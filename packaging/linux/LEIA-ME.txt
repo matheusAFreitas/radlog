@@ -1,0 +1,16 @@
+GMC Monitor para Linux (x86_64)
+
+Precisa: WebKitGTK 4.1 (Debian 12+, Ubuntu 22.04+, Parrot 6+:
+  sudo apt install libwebkit2gtk-4.1-0)
+e o usuário no grupo dialout para ler o contador:
+  sudo usermod -aG dialout $USER   (saia e entre de novo)
+
+Jeitos de usar:
+  1) Rodar direto:      ./gmc-monitor
+  2) Instalar no menu:  ./install.sh
+  3) Gerar o AppImage:  ./build-appimage.sh
+     (baixa o appimagetool oficial na primeira vez)
+
+O contador aparece como /dev/ttyUSB0 (ou ttyACM0).
+Dados: ~/.config/GMC Monitor/
+No Linux não há ícone na bandeja nem "iniciar com o sistema".

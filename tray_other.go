@@ -1,0 +1,15 @@
+//go:build !windows
+
+package main
+
+// Fora do Windows (testes no Linux) não há bandeja nem início automático.
+
+const trayAvailable = false
+
+func (a *App) startTray()                 {}
+func (a *App) stopTray()                  {}
+func (a *App) trayShow(tip, level string) {}
+func setAutostart(on bool) error          { return nil }
+func autostartPath() string               { return "" }
+func startupDisabled() bool               { return false }
+func enableStartup() error                { return nil }

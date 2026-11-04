@@ -1,0 +1,22 @@
+# binários e pacotes
+/gmc-monitor
+/radlog
+*.exe
+*.AppImage
+*.tar.gz
+*.zip
+build/
+dist-pkg/
+packaging/linux/*.AppDir/
+packaging/linux/appimagetool
+
+# go.mod alternativo usado só no ambiente offline de quem desenvolve
+local.mod
+local.sum
+
+# sistema/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp

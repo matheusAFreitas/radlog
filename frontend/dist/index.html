@@ -1,0 +1,1121 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GMC Monitor</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bars">
+  <div class="attn-bar" id="attnBar" role="status" hidden>
+    <div class="bar-row">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
+      <div class="alarm-text">
+        <strong id="attnTitle">Atenção</strong>
+        <span class="mono" id="attnDetail"></span>
+        <span class="hint" id="attnHint"></span>
+      </div>
+      <button type="button" class="btn small attn-btn" id="btnAttnGuide" aria-expanded="false" aria-controls="attnGuide">O que fazer</button>
+      <button type="button" class="btn small attn-btn" id="btnAttnOk">OK</button>
+    </div>
+    <ol class="guide" id="attnGuide" hidden></ol>
+  </div>
+  <div class="alarm-bar" id="alarmBar" role="alert" hidden>
+    <div class="bar-row">
+      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
+      <div class="alarm-text">
+        <strong id="alarmTitle">ALARME</strong>
+        <span class="mono" id="alarmDetail"></span>
+        <span class="hint" id="alarmHint"></span>
+        <span class="alarm-rise" id="alarmRise" hidden></span>
+        <span class="alarm-note" id="alarmNote" hidden></span>
+      </div>
+      <button type="button" class="btn alarm-btn alt" id="btnAlarmGuide" aria-expanded="false" aria-controls="alarmGuide">O que fazer</button>
+      <button type="button" class="btn alarm-btn" id="btnSilence">Silenciar</button>
+    </div>
+    <ol class="guide" id="alarmGuide" hidden></ol>
+  </div>
+</div>
+<div class="wrap">
+
+<header class="top">
+  <div class="brand-row">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M12 10 L9 4.8 A8 8 0 0 1 15 4.8 Z"/><path d="M13.7 13 L19.7 13 A8 8 0 0 1 16.7 18.2 Z"/><path d="M10.3 13 L7.3 18.2 A8 8 0 0 1 4.3 13 Z"/></svg>
+      <span>GMC Monitor</span>
+    </div>
+    <button type="button" class="pill" id="statusPill" title="Conexão">
+      <span class="dot" id="statusDot" aria-hidden="true"></span>
+      <span id="statusText">desconectado</span>
+    </button>
+    <button type="button" class="pill clock-chip" id="clockChip" title="Sincronizar o relógio do contador com o do PC" hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
+      <span id="clockText">relógio certo</span>
+    </button>
+  </div>
+  <div class="actions">
+    <button type="button" class="btn" id="btnHistory">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
+      Baixar histórico
+    </button>
+    <button type="button" class="btn" id="btnDemo" aria-pressed="false">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>
+      <span id="btnDemoText">Modo demo</span>
+    </button>
+    <button type="button" class="btn" id="btnEvents">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+      Eventos
+    </button>
+    <button type="button" class="btn" id="btnExport">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
+      Exportar CSV
+    </button>
+    <button type="button" class="btn icon" id="btnSettings" aria-label="Configurações">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+    </button>
+  </div>
+</header>
+
+<div class="progress" id="progress" hidden>
+  <div class="progress-row">
+    <span id="progressText">Lendo a memória do contador…</span>
+    <button type="button" class="btn small" id="btnCancel">Cancelar</button>
+  </div>
+  <div class="bar"><div class="bar-fill" id="progressFill"></div></div>
+</div>
+
+<div class="layout">
+<main class="col-main">
+<div class="col-a">
+
+  <section class="card demo-card" id="demoCard" hidden>
+    <div class="demo-head">
+      <div>
+        <h2>Modo demo</h2>
+        <p class="small muted">Valores simulados só no app, para testar alarme e gráficos. O contador continua sendo lido e as leituras reais continuam sendo gravadas; nada do demo vai para os arquivos. Ao sair, tudo que foi simulado some.</p>
+      </div>
+      <button type="button" class="btn" id="btnDemoStop">Sair do demo</button>
+    </div>
+    <div class="demo-controls">
+      <label for="demoCPM">Valor simulado (CPM)</label>
+      <div class="row">
+        <input type="number" id="demoCPM" min="0" max="999999" step="1" inputmode="numeric">
+        <input type="range" id="demoSlider" min="0" max="100" step="1" aria-label="Valor simulado em escala logarítmica">
+      </div>
+      <div class="row presets">
+        <button type="button" class="btn small" data-demo="20">20 · fundo</button>
+        <button type="button" class="btn small" data-demo="70">70 · atenção</button>
+        <button type="button" class="btn small" data-demo="150">150 · alerta</button>
+        <button type="button" class="btn small" data-demo="1000">1.000</button>
+        <button type="button" class="btn small" data-demo="10000">10.000</button>
+      </div>
+      <label class="toggle"><span>Variar como um contador de verdade (o CPM leva até 1 min para chegar no valor)</span><input type="checkbox" id="demoReal"></label>
+      <p class="small mono" id="demoRealLine">Leitura real: —</p>
+    </div>
+  </section>
+
+  <section class="card hero" id="hero">
+    <div class="hero-top">
+      <div class="reading">
+        <div class="read-head">
+          <div class="read-main">
+            <span class="eyebrow">Leitura atual <span class="demo-tag" id="demoTag" hidden>demo</span></span>
+            <div class="value-row">
+              <span class="value" id="readValue">—</span>
+              <span class="unit" id="readUnit">CPM</span>
+            </div>
+          </div>
+          <div class="hero-dose" id="heroDose">
+            <span class="tile-label">Dose hoje</span>
+            <span class="hero-dose-v mono"><span id="tDose">—</span> <span class="hero-dose-u">µSv</span></span>
+            <span class="tile-sub" id="tDoseSub">acumulados</span>
+          </div>
+        </div>
+        <span class="alt" id="readAlt">sem contador conectado</span>
+        <span class="sigma" id="readSigma" hidden></span>
+        <span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span>
+      </div>
+      <div class="seg" role="group" aria-label="Unidade" id="unitSeg">
+        <button type="button" data-unit="cpm" aria-pressed="true">CPM</button>
+        <button type="button" data-unit="usv" aria-pressed="false">µSv/h</button>
+        <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
+        <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
+      </div>
+    </div>
+
+    <div class="level">
+      <div class="level-head">
+        <span class="level-name" id="levelName">—</span>
+        <span class="muted small" id="levelHint">faixas do manual do GMC-800</span>
+      </div>
+      <div class="level-bar">
+        <div class="seg-safe"></div>
+        <div class="seg-att"></div>
+        <div class="seg-warn"></div>
+        <div class="marker" id="levelMarker" hidden></div>
+      </div>
+      <div class="level-scale mono">
+        <span>0</span><span>50 · atenção</span><span>100 · alerta</span>
+      </div>
+      <div class="level-foot"><button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
+    </div>
+
+    <div class="empty" id="emptyHint" hidden>
+      <span>Nenhum contador conectado.</span>
+      <button type="button" class="btn accent" id="btnConnectHint">Conectar</button>
+    </div>
+  </section>
+
+  <section class="tiles">
+    <div class="card tile"><span class="tile-label">Média · 1 h · CPM</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
+    <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">CPM</span></div>
+    <div class="card tile"><span class="tile-label">Máximo · 24 h</span><span class="tile-value mono" id="tMax">—</span><span class="tile-sub" id="tMaxSub">CPM</span></div>
+  </section>
+
+  <section class="card" id="alertsCard">
+    <div class="card-head">
+      <h2>Alertas ativos</h2>
+    </div>
+    <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li></ul>
+    <h3 class="sub-head">Últimos alertas</h3>
+    <ul class="events alerts" id="alerts"><li class="muted">Nenhum alerta.</li></ul>
+  </section>
+  <section class="card">
+    <h2>Fundo diário</h2>
+    <div class="table-box">
+      <table>
+        <thead><tr><th scope="col">Dia</th><th scope="col" class="num">CPM</th><th scope="col" class="num">µSv/h</th></tr></thead>
+        <tbody id="days"><tr><td colspan="3" class="muted">Sem leituras guardadas.</td></tr></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+<div class="col-b">
+  <nav class="seg view-tabs" aria-label="O que mostrar" id="viewTabs">
+    <button type="button" data-view="graficos" aria-pressed="true">Gráficos</button>
+    <button type="button" data-view="resumo" aria-pressed="false">Resumo</button>
+    <button type="button" data-view="medir" aria-pressed="false">Medir objeto</button>
+    <button type="button" data-view="alertas" aria-pressed="false">Alertas</button>
+    <button type="button" data-view="fora" aria-pressed="false">Fora de casa</button>
+    <button type="button" data-view="chuva" aria-pressed="false">Chuva</button>
+    <button type="button" data-view="radiacode" aria-pressed="false">RadiaCode <span class="wip-tag">em breve</span></button>
+  </nav>
+  <section class="card chart-card view-graficos" id="cpmCard">
+    <div class="chart-head">
+      <div>
+        <h2 id="chartTitle">CPM ao longo do tempo</h2>
+        <span class="mono muted small" id="chartStats">sem dados no período</span>
+      </div>
+      <div class="chart-ctrls">
+      <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
+        <button type="button" data-cunit="cpm" aria-pressed="true">CPM</button>
+        <button type="button" data-cunit="usv" aria-pressed="false">µSv/h</button>
+      </div>
+      <div class="seg" role="group" aria-label="Período" id="rangeSeg">
+        <button type="button" data-range="15m" aria-pressed="false">15 min</button>
+        <button type="button" data-range="30m" aria-pressed="false">30 min</button>
+        <button type="button" data-range="1h" aria-pressed="true">1 h</button>
+        <button type="button" data-range="24h" aria-pressed="false">24 h</button>
+        <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
+      </div>
+      </div>
+    </div>
+    <div class="zoom-bar" id="zoomBar" hidden>
+      <span class="zoom-info"><strong id="zoomRange"></strong> <span class="mono small" id="zoomStats"></span></span>
+      <span class="zoom-btns">
+        <button type="button" class="btn small note-btn" id="btnZoomNote">Anotar este trecho</button>
+        <button type="button" class="btn small away-btn" id="btnZoomAway">Marcar como fora de casa</button>
+        <button type="button" class="btn small" id="btnZoomReport" title="Relatório em PDF só deste trecho">Relatório (PDF)</button>
+        <button type="button" class="btn small" id="btnZoomBack">Voltar</button>
+        <button type="button" class="btn small" id="btnZoomOut">Sair do zoom</button>
+      </span>
+    </div>
+    <div class="chart-body">
+      <div class="y-axis mono" id="yAxis"><span>60</span><span>40</span><span>20</span><span>0</span></div>
+      <div class="plot-wrap">
+        <div class="plot" id="plot">
+          <svg id="chart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho."></svg>
+          <div class="peak-dots" id="peakDots"></div>
+          <div class="note-marks" id="noteMarks"></div>
+          <div class="cursor" id="cursor" hidden></div>
+          <div class="zoom-sel" id="zoomSel" hidden></div>
+          <div class="tip mono" id="tip" hidden></div>
+        </div>
+        <div class="x-axis mono"><span id="x0"></span><span id="x1"></span><span id="x2"></span></div>
+      </div>
+    </div>
+    <div class="legend small muted" id="legend">
+      <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+    </div>
+  </section>
+
+  <section class="card chart-card view-graficos" id="doseCard">
+    <div class="chart-head">
+      <div>
+        <h2>Dose acumulada</h2>
+        <span class="mono muted small" id="doseSub">sem dados no período</span>
+      </div>
+      <div class="seg" role="group" aria-label="Período da dose" id="doseSeg">
+        <button type="button" data-dperiod="3h" aria-pressed="false">3 h</button>
+        <button type="button" data-dperiod="6h" aria-pressed="false">6 h</button>
+        <button type="button" data-dperiod="12h" aria-pressed="false">12 h</button>
+        <button type="button" data-dperiod="24h" aria-pressed="true">24 h</button>
+        <button type="button" data-dperiod="7d" aria-pressed="false">7 dias</button>
+        <button type="button" data-dperiod="30d" aria-pressed="false">30 dias</button>
+        <button type="button" data-dperiod="1y" aria-pressed="false">1 ano</button>
+      </div>
+    </div>
+
+    <div class="zoom-bar" id="doseZoomBar" hidden>
+      <span class="zoom-info"><strong id="doseZoomRange"></strong> <span class="mono small" id="doseZoomStats"></span></span>
+      <span class="zoom-btns">
+        <button type="button" class="btn small away-btn" id="btnDoseZoomAway">Marcar como fora de casa</button>
+        <button type="button" class="btn small" id="btnDoseZoomBack">Voltar</button>
+        <button type="button" class="btn small" id="btnDoseZoomOut">Sair do zoom</button>
+      </span>
+    </div>
+    <div class="dose-top">
+      <div class="dose-big">
+        <span class="value mono small-value" id="doseTotal">—</span>
+        <span class="unit">µSv</span>
+      </div>
+      <div class="dose-status" id="doseStatus"></div>
+      <p class="dose-cmp small" id="doseCmp" hidden><span id="doseCmpTxt"></span> <button type="button" class="link small-link" data-regua="dose">ver na régua</button></p>
+      <label class="dose-limit">
+        <span class="small muted">Teto</span>
+        <select id="doseLimit">
+          <option value="publico">Público · 1 mSv/ano</option>
+          <option value="trabalhador">Trabalhador exposto · 20 mSv/ano</option>
+        </select>
+      </label>
+    </div>
+
+    <div class="chart-body">
+      <div class="y-axis mono" id="doseY"><span></span><span></span><span></span><span>0</span></div>
+      <div class="plot-wrap">
+        <div class="plot" id="dosePlot">
+          <svg id="doseChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da dose acumulada, do fundo esperado e do teto"></svg>
+          <div class="cursor" id="doseCursor" hidden></div>
+          <div class="zoom-sel" id="doseZoomSel" hidden></div>
+          <div class="tip mono" id="doseTip" hidden></div>
+        </div>
+        <div class="x-axis mono"><span id="dx0"></span><span id="dx1"></span><span id="dx2"></span></div>
+      </div>
+    </div>
+    <div class="legend small muted dose-legend">
+      <span class="key"><span class="swatch sw-dose" aria-hidden="true"></span>dose medida</span>
+      <span class="key"><span class="swatch sw-bg" aria-hidden="true"></span>só o fundo natural</span>
+      <span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span>
+      <span class="away-key" id="doseAwayKey" hidden><i aria-hidden="true"></i>fora de casa</span>
+    </div>
+    <details class="note-d">
+      <summary class="small muted">Como o teto é calculado</summary>
+      <p class="small muted note" id="doseNote"></p>
+    </details>
+  </section>
+
+  <section class="card view-graficos" id="heatCard">
+    <div class="chart-head">
+      <div>
+        <h2>Padrão por hora do dia</h2>
+        <span class="mono muted small" id="heatSub">sem dados ainda</span>
+      </div>
+      <div class="seg" role="group" aria-label="Dias no mapa" id="heatSeg">
+        <button type="button" data-hdays="7" aria-pressed="false">7 dias</button>
+        <button type="button" data-hdays="14" aria-pressed="true">14 dias</button>
+        <button type="button" data-hdays="30" aria-pressed="false">30 dias</button>
+      </div>
+    </div>
+    <div class="heat-wrap">
+      <div class="heat" id="heat" role="img" aria-label="Mapa de calor do CPM médio por dia e hora"></div>
+    </div>
+    <div class="heat-legend small muted">
+      <span id="heatMin">—</span>
+      <span class="heat-ramp" aria-hidden="true"></span>
+      <span id="heatMax">—</span>
+      <span>CPM médio · cinza = sem dados</span>
+      <span class="heat-key"><i class="hk-att" aria-hidden="true"></i>teve atenção</span>
+      <span class="heat-key"><i class="hk-alarm" aria-hidden="true"></i>teve alarme</span>
+      <span class="heat-key"><i class="hk-danger" aria-hidden="true"></i>teve perigo</span>
+      <span class="heat-key"><i class="hk-away" aria-hidden="true"></i>fora de casa</span>
+    </div>
+  </section>
+  <section class="card view" id="viewSummary" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <div>
+        <h2>Resumo</h2>
+        <span class="mono muted small" id="sumSub">—</span>
+      </div>
+      <div class="row">
+        <button type="button" class="btn small" id="btnReport" title="Salva o relatório do período em PDF">Relatório (PDF)</button>
+        <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+      </div>
+    </div>
+    <div class="sum-tools">
+      <div class="seg" role="group" aria-label="Resumo ou comparação" id="sumModeSeg">
+        <button type="button" data-smode="resumo" aria-pressed="true">Resumo</button>
+        <button type="button" data-smode="comparar" aria-pressed="false">Comparar</button>
+      </div>
+      <div class="seg" role="group" aria-label="Período" id="sumPresetSeg">
+        <button type="button" data-sp="hoje" aria-pressed="true">Hoje</button>
+        <button type="button" data-sp="ontem" aria-pressed="false">Ontem</button>
+        <button type="button" data-sp="semana" aria-pressed="false">Esta semana</button>
+        <button type="button" data-sp="semana-passada" aria-pressed="false">Semana passada</button>
+        <button type="button" data-sp="mes" aria-pressed="false">Este mês</button>
+        <button type="button" data-sp="mes-passado" aria-pressed="false">Mês passado</button>
+      </div>
+      <label class="sum-day">Dia <input type="date" id="sumDay"></label>
+      <div class="seg" role="group" aria-label="O que comparar" id="sumCmpSeg" hidden>
+        <button type="button" data-sc="hoje-ontem" aria-pressed="true">Hoje × ontem</button>
+        <button type="button" data-sc="7d" aria-pressed="false">7 dias × 7 dias antes</button>
+        <button type="button" data-sc="dias" aria-pressed="false">Dois dias</button>
+      </div>
+      <span class="sum-days" id="sumDays" hidden>
+        <label>A <input type="date" id="sumDayA"></label>
+        <label>B <input type="date" id="sumDayB"></label>
+      </span>
+    </div>
+    <div class="ri-tiles sum-tiles" id="sumTiles"></div>
+    <div class="ri-chart">
+      <div class="m-chart-wrap">
+        <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
+        <div class="plot m-plot" id="sumPlot">
+          <svg id="sumChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="CPM médio no período"></svg>
+          <div class="cursor" id="sumCursor" hidden></div>
+          <div class="tip mono" id="sumTip" hidden></div>
+        </div>
+      </div>
+      <div class="ad-x mono" id="sumX"><span></span><span></span><span></span></div>
+      <div class="legend small muted ad-legend" id="sumLegend"></div>
+    </div>
+    <table class="sum-table" id="sumTable" hidden></table>
+    <div class="sum-notes" id="sumNotes" hidden></div>
+    </div>
+  </section>
+  <section class="card view" id="viewRain" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <div>
+        <h2>Chuva e radiação</h2>
+        <span class="mono muted small" id="riSub">—</span>
+      </div>
+      <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+    </div>
+    <div>
+    <div class="ri-now" id="riNow" hidden></div>
+    <div class="ri-tiles" id="riTiles"></div>
+    <div class="ri-chart" id="riChartBox" hidden>
+      <div class="m-chart-wrap">
+        <div class="y-axis mono" id="riY"><span></span><span></span><span></span><span></span></div>
+        <div class="plot m-plot" id="riPlot">
+          <svg id="riChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="CPM médio antes e depois da chuva, comparado com horários sem chuva"></svg>
+          <div class="cursor" id="riCursor" hidden></div>
+          <div class="tip mono" id="riTip" hidden></div>
+        </div>
+      </div>
+      <div class="ad-x mono ri-x" id="riX"><span>2 h antes</span><span>começo da chuva</span><span>4 h depois</span></div>
+      <div class="legend small muted ad-legend">
+        <span class="key"><i style="border-color:#3DA5FF"></i>depois da chuva</span>
+        <span class="key"><i style="border-color:#A3ADB4"></i>sem chuva (variação normal)</span>
+        <span class="small muted">CPM acima da média das 2 h antes</span>
+      </div>
+    </div>
+    <ul class="ri-list" id="riList"></ul>
+    </div>
+    </div>
+  </section>
+  <section class="card view view-measure" id="viewMeasure" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <h2 id="measureTitle">Medir um objeto</h2>
+      <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+    </div>
+    <p class="small muted">Duas medições do mesmo tempo: primeiro o fundo, com o objeto longe (2 m ou mais); depois com o objeto encostado no contador, do lado do tubo. O app compara as duas e diz se a diferença é real ou só a variação natural da contagem. Quanto mais tempo, mais confiável.</p>
+    <div class="m-grid">
+      <div class="m-main">
+    <label for="mName">Nome do objeto (opcional)</label>
+    <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
+    <label for="mSecs">Tempo de cada medição</label>
+    <select id="mSecs">
+      <option value="30">30 s (rápido, pouco preciso)</option>
+      <option value="60" selected>1 min</option>
+      <option value="120">2 min</option>
+      <option value="300">5 min (bem mais preciso)</option>
+    </select>
+
+    <div class="m-step" id="mStepBg">
+      <div class="m-step-head"><strong>1. Fundo</strong><span class="mono small" id="mBgVal">—</span></div>
+      <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
+      <button type="button" class="btn" id="btnMeasureBg">Medir o fundo</button>
+    </div>
+    <div class="m-step" id="mStepObj">
+      <div class="m-step-head"><strong>2. Com o objeto</strong><span class="mono small" id="mObjVal">—</span></div>
+      <div class="bar"><div class="bar-fill" id="mObjFill"></div></div>
+      <button type="button" class="btn" id="btnMeasureObj" disabled>Medir com o objeto</button>
+    </div>
+    <div class="m-result" id="mResult" hidden>
+      <strong id="mVerdict"></strong>
+      <span class="mono" id="mNumbers"></span>
+      <div id="mStats"></div>
+      <span class="small muted" id="mExplain"></span>
+      <span class="small m-saved" id="mSaved" hidden>Salva em "Medições salvas" e marcada no gráfico de CPM.</span>
+    </div>
+    <div class="dlg-foot spread">
+      <button type="button" class="btn" id="btnMeasureReset">Recomeçar</button>
+    </div>
+      </div>
+      <div class="m-side">
+        <div class="m-live" id="mLive">
+          <div class="m-live-head">
+            <h3><span id="mLiveTitle">Durante a medição</span> <span class="small muted" id="mLiveSub"></span></h3>
+            <button type="button" class="btn small" id="btnMLiveBack" hidden>Voltar à medição atual</button>
+          </div>
+          <div class="m-chart-wrap">
+            <div class="y-axis mono" id="mY"><span></span><span></span><span></span><span>0</span></div>
+            <div class="plot m-plot" id="mPlot">
+              <svg id="mChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da medição: CPM ao vivo e média de cada fase"></svg>
+              <div class="cursor" id="mCursor" hidden></div>
+              <div class="tip mono" id="mTip" hidden></div>
+            </div>
+          </div>
+          <div class="legend small muted">
+            <span class="key"><i class="mk-live" aria-hidden="true"></i>CPM ao vivo</span>
+            <span class="key"><i class="mk-bg" aria-hidden="true"></i>média do fundo</span>
+            <span class="key"><i class="mk-obj" aria-hidden="true"></i>média com o objeto</span>
+            <span class="small muted">faixa = margem de erro</span>
+          </div>
+        </div>
+    <div class="m-history" id="mHistory">
+      <h3>Medições salvas <span class="small muted" id="mHistCount"></span></h3>
+      <ul class="periods" id="mHistList"></ul>
+    </div>
+      </div>
+    </div>
+
+      </div>
+  </section>
+  <section class="card view " id="viewAlerts" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <h2 id="alertsTitle">Histórico de alertas</h2>
+      <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+    </div>
+    <p class="small muted">Todos os alertas de radiação, com data e hora. Os marcados "do contador" foram achados depois, no histórico baixado do aparelho (aconteceram enquanto o app estava fechado ou desconectado).</p>
+    <div class="alerts-tools">
+      <div class="seg" role="group" aria-label="Filtrar alertas" id="alertFilter">
+        <button type="button" data-af="" aria-pressed="true">Todos</button>
+        <button type="button" data-af="live" aria-pressed="false">Ao vivo</button>
+        <button type="button" data-af="retro" aria-pressed="false">Do contador</button>
+        <button type="button" data-af="alarme" aria-pressed="false">Só alarmes</button>
+      </div>
+      <span class="small muted" id="alertCount"></span>
+    </div>
+    <div class="a-grid">
+      <div id="alertHistList" class="alert-hist"></div>
+      <div class="a-detail" id="aDetail">
+        <div class="m-live-head">
+          <h3 id="adTitle">Detalhe do alerta</h3>
+          <button type="button" class="btn small" id="btnAdOpen" hidden>Ver nos gráficos</button>
+        </div>
+        <p class="small muted mono ad-sub" id="adSub">Clique num alerta da lista.</p>
+        <div class="m-chart-wrap">
+          <div class="y-axis mono" id="adY"><span></span><span></span><span></span><span>0</span></div>
+          <div class="plot m-plot" id="adPlot">
+            <svg id="adChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico do alerta"></svg>
+            <div class="ad-peak" id="adPeak" hidden></div>
+            <div class="cursor" id="adCursor" hidden></div>
+            <div class="tip mono" id="adTip" hidden></div>
+          </div>
+        </div>
+        <div class="ad-x mono" id="adX"><span></span><span></span><span></span></div>
+        <div class="legend small muted ad-legend" id="adLegend"></div>
+        <p class="small muted" id="adNote" hidden></p>
+      </div>
+    </div>
+      </div>
+  </section>
+  <section class="card view" id="viewRadiacode" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <div>
+        <h2>RadiaCode</h2>
+        <span class="mono muted small">em construção · o aparelho chega em 10/11</span>
+      </div>
+      <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+    </div>
+    <p class="small muted">O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam <b>dados simulados</b>, no mesmo formato que o aparelho manda (1.024 canais de energia), só para deixar as telas prontas. A conexão de verdade só será feita com o aparelho em mãos.</p>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
+      <div class="rc-ctrl">
+        <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RadiaCode"></div>
+      </div>
+      <div class="rc-ctrl">
+        <button type="button" class="btn small" id="rcSpecPlay">Pausar</button>
+        <button type="button" class="btn small" id="rcSpecReset">Recomeçar</button>
+        <button type="button" class="btn small" id="rcSpecLog">Escala: linear</button>
+        <label class="rc-inline small">velocidade
+          <select id="rcSpecSpeed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select></label>
+        <label class="rc-inline small"><input type="checkbox" id="rcSpecBg" checked> fundo por cima</label>
+      </div>
+      <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
+      <p class="mono small rc-info" id="rcSpecInfo"></p>
+      <p class="rc-use"><strong>Para você:</strong> no eletrodo, os picos do tório (Pb-212 em 239 keV, Tl-208 em 583 e 2.614 keV, Ac-228 em 911 keV) e o raio X do próprio tungstênio perto de 59 keV. No detector de fumaça, um pico só, do amerício, em 59,5 keV. No sal light, o K-40 em 1.460 keV cresce devagar: precisa de tempo.</p>
+    </article>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
+      <div class="rc-sgram">
+        <div class="rc-sg-time mono small"><span>min 0</span><span>min 60</span><span>min 120</span><span>min 180</span></div>
+        <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
+          <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
+      </div>
+      <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span></div>
+      <p class="rc-use"><strong>Para você:</strong> durante a chuva aparecem os traços do Pb-214 (295 e 352 keV) e do Bi-214 (609 keV), que somem devagar depois; o eletrodo aparece como uma faixa forte que começa e termina de repente.</p>
+    </article>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">3</span><h3>Dureza nos gráficos</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
+      <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
+      <p class="small muted rc-legend"><span class="lg-cps">contagem (cps)</span><span class="lg-hard">dureza</span><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span></p>
+      <p class="rc-use"><strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.</p>
+    </article>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">4</span><h3>Importar o log</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>O RadiaCode guarda sozinho as últimas 1.000 horas, em pontos como estes. Ao importar, cada minuto vira um ponto numa segunda curva no gráfico, e o que o GMC já gravou não muda.</p>
+      <div class="rc-log-wrap"><table class="rc-log mono"><thead><tr><th>data e hora</th><th>dose</th><th>contagem</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
+      <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogNew">Gerar outro exemplo</button></div>
+      <p class="rc-use"><strong>Para você:</strong> medições fora de casa e no carro entram no gráfico e nos alertas sem levar o notebook.</p>
+    </article>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">5</span><h3>Modo busca</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.</p>
+      <div class="rc-search">
+        <div class="rc-gauge"><div id="rcGauge"></div><div class="rc-mult mono small" id="rcMult"><span data-m="1">×1</span><span data-m="10">×10</span><span data-m="100">×100</span><span data-m="1000">×1000</span></div></div>
+        <div class="rc-search-ctl">
+          <label class="small muted" for="rcSrc">Fonte</label>
+          <select id="rcSrc"></select>
+          <label class="small muted" for="rcDist">Distância: <span class="mono" id="rcDistLbl"></span></label>
+          <input type="range" id="rcDist" min="0" max="2" step="0.01" value="1.48">
+          <label class="rc-inline small"><input type="checkbox" id="rcSound"> som (cliques)</label>
+          <canvas id="rcTrend" class="rc-canvas"></canvas>
+          <p class="mono small rc-info" id="rcSearchInfo"></p>
+        </div>
+      </div>
+      <p class="rc-use"><strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
+    </article>
+
+    <article class="rc-card">
+      <div class="rc-head"><span class="rc-num mono">6</span><h3>Atividade com KCl</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
+      <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. O potássio natural tem uma fração fixa de K-40, então a atividade do sal é conhecida e serve para conferir o aparelho.</p>
+      <div class="rc-kcl">
+        <label class="small muted" for="rcKType">Amostra</label>
+        <select id="rcKType"><option value="light" selected>Sal light (≈ 50% KCl)</option><option value="kcl">KCl puro (cloreto de potássio)</option><option value="rotulo">Pelo rótulo: mg de potássio por grama</option></select>
+        <div id="rcKMgRow" hidden><label class="small muted" for="rcKMg">Potássio (mg por 1 g de sal)</label><input type="number" id="rcKMg" min="0" max="600" value="260"></div>
+        <label class="small muted" for="rcKMass">Massa (g)</label>
+        <input type="number" id="rcKMass" min="10" max="5000" step="10" value="500">
+        <label class="small muted" for="rcKTime">Tempo de medição: <span class="mono" id="rcKTimeLbl"></span></label>
+        <input type="range" id="rcKTime" min="5" max="480" step="5" value="60">
+      </div>
+      <div class="rc-kout" id="rcKOut"></div>
+      <div class="rc-plot"><canvas id="rcKSpec" class="rc-canvas"></canvas></div>
+      <p class="small muted rc-legend"><span class="lg-samp">com o sal</span><span class="lg-bg">só o fundo</span></p>
+      <p class="small muted">A eficiência no pico (0,1%) é um chute para o 102 encostado num pacote; com o aparelho, ela vai ser medida com o próprio KCl. O tempo de medição vale para o fundo e para o sal.</p>
+    </article>
+
+    <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>
+    </div>
+  </section>
+  <section class="card view view-periods" id="viewPeriods" hidden>
+    <div class="view-body">
+    <div class="dlg-head">
+      <h2 id="periodsTitle">Fora de casa</h2>
+      <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
+    </div>
+    <p class="small muted">Marque quando o contador estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora.</p>
+    <div class="p-grid">
+    <ul class="periods" id="periodList"></ul>
+    <fieldset id="periodForm">
+      <legend id="periodFormTitle">Novo período</legend>
+      <label for="pName">Nome</label>
+      <input type="text" id="pName" maxlength="60" placeholder="Fora de casa">
+      <div class="p-times">
+        <label>Início<input type="datetime-local" id="pFrom"></label>
+        <label>Fim<input type="datetime-local" id="pTo"></label>
+      </div>
+      <p class="small p-err" id="pErr" hidden></p>
+      <div class="row-btns">
+        <button type="button" class="btn accent" id="btnPeriodSave">Salvar período</button>
+        <button type="button" class="btn" id="btnPeriodNew" hidden>Cancelar edição</button>
+      </div>
+    </fieldset>
+    </div>
+      </div>
+  </section>
+
+</div>
+
+</main>
+
+
+</div>
+
+<footer class="foot mono">
+  <span id="footLeft"><span id="appVersion"></span>atualiza a cada 1 s · protocolo GQ-RFC1201</span>
+  <button type="button" class="link" id="footData">pasta de dados</button>
+</footer>
+
+</div>
+
+<dialog id="settings" aria-labelledby="settingsTitle">
+  <form method="dialog" class="dlg set-form">
+    <div class="dlg-head set-head">
+      <h2 id="settingsTitle">Configurações</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="set-body">
+    <nav class="set-nav" id="setNav" aria-label="Seções das configurações"></nav>
+    <div class="set-content" id="setContent">
+    <div class="set-panel" id="setGeneral">
+
+    <fieldset>
+      <legend>Contador</legend>
+      <dl class="info">
+        <dt>Modelo</dt><dd class="mono" id="iModel">—</dd>
+        <dt title="O que o contador manda pela USB (GETSERIAL). A tela Sobre do GMC-800 mostra outro código, de 12 bytes: para a GQ, use o da tela.">Série (USB)</dt><dd class="mono" id="iSerial">—</dd>
+        <dt>Porta</dt><dd class="mono" id="iPort">—</dd>
+        <dt>Relógio</dt><dd class="mono" id="iClock">—</dd>
+        <dt>Calibração</dt><dd class="mono" id="iCal">—</dd>
+      </dl>
+<div class="devcfg" id="devcfg">
+      <h3 class="sub-head">Ajustes gravados no aparelho</h3>
+      <p class="small muted" id="dcIntro">Lendo a configuração do contador…</p>
+    <div class="notice" id="dcProblems" hidden></div>
+
+    <div class="dc-grid" id="dcBody">
+      <fieldset class="dc-edit">
+        <legend>Memória</legend>
+        <label for="dcSave">Gravar leituras na memória</label>
+        <select id="dcSave" data-key="saveMode">
+          <option value="0">Desligada</option>
+          <option value="1">A cada segundo (CPS)</option>
+          <option value="2">A cada minuto (CPM) — recomendado</option>
+          <option value="3">A cada hora (CPM)</option>
+          <option value="4">Por limiar, a cada segundo</option>
+          <option value="5">Por limiar, a cada minuto</option>
+        </select>
+        <p class="small muted" id="dcSaveHint"></p>
+        <p class="small mono" id="dcMem"></p>
+        <div class="rec" id="dcRec" hidden>
+          <span>Recomendado: <strong>a cada minuto</strong>.</span>
+          <button type="button" class="btn small" id="dcUseRec">Usar o recomendado</button>
+        </div>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Medição</legend>
+        <label for="dcFet">Estimativa rápida (FET)</label>
+        <select id="dcFet" data-key="fastEstimate">
+          <option value="3">Dinâmica (padrão)</option>
+          <option value="5">5 s</option>
+          <option value="10">10 s</option>
+          <option value="15">15 s</option>
+          <option value="20">20 s</option>
+          <option value="30">30 s</option>
+          <option value="60">60 s (sem estimativa)</option>
+        </select>
+        <p class="small muted">A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.</p>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Alarme do aparelho</legend>
+        <label for="dcAlarm">Limite (CPM)</label>
+        <input type="number" id="dcAlarm" data-key="alarmCPM" min="1" max="999999" step="1" inputmode="numeric">
+        <label for="dcVol">Volume do alarme: <span class="mono" data-out="alarmVolume"></span></label>
+        <input type="range" id="dcVol" data-key="alarmVolume" min="0" max="15" step="1">
+        <label class="toggle"><span>Vibração</span><input type="checkbox" data-key="vibration"></label>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Som</legend>
+        <label class="toggle"><span>Clique a cada contagem</span><input type="checkbox" data-key="clickSound"></label>
+        <label for="dcVoice">Volume da voz: <span class="mono" data-out="voiceVolume"></span></label>
+        <input type="range" id="dcVoice" data-key="voiceVolume" min="0" max="15" step="1">
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Tela</legend>
+        <label class="toggle"><span>Modo escuro</span><input type="checkbox" data-key="darkMode"></label>
+        <label for="dcLight">Brilho: <span class="mono" data-out="backlight"></span></label>
+        <input type="range" id="dcLight" data-key="backlight" min="0" max="30" step="1">
+        <label for="dcPower">Economia de energia</label>
+        <select id="dcPower" data-key="powerSaving">
+          <option value="0">Escurecer a tela</option>
+          <option value="1">Apagar a tela</option>
+          <option value="2">Desligada</option>
+        </select>
+        <label class="toggle"><span>LED de contagem</span><input type="checkbox" data-key="led"></label>
+      </fieldset>
+
+      <fieldset class="dc-edit dc-cal">
+        <legend>Calibração</legend>
+        <p class="small muted">Seis pontos que convertem CPM em µSv/h, no contador e no app. Só mude se souber o valor certo para o seu tubo (por exemplo, medido com uma fonte de referência).</p>
+        <div class="table-box">
+          <table class="cal">
+            <thead><tr><th scope="col">Ponto</th><th scope="col">CPM</th><th scope="col">µSv/h</th><th scope="col" class="num">CPM por µSv/h</th></tr></thead>
+            <tbody id="calRows"></tbody>
+          </table>
+        </div>
+        <label for="calSens">Usar uma sensibilidade só em todos os pontos (CPM por µSv/h)</label>
+        <div class="row">
+          <input type="number" id="calSens" min="20" max="1000" step="0.1" inputmode="decimal">
+          <button type="button" class="btn" id="calApply">Aplicar nos pontos</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Só leitura</legend>
+        <dl class="info">
+          <dt>Tensão do tubo</dt><dd class="mono" id="dcTube">—</dd>
+        </dl>
+        <p class="small muted">A tensão do tubo é ajuste de fábrica. Mudar sem instrumento para medir pode distorcer as leituras ou encurtar a vida do tubo, então o app não grava esse campo.</p>
+      </fieldset>
+
+      <details class="discover">
+        <summary>Descobrir onde fica um ajuste</summary>
+        <p class="small muted">Para mapear ajustes que o app ainda não conhece (como ligar/desligar o alarme): tire a foto, mude só esse ajuste no menu do contador e compare.</p>
+        <div class="row">
+          <button type="button" class="btn" id="dcSnap">1. Tirar foto</button>
+          <button type="button" class="btn" id="dcDiff" disabled>2. Comparar</button>
+        </div>
+        <ul class="events mono small" id="dcDiffOut"></ul>
+      </details>
+    </div>
+
+    <p class="small muted">Antes de gravar, o app salva uma cópia da configuração atual e confere lendo de volta. Se algo der errado, dá para voltar com "Restaurar cópia".</p>
+
+    <div class="dc-foot">
+      <div class="row">
+        <button type="button" class="btn" id="dcRestore">Restaurar cópia</button>
+        <button type="button" class="btn" id="dcBackups">Ver cópias</button>
+      </div>
+      <button type="button" class="btn accent" id="dcSaveBtn" disabled>Gravar no contador</button>
+    </div>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Conexão</legend>
+      <label for="selPort">Porta</label>
+      <div class="row">
+        <select id="selPort"></select>
+        <button type="button" class="btn" id="btnRefresh">Atualizar</button>
+        <button type="button" class="btn" id="btnDetect">Procurar</button>
+      </div>
+      <div class="row">
+        <button type="button" class="btn accent" id="btnConnect">Conectar</button>
+        <span class="small muted" id="connMsg"></span>
+      </div>
+      <label class="toggle">
+        <span>Conectar sozinho ao abrir o app</span>
+        <input type="checkbox" id="chkAuto">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Alarme</legend>
+      <label class="toggle">
+        <span id="alarmLabel">Alarme ligado</span>
+        <input type="checkbox" id="chkAlarm">
+      </label>
+      <label for="numAlarm">Tocar alarme a partir de (CPM)</label>
+      <input type="number" id="numAlarm" min="1" step="1" inputmode="numeric">
+      <label for="selSound">Som</label>
+      <select id="selSound">
+        <option value="sirene">Sirene contínua</option>
+        <option value="bipes">Bipes rápidos</option>
+        <option value="mudo">Sem som (só visual)</option>
+      </select>
+      <label class="toggle">
+        <span>Trazer a janela para a frente quando o alarme tocar</span>
+        <input type="checkbox" id="chkRaise">
+      </label>
+      <p class="small" id="dangerNote"></p>
+      <div class="row-btns">
+        <button type="button" class="btn" id="btnTestAlarm">Testar alarme (5 s)</button>
+        <button type="button" class="btn" id="btnTestDanger">Testar alarme de perigo (5 s)</button>
+      </div>
+      <label class="toggle">
+        <span id="attnToggleLabel">Aviso de atenção a partir de 50 CPM (aviso amarelo e 3 bipes)</span>
+        <input type="checkbox" id="chkAttn">
+      </label>
+    </fieldset>
+
+    <fieldset>
+      <legend>Chuva no gráfico</legend>
+      <p class="small muted">Marca a chuva da sua cidade no gráfico de CPM. Com o app aberto, lê o radar meteorológico (RainViewer) a cada 10 min. Para os horários sem radar (app fechado, histórico baixado do contador), usa o modelo do tempo do Open-Meteo, menos preciso. A chuva traz para o chão produtos do radônio do ar e costuma dar picos leves que somem em algumas horas.</p>
+      <label class="toggle">
+        <span>Mostrar chuva no gráfico</span>
+        <input type="checkbox" id="chkRain">
+      </label>
+      <label for="txtPlace">Cidade</label>
+      <div class="row">
+        <input type="text" id="txtPlace" autocomplete="off" spellcheck="false" placeholder="ex.: Campinas">
+        <button type="button" class="btn" id="btnPlace">Buscar</button>
+      </div>
+      <ul class="places" id="placeList"></ul>
+      <p class="small mono" id="placeChosen"></p>
+      <label class="toggle">
+        <span>Ocultar a cidade na tela (mostra só "chuva configurada")</span>
+        <input type="checkbox" id="chkRainHide">
+      </label>
+      <p class="small" id="rainStatusSet"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Janela</legend>
+      <label class="toggle">
+        <span>Ao fechar, continuar rodando na bandeja (perto do relógio)</span>
+        <input type="checkbox" id="chkTray">
+      </label>
+      <label class="toggle">
+        <span>Iniciar com o Windows (abre na bandeja)</span>
+        <input type="checkbox" id="chkAutostart">
+      </label>
+      <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
+      <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Fora de casa</legend>
+      <label for="numAwayAsk">Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)</label>
+      <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
+    </fieldset>
+
+    <fieldset>
+      <legend>Backup</legend>
+      <div class="row">
+        <button type="button" class="btn" id="btnBackup">Fazer backup (.zip)</button>
+        <button type="button" class="btn" id="btnImportBackup">Importar backup…</button>
+      </div>
+      <p class="small muted">Importar junta só o que falta: o que já existe aqui não muda.</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>Relatórios</legend>
+      <p class="small muted">Os relatórios em PDF (Resumo → Relatório, ou um trecho selecionado no gráfico ou no padrão por hora) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
+      <p class="small mono path" id="reportDir">—</p>
+      <div class="row">
+        <button type="button" class="btn" id="btnReportDir">Escolher pasta…</button>
+        <button type="button" class="btn" id="btnOpenReportDir">Abrir pasta</button>
+        <button type="button" class="btn" id="btnResetReportDir" hidden>Voltar para a padrão</button>
+      </div>
+    </fieldset>
+
+    <fieldset>
+      <legend>Dados</legend>
+      <p class="small muted mono path" id="dataDir">—</p>
+      <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
+    </fieldset>
+    </div>
+
+    <div class="set-panel" id="setLevels" hidden>
+      <p class="small muted set-note">Níveis que o app usa por conta própria, além do seu alarme. Valem para o contador e para o modo demo.</p>
+      <fieldset>
+        <legend>Aviso de atenção</legend>
+        <label for="lvAttn">A partir de (CPM)</label>
+        <input type="number" id="lvAttn" min="5" step="1" inputmode="numeric">
+        <p class="small muted lv-eq" data-eq="lvAttn"></p>
+      </fieldset>
+      <fieldset>
+        <legend>Alarme de perigo</legend>
+        <label for="lvDanger">A partir de (CPM)</label>
+        <input type="number" id="lvDanger" min="50" step="1" inputmode="numeric">
+        <p class="small muted lv-eq" data-eq="lvDanger"></p>
+        <label for="lvSnooze">"Silenciar" cala o som por (minutos)</label>
+        <input type="number" id="lvSnooze" min="1" max="60" step="1" inputmode="numeric">
+        <p class="small muted">Tem prioridade sobre o seu alarme e não desliga; depois do tempo, se continuar alto, volta a tocar.</p>
+      </fieldset>
+      <fieldset>
+        <legend>Geiger saturado</legend>
+        <label for="lvSatMax">Fim da escala (µSv/h)</label>
+        <input type="number" id="lvSatMax" min="10" step="1" inputmode="decimal">
+        <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
+        <label for="lvSatDrop">Queda brusca a partir de (µSv/h)</label>
+        <input type="number" id="lvSatDrop" min="1" step="1" inputmode="decimal">
+        <p class="small muted">Se a leitura passar disso e despencar em segundos, o tubo pode ter travado.</p>
+        <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
+        <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
+      </fieldset>
+      <fieldset>
+        <legend>Tempo morto do tubo</legend>
+        <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
+        <label for="lvDTUs">Tempo morto τ (µs)</label>
+        <input type="number" id="lvDTUs" min="5" max="500" step="1" inputmode="decimal">
+        <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
+        <div class="lv-dt-wrap"><table class="m-stats mono lv-dt" id="lvDTTable"></table></div>
+      </fieldset>
+    </div>
+    </div>
+    </div>
+
+    <div class="dlg-foot set-foot">
+      <button type="button" class="btn" id="btnLevelsReset" hidden>Restaurar padrões dos níveis</button>
+      <button type="button" class="btn accent" id="btnSave">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+
+
+
+
+
+<dialog id="reguaDlg" class="wide" aria-labelledby="reguaTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="reguaTitle">Régua de radiação</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="small muted">Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas) e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.</p>
+    <div class="seg" id="rgTabs" role="group" aria-label="Taxa ou dose">
+      <button type="button" data-rg="taxa" aria-pressed="true">Taxa agora (µSv/h)</button>
+      <button type="button" data-rg="dose" aria-pressed="false">Dose recebida (µSv)</button>
+    </div>
+    <div id="rgPaneTaxa">
+      <p class="small" id="rgTaxaSub"></p>
+      <ol class="rg-list" id="rgTaxa"></ol>
+    </div>
+    <div id="rgPaneDose" hidden>
+      <p class="small" id="rgDoseSub"></p>
+      <ol class="rg-list" id="rgDose"></ol>
+    </div>
+    <p class="small muted">Taxa é quanto está chegando agora, por hora (a velocidade); dose é o total recebido (a distância). Dose = taxa × tempo.</p>
+  </form>
+</dialog>
+<dialog id="sigmaDlg" class="wide" aria-labelledby="sigmaTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="sigmaTitle">Como ler σ (sigma)</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="sg-help" id="sigmaBody"></div>
+  </form>
+</dialog>
+<dialog id="eventsDlg" class="wide logs-dlg" aria-labelledby="eventsTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="eventsTitle">Eventos e log</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div class="seg" role="group" aria-label="O que mostrar" id="evTabs">
+      <button type="button" data-evtab="log" aria-pressed="true">Log técnico</button>
+      <button type="button" data-evtab="eventos" aria-pressed="false">Eventos</button>
+    </div>
+
+    <div class="lg-pane" id="logPane">
+      <div class="lg-tools">
+        <div class="seg" role="group" aria-label="Período" id="lgRange">
+          <button type="button" data-lr="15m" aria-pressed="false">15 min</button>
+          <button type="button" data-lr="1h" aria-pressed="false">1 h</button>
+          <button type="button" data-lr="24h" aria-pressed="true">24 h</button>
+          <button type="button" data-lr="7d" aria-pressed="false">7 dias</button>
+          <button type="button" data-lr="all" aria-pressed="false">tudo</button>
+        </div>
+        <div class="lg-levels" id="lgLevels" role="group" aria-label="Níveis">
+          <button type="button" class="lg-lv" data-lv="DEBUG" aria-pressed="false">DEBUG <span class="mono"></span></button>
+          <button type="button" class="lg-lv" data-lv="INFO" aria-pressed="true">INFO <span class="mono"></span></button>
+          <button type="button" class="lg-lv" data-lv="WARN" aria-pressed="true">WARN <span class="mono"></span></button>
+          <button type="button" class="lg-lv" data-lv="ERROR" aria-pressed="true">ERROR <span class="mono"></span></button>
+        </div>
+      </div>
+      <div class="lg-tools">
+        <select id="lgComp" aria-label="Componente"><option value="">todos os componentes</option></select>
+        <input type="search" id="lgText" placeholder="buscar no texto (ex.: COM13, travada, GETCPM)" spellcheck="false" autocomplete="off">
+        <label class="lg-live"><input type="checkbox" id="lgLive" checked> ao vivo</label>
+        <button type="button" class="btn small" id="btnOpenLog" title="Abrir o log.txt no programa padrão">Abrir log.txt</button>
+      </div>
+      <div class="lg-hist">
+        <div class="lg-hist-head small muted"><span id="lgHistTitle">linhas por intervalo</span><button type="button" class="link small-link" id="lgZoomOut" hidden>voltar ao período</button></div>
+        <svg id="lgChart" viewBox="0 0 1000 120" preserveAspectRatio="none" role="img" aria-label="Quantidade de linhas do log por nível"></svg>
+        <div class="lg-x mono small" id="lgX"><span></span><span></span><span></span></div>
+        <div class="tip mono" id="lgTip" hidden></div>
+      </div>
+      <div class="lg-table" id="lgTable"></div>
+      <p class="small muted" id="lgFoot"></p>
+    </div>
+
+    <div class="lg-pane" id="evPane" hidden>
+      <p class="small muted">Conexões, histórico baixado, relógio, ajustes do contador e outras coisas do app. Os alertas de radiação ficam na tela Alertas.</p>
+      <ul class="events" id="eventsList"><li class="muted">Nada por enquanto.</li></ul>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="noteDlg" aria-labelledby="noteTitle">
+  <form method="dialog" class="dlg note-dlg">
+    <div class="dlg-head">
+      <h2 id="noteTitle">Anotação</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <label for="noteText">O que aconteceu</label>
+    <input type="text" id="noteText" maxlength="200" placeholder="ex.: abri a janela, liguei o ar, passei aspirador">
+    <div class="note-when">
+      <div><label for="noteWhen">Quando (ou começo)</label><input type="datetime-local" id="noteWhen" step="60"></div>
+      <div><label for="noteEnd">Até (para um trecho; vazio = um momento)</label><input type="datetime-local" id="noteEnd" step="60"></div>
+    </div>
+    <div class="dlg-foot spread">
+      <button type="button" class="btn" id="btnNoteDelete" hidden>Apagar</button>
+      <button type="button" class="btn accent" id="btnNoteSave">Salvar</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="newDataDlg" aria-labelledby="newDataTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="newDataTitle">Dados novos do contador</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="small muted">O histórico trouxe trechos que o app não tinha visto. Algum foi fora de casa? Se você só estava dormindo ou com o PC desligado, é "Em casa".</p>
+    <ul class="periods new-ranges" id="newRangeList"></ul>
+    <div class="dlg-foot">
+      <button type="submit" class="btn accent" value="close">Pronto</button>
+    </div>
+  </form>
+</dialog>
+
+
+
+
+
+<div class="heat-tip" id="heatTip" role="tooltip" hidden></div>
+
+
+
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="regua.js"></script>
+<script src="radiacode.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
