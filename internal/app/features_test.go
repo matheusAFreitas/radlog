@@ -238,3 +238,48 @@ func TestRain(t *testing.T) {
 		t.Fatalf("cache em disco: %+v", b.rain)
 	}
 }
+
+func TestHeatmapMonth(t *testing.T) {
+	a := newTestApp(t)
+	if a.GetDataStart() != 0 {
+		t.Fatal("sem dados deveria ser 0")
+	}
+	// três meses atrás, dia 10, 6h: 50 CPM por uma hora
+	now := time.Now()
+	old := time.Date(now.Year(), now.Month()-3, 10, 6, 0, 0, 0, now.Location())
+	var pts []store.Point
+	for m := 0; m < 60; m++ {
+		pts = append(pts, store.Point{T: old.Add(time.Duration(m) * time.Minute), CPM: 50, Src: store.SrcDevice})
+	}
+	if _, err := a.store.Import(pts); err != nil {
+		t.Fatal(err)
+	}
+	first := time.Date(old.Year(), old.Month(), 1, 0, 0, 0, 0, now.Location())
+	if a.GetDataStart() != first.UnixMilli() {
+		t.Fatalf("início %v", time.UnixMilli(a.GetDataStart()))
+	}
+	h, err := a.GetHeatmapMonth(old.Year(), int(old.Month()))
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := first.AddDate(0, 1, 0).AddDate(0, 0, -1).Day()
+	if len(h.Days) != want || h.Days[0] != first.UnixMilli() {
+		t.Fatalf("dias %d (queria %d)", len(h.Days), want)
+	}
+	if v := h.Values[9][6]; v == nil || *v != 50 || h.Counts[9][6] != 60 || h.PeakHour != 6 {
+		t.Fatalf("dia 10 6h: %v", h.Values[9][6])
+	}
+	// mês atual vai só até hoje
+	cur, _ := a.GetHeatmapMonth(now.Year(), int(now.Month()))
+	if len(cur.Days) != now.Day() {
+		t.Fatalf("mês atual: %d dias", len(cur.Days))
+	}
+	// mês futuro: vazio, mas sem nil (a tela usa .length)
+	fut, _ := a.GetHeatmapMonth(now.Year()+1, 1)
+	if fut.Days == nil || len(fut.Days) != 0 || fut.Values == nil {
+		t.Fatalf("futuro: %+v", fut)
+	}
+	if _, err := a.GetHeatmapMonth(2026, 13); err == nil {
+		t.Fatal("mês 13 deveria dar erro")
+	}
+}

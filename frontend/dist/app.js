@@ -43,6 +43,9 @@ const state = {
   doseZoomStack: [],
   chartUnit: localGet("chartUnit", "cpm"),
   heatDays: parseInt(localGet("heatDays", "14"), 10) || 14,
+  heatMonthMode: localGet("heatMode", "dias") === "mes",
+  heatMonth: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() + 1 }; })(),
+  heatDataStart: 0, // início do mês da leitura mais antiga (ms)
   dosePeriod: localGet("dosePeriod", "24h"),
   doseLimit: localGet("doseLimit", "publico"),
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
@@ -1396,9 +1399,24 @@ function wireDemo() {
 
 // ---------- padrão por hora do dia (mapa de calor) ----------
 
+function heatMonthStart(hm) { return new Date(hm.y, hm.m - 1, 1).getTime(); }
+
 async function refreshHeat() {
-  document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(parseInt(b.dataset.hdays, 10) === state.heatDays)));
-  const h = await api.GetHeatmap(state.heatDays);
+  const mm = state.heatMonthMode;
+  document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
+  $("heatMonthNav").hidden = !mm;
+  let h;
+  if (mm) {
+    if (api.GetDataStart) state.heatDataStart = (await api.GetDataStart()) || 0;
+    const hm = state.heatMonth, now = new Date();
+    const label = new Date(hm.y, hm.m - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    $("heatMonthLabel").textContent = label.charAt(0).toUpperCase() + label.slice(1);
+    $("heatPrev").disabled = !!state.heatDataStart && heatMonthStart(hm) <= state.heatDataStart;
+    $("heatNext").disabled = hm.y > now.getFullYear() || (hm.y === now.getFullYear() && hm.m >= now.getMonth() + 1);
+    h = await api.GetHeatmapMonth(hm.y, hm.m);
+  } else {
+    h = await api.GetHeatmap(state.heatDays);
+  }
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1580,8 +1598,22 @@ function wireHeat() {
   });
   window.addEventListener("scroll", hideHeatTip, { passive: true });
   document.querySelectorAll("#heatSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.heatDays = parseInt(b.dataset.hdays, 10); localSet("heatDays", String(state.heatDays)); refreshHeat();
+    if (b.dataset.hmonth) {
+      state.heatMonthMode = true;
+    } else {
+      state.heatMonthMode = false;
+      state.heatDays = parseInt(b.dataset.hdays, 10); localSet("heatDays", String(state.heatDays));
+    }
+    localSet("heatMode", state.heatMonthMode ? "mes" : "dias");
+    refreshHeat();
   }));
+  const stepMonth = (d) => {
+    const hm = state.heatMonth, t = new Date(hm.y, hm.m - 1 + d, 1);
+    state.heatMonth = { y: t.getFullYear(), m: t.getMonth() + 1 };
+    refreshHeat();
+  };
+  $("heatPrev").addEventListener("click", () => stepMonth(-1));
+  $("heatNext").addEventListener("click", () => stepMonth(1));
 }
 
 // ---------- chuva (configurações) ----------
@@ -3974,8 +4006,15 @@ function makeDemoApi() {
       return p;
     },
     DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => emit("periods", periods.slice()), 0); },
-    GetHeatmap: async (days) => {
+    GetDataStart: async () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() - 1, 1).getTime(); },
+    GetHeatmapMonth: async (y, m) => {
+      const first = new Date(y, m - 1, 1), t = new Date(); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 1);
+      const end = Math.min(new Date(y, m, 1).getTime(), t.getTime());
+      return api.GetHeatmap(Math.max(0, Math.round((end - first.getTime()) / 864e5)), first.getTime());
+    },
+    GetHeatmap: async (days, from) => {
       const d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - (days - 1));
+      if (from) d0.setTime(from);
       const first = d0.getTime(), dayList = [], values = [], usv = [], counts = [], hs = new Array(24).fill(0), hc = new Array(24).fill(0);
       let mn = null, mx = null;
       for (let i = 0; i < days; i++) {

@@ -175,8 +175,45 @@ func (a *App) GetHeatmap(days int) (Heatmap, error) {
 	now := time.Now()
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
-	first := today.AddDate(0, 0, -(days - 1))
-	pts, err := a.points(first, today.AddDate(0, 0, 1))
+	return a.heatmapFrom(today.AddDate(0, 0, -(days-1)), days)
+}
+
+// GetHeatmapMonth monta o mapa de calor de um mês (month 1–12). O mês atual
+// vai só até hoje; mês futuro volta vazio.
+func (a *App) GetHeatmapMonth(year, month int) (Heatmap, error) {
+	if month < 1 || month > 12 {
+		return Heatmap{}, fmt.Errorf("mês inválido: %d", month)
+	}
+	now := time.Now()
+	first := time.Date(year, time.Month(month), 1, 0, 0, 0, 0, now.Location())
+	end := first.AddDate(0, 1, 0)
+	y, m, d := now.Date()
+	tomorrow := time.Date(y, m, d+1, 0, 0, 0, 0, now.Location())
+	if end.After(tomorrow) {
+		end = tomorrow
+	}
+	days := int(math.Round(end.Sub(first).Hours() / 24))
+	if days < 1 {
+		return Heatmap{Days: []int64{}, Values: [][]*float64{}, USv: [][]*float64{}, Counts: [][]int{},
+			AwayCounts: [][]int{}, AwayValues: [][]*float64{}, Alerts: map[string][]HeatAlert{},
+			HourAvg: make([]*float64, 24), PeakHour: -1, LowHour: -1}, nil
+	}
+	return a.heatmapFrom(first, days)
+}
+
+// GetDataStart devolve o início (ms) do mês da leitura mais antiga guardada,
+// ou 0 se ainda não há nada. Serve para a tela não deixar voltar além disso.
+func (a *App) GetDataStart() int64 {
+	t, ok := a.store.FirstTime()
+	if !ok {
+		return 0
+	}
+	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location()).UnixMilli()
+}
+
+// heatmapFrom monta o mapa de calor de days dias a partir de first (meia-noite).
+func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
+	pts, err := a.points(first, first.AddDate(0, 0, days))
 	if err != nil {
 		return Heatmap{}, err
 	}

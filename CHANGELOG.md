@@ -1,5 +1,11 @@
 # Versões
 
+## 1.15.0
+- **Padrão por hora por mês**: novo botão "Mês" no mapa de calor, com ‹ › para
+  andar entre os meses. Dá para ver qualquer mês desde a primeira leitura
+  guardada (antes só ia até 30 dias para trás). O mês atual vai até hoje, e
+  selecionar um trecho do mês abre no gráfico e no relatório como antes.
+
 ## 1.14.2
 - **Tema da tela do firmware 1.23**: em Configurações → Contador, o antigo
   "modo escuro" virou um seletor de tema. No Re1.23 são 5 opções (Light,

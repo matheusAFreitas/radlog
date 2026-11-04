@@ -321,10 +321,18 @@
         <h2>Padrão por hora do dia</h2>
         <span class="mono muted small" id="heatSub">sem dados ainda</span>
       </div>
+      <div class="heat-ctrl">
       <div class="seg" role="group" aria-label="Dias no mapa" id="heatSeg">
         <button type="button" data-hdays="7" aria-pressed="false">7 dias</button>
         <button type="button" data-hdays="14" aria-pressed="true">14 dias</button>
         <button type="button" data-hdays="30" aria-pressed="false">30 dias</button>
+        <button type="button" data-hmonth="1" aria-pressed="false">Mês</button>
+      </div>
+      <div class="heat-month" id="heatMonthNav" hidden>
+        <button type="button" class="btn small" id="heatPrev" aria-label="Mês anterior">‹</button>
+        <span class="mono" id="heatMonthLabel"></span>
+        <button type="button" class="btn small" id="heatNext" aria-label="Próximo mês">›</button>
+      </div>
       </div>
     </div>
     <div class="heat-wrap">

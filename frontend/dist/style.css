@@ -894,3 +894,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 /* mapa de calor: o contorno do quadrado (hover/seleção) passa 2–3 px da
    borda; o overflow-x da caixa cortava o da última linha e da última coluna */
 .heat-wrap { padding: 3px; margin: -3px; }
+
+/* padrão por hora: navegação por mês */
+.heat-month { display: flex; align-items: center; gap: 8px; }
+.heat-month[hidden] { display: none; }
+.heat-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.heat-month span { min-width: 9.5em; text-align: center; }
