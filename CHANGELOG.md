@@ -1,5 +1,12 @@
 # Versões
 
+## 1.13.4
+- **Código reorganizado em pastas** (para o GitHub), sem mudar nada no
+  funcionamento: o app foi para `internal/app`, o gerador de PDF virou o
+  pacote `internal/pdf`, ícones e arquivos de empacotamento em `build/`,
+  scripts em `scripts/` e o roadmap em `docs/`. Na raiz ficam só o `main.go`,
+  o `go.mod` e os documentos.
+
 ## 1.13.3
 - Padrão por hora: o contorno do quadrado com o mouse em cima (ou
   selecionado) não é mais cortado na última linha e na última coluna.

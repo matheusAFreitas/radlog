@@ -2,8 +2,11 @@
 
 // ---------- ponte com o Go (ou modo demonstração no navegador) ----------
 
-const hasGo = !!(window.go && window.go.main && window.go.main.App);
-const api = hasGo ? window.go.main.App : makeDemoApi();
+// a Wails expõe os métodos em window.go.<pacote Go>.App (o pacote é "app"
+// desde a 1.13.4; antes era "main")
+const goApp = window.go && ((window.go.app && window.go.app.App) || (window.go.main && window.go.main.App));
+const hasGo = !!goApp;
+const api = hasGo ? goApp : makeDemoApi();
 const on = (name, fn) => {
   if (hasGo && window.runtime) window.runtime.EventsOn(name, fn);
   else demoBus[name] = (demoBus[name] || []).concat(fn);

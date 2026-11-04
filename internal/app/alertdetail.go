@@ -1,0 +1,340 @@
+package app
+
+import (
+	"encoding/json"
+	"errors"
+	"fmt"
+	"os"
+	"path/filepath"
+	"regexp"
+	"sort"
+	"strconv"
+	"time"
+)
+
+// ---------- gráfico detalhado de um alerta (tela Alertas) ----------
+//
+// As leituras por segundo só ficam na memória por 1 hora. Para o gráfico de
+// um alerta continuar detalhado depois, o app grava os segundos do alerta
+// (com 2 min antes e depois) em "alertas-detalhe/" quando ele termina.
+
+const (
+	alertPre      = 2 * time.Minute // segundos guardados antes e depois do alerta
+	alertMaxSecs  = 3 * time.Hour   // alerta muito longo: guarda no máximo isto
+	alertMaxShown = 1500            // pontos por segundo mandados à tela
+)
+
+// AlertPoint é uma leitura no gráfico do alerta.
+type AlertPoint struct {
+	T   int64   `json:"t"` // ms
+	CPM float64 `json:"cpm"`
+}
+
+// AlertDetail é o que a tela precisa para desenhar o gráfico de um alerta.
+type AlertDetail struct {
+	Event     Event        `json:"event"`
+	From      int64        `json:"from"`
+	To        int64        `json:"to"`
+	End       int64        `json:"end"`       // fim do alerta (ou agora, se ativo)
+	Seconds   []AlertPoint `json:"seconds"`   // leituras por segundo (pode vir vazio)
+	Minutes   []AlertPoint `json:"minutes"`   // um ponto por minuto (sempre que houver)
+	Limit     float64      `json:"limit"`     // limite deste alerta (do texto dele)
+	Attention float64      `json:"attention"` // níveis atuais, para referência
+	Alarm     float64      `json:"alarm"`
+	Danger    float64      `json:"danger"`
+	Detailed  bool         `json:"detailed"` // tem os segundos de todo o alerta
+}
+
+func (a *App) alertDir() string { return filepath.Join(a.dataDir, "alertas-detalhe") }
+
+// alertKey é o nome do arquivo dos segundos do alerta. Usa a hora em
+// segundos: o eventos.csv grava a hora sem os milissegundos, então depois de
+// reabrir o app a hora do alerta perde os ms (até a 0.23.0 o nome usava ms e
+// o arquivo não era mais achado).
+func alertKey(e Event) string { return fmt.Sprintf("%d-%s.json", e.Time/1000, e.Level) }
+
+// readAlertSeconds lê os segundos gravados do alerta (nome novo ou o antigo,
+// com ms, que começa com os mesmos dígitos).
+func (a *App) readAlertSeconds(e Event) []AlertPoint {
+	names := []string{filepath.Join(a.alertDir(), alertKey(e))}
+	if old, _ := filepath.Glob(filepath.Join(a.alertDir(), fmt.Sprintf("%d???-%s.json", e.Time/1000, e.Level))); len(old) > 0 {
+		names = append(names, old...)
+	}
+	for _, n := range names {
+		b, err := os.ReadFile(n)
+		if err != nil {
+			continue
+		}
+		var pts []AlertPoint
+		if json.Unmarshal(b, &pts) == nil && len(pts) > 0 {
+			return pts
+		}
+	}
+	return nil
+}
+
+var limitRe = regexp.MustCompile(`(?:a partir de|acima de|limite) (\d+)`)
+
+func alertLimit(e Event, lv Levels, alarm int) float64 {
+	if m := limitRe.FindStringSubmatch(e.Text); m != nil {
+		v, _ := strconv.Atoi(m[1])
+		return float64(v)
+	}
+	switch e.Level {
+	case "perigo":
+		return float64(lv.DangerCPM)
+	case "alarme":
+		return float64(alarm)
+	}
+	return float64(lv.AttentionCPM)
+}
+
+// saveAlertSeconds grava os segundos de um alerta que terminou (agora e de
+// novo 2 min depois, para pegar o "depois").
+func (a *App) saveAlertSeconds(ids []int64) {
+	if a.dataDir == "" {
+		return
+	}
+	var evs []Event
+	a.mu.Lock()
+	for _, id := range ids {
+		if e := a.eventLocked(id); e != nil && !e.Demo && e.End != 0 {
+			evs = append(evs, *e)
+		}
+	}
+	a.mu.Unlock()
+	if len(evs) == 0 {
+		return
+	}
+	write := func() {
+		for _, e := range evs {
+			from := time.UnixMilli(e.Time).Add(-alertPre)
+			to := time.UnixMilli(e.End).Add(alertPre)
+			if to.Sub(from) > alertMaxSecs {
+				from = to.Add(-alertMaxSecs)
+			}
+			a.mu.Lock()
+			ss := a.live.between(from, to)
+			a.mu.Unlock()
+			if len(ss) == 0 {
+				continue
+			}
+			pts := make([]AlertPoint, len(ss))
+			for i, s := range ss {
+				pts[i] = AlertPoint{s.t.UnixMilli(), s.cpm}
+			}
+			b, err := json.Marshal(pts)
+			if err != nil {
+				continue
+			}
+			_ = os.MkdirAll(a.alertDir(), 0o755)
+			_ = os.WriteFile(filepath.Join(a.alertDir(), alertKey(e)), b, 0o644)
+		}
+	}
+	write()
+	time.AfterFunc(alertPre+5*time.Second, write)
+}
+
+// GetAlertDetail monta o gráfico do alerta de id dado.
+func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
+	a.mu.Lock()
+	ep := a.eventLocked(id)
+	if ep == nil || ep.Kind != kindAlert {
+		a.mu.Unlock()
+		return AlertDetail{}, errors.New("alerta não encontrado")
+	}
+	e := *ep
+	e.Active = a.isActiveLocked(e.ID)
+	lv, alarm := a.settings.Levels, a.settings.AlarmCPM
+	a.mu.Unlock()
+
+	now := time.Now()
+	start := time.UnixMilli(e.Time)
+	end := now
+	if e.End != 0 && !e.Active {
+		end = time.UnixMilli(e.End)
+	}
+	d := AlertDetail{
+		Event: e, End: end.UnixMilli(),
+		Limit: alertLimit(e, lv, alarm), Attention: float64(lv.AttentionCPM),
+		Alarm: float64(alarm), Danger: float64(lv.DangerCPM),
+	}
+
+	// segundos: arquivo gravado; senão, a memória (última hora) ou o demo
+	var secs []AlertPoint
+	if !e.Demo && a.dataDir != "" {
+		secs = a.readAlertSeconds(e)
+	}
+	if len(secs) == 0 {
+		for _, s := range a.liveSamples(start.Add(-alertPre), end.Add(alertPre)) {
+			secs = append(secs, AlertPoint{s.t.UnixMilli(), s.cpm})
+		}
+	}
+
+	// janela: com segundos, 2 min em volta (ou 1/4 do alerta, até 30 min);
+	// só com minutos, mais contexto (10 min a 2 h)
+	dur := end.Sub(start)
+	pad := dur / 4
+	if len(secs) > 0 {
+		pad = min(max(pad, alertPre), 30*time.Minute)
+	} else {
+		pad = min(max(dur, 10*time.Minute), 2*time.Hour)
+	}
+	from, to := start.Add(-pad), end.Add(pad)
+	if to.After(now) {
+		to = now
+	}
+	d.From, d.To = from.UnixMilli(), to.UnixMilli()
+
+	var in []AlertPoint
+	for _, p := range secs {
+		if p.T >= d.From && p.T < d.To {
+			in = append(in, p)
+		}
+	}
+	if len(in) > 0 {
+		d.Detailed = in[0].T <= e.Time+5000 && in[len(in)-1].T >= d.End-5000
+	}
+	d.Seconds = thinMax(in, alertMaxShown)
+
+	pts, err := a.points(from.Truncate(time.Minute), to)
+	if err != nil {
+		return d, err
+	}
+	for _, p := range pts {
+		d.Minutes = append(d.Minutes, AlertPoint{p.T.UnixMilli(), p.CPM})
+	}
+	if d.Minutes == nil {
+		d.Minutes = []AlertPoint{}
+	}
+	if d.Seconds == nil {
+		d.Seconds = []AlertPoint{}
+	}
+	return d, nil
+}
+
+// thinMax reduz a lista para no máximo n pontos sem perder os picos.
+func thinMax(in []AlertPoint, n int) []AlertPoint {
+	if len(in) <= n {
+		return in
+	}
+	k := (len(in) + n - 1) / n
+	out := make([]AlertPoint, 0, n)
+	for i := 0; i < len(in); i += k {
+		best := in[i]
+		for j := i + 1; j < i+k && j < len(in); j++ {
+			if in[j].CPM > best.CPM {
+				best = in[j]
+			}
+		}
+		out = append(out, best)
+	}
+	return out
+}
+
+// ChartPeak é o pico de um alerta, marcado como ponto no gráfico.
+type ChartPeak struct {
+	T     int64   `json:"t"` // ms
+	CPM   float64 `json:"cpm"`
+	Level string  `json:"level"`
+	Retro bool    `json:"retro"`
+}
+
+// alertPeaks devolve os picos dos alertas em [from, to). O CPM do contador é
+// a soma dos últimos 60 s, recalculada a cada segundo; o gráfico guarda o
+// valor de cada minuto do relógio (de :00 a :59). O pico do alerta é a maior
+// leitura de segundo e pode ficar um pouco acima do valor do minuto: ele entra
+// no "máx" e aparece como ponto, para os números baterem.
+func (a *App) alertPeaks(from, to time.Time) []ChartPeak {
+	f, t := from.UnixMilli(), to.UnixMilli()
+	rank := map[string]int{"atencao": 1, "alarme": 2, "perigo": 3}
+	a.mu.Lock()
+	demo := a.demo.Active
+	byAt := map[int64]int{}
+	var out []ChartPeak
+	for _, e := range a.events {
+		if e.Kind != kindAlert || e.Peak <= 0 || (e.Demo && !demo) {
+			continue
+		}
+		at := e.PeakAt
+		if at == 0 {
+			at = e.Time
+		}
+		if at < f || at >= t {
+			continue
+		}
+		// atenção e alarme do mesmo pico: um ponto só, com o nível mais alto
+		if i, ok := byAt[at]; ok {
+			if rank[e.Level] > rank[out[i].Level] {
+				out[i].Level = e.Level
+			}
+			out[i].CPM = max(out[i].CPM, e.Peak)
+			continue
+		}
+		byAt[at] = len(out)
+		out = append(out, ChartPeak{T: at, CPM: e.Peak, Level: e.Level, Retro: e.Retro})
+	}
+	a.mu.Unlock()
+	if out == nil {
+		out = []ChartPeak{}
+	}
+	return out
+}
+
+// alertSamples devolve as leituras por segundo gravadas dos alertas que
+// caem em [from, to), em ordem.
+func (a *App) alertSamples(from, to time.Time) []sample {
+	if a.dataDir == "" {
+		return nil
+	}
+	f, t := from.UnixMilli(), to.UnixMilli()
+	pre := alertPre.Milliseconds()
+	a.mu.Lock()
+	if a.demo.Active {
+		a.mu.Unlock()
+		return nil
+	}
+	var evs []Event
+	for _, e := range a.events {
+		if e.Kind != kindAlert || e.Demo || e.Retro || e.End == 0 {
+			continue
+		}
+		if e.End+pre > f && e.Time-pre < t {
+			evs = append(evs, e)
+		}
+	}
+	a.mu.Unlock()
+	var out []sample
+	seen := map[int64]bool{}
+	for _, e := range evs {
+		for _, p := range a.readAlertSeconds(e) {
+			if p.T >= f && p.T < t && !seen[p.T] {
+				seen[p.T] = true
+				out = append(out, sample{time.UnixMilli(p.T), p.CPM})
+			}
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].t.Before(out[j].t) })
+	return out
+}
+
+// fineSamples junta as leituras por segundo da memória (última hora) com as
+// gravadas dos alertas (mais antigas), sem repetir.
+func (a *App) fineSamples(from, to time.Time) []sample {
+	live := a.liveSamples(from, to)
+	old := a.alertSamples(from, to)
+	if len(old) == 0 {
+		return live
+	}
+	if len(live) == 0 {
+		return old
+	}
+	first := live[0].t
+	out := make([]sample, 0, len(old)+len(live))
+	for _, s := range old {
+		if s.t.Before(first) {
+			out = append(out, s)
+		}
+	}
+	return append(out, live...)
+}

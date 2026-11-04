@@ -22,8 +22,8 @@ jobs:
       - name: Versão
         id: v
         run: |
-          V=$(sed -n 's/^const AppVersion = "\(.*\)"/\1/p' version.go)
-          if [ "v$V" != "${GITHUB_REF_NAME}" ]; then echo "a tag ${GITHUB_REF_NAME} não bate com version.go ($V)"; exit 1; fi
+          V=$(sed -n 's/^const AppVersion = "\(.*\)"/\1/p' internal/app/version.go)
+          if [ "v$V" != "${GITHUB_REF_NAME}" ]; then echo "a tag ${GITHUB_REF_NAME} não bate com internal/app/version.go ($V)"; exit 1; fi
           echo "ver=$V" >> "$GITHUB_OUTPUT"
       - name: go.sum
         run: go mod tidy
@@ -32,7 +32,7 @@ jobs:
       - name: Windows (.exe)
         run: |
           go install github.com/tc-hib/go-winres@latest
-          go-winres make --in winres/winres.json
+          go-winres make --in build/windows/winres.json
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -tags desktop,production \
             -ldflags "-w -s -H windowsgui" -o "out/GMC-Monitor-v${{ steps.v.outputs.ver }}.exe" .
       - name: Linux (AppImage e .tar.gz)
@@ -41,7 +41,7 @@ jobs:
           P="out/gmc-monitor-v$V-linux-x86_64"
           mkdir -p "$P"
           CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s" -o "$P/gmc-monitor" .
-          cp packaging/linux/* "$P/"
+          cp build/linux/* "$P/"
           echo "$V" > "$P/VERSION"
           (cd "$P" && sh build-appimage.sh)
           mv "$P/GMC-Monitor-v$V-x86_64.AppImage" out/

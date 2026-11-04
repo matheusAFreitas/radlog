@@ -1,7 +1,7 @@
 # RadLog
 
 > Hoje ainda se chama **GMC Monitor** (versões 1.x). A partir da 2.0, com o
-> RadiaCode, passa a se chamar RadLog. Veja o [ROADMAP](ROADMAP.md).
+> RadiaCode, passa a se chamar RadLog. Veja o [ROADMAP](docs/ROADMAP.md).
 
 Monitor para o contador Geiger **GQ GMC-800**, feito em Go + Wails, para
 Windows e Linux. Lê o contador pela USB a cada segundo, guarda uma leitura por
@@ -9,7 +9,7 @@ minuto e mostra tudo numa tela só: leitura ao vivo, gráficos, dose acumulada,
 alertas, chuva × radiação, medição de objetos, relatórios em PDF e um log
 técnico com níveis.
 
-Versão atual: veja `version.go` e o [CHANGELOG](CHANGELOG.md).
+Versão atual: veja `internal/app/version.go` e o [CHANGELOG](CHANGELOG.md).
 
 ## Baixar
 
@@ -124,28 +124,28 @@ vem no Windows 10/11. Não precisa do Wails CLI nem de Node.
 Na pasta do projeto:
 
 ```
-build.bat
+scripts\build.bat
 ```
 
 Isso baixa as dependências (`go mod tidy`), roda os testes e gera
 `GMC-Monitor.exe`.
 
 As releases são geradas pelo GitHub Actions (`.github/workflows/release.yml`):
-uma tag `vX.Y.Z` igual ao `AppVersion` de `version.go` compila o `.exe`, o
+uma tag `vX.Y.Z` igual ao `AppVersion` de `internal/app/version.go` compila o `.exe`, o
 AppImage e o `.tar.gz` e publica com o trecho da versão no CHANGELOG.
 
 ### Linux
 
 O pacote `gmc-monitor-vX-linux-x86_64.tar.gz` já traz o binário pronto, o
 `install.sh` (atalho no menu) e o `build-appimage.sh` (gera o AppImage; os
-arquivos ficam em `packaging/linux/`). Precisa da WebKitGTK 4.1 instalada
+arquivos ficam em `build/linux/`). Precisa da WebKitGTK 4.1 instalada
 (`sudo apt install libwebkit2gtk-4.1-0`).
 
 Para compilar no próprio Linux:
 
 ```
 sudo apt install golang libgtk-3-dev libwebkit2gtk-4.1-dev   # Debian/Ubuntu
-./build-linux.sh
+./scripts/build-linux.sh
 ```
 
 Para ler o contador sem root, o usuário precisa estar no grupo `dialout`
@@ -156,37 +156,34 @@ Para ler o contador sem root, o usuário precisa estar no grupo `dialout`
 ## Estrutura
 
 ```
-main.go                 abre a janela (Wails)
-app.go                  tudo que a tela chama: conexão, leitura, histórico, gráficos
-devconfig.go            ler e gravar os ajustes do contador
-dose.go                 cálculo do dosímetro (dose, fundo e teto)
-demo.go                 modo demo e buffer das leituras por segundo
-stats.go                fundo, desvios (σ) e mapa de calor
-measure.go              medir um objeto
-weather.go              chuva (Open-Meteo)
-radar.go                chuva pelo radar (RainViewer)
-rainimpact.go           chuva × radiação (efeito da chuva no CPM)
-tray*.go                ícone na bandeja e iniciar com o Windows
-watchdog.go             leitura travada, fechamento e diagnóstico
-alertdetail.go          gráfico detalhado de cada alerta
-summary.go              resumo de período (aba Resumo, dados novos)
-notes.go                anotações no gráfico
-backup.go               backup .zip (gerar e importar mesclando)
-applog.go               log técnico (log.txt)
-logs.go                 visor do log técnico (níveis, histograma, filtros)
-report.go               relatório do período (dados, pasta dos relatórios)
-reportpdf.go, pdf.go    o PDF do relatório (gerador próprio, sem dependências)
-handoff*.go             troca automática de versão
-webview.go              pasta do WebView2 e limpeza das antigas
-periods.go              períodos fora de casa
-levels.go               níveis do app (atenção, perigo, saturado)
-saturation.go           Geiger saturado e subida até o perigo
-alerts.go               alertas ativos, retroativos e o eventos.csv
-alarm.go                título e foco da janela durante o alarme
-internal/gmc/           protocolo do contador (serial, comandos, calibração, histórico)
-internal/store/         gravação das leituras em CSV mensal
-frontend/dist/          interface (HTML, CSS e JS puros, sem build)
-winres/                 ícone e manifesto do .exe
+main.go                     embute a interface e chama o app
+internal/app/               o app (um pacote Go só; os métodos exportados de App
+                            são o que a interface chama)
+  run.go                    abre a janela (Wails), uma cópia só, troca de versão
+  app.go                    conexão, leitura ao vivo, histórico, gráficos
+  alerts.go, alarm.go       alertas ativos, retroativos, episódios, eventos.csv
+  levels.go, saturation.go  níveis do app, tempo morto, Geiger saturado
+  dose.go, stats.go         dosímetro, fundo, desvios (σ), mapa de calor
+  summary.go, report*.go    resumo de período e relatório em PDF
+  measure.go                medir um objeto
+  weather.go, radar.go,     chuva (Open-Meteo e radar RainViewer) e
+  rainimpact.go             chuva × radiação
+  devconfig.go, memory.go   ajustes e memória do contador
+  backup.go                 backup .zip (gerar e importar mesclando)
+  applog.go, logs.go        log técnico e o visor dele
+  tray*.go, icons/          ícone na bandeja e iniciar com o Windows
+  handoff*.go, webview.go   troca automática de versão, pasta do WebView2
+  watchdog.go               leitura travada, fechamento e diagnóstico
+  demo.go, notes.go,        modo demo, anotações, períodos fora de casa
+  periods.go
+internal/gmc/               protocolo do contador (serial, comandos, calibração, histórico)
+internal/store/             gravação das leituras em CSV mensal
+internal/pdf/               gerador de PDF mínimo, sem dependências
+frontend/dist/              interface (HTML, CSS e JS puros, sem build)
+build/windows/              ícone e manifesto do .exe (go-winres)
+build/linux/                AppImage, atalho (.desktop) e install.sh
+scripts/                    build.bat (Windows) e build-linux.sh
+docs/ROADMAP.md             o que está planejado
 ```
 
 A interface também abre direto no navegador (`frontend/dist/index.html`) em
@@ -196,7 +193,7 @@ contador.
 ## Testes
 
 ```
-go test ./internal/...
+go test ./...
 ```
 
 Os testes usam um GMC-800 simulado com respostas gravadas de um aparelho real.
