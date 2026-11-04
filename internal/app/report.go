@@ -10,6 +10,8 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/store"
+
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
@@ -45,6 +47,36 @@ type reportData struct {
 	AlertList                                 []reportAlert
 	Meas                                      []reportMeas
 	Cal, DeadTime                             string
+
+	// relatório técnico (reportstats.go)
+	From, To     time.Time     // período; To não passa de agora
+	Pts          []store.Point // leituras por minuto do período
+	St           minuteStats
+	Gaps         []gap
+	SpanMin      int // minutos do período (até agora)
+	DaysData     int
+	Bins         []histBin
+	Episodes     []reportEpisode
+	Above        []reportAbove
+	Config       [][2]string // configurações e método (rótulo, valor)
+	AlertPeakMax float64     // maior pico dos alertas (pode vir do detalhe por segundo)
+}
+
+type reportEpisode struct {
+	Start, End        time.Time
+	Level, LevelCls   string
+	Minutes           int
+	N                 int // minutos com leitura dentro do episódio
+	MinC, MeanC, MaxC float64
+	Peak              float64 // pico do alerta (por segundo, se ao vivo)
+	Limit             int
+	Retro             bool
+}
+
+type reportAbove struct {
+	Label   string
+	Limit   int
+	Minutes int
 }
 
 func fmtBR(v float64, dec int) string {
@@ -169,8 +201,42 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		}
 	}
 
-	// por dia
+	// leituras por minuto do período (base de tudo o que vem abaixo)
 	pts, err := a.points(from.Truncate(time.Minute), to)
+	if err == nil {
+		k := 0
+		for _, p := range pts {
+			if !p.T.Before(from) && p.T.Before(to) {
+				pts[k] = p
+				k++
+			}
+		}
+		pts = pts[:k]
+		sort.Slice(pts, func(i, j int) bool { return pts[i].T.Before(pts[j].T) })
+	}
+	effTo := to
+	if now := time.Now(); effTo.After(now) {
+		effTo = now
+	}
+	r.From, r.To, r.Pts = from, effTo, pts
+	r.St = calcMinuteStats(pts)
+	r.Gaps = findGaps(pts, from, effTo)
+	r.SpanMin = int(math.Round(effTo.Sub(from).Minutes()))
+	r.DaysData = daysWithData(pts)
+	r.Bins = histogram(pts, r.St.Mean)
+	if r.St.N > 0 {
+		r.Min = fmtBR(r.St.Min, 0)
+		r.MinAt = r.St.MinAt.Format("02/01 15:04")
+		r.Max = fmtBR(r.St.Max, 0)
+		r.MaxAt = r.St.MaxAt.Format("02/01 15:04")
+	}
+	pct := 0.0
+	if r.SpanMin > 0 {
+		pct = math.Min(100, float64(r.St.N)/float64(r.SpanMin)*100)
+	}
+	r.Coverage = fmt.Sprintf("%s%% · %d de %d min", fmtBR(pct, 0), r.St.N, r.SpanMin)
+
+	// por dia
 	if err == nil {
 		type acc struct {
 			sum, dose, min, max float64
@@ -209,6 +275,48 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		}
 	}
 
+	// episódios com a estatística dos minutos de dentro e o limite passado
+	a.mu.Lock()
+	alarmCPM, alarmOn := a.settings.AlarmCPM, a.settings.AlarmEnabled
+	a.mu.Unlock()
+	limitOf := func(level string) int {
+		switch level {
+		case "perigo":
+			return lv.DangerCPM
+		case "alarme":
+			return alarmCPM
+		}
+		return lv.AttentionCPM
+	}
+	retroOf := map[int64]bool{}
+	for _, e := range evs {
+		retroOf[e.ID] = e.Retro
+	}
+	for _, ep := range alertEpisodes(evs, time.Now()) {
+		st, en := time.UnixMilli(ep.Start), time.UnixMilli(ep.Until)
+		re := reportEpisode{Start: st, End: en, Level: levelName(ep.Level), LevelCls: ep.Level,
+			Minutes: int(math.Ceil(en.Sub(st).Minutes())), Peak: ep.Peak, Limit: limitOf(ep.Level)}
+		if len(ep.IDs) > 0 {
+			re.Retro = retroOf[ep.IDs[0]]
+		}
+		if re.Retro {
+			re.Minutes++ // do histórico: de minuto a minuto, inclusive o último
+		}
+		in := pointsIn(pts, st.Truncate(time.Minute), en)
+		if ms := calcMinuteStats(in); ms.N > 0 {
+			re.N, re.MinC, re.MeanC, re.MaxC = ms.N, ms.Min, ms.Mean, ms.Max
+		}
+		if ep.Peak > r.AlertPeakMax {
+			r.AlertPeakMax = ep.Peak
+		}
+		r.Episodes = append(r.Episodes, re)
+	}
+	r.Above = append(r.Above, reportAbove{"Atenção", lv.AttentionCPM, minutesAtOrAbove(pts, float64(lv.AttentionCPM))})
+	if alarmOn {
+		r.Above = append(r.Above, reportAbove{"Alarme", alarmCPM, minutesAtOrAbove(pts, float64(alarmCPM))})
+	}
+	r.Above = append(r.Above, reportAbove{"Perigo", lv.DangerCPM, minutesAtOrAbove(pts, float64(lv.DangerCPM))})
+
 	// alertas por episódio (o mais recente primeiro)
 	eps := alertEpisodes(evs, time.Now())
 	for i := len(eps) - 1; i >= 0; i-- {
@@ -226,11 +334,19 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 
 	for _, m := range meas {
-		res := fmt.Sprintf("+%s ± %s CPM", fmtBR(m.Result.NetCPM, 1), fmtBR(m.Result.NetErr, 1))
+		sign := "+"
+		if m.Result.NetCPM < 0 {
+			sign = ""
+		}
+		res := fmt.Sprintf("%s%s ± %s CPM", sign, fmtBR(m.Result.NetCPM, 1), fmtBR(m.Result.NetErr, 1))
 		if m.Result.NetUSv != 0 {
 			res += fmt.Sprintf(" (≈ %s µSv/h)", fmtBR(m.Result.NetUSv, 3))
 		}
-		r.Meas = append(r.Meas, reportMeas{When: time.UnixMilli(m.Time).Format("02/01 15:04"), Name: m.Name, Result: res, Verdict: m.Result.Verdict})
+		verdict := m.Result.Verdict
+		if i := strings.IndexAny(verdict, ":(—"); i > 0 {
+			verdict = strings.TrimSpace(verdict[:i])
+		}
+		r.Meas = append(r.Meas, reportMeas{When: time.UnixMilli(m.Time).Format("02/01 15:04"), Name: m.Name, Result: res, Verdict: verdict})
 	}
 
 	r.Cal = fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM"
@@ -238,6 +354,43 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		r.DeadTime = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
 	} else {
 		r.DeadTime = "desligada"
+	}
+
+	// configurações e método
+	calSrc := "lida do contador agora"
+	switch cal.Source {
+	case calFromLast:
+		calSrc = "última lida do contador; ele não estava conectado"
+	case "padrão":
+		calSrc = "padrão de fábrica do GMC-800; o app ainda não leu a do contador"
+	}
+	alarm := "desligado"
+	if alarmOn {
+		alarm = fmt.Sprintf("a partir de %d CPM", alarmCPM)
+	}
+	bg := "ainda sem fundo"
+	if s.BgOK && s.BgCPM > 0 {
+		bg = fmt.Sprintf("%s CPM (≈ %s µSv/h), mediana das leituras por minuto dos últimos 30 dias em casa", fmtBR(s.BgCPM, 1), fmtBR(cal.USv(s.BgCPM), 3))
+	}
+	dev := r.Device
+	if dev == "" {
+		dev = "contador não conectado na hora do relatório"
+	}
+	zone, _ := time.Now().Zone()
+	r.Config = [][2]string{
+		{"Contador", dev},
+		{"Calibração", r.Cal + " (" + calSrc + ")"},
+		{"Tempo morto", r.DeadTime},
+		{"Fundo de referência", bg},
+		{"Aviso de atenção", fmt.Sprintf("a partir de %d CPM (limite operacional configurado)", lv.AttentionCPM)},
+		{"Alarme", alarm + " (limite operacional configurado)"},
+		{"Alarme de perigo", fmt.Sprintf("a partir de %d CPM (limite operacional configurado)", lv.DangerCPM)},
+		{"Dose", "calculada pelo app: soma, minuto a minuto, de CPM × calibração ÷ 60. Não é o acumulador interno do contador."},
+		{"σ (Poisson)", "√média: a variação que o acaso sozinho dá numa contagem de 1 minuto"},
+		{"Percentis", "interpolação linear entre as leituras ordenadas"},
+		{"Lacuna", "minuto sem leitura (cabo fora, app fechado sem histórico baixado); nunca conta como zero"},
+		{"Horários", "hora local (" + zone + ")"},
+		{"Programa", "GMC Monitor " + AppVersion},
 	}
 	return r, nil
 }

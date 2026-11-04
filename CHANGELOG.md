@@ -1,5 +1,29 @@
 # Versões
 
+## 1.14.0
+- **Relatório técnico em PDF**:
+  - **gráfico com todas as leituras por minuto**, em vez da média por
+    trecho. Em períodos longos cada coluna mostra a faixa do menor ao maior
+    minuto (nenhum pico some) e a média; trechos sem dado ficam cinza,
+    episódios de alerta com o fundo da cor do nível, e um pico isolado muito
+    alto aparece cortado com o valor escrito, para não achatar o resto;
+  - **estatística das leituras por minuto**: n, média, mediana,
+    desvio-padrão real, σ esperado só pelo acaso (√média), dispersão
+    (real ÷ acaso) e percentis P5, P25, P50, P75 e P95;
+  - **histograma** dos minutos por faixa de CPM com a curva de Poisson da
+    mesma média;
+  - **episódios de alerta** com duração, mínimo/média/máximo dos minutos,
+    pico, limite e quanto passou dele;
+  - **tempo acima de cada limite operacional**;
+  - **lacunas**: tempo total sem leitura e os trechos de 10 min ou mais;
+  - cobertura escrita como "X de Y min" e dias com dado;
+  - **configurações e método** (calibração e de onde veio, tempo morto,
+    fundo de referência, limites, como a dose é calculada) e **limitações**.
+- **Calibração guardada**: a última calibração lida do contador fica em
+  `calibracao.json` e vale enquanto ele estiver desconectado. Antes, sem o
+  contador, o app voltava para a de fábrica (0,0065 µSv/h por CPM) e a dose e
+  os relatórios saíam com outro fator.
+
 ## 1.13.4
 - **Código reorganizado em pastas** (para o GitHub), sem mudar nada no
   funcionamento: o app foi para `internal/app`, o gerador de PDF virou o

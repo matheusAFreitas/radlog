@@ -359,6 +359,7 @@ func (a *App) startup(ctx context.Context) {
 	a.logStart()
 
 	a.settings = a.loadSettings()
+	a.loadLastCal()
 	a.loadRain()
 	a.loadPeriods()
 	a.loadNotes()
@@ -687,6 +688,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	a.settings.Port = port
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	a.saveLastCal(cal)
 
 	a.setState("conectado", "")
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
