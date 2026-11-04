@@ -15,7 +15,7 @@ func TestDecodeRealConfig(t *testing.T) {
 	want := map[string]int{
 		"saveMode": 1, "powerSaving": 1, "backlight": 10, "led": 1, "fastEstimate": 3,
 		"alarmVolume": 15, "clickSound": 0, "voiceVolume": 0, "vibration": 1, "alarmCPM": 100,
-		"darkMode": 1, // byte 0 = modo escuro ligado
+		"theme": 0, // byte 129 (no 1.08, 0 = modo escuro)
 	}
 	for k, v := range want {
 		if c.Values[k] != v {
@@ -64,7 +64,7 @@ func TestEncodeTouchesOnlyChangedBytes(t *testing.T) {
 	c, _ := DecodeConfig800(base)
 	c.Values["saveMode"] = 2
 	c.Values["alarmCPM"] = 0x3E3E // bytes iguais a '>' de propósito
-	c.Values["darkMode"] = 0
+	c.Values["theme"] = 4
 	c.Values["fastEstimate"] = 60
 	out, err := EncodeConfig800(base, c)
 	if err != nil {
@@ -76,14 +76,14 @@ func TestEncodeTouchesOnlyChangedBytes(t *testing.T) {
 			t.Fatalf("byte %d mudou sem querer", i)
 		}
 	}
-	if out[129] != 1 {
-		t.Fatalf("modo escuro desligado deveria gravar 1, gravou %d", out[129])
+	if out[129] != 4 {
+		t.Fatalf("tema Dark deveria gravar 4, gravou %d", out[129])
 	}
 	back, _ := DecodeConfig800(out)
-	if back.Values["saveMode"] != 2 || back.Values["alarmCPM"] != 0x3E3E || back.Values["darkMode"] != 0 || back.Values["fastEstimate"] != 60 {
+	if back.Values["saveMode"] != 2 || back.Values["alarmCPM"] != 0x3E3E || back.Values["theme"] != 4 || back.Values["fastEstimate"] != 60 {
 		t.Fatalf("%+v", back.Values)
 	}
-	if d := DescribeChanges(c0(t), back); !strings.Contains(d, "gravação na memória a cada minuto") || !strings.Contains(d, "modo escuro desligado") || !strings.Contains(d, "estimativa rápida 60 s") {
+	if d := DescribeChanges(c0(t), back); !strings.Contains(d, "gravação na memória a cada minuto") || !strings.Contains(d, "tema Dark") || !strings.Contains(d, "estimativa rápida 60 s") {
 		t.Fatalf("resumo: %s", d)
 	}
 	for k, v := range map[string]int{"saveMode": 6, "alarmCPM": 0, "alarmVolume": 16, "backlight": 31, "fastEstimate": 7, "led": 2} {
@@ -155,7 +155,7 @@ func TestDiffConfig(t *testing.T) {
 	b[129] = 1
 	b[80] = 9
 	d := DiffConfig(a, b)
-	if len(d) != 3 || d[0].Field != "calibração, CPM do ponto 2" || d[1].Field != "" || d[1].Index != 124 || d[2].Field != "modo escuro" {
+	if len(d) != 3 || d[0].Field != "calibração, CPM do ponto 2" || d[1].Field != "" || d[1].Index != 124 || d[2].Field != "tema" {
 		t.Fatalf("%+v", d)
 	}
 }

@@ -1,5 +1,13 @@
 # Versões
 
+## 1.14.2
+- **Tema da tela do firmware 1.23**: em Configurações → Contador, o antigo
+  "modo escuro" virou um seletor de tema. No Re1.23 são 5 opções (Light,
+  BRY, BGY, BBY, Dark), gravadas no byte 129 da configuração; firmwares
+  antigos continuam com Escuro/Claro.
+- A dica do campo Série (USB) agora explica que é esse o número que a GQ usa
+  para gerar a atualização de firmware.
+
 ## 1.14.1
 - **Calibração de fábrica certa**: a reserva do app (usada só se ele nunca
   leu a do contador) passa a ser a do GMC-800 formatado, 986 CPM = 10 µSv/h

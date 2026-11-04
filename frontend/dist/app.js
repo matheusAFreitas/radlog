@@ -2923,7 +2923,18 @@ function updateCalSens() {
   });
 }
 
+// tema da tela: o firmware 1.23 tem 5; os antigos só "modo escuro"
+function fwVersion() {
+  const m = /Re(\d+)\.(\d+)/.exec(((state.status || {}).device || {}).version || "");
+  return m ? +m[1] + +m[2] / 100 : 0;
+}
+function fillThemeOptions() {
+  const names = fwVersion() >= 1.23 ? ["Light", "BRY", "BGY", "BBY", "Dark"] : ["Escuro", "Claro"];
+  $("dcTheme").innerHTML = names.map((n, i) => `<option value="${i}">${n}</option>`).join("");
+}
+
 function fillDevCfg(c) {
+  fillThemeOptions();
   const v = c.values || {};
   qsa("#devcfg [data-key]").forEach((el) => {
     const val = v[el.dataset.key];
@@ -3712,15 +3723,15 @@ function makeDemoApi() {
     if (i > 3 * 24 * 60 && i < 4 * 24 * 60) continue; // um buraco de um dia
     pts.push({ t: Math.floor(now / 60000) * 60000 - i * 60000, cpm: Math.round(20 + (rnd() - 0.5) * 14) });
   }
-  const dev = { port: "COM5", version: "GMC-800Re1.08", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
+  const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
   let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\GMC Monitor" };
   let settings = { levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
   const demoCfg = {
-    values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, darkMode: 1 },
+    values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, theme: 4 },
     calibration: { source: "contador", points: [[986, 10], [8546, 100], [16408, 200], [37970, 500], [76010, 1000], [139671, 2000]].map(([cpm, usv]) => ({ cpm, usv })) },
     tubeVoltage: 44, locked: null, calibrationEditable: true, editable: true, problems: null };
   const events = [
-    { time: now - 3600e3, text: "Contador conectado (GMC-800Re1.08 em COM5)", kind: "evento" },
+    { time: now - 3600e3, text: "Contador conectado (GMC-800Re1.23 em COM5)", kind: "evento" },
     { time: now - 1800e3, text: "Histórico baixado: 1440 registros, 32 minutos novos", kind: "evento" },
     { time: now - 900e3, text: "Atenção: 54 CPM (acima de 50)", kind: "alerta", level: "atencao", cpm: 54, peak: 61, peakAt: now - 780e3, end: now - 540e3 },
     { time: now - 2 * 864e5 - 5 * 36e5, text: "Alarme (histórico do contador): pico de 134 CPM às 03:12 (limite 100)", kind: "alerta", level: "alarme", cpm: 58, peak: 134, peakAt: now - 2 * 864e5 - 4.6 * 36e5, end: now - 2 * 864e5 - 4.2 * 36e5, retro: true },
@@ -3803,7 +3814,7 @@ function makeDemoApi() {
     GetStatus: async () => status,
     GetLogs: async (q) => {
       const now = Date.now(), from = q.from || now - 3 * 86400e3, to = q.to || now;
-      const msgs = [["INFO", "conexão", "conexão: ok, GMC-800Re1.08 em COM5, série 5A 10 33 38 31 30 03 00 48 36 37 31"], ["INFO", "leitura ao vivo", "leitura ao vivo: começou"],
+      const msgs = [["INFO", "conexão", "conexão: ok, GMC-800Re1.23 em COM5, série 5A 10 33 38 31 30 03 00 48 36 37 31"], ["INFO", "leitura ao vivo", "leitura ao vivo: começou"],
         ["INFO", "histórico", "histórico: terminou"], ["WARN", "leitura ao vivo", "leitura ao vivo: erro 1/3 em GETCPM: Access is denied."],
         ["DEBUG", "reconexão", "reconexão: COM5 não encontrada"], ["DEBUG", "conexão", "conexão: abrindo COM5"],
         ["ERROR", "leitura ao vivo", "leitura ao vivo: GETCPM sem resposta em 6 s (porta travada)"], ["INFO", "evento", "evento: Histórico baixado: 1440 registros, 12 minutos novos"]];

@@ -46,7 +46,10 @@ var fields800 = []field{
 	{Key: "voiceVolume", Name: "volume da voz", Off: 122, Kind: kindByte, Min: 0, Max: 15},
 	{Key: "vibration", Name: "vibração", Off: 123, Kind: kindBool},
 	{Key: "alarmCPM", Name: "limite do alarme", Off: 125, Kind: kindU32, Min: 1, Max: 999999},
-	{Key: "darkMode", Name: "modo escuro", Off: 129, Kind: kindBool, Invert: true},
+	// tema da tela. No firmware 1.23: 0 Light, 1 BRY, 2 BGY, 3 BBY, 4 Dark
+	// (mapeado comparando a configuração antes e depois de trocar no menu).
+	// Firmwares antigos só tinham "modo escuro": 0 escuro, 1 claro.
+	{Key: "theme", Name: "tema", Off: 129, Kind: kindByte, Min: 0, Max: 4},
 }
 
 const (
@@ -121,6 +124,10 @@ func (f field) describe(v int) string {
 		return saveModeNames[v]
 	case f.Key == "powerSaving":
 		return powerSavingNames[v]
+	case f.Key == "theme":
+		if n, ok := themeNames[v]; ok {
+			return n
+		}
 	case f.Key == "fastEstimate" && v == 3:
 		return "dinâmica"
 	case f.Key == "fastEstimate":
@@ -141,6 +148,9 @@ var saveModeNames = map[int]string{
 }
 
 var powerSavingNames = map[int]string{0: "escurecer a tela", 1: "apagar a tela", 2: "desligada"}
+
+// nomes do firmware 1.23 (em firmwares antigos, 0 = escuro e 1 = claro)
+var themeNames = map[int]string{0: "Light", 1: "BRY", 2: "BGY", 3: "BBY", 4: "Dark"}
 
 // Config800 são os ajustes do GMC-800 que o app sabe ler e mudar.
 type Config800 struct {

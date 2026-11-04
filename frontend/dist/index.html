@@ -691,7 +691,7 @@
       <legend>Contador</legend>
       <dl class="info">
         <dt>Modelo</dt><dd class="mono" id="iModel">—</dd>
-        <dt title="O que o contador manda pela USB (GETSERIAL). A tela Sobre do GMC-800 mostra outro código, de 12 bytes: para a GQ, use o da tela.">Série (USB)</dt><dd class="mono" id="iSerial">—</dd>
+        <dt title="O número que o contador manda pela USB (GETSERIAL). É o que a GQ usa para gerar a atualização de firmware (o arquivo vem com esse número). A tela Sobre do GMC-800 mostra outro código, de 12 bytes.">Série (USB)</dt><dd class="mono" id="iSerial">—</dd>
         <dt>Porta</dt><dd class="mono" id="iPort">—</dd>
         <dt>Relógio</dt><dd class="mono" id="iClock">—</dd>
         <dt>Calibração</dt><dd class="mono" id="iCal">—</dd>
@@ -754,7 +754,8 @@
 
       <fieldset class="dc-edit">
         <legend>Tela</legend>
-        <label class="toggle"><span>Modo escuro</span><input type="checkbox" data-key="darkMode"></label>
+        <label for="dcTheme">Tema</label>
+        <select id="dcTheme" data-key="theme"></select>
         <label for="dcLight">Brilho: <span class="mono" data-out="backlight"></span></label>
         <input type="range" id="dcLight" data-key="backlight" min="0" max="30" step="1">
         <label for="dcPower">Economia de energia</label>
