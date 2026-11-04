@@ -2055,7 +2055,7 @@ function renderMeasureHistory() {
     const iName = document.createElement("input");
     iName.type = "text"; iName.value = m.name; iName.setAttribute("aria-label", "Nome");
     const iNote = document.createElement("input");
-    iNote.type = "text"; iNote.value = m.note || ""; iNote.placeholder = "anotação (opcional)"; iNote.setAttribute("aria-label", "Anotação");
+    iNote.type = "text"; iNote.value = m.note || ""; iNote.placeholder = "anotação: distância, lado encostado, embalagem…"; iNote.setAttribute("aria-label", "Anotação");
     const ok = document.createElement("button");
     ok.type = "button"; ok.className = "btn small accent"; ok.textContent = "Salvar";
     ok.addEventListener("click", () => call(api.UpdateMeasurement, m.id, iName.value, iNote.value));

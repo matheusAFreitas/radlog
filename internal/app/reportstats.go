@@ -198,3 +198,54 @@ func pointsIn(pts []store.Point, from, to time.Time) []store.Point {
 	}
 	return pts[i:j]
 }
+
+// maxEpisodeCharts é quantos episódios ganham o gráfico de antes e depois.
+const maxEpisodeCharts = 12
+
+// homeMedian devolve a mediana do CPM gravado em casa em [from, to) e quantos
+// minutos entraram (o demo não entra, como no fundo de referência).
+func (a *App) homeMedian(from, to time.Time) (float64, int) {
+	if a.store == nil {
+		return 0, 0
+	}
+	pts, err := a.store.Range(from, to)
+	if err != nil {
+		return 0, 0
+	}
+	pts = a.homeOnly(pts)
+	if len(pts) == 0 {
+		return 0, 0
+	}
+	v := make([]float64, len(pts))
+	for i, p := range pts {
+		v[i] = p.CPM
+	}
+	return median(v), len(v)
+}
+
+// episodeSeconds junta os segundos gravados dos alertas que tocam
+// [start, end], com 2 min de folga, sem repetir (atenção e alarme do mesmo
+// episódio gravam os mesmos segundos).
+func (a *App) episodeSeconds(evs []Event, start, end time.Time) []AlertPoint {
+	f, t := start.Add(-alertPre).UnixMilli(), end.Add(alertPre).UnixMilli()
+	seen := map[int64]bool{}
+	var out []AlertPoint
+	for _, e := range evs {
+		stop := e.End
+		if stop == 0 {
+			stop = e.Time
+		}
+		if e.Retro || stop < start.UnixMilli() || e.Time > end.UnixMilli() {
+			continue
+		}
+		for _, p := range a.readAlertSeconds(e) {
+			if p.T < f || p.T > t || seen[p.T] {
+				continue
+			}
+			seen[p.T] = true
+			out = append(out, p)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].T < out[j].T })
+	return thinMax(out, 400)
+}

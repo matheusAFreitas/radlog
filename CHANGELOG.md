@@ -1,5 +1,27 @@
 # Versões
 
+## 1.16.0
+Relatório em PDF, a partir da revisão de um relatório antigo:
+- **Máximo com uma definição só**: no resumo e na tabela por dia é o maior
+  valor visto, igual ao app, contando o pico ao vivo dos alertas. Quando o
+  pico ao vivo passa do maior minuto gravado, o valor vem marcado com * e o
+  maior minuto aparece junto. Antes o resumo mostrava 124 e a tabela 114. A
+  estatística continua só com os minutos gravados e diz isso no rótulo.
+- **Pico ao vivo** explicado em "Configurações e método": o contador soma os
+  últimos 60 s, o app lê a cada segundo, e essa janela não coincide com o
+  minuto do relógio que fica gravado.
+- **Episódios**: duração exata (ex.: 4 min 37 s; os do histórico do contador
+  ficam "≈", porque são de minuto a minuto) e um **gráfico de 30 min antes e
+  depois** de cada um (até 12), com os minutos gravados, a leitura ao vivo
+  por segundo quando o app gravou, o limite, o fundo e o pico.
+- **Fundo da casa: agora × 7 dias × 30 dias**: mediana da última hora, de 7 e
+  de 30 dias, com µSv/h, minutos usados e a média do período comparada a cada
+  uma.
+- **Medições de objeto** completas: contagens e tempo do fundo usado e do
+  objeto, líquido com objeto ÷ fundo e σ, e a anotação (para a geometria). A
+  dica do campo de anotação na aba Medir sugere o que escrever.
+- O título de uma seção não fica mais sozinho no pé da página.
+
 ## 1.15.0
 - **Padrão por hora por mês**: novo botão "Mês" no mapa de calor, com ‹ › para
   andar entre os meses. Dá para ver qualquer mês desde a primeira leitura

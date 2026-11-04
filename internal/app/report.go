@@ -21,9 +21,10 @@ import (
 
 type reportDay struct {
 	Label         string
-	Avg, Min, Max float64
+	Avg, Min, Max float64 // por minuto
 	USv, Dose     float64
 	Minutes       int
+	LivePeak      float64 // maior pico ao vivo (janela de 60 s) de alerta no dia; 0 = nenhum
 }
 
 type reportAlert struct {
@@ -32,6 +33,16 @@ type reportAlert struct {
 
 type reportMeas struct {
 	When, Name, Result, Verdict string
+	M                           SavedMeasure // dados completos (contagens, tempos, anotação)
+}
+
+// reportBg é uma linha da comparação do fundo da casa.
+type reportBg struct {
+	Label string
+	CPM   float64
+	USv   float64
+	N     int // minutos em casa na janela
+	OK    bool
 }
 
 type reportData struct {
@@ -59,7 +70,11 @@ type reportData struct {
 	Episodes     []reportEpisode
 	Above        []reportAbove
 	Config       [][2]string // configurações e método (rótulo, valor)
-	AlertPeakMax float64     // maior pico dos alertas (pode vir do detalhe por segundo)
+	AlertPeakMax float64     // maior pico ao vivo dos alertas (janela de 60 s); só alertas ao vivo
+	BgRows       []reportBg  // fundo: última hora, 7 dias, 30 dias
+	dayKeys      []string    // "AAAA-MM-DD" de cada linha de Days
+	alertPeakAt  time.Time
+	MaxLive      bool // o máximo do resumo veio de um pico ao vivo
 }
 
 type reportEpisode struct {
@@ -68,9 +83,15 @@ type reportEpisode struct {
 	Minutes           int
 	N                 int // minutos com leitura dentro do episódio
 	MinC, MeanC, MaxC float64
-	Peak              float64 // pico do alerta (por segundo, se ao vivo)
+	Peak              float64 // pico do alerta (ao vivo: janela de 60 s lida por segundo)
+	PeakAt            time.Time
 	Limit             int
 	Retro             bool
+	DurSec            int // duração exata (do histórico: de minuto a minuto)
+	// para o gráfico de antes e depois (só os episódios escolhidos)
+	Chart  bool
+	Around []store.Point // por minuto, 30 min antes e depois
+	Secs   []AlertPoint  // por segundo, se o app gravou o detalhe
 }
 
 type reportAbove struct {
@@ -103,6 +124,21 @@ func fmtMinutes(m int) string {
 		return fmt.Sprintf("%d h", h)
 	}
 	return fmt.Sprintf("%d h %02d min", h, r)
+}
+
+// fmtSeconds escreve uma duração exata: "45 s", "4 min 37 s", "1 h 02 min 05 s".
+func fmtSeconds(sec int) string {
+	if sec < 0 {
+		sec = 0
+	}
+	h, m, ss := sec/3600, sec%3600/60, sec%60
+	switch {
+	case h > 0:
+		return fmt.Sprintf("%d h %02d min %02d s", h, m, ss)
+	case m > 0:
+		return fmt.Sprintf("%d min %02d s", m, ss)
+	}
+	return fmt.Sprintf("%d s", ss)
 }
 
 // buildReport monta os dados do relatório de [from, to).
@@ -272,6 +308,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 				Label: wd[t.Weekday()] + " " + t.Format("02/01"),
 				Avg:   avg, Min: x.min, Max: x.max, USv: cal.USv(avg), Dose: x.dose, Minutes: x.n,
 			})
+			r.dayKeys = append(r.dayKeys, t.Format("2006-01-02"))
 		}
 	}
 
@@ -288,28 +325,88 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		}
 		return lv.AttentionCPM
 	}
-	retroOf := map[int64]bool{}
+	evByID := map[int64]Event{}
 	for _, e := range evs {
-		retroOf[e.ID] = e.Retro
+		evByID[e.ID] = e
 	}
+	livePeakDay := map[string]float64{}
 	for _, ep := range alertEpisodes(evs, time.Now()) {
 		st, en := time.UnixMilli(ep.Start), time.UnixMilli(ep.Until)
 		re := reportEpisode{Start: st, End: en, Level: levelName(ep.Level), LevelCls: ep.Level,
-			Minutes: int(math.Ceil(en.Sub(st).Minutes())), Peak: ep.Peak, Limit: limitOf(ep.Level)}
+			Minutes: int(math.Ceil(en.Sub(st).Minutes())), Peak: ep.Peak, Limit: limitOf(ep.Level),
+			DurSec: int(math.Round(en.Sub(st).Seconds())), PeakAt: st}
 		if len(ep.IDs) > 0 {
-			re.Retro = retroOf[ep.IDs[0]]
+			re.Retro = evByID[ep.IDs[0]].Retro
+		}
+		// hora do pico: o evento do episódio com o maior pico
+		best := -1.0
+		for _, id := range ep.IDs {
+			e := evByID[id]
+			if e.Peak > best {
+				best = e.Peak
+				if e.PeakAt != 0 {
+					re.PeakAt = time.UnixMilli(e.PeakAt)
+				} else {
+					re.PeakAt = time.UnixMilli(e.Time)
+				}
+			}
 		}
 		if re.Retro {
 			re.Minutes++ // do histórico: de minuto a minuto, inclusive o último
+			re.DurSec += 60
 		}
 		in := pointsIn(pts, st.Truncate(time.Minute), en)
 		if ms := calcMinuteStats(in); ms.N > 0 {
 			re.N, re.MinC, re.MeanC, re.MaxC = ms.N, ms.Min, ms.Mean, ms.Max
 		}
-		if ep.Peak > r.AlertPeakMax {
-			r.AlertPeakMax = ep.Peak
+		if !re.Retro {
+			if ep.Peak > r.AlertPeakMax {
+				r.AlertPeakMax, r.alertPeakAt = ep.Peak, re.PeakAt
+			}
+			k := re.PeakAt.Format("2006-01-02")
+			livePeakDay[k] = math.Max(livePeakDay[k], ep.Peak)
 		}
 		r.Episodes = append(r.Episodes, re)
+	}
+	for i := range r.Days {
+		if v, ok := livePeakDay[r.dayKeys[i]]; ok {
+			r.Days[i].LivePeak = v
+		}
+	}
+	// máximo do relatório = o mesmo do app: o maior valor visto, contando o
+	// pico ao vivo dos alertas (que pode passar do maior minuto gravado)
+	if r.St.N > 0 && r.AlertPeakMax > r.St.Max {
+		r.Max = fmtBR(r.AlertPeakMax, 0)
+		r.MaxAt = r.alertPeakAt.Format("02/01 15:04")
+		r.MaxLive = true
+	}
+	// gráficos de antes e depois: até 12 episódios, os mais graves e altos
+	if len(r.Episodes) > 0 {
+		idx := make([]int, len(r.Episodes))
+		for i := range idx {
+			idx[i] = i
+		}
+		sort.SliceStable(idx, func(i, j int) bool {
+			ei, ej := r.Episodes[idx[i]], r.Episodes[idx[j]]
+			if levelRank[ei.LevelCls] != levelRank[ej.LevelCls] {
+				return levelRank[ei.LevelCls] > levelRank[ej.LevelCls]
+			}
+			return ei.Peak > ej.Peak
+		})
+		if len(idx) > maxEpisodeCharts {
+			idx = idx[:maxEpisodeCharts]
+		}
+		for _, i := range idx {
+			ep := &r.Episodes[i]
+			ep.Chart = true
+			w0, w1 := ep.Start.Add(-30*time.Minute).Truncate(time.Minute), ep.End.Add(31*time.Minute)
+			if around, err := a.points(w0, w1); err == nil {
+				ep.Around = around
+			}
+			if !ep.Retro {
+				ep.Secs = a.episodeSeconds(evs, ep.Start, ep.End)
+			}
+		}
 	}
 	r.Above = append(r.Above, reportAbove{"Atenção", lv.AttentionCPM, minutesAtOrAbove(pts, float64(lv.AttentionCPM))})
 	if alarmOn {
@@ -346,7 +443,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		if i := strings.IndexAny(verdict, ":(—"); i > 0 {
 			verdict = strings.TrimSpace(verdict[:i])
 		}
-		r.Meas = append(r.Meas, reportMeas{When: time.UnixMilli(m.Time).Format("02/01 15:04"), Name: m.Name, Result: res, Verdict: verdict})
+		r.Meas = append(r.Meas, reportMeas{When: time.UnixMilli(m.Time).Format("02/01 15:04"), Name: m.Name, Result: res, Verdict: verdict, M: m})
 	}
 
 	r.Cal = fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM"
@@ -354,6 +451,26 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		r.DeadTime = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
 	} else {
 		r.DeadTime = "desligada"
+	}
+
+	// fundo da casa: agora × 7 dias × 30 dias
+	now := time.Now()
+	for _, w := range []struct {
+		label string
+		d     time.Duration
+		min   int
+	}{
+		{"Última hora (agora)", time.Hour, 30},
+		{"Mediana de 7 dias", 7 * 24 * time.Hour, bgMinCount},
+		{"Mediana de 30 dias (referência)", bgWindow, bgMinCount},
+	} {
+		v, n := a.homeMedian(now.Add(-w.d), now.Add(time.Minute))
+		row := reportBg{Label: w.label, CPM: v, N: n, OK: n >= w.min}
+		if w.d == bgWindow && s.BgOK && s.BgCPM > 0 {
+			row.CPM, row.OK = s.BgCPM, true // o mesmo número do resto do relatório
+		}
+		row.USv = cal.USv(row.CPM)
+		r.BgRows = append(r.BgRows, row)
 	}
 
 	// configurações e método
@@ -388,6 +505,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		{"Dose", "calculada pelo app: soma, minuto a minuto, de CPM × calibração ÷ 60. Não é o acumulador interno do contador."},
 		{"σ (Poisson)", "√média: a variação que o acaso sozinho dá numa contagem de 1 minuto"},
 		{"Percentis", "interpolação linear entre as leituras ordenadas"},
+		{"Máximo", "o maior valor visto, no resumo e na tabela por dia (igual ao app): o maior minuto gravado ou, se for maior, o pico ao vivo de um alerta (marcado com *). A estatística usa só os minutos gravados."},
+		{"Pico ao vivo", "maior CPM da leitura ao vivo durante um alerta: o contador soma os últimos 60 s e o app lê a cada segundo. Essa janela não coincide com o minuto do relógio que fica gravado, por isso o pico pode passar do maior minuto."},
+		{"Fundo atual", "mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa"},
 		{"Lacuna", "minuto sem leitura (cabo fora, app fechado sem histórico baixado); nunca conta como zero"},
 		{"Horários", "hora local (" + zone + ")"},
 		{"Programa", "GMC Monitor " + AppVersion},

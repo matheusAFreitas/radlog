@@ -58,7 +58,7 @@ func (p *reportPDF) need(h float64) {
 }
 
 func (p *reportPDF) section(title string) {
-	p.need(60)
+	p.need(85) // título + cabeçalho de tabela + uma linha, para o título não ficar sozinho
 	p.y += 18
 	p.d.Text(pm, p.y, pdf.SansBold, 9, cMuted, title)
 	p.y += 8
@@ -511,16 +511,20 @@ func renderReportPDF(r reportData) []byte {
 	if r.Away != "" {
 		cover += " · " + r.Away + " fora de casa"
 	}
-	maxSub := r.MinAt + " · " + r.MaxAt + " (por minuto)"
-	if r.AlertPeakMax > st.Max {
-		maxSub = fmt.Sprintf("pico de alerta (por segundo): %s CPM", fmtBR(r.AlertPeakMax, 0))
+	maxSub := r.MinAt + " · " + r.MaxAt
+	if r.MaxLive {
+		maxSub += " · máx. = pico ao vivo (maior minuto: " + fmtBR(st.Max, 0) + ")"
+	}
+	alertSub := "contados por episódio"
+	if r.AlertPeakMax > 0 {
+		alertSub += " · pico ao vivo " + fmtBR(r.AlertPeakMax, 0) + " CPM"
 	}
 	tiles := [][4]string{
 		{"Média (por minuto)", r.Avg + " CPM", fmt.Sprintf("≈ %s µSv/h · n = %d min", r.AvgUSv, st.N), "m"},
 		{"Dose no período", r.Dose + " µSv", "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (extrapolação)", "m"},
 		{"Fundo da casa", bg, bgSub, "m"},
 		{"Mínimo · máximo", r.Min + " · " + r.Max + " CPM", maxSub, "m"},
-		{"Alertas", r.Alerts, "contados por episódio", "s"},
+		{"Alertas", r.Alerts, alertSub, "s"},
 		{"Chuva", rain, "radar/modelo do app", "s"},
 		{"Cobertura", fmtBR(math.Min(100, float64(st.N)/math.Max(1, float64(r.SpanMin))*100), 0) + "%", fmt.Sprintf("%d de %d min · ", st.N, r.SpanMin) + cover, "s"},
 		{"Medições de objeto", fmt.Sprint(len(r.Meas)), "no período", "m"},
@@ -541,8 +545,12 @@ func renderReportPDF(r reportData) []byte {
 
 	// estatística + histograma lado a lado
 	p.section("ESTATÍSTICA DAS LEITURAS POR MINUTO")
-	p.need(150)
+	p.need(165)
 	top := p.y
+	livePeak := "— (nenhum alerta ao vivo)"
+	if r.AlertPeakMax > 0 {
+		livePeak = fmtBR(r.AlertPeakMax, 0) + " CPM às " + r.alertPeakAt.Format("02/01 15:04")
+	}
 	rows := [][2]string{
 		{"Minutos com leitura (n)", fmt.Sprintf("%d", st.N)},
 		{"Média · mediana", fmtBR(st.Mean, 2) + " · " + fmtBR(st.Median, 1) + " CPM"},
@@ -551,7 +559,8 @@ func renderReportPDF(r reportData) []byte {
 		{"Dispersão (real ÷ acaso)", fmtBR(st.Dispersion, 2)},
 		{"P5 · P25 · P50", fmtBR(st.P5, 1) + " · " + fmtBR(st.P25, 1) + " · " + fmtBR(st.Median, 1)},
 		{"P75 · P95", fmtBR(st.P75, 1) + " · " + fmtBR(st.P95, 1)},
-		{"Mínimo · máximo", fmtBR(st.Min, 0) + " · " + fmtBR(st.Max, 0) + " CPM"},
+		{"Mínimo · máximo (minutos gravados)", fmtBR(st.Min, 0) + " · " + fmtBR(st.Max, 0) + " CPM"},
+		{"Pico ao vivo (alertas, janela de 60 s)", livePeak},
 	}
 	colW := (pdf.W - 2*pm) * 0.46
 	for _, kv := range rows {
@@ -580,13 +589,46 @@ func renderReportPDF(r reportData) []byte {
 
 	p.section("POR DIA")
 	var trows [][]string
+	starred := false
 	for _, dd := range r.Days {
-		trows = append(trows, []string{dd.Label, fmtBR(dd.Avg, 1), fmtBR(dd.USv, 3), fmtBR(dd.Min, 0), fmtBR(dd.Max, 0), fmtBR(dd.Dose, 2), fmt.Sprintf("%d / 1440", dd.Minutes)})
+		mx := fmtBR(dd.Max, 0)
+		if dd.LivePeak > dd.Max {
+			mx = fmtBR(dd.LivePeak, 0) + "*"
+			starred = true
+		}
+		trows = append(trows, []string{dd.Label, fmtBR(dd.Avg, 1), fmtBR(dd.USv, 3), fmtBR(dd.Min, 0), mx, fmtBR(dd.Dose, 2), fmt.Sprintf("%d / 1440", dd.Minutes)})
 	}
 	cw := pdf.W - 2*pm
 	p.table([]string{"Dia", "Média CPM", "µSv/h", "Mín", "Máx", "Dose µSv", "Minutos"}, trows,
 		[]float64{cw * .2, cw * .14, cw * .13, cw * .1, cw * .1, cw * .15, cw * .18},
 		[]bool{false, true, true, true, true, true, true}, []bool{false, true, true, true, true, true, true}, nil)
+	if starred {
+		p.need(14)
+		d.Text(pm, p.y+10, pdf.Sans, 6.8, cMuted, "* pico ao vivo de um alerta (janela de 60 s), maior que o maior minuto gravado do dia. Média, mínimo e dose usam os minutos gravados.")
+		p.y += 14
+	}
+
+	p.section("FUNDO DA CASA: AGORA × 7 DIAS × 30 DIAS")
+	trows = nil
+	for _, b := range r.BgRows {
+		if !b.OK {
+			trows = append(trows, []string{b.Label, "—", "—", fmt.Sprint(b.N), "dados insuficientes"})
+			continue
+		}
+		vs := "—"
+		if st.N > 0 && b.CPM > 0 {
+			pc := (st.Mean - b.CPM) / b.CPM * 100
+			sign := "+"
+			if pc < 0 {
+				sign = ""
+			}
+			vs = sign + fmtBR(pc, 1) + "%"
+		}
+		trows = append(trows, []string{b.Label, fmtBR(b.CPM, 1), fmtBR(b.USv, 3), fmt.Sprint(b.N), vs})
+	}
+	p.table([]string{"Janela", "Mediana CPM", "µSv/h", "Minutos em casa", "Média do período vs."}, trows,
+		[]float64{cw * .32, cw * .15, cw * .13, cw * .18, cw * .22},
+		[]bool{false, true, true, true, true}, []bool{false, true, true, true, true}, nil)
 
 	p.section("ALERTAS (EPISÓDIOS)")
 	if len(r.Episodes) == 0 {
@@ -604,9 +646,9 @@ func renderReportPDF(r reportData) []byte {
 				mm = fmtBR(e.MinC, 0) + " / " + fmtBR(e.MeanC, 1) + " / " + fmtBR(e.MaxC, 0)
 			}
 			exc := fmt.Sprintf("+%s (×%s)", fmtBR(e.Peak-float64(e.Limit), 0), fmtBR(e.Peak/float64(e.Limit), 2))
-			dur := fmtMinutes(e.Minutes)
-			if e.Minutes < 1 {
-				dur = "< 1 min"
+			dur := fmtSeconds(e.DurSec)
+			if e.Retro {
+				dur = "≈ " + fmtMinutes(e.Minutes) // histórico: só minuto a minuto
 			}
 			lvl := e.Level
 			if e.Retro {
@@ -631,8 +673,9 @@ func renderReportPDF(r reportData) []byte {
 				return &cAtt
 			})
 		p.need(14)
-		d.Text(pm, p.y+10, pdf.Sans, 6.8, cMuted, "Pico: maior valor do alerta (ao vivo, do detalhe por segundo). Mín/méd/máx: minutos gravados no episódio. (c): achado no histórico do contador.")
+		d.Text(pm, p.y+10, pdf.Sans, 6.8, cMuted, "Pico: maior leitura ao vivo do alerta (janela de 60 s, lida por segundo). Mín/méd/máx: minutos gravados no episódio. (c): achado no histórico do contador.")
 		p.y += 14
+		p.episodeCharts()
 	}
 
 	p.section("TEMPO ACIMA DOS LIMITES OPERACIONAIS")
@@ -672,13 +715,9 @@ func renderReportPDF(r reportData) []byte {
 
 	if len(r.Meas) > 0 {
 		p.section("MEDIÇÕES DE OBJETO")
-		trows = nil
 		for _, m := range r.Meas {
-			trows = append(trows, []string{m.When, m.Name, m.Result, m.Verdict})
+			p.measBlock(m)
 		}
-		p.table([]string{"Quando", "Objeto", "Resultado (líquido)", "Conclusão"}, trows,
-			[]float64{cw * .14, cw * .3, cw * .34, cw * .22},
-			[]bool{false, false, false, false}, []bool{true, false, true, false}, nil)
 	}
 
 	p.section("CONFIGURAÇÕES E MÉTODO")
@@ -701,4 +740,187 @@ func renderReportPDF(r reportData) []byte {
 	}
 	p.footer()
 	return d.Bytes(r.Title+" · "+r.Period, "GMC Monitor "+AppVersion)
+}
+
+// episodeCharts desenha, para os episódios escolhidos, o CPM de 30 min antes
+// até 30 min depois: minutos gravados (verde) e, se houver, a leitura ao vivo
+// por segundo (cinza), com o limite e o fundo tracejados.
+func (p *reportPDF) episodeCharts() {
+	var eps []reportEpisode
+	for _, e := range p.r.Episodes {
+		if e.Chart {
+			eps = append(eps, e)
+		}
+	}
+	if len(eps) == 0 {
+		return
+	}
+	d := p.d
+	p.section("EPISÓDIOS: 30 MIN ANTES E DEPOIS")
+	if len(eps) < len(p.r.Episodes) {
+		p.need(14)
+		d.Text(pm, p.y+10, pdf.Sans, 7, cMuted, fmt.Sprintf("Os %d episódios mais graves e mais altos de %d.", len(eps), len(p.r.Episodes)))
+		p.y += 14
+	}
+	cSec := pdf.Hex("#8C99A3")
+	const ncol, gapX, ch = 3, 14.0, 66.0
+	cw := (pdf.W - 2*pm - gapX*(ncol-1)) / ncol
+	for i, e := range eps {
+		if i%ncol == 0 {
+			if i > 0 {
+				p.y += ch + 34
+			}
+			p.need(ch + 36)
+		}
+		x0 := pm + float64(i%ncol)*(cw+gapX)
+		y0 := p.y + 14
+		lc := cAtt
+		bgc := cAttBg
+		switch e.LevelCls {
+		case "alarme":
+			lc, bgc = cAlarm, cAlmBg
+		case "perigo":
+			lc, bgc = cWarn, cDngBg
+		}
+		title := e.Start.Format("02/01 15:04") + " · " + e.Level + " · pico " + fmtBR(e.Peak, 0)
+		d.Text(x0, p.y+9, pdf.SansBold, 7, cInk, pdf.Fit(title, pdf.SansBold, 7, cw))
+
+		w0 := e.Start.Add(-30 * time.Minute).Truncate(time.Minute)
+		w1 := e.End.Add(31 * time.Minute).Truncate(time.Minute)
+		span := w1.Sub(w0)
+		top := math.Max(e.Peak, float64(e.Limit))
+		for _, pt := range e.Around {
+			top = math.Max(top, pt.CPM)
+		}
+		for _, sp := range e.Secs {
+			top = math.Max(top, sp.CPM)
+		}
+		top = math.Max(1, top*1.12)
+		xOf := func(t time.Time) float64 { return x0 + cw*float64(t.Sub(w0))/float64(span) }
+		yv := func(v float64) float64 { return y0 + ch*(1-math.Min(math.Max(v, 0), top)/top) }
+
+		ex1, ex2 := xOf(e.Start), xOf(e.End.Add(time.Minute))
+		if ex2-ex1 < 1 {
+			ex2 = ex1 + 1
+		}
+		d.Rect(ex1, y0, ex2-ex1, ch, &bgc, nil)
+		if p.r.S.BgCPM > 0 && p.r.S.BgCPM < top {
+			d.Line(x0, yv(p.r.S.BgCPM), x0+cw, yv(p.r.S.BgCPM), 0.5, cMuted, true)
+		}
+		if float64(e.Limit) < top {
+			d.Line(x0, yv(float64(e.Limit)), x0+cw, yv(float64(e.Limit)), 0.6, lc, true)
+		}
+		// por segundo
+		var seg [][2]float64
+		var prev int64
+		for _, sp := range e.Secs {
+			t := time.UnixMilli(sp.T)
+			if t.Before(w0) || t.After(w1) {
+				continue
+			}
+			if len(seg) > 0 && sp.T-prev > 30000 {
+				d.Polyline(seg, 0.4, cSec)
+				seg = nil
+			}
+			seg = append(seg, [2]float64{xOf(t), yv(sp.CPM)})
+			prev = sp.T
+		}
+		d.Polyline(seg, 0.4, cSec)
+		// por minuto
+		seg = nil
+		var pt0 time.Time
+		for _, pt := range e.Around {
+			if pt.T.Before(w0) || !pt.T.Before(w1) {
+				continue
+			}
+			if len(seg) > 0 && pt.T.Sub(pt0) >= 90*time.Second {
+				d.Polyline(seg, 0.9, cAccent)
+				seg = nil
+			}
+			seg = append(seg, [2]float64{xOf(pt.T.Add(30 * time.Second)), yv(pt.CPM)})
+			pt0 = pt.T
+		}
+		d.Polyline(seg, 0.9, cAccent)
+		// pico
+		if !e.PeakAt.IsZero() && !e.PeakAt.Before(w0) && e.PeakAt.Before(w1) {
+			px, py := xOf(e.PeakAt), yv(e.Peak)
+			d.Rect(px-1.3, py-1.3, 2.6, 2.6, &lc, nil)
+		}
+		d.Rect(x0, y0, cw, ch, nil, &cLine)
+		d.Text(x0+2, y0+7, pdf.Mono, 5.8, cMuted, fmtBR(top, 0))
+		d.Text(x0, y0+ch+8, pdf.Mono, 6, cMuted, w0.Format("15:04"))
+		d.TextRight(x0+cw, y0+ch+8, pdf.Mono, 6, cMuted, w1.Format("15:04"))
+		dur := fmtSeconds(e.DurSec)
+		if e.Retro {
+			dur = "≈ " + fmtMinutes(e.Minutes)
+		}
+		mid := dur
+		if e.N > 0 {
+			mid += " · méd. " + fmtBR(e.MeanC, 1)
+		}
+		mw := pdf.TextWidth(mid, pdf.Sans, 6.2)
+		d.Text(x0+cw/2-mw/2, y0+ch+8, pdf.Sans, 6.2, cMuted, mid)
+	}
+	p.y += ch + 34
+	p.need(14)
+	lx := pm
+	leg := func(c pdf.RGB, txt string, dashed bool, thin bool) {
+		switch {
+		case dashed:
+			d.Line(lx, p.y-2.5, lx+12, p.y-2.5, 0.7, c, true)
+		case thin:
+			d.Line(lx, p.y-2.5, lx+12, p.y-2.5, 0.5, c, false)
+		default:
+			d.Line(lx, p.y-2.5, lx+12, p.y-2.5, 1.1, c, false)
+		}
+		d.Text(lx+15, p.y, pdf.Sans, 7, cMuted, txt)
+		lx += 15 + pdf.TextWidth(txt, pdf.Sans, 7) + 12
+	}
+	leg(cAccent, "minuto gravado", false, false)
+	leg(cSec, "ao vivo, por segundo (janela de 60 s)", false, true)
+	leg(cAlarm, "limite do nível", true, false)
+	leg(cMuted, "fundo", true, false)
+	d.Rect(lx, p.y-5, 4, 4, &cAlarm, nil)
+	d.Text(lx+7, p.y, pdf.Sans, 7, cMuted, "pico")
+	p.y += 8
+}
+
+// measBlock escreve uma medição de objeto com tudo o que ela usou.
+func (p *reportPDF) measBlock(m reportMeas) {
+	d := p.d
+	x := m.M
+	phase := func(ph MeasurePhase) string {
+		return fmt.Sprintf("%d contagens em %d s = %s ± %s CPM", ph.Counts, ph.Seconds, fmtBR(ph.CPM, 1), fmtBR(ph.ErrCPM, 1))
+	}
+	net := m.Result
+	if x.Result.Ratio > 0 {
+		net += " · objeto ÷ fundo = " + fmtBR(x.Result.Ratio, 2) + "×"
+	}
+	if x.Result.Sigma != 0 {
+		net += " · " + fmtBR(x.Result.Sigma, 1) + "σ"
+	}
+	note := strings.TrimSpace(x.Note)
+	if note == "" {
+		note = "não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)"
+	}
+	lines := [][2]string{
+		{"Fundo usado", phase(x.Bg) + " (medido logo antes, com o objeto longe)"},
+		{"Com o objeto", phase(x.Obj)},
+		{"Líquido", net},
+		{"Geometria / anotação", note},
+	}
+	p.need(14 + float64(len(lines))*10 + 8)
+	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+m.Name, pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
+	d.TextRight(pdf.W-pm, p.y+11, pdf.SansBold, 8, cMuted, pdf.Fit(m.Verdict, pdf.SansBold, 8, (pdf.W-2*pm)*0.33))
+	p.y += 15
+	for _, l := range lines {
+		ls := wrapText(l[1], pdf.Sans, 7.8, pdf.W-2*pm-95, 2)
+		d.Text(pm+8, p.y+9, pdf.Sans, 7.8, cMuted, l[0])
+		for i, ln := range ls {
+			d.Text(pm+95, p.y+9+float64(i)*9.5, pdf.Sans, 7.8, cInk, ln)
+		}
+		p.y += float64(len(ls))*9.5 + 1.5
+	}
+	p.y += 4
+	d.Line(pm, p.y, pdf.W-pm, p.y, 0.3, cLine, false)
 }
