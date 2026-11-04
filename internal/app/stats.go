@@ -181,7 +181,7 @@ func (a *App) GetHeatmap(days int) (Heatmap, error) {
 		return Heatmap{}, err
 	}
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	a.mu.Unlock()
 	sum := make([][24]float64, days)
 	cnt := make([][24]int, days)

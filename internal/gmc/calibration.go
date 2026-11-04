@@ -20,16 +20,41 @@ type Calibration struct {
 	Source string     `json:"source"` // "contador" ou "padrão"
 }
 
-// DefaultCalibration é a calibração de fábrica do GMC-800
-// (1538 CPM = 10 µSv/h, ou seja, 0,0065 µSv/h por CPM).
+// DefaultCalibration é a calibração de fábrica do GMC-800, a que ele volta
+// ao ser formatado (986 CPM = 10 µSv/h no 1º ponto, ou seja, ≈ 0,0101 µSv/h
+// por CPM no fundo). Os pontos de cima têm menos CPM por µSv/h: compensam as
+// contagens que o tubo perde em taxas altas (tempo morto).
 func DefaultCalibration() Calibration {
 	return Calibration{
 		Points: []CalPoint{
-			{1538, 10}, {15380, 100}, {30760, 200},
-			{76900, 500}, {153800, 1000}, {307600, 2000},
+			{986, 10}, {8546, 100}, {16408, 200},
+			{37970, 500}, {76010, 1000}, {139671, 2000},
 		},
 		Source: "padrão",
 	}
+}
+
+// Linear devolve a calibração só com a sensibilidade do 1º ponto (reta da
+// origem até ele, continuada para cima). Serve para CPM já corrigido do
+// tempo morto: a contagem verdadeira cresce em linha reta com a dose, então
+// a curva do contador (que já compensa as perdas) contaria a correção duas
+// vezes.
+func (c Calibration) Linear() Calibration {
+	if len(c.Points) == 0 {
+		return c
+	}
+	return Calibration{Points: []CalPoint{c.Points[0]}, Source: c.Source}
+}
+
+// CompensatesDeadTime diz se a curva já compensa perdas em taxas altas
+// (sensibilidade do último ponto mais de 5% abaixo da do primeiro).
+func (c Calibration) CompensatesDeadTime() bool {
+	if len(c.Points) < 2 {
+		return false
+	}
+	first := c.Points[0].CPM / c.Points[0].USv
+	last := c.Points[len(c.Points)-1].CPM / c.Points[len(c.Points)-1].USv
+	return last < first*0.95
 }
 
 // Offsets dos 6 pontos de calibração na configuração do GMC-800.

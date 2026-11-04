@@ -26,6 +26,10 @@ const isYesterday = (ms) => { const y = new Date(); y.setDate(y.getDate() - 1); 
 const usvDigits = (v) => (v < 1 ? 3 : v < 10 ? 2 : 1);
 const $ = (id) => document.getElementById(id);
 
+// fator µSv/h por CPM no fundo: o do contador (ou o último lido dele); o
+// 0,0101 é o de fábrica do GMC-800, só se o app ainda não leu nada
+const calK = () => (state.status && (state.status.usvPerCPM || (state.status.device || {}).usvPerCPM)) || 0.0101;
+
 // ---------- estado ----------
 
 const state = {
@@ -259,7 +263,7 @@ function renderStatus() {
 async function refreshStats() {
   const s = await api.GetStats();
   state.bgCPM = s.bgCPM || null;
-  const cal = (state.status.device || {}).usvPerCPM || 0.0065;
+  const cal = calK();
   $("tAvg").textContent = fmt(s.avg1h, 1);
   $("tAvgSub").textContent = s.avg1h == null ? "CPM" : `≈ ${fmt(s.avg1h * cal, 3)} µSv/h`;
   $("tMin").textContent = fmt(s.min24h, 0);
@@ -2379,7 +2383,7 @@ function updateAlarm() {
   bar.classList.toggle("muted", sev === "perigo" ? snoozed : alarmCtl.muted);
   if (!on) return;
 
-  const usv = kind === "test" ? cpm * ((state.status.device || {}).usvPerCPM || 0.0065) : r ? r.usv : 0;
+  const usv = kind === "test" ? cpm * (calK()) : r ? r.usv : 0;
   const tag = { real: state.demo.active ? " REAL" : "", demo: " (demo)", test: " (teste)" }[kind];
   const note = $("alarmNote");
   const sat = r && r.saturated ? r.satReason || "limite" : null;
@@ -2458,7 +2462,7 @@ function dtFactor(perSec, tau) { return 1 / Math.max(0.1, 1 - perSec * tau); }
 function renderDeadTime() {
   const tau = (parseFloat($("lvDTUs").value) || LV_DEFAULT.deadTimeUs) * 1e-6, on = $("lvDTOn").checked;
   $("lvDTUs").disabled = !on;
-  const k = (state.status.device || {}).usvPerCPM || 0.0065;
+  const k = calK();
   const rows = [28, 1000, 10000, 30000, 100000, 200000].map((c) => {
     const f = dtFactor(c / 60, tau), cap = f >= 9.999;
     return `<tr><td>${fmt(c, 0)}</td><td>${fmt(c * f, 0)}</td><td>${f < 1.0005 ? "+" + fmt((f - 1) * 100, 3) : "+" + fmt((f - 1) * 100, f < 1.1 ? 1 : 0)}%${cap ? " (teto)" : ""}</td><td>${fmt(c * f * k, usvDigits(c * f * k))}</td></tr>`;
@@ -2479,7 +2483,7 @@ function readLevels() {
 
 // mostra quanto o CPM dá em µSv/h com a calibração do contador
 function renderLevelEq() {
-  const k = (state.status.device || {}).usvPerCPM || 0.0065;
+  const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
     const v = parseFloat($(el.dataset.eq).value) || 0;
     el.textContent = v ? `≈ ${fmt(v * k, usvDigits(v * k))} µSv/h com a calibração atual` : "";
@@ -3708,12 +3712,12 @@ function makeDemoApi() {
     if (i > 3 * 24 * 60 && i < 4 * 24 * 60) continue; // um buraco de um dia
     pts.push({ t: Math.floor(now / 60000) * 60000 - i * 60000, cpm: Math.round(20 + (rnd() - 0.5) * 14) });
   }
-  const dev = { port: "COM5", version: "GMC-800Re1.08", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0065, calibration: { source: "contador" } };
+  const dev = { port: "COM5", version: "GMC-800Re1.08", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
   let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\GMC Monitor" };
   let settings = { levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
   const demoCfg = {
     values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, darkMode: 1 },
-    calibration: { source: "contador", points: [[1538, 10], [15380, 100], [30760, 200], [76900, 500], [153800, 1000], [307600, 2000]].map(([cpm, usv]) => ({ cpm, usv })) },
+    calibration: { source: "contador", points: [[986, 10], [8546, 100], [16408, 200], [37970, 500], [76010, 1000], [139671, 2000]].map(([cpm, usv]) => ({ cpm, usv })) },
     tubeVoltage: 44, locked: null, calibrationEditable: true, editable: true, problems: null };
   const events = [
     { time: now - 3600e3, text: "Contador conectado (GMC-800Re1.08 em COM5)", kind: "evento" },
@@ -3760,19 +3764,19 @@ function makeDemoApi() {
         changed = true;
       }
       if (changed) { emit("event", { kind: "alerta" }); }
-      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0065, mrh: c * 0.00065, level: c >= dl ? "perigo" : c >= 100 ? "alerta" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0065 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
+      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alerta" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
       feed(Math.max(0, Math.round(c / 60 + (Math.random() - 0.5) * 2)));
       emit("realReading", { time: Date.now(), cpm: 21, cps: 0, usv: 0.137, mrh: 0.0137, level: "seguro", alarm: false });
       return;
     }
     if (status.state !== "conectado") return;
     const cpm = Math.round(20 + (Math.random() - 0.5) * 12);
-    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0065, mrh: cpm * 0.00065, level: cpm >= 100 ? "alerta" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
+    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0101, mrh: cpm * 0.00101, level: cpm >= 100 ? "alerta" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
     feed(Math.random() < 0.33 ? 1 : 0);
   }, 1000);
   const range = (from, to) => pts.filter((p) => p.t >= from && p.t < to);
   let meas = { phase: "", seconds: 0, elapsed: 0, counts: 0, name: "", demo: false, bg: null, obj: null, result: null };
-  const phaseOf = (counts, secs) => { const m = secs / 60, cpm = counts / m; return { counts, seconds: secs, cpm, errCPM: Math.sqrt(Math.max(counts, 1)) / m, usv: cpm * 0.0065 }; };
+  const phaseOf = (counts, secs) => { const m = secs / 60, cpm = counts / m; return { counts, seconds: secs, cpm, errCPM: Math.sqrt(Math.max(counts, 1)) / m, usv: cpm * 0.0101 }; };
   function feed(cps) {
     if (meas.phase !== "fundo" && meas.phase !== "objeto") return;
     meas.counts += cps; meas.elapsed++;
@@ -3896,8 +3900,8 @@ function makeDemoApi() {
         bgCPM: 20, bgOK: true, attention: 0, alarm: 0, danger: 0, peakAlert: 0, rainMM: 0, rainHours: 0, rainKnown: !!settings.rainEnabled, measurements: 0, dose: 0 };
       if (p.length) {
         let sum = 0, mx = p[0], mn = p[0];
-        for (const q of p) { sum += q.cpm; if (q.cpm > mx.cpm) mx = q; if (q.cpm < mn.cpm) mn = q; r.dose += q.cpm * 0.0065 / 60; }
-        r.avg = sum / p.length; r.max = mx.cpm; r.maxAt = mx.t; r.min = mn.cpm; r.minAt = mn.t; r.avgUSv = r.avg * 0.0065; r.vsBgPct = (r.avg - 20) / 20 * 100;
+        for (const q of p) { sum += q.cpm; if (q.cpm > mx.cpm) mx = q; if (q.cpm < mn.cpm) mn = q; r.dose += q.cpm * 0.0101 / 60; }
+        r.avg = sum / p.length; r.max = mx.cpm; r.maxAt = mx.t; r.min = mn.cpm; r.minAt = mn.t; r.avgUSv = r.avg * 0.0101; r.vsBgPct = (r.avg - 20) / 20 * 100;
       }
       for (let t = from; t < to; t += step) { const q = range(t, t + step); r.curve.push({ t, cpm: q.length ? q.reduce((a, b) => a + b.cpm, 0) / q.length : null }); }
       for (const e of events.concat(demoAlerts)) if (e.kind === "alerta" && e.time >= from && e.time < to) { r[e.level === "perigo" ? "danger" : e.level === "alarme" ? "alarm" : "attention"]++; r.peakAlert = Math.max(r.peakAlert, e.peak || 0); }
@@ -3971,7 +3975,7 @@ function makeDemoApi() {
           crow.push(p.length);
           if (!p.length) { row.push(null); urow.push(null); continue; }
           const v = p.reduce((x, q) => x + q.cpm, 0) / p.length + 2 * Math.sin((hr - 4) / 24 * 2 * Math.PI) * -1;
-          row.push(v); urow.push(v * 0.0065); hs[hr] += v; hc[hr]++;
+          row.push(v); urow.push(v * 0.0101); hs[hr] += v; hc[hr]++;
           mn = mn == null || v < mn ? v : mn; mx = mx == null || v > mx ? v : mx;
         }
         values.push(row); usv.push(urow); counts.push(crow);
@@ -4006,7 +4010,7 @@ function makeDemoApi() {
         avg1h: h.length ? h.reduce((a, p) => a + p.cpm, 0) / h.length : null,
         min24h: d.length ? Math.min(...d.map((p) => p.cpm)) : null,
         max24h: mx.cpm, max24hAt: mx.t,
-        doseToday: td.reduce((a, p) => a + (p.cpm * 0.0065) / 60, 0), minutesToday: td.length,
+        doseToday: td.reduce((a, p) => a + (p.cpm * 0.0101) / 60, 0), minutesToday: td.length,
       };
     },
     GetDaily: async () => {
@@ -4014,7 +4018,7 @@ function makeDemoApi() {
       for (let k = 0; k < 7; k++) {
         const d0 = new Date(); d0.setHours(0, 0, 0, 0); d0.setDate(d0.getDate() - k);
         const p = range(d0.getTime(), d0.getTime() + 864e5);
-        if (p.length) { const c = p.reduce((a, x) => a + x.cpm, 0) / p.length; out.push({ day: d0.getTime(), cpm: c, usv: c * 0.0065, minutes: p.length }); }
+        if (p.length) { const c = p.reduce((a, x) => a + x.cpm, 0) / p.length; out.push({ day: d0.getTime(), cpm: c, usv: c * 0.0101, minutes: p.length }); }
       }
       return out;
     },
@@ -4033,12 +4037,12 @@ function makeDemoApi() {
       const span = to - from;
       const p = range(from, to);
       const all = range(Date.now() - 2592e6, to).map((q) => q.cpm).sort((a, b) => a - b);
-      const rate = (all[Math.floor(all.length / 2)] || 0) * 0.0065;
+      const rate = (all[Math.floor(all.length / 2)] || 0) * 0.0101;
       const limY = limit === "trabalhador" ? 20 : 1, limMin = limY * 1000 / 525960;
       const times = [], dose = [], bg = [], ceil = [];
       let d = 0, b = 0, al = 0, k = 0;
       for (let e = from + step; e <= to; e += step) {
-        while (k < p.length && p[k].t < e) { d += p[k].cpm * 0.0065 / 60; b += rate / 60; al += limMin; k++; }
+        while (k < p.length && p[k].t < e) { d += p[k].cpm * 0.0101 / 60; b += rate / 60; al += limMin; k++; }
         times.push(e); dose.push(d); bg.push(b); ceil.push(b + al);
       }
       return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, backgroundTotal: b, ceilingTotal: b + al,
@@ -4057,14 +4061,14 @@ function makeDemoApi() {
       }
       const ok = vals.filter((v) => v != null);
       const avg = ok.length ? ok.reduce((x, v) => x + v, 0) / ok.length : null;
-      return { from: f, to: f + n * step, stepMs: step, times, values: vals, usv: vals.map((v) => (v == null ? null : v * 0.0065)),
+      return { from: f, to: f + n * step, stepMs: step, times, values: vals, usv: vals.map((v) => (v == null ? null : v * 0.0101)),
         avg, min: ok.length ? Math.min(...ok) : null, max: ok.length ? Math.max(...ok) : null,
-        avgUSv: avg == null ? null : avg * 0.0065, minUSv: null, maxUSv: null,
-        attentionCPM: 50, attentionUSv: 50 * 0.0065, alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0065, dangerCPM: 1000, dangerUSv: 6.5 };
+        avgUSv: avg == null ? null : avg * 0.0101, minUSv: null, maxUSv: null,
+        attentionCPM: 50, attentionUSv: 50 * 0.0101, alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0101, dangerCPM: 1000, dangerUSv: 10.1 };
     },
     GetChart: async (period) => {
       const c = await chartPreview(period);
-      const u = (v) => (v == null ? null : v * 0.0065);
+      const u = (v) => (v == null ? null : v * 0.0101);
       withPeaks(c);
       return Object.assign(c, { avgUSv: u(c.avg), minUSv: u(c.min), maxUSv: u(c.max) });
     },
@@ -4084,10 +4088,10 @@ function makeDemoApi() {
         from, to, stepMs: step,
         times: sums.map((_, i) => from + i * step),
         values: sums.map((s, i) => (cnt[i] ? s / cnt[i] : null)),
-        usv: sums.map((s, i) => (cnt[i] ? (s / cnt[i]) * 0.0065 : null)),
-        attentionUSv: 50 * 0.0065,
-        alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0065,
-        dangerCPM: (settings.levels || {}).dangerCPM || 1000, dangerUSv: ((settings.levels || {}).dangerCPM || 1000) * 0.0065,
+        usv: sums.map((s, i) => (cnt[i] ? (s / cnt[i]) * 0.0101 : null)),
+        attentionUSv: 50 * 0.0101,
+        alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0101,
+        dangerCPM: (settings.levels || {}).dangerCPM || 1000, dangerUSv: ((settings.levels || {}).dangerCPM || 1000) * 0.0101,
         attentionCPM: (settings.levels || {}).attentionCPM || 50,
         avg: all.length ? all.reduce((a, p) => a + p.cpm, 0) / all.length : null,
         min: all.length ? Math.min(...all.map((p) => p.cpm)) : null,

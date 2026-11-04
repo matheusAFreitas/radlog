@@ -36,7 +36,7 @@ func TestGetDose(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	usv := func(cpm float64) float64 { return cpm * 10 / 1538 } // calibração padrão
+	usv := func(cpm float64) float64 { return gmc.DefaultCalibration().USv(cpm) } // calibração padrão
 	wantTotal := (590*usv(20) + 10*usv(220)) / 60
 	wantBg := 600 * usv(20) / 60 // mediana = 20 CPM
 	wantAllow := 600 * 1000 / minutesPerYear

@@ -53,3 +53,15 @@ func (a *App) loadLastCal() {
 	a.mu.Unlock()
 	a.logf("calibração: usando a última lida do contador (%.4f µSv/h por CPM) até conectar", c.USv(100)/100)
 }
+
+// convCalLocked é a calibração para converter o CPM que o app grava e
+// mostra. Com a correção de tempo morto ligada esse CPM já é a contagem
+// verdadeira; se a curva do contador também compensa as perdas, usa só a
+// reta do 1º ponto para não corrigir duas vezes. Sem a correção, usa a curva
+// do contador como ela é. (a.mu travado)
+func (a *App) convCalLocked() gmc.Calibration {
+	if a.settings.Levels.DeadTimeOn && a.cal.CompensatesDeadTime() {
+		return a.cal.Linear()
+	}
+	return a.cal
+}

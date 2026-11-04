@@ -119,7 +119,7 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit string) (D
 		return DoseChart{}, err
 	}
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	a.mu.Unlock()
 
 	c := DoseChart{

@@ -113,7 +113,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 	from, to := time.UnixMilli(s.From), time.UnixMilli(s.To)
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active

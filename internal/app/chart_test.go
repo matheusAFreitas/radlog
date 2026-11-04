@@ -34,10 +34,10 @@ func TestChartUSv(t *testing.T) {
 		if c.Max == nil || math.Abs(*c.MaxUSv-a.cal.USv(*c.Max)) > 1e-12 || c.AvgUSv == nil {
 			t.Fatalf("%s: resumo em µSv errado", period)
 		}
-		if c.DangerCPM != 1000 || math.Abs(c.DangerUSv-1000*10.0/1538) > 1e-9 || c.AlarmCPM <= 0 || c.AlarmUSv <= 0 {
+		if c.DangerCPM != 1000 || math.Abs(c.DangerUSv-gmc.DefaultCalibration().USv(1000)) > 1e-9 || c.AlarmCPM <= 0 || c.AlarmUSv <= 0 {
 			t.Fatalf("limites dos alarmes: %+v", c)
 		}
-		if math.Abs(c.AttentionUSv-50*10.0/1538) > 1e-12 {
+		if math.Abs(c.AttentionUSv-50*10.0/986) > 1e-12 {
 			t.Fatalf("limiar de atenção em µSv: %v", c.AttentionUSv)
 		}
 	}

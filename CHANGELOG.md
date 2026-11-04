@@ -1,5 +1,19 @@
 # Versões
 
+## 1.14.1
+- **Calibração de fábrica certa**: a reserva do app (usada só se ele nunca
+  leu a do contador) passa a ser a do GMC-800 formatado, 986 CPM = 10 µSv/h
+  no 1º ponto (≈ 0,0101 µSv/h por CPM). Antes era 1538 CPM = 10 µSv/h
+  (0,0065), de um firmware antigo.
+- **Tempo morto sem compensar duas vezes**: a curva de fábrica já compensa
+  as contagens perdidas em taxa alta. Com a correção de tempo morto ligada, o
+  CPM gravado já é a contagem verdadeira, então o app converte em µSv/h pela
+  reta do 1º ponto. O Geiger saturado continua olhando o que o contador
+  mandou, com a curva dele. No fundo da casa não muda nada; perto de
+  100 µSv/h a diferença é de uns 3%.
+- A tela usa o fator em uso no app (inclusive o último lido, com o contador
+  desconectado) em vez de 0,0065 fixo.
+
 ## 1.14.0
 - **Relatório técnico em PDF**:
   - **gráfico com todas as leituras por minuto**, em vez da média por

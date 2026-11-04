@@ -143,6 +143,9 @@ type Status struct {
 	Device      DeviceInfo `json:"device"`
 	Downloading bool       `json:"downloading"`
 	DataDir     string     `json:"dataDir"`
+	// fator do fundo (µSv/h por CPM) em uso agora, mesmo desconectado
+	USvPerCPM float64 `json:"usvPerCPM"`
+	CalSource string  `json:"calSource"`
 }
 
 // Event é uma linha do registro de eventos.
@@ -203,7 +206,7 @@ type Chart struct {
 // withUSv preenche as séries em µSv/h.
 func (a *App) withUSv(c Chart) Chart {
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	alarmCPM := a.settings.AlarmCPM
 	lv := a.settings.Levels.norm()
 	a.mu.Unlock()
@@ -554,6 +557,7 @@ func (a *App) statusLocked() Status {
 	return Status{
 		State: a.state, Message: a.message, Device: a.info,
 		Downloading: a.downloading.Load(), DataDir: a.dataDir,
+		USvPerCPM: a.cal.USv(100) / 100, CalSource: a.cal.Source,
 	}
 }
 
@@ -908,7 +912,8 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		minute, lastCPM, lastAt = m, cpm, now
 
 		a.mu.Lock()
-		cal := a.cal
+		cal := a.convCalLocked()
+		rawCal := a.cal // o que o contador mandou (sem correção): curva dele
 		set := a.settings
 		alarm := set.AlarmEnabled && int(cpm) >= set.AlarmCPM
 		was := a.alarmOn
@@ -924,7 +929,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		lv := set.Levels.norm()
 		attnStarted := attentionStep(&a.attnOn, set.AttentionEnabled, float64(cpm), lv)
 		attnOn := a.attnOn
-		satOn, satStarted := a.sat.step(now, cal.USv(float64(rawCPM)), cal.USv(float64(rawCPS)*60), lv)
+		satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
 		dCPM := float64(cpm)
 		if satOn {
 			dCPM = math.Max(dCPM, lv.dangerEnter()) // saturado: o perigo continua valendo
@@ -1372,7 +1377,7 @@ func (a *App) shortChart(from, to time.Time, step time.Duration, pts []store.Poi
 func (a *App) GetStats() (Stats, error) {
 	now := time.Now()
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	a.mu.Unlock()
 	var s Stats
 	pts, err := a.points(now.Add(-24*time.Hour), now.Add(time.Minute))
@@ -1427,7 +1432,7 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 	}
 	now := time.Now()
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	a.mu.Unlock()
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
@@ -1485,7 +1490,7 @@ func (a *App) ExportCSV() (string, error) {
 	}
 	defer f.Close()
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	a.mu.Unlock()
 	if err := a.store.ExportCSV(f, from, time.Now().Add(time.Minute), cal.USv); err != nil {
 		return "", err

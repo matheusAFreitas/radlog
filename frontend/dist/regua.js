@@ -34,7 +34,7 @@ const REGUA_DOSE = [
 // valores da casa e das medições salvas (o que é seu entra na escada também)
 function reguaTaxaRefs() {
   const out = [...REGUA_TAXA];
-  const cal = (state.status.device || {}).usvPerCPM || 0.0065;
+  const cal = calK();
   const bg = (state.last && state.last.bgCPM) || state.bgCPM;
   if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa", d: `mediana dos últimos 30 dias: ${fmt(bg, 0)} CPM`, mine: true });
   const seen = new Set();
@@ -50,7 +50,7 @@ function reguaTaxaRefs() {
 
 function reguaDoseRefs() {
   const out = [...REGUA_DOSE];
-  const cal = (state.status.device || {}).usvPerCPM || 0.0065;
+  const cal = calK();
   const bg = (state.last && state.last.bgCPM) || state.bgCPM;
   if (bg) {
     const h = bg * cal;
@@ -111,7 +111,7 @@ function doseCompare(uSv) {
 }
 
 function openRegua(which) {
-  const cal = (state.status.device || {}).usvPerCPM || 0.0065;
+  const cal = calK();
   const r = state.last;
   const nowUSv = r && r.usv > 0 ? r.usv : null;
   reguaLadder($("rgTaxa"), reguaTaxaRefs(), nowUSv, nowUSv ? `Agora: ${fmt(r.cpm, 0)} CPM no contador` : "", "µSv/h");

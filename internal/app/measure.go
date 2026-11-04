@@ -142,14 +142,14 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 	var logText string
 	var save *SavedMeasure
 	if m.Elapsed >= m.Seconds {
-		ph := phaseResult(m.Counts, m.Elapsed, a.cal.USv)
+		ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 		ph.Start, ph.End = m.PhaseStart, time.Now().UnixMilli()
 		if m.Phase == "fundo" {
 			m.Bg = &ph
 			m.Phase = "fundo-pronto"
 		} else {
 			m.Obj = &ph
-			r := compareMeasure(*m.Bg, ph, a.cal.USv)
+			r := compareMeasure(*m.Bg, ph, a.convCalLocked().USv)
 			m.Result = &r
 			m.Phase = "pronto"
 			name := m.Name

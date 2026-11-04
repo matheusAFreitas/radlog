@@ -68,13 +68,27 @@ func TestCalibrationFromRealConfig(t *testing.T) {
 	}
 }
 
-func TestDefaultCalibrationMatchesDevice(t *testing.T) {
-	cal, _ := ParseCalibration800(cfg800())
+// A de fábrica é a que o GMC-800 Re1.20 volta a ter quando é formatado.
+// (O contador gravado nos testes, de firmware 1.08, tem outra: 1538 CPM = 10
+// µSv/h. Por isso o app sempre usa a lida do aparelho quando consegue.)
+func TestDefaultCalibration(t *testing.T) {
 	def := DefaultCalibration()
-	for _, cpm := range []float64{0, 10, 22, 50, 1538, 5000, 400000} {
-		if a, b := cal.USv(cpm), def.USv(cpm); math.Abs(a-b) > 1e-9 {
-			t.Fatalf("cpm %v: contador %v, padrão %v", cpm, a, b)
-		}
+	if len(def.Points) != 6 || def.Points[0] != (CalPoint{986, 10}) || def.Points[5] != (CalPoint{139671, 2000}) {
+		t.Fatalf("pontos: %+v", def.Points)
+	}
+	if got := def.USv(28); math.Abs(got-28*10.0/986) > 1e-12 {
+		t.Fatalf("USv(28) = %v", got)
+	}
+	if !def.CompensatesDeadTime() {
+		t.Fatal("a curva de fábrica compensa as perdas em taxa alta")
+	}
+	lin := def.Linear()
+	if got := lin.USv(100000); math.Abs(got-100000*10.0/986) > 1e-9 {
+		t.Fatalf("linear USv(100000) = %v", got)
+	}
+	dev, _ := ParseCalibration800(cfg800())
+	if dev.CompensatesDeadTime() {
+		t.Fatal("a curva do contador gravado é uma reta só")
 	}
 }
 

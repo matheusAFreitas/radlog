@@ -962,6 +962,7 @@
         <label for="lvDTUs">Tempo morto τ (µs)</label>
         <input type="number" id="lvDTUs" min="5" max="500" step="1" inputmode="decimal">
         <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
+        <p class="small muted">A calibração de fábrica do GMC-800 já compensa essas perdas nos pontos de cima (menos CPM por µSv/h em taxa alta). Com a correção ligada, o app converte em µSv/h pela reta do 1º ponto, para não compensar duas vezes. No fundo da casa não muda nada.</p>
         <div class="lv-dt-wrap"><table class="m-stats mono lv-dt" id="lvDTTable"></table></div>
       </fieldset>
     </div>

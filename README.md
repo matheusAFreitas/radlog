@@ -28,7 +28,7 @@ o lugar para a nova sozinha.
 - Leitura ao vivo em CPM, µSv/h, mrem/h ou CPS, com as faixas do manual
   (abaixo de 50 CPM seguro, 50–99 atenção, 100+ alerta).
 - Converte para µSv/h usando a **calibração gravada no próprio contador**
-  (se não conseguir ler, usa a de fábrica: 0,0065 µSv/h por CPM).
+  (guarda a última lida; se nunca leu, usa a de fábrica do GMC-800: 986 CPM = 10 µSv/h, ≈ 0,0101 µSv/h por CPM).
 - Gráfico em CPM ou µSv/h, de 15 min, 30 min, 1 h, 24 h e 7 dias, média/mínimo/máximo e dose acumulada no dia.
   Arrastando no gráfico dá zoom num trecho, com a resolução mais fina disponível.
 - **Dosímetro**: dose acumulada em 3 h, 6 h, 12 h, 24 h, 7 dias, 30 dias ou 1 ano, comparada

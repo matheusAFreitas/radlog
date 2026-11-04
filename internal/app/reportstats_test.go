@@ -66,3 +66,17 @@ func TestLastCal(t *testing.T) {
 		t.Fatal("guardou a de fábrica")
 	}
 }
+
+func TestConvCalDeadTime(t *testing.T) {
+	a, _ := testApp(t)
+	a.cal = gmc.DefaultCalibration() // curva que já compensa as perdas
+	a.settings.Levels.DeadTimeOn = false
+	if c := a.convCalLocked(); len(c.Points) != 6 {
+		t.Fatal("sem a correção, usa a curva do contador")
+	}
+	a.settings.Levels.DeadTimeOn = true
+	c := a.convCalLocked()
+	if len(c.Points) != 1 || math.Abs(c.USv(10000)-10000*10.0/986) > 1e-9 {
+		t.Fatalf("com a correção, usa a reta do 1º ponto: %+v", c)
+	}
+}

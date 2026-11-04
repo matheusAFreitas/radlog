@@ -78,10 +78,11 @@ func TestDemoDoesNotTouchFiles(t *testing.T) {
 		t.Fatalf("sobreposição: %+v", pts)
 	}
 	d, _ := a.GetDose("3h", "publico")
-	if d.MeasuredMinutes != 1 || math.Abs(d.Total-500*10.0/1538/60) > 1e-9 {
-		t.Fatalf("dose no demo: %+v", d.Total)
+	// 1 minuto demo (2 se o relógio virou o minuto durante o teste)
+	if (d.MeasuredMinutes != 1 && d.MeasuredMinutes != 2) || math.Abs(d.Total-float64(d.MeasuredMinutes)*a.cal.USv(500)/60) > 1e-9 {
+		t.Fatalf("dose no demo: %+v (%d min) — %+v", d.Total, d.MeasuredMinutes, a.demo.minutes)
 	}
-	if d.BackgroundRate > 0.2 { // fundo continua vindo dos dados reais
+	if d.BackgroundRate > a.cal.USv(25) { // fundo continua vindo dos dados reais (20 CPM)
 		t.Fatalf("fundo contaminado pelo demo: %v", d.BackgroundRate)
 	}
 

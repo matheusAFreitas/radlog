@@ -215,7 +215,8 @@ func (a *App) demoLoop(stop chan struct{}) {
 		}
 		a.mu.Lock()
 		target, realistic := a.demo.CPM, a.demo.Realistic
-		cal := a.cal
+		cal := a.convCalLocked()
+		rawCal := cal
 		set := a.settings
 		a.mu.Unlock()
 
@@ -265,7 +266,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 		lv := set.Levels.norm()
 		attnStarted := attentionStep(&a.demo.attnOn, set.AttentionEnabled, cpm, lv)
 		attnOn := a.demo.attnOn
-		satOn, satStarted := a.demo.sat.step(now, cal.USv(cpm), cal.USv(float64(cps)*60), lv)
+		satOn, satStarted := a.demo.sat.step(now, rawCal.USv(cpm), rawCal.USv(float64(cps)*60), lv)
 		dCPM := cpm
 		if satOn {
 			dCPM = math.Max(dCPM, lv.dangerEnter())

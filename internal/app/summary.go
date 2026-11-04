@@ -67,7 +67,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		return s, err
 	}
 	a.mu.Lock()
-	cal := a.cal
+	cal := a.convCalLocked()
 	demo := a.demo.Active
 	var meas int
 	for _, m := range a.measurements {
