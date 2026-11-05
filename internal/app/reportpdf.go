@@ -43,7 +43,7 @@ type reportPDF struct {
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
-	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, "GMC Monitor "+p.r.Version+" · "+p.r.Period)
+	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("GMC Monitor "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
 	p.d.TextRight(pdf.W-pm, pdf.H-24, pdf.Sans, 7.5, cMuted, fmt.Sprintf("página %d", p.page))
 }
 
@@ -476,7 +476,11 @@ func renderReportPDF(r reportData) []byte {
 	d := p.d
 	// cabeçalho
 	d.Text(pm, p.y+4, pdf.SansBold, 18, cInk, r.Title)
-	d.Text(pm, p.y+20, pdf.Sans, 9, cMuted, r.Period)
+	// período com nome comprido (ex.: "Fora de casa: …"): quebra, não corta
+	pl := wrapText(r.Period, pdf.Sans, 9, pdf.W-2*pm-150, 3)
+	for i, ln := range pl {
+		d.Text(pm, p.y+20+float64(i)*11, pdf.Sans, 9, cMuted, ln)
+	}
 	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "GMC Monitor "+r.Version)
 	ry := p.y + 11
 	if r.Device != "" {
@@ -484,7 +488,7 @@ func renderReportPDF(r reportData) []byte {
 		ry += 11
 	}
 	d.TextRight(pdf.W-pm, ry, pdf.Sans, 8, cMuted, "gerado em "+r.Generated)
-	p.y += 32
+	p.y += 32 + float64(len(pl)-1)*11
 	d.Line(pm, p.y, pdf.W-pm, p.y, 1.5, cInk, false)
 	p.y += 12
 

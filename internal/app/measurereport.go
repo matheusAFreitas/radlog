@@ -174,8 +174,19 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	period := t0.Format("02/01/2006 15:04") + " · fundo " + fmt.Sprint(m.Bg.Seconds) + " s + objeto " + fmt.Sprint(m.Obj.Seconds) + " s"
 	p := &reportPDF{d: pdf.New(), y: 50, page: 1, r: reportData{Version: AppVersion, Period: period}}
 	d := p.d
-	d.Text(pm, p.y+4, pdf.SansBold, 18, cInk, pdf.Fit(title, pdf.SansBold, 18, pdf.W-2*pm-150))
-	d.Text(pm, p.y+20, pdf.Sans, 9, cMuted, period)
+	// nome comprido: diminui a letra até 14 e, se ainda não couber, quebra em
+	// até 3 linhas (nunca corta o nome)
+	tmax := pdf.W - 2*pm - 150
+	ts := 18.0
+	for ts > 14 && pdf.TextWidth(title, pdf.SansBold, ts) > tmax {
+		ts -= 0.5
+	}
+	tl := wrapText(title, pdf.SansBold, ts, tmax, 3)
+	for i, ln := range tl {
+		d.Text(pm, p.y+4+float64(i)*(ts+3), pdf.SansBold, ts, cInk, ln)
+	}
+	extra := float64(len(tl)-1) * (ts + 3)
+	d.Text(pm, p.y+20+extra, pdf.Sans, 9, cMuted, period)
 	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "GMC Monitor "+AppVersion)
 	ry := p.y + 11
 	if device != "" {
@@ -183,7 +194,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 		ry += 11
 	}
 	d.TextRight(pdf.W-pm, ry, pdf.Sans, 8, cMuted, "gerado em "+time.Now().Format("02/01/2006 15:04"))
-	p.y += 32
+	p.y += 32 + extra
 	d.Line(pm, p.y, pdf.W-pm, p.y, 1.5, cInk, false)
 	p.y += 12
 

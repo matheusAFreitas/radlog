@@ -64,6 +64,13 @@ func TestMeasureReport(t *testing.T) {
 	if out := os.Getenv("MEAS_OUT"); out != "" {
 		_ = os.WriteFile(out, b, 0o644)
 	}
+	// nome comprido não pode ser cortado
+	long := m
+	long.Name = "Eletrodo Toriado (Mesa Granito, encostado no tubo, lado esquerdo, sem embalagem plástica)"
+	lb := renderMeasurePDF(long, "", "x", "y")
+	if out := os.Getenv("MEAS_OUT"); out != "" {
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-longo.pdf", lb, 0o644)
+	}
 	// medição antiga, sem os segundos
 	old := m
 	old.Samples = nil

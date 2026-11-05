@@ -1,5 +1,10 @@
 # Versões
 
+## 1.19.1
+- **Nome comprido não é mais cortado no relatório**: o título da medição
+  diminui um pouco e, se ainda não couber, quebra em até 3 linhas. O mesmo
+  vale para o período dos outros relatórios (ex.: "Fora de casa: …").
+
 ## 1.19.0
 - **Relatório de uma medição de objeto (PDF)**: botão "Relatório (PDF)" em
   cada medição salva. Traz:
