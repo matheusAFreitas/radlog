@@ -1,5 +1,23 @@
 # Versões
 
+## 1.19.0
+- **Relatório de uma medição de objeto (PDF)**: botão "Relatório (PDF)" em
+  cada medição salva. Traz:
+  - a conclusão e os números das duas fases (contagens, tempo, CPM ± σ);
+  - o líquido em CPM e µSv/h no tubo, objeto ÷ fundo e a significância (σ);
+  - o gráfico segundo a segundo, com a média e a margem de erro de cada fase;
+  - a distribuição das contagens por segundo comparada com o acaso (Poisson),
+    para ver se algo mudou durante a medição;
+  - o limite de detecção (Currie) para o tempo usado e quanto tempo daria
+    ±10% e ±5% de precisão;
+  - geometria (a anotação da medição), contador, calibração, método e
+    limitações.
+- **O relatório sai sozinho no fim da medição**: salvo na pasta de relatórios,
+  com "Abrir relatório" no resultado. Dá para desligar em Configurações →
+  Relatórios.
+- **Relatório de um período fora de casa**: botão "Relatório (PDF)" em cada
+  período da lista Fora de casa.
+
 ## 1.18.2
 - **Releases automáticas**: toda versão nova que chega ao GitHub vira release
   sozinha (com o .exe, o AppImage, o .tar.gz e o SHA256SUMS.txt), e o app

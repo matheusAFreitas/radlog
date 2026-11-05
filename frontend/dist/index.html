@@ -474,6 +474,7 @@
       <div id="mStats"></div>
       <span class="small muted" id="mExplain"></span>
       <span class="small m-saved" id="mSaved" hidden>Salva em "Medições salvas" e marcada no gráfico de CPM.</span>
+      <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span> <button type="button" class="btn small" id="btnMReportOpen" hidden>Abrir relatório</button><button type="button" class="btn small" id="btnMReportMake" hidden>Relatório (PDF)</button></div>
     </div>
     <div class="dlg-foot spread">
       <button type="button" class="btn" id="btnMeasureReset">Recomeçar</button>
@@ -936,13 +937,17 @@
 
     <fieldset>
       <legend>Relatórios</legend>
-      <p class="small muted">Os relatórios em PDF (Resumo → Relatório, ou um trecho selecionado no gráfico ou no padrão por hora) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
+      <p class="small muted">Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
       <p class="small mono path" id="reportDir">—</p>
       <div class="row">
         <button type="button" class="btn" id="btnReportDir">Escolher pasta…</button>
         <button type="button" class="btn" id="btnOpenReportDir">Abrir pasta</button>
         <button type="button" class="btn" id="btnResetReportDir" hidden>Voltar para a padrão</button>
       </div>
+      <label class="toggle">
+        <span>Gerar o relatório da medição de objeto sozinho, no fim da medição</span>
+        <input type="checkbox" id="chkMeasReport">
+      </label>
     </fieldset>
 
     <fieldset>

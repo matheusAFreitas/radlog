@@ -1949,6 +1949,16 @@ function renderMeasure(st) {
   const r = st.result;
   $("mResult").hidden = !r;
   $("mSaved").hidden = !st.savedId;
+  const rp = $("mReport");
+  rp.hidden = !st.savedId;
+  if (st.savedId) {
+    $("mReportText").textContent = st.reportPath ? "Relatório salvo: " + st.reportPath.split(/[\\/]/).pop()
+      : st.reportError ? "Relatório não saiu: " + st.reportError : state.settings.noMeasureReport ? "" : "Gerando o relatório…";
+    $("btnMReportOpen").hidden = !st.reportPath;
+    $("btnMReportMake").hidden = !!st.reportPath;
+    rp.dataset.id = st.savedId;
+    rp.dataset.path = st.reportPath || "";
+  }
   if (!r) return;
   $("mResult").className = "m-result " + r.level;
   $("mVerdict").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
@@ -2074,7 +2084,11 @@ function renderMeasureHistory() {
       if (stats.hidden) state.mDet.delete(m.id); else state.mDet.add(m.id);
       det.setAttribute("aria-expanded", String(!stats.hidden));
     });
-    li.append(info, see, det, ed, del, form, stats);
+    const pdfBtn = document.createElement("button");
+    pdfBtn.type = "button"; pdfBtn.className = "btn small"; pdfBtn.textContent = "Relatório (PDF)";
+    pdfBtn.title = "Relatório detalhado dessa medição";
+    pdfBtn.addEventListener("click", () => exportMeasureReport(m.id));
+    li.append(info, see, pdfBtn, det, ed, del, form, stats);
     ul.appendChild(li);
   }
 }
@@ -2124,7 +2138,11 @@ function renderPeriods() {
       if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
       await call(api.DeletePeriod, p.id);
     });
-    li.append(txt, see, ed, del);
+    const rep = document.createElement("button");
+    rep.type = "button"; rep.className = "btn small"; rep.textContent = "Relatório (PDF)";
+    rep.title = "Relatório em PDF só desse trecho fora de casa";
+    rep.addEventListener("click", () => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name));
+    li.append(txt, see, rep, ed, del);
     ul.appendChild(li);
   }
 }
@@ -2845,6 +2863,7 @@ async function openSettings(focusId) {
   $("chkTray").checked = s.trayOnClose !== false;
   $("chkAutostart").checked = !!s.startWithWindows;
   $("chkUpdCheck").checked = !s.noUpdateCheck;
+  $("chkMeasReport").checked = !s.noMeasureReport;
   fillLevels(lv());
   renderAttnLabel();
   buildSetNav();
@@ -3190,6 +3209,7 @@ function wire() {
       trayOnClose: $("chkTray").checked,
       startWithWindows: $("chkAutostart").checked,
       noUpdateCheck: !$("chkUpdCheck").checked,
+      noMeasureReport: !$("chkMeasReport").checked,
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
@@ -3760,6 +3780,13 @@ function drawSumChart(series) {
 
 // ---------- relatórios em PDF ----------
 
+async function exportMeasureReport(id) {
+  try {
+    const f = await api.ExportMeasureReport(id);
+    if (f) toast("Relatório salvo: " + f.split(/[\\/]/).pop());
+  } catch (e) { toast(errMsg(e), true); }
+}
+
 async function exportReport(from, to, label) {
   try {
     const f = await api.ExportReport(Math.round(from), Math.round(to), label);
@@ -3775,6 +3802,8 @@ function renderReportDir(d) {
 async function refreshReportDir() { try { renderReportDir(await api.GetReportDir()); } catch (e) { /* segue */ } }
 
 function wireReports() {
+  $("btnMReportOpen").addEventListener("click", () => call(api.OpenReportFile, $("mReport").dataset.path));
+  $("btnMReportMake").addEventListener("click", () => exportMeasureReport(+$("mReport").dataset.id));
   $("btnReportDir").addEventListener("click", async () => { try { renderReportDir(await api.ChooseReportDir()); } catch (e) { toast(errMsg(e), true); } });
   $("btnOpenReportDir").addEventListener("click", () => call(api.OpenReportDir));
   $("btnResetReportDir").addEventListener("click", async () => renderReportDir(await api.ResetReportDir()));
@@ -4042,6 +4071,8 @@ function makeDemoApi() {
     StartDemo: async (cpm, realistic) => (demoSt = { active: true, cpm, realistic }),
     StopDemo: async () => { demoAlerts = []; demoSt = { active: false, cpm: 20, realistic: false }; emit("event", { kind: "alerta" }); emit("demo", demoSt); return demoSt; },
     GetVersion: async () => "navegador",
+    ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\GMC Monitor\\Relatórios\\gmc-medicao-${id}.pdf`; },
+    OpenReportFile: async () => {},
     GetUpdateInfo: async () => demoUpd,
     CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: "1.18.0", available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },

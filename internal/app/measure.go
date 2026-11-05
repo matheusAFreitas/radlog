@@ -55,6 +55,9 @@ type MeasureState struct {
 	// quando a fase atual começou (ms) e o ID da medição salva no fim
 	PhaseStart int64 `json:"phaseStart"`
 	SavedID    int64 `json:"savedId"`
+	// relatório em PDF gerado sozinho no fim (caminho; "" = não gerou)
+	ReportPath  string `json:"reportPath"`
+	ReportError string `json:"reportError"`
 }
 
 // GetMeasure devolve o estado atual.
@@ -169,7 +172,11 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 		if id, err := a.addMeasurement(*save); err == nil {
 			a.mu.Lock()
 			a.measure.SavedID = id
+			auto := !a.settings.NoMeasureReport
 			a.mu.Unlock()
+			if auto {
+				go a.autoMeasureReport(id)
+			}
 		}
 	}
 	a.mu.Lock()
@@ -352,4 +359,23 @@ func (a *App) measuringChecker() func(time.Time) bool {
 		}
 		return false
 	}
+}
+
+// autoMeasureReport gera o PDF da medição que acabou de terminar (sem abrir:
+// a tela mostra "Abrir relatório").
+func (a *App) autoMeasureReport(id int64) {
+	path, err := a.saveMeasureReport(id)
+	a.mu.Lock()
+	if a.measure.SavedID == id {
+		a.measure.ReportPath = path
+		if err != nil {
+			a.measure.ReportError = err.Error()
+		}
+	}
+	st := a.measure
+	a.mu.Unlock()
+	if err != nil {
+		a.logf("relatório da medição %d: %v", id, err)
+	}
+	a.emit("measure", st)
 }

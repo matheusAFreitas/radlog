@@ -30,6 +30,11 @@ const (
 
 type RGB struct{ r, g, b float64 }
 
+// Tint clareia a cor em direção ao branco: 0 = a mesma cor, 1 = branco.
+func (c RGB) Tint(f float64) RGB {
+	return RGB{1 - (1-c.r)*(1-f), 1 - (1-c.g)*(1-f), 1 - (1-c.b)*(1-f)}
+}
+
 func Hex(h string) RGB {
 	var r, g, b int
 	fmt.Sscanf(strings.TrimPrefix(h, "#"), "%02x%02x%02x", &r, &g, &b)

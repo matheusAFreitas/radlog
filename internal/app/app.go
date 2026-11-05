@@ -73,6 +73,8 @@ type Settings struct {
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
 	NoUpdateCheck bool   `json:"noUpdateCheck"`
 	SkipVersion   string `json:"skipVersion"` // "Pular esta versão"
+	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
+	NoMeasureReport bool `json:"noMeasureReport"`
 	// pasta dos relatórios em PDF; vazio = Documentos/GMC Monitor/Relatórios
 	// (report.go; só muda por ChooseReportDir)
 	ReportDir string `json:"reportDir"`
