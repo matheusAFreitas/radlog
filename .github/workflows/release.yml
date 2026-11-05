@@ -1,8 +1,12 @@
 name: release
 
-# Uma tag "v1.14.0" gera o .exe (Windows), o AppImage e o .tar.gz (Linux) e
-# publica a release com o trecho daquela versão no CHANGELOG.
+# Gera o .exe (Windows), o AppImage e o .tar.gz (Linux) e publica a release
+# com o trecho daquela versão no CHANGELOG. Dois jeitos de disparar:
+#   - Actions → release → Run workflow: publica a versão que está em
+#     internal/app/version.go no main (cria a tag vX.Y.Z sozinho);
+#   - empurrar uma tag "vX.Y.Z" (precisa bater com o version.go).
 on:
+  workflow_dispatch:
   push:
     tags: ["v*"]
 
@@ -23,7 +27,11 @@ jobs:
         id: v
         run: |
           V=$(sed -n 's/^const AppVersion = "\(.*\)"/\1/p' internal/app/version.go)
-          if [ "v$V" != "${GITHUB_REF_NAME}" ]; then echo "a tag ${GITHUB_REF_NAME} não bate com internal/app/version.go ($V)"; exit 1; fi
+          if [ "${GITHUB_REF_TYPE}" = "tag" ]; then
+            if [ "v$V" != "${GITHUB_REF_NAME}" ]; then echo "a tag ${GITHUB_REF_NAME} não bate com internal/app/version.go ($V)"; exit 1; fi
+          elif git ls-remote --exit-code --tags origin "refs/tags/v$V" >/dev/null; then
+            echo "a versão $V já tem release (tag v$V). Mude internal/app/version.go antes."; exit 1
+          fi
           echo "ver=$V" >> "$GITHUB_OUTPUT"
       - name: go.sum
         run: go mod tidy
@@ -56,6 +64,8 @@ jobs:
       - uses: softprops/action-gh-release@v2
         with:
           name: v${{ steps.v.outputs.ver }}
+          tag_name: v${{ steps.v.outputs.ver }}
+          target_commitish: ${{ github.sha }}
           body_path: notes.md
           files: |
             out/*.exe
