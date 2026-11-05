@@ -187,7 +187,7 @@ func TestDangerLevel(t *testing.T) {
 
 	a.StartDemo(1200, false)
 	waitFor(t, "perigo ativo", func() bool { l := active(); return len(l) >= 1 && l[0].Level == "perigo" })
-	if l := active(); len(l) != 2 || l[1].Level != "atencao" { // alarme desligado: perigo + atenção
+	if l := active(); len(l) != 1 { // pulou do fundo para o perigo: só o perigo abre
 		t.Fatalf("ativos: %+v", l)
 	}
 	if l := active(); l[0].Text != "[demo] Perigo: 1200 CPM (a partir de 1000)" {
@@ -381,11 +381,11 @@ func TestAwayPeriods(t *testing.T) {
 		t.Fatalf("salvar: %+v %v", p, err)
 	}
 	// com 25% fora a 80 CPM, a mediana já era 20; o teste forte é o dia e o mapa
-	days, _ := a.GetDaily(1)
+	days, _ := a.GetDaily(2) // 2 dias: perto da meia-noite as 4 h pegam ontem
 	if len(days) == 0 || days[len(days)-1].CPM > 20.0001 && days[0].CPM > 20.0001 {
 		t.Fatalf("fundo diário não tirou o fora de casa: %+v", days)
 	}
-	h, _ := a.GetHeatmap(1)
+	h, _ := a.GetHeatmap(2)
 	awayMin := 0
 	for _, row := range h.AwayCounts {
 		for _, n := range row {
