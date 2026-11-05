@@ -42,6 +42,7 @@ const state = {
   doseZoom: null,
   doseZoomStack: [],
   chartUnit: localGet("chartUnit", "cpm"),
+  mMode: localGet("mMode", "nova"),
   heatDays: parseInt(localGet("heatDays", "14"), 10) || 14,
   heatMonthMode: localGet("heatMode", "dias") === "mes",
   heatMonth: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() + 1 }; })(),
@@ -853,7 +854,7 @@ async function showView(v, skipRender) {
   if (v === "fora") { renderPeriods(); editPeriod(null); }
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
-  if (v === "medir") { renderMeasure(await api.GetMeasure()); renderMeasureHistory(); }
+  if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
 }
 
 document.addEventListener("click", (e) => {
@@ -1748,7 +1749,7 @@ const mlog = { start: 0, live: [], ph: [], demo: false };
 function measureLogStep(st) {
   const active = st.phase === "fundo" || st.phase === "objeto";
   if (!st.phase) { mlog.start = 0; mlog.live = []; mlog.ph = []; return; }
-  if (st.phase === "fundo" && st.elapsed <= 1) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.demo = !!st.demo; state.mSel = null; }
+  if (st.phase === "fundo" && st.elapsed <= 1) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
   if (!mlog.start) mlog.start = Date.now();
   if (active && st.elapsed > 0) {
     const m = st.elapsed / 60;
@@ -1789,9 +1790,8 @@ function savedMeasureSrc(m) {
 function drawMeasureChart() {
   const sel = state.mSel ? (state.measurements || []).find((m) => m.id === state.mSel) : null;
   if (state.mSel && !sel) state.mSel = null;
-  $("btnMLiveBack").hidden = !sel;
-  $("mLiveTitle").textContent = sel ? `${sel.name} · ${whenLabel(sel.time)}` : "Durante a medição";
-  document.querySelectorAll("#mHistList .mh").forEach((li) => li.classList.toggle("sel", +li.dataset.id === state.mSel));
+  $("btnMLiveBack").hidden = true;
+  $("mLiveTitle").textContent = sel ? "Segundo a segundo" : "Durante a medição";
   if (sel && !(sel.samples && sel.samples.length)) {
     state.mSrc = null;
     $("mChart").innerHTML = "";
@@ -1877,7 +1877,7 @@ function setupMeasureHover() {
     tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("mCursor").hidden = true; $("mTip").hidden = true; });
-  $("btnMLiveBack").addEventListener("click", () => { state.mSel = null; drawMeasureChart(); });
+  $("btnMLiveBack").addEventListener("click", () => setMeasureMode("nova"));
 }
 
 // tabela com as contas da medição: contagens, tempo, taxa média e a
@@ -1949,6 +1949,7 @@ function renderMeasure(st) {
   const r = st.result;
   $("mResult").hidden = !r;
   $("mSaved").hidden = !st.savedId;
+  if (st.savedId) state.mLastSaved = st.savedId;
   const rp = $("mReport");
   rp.hidden = !st.savedId;
   if (st.savedId) {
@@ -2016,81 +2017,115 @@ function measureBands(t0, t1, xt) {
 
 const verdictWord = { sim: "radioativo", talvez: "talvez", nada: "sem diferença" };
 
+// ---------- medições salvas: lista à esquerda, detalhes à direita ----------
+
+function setMeasureMode(mode) {
+  state.mMode = mode === "salvas" ? "salvas" : "nova";
+  localSet("mMode", state.mMode);
+  const saved = state.mMode === "salvas";
+  document.querySelectorAll("#mModeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mmode === state.mMode)));
+  $("mNewPane").hidden = saved;
+  $("mSavedPane").hidden = !saved;
+  $(saved ? "mLiveSlotSaved" : "mLiveSlotNew").appendChild($("mLive"));
+  if (saved) {
+    const list = state.measurements || [];
+    if (!list.some((m) => m.id === state.mSel)) state.mSel = list.length ? list[list.length - 1].id : null;
+  } else {
+    state.mSel = null;
+  }
+  renderMeasureHistory();
+  drawMeasureChart();
+}
+
 function renderMeasureHistory() {
   const ul = $("mHistList");
-  const list = [...(state.measurements || [])].reverse();
-  $("mHistCount").textContent = list.length ? `(${list.length})` : "";
+  const all = [...(state.measurements || [])].reverse();
+  $("mHistCount").textContent = all.length ? `(${all.length})` : "";
+  const q = ($("mSearch").value || "").trim().toLowerCase();
+  const list = q ? all.filter((m) => (m.name + " " + (m.note || "")).toLowerCase().includes(q)) : all;
   ul.textContent = "";
-  if (!list.length) { ul.innerHTML = '<li class="muted small">Nenhuma medição salva ainda.</li>'; return; }
+  if (!all.length) ul.innerHTML = '<li class="muted small">Nenhuma medição salva ainda.</li>';
+  else if (!list.length) ul.innerHTML = '<li class="muted small">Nenhuma medição com esse nome.</li>';
   for (const m of list) {
     const li = document.createElement("li");
-    li.className = "mh" + (state.mSel === m.id ? " sel" : "");
-    li.dataset.id = m.id;
-    const info = document.createElement("span");
-    const head = document.createElement("span");
-    head.className = "mh-head";
-    const dot = document.createElement("span");
-    dot.className = "mh-dot " + m.result.level;
-    const nm = document.createElement("strong");
-    nm.textContent = m.name;
-    const when = document.createElement("span");
-    when.className = "mono small muted";
-    when.textContent = whenLabel(m.time);
-    head.append(dot, nm, when);
-    const nums = document.createElement("span");
-    nums.className = "mono small";
-    nums.textContent = `${verdictWord[m.result.level] || ""} · ${m.result.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(m.result.netCPM), 1)} ± ${fmt(m.result.netErr, 1)} CPM · ${fmtDur(m.obj.end - m.obj.start)} cada`;
-    info.append(head, nums);
-    info.className = "mh-info";
-    info.title = "Ver o gráfico dessa medição";
-    info.tabIndex = 0;
-    info.setAttribute("role", "button");
-    const pick = () => { state.mSel = state.mSel === m.id ? null : m.id; drawMeasureChart(); };
-    info.addEventListener("click", pick);
-    info.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
-    if (m.note) { const n = document.createElement("span"); n.className = "small muted"; n.textContent = m.note; info.appendChild(n); }
-    const see = document.createElement("button");
-    see.type = "button"; see.className = "btn small"; see.textContent = "Ver no gráfico";
-    see.addEventListener("click", () => showRange(m.bg.start - 120e3, m.obj.end + 120e3));
-    const ed = document.createElement("button");
-    ed.type = "button"; ed.className = "btn small"; ed.textContent = "Editar";
-    const del = document.createElement("button");
-    del.type = "button"; del.className = "btn small danger-btn"; del.textContent = "Apagar";
-    del.addEventListener("click", async () => {
-      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
-      await call(api.DeleteMeasurement, m.id);
-    });
-    const form = document.createElement("div");
-    form.className = "nr-form";
-    form.hidden = true;
-    const iName = document.createElement("input");
-    iName.type = "text"; iName.value = m.name; iName.setAttribute("aria-label", "Nome");
-    const iNote = document.createElement("input");
-    iNote.type = "text"; iNote.value = m.note || ""; iNote.placeholder = "anotação: distância, lado encostado, embalagem…"; iNote.setAttribute("aria-label", "Anotação");
-    const ok = document.createElement("button");
-    ok.type = "button"; ok.className = "btn small accent"; ok.textContent = "Salvar";
-    ok.addEventListener("click", () => call(api.UpdateMeasurement, m.id, iName.value, iNote.value));
-    form.append(iName, iNote, ok);
-    ed.addEventListener("click", () => { form.hidden = !form.hidden; if (!form.hidden) iName.focus(); });
-    const det = document.createElement("button");
-    det.type = "button"; det.className = "btn small"; det.textContent = "Detalhes";
-    const stats = measureStats(m);
-    stats.classList.add("mh-stats");
-    stats.hidden = !state.mDet?.has(m.id);
-    det.setAttribute("aria-expanded", String(!stats.hidden));
-    det.addEventListener("click", () => {
-      state.mDet = state.mDet || new Set();
-      stats.hidden = !stats.hidden;
-      if (stats.hidden) state.mDet.delete(m.id); else state.mDet.add(m.id);
-      det.setAttribute("aria-expanded", String(!stats.hidden));
-    });
-    const pdfBtn = document.createElement("button");
-    pdfBtn.type = "button"; pdfBtn.className = "btn small"; pdfBtn.textContent = "Relatório (PDF)";
-    pdfBtn.title = "Relatório detalhado dessa medição";
-    pdfBtn.addEventListener("click", () => exportMeasureReport(m.id));
-    li.append(info, see, pdfBtn, det, ed, del, form, stats);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "m-item" + (state.mSel === m.id ? " sel" : "");
+    b.dataset.id = m.id;
+    b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
+    b.querySelector(".mh-dot").classList.add(m.result.level);
+    b.querySelector("strong").textContent = m.name;
+    b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}`;
+    const net = b.querySelector(".m-item-net");
+    net.textContent = `${m.result.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(m.result.netCPM), 1)}`;
+    net.title = "CPM acima do fundo";
+    b.addEventListener("click", () => { state.mSel = m.id; renderMeasureHistory(); drawMeasureChart(); });
+    li.appendChild(b);
     ul.appendChild(li);
   }
+  renderMeasureDetail();
+}
+
+// limite de detecção (Currie) e tempo para uma precisão, como no PDF
+const mDetLimit = (bg) => (bg.seconds > 0 ? (2.71 + 4.65 * Math.sqrt(bg.counts)) / (bg.seconds / 60) : 0);
+const mSecsFor = (bg, obj, rel) => {
+  const rb = bg.cpm / 60, ro = obj.cpm / 60, net = ro - rb;
+  return net > 0 ? (rb + ro) / (rel * rel * net * net) : Infinity;
+};
+const mDurTxt = (s) => (!isFinite(s) || s > 30 * 864e2 ? "—" : s < 90 ? `${Math.ceil(s)} s` : s < 5400 ? `${Math.ceil(s / 60)} min` : `${fmt(s / 3600, 1)} h`);
+
+function renderMeasureDetail() {
+  const m = (state.measurements || []).find((x) => x.id === state.mSel);
+  $("mDetailEmpty").hidden = !!m;
+  $("mDetailBody").hidden = !m;
+  if (!m) return;
+  const r = m.result;
+  $("mdName").textContent = m.name;
+  $("mdWhen").textContent = `${whenLabel(m.time)} · fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`;
+  const v = $("mdVerdict");
+  v.className = "m-verdict " + r.level;
+  v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
+  v.querySelector("span").textContent = `${fmt(r.sigma, 1)}σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.`;
+  const t = $("mdTiles");
+  t.textContent = "";
+  sumTile(t, "Fundo (objeto longe)", `${fmt(m.bg.cpm, 1)} CPM`, `± ${fmt(m.bg.errCPM, 1)} · ${m.bg.counts} contagens`);
+  sumTile(t, "Com o objeto", `${fmt(m.obj.cpm, 1)} CPM`, `± ${fmt(m.obj.errCPM, 1)} · ${m.obj.counts} contagens`);
+  sumTile(t, "Líquido", `${r.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(r.netCPM), 1)} CPM`, `± ${fmt(r.netErr, 1)} · ≈ ${fmt(r.netUSv, usvDigits(Math.abs(r.netUSv)))} µSv/h no tubo`, r.level === "sim" ? "warn" : "");
+  sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
+  $("mdStats").replaceChildren(measureStats(m));
+  $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar a distância, o lado encostado no tubo e a embalagem.";
+  $("mdNote").classList.toggle("muted", !m.note);
+  let lim = `Limite de detecção: ${fmt(mDetLimit(m.bg), 1)} CPM acima do fundo com ${m.bg.seconds} s.`;
+  if (r.netCPM > 0) lim += ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
+  $("mdLimits").textContent = lim;
+  $("mdEditName").value = m.name;
+  $("mdEditNote").value = m.note || "";
+  const del = $("btnMdDel");
+  del.dataset.sure = "";
+  del.textContent = "Apagar";
+}
+
+function wireMeasureSaved() {
+  document.querySelectorAll("#mModeSeg button").forEach((b) => b.addEventListener("click", () => setMeasureMode(b.dataset.mmode)));
+  $("mSearch").addEventListener("input", renderMeasureHistory);
+  const cur = () => (state.measurements || []).find((x) => x.id === state.mSel);
+  $("btnMOpenSaved").addEventListener("click", () => { const id = state.mLastSaved; setMeasureMode("salvas"); if (id) { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); } });
+  $("btnMdReport").addEventListener("click", () => { const m = cur(); if (m) exportMeasureReport(m.id); });
+  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange(m.bg.start - 120e3, m.obj.end + 120e3); });
+  $("btnMdEdit").addEventListener("click", () => { const f = $("mdEditForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdEditName").focus(); });
+  $("btnMdSave").addEventListener("click", async () => {
+    const m = cur();
+    if (!m) return;
+    await call(api.UpdateMeasurement, m.id, $("mdEditName").value, $("mdEditNote").value);
+    $("mdEditForm").hidden = true;
+  });
+  $("btnMdDel").addEventListener("click", async () => {
+    const m = cur(), del = $("btnMdDel");
+    if (!m) return;
+    if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
+    state.mSel = null;
+    await call(api.DeleteMeasurement, m.id);
+  });
 }
 
 async function refreshMeasurements() {
@@ -3252,6 +3287,7 @@ function wire() {
   wireAlarm();
   wireHeat();
   wireUpdate();
+  wireMeasureSaved();
   wireRain();
   wireMeasure();
   setupMeasureHover();

@@ -1,5 +1,19 @@
 # Versões
 
+## 1.20.0
+- **Medir objeto em duas partes**: "Nova medição" e "Medições salvas".
+- **Medições salvas** com a lista à esquerda (nome, data, duração e o líquido
+  em CPM, com busca pelo nome ou pela anotação) e a medição escolhida à
+  direita:
+  - conclusão em destaque;
+  - fundo, com o objeto, líquido e objeto ÷ fundo;
+  - o gráfico segundo a segundo;
+  - a tabela das duas fases;
+  - a geometria/anotação;
+  - o limite de detecção e o tempo para ±10% e ±5%;
+  - os botões Relatório (PDF), Ver no gráfico, Editar e Apagar.
+- No fim de uma medição, "Ver em Medições salvas" abre ela direto.
+
 ## 1.19.1
 - **Nome comprido não é mais cortado no relatório**: o título da medição
   diminui um pouco e, se ainda não couber, quebra em até 3 linhas. O mesmo

@@ -445,6 +445,12 @@
       <h2 id="measureTitle">Medir um objeto</h2>
       <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
     </div>
+    <div class="seg m-mode" role="group" aria-label="Nova medição ou medições salvas" id="mModeSeg">
+      <button type="button" data-mmode="nova" aria-pressed="true">Nova medição</button>
+      <button type="button" data-mmode="salvas" aria-pressed="false">Medições salvas <span id="mHistCount"></span></button>
+    </div>
+
+    <div id="mNewPane">
     <p class="small muted">Duas medições do mesmo tempo: primeiro o fundo, com o objeto longe (2 m ou mais); depois com o objeto encostado no contador, do lado do tubo. O app compara as duas e diz se a diferença é real ou só a variação natural da contagem. Quanto mais tempo, mais confiável.</p>
     <div class="m-grid">
       <div class="m-main">
@@ -473,14 +479,14 @@
       <span class="mono" id="mNumbers"></span>
       <div id="mStats"></div>
       <span class="small muted" id="mExplain"></span>
-      <span class="small m-saved" id="mSaved" hidden>Salva em "Medições salvas" e marcada no gráfico de CPM.</span>
+      <span class="small m-saved" id="mSaved" hidden>Salva e marcada no gráfico de CPM. <button type="button" class="link small-link" id="btnMOpenSaved">Ver em Medições salvas</button></span>
       <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span> <button type="button" class="btn small" id="btnMReportOpen" hidden>Abrir relatório</button><button type="button" class="btn small" id="btnMReportMake" hidden>Relatório (PDF)</button></div>
     </div>
     <div class="dlg-foot spread">
       <button type="button" class="btn" id="btnMeasureReset">Recomeçar</button>
     </div>
       </div>
-      <div class="m-side">
+      <div class="m-side" id="mLiveSlotNew">
         <div class="m-live" id="mLive">
           <div class="m-live-head">
             <h3><span id="mLiveTitle">Durante a medição</span> <span class="small muted" id="mLiveSub"></span></h3>
@@ -501,11 +507,44 @@
             <span class="small muted">faixa = margem de erro</span>
           </div>
         </div>
-    <div class="m-history" id="mHistory">
-      <h3>Medições salvas <span class="small muted" id="mHistCount"></span></h3>
-      <ul class="periods" id="mHistList"></ul>
-    </div>
       </div>
+    </div>
+    </div>
+
+    <div class="m-saved-grid" id="mSavedPane" hidden>
+      <aside class="m-history" id="mHistory">
+        <input type="search" id="mSearch" placeholder="Procurar pelo nome ou anotação" aria-label="Procurar medição" autocomplete="off">
+        <ul class="m-list" id="mHistList"></ul>
+      </aside>
+      <section class="m-detail" id="mDetail">
+        <div class="m-detail-empty muted" id="mDetailEmpty">Escolha uma medição na lista.</div>
+        <div id="mDetailBody" hidden>
+          <div class="m-detail-head">
+            <div>
+              <h3 id="mdName"></h3>
+              <span class="mono small muted" id="mdWhen"></span>
+            </div>
+            <div class="m-detail-actions">
+              <button type="button" class="btn small accent" id="btnMdReport">Relatório (PDF)</button>
+              <button type="button" class="btn small" id="btnMdChart">Ver no gráfico</button>
+              <button type="button" class="btn small" id="btnMdEdit">Editar</button>
+              <button type="button" class="btn small danger-btn" id="btnMdDel">Apagar</button>
+            </div>
+          </div>
+          <div class="nr-form m-edit" id="mdEditForm" hidden>
+            <input type="text" id="mdEditName" aria-label="Nome">
+            <input type="text" id="mdEditNote" placeholder="anotação: distância, lado encostado, embalagem…" aria-label="Anotação">
+            <button type="button" class="btn small accent" id="btnMdSave">Salvar</button>
+          </div>
+          <div class="m-verdict" id="mdVerdict"><strong></strong><span class="small"></span></div>
+          <div class="ri-tiles m-tiles" id="mdTiles"></div>
+          <div id="mLiveSlotSaved"></div>
+          <div class="m-detail-cols">
+            <div><h4>As duas fases</h4><div id="mdStats"></div></div>
+            <div><h4>Geometria / anotação</h4><p class="small" id="mdNote"></p><h4>O que esta medição consegue ver</h4><p class="small" id="mdLimits"></p></div>
+          </div>
+        </div>
+      </section>
     </div>
 
       </div>
