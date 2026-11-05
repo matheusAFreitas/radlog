@@ -1,5 +1,12 @@
 # Versões
 
+## 1.18.2
+- **Releases automáticas**: toda versão nova que chega ao GitHub vira release
+  sozinha (com o .exe, o AppImage, o .tar.gz e o SHA256SUMS.txt), e o app
+  avisa da atualização.
+- Em Configurações → Atualizações, quando esta versão é mais nova que a
+  última publicada, o texto diz isso em vez de "você está na versão mais nova".
+
 ## 1.18.1
 - **Conectar vai direto para a Conexão**: o botão "Conectar" da tela inicial
   e o indicador de conexão no topo abrem as Configurações já na seção

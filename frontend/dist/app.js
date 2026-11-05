@@ -3518,6 +3518,13 @@ async function renderSumNotes(from, to) {
 
 // ---------- atualização (GitHub, com clique) ----------
 
+// compara "1.18.2" com "1.18.10": >0 se a for mais nova
+function verCmp(a, b) {
+  const pa = String(a || "").split(".").map(Number), pb = String(b || "").split(".").map(Number);
+  for (let i = 0; i < 3; i++) if ((pa[i] || 0) !== (pb[i] || 0)) return (pa[i] || 0) - (pb[i] || 0);
+  return 0;
+}
+
 function renderUpdate(u) {
   state.update = u = u || state.update || {};
   const show = u.available && !u.skipped;
@@ -3530,7 +3537,9 @@ function renderUpdate(u) {
   const when = u.checkedAt ? ` (olhou às ${hhmm(u.checkedAt)})` : "";
   $("updStatus").textContent = u.state === "procurando" ? "procurando…"
     : u.error && u.state !== "erro" ? u.error
-    : !u.latest ? "" : u.available ? `versão ${u.latest} disponível${u.skipped ? " (pulada)" : ""}${when}` : `você está na versão mais nova (${u.current})${when}`;
+    : !u.latest ? "" : u.available ? `versão ${u.latest} disponível${u.skipped ? " (pulada)" : ""}${when}`
+    : verCmp(u.current, u.latest) > 0 ? `esta versão (${u.current}) é mais nova que a última publicada (${u.latest})${when}`
+    : `você está na versão mais nova (${u.current})${when}`;
   // diálogo
   $("updTitle").textContent = u.latest ? `Versão ${u.latest}` : "Versão nova";
   $("updSub").textContent = `Você está na ${u.current || "?"}.` + (u.canAuto ? "" : u.manual ? ` Atualizar por aqui não dá: ${u.manual}.` : "");
