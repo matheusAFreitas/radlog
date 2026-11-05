@@ -9,8 +9,25 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
 - [ ] Novo nome: a pasta de dados migra sozinha na primeira abertura; a troca
       automática de versão continua funcionando com as versões 1.x abertas;
       o início com o Windows é refeito com o nome novo.
-- [ ] Conexão com o **RadiaCode 102** (USB primeiro, Bluetooth depois), na
-      ordem da aba RadiaCode (hoje com dados simulados):
+- [ ] Papéis: o **GMC-800 é a base da casa** (fica parado, monitora o
+      ambiente) e o **RadiaCode 102 é o dosímetro pessoal** (anda pela casa e
+      fora dela).
+- [ ] Conexão com o RadiaCode por **USB e Bluetooth**. O app do PC tenta
+      conectar sozinho de tempos em tempos: quando o celular solta o aparelho
+      (app oficial fechado ou fora do alcance), o PC assume e baixa o que
+      ficou na memória do RadiaCode.
+- [ ] **Alarmes em dois blocos**: "Base (GMC-800)" continua como hoje;
+      "Dosímetro (RadiaCode)" em µSv/h e dose acumulada, configurando os
+      alarmes do próprio aparelho (na rua quem apita é ele) e registrando os
+      que tocaram. Fundo de referência e saturação por aparelho.
+- [ ] **Minha dose**: dose pessoal do dia, semana, mês e ano, comparada com o
+      esperado só pelo fundo natural e com o limite de 1 mSv/ano acima do
+      natural.
+- [ ] Importar os rastros exportados pelo app oficial do RadiaCode (uso na
+      rua), para a dose pessoal juntar casa e rua.
+- [ ] Confirmação cruzada só quando o RadiaCode estiver na mesa, ao lado do
+      GMC (ex.: no USB): os dois subindo juntos = radiação; só um = suspeito.
+- [ ] Recursos da aba RadiaCode (hoje com dados simulados), nesta ordem:
   1. Espectro
   2. Espectrograma
   3. Dureza do espectro nos gráficos
@@ -21,6 +38,13 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
       dosímetro pessoal (RadiaCode), e a razão entre os dois.
 - [ ] Intercalibração: os dois aparelhos lado a lado por 1–2 dias para achar o
       fator entre eles.
+
+## 3.0 — App Android (depois da 2.0)
+
+- [ ] Dosímetro no celular: conexão Bluetooth com o RadiaCode o dia todo
+      (serviço em primeiro plano, sem otimização de bateria), GPS, alarme e
+      notificação; reaproveita o núcleo em Go (protocolo, estatística, dose).
+- [ ] Sincroniza com o app do PC (mesmo pareamento da comunicação entre PCs).
 
 ## Comunicação entre PCs (1.x)
 
