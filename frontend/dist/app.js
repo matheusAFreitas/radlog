@@ -2844,6 +2844,7 @@ async function openSettings(focusId) {
   $("numAwayAsk").value = s.awayAskMin || 15;
   $("chkTray").checked = s.trayOnClose !== false;
   $("chkAutostart").checked = !!s.startWithWindows;
+  $("chkUpdCheck").checked = !s.noUpdateCheck;
   fillLevels(lv());
   renderAttnLabel();
   buildSetNav();
@@ -3188,6 +3189,7 @@ function wire() {
       attentionEnabled: $("chkAttn").checked,
       trayOnClose: $("chkTray").checked,
       startWithWindows: $("chkAutostart").checked,
+      noUpdateCheck: !$("chkUpdCheck").checked,
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
@@ -3229,6 +3231,7 @@ function wire() {
   wireDemo();
   wireAlarm();
   wireHeat();
+  wireUpdate();
   wireRain();
   wireMeasure();
   setupMeasureHover();
@@ -3513,6 +3516,71 @@ async function renderSumNotes(from, to) {
   }
 }
 
+// ---------- atualização (GitHub, com clique) ----------
+
+function renderUpdate(u) {
+  state.update = u = u || state.update || {};
+  const show = u.available && !u.skipped;
+  const busy = u.state === "baixando" || u.state === "esperando" || u.state === "abrindo";
+  $("updPill").hidden = !(show || busy);
+  $("updPillText").textContent = u.state === "baixando" ? `baixando v${u.latest}… ${fmt((u.progress || 0) * 100, 0)}%`
+    : u.state === "esperando" ? `v${u.latest}: troca quando o CPM normalizar`
+    : `v${u.latest} disponível`;
+  // configurações
+  const when = u.checkedAt ? ` (olhou às ${hhmm(u.checkedAt)})` : "";
+  $("updStatus").textContent = u.state === "procurando" ? "procurando…"
+    : u.error && u.state !== "erro" ? u.error
+    : !u.latest ? "" : u.available ? `versão ${u.latest} disponível${u.skipped ? " (pulada)" : ""}${when}` : `você está na versão mais nova (${u.current})${when}`;
+  // diálogo
+  $("updTitle").textContent = u.latest ? `Versão ${u.latest}` : "Versão nova";
+  $("updSub").textContent = `Você está na ${u.current || "?"}.` + (u.canAuto ? "" : u.manual ? ` Atualizar por aqui não dá: ${u.manual}.` : "");
+  $("updNotes").textContent = (u.notes || "Sem notas.").replace(/\*\*/g, "");
+  const st = $("updState");
+  const msg = {
+    baixando: `Baixando e conferindo… ${fmt((u.progress || 0) * 100, 0)}%`,
+    esperando: `Baixado e conferido. Troca sozinho quando o CPM voltar ao normal (agora: ${u.wait}).`,
+    abrindo: "Abrindo a versão nova…",
+    erro: `Não deu certo: ${u.error}`,
+    cancelado: "Troca cancelada. O arquivo baixado ficou na pasta do app.",
+  }[u.state];
+  st.hidden = !msg;
+  st.textContent = msg || "";
+  st.className = "small" + (u.state === "erro" ? " warn-text" : "");
+  $("updBar").hidden = u.state !== "baixando";
+  $("updBarFill").style.width = `${Math.round((u.progress || 0) * 100)}%`;
+  $("btnUpdGo").hidden = !u.canAuto || busy;
+  $("btnUpdGo").textContent = u.state === "erro" ? "Tentar de novo" : "Atualizar";
+  $("btnUpdCancel").hidden = u.state !== "esperando";
+  $("btnUpdLater").textContent = busy ? "Fechar" : "Agora não";
+  $("btnUpdSkip").hidden = busy || !u.available;
+  $("btnUpdSkip").textContent = u.skipped ? "Voltar a avisar desta versão" : "Pular esta versão";
+}
+
+function wireUpdate() {
+  on("update", renderUpdate);
+  $("updPill").addEventListener("click", () => { renderUpdate(); $("updDlg").showModal(); });
+  $("btnUpdGo").addEventListener("click", () => call(api.StartUpdate));
+  $("btnUpdCancel").addEventListener("click", () => call(api.CancelUpdate));
+  $("btnUpdSkip").addEventListener("click", async () => {
+    const u = state.update || {};
+    await call(api.SkipUpdate, u.skipped ? "" : u.latest);
+    if (!u.skipped) $("updDlg").close();
+  });
+  $("btnUpdPage").addEventListener("click", () => {
+    const u = state.update || {};
+    const url = u.url || "https://github.com/matheusAFreitas/radlog/releases";
+    if (window.runtime && window.runtime.BrowserOpenURL) window.runtime.BrowserOpenURL(url); else window.open(url, "_blank");
+  });
+  $("btnUpdCheck").addEventListener("click", async () => {
+    try {
+      const u = await api.CheckUpdate();
+      renderUpdate(u);
+      if (u.available) $("updDlg").showModal();
+    } catch (e) { renderUpdate(); }
+  });
+  if (api.GetUpdateInfo) api.GetUpdateInfo().then(renderUpdate).catch(() => {});
+}
+
 // ---------- resumo e comparação ----------
 
 state.sum = { mode: "resumo", preset: "hoje", cmp: "hoje-ontem", day: 0, dayA: 0, dayB: 0 };
@@ -3794,6 +3862,8 @@ init();
 
 var demoBus;
 function makeDemoApi() {
+  let demoUpd = { current: "1.17.1", latest: "1.18.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
+    notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
   const now = Date.now();
@@ -3963,6 +4033,19 @@ function makeDemoApi() {
     StartDemo: async (cpm, realistic) => (demoSt = { active: true, cpm, realistic }),
     StopDemo: async () => { demoAlerts = []; demoSt = { active: false, cpm: 20, realistic: false }; emit("event", { kind: "alerta" }); emit("demo", demoSt); return demoSt; },
     GetVersion: async () => "navegador",
+    GetUpdateInfo: async () => demoUpd,
+    CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: "1.18.0", available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
+    SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },
+    CancelUpdate: async () => { demoUpd = { ...demoUpd, state: "cancelado" }; emit("update", demoUpd); },
+    StartUpdate: async () => {
+      let p = 0;
+      const t = setInterval(() => {
+        p += 0.2;
+        demoUpd = { ...demoUpd, state: p < 1 ? "baixando" : "esperando", progress: Math.min(1, p), wait: "atenção ativa" };
+        emit("update", demoUpd);
+        if (p >= 1) clearInterval(t);
+      }, 400);
+    },
     GetMeasure: async () => ({ ...meas }),
     StartMeasurePhase: async (phase, secs, name) => {
       if (phase === "fundo") meas = { phase, seconds: secs || 60, elapsed: 0, counts: 0, name, demo: demoSt.active, bg: null, obj: null, result: null };

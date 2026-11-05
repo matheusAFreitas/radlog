@@ -49,6 +49,10 @@
       <span class="dot" id="statusDot" aria-hidden="true"></span>
       <span id="statusText">desconectado</span>
     </button>
+    <button type="button" class="pill upd-pill" id="updPill" title="Versão nova do app" hidden>
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
+      <span id="updPillText">versão nova</span>
+    </button>
     <button type="button" class="pill clock-chip" id="clockChip" title="Sincronizar o relógio do contador com o do PC" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       <span id="clockText">relógio certo</span>
@@ -906,6 +910,16 @@
     </fieldset>
 
     <fieldset>
+      <legend>Atualizações</legend>
+      <label class="toggle">
+        <span>Procurar versão nova ao abrir e uma vez por dia</span>
+        <input type="checkbox" id="chkUpdCheck">
+      </label>
+      <div class="upd-row"><button type="button" class="btn small" id="btnUpdCheck">Procurar agora</button> <span class="small muted" id="updStatus"></span></div>
+      <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Fora de casa</legend>
       <label for="numAwayAsk">Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)</label>
       <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
@@ -1118,6 +1132,28 @@
 
 
 
+
+<dialog id="updDlg" aria-labelledby="updTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="updTitle">Versão nova</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <p class="small muted" id="updSub"></p>
+    <div class="upd-notes" id="updNotes"></div>
+    <p class="small" id="updState" hidden></p>
+    <div class="upd-bar" id="updBar" hidden><i id="updBarFill"></i></div>
+    <div class="dlg-foot">
+      <button type="button" class="link small-link" id="btnUpdPage">Ver no GitHub</button>
+      <button type="button" class="btn" id="btnUpdSkip">Pular esta versão</button>
+      <button type="button" class="btn" id="btnUpdCancel" hidden>Não trocar agora</button>
+      <button type="submit" class="btn" value="close" id="btnUpdLater">Agora não</button>
+      <button type="button" class="btn accent" id="btnUpdGo">Atualizar</button>
+    </div>
+  </form>
+</dialog>
 
 <div class="heat-tip" id="heatTip" role="tooltip" hidden></div>
 

@@ -55,6 +55,11 @@ jobs:
           mv "$P/GMC-Monitor-v$V-x86_64.AppImage" out/
           rm -rf "$P/GMC-Monitor.AppDir" "$P/appimagetool"
           tar -C out -czf "out/gmc-monitor-v$V-linux-x86_64.tar.gz" "gmc-monitor-v$V-linux-x86_64"
+      - name: SHA-256 dos arquivos (o atualizador do app confere)
+        run: |
+          cd out
+          sha256sum *.exe *.AppImage *.tar.gz > SHA256SUMS.txt
+          cat SHA256SUMS.txt
       - name: Notas da versão (do CHANGELOG)
         run: |
           awk -v v="## ${{ steps.v.outputs.ver }}" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md > notes.md
@@ -71,3 +76,4 @@ jobs:
             out/*.exe
             out/*.AppImage
             out/*.tar.gz
+            out/SHA256SUMS.txt

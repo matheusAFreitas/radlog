@@ -70,6 +70,9 @@ type Settings struct {
 	TrayOnClose bool `json:"trayOnClose"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
+	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
+	NoUpdateCheck bool   `json:"noUpdateCheck"`
+	SkipVersion   string `json:"skipVersion"` // "Pular esta versão"
 	// pasta dos relatórios em PDF; vazio = Documentos/GMC Monitor/Relatórios
 	// (report.go; só muda por ChooseReportDir)
 	ReportDir string `json:"reportDir"`
@@ -329,6 +332,7 @@ type App struct {
 	sat      satState
 	noCount  noCountState
 	interf   interferenceDetector
+	upd      updater
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -388,6 +392,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.store = st
 	go a.scanRetroOnce()
+	go a.updateLoop()
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		go a.autoReconnect(0)
@@ -524,6 +529,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
+	s.SkipVersion = a.settings.SkipVersion // muda só por SkipUpdate
 	old := a.settings
 	autostartChanged := old.StartWithWindows != s.StartWithWindows
 	if old.RainLat != s.RainLat || old.RainLon != s.RainLon || old.RainEnabled != s.RainEnabled {

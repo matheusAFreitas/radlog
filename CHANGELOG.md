@@ -1,5 +1,22 @@
 # Versões
 
+## 1.18.0
+- **Atualização pelo app, com clique**: o app olha as releases do GitHub ao
+  abrir e uma vez por dia. Com versão nova, aparece "vX disponível" no topo;
+  clicando, você vê as notas e escolhe **Atualizar**, **Agora não** ou **Pular
+  esta versão**.
+- Ao atualizar, ele baixa o .exe (ou o AppImage) para a mesma pasta, confere o
+  SHA-256 com o SHA256SUMS.txt da release (arquivo que não confere é apagado e
+  não abre) e abre a versão nova, que assume no lugar desta como quando você
+  abre um .exe novo à mão.
+- **Só troca com o CPM normal**: com alerta ativo, Geiger saturado, medição de
+  objeto ou histórico baixando, ele baixa e espera; troca sozinho quando tudo
+  voltar ao normal. Dá para cancelar a troca.
+- Em Configurações → Atualizações: ligar/desligar a procura e "Procurar agora".
+- No Linux funciona com o AppImage; instalado pelo .tar.gz, ele avisa e manda
+  para a página.
+- As releases passam a trazer o SHA256SUMS.txt.
+
 ## 1.17.1
 - **Alarme e perigo não abrem mais juntos**: quando o CPM pula vários níveis
   no mesmo segundo (ex.: de 20 para 1.000), só o nível mais alto é aberto. Se
