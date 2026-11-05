@@ -1,5 +1,19 @@
 # Versões
 
+## 1.21.0
+- **Interface em inglês**: Configurações → Idioma (Automático, Português ou
+  English). No automático, segue o idioma do sistema. A troca é na hora (a
+  janela recarrega).
+- Traduz a tela inteira, inclusive os textos que vêm do contador e do app
+  (alertas, eventos, conclusões das medições). Os eventos antigos, gravados em
+  português, também aparecem em inglês.
+- Números e datas seguem o idioma (0.27 em inglês, 0,27 em português).
+- Ainda em português nesta versão: relatórios em PDF, menu da bandeja e o
+  texto das linhas do registro técnico.
+- Para quem for traduzir: as frases ficam em i18n/en.tsv;
+  scripts/i18n_extract.py lista os textos do app e scripts/i18n_build.py gera
+  a tradução usada pela tela.
+
 ## 1.20.0
 - **Medir objeto em duas partes**: "Nova medição" e "Medições salvas".
 - **Medições salvas** com a lista à esquerda (nome, data, duração e o líquido

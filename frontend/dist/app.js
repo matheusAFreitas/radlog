@@ -14,7 +14,7 @@ const on = (name, fn) => {
 
 // ---------- formatação ----------
 
-const nf = (d) => new Intl.NumberFormat("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+const nf = (d) => new Intl.NumberFormat(LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
 const fmt = (v, d) => (v == null || !isFinite(v) ? "—" : nf(d).format(v));
 const pad = (n) => String(n).padStart(2, "0");
 const hhmm = (ms) => { const t = new Date(ms); return pad(t.getHours()) + ":" + pad(t.getMinutes()); };
@@ -133,7 +133,7 @@ function openSigmaHelp() {
   const box = $("sigmaBody");
   const rows = [1, 2, 3, 4, 5].map((k) => {
     const thr = Math.ceil(bg + k * sd), p = poissonTail(thr, bg);
-    return `<tr><td>+${k}σ</td><td>${fmt(thr, 0)} CPM ou mais</td><td>${p * 100 >= 0.1 ? fmt(p * 100, 1) : Number((p * 100).toPrecision(2)).toLocaleString("pt-BR", { maximumFractionDigits: 10 })}%</td><td>${everyText(p)}</td></tr>`;
+    return `<tr><td>+${k}σ</td><td>${fmt(thr, 0)} CPM ou mais</td><td>${p * 100 >= 0.1 ? fmt(p * 100, 1) : Number((p * 100).toPrecision(2)).toLocaleString(LOCALE, { maximumFractionDigits: 10 })}%</td><td>${everyText(p)}</td></tr>`;
   }).join("");
   const now = r && r.cpm != null ? `<p>Agora: <b class="mono">${fmt(r.cpm, 0)} CPM</b> → (${fmt(r.cpm, 0)} − ${fmt(bg, 0)}) ÷ ${fmt(sd, 1)} = <b class="mono">${fmtSig(sigmaOf(r.cpm, bg))}</b>.</p>` : "";
   box.innerHTML = `
@@ -498,7 +498,7 @@ function renderAlertHistory(all) {
       day = key;
       const h = document.createElement("h3");
       h.textContent = isToday(e.time) ? "Hoje" : isYesterday(e.time) ? "Ontem" :
-        dt.toLocaleDateString("pt-BR", { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+        dt.toLocaleDateString(LOCALE, { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
       ul = document.createElement("ul");
       ul.className = "events alerts";
       box.append(h, ul);
@@ -1411,7 +1411,7 @@ async function refreshHeat() {
   if (mm) {
     if (api.GetDataStart) state.heatDataStart = (await api.GetDataStart()) || 0;
     const hm = state.heatMonth, now = new Date();
-    const label = new Date(hm.y, hm.m - 1, 1).toLocaleDateString("pt-BR", { month: "long", year: "numeric" });
+    const label = new Date(hm.y, hm.m - 1, 1).toLocaleDateString(LOCALE, { month: "long", year: "numeric" });
     $("heatMonthLabel").textContent = label.charAt(0).toUpperCase() + label.slice(1);
     $("heatPrev").disabled = !!state.heatDataStart && heatMonthStart(hm) <= state.heatDataStart;
     $("heatNext").disabled = hm.y > now.getFullYear() || (hm.y === now.getFullYear() && hm.m >= now.getMonth() + 1);
@@ -1475,7 +1475,7 @@ function showHeatTip(c) {
   const v = h.values[i][hr];
   const day = new Date(h.days[i]);
   const dayTxt = isToday(h.days[i]) ? "hoje" : isYesterday(h.days[i]) ? "ontem" :
-    day.toLocaleDateString("pt-BR", { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+    day.toLocaleDateString(LOCALE, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
   const tip = $("heatTip");
   tip.textContent = "";
   const line = (txt, cls) => { const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = txt; tip.appendChild(d); };
@@ -1897,7 +1897,7 @@ function measureStats(m) {
   const tb = document.createElement("tbody");
   for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
     if (!x) continue;
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : nm, x.counts.toLocaleString("pt-BR"), fmtDur(x.seconds * 1000), fmt(x.cpm, 1), `±${fmt(x.errCPM, 1)}`]));
+    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : nm, x.counts.toLocaleString(LOCALE), fmtDur(x.seconds * 1000), fmt(x.cpm, 1), `±${fmt(x.errCPM, 1)}`]));
   }
   const r = m.result;
   if (r) {
@@ -2898,6 +2898,7 @@ async function openSettings(focusId) {
   $("chkTray").checked = s.trayOnClose !== false;
   $("chkAutostart").checked = !!s.startWithWindows;
   $("chkUpdCheck").checked = !s.noUpdateCheck;
+  $("selLang").value = s.lang || "auto";
   $("chkMeasReport").checked = !s.noMeasureReport;
   fillLevels(lv());
   renderAttnLabel();
@@ -2911,10 +2912,22 @@ async function openSettings(focusId) {
   await fillPorts();
 }
 
+// idioma: o i18n.js lê do localStorage antes de tudo; o Go guarda a escolha
+// (para os relatórios e para valer em outra instalação). Se mudar, recarrega.
+function syncLang(lang) {
+  const want = lang || "auto";
+  if (want === LANG_PREF) return;
+  try {
+    localStorage.setItem("lang", want);
+    if (localStorage.getItem("lang") === want) location.reload();
+  } catch (e) { /* sem localStorage: fica no idioma atual */ }
+}
+
 async function saveSettings(extra) {
   const s = Object.assign({}, state.settings, extra || {});
   const rainWas = state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon;
   state.settings = await call(api.SaveSettings, s);
+  syncLang(state.settings.lang);
   if (rainWas !== state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon) refreshRainImpact(true);
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
@@ -3244,6 +3257,7 @@ function wire() {
       trayOnClose: $("chkTray").checked,
       startWithWindows: $("chkAutostart").checked,
       noUpdateCheck: !$("chkUpdCheck").checked,
+      lang: $("selLang").value,
       noMeasureReport: !$("chkMeasReport").checked,
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
@@ -3906,6 +3920,8 @@ async function init() {
   listen();
   try {
     state.settings = await api.GetSettings();
+    if (hasGo) syncLang(state.settings.lang);
+    else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();
   } catch (e) { /* segue com o padrão */ }

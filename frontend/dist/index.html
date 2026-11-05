@@ -950,6 +950,17 @@
     </fieldset>
 
     <fieldset>
+      <legend>Idioma</legend>
+      <label for="selLang">Idioma do app</label>
+      <select id="selLang" data-no-tr>
+        <option value="auto">Automático (idioma do sistema) · Automatic</option>
+        <option value="pt">Português</option>
+        <option value="en">English</option>
+      </select>
+      <p class="small muted">Muda na hora (a janela recarrega). Os relatórios em PDF e o registro técnico ainda saem em português.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Atualizações</legend>
       <label class="toggle">
         <span>Procurar versão nova ao abrir e uma vez por dia</span>
@@ -1205,6 +1216,8 @@
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
+<script src="i18n-en.js"></script>
+<script src="i18n.js"></script>
 <script src="regua.js"></script>
 <script src="radiacode.js"></script>
 <script src="app.js"></script>

@@ -145,7 +145,7 @@
 
   // ---------- utilidades de tela ----------
   const $ = (id) => document.getElementById(id);
-  const nf = (v, d = 1) => Number(v).toLocaleString("pt-BR", { minimumFractionDigits: d, maximumFractionDigits: d });
+  const nf = (v, d = 1) => Number(v).toLocaleString(LOCALE, { minimumFractionDigits: d, maximumFractionDigits: d });
   const css = (n) => getComputedStyle(document.documentElement).getPropertyValue(n).trim() || "#888";
   function fit(cv, h) {
     const dpr = window.devicePixelRatio || 1, w = cv.clientWidth;
@@ -219,7 +219,7 @@
     if (sp.hover != null) {
       const x = xOf(sp.hover); g.strokeStyle = "#B79CFF"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke();
     }
-    g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText("energia (keV)", L + pw, T + 12);
+    g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText(LANG === "en" ? "energy (keV)" : "energia (keV)", L + pw, T + 12);
     // números
     const tot = sp.counts.reduce((a, b) => a + b, 0), cps = sp.t ? tot / sp.t : 0, err = tot ? 100 / Math.sqrt(tot) : 0;
     let net = "";
@@ -228,7 +228,7 @@
       const nt = n.reduce((a, b) => a + b, 0), nerr = Math.sqrt(tot + SHAPE.fundo.reduce((a, b) => a + b, 0) * sp.t);
       net = ` · dureza ${nf(hardRel(sp.counts), 2)}` + (nt > 3 * nerr ? ` · parece: <b>${guessFrom(n)}</b>` : " · ainda não dá para separar do fundo");
     } else if (sp.t > 0) net = ` · dureza ${nf(hardRel(sp.counts), 2)} (1,00 = fundo)`;
-    $("rcSpecInfo").innerHTML = `${fmtT(sp.t)} acumulados · ${Math.round(tot).toLocaleString("pt-BR")} contagens · ${nf(cps, 2)} cps ±${nf(err, 1)}% · ≈ ${nf(cps / CPS_PER_USV, 3)} µSv/h${net}`;
+    $("rcSpecInfo").innerHTML = `${fmtT(sp.t)} acumulados · ${Math.round(tot).toLocaleString(LOCALE)} contagens · ${nf(cps, 2)} cps ±${nf(err, 1)}% · ≈ ${nf(cps / CPS_PER_USV, 3)} µSv/h${net}`;
   }
   function spHover(ev) {
     const cv = $("rcSpec"), r = cv.getBoundingClientRect(), L = 44, R = 10, pw = r.width - L - R;
@@ -389,7 +389,7 @@
     }
     for (const [ts, cps, e] of rows.reverse()) {
       const tr = document.createElement("tr"), d = new Date(ts);
-      const cells = [d.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString("pt-BR"),
+      const cells = [d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString(LOCALE),
         `${nf(cps / CPS_PER_USV, 2)} µSv/h ±${nf(e, 1)}%`, `${nf(cps, 1)} cps ±${nf(e, 1)}%`];
       for (const c of cells) { const td = document.createElement("td"); td.textContent = c; tr.appendChild(td); }
       tb.appendChild(tr);
