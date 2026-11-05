@@ -36,8 +36,22 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
   6. Atividade com KCl
 - [ ] **Casa × pessoal** no Resumo: dose do monitor de área (GMC) e do
       dosímetro pessoal (RadiaCode), e a razão entre os dois.
-- [ ] Intercalibração: os dois aparelhos lado a lado por 1–2 dias para achar o
-      fator entre eles.
+- [ ] **Intercalibração** (primeiro teste com o RadiaCode): os dois lado a
+      lado por pelo menos 24 h, na mesma altura, sem um blindar o outro. Os
+      dois em µSv/h no mesmo gráfico, razão e correlação minuto a minuto, e o
+      fator entre eles. O fator vale para o fundo natural; com fontes de outra
+      energia ele muda (o tubo Geiger exagera em energias baixas). Serve
+      também para testar a confirmação cruzada.
+- [ ] **ALARA** (segundo teste, com o RadiaCode no bolso): tempo, distância e
+      blindagem medidos.
+  - De onde vem a dose: marcar trechos com lugar ou atividade (quarto,
+    trabalho, metrô, rua) e ver quanto da dose do dia veio de cada um.
+  - Teste de distância guiado: o mesmo objeto a 5, 10, 20 e 40 cm; o app
+    mostra se segue o inverso do quadrado e a partir de onde vira fundo.
+  - Teste de blindagem: medição de objeto com a etapa a mais "com o material
+    na frente", dando quanto o material cortou.
+  - Antes e depois: quanto de dose por mês uma mudança economizou (ex.: a
+    caixa do eletrodo longe da mesa).
 
 ## 3.0 — App Android (depois da 2.0)
 
