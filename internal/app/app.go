@@ -328,6 +328,7 @@ type App struct {
 	dangerOn bool
 	sat      satState
 	noCount  noCountState
+	interf   interferenceDetector
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -949,6 +950,9 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		a.mu.Unlock()
 		if satStarted {
 			a.logEvent(satText(satReason, lv))
+		}
+		if !satOn {
+			a.checkInterference(now, float64(rawCPS))
 		}
 		if zeroStarted {
 			a.logEvent("Sem contagens: 0 CPM há 2 min. O tubo pode estar com defeito; confira o contador")

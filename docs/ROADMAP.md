@@ -30,8 +30,8 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
 
 ## Ideias em aberto
 
-- [ ] Aviso de "pico suspeito de interferência" quando um segundo vier muito
-      fora do padrão de Poisson (ruído elétrico, celular encostado).
+- [ ] Tendência do fundo: média móvel de 24 h no gráfico, para ver o fundo
+      subir ou descer devagar ao longo das semanas.
 - [ ] Tempo morto: medir o τ real do tubo (precisa do tempo de cada pulso).
       Hoje usa 200 µs, típico do M4011.
 - [ ] Rad Pro no GMC-800: se um dia, o app aprende o protocolo do Rad Pro.

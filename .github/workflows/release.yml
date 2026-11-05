@@ -50,6 +50,8 @@ jobs:
       - name: Notas da versão (do CHANGELOG)
         run: |
           awk -v v="## ${{ steps.v.outputs.ver }}" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md > notes.md
+          printf '\n---\n**Downloads:** Windows: `GMC-Monitor-v%s.exe` · Linux: `GMC-Monitor-v%s-x86_64.AppImage` (precisa da WebKitGTK 4.1) ou `gmc-monitor-v%s-linux-x86_64.tar.gz` (com `install.sh`).\n' \
+            "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" >> notes.md
           cat notes.md
       - uses: softprops/action-gh-release@v2
         with:

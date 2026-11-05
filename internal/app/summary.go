@@ -2,7 +2,10 @@ package app
 
 import (
 	"math"
+	"strings"
 	"time"
+
+	"radlog/internal/store"
 )
 
 // ---------- resumo de um período (aba Resumo e dados novos) ----------
@@ -40,6 +43,52 @@ type Summary struct {
 	Measurements int      `json:"measurements"`
 	StepMs       int64    `json:"stepMs"`
 	Curve        []SumPt  `json:"curve"`
+	// cobertura e lacunas
+	SpanMinutes int      `json:"spanMinutes"` // minutos do período até agora
+	DaysData    int      `json:"daysData"`    // dias com pelo menos uma leitura
+	Gaps        []SumGap `json:"gaps"`        // lacunas de 10 min ou mais (as mais recentes primeiro, até 30)
+	GapCount    int      `json:"gapCount"`    // quantas lacunas de 10 min ou mais
+	GapMinutes  int      `json:"gapMinutes"`  // minutos sem leitura no período (todas)
+	// estatística do fundo (em casa, sem medição de objeto)
+	SD         *float64 `json:"sd"`         // desvio-padrão real dos minutos
+	Dispersion *float64 `json:"dispersion"` // SD ÷ √média (1 = só acaso)
+}
+
+// SumGap é um trecho sem leitura, com a causa provável.
+type SumGap struct {
+	From    int64  `json:"from"`
+	To      int64  `json:"to"`
+	Minutes int    `json:"minutes"`
+	Cause   string `json:"cause"`
+	Open    bool   `json:"open"` // ainda sem leitura até agora
+}
+
+const (
+	sumGapMin  = 10 * time.Minute
+	sumGapList = 30
+)
+
+// gapCause diz a causa provável de uma lacuna olhando os eventos perto do
+// começo dela. Fora de casa e app fechado com o contador sem histórico desse
+// trecho (desligado, memória apagada) ficam como "sem leitura".
+func gapCause(g gap, evs []Event, now time.Time) (string, bool) {
+	if now.Sub(g.To) < 2*time.Minute {
+		return "sem leitura até agora", true
+	}
+	for _, e := range evs {
+		t := time.UnixMilli(e.Time)
+		if t.Before(g.From.Add(-3*time.Minute)) || t.After(g.From.Add(3*time.Minute)) {
+			continue
+		}
+		low := strings.ToLower(e.Text)
+		switch {
+		case strings.Contains(low, "parou de responder"):
+			return "porta travou", false
+		case strings.Contains(low, "desconectado"), strings.Contains(low, "conexão com o contador perdida"):
+			return "contador desconectado", false
+		}
+	}
+	return "app fechado e sem histórico do contador", false
 }
 
 func summaryStep(span time.Duration) time.Duration {
@@ -117,6 +166,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	if span := to.Sub(from).Minutes(); span > 0 {
 		s.Coverage = math.Min(1, float64(s.Minutes)/span)
 	}
+	a.fillCoverage(&s, pts, from, to)
 	for i := 0; i < n; i++ {
 		pt := SumPt{T: from.Add(time.Duration(i) * step).UnixMilli()}
 		if cnt[i] > 0 {
@@ -184,4 +234,45 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		s.RainHours = len(wetHours)
 	}
 	return s, nil
+}
+
+// fillCoverage completa o resumo com dias com dado, lacunas e a dispersão.
+func (a *App) fillCoverage(s *Summary, pts []store.Point, from, to time.Time) {
+	now := time.Now()
+	effTo := to
+	if effTo.After(now) {
+		effTo = now
+	}
+	in := pointsIn(pts, from, effTo)
+	s.SpanMinutes = int(math.Round(effTo.Sub(from).Minutes()))
+	s.DaysData = daysWithData(in)
+	s.GapMinutes = max(0, s.SpanMinutes-len(in))
+	s.Gaps = []SumGap{}
+
+	a.mu.Lock()
+	var evs []Event
+	for _, e := range a.events {
+		if e.Kind == kindEvent && e.Time >= from.Add(-5*time.Minute).UnixMilli() && e.Time < effTo.UnixMilli() {
+			evs = append(evs, e)
+		}
+	}
+	a.mu.Unlock()
+	gs := findGaps(in, from, effTo)
+	for i := len(gs) - 1; i >= 0; i-- {
+		g := gs[i]
+		if g.To.Sub(g.From) < sumGapMin {
+			continue
+		}
+		s.GapCount++
+		if len(s.Gaps) < sumGapList {
+			cause, open := gapCause(g, evs, now)
+			s.Gaps = append(s.Gaps, SumGap{From: g.From.UnixMilli(), To: g.To.UnixMilli(), Minutes: g.Minutes(), Cause: cause, Open: open})
+		}
+	}
+
+	// dispersão: só o fundo da casa (sem fora de casa nem objeto encostado)
+	if st := calcMinuteStats(a.homeOnly(in)); st.N >= 30 && st.Mean > 0 {
+		sd, disp := st.SD, st.Dispersion
+		s.SD, s.Dispersion = &sd, &disp
+	}
 }

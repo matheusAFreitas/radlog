@@ -3443,6 +3443,50 @@ function wireNotes() {
   });
 }
 
+// lacunas do período no Resumo (clique abre o trecho no gráfico)
+function renderSumGaps(r) {
+  const box = $("sumGaps");
+  const list = (r && r.gaps) || [];
+  box.hidden = !list.length;
+  box.textContent = "";
+  if (!list.length) return;
+  const h = document.createElement("h3");
+  h.textContent = `Lacunas de 10 min ou mais (${r.gapCount}` + (r.gapMinutes ? ` · ${hm(r.gapMinutes)} sem leitura no período` : "") + ")";
+  box.appendChild(h);
+  const long = r.to - r.from > DAY_MS * 1.1;
+  const at = (t) => (long ? `${dayLabel(t)} ${hhmm(t)}` : hhmm(t));
+  for (const g of list) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "sum-note";
+    b.innerHTML = '<span class="mono muted"></span><span></span>';
+    b.children[0].textContent = `${at(g.from)} → ${g.open ? "agora" : long && dayLabel(g.to) !== dayLabel(g.from) ? at(g.to) : hhmm(g.to)}`;
+    b.children[1].textContent = `${hm(g.minutes)} · ${g.cause}`;
+    b.title = "Ver o trecho no gráfico";
+    b.addEventListener("click", () => openGapOnChart(g));
+    box.appendChild(b);
+  }
+  if (r.gapCount > list.length) {
+    const more = document.createElement("p");
+    more.className = "small muted";
+    more.textContent = `Mostrando as ${list.length} mais recentes.`;
+    box.appendChild(more);
+  }
+}
+
+async function openGapOnChart(g) {
+  const pad = Math.max(10 * 6e4, (g.to - g.from) * 0.3);
+  const from = g.from - pad, to = Math.min(Date.now(), g.to + pad);
+  await showView("graficos");
+  state.zoom = { from, to };
+  state.zoomStack = [];
+  state.doseZoom = { from, to };
+  state.doseZoomStack = [];
+  state.zoomLinked = true;
+  refreshChart();
+  refreshDose();
+}
+
 async function renderSumNotes(from, to) {
   const box = $("sumNotes");
   let list = [];
@@ -3528,6 +3572,7 @@ async function refreshSummary() {
   state.sumRes = { periods, res };
   if (s.mode === "resumo") renderSummary(res[0], periods[0]);
   else renderCompare(res, periods);
+  renderSumGaps(s.mode === "resumo" ? res[0] : null);
   renderSumNotes(periods[0][0], periods[0][1]);
 }
 
@@ -3569,8 +3614,11 @@ function renderSummary(r, per) {
   sumTile(t, "Máximo", `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
   sumTile(t, "Mínimo", `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
   sumTile(t, "Dose", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média`);
-  sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, `${hm(r.minutes)} com leitura` + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
-  sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `maior pico ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
+  const cov = r.spanMinutes ? `${fmt(r.minutes, 0)} de ${fmt(r.spanMinutes, 0)} min` : `${hm(r.minutes)} com leitura`;
+  const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
+  sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, cov + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
+  if (r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
+  sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   if (r.measurements) sumTile(t, "Medições", String(r.measurements), "de objetos");
   drawSumChart([{ r, color: "#6EE7A0", label: per[2] }]);
@@ -3949,6 +3997,14 @@ function makeDemoApi() {
       for (let t = from; t < to; t += step) { const q = range(t, t + step); r.curve.push({ t, cpm: q.length ? q.reduce((a, b) => a + b.cpm, 0) / q.length : null }); }
       for (const e of events.concat(demoAlerts)) if (e.kind === "alerta" && e.time >= from && e.time < to) { r[e.level === "perigo" ? "danger" : e.level === "alarme" ? "alarm" : "attention"]++; r.peakAlert = Math.max(r.peakAlert, e.peak || 0); }
       if (settings.rainEnabled && span > 20 * 36e5) { r.rainMM = 3.4; r.rainHours = 2; }
+      const effTo = Math.min(to, Date.now());
+      r.spanMinutes = Math.round((effTo - from) / 6e4);
+      r.daysData = new Set(p.map((q) => new Date(q.t).toDateString())).size;
+      r.gapMinutes = Math.max(0, r.spanMinutes - p.length);
+      r.gaps = []; r.gapCount = 0;
+      for (let i = 1; i < p.length; i++) if (p[i].t - p[i - 1].t >= 10 * 6e4) { r.gapCount++; r.gaps.unshift({ from: p[i - 1].t + 6e4, to: p[i].t, minutes: Math.round((p[i].t - p[i - 1].t - 6e4) / 6e4), cause: "contador desconectado", open: false }); }
+      if (span >= 6 * 36e5) { r.gapCount++; r.gaps.unshift({ from: from + 3 * 36e5, to: from + 3 * 36e5 + 42 * 6e4, minutes: 42, cause: "app fechado e sem histórico do contador", open: false }); }
+      if (p.length > 30) { const m = r.avg; r.sd = Math.sqrt(m) * 1.04; r.dispersion = 1.04; }
       return r;
     },
     GetRainImpact: async () => {

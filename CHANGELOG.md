@@ -1,5 +1,23 @@
 # Versões
 
+## 1.17.0
+- **Lacunas no Resumo**: lista dos trechos de 10 min ou mais sem leitura no
+  período, com a duração e a causa provável (contador desconectado, porta
+  travou, app fechado e sem histórico do contador, ou sem leitura até agora).
+  Clicar abre o trecho no gráfico.
+- **Cobertura**: o quadro "Medido" mostra "X de Y min" e, em períodos de mais
+  de um dia, quantos dias tiveram dado.
+- **Dispersão no Resumo**: desvio-padrão real dos minutos ÷ o que o acaso
+  explica (√média), só com o fundo da casa (sem fora de casa nem medição de
+  objeto). Perto de 1 é normal; de ~1,2 para cima, algo variou além do acaso.
+- **Pico suspeito de interferência**: um segundo com contagens quase
+  impossíveis pelo acaso enquanto os 20 s em volta estão normais vira um aviso
+  no registro (nível WARN). Radiação de verdade sobe vários segundos seguidos;
+  ruído elétrico (celular encostado, fonte, motor) costuma ser um segundo
+  isolado. Se um alerta começou por causa desse pico, ele ganha a anotação
+  "possível interferência". No máximo um aviso a cada 5 min (os outros somam).
+- O quadro Alertas do Resumo chama o pico de "pico ao vivo", como o relatório.
+
 ## 1.16.0
 Relatório em PDF, a partir da revisão de um relatório antigo:
 - **Máximo com uma definição só**: no resumo e na tabela por dia é o maior

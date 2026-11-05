@@ -59,7 +59,8 @@ func classifyLog(msg string) string {
 		strings.Contains(m, "conexão perdida"), strings.Contains(m, "conexão com o contador perdida"),
 		strings.HasPrefix(m, "portas ("), strings.Contains(m, "lenta"), strings.Contains(m, "em uso"),
 		strings.Contains(m, "invalid"), strings.Contains(m, "falhou"), strings.Contains(m, "não consegui"),
-		strings.Contains(m, "access is denied"), strings.Contains(m, "erro"), strings.Contains(m, "sumiu da lista"):
+		strings.Contains(m, "access is denied"), strings.Contains(m, "erro"), strings.Contains(m, "sumiu da lista"),
+		strings.Contains(m, "interferência"):
 		return lvWarn
 	}
 	return lvInfo
