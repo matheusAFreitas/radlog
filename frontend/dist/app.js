@@ -3147,9 +3147,9 @@ function wire() {
     state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart(); markHeatPick();
   }));
 
-  $("statusPill").addEventListener("click", openSettings);
+  $("statusPill").addEventListener("click", () => openSettings("selPort"));
   $("btnSettings").addEventListener("click", openSettings);
-  $("btnConnectHint").addEventListener("click", openSettings);
+  $("btnConnectHint").addEventListener("click", () => openSettings("selPort")); // direto na seção Conexão
 
   $("btnRefresh").addEventListener("click", () => fillPorts($("selPort").value));
   $("btnDetect").addEventListener("click", async () => {

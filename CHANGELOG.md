@@ -1,5 +1,10 @@
 # Versões
 
+## 1.18.1
+- **Conectar vai direto para a Conexão**: o botão "Conectar" da tela inicial
+  e o indicador de conexão no topo abrem as Configurações já na seção
+  Conexão (porta), em vez da última seção aberta.
+
 ## 1.18.0
 - **Atualização pelo app, com clique**: o app olha as releases do GitHub ao
   abrir e uma vez por dia. Com versão nova, aparece "vX disponível" no topo;
