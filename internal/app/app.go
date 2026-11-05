@@ -963,7 +963,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		a.stepAlerts(&a.alerts, alertStep{
 			Now: now, CPM: float64(cpm), AlarmCPM: set.AlarmCPM, Lv: lv,
 			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
-			AlarmStarted: started, AlarmEnded: ended,
+			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
 			DangerStarted: dangerStarted, DangerEnded: dangerEnded,
 		})
 		if dangerStarted {

@@ -291,7 +291,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 		a.stepAlerts(&a.demo.alerts, alertStep{
 			Now: now, CPM: cpm, AlarmCPM: set.AlarmCPM, Demo: true, Lv: lv,
 			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
-			AlarmStarted: started, AlarmEnded: ended,
+			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
 			DangerStarted: dangerStarted, DangerEnded: dangerEnded,
 		})
 		if dangerStarted {

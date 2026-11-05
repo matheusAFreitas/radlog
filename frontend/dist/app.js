@@ -450,11 +450,11 @@ function renderActive() {
     return;
   }
   const now = Date.now();
-  // no alarme (ou perigo) a atenção vem junto: mostra só o nível mais alto,
-  // com a hora em que a atenção começou
-  const attn = (demo) => list.find((x) => x.level === "atencao" && !!x.demo === demo);
-  const above = (demo) => list.some((x) => (x.level === "alarme" || x.level === "perigo") && !!x.demo === demo);
-  const shown = list.filter((e) => !(e.level === "atencao" && above(!!e.demo)));
+  // num episódio os níveis de baixo vêm junto: mostra só o mais alto de cada
+  // fonte (real/demo), com a hora em que os de baixo começaram
+  const rank = { atencao: 1, alarme: 2, perigo: 3 };
+  const top = (demo) => Math.max(0, ...list.filter((x) => !!x.demo === demo).map((x) => rank[x.level] || 1));
+  const shown = list.filter((e) => (rank[e.level] || 1) === top(!!e.demo));
   for (const e of shown) {
     const li = document.createElement("li");
     li.className = "on " + lvlCls(e);
@@ -465,8 +465,9 @@ function renderActive() {
     li.querySelector(".a-meta").textContent =
       `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${fmt(e.peak, 0)} CPM${sigTxt(e.peak)}` +
       (lim ? ` · limite ${fmt(+lim, 0)}` : "");
-    const at = e.level !== "atencao" && attn(!!e.demo);
-    if (at && at.time < e.time) li.querySelector(".a-meta").textContent += ` · atenção desde ${hhmm(at.time)}`;
+    for (const lower of list.filter((x) => !!x.demo === !!e.demo && (rank[x.level] || 1) < (rank[e.level] || 1)).sort((a, b) => a.time - b.time)) {
+      if (lower.time < e.time) li.querySelector(".a-meta").textContent += ` · ${lvlName(lower).toLowerCase()} desde ${hhmm(lower.time)}`;
+    }
     ul.appendChild(li);
   }
 }

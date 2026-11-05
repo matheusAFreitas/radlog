@@ -1,5 +1,14 @@
 # Versões
 
+## 1.17.1
+- **Alarme e perigo não abrem mais juntos**: quando o CPM pula vários níveis
+  no mesmo segundo (ex.: de 20 para 1.000), só o nível mais alto é aberto. Se
+  o valor descer só até um nível de baixo, ele abre nessa hora (perigo →
+  alarme → atenção).
+- **Alertas ativos com um quadro só**: numa subida aos poucos, o painel mostra
+  só o nível mais alto, com a hora em que os de baixo começaram ("atenção
+  desde 00:11 · alarme desde 00:16").
+
 ## 1.17.0
 - **Lacunas no Resumo**: lista dos trechos de 10 min ou mais sem leitura no
   período, com a duração e a causa provável (contador desconectado, porta

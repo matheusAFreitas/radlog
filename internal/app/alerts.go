@@ -166,6 +166,7 @@ type alertStep struct {
 	AttnOn        bool
 	AlarmStarted  bool
 	AlarmEnded    bool
+	AlarmOn       bool // alarme do usuário ligado e acima do limite agora
 	DangerStarted bool
 	DangerEnded   bool
 }
@@ -192,15 +193,16 @@ func (a *App) openAlert(level string, s alertStep) int64 {
 // ids aponta para a.alerts ou a.demo.alerts (protegidos por a.mu).
 func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 	changed := false
-	// só abre a atenção se não for direto para o alarme (aí o alarme já anota)
-	if s.AttnStarted && !s.AlarmStarted {
+	// Pulou vários níveis no mesmo segundo: abre só o mais alto (ele já anota
+	// o episódio). Os de baixo abrem depois, se o valor voltar só até eles.
+	if s.AttnStarted && !s.AlarmStarted && !s.DangerStarted {
 		id := a.openAlert("atencao", s)
 		a.mu.Lock()
 		ids.attn = id
 		a.mu.Unlock()
 		changed = true
 	}
-	if s.AlarmStarted {
+	if s.AlarmStarted && !s.DangerStarted {
 		id := a.openAlert("alarme", s)
 		a.mu.Lock()
 		ids.alarm = id
@@ -235,13 +237,21 @@ func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 		closeIDs = append(closeIDs, ids.danger)
 		ids.danger = 0
 	}
-	// o alarme acabou mas continua no nível de atenção, que não tinha sido
-	// anotado (o valor pulou direto para o alarme): abre a atenção agora
-	reopen := s.AlarmEnded && s.AttnOn && ids.attn == 0
+	// saiu de um nível mas continua num de baixo que não tinha sido anotado
+	// (o valor pulou direto para cima): abre esse agora
+	reopenAlarm := s.DangerEnded && s.AlarmOn && ids.alarm == 0
+	reopen := (s.AlarmEnded || s.DangerEnded) && s.AttnOn && ids.attn == 0 && ids.alarm == 0 && !reopenAlarm
 	a.mu.Unlock()
 
 	if len(closeIDs) > 0 {
 		a.finishAlerts(closeIDs, s.Now, s.Demo)
+		changed = true
+	}
+	if reopenAlarm {
+		id := a.openAlert("alarme", s)
+		a.mu.Lock()
+		ids.alarm = id
+		a.mu.Unlock()
 		changed = true
 	}
 	if reopen {
@@ -249,6 +259,7 @@ func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 		a.mu.Lock()
 		ids.attn = id
 		a.mu.Unlock()
+		changed = true
 	}
 	if changed {
 		a.emitActive()
