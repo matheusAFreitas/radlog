@@ -67,12 +67,6 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
       notificação; reaproveita o núcleo em Go (protocolo, estatística, dose).
 - [ ] Sincroniza com o app do PC (mesmo pareamento da comunicação entre PCs).
 
-## Comunicação entre PCs (1.x)
-
-- [ ] Sincronização direta app ↔ app com pareamento (código de 6 dígitos):
-      cada PC se anuncia na rede e troca só o que falta.
-- [ ] Funcionar fora de casa por Tailscale, sem mudar nada no app.
-
 ## Ideias em aberto
 
 - [ ] Tendência do fundo: média móvel de 24 h no gráfico, para ver o fundo

@@ -1412,3 +1412,75 @@ Segundos	Seconds
 Fase	Phase
 Apagar as versões antigas depois que a nova abrir	Delete old versions after the new one opens
 Versões baixadas em	Versions downloaded to
+# --- sincronização entre PCs
+Sincronização	Sync
+Junta os dados de dois PCs com o GMC Monitor (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.	Joins the data of two PCs running GMC Monitor (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.
+Aceitar conexões de outros PCs (este PC aparece na rede)	Accept connections from other PCs (this PC shows up on the network)
+Não deu para aceitar conexões: {0}	Couldn't accept connections: {0}
+Este PC: {0} · {1}	This PC: {0} · {1}
+sem rede	no network
+Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).	Off: this PC only connects to the others (on Windows it doesn't ask for firewall permission).
+Mostrar código para parear	Show pairing code
+Cancelar código	Cancel code
+vale por mais {0}	valid for {0} more
+Sincronizar sozinho a cada 10 min	Sync automatically every 10 min
+PCs pareados	Paired PCs
+Nenhum PC pareado ainda.	No paired PCs yet.
+Última tentativa {0}: {1}	Last attempt {0}: {1}
+Sincronizado {0}	Synced {0}
+Ainda não sincronizou.	Not synced yet.
+Sincronizando…	Syncing…
+Sincronizar agora	Sync now
+Endereços	Addresses
+Endereços extras	Extra addresses
+Endereços extras deste PC, separados por vírgula (ex.: o IP do Tailscale)	Extra addresses for this PC, separated by commas (e.g., the Tailscale IP)
+ex.: 100.101.102.103, notebook	e.g., 100.101.102.103, laptop
+Esquecer	Forget
+Confirmar	Confirm
+Parear com outro PC	Pair with another PC
+No outro PC, ligue "Aceitar conexões" e clique em "Mostrar código para parear". Aqui, escolha ele na lista (ou digite o endereço) e digite o código.	On the other PC, turn on "Accept connections" and click "Show pairing code". Here, pick it from the list (or type the address) and type the code.
+Procurar na rede	Search the network
+Procurando…	Searching…
+Ninguém respondeu. O outro PC está com "Aceitar conexões" ligado e na mesma rede?	Nobody answered. Is the other PC on the same network with "Accept connections" on?
+{0} (já pareado)	{0} (already paired)
+Usar este	Use this one
+endereço (ex.: 192.168.0.20 ou o 100.x.y.z do Tailscale)	address (e.g., 192.168.0.20 or the Tailscale 100.x.y.z)
+código	code
+Endereço do outro PC	Other PC's address
+Código de 6 dígitos	6-digit code
+Parear	Pair
+Pareando…	Pairing…
+Pareado. A primeira sincronização já começou.	Paired. The first sync has already started.
+ligue "Aceitar conexões de outros PCs" primeiro	turn on "Accept connections from other PCs" first
+nenhum código ativo neste PC	no active code on this PC
+pareamento expirou	pairing expired
+código errado	wrong code
+PC não pareado	PC not paired
+relógio muito diferente entre os PCs	clocks too different between the PCs
+mensagem inválida	invalid message
+mensagem repetida	repeated message
+Pareado com {0}	Paired with {0}
+informe o endereço e o código de 6 dígitos	enter the address and the 6-digit code
+não consegui falar com {0}: {1}	couldn't reach {0}: {1}
+o outro PC recusou: {0}	the other PC refused: {0}
+resposta estranha do outro PC	odd answer from the other PC
+nenhum endereço conhecido; informe o IP do outro PC	no known address; enter the other PC's IP
+{0} não respondeu ({1})	{0} didn't answer ({1})
+tempo esgotado	timed out
+conexão recusada: o outro PC está com "Aceitar conexões" ligado?	connection refused: does the other PC have "Accept connections" on?
+sem rota até ele	no route to it
+sem resposta	no answer
+{0} respondeu: {1}	{0} answered: {1}
+trouxe: {0}	brought: {0}
+levou: {0}	sent: {0}
+recebido: {0}	received: {0}
+nada novo	nothing new
+{0} minutos de leitura	{0} minutes of readings
+{0} eventos/alertas	{0} events/alerts
+sincronização: aceitando conexões na porta {0} ({1})	sync: accepting connections on port {0} ({1})
+sincronização: parou de aceitar conexões	sync: stopped accepting connections
+sincronização: não consegui escutar em {0}: {1}	sync: couldn't listen on {0}: {1}
+sincronização: código errado no pareamento ({0})	sync: wrong code while pairing ({0})
+sincronização: pareamento com {0} desfeito	sync: pairing with {0} removed
+sincronização com {0}: {1}	sync with {0}: {1}
+sincronização com {0} ({1}): trouxe {2}; levou {3}	sync with {0} ({1}): brought {2}; sent {3}

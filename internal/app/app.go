@@ -74,6 +74,9 @@ type Settings struct {
 	NoUpdateCheck   bool   `json:"noUpdateCheck"`
 	SkipVersion     string `json:"skipVersion"`     // "Pular esta versão"
 	KeepOldVersions bool   `json:"keepOldVersions"` // não apagar as versões antigas depois de atualizar
+	// sincronização entre PCs: aceitar conexões (porta 47862) e não sincronizar sozinho
+	SyncListen bool `json:"syncListen"`
+	NoSyncAuto bool `json:"noSyncAuto"`
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
@@ -340,6 +343,7 @@ type App struct {
 	noCount  noCountState
 	interf   interferenceDetector
 	upd      updater
+	sync     syncState // sincronização entre PCs (sync.go)
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -401,6 +405,7 @@ func (a *App) startup(ctx context.Context) {
 	go a.scanRetroOnce()
 	go a.updateLoop()
 	go a.cleanOldVersionsLater()
+	go a.syncLoop()
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		go a.autoReconnect(0)

@@ -117,10 +117,12 @@ const tr = (() => {
       // pedaços juntados com " · ": traduz cada um (com e sem o "· ")
       const segs = core.split(/ (?=· )/);
       const ts = segs.map((g) => {
-        const t = one(g, true);
-        if (t !== g || !g.startsWith("· ")) return t === g ? (sentences(g) || g) : t;
-        const r = g.slice(2);
-        return "· " + (one(r, false) || sentences(r) || r);
+        const dot = g.startsWith("· ");
+        const r = dot ? g.slice(2) : g;
+        // primeiro os moldes que começam com texto fixo; os genéricos por último
+        const t = (dot && one(g, false, false)) || one(r, false, false) || wide(r) || sentences(r) || one(r, false, true);
+        if (t == null) return g;
+        return dot && !t.startsWith("· ") ? "· " + t : t;
       });
       if (ts.some((g, i) => g !== segs[i])) out = ts.join(" ");
     }

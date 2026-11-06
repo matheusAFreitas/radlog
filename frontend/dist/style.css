@@ -945,3 +945,14 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .m-history { position: static; }
   .m-list { max-height: 260px; }
 }
+
+/* sincronização entre PCs */
+.sync-code { font-size: 26px; letter-spacing: 4px; color: var(--accent); }
+.sync-h { margin: 14px 0 6px; font-size: 14px; }
+.sync-list { list-style: none; margin: 0 0 8px; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.sync-list li { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+.sync-list li .grow { flex: 1 1 220px; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.sync-list li .err { color: var(--warn); }
+.sync-pair { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.sync-pair #syncAddr { flex: 1 1 240px; }
+.sync-pair #syncPairCode { width: 9em; font-family: var(--mono); letter-spacing: 2px; }

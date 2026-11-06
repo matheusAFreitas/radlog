@@ -1,5 +1,27 @@
 # Versões
 
+## 1.23.0
+- **Sincronização entre PCs** (Configurações → Sincronização): dois apps
+  trocam o que falta um no outro (leituras por minuto, alertas encerrados,
+  períodos fora de casa, medições, anotações e os segundos dos alertas). É a
+  mesma mescla do "Importar backup": nada é apagado nem substituído.
+- **Pareamento com código de 6 dígitos**: um PC "aceita conexões" e mostra o
+  código (vale 5 min, um pareamento, até 5 tentativas erradas); o outro acha
+  ele na rede (ou pelo endereço) e digita. O código não vira a chave: o
+  pareamento usa CPace (troca de chaves autenticada por senha), então quem
+  escuta a rede não consegue descobrir nada, e quem tentar se meter no meio só
+  testa um código por vez.
+- **Troca só o que falta**: cada lado resume os minutos de cada dia; só vão
+  os dias diferentes e os segundos de alerta que o outro não tem. Tudo
+  cifrado (AES-256-GCM) com a chave do par.
+- **Sozinho a cada 10 min** (dá para desligar) e "Sincronizar agora".
+- **Fora de casa pelo Tailscale**: o PC que aceita conexões informa todos os
+  endereços dele (rede de casa e 100.x.y.z do Tailscale) e o outro tenta um
+  por um. Dá para acrescentar endereços à mão em "Endereços".
+- Só quem "aceita conexões" escuta na rede (porta 47862). No Windows isso
+  pede liberação no firewall; por isso a sugestão é deixar ligado no
+  notebook (Linux) e o PC só conectar.
+
 ## 1.22.1
 - **As versões baixadas pelo app ficam numa pasta só dele**:
   Documentos\GMC Monitor\Versões, ao lado de Relatórios, em vez da pasta do

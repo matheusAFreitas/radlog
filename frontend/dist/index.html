@@ -950,6 +950,37 @@
     </fieldset>
 
     <fieldset>
+      <legend>Sincronização</legend>
+      <p class="small muted">Junta os dados de dois PCs com o GMC Monitor (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
+      <label class="toggle">
+        <span>Aceitar conexões de outros PCs (este PC aparece na rede)</span>
+        <input type="checkbox" id="chkSyncListen">
+      </label>
+      <p class="small muted" id="syncListenInfo"></p>
+      <div class="upd-row" id="syncCodeRow" hidden>
+        <button type="button" class="btn small" id="btnSyncCode">Mostrar código para parear</button>
+        <span class="sync-code mono" id="syncCode" data-no-tr></span>
+        <span class="small muted" id="syncCodeLeft"></span>
+      </div>
+      <label class="toggle">
+        <span>Sincronizar sozinho a cada 10 min</span>
+        <input type="checkbox" id="chkSyncAuto">
+      </label>
+      <h4 class="sync-h">PCs pareados</h4>
+      <ul class="sync-list" id="syncPeers"></ul>
+      <h4 class="sync-h">Parear com outro PC</h4>
+      <p class="small muted">No outro PC, ligue "Aceitar conexões" e clique em "Mostrar código para parear". Aqui, escolha ele na lista (ou digite o endereço) e digite o código.</p>
+      <div class="upd-row"><button type="button" class="btn small" id="btnSyncFind">Procurar na rede</button> <span class="small muted" id="syncFindMsg"></span></div>
+      <ul class="sync-list" id="syncFound"></ul>
+      <div class="sync-pair">
+        <input type="text" id="syncAddr" placeholder="endereço (ex.: 192.168.0.20 ou o 100.x.y.z do Tailscale)" autocomplete="off" aria-label="Endereço do outro PC">
+        <input type="text" id="syncPairCode" inputmode="numeric" maxlength="7" placeholder="código" autocomplete="off" aria-label="Código de 6 dígitos">
+        <button type="button" class="btn small accent" id="btnSyncPair">Parear</button>
+      </div>
+      <p class="small" id="syncPairMsg"></p>
+    </fieldset>
+
+    <fieldset>
       <legend>Idioma</legend>
       <label for="selLang">Idioma do app</label>
       <select id="selLang" data-no-tr>

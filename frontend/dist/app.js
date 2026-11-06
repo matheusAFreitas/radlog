@@ -3304,6 +3304,7 @@ function wire() {
   wireAlarm();
   wireHeat();
   wireUpdate();
+  wireSync();
   wireMeasureSaved();
   wireRain();
   wireMeasure();
@@ -3664,6 +3665,138 @@ function wireUpdate() {
   if (api.GetUpdateInfo) api.GetUpdateInfo().then(renderUpdate).catch(() => {});
 }
 
+// ---------- sincronização entre PCs ----------
+
+let syncTimer = null;
+
+function renderSync(info) {
+  if (!info) return;
+  state.sync = info;
+  $("chkSyncListen").checked = !!info.listen;
+  $("chkSyncAuto").checked = !!info.auto;
+  const li = $("syncListenInfo");
+  if (info.listen && info.listenErr) {
+    li.textContent = "Não deu para aceitar conexões: " + info.listenErr;
+    li.className = "small warn-text";
+  } else if (info.listening) {
+    li.textContent = `Este PC: ${info.name} · ${(info.addrs || []).join(", ") || "sem rede"}`;
+    li.className = "small muted";
+  } else {
+    li.textContent = "Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).";
+    li.className = "small muted";
+  }
+  $("syncCodeRow").hidden = !info.listening;
+  const codeOn = !!info.code;
+  $("syncCode").textContent = codeOn ? info.code.slice(0, 3) + " " + info.code.slice(3) : "";
+  $("btnSyncCode").textContent = codeOn ? "Cancelar código" : "Mostrar código para parear";
+  clearInterval(syncTimer);
+  const left = () => {
+    const s = Math.max(0, Math.round((info.codeUntil - Date.now()) / 1000));
+    $("syncCodeLeft").textContent = codeOn ? `vale por mais ${Math.floor(s / 60)}:${pad(s % 60)}` : "";
+    if (codeOn && s <= 0) { clearInterval(syncTimer); api.GetSync().then(renderSync).catch(() => {}); }
+  };
+  left();
+  if (codeOn) syncTimer = setInterval(left, 1000);
+  const ul = $("syncPeers");
+  ul.textContent = "";
+  if (!info.peers.length) ul.innerHTML = '<li class="small muted">Nenhum PC pareado ainda.</li>';
+  for (const p of info.peers) {
+    const item = document.createElement("li");
+    const g = document.createElement("span");
+    g.className = "grow";
+    const name = document.createElement("strong");
+    name.textContent = p.name;
+    const st = document.createElement("span");
+    st.className = "small " + (p.lastError ? "err" : "muted");
+    st.textContent = p.lastError ? `Última tentativa ${whenLabel(p.lastTry)}: ${p.lastError}`
+      : p.lastSync ? `Sincronizado ${whenLabel(p.lastSync)} · ${p.lastResult || ""}` : "Ainda não sincronizou.";
+    const ad = document.createElement("span");
+    ad.className = "small mono muted";
+    ad.dataset.noTr = "";
+    ad.textContent = [...(p.manualAddrs || []), ...(p.addrs || [])].join(", ");
+    g.append(name, st, ad);
+    const now = document.createElement("button");
+    now.type = "button"; now.className = "btn small"; now.textContent = info.running ? "Sincronizando…" : "Sincronizar agora";
+    now.disabled = !!info.running;
+    now.addEventListener("click", async () => {
+      try { await api.SyncNow(p.id); } catch (e) { toast(errMsg(e), true); }
+      renderSync(await api.GetSync());
+    });
+    const addrs = document.createElement("button");
+    addrs.type = "button"; addrs.className = "btn small"; addrs.textContent = "Endereços";
+    addrs.title = "Endereços extras deste PC, separados por vírgula (ex.: o IP do Tailscale)";
+    addrs.addEventListener("click", () => {
+      const f = item.querySelector(".nr-form");
+      if (f) { f.remove(); return; }
+      const form = document.createElement("div");
+      form.className = "nr-form sync-pair";
+      form.innerHTML = '<input type="text" aria-label="Endereços extras"><button type="button" class="btn small accent">Salvar</button>';
+      const inp = form.querySelector("input");
+      inp.value = (p.manualAddrs || []).join(", ");
+      inp.placeholder = "ex.: 100.101.102.103, notebook";
+      form.querySelector("button").addEventListener("click", async () => {
+        renderSync(await call(api.SetPeerAddrs, p.id, inp.value.split(/[,\s]+/).filter(Boolean)));
+      });
+      item.appendChild(form);
+      inp.focus();
+    });
+    const del = document.createElement("button");
+    del.type = "button"; del.className = "btn small danger-btn"; del.textContent = "Esquecer";
+    del.addEventListener("click", async () => {
+      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
+      renderSync(await call(api.ForgetPeer, p.id));
+    });
+    item.append(g, now, addrs, del);
+    ul.appendChild(item);
+  }
+}
+
+function wireSync() {
+  on("sync", renderSync);
+  $("chkSyncListen").addEventListener("change", async (e) => renderSync(await call(api.SetSyncListen, e.target.checked)));
+  $("chkSyncAuto").addEventListener("change", async (e) => renderSync(await call(api.SetSyncAuto, e.target.checked)));
+  $("btnSyncCode").addEventListener("click", async () => {
+    try { renderSync(state.sync && state.sync.code ? await api.CancelPairCode() : await api.ShowPairCode()); }
+    catch (e) { toast(errMsg(e), true); }
+  });
+  $("btnSyncFind").addEventListener("click", async () => {
+    const msg = $("syncFindMsg"), ul = $("syncFound");
+    msg.textContent = "Procurando…";
+    ul.textContent = "";
+    let list = [];
+    try { list = await api.DiscoverPeers(); } catch (e) { msg.textContent = errMsg(e); return; }
+    msg.textContent = list.length ? "" : "Ninguém respondeu. O outro PC está com \"Aceitar conexões\" ligado e na mesma rede?";
+    for (const f of list) {
+      const li = document.createElement("li");
+      const g = document.createElement("span");
+      g.className = "grow";
+      g.innerHTML = "<strong></strong><span class='small mono muted' data-no-tr></span>";
+      g.firstChild.textContent = f.name + (f.paired ? " (já pareado)" : "");
+      g.lastChild.textContent = f.addr;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "btn small"; b.textContent = "Usar este";
+      b.addEventListener("click", () => { $("syncAddr").value = f.addr; $("syncPairCode").focus(); });
+      li.append(g, b);
+      ul.appendChild(li);
+    }
+  });
+  $("btnSyncPair").addEventListener("click", async () => {
+    const msg = $("syncPairMsg");
+    msg.className = "small";
+    msg.textContent = "Pareando…";
+    try {
+      renderSync(await api.PairWith($("syncAddr").value, $("syncPairCode").value));
+      msg.textContent = "Pareado. A primeira sincronização já começou.";
+      $("syncPairCode").value = "";
+      $("syncFound").textContent = "";
+    } catch (e) {
+      msg.className = "small warn-text";
+      msg.textContent = errMsg(e);
+    }
+  });
+  if (api.GetSync) api.GetSync().then(renderSync).catch(() => {});
+}
+
 // ---------- resumo e comparação ----------
 
 state.sum = { mode: "resumo", preset: "hoje", cmp: "hoje-ontem", day: 0, dayA: 0, dayB: 0 };
@@ -3956,6 +4089,8 @@ init();
 
 var demoBus;
 function makeDemoApi() {
+  let demoSync = { id: "a", name: "ACENULL", listen: false, listening: false, auto: true, peers: [
+    { id: "b", name: "parrot", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   let demoUpd = { current: "1.17.1", latest: "1.18.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
     notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
@@ -4131,6 +4266,16 @@ function makeDemoApi() {
     OpenReportFile: async () => {},
     GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\GMC Monitor\\Versões",
     OpenVersionsDir: async () => {},
+    GetSync: async () => demoSync,
+    SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
+    SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
+    ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),
+    CancelPairCode: async () => (demoSync = { ...demoSync, code: "" }),
+    DiscoverPeers: async () => { await new Promise((r) => setTimeout(r, 800)); return [{ id: "b", name: "parrot", addr: "192.168.0.20:47862", paired: false }]; },
+    PairWith: async () => { throw new Error("no modo navegador não dá para parear; abra pelo app"); },
+    SyncNow: async () => ({}),
+    SetPeerAddrs: async () => demoSync,
+    ForgetPeer: async () => demoSync,
     GetUpdateInfo: async () => demoUpd,
     CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: "1.18.0", available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },

@@ -192,9 +192,16 @@ func (d *dict) tr(s string) string {
 					continue
 				}
 			}
-			t, ok2 := d.one(g, true)
+			// primeiro os moldes que começam com texto fixo; os genéricos por último
+			t, ok2 := d.one(g, false)
+			if !ok2 {
+				t, ok2 = d.wide(g)
+			}
 			if !ok2 {
 				t, ok2 = d.sentences(g)
+			}
+			if !ok2 {
+				t, ok2 = d.one(g, true)
 			}
 			if ok2 {
 				segs[i], changed = t, true

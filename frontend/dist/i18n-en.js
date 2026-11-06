@@ -1054,7 +1054,55 @@ const I18N_EN = {
 "Segundos": "Seconds",
 "Fase": "Phase",
 "Apagar as versões antigas depois que a nova abrir": "Delete old versions after the new one opens",
-"Versões baixadas em": "Versions downloaded to"
+"Versões baixadas em": "Versions downloaded to",
+"Sincronização": "Sync",
+"Junta os dados de dois PCs com o GMC Monitor (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.": "Joins the data of two PCs running GMC Monitor (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.",
+"Aceitar conexões de outros PCs (este PC aparece na rede)": "Accept connections from other PCs (this PC shows up on the network)",
+"sem rede": "no network",
+"Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).": "Off: this PC only connects to the others (on Windows it doesn't ask for firewall permission).",
+"Mostrar código para parear": "Show pairing code",
+"Cancelar código": "Cancel code",
+"Sincronizar sozinho a cada 10 min": "Sync automatically every 10 min",
+"PCs pareados": "Paired PCs",
+"Nenhum PC pareado ainda.": "No paired PCs yet.",
+"Ainda não sincronizou.": "Not synced yet.",
+"Sincronizando…": "Syncing…",
+"Sincronizar agora": "Sync now",
+"Endereços": "Addresses",
+"Endereços extras": "Extra addresses",
+"Endereços extras deste PC, separados por vírgula (ex.: o IP do Tailscale)": "Extra addresses for this PC, separated by commas (e.g., the Tailscale IP)",
+"ex.: 100.101.102.103, notebook": "e.g., 100.101.102.103, laptop",
+"Esquecer": "Forget",
+"Confirmar": "Confirm",
+"Parear com outro PC": "Pair with another PC",
+"No outro PC, ligue \"Aceitar conexões\" e clique em \"Mostrar código para parear\". Aqui, escolha ele na lista (ou digite o endereço) e digite o código.": "On the other PC, turn on \"Accept connections\" and click \"Show pairing code\". Here, pick it from the list (or type the address) and type the code.",
+"Procurar na rede": "Search the network",
+"Procurando…": "Searching…",
+"Ninguém respondeu. O outro PC está com \"Aceitar conexões\" ligado e na mesma rede?": "Nobody answered. Is the other PC on the same network with \"Accept connections\" on?",
+"Usar este": "Use this one",
+"endereço (ex.: 192.168.0.20 ou o 100.x.y.z do Tailscale)": "address (e.g., 192.168.0.20 or the Tailscale 100.x.y.z)",
+"código": "code",
+"Endereço do outro PC": "Other PC's address",
+"Código de 6 dígitos": "6-digit code",
+"Parear": "Pair",
+"Pareando…": "Pairing…",
+"Pareado. A primeira sincronização já começou.": "Paired. The first sync has already started.",
+"ligue \"Aceitar conexões de outros PCs\" primeiro": "turn on \"Accept connections from other PCs\" first",
+"nenhum código ativo neste PC": "no active code on this PC",
+"pareamento expirou": "pairing expired",
+"código errado": "wrong code",
+"PC não pareado": "PC not paired",
+"relógio muito diferente entre os PCs": "clocks too different between the PCs",
+"mensagem inválida": "invalid message",
+"mensagem repetida": "repeated message",
+"informe o endereço e o código de 6 dígitos": "enter the address and the 6-digit code",
+"resposta estranha do outro PC": "odd answer from the other PC",
+"nenhum endereço conhecido; informe o IP do outro PC": "no known address; enter the other PC's IP",
+"tempo esgotado": "timed out",
+"conexão recusada: o outro PC está com \"Aceitar conexões\" ligado?": "connection refused: does the other PC have \"Accept connections\" on?",
+"sem rota até ele": "no route to it",
+"nada novo": "nothing new",
+"sincronização: parou de aceitar conexões": "sync: stopped accepting connections"
 },
 "patterns": [
 [
@@ -1702,6 +1750,14 @@ const I18N_EN = {
 ]
 ],
 [
+"sincronização: aceitando conexões na porta ",
+"^sincronização: aceitando conexões na porta ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"sync: accepting connections on port ${1} (${2})",
+[
+"sincronização: aceitando conexões na porta "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -1718,6 +1774,14 @@ const I18N_EN = {
 " cm · esperado ",
 " cps (fundo 8,4) · ≈ ",
 " µSv/h"
+]
+],
+[
+"sincronização: código errado no pareamento (",
+"^sincronização: código errado no pareamento \\(((?:(?! · ).)+?)\\)$",
+"sync: wrong code while pairing (${1})",
+[
+"sincronização: código errado no pareamento ("
 ]
 ],
 [
@@ -1849,6 +1913,14 @@ const I18N_EN = {
 ]
 ],
 [
+"sincronização: não consegui escutar em ",
+"^sincronização: não consegui escutar em ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"sync: couldn't listen on ${1}: ${2}",
+[
+"sincronização: não consegui escutar em "
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -1872,6 +1944,16 @@ const I18N_EN = {
 [
 "atualiza a cada ",
 " · protocolo GQ-RFC1201"
+]
+],
+[
+"sincronização com ",
+"^sincronização com ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\): trouxe ((?:(?! · ).)+?); levou ((?:(?! · ).)+?)$",
+"sync with ${1} (${2}): brought ${3}; sent ${4}",
+[
+"sincronização com ",
+"): trouxe ",
+"; levou "
 ]
 ],
 [
@@ -1919,6 +2001,15 @@ const I18N_EN = {
 "max. = live peak (highest minute: ${1})",
 [
 "máx. = pico ao vivo (maior minuto: "
+]
+],
+[
+"sincronização: pareamento com ",
+"^sincronização: pareamento com ((?:(?! · ).)+?) desfeito$",
+"sync: pairing with ${1} removed",
+[
+"sincronização: pareamento com ",
+" desfeito"
 ]
 ],
 [
@@ -2194,6 +2285,14 @@ const I18N_EN = {
 "≈ ${1} µSv/h with the current calibration",
 [
 " µSv/h com a calibração atual"
+]
+],
+[
+"Não deu para aceitar conexões: ",
+"^Não deu para aceitar conexões: ((?:(?! · ).)+?)$",
+"Couldn't accept connections: ${1}",
+[
+"Não deu para aceitar conexões: "
 ]
 ],
 [
@@ -2558,6 +2657,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui falar com ",
+"^não consegui falar com ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"couldn't reach ${1}: ${2}",
+[
+"não consegui falar com "
+]
+],
+[
 "%w (recebi ",
 "^%w \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "%w (got ${1} of ${2} bytes)",
@@ -2798,6 +2905,22 @@ const I18N_EN = {
 ]
 ],
 [
+"o outro PC recusou: ",
+"^o outro PC recusou: ((?:(?! · ).)+?)$",
+"the other PC refused: ${1}",
+[
+"o outro PC recusou: "
+]
+],
+[
+"sincronização com ",
+"^sincronização com ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"sync with ${1}: ${2}",
+[
+"sincronização com "
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -2862,6 +2985,30 @@ const I18N_EN = {
 "${1} µSv/h per CPM (${2})",
 [
 " µSv/h por CPM ("
+]
+],
+[
+"Última tentativa ",
+"^Última tentativa ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"Last attempt ${1}: ${2}",
+[
+"Última tentativa "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) não respondeu \\(((?:(?! · ).)+?)\\)$",
+"${1} didn't answer (${2})",
+[
+" não respondeu ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) minutos de leitura$",
+"${1} minutes of readings",
+[
+" minutos de leitura"
 ]
 ],
 [
@@ -3146,6 +3293,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) eventos/alertas$",
+"${1} events/alerts",
+[
+" eventos/alertas"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -3262,6 +3417,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) \\(já pareado\\)$",
+"${1} (already paired)",
+[
+" (já pareado)"
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -3312,6 +3475,14 @@ const I18N_EN = {
 [
 "1 ano e ",
 " meses"
+]
+],
+[
+"vale por mais ",
+"^vale por mais ((?:(?! · ).)+?)$",
+"valid for ${1} more",
+[
+"vale por mais "
 ]
 ],
 [
@@ -3405,6 +3576,14 @@ const I18N_EN = {
 "${1} in each phase",
 [
 " em cada fase"
+]
+],
+[
+"Sincronizado ",
+"^Sincronizado ((?:(?! · ).)+?)$",
+"Synced ${1}",
+[
+"Sincronizado "
 ]
 ],
 [
@@ -3519,6 +3698,30 @@ const I18N_EN = {
 "${1} min measured",
 [
 " min medidos"
+]
+],
+[
+"Este PC: ",
+"^Este PC: ((?:(?! · ).)+?) · ((?:(?! · ).)+?)$",
+"This PC: ${1} · ${2}",
+[
+"Este PC: "
+]
+],
+[
+"Pareado com ",
+"^Pareado com ((?:(?! · ).)+?)$",
+"Paired with ${1}",
+[
+"Pareado com "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) respondeu: ((?:(?! · ).)+?)$",
+"${1} answered: ${2}",
+[
+" respondeu: "
 ]
 ],
 [
@@ -3681,6 +3884,14 @@ const I18N_EN = {
 ]
 ],
 [
+"recebido: ",
+"^recebido: ((?:(?! · ).)+?)$",
+"received: ${1}",
+[
+"recebido: "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -3836,6 +4047,14 @@ const I18N_EN = {
 ]
 ],
 [
+"trouxe: ",
+"^trouxe: ((?:(?! · ).)+?)$",
+"brought: ${1}",
+[
+"trouxe: "
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -3930,6 +4149,14 @@ const I18N_EN = {
 "rain: ${1}",
 [
 "chuva: "
+]
+],
+[
+"levou: ",
+"^levou: ((?:(?! · ).)+?)$",
+"sent: ${1}",
+[
+"levou: "
 ]
 ],
 [

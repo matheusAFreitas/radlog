@@ -40,6 +40,7 @@ P().feed(open(os.path.join(ROOT, "frontend/dist/index.html"), encoding="utf-8").
 def js_unescape(s):
     return s.replace('\\"', '"').replace("\\'", "'").replace("\\n", "\n").replace("\\\\", "\\")
 for f in glob.glob(os.path.join(ROOT, "frontend/dist/*.js")):
+    if f.endswith("i18n-en.js"): continue
     src = open(f, encoding="utf-8").read()
     src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
     for q in ('"', "'"):

@@ -211,7 +211,11 @@ func eventKey(e Event) string {
 }
 
 // mergeBackup junta o conteúdo do .zip aos dados daqui (só o que falta).
-func (a *App) mergeBackup(src string) (MergeResult, error) {
+func (a *App) mergeBackup(src string) (MergeResult, error) { return a.mergeZip(src, true) }
+
+// mergeZip é a mescla do backup, usada também pela sincronização entre PCs
+// (backup=false: só registra no log quando entrou alguma coisa).
+func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	var res MergeResult
 	zr, err := zip.OpenReader(src)
 	if err != nil {
@@ -430,7 +434,9 @@ func (a *App) mergeBackup(src string) (MergeResult, error) {
 		}
 	}
 
-	a.logf("backup: mesclado %s (%s): %s", filepath.Base(src), res.From, mergeText(res))
+	if backup {
+		a.logf("backup: mesclado %s (%s): %s", filepath.Base(src), res.From, mergeText(res))
+	}
 	if res.total() > 0 {
 		a.mu.Lock()
 		a.bgAt = time.Time{} // recalcula o fundo

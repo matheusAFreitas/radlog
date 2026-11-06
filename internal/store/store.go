@@ -352,3 +352,44 @@ func (s *Store) FirstTime() (time.Time, bool) {
 	}
 	return time.Time{}, false
 }
+
+// WriteCSV escreve pontos no mesmo formato dos arquivos (ParseCSV lê de volta).
+func WriteCSV(w io.Writer, pts []Point) error {
+	bw := bufio.NewWriter(w)
+	fmt.Fprintln(bw, header)
+	for _, p := range pts {
+		fmt.Fprintln(bw, formatLine(p))
+	}
+	return bw.Flush()
+}
+
+// MonthFiles lista os arquivos de leituras (um por mês), com o tamanho e a
+// hora da última mudança, para quem precisa saber se algo mudou.
+func (s *Store) MonthFiles() ([]os.FileInfo, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	ents, err := os.ReadDir(filepath.Join(s.dir, "leituras"))
+	if errors.Is(err, fs.ErrNotExist) {
+		return nil, nil
+	}
+	if err != nil {
+		return nil, err
+	}
+	var out []os.FileInfo
+	for _, e := range ents {
+		if e.IsDir() || !strings.HasSuffix(e.Name(), ".csv") {
+			continue
+		}
+		if fi, err := e.Info(); err == nil {
+			out = append(out, fi)
+		}
+	}
+	return out, nil
+}
+
+// ReadMonthFile lê um arquivo de mês pelo nome (de MonthFiles).
+func (s *Store) ReadMonthFile(name string) ([]Point, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return readFile(filepath.Join(s.dir, "leituras", filepath.Base(name)))
+}
