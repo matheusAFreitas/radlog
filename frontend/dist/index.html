@@ -49,6 +49,10 @@
       <span class="dot" id="statusDot" aria-hidden="true"></span>
       <span id="statusText">desconectado</span>
     </button>
+    <button type="button" class="pill rc-pill" id="rcPill" title="RadiaCode" hidden>
+      <span class="dot" id="rcDot" aria-hidden="true"></span>
+      <span id="rcPillText">RadiaCode</span>
+    </button>
     <button type="button" class="pill upd-pill" id="updPill" title="Versão nova do app" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
       <span id="updPillText">versão nova</span>
@@ -203,7 +207,7 @@
     <button type="button" data-view="alertas" aria-pressed="false">Alertas</button>
     <button type="button" data-view="fora" aria-pressed="false">Fora de casa</button>
     <button type="button" data-view="chuva" aria-pressed="false">Chuva</button>
-    <button type="button" data-view="radiacode" aria-pressed="false">RadiaCode <span class="wip-tag">em breve</span></button>
+    <button type="button" data-view="radiacode" aria-pressed="false">RadiaCode</button>
   </nav>
   <section class="card chart-card view-graficos" id="cpmCard">
     <div class="chart-head">
@@ -621,11 +625,49 @@
     <div class="dlg-head">
       <div>
         <h2>RadiaCode</h2>
-        <span class="mono muted small">em construção · o aparelho chega em 10/11</span>
+        <span class="mono muted small" id="rcSub">procurando no USB…</span>
       </div>
       <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
     </div>
-    <p class="small muted">O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam <b>dados simulados</b>, no mesmo formato que o aparelho manda (1.024 canais de energia), só para deixar as telas prontas. A conexão de verdade só será feita com o aparelho em mãos.</p>
+
+    <article class="rc-card rc-real rc-live" id="rcLive">
+      <div class="rc-head"><h3>Aparelho</h3><span class="rc-state mono small" id="rcState">procurando</span></div>
+      <div class="rc-nums" id="rcNums" hidden>
+        <div><span class="lbl">Taxa de dose</span><span class="val mono" id="rcUsv">—</span><span class="small muted mono" id="rcUsvErr"></span></div>
+        <div><span class="lbl">Contagem</span><span class="val mono" id="rcCps">—</span><span class="small muted mono" id="rcCpsErr"></span></div>
+        <div><span class="lbl">Dose acumulada</span><span class="val mono" id="rcDose">—</span><span class="small muted mono" id="rcDoseSince"></span></div>
+        <div><span class="lbl">Bateria</span><span class="val mono" id="rcBat">—</span><span class="small muted mono" id="rcTemp"></span></div>
+      </div>
+      <p class="small muted" id="rcHelp"></p>
+      <p class="small muted mono" id="rcDevInfo"></p>
+      <div class="rc-ctrl">
+        <button type="button" class="btn small" id="btnRcRetry">Procurar de novo</button>
+        <button type="button" class="btn small" id="btnRcSettings">Configurar conexão</button>
+      </div>
+    </article>
+
+    <article class="rc-card rc-real" id="rcCmpCard">
+      <div class="rc-head"><h3>Lado a lado com o GMC</h3>
+        <div class="seg" id="rcCmpRange"><button type="button" data-min="60">1 h</button><button type="button" data-min="360" aria-pressed="true">6 h</button><button type="button" data-min="1440">24 h</button><button type="button" data-min="10080">7 d</button></div>
+      </div>
+      <p class="small muted">Para a intercalibração: deixe os dois aparelhos juntos, na mesma altura, sem um blindar o outro, por pelo menos 24 h. Cada ponto é um minuto em que os dois mediram; os dois em µSv/h (o GMC pela calibração dele).</p>
+      <div class="rc-cmp-chart" id="rcCmpChart"></div>
+      <p class="small mono" id="rcCmpStats"></p>
+    </article>
+
+    <article class="rc-card rc-real" id="rcSpecCard" hidden>
+      <div class="rc-head"><h3>Espectro do aparelho</h3>
+        <div class="seg" id="rcSpecSrc"><button type="button" data-acc="0" aria-pressed="true">Atual</button><button type="button" data-acc="1">Acumulado</button></div>
+      </div>
+      <div class="rc-ctrl">
+        <button type="button" class="btn small" id="btnRcSpec">Ler espectro</button>
+        <button type="button" class="btn small" id="btnRcSpecLog">Escala: log</button>
+        <span class="small muted mono" id="rcRealSpecInfo"></span>
+      </div>
+      <div class="rc-real-spec" id="rcRealSpec"></div>
+    </article>
+
+    <p class="small muted">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
 
     <article class="rc-card">
       <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
@@ -974,6 +1016,22 @@
       </label>
       <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
       <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+    </fieldset>
+
+    <fieldset>
+      <legend>RadiaCode</legend>
+      <p class="small muted">O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
+      <label class="toggle">
+        <span>Procurar o RadiaCode</span>
+        <input type="checkbox" id="chkRcOn">
+      </label>
+      <label for="rcBLE">Endereço Bluetooth (opcional)</label>
+      <div class="upd-row">
+        <input type="text" id="rcBLE" class="mono" placeholder="ex.: 52:43:01:02:03:04" autocomplete="off" spellcheck="false">
+        <button type="button" class="btn small" id="btnRcBLEScan">Procurar no Bluetooth</button>
+      </div>
+      <ul class="sync-list" id="rcBLEFound"></ul>
+      <p class="small muted" id="rcBLEInfo"></p>
     </fieldset>
 
     <fieldset>

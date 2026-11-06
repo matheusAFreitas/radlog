@@ -855,6 +855,7 @@ async function showView(v, skipRender) {
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
+  if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
 }
 
 document.addEventListener("click", (e) => {
@@ -3413,6 +3414,7 @@ function wire() {
   wireHeat();
   wireUpdate();
   wireSync();
+  wireRc();
   wireMeasureSaved();
   wireRain();
   wireMeasure();
@@ -3905,6 +3907,180 @@ function wireSync() {
   if (api.GetSync) api.GetSync().then(renderSync).catch(() => {});
 }
 
+// ---------- RadiaCode (aparelho de verdade) ----------
+
+state.rc = { st: null, cmpMin: 360, accum: false, log: true, spec: null };
+
+function rcDur(sec) {
+  if (!(sec > 0)) return "";
+  const h = sec / 3600;
+  return h < 1 ? `${Math.round(sec / 60)} min` : h < 48 ? `${fmt(h, 1)} h` : `${Math.round(h / 24)} dias`;
+}
+
+function renderRc(st) {
+  if (!st) return;
+  const prev = state.rc.st;
+  state.rc.st = st;
+  const on = st.state === "conectado";
+  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  // pílula no topo: só aparece quando tem algo a dizer
+  const pill = $("rcPill");
+  pill.hidden = st.state === "off" || st.state === "procurando";
+  $("rcDot").className = "dot " + (on ? "on" : st.state === "erro" ? "err" : "wait");
+  $("rcPillText").textContent = on
+    ? `RadiaCode · ${st.time ? fmt(st.usvh, usvDigits(st.usvh)) + " µSv/h" : via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
+    : st.state === "conectando" ? "RadiaCode: conectando…" : "RadiaCode: erro";
+  pill.title = on ? `RadiaCode conectado pelo ${via}` : st.err || "RadiaCode";
+  // aba
+  $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "erro na conexão" }[st.state] || st.state;
+  $("rcState").textContent = on ? `conectado · ${via}` : st.state;
+  $("rcState").className = "rc-state mono small " + (on ? "ok" : st.state === "erro" ? "err" : "");
+  $("rcNums").hidden = !on;
+  $("rcSpecCard").hidden = !on;
+  if (on) {
+    $("rcUsv").textContent = st.time ? `${fmt(st.usvh, usvDigits(st.usvh))} µSv/h` : "—";
+    $("rcUsvErr").textContent = st.time ? `± ${fmt(st.usvhErr, 0)}%` : "";
+    $("rcCps").textContent = st.time ? `${fmt(st.cps, 2)} cps` : "—";
+    $("rcCpsErr").textContent = st.time ? `± ${fmt(st.cpsErr, 0)}% · ${fmt(st.cps * 60, 0)} CPM` : "";
+    $("rcDose").textContent = st.hasRare ? `${fmt(st.dose, st.dose < 10 ? 2 : 1)} µSv` : "—";
+    $("rcDoseSince").textContent = st.hasRare && st.doseSec ? `em ${rcDur(st.doseSec)}` : "";
+    $("rcBat").textContent = st.hasRare ? `${fmt(st.battery, 0)}%` : "—";
+    $("rcTemp").textContent = st.hasRare ? `${fmt(st.tempC, 1)} °C` : "";
+  }
+  $("rcDevInfo").textContent = on ? [st.model, st.serial && "série " + st.serial, st.firmware && "firmware " + st.firmware].filter(Boolean).join(" · ") : "";
+  $("rcHelp").textContent = on ? "" : st.state === "erro" ? st.err
+    : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
+    : "Ligue o RadiaCode no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
+  $("rcHelp").className = "small " + (st.state === "erro" ? "warn-text" : "muted");
+  if (on && (!prev || prev.state !== "conectado")) refreshRcCompare();
+  // configurações
+  $("chkRcOn").checked = !st.off;
+  if (document.activeElement !== $("rcBLE")) $("rcBLE").value = st.ble || "";
+  $("btnRcBLEScan").disabled = !st.bleOK;
+  $("rcBLEInfo").textContent = st.bleOK ? "" : "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.";
+}
+
+async function refreshRcCompare() {
+  if (!api.GetRcCompare || state.view !== "radiacode") return;
+  let c;
+  try { c = await api.GetRcCompare(state.rc.cmpMin); } catch (e) { $("rcCmpStats").textContent = errMsg(e); return; }
+  drawRcCompare(c);
+}
+
+function drawRcCompare(c) {
+  const box = $("rcCmpChart");
+  if (!c || !c.minutes) {
+    box.innerHTML = `<div class="rc-empty small muted">Sem minutos com os dois aparelhos nesse período.</div>`;
+    $("rcCmpStats").textContent = c && c.rcOnly ? `${c.rcOnly} min só do RadiaCode (GMC desconectado?)` : "";
+    return;
+  }
+  const W = 1000, H = 260, PL = 46, PB = 22, n = c.t.length;
+  // média de 10 min para as curvas (o minuto sozinho é muito ruidoso)
+  const avg = (arr, k) => arr.map((_, i) => { const a = Math.max(0, i - k + 1); let s = 0; for (let j = a; j <= i; j++) s += arr[j]; return s / (i - a + 1); });
+  const g = avg(c.gmc, 10), r = avg(c.rc, 10);
+  const t0 = c.t[0], t1 = Math.max(c.t[n - 1], t0 + 60e3);
+  let top = 0;
+  for (let i = 0; i < n; i++) top = Math.max(top, g[i], r[i]);
+  top = top * 1.15 || 0.2;
+  const x = (t) => PL + ((t - t0) / (t1 - t0)) * (W - PL - 8), y = (v) => 8 + (1 - v / top) * (H - PB - 8);
+  const path = (arr) => arr.map((v, i) => `${i ? "L" : "M"}${x(c.t[i]).toFixed(1)},${y(v).toFixed(1)}`).join("");
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-cmp-svg">`;
+  for (let k = 0; k <= 4; k++) {
+    const v = (top / 4) * k, yy = y(v);
+    svg += `<line x1="${PL}" x2="${W - 8}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 6}" y="${yy + 4}" text-anchor="end" class="ax">${fmt(v, 2)}</text>`;
+  }
+  svg += `<text x="${PL}" y="${H - 4}" class="ax">${hhmm(t0)}</text><text x="${W - 8}" y="${H - 4}" text-anchor="end" class="ax">${hhmm(t1)}</text>`;
+  svg += `<path d="${path(g)}" class="gmc"/><path d="${path(r)}" class="rc"/></svg>`;
+  box.innerHTML = svg + `<div class="rc-legend small"><span class="k gmc"></span>GMC-800 (µSv/h, média de 10 min) <span class="k rc"></span>RadiaCode</div>`;
+  const parts = [`${n} min juntos`];
+  if (c.ratio) parts.push(`RadiaCode ÷ GMC = ${fmt(c.ratio, 2)}${c.ratioErr ? ` ± ${fmt(c.ratioErr, 2)}` : ""}`);
+  if (c.corr) parts.push(`correlação ${fmt(c.corr, 2)}`);
+  if (n < 24 * 60) parts.push(`para o fator valer, junte 24 h (faltam ${rcDur((24 * 60 - n) * 60)})`);
+  $("rcCmpStats").textContent = parts.join(" · ");
+}
+
+async function readRcSpectrum() {
+  try {
+    state.rc.spec = await api.GetRcSpectrum(state.rc.accum);
+    drawRcSpectrum();
+  } catch (e) { toast(errMsg(e), true); }
+}
+
+function drawRcSpectrum() {
+  const sp = state.rc.spec, box = $("rcRealSpec");
+  if (!sp || !sp.counts || !sp.counts.length) { box.textContent = ""; return; }
+  const W = 1000, H = 260, PL = 8, PB = 22, n = sp.counts.length;
+  const E = (c) => sp.a[0] + sp.a[1] * c + sp.a[2] * c * c;
+  const eMax = E(n - 1);
+  let top = 1, total = 0;
+  for (let i = 0; i < n; i++) { total += sp.counts[i]; if (i > 8) top = Math.max(top, sp.counts[i]); }
+  const yv = (v) => (state.rc.log ? Math.log10(1 + v) / Math.log10(1 + top) : v / top);
+  const x = (c) => PL + (Math.max(0, E(c)) / eMax) * (W - PL - 8), y = (v) => 8 + (1 - Math.min(1, yv(v))) * (H - PB - 8);
+  let d = "";
+  for (let i = 0; i < n; i++) d += `${i ? "L" : "M"}${x(i).toFixed(1)},${y(sp.counts[i]).toFixed(1)}`;
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-cmp-svg">`;
+  for (const e of [100, 500, 1000, 1500, 2000, 2500, 3000]) {
+    if (e > eMax) break;
+    const xx = PL + (e / eMax) * (W - PL - 8);
+    svg += `<line x1="${xx}" x2="${xx}" y1="8" y2="${H - PB}" class="grid"/><text x="${xx}" y="${H - 4}" text-anchor="middle" class="ax">${e} keV</text>`;
+  }
+  svg += `<path d="${d}" class="rc"/></svg>`;
+  box.innerHTML = svg;
+  $("rcRealSpecInfo").textContent = `${(total).toLocaleString(LOCALE)} contagens em ${rcDur(sp.seconds) || sp.seconds + " s"} · ${n} canais`;
+}
+
+function wireRc() {
+  on("radiacode", renderRc);
+  $("rcPill").addEventListener("click", () => showView("radiacode"));
+  $("btnRcRetry").addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
+  $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
+  $("chkRcOn").addEventListener("change", async (e) => renderRc(await call(api.SetRadiacode, e.target.checked, $("rcBLE").value)));
+  $("rcBLE").addEventListener("change", async () => renderRc(await call(api.SetRadiacode, $("chkRcOn").checked, $("rcBLE").value)));
+  $("btnRcBLEScan").addEventListener("click", async () => {
+    const ul = $("rcBLEFound"), info = $("rcBLEInfo");
+    ul.textContent = "";
+    info.textContent = "Procurando (uns 6 segundos)…";
+    let list = [];
+    try { list = await api.ScanRadiacodeBLE(); } catch (e) { info.textContent = errMsg(e); return; }
+    info.textContent = list.length ? "" : "Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?";
+    for (const d of list) {
+      const li = document.createElement("li");
+      const g = document.createElement("span");
+      g.className = "grow";
+      g.innerHTML = "<strong data-no-tr></strong><span class='small mono muted' data-no-tr></span>";
+      g.firstChild.textContent = d.name;
+      g.lastChild.textContent = d.address + (d.rssi ? ` · ${d.rssi} dBm` : "");
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "btn small"; b.textContent = "Usar este";
+      b.addEventListener("click", async () => { $("rcBLE").value = d.address; renderRc(await call(api.SetRadiacode, true, d.address)); ul.textContent = ""; });
+      li.append(g, b);
+      ul.appendChild(li);
+    }
+  });
+  $("rcCmpRange").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-min]");
+    if (!b) return;
+    state.rc.cmpMin = +b.dataset.min;
+    $("rcCmpRange").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    refreshRcCompare();
+  });
+  $("rcSpecSrc").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-acc]");
+    if (!b) return;
+    state.rc.accum = b.dataset.acc === "1";
+    $("rcSpecSrc").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    readRcSpectrum();
+  });
+  $("btnRcSpec").addEventListener("click", readRcSpectrum);
+  $("btnRcSpecLog").addEventListener("click", () => {
+    state.rc.log = !state.rc.log;
+    $("btnRcSpecLog").textContent = state.rc.log ? "Escala: log" : "Escala: linear";
+    drawRcSpectrum();
+  });
+  setInterval(() => { if (state.view === "radiacode" && state.rc.st && state.rc.st.state === "conectado") refreshRcCompare(); }, 60e3);
+  if (api.GetRadiacode) api.GetRadiacode().then(renderRc).catch(() => {});
+}
+
 // ---------- resumo e comparação ----------
 
 state.sum = { mode: "resumo", preset: "hoje", cmp: "hoje-ontem", day: 0, dayA: 0, dayB: 0 };
@@ -4325,6 +4501,12 @@ function makeDemoApi() {
     }
     emit("measure", { ...meas });
   }
+  const demoRcCfg = { off: false, ble: "" };
+  // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
+  const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
+  const demoRc = () => demoRcFake() && !demoRcCfg.off
+    ? { state: "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+    : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
   let api;
@@ -4409,6 +4591,21 @@ function makeDemoApi() {
     GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\GMC Monitor\\Versões",
     OpenVersionsDir: async () => {},
     GetSync: async () => demoSync,
+    GetRadiacode: async () => demoRc(),
+    SetRadiacode: async (on, ble) => { demoRcCfg.off = !on; demoRcCfg.ble = (ble || "").toUpperCase(); return demoRc(); },
+    ReconnectRadiacode: async () => demoRc(),
+    ScanRadiacodeBLE: async () => { await new Promise((r) => setTimeout(r, 600)); return [{ address: "52:43:06:50:01:D7", name: "RadiaCode-102#RC-102-001234", rssi: -62 }]; },
+    GetRcCompare: async (min) => {
+      if (!demoRcFake()) return { minutes: 0, rcOnly: 0 };
+      const n = Math.min(min, 600), t = [], gmc = [], rc = [];
+      for (let i = 0; i < n; i++) { const g = 0.1 + 0.02 * Math.sin(i / 60) + (Math.random() - 0.5) * 0.04; t.push(Date.now() - (n - i) * 60e3); gmc.push(g); rc.push(g * 0.92 + (Math.random() - 0.5) * 0.02); }
+      return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0 };
+    },
+    GetRcSpectrum: async () => {
+      if (!demoRcFake()) throw new Error("RadiaCode não conectado");
+      const counts = []; for (let i = 0; i < 1024; i++) counts.push(Math.round(4000 * Math.exp(-i / 60) + 300 * Math.exp(-0.5 * ((i - 250) / 9) ** 2) + Math.random() * 5));
+      return { seconds: 3600, a: [-6, 2.45, 0.00042], counts, accum: false };
+    },
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
     SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
     ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),

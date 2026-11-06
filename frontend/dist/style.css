@@ -960,3 +960,27 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .sync-pair { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
 .sync-pair #syncAddr { flex: 1 1 240px; }
 .sync-pair #syncPairCode { width: 9em; font-family: var(--mono); letter-spacing: 2px; }
+
+/* RadiaCode de verdade */
+.rc-card.rc-real { border-style: solid; background: var(--surface); }
+.rc-pill { gap: 6px; }
+.rc-state { color: var(--muted); }
+.rc-state.ok { color: var(--accent); }
+.rc-state.err { color: var(--warn); }
+.rc-nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.rc-nums > div { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.rc-nums .lbl { font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.rc-nums .val { font-size: 22px; color: var(--text); }
+.rc-cmp-chart, .rc-real-spec { width: 100%; }
+.rc-cmp-svg { width: 100%; height: 220px; display: block; }
+.rc-cmp-svg .grid { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
+.rc-cmp-svg .ax { fill: var(--muted); font-size: 11px; font-family: var(--mono, monospace); }
+.rc-cmp-svg path { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.rc-cmp-svg path.gmc { stroke: #A3ADB4; }
+.rc-cmp-svg path.rc { stroke: #5EEAD4; }
+.rc-legend { display: flex; align-items: center; gap: 6px; color: var(--muted); }
+.rc-legend .k { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-left: 8px; }
+.rc-legend .k.gmc { background: #A3ADB4; }
+.rc-legend .k.rc { background: #5EEAD4; }
+.rc-empty { padding: 28px 0; text-align: center; }
+@media (max-width: 900px) { .rc-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }

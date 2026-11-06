@@ -79,6 +79,10 @@ type Settings struct {
 	NoSyncAuto bool `json:"noSyncAuto"`
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
+	// RadiaCode (radiacode.go): não procurar o aparelho; endereço Bluetooth
+	// (Linux) para quando não estiver no USB. Só mudam por SetRadiacode.
+	RcOff bool   `json:"rcOff"`
+	RcBLE string `json:"rcBLE"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
 	// pasta dos relatórios em PDF; vazio = Documentos/GMC Monitor/Relatórios
@@ -344,6 +348,7 @@ type App struct {
 	interf   interferenceDetector
 	upd      updater
 	sync     syncState // sincronização entre PCs (sync.go)
+	rc       rcState   // RadiaCode (radiacode.go)
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -406,6 +411,7 @@ func (a *App) startup(ctx context.Context) {
 	go a.updateLoop()
 	go a.cleanOldVersionsLater()
 	go a.syncLoop()
+	go a.rcLoop()
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		go a.autoReconnect(0)
@@ -543,6 +549,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
 	s.SkipVersion = a.settings.SkipVersion // muda só por SkipUpdate
+	s.RcOff, s.RcBLE = a.settings.RcOff, a.settings.RcBLE // só por SetRadiacode
 	old := a.settings
 	autostartChanged := old.StartWithWindows != s.StartWithWindows
 	if old.RainLat != s.RainLat || old.RainLon != s.RainLon || old.RainEnabled != s.RainEnabled {

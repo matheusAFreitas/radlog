@@ -1183,7 +1183,79 @@ const I18N_EN = {
 "Incerteza": "Uncertainty",
 "nenhuma diferença que dê para separar do fundo (chegou ao tempo máximo sem decidir)": "no difference that can be told apart from background (reached the time limit without deciding)",
 "provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou ao tempo máximo sem decidir)": "probably slightly radioactive; measure longer to confirm (reached the time limit without deciding)",
-": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).": ": the object came out below background, so the background probably changed (another spot, rain)."
+": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).": ": the object came out below background, so the background probably changed (another spot, rain).",
+"RadiaCode: desligou": "RadiaCode: turned off",
+"RadiaCode: ligou": "RadiaCode: turned on",
+"RadiaCode: desligou por bateria fraca": "RadiaCode: shut down on low battery",
+"RadiaCode: configuração alterada": "RadiaCode: settings changed",
+"RadiaCode: dose zerada": "RadiaCode: dose reset",
+"RadiaCode: evento do usuário": "RadiaCode: user event",
+"RadiaCode: alarme de bateria vazia": "RadiaCode: empty battery alarm",
+"RadiaCode: começou a carregar": "RadiaCode: started charging",
+"RadiaCode: parou de carregar": "RadiaCode: stopped charging",
+"RadiaCode: alarme 1 de taxa de dose": "RadiaCode: dose rate alarm 1",
+"RadiaCode: alarme 2 de taxa de dose": "RadiaCode: dose rate alarm 2",
+"RadiaCode: taxa de dose fora da escala": "RadiaCode: dose rate off scale",
+"RadiaCode: alarme 1 de dose": "RadiaCode: dose alarm 1",
+"RadiaCode: alarme 2 de dose": "RadiaCode: dose alarm 2",
+"RadiaCode: dose fora da escala": "RadiaCode: dose off scale",
+"RadiaCode: temperatura baixa demais": "RadiaCode: temperature too low",
+"RadiaCode: temperatura alta demais": "RadiaCode: temperature too high",
+"RadiaCode: mensagem de texto": "RadiaCode: text message",
+"RadiaCode: cópia da memória": "RadiaCode: memory snapshot",
+"RadiaCode: espectro zerado": "RadiaCode: spectrum reset",
+"RadiaCode: alarme 1 de contagem": "RadiaCode: count rate alarm 1",
+"RadiaCode: alarme 2 de contagem": "RadiaCode: count rate alarm 2",
+"RadiaCode: contagem fora da escala": "RadiaCode: count rate off scale",
+"Aparelho": "Device",
+"Taxa de dose": "Dose rate",
+"Contagem": "Count",
+"Bateria": "Battery",
+"Procurar de novo": "Search again",
+"Configurar conexão": "Set up connection",
+"Lado a lado com o GMC": "Side by side with the GMC",
+"Para a intercalibração: deixe os dois aparelhos juntos, na mesma altura, sem um blindar o outro, por pelo menos 24 h. Cada ponto é um minuto em que os dois mediram; os dois em µSv/h (o GMC pela calibração dele).": "For intercalibration: keep both devices together, at the same height, without one shielding the other, for at least 24 h. Each point is a minute in which both measured; both in µSv/h (the GMC through its own calibration).",
+"Espectro do aparelho": "Device spectrum",
+"Atual": "Current",
+"Acumulado": "Accumulated",
+"Ler espectro": "Read spectrum",
+"Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).": "Below, what's still to come, with <b>simulated data</b> in the same format the device sends (1,024 energy channels).",
+"Abaixo, o que ainda vai ficar pronto, com": "Below, what's still to come, with",
+"no mesmo formato que o aparelho manda (1.024 canais de energia).": "in the same format the device sends (1,024 energy channels).",
+"O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.": "The app looks for the RadiaCode by itself: on USB and, if a Bluetooth address is set, over Bluetooth. If the phone is connected to it, the PC tries again later and takes over when the phone lets go.",
+"Procurar o RadiaCode": "Look for the RadiaCode",
+"Endereço Bluetooth (opcional)": "Bluetooth address (optional)",
+"ex.: 52:43:01:02:03:04": "e.g., 52:43:01:02:03:04",
+"Procurar no Bluetooth": "Search Bluetooth",
+"Procurando (uns 6 segundos)…": "Searching (about 6 seconds)…",
+"Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?": "No RadiaCode showed up. Is its Bluetooth on? Is the phone app disconnected?",
+"No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.": "On Windows, the Bluetooth connection isn't ready yet: use the USB cable.",
+"A procura está desligada em Configurações → RadiaCode.": "Searching is off in Settings → RadiaCode.",
+"Ligue o RadiaCode no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": "Plug the RadiaCode into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).",
+"Ligue o RadiaCode no USB do PC, ou configure o endereço Bluetooth.": "Plug the RadiaCode into the PC's USB, or set up the Bluetooth address.",
+"Ligue o RadiaCode no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.": "Plug the RadiaCode into the PC's USB. On Windows, for now, the connection is USB only.",
+"procura desligada": "search off",
+"procurando no USB…": "searching USB…",
+"procurando no USB e no Bluetooth…": "searching USB and Bluetooth…",
+"conectando…": "connecting…",
+"erro na conexão": "connection error",
+"procurando": "searching",
+"conectando": "connecting",
+"erro": "error",
+"RadiaCode: conectando…": "RadiaCode: connecting…",
+"RadiaCode: erro": "RadiaCode: error",
+"Sem minutos com os dois aparelhos nesse período.": "No minutes with both devices in this period.",
+"GMC-800 (µSv/h, média de 10 min)": "GMC-800 (µSv/h, 10-min average)",
+"RadiaCode não conectado": "RadiaCode not connected",
+"RadiaCode não encontrado": "RadiaCode not found",
+"USB: o RadiaCode não respondeu": "USB: the RadiaCode didn't respond",
+"Bluetooth: conexão perdida": "Bluetooth: connection lost",
+"Bluetooth: o RadiaCode não respondeu": "Bluetooth: the RadiaCode didn't respond",
+"Bluetooth: o aparelho não mostrou o serviço do RadiaCode": "Bluetooth: the device didn't show the RadiaCode service",
+"Bluetooth com o RadiaCode ainda só no Linux; no Windows, use o USB por enquanto": "Bluetooth with the RadiaCode is Linux-only for now; on Windows, use USB",
+"nenhum adaptador Bluetooth": "no Bluetooth adapter",
+"o Bluetooth do PC está desligado": "the PC's Bluetooth is off",
+"sem interface USB aberta": "no USB interface opened"
 },
 "patterns": [
 [
@@ -1360,6 +1432,15 @@ const I18N_EN = {
 [
 "Registrado: ",
 ". Abre escondido na bandeja, perto do relógio (às vezes dentro da setinha ^)."
+]
+],
+[
+"RadiaCode ",
+"^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
+"RadiaCode ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
+[
+"RadiaCode ",
+" não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)"
 ]
 ],
 [
@@ -1632,6 +1713,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui pegar o USB do RadiaCode (outro programa usando?): ",
+"^não consegui pegar o USB do RadiaCode \\(outro programa usando\\?\\): ((?:(?! · ).)+?)$",
+"couldn't claim the RadiaCode's USB (another program using it?): ${1}",
+[
+"não consegui pegar o USB do RadiaCode (outro programa usando?): "
+]
+],
+[
 "atualização: não deu para salvar em ",
 "^atualização: não deu para salvar em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\); usando a pasta de dados$",
 "update: couldn't save to ${1} (${2}); using the data folder",
@@ -1753,6 +1842,24 @@ const I18N_EN = {
 ]
 ],
 [
+"firmware ",
+"^firmware ((?:(?! · ).)+?)\\.((?:(?! · ).)+?) é antigo demais \\(precisa de 4\\.8 ou mais novo\\)$",
+"firmware ${1}.${2} is too old (needs 4.8 or newer)",
+[
+"firmware ",
+" é antigo demais (precisa de 4.8 ou mais novo)"
+]
+],
+[
+"o RadiaCode está com o driver ",
+"^o RadiaCode está com o driver ((?:(?! · ).)+?); o app precisa do WinUSB \\(((?:(?! · ).)+?)\\)$",
+"the RadiaCode is using the ${1} driver; the app needs WinUSB (${2})",
+[
+"o RadiaCode está com o driver ",
+"; o app precisa do WinUSB ("
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -1839,6 +1946,15 @@ const I18N_EN = {
 [
 "só ",
 " min do fundo da casa na última hora (precisa de "
+]
+],
+[
+"sem permissão em ",
+"^sem permissão em ((?:(?! · ).)+?): instale a regra do udev do RadiaCode$",
+"no permission on ${1}: install the RadiaCode udev rule",
+[
+"sem permissão em ",
+": instale a regra do udev do RadiaCode"
 ]
 ],
 [
@@ -2163,6 +2279,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) min só do RadiaCode \\(GMC desconectado\\?\\)$",
+"${1} min from the RadiaCode only (GMC disconnected?)",
+[
+" min só do RadiaCode (GMC desconectado?)"
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -2176,6 +2300,14 @@ const I18N_EN = {
 "disconnection: closing the port failed/hung: ${1}",
 [
 "desconexão: fechar a porta falhou/travou: "
+]
+],
+[
+"para o fator valer, junte 24 h (faltam ",
+"^para o fator valer, junte 24 h \\(faltam ((?:(?! · ).)+?)\\)$",
+"for the factor to count, gather 24 h (${1} to go)",
+[
+"para o fator valer, junte 24 h (faltam "
 ]
 ],
 [
@@ -2215,6 +2347,15 @@ const I18N_EN = {
 ]
 ],
 [
+"resposta fora de ordem (pedido ",
+"^resposta fora de ordem \\(pedido ((?:(?! · ).)+?), veio ((?:(?! · ).)+?)\\)$",
+"out-of-order response (request ${1}, got ${2})",
+[
+"resposta fora de ordem (pedido ",
+", veio "
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -2248,6 +2389,16 @@ const I18N_EN = {
 "sincronização com ",
 "): trouxe ",
 "; levou "
+]
+],
+[
+"RadiaCode conectado (",
+"^RadiaCode conectado \\(((?:(?! · ).)+?)\\) · ((?:(?! · ).)+?) ((?:(?! · ).)+?) · firmware ((?:(?! · ).)+?)$",
+"RadiaCode connected (${1}) · ${2} ${3} · firmware ${4}",
+[
+"RadiaCode conectado (",
+") · ",
+" · firmware "
 ]
 ],
 [
@@ -2458,6 +2609,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: BlueZ não respondeu (",
+"^Bluetooth: BlueZ não respondeu \\(((?:(?! · ).)+?)\\)$",
+"Bluetooth: BlueZ didn't respond (${1})",
+[
+"Bluetooth: BlueZ não respondeu ("
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -2596,6 +2755,14 @@ const I18N_EN = {
 [
 "· dose ≈ ",
 " µSv · um ponto a cada "
+]
+],
+[
+"Bluetooth: não conectou em ",
+"^Bluetooth: não conectou em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"Bluetooth: couldn't connect to ${1} (${2})",
+[
+"Bluetooth: não conectou em "
 ]
 ],
 [
@@ -2743,6 +2910,15 @@ const I18N_EN = {
 [
 "≈ 1/",
 " de um raio-X de tórax ·"
+]
+],
+[
+"leitura ",
+"^leitura ((?:(?! · ).)+?) recusada \\(código ((?:(?! · ).)+?)\\)$",
+"read ${1} refused (code ${2})",
+[
+"leitura ",
+" recusada (código "
 ]
 ],
 [
@@ -2957,6 +3133,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: sem D-Bus (",
+"^Bluetooth: sem D\\-Bus \\(((?:(?! · ).)+?)\\)$",
+"Bluetooth: no D-Bus (${1})",
+[
+"Bluetooth: sem D-Bus ("
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -3042,6 +3226,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode conectado pelo ",
+"^RadiaCode conectado pelo ((?:(?! · ).)+?)$",
+"RadiaCode connected via ${1}",
+[
+"RadiaCode conectado pelo "
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -3107,6 +3299,23 @@ const I18N_EN = {
 [
 "dureza ",
 " (1,00 = fundo)"
+]
+],
+[
+"RadiaCode desconectado: ",
+"^RadiaCode desconectado: ((?:(?! · ).)+?)$",
+"RadiaCode disconnected: ${1}",
+[
+"RadiaCode desconectado: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) contagens em ((?:(?! · ).)+?) · ((?:(?! · ).)+?) canais$",
+"${1} counts in ${2} · ${3} channels",
+[
+" contagens em ",
+" canais"
 ]
 ],
 [
@@ -3275,6 +3484,14 @@ const I18N_EN = {
 [
 " CPM (",
 " min até "
+]
+],
+[
+"Bluetooth (envio): ",
+"^Bluetooth \\(envio\\): ((?:(?! · ).)+?)$",
+"Bluetooth (send): ${1}",
+[
+"Bluetooth (envio): "
 ]
 ],
 [
@@ -3590,6 +3807,22 @@ const I18N_EN = {
 "Last attempt: ${1}",
 [
 "Última tentativa: "
+]
+],
+[
+"RadiaCode ÷ GMC = ",
+"^RadiaCode ÷ GMC = ((?:(?! · ).)+?)$",
+"RadiaCode ÷ GMC = ${1}",
+[
+"RadiaCode ÷ GMC = "
+]
+],
+[
+"USB (resposta): ",
+"^USB \\(resposta\\): ((?:(?! · ).)+?)$",
+"USB (response): ${1}",
+[
+"USB (resposta): "
 ]
 ],
 [
@@ -3933,6 +4166,22 @@ const I18N_EN = {
 ]
 ],
 [
+"conectado pelo ",
+"^conectado pelo ((?:(?! · ).)+?)$",
+"connected via ${1}",
+[
+"conectado pelo "
+]
+],
+[
+"USB (envio): ",
+"^USB \\(envio\\): ((?:(?! · ).)+?)$",
+"USB (send): ${1}",
+[
+"USB (envio): "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -4257,6 +4506,14 @@ const I18N_EN = {
 ]
 ],
 [
+"conectado · ",
+"^conectado · ((?:(?! · ).)+?)$",
+"connected · ${1}",
+[
+"conectado · "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -4346,6 +4603,22 @@ const I18N_EN = {
 "${1} accumulated",
 [
 " acumulados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) min juntos$",
+"${1} min together",
+[
+" min juntos"
+]
+],
+[
+"correlação ",
+"^correlação ((?:(?! · ).)+?)$",
+"correlation ${1}",
+[
+"correlação "
 ]
 ],
 [
@@ -4539,6 +4812,14 @@ const I18N_EN = {
 ]
 ],
 [
+"firmware ",
+"^firmware ((?:(?! · ).)+?)$",
+"firmware ${1}",
+[
+"firmware "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -4625,6 +4906,22 @@ const I18N_EN = {
 "brought: ${1}",
 [
 "trouxe: "
+]
+],
+[
+"início: ",
+"^início: ((?:(?! · ).)+?)$",
+"startup: ${1}",
+[
+"início: "
+]
+],
+[
+"abrir ",
+"^abrir ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"open ${1}: ${2}",
+[
+"abrir "
 ]
 ],
 [
@@ -4805,6 +5102,14 @@ const I18N_EN = {
 ]
 ],
 [
+"série ",
+"^série ((?:(?! · ).)+?)$",
+"serial ${1}",
+[
+"série "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) dias$",
 "${1} days",
@@ -4929,6 +5234,14 @@ const I18N_EN = {
 "^v((?:(?! · ).)+?) ·$",
 "v${1} ·",
 []
+],
+[
+"em ",
+"^em ((?:(?! · ).)+?)$",
+"over ${1}",
+[
+"em "
+]
 ],
 [
 "",

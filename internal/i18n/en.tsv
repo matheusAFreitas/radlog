@@ -1623,3 +1623,105 @@ provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou a
 — fundo da casa {0} ± {1}	— home background {0} ± {1}
 : o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	: the object came out below background, so the background probably changed (another spot, rain).
 A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
+
+RadiaCode: desligou	RadiaCode: turned off
+RadiaCode: ligou	RadiaCode: turned on
+RadiaCode: desligou por bateria fraca	RadiaCode: shut down on low battery
+RadiaCode: configuração alterada	RadiaCode: settings changed
+RadiaCode: dose zerada	RadiaCode: dose reset
+RadiaCode: evento do usuário	RadiaCode: user event
+RadiaCode: alarme de bateria vazia	RadiaCode: empty battery alarm
+RadiaCode: começou a carregar	RadiaCode: started charging
+RadiaCode: parou de carregar	RadiaCode: stopped charging
+RadiaCode: alarme 1 de taxa de dose	RadiaCode: dose rate alarm 1
+RadiaCode: alarme 2 de taxa de dose	RadiaCode: dose rate alarm 2
+RadiaCode: taxa de dose fora da escala	RadiaCode: dose rate off scale
+RadiaCode: alarme 1 de dose	RadiaCode: dose alarm 1
+RadiaCode: alarme 2 de dose	RadiaCode: dose alarm 2
+RadiaCode: dose fora da escala	RadiaCode: dose off scale
+RadiaCode: temperatura baixa demais	RadiaCode: temperature too low
+RadiaCode: temperatura alta demais	RadiaCode: temperature too high
+RadiaCode: mensagem de texto	RadiaCode: text message
+RadiaCode: cópia da memória	RadiaCode: memory snapshot
+RadiaCode: espectro zerado	RadiaCode: spectrum reset
+RadiaCode: alarme 1 de contagem	RadiaCode: count rate alarm 1
+RadiaCode: alarme 2 de contagem	RadiaCode: count rate alarm 2
+RadiaCode: contagem fora da escala	RadiaCode: count rate off scale
+Aparelho	Device
+Taxa de dose	Dose rate
+Contagem	Count
+Bateria	Battery
+Procurar de novo	Search again
+Configurar conexão	Set up connection
+Lado a lado com o GMC	Side by side with the GMC
+Para a intercalibração: deixe os dois aparelhos juntos, na mesma altura, sem um blindar o outro, por pelo menos 24 h. Cada ponto é um minuto em que os dois mediram; os dois em µSv/h (o GMC pela calibração dele).	For intercalibration: keep both devices together, at the same height, without one shielding the other, for at least 24 h. Each point is a minute in which both measured; both in µSv/h (the GMC through its own calibration).
+Espectro do aparelho	Device spectrum
+Atual	Current
+Acumulado	Accumulated
+Ler espectro	Read spectrum
+Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).	Below, what's still to come, with <b>simulated data</b> in the same format the device sends (1,024 energy channels).
+Abaixo, o que ainda vai ficar pronto, com	Below, what's still to come, with
+no mesmo formato que o aparelho manda (1.024 canais de energia).	in the same format the device sends (1,024 energy channels).
+O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.	The app looks for the RadiaCode by itself: on USB and, if a Bluetooth address is set, over Bluetooth. If the phone is connected to it, the PC tries again later and takes over when the phone lets go.
+Procurar o RadiaCode	Look for the RadiaCode
+Endereço Bluetooth (opcional)	Bluetooth address (optional)
+ex.: 52:43:01:02:03:04	e.g., 52:43:01:02:03:04
+Procurar no Bluetooth	Search Bluetooth
+Procurando (uns 6 segundos)…	Searching (about 6 seconds)…
+Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?	No RadiaCode showed up. Is its Bluetooth on? Is the phone app disconnected?
+No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.	On Windows, the Bluetooth connection isn't ready yet: use the USB cable.
+A procura está desligada em Configurações → RadiaCode.	Searching is off in Settings → RadiaCode.
+Ligue o RadiaCode no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).	Plug the RadiaCode into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).
+Ligue o RadiaCode no USB do PC, ou configure o endereço Bluetooth.	Plug the RadiaCode into the PC's USB, or set up the Bluetooth address.
+Ligue o RadiaCode no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.	Plug the RadiaCode into the PC's USB. On Windows, for now, the connection is USB only.
+procura desligada	search off
+procurando no USB…	searching USB…
+procurando no USB e no Bluetooth…	searching USB and Bluetooth…
+conectando…	connecting…
+erro na conexão	connection error
+procurando	searching
+conectando	connecting
+erro	error
+RadiaCode: conectando…	RadiaCode: connecting…
+RadiaCode: erro	RadiaCode: error
+conectado pelo {0}	connected via {0}
+conectado · {0}	connected · {0}
+RadiaCode conectado pelo {0}	RadiaCode connected via {0}
+RadiaCode conectado ({0}) · {1} {2} · firmware {3}	RadiaCode connected ({0}) · {1} {2} · firmware {3}
+RadiaCode desconectado: {0}	RadiaCode disconnected: {0}
+série {0}	serial {0}
+firmware {0}	firmware {0}
+em {0}	over {0}
+Sem minutos com os dois aparelhos nesse período.	No minutes with both devices in this period.
+{0} min só do RadiaCode (GMC desconectado?)	{0} min from the RadiaCode only (GMC disconnected?)
+GMC-800 (µSv/h, média de 10 min)	GMC-800 (µSv/h, 10-min average)
+{0} min juntos	{0} min together
+RadiaCode ÷ GMC = {0}	RadiaCode ÷ GMC = {0}
+correlação {0}	correlation {0}
+para o fator valer, junte 24 h (faltam {0})	for the factor to count, gather 24 h ({0} to go)
+{0} contagens em {1} · {2} canais	{0} counts in {1} · {2} channels
+RadiaCode não conectado	RadiaCode not connected
+RadiaCode não encontrado	RadiaCode not found
+USB: o RadiaCode não respondeu	USB: the RadiaCode didn't respond
+USB (envio): {0}	USB (send): {0}
+USB (resposta): {0}	USB (response): {0}
+Bluetooth: conexão perdida	Bluetooth: connection lost
+Bluetooth: o RadiaCode não respondeu	Bluetooth: the RadiaCode didn't respond
+Bluetooth: o aparelho não mostrou o serviço do RadiaCode	Bluetooth: the device didn't show the RadiaCode service
+Bluetooth (envio): {0}	Bluetooth (send): {0}
+Bluetooth: BlueZ não respondeu ({0})	Bluetooth: BlueZ didn't respond ({0})
+Bluetooth: não conectou em {0} ({1})	Bluetooth: couldn't connect to {0} ({1})
+Bluetooth: sem D-Bus ({0})	Bluetooth: no D-Bus ({0})
+Bluetooth com o RadiaCode ainda só no Linux; no Windows, use o USB por enquanto	Bluetooth with the RadiaCode is Linux-only for now; on Windows, use USB
+nenhum adaptador Bluetooth	no Bluetooth adapter
+o Bluetooth do PC está desligado	the PC's Bluetooth is off
+RadiaCode {0} não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)	RadiaCode {0} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)
+firmware {0}.{1} é antigo demais (precisa de 4.8 ou mais novo)	firmware {0}.{1} is too old (needs 4.8 or newer)
+início: {0}	startup: {0}
+não consegui pegar o USB do RadiaCode (outro programa usando?): {0}	couldn't claim the RadiaCode's USB (another program using it?): {0}
+o RadiaCode está com o driver {0}; o app precisa do WinUSB ({1})	the RadiaCode is using the {0} driver; the app needs WinUSB ({1})
+sem permissão em {0}: instale a regra do udev do RadiaCode	no permission on {0}: install the RadiaCode udev rule
+resposta fora de ordem (pedido {0}, veio {1})	out-of-order response (request {0}, got {1})
+leitura {0} recusada (código {1})	read {0} refused (code {1})
+sem interface USB aberta	no USB interface opened
+abrir {0}: {1}	open {0}: {1}

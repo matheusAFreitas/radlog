@@ -1,5 +1,24 @@
 # Versões
 
+## 1.25.0
+- **RadiaCode (primeira versão)**: o app procura o RadiaCode sozinho e
+  conecta pelo **USB** (Windows e Linux) ou pelo **Bluetooth** (por enquanto
+  só no Linux). O protocolo segue a biblioteca aberta cdump/radiacode.
+  - Na aba RadiaCode: taxa de dose, contagem, dose acumulada, bateria,
+    temperatura, modelo, número de série e firmware ao vivo.
+  - A pílula no topo mostra o µSv/h e a bateria.
+  - Os eventos do aparelho (alarmes, carga) entram nos Eventos.
+  - O app grava um ponto por minuto, separado das leituras do GMC
+    (pasta `radiacode`).
+  - **Lado a lado com o GMC**: os dois aparelhos em µSv/h no mesmo gráfico,
+    com a razão RadiaCode ÷ GMC e a correlação minuto a minuto. É o começo da
+    intercalibração.
+  - **Espectro do aparelho**: o atual ou o acumulado, em escala log ou linear.
+  - Em Configurações → RadiaCode: ligar e desligar a procura, além do
+    endereço Bluetooth e da busca pelo aparelho.
+- No Windows, o USB precisa do driver WinUSB. Se o aparelho estiver com
+  outro driver, o erro mostra qual é.
+
 ## 1.24.0
 - **Medir objeto no automático**: a fase com o objeto para sozinha quando já
   dá para responder. Para quando o objeto está claramente acima do fundo
