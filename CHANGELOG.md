@@ -1,5 +1,18 @@
 # Versões
 
+## 1.28.3
+- Os quadros **GMC-800 | RadiaCode** agora têm a mesma estrutura, linha por
+  linha:
+  - número, linha de baixo, "normal", σ, unidades, régua e medidas ficam na
+    mesma altura nos dois, mesmo quando um texto quebra em duas linhas ou
+    some (por exemplo, com o RadiaCode desconectado);
+  - as unidades vêm na mesma ordem (CPM, µSv/h, mrem/h, CPS), e cada uma
+    mostra as mesmas informações embaixo nos dois aparelhos;
+  - o mesmo tipo de número;
+  - o "o que é σ?" também aparece no RadiaCode;
+  - a porta do GMC aparece no canto, como a conexão do RadiaCode;
+  - as medidas do GMC mostram só a unidade, como as do RadiaCode.
+
 ## 1.28.2
 - Os quadros **GMC-800 | RadiaCode** agora têm a mesma largura e o mesmo
   formato.

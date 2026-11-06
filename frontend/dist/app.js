@@ -152,7 +152,7 @@ function openSigmaHelp() {
     </ul>`;
   $("sigmaDlg").showModal();
 }
-document.addEventListener("click", (e) => { if (e.target.closest("#btnSigmaHelp")) openSigmaHelp(); });
+document.addEventListener("click", (e) => { if (e.target.closest("#btnSigmaHelp, .rc-sigma-help")) openSigmaHelp(); });
 
 function renderReading() {
   const r = state.last;
@@ -259,6 +259,7 @@ function renderStatus() {
   $("dataDir").textContent = s.dataDir || "—";
   $("connMsg").textContent = s.state === "erro" ? s.message : s.state === "conectado" ? "conectado em " + d.port : "";
   $("btnConnect").textContent = connected ? "Desconectar" : "Conectar";
+  renderHeroVia();
   renderReading();
 }
 
@@ -275,7 +276,6 @@ async function refreshStats() {
   $("tMaxSub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o RadiaCode)
   $("hAvg1h").textContent = fmt(s.avg1h, 1);
-  $("hAvg1hSub").textContent = s.avg1h == null ? "CPM" : `CPM · ≈ ${fmt(s.avg1h * cal, 3)} µSv/h`;
   $("hMin24").textContent = fmt(s.min24h, 0);
   $("hMax24").textContent = fmt(s.max24h, 0);
   $("hMax24Sub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
@@ -3990,6 +3990,16 @@ state.rcUnit = localGet("rcUnit", "usv");
 
 // quadro do RadiaCode, com as mesmas informações do GMC: valor, dose de
 // hoje, normal/σ, régua e medidas
+// conexão do GMC no canto do quadro, como a do RadiaCode (só lado a lado)
+function renderHeroVia() {
+  const el = $("heroVia");
+  const s = state.status || {}, d = s.device || {};
+  const on = s.state === "conectado";
+  el.hidden = !document.body.classList.contains("has-rc");
+  el.textContent = on ? `· ${d.port || ""}` : state.demo && state.demo.active ? "" : "· desconectado";
+  el.className = "rc-main-via gmc-via mono" + (on ? " on" : "");
+}
+
 function renderRcMain(st) {
   const live = st.state === "conectado" && st.time;
   const show = st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
@@ -3997,6 +4007,7 @@ function renderRcMain(st) {
   $("duo").classList.toggle("on", show);
   document.body.classList.toggle("has-rc", show);
   $("heroEyebrow").textContent = show ? "GMC-800" : "Leitura atual";
+  renderHeroVia();
   if (!show) return;
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
   $("rcMainVia").textContent = st.state === "conectado" ? `· ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "· conectando…" : "· desconectado";
@@ -4012,11 +4023,12 @@ function renderRcMain(st) {
   const v = usv == null ? null : { usv, mrh: usv / 10, cps, cpm: cps * 60 }[u];
   $("rcMainVal").textContent = v == null ? "—" : u === "usv" ? fmt(v, usvDigits(v)) : u === "mrh" ? fmt(v, usvDigits(v * 10) + 1) : u === "cps" ? fmt(v, 2) : fmt(v, 0);
   const vs = usv == null ? "" : `${fmt(usv, usvDigits(usv))} µSv/h`;
+  // mesmas linhas do quadro do GMC em cada unidade
   const alt = usv == null ? "" : {
-    usv: `${fmt(cps, 2)} CPS · ${fmt(cps * 60, 0)} CPM`,
-    mrh: `${vs} · ${fmt(cps, 2)} CPS`,
-    cps: `${vs} · ${fmt(cps * 60, 0)} CPM`,
-    cpm: `${vs} · ${fmt(cps, 2)} CPS`,
+    cpm: `≈ ${vs} · ${fmt(cps, 1)} CPS`,
+    usv: `${fmt(cps * 60, 0)} CPM · ${fmt(usv / 10, usvDigits(usv) + 1)} mrem/h`,
+    mrh: `${fmt(cps * 60, 0)} CPM · ${vs}`,
+    cps: `${fmt(cps * 60, 0)} CPM · ${vs}`,
   }[u];
   $("rcMainAlt").textContent = live ? `${alt} · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
@@ -4037,7 +4049,7 @@ function renderRcMain(st) {
     sig.className = "sigma " + cls;
     sig.title = `Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ${fmt(sx.bgUSv, d)} µSv/h (80% entre ${range}).`;
     sig.hidden = false;
-    num.textContent = `${fmtSig(z)} · fundo ${fmt(sx.bgUSv, d)} µSv/h · 1σ = ${fmt(sd, usvDigits(sd) + 1)} µSv/h`;
+    $("rcMainSigmaVal").textContent = `${fmtSig(z)} · fundo ${fmt(sx.bgUSv, d)} µSv/h · 1σ = ${fmt(sd, usvDigits(sd))} µSv/h`;
     num.hidden = false;
   } else if (live) {
     sig.textContent = `Fundo: juntando dados em casa (${Math.round((sx.bgMinutes || 0))} de 60 min)`;
@@ -4048,7 +4060,7 @@ function renderRcMain(st) {
   } else { sig.hidden = true; num.hidden = true; }
   // régua: as mesmas faixas do app, em µSv/h
   const attn = st.attnUSv || 0.505, alarm = st.alarmUSv || 1.01, top = alarm * 1.5;
-  $("rcLevelScale").innerHTML = `<span>0</span><span>${fmt(attn, usvDigits(attn))} · atenção</span><span>${fmt(alarm, usvDigits(alarm))} · alerta</span>`;
+  $("rcLevelScale").innerHTML = `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alerta</span>`;
   const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alerta" : usv >= attn ? "atencao" : "seguro";
   $("rcLevelName").textContent = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" }[lvl] || "—";
   $("rcLevelName").className = "level-name " + lvl;

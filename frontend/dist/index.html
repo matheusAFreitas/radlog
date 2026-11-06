@@ -129,7 +129,7 @@
       <div class="reading">
         <div class="read-head">
           <div class="read-main">
-            <span class="eyebrow"><span id="heroEyebrow">Leitura atual</span> <span class="demo-tag" id="demoTag" hidden>demo</span></span>
+            <span class="eyebrow"><span id="heroEyebrow">Leitura atual</span><span class="rc-main-via gmc-via mono" id="heroVia"></span> <span class="demo-tag" id="demoTag" hidden>demo</span></span>
             <div class="value-row">
               <span class="value" id="readValue">—</span>
               <span class="unit" id="readUnit">CPM</span>
@@ -171,7 +171,7 @@
     </div>
 
     <div class="rc-mini duo-only">
-      <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub" id="hAvg1hSub"></span></div>
+      <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">CPM</span></div>
       <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">CPM</span></div>
       <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
     </div>
@@ -182,26 +182,31 @@
     </div>
   </section>
   <section class="card rc-main" id="rcMain" hidden>
-    <div class="read-head">
-      <div class="read-main">
-        <span class="eyebrow">RadiaCode <span class="rc-main-via mono" id="rcMainVia"></span></span>
-        <div class="value-row"><span class="rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
+    <div class="hero-top">
+      <div class="reading">
+      <div class="read-head">
+        <div class="read-main">
+          <span class="eyebrow">RadiaCode <span class="rc-main-via mono" id="rcMainVia"></span></span>
+          <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
+        </div>
+        <div class="hero-dose">
+          <span class="tile-label">Dose hoje</span>
+          <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u">µSv</span></span>
+          <span class="tile-sub" id="rcDoseTodaySub"></span>
+        </div>
       </div>
-      <div class="hero-dose">
-        <span class="tile-label">Dose hoje</span>
-        <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u">µSv</span></span>
-        <span class="tile-sub" id="rcDoseTodaySub"></span>
+      <span class="alt" id="rcMainAlt"></span>
+      <span class="sigma" id="rcMainSigma" hidden></span>
+      <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
+      </div>
+      <div class="seg" role="group" aria-label="Unidade do RadiaCode" id="rcUnitSeg">
+        <button type="button" data-unit="cpm" aria-pressed="false">CPM</button>
+        <button type="button" data-unit="usv" aria-pressed="true">µSv/h</button>
+        <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
+        <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
       </div>
     </div>
-    <span class="alt" id="rcMainAlt"></span>
-    <span class="sigma" id="rcMainSigma" hidden></span>
-    <span class="sigma-line mono" id="rcMainSigmaNum" hidden></span>
-    <div class="seg" role="group" aria-label="Unidade do RadiaCode" id="rcUnitSeg">
-      <button type="button" data-unit="usv" aria-pressed="true">µSv/h</button>
-      <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
-      <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
-      <button type="button" data-unit="cpm" aria-pressed="false">CPM</button>
-    </div>
+
     <div class="level">
       <div class="level-head">
         <span class="level-name" id="rcLevelName">—</span>

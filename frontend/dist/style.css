@@ -997,7 +997,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-main-via { margin-left: 6px; letter-spacing: 0; text-transform: none; color: var(--muted); }
 .rc-main-via.on { color: #F472B6; }
 .rc-main .value-row { flex-wrap: nowrap; white-space: nowrap; }
-.rc-main-val { font-size: 56px; font-weight: 600; line-height: 1.05; color: var(--text); letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+.rc-main .value { font-size: 56px; font-weight: 600; letter-spacing: -.03em; }
+.gmc-via.on { color: var(--accent); }
 .rc-main.stale .rc-main-val { color: var(--dim, var(--muted)); }
 .rc-main .seg button { min-height: 32px; }
 .rc-mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; border-top: 1px solid var(--border); padding-top: 10px; margin-top: auto; }
@@ -1033,3 +1034,19 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-main.lv-atencao .rc-main-val { color: var(--att); }
 .rc-main.lv-alerta .rc-main-val, .rc-main.lv-perigo .rc-main-val { color: var(--alarm); }
 .rc-main.stale { --glow: transparent; }
+
+/* lado a lado: os dois quadros com a mesma estrutura, linha por linha
+   (cada parte na mesma altura nos dois, mesmo quando um texto quebra em duas
+   linhas ou some) */
+.duo.on { grid-template-rows: repeat(8, auto); row-gap: 0; }
+.duo.on > .card { grid-row: 1 / span 8; display: grid; grid-template-rows: subgrid; row-gap: 0; align-content: start; }
+.duo.on .hero-top, .duo.on .reading { display: contents; }
+.duo.on .read-head { grid-row: 1; }
+.duo.on .alt { grid-row: 2; margin-top: 6px; }
+.duo.on .sigma { grid-row: 3; margin-top: 8px; }
+.duo.on .sigma-line { grid-row: 4; margin-top: 4px; }
+.duo.on .seg { grid-row: 5; margin-top: 14px; justify-self: start; align-self: start; }
+.duo.on .level { grid-row: 6; margin-top: 16px; }
+.duo.on .rc-mini { grid-row: 7; margin-top: 14px; align-self: end; }
+.duo.on .empty { grid-row: 8; margin-top: 12px; }
+.duo.on .level-scale span { padding-right: 6px; min-width: 0; }
