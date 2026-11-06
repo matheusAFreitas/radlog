@@ -64,6 +64,7 @@ type RcState struct {
 	LastT   int64   `json:"lastT"`   // ms do último minuto gravado
 	LastUSv float64 `json:"lastUSv"` // µSv/h desse minuto
 	LastCPS float64 `json:"lastCPS"`
+	Raw     bool    `json:"raw"` // guardando os dados brutos
 	// para o quadro igual ao do GMC
 	Stats *RcStats `json:"stats"`
 	// faixas do app em µSv/h (as do GMC convertidas pela calibração dele)
@@ -100,6 +101,7 @@ type rcState struct {
 	fileM   sync.Mutex
 	ring    []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today   rcToday
+	raw     rcRawLog
 }
 
 type rcSample struct {
@@ -127,7 +129,7 @@ type rcMinute struct {
 func (a *App) GetRadiacode() RcState {
 	stats := a.rcStats()
 	a.mu.Lock()
-	off, ble := a.settings.RcOff, a.settings.RcBLE
+	off, ble, noRaw := a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw
 	cal := a.convCalLocked()
 	lv := a.settings.Levels.norm()
 	alarmCPM := a.settings.AlarmCPM
@@ -146,6 +148,7 @@ func (a *App) GetRadiacode() RcState {
 	}
 	st.Off, st.BLE, st.BLEOK = off, ble, radiacode.BLESupported
 	st.Stats = stats
+	st.Raw = !noRaw
 	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.attnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.dangerEnter())
 	a.rcTodayLocked()
 	st.Today = a.rc.today.sum
@@ -368,6 +371,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	via := map[string]string{"usb": "USB", "bluetooth": "Bluetooth"}[dev.Kind()]
 	a.logEvent(fmt.Sprintf("RadiaCode conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
+	a.rcRawSnapshot(dev)
 	fails := 0
 	tick := time.NewTicker(rcPollEvery)
 	defer tick.Stop()
@@ -378,7 +382,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		if off {
 			break
 		}
-		recs, err := dev.DataBuf()
+		raw, recs, err := dev.DataBufRaw()
 		if err != nil {
 			fails++
 			if fails < 3 {
@@ -390,10 +394,13 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			break
 		}
 		fails = 0
+		a.rcRawRecords(raw, dev.Base())
 		a.rcRecords(recs)
+		a.rcRawSpectrum(dev)
 	}
 	dev.Close()
 	a.rcFlushMinute()
+	a.rcRawClose()
 	a.rc.mu.Lock()
 	a.rc.dev = nil
 	if a.rc.st.State == "conectado" {

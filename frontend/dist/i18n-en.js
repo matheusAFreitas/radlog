@@ -1267,7 +1267,10 @@ const I18N_EN = {
 "Máx 24 h": "Max 24 h",
 "Unidade do RadiaCode": "RadiaCode unit",
 "· desconectado": "· disconnected",
-"· conectando…": "· connecting…"
+"· conectando…": "· connecting…",
+"Guardar tudo o que o RadiaCode manda (dados brutos)": "Keep everything the RadiaCode sends (raw data)",
+"Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta": "To find out what else the device can offer: each record as it came, the spectrum every hour and, on each connection, all registers and the memory snapshot. Kept in the folder",
+"e entra no backup (alguns MB por dia).": "and included in the backup (a few MB per day)."
 },
 "patterns": [
 [
@@ -3681,6 +3684,15 @@ const I18N_EN = {
 "Bluetooth (send): ${1}",
 [
 "Bluetooth (envio): "
+]
+],
+[
+"registrador ",
+"^registrador ((?:(?! · ).)+?) recusado$",
+"register ${1} refused",
+[
+"registrador ",
+" recusado"
 ]
 ],
 [

@@ -160,3 +160,30 @@ func TestDataBufSeqJump(t *testing.T) {
 		t.Fatalf("pulo de sequência: %d registros", n)
 	}
 }
+
+func TestSplitDataBuf(t *testing.T) {
+	var db []byte
+	db = append(db, le(uint8(0), uint8(0), uint8(0), int32(100))...)
+	db = append(db, le(float32(4.5), float32(1.2e-5), uint16(150), uint16(200), uint16(0), uint8(3))...)
+	db = append(db, le(uint8(1), uint8(0), uint8(8), int32(150), float32(7), uint16(1))...)
+	db = append(db, le(uint8(2), uint8(1), uint8(2), int32(160), uint16(2), uint32(500))...)
+	db = append(db, bytes.Repeat([]byte{0xAB}, 32)...)
+	db = append(db, le(uint8(3), uint8(0), uint8(42), int32(170), uint32(0xdeadbeef))...)
+	base := time.Unix(1000, 0)
+	rs := SplitDataBuf(db, base)
+	if len(rs) != 4 {
+		t.Fatalf("%d registros: %+v", len(rs), rs)
+	}
+	if rs[0].Name != "RealTimeData" || rs[0].Fields["count_rate"] != 4.5 || rs[0].Fields["rt_flags"] != 3 || len(rs[0].Data) != 7+15 {
+		t.Fatalf("tempo real: %+v", rs[0])
+	}
+	if rs[1].Name != "RawCountRate" || rs[1].Fields["count_rate"] != 7 || !rs[1].T.Equal(base.Add(1500*time.Millisecond)) {
+		t.Fatalf("contagem crua: %+v", rs[1])
+	}
+	if rs[2].Name != "Bloco2" || rs[2].Fields["samples"] != 2 || len(rs[2].Data) != 7+6+32 {
+		t.Fatalf("bloco: %+v", rs[2])
+	}
+	if rs[3].Name != "Desconhecido" || len(rs[3].Data) != 11 {
+		t.Fatalf("desconhecido: %+v", rs[3])
+	}
+}

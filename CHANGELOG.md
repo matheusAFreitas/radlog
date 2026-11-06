@@ -1,5 +1,21 @@
 # Versões
 
+## 1.28.0
+- **Dados brutos do RadiaCode**: para descobrir o que mais dá para
+  aproveitar do aparelho, o app guarda tudo o que ele manda, na pasta
+  `radiacode/bruto`.
+  - **Todo registro como veio** (hex), com os campos que já se sabe ler.
+    Isso inclui os que o app ainda não usa: histórico interno (DoseRateDB),
+    contagens cruas, acelerômetro e blocos de amostras.
+  - O **espectro** atual e o acumulado, **a cada hora**.
+  - **A cada conexão**: todos os registradores conhecidos e todas as
+    "strings virtuais", inclusive as de formato ainda desconhecido, como a
+    **cópia da memória** (MEM_SNAPSHOT) e o arquivo de registradores.
+  - Fica em arquivos .jsonl.gz por dia, de alguns MB. Dá para desligar em
+    Configurações → RadiaCode.
+- O **backup** agora leva os minutos do RadiaCode e os dados brutos. Ao
+  restaurar, os minutos se juntam pela hora, sem repetir.
+
 ## 1.27.2
 - O quadro do RadiaCode agora mostra as mesmas informações do GMC:
   - dose de hoje com os minutos medidos;

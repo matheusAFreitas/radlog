@@ -83,6 +83,8 @@ type Settings struct {
 	// (Linux) para quando não estiver no USB. Só mudam por SetRadiacode.
 	RcOff bool   `json:"rcOff"`
 	RcBLE string `json:"rcBLE"`
+	// não guardar os dados brutos do RadiaCode (radiacode/bruto)
+	RcNoRaw bool `json:"rcNoRaw"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
 	// pasta dos relatórios em PDF; vazio = Documentos/GMC Monitor/Relatórios
@@ -551,8 +553,8 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
-	s.SkipVersion = a.settings.SkipVersion                // muda só por SkipUpdate
-	s.RcOff, s.RcBLE = a.settings.RcOff, a.settings.RcBLE // só por SetRadiacode
+	s.SkipVersion = a.settings.SkipVersion                                               // muda só por SkipUpdate
+	s.RcOff, s.RcBLE, s.RcNoRaw = a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw // só por SetRadiacode/SetRcRaw
 	old := a.settings
 	autostartChanged := old.StartWithWindows != s.StartWithWindows
 	if old.RainLat != s.RainLat || old.RainLon != s.RainLon || old.RainEnabled != s.RainEnabled {

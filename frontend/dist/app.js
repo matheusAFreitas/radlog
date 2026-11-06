@@ -3972,6 +3972,7 @@ function renderRc(st) {
   renderRcMain(st);
   // configurações
   $("chkRcOn").checked = !st.off;
+  $("chkRcRaw").checked = st.raw !== false;
   if (document.activeElement !== $("rcBLE")) $("rcBLE").value = st.ble || "";
   $("btnRcBLEScan").disabled = !st.bleOK;
   $("rcBLEInfo").textContent = st.bleOK ? "" : "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.";
@@ -4143,6 +4144,7 @@ function wireRc() {
   $("btnRcRetry").addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
   $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
   $("chkRcOn").addEventListener("change", async (e) => renderRc(await call(api.SetRadiacode, e.target.checked, $("rcBLE").value)));
+  $("chkRcRaw").addEventListener("change", async (e) => renderRc(await call(api.SetRcRaw, e.target.checked)));
   $("rcBLE").addEventListener("change", async () => renderRc(await call(api.SetRadiacode, $("chkRcOn").checked, $("rcBLE").value)));
   $("btnRcBLEScan").addEventListener("click", async () => {
     const ul = $("rcBLEFound"), info = $("rcBLEInfo");
@@ -4609,13 +4611,13 @@ function makeDemoApi() {
     }
     emit("measure", { ...meas });
   }
-  const demoRcCfg = { off: false, ble: "" };
+  const demoRcCfg = { off: false, ble: "", raw: true };
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
-    : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off };
+    : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off, raw: demoRcCfg.raw };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
   let api;
@@ -4703,6 +4705,7 @@ function makeDemoApi() {
     GetRadiacode: async () => demoRc(),
     SetRadiacode: async (on, ble) => { demoRcCfg.off = !on; demoRcCfg.ble = (ble || "").toUpperCase(); return demoRc(); },
     ReconnectRadiacode: async () => demoRc(),
+    SetRcRaw: async (on) => { demoRcCfg.raw = on; return demoRc(); },
     ScanRadiacodeBLE: async () => { await new Promise((r) => setTimeout(r, 600)); return [{ address: "52:43:06:50:01:D7", name: "RadiaCode-102#RC-102-001234", rssi: -62 }]; },
     GetRcCompare: async (min) => {
       if (!demoRcFake()) return { minutes: 0, rcOnly: 0 };

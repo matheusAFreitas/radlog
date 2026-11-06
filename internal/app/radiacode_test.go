@@ -1,7 +1,13 @@
 package app
 
 import (
+	"bytes"
+	"compress/gzip"
+	"io"
 	"math"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -114,5 +120,53 @@ func TestRcStats(t *testing.T) {
 	}
 	if st.AttnUSv <= 0 || st.AlarmUSv <= st.AttnUSv {
 		t.Fatalf("faixas: %v %v", st.AttnUSv, st.AlarmUSv)
+	}
+}
+
+func TestRcRawAndBackup(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	a.rcAddMinute(now.Add(-3*time.Minute+time.Second), 3, 0.1)
+	a.rcAddMinute(now.Add(-2*time.Minute+time.Second), 3, 0.1)
+	a.rcFlushMinute()
+	// um registro de tempo real cru
+	rec := []byte{0, 0, 0, 100, 0, 0, 0, 0, 0, 0x90, 0x40, 0xac, 0xc5, 0x27, 0x37, 150, 0, 200, 0, 0, 0, 0}
+	a.rcRawRecords(rec, time.Now())
+	a.rcRawClose()
+	files := a.rcBackupFiles()
+	if len(files) != 2 || !strings.HasPrefix(files[1], "radiacode/bruto/") {
+		t.Fatalf("arquivos: %v", files)
+	}
+	var buf bytes.Buffer
+	if err := a.writeBackup(&buf); err != nil {
+		t.Fatal(err)
+	}
+	// outro PC sem nada do RadiaCode recebe o backup
+	b := newTestApp(t)
+	zp := filepath.Join(t.TempDir(), "b.zip")
+	os.WriteFile(zp, buf.Bytes(), 0o644)
+	res, err := b.mergeZip(zp, true)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.RcMinutes != 2 || len(b.rcRange(now.Add(-time.Hour), now)) != 2 {
+		t.Fatalf("minutos: %+v", res)
+	}
+	raws, _ := filepath.Glob(filepath.Join(b.rcDir(), "bruto", "*.jsonl.gz"))
+	if len(raws) != 1 {
+		t.Fatalf("brutos: %v", raws)
+	}
+	f, _ := os.Open(raws[0])
+	zr, err := gzip.NewReader(f)
+	if err != nil {
+		t.Fatal(err)
+	}
+	line, _ := io.ReadAll(zr)
+	if !strings.Contains(string(line), `"tipo":"RealTimeData"`) {
+		t.Fatalf("linha: %s", line)
+	}
+	// de novo: nada repete
+	if res, _ := b.mergeZip(zp, true); res.RcMinutes != 0 {
+		t.Fatalf("repetiu: %+v", res)
 	}
 }

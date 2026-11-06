@@ -37,10 +37,11 @@ type MergeResult struct {
 	Measurements int    `json:"measurements"`
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
+	RcMinutes    int    `json:"rcMinutes"` // minutos do RadiaCode
 }
 
 func (m MergeResult) total() int {
-	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes
+	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
 }
 
 type backupManifest struct {
@@ -96,6 +97,7 @@ func (a *App) writeBackup(w io.Writer) error {
 	for _, f := range alerts {
 		files = append(files, "alertas-detalhe/"+filepath.Base(f))
 	}
+	files = append(files, a.rcBackupFiles()...)
 	for _, f := range files {
 		if err := add(f); err != nil {
 			zw.Close()
@@ -392,6 +394,20 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if os.WriteFile(dst, b, 0o644) == nil {
 			res.AlertFiles++
 		}
+	}
+
+	// RadiaCode: minutos (junta pela hora) e dados brutos (copia o que falta)
+	for n, f := range files {
+		b, err := func() ([]byte, error) {
+			if !strings.HasPrefix(n, rcDirName+"/") {
+				return nil, nil
+			}
+			return readZipFile(f)
+		}()
+		if err != nil || b == nil {
+			continue
+		}
+		res.RcMinutes += a.rcMergeFile(n, b)
 	}
 
 	// chuva (só se for o mesmo lugar)
