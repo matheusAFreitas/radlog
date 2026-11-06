@@ -47,7 +47,7 @@ func fakeMeasure(seconds int, bgCPM, objCPM float64) SavedMeasure {
 
 func TestMeasureReport(t *testing.T) {
 	m := fakeMeasure(120, 25, 105)
-	if ld := detectionLimitCPM(m.Bg); ld < 4 || ld > 20 {
+	if ld := detectionLimitCPM(m.Bg, m.Obj.Seconds); ld < 4 || ld > 20 {
 		t.Fatalf("limite de detecção %v", ld)
 	}
 	if s := secondsForPrecision(m.Bg, m.Obj, 0.10); s < 5 || s > 600 {

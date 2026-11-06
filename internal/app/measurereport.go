@@ -64,14 +64,31 @@ func calcPhaseStats(v []float64) measPhaseStats {
 	return st
 }
 
-// detectionLimitCPM é o limite de detecção de Currie para duas medições do
-// mesmo tempo: L_D = 2,71 + 4,65·√B contagens, em CPM.
-func detectionLimitCPM(bg MeasurePhase) float64 {
+// detectionLimitCPM é o limite de detecção de Currie, em CPM, para o fundo
+// bg e a fase do objeto de objSec segundos: L_D = 2,71/t_o + 3,29·σ0, com
+// σ0 = √(r_b/t_o + r_b/t_b). Com tempos iguais é o clássico 2,71 + 4,65·√B
+// contagens.
+func detectionLimitCPM(bg MeasurePhase, objSec int) float64 {
 	if bg.Seconds <= 0 {
 		return 0
 	}
-	ld := 2.71 + 4.65*math.Sqrt(float64(bg.Counts))
-	return ld / (float64(bg.Seconds) / 60)
+	if objSec <= 0 {
+		objSec = bg.Seconds
+	}
+	tb, to := float64(bg.Seconds)/60, float64(objSec)/60
+	rb := float64(bg.Counts) / tb
+	return 2.71/to + 3.29*math.Sqrt(rb/to+rb/tb)
+}
+
+// objSecondsForPrecision: com o fundo já fixo (fundo da casa), quantos
+// segundos com o objeto dariam o líquido com incerteza relativa rel.
+func objSecondsForPrecision(bg, obj MeasurePhase, rel float64) float64 {
+	net := obj.CPM - bg.CPM
+	q := math.Pow(rel*net, 2) - bg.ErrCPM*bg.ErrCPM
+	if net <= 0 || q <= 0 {
+		return math.Inf(1)
+	}
+	return obj.CPM / q * 60
 }
 
 // secondsForPrecision diz quantos segundos de cada fase dariam o líquido
@@ -172,7 +189,11 @@ func asciiFold(s string) string {
 func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	t0 := time.UnixMilli(m.Time)
 	title := "Medição: " + m.Name
+	home := m.Bg.Source == "casa"
 	period := t0.Format("02/01/2006 15:04") + " · fundo " + fmt.Sprint(m.Bg.Seconds) + " s + objeto " + fmt.Sprint(m.Obj.Seconds) + " s"
+	if home {
+		period = t0.Format("02/01/2006 15:04") + " · fundo da casa (" + fmt.Sprint(m.Bg.Seconds/60) + " min) + objeto " + fmt.Sprint(m.Obj.Seconds) + " s"
+	}
 	p := &reportPDF{d: pdf.New(), y: 50, page: 1, r: reportData{Version: AppVersion, Period: period}}
 	d := p.d
 	// nome comprido: diminui a letra até 14 e, se ainda não couber, quebra em
@@ -225,9 +246,13 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	tg := 8.0
 	tw := (pdf.W - 2*pm - 3*tg) / 4
 	th := 60.0
-	ld := detectionLimitCPM(m.Bg)
+	ld := detectionLimitCPM(m.Bg, m.Obj.Seconds)
+	bgLabel := "Fundo (objeto longe)"
+	if home {
+		bgLabel = "Fundo da casa (última hora)"
+	}
 	tiles := [][4]string{
-		{"Fundo (objeto longe)", fmtBR(m.Bg.CPM, 1) + " CPM", "± " + fmtBR(m.Bg.ErrCPM, 1) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
+		{bgLabel, fmtBR(m.Bg.CPM, 1) + " CPM", "± " + fmtBR(m.Bg.ErrCPM, 1) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
 		{"Com o objeto", fmtBR(m.Obj.CPM, 1) + " CPM", "± " + fmtBR(m.Obj.ErrCPM, 1) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
 		{"Líquido (objeto − fundo)", sign + fmtBR(r.NetCPM, 1) + " CPM", "± " + fmtBR(r.NetErr, 1) + " CPM · ≈ " + fmtBR(r.NetUSv, 3) + " µSv/h no tubo", "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
@@ -276,8 +301,8 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	}
 	cw := pdf.W - 2*pm
 	p.table([]string{"Fase", "Horário", "Contagens", "Segundos", "CPM ± σ", "Média/s", "Var ÷ média", "Máx/s"},
-		[][]string{row("Fundo", m.Bg, bgS), row("Com o objeto", m.Obj, objS)},
-		[]float64{cw * .14, cw * .2, cw * .1, cw * .09, cw * .16, cw * .1, cw * .11, cw * .1},
+		[][]string{row(map[bool]string{true: "Fundo (casa)", false: "Fundo"}[home], m.Bg, bgS), row("Com o objeto", m.Obj, objS)},
+		[]float64{cw * .17, cw * .2, cw * .1, cw * .09, cw * .14, cw * .09, cw * .11, cw * .1},
 		[]bool{false, false, true, true, true, true, true, true}, []bool{false, true, true, true, true, true, true, true}, nil)
 	p.need(22)
 	note := "Var ÷ média perto de 1: a contagem variou como o acaso explica. Bem acima de 1: algo mudou durante a fase (o objeto mexeu, interferência, fonte variando)."
@@ -289,14 +314,32 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	// limite de detecção e precisão
 	p.section("O QUE ESTA MEDIÇÃO CONSEGUE VER")
 	rows := [][2]string{
-		{"Limite de detecção", fmt.Sprintf("%s CPM acima do fundo (Currie, 95%%, com %d s de fundo). Abaixo disso, um objeto fraco pode passar despercebido.", fmtBR(ld, 1), m.Bg.Seconds)},
+		{"Limite de detecção", fmt.Sprintf("%s CPM acima do fundo (Currie, 95%%, com %d s de fundo e %d s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido.", fmtBR(ld, 1), m.Bg.Seconds, m.Obj.Seconds)},
+	}
+	if r.Limit > 0 {
+		rows = append(rows, [2]string{"Limite superior", fmt.Sprintf("se o objeto emite algo, é menos que +%s CPM acima do fundo (líquido + 2σ, ~97,5%%)", fmtBR(r.Limit, 1))})
+	}
+	switch r.Stop {
+	case "achou":
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando o líquido passou de 4σ (%s s com o objeto)", fmt.Sprint(m.Obj.Seconds))})
+	case "nada":
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando deu para garantir que o objeto sobe menos que %s%% do fundo (+%s CPM)", fmtBR(r.Pct, 0), fmtBR(r.Threshold, 1))})
+	case "limite":
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: chegou ao tempo máximo (%s) sem decidir", fmtDurSec(float64(m.Obj.Seconds)))})
 	}
 	if r.NetCPM > 0 {
-		rows = append(rows,
-			[2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ)", fmtBR(r.NetErr/r.NetCPM*100, 0))},
-			[2]string{"Tempo para ±10%", fmtDurSec(secondsForPrecision(m.Bg, m.Obj, 0.10)) + " em cada fase"},
-			[2]string{"Tempo para ±5%", fmtDurSec(secondsForPrecision(m.Bg, m.Obj, 0.05)) + " em cada fase"},
-		)
+		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ)", fmtBR(r.NetErr/r.NetCPM*100, 0))})
+		if home {
+			rows = append(rows,
+				[2]string{"Tempo para ±10%", fmtDurSec(objSecondsForPrecision(m.Bg, m.Obj, 0.10)) + " com o objeto"},
+				[2]string{"Tempo para ±5%", fmtDurSec(objSecondsForPrecision(m.Bg, m.Obj, 0.05)) + " com o objeto"},
+			)
+		} else {
+			rows = append(rows,
+				[2]string{"Tempo para ±10%", fmtDurSec(secondsForPrecision(m.Bg, m.Obj, 0.10)) + " em cada fase"},
+				[2]string{"Tempo para ±5%", fmtDurSec(secondsForPrecision(m.Bg, m.Obj, 0.05)) + " em cada fase"},
+			)
+		}
 	}
 	p.kv(rows, 120)
 
@@ -304,20 +347,30 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	p.section("GEOMETRIA, CONTADOR E MÉTODO")
 	geo := strings.TrimSpace(m.Note)
 	if geo == "" {
-		geo = "não anotada (na aba Medir, a anotação da medição guarda distância, lado encostado no tubo e embalagem)"
+		geo = "não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)"
+	}
+	dist := strings.TrimSpace(m.Distance)
+	if dist == "" {
+		dist = "não informada"
+	}
+	bgHow := "medido na hora, com o objeto longe (2 m ou mais)"
+	if home {
+		bgHow = fmt.Sprintf("fundo da casa: média dos %d min gravados antes da medição (em casa, fora de alertas e medições); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos", m.Bg.Seconds/60)
 	}
 	if device == "" {
 		device = "contador não conectado na hora do relatório"
 	}
 	p.kv([][2]string{
+		{"Distância", dist},
 		{"Geometria / anotação", geo},
+		{"Fundo", bgHow},
 		{"Contador", device},
 		{"Calibração", calTxt + " (para gama do Cs-137)"},
 		{"Tempo morto", deadTime},
 		{"Contagens", "soma do CPS do contador a cada segundo, em cada fase"},
 		{"Incerteza", "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"},
 		{"Significância", "líquido ÷ incerteza do líquido (σ)"},
-		{"Limite de detecção", "Currie: L_D = 2,71 + 4,65·√B contagens, com B = contagens do fundo, mesmo tempo nas duas fases"},
+		{"Limite de detecção", "Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto"},
 	}, 120)
 
 	p.section("LIMITAÇÕES")
@@ -420,6 +473,9 @@ func (p *reportPDF) measChart(m SavedMeasure) {
 		d.Line(xv(math.Max(0, a)), yv(ph.CPM), xv(b), yv(ph.CPM), 1.1, c, false)
 	}
 	ba, bb := span("fundo")
+	if m.Bg.Source == "casa" {
+		ba, bb = oa, ob // o fundo da casa vale para a fase toda
+	}
 	band(m.Bg, ba, bb, cMuted)
 	band(m.Obj, oa, ob, cAccent)
 	line := func(l []pt, c pdf.RGB) {
@@ -451,9 +507,15 @@ func (p *reportPDF) measChart(m SavedMeasure) {
 		d.Text(lx+15, p.y, pdf.Sans, 7, cMuted, txt)
 		lx += 15 + pdf.TextWidth(txt, pdf.Sans, 7) + 12
 	}
-	leg(pdf.Hex("#8C99A3"), "fundo (média de 10 s)", 0.6)
+	if m.Bg.Source != "casa" {
+		leg(pdf.Hex("#8C99A3"), "fundo (média de 10 s)", 0.6)
+	}
 	leg(pdf.Hex("#5FBF8A"), "com o objeto (média de 10 s)", 0.6)
-	leg(cMuted, "média do fundo ± σ", 1.1)
+	if m.Bg.Source == "casa" {
+		leg(cMuted, "fundo da casa ± σ", 1.1)
+	} else {
+		leg(cMuted, "média do fundo ± σ", 1.1)
+	}
 	leg(cAccent, "média com o objeto ± σ", 1.1)
 	p.y += 6
 }

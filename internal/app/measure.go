@@ -28,6 +28,8 @@ type MeasurePhase struct {
 	USv     float64 `json:"usv"`
 	Start   int64   `json:"start"` // ms
 	End     int64   `json:"end"`   // ms
+	// "casa" = fundo da última hora gravada (não medido na hora)
+	Source string `json:"source,omitempty"`
 }
 
 // MeasureResult compara as duas fases.
@@ -39,6 +41,13 @@ type MeasureResult struct {
 	Sigma   float64 `json:"sigma"`
 	Verdict string  `json:"verdict"`
 	Level   string  `json:"level"` // nada, talvez, sim
+	// como parou: achou, nada, limite (automático) ou "" (tempo fixo)
+	Stop string `json:"stop,omitempty"`
+	// limite superior do líquido (CPM, ~97,5%) quando não deu "sim"
+	Limit float64 `json:"limit,omitempty"`
+	// automático: o que contava como "tem algo" (% do fundo e em CPM)
+	Pct       float64 `json:"pct,omitempty"`
+	Threshold float64 `json:"threshold,omitempty"`
 }
 
 // MeasureState é o estado da medição, mandado para a tela a cada segundo.
@@ -58,6 +67,14 @@ type MeasureState struct {
 	// relatório em PDF gerado sozinho no fim (caminho; "" = não gerou)
 	ReportPath  string `json:"reportPath"`
 	ReportError string `json:"reportError"`
+	// automático: para sozinho quando der resposta (até MaxSec na fase do
+	// objeto); Live é o resultado parcial e Eta, os segundos que faltam (-1 = ?)
+	Auto     bool           `json:"auto"`
+	MaxSec   int            `json:"maxSec"`
+	Pct      float64        `json:"pct"`
+	Distance string         `json:"distance"`
+	Live     *MeasureResult `json:"live"`
+	Eta      int            `json:"eta"`
 }
 
 // GetMeasure devolve o estado atual.
@@ -81,7 +98,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		if seconds < 10 || seconds > 1800 {
 			seconds = 60
 		}
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active, PhaseStart: time.Now().UnixMilli()}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active, PhaseStart: time.Now().UnixMilli(), Eta: -1}
 		a.measSamples = nil
 	case "objeto":
 		if a.measure.Bg == nil {
@@ -89,7 +106,10 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		}
 		a.measure.Phase = "objeto"
 		a.measure.Elapsed, a.measure.Counts = 0, 0
-		a.measure.Obj, a.measure.Result = nil, nil
+		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
+		if a.measure.Auto {
+			a.measure.Seconds = a.measure.MaxSec
+		}
 		a.measure.PhaseStart, a.measure.SavedID = time.Now().UnixMilli(), 0
 		// medindo o objeto de novo: tira os segundos da tentativa anterior
 		kept := a.measSamples[:0]
@@ -138,13 +158,26 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 	m.Counts += int(cps)
 	m.Elapsed++
 	start := m.PhaseStart
-	if m.Bg != nil && m.Phase == "objeto" {
+	if m.Bg != nil && m.Phase == "objeto" && m.Bg.Source != "casa" {
 		start = m.Bg.Start
 	}
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: cpm, CPS: cps})
 	var logText string
 	var save *SavedMeasure
-	if m.Elapsed >= m.Seconds {
+	stop := ""
+	if m.Phase == "objeto" {
+		part := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
+		live := compareMeasure(*m.Bg, part, a.convCalLocked().USv)
+		m.Live = &live
+		if m.Auto {
+			stop = autoDecide(live, *m.Bg, m.Elapsed, m.Pct)
+			m.Eta = autoEta(*m.Bg, part, m.Elapsed, m.MaxSec, m.Pct)
+			if stop == "" && m.Elapsed >= m.Seconds {
+				stop = "limite"
+			}
+		}
+	}
+	if m.Elapsed >= m.Seconds || stop != "" {
 		ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 		ph.Start, ph.End = m.PhaseStart, time.Now().UnixMilli()
 		if m.Phase == "fundo" {
@@ -153,7 +186,8 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 		} else {
 			m.Obj = &ph
 			r := compareMeasure(*m.Bg, ph, a.convCalLocked().USv)
-			m.Result = &r
+			finishResult(&r, stop, *m.Bg, m.Pct, m.Auto)
+			m.Result, m.Live, m.Eta = &r, nil, -1
 			m.Phase = "pronto"
 			name := m.Name
 			if name == "" {
@@ -162,7 +196,11 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 			logText = fmt.Sprintf("Medição de %s: %s ± %s CPM sobre o fundo (%sσ) — %s",
 				name, br(r.NetCPM, true), br(r.NetErr, false), br(r.Sigma, false), r.Verdict)
 			if !demo { // o demo não fica salvo
-				save = &SavedMeasure{Name: name, Time: m.Bg.Start, Bg: *m.Bg, Obj: ph, Result: r,
+				when := m.Bg.Start
+				if m.Bg.Source == "casa" {
+					when = ph.Start
+				}
+				save = &SavedMeasure{Name: name, Time: when, Bg: *m.Bg, Obj: ph, Result: r, Distance: m.Distance,
 					Samples: append([]MeasureSample(nil), a.measSamples...)}
 			}
 		}
@@ -245,6 +283,8 @@ type SavedMeasure struct {
 	Obj    MeasurePhase  `json:"obj"`
 	Result MeasureResult `json:"result"`
 	Note   string        `json:"note"`
+	// distância do objeto ao tubo, como foi escrita (ex.: encostado, 5 cm)
+	Distance string `json:"distance,omitempty"`
 	// um registro por segundo (medições a partir da 0.20.3)
 	Samples []MeasureSample `json:"samples,omitempty"`
 }

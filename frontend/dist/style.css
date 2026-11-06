@@ -355,6 +355,10 @@ td { padding: 6px 0; }
 .m-step { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: 10px; }
 .m-step-head { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; }
 .m-step .btn { align-self: flex-start; }
+.m-opts { display: flex; flex-direction: column; }
+.m-opts select { width: 100%; }
+.m-live-line { color: var(--muted); line-height: 1.45; }
+.m-live-line b { color: var(--text); font-weight: 600; }
 .m-result { display: flex; flex-direction: column; gap: 6px; padding: 14px; border-radius: 10px; border: 1px solid var(--border); }
 .m-result.sim { border-color: var(--warn); }
 .m-result.sim strong { color: var(--warn); }

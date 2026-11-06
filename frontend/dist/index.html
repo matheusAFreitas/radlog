@@ -451,27 +451,54 @@
     </div>
 
     <div id="mNewPane">
-    <p class="small muted">Duas medições do mesmo tempo: primeiro o fundo, com o objeto longe (2 m ou mais); depois com o objeto encostado no contador, do lado do tubo. O app compara as duas e diz se a diferença é real ou só a variação natural da contagem. Quanto mais tempo, mais confiável.</p>
+    <p class="small muted">Compara a contagem com o objeto perto do tubo com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.</p>
     <div class="m-grid">
       <div class="m-main">
     <label for="mName">Nome do objeto (opcional)</label>
     <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
-    <label for="mSecs">Tempo de cada medição</label>
-    <select id="mSecs">
-      <option value="30">30 s (rápido, pouco preciso)</option>
-      <option value="60" selected>1 min</option>
-      <option value="120">2 min</option>
-      <option value="300">5 min (bem mais preciso)</option>
-    </select>
+    <label for="mDist">Distância até o tubo (opcional)</label>
+    <input type="text" id="mDist" autocomplete="off" list="mDistList" placeholder="ex.: encostado, 5 cm">
+    <datalist id="mDistList"><option value="encostado"></option><option value="1 cm"></option><option value="5 cm"></option><option value="10 cm"></option><option value="30 cm"></option><option value="1 m"></option></datalist>
+    <div class="m-opts">
+      <div>
+        <label for="mBgSrc">Fundo</label>
+        <select id="mBgSrc">
+          <option value="casa" selected>Fundo da casa (última hora)</option>
+          <option value="medir">Medir agora, com o objeto longe</option>
+        </select>
+      </div>
+      <div>
+        <label for="mSecs">Tempo</label>
+        <select id="mSecs">
+          <option value="auto600">Automático, até 10 min</option>
+          <option value="auto1800" selected>Automático, até 30 min</option>
+          <option value="auto3600">Automático, até 1 h</option>
+          <option value="30">Fixo: 30 s</option>
+          <option value="60">Fixo: 1 min</option>
+          <option value="120">Fixo: 2 min</option>
+          <option value="300">Fixo: 5 min</option>
+        </select>
+      </div>
+      <div id="mPctBox">
+        <label for="mPct">Conta como “tem algo”</label>
+        <select id="mPct">
+          <option value="50">+50% do fundo (mais rápido)</option>
+          <option value="20" selected>+20% do fundo</option>
+          <option value="10">+10% do fundo (mais lento)</option>
+        </select>
+      </div>
+    </div>
+    <p class="small muted" id="mOptHint"></p>
 
     <div class="m-step" id="mStepBg">
-      <div class="m-step-head"><strong>1. Fundo</strong><span class="mono small" id="mBgVal">—</span></div>
+      <div class="m-step-head"><strong id="mBgTitle">1. Fundo</strong><span class="mono small" id="mBgVal">—</span></div>
       <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
       <button type="button" class="btn" id="btnMeasureBg">Medir o fundo</button>
     </div>
     <div class="m-step" id="mStepObj">
       <div class="m-step-head"><strong>2. Com o objeto</strong><span class="mono small" id="mObjVal">—</span></div>
       <div class="bar"><div class="bar-fill" id="mObjFill"></div></div>
+      <div class="small m-live-line" id="mObjLive" hidden></div>
       <button type="button" class="btn" id="btnMeasureObj" disabled>Medir com o objeto</button>
     </div>
     <div class="m-result" id="mResult" hidden>

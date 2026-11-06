@@ -1749,7 +1749,8 @@ const mlog = { start: 0, live: [], ph: [], demo: false };
 function measureLogStep(st) {
   const active = st.phase === "fundo" || st.phase === "objeto";
   if (!st.phase) { mlog.start = 0; mlog.live = []; mlog.ph = []; return; }
-  if (st.phase === "fundo" && st.elapsed <= 1) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
+  const fresh = st.elapsed <= 1 && (st.phase === "fundo" || (st.phase === "objeto" && st.bg && st.bg.source === "casa"));
+  if (fresh) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
   if (!mlog.start) mlog.start = Date.now();
   if (active && st.elapsed > 0) {
     const m = st.elapsed / 60;
@@ -1768,11 +1769,20 @@ function measureLogReading(r) {
 // fonte do gráfico: a medição em andamento ou uma salva (clicada na lista)
 function liveMeasureSrc() {
   const st = state.measureSt || {};
-  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60 };
+  const home = st.bg && st.bg.source === "casa";
+  // eixo: até o fim previsto (no automático, o que falta pela estimativa)
+  let expectSec = (st.seconds || 60) * (home ? 1 : 2) + 15;
+  if (st.auto && st.phase === "objeto") {
+    const before = mlog.start ? Math.max(0, (Date.now() - mlog.start) / 1000 - st.elapsed) : 0;
+    expectSec = before + st.elapsed + (st.eta >= 0 ? st.eta : 60) + 5;
+  } else if (st.auto && st.phase === "fundo") expectSec = st.seconds + 60;
+  else if (st.phase !== "fundo" && st.phase !== "objeto") expectSec = 1; // terminou: o eixo vai até o último ponto
+  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null };
 }
 
 function savedMeasureSrc(m) {
-  const start = m.bg.start;
+  const home = m.bg.source === "casa";
+  const start = home ? m.obj.start : m.bg.start;
   const live = [], ph = [];
   const acc = {};
   for (const s of m.samples || []) {
@@ -1784,7 +1794,7 @@ function savedMeasureSrc(m) {
     const min = a.n / 60;
     ph.push({ t, phase: s.phase, avg: a.counts / min, err: Math.sqrt(Math.max(a.counts, 1)) / min });
   }
-  return { start, live, ph, seconds: m.bg.seconds || 60, done: true };
+  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null };
 }
 
 function drawMeasureChart() {
@@ -1806,7 +1816,7 @@ function drawMeasureSrc(src) {
   const svg = $("mChart");
   if (!src.start || (!src.live.length && !src.ph.length)) {
     svg.innerHTML = "";
-    $("mLiveSub").textContent = "— comece medindo o fundo";
+    $("mLiveSub").textContent = "— comece a medição";
     const ys = $("mY").children;
     for (let i = 0; i < 4; i++) ys[i].textContent = i === 3 ? "0" : "";
     return;
@@ -1814,7 +1824,7 @@ function drawMeasureSrc(src) {
   const t0 = src.start;
   const tAll = [...src.live.map((p) => p.t), ...src.ph.map((p) => p.t)];
   // o eixo vai até o fim previsto da medição (fundo + objeto), para ir enchendo
-  const expected = src.done ? 0 : (src.seconds * 2 + 15) * 1000;
+  const expected = src.done ? 0 : (src.expectSec || src.seconds * 2 + 15) * 1000;
   const t1 = Math.max(t0 + expected, t0 + 10e3, ...tAll);
   src.t1 = t1;
   let top = 0;
@@ -1823,6 +1833,7 @@ function drawMeasureSrc(src) {
   // ela não entra na escala; a faixa de erro também pode passar do topo
   const first = {};
   for (const p of src.ph) { if (!(p.phase in first)) first[p.phase] = p.t; if (p.t - first[p.phase] >= 5000) top = Math.max(top, p.avg); }
+  if (src.bgFlat) top = Math.max(top, src.bgFlat.cpm + src.bgFlat.errCPM);
   top = Math.max(10, Math.ceil((top * 1.15) / 10) * 10);
   const x = (t) => ((t - t0) / (t1 - t0)) * W;
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
@@ -1832,6 +1843,12 @@ function drawMeasureSrc(src) {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
+  if (src.bgFlat) {
+    // fundo da casa: faixa reta (média ± σ) na medição toda
+    const b = src.bgFlat, y1 = y(b.cpm + b.errCPM), y2 = y(b.cpm - b.errCPM);
+    out += `<rect x="0" y="${y1.toFixed(1)}" width="${W}" height="${Math.max(1, y2 - y1).toFixed(1)}" fill="#A3ADB4" fill-opacity="0.18"/>`;
+    out += `<line x1="0" y1="${y(b.cpm).toFixed(1)}" x2="${W}" y2="${y(b.cpm).toFixed(1)}" stroke="#A3ADB4" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+  }
   for (const [phase, color] of [["fundo", "#A3ADB4"], ["objeto", "#5EEAD4"]]) {
     const pts = src.ph.filter((p) => p.phase === phase);
     if (!pts.length) continue;
@@ -1854,6 +1871,7 @@ function drawMeasureSrc(src) {
   const b = last("fundo"), o = last("objeto");
   const parts = [];
   if (b) parts.push(`fundo ${fmt(b.avg, 1)} ± ${fmt(b.err, 1)}`);
+  else if (src.bgFlat) parts.push(`fundo da casa ${fmt(src.bgFlat.cpm, 1)} ± ${fmt(src.bgFlat.errCPM, 1)}`);
   if (o) parts.push(`objeto ${fmt(o.avg, 1)} ± ${fmt(o.err, 1)}`);
   $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " CPM" : "";
 }
@@ -1897,7 +1915,7 @@ function measureStats(m) {
   const tb = document.createElement("tbody");
   for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
     if (!x) continue;
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : nm, x.counts.toLocaleString(LOCALE), fmtDur(x.seconds * 1000), fmt(x.cpm, 1), `±${fmt(x.errCPM, 1)}`]));
+    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), fmt(x.cpm, 1), `±${fmt(x.errCPM, 1)}`]));
   }
   const r = m.result;
   if (r) {
@@ -1913,39 +1931,91 @@ function measureStats(m) {
     const sig = Math.abs(r.sigma);
     p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para CPM. A da diferença junta as duas (raiz da soma dos quadrados). ` +
       `A diferença vale ${fmt(sig, 1)} vezes a incerteza (${fmt(sig, 1)}σ)` +
-      (sig >= 3 ? ": é real, não variação da contagem." : sig >= 2 ? ": provavelmente real, mas vale repetir." : ": cabe na variação natural da contagem.");
+      (r.sigma >= 3 ? ": é real, não variação da contagem." : r.sigma >= 2 ? ": provavelmente real, mas vale repetir." : r.sigma <= -3 ? ": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)." : ": cabe na variação natural da contagem.");
     box.appendChild(p);
   }
   return box;
 }
+
+// opções da tela de medir (lembradas entre as vezes)
+function measureOpts() {
+  const t = $("mSecs").value, auto = t.startsWith("auto");
+  return {
+    name: $("mName").value, distance: $("mDist").value, auto, homeBg: $("mBgSrc").value === "casa",
+    seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat($("mPct").value),
+  };
+}
+
+async function refreshHomeBg(force) {
+  if (!force && state.homeBgAt && Date.now() - state.homeBgAt < 30e3) return;
+  state.homeBgAt = Date.now();
+  try { state.homeBg = await api.GetHomeBackground(); } catch (e) { state.homeBg = { ok: false, why: errMsg(e) }; }
+  if (state.measureSt) renderMeasure(state.measureSt);
+}
+
+const fmtMin = (sec) => (sec < 90 ? `${Math.max(1, Math.round(sec))} s` : `${Math.round(sec / 60)} min`);
 
 function renderMeasure(st) {
   state.measureSt = st;
   measureLogStep(st);
   drawMeasureChart();
   const running = st.phase === "fundo" || st.phase === "objeto";
+  const started = running || !!st.bg;
   $("measureTitle").textContent = "Medir um objeto" + (st.demo ? " (demo)" : "");
-  $("mSecs").disabled = running || !!st.bg;
+  for (const id of ["mSecs", "mBgSrc", "mPct", "mDist"]) $(id).disabled = started;
+  const o = measureOpts();
+  const home = started ? !!(st.bg && st.bg.source === "casa") : o.homeBg;
+  const auto = started ? !!st.auto : o.auto;
+  $("mPctBox").style.visibility = o.auto ? "" : "hidden";
+  if (!started) refreshHomeBg(false);
+  const hb = state.homeBg;
+  // dica embaixo das opções
+  $("mOptHint").textContent = !started ? [
+    o.homeBg ? "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro)." : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
+    o.auto ? `Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ${o.pct}% do fundo.` : "",
+  ].filter(Boolean).join(" ") : "";
+  // passo 1: fundo
+  $("mBgTitle").textContent = home ? "1. Fundo da casa" : "1. Fundo";
+  $("btnMeasureBg").hidden = home;
   $("btnMeasureBg").disabled = running;
-  $("btnMeasureObj").disabled = running || !st.bg;
   $("btnMeasureBg").textContent = st.bg ? "Medir o fundo de novo" : "Medir o fundo";
+  const objReady = !running && (st.bg ? true : home && hb && hb.ok);
+  $("btnMeasureObj").disabled = !objReady;
   $("btnMeasureObj").textContent = st.obj ? "Medir de novo com o objeto" : "Medir com o objeto";
   const prog = (phase, fill, val, done) => {
     if (st.phase === phase) {
-      $(fill).style.width = (st.elapsed / Math.max(1, st.seconds)) * 100 + "%";
+      const auto = phase === "objeto" && st.auto;
+      const total = auto ? (st.eta >= 0 ? st.elapsed + st.eta : st.seconds) : st.seconds;
+      $(fill).style.width = Math.min(100, (st.elapsed / Math.max(1, total)) * 100) + "%";
       // até agora: taxa e incerteza com as contagens já feitas
       const so = st.elapsed > 0 ? ` · ${fmt(st.counts * 60 / st.elapsed, 1)} ± ${fmt(Math.sqrt(Math.max(st.counts, 1)) * 60 / st.elapsed, 1)} CPM` : "";
-      $(val).textContent = `${st.elapsed}/${st.seconds} s · ${st.counts} contagens${so}`;
+      $(val).textContent = (auto ? `${Math.floor(st.elapsed / 60)}:${pad(st.elapsed % 60)}` : `${st.elapsed}/${st.seconds} s`) + ` · ${st.counts} contagens${so}`;
     } else if (done) {
       $(fill).style.width = "100%";
-      $(val).textContent = `${fmt(done.cpm, 1)} ± ${fmt(done.errCPM, 1)} CPM (${done.counts} em ${done.seconds} s)`;
+      $(val).textContent = done.source === "casa"
+        ? `${fmt(done.cpm, 1)} ± ${fmt(done.errCPM, 1)} CPM (${Math.round(done.seconds / 60)} min até ${hhmm(done.end)})`
+        : `${fmt(done.cpm, 1)} ± ${fmt(done.errCPM, 1)} CPM (${done.counts} em ${done.seconds} s)`;
     } else {
       $(fill).style.width = "0%";
       $(val).textContent = "—";
     }
   };
-  prog("fundo", "mBgFill", "mBgVal", st.bg);
+  if (!st.bg && home) {
+    // ainda não começou: mostra o fundo da casa que vai ser usado
+    $("mBgFill").style.width = hb && hb.ok ? "100%" : "0%";
+    $("mBgVal").textContent = !hb ? "…" : hb.ok ? `${fmt(hb.cpm, 1)} ± ${fmt(hb.errCPM, 1)} CPM (${hb.minutes} min até ${hhmm(hb.to)})` : hb.why;
+  } else prog("fundo", "mBgFill", "mBgVal", st.bg);
   prog("objeto", "mObjFill", "mObjVal", st.obj);
+  // resultado parcial ao vivo
+  const lv = st.phase === "objeto" ? st.live : null;
+  $("mObjLive").hidden = !lv;
+  if (lv) {
+    const sig = lv.sigma;
+    let what = sig >= 3 ? "parece radioativo" : sig >= 2 ? "talvez um pouco acima" : "ainda não dá para dizer";
+    let when = "";
+    if (st.auto) when = st.elapsed < 20 ? " · juntando contagens…" : st.eta > 0 ? ` · ~${fmtMin(st.eta)} para decidir` : " · pode ir até o tempo máximo";
+    $("mObjLive").innerHTML = `Até agora: <b>${plusMinus(lv.netCPM)} ± ${fmt(lv.netErr, 1)} CPM</b> sobre o fundo (${fmt(sig, 1)}σ) · ${what}${when}`;
+  }
   const r = st.result;
   $("mResult").hidden = !r;
   $("mSaved").hidden = !st.savedId;
@@ -1965,25 +2035,46 @@ function renderMeasure(st) {
   $("mVerdict").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
   $("mStats").replaceChildren(measureStats({ bg: st.bg, obj: st.obj, result: r }));
   const sign = r.netCPM >= 0 ? "+" : "−";
-  $("mNumbers").textContent = `${sign}${fmt(Math.abs(r.netCPM), 1)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} µSv/h encostado`;
-  $("mExplain").textContent = {
+  $("mNumbers").textContent = `${sign}${fmt(Math.abs(r.netCPM), 1)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} µSv/h no tubo`;
+  $("mExplain").textContent = measureExplain(r, st.obj, auto);
+}
+
+function measureExplain(r, obj, auto) {
+  const t = obj ? fmtMin(obj.seconds) : "";
+  if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
+  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${fmt(r.threshold, 1)} CPM). Para procurar algo mais fraco, escolha “+10% do fundo”.`;
+  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" ? "" : ` Se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM; para ir além, aumente o tempo máximo.`);
+  return {
     sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto encostado no contador; a 1 metro é muito menos.",
-    talvez: "A diferença está perto do limite da variação natural. Repita com 5 minutos para ter certeza.",
-    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo. Repita com 5 minutos se quiser mais certeza.",
+    talvez: "A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.",
+    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit ? ` (menos que +${fmt(r.limit, 1)} CPM)` : "") + ". Use o modo automático para mais certeza.",
   }[r.level];
 }
 
 function wireMeasure() {
+  for (const id of ["mSecs", "mBgSrc", "mPct"]) {
+    const v = localGet("m-" + id);
+    if (v && [...$(id).options].some((o) => o.value === v)) $(id).value = v;
+    $(id).addEventListener("change", () => { localSet("m-" + id, $(id).value); renderMeasure(state.measureSt || {}); });
+  }
   $("btnMeasureBg").addEventListener("click", async () => {
-    try { renderMeasure(await api.StartMeasurePhase("fundo", parseInt($("mSecs").value, 10), $("mName").value)); }
-    catch (e) { toast(errMsg(e), true); }
+    try {
+      const st = state.measureSt || {};
+      // fundo de novo no meio de uma medição: recomeça com as mesmas opções
+      renderMeasure(await api.StartMeasure({ ...measureOpts(), homeBg: false }));
+      if (st.bg) toast("Medindo o fundo de novo.");
+    } catch (e) { toast(errMsg(e), true); }
   });
   $("btnMeasureObj").addEventListener("click", async () => {
-    try { renderMeasure(await api.StartMeasurePhase("objeto", 0, $("mName").value)); }
-    catch (e) { toast(errMsg(e), true); }
+    try {
+      const st = state.measureSt || {};
+      if (st.bg) renderMeasure(await api.StartMeasurePhase("objeto", 0, $("mName").value));
+      else renderMeasure(await api.StartMeasure(measureOpts()));
+    } catch (e) { toast(errMsg(e), true); }
   });
   $("btnMeasureReset").addEventListener("click", async () => {
     renderMeasure(await api.CancelMeasure());
+    refreshHomeBg(true);
   });
 }
 
@@ -1992,7 +2083,7 @@ function wireMeasure() {
 const measureAt = (ms) => {
   for (const m of state.measurements || []) {
     if (ms >= m.obj.start - 30e3 && ms <= m.obj.end + 30e3) return [m, "com o objeto"];
-    if (ms >= m.bg.start - 30e3 && ms <= m.bg.end + 30e3) return [m, "fundo"];
+    if (m.bg.source !== "casa" && ms >= m.bg.start - 30e3 && ms <= m.bg.end + 30e3) return [m, "fundo"];
   }
   return null;
 };
@@ -2003,7 +2094,7 @@ function measureBands(t0, t1, xt) {
   let out = "";
   for (const m of state.measurements || []) {
     for (const [ph, color, op] of [[m.bg, "#A3ADB4", 0.14], [m.obj, "#5EEAD4", 0.24]]) {
-      if (!(ph.end > t0 && ph.start < t1)) continue;
+      if (ph.source === "casa" || !(ph.end > t0 && ph.start < t1)) continue;
       const x1 = xt(Math.max(ph.start, t0)), x2 = xt(Math.min(ph.end, t1));
       out += `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(2, x2 - x1).toFixed(1)}" height="${H}" fill="${color}" fill-opacity="${op}"/>`;
     }
@@ -2067,7 +2158,17 @@ function renderMeasureHistory() {
 }
 
 // limite de detecção (Currie) e tempo para uma precisão, como no PDF
-const mDetLimit = (bg) => (bg.seconds > 0 ? (2.71 + 4.65 * Math.sqrt(bg.counts)) / (bg.seconds / 60) : 0);
+// Currie com tempos diferentes (igual ao measurereport.go)
+const mDetLimit = (bg, objSec) => {
+  if (!(bg.seconds > 0)) return 0;
+  const tb = bg.seconds / 60, to = (objSec || bg.seconds) / 60, rb = bg.counts / tb;
+  return 2.71 / to + 3.29 * Math.sqrt(rb / to + rb / tb);
+};
+// fundo fixo (da casa): segundos com o objeto para o líquido ter precisão rel
+const mObjSecsFor = (bg, obj, rel) => {
+  const net = obj.cpm - bg.cpm, q = (rel * net) ** 2 - bg.errCPM ** 2;
+  return net > 0 && q > 0 ? (obj.cpm / q) * 60 : Infinity;
+};
 const mSecsFor = (bg, obj, rel) => {
   const rb = bg.cpm / 60, ro = obj.cpm / 60, net = ro - rb;
   return net > 0 ? (rb + ro) / (rel * rel * net * net) : Infinity;
@@ -2081,22 +2182,27 @@ function renderMeasureDetail() {
   if (!m) return;
   const r = m.result;
   $("mdName").textContent = m.name;
-  $("mdWhen").textContent = `${whenLabel(m.time)} · fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`;
+  const home = m.bg.source === "casa";
+  $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "");
   const v = $("mdVerdict");
   v.className = "m-verdict " + r.level;
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
   v.querySelector("span").textContent = `${fmt(r.sigma, 1)}σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.`;
   const t = $("mdTiles");
   t.textContent = "";
-  sumTile(t, "Fundo (objeto longe)", `${fmt(m.bg.cpm, 1)} CPM`, `± ${fmt(m.bg.errCPM, 1)} · ${m.bg.counts} contagens`);
+  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", `${fmt(m.bg.cpm, 1)} CPM`, `± ${fmt(m.bg.errCPM, 1)} · ${m.bg.counts} contagens`);
   sumTile(t, "Com o objeto", `${fmt(m.obj.cpm, 1)} CPM`, `± ${fmt(m.obj.errCPM, 1)} · ${m.obj.counts} contagens`);
   sumTile(t, "Líquido", `${r.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(r.netCPM), 1)} CPM`, `± ${fmt(r.netErr, 1)} · ≈ ${fmt(r.netUSv, usvDigits(Math.abs(r.netUSv)))} µSv/h no tubo`, r.level === "sim" ? "warn" : "");
   sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
   $("mdStats").replaceChildren(measureStats(m));
-  $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar a distância, o lado encostado no tubo e a embalagem.";
+  $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
   $("mdNote").classList.toggle("muted", !m.note);
-  let lim = `Limite de detecção: ${fmt(mDetLimit(m.bg), 1)} CPM acima do fundo com ${m.bg.seconds} s.`;
-  if (r.netCPM > 0) lim += ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
+  let lim = `Limite de detecção: ${fmt(mDetLimit(m.bg, m.obj.seconds), 1)} CPM acima do fundo.`;
+  if (r.limit) lim += ` Se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM.`;
+  if (r.netCPM > 0) lim += home
+    ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`
+    : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
+  if (r.stop) lim = measureExplain(r, m.obj, true) + " " + lim;
   $("mdLimits").textContent = lim;
   $("mdEditName").value = m.name;
   $("mdEditNote").value = m.note || "";
@@ -2111,7 +2217,7 @@ function wireMeasureSaved() {
   const cur = () => (state.measurements || []).find((x) => x.id === state.mSel);
   $("btnMOpenSaved").addEventListener("click", () => { const id = state.mLastSaved; setMeasureMode("salvas"); if (id) { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); } });
   $("btnMdReport").addEventListener("click", () => { const m = cur(); if (m) exportMeasureReport(m.id); });
-  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange(m.bg.start - 120e3, m.obj.end + 120e3); });
+  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3); });
   $("btnMdEdit").addEventListener("click", () => { const f = $("mdEditForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdEditName").focus(); });
   $("btnMdSave").addEventListener("click", async () => {
     const m = cur();
@@ -4170,22 +4276,56 @@ function makeDemoApi() {
   const range = (from, to) => pts.filter((p) => p.t >= from && p.t < to);
   let meas = { phase: "", seconds: 0, elapsed: 0, counts: 0, name: "", demo: false, bg: null, obj: null, result: null };
   const phaseOf = (counts, secs) => { const m = secs / 60, cpm = counts / m; return { counts, seconds: secs, cpm, errCPM: Math.sqrt(Math.max(counts, 1)) / m, usv: cpm * 0.0101 }; };
+  // mesmas contas do measure.go / measureauto.go
+  const compare = (b, ph) => {
+    const net = ph.cpm - b.cpm, err = Math.hypot(b.errCPM, ph.errCPM), z = net / err;
+    const level = z >= 3 ? "sim" : z >= 2 ? "talvez" : "nada";
+    return { netCPM: net, netErr: err, netUSv: ph.usv - b.usv, ratio: ph.cpm / b.cpm, sigma: z, level,
+      verdict: { sim: "radioativo: a diferença para o fundo é clara", talvez: "provavelmente um pouco radioativo; meça por mais tempo para confirmar", nada: "nenhuma diferença que dê para separar do fundo" }[level] };
+  };
+  const thrOf = (b, pct) => Math.max(1, b.cpm * pct / 100);
+  const etaOf = (b, ph, el, max, pct) => {
+    if (el < 5) return -1;
+    const net = ph.cpm - b.cpm, rate = Math.max(ph.cpm, b.cpm);
+    let need = Infinity;
+    const q1 = (net / 4) ** 2 - b.errCPM ** 2;
+    if (net > 0 && q1 > 0) need = Math.min(need, rate / q1 * 60);
+    const d = thrOf(b, pct) - Math.max(net, 0), q2 = (d / 2) ** 2 - b.errCPM ** 2;
+    if (d > 0 && q2 > 0) need = Math.min(need, rate / q2 * 60);
+    need = Math.max(need, 20);
+    return !isFinite(need) || need > max ? -1 : Math.ceil(need) - el;
+  };
   function feed(cps) {
     if (meas.phase !== "fundo" && meas.phase !== "objeto") return;
     meas.counts += cps; meas.elapsed++;
-    if (meas.elapsed >= meas.seconds) {
+    let stop = "";
+    if (meas.phase === "objeto") {
+      const part = phaseOf(meas.counts, meas.elapsed);
+      meas.live = compare(meas.bg, part);
+      if (meas.auto) {
+        if (meas.elapsed >= 20 && meas.live.sigma >= 4) stop = "achou";
+        else if (meas.elapsed >= 20 && Math.max(meas.live.netCPM, 0) + 2 * meas.live.netErr < thrOf(meas.bg, meas.pct)) stop = "nada";
+        else if (meas.elapsed >= meas.seconds) stop = "limite";
+        meas.eta = etaOf(meas.bg, part, meas.elapsed, meas.maxSec, meas.pct);
+      }
+    }
+    if (meas.elapsed >= meas.seconds || stop) {
       const ph = phaseOf(meas.counts, meas.elapsed);
       if (meas.phase === "fundo") { meas.bg = ph; meas.phase = "fundo-pronto"; }
       else {
         meas.obj = ph; meas.phase = "pronto";
-        const b = meas.bg, net = ph.cpm - b.cpm, err = Math.hypot(b.errCPM, ph.errCPM), z = net / err;
-        const level = z >= 3 ? "sim" : z >= 2 ? "talvez" : "nada";
-        meas.result = { netCPM: net, netErr: err, netUSv: ph.usv - b.usv, ratio: ph.cpm / b.cpm, sigma: z, level,
-          verdict: { sim: "radioativo: a diferença para o fundo é clara", talvez: "provavelmente um pouco radioativo; meça por mais tempo para confirmar", nada: "nenhuma diferença que dê para separar do fundo" }[level] };
+        const r = compare(meas.bg, ph);
+        r.stop = stop;
+        if (r.level !== "sim") r.limit = Math.max(r.netCPM, 0) + 2 * r.netErr;
+        if (stop === "nada") { r.level = "nada"; r.verdict = `igual ao fundo: se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM`; }
+        if (stop === "limite" && r.level !== "sim") r.verdict += " (chegou ao tempo máximo sem decidir)";
+        if (meas.auto) { r.pct = meas.pct; r.threshold = thrOf(meas.bg, meas.pct); }
+        meas.result = r; meas.live = null; meas.eta = -1;
       }
     }
     emit("measure", { ...meas });
   }
+  const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
   let api;
   api = {
@@ -4293,8 +4433,21 @@ function makeDemoApi() {
     },
     GetMeasure: async () => ({ ...meas }),
     StartMeasurePhase: async (phase, secs, name) => {
-      if (phase === "fundo") meas = { phase, seconds: secs || 60, elapsed: 0, counts: 0, name, demo: demoSt.active, bg: null, obj: null, result: null };
-      else { if (!meas.bg) throw new Error("meça o fundo primeiro"); Object.assign(meas, { phase, elapsed: 0, counts: 0, obj: null, result: null, name: name || meas.name }); }
+      if (phase === "fundo") meas = { phase, seconds: secs || 60, elapsed: 0, counts: 0, name, demo: demoSt.active, bg: null, obj: null, result: null, eta: -1 };
+      else { if (!meas.bg) throw new Error("meça o fundo primeiro"); Object.assign(meas, { phase, elapsed: 0, counts: 0, obj: null, result: null, live: null, eta: -1, name: name || meas.name }); if (meas.auto) meas.seconds = meas.maxSec; }
+      emit("measure", { ...meas }); return { ...meas };
+    },
+    GetHomeBackground: async () => demoHomeBg(),
+    StartMeasure: async (o) => {
+      const maxSec = o.maxSec || 1800, pct = o.pct || 20;
+      meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active,
+        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now() };
+      if (o.homeBg) {
+        const h = demoHomeBg();
+        meas.bg = { counts: h.counts, seconds: h.minutes * 60, cpm: h.cpm, errCPM: h.errCPM, usv: h.cpm * 0.0101, start: h.from, end: h.to, source: "casa" };
+        meas.phase = "objeto";
+        meas.seconds = o.auto ? maxSec : o.seconds || 60;
+      }
       emit("measure", { ...meas }); return { ...meas };
     },
     CancelMeasure: async () => { meas = { phase: "", seconds: 0, elapsed: 0, counts: 0, name: "", demo: false, bg: null, obj: null, result: null }; emit("measure", { ...meas }); return { ...meas }; },

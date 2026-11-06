@@ -1,5 +1,22 @@
 # Versões
 
+## 1.24.0
+- **Medir objeto no automático**: a fase com o objeto para sozinha quando já
+  dá para responder. Para quando o objeto está claramente acima do fundo
+  (4σ) ou quando dá para garantir que ele sobe menos que 50%, 20% ou 10% do
+  fundo, à escolha. Vai até 10 min, 30 min ou 1 h. Durante a medição aparece
+  o resultado parcial e quanto falta para decidir. Os tempos fixos continuam
+  disponíveis.
+- **Fundo da casa**: dá para pular a fase do fundo e usar a média da última
+  hora gravada (em casa, fora de alertas e medições). Vale quando o objeto é
+  medido no lugar de sempre do contador. É bem mais preciso que 1–5 min
+  medidos na hora e corta o tempo pela metade.
+- Campo **distância** (encostado, 5 cm…), que aparece no histórico e no
+  relatório.
+- O relatório da medição mostra como ela parou, o limite superior ("se tiver
+  algo, é menos que +X CPM") e o limite de detecção com tempos diferentes
+  para fundo e objeto.
+
 ## 1.23.2
 - Em inglês, o erro ao abrir a porta do contador ("não consegui abrir …") e
   outras mensagens de erro ainda saíam em português. Também: a chuva na dica

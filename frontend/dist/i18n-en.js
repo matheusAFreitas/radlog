@@ -1132,7 +1132,58 @@ const I18N_EN = {
 "+1 medição": "+1 measurement",
 "+1 detalhe de alerta": "+1 alert detail",
 "+1 anotação": "+1 note",
-"ainda não dá para separar do fundo": "can't be told apart from background yet"
+"ainda não dá para separar do fundo": "can't be told apart from background yet",
+"Compara a contagem com o objeto perto do tubo com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.": "Compares the count with the object near the tube against the background and says whether the difference is real or just the natural variation of the count. In automatic mode, the measurement stops by itself once it can answer: strong objects in seconds, weak ones take longer.",
+"Distância até o tubo (opcional)": "Distance to the tube (optional)",
+"ex.: encostado, 5 cm": "e.g., touching, 5 cm",
+"encostado": "touching",
+"Distância": "Distance",
+"Tempo": "Time",
+"Fundo da casa (última hora)": "Home background (last hour)",
+"Medir agora, com o objeto longe": "Measure now, with the object far away",
+"Automático, até 10 min": "Automatic, up to 10 min",
+"Automático, até 30 min": "Automatic, up to 30 min",
+"Automático, até 1 h": "Automatic, up to 1 h",
+"Fixo: 30 s": "Fixed: 30 s",
+"Fixo: 1 min": "Fixed: 1 min",
+"Fixo: 2 min": "Fixed: 2 min",
+"Fixo: 5 min": "Fixed: 5 min",
+"Conta como “tem algo”": "Counts as “something there”",
+"+50% do fundo (mais rápido)": "+50% of background (faster)",
+"+20% do fundo": "+20% of background",
+"+10% do fundo (mais lento)": "+10% of background (slower)",
+"Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).": "Home background: measure the object where the counter usually sits (the background changes from one spot to another).",
+"O fundo é medido primeiro, com o objeto longe (2 m ou mais), por 5 min.": "The background is measured first, with the object far away (2 m or more), for 5 min.",
+"O fundo é medido primeiro, com o objeto longe (2 m ou mais), pelo mesmo tempo do objeto.": "The background is measured first, with the object far away (2 m or more), for the same time as the object.",
+"1. Fundo da casa": "1. Home background",
+"Até agora:": "So far:",
+"parece radioativo": "looks radioactive",
+"talvez um pouco acima": "maybe slightly above",
+"ainda não dá para dizer": "can't tell yet",
+"juntando contagens…": "gathering counts…",
+"pode ir até o tempo máximo": "may run until the time limit",
+"Fundo (casa)": "Background (home)",
+"Medindo o fundo de novo.": "Measuring the background again.",
+"— comece a medição": "— start the measurement",
+"A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.": "The difference is close to the limit of natural variation. Use automatic mode to measure until it's certain.",
+"Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo. Use o modo automático para mais certeza.": "If the object emits anything, it's below what can be seen in this time. Use automatic mode for more certainty.",
+"Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.": "Not noted. Use Edit to keep the side touching the tube, the packaging, etc.",
+"(chegou ao tempo máximo sem decidir)": "(reached the time limit without deciding)",
+"sem dados gravados": "no recorded data",
+"sem minutos válidos": "no valid minutes",
+"Fundo de casa": "Home background",
+"não informada": "not given",
+"medido na hora, com o objeto longe (2 m ou mais)": "measured on the spot, with the object far away (2 m or more)",
+"não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)": "not noted (on the Measure tab, the measurement's note keeps the side touching the tube, packaging, etc.)",
+"Limite superior": "Upper limit",
+"Como parou": "How it stopped",
+"Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto": "Currie: L_D = 2.71/t_o + 3.29·√(r_b/t_o + r_b/t_b), with r_b = background rate and t_b, t_o = background and object times",
+"fundo da casa ± σ": "home background ± σ",
+"fundo da casa (": "home background (",
+"Incerteza": "Uncertainty",
+"nenhuma diferença que dê para separar do fundo (chegou ao tempo máximo sem decidir)": "no difference that can be told apart from background (reached the time limit without deciding)",
+"provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou ao tempo máximo sem decidir)": "probably slightly radioactive; measure longer to confirm (reached the time limit without deciding)",
+": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).": ": the object came out below background, so the background probably changed (another spot, rain)."
 },
 "patterns": [
 [
@@ -1147,6 +1198,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo da casa: média dos ",
+"^fundo da casa: média dos ((?:(?! · ).)+?) min gravados antes da medição \\(em casa, fora de alertas e medições\\); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos$",
+"home background: average of the ${1} min recorded before the measurement (at home, outside alerts and measurements); the uncertainty is the larger of Poisson's and the real spread of the minutes",
+[
+"fundo da casa: média dos ",
+" min gravados antes da medição (em casa, fora de alertas e medições); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos"
+]
+],
+[
 ": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
 "^: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto \\(((?:(?! · ).)+?) CPM com o seu fundo\\)\\. Por isso, no padrão por hora, \\+1,8 CPM numa hora já pode ser 2σ ou mais\\.$",
 ": the 60-minute average varies √60 ≈ 7.7 times less than 1 minute (${1} CPM with your background). So, in the hourly pattern, +1.8 CPM in an hour may already be 2σ or more.",
@@ -1156,12 +1216,80 @@ const I18N_EN = {
 ]
 ],
 [
+"Parou em ",
+"^Parou em ((?:(?! · ).)+?): a diferença passou de 4σ, bem acima da variação natural da contagem\\. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos\\.$",
+"Stopped at ${1}: the difference went past 4σ, well above the natural variation of the count. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.",
+[
+"Parou em ",
+": a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos."
+]
+],
+[
+"Parou em ",
+"^Parou em ((?:(?! · ).)+?), quando deu para garantir que o objeto sobe menos de ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)\\. Para procurar algo mais fraco, escolha “\\+10% do fundo”\\.$",
+"Stopped at ${1}, once it could guarantee the object adds less than ${2}% of background (+${3} CPM). To look for something weaker, pick “+10% of background”.",
+[
+"Parou em ",
+", quando deu para garantir que o objeto sobe menos de ",
+"% do fundo (+",
+" CPM). Para procurar algo mais fraco, escolha “+10% do fundo”."
+]
+],
+[
+"Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +",
+"^Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo \\(menos que \\+((?:(?! · ).)+?) CPM\\)\\. Use o modo automático para mais certeza\\.$",
+"If the object emits anything, it's below what can be seen in this time (less than +${1} CPM). Use automatic mode for more certainty.",
+[
+"Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +",
+" CPM). Use o modo automático para mais certeza."
+]
+],
+[
+"A diferença vale ",
+"^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): o objeto deu abaixo do fundo, então o fundo provavelmente mudou \\(outro lugar, chuva\\)\\.$",
+"The difference is ${1} times the uncertainty (${2}σ): the object came out below background, so the background probably changed (another spot, rain).",
+[
+"A diferença vale ",
+" vezes a incerteza (",
+"σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) CPM acima do fundo \\(Currie, 95%, com ((?:(?! · ).)+?) s de fundo e ((?:(?! · ).)+?) s com o objeto\\)\\. Abaixo disso, um objeto fraco pode passar despercebido\\.$",
+"${1} CPM above background (Currie, 95%, with ${2} s of background and ${3} s with the object). Below that, a weak object can go unnoticed.",
+[
+" CPM acima do fundo (Currie, 95%, com ",
+" s de fundo e ",
+" s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM; para ir além, aumente o tempo máximo\\.$",
+"Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2} CPM; to go further, raise the time limit.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Se o objeto emite algo, é menos que +",
+" CPM; para ir além, aumente o tempo máximo."
+]
+],
+[
 "A partir de ",
 "^A partir de ((?:(?! · ).)+?) CPM toca o alarme de perigo do app \\(vermelho\\), com prioridade sobre o seu\\. Ajuste em \"Níveis do app\"\\.$",
 "From ${1} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in \"App levels\".",
 [
 "A partir de ",
 " CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em \"Níveis do app\"."
+]
+],
+[
+"Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ",
+"^Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ((?:(?! · ).)+?)% do fundo\\.$",
+"Stops when the object is clearly above background, or when it can guarantee it adds less than ${1}% of background.",
+[
+"Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ",
+"% do fundo."
 ]
 ],
 [
@@ -1235,6 +1363,16 @@ const I18N_EN = {
 ]
 ],
 [
+"automático: parou quando deu para garantir que o objeto sobe menos que ",
+"^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
+"automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
+[
+"automático: parou quando deu para garantir que o objeto sobe menos que ",
+"% do fundo (+",
+" CPM)"
+]
+],
+[
 "Geiger saturado: a leitura chegou a ",
 "^Geiger saturado: a leitura chegou a ((?:(?! · ).)+?) µSv/h \\(fim da escala\\); o valor real pode ser maior$",
 "Geiger saturated: the reading reached ${1} µSv/h (end of scale); the real value may be higher",
@@ -1282,6 +1420,15 @@ const I18N_EN = {
 ]
 ],
 [
+"se o objeto emite algo, é menos que +",
+"^se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM acima do fundo \\(líquido \\+ 2σ, \\~97,5%\\)$",
+"if the object emits anything, it's less than +${1} CPM above background (net + 2σ, ~97.5%)",
+[
+"se o objeto emite algo, é menos que +",
+" CPM acima do fundo (líquido + 2σ, ~97,5%)"
+]
+],
+[
 "não vou gravar: a configuração do contador tem valores que o app não reconhece (",
 "^não vou gravar: a configuração do contador tem valores que o app não reconhece \\(((?:(?! · ).)+?)\\)$",
 "won't write: the counter configuration has values the app doesn't recognize (${1})",
@@ -1295,6 +1442,15 @@ const I18N_EN = {
 "${1}σ: up to ~2σ is the natural variation of the count; from 3σ up the difference is real.",
 [
 "σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real."
+]
+],
+[
+"Se o objeto emite algo, é menos que +",
+"^Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM; para ir além, aumente o tempo máximo\\.$",
+"If the object emits anything, it's less than +${1} CPM; to go further, raise the time limit.",
+[
+"Se o objeto emite algo, é menos que +",
+" CPM; para ir além, aumente o tempo máximo."
 ]
 ],
 [
@@ -1467,6 +1623,15 @@ const I18N_EN = {
 ]
 ],
 [
+"automático: parou quando o líquido passou de 4σ (",
+"^automático: parou quando o líquido passou de 4σ \\(((?:(?! · ).)+?) s com o objeto\\)$",
+"automatic: stopped when the net went past 4σ (${1} s with the object)",
+[
+"automático: parou quando o líquido passou de 4σ (",
+" s com o objeto)"
+]
+],
+[
 "atualização: não deu para salvar em ",
 "^atualização: não deu para salvar em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\); usando a pasta de dados$",
 "update: couldn't save to ${1} (${2}); using the data folder",
@@ -1532,6 +1697,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Precisão do líquido: ±",
+"^Precisão do líquido: ±((?:(?! · ).)+?)%\\. Para ±10%: ((?:(?! · ).)+?) com o objeto; para ±5%: ((?:(?! · ).)+?)\\.$",
+"Net precision: ±${1}%. For ±10%: ${2} with the object; for ±5%: ${3}.",
+[
+"Precisão do líquido: ±",
+"%. Para ±10%: ",
+" com o objeto; para ±5%: "
+]
+],
+[
 "acima do que o aparelho mede · o real pode ser maior que ",
 "^acima do que o aparelho mede · o real pode ser maior que ((?:(?! · ).)+?) µSv/h$",
 "above what the device measures · the real value may be higher than ${1} µSv/h",
@@ -1566,6 +1741,33 @@ const I18N_EN = {
 "${1} didn't open (the port seems stuck): unplug and replug the USB cable",
 [
 " não abriu (a porta parece presa): tire e coloque o cabo USB"
+]
+],
+[
+"Igual ao fundo: se o objeto emite algo, é menos que +",
+"^Igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM\\.$",
+"Same as background: if the object emits anything, it's less than +${1} CPM.",
+[
+"Igual ao fundo: se o objeto emite algo, é menos que +",
+" CPM."
+]
+],
+[
+"igual ao fundo: se o objeto emite algo, é menos que +",
+"^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
+"same as background: if the object emits anything, it's less than +${1} CPM",
+[
+"igual ao fundo: se o objeto emite algo, é menos que +",
+" CPM"
+]
+],
+[
+"Igual ao fundo: se o objeto emite algo, é menos que +",
+"^Igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
+"Same as background: if the object emits anything, it's less than +${1} CPM",
+[
+"Igual ao fundo: se o objeto emite algo, é menos que +",
+" CPM"
 ]
 ],
 [
@@ -1631,6 +1833,15 @@ const I18N_EN = {
 ]
 ],
 [
+"só ",
+"^só ((?:(?! · ).)+?) min do fundo da casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
+"only ${1} min of home background in the last hour (needs ${2})",
+[
+"só ",
+" min do fundo da casa na última hora (precisa de "
+]
+],
+[
 "Dose medida no período escolhido no cartão de dose: ",
 "^Dose medida no período escolhido no cartão de dose: ((?:(?! · ).)+?)\\.$",
 "Dose measured in the period chosen on the dose card: ${1}.",
@@ -1666,16 +1877,6 @@ const I18N_EN = {
 ]
 ],
 [
-"",
-"^((?:(?! · ).)+?)((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?)((?:(?! · ).)+?) µSv/h encostado$",
-"${1}${2} ± ${3} CPM above background · ${4}× the background · ≈ ${5}${6} µSv/h touching",
-[
-" CPM sobre o fundo · ",
-"× o fundo · ≈ ",
-" µSv/h encostado"
-]
-],
-[
 "3 erros seguidos em ",
 "^3 erros seguidos em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\), com a porta ainda na lista$",
 "3 errors in a row on ${1} (${2}), with the port still in the list",
@@ -1704,6 +1905,16 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?)((?:(?! · ).)+?) µSv/h no tubo$",
+"${1}${2} ± ${3} CPM above background · ${4}× the background · ≈ ${5}${6} µSv/h at the tube",
+[
+" CPM sobre o fundo · ",
+"× o fundo · ≈ ",
+" µSv/h no tubo"
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -1718,6 +1929,15 @@ const I18N_EN = {
 "${1} is locked (value not recognized on the counter)",
 [
 " está travado (valor não reconhecido no contador)"
+]
+],
+[
+"automático: chegou ao tempo máximo (",
+"^automático: chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir$",
+"automatic: reached the time limit (${1}) without deciding",
+[
+"automático: chegou ao tempo máximo (",
+") sem decidir"
 ]
 ],
 [
@@ -1899,6 +2119,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Se o objeto emite algo, é menos que +",
+"^Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM\\.$",
+"If the object emits anything, it's less than +${1} CPM.",
+[
+"Se o objeto emite algo, é menos que +",
+" CPM."
+]
+],
+[
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
 "Measurement of ${1}: ${2} ± ${3} CPM above background (${4}σ) — ${5}",
@@ -1965,6 +2194,24 @@ const I18N_EN = {
 "sync: couldn't listen on ${1}: ${2}",
 [
 "sincronização: não consegui escutar em "
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\.$",
+"Reached the time limit (${1}) without deciding.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir."
+]
+],
+[
+"Limite de detecção: ",
+"^Limite de detecção: ((?:(?! · ).)+?) CPM acima do fundo\\.$",
+"Detection limit: ${1} CPM above background.",
+[
+"Limite de detecção: ",
+" CPM acima do fundo."
 ]
 ],
 [
@@ -2068,12 +2315,29 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) \\(chegou ao tempo máximo sem decidir\\)$",
+"${1} (reached the time limit without deciding)",
+[
+" (chegou ao tempo máximo sem decidir)"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
 [
 "[demo] Perigo: ",
 " CPM (a partir de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · fundo da casa \\(((?:(?! · ).)+?) min\\) \\+ objeto ((?:(?! · ).)+?) s$",
+"${1} · home background (${2} min) + object ${3} s",
+[
+" · fundo da casa (",
+" min) + objeto "
 ]
 ],
 [
@@ -2185,6 +2449,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo da casa (",
+"^fundo da casa \\(((?:(?! · ).)+?) min\\) \\+ objeto ((?:(?! · ).)+?) s$",
+"home background (${1} min) + object ${2} s",
+[
+"fundo da casa (",
+" min) + objeto "
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -2271,6 +2544,15 @@ const I18N_EN = {
 " chuva",
 " medida",
 " nos últimos 60 dias"
+]
+],
+[
+"fundo da casa (",
+"^fundo da casa \\(((?:(?! · ).)+?) min\\) \\+ objeto ((?:(?! · ).)+?)$",
+"home background (${1} min) + object ${2}",
+[
+"fundo da casa (",
+" min) + objeto "
 ]
 ],
 [
@@ -2486,6 +2768,14 @@ const I18N_EN = {
 "measurement report saved: ${1}",
 [
 "relatório da medição salvo: "
+]
+],
+[
+"fundo da casa indisponível: ",
+"^fundo da casa indisponível: ((?:(?! · ).)+?)$",
+"home background unavailable: ${1}",
+[
+"fundo da casa indisponível: "
 ]
 ],
 [
@@ -2744,6 +3034,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) \\(para gama do Cs\\-137\\)$",
+"${1} (for Cs-137 gamma)",
+[
+" (para gama do Cs-137)"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -2971,6 +3269,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM \\(((?:(?! · ).)+?) min até ((?:(?! · ).)+?)\\)$",
+"${1} ± ${2} CPM (${3} min until ${4})",
+[
+" CPM (",
+" min até "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -3137,6 +3444,23 @@ const I18N_EN = {
 "fetching rain in ${1}…",
 [
 "buscando chuva em "
+]
+],
+[
+"sobre o fundo (",
+"^sobre o fundo \\(((?:(?! · ).)+?)σ\\)$",
+"above background (${1}σ)",
+[
+"sobre o fundo (",
+"σ)"
+]
+],
+[
+"— fundo da casa ",
+"^— fundo da casa ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
+"— home background ${1} ± ${2}",
+[
+"— fundo da casa "
 ]
 ],
 [
@@ -3340,6 +3664,14 @@ const I18N_EN = {
 "tries again at ${1}",
 [
 "tenta de novo às "
+]
+],
+[
+"fundo da casa ",
+"^fundo da casa ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
+"home background ${1} ± ${2}",
+[
+"fundo da casa "
 ]
 ],
 [
@@ -3593,6 +3925,14 @@ const I18N_EN = {
 ]
 ],
 [
+"~",
+"^\\~((?:(?! · ).)+?) para decidir$",
+"~${1} to decide",
+[
+" para decidir"
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -3760,6 +4100,14 @@ const I18N_EN = {
 "raining (${1})",
 [
 "chovendo ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com o objeto$",
+"${1} with the object",
+[
+" com o objeto"
 ]
 ],
 [

@@ -1130,7 +1130,7 @@ v{0} disponível	v{0} available
 {0}: pico de {1} CPM{2}	{0}: peak of {1} CPM{2}
 {0}: valor {1} fora da faixa aceita	{0}: value {1} outside the accepted range
 {0}{1} da média das {2}h ({3})	{0}{1} the {2}h average ({3})
-{0}{1} ± {2} CPM sobre o fundo · {3}× o fundo · ≈ {4}{5} µSv/h encostado	{0}{1} ± {2} CPM above background · {3}× the background · ≈ {4}{5} µSv/h touching
+{0}{1} ± {2} CPM sobre o fundo · {3}× o fundo · ≈ {4}{5} µSv/h no tubo	{0}{1} ± {2} CPM above background · {3}× the background · ≈ {4}{5} µSv/h at the tube
 {0}× mais	{0}× more
 {0}× menos	{0}× less
 {0}σ acima do acaso	{0}σ above chance
@@ -1538,5 +1538,88 @@ chuva {0} mm (modelo)	rain: {0} mm (model)
 {0} acumulados	{0} accumulated
 dureza {0}	hardness {0}
 dureza {0} (1,00 = fundo)	hardness {0} (1.00 = background)
-parece:	looks like:
 ainda não dá para separar do fundo	can't be told apart from background yet
+Compara a contagem com o objeto perto do tubo com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.	Compares the count with the object near the tube against the background and says whether the difference is real or just the natural variation of the count. In automatic mode, the measurement stops by itself once it can answer: strong objects in seconds, weak ones take longer.
+Distância até o tubo (opcional)	Distance to the tube (optional)
+ex.: encostado, 5 cm	e.g., touching, 5 cm
+encostado	touching
+Distância	Distance
+Tempo	Time
+Fundo da casa (última hora)	Home background (last hour)
+Medir agora, com o objeto longe	Measure now, with the object far away
+Automático, até 10 min	Automatic, up to 10 min
+Automático, até 30 min	Automatic, up to 30 min
+Automático, até 1 h	Automatic, up to 1 h
+Fixo: 30 s	Fixed: 30 s
+Fixo: 1 min	Fixed: 1 min
+Fixo: 2 min	Fixed: 2 min
+Fixo: 5 min	Fixed: 5 min
+Conta como “tem algo”	Counts as “something there”
++50% do fundo (mais rápido)	+50% of background (faster)
++20% do fundo	+20% of background
++10% do fundo (mais lento)	+10% of background (slower)
+Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).	Home background: measure the object where the counter usually sits (the background changes from one spot to another).
+O fundo é medido primeiro, com o objeto longe (2 m ou mais), por 5 min.	The background is measured first, with the object far away (2 m or more), for 5 min.
+O fundo é medido primeiro, com o objeto longe (2 m ou mais), pelo mesmo tempo do objeto.	The background is measured first, with the object far away (2 m or more), for the same time as the object.
+Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de {0}% do fundo.	Stops when the object is clearly above background, or when it can guarantee it adds less than {0}% of background.
+1. Fundo da casa	1. Home background
+{0} ± {1} CPM ({2} min até {3})	{0} ± {1} CPM ({2} min until {3})
+Até agora:	So far:
+sobre o fundo ({0}σ)	above background ({0}σ)
+parece radioativo	looks radioactive
+talvez um pouco acima	maybe slightly above
+ainda não dá para dizer	can't tell yet
+juntando contagens…	gathering counts…
+~{0} para decidir	~{0} to decide
+pode ir até o tempo máximo	may run until the time limit
+Fundo (casa)	Background (home)
+Medindo o fundo de novo.	Measuring the background again.
+— comece a medição	— start the measurement
+fundo da casa {0} ± {1}	home background {0} ± {1}
+Parou em {0}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.	Stopped at {0}: the difference went past 4σ, well above the natural variation of the count. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.
+Parou em {0}, quando deu para garantir que o objeto sobe menos de {1}% do fundo (+{2} CPM). Para procurar algo mais fraco, escolha “+10% do fundo”.	Stopped at {0}, once it could guarantee the object adds less than {1}% of background (+{2} CPM). To look for something weaker, pick “+10% of background”.
+Chegou ao tempo máximo ({0}) sem decidir.	Reached the time limit ({0}) without deciding.
+Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1} CPM; para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1} CPM; to go further, raise the time limit.
+Se o objeto emite algo, é menos que +{0} CPM; para ir além, aumente o tempo máximo.	If the object emits anything, it's less than +{0} CPM; to go further, raise the time limit.
+Se o objeto emite algo, é menos que +{0} CPM.	If the object emits anything, it's less than +{0} CPM.
+A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.	The difference is close to the limit of natural variation. Use automatic mode to measure until it's certain.
+Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo. Use o modo automático para mais certeza.	If the object emits anything, it's below what can be seen in this time. Use automatic mode for more certainty.
+Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +{0} CPM). Use o modo automático para mais certeza.	If the object emits anything, it's below what can be seen in this time (less than +{0} CPM). Use automatic mode for more certainty.
+Limite de detecção: {0} CPM acima do fundo.	Detection limit: {0} CPM above background.
+Precisão do líquido: ±{0}%. Para ±10%: {1} com o objeto; para ±5%: {2}.	Net precision: ±{0}%. For ±10%: {1} with the object; for ±5%: {2}.
+Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.	Not noted. Use Edit to keep the side touching the tube, the packaging, etc.
+fundo da casa ({0} min) + objeto {1}	home background ({0} min) + object {1}
+igual ao fundo: se o objeto emite algo, é menos que +{0} CPM	same as background: if the object emits anything, it's less than +{0} CPM
+(chegou ao tempo máximo sem decidir)	(reached the time limit without deciding)
+{0} (chegou ao tempo máximo sem decidir)	{0} (reached the time limit without deciding)
+fundo da casa indisponível: {0}	home background unavailable: {0}
+só {0} min do fundo da casa na última hora (precisa de {1})	only {0} min of home background in the last hour (needs {1})
+sem dados gravados	no recorded data
+sem minutos válidos	no valid minutes
+Fundo de casa	Home background
+não informada	not given
+medido na hora, com o objeto longe (2 m ou mais)	measured on the spot, with the object far away (2 m or more)
+fundo da casa: média dos {0} min gravados antes da medição (em casa, fora de alertas e medições); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos	home background: average of the {0} min recorded before the measurement (at home, outside alerts and measurements); the uncertainty is the larger of Poisson's and the real spread of the minutes
+não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)	not noted (on the Measure tab, the measurement's note keeps the side touching the tube, packaging, etc.)
+se o objeto emite algo, é menos que +{0} CPM acima do fundo (líquido + 2σ, ~97,5%)	if the object emits anything, it's less than +{0} CPM above background (net + 2σ, ~97.5%)
+Limite superior	Upper limit
+Como parou	How it stopped
+automático: parou quando o líquido passou de 4σ ({0} s com o objeto)	automatic: stopped when the net went past 4σ ({0} s with the object)
+automático: parou quando deu para garantir que o objeto sobe menos que {0}% do fundo (+{1} CPM)	automatic: stopped once it could guarantee the object adds less than {0}% of background (+{1} CPM)
+automático: chegou ao tempo máximo ({0}) sem decidir	automatic: reached the time limit ({0}) without deciding
+{0} CPM acima do fundo (Currie, 95%, com {1} s de fundo e {2} s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido.	{0} CPM above background (Currie, 95%, with {1} s of background and {2} s with the object). Below that, a weak object can go unnoticed.
+Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto	Currie: L_D = 2.71/t_o + 3.29·√(r_b/t_o + r_b/t_b), with r_b = background rate and t_b, t_o = background and object times
+{0} com o objeto	{0} with the object
+fundo da casa ± σ	home background ± σ
+fundo da casa (	home background (
+{0} · fundo da casa ({1} min) + objeto {2} s	{0} · home background ({1} min) + object {2} s
+fundo da casa ({0} min) + objeto {1} s	home background ({0} min) + object {1} s
+Incerteza	Uncertainty
+Igual ao fundo: se o objeto emite algo, é menos que +{0} CPM	Same as background: if the object emits anything, it's less than +{0} CPM
+Igual ao fundo: se o objeto emite algo, é menos que +{0} CPM.	Same as background: if the object emits anything, it's less than +{0} CPM.
+{0} (para gama do Cs-137)	{0} (for Cs-137 gamma)
+nenhuma diferença que dê para separar do fundo (chegou ao tempo máximo sem decidir)	no difference that can be told apart from background (reached the time limit without deciding)
+provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou ao tempo máximo sem decidir)	probably slightly radioactive; measure longer to confirm (reached the time limit without deciding)
+— fundo da casa {0} ± {1}	— home background {0} ± {1}
+: o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	: the object came out below background, so the background probably changed (another spot, rain).
+A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
