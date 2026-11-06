@@ -12,19 +12,7 @@ import (
 // Bluetooth no Linux pelo BlueZ (D-Bus), sem nada a instalar além do
 // bluetoothd que já vem no sistema.
 
-const (
-	bleWriteUUID  = "e63215e6-7003-49d8-96b0-b024798fb901"
-	bleNotifyUUID = "e63215e7-7003-49d8-96b0-b024798fb901"
-	bluez         = "org.bluez"
-)
-
-// BLEDevice é um RadiaCode visto pelo Bluetooth.
-type BLEDevice struct {
-	Address string `json:"address"`
-	Name    string `json:"name"`
-	RSSI    int    `json:"rssi"`
-	Paired  bool   `json:"paired"`
-}
+const bluez = "org.bluez"
 
 func managedObjects(conn *dbus.Conn) (map[dbus.ObjectPath]map[string]map[string]dbus.Variant, error) {
 	var objs map[dbus.ObjectPath]map[string]map[string]dbus.Variant
@@ -82,7 +70,7 @@ func ScanBLE(d time.Duration) ([]BLEDevice, error) {
 		if name == "" {
 			name = str(dev["Alias"])
 		}
-		if !strings.HasPrefix(strings.ToLower(name), "radiacode") && !strings.HasPrefix(strings.ToLower(name), "rc-") {
+		if !isRadiacodeName(name) {
 			continue
 		}
 		b := BLEDevice{Address: str(dev["Address"]), Name: name}

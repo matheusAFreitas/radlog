@@ -12,9 +12,8 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
 - [ ] Papéis: o **GMC-800 é a base da casa** (fica parado, monitora o
       ambiente) e o **RadiaCode 102 é o dosímetro pessoal** (anda pela casa e
       fora dela).
-- [ ] Conexão com o RadiaCode por **USB e Bluetooth** (1.25: USB no Windows e
-      no Linux, Bluetooth no Linux; falta o Bluetooth no Windows e baixar a
-      memória do aparelho). O app do PC tenta
+- [ ] Conexão com o RadiaCode por **USB e Bluetooth** (1.25–1.26: USB e
+      Bluetooth no Windows e no Linux; falta baixar a memória do aparelho). O app do PC tenta
       conectar sozinho de tempos em tempos: quando o celular solta o aparelho
       (app oficial fechado ou fora do alcance), o PC assume e baixa o que
       ficou na memória do RadiaCode.

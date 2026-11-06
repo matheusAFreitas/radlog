@@ -1,5 +1,12 @@
 # Versões
 
+## 1.26.0
+- **RadiaCode pelo Bluetooth no Windows** (Windows 10 ou mais novo), pelas
+  APIs do próprio Windows, sem instalar nada. Em Configurações → RadiaCode,
+  "Procurar no Bluetooth" acha o aparelho e "Usar este" grava o endereço.
+  Daí em diante o app conecta sozinho. Se o celular estiver conectado no
+  RadiaCode, o PC tenta de novo a cada 30 s e assume quando o celular solta.
+
 ## 1.25.0
 - **RadiaCode (primeira versão)**: o app procura o RadiaCode sozinho e
   conecta pelo **USB** (Windows e Linux) ou pelo **Bluetooth** (por enquanto
