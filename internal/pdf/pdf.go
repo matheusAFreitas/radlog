@@ -5,6 +5,7 @@ import (
 	"compress/zlib"
 	"fmt"
 	"strings"
+	"sync"
 )
 
 // Package pdf é um gerador de PDF mínimo, sem dependências.
@@ -153,7 +154,55 @@ func baseLetter(c byte) byte {
 	return 0
 }
 
+// ---------- tradução ----------
+//
+// Os relatórios são escritos em português. Com um tradutor ligado
+// (SetTranslator), Text, TextRight, TextWidth e Fit traduzem o texto antes
+// de medir e escrever, e o que já saiu traduzido não é traduzido de novo
+// (Fit e as linhas quebradas passam por aqui duas vezes).
+
+var (
+	trMu   sync.Mutex
+	trFn   func(string) string
+	trDone map[string]bool
+)
+
+// SetTranslator liga a tradução para os próximos textos (nil desliga). Use
+// com WithTranslator, que segura o PDF inteiro.
+func SetTranslator(f func(string) string) {
+	trFn = f
+	trDone = map[string]bool{}
+}
+
+// WithTranslator gera um PDF com o tradutor ligado (um de cada vez).
+func WithTranslator(f func(string) string, render func() []byte) []byte {
+	trMu.Lock()
+	defer trMu.Unlock()
+	SetTranslator(f)
+	defer SetTranslator(nil)
+	return render()
+}
+
+// Tr traduz (se houver tradutor) e marca o resultado como pronto.
+func Tr(s string) string {
+	if trFn == nil || trDone[s] {
+		return s
+	}
+	t := trFn(s)
+	trDone[t] = true
+	return t
+}
+
+// MarkTranslated diz que s já está no idioma certo (ex.: linha quebrada de
+// um texto já traduzido).
+func MarkTranslated(s string) {
+	if trFn != nil {
+		trDone[s] = true
+	}
+}
+
 func TextWidth(s string, f Font, size float64) float64 {
+	s = Tr(s)
 	total := 0.0
 	for _, run := range splitSym(s) {
 		if run.sym {
@@ -209,6 +258,7 @@ func (d *Doc) color(c RGB, fill bool) {
 
 // text escreve com a linha de base em y (medido do topo).
 func (d *Doc) Text(x, y float64, f Font, size float64, c RGB, s string) {
+	s = Tr(s)
 	d.color(c, true)
 	fmt.Fprintf(d.cur, "BT %.2f %.2f Td", x, H-y)
 	for _, run := range splitSym(s) {
@@ -226,19 +276,24 @@ func (d *Doc) Text(x, y float64, f Font, size float64, c RGB, s string) {
 }
 
 func (d *Doc) TextRight(xr, y float64, f Font, size float64, c RGB, s string) {
+	s = Tr(s)
 	d.Text(xr-TextWidth(s, f, size), y, f, size, c, s)
 }
 
 // Fit corta o texto com "..." para caber na largura.
 func Fit(s string, f Font, size, w float64) string {
+	s = Tr(s)
 	if TextWidth(s, f, size) <= w {
 		return s
 	}
 	r := []rune(s)
 	for len(r) > 1 && TextWidth(string(r)+"...", f, size) > w {
 		r = r[:len(r)-1]
+		MarkTranslated(string(r) + "...")
 	}
-	return string(r) + "..."
+	out := string(r) + "..."
+	MarkTranslated(out)
+	return out
 }
 
 func (d *Doc) Line(x1, y1, x2, y2, width float64, c RGB, dash bool) {

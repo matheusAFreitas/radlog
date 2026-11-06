@@ -21,6 +21,7 @@ func testApp(t *testing.T) (*App, string) {
 	a := NewApp()
 	a.dataDir, a.store, a.cal = dir, st, gmc.DefaultCalibration()
 	a.settings = defaultSettings()
+	a.settings.NoMeasureReport = true // o PDF automático é testado à parte (não escreve depois do teste)
 	return a, dir
 }
 

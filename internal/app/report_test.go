@@ -111,6 +111,14 @@ func TestReportMaxConsistent(t *testing.T) {
 	if out := os.Getenv("REPORT_OUT"); out != "" {
 		_ = os.WriteFile(out, pdfb, 0o644)
 	}
+	a.SetUILang("en")
+	enb := a.inLang(func() []byte { return renderReportPDF(r) })
+	if !strings.HasPrefix(string(enb), "%PDF") || string(enb) == string(pdfb) {
+		t.Fatal("PDF em inglês igual ao português")
+	}
+	if out := os.Getenv("REPORT_OUT"); out != "" {
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-en.pdf", enb, 0o644)
+	}
 }
 
 func TestFmtSeconds(t *testing.T) {

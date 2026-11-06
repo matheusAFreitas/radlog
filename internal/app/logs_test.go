@@ -51,4 +51,10 @@ func TestGetLogs(t *testing.T) {
 	if r.Total != 1 || r.Entries[0].Comp != "leitura ao vivo" {
 		t.Fatalf("busca: %+v", r)
 	}
+	// em inglês a mensagem sai traduzida; o componente fica (é o filtro)
+	a.SetUILang("en")
+	r, _ = a.GetLogs(LogQuery{Text: "travada"})
+	if r.Total != 1 || r.Entries[0].Comp != "leitura ao vivo" || r.Entries[0].Msg != "leitura ao vivo: GETCPM with no answer in 6 s (port locked)" {
+		t.Fatalf("inglês: %+v", r.Entries)
+	}
 }

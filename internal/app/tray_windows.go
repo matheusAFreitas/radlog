@@ -36,9 +36,12 @@ func (a *App) startTray() {
 		systray.Run(func() {
 			systray.SetIcon(trayIcon)
 			systray.SetTooltip(appTitle)
-			open := systray.AddMenuItem("Abrir o GMC Monitor", "Mostra a janela")
+			open := systray.AddMenuItem(a.T("Abrir o GMC Monitor"), a.T("Mostra a janela"))
 			systray.AddSeparator()
-			quit := systray.AddMenuItem("Sair", "Fecha o app (para de monitorar)")
+			quit := systray.AddMenuItem(a.T("Sair"), a.T("Fecha o app (para de monitorar)"))
+			a.trayMu.Lock()
+			a.trayItems = []trayItem{{open, "Abrir o GMC Monitor", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
+			a.trayMu.Unlock()
 			a.trayReady.Store(true)
 			for {
 				select {
@@ -66,6 +69,7 @@ func (a *App) trayShow(tip, level string) {
 	}
 	a.trayMu.Lock()
 	defer a.trayMu.Unlock()
+	tip = a.T(tip)
 	if tip != a.trayTip {
 		a.trayTip = tip
 		systray.SetTooltip(tip)
@@ -147,4 +151,23 @@ func autostartPath() string {
 		return ""
 	}
 	return strings.TrimSpace(v)
+}
+
+type trayItem struct {
+	it         *systray.MenuItem
+	title, tip string
+}
+
+// trayRelabel troca os textos do menu quando o idioma muda.
+func (a *App) trayRelabel() {
+	if !a.trayReady.Load() {
+		return
+	}
+	a.trayMu.Lock()
+	defer a.trayMu.Unlock()
+	for _, t := range a.trayItems {
+		t.it.SetTitle(a.T(t.title))
+		t.it.SetTooltip(a.T(t.tip))
+	}
+	a.trayTip = "" // a próxima dica sai no idioma novo
 }

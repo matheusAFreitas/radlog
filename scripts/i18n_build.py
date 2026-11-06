@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Gera frontend/dist/i18n-en.js a partir de i18n/en.tsv.
+"""Gera frontend/dist/i18n-en.js a partir de internal/i18n/en.tsv.
 
-i18n/en.tsv: uma linha por frase, "português<TAB>inglês". Frases com {0},
+internal/i18n/en.tsv: uma linha por frase, "português<TAB>inglês". Frases com {0},
 {1}… são moldes: as partes variáveis são capturadas e reaparecem no inglês
 na posição do mesmo número.
 """
@@ -9,7 +9,7 @@ import json, os, re
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 exact, pats = {}, []
-for ln in open(os.path.join(ROOT, "i18n/en.tsv"), encoding="utf-8"):
+for ln in open(os.path.join(ROOT, "internal/i18n/en.tsv"), encoding="utf-8"):
     ln = ln.rstrip("\n")
     if not ln or ln.startswith("#") or "\t" not in ln:
         continue
@@ -34,7 +34,7 @@ for ln in open(os.path.join(ROOT, "i18n/en.tsv"), encoding="utf-8"):
         exact[pt] = en
 # moldes com mais texto fixo primeiro (os mais específicos ganham)
 pats.sort(key=lambda p: -len(re.sub(r"\(\(\?:\(\?! · \)\.\)\+\?\)", "", p[1])))
-js = "// gerado por scripts/i18n_build.py a partir de i18n/en.tsv: não edite à mão\n"
+js = "// gerado por scripts/i18n_build.py a partir de internal/i18n/en.tsv: não edite à mão\n"
 js += "const I18N_EN = " + json.dumps({"exact": exact, "patterns": pats}, ensure_ascii=False, indent=0) + ";\n"
 open(os.path.join(ROOT, "frontend/dist/i18n-en.js"), "w", encoding="utf-8").write(js)
 print(f"{len(exact)} frases, {len(pats)} moldes")

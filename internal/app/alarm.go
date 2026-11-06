@@ -31,7 +31,7 @@ func (a *App) flagWindow(tag string, cpm float64, demo, raise bool) {
 	if demo {
 		tag += " (demo)"
 	}
-	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %.0f CPM — %s", tag, cpm, appTitle))
+	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %.0f CPM — %s", a.T(tag), cpm, appTitle))
 	// escondida na bandeja: sempre volta (escondida, o som pode não tocar)
 	if a.inTray.Load() {
 		raise = true

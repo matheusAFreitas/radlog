@@ -326,7 +326,9 @@ type App struct {
 	quitting  atomic.Bool
 	trayReady atomic.Bool
 	trayMu    sync.Mutex
+	trayItems []trayItem // itens do menu da bandeja (para trocar o idioma)
 	trayTip   string
+	lang      string // idioma da interface já resolvido ("pt" ou "en"); a tela informa
 	trayLevel string
 	notes     []Note // anotações no gráfico (notes.go)
 

@@ -631,7 +631,8 @@ func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(dst, renderReportPDF(r), 0o644); err != nil {
+	body := a.inLang(func() []byte { return renderReportPDF(r) })
+	if err := os.WriteFile(dst, body, 0o644); err != nil {
 		return "", err
 	}
 	a.logf("relatório salvo: %s", dst)

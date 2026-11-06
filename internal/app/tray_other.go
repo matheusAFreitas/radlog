@@ -13,3 +13,7 @@ func setAutostart(on bool) error          { return nil }
 func autostartPath() string               { return "" }
 func startupDisabled() bool               { return false }
 func enableStartup() error                { return nil }
+
+type trayItem struct{}
+
+func (a *App) trayRelabel() {}

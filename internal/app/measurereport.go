@@ -154,7 +154,8 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	if lv.DeadTimeOn {
 		dt = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
 	}
-	if err := os.WriteFile(dst, renderMeasurePDF(*m, dev, calTxt, dt), 0o644); err != nil {
+	body := a.inLang(func() []byte { return renderMeasurePDF(*m, dev, calTxt, dt) })
+	if err := os.WriteFile(dst, body, 0o644); err != nil {
 		return "", err
 	}
 	a.logf("relatório da medição salvo: %s", dst)
@@ -333,7 +334,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 		p.y += float64(len(lines))*9.5 + 3
 	}
 	p.footer()
-	return d.Bytes(title, "GMC Monitor "+AppVersion)
+	return d.Bytes(pdf.Tr(title), "GMC Monitor "+AppVersion)
 }
 
 // measChart: contagem por segundo (média de 10 s, em CPM) das duas fases,

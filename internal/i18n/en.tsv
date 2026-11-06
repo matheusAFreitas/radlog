@@ -1179,7 +1179,7 @@ Aplicar nos pontos	Apply to the points
 conectado em {0}	connected on {0}
 Idioma	Language
 Idioma do app	App language
-Muda na hora (a janela recarrega). Os relatórios em PDF e o registro técnico ainda saem em português.	Changes right away (the window reloads). PDF reports and the technical log still come out in Portuguese.
+Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.	Changes right away (the window reloads). Applies to the screen, PDF reports, the tray menu and the technical log. The log.txt file stays in Portuguese.
 {0} → agora	{0} → now
 agora	now
 σ real {0} ÷ acaso {1}	actual σ {0} ÷ chance {1}
@@ -1368,3 +1368,45 @@ Nível mínimo	Minimum level
 Hoje	Today
 teto {0}	ceiling {0}
 {0} · dose {1} · teto {2}	{0} · dose {1} · ceiling {2}
+# --- relatórios em PDF
+calculada pelo app	calculated by the app
+≈ {0} mSv/ano (extrapolação)	≈ {0} mSv/year (extrapolation)
+mediana de 30 dias	30-day median
+média do período {0}	period average {0}
+máx. = pico ao vivo (maior minuto: {0})	max. = live peak (highest minute: {0})
+Cobertura	Coverage
+medido	measured
+dom {0}	Sun {0}
+seg {0}	Mon {0}
+ter {0}	Tue {0}
+qua {0}	Wed {0}
+qui {0}	Thu {0}
+sex {0}	Fri {0}
+sáb {0}	Sat {0}
+Mediana CPM	Median CPM
+dados insuficientes	not enough data
+Quando	When
+Pico	Peak
+pico {0}	peak {0}
+méd. {0}	avg. {0}
+pico	peak
+TEMPO ACIMA DOS LIMITES OPERACIONAIS	TIME ABOVE THE OPERATING LIMITS
+{0} contagens em {1} s = {2} ± {3} CPM (medido logo antes, com o objeto longe)	{0} counts in {1} s = {2} ± {3} CPM (measured just before, with the object far away)
+objeto ÷ fundo = {0}×	object ÷ background = {0}×
+{0} µSv/h por CPM ({1})	{0} µSv/h per CPM ({1})
+para gama do Cs-137	for Cs-137 gamma
+Tempo morto	Dead time
+desligada	off
+ligada (τ = {0} µs)	on (τ = {0} µs)
+hora local ({0})	local time ({0})
+Medição: {0}	Measurement: {0}
+{0} em cada fase	{0} in each phase
+gerado em {0}	generated on {0}
+Radioativo	Radioactive
+Talvez	Maybe
+Sem diferença	No difference
+Relatório: {0}	Report: {0}
+fundo {0} s + objeto {1} s	background {0} s + object {1} s
+SEGUNDO A SEGUNDO	SECOND BY SECOND
+Segundos	Seconds
+Fase	Phase

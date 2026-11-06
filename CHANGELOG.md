@@ -1,5 +1,18 @@
 # Versões
 
+## 1.22.0
+Segunda parte do inglês:
+- **Relatórios em PDF em inglês**: o relatório do período e o da medição de
+  objeto saem no idioma do app, com números com ponto decimal. O texto é
+  traduzido antes de medir, então quebra de linha e cortes continuam certos.
+- **Menu da bandeja e título da janela** (ALARM: 150 CPM) no idioma do app;
+  o menu troca na hora quando você muda o idioma.
+- **Registro técnico** (Eventos e log) com as mensagens em inglês. O arquivo
+  log.txt continua em português; os nomes dos componentes também (são os
+  filtros), mas aparecem traduzidos na tela.
+- A tradução fica num lugar só, internal/i18n/en.tsv, usada pela tela e pelo
+  Go.
+
 ## 1.21.0
 - **Interface em inglês**: Configurações → Idioma (Automático, Português ou
   English). No automático, segue o idioma do sistema. A troca é na hora (a
@@ -10,7 +23,7 @@
 - Números e datas seguem o idioma (0.27 em inglês, 0,27 em português).
 - Ainda em português nesta versão: relatórios em PDF, menu da bandeja e o
   texto das linhas do registro técnico.
-- Para quem for traduzir: as frases ficam em i18n/en.tsv;
+- Para quem for traduzir: as frases ficam em internal/i18n/en.tsv;
   scripts/i18n_extract.py lista os textos do app e scripts/i18n_build.py gera
   a tradução usada pela tela.
 

@@ -82,7 +82,11 @@ func (p *reportPDF) tile(x, y, w, h float64, k, v, sub string, vf pdf.Font) {
 
 // wrapText quebra em linhas que cabem na largura (no máximo max linhas).
 func wrapText(s string, f pdf.Font, size, w float64, max int) []string {
+	s = pdf.Tr(s) // traduz a frase inteira antes de quebrar
 	words := strings.Fields(s)
+	for _, wd := range words {
+		pdf.MarkTranslated(wd)
+	}
 	var lines []string
 	cur := ""
 	for _, wd := range words {
@@ -97,8 +101,13 @@ func wrapText(s string, f pdf.Font, size, w float64, max int) []string {
 	if cur != "" {
 		lines = append(lines, cur)
 	}
+	for _, ln := range lines {
+		pdf.MarkTranslated(ln)
+	}
 	if len(lines) > max {
-		lines = append(lines[:max-1], pdf.Fit(strings.Join(lines[max-1:], " "), f, size, w))
+		rest := strings.Join(lines[max-1:], " ")
+		pdf.MarkTranslated(rest)
+		lines = append(lines[:max-1], pdf.Fit(rest, f, size, w))
 	}
 	return lines
 }
@@ -495,7 +504,7 @@ func renderReportPDF(r reportData) []byte {
 	if !r.HasData || r.St.N == 0 {
 		d.Text(pm, p.y+12, pdf.Sans, 10, cMuted, "Sem leituras guardadas neste período.")
 		p.footer()
-		return d.Bytes(r.Title, "GMC Monitor "+AppVersion)
+		return d.Bytes(pdf.Tr(r.Title), "GMC Monitor "+AppVersion)
 	}
 	st := r.St
 
@@ -743,7 +752,7 @@ func renderReportPDF(r reportData) []byte {
 		p.y += float64(len(lines))*9.5 + 3
 	}
 	p.footer()
-	return d.Bytes(r.Title+" · "+r.Period, "GMC Monitor "+AppVersion)
+	return d.Bytes(pdf.Tr(r.Title+" · "+r.Period), "GMC Monitor "+AppVersion)
 }
 
 // episodeCharts desenha, para os episódios escolhidos, o CPM de 30 min antes

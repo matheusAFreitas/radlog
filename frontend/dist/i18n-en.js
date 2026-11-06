@@ -1,4 +1,4 @@
-// gerado por scripts/i18n_build.py a partir de i18n/en.tsv: não edite à mão
+// gerado por scripts/i18n_build.py a partir de internal/i18n/en.tsv: não edite à mão
 const I18N_EN = {
 "exact": {
 "\"Silenciar\" cala o som por (minutos)": "\"Silence\" mutes the sound for (minutes)",
@@ -901,7 +901,7 @@ const I18N_EN = {
 "Aplicar nos pontos": "Apply to the points",
 "Idioma": "Language",
 "Idioma do app": "App language",
-"Muda na hora (a janela recarrega). Os relatórios em PDF e o registro técnico ainda saem em português.": "Changes right away (the window reloads). PDF reports and the technical log still come out in Portuguese.",
+"Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.": "Changes right away (the window reloads). Applies to the screen, PDF reports, the tray menu and the technical log. The log.txt file stays in Portuguese.",
 "agora": "now",
 "seu normal": "your normal",
 "evento": "event",
@@ -1033,7 +1033,26 @@ const I18N_EN = {
 "velocidade": "speed",
 "parece:": "looks like:",
 "Todos os níveis": "All levels",
-"Nível mínimo": "Minimum level"
+"Nível mínimo": "Minimum level",
+"calculada pelo app": "calculated by the app",
+"mediana de 30 dias": "30-day median",
+"Cobertura": "Coverage",
+"medido": "measured",
+"Mediana CPM": "Median CPM",
+"dados insuficientes": "not enough data",
+"Quando": "When",
+"Pico": "Peak",
+"pico": "peak",
+"TEMPO ACIMA DOS LIMITES OPERACIONAIS": "TIME ABOVE THE OPERATING LIMITS",
+"para gama do Cs-137": "for Cs-137 gamma",
+"Tempo morto": "Dead time",
+"desligada": "off",
+"Radioativo": "Radioactive",
+"Talvez": "Maybe",
+"Sem diferença": "No difference",
+"SEGUNDO A SEGUNDO": "SECOND BY SECOND",
+"Segundos": "Seconds",
+"Fase": "Phase"
 },
 "patterns": [
 [
@@ -1312,6 +1331,16 @@ const I18N_EN = {
 [
 "Já entrou na conta; o resultado fecha às ",
 " (4 h depois do começo)."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) contagens em ((?:(?! · ).)+?) s = ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM \\(medido logo antes, com o objeto longe\\)$",
+"${1} counts in ${2} s = ${3} ± ${4} CPM (measured just before, with the object far away)",
+[
+" contagens em ",
+" s = ",
+" CPM (medido logo antes, com o objeto longe)"
 ]
 ],
 [
@@ -1883,6 +1912,14 @@ const I18N_EN = {
 ]
 ],
 [
+"máx. = pico ao vivo (maior minuto: ",
+"^máx\\. = pico ao vivo \\(maior minuto: ((?:(?! · ).)+?)\\)$",
+"max. = live peak (highest minute: ${1})",
+[
+"máx. = pico ao vivo (maior minuto: "
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -2359,6 +2396,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) mSv/ano \\(extrapolação\\)$",
+"≈ ${1} mSv/year (extrapolation)",
+[
+" mSv/ano (extrapolação)"
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -2689,6 +2734,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo ",
+"^fundo ((?:(?! · ).)+?) s \\+ objeto ((?:(?! · ).)+?) s$",
+"background ${1} s + object ${2} s",
+[
+"fundo ",
+" s + objeto "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -2801,6 +2855,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM \\(((?:(?! · ).)+?)\\)$",
+"${1} µSv/h per CPM (${2})",
+[
+" µSv/h por CPM ("
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -2905,6 +2967,23 @@ const I18N_EN = {
 ]
 ],
 [
+"objeto ÷ fundo = ",
+"^objeto ÷ fundo = ((?:(?! · ).)+?)×$",
+"object ÷ background = ${1}×",
+[
+"objeto ÷ fundo = "
+]
+],
+[
+"ligada (τ = ",
+"^ligada \\(τ = ((?:(?! · ).)+?) µs\\)$",
+"on (τ = ${1} µs)",
+[
+"ligada (τ = ",
+" µs)"
+]
+],
+[
 "WCFG no byte ",
 "^WCFG no byte ((?:(?! · ).)+?): %w$",
 "WCFG at byte ${1}: %w",
@@ -2969,6 +3048,14 @@ const I18N_EN = {
 [
 "relógio ",
 " atrasado"
+]
+],
+[
+"média do período ",
+"^média do período ((?:(?! · ).)+?)$",
+"period average ${1}",
+[
+"média do período "
 ]
 ],
 [
@@ -3165,6 +3252,14 @@ const I18N_EN = {
 ]
 ],
 [
+"hora local (",
+"^hora local \\(((?:(?! · ).)+?)\\)$",
+"local time (${1})",
+[
+"hora local ("
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -3300,6 +3395,14 @@ const I18N_EN = {
 "${1} · ${2} counts",
 [
 " contagens"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) em cada fase$",
+"${1} in each phase",
+[
+" em cada fase"
 ]
 ],
 [
@@ -3493,6 +3596,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Relatório: ",
+"^Relatório: ((?:(?! · ).)+?)$",
+"Report: ${1}",
+[
+"Relatório: "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -3560,6 +3671,14 @@ const I18N_EN = {
 ]
 ],
 [
+"gerado em ",
+"^gerado em ((?:(?! · ).)+?)$",
+"generated on ${1}",
+[
+"gerado em "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -3623,6 +3742,14 @@ const I18N_EN = {
 "${1} behind",
 [
 " atrasado"
+]
+],
+[
+"Medição: ",
+"^Medição: ((?:(?! · ).)+?)$",
+"Measurement: ${1}",
+[
+"Medição: "
 ]
 ],
 [
@@ -3860,6 +3987,14 @@ const I18N_EN = {
 ]
 ],
 [
+"méd. ",
+"^méd\\. ((?:(?! · ).)+?)$",
+"avg. ${1}",
+[
+"méd. "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) dias$",
 "${1} days",
@@ -3892,6 +4027,14 @@ const I18N_EN = {
 ]
 ],
 [
+"pico ",
+"^pico ((?:(?! · ).)+?)$",
+"peak ${1}",
+[
+"pico "
+]
+],
+[
 "mín ",
 "^mín ((?:(?! · ).)+?)$",
 "min ${1}",
@@ -3905,6 +4048,62 @@ const I18N_EN = {
 "${1} at ${2}${3}${4}",
 [
 " às "
+]
+],
+[
+"dom ",
+"^dom ((?:(?! · ).)+?)$",
+"Sun ${1}",
+[
+"dom "
+]
+],
+[
+"seg ",
+"^seg ((?:(?! · ).)+?)$",
+"Mon ${1}",
+[
+"seg "
+]
+],
+[
+"ter ",
+"^ter ((?:(?! · ).)+?)$",
+"Tue ${1}",
+[
+"ter "
+]
+],
+[
+"qua ",
+"^qua ((?:(?! · ).)+?)$",
+"Wed ${1}",
+[
+"qua "
+]
+],
+[
+"qui ",
+"^qui ((?:(?! · ).)+?)$",
+"Thu ${1}",
+[
+"qui "
+]
+],
+[
+"sex ",
+"^sex ((?:(?! · ).)+?)$",
+"Fri ${1}",
+[
+"sex "
+]
+],
+[
+"sáb ",
+"^sáb ((?:(?! · ).)+?)$",
+"Sat ${1}",
+[
+"sáb "
 ]
 ],
 [

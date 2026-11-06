@@ -3920,7 +3920,7 @@ async function init() {
   listen();
   try {
     state.settings = await api.GetSettings();
-    if (hasGo) syncLang(state.settings.lang);
+    if (hasGo) { syncLang(state.settings.lang); if (api.SetUILang) api.SetUILang(LANG).catch(() => {}); }
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();

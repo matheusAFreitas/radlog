@@ -64,6 +64,10 @@ func TestMeasureReport(t *testing.T) {
 	if out := os.Getenv("MEAS_OUT"); out != "" {
 		_ = os.WriteFile(out, b, 0o644)
 	}
+	en := pdfWithLang("en", func() []byte { return renderMeasurePDF(m, "GMC-800Re1.23", "0,0101 µSv/h por CPM", "desligada") })
+	if out := os.Getenv("MEAS_OUT"); out != "" {
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-en.pdf", en, 0o644)
+	}
 	// nome comprido não pode ser cortado
 	long := m
 	long.Name = "Eletrodo Toriado (Mesa Granito, encostado no tubo, lado esquerdo, sem embalagem plástica)"
@@ -96,4 +100,9 @@ func TestAutoMeasureReport(t *testing.T) {
 	if err := a.OpenReportFile(filepath.Join(t.TempDir(), "x.pdf")); err == nil {
 		t.Fatal("abriu arquivo fora da pasta de relatórios")
 	}
+}
+
+func pdfWithLang(lang string, f func() []byte) []byte {
+	a := &App{lang: lang}
+	return a.inLang(f)
 }

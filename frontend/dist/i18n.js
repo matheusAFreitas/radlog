@@ -10,7 +10,7 @@
 // inglês (números com vírgula viram ponto). Um MutationObserver traduz
 // tudo o que muda na tela depois.
 //
-// Para editar a tradução: i18n/en.tsv e depois scripts/i18n_build.py.
+// Para editar a tradução: internal/i18n/en.tsv e depois scripts/i18n_build.py.
 
 const LANG_PREF = (() => { try { return localStorage.getItem("lang") || "auto"; } catch (e) { return "auto"; } })();
 const LANG = LANG_PREF === "auto" ? ((navigator.language || "pt").toLowerCase().startsWith("pt") ? "pt" : "en") : LANG_PREF;
@@ -25,7 +25,7 @@ const tr = (() => {
   const byLead = new Map();
   const anyLead = [];
   for (const [lead, src, out, pieces] of dict.patterns) {
-    const p = { re: new RegExp(src), out, pieces: pieces || [] };
+    const p = { re: new RegExp(src), out, pieces: pieces || [], fixed: (pieces || []).join("").length };
     const k = lead.trim().slice(0, 3).toLowerCase();
     if (k.length < 3) anyLead.push(p);
     else (byLead.get(k) || byLead.set(k, []).get(k)).push(p);
@@ -44,6 +44,19 @@ const tr = (() => {
     const t = one(core, true);
     return a + (t !== core ? t : fixNums(core)) + z;
   };
+  // moldes que começam variáveis mas cobrem boa parte do texto (40%+ fixo):
+  // valem antes de quebrar em frases ou pedaços
+  function wide(s) {
+    if (s.length > 300) return null;
+    for (const p of anyLead) {
+      if (p.fixed * 10 < s.length * 4) continue;
+      if (!p.pieces.every((x) => s.includes(x))) continue;
+      const m = p.re.exec(s);
+      if (m) return p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+    }
+    return null;
+  }
+
   // várias frases no mesmo texto: junta as que formam uma frase conhecida
   // (a mais longa primeiro) e traduz o resto uma a uma
   function sentences(core) {
@@ -98,6 +111,7 @@ const tr = (() => {
     if (c !== undefined) return c;
     const core = s.trim().replace(/\s+/g, " ");
     let out = one(core, false, false);
+    if (out == null) out = wide(core);
     if (out == null) out = sentences(core);
     if (out == null && core.includes(" · ")) {
       // pedaços juntados com " · ": traduz cada um (com e sem o "· ")

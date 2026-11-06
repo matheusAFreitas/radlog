@@ -8,6 +8,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"radlog/internal/i18n"
 )
 
 // ---------- visor do log técnico (Eventos → Log técnico) ----------
@@ -233,8 +235,21 @@ func (a *App) GetLogs(q LogQuery) (LogResult, error) {
 		hits = append(hits, e)
 	}
 	res.Total = len(hits)
+	lang := a.uiLang()
 	for i := len(hits) - 1; i >= 0 && len(res.Entries) < q.Limit; i-- {
-		res.Entries = append(res.Entries, hits[i])
+		e := hits[i]
+		if lang != "pt" {
+			// traduz a linha inteira; o "componente: " do começo volta em
+			// português, porque é ele que a tela usa para filtrar e separar
+			t := i18n.T(lang, e.Msg)
+			if pre := e.Comp + ": "; strings.HasPrefix(e.Msg, pre) {
+				if _, rest, ok := strings.Cut(t, ": "); ok {
+					t = pre + rest
+				}
+			}
+			e.Msg = t
+		}
+		res.Entries = append(res.Entries, e)
 	}
 	for name, c := range comps {
 		res.Comps = append(res.Comps, LogComp{Name: name, Count: c})
