@@ -1,5 +1,13 @@
 # Versões
 
+## 1.23.2
+- Em inglês, o erro ao abrir a porta do contador ("não consegui abrir …") e
+  outras mensagens de erro ainda saíam em português. Também: a chuva na dica
+  do gráfico, "Chovendo desde…", a validade do código de pareamento e
+  alguns eventos (modo demo, tempo morto, limpeza de versões antigas).
+- Resumo da sincronização e do backup com singular certo: "1 anotação",
+  "1 período fora de casa" (antes saía "1 anotações").
+
 ## 1.23.1
 - Em inglês, o aviso de chuva do gráfico ("buscando chuva…", "chuva em …",
   "radar às …") e mais alguns textos da chuva e do pareamento ainda saíam em

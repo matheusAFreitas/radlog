@@ -80,11 +80,11 @@ for f in glob.glob(os.path.join(ROOT, "internal/*/*.go")):
     src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
     for m in re.finditer(r'"((?:[^"\\\n]|\\.)*)"', src):
         s = m.group(1).replace('\\"', '"').replace("\\n", " ")
-        if re.search(r"%[-+ #0-9.]*[vdsfqxg]", s):
+        if re.search(r"%[-+ #0-9.]*[vdsfqxgw]", s):
             n = [0]
             def rep(_):
                 n[0] += 1; return "{%d}" % (n[0] - 1)
-            out = norm(re.sub(r"%[-+ #0-9.]*[vdsfqxg]", rep, s.replace("%%", "%")))
+            out = norm(re.sub(r"%[-+ #0-9.]*[vdsfqxgw]", rep, s.replace("%%", "%")))
             lit = re.sub(r"\{\d+\}", "", out)
             if WORD.search(lit) and PT.search(lit): pats.add(out)
         else:

@@ -174,24 +174,19 @@ func mergeText(r MergeResult) string {
 		return "nada novo"
 	}
 	var p []string
-	if r.Minutes > 0 {
-		p = append(p, fmt.Sprintf("%d minutos de leitura", r.Minutes))
+	add := func(n int, one, many string) {
+		if n == 1 {
+			p = append(p, "1 "+one)
+		} else if n > 1 {
+			p = append(p, fmt.Sprintf("%d %s", n, many))
+		}
 	}
-	if r.Events > 0 {
-		p = append(p, fmt.Sprintf("%d eventos/alertas", r.Events))
-	}
-	if r.Periods > 0 {
-		p = append(p, fmt.Sprintf("%d períodos fora de casa", r.Periods))
-	}
-	if r.Measurements > 0 {
-		p = append(p, fmt.Sprintf("%d medições", r.Measurements))
-	}
-	if r.AlertFiles > 0 {
-		p = append(p, fmt.Sprintf("%d detalhes de alerta", r.AlertFiles))
-	}
-	if r.Notes > 0 {
-		p = append(p, fmt.Sprintf("%d anotações", r.Notes))
-	}
+	add(r.Minutes, "minuto de leitura", "minutos de leitura")
+	add(r.Events, "evento/alerta", "eventos/alertas")
+	add(r.Periods, "período fora de casa", "períodos fora de casa")
+	add(r.Measurements, "medição", "medições")
+	add(r.AlertFiles, "detalhe de alerta", "detalhes de alerta")
+	add(r.Notes, "anotação", "anotações")
 	return "+" + strings.Join(p, ", ")
 }
 

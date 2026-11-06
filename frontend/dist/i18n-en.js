@@ -610,7 +610,6 @@ const I18N_EN = {
 "calibração": "calibration",
 "calibração com pontos estranhos": "calibration with odd points",
 "calibração ilegível": "unreadable calibration",
-"calibração: %w": "calibration: %w",
 "chance por minuto": "chance per minute",
 "choveu menos de 3 h antes": "rained less than 3 h before",
 "com mais dias de dados dá para ver se o fundo muda com a hora": "with more days of data you can see whether the background changes with the hour",
@@ -745,16 +744,12 @@ const I18N_EN = {
 "não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)": "not noted (you can note it on the Measure tab: distance, side touching the tube, with or without packaging)",
 "não anotada (na aba Medir, a anotação da medição guarda distância, lado encostado no tubo e embalagem)": "not noted (on the Measure tab, the measurement's note keeps distance, side touching the tube and packaging)",
 "não consegui": "couldn't",
-"não consegui abrir a versão nova: %w": "couldn't open the new version: %w",
-"não consegui baixar: %w": "couldn't download: %w",
 "não consegui olhar o GitHub:": "couldn't check GitHub:",
-"não consegui salvar a cópia de segurança, então não gravei nada: %w": "couldn't save the backup copy, so nothing was written: %w",
 "não encontrada": "not found",
 "não há versão nova": "there's no new version",
 "não voltou em 4 h": "didn't come back within 4 h",
 "não é um backup do GMC Monitor": "not a GMC Monitor backup",
 "não é um backup do GMC Monitor (falta backup.json)": "not a GMC Monitor backup (backup.json missing)",
-"não é um backup válido: %w": "not a valid backup: %w",
 "nível": "level",
 "o app demorou mais de 5 s para fechar": "the app took more than 5 s to close",
 "o app está fechando": "the app is closing",
@@ -805,8 +800,6 @@ const I18N_EN = {
 "relógio certo": "clock correct",
 "rádio, urânio": "radium, uranium",
 "saindo do pacote": "leaving the package",
-"sem acesso ao radar: %w": "no access to the radar: %w",
-"sem acesso ao serviço de clima: %w": "no access to the weather service: %w",
 "sem atualização automática neste sistema": "no automatic update on this system",
 "sem chuva": "no rain",
 "sem chuva (variação normal)": "no rain (normal variation)",
@@ -1126,7 +1119,20 @@ const I18N_EN = {
 "ponto inválido": "invalid point",
 "ponto inválido no pareamento": "invalid point in pairing",
 "radar+modelo": "radar+model",
-"Versões": "Versions"
+"Versões": "Versions",
+"1 minuto de leitura": "1 minute of reading",
+"1 evento/alerta": "1 event/alert",
+"1 período fora de casa": "1 away-from-home period",
+"1 medição": "1 measurement",
+"1 detalhe de alerta": "1 alert detail",
+"1 anotação": "1 note",
+"+1 minuto de leitura": "+1 minute of reading",
+"+1 evento/alerta": "+1 event/alert",
+"+1 período fora de casa": "+1 away-from-home period",
+"+1 medição": "+1 measurement",
+"+1 detalhe de alerta": "+1 alert detail",
+"+1 anotação": "+1 note",
+"ainda não dá para separar do fundo": "can't be told apart from background yet"
 },
 "patterns": [
 [
@@ -1467,6 +1473,14 @@ const I18N_EN = {
 [
 "atualização: não deu para salvar em ",
 "); usando a pasta de dados"
+]
+],
+[
+"não consegui salvar a cópia de segurança, então não gravei nada: ",
+"^não consegui salvar a cópia de segurança, então não gravei nada: ((?:(?! · ).)+?)$",
+"couldn't save the backup copy, so nothing was written: ${1}",
+[
+"não consegui salvar a cópia de segurança, então não gravei nada: "
 ]
 ],
 [
@@ -2046,6 +2060,14 @@ const I18N_EN = {
 ]
 ],
 [
+"versões antigas: não consegui apagar ",
+"^versões antigas: não consegui apagar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"old versions: couldn't delete ${1}: ${2}",
+[
+"versões antigas: não consegui apagar "
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -2163,6 +2185,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui abrir a versão nova: ",
+"^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
+"couldn't open the new version: ${1}",
+[
+"não consegui abrir a versão nova: "
+]
+],
+[
 "ano ",
 "^ano ((?:(?! · ).)+?) fora do que o contador aceita$",
 "year ${1} outside what the counter accepts",
@@ -2188,14 +2218,6 @@ const I18N_EN = {
 "download incompleto (",
 " de ",
 " bytes)"
-]
-],
-[
-"não consegui abrir a versão nova: ",
-"^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
-"couldn't open the new version: ${1}",
-[
-"não consegui abrir a versão nova: "
 ]
 ],
 [
@@ -2252,6 +2274,14 @@ const I18N_EN = {
 ]
 ],
 [
+"sem acesso ao serviço de clima: ",
+"^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
+"no access to the weather service: ${1}",
+[
+"sem acesso ao serviço de clima: "
+]
+],
+[
 "Lendo a memória do contador… ",
 "^Lendo a memória do contador… ((?:(?! · ).)+?) KB$",
 "Reading the counter memory… ${1} KB",
@@ -2293,15 +2323,6 @@ const I18N_EN = {
 [
 "a calibração precisa de ",
 " pontos"
-]
-],
-[
-"não consegui criar a pasta ",
-"^não consegui criar a pasta ((?:(?! · ).)+?): %w$",
-"couldn't create the folder ${1}: %w",
-[
-"não consegui criar a pasta ",
-": %w"
 ]
 ],
 [
@@ -2364,6 +2385,15 @@ const I18N_EN = {
 ]
 ],
 [
+"tempo morto ligado (τ = ",
+"^tempo morto ligado \\(τ = ((?:(?! · ).)+?) µs\\)$",
+"dead time on (τ = ${1} µs)",
+[
+"tempo morto ligado (τ = ",
+" µs)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -2387,6 +2417,14 @@ const I18N_EN = {
 [
 "Perigo: ",
 " CPM (a partir de "
+]
+],
+[
+"não consegui criar a pasta ",
+"^não consegui criar a pasta ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"couldn't create the folder ${1}: ${2}",
+[
+"não consegui criar a pasta "
 ]
 ],
 [
@@ -2566,15 +2604,6 @@ const I18N_EN = {
 ]
 ],
 [
-"não consegui baixar o ",
-"^não consegui baixar o ((?:(?! · ).)+?): %w$",
-"couldn't download the ${1}: %w",
-[
-"não consegui baixar o ",
-": %w"
-]
-],
-[
 "reconexão: ",
 "^reconexão: ((?:(?! · ).)+?) não encontrada$",
 "reconnection: ${1} not found",
@@ -2627,6 +2656,14 @@ const I18N_EN = {
 [
 "· dureza ",
 " (1,00 = fundo)"
+]
+],
+[
+"versões antigas apagadas: ",
+"^versões antigas apagadas: ((?:(?! · ).)+?)$",
+"old versions deleted: ${1}",
+[
+"versões antigas apagadas: "
 ]
 ],
 [
@@ -2698,13 +2735,20 @@ const I18N_EN = {
 ]
 ],
 [
-"%w (recebi ",
-"^%w \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
-"%w (got ${1} of ${2} bytes)",
+"Modo demo ligado (",
+"^Modo demo ligado \\(((?:(?! · ).)+?) CPM\\)$",
+"Demo mode on (${1} CPM)",
 [
-"%w (recebi ",
-" de ",
-" bytes)"
+"Modo demo ligado (",
+" CPM)"
+]
+],
+[
+"não é um backup válido: ",
+"^não é um backup válido: ((?:(?! · ).)+?)$",
+"not a valid backup: ${1}",
+[
+"não é um backup válido: "
 ]
 ],
 [
@@ -2734,6 +2778,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui baixar o ",
+"^não consegui baixar o ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"couldn't download the ${1}: ${2}",
+[
+"não consegui baixar o "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) s \\+ objeto ((?:(?! · ).)+?) s$",
 "${1} · background ${2} s + object ${3} s",
@@ -2748,6 +2800,15 @@ const I18N_EN = {
 "${1} (${2} above the background of ${3})",
 [
 " acima do fundo de "
+]
+],
+[
+"dureza ",
+"^dureza ((?:(?! · ).)+?) \\(1,00 = fundo\\)$",
+"hardness ${1} (1.00 = background)",
+[
+"dureza ",
+" (1,00 = fundo)"
 ]
 ],
 [
@@ -2768,20 +2829,21 @@ const I18N_EN = {
 ]
 ],
 [
-"não consegui abrir ",
-"^não consegui abrir ((?:(?! · ).)+?): %w$",
-"couldn't open ${1}: %w",
-[
-"não consegui abrir ",
-": %w"
-]
-],
-[
 "relatório da medição ",
 "^relatório da medição ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "measurement report ${1}: ${2}",
 [
 "relatório da medição "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+"${1} (got ${2} of ${3} bytes)",
+[
+" (recebi ",
+" de ",
+" bytes)"
 ]
 ],
 [
@@ -2826,6 +2888,22 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui baixar: ",
+"^não consegui baixar: ((?:(?! · ).)+?)$",
+"couldn't download: ${1}",
+[
+"não consegui baixar: "
+]
+],
+[
+"sem acesso ao radar: ",
+"^sem acesso ao radar: ((?:(?! · ).)+?)$",
+"no access to the radar: ${1}",
+[
+"sem acesso ao radar: "
+]
+],
+[
 "+",
 "^\\+((?:(?! · ).)+?) alertas nesta hora$",
 "+${1} alerts in this hour",
@@ -2847,6 +2925,14 @@ const I18N_EN = {
 "connection: couldn't open ${1}: ${2}",
 [
 "conexão: não abriu "
+]
+],
+[
+"não consegui abrir ",
+"^não consegui abrir ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"couldn't open ${1}: ${2}",
+[
+"não consegui abrir "
 ]
 ],
 [
@@ -2954,6 +3040,15 @@ const I18N_EN = {
 ]
 ],
 [
+"chuva ",
+"^chuva ((?:(?! · ).)+?) mm \\(modelo\\)$",
+"rain: ${1} mm (model)",
+[
+"chuva ",
+" mm (modelo)"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -3034,14 +3129,6 @@ const I18N_EN = {
 "${1} didn't answer (${2})",
 [
 " não respondeu ("
-]
-],
-[
-"",
-"^((?:(?! · ).)+?) minutos de leitura$",
-"${1} minutes of readings",
-[
-" minutos de leitura"
 ]
 ],
 [
@@ -3179,15 +3266,6 @@ const I18N_EN = {
 "Last attempt: ${1}",
 [
 "Última tentativa: "
-]
-],
-[
-"WCFG no byte ",
-"^WCFG no byte ((?:(?! · ).)+?): %w$",
-"WCFG at byte ${1}: %w",
-[
-"WCFG no byte ",
-": %w"
 ]
 ],
 [
@@ -3358,6 +3436,15 @@ const I18N_EN = {
 ]
 ],
 [
+"chuva ",
+"^chuva ((?:(?! · ).)+?) \\(radar\\)$",
+"rain: ${1} (radar)",
+[
+"chuva ",
+" (radar)"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -3397,6 +3484,14 @@ const I18N_EN = {
 "You're on ${1}.",
 [
 "Você está na "
+]
+],
+[
+"WCFG no byte ",
+"^WCFG no byte ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"WCFG at byte ${1}: ${2}",
+[
+"WCFG no byte "
 ]
 ],
 [
@@ -3479,6 +3574,22 @@ const I18N_EN = {
 "${1} (already paired)",
 [
 " (já pareado)"
+]
+],
+[
+"Chovendo desde ",
+"^Chovendo desde ((?:(?! · ).)+?)$",
+"Raining since ${1}",
+[
+"Chovendo desde "
+]
+],
+[
+"vale por mais ",
+"^vale por mais ((?:(?! · ).)+?):((?:(?! · ).)+?)$",
+"valid for ${1}:${2} more",
+[
+"vale por mais "
 ]
 ],
 [
@@ -3649,6 +3760,14 @@ const I18N_EN = {
 "raining (${1})",
 [
 "chovendo ("
+]
+],
+[
+"calibração: ",
+"^calibração: ((?:(?! · ).)+?)$",
+"calibration: ${1}",
+[
+"calibração: "
 ]
 ],
 [
@@ -3871,6 +3990,14 @@ const I18N_EN = {
 "Report: ${1}",
 [
 "Relatório: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) acumulados$",
+"${1} accumulated",
+[
+" acumulados"
 ]
 ],
 [
@@ -4255,6 +4382,14 @@ const I18N_EN = {
 "sent: ${1}",
 [
 "levou: "
+]
+],
+[
+"dureza ",
+"^dureza ((?:(?! · ).)+?)$",
+"hardness ${1}",
+[
+"dureza "
 ]
 ],
 [

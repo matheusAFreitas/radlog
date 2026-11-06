@@ -2849,11 +2849,13 @@ function renderAlarmLabel() {
 
 function mergeTextJS(r) {
   const p = [];
-  if (r.minutes) p.push(`${r.minutes} minutos`);
-  if (r.events) p.push(`${r.events} eventos/alertas`);
-  if (r.periods) p.push(`${r.periods} fora de casa`);
-  if (r.measurements) p.push(`${r.measurements} medições`);
-  if (r.alertFiles) p.push(`${r.alertFiles} detalhes de alerta`);
+  const add = (n, one, many) => { if (n === 1) p.push(`1 ${one}`); else if (n > 1) p.push(`${n} ${many}`); };
+  add(r.minutes, "minuto de leitura", "minutos de leitura");
+  add(r.events, "evento/alerta", "eventos/alertas");
+  add(r.periods, "período fora de casa", "períodos fora de casa");
+  add(r.measurements, "medição", "medições");
+  add(r.alertFiles, "detalhe de alerta", "detalhes de alerta");
+  add(r.notes, "anotação", "anotações");
   return p.length ? "+" + p.join(", ") : "nada novo";
 }
 

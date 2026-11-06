@@ -609,7 +609,7 @@ calculada pelo app: soma, minuto a minuto, de CPM × calibração ÷ 60. Não é
 calibração	calibration
 calibração com pontos estranhos	calibration with odd points
 calibração ilegível	unreadable calibration
-calibração: %w	calibration: %w
+calibração: {0}	calibration: {0}
 chance por minuto	chance per minute
 choveu menos de 3 h antes	rained less than 3 h before
 com mais dias de dados dá para ver se o fundo muda com a hora	with more days of data you can see whether the background changes with the hour
@@ -744,16 +744,16 @@ não achei uma pasta para salvar (escolha uma nas Configurações → Relatório
 não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)	not noted (you can note it on the Measure tab: distance, side touching the tube, with or without packaging)
 não anotada (na aba Medir, a anotação da medição guarda distância, lado encostado no tubo e embalagem)	not noted (on the Measure tab, the measurement's note keeps distance, side touching the tube and packaging)
 não consegui	couldn't
-não consegui abrir a versão nova: %w	couldn't open the new version: %w
-não consegui baixar: %w	couldn't download: %w
+não consegui abrir a versão nova: {0}	couldn't open the new version: {0}
+não consegui baixar: {0}	couldn't download: {0}
 não consegui olhar o GitHub:	couldn't check GitHub:
-não consegui salvar a cópia de segurança, então não gravei nada: %w	couldn't save the backup copy, so nothing was written: %w
+não consegui salvar a cópia de segurança, então não gravei nada: {0}	couldn't save the backup copy, so nothing was written: {0}
 não encontrada	not found
 não há versão nova	there's no new version
 não voltou em 4 h	didn't come back within 4 h
 não é um backup do GMC Monitor	not a GMC Monitor backup
 não é um backup do GMC Monitor (falta backup.json)	not a GMC Monitor backup (backup.json missing)
-não é um backup válido: %w	not a valid backup: %w
+não é um backup válido: {0}	not a valid backup: {0}
 nível	level
 o app demorou mais de 5 s para fechar	the app took more than 5 s to close
 o app está fechando	the app is closing
@@ -804,8 +804,8 @@ relógio	clock
 relógio certo	clock correct
 rádio, urânio	radium, uranium
 saindo do pacote	leaving the package
-sem acesso ao radar: %w	no access to the radar: %w
-sem acesso ao serviço de clima: %w	no access to the weather service: %w
+sem acesso ao radar: {0}	no access to the radar: {0}
+sem acesso ao serviço de clima: {0}	no access to the weather service: {0}
 sem atualização automática neste sistema	no automatic update on this system
 sem chuva	no rain
 sem chuva (variação normal)	no rain (normal variation)
@@ -893,7 +893,7 @@ volume do alarme	alarm volume
 — o app tenta de novo a cada 10 s	— the app tries again every 10 s
 √N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados	√N of each phase (Poisson); the net's combines both: square root of the sum of squares
 √média: a variação que o acaso sozinho dá numa contagem de 1 minuto	√mean: the variation chance alone gives in a 1-minute count
-%w (recebi {0} de {1} bytes)	%w (got {0} of {1} bytes)
+{2} (recebi {0} de {1} bytes)	{2} (got {0} of {1} bytes)
 (mais {0} desde o último aviso)	({0} more since the last warning)
 (olhou às {0})	(checked at {0})
 (travado: valor {0} não reconhecido)	(locked: value {0} not recognized)
@@ -967,7 +967,7 @@ Subiu de {0} em {1}: você foi chegando perto de algo.	Rose by {0} in {1}: you w
 Um pouco acima do normal ({0}) — pode ser só variação	A little above normal ({0}) — may be just variation
 Versão {0}	Version {0}
 Você está na {0}.	You're on {0}.
-WCFG no byte {0}: %w	WCFG at byte {0}: %w
+WCFG no byte {0}: {1}	WCFG at byte {0}: {1}
 [demo] Alarme: {0} CPM (limite {1})	[demo] Alarm: {0} CPM (limit {1})
 [demo] Atenção: {0} CPM (a partir de {1})	[demo] Attention: {0} CPM (from {1})
 [demo] Perigo: {0} CPM (a partir de {1})	[demo] Danger: {0} CPM (from {1})
@@ -1037,10 +1037,9 @@ média {0} · mín {1} · máx {2}	average {0} · min {1} · max {2}
 média {0} · mín {1} · máx {2} µSv/h	average {0} · min {1} · max {2} µSv/h
 mês inválido: {0}	invalid month: {0}
 mín {0}	min {0}
-não consegui abrir a versão nova: {0}	couldn't open the new version: {0}
-não consegui abrir {0}: %w	couldn't open {0}: %w
-não consegui baixar o {0}: %w	couldn't download the {0}: %w
-não consegui criar a pasta {0}: %w	couldn't create the folder {0}: %w
+não consegui abrir {0}: {1}	couldn't open {0}: {1}
+não consegui baixar o {0}: {1}	couldn't download the {0}: {1}
+não consegui criar a pasta {0}: {1}	couldn't create the folder {0}: {1}
 não vou gravar: a configuração do contador tem valores que o app não reconhece ({0})	won't write: the counter configuration has values the app doesn't recognize ({0})
 os pontos precisam crescer em CPM e em µSv/h (ponto {0})	the points must increase in CPM and in µSv/h (point {0})
 outra versão aberta ({0} em {1}): abrindo ela e fechando esta ({2})	another version open ({0} in {1}): opening it and closing this one ({2})
@@ -1365,7 +1364,6 @@ v{0} ·	v{0} ·
 {0}, {1}	{0}, {1}
 Todos os níveis	All levels
 Nível mínimo	Minimum level
-Hoje	Today
 teto {0}	ceiling {0}
 {0} · dose {1} · teto {2}	{0} · dose {1} · ceiling {2}
 # --- relatórios em PDF
@@ -1469,13 +1467,11 @@ nenhum endereço conhecido; informe o IP do outro PC	no known address; enter the
 tempo esgotado	timed out
 conexão recusada: o outro PC está com "Aceitar conexões" ligado?	connection refused: does the other PC have "Accept connections" on?
 sem rota até ele	no route to it
-sem resposta	no answer
 {0} respondeu: {1}	{0} answered: {1}
 trouxe: {0}	brought: {0}
 levou: {0}	sent: {0}
 recebido: {0}	received: {0}
 nada novo	nothing new
-{0} minutos de leitura	{0} minutes of readings
 {0} eventos/alertas	{0} events/alerts
 sincronização: aceitando conexões na porta {0} ({1})	sync: accepting connections on port {0} ({1})
 sincronização: parou de aceitar conexões	sync: stopped accepting connections
@@ -1509,7 +1505,6 @@ chovendo	raining
 chuva (mm/h)	rain (mm/h)
 chuva (radar · modelo)	rain (radar · model)
 chuva (radar)	rain (radar)
-chuva (modelo)	rain (model)
 ligado	on
 modelo	model
 nenhuma chuva medida ainda	no rain measured yet
@@ -1519,3 +1514,29 @@ ponto inválido	invalid point
 ponto inválido no pareamento	invalid point in pairing
 radar+modelo	radar+model
 Versões	Versions
+1 minuto de leitura	1 minute of reading
+1 evento/alerta	1 event/alert
+1 período fora de casa	1 away-from-home period
+1 medição	1 measurement
+1 detalhe de alerta	1 alert detail
+1 anotação	1 note
+
++1 minuto de leitura	+1 minute of reading
++1 evento/alerta	+1 event/alert
++1 período fora de casa	+1 away-from-home period
++1 medição	+1 measurement
++1 detalhe de alerta	+1 alert detail
++1 anotação	+1 note
+Chovendo desde {0}	Raining since {0}
+Modo demo ligado ({0} CPM)	Demo mode on ({0} CPM)
+tempo morto ligado (τ = {0} µs)	dead time on (τ = {0} µs)
+vale por mais {0}:{1}	valid for {0}:{1} more
+versões antigas apagadas: {0}	old versions deleted: {0}
+versões antigas: não consegui apagar {0}: {1}	old versions: couldn't delete {0}: {1}
+chuva {0} (radar)	rain: {0} (radar)
+chuva {0} mm (modelo)	rain: {0} mm (model)
+{0} acumulados	{0} accumulated
+dureza {0}	hardness {0}
+dureza {0} (1,00 = fundo)	hardness {0} (1.00 = background)
+parece:	looks like:
+ainda não dá para separar do fundo	can't be told apart from background yet
