@@ -1747,3 +1747,7 @@ operação do Bluetooth falhou (status {0})	Bluetooth operation failed (status {
 endereço Bluetooth inválido: {0}	invalid Bluetooth address: {0}
 Bluetooth: não deu para procurar (o Bluetooth do PC está ligado?) {0}	Bluetooth: couldn't search (is the PC's Bluetooth on?) {0}
 média {0} · mín {1} · máx {2} µSv/h · RadiaCode média {3}	average {0} · min {1} · max {2} µSv/h · RadiaCode average {3}
+última leitura às {0}	last reading at {0}
+última leitura (ontem {0})	last reading (yesterday {0})
+última leitura ({0} {1})	last reading ({0} {1})
+conectado pelo {0}, bateria {1}%	connected via {0}, battery {1}%

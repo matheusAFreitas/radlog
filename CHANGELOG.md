@@ -1,5 +1,14 @@
 # Versões
 
+## 1.27.1
+- Quadros lado a lado na tela principal: **GMC-800 | RadiaCode**, com a
+  mesma altura. A coluna da esquerda fica um pouco mais larga quando o
+  RadiaCode aparece.
+- O quadro do RadiaCode mostra o µSv/h grande, a incerteza, os cps e a dose
+  de hoje; a conexão e a bateria ficam no canto.
+- Desconectado: mostra o último valor apagado, a hora da leitura e a dose de
+  hoje.
+
 ## 1.27.0
 - **Tela principal com os dois aparelhos**: logo abaixo do quadro do GMC
   (agora chamado "GMC-800") aparece o quadro do **RadiaCode**.

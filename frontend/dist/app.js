@@ -3980,23 +3980,32 @@ function renderRc(st) {
 // quadro do RadiaCode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
 function renderRcMain(st) {
-  const on = st.state === "conectado" && st.time;
-  const show = on || st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
+  const live = st.state === "conectado" && st.time;
+  const show = st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
   $("rcMain").hidden = !show;
+  $("duo").classList.toggle("on", show);
+  document.body.classList.toggle("has-rc", show);
   $("heroEyebrow").textContent = show ? "GMC-800" : "Leitura atual";
   if (!show) return;
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
-  $("rcMainVia").textContent = on || st.state === "conectado" ? `conectado · ${via}` : st.state === "conectando" ? "conectando…" : "desconectado";
+  $("rcMainVia").textContent = st.state === "conectado" ? `${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "conectando…" : "desconectado";
+  $("rcMainVia").title = st.state === "conectado" ? `conectado pelo ${via}` + (st.hasRare ? `, bateria ${fmt(st.battery, 0)}%` : "") : "";
   $("rcMainVia").className = "rc-main-via mono small" + (st.state === "conectado" ? " on" : "");
-  $("rcMainFull").hidden = !on;
-  $("rcMainCompact").hidden = !!on;
+  $("rcMain").classList.toggle("stale", !live);
   const dose = `dose hoje ${fmt(st.today, st.today < 10 ? 2 : 1)} µSv`;
-  if (on) {
+  if (live) {
     $("rcMainVal").textContent = fmt(st.usvh, usvDigits(st.usvh));
-    $("rcMainSub").textContent = [`± ${fmt(st.usvhErr, 0)}%`, `${fmt(st.cps, 2)} cps`, dose, st.hasRare ? `bateria ${fmt(st.battery, 0)}%` : ""].filter(Boolean).join(" · ");
+    $("rcMainSub").textContent = `± ${fmt(st.usvhErr, 0)}% · ${fmt(st.cps, 2)} cps`;
+    $("rcMainSub2").textContent = dose;
+  } else if (st.lastT) {
+    // desconectado: o último valor, apagado, e quando foi
+    $("rcMainVal").textContent = fmt(st.lastUSv, usvDigits(st.lastUSv));
+    $("rcMainSub").textContent = `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}`;
+    $("rcMainSub2").textContent = dose;
   } else {
-    const last = st.lastT ? `última leitura ${fmt(st.lastUSv, usvDigits(st.lastUSv))} µSv/h ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
-    $("rcMainCompact").textContent = `${last} · ${dose}`;
+    $("rcMainVal").textContent = "—";
+    $("rcMainSub").textContent = "sem leituras ainda";
+    $("rcMainSub2").textContent = "";
   }
 }
 

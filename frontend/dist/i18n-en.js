@@ -3232,6 +3232,15 @@ const I18N_EN = {
 ]
 ],
 [
+"conectado pelo ",
+"^conectado pelo ((?:(?! · ).)+?), bateria ((?:(?! · ).)+?)%$",
+"connected via ${1}, battery ${2}%",
+[
+"conectado pelo ",
+", bateria "
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -3331,6 +3340,14 @@ const I18N_EN = {
 [
 "última leitura ",
 " µSv/h às "
+]
+],
+[
+"última leitura (ontem ",
+"^última leitura \\(ontem ((?:(?! · ).)+?)\\)$",
+"last reading (yesterday ${1})",
+[
+"última leitura (ontem "
 ]
 ],
 [
@@ -3673,6 +3690,14 @@ const I18N_EN = {
 ]
 ],
 [
+"última leitura (",
+"^última leitura \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
+"last reading (${1} ${2})",
+[
+"última leitura ("
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -3931,6 +3956,14 @@ const I18N_EN = {
 "USB (response): ${1}",
 [
 "USB (resposta): "
+]
+],
+[
+"última leitura às ",
+"^última leitura às ((?:(?! · ).)+?)$",
+"last reading at ${1}",
+[
+"última leitura às "
 ]
 ],
 [
