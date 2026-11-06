@@ -1052,7 +1052,9 @@ const I18N_EN = {
 "Sem diferença": "No difference",
 "SEGUNDO A SEGUNDO": "SECOND BY SECOND",
 "Segundos": "Seconds",
-"Fase": "Phase"
+"Fase": "Phase",
+"Apagar as versões antigas depois que a nova abrir": "Delete old versions after the new one opens",
+"Versões baixadas em": "Versions downloaded to"
 },
 "patterns": [
 [

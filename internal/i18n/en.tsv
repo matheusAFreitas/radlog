@@ -1410,3 +1410,5 @@ fundo {0} s + objeto {1} s	background {0} s + object {1} s
 SEGUNDO A SEGUNDO	SECOND BY SECOND
 Segundos	Seconds
 Fase	Phase
+Apagar as versões antigas depois que a nova abrir	Delete old versions after the new one opens
+Versões baixadas em	Versions downloaded to

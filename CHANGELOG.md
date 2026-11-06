@@ -1,5 +1,16 @@
 # Versões
 
+## 1.22.1
+- **As versões baixadas pelo app ficam numa pasta só dele**:
+  Documentos\GMC Monitor\Versões, ao lado de Relatórios, em vez da pasta do
+  .exe aberto (que costumava ser Downloads).
+- **As versões antigas são apagadas sozinhas**: 2 minutos depois que a versão
+  nova abre e fica rodando, o app apaga os GMC-Monitor-vX.Y.Z.exe (ou
+  AppImage) de versões mais antigas, na pasta das versões e na pasta de onde
+  veio a versão anterior. Nunca apaga a que está aberta, uma mais nova nem
+  arquivos com outro nome. Dá para desligar em Configurações → Atualizações,
+  onde também tem "Abrir pasta".
+
 ## 1.22.0
 Segunda parte do inglês:
 - **Relatórios em PDF em inglês**: o relatório do período e o da medição de

@@ -2898,6 +2898,8 @@ async function openSettings(focusId) {
   $("chkTray").checked = s.trayOnClose !== false;
   $("chkAutostart").checked = !!s.startWithWindows;
   $("chkUpdCheck").checked = !s.noUpdateCheck;
+  $("chkCleanOld").checked = !s.keepOldVersions;
+  if (api.GetVersionsDir) api.GetVersionsDir().then((d) => { $("updDir").textContent = d; }).catch(() => {});
   $("selLang").value = s.lang || "auto";
   $("chkMeasReport").checked = !s.noMeasureReport;
   fillLevels(lv());
@@ -3257,6 +3259,7 @@ function wire() {
       trayOnClose: $("chkTray").checked,
       startWithWindows: $("chkAutostart").checked,
       noUpdateCheck: !$("chkUpdCheck").checked,
+      keepOldVersions: !$("chkCleanOld").checked,
       lang: $("selLang").value,
       noMeasureReport: !$("chkMeasReport").checked,
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
@@ -3650,6 +3653,7 @@ function wireUpdate() {
     const url = u.url || "https://github.com/matheusAFreitas/radlog/releases";
     if (window.runtime && window.runtime.BrowserOpenURL) window.runtime.BrowserOpenURL(url); else window.open(url, "_blank");
   });
+  $("btnUpdDir").addEventListener("click", () => call(api.OpenVersionsDir));
   $("btnUpdCheck").addEventListener("click", async () => {
     try {
       const u = await api.CheckUpdate();
@@ -4125,6 +4129,8 @@ function makeDemoApi() {
     GetVersion: async () => "navegador",
     ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\GMC Monitor\\Relatórios\\gmc-medicao-${id}.pdf`; },
     OpenReportFile: async () => {},
+    GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\GMC Monitor\\Versões",
+    OpenVersionsDir: async () => {},
     GetUpdateInfo: async () => demoUpd,
     CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: "1.18.0", available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },

@@ -45,6 +45,9 @@ func TestParseSumsAndNotes(t *testing.T) {
 
 // release falsa num servidor local: procura, baixa, confere e "abre".
 func TestUpdateFlow(t *testing.T) {
+	home := t.TempDir() // a pasta das versões fica em Documentos: não suja o HOME de verdade
+	t.Setenv("HOME", home)
+	t.Setenv("USERPROFILE", home)
 	if runtime.GOOS == "linux" {
 		t.Setenv("APPIMAGE", filepath.Join(t.TempDir(), "GMC-Monitor-v1.0.0-x86_64.AppImage"))
 	}
@@ -128,5 +131,22 @@ func TestUpdateFlow(t *testing.T) {
 	a2.SkipUpdate("99.0.0")
 	if !a2.GetUpdateInfo().Skipped {
 		t.Fatal("não marcou como pulada")
+	}
+}
+
+func TestOldVersionsIn(t *testing.T) {
+	dir := t.TempDir()
+	for _, n := range []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.21.0.exe", "GMC-Monitor-v99.0.0.exe",
+		"GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "outro.exe", "GMC-Monitor-v1.0.0-notas.txt"} {
+		_ = os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
+	}
+	self := filepath.Join(dir, "GMC-Monitor-v1.21.0.exe")
+	var got []string
+	for _, p := range oldVersionsIn(dir, self) {
+		got = append(got, filepath.Base(p))
+	}
+	want := "GMC-Monitor-v1.0.0.exe,GMC-Monitor-v1.2.0-x86_64.AppImage,GMC-Monitor-v1.5.0.exe.part"
+	if strings.Join(got, ",") != want {
+		t.Fatalf("apagaria %v", got)
 	}
 }

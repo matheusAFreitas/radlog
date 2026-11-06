@@ -10,7 +10,9 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
+	"sort"
 	"strconv"
 	"strings"
 	"sync"
@@ -366,15 +368,114 @@ func (a *App) runUpdate(version string, asset, sums ghAsset) {
 	a.quitApp()
 }
 
-// updateDir é a pasta onde fica o .exe (ou o AppImage) atual.
+// updateDir é a pasta das versões, só do app: Documentos\GMC Monitor\Versões
+// (ao lado de Relatórios), para não encher a pasta Downloads.
 func updateDir() string {
-	if p := os.Getenv("APPIMAGE"); p != "" {
-		return filepath.Dir(p)
-	}
-	if exe := selfExe(); exe != "" {
-		return filepath.Dir(exe)
+	if d := defaultReportDir(); d != "" {
+		return filepath.Join(filepath.Dir(d), "Versões")
 	}
 	return ""
+}
+
+// GetVersionsDir devolve a pasta das versões (para o botão "Abrir pasta").
+func (a *App) GetVersionsDir() string {
+	if d := updateDir(); d != "" {
+		return d
+	}
+	return filepath.Join(a.dataDir, "versoes")
+}
+
+// OpenVersionsDir abre a pasta das versões no explorador.
+func (a *App) OpenVersionsDir() error {
+	d := a.GetVersionsDir()
+	if err := os.MkdirAll(d, 0o755); err != nil {
+		return err
+	}
+	return openFolder(d)
+}
+
+// ---------- apagar as versões antigas ----------
+//
+// Depois que a versão nova fica aberta e funcionando por cleanAfter, o app
+// apaga os .exe (ou AppImages) de versões mais antigas que ela: os da pasta
+// das versões e os da pasta de onde veio a versão anterior (normalmente
+// Downloads). Só arquivos com o nome das releases (GMC-Monitor-vX.Y.Z.exe),
+// nunca a versão que está aberta nem uma mais nova.
+
+const (
+	prevArg    = "--anterior=" // caminho do .exe que abriu esta versão pelo atualizador
+	cleanAfter = 2 * time.Minute
+)
+
+var releaseName = regexp.MustCompile(`^(?i)GMC-Monitor-v(\d+\.\d+\.\d+)(\.exe|-x86_64\.AppImage)(\.part)?$`)
+
+// oldVersionsIn lista os arquivos de releases mais antigas que AppVersion.
+func oldVersionsIn(dir, self string) []string {
+	ents, err := os.ReadDir(dir)
+	if err != nil {
+		return nil
+	}
+	var out []string
+	for _, e := range ents {
+		m := releaseName.FindStringSubmatch(e.Name())
+		if e.IsDir() || m == nil {
+			continue
+		}
+		p := filepath.Join(dir, e.Name())
+		if sameExe(p, self) {
+			continue
+		}
+		if m[3] == ".part" || newerVersion(AppVersion, m[1]) {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
+func previousExe() string {
+	for _, a := range os.Args[1:] {
+		if strings.HasPrefix(a, prevArg) {
+			return strings.TrimPrefix(a, prevArg)
+		}
+	}
+	return ""
+}
+
+// cleanOldVersionsLater espera a versão nova firmar e apaga as antigas.
+func (a *App) cleanOldVersionsLater() {
+	time.Sleep(cleanAfter)
+	a.mu.Lock()
+	off := a.settings.KeepOldVersions
+	a.mu.Unlock()
+	if off || a.closing.Load() {
+		return
+	}
+	self := selfExe()
+	if p := os.Getenv("APPIMAGE"); p != "" {
+		self = p
+	}
+	dirs := map[string]bool{}
+	if d := updateDir(); d != "" {
+		dirs[d] = true
+	}
+	dirs[filepath.Join(a.dataDir, "versoes")] = true
+	if prev := previousExe(); prev != "" {
+		dirs[filepath.Dir(prev)] = true
+	}
+	var gone []string
+	for d := range dirs {
+		for _, f := range oldVersionsIn(d, self) {
+			if err := os.Remove(f); err == nil {
+				gone = append(gone, filepath.Base(f))
+			} else {
+				a.logf("versões antigas: não consegui apagar %s: %v", f, err)
+			}
+		}
+	}
+	if len(gone) > 0 {
+		sort.Strings(gone)
+		a.logf("versões antigas apagadas: %s", strings.Join(gone, ", "))
+	}
 }
 
 // expectedSum lê o SHA-256 do arquivo no SHA256SUMS.txt da release.
@@ -507,8 +608,12 @@ func fileSHA256(path string) (string, error) {
 // trava (--atualizando); no Linux um shell espera 3 s, para esta já ter
 // saído quando a nova pedir a trava de cópia única.
 var launchUpdated = func(path string) error {
-	if runtime.GOOS == "windows" {
-		return startDetached(path, []string{updatingArg})
+	prev := selfExe()
+	if p := os.Getenv("APPIMAGE"); p != "" {
+		prev = p
 	}
-	return startDetached("/bin/sh", []string{"-c", `sleep 3; exec "$0" ` + updatingArg, path})
+	if runtime.GOOS == "windows" {
+		return startDetached(path, []string{updatingArg, prevArg + prev})
+	}
+	return startDetached("/bin/sh", []string{"-c", `sleep 3; exec "$0" ` + updatingArg + ` "$1"`, path, prevArg + prev})
 }

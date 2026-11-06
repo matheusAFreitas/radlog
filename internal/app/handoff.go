@@ -46,7 +46,7 @@ func splitInstance(args []string) (version, exe string, rest []string) {
 			if i := strings.Index(v, "|"); i >= 0 {
 				version, exe = v[:i], v[i+1:]
 			}
-		case a == updatingArg:
+		case a == updatingArg, strings.HasPrefix(a, prevArg):
 		default:
 			rest = append(rest, a)
 		}

@@ -71,8 +71,9 @@ type Settings struct {
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
-	NoUpdateCheck bool   `json:"noUpdateCheck"`
-	SkipVersion   string `json:"skipVersion"` // "Pular esta versão"
+	NoUpdateCheck   bool   `json:"noUpdateCheck"`
+	SkipVersion     string `json:"skipVersion"`     // "Pular esta versão"
+	KeepOldVersions bool   `json:"keepOldVersions"` // não apagar as versões antigas depois de atualizar
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
@@ -399,6 +400,7 @@ func (a *App) startup(ctx context.Context) {
 	a.store = st
 	go a.scanRetroOnce()
 	go a.updateLoop()
+	go a.cleanOldVersionsLater()
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		go a.autoReconnect(0)
