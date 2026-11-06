@@ -10,7 +10,7 @@ import glob, os, re, sys
 from html.parser import HTMLParser
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
-PT = re.compile(r"[ãçõéêáíóúâôà]|\b(de|do|da|não|com|para|sem|um|uma|em|no|na|os|as|ao|à|que|por|mais|menos|hoje|ontem|dias?|minutos?|horas?|fundo|contador|medição|alerta|alarme|atenção|perigo|leitura|salvar|abrir|fechar|voltar|baixar|gráfico|configura\w*|porta|conectad\w*|desconectad\w*)\b", re.I)
+PT = re.compile(r"[ãçõéêáíóúâôà]|\b(de|do|da|não|com|para|sem|um|uma|em|no|na|os|as|ao|à|que|por|mais|menos|hoje|ontem|dias?|minutos?|horas?|fundo|contador|medição|alerta|alarme|atenção|perigo|leitura|salvar|abrir|fechar|voltar|baixar|gráfico|configura\w*|porta|conectad\w*|desconectad\w*|chuva|chovendo|buscando|aguardando|ligad[oa]|configurad[oa]|modelo|fraca|moderada|forte)\b", re.I)
 WORD = re.compile(r"[A-Za-zÀ-ú]{2}")
 exact, pats = set(), set()
 

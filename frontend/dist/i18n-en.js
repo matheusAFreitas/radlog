@@ -1102,7 +1102,31 @@ const I18N_EN = {
 "conexão recusada: o outro PC está com \"Aceitar conexões\" ligado?": "connection refused: does the other PC have \"Accept connections\" on?",
 "sem rota até ele": "no route to it",
 "nada novo": "nothing new",
-"sincronização: parou de aceitar conexões": "sync: stopped accepting connections"
+"sincronização: parou de aceitar conexões": "sync: stopped accepting connections",
+"buscando chuva…": "fetching rain…",
+"chuva configurada": "rain configured",
+"sem radar aqui": "no radar here",
+"chuva ligada": "rain on",
+"aguardando a primeira busca": "waiting for the first fetch",
+"fraca": "light",
+"moderada": "moderate",
+"forte": "heavy",
+"muito forte": "very heavy",
+"chuva: sem acesso ao serviço de clima": "rain: no access to the weather service",
+"buscando…": "fetching…",
+"chovendo": "raining",
+"chuva (mm/h)": "rain (mm/h)",
+"chuva (radar · modelo)": "rain (radar · model)",
+"chuva (radar)": "rain (radar)",
+"ligado": "on",
+"modelo": "model",
+"nenhuma chuva medida ainda": "no rain measured yet",
+"no modo navegador não dá para parear; abra pelo app": "in browser mode you can't pair; open it through the app",
+"pedido inválido": "invalid request",
+"ponto inválido": "invalid point",
+"ponto inválido no pareamento": "invalid point in pairing",
+"radar+modelo": "radar+model",
+"Versões": "Versions"
 },
 "patterns": [
 [
@@ -1165,6 +1189,15 @@ const I18N_EN = {
 [
 " CPM acima do fundo (Currie, 95%, com ",
 " s de fundo). Abaixo disso, um objeto fraco pode passar despercebido."
+]
+],
+[
+"Radar indisponível agora (",
+"^Radar indisponível agora \\(((?:(?! · ).)+?)\\); usando o modelo do Open\\-Meteo, que pode não mostrar chuva bem localizada\\.$",
+"Radar unavailable now (${1}); using the Open-Meteo model, which may miss very local rain.",
+[
+"Radar indisponível agora (",
+"); usando o modelo do Open-Meteo, que pode não mostrar chuva bem localizada."
 ]
 ],
 [
@@ -3012,6 +3045,14 @@ const I18N_EN = {
 ]
 ],
 [
+"buscando chuva em ",
+"^buscando chuva em ((?:(?! · ).)+?)…$",
+"fetching rain in ${1}…",
+[
+"buscando chuva em "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -3133,6 +3174,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Última tentativa: ",
+"^Última tentativa: ((?:(?! · ).)+?)$",
+"Last attempt: ${1}",
+[
+"Última tentativa: "
+]
+],
+[
 "WCFG no byte ",
 "^WCFG no byte ((?:(?! · ).)+?): %w$",
 "WCFG at byte ${1}: %w",
@@ -3205,6 +3254,14 @@ const I18N_EN = {
 "period average ${1}",
 [
 "média do período "
+]
+],
+[
+"tenta de novo às ",
+"^tenta de novo às ((?:(?! · ).)+?)$",
+"tries again at ${1}",
+[
+"tenta de novo às "
 ]
 ],
 [
@@ -3587,6 +3644,14 @@ const I18N_EN = {
 ]
 ],
 [
+"chovendo (",
+"^chovendo \\(((?:(?! · ).)+?)\\)$",
+"raining (${1})",
+[
+"chovendo ("
+]
+],
+[
 "Backup de ",
 "^Backup de ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "Backup of ${1}: ${2}",
@@ -3892,6 +3957,14 @@ const I18N_EN = {
 ]
 ],
 [
+"modelo às ",
+"^modelo às ((?:(?! · ).)+?)$",
+"model at ${1}",
+[
+"modelo às "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -3963,6 +4036,31 @@ const I18N_EN = {
 "Measurement: ${1}",
 [
 "Medição: "
+]
+],
+[
+"chuva em ",
+"^chuva em ((?:(?! · ).)+?)$",
+"rain in ${1}",
+[
+"chuva em "
+]
+],
+[
+"radar às ",
+"^radar às ((?:(?! · ).)+?)$",
+"radar at ${1}",
+[
+"radar às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?), \\~((?:(?! · ).)+?) mm/h$",
+"${1}, ~${2} mm/h",
+[
+", ~",
+" mm/h"
 ]
 ],
 [

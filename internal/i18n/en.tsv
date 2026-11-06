@@ -1484,3 +1484,38 @@ sincronização: código errado no pareamento ({0})	sync: wrong code while pairi
 sincronização: pareamento com {0} desfeito	sync: pairing with {0} removed
 sincronização com {0}: {1}	sync with {0}: {1}
 sincronização com {0} ({1}): trouxe {2}; levou {3}	sync with {0} ({1}): brought {2}; sent {3}
+# --- chuva (status no gráfico)
+buscando chuva…	fetching rain…
+buscando chuva em {0}…	fetching rain in {0}…
+chuva em {0}	rain in {0}
+chuva configurada	rain configured
+chovendo ({0})	raining ({0})
+radar às {0}	radar at {0}
+modelo às {0}	model at {0}
+sem radar aqui	no radar here
+tenta de novo às {0}	tries again at {0}
+chuva ligada	rain on
+aguardando a primeira busca	waiting for the first fetch
+fraca	light
+moderada	moderate
+forte	heavy
+muito forte	very heavy
+{0}, ~{1} mm/h	{0}, ~{1} mm/h
+Última tentativa: {0}	Last attempt: {0}
+Radar indisponível agora ({0}); usando o modelo do Open-Meteo, que pode não mostrar chuva bem localizada.	Radar unavailable now ({0}); using the Open-Meteo model, which may miss very local rain.
+chuva: sem acesso ao serviço de clima	rain: no access to the weather service
+buscando…	fetching…
+chovendo	raining
+chuva (mm/h)	rain (mm/h)
+chuva (radar · modelo)	rain (radar · model)
+chuva (radar)	rain (radar)
+chuva (modelo)	rain (model)
+ligado	on
+modelo	model
+nenhuma chuva medida ainda	no rain measured yet
+no modo navegador não dá para parear; abra pelo app	in browser mode you can't pair; open it through the app
+pedido inválido	invalid request
+ponto inválido	invalid point
+ponto inválido no pareamento	invalid point in pairing
+radar+modelo	radar+model
+Versões	Versions

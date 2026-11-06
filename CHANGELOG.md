@@ -1,5 +1,10 @@
 # Versões
 
+## 1.23.1
+- Em inglês, o aviso de chuva do gráfico ("buscando chuva…", "chuva em …",
+  "radar às …") e mais alguns textos da chuva e do pareamento ainda saíam em
+  português.
+
 ## 1.23.0
 - **Sincronização entre PCs** (Configurações → Sincronização): dois apps
   trocam o que falta um no outro (leituras por minuto, alertas encerrados,
