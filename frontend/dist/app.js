@@ -918,6 +918,9 @@ async function refreshChart() {
   const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
   for (const p of c.peaks || []) max = Math.max(max, peakV(p));
+  // RadiaCode: só no gráfico em µSv/h (é a unidade que os dois têm em comum)
+  const rcVals = usvMode && c.rc ? c.rc : null;
+  if (rcVals) for (const v of rcVals) if (v != null && v > max) max = v;
   // durante um alarme, mostra as linhas do seu limite e do perigo do app
   const ringing = !!alarmCtl.kind;
   const alarmV = usvMode ? c.alarmUSv : c.alarmCPM;
@@ -949,6 +952,16 @@ async function refreshChart() {
   };
   vals.forEach((v, i) => { if (v == null) flush(); else seg.push([x(i), y(v)]); });
   flush();
+  let rcLine = "";
+  if (rcVals) {
+    let pts = [];
+    const out = () => { if (pts.length) rcLine += "M" + pts.join("L") + (pts.length === 1 ? "l0.01 0" : ""); pts = []; };
+    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push(x(i).toFixed(1) + " " + y(v).toFixed(1)); });
+    out();
+  }
+  $("rcKey").hidden = !c.rc;
+  $("rcKey").classList.toggle("off", !usvMode);
+  $("rcKeyText").textContent = usvMode ? "RadiaCode" : "RadiaCode (só em µSv/h)";
 
   const grid = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
@@ -1015,7 +1028,8 @@ async function refreshChart() {
   }).join("");
   $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines +
     `<path d="${area}" fill="#6EE7A0" fill-opacity="0.12"/>` +
-    `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`;
+    `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+    (rcLine ? `<path d="${rcLine}" fill="none" stroke="#F472B6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` : "");
 
   if (state.zoom) {
     const f = chartTimeFmt(c);
@@ -1038,7 +1052,7 @@ async function refreshChart() {
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`
+      ? `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` + (c.rcAvg != null ? ` · RadiaCode média ${fmt(c.rcAvg, 3)}` : "")
       : `média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)}`;
 }
 
@@ -1067,9 +1081,11 @@ function setupChartHover() {
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
+    const rcv = c.rc ? c.rc[i] : null;
+    const rcText = rcv != null ? ` · RadiaCode ${fmt(rcv, usvDigits(rcv))} µSv/h` : "";
     tip.textContent = (v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
-      : `${when} · ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + awayLabel(t) + measureLabel(t) + ntText;
+      : `${when} · ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
   });
@@ -3952,12 +3968,36 @@ function renderRc(st) {
     : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
     : "Ligue o RadiaCode no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
   $("rcHelp").className = "small " + (st.state === "erro" ? "warn-text" : "muted");
-  if (on && (!prev || prev.state !== "conectado")) refreshRcCompare();
+  if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); }
+  renderRcMain(st);
   // configurações
   $("chkRcOn").checked = !st.off;
   if (document.activeElement !== $("rcBLE")) $("rcBLE").value = st.ble || "";
   $("btnRcBLEScan").disabled = !st.bleOK;
   $("rcBLEInfo").textContent = st.bleOK ? "" : "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.";
+}
+
+// quadro do RadiaCode na tela principal: cheio quando conectado, uma linha
+// com o último dado quando não
+function renderRcMain(st) {
+  const on = st.state === "conectado" && st.time;
+  const show = on || st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
+  $("rcMain").hidden = !show;
+  $("heroEyebrow").textContent = show ? "GMC-800" : "Leitura atual";
+  if (!show) return;
+  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  $("rcMainVia").textContent = on || st.state === "conectado" ? `conectado · ${via}` : st.state === "conectando" ? "conectando…" : "desconectado";
+  $("rcMainVia").className = "rc-main-via mono small" + (st.state === "conectado" ? " on" : "");
+  $("rcMainFull").hidden = !on;
+  $("rcMainCompact").hidden = !!on;
+  const dose = `dose hoje ${fmt(st.today, st.today < 10 ? 2 : 1)} µSv`;
+  if (on) {
+    $("rcMainVal").textContent = fmt(st.usvh, usvDigits(st.usvh));
+    $("rcMainSub").textContent = [`± ${fmt(st.usvhErr, 0)}%`, `${fmt(st.cps, 2)} cps`, dose, st.hasRare ? `bateria ${fmt(st.battery, 0)}%` : ""].filter(Boolean).join(" · ");
+  } else {
+    const last = st.lastT ? `última leitura ${fmt(st.lastUSv, usvDigits(st.lastUSv))} µSv/h ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
+    $("rcMainCompact").textContent = `${last} · ${dose}`;
+  }
 }
 
 async function refreshRcCompare() {
@@ -4032,6 +4072,13 @@ function drawRcSpectrum() {
 function wireRc() {
   on("radiacode", renderRc);
   $("rcPill").addEventListener("click", () => showView("radiacode"));
+  $("rcMain").addEventListener("click", () => showView("radiacode"));
+  $("rcKey").addEventListener("click", () => {
+    if (state.chartUnit === "usv") return;
+    state.chartUnit = "usv";
+    localSet("chartUnit", "usv");
+    refreshChart();
+  });
   $("btnRcRetry").addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
   $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
   $("chkRcOn").addEventListener("change", async (e) => renderRc(await call(api.SetRadiacode, e.target.checked, $("rcBLE").value)));
@@ -4505,7 +4552,7 @@ function makeDemoApi() {
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   const demoRc = () => demoRcFake() && !demoRcCfg.off
-    ? { state: "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+    ? { today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
     : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
@@ -4855,6 +4902,11 @@ function makeDemoApi() {
       const c = await chartPreview(period);
       const u = (v) => (v == null ? null : v * 0.0101);
       withPeaks(c);
+      if (demoRcFake()) { // RadiaCode fingido: segue o GMC um pouco abaixo
+        c.rc = (c.usv || []).map((v, i) => (v == null || i < c.usv.length * 0.3 ? null : v * 0.9 + (Math.sin(i / 3) * 0.004)));
+        const ok = c.rc.filter((v) => v != null);
+        c.rcAvg = ok.length ? ok.reduce((a, b) => a + b, 0) / ok.length : null;
+      }
       return Object.assign(c, { avgUSv: u(c.avg), minUSv: u(c.min), maxUSv: u(c.max) });
     },
     _unused: async (period) => {

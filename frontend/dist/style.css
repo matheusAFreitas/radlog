@@ -976,11 +976,25 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-cmp-svg .grid { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .rc-cmp-svg .ax { fill: var(--muted); font-size: 11px; font-family: var(--mono, monospace); }
 .rc-cmp-svg path { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; }
-.rc-cmp-svg path.gmc { stroke: #A3ADB4; }
-.rc-cmp-svg path.rc { stroke: #5EEAD4; }
+.rc-cmp-svg path.gmc { stroke: #6EE7A0; }
+.rc-cmp-svg path.rc { stroke: #F472B6; }
 .rc-legend { display: flex; align-items: center; gap: 6px; color: var(--muted); }
 .rc-legend .k { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-left: 8px; }
-.rc-legend .k.gmc { background: #A3ADB4; }
-.rc-legend .k.rc { background: #5EEAD4; }
+.rc-legend .k.gmc { background: #6EE7A0; }
+.rc-legend .k.rc { background: #F472B6; }
 .rc-empty { padding: 28px 0; text-align: center; }
 @media (max-width: 900px) { .rc-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
+/* RadiaCode na tela principal e no gráfico */
+.rc-main { padding: 16px 20px; gap: 8px; cursor: pointer; }
+.rc-main-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.rc-main-via { color: var(--muted); }
+.rc-main-via.on { color: #F472B6; }
+.rc-main-val { font-size: 36px; font-weight: 600; line-height: 1.1; color: var(--text); letter-spacing: -0.01em; }
+.rc-main .unit { margin-left: 8px; }
+.rc-main-sub, .rc-main-compact { color: var(--muted); line-height: 1.5; }
+.rc-main-compact b { color: var(--text); font-weight: 500; }
+.legend .rc-key { display: inline-flex; align-items: center; gap: 6px; background: none; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+.legend .rc-key i { width: 14px; height: 2px; border-radius: 2px; background: #F472B6; display: inline-block; }
+.legend .rc-key.off i { opacity: .45; }
+.legend .rc-key.off { text-decoration: underline dotted; }

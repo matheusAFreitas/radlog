@@ -58,6 +58,11 @@ type RcState struct {
 	HasRare  bool                   `json:"hasRare"`
 	Alarms   *radiacode.AlarmLimits `json:"alarms"`
 	Since    int64                  `json:"since"` // ms em que conectou
+	// para a tela principal, conectado ou não
+	Today   float64 `json:"today"`   // µSv de hoje pelo que o app gravou
+	LastT   int64   `json:"lastT"`   // ms do último minuto gravado
+	LastUSv float64 `json:"lastUSv"` // µSv/h desse minuto
+	LastCPS float64 `json:"lastCPS"`
 }
 
 type rcState struct {
@@ -67,6 +72,23 @@ type rcState struct {
 	min   rcMinute
 	wake  chan struct{}
 	fileM sync.Mutex
+	ring  []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
+	today rcToday
+}
+
+type rcSample struct {
+	t        time.Time
+	usv, cps float64
+}
+
+// rcToday guarda a dose de hoje e o último minuto, sem reler o arquivo a cada
+// segundo.
+type rcToday struct {
+	day     string
+	loaded  bool
+	sum     float64 // µSv
+	last    RcPoint
+	hasLast bool
 }
 
 type rcMinute struct {
@@ -90,7 +112,41 @@ func (a *App) GetRadiacode() RcState {
 		st.State = "off"
 	}
 	st.Off, st.BLE, st.BLEOK = off, ble, radiacode.BLESupported
+	a.rcTodayLocked()
+	st.Today = a.rc.today.sum
+	if a.rc.min.n > 0 { // minuto em andamento: conta o que já passou dele
+		st.Today += a.rc.min.usv / float64(a.rc.min.n) * float64(time.Since(a.rc.min.t)) / float64(time.Hour)
+	}
+	if a.rc.today.hasLast {
+		l := a.rc.today.last
+		st.LastT, st.LastUSv, st.LastCPS = l.T.UnixMilli(), l.USvh, l.CPS
+	}
 	return st
+}
+
+// rcTodayLocked carrega (uma vez por dia) a dose de hoje e o último minuto.
+// Precisa de a.rc.mu.
+func (a *App) rcTodayLocked() {
+	day := time.Now().Format("2006-01-02")
+	if a.rc.today.loaded && a.rc.today.day == day {
+		return
+	}
+	last, hasLast := a.rc.today.last, a.rc.today.hasLast
+	a.rc.today = rcToday{day: day, loaded: true, last: last, hasLast: hasLast}
+	if a.dataDir == "" {
+		return
+	}
+	now := time.Now()
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	for _, p := range a.rcRange(start, now.Add(time.Minute)) {
+		a.rc.today.sum += p.USvh / 60
+	}
+	if !hasLast {
+		// último minuto gravado: procura neste mês e no anterior
+		if pts := a.rcRange(start.AddDate(0, -1, 0), now.Add(time.Minute)); len(pts) > 0 {
+			a.rc.today.last, a.rc.today.hasLast = pts[len(pts)-1], true
+		}
+	}
 }
 
 func (a *App) emitRc() { a.emit("radiacode", a.GetRadiacode()) }
@@ -261,6 +317,16 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.st.USvh, a.rc.st.USvhErr = v.DoseRate, v.DoseErr
 			a.rc.mu.Unlock()
 			a.rcAddMinute(now, v.CPS, v.DoseRate)
+			a.rc.mu.Lock()
+			a.rc.ring = append(a.rc.ring, rcSample{now, v.DoseRate, v.CPS})
+			if cut := now.Add(-liveWindow); a.rc.ring[0].t.Before(cut) {
+				i := 0
+				for i < len(a.rc.ring) && a.rc.ring[i].t.Before(cut) {
+					i++
+				}
+				a.rc.ring = append([]rcSample(nil), a.rc.ring[i:]...)
+			}
+			a.rc.mu.Unlock()
 			changed = true
 		case radiacode.Rare:
 			a.rc.mu.Lock()
@@ -313,6 +379,21 @@ func (a *App) rcWriteMinute(m rcMinute) {
 	if m.n == 0 || a.dataDir == "" {
 		return
 	}
+	n := float64(m.n)
+	if !a.rcAppend(m) {
+		return
+	}
+	// dose de hoje e último minuto, sem reler o arquivo (fora do fileM: o
+	// GetRadiacode tranca rc.mu e depois fileM)
+	a.rc.mu.Lock()
+	if a.rc.today.loaded && a.rc.today.day == m.t.Format("2006-01-02") {
+		a.rc.today.sum += m.usv / n / 60
+	}
+	a.rc.today.last, a.rc.today.hasLast = RcPoint{T: m.t, CPS: m.cps / n, USvh: m.usv / n, N: m.n}, true
+	a.rc.mu.Unlock()
+}
+
+func (a *App) rcAppend(m rcMinute) bool {
 	a.rc.fileM.Lock()
 	defer a.rc.fileM.Unlock()
 	dir := a.rcDir()
@@ -321,7 +402,7 @@ func (a *App) rcWriteMinute(m rcMinute) {
 	_, statErr := os.Stat(path)
 	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 	if err != nil {
-		return
+		return false
 	}
 	defer f.Close()
 	if statErr != nil {
@@ -329,6 +410,7 @@ func (a *App) rcWriteMinute(m rcMinute) {
 	}
 	n := float64(m.n)
 	fmt.Fprintf(f, "%s,%.3f,%.5f,%d\n", m.t.Format(time.RFC3339), m.cps/n, m.usv/n, m.n)
+	return true
 }
 
 // RcPoint é um minuto gravado do RadiaCode.
@@ -465,6 +547,69 @@ func blockRatioErr(rc, gmc []float64, size int) float64 {
 		v += (r - m) * (r - m)
 	}
 	return math.Sqrt(v/float64(len(rs)-1)) / math.Sqrt(float64(len(rs)))
+}
+
+// withRc põe a curva do RadiaCode (µSv/h) no gráfico, alinhada aos pontos do
+// GMC: nos passos de menos de 1 min usa as leituras ao vivo da última hora,
+// e nos outros a média dos minutos gravados.
+func (a *App) withRc(c Chart) Chart {
+	n := len(c.Times)
+	if n == 0 || c.StepMs <= 0 {
+		return c
+	}
+	step := time.Duration(c.StepMs) * time.Millisecond
+	from := time.UnixMilli(c.Times[0])
+	to := from.Add(time.Duration(n) * step)
+	sum := make([]float64, n)
+	cnt := make([]int, n)
+	add := func(t time.Time, v float64) {
+		i := int(t.Sub(from) / step)
+		if i >= 0 && i < n {
+			sum[i] += v
+			cnt[i]++
+		}
+	}
+	if step < time.Minute {
+		a.rc.mu.Lock()
+		ring := append([]rcSample(nil), a.rc.ring...)
+		a.rc.mu.Unlock()
+		for _, s := range ring {
+			add(s.t, s.usv)
+		}
+		// mais antigo que a memória: o valor do minuto em cada ponto
+		lim := to
+		if len(ring) > 0 {
+			lim = ring[0].t
+		}
+		if lim.After(from) {
+			for _, p := range a.rcRange(from.Truncate(time.Minute), lim) {
+				for t := p.T; t.Before(p.T.Add(time.Minute)) && t.Before(lim); t = t.Add(step) {
+					add(t, p.USvh)
+				}
+			}
+		}
+	} else {
+		for _, p := range a.rcRange(from, to) {
+			add(p.T, p.USvh)
+		}
+	}
+	var tot float64
+	k := 0
+	rc := make([]*float64, n)
+	for i := range sum {
+		if cnt[i] > 0 {
+			v := sum[i] / float64(cnt[i])
+			rc[i] = &v
+			tot += v
+			k++
+		}
+	}
+	if k == 0 {
+		return c
+	}
+	avg := tot / float64(k)
+	c.RC, c.RCAvg = rc, &avg
+	return c
 }
 
 // RcSpectrum é o espectro do aparelho para a tela.

@@ -21,13 +21,14 @@ O app passa a se chamar **RadLog** e deixa de ser só do GQ GMC-800.
       "Dosímetro (RadiaCode)" em µSv/h e dose acumulada, configurando os
       alarmes do próprio aparelho (na rua quem apita é ele) e registrando os
       que tocaram. Fundo de referência e saturação por aparelho.
-- [ ] **Tela principal com os dois**: pílula de conexão de cada aparelho no
+- [x] **Tela principal com os dois** (1.27; falta marcar no gráfico quando
+      estavam lado a lado): pílula de conexão de cada aparelho no
       topo; quadros "GMC-800" (CPM, µSv/h, estado × fundo de 30 d) e
       "RadiaCode 102" (µSv/h, cps, dose de hoje, bateria, lugar) lado a lado;
       um gráfico com as duas curvas, marcando quando estavam lado a lado; dose
-      do dia e do mês e alertas por aparelho embaixo. A decidir com o
-      aparelho em mãos: o quadro do RadiaCode desconectado (última leitura ou
-      some) e o gráfico todo em µSv/h ou o GMC em CPM com outro eixo.
+      do dia e do mês e alertas por aparelho embaixo. Decidido: o
+      quadro desconectado fica compacto com o último dado; o RadiaCode entra
+      no gráfico em µSv/h.
 - [ ] **Minha dose**: dose pessoal do dia, semana, mês e ano, comparada com o
       esperado só pelo fundo natural e com o limite de 1 mSv/ano acima do
       natural.

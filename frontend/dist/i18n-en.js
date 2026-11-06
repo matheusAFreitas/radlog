@@ -1255,7 +1255,12 @@ const I18N_EN = {
 "Bluetooth com o RadiaCode ainda só no Linux; no Windows, use o USB por enquanto": "Bluetooth with the RadiaCode is Linux-only for now; on Windows, use USB",
 "nenhum adaptador Bluetooth": "no Bluetooth adapter",
 "o Bluetooth do PC está desligado": "the PC's Bluetooth is off",
-"sem interface USB aberta": "no USB interface opened"
+"sem interface USB aberta": "no USB interface opened",
+"RadiaCode (só em µSv/h)": "RadiaCode (µSv/h only)",
+"sem leituras ainda": "no readings yet",
+"Bluetooth com o RadiaCode só no Windows e no Linux": "Bluetooth with the RadiaCode only on Windows and Linux",
+"o aparelho não mostrou o serviço do RadiaCode": "the device didn't show the RadiaCode service",
+"o Windows não respondeu a tempo": "Windows didn't respond in time"
 },
 "patterns": [
 [
@@ -1641,6 +1646,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: não deu para procurar (o Bluetooth do PC está ligado?) ",
+"^Bluetooth: não deu para procurar \\(o Bluetooth do PC está ligado\\?\\) ((?:(?! · ).)+?)$",
+"Bluetooth: couldn't search (is the PC's Bluetooth on?) ${1}",
+[
+"Bluetooth: não deu para procurar (o Bluetooth do PC está ligado?) "
+]
+],
+[
 "Atenção (histórico do contador): pico de ",
 "^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Attention (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -1885,6 +1898,14 @@ const I18N_EN = {
 "ponto ",
 " dá ",
 " CPM por µSv/h, fora da faixa plausível ("
+]
+],
+[
+"Bluetooth: o aparelho recusou as notificações (status ",
+"^Bluetooth: o aparelho recusou as notificações \\(status ((?:(?! · ).)+?)\\)$",
+"Bluetooth: the device refused notifications (status ${1})",
+[
+"Bluetooth: o aparelho recusou as notificações (status "
 ]
 ],
 [
@@ -2168,6 +2189,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: ",
+"^Bluetooth: ((?:(?! · ).)+?) \\(o celular está conectado nele\\?\\)$",
+"Bluetooth: ${1} (is the phone connected to it?)",
+[
+"Bluetooth: ",
+" (o celular está conectado nele?)"
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -2195,6 +2225,17 @@ const I18N_EN = {
 " cps ±",
 "% · ≈ ",
 " µSv/h"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h · RadiaCode média ((?:(?! · ).)+?)$",
+"average ${1} · min ${2} · max ${3} µSv/h · RadiaCode average ${4}",
+[
+"média ",
+" · mín ",
+" · máx ",
+" µSv/h · RadiaCode média "
 ]
 ],
 [
@@ -2399,6 +2440,14 @@ const I18N_EN = {
 "RadiaCode conectado (",
 ") · ",
 " · firmware "
+]
+],
+[
+"operação do Bluetooth falhou (status ",
+"^operação do Bluetooth falhou \\(status ((?:(?! · ).)+?)\\)$",
+"Bluetooth operation failed (status ${1})",
+[
+"operação do Bluetooth falhou (status "
 ]
 ],
 [
@@ -2715,6 +2764,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: WinRT não iniciou (",
+"^Bluetooth: WinRT não iniciou \\(((?:(?! · ).)+?)\\)$",
+"Bluetooth: WinRT didn't start (${1})",
+[
+"Bluetooth: WinRT não iniciou ("
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -2766,6 +2823,15 @@ const I18N_EN = {
 ]
 ],
 [
+"última leitura ",
+"^última leitura ((?:(?! · ).)+?) µSv/h \\(ontem ((?:(?! · ).)+?)\\)$",
+"last reading ${1} µSv/h (yesterday ${2})",
+[
+"última leitura ",
+" µSv/h (ontem "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -2796,6 +2862,14 @@ const I18N_EN = {
 "Couldn't accept connections: ${1}",
 [
 "Não deu para aceitar conexões: "
+]
+],
+[
+"Bluetooth: ligar notificações: ",
+"^Bluetooth: ligar notificações: ((?:(?! · ).)+?)$",
+"Bluetooth: enabling notifications: ${1}",
+[
+"Bluetooth: ligar notificações: "
 ]
 ],
 [
@@ -2922,6 +2996,14 @@ const I18N_EN = {
 ]
 ],
 [
+"endereço Bluetooth inválido: ",
+"^endereço Bluetooth inválido: ((?:(?! · ).)+?)$",
+"invalid Bluetooth address: ${1}",
+[
+"endereço Bluetooth inválido: "
+]
+],
+[
 "Atenção · ",
 "^Atenção · ((?:(?! · ).)+?) CPM · GMC Monitor$",
 "Attention · ${1} CPM · GMC Monitor",
@@ -3039,6 +3121,15 @@ const I18N_EN = {
 "≈ ${1} mSv/year (extrapolation)",
 [
 " mSv/ano (extrapolação)"
+]
+],
+[
+"última leitura ",
+"^última leitura ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
+"last reading ${1} µSv/h (${2} ${3})",
+[
+"última leitura ",
+" µSv/h ("
 ]
 ],
 [
@@ -3231,6 +3322,15 @@ const I18N_EN = {
 "RadiaCode connected via ${1}",
 [
 "RadiaCode conectado pelo "
+]
+],
+[
+"última leitura ",
+"^última leitura ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?)$",
+"last reading ${1} µSv/h at ${2}",
+[
+"última leitura ",
+" µSv/h às "
 ]
 ],
 [
@@ -3681,6 +3781,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bluetooth: sessão: ",
+"^Bluetooth: sessão: ((?:(?! · ).)+?)$",
+"Bluetooth: session: ${1}",
+[
+"Bluetooth: sessão: "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -4010,6 +4118,23 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?)$",
+"RadiaCode average ${1}",
+[
+"RadiaCode média "
+]
+],
+[
+"RadiaCode ",
+"^RadiaCode ((?:(?! · ).)+?) µSv/h$",
+"RadiaCode ${1} µSv/h",
+[
+"RadiaCode ",
+" µSv/h"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -4240,6 +4365,15 @@ const I18N_EN = {
 "valid for ${1} more",
 [
 "vale por mais "
+]
+],
+[
+"dose hoje ",
+"^dose hoje ((?:(?! · ).)+?) µSv$",
+"dose today ${1} µSv",
+[
+"dose hoje ",
+" µSv"
 ]
 ],
 [
@@ -4817,6 +4951,14 @@ const I18N_EN = {
 "firmware ${1}",
 [
 "firmware "
+]
+],
+[
+"bateria ",
+"^bateria ((?:(?! · ).)+?)%$",
+"battery ${1}%",
+[
+"bateria "
 ]
 ],
 [

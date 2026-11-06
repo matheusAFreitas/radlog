@@ -216,6 +216,9 @@ type Chart struct {
 	// trecho antigo com passo menor que 1 min: o detalhe por segundo só
 	// existe perto dos alertas (o resto é o valor do minuto)
 	FineAlertsOnly bool `json:"fineAlertsOnly"`
+	// RadiaCode no mesmo período, em µSv/h (nil se não tem dado)
+	RC    []*float64 `json:"rc"`
+	RCAvg *float64   `json:"rcAvg"`
 }
 
 // withUSv preenche as séries em µSv/h.
@@ -548,7 +551,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
-	s.SkipVersion = a.settings.SkipVersion // muda só por SkipUpdate
+	s.SkipVersion = a.settings.SkipVersion                // muda só por SkipUpdate
 	s.RcOff, s.RcBLE = a.settings.RcOff, a.settings.RcBLE // só por SetRadiacode
 	old := a.settings
 	autostartChanged := old.StartWithWindows != s.StartWithWindows
@@ -1314,7 +1317,7 @@ func (a *App) buildChart(from, to time.Time, step time.Duration) (Chart, error) 
 		return Chart{}, err
 	}
 	if step < time.Minute {
-		return a.withUSv(a.shortChart(from, to, step, pts)), nil
+		return a.withRc(a.withUSv(a.shortChart(from, to, step, pts))), nil
 	}
 	n := int(span / step)
 	sums := make([]float64, n)
@@ -1349,7 +1352,7 @@ func (a *App) buildChart(from, to time.Time, step time.Duration) (Chart, error) 
 		avg := sum / float64(len(all))
 		c.Avg, c.Min, c.Max = &avg, &mn, &mx
 	}
-	return a.withUSv(c), nil
+	return a.withRc(a.withUSv(c)), nil
 }
 
 // shortChart monta os gráficos de 15 e 30 min com as leituras por segundo.

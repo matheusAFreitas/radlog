@@ -1,5 +1,18 @@
 # Versões
 
+## 1.27.0
+- **Tela principal com os dois aparelhos**: logo abaixo do quadro do GMC
+  (agora chamado "GMC-800") aparece o quadro do **RadiaCode**.
+  - Conectado: µSv/h grande, incerteza, cps, dose de hoje e bateria.
+  - Desconectado: uma linha com a última leitura e a dose de hoje.
+  - Quem nunca conectou um RadiaCode não vê nada diferente.
+- **Gráfico**: em µSv/h, a curva do RadiaCode (rosa) aparece junto com a do
+  GMC, com a média nas estatísticas e o valor na dica ao passar o mouse. Em
+  CPM, a legenda avisa que ela só aparece em µSv/h; clicando, o gráfico
+  troca de unidade.
+- Na aba RadiaCode, a comparação usa as mesmas cores (GMC verde, RadiaCode
+  rosa).
+
 ## 1.26.0
 - **RadiaCode pelo Bluetooth no Windows** (Windows 10 ou mais novo), pelas
   APIs do próprio Windows, sem instalar nada. Em Configurações → RadiaCode,

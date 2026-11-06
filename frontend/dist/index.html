@@ -128,7 +128,7 @@
       <div class="reading">
         <div class="read-head">
           <div class="read-main">
-            <span class="eyebrow">Leitura atual <span class="demo-tag" id="demoTag" hidden>demo</span></span>
+            <span class="eyebrow"><span id="heroEyebrow">Leitura atual</span> <span class="demo-tag" id="demoTag" hidden>demo</span></span>
             <div class="value-row">
               <span class="value" id="readValue">—</span>
               <span class="unit" id="readUnit">CPM</span>
@@ -173,6 +173,18 @@
       <span>Nenhum contador conectado.</span>
       <button type="button" class="btn accent" id="btnConnectHint">Conectar</button>
     </div>
+  </section>
+
+  <section class="card rc-main" id="rcMain" hidden>
+    <div class="rc-main-head">
+      <span class="eyebrow">RadiaCode</span>
+      <span class="rc-main-via mono small" id="rcMainVia"></span>
+    </div>
+    <div class="rc-main-full" id="rcMainFull">
+      <div class="value-row"><span class="rc-main-val" id="rcMainVal">—</span><span class="unit">µSv/h</span></div>
+      <div class="rc-main-sub mono small" id="rcMainSub"></div>
+    </div>
+    <div class="rc-main-compact mono small" id="rcMainCompact" hidden></div>
   </section>
 
   <section class="tiles">
@@ -254,7 +266,7 @@
       </div>
     </div>
     <div class="legend small muted" id="legend">
-      <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+      <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
     </div>
   </section>
 

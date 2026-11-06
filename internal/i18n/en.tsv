@@ -1725,3 +1725,25 @@ resposta fora de ordem (pedido {0}, veio {1})	out-of-order response (request {0}
 leitura {0} recusada (código {1})	read {0} refused (code {1})
 sem interface USB aberta	no USB interface opened
 abrir {0}: {1}	open {0}: {1}
+RadiaCode (só em µSv/h)	RadiaCode (µSv/h only)
+sem leituras ainda	no readings yet
+dose hoje {0} µSv	dose today {0} µSv
+bateria {0}%	battery {0}%
+desconectado	disconnected
+última leitura {0} µSv/h às {1}	last reading {0} µSv/h at {1}
+última leitura {0} µSv/h (ontem {1})	last reading {0} µSv/h (yesterday {1})
+última leitura {0} µSv/h ({1} {2})	last reading {0} µSv/h ({1} {2})
+RadiaCode média {0}	RadiaCode average {0}
+RadiaCode {0} µSv/h	RadiaCode {0} µSv/h
+Bluetooth com o RadiaCode só no Windows e no Linux	Bluetooth with the RadiaCode only on Windows and Linux
+Bluetooth: WinRT não iniciou ({0})	Bluetooth: WinRT didn't start ({0})
+Bluetooth: sessão: {0}	Bluetooth: session: {0}
+Bluetooth: ligar notificações: {0}	Bluetooth: enabling notifications: {0}
+Bluetooth: o aparelho recusou as notificações (status {0})	Bluetooth: the device refused notifications (status {0})
+Bluetooth: {0} (o celular está conectado nele?)	Bluetooth: {0} (is the phone connected to it?)
+o aparelho não mostrou o serviço do RadiaCode	the device didn't show the RadiaCode service
+o Windows não respondeu a tempo	Windows didn't respond in time
+operação do Bluetooth falhou (status {0})	Bluetooth operation failed (status {0})
+endereço Bluetooth inválido: {0}	invalid Bluetooth address: {0}
+Bluetooth: não deu para procurar (o Bluetooth do PC está ligado?) {0}	Bluetooth: couldn't search (is the PC's Bluetooth on?) {0}
+média {0} · mín {1} · máx {2} µSv/h · RadiaCode média {3}	average {0} · min {1} · max {2} µSv/h · RadiaCode average {3}

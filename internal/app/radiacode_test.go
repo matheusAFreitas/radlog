@@ -49,3 +49,49 @@ func TestRcRecordsState(t *testing.T) {
 		t.Fatalf("estado: %+v", st)
 	}
 }
+
+func TestRcTodayAndChart(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now()
+	start := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	if now.Sub(start) < 15*time.Minute {
+		t.Skip("logo depois da meia-noite")
+	}
+	// 10 minutos a 0,6 µSv/h = 0,1 µSv
+	for i := 12; i > 2; i-- {
+		m := now.Truncate(time.Minute).Add(-time.Duration(i) * time.Minute)
+		a.rcAddMinute(m.Add(time.Second), 3, 0.6)
+	}
+	a.rcFlushMinute()
+	st := a.GetRadiacode()
+	if math.Abs(st.Today-0.1) > 1e-6 || st.LastUSv != 0.6 || st.LastT == 0 {
+		t.Fatalf("hoje: %+v", st)
+	}
+	c, err := a.GetChart("1h")
+	if err != nil {
+		t.Fatal(err)
+	}
+	k := 0
+	for _, v := range c.RC {
+		if v != nil {
+			k++
+			if *v != 0.6 {
+				t.Fatalf("valor %v", *v)
+			}
+		}
+	}
+	if k != 10 || c.RCAvg == nil {
+		t.Fatalf("curva: %d pontos", k)
+	}
+	// período curto (passo de 5 s): minutos gravados viram pontos também
+	c, _ = a.GetChart("15m")
+	k = 0
+	for _, v := range c.RC {
+		if v != nil {
+			k++
+		}
+	}
+	if k < 100 {
+		t.Fatalf("curva curta: %d pontos", k)
+	}
+}
