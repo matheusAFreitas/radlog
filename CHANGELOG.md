@@ -1,5 +1,16 @@
 # Versões
 
+## 1.28.2
+- Os quadros **GMC-800 | RadiaCode** agora têm a mesma largura e o mesmo
+  formato.
+  - A média de 1 h e o mínimo e o máximo de 24 h do GMC entraram no quadro
+    dele, como no do RadiaCode. Os cartões separados embaixo somem enquanto
+    os dois aparecem lado a lado.
+  - O quadro do RadiaCode ganhou a mesma cor de fundo do GMC, que muda com o
+    nível dele (verde, âmbar em atenção, laranja/vermelho em alerta). O
+    número também muda de cor.
+  - Fica sem cor quando está desconectado.
+
 ## 1.28.1
 - **RadiaCode com firmware 4.15**: esse firmware manda um byte a mais
   depois de cada leitura ao vivo, coisa que a biblioteca aberta não

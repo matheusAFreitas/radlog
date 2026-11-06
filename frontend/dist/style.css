@@ -990,7 +990,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 
 /* RadiaCode na tela principal: lado a lado com o GMC (GMC | RadiaCode) */
 .duo { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-.duo.on { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); align-items: stretch; }
+.duo.on { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
 .duo.on .hero .value { font-size: 56px; }
 .rc-main { padding: 16px 20px; gap: 12px; display: flex; flex-direction: column; }
 .rc-main .read-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
@@ -1019,3 +1019,17 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .legend .rc-key i { width: 14px; height: 2px; border-radius: 2px; background: #F472B6; display: inline-block; }
 .legend .rc-key.off i { opacity: .45; }
 .legend .rc-key.off { text-decoration: underline dotted; }
+
+/* lado a lado: os dois quadros iguais (medidas dentro de cada um, com a
+   mesma cor de fundo pelo nível de cada aparelho) */
+.duo-only { display: none !important; }
+.duo.on .duo-only { display: grid !important; }
+.duo.on + .tiles { display: none; }
+.duo.on .hero { justify-content: flex-start; }
+.rc-main { --glow: rgba(110, 231, 160, .05); background: linear-gradient(180deg, var(--glow), transparent 55%), var(--surface); transition: --glow .8s ease, border-color .4s; }
+.rc-main.lv-atencao { --glow: rgba(245, 184, 74, .16); border-color: var(--att); }
+.rc-main.lv-alerta { --glow: rgba(242, 140, 56, .22); border-color: var(--alarm); }
+.rc-main.lv-perigo { --glow: rgba(240, 101, 106, .26); border-color: var(--warn); }
+.rc-main.lv-atencao .rc-main-val { color: var(--att); }
+.rc-main.lv-alerta .rc-main-val, .rc-main.lv-perigo .rc-main-val { color: var(--alarm); }
+.rc-main.stale { --glow: transparent; }

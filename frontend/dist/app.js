@@ -273,6 +273,12 @@ async function refreshStats() {
   $("tMin").textContent = fmt(s.min24h, 0);
   $("tMax").textContent = fmt(s.max24h, 0);
   $("tMaxSub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
+  // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o RadiaCode)
+  $("hAvg1h").textContent = fmt(s.avg1h, 1);
+  $("hAvg1hSub").textContent = s.avg1h == null ? "CPM" : `CPM · ≈ ${fmt(s.avg1h * cal, 3)} µSv/h`;
+  $("hMin24").textContent = fmt(s.min24h, 0);
+  $("hMax24").textContent = fmt(s.max24h, 0);
+  $("hMax24Sub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)}` : "";
@@ -4046,6 +4052,7 @@ function renderRcMain(st) {
   const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alerta" : usv >= attn ? "atencao" : "seguro";
   $("rcLevelName").textContent = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" }[lvl] || "—";
   $("rcLevelName").className = "level-name " + lvl;
+  ["seguro", "atencao", "alerta", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   $("rcLevelMarker").hidden = usv == null;
   if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
   // medidas
@@ -4053,7 +4060,7 @@ function renderRcMain(st) {
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
-  $("rcMax24At").textContent = sx.n24h ? `às ${hhmm(sx.max24hAt)}` : "";
+  $("rcMax24At").textContent = sx.n24h ? `µSv/h às ${hhmm(sx.max24hAt)}` : "µSv/h";
 }
 
 async function refreshRcCompare() {
