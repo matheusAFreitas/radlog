@@ -1260,7 +1260,14 @@ const I18N_EN = {
 "sem leituras ainda": "no readings yet",
 "Bluetooth com o RadiaCode só no Windows e no Linux": "Bluetooth with the RadiaCode only on Windows and Linux",
 "o aparelho não mostrou o serviço do RadiaCode": "the device didn't show the RadiaCode service",
-"o Windows não respondeu a tempo": "Windows didn't respond in time"
+"o Windows não respondeu a tempo": "Windows didn't respond in time",
+"faixas do app em µSv/h": "app ranges in µSv/h",
+"Média 1 h": "Average 1 h",
+"Mín 24 h": "Min 24 h",
+"Máx 24 h": "Max 24 h",
+"Unidade do RadiaCode": "RadiaCode unit",
+"· desconectado": "· disconnected",
+"· conectando…": "· connecting…"
 },
 "patterns": [
 [
@@ -1419,6 +1426,16 @@ const I18N_EN = {
 "interferência: outro segundo suspeito às ",
 " contagens; esperado ~",
 "), aviso já dado há menos de 5 min"
+]
+],
+[
+"Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ",
+"^Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ((?:(?! · ).)+?) µSv/h \\(80% entre ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\)\\.$",
+"From the minutes at home over the last 7 days, the RadiaCode usually reads ${1} µSv/h (80% between ${2} and ${3} µSv/h).",
+[
+"Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ",
+" µSv/h (80% entre ",
+" µSv/h)."
 ]
 ],
 [
@@ -1606,6 +1623,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Um pouco acima do normal (seu normal: ",
+"^Um pouco acima do normal \\(seu normal: ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\) — pode ser só variação$",
+"Slightly above normal (your normal: ${1} to ${2} µSv/h) — may be just variation",
+[
+"Um pouco acima do normal (seu normal: ",
+" µSv/h) — pode ser só variação"
+]
+],
+[
 "mais alto por volta das ",
 "^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) CPM\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) CPM\\)$",
 "highest around ${1}h (${2} CPM) · lowest around ${3}h (${4} CPM)",
@@ -1632,6 +1658,15 @@ const I18N_EN = {
 "· accumulated dose only in this span, starting from zero · one point every ${1}",
 [
 "· dose acumulada só nesse trecho, começando do zero · um ponto a cada "
+]
+],
+[
+"Acima do normal (seu normal: ",
+"^Acima do normal \\(seu normal: ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\) — dificilmente é só variação$",
+"Above normal (your normal: ${1} to ${2} µSv/h) — hardly just variation",
+[
+"Acima do normal (seu normal: ",
+" µSv/h) — dificilmente é só variação"
 ]
 ],
 [
@@ -1891,6 +1926,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Dentro do normal — seu fundo costuma ficar entre ",
+"^Dentro do normal — seu fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) µSv/h$",
+"Within normal — your background usually stays between ${1} and ${2} µSv/h",
+[
+"Dentro do normal — seu fundo costuma ficar entre ",
+" µSv/h"
+]
+],
+[
 "ponto ",
 "^ponto ((?:(?! · ).)+?) dá ((?:(?! · ).)+?) CPM por µSv/h, fora da faixa plausível \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
 "point ${1} gives ${2} CPM per µSv/h, outside the plausible range (${3} to ${4})",
@@ -1906,6 +1950,15 @@ const I18N_EN = {
 "Bluetooth: the device refused notifications (status ${1})",
 [
 "Bluetooth: o aparelho recusou as notificações (status "
+]
+],
+[
+"Abaixo do normal (seu normal: ",
+"^Abaixo do normal \\(seu normal: ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\) — sem problema$",
+"Below normal (your normal: ${1} to ${2} µSv/h) — no problem",
+[
+"Abaixo do normal (seu normal: ",
+" µSv/h) — sem problema"
 ]
 ],
 [
@@ -2282,6 +2335,15 @@ const I18N_EN = {
 [
 "Se o objeto emite algo, é menos que +",
 " CPM."
+]
+],
+[
+"Fundo: juntando dados em casa (",
+"^Fundo: juntando dados em casa \\(((?:(?! · ).)+?) de 60 min\\)$",
+"Background: gathering data at home (${1} of 60 min)",
+[
+"Fundo: juntando dados em casa (",
+" de 60 min)"
 ]
 ],
 [
@@ -3001,6 +3063,16 @@ const I18N_EN = {
 "invalid Bluetooth address: ${1}",
 [
 "endereço Bluetooth inválido: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) µSv/h · 1σ = ((?:(?! · ).)+?) µSv/h$",
+"${1} · background ${2} µSv/h · 1σ = ${3} µSv/h",
+[
+" · fundo ",
+" µSv/h · 1σ = ",
+" µSv/h"
 ]
 ],
 [

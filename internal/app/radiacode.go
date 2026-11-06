@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"radlog/internal/radiacode"
+	"radlog/internal/store"
 )
 
 // ---------- RadiaCode 10x: conexão, leitura ao vivo e gravação ----------
@@ -63,17 +64,42 @@ type RcState struct {
 	LastT   int64   `json:"lastT"`   // ms do último minuto gravado
 	LastUSv float64 `json:"lastUSv"` // µSv/h desse minuto
 	LastCPS float64 `json:"lastCPS"`
+	// para o quadro igual ao do GMC
+	Stats *RcStats `json:"stats"`
+	// faixas do app em µSv/h (as do GMC convertidas pela calibração dele)
+	AttnUSv   float64 `json:"attnUSv"`
+	AlarmUSv  float64 `json:"alarmUSv"`
+	DangerUSv float64 `json:"dangerUSv"`
+}
+
+// RcStats são as medidas do RadiaCode como as do GMC: fundo de casa, média
+// da última hora e mínimo/máximo de 24 h (minutos gravados).
+type RcStats struct {
+	BgUSv     float64 `json:"bgUSv"` // mediana em casa (7 dias)
+	BgLo      float64 `json:"bgLo"`  // faixa típica (10%–90%)
+	BgHi      float64 `json:"bgHi"`
+	BgMinutes int     `json:"bgMinutes"`
+	Avg1h     float64 `json:"avg1h"`
+	N1h       int     `json:"n1h"`
+	Min24h    float64 `json:"min24h"`
+	Max24h    float64 `json:"max24h"`
+	Max24hAt  int64   `json:"max24hAt"`
+	N24h      int     `json:"n24h"`
+	Today     int     `json:"todayMinutes"`
 }
 
 type rcState struct {
-	mu    sync.Mutex
-	st    RcState
-	dev   *radiacode.Device
-	min   rcMinute
-	wake  chan struct{}
-	fileM sync.Mutex
-	ring  []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
-	today rcToday
+	statsM  sync.Mutex
+	stats   *RcStats
+	statsAt time.Time
+	mu      sync.Mutex
+	st      RcState
+	dev     *radiacode.Device
+	min     rcMinute
+	wake    chan struct{}
+	fileM   sync.Mutex
+	ring    []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
+	today   rcToday
 }
 
 type rcSample struct {
@@ -99,9 +125,16 @@ type rcMinute struct {
 
 // GetRadiacode devolve o estado do RadiaCode.
 func (a *App) GetRadiacode() RcState {
+	stats := a.rcStats()
 	a.mu.Lock()
 	off, ble := a.settings.RcOff, a.settings.RcBLE
+	cal := a.convCalLocked()
+	lv := a.settings.Levels.norm()
+	alarmCPM := a.settings.AlarmCPM
 	a.mu.Unlock()
+	if alarmCPM <= 0 {
+		alarmCPM = warningCPM
+	}
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
 	st := a.rc.st
@@ -112,6 +145,8 @@ func (a *App) GetRadiacode() RcState {
 		st.State = "off"
 	}
 	st.Off, st.BLE, st.BLEOK = off, ble, radiacode.BLESupported
+	st.Stats = stats
+	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.attnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.dangerEnter())
 	a.rcTodayLocked()
 	st.Today = a.rc.today.sum
 	if a.rc.min.n > 0 { // minuto em andamento: conta o que já passou dele
@@ -121,6 +156,69 @@ func (a *App) GetRadiacode() RcState {
 		l := a.rc.today.last
 		st.LastT, st.LastUSv, st.LastCPS = l.T.UnixMilli(), l.USvh, l.CPS
 	}
+	return st
+}
+
+// rcStats recalcula as medidas a cada 2 min (lendo os minutos gravados).
+func (a *App) rcStats() *RcStats {
+	a.rc.statsM.Lock()
+	defer a.rc.statsM.Unlock()
+	if a.rc.stats != nil && time.Since(a.rc.statsAt) < 2*time.Minute {
+		return a.rc.stats
+	}
+	a.rc.statsAt = time.Now()
+	now := time.Now()
+	pts := a.rcRange(now.AddDate(0, 0, -7), now.Add(time.Minute))
+	if len(pts) == 0 {
+		a.rc.stats = nil
+		return nil
+	}
+	st := &RcStats{}
+	// fundo: só em casa (fora dos períodos "fora de casa" e das medições) e
+	// fora de alertas
+	inAlert := a.alertChecker()
+	sp := make([]store.Point, 0, len(pts))
+	for _, p := range pts {
+		if !inAlert(p.T) {
+			sp = append(sp, store.Point{T: p.T, CPM: p.USvh})
+		}
+	}
+	sp = a.homeOnly(sp)
+	if len(sp) >= 60 {
+		v := make([]float64, len(sp))
+		for i, p := range sp {
+			v[i] = p.CPM
+		}
+		sort.Float64s(v)
+		q := func(f float64) float64 { return v[int(f*float64(len(v)-1)+0.5)] }
+		st.BgUSv, st.BgLo, st.BgHi, st.BgMinutes = q(0.5), q(0.1), q(0.9), len(v)
+	} else {
+		st.BgMinutes = len(sp)
+	}
+	day := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	var s1 float64
+	for _, p := range pts {
+		if p.T.After(now.Add(-time.Hour)) {
+			s1 += p.USvh
+			st.N1h++
+		}
+		if p.T.After(now.Add(-24 * time.Hour)) {
+			if st.N24h == 0 || p.USvh < st.Min24h {
+				st.Min24h = p.USvh
+			}
+			if st.N24h == 0 || p.USvh > st.Max24h {
+				st.Max24h, st.Max24hAt = p.USvh, p.T.UnixMilli()
+			}
+			st.N24h++
+		}
+		if !p.T.Before(day) {
+			st.Today++
+		}
+	}
+	if st.N1h > 0 {
+		st.Avg1h = s1 / float64(st.N1h)
+	}
+	a.rc.stats = st
 	return st
 }
 

@@ -1751,3 +1751,17 @@ média {0} · mín {1} · máx {2} µSv/h · RadiaCode média {3}	average {0} ·
 última leitura (ontem {0})	last reading (yesterday {0})
 última leitura ({0} {1})	last reading ({0} {1})
 conectado pelo {0}, bateria {1}%	connected via {0}, battery {1}%
+Dentro do normal — seu fundo costuma ficar entre {0} e {1} µSv/h	Within normal — your background usually stays between {0} and {1} µSv/h
+Acima do normal (seu normal: {0} a {1} µSv/h) — dificilmente é só variação	Above normal (your normal: {0} to {1} µSv/h) — hardly just variation
+Um pouco acima do normal (seu normal: {0} a {1} µSv/h) — pode ser só variação	Slightly above normal (your normal: {0} to {1} µSv/h) — may be just variation
+Abaixo do normal (seu normal: {0} a {1} µSv/h) — sem problema	Below normal (your normal: {0} to {1} µSv/h) — no problem
+{0} · fundo {1} µSv/h · 1σ = {2} µSv/h	{0} · background {1} µSv/h · 1σ = {2} µSv/h
+Fundo: juntando dados em casa ({0} de 60 min)	Background: gathering data at home ({0} of 60 min)
+Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar {0} µSv/h (80% entre {1} a {2} µSv/h).	From the minutes at home over the last 7 days, the RadiaCode usually reads {0} µSv/h (80% between {1} and {2} µSv/h).
+faixas do app em µSv/h	app ranges in µSv/h
+Média 1 h	Average 1 h
+Mín 24 h	Min 24 h
+Máx 24 h	Max 24 h
+Unidade do RadiaCode	RadiaCode unit
+· desconectado	· disconnected
+· conectando…	· connecting…

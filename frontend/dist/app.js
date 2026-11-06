@@ -3979,6 +3979,10 @@ function renderRc(st) {
 
 // quadro do RadiaCode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
+state.rcUnit = localGet("rcUnit", "usv");
+
+// quadro do RadiaCode, com as mesmas informações do GMC: valor, dose de
+// hoje, normal/σ, régua e medidas
 function renderRcMain(st) {
   const live = st.state === "conectado" && st.time;
   const show = st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
@@ -3988,25 +3992,67 @@ function renderRcMain(st) {
   $("heroEyebrow").textContent = show ? "GMC-800" : "Leitura atual";
   if (!show) return;
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
-  $("rcMainVia").textContent = st.state === "conectado" ? `${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "conectando…" : "desconectado";
-  $("rcMainVia").title = st.state === "conectado" ? `conectado pelo ${via}` + (st.hasRare ? `, bateria ${fmt(st.battery, 0)}%` : "") : "";
-  $("rcMainVia").className = "rc-main-via mono small" + (st.state === "conectado" ? " on" : "");
+  $("rcMainVia").textContent = st.state === "conectado" ? `· ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "· conectando…" : "· desconectado";
+  $("rcMainVia").className = "rc-main-via mono" + (st.state === "conectado" ? " on" : "");
   $("rcMain").classList.toggle("stale", !live);
-  const dose = `dose hoje ${fmt(st.today, st.today < 10 ? 2 : 1)} µSv`;
-  if (live) {
-    $("rcMainVal").textContent = fmt(st.usvh, usvDigits(st.usvh));
-    $("rcMainSub").textContent = `± ${fmt(st.usvhErr, 0)}% · ${fmt(st.cps, 2)} cps`;
-    $("rcMainSub2").textContent = dose;
-  } else if (st.lastT) {
-    // desconectado: o último valor, apagado, e quando foi
-    $("rcMainVal").textContent = fmt(st.lastUSv, usvDigits(st.lastUSv));
-    $("rcMainSub").textContent = `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}`;
-    $("rcMainSub2").textContent = dose;
-  } else {
-    $("rcMainVal").textContent = "—";
-    $("rcMainSub").textContent = "sem leituras ainda";
-    $("rcMainSub2").textContent = "";
-  }
+  const sx = st.stats || {};
+  // valor (ao vivo ou o último gravado, apagado)
+  const usv = live ? st.usvh : st.lastT ? st.lastUSv : null;
+  const cps = live ? st.cps : st.lastT ? st.lastCPS : null;
+  const u = state.rcUnit;
+  document.querySelectorAll("#rcUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === u)));
+  $("rcMainUnit").textContent = { usv: "µSv/h", mrh: "mrem/h", cps: "CPS", cpm: "CPM" }[u];
+  const v = usv == null ? null : { usv, mrh: usv / 10, cps, cpm: cps * 60 }[u];
+  $("rcMainVal").textContent = v == null ? "—" : u === "usv" ? fmt(v, usvDigits(v)) : u === "mrh" ? fmt(v, usvDigits(v * 10) + 1) : u === "cps" ? fmt(v, 2) : fmt(v, 0);
+  const vs = usv == null ? "" : `${fmt(usv, usvDigits(usv))} µSv/h`;
+  const alt = usv == null ? "" : {
+    usv: `${fmt(cps, 2)} CPS · ${fmt(cps * 60, 0)} CPM`,
+    mrh: `${vs} · ${fmt(cps, 2)} CPS`,
+    cps: `${vs} · ${fmt(cps * 60, 0)} CPM`,
+    cpm: `${vs} · ${fmt(cps, 2)} CPS`,
+  }[u];
+  $("rcMainAlt").textContent = live ? `${alt} · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
+  // dose de hoje
+  $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
+  $("rcDoseTodaySub").textContent = sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "acumulados";
+  // normal / σ, pelo fundo em casa dos últimos 7 dias
+  const sig = $("rcMainSigma"), num = $("rcMainSigmaNum");
+  if (live && sx.bgUSv > 0) {
+    const sdDev = st.usvh * (st.usvhErr || 0) / 100, sdBg = (sx.bgHi - sx.bgLo) / 2.56;
+    const sd = Math.max(sdDev, sdBg, 1e-4), z = (st.usvh - sx.bgUSv) / sd, d = usvDigits(sx.bgUSv);
+    const range = `${fmt(sx.bgLo, d)} a ${fmt(sx.bgHi, d)} µSv/h`;
+    let text, cls = "";
+    if (z >= 3) { text = `Acima do normal (seu normal: ${range}) — dificilmente é só variação`; cls = "high"; }
+    else if (z >= 2) { text = `Um pouco acima do normal (seu normal: ${range}) — pode ser só variação`; cls = "mid"; }
+    else if (z <= -2) { text = `Abaixo do normal (seu normal: ${range}) — sem problema`; }
+    else { text = `Dentro do normal — seu fundo costuma ficar entre ${fmt(sx.bgLo, d)} e ${fmt(sx.bgHi, d)} µSv/h`; }
+    sig.textContent = text;
+    sig.className = "sigma " + cls;
+    sig.title = `Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ${fmt(sx.bgUSv, d)} µSv/h (80% entre ${range}).`;
+    sig.hidden = false;
+    num.textContent = `${fmtSig(z)} · fundo ${fmt(sx.bgUSv, d)} µSv/h · 1σ = ${fmt(sd, usvDigits(sd) + 1)} µSv/h`;
+    num.hidden = false;
+  } else if (live) {
+    sig.textContent = `Fundo: juntando dados em casa (${Math.round((sx.bgMinutes || 0))} de 60 min)`;
+    sig.className = "sigma";
+    sig.title = "";
+    sig.hidden = false;
+    num.hidden = true;
+  } else { sig.hidden = true; num.hidden = true; }
+  // régua: as mesmas faixas do app, em µSv/h
+  const attn = st.attnUSv || 0.505, alarm = st.alarmUSv || 1.01, top = alarm * 1.5;
+  $("rcLevelScale").innerHTML = `<span>0</span><span>${fmt(attn, usvDigits(attn))} · atenção</span><span>${fmt(alarm, usvDigits(alarm))} · alerta</span>`;
+  const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alerta" : usv >= attn ? "atencao" : "seguro";
+  $("rcLevelName").textContent = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" }[lvl] || "—";
+  $("rcLevelName").className = "level-name " + lvl;
+  $("rcLevelMarker").hidden = usv == null;
+  if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
+  // medidas
+  const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
+  $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
+  $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
+  $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
+  $("rcMax24At").textContent = sx.n24h ? `às ${hhmm(sx.max24hAt)}` : "";
 }
 
 async function refreshRcCompare() {
@@ -4081,7 +4127,13 @@ function drawRcSpectrum() {
 function wireRc() {
   on("radiacode", renderRc);
   $("rcPill").addEventListener("click", () => showView("radiacode"));
-  $("rcMain").addEventListener("click", () => showView("radiacode"));
+  $("rcUnitSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-unit]");
+    if (!b) return;
+    state.rcUnit = b.dataset.unit;
+    localSet("rcUnit", state.rcUnit);
+    if (state.rc.st) renderRcMain(state.rc.st);
+  });
   $("rcKey").addEventListener("click", () => {
     if (state.chartUnit === "usv") return;
     state.chartUnit = "usv";
@@ -4561,7 +4613,8 @@ function makeDemoApi() {
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   const demoRc = () => demoRcFake() && !demoRcCfg.off
-    ? { today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+    ? { today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
+        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
     : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);

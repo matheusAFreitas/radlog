@@ -95,3 +95,24 @@ func TestRcTodayAndChart(t *testing.T) {
 		t.Fatalf("curva curta: %d pontos", k)
 	}
 }
+
+func TestRcStats(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	for i := 90; i >= 1; i-- {
+		v := 0.10
+		if i%10 == 0 {
+			v = 0.12
+		}
+		a.rcAddMinute(now.Add(-time.Duration(i)*time.Minute+time.Second), 3, v)
+	}
+	a.rcFlushMinute()
+	st := a.GetRadiacode()
+	s := st.Stats
+	if s == nil || s.BgMinutes != 90 || s.BgUSv != 0.10 || s.BgHi != 0.10 || s.N1h < 59 || s.Max24h != 0.12 || s.Min24h != 0.10 {
+		t.Fatalf("medidas: %+v", s)
+	}
+	if st.AttnUSv <= 0 || st.AlarmUSv <= st.AttnUSv {
+		t.Fatalf("faixas: %v %v", st.AttnUSv, st.AlarmUSv)
+	}
+}

@@ -1,5 +1,17 @@
 # Versões
 
+## 1.27.2
+- O quadro do RadiaCode agora mostra as mesmas informações do GMC:
+  - dose de hoje com os minutos medidos;
+  - CPS, CPM e incerteza;
+  - **normal/σ** pelo fundo em casa dos últimos 7 dias (a faixa típica);
+  - seletor de unidade (µSv/h, mrem/h, CPS, CPM);
+  - **régua** com as faixas do app em µSv/h;
+  - **medidas**: média de 1 h e mínimo e máximo de 24 h.
+- Lado a lado, a dose de hoje vai para uma linha embaixo do número nos dois
+  quadros, e a coluna da esquerda fica mais larga.
+- As abas da direita não quebram mais em duas linhas.
+
 ## 1.27.1
 - Quadros lado a lado na tela principal: **GMC-800 | RadiaCode**, com a
   mesma altura. A coluna da esquerda fica um pouco mais larga quando o

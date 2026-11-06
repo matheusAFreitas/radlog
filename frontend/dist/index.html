@@ -176,13 +176,45 @@
     </div>
   </section>
   <section class="card rc-main" id="rcMain" hidden>
-    <div class="rc-main-head">
-      <span class="eyebrow">RadiaCode</span>
-      <span class="rc-main-via mono small" id="rcMainVia"></span>
+    <div class="read-head">
+      <div class="read-main">
+        <span class="eyebrow">RadiaCode <span class="rc-main-via mono" id="rcMainVia"></span></span>
+        <div class="value-row"><span class="rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
+      </div>
+      <div class="hero-dose">
+        <span class="tile-label">Dose hoje</span>
+        <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u">µSv</span></span>
+        <span class="tile-sub" id="rcDoseTodaySub"></span>
+      </div>
     </div>
-    <div class="value-row"><span class="rc-main-val" id="rcMainVal">—</span><span class="unit">µSv/h</span></div>
-    <div class="rc-main-sub mono small" id="rcMainSub"></div>
-    <div class="rc-main-sub mono small" id="rcMainSub2"></div>
+    <span class="alt" id="rcMainAlt"></span>
+    <span class="sigma" id="rcMainSigma" hidden></span>
+    <span class="sigma-line mono" id="rcMainSigmaNum" hidden></span>
+    <div class="seg" role="group" aria-label="Unidade do RadiaCode" id="rcUnitSeg">
+      <button type="button" data-unit="usv" aria-pressed="true">µSv/h</button>
+      <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
+      <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
+      <button type="button" data-unit="cpm" aria-pressed="false">CPM</button>
+    </div>
+    <div class="level">
+      <div class="level-head">
+        <span class="level-name" id="rcLevelName">—</span>
+        <span class="muted small">faixas do app em µSv/h</span>
+      </div>
+      <div class="level-bar">
+        <div class="seg-safe"></div>
+        <div class="seg-att"></div>
+        <div class="seg-warn"></div>
+        <div class="marker" id="rcLevelMarker" hidden></div>
+      </div>
+      <div class="level-scale mono" id="rcLevelScale"><span>0</span><span>—</span><span>—</span></div>
+      <div class="level-foot"><button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
+    </div>
+    <div class="rc-mini">
+      <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span></div>
+      <div><span class="tile-label">Mín 24 h</span><span class="mono" id="rcMin24">—</span></div>
+      <div><span class="tile-label">Máx 24 h</span><span class="mono" id="rcMax24">—</span><span class="tile-sub" id="rcMax24At"></span></div>
+    </div>
   </section>
   </div>
 
