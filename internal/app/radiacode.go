@@ -372,6 +372,8 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	a.logEvent(fmt.Sprintf("RadiaCode conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
 	a.rcRawSnapshot(dev)
+	texts := map[string]bool{}
+	a.rcTextLog(dev, texts)
 	fails := 0
 	tick := time.NewTicker(rcPollEvery)
 	defer tick.Stop()
@@ -397,6 +399,12 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rcRawRecords(raw, dev.Base())
 		a.rcRecords(recs)
 		a.rcRawSpectrum(dev)
+		for _, r := range recs {
+			if e, ok := r.(radiacode.Event); ok && e.ID == 17 { // mensagem de texto nova
+				a.rcTextLog(dev, texts)
+				break
+			}
+		}
 	}
 	dev.Close()
 	a.rcFlushMinute()
@@ -439,6 +447,14 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.mu.Unlock()
 			changed = true
 		case radiacode.Event:
+			a.rc.mu.Lock()
+			justConnected := time.Since(time.UnixMilli(a.rc.st.Since)) < 20*time.Second
+			a.rc.mu.Unlock()
+			// 17 = mensagem interna (vai para o log.txt); 3 logo ao conectar
+			// é o próprio app acertando o relógio do aparelho
+			if v.ID == 17 || (v.ID == 3 && justConnected) {
+				continue
+			}
 			a.logEvent("RadiaCode: " + radiacode.EventName(v.ID))
 		}
 	}

@@ -3,6 +3,7 @@ package radiacode
 import (
 	"bytes"
 	"encoding/binary"
+	"encoding/hex"
 	"math"
 	"testing"
 	"time"
@@ -185,5 +186,27 @@ func TestSplitDataBuf(t *testing.T) {
 	}
 	if rs[3].Name != "Desconhecido" || len(rs[3].Data) != 11 {
 		t.Fatalf("desconhecido: %+v", rs[3])
+	}
+}
+
+// resposta real de um RC-102 com firmware 4.15: um byte a mais depois do
+// RealTimeData, depois amostras cruas (eid 1) e o RareData com a bateria.
+func TestDataBufFirmware415(t *testing.T) {
+	b, _ := hex.DecodeString("8f0000e31d00009d284841d50278372900960040000000900101434000000200320000000000c0405f294b3600002041a69bc436910003524000005d0c0000931a5a373f128a174010")
+	recs := decodeDataBuf(b, time.Unix(0, 0))
+	if len(recs) != 2 {
+		t.Fatalf("registros: %d %+v", len(recs), recs)
+	}
+	rt := recs[0].(RealTime)
+	if math.Abs(rt.CPS-12.51) > 0.01 || rt.DoseErr != 15 {
+		t.Fatalf("tempo real: %+v", rt)
+	}
+	rare := recs[1].(Rare)
+	if rare.Duration != 3165 || math.Abs(rare.Battery-60.26) > 1e-9 || math.Abs(rare.TempC-26.71) > 1e-9 || math.Abs(rare.Dose-0.13) > 1e-4 {
+		t.Fatalf("raro: %+v", rare)
+	}
+	raw := SplitDataBuf(b, time.Unix(0, 0))
+	if len(raw) != 3 || raw[0].Fields["_extra_bytes"] != 1 || raw[1].Name != "Bloco1" || raw[2].Name != "RareData" {
+		t.Fatalf("brutos: %+v", raw)
 	}
 }

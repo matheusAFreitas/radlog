@@ -4,6 +4,8 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math"
+	"strconv"
+	"strings"
 	"time"
 )
 
@@ -58,8 +60,19 @@ func fieldSize(t byte) int {
 // tamanho deles).
 func SplitDataBuf(b []byte, base time.Time) []RawRec {
 	var out []RawRec
-	p := 0
+	p, next, prev := 0, -1, 0
 	for len(b)-p >= 7 {
+		if q := resync(b, p, next); q != p {
+			// bytes a mais entre registros: vão para o registro anterior
+			if n := len(out); n > 0 {
+				out[n-1].Data = b[prev:q]
+				out[n-1].Fields["_extra_bytes"] = float64(q - p)
+			}
+			p = q
+			if len(b)-p < 7 {
+				break
+			}
+		}
 		start := p
 		seq, eid, gid := int(b[p]), int(b[p+1]), int(b[p+2])
 		off := int32(binary.LittleEndian.Uint32(b[p+3:]))
@@ -114,6 +127,7 @@ func SplitDataBuf(b []byte, base time.Time) []RawRec {
 		}
 		r.Data = b[start:p]
 		out = append(out, r)
+		next, prev = (seq+1)%256, start
 	}
 	return out
 }
@@ -183,4 +197,44 @@ var KnownSFR = []Named{
 	{0xFFFF0005, "SYS_DEVICE_ID"}, {0xFFFF0006, "SYS_SIGNATURE"}, {0xFFFF0007, "SYS_RX_SIZE"},
 	{0xFFFF0008, "SYS_TX_SIZE"}, {0xFFFF0009, "SYS_BOOT_VERSION"}, {0xFFFF000A, "SYS_TARGET_VERSION"},
 	{0xFFFF000B, "SYS_STATUS"}, {0xFFFF000C, "SYS_MCU_VREF"}, {0xFFFF000D, "SYS_MCU_TEMP"}, {0xFFFF0010, "SYS_FW_VER_BT"},
+}
+
+// ReadVSRaw é a resposta inteira (sem o cabeçalho) de um pedido de string
+// virtual, para os casos em que ReadVS não entende o formato.
+func (d *Device) ReadVSRaw(id uint32) ([]byte, error) {
+	r, err := d.execute(cmdRdVirtString, u32(id))
+	if err != nil {
+		return nil, err
+	}
+	return r.rest(), nil
+}
+
+// TextLine é uma linha do registro de mensagens do aparelho.
+type TextLine struct {
+	AgoSec int    // segundos antes da leitura
+	Text   string // como veio
+}
+
+// TextMessages lê as mensagens internas do aparelho ("BLE: client
+// connected", erros…), cada uma com quantos segundos atrás aconteceu.
+func (d *Device) TextMessages() ([]TextLine, error) {
+	b, err := d.readString(0xF)
+	if err != nil {
+		return nil, err
+	}
+	var out []TextLine
+	for _, ln := range strings.Split(cp1251(b), "\n") {
+		ln = strings.TrimSpace(strings.TrimRight(ln, "\x00"))
+		if ln == "" {
+			continue
+		}
+		n, rest, ok := strings.Cut(ln, ",")
+		ago, err := strconv.Atoi(strings.TrimSpace(n))
+		if !ok || err != nil {
+			out = append(out, TextLine{Text: ln})
+			continue
+		}
+		out = append(out, TextLine{AgoSec: -ago, Text: strings.TrimSpace(rest)})
+	}
+	return out, nil
 }

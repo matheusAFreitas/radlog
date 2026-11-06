@@ -164,7 +164,11 @@ func (a *App) rcRawSnapshot(dev *radiacode.Device) {
 		if b, err := dev.ReadVS(s.ID); err == nil {
 			vs[k] = map[string]any{"bytes": len(b), "hex": hex.EncodeToString(b)}
 		} else {
-			vs[k] = "erro: " + err.Error()
+			e := map[string]any{"erro": err.Error()}
+			if raw, err2 := dev.ReadVSRaw(s.ID); err2 == nil {
+				e["resposta"] = hex.EncodeToString(raw)
+			}
+			vs[k] = e
 		}
 	}
 	snap["strings"] = vs
@@ -284,4 +288,26 @@ func (a *App) SetRcRaw(on bool) RcState {
 	}
 	a.emitRc()
 	return a.GetRadiacode()
+}
+
+// rcTextLog passa as mensagens internas do aparelho para o log.txt (só as
+// que ainda não passaram nesta conexão).
+func (a *App) rcTextLog(dev *radiacode.Device, seen map[string]bool) {
+	lines, err := dev.TextMessages()
+	if err != nil {
+		return
+	}
+	now := time.Now()
+	for _, l := range lines {
+		when := now.Add(-time.Duration(l.AgoSec) * time.Second)
+		// a mesma mensagem lida de novo vem com outro "segundos atrás":
+		// a chave usa o minuto em que aconteceu
+		key := when.Truncate(time.Minute).Format("15:04") + "|" + l.Text
+		alt := when.Add(-30*time.Second).Truncate(time.Minute).Format("15:04") + "|" + l.Text
+		if seen[key] || seen[alt] {
+			continue
+		}
+		seen[key] = true
+		a.logf("RadiaCode (mensagem do aparelho, %s): %s", when.Format("15:04:05"), l.Text)
+	}
 }

@@ -370,11 +370,30 @@ func EventName(id int) string {
 	return fmt.Sprintf("evento %d", id)
 }
 
+// resync: o firmware 4.15 manda um byte a mais depois do RealTimeData (que a
+// biblioteca aberta não conhece). Se o próximo registro não começa com a
+// sequência esperada, mas começa 1–3 bytes adiante, pula esses bytes.
+func resync(b []byte, p, next int) int {
+	if next < 0 || p >= len(b) || int(b[p]) == next {
+		return p
+	}
+	for k := 1; k <= 3 && p+k < len(b); k++ {
+		if int(b[p+k]) == next && p+k+2 < len(b) && b[p+k+1] <= 1 {
+			return p + k
+		}
+	}
+	return p
+}
+
 func decodeDataBuf(b []byte, base time.Time) []Record {
 	r := &buf{b: b}
 	var out []Record
 	next := -1
 	for r.left() >= 7 {
+		r.p = resync(r.b, r.p, next)
+		if r.left() < 7 {
+			break
+		}
 		seq, _ := r.u8()
 		eid, _ := r.u8()
 		gid, _ := r.u8()

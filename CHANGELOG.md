@@ -1,5 +1,18 @@
 # Versões
 
+## 1.28.1
+- **RadiaCode com firmware 4.15**: esse firmware manda um byte a mais
+  depois de cada leitura ao vivo, coisa que a biblioteca aberta não
+  conhece. Com isso o app descartava todo o resto da resposta, inclusive o
+  pacote com a **bateria**, a temperatura e a dose acumulada. Agora ele pula
+  esse byte e lê tudo. A bateria aparece em até 4 min depois de conectar.
+- As **mensagens internas do aparelho** ("BLE: client connected", erros de
+  quadro…) vão para o log técnico (log.txt), e não mais para os Eventos.
+- "Configuração alterada" logo ao conectar não entra mais em Eventos: era o
+  próprio app acertando o relógio do RadiaCode.
+- O retrato da conexão guarda a resposta crua quando o formato de uma área
+  de dados não é entendido (ex.: a cópia da memória).
+
 ## 1.28.0
 - **Dados brutos do RadiaCode**: para descobrir o que mais dá para
   aproveitar do aparelho, o app guarda tudo o que ele manda, na pasta
