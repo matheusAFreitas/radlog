@@ -242,4 +242,3 @@ func (a *App) newSide(primary, mode string, homeBg bool) (*MeasureSide, error) {
 	}
 	return s, nil
 }
-
