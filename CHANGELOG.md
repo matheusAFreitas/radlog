@@ -1,5 +1,14 @@
 # Versões
 
+## 1.37.0
+- **Cartão "Sua dose (RadiaCode)"**: o número grande agora é a dose do
+  próprio aparelho (desde que foi zerado, a mesma da tela dele), andando ao
+  vivo. A dose que o app calcula com os minutos gravados no período escolhido
+  fica embaixo, menor ("Calculado pelo app"), com quanto do período foi
+  gravado. O teto e o gráfico continuam sendo do período. No zoom (um trecho
+  escolhido no gráfico) e enquanto o aparelho ainda não mandou o total, o
+  número grande continua sendo o do app.
+
 ## 1.36.1
 - Dose do aparelho no cartão de dose: logo depois de conectar, enquanto o
   RadiaCode ainda não mandou o total (ele manda a cada 3 a 4 min), a linha

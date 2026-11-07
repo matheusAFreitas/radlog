@@ -515,8 +515,10 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .p-stats .p-gmc b { color: #6EE7A0; }
 .p-stats .warn { color: var(--att); }
 .p-total { margin: 0 0 8px; }
-.dose-device { margin: 2px 0 0; color: var(--muted); }
+.dose-device { margin: 2px 0 0; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
+.dose-device .dd-cap { color: var(--muted); }
 .dose-device b { color: #F472B6; font-weight: 600; }
+.dose-device .dd-app { color: var(--muted); }
 .ri-dev { margin: 0 0 12px; display: inline-flex; width: auto; }
 .p-times { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .p-times input { min-width: 0; width: 100%; box-sizing: border-box; }

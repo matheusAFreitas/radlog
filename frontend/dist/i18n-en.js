@@ -1347,7 +1347,10 @@ const I18N_EN = {
 "A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
 "sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before",
 "No aparelho:": "On the device:",
-"esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RadiaCode's total (it sends it every 3 to 4 min)"
+"esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RadiaCode's total (it sends it every 3 to 4 min)",
+"no aparelho, desde que foi zerado": "on the device, since it was last reset",
+"Calculado pelo app:": "Calculated by the app:",
+"sem leituras gravadas no período": "no recorded readings in the period"
 },
 "patterns": [
 [
@@ -2280,6 +2283,16 @@ const I18N_EN = {
 " CPM sobre o fundo · ",
 "× o fundo · ≈ ",
 " µSv/h no tubo"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) em ((?:(?! · ).)+?) \\(só os minutos que o PC gravou: ((?:(?! · ).)+?)% do período\\)$",
+"${1} over ${2} (only the minutes the PC recorded: ${3}% of the period)",
+[
+" em ",
+" (só os minutos que o PC gravou: ",
+"% do período)"
 ]
 ],
 [
@@ -5724,6 +5737,14 @@ const I18N_EN = {
 "alerts: ${1}",
 [
 "alertas: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) contando$",
+"${1} counting",
+[
+" contando"
 ]
 ],
 [

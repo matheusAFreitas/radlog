@@ -1325,6 +1325,7 @@ async function refreshDose() {
     $("doseStatus").textContent = "";
     $("doseChart").innerHTML = "";
     ["dx0", "dx1", "dx2"].forEach((id) => { $(id).textContent = ""; });
+    renderDoseDevice();
     return;
   }
 
@@ -1334,6 +1335,7 @@ async function refreshDose() {
   $("doseCmp").hidden = !cmp;
   $("doseTotal").textContent = tv;
   $("doseTotal").nextElementSibling.textContent = tu;
+  renderDoseDevice();
   const cov = c.coverage * 100;
   const perYear = c.backgroundRate * 8766 / 1000; // mSv por ano no ritmo do fundo
   $("doseSub").textContent = `fundo ${fmt(c.backgroundRate, 3)} µSv/h (${c.backgroundSource}) · ≈ ${fmt(perYear, perYear < 10 ? 2 : 1)} mSv/ano nesse ritmo · ${fmt(cov, cov < 10 ? 1 : 0)}% do período medido`;
@@ -1861,20 +1863,43 @@ function measureLogReading(r) {
 // dose: anda ao vivo com ele conectado
 function renderDoseDevice() {
   const el = $("doseDevice"), st = state.rc.st || {};
+  const c = state.dose;
   const on = st.state === "conectado";
-  const show = state.doseSrc === "radiacode" && (st.doseLiveAt > 0 || on);
+  const rcCard = state.doseSrc === "radiacode";
+  const show = rcCard && (st.doseLiveAt > 0 || on);
   el.hidden = !show;
-  if (!show) return;
-  const v = st.doseLive;
-  el.innerHTML = "<b></b><span></span>";
-  el.children[0].textContent = "No aparelho:";
-  if (!(st.doseLiveAt > 0)) {
-    // conectou agora e o aparelho ainda não mandou o total (vem a cada ~3–4 min)
-    el.children[1].textContent = " esperando o total do RadiaCode (ele manda a cada 3 a 4 min)";
+  // com o total do aparelho: ele vira o número grande e a conta do app vai
+  // para a linha de baixo (num zoom vale só o trecho, então fica a do app)
+  const devMain = rcCard && st.doseLiveAt > 0 && !state.doseZoom && c && c.device === "radiacode";
+  state.doseDevMain = devMain;
+  const appTxt = () => {
+    if (!c || !c.measuredMinutes) return "sem leituras gravadas no período";
+    const per = (document.querySelector('#doseSeg button[aria-pressed="true"]') || {}).textContent || "";
+    const cov = c.coverage * 100;
+    return `${doseTxt(c.total)}` + (per ? ` em ${per.trim()}` : "") + ` (só os minutos que o PC gravou: ${fmt(cov, cov < 10 ? 1 : 0)}% do período)`;
+  };
+  if (devMain) {
+    const v = st.doseLive;
+    const [tv, tu] = fmtDose(v);
+    $("doseTotal").textContent = v < 10 ? fmt(v, 3) : tv;
+    $("doseTotal").nextElementSibling.textContent = tu;
+    const cmp = doseCompare(v);
+    $("doseCmpTxt").textContent = cmp;
+    $("doseCmp").hidden = !cmp;
+    el.innerHTML = '<span class="dd-cap"></span><span class="dd-app"><b></b><span></span></span>';
+    el.children[0].textContent = "no aparelho, desde que foi zerado" + (st.doseLiveSec ? ` · ${rcDur(st.doseLiveSec)} contando` : "") +
+      (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
+    el.children[1].children[0].textContent = "Calculado pelo app:";
+    el.children[1].children[1].textContent = " " + appTxt();
     return;
   }
-  el.children[1].textContent = ` ${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)} contando)` : "") +
-    (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
+  if (!show) return;
+  el.innerHTML = '<span class="dd-app"><b></b><span></span></span>';
+  el.children[0].children[0].textContent = "No aparelho:";
+  el.children[0].children[1].textContent = on && !(st.doseLiveAt > 0)
+    ? " esperando o total do RadiaCode (ele manda a cada 3 a 4 min)"
+    : ` ${fmt(st.doseLive, st.doseLive < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)} contando)` : "") +
+      (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
 }
 
 // alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que

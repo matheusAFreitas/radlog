@@ -1914,3 +1914,8 @@ No aparelho:	On the device:
 {0} µSv desde que foi zerado	{0} µSv since it was last reset
 às {0}, desconectado	at {0}, disconnected
 esperando o total do RadiaCode (ele manda a cada 3 a 4 min)	waiting for the RadiaCode's total (it sends it every 3 to 4 min)
+no aparelho, desde que foi zerado	on the device, since it was last reset
+{0} contando	{0} counting
+Calculado pelo app:	Calculated by the app:
+{0} em {1} (só os minutos que o PC gravou: {2}% do período)	{0} over {1} (only the minutes the PC recorded: {2}% of the period)
+sem leituras gravadas no período	no recorded readings in the period
