@@ -1,5 +1,17 @@
 # Versões
 
+## 1.39.0
+- **Medir objeto em µSv/h**: tudo na tela de medir passa a ser em µSv/h
+  (fundo, objeto, líquido, incerteza, limite de detecção, gráfico, medições
+  salvas e o relatório em PDF). As contas continuam nas contagens (σ, Poisson);
+  só a unidade mostrada mudou, e as contagens de cada fase continuam
+  aparecendo. No RadiaCode vale o µSv/h que ele calcula; no GMC, a
+  calibração dele.
+- **Com os dois aparelhos, os dois aparecem ao vivo**: em cima das fases, um
+  quadro para cada aparelho, desde o fundo: leitura de agora, contagens da
+  fase e a média; com o objeto, quanto subiu (ou, no que está com você, a sua
+  dose até agora).
+
 ## 1.38.0
 - **Medir objeto com os dois aparelhos**: o campo "Aparelho" ganhou duas
   opções.

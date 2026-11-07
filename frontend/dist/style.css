@@ -515,7 +515,10 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .p-stats .p-gmc b { color: #6EE7A0; }
 .p-stats .warn { color: var(--att); }
 .p-total { margin: 0 0 8px; }
-.m-other-live { color: var(--muted); }
+.m-duo { display: flex; flex-direction: column; gap: 6px; margin: 4px 0 10px; }
+.m-duo-row { border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.m-duo-row strong { font-weight: 600; }
+.m-duo-row .mono { font-size: 12.5px; color: var(--muted); }
 .m-other-res { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
 .m-other-res strong { font-weight: 600; }
 .m-other-res .mono { font-size: 13px; }

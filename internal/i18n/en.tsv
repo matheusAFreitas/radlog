@@ -1966,3 +1966,38 @@ Acima do fundo	Above background
 {0} ± {1} CPM · {2}σ · {3}× o fundo · ≈ {4} µSv/h	{0} ± {1} CPM · {2}σ · {3}× the background · ≈ {4} µSv/h
 Os dois juntos	Both together
 {0} ± {1} CPM sobre o fundo · {2}σ · {3}× o fundo · ≈ {4}{5} µSv/h	{0} ± {1} CPM above background · {2}σ · {3}× the background · ≈ {4}{5} µSv/h
+A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados).	Each line's uncertainty is Poisson's: square root of the counts, converted to µSv/h. The difference's combines both (root of the sum of squares).
+Limite de detecção: {0} acima do fundo.	Detection limit: {0} above background.
+Se o objeto emite algo, é menos que +{0}.	If the object emits anything, it's less than +{0}.
+Se o objeto emite algo, é menos que +{0}; para ir além, aumente o tempo máximo.	If the object emits anything, it's less than +{0}; to go further, raise the time limit.
+Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1}; para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1}; to go further, raise the time limit.
+Parou em {0}, quando deu para garantir que o objeto sobe menos de {1}% do fundo (+{2}). Para procurar algo mais fraco, escolha “+10% do fundo”.	Stopped at {0}, once it could guarantee the object adds less than {1}% of background (+{2}). To look for something weaker, choose “+10% of background”.
+Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +{0}). Use o modo automático para mais certeza.	If the object emits anything, it's below what can be seen in that time (less than +{0}). Use automatic mode for more certainty.
+{0} ± {1} µSv/h sobre o fundo no tubo	{0} ± {1} µSv/h above background at the tube
+{0} ± {1} µSv/h sobre o fundo no detector	{0} ± {1} µSv/h above background at the detector
+± {0} no tubo	± {0} at the tube
+± {0} no detector	± {0} at the detector
+no objeto	on the object
+com você	with you
+{0} contagens nesta fase	{0} counts in this phase
+{0} contagem nesta fase	{0} count in this phase
+{0} contagem	{0} count
+{0} sobre o fundo ({1}σ)	{0} above background ({1}σ)
+a sua dose começa a contar quando o objeto for medido	your dose starts counting when the object is measured
+sua dose {0} µSv	your dose {0} µSv
+igual ao fundo: se o objeto emite algo, é menos que +{0} µSv/h	same as background: if the object emits anything, it's less than +{0} µSv/h
+Igual ao fundo: se o objeto emite algo, é menos que +{0} µSv/h.	Same as background: if the object emits anything, it's less than +{0} µSv/h.
+Medição de {0}: {1} ± {2} µSv/h sobre o fundo ({3}σ) — {4}	Measurement of {0}: {1} ± {2} µSv/h above background ({3}σ) — {4}
+{0} µSv/h acima do fundo (Currie, 95%, com {1} s de fundo e {2} s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido.	{0} µSv/h above background (Currie, 95%, with {1} s of background and {2} s with the object). Below that, a weak object can go unnoticed.
+se o objeto emite algo, é menos que +{0} µSv/h acima do fundo (líquido + 2σ, ~97,5%)	if the object emits anything, it's less than +{0} µSv/h above background (net + 2σ, ~97.5%)
+automático: parou quando deu para garantir que o objeto sobe menos que {0}% do fundo (+{1} µSv/h)	automatic: stopped once it could guarantee the object adds less than {0}% of background (+{1} µSv/h)
+{0} ± {1} µSv/h ({2} contagens em {3} s)	{0} ± {1} µSv/h ({2} counts in {3} s)
+{0} µSv/h ± {1} · {2}σ · {3}× o fundo	{0} µSv/h ± {1} · {2}σ · {3}× the background
+µSv/h acima do fundo	µSv/h above background
+Gráfico da medição: leitura ao vivo e média de cada fase	Measurement chart: live reading and average of each phase
+{0} ({1} contagens em {2} s)	{0} ({1} counts in {2} s)
+{0}× o fundo	{0}× the background
+{0} ± {1} ({2} min até {3})	{0} ± {1} ({2} min until {3})
+objeto {0} ± {1} µSv/h	object {0} ± {1} µSv/h
+objeto {0} ± {1}	object {0} ± {1}
+{0} ± {1} ({2} contagens em {3} s)	{0} ± {1} ({2} counts in {3} s)

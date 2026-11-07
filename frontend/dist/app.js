@@ -1934,7 +1934,7 @@ function liveMeasureSrc() {
     expectSec = before + st.elapsed + (st.eta >= 0 ? st.eta : 60) + 5;
   } else if (st.auto && st.phase === "fundo") expectSec = st.seconds + 60;
   else if (st.phase !== "fundo" && st.phase !== "objeto") expectSec = 1; // terminou: o eixo vai até o último ponto
-  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null };
+  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st) };
 }
 
 function savedMeasureSrc(m) {
@@ -1951,7 +1951,7 @@ function savedMeasureSrc(m) {
     const min = a.n / 60;
     ph.push({ t, phase: s.phase, avg: a.counts / min, err: Math.sqrt(Math.max(a.counts, 1)) / min });
   }
-  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null };
+  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m) };
 }
 
 function drawMeasureChart() {
@@ -1994,8 +1994,10 @@ function drawMeasureSrc(src) {
   top = Math.max(10, Math.ceil((top * 1.15) / 10) * 10);
   const x = (t) => ((t - t0) / (t1 - t0)) * W;
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
+  // o gráfico fica em CPM por dentro; os números saem em µSv/h
+  const k = src.k || calK();
   const ys = $("mY").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, 0);
+  for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : fmt(v, usvDigits(top * k)); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
@@ -2027,10 +2029,10 @@ function drawMeasureSrc(src) {
   const last = (ph) => { const l = src.ph.filter((p) => p.phase === ph); return l[l.length - 1]; };
   const b = last("fundo"), o = last("objeto");
   const parts = [];
-  if (b) parts.push(`fundo ${fmt(b.avg, 1)} ± ${fmt(b.err, 1)}`);
-  else if (src.bgFlat) parts.push(`fundo da casa ${fmt(src.bgFlat.cpm, 1)} ± ${fmt(src.bgFlat.errCPM, 1)}`);
-  if (o) parts.push(`objeto ${fmt(o.avg, 1)} ± ${fmt(o.err, 1)}`);
-  $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " CPM" : "";
+  if (b) parts.push(`fundo ${numU(b.avg * k)} ± ${numU(b.err * k)}`);
+  else if (src.bgFlat) parts.push(`fundo da casa ${numU(src.bgFlat.cpm * k)} ± ${numU(src.bgFlat.errCPM * k)}`);
+  if (o) parts.push(`objeto ${numU(o.avg * k)} ± ${numU(o.err * k)}`);
+  $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " µSv/h" : "";
 }
 
 function setupMeasureHover() {
@@ -2048,7 +2050,8 @@ function setupMeasureHover() {
     $("mCursor").style.left = ((ref.t - t0) / (t1 - t0)) * 100 + "%";
     const tip = $("mTip");
     tip.hidden = false;
-    tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ao vivo ${fmt(lv.cpm, 0)} CPM` : "") + (ph ? ` · média (${ph.phase}) ${fmt(ph.avg, 1)} ± ${fmt(ph.err, 1)}` : "");
+    const k = src.k || calK();
+    tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ao vivo ${uS(lv.cpm, k)}` : "") + (ph ? ` · média (${ph.phase}) ${numU(ph.avg * k)} ± ${numU(ph.err * k)} µSv/h` : "");
     tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("mCursor").hidden = true; $("mTip").hidden = true; });
@@ -2058,6 +2061,20 @@ function setupMeasureHover() {
 // tabela com as contas da medição: contagens, tempo, taxa média e a
 // incerteza de Poisson (1σ = raiz das contagens, levada para CPM)
 const plusMinus = (v) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), 1);
+
+// ---------- medição em µSv/h ----------
+// As contas (incerteza, σ) são feitas nas contagens; a tela mostra tudo em
+// µSv/h. k = µSv/h por CPM: o RadiaCode tem a dose dele (k da fase), o GMC
+// usa a calibração.
+const rcK = () => { const s = state.rc.st || {}; return s.cps > 0 && s.usvh > 0 ? s.usvh / (s.cps * 60) : 0.1 / 720; };
+const devK = (dev) => (dev === "radiacode" ? rcK() : calK());
+const phK = (ph, dev) => (ph && ph.cpm > 0 && ph.usv > 0 ? ph.usv / ph.cpm : devK(dev));
+const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
+const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
+const sgnUS = (v) => (v >= 0 ? "+" : "−") + usvVal(Math.abs(v));
+const numU = (v) => fmt(v, v === 0 ? 0 : usvDigits(Math.abs(v)));
+const cntTxt = (n) => `${(n || 0).toLocaleString(LOCALE)} ${n === 1 ? "contagem" : "contagens"}`;
+
 function measureStats(m) {
   const tbl = document.createElement("table");
   tbl.className = "m-stats mono";
@@ -2068,15 +2085,18 @@ function measureStats(m) {
     return tr;
   };
   const thead = document.createElement("thead");
-  thead.appendChild(row(["", "contagens", "tempo", "CPM", "± 1σ"]));
+  thead.appendChild(row(["", "contagens", "tempo", "µSv/h", "± 1σ"]));
   const tb = document.createElement("tbody");
+  const dev = isRcMeasure(m) ? "radiacode" : "gmc";
   for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
     if (!x) continue;
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), fmt(x.cpm, 1), `±${fmt(x.errCPM, 1)}`]));
+    const k = phK(x, dev);
+    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), numU(x.cpm * k), `±${numU(x.errCPM * k)}`]));
   }
   const r = m.result;
   if (r) {
-    tb.appendChild(row(["Diferença", "", "", plusMinus(r.netCPM), `±${fmt(r.netErr, 1)}`], "m-diff"));
+    const k = phK(m.obj, dev);
+    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv)), `±${numU(r.netErr * k)}`], "m-diff"));
   }
   tbl.append(thead, tb);
   const box = document.createElement("div");
@@ -2086,7 +2106,7 @@ function measureStats(m) {
     const p = document.createElement("p");
     p.className = "small muted";
     const sig = Math.abs(r.sigma);
-    p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para CPM. A da diferença junta as duas (raiz da soma dos quadrados). ` +
+    p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados). ` +
       `A diferença vale ${fmt(sig, 1)} vezes a incerteza (${fmt(sig, 1)}σ)` +
       (r.sigma >= 3 ? ": é real, não variação da contagem." : r.sigma >= 2 ? ": provavelmente real, mas vale repetir." : r.sigma <= -3 ? ": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)." : ": cabe na variação natural da contagem.");
     box.appendChild(p);
@@ -2173,19 +2193,21 @@ function renderMeasure(st) {
   const objReady = !running && (st.bg ? true : home && hb && hb.ok);
   $("btnMeasureObj").disabled = !objReady;
   $("btnMeasureObj").textContent = st.obj ? "Medir de novo com o objeto" : "Medir com o objeto";
+  const k = mK(st);
   const prog = (phase, fill, val, done) => {
     if (st.phase === phase) {
       const auto = phase === "objeto" && st.auto;
       const total = auto ? (st.eta >= 0 ? st.elapsed + st.eta : st.seconds) : st.seconds;
       $(fill).style.width = Math.min(100, (st.elapsed / Math.max(1, total)) * 100) + "%";
       // até agora: taxa e incerteza com as contagens já feitas
-      const so = st.elapsed > 0 ? ` · ${fmt(st.counts * 60 / st.elapsed, 1)} ± ${fmt(Math.sqrt(Math.max(st.counts, 1)) * 60 / st.elapsed, 1)} CPM` : "";
+      const so = st.elapsed > 0 ? ` · ${numU(st.counts * 60 / st.elapsed * k)} ± ${uS(Math.sqrt(Math.max(st.counts, 1)) * 60 / st.elapsed, k)}` : "";
       $(val).textContent = (auto ? `${Math.floor(st.elapsed / 60)}:${pad(st.elapsed % 60)}` : `${st.elapsed}/${st.seconds} s`) + ` · ${st.counts} contagens${so}`;
     } else if (done) {
       $(fill).style.width = "100%";
+      const dk = phK(done, isRcMeasure(st) ? "radiacode" : "gmc");
       $(val).textContent = done.source === "casa"
-        ? `${fmt(done.cpm, 1)} ± ${fmt(done.errCPM, 1)} CPM (${Math.round(done.seconds / 60)} min até ${hhmm(done.end)})`
-        : `${fmt(done.cpm, 1)} ± ${fmt(done.errCPM, 1)} CPM (${done.counts} em ${done.seconds} s)`;
+        ? `${numU(done.cpm * dk)} ± ${uS(done.errCPM, dk)} (${Math.round(done.seconds / 60)} min até ${hhmm(done.end)})`
+        : `${numU(done.cpm * dk)} ± ${uS(done.errCPM, dk)} (${done.counts} contagens em ${done.seconds} s)`;
     } else {
       $(fill).style.width = "0%";
       $(val).textContent = "—";
@@ -2194,13 +2216,12 @@ function renderMeasure(st) {
   if (!st.bg && home) {
     // ainda não começou: mostra o fundo da casa que vai ser usado
     $("mBgFill").style.width = hb && hb.ok ? "100%" : "0%";
-    $("mBgVal").textContent = !hb ? "…" : hb.ok ? `${fmt(hb.cpm, 1)} ± ${fmt(hb.errCPM, 1)} CPM (${hb.minutes} min até ${hhmm(hb.to)})` : hb.why;
+    const hk = hb && hb.ok && hb.cpm > 0 && hb.usv > 0 ? hb.usv / hb.cpm : devK(measureDevOpts().device);
+    $("mBgVal").textContent = !hb ? "…" : hb.ok ? `${numU(hb.cpm * hk)} ± ${uS(hb.errCPM, hk)} (${hb.minutes} min até ${hhmm(hb.to)})` : hb.why;
   } else prog("fundo", "mBgFill", "mBgVal", st.bg);
   prog("objeto", "mObjFill", "mObjVal", st.obj);
-  // segundo aparelho
-  const ol = $("mOtherLive"), oth = running ? st.other : null;
-  ol.hidden = !oth;
-  if (oth) ol.textContent = sideLiveText(st, oth);
+  // os dois aparelhos ao vivo
+  renderMeasureDuo(st, running);
   renderSideResult($("mOtherRes"), st.phase === "pronto" ? st : null);
   // resultado parcial ao vivo
   const lv = st.phase === "objeto" ? st.live : null;
@@ -2210,7 +2231,7 @@ function renderMeasure(st) {
     let what = sig >= 3 ? "parece radioativo" : sig >= 2 ? "talvez um pouco acima" : "ainda não dá para dizer";
     let when = "";
     if (st.auto) when = st.elapsed < 20 ? " · juntando contagens…" : st.eta > 0 ? ` · ~${fmtMin(st.eta)} para decidir` : " · pode ir até o tempo máximo";
-    $("mObjLive").innerHTML = `Até agora: <b>${plusMinus(lv.netCPM)} ± ${fmt(lv.netErr, 1)} CPM</b> sobre o fundo (${fmt(sig, 1)}σ) · ${what}${when}`;
+    $("mObjLive").innerHTML = `Até agora: <b>${(lv.netUSv >= 0 ? "+" : "−") + numU(Math.abs(lv.netUSv))} ± ${uS(lv.netErr, k)}</b> sobre o fundo (${fmt(sig, 1)}σ) · ${what}${when}`;
   }
   const r = st.result;
   $("mResult").hidden = !r;
@@ -2231,8 +2252,9 @@ function renderMeasure(st) {
   $("mVerdict").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
   $("mStats").replaceChildren(measureStats({ bg: st.bg, obj: st.obj, result: r }));
   const sign = r.netCPM >= 0 ? "+" : "−";
-  $("mNumbers").textContent = `${sign}${fmt(Math.abs(r.netCPM), 1)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} ` + (rc ? "µSv/h no detector" : "µSv/h no tubo");
-  $("mExplain").textContent = measureExplain(r, st.obj, auto);
+  const ok = phK(st.obj, rc ? "radiacode" : "gmc");
+  $("mNumbers").textContent = `${(r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv))} ± ${uS(r.netErr, ok)} sobre o fundo ${rc ? "no detector" : "no tubo"} · ${fmt(r.ratio, 1)}× o fundo · ${fmt(r.sigma, 1)}σ`;
+  $("mExplain").textContent = measureExplain(r, st.obj, auto, ok);
   renderMeasSpec($("mSpec"), st.spectrum);
 }
 
@@ -2240,19 +2262,48 @@ function renderMeasure(st) {
 
 const devLabel = (d) => (d === "radiacode" ? "RadiaCode" : "GMC-800");
 
-// linha ao vivo do segundo aparelho
-function sideLiveText(st, o) {
-  const name = devLabel(o.device);
-  if (o.role === "voce") {
-    if (st.phase !== "objeto") return `Com você (${name}): começa a contar quando o objeto for medido.`;
-    return `Com você (${name}): ${fmt(o.dose, 4)} µSv até agora · agora ${usvVal(o.nowUSv || 0)}` + (o.bgUSv ? ` · seu fundo ${usvVal(o.bgUSv)}` : "");
+// os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
+function renderMeasureDuo(st, running) {
+  const box = $("mDuo"), o = st.other;
+  box.hidden = !(running && o);
+  if (box.hidden) { box.textContent = ""; return; }
+  const pDev = isRcMeasure(st) ? "radiacode" : "gmc";
+  const last = (state.demo.active ? state.lastReal : state.last) || {};
+  const pNow = pDev === "radiacode" ? (state.rc.st || {}).usvh : last.usv;
+  const k = mK(st);
+  const rows = [];
+  // aparelho principal (no objeto)
+  {
+    const parts = [`agora ${pNow != null ? usvVal(pNow) : "—"}`, `${cntTxt(st.counts)} nesta fase`];
+    if (st.elapsed > 0) parts.push(`média ${uS(st.counts * 60 / st.elapsed, k)}`);
+    if (st.phase === "objeto" && st.live) parts.push(`${sgnUS(st.live.netUSv)} sobre o fundo (${fmt(st.live.sigma, 1)}σ)`);
+    rows.push([`${devLabel(pDev)} · no objeto`, parts.join(" · ")]);
   }
-  if (st.phase === "fundo" || !o.live) {
-    const m = (o.elapsed || 0) / 60;
-    return `${name}: ${o.counts} contagens` + (m > 0 ? ` · ${fmt(o.counts / m, 1)} CPM` : "") + (o.bg && st.phase === "objeto" ? ` · fundo ${fmt(o.bg.cpm, 1)}` : "");
+  // segundo aparelho
+  {
+    const parts = [`agora ${o.nowUSv ? usvVal(o.nowUSv) : "—"}`];
+    if (o.role === "voce") {
+      if (st.phase === "objeto") {
+        parts.push(cntTxt(o.counts), `sua dose ${fmt(o.dose || 0, 4)} µSv`);
+        if (o.bgUSv) parts.push(`seu fundo ${usvVal(o.bgUSv)}`);
+      } else parts.push("a sua dose começa a contar quando o objeto for medido");
+    } else {
+      parts.push(`${cntTxt(o.counts)} nesta fase`);
+      const ok = phK(o.bg, o.device);
+      if (o.elapsed > 0) parts.push(`média ${uS(o.counts * 60 / o.elapsed, ok)}`);
+      if (st.phase === "objeto" && o.live) parts.push(`${sgnUS(o.live.netUSv)} sobre o fundo (${fmt(o.live.sigma, 1)}σ)`);
+    }
+    rows.push([`${devLabel(o.device)} · ${o.role === "voce" ? "com você" : "no objeto"}`, parts.join(" · ")]);
   }
-  const l = o.live;
-  return `${name}: ${plusMinus(l.netCPM)} ± ${fmt(l.netErr, 1)} CPM sobre o fundo (${fmt(l.sigma, 1)}σ)`;
+  box.textContent = "";
+  for (const [title, text] of rows) {
+    const d = document.createElement("div");
+    d.className = "m-duo-row";
+    d.innerHTML = "<strong></strong><span class=\"mono\"></span>";
+    d.children[0].textContent = title;
+    d.children[1].textContent = text;
+    box.appendChild(d);
+  }
 }
 
 // resultado do segundo aparelho (medição terminada ou salva)
@@ -2275,7 +2326,7 @@ function renderSideResult(box, m) {
   }
   add("strong", `${name} (também perto do objeto)`);
   const r = o.result;
-  if (r) add("mono", `${plusMinus(r.netCPM)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} µSv/h`);
+  if (r) add("mono", `${sgnUS(r.netUSv)} ± ${uS(r.netErr, phK(o.obj, o.device))} sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo`);
   else add("small muted", "Sem leituras suficientes desse aparelho.");
   if (o.hint) add("small", o.hint);
   add("small muted", "O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.");
@@ -2384,15 +2435,16 @@ function renderMeasSpec(box, sp) {
   }
 }
 
-function measureExplain(r, obj, auto) {
+function measureExplain(r, obj, auto, k) {
   const t = obj ? fmtMin(obj.seconds) : "";
+  k = k || 1;
   if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
-  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${fmt(r.threshold, 1)} CPM). Para procurar algo mais fraco, escolha “+10% do fundo”.`;
-  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" ? "" : ` Se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM; para ir além, aumente o tempo máximo.`);
+  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${uS(r.threshold, k)}). Para procurar algo mais fraco, escolha “+10% do fundo”.`;
+  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" ? "" : ` Se o objeto emite algo, é menos que +${uS(r.limit, k)}; para ir além, aumente o tempo máximo.`);
   return {
     sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto encostado no contador; a 1 metro é muito menos.",
     talvez: "A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.",
-    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit ? ` (menos que +${fmt(r.limit, 1)} CPM)` : "") + ". Use o modo automático para mais certeza.",
+    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit ? ` (menos que +${uS(r.limit, k)})` : "") + ". Use o modo automático para mais certeza.",
   }[r.level];
 }
 
@@ -2493,8 +2545,8 @@ function renderMeasureHistory() {
     b.querySelector("strong").textContent = m.name;
     b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}`;
     const net = b.querySelector(".m-item-net");
-    net.textContent = `${m.result.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(m.result.netCPM), 1)}`;
-    net.title = "CPM acima do fundo";
+    net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${numU(Math.abs(m.result.netUSv))}`;
+    net.title = "µSv/h acima do fundo";
     b.addEventListener("click", () => { state.mSel = m.id; renderMeasureHistory(); drawMeasureChart(); });
     li.appendChild(b);
     ul.appendChild(li);
@@ -2537,21 +2589,22 @@ function renderMeasureDetail() {
   v.querySelector("span").textContent = `${fmt(r.sigma, 1)}σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.`;
   const t = $("mdTiles");
   t.textContent = "";
-  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", `${fmt(m.bg.cpm, 1)} CPM`, `± ${fmt(m.bg.errCPM, 1)} · ${m.bg.counts} contagens`);
-  sumTile(t, "Com o objeto", `${fmt(m.obj.cpm, 1)} CPM`, `± ${fmt(m.obj.errCPM, 1)} · ${m.obj.counts} contagens`);
-  sumTile(t, "Líquido", `${r.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(r.netCPM), 1)} CPM`, `± ${fmt(r.netErr, 1)} · ≈ ${fmt(r.netUSv, usvDigits(Math.abs(r.netUSv)))} ` + (rc ? "µSv/h no detector" : "µSv/h no tubo"), r.level === "sim" ? "warn" : "");
+  const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
+  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${uS(m.bg.errCPM, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
+  sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${uS(m.obj.errCPM, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
+  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)} ` + (rc ? "no detector" : "no tubo"), r.level === "sim" ? "warn" : "");
   sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);
   renderSideResult($("mdOther"), m);
   $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
   $("mdNote").classList.toggle("muted", !m.note);
-  let lim = `Limite de detecção: ${fmt(mDetLimit(m.bg, m.obj.seconds), 1)} CPM acima do fundo.`;
-  if (r.limit) lim += ` Se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM.`;
+  let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
+  if (r.limit) lim += ` Se o objeto emite algo, é menos que +${uS(r.limit, ok)}.`;
   if (r.netCPM > 0) lim += home
     ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`
     : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
-  if (r.stop) lim = measureExplain(r, m.obj, true) + " " + lim;
+  if (r.stop) lim = measureExplain(r, m.obj, true, ok) + " " + lim;
   $("mdLimits").textContent = lim;
   $("mdEditName").value = m.name;
   $("mdEditNote").value = m.note || "";
@@ -5130,6 +5183,7 @@ function makeDemoApi() {
   };
   function feedSide(cps, usv) {
     const o = meas.other;
+    o.nowUSv = usv;
     if (o.role === "voce" && meas.phase !== "objeto") return;
     if (o.role === "objeto" && meas.phase === "fundo" && o.bg) return;
     o.counts += cps; o.elapsed++; o.usvSum = (o.usvSum || 0) + usv; o.nowUSv = usv;

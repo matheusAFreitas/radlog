@@ -85,6 +85,12 @@ func (a *App) feedSideLocked(m *MeasureState, f measFeed) bool {
 	if m.Phase != "fundo" && m.Phase != "objeto" {
 		return true
 	}
+	// leitura de agora, para a tela (em qualquer fase)
+	if s.Device == devRC {
+		s.NowUSv = f.usv
+	} else {
+		s.NowUSv = a.convCalLocked().USv(f.cpm)
+	}
 	if s.Role == "voce" && m.Phase != "objeto" {
 		return true // com você só conta enquanto o objeto é medido
 	}
@@ -99,7 +105,6 @@ func (a *App) feedSideLocked(m *MeasureState, f measFeed) bool {
 	}
 	s.usvSum += usv
 	s.usvN++
-	s.NowUSv = usv
 	if m.Phase == "objeto" {
 		s.MaxUSv = math.Max(s.MaxUSv, usv)
 		if s.Role == "objeto" && s.Bg != nil {

@@ -281,8 +281,16 @@ func (a *App) feedMeasureDev(f measFeed) {
 			if f.dev == "radiacode" {
 				via = " (RadiaCode)"
 			}
-			logText = fmt.Sprintf("Medição de %s%s: %s ± %s CPM sobre o fundo (%sσ) — %s",
-				name, via, br(r.NetCPM, true), br(r.NetErr, false), br(r.Sigma, false), r.Verdict)
+			k := 0.0
+			if ph.CPM > 0 {
+				k = ph.USv / ph.CPM
+			}
+			sign := "+"
+			if r.NetUSv < 0 {
+				sign = "−"
+			}
+			logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ) — %s",
+				name, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
 			if !f.demo { // o demo não fica salvo
 				when := m.Bg.Start
 				if m.Bg.Source == "casa" {

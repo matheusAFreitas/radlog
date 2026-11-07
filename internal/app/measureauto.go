@@ -335,7 +335,11 @@ func finishResult(r *MeasureResult, stop string, bg MeasurePhase, pct float64, a
 	switch stop {
 	case "nada":
 		r.Level = "nada"
-		r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s CPM", br(r.Limit, false))
+		if bg.CPM > 0 && bg.USv > 0 { // em µSv/h, como o resto da tela
+			r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s µSv/h", usvTxt(r.Limit*bg.USv/bg.CPM))
+		} else {
+			r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s CPM", br(r.Limit, false))
+		}
 	case "limite":
 		if r.Level != "sim" {
 			r.Verdict += " (chegou ao tempo máximo sem decidir)"

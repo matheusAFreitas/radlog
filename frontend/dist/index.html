@@ -575,6 +575,7 @@
     </div>
     <p class="small muted" id="mOptHint"></p>
 
+    <div class="m-duo" id="mDuo" hidden></div>
     <div class="m-step" id="mStepBg">
       <div class="m-step-head"><strong id="mBgTitle">1. Fundo</strong><span class="mono small" id="mBgVal">—</span></div>
       <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
@@ -584,7 +585,6 @@
       <div class="m-step-head"><strong>2. Com o objeto</strong><span class="mono small" id="mObjVal">—</span></div>
       <div class="bar"><div class="bar-fill" id="mObjFill"></div></div>
       <div class="small m-live-line" id="mObjLive" hidden></div>
-      <div class="small m-live-line m-other-live" id="mOtherLive" hidden></div>
       <button type="button" class="btn" id="btnMeasureObj" disabled>Medir com o objeto</button>
     </div>
     <div class="m-result" id="mResult" hidden>
@@ -609,13 +609,13 @@
           <div class="m-chart-wrap">
             <div class="y-axis mono" id="mY"><span></span><span></span><span></span><span>0</span></div>
             <div class="plot m-plot" id="mPlot">
-              <svg id="mChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da medição: CPM ao vivo e média de cada fase"></svg>
+              <svg id="mChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da medição: leitura ao vivo e média de cada fase"></svg>
               <div class="cursor" id="mCursor" hidden></div>
               <div class="tip mono" id="mTip" hidden></div>
             </div>
           </div>
           <div class="legend small muted">
-            <span class="key"><i class="mk-live" aria-hidden="true"></i>CPM ao vivo</span>
+            <span class="key"><i class="mk-live" aria-hidden="true"></i>leitura ao vivo</span>
             <span class="key"><i class="mk-bg" aria-hidden="true"></i>média do fundo</span>
             <span class="key"><i class="mk-obj" aria-hidden="true"></i>média com o objeto</span>
             <span class="small muted">faixa = margem de erro</span>
