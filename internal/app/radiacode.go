@@ -117,6 +117,7 @@ type rcState struct {
 	macc     rcMeasAcc // só a goroutine do rcRun mexe
 	dose     rcDoseLive
 	cfgLogAt time.Time
+	logCfgAt time.Time   // última "configuração alterada" no log do aparelho
 	bleNow   atomic.Bool // endereço Bluetooth novo: tentar já
 	doseLast rcDosePt    // último total gravado (protegido por fileM)
 }
@@ -473,6 +474,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 }
 
 func (a *App) rcRecords(recs []radiacode.Record) {
+	a.rcLogRecords(recs)
 	changed := false
 	for _, r := range recs {
 		switch v := r.(type) {

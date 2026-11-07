@@ -1,5 +1,21 @@
 # Versões
 
+## 1.44.0
+- **Log do RadiaCode** na aba RadiaCode (cartão 4), no estilo da aba Log do
+  app do celular:
+  - a taxa de dose que o aparelho manda a cada ~1,5 min (µSv/h e cps, com o
+    ±), a temperatura, a bateria e a dose acumulada (Σ), e os eventos
+    (ligou, carregando, alarmes…), do mais novo para o mais velho;
+  - filtros por tipo (os três ícones), contador "mostrando/total" e período
+    (hoje, 7 dias, 30 dias, tudo);
+  - **importar do celular**: o .csv que o app do RadiaCode exporta entra no
+    mesmo log, marcado como "celular", sem repetir o que o PC já tinha;
+  - na primeira vez, o log é montado com os dados brutos já gravados;
+  - fica em `radiacode/log-AAAA-MM.csv` e entra no backup (e na junção de
+    backups, linha a linha).
+- O cartão "Importar o log" simulado saiu: o RadiaCode não guarda histórico
+  para baixar (cada app só tem o que recebeu conectado).
+
 ## 1.43.0
 - **Dureza de verdade** na aba RadiaCode (cartão 3), com os espectros que o
   app grava de minuto em minuto:

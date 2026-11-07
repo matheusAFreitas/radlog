@@ -795,12 +795,21 @@
       <p class="rc-use" id="rcHdUse"><strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.</p>
     </article>
 
-    <article class="rc-card">
-      <div class="rc-head"><span class="rc-num mono">4</span><h3>Importar o log</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>O RadiaCode guarda sozinho as últimas 1.000 horas, em pontos como estes. Ao importar, cada minuto vira um ponto numa segunda curva no gráfico, e o que o GMC já gravou não muda.</p>
-      <div class="rc-log-wrap"><table class="rc-log mono"><thead><tr><th>data e hora</th><th>dose</th><th>contagem</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
-      <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogNew">Gerar outro exemplo</button></div>
-      <p class="rc-use"><strong>Para você:</strong> medições fora de casa e no carro entram no gráfico e nos alertas sem levar o notebook.</p>
+    <article class="rc-card" id="rcLogCard">
+      <div class="rc-head"><span class="rc-num mono">4</span><h3>Log</h3><span class="live-tag">do aparelho</span></div>
+      <p>Igual à aba Log do app do celular: a taxa de dose que o RadiaCode manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
+      <div class="rc-ctrl rc-log-bar">
+        <span class="small muted">Mostrar:</span>
+        <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
+        <span class="mono small" id="rcLogCount"></span>
+        <div class="seg rc-seg" id="rcLogPeriod" aria-label="Período"><button type="button" data-p="1" aria-pressed="false">Hoje</button><button type="button" data-p="7" aria-pressed="false">7 dias</button><button type="button" data-p="30" aria-pressed="false">30 dias</button><button type="button" data-p="0" aria-pressed="true">Tudo</button></div>
+        <button type="button" class="btn small" id="rcLogImport">Importar do celular</button>
+      </div>
+      <p class="small" id="rcLogMsg" hidden></p>
+      <div class="rc-log-wrap"><table class="rc-log rc-mlog"><thead><tr><th></th><th>data e hora</th><th colspan="2">dados</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
+      <p class="small muted rc-log-empty" id="rcLogEmpty" hidden>Ainda sem registros. Com o RadiaCode conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.</p>
+      <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogMore" hidden>Mostrar mais antigos</button></div>
+      <p class="rc-use"><strong>Para você:</strong> no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como "celular", sem repetir o que o PC já tinha.</p>
     </article>
 
     <article class="rc-card">

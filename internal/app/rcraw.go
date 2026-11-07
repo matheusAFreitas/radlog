@@ -265,6 +265,17 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	if !strings.HasSuffix(name, ".csv") || strings.Contains(strings.TrimPrefix(rel, rcDirName+"/"), "/") {
 		return 0
 	}
+	if strings.HasPrefix(name, "log-") { // log do aparelho: junta linha a linha
+		var lines []string
+		sc := bufio.NewScanner(bytes.NewReader(data))
+		for sc.Scan() {
+			lines = append(lines, sc.Text())
+		}
+		a.rc.fileM.Lock()
+		defer a.rc.fileM.Unlock()
+		a.rcLogMergeLocked(name, lines)
+		return 0
+	}
 	a.rc.fileM.Lock()
 	defer a.rc.fileM.Unlock()
 	dst := filepath.Join(a.rcDir(), name)

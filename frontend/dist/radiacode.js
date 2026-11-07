@@ -463,7 +463,7 @@
     document.querySelectorAll(".rc-per button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === sg.period)));
     document.querySelectorAll("#rcSgE button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.e === sg.emax)));
     // o aviso de "dados simulados" passa para depois deste cartão
-    const note = $("rcSimNote"), before = sg.on ? $("rcHardCard") : $("rcSgCard");
+    const note = $("rcSimNote"), before = sg.on ? $("rcLogCard").nextElementSibling : $("rcSgCard");
     if (note && before && note.nextElementSibling !== before) before.before(note);
     $("rcSgDesc").textContent = sg.on
       ? "Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho)."
@@ -701,23 +701,77 @@
   // =====================================================================
   // 4. log
   // =====================================================================
-  function logBuild() {
-    const tb = $("rcLogBody"); if (!tb) return;
-    tb.textContent = "";
-    let t = Date.now() - 30 * 60e3;
-    const rows = [];
-    for (let k = 0; k < 10; k++) {
-      const dt = 15 + Math.round(Math.random() * 30);
-      const n = poisson(8.4 * dt), cps = n / dt, e = 100 / Math.sqrt(Math.max(1, n));
-      rows.push([t, cps, e]); t += dt * 1000 + Math.random() * 60e3;
+  // O log de verdade (como a aba Log do app do celular): o que o PC recebeu do
+  // aparelho e o que veio do celular (importado).
+  const LOG_IC = {
+    taxa: '<svg viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="16" rx="2.5"/><path d="M7 9h6M7 13h3"/><circle cx="17" cy="16" r="4.2" fill="#0D1012"/><path d="M17 14v2l1.3 1"/></svg>',
+    evento: '<svg viewBox="0 0 24 24" fill="#F5B84A" stroke="#F5B84A" stroke-width="1.6" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.5 4L17 12H6z"/></svg>',
+    raro: '<svg viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round"><path d="M8 14.5V5a2 2 0 0 1 4 0v9.5a3.5 3.5 0 1 1-4 0z"/><path d="M10 9v7"/><rect x="15" y="7" width="6" height="12" rx="1.5"/><path d="M17 5h2M16.5 13h3M16.5 16h3"/></svg>',
+  };
+  const lg = { kinds: new Set(["taxa", "evento", "raro"]), period: 0, items: [], more: false, busy: false, shown: 0, total: 0, loaded: false };
+  const lgFrom = () => {
+    if (!lg.period) return 0;
+    const d = new Date(); d.setHours(0, 0, 0, 0);
+    return d.getTime() - (lg.period - 1) * 86400e3;
+  };
+  async function lgLoad(more) {
+    if (typeof api === "undefined" || !api.GetRcLog || lg.busy) return;
+    lg.busy = true;
+    const before = more && lg.items.length ? lg.items[lg.items.length - 1].t : 0;
+    const limit = more ? 100 : Math.max(100, Math.min(lg.items.length, 1000));
+    let p = null;
+    try { p = await api.GetRcLog(lgFrom(), 0, [...lg.kinds], limit, before); } catch (e) { p = null; }
+    lg.busy = false;
+    if (!p) return;
+    // o "antes de" junta registros do mesmo segundo: tira os repetidos
+    if (more) {
+      const seen = new Set(lg.items.map((it) => JSON.stringify(it)));
+      lg.items = lg.items.concat(p.items.filter((it) => !seen.has(JSON.stringify(it))));
+    } else lg.items = p.items || [];
+    lg.more = p.more; lg.shown = p.shown; lg.total = p.total; lg.loaded = true;
+    lgRender();
+  }
+  const fmtDate = (t) => new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" });
+  const fmtTime = (t) => new Date(t).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const fmtDur = (s) => { s = Math.round(s); const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return (d ? d + "d " : "") + h + ":" + pad2(m) + ":" + pad2(ss); };
+  function lgRow(it) {
+    const src = it.src === "celular" ? '<span class="src">celular</span>' : "";
+    const when = `<td class="when mono"><b>${fmtDate(it.t)}</b><span>${fmtTime(it.t)}</span>${src}</td>`;
+    let data = "";
+    if (it.kind === "taxa") {
+      data = `<td class="v mono" colspan="2"><span>${nf(it.usv, 3)} µSv/h ±${nf(it.usvErr || 0, 1)}%</span><span>${nf(it.cps, 1)} cps ±${nf(it.cpsErr || 0, 1)}%</span></td>`;
+    } else if (it.kind === "raro") {
+      const pw = it.power === "carregando" ? "carregando na fonte externa" : it.power === "externa" ? "na fonte externa" : "";
+      const bat = it.hasBat ? `Bateria: ${nf(it.battery, 0)}%` : "";
+      const l1 = it.hasTemp ? `<span>t = ${nf(it.temp, 1)} °C</span>` : "";
+      const l2 = bat || pw ? `<span>${esc([bat, pw].filter(Boolean).join(" · "))}</span>` : "";
+      const dose = it.hasDose ? `<span>Σ = ${nf(it.dose, 2)} µSv</span>${it.doseSec ? `<span class="mute">em ${fmtDur(it.doseSec)}</span>` : ""}` : "";
+      data = `<td class="v mono">${l1}${l2}</td><td class="v mono">${dose}</td>`;
+    } else {
+      data = `<td class="ev" colspan="2">${esc(it.event || "")}</td>`;
     }
-    for (const [ts, cps, e] of rows.reverse()) {
-      const tr = document.createElement("tr"), d = new Date(ts);
-      const cells = [d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString(LOCALE),
-        `${nf(cps / CPS_PER_USV, 2)} µSv/h ±${nf(e, 1)}%`, `${nf(cps, 1)} cps ±${nf(e, 1)}%`];
-      for (const c of cells) { const td = document.createElement("td"); td.textContent = c; tr.appendChild(td); }
-      tb.appendChild(tr);
+    return `<tr><td class="ic">${LOG_IC[it.kind] || ""}</td>${when}${data}</tr>`;
+  }
+  function lgRender() {
+    $("rcLogBody").innerHTML = lg.items.map(lgRow).join("");
+    $("rcLogCount").textContent = lg.loaded ? `${lg.shown}/${lg.total}` : "";
+    $("rcLogMore").hidden = !lg.more;
+    $("rcLogEmpty").hidden = !lg.loaded || lg.items.length > 0;
+    document.querySelectorAll("#rcLogKinds button").forEach((b) => b.setAttribute("aria-pressed", String(lg.kinds.has(b.dataset.k))));
+    document.querySelectorAll("#rcLogPeriod button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.p === lg.period)));
+  }
+  async function lgImport() {
+    if (!api.ImportRcLog) return;
+    const m = $("rcLogMsg");
+    let r = null;
+    try { r = await api.ImportRcLog(); } catch (e) {
+      m.hidden = false; m.className = "small warn-text"; m.textContent = "Não consegui importar: " + (e && e.message ? e.message : e); return;
     }
+    if (!r || !r.file) return; // cancelou
+    m.hidden = false; m.className = "small muted";
+    const span = r.from ? ` · de ${fmtDate(r.from)} ${fmtTime(r.from)} a ${fmtDate(r.to)} ${fmtTime(r.to)}` : "";
+    m.textContent = `${r.file}: ${r.added} registros novos de ${r.read}` + (r.skipped ? ` · ${r.skipped} linhas ignoradas` : "") + span;
+    lg.items = []; lgLoad();
   }
 
   // =====================================================================
@@ -853,8 +907,15 @@
     $("rcHard").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); });
     sgMark();
     // log
-    logBuild();
-    $("rcLogNew").addEventListener("click", logBuild);
+    for (const b of document.querySelectorAll("#rcLogKinds button")) b.innerHTML = LOG_IC[b.dataset.k];
+    $("rcLogKinds").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-k]"); if (!b) return;
+      if (lg.kinds.has(b.dataset.k)) lg.kinds.delete(b.dataset.k); else lg.kinds.add(b.dataset.k);
+      lg.items = []; lgRender(); lgLoad();
+    });
+    $("rcLogPeriod").addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; lg.period = +b.dataset.p; lg.items = []; lgRender(); lgLoad(); });
+    $("rcLogMore").addEventListener("click", () => lgLoad(true));
+    $("rcLogImport").addEventListener("click", lgImport);
     // busca
     $("rcGauge").innerHTML = gaugeSVG();
     const ss = $("rcSrc");
@@ -894,6 +955,7 @@
     visible = true;
     realTick(true);
     sgLoad();
+    lgLoad();
     drawAll();
     timers.forEach(clearInterval);
     timers = [
@@ -901,6 +963,7 @@
       setInterval(() => realTick(), 2000),
       setInterval(() => { if (tl.run && tl.shown < TL_N) { tl.shown++; if (!sg.on) sgDraw(); hdDraw(); if (tl.shown >= TL_N) tl.run = false; } }, 110),
       setInterval(sgLoad, 60e3),
+      setInterval(() => lgLoad(), 30e3),
       setInterval(srTick, 500),
     ];
   }

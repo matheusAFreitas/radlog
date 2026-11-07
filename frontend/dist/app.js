@@ -5521,6 +5521,27 @@ function makeDemoApi() {
       if (ago < 6 && ago > 3) return [{ group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 200, sigma: 7 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 150, sigma: 5 }];
       return [];
     },
+    GetRcLog: async (from, to, kinds, limit, before) => {
+      if (!demoRcFake()) return { items: [], shown: 0, total: 0, kinds: {}, more: false, first: 0 };
+      // log de mentira, parecido com o do celular: taxa a cada 96 s, raros a
+      // cada 5 min, alguns eventos; uma parte veio do celular
+      const now = Date.now(), all = [], rnd = (k) => { const x = Math.sin(k * 12.9898) * 43758.5453; return x - Math.floor(x); };
+      const t0 = now - 2 * 86400e3;
+      for (let t = now - ((now / 1000) % 96) * 1000, k = 0; t > t0; t -= 96e3, k++) {
+        const cps = 12.3 + (rnd(k) - 0.5) * 1.6, n = Math.round(cps * 96);
+        all.push({ t, kind: "taxa", usv: Math.round((0.148 + (rnd(k + 9) - 0.5) * 0.04) * 1e4) / 1e4, usvErr: 19 + rnd(k + 3) * 3, cps, cpsErr: 200 / Math.sqrt(n), count: n, src: (now - t) > 20 * 3600e3 && (now - t) < 26 * 3600e3 ? "celular" : "pc" });
+        if (k % 3 === 1) all.push({ t: t - 31e3, kind: "raro", temp: 27 + rnd(k + 5) * 1.5, hasTemp: true, battery: 100, hasBat: true, dose: 1.2 - k * 0.0006, hasDose: true, doseSec: 26000 - k * 96, src: "pc" });
+      }
+      all.push({ t: now - 7.5 * 3600e3, kind: "evento", event: "começou a carregar", code: 7, src: "celular" });
+      all.push({ t: now - 7.5 * 3600e3 - 2e3, kind: "evento", event: "ligou", code: 1, src: "celular" });
+      all.push({ t: now - 3.2 * 3600e3, kind: "evento", event: "configuração alterada", code: 3, src: "pc" });
+      all.push({ t: now - 7.5 * 3600e3 + 1e3, kind: "raro", hasBat: true, battery: 62, power: "carregando", hasTemp: true, temp: 26.7, hasDose: true, dose: 0.03, doseSec: 120, src: "celular" });
+      const inR = all.filter((it) => (!from || it.t >= from) && (!to || it.t <= to)).sort((a, b) => b.t - a.t);
+      const k = {}; inR.forEach((it) => { k[it.kind] = (k[it.kind] || 0) + 1; });
+      const sel = inR.filter((it) => kinds.includes(it.kind)), page = sel.filter((it) => !before || it.t < before);
+      return { items: page.slice(0, limit), shown: sel.length, total: inR.length, kinds: k, more: page.length > limit, first: t0 };
+    },
+    ImportRcLog: async () => ({ file: "RadiaCode-log.csv", read: 57, added: 41, skipped: 1, from: Date.now() - 26 * 3600e3, to: Date.now() - 20 * 3600e3 }),
     AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),

@@ -425,7 +425,7 @@ func (a *App) startup(ctx context.Context) {
 	go a.cleanOldVersionsLater()
 	go a.syncLoop()
 	go a.rcLoop()
-	go a.rcDoseBackfill()
+	go func() { a.rcDoseBackfill(); a.rcLogBackfill() }()
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		go a.autoReconnect(0)

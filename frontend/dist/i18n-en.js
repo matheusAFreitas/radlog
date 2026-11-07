@@ -1419,7 +1419,20 @@ const I18N_EN = {
 "cai": "drops",
 "fundo da casa: ainda pouco dado (precisa de algumas horas gravadas)": "home background: not enough data yet (needs a few recorded hours)",
 "sem dados neste período": "no data in this period",
-"~Ra-226 (urânio/radônio)": "~Ra-226 (uranium/radon)"
+"~Ra-226 (urânio/radônio)": "~Ra-226 (uranium/radon)",
+"Log": "Log",
+"Igual à aba Log do app do celular: a taxa de dose que o RadiaCode manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.": "Just like the Log tab in the phone app: the dose rate the RadiaCode sends every ~1.5 minutes, the temperature, battery and accumulated dose, and the events (powered on, charging, alarms). The device doesn't keep this to download later: each app only has what it received while connected. To bring in what stayed on the phone (away from home, for example), export the log in the phone app and import it here.",
+"Mostrar:": "Show:",
+"Temperatura, bateria e dose": "Temperature, battery and dose",
+"Tudo": "All",
+"Importar do celular": "Import from phone",
+"dados": "data",
+"Ainda sem registros. Com o RadiaCode conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.": "No records yet. With the RadiaCode connected, the dose rate arrives every ~1.5 minutes and temperature and dose every few minutes.",
+"Mostrar mais antigos": "Show older",
+"no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como \"celular\", sem repetir o que o PC já tinha.": "in the phone app, Log tab → export (.csv). When you import it here, what the phone received away from home goes into the same log, marked \"phone\", without repeating what the PC already had.",
+"celular": "phone",
+"carregando na fonte externa": "charging from external power",
+"na fonte externa": "on external power"
 },
 "patterns": [
 [
@@ -4376,6 +4389,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Não consegui importar: ",
+"^Não consegui importar: ((?:(?! · ).)+?)$",
+"Couldn't import: ${1}",
+[
+"Não consegui importar: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -4467,6 +4488,14 @@ const I18N_EN = {
 "${1} live (on the object)",
 [
 " ao vivo (no objeto)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) registros novos de ((?:(?! · ).)+?)$",
+"${1}: ${2} new records out of ${3}",
+[
+" registros novos de "
 ]
 ],
 [
@@ -5200,6 +5229,14 @@ const I18N_EN = {
 "Connecting via ${1}…",
 [
 "Conectando pelo "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) linhas ignoradas$",
+"${1} lines skipped",
+[
+" linhas ignoradas"
 ]
 ],
 [
@@ -6238,6 +6275,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bateria: ",
+"^Bateria: ((?:(?! · ).)+?)%$",
+"Battery: ${1}%",
+[
+"Bateria: "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -6737,6 +6782,14 @@ const I18N_EN = {
 "now ${1}",
 [
 "agora "
+]
+],
+[
+"de ",
+"^de ((?:(?! · ).)+?) a ((?:(?! · ).)+?)$",
+"from ${1} to ${2}",
+[
+"de "
 ]
 ],
 [
