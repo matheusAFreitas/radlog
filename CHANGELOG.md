@@ -1,5 +1,23 @@
 # Versões
 
+## 2.4.0
+- **Fundo ao longo do tempo** (novo quadro em Gráficos, abaixo do padrão por
+  hora): média e mediana móveis de 24 h do fundo em casa, em janelas de 7,
+  30, 90 dias e 1 ano, com a média de cada dia (sem os 5% extremos) em
+  pontos. Usa só os minutos em casa, sem medição de objeto e sem minutos
+  saturados ou com interferência; a janela móvel só aparece com pelo menos
+  6 h medidas nas 24 h. O trecho antes do primeiro dado fica marcado e a
+  janela aparece como "em formação".
+- **Variação dentro de cada dia:** barras com a dispersão de cada dia (DP
+  real ÷ √média), o "sigma ao longo do tempo"; acima de 1,2 o dia variou
+  além do acaso.
+- **Aviso de tendência, sem conclusão automática:** com 7 ou mais dias
+  completos (12 h medidas), procura rampa (reta pela média de cada dia) e
+  degrau (dois níveis). Só avisa quando a mudança passa de 5% do nível e é
+  grande perto da variação entre os dias (3σ na rampa, 4σ no degrau); senão
+  diz "estável", com a inclinação e a incerteza. O texto lembra que estação,
+  chuva, ventilação e o lugar do contador também mudam o fundo.
+
 ## 2.3.0
 - **Cobertura com denominador claro.** A % e o "n de N min" agora usam o
   mesmo denominador e vão só até agora (num período em andamento a % ficava

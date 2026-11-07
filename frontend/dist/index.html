@@ -418,6 +418,41 @@
       <span class="heat-key"><i class="hk-away" aria-hidden="true"></i>fora de casa</span>
     </div>
   </section>
+  <section class="card view-graficos" id="bgCard">
+    <div class="chart-head">
+      <div>
+        <h2>Fundo ao longo do tempo</h2>
+        <span class="mono muted small" id="bgSub">sem dados ainda</span>
+      </div>
+      <div class="seg" role="group" aria-label="Janela do fundo" id="bgSeg">
+        <button type="button" data-bgdays="7" aria-pressed="false">7 dias</button>
+        <button type="button" data-bgdays="30" aria-pressed="true">30 dias</button>
+        <button type="button" data-bgdays="90" aria-pressed="false">90 dias</button>
+        <button type="button" data-bgdays="365" aria-pressed="false">1 ano</button>
+      </div>
+    </div>
+    <div class="bg-fit" id="bgFit" hidden></div>
+    <div class="m-chart-wrap">
+      <div class="y-axis mono" id="bgY"><span></span><span></span><span></span><span></span></div>
+      <div class="plot m-plot" id="bgPlot">
+        <svg id="bgChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Média e mediana móveis de 24 h do fundo em casa"></svg>
+        <div class="cursor" id="bgCursor" hidden></div>
+        <div class="tip mono" id="bgTip" hidden></div>
+      </div>
+    </div>
+    <div class="ad-x mono" id="bgX"><span></span><span></span><span></span></div>
+    <div class="legend small muted ad-legend" id="bgLegend"></div>
+    <h3 class="sub-head">Variação dentro de cada dia</h3>
+    <div class="m-chart-wrap bg-disp-wrap">
+      <div class="y-axis mono" id="bgDY"><span></span><span></span><span></span></div>
+      <div class="plot m-plot bg-disp" id="bgDPlot">
+        <svg id="bgDisp" viewBox="0 0 600 80" preserveAspectRatio="none" role="img" aria-label="Dispersão de cada dia"></svg>
+        <div class="tip mono" id="bgDTip" hidden></div>
+      </div>
+    </div>
+    <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
+  </section>
+
   <section class="card view" id="viewSummary" hidden>
     <div class="view-body">
     <div class="dlg-head">

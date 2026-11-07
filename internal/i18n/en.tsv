@@ -2345,3 +2345,35 @@ aguardando dados	waiting for data
 {0}% · {1} de {2} min com leitura do RadiaCode	{0}% · {1} of {2} min with RadiaCode readings
 {0} de {1} min com leitura do RadiaCode	{0} of {1} min with RadiaCode readings
 {0} de {1} min com leitura do RadiaCode desde o primeiro dado ({2})	{0} of {1} min with RadiaCode readings since the first reading ({2})
+Fundo ao longo do tempo	Background over time
+90 dias	90 days
+Variação dentro de cada dia	Variation within each day
+Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.	Bars: each day's dispersion, the actual standard deviation of the minutes divided by chance's (√mean). Near 1, the day only varied by chance; above 1.2, it really varied (radon, rain, an object nearby). Only minutes at home, without object measurements and without saturated or interference minutes; the moving window needs at least 6 h measured in the 24 h.
+Estável	Stable
+Tendência de alta	Upward trend
+Tendência de queda	Downward trend
+Mudança brusca	Abrupt change
+Ainda sem tendência	No trend yet
+sem minutos em casa nessa janela	no minutes at home in this window
+{0} min em casa	{0} min at home
+janela em formação ({0} de {1} dias)	window still forming ({0} of {1} days)
+média móvel de 24 h	24 h moving average
+mediana móvel de 24 h	24 h moving median
+média de cada dia (sem os 5% extremos)	each day's average (without the 5% extremes)
+tendência	trend
+antes do primeiro dado	before the first reading
+24 h até {0}	24 h up to {0}
+poucos dados ({0} min)	little data ({0} min)
+média {0} · mediana {1} CPM	average {0} · median {1} CPM
+média {0}	average {0}
+mediana {0} CPM	median {0} CPM
+n = {0} min	n = {0} min
+dispersão {0}	dispersion {0}
+Poucos dias completos para falar de tendência: {0} de {1} (um dia conta com pelo menos 12 h medidas em casa).	Too few complete days to talk about a trend: {0} of {1} (a day counts with at least 12 h measured at home).
+Sem tendência: a média dos dias variou dentro do esperado ({0} ± {1} CPM por dia, {2}% no período, {3} dias completos).	No trend: the daily average varied within what's expected ({0} ± {1} CPM per day, {2}% over the period, {3} complete days).
+O fundo subiu cerca de {0}% em {1} dias ({2} ± {3} CPM por dia, {4} dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo.	The background rose about {0}% in {1} days ({2} ± {3} CPM per day, {4} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.
+O fundo desceu cerca de {0}% em {1} dias ({2} ± {3} CPM por dia, {4} dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo.	The background fell about {0}% in {1} days ({2} ± {3} CPM per day, {4} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.
+Mudança brusca por volta de {0}: o fundo passou de {1} para {2} CPM ({3}%), com {4} dias antes e {5} depois. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo.	Abrupt change around {0}: the background went from {1} to {2} CPM ({3}%), with {4} days before and {5} after. It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.
+Janela do fundo	Background window
+Média e mediana móveis de 24 h do fundo em casa	24 h moving average and median of the home background
+Dispersão de cada dia	Each day's dispersion

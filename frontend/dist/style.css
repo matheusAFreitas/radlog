@@ -1192,3 +1192,10 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .mat-table td.disponivel > span:first-child { color: var(--accent); }
 .mat-table td.formacao > span:first-child { color: var(--att); }
 .mat-table td.aguardando { color: var(--muted); }
+
+/* fundo ao longo do tempo (2.4) */
+.bg-fit { margin: 4px 0 10px; padding: 10px 12px; border-radius: 8px; border: 1px solid var(--border); font-size: 14px; }
+.bg-fit.warn { border-color: var(--att); }
+.bg-fit strong { display: block; margin-bottom: 2px; }
+.bg-disp-wrap .y-axis, .bg-disp { height: 80px; }
+.ad-legend .key i.dot-k { width: 6px; height: 6px; border: 0; border-radius: 50%; background: #E9EDEF; opacity: .75; }

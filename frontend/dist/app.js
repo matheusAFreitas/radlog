@@ -882,7 +882,7 @@ async function showView(v, skipRender) {
   document.querySelectorAll(".col-b .view-graficos").forEach((el) => { el.hidden = v !== "graficos"; });
   for (const [k, id] of Object.entries(VIEW_IDS)) $(id).hidden = k !== v;
   document.querySelectorAll("#viewTabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
-  if (v === "graficos") { refreshChart(); refreshDose(); refreshHeat(); }
+  if (v === "graficos") { refreshChart(); refreshDose(); refreshHeat(); refreshBgTrend(); }
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
@@ -1698,6 +1698,7 @@ function wireHeat() {
     openHeatRange(d.i, Math.min(d.h0, d.h1), Math.max(d.h0, d.h1));
   });
   window.addEventListener("scroll", hideHeatTip, { passive: true });
+  wireBgTrend();
   document.querySelectorAll("#heatSeg button").forEach((b) => b.addEventListener("click", () => {
     if (b.dataset.hmonth) {
       state.heatMonthMode = true;
@@ -4132,7 +4133,7 @@ function listen() {
 }
 
 async function refreshAll() {
-  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshDaily(), refreshEvents(), refreshRainImpact()]);
+  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshBgTrend(), refreshDaily(), refreshEvents(), refreshRainImpact()]);
 }
 
 // ---------- chuva × radiação ----------
@@ -5170,6 +5171,124 @@ function drawSumChartUSv(r, rc) {
     (rc.bgUSv ? '<span class="key"><i style="border-color:#F472B6;border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
 }
 
+// ---------- fundo ao longo do tempo (2.4) ----------
+
+const BG_STATE = { estavel: "Estável", subindo: "Tendência de alta", descendo: "Tendência de queda", degrau: "Mudança brusca", insuficiente: "Ainda sem tendência" };
+let bgSeq = 0;
+async function refreshBgTrend() {
+  if (!api.GetBgTrend || state.view !== "graficos") return;
+  const days = state.bgDays || 30;
+  document.querySelectorAll("#bgSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.bgdays === days)));
+  const my = ++bgSeq;
+  let tr;
+  try { tr = await api.GetBgTrend(days); } catch (e) { return; }
+  if (my !== bgSeq) return;
+  state.bgTrend = tr;
+  drawBgTrend(tr);
+}
+
+function drawBgTrend(tr) {
+  const pts = tr.pts || [], daily = tr.daily || [];
+  const hist = tr.first ? Math.max(0, (tr.to - Math.max(tr.from, tr.first)) / DAY_MS) : 0;
+  const forming = tr.first && tr.first > tr.from;
+  $("bgSub").textContent = !tr.minutes ? "sem minutos em casa nessa janela"
+    : `${fmt(tr.minutes, 0)} min em casa · ${daily.length} ${daily.length === 1 ? "dia" : "dias"} com dado` +
+      (forming ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${tr.days} dias)` : "");
+  const fit = $("bgFit");
+  const f = tr.fit || {};
+  fit.hidden = !tr.minutes;
+  fit.className = "bg-fit" + (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? " warn" : "");
+  fit.innerHTML = "<strong></strong><span></span>";
+  fit.children[0].textContent = BG_STATE[f.state] || "";
+  fit.children[1].textContent = f.text || "";
+
+  // gráfico: média e mediana móveis, a média aparada de cada dia (pontos) e
+  // a reta ou o degrau quando há aviso
+  const svg = $("bgChart");
+  let lo = Infinity, hi = -Infinity;
+  for (const p of pts) for (const v of [p.mean, p.median]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  for (const d of daily) if (d.full) { lo = Math.min(lo, d.trimmed); hi = Math.max(hi, d.trimmed); }
+  const ys = $("bgY").children;
+  if (!isFinite(lo)) { svg.innerHTML = ""; for (const e of ys) e.textContent = ""; $("bgLegend").textContent = ""; $("bgDisp").innerHTML = ""; for (const e of $("bgX").children) e.textContent = ""; return; }
+  const pad = Math.max(1, (hi - lo) * 0.15);
+  lo = Math.max(0, Math.floor(lo - pad)); hi = Math.ceil(hi + pad);
+  const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
+  const y = (v) => H - ((v - lo) / (hi - lo)) * H;
+  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, hi - lo < 6 ? 1 : 0);
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="#A3ADB4" fill-opacity="0.06"/>`;
+  const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = val(p); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
+  out += `<path d="${path((p) => p.mean)}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path((p) => p.median)}" fill="none" stroke="#7DD3FC" stroke-width="1.4" stroke-dasharray="5 3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="#E9EDEF" fill-opacity="0.75"/>`;
+  if (f.state === "subindo" || f.state === "descendo") {
+    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+  } else if (f.state === "degrau") {
+    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+  }
+  svg.innerHTML = out;
+  const lab = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
+  const xs = $("bgX").children;
+  xs[0].textContent = lab(tr.from); xs[1].textContent = lab((tr.from + tr.to) / 2); xs[2].textContent = "agora";
+  $("bgLegend").innerHTML = '<span class="key"><i style="border-color:#6EE7A0"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
+    '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
+    (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:#F5B84A;border-top-style:dashed"></i>tendência</span>' : "") +
+    (forming ? '<span class="key"><i class="sw" style="background:#A3ADB4"></i>antes do primeiro dado</span>' : "") + " (CPM)";
+
+  // dispersão de cada dia
+  const dsvg = $("bgDisp"), DH = 80;
+  let dtop = 2;
+  for (const d of daily) dtop = Math.max(dtop, Math.ceil(d.dispersion * 2) / 2);
+  const dys = $("bgDY").children;
+  dys[0].textContent = fmt(dtop, 1); dys[1].textContent = fmt(dtop / 2, 1); dys[2].textContent = "0";
+  const bw = Math.max(2, (DAY_MS / (tr.to - tr.from)) * W * 0.7);
+  let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="#A3ADB4" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+  for (const d of daily) {
+    const h = (Math.min(dtop, d.dispersion) / dtop) * DH, cx = x(d.day + DAY_MS / 2);
+    const col = d.dispersion >= 1.2 ? "#F5B84A" : "#6EE7A0";
+    dout += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${(DH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" fill-opacity="${d.full ? 0.7 : 0.3}"/>`;
+  }
+  dsvg.innerHTML = dout;
+}
+
+function wireBgTrend() {
+  state.bgDays = parseInt(localGet("bgDays") || "30", 10) || 30;
+  document.querySelectorAll("#bgSeg button").forEach((b) => b.addEventListener("click", () => {
+    state.bgDays = +b.dataset.bgdays; localSet("bgDays", String(state.bgDays)); refreshBgTrend();
+  }));
+  const plot = $("bgPlot");
+  plot.addEventListener("mousemove", (ev) => {
+    const tr = state.bgTrend;
+    if (!tr || !tr.pts || !tr.pts.length) return;
+    const b = plot.getBoundingClientRect(), f = (ev.clientX - b.left) / b.width;
+    const t = tr.from + f * (tr.to - tr.from);
+    let best = tr.pts[0];
+    for (const p of tr.pts) if (Math.abs(p.t - t) < Math.abs(best.t - t)) best = p;
+    $("bgCursor").hidden = false;
+    $("bgCursor").style.left = (((best.t - tr.from) / (tr.to - tr.from)) * 100) + "%";
+    const tip = $("bgTip");
+    tip.hidden = false;
+    tip.textContent = `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean, 1)} · mediana ${fmt(best.median, 1)} CPM · n = ${fmt(best.n, 0)} min`);
+    const left = ((best.t - tr.from) / (tr.to - tr.from)) * b.width;
+    tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
+  });
+  plot.addEventListener("mouseleave", () => { $("bgCursor").hidden = true; $("bgTip").hidden = true; });
+  const dplot = $("bgDPlot");
+  dplot.addEventListener("mousemove", (ev) => {
+    const tr = state.bgTrend;
+    if (!tr || !tr.daily || !tr.daily.length) return;
+    const b = dplot.getBoundingClientRect(), t = tr.from + ((ev.clientX - b.left) / b.width) * (tr.to - tr.from);
+    const d = tr.daily.find((q) => t >= q.day && t < q.day + DAY_MS);
+    const tip = $("bgDTip");
+    if (!d) { tip.hidden = true; return; }
+    tip.hidden = false;
+    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} · σ real ${fmt(d.sd, 1)} ÷ acaso ${fmt(d.poissonSD, 1)} · mediana ${fmt(d.median, 1)} CPM · n = ${fmt(d.n, 0)} min`;
+    const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
+    tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
+  });
+  dplot.addEventListener("mouseleave", () => { $("bgDTip").hidden = true; });
+}
+
 // ---------- relatórios em PDF ----------
 
 async function exportMeasureReport(id) {
@@ -5817,6 +5936,27 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
       { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
     ],
+    GetBgTrend: async (days) => {
+      const now = Date.now(), to = Math.floor(now / 6e4) * 6e4 + 6e4, from = to - days * 864e5;
+      const step = days <= 7 ? 36e5 : days <= 30 ? 108e5 : days <= 90 ? 432e5 : 864e5;
+      const all = range(from - 864e5, to), pts = [];
+      for (let t = from + step; t <= to; t += step) {
+        const w = all.filter((p) => p.t >= t - 864e5 && p.t < t).map((p) => p.cpm).sort((a, b) => a - b);
+        const pt = { t, n: w.length, mean: null, median: null };
+        if (w.length >= 360) { pt.mean = w.reduce((a, b) => a + b, 0) / w.length; pt.median = w[Math.floor(w.length / 2)]; }
+        pts.push(pt);
+      }
+      const byDay = new Map();
+      for (const p of all) { if (p.t < from) continue; const d = new Date(p.t); d.setHours(0, 0, 0, 0); const k = d.getTime(); (byDay.get(k) || byDay.set(k, []).get(k)).push(p.cpm); }
+      const daily = [...byDay.entries()].sort((a, b) => a[0] - b[0]).map(([day, v]) => {
+        v.sort((a, b) => a - b); const n = v.length, mean = v.reduce((a, b) => a + b, 0) / n, sd = Math.sqrt(v.reduce((a, b) => a + (b - mean) ** 2, 0) / Math.max(1, n - 1));
+        return { day, n, mean, trimmed: mean, median: v[Math.floor(n / 2)], sd, poissonSD: Math.sqrt(mean), dispersion: sd / Math.sqrt(mean), full: n >= 720 };
+      });
+      const full = daily.filter((d) => d.full).length;
+      const fit = full < 7 ? { state: "insuficiente", daysUsed: full, text: `Poucos dias completos para falar de tendência: ${full} de 7 (um dia conta com pelo menos 12 h medidas em casa).` }
+        : { state: "estavel", daysUsed: full, text: `Sem tendência: a média dos dias variou dentro do esperado (+0,03 ± 0,05 CPM por dia, +1,2% no período, ${full} dias completos).` };
+      return { days, from, to, stepMs: step, minutes: daily.reduce((a, d) => a + d.n, 0), first: demoFirst(), pts, daily, fit };
+    },
     GetMaturity: async () => {
       const now = Date.now(), f = demoFirst();
       const win = (d) => { const from = now - d * 864e5, hf = Math.max(from, f), hist = Math.round((now - hf) / 6e4), n = range(from, now).length;

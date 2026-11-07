@@ -1620,7 +1620,25 @@ const I18N_EN = {
 "Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas \"em formação\" ainda não representam a janela toda.": "For each window (up to now): whether the history already covers the whole window and how much of it was measured, counting from the device's first reading. Averages of \"forming\" windows don't represent the whole window yet.",
 "janela": "window",
 "disponível": "available",
-"aguardando dados": "waiting for data"
+"aguardando dados": "waiting for data",
+"Fundo ao longo do tempo": "Background over time",
+"90 dias": "90 days",
+"Variação dentro de cada dia": "Variation within each day",
+"Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.": "Bars: each day's dispersion, the actual standard deviation of the minutes divided by chance's (√mean). Near 1, the day only varied by chance; above 1.2, it really varied (radon, rain, an object nearby). Only minutes at home, without object measurements and without saturated or interference minutes; the moving window needs at least 6 h measured in the 24 h.",
+"Estável": "Stable",
+"Tendência de alta": "Upward trend",
+"Tendência de queda": "Downward trend",
+"Mudança brusca": "Abrupt change",
+"Ainda sem tendência": "No trend yet",
+"sem minutos em casa nessa janela": "no minutes at home in this window",
+"média móvel de 24 h": "24 h moving average",
+"mediana móvel de 24 h": "24 h moving median",
+"média de cada dia (sem os 5% extremos)": "each day's average (without the 5% extremes)",
+"tendência": "trend",
+"antes do primeiro dado": "before the first reading",
+"Janela do fundo": "Background window",
+"Média e mediana móveis de 24 h do fundo em casa": "24 h moving average and median of the home background",
+"Dispersão de cada dia": "Each day's dispersion"
 },
 "patterns": [
 [
@@ -1632,6 +1650,44 @@ const I18N_EN = {
 " CPM e quase todas as leituras (95%) caem entre ",
 " CPM. Um pouco acima disso ainda pode ser acaso; acima de ",
 " CPM dificilmente é."
+]
+],
+[
+"Mudança brusca por volta de ",
+"^Mudança brusca por volta de ((?:(?! · ).)+?): o fundo passou de ((?:(?! · ).)+?) para ((?:(?! · ).)+?) CPM \\(((?:(?! · ).)+?)%\\), com ((?:(?! · ).)+?) dias antes e ((?:(?! · ).)+?) depois\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"Abrupt change around ${1}: the background went from ${2} to ${3} CPM (${4}%), with ${5} days before and ${6} after. It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"Mudança brusca por volta de ",
+": o fundo passou de ",
+" para ",
+" CPM (",
+"%), com ",
+" dias antes e ",
+" depois. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"O fundo desceu cerca de ",
+"^O fundo desceu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"The background fell about ${1}% in ${2} days (${3} ± ${4} CPM per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"O fundo desceu cerca de ",
+"% em ",
+" dias (",
+" CPM por dia, ",
+" dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"O fundo subiu cerca de ",
+"^O fundo subiu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"The background rose about ${1}% in ${2} days (${3} ± ${4} CPM per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"O fundo subiu cerca de ",
+"% em ",
+" dias (",
+" CPM por dia, ",
+" dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
 ]
 ],
 [
@@ -1823,12 +1879,33 @@ const I18N_EN = {
 ]
 ],
 [
+"Sem tendência: a média dos dias variou dentro do esperado (",
+"^Sem tendência: a média dos dias variou dentro do esperado \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM por dia, ((?:(?! · ).)+?)% no período, ((?:(?! · ).)+?) dias completos\\)\\.$",
+"No trend: the daily average varied within what's expected (${1} ± ${2} CPM per day, ${3}% over the period, ${4} complete days).",
+[
+"Sem tendência: a média dos dias variou dentro do esperado (",
+" CPM por dia, ",
+"% no período, ",
+" dias completos)."
+]
+],
+[
 "Radar indisponível agora (",
 "^Radar indisponível agora \\(((?:(?! · ).)+?)\\); usando o modelo do Open\\-Meteo, que pode não mostrar chuva bem localizada\\.$",
 "Radar unavailable now (${1}); using the Open-Meteo model, which may miss very local rain.",
 [
 "Radar indisponível agora (",
 "); usando o modelo do Open-Meteo, que pode não mostrar chuva bem localizada."
+]
+],
+[
+"Poucos dias completos para falar de tendência: ",
+"^Poucos dias completos para falar de tendência: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) \\(um dia conta com pelo menos 12 h medidas em casa\\)\\.$",
+"Too few complete days to talk about a trend: ${1} of ${2} (a day counts with at least 12 h measured at home).",
+[
+"Poucos dias completos para falar de tendência: ",
+" de ",
+" (um dia conta com pelo menos 12 h medidas em casa)."
 ]
 ],
 [
@@ -4080,6 +4157,16 @@ const I18N_EN = {
 ]
 ],
 [
+"janela em formação (",
+"^janela em formação \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias\\)$",
+"window still forming (${1} of ${2} days)",
+[
+"janela em formação (",
+" de ",
+" dias)"
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -5284,6 +5371,25 @@ const I18N_EN = {
 [
 "para ±3%: ~",
 " no total"
+]
+],
+[
+"poucos dados (",
+"^poucos dados \\(((?:(?! · ).)+?) min\\)$",
+"little data (${1} min)",
+[
+"poucos dados (",
+" min)"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) CPM$",
+"average ${1} · median ${2} CPM",
+[
+"média ",
+" · mediana ",
+" CPM"
 ]
 ],
 [
@@ -6792,6 +6898,23 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) min em casa$",
+"${1} min at home",
+[
+" min em casa"
+]
+],
+[
+"mediana ",
+"^mediana ((?:(?! · ).)+?) CPM$",
+"median ${1} CPM",
+[
+"mediana ",
+" CPM"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -7143,6 +7266,14 @@ const I18N_EN = {
 ]
 ],
 [
+"dispersão ",
+"^dispersão ((?:(?! · ).)+?)$",
+"dispersion ${1}",
+[
+"dispersão "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -7331,6 +7462,14 @@ const I18N_EN = {
 ]
 ],
 [
+"24 h até ",
+"^24 h até ((?:(?! · ).)+?)$",
+"24 h up to ${1}",
+[
+"24 h até "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -7490,6 +7629,15 @@ const I18N_EN = {
 "sample ${1}",
 [
 "amostra "
+]
+],
+[
+"n = ",
+"^n = ((?:(?! · ).)+?) min$",
+"n = ${1} min",
+[
+"n = ",
+" min"
 ]
 ],
 [
@@ -7707,6 +7855,14 @@ const I18N_EN = {
 "background ${1}",
 [
 "fundo "
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?)$",
+"average ${1}",
+[
+"média "
 ]
 ],
 [
