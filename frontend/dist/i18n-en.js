@@ -1338,7 +1338,10 @@ const I18N_EN = {
 "leitura ao vivo do RadiaCode (µSv/h)": "RadiaCode live reading (µSv/h)",
 "valor do minuto": "minute value",
 "valor do minuto do RadiaCode (µSv/h)": "RadiaCode minute value (µSv/h)",
-"Só há o valor de cada minuto do RadiaCode.": "Only the RadiaCode's per-minute values are available."
+"Só há o valor de cada minuto do RadiaCode.": "Only the RadiaCode's per-minute values are available.",
+"Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.": "Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RadiaCode measured in it and the GMC-800 over the same time.",
+"sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)": "no readings on the PC in this period (with the phone app connected, the data stays on the phone)",
+"não deu para calcular": "couldn't calculate"
 },
 "patterns": [
 [
@@ -1940,6 +1943,16 @@ const I18N_EN = {
 [
 "acima do que o aparelho mede · o real pode ser maior que ",
 " µSv/h"
+]
+],
+[
+"RadiaCode fora de casa, somando os períodos: ",
+"^RadiaCode fora de casa, somando os períodos: ((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?) medidos\\.$",
+"RadiaCode away from home, adding up the periods: ${1} µSv over ${2} measured.",
+[
+"RadiaCode fora de casa, somando os períodos: ",
+" µSv em ",
+" medidos."
 ]
 ],
 [
@@ -2926,6 +2939,15 @@ const I18N_EN = {
 ]
 ],
 [
+"média ",
+"^média ((?:(?! · ).)+?) µSv/h \\(igual ao seu normal\\)$",
+"average ${1} µSv/h (same as your normal)",
+[
+"média ",
+" µSv/h (igual ao seu normal)"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -3193,6 +3215,16 @@ const I18N_EN = {
 " µSv em ",
 " · média ",
 " · máximo "
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)% do seu normal\\)$",
+"average ${1} µSv/h (${2}% vs. your normal)",
+[
+"média ",
+" µSv/h (",
+"% do seu normal)"
 ]
 ],
 [
@@ -5198,6 +5230,15 @@ const I18N_EN = {
 ]
 ],
 [
+"média ",
+"^média ((?:(?! · ).)+?) µSv/h$",
+"average ${1} µSv/h",
+[
+"média ",
+" µSv/h"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -5453,6 +5494,15 @@ const I18N_EN = {
 ]
 ],
 [
+"máx ",
+"^máx ((?:(?! · ).)+?) µSv/h$",
+"max ${1} µSv/h",
+[
+"máx ",
+" µSv/h"
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -5584,6 +5634,14 @@ const I18N_EN = {
 ]
 ],
 [
+"alertas: ",
+"^alertas: ((?:(?! · ).)+?)$",
+"alerts: ${1}",
+[
+"alertas: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -5702,6 +5760,23 @@ const I18N_EN = {
 "${1} µSv over ${2}",
 [
 " µSv em "
+]
+],
+[
+"máx ",
+"^máx ((?:(?! · ).)+?) CPM$",
+"max ${1} CPM",
+[
+"máx ",
+" CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% medido$",
+"${1}% measured",
+[
+"% medido"
 ]
 ],
 [

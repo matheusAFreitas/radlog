@@ -1888,3 +1888,14 @@ Alarme no RadiaCode: {0} µSv/h (limite {1})	Alarm on the RadiaCode: {0} µSv/h 
 Perigo no RadiaCode: {0} µSv/h (a partir de {1})	Danger on the RadiaCode: {0} µSv/h (from {1})
 pico ao vivo {0} µSv/h	live peak {0} µSv/h
 maior pico {0} µSv/h	highest peak {0} µSv/h
+Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.	Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RadiaCode measured in it and the GMC-800 over the same time.
+RadiaCode fora de casa, somando os períodos: {0} µSv em {1} medidos.	RadiaCode away from home, adding up the periods: {0} µSv over {1} measured.
+média {0} µSv/h (igual ao seu normal)	average {0} µSv/h (same as your normal)
+média {0} µSv/h ({1}% do seu normal)	average {0} µSv/h ({1}% vs. your normal)
+média {0} µSv/h	average {0} µSv/h
+máx {0} µSv/h	max {0} µSv/h
+máx {0} CPM	max {0} CPM
+{0}% medido	{0}% measured
+alertas: {0}	alerts: {0}
+sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)	no readings on the PC in this period (with the phone app connected, the data stays on the phone)
+não deu para calcular	couldn't calculate

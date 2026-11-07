@@ -835,9 +835,12 @@
       <h2 id="periodsTitle">Fora de casa</h2>
       <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
     </div>
-    <p class="small muted">Marque quando o contador estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora.</p>
+    <p class="small muted">Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.</p>
     <div class="p-grid">
+    <div>
+    <p class="small p-total" id="periodTotal" hidden></p>
     <ul class="periods" id="periodList"></ul>
+    </div>
     <fieldset id="periodForm">
       <legend id="periodFormTitle">Novo período</legend>
       <label for="pName">Nome</label>

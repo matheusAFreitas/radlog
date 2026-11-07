@@ -1,5 +1,14 @@
 # Versões
 
+## 1.34.0
+- **Fora de casa com o RadiaCode**: cada período mostra o que o RadiaCode
+  mediu nele (dose, média comparada com o seu normal em casa, máximo, quanto
+  foi medido e alertas) e o GMC-800 no mesmo tempo. Em cima da lista, a dose
+  do RadiaCode somando todos os períodos. Quando o RadiaCode estava no app do
+  celular, o período avisa que os dados ficaram lá.
+- Os campos de início e fim do período não passam mais da borda em janelas
+  estreitas.
+
 ## 1.33.0
 - **Alertas do RadiaCode**: o RadiaCode agora gera alertas como o GMC, em
   µSv/h, com os limites do próprio aparelho:

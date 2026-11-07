@@ -2491,12 +2491,75 @@ const fromLocalInput = (s) => (s ? new Date(s).getTime() : NaN);
 
 let periodEditing = 0;
 
+// números de um período: RadiaCode (você) e GMC-800 no mesmo tempo
+state.periodSum = {};
+function periodSummary(p) {
+  const to = Math.min(p.to, Date.now());
+  const key = `${p.from}-${to}`;
+  // período que ainda está acontecendo: refaz a conta a cada abertura
+  if (!state.periodSum[key] || p.to > Date.now()) state.periodSum[key] = api.GetSummary(p.from, to).catch(() => null);
+  return state.periodSum[key];
+}
+
+function periodStatsEl(p) {
+  const box = document.createElement("div");
+  box.className = "p-stats mono";
+  box.textContent = "…";
+  periodSummary(p).then((s) => {
+    box.textContent = "";
+    if (!s) { box.textContent = "não deu para calcular"; return; }
+    const line = (cls, label, text, warn) => {
+      const d = document.createElement("div");
+      d.className = cls;
+      const b = document.createElement("b");
+      b.textContent = label;
+      const t = document.createElement("span");
+      t.textContent = text;
+      if (warn) t.className = "warn";
+      d.append(b, t);
+      box.appendChild(d);
+    };
+    const rc = s.rc && s.rc.minutes ? s.rc : null;
+    if (rc) {
+      const dg = (v) => fmt(v, usvDigits(v));
+      const vs = rc.bgUSv ? (Math.abs(rc.vsBgPct) < 5 ? " (igual ao seu normal)" : ` (${rc.vsBgPct > 0 ? "+" : "−"}${fmt(Math.abs(rc.vsBgPct), 0)}% do seu normal)`) : "";
+      const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
+      if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
+      if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
+      line("p-rc", "RadiaCode", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
+    } else {
+      line("p-rc", "RadiaCode", "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)");
+    }
+    if (s.minutes) {
+      const parts = [`média ${fmt(s.avg, 1)} CPM`, `máx ${fmt(s.max, 0)} CPM`];
+      if (s.coverage < 0.95) parts.push(`${fmt(s.coverage * 100, 0)}% medido`);
+      if (s.danger || s.alarm || s.attention) parts.push(`alertas: ${alertsText(s)}`);
+      line("p-gmc", "GMC-800", parts.join(" · "));
+    } else line("p-gmc", "GMC-800", "sem leitura");
+  });
+  return box;
+}
+
+// total do RadiaCode fora de casa (todos os períodos)
+async function renderPeriodTotal() {
+  const el = $("periodTotal");
+  const list = state.periods || [];
+  if (!list.length) { el.hidden = true; return; }
+  const sums = await Promise.all(list.map(periodSummary));
+  let dose = 0, min = 0;
+  for (const s of sums) if (s && s.rc && s.rc.minutes) { dose += s.rc.dose; min += s.rc.minutes; }
+  el.hidden = !min;
+  if (min) el.textContent = `RadiaCode fora de casa, somando os períodos: ${fmt(dose, dose < 10 ? 2 : 1)} µSv em ${hm(min)} medidos.`;
+}
+
 function renderPeriods() {
   const ul = $("periodList");
   ul.textContent = "";
-  if (!state.periods.length) { ul.innerHTML = '<li class="muted small">Nenhum período marcado.</li>'; return; }
+  if (!state.periods.length) { ul.innerHTML = '<li class="muted small">Nenhum período marcado.</li>'; renderPeriodTotal(); return; }
+  renderPeriodTotal();
   for (const p of [...state.periods].reverse()) {
     const li = document.createElement("li");
+    li.className = "p-row";
     const txt = document.createElement("span");
     txt.innerHTML = `<strong></strong> <span class="mono small muted"></span>`;
     txt.firstChild.textContent = p.name;
@@ -2517,7 +2580,10 @@ function renderPeriods() {
     rep.type = "button"; rep.className = "btn small"; rep.textContent = "Relatório (PDF)";
     rep.title = "Relatório em PDF só desse trecho fora de casa";
     rep.addEventListener("click", () => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name));
-    li.append(txt, see, rep, ed, del);
+    const head = document.createElement("div");
+    head.className = "p-head";
+    head.append(txt, see, rep, ed, del);
+    li.append(head, periodStatsEl(p));
     ul.appendChild(li);
   }
 }
@@ -2552,6 +2618,7 @@ function showRange(from, to) {
 
 async function refreshPeriods() {
   try { state.periods = (await api.GetPeriods()) || []; } catch (e) { state.periods = []; }
+  state.periodSum = {};
   renderPeriods();
 }
 
