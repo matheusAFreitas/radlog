@@ -9,15 +9,18 @@ import (
 // webviewDir é a pasta fixa do WebView2 (cache e localStorage da tela),
 // dentro da pasta de dados do app.
 func webviewDir() string {
+	if migNow.dir != "" {
+		return filepath.Join(migNow.dir, "webview")
+	}
 	base, err := os.UserConfigDir()
 	if err != nil || base == "" {
 		return ""
 	}
-	return filepath.Join(base, "GMC Monitor", "webview")
+	return filepath.Join(base, appDirName, "webview")
 }
 
 // oldWebviewDirs acha as pastas que o WebView2 criava em %APPDATA% com o
-// nome de cada .exe (GMC-Monitor-v1.6.2.exe, GMC-Monitor(1).exe...).
+// nome de cada .exe (GMC-Monitor-v1.6.2.exe, GMC-Monitor(1).exe, RadLog...).
 // Só entram pastas com o nome do app terminando em .exe e com EBWebView
 // dentro: é certeza de que são só cache da tela.
 func oldWebviewDirs(base string) []string {
@@ -29,7 +32,7 @@ func oldWebviewDirs(base string) []string {
 	for _, e := range ents {
 		n := e.Name()
 		low := strings.ToLower(n)
-		if !e.IsDir() || !strings.HasPrefix(low, "gmc-monitor") || !strings.HasSuffix(low, ".exe") {
+		if !e.IsDir() || !(strings.HasPrefix(low, "gmc-monitor") || strings.HasPrefix(low, "radlog")) || !strings.HasSuffix(low, ".exe") {
 			continue
 		}
 		dir := filepath.Join(base, n)

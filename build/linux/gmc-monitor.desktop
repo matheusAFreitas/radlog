@@ -1,9 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=GMC Monitor
-Comment=Monitor do contador Geiger GQ GMC-800
-Exec=gmc-monitor
-Icon=gmc-monitor
-Categories=Science;Utility;
-Terminal=false
-StartupWMClass=gmc-monitor

@@ -36,11 +36,11 @@ func (a *App) startTray() {
 		systray.Run(func() {
 			systray.SetIcon(trayIcon)
 			systray.SetTooltip(appTitle)
-			open := systray.AddMenuItem(a.T("Abrir o GMC Monitor"), a.T("Mostra a janela"))
+			open := systray.AddMenuItem(a.T("Abrir o RadLog"), a.T("Mostra a janela"))
 			systray.AddSeparator()
 			quit := systray.AddMenuItem(a.T("Sair"), a.T("Fecha o app (para de monitorar)"))
 			a.trayMu.Lock()
-			a.trayItems = []trayItem{{open, "Abrir o GMC Monitor", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
+			a.trayItems = []trayItem{{open, "Abrir o RadLog", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
 			a.trayMu.Unlock()
 			a.trayReady.Store(true)
 			for {
@@ -92,7 +92,30 @@ func (a *App) trayShow(tip, level string) {
 // ---------- iniciar com o Windows ----------
 
 const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
-const runName = "GMC Monitor"
+const runName = "RadLog"
+
+// oldRunName é o nome da 1.x (GMC Monitor) no Run e no StartupApproved.
+const oldRunName = "GMC Monitor"
+
+// renameAutostart troca o item "GMC Monitor" do início com o Windows pelo
+// "RadLog", levando a marca de desativado do Gerenciador de Tarefas.
+func renameAutostart() {
+	if k, err := registry.OpenKey(registry.CURRENT_USER, runKey, registry.SET_VALUE|registry.QUERY_VALUE); err == nil {
+		k.DeleteValue(oldRunName)
+		k.Close()
+	}
+	k, err := registry.OpenKey(registry.CURRENT_USER, approvedKey, registry.SET_VALUE|registry.QUERY_VALUE)
+	if err != nil {
+		return
+	}
+	defer k.Close()
+	if b, _, err := k.GetBinaryValue(oldRunName); err == nil {
+		if _, _, err := k.GetBinaryValue(runName); err != nil {
+			k.SetBinaryValue(runName, b)
+		}
+		k.DeleteValue(oldRunName)
+	}
+}
 
 // O Gerenciador de Tarefas (Aplicativos de inicialização) desativa um item
 // sem apagar a linha do Run: marca aqui, com o 1º byte ímpar (0x03).

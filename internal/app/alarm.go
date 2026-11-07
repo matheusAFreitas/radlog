@@ -7,7 +7,7 @@ import (
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
-const appTitle = "GMC Monitor"
+const appTitle = "RadLog"
 
 // alarmStarted chama atenção para a janela: título com o alarme e, se a
 // opção estiver ligada, traz a janela para a frente (mesmo minimizada).

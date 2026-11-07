@@ -11,7 +11,7 @@ func TestT(t *testing.T) {
 		"Nenhuma diferença que dê para separar do fundo.": "No difference that can be told apart from background.",
 		"Atenção: 54 CPM (a partir de 50) · possível interferência (40 contagens em 1 s às 23:41:07)": "Attention: 54 CPM (from 50) · possible interference (40 counts in 1 s at 23:41:07)",
 		"23,5":                "23.5",
-		"Abrir o GMC Monitor": "Open GMC Monitor",
+		"Abrir o RadLog": "Open RadLog",
 	}
 	for in, want := range cases {
 		if got := T("en", in); got != want {

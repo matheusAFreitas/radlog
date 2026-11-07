@@ -1,9 +1,10 @@
 # RadLog
 
-> Hoje ainda se chama **GMC Monitor** (versões 1.x). A partir da 2.0, com o
-> RadiaCode, passa a se chamar RadLog. Veja o [ROADMAP](docs/ROADMAP.md).
+> Até a 1.x se chamava **GMC Monitor**. A 2.0 leva os dados sozinha para a
+> pasta nova na primeira vez que abre. Veja o [ROADMAP](docs/ROADMAP.md).
 
-Monitor para o contador Geiger **GQ GMC-800**, feito em Go + Wails, para
+Registro de radiação para o contador Geiger **GQ GMC-800** e o
+**RadiaCode**, feito em Go + Wails, para
 Windows e Linux. Lê o contador pela USB a cada segundo, guarda uma leitura por
 minuto e mostra tudo numa tela só: leitura ao vivo, gráficos, dose acumulada,
 alertas, chuva × radiação, medição de objetos, relatórios em PDF e um log
@@ -15,9 +16,9 @@ Versão atual: veja `internal/app/version.go` e o [CHANGELOG](CHANGELOG.md).
 
 Os arquivos prontos ficam em **[Releases](../../releases)**:
 
-- Windows: `GMC-Monitor-vX.exe` (não precisa instalar; o WebView2 já vem no
+- Windows: `RadLog-vX.exe` (não precisa instalar; o WebView2 já vem no
   Windows 10/11).
-- Linux: `GMC-Monitor-vX-x86_64.AppImage`, ou o `.tar.gz` com o binário e o
+- Linux: `RadLog-vX-x86_64.AppImage`, ou o `.tar.gz` com o binário e o
   `install.sh`. Precisa da WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0`).
 
 Para atualizar, abra a versão nova com a antiga aberta: a antiga fecha e passa
@@ -97,7 +98,7 @@ o lugar para a nova sozinha.
 
 ## Onde ficam os dados
 
-`%AppData%\GMC Monitor\` (o botão "pasta de dados" no rodapé abre):
+`%AppData%\RadLog\` (o botão "pasta de dados" no rodapé abre):
 
 - `leituras\AAAA-MM.csv` — uma linha por minuto, abre direto no Excel
 - `historico\*.bin` — cópias brutas da memória do contador
@@ -114,7 +115,10 @@ o lugar para a nova sozinha.
 - `log.txt` (e `log-anterior.txt`) — log técnico; `diagnostico.txt` — estado do app quando algo travou
 - `anotacoes.json` — anotações do gráfico
 
-No Linux, a pasta é `~/.config/GMC Monitor/`.
+No Linux, a pasta é `~/.config/RadLog/`. Na primeira abertura da 2.0, o app
+copia a pasta antiga (`GMC Monitor`), confere arquivo por arquivo, guarda um
+backup dela em `migracao\` e só então a apaga (`migrado-de-gmc-monitor.json`
+diz o que foi feito).
 
 ## Compilar
 
@@ -128,7 +132,7 @@ scripts\build.bat
 ```
 
 Isso baixa as dependências (`go mod tidy`), roda os testes e gera
-`GMC-Monitor.exe`.
+`RadLog.exe`.
 
 As releases são geradas pelo GitHub Actions (`.github/workflows/release.yml`):
 uma tag `vX.Y.Z` igual ao `AppVersion` de `internal/app/version.go` compila o `.exe`, o
@@ -136,7 +140,7 @@ AppImage e o `.tar.gz` e publica com o trecho da versão no CHANGELOG.
 
 ### Linux
 
-O pacote `gmc-monitor-vX-linux-x86_64.tar.gz` já traz o binário pronto, o
+O pacote `radlog-vX-linux-x86_64.tar.gz` já traz o binário pronto, o
 `install.sh` (atalho no menu) e o `build-appimage.sh` (gera o AppImage; os
 arquivos ficam em `build/linux/`). Precisa da WebKitGTK 4.1 instalada
 (`sudo apt install libwebkit2gtk-4.1-0`).

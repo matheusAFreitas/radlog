@@ -137,7 +137,8 @@ func TestUpdateFlow(t *testing.T) {
 func TestOldVersionsIn(t *testing.T) {
 	dir := t.TempDir()
 	for _, n := range []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.21.0.exe", "GMC-Monitor-v99.0.0.exe",
-		"GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "outro.exe", "GMC-Monitor-v1.0.0-notas.txt"} {
+		"GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "outro.exe", "GMC-Monitor-v1.0.0-notas.txt",
+		"RadLog-v1.9.0.exe", "RadLog-v99.0.0.exe"} {
 		_ = os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
 	}
 	self := filepath.Join(dir, "GMC-Monitor-v1.21.0.exe")
@@ -145,7 +146,7 @@ func TestOldVersionsIn(t *testing.T) {
 	for _, p := range oldVersionsIn(dir, self) {
 		got = append(got, filepath.Base(p))
 	}
-	want := "GMC-Monitor-v1.0.0.exe,GMC-Monitor-v1.2.0-x86_64.AppImage,GMC-Monitor-v1.5.0.exe.part"
+	want := "GMC-Monitor-v1.0.0.exe,GMC-Monitor-v1.2.0-x86_64.AppImage,GMC-Monitor-v1.5.0.exe.part,RadLog-v1.9.0.exe"
 	if strings.Join(got, ",") != want {
 		t.Fatalf("apagaria %v", got)
 	}

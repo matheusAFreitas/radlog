@@ -9,10 +9,10 @@ echo Rodando testes...
 go test ./... || goto erro
 
 echo Compilando...
-go build -trimpath -tags desktop,production -ldflags "-w -s -H windowsgui" -o GMC-Monitor.exe . || goto erro
+go build -trimpath -tags desktop,production -ldflags "-w -s -H windowsgui" -o RadLog.exe . || goto erro
 
 echo.
-echo Pronto: GMC-Monitor.exe
+echo Pronto: RadLog.exe
 goto fim
 
 :erro

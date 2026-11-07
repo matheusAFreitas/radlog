@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=RadLog
+Comment=Registro de radiação: contador Geiger GQ GMC-800 e RadiaCode
+Exec=radlog
+Icon=radlog
+Categories=Science;Utility;
+Terminal=false
+StartupWMClass=radlog

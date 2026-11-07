@@ -49,7 +49,7 @@ func (a *App) logf(format string, args ...any) {
 
 func (a *App) logStart() {
 	host, _ := os.Hostname()
-	a.logf("==== GMC Monitor %s iniciado (%s/%s, %s, PC %s)", AppVersion, runtime.GOOS, runtime.GOARCH, runtime.Version(), host)
+	a.logf("==== RadLog %s iniciado (%s/%s, %s, PC %s)", AppVersion, runtime.GOOS, runtime.GOARCH, runtime.Version(), host)
 }
 
 // logPorts registra as portas seriais que o Windows está vendo agora.

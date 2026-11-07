@@ -510,26 +510,19 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		{"Fundo atual", "mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa"},
 		{"Lacuna", "minuto sem leitura (cabo fora, app fechado sem histórico baixado); nunca conta como zero"},
 		{"Horários", "hora local (" + zone + ")"},
-		{"Programa", "GMC Monitor " + AppVersion},
+		{"Programa", "RadLog " + AppVersion},
 	}
 	return r, nil
 }
 
-// defaultReportDir é Documentos/GMC Monitor/Relatórios (no Linux, a pasta
+// defaultReportDir é Documentos/RadLog/Relatórios (no Linux, a pasta
 // Documentos ou Documents que existir; senão a pasta pessoal).
 func defaultReportDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil || home == "" {
+	docs := docsBase()
+	if docs == "" {
 		return ""
 	}
-	docs := home
-	for _, n := range []string{"Documents", "Documentos"} {
-		if st, err := os.Stat(filepath.Join(home, n)); err == nil && st.IsDir() {
-			docs = filepath.Join(home, n)
-			break
-		}
-	}
-	return filepath.Join(docs, "GMC Monitor", "Relatórios")
+	return filepath.Join(docs, appDirName, "Relatórios")
 }
 
 // ReportDirInfo é o que as Configurações mostram.

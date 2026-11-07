@@ -88,7 +88,7 @@ type Settings struct {
 	RcNoRaw bool `json:"rcNoRaw"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
-	// pasta dos relatórios em PDF; vazio = Documentos/GMC Monitor/Relatórios
+	// pasta dos relatórios em PDF; vazio = Documentos/RadLog/Relatórios
 	// (report.go; só muda por ChooseReportDir)
 	ReportDir string `json:"reportDir"`
 }
@@ -387,15 +387,22 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	base, err := os.UserConfigDir()
-	if err != nil || base == "" {
-		base, _ = os.Getwd()
+	a.dataDir = migNow.dir
+	if a.dataDir == "" {
+		base, err := os.UserConfigDir()
+		if err != nil || base == "" {
+			base, _ = os.Getwd()
+		}
+		a.dataDir = filepath.Join(base, appDirName)
 	}
-	a.dataDir = filepath.Join(base, "GMC Monitor")
 	_ = os.MkdirAll(a.dataDir, 0o755)
 	a.logStart()
 
 	a.settings = a.loadSettings()
+	if d := docsBase(); d != "" && a.settings.ReportDir == filepath.Join(d, oldDirName, "Relatórios") {
+		a.settings.ReportDir = "" // era a pasta padrão antiga: vale a nova (a migração levou os PDFs)
+	}
+	renameAutostart() // tira o "GMC Monitor" da 1.x do início com o Windows
 	a.loadLastCal()
 	a.loadRain()
 	a.loadPeriods()
@@ -413,11 +420,12 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.logAutostart()
 	a.events = a.loadEvents()
+	a.logMigration(migNow, migDocsMoved, migDocsErr)
 
 	st, err := store.Open(a.dataDir)
 	if err != nil {
 		a.logEvent("Erro ao abrir os dados: " + err.Error())
-		st, _ = store.Open(filepath.Join(os.TempDir(), "GMC Monitor"))
+		st, _ = store.Open(filepath.Join(os.TempDir(), appDirName))
 	}
 	a.store = st
 	go a.scanRetroOnce()
@@ -768,7 +776,7 @@ func (a *App) disconnect(errMsg string) bool {
 	a.noCount = noCountState{}
 	a.mu.Unlock()
 	a.closeAlerts(&a.alerts, time.Now(), false)
-	a.trayShow("GMC Monitor · contador desconectado", "")
+	a.trayShow("RadLog · contador desconectado", "")
 	if d == nil {
 		return false
 	}

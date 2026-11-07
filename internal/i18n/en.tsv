@@ -77,7 +77,7 @@ ALERTAS (EPISÓDIOS)	ALERTS (EPISODES)
 Abrindo a versão	Opening version
 Abrindo a versão nova…	Opening the new version…
 Abrir log.txt	Open log.txt
-Abrir o GMC Monitor	Open GMC Monitor
+Abrir o RadLog	Open RadLog
 Abrir o log.txt no programa padrão	Open log.txt in the default program
 Abrir pasta	Open folder
 Abrir relatório	Open report
@@ -127,7 +127,7 @@ Até (para um trecho; vazio = um momento)	To (for a span; empty = a moment)
 Aviso de atenção	Attention warning
 Aviso de atenção a partir de 50 CPM (aviso amarelo e 3 bipes)	Attention warning from 50 CPM (yellow warning and 3 beeps)
 Avião em altitude de cruzeiro	Airplane at cruising altitude
-Backup do GMC Monitor (*.zip)	GMC Monitor backup (*.zip)
+Backup do RadLog (*.zip)	RadLog backup (*.zip)
 Baixar histórico	Download history
 Baixe o histórico uma vez para o app saber quanto já está ocupado.	Download the history once so the app knows how much is already used.
 Banana com casca	Banana with peel
@@ -138,7 +138,7 @@ Bom só para investigar algo por pouco tempo. No fundo natural cada segundo tem 
 Buscando a chuva por hora no Open-Meteo.	Fetching hourly rain from Open-Meteo.
 Bússola com tinta de rádio	Compass with radium paint
 Bússola com tinta de rádio, encostada	Compass with radium paint, touching
-C:\Users\voce\Documents\GMC Monitor\Relatórios	C:\Users\you\Documents\GMC Monitor\Reports
+C:\Users\voce\Documents\RadLog\Relatórios	C:\Users\you\Documents\RadLog\Reports
 CONFIGURAÇÕES E MÉTODO	SETTINGS AND METHOD
 CONTAGENS POR SEGUNDO × ACASO (POISSON)	COUNTS PER SECOND × CHANCE (POISSON)
 CPM AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)	CPM OVER THE PERIOD (ALL PER-MINUTE READINGS)
@@ -259,7 +259,7 @@ Fundo de referência	Reference background
 Fundo diário	Daily background
 Fundo usado	Background used
 GEOMETRIA, CONTADOR E MÉTODO	GEOMETRY, COUNTER AND METHOD
-GMC Monitor · contador desconectado	GMC Monitor · counter disconnected
+RadLog · contador desconectado	RadLog · counter disconnected
 Geiger saturado: a leitura caiu de repente depois de um valor extremo; o tubo pode ter travado e estar mostrando menos que o real	Geiger saturated: the reading suddenly dropped after an extreme value; the tube may have locked up and be showing less than the real value
 Geiger saturado: acima do que o aparelho mede; o real pode ser maior	Geiger saturated: above what the device measures; the real value may be higher
 Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior	Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher
@@ -500,7 +500,7 @@ Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo. R
 Seis pontos que convertem CPM em µSv/h, no contador e no app. Só mude se souber o valor certo para o seu tubo (por exemplo, medido com uma fonte de referência).	Six points that convert CPM to µSv/h, on the counter and in the app. Only change them if you know the right value for your tube (for example, measured with a reference source).
 Sem contagens	No counts
 Sem contagens há 2 min: confira o contador	No counts for 2 min: check the counter
-Sem contagens · confira o contador · GMC Monitor	No counts · check the counter · GMC Monitor
+Sem contagens · confira o contador · RadLog	No counts · check the counter · RadLog
 Sem contagens: 0 CPM há 2 min. O tubo pode estar com defeito; confira o contador	No counts: 0 CPM for 2 min. The tube may be faulty; check the counter
 Sem dose medida no período: a escada mostra só as referências.	No dose measured in the period: the ladder shows only the references.
 Sem leitura agora: a escada mostra só as referências.	No reading now: the ladder shows only the references.
@@ -751,8 +751,8 @@ não consegui salvar a cópia de segurança, então não gravei nada: {0}	couldn
 não encontrada	not found
 não há versão nova	there's no new version
 não voltou em 4 h	didn't come back within 4 h
-não é um backup do GMC Monitor	not a GMC Monitor backup
-não é um backup do GMC Monitor (falta backup.json)	not a GMC Monitor backup (backup.json missing)
+não é um backup do RadLog	not a RadLog backup
+não é um backup do RadLog (falta backup.json)	not a RadLog backup (backup.json missing)
 não é um backup válido: {0}	not a valid backup: {0}
 nível	level
 o app demorou mais de 5 s para fechar	the app took more than 5 s to close
@@ -904,7 +904,7 @@ volume do alarme	alarm volume
 A contagem do Geiger varia sozinha de um minuto para outro. Pelas suas leituras dos últimos 30 dias, o fundo fica em {0} CPM e quase todas as leituras (95%) caem entre {1} e {2} CPM. Um pouco acima disso ainda pode ser acaso; acima de {3} CPM dificilmente é.	The Geiger count varies on its own from one minute to the next. From your readings over the last 30 days, the background sits at {0} CPM and almost all readings (95%) fall between {1} and {2} CPM. A little above that can still be chance; above {3} CPM it hardly is.
 A diferença vale {0} vezes a incerteza ({1}σ)	The difference is {0} times the uncertainty ({1}σ)
 A partir de {0} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em "Níveis do app".	From {0} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in "App levels".
-ALARME · {0} CPM · GMC Monitor	ALARM · {0} CPM · GMC Monitor
+ALARME · {0} CPM · RadLog	ALARM · {0} CPM · RadLog
 Abaixo do normal ({0}) — sem problema	Below normal ({0}) — no problem
 Acima do fundo: {0} de {1} permitidos no período ({2}%).	Above background: {0} of {1} allowed in the period ({2}%).
 Acima do fundo: {0}; o permitido no período era {1}.	Above background: {0}; the allowance for the period was {1}.
@@ -914,7 +914,7 @@ Alarme (histórico do contador): pico de {0} CPM às {1} (limite {2})	Alarm (cou
 Alarme: {0} CPM (limite {1})	Alarm: {0} CPM (limit {1})
 Antes da chuva: {0} CPM · últimos 15 min: {1} ({2})	Before the rain: {0} CPM · last 15 min: {1} ({2})
 Atenção (histórico do contador): pico de {0} CPM às {1} (a partir de {2})	Attention (counter history): peak of {0} CPM at {1} (from {2})
-Atenção · {0} CPM · GMC Monitor	Attention · {0} CPM · GMC Monitor
+Atenção · {0} CPM · RadLog	Attention · {0} CPM · RadLog
 Atenção: {0} CPM (a partir de {1})	Attention: {0} CPM (from {1})
 Atualizar por aqui não dá: {0}.	Can't update from here: {0}.
 Aviso de atenção a partir de {0} CPM (amarelo e 3 bipes)	Attention warning from {0} CPM (yellow and 3 beeps)
@@ -949,7 +949,7 @@ Nesse modo a memória vazia dura cerca de {0}.	In this mode the empty memory las
 Nesse modo, o espaço livre dura cerca de {0}.	In this mode, the free space lasts about {0}.
 Não deu certo: {0}	It didn't work: {0}
 Os {0} episódios mais graves e mais altos de {1}.	The {0} most severe and highest episodes of {1}.
-PERIGO · {0} CPM · GMC Monitor	DANGER · {0} CPM · GMC Monitor
+PERIGO · {0} CPM · RadLog	DANGER · {0} CPM · RadLog
 Perigo (histórico do contador): pico de {0} CPM às {1} (a partir de {2})	Danger (counter history): peak of {0} CPM at {1} (from {2})
 Perigo: {0} CPM (a partir de {1})	Danger: {0} CPM (from {1})
 Pico suspeito de interferência: {0} contagens em 1 s às {1}, com os 20 s em volta normais (esperado ~{2} por segundo).	Suspected interference peak: {0} counts in 1 s at {1}, with the surrounding 20 s normal (expected ~{2} per second).
@@ -1412,7 +1412,7 @@ Apagar as versões antigas depois que a nova abrir	Delete old versions after the
 Versões baixadas em	Versions downloaded to
 # --- sincronização entre PCs
 Sincronização	Sync
-Junta os dados de dois PCs com o GMC Monitor (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.	Joins the data of two PCs running GMC Monitor (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.
+Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.	Joins the data of two PCs running RadLog (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.
 Aceitar conexões de outros PCs (este PC aparece na rede)	Accept connections from other PCs (this PC shows up on the network)
 Não deu para aceitar conexões: {0}	Couldn't accept connections: {0}
 Este PC: {0} · {1}	This PC: {0} · {1}

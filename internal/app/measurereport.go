@@ -221,7 +221,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	}
 	extra := float64(len(tl)-1) * (ts + 3)
 	d.Text(pm, p.y+20+extra, pdf.Sans, 9, cMuted, period)
-	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "GMC Monitor "+AppVersion)
+	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "RadLog "+AppVersion)
 	rc := m.Device == "radiacode"
 	at := "no tubo"
 	if rc {
@@ -449,7 +449,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 		p.y += float64(len(lines))*9.5 + 3
 	}
 	p.footer()
-	return d.Bytes(pdf.Tr(title), "GMC Monitor "+AppVersion)
+	return d.Bytes(pdf.Tr(title), "RadLog "+AppVersion)
 }
 
 // measChart: contagem por segundo (média de 10 s, em CPM) das duas fases,

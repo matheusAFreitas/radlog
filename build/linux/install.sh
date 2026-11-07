@@ -1,13 +1,16 @@
 #!/bin/sh
-# Instala o GMC Monitor para o seu usuário (sem AppImage): binário em
-# ~/.local/bin e atalho no menu de aplicativos.
+# Instala o RadLog para o seu usuário (sem AppImage): binário em
+# ~/.local/bin e atalho no menu de aplicativos. Tira o GMC Monitor (1.x) se
+# ele foi instalado assim antes (os dados vão sozinhos para ~/.config/RadLog
+# na primeira vez que o RadLog abre).
 set -e
 cd "$(dirname "$0")"
 mkdir -p "$HOME/.local/bin" "$HOME/.local/share/applications" "$HOME/.local/share/icons/hicolor/256x256/apps"
-install -m 755 gmc-monitor "$HOME/.local/bin/gmc-monitor"
-sed "s|^Exec=.*|Exec=$HOME/.local/bin/gmc-monitor|" gmc-monitor.desktop > "$HOME/.local/share/applications/gmc-monitor.desktop"
-install -m 644 gmc-monitor.png "$HOME/.local/share/icons/hicolor/256x256/apps/gmc-monitor.png"
-echo "Instalado. Procure \"GMC Monitor\" no menu de aplicativos."
+install -m 755 radlog "$HOME/.local/bin/radlog"
+sed "s|^Exec=.*|Exec=$HOME/.local/bin/radlog|" radlog.desktop > "$HOME/.local/share/applications/radlog.desktop"
+install -m 644 radlog.png "$HOME/.local/share/icons/hicolor/256x256/apps/radlog.png"
+rm -f "$HOME/.local/bin/gmc-monitor" "$HOME/.local/share/applications/gmc-monitor.desktop" "$HOME/.local/share/icons/hicolor/256x256/apps/gmc-monitor.png"
+echo "Instalado. Procure \"RadLog\" no menu de aplicativos."
 
 if ! ldconfig -p 2>/dev/null | grep -q libwebkit2gtk-4.1; then
   echo

@@ -75,19 +75,19 @@ jobs:
           go install github.com/tc-hib/go-winres@latest
           go-winres make --in build/windows/winres.json
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -tags desktop,production \
-            -ldflags "-w -s -H windowsgui" -o "out/GMC-Monitor-v${{ steps.v.outputs.ver }}.exe" .
+            -ldflags "-w -s -H windowsgui" -o "out/RadLog-v${{ steps.v.outputs.ver }}.exe" .
       - name: Linux (AppImage e .tar.gz)
         run: |
           V=${{ steps.v.outputs.ver }}
-          P="out/gmc-monitor-v$V-linux-x86_64"
+          P="out/radlog-v$V-linux-x86_64"
           mkdir -p "$P"
-          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s" -o "$P/gmc-monitor" .
+          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s" -o "$P/radlog" .
           cp build/linux/* "$P/"
           echo "$V" > "$P/VERSION"
           (cd "$P" && sh build-appimage.sh)
-          mv "$P/GMC-Monitor-v$V-x86_64.AppImage" out/
-          rm -rf "$P/GMC-Monitor.AppDir" "$P/appimagetool"
-          tar -C out -czf "out/gmc-monitor-v$V-linux-x86_64.tar.gz" "gmc-monitor-v$V-linux-x86_64"
+          mv "$P/RadLog-v$V-x86_64.AppImage" out/
+          rm -rf "$P/RadLog.AppDir" "$P/appimagetool"
+          tar -C out -czf "out/radlog-v$V-linux-x86_64.tar.gz" "radlog-v$V-linux-x86_64"
       - name: SHA-256 dos arquivos (o atualizador do app confere)
         run: |
           cd out
@@ -96,7 +96,7 @@ jobs:
       - name: Notas da versão (do CHANGELOG)
         run: |
           awk -v v="## ${{ steps.v.outputs.ver }}" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md > notes.md
-          printf '\n---\n**Downloads:** Windows: `GMC-Monitor-v%s.exe` · Linux: `GMC-Monitor-v%s-x86_64.AppImage` (precisa da WebKitGTK 4.1) ou `gmc-monitor-v%s-linux-x86_64.tar.gz` (com `install.sh`).\n' \
+          printf '\n---\n**Downloads:** Windows: `RadLog-v%s.exe` · Linux: `RadLog-v%s-x86_64.AppImage` (precisa da WebKitGTK 4.1) ou `radlog-v%s-linux-x86_64.tar.gz` (com `install.sh`).\n' \
             "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" >> notes.md
           cat notes.md
       - uses: softprops/action-gh-release@v2

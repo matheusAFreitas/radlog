@@ -50,7 +50,7 @@ func (a *App) dumpDiag(why string) {
 	}
 	buf := make([]byte, 1<<20)
 	n := runtime.Stack(buf, true)
-	txt := fmt.Sprintf("GMC Monitor %s\n%s\nMotivo: %s\n\n%s", AppVersion, time.Now().Format(time.RFC3339), why, buf[:n])
+	txt := fmt.Sprintf("RadLog %s\n%s\nMotivo: %s\n\n%s", AppVersion, time.Now().Format(time.RFC3339), why, buf[:n])
 	_ = os.WriteFile(filepath.Join(a.dataDir, "diagnostico.txt"), []byte(txt), 0o644)
 }
 

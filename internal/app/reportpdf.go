@@ -43,7 +43,7 @@ type reportPDF struct {
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
-	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("GMC Monitor "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
+	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("RadLog "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
 	p.d.TextRight(pdf.W-pm, pdf.H-24, pdf.Sans, 7.5, cMuted, fmt.Sprintf("página %d", p.page))
 }
 
@@ -490,7 +490,7 @@ func renderReportPDF(r reportData) []byte {
 	for i, ln := range pl {
 		d.Text(pm, p.y+20+float64(i)*11, pdf.Sans, 9, cMuted, ln)
 	}
-	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "GMC Monitor "+r.Version)
+	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "RadLog "+r.Version)
 	ry := p.y + 11
 	if r.Device != "" {
 		d.TextRight(pdf.W-pm, ry, pdf.Sans, 8, cMuted, r.Device)
@@ -504,7 +504,7 @@ func renderReportPDF(r reportData) []byte {
 	if !r.HasData || r.St.N == 0 {
 		d.Text(pm, p.y+12, pdf.Sans, 10, cMuted, "Sem leituras guardadas neste período.")
 		p.footer()
-		return d.Bytes(pdf.Tr(r.Title), "GMC Monitor "+AppVersion)
+		return d.Bytes(pdf.Tr(r.Title), "RadLog "+AppVersion)
 	}
 	st := r.St
 
@@ -775,7 +775,7 @@ func renderReportPDF(r reportData) []byte {
 		p.y += float64(len(lines))*9.5 + 3
 	}
 	p.footer()
-	return d.Bytes(pdf.Tr(r.Title+" · "+r.Period), "GMC Monitor "+AppVersion)
+	return d.Bytes(pdf.Tr(r.Title+" · "+r.Period), "RadLog "+AppVersion)
 }
 
 // episodeCharts desenha, para os episódios escolhidos, o CPM de 30 min antes

@@ -78,7 +78,7 @@ const I18N_EN = {
 "Abrindo a versão": "Opening version",
 "Abrindo a versão nova…": "Opening the new version…",
 "Abrir log.txt": "Open log.txt",
-"Abrir o GMC Monitor": "Open GMC Monitor",
+"Abrir o RadLog": "Open RadLog",
 "Abrir o log.txt no programa padrão": "Open log.txt in the default program",
 "Abrir pasta": "Open folder",
 "Abrir relatório": "Open report",
@@ -128,7 +128,7 @@ const I18N_EN = {
 "Aviso de atenção": "Attention warning",
 "Aviso de atenção a partir de 50 CPM (aviso amarelo e 3 bipes)": "Attention warning from 50 CPM (yellow warning and 3 beeps)",
 "Avião em altitude de cruzeiro": "Airplane at cruising altitude",
-"Backup do GMC Monitor (*.zip)": "GMC Monitor backup (*.zip)",
+"Backup do RadLog (*.zip)": "RadLog backup (*.zip)",
 "Baixar histórico": "Download history",
 "Baixe o histórico uma vez para o app saber quanto já está ocupado.": "Download the history once so the app knows how much is already used.",
 "Banana com casca": "Banana with peel",
@@ -139,7 +139,7 @@ const I18N_EN = {
 "Buscando a chuva por hora no Open-Meteo.": "Fetching hourly rain from Open-Meteo.",
 "Bússola com tinta de rádio": "Compass with radium paint",
 "Bússola com tinta de rádio, encostada": "Compass with radium paint, touching",
-"C:\\Users\\voce\\Documents\\GMC Monitor\\Relatórios": "C:\\Users\\you\\Documents\\GMC Monitor\\Reports",
+"C:\\Users\\voce\\Documents\\RadLog\\Relatórios": "C:\\Users\\you\\Documents\\RadLog\\Reports",
 "CONFIGURAÇÕES E MÉTODO": "SETTINGS AND METHOD",
 "CONTAGENS POR SEGUNDO × ACASO (POISSON)": "COUNTS PER SECOND × CHANCE (POISSON)",
 "CPM AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)": "CPM OVER THE PERIOD (ALL PER-MINUTE READINGS)",
@@ -260,7 +260,7 @@ const I18N_EN = {
 "Fundo diário": "Daily background",
 "Fundo usado": "Background used",
 "GEOMETRIA, CONTADOR E MÉTODO": "GEOMETRY, COUNTER AND METHOD",
-"GMC Monitor · contador desconectado": "GMC Monitor · counter disconnected",
+"RadLog · contador desconectado": "RadLog · counter disconnected",
 "Geiger saturado: a leitura caiu de repente depois de um valor extremo; o tubo pode ter travado e estar mostrando menos que o real": "Geiger saturated: the reading suddenly dropped after an extreme value; the tube may have locked up and be showing less than the real value",
 "Geiger saturado: acima do que o aparelho mede; o real pode ser maior": "Geiger saturated: above what the device measures; the real value may be higher",
 "Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior": "Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher",
@@ -501,7 +501,7 @@ const I18N_EN = {
 "Seis pontos que convertem CPM em µSv/h, no contador e no app. Só mude se souber o valor certo para o seu tubo (por exemplo, medido com uma fonte de referência).": "Six points that convert CPM to µSv/h, on the counter and in the app. Only change them if you know the right value for your tube (for example, measured with a reference source).",
 "Sem contagens": "No counts",
 "Sem contagens há 2 min: confira o contador": "No counts for 2 min: check the counter",
-"Sem contagens · confira o contador · GMC Monitor": "No counts · check the counter · GMC Monitor",
+"Sem contagens · confira o contador · RadLog": "No counts · check the counter · RadLog",
 "Sem contagens: 0 CPM há 2 min. O tubo pode estar com defeito; confira o contador": "No counts: 0 CPM for 2 min. The tube may be faulty; check the counter",
 "Sem dose medida no período: a escada mostra só as referências.": "No dose measured in the period: the ladder shows only the references.",
 "Sem leitura agora: a escada mostra só as referências.": "No reading now: the ladder shows only the references.",
@@ -748,8 +748,8 @@ const I18N_EN = {
 "não encontrada": "not found",
 "não há versão nova": "there's no new version",
 "não voltou em 4 h": "didn't come back within 4 h",
-"não é um backup do GMC Monitor": "not a GMC Monitor backup",
-"não é um backup do GMC Monitor (falta backup.json)": "not a GMC Monitor backup (backup.json missing)",
+"não é um backup do RadLog": "not a RadLog backup",
+"não é um backup do RadLog (falta backup.json)": "not a RadLog backup (backup.json missing)",
 "nível": "level",
 "o app demorou mais de 5 s para fechar": "the app took more than 5 s to close",
 "o app está fechando": "the app is closing",
@@ -1049,7 +1049,7 @@ const I18N_EN = {
 "Apagar as versões antigas depois que a nova abrir": "Delete old versions after the new one opens",
 "Versões baixadas em": "Versions downloaded to",
 "Sincronização": "Sync",
-"Junta os dados de dois PCs com o GMC Monitor (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.": "Joins the data of two PCs running GMC Monitor (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.",
+"Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.": "Joins the data of two PCs running RadLog (e.g., the counter's PC and the laptop): readings, alerts, away-from-home periods, measurements and notes. Only what's missing comes in; nothing is deleted or replaced.",
 "Aceitar conexões de outros PCs (este PC aparece na rede)": "Accept connections from other PCs (this PC shows up on the network)",
 "sem rede": "no network",
 "Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).": "Off: this PC only connects to the others (on Windows it doesn't ask for firewall permission).",
@@ -3992,15 +3992,6 @@ const I18N_EN = {
 ]
 ],
 [
-"Atenção · ",
-"^Atenção · ((?:(?! · ).)+?) CPM · GMC Monitor$",
-"Attention · ${1} CPM · GMC Monitor",
-[
-"Atenção · ",
-" CPM · GMC Monitor"
-]
-],
-[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -4053,15 +4044,6 @@ const I18N_EN = {
 ]
 ],
 [
-"ALARME · ",
-"^ALARME · ((?:(?! · ).)+?) CPM · GMC Monitor$",
-"ALARM · ${1} CPM · GMC Monitor",
-[
-"ALARME · ",
-" CPM · GMC Monitor"
-]
-],
-[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -4086,15 +4068,6 @@ const I18N_EN = {
 "Leitura real: ",
 " CPM · ",
 " µSv/h"
-]
-],
-[
-"PERIGO · ",
-"^PERIGO · ((?:(?! · ).)+?) CPM · GMC Monitor$",
-"DANGER · ${1} CPM · GMC Monitor",
-[
-"PERIGO · ",
-" CPM · GMC Monitor"
 ]
 ],
 [
@@ -4597,6 +4570,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção · ",
+"^Atenção · ((?:(?! · ).)+?) CPM · RadLog$",
+"Attention · ${1} CPM · RadLog",
+[
+"Atenção · ",
+" CPM · RadLog"
+]
+],
+[
 "relatório da medição ",
 "^relatório da medição ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "measurement report ${1}: ${2}",
@@ -4645,6 +4627,24 @@ const I18N_EN = {
 " (recebi ",
 " de ",
 " bytes)"
+]
+],
+[
+"ALARME · ",
+"^ALARME · ((?:(?! · ).)+?) CPM · RadLog$",
+"ALARM · ${1} CPM · RadLog",
+[
+"ALARME · ",
+" CPM · RadLog"
+]
+],
+[
+"PERIGO · ",
+"^PERIGO · ((?:(?! · ).)+?) CPM · RadLog$",
+"DANGER · ${1} CPM · RadLog",
+[
+"PERIGO · ",
+" CPM · RadLog"
 ]
 ],
 [

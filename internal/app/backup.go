@@ -44,6 +44,12 @@ func (m MergeResult) total() int {
 	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
 }
 
+// backupAppID marca os backups; os da 1.x (GMC Monitor) continuam valendo.
+const (
+	backupAppID    = "radlog"
+	oldBackupAppID = "gmc-monitor"
+)
+
 type backupManifest struct {
 	App     string `json:"app"`
 	Version string `json:"version"`
@@ -66,7 +72,7 @@ var badFileChars = regexp.MustCompile(`[^A-Za-z0-9_.-]+`)
 // writeBackup escreve o .zip em w.
 func (a *App) writeBackup(w io.Writer) error {
 	zw := zip.NewWriter(w)
-	man, _ := json.MarshalIndent(backupManifest{App: "gmc-monitor", Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)}, "", "  ")
+	man, _ := json.MarshalIndent(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)}, "", "  ")
 	if f, err := zw.Create("backup.json"); err == nil {
 		_, _ = f.Write(man)
 	}
@@ -131,10 +137,10 @@ func (a *App) ExportBackup() (string, error) {
 	if a.ctx == nil {
 		return "", errors.New("sem janela")
 	}
-	name := fmt.Sprintf("gmc-backup-%s-%s.zip", badFileChars.ReplaceAllString(hostName(), "_"), time.Now().Format("2006-01-02"))
+	name := fmt.Sprintf("radlog-backup-%s-%s.zip", badFileChars.ReplaceAllString(hostName(), "_"), time.Now().Format("2006-01-02"))
 	dst, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
 		Title: "Salvar backup", DefaultFilename: name,
-		Filters: []wruntime.FileFilter{{DisplayName: "Backup do GMC Monitor (*.zip)", Pattern: "*.zip"}},
+		Filters: []wruntime.FileFilter{{DisplayName: "Backup do RadLog (*.zip)", Pattern: "*.zip"}},
 	})
 	if err != nil || dst == "" {
 		return "", err
@@ -158,7 +164,7 @@ func (a *App) ImportBackup() (MergeResult, error) {
 	}
 	src, err := wruntime.OpenFileDialog(a.ctx, wruntime.OpenDialogOptions{
 		Title:   "Importar backup",
-		Filters: []wruntime.FileFilter{{DisplayName: "Backup do GMC Monitor (*.zip)", Pattern: "*.zip"}},
+		Filters: []wruntime.FileFilter{{DisplayName: "Backup do RadLog (*.zip)", Pattern: "*.zip"}},
 	})
 	if err != nil || src == "" {
 		return MergeResult{}, err
@@ -225,13 +231,13 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	}
 	mf, ok := files["backup.json"]
 	if !ok {
-		return res, errors.New("não é um backup do GMC Monitor (falta backup.json)")
+		return res, errors.New("não é um backup do RadLog (falta backup.json)")
 	}
 	if b, err := readZipFile(mf); err == nil {
 		var m backupManifest
 		if json.Unmarshal(b, &m) == nil {
-			if m.App != "gmc-monitor" {
-				return res, errors.New("não é um backup do GMC Monitor")
+			if m.App != backupAppID && m.App != oldBackupAppID {
+				return res, errors.New("não é um backup do RadLog")
 			}
 			res.From, res.Created = m.Host, m.Created
 		}

@@ -26,6 +26,10 @@ func Run(assets fs.FS) error {
 	if startedUpdating() {
 		waitPreviousExit(20 * time.Second)
 	}
+	// pasta de dados (na primeira abertura da 2.0, leva os dados da pasta
+	// "GMC Monitor"; migrate.go). Antes da janela: o WebView2 guarda o dele lá.
+	migNow = prepareDataDir()
+	migDocsMoved, migDocsErr = migrateDocs(docsBase())
 	// a Wails repassa os argumentos para a cópia já aberta: vai junto quem
 	// somos, para ela saber se é outra versão (handoff.go)
 	os.Args = append(os.Args[:1], tagArgs(os.Args[1:])...)

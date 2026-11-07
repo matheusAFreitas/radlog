@@ -696,7 +696,7 @@ func (a *App) alertFiles() []string {
 func (a *App) buildDelta(days, alerts []string) ([]byte, error) {
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
-	man, _ := json.Marshal(backupManifest{App: "gmc-monitor", Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)})
+	man, _ := json.Marshal(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)})
 	if f, err := zw.Create("backup.json"); err == nil {
 		_, _ = f.Write(man)
 	}

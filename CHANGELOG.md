@@ -1,5 +1,29 @@
 # Versões
 
+## 2.0.0
+- **GMC Monitor agora é RadLog.** Nenhum cálculo muda nesta versão: é só o
+  nome e a mudança de pasta, para um problema de migração não se misturar com
+  um problema de número.
+- **Pasta de dados:** na primeira abertura, sem a versão antiga aberta, o app
+  copia `%AppData%\GMC Monitor` (no Linux, `~/.config/GMC Monitor`) para
+  `RadLog`, confere arquivo por arquivo, grava um backup completo da pasta
+  antiga em `RadLog\migracao\` e só então apaga a antiga. O que foi feito
+  fica em `migrado-de-gmc-monitor.json` e no log. Se algo falhar, nada é
+  apagado: o app segue na pasta antiga e tenta de novo na próxima abertura.
+  Caches da tela (que se refazem) não são copiados; o idioma escolhido vem
+  junto.
+- **Relatórios:** `Documentos\GMC Monitor\Relatórios` vira
+  `Documentos\RadLog\Relatórios` (os PDFs vão junto, nada é sobrescrito).
+  Versões novas passam a ser baixadas em `Documentos\RadLog\Versões`; as
+  versões antigas (GMC-Monitor-v…) saem sozinhas como antes.
+- **Iniciar com o Windows:** o item "GMC Monitor" é trocado por "RadLog"
+  (mantendo o desativado do Gerenciador de Tarefas, se for o caso).
+- **Backup:** passa a se chamar `radlog-backup-….zip`; os backups da 1.x
+  continuam sendo aceitos. Um backup da 2.0 importado numa 1.x é recusado.
+- **Arquivos da release:** `RadLog-vX.exe`, `RadLog-vX-x86_64.AppImage` e
+  `radlog-vX-linux-x86_64.tar.gz` (o `install.sh` tira o GMC Monitor instalado
+  antes). A 1.x se atualiza sozinha para a 2.0.
+
 ## 1.46.1
 - Mapa de calor (Padrão por hora do dia): os alertas do RadiaCode não aparecem
   mais marcados no mapa do GMC.

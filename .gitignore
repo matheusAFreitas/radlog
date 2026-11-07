@@ -1,6 +1,8 @@
 # binários e pacotes
 /gmc-monitor
 /radlog
+/RadLog*.exe
+/radlog
 *.exe
 *.AppImage
 *.tar.gz

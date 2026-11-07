@@ -5128,7 +5128,7 @@ function makeDemoApi() {
     pts.push({ t: Math.floor(now / 60000) * 60000 - i * 60000, cpm: Math.round(20 + (rnd() - 0.5) * 14) });
   }
   const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
-  let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\GMC Monitor" };
+  let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\RadLog" };
   let settings = { levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
   const demoCfg = {
     values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, theme: 4 },
@@ -5402,7 +5402,7 @@ function makeDemoApi() {
   let api;
   api = {
     GetSettings: async () => settings,
-    GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\GMC-Monitor-v1.6.0.exe", exists: false, current: false, disabled: false, started: false }),
+    GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\RadLog-v2.0.0.exe", exists: false, current: false, disabled: false, started: false }),
     FixAutostart: async () => ({}),
     SaveSettings: async (s) => { settings = s; setTimeout(() => emit("rain-status", rainStatus()), 0); return s; },
     GetStatus: async () => status,
@@ -5434,7 +5434,7 @@ function makeDemoApi() {
       return { entries: hits.slice().reverse().slice(0, q.limit || 1000), total: hits.length, counts, comps: Object.entries(comps).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count), buckets, bucketMs: step, from, to };
     },
     ExportReport: async () => { throw new Error("no modo navegador não dá para salvar arquivo; abra pelo app"); },
-    GetReportDir: async () => ({ dir: settings.reportDir || "C:\\Users\\voce\\Documents\\GMC Monitor\\Relatórios", default: !settings.reportDir }),
+    GetReportDir: async () => ({ dir: settings.reportDir || "C:\\Users\\voce\\Documents\\RadLog\\Relatórios", default: !settings.reportDir }),
     ChooseReportDir: async () => { settings.reportDir = "D:\\Radiação\\Relatórios"; return api.GetReportDir(); },
     ResetReportDir: async () => { settings.reportDir = ""; return api.GetReportDir(); },
     OpenReportDir: async () => {},
@@ -5490,9 +5490,9 @@ function makeDemoApi() {
     StartDemo: async (cpm, realistic) => (demoSt = { active: true, cpm, realistic }),
     StopDemo: async () => { demoAlerts = []; demoSt = { active: false, cpm: 20, realistic: false }; emit("event", { kind: "alerta" }); emit("demo", demoSt); return demoSt; },
     GetVersion: async () => "navegador",
-    ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\GMC Monitor\\Relatórios\\gmc-medicao-${id}.pdf`; },
+    ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\RadLog\\Relatórios\\gmc-medicao-${id}.pdf`; },
     OpenReportFile: async () => {},
-    GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\GMC Monitor\\Versões",
+    GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\RadLog\\Versões",
     OpenVersionsDir: async () => {},
     GetSync: async () => demoSync,
     GetRadiacode: async () => demoRc(),

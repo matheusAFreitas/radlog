@@ -19,7 +19,7 @@ func TestLogFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	s := string(b)
-	if !strings.Contains(s, "GMC Monitor "+AppVersion) || !strings.Contains(s, "abrindo COM13") || !strings.Contains(s, "evento: Contador conectado") {
+	if !strings.Contains(s, "RadLog "+AppVersion) || !strings.Contains(s, "abrindo COM13") || !strings.Contains(s, "evento: Contador conectado") {
 		t.Fatalf("log:\n%s", s)
 	}
 	// passou de 2 MB: vira log-anterior.txt

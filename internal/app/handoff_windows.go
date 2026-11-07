@@ -36,3 +36,14 @@ func waitPreviousExit(limit time.Duration) bool {
 		time.Sleep(200 * time.Millisecond)
 	}
 }
+
+// otherInstanceRunning diz se outra cópia do app (1.x ou 2.x) está aberta.
+func otherInstanceRunning() bool {
+	name, _ := windows.UTF16PtrFromString(instanceMutex)
+	h, err := windows.OpenMutex(windows.SYNCHRONIZE, false, name)
+	if err != nil {
+		return false
+	}
+	windows.CloseHandle(h)
+	return true
+}

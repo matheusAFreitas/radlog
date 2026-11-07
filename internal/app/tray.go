@@ -71,16 +71,16 @@ func (a *App) onBeforeClose() (prevent bool) {
 
 // trayTick atualiza a dica do ícone a cada leitura.
 func (a *App) trayTick(cpm uint32, usv float64, level string, noCount, demo bool) {
-	tip := fmt.Sprintf("GMC Monitor · %d CPM · %.3f µSv/h", cpm, usv)
+	tip := fmt.Sprintf("RadLog · %d CPM · %.3f µSv/h", cpm, usv)
 	switch {
 	case level == "perigo":
-		tip = fmt.Sprintf("PERIGO · %d CPM · GMC Monitor", cpm)
+		tip = fmt.Sprintf("PERIGO · %d CPM · RadLog", cpm)
 	case level == "alarme":
-		tip = fmt.Sprintf("ALARME · %d CPM · GMC Monitor", cpm)
+		tip = fmt.Sprintf("ALARME · %d CPM · RadLog", cpm)
 	case level == "atencao":
-		tip = fmt.Sprintf("Atenção · %d CPM · GMC Monitor", cpm)
+		tip = fmt.Sprintf("Atenção · %d CPM · RadLog", cpm)
 	case noCount:
-		tip = "Sem contagens · confira o contador · GMC Monitor"
+		tip = "Sem contagens · confira o contador · RadLog"
 		level = "alarme"
 	}
 	if demo {
