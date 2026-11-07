@@ -1,5 +1,9 @@
 # Versões
 
+## 1.28.5
+- A pílula do RadiaCode no topo agora mostra só o nome e a bateria
+  ("RadiaCode · 100%"). O µSv/h já está no quadro.
+
 ## 1.28.4
 - A régua do RadiaCode agora usa os **alarmes do próprio aparelho** (no seu,
   0,40 µSv/h para o alarme 1 e 1,20 µSv/h para o alarme 2), como a do GMC

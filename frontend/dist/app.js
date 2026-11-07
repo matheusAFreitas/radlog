@@ -3950,7 +3950,7 @@ function renderRc(st) {
   pill.hidden = st.state === "off" || st.state === "procurando";
   $("rcDot").className = "dot " + (on ? "on" : st.state === "erro" ? "err" : "wait");
   $("rcPillText").textContent = on
-    ? `RadiaCode · ${st.time ? fmt(st.usvh, usvDigits(st.usvh)) + " µSv/h" : via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
+    ? "RadiaCode" + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
     : st.state === "conectando" ? "RadiaCode: conectando…" : "RadiaCode: erro";
   pill.title = on ? `RadiaCode conectado pelo ${via}` : st.err || "RadiaCode";
   // aba
