@@ -1638,7 +1638,37 @@ const I18N_EN = {
 "antes do primeiro dado": "before the first reading",
 "Janela do fundo": "Background window",
 "Média e mediana móveis de 24 h do fundo em casa": "24 h moving average and median of the home background",
-"Dispersão de cada dia": "Each day's dispersion"
+"Dispersão de cada dia": "Each day's dispersion",
+"Aparelho do mapa": "Map device",
+"Padrões do fundo": "Background patterns",
+"Aparelho dos padrões": "Patterns device",
+"Janela dos padrões": "Patterns window",
+"Hora do dia": "Hour of day",
+"Mediana por hora do dia": "Median by hour of day",
+"mediana": "median",
+"1º a 3º quartil": "1st to 3rd quartile",
+"média": "average",
+"noite (18h–6h)": "night (6pm–6am)",
+"Dia × noite": "Day × night",
+"Dia (6h–18h)": "Day (6am–6pm)",
+"Noite (18h–6h)": "Night (6pm–6am)",
+"Dia da semana": "Day of week",
+"segunda": "Monday",
+"terça": "Tuesday",
+"quarta": "Wednesday",
+"quinta": "Thursday",
+"sexta": "Friday",
+"sábado": "Saturday",
+"domingo": "Sunday",
+"1 dia": "1 day",
+"µSv/h médio (RadiaCode)": "average µSv/h (RadiaCode)",
+"Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.": "Median of the minutes at home (without object measurements and without saturated or interference minutes); the band goes from the 1st to the 3rd quartile. The day × night comparison uses the days with both halves measured (6 h or more of each) and compares each day with its own night, so one day's weather doesn't weigh in.",
+"Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio.": "When readings came back they were still high: the alert continued in the same episode.",
+"O tempo sem leitura não entra no mínimo nem na média.": "The time without readings is not part of the minimum or the average.",
+"Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.": "If you download the counter's history, the minutes after that show up in the chart.",
+"RadiaCode desconectado": "RadiaCode disconnected",
+"app fechado": "app closed",
+"cinza = sem dados": "gray = no data"
 },
 "patterns": [
 [
@@ -1706,6 +1736,16 @@ const I18N_EN = {
 [
 ": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
 " CPM com o seu fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais."
+]
+],
+[
+"A noite (18h–6h) fica ",
+"^A noite \\(18h–6h\\) fica ((?:(?! · ).)+?)% acima do dia \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\. É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite\\.$",
+"Night (6pm–6am) is ${1}% above day (${2} ± ${3} ${4}, ${5} days with both halves). That's the usual radon pattern: it builds up with the house closed and still air at night.",
+[
+"A noite (18h–6h) fica ",
+"% acima do dia (",
+" dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite."
 ]
 ],
 [
@@ -1890,6 +1930,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Faz parte de um episódio de ",
+"^Faz parte de um episódio de ((?:(?! · ).)+?) alertas, ((?:(?! · ).)+?)–((?:(?! · ).)+?) \\(nível mais alto: ((?:(?! · ).)+?)\\); o mínimo e a média são do episódio inteiro\\.$",
+"Part of an episode of ${1} alerts, ${2}–${3} (highest level: ${4}); the minimum and average are for the whole episode.",
+[
+"Faz parte de um episódio de ",
+" alertas, ",
+" (nível mais alto: ",
+"); o mínimo e a média são do episódio inteiro."
+]
+],
+[
 "Radar indisponível agora (",
 "^Radar indisponível agora \\(((?:(?! · ).)+?)\\); usando o modelo do Open\\-Meteo, que pode não mostrar chuva bem localizada\\.$",
 "Radar unavailable now (${1}); using the Open-Meteo model, which may miss very local rain.",
@@ -1926,6 +1977,16 @@ const I18N_EN = {
 "Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ",
 " µSv/h (80% entre ",
 " µSv/h)."
+]
+],
+[
+"O episódio terminou porque parou de chegar leitura (",
+"^O episódio terminou porque parou de chegar leitura \\(((?:(?! · ).)+?)\\) às ((?:(?! · ).)+?), não porque a contagem voltou ao normal\\.$",
+"The episode ended because readings stopped arriving (${1}) at ${2}, not because the count went back to normal.",
+[
+"O episódio terminou porque parou de chegar leitura (",
+") às ",
+", não porque a contagem voltou ao normal."
 ]
 ],
 [
@@ -2021,6 +2082,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Sem diferença clara entre dia e noite (noite − dia = ",
+"^Sem diferença clara entre dia e noite \\(noite − dia = ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\.$",
+"No clear difference between day and night (night − day = ${1} ± ${2} ${3}, ${4} days with both halves).",
+[
+"Sem diferença clara entre dia e noite (noite − dia = ",
+" dias com as duas metades)."
+]
+],
+[
 "leitura ao vivo: iniciada em ",
 "^leitura ao vivo: iniciada em ((?:(?! · ).)+?) \\(GETCPM \\+ GETCPS a cada 1 s, prazo de ((?:(?! · ).)+?) s por comando, ((?:(?! · ).)+?)\\)$",
 "live reading: started on ${1} (GETCPM + GETCPS every 1 s, ${2} s timeout per command, ${3})",
@@ -2037,6 +2107,15 @@ const I18N_EN = {
 [
 "Calibração do GMC: histórico recalculado com a versão ",
 " (os minutos gravados não mudam)"
+]
+],
+[
+"Poucos dias com dia e noite medidos (",
+"^Poucos dias com dia e noite medidos \\(((?:(?! · ).)+?); precisa de 3, com 6 h ou mais de cada metade\\)\\.$",
+"Too few days with day and night measured (${1}; needs 3, with 6 h or more of each half).",
+[
+"Poucos dias com dia e noite medidos (",
+"; precisa de 3, com 6 h ou mais de cada metade)."
 ]
 ],
 [
@@ -2202,6 +2281,28 @@ const I18N_EN = {
 [
 "calibração: usando a última lida do contador (",
 " µSv/h por CPM) até conectar"
+]
+],
+[
+"mais alto por volta das ",
+"^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) µSv/h\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) µSv/h\\)$",
+"highest around ${1}h (${2} µSv/h) · lowest around ${3}h (${4} µSv/h)",
+[
+"mais alto por volta das ",
+"h (",
+" µSv/h) · mais baixo por volta das ",
+"h (",
+" µSv/h)"
+]
+],
+[
+"O dia (6h–18h) fica ",
+"^O dia \\(6h–18h\\) fica ((?:(?! · ).)+?)% acima da noite \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\.$",
+"Day (6am–6pm) is ${1}% above night (${2} ± ${3} ${4}, ${5} days with both halves).",
+[
+"O dia (6h–18h) fica ",
+"% acima da noite (",
+" dias com as duas metades)."
 ]
 ],
 [
@@ -2880,6 +2981,15 @@ const I18N_EN = {
 [
 "Lado a lado com o RadiaCode (",
 " min nas últimas 6 h):"
+]
+],
+[
+"mais alto por volta das ",
+"^mais alto por volta das ((?:(?! · ).)+?)h, mais baixo por volta das ((?:(?! · ).)+?)h$",
+"highest around ${1}h, lowest around ${2}h",
+[
+"mais alto por volta das ",
+"h, mais baixo por volta das "
 ]
 ],
 [
@@ -4491,6 +4601,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) trechos sem leitura no meio$",
+"${1} stretches without readings in the middle",
+[
+" trechos sem leitura no meio"
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -4908,6 +5026,23 @@ const I18N_EN = {
 ]
 ],
 [
+"terminou sem leitura (",
+"^terminou sem leitura \\(((?:(?! · ).)+?)\\)$",
+"ended without readings (${1})",
+[
+"terminou sem leitura ("
+]
+],
+[
+"Sem leitura de ",
+"^Sem leitura de ((?:(?! · ).)+?) a ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)\\.$",
+"No readings from ${1} to ${2} (${3}).",
+[
+"Sem leitura de ",
+")."
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -5015,6 +5150,15 @@ const I18N_EN = {
 "Activity: finished (${1})",
 [
 "Atividade: terminou ("
+]
+],
+[
+"sem leitura por ",
+"^sem leitura por ((?:(?! · ).)+?) no meio$",
+"no readings for ${1} in the middle",
+[
+"sem leitura por ",
+" no meio"
 ]
 ],
 [
@@ -5521,6 +5665,15 @@ const I18N_EN = {
 ]
 ],
 [
+"média ",
+"^média ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) segundos\\)$",
+"average ${1} (${2} seconds)",
+[
+"média ",
+" segundos)"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -5713,6 +5866,15 @@ const I18N_EN = {
 "Dose: ",
 " µSv (",
 "%)"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) minutos\\)$",
+"average ${1} (${2} minutes)",
+[
+"média ",
+" minutos)"
 ]
 ],
 [
@@ -6060,6 +6222,14 @@ const I18N_EN = {
 [
 " de ",
 " min desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) min em casa \\(((?:(?! · ).)+?)\\)$",
+"${1} min at home (${2})",
+[
+" min em casa ("
 ]
 ],
 [
@@ -6723,6 +6893,23 @@ const I18N_EN = {
 "${1} day with data",
 [
 " dia com dado"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) min em ((?:(?! · ).)+?) dias$",
+"${1} min over ${2} days",
+[
+" min em ",
+" dias"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) min em 1 dia$",
+"${1} min over 1 day",
+[
+" min em 1 dia"
 ]
 ],
 [
@@ -7470,6 +7657,14 @@ const I18N_EN = {
 ]
 ],
 [
+"quartis ",
+"^quartis ((?:(?! · ).)+?)–((?:(?! · ).)+?)$",
+"quartiles ${1}–${2}",
+[
+"quartis "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -7641,6 +7836,14 @@ const I18N_EN = {
 ]
 ],
 [
+"mediana ",
+"^mediana ((?:(?! · ).)+?)$",
+"median ${1}",
+[
+"mediana "
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -7759,6 +7962,14 @@ const I18N_EN = {
 "${1} (${2} g)",
 [
 " g)"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"average ${1} ${2}",
+[
+"média "
 ]
 ],
 [

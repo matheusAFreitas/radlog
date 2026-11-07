@@ -158,7 +158,11 @@ func (a *App) rcAlertsOff() {
 	a.mu.Lock()
 	a.rcAlert.attnOn, a.rcAlert.alarmOn, a.rcAlert.dangOn = false, false, false
 	a.mu.Unlock()
-	a.closeAlerts(&a.rcAlert.ids, time.Now(), false)
+	reason := endRcDisconnected
+	if a.closing.Load() {
+		reason = endAppClosed
+	}
+	a.closeAlerts(&a.rcAlert.ids, time.Now(), false, reason)
 	a.alarmEnded()
 }
 
@@ -250,6 +254,7 @@ func (a *App) rcAlertDetail(e Event, end time.Time) AlertDetail {
 		d.Detailed = in[0].T <= e.Time+5000 && in[len(in)-1].T >= d.End-5000
 	}
 	d.Seconds = thinMax(in, alertMaxShown)
+	d.allSecs = in
 	d.Minutes = []AlertPoint{}
 	for _, p := range a.rcRange(from.Truncate(time.Minute), to) {
 		d.Minutes = append(d.Minutes, AlertPoint{p.T.UnixMilli(), p.USvh})

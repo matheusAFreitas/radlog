@@ -1199,3 +1199,18 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .bg-fit strong { display: block; margin-bottom: 2px; }
 .bg-disp-wrap .y-axis, .bg-disp { height: 80px; }
 .ad-legend .key i.dot-k { width: 6px; height: 6px; border: 0; border-radius: 50%; background: #E9EDEF; opacity: .75; }
+.heat-ramp.rc { background: linear-gradient(90deg, rgba(244,114,182,.15), rgba(244,114,182,1)); }
+
+/* padrões do fundo (2.5) */
+.pat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 12px; }
+@media (max-width: 760px) { .pat-grid { grid-template-columns: 1fr; } }
+.pat-hours .m-chart-wrap .y-axis, .pat-hours .m-plot { height: 160px; }
+.pat-dn { display: flex; gap: 12px; flex-wrap: wrap; margin: 8px 0; }
+.pat-dn .pat-dn-v { flex: 1 1 140px; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; }
+.pat-dn .pat-dn-v b { display: block; font-family: var(--mono); font-size: 18px; }
+.pat-bars { display: grid; grid-template-columns: auto 1fr auto; gap: 4px 10px; align-items: center; font-size: 13px; }
+.pat-bars .track { display: block; }
+.pat-bars .bar { display: block; height: 10px; border-radius: 3px; background: rgba(110,231,160,.7); min-width: 2px; }
+.pat-bars.rc .bar { background: rgba(244,114,182,.7); }
+.pat-bars .v { font-family: var(--mono); color: var(--muted); white-space: nowrap; }
+.pat-bars .lab { color: var(--muted); }

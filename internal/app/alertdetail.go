@@ -46,6 +46,99 @@ type AlertDetail struct {
 	Detailed  bool         `json:"detailed"` // tem os segundos de todo o alerta
 	// "radiacode": valores, limites e níveis em µSv/h
 	Device string `json:"device,omitempty"`
+	// o episódio inteiro (alertas que se encostam), com mínimo e média (2.5)
+	Episode *AlertEp `json:"episode,omitempty"`
+
+	allSecs []AlertPoint // segundos sem afinar (para a estatística)
+}
+
+// AlertEp é o episódio de um alerta.
+type AlertEp struct {
+	From      int64        `json:"from"`
+	To        int64        `json:"to"`
+	Level     string       `json:"level"`
+	Alerts    int          `json:"alerts"`
+	Peak      float64      `json:"peak"`
+	Breaks    []alertBreak `json:"breaks"`              // trechos sem leitura no meio
+	EndReason string       `json:"endReason,omitempty"` // terminou desconectado
+	// estatística das leituras de dentro do episódio
+	N      int     `json:"n"`
+	Src    string  `json:"src"` // "segundos" ou "minutos"
+	Min    float64 `json:"min"`
+	Mean   float64 `json:"mean"`
+	Median float64 `json:"median"`
+	Max    float64 `json:"max"`
+}
+
+// episodeOf acha o episódio do alerta (mesmo aparelho, demo e origem).
+func (a *App) episodeOf(e Event, now time.Time) (alertEpisode, bool) {
+	a.mu.Lock()
+	var list []Event
+	for _, x := range a.events {
+		if x.Kind == kindAlert && x.Device == e.Device && x.Demo == e.Demo && x.Retro == e.Retro {
+			c := x
+			c.Active = a.isActiveLocked(x.ID)
+			list = append(list, c)
+		}
+	}
+	a.mu.Unlock()
+	for _, ep := range alertEpisodes(list, now) {
+		for _, id := range ep.IDs {
+			if id == e.ID {
+				return ep, true
+			}
+		}
+	}
+	return alertEpisode{}, false
+}
+
+// fillEpisode põe no detalhe o episódio e a estatística de dentro dele:
+// com os segundos do alerta inteiro (um alerta só), usa os segundos; senão,
+// os minutos gravados.
+func (a *App) fillEpisode(d *AlertDetail) {
+	ep, ok := a.episodeOf(d.Event, time.Now())
+	if !ok {
+		return
+	}
+	if d.Event.Active {
+		ep.Until = d.End
+	}
+	out := &AlertEp{From: ep.Start, To: ep.Until, Level: ep.Level, Alerts: len(ep.IDs), Peak: ep.Peak, Breaks: ep.Breaks, EndReason: ep.EndReason}
+	if out.Breaks == nil {
+		out.Breaks = []alertBreak{}
+	}
+	var vs []float64
+	if len(ep.IDs) == 1 && d.Detailed {
+		out.Src = "segundos"
+		for _, p := range d.allSecs {
+			if p.T >= ep.Start && p.T <= ep.Until {
+				vs = append(vs, p.CPM)
+			}
+		}
+	}
+	if len(vs) == 0 {
+		out.Src = "minutos"
+		from, to := time.UnixMilli(ep.Start).Truncate(time.Minute), time.UnixMilli(ep.Until)
+		if d.Device == devRC {
+			for _, p := range a.rcRange(from, to) {
+				vs = append(vs, p.USvh)
+			}
+		} else if pts, err := a.points(from, to); err == nil {
+			for _, p := range pts {
+				vs = append(vs, p.CPM)
+			}
+		}
+	}
+	if len(vs) > 0 {
+		sort.Float64s(vs)
+		var sum float64
+		for _, v := range vs {
+			sum += v
+		}
+		out.N, out.Min, out.Max = len(vs), vs[0], vs[len(vs)-1]
+		out.Mean, out.Median = sum/float64(len(vs)), percentile(vs, .5)
+	}
+	d.Episode = out
 }
 
 func (a *App) alertDir() string { return filepath.Join(a.dataDir, "alertas-detalhe") }
@@ -259,7 +352,9 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 		end = time.UnixMilli(e.End)
 	}
 	if e.Device == devRC {
-		return a.rcAlertDetail(e, end), nil
+		d := a.rcAlertDetail(e, end)
+		a.fillEpisode(&d)
+		return d, nil
 	}
 	d := AlertDetail{
 		Event: e, End: end.UnixMilli(),
@@ -303,6 +398,7 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 		d.Detailed = in[0].T <= e.Time+5000 && in[len(in)-1].T >= d.End-5000
 	}
 	d.Seconds = thinMax(in, alertMaxShown)
+	d.allSecs = in
 
 	pts, err := a.points(from.Truncate(time.Minute), to)
 	if err != nil {
@@ -317,6 +413,7 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 	if d.Seconds == nil {
 		d.Seconds = []AlertPoint{}
 	}
+	a.fillEpisode(&d)
 	return d, nil
 }
 

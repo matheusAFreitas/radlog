@@ -62,6 +62,7 @@ func parseEventRow(rec []string) (Event, bool) {
 	}
 	ev.Retro = col(8) == "1"
 	ev.Device = col(9)
+	ev.EndReason = col(10)
 	return ev, true
 }
 
@@ -85,7 +86,7 @@ func eventRow(e Event) []string {
 	if e.Retro {
 		retro = "1"
 	}
-	row := []string{ms(e.Time), e.Text, e.Kind, e.Level, num(e.CPM), num(e.Peak), ms(e.PeakAt), ms(e.End), retro, e.Device}
+	row := []string{ms(e.Time), e.Text, e.Kind, e.Level, num(e.CPM), num(e.Peak), ms(e.PeakAt), ms(e.End), retro, e.Device, e.EndReason}
 	for len(row) > 3 && row[len(row)-1] == "" {
 		row = row[:len(row)-1]
 	}
@@ -273,9 +274,17 @@ func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 	}
 }
 
+// Motivos de um alerta terminar sem a leitura voltar ao normal.
+const (
+	endDisconnected   = "contador desconectado"
+	endRcDisconnected = "RadiaCode desconectado"
+	endAppClosed      = "app fechado"
+)
+
 // closeAlerts fecha tudo que estiver aberto (contador desconectado, demo
-// desligado).
-func (a *App) closeAlerts(ids *alertIDs, now time.Time, demo bool) {
+// desligado). reason vai no alerta: ele não terminou porque a leitura
+// voltou, e sim porque parou de chegar leitura.
+func (a *App) closeAlerts(ids *alertIDs, now time.Time, demo bool, reason string) {
 	a.mu.Lock()
 	var list []int64
 	for _, id := range []int64{ids.attn, ids.alarm, ids.danger} {
@@ -284,6 +293,11 @@ func (a *App) closeAlerts(ids *alertIDs, now time.Time, demo bool) {
 		}
 	}
 	*ids = alertIDs{}
+	for _, id := range list {
+		if e := a.eventLocked(id); e != nil && e.End == 0 {
+			e.EndReason = reason
+		}
+	}
 	a.mu.Unlock()
 	if len(list) > 0 {
 		a.finishAlerts(list, now, demo)
@@ -536,7 +550,23 @@ type alertEpisode struct {
 	Until int64
 	Peak  float64
 	IDs   []int64
+	// trechos sem leitura no meio do episódio: o aparelho desconectou com o
+	// alerta aberto e, ao voltar em até 15 min, a leitura ainda estava alta
+	Breaks []alertBreak
+	// o episódio terminou com o aparelho desconectado (sem saber como acabou)
+	EndReason string
 }
+
+// alertBreak é um trecho sem leitura dentro de um episódio.
+type alertBreak struct {
+	From   int64  `json:"from"`
+	To     int64  `json:"to"`
+	Reason string `json:"reason"`
+}
+
+// alertResume é quanto tempo depois de uma desconexão um alerta novo ainda
+// conta como o mesmo episódio.
+const alertResume = 15 * 60 * 1000
 
 var levelRank = map[string]int{"atencao": 1, "alarme": 2, "perigo": 3}
 
@@ -558,8 +588,18 @@ func alertEpisodes(evs []Event, now time.Time) []alertEpisode {
 		if lvl == "" {
 			lvl = "atencao"
 		}
-		if n := len(out); n > 0 && e.Demo == demo && e.Retro == retro && e.Device == dev && e.Time <= out[n-1].Until+60000 {
+		gap := int64(60000)
+		if n := len(out); n > 0 && out[n-1].EndReason != "" && out[n-1].EndReason != endAppClosed {
+			gap = alertResume
+		}
+		if n := len(out); n > 0 && e.Demo == demo && e.Retro == retro && e.Device == dev && e.Time <= out[n-1].Until+gap {
 			ep := &out[n-1]
+			if ep.EndReason != "" && e.Time > ep.Until+60000 {
+				ep.Breaks = append(ep.Breaks, alertBreak{From: ep.Until, To: e.Time, Reason: ep.EndReason})
+			}
+			if end >= ep.Until {
+				ep.EndReason = e.EndReason
+			}
 			if levelRank[lvl] > levelRank[ep.Level] {
 				ep.Level = lvl
 			}
@@ -573,7 +613,7 @@ func alertEpisodes(evs []Event, now time.Time) []alertEpisode {
 			continue
 		}
 		demo, retro, dev = e.Demo, e.Retro, e.Device
-		out = append(out, alertEpisode{Level: lvl, Start: e.Time, Until: end, Peak: e.Peak, IDs: []int64{e.ID}})
+		out = append(out, alertEpisode{Level: lvl, Start: e.Time, Until: end, Peak: e.Peak, IDs: []int64{e.ID}, EndReason: e.EndReason})
 	}
 	return out
 }

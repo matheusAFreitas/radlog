@@ -1,5 +1,27 @@
 # Versões
 
+## 2.5.0
+- **Padrões do fundo** (novo quadro em Gráficos): mediana por hora do dia,
+  com a faixa do 1º ao 3º quartil e a média; dia da semana; mês; e dia ×
+  noite. Janelas de 30, 90 dias e 1 ano, para o GMC (CPM) ou o RadiaCode
+  (µSv/h). Só os minutos em casa, sem objeto encostado e sem minutos
+  saturados ou com interferência.
+- **Dia × noite pareado:** cada dia é comparado com a própria noite (6 h ou
+  mais de cada metade), e só diz que a noite fica acima (ou abaixo) quando a
+  diferença passa de 3 vezes a incerteza e de 2%.
+- **Mapa de calor do RadiaCode:** o "Padrão por hora do dia" ganha a escolha
+  GMC-800 / RadiaCode, com os alertas de cada aparelho.
+- **Mínimo e média do episódio:** o detalhe do alerta mostra mínimo, média
+  (e mediana) das leituras de dentro do episódio inteiro, com quantos
+  segundos ou minutos entraram.
+- **Alerta com o aparelho desconectado:** o alerta agora guarda por que
+  terminou ("contador desconectado", "RadiaCode desconectado", "app
+  fechado"; nova coluna no `eventos.csv`). Se o aparelho volta em até 15 min
+  e a leitura ainda está alta, o alerta novo continua o mesmo episódio, com
+  o trecho sem leitura marcado (ele não entra no mínimo nem na média). Se
+  não volta, o episódio fica marcado como "terminou sem leitura", sem
+  fingir que a contagem voltou ao normal. Fechar o app não emenda episódios.
+
 ## 2.4.0
 - **Fundo ao longo do tempo** (novo quadro em Gráficos, abaixo do padrão por
   hora): média e mediana móveis de 24 h do fundo em casa, em janelas de 7,

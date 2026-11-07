@@ -370,6 +370,8 @@ function alertSub(e) {
   if (e.end) parts.push(`${hhmm(e.time)}–${hhmm(e.end)} · durou ${fmtDur(e.end - e.time)}`);
   else if (!e.active && e.level) parts.push("fim não registrado");
   if (e.peak && (e.retro || e.peak > (e.cpm || 0))) parts.push(`pico ${evVal(e, e.peak)}${evSig(e, e.peak)} às ${(e.retro ? hhmm : hhmmss)(e.peakAt || e.time)}`);
+  if (e.breaks && e.breaks.length) parts.push(e.breaks.length === 1 ? `sem leitura por ${fmtDur(e.breaks[0].to - e.breaks[0].from)} no meio` : `${e.breaks.length} trechos sem leitura no meio`);
+  if (e.endReason && !e.active) parts.push(`terminou sem leitura (${e.endReason})`);
   return parts.join(" · ");
 }
 
@@ -385,17 +387,22 @@ function groupEpisodes(list) {
   let cur = null;
   for (const e of asc) {
     const end = e.active ? now : (e.end || e.time);
-    if (cur && !!e.demo === cur.demo && !!e.retro === cur.retro && (e.device || "") === cur.device && e.time <= cur.until + 60000) {
+    // desconectou com o alerta aberto e voltou alto em até 15 min: mesmo episódio (2.5)
+    const gap = cur && cur.endReason && cur.endReason !== "app fechado" ? 15 * 60e3 : 60e3;
+    if (cur && !!e.demo === cur.demo && !!e.retro === cur.retro && (e.device || "") === cur.device && e.time <= cur.until + gap) {
       cur.members.push(e);
+      if (cur.endReason && e.time > cur.until + 60e3) cur.breaks.push({ from: cur.until, to: e.time, reason: cur.endReason });
+      if (end >= cur.until) cur.endReason = e.endReason || "";
       cur.until = Math.max(cur.until, end);
       continue;
     }
-    cur = { members: [e], until: end, demo: !!e.demo, retro: !!e.retro, device: e.device || "" };
+    cur = { members: [e], until: end, demo: !!e.demo, retro: !!e.retro, device: e.device || "", endReason: e.endReason || "", breaks: [] };
     eps.push(cur);
   }
   return eps.map((g) => {
     const ms = g.members;
     if (ms.length === 1) return ms[0];
+    const extra = { breaks: g.breaks, endReason: g.endReason };
     const top = ms.reduce((b, x) => ((LVL_RANK[lvlCls(x)] || 0) > (LVL_RANK[lvlCls(b)] || 0) ? x : b), ms[0]);
     const pk = ms.reduce((b, x) => ((x.peak || 0) > (b.peak || 0) ? x : b), ms[0]);
     const first = ms[0];
@@ -409,7 +416,7 @@ function groupEpisodes(list) {
       startedAs: lvlCls(first) !== lvlCls(top) ? { level: lvlCls(first), time: first.time } : null,
       upAt: top.time,
       members: ms,
-    });
+    }, extra);
   }).sort((x, y) => y.time - x.time);
 }
 
@@ -583,6 +590,8 @@ function drawAlertDetail(d) {
   sub.push(e.active ? `desde ${hhmm(e.time)} · ${fmtDur(d.end - e.time)}` : `${hhmmss(e.time)}–${hhmmss(d.end)} · durou ${fmtDur(d.end - e.time)}`);
   if (e.peak) sub.push(`pico ${val(e.peak)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${fmt(bgNow(), 0)})` : ""));
   sub.push(`limite ${val(d.limit)}`);
+  const ep = d.episode;
+  if (ep && ep.n) sub.push(`mín ${val(ep.min)} · média ${val(ep.mean)} (${fmt(ep.n, 0)} ${ep.src === "segundos" ? "segundos" : "minutos"})`);
   $("adSub").textContent = sub.join(" · ");
 
   const secs = d.seconds || [], mins = d.minutes || [];
@@ -641,11 +650,16 @@ function drawAlertDetail(d) {
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
   const note = $("adNote");
-  note.hidden = !!(secs.length && d.detailed);
-  note.textContent = e.retro ? "Alerta achado no histórico do contador: só há o valor de cada minuto."
+  const notes = [];
+  if (!(secs.length && d.detailed)) notes.push(e.retro ? "Alerta achado no histórico do contador: só há o valor de cada minuto."
     : !secs.length && rc ? "Só há o valor de cada minuto do RadiaCode."
     : !secs.length ? "Só há o valor de cada minuto. O detalhe por segundo é guardado nos alertas ao vivo a partir da versão 0.22.0."
-    : "O detalhe por segundo não cobre o alerta inteiro (o app foi fechado ou reaberto no meio).";
+    : "O detalhe por segundo não cobre o alerta inteiro (o app foi fechado ou reaberto no meio).");
+  if (ep && ep.alerts > 1) notes.push(`Faz parte de um episódio de ${ep.alerts} alertas, ${hhmm(ep.from)}–${hhmm(ep.to)} (nível mais alto: ${({ perigo: "perigo", alarme: "alarme" })[ep.level] || "atenção"}); o mínimo e a média são do episódio inteiro.`);
+  for (const b of (ep && ep.breaks) || []) notes.push(`Sem leitura de ${hhmm(b.from)} a ${hhmm(b.to)} (${b.reason}). Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio. O tempo sem leitura não entra no mínimo nem na média.`);
+  if (ep && ep.endReason && !e.active) notes.push(`O episódio terminou porque parou de chegar leitura (${ep.endReason}) às ${hhmm(ep.to)}, não porque a contagem voltou ao normal. Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.`);
+  note.hidden = !notes.length;
+  note.textContent = notes.join(" ");
 }
 
 function setupAlertDetail() {
@@ -882,7 +896,7 @@ async function showView(v, skipRender) {
   document.querySelectorAll(".col-b .view-graficos").forEach((el) => { el.hidden = v !== "graficos"; });
   for (const [k, id] of Object.entries(VIEW_IDS)) $(id).hidden = k !== v;
   document.querySelectorAll("#viewTabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
-  if (v === "graficos") { refreshChart(); refreshDose(); refreshHeat(); refreshBgTrend(); }
+  if (v === "graficos") { refreshChart(); refreshDose(); refreshHeat(); refreshPatterns(); refreshBgTrend(); }
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
@@ -1506,6 +1520,11 @@ async function refreshHeat() {
   const mm = state.heatMonthMode;
   document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
   $("heatMonthNav").hidden = !mm;
+  const rcOn = hasRcData() && !!api.GetHeatmapDev;
+  $("heatDevSeg").hidden = !rcOn;
+  if (!rcOn) state.heatDev = "";
+  const dev = state.heatDev || "";
+  document.querySelectorAll("#heatDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hdev === dev)));
   let h;
   if (mm) {
     if (api.GetDataStart) state.heatDataStart = (await api.GetDataStart()) || 0;
@@ -1514,10 +1533,13 @@ async function refreshHeat() {
     $("heatMonthLabel").textContent = label.charAt(0).toUpperCase() + label.slice(1);
     $("heatPrev").disabled = !!state.heatDataStart && heatMonthStart(hm) <= state.heatDataStart;
     $("heatNext").disabled = hm.y > now.getFullYear() || (hm.y === now.getFullYear() && hm.m >= now.getMonth() + 1);
-    h = await api.GetHeatmapMonth(hm.y, hm.m);
+    h = api.GetHeatmapMonthDev ? await api.GetHeatmapMonthDev(hm.y, hm.m, dev) : await api.GetHeatmapMonth(hm.y, hm.m);
   } else {
-    h = await api.GetHeatmap(state.heatDays);
+    h = api.GetHeatmapDev ? await api.GetHeatmapDev(state.heatDays, dev) : await api.GetHeatmap(state.heatDays);
   }
+  const rcMap = h.device === "radiacode";
+  const hv = (v, d) => (rcMap ? fmt(v, usvDigits(v)) : fmt(v, d));
+  $("heatUnit").textContent = rcMap ? "µSv/h médio (RadiaCode) · cinza = sem dados" : "CPM médio · cinza = sem dados";
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1550,19 +1572,21 @@ async function refreshHeat() {
         // hora com alerta: laranja (atenção) ou vermelho (alarme)
         c.classList.add(al.some((x) => x.level === "perigo") ? "danger" : al.some((x) => x.level === "alarme") ? "alarm" : "att");
       } else if (v != null) {
-        c.style.background = `rgba(110,231,160,${(0.15 + 0.85 * ((v - mn) / span)).toFixed(3)})`;
+        c.style.background = `rgba(${rcMap ? "244,114,182" : "110,231,160"},${(0.15 + 0.85 * ((v - mn) / span)).toFixed(3)})`;
       }
     }
   }
   markHeatPick();
-  $("heatMin").textContent = mn == null ? "—" : fmt(mn, 0);
-  $("heatMax").textContent = mx == null ? "—" : fmt(mx, 0);
+  $("heatMin").textContent = mn == null ? "—" : hv(mn, 0);
+  $("heatMax").textContent = mx == null ? "—" : hv(mx, 0);
+  document.querySelector("#heatCard .heat-ramp").classList.toggle("rc", rcMap);
   const daysWith = h.values.filter((row) => row.some((v) => v != null)).length;
   if (h.peakHour < 0) $("heatSub").textContent = "sem dados ainda";
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvg[h.peakHour], l = h.hourAvg[h.lowHour];
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${fmt(p, 1)} CPM) · mais baixo por volta das ${h.lowHour}h (${fmt(l, 1)} CPM)`;
+    const u = rcMap ? " µSv/h" : " CPM";
+    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p, 1)}${u}) · mais baixo por volta das ${h.lowHour}h (${hv(l, 1)}${u})`;
   }
 }
 
@@ -1583,12 +1607,16 @@ function showHeatTip(c) {
   if (v == null) {
     if (!onlyAway) line("sem dados", "ht-none");
   } else {
-    line(`${fmt(v, 1)} CPM`, "ht-val");
+    const rcMap = h.device === "radiacode";
+    line(rcMap ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 1)} CPM`, "ht-val");
     const u = h.usv && h.usv[i] ? h.usv[i][hr] : null;
-    if (u != null) line(`≈ ${fmt(u, usvDigits(u))} µSv/h`);
+    if (u != null && !rcMap) line(`≈ ${fmt(u, usvDigits(u))} µSv/h`);
     const avg = h.hourAvg[hr];
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
-    if (avg != null && h.days.length > 1) {
+    if (rcMap && avg != null && h.days.length > 1) {
+      const d = v - avg;
+      line(Math.abs(d) < avg * 0.005 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d), usvDigits(avg) + 1)} da média das ${hr}h (${fmt(avg, usvDigits(avg))})`, "ht-dim");
+    } else if (avg != null && h.days.length > 1) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
@@ -1599,7 +1627,7 @@ function showHeatTip(c) {
   const ac = h.awayCounts && h.awayCounts[i] ? h.awayCounts[i][hr] : 0;
   if (ac) {
     const av = h.awayValues && h.awayValues[i] ? h.awayValues[i][hr] : null;
-    line(`fora de casa: ${ac} min${av != null ? ` · ${fmt(av, 1)} CPM` : ""} (fora do padrão)`, "ht-away");
+    line(`fora de casa: ${ac} min${av != null ? ` · ${h.device === "radiacode" ? fmt(av, usvDigits(av)) + " µSv/h" : fmt(av, 1) + " CPM"}` : ""} (fora do padrão)`, "ht-away");
   }
   // o mais perigoso primeiro (perigo, alarme, atenção); no mesmo nível, o maior pico
   const rank = { perigo: 0, alarme: 1 };
@@ -1607,7 +1635,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + fmt(a.peak, 0) + " CPM" : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + (h.device === "radiacode" ? fmt(a.peak, usvDigits(a.peak)) + " µSv/h" : fmt(a.peak, 0) + " CPM") : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -1699,6 +1727,8 @@ function wireHeat() {
   });
   window.addEventListener("scroll", hideHeatTip, { passive: true });
   wireBgTrend();
+  wirePatterns();
+  document.querySelectorAll("#heatDevSeg button").forEach((b) => b.addEventListener("click", () => { state.heatDev = b.dataset.hdev; refreshHeat(); }));
   document.querySelectorAll("#heatSeg button").forEach((b) => b.addEventListener("click", () => {
     if (b.dataset.hmonth) {
       state.heatMonthMode = true;
@@ -4133,7 +4163,7 @@ function listen() {
 }
 
 async function refreshAll() {
-  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshBgTrend(), refreshDaily(), refreshEvents(), refreshRainImpact()]);
+  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshPatterns(), refreshBgTrend(), refreshDaily(), refreshEvents(), refreshRainImpact()]);
 }
 
 // ---------- chuva × radiação ----------
@@ -5171,6 +5201,121 @@ function drawSumChartUSv(r, rc) {
     (rc.bgUSv ? '<span class="key"><i style="border-color:#F472B6;border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
 }
 
+// ---------- padrões do fundo (2.5) ----------
+
+let patSeq = 0;
+async function refreshPatterns() {
+  if (!api.GetPatterns || state.view !== "graficos") return;
+  const rcOn = hasRcData();
+  $("patDevSeg").hidden = !rcOn;
+  if (!rcOn) state.patDev = "";
+  const dev = state.patDev || "", days = state.patDays || 90;
+  document.querySelectorAll("#patDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.pdev === dev)));
+  document.querySelectorAll("#patSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.pdays === days)));
+  const my = ++patSeq;
+  let p;
+  try { p = await api.GetPatterns(days, dev); } catch (e) { return; }
+  if (my !== patSeq) return;
+  state.pat = p;
+  drawPatterns(p);
+}
+
+function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : fmt(v, usvDigits(v)); }
+
+function drawPatterns(p) {
+  const rc = p.device === "radiacode", color = rc ? "#F472B6" : "#6EE7A0";
+  const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
+  $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
+    : `${fmt(p.minutes, 0)} min em casa (${p.unit})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
+      (p.peakHour >= 0 ? ` · mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h` : "");
+  // hora do dia
+  const svg = $("patChart"), PH = 160;
+  const hs = p.hours || [];
+  let lo = Infinity, hi = -Infinity;
+  for (const h of hs) if (h.n >= 30) { lo = Math.min(lo, h.p25, h.mean); hi = Math.max(hi, h.p75, h.mean); }
+  const ys = $("patY").children;
+  if (!isFinite(lo)) {
+    svg.innerHTML = ""; for (const e of ys) e.textContent = ""; $("patLegend").textContent = "";
+  } else {
+    const pad = (hi - lo) * 0.1 || hi * 0.05 || 1;
+    lo = Math.max(0, lo - pad); hi += pad;
+    const x = (h) => (h / 23) * W;
+    const y = (v) => PH - ((v - lo) / (hi - lo)) * PH;
+    for (let i = 0; i < 4; i++) ys[i].textContent = patVal(p, hi - ((hi - lo) / 3) * i);
+    let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? PH - 0.5 : i === 0 ? 0.5 : (PH / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+    // noite (18h–6h) com fundo levemente mais escuro
+    out += `<rect x="0" y="0" width="${x(6).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/><rect x="${x(18).toFixed(1)}" y="0" width="${(W - x(18)).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/>`;
+    const ok = hs.map((h, i) => ({ h, i })).filter((q) => q.h.n >= 30);
+    if (ok.length > 1) {
+      const top = ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.p75).toFixed(1)}`).join(" L");
+      const bot = ok.slice().reverse().map((q) => `${x(q.i).toFixed(1)} ${y(q.h.p25).toFixed(1)}`).join(" L");
+      out += `<path d="M${top} L${bot} Z" fill="${color}" fill-opacity="0.15"/>`;
+      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.median).toFixed(1)}`).join(" L")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="#E9EDEF" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
+    }
+    svg.innerHTML = out;
+    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:#E9EDEF;border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
+  }
+  // dia × noite
+  const dn = $("patDN");
+  dn.innerHTML = "";
+  for (const [lab, st] of [["Dia (6h–18h)", p.day], ["Noite (18h–6h)", p.night]]) {
+    const d = document.createElement("div");
+    d.className = "pat-dn-v";
+    d.innerHTML = "<span class='small muted'></span><b></b><span class='small muted'></span>";
+    d.children[0].textContent = lab;
+    d.children[1].textContent = st && st.n ? `${patVal(p, st.median)} ${p.unit}` : "—";
+    d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean)} · ${fmt(st.n, 0)} min` : "sem dados";
+    dn.appendChild(d);
+  }
+  $("patDNText").textContent = p.minutes ? p.dnText : "";
+  // barras
+  const bars = (box, rows) => {
+    box.textContent = "";
+    box.classList.toggle("rc", rc);
+    const vals = rows.filter((r) => r.st && r.st.n >= 60).map((r) => r.st.median);
+    if (!vals.length) { box.innerHTML = '<span class="small muted">sem dados</span>'; return; }
+    const mn = Math.min(...vals), mx = Math.max(...vals), base = Math.max(0, mn - (mx - mn) * 0.6 - mx * 0.02);
+    for (const r of rows) {
+      const l = document.createElement("span"); l.className = "lab"; l.textContent = r.label;
+      const wrap = document.createElement("span"); wrap.className = "track";
+      const v = document.createElement("span"); v.className = "v";
+      if (r.st && r.st.n >= 60) {
+        const b = document.createElement("span"); b.className = "bar";
+        b.style.width = `${Math.max(2, ((r.st.median - base) / (mx - base)) * 100).toFixed(1)}%`;
+        wrap.appendChild(b);
+        v.textContent = `${patVal(p, r.st.median)} · ${r.st.days} ${r.st.days === 1 ? "dia" : "dias"}`;
+      } else v.textContent = "—";
+      box.append(l, wrap, v);
+    }
+  };
+  const WD = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+  bars($("patWd"), [1, 2, 3, 4, 5, 6, 0].map((i) => ({ label: WD[i], st: (p.weekdays || [])[i] })));
+  bars($("patMonths"), (p.months || []).map((m) => ({ label: new Date(m.month).toLocaleDateString(LOCALE, { month: "short", year: "2-digit" }), st: m })));
+}
+
+function wirePatterns() {
+  state.patDays = parseInt(localGet("patDays") || "90", 10) || 90;
+  document.querySelectorAll("#patSeg button").forEach((b) => b.addEventListener("click", () => { state.patDays = +b.dataset.pdays; localSet("patDays", String(state.patDays)); refreshPatterns(); }));
+  document.querySelectorAll("#patDevSeg button").forEach((b) => b.addEventListener("click", () => { state.patDev = b.dataset.pdev; refreshPatterns(); }));
+  const plot = $("patPlot");
+  plot.addEventListener("mousemove", (ev) => {
+    const p = state.pat;
+    if (!p || !p.hours) return;
+    const r = plot.getBoundingClientRect();
+    const h = Math.max(0, Math.min(23, Math.round(((ev.clientX - r.left) / r.width) * 23)));
+    const st = p.hours[h];
+    $("patCursor").hidden = false;
+    $("patCursor").style.left = (h / 23) * 100 + "%";
+    const tip = $("patTip");
+    tip.hidden = false;
+    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${p.unit} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
+    const left = (h / 23) * r.width;
+    tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px";
+  });
+  plot.addEventListener("mouseleave", () => { $("patCursor").hidden = true; $("patTip").hidden = true; });
+}
+
 // ---------- fundo ao longo do tempo (2.4) ----------
 
 const BG_STATE = { estavel: "Estável", subindo: "Tendência de alta", descendo: "Tendência de queda", degrau: "Mudança brusca", insuficiente: "Ainda sem tendência" };
@@ -5697,6 +5842,7 @@ function makeDemoApi() {
     },
   };
   const demoFirst = () => Date.now() - 12 * 864e5;
+  const rcHeat = (h) => { const k = 0.0061, sc = (rows) => rows.map((r) => r.map((v) => (v == null ? null : v * k))); return Object.assign({}, h, { device: "radiacode", values: sc(h.values), usv: sc(h.values), awayValues: sc(h.awayValues || []), hourAvg: h.hourAvg.map((v) => (v == null ? null : v * k)), min: h.min == null ? null : h.min * k, max: h.max == null ? null : h.max * k, alerts: {} }); };
   const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
 const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
@@ -5936,6 +6082,24 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
       { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
     ],
+    GetPatterns: async (days, dev) => {
+      const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 1;
+      const pts = range(from, now).map((q) => ({ t: q.t, v: q.cpm * k }));
+      const st = (vs) => { if (!vs.length) return { n: 0, days: 0, median: 0, p25: 0, p75: 0, mean: 0 }; const x = vs.map((q) => q.v).sort((a, b) => a - b), q = (f) => x[Math.min(x.length - 1, Math.floor(f * x.length))];
+        return { n: x.length, days: new Set(vs.map((v) => new Date(v.t).toDateString())).size, median: q(0.5), p25: q(0.25), p75: q(0.75), mean: x.reduce((a, b) => a + b, 0) / x.length }; };
+      const hours = Array.from({ length: 24 }, (_, h) => st(pts.filter((q) => new Date(q.t).getHours() === h)));
+      const weekdays = Array.from({ length: 7 }, (_, d) => st(pts.filter((q) => new Date(q.t).getDay() === d)));
+      const isDay = (t) => { const h = new Date(t).getHours(); return h >= 6 && h < 18; };
+      const mStart = (t) => { const d = new Date(t); return new Date(d.getFullYear(), d.getMonth(), 1).getTime(); };
+      const months = [...new Set(pts.map((q) => mStart(q.t)))].sort().map((m) => Object.assign({ month: m }, st(pts.filter((q) => mStart(q.t) === m))));
+      let pk = -1, lw = -1;
+      hours.forEach((h, i) => { if (h.n < 30) return; if (pk < 0 || h.median > hours[pk].median) pk = i; if (lw < 0 || h.median < hours[lw].median) lw = i; });
+      return { device: dev, unit: dev === "radiacode" ? "µSv/h" : "CPM", days, from, to: now, minutes: pts.length, first: demoFirst(), hours, weekdays, months,
+        day: st(pts.filter((q) => isDay(q.t))), night: st(pts.filter((q) => !isDay(q.t))), dnDays: 6, dnDiff: 1.2 * k, dnErr: 0.3 * k, dnPct: 6,
+        dnText: "A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.", peakHour: pk, lowHour: lw };
+    },
+    GetHeatmapDev: async (days, dev) => { const h = await api.GetHeatmap(days); return dev === "radiacode" ? rcHeat(h) : h; },
+    GetHeatmapMonthDev: async (y, m, dev) => { const h = await api.GetHeatmapMonth(y, m); return dev === "radiacode" ? rcHeat(h) : h; },
     GetBgTrend: async (days) => {
       const now = Date.now(), to = Math.floor(now / 6e4) * 6e4 + 6e4, from = to - days * 864e5;
       const step = days <= 7 ? 36e5 : days <= 30 ? 108e5 : days <= 90 ? 432e5 : 864e5;

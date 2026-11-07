@@ -2377,3 +2377,53 @@ Mudança brusca por volta de {0}: o fundo passou de {1} para {2} CPM ({3}%), com
 Janela do fundo	Background window
 Média e mediana móveis de 24 h do fundo em casa	24 h moving average and median of the home background
 Dispersão de cada dia	Each day's dispersion
+Aparelho do mapa	Map device
+Padrões do fundo	Background patterns
+Aparelho dos padrões	Patterns device
+Janela dos padrões	Patterns window
+Hora do dia	Hour of day
+Mediana por hora do dia	Median by hour of day
+mediana	median
+1º a 3º quartil	1st to 3rd quartile
+média	average
+noite (18h–6h)	night (6pm–6am)
+Dia × noite	Day × night
+Dia (6h–18h)	Day (6am–6pm)
+Noite (18h–6h)	Night (6pm–6am)
+Dia da semana	Day of week
+segunda	Monday
+terça	Tuesday
+quarta	Wednesday
+quinta	Thursday
+sexta	Friday
+sábado	Saturday
+domingo	Sunday
+1 dia	1 day
+{0} min em casa ({1})	{0} min at home ({1})
+mais alto por volta das {0}h, mais baixo por volta das {1}h	highest around {0}h, lowest around {1}h
+mais alto por volta das {0}h ({1} µSv/h) · mais baixo por volta das {2}h ({3} µSv/h)	highest around {0}h ({1} µSv/h) · lowest around {2}h ({3} µSv/h)
+µSv/h médio (RadiaCode)	average µSv/h (RadiaCode)
+mediana {0}	median {0}
+quartis {0}–{1}	quartiles {0}–{1}
+média {0} {1}	average {0} {1}
+{0} min em {1} dias	{0} min over {1} days
+{0} min em 1 dia	{0} min over 1 day
+Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.	Median of the minutes at home (without object measurements and without saturated or interference minutes); the band goes from the 1st to the 3rd quartile. The day × night comparison uses the days with both halves measured (6 h or more of each) and compares each day with its own night, so one day's weather doesn't weigh in.
+A noite (18h–6h) fica {0}% acima do dia ({1} ± {2} {3}, {4} dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (6pm–6am) is {0}% above day ({1} ± {2} {3}, {4} days with both halves). That's the usual radon pattern: it builds up with the house closed and still air at night.
+O dia (6h–18h) fica {0}% acima da noite ({1} ± {2} {3}, {4} dias com as duas metades).	Day (6am–6pm) is {0}% above night ({1} ± {2} {3}, {4} days with both halves).
+Sem diferença clara entre dia e noite (noite − dia = {0} ± {1} {2}, {3} dias com as duas metades).	No clear difference between day and night (night − day = {0} ± {1} {2}, {3} days with both halves).
+Poucos dias com dia e noite medidos ({0}; precisa de 3, com 6 h ou mais de cada metade).	Too few days with day and night measured ({0}; needs 3, with 6 h or more of each half).
+média {0} ({1} segundos)	average {0} ({1} seconds)
+média {0} ({1} minutos)	average {0} ({1} minutes)
+sem leitura por {0} no meio	no readings for {0} in the middle
+{0} trechos sem leitura no meio	{0} stretches without readings in the middle
+terminou sem leitura ({0})	ended without readings ({0})
+Faz parte de um episódio de {0} alertas, {1}–{2} (nível mais alto: {3}); o mínimo e a média são do episódio inteiro.	Part of an episode of {0} alerts, {1}–{2} (highest level: {3}); the minimum and average are for the whole episode.
+Sem leitura de {0} a {1} ({2}).	No readings from {0} to {1} ({2}).
+Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio.	When readings came back they were still high: the alert continued in the same episode.
+O tempo sem leitura não entra no mínimo nem na média.	The time without readings is not part of the minimum or the average.
+O episódio terminou porque parou de chegar leitura ({0}) às {1}, não porque a contagem voltou ao normal.	The episode ended because readings stopped arriving ({0}) at {1}, not because the count went back to normal.
+Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.	If you download the counter's history, the minutes after that show up in the chart.
+RadiaCode desconectado	RadiaCode disconnected
+app fechado	app closed
+cinza = sem dados	gray = no data

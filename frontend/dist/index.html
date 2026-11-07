@@ -391,6 +391,10 @@
         <span class="mono muted small" id="heatSub">sem dados ainda</span>
       </div>
       <div class="heat-ctrl">
+      <div class="seg" role="group" aria-label="Aparelho do mapa" id="heatDevSeg" hidden>
+        <button type="button" data-hdev="" aria-pressed="true">GMC-800</button>
+        <button type="button" data-hdev="radiacode" aria-pressed="false">RadiaCode</button>
+      </div>
       <div class="seg" role="group" aria-label="Dias no mapa" id="heatSeg">
         <button type="button" data-hdays="7" aria-pressed="false">7 dias</button>
         <button type="button" data-hdays="14" aria-pressed="true">14 dias</button>
@@ -411,13 +415,54 @@
       <span id="heatMin">—</span>
       <span class="heat-ramp" aria-hidden="true"></span>
       <span id="heatMax">—</span>
-      <span>CPM médio · cinza = sem dados</span>
+      <span id="heatUnit">CPM médio · cinza = sem dados</span>
       <span class="heat-key"><i class="hk-att" aria-hidden="true"></i>teve atenção</span>
       <span class="heat-key"><i class="hk-alarm" aria-hidden="true"></i>teve alarme</span>
       <span class="heat-key"><i class="hk-danger" aria-hidden="true"></i>teve perigo</span>
       <span class="heat-key"><i class="hk-away" aria-hidden="true"></i>fora de casa</span>
     </div>
   </section>
+  <section class="card view-graficos" id="patCard">
+    <div class="chart-head">
+      <div>
+        <h2>Padrões do fundo</h2>
+        <span class="mono muted small" id="patSub">sem dados ainda</span>
+      </div>
+      <div class="heat-ctrl">
+        <div class="seg" role="group" aria-label="Aparelho dos padrões" id="patDevSeg" hidden>
+          <button type="button" data-pdev="" aria-pressed="true">GMC-800</button>
+          <button type="button" data-pdev="radiacode" aria-pressed="false">RadiaCode</button>
+        </div>
+        <div class="seg" role="group" aria-label="Janela dos padrões" id="patSeg">
+          <button type="button" data-pdays="30" aria-pressed="false">30 dias</button>
+          <button type="button" data-pdays="90" aria-pressed="true">90 dias</button>
+          <button type="button" data-pdays="365" aria-pressed="false">1 ano</button>
+        </div>
+      </div>
+    </div>
+    <div class="pat-hours">
+      <h3 class="sub-head">Hora do dia</h3>
+      <div class="m-chart-wrap">
+        <div class="y-axis mono" id="patY"><span></span><span></span><span></span><span></span></div>
+        <div class="plot m-plot" id="patPlot">
+          <svg id="patChart" viewBox="0 0 600 160" preserveAspectRatio="none" role="img" aria-label="Mediana por hora do dia"></svg>
+          <div class="cursor" id="patCursor" hidden></div>
+          <div class="tip mono" id="patTip" hidden></div>
+        </div>
+      </div>
+      <div class="ad-x mono" id="patX"><span>0h</span><span>6h</span><span>12h</span><span>18h</span><span>23h</span></div>
+      <div class="legend small muted ad-legend" id="patLegend"></div>
+    </div>
+    <h3 class="sub-head">Dia × noite</h3>
+    <div class="pat-dn" id="patDN"></div>
+    <p class="small" id="patDNText"></p>
+    <div class="pat-grid">
+      <div><h3 class="sub-head">Dia da semana</h3><div class="pat-bars" id="patWd"></div></div>
+      <div><h3 class="sub-head">Mês</h3><div class="pat-bars" id="patMonths"></div></div>
+    </div>
+    <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
+  </section>
+
   <section class="card view-graficos" id="bgCard">
     <div class="chart-head">
       <div>

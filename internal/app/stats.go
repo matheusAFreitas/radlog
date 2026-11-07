@@ -5,6 +5,8 @@ import (
 	"math"
 	"sort"
 	"time"
+
+	"radlog/internal/store"
 )
 
 // ---------- fundo e "quão incomum" é a leitura ----------
@@ -100,6 +102,8 @@ type Heatmap struct {
 	PeakHour int                    `json:"peakHour"` // -1 se não houver dados
 	LowHour  int                    `json:"lowHour"`
 	Minutes  int                    `json:"minutes"`
+	// "" = GMC (CPM); "radiacode" = valores em µSv/h (2.5)
+	Device string `json:"device,omitempty"`
 }
 
 // HeatAlert é um alerta que aconteceu (ao menos em parte) numa hora do mapa.
@@ -111,14 +115,14 @@ type HeatAlert struct {
 }
 
 // heatAlerts marca as horas em que houve alerta do GMC.
-func (a *App) heatAlerts(first time.Time, days int) map[string][]HeatAlert {
+func (a *App) heatAlerts(first time.Time, days int, dev string) map[string][]HeatAlert {
 	out := map[string][]HeatAlert{}
 	end := first.AddDate(0, 0, days)
 	now := time.Now()
 	a.mu.Lock()
 	var list []Event
 	for _, e := range a.events {
-		if e.Kind == kindAlert && e.Device != devRC { // o mapa é do GMC: alertas do RadiaCode ficam de fora
+		if e.Kind == kindAlert && e.Device == dev { // só os alertas do aparelho do mapa
 			c := e
 			c.Active = a.isActiveLocked(e.ID)
 			list = append(list, c)
@@ -168,19 +172,33 @@ func (a *App) heatAlerts(first time.Time, days int) map[string][]HeatAlert {
 }
 
 // GetHeatmap monta o mapa de calor dos últimos dias (1 a 60).
-func (a *App) GetHeatmap(days int) (Heatmap, error) {
+func (a *App) GetHeatmap(days int) (Heatmap, error) { return a.GetHeatmapDev(days, "") }
+
+// GetHeatmapDev é o mapa de um aparelho ("" = GMC, "radiacode").
+func (a *App) GetHeatmapDev(days int, dev string) (Heatmap, error) {
+	if dev != devRC {
+		dev = ""
+	}
 	if days < 1 || days > 60 {
 		days = 14
 	}
 	now := time.Now()
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
-	return a.heatmapFrom(today.AddDate(0, 0, -(days-1)), days)
+	return a.heatmapFromDev(today.AddDate(0, 0, -(days-1)), days, dev)
 }
 
 // GetHeatmapMonth monta o mapa de calor de um mês (month 1–12). O mês atual
 // vai só até hoje; mês futuro volta vazio.
 func (a *App) GetHeatmapMonth(year, month int) (Heatmap, error) {
+	return a.GetHeatmapMonthDev(year, month, "")
+}
+
+// GetHeatmapMonthDev é o mapa do mês de um aparelho ("" = GMC, "radiacode").
+func (a *App) GetHeatmapMonthDev(year, month int, dev string) (Heatmap, error) {
+	if dev != devRC {
+		dev = ""
+	}
 	if month < 1 || month > 12 {
 		return Heatmap{}, fmt.Errorf("mês inválido: %d", month)
 	}
@@ -196,9 +214,9 @@ func (a *App) GetHeatmapMonth(year, month int) (Heatmap, error) {
 	if days < 1 {
 		return Heatmap{Days: []int64{}, Values: [][]*float64{}, USv: [][]*float64{}, Counts: [][]int{},
 			AwayCounts: [][]int{}, AwayValues: [][]*float64{}, Alerts: map[string][]HeatAlert{},
-			HourAvg: make([]*float64, 24), PeakHour: -1, LowHour: -1}, nil
+			HourAvg: make([]*float64, 24), PeakHour: -1, LowHour: -1, Device: dev}, nil
 	}
-	return a.heatmapFrom(first, days)
+	return a.heatmapFromDev(first, days, dev)
 }
 
 // GetDataStart devolve o início (ms) do mês da leitura mais antiga guardada,
@@ -213,7 +231,20 @@ func (a *App) GetDataStart() int64 {
 
 // heatmapFrom monta o mapa de calor de days dias a partir de first (meia-noite).
 func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
-	pts, err := a.points(first, first.AddDate(0, 0, days))
+	return a.heatmapFromDev(first, days, "")
+}
+
+// heatmapFromDev: dev "" = GMC; devRC = RadiaCode (µSv/h nos valores).
+func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, error) {
+	var pts []store.Point
+	var err error
+	if dev == devRC {
+		for _, r := range a.rcRange(first, first.AddDate(0, 0, days)) {
+			pts = append(pts, store.Point{T: r.T, CPM: r.USvh})
+		}
+	} else {
+		pts, err = a.points(first, first.AddDate(0, 0, days))
+	}
 	if err != nil {
 		return Heatmap{}, err
 	}
@@ -247,7 +278,11 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 			continue
 		}
 		sum[i][hr] += p.CPM
-		usum[i][hr] += tl.USv(p) // pela calibração que valia nesse minuto
+		if dev == devRC {
+			usum[i][hr] += p.CPM
+		} else {
+			usum[i][hr] += tl.USv(p) // pela calibração que valia nesse minuto
+		}
 		cnt[i][hr]++
 		hsum[hr] += p.CPM
 		hcnt[hr]++
@@ -288,7 +323,8 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 		h.AwayCounts = append(h.AwayCounts, arow)
 		h.AwayValues = append(h.AwayValues, avrow)
 	}
-	h.Alerts = a.heatAlerts(first, days)
+	h.Alerts = a.heatAlerts(first, days, dev)
+	h.Device = dev
 	h.HourAvg = make([]*float64, 24)
 	for hr := 0; hr < 24; hr++ {
 		if hcnt[hr] == 0 {

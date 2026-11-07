@@ -184,6 +184,9 @@ type Event struct {
 	Demo   bool    `json:"demo,omitempty"`
 	// aparelho do alerta: "" = GMC (CPM); "radiacode" (CPM e Peak em µSv/h)
 	Device string `json:"device,omitempty"`
+	// por que terminou sem a leitura voltar ao normal (2.5): "contador
+	// desconectado", "RadiaCode desconectado", "app fechado"; "" = voltou
+	EndReason string `json:"endReason,omitempty"`
 }
 
 const (
@@ -808,7 +811,11 @@ func (a *App) disconnect(errMsg string) bool {
 	a.sat = satState{}
 	a.noCount = noCountState{}
 	a.mu.Unlock()
-	a.closeAlerts(&a.alerts, time.Now(), false)
+	reason := endDisconnected
+	if a.closing.Load() {
+		reason = endAppClosed
+	}
+	a.closeAlerts(&a.alerts, time.Now(), false, reason)
 	a.trayShow("RadLog · contador desconectado", "")
 	if d == nil {
 		return false
