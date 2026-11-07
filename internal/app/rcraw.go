@@ -196,6 +196,15 @@ func (a *App) rcBackupFiles() []string {
 	if _, err := os.Stat(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
 		out = append(out, rcDirName+"/"+rcDoseFile)
 	}
+	a.rc.spec.mu.Lock()
+	if a.rc.spec.gz != nil {
+		a.rc.spec.gz.Flush()
+	}
+	a.rc.spec.mu.Unlock()
+	specs, _ := a.rcSpecFiles()
+	for _, n := range specs {
+		out = append(out, rcDirName+"/"+rcSpecDir+"/"+n)
+	}
 	raws, _ := filepath.Glob(filepath.Join(a.rcDir(), rcRawDir, "*"))
 	sort.Strings(raws)
 	for _, r := range raws {
@@ -210,6 +219,18 @@ func (a *App) rcBackupFiles() []string {
 func (a *App) rcMergeFile(rel string, data []byte) int {
 	name := filepath.Base(rel)
 	if strings.Contains(name, "..") || name == "" {
+		return 0
+	}
+	if strings.HasPrefix(rel, rcDirName+"/"+rcSpecDir+"/") {
+		if !rcSpecName.MatchString(name) {
+			return 0
+		}
+		dst := a.rcSpecPath(name)
+		if _, err := os.Stat(dst); err == nil {
+			return 0
+		}
+		os.MkdirAll(a.rcSpecPath(""), 0o755)
+		os.WriteFile(dst, data, 0o644)
 		return 0
 	}
 	if strings.HasPrefix(rel, rcDirName+"/"+rcRawDir+"/") {

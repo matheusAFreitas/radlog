@@ -767,21 +767,25 @@
       <p class="rc-use" id="rcSpecUse"><strong>Para você:</strong> no eletrodo, os picos do tório (Pb-212 em 239 keV, Tl-208 em 583 e 2.614 keV, Ac-228 em 911 keV) e o raio X do próprio tungstênio perto de 59 keV. No detector de fumaça, um pico só, do amerício, em 59,5 keV. No sal light, o K-40 em 1.460 keV cresce devagar: precisa de tempo.</p>
     </article>
 
-    <p class="small muted">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
+    <p class="small muted" id="rcSimNote">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
 
-    <article class="rc-card">
-      <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
+    <article class="rc-card" id="rcSgCard">
+      <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span id="rcSgSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSgLiveTag" hidden>do aparelho</span></div>
+      <p id="rcSgDesc">Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
+      <div class="rc-ctrl" id="rcSgCtrl" hidden>
+        <div class="seg rc-seg" id="rcSgPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div>
+        <div class="seg rc-seg" id="rcSgE" aria-label="Energia"><button type="button" data-e="1500" aria-pressed="true">até 1.500 keV</button><button type="button" data-e="3000" aria-pressed="false">até 3.000 keV</button></div>
+      </div>
       <div class="rc-sgram">
-        <div class="rc-sg-time mono small"><span>min 0</span><span>min 60</span><span>min 120</span><span>min 180</span></div>
+        <div class="rc-sg-time mono small" id="rcSgTime"><span>min 0</span><span>min 60</span><span>min 120</span><span>min 180</span></div>
         <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
           <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
       </div>
-      <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span></div>
+      <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="mono small muted" id="rcSgInfo"></span></div>
       <p class="rc-use"><strong>Para você:</strong> durante a chuva aparecem os traços do Pb-214 (295 e 352 keV) e do Bi-214 (609 keV), que somem devagar depois; o eletrodo aparece como uma faixa forte que começa e termina de repente.</p>
     </article>
 
-    <article class="rc-card">
+    <article class="rc-card" id="rcHardCard">
       <div class="rc-head"><span class="rc-num mono">3</span><h3>Dureza nos gráficos</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
       <p>Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
       <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>

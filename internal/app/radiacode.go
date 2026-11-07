@@ -112,6 +112,7 @@ type rcState struct {
 	ring     []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today    rcToday
 	raw      rcRawLog
+	spec     rcSpecLog // espectro de minuto em minuto (espectrograma)
 	macc     rcMeasAcc // só a goroutine do rcRun mexe
 	dose     rcDoseLive
 	cfgLogAt time.Time
@@ -440,6 +441,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rcRawRecords(raw, dev.Base())
 		a.rcRecords(recs)
 		a.rcRawSpectrum(dev)
+		a.rcSpecTick(dev)
 		for _, r := range recs {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 17 { // mensagem de texto nova
 				a.rcTextLog(dev, texts)

@@ -386,6 +386,7 @@
   const SG_COLS = (() => { let n = 0; for (let i = 0; i < NCH; i++) if (EN[i] <= SG_EMAX) n = i + 1; return n; })();
   function sgDraw() {
     const cv = $("rcSgram"); if (!cv) return;
+    if (sg.on) { sgDrawReal(cv); return; }
     const W = Math.ceil(SG_COLS / 2);
     if (cv.width !== W || cv.height !== TL_N) { cv.width = W; cv.height = TL_N; }
     const g = cv.getContext("2d"), img = g.createImageData(W, TL_N), lm = Math.log1p(tl.max);
@@ -407,6 +408,7 @@
     return ev.join(" · ");
   }
   function sgHover(ev) {
+    if (sg.on) { sgHoverReal(ev); return; }
     const cv = $("rcSgram"), r = cv.getBoundingClientRect();
     const t = Math.floor(((ev.clientY - r.top) / r.height) * TL_N), e = ((ev.clientX - r.left) / r.width) * SG_EMAX;
     if (t < 0 || t >= tl.shown) { tl.hover = null; tip($("rcSgTip"), null); sgDraw(); return; }
@@ -414,6 +416,113 @@
     const ev2 = tlLabel(t), near = libNear(e);
     tip($("rcSgTip"), `<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
+  }
+
+  // ---------- espectrograma de verdade (o que o app gravou do aparelho) ----------
+  // Com o RadiaCode conectado, o app guarda o espectro de cada minuto. Cada
+  // linha aqui junta um pedaço do período (1 min em 3 h, 30 min em 7 dias);
+  // a mais recente fica embaixo.
+  const SG_PER = { "3h": [3 * 3600, 60], "12h": [12 * 3600, 120], "24h": [24 * 3600, 300], "7d": [7 * 86400, 1800] };
+  const sg = { on: false, data: null, period: "3h", emax: 1500, busy: false, at: 0, hover: null, max: 1, want: 0 };
+  const pad2 = (v) => String(v).padStart(2, "0");
+  const hhmm = (ms) => { const d = new Date(ms); return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
+  const ddmm = (ms) => { const d = new Date(ms); return pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1); };
+  async function sgLoad() {
+    if (typeof api === "undefined" || !api.GetRcSpectrogram || sg.busy) return;
+    const [span, rowSec] = SG_PER[sg.period], rowMs = rowSec * 1000;
+    const to = Math.ceil(Date.now() / rowMs) * rowMs, from = to - span * 1000;
+    const want = ++sg.want;
+    sg.busy = true;
+    let d = null;
+    try { d = await api.GetRcSpectrogram(from, to, rowSec, sg.emax); } catch (e) { d = null; }
+    sg.busy = false;
+    if (want !== sg.want) return;
+    const on = !!(d && d.rows && (d.first > 0 || rcLive()));
+    if (on) {
+      sg.data = d;
+      // escala de cor: quase o máximo do que aparece (sem os poucos pontos isolados)
+      const all = [];
+      for (const r of d.rows) if (r) for (const v of r) if (v > 0) all.push(v);
+      all.sort((a, b) => a - b);
+      sg.max = Math.max(1, all.length ? all[Math.floor(all.length * 0.997)] : 1);
+    }
+    if (on !== sg.on) { sg.on = on; sg.hover = null; tip($("rcSgTip"), null); }
+    sgMark();
+    sgDraw();
+  }
+  function sgMark() {
+    $("rcSgSimTags").hidden = sg.on;
+    $("rcSgLiveTag").hidden = !sg.on;
+    $("rcSgCtrl").hidden = !sg.on;
+    $("rcTlReplay").hidden = sg.on;
+    document.querySelectorAll("#rcSgPeriod button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === sg.period)));
+    document.querySelectorAll("#rcSgE button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.e === sg.emax)));
+    // o aviso de "dados simulados" passa para depois deste cartão
+    const note = $("rcSimNote"), before = sg.on ? $("rcHardCard") : $("rcSgCard");
+    if (note && before && note.nextElementSibling !== before) before.before(note);
+    $("rcSgDesc").textContent = sg.on
+      ? "Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho)."
+      : "Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.";
+    // eixos
+    const emax = sg.on ? sg.emax : SG_EMAX, step = emax > 2000 ? 500 : 250, ax = $("rcSgAxis");
+    if (ax.dataset.emax !== String(emax)) {
+      ax.dataset.emax = String(emax); ax.innerHTML = "";
+      for (let e = 0; e <= emax; e += step) { const el = document.createElement("span"); el.textContent = e; el.style.left = (e / emax) * 100 + "%"; ax.appendChild(el); }
+    }
+    const tm = $("rcSgTime"), d = sg.data;
+    let labels = ["min 0", "min 60", "min 120", "min 180"];
+    if (sg.on && d) {
+      const long = d.to - d.from > 26 * 3600e3;
+      labels = [0, 1, 2, 3, 4].map((k) => { const t = d.from + ((d.to - d.from) * k) / 4; return long ? ddmm(t) : hhmm(t); });
+    }
+    const key = labels.join("|");
+    if (tm.dataset.k !== key) { tm.dataset.k = key; tm.innerHTML = labels.map((l) => `<span>${esc(l)}</span>`).join(""); }
+    let info = "";
+    if (sg.on && d) {
+      const has = d.rows.some((r) => r);
+      info = d.first > 0
+        ? `um espectro por minuto · gravando desde ${ddmm(d.first)} ${hhmm(d.first)}` + (has ? "" : " · nada neste período")
+        : "ainda sem dados: a primeira linha aparece em até 2 minutos";
+    }
+    $("rcSgInfo").textContent = info;
+  }
+  function sgDrawReal(cv) {
+    const d = sg.data; if (!d) return;
+    const W = d.bins, H = d.rows.length;
+    if (cv.width !== W || cv.height !== H) { cv.width = W; cv.height = H; }
+    const g = cv.getContext("2d"), img = g.createImageData(W, H), lm = Math.log1p(sg.max);
+    for (let y = 0; y < H; y++) {
+      const row = d.rows[y], dim = d.gap[y] ? 0.5 : 1;
+      for (let x = 0; x < W; x++) {
+        const o = (y * W + x) * 4;
+        if (!row) { img.data[o] = 13; img.data[o + 1] = 16; img.data[o + 2] = 18; img.data[o + 3] = 255; continue; }
+        const [r, gg, b] = cmap(Math.log1p(row[x]) / lm);
+        img.data[o] = r * dim; img.data[o + 1] = gg * dim; img.data[o + 2] = b * dim; img.data[o + 3] = 255;
+      }
+    }
+    g.putImageData(img, 0, 0);
+    if (sg.hover != null) { g.fillStyle = "rgba(255,255,255,.55)"; g.fillRect(0, sg.hover, W, 1); }
+  }
+  function sgHoverReal(ev) {
+    const d = sg.data; if (!d) return;
+    const cv = $("rcSgram"), r = cv.getBoundingClientRect(), H = d.rows.length;
+    const k = Math.floor(((ev.clientY - r.top) / r.height) * H), e = Math.max(0, ((ev.clientX - r.left) / r.width) * d.eMax);
+    if (k < 0 || k >= H) { sg.hover = null; tip($("rcSgTip"), null); sgDraw(); return; }
+    sg.hover = k;
+    const t0 = d.from + k * d.rowSec * 1000, t1 = t0 + d.rowSec * 1000;
+    const when = (d.to - d.from > 26 * 3600e3 ? ddmm(t0) + " " : "") + hhmm(t0) + "–" + hhmm(t1);
+    const row = d.rows[k];
+    let html = `<span class="mono">${when}</span>`;
+    if (!row) html += "<br>sem dados";
+    else {
+      const b = Math.min(d.bins - 1, Math.floor((e / d.eMax) * d.bins)), near = libNear(e);
+      html += `<br><span class="mono">${nf(d.cps[k], 2)} cps · ${nf(e, 0)} keV · ${nf(row[b], 2)} por min</span>`;
+      if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
+      else if (d.secs[k] < d.rowSec * 0.9) html += `<br>${nf((d.secs[k] / d.rowSec) * 100, 0)}% do tempo com dados`;
+      if (near.length) html += `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
+    }
+    tip($("rcSgTip"), html, ev.clientX - r.left, ev.clientY - r.top);
+    sgDraw();
   }
 
   function hdDraw() {
@@ -605,11 +714,12 @@
     tlBuild();
     $("rcTlReplay").addEventListener("click", () => { tlBuild(); tl.run = true; sgDraw(); hdDraw(); });
     $("rcSgram").addEventListener("mousemove", sgHover);
-    $("rcSgram").addEventListener("mouseleave", () => { tl.hover = null; tip($("rcSgTip"), null); sgDraw(); hdDraw(); });
+    $("rcSgram").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcSgTip"), null); sgDraw(); hdDraw(); });
+    $("rcSgPeriod").addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; sg.period = b.dataset.p; sgMark(); sgLoad(); });
+    $("rcSgE").addEventListener("click", (e) => { const b = e.target.closest("button[data-e]"); if (!b) return; sg.emax = +b.dataset.e; sgMark(); sgLoad(); });
     $("rcHard").addEventListener("mousemove", hdHover);
     $("rcHard").addEventListener("mouseleave", () => { tl.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); });
-    const ax = $("rcSgAxis");
-    for (let e = 0; e <= SG_EMAX; e += 250) { const s = document.createElement("span"); s.textContent = e; s.style.left = (e / SG_EMAX) * 100 + "%"; ax.appendChild(s); }
+    sgMark();
     // log
     logBuild();
     $("rcLogNew").addEventListener("click", logBuild);
@@ -651,12 +761,14 @@
     build();
     visible = true;
     realTick(true);
+    sgLoad();
     drawAll();
     timers.forEach(clearInterval);
     timers = [
       setInterval(() => { if (sp.run && !rl.on) { spStep(sp.speed * 0.25); spDraw(); } }, 250),
       setInterval(() => realTick(), 2000),
-      setInterval(() => { if (tl.run && tl.shown < TL_N) { tl.shown++; sgDraw(); hdDraw(); if (tl.shown >= TL_N) tl.run = false; } }, 110),
+      setInterval(() => { if (tl.run && tl.shown < TL_N) { tl.shown++; if (!sg.on) sgDraw(); hdDraw(); if (tl.shown >= TL_N) tl.run = false; } }, 110),
+      setInterval(sgLoad, 60e3),
       setInterval(srTick, 500),
     ];
   }

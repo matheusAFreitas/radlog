@@ -5471,6 +5471,31 @@ function makeDemoApi() {
       for (let i = 0; i < 1024; i++) demoSpecLive.counts[i] += pois(rate(i, true) * dt);
       return { seconds: Math.round(demoSpecLive.seconds), a: A, counts: demoSpecLive.counts.slice(), accum: false };
     },
+    GetRcSpectrogram: async (from, to, rowSec, eMax) => {
+      // espectrograma de mentira: fundo, uma chuva há ~5 h e um eletrodo de
+      // tório perto há ~40 min; o app "fechado" de 20 a 14 h atrás
+      const bins = 256, n = Math.ceil((to - from) / (rowSec * 1000)), now = Date.now();
+      const first = demoRcFake() ? now - 30 * 3600e3 : 0;
+      const out = { from, to, rowSec, eMax, bins, rows: [], secs: [], cps: [], gap: [], first };
+      const pk = (e, pe, r) => { const sg = 65 * Math.sqrt(pe / 661.7) / 2.355; return r * Math.exp(-(((e - pe) / sg) ** 2) / 2); };
+      const rnd = (k) => { const x = Math.sin(k * 12.9898) * 43758.5453; return x - Math.floor(x); };
+      for (let k = 0; k < n; k++) {
+        const t0 = from + k * rowSec * 1000, t1 = t0 + rowSec * 1000, ago = (now - t0) / 3600e3;
+        if (!first || t1 <= first || t0 > now) { out.rows.push(null); out.secs.push(0); out.cps.push(0); out.gap.push(false); continue; }
+        const rain = ago < 6 && ago > 2 ? Math.exp(-Math.abs(ago - 4.6) * 1.2) * 1.5 : 0, th = ago < 0.7 && ago > 0.4 ? 1 : 0, gap = ago > 14 && ago < 20;
+        const row = [], f = rowSec / 60;
+        let tot = 0;
+        for (let b = 0; b < bins; b++) {
+          const e = (b + 0.5) * eMax / bins; if (e < 25) { row.push(0); continue; }
+          const lam = 6 * Math.exp(-e / 260) + 0.04 + pk(e, 1460.8, 0.25) + rain * (pk(e, 351.9, 1.6) + pk(e, 295.2, 0.9) + pk(e, 609.3, 1.4) + 2 * Math.exp(-e / 300))
+            + th * (pk(e, 238.6, 9) + pk(e, 583.2, 3) + pk(e, 911.2, 1.2) + pk(e, 2614.5, 0.9) + 4 * Math.exp(-e / 300));
+          const c = Math.max(0, lam * f + Math.sqrt(lam * f) * (rnd(k * 997 + b + t0 / 6e4) + rnd(k * 31 + b * 7) - 1) * 2.4);
+          row.push(Math.round((c / f) * 100) / 100); tot += c / f;
+        }
+        out.rows.push(row); out.secs.push(Math.min(rowSec, (Math.min(t1, now) - t0) / 1000)); out.cps.push(Math.round(tot / 60 * 1.6 * 100) / 100); out.gap.push(gap);
+      }
+      return out;
+    },
     AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),

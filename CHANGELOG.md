@@ -1,5 +1,18 @@
 # Versões
 
+## 1.42.0
+- **Espectrograma de verdade** na aba RadiaCode (o cartão 2 deixou de ser
+  exemplo quando há dados do aparelho):
+  - com o RadiaCode conectado, o app lê o espectro uma vez por minuto e guarda
+    o que chegou naquele minuto (`radiacode/espectros`, ~300 KB por dia);
+  - períodos de 3 h, 12 h, 24 h e 7 dias (linhas de 1, 2, 5 e 30 min) e
+    energia até 1.500 ou 3.000 keV; o mais recente fica embaixo;
+  - se o app fechar ou o Bluetooth cair, o aparelho segue contando: a linha
+    seguinte cobre o intervalo todo e aparece mais apagada (é a média dele);
+  - passe o mouse: horário, cps, energia, contagens por minuto e o isótopo que
+    costuma aparecer ali;
+  - entra no backup e na junção de backups.
+
 ## 1.41.0
 - **Espectro ao vivo** na aba RadiaCode (o primeiro dos exemplos simulados
   agora é de verdade, com o RadiaCode conectado):

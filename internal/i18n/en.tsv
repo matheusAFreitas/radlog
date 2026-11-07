@@ -2027,3 +2027,18 @@ Qual espectro	Which spectrum
 Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.	Live, from your RadiaCode: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.
 canal {0} · {1} contagens	channel {0} · {1} counts
 {0} keV · canal {1} · {2} contagens	{0} keV · channel {1} · {2} counts
+do aparelho	from the device
+Energia	Energy
+3 h	3 h
+12 h	12 h
+24 h	24 h
+até 1.500 keV	up to 1,500 keV
+até 3.000 keV	up to 3,000 keV
+Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho).	From your RadiaCode: while it's connected, the app saves the spectrum of every minute. Each row is a slice of time (the most recent at the bottom), energy goes to the right and the color shows how many photons arrived at that energy. Dark gray: no data. Dimmer rows: the app was closed or the device disconnected, and the row shows the average over that interval (the device keeps counting on its own).
+um espectro por minuto	one spectrum per minute
+gravando desde {0}	recording since {0}
+nada neste período	nothing in this period
+ainda sem dados: a primeira linha aparece em até 2 minutos	no data yet: the first row shows up within 2 minutes
+{0} por min	{0} per min
+sem leitura nesse intervalo: média dele	no reading in this interval: its average
+{0}% do tempo com dados	{0}% of the time with data
