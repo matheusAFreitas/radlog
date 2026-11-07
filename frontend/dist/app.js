@@ -1861,12 +1861,18 @@ function measureLogReading(r) {
 // dose: anda ao vivo com ele conectado
 function renderDoseDevice() {
   const el = $("doseDevice"), st = state.rc.st || {};
-  const show = state.doseSrc === "radiacode" && st.doseLiveAt > 0;
+  const on = st.state === "conectado";
+  const show = state.doseSrc === "radiacode" && (st.doseLiveAt > 0 || on);
   el.hidden = !show;
   if (!show) return;
   const v = st.doseLive;
   el.innerHTML = "<b></b><span></span>";
   el.children[0].textContent = "No aparelho:";
+  if (!(st.doseLiveAt > 0)) {
+    // conectou agora e o aparelho ainda não mandou o total (vem a cada ~3–4 min)
+    el.children[1].textContent = " esperando o total do RadiaCode (ele manda a cada 3 a 4 min)";
+    return;
+  }
   el.children[1].textContent = ` ${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)} contando)` : "") +
     (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
 }

@@ -390,8 +390,14 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	// o total ao vivo recomeça no primeiro RareData desta conexão (até lá vale
 	// o último gravado)
 	a.rc.dose.has, a.rc.dose.lastRT = false, time.Time{}
+	prev := a.rc.st
 	a.rc.st = RcState{State: "conectado", Via: dev.Kind(), Model: dev.Model, Serial: dev.Serial, Firmware: dev.Firmware,
 		Since: time.Now().UnixMilli()}
+	// reconectou (o Bluetooth cai e volta): bateria e temperatura continuam
+	// as últimas até o aparelho mandar de novo (~3–4 min)
+	if prev.HasRare && prev.Serial == dev.Serial {
+		a.rc.st.HasRare, a.rc.st.Battery, a.rc.st.TempC, a.rc.st.Dose, a.rc.st.DoseSec = true, prev.Battery, prev.TempC, prev.Dose, prev.DoseSec
+	}
 	if alErr == nil {
 		a.rc.st.Alarms = &al
 	}

@@ -1,5 +1,13 @@
 # Versões
 
+## 1.36.1
+- Dose do aparelho no cartão de dose: logo depois de conectar, enquanto o
+  RadiaCode ainda não mandou o total (ele manda a cada 3 a 4 min), a linha
+  "No aparelho" já aparece avisando que está esperando, em vez de ficar
+  escondida.
+- Quando o Bluetooth cai e volta, a bateria e a temperatura do RadiaCode
+  continuam aparecendo (as últimas recebidas) até ele mandar de novo.
+
 ## 1.36.0
 - **Dose acumulada do RadiaCode sempre atualizada**: o cartão "Sua dose
   (RadiaCode)" mostra o total do próprio aparelho (desde que foi zerado, o

@@ -1346,7 +1346,8 @@ const I18N_EN = {
 "% acima da média das 2 h antes (RadiaCode)": "% above the average of the 2 h before (RadiaCode)",
 "A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
 "sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before",
-"No aparelho:": "On the device:"
+"No aparelho:": "On the device:",
+"esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RadiaCode's total (it sends it every 3 to 4 min)"
 },
 "patterns": [
 [
