@@ -150,6 +150,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	from, to := time.UnixMilli(s.From), time.UnixMilli(s.To)
 	a.mu.Lock()
 	cal := a.convCalLocked()
+	tl := a.calTLLocked()
+	devSrc := a.cal.Source
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
@@ -275,8 +277,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	// por dia
 	if err == nil {
 		type acc struct {
-			sum, dose, min, max float64
-			n                   int
+			sum, usum, dose, min, max float64
+			n                         int
 		}
 		byDay := map[int64]*acc{}
 		var keys []int64
@@ -293,7 +295,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 				keys = append(keys, k)
 			}
 			x.sum += p.CPM
-			x.dose += cal.USv(p.CPM) / 60
+			u := tl.USv(p) // pela calibração que valia nesse minuto
+			x.usum += u
+			x.dose += u / 60
 			x.min = math.Min(x.min, p.CPM)
 			x.max = math.Max(x.max, p.CPM)
 			x.n++
@@ -306,7 +310,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			avg := x.sum / float64(x.n)
 			r.Days = append(r.Days, reportDay{
 				Label: wd[t.Weekday()] + " " + t.Format("02/01"),
-				Avg:   avg, Min: x.min, Max: x.max, USv: cal.USv(avg), Dose: x.dose, Minutes: x.n,
+				Avg:   avg, Min: x.min, Max: x.max, USv: x.usum / float64(x.n), Dose: x.dose, Minutes: x.n,
 			})
 			r.dayKeys = append(r.dayKeys, t.Format("2006-01-02"))
 		}
@@ -447,6 +451,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 
 	r.Cal = fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM"
+	calPeriod := tl.periodDesc(from.UnixMilli(), to.UnixMilli())
 	if lv.DeadTimeOn {
 		r.DeadTime = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
 	} else {
@@ -475,7 +480,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 
 	// configurações e método
 	calSrc := "lida do contador agora"
-	switch cal.Source {
+	switch devSrc {
 	case calFromLast:
 		calSrc = "última lida do contador; ele não estava conectado"
 	case "padrão":
@@ -497,6 +502,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	r.Config = [][2]string{
 		{"Contador", dev},
 		{"Calibração", r.Cal + " (" + calSrc + ")"},
+		{"Calibração no período", calPeriod},
+		{"Dose do GMC", "calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma"},
 		{"Tempo morto", r.DeadTime},
 		{"Registro de cada minuto", traceSummary(r.Pts)},
 		{"Fundo de referência", bg},

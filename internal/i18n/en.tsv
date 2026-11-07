@@ -2241,3 +2241,84 @@ Registro de cada minuto	Per-minute record
 {0} de antes da 2.1, sem esse registro (até a 2.0 a correção nunca foi ligada: bruto = gravado)	{0} from before 2.1, without that record (up to 2.0 the correction was never on: raw = recorded)
 marcas: {0} vindos de gravação por segundo, {1} com saturação, {2} com interferência	marks: {0} from per-second recording, {1} with saturation, {2} with interference
 sem minutos no período	no minutes in the period
+Converte o CPM em µSv/h e em dose. Cada mudança vira uma versão com a data em que passou a valer: o que já foi medido continua com a calibração da época.	Converts CPM into µSv/h and dose. Each change becomes a version dated from when it took effect: what was already measured keeps the calibration of its time.
+Em uso	In use
+µSv/h por CPM no fundo	µSv/h per CPM at background
+Usar a partir de agora	Use from now on
+Voltar à curva do contador	Back to the counter's curve
+Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.	Scales the counter's curve (its shape stays). Applies from now on; the history doesn't change.
+desde	since
+até	until
+minutos	minutes
+Recalcular o histórico é opcional: aplica uma versão também antes da data dela, sem mudar nenhuma leitura gravada. Dá para desfazer a qualquer momento, e a exportação marca cada minuto com a calibração usada.	Recalculating the history is optional: it applies a version also before its date, without changing any recorded reading. It can be undone at any time, and the export tags each minute with the calibration used.
+Dose do aparelho	Device dose
+O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.	GQ's protocol has no command for the dose the GMC-800 adds up on its screen, so the GMC dose is calculated by the app. This test only reads the counter (about 2 min) and saves a report to check for any undocumented command.
+Testar o contador	Test the counter
+curva do contador	counter's curve
+informado à mão	entered by hand
+padrão de fábrica	factory default
+curva do contador (início)	counter's curve (start)
+histórico recalculado	history recalculated
+o começo	the beginning
+Voltar ao original	Back to the original
+Recalcular o passado…	Recalculate the past…
+vale também antes desta data	also applies before this date
+a curva do contador mudou	the counter's curve changed
+a curva do contador mudou; o fator manual foi mantido	the counter's curve changed; the manual factor was kept
+Lado a lado com o RadiaCode ({0} min nas últimas 6 h):	Side by side with the RadiaCode ({0} min in the last 6 h):
+µSv/h por CPM faria o GMC bater com ele na média.	µSv/h per CPM would make the GMC match it on average.
+Preencher	Fill in
+Recalcular com a versão de {0} ({1} µSv/h por CPM)	Recalculate with the version of {0} ({1} µSv/h per CPM)
+Período: {0} a {1} ({2} minutos gravados)	Period: {0} to {1} ({2} recorded minutes)
+Dose: {0} → {1} µSv ({2}%)	Dose: {0} → {1} µSv ({2}%)
+Média: {0} → {1} µSv/h	Average: {0} → {1} µSv/h
+máximo: {0} → {1} µSv/h	maximum: {0} → {1} µSv/h
+Nenhuma leitura gravada muda; dá para voltar ao original depois.	No recorded reading changes; you can go back to the original later.
+Recalcular o histórico	Recalculate the history
+Não há minutos gravados antes de {0} para recalcular.	There are no recorded minutes before {0} to recalculate.
+Informe o µSv/h por CPM	Enter the µSv/h per CPM
+Calibração nova a partir de agora	New calibration from now on
+Voltou à curva do contador a partir de agora	Back to the counter's curve from now on
+Histórico recalculado (as leituras gravadas não mudaram)	History recalculated (recorded readings didn't change)
+Histórico original de volta	Original history restored
+testando… (cerca de 2 min)	testing… (about 2 min)
+esperando 90 s para ler de novo…	waiting 90 s to read again…
+testando… (1ª leitura)	testing… (1st reading)
+testando… (2ª leitura)	testing… (2nd reading)
+{0}. Relatório: {1}	{0}. Report: {1}
+nenhum comando de leitura informa a dose do aparelho; o app continua calculando a dose	no read command reports the device's dose; the app keeps calculating the dose
+candidatos responderam ({0}); mande o arquivo para análise	candidates answered ({0}); send the file for analysis
+{0} bytes da configuração mudaram; mande o arquivo para análise	{0} configuration bytes changed; send the file for analysis
+fator fora da faixa (0,0005 a 0,1 µSv/h por CPM)	factor out of range (0.0005 to 0.1 µSv/h per CPM)
+esse já é o fator em uso	that's already the factor in use
+versão não encontrada	version not found
+dose calculada pelo app	dose calculated by the app
+O GMC não informa a dose que soma na tela: esta é calculada pelo app, minuto a minuto, pela calibração que valia em cada minuto.	The GMC doesn't report the dose it adds up on its screen: this one is calculated by the app, minute by minute, with the calibration in effect in each minute.
+Calibração:	Calibration:
+mudou no período	changed in the period
+{0} µSv/h por CPM no fundo (versão {1}, {2})	{0} µSv/h per CPM at background (version {1}, {2})
+desde {0}: {1} µSv/h por CPM no fundo (versão {2}, {3})	since {0}: {1} µSv/h per CPM at background (version {2}, {3})
+até {0}: {1} µSv/h por CPM no fundo (versão {2}, {3})	until {0}: {1} µSv/h per CPM at background (version {2}, {3})
+curva do contador, recalculando o histórico de antes dela	counter's curve, recalculating the history before it
+informado à mão, recalculando o histórico de antes dela	entered by hand, recalculating the history before it
+{0} µSv/h por CPM no fundo (informado à mão)	{0} µSv/h per CPM at background (entered by hand)
+{0} µSv/h por CPM no fundo (curva do contador)	{0} µSv/h per CPM at background (counter's curve)
+histórico recalculado com a versão {0}	history recalculated with version {0}
+Calibração em uso	Calibration in use
+Calibração no período	Calibration in the period
+Calibração do GMC: {0} µSv/h por CPM no fundo, informado à mão (vale a partir de agora)	GMC calibration: {0} µSv/h per CPM at background, entered by hand (applies from now on)
+Calibração do GMC: voltou à curva do contador (vale a partir de agora)	GMC calibration: back to the counter's curve (applies from now on)
+Calibração do GMC: recálculo retroativo desligado (histórico original)	GMC calibration: retroactive recalculation off (original history)
+Calibração do GMC: histórico recalculado com a versão {0} (os minutos gravados não mudam)	GMC calibration: history recalculated with version {0} (recorded minutes don't change)
+Diagnóstico da dose do GMC: {0}	GMC dose diagnostic: {0}
+Dose (app)	Dose (app)
+somada pelo RadiaCode, também longe do PC · pelo app: {0}	added up by the RadiaCode, also away from the PC · by the app: {0}
+pelo app: {0}	by the app: {0}
+só os minutos gravados	only the recorded minutes
+{0} min medidos · app	{0} min measured · app
+Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): {0} µSv	Added up by the RadiaCode itself, also away from the PC. By the app (only the recorded minutes): {0} µSv
+Calculada pelo app: só os minutos que o PC gravou	Calculated by the app: only the minutes the PC recorded
+calculada pelo app (o GMC não informa a dose que soma)	calculated by the app (the GMC doesn't report the dose it adds up)
+{0} µSv/h por CPM	{0} µSv/h per CPM
+Dose do GMC	GMC dose
+calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma	calculated by the app from each minute's CPM; the counter doesn't report the dose it adds up

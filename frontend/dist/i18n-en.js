@@ -1558,7 +1558,64 @@ const I18N_EN = {
 "você (pelo app)": "you (through the app)",
 "você (cópia restaurada)": "you (restored copy)",
 "Registro de cada minuto": "Per-minute record",
-"sem minutos no período": "no minutes in the period"
+"sem minutos no período": "no minutes in the period",
+"Converte o CPM em µSv/h e em dose. Cada mudança vira uma versão com a data em que passou a valer: o que já foi medido continua com a calibração da época.": "Converts CPM into µSv/h and dose. Each change becomes a version dated from when it took effect: what was already measured keeps the calibration of its time.",
+"Em uso": "In use",
+"µSv/h por CPM no fundo": "µSv/h per CPM at background",
+"Usar a partir de agora": "Use from now on",
+"Voltar à curva do contador": "Back to the counter's curve",
+"Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.": "Scales the counter's curve (its shape stays). Applies from now on; the history doesn't change.",
+"desde": "since",
+"até": "until",
+"minutos": "minutes",
+"Recalcular o histórico é opcional: aplica uma versão também antes da data dela, sem mudar nenhuma leitura gravada. Dá para desfazer a qualquer momento, e a exportação marca cada minuto com a calibração usada.": "Recalculating the history is optional: it applies a version also before its date, without changing any recorded reading. It can be undone at any time, and the export tags each minute with the calibration used.",
+"Dose do aparelho": "Device dose",
+"O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.": "GQ's protocol has no command for the dose the GMC-800 adds up on its screen, so the GMC dose is calculated by the app. This test only reads the counter (about 2 min) and saves a report to check for any undocumented command.",
+"Testar o contador": "Test the counter",
+"curva do contador": "counter's curve",
+"informado à mão": "entered by hand",
+"padrão de fábrica": "factory default",
+"curva do contador (início)": "counter's curve (start)",
+"histórico recalculado": "history recalculated",
+"o começo": "the beginning",
+"Voltar ao original": "Back to the original",
+"Recalcular o passado…": "Recalculate the past…",
+"vale também antes desta data": "also applies before this date",
+"a curva do contador mudou": "the counter's curve changed",
+"a curva do contador mudou; o fator manual foi mantido": "the counter's curve changed; the manual factor was kept",
+"µSv/h por CPM faria o GMC bater com ele na média.": "µSv/h per CPM would make the GMC match it on average.",
+"Preencher": "Fill in",
+"Nenhuma leitura gravada muda; dá para voltar ao original depois.": "No recorded reading changes; you can go back to the original later.",
+"Recalcular o histórico": "Recalculate the history",
+"Informe o µSv/h por CPM": "Enter the µSv/h per CPM",
+"Calibração nova a partir de agora": "New calibration from now on",
+"Voltou à curva do contador a partir de agora": "Back to the counter's curve from now on",
+"Histórico recalculado (as leituras gravadas não mudaram)": "History recalculated (recorded readings didn't change)",
+"Histórico original de volta": "Original history restored",
+"testando… (cerca de 2 min)": "testing… (about 2 min)",
+"esperando 90 s para ler de novo…": "waiting 90 s to read again…",
+"testando… (1ª leitura)": "testing… (1st reading)",
+"testando… (2ª leitura)": "testing… (2nd reading)",
+"nenhum comando de leitura informa a dose do aparelho; o app continua calculando a dose": "no read command reports the device's dose; the app keeps calculating the dose",
+"fator fora da faixa (0,0005 a 0,1 µSv/h por CPM)": "factor out of range (0.0005 to 0.1 µSv/h per CPM)",
+"esse já é o fator em uso": "that's already the factor in use",
+"versão não encontrada": "version not found",
+"dose calculada pelo app": "dose calculated by the app",
+"O GMC não informa a dose que soma na tela: esta é calculada pelo app, minuto a minuto, pela calibração que valia em cada minuto.": "The GMC doesn't report the dose it adds up on its screen: this one is calculated by the app, minute by minute, with the calibration in effect in each minute.",
+"Calibração:": "Calibration:",
+"mudou no período": "changed in the period",
+"curva do contador, recalculando o histórico de antes dela": "counter's curve, recalculating the history before it",
+"informado à mão, recalculando o histórico de antes dela": "entered by hand, recalculating the history before it",
+"Calibração em uso": "Calibration in use",
+"Calibração no período": "Calibration in the period",
+"Calibração do GMC: voltou à curva do contador (vale a partir de agora)": "GMC calibration: back to the counter's curve (applies from now on)",
+"Calibração do GMC: recálculo retroativo desligado (histórico original)": "GMC calibration: retroactive recalculation off (original history)",
+"Dose (app)": "Dose (app)",
+"só os minutos gravados": "only the recorded minutes",
+"Calculada pelo app: só os minutos que o PC gravou": "Calculated by the app: only the minutes the PC recorded",
+"calculada pelo app (o GMC não informa a dose que soma)": "calculated by the app (the GMC doesn't report the dose it adds up)",
+"Dose do GMC": "GMC dose",
+"calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma": "calculated by the app from each minute's CPM; the counter doesn't report the dose it adds up"
 },
 "patterns": [
 [
@@ -1835,6 +1892,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ",
+"^Somada pelo próprio RadiaCode, também longe do PC\\. Pelo app \\(só os minutos gravados\\): ((?:(?! · ).)+?) µSv$",
+"Added up by the RadiaCode itself, also away from the PC. By the app (only the recorded minutes): ${1} µSv",
+[
+"Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ",
+" µSv"
+]
+],
+[
 "automático: parou quando deu para garantir que o objeto sobe menos que ",
 "^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
 "automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
@@ -1873,6 +1939,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Calibração do GMC: histórico recalculado com a versão ",
+"^Calibração do GMC: histórico recalculado com a versão ((?:(?! · ).)+?) \\(os minutos gravados não mudam\\)$",
+"GMC calibration: history recalculated with version ${1} (recorded minutes don't change)",
+[
+"Calibração do GMC: histórico recalculado com a versão ",
+" (os minutos gravados não mudam)"
+]
+],
+[
 "Seu limite (",
 "^Seu limite \\(((?:(?! · ).)+?)\\) está acima do perigo do app \\(((?:(?! · ).)+?) CPM\\): quem toca é o alarme de perigo\\.$",
 "Your limit (${1}) is above the app's danger level (${2} CPM): the danger alarm is the one that sounds.",
@@ -1889,6 +1964,15 @@ const I18N_EN = {
 [
 "se o objeto emite algo, é menos que +",
 " µSv/h acima do fundo (líquido + 2σ, ~97,5%)"
+]
+],
+[
+"Calibração do GMC: ",
+"^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, informado à mão \\(vale a partir de agora\\)$",
+"GMC calibration: ${1} µSv/h per CPM at background, entered by hand (applies from now on)",
+[
+"Calibração do GMC: ",
+" µSv/h por CPM no fundo, informado à mão (vale a partir de agora)"
 ]
 ],
 [
@@ -2389,6 +2473,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) bytes da configuração mudaram; mande o arquivo para análise$",
+"${1} configuration bytes changed; send the file for analysis",
+[
+" bytes da configuração mudaram; mande o arquivo para análise"
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RadiaCode readings at home in the last hour (needs ${2})",
@@ -2478,6 +2570,15 @@ const I18N_EN = {
 [
 "acima do fundo (",
 " cps a mais), sem linha conhecida ainda"
+]
+],
+[
+"candidatos responderam (",
+"^candidatos responderam \\(((?:(?! · ).)+?)\\); mande o arquivo para análise$",
+"candidates answered (${1}); send the file for analysis",
+[
+"candidatos responderam (",
+"); mande o arquivo para análise"
 ]
 ],
 [
@@ -2626,6 +2727,14 @@ const I18N_EN = {
 ]
 ],
 [
+"somada pelo RadiaCode, também longe do PC · pelo app: ",
+"^somada pelo RadiaCode, também longe do PC · pelo app: ((?:(?! · ).)+?)$",
+"added up by the RadiaCode, also away from the PC · by the app: ${1}",
+[
+"somada pelo RadiaCode, também longe do PC · pelo app: "
+]
+],
+[
 "3 erros seguidos em ",
 "^3 erros seguidos em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\), com a porta ainda na lista$",
 "3 errors in a row on ${1} (${2}), with the port still in the list",
@@ -2651,6 +2760,15 @@ const I18N_EN = {
 "fim da escala ",
 " µSv/h, queda brusca a partir de ",
 " µSv/h"
+]
+],
+[
+"Lado a lado com o RadiaCode (",
+"^Lado a lado com o RadiaCode \\(((?:(?! · ).)+?) min nas últimas 6 h\\):$",
+"Side by side with the RadiaCode (${1} min in the last 6 h):",
+[
+"Lado a lado com o RadiaCode (",
+" min nas últimas 6 h):"
 ]
 ],
 [
@@ -2716,6 +2834,15 @@ const I18N_EN = {
 [
 "automático: chegou ao tempo máximo (",
 ") sem decidir"
+]
+],
+[
+"Não há minutos gravados antes de ",
+"^Não há minutos gravados antes de ((?:(?! · ).)+?) para recalcular\\.$",
+"There are no recorded minutes before ${1} to recalculate.",
+[
+"Não há minutos gravados antes de ",
+" para recalcular."
 ]
 ],
 [
@@ -2916,6 +3043,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Recalcular com a versão de ",
+"^Recalcular com a versão de ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) µSv/h por CPM\\)$",
+"Recalculate with the version of ${1} (${2} µSv/h per CPM)",
+[
+"Recalcular com a versão de ",
+" µSv/h por CPM)"
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -2973,6 +3109,23 @@ const I18N_EN = {
 "Medição de ",
 " µSv/h sobre o fundo (",
 "σ) — "
+]
+],
+[
+"desde ",
+"^desde ((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h por CPM no fundo \\(versão ((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"since ${1}: ${2} µSv/h per CPM at background (version ${3}, ${4})",
+[
+"desde ",
+" µSv/h por CPM no fundo (versão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM no fundo \\(curva do contador\\)$",
+"${1} µSv/h per CPM at background (counter's curve)",
+[
+" µSv/h por CPM no fundo (curva do contador)"
 ]
 ],
 [
@@ -3080,6 +3233,23 @@ const I18N_EN = {
 "${1} min from the RadiaCode only (GMC disconnected?)",
 [
 " min só do RadiaCode (GMC desconectado?)"
+]
+],
+[
+"até ",
+"^até ((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h por CPM no fundo \\(versão ((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"until ${1}: ${2} µSv/h per CPM at background (version ${3}, ${4})",
+[
+"até ",
+" µSv/h por CPM no fundo (versão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM no fundo \\(informado à mão\\)$",
+"${1} µSv/h per CPM at background (entered by hand)",
+[
+" µSv/h por CPM no fundo (informado à mão)"
 ]
 ],
 [
@@ -3428,6 +3598,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM no fundo \\(versão ((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"${1} µSv/h per CPM at background (version ${2}, ${3})",
+[
+" µSv/h por CPM no fundo (versão "
+]
+],
+[
 "Abaixo do normal (",
 "^Abaixo do normal \\(((?:(?! · ).)+?)\\) — sem problema$",
 "Below normal (${1}) — no problem",
@@ -3568,6 +3746,14 @@ const I18N_EN = {
 ]
 ],
 [
+"histórico recalculado com a versão ",
+"^histórico recalculado com a versão ((?:(?! · ).)+?)$",
+"history recalculated with version ${1}",
+[
+"histórico recalculado com a versão "
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -3628,6 +3814,15 @@ const I18N_EN = {
 "σ · ",
 "× o fundo · ≈ ",
 " µSv/h"
+]
+],
+[
+"Período: ",
+"^Período: ((?:(?! · ).)+?) a ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) minutos gravados\\)$",
+"Period: ${1} to ${2} (${3} recorded minutes)",
+[
+"Período: ",
+" minutos gravados)"
 ]
 ],
 [
@@ -4103,6 +4298,14 @@ const I18N_EN = {
 [
 "eletrodo de tório (",
 "% ThO₂)"
+]
+],
+[
+"Diagnóstico da dose do GMC: ",
+"^Diagnóstico da dose do GMC: ((?:(?! · ).)+?)$",
+"GMC dose diagnostic: ${1}",
+[
+"Diagnóstico da dose do GMC: "
 ]
 ],
 [
@@ -5276,6 +5479,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Dose: ",
+"^Dose: ((?:(?! · ).)+?) → ((?:(?! · ).)+?) µSv \\(((?:(?! · ).)+?)%\\)$",
+"Dose: ${1} → ${2} µSv (${3}%)",
+[
+"Dose: ",
+" µSv (",
+"%)"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -5447,6 +5660,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) min medidos · app$",
+"${1} min measured · app",
+[
+" min medidos · app"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -5585,6 +5806,15 @@ const I18N_EN = {
 [
 "abaixo de ",
 " kBq/kg"
+]
+],
+[
+"máximo: ",
+"^máximo: ((?:(?! · ).)+?) → ((?:(?! · ).)+?) µSv/h$",
+"maximum: ${1} → ${2} µSv/h",
+[
+"máximo: ",
+" µSv/h"
 ]
 ],
 [
@@ -5731,6 +5961,15 @@ const I18N_EN = {
 [
 "abaixo de ",
 " Bq/kg"
+]
+],
+[
+"Média: ",
+"^Média: ((?:(?! · ).)+?) → ((?:(?! · ).)+?) µSv/h$",
+"Average: ${1} → ${2} µSv/h",
+[
+"Média: ",
+" µSv/h"
 ]
 ],
 [
@@ -6047,6 +6286,22 @@ const I18N_EN = {
 [
 "abaixo de ",
 " kBq"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)\\. Relatório: ((?:(?! · ).)+?)$",
+"${1}. Report: ${2}",
+[
+". Relatório: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM$",
+"${1} µSv/h per CPM",
+[
+" µSv/h por CPM"
 ]
 ],
 [
@@ -6713,6 +6968,14 @@ const I18N_EN = {
 "${1}× normal",
 [
 "× o normal"
+]
+],
+[
+"pelo app: ",
+"^pelo app: ((?:(?! · ).)+?)$",
+"by the app: ${1}",
+[
+"pelo app: "
 ]
 ],
 [

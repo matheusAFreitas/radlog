@@ -375,18 +375,20 @@ func (s *Store) Range(from, to time.Time) ([]Point, error) {
 	return s.load(from, to)
 }
 
-// ExportCSV escreve todos os pontos em [from, to) num único CSV.
-func (s *Store) ExportCSV(w io.Writer, from, to time.Time, usv func(float64) float64) error {
+// ExportCSV escreve todos os pontos em [from, to) num único CSV. usv devolve
+// o µSv/h do minuto e a calibração usada (vai na coluna "calibracao").
+func (s *Store) ExportCSV(w io.Writer, from, to time.Time, usv func(Point) (float64, string)) error {
 	pts, err := s.Range(from, to)
 	if err != nil {
 		return err
 	}
 	bw := bufio.NewWriter(w)
-	fmt.Fprintln(bw, "data_hora,cpm,usv_h,origem,cpm_bruto,cpm_corrigido,tau_us,tm,obs")
+	fmt.Fprintln(bw, "data_hora,cpm,usv_h,origem,cpm_bruto,cpm_corrigido,tau_us,tm,obs,calibracao")
 	for _, p := range pts {
+		u, cal := usv(p)
 		fmt.Fprintf(bw, "%s,%s,%s,%s", p.T.Format("2006-01-02 15:04"),
 			strconv.FormatFloat(p.CPM, 'f', -1, 64),
-			strconv.FormatFloat(usv(p.CPM), 'f', 4, 64), p.Src)
+			strconv.FormatFloat(u, 'f', 4, 64), p.Src)
 		if p.Has {
 			tm, tau := "desligado", ""
 			if p.DTOn {
@@ -396,7 +398,7 @@ func (s *Store) ExportCSV(w io.Writer, from, to time.Time, usv func(float64) flo
 		} else {
 			fmt.Fprint(bw, ",,,,sem registro (antes da 2.1),")
 		}
-		fmt.Fprintln(bw)
+		fmt.Fprintf(bw, ",%s\n", cal)
 	}
 	return bw.Flush()
 }

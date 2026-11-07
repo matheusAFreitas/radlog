@@ -61,6 +61,9 @@ type DoseChart struct {
 	AppTotal    float64 `json:"appTotal"`
 	AppMinutes  int     `json:"appMinutes"`
 	AppCoverage float64 `json:"appCoverage"`
+	// GMC: o contador não informa a dose que soma; a do app sai do CPM de
+	// cada minuto pela calibração que valia nele (CalNote diz qual).
+	CalNote string `json:"calNote,omitempty"`
 }
 
 // GetDose monta o gráfico do dosímetro. period: "3h", "6h", "12h", "24h",
@@ -184,10 +187,11 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 	}
 	a.mu.Lock()
 	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 	out := make([]doseMin, len(pts))
 	for i, p := range pts {
-		out[i] = doseMin{p.T, cal.USv(p.CPM)}
+		out[i] = doseMin{p.T, tl.USv(p)} // pela calibração que valia nesse minuto
 	}
 	// Fundo: mediana do CPM real dos últimos 30 dias (resiste a picos; o
 	// demo não mexe nele). Se tiver pouco dado, usa o próprio período.
@@ -239,11 +243,16 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit, src strin
 
 	bgPerMin := c.BackgroundRate / 60
 	limPerMin := lim.MSvYear * 1000 / minutesPerYear
+	c.DoseSource = "app"
 	if src == "radiacode" {
-		c.DoseSource = "app"
 		if a.rcDoseFromDevice(&c, from, to, step, pts, bgPerMin, limPerMin) {
 			return c, nil
 		}
+	} else {
+		a.mu.Lock()
+		tl := a.calTLLocked()
+		a.mu.Unlock()
+		c.CalNote = tl.periodDesc(from.UnixMilli(), to.UnixMilli())
 	}
 
 	n := int(span / step)

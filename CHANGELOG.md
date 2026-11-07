@@ -1,5 +1,33 @@
 # Versões
 
+## 2.2.0
+- **Calibração do GMC com versões** (Configurações → Calibração do GMC).
+  Cada mudança vira uma versão com a data em que passou a valer, guardada em
+  `calibracao-versoes.json` (entra no backup). O µSv/h e a dose de cada
+  minuto saem da versão que valia naquele minuto: mudar a calibração hoje não
+  muda o que já foi medido. Gráficos, resumo, mapa de calor, dosímetro,
+  relatório e exportação seguem essa regra.
+- **Fator informado à mão:** um µSv/h por CPM no fundo (por exemplo, o que
+  bate com o RadiaCode) escala a curva do contador a partir de agora. Com o
+  RadiaCode ligado, a tela sugere o fator das últimas 6 h lado a lado.
+  "Voltar à curva do contador" cria outra versão, também a partir de agora.
+  Se a curva lida do contador mudar, vira uma versão nova (o fator manual é
+  mantido).
+- **Recálculo retroativo opcional:** aplica uma versão também antes da data
+  dela. Antes de aplicar, mostra a comparação (dose, média e máximo antes e
+  depois). Nenhuma leitura gravada muda e dá para voltar ao original.
+- **Origem da dose sempre indicada.** GMC: "dose calculada pelo app", com a
+  calibração do período na nota do dosímetro e no relatório. RadiaCode:
+  "Dose hoje" e o resumo passam a usar a dose somada pelo próprio aparelho
+  (inclui o tempo longe do PC) quando o registro dos totais cobre o período;
+  senão, a do app, marcada como tal.
+- CSV exportado: nova coluna `calibracao` (versão e fator de cada minuto,
+  com `manual` e `recalculado` quando for o caso).
+- **Teste da dose do GMC** (Configurações → Calibração do GMC → Testar o
+  contador): só leitura. Lê a configuração duas vezes com 90 s de intervalo e
+  tenta comandos `<GET…>>` candidatos; grava
+  `diagnostico-dose-gmc-….txt` na pasta de dados.
+
 ## 2.1.0
 - **Cada minuto do GMC guarda de onde veio.** O arquivo de leituras ganha
   colunas: `cpm_bruto` (o que o contador mandou), `cpm_corrigido` (do tempo

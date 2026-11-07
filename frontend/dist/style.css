@@ -1175,3 +1175,11 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .cfg-hist th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--card, var(--bg)); }
 .cfg-hist td.when { font-family: var(--mono); white-space: nowrap; color: var(--muted); }
 .cfg-hist td.from { color: var(--muted); }
+
+/* versões da calibração (2.2) */
+.cal-ver td.num { font-variant-numeric: tabular-nums; }
+.cal-ver tr.cur td { font-weight: 600; }
+.cal-ver tr.retro td { background: color-mix(in srgb, var(--accent, #3b82f6) 8%, transparent); }
+.cal-ver .btn.small { min-height: 26px; padding: 0 8px; font-size: 12px; }
+.cal-cmp .row { margin-top: 8px; gap: 8px; }
+#calK { max-width: 130px; }

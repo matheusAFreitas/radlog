@@ -218,9 +218,10 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 		return Heatmap{}, err
 	}
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 	sum := make([][24]float64, days)
+	usum := make([][24]float64, days)
 	cnt := make([][24]int, days)
 	asum := make([][24]float64, days)
 	acnt := make([][24]int, days)
@@ -246,6 +247,7 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 			continue
 		}
 		sum[i][hr] += p.CPM
+		usum[i][hr] += tl.USv(p) // pela calibração que valia nesse minuto
 		cnt[i][hr]++
 		hsum[hr] += p.CPM
 		hcnt[hr]++
@@ -269,7 +271,7 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 			}
 			v := sum[i][hr] / float64(cnt[i][hr])
 			row[hr] = &v
-			u := cal.USv(v)
+			u := usum[i][hr] / float64(cnt[i][hr])
 			urow[hr] = &u
 			if h.Min == nil || v < *h.Min {
 				mn := v

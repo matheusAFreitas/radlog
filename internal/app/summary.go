@@ -77,6 +77,11 @@ type RcSum struct {
 	AwayMax     float64   `json:"awayMax"`
 	AwayMaxAt   int64     `json:"awayMaxAt"`
 	Curve       []RcSumPt `json:"curve"`
+	// dose que o próprio aparelho somou no período (inclui o tempo longe do
+	// PC); DevOK = o registro dos totais cobre o começo do período
+	DevDose float64 `json:"devDose"`
+	DevOK   bool    `json:"devOK"`
+	DevUpTo int64   `json:"devUpTo"`
 	// alertas do RadiaCode no período (por episódio) e o maior pico (µSv/h)
 	Attention int     `json:"attention"`
 	Alarm     int     `json:"alarm"`
@@ -125,6 +130,9 @@ func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
 		}
 	}
 	r.Avg = r.Dose * 60 / float64(r.Minutes)
+	if d, up, ok := a.rcDeviceDose(from, to); ok {
+		r.DevDose, r.DevOK, r.DevUpTo = d, true, up.UnixMilli()
+	}
 	if r.AwayMinutes > 0 {
 		r.AwayAvg = r.AwayDose * 60 / float64(r.AwayMinutes)
 	}
@@ -229,7 +237,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		return s, err
 	}
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	demo := a.demo.Active
 	var meas int
 	for _, m := range a.measurements {
@@ -246,7 +254,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	n := int(math.Ceil(float64(to.Sub(from)) / float64(step)))
 	sums := make([]float64, n)
 	cnt := make([]int, n)
-	total := 0.0
+	total, utotal := 0.0, 0.0
 	for _, p := range pts {
 		if p.T.Before(from) {
 			continue
@@ -254,7 +262,9 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		v := p.CPM
 		s.Minutes++
 		total += v
-		s.Dose += cal.USv(v) / 60
+		u := tl.USv(p) // pela calibração que valia nesse minuto
+		utotal += u
+		s.Dose += u / 60
 		if away(p.T) {
 			s.AwayMinutes++
 		}
@@ -274,7 +284,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	if s.Minutes > 0 {
 		avg := total / float64(s.Minutes)
 		s.Avg = &avg
-		s.AvgUSv = cal.USv(avg)
+		s.AvgUSv = utotal / float64(s.Minutes)
 	}
 	if span := to.Sub(from).Minutes(); span > 0 {
 		s.Coverage = math.Min(1, float64(s.Minutes)/span)

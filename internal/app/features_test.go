@@ -82,7 +82,7 @@ func TestHeatmap(t *testing.T) {
 	if len(h.Days) != 7 || len(h.Values) != 7 || h.PeakHour != 6 || h.LowHour != 15 || h.Minutes != 2*1440 {
 		t.Fatalf("dias %d, pico %d, vale %d, min %d", len(h.Days), h.PeakHour, h.LowHour, h.Minutes)
 	}
-	if h.Counts[5][6] != 60 || h.Counts[6][0] != 0 || h.USv[5][6] == nil || *h.USv[5][6] != a.cal.USv(40) {
+	if h.Counts[5][6] != 60 || h.Counts[6][0] != 0 || h.USv[5][6] == nil || math.Abs(*h.USv[5][6]-a.cal.USv(40)) > 1e-9 {
 		t.Fatalf("contagens/µSv: %v %v", h.Counts[5], h.USv[5][6])
 	}
 	yest := h.Values[5]

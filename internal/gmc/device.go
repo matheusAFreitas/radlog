@@ -324,3 +324,32 @@ func makeTime(yy, mo, dd, hh, mi, ss byte) (time.Time, bool) {
 	}
 	return t, true
 }
+
+// ErrNotReadOnly: Probe só manda comandos de leitura.
+var ErrNotReadOnly = errors.New("só comandos de leitura (<GET…>>)")
+
+// Probe manda um comando de leitura e devolve o que voltar, para
+// diagnóstico (procurar comandos não documentados). Só aceita <GETxxx>>,
+// com letras e números: nada que grave ou mude o aparelho. Sem resposta em
+// max volta ErrTimeout.
+func (d *Device) Probe(cmd string, max time.Duration) ([]byte, error) {
+	if !strings.HasPrefix(cmd, "<GET") || !strings.HasSuffix(cmd, ">>") {
+		return nil, ErrNotReadOnly
+	}
+	for _, c := range cmd[1 : len(cmd)-2] {
+		if !(c >= 'A' && c <= 'Z' || c >= '0' && c <= '9') {
+			return nil, ErrNotReadOnly
+		}
+	}
+	d.mu.Lock()
+	defer d.mu.Unlock()
+	if err := d.port.ResetInputBuffer(); err != nil {
+		return nil, err
+	}
+	if err := d.send(cmd); err != nil {
+		return nil, err
+	}
+	b, err := d.readIdle(150*time.Millisecond, max)
+	_ = d.port.ResetInputBuffer()
+	return b, err
+}

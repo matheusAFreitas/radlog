@@ -30,6 +30,8 @@ o lugar para a nova sozinha.
   (abaixo de 50 CPM seguro, 50–99 atenção, 100+ alerta).
 - Converte para µSv/h usando a **calibração gravada no próprio contador**
   (guarda a última lida; se nunca leu, usa a de fábrica do GMC-800: 986 CPM = 10 µSv/h, ≈ 0,0101 µSv/h por CPM).
+  A calibração tem versões com data: um fator novo (por exemplo, comparando com o RadiaCode) vale a partir
+  de quando foi aplicado, e o histórico só é recalculado se você pedir (dá para desfazer).
 - Gráfico em CPM ou µSv/h, de 15 min, 30 min, 1 h, 24 h e 7 dias, média/mínimo/máximo e dose acumulada no dia.
   Arrastando no gráfico dá zoom num trecho, com a resolução mais fina disponível.
 - **Dosímetro**: dose acumulada em 3 h, 6 h, 12 h, 24 h, 7 dias, 30 dias ou 1 ano, comparada

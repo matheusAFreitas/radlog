@@ -207,3 +207,23 @@ func TestNotFoundMessage(t *testing.T) {
 		t.Fatalf("%v", err)
 	}
 }
+
+func TestProbeReadOnly(t *testing.T) {
+	s := newSim()
+	d := New(s)
+	b, err := d.Probe("<GETVER>>", 300*time.Millisecond)
+	if err != nil || string(b) != "GMC-800Re1.08" {
+		t.Fatalf("GETVER: %q %v", b, err)
+	}
+	if _, err := d.Probe("<GETDOSE>>", 100*time.Millisecond); !errors.Is(err, ErrTimeout) {
+		t.Fatalf("comando sem resposta: %v", err)
+	}
+	for _, c := range []string{"<ECFG>>", "<WCFG>>", "<GETCFG>><ECFG>>", "<GET CFG>>", "<SETDATETIME>>", "GETVER"} {
+		if _, err := d.Probe(c, 50*time.Millisecond); !errors.Is(err, ErrNotReadOnly) {
+			t.Fatalf("%q passou: %v", c, err)
+		}
+	}
+	if s.cfg[0] == 0xFF {
+		t.Fatal("a configuração mudou")
+	}
+}

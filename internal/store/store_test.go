@@ -54,7 +54,7 @@ func TestAddRangeImportReopen(t *testing.T) {
 	}
 
 	var buf bytes.Buffer
-	if err := s2.ExportCSV(&buf, now.Add(-time.Hour), now, func(c float64) float64 { return c * 0.0065 }); err != nil {
+	if err := s2.ExportCSV(&buf, now.Add(-time.Hour), now, func(p Point) (float64, string) { return p.CPM * 0.0065, "v1" }); err != nil {
 		t.Fatal(err)
 	}
 	if lines := strings.Count(buf.String(), "\n"); lines != 41 {
@@ -131,8 +131,8 @@ func TestTraceColumns(t *testing.T) {
 		t.Fatalf("arquivo:\n%s", txt)
 	}
 	var buf strings.Builder
-	s.ExportCSV(&buf, now.Add(-time.Hour), now.Add(time.Minute), func(c float64) float64 { return c / 100 })
-	if !strings.Contains(buf.String(), "sem registro (antes da 2.1)") || !strings.Contains(buf.String(), ",4400,5200,200,ligado,sat+interf") {
+	s.ExportCSV(&buf, now.Add(-time.Hour), now.Add(time.Minute), func(p Point) (float64, string) { return p.CPM / 100, "v1" })
+	if !strings.Contains(buf.String(), "sem registro (antes da 2.1)") || !strings.Contains(buf.String(), ",4400,5200,200,ligado,sat+interf,v1") {
 		t.Fatalf("export:\n%s", buf.String())
 	}
 }

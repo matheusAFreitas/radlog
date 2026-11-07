@@ -1253,6 +1253,29 @@
       </label>
     </fieldset>
 
+    <fieldset id="setCalHist">
+      <legend>Calibração do GMC</legend>
+      <p class="small muted">Converte o CPM em µSv/h e em dose. Cada mudança vira uma versão com a data em que passou a valer: o que já foi medido continua com a calibração da época.</p>
+      <dl class="info">
+        <dt>Em uso</dt><dd class="mono" id="calNow">—</dd>
+        <dt>Do contador</dt><dd class="mono" id="calDev">—</dd>
+      </dl>
+      <label for="calK">µSv/h por CPM no fundo</label>
+      <div class="row">
+        <input type="number" id="calK" min="0.0005" max="0.1" step="0.00001" inputmode="decimal">
+        <button type="button" class="btn" id="calKApply">Usar a partir de agora</button>
+        <button type="button" class="btn" id="calKReset" hidden>Voltar à curva do contador</button>
+      </div>
+      <p class="small muted">Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.</p>
+      <p class="small" id="calKHint" hidden></p>
+      <h3 class="sub-head">Versões</h3>
+      <div class="cfg-hist-wrap"><table class="cfg-hist cal-ver"><thead><tr><th>desde</th><th>até</th><th>µSv/h por CPM</th><th>origem</th><th>minutos</th><th></th></tr></thead><tbody id="calVerBody"></tbody></table></div>
+      <div class="notice cal-cmp" id="calCmp" hidden></div>
+      <p class="small muted">Recalcular o histórico é opcional: aplica uma versão também antes da data dela, sem mudar nenhuma leitura gravada. Dá para desfazer a qualquer momento, e a exportação marca cada minuto com a calibração usada.</p>
+      <h3 class="sub-head">Dose do aparelho</h3>
+      <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
+      <div class="row"><button type="button" class="btn" id="btnGmcDiag">Testar o contador</button><span class="small muted" id="gmcDiagOut"></span></div>
+    </fieldset>
     <fieldset>
       <legend>Dados</legend>
       <p class="small muted mono path" id="dataDir">—</p>

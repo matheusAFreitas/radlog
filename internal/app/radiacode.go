@@ -61,11 +61,15 @@ type RcState struct {
 	Alarms   *radiacode.AlarmLimits `json:"alarms"`
 	Since    int64                  `json:"since"` // ms em que conectou
 	// para a tela principal, conectado ou não
-	Today   float64 `json:"today"`   // µSv de hoje pelo que o app gravou
-	LastT   int64   `json:"lastT"`   // ms do último minuto gravado
-	LastUSv float64 `json:"lastUSv"` // µSv/h desse minuto
-	LastCPS float64 `json:"lastCPS"`
-	Raw     bool    `json:"raw"` // guardando os dados brutos
+	Today float64 `json:"today"` // µSv de hoje pelo que o app gravou
+	// TodayDev é a dose de hoje que o próprio aparelho somou (inclui o tempo
+	// longe do PC); TodayDevOK = o registro dos totais cobre o dia todo
+	TodayDev   float64 `json:"todayDev"`
+	TodayDevOK bool    `json:"todayDevOK"`
+	LastT      int64   `json:"lastT"`   // ms do último minuto gravado
+	LastUSv    float64 `json:"lastUSv"` // µSv/h desse minuto
+	LastCPS    float64 `json:"lastCPS"`
+	Raw        bool    `json:"raw"` // guardando os dados brutos
 	// para o quadro igual ao do GMC
 	Stats *RcStats `json:"stats"`
 	// faixas do app em µSv/h (as do GMC convertidas pela calibração dele)
@@ -168,9 +172,11 @@ func (a *App) GetRadiacode() RcState {
 	if alarmCPM <= 0 {
 		alarmCPM = warningCPM
 	}
+	devToday, devOK := a.rcTodayDevice(time.Now())
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
 	st := a.rc.st
+	st.TodayDev, st.TodayDevOK = devToday, devOK
 	if st.State == "" {
 		st.State = "procurando"
 	}
@@ -700,6 +706,10 @@ type RcCompare struct {
 	Corr    float64   `json:"corr"`    // correlação minuto a minuto
 	Minutes int       `json:"minutes"` // minutos com os dois
 	RCOnly  int       `json:"rcOnly"`  // minutos só do RadiaCode
+	// SuggestK é o µSv/h por CPM que faria o GMC bater com o RadiaCode na
+	// média desses minutos (taxas baixas, sem a curva); CurK é o em uso.
+	SuggestK float64 `json:"suggestK"`
+	CurK     float64 `json:"curK"`
 }
 
 // GetRcCompare junta os últimos minutos do GMC e do RadiaCode (intercalibração).
@@ -719,20 +729,24 @@ func (a *App) GetRcCompare(minutes int) (RcCompare, error) {
 		return out, err
 	}
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
+	out.CurK = a.convCalLocked().USv(100) / 100
 	a.mu.Unlock()
-	gm := map[int64]float64{}
+	gm := map[int64]store.Point{}
 	for _, p := range pts {
-		gm[p.T.Truncate(time.Minute).Unix()] = p.CPM
+		gm[p.T.Truncate(time.Minute).Unix()] = p
 	}
+	var scpm float64
 	var sg, sr, sgg, srr, sgr float64
 	for _, r := range rcs {
-		cpm, ok := gm[r.T.Truncate(time.Minute).Unix()]
+		gp, ok := gm[r.T.Truncate(time.Minute).Unix()]
 		if !ok {
 			out.RCOnly++
 			continue
 		}
-		g := cal.USv(cpm)
+		cpm := gp.CPM
+		g := tl.USv(gp)
+		scpm += cpm
 		out.T = append(out.T, r.T.UnixMilli())
 		out.GMC = append(out.GMC, g)
 		out.GMCCPM = append(out.GMCCPM, cpm)
@@ -748,6 +762,9 @@ func (a *App) GetRcCompare(minutes int) (RcCompare, error) {
 	out.Minutes = len(out.T)
 	if n >= 2 && sg > 0 {
 		out.Ratio = sr / sg
+		if scpm > 0 {
+			out.SuggestK = sr / scpm
+		}
 		// incerteza da razão pelo espalhamento das razões por bloco de 10 min
 		out.RatioE = blockRatioErr(out.RC, out.GMC, 10)
 		cov := sgr/n - (sg/n)*(sr/n)

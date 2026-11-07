@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"time"
 
 	"radlog/internal/gmc"
 )
@@ -33,6 +34,7 @@ func (a *App) saveLastCal(c gmc.Calibration) {
 	if os.WriteFile(tmp, b, 0o644) == nil {
 		_ = os.Rename(tmp, a.lastCalPath())
 	}
+	a.calHistDevice(c)
 }
 
 // loadLastCal usa a última calibração guardada enquanto não conecta.
@@ -59,9 +61,10 @@ func (a *App) loadLastCal() {
 // verdadeira; se a curva do contador também compensa as perdas, usa só a
 // reta do 1º ponto para não corrigir duas vezes. Sem a correção, usa a curva
 // do contador como ela é. (a.mu travado)
+//
+// Desde a 2.2 é a versão da calibração em uso agora (com o fator manual, se
+// houver). Para minutos gravados, use calTLLocked: cada um pela versão que
+// valia nele.
 func (a *App) convCalLocked() gmc.Calibration {
-	if a.settings.Levels.DeadTimeOn && a.cal.CompensatesDeadTime() {
-		return a.cal.Linear()
-	}
-	return a.cal
+	return a.calTLLocked().calAt(time.Now().UnixMilli(), a.settings.Levels.DeadTimeOn)
 }

@@ -281,7 +281,7 @@ async function refreshStats() {
   $("hMax24Sub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
-  $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)}` : "";
+  $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)} · calculada pelo app (o GMC não informa a dose que soma)` : "";
 }
 
 async function refreshDaily() {
@@ -1312,14 +1312,21 @@ async function refreshDose() {
   renderDoseDevice();
   $("doseOther").hidden = !(rcOn && c.otherMinutes > 0);
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
-  $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose medida";
+  $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose calculada pelo app";
   $("doseNote").textContent =
     "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido. " +
     (isRc
       ? (c.doseSource === "aparelho"
         ? "A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
         : "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.")
-      : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas.");
+      : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas. " +
+        "O GMC não informa a dose que soma na tela: esta é calculada pelo app, minuto a minuto, pela calibração que valia em cada minuto.");
+  if (!isRc && c.calNote) {
+    const a = document.createElement("span"), b = document.createElement("span");
+    a.textContent = " Calibração:";
+    b.textContent = " " + c.calNote;
+    $("doseNote").append(a, b);
+  }
 
   if (!c.measuredMinutes) {
     $("doseTotal").textContent = "—";
@@ -3540,8 +3547,121 @@ async function openSettings(focusId) {
   renderRainSettings();
   renderStatus();
   renderCfgHist();
+  renderCalHist();
   $("settings").showModal();
   await fillPorts();
+}
+
+// versões da calibração do GMC (2.2)
+const calWhen = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+const calSrcTxt = (v) => v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
+async function renderCalHist() {
+  if (!api.GetCalHistory) return;
+  let h;
+  try { h = await api.GetCalHistory(); } catch (e) { return; }
+  state.calHist = h;
+  const vs = h.versions || [];
+  const cur = vs.find((v) => v.atual) || vs[0];
+  if (cur) {
+    $("calNow").textContent = `${fmt(cur.k, 5)} µSv/h por CPM · ${calSrcTxt(cur)}` + (h.retro ? " · histórico recalculado" : "");
+    $("calK").value = cur.k ? cur.k.toFixed(5) : "";
+    $("calKReset").hidden = !(cur.fator > 0);
+  }
+  $("calDev").textContent = h.devK ? `${fmt(h.devK, 5)} µSv/h por CPM` : "—";
+  $("calVerBody").innerHTML = vs.map((v) => {
+    const isRetro = h.retro === v.id;
+    let act = "";
+    if (isRetro) act = `<button type="button" class="btn small" data-retro="0">Voltar ao original</button>`;
+    else if (v.desde > 0) act = `<button type="button" class="btn small" data-cmp="${v.id}">Recalcular o passado…</button>`;
+    const note = v.nota ? `<br><span class="muted">${escHtml(v.nota)}</span>` : "";
+    return `<tr class="${v.atual ? "cur" : ""}${isRetro ? " retro" : ""}"><td class="when">${v.desde ? calWhen(v.desde) : "o começo"}</td><td class="when">${v.ate ? calWhen(v.ate) : "em uso"}</td>` +
+      `<td class="num mono">${fmt(v.k, 5)}</td><td>${escHtml(calSrcTxt(v))}${isRetro ? `<br><span class="muted">vale também antes desta data</span>` : ""}${note}</td><td class="num">${fmt(v.minutos, 0)}</td><td>${act}</td></tr>`;
+  }).join("");
+  $("calCmp").hidden = true;
+  calSuggest();
+}
+
+async function calSuggest() {
+  const el = $("calKHint");
+  el.hidden = true;
+  if (!api.GetRcCompare || !hasRcData()) return;
+  let c;
+  try { c = await api.GetRcCompare(6 * 60); } catch (e) { return; }
+  if (!c || c.minutes < 60 || !(c.suggestK > 0)) return;
+  el.innerHTML = `Lado a lado com o RadiaCode (${fmt(c.minutes, 0)} min nas últimas 6 h): <strong class="mono">${fmt(c.suggestK, 5)}</strong> µSv/h por CPM faria o GMC bater com ele na média. <button type="button" class="btn small" id="calUseSug">Preencher</button>`;
+  el.hidden = false;
+  $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").focus(); });
+}
+
+async function calCompare(id) {
+  const box = $("calCmp");
+  let c;
+  try { c = await call(api.CompareCal, id); } catch (e) { return; }
+  const v = (state.calHist.versions || []).find((x) => x.id === id) || {};
+  if (!c.minutes) {
+    box.innerHTML = `Não há minutos gravados antes de ${calWhen(v.desde)} para recalcular.`;
+    box.hidden = false;
+    return;
+  }
+  const pct = c.changePct;
+  box.innerHTML = `<strong>Recalcular com a versão de ${calWhen(v.desde)} (${fmt(v.k, 5)} µSv/h por CPM)</strong><br>` +
+    `<span>Período: ${calWhen(c.from)} a ${calWhen(c.to)} (${fmt(c.minutes, 0)} minutos gravados)</span><br>` +
+    `<span>Dose: ${fmt(c.doseOrig, 2)} → ${fmt(c.doseNew, 2)} µSv (${pct >= 0 ? "+" : "−"}${fmt(Math.abs(pct), 0)}%)</span><br>` +
+    `<span>Média: ${fmt(c.avgOrig, 3)} → ${fmt(c.avgNew, 3)} µSv/h · máximo: ${fmt(c.maxOrig, 3)} → ${fmt(c.maxNew, 3)} µSv/h</span><br>` +
+    `<span class="muted">Nenhuma leitura gravada muda; dá para voltar ao original depois.</span>` +
+    `<div class="row"><button type="button" class="btn accent small" data-retro="${id}">Recalcular o histórico</button><button type="button" class="btn small" data-cmpclose="1">Cancelar</button></div>`;
+  box.hidden = false;
+}
+
+async function calHistChanged() {
+  await renderCalHist();
+  renderCfgHist();
+  refreshAll();
+}
+
+function initCalHist() {
+  $("calKApply").addEventListener("click", async () => {
+    const k = parseFloat(String($("calK").value).replace(",", "."));
+    if (!(k > 0)) { toast("Informe o µSv/h por CPM", true); return; }
+    try { await call(api.SetGMCFactor, k, ""); } catch (e) { return; }
+    toast("Calibração nova a partir de agora");
+    calHistChanged();
+  });
+  $("calKReset").addEventListener("click", async () => {
+    try { await call(api.SetGMCFactor, 0, ""); } catch (e) { return; }
+    toast("Voltou à curva do contador a partir de agora");
+    calHistChanged();
+  });
+  const onClick = async (e) => {
+    const b = e.target.closest("button");
+    if (!b) return;
+    if (b.dataset.cmp) calCompare(Number(b.dataset.cmp));
+    else if (b.dataset.cmpclose) $("calCmp").hidden = true;
+    else if (b.dataset.retro != null) {
+      const id = Number(b.dataset.retro);
+      try { await call(api.SetCalRetro, id); } catch (e2) { return; }
+      toast(id ? "Histórico recalculado (as leituras gravadas não mudaram)" : "Histórico original de volta");
+      calHistChanged();
+    }
+  };
+  $("calVerBody").addEventListener("click", onClick);
+  $("calCmp").addEventListener("click", onClick);
+  $("btnGmcDiag").addEventListener("click", async () => {
+    const b = $("btnGmcDiag"), out = $("gmcDiagOut");
+    if (!api.DiagnoseGMCDose) return;
+    b.disabled = true;
+    out.textContent = "testando… (cerca de 2 min)";
+    try {
+      const r = await call(api.DiagnoseGMCDose);
+      out.textContent = `${r.verdict}. Relatório: ${r.path}`;
+    } catch (e) { out.textContent = ""; }
+    b.disabled = false;
+  });
+  on("gmcdiag", (st) => {
+    if (!st) return;
+    $("gmcDiagOut").textContent = st === "esperando" ? "esperando 90 s para ler de novo…" : `testando… (${st})`;
+  });
+  on("calibration", () => { if ($("settings").open) renderCalHist(); });
 }
 
 // histórico de configurações (2.1)
@@ -3909,6 +4029,7 @@ function wire() {
     toast("Configurações salvas");
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
+  initCalHist();
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
   $("footData").addEventListener("click", () => call(api.OpenDataFolder));
 
@@ -4608,8 +4729,15 @@ function renderRcMain(st) {
   }[u];
   $("rcMainAlt").textContent = live ? `${alt} · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
-  $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
-  $("rcDoseTodaySub").textContent = sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "acumulados";
+  if (st.todayDevOK) {
+    $("rcDoseToday").textContent = fmt(st.todayDev, 2);
+    $("rcDoseTodaySub").textContent = "do aparelho";
+    $("rcDoseToday").title = `Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
+  } else {
+    $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
+    $("rcDoseTodaySub").textContent = sx.todayMinutes ? `${sx.todayMinutes} min medidos · app` : "acumulados";
+    $("rcDoseToday").title = "Calculada pelo app: só os minutos que o PC gravou";
+  }
   // normal / σ, pelo fundo em casa dos últimos 7 dias
   const sig = $("rcMainSigma"), num = $("rcMainSigmaNum");
   if (live && sx.bgUSv > 0) {
@@ -4861,7 +4989,8 @@ function renderRcSummary(t, rc, r) {
   const d = (v) => fmt(v, usvDigits(v));
   const dose = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv`;
   sumHead(t, "RadiaCode", "rc");
-  sumTile(t, "Dose", dose(rc.dose), `≈ ${d(rc.avg)} µSv/h em média`, "rc");
+  if (rc.devOK) sumTile(t, "Dose do aparelho", dose(rc.devDose), `somada pelo RadiaCode, também longe do PC · pelo app: ${dose(rc.dose)}`, "rc");
+  else sumTile(t, "Dose (app)", dose(rc.dose), `≈ ${d(rc.avg)} µSv/h em média · só os minutos gravados`, "rc");
   const p = rc.vsBgPct;
   const vs = !rc.bgUSv ? "fundo em casa ainda não calculado" : Math.abs(p) < 5 ? `igual ao seu normal em casa (${d(rc.bgUSv)})` : `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal em casa (${d(rc.bgUSv)})`;
   sumTile(t, "Média", `${d(rc.avg)} µSv/h`, vs, rc.bgUSv && p >= 20 ? "warn rc" : "rc");
@@ -4892,7 +5021,7 @@ function renderSummary(r, per) {
   sumTile(t, "Média", `${fmt(r.avg, 1)} CPM`, bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
   sumTile(t, "Máximo", `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
   sumTile(t, "Mínimo", `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
-  sumTile(t, "Dose", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média`);
+  sumTile(t, "Dose (app)", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média · calculada pelo app`);
   const cov = r.spanMinutes ? `${fmt(r.minutes, 0)} de ${fmt(r.spanMinutes, 0)} min` : `${hm(r.minutes)} com leitura`;
   const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
   sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, cov + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
@@ -5403,7 +5532,8 @@ function makeDemoApi() {
       return v;
     },
   };
-  const demoRc = () => demoRcFake() && !demoRcCfg.off
+  const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
+const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
         stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : demoRcCfg.st || "conectado", via: demoRcCfg.via || "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, doseLive: 2.41 + (Date.now() % 600000) / 3.6e7, doseLiveSec: 93600, doseLiveAt: Date.now(), doseLiveOn: !localStorage.getItem("rcFake2"), battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
@@ -5525,7 +5655,7 @@ function makeDemoApi() {
       if (!demoRcFake()) return { minutes: 0, rcOnly: 0 };
       const n = Math.min(min, 600), t = [], gmc = [], rc = [];
       for (let i = 0; i < n; i++) { const g = 0.1 + 0.02 * Math.sin(i / 60) + (Math.random() - 0.5) * 0.04; t.push(Date.now() - (n - i) * 60e3); gmc.push(g); rc.push(g * 0.92 + (Math.random() - 0.5) * 0.02); }
-      return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0 };
+      return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0, suggestK: 0.0055, curK: 0.01014 };
     },
     GetRcSpectrum: async (accum) => {
       if (!demoRcFake()) throw new Error("RadiaCode não conectado");
@@ -5641,6 +5771,15 @@ function makeDemoApi() {
       { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
       { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
     ],
+    GetCalHistory: async () => {
+      const d = demoCal, now = Date.now();
+      const vs = d.vers.map((v, i) => ({ ...v, ate: d.vers[i + 1] ? d.vers[i + 1].desde : 0, k: v.fator || 0.01014, devK: 0.01014, atual: i === d.vers.length - 1, minutos: i === d.vers.length - 1 ? Math.round((now - v.desde) / 6e4) : 40320 }));
+      return { versions: vs.reverse(), retro: d.retro, devK: 0.01014 };
+    },
+    SetGMCFactor: async (k) => { demoCal.vers.push({ id: demoCal.vers.length + 1, desde: Date.now(), fator: k, origem: "você", pontos: [] }); },
+    SetCalRetro: async (id) => { demoCal.retro = id; },
+    CompareCal: async (id) => { const v = demoCal.vers.find((x) => x.id === id) || {}; const f = (v.fator || 0.01014) / 0.01014; return { id, from: Date.now() - 28 * 86400e3, to: v.desde, minutes: 40320, doseOrig: 81.2, doseNew: 81.2 * f, avgOrig: 0.121, avgNew: 0.121 * f, maxOrig: 0.42, maxNew: 0.42 * f, changePct: (f - 1) * 100 }; },
+    DiagnoseGMCDose: async () => ({ path: "C:\\Users\\voce\\AppData\\Roaming\\RadLog\\diagnostico-dose-gmc-2026-11-07_101500.txt", verdict: "nenhum comando de leitura informa a dose do aparelho; o app continua calculando a dose", unknown: [], changed: [], cfgChanged: 0 }),
     GetActivity: async () => demoAct.view(),
     StartActivity: async (o) => demoAct.start(o),
     ActivityNext: async () => demoAct.next(),
@@ -5919,7 +6058,7 @@ function makeDemoApi() {
         while (k < p.length && p[k].t < e) { d += p[k].cpm * 0.0101 / 60; b += rate / 60; al += limMin; k++; }
         times.push(e); dose.push(d); bg.push(b); ceil.push(b + al);
       }
-      return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, backgroundTotal: b, ceilingTotal: b + al,
+      return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, doseSource: "app", calNote: "mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)", backgroundTotal: b, ceilingTotal: b + al,
         allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY,
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
     },

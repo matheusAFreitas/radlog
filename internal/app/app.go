@@ -226,10 +226,13 @@ type Chart struct {
 	RCAvg *float64   `json:"rcAvg"`
 }
 
-// withUSv preenche as séries em µSv/h.
+// withUSv preenche as séries em µSv/h. Cada valor sai da versão da
+// calibração que valia naquele momento (2.2); buildChart já converte minuto
+// a minuto e deixa c.USv pronto.
 func (a *App) withUSv(c Chart) Chart {
 	a.mu.Lock()
 	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	alarmCPM := a.settings.AlarmCPM
 	lv := a.settings.Levels.norm()
 	a.mu.Unlock()
@@ -239,16 +242,23 @@ func (a *App) withUSv(c Chart) Chart {
 	c.AlarmCPM, c.AlarmUSv = alarmCPM, cal.USv(float64(alarmCPM))
 	c.DangerCPM, c.DangerUSv = lv.DangerCPM, cal.USv(lv.dangerEnter())
 	c.AttentionCPM, c.AttentionUSv = lv.AttentionCPM, cal.USv(lv.attnEnter())
-	conv := func(v *float64) *float64 {
-		if v == nil {
-			return nil
+	if c.USv == nil {
+		c.USv = make([]*float64, len(c.Values))
+		var mn, mx *float64
+		for i, v := range c.Values {
+			if v == nil {
+				continue
+			}
+			u := tl.USvAt(time.UnixMilli(c.Times[i]), *v)
+			c.USv[i] = &u
+			if mn == nil || u < *mn {
+				mn = &u
+			}
+			if mx == nil || u > *mx {
+				mx = &u
+			}
 		}
-		u := cal.USv(*v)
-		return &u
-	}
-	c.USv = make([]*float64, len(c.Values))
-	for i, v := range c.Values {
-		c.USv[i] = conv(v)
+		c.MinUSv, c.MaxUSv = mn, mx
 	}
 	if c.Values != nil {
 		var sum float64
@@ -270,8 +280,10 @@ func (a *App) withUSv(c Chart) Chart {
 			v := p.CPM
 			c.Max = &v
 		}
+		if u := tl.USvAt(time.UnixMilli(p.T), p.CPM); c.MaxUSv == nil || u > *c.MaxUSv {
+			c.MaxUSv = &u
+		}
 	}
-	c.MinUSv, c.MaxUSv = conv(c.Min), conv(c.Max)
 	return c
 }
 
@@ -318,6 +330,8 @@ type App struct {
 	dev      *gmc.Device
 	info     DeviceInfo
 	cal      gmc.Calibration
+	calHist  calHistData // versões da calibração (2.2)
+	rcDevT   rcDevToday  // dose de hoje do RadiaCode pelo aparelho
 	state    string
 	message  string
 	stopPoll chan struct{}
@@ -409,6 +423,7 @@ func (a *App) startup(ctx context.Context) {
 	}
 	renameAutostart() // tira o "GMC Monitor" da 1.x do início com o Windows
 	a.loadLastCal()
+	a.loadCalHist()
 	a.loadRain()
 	a.loadPeriods()
 	a.loadNotes()
@@ -613,7 +628,7 @@ func (a *App) statusLocked() Status {
 	return Status{
 		State: a.state, Message: a.message, Device: a.info,
 		Downloading: a.downloading.Load(), DataDir: a.dataDir,
-		USvPerCPM: a.cal.USv(100) / 100, CalSource: a.cal.Source,
+		USvPerCPM: a.convCalLocked().USv(100) / 100, CalSource: a.calSourceLocked(),
 	}
 }
 
@@ -1380,26 +1395,44 @@ func (a *App) buildChart(from, to time.Time, step time.Duration) (Chart, error) 
 	}
 	n := int(span / step)
 	sums := make([]float64, n)
+	usums := make([]float64, n)
 	cnt := make([]int, n)
 	var all []float64
+	a.mu.Lock()
+	tl := a.calTLLocked()
+	a.mu.Unlock()
+	c := Chart{From: from.UnixMilli(), To: to.UnixMilli(), StepMs: step.Milliseconds()}
 	for _, p := range pts {
 		i := int(p.T.Sub(from) / step)
 		if p.T.Before(from) || i >= n {
 			continue
 		}
+		u := tl.USv(p) // pela calibração que valia nesse minuto
 		sums[i] += p.CPM
+		usums[i] += u
 		cnt[i]++
 		all = append(all, p.CPM)
+		if c.MinUSv == nil || u < *c.MinUSv {
+			v := u
+			c.MinUSv = &v
+		}
+		if c.MaxUSv == nil || u > *c.MaxUSv {
+			v := u
+			c.MaxUSv = &v
+		}
 	}
-	c := Chart{From: from.UnixMilli(), To: to.UnixMilli(), StepMs: step.Milliseconds()}
+	c.USv = make([]*float64, 0, n)
 	for i := 0; i < n; i++ {
 		c.Times = append(c.Times, from.Add(time.Duration(i)*step).UnixMilli())
 		if cnt[i] == 0 {
 			c.Values = append(c.Values, nil)
+			c.USv = append(c.USv, nil)
 			continue
 		}
 		v := sums[i] / float64(cnt[i])
+		u := usums[i] / float64(cnt[i])
 		c.Values = append(c.Values, &v)
+		c.USv = append(c.USv, &u)
 	}
 	if len(all) > 0 {
 		sum, mn, mx := 0.0, all[0], all[0]
@@ -1469,7 +1502,7 @@ func (a *App) shortChart(from, to time.Time, step time.Duration, pts []store.Poi
 func (a *App) GetStats() (Stats, error) {
 	now := time.Now()
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 	var s Stats
 	pts, err := a.points(now.Add(-24*time.Hour), now.Add(time.Minute))
@@ -1508,7 +1541,7 @@ func (a *App) GetStats() (Stats, error) {
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
 	tp, _ := a.points(today, now.Add(time.Minute))
 	for _, p := range tp {
-		s.DoseToday += cal.USv(p.CPM) / 60
+		s.DoseToday += tl.USv(p) / 60
 	}
 	s.MinutesToday = len(tp)
 	if bg, ok := a.backgroundCPM(); ok && bg > 0 {
@@ -1524,7 +1557,7 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 	}
 	now := time.Now()
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 	y, m, d := now.Date()
 	today := time.Date(y, m, d, 0, 0, 0, 0, now.Location())
@@ -1548,7 +1581,7 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 			byDay[k] = x
 		}
 		x.sum += p.CPM
-		x.usv += cal.USv(p.CPM)
+		x.usv += tl.USv(p)
 		x.n++
 	}
 	var out []DayStat
@@ -1563,7 +1596,7 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 func (a *App) ExportCSV() (string, error) {
 	path, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
 		Title:           "Exportar leituras",
-		DefaultFilename: "gmc-leituras-" + time.Now().Format("2006-01-02") + ".csv",
+		DefaultFilename: "radlog-gmc-leituras-" + time.Now().Format("2006-01-02") + ".csv",
 		Filters:         []wruntime.FileFilter{{DisplayName: "CSV", Pattern: "*.csv"}},
 	})
 	if err != nil || path == "" {
@@ -1582,9 +1615,10 @@ func (a *App) ExportCSV() (string, error) {
 	}
 	defer f.Close()
 	a.mu.Lock()
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
-	if err := a.store.ExportCSV(f, from, time.Now().Add(time.Minute), cal.USv); err != nil {
+	conv := func(p store.Point) (float64, string) { return tl.USv(p), tl.Tag(p) }
+	if err := a.store.ExportCSV(f, from, time.Now().Add(time.Minute), conv); err != nil {
 		return "", err
 	}
 	return path, nil
