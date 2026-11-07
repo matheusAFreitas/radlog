@@ -1794,3 +1794,13 @@ Chernobyl, 1986: bombeiros e operadores	Chernobyl, 1986: firefighters and operat
 {0} mil× menos	{0}k× less
 {0} mi× menos	{0}M× less
 {0} bi× menos	{0}B× less
+Sua dose (RadiaCode)	Your dose (RadiaCode)
+Dose da casa (GMC-800)	Home dose (GMC-800)
+mediana em casa dos últimos 30 dias	median at home over the last 30 days
+mediana em casa no período	median at home in the period
+RadiaCode média {0} · GMC-800 média {1} · mín {2} · máx {3} µSv/h	RadiaCode average {0} · GMC-800 average {1} · min {2} · max {3} µSv/h
+GMC-800 (casa) no mesmo período: {0} em {1} medidos	GMC-800 (home) in the same period: {0} over {1} measured
+RadiaCode (você) no mesmo período: {0} em {1} medidos	RadiaCode (you) in the same period: {0} over {1} measured
+Aparelho da dose	Dose device
+O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.	The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.
+Sua dose no RadiaCode ({0})	Your dose on the RadiaCode ({0})

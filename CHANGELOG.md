@@ -1,5 +1,18 @@
 # Versões
 
+## 1.30.0
+- **RadiaCode como aparelho principal** (seu dosímetro), com o GMC como
+  contador da casa:
+  - o quadro e a pílula do RadiaCode vêm primeiro, e o GMC fica à direita;
+  - **gráfico**: em µSv/h, o RadiaCode é a curva cheia (rosa) e o GMC
+    (verde) vira uma linha de referência. Na primeira vez com o RadiaCode,
+    o gráfico passa para µSv/h;
+  - **cartão de dose**: mostra a **sua dose pelo RadiaCode**, com o fundo
+    em casa dele, e o GMC-800 (casa) no mesmo período logo abaixo. Um seletor
+    troca para a dose da casa (GMC-800). Os minutos sem leitura continuam
+    fora da conta;
+  - a régua de dose mostra os dois no mesmo período.
+
 ## 1.29.0
 - **Régua de radiação com os dois aparelhos**:
   - **Taxa agora:** duas linhas, "Agora no GMC-800" (âmbar) e "Agora no

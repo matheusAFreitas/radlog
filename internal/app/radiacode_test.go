@@ -170,3 +170,30 @@ func TestRcRawAndBackup(t *testing.T) {
 		t.Fatalf("repetiu: %+v", res)
 	}
 }
+
+func TestDoseRadiacode(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	var pts []store.Point
+	for i := 120; i >= 1; i-- {
+		m := now.Add(-time.Duration(i) * time.Minute)
+		a.rcAddMinute(m.Add(time.Second), 3, 0.12)
+		pts = append(pts, store.Point{T: m, CPM: 20, Src: "live"})
+	}
+	a.rcFlushMinute()
+	a.store.Import(pts)
+	c, err := a.GetDoseSrc("3h", "publico", "radiacode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if c.Device != "radiacode" || c.MeasuredMinutes != 120 || math.Abs(c.Total-0.24) > 1e-6 || math.Abs(c.BackgroundRate-0.12) > 1e-9 {
+		t.Fatalf("RadiaCode: %+v", c)
+	}
+	if c.OtherMinutes != 120 || math.Abs(c.OtherTotal-120*a.convCalLocked().USv(20)/60) > 1e-6 || !c.HasRC {
+		t.Fatalf("casa: %v %v", c.OtherMinutes, c.OtherTotal)
+	}
+	g, _ := a.GetDoseSrc("3h", "publico", "gmc")
+	if g.Device != "gmc" || math.Abs(g.OtherTotal-0.24) > 1e-6 {
+		t.Fatalf("GMC: %+v", g)
+	}
+}

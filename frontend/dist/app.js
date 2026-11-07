@@ -958,11 +958,17 @@ async function refreshChart() {
   };
   vals.forEach((v, i) => { if (v == null) flush(); else seg.push([x(i), y(v)]); });
   flush();
-  let rcLine = "";
+  let rcLine = "", rcArea = "";
   if (rcVals) {
     let pts = [];
-    const out = () => { if (pts.length) rcLine += "M" + pts.join("L") + (pts.length === 1 ? "l0.01 0" : ""); pts = []; };
-    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push(x(i).toFixed(1) + " " + y(v).toFixed(1)); });
+    const out = () => {
+      if (pts.length) {
+        rcLine += "M" + pts.map((p) => p.join(" ")).join("L") + (pts.length === 1 ? "l0.01 0" : "");
+        rcArea += `M${pts[0][0]} ${H}L` + pts.map((p) => p.join(" ")).join("L") + `L${pts[pts.length - 1][0]} ${H}Z`;
+      }
+      pts = [];
+    };
+    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push([x(i).toFixed(1), y(v).toFixed(1)]); });
     out();
   }
   $("rcKey").hidden = !c.rc;
@@ -1032,10 +1038,15 @@ async function refreshChart() {
     const col = { perigo: "#F0656A", alarme: "#F28C38" }[p.level] || "#F5B84A";
     return `<i style="left:${((x(i) / W) * 100).toFixed(2)}%;top:${((y(peakV(p)) / H) * 100).toFixed(2)}%;background:${col}"></i>`;
   }).join("");
-  $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines +
-    `<path d="${area}" fill="#6EE7A0" fill-opacity="0.12"/>` +
-    `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
-    (rcLine ? `<path d="${rcLine}" fill="none" stroke="#F472B6" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` : "");
+  // com o RadiaCode (aparelho principal), ele é a curva cheia e o GMC (casa)
+  // vira uma linha de referência
+  $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines + (rcLine
+    ? `<path d="${rcArea}" fill="#F472B6" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      `<path d="${rcLine}" fill="none" stroke="#F472B6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
+    : `<path d="${area}" fill="#6EE7A0" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+  $("gmcKey").hidden = !rcLine;
 
   if (state.zoom) {
     const f = chartTimeFmt(c);
@@ -1058,7 +1069,7 @@ async function refreshChart() {
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` + (c.rcAvg != null ? ` · RadiaCode média ${fmt(c.rcAvg, 3)}` : "")
+      ? (c.rcAvg != null ? `RadiaCode média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
       : `média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)}`;
 }
 
@@ -1236,13 +1247,21 @@ function fmtDose(v) {
 }
 const doseTxt = (v) => fmtDose(v).join(" ");
 
+// o RadiaCode já mandou algum dado (está conectado ou tem minuto gravado)
+function hasRcData() {
+  const st = state.rc && state.rc.st;
+  return !!(st && (st.state === "conectado" || st.lastT > 0));
+}
+state.doseSrc = localGet("doseSrc", "radiacode");
+
 async function refreshDose() {
   document.querySelectorAll("#doseSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.doseZoom && b.dataset.dperiod === state.dosePeriod)));
   $("doseLimit").value = state.doseLimit;
   const my = ++doseSeq;
+  const src = state.doseSrc;
   const c = state.doseZoom
-    ? await api.GetDoseRange(state.doseZoom.from, state.doseZoom.to, state.doseLimit)
-    : await api.GetDose(state.dosePeriod, state.doseLimit);
+    ? await (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(state.doseZoom.from, state.doseZoom.to, state.doseLimit, src) : api.GetDoseRange(state.doseZoom.from, state.doseZoom.to, state.doseLimit))
+    : await (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
   if (my !== doseSeq) return;
   state.dose = c;
   const dz = $("doseZoomBar");
@@ -1255,9 +1274,19 @@ async function refreshDose() {
   }
   renderZoomButtons();
 
+  const isRc = c.device === "radiacode";
+  const rcOn = hasRcData();
+  $("doseSrcSeg").hidden = !rcOn;
+  document.querySelectorAll("#doseSrcSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dsrc === (isRc ? "radiacode" : "gmc"))));
+  $("doseTitle").textContent = rcOn ? (isRc ? "Sua dose (RadiaCode)" : "Dose da casa (GMC-800)") : "Dose acumulada";
+  const otherName = isRc ? "GMC-800 (casa)" : "RadiaCode (você)";
+  $("doseOther").hidden = !(rcOn && c.otherMinutes > 0);
+  $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
   $("doseNote").textContent =
     "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido. " +
-    "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas.";
+    (isRc
+      ? "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas."
+      : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas.");
 
   if (!c.measuredMinutes) {
     $("doseTotal").textContent = "—";
@@ -1307,11 +1336,13 @@ async function refreshDose() {
   const dxt = (t) => Math.max(0, Math.min(W, ((t - dt0) / Math.max(1, dt1 - dt0)) * W));
   const dAway = awayBands(dt0, dt1, dxt);
   $("doseAwayKey").hidden = !dAway;
+  const dcol = isRc ? "#F472B6" : "#6EE7A0";
+  $("doseCard").classList.toggle("rc", isRc);
   $("doseChart").innerHTML = grid + dAway +
-    `<path d="${dosePath}L${W} ${H}L0 ${H}Z" fill="#6EE7A0" fill-opacity="0.10"/>` +
+    `<path d="${dosePath}L${W} ${H}L0 ${H}Z" fill="${dcol}" fill-opacity="0.10"/>` +
     `<path d="${path(c.background)}" fill="none" stroke="#A3ADB4" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>` +
     `<path d="${path(c.ceiling)}" fill="none" stroke="#F0656A" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
-    `<path d="${dosePath}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
   ys[3].textContent = "0";
@@ -1354,6 +1385,9 @@ function setupDoseHover() {
 }
 
 function wireDose() {
+  document.querySelectorAll("#doseSrcSeg button").forEach((b) => b.addEventListener("click", () => {
+    state.doseSrc = b.dataset.dsrc; localSet("doseSrc", state.doseSrc); refreshDose();
+  }));
   document.querySelectorAll("#doseSeg button").forEach((b) => b.addEventListener("click", () => {
     state.dosePeriod = b.dataset.dperiod; localSet("dosePeriod", state.dosePeriod); state.doseZoom = null; state.doseZoomStack = []; unlinkZoom(); refreshDose();
   }));
@@ -3974,7 +4008,13 @@ function renderRc(st) {
     : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
     : "Ligue o RadiaCode no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
   $("rcHelp").className = "small " + (st.state === "erro" ? "warn-text" : "muted");
-  if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); }
+  if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); refreshDose(); }
+  // RadiaCode como aparelho principal: na primeira vez, o gráfico vai para µSv/h
+  if (hasRcData() && !localGet("rcPrimaryUnit", "")) {
+    localSet("rcPrimaryUnit", "1");
+    if (state.chartUnit !== "usv") { state.chartUnit = "usv"; localSet("chartUnit", "usv"); refreshChart(); }
+  }
+  if (hasRcData() && prev && !(prev.state === "conectado" || prev.lastT > 0)) refreshDose();
   renderRcMain(st);
   // configurações
   $("chkRcOn").checked = !st.off;
@@ -4956,6 +4996,16 @@ function makeDemoApi() {
       const to = Math.floor(Date.now() / 6e4) * 6e4 + 6e4;
       return api._dose(to - span, to, step, limit);
     },
+    // RadiaCode fingido: dose um pouco abaixo da do GMC
+    _doseSrc: (c, src) => {
+      if (src !== "radiacode" || !demoRcFake()) return Object.assign(c, { device: "gmc", other: "radiacode", otherTotal: demoRcFake() ? c.total * 0.6 : 0, otherMinutes: demoRcFake() ? c.measuredMinutes : 0 });
+      const k = 0.6, sc = (a) => a.map((v) => v * k);
+      return Object.assign({}, c, { device: "radiacode", other: "gmc", otherTotal: c.total, otherMinutes: c.measuredMinutes,
+        dose: sc(c.dose), background: sc(c.background), ceiling: c.ceiling.map((v, i) => v - c.background[i] + c.background[i] * k),
+        total: c.total * k, backgroundTotal: c.backgroundTotal * k, ceilingTotal: c.ceilingTotal - c.backgroundTotal * (1 - k), excess: c.excess * k, backgroundRate: c.backgroundRate * k, backgroundSource: "mediana em casa dos últimos 30 dias" });
+    },
+    GetDoseSrc: async (period, limit, src) => api._doseSrc(await api.GetDose(period, limit), src),
+    GetDoseRangeSrc: async (from, to, limit, src) => api._doseSrc(await api.GetDoseRange(from, to, limit), src),
     _dose: (from, to, step, limit) => {
       const span = to - from;
       const p = range(from, to);

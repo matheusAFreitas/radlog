@@ -1054,3 +1054,12 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .duo.on .rc-mini { grid-row: 7; margin-top: 14px; align-self: end; }
 .duo.on .empty { grid-row: 8; margin-top: 12px; }
 .duo.on .level-scale span { padding-right: 6px; min-width: 0; }
+
+/* RadiaCode como aparelho principal: quadro dele à esquerda */
+.duo.on .rc-main { grid-column: 1; }
+.duo.on .hero { grid-column: 2; }
+.legend .gmc-key { display: inline-flex; align-items: center; gap: 6px; }
+.legend .gmc-key i { width: 14px; height: 2px; border-radius: 2px; background: #6EE7A0; opacity: .75; display: inline-block; }
+.dose-other { margin: 0; flex-basis: 100%; order: 10; }
+#doseCard.rc .sw-dose { border-color: #F472B6; }
+#doseSrcSeg { margin-left: auto; margin-right: 8px; }

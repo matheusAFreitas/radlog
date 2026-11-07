@@ -130,10 +130,15 @@ function openRegua(which) {
   const doseHere = d && d.measuredMinutes ? d.total : null;
   const per = state.doseZoom ? "trecho do zoom" : ($("doseSeg").querySelector('[aria-pressed="true"]')?.textContent.trim() || "período");
   const lbl = d && d.measuredMinutes ? `Dose no contador (${per})` : "";
-  const rcDose = rc && rc.today > 0 ? rc.today : null;
+  // o cartão de dose pode estar no RadiaCode (sua dose) ou no GMC (casa):
+  // entram os dois, no mesmo período
+  const dRc = d && d.device === "radiacode";
+  const gmcDose = dRc ? (d.otherMinutes ? d.otherTotal : null) : doseHere;
+  const rcDose = dRc ? doseHere : d && d.otherMinutes ? d.otherTotal : rc && rc.today > 0 ? rc.today : null;
+  const rcLbl = dRc || (d && d.otherMinutes) ? `Sua dose no RadiaCode (${per})` : "Dose hoje no RadiaCode";
   reguaLadder($("rgDose"), reguaDoseRefs(), [
-    { v: doseHere, t: lbl.replace("Dose no contador", "Dose no GMC-800"), tag: "GMC-800" },
-    { v: rcDose, t: "Dose hoje no RadiaCode", tag: "RadiaCode", rc: true },
+    { v: gmcDose, t: `Dose no GMC-800 (${per})`, tag: "GMC-800" },
+    { v: rcDose, t: rcLbl, tag: "RadiaCode", rc: true },
   ], "µSv");
   $("rgTaxaSub").textContent = nowUSv || rcNow
     ? [nowUSv ? `GMC-800 agora: ${reguaFmt(nowUSv, "µSv/h")} (calibração ${fmt(cal, 4)} µSv/h por CPM)` : "", rcNow ? `RadiaCode agora: ${reguaFmt(rcNow, "µSv/h")}` : ""].filter(Boolean).join(" · ") + "."

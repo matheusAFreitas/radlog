@@ -1280,7 +1280,13 @@ const I18N_EN = {
 "Agora no RadiaCode": "Now on the RadiaCode",
 "Dose hoje no RadiaCode": "Dose today on the RadiaCode",
 "≈ igual": "≈ same",
-"Chernobyl, 1986: bombeiros e operadores": "Chernobyl, 1986: firefighters and operators"
+"Chernobyl, 1986: bombeiros e operadores": "Chernobyl, 1986: firefighters and operators",
+"Sua dose (RadiaCode)": "Your dose (RadiaCode)",
+"Dose da casa (GMC-800)": "Home dose (GMC-800)",
+"mediana em casa dos últimos 30 dias": "median at home over the last 30 days",
+"mediana em casa no período": "median at home in the period",
+"Aparelho da dose": "Dose device",
+"O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines."
 },
 "patterns": [
 [
@@ -2090,6 +2096,18 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RadiaCode average ${1} · GMC-800 average ${2} · min ${3} · max ${4} µSv/h",
+[
+"RadiaCode média ",
+" · GMC-800 média ",
+" · mín ",
+" · máx ",
+" µSv/h"
+]
+],
+[
 "3 erros seguidos em ",
 "^3 erros seguidos em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\), com a porta ainda na lista$",
 "3 errors in a row on ${1} (${2}), with the port still in the list",
@@ -2201,6 +2219,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode (você) no mesmo período: ",
+"^RadiaCode \\(você\\) no mesmo período: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) medidos$",
+"RadiaCode (you) in the same period: ${1} over ${2} measured",
+[
+"RadiaCode (você) no mesmo período: ",
+" em ",
+" medidos"
+]
+],
+[
 "Contador voltou a contar depois de ",
 "^Contador voltou a contar depois de ((?:(?! · ).)+?) min em 0 CPM$",
 "Counter counting again after ${1} min at 0 CPM",
@@ -2245,6 +2273,16 @@ const I18N_EN = {
 "GMC-800 agora: ",
 " (calibração ",
 " µSv/h por CPM)."
+]
+],
+[
+"GMC-800 (casa) no mesmo período: ",
+"^GMC\\-800 \\(casa\\) no mesmo período: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) medidos$",
+"GMC-800 (home) in the same period: ${1} over ${2} measured",
+[
+"GMC-800 (casa) no mesmo período: ",
+" em ",
+" medidos"
 ]
 ],
 [
@@ -3343,6 +3381,14 @@ const I18N_EN = {
 [
 "conectado pelo ",
 ", bateria "
+]
+],
+[
+"Sua dose no RadiaCode (",
+"^Sua dose no RadiaCode \\(((?:(?! · ).)+?)\\)$",
+"Your dose on the RadiaCode (${1})",
+[
+"Sua dose no RadiaCode ("
 ]
 ],
 [

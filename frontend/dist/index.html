@@ -45,13 +45,13 @@
       <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="2"/><path d="M12 10 L9 4.8 A8 8 0 0 1 15 4.8 Z"/><path d="M13.7 13 L19.7 13 A8 8 0 0 1 16.7 18.2 Z"/><path d="M10.3 13 L7.3 18.2 A8 8 0 0 1 4.3 13 Z"/></svg>
       <span>GMC Monitor</span>
     </div>
-    <button type="button" class="pill" id="statusPill" title="Conexão">
-      <span class="dot" id="statusDot" aria-hidden="true"></span>
-      <span id="statusText">desconectado</span>
-    </button>
     <button type="button" class="pill rc-pill" id="rcPill" title="RadiaCode" hidden>
       <span class="dot" id="rcDot" aria-hidden="true"></span>
       <span id="rcPillText">RadiaCode</span>
+    </button>
+    <button type="button" class="pill" id="statusPill" title="Conexão">
+      <span class="dot" id="statusDot" aria-hidden="true"></span>
+      <span id="statusText">desconectado</span>
     </button>
     <button type="button" class="pill upd-pill" id="updPill" title="Versão nova do app" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
@@ -309,15 +309,19 @@
       </div>
     </div>
     <div class="legend small muted" id="legend">
-      <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+      <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
     </div>
   </section>
 
   <section class="card chart-card view-graficos" id="doseCard">
     <div class="chart-head">
       <div>
-        <h2>Dose acumulada</h2>
+        <h2 id="doseTitle">Dose acumulada</h2>
         <span class="mono muted small" id="doseSub">sem dados no período</span>
+      </div>
+      <div class="seg" role="group" aria-label="Aparelho da dose" id="doseSrcSeg" hidden>
+        <button type="button" data-dsrc="radiacode" aria-pressed="true">RadiaCode</button>
+        <button type="button" data-dsrc="gmc" aria-pressed="false">GMC-800</button>
       </div>
       <div class="seg" role="group" aria-label="Período da dose" id="doseSeg">
         <button type="button" data-dperiod="3h" aria-pressed="false">3 h</button>
@@ -344,6 +348,7 @@
         <span class="unit">µSv</span>
       </div>
       <div class="dose-status" id="doseStatus"></div>
+      <p class="small muted mono dose-other" id="doseOther" hidden></p>
       <p class="dose-cmp small" id="doseCmp" hidden><span id="doseCmpTxt"></span> <button type="button" class="link small-link" data-regua="dose">ver na régua</button></p>
       <label class="dose-limit">
         <span class="small muted">Teto</span>
