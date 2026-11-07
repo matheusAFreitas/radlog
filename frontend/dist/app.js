@@ -4484,7 +4484,6 @@ function renderRc(st) {
   $("rcState").textContent = on ? `conectado · ${via}` : st.state;
   $("rcState").className = "rc-state mono small " + (on ? "ok" : st.state === "erro" ? "err" : "");
   $("rcNums").hidden = !on;
-  $("rcSpecCard").hidden = !on;
   if (on) {
     $("rcUsv").textContent = st.time ? `${fmt(st.usvh, usvDigits(st.usvh))} µSv/h` : "—";
     $("rcUsvErr").textContent = st.time ? `± ${fmt(st.usvhErr, 0)}%` : "";
@@ -4686,36 +4685,6 @@ function drawRcCompare(c) {
   $("rcCmpStats").textContent = parts.join(" · ");
 }
 
-async function readRcSpectrum() {
-  try {
-    state.rc.spec = await api.GetRcSpectrum(state.rc.accum);
-    drawRcSpectrum();
-  } catch (e) { toast(errMsg(e), true); }
-}
-
-function drawRcSpectrum() {
-  const sp = state.rc.spec, box = $("rcRealSpec");
-  if (!sp || !sp.counts || !sp.counts.length) { box.textContent = ""; return; }
-  const W = 1000, H = 260, PL = 8, PB = 22, n = sp.counts.length;
-  const E = (c) => sp.a[0] + sp.a[1] * c + sp.a[2] * c * c;
-  const eMax = E(n - 1);
-  let top = 1, total = 0;
-  for (let i = 0; i < n; i++) { total += sp.counts[i]; if (i > 8) top = Math.max(top, sp.counts[i]); }
-  const yv = (v) => (state.rc.log ? Math.log10(1 + v) / Math.log10(1 + top) : v / top);
-  const x = (c) => PL + (Math.max(0, E(c)) / eMax) * (W - PL - 8), y = (v) => 8 + (1 - Math.min(1, yv(v))) * (H - PB - 8);
-  let d = "";
-  for (let i = 0; i < n; i++) d += `${i ? "L" : "M"}${x(i).toFixed(1)},${y(sp.counts[i]).toFixed(1)}`;
-  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-cmp-svg">`;
-  for (const e of [100, 500, 1000, 1500, 2000, 2500, 3000]) {
-    if (e > eMax) break;
-    const xx = PL + (e / eMax) * (W - PL - 8);
-    svg += `<line x1="${xx}" x2="${xx}" y1="8" y2="${H - PB}" class="grid"/><text x="${xx}" y="${H - 4}" text-anchor="middle" class="ax">${e} keV</text>`;
-  }
-  svg += `<path d="${d}" class="rc"/></svg>`;
-  box.innerHTML = svg;
-  $("rcRealSpecInfo").textContent = `${(total).toLocaleString(LOCALE)} contagens em ${rcDur(sp.seconds) || sp.seconds + " s"} · ${n} canais`;
-}
-
 function wireRc() {
   on("radiacode", (st) => {
     renderRc(st);
@@ -4775,19 +4744,6 @@ function wireRc() {
     state.rc.cmpMin = +b.dataset.min;
     $("rcCmpRange").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     refreshRcCompare();
-  });
-  $("rcSpecSrc").addEventListener("click", (e) => {
-    const b = e.target.closest("button[data-acc]");
-    if (!b) return;
-    state.rc.accum = b.dataset.acc === "1";
-    $("rcSpecSrc").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
-    readRcSpectrum();
-  });
-  $("btnRcSpec").addEventListener("click", readRcSpectrum);
-  $("btnRcSpecLog").addEventListener("click", () => {
-    state.rc.log = !state.rc.log;
-    $("btnRcSpecLog").textContent = state.rc.log ? "Escala: log" : "Escala: linear";
-    drawRcSpectrum();
   });
   setInterval(() => { if (state.view === "radiacode" && state.rc.st && state.rc.st.state === "conectado") refreshRcCompare(); }, 60e3);
   if (api.GetRadiacode) api.GetRadiacode().then(renderRc).catch(() => {});
@@ -5363,6 +5319,7 @@ function makeDemoApi() {
       result: { netCPM: 1675.7, netErr: 39.1, netUSv: 0.218, ratio: 3.33, sigma: 42.9, level: "sim", verdict: "radioativo: a diferença para o fundo é clara", stop: "achou", pct: 20, threshold: 143.6 },
       samples, spectrum: demoMeasSpec(sec, true) });
   }
+  const demoSpecLive = { counts: null, seconds: 0, at: 0 };
   const demoRcCfg = { off: false, ble: "", raw: true };
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
@@ -5490,11 +5447,33 @@ function makeDemoApi() {
       for (let i = 0; i < n; i++) { const g = 0.1 + 0.02 * Math.sin(i / 60) + (Math.random() - 0.5) * 0.04; t.push(Date.now() - (n - i) * 60e3); gmc.push(g); rc.push(g * 0.92 + (Math.random() - 0.5) * 0.02); }
       return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0 };
     },
-    GetRcSpectrum: async () => {
+    GetRcSpectrum: async (accum) => {
       if (!demoRcFake()) throw new Error("RadiaCode não conectado");
-      const counts = []; for (let i = 0; i < 1024; i++) counts.push(Math.round(4000 * Math.exp(-i / 60) + 300 * Math.exp(-0.5 * ((i - 250) / 9) ** 2) + Math.random() * 5));
-      return { seconds: 3600, a: [-6, 2.45, 0.00042], counts, accum: false };
+      // espectro de mentira: fundo (acumulado, 7 h) e o atual, que vai
+      // juntando com um eletrodo de tório encostado
+      const A = [5.43, 2.351, 0.000381], En = (i) => A[0] + A[1] * (i + 0.5) + A[2] * (i + 0.5) ** 2;
+      const rate = (i, th) => {
+        const e = En(i); if (e < 20) return 0;
+        const pk = (pe, r) => { const sg = 65 * Math.sqrt(pe / 661.7) / 2.355; return r * 2.35 / (sg * 2.5066) * Math.exp(-(((e - pe) / sg) ** 2) / 2); };
+        let v = 0.035 * Math.exp(-e / 350) + pk(1460.8, 0.08) + pk(609.3, 0.06) + pk(351.9, 0.06);
+        if (th) v += 0.09 * Math.exp(-e / 300) + pk(238.6, 3) + pk(583.2, 1) + pk(911.2, 0.5) + pk(2614.5, 0.4) + pk(75, 1.5);
+        return v;
+      };
+      const pois = (l) => { if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * (Math.random() + Math.random() + Math.random() - 1.5) * 2)); let k = 0, p = 1; const L = Math.exp(-l); do { k++; p *= Math.random(); } while (p > L); return k - 1; };
+      if (accum) {
+        const sec = 26000, counts = []; for (let i = 0; i < 1024; i++) counts.push(pois(rate(i, false) * sec));
+        return { seconds: sec, a: A, counts, accum: true };
+      }
+      const now = Date.now();
+      if (!demoSpecLive.counts) { demoSpecLive.counts = new Array(1024).fill(0); demoSpecLive.seconds = 600; demoSpecLive.at = now; }
+      const dt = Math.min(10, (now - demoSpecLive.at) / 1000) * 10; // 10× mais rápido
+      demoSpecLive.at = now; demoSpecLive.seconds += dt;
+      for (let i = 0; i < 1024; i++) demoSpecLive.counts[i] += pois(rate(i, true) * dt);
+      return { seconds: Math.round(demoSpecLive.seconds), a: A, counts: demoSpecLive.counts.slice(), accum: false };
     },
+    AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
+      { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
+      { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
     SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
     ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),

@@ -1,5 +1,23 @@
 # Versões
 
+## 1.41.0
+- **Espectro ao vivo** na aba RadiaCode (o primeiro dos exemplos simulados
+  agora é de verdade, com o RadiaCode conectado):
+  - mostra o que o aparelho juntou desde o **Recomeçar** (encoste a amostra e
+    clique), ou o **acumulado do aparelho**;
+  - a linha tracejada é o fundo da casa no mesmo tempo (o acumulado do
+    aparelho, horas em casa), e os riscos vermelhos marcam as linhas gama que
+    subiram acima dele, com o palpite do que é ("parece: ~Th-232");
+  - números ao vivo: tempo, contagens, cps com a incerteza, o µSv/h do
+    aparelho e a dureza (acima de 1.500 keV sobre 150–1.500 keV, relativa ao
+    fundo); passe o mouse para ver os isótopos de cada energia;
+  - lê o espectro a cada 2 s pelo USB e a cada 6 s pelo Bluetooth, só com a
+    aba aberta. Sem o RadiaCode, continua o exemplo simulado.
+  - O cartão antigo "Espectro do aparelho" saiu (virou o modo "Acumulado do
+    aparelho").
+- Os botões no rodapé das janelas (ex.: a da atualização) não ficam mais
+  colados.
+
 ## 1.40.1
 - Configurações → RadiaCode: uma linha mostra o estado da conexão o tempo
   todo (conectado pelo USB/Bluetooth, conectando, procurando ou o erro). Ao

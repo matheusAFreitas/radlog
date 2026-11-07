@@ -190,3 +190,13 @@ func (s *MeasureSpectrum) bins() []specBin {
 	}
 	return out
 }
+
+// AnalyzeSpectrum procura as linhas conhecidas num espectro com o fundo (a
+// tela do espectro ao vivo manda o que juntou e o acumulado do aparelho).
+func (a *App) AnalyzeSpectrum(s MeasureSpectrum) []SpecPeak {
+	p := s.findPeaks()
+	if p == nil {
+		p = []SpecPeak{}
+	}
+	return p
+}

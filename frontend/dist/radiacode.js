@@ -16,8 +16,11 @@
   const NCH = 1024;
   const CAL = [-6, 2.45, 0.00042]; // keV = a0 + a1·c + a2·c² (típico do 102)
   const chE = (c) => CAL[0] + CAL[1] * c + CAL[2] * c * c;
-  const EN = Float64Array.from({ length: NCH }, (_, i) => chE(i));
-  const DE = Float64Array.from({ length: NCH }, (_, i) => chE(i + 0.5) - chE(i - 0.5));
+  const SIM_EN = Float64Array.from({ length: NCH }, (_, i) => chE(i));
+  const SIM_DE = Float64Array.from({ length: NCH }, (_, i) => chE(i + 0.5) - chE(i - 0.5));
+  // EN/DE: energia de cada canal; no espectro ao vivo, a calibração do aparelho
+  let EN = SIM_EN, DE = SIM_DE;
+  const calEN = (a, n) => Float64Array.from({ length: n }, (_, i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) * (i + 0.5));
   const RES = 0.094; // FWHM no Cs-137 (102: 9,4%)
   const fwhm = (e) => RES * 662 * Math.sqrt(Math.max(e, 20) / 662);
   const sig = (e) => fwhm(e) / 2.355;
@@ -188,13 +191,63 @@
     for (let i = 0; i < NCH; i++) sp.counts[i] += poisson(sp.rate[i] * dt);
     sp.t += dt;
   }
+  // ---------- espectro ao vivo (RadiaCode conectado) ----------
+  // O aparelho junta o espectro dele o tempo todo; a tela mostra o que entrou
+  // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
+  // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
+  const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], peaksAt: 0, n: NCH };
+  const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
+  function realCounts() {
+    if (rl.mode === "acc") return rl.acc ? { c: rl.acc.counts, t: rl.acc.seconds } : null;
+    if (!rl.last) return null;
+    const b = rl.base, L = rl.last;
+    let reset = !b || L.seconds < b.seconds || L.counts.length !== b.counts.length;
+    const c = new Float64Array(L.counts.length);
+    if (!reset) for (let i = 0; i < c.length; i++) { const d = L.counts[i] - b.counts[i]; if (d < 0) { reset = true; break; } c[i] = d; }
+    if (reset) { rl.base = { counts: new Array(L.counts.length).fill(0), seconds: 0 }; return { c: Float64Array.from(L.counts), t: L.seconds }; }
+    return { c, t: Math.max(L.seconds - b.seconds, 0) };
+  }
+  async function realTick(force) {
+    if (!rcLive()) { if (rl.on) { rl.on = false; EN = SIM_EN; DE = SIM_DE; spMark(); spDraw(); } return; }
+    if (!rl.on) { rl.on = true; rl.base = null; spMark(); }
+    if ((!sp.run && !force) || rl.busy) return;
+    // pelo Bluetooth a leitura do espectro é mais lenta: lê a cada 6 s
+    const every = state.rc.st.via === "bluetooth" ? 6000 : 2000;
+    if (!force && rl.readAt && Date.now() - rl.readAt < every - 200) return;
+    rl.readAt = Date.now();
+    rl.busy = true;
+    try {
+      const s = await api.GetRcSpectrum(false);
+      if (s && s.counts && s.counts.length) {
+        rl.last = s;
+        if (!rl.base) rl.base = s;
+        if (rl.n !== s.counts.length || !rl.cal || rl.cal.join() !== s.a.join()) { rl.n = s.counts.length; rl.cal = s.a; EN = calEN(s.a, rl.n); DE = Float64Array.from(EN, (e, i) => (i + 1 < rl.n ? EN[i + 1] - e : e - EN[i - 1])); }
+      }
+      if (!rl.acc || Date.now() - rl.accAt > 10 * 60e3) { const a = await api.GetRcSpectrum(true); if (a && a.counts && a.counts.length) { rl.acc = a; rl.accAt = Date.now(); } }
+      // picos (no Go, igual à medição de objeto), a cada ~10 s
+      const rc = realCounts();
+      if (rc && rl.acc && rl.mode === "agora" && rc.t > 5 && Date.now() - rl.peaksAt > 10e3 && api.AnalyzeSpectrum) {
+        rl.peaksAt = Date.now();
+        rl.peaks = (await api.AnalyzeSpectrum({ a: rl.cal, obj: Array.from(rc.c, Math.round), objSec: rc.t, bg: rl.acc.counts, bgSec: rl.acc.seconds })) || [];
+      }
+    } catch (e) { /* aparelho ocupado: tenta no próximo */ }
+    rl.busy = false;
+    spDraw();
+  }
+  const GROUP_SHORT = { "Tório-232 (série)": "~Th-232 (tório)", "Rádio-226 (série do urânio)": "~Ra-226 (urânio/radônio)", "Urânio-235": "~U-235",
+    "Amerício-241": "~Am-241", "Césio-137": "~Cs-137", "Cobalto-60": "~Co-60", "Potássio-40": "~K-40 (potássio)" };
+
   function spDraw() {
     const cv = $("rcSpec"); if (!cv) return;
+    const real = rl.on ? realCounts() : null;
+    const counts = real ? real.c : sp.counts, tNow = real ? real.t : sp.t;
+    const bgRate = real && rl.acc && rl.acc.seconds > 0 && rl.mode === "agora" ? Float64Array.from(rl.acc.counts, (v) => v / rl.acc.seconds) : null;
+    const nch = counts.length;
     const f = fit(cv, 260); if (!f) return;
     const { g, w, h } = f, L = 44, R = 10, T = 10, B = 24, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
     const EMAX = 3000, xOf = (e) => L + (Math.max(0, e) / EMAX) * pw;
-    let max = 1; for (let i = 0; i < NCH; i++) if (EN[i] > 25 && sp.counts[i] > max) max = sp.counts[i];
+    let max = 1; for (let i = 0; i < nch; i++) if (EN[i] > 25 && counts[i] > max) max = counts[i];
     const yOf = sp.log ? (v) => T + ph - (Math.log10(1 + v) / Math.log10(1 + max * 1.15)) * ph : (v) => T + ph - (v / (max * 1.1)) * ph;
     // grade
     g.strokeStyle = css("--border"); g.lineWidth = 1; g.fillStyle = css("--dim"); g.font = "11px " + css("--mono");
@@ -204,22 +257,51 @@
     const ticks = sp.log ? [0, 1, 10, 100, 1000, 10000, 100000].filter((v) => v <= max * 1.15) : [0, max * 0.25, max * 0.5, max * 0.75, max].map(Math.round);
     for (const v of ticks) { const y = yOf(v); g.globalAlpha = 0.5; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke(); g.globalAlpha = 1; g.fillText(v >= 1000 ? nf(v / 1000, v >= 10000 ? 0 : 1) + "k" : String(v), L - 6, y + 4); }
     // fundo esperado no mesmo tempo
-    if (sp.bg && sp.scen !== "fundo" && sp.t > 0) {
+    if (sp.bg && (real ? bgRate : sp.scen !== "fundo") && tNow > 0) {
       g.beginPath();
-      for (let i = 0; i < NCH; i++) { const x = xOf(EN[i]), y = yOf(SHAPE.fundo[i] * sp.t); i ? g.lineTo(x, y) : g.moveTo(x, y); }
+      for (let i = 0; i < nch; i++) { if (EN[i] > EMAX) break; const x = xOf(EN[i]), y = yOf((real ? bgRate[i] : SHAPE.fundo[i]) * tNow); i ? g.lineTo(x, y) : g.moveTo(x, y); }
       g.strokeStyle = css("--muted"); g.setLineDash([4, 3]); g.stroke(); g.setLineDash([]);
     }
     // espectro
     const acc = "#F2A33A";
     g.beginPath(); g.moveTo(xOf(EN[0]), T + ph);
-    for (let i = 0; i < NCH; i++) { if (EN[i] > EMAX) break; g.lineTo(xOf(EN[i]), yOf(sp.counts[i])); }
-    g.lineTo(xOf(Math.min(EMAX, EN[NCH - 1])), T + ph); g.closePath();
+    for (let i = 0; i < nch; i++) { if (EN[i] > EMAX) break; g.lineTo(xOf(EN[i]), yOf(counts[i])); }
+    g.lineTo(xOf(Math.min(EMAX, EN[nch - 1])), T + ph); g.closePath();
     g.fillStyle = "rgba(242,163,58,.55)"; g.fill(); g.strokeStyle = acc; g.lineWidth = 1; g.stroke();
+    // linhas que subiram acima do fundo (ao vivo)
+    if (real && rl.mode === "agora") {
+      g.font = "11px " + css("--mono"); g.textAlign = "left";
+      let row = 0;
+      for (const p of [...rl.peaks].sort((a, b) => a.kev - b.kev)) {
+        const x = xOf(p.kev); g.strokeStyle = "#F0656A"; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); g.setLineDash([]);
+        g.fillStyle = "#F0656A"; g.fillText(`${p.nuclide} ${nf(p.kev, 0)}`, Math.min(x + 3, L + pw - 70), T + 24 + (row++ % 3) * 12);
+      }
+    }
     // cursor
     if (sp.hover != null) {
       const x = xOf(sp.hover); g.strokeStyle = "#B79CFF"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke();
     }
     g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText(LANG === "en" ? "energy (keV)" : "energia (keV)", L + pw, T + 12);
+    // números
+    if (real) {
+      const tot = counts.reduce((a, b) => a + b, 0), cps = tNow ? tot / tNow : 0, err = tot ? 100 / Math.sqrt(tot) : 0;
+      const st = state.rc.st || {};
+      let txt = rl.mode === "acc"
+        ? `acumulado do aparelho · ${fmtT(tNow)} · ${Math.round(tot).toLocaleString(LOCALE)} contagens · ${nf(cps, 2)} cps`
+        : `${fmtT(tNow)} acumulados · ${Math.round(tot).toLocaleString(LOCALE)} contagens · ${nf(cps, 2)} cps ±${nf(err, 1)}% · ≈ ${nf(st.usvh || 0, 3)} µSv/h agora`;
+      if (rl.mode === "agora" && bgRate && tNow > 0) {
+        const bgT = Float64Array.from(bgRate, (v) => v * tNow);
+        const hr = (a) => { let hi = 0, lo = 0; for (let i = 0; i < a.length; i++) { if (EN[i] >= 1500 && EN[i] < 3100) hi += a[i]; else if (EN[i] >= 150 && EN[i] < 1500) lo += a[i]; } return hi / Math.max(1e-9, lo); };
+        const bgTot = bgT.reduce((a, b) => a + b, 0), net = tot - bgTot, nerr = Math.sqrt(tot + bgTot * tNow / Math.max(1, rl.acc.seconds));
+        txt += ` · dureza ${nf(hr(counts) / Math.max(1e-9, hr(bgT)), 2)}`;
+        const groups = [...new Set(rl.peaks.map((p) => p.group))];
+        if (groups.length) txt += ` · parece: <b>${groups.map((g) => esc(GROUP_SHORT[g] || g)).join(", ")}</b>`;
+        else if (net > 3 * nerr) txt += ` · acima do fundo (${nf(net / tNow, 2)} cps a mais), sem linha conhecida ainda`;
+        else txt += tNow < 60 ? " · juntando contagens…" : " · igual ao fundo";
+      }
+      $("rcSpecInfo").innerHTML = txt;
+      return;
+    }
     // números
     const tot = sp.counts.reduce((a, b) => a + b, 0), cps = sp.t ? tot / sp.t : 0, err = tot ? 100 / Math.sqrt(tot) : 0;
     let net = "";
@@ -236,10 +318,11 @@
     if (x < L || x > L + pw) { sp.hover = null; tip($("rcSpecTip"), null); spDraw(); return; }
     const e = ((x - L) / pw) * 3000;
     sp.hover = e;
-    let ch = 0; for (let i = 0; i < NCH; i++) if (Math.abs(EN[i] - e) < Math.abs(EN[ch] - e)) ch = i;
+    let ch = 0; for (let i = 0; i < EN.length; i++) if (Math.abs(EN[i] - e) < Math.abs(EN[ch] - e)) ch = i;
+    const rc = rl.on ? realCounts() : null, cnt = rc ? rc.c : sp.counts;
     const near = libNear(e);
     const lib = near.length ? near.map(([le, n, d]) => `<b>${esc(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${esc(d)})</span>` : ""}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
-    tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(sp.counts[ch])} contagens</span><br>${lib}`, x, ev.clientY - r.top);
+    tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(cnt[ch] || 0)} contagens</span><br>${lib}`, x, ev.clientY - r.top);
     spDraw();
   }
 
@@ -506,8 +589,15 @@
     $("rcSpecLog").addEventListener("click", () => { sp.log = !sp.log; spMark(); spDraw(); });
     $("rcSpecBg").addEventListener("change", (e) => { sp.bg = e.target.checked; spDraw(); });
     $("rcSpecSpeed").addEventListener("change", (e) => { sp.speed = +e.target.value; });
-    $("rcSpecPlay").addEventListener("click", () => { sp.run = !sp.run; spMark(); });
-    $("rcSpecReset").addEventListener("click", spReset);
+    $("rcSpecPlay").addEventListener("click", () => { sp.run = !sp.run; spMark(); if (sp.run && rl.on) realTick(); });
+    $("rcSpecReset").addEventListener("click", () => {
+      if (rl.on) { rl.base = rl.last; rl.peaks = []; rl.peaksAt = Date.now(); spDraw(); realTick(true); return; }
+      spReset();
+    });
+    $("rcSpecMode").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-m]"); if (!b) return;
+      rl.mode = b.dataset.m; spMark(); spDraw();
+    });
     $("rcSpec").addEventListener("mousemove", spHover);
     $("rcSpec").addEventListener("mouseleave", () => { sp.hover = null; tip($("rcSpecTip"), null); spDraw(); });
     spRate();
@@ -544,6 +634,15 @@
   }
   function spMark() {
     document.querySelectorAll("#rcSpecScen button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.s === sp.scen)));
+    document.querySelectorAll("#rcSpecMode button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === rl.mode)));
+    $("rcSpecScen").hidden = rl.on;
+    $("rcSpecMode").hidden = !rl.on;
+    $("rcSpecSpeedBox").hidden = rl.on;
+    $("rcSpecSimTag").hidden = rl.on;
+    $("rcSpecLiveTag").hidden = !rl.on;
+    $("rcSpecDesc").textContent = rl.on
+      ? "Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
+      : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";
   }
@@ -551,10 +650,12 @@
   function show() {
     build();
     visible = true;
+    realTick(true);
     drawAll();
     timers.forEach(clearInterval);
     timers = [
-      setInterval(() => { if (sp.run) { spStep(sp.speed * 0.25); spDraw(); } }, 250),
+      setInterval(() => { if (sp.run && !rl.on) { spStep(sp.speed * 0.25); spDraw(); } }, 250),
+      setInterval(() => realTick(), 2000),
       setInterval(() => { if (tl.run && tl.shown < TL_N) { tl.shown++; sgDraw(); hdDraw(); if (tl.shown >= TL_N) tl.run = false; } }, 110),
       setInterval(srTick, 500),
     ];

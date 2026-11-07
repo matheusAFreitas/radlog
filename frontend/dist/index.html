@@ -747,38 +747,27 @@
       <p class="small mono" id="rcCmpStats"></p>
     </article>
 
-    <article class="rc-card rc-real" id="rcSpecCard" hidden>
-      <div class="rc-head"><h3>Espectro do aparelho</h3>
-        <div class="seg" id="rcSpecSrc"><button type="button" data-acc="0" aria-pressed="true">Atual</button><button type="button" data-acc="1">Acumulado</button></div>
-      </div>
-      <div class="rc-ctrl">
-        <button type="button" class="btn small" id="btnRcSpec">Ler espectro</button>
-        <button type="button" class="btn small" id="btnRcSpecLog">Escala: log</button>
-        <span class="small muted mono" id="rcRealSpecInfo"></span>
-      </div>
-      <div class="rc-real-spec" id="rcRealSpec"></div>
-    </article>
-
-    <p class="small muted">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
-
     <article class="rc-card">
-      <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
+      <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
+      <p id="rcSpecDesc">Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
       <div class="rc-ctrl">
         <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RadiaCode"></div>
+        <div class="seg rc-seg" id="rcSpecMode" aria-label="Qual espectro" hidden><button type="button" data-m="agora" aria-pressed="true">Desde o Recomeçar</button><button type="button" data-m="acc" aria-pressed="false">Acumulado do aparelho</button></div>
       </div>
       <div class="rc-ctrl">
         <button type="button" class="btn small" id="rcSpecPlay">Pausar</button>
         <button type="button" class="btn small" id="rcSpecReset">Recomeçar</button>
         <button type="button" class="btn small" id="rcSpecLog">Escala: linear</button>
-        <label class="rc-inline small">velocidade
+        <label class="rc-inline small" id="rcSpecSpeedBox">velocidade
           <select id="rcSpecSpeed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select></label>
         <label class="rc-inline small"><input type="checkbox" id="rcSpecBg" checked> fundo por cima</label>
       </div>
       <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
       <p class="mono small rc-info" id="rcSpecInfo"></p>
-      <p class="rc-use"><strong>Para você:</strong> no eletrodo, os picos do tório (Pb-212 em 239 keV, Tl-208 em 583 e 2.614 keV, Ac-228 em 911 keV) e o raio X do próprio tungstênio perto de 59 keV. No detector de fumaça, um pico só, do amerício, em 59,5 keV. No sal light, o K-40 em 1.460 keV cresce devagar: precisa de tempo.</p>
+      <p class="rc-use" id="rcSpecUse"><strong>Para você:</strong> no eletrodo, os picos do tório (Pb-212 em 239 keV, Tl-208 em 583 e 2.614 keV, Ac-228 em 911 keV) e o raio X do próprio tungstênio perto de 59 keV. No detector de fumaça, um pico só, do amerício, em 59,5 keV. No sal light, o K-40 em 1.460 keV cresce devagar: precisa de tempo.</p>
     </article>
+
+    <p class="small muted">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
 
     <article class="rc-card">
       <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>

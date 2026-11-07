@@ -162,7 +162,7 @@ fieldset > label:not(.toggle) { font-size: 13px; color: var(--muted); }
 select, input[type="text"], input[type="search"], input[type="number"] { min-height: 44px; padding: 0 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; }
 .row select { flex: 1 1 200px; min-width: 0; }
 .path { overflow-wrap: anywhere; }
-.dlg-foot { display: flex; justify-content: flex-end; }
+.dlg-foot { display: flex; justify-content: flex-end; align-items: center; gap: 8px; flex-wrap: wrap; }
 
 /* avisos */
 .toasts { position: fixed; right: 16px; bottom: 16px; display: flex; flex-direction: column; gap: 8px; max-width: min(420px, calc(100vw - 32px)); z-index: 10; }
@@ -702,6 +702,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .mh-stats[hidden] { display: none; }
 
 /* exemplos simulados da aba RadiaCode */
+.live-tag { display: inline-block; font-size: 10px; font-family: var(--mono); line-height: 1.5; padding: 0 6px; border-radius: 6px; border: 1px solid rgba(244, 114, 182, .6); color: #F9A8D4; white-space: nowrap; }
 .sim-tag { display: inline-block; font-size: 10px; font-family: var(--mono); line-height: 1.5; padding: 0 6px; border-radius: 6px; border: 1px solid rgba(183, 156, 255, .55); color: #CDB8FF; white-space: nowrap; }
 .rc-card { gap: 10px; }
 .rc-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }

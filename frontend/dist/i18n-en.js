@@ -1392,7 +1392,13 @@ const I18N_EN = {
 "RadiaCode conectado pelo Bluetooth": "RadiaCode connected via Bluetooth",
 "O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.": "The RadiaCode is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.",
 "Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.": "Couldn't connect via Bluetooth. Is the phone app connected to it? The app retries on its own every 30 seconds.",
-"Neste computador a conexão Bluetooth não está disponível: use o cabo USB.": "Bluetooth isn't available on this computer: use the USB cable."
+"Neste computador a conexão Bluetooth não está disponível: use o cabo USB.": "Bluetooth isn't available on this computer: use the USB cable.",
+"acumulado do aparelho": "device's accumulated",
+"igual ao fundo": "same as background",
+"Desde o Recomeçar": "Since Restart",
+"Acumulado do aparelho": "Device's accumulated",
+"Qual espectro": "Which spectrum",
+"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RadiaCode: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there."
 },
 "patterns": [
 [
@@ -2276,6 +2282,15 @@ const I18N_EN = {
 " (RadiaCode): ",
 " CPM sobre o fundo (",
 "σ) — "
+]
+],
+[
+"acima do fundo (",
+"^acima do fundo \\(((?:(?! · ).)+?) cps a mais\\), sem linha conhecida ainda$",
+"above background (${1} cps more), no known line yet",
+[
+"acima do fundo (",
+" cps a mais), sem linha conhecida ainda"
 ]
 ],
 [
@@ -4041,6 +4056,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) keV · canal ((?:(?! · ).)+?) · ((?:(?! · ).)+?) contagens$",
+"${1} keV · channel ${2} · ${3} counts",
+[
+" keV · canal ",
+" contagens"
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -4828,6 +4852,15 @@ const I18N_EN = {
 ]
 ],
 [
+"canal ",
+"^canal ((?:(?! · ).)+?) · ((?:(?! · ).)+?) contagens$",
+"channel ${1} · ${2} counts",
+[
+"canal ",
+" contagens"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -5504,6 +5537,14 @@ const I18N_EN = {
 "Didn't connect: ${1}",
 [
 "Não conectou: "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) µSv/h agora$",
+"≈ ${1} µSv/h now",
+[
+" µSv/h agora"
 ]
 ],
 [
