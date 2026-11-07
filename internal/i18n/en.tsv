@@ -2322,3 +2322,26 @@ calculada pelo app (o GMC não informa a dose que soma)	calculated by the app (t
 {0} µSv/h por CPM	{0} µSv/h per CPM
 Dose do GMC	GMC dose
 calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma	calculated by the app from each minute's CPM; the counter doesn't report the dose it adds up
+desde o primeiro dado ({0})	since the first reading ({0})
+{0}% do período inteiro	{0}% of the whole period
+{0}% do período inteiro ({1} min)	{0}% of the whole period ({1} min)
+{0} dia com dado	{0} day with data
+{0} dias com dado	{0} days with data
+{0} de {1} min até agora	{0} of {1} min so far
+· {0} sem leitura desde o primeiro dado)	· {0} without readings since the first reading)
+{0} sem leitura desde o primeiro dado)	{0} without readings since the first reading)
+O período começa {0} antes do primeiro dado do GMC ({1}); esse trecho não conta como lacuna.	The period starts {0} before the GMC's first reading ({1}); that stretch doesn't count as a gap.
+O período começa {0} antes do primeiro dado do contador ({1}); esse trecho não é lacuna.	The period starts {0} before the counter's first reading ({1}); that stretch is not a gap.
+Histórico disponível	Available history
+Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas "em formação" ainda não representam a janela toda.	For each window (up to now): whether the history already covers the whole window and how much of it was measured, counting from the device's first reading. Averages of "forming" windows don't represent the whole window yet.
+janela	window
+disponível	available
+em formação ({0} de {1} dias)	forming ({0} of {1} days)
+aguardando dados	waiting for data
+{0}% medido desde o primeiro dado ({1})	{0}% measured since the first reading ({1})
+{0} de {1} min desde o primeiro dado ({2})	{0} of {1} min since the first reading ({2})
+{0} de {1} min desde {2}	{0} of {1} min since {2}
+{0} de {1} min desde {2} ·	{0} of {1} min since {2} ·
+{0}% · {1} de {2} min com leitura do RadiaCode	{0}% · {1} of {2} min with RadiaCode readings
+{0} de {1} min com leitura do RadiaCode	{0} of {1} min with RadiaCode readings
+{0} de {1} min com leitura do RadiaCode desde o primeiro dado ({2})	{0} of {1} min with RadiaCode readings since the first reading ({2})

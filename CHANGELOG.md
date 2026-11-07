@@ -1,5 +1,20 @@
 # Versões
 
+## 2.3.0
+- **Cobertura com denominador claro.** A % e o "n de N min" agora usam o
+  mesmo denominador e vão só até agora (num período em andamento a % ficava
+  menor que n ÷ N). O tempo antes do primeiro dado do aparelho não conta mais
+  como lacuna: "Este mês" com 7 dias de histórico mostra a cobertura desses 7
+  dias, e ao lado aparece também a % do período inteiro. Vale para o Resumo
+  (GMC e RadiaCode), o dosímetro e o relatório em PDF.
+- Lacunas: o trecho antes do primeiro dado sai da lista e ganha uma linha
+  própria ("o período começa X antes do primeiro dado; esse trecho não conta
+  como lacuna").
+- **Histórico disponível** (no fim do Resumo): para 24 h, 7, 30, 90 dias e
+  1 ano, se o histórico já cobre a janela inteira ("disponível"), se ainda
+  está "em formação" (quantos dias de quantos) ou "aguardando dados", e
+  quanto foi medido, para o GMC e o RadiaCode.
+
 ## 2.2.0
 - **Calibração do GMC com versões** (Configurações → Calibração do GMC).
   Cada mudança vira uma versão com a data em que passou a valer, guardada em

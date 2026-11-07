@@ -332,6 +332,7 @@ type App struct {
 	cal      gmc.Calibration
 	calHist  calHistData // versões da calibração (2.2)
 	rcDevT   rcDevToday  // dose de hoje do RadiaCode pelo aparelho
+	firsts   firstCache  // primeiro dado de cada aparelho
 	state    string
 	message  string
 	stopPoll chan struct{}

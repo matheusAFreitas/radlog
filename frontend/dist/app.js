@@ -1348,7 +1348,7 @@ async function refreshDose() {
   renderDoseDevice();
   const cov = c.coverage * 100;
   const perYear = c.backgroundRate * 8766 / 1000; // mSv por ano no ritmo do fundo
-  $("doseSub").textContent = `fundo ${fmt(c.backgroundRate, 3)} µSv/h (${c.backgroundSource}) · ≈ ${fmt(perYear, perYear < 10 ? 2 : 1)} mSv/ano nesse ritmo · ${fmt(cov, cov < 10 ? 1 : 0)}% do período medido`;
+  $("doseSub").textContent = `fundo ${fmt(c.backgroundRate, 3)} µSv/h (${c.backgroundSource}) · ≈ ${fmt(perYear, perYear < 10 ? 2 : 1)} mSv/ano nesse ritmo · ${fmt(cov, cov < 10 ? 1 : 0)}% ` + (c.histFrom ? `medido desde o primeiro dado (${dayLabel(c.histFrom)})` : "do período medido");
 
   const st = $("doseStatus");
   const excess = Math.max(0, c.excess);
@@ -4309,16 +4309,37 @@ function wireNotes() {
   });
 }
 
+// cobertura com o denominador (2.3): "n de N min", até agora; se o período
+// começa antes do primeiro dado, conta desde ele e mostra também o período
+// inteiro
+function covText(r) {
+  const hist = r.histMinutes != null ? r.histMinutes : r.spanMinutes;
+  if (!hist) return `${hm(r.minutes)} com leitura`;
+  let s = `${fmt(r.minutes, 0)} de ${fmt(hist, 0)} min` + (r.ongoing ? " até agora" : "");
+  if (r.spanMinutes > hist && r.histFrom) {
+    s += ` · desde o primeiro dado (${dayLabel(r.histFrom)} ${hhmm(r.histFrom)})`;
+    s += ` · ${fmt((r.coverageAll || 0) * 100, 0)}% do período inteiro`;
+  }
+  return s;
+}
+
 // lacunas do período no Resumo (clique abre o trecho no gráfico)
 function renderSumGaps(r) {
   const box = $("sumGaps");
   const list = (r && r.gaps) || [];
-  box.hidden = !list.length;
+  const pre = r && r.preMinutes > 0 && r.histMinutes > 0;
+  box.hidden = !list.length && !pre;
   box.textContent = "";
-  if (!list.length) return;
+  if (!list.length && !pre) return;
   const h = document.createElement("h3");
-  h.textContent = `Lacunas de 10 min ou mais (${r.gapCount}` + (r.gapMinutes ? ` · ${hm(r.gapMinutes)} sem leitura no período` : "") + ")";
+  h.textContent = `Lacunas de 10 min ou mais (${r.gapCount}` + (r.gapMinutes ? ` · ${fmtDur(r.gapMinutes * 6e4)} sem leitura` + (pre ? " desde o primeiro dado" : " no período") : "") + ")";
   box.appendChild(h);
+  if (pre) {
+    const p = document.createElement("p");
+    p.className = "small muted";
+    p.textContent = `O período começa ${fmtDur(r.preMinutes * 6e4)} antes do primeiro dado do GMC (${dayLabel(r.histFrom)} ${hhmm(r.histFrom)}); esse trecho não conta como lacuna.`;
+    box.appendChild(p);
+  }
   const long = r.to - r.from > DAY_MS * 1.1;
   const at = (t) => (long ? `${dayLabel(t)} ${hhmm(t)}` : hhmm(t));
   for (const g of list) {
@@ -4950,6 +4971,32 @@ async function refreshSummary() {
   else renderCompare(res, periods);
   renderSumGaps(s.mode === "resumo" ? res[0] : null);
   renderSumNotes(periods[0][0], periods[0][1]);
+  renderMaturity();
+}
+
+// maturidade do histórico (2.3): para cada janela, se já existe histórico
+// para ela inteira e quanto foi medido
+const MAT_STATE = { disponivel: "disponível", formacao: "em formação", aguardando: "aguardando dados" };
+async function renderMaturity() {
+  const box = $("sumMature");
+  if (!api.GetMaturity) { box.hidden = true; return; }
+  let m;
+  try { m = await api.GetMaturity(); } catch (e) { box.hidden = true; return; }
+  const winTxt = (d) => (d === 1 ? "24 h" : d === 365 ? "1 ano" : `${d} dias`);
+  const cell = (w) => {
+    if (!w || w.state === "aguardando") return `<td class="mat aguardando">${MAT_STATE.aguardando}</td>`;
+    const st = w.state === "formacao" ? `em formação (${fmt(w.histDays, w.histDays < 10 ? 1 : 0)} de ${w.days} dias)` : MAT_STATE.disponivel;
+    return `<td class="mat ${w.state}"><span>${st}</span><br><span class="muted">${fmt(w.coverage * 100, 0)}% medido · ${fmt(w.minutes, 0)} de ${fmt(w.histMinutes, 0)} min</span></td>`;
+  };
+  const rc = m.rc && m.rc.length;
+  let html = `<h3>Histórico disponível</h3><p class="small muted">Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas "em formação" ainda não representam a janela toda.</p>`;
+  html += `<table class="mat-table"><thead><tr><th>janela</th><th>GMC-800</th>${rc ? "<th>RadiaCode</th>" : ""}</tr></thead><tbody>`;
+  m.gmc.forEach((w, i) => { html += `<tr><th>${winTxt(w.days)}</th>${cell(w)}${rc ? cell(m.rc[i]) : ""}</tr>`; });
+  html += "</tbody></table>";
+  const first = [m.gmcFirst ? `GMC desde ${dayLabel(m.gmcFirst)} ${hhmm(m.gmcFirst)}` : "", m.rcFirst ? `RadiaCode desde ${dayLabel(m.rcFirst)} ${hhmm(m.rcFirst)}` : ""].filter(Boolean).join(" · ");
+  if (first) html += `<p class="small muted">${first}</p>`;
+  box.innerHTML = html;
+  box.hidden = false;
 }
 
 function bgVerdict(r) {
@@ -4999,8 +5046,7 @@ function renderRcSummary(t, rc, r) {
   sumTile(t, "Em casa", dose(rc.homeDose), `${hm(rc.homeMinutes)} medidos`, "rc");
   sumTile(t, "Fora de casa", rc.awayMinutes ? dose(rc.awayDose) : "—",
     rc.awayMinutes ? `${hm(rc.awayMinutes)} · média ${d(rc.awayAvg)} · máx ${d(rc.awayMax)} µSv/h` : "nenhum minuto fora de casa", "rc");
-  const span = r.spanMinutes || Math.round((r.to - r.from) / 6e4);
-  sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, `${fmt(rc.minutes, 0)} de ${fmt(span, 0)} min`, "rc");
+  sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, covText({ ...rc, ongoing: r.ongoing }), "rc");
   sumTile(t, "Alertas", alertsText(rc), rc.peakAlert ? `pico ao vivo ${d(rc.peakAlert)} µSv/h` : "alarmes 1 e 2 do aparelho", rc.danger || rc.alarm ? "warn rc" : "rc");
 }
 
@@ -5022,9 +5068,8 @@ function renderSummary(r, per) {
   sumTile(t, "Máximo", `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
   sumTile(t, "Mínimo", `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
   sumTile(t, "Dose (app)", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média · calculada pelo app`);
-  const cov = r.spanMinutes ? `${fmt(r.minutes, 0)} de ${fmt(r.spanMinutes, 0)} min` : `${hm(r.minutes)} com leitura`;
   const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
-  sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, cov + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
+  sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, covText(r) + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
   if (r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
   sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
@@ -5532,6 +5577,7 @@ function makeDemoApi() {
       return v;
     },
   };
+  const demoFirst = () => Date.now() - 12 * 864e5;
   const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
 const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
@@ -5771,6 +5817,13 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
       { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
     ],
+    GetMaturity: async () => {
+      const now = Date.now(), f = demoFirst();
+      const win = (d) => { const from = now - d * 864e5, hf = Math.max(from, f), hist = Math.round((now - hf) / 6e4), n = range(from, now).length;
+        return { days: d, state: f > from ? "formacao" : "disponivel", histDays: hist / 1440, minutes: n, histMinutes: hist, spanMinutes: d * 1440, coverage: hist ? Math.min(1, n / hist) : 0, coverageAll: n / (d * 1440) }; };
+      const g = [1, 7, 30, 90, 365].map(win);
+      return { gmcFirst: f, rcFirst: demoRcFake() ? f + 5 * 864e5 : 0, gmc: g, rc: demoRcFake() ? g.map((w) => ({ ...w, state: w.days > 7 ? "formacao" : w.state, histDays: Math.min(w.histDays, 7) })) : [] };
+    },
     GetCalHistory: async () => {
       const d = demoCal, now = Date.now();
       const vs = d.vers.map((v, i) => ({ ...v, ate: d.vers[i + 1] ? d.vers[i + 1].desde : 0, k: v.fator || 0.01014, devK: 0.01014, atual: i === d.vers.length - 1, minutos: i === d.vers.length - 1 ? Math.round((now - v.desde) / 6e4) : 40320 }));
@@ -5876,14 +5929,17 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       if (settings.rainEnabled && span > 20 * 36e5) { r.rainMM = 3.4; r.rainHours = 2; }
       const effTo = Math.min(to, Date.now());
       r.spanMinutes = Math.round((effTo - from) / 6e4);
+      const hf = Math.max(from, demoFirst());
+      r.histFrom = hf; r.histMinutes = Math.max(0, Math.round((effTo - hf) / 6e4)); r.preMinutes = r.spanMinutes - r.histMinutes; r.ongoing = to > Date.now();
+      r.coverage = r.histMinutes ? Math.min(1, p.length / r.histMinutes) : 0; r.coverageAll = r.spanMinutes ? Math.min(1, p.length / r.spanMinutes) : 0;
       r.daysData = new Set(p.map((q) => new Date(q.t).toDateString())).size;
-      r.gapMinutes = Math.max(0, r.spanMinutes - p.length);
+      r.gapMinutes = Math.max(0, r.histMinutes - p.length);
       r.gaps = []; r.gapCount = 0;
       for (let i = 1; i < p.length; i++) if (p[i].t - p[i - 1].t >= 10 * 6e4) { r.gapCount++; r.gaps.unshift({ from: p[i - 1].t + 6e4, to: p[i].t, minutes: Math.round((p[i].t - p[i - 1].t - 6e4) / 6e4), cause: "contador desconectado", open: false }); }
       if (span >= 6 * 36e5) { r.gapCount++; r.gaps.unshift({ from: from + 3 * 36e5, to: from + 3 * 36e5 + 42 * 6e4, minutes: 42, cause: "app fechado e sem histórico do contador", open: false }); }
       if (p.length > 30) { const m = r.avg; r.sd = Math.sqrt(m) * 1.04; r.dispersion = 1.04; }
       if (demoRcFake() && p.length) { // RadiaCode fingido: segue o GMC um pouco abaixo
-        const k = 0.0101 * 0.6, rc = { minutes: p.length, coverage: r.coverage, dose: r.dose * 0.6, avg: r.avg * k, bgUSv: 20 * k, curve: [] };
+        const k = 0.0101 * 0.6, rc = { minutes: p.length, coverage: r.coverage, coverageAll: r.coverageAll, histMinutes: r.histMinutes, spanMinutes: r.spanMinutes, histFrom: r.histFrom, dose: r.dose * 0.6, avg: r.avg * k, bgUSv: 20 * k, curve: [] };
         rc.vsBgPct = (rc.avg - rc.bgUSv) / rc.bgUSv * 100;
         rc.max = r.max * k; rc.maxAt = r.maxAt; rc.min = r.min * k; rc.minAt = r.minAt;
         rc.awayMinutes = Math.round(p.length * 0.2); rc.awayDose = rc.dose * 0.25; rc.awayAvg = rc.avg * 1.25; rc.awayMax = rc.max * 1.1; rc.awayMaxAt = r.maxAt;

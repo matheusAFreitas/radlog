@@ -44,7 +44,10 @@ type DoseChart struct {
 	LimitName        string  `json:"limitName"`
 	LimitMSvYear     float64 `json:"limitMSvYear"`
 	MeasuredMinutes  int     `json:"measuredMinutes"`
-	Coverage         float64 `json:"coverage"` // 0 a 1
+	Coverage         float64 `json:"coverage"` // 0 a 1, desde o primeiro dado (até agora)
+	HistMinutes      int     `json:"histMinutes"`
+	SpanMinutes      int     `json:"spanMinutes"`
+	HistFrom         int64   `json:"histFrom"` // ms; ≠ 0 quando o período começa antes do primeiro dado
 
 	// de qual aparelho é a dose ("radiacode": sua dose pessoal; "gmc": a da
 	// casa) e a do outro no mesmo período, para comparar
@@ -275,9 +278,18 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit, src strin
 	c.Total, c.BackgroundTotal, c.Allowance = dose, bg, allow
 	c.CeilingTotal = bg + allow
 	c.Excess = dose - bg
-	c.Coverage = float64(c.MeasuredMinutes) / span.Minutes()
-	if c.Coverage > 1 {
-		c.Coverage = 1
+	// cobertura desde o primeiro dado do aparelho (2.3): antes dele não é falta
+	first := a.gmcFirst()
+	if src == "radiacode" {
+		first = a.rcFirst()
+	}
+	if len(pts) > 0 && (first.IsZero() || pts[0].T.Before(first)) {
+		first = pts[0].T
+	}
+	cs := coverageSpan(from, to, first, time.Now())
+	c.Coverage, c.HistMinutes, c.SpanMinutes = ratio(c.MeasuredMinutes, cs.Hist), cs.Hist, cs.Span
+	if cs.Pre > 0 && cs.Hist > 0 {
+		c.HistFrom = cs.HistFrom.UnixMilli()
 	}
 	return c, nil
 }

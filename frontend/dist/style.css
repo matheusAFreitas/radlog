@@ -1183,3 +1183,12 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .cal-ver .btn.small { min-height: 26px; padding: 0 8px; font-size: 12px; }
 .cal-cmp .row { margin-top: 8px; gap: 8px; }
 #calK { max-width: 130px; }
+
+/* maturidade do histórico (2.3) */
+.mat-table { border-collapse: collapse; width: 100%; font-size: 13px; margin: 6px 0; }
+.mat-table th, .mat-table td { text-align: left; padding: 6px 8px; border-top: 1px solid var(--border); vertical-align: top; }
+.mat-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
+.mat-table td.mat > span:first-child { font-weight: 600; }
+.mat-table td.disponivel > span:first-child { color: var(--accent); }
+.mat-table td.formacao > span:first-child { color: var(--att); }
+.mat-table td.aguardando { color: var(--muted); }

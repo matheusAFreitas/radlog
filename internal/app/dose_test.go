@@ -63,8 +63,9 @@ func TestGetDose(t *testing.T) {
 	if c.Excess <= 0 || c.Excess >= c.Allowance {
 		t.Fatalf("excesso %v, permitido %v", c.Excess, c.Allowance)
 	}
-	if cov := c.Coverage; math.Abs(cov-600.0/1440) > 1e-9 {
-		t.Fatalf("cobertura %v", cov)
+	// cobertura desde o primeiro dado (2.3): as 10 h medidas são tudo o que existe
+	if cov := c.Coverage; cov < 0.99 || c.HistFrom == 0 || c.HistMinutes > 602 || c.SpanMinutes < 1430 {
+		t.Fatalf("cobertura %v, desde %v, %d de %d min", cov, c.HistFrom, c.HistMinutes, c.SpanMinutes)
 	}
 
 	w, _ := a.GetDose("7d", "trabalhador")

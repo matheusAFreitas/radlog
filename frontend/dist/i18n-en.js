@@ -1615,7 +1615,12 @@ const I18N_EN = {
 "Calculada pelo app: só os minutos que o PC gravou": "Calculated by the app: only the minutes the PC recorded",
 "calculada pelo app (o GMC não informa a dose que soma)": "calculated by the app (the GMC doesn't report the dose it adds up)",
 "Dose do GMC": "GMC dose",
-"calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma": "calculated by the app from each minute's CPM; the counter doesn't report the dose it adds up"
+"calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma": "calculated by the app from each minute's CPM; the counter doesn't report the dose it adds up",
+"Histórico disponível": "Available history",
+"Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas \"em formação\" ainda não representam a janela toda.": "For each window (up to now): whether the history already covers the whole window and how much of it was measured, counting from the device's first reading. Averages of \"forming\" windows don't represent the whole window yet.",
+"janela": "window",
+"disponível": "available",
+"aguardando dados": "waiting for data"
 },
 "patterns": [
 [
@@ -1929,6 +1934,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O período começa ",
+"^O período começa ((?:(?! · ).)+?) antes do primeiro dado do GMC \\(((?:(?! · ).)+?)\\); esse trecho não conta como lacuna\\.$",
+"The period starts ${1} before the GMC's first reading (${2}); that stretch doesn't count as a gap.",
+[
+"O período começa ",
+" antes do primeiro dado do GMC (",
+"); esse trecho não conta como lacuna."
+]
+],
+[
 "leitura ao vivo: iniciada em ",
 "^leitura ao vivo: iniciada em ((?:(?! · ).)+?) \\(GETCPM \\+ GETCPS a cada 1 s, prazo de ((?:(?! · ).)+?) s por comando, ((?:(?! · ).)+?)\\)$",
 "live reading: started on ${1} (GETCPM + GETCPS every 1 s, ${2} s timeout per command, ${3})",
@@ -1973,6 +1988,16 @@ const I18N_EN = {
 [
 "Calibração do GMC: ",
 " µSv/h por CPM no fundo, informado à mão (vale a partir de agora)"
+]
+],
+[
+"O período começa ",
+"^O período começa ((?:(?! · ).)+?) antes do primeiro dado do contador \\(((?:(?! · ).)+?)\\); esse trecho não é lacuna\\.$",
+"The period starts ${1} before the counter's first reading (${2}); that stretch is not a gap.",
+[
+"O período começa ",
+" antes do primeiro dado do contador (",
+"); esse trecho não é lacuna."
 ]
 ],
 [
@@ -2478,6 +2503,15 @@ const I18N_EN = {
 "${1} configuration bytes changed; send the file for analysis",
 [
 " bytes da configuração mudaram; mande o arquivo para análise"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"${1} of ${2} min with RadiaCode readings since the first reading (${3})",
+[
+" de ",
+" min com leitura do RadiaCode desde o primeiro dado ("
 ]
 ],
 [
@@ -3562,6 +3596,14 @@ const I18N_EN = {
 ]
 ],
 [
+"· ",
+"^· ((?:(?! · ).)+?) sem leitura desde o primeiro dado\\)$",
+"· ${1} without readings since the first reading)",
+[
+" sem leitura desde o primeiro dado)"
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -3603,6 +3645,16 @@ const I18N_EN = {
 "${1} µSv/h per CPM at background (version ${2}, ${3})",
 [
 " µSv/h por CPM no fundo (versão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode$",
+"${1}% · ${2} of ${3} min with RadiaCode readings",
+[
+"% · ",
+" de ",
+" min com leitura do RadiaCode"
 ]
 ],
 [
@@ -3657,6 +3709,14 @@ const I18N_EN = {
 [
 "média ",
 " µSv/h (igual ao seu normal)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) sem leitura desde o primeiro dado\\)$",
+"${1} without readings since the first reading)",
+[
+" sem leitura desde o primeiro dado)"
 ]
 ],
 [
@@ -3751,6 +3811,23 @@ const I18N_EN = {
 "history recalculated with version ${1}",
 [
 "histórico recalculado com a versão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% medido desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"${1}% measured since the first reading (${2})",
+[
+"% medido desde o primeiro dado ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"${1} of ${2} min since the first reading (${3})",
+[
+" de ",
+" min desde o primeiro dado ("
 ]
 ],
 [
@@ -3893,6 +3970,15 @@ const I18N_EN = {
 "${1}% · ${2} min with RadiaCode readings",
 [
 "% · ",
+" min com leitura do RadiaCode"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode$",
+"${1} of ${2} min with RadiaCode readings",
+[
+" de ",
 " min com leitura do RadiaCode"
 ]
 ],
@@ -4249,6 +4335,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% do período inteiro \\(((?:(?! · ).)+?) min\\)$",
+"${1}% of the whole period (${2} min)",
+[
+"% do período inteiro (",
+" min)"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -4546,6 +4641,14 @@ const I18N_EN = {
 ]
 ],
 [
+"desde o primeiro dado (",
+"^desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"since the first reading (${1})",
+[
+"desde o primeiro dado ("
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -4705,6 +4808,16 @@ const I18N_EN = {
 "slope so far: ${1} ± ${2}",
 [
 "inclinação até agora: "
+]
+],
+[
+"em formação (",
+"^em formação \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias\\)$",
+"forming (${1} of ${2} days)",
+[
+"em formação (",
+" de ",
+" dias)"
 ]
 ],
 [
@@ -5294,6 +5407,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% do período inteiro$",
+"${1}% of the whole period",
+[
+"% do período inteiro"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -5668,6 +5789,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min até agora$",
+"${1} of ${2} min so far",
+[
+" de ",
+" min até agora"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -5815,6 +5945,15 @@ const I18N_EN = {
 [
 "máximo: ",
 " µSv/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min desde ((?:(?! · ).)+?) ·$",
+"${1} of ${2} min since ${3} ·",
+[
+" de ",
+" min desde "
 ]
 ],
 [
@@ -6170,6 +6309,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min desde ((?:(?! · ).)+?)$",
+"${1} of ${2} min since ${3}",
+[
+" de ",
+" min desde "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -6302,6 +6450,14 @@ const I18N_EN = {
 "${1} µSv/h per CPM",
 [
 " µSv/h por CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) dias com dado$",
+"${1} days with data",
+[
+" dias com dado"
 ]
 ],
 [
@@ -6453,6 +6609,14 @@ const I18N_EN = {
 [
 "abaixo de ",
 " Bq"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) dia com dado$",
+"${1} day with data",
+[
+" dia com dado"
 ]
 ],
 [

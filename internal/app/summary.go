@@ -20,8 +20,9 @@ type SumPt struct {
 type Summary struct {
 	From         int64    `json:"from"`
 	To           int64    `json:"to"`
-	Minutes      int      `json:"minutes"`  // minutos com leitura
-	Coverage     float64  `json:"coverage"` // 0..1 do período
+	Minutes      int      `json:"minutes"`     // minutos com leitura
+	Coverage     float64  `json:"coverage"`    // 0..1, desde o primeiro dado e só até agora
+	CoverageAll  float64  `json:"coverageAll"` // 0..1 do período inteiro (até agora)
 	AwayMinutes  int      `json:"awayMinutes"`
 	Avg          *float64 `json:"avg"`
 	Min          *float64 `json:"min"`
@@ -45,10 +46,14 @@ type Summary struct {
 	Curve        []SumPt  `json:"curve"`
 	// cobertura e lacunas
 	SpanMinutes int      `json:"spanMinutes"` // minutos do período até agora
+	HistMinutes int      `json:"histMinutes"` // minutos desde o primeiro dado do GMC (até agora)
+	PreMinutes  int      `json:"preMinutes"`  // minutos do período antes do primeiro dado
+	HistFrom    int64    `json:"histFrom"`    // ms: começo do histórico dentro do período
+	Ongoing     bool     `json:"ongoing"`     // o período ainda não terminou
 	DaysData    int      `json:"daysData"`    // dias com pelo menos uma leitura
 	Gaps        []SumGap `json:"gaps"`        // lacunas de 10 min ou mais (as mais recentes primeiro, até 30)
 	GapCount    int      `json:"gapCount"`    // quantas lacunas de 10 min ou mais
-	GapMinutes  int      `json:"gapMinutes"`  // minutos sem leitura no período (todas)
+	GapMinutes  int      `json:"gapMinutes"`  // minutos sem leitura desde o primeiro dado
 	// estatística do fundo (em casa, sem medição de objeto)
 	SD         *float64 `json:"sd"`         // desvio-padrão real dos minutos
 	Dispersion *float64 `json:"dispersion"` // SD ÷ √média (1 = só acaso)
@@ -60,7 +65,11 @@ type Summary struct {
 // separando o tempo em casa e fora de casa.
 type RcSum struct {
 	Minutes     int       `json:"minutes"`
-	Coverage    float64   `json:"coverage"`
+	Coverage    float64   `json:"coverage"`    // desde o primeiro dado do RadiaCode, até agora
+	CoverageAll float64   `json:"coverageAll"` // no período inteiro, até agora
+	SpanMinutes int       `json:"spanMinutes"`
+	HistMinutes int       `json:"histMinutes"`
+	HistFrom    int64     `json:"histFrom"`
 	Dose        float64   `json:"dose"`
 	Avg         float64   `json:"avg"`
 	Min         float64   `json:"min"`
@@ -136,9 +145,13 @@ func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
 	if r.AwayMinutes > 0 {
 		r.AwayAvg = r.AwayDose * 60 / float64(r.AwayMinutes)
 	}
-	if span := to.Sub(from).Minutes(); span > 0 {
-		r.Coverage = math.Min(1, float64(r.Minutes)/span)
+	first := a.rcFirst()
+	if first.IsZero() || pts[0].T.Before(first) {
+		first = pts[0].T
 	}
+	cs := coverageSpan(from, to, first, time.Now())
+	r.SpanMinutes, r.HistMinutes, r.HistFrom = cs.Span, cs.Hist, cs.HistFrom.UnixMilli()
+	r.Coverage, r.CoverageAll = ratio(r.Minutes, cs.Hist), ratio(r.Minutes, cs.Span)
 	if st := a.rcStats(); st != nil && st.BgUSv > 0 {
 		r.BgUSv = st.BgUSv
 		r.VsBgPct = (r.Avg - st.BgUSv) / st.BgUSv * 100
@@ -286,9 +299,6 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		s.Avg = &avg
 		s.AvgUSv = utotal / float64(s.Minutes)
 	}
-	if span := to.Sub(from).Minutes(); span > 0 {
-		s.Coverage = math.Min(1, float64(s.Minutes)/span)
-	}
 	a.fillCoverage(&s, pts, from, to)
 	s.RC = a.rcSummary(from, to, step, n)
 	for i := 0; i < n; i++ {
@@ -363,14 +373,15 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 // fillCoverage completa o resumo com dias com dado, lacunas e a dispersão.
 func (a *App) fillCoverage(s *Summary, pts []store.Point, from, to time.Time) {
 	now := time.Now()
-	effTo := to
-	if effTo.After(now) {
-		effTo = now
-	}
-	in := pointsIn(pts, from, effTo)
-	s.SpanMinutes = int(math.Round(effTo.Sub(from).Minutes()))
+	in := pointsIn(pts, from, to)
+	cs := coverageSpan(from, to, a.pointsFirst(pts), now)
+	effTo := cs.EffTo
+	in = pointsIn(in, from, effTo)
+	s.SpanMinutes, s.HistMinutes, s.PreMinutes = cs.Span, cs.Hist, cs.Pre
+	s.HistFrom, s.Ongoing = cs.HistFrom.UnixMilli(), cs.Ongoing
+	s.Coverage, s.CoverageAll = ratio(len(in), cs.Hist), ratio(len(in), cs.Span)
 	s.DaysData = daysWithData(in)
-	s.GapMinutes = max(0, s.SpanMinutes-len(in))
+	s.GapMinutes = max(0, cs.Hist-len(in))
 	s.Gaps = []SumGap{}
 
 	a.mu.Lock()
@@ -381,7 +392,10 @@ func (a *App) fillCoverage(s *Summary, pts []store.Point, from, to time.Time) {
 		}
 	}
 	a.mu.Unlock()
-	gs := findGaps(in, from, effTo)
+	if cs.Hist == 0 {
+		return
+	}
+	gs := findGaps(in, cs.HistFrom, effTo)
 	for i := len(gs) - 1; i >= 0; i-- {
 		g := gs[i]
 		if g.To.Sub(g.From) < sumGapMin {

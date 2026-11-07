@@ -521,6 +521,10 @@ func renderReportPDF(r reportData) []byte {
 		rain = "—"
 	}
 	cover := fmt.Sprintf("%d dia(s) com dado", r.DaysData)
+	covSub := fmt.Sprintf("%d de %d min · ", st.N, r.HistMin)
+	if r.HistMin < r.SpanMin {
+		covSub = fmt.Sprintf("%d de %d min desde %s · ", st.N, r.HistMin, r.HistFrom.Format("02/01 15:04"))
+	}
 	if r.Away != "" {
 		cover += " · " + r.Away + " fora de casa"
 	}
@@ -539,7 +543,7 @@ func renderReportPDF(r reportData) []byte {
 		{"Mínimo · máximo", r.Min + " · " + r.Max + " CPM", maxSub, "m"},
 		{"Alertas", r.Alerts, alertSub, "s"},
 		{"Chuva", rain, "radar/modelo do app", "s"},
-		{"Cobertura", fmtBR(math.Min(100, float64(st.N)/math.Max(1, float64(r.SpanMin))*100), 0) + "%", fmt.Sprintf("%d de %d min · ", st.N, r.SpanMin) + cover, "s"},
+		{"Cobertura", fmtBR(ratio(st.N, r.HistMin)*100, 0) + "%", covSub + cover, "s"},
 		{"Medições de objeto", fmt.Sprint(len(r.Meas)), "no período", "m"},
 	}
 	for i, t := range tiles {
@@ -571,7 +575,7 @@ func renderReportPDF(r reportData) []byte {
 			{"Mínimo · máximo", fmt.Sprintf("%s (%s) · %s (%s)", u(rc.Min), at(rc.MinAt), u(rc.Max), at(rc.MaxAt))},
 			{"Em casa", fmt.Sprintf("%s µSv em %s", fmtBR(rc.HomeDose, 2), fmtMinutes(rc.HomeMinutes))},
 			{"Fora de casa", away},
-			{"Cobertura", fmt.Sprintf("%s%% · %d min com leitura do RadiaCode", fmtBR(rc.Coverage*100, 0), rc.Minutes)},
+			{"Cobertura", rcCoverageTxt(rc)},
 			{"Alertas", rcAlertsTxt(rc)},
 		}, 150)
 	}
@@ -723,13 +727,18 @@ func renderReportPDF(r reportData) []byte {
 		[]float64{cw * .2, cw * .2, cw * .35, cw * .25}, []bool{false, true, true, true}, []bool{false, true, true, true}, nil)
 
 	p.section("LACUNAS (SEM LEITURA)")
-	missing := r.SpanMin - st.N
+	missing := r.HistMin - st.N
 	if missing < 0 {
 		missing = 0
 	}
 	p.need(16)
 	d.Text(pm, p.y+11, pdf.Sans, 8, cInk, fmt.Sprintf("%s sem leitura no período, em %d trecho(s). Lacuna não conta como zero em nenhum cálculo.", fmtMinutes(missing), len(r.Gaps)))
 	p.y += 16
+	if pre := r.SpanMin - r.HistMin; pre > 0 {
+		p.need(14)
+		d.Text(pm, p.y+9, pdf.Sans, 8, cMuted, fmt.Sprintf("O período começa %s antes do primeiro dado do contador (%s); esse trecho não é lacuna.", fmtMinutes(pre), r.HistFrom.Format("02/01/2006 15:04")))
+		p.y += 14
+	}
 	var big []gap
 	for _, g := range r.Gaps {
 		if g.Minutes() >= 10 {
@@ -996,4 +1005,12 @@ func rcAlertsTxt(rc *RcSum) string {
 		return "nenhum"
 	}
 	return strings.Join(parts, ", ") + " · maior pico " + usvTxt(rc.PeakAlert) + " µSv/h"
+}
+
+func rcCoverageTxt(rc *RcSum) string {
+	s := fmt.Sprintf("%s%% · %d de %d min com leitura do RadiaCode", fmtBR(rc.Coverage*100, 0), rc.Minutes, rc.HistMinutes)
+	if rc.HistMinutes < rc.SpanMinutes {
+		s += fmt.Sprintf(" desde o primeiro dado (%s) · %s%% do período inteiro", time.UnixMilli(rc.HistFrom).Format("02/01/2006 15:04"), fmtBR(rc.CoverageAll*100, 0))
+	}
+	return s
 }

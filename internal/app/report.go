@@ -65,6 +65,8 @@ type reportData struct {
 	St           minuteStats
 	Gaps         []gap
 	SpanMin      int // minutos do período (até agora)
+	HistMin      int // minutos desde o primeiro dado do GMC (até agora)
+	HistFrom     time.Time
 	DaysData     int
 	Bins         []histBin
 	Episodes     []reportEpisode
@@ -258,8 +260,11 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 	r.From, r.To, r.Pts = from, effTo, pts
 	r.St = calcMinuteStats(pts)
-	r.Gaps = findGaps(pts, from, effTo)
-	r.SpanMin = int(math.Round(effTo.Sub(from).Minutes()))
+	cs := coverageSpan(from, to, a.pointsFirst(pts), time.Now())
+	r.SpanMin, r.HistMin, r.HistFrom = cs.Span, cs.Hist, cs.HistFrom
+	if cs.Hist > 0 {
+		r.Gaps = findGaps(pts, cs.HistFrom, effTo)
+	}
 	r.DaysData = daysWithData(pts)
 	r.Bins = histogram(pts, r.St.Mean)
 	if r.St.N > 0 {
@@ -268,11 +273,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		r.Max = fmtBR(r.St.Max, 0)
 		r.MaxAt = r.St.MaxAt.Format("02/01 15:04")
 	}
-	pct := 0.0
-	if r.SpanMin > 0 {
-		pct = math.Min(100, float64(r.St.N)/float64(r.SpanMin)*100)
-	}
-	r.Coverage = fmt.Sprintf("%s%% · %d de %d min", fmtBR(pct, 0), r.St.N, r.SpanMin)
+	r.Coverage = r.coverageTxt()
 
 	// por dia
 	if err == nil {
@@ -682,4 +683,15 @@ func traceSummary(pts []store.Point) string {
 		return "sem minutos no período"
 	}
 	return strings.Join(parts, "; ")
+}
+
+// coverageTxt é a cobertura com os denominadores: desde o primeiro dado e,
+// se o período começa antes dele, também no período inteiro.
+func (r reportData) coverageTxt() string {
+	pct := ratio(r.St.N, r.HistMin) * 100
+	if r.HistMin >= r.SpanMin {
+		return fmt.Sprintf("%s%% · %d de %d min", fmtBR(pct, 0), r.St.N, r.SpanMin)
+	}
+	return fmt.Sprintf("%s%% · %d de %d min desde o primeiro dado (%s) · %s%% do período inteiro (%d min)",
+		fmtBR(pct, 0), r.St.N, r.HistMin, r.HistFrom.Format("02/01/2006 15:04"), fmtBR(ratio(r.St.N, r.SpanMin)*100, 0), r.SpanMin)
 }
