@@ -1063,3 +1063,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .dose-other { margin: 0; flex-basis: 100%; order: 10; }
 #doseCard.rc .sw-dose { border-color: #F472B6; }
 #doseSrcSeg { margin-left: auto; margin-right: 8px; }
+
+/* resumo: blocos do RadiaCode e do GMC */
+#sumTiles .sum-head { grid-column: 1 / -1; margin: 6px 0 -2px; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
+#sumTiles .sum-head.rc { color: #F472B6; margin-top: 0; }
+#sumTiles .sum-none { grid-column: 1 / -1; margin: 0; }
+#sumTiles .ri-tile.rc { border-color: rgba(244, 114, 182, .25); }

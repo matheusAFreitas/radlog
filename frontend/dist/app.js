@@ -4344,16 +4344,46 @@ function sumTile(box, label, value, sub, cls) {
   box.appendChild(d);
 }
 
+function sumHead(box, text, cls) {
+  const h = document.createElement("h3");
+  h.className = "sum-head " + (cls || "");
+  h.textContent = text;
+  box.appendChild(h);
+}
+
+// bloco do RadiaCode (seu dosímetro): dose, média, máximo e mínimo, e o tempo
+// em casa e fora
+function renderRcSummary(t, rc, r) {
+  const d = (v) => fmt(v, usvDigits(v));
+  const dose = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv`;
+  sumHead(t, "RadiaCode", "rc");
+  sumTile(t, "Dose", dose(rc.dose), `≈ ${d(rc.avg)} µSv/h em média`, "rc");
+  const p = rc.vsBgPct;
+  const vs = !rc.bgUSv ? "fundo em casa ainda não calculado" : Math.abs(p) < 5 ? `igual ao seu normal em casa (${d(rc.bgUSv)})` : `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal em casa (${d(rc.bgUSv)})`;
+  sumTile(t, "Média", `${d(rc.avg)} µSv/h`, vs, rc.bgUSv && p >= 20 ? "warn rc" : "rc");
+  sumTile(t, "Máximo", `${d(rc.max)} µSv/h`, atText(r, rc.maxAt), "rc");
+  sumTile(t, "Mínimo", `${d(rc.min)} µSv/h`, atText(r, rc.minAt), "rc");
+  sumTile(t, "Em casa", dose(rc.homeDose), `${hm(rc.homeMinutes)} medidos`, "rc");
+  sumTile(t, "Fora de casa", rc.awayMinutes ? dose(rc.awayDose) : "—",
+    rc.awayMinutes ? `${hm(rc.awayMinutes)} · média ${d(rc.awayAvg)} · máx ${d(rc.awayMax)} µSv/h` : "nenhum minuto fora de casa", "rc");
+  const span = r.spanMinutes || Math.round((r.to - r.from) / 6e4);
+  sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, `${fmt(rc.minutes, 0)} de ${fmt(span, 0)} min`, "rc");
+}
+
 function renderSummary(r, per) {
   $("sumSub").textContent = `${per[2]} · ${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + hhmm(per[1])}`;
   const t = $("sumTiles");
   t.textContent = "";
   $("sumTable").hidden = true;
+  const rc = r.rc && r.rc.minutes ? r.rc : null;
+  if (rc) renderRcSummary(t, rc, r);
   if (!r.minutes) {
+    if (rc) { sumHead(t, "GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: "#6EE7A0", label: "GMC-800" }]); return; }
     t.innerHTML = '<p class="small muted">Sem leituras nesse período.</p>';
     drawSumChart([]);
     return;
   }
+  if (rc) sumHead(t, "GMC-800 (casa)");
   sumTile(t, "Média", `${fmt(r.avg, 1)} CPM`, bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
   sumTile(t, "Máximo", `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
   sumTile(t, "Mínimo", `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
@@ -4365,7 +4395,7 @@ function renderSummary(r, per) {
   sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   if (r.measurements) sumTile(t, "Medições", String(r.measurements), "de objetos");
-  drawSumChart([{ r, color: "#6EE7A0", label: per[2] }]);
+  drawSumChart([{ r, color: "#6EE7A0", label: rc ? "GMC-800" : per[2] }]);
 }
 
 function renderCompare(res, periods) {
@@ -4389,6 +4419,14 @@ function renderCompare(res, periods) {
   const body = tb.querySelector("tbody");
   const row = (cells) => { const tr = document.createElement("tr"); cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); td.textContent = c; tr.appendChild(td); }); body.appendChild(tr); };
   for (const [n, x, y, d, u] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u)]);
+  if ((a.rc && a.rc.minutes) || (b.rc && b.rc.minutes)) {
+    const ra = a.rc || {}, rb = b.rc || {};
+    const v = (o, k, dd, u) => (o.minutes ? fmt(o[k], dd) + u : "—");
+    const dd = (o, k, d2, u) => (o.minutes && o[k] != null ? o[k] : null);
+    row(["RadiaCode: dose", v(ra, "dose", 2, " µSv"), v(rb, "dose", 2, " µSv"), diff(dd(ra, "dose"), dd(rb, "dose"), 2, " µSv")]);
+    row(["RadiaCode: média", v(ra, "avg", 3, " µSv/h"), v(rb, "avg", 3, " µSv/h"), diff(dd(ra, "avg"), dd(rb, "avg"), 3, " µSv/h")]);
+    row(["RadiaCode: fora de casa", ra.minutes ? `${fmt(ra.awayDose, 2)} µSv em ${hm(ra.awayMinutes)}` : "—", rb.minutes ? `${fmt(rb.awayDose, 2)} µSv em ${hm(rb.awayMinutes)}` : "—", ""]);
+  }
   row(["Medido", hm(a.minutes), hm(b.minutes), Math.abs(a.minutes - b.minutes) > 0.1 * Math.max(a.minutes, b.minutes) ? "tempos bem diferentes: compare pela média" : ""]);
   row(["Alertas", alertsText(a), alertsText(b), ""]);
   row(["Chuva", rainText(a), rainText(b), ""]);
@@ -4399,6 +4437,8 @@ function drawSumChart(series) {
   state.sumSeries = series;
   const svg = $("sumChart");
   if (!series.length) { svg.innerHTML = ""; $("sumLegend").textContent = ""; return; }
+  const rc0 = series.length === 1 && series[0].r.rc && series[0].r.rc.minutes ? series[0].r.rc : null;
+  if (rc0) return drawSumChartUSv(series[0].r, rc0);
   const n = Math.max(...series.map((s) => s.r.curve.length));
   let top = 10;
   for (const s of series) for (const p of s.r.curve) if (p.cpm != null) top = Math.max(top, p.cpm);
@@ -4422,6 +4462,33 @@ function drawSumChart(series) {
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(series[0].r.to);
   $("sumLegend").innerHTML = series.map((s) => `<span class="key"><i style="border-color:${s.color}"></i></span>`).join("") + (bg ? '<span class="key"><i style="border-color:#6EE7A0;border-top-style:dashed;opacity:.5"></i>seu normal</span>' : "");
   series.forEach((s, i) => $("sumLegend").children[i].append(s.label));
+}
+
+// resumo com o RadiaCode: as duas curvas em µSv/h (o GMC pela calibração dele)
+function drawSumChartUSv(r, rc) {
+  const svg = $("sumChart");
+  const k = calK();
+  const n = Math.max(r.curve.length, rc.curve.length);
+  let top = 0.05;
+  for (const p of rc.curve) if (p.usv != null) top = Math.max(top, p.usv);
+  for (const p of r.curve) if (p.cpm != null) top = Math.max(top, p.cpm * k);
+  top = niceTop(top * 1.15);
+  const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
+  const y = (v) => H - (Math.min(top, v) / top) * H;
+  const ys = $("sumY").children;
+  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="#F472B6" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  const path = (pts, val) => { let d = "", pen = "M"; pts.forEach((p, i) => { const v = val(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; }); return d; };
+  out += `<path d="${path(r.curve, (p) => (p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="#6EE7A0" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="#F472B6" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  svg.innerHTML = out;
+  const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;
+  const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
+  const xs = $("sumX").children;
+  xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
+  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:#F472B6"></i>RadiaCode (µSv/h)</span><span class="key"><i style="border-color:#6EE7A0"></i>GMC-800 (µSv/h)</span>' +
+    (rc.bgUSv ? '<span class="key"><i style="border-color:#F472B6;border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
 }
 
 // ---------- relatórios em PDF ----------
@@ -4482,6 +4549,8 @@ function setupSummary() {
       const p = s.r.curve[i];
       if (!p) return "";
       const when = long ? `${WEEKDAY[new Date(p.t).getDay()]} ${ddmm(p.t)} ${hhmm(p.t)}` : hhmm(p.t);
+      const rc = ser.length === 1 && s.r.rc && s.r.rc.minutes ? s.r.rc.curve[i] : null;
+      if (rc) return `${when}: RadiaCode ${rc.usv == null ? "sem dado" : fmt(rc.usv, usvDigits(rc.usv)) + " µSv/h"} · GMC-800 ${p.cpm == null ? "sem dado" : fmt(p.cpm * calK(), usvDigits(p.cpm * calK())) + " µSv/h (" + fmt(p.cpm, 1) + " CPM)"}`;
       return `${ser.length > 1 ? s.label + " " : ""}${when}: ${p.cpm == null ? "sem dado" : fmt(p.cpm, 1) + " CPM"}`;
     }).filter(Boolean);
     const tip = $("sumTip");
@@ -4862,6 +4931,15 @@ function makeDemoApi() {
       for (let i = 1; i < p.length; i++) if (p[i].t - p[i - 1].t >= 10 * 6e4) { r.gapCount++; r.gaps.unshift({ from: p[i - 1].t + 6e4, to: p[i].t, minutes: Math.round((p[i].t - p[i - 1].t - 6e4) / 6e4), cause: "contador desconectado", open: false }); }
       if (span >= 6 * 36e5) { r.gapCount++; r.gaps.unshift({ from: from + 3 * 36e5, to: from + 3 * 36e5 + 42 * 6e4, minutes: 42, cause: "app fechado e sem histórico do contador", open: false }); }
       if (p.length > 30) { const m = r.avg; r.sd = Math.sqrt(m) * 1.04; r.dispersion = 1.04; }
+      if (demoRcFake() && p.length) { // RadiaCode fingido: segue o GMC um pouco abaixo
+        const k = 0.0101 * 0.6, rc = { minutes: p.length, coverage: r.coverage, dose: r.dose * 0.6, avg: r.avg * k, bgUSv: 20 * k, curve: [] };
+        rc.vsBgPct = (rc.avg - rc.bgUSv) / rc.bgUSv * 100;
+        rc.max = r.max * k; rc.maxAt = r.maxAt; rc.min = r.min * k; rc.minAt = r.minAt;
+        rc.awayMinutes = Math.round(p.length * 0.2); rc.awayDose = rc.dose * 0.25; rc.awayAvg = rc.avg * 1.25; rc.awayMax = rc.max * 1.1; rc.awayMaxAt = r.maxAt;
+        rc.homeMinutes = p.length - rc.awayMinutes; rc.homeDose = rc.dose - rc.awayDose;
+        rc.curve = r.curve.map((q) => ({ t: q.t, usv: q.cpm == null ? null : q.cpm * k }));
+        r.rc = rc;
+      }
       return r;
     },
     GetRainImpact: async () => {

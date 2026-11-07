@@ -1,5 +1,19 @@
 # Versões
 
+## 1.31.0
+- **Resumo com o RadiaCode**: quando ele tem dado no período, o resumo
+  começa por ele:
+  - dose, média (comparada com o seu fundo em casa), máximo e mínimo em
+    µSv/h;
+  - **em casa × fora de casa**: dose e tempo de cada um, com a média e o
+    máximo fora;
+  - quanto do período foi medido.
+  Depois vem o bloco do **GMC-800 (casa)** como antes. O gráfico do resumo
+  fica em µSv/h com os dois aparelhos (RadiaCode rosa, GMC verde). No modo
+  Comparar entram as linhas de dose, média e fora de casa do RadiaCode.
+- O **relatório em PDF** ganhou a seção "RadiaCode (dosímetro pessoal)",
+  com os mesmos números.
+
 ## 1.30.0
 - **RadiaCode como aparelho principal** (seu dosímetro), com o GMC como
   contador da casa:

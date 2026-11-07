@@ -52,6 +52,93 @@ type Summary struct {
 	// estatística do fundo (em casa, sem medição de objeto)
 	SD         *float64 `json:"sd"`         // desvio-padrão real dos minutos
 	Dispersion *float64 `json:"dispersion"` // SD ÷ √média (1 = só acaso)
+	// o RadiaCode no mesmo período (nil se não tem dado dele)
+	RC *RcSum `json:"rc"`
+}
+
+// RcSum é o resumo do RadiaCode (seu dosímetro) num período, em µSv/h e µSv,
+// separando o tempo em casa e fora de casa.
+type RcSum struct {
+	Minutes     int       `json:"minutes"`
+	Coverage    float64   `json:"coverage"`
+	Dose        float64   `json:"dose"`
+	Avg         float64   `json:"avg"`
+	Min         float64   `json:"min"`
+	MinAt       int64     `json:"minAt"`
+	Max         float64   `json:"max"`
+	MaxAt       int64     `json:"maxAt"`
+	BgUSv       float64   `json:"bgUSv"` // fundo em casa (mediana de 7 dias)
+	VsBgPct     float64   `json:"vsBgPct"`
+	HomeMinutes int       `json:"homeMinutes"`
+	HomeDose    float64   `json:"homeDose"`
+	AwayMinutes int       `json:"awayMinutes"`
+	AwayDose    float64   `json:"awayDose"`
+	AwayAvg     float64   `json:"awayAvg"`
+	AwayMax     float64   `json:"awayMax"`
+	AwayMaxAt   int64     `json:"awayMaxAt"`
+	Curve       []RcSumPt `json:"curve"`
+}
+
+// RcSumPt é um ponto da curva do RadiaCode no resumo (média do passo).
+type RcSumPt struct {
+	T   int64    `json:"t"`
+	USv *float64 `json:"usv"`
+}
+
+// rcSummary resume o RadiaCode em [from, to), com os mesmos passos da curva
+// do GMC.
+func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
+	pts := a.rcRange(from, to)
+	if len(pts) == 0 {
+		return nil
+	}
+	away := a.awayChecker()
+	r := &RcSum{Minutes: len(pts)}
+	sums, cnt := make([]float64, n), make([]int, n)
+	for i, p := range pts {
+		d := p.USvh / 60
+		r.Dose += d
+		if i == 0 || p.USvh < r.Min {
+			r.Min, r.MinAt = p.USvh, p.T.UnixMilli()
+		}
+		if i == 0 || p.USvh > r.Max {
+			r.Max, r.MaxAt = p.USvh, p.T.UnixMilli()
+		}
+		if away(p.T) {
+			r.AwayMinutes++
+			r.AwayDose += d
+			if p.USvh > r.AwayMax {
+				r.AwayMax, r.AwayMaxAt = p.USvh, p.T.UnixMilli()
+			}
+		} else {
+			r.HomeMinutes++
+			r.HomeDose += d
+		}
+		if k := int(p.T.Sub(from) / step); k >= 0 && k < n {
+			sums[k] += p.USvh
+			cnt[k]++
+		}
+	}
+	r.Avg = r.Dose * 60 / float64(r.Minutes)
+	if r.AwayMinutes > 0 {
+		r.AwayAvg = r.AwayDose * 60 / float64(r.AwayMinutes)
+	}
+	if span := to.Sub(from).Minutes(); span > 0 {
+		r.Coverage = math.Min(1, float64(r.Minutes)/span)
+	}
+	if st := a.rcStats(); st != nil && st.BgUSv > 0 {
+		r.BgUSv = st.BgUSv
+		r.VsBgPct = (r.Avg - st.BgUSv) / st.BgUSv * 100
+	}
+	for k := 0; k < n; k++ {
+		pt := RcSumPt{T: from.Add(time.Duration(k) * step).UnixMilli()}
+		if cnt[k] > 0 {
+			v := sums[k] / float64(cnt[k])
+			pt.USv = &v
+		}
+		r.Curve = append(r.Curve, pt)
+	}
+	return r
 }
 
 // SumGap é um trecho sem leitura, com a causa provável.
@@ -167,6 +254,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		s.Coverage = math.Min(1, float64(s.Minutes)/span)
 	}
 	a.fillCoverage(&s, pts, from, to)
+	s.RC = a.rcSummary(from, to, step, n)
 	for i := 0; i < n; i++ {
 		pt := SumPt{T: from.Add(time.Duration(i) * step).UnixMilli()}
 		if cnt[i] > 0 {

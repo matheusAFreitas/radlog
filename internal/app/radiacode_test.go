@@ -197,3 +197,39 @@ func TestDoseRadiacode(t *testing.T) {
 		t.Fatalf("GMC: %+v", g)
 	}
 }
+
+func TestSummaryAndReportRadiacode(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	var pts []store.Point
+	for i := 90; i >= 1; i-- {
+		m := now.Add(-time.Duration(i) * time.Minute)
+		v := 0.12
+		if i <= 30 {
+			v = 0.30
+		}
+		a.rcAddMinute(m.Add(time.Second), 3, v)
+		pts = append(pts, store.Point{T: m, CPM: 20, Src: "live"})
+	}
+	a.rcFlushMinute()
+	a.store.Import(pts)
+	// os últimos 30 min fora de casa
+	a.mu.Lock()
+	a.periods = append(a.periods, Period{ID: 1, From: now.Add(-30 * time.Minute).UnixMilli(), To: now.Add(time.Hour).UnixMilli()})
+	a.mu.Unlock()
+	s, err := a.GetSummary(now.Add(-2*time.Hour).UnixMilli(), now.UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	rc := s.RC
+	if rc == nil || rc.Minutes != 90 || rc.AwayMinutes != 30 || math.Abs(rc.AwayDose-0.15) > 1e-6 || math.Abs(rc.HomeDose-0.12) > 1e-6 || rc.Max != 0.30 {
+		t.Fatalf("resumo do RadiaCode: %+v", rc)
+	}
+	r, err := a.buildReport(now.Add(-2*time.Hour).UnixMilli(), now.UnixMilli(), "teste")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if b := renderReportPDF(r); len(b) < 2000 {
+		t.Fatal("PDF vazio")
+	}
+}

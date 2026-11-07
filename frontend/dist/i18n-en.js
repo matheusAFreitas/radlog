@@ -1286,7 +1286,18 @@ const I18N_EN = {
 "mediana em casa dos últimos 30 dias": "median at home over the last 30 days",
 "mediana em casa no período": "median at home in the period",
 "Aparelho da dose": "Dose device",
-"O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines."
+"O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.",
+"GMC-800 (casa)": "GMC-800 (home)",
+"nenhum minuto fora de casa": "no minutes away from home",
+"fundo em casa ainda não calculado": "home background not calculated yet",
+"Sem leituras do GMC nesse período.": "No GMC readings in this period.",
+"RadiaCode (µSv/h)": "RadiaCode (µSv/h)",
+"GMC-800 (µSv/h)": "GMC-800 (µSv/h)",
+"seu normal em casa (RadiaCode)": "your normal at home (RadiaCode)",
+"RadiaCode: dose": "RadiaCode: dose",
+"RadiaCode: média": "RadiaCode: average",
+"RadiaCode: fora de casa": "RadiaCode: away from home",
+"RADIACODE (DOSÍMETRO PESSOAL)": "RADIACODE (PERSONAL DOSIMETER)"
 },
 "patterns": [
 [
@@ -2117,6 +2128,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% em relação ao fundo em casa \\(((?:(?! · ).)+?), mediana de 7 dias\\)$",
+"${1}% relative to the home background (${2}, 7-day median)",
+[
+"% em relação ao fundo em casa (",
+", mediana de 7 dias)"
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -2656,6 +2676,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?) CPM\\)$",
+"${1}: RadiaCode ${2} · GMC-800 ${3} µSv/h (${4} CPM)",
+[
+": RadiaCode ",
+" · GMC-800 ",
+" µSv/h (",
+" CPM)"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -2671,6 +2702,14 @@ const I18N_EN = {
 [
 " · fundo da casa (",
 " min) + objeto "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv \\(só os minutos medidos; média ((?:(?! · ).)+?)\\)$",
+"${1} µSv (measured minutes only; average ${2})",
+[
+" µSv (só os minutos medidos; média "
 ]
 ],
 [
@@ -2799,6 +2838,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% abaixo do seu normal em casa \\(((?:(?! · ).)+?)\\)$",
+"${1}% below your normal at home (${2})",
+[
+"% abaixo do seu normal em casa ("
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -2840,6 +2887,14 @@ const I18N_EN = {
 "you're on the newest version (${1})${2}",
 [
 "você está na versão mais nova ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% acima do seu normal em casa \\(((?:(?! · ).)+?)\\)$",
+"${1}% above your normal at home (${2})",
+[
+"% acima do seu normal em casa ("
 ]
 ],
 [
@@ -2905,6 +2960,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) min com leitura do RadiaCode$",
+"${1}% · ${2} min with RadiaCode readings",
+[
+"% · ",
+" min com leitura do RadiaCode"
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -2962,6 +3026,24 @@ const I18N_EN = {
 [
 "última leitura ",
 " µSv/h (ontem "
+]
+],
+[
+"igual ao seu normal em casa (",
+"^igual ao seu normal em casa \\(((?:(?! · ).)+?)\\)$",
+"same as your normal at home (${1})",
+[
+"igual ao seu normal em casa ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?) · média ((?:(?! · ).)+?) · máximo ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"${1} µSv over ${2} · average ${3} · max ${4} (${5})",
+[
+" µSv em ",
+" · média ",
+" · máximo "
 ]
 ],
 [
@@ -3669,6 +3751,16 @@ const I18N_EN = {
 "· your normal at home: ${1}",
 [
 "· seu normal em casa: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"${1} · average ${2} · max ${3} µSv/h",
+[
+" · média ",
+" · máx ",
+" µSv/h"
 ]
 ],
 [
@@ -5362,6 +5454,22 @@ const I18N_EN = {
 "open ${1}: ${2}",
 [
 "abrir "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) medidos$",
+"${1} measured",
+[
+" medidos"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?)$",
+"${1} µSv over ${2}",
+[
+" µSv em "
 ]
 ],
 [

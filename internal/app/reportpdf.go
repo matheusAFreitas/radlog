@@ -553,6 +553,28 @@ func renderReportPDF(r reportData) []byte {
 	}
 	p.y += 2*th + tg
 
+	if rc := r.S.RC; rc != nil && rc.Minutes > 0 {
+		p.section("RADIACODE (DOSÍMETRO PESSOAL)")
+		u := func(v float64) string { return fmtBR(v, usvDec(v)) + " µSv/h" }
+		at := func(ms int64) string { return time.UnixMilli(ms).Format("02/01 15:04") }
+		vs := "fundo em casa ainda não calculado"
+		if rc.BgUSv > 0 {
+			vs = fmt.Sprintf("%s%% em relação ao fundo em casa (%s, mediana de 7 dias)", fmtSigned(rc.VsBgPct, 0), u(rc.BgUSv))
+		}
+		away := "nenhum minuto fora de casa"
+		if rc.AwayMinutes > 0 {
+			away = fmt.Sprintf("%s µSv em %s · média %s · máximo %s (%s)", fmtBR(rc.AwayDose, 2), fmtMinutes(rc.AwayMinutes), u(rc.AwayAvg), u(rc.AwayMax), at(rc.AwayMaxAt))
+		}
+		p.kv([][2]string{
+			{"Dose no período", fmt.Sprintf("%s µSv (só os minutos medidos; média %s)", fmtBR(rc.Dose, 2), u(rc.Avg))},
+			{"Média", vs},
+			{"Mínimo · máximo", fmt.Sprintf("%s (%s) · %s (%s)", u(rc.Min), at(rc.MinAt), u(rc.Max), at(rc.MaxAt))},
+			{"Em casa", fmt.Sprintf("%s µSv em %s", fmtBR(rc.HomeDose, 2), fmtMinutes(rc.HomeMinutes))},
+			{"Fora de casa", away},
+			{"Cobertura", fmt.Sprintf("%s%% · %d min com leitura do RadiaCode", fmtBR(rc.Coverage*100, 0), rc.Minutes)},
+		}, 150)
+	}
+
 	p.section("CPM AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)")
 	p.chart(r)
 
@@ -936,4 +958,23 @@ func (p *reportPDF) measBlock(m reportMeas) {
 	}
 	p.y += 4
 	d.Line(pm, p.y, pdf.W-pm, p.y, 0.3, cLine, false)
+}
+
+// usvDec: casas decimais para µSv/h (3 abaixo de 1, 2 até 10, 1 acima).
+func usvDec(v float64) int {
+	switch {
+	case v < 1:
+		return 3
+	case v < 10:
+		return 2
+	}
+	return 1
+}
+
+// fmtSigned: número com sinal (+12, −3), vírgula decimal.
+func fmtSigned(v float64, dec int) string {
+	if v >= 0 {
+		return "+" + fmtBR(v, dec)
+	}
+	return "−" + fmtBR(-v, dec)
 }
