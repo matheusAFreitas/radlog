@@ -113,6 +113,7 @@ type rcState struct {
 	today    rcToday
 	raw      rcRawLog
 	spec     rcSpecLog // espectro de minuto em minuto (espectrograma)
+	specSum  rcSpecCache
 	macc     rcMeasAcc // só a goroutine do rcRun mexe
 	dose     rcDoseLive
 	cfgLogAt time.Time

@@ -1410,7 +1410,16 @@ const I18N_EN = {
 "um espectro por minuto": "one spectrum per minute",
 "nada neste período": "nothing in this period",
 "ainda sem dados: a primeira linha aparece em até 2 minutos": "no data yet: the first row shows up within 2 minutes",
-"sem leitura nesse intervalo: média dele": "no reading in this interval: its average"
+"sem leitura nesse intervalo: média dele": "no reading in this interval: its average",
+"sem leitura (média)": "no reading (average)",
+"Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RadiaCode, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"se a contagem sobe e a dureza": "if the count rate goes up and hardness",
+", costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza": ", it's usually radon (rain, closed house: its daughters sit almost entirely below 1,500 keV). If hardness",
+"junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece.": "goes up too, something with a high-energy line is nearby, like thorium (Tl-208 at 2,614 keV). Hover: the app adds up the spectra of that stretch, compares them with the background and says what it looks like.",
+"cai": "drops",
+"fundo da casa: ainda pouco dado (precisa de algumas horas gravadas)": "home background: not enough data yet (needs a few recorded hours)",
+"sem dados neste período": "no data in this period",
+"~Ra-226 (urânio/radônio)": "~Ra-226 (uranium/radon)"
 },
 "patterns": [
 [
@@ -3346,6 +3355,15 @@ const I18N_EN = {
 ]
 ],
 [
+"dureza 1,00 = ",
+"^dureza 1,00 = ((?:(?! · ).)+?)% acima de 1\\.500 keV$",
+"hardness 1.00 = ${1}% above 1,500 keV",
+[
+"dureza 1,00 = ",
+"% acima de 1.500 keV"
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -4881,6 +4899,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo da casa: ",
+"^fundo da casa: ((?:(?! · ).)+?) cps$",
+"home background: ${1} cps",
+[
+"fundo da casa: ",
+" cps"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -5031,6 +5058,24 @@ const I18N_EN = {
 "last reading at ${1}",
 [
 "última leitura às "
+]
+],
+[
+"chovendo (",
+"^chovendo \\(((?:(?! · ).)+?) mm/h\\)$",
+"raining (${1} mm/h)",
+[
+"chovendo (",
+" mm/h)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) cps \\(((?:(?! · ).)+?)× o fundo\\)$",
+"${1} cps (${2}× background)",
+[
+" cps (",
+"× o fundo)"
 ]
 ],
 [
@@ -6182,6 +6227,14 @@ const I18N_EN = {
 "object ${1} ± ${2}",
 [
 "objeto "
+]
+],
+[
+"dureza ",
+"^dureza ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
+"hardness ${1} ± ${2}",
+[
+"dureza "
 ]
 ],
 [

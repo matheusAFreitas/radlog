@@ -5496,6 +5496,31 @@ function makeDemoApi() {
       }
       return out;
     },
+    GetRcHardness: async (from, to, rowSec) => {
+      // mesma história do espectrograma de mentira: chuva há ~5 h (dureza
+      // cai), eletrodo de tório há ~40 min (sobe)
+      const n = Math.ceil((to - from) / (rowSec * 1000)), now = Date.now(), first = demoRcFake() ? now - 30 * 3600e3 : 0;
+      const win = Math.max(1200, rowSec), half = Math.floor(win / 2 / rowSec);
+      const out = { from, to, rowSec, winSec: (2 * half + 1) * rowSec, cps: [], hard: [], hardErr: [], gap: [], rain: [], wet: [], ref: 0.0125, refCps: 4.6, first };
+      const rnd = (k) => { const x = Math.sin(k * 12.9898) * 43758.5453; return x - Math.floor(x); };
+      for (let k = 0; k < n; k++) {
+        const t0 = from + k * rowSec * 1000, ago = (now - t0) / 3600e3;
+        if (!first || t0 + rowSec * 1000 <= first || t0 > now) { out.cps.push(0); out.hard.push(0); out.hardErr.push(0); out.gap.push(false); out.rain.push(0); out.wet.push(false); continue; }
+        const rain = ago < 6 && ago > 2 ? Math.exp(-Math.abs(ago - 4.6) * 1.2) : 0, th = ago < 0.7 && ago > 0.4 ? 1 : 0, wet = ago > 4.2 && ago < 5.4;
+        const noise = (rnd(t0 / 6e4) - 0.5) * Math.sqrt(60 / rowSec);
+        out.cps.push(Math.round((4.6 * (1 + 0.55 * rain) + 9 * th + noise * 0.6) * 100) / 100);
+        const hd = 1 - 0.28 * rain + 0.4 * th + (rnd(t0 / 6e4 + 7) - 0.5) * 0.08;
+        out.hard.push(Math.round(hd * 1000) / 1000); out.hardErr.push(0.05 + 0.03 * Math.sqrt(60 / out.winSec * 20));
+        out.gap.push(ago > 14 && ago < 20); out.rain.push(wet ? 2.4 : ago > 3.8 && ago < 4.2 ? 0.3 : 0); out.wet.push(wet);
+      }
+      return out;
+    },
+    GetRcWindowPeaks: async (from, to) => {
+      const ago = (Date.now() - (from + to) / 2) / 3600e3;
+      if (ago < 0.75 && ago > 0.35) return [{ group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 400, sigma: 14 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 120, sigma: 6 }];
+      if (ago < 6 && ago > 3) return [{ group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 200, sigma: 7 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 150, sigma: 5 }];
+      return [];
+    },
     AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),

@@ -227,32 +227,18 @@ func (a *App) GetRcSpectrogram(fromMs, toMs int64, rowSec int, eMax float64) (Rc
 	if a.dataDir == "" {
 		return out, nil
 	}
-	a.rc.spec.mu.Lock()
-	if a.rc.spec.gz != nil {
-		a.rc.spec.gz.Flush()
-	}
-	a.rc.spec.mu.Unlock()
+	a.rcSpecFlush()
 	names, days := a.rcSpecFiles()
 	var rows []rcSpecRow
 	for i, name := range names {
-		d := days[i]
 		// cada arquivo só tem linhas que terminam naquele dia
-		if d.UnixMilli() > toMs || d.AddDate(0, 0, 1).UnixMilli() < fromMs {
+		if days[i].UnixMilli() > toMs || days[i].AddDate(0, 0, 1).UnixMilli() < fromMs {
 			continue
 		}
-		b, err := os.ReadFile(a.rcSpecPath(name))
-		if err != nil {
-			continue
-		}
-		for _, ln := range gzipLinesTolerant(b) {
-			var r rcSpecRow
-			if json.Unmarshal(ln, &r) != nil || r.S <= 0 || len(r.C) == 0 {
-				continue
+		for _, r := range a.rcSpecRead(name) {
+			if r.T > fromMs && float64(r.T)-r.S*1000 < float64(toMs) {
+				rows = append(rows, r)
 			}
-			if r.T <= fromMs || float64(r.T)-r.S*1000 >= float64(toMs) {
-				continue
-			}
-			rows = append(rows, r)
 		}
 	}
 	sort.Slice(rows, func(i, j int) bool { return rows[i].T < rows[j].T })

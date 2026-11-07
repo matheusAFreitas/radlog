@@ -731,6 +731,8 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .lg-hard::before { background: #B79CFF; }
 .lg-rain::before { background: rgba(96, 165, 250, .5); height: 10px !important; }
 .lg-elec::before { background: rgba(94, 234, 212, .5); height: 10px !important; }
+.lg-gap::before { background: rgba(255, 255, 255, .12); height: 10px !important; }
+.rc-legend span[hidden] { display: none; }
 .lg-samp::before { background: #F2A33A; }
 .lg-bg::before { background: #A3ADB4; }
 .rc-log-wrap { overflow-x: auto; }

@@ -423,7 +423,7 @@
   // linha aqui junta um pedaço do período (1 min em 3 h, 30 min em 7 dias);
   // a mais recente fica embaixo.
   const SG_PER = { "3h": [3 * 3600, 60], "12h": [12 * 3600, 120], "24h": [24 * 3600, 300], "7d": [7 * 86400, 1800] };
-  const sg = { on: false, data: null, period: "3h", emax: 1500, busy: false, at: 0, hover: null, max: 1, want: 0 };
+  const sg = { on: false, data: null, hd: null, guess: {}, period: "3h", emax: 1500, busy: false, at: 0, hover: null, max: 1, want: 0 };
   const pad2 = (v) => String(v).padStart(2, "0");
   const hhmm = (ms) => { const d = new Date(ms); return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
   const ddmm = (ms) => { const d = new Date(ms); return pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1); };
@@ -433,10 +433,14 @@
     const to = Math.ceil(Date.now() / rowMs) * rowMs, from = to - span * 1000;
     const want = ++sg.want;
     sg.busy = true;
-    let d = null;
-    try { d = await api.GetRcSpectrogram(from, to, rowSec, sg.emax); } catch (e) { d = null; }
+    let d = null, hd = null;
+    try {
+      [d, hd] = await Promise.all([api.GetRcSpectrogram(from, to, rowSec, sg.emax), api.GetRcHardness ? api.GetRcHardness(from, to, rowSec).catch(() => null) : null]);
+    } catch (e) { d = null; }
     sg.busy = false;
     if (want !== sg.want) return;
+    if (hd && (!sg.hd || sg.hd.from !== hd.from || sg.hd.rowSec !== hd.rowSec)) sg.guess = {};
+    sg.hd = hd && hd.cps ? hd : null;
     const on = !!(d && d.rows && (d.first > 0 || rcLive()));
     if (on) {
       sg.data = d;
@@ -449,13 +453,14 @@
     if (on !== sg.on) { sg.on = on; sg.hover = null; tip($("rcSgTip"), null); }
     sgMark();
     sgDraw();
+    hdDraw();
   }
   function sgMark() {
     $("rcSgSimTags").hidden = sg.on;
     $("rcSgLiveTag").hidden = !sg.on;
     $("rcSgCtrl").hidden = !sg.on;
     $("rcTlReplay").hidden = sg.on;
-    document.querySelectorAll("#rcSgPeriod button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === sg.period)));
+    document.querySelectorAll(".rc-per button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.p === sg.period)));
     document.querySelectorAll("#rcSgE button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.e === sg.emax)));
     // o aviso de "dados simulados" passa para depois deste cartão
     const note = $("rcSimNote"), before = sg.on ? $("rcHardCard") : $("rcSgCard");
@@ -485,6 +490,22 @@
         : "ainda sem dados: a primeira linha aparece em até 2 minutos";
     }
     $("rcSgInfo").textContent = info;
+    // cartão 3 (dureza): mesmo período
+    const hdOn = sg.on && !!sg.hd;
+    $("rcHdSimTags").hidden = hdOn;
+    $("rcHdLiveTag").hidden = !hdOn;
+    $("rcHdCtrl").hidden = !hdOn;
+    document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
+    document.querySelector("#rcHardCard .lg-gap").hidden = !hdOn;
+    $("rcHdDesc").textContent = hdOn
+      ? "Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva."
+      : "Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.";
+    $("rcHdUse").innerHTML = hdOn
+      ? "<strong>Para você:</strong> se a contagem sobe e a dureza <b>cai</b>, costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza <b>sobe</b> junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece."
+      : "<strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.";
+    const hi = $("rcHdInfo");
+    hi.hidden = !hdOn;
+    if (hdOn) hi.textContent = sg.hd.ref > 0 ? `fundo da casa: ${nf(sg.hd.refCps, 2)} cps · dureza 1,00 = ${nf(sg.hd.ref * 100, 2)}% acima de 1.500 keV` : "fundo da casa: ainda pouco dado (precisa de algumas horas gravadas)";
   }
   function sgDrawReal(cv) {
     const d = sg.data; if (!d) return;
@@ -522,11 +543,12 @@
       if (near.length) html += `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
     }
     tip($("rcSgTip"), html, ev.clientX - r.left, ev.clientY - r.top);
-    sgDraw();
+    sgDraw(); hdDraw();
   }
 
   function hdDraw() {
     const cv = $("rcHard"); if (!cv) return;
+    if (sg.on && sg.hd) { hdDrawReal(cv); return; }
     const f = fit(cv, 200); if (!f) return;
     const { g, w, h } = f, L = 40, R = 44, T = 10, B = 22, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
@@ -557,6 +579,7 @@
     if (tl.hover != null && tl.hover < tl.shown) { const x = xOf(tl.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
   function hdHover(ev) {
+    if (sg.on && sg.hd) { hdHoverReal(ev); return; }
     const cv = $("rcHard"), r = cv.getBoundingClientRect(), L = 40, R = 44, pw = r.width - L - R;
     const t = Math.round(((ev.clientX - r.left - L) / pw) * (TL_N - 1));
     if (t < 0 || t >= tl.shown) { tl.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); return; }
@@ -564,6 +587,115 @@
     const ev2 = tlLabel(t), lab = tl.label[t];
     tip($("rcHardTip"), `<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · dureza ${nf(tl.hard[t], 2)}</span>${ev2 ? `<br>${ev2}` : ""}${lab ? `<br>parece: <b>${esc(lab)}</b>` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     hdDraw(); sgDraw();
+  }
+
+  // ---------- dureza de verdade ----------
+  const hdX = (w) => { const L = 40, R = 44; return { L, R, pw: w - L - R }; };
+  function hdDrawReal(cv) {
+    const d = sg.hd, f = fit(cv, 200); if (!f) return;
+    const { g, w, h } = f, { L, pw } = hdX(w), T = 10, B = 22, ph = h - T - B, n = d.cps.length;
+    g.clearRect(0, 0, w, h);
+    const xOf = (k) => L + ((k + 0.5) / n) * pw, bw = pw / n;
+    // chuva e intervalos sem leitura
+    for (let k = 0; k < n; k++) {
+      if (d.wet[k]) { g.fillStyle = "rgba(96,165,250,.16)"; g.fillRect(L + k * bw, T, bw + 0.5, ph); }
+      else if (d.rain[k] > 0) { g.fillStyle = "rgba(96,165,250,.07)"; g.fillRect(L + k * bw, T, bw + 0.5, ph); }
+      if (d.gap[k]) { g.fillStyle = "rgba(255,255,255,.05)"; g.fillRect(L + k * bw, T, bw + 0.5, ph); }
+    }
+    const cs = d.cps.filter((v) => v > 0), hs = [];
+    d.hard.forEach((v, k) => { if (v > 0) hs.push(v - d.hardErr[k], v + d.hardErr[k]); });
+    const cmax = Math.max(d.refCps * 1.6, ...cs, 1) * 1.1;
+    const hmin = Math.min(0.6, ...hs) * 0.95, hmax = Math.max(1.4, ...hs) * 1.05;
+    const yC = (v) => T + ph - (v / cmax) * ph, yH = (v) => T + ph - ((v - hmin) / (hmax - hmin)) * ph;
+    g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
+    for (let k = 0; k <= 4; k++) {
+      const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
+      g.fillStyle = "#6EE7A0"; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), cmax < 20 ? 1 : 0), L - 6, y + 4);
+      g.fillStyle = "#B79CFF"; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
+    }
+    const long = d.to - d.from > 26 * 3600e3;
+    g.fillStyle = css("--dim");
+    for (let k = 0; k <= 4; k++) {
+      const t = d.from + ((d.to - d.from) * k) / 4, x = L + (pw * k) / 4;
+      g.textAlign = k === 0 ? "left" : k === 4 ? "right" : "center";
+      g.fillText(long ? ddmm(t) : hhmm(t), x, h - 6);
+    }
+    // referências: dureza 1,00 e o fundo em cps
+    g.setLineDash([3, 3]);
+    g.strokeStyle = "rgba(183,156,255,.5)"; g.beginPath(); g.moveTo(L, yH(1)); g.lineTo(L + pw, yH(1)); g.stroke();
+    if (d.refCps > 0) { g.strokeStyle = "rgba(110,231,160,.35)"; g.beginPath(); g.moveTo(L, yC(d.refCps)); g.lineTo(L + pw, yC(d.refCps)); g.stroke(); }
+    g.setLineDash([]);
+    // faixa de incerteza da dureza (em pedaços, onde há valor)
+    g.fillStyle = "rgba(183,156,255,.16)";
+    for (let k = 0; k < n;) {
+      if (!(d.hard[k] > 0)) { k++; continue; }
+      let e = k; while (e + 1 < n && d.hard[e + 1] > 0) e++;
+      g.beginPath();
+      for (let i = k; i <= e; i++) g.lineTo(xOf(i), yH(d.hard[i] + d.hardErr[i]));
+      for (let i = e; i >= k; i--) g.lineTo(xOf(i), yH(d.hard[i] - d.hardErr[i]));
+      g.closePath(); g.fill();
+      k = e + 1;
+    }
+    const line = (arr, yf, color) => {
+      g.beginPath();
+      let pen = false;
+      for (let k = 0; k < n; k++) {
+        if (!(arr[k] > 0)) { pen = false; continue; }
+        const x = xOf(k), y = yf(arr[k]);
+        if (pen) g.lineTo(x, y); else { g.moveTo(x, y); if (k + 1 >= n || !(arr[k + 1] > 0)) g.lineTo(x + 0.5, y); }
+        pen = true;
+      }
+      g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
+    };
+    line(d.cps, yC, "#6EE7A0");
+    line(d.hard, yH, "#B79CFF");
+    if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
+    if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
+  }
+  // com o que parece o trecho (no Go, como na medição de objeto)
+  function hdGuessText(peaks) {
+    if (!peaks || !peaks.length) return "";
+    const by = {};
+    for (const p of peaks) by[p.group] = (by[p.group] || 0) + p.sigma;
+    const best = Object.entries(by).sort((a, b) => b[1] - a[1])[0][0];
+    return GROUP_SHORT[best] || best;
+  }
+  let hdGuessTimer = 0;
+  function hdTipHtml(k) {
+    const d = sg.hd, t0 = d.from + k * d.rowSec * 1000, t1 = t0 + d.rowSec * 1000;
+    const when = (d.to - d.from > 26 * 3600e3 ? ddmm(t0) + " " : "") + hhmm(t0) + "–" + hhmm(t1);
+    let html = `<span class="mono">${when}</span>`;
+    if (!(d.cps[k] > 0)) return html + "<br>sem dados";
+    html += `<br><span class="mono">${nf(d.cps[k], 2)} cps`;
+    if (d.refCps > 0) html += ` (${nf(d.cps[k] / d.refCps, 2)}× o fundo)`;
+    html += "</span>";
+    if (d.hard[k] > 0) html += `<br><span class="mono">dureza ${nf(d.hard[k], 2)} ± ${nf(d.hardErr[k], 2)}</span>`;
+    if (d.wet[k]) html += `<br>chovendo (${nf(d.rain[k], 1)} mm/h)`;
+    if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
+    const gs = sg.guess[k];
+    if (gs) html += `<br>parece: <b>${esc(gs)}</b>`;
+    return html;
+  }
+  function hdHoverReal(ev) {
+    const d = sg.hd, cv = $("rcHard"), r = cv.getBoundingClientRect(), { L, pw } = hdX(r.width), n = d.cps.length;
+    const k = Math.floor(((ev.clientX - r.left - L) / pw) * n);
+    if (k < 0 || k >= n) { sg.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); return; }
+    sg.hover = k;
+    const pos = [ev.clientX - r.left, ev.clientY - r.top];
+    tip($("rcHardTip"), hdTipHtml(k), ...pos);
+    hdDraw(); sgDraw();
+    // palpite: só quando a contagem subiu ou a dureza saiu do fundo
+    const up = d.refCps > 0 && d.cps[k] > d.refCps * 1.1, off = d.hard[k] > 0 && Math.abs(d.hard[k] - 1) > 2 * d.hardErr[k];
+    if (!(k in sg.guess) && (up || off) && api.GetRcWindowPeaks) {
+      clearTimeout(hdGuessTimer);
+      hdGuessTimer = setTimeout(async () => {
+        const c = d.from + (k + 0.5) * d.rowSec * 1000, half = (d.winSec * 1000) / 2;
+        let p = null;
+        try { p = await api.GetRcWindowPeaks(Math.round(c - half), Math.round(c + half)); } catch (e) { p = null; }
+        sg.guess[k] = hdGuessText(p);
+        if (sg.hover === k && sg.hd === d) tip($("rcHardTip"), hdTipHtml(k), ...pos);
+      }, 250);
+    }
   }
 
   // =====================================================================
@@ -715,10 +847,10 @@
     $("rcTlReplay").addEventListener("click", () => { tlBuild(); tl.run = true; sgDraw(); hdDraw(); });
     $("rcSgram").addEventListener("mousemove", sgHover);
     $("rcSgram").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcSgTip"), null); sgDraw(); hdDraw(); });
-    $("rcSgPeriod").addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; sg.period = b.dataset.p; sgMark(); sgLoad(); });
+    for (const id of ["rcSgPeriod", "rcHdPeriod"]) $(id).addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; sg.period = b.dataset.p; sg.hover = null; sgMark(); sgLoad(); });
     $("rcSgE").addEventListener("click", (e) => { const b = e.target.closest("button[data-e]"); if (!b) return; sg.emax = +b.dataset.e; sgMark(); sgLoad(); });
     $("rcHard").addEventListener("mousemove", hdHover);
-    $("rcHard").addEventListener("mouseleave", () => { tl.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); });
+    $("rcHard").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); });
     sgMark();
     // log
     logBuild();

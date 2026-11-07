@@ -1,5 +1,20 @@
 # Versões
 
+## 1.43.0
+- **Dureza de verdade** na aba RadiaCode (cartão 3), com os espectros que o
+  app grava de minuto em minuto:
+  - contagem (cps) e dureza (fótons acima de 1.500 keV sobre os de 150 a
+    1.500 keV) no mesmo período do espectrograma (3 h a 7 dias, os dois
+    cartões andam juntos);
+  - 1,00 é o fundo da casa: a mediana das horas dos últimos 7 dias; cada ponto
+    usa uns 20 minutos em volta, com a faixa de incerteza;
+  - chuva marcada em azul e os intervalos sem leitura em cinza;
+  - passe o mouse: cps (× o fundo), dureza ± incerteza, chuva e, quando a
+    subida é grande o bastante, **com o que parece** (o app soma os espectros
+    daquele trecho e procura as linhas gama acima do fundo, como na medição
+    de objeto);
+  - passar o mouse num cartão marca o mesmo momento no outro.
+
 ## 1.42.0
 - **Espectrograma de verdade** na aba RadiaCode (o cartão 2 deixou de ser
   exemplo quando há dados do aparelho):

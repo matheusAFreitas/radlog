@@ -773,7 +773,7 @@
       <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span id="rcSgSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSgLiveTag" hidden>do aparelho</span></div>
       <p id="rcSgDesc">Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
       <div class="rc-ctrl" id="rcSgCtrl" hidden>
-        <div class="seg rc-seg" id="rcSgPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div>
+        <div class="seg rc-seg rc-per" id="rcSgPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div>
         <div class="seg rc-seg" id="rcSgE" aria-label="Energia"><button type="button" data-e="1500" aria-pressed="true">até 1.500 keV</button><button type="button" data-e="3000" aria-pressed="false">até 3.000 keV</button></div>
       </div>
       <div class="rc-sgram">
@@ -786,11 +786,13 @@
     </article>
 
     <article class="rc-card" id="rcHardCard">
-      <div class="rc-head"><span class="rc-num mono">3</span><h3>Dureza nos gráficos</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
+      <div class="rc-head"><span class="rc-num mono">3</span><h3>Dureza nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
+      <p id="rcHdDesc">Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
+      <div class="rc-ctrl" id="rcHdCtrl" hidden><div class="seg rc-seg rc-per" id="rcHdPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div></div>
       <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
-      <p class="small muted rc-legend"><span class="lg-cps">contagem (cps)</span><span class="lg-hard">dureza</span><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span></p>
-      <p class="rc-use"><strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.</p>
+      <p class="small muted rc-legend"><span class="lg-cps">contagem (cps)</span><span class="lg-hard">dureza</span><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span><span class="lg-gap" hidden>sem leitura (média)</span></p>
+      <p class="mono small muted" id="rcHdInfo" hidden></p>
+      <p class="rc-use" id="rcHdUse"><strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.</p>
     </article>
 
     <article class="rc-card">
