@@ -2218,3 +2218,26 @@ Atividade: terminou ({0})	Activity: finished ({0})
 KCl ({0}%)	KCl ({0}%)
 eletrodo de tório ({0}% ThO₂)	thorium electrode ({0}% ThO₂)
 pote encostado no RadiaCode	jar touching the RadiaCode
+Histórico de configurações	Settings history
+Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.	Everything that changes the comparison between periods is recorded with its date: limits, dead time, GMC calibration, saturation, memory recording mode and changes made to the counter by the app. It goes into the backup.
+quando	when
+o quê	what
+de	from
+para	to
+origem	source
+Ainda nada registrado.	Nothing recorded yet.
+Saturação do GMC	GMC saturation
+Calibração do GMC	GMC calibration
+Gravação na memória do GMC	GMC memory recording
+Configuração do contador	Counter settings
+ligado, τ = {0} µs	on, τ = {0} µs
+fim da escala {0} µSv/h, queda brusca a partir de {1} µSv/h	end of scale {0} µSv/h, sudden drop from {1} µSv/h
+{0} µSv/h por CPM no fundo ({1}; {2})	{0} µSv/h per CPM at background ({1}; {2})
+início do registro	start of record
+você (pelo app)	you (through the app)
+você (cópia restaurada)	you (restored copy)
+Registro de cada minuto	Per-minute record
+{0} com CPM bruto e corrigido gravados (correção de tempo morto ligada em {1})	{0} with raw and corrected CPM recorded (dead-time correction on in {1})
+{0} de antes da 2.1, sem esse registro (até a 2.0 a correção nunca foi ligada: bruto = gravado)	{0} from before 2.1, without that record (up to 2.0 the correction was never on: raw = recorded)
+marcas: {0} vindos de gravação por segundo, {1} com saturação, {2} com interferência	marks: {0} from per-second recording, {1} with saturation, {2} with interference
+sem minutos no período	no minutes in the period

@@ -1167,3 +1167,11 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #sumTiles .sum-head.rc { color: #F472B6; margin-top: 0; }
 #sumTiles .sum-none { grid-column: 1 / -1; margin: 0; }
 #sumTiles .ri-tile.rc { border-color: rgba(244, 114, 182, .25); }
+
+/* histórico de configurações */
+.cfg-hist-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: 8px; }
+.cfg-hist { border-collapse: collapse; font-size: 12.5px; width: 100%; }
+.cfg-hist th, .cfg-hist td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.cfg-hist th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--card, var(--bg)); }
+.cfg-hist td.when { font-family: var(--mono); white-space: nowrap; color: var(--muted); }
+.cfg-hist td.from { color: var(--muted); }

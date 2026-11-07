@@ -498,6 +498,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		{"Contador", dev},
 		{"Calibração", r.Cal + " (" + calSrc + ")"},
 		{"Tempo morto", r.DeadTime},
+		{"Registro de cada minuto", traceSummary(r.Pts)},
 		{"Fundo de referência", bg},
 		{"Aviso de atenção", fmt.Sprintf("a partir de %d CPM (limite operacional configurado)", lv.AttentionCPM)},
 		{"Alarme", alarm + " (limite operacional configurado)"},
@@ -631,4 +632,47 @@ func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
 	a.logf("relatório salvo: %s", dst)
 	_ = openFolder(dst) // abre no leitor de PDF padrão
 	return dst, nil
+}
+
+// traceSummary resume o que se sabe de cada minuto do período (2.1): quantos
+// têm bruto e corrigido gravados, com a correção ligada ou não, quantos são
+// de antes da 2.1 e as marcas.
+func traceSummary(pts []store.Point) string {
+	var has, on, legacy, seg, sat, intf int
+	for _, p := range pts {
+		if p.Src == "demo" {
+			continue
+		}
+		if !p.Has {
+			legacy++
+			continue
+		}
+		has++
+		if p.DTOn {
+			on++
+		}
+		if p.HasObs(store.ObsSeconds) {
+			seg++
+		}
+		if p.HasObs(store.ObsSaturation) {
+			sat++
+		}
+		if p.HasObs(store.ObsInterference) {
+			intf++
+		}
+	}
+	var parts []string
+	if has > 0 {
+		parts = append(parts, fmt.Sprintf("%d com CPM bruto e corrigido gravados (correção de tempo morto ligada em %d)", has, on))
+	}
+	if legacy > 0 {
+		parts = append(parts, fmt.Sprintf("%d de antes da 2.1, sem esse registro (até a 2.0 a correção nunca foi ligada: bruto = gravado)", legacy))
+	}
+	if seg+sat+intf > 0 {
+		parts = append(parts, fmt.Sprintf("marcas: %d vindos de gravação por segundo, %d com saturação, %d com interferência", seg, sat, intf))
+	}
+	if len(parts) == 0 {
+		return "sem minutos no período"
+	}
+	return strings.Join(parts, "; ")
 }

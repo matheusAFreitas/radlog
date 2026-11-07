@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"regexp"
@@ -15,12 +16,12 @@ import (
 // ---------- gráfico detalhado de um alerta (tela Alertas) ----------
 //
 // As leituras por segundo só ficam na memória por 1 hora. Para o gráfico de
-// um alerta continuar detalhado depois, o app grava os segundos do alerta
-// (com 2 min antes e depois) em "alertas-detalhe/" quando ele termina.
+// um alerta continuar detalhado depois, o app grava os segundos do alerta em
+// "alertas-detalhe/" (veja "gravação dos segundos", abaixo).
 
 const (
-	alertPre      = 2 * time.Minute // segundos guardados antes e depois do alerta
-	alertMaxSecs  = 3 * time.Hour   // alerta muito longo: guarda no máximo isto
+	alertPre      = 2 * time.Minute // folga em volta do alerta na tela (e no RadiaCode, o que é guardado)
+	alertMaxSecs  = 3 * time.Hour   // RadiaCode: alerta muito longo guarda no máximo isto
 	alertMaxShown = 1500            // pontos por segundo mandados à tela
 )
 
@@ -91,50 +92,151 @@ func alertLimit(e Event, lv Levels, alarm int) float64 {
 	return float64(lv.AttentionCPM)
 }
 
-// saveAlertSeconds grava os segundos de um alerta que terminou (agora e de
-// novo 2 min depois, para pegar o "depois").
+// ---------- gravação dos segundos (2.1) ----------
+//
+// Enquanto um alerta do GMC está aberto, o app grava os segundos dele de
+// minuto em minuto (juntando com o que já gravou, porque a memória só guarda
+// 1 hora): desde 10 min antes do disparo até a contagem voltar ao fundo
+// (dentro de 2σ por 5 min seguidos), no máximo 30 min depois do fim.
+
+const (
+	alertKeepPre  = 10 * time.Minute // segundos guardados antes do disparo
+	alertKeepPost = 30 * time.Minute // depois do fim: até voltar ao fundo, no máximo isto
+	alertCalmFor  = 5 * time.Minute  // "voltou ao fundo": tanto tempo dentro de 2σ
+	alertKeepMax  = 8 * time.Hour    // alerta muito longo: guarda no máximo isto
+)
+
+// saveAlertSeconds é chamado quando alertas do GMC terminam: grava já e
+// continua gravando o "depois" até a contagem voltar ao fundo.
 func (a *App) saveAlertSeconds(ids []int64) {
 	if a.dataDir == "" {
 		return
 	}
-	var evs []Event
 	a.mu.Lock()
+	if a.alertWatch == nil {
+		a.alertWatch = map[int64]bool{}
+	}
 	for _, id := range ids {
-		if e := a.eventLocked(id); e != nil && !e.Demo && e.End != 0 {
-			evs = append(evs, *e)
-		}
+		a.alertWatch[id] = true
 	}
 	a.mu.Unlock()
-	if len(evs) == 0 {
+	a.alertSecondsTick(time.Now())
+}
+
+// alertSecondsLoop grava os segundos dos alertas abertos (e dos que acabaram
+// de terminar) a cada minuto.
+func (a *App) alertSecondsLoop() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+	for range t.C {
+		if a.closing.Load() {
+			return
+		}
+		a.alertSecondsTick(time.Now())
+	}
+}
+
+// alertSecondsTick grava o que há de novo e diz adeus aos alertas cuja
+// contagem já voltou ao fundo.
+func (a *App) alertSecondsTick(now time.Time) {
+	if a.dataDir == "" {
 		return
 	}
-	write := func() {
-		for _, e := range evs {
-			from := time.UnixMilli(e.Time).Add(-alertPre)
-			to := time.UnixMilli(e.End).Add(alertPre)
-			if to.Sub(from) > alertMaxSecs {
-				from = to.Add(-alertMaxSecs)
-			}
-			a.mu.Lock()
-			ss := a.live.between(from, to)
-			a.mu.Unlock()
-			if len(ss) == 0 {
-				continue
-			}
-			pts := make([]AlertPoint, len(ss))
-			for i, s := range ss {
-				pts[i] = AlertPoint{s.t.UnixMilli(), s.cpm}
-			}
-			b, err := json.Marshal(pts)
-			if err != nil {
-				continue
-			}
-			_ = os.MkdirAll(a.alertDir(), 0o755)
-			_ = os.WriteFile(filepath.Join(a.alertDir(), alertKey(e)), b, 0o644)
+	bg, bgOK := a.backgroundCPM()
+	a.mu.Lock()
+	if a.alertWatch == nil {
+		a.alertWatch = map[int64]bool{}
+	}
+	for _, id := range []int64{a.alerts.attn, a.alerts.alarm, a.alerts.danger} {
+		if id != 0 {
+			a.alertWatch[id] = true
 		}
 	}
-	write()
-	time.AfterFunc(alertPre+5*time.Second, write)
+	var evs []Event
+	for id := range a.alertWatch {
+		e := a.eventLocked(id)
+		if e == nil || e.Demo || e.Device == devRC {
+			delete(a.alertWatch, id)
+			continue
+		}
+		c := *e
+		c.Active = a.isActiveLocked(id)
+		evs = append(evs, c)
+	}
+	thr := a.settings.Levels.norm().attnExit()
+	a.mu.Unlock()
+	if bgOK && bg > 0 {
+		thr = bg + 2*math.Sqrt(bg)
+	}
+	for _, e := range evs {
+		from := time.UnixMilli(e.Time).Add(-alertKeepPre)
+		a.writeAlertSeconds(e, from, now)
+		if e.Active || e.End == 0 {
+			continue
+		}
+		end := time.UnixMilli(e.End)
+		done := now.Sub(end) >= alertKeepPost
+		if !done && now.Sub(end) >= alertCalmFor {
+			a.mu.Lock()
+			ss := a.live.between(now.Add(-alertCalmFor), now)
+			a.mu.Unlock()
+			calm := true
+			for _, s := range ss {
+				if s.cpm > thr {
+					calm = false
+					break
+				}
+			}
+			// sem leitura (desconectou): não há mais o que gravar
+			done = calm || len(ss) == 0
+		}
+		if done {
+			a.mu.Lock()
+			delete(a.alertWatch, e.ID)
+			a.mu.Unlock()
+		}
+	}
+}
+
+// writeAlertSeconds junta os segundos da memória em [from, to) com os já
+// gravados do alerta e grava.
+func (a *App) writeAlertSeconds(e Event, from, to time.Time) {
+	a.mu.Lock()
+	ss := a.live.between(from, to)
+	a.mu.Unlock()
+	old := a.readAlertSeconds(e)
+	if len(ss) == 0 && len(old) == 0 {
+		return
+	}
+	seen := make(map[int64]bool, len(old)+len(ss))
+	pts := make([]AlertPoint, 0, len(old)+len(ss))
+	for _, p := range old {
+		if !seen[p.T] {
+			seen[p.T] = true
+			pts = append(pts, p)
+		}
+	}
+	for _, s := range ss {
+		if t := s.t.UnixMilli(); !seen[t] {
+			seen[t] = true
+			pts = append(pts, AlertPoint{t, s.cpm})
+		}
+	}
+	sort.Slice(pts, func(i, j int) bool { return pts[i].T < pts[j].T })
+	if n := len(pts); n > 0 {
+		cut := pts[n-1].T - alertKeepMax.Milliseconds()
+		i := sort.Search(n, func(i int) bool { return pts[i].T >= cut })
+		pts = pts[i:]
+	}
+	b, err := json.Marshal(pts)
+	if err != nil {
+		return
+	}
+	_ = os.MkdirAll(a.alertDir(), 0o755)
+	path := filepath.Join(a.alertDir(), alertKey(e))
+	if os.WriteFile(path+".tmp", b, 0o644) == nil {
+		os.Rename(path+".tmp", path)
+	}
 }
 
 // GetAlertDetail monta o gráfico do alerta de id dado.
@@ -293,7 +395,6 @@ func (a *App) alertSamples(from, to time.Time) []sample {
 		return nil
 	}
 	f, t := from.UnixMilli(), to.UnixMilli()
-	pre := alertPre.Milliseconds()
 	a.mu.Lock()
 	if a.demo.Active {
 		a.mu.Unlock()
@@ -304,7 +405,7 @@ func (a *App) alertSamples(from, to time.Time) []sample {
 		if e.Kind != kindAlert || e.Demo || e.Retro || e.End == 0 || e.Device == devRC {
 			continue
 		}
-		if e.End+pre > f && e.Time-pre < t {
+		if e.End+alertKeepPost.Milliseconds() > f && e.Time-alertKeepPre.Milliseconds() < t {
 			evs = append(evs, e)
 		}
 	}

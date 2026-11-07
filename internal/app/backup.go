@@ -93,7 +93,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json"}
+	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -380,6 +380,13 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			if json.Unmarshal(b, &list) == nil {
 				res.Notes = a.mergeNotes(list)
 			}
+		}
+	}
+
+	// histórico de configurações
+	if f, ok := files[cfgHistFile]; ok {
+		if b, err := readZipFile(f); err == nil {
+			a.cfgMerge(b)
 		}
 	}
 

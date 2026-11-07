@@ -424,3 +424,11 @@ func firstDiff(a, b []byte) int {
 	}
 	return len(a)
 }
+
+// SaveModeName é o nome do modo de gravação da memória ("a cada minuto"...).
+func SaveModeName(v int) string {
+	if n, ok := saveModeNames[v]; ok {
+		return n
+	}
+	return fmt.Sprintf("modo %d", v)
+}

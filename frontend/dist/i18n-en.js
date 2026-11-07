@@ -1541,7 +1541,24 @@ const I18N_EN = {
 "o fundo salvo tem mais de 30 dias: meça um novo": "the saved background is more than 30 days old: measure a new one",
 "nenhuma medição em andamento": "no measurement in progress",
 "Conecte o RadiaCode para medir.": "Connect the RadiaCode to measure.",
-"pote encostado no RadiaCode": "jar touching the RadiaCode"
+"pote encostado no RadiaCode": "jar touching the RadiaCode",
+"Histórico de configurações": "Settings history",
+"Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.": "Everything that changes the comparison between periods is recorded with its date: limits, dead time, GMC calibration, saturation, memory recording mode and changes made to the counter by the app. It goes into the backup.",
+"quando": "when",
+"o quê": "what",
+"de": "from",
+"para": "to",
+"origem": "source",
+"Ainda nada registrado.": "Nothing recorded yet.",
+"Saturação do GMC": "GMC saturation",
+"Calibração do GMC": "GMC calibration",
+"Gravação na memória do GMC": "GMC memory recording",
+"Configuração do contador": "Counter settings",
+"início do registro": "start of record",
+"você (pelo app)": "you (through the app)",
+"você (cópia restaurada)": "you (restored copy)",
+"Registro de cada minuto": "Per-minute record",
+"sem minutos no período": "no minutes in the period"
 },
 "patterns": [
 [
@@ -1782,6 +1799,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) de antes da 2\\.1, sem esse registro \\(até a 2\\.0 a correção nunca foi ligada: bruto = gravado\\)$",
+"${1} from before 2.1, without that record (up to 2.0 the correction was never on: raw = recorded)",
+[
+" de antes da 2.1, sem esse registro (até a 2.0 a correção nunca foi ligada: bruto = gravado)"
+]
+],
+[
 "Registrado: ",
 "^Registrado: ((?:(?! · ).)+?)\\. Abre escondido na bandeja, perto do relógio \\(às vezes dentro da setinha \\^\\)\\.$",
 "Registered: ${1}. Opens hidden in the tray, near the clock (sometimes inside the ^ arrow).",
@@ -2000,6 +2025,25 @@ const I18N_EN = {
 [
 "Conectando a ",
 "… leva alguns segundos. Deixe o app do celular desconectado."
+]
+],
+[
+"marcas: ",
+"^marcas: ((?:(?! · ).)+?) vindos de gravação por segundo, ((?:(?! · ).)+?) com saturação, ((?:(?! · ).)+?) com interferência$",
+"marks: ${1} from per-second recording, ${2} with saturation, ${3} with interference",
+[
+"marcas: ",
+" vindos de gravação por segundo, ",
+" com saturação, ",
+" com interferência"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com CPM bruto e corrigido gravados \\(correção de tempo morto ligada em ((?:(?! · ).)+?)\\)$",
+"${1} with raw and corrected CPM recorded (dead-time correction on in ${2})",
+[
+" com CPM bruto e corrigido gravados (correção de tempo morto ligada em "
 ]
 ],
 [
@@ -2597,6 +2641,16 @@ const I18N_EN = {
 [
 "% em relação ao fundo em casa (",
 ", mediana de 7 dias)"
+]
+],
+[
+"fim da escala ",
+"^fim da escala ((?:(?! · ).)+?) µSv/h, queda brusca a partir de ((?:(?! · ).)+?) µSv/h$",
+"end of scale ${1} µSv/h, sudden drop from ${2} µSv/h",
+[
+"fim da escala ",
+" µSv/h, queda brusca a partir de ",
+" µSv/h"
 ]
 ],
 [
@@ -3855,6 +3909,14 @@ const I18N_EN = {
 " µSv/h (",
 " contagens em ",
 " s)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM no fundo \\(((?:(?! · ).)+?); ((?:(?! · ).)+?)\\)$",
+"${1} µSv/h per CPM at background (${2}; ${3})",
+[
+" µSv/h por CPM no fundo ("
 ]
 ],
 [
@@ -5857,6 +5919,15 @@ const I18N_EN = {
 "recording since ${1}",
 [
 "gravando desde "
+]
+],
+[
+"ligado, τ = ",
+"^ligado, τ = ((?:(?! · ).)+?) µs$",
+"on, τ = ${1} µs",
+[
+"ligado, τ = ",
+" µs"
 ]
 ],
 [

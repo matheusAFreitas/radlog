@@ -369,12 +369,16 @@ type App struct {
 	measure      MeasureState // medição de objeto (measure.go)
 	rain         *rainCache   // chuva (weather.go)
 	rainSt       rainState
-	radar        *radarStore     // chuva pelo radar (radar.go)
-	radarKick    chan struct{}   // busca o radar já (lugar novo)
-	periods      []Period        // fora de casa (periods.go)
-	measurements []SavedMeasure  // medições de objeto salvas (measure.go)
-	measSamples  []MeasureSample // segundos da medição em andamento
-	measSamples2 []MeasureSample // os do segundo aparelho (µSv/h)
+	radar        *radarStore      // chuva pelo radar (radar.go)
+	radarKick    chan struct{}    // busca o radar já (lugar novo)
+	periods      []Period         // fora de casa (periods.go)
+	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
+	measSamples  []MeasureSample  // segundos da medição em andamento
+	measSamples2 []MeasureSample  // os do segundo aparelho (µSv/h)
+	minuteObs    map[int64]string // marcas do minuto (saturação, interferência) até ele ser gravado
+	cfgMu        sync.Mutex       // histórico de configurações
+	devSaveMode  string           // modo de gravação da memória do GMC (lido ao conectar)
+	alertWatch   map[int64]bool   // alertas do GMC com segundos sendo gravados
 	// RadiaCode: espectro no começo da fase atual e o do fundo já medido
 	measSpec0  *radiacode.Spectrum
 	measSpecBg *MeasureSpectrum
@@ -399,6 +403,7 @@ func (a *App) startup(ctx context.Context) {
 	a.logStart()
 
 	a.settings = a.loadSettings()
+	defer a.cfgRecord("app") // estado inicial (ou o que mudou com o app fechado)
 	if d := docsBase(); d != "" && a.settings.ReportDir == filepath.Join(d, oldDirName, "Relatórios") {
 		a.settings.ReportDir = "" // era a pasta padrão antiga: vale a nova (a migração levou os PDFs)
 	}
@@ -431,6 +436,7 @@ func (a *App) startup(ctx context.Context) {
 	go a.scanRetroOnce()
 	go a.updateLoop()
 	go a.cleanOldVersionsLater()
+	go a.alertSecondsLoop()
 	go a.syncLoop()
 	go a.rcLoop()
 	go func() { a.rcDoseBackfill(); a.rcLogBackfill() }()
@@ -581,6 +587,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.settings = s
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	a.cfgRecord("você")
 	if autostartChanged {
 		a.syncAutostart(s.StartWithWindows)
 		if s.StartWithWindows && startupDisabled() {
@@ -721,9 +728,15 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	info.Serial, _ = withTimeout(6*time.Second, d.Serial)
 
 	cal := gmc.DefaultCalibration()
+	saveMode := ""
 	if cfg, err := withTimeout(10*time.Second, d.Config); err == nil {
 		if c, err := gmc.ParseCalibration800(cfg); err == nil {
 			cal = c
+		}
+		if dec, err := gmc.DecodeConfig800(cfg); err == nil {
+			if v, ok := dec.Values["saveMode"]; ok {
+				saveMode = gmc.SaveModeName(v)
+			}
 		}
 	}
 	info.Calibration = cal
@@ -737,11 +750,15 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	stop := make(chan struct{})
 	a.mu.Lock()
 	a.dev, a.info, a.cal, a.stopPoll = d, info, cal, stop
+	if saveMode != "" {
+		a.devSaveMode = saveMode
+	}
 	a.cfgBackedUp = false
 	a.settings.Port = port
 	a.saveSettingsLocked()
 	a.mu.Unlock()
 	a.saveLastCal(cal)
+	a.cfgRecord("contador")
 
 	a.setState("conectado", "")
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
@@ -851,7 +868,8 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 	defer ticker.Stop()
 	fails := 0
 	var minute time.Time // minuto da última amostra
-	var lastCPM uint32
+	var lastCPM, lastRaw uint32
+	var lastLv Levels
 	var lastAt time.Time
 	lastTick := time.Now()
 	began := time.Now()
@@ -956,9 +974,9 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		// (o CPM do contador já é a soma dos últimos 60 s).
 		m := now.Truncate(time.Minute)
 		if !minute.IsZero() && m.After(minute) && lastAt.Sub(minute) >= 50*time.Second {
-			a.storeMinute(minute, float64(lastCPM))
+			a.storeMinute(minute, float64(lastCPM), float64(lastRaw), lastLv)
 		}
-		minute, lastCPM, lastAt = m, cpm, now
+		minute, lastCPM, lastRaw, lastAt, lastLv = m, cpm, rawCPM, now, lvDT
 
 		a.mu.Lock()
 		cal := a.convCalLocked()
@@ -992,6 +1010,9 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			a.sat.rise = nil
 		}
 		satReason, rise := a.sat.reason, a.sat.rise
+		if satOn {
+			a.markMinuteLocked(now, store.ObsSaturation)
+		}
 		zeroSince := a.noCount.since
 		zeroStarted, zeroEnded := a.noCount.step(now, cpm, satOn)
 		noCount, noCountSince := a.noCount.on, a.noCount.since
@@ -1095,8 +1116,15 @@ func (a *App) lostConnection(err error) {
 	}
 }
 
-func (a *App) storeMinute(t time.Time, cpm float64) {
-	if err := a.store.Add(store.Point{T: t, CPM: cpm, Src: store.SrcLive}); err != nil {
+// storeMinute grava o minuto com o CPM bruto, o corrigido, o τ, o estado da
+// correção de tempo morto e as marcas do minuto (saturação, interferência).
+func (a *App) storeMinute(t time.Time, cpm, raw float64, lv Levels) {
+	p := store.Point{T: t, CPM: cpm, Src: store.SrcLive, Has: true, Raw: raw, Corr: cpm, DTOn: lv.DeadTimeOn}
+	if lv.DeadTimeOn {
+		p.TauUs = lv.DeadTimeUs
+	}
+	p.Obs = a.takeMinuteObs(t)
+	if err := a.store.Add(p); err != nil {
 		a.logEvent("Erro ao gravar leitura: " + err.Error())
 		return
 	}
@@ -1222,20 +1250,30 @@ func (a *App) CancelDownload() {
 	a.mu.Unlock()
 }
 
+// traced completa o ponto com o bruto, o corrigido, o τ e as marcas.
+func traced(p store.Point, raw float64, lv Levels, obs string) store.Point {
+	p.Has, p.Raw, p.Corr, p.DTOn, p.Obs = true, raw, p.CPM, lv.DeadTimeOn, obs
+	if lv.DeadTimeOn {
+		p.TauUs = lv.DeadTimeUs
+	}
+	return p
+}
+
 // recordsToPoints converte os registros do contador em pontos por minuto.
 // Gravações por segundo (CPS) viram a soma de cada minuto. Com a
 // compensação de tempo morto ligada, cada registro é corrigido antes.
 func recordsToPoints(recs []gmc.Record, lv Levels) []store.Point {
 	var pts []store.Point
 	type acc struct {
-		sum float64
-		n   int
+		sum, raw float64
+		n        int
 	}
 	perMin := map[int64]*acc{}
 	for _, r := range recs {
 		switch r.Unit {
 		case "CPM":
-			pts = append(pts, store.Point{T: r.Time, CPM: math.Round(lv.dtCPM(float64(r.Count))), Src: store.SrcDevice})
+			c := math.Round(lv.dtCPM(float64(r.Count)))
+			pts = append(pts, traced(store.Point{T: r.Time, CPM: c, Src: store.SrcDevice}, float64(r.Count), lv, ""))
 		case "CPS":
 			m := r.Time.Add(-time.Second).Truncate(time.Minute).Unix()
 			x := perMin[m]
@@ -1244,6 +1282,7 @@ func recordsToPoints(recs []gmc.Record, lv Levels) []store.Point {
 				perMin[m] = x
 			}
 			x.sum += lv.dtCPS(float64(r.Count))
+			x.raw += float64(r.Count)
 			x.n++
 		}
 	}
@@ -1251,7 +1290,8 @@ func recordsToPoints(recs []gmc.Record, lv Levels) []store.Point {
 		if x.n < 30 { // minuto incompleto demais
 			continue
 		}
-		pts = append(pts, store.Point{T: time.Unix(m, 0), CPM: math.Round(x.sum * 60 / float64(x.n)), Src: store.SrcDevice})
+		c := math.Round(x.sum * 60 / float64(x.n))
+		pts = append(pts, traced(store.Point{T: time.Unix(m, 0), CPM: c, Src: store.SrcDevice}, math.Round(x.raw*60/float64(x.n)), lv, store.ObsSeconds))
 	}
 	return pts
 }
@@ -1566,4 +1606,39 @@ func openFolder(dir string) error {
 		cmd = exec.Command("xdg-open", dir)
 	}
 	return cmd.Start()
+}
+
+// ---------- marcas de cada minuto ----------
+
+// markMinuteLocked anota uma marca (saturação, interferência) no minuto de t;
+// ela vai para o arquivo quando o minuto for gravado. Chame com a.mu.
+func (a *App) markMinuteLocked(t time.Time, obs string) {
+	if a.minuteObs == nil {
+		a.minuteObs = map[int64]string{}
+	}
+	k := t.Truncate(time.Minute).Unix()
+	cur := a.minuteObs[k]
+	for _, x := range strings.Split(cur, "+") {
+		if x == obs {
+			return
+		}
+	}
+	if cur != "" {
+		cur += "+"
+	}
+	a.minuteObs[k] = cur + obs
+}
+
+// takeMinuteObs devolve (e esquece) as marcas do minuto t.
+func (a *App) takeMinuteObs(t time.Time) string {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	k := t.Truncate(time.Minute).Unix()
+	v := a.minuteObs[k]
+	for m := range a.minuteObs {
+		if m <= k {
+			delete(a.minuteObs, m)
+		}
+	}
+	return v
 }

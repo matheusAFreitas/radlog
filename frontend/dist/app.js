@@ -3539,8 +3539,19 @@ async function openSettings(focusId) {
   renderDangerNote();
   renderRainSettings();
   renderStatus();
+  renderCfgHist();
   $("settings").showModal();
   await fillPorts();
+}
+
+// histórico de configurações (2.1)
+async function renderCfgHist() {
+  if (!api.GetConfigHistory) return;
+  let h = [];
+  try { h = (await api.GetConfigHistory()) || []; } catch (e) { h = []; }
+  const when = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+  $("cfgHistBody").innerHTML = h.map((c) => `<tr><td class="when">${when(c.t)}</td><td>${escHtml(c.campo)}</td><td class="from">${escHtml(c.de || "—")}</td><td>${escHtml(c.para)}</td><td class="from">${escHtml(c.origem)}</td></tr>`).join("");
+  $("cfgHistEmpty").hidden = h.length > 0;
 }
 
 // idioma: o i18n.js lê do localStorage antes de tudo; o Go guarda a escolha
@@ -5625,6 +5636,11 @@ function makeDemoApi() {
       return out;
     },
     // atividade de mentira: o tempo passa 120× mais rápido
+    GetConfigHistory: async () => [
+      { t: Date.now() - 3600e3, campo: "Alarme", de: "a partir de 100 CPM", para: "a partir de 120 CPM", origem: "você" },
+      { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
+      { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
+    ],
     GetActivity: async () => demoAct.view(),
     StartActivity: async (o) => demoAct.start(o),
     ActivityNext: async () => demoAct.next(),

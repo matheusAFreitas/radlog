@@ -5,6 +5,8 @@ import (
 	"math"
 	"strings"
 	"time"
+
+	"radlog/internal/store"
 )
 
 // ---------- pico suspeito de interferência ----------
@@ -127,6 +129,7 @@ func (a *App) checkInterference(now time.Time, rawCPS float64) {
 		a.mu.Unlock()
 		return
 	}
+	a.markMinuteLocked(s.At, store.ObsInterference)
 	if !a.interf.lastWarn.IsZero() && s.At.Sub(a.interf.lastWarn) < ifQuiet {
 		a.interf.pending++
 		a.mu.Unlock()

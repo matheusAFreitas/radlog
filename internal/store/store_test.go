@@ -89,3 +89,50 @@ func TestBrokenLastLineIsIgnored(t *testing.T) {
 		t.Fatalf("depois de gravar de novo: %+v", pts)
 	}
 }
+
+func TestTraceColumns(t *testing.T) {
+	dir := t.TempDir()
+	s, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().Truncate(time.Minute)
+	// arquivo de antes da 2.1: cabeçalho e linhas de 3 colunas
+	old := now.Add(-3 * time.Minute)
+	os.WriteFile(s.monthFile(old), []byte("data_hora,cpm,origem\n"+old.Format(time.RFC3339)+",25,ao vivo\n"), 0o644)
+	s, _ = Open(dir)
+	if err := s.Add(Point{T: now.Add(-2 * time.Minute), CPM: 30, Src: SrcLive, Has: true, Raw: 30, Corr: 30}); err != nil {
+		t.Fatal(err)
+	}
+	if err := s.Add(Point{T: now.Add(-time.Minute), CPM: 5200, Src: SrcLive, Has: true, Raw: 4400, Corr: 5200, TauUs: 200, DTOn: true, Obs: ObsSaturation + "+" + ObsInterference}); err != nil {
+		t.Fatal(err)
+	}
+	pts, _ := s.Range(now.Add(-time.Hour), now.Add(time.Minute))
+	if len(pts) != 3 {
+		t.Fatalf("pontos: %+v", pts)
+	}
+	if pts[0].Has || pts[0].RawCPM() != 25 {
+		t.Fatalf("antigo: %+v", pts[0])
+	}
+	if !pts[1].Has || pts[1].DTOn || pts[1].Raw != 30 || pts[1].TauUs != 0 {
+		t.Fatalf("sem correção: %+v", pts[1])
+	}
+	p := pts[2]
+	if !p.Has || !p.DTOn || p.Raw != 4400 || p.Corr != 5200 || p.CPM != 5200 || p.TauUs != 200 || !p.HasObs(ObsSaturation) || !p.HasObs(ObsInterference) || p.HasObs(ObsSeconds) {
+		t.Fatalf("com correção: %+v", p)
+	}
+	// reescrever o arquivo (importação) não inventa colunas para o minuto antigo
+	if _, err := s.Import([]Point{{T: now.Add(-10 * time.Minute), CPM: 22, Src: SrcDevice, Has: true, Raw: 22, Corr: 22, Obs: ObsSeconds}}); err != nil {
+		t.Fatal(err)
+	}
+	b, _ := os.ReadFile(s.monthFile(now))
+	txt := string(b)
+	if !strings.Contains(txt, old.Format(time.RFC3339)+",25,ao vivo\n") || !strings.HasPrefix(txt, header+"\n") || !strings.Contains(txt, ",22,contador,22,22,,desligado,seg\n") {
+		t.Fatalf("arquivo:\n%s", txt)
+	}
+	var buf strings.Builder
+	s.ExportCSV(&buf, now.Add(-time.Hour), now.Add(time.Minute), func(c float64) float64 { return c / 100 })
+	if !strings.Contains(buf.String(), "sem registro (antes da 2.1)") || !strings.Contains(buf.String(), ",4400,5200,200,ligado,sat+interf") {
+		t.Fatalf("export:\n%s", buf.String())
+	}
+}

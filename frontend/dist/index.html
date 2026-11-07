@@ -1258,6 +1258,12 @@
       <p class="small muted mono path" id="dataDir">—</p>
       <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
     </fieldset>
+    <fieldset id="setCfgHist">
+      <legend>Histórico de configurações</legend>
+      <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
+      <div class="cfg-hist-wrap"><table class="cfg-hist"><thead><tr><th>quando</th><th>o quê</th><th>de</th><th>para</th><th>origem</th></tr></thead><tbody id="cfgHistBody"></tbody></table></div>
+      <p class="small muted" id="cfgHistEmpty" hidden>Ainda nada registrado.</p>
+    </fieldset>
     </div>
 
     <div class="set-panel" id="setLevels" hidden>

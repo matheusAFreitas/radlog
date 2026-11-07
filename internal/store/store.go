@@ -26,10 +26,49 @@ const (
 
 // Point é a contagem de um minuto (ou de uma hora, se veio do contador
 // gravando por hora).
+//
+// Desde a 2.1 cada minuto guarda também de onde o CPM veio: o CPM bruto (o
+// que o contador mandou), o corrigido do tempo morto, o τ usado e se a
+// correção estava ligada, e marcas (Obs). CPM continua sendo o valor usado
+// em tudo (o corrigido, com a correção ligada). Minutos gravados antes não
+// têm essas colunas (Has = false) e não são reescritos com elas.
 type Point struct {
 	T   time.Time
 	CPM float64
 	Src string
+
+	Has   bool    // tem as colunas da 2.1
+	Raw   float64 // CPM bruto
+	Corr  float64 // CPM corrigido do tempo morto (igual ao bruto com a correção desligada)
+	TauUs float64 // τ usado (µs); 0 com a correção desligada
+	DTOn  bool    // correção de tempo morto ligada
+	Obs   string  // marcas separadas por "+": seg, sat, interf
+}
+
+// Marcas de um minuto (Point.Obs).
+const (
+	ObsSeconds      = "seg"    // veio de gravações por segundo da memória do contador
+	ObsSaturation   = "sat"    // o contador saturou nesse minuto
+	ObsInterference = "interf" // segundo suspeito de interferência elétrica nesse minuto
+)
+
+// HasObs diz se o minuto tem a marca o.
+func (p Point) HasObs(o string) bool {
+	for _, x := range strings.Split(p.Obs, "+") {
+		if x == o {
+			return true
+		}
+	}
+	return false
+}
+
+// RawCPM é o CPM bruto (nos minutos antigos, o próprio CPM: até a 2.0 a
+// correção de tempo morto nunca foi usada).
+func (p Point) RawCPM() float64 {
+	if p.Has {
+		return p.Raw
+	}
+	return p.CPM
 }
 
 // Store mantém os últimos dias em memória e grava tudo em disco.
@@ -70,7 +109,7 @@ func (s *Store) monthFile(t time.Time) string {
 	return filepath.Join(s.dir, "leituras", t.Format("2006-01")+".csv")
 }
 
-const header = "data_hora,cpm,origem"
+const header = "data_hora,cpm,origem,cpm_bruto,cpm_corrigido,tau_us,tm,obs"
 
 // Add grava a leitura de um minuto feita ao vivo.
 func (s *Store) Add(p Point) error {
@@ -125,7 +164,15 @@ func endsWithNewline(path string) bool {
 }
 
 func formatLine(p Point) string {
-	return p.T.Format(time.RFC3339) + "," + strconv.FormatFloat(p.CPM, 'f', -1, 64) + "," + p.Src
+	l := p.T.Format(time.RFC3339) + "," + strconv.FormatFloat(p.CPM, 'f', -1, 64) + "," + p.Src
+	if !p.Has {
+		return l // minuto de antes da 2.1: fica como estava
+	}
+	tm, tau := "desligado", ""
+	if p.DTOn {
+		tm, tau = "ligado", strconv.FormatFloat(p.TauUs, 'f', -1, 64)
+	}
+	return l + "," + strconv.FormatFloat(p.Raw, 'f', -1, 64) + "," + strconv.FormatFloat(p.Corr, 'f', -1, 64) + "," + tau + "," + tm + "," + p.Obs
 }
 
 func (s *Store) trim() {
@@ -270,7 +317,20 @@ func ParseCSV(rd io.Reader) []Point {
 		if len(rec) > 2 {
 			src = rec[2]
 		}
-		out = append(out, Point{T: t.Local(), CPM: v, Src: src})
+		p := Point{T: t.Local(), CPM: v, Src: src}
+		if len(rec) >= 7 && rec[3] != "" {
+			raw, e1 := strconv.ParseFloat(rec[3], 64)
+			corr, e2 := strconv.ParseFloat(rec[4], 64)
+			if e1 == nil && e2 == nil {
+				p.Has, p.Raw, p.Corr = true, raw, corr
+				p.DTOn = rec[6] == "ligado"
+				p.TauUs, _ = strconv.ParseFloat(rec[5], 64)
+				if len(rec) > 7 {
+					p.Obs = rec[7]
+				}
+			}
+		}
+		out = append(out, p)
 	}
 	return out
 }
@@ -322,11 +382,21 @@ func (s *Store) ExportCSV(w io.Writer, from, to time.Time, usv func(float64) flo
 		return err
 	}
 	bw := bufio.NewWriter(w)
-	fmt.Fprintln(bw, "data_hora,cpm,usv_h,origem")
+	fmt.Fprintln(bw, "data_hora,cpm,usv_h,origem,cpm_bruto,cpm_corrigido,tau_us,tm,obs")
 	for _, p := range pts {
-		fmt.Fprintf(bw, "%s,%s,%s,%s\n", p.T.Format("2006-01-02 15:04"),
+		fmt.Fprintf(bw, "%s,%s,%s,%s", p.T.Format("2006-01-02 15:04"),
 			strconv.FormatFloat(p.CPM, 'f', -1, 64),
 			strconv.FormatFloat(usv(p.CPM), 'f', 4, 64), p.Src)
+		if p.Has {
+			tm, tau := "desligado", ""
+			if p.DTOn {
+				tm, tau = "ligado", strconv.FormatFloat(p.TauUs, 'f', -1, 64)
+			}
+			fmt.Fprintf(bw, ",%s,%s,%s,%s,%s", strconv.FormatFloat(p.Raw, 'f', -1, 64), strconv.FormatFloat(p.Corr, 'f', -1, 64), tau, tm, p.Obs)
+		} else {
+			fmt.Fprint(bw, ",,,,sem registro (antes da 2.1),")
+		}
+		fmt.Fprintln(bw)
 	}
 	return bw.Flush()
 }

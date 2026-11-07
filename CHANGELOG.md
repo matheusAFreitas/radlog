@@ -1,5 +1,30 @@
 # Versões
 
+## 2.1.0
+- **Cada minuto do GMC guarda de onde veio.** O arquivo de leituras ganha
+  colunas: `cpm_bruto` (o que o contador mandou), `cpm_corrigido` (do tempo
+  morto), `tau_us`, `tm` (correção ligada ou desligada) e `obs` (marcas). A
+  coluna `cpm` continua sendo o valor usado, então versões antigas continuam
+  lendo os arquivos. Os minutos gravados antes ficam como estavam (até a 2.0
+  a correção nunca foi ligada: o gravado é o bruto).
+- **Marcas no minuto:** `seg` (veio de gravações por segundo da memória do
+  contador), `sat` (o contador saturou) e `interf` (segundo suspeito de
+  interferência). O CSV exportado traz as mesmas colunas.
+- **Histórico de configurações** (Configurações → Histórico de
+  configurações): limites, tempo morto, calibração do GMC, saturação, modo
+  de gravação da memória e mudanças feitas no contador pelo app, com data, o
+  valor antes e depois e quem mudou. Na primeira abertura grava o estado
+  atual. Fica em `configuracoes-historico.jsonl` e entra no backup (e na
+  junção de backups, sem repetir).
+- **Segundos dos alertas do GMC:** agora a partir de 10 min antes do disparo
+  (eram 2) até a contagem voltar ao fundo (dentro de 2σ por 5 min seguidos),
+  no máximo 30 min depois do fim (eram 2). A gravação acontece de minuto em
+  minuto enquanto o alerta está aberto, então alertas longos não perdem o
+  começo.
+- Relatório em PDF: nova linha "Registro de cada minuto" em Configurações e
+  método (quantos minutos têm bruto e corrigido, quantos são de antes da 2.1
+  e as marcas).
+
 ## 2.0.0
 - **GMC Monitor agora é RadLog.** Nenhum cálculo muda nesta versão: é só o
   nome e a mudança de pasta, para um problema de migração não se misturar com
