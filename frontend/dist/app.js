@@ -4513,7 +4513,41 @@ function renderRc(st) {
   $("chkRcRaw").checked = st.raw !== false;
   if (document.activeElement !== $("rcBLE")) $("rcBLE").value = st.ble || "";
   $("btnRcBLEScan").disabled = !st.bleOK;
-  $("rcBLEInfo").textContent = st.bleOK ? "" : "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.";
+  renderRcSetState(st, prev);
+  const noBLE = "Neste computador a conexão Bluetooth não está disponível: use o cabo USB.";
+  if (!st.bleOK) $("rcBLEInfo").textContent = noBLE;
+  else if ($("rcBLEInfo").textContent === noBLE) $("rcBLEInfo").textContent = "";
+}
+
+// estado da conexão nas Configurações → RadiaCode (e o aviso de quando o
+// endereço escolhido conectou ou deu erro)
+function renderRcSetState(st, prev) {
+  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  const txt = {
+    conectado: `Conectado pelo ${via}` + (st.model || st.serial ? ` · ${[st.model, st.serial].filter(Boolean).join(" ")}` : ""),
+    conectando: st.via ? `Conectando pelo ${via}…` : "Conectando…",
+    procurando: "Procurando" + (st.ble ? " no USB e no Bluetooth…" : " no USB…"),
+    erro: "Não conectou: " + (st.err || "erro"),
+    off: "Procura desligada",
+  }[st.state] || st.state;
+  $("rcSetText").textContent = txt;
+  $("rcSetDot").className = "dot " + (st.state === "conectado" ? "on" : st.state === "erro" ? "err" : "wait");
+  $("rcSetState").classList.toggle("err", st.state === "erro");
+  const p = state.rc.pendingBLE;
+  if (!p) return;
+  const info = $("rcBLEInfo");
+  if (st.state === "conectado" && st.via === "bluetooth") {
+    info.textContent = "";
+    toast("RadiaCode conectado pelo Bluetooth");
+    state.rc.pendingBLE = null;
+  } else if (st.state === "conectado" && st.via === "usb") {
+    info.textContent = "O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.";
+    state.rc.pendingBLE = null;
+  } else if (st.state === "erro" && prev && prev.state !== "erro") {
+    info.textContent = "Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.";
+  } else if (Date.now() - p.at > 60e3) {
+    state.rc.pendingBLE = null;
+  }
 }
 
 // quadro do RadiaCode na tela principal: cheio quando conectado, uma linha
@@ -4724,7 +4758,13 @@ function wireRc() {
       g.lastChild.textContent = d.address + (d.rssi ? ` · ${d.rssi} dBm` : "");
       const b = document.createElement("button");
       b.type = "button"; b.className = "btn small"; b.textContent = "Usar este";
-      b.addEventListener("click", async () => { $("rcBLE").value = d.address; renderRc(await call(api.SetRadiacode, true, d.address)); ul.textContent = ""; });
+      b.addEventListener("click", async () => {
+        $("rcBLE").value = d.address;
+        state.rc.pendingBLE = { address: d.address, name: d.name, at: Date.now() };
+        ul.textContent = "";
+        info.textContent = `Conectando a ${d.name}… leva alguns segundos. Deixe o app do celular desconectado.`;
+        renderRc(await call(api.SetRadiacode, true, d.address));
+      });
       li.append(g, b);
       ul.appendChild(li);
     }
@@ -5329,7 +5369,7 @@ function makeDemoApi() {
   const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
-        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, doseLive: 2.41 + (Date.now() % 600000) / 3.6e7, doseLiveSec: 93600, doseLiveAt: Date.now(), doseLiveOn: !localStorage.getItem("rcFake2"), battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : demoRcCfg.st || "conectado", via: demoRcCfg.via || "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, doseLive: 2.41 + (Date.now() % 600000) / 3.6e7, doseLiveSec: 93600, doseLiveAt: Date.now(), doseLiveOn: !localStorage.getItem("rcFake2"), battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
     : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off, raw: demoRcCfg.raw };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
@@ -5430,7 +5470,17 @@ function makeDemoApi() {
     OpenVersionsDir: async () => {},
     GetSync: async () => demoSync,
     GetRadiacode: async () => demoRc(),
-    SetRadiacode: async (on, ble) => { demoRcCfg.off = !on; demoRcCfg.ble = (ble || "").toUpperCase(); return demoRc(); },
+    SetRadiacode: async (on, ble) => {
+      const nb = (ble || "").toUpperCase(), changed = nb && nb !== demoRcCfg.ble;
+      demoRcCfg.off = !on; demoRcCfg.ble = nb;
+      if (changed && demoRcFake()) {
+        // finge a conexão pelo Bluetooth: conectando… e, 3 s depois, conectado
+        demoRcCfg.via = "bluetooth"; demoRcCfg.st = "conectando";
+        setTimeout(() => emit("radiacode", demoRc()), 50);
+        setTimeout(() => { demoRcCfg.st = ""; emit("radiacode", demoRc()); }, 3000);
+      }
+      return demoRc();
+    },
     ReconnectRadiacode: async () => demoRc(),
     SetRcRaw: async (on) => { demoRcCfg.raw = on; return demoRc(); },
     ScanRadiacodeBLE: async () => { await new Promise((r) => setTimeout(r, 600)); return [{ address: "52:43:06:50:01:D7", name: "RadiaCode-102#RC-102-001234", rssi: -62 }]; },

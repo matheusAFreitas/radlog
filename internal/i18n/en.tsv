@@ -2005,3 +2005,15 @@ objeto {0} ± {1}	object {0} ± {1}
 {0} ao vivo (com você)	{0} live (with you)
 dose do aparelho	device dose
 A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.	The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.
+Conectado pelo {0}	Connected via {0}
+Conectando pelo {0}…	Connecting via {0}…
+Conectando…	Connecting…
+Procurando no USB e no Bluetooth…	Searching on USB and Bluetooth…
+Procurando no USB…	Searching on USB…
+Não conectou: {0}	Didn't connect: {0}
+Procura desligada	Search turned off
+Conectando a {0}… leva alguns segundos. Deixe o app do celular desconectado.	Connecting to {0}… it takes a few seconds. Keep the phone app disconnected.
+RadiaCode conectado pelo Bluetooth	RadiaCode connected via Bluetooth
+O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.	The RadiaCode is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.
+Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.	Couldn't connect via Bluetooth. Is the phone app connected to it? The app retries on its own every 30 seconds.
+Neste computador a conexão Bluetooth não está disponível: use o cabo USB.	Bluetooth isn't available on this computer: use the USB cable.

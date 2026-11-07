@@ -1,5 +1,14 @@
 # Versões
 
+## 1.40.1
+- Configurações → RadiaCode: uma linha mostra o estado da conexão o tempo
+  todo (conectado pelo USB/Bluetooth, conectando, procurando ou o erro). Ao
+  escolher um RadiaCode na busca do Bluetooth, aparece "Conectando a…", o app
+  tenta na hora (antes esperava a vez, até 30 s) e avisa quando conectou; se
+  ele estiver no cabo USB ou o Bluetooth falhar, a tela explica.
+- As mensagens da busca do Bluetooth não somem mais sozinhas a cada leitura
+  do RadiaCode.
+
 ## 1.40.0
 - **Gráfico da dose do RadiaCode com o número do aparelho**: o app agora
   guarda cada total que o RadiaCode manda (`radiacode/dose-AAAA-MM.csv`) e o

@@ -1384,7 +1384,15 @@ const I18N_EN = {
 "µSv/h acima do fundo": "µSv/h above background",
 "Gráfico da medição: leitura ao vivo e média de cada fase": "Measurement chart: live reading and average of each phase",
 "dose do aparelho": "device dose",
-"A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out."
+"A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.",
+"Conectando…": "Connecting…",
+"Procurando no USB e no Bluetooth…": "Searching on USB and Bluetooth…",
+"Procurando no USB…": "Searching on USB…",
+"Procura desligada": "Search turned off",
+"RadiaCode conectado pelo Bluetooth": "RadiaCode connected via Bluetooth",
+"O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.": "The RadiaCode is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.",
+"Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.": "Couldn't connect via Bluetooth. Is the phone app connected to it? The app retries on its own every 30 seconds.",
+"Neste computador a conexão Bluetooth não está disponível: use o cabo USB.": "Bluetooth isn't available on this computer: use the USB cable."
 },
 "patterns": [
 [
@@ -1834,6 +1842,15 @@ const I18N_EN = {
 [
 "calibração: usando a última lida do contador (",
 " µSv/h por CPM) até conectar"
+]
+],
+[
+"Conectando a ",
+"^Conectando a ((?:(?! · ).)+?)… leva alguns segundos\\. Deixe o app do celular desconectado\\.$",
+"Connecting to ${1}… it takes a few seconds. Keep the phone app disconnected.",
+[
+"Conectando a ",
+"… leva alguns segundos. Deixe o app do celular desconectado."
 ]
 ],
 [
@@ -5080,6 +5097,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Conectando pelo ",
+"^Conectando pelo ((?:(?! · ).)+?)…$",
+"Connecting via ${1}…",
+[
+"Conectando pelo "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -5380,6 +5405,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Conectado pelo ",
+"^Conectado pelo ((?:(?! · ).)+?)$",
+"Connected via ${1}",
+[
+"Conectado pelo "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -5463,6 +5496,14 @@ const I18N_EN = {
 "± ${1} at the detector",
 [
 " no detector"
+]
+],
+[
+"Não conectou: ",
+"^Não conectou: ((?:(?! · ).)+?)$",
+"Didn't connect: ${1}",
+[
+"Não conectou: "
 ]
 ],
 [

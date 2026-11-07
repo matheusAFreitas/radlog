@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"radlog/internal/radiacode"
@@ -114,7 +115,8 @@ type rcState struct {
 	macc     rcMeasAcc // só a goroutine do rcRun mexe
 	dose     rcDoseLive
 	cfgLogAt time.Time
-	doseLast rcDosePt // último total gravado (protegido por fileM)
+	bleNow   atomic.Bool // endereço Bluetooth novo: tentar já
+	doseLast rcDosePt    // último total gravado (protegido por fileM)
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -283,6 +285,9 @@ func (a *App) emitRc() { a.emit("radiacode", a.GetRadiacode()) }
 func (a *App) SetRadiacode(on bool, ble string) RcState {
 	ble = strings.ToUpper(strings.TrimSpace(ble))
 	a.mu.Lock()
+	if ble != "" && ble != a.settings.RcBLE {
+		a.rc.bleNow.Store(true) // endereço novo: tenta o Bluetooth já, sem esperar a vez
+	}
 	a.settings.RcOff, a.settings.RcBLE = !on, ble
 	a.saveSettingsLocked()
 	a.mu.Unlock()
@@ -353,7 +358,7 @@ func (a *App) rcLoop() {
 		}
 		tr, err := radiacode.OpenUSB()
 		if errors.Is(err, radiacode.ErrNotFound) && ble != "" && radiacode.BLESupported {
-			if time.Since(lastBLE) < rcRetryBLE {
+			if time.Since(lastBLE) < rcRetryBLE && !a.rc.bleNow.Swap(false) {
 				wait(rcRetryUSB)
 				continue
 			}
