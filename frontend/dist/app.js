@@ -1312,10 +1312,13 @@ async function refreshDose() {
   renderDoseDevice();
   $("doseOther").hidden = !(rcOn && c.otherMinutes > 0);
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
+  $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose medida";
   $("doseNote").textContent =
     "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido. " +
     (isRc
-      ? "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas."
+      ? (c.doseSource === "aparelho"
+        ? "A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
+        : "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.")
       : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas.");
 
   if (!c.measuredMinutes) {
@@ -1876,10 +1879,12 @@ function renderDoseDevice() {
   const devMain = rcCard && st.doseLiveAt > 0 && !state.doseZoom && c && c.device === "radiacode";
   state.doseDevMain = devMain;
   const appTxt = () => {
-    if (!c || !c.measuredMinutes) return "sem leituras gravadas no período";
+    const dev = c && c.doseSource === "aparelho";
+    const tot = dev ? c.appTotal : c && c.total, mins = dev ? c.appMinutes : c && c.measuredMinutes;
+    if (!c || !mins) return "sem leituras gravadas no período";
     const per = (document.querySelector('#doseSeg button[aria-pressed="true"]') || {}).textContent || "";
-    const cov = c.coverage * 100;
-    return `${doseTxt(c.total)}` + (per ? ` em ${per.trim()}` : "") + ` (só os minutos que o PC gravou: ${fmt(cov, cov < 10 ? 1 : 0)}% do período)`;
+    const cov = (dev ? c.appCoverage : c.coverage) * 100;
+    return `${doseTxt(tot)}` + (per ? ` em ${per.trim()}` : "") + ` (só os minutos que o PC gravou: ${fmt(cov, cov < 10 ? 1 : 0)}% do período)`;
   };
   if (devMain) {
     const v = st.doseLive;
@@ -5691,9 +5696,9 @@ function makeDemoApi() {
     _doseSrc: (c, src) => {
       if (src !== "radiacode" || !demoRcFake()) return Object.assign(c, { device: "gmc", other: "radiacode", otherTotal: demoRcFake() ? c.total * 0.6 : 0, otherMinutes: demoRcFake() ? c.measuredMinutes : 0 });
       const k = 0.6, sc = (a) => a.map((v) => v * k);
-      return Object.assign({}, c, { device: "radiacode", other: "gmc", otherTotal: c.total, otherMinutes: c.measuredMinutes,
+      return Object.assign({}, c, { device: "radiacode", other: "gmc", otherTotal: c.total, otherMinutes: c.measuredMinutes, doseSource: "aparelho", appMinutes: Math.round(c.measuredMinutes * 0.9), appCoverage: c.coverage * 0.9,
         dose: sc(c.dose), background: sc(c.background), ceiling: c.ceiling.map((v, i) => v - c.background[i] + c.background[i] * k),
-        total: c.total * k, backgroundTotal: c.backgroundTotal * k, ceilingTotal: c.ceilingTotal - c.backgroundTotal * (1 - k), excess: c.excess * k, backgroundRate: c.backgroundRate * k, backgroundSource: "mediana em casa dos últimos 30 dias" });
+        total: c.total * k, appTotal: c.total * k * 0.9, backgroundTotal: c.backgroundTotal * k, ceilingTotal: c.ceilingTotal - c.backgroundTotal * (1 - k), excess: c.excess * k, backgroundRate: c.backgroundRate * k, backgroundSource: "mediana em casa dos últimos 30 dias" });
     },
     GetDoseSrc: async (period, limit, src) => api._doseSrc(await api.GetDose(period, limit), src),
     GetDoseRangeSrc: async (from, to, limit, src) => api._doseSrc(await api.GetDoseRange(from, to, limit), src),

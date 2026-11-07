@@ -238,3 +238,6 @@ func (d *Device) TextMessages() ([]TextLine, error) {
 	}
 	return out, nil
 }
+
+// DecodeDataBuf lê os registros de uma resposta do DATA_BUF guardada (crua).
+func DecodeDataBuf(b []byte, base time.Time) []Record { return decodeDataBuf(b, base) }

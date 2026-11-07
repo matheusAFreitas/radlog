@@ -2003,3 +2003,5 @@ objeto {0} ± {1}	object {0} ± {1}
 {0} ± {1} ({2} contagens em {3} s)	{0} ± {1} ({2} counts in {3} s)
 {0} ao vivo (no objeto)	{0} live (on the object)
 {0} ao vivo (com você)	{0} live (with you)
+dose do aparelho	device dose
+A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.	The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.

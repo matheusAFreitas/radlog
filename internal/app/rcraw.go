@@ -284,7 +284,11 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 		return ti.Before(tj)
 	})
 	var out bytes.Buffer
-	out.WriteString(rcHeader + "\n")
+	hdr := rcHeader
+	if strings.HasPrefix(name, "dose-") {
+		hdr = rcDoseHeader
+	}
+	out.WriteString(hdr + "\n")
 	for _, k := range keys {
 		out.WriteString(have[k] + "\n")
 	}

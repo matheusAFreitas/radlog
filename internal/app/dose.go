@@ -1,6 +1,7 @@
 package app
 
 import (
+	"math"
 	"sort"
 	"time"
 
@@ -52,6 +53,14 @@ type DoseChart struct {
 	OtherTotal   float64 `json:"otherTotal"`
 	OtherMinutes int     `json:"otherMinutes"`
 	HasRC        bool    `json:"hasRC"` // o RadiaCode tem dado no período
+
+	// RadiaCode: "aparelho" = a curva é a dose que o próprio aparelho soma
+	// (continua contando desconectado); "app" = a soma dos minutos gravados.
+	// App* é a conta do app no mesmo período, para comparar.
+	DoseSource  string  `json:"doseSource"`
+	AppTotal    float64 `json:"appTotal"`
+	AppMinutes  int     `json:"appMinutes"`
+	AppCoverage float64 `json:"appCoverage"`
 }
 
 // GetDose monta o gráfico do dosímetro. period: "3h", "6h", "12h", "24h",
@@ -230,6 +239,12 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit, src strin
 
 	bgPerMin := c.BackgroundRate / 60
 	limPerMin := lim.MSvYear * 1000 / minutesPerYear
+	if src == "radiacode" {
+		c.DoseSource = "app"
+		if a.rcDoseFromDevice(&c, from, to, step, pts, bgPerMin, limPerMin) {
+			return c, nil
+		}
+	}
 
 	n := int(span / step)
 	i := 0
@@ -256,4 +271,77 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit, src strin
 		c.Coverage = 1
 	}
 	return c, nil
+}
+
+// rcDoseFromDevice monta a curva com a dose do próprio RadiaCode (os totais
+// que ele manda). O fundo e o teto crescem com o tempo em que o aparelho
+// contou (ele conta mesmo longe do PC). Devolve false se não há totais
+// suficientes no período (aí vale a soma dos minutos do app).
+func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Duration, mins []doseMin, bgPerMin, limPerMin float64) bool {
+	raw := a.rcDoseLog(from.AddDate(0, 0, -7), to)
+	// o total de agora (ao vivo), se conectado
+	a.rc.mu.Lock()
+	if d := a.rc.dose; d.has && a.rc.st.State == "conectado" {
+		now := time.Now()
+		if now.Before(to) && (len(raw) == 0 || now.After(raw[len(raw)-1].T)) {
+			raw = append(raw, rcDosePt{now, d.base + d.acc, d.baseSec + now.Sub(d.baseAt).Seconds()})
+		}
+	}
+	a.rc.mu.Unlock()
+	if len(raw) < 2 || !raw[len(raw)-1].T.After(from) {
+		return false
+	}
+	curve := rcDoseCurve(raw)
+	// tempo contando, também contínuo (zerou: recomeça do que veio depois)
+	secs := make([]rcDosePt, len(raw))
+	var v float64
+	for i, p := range raw {
+		if i > 0 {
+			d := p.Sec - raw[i-1].Sec
+			if d < 0 {
+				d = p.Sec
+			}
+			v += d
+		}
+		secs[i] = rcDosePt{T: p.T, Dose: v}
+	}
+	first, last := raw[0].T, raw[len(raw)-1].T
+	start := from
+	if first.After(start) {
+		start = first
+	}
+	d0, s0 := curveAt(curve, start), curveAt(secs, start)
+	at := func(t time.Time) (dose, minutes float64) {
+		if !t.After(start) {
+			return 0, 0
+		}
+		if t.After(last) {
+			t = last
+		}
+		return curveAt(curve, t) - d0, (curveAt(secs, t) - s0) / 60
+	}
+	n := int(to.Sub(from) / step)
+	c.Times, c.Dose, c.Background, c.Ceiling = nil, nil, nil, nil
+	for k := 1; k <= n; k++ {
+		end := from.Add(time.Duration(k) * step)
+		dose, m := at(end)
+		c.Times = append(c.Times, end.UnixMilli())
+		c.Dose = append(c.Dose, dose)
+		c.Background = append(c.Background, m*bgPerMin)
+		c.Ceiling = append(c.Ceiling, m*(bgPerMin+limPerMin))
+	}
+	dose, m := at(to)
+	c.Total, c.BackgroundTotal, c.Allowance = dose, m*bgPerMin, m*limPerMin
+	c.CeilingTotal = c.BackgroundTotal + c.Allowance
+	c.Excess = dose - c.BackgroundTotal
+	c.MeasuredMinutes = int(m + 0.5)
+	c.Coverage = math.Min(1, m/to.Sub(from).Minutes())
+	c.DoseSource = "aparelho"
+	for _, p := range mins {
+		c.AppTotal += p.USv / 60
+	}
+	c.AppMinutes = len(mins)
+	c.AppCoverage = math.Min(1, float64(len(mins))/to.Sub(from).Minutes())
+	c.HasRC = true
+	return true
 }

@@ -1,5 +1,18 @@
 # Versões
 
+## 1.40.0
+- **Gráfico da dose do RadiaCode com o número do aparelho**: o app agora
+  guarda cada total que o RadiaCode manda (`radiacode/dose-AAAA-MM.csv`) e o
+  gráfico "Sua dose (RadiaCode)" usa esses totais, não mais a soma dos
+  minutos gravados pelo PC. Como o aparelho continua contando desconectado,
+  o que ele somou longe do PC entra quando ele volta (no gráfico, espalhado
+  pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que
+  o aparelho contou. Se ele for zerado no meio, a conta continua do zero dele.
+- Na primeira vez, o app recupera esses totais dos dados brutos já gravados
+  (desde a chegada do RadiaCode), então o histórico não começa vazio.
+- A linha "Calculado pelo app" continua embaixo, com a soma dos minutos do
+  PC, para comparar.
+
 ## 1.39.2
 - RadiaCode, dados brutos: agora é um arquivo por conexão
   (`bruto/AAAA-MM-DD-HHMMSS.jsonl.gz`). Antes cada conexão era emendada no

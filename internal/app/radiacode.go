@@ -114,6 +114,7 @@ type rcState struct {
 	macc     rcMeasAcc // só a goroutine do rcRun mexe
 	dose     rcDoseLive
 	cfgLogAt time.Time
+	doseLast rcDosePt // último total gravado (protegido por fileM)
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -502,6 +503,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.st.Dose, a.rc.st.DoseSec, a.rc.st.Battery, a.rc.st.TempC, a.rc.st.HasRare = v.Dose, int64(v.Duration), v.Battery, v.TempC, true
 			a.rcDoseRareLocked(v.Dose, float64(v.Duration), time.Now())
 			a.rc.mu.Unlock()
+			a.rcDoseLogAppend(time.Now(), v.Dose, float64(v.Duration))
 			changed = true
 		case radiacode.Event:
 			a.rc.mu.Lock()

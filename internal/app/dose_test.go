@@ -100,3 +100,42 @@ func TestDoseRange(t *testing.T) {
 		t.Fatalf("passo do trecho longo: %d", c.StepMs)
 	}
 }
+
+func TestDoseFromDevice(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	// totais do aparelho: 0,15 µSv/h, zerado no meio (às -3 h)
+	var pts []rcDosePt
+	for m := 6 * 60; m >= 10; m -= 5 {
+		at := now.Add(-time.Duration(m) * time.Minute)
+		el := float64(6*60-m) * 60 // s desde -6 h
+		dose := 0.5 + el/3600*0.15
+		sec := 10000 + el
+		if m <= 180 { // zerado às -3 h
+			e2 := float64(180-m) * 60
+			dose, sec = e2/3600*0.15, e2
+		}
+		pts = append(pts, rcDosePt{at, dose, sec})
+	}
+	a.rcDoseMerge(pts)
+	// só 1 h de minutos gravados pelo app
+	for m := 60; m >= 1; m-- {
+		a.rcAddMinute(now.Add(-time.Duration(m)*time.Minute+time.Second), 12, 0.15)
+	}
+	a.rcFlushMinute()
+	c, err := a.GetDoseSrc("6h", "publico", "radiacode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	// do primeiro total (-6 h) ao último (-10 min): 5 h 50 min a 0,15 µSv/h
+	want := 0.15 * (6*60 - 10 - 5) / 60.0 // os 5 min antes de zerar se perdem
+	if c.DoseSource != "aparelho" || math.Abs(c.Total-want) > 0.01 {
+		t.Fatalf("dose do aparelho: %v (%v) quer %v", c.Total, c.DoseSource, want)
+	}
+	if math.Abs(c.AppTotal-0.15) > 0.01 || c.AppMinutes != 60 {
+		t.Fatalf("conta do app: %v em %d min", c.AppTotal, c.AppMinutes)
+	}
+	if c.MeasuredMinutes < 340 || c.Dose[len(c.Dose)-1] != c.Total {
+		t.Fatalf("minutos %d", c.MeasuredMinutes)
+	}
+}

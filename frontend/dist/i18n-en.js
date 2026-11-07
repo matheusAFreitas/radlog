@@ -1382,7 +1382,9 @@ const I18N_EN = {
 "com você": "with you",
 "a sua dose começa a contar quando o objeto for medido": "your dose starts counting when the object is measured",
 "µSv/h acima do fundo": "µSv/h above background",
-"Gráfico da medição: leitura ao vivo e média de cada fase": "Measurement chart: live reading and average of each phase"
+"Gráfico da medição: leitura ao vivo e média de cada fase": "Measurement chart: live reading and average of each phase",
+"dose do aparelho": "device dose",
+"A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out."
 },
 "patterns": [
 [
