@@ -1270,7 +1270,10 @@ const I18N_EN = {
 "· conectando…": "· connecting…",
 "Guardar tudo o que o RadiaCode manda (dados brutos)": "Keep everything the RadiaCode sends (raw data)",
 "Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta": "To find out what else the device can offer: each record as it came, the spectrum every hour and, on each connection, all registers and the memory snapshot. Kept in the folder",
-"e entra no backup (alguns MB por dia).": "and included in the backup (a few MB per day)."
+"e entra no backup (alguns MB por dia).": "and included in the backup (a few MB per day).",
+"alarmes do RadiaCode": "RadiaCode alarms",
+"Alarme 1": "Alarm 1",
+"Alarme 2": "Alarm 2"
 },
 "patterns": [
 [
@@ -4870,6 +4873,22 @@ const I18N_EN = {
 "correlation ${1}",
 [
 "correlação "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · alarme 1$",
+"${1} · alarm 1",
+[
+" · alarme 1"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · alarme 2$",
+"${1} · alarm 2",
+[
+" · alarme 2"
 ]
 ],
 [

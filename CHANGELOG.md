@@ -1,5 +1,11 @@
 # Versões
 
+## 1.28.4
+- A régua do RadiaCode agora usa os **alarmes do próprio aparelho** (no seu,
+  0,40 µSv/h para o alarme 1 e 1,20 µSv/h para o alarme 2), como a do GMC
+  usa as faixas do manual dele. O nível aparece como Seguro, Alarme 1 ou
+  Alarme 2. Se o app não conseguir ler os alarmes, volta às faixas do app.
+
 ## 1.28.3
 - Os quadros **GMC-800 | RadiaCode** agora têm a mesma estrutura, linha por
   linha:
