@@ -544,10 +544,17 @@ func (a *App) rcWriteMinute(m rcMinute) {
 	// dose de hoje e último minuto, sem reler o arquivo (fora do fileM: o
 	// GetRadiacode tranca rc.mu e depois fileM)
 	a.rc.mu.Lock()
-	if a.rc.today.loaded && a.rc.today.day == m.t.Format("2006-01-02") {
-		a.rc.today.sum += m.usv / n / 60
+	pt := RcPoint{T: m.t, CPS: m.cps / n, USvh: m.usv / n, N: m.n}
+	prev := 0.0
+	if l := a.rc.today.last; a.rc.today.hasLast && l.T.Equal(m.t) {
+		// mesmo minuto de novo (reconectou no meio dele): vale a média dos dois
+		pt = mergeRcMinutes([]RcPoint{l, pt})[0]
+		prev = l.USvh / 60
 	}
-	a.rc.today.last, a.rc.today.hasLast = RcPoint{T: m.t, CPS: m.cps / n, USvh: m.usv / n, N: m.n}, true
+	if a.rc.today.loaded && a.rc.today.day == m.t.Format("2006-01-02") {
+		a.rc.today.sum += pt.USvh/60 - prev
+	}
+	a.rc.today.last, a.rc.today.hasLast = pt, true
 	a.rc.mu.Unlock()
 }
 
@@ -606,7 +613,27 @@ func (a *App) rcRange(from, to time.Time) []RcPoint {
 		}
 		f.Close()
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].T.Before(out[j].T) })
+	sort.SliceStable(out, func(i, j int) bool { return out[i].T.Before(out[j].T) })
+	return mergeRcMinutes(out)
+}
+
+// mergeRcMinutes junta linhas do mesmo minuto (a conexão caiu e voltou no
+// meio do minuto: o pedaço de antes e o de depois foram gravados separados),
+// com a média pesada pelo número de leituras. Sem isso, o minuto contava duas
+// vezes na dose.
+func mergeRcMinutes(in []RcPoint) []RcPoint {
+	out := in[:0]
+	for _, p := range in {
+		if n := len(out); n > 0 && out[n-1].T.Equal(p.T) {
+			q := &out[n-1]
+			w1, w2 := float64(max(q.N, 1)), float64(max(p.N, 1))
+			q.CPS = (q.CPS*w1 + p.CPS*w2) / (w1 + w2)
+			q.USvh = (q.USvh*w1 + p.USvh*w2) / (w1 + w2)
+			q.N = int(w1 + w2)
+			continue
+		}
+		out = append(out, p)
+	}
 	return out
 }
 

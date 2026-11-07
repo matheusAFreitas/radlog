@@ -1,5 +1,11 @@
 # Versões
 
+## 1.35.1
+- RadiaCode: quando a conexão caía e voltava no meio de um minuto, o minuto
+  era gravado duas vezes e contava duas vezes na dose. Agora as duas partes
+  viram um minuto só (com a média das duas), inclusive nos arquivos já
+  gravados.
+
 ## 1.35.0
 - **Chuva com o RadiaCode**: a aba Chuva ganhou a escolha do aparelho
   (RadiaCode ou GMC-800). Da primeira vez, vem o RadiaCode se ele já tiver

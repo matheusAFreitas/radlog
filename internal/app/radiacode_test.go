@@ -253,3 +253,24 @@ func TestRcHomeBackground(t *testing.T) {
 		t.Fatalf("erro: %v", hb.ErrCPM)
 	}
 }
+
+func TestRcDuplicateMinute(t *testing.T) {
+	a := newTestApp(t)
+	m := time.Now().Truncate(time.Minute).Add(-5 * time.Minute)
+	for k := 0; k < 30; k++ {
+		a.rcAddMinute(m.Add(time.Duration(k)*time.Second), 10, 0.10)
+	}
+	a.rcFlushMinute() // caiu no meio do minuto
+	for k := 40; k < 50; k++ {
+		a.rcAddMinute(m.Add(time.Duration(k)*time.Second), 14, 0.14)
+	}
+	a.rcFlushMinute()
+	pts := a.rcRange(m.Add(-time.Hour), time.Now())
+	if len(pts) != 1 || pts[0].N != 40 || math.Abs(pts[0].USvh-0.11) > 1e-9 {
+		t.Fatalf("minuto repetido: %+v", pts)
+	}
+	st := a.GetRadiacode()
+	if m.Day() == time.Now().Day() && math.Abs(st.Today-0.11/60) > 1e-6 {
+		t.Fatalf("dose de hoje contou o minuto duas vezes: %v", st.Today)
+	}
+}
