@@ -36,7 +36,9 @@ function reguaTaxaRefs() {
   const out = [...REGUA_TAXA];
   const cal = calK();
   const bg = (state.last && state.last.bgCPM) || state.bgCPM;
-  if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa", d: `mediana dos últimos 30 dias: ${fmt(bg, 0)} CPM`, mine: true });
+  if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa (GMC-800)", d: `mediana dos últimos 30 dias: ${fmt(bg, 0)} CPM`, mine: true });
+  const rs = (state.rc && state.rc.st && state.rc.st.stats) || {};
+  if (rs.bgUSv > 0) out.push({ v: rs.bgUSv, t: "Fundo da sua casa (RadiaCode)", d: "mediana dos minutos em casa dos últimos 7 dias", mine: true, rc: true });
   const seen = new Set();
   for (const m of [...(state.measurements || [])].reverse()) {
     if (!m.result || m.result.level !== "sim" || !m.obj || !(m.obj.usv > 0)) continue;
@@ -77,23 +79,27 @@ function reguaRel(v, here) {
   return `${bigX(1 / r)}× menos`;
 }
 
-// escada: itens em ordem, com a barra em escala log e a linha "você" no meio
-function reguaLadder(el, refs, here, hereLabel, unit) {
+// escada: itens em ordem, com a barra em escala log e as linhas "agora" de
+// cada aparelho (GMC e RadiaCode) no meio. As relações ("3× mais") são com a
+// primeira delas.
+function reguaLadder(el, refs, heres, unit) {
   const rows = refs.map((r) => ({ ...r })).sort((a, b) => a.v - b.v);
-  if (here > 0) rows.push({ v: here, t: hereLabel, here: true });
+  heres = (heres || []).filter((h) => h.v > 0);
+  const here = heres.length ? heres[0].v : null;
+  for (const h of heres) rows.push({ v: h.v, t: h.t, here: true, rc: h.rc, tag: h.tag });
   rows.sort((a, b) => a.v - b.v || (a.here ? 1 : -1));
   const lo = Math.log10(Math.min(...rows.map((r) => r.v)) / 2), hi = Math.log10(Math.max(...rows.map((r) => r.v)) * 2);
   const pos = (v) => ((Math.log10(v) - lo) / (hi - lo)) * 100;
   el.textContent = "";
   for (const r of rows) {
     const li = document.createElement("li");
-    li.className = "rg-row" + (r.here ? " here" : "") + (r.mine ? " mine" : "") + (r.acc ? " acc" : "");
+    li.className = "rg-row" + (r.here ? " here" : "") + (r.mine ? " mine" : "") + (r.acc ? " acc" : "") + (r.rc ? " rc" : "");
     li.innerHTML = '<span class="rg-val mono"></span><span class="rg-txt"><span class="rg-t"></span><span class="rg-d small"></span></span><span class="rg-bar" aria-hidden="true"><i></i></span><span class="rg-rel mono small"></span>';
     li.querySelector(".rg-val").textContent = reguaFmt(r.v, unit);
     li.querySelector(".rg-t").textContent = r.t;
     li.querySelector(".rg-d").textContent = r.here ? "" : r.d || "";
     li.querySelector(".rg-bar i").style.width = Math.max(2, pos(r.v)) + "%";
-    li.querySelector(".rg-rel").textContent = r.here ? "você" : reguaRel(r.v, here);
+    li.querySelector(".rg-rel").textContent = r.here ? r.tag || "você" : reguaRel(r.v, here);
     el.appendChild(li);
   }
 }
@@ -114,13 +120,24 @@ function openRegua(which) {
   const cal = calK();
   const r = state.last;
   const nowUSv = r && r.usv > 0 ? r.usv : null;
-  reguaLadder($("rgTaxa"), reguaTaxaRefs(), nowUSv, nowUSv ? `Agora: ${fmt(r.cpm, 0)} CPM no contador` : "", "µSv/h");
+  const rc = state.rc && state.rc.st;
+  const rcNow = rc && rc.state === "conectado" && rc.time && rc.usvh > 0 ? rc.usvh : null;
+  reguaLadder($("rgTaxa"), reguaTaxaRefs(), [
+    { v: nowUSv, t: nowUSv ? `Agora no GMC-800: ${fmt(r.cpm, 0)} CPM` : "", tag: "GMC-800" },
+    { v: rcNow, t: "Agora no RadiaCode", tag: "RadiaCode", rc: true },
+  ], "µSv/h");
   const d = state.dose;
   const doseHere = d && d.measuredMinutes ? d.total : null;
   const per = state.doseZoom ? "trecho do zoom" : ($("doseSeg").querySelector('[aria-pressed="true"]')?.textContent.trim() || "período");
   const lbl = d && d.measuredMinutes ? `Dose no contador (${per})` : "";
-  reguaLadder($("rgDose"), reguaDoseRefs(), doseHere, lbl, "µSv");
-  $("rgTaxaSub").textContent = nowUSv ? `Leitura de agora: ${reguaFmt(nowUSv, "µSv/h")} (calibração ${fmt(cal, 4)} µSv/h por CPM).` : "Sem leitura agora: a escada mostra só as referências.";
+  const rcDose = rc && rc.today > 0 ? rc.today : null;
+  reguaLadder($("rgDose"), reguaDoseRefs(), [
+    { v: doseHere, t: lbl.replace("Dose no contador", "Dose no GMC-800"), tag: "GMC-800" },
+    { v: rcDose, t: "Dose hoje no RadiaCode", tag: "RadiaCode", rc: true },
+  ], "µSv");
+  $("rgTaxaSub").textContent = nowUSv || rcNow
+    ? [nowUSv ? `GMC-800 agora: ${reguaFmt(nowUSv, "µSv/h")} (calibração ${fmt(cal, 4)} µSv/h por CPM)` : "", rcNow ? `RadiaCode agora: ${reguaFmt(rcNow, "µSv/h")}` : ""].filter(Boolean).join(" · ") + "."
+    : "Sem leitura agora: a escada mostra só as referências.";
   $("rgDoseSub").textContent = doseHere ? `Dose medida no período escolhido no cartão de dose: ${reguaFmt(doseHere, "µSv")}.` : "Sem dose medida no período: a escada mostra só as referências.";
   showReguaTab(which === "dose" ? "dose" : "taxa");
   $("reguaDlg").showModal();

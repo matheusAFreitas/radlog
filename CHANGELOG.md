@@ -1,5 +1,15 @@
 # Versões
 
+## 1.29.0
+- **Régua de radiação com os dois aparelhos**:
+  - **Taxa agora:** duas linhas, "Agora no GMC-800" (âmbar) e "Agora no
+    RadiaCode" (rosa). O fundo da casa também aparece pelos dois.
+  - **Dose recebida:** a dose do GMC no período escolhido e a dose de hoje
+    no RadiaCode.
+  - As comparações ("3× mais") continuam em relação ao GMC.
+- Textos da régua que faltavam em inglês ("≈ igual", "mil×", "1 ano",
+  Chernobyl).
+
 ## 1.28.5
 - A pílula do RadiaCode no topo agora mostra só o nome e a bateria
   ("RadiaCode · 100%"). O µSv/h já está no quadro.

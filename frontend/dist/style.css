@@ -778,6 +778,10 @@ dialog#settings { width: min(1040px, calc(100vw - 32px)); height: min(780px, cal
 .rg-row.here .rg-t { color: var(--att); font-weight: 600; }
 .rg-row.here .rg-bar i { background: var(--att); }
 .rg-row.here .rg-rel { color: var(--att); font-weight: 600; }
+.rg-row.here.rc { background: rgba(244, 114, 182, .10); border-color: rgba(244, 114, 182, .5); }
+.rg-row.here.rc .rg-t, .rg-row.here.rc .rg-rel { color: #F472B6; }
+.rg-row.here.rc .rg-bar i, .rg-row.mine.rc .rg-bar i { background: #F472B6; }
+.rg-row.mine.rc .rg-t { color: #F472B6; }
 @media (max-width: 700px) { .rg-row { grid-template-columns: 80px minmax(0, 1fr) 70px; } .rg-bar { display: none; } }
 .rg-row.acc .rg-t { color: #F28B8F; }
 .rg-row.acc .rg-bar i { background: rgba(240, 101, 106, .65); }

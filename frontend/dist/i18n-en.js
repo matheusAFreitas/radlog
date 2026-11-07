@@ -424,7 +424,7 @@ const I18N_EN = {
 "Ocultar a cidade na tela (mostra só \"chuva configurada\")": "Hide the city on screen (shows only \"rain configured\")",
 "Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.": "Checks the releases at github.com/matheusAFreitas/radlog. Nothing is downloaded until you click Update.",
 "Onde mais aparece": "Where else it shows up",
-"Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas) e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements) and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
+"Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RadiaCode and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
 "Ontem": "Yesterday",
 "Os ajustes do aparelho não foram para o contador: use \"Gravar no contador\" na seção Contador.": "The device settings didn't go to the counter: use \"Write to the counter\" in the Counter section.",
 "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
@@ -1273,7 +1273,14 @@ const I18N_EN = {
 "e entra no backup (alguns MB por dia).": "and included in the backup (a few MB per day).",
 "alarmes do RadiaCode": "RadiaCode alarms",
 "Alarme 1": "Alarm 1",
-"Alarme 2": "Alarm 2"
+"Alarme 2": "Alarm 2",
+"Fundo da sua casa (GMC-800)": "Your home background (GMC-800)",
+"Fundo da sua casa (RadiaCode)": "Your home background (RadiaCode)",
+"mediana dos minutos em casa dos últimos 7 dias": "median of the minutes at home over the last 7 days",
+"Agora no RadiaCode": "Now on the RadiaCode",
+"Dose hoje no RadiaCode": "Dose today on the RadiaCode",
+"≈ igual": "≈ same",
+"Chernobyl, 1986: bombeiros e operadores": "Chernobyl, 1986: firefighters and operators"
 },
 "patterns": [
 [
@@ -1721,6 +1728,16 @@ const I18N_EN = {
 " contagens em ",
 " s = ",
 " CPM (medido logo antes, com o objeto longe)"
+]
+],
+[
+"GMC-800 agora: ",
+"^GMC\\-800 agora: ((?:(?! · ).)+?) \\(calibração ((?:(?! · ).)+?) µSv/h por CPM\\) · RadiaCode agora: ((?:(?! · ).)+?)\\.$",
+"GMC-800 now: ${1} (calibration ${2} µSv/h per CPM) · RadiaCode now: ${3}.",
+[
+"GMC-800 agora: ",
+" (calibração ",
+" µSv/h por CPM) · RadiaCode agora: "
 ]
 ],
 [
@@ -2218,6 +2235,16 @@ const I18N_EN = {
 "sync: accepting connections on port ${1} (${2})",
 [
 "sincronização: aceitando conexões na porta "
+]
+],
+[
+"GMC-800 agora: ",
+"^GMC\\-800 agora: ((?:(?! · ).)+?) \\(calibração ((?:(?! · ).)+?) µSv/h por CPM\\)\\.$",
+"GMC-800 now: ${1} (calibration ${2} µSv/h per CPM).",
+[
+"GMC-800 agora: ",
+" (calibração ",
+" µSv/h por CPM)."
 ]
 ],
 [
@@ -3539,6 +3566,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Agora no GMC-800: ",
+"^Agora no GMC\\-800: ((?:(?! · ).)+?) CPM$",
+"Now on the GMC-800: ${1} CPM",
+[
+"Agora no GMC-800: ",
+" CPM"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -3696,6 +3732,14 @@ const I18N_EN = {
 [
 "registrador ",
 " recusado"
+]
+],
+[
+"Dose no GMC-800 (",
+"^Dose no GMC\\-800 \\(((?:(?! · ).)+?)\\)$",
+"Dose on the GMC-800 (${1})",
+[
+"Dose no GMC-800 ("
 ]
 ],
 [
@@ -3898,6 +3942,14 @@ const I18N_EN = {
 "Bluetooth: session: ${1}",
 [
 "Bluetooth: sessão: "
+]
+],
+[
+"RadiaCode agora: ",
+"^RadiaCode agora: ((?:(?! · ).)+?)\\.$",
+"RadiaCode now: ${1}.",
+[
+"RadiaCode agora: "
 ]
 ],
 [
@@ -4497,6 +4549,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h × 1 ano$",
+"${1} µSv/h × 1 year",
+[
+" µSv/h × 1 ano"
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -4611,6 +4671,14 @@ const I18N_EN = {
 "${1} with the object",
 [
 " com o objeto"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h × 24 h$",
+"${1} µSv/h × 24 h",
+[
+" µSv/h × 24 h"
 ]
 ],
 [
@@ -4892,6 +4960,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) mil× menos$",
+"${1}k× less",
+[
+" mil× menos"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -4980,6 +5056,30 @@ const I18N_EN = {
 "model at ${1}",
 [
 "modelo às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) mil× mais$",
+"${1}k× more",
+[
+" mil× mais"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) mi× menos$",
+"${1}M× less",
+[
+" mi× menos"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) bi× menos$",
+"${1}B× less",
+[
+" bi× menos"
 ]
 ],
 [
@@ -5095,6 +5195,22 @@ const I18N_EN = {
 "battery ${1}%",
 [
 "bateria "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) mi× mais$",
+"${1}M× more",
+[
+" mi× mais"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) bi× mais$",
+"${1}B× more",
+[
+" bi× mais"
 ]
 ],
 [

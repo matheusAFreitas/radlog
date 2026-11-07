@@ -423,7 +423,7 @@ Objeto ÷ fundo	Object ÷ background
 Ocultar a cidade na tela (mostra só "chuva configurada")	Hide the city on screen (shows only "rain configured")
 Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.	Checks the releases at github.com/matheusAFreitas/radlog. Nothing is downloaded until you click Update.
 Onde mais aparece	Where else it shows up
-Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas) e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.	Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements) and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.
+Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.	Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RadiaCode and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.
 Ontem	Yesterday
 Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.	The device settings didn't go to the counter: use "Write to the counter" in the Counter section.
 Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido.	CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.
@@ -1774,3 +1774,23 @@ alarmes do RadiaCode	RadiaCode alarms
 {0} · alarme 2	{0} · alarm 2
 Alarme 1	Alarm 1
 Alarme 2	Alarm 2
+Fundo da sua casa (GMC-800)	Your home background (GMC-800)
+Fundo da sua casa (RadiaCode)	Your home background (RadiaCode)
+mediana dos minutos em casa dos últimos 7 dias	median of the minutes at home over the last 7 days
+Agora no GMC-800: {0} CPM	Now on the GMC-800: {0} CPM
+Agora no RadiaCode	Now on the RadiaCode
+Dose no GMC-800 ({0})	Dose on the GMC-800 ({0})
+Dose hoje no RadiaCode	Dose today on the RadiaCode
+GMC-800 agora: {0} (calibração {1} µSv/h por CPM).	GMC-800 now: {0} (calibration {1} µSv/h per CPM).
+GMC-800 agora: {0} (calibração {1} µSv/h por CPM) · RadiaCode agora: {2}.	GMC-800 now: {0} (calibration {1} µSv/h per CPM) · RadiaCode now: {2}.
+RadiaCode agora: {0}.	RadiaCode now: {0}.
+≈ igual	≈ same
+{0} µSv/h × 1 ano	{0} µSv/h × 1 year
+{0} µSv/h × 24 h	{0} µSv/h × 24 h
+Chernobyl, 1986: bombeiros e operadores	Chernobyl, 1986: firefighters and operators
+{0} mil× mais	{0}k× more
+{0} mi× mais	{0}M× more
+{0} bi× mais	{0}B× more
+{0} mil× menos	{0}k× less
+{0} mi× menos	{0}M× less
+{0} bi× menos	{0}B× less
