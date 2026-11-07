@@ -1,5 +1,19 @@
 # Versões
 
+## 1.38.0
+- **Medir objeto com os dois aparelhos**: o campo "Aparelho" ganhou duas
+  opções.
+  - **Os dois perto do objeto**: o RadiaCode e o GMC medem ao mesmo tempo,
+    cada um contra o seu fundo. No automático, só para quando os dois têm
+    resposta. O resultado mostra os dois e o que a comparação sugere: o GMC
+    vê beta e gama, o RadiaCode quase só gama, então se o GMC sobe bem mais,
+    o objeto deve emitir beta.
+  - **Um no objeto, outro com você**: você escolhe qual fica no objeto; o
+    outro fica com você (bolso ou mão) e, no fim, o app mostra quanto você
+    recebeu enquanto o objeto era medido (dose, média, máximo e quanto ficou
+    acima do seu fundo).
+  - Os dois jeitos ficam nas medições salvas e no relatório em PDF.
+
 ## 1.37.0
 - **Cartão "Sua dose (RadiaCode)"**: o número grande agora é a dose do
   próprio aparelho (desde que foi zerado, a mesma da tela dele), andando ao

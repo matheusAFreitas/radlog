@@ -2,6 +2,7 @@ package app
 
 import (
 	"math"
+	"strings"
 	"testing"
 )
 
@@ -30,5 +31,19 @@ func TestFindPeaks(t *testing.T) {
 	s.Bg = nil
 	if s.findPeaks() != nil {
 		t.Fatal("sem fundo")
+	}
+}
+
+func TestDualHint(t *testing.T) {
+	cases := []struct {
+		g, r float64
+		want string
+	}{
+		{5, 1, "principalmente beta"}, {5, 2.5, "bastante beta"}, {1, 5, "Só o RadiaCode"}, {2.5, 5, "Só o RadiaCode"}, {1, 1, "Nenhum"},
+	}
+	for _, c := range cases {
+		if h := dualHint(MeasureResult{Sigma: c.g, Ratio: 2}, MeasureResult{Sigma: c.r, Ratio: 1.5}); !strings.Contains(h, c.want) {
+			t.Errorf("%v/%v: %q", c.g, c.r, h)
+		}
 	}
 }

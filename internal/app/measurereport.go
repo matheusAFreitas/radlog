@@ -363,6 +363,10 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	}
 	p.kv(rows, 120)
 
+	if o := m.Other; o != nil {
+		p.measSide(m, o)
+	}
+
 	// geometria e método
 	if rc {
 		p.section("GEOMETRIA, APARELHO E MÉTODO")
@@ -761,4 +765,39 @@ func specDur(sec float64) string {
 		return fmt.Sprintf("%d s", int(math.Round(sec)))
 	}
 	return fmtDurSec(sec)
+}
+
+// measSide: o segundo aparelho (os dois perto, ou um com a pessoa).
+func (p *reportPDF) measSide(m SavedMeasure, o *MeasureSide) {
+	name := map[string]string{"gmc": "GMC-800", devRC: "RadiaCode"}[devName(o.Device)]
+	u := func(v float64) string { return usvTxt(v) + " µSv/h" }
+	if o.Role == "voce" {
+		p.section("COM VOCÊ: " + strings.ToUpper(name))
+		rows := [][2]string{
+			{"Dose recebida", fmt.Sprintf("%s µSv em %s, enquanto o objeto era medido", fmtBR(o.Dose, 4), specDur(float64(m.Obj.Seconds)))},
+			{"Média · máximo", u(o.AvgUSv) + " · " + u(o.MaxUSv)},
+		}
+		if o.BgUSv > 0 {
+			rows = append(rows,
+				[2]string{"Seu fundo em casa", u(o.BgUSv)},
+				[2]string{"Acima do fundo", fmt.Sprintf("%s µSv (o que o objeto somou nesse tempo)", fmtBR(o.Excess, 4))})
+		}
+		p.kv(rows, 120)
+		return
+	}
+	p.section("TAMBÉM PERTO DO OBJETO: " + strings.ToUpper(name))
+	ph := func(x *MeasurePhase) string {
+		if x == nil {
+			return "—"
+		}
+		return fmt.Sprintf("%s ± %s CPM (%d contagens em %d s)", fmtBR(x.CPM, 1), fmtBR(x.ErrCPM, 1), x.Counts, x.Seconds)
+	}
+	rows := [][2]string{{"Fundo", ph(o.Bg)}, {"Com o objeto", ph(o.Obj)}}
+	if r := o.Result; r != nil {
+		rows = append(rows, [2]string{"Líquido", fmt.Sprintf("%s ± %s CPM · %sσ · %s× o fundo · ≈ %s µSv/h", fmtSigned(r.NetCPM, 1), fmtBR(r.NetErr, 1), fmtBR(r.Sigma, 1), fmtBR(r.Ratio, 2), fmtBR(r.NetUSv, 3))})
+	}
+	if o.Hint != "" {
+		rows = append(rows, [2]string{"Os dois juntos", o.Hint + " Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto."})
+	}
+	p.kv(rows, 120)
 }

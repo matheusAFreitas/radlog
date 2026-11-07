@@ -1919,3 +1919,50 @@ no aparelho, desde que foi zerado	on the device, since it was last reset
 Calculado pelo app:	Calculated by the app:
 {0} em {1} (só os minutos que o PC gravou: {2}% do período)	{0} over {1} (only the minutes the PC recorded: {2}% of the period)
 sem leituras gravadas no período	no recorded readings in the period
+Os dois perto do objeto	Both near the object
+Um no objeto, outro com você	One on the object, the other with you
+Qual fica no objeto	Which one stays on the object
+GMC-800 no objeto, RadiaCode com você	GMC-800 on the object, RadiaCode with you
+RadiaCode no objeto, GMC-800 com você	RadiaCode on the object, GMC-800 with you
+Distância até os aparelhos (opcional)	Distance to the devices (optional)
+O GMC-800 não está conectado.	The GMC-800 isn't connected.
+Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite.	Both near the object, at the same time. The GMC sees beta and gamma; the RadiaCode, almost only gamma: comparing them gives a hint of what the object emits.
+Deixe o {0} no objeto e o {1} com você (no bolso ou na mão): no fim, o app mostra quanto você recebeu enquanto o objeto era medido.	Leave the {0} on the object and keep the {1} with you (in a pocket or in your hand): at the end, the app shows how much you received while the object was being measured.
+Com você ({0}): começa a contar quando o objeto for medido.	With you ({0}): starts counting when the object is measured.
+Com você ({0}): {1} µSv até agora	With you ({0}): {1} µSv so far
+agora {0}	now {0}
+seu fundo {0}	your background {0}
+{0}: {1} contagens	{0}: {1} counts
+{0}: {1} ± {2} CPM sobre o fundo ({3}σ)	{0}: {1} ± {2} CPM above background ({3}σ)
+Com você ({0})	With you ({0})
+Acima do seu fundo ({0}): +{1} µSv, o que o objeto somou na sua dose nesse tempo.	Above your background ({0}): +{1} µSv, what the object added to your dose in that time.
+Igual ao seu fundo ({0}): o objeto não somou nada que dê para ver na sua dose.	Same as your background ({0}): the object added nothing visible to your dose.
+Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).	Shows how much you received while the object was being measured, at the position where the device was (pocket, hand…).
+{0} (também perto do objeto)	{0} (also near the object)
+Sem leituras suficientes desse aparelho.	Not enough readings from this device.
+O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta).	The GMC saw the object and the RadiaCode barely did: it probably emits mainly beta (the RadiaCode's crystal barely sees beta).
+O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta.	The GMC saw it clearly and the RadiaCode only a little: the object probably emits a lot of beta.
+Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco.	Only the RadiaCode saw it: it's much more sensitive to gamma than the GMC's tube, so the object probably emits weak gamma.
+Os dois viram, mas o GMC subiu bem mais ({0}× o fundo contra {1}× no RadiaCode): além de gama, o objeto deve emitir beta.	Both saw it, but the GMC rose much more ({0}× the background against {1}× on the RadiaCode): besides gamma, the object probably emits beta.
+Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama.	Both saw it, in a similar proportion: the object probably emits mainly gamma.
+Nenhum dos dois viu uma diferença clara.	Neither saw a clear difference.
+O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.	The GMC sees beta and gamma; the RadiaCode, almost only gamma. Take it as a hint: the tube and the crystal sit at different spots relative to the object.
+Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.	Take it as a hint: the tube and the crystal sit at different spots relative to the object.
+os dois aparelhos	both devices
+{0} no objeto, {1} com você	{0} on the object, {1} with you
+conecte o RadiaCode para medir com os dois	connect the RadiaCode to measure with both
+desligue o modo demo para medir com os dois aparelhos	turn off demo mode to measure with both devices
+conecte o GMC-800 para medir com os dois	connect the GMC-800 to measure with both
+fundo da casa do {0} indisponível: {1}	home background of the {0} unavailable: {1}
+COM VOCÊ: {0}	WITH YOU: {0}
+TAMBÉM PERTO DO OBJETO: {0}	ALSO NEAR THE OBJECT: {0}
+Dose recebida	Dose received
+{0} µSv em {1}, enquanto o objeto era medido	{0} µSv over {1}, while the object was being measured
+Média · máximo	Average · maximum
+Seu fundo em casa	Your home background
+Acima do fundo	Above background
+{0} µSv (o que o objeto somou nesse tempo)	{0} µSv (what the object added in that time)
+{0} ± {1} CPM ({2} contagens em {3} s)	{0} ± {1} CPM ({2} counts in {3} s)
+{0} ± {1} CPM · {2}σ · {3}× o fundo · ≈ {4} µSv/h	{0} ± {1} CPM · {2}σ · {3}× the background · ≈ {4} µSv/h
+Os dois juntos	Both together
+{0} ± {1} CPM sobre o fundo · {2}σ · {3}× o fundo · ≈ {4}{5} µSv/h	{0} ± {1} CPM above background · {2}σ · {3}× the background · ≈ {4}{5} µSv/h

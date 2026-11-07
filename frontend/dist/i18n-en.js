@@ -1350,7 +1350,33 @@ const I18N_EN = {
 "esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RadiaCode's total (it sends it every 3 to 4 min)",
 "no aparelho, desde que foi zerado": "on the device, since it was last reset",
 "Calculado pelo app:": "Calculated by the app:",
-"sem leituras gravadas no período": "no recorded readings in the period"
+"sem leituras gravadas no período": "no recorded readings in the period",
+"Os dois perto do objeto": "Both near the object",
+"Um no objeto, outro com você": "One on the object, the other with you",
+"Qual fica no objeto": "Which one stays on the object",
+"GMC-800 no objeto, RadiaCode com você": "GMC-800 on the object, RadiaCode with you",
+"RadiaCode no objeto, GMC-800 com você": "RadiaCode on the object, GMC-800 with you",
+"Distância até os aparelhos (opcional)": "Distance to the devices (optional)",
+"O GMC-800 não está conectado.": "The GMC-800 isn't connected.",
+"Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite.": "Both near the object, at the same time. The GMC sees beta and gamma; the RadiaCode, almost only gamma: comparing them gives a hint of what the object emits.",
+"Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).": "Shows how much you received while the object was being measured, at the position where the device was (pocket, hand…).",
+"Sem leituras suficientes desse aparelho.": "Not enough readings from this device.",
+"O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta).": "The GMC saw the object and the RadiaCode barely did: it probably emits mainly beta (the RadiaCode's crystal barely sees beta).",
+"O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta.": "The GMC saw it clearly and the RadiaCode only a little: the object probably emits a lot of beta.",
+"Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco.": "Only the RadiaCode saw it: it's much more sensitive to gamma than the GMC's tube, so the object probably emits weak gamma.",
+"Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama.": "Both saw it, in a similar proportion: the object probably emits mainly gamma.",
+"Nenhum dos dois viu uma diferença clara.": "Neither saw a clear difference.",
+"O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "The GMC sees beta and gamma; the RadiaCode, almost only gamma. Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
+"Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
+"os dois aparelhos": "both devices",
+"conecte o RadiaCode para medir com os dois": "connect the RadiaCode to measure with both",
+"desligue o modo demo para medir com os dois aparelhos": "turn off demo mode to measure with both devices",
+"conecte o GMC-800 para medir com os dois": "connect the GMC-800 to measure with both",
+"Dose recebida": "Dose received",
+"Média · máximo": "Average · maximum",
+"Seu fundo em casa": "Your home background",
+"Acima do fundo": "Above background",
+"Os dois juntos": "Both together"
 },
 "patterns": [
 [
@@ -1432,6 +1458,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Deixe o ",
+"^Deixe o ((?:(?! · ).)+?) no objeto e o ((?:(?! · ).)+?) com você \\(no bolso ou na mão\\): no fim, o app mostra quanto você recebeu enquanto o objeto era medido\\.$",
+"Leave the ${1} on the object and keep the ${2} with you (in a pocket or in your hand): at the end, the app shows how much you received while the object was being measured.",
+[
+"Deixe o ",
+" no objeto e o ",
+" com você (no bolso ou na mão): no fim, o app mostra quanto você recebeu enquanto o objeto era medido."
+]
+],
+[
 "Chegou ao tempo máximo (",
 "^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM; para ir além, aumente o tempo máximo\\.$",
 "Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2} CPM; to go further, raise the time limit.",
@@ -1457,6 +1493,16 @@ const I18N_EN = {
 [
 "Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ",
 "% do fundo."
+]
+],
+[
+"Os dois viram, mas o GMC subiu bem mais (",
+"^Os dois viram, mas o GMC subiu bem mais \\(((?:(?! · ).)+?)× o fundo contra ((?:(?! · ).)+?)× no RadiaCode\\): além de gama, o objeto deve emitir beta\\.$",
+"Both saw it, but the GMC rose much more (${1}× the background against ${2}× on the RadiaCode): besides gamma, the object probably emits beta.",
+[
+"Os dois viram, mas o GMC subiu bem mais (",
+"× o fundo contra ",
+"× no RadiaCode): além de gama, o objeto deve emitir beta."
 ]
 ],
 [
@@ -1668,12 +1714,31 @@ const I18N_EN = {
 ]
 ],
 [
+"Acima do seu fundo (",
+"^Acima do seu fundo \\(((?:(?! · ).)+?)\\): \\+((?:(?! · ).)+?) µSv, o que o objeto somou na sua dose nesse tempo\\.$",
+"Above your background (${1}): +${2} µSv, what the object added to your dose in that time.",
+[
+"Acima do seu fundo (",
+"): +",
+" µSv, o que o objeto somou na sua dose nesse tempo."
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) CPM \\(≈ ((?:(?! · ).)+?) µSv/h\\), mediana das leituras por minuto dos últimos 30 dias em casa$",
 "${1} CPM (≈ ${2} µSv/h), median of the per-minute readings of the last 30 days at home",
 [
 " CPM (≈ ",
 " µSv/h), mediana das leituras por minuto dos últimos 30 dias em casa"
+]
+],
+[
+"Igual ao seu fundo (",
+"^Igual ao seu fundo \\(((?:(?! · ).)+?)\\): o objeto não somou nada que dê para ver na sua dose\\.$",
+"Same as your background (${1}): the object added nothing visible to your dose.",
+[
+"Igual ao seu fundo (",
+"): o objeto não somou nada que dê para ver na sua dose."
 ]
 ],
 [
@@ -2026,6 +2091,15 @@ const I18N_EN = {
 [
 "só ",
 " min do RadiaCode em casa na última hora (precisa de "
+]
+],
+[
+"Com você (",
+"^Com você \\(((?:(?! · ).)+?)\\): começa a contar quando o objeto for medido\\.$",
+"With you (${1}): starts counting when the object is measured.",
+[
+"Com você (",
+"): começa a contar quando o objeto for medido."
 ]
 ],
 [
@@ -2444,6 +2518,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo · ((?:(?! · ).)+?)σ · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?)((?:(?! · ).)+?) µSv/h$",
+"${1} ± ${2} CPM above background · ${3}σ · ${4}× the background · ≈ ${5}${6} µSv/h",
+[
+" CPM sobre o fundo · ",
+"σ · ",
+"× o fundo · ≈ ",
+" µSv/h"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -2732,6 +2817,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv \\(o que o objeto somou nesse tempo\\)$",
+"${1} µSv (what the object added in that time)",
+[
+" µSv (o que o objeto somou nesse tempo)"
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -2918,6 +3011,15 @@ const I18N_EN = {
 "${1} µSv (measured minutes only; average ${2})",
 [
 " µSv (só os minutos medidos; média "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?), enquanto o objeto era medido$",
+"${1} µSv over ${2}, while the object was being measured",
+[
+" µSv em ",
+", enquanto o objeto era medido"
 ]
 ],
 [
@@ -3123,6 +3225,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM · ((?:(?! · ).)+?)σ · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?) µSv/h$",
+"${1} ± ${2} CPM · ${3}σ · ${4}× the background · ≈ ${5} µSv/h",
+[
+" CPM · ",
+"σ · ",
+"× o fundo · ≈ ",
+" µSv/h"
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -3279,6 +3392,15 @@ const I18N_EN = {
 "média ",
 " µSv/h (",
 "% do seu normal)"
+]
+],
+[
+"fundo da casa do ",
+"^fundo da casa do ((?:(?! · ).)+?) indisponível: ((?:(?! · ).)+?)$",
+"home background of the ${1} unavailable: ${2}",
+[
+"fundo da casa do ",
+" indisponível: "
 ]
 ],
 [
@@ -3473,6 +3595,25 @@ const I18N_EN = {
 ]
 ],
 [
+"Com você (",
+"^Com você \\(((?:(?! · ).)+?)\\): ((?:(?! · ).)+?) µSv até agora$",
+"With you (${1}): ${2} µSv so far",
+[
+"Com você (",
+"): ",
+" µSv até agora"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\)$",
+"${1}: ${2} ± ${3} CPM above background (${4}σ)",
+[
+" CPM sobre o fundo (",
+"σ)"
+]
+],
+[
 "Atenção · ",
 "^Atenção · ((?:(?! · ).)+?) CPM · GMC Monitor$",
 "Attention · ${1} CPM · GMC Monitor",
@@ -3503,6 +3644,16 @@ const I18N_EN = {
 "home background unavailable: ${1}",
 [
 "fundo da casa indisponível: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM \\(((?:(?! · ).)+?) contagens em ((?:(?! · ).)+?) s\\)$",
+"${1} ± ${2} CPM (${3} counts in ${4} s)",
+[
+" CPM (",
+" contagens em ",
+" s)"
 ]
 ],
 [
@@ -3599,6 +3750,14 @@ const I18N_EN = {
 [
 "última leitura ",
 " µSv/h ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) \\(também perto do objeto\\)$",
+"${1} (also near the object)",
+[
+" (também perto do objeto)"
 ]
 ],
 [
@@ -3930,6 +4089,14 @@ const I18N_EN = {
 ]
 ],
 [
+"TAMBÉM PERTO DO OBJETO: ",
+"^TAMBÉM PERTO DO OBJETO: ((?:(?! · ).)+?)$",
+"ALSO NEAR THE OBJECT: ${1}",
+[
+"TAMBÉM PERTO DO OBJETO: "
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -4172,6 +4339,15 @@ const I18N_EN = {
 "Dose on the GMC-800 (${1})",
 [
 "Dose no GMC-800 ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no objeto, ((?:(?! · ).)+?) com você$",
+"${1} on the object, ${2} with you",
+[
+" no objeto, ",
+" com você"
 ]
 ],
 [
@@ -5174,6 +5350,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Com você (",
+"^Com você \\(((?:(?! · ).)+?)\\)$",
+"With you (${1})",
+[
+"Com você ("
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -5334,6 +5518,14 @@ const I18N_EN = {
 [
 "média ",
 " µSv/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) contagens$",
+"${1}: ${2} counts",
+[
+" contagens"
 ]
 ],
 [
@@ -5598,6 +5790,22 @@ const I18N_EN = {
 [
 "máx ",
 " µSv/h"
+]
+],
+[
+"seu fundo ",
+"^seu fundo ((?:(?! · ).)+?)$",
+"your background ${1}",
+[
+"seu fundo "
+]
+],
+[
+"COM VOCÊ: ",
+"^COM VOCÊ: ((?:(?! · ).)+?)$",
+"WITH YOU: ${1}",
+[
+"COM VOCÊ: "
 ]
 ],
 [
@@ -6068,6 +6276,14 @@ const I18N_EN = {
 "serial ${1}",
 [
 "série "
+]
+],
+[
+"agora ",
+"^agora ((?:(?! · ).)+?)$",
+"now ${1}",
+[
+"agora "
 ]
 ],
 [

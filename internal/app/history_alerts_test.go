@@ -544,3 +544,46 @@ func TestSpecDiff(t *testing.T) {
 		t.Fatalf("zerado: %+v", d)
 	}
 }
+
+func TestDualMeasure(t *testing.T) {
+	a, _ := testApp(t)
+	a.settings.NoMeasureReport = true
+	rcBg := &MeasurePhase{Counts: 43200, Seconds: 3600, CPM: 720, ErrCPM: 3.5, USv: 0.10, Source: "casa"}
+	gBg := &MeasurePhase{Counts: 1500, Seconds: 3600, CPM: 25, ErrCPM: 0.65, USv: 0.16, Source: "casa"}
+	// os dois perto: o objeto quase não muda o RadiaCode e triplica o GMC (beta)
+	a.measure = MeasureState{Phase: "objeto", Seconds: 60, Device: "radiacode", Mode: "ambos", Bg: rcBg, PhaseStart: time.Now().UnixMilli(),
+		Other: &MeasureSide{Device: "gmc", Role: "objeto", Bg: gBg}}
+	for i := 0; i < 60; i++ {
+		a.rcMeasureSamples(radiacode.RawSamples{Period: 500 * time.Millisecond, CPS: []float64{12, 12}, DoseRate: []float64{0.1, 0.1}})
+		cps := uint32(1)
+		if i%3 == 0 {
+			cps = 2 // ~80 CPM
+		}
+		a.feedMeasure(80, cps, false)
+	}
+	st := a.GetMeasure()
+	if st.Phase != "pronto" || st.Other == nil || st.Other.Result == nil || st.Other.Obj == nil {
+		t.Fatalf("medição: %+v other %+v", st, st.Other)
+	}
+	if st.Other.Result.Sigma < 3 || st.Result.Sigma > 2 || !strings.Contains(st.Other.Hint, "beta") {
+		t.Fatalf("resultado: rc %+v gmc %+v dica %q", st.Result, st.Other.Result, st.Other.Hint)
+	}
+	list := a.GetMeasurements()
+	if len(list) != 1 || list[0].Mode != "ambos" || list[0].Other == nil || list[0].Other.Result == nil {
+		t.Fatalf("salva: %+v", list)
+	}
+
+	// um no objeto (GMC), outro com você (RadiaCode): dose da pessoa
+	a.measure = MeasureState{Phase: "objeto", Seconds: 30, Device: "gmc", Mode: "voce", Bg: gBg, PhaseStart: time.Now().UnixMilli(),
+		Other: &MeasureSide{Device: "radiacode", Role: "voce", BgUSv: 0.10}}
+	for i := 0; i < 30; i++ {
+		a.rcMeasureSamples(radiacode.RawSamples{Period: 500 * time.Millisecond, CPS: []float64{24, 24}, DoseRate: []float64{0.46, 0.46}})
+		a.feedMeasure(30, 1, false)
+	}
+	st = a.GetMeasure()
+	o := st.Other
+	// 30 s a 0,46 µSv/h = 0,00383 µSv; acima do fundo (0,10): 0,003 µSv
+	if st.Phase != "pronto" || o == nil || math.Abs(o.Dose-0.46*30/3600) > 1e-6 || math.Abs(o.Excess-0.36*30/3600) > 1e-6 || o.MaxUSv != 0.46 {
+		t.Fatalf("com você: %+v", o)
+	}
+}

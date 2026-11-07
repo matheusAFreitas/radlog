@@ -851,7 +851,8 @@ func (a *App) GetRcSpectrum(accum bool) (RcSpectrum, error) {
 // objeto (quando ela está usando o RadiaCode).
 func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
 	a.mu.Lock()
-	active := (a.measure.Phase == "fundo" || a.measure.Phase == "objeto") && a.measure.Device == "radiacode"
+	active := (a.measure.Phase == "fundo" || a.measure.Phase == "objeto") &&
+		(a.measure.Device == "radiacode" || (a.measure.Other != nil && a.measure.Other.Device == "radiacode"))
 	a.mu.Unlock()
 	acc := &a.rc.macc
 	if !active {

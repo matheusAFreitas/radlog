@@ -515,6 +515,11 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .p-stats .p-gmc b { color: #6EE7A0; }
 .p-stats .warn { color: var(--att); }
 .p-total { margin: 0 0 8px; }
+.m-other-live { color: var(--muted); }
+.m-other-res { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; display: flex; flex-direction: column; gap: 4px; font-size: 13.5px; }
+.m-other-res strong { font-weight: 600; }
+.m-other-res .mono { font-size: 13px; }
+.m-other-res .muted { font-size: 12.5px; }
 .dose-device { margin: 2px 0 0; color: var(--muted); display: flex; flex-direction: column; gap: 2px; }
 .dose-device .dd-cap { color: var(--muted); }
 .dose-device b { color: #F472B6; font-weight: 600; }

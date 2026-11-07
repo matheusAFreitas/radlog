@@ -171,3 +171,25 @@ func TestMeasureReportRadiacode(t *testing.T) {
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-rc-en.pdf", en, 0o644)
 	}
 }
+
+func TestMeasureReportDual(t *testing.T) {
+	m := fakeMeasure(90, 720, 760)
+	m.Device, m.Mode = "radiacode", "ambos"
+	gb := phaseResult(1500, 3600, func(c float64) float64 { return c * 0.0065 })
+	gb.Source = "casa"
+	gobj := phaseResult(120, 90, func(c float64) float64 { return c * 0.0065 })
+	r := compareMeasure(gb, gobj, nil)
+	m.Other = &MeasureSide{Device: "gmc", Role: "objeto", Bg: &gb, Obj: &gobj, Result: &r, Hint: dualHint(r, m.Result)}
+	b := renderMeasurePDF(m, "RadiaCode-102", "x", "")
+	v := m
+	v.Mode = "voce"
+	v.Other = &MeasureSide{Device: "radiacode", Role: "voce", Dose: 0.0115, AvgUSv: 0.46, MaxUSv: 0.61, BgUSv: 0.10, Excess: 0.009}
+	b2 := renderMeasurePDF(v, "GMC-800", "x", "y")
+	if out := os.Getenv("MEAS_OUT"); out != "" {
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-ambos.pdf", b, 0o644)
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-voce.pdf", b2, 0o644)
+	}
+	if !strings.Contains(m.Other.Hint, "beta") {
+		t.Fatalf("dica: %q", m.Other.Hint)
+	}
+}

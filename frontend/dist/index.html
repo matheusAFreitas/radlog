@@ -534,6 +534,15 @@
         <select id="mDev">
           <option value="radiacode">RadiaCode (com espectro)</option>
           <option value="gmc">GMC-800</option>
+          <option value="ambos">Os dois perto do objeto</option>
+          <option value="voce">Um no objeto, outro com você</option>
+        </select>
+      </div>
+      <div id="mObjDevBox" hidden>
+        <label for="mObjDev">Qual fica no objeto</label>
+        <select id="mObjDev">
+          <option value="gmc">GMC-800 no objeto, RadiaCode com você</option>
+          <option value="radiacode">RadiaCode no objeto, GMC-800 com você</option>
         </select>
       </div>
       <div>
@@ -575,6 +584,7 @@
       <div class="m-step-head"><strong>2. Com o objeto</strong><span class="mono small" id="mObjVal">—</span></div>
       <div class="bar"><div class="bar-fill" id="mObjFill"></div></div>
       <div class="small m-live-line" id="mObjLive" hidden></div>
+      <div class="small m-live-line m-other-live" id="mOtherLive" hidden></div>
       <button type="button" class="btn" id="btnMeasureObj" disabled>Medir com o objeto</button>
     </div>
     <div class="m-result" id="mResult" hidden>
@@ -582,6 +592,7 @@
       <span class="mono" id="mNumbers"></span>
       <div id="mStats"></div>
       <span class="small muted" id="mExplain"></span>
+      <div class="m-other-res" id="mOtherRes" hidden></div>
       <span class="small m-saved" id="mSaved" hidden>Salva e marcada no gráfico de CPM. <button type="button" class="link small-link" id="btnMOpenSaved">Ver em Medições salvas</button></span>
       <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span> <button type="button" class="btn small" id="btnMReportOpen" hidden>Abrir relatório</button><button type="button" class="btn small" id="btnMReportMake" hidden>Relatório (PDF)</button></div>
     </div>
@@ -642,6 +653,7 @@
           </div>
           <div class="m-verdict" id="mdVerdict"><strong></strong><span class="small"></span></div>
           <div class="ri-tiles m-tiles" id="mdTiles"></div>
+          <div class="m-other-res" id="mdOther" hidden></div>
           <div id="mLiveSlotSaved"></div>
           <div class="m-spec" id="mdSpec" hidden></div>
           <div class="m-detail-cols">

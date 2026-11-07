@@ -42,7 +42,8 @@ type MeasureOpts struct {
 	Seconds  int     `json:"seconds"` // manual: cada fase
 	MaxSec   int     `json:"maxSec"`  // automático: limite da fase do objeto
 	Pct      float64 `json:"pct"`     // automático: % do fundo que conta como "tem algo"
-	Device   string  `json:"device"`  // "gmc" (ou "") ou "radiacode"
+	Device   string  `json:"device"`  // "gmc" (ou "") ou "radiacode": o que fica no objeto
+	Mode     string  `json:"mode"`    // "", "ambos" (os dois perto) ou "voce" (o outro com a pessoa)
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -207,6 +208,19 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		o.Seconds = 60
 	}
 	dev := devName(o.Device)
+	if o.Mode != "ambos" && o.Mode != "voce" {
+		o.Mode = ""
+	}
+	if o.Mode == "ambos" {
+		dev = devRC // o RadiaCode comanda (conta muito mais, decide antes)
+	}
+	var side *MeasureSide
+	if o.Mode != "" {
+		var err error
+		if side, err = a.newSide(dev, o.Mode, o.HomeBg); err != nil {
+			return a.GetMeasure(), err
+		}
+	}
 	var hb HomeBg
 	if o.HomeBg {
 		hb = a.GetHomeBackgroundDev(dev)
@@ -230,13 +244,16 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	}
 	a.mu.Lock()
 	if dev == "gmc" && a.dev == nil && !a.demo.Active {
-		st := a.measure
+		st := a.measureSnapLocked()
 		a.mu.Unlock()
 		return st, errors.New("conecte o contador (ou ligue o modo demo) para medir")
 	}
 	now := time.Now().UnixMilli()
 	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active && dev == "gmc",
-		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev}
+		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
+	if side != nil {
+		m.Demo = false
+	}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
 			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}
@@ -256,7 +273,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	a.measure = m
 	a.measSamples = nil
 	a.measSpec0, a.measSpecBg = spec0, specBg
-	st := a.measure
+	st := a.measureSnapLocked()
 	a.mu.Unlock()
 	go a.emit("measure", st)
 	return st, nil

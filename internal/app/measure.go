@@ -81,6 +81,10 @@ type MeasureState struct {
 	Device string `json:"device"`
 	// espectro (RadiaCode), quando a medição termina
 	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
+	// com os dois aparelhos: "ambos" (os dois perto) ou "voce" (um com a
+	// pessoa); Other é o segundo aparelho
+	Mode  string       `json:"mode,omitempty"`
+	Other *MeasureSide `json:"other,omitempty"`
 	// RadiaCode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
 }
@@ -110,7 +114,7 @@ func devName(d string) string {
 func (a *App) GetMeasure() MeasureState {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return a.measure
+	return a.measureSnapLocked()
 }
 
 // StartMeasurePhase começa a fase "fundo" ou "objeto". seconds vale para as
@@ -136,7 +140,11 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		if seconds < 10 || seconds > 1800 {
 			seconds = 60
 		}
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active && dev == "gmc", PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev}
+		prev := a.measure
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active && dev == "gmc", PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode}
+		if o := prev.Other; o != nil {
+			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
+		}
 		a.measSamples = nil
 		a.measSpecBg = nil
 	case "objeto":
@@ -147,6 +155,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
 		a.measure.Spectrum, a.measure.usvSum = nil, 0
+		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
 			a.measure.Seconds = a.measure.MaxSec
 		}
@@ -165,7 +174,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	default:
 		return a.measure, fmt.Errorf("fase desconhecida %q", phase)
 	}
-	st := a.measure
+	st := a.measureSnapLocked()
 	go a.emit("measure", st)
 	return st, nil
 }
@@ -214,6 +223,10 @@ func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
 func (a *App) feedMeasureDev(f measFeed) {
 	a.mu.Lock()
 	m := &a.measure
+	if a.feedSideLocked(m, f) {
+		a.mu.Unlock()
+		return
+	}
 	if (m.Phase != "fundo" && m.Phase != "objeto") || m.Demo != f.demo || devName(m.Device) != f.dev {
 		a.mu.Unlock()
 		return
@@ -235,6 +248,10 @@ func (a *App) feedMeasureDev(f measFeed) {
 		m.Live = &live
 		if m.Auto {
 			stop = autoDecide(live, *m.Bg, m.Elapsed, m.Pct)
+			// os dois perto: só para quando os dois já tiverem resposta
+			if stop != "" && sideDecide(m) == "" {
+				stop = ""
+			}
 			m.Eta = autoEta(*m.Bg, part, m.Elapsed, m.MaxSec, m.Pct)
 			if stop == "" && m.Elapsed >= m.Seconds {
 				stop = "limite"
@@ -245,6 +262,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		ph := a.measPhaseLocked(m)
 		ph.Start, ph.End = m.PhaseStart, time.Now().UnixMilli()
 		ended = m.Phase
+		a.endSidePhaseLocked(m, m.Phase, ph.Start, ph.End)
 		if m.Phase == "fundo" {
 			m.Bg = &ph
 			m.Phase = "fundo-pronto"
@@ -253,6 +271,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			r := compareMeasure(*m.Bg, ph, a.convCalLocked().USv)
 			finishResult(&r, stop, *m.Bg, m.Pct, m.Auto)
 			m.Result, m.Live, m.Eta = &r, nil, -1
+			a.finishSideLocked(m)
 			m.Phase = "pronto"
 			name := m.Name
 			if name == "" {
@@ -274,6 +293,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 				if f.dev == "radiacode" {
 					save.Device = "radiacode"
 				}
+				save.Mode, save.Other = m.Mode, m.Other.clone()
 			}
 		}
 	}
@@ -314,7 +334,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		}
 	}
 	a.mu.Lock()
-	st := a.measure
+	st := a.measureSnapLocked()
 	a.mu.Unlock()
 	if logText != "" {
 		if f.demo {
@@ -408,6 +428,9 @@ type SavedMeasure struct {
 	// aparelho que mediu ("" = GMC) e os espectros (RadiaCode)
 	Device   string           `json:"device,omitempty"`
 	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
+	// com os dois aparelhos (ver measuredual.go)
+	Mode  string       `json:"mode,omitempty"`
+	Other *MeasureSide `json:"other,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }
@@ -533,7 +556,7 @@ func (a *App) autoMeasureReport(id int64) {
 			a.measure.ReportError = err.Error()
 		}
 	}
-	st := a.measure
+	st := a.measureSnapLocked()
 	a.mu.Unlock()
 	if err != nil {
 		a.logf("relatório da medição %d: %v", id, err)
