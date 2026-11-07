@@ -163,6 +163,8 @@ func TestHeatmapAlerts(t *testing.T) {
 	a.addEvent(Event{Time: at(-1, 6, 50).UnixMilli(), End: at(-1, 7, 10).UnixMilli(), Kind: kindAlert, Level: "atencao", CPM: 55, Peak: 61, Text: "Atenção: 55 CPM (acima de 50)"}, true)
 	a.addEvent(Event{Time: at(0, 1, 55).UnixMilli(), End: at(0, 1, 56).UnixMilli(), Kind: kindAlert, Level: "alarme", CPM: 120, Peak: 130, Retro: true, Text: "Alarme (histórico do contador)"}, true)
 	a.addEvent(Event{Time: at(-30, 1, 0).UnixMilli(), Kind: kindAlert, Level: "alarme", Text: "Alarme: fora do período"}, true)
+	// alerta do RadiaCode: não entra no mapa do GMC
+	a.addEvent(Event{Time: at(-2, 3, 0).UnixMilli(), End: at(-2, 3, 5).UnixMilli(), Kind: kindAlert, Level: "alarme", Device: devRC, Text: "RadiaCode: alarme"}, true)
 	a.logEvent("Contador conectado")
 
 	h, err := a.GetHeatmap(7)

@@ -110,7 +110,7 @@ type HeatAlert struct {
 	Retro bool    `json:"retro"`
 }
 
-// heatAlerts marca as horas em que houve alerta.
+// heatAlerts marca as horas em que houve alerta do GMC.
 func (a *App) heatAlerts(first time.Time, days int) map[string][]HeatAlert {
 	out := map[string][]HeatAlert{}
 	end := first.AddDate(0, 0, days)
@@ -118,7 +118,7 @@ func (a *App) heatAlerts(first time.Time, days int) map[string][]HeatAlert {
 	a.mu.Lock()
 	var list []Event
 	for _, e := range a.events {
-		if e.Kind == kindAlert {
+		if e.Kind == kindAlert && e.Device != devRC { // o mapa é do GMC: alertas do RadiaCode ficam de fora
 			c := e
 			c.Active = a.isActiveLocked(e.ID)
 			list = append(list, c)

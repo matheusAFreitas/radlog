@@ -1,5 +1,9 @@
 # Versões
 
+## 1.46.1
+- Mapa de calor (Padrão por hora do dia): os alertas do RadiaCode não aparecem
+  mais marcados no mapa do GMC.
+
 ## 1.46.0
 - **Atividade (Bq) de verdade** na aba RadiaCode (cartão 6, no lugar do
   exemplo do KCl):
