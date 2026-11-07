@@ -569,7 +569,7 @@ func TestDualMeasure(t *testing.T) {
 		t.Fatalf("resultado: rc %+v gmc %+v dica %q", st.Result, st.Other.Result, st.Other.Hint)
 	}
 	list := a.GetMeasurements()
-	if len(list) != 1 || list[0].Mode != "ambos" || list[0].Other == nil || list[0].Other.Result == nil {
+	if len(list) != 1 || list[0].Mode != "ambos" || list[0].Other == nil || list[0].Other.Result == nil || len(list[0].Other.Samples) < 59 || list[0].Other.Samples[0].USv <= 0 {
 		t.Fatalf("salva: %+v", list)
 	}
 

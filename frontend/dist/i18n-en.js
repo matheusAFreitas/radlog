@@ -4389,6 +4389,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ao vivo \\(no objeto\\)$",
+"${1} live (on the object)",
+[
+" ao vivo (no objeto)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -4529,6 +4537,14 @@ const I18N_EN = {
 [
 " contagens em ",
 " s)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) ao vivo \\(com você\\)$",
+"${1} live (with you)",
+[
+" ao vivo (com você)"
 ]
 ],
 [

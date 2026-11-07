@@ -374,6 +374,7 @@ type App struct {
 	periods      []Period        // fora de casa (periods.go)
 	measurements []SavedMeasure  // medições de objeto salvas (measure.go)
 	measSamples  []MeasureSample // segundos da medição em andamento
+	measSamples2 []MeasureSample // os do segundo aparelho (µSv/h)
 	// RadiaCode: espectro no começo da fase atual e o do fundo já medido
 	measSpec0  *radiacode.Spectrum
 	measSpecBg *MeasureSpectrum

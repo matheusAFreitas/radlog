@@ -271,7 +271,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		}
 	}
 	a.measure = m
-	a.measSamples = nil
+	a.measSamples, a.measSamples2 = nil, nil
 	a.measSpec0, a.measSpecBg = spec0, specBg
 	st := a.measureSnapLocked()
 	a.mu.Unlock()

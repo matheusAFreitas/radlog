@@ -1,5 +1,11 @@
 # Versões
 
+## 1.39.1
+- Medir objeto com os dois aparelhos: o gráfico agora mostra o segundo
+  aparelho também, em µSv/h (rosa para o RadiaCode, verde para o GMC;
+  tracejado quando ele está com você), ao vivo e nas medições salvas. A
+  legenda diz de qual aparelho é cada linha.
+
 ## 1.39.0
 - **Medir objeto em µSv/h**: tudo na tela de medir passa a ser em µSv/h
   (fundo, objeto, líquido, incerteza, limite de detecção, gráfico, medições

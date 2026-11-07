@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"math"
+	"time"
 )
 
 // ---------- medir um objeto com os dois aparelhos ----------
@@ -37,6 +38,8 @@ type MeasureSide struct {
 	NowUSv float64 `json:"nowUSv"` // última leitura (ao vivo)
 	// os dois perto: o que a comparação sugere (beta × gama)
 	Hint string `json:"hint,omitempty"`
+	// um registro por segundo (só na medição salva, para o gráfico)
+	Samples []MeasureSample `json:"samples,omitempty"`
 
 	usvSum float64
 	usvN   int
@@ -85,12 +88,13 @@ func (a *App) feedSideLocked(m *MeasureState, f measFeed) bool {
 	if m.Phase != "fundo" && m.Phase != "objeto" {
 		return true
 	}
-	// leitura de agora, para a tela (em qualquer fase)
+	// leitura de agora, para a tela e o gráfico (em qualquer fase)
 	if s.Device == devRC {
 		s.NowUSv = f.usv
 	} else {
 		s.NowUSv = a.convCalLocked().USv(f.cpm)
 	}
+	a.measSamples2 = append(a.measSamples2, MeasureSample{T: time.Now().UnixMilli() - measT0(m), Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0)), USv: s.NowUSv})
 	if s.Role == "voce" && m.Phase != "objeto" {
 		return true // com você só conta enquanto o objeto é medido
 	}

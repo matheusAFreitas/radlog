@@ -1837,13 +1837,13 @@ async function refreshRainStatus() {
 // CPM ao vivo (linha fina) e a média acumulada de cada fase com a margem de
 // erro (faixa), segundo a segundo.
 
-const mlog = { start: 0, live: [], ph: [], demo: false };
+const mlog = { start: 0, live: [], ph: [], demo: false, other: [] };
 
 function measureLogStep(st) {
   const active = st.phase === "fundo" || st.phase === "objeto";
-  if (!st.phase) { mlog.start = 0; mlog.live = []; mlog.ph = []; return; }
+  if (!st.phase) { mlog.start = 0; mlog.live = []; mlog.ph = []; mlog.other = []; return; }
   const fresh = st.elapsed <= 1 && (st.phase === "fundo" || (st.phase === "objeto" && st.bg && st.bg.source === "casa"));
-  if (fresh) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
+  if (fresh) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.other = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
   if (!mlog.start) mlog.start = Date.now();
   if (active && st.elapsed > 0) {
     const m = st.elapsed / 60;
@@ -1855,7 +1855,10 @@ function measureLogStep(st) {
 
 function measureLogReading(r) {
   const st = state.measureSt;
-  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !!r.demo !== !!st.demo || isRcMeasure(st)) return;
+  if (!st || (st.phase !== "fundo" && st.phase !== "objeto")) return;
+  // GMC como segundo aparelho: vai para a linha dele (µSv/h)
+  if (st.other && st.other.device === "gmc" && !r.demo) { mlog.other.push({ t: Date.now(), usv: r.usv, phase: st.phase }); return; }
+  if (!!r.demo !== !!st.demo || isRcMeasure(st)) return;
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
 }
 
@@ -1917,7 +1920,13 @@ function rcAlarmState(st) {
 // RadiaCode medindo: a leitura ao vivo é o CPS do aparelho × 60
 function measureLogRc(rs) {
   const st = state.measureSt;
-  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !isRcMeasure(st) || !rs || rs.state !== "conectado") return;
+  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !rs || rs.state !== "conectado") return;
+  if (st.other && st.other.device === "radiacode") {
+    const lo = mlog.other[mlog.other.length - 1];
+    if (!lo || Date.now() - lo.t >= 500) mlog.other.push({ t: Date.now(), usv: rs.usvh, phase: st.phase });
+    return;
+  }
+  if (!isRcMeasure(st)) return;
   const last = mlog.live[mlog.live.length - 1];
   if (last && Date.now() - last.t < 500) return;
   mlog.live.push({ t: Date.now(), cpm: rs.cps * 60 });
@@ -1934,7 +1943,8 @@ function liveMeasureSrc() {
     expectSec = before + st.elapsed + (st.eta >= 0 ? st.eta : 60) + 5;
   } else if (st.auto && st.phase === "fundo") expectSec = st.seconds + 60;
   else if (st.phase !== "fundo" && st.phase !== "objeto") expectSec = 1; // terminou: o eixo vai até o último ponto
-  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st) };
+  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st),
+    dev: isRcMeasure(st) ? "radiacode" : "gmc", other: st.other ? mlog.other : null, otherDev: st.other && st.other.device, otherRole: st.other && st.other.role };
 }
 
 function savedMeasureSrc(m) {
@@ -1951,7 +1961,10 @@ function savedMeasureSrc(m) {
     const min = a.n / 60;
     ph.push({ t, phase: s.phase, avg: a.counts / min, err: Math.sqrt(Math.max(a.counts, 1)) / min });
   }
-  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m) };
+  const o = m.other;
+  const other = o && o.samples ? o.samples.filter((s) => s.usv > 0).map((s) => ({ t: start + s.t, usv: s.usv, phase: s.phase })) : null;
+  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m),
+    dev: isRcMeasure(m) ? "radiacode" : "gmc", other, otherDev: o && o.device, otherRole: o && o.role };
 }
 
 function drawMeasureChart() {
@@ -1979,13 +1992,16 @@ function drawMeasureSrc(src) {
     return;
   }
   const t0 = src.start;
-  const tAll = [...src.live.map((p) => p.t), ...src.ph.map((p) => p.t)];
+  const k = src.k || calK();
+  const oth = (src.other || []).map((p) => ({ t: p.t, cpm: p.usv / k })); // na escala do principal
+  const tAll = [...src.live.map((p) => p.t), ...src.ph.map((p) => p.t), ...oth.map((p) => p.t)];
   // o eixo vai até o fim previsto da medição (fundo + objeto), para ir enchendo
   const expected = src.done ? 0 : (src.expectSec || src.seconds * 2 + 15) * 1000;
   const t1 = Math.max(t0 + expected, t0 + 10e3, ...tAll);
   src.t1 = t1;
   let top = 0;
   for (const p of src.live) top = Math.max(top, p.cpm);
+  for (const p of oth) top = Math.max(top, p.cpm);
   // a média dos primeiros segundos pula muito (1 contagem em 1 s = 60 CPM):
   // ela não entra na escala; a faixa de erro também pode passar do topo
   const first = {};
@@ -1995,7 +2011,6 @@ function drawMeasureSrc(src) {
   const x = (t) => ((t - t0) / (t1 - t0)) * W;
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   // o gráfico fica em CPM por dentro; os números saem em µSv/h
-  const k = src.k || calK();
   const ys = $("mY").children;
   for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : fmt(v, usvDigits(top * k)); }
   let out = [0, 1, 2, 3].map((i) => {
@@ -2023,9 +2038,23 @@ function drawMeasureSrc(src) {
   if (src.live.length > 1) {
     // quebra a linha nos intervalos (ex.: entre o fundo e o objeto)
     const d = src.live.map((p, i) => (i && p.t - src.live[i - 1].t <= 3000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="#6EE7A0" stroke-opacity="0.55" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || "#6EE7A0"}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+  }
+  // segundo aparelho: a leitura dele em µSv/h, por cima
+  if (oth.length > 1) {
+    const d = oth.map((p, i) => (i && p.t - oth[i - 1].t <= 5000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
+    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.otherDev] || "#F472B6"}" stroke-width="1.6" stroke-dasharray="${src.otherRole === "voce" ? "5 3" : "0"}" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
+  // legenda: de que aparelho é cada linha
+  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || "#6EE7A0";
+  $("mLiveKeyTxt").textContent = src.otherDev ? `${devLabel(src.dev)} ao vivo (no objeto)` : "leitura ao vivo";
+  $("mOtherKey").hidden = !src.otherDev;
+  if (src.otherDev) {
+    $("mOtherKeyI").style.borderColor = DEV_COLOR[src.otherDev];
+    $("mOtherKeyI").style.borderTopStyle = src.otherRole === "voce" ? "dashed" : "solid";
+    $("mOtherKeyTxt").textContent = `${devLabel(src.otherDev)} ao vivo (${src.otherRole === "voce" ? "com você" : "no objeto"})`;
+  }
   const last = (ph) => { const l = src.ph.filter((p) => p.phase === ph); return l[l.length - 1]; };
   const b = last("fundo"), o = last("objeto");
   const parts = [];
@@ -2051,7 +2080,9 @@ function setupMeasureHover() {
     const tip = $("mTip");
     tip.hidden = false;
     const k = src.k || calK();
-    tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ao vivo ${uS(lv.cpm, k)}` : "") + (ph ? ` · média (${ph.phase}) ${numU(ph.avg * k)} ± ${numU(ph.err * k)} µSv/h` : "");
+    const ov = src.other && src.other.length ? near(src.other) : null;
+    tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ${src.otherDev ? devLabel(src.dev) : "ao vivo"} ${uS(lv.cpm, k)}` : "") +
+      (ov && Math.abs(ov.t - ref.t) < 5000 ? ` · ${devLabel(src.otherDev)} ${usvVal(ov.usv)}` : "") + (ph ? ` · média (${ph.phase}) ${numU(ph.avg * k)} ± ${numU(ph.err * k)} µSv/h` : "");
     tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("mCursor").hidden = true; $("mTip").hidden = true; });
@@ -2261,6 +2292,7 @@ function renderMeasure(st) {
 // ---------- segundo aparelho (os dois perto, ou um com você) ----------
 
 const devLabel = (d) => (d === "radiacode" ? "RadiaCode" : "GMC-800");
+const DEV_COLOR = { radiacode: "#F472B6", gmc: "#6EE7A0" };
 
 // os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
 function renderMeasureDuo(st, running) {

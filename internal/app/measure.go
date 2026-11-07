@@ -145,7 +145,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		if o := prev.Other; o != nil {
 			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
 		}
-		a.measSamples = nil
+		a.measSamples, a.measSamples2 = nil, nil
 		a.measSpecBg = nil
 	case "objeto":
 		if a.measure.Bg == nil {
@@ -168,6 +168,13 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 			}
 		}
 		a.measSamples = kept
+		kept2 := a.measSamples2[:0]
+		for _, s := range a.measSamples2 {
+			if s.Phase == "fundo" {
+				kept2 = append(kept2, s)
+			}
+		}
+		a.measSamples2 = kept2
 		if n := strings.TrimSpace(name); n != "" {
 			a.measure.Name = n
 		}
@@ -194,6 +201,17 @@ type MeasureSample struct {
 	Phase string  `json:"phase"` // fundo ou objeto
 	CPM   float64 `json:"cpm"`   // leitura ao vivo do contador (60 s)
 	CPS   uint32  `json:"cps"`   // contagens desse segundo
+	// µSv/h desse segundo (segundo aparelho, para o gráfico)
+	USv float64 `json:"usv,omitempty"`
+}
+
+// measT0 é o zero do tempo dos segundos guardados (começo do fundo medido,
+// ou do objeto quando o fundo é o da casa).
+func measT0(m *MeasureState) int64 {
+	if m.Bg != nil && m.Phase == "objeto" && m.Bg.Source != "casa" {
+		return m.Bg.Start
+	}
+	return m.PhaseStart
 }
 
 // feedMeasure recebe a leitura de um segundo do GMC (real ou do demo).
@@ -234,10 +252,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 	m.Counts += f.counts
 	m.usvSum += f.usv
 	m.Elapsed++
-	start := m.PhaseStart
-	if m.Bg != nil && m.Phase == "objeto" && m.Bg.Source != "casa" {
-		start = m.Bg.Start
-	}
+	start := measT0(m)
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
 	var logText string
 	var save *SavedMeasure
@@ -302,6 +317,9 @@ func (a *App) feedMeasureDev(f measFeed) {
 					save.Device = "radiacode"
 				}
 				save.Mode, save.Other = m.Mode, m.Other.clone()
+				if save.Other != nil {
+					save.Other.Samples = append([]MeasureSample(nil), a.measSamples2...)
+				}
 			}
 		}
 	}

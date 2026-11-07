@@ -2001,3 +2001,5 @@ Gráfico da medição: leitura ao vivo e média de cada fase	Measurement chart: 
 objeto {0} ± {1} µSv/h	object {0} ± {1} µSv/h
 objeto {0} ± {1}	object {0} ± {1}
 {0} ± {1} ({2} contagens em {3} s)	{0} ± {1} ({2} counts in {3} s)
+{0} ao vivo (no objeto)	{0} live (on the object)
+{0} ao vivo (com você)	{0} live (with you)
