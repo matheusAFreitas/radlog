@@ -274,3 +274,26 @@ func TestRcDuplicateMinute(t *testing.T) {
 		t.Fatalf("dose de hoje contou o minuto duas vezes: %v", st.Today)
 	}
 }
+
+func TestRcDoseLive(t *testing.T) {
+	a := newTestApp(t)
+	a.rc.st.State = "conectado"
+	t0 := time.Now().Add(-10 * time.Second)
+	a.rc.mu.Lock()
+	a.rcDoseRareLocked(0.70, 3600, t0)
+	for k := 0; k <= 10; k++ { // 10 s a 36 µSv/h = 0,1 µSv
+		a.rcDoseRTLocked(36, t0.Add(time.Duration(k)*time.Second))
+	}
+	a.rc.mu.Unlock()
+	st := a.GetRadiacode()
+	if !st.DoseLiveOn || math.Abs(st.DoseLive-0.80) > 1e-6 || st.DoseLiveSec < 3609 {
+		t.Fatalf("ao vivo: %+v", st)
+	}
+	// desconectado e reaberto: vale o último total gravado
+	b := newTestApp(t)
+	b.dataDir = a.dataDir
+	st = b.GetRadiacode()
+	if st.DoseLiveOn || st.DoseLive != 0.70 || st.DoseLiveAt != t0.UnixMilli() {
+		t.Fatalf("gravado: %+v", st)
+	}
+}

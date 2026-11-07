@@ -1909,3 +1909,7 @@ Antes da chuva: {0} µSv/h · últimos 15 min: {1} ({2}%)	Before the rain: {0} �
 {0} → {1} µSv/h ({2}%) em {3}	{0} → {1} µSv/h ({2}%) in {3}
 sem leituras do RadiaCode nas 2 h antes	no RadiaCode readings in the 2 h before
 {0} · chuva {1} · sem chuva {2}	{0} · rain {1} · no rain {2}
+No aparelho:	On the device:
+{0} µSv desde que foi zerado ({1} contando)	{0} µSv since it was last reset ({1} counting)
+{0} µSv desde que foi zerado	{0} µSv since it was last reset
+às {0}, desconectado	at {0}, disconnected

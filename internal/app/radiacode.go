@@ -74,6 +74,12 @@ type RcState struct {
 	// alertas do RadiaCode: o nível aberto agora e os limites usados
 	AlertLevel string   `json:"alertLevel"`
 	Limits     RcLimits `json:"limits"`
+	// dose acumulada do aparelho (desde que foi zerado), ao vivo quando
+	// conectado; senão, a última recebida (DoseLiveAt diz de quando)
+	DoseLive    float64 `json:"doseLive"`
+	DoseLiveSec float64 `json:"doseLiveSec"`
+	DoseLiveAt  int64   `json:"doseLiveAt"`
+	DoseLiveOn  bool    `json:"doseLiveOn"`
 }
 
 // RcStats são as medidas do RadiaCode como as do GMC: fundo de casa, média
@@ -106,6 +112,7 @@ type rcState struct {
 	today   rcToday
 	raw     rcRawLog
 	macc    rcMeasAcc // só a goroutine do rcRun mexe
+	dose    rcDoseLive
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -164,6 +171,7 @@ func (a *App) GetRadiacode() RcState {
 	st.Raw = !noRaw
 	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.attnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.dangerEnter())
 	st.AlertLevel, st.Limits = alertLvl, lim
+	a.rcDoseFillLocked(&st, st.State == "conectado")
 	if st.State != "conectado" {
 		st.AlertLevel = ""
 	}
@@ -379,6 +387,9 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	al, alErr := dev.Alarms()
 	a.rc.mu.Lock()
 	a.rc.dev = dev
+	// o total ao vivo recomeça no primeiro RareData desta conexão (até lá vale
+	// o último gravado)
+	a.rc.dose.has, a.rc.dose.lastRT = false, time.Time{}
 	a.rc.st = RcState{State: "conectado", Via: dev.Kind(), Model: dev.Model, Serial: dev.Serial, Firmware: dev.Firmware,
 		Since: time.Now().UnixMilli()}
 	if alErr == nil {
@@ -455,6 +466,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.mu.Lock()
 			a.rc.st.Time, a.rc.st.CPS, a.rc.st.CPSErr = now.UnixMilli(), v.CPS, v.CPSErr
 			a.rc.st.USvh, a.rc.st.USvhErr = v.DoseRate, v.DoseErr
+			a.rcDoseRTLocked(v.DoseRate, now)
 			a.rc.mu.Unlock()
 			a.rcAddMinute(now, v.CPS, v.DoseRate)
 			// os primeiros segundos podem trazer leituras paradas no buffer do
@@ -481,6 +493,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 		case radiacode.Rare:
 			a.rc.mu.Lock()
 			a.rc.st.Dose, a.rc.st.DoseSec, a.rc.st.Battery, a.rc.st.TempC, a.rc.st.HasRare = v.Dose, int64(v.Duration), v.Battery, v.TempC, true
+			a.rcDoseRareLocked(v.Dose, float64(v.Duration), time.Now())
 			a.rc.mu.Unlock()
 			changed = true
 		case radiacode.Event:

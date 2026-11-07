@@ -1,5 +1,13 @@
 # Versões
 
+## 1.36.0
+- **Dose acumulada do RadiaCode sempre atualizada**: o cartão "Sua dose
+  (RadiaCode)" mostra o total do próprio aparelho (desde que foi zerado, o
+  mesmo número da tela dele). O aparelho manda esse total a cada ~4 min; entre
+  um envio e outro o app soma a leitura ao vivo, então o número anda a cada
+  segundo e se acerta no envio seguinte. Desconectado, aparece o último total
+  recebido, com a hora. A aba RadiaCode usa o mesmo número.
+
 ## 1.35.1
 - RadiaCode: quando a conexão caía e voltava no meio de um minuto, o minuto
   era gravado duas vezes e contava duas vezes na dose. Agora as duas partes

@@ -1309,6 +1309,7 @@ async function refreshDose() {
   document.querySelectorAll("#doseSrcSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dsrc === (isRc ? "radiacode" : "gmc"))));
   $("doseTitle").textContent = rcOn ? (isRc ? "Sua dose (RadiaCode)" : "Dose da casa (GMC-800)") : "Dose acumulada";
   const otherName = isRc ? "GMC-800 (casa)" : "RadiaCode (você)";
+  renderDoseDevice();
   $("doseOther").hidden = !(rcOn && c.otherMinutes > 0);
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
   $("doseNote").textContent =
@@ -1854,6 +1855,20 @@ function measureLogReading(r) {
   const st = state.measureSt;
   if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !!r.demo !== !!st.demo || isRcMeasure(st)) return;
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
+}
+
+// dose acumulada do próprio RadiaCode (desde que foi zerado), no cartão de
+// dose: anda ao vivo com ele conectado
+function renderDoseDevice() {
+  const el = $("doseDevice"), st = state.rc.st || {};
+  const show = state.doseSrc === "radiacode" && st.doseLiveAt > 0;
+  el.hidden = !show;
+  if (!show) return;
+  const v = st.doseLive;
+  el.innerHTML = "<b></b><span></span>";
+  el.children[0].textContent = "No aparelho:";
+  el.children[1].textContent = ` ${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)} contando)` : "") +
+    (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
 }
 
 // alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que
@@ -4267,6 +4282,7 @@ function renderRc(st) {
   const prev = state.rc.st;
   state.rc.st = st;
   rcAlarmState(st);
+  renderDoseDevice();
   const on = st.state === "conectado";
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
   // pílula no topo: só aparece quando tem algo a dizer
@@ -4288,8 +4304,8 @@ function renderRc(st) {
     $("rcUsvErr").textContent = st.time ? `± ${fmt(st.usvhErr, 0)}%` : "";
     $("rcCps").textContent = st.time ? `${fmt(st.cps, 2)} cps` : "—";
     $("rcCpsErr").textContent = st.time ? `± ${fmt(st.cpsErr, 0)}% · ${fmt(st.cps * 60, 0)} CPM` : "";
-    $("rcDose").textContent = st.hasRare ? `${fmt(st.dose, st.dose < 10 ? 2 : 1)} µSv` : "—";
-    $("rcDoseSince").textContent = st.hasRare && st.doseSec ? `em ${rcDur(st.doseSec)}` : "";
+    $("rcDose").textContent = st.doseLiveAt ? `${fmt(st.doseLive, st.doseLive < 10 ? 3 : 2)} µSv` : "—";
+    $("rcDoseSince").textContent = st.doseLiveAt && st.doseLiveSec ? `em ${rcDur(st.doseLiveSec)}` + (st.doseLiveOn ? "" : ` · às ${hhmm(st.doseLiveAt)}`) : "";
     $("rcBat").textContent = st.hasRare ? `${fmt(st.battery, 0)}%` : "—";
     $("rcTemp").textContent = st.hasRare ? `${fmt(st.tempC, 1)} °C` : "";
   }
@@ -5090,7 +5106,7 @@ function makeDemoApi() {
   const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
-        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, doseLive: 2.41 + (Date.now() % 600000) / 3.6e7, doseLiveSec: 93600, doseLiveAt: Date.now(), doseLiveOn: !localStorage.getItem("rcFake2"), battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
     : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off, raw: demoRcCfg.raw };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);

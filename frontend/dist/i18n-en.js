@@ -1345,7 +1345,8 @@ const I18N_EN = {
 "Aparelho da conta da chuva": "Device for the rain analysis",
 "% acima da média das 2 h antes (RadiaCode)": "% above the average of the 2 h before (RadiaCode)",
 "A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
-"sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before"
+"sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before",
+"No aparelho:": "On the device:"
 },
 "patterns": [
 [
@@ -2871,6 +2872,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv desde que foi zerado \\(((?:(?! · ).)+?) contando\\)$",
+"${1} µSv since it was last reset (${2} counting)",
+[
+" µSv desde que foi zerado (",
+" contando)"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -3813,6 +3823,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv desde que foi zerado$",
+"${1} µSv since it was last reset",
+[
+" µSv desde que foi zerado"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -4636,6 +4654,15 @@ const I18N_EN = {
 [
 "maior pico ",
 " µSv/h"
+]
+],
+[
+"às ",
+"^às ((?:(?! · ).)+?), desconectado$",
+"at ${1}, disconnected",
+[
+"às ",
+", desconectado"
 ]
 ],
 [
