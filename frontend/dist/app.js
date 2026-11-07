@@ -5323,6 +5323,75 @@ function makeDemoApi() {
   const demoRcCfg = { off: false, ble: "", raw: true };
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
+  // medição de atividade de mentira (para ver a tela sem o aparelho)
+  const demoAct = {
+    run: null,
+    bg: null,
+    cal: { geometry: "pote de 500 mL encostado", kcl: { t: Date.now() - 3 * 86400e3, eff: 0.00182, effErr: 0.031, massG: 500, pct: 100, sec: 3600 }, th: null },
+    hist: [],
+    nucs: [
+      { id: "K-40", name: "Potássio-40", kevs: [1460.8] }, { id: "Cs-137", name: "Césio-137", kevs: [661.7] },
+      { id: "Ra-226", name: "Rádio-226 (série do urânio)", note: "pelos filhos Pb-214 e Bi-214: a amostra precisa ficar fechada ~3 semanas antes, para o radônio não escapar", kevs: [351.9, 609.3, 1764.5] },
+      { id: "Ra-228", name: "Rádio-228 (início da série do tório)", note: "pelo Ac-228, que acompanha o Ra-228 em poucos dias", kevs: [911.2, 969] },
+      { id: "Th-232", name: "Tório-232 (série, em equilíbrio)", kevs: [238.6, 583.2, 911.2, 2614.5] }, { id: "U-238", name: "Urânio-238 (urânio natural)", kevs: [1001] },
+    ],
+    sec() { return this.run ? Math.min(this.run.target || 1e9, ((Date.now() - this.run.at) / 1000) * 120) : 0; },
+    start(o) {
+      if (!demoRcFake()) throw new Error("RadiaCode não conectado");
+      if (!(o.massG > 0)) throw new Error("informe a massa em gramas");
+      o.name = o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : o.kind === "torio" ? "eletrodo de tório (" + o.pct + "% ThO₂)" : "amostra");
+      this.run = { o, phase: o.newBg ? "fundo" : "amostra", at: Date.now(), target: o.newBg ? o.bgSec : o.smpSec, bgSec: o.newBg ? 0 : 7200 };
+    },
+    next() {
+      const r = this.run; if (!r) return;
+      if (r.phase === "fundo") { r.bgSec = this.sec(); r.phase = "trocar"; this.bg = { t: Date.now(), sec: r.bgSec }; }
+      else if (r.phase === "trocar") { r.phase = "amostra"; r.at = Date.now(); r.target = r.o.smpSec; }
+      else if (r.phase === "amostra") {
+        r.sec = this.sec(); r.phase = "pronto"; r.result = this.result(r.sec); this.hist.unshift(r.result);
+        if (r.o.kind === "kcl") this.cal.kcl = { ...r.result.kcl };
+        if (r.o.kind === "torio") this.cal.th = { ...r.result.th };
+      }
+    },
+    nucRes(sec, massG, ids) {
+      const f = Math.sqrt(3600 / Math.max(sec, 60));
+      const base = { "K-40": [180, 0.08], "Ra-226": [58, 0.35], "Ra-228": [40, 0.6], "Th-232": [25, 0.9], "Cs-137": [0, 0], "U-238": [0, 0] };
+      return ids.map((id) => {
+        const nu = this.nucs.find((n) => n.id === id) || { id, name: id }, [bq] = base[id] || [0], rel = (base[id] || [0, 0])[1], kg = massG / 1000;
+        const stat = bq ? bq * rel * f : 6 * f, det = bq > 1.645 * stat, err = Math.hypot(stat, bq * 0.05);
+        return { id, name: nu.name, note: nu.note || "", bq, err, statErr: stat, detected: det, mda: 4.65 * stat, bqKg: bq / kg, errKg: err / kg, mdaKg: (4.65 * stat) / kg,
+          needSec: bq ? sec * (stat / bq / 0.1) ** 2 : 0, lines: (nu.kevs || []).map((e) => ({ kev: e, who: id, bq: bq * (0.9 + Math.random() * 0.2), err: stat * 1.4 })) };
+      });
+    },
+    result(sec) {
+      const o = this.run.o, r = { t: Date.now(), kind: o.kind, name: o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : "eletrodo de tório"), massG: o.massG, geometry: o.geometry, sec, bgSec: this.run.bgSec, calSrc: "kcl", nuclides: [] };
+      if (o.kind === "kcl") { r.expected = (o.massG * o.pct) / 100 * 0.52445 * 31.7; r.kcl = { t: r.t, eff: 0.00179 + Math.random() * 0.00008, effErr: 0.03 * Math.sqrt(3600 / sec), massG: o.massG, pct: o.pct, sec }; r.prev = this.cal.kcl && this.cal.kcl.eff; }
+      else if (o.kind === "torio") { r.th = { t: r.t, b: -1.24, bErr: 0.07, pivot: 583.2 }; r.thLines = [{ kev: 238.6, area: 41230, areaErr: 410 }, { kev: 583.2, area: 9120, areaErr: 260 }, { kev: 2614.5, area: 2210, areaErr: 120 }]; r.nuclides = this.nucRes(sec, o.massG, ["Th-232"]); }
+      else r.nuclides = this.nucRes(sec, o.massG, o.nuclides);
+      return r;
+    },
+    view() {
+      const cal = this.cal, effAt = (e) => (cal.kcl ? cal.kcl.eff : 0.001) * Math.pow(e / 1460.8, cal.th ? cal.th.b : -1.3);
+      const E = [250, 500, 1000, 1500, 2000, 2500];
+      const v = { phase: "", cal, calSrc: cal.kcl ? "kcl" : "chute", calEff: E.map(effAt), calErr: E.map((e) => Math.hypot(cal.kcl ? cal.kcl.effErr : 1, (cal.th ? 0.07 : 0.4) * Math.log(e / 1460.8))),
+        savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, history: this.hist, nuclides: this.nucs, connected: demoRcFake() };
+      if (this.run && (this.run.phase === "fundo" || this.run.phase === "amostra") && this.run.target > 0 && this.sec() >= this.run.target) this.next();
+      const r = this.run; if (!r) return v;
+      v.opts = r.o; v.phase = r.phase; v.phaseAt = r.at; v.bgSec = r.bgSec;
+      if (r.phase === "fundo" || r.phase === "amostra") { v.phaseSec = this.sec(); v.target = r.target; }
+      if (r.phase === "amostra" && v.phaseSec > 10) {
+        if (r.o.kind === "kcl") { v.liveKcl = { eff: 0.0018, effErr: 0.03 * Math.sqrt(3600 / v.phaseSec) }; v.expected = 8300; }
+        else if (r.o.kind === "torio") v.liveTh = { b: -1.24, bErr: 0.07 * Math.sqrt(3600 / v.phaseSec) };
+        else v.live = this.nucRes(v.phaseSec, r.o.massG, r.o.nuclides);
+      }
+      if (r.phase === "pronto") v.result = r.result;
+      const pk = (e, c, a) => a * Math.exp(-0.5 * ((e - c) / (27.6 * Math.sqrt(c / 661.7))) ** 2);
+      const bgf = (e) => 0.02 * Math.exp(-e / 300) + 0.0004 + pk(e, 1460.8, 0.0012) + pk(e, 609.3, 0.0015) + pk(e, 351.9, 0.0018);
+      const smpf = (e) => bgf(e) * 1.25 + pk(e, 1460.8, 0.002) + pk(e, 609.3, 0.0012) + pk(e, 351.9, 0.0013);
+      const mk = (fn) => Array.from({ length: 300 }, (_, i) => fn((i + 0.5) * 10) * (0.92 + Math.random() * 0.16));
+      if (r.phase !== "trocar") v.chart = { eMax: 3000, bg: mk(bgf), smp: r.phase === "fundo" ? null : mk(smpf) };
+      return v;
+    },
+  };
   const demoRc = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
@@ -5555,6 +5624,13 @@ function makeDemoApi() {
       }
       return out;
     },
+    // atividade de mentira: o tempo passa 120× mais rápido
+    GetActivity: async () => demoAct.view(),
+    StartActivity: async (o) => demoAct.start(o),
+    ActivityNext: async () => demoAct.next(),
+    CancelActivity: async () => { demoAct.run = null; },
+    CloseActivity: async () => { demoAct.run = null; },
+    ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
     AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),

@@ -1,5 +1,27 @@
 # Versões
 
+## 1.46.0
+- **Atividade (Bq) de verdade** na aba RadiaCode (cartão 6, no lugar do
+  exemplo do KCl):
+  - **calibrar com KCl** (KCl puro ou sal light, pela % de KCl): mede a
+    eficiência do aparelho em 1.460 keV naquela posição;
+  - **calibrar com o eletrodo de tório** (WT10 a WT40, com a idade se
+    souber): as linhas de 238,6, 583,2 e 2.614,5 keV dão a forma da curva
+    de eficiência (como ela muda com a energia);
+  - **medir amostra**: K-40, Cs-137, Ra-226, Ra-228, série do Th-232 e
+    U-238, em Bq e Bq/kg com a incerteza, ou "abaixo de" (atividade mínima
+    detectável) quando não aparece; prontos para castanha-do-pará, areia
+    monazítica, granito/porcelanato, vidro de urânio, alimento e adubo, com
+    valores típicos para comparar;
+  - fundo e amostra em fases, com tempo escolhido (ou até parar), resultado
+    parcial e quanto tempo falta para ±10%; o fundo fica salvo para as
+    próximas;
+  - os picos são ajustados juntos (gaussianas de posição e largura conhecidas
+    mais uma reta), para linhas vizinhas como 583/609 e 338/352 não se
+    misturarem;
+  - continua se o app fechar no meio; calibração, fundo e medidas entram no
+    backup.
+
 ## 1.45.0
 - **Modo busca de verdade** na aba RadiaCode (cartão 5), com o aparelho
   conectado:

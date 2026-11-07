@@ -1445,7 +1445,103 @@ const I18N_EN = {
 "Zerar máximo": "Reset max",
 "desligado": "off",
 "cliques": "clicks",
-"tom (mais agudo = mais forte)": "tone (higher = stronger)"
+"tom (mais agudo = mais forte)": "tone (higher = stronger)",
+"Atividade (Bq)": "Activity (Bq)",
+"Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RadiaCode enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.": "Activity (Bq) is how many atoms decay per second in the sample; dose (µSv) is how much of that reaches the body. To know the activity, the app needs to know how much of each energy the RadiaCode sees in that position (the efficiency): this is measured once with known references, KCl (potassium) and, if you have one, the thorium electrode. After that you can measure samples in the same position.",
+"Tipo": "Type",
+"Medir amostra": "Measure sample",
+"Calibrar com KCl": "Calibrate with KCl",
+"Calibrar com tório": "Calibrate with thorium",
+"O que é": "What it is",
+"KCl puro (substituto de sal)": "Pure KCl (salt substitute)",
+"Sal light": "Lite salt",
+"% de KCl": "% KCl",
+"no rótulo: mg de potássio em 1 g × 0,19": "on the label: mg of potassium in 1 g × 0.19",
+"Eletrodo": "Electrode",
+"WT10 (amarelo, 1% de ThO₂)": "WT10 (yellow, 1% ThO₂)",
+"WT20 (vermelho, 2%)": "WT20 (red, 2%)",
+"WT30 (roxo, 3%)": "WT30 (purple, 3%)",
+"WT40 (laranja, 4%)": "WT40 (orange, 4%)",
+"Idade do eletrodo (anos)": "Electrode age (years)",
+"não sei": "don't know",
+"Posição": "Position",
+"medir um fundo novo": "measure a new background",
+"usar o fundo salvo": "use the saved background",
+"usar o fundo salvo (não tem)": "use the saved background (none)",
+"Tempo do fundo": "Background time",
+"Tempo da amostra": "Sample time",
+"até eu parar": "until I stop",
+"Começar": "Start",
+"amostra": "sample",
+"Limites: o cristal do RadiaCode é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.": "Limits: the RadiaCode crystal is small and the peaks are wide, so neighboring lines blend together (the app fits them all at once, but the uncertainty grows) and weak things, like food, need many hours. The sample can't be very different from the reference in density and size, and must always be in the same position.",
+"esquecer": "forget",
+"sem KCl: a escala vem do tório (aproximada)": "no KCl: the scale comes from thorium (approximate)",
+"sem calibração: os Bq são só um chute (±100%). Comece pelo KCl.": "no calibration: the Bq are just a guess (±100%). Start with KCl.",
+"forma da curva: estimada (inclinação −1,3 ± 0,4); o tório melhora": "curve shape: estimated (slope −1.3 ± 0.4); thorium improves it",
+"radionuclídeo": "radionuclide",
+"atividade": "activity",
+"por kg": "per kg",
+"para ±10%": "for ±10%",
+"já chegou": "already reached",
+"ainda não aparece": "not showing yet",
+"Rádio-228 (início da série do tório)": "Radium-228 (start of the thorium series)",
+"Tório-232 (série, em equilíbrio)": "Thorium-232 (series, in equilibrium)",
+"Urânio-238 (urânio natural)": "Uranium-238 (natural uranium)",
+"pelos filhos Pb-214 e Bi-214: a amostra precisa ficar fechada ~3 semanas antes, para o radônio não escapar": "via the daughters Pb-214 and Bi-214: the sample needs to be sealed ~3 weeks beforehand so the radon can't escape",
+"pelo Ac-228, que acompanha o Ra-228 em poucos dias": "via Ac-228, which catches up with Ra-228 within a few days",
+"supõe a série inteira em equilíbrio (areia, rocha); em coisa nova ou purificada as linhas não batem": "assumes the whole series is in equilibrium (sand, rock); in something new or purified the lines won't agree",
+"pelo Pa-234m em 1.001 keV: linha fraca, precisa de amostra forte (vidro ou esmalte de urânio)": "via Pa-234m at 1,001 keV: weak line, needs a strong sample (uranium glass or glaze)",
+"eficiência medida em 1.460 keV:": "efficiency measured at 1,460 keV:",
+"A calibração foi atualizada.": "The calibration was updated.",
+"O pico do K-40 não apareceu: confira a massa, a posição e o tempo.": "The K-40 peak didn't show up: check the mass, the position and the time.",
+"Tório: inclinação da curva": "Thorium: curve slope",
+"(pelas linhas de 238,6, 583,2 e 2.614,5 keV)": "(from the 238.6, 583.2 and 2,614.5 keV lines)",
+"A calibração foi atualizada; a escala continua a do KCl.": "The calibration was updated; the scale is still the KCl one.",
+"A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade).": "The calibration was updated; without KCl, the scale comes from thorium (approximate, depends on the age).",
+"As linhas do tório não apareceram o bastante (precisa de pelo menos duas).": "The thorium lines didn't show up enough (at least two are needed).",
+"calibração pelo KCl": "calibrated with KCl",
+"calibração pelo tório (aproximada)": "calibrated with thorium (approximate)",
+"sem calibração: chute": "no calibration: guess",
+"sem pico": "no peak",
+"sem linhas": "no lines",
+"Medidas anteriores": "Previous measurements",
+"1. Fundo:": "1. Background:",
+"tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.": "take the sample away (about 3 m) and leave the RadiaCode in its usual spot.",
+"2. Amostra:": "2. Sample:",
+"a amostra": "the sample",
+"a mesma da calibração": "the same as the calibration",
+"1. Medindo:": "1. Measuring:",
+"3. Medindo:": "3. Measuring:",
+"Pronto:": "Done:",
+"Encerrar o fundo agora": "End the background now",
+"Encerrar agora": "End now",
+"Nova medida": "New measurement",
+"Os números aparecem depois de alguns segundos.": "The numbers show up after a few seconds.",
+"Pote cheio de sal, o RadiaCode encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "A jar full of salt, the RadiaCode touching it always the same way (note the position). With 500 g of pure KCl, 1 h already gives a good measurement; with lite salt, 2 h. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"O eletrodo encostado no RadiaCode. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.": "The electrode touching the RadiaCode. It gives the shape of the curve (how efficiency changes with energy): the three lines used come from the same branch of the series, so the age doesn't affect the shape, only the scale.",
+"castanha-do-pará": "Brazil nuts",
+"areia monazítica": "monazite sand",
+"granito / porcelanato": "granite / porcelain tile",
+"vidro ou esmalte de urânio": "uranium glass or glaze",
+"alimento": "food",
+"adubo de potássio": "potash fertilizer",
+"outra coisa": "something else",
+"Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RadiaCode é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\").": "Ground or chopped nuts, jar full and tightly sealed ~3 weeks beforehand (for Ra-226). Typical: Ra-226 ≈ 105 and Ra-228 ≈ 99 Bq/kg on average over 30 lots (Acta Amazonica, 2012); another study found 24 and 26 Bq/kg. For the RadiaCode it's weak: expect 12 to 24 h and maybe just a limit (\"below\").",
+"Areia seca, pote cheio. Típico: Th-232 de ~1.000 a 2.300 Bq/kg em praias de Marataízes (ES); solo comum tem ~45 Bq/kg (UNSCEAR 2000). Sai em menos de 1 h.": "Dry sand, full jar. Typical: Th-232 from ~1,000 to 2,300 Bq/kg on beaches in Marataízes (ES, Brazil); ordinary soil has ~45 Bq/kg (UNSCEAR 2000). Done in under 1 h.",
+"Pedaços que caibam no pote, ou a peça encostada do mesmo jeito. Para comparar, a média do solo no mundo: K-40 ≈ 420, Ra-226 ≈ 32 e Th-232 ≈ 45 Bq/kg (UNSCEAR 2000).": "Pieces that fit in the jar, or the piece touching the device the same way. For comparison, the world soil average: K-40 ≈ 420, Ra-226 ≈ 32 and Th-232 ≈ 45 Bq/kg (UNSCEAR 2000).",
+"O urânio-238 sai pela linha de 1.001 keV (fraca): só funciona com peça forte. O rádio costuma ser baixo, porque o urânio foi purificado ao fazer o vidro.": "Uranium-238 comes from the 1,001 keV line (weak): it only works with a strong piece. Radium is usually low, because the uranium was purified when the glass was made.",
+"Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RadiaCode enxerga: o resultado deve ser \"abaixo de\".": "In ordinary food, what shows up is K-40 (potassium). Today's Cs-137 in Brazilian food is well below what the RadiaCode can see: the result should be \"below\".",
+"Pelo K-40 o app calcula quanto potássio tem (31,7 Bq por grama de potássio).": "From K-40 the app works out how much potassium there is (31.7 Bq per gram of potassium).",
+"informe a % de KCl (100 para KCl puro)": "enter the % of KCl (100 for pure KCl)",
+"informe a % de ThO₂ do eletrodo (2 no WT20)": "enter the electrode's % of ThO₂ (2 for WT20)",
+"escolha pelo menos um radionuclídeo": "choose at least one radionuclide",
+"tipo de medição desconhecido": "unknown measurement type",
+"informe a massa em gramas": "enter the mass in grams",
+"não tem fundo salvo: meça um fundo novo": "there's no saved background: measure a new one",
+"o fundo salvo tem mais de 30 dias: meça um novo": "the saved background is more than 30 days old: measure a new one",
+"nenhuma medição em andamento": "no measurement in progress",
+"Conecte o RadiaCode para medir.": "Connect the RadiaCode to measure.",
+"pote encostado no RadiaCode": "jar touching the RadiaCode"
 },
 "patterns": [
 [
@@ -2756,6 +2852,16 @@ const I18N_EN = {
 ]
 ],
 [
+"coloque ",
+"^coloque ((?:(?! · ).)+?) na posição \\(((?:(?! · ).)+?)\\) e clique em Começar\\.$",
+"place ${1} in position (${2}) and click Start.",
+[
+"coloque ",
+" na posição (",
+") e clique em Começar."
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -3014,6 +3120,15 @@ const I18N_EN = {
 [
 "normal: ",
 " cps (mediana das últimas 24 h)"
+]
+],
+[
+"forma da curva pelo tório em ",
+"^forma da curva pelo tório em ((?:(?! · ).)+?): inclinação$",
+"curve shape from thorium on ${1}: slope",
+[
+"forma da curva pelo tório em ",
+": inclinação"
 ]
 ],
 [
@@ -3920,6 +4035,24 @@ const I18N_EN = {
 ]
 ],
 [
+"KCl: ",
+"^KCl: ((?:(?! · ).)+?) kBq de K\\-40 esperados$",
+"KCl: ${1} kBq of K-40 expected",
+[
+"KCl: ",
+" kBq de K-40 esperados"
+]
+],
+[
+"eletrodo de tório (",
+"^eletrodo de tório \\(((?:(?! · ).)+?)% ThO₂\\)$",
+"thorium electrode (${1}% ThO₂)",
+[
+"eletrodo de tório (",
+"% ThO₂)"
+]
+],
+[
 "ALARME · ",
 "^ALARME · ((?:(?! · ).)+?) CPM · GMC Monitor$",
 "ALARM · ${1} CPM · GMC Monitor",
@@ -4021,6 +4154,24 @@ const I18N_EN = {
 "${1} (also near the object)",
 [
 " (também perto do objeto)"
+]
+],
+[
+"KCl: ",
+"^KCl: ((?:(?! · ).)+?) Bq de K\\-40 esperados$",
+"KCl: ${1} Bq of K-40 expected",
+[
+"KCl: ",
+" Bq de K-40 esperados"
+]
+],
+[
+"Atividade: começou (",
+"^Atividade: começou \\(((?:(?! · ).)+?), ((?:(?! · ).)+?) g\\)$",
+"Activity: started (${1}, ${2} g)",
+[
+"Atividade: começou (",
+" g)"
 ]
 ],
 [
@@ -4146,6 +4297,14 @@ const I18N_EN = {
 [
 " keV · canal ",
 " contagens"
+]
+],
+[
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)%$",
+"efficiency so far: ${1} ± ${2}%",
+[
+"eficiência até agora: "
 ]
 ],
 [
@@ -4286,6 +4445,31 @@ const I18N_EN = {
 ]
 ],
 [
+"usar o fundo salvo (",
+"^usar o fundo salvo \\(((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"use the saved background (${1}, ${2})",
+[
+"usar o fundo salvo ("
+]
+],
+[
+"eficiência ",
+"^eficiência ((?:(?! · ).)+?) em 1\\.460 keV$",
+"efficiency ${1} at 1,460 keV",
+[
+"eficiência ",
+" em 1.460 keV"
+]
+],
+[
+"inclinação até agora: ",
+"^inclinação até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
+"slope so far: ${1} ± ${2}",
+[
+"inclinação até agora: "
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -4388,6 +4572,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Atividade: terminou (",
+"^Atividade: terminou \\(((?:(?! · ).)+?)\\)$",
+"Activity: finished (${1})",
+[
+"Atividade: terminou ("
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -4435,6 +4627,14 @@ const I18N_EN = {
 "Couldn't import: ${1}",
 [
 "Não consegui importar: "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) g de potássio por kg$",
+"≈ ${1} g of potassium per kg",
+[
+" g de potássio por kg"
 ]
 ],
 [
@@ -4537,6 +4737,15 @@ const I18N_EN = {
 "${1}: ${2} new records out of ${3}",
 [
 " registros novos de "
+]
+],
+[
+"KCl em ",
+"^KCl em ((?:(?! · ).)+?): eficiência de$",
+"KCl on ${1}: efficiency of",
+[
+"KCl em ",
+": eficiência de"
 ]
 ],
 [
@@ -4691,6 +4900,15 @@ const I18N_EN = {
 ]
 ],
 [
+"para ±3%: ~",
+"^para ±3%: \\~((?:(?! · ).)+?) no total$",
+"for ±3%: ~${1} in total",
+[
+"para ±3%: ~",
+" no total"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -4799,6 +5017,15 @@ const I18N_EN = {
 "${1}% of the time with data",
 [
 "% do tempo com dados"
+]
+],
+[
+"em 1.460 keV (±",
+"^em 1\\.460 keV \\(±((?:(?! · ).)+?)%\\)$",
+"at 1,460 keV (±${1}%)",
+[
+"em 1.460 keV (±",
+"%)"
 ]
 ],
 [
@@ -4975,6 +5202,15 @@ const I18N_EN = {
 [
 "fundo da casa: ",
 " cps"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) keV: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) contagens$",
+"${1} keV: ${2} ± ${3} counts",
+[
+" keV: ",
+" contagens"
 ]
 ],
 [
@@ -5281,6 +5517,15 @@ const I18N_EN = {
 ]
 ],
 [
+"abaixo de ",
+"^abaixo de ((?:(?! · ).)+?) kBq/kg$",
+"below ${1} kBq/kg",
+[
+"abaixo de ",
+" kBq/kg"
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -5415,6 +5660,15 @@ const I18N_EN = {
 [
 "máximo: ",
 " cps às "
+]
+],
+[
+"abaixo de ",
+"^abaixo de ((?:(?! · ).)+?) Bq/kg$",
+"below ${1} Bq/kg",
+[
+"abaixo de ",
+" Bq/kg"
 ]
 ],
 [
@@ -5716,6 +5970,15 @@ const I18N_EN = {
 ]
 ],
 [
+"abaixo de ",
+"^abaixo de ((?:(?! · ).)+?) kBq$",
+"below ${1} kBq",
+[
+"abaixo de ",
+" kBq"
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -5855,6 +6118,15 @@ const I18N_EN = {
 [
 "sua dose ",
 " µSv"
+]
+],
+[
+"abaixo de ",
+"^abaixo de ((?:(?! · ).)+?) Bq$",
+"below ${1} Bq",
+[
+"abaixo de ",
+" Bq"
 ]
 ],
 [
@@ -6158,6 +6430,30 @@ const I18N_EN = {
 "${1}k× less",
 [
 " mil× menos"
+]
+],
+[
+"~",
+"^\\~((?:(?! · ).)+?) no total$",
+"~${1} in total",
+[
+" no total"
+]
+],
+[
+"(antes: ",
+"^\\(antes: ((?:(?! · ).)+?)\\)$",
+"(before: ${1})",
+[
+"(antes: "
+]
+],
+[
+"inclinação ",
+"^inclinação ((?:(?! · ).)+?)$",
+"slope ${1}",
+[
+"inclinação "
 ]
 ],
 [
@@ -6512,6 +6808,31 @@ const I18N_EN = {
 ]
 ],
 [
+"posição: ",
+"^posição: ((?:(?! · ).)+?)$",
+"position: ${1}",
+[
+"posição: "
+]
+],
+[
+"fundo de ",
+"^fundo de ((?:(?! · ).)+?)$",
+"background of ${1}",
+[
+"fundo de "
+]
+],
+[
+"KCl (",
+"^KCl \\(((?:(?! · ).)+?)%\\)$",
+"KCl (${1}%)",
+[
+"KCl (",
+"%)"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -6601,6 +6922,14 @@ const I18N_EN = {
 ]
 ],
 [
+"durante ",
+"^durante ((?:(?! · ).)+?)$",
+"over ${1}",
+[
+"durante "
+]
+],
+[
 "início: ",
 "^início: ((?:(?! · ).)+?)$",
 "startup: ${1}",
@@ -6655,6 +6984,14 @@ const I18N_EN = {
 "${1} per min",
 [
 " por min"
+]
+],
+[
+"amostra ",
+"^amostra ((?:(?! · ).)+?)$",
+"sample ${1}",
+[
+"amostra "
 ]
 ],
 [
@@ -6771,6 +7108,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) \\(((?:(?! · ).)+?) g\\)$",
+"${1} (${2} g)",
+[
+" g)"
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -6856,6 +7201,14 @@ const I18N_EN = {
 "from ${1} to ${2}",
 [
 "de "
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?)$",
+"background ${1}",
+[
+"fundo "
 ]
 ],
 [
@@ -6983,14 +7336,6 @@ const I18N_EN = {
 "^v((?:(?! · ).)+?) ·$",
 "v${1} ·",
 []
-],
-[
-"em ",
-"^em ((?:(?! · ).)+?)$",
-"over ${1}",
-[
-"em "
-]
 ],
 [
 "",

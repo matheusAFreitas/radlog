@@ -773,6 +773,33 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-gauge-unit { fill: var(--muted); font: 12px var(--mono); text-anchor: middle; }
 .rc-mult { display: flex; gap: 10px; color: var(--dim); }
 .rc-mult span.on { color: var(--accent); font-weight: 600; }
+.rc-act-cal { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin: 4px 0 12px; font-size: 13px; line-height: 1.5; }
+.rc-act-cal .mono { font-size: 12px; }
+.rc-act-cal button.link { background: none; border: 0; color: var(--muted); text-decoration: underline dotted; cursor: pointer; padding: 0; font: inherit; font-size: 12px; margin-left: 8px; }
+.rc-act-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px 14px; margin: 12px 0 8px; }
+.rc-act-grid label { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.rc-act-grid label[hidden] { display: none; }
+.rc-act-nucs { display: flex; flex-wrap: wrap; gap: 6px 14px; margin: 4px 0 6px; }
+.rc-act-nucs[hidden] { display: none; }
+.rc-act-nucs label { display: inline-flex; gap: 6px; align-items: center; font-size: 13px; }
+.rc-act-nucs input { width: 16px; height: 16px; accent-color: var(--accent); }
+.rc-act-step { font-size: 15px; margin: 6px 0; }
+.rc-act-prog { height: 6px; border-radius: 4px; background: var(--border); overflow: hidden; margin: 6px 0 4px; }
+.rc-act-prog i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s; }
+.rc-act-wrap { overflow-x: auto; }
+.rc-act-tab { border-collapse: collapse; font-size: 13px; width: 100%; margin: 8px 0; }
+.rc-act-tab th, .rc-act-tab td { text-align: left; padding: 5px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.rc-act-tab th { color: var(--muted); font-weight: 500; }
+.rc-act-tab td.n { font-family: var(--mono); white-space: nowrap; }
+.rc-act-tab .sub { color: var(--muted); font-size: 12px; display: block; }
+.rc-act-tab tr:has(+ tr.lines) td { border-bottom: 0; }
+.rc-act-tab tr.lines td { padding-top: 0; }
+.rc-act-res { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin: 10px 0; background: var(--bg); }
+.rc-act-res h4 { margin: 0 0 4px; font-size: 14px; }
+#rcActHist details { border-bottom: 1px solid var(--border); padding: 6px 0; }
+#rcActHist summary { cursor: pointer; font-size: 13px; }
+#rcActHist summary .mono { color: var(--muted); font-size: 12px; margin-right: 8px; }
+@media (max-width: 900px) { .rc-act-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .rc-kcl { display: grid; grid-template-columns: minmax(0, 1fr); gap: 6px; max-width: 420px; }
 .rc-kout { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
 .rc-kout > div { display: flex; flex-direction: column; gap: 2px; padding: 10px 12px; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; min-width: 0; }

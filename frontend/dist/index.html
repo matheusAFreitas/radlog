@@ -839,22 +839,40 @@
       <p class="rc-use" id="rcSrUse"><strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
     </article>
 
-    <article class="rc-card">
-      <div class="rc-head"><span class="rc-num mono">6</span><h3>Atividade com KCl</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. O potássio natural tem uma fração fixa de K-40, então a atividade do sal é conhecida e serve para conferir o aparelho.</p>
-      <div class="rc-kcl">
-        <label class="small muted" for="rcKType">Amostra</label>
-        <select id="rcKType"><option value="light" selected>Sal light (≈ 50% KCl)</option><option value="kcl">KCl puro (cloreto de potássio)</option><option value="rotulo">Pelo rótulo: mg de potássio por grama</option></select>
-        <div id="rcKMgRow" hidden><label class="small muted" for="rcKMg">Potássio (mg por 1 g de sal)</label><input type="number" id="rcKMg" min="0" max="600" value="260"></div>
-        <label class="small muted" for="rcKMass">Massa (g)</label>
-        <input type="number" id="rcKMass" min="10" max="5000" step="10" value="500">
-        <label class="small muted" for="rcKTime">Tempo de medição: <span class="mono" id="rcKTimeLbl"></span></label>
-        <input type="range" id="rcKTime" min="5" max="480" step="5" value="60">
+    <article class="rc-card" id="rcActCard">
+      <div class="rc-head"><span class="rc-num mono">6</span><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
+      <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RadiaCode enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p>
+      <div class="rc-act-cal" id="rcActCal"></div>
+      <div id="rcActForm">
+        <div class="seg rc-seg" id="rcActKind" aria-label="Tipo"><button type="button" data-k="amostra" aria-pressed="true">Medir amostra</button><button type="button" data-k="kcl" aria-pressed="false">Calibrar com KCl</button><button type="button" data-k="torio" aria-pressed="false">Calibrar com tório</button></div>
+        <div class="rc-act-grid">
+          <label data-for="amostra"><span class="small muted">O que é</span><select id="rcActPreset"></select></label>
+          <label data-for="amostra"><span class="small muted">Nome</span><input type="text" id="rcActName" maxlength="60"></label>
+          <label data-for="kcl"><span class="small muted">Amostra</span><select id="rcActKclType"><option value="100">KCl puro (substituto de sal)</option><option value="light" selected>Sal light</option></select></label>
+          <label data-for="kcl" id="rcActPctBox"><span class="small muted">% de KCl</span><input type="number" id="rcActPct" min="1" max="100" step="1" value="50"><span class="small muted">no rótulo: mg de potássio em 1 g × 0,19</span></label>
+          <label data-for="torio"><span class="small muted">Eletrodo</span><select id="rcActTh"><option value="1">WT10 (amarelo, 1% de ThO₂)</option><option value="2" selected>WT20 (vermelho, 2%)</option><option value="3">WT30 (roxo, 3%)</option><option value="4">WT40 (laranja, 4%)</option></select></label>
+          <label data-for="torio"><span class="small muted">Idade do eletrodo (anos)</span><input type="number" id="rcActAge" min="0" max="80" step="0.5" placeholder="não sei"></label>
+          <label><span class="small muted">Massa (g)</span><input type="number" id="rcActMass" min="0.1" step="0.1" value="500"></label>
+          <label><span class="small muted">Posição</span><input type="text" id="rcActGeom" maxlength="80"></label>
+          <label><span class="small muted">Fundo</span><select id="rcActBg"><option value="novo">medir um fundo novo</option><option value="salvo">usar o fundo salvo</option></select></label>
+          <label id="rcActBgTBox"><span class="small muted">Tempo do fundo</span><select id="rcActBgT"><option value="600">10 min</option><option value="1800">30 min</option><option value="3600" selected>1 h</option><option value="7200">2 h</option><option value="14400">4 h</option><option value="28800">8 h</option><option value="43200">12 h</option><option value="86400">24 h</option><option value="0">até eu parar</option></select></label>
+          <label><span class="small muted">Tempo da amostra</span><select id="rcActSmpT"><option value="600">10 min</option><option value="1800">30 min</option><option value="3600" selected>1 h</option><option value="7200">2 h</option><option value="14400">4 h</option><option value="28800">8 h</option><option value="43200">12 h</option><option value="86400">24 h</option><option value="0">até eu parar</option></select></label>
+        </div>
+        <div class="rc-act-nucs" data-for="amostra" id="rcActNucs"></div>
+        <p class="small muted" id="rcActHint"></p>
+        <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActStart">Começar</button><span class="small warn-text" id="rcActErr"></span></div>
       </div>
-      <div class="rc-kout" id="rcKOut"></div>
-      <div class="rc-plot"><canvas id="rcKSpec" class="rc-canvas"></canvas></div>
-      <p class="small muted rc-legend"><span class="lg-samp">com o sal</span><span class="lg-bg">só o fundo</span></p>
-      <p class="small muted">A eficiência no pico (0,1%) é um chute para o 102 encostado num pacote; com o aparelho, ela vai ser medida com o próprio KCl. O tempo de medição vale para o fundo e para o sal.</p>
+      <div id="rcActRun" hidden>
+        <p class="rc-act-step" id="rcActStep"></p>
+        <div class="rc-act-prog"><i id="rcActBar"></i></div>
+        <p class="mono small muted" id="rcActTime"></p>
+        <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActNext"></button><button type="button" class="btn" id="rcActCancel">Cancelar</button></div>
+        <div id="rcActLive"></div>
+      </div>
+      <div class="rc-plot" id="rcActPlot" hidden><canvas id="rcActSpec" class="rc-canvas"></canvas></div>
+      <p class="small muted rc-legend" id="rcActLegend" hidden><span class="lg-samp">amostra</span><span class="lg-bg">fundo</span></p>
+      <div id="rcActHist"></div>
+      <p class="small muted">Limites: o cristal do RadiaCode é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.</p>
     </article>
 
     <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>

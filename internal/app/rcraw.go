@@ -201,6 +201,7 @@ func (a *App) rcBackupFiles() []string {
 		a.rc.spec.gz.Flush()
 	}
 	a.rc.spec.mu.Unlock()
+	out = append(out, a.actBackupFiles()...)
 	specs, _ := a.rcSpecFiles()
 	for _, n := range specs {
 		out = append(out, rcDirName+"/"+rcSpecDir+"/"+n)
@@ -219,6 +220,10 @@ func (a *App) rcBackupFiles() []string {
 func (a *App) rcMergeFile(rel string, data []byte) int {
 	name := filepath.Base(rel)
 	if strings.Contains(name, "..") || name == "" {
+		return 0
+	}
+	if strings.HasPrefix(rel, rcDirName+"/"+actDir+"/") {
+		a.actMerge(name, data)
 		return 0
 	}
 	if strings.HasPrefix(rel, rcDirName+"/"+rcSpecDir+"/") {
