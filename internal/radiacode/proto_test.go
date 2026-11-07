@@ -194,9 +194,14 @@ func TestSplitDataBuf(t *testing.T) {
 func TestDataBufFirmware415(t *testing.T) {
 	b, _ := hex.DecodeString("8f0000e31d00009d284841d50278372900960040000000900101434000000200320000000000c0405f294b3600002041a69bc436910003524000005d0c0000931a5a373f128a174010")
 	recs := decodeDataBuf(b, time.Unix(0, 0))
-	if len(recs) != 2 {
+	if len(recs) != 3 {
 		t.Fatalf("registros: %d %+v", len(recs), recs)
 	}
+	raw := recs[1].(RawSamples)
+	if raw.Period != 500*time.Millisecond || len(raw.CPS) != 2 || raw.Counts() != 8 {
+		t.Fatalf("amostras: %+v (%v contagens)", raw, raw.Counts())
+	}
+	recs = append(recs[:1], recs[2])
 	rt := recs[0].(RealTime)
 	if math.Abs(rt.CPS-12.51) > 0.01 || rt.DoseErr != 15 {
 		t.Fatalf("tempo real: %+v", rt)
@@ -205,8 +210,8 @@ func TestDataBufFirmware415(t *testing.T) {
 	if rare.Duration != 3165 || math.Abs(rare.Battery-60.26) > 1e-9 || math.Abs(rare.TempC-26.71) > 1e-9 || math.Abs(rare.Dose-0.13) > 1e-4 {
 		t.Fatalf("raro: %+v", rare)
 	}
-	raw := SplitDataBuf(b, time.Unix(0, 0))
-	if len(raw) != 3 || raw[0].Fields["_extra_bytes"] != 1 || raw[1].Name != "Bloco1" || raw[2].Name != "RareData" {
-		t.Fatalf("brutos: %+v", raw)
+	split := SplitDataBuf(b, time.Unix(0, 0))
+	if len(split) != 3 || split[0].Fields["_extra_bytes"] != 1 || split[1].Name != "Bloco1" || split[2].Name != "RareData" {
+		t.Fatalf("brutos: %+v", split)
 	}
 }

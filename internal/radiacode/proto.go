@@ -351,6 +351,25 @@ type Event struct {
 	Flags uint16
 }
 
+// RawSamples são as amostras cruas do aparelho (cps de cada janela curta,
+// ~0,5 s), chegam uma vez por segundo. Contagens = CPS × Period.
+type RawSamples struct {
+	T        time.Time
+	Period   time.Duration
+	CPS      []float64
+	DoseRate []float64 // µSv/h
+}
+
+// Counts são as contagens somadas das amostras.
+func (r RawSamples) Counts() float64 {
+	var c float64
+	for _, v := range r.CPS {
+		c += v * r.Period.Seconds()
+	}
+	return c
+}
+
+func (r RawSamples) When() time.Time { return r.T }
 func (r RealTime) When() time.Time   { return r.T }
 func (r DoseRateDB) When() time.Time { return r.T }
 func (r Rare) When() time.Time       { return r.T }
@@ -466,7 +485,24 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			}
 		case eid == 0 && (gid == 8 || gid == 9):
 			err = r.skip(6)
-		case eid == 1 && gid >= 1 && gid <= 3:
+		case eid == 1 && gid == 1:
+			// amostras cruas: n × (cps, dose) a cada "unidade" × 10 ms
+			var n uint16
+			var unit uint32
+			n, _ = r.u16()
+			unit, err = r.u32()
+			rs := RawSamples{T: t, Period: time.Duration(unit) * 10 * time.Millisecond}
+			for i := 0; i < int(n) && err == nil; i++ {
+				var cr, dr float32
+				cr, _ = r.f32()
+				dr, err = r.f32()
+				rs.CPS = append(rs.CPS, float64(cr))
+				rs.DoseRate = append(rs.DoseRate, float64(dr)*DoseScale)
+			}
+			if err == nil && rs.Period > 0 && rs.Period < time.Minute {
+				out = append(out, rs)
+			}
+		case eid == 1 && gid >= 2 && gid <= 3:
 			var n uint16
 			n, _ = r.u16()
 			_, err = r.u32()

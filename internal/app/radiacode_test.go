@@ -233,3 +233,23 @@ func TestSummaryAndReportRadiacode(t *testing.T) {
 		t.Fatal("PDF vazio")
 	}
 }
+
+func TestRcHomeBackground(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	for i := 50; i >= 1; i-- {
+		for k := 0; k < 25; k++ { // ~1 leitura a cada 2 s
+			a.rcAddMinute(now.Add(-time.Duration(i)*time.Minute+time.Duration(k*2)*time.Second), 10, 0.08)
+		}
+	}
+	a.rcAddMinute(now.Add(-30*time.Second), 10, 0.08) // minuto incompleto: fica de fora
+	a.rcFlushMinute()
+	hb := a.GetHomeBackgroundDev("radiacode")
+	if !hb.OK || hb.Device != "radiacode" || hb.Minutes != 50 || math.Abs(hb.CPM-600) > 1e-6 || math.Abs(hb.USv-0.08) > 1e-9 {
+		t.Fatalf("fundo do RadiaCode: %+v", hb)
+	}
+	// Poisson: 30 000 contagens em 50 min → ±3,46 CPM
+	if math.Abs(hb.ErrCPM-math.Sqrt(30000)/50) > 0.01 {
+		t.Fatalf("erro: %v", hb.ErrCPM)
+	}
+}

@@ -10,6 +10,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"radlog/internal/radiacode"
 )
 
 // ---------- medir um objeto ----------
@@ -75,6 +77,33 @@ type MeasureState struct {
 	Distance string         `json:"distance"`
 	Live     *MeasureResult `json:"live"`
 	Eta      int            `json:"eta"`
+	// aparelho que está medindo: "gmc" (ou "") e "radiacode"
+	Device string `json:"device"`
+	// espectro (RadiaCode), quando a medição termina
+	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
+	// RadiaCode: soma do µSv/h do aparelho a cada segundo da fase atual
+	usvSum float64
+}
+
+// MeasureSpectrum são os espectros do RadiaCode de cada fase (contagens por
+// canal; energia = A0 + A1·canal + A2·canal²).
+type MeasureSpectrum struct {
+	A      [3]float64 `json:"a"`
+	Bg     []uint32   `json:"bg,omitempty"`
+	BgSec  float64    `json:"bgSec"`
+	BgSrc  string     `json:"bgSrc,omitempty"` // "acumulado" = espectro acumulado do aparelho (fundo da casa)
+	Obj    []uint32   `json:"obj"`
+	ObjSec float64    `json:"objSec"`
+	// linhas gama que subiram acima do fundo (pista do radionuclídeo)
+	Peaks []SpecPeak `json:"peaks,omitempty"`
+}
+
+// devName é o nome do aparelho da medição ("" conta como GMC).
+func devName(d string) string {
+	if d == "radiacode" {
+		return d
+	}
+	return "gmc"
 }
 
 // GetMeasure devolve o estado atual.
@@ -88,18 +117,28 @@ func (a *App) GetMeasure() MeasureState {
 // duas fases (a do objeto usa o mesmo tempo do fundo).
 func (a *App) StartMeasurePhase(phase string, seconds int, name string) (MeasureState, error) {
 	a.mu.Lock()
+	dev := devName(a.measure.Device)
+	a.mu.Unlock()
+	var spec0 *radiacode.Spectrum
+	if dev == "radiacode" {
+		if spec0 = a.rcSpectrumNow(false); spec0 == nil && !a.rcConnected() {
+			return a.GetMeasure(), errors.New("conecte o RadiaCode para medir")
+		}
+	}
+	a.mu.Lock()
 	defer a.mu.Unlock()
-	connected := a.dev != nil || a.demo.Active
-	if !connected {
+	if dev == "gmc" && a.dev == nil && !a.demo.Active {
 		return a.measure, errors.New("conecte o contador (ou ligue o modo demo) para medir")
 	}
+	a.measSpec0 = spec0
 	switch phase {
 	case "fundo":
 		if seconds < 10 || seconds > 1800 {
 			seconds = 60
 		}
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active, PhaseStart: time.Now().UnixMilli(), Eta: -1}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active && dev == "gmc", PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev}
 		a.measSamples = nil
+		a.measSpecBg = nil
 	case "objeto":
 		if a.measure.Bg == nil {
 			return a.measure, errors.New("meça o fundo primeiro")
@@ -107,6 +146,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Phase = "objeto"
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
+		a.measure.Spectrum, a.measure.usvSum = nil, 0
 		if a.measure.Auto {
 			a.measure.Seconds = a.measure.MaxSec
 		}
@@ -147,26 +187,50 @@ type MeasureSample struct {
 	CPS   uint32  `json:"cps"`   // contagens desse segundo
 }
 
-// feedMeasure recebe a leitura de um segundo (real ou do demo).
+// feedMeasure recebe a leitura de um segundo do GMC (real ou do demo).
 func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
+	a.feedMeasureDev(measFeed{dev: "gmc", cpm: cpm, counts: int(cps), demo: demo})
+}
+
+// measFeed é um segundo de leitura de um aparelho.
+type measFeed struct {
+	dev    string  // gmc ou radiacode
+	cpm    float64 // leitura ao vivo (para o gráfico)
+	counts int     // contagens desse segundo
+	usv    float64 // RadiaCode: µSv/h do aparelho nesse segundo
+	demo   bool
+}
+
+// measPhaseLocked é o resultado da fase atual até agora. No GMC o µSv/h vem
+// da calibração; no RadiaCode, da média do que o próprio aparelho calculou.
+func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
+	ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
+	if devName(m.Device) == "radiacode" && m.Elapsed > 0 {
+		ph.USv = m.usvSum / float64(m.Elapsed)
+	}
+	return ph
+}
+
+func (a *App) feedMeasureDev(f measFeed) {
 	a.mu.Lock()
 	m := &a.measure
-	if (m.Phase != "fundo" && m.Phase != "objeto") || m.Demo != demo {
+	if (m.Phase != "fundo" && m.Phase != "objeto") || m.Demo != f.demo || devName(m.Device) != f.dev {
 		a.mu.Unlock()
 		return
 	}
-	m.Counts += int(cps)
+	m.Counts += f.counts
+	m.usvSum += f.usv
 	m.Elapsed++
 	start := m.PhaseStart
 	if m.Bg != nil && m.Phase == "objeto" && m.Bg.Source != "casa" {
 		start = m.Bg.Start
 	}
-	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: cpm, CPS: cps})
+	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
 	var logText string
 	var save *SavedMeasure
-	stop := ""
+	stop, ended := "", ""
 	if m.Phase == "objeto" {
-		part := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
+		part := a.measPhaseLocked(m)
 		live := compareMeasure(*m.Bg, part, a.convCalLocked().USv)
 		m.Live = &live
 		if m.Auto {
@@ -178,8 +242,9 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 		}
 	}
 	if m.Elapsed >= m.Seconds || stop != "" {
-		ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
+		ph := a.measPhaseLocked(m)
 		ph.Start, ph.End = m.PhaseStart, time.Now().UnixMilli()
+		ended = m.Phase
 		if m.Phase == "fundo" {
 			m.Bg = &ph
 			m.Phase = "fundo-pronto"
@@ -193,19 +258,50 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 			if name == "" {
 				name = "objeto"
 			}
-			logText = fmt.Sprintf("Medição de %s: %s ± %s CPM sobre o fundo (%sσ) — %s",
-				name, br(r.NetCPM, true), br(r.NetErr, false), br(r.Sigma, false), r.Verdict)
-			if !demo { // o demo não fica salvo
+			via := ""
+			if f.dev == "radiacode" {
+				via = " (RadiaCode)"
+			}
+			logText = fmt.Sprintf("Medição de %s%s: %s ± %s CPM sobre o fundo (%sσ) — %s",
+				name, via, br(r.NetCPM, true), br(r.NetErr, false), br(r.Sigma, false), r.Verdict)
+			if !f.demo { // o demo não fica salvo
 				when := m.Bg.Start
 				if m.Bg.Source == "casa" {
 					when = ph.Start
 				}
 				save = &SavedMeasure{Name: name, Time: when, Bg: *m.Bg, Obj: ph, Result: r, Distance: m.Distance,
 					Samples: append([]MeasureSample(nil), a.measSamples...)}
+				if f.dev == "radiacode" {
+					save.Device = "radiacode"
+				}
 			}
 		}
 	}
 	a.mu.Unlock()
+	if ended != "" && f.dev == "radiacode" {
+		// espectro da fase = o do aparelho agora menos o do começo da fase
+		sp := a.rcSpectrumNow(false)
+		a.mu.Lock()
+		part := specDiff(a.measSpec0, sp)
+		if ended == "fundo" {
+			a.measSpecBg = nil
+			if part != nil {
+				a.measSpecBg = &MeasureSpectrum{A: part.A, Bg: part.Obj, BgSec: part.ObjSec}
+			}
+		} else if part != nil {
+			ms := *part
+			if b := a.measSpecBg; b != nil {
+				ms.Bg, ms.BgSec, ms.BgSrc = b.Bg, b.BgSec, b.BgSrc
+			}
+			ms.Peaks = ms.findPeaks()
+			a.measure.Spectrum = &ms
+			if save != nil {
+				save.Spectrum = &ms
+			}
+		}
+		a.measSpec0 = nil
+		a.mu.Unlock()
+	}
 	if save != nil {
 		if id, err := a.addMeasurement(*save); err == nil {
 			a.mu.Lock()
@@ -221,13 +317,35 @@ func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
 	st := a.measure
 	a.mu.Unlock()
 	if logText != "" {
-		if demo {
+		if f.demo {
 			a.logDemoEvent(logText, kindEvent)
 		} else {
 			a.logEvent(logText)
 		}
 	}
 	a.emit("measure", st)
+}
+
+// specDiff é o espectro acumulado entre duas leituras do aparelho (se ele
+// foi zerado no meio, vale a segunda inteira).
+func specDiff(s0, s1 *radiacode.Spectrum) *MeasureSpectrum {
+	if s1 == nil || len(s1.Counts) == 0 {
+		return nil
+	}
+	out := &MeasureSpectrum{A: [3]float64{s1.A0, s1.A1, s1.A2}, Obj: make([]uint32, len(s1.Counts)), ObjSec: s1.Duration.Seconds()}
+	copy(out.Obj, s1.Counts)
+	if s0 == nil || len(s0.Counts) != len(s1.Counts) || s1.Duration < s0.Duration {
+		return out
+	}
+	for i, c := range s0.Counts {
+		if out.Obj[i] < c { // zerou no meio
+			copy(out.Obj, s1.Counts)
+			return out
+		}
+		out.Obj[i] -= c
+	}
+	out.ObjSec = (s1.Duration - s0.Duration).Seconds()
+	return out
 }
 
 func phaseResult(counts, seconds int, usv func(float64) float64) MeasurePhase {
@@ -287,6 +405,9 @@ type SavedMeasure struct {
 	Distance string `json:"distance,omitempty"`
 	// um registro por segundo (medições a partir da 0.20.3)
 	Samples []MeasureSample `json:"samples,omitempty"`
+	// aparelho que mediu ("" = GMC) e os espectros (RadiaCode)
+	Device   string           `json:"device,omitempty"`
+	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }

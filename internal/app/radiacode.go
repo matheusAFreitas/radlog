@@ -102,6 +102,14 @@ type rcState struct {
 	ring    []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today   rcToday
 	raw     rcRawLog
+	macc    rcMeasAcc // só a goroutine do rcRun mexe
+}
+
+// rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
+// medição de objeto.
+type rcMeasAcc struct {
+	counts, secs, dose float64
+	carry              float64 // fração de contagem que sobrou do arredondamento
 }
 
 type rcSample struct {
@@ -441,6 +449,8 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			}
 			a.rc.mu.Unlock()
 			changed = true
+		case radiacode.RawSamples:
+			a.rcMeasureSamples(v)
 		case radiacode.Rare:
 			a.rc.mu.Lock()
 			a.rc.st.Dose, a.rc.st.DoseSec, a.rc.st.Battery, a.rc.st.TempC, a.rc.st.HasRare = v.Dose, int64(v.Duration), v.Battery, v.TempC, true
@@ -760,4 +770,111 @@ func (a *App) GetRcSpectrum(accum bool) (RcSpectrum, error) {
 		return RcSpectrum{}, err
 	}
 	return RcSpectrum{Seconds: s.Duration.Seconds(), A: [3]float64{s.A0, s.A1, s.A2}, Counts: s.Counts, Accum: accum}, nil
+}
+
+// ---------- medição de objeto com o RadiaCode ----------
+
+// rcMeasureSamples manda as contagens de cada segundo para a medição de
+// objeto (quando ela está usando o RadiaCode).
+func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
+	a.mu.Lock()
+	active := (a.measure.Phase == "fundo" || a.measure.Phase == "objeto") && a.measure.Device == "radiacode"
+	a.mu.Unlock()
+	acc := &a.rc.macc
+	if !active {
+		*acc = rcMeasAcc{}
+		return
+	}
+	p := v.Period.Seconds()
+	for i, c := range v.CPS {
+		acc.counts += c * p
+		acc.dose += v.DoseRate[i] * p
+		acc.secs += p
+		for acc.secs >= 1-1e-6 {
+			// um segundo inteiro (se a janela passar de 1 s, divide igual)
+			share := 1 / math.Max(acc.secs, 1)
+			c1, d1 := acc.counts*share, acc.dose*share
+			n := math.Round(c1 + acc.carry)
+			acc.carry += c1 - n
+			acc.counts -= c1
+			acc.dose -= d1
+			acc.secs -= 1
+			a.rc.mu.Lock()
+			cpm := a.rc.st.CPS * 60
+			a.rc.mu.Unlock()
+			a.feedMeasureDev(measFeed{dev: "radiacode", cpm: cpm, counts: int(n), usv: d1})
+		}
+	}
+}
+
+// rcConnected diz se o RadiaCode está conectado.
+func (a *App) rcConnected() bool {
+	a.rc.mu.Lock()
+	defer a.rc.mu.Unlock()
+	return a.rc.dev != nil
+}
+
+// rcSpectrumNow lê o espectro do aparelho (nil se não deu).
+func (a *App) rcSpectrumNow(accum bool) *radiacode.Spectrum {
+	a.rc.mu.Lock()
+	dev := a.rc.dev
+	a.rc.mu.Unlock()
+	if dev == nil {
+		return nil
+	}
+	var s radiacode.Spectrum
+	var err error
+	if accum {
+		s, err = dev.SpectrumAccum()
+	} else {
+		s, err = dev.Spectrum()
+	}
+	if err != nil {
+		a.logf("RadiaCode: espectro para a medição: %v", err)
+		return nil
+	}
+	return &s
+}
+
+// rcHomeBackground é o fundo da casa da última hora pelo RadiaCode: minutos
+// gravados em casa, fora de alertas e de medições (CPM = cps × 60; o µSv/h é
+// a média do que o aparelho calculou).
+func (a *App) rcHomeBackground() HomeBg {
+	now := time.Now()
+	pts := a.rcRange(now.Add(-homeBgWindow), now.Add(time.Minute))
+	byT := map[int64]RcPoint{}
+	sp := make([]store.Point, 0, len(pts))
+	inAlert := a.alertChecker()
+	for _, p := range pts {
+		if p.N < 20 || inAlert(p.T) { // minuto incompleto (conectou/caiu no meio)
+			continue
+		}
+		byT[p.T.Unix()] = p
+		sp = append(sp, store.Point{T: p.T, CPM: p.CPS * 60})
+	}
+	sp = a.homeOnly(sp)
+	if len(sp) < homeBgMinMins {
+		return HomeBg{Minutes: len(sp), Device: "radiacode",
+			Why: fmt.Sprintf("só %d min do RadiaCode em casa na última hora (precisa de %d)", len(sp), homeBgMinMins)}
+	}
+	mins := make([]float64, len(sp))
+	for i, p := range sp {
+		mins[i] = p.CPM
+	}
+	hb := homeBgFrom(mins, sp[0].T, sp[len(sp)-1].T.Add(time.Minute))
+	// µSv/h: média dos mesmos minutos que ficaram (sem os picos)
+	lim := median(mins) + 5*math.Sqrt(math.Max(median(mins), 1))
+	var su float64
+	k := 0
+	for _, p := range sp {
+		if p.CPM <= lim {
+			su += byT[p.T.Unix()].USvh
+			k++
+		}
+	}
+	if k > 0 {
+		hb.USv = su / float64(k)
+	}
+	hb.Device = "radiacode"
+	return hb
 }

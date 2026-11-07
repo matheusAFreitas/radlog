@@ -1819,8 +1819,17 @@ function measureLogStep(st) {
 
 function measureLogReading(r) {
   const st = state.measureSt;
-  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !!r.demo !== !!st.demo) return;
+  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !!r.demo !== !!st.demo || isRcMeasure(st)) return;
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
+}
+
+// RadiaCode medindo: a leitura ao vivo é o CPS do aparelho × 60
+function measureLogRc(rs) {
+  const st = state.measureSt;
+  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !isRcMeasure(st) || !rs || rs.state !== "conectado") return;
+  const last = mlog.live[mlog.live.length - 1];
+  if (last && Date.now() - last.t < 500) return;
+  mlog.live.push({ t: Date.now(), cpm: rs.cps * 60 });
 }
 
 // fonte do gráfico: a medição em andamento ou uma salva (clicada na lista)
@@ -1998,17 +2007,33 @@ function measureStats(m) {
 function measureOpts() {
   const t = $("mSecs").value, auto = t.startsWith("auto");
   return {
-    name: $("mName").value, distance: $("mDist").value, auto, homeBg: $("mBgSrc").value === "casa",
+    name: $("mName").value, distance: $("mDist").value, auto, homeBg: $("mBgSrc").value === "casa", device: $("mDev").value,
     seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat($("mPct").value),
   };
 }
 
 async function refreshHomeBg(force) {
-  if (!force && state.homeBgAt && Date.now() - state.homeBgAt < 30e3) return;
+  const dev = $("mDev").value;
+  if (!force && state.homeBgAt && state.homeBgDev === dev && Date.now() - state.homeBgAt < 30e3) return;
   state.homeBgAt = Date.now();
-  try { state.homeBg = await api.GetHomeBackground(); } catch (e) { state.homeBg = { ok: false, why: errMsg(e) }; }
+  state.homeBgDev = dev;
+  if (state.homeBg && state.homeBg.device !== dev) state.homeBg = null;
+  let hb;
+  try { hb = await api.GetHomeBackgroundDev(dev); } catch (e) { hb = { ok: false, why: errMsg(e), device: dev }; }
+  if ($("mDev").value !== dev) return; // trocou de aparelho no meio
+  state.homeBg = { ...hb, device: dev };
   if (state.measureSt) renderMeasure(state.measureSt);
 }
+
+// aparelho da medição: o escolhido antes ou, da primeira vez, o RadiaCode
+// se estiver conectado
+const rcOnline = () => !!(state.rc.st && state.rc.st.state === "conectado");
+function measureDevDefault() {
+  if (localGet("m-mDev")) return;
+  const want = rcOnline() ? "radiacode" : "gmc";
+  if ($("mDev").value !== want) { $("mDev").value = want; state.homeBgAt = 0; }
+}
+const isRcMeasure = (x) => (x && x.device) === "radiacode";
 
 const fmtMin = (sec) => (sec < 90 ? `${Math.max(1, Math.round(sec))} s` : `${Math.round(sec / 60)} min`);
 
@@ -2019,8 +2044,12 @@ function renderMeasure(st) {
   const running = st.phase === "fundo" || st.phase === "objeto";
   const started = running || !!st.bg;
   $("measureTitle").textContent = "Medir um objeto" + (st.demo ? " (demo)" : "");
-  for (const id of ["mSecs", "mBgSrc", "mPct", "mDist"]) $(id).disabled = started;
+  for (const id of ["mSecs", "mBgSrc", "mPct", "mDist", "mDev"]) $(id).disabled = started;
+  if (!started) measureDevDefault();
+  else if (st.device) $("mDev").value = st.device === "radiacode" ? "radiacode" : "gmc";
   const o = measureOpts();
+  const rc = started ? isRcMeasure(st) : o.device === "radiacode";
+  $("mDistLabel").textContent = rc ? "Distância até o RadiaCode (opcional)" : "Distância até o tubo (opcional)";
   const home = started ? !!(st.bg && st.bg.source === "casa") : o.homeBg;
   const auto = started ? !!st.auto : o.auto;
   $("mPctBox").style.visibility = o.auto ? "" : "hidden";
@@ -2028,7 +2057,8 @@ function renderMeasure(st) {
   const hb = state.homeBg;
   // dica embaixo das opções
   $("mOptHint").textContent = !started ? [
-    o.homeBg ? "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro)." : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
+    rc && !rcOnline() ? "O RadiaCode não está conectado." : "",
+    o.homeBg ? (rc ? "Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro)." : "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).") : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
     o.auto ? `Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ${o.pct}% do fundo.` : "",
   ].filter(Boolean).join(" ") : "";
   // passo 1: fundo
@@ -2092,8 +2122,112 @@ function renderMeasure(st) {
   $("mVerdict").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
   $("mStats").replaceChildren(measureStats({ bg: st.bg, obj: st.obj, result: r }));
   const sign = r.netCPM >= 0 ? "+" : "−";
-  $("mNumbers").textContent = `${sign}${fmt(Math.abs(r.netCPM), 1)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} µSv/h no tubo`;
+  $("mNumbers").textContent = `${sign}${fmt(Math.abs(r.netCPM), 1)} ± ${fmt(r.netErr, 1)} CPM sobre o fundo · ${fmt(r.ratio, 1)}× o fundo · ≈ ${r.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(r.netUSv), usvDigits(Math.abs(r.netUSv)))} ` + (rc ? "µSv/h no detector" : "µSv/h no tubo");
   $("mExplain").textContent = measureExplain(r, st.obj, auto);
+  renderMeasSpec($("mSpec"), st.spectrum);
+}
+
+// ---------- espectro da medição (RadiaCode) ----------
+
+const kevTxt = (k) => k.toLocaleString(LOCALE, { useGrouping: false, maximumFractionDigits: 1, minimumFractionDigits: 1 });
+const specFWHM = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
+const SPEC_LINES = [
+  ["Am-241", 59.5], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
+  ["Cs-137", 661.7], ["Ac-228", 911.2], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5],
+];
+// faixas de meio pico (iguais às do PDF), em contagens/s
+function measSpecBins(sp) {
+  const en = (ch) => { const c = ch + 0.5; return sp.a[0] + sp.a[1] * c + sp.a[2] * c * c; };
+  const n = sp.obj.length, lo = 20, hi = Math.min(3000, en(n - 1));
+  const hasBg = !!(sp.bg && sp.bg.length === n && sp.bgSec > 0);
+  const bins = [];
+  for (let e = lo; e < hi;) { const w = Math.max(specFWHM(e) / 2, 2 * sp.a[1]); bins.push({ e0: e, e1: Math.min(e + w, hi), obj: 0, bg: 0 }); e += w; }
+  let j = 0;
+  for (let i = 0; i < n; i++) {
+    const e = en(i);
+    if (e < lo || e >= hi) continue;
+    while (j < bins.length - 1 && e >= bins[j].e1) j++;
+    bins[j].obj += sp.obj[i] / sp.objSec;
+    if (hasBg) bins[j].bg += sp.bg[i] / sp.bgSec;
+  }
+  return { bins, hasBg };
+}
+
+const specDur = (sec) => (sec < 300 ? `${Math.round(sec)} s` : rcDur(sec) || fmtMin(sec));
+function renderMeasSpec(box, sp) {
+  box.hidden = !(sp && sp.obj && sp.obj.length && sp.objSec > 0 && sp.a && sp.a[1] > 0);
+  if (box.hidden) { box.textContent = ""; return; }
+  const { bins, hasBg } = measSpecBins(sp);
+  if (!bins.length) { box.hidden = true; return; }
+  const W = 640, H = 210, PL = 44, PR = 10, PT = 18, PB = 22;
+  let lo = Infinity, hi = 0;
+  for (const b of bins) for (const v of [b.obj, b.bg]) if (v > 0) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  if (!hi) { box.hidden = true; return; }
+  const dlo = Math.floor(Math.log10(lo)), dhi = Math.max(dlo + 1, Math.ceil(Math.log10(hi)));
+  const e0 = bins[0].e0, e1 = bins[bins.length - 1].e1;
+  const x = (e) => PL + ((e - e0) / (e1 - e0)) * (W - PL - PR);
+  const y = (v) => PT + (H - PT - PB) * (1 - ((v > 0 ? Math.max(dlo, Math.log10(v)) : dlo) - dlo) / (dhi - dlo));
+  let g = "";
+  for (let d = dlo; d <= dhi; d++) {
+    const yy = y(10 ** d).toFixed(1);
+    g += `<line x1="${PL}" x2="${W - PR}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 5}" y="${(+yy + 4).toFixed(1)}" text-anchor="end" class="ax">${d >= 4 || d < -3 ? "1e" + d : fmt(10 ** d, Math.max(0, -d))}</text>`;
+  }
+  for (let e = 500; e < e1; e += 500) g += `<line x1="${x(e).toFixed(1)}" x2="${x(e).toFixed(1)}" y1="${PT}" y2="${H - PB}" class="grid"/><text x="${x(e).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="ax">${e}</text>`;
+  g += `<text x="${W - PR}" y="${H - 6}" text-anchor="end" class="ax">keV</text>`;
+  // linhas conhecidas: risco embaixo; as que subiram acima do fundo, tracejado com nome
+  const found = sp.peaks || [];
+  for (const [nuc, e] of SPEC_LINES) {
+    if (e < e0 || e > e1 || found.some((p) => p.kev === e)) continue;
+    g += `<line x1="${x(e).toFixed(1)}" x2="${x(e).toFixed(1)}" y1="${H - PB - 6}" y2="${H - PB}" class="tick"><title>${nuc} · ${kevTxt(e)} keV</title></line>`;
+  }
+  // nomes que não cabem lado a lado descem uma linha
+  const rows = [];
+  for (const p of [...found].sort((a, b) => a.kev - b.kev)) {
+    if (p.kev < e0 || p.kev > e1) continue;
+    const xx = x(p.kev), lbl = `${p.nuclide} ${kevTxt(p.kev)}`, w = lbl.length * 6.8 + 6;
+    const right = xx + 3 + w > W - PR; // perto da borda: escreve à esquerda do risco
+    const a0 = right ? xx - 3 - w : xx, a1 = right ? xx : xx + 3 + w;
+    let r = rows.findIndex((end) => end < a0);
+    if (r < 0) { r = rows.length; rows.push(0); }
+    rows[r] = Math.max(rows[r], a1);
+    g += `<line x1="${xx.toFixed(1)}" x2="${xx.toFixed(1)}" y1="${PT}" y2="${H - PB}" class="peak"/><text x="${(right ? xx - 3 : xx + 3).toFixed(1)}" y="${PT + 9 + r * 12}" text-anchor="${right ? "end" : "start"}" class="peak-l">${lbl}</text>`;
+  }
+  const path = (get) => {
+    let d = "", pen = false;
+    for (const b of bins) {
+      const v = get(b);
+      if (!(v > 0)) { pen = false; continue; }
+      d += `${pen ? "L" : "M"}${x(b.e0).toFixed(1)} ${y(v).toFixed(1)}L${x(b.e1).toFixed(1)} ${y(v).toFixed(1)}`;
+      pen = true;
+    }
+    return d;
+  };
+  if (hasBg) g += `<path d="${path((b) => b.bg)}" class="bg"/>`;
+  g += `<path d="${path((b) => b.obj)}" class="obj"/>`;
+  const bgTxt = !hasBg ? "" : sp.bgSrc === "acumulado" ? `fundo: espectro acumulado do aparelho (${rcDur(sp.bgSec) || fmtMin(sp.bgSec)}), na escala do tempo do objeto` : `fundo (${specDur(sp.bgSec)})`;
+  let txt = "";
+  const groups = new Map();
+  if (!hasBg) txt = "Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.";
+  else if (!found.length) txt = "Nenhuma linha gama conhecida subiu acima do fundo (3σ).";
+  else {
+    txt = "Linhas acima do fundo (uma pista do radionuclídeo, não uma identificação garantida):";
+    for (const p of found) { if (!groups.has(p.group)) groups.set(p.group, []); groups.get(p.group).push(p.kev); }
+  }
+  box.innerHTML = `<h4>Espectro</h4><svg viewBox="0 0 ${W} ${H}" class="m-spec-svg" role="img" aria-label="Espectro do objeto e do fundo">${g}</svg>
+    <div class="legend small muted"><span class="key"><i class="mk-obj" aria-hidden="true"></i>com o objeto (${specDur(sp.objSec)})</span>${hasBg ? `<span class="key"><i class="mk-bg" aria-hidden="true"></i>${bgTxt}</span>` : ""}<span>contagens/s em escala log</span></div>
+    <p class="small m-spec-txt"></p><ul class="small m-spec-peaks"></ul>`;
+  box.querySelector(".m-spec-txt").textContent = txt;
+  const ul = box.querySelector(".m-spec-peaks");
+  for (const [gname, ks] of groups) {
+    const li = document.createElement("li");
+    const b = document.createElement("b");
+    b.textContent = gname;
+    const k = document.createElement("span");
+    k.className = "mono";
+    k.textContent = ks.sort((a, b2) => a - b2).map(kevTxt).join("; ") + " keV";
+    li.append(b, " ", k);
+    ul.appendChild(li);
+  }
 }
 
 function measureExplain(r, obj, auto) {
@@ -2109,10 +2243,10 @@ function measureExplain(r, obj, auto) {
 }
 
 function wireMeasure() {
-  for (const id of ["mSecs", "mBgSrc", "mPct"]) {
+  for (const id of ["mSecs", "mBgSrc", "mPct", "mDev"]) {
     const v = localGet("m-" + id);
     if (v && [...$(id).options].some((o) => o.value === v)) $(id).value = v;
-    $(id).addEventListener("change", () => { localSet("m-" + id, $(id).value); renderMeasure(state.measureSt || {}); });
+    $(id).addEventListener("change", () => { localSet("m-" + id, $(id).value); if (id === "mDev") refreshHomeBg(true); renderMeasure(state.measureSt || {}); });
   }
   $("btnMeasureBg").addEventListener("click", async () => {
     try {
@@ -2174,7 +2308,7 @@ function setMeasureMode(mode) {
   document.querySelectorAll("#mModeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mmode === state.mMode)));
   $("mNewPane").hidden = saved;
   $("mSavedPane").hidden = !saved;
-  $(saved ? "mLiveSlotSaved" : "mLiveSlotNew").appendChild($("mLive"));
+  $(saved ? "mLiveSlotSaved" : "mLiveSlotNew").prepend($("mLive"));
   if (saved) {
     const list = state.measurements || [];
     if (!list.some((m) => m.id === state.mSel)) state.mSel = list.length ? list[list.length - 1].id : null;
@@ -2240,7 +2374,8 @@ function renderMeasureDetail() {
   const r = m.result;
   $("mdName").textContent = m.name;
   const home = m.bg.source === "casa";
-  $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "");
+  const rc = isRcMeasure(m);
+  $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "") + (rc ? " · RadiaCode" : "");
   const v = $("mdVerdict");
   v.className = "m-verdict " + r.level;
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
@@ -2249,9 +2384,10 @@ function renderMeasureDetail() {
   t.textContent = "";
   sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", `${fmt(m.bg.cpm, 1)} CPM`, `± ${fmt(m.bg.errCPM, 1)} · ${m.bg.counts} contagens`);
   sumTile(t, "Com o objeto", `${fmt(m.obj.cpm, 1)} CPM`, `± ${fmt(m.obj.errCPM, 1)} · ${m.obj.counts} contagens`);
-  sumTile(t, "Líquido", `${r.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(r.netCPM), 1)} CPM`, `± ${fmt(r.netErr, 1)} · ≈ ${fmt(r.netUSv, usvDigits(Math.abs(r.netUSv)))} µSv/h no tubo`, r.level === "sim" ? "warn" : "");
+  sumTile(t, "Líquido", `${r.netCPM >= 0 ? "+" : "−"}${fmt(Math.abs(r.netCPM), 1)} CPM`, `± ${fmt(r.netErr, 1)} · ≈ ${fmt(r.netUSv, usvDigits(Math.abs(r.netUSv)))} ` + (rc ? "µSv/h no detector" : "µSv/h no tubo"), r.level === "sim" ? "warn" : "");
   sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
   $("mdStats").replaceChildren(measureStats(m));
+  renderMeasSpec($("mdSpec"), m.spectrum);
   $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
   $("mdNote").classList.toggle("muted", !m.note);
   let lim = `Limite de detecção: ${fmt(mDetLimit(m.bg, m.obj.seconds), 1)} CPM acima do fundo.`;
@@ -4191,7 +4327,12 @@ function drawRcSpectrum() {
 }
 
 function wireRc() {
-  on("radiacode", renderRc);
+  on("radiacode", (st) => {
+    renderRc(st);
+    measureLogRc(st);
+    // a tela de medir muda o aparelho padrão e o aviso quando o RadiaCode conecta/cai
+    if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
+  });
   $("rcPill").addEventListener("click", () => showView("radiacode"));
   $("rcUnitSeg").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-unit]");
@@ -4695,7 +4836,7 @@ function makeDemoApi() {
   }, 1000);
   const range = (from, to) => pts.filter((p) => p.t >= from && p.t < to);
   let meas = { phase: "", seconds: 0, elapsed: 0, counts: 0, name: "", demo: false, bg: null, obj: null, result: null };
-  const phaseOf = (counts, secs) => { const m = secs / 60, cpm = counts / m; return { counts, seconds: secs, cpm, errCPM: Math.sqrt(Math.max(counts, 1)) / m, usv: cpm * 0.0101 }; };
+  const phaseOf = (counts, secs) => { const m = secs / 60, cpm = counts / m; return { counts, seconds: secs, cpm, errCPM: Math.sqrt(Math.max(counts, 1)) / m, usv: cpm * (meas.device === "radiacode" ? 0.092 / 718 : 0.0101) }; };
   // mesmas contas do measure.go / measureauto.go
   const compare = (b, ph) => {
     const net = ph.cpm - b.cpm, err = Math.hypot(b.errCPM, ph.errCPM), z = net / err;
@@ -4715,8 +4856,9 @@ function makeDemoApi() {
     need = Math.max(need, 20);
     return !isFinite(need) || need > max ? -1 : Math.ceil(need) - el;
   };
-  function feed(cps) {
+  function feed(cps, dev) {
     if (meas.phase !== "fundo" && meas.phase !== "objeto") return;
+    if ((meas.device || "gmc") !== (dev || "gmc")) return;
     meas.counts += cps; meas.elapsed++;
     let stop = "";
     if (meas.phase === "objeto") {
@@ -4741,9 +4883,47 @@ function makeDemoApi() {
         if (stop === "limite" && r.level !== "sim") r.verdict += " (chegou ao tempo máximo sem decidir)";
         if (meas.auto) { r.pct = meas.pct; r.threshold = thrOf(meas.bg, meas.pct); }
         meas.result = r; meas.live = null; meas.eta = -1;
+        if (meas.device === "radiacode") meas.spectrum = demoMeasSpec(meas.elapsed, meas.bg.source === "casa");
       }
     }
     emit("measure", { ...meas });
+  }
+  // RadiaCode medindo no modo navegador: fundo ~12 cps, objeto ~19 cps
+  setInterval(() => {
+    if (meas.device !== "radiacode" || !demoRcFake() || (meas.phase !== "fundo" && meas.phase !== "objeto")) return;
+    const lam = meas.phase === "objeto" ? 19 : 12;
+    let k = 0, p = 1; const L = Math.exp(-lam); for (;;) { p *= Math.random(); if (p <= L) break; k++; }
+    emit("radiacode", { ...demoRc(), cps: lam + (Math.random() - 0.5) * 2 });
+    feed(k, "radiacode");
+  }, 1000);
+  // espectro de mentira: contínuo + linhas do tório (camisa de lampião)
+  const demoSpecArr = (sec, cont, peaks) => {
+    const out = [];
+    for (let i = 0; i < 1024; i++) {
+      const e = (i + 0.5) * 3;
+      let r = cont * Math.exp(-e / 350) / 3;
+      for (const [pe, pr] of peaks) { const sg = 65 * Math.sqrt(pe / 661.7) / 2.355; r += pr * 3 / (sg * 2.5066) * Math.exp(-(((e - pe) / sg) ** 2) / 2); }
+      const l = r * sec;
+      out.push(Math.max(0, Math.round(l + Math.sqrt(l) * (Math.random() + Math.random() + Math.random() - 1.5) * 2)));
+    }
+    return out;
+  };
+  const demoMeasSpec = (objSec, home) => {
+    const bgPk = [[1460.8, 0.08], [609.3, 0.05], [351.9, 0.05]];
+    return { a: [0, 3, 0], bgSrc: home ? "acumulado" : "", bgSec: home ? 50 * 3600 : objSec, objSec,
+      bg: demoSpecArr(home ? 50 * 3600 : objSec, 0.3, bgPk), obj: demoSpecArr(objSec, 0.8, [[238.6, 3], [583.2, 1], [911.2, 0.5], [2614.5, 0.4], ...bgPk]),
+      peaks: [{ group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 260, sigma: 11 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 80, sigma: 5.2 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4.1 }] };
+  };
+  {
+    // uma medição salva do RadiaCode, com espectro
+    const t0 = Date.now() - 3 * 3600e3, sec = 95, samples = [];
+    let cpm = 2300;
+    for (let i = 0; i < sec; i++) { cpm = Math.max(1500, cpm + (Math.random() - 0.5) * 60); samples.push({ t: (i + 1) * 1000, phase: "objeto", cpm: Math.round(cpm), cps: Math.round(38 + (Math.random() - 0.5) * 12) }); }
+    measurements.push({ id: 3, name: "Camisa de lampião antiga", note: "", time: t0, device: "radiacode", distance: "encostado",
+      bg: { counts: 40926, seconds: 3420, cpm: 718, errCPM: 3.5, usv: 0.092, start: t0 - 3600e3, end: t0 - 60e3, source: "casa" },
+      obj: { counts: 3790, seconds: sec, cpm: 2393.7, errCPM: 38.9, usv: 0.31, start: t0, end: t0 + sec * 1000 },
+      result: { netCPM: 1675.7, netErr: 39.1, netUSv: 0.218, ratio: 3.33, sigma: 42.9, level: "sim", verdict: "radioativo: a diferença para o fundo é clara", stop: "achou", pct: 20, threshold: 143.6 },
+      samples, spectrum: demoMeasSpec(sec, true) });
   }
   const demoRcCfg = { off: false, ble: "", raw: true };
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
@@ -4882,13 +5062,21 @@ function makeDemoApi() {
       emit("measure", { ...meas }); return { ...meas };
     },
     GetHomeBackground: async () => demoHomeBg(),
+    GetHomeBackgroundDev: async (dev) => {
+      if (dev !== "radiacode") return { ...demoHomeBg(), usv: 20.4 * 0.0101, device: "gmc" };
+      if (!demoRcFake()) return { ok: false, minutes: 0, why: "só 0 min do RadiaCode em casa na última hora (precisa de 30)", device: "radiacode" };
+      return { ok: true, cpm: 718, errCPM: 3.5, minutes: 57, counts: 40926, from: Date.now() - 3600e3, to: Date.now() - 60e3, usv: 0.092, device: "radiacode" };
+    },
     StartMeasure: async (o) => {
       const maxSec = o.maxSec || 1800, pct = o.pct || 20;
-      meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active,
-        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now() };
+      const device = o.device === "radiacode" ? "radiacode" : "gmc";
+      if (device === "radiacode" && (!demoRcFake() || localStorage.getItem("rcFake2"))) throw new Error("conecte o RadiaCode para medir");
+      meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
+        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
       if (o.homeBg) {
-        const h = demoHomeBg();
-        meas.bg = { counts: h.counts, seconds: h.minutes * 60, cpm: h.cpm, errCPM: h.errCPM, usv: h.cpm * 0.0101, start: h.from, end: h.to, source: "casa" };
+        const h = await api.GetHomeBackgroundDev(device);
+        if (!h.ok) throw new Error("fundo da casa indisponível: " + h.why);
+        meas.bg = { counts: h.counts, seconds: h.minutes * 60, cpm: h.cpm, errCPM: h.errCPM, usv: h.usv, start: h.from, end: h.to, source: "casa" };
         meas.phase = "objeto";
         meas.seconds = o.auto ? maxSec : o.seconds || 60;
       }

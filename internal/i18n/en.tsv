@@ -1729,7 +1729,6 @@ RadiaCode (só em µSv/h)	RadiaCode (µSv/h only)
 sem leituras ainda	no readings yet
 dose hoje {0} µSv	dose today {0} µSv
 bateria {0}%	battery {0}%
-desconectado	disconnected
 última leitura {0} µSv/h às {1}	last reading {0} µSv/h at {1}
 última leitura {0} µSv/h (ontem {1})	last reading {0} µSv/h (yesterday {1})
 última leitura {0} µSv/h ({1} {2})	last reading {0} µSv/h ({1} {2})
@@ -1805,8 +1804,6 @@ Aparelho da dose	Dose device
 O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.	The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.
 Sua dose no RadiaCode ({0})	Your dose on the RadiaCode ({0})
 GMC-800 (casa)	GMC-800 (home)
-Em casa	At home
-Fora de casa	Away from home
 {0} medidos	{0} measured
 nenhum minuto fora de casa	no minutes away from home
 {0} · média {1} · máx {2} µSv/h	{0} · average {1} · max {2} µSv/h
@@ -1824,8 +1821,47 @@ RadiaCode: fora de casa	RadiaCode: away from home
 {0} µSv em {1}	{0} µSv over {1}
 {0}: RadiaCode {1} · GMC-800 {2} µSv/h ({3} CPM)	{0}: RadiaCode {1} · GMC-800 {2} µSv/h ({3} CPM)
 RADIACODE (DOSÍMETRO PESSOAL)	RADIACODE (PERSONAL DOSIMETER)
-Dose no período	Dose in the period
 {0} µSv (só os minutos medidos; média {1})	{0} µSv (measured minutes only; average {1})
 {0}% em relação ao fundo em casa ({1}, mediana de 7 dias)	{0}% relative to the home background ({1}, 7-day median)
 {0} µSv em {1} · média {2} · máximo {3} ({4})	{0} µSv over {1} · average {2} · max {3} ({4})
 {0}% · {1} min com leitura do RadiaCode	{0}% · {1} min with RadiaCode readings
+Compara a contagem com o objeto perto do aparelho com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.	Compares the count with the object near the device against the background and says whether the difference is real or just the natural variation of the count. In automatic mode, the measurement stops by itself once it can answer: strong objects in seconds, weak ones take longer.
+RadiaCode (com espectro)	RadiaCode (with spectrum)
+Distância até o RadiaCode (opcional)	Distance to the RadiaCode (optional)
+O RadiaCode não está conectado.	The RadiaCode isn't connected.
+Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro).	Home background: only valid if the RadiaCode spent the last hour sitting where you'll measure the object (in a pocket, the background is different).
+{0}{1} ± {2} CPM sobre o fundo · {3}× o fundo · ≈ {4}{5} µSv/h no detector	{0}{1} ± {2} CPM above background · {3}× the background · ≈ {4}{5} µSv/h at the detector
+± {0} · ≈ {1} µSv/h no detector	± {0} · ≈ {1} µSv/h at the detector
+µSv/h no detector	µSv/h at the detector
+Espectro do objeto e do fundo	Spectrum of the object and of the background
+com o objeto ({0})	with the object ({0})
+fundo ({0})	background ({0})
+fundo: espectro acumulado do aparelho ({0}), na escala do tempo do objeto	background: the device's accumulated spectrum ({0}), scaled to the object's time
+contagens/s em escala log	counts/s on a log scale
+Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.	No background spectrum: the object's peaks couldn't be told apart from the surroundings'.
+Nenhuma linha gama conhecida subiu acima do fundo (3σ).	No known gamma line rose above the background (3σ).
+Linhas acima do fundo (uma pista do radionuclídeo, não uma identificação garantida):	Lines above the background (a hint of the radionuclide, not a guaranteed identification):
+Amerício-241	Americium-241
+Urânio-235	Uranium-235
+Tório-232 (série)	Thorium-232 (series)
+Rádio-226 (série do urânio)	Radium-226 (uranium series)
+Césio-137	Caesium-137
+Cobalto-60	Cobalt-60
+Potássio-40	Potassium-40
+Camisa de lampião antiga	Old lantern mantle
+só {0} min do RadiaCode em casa na última hora (precisa de {1})	only {0} min of RadiaCode readings at home in the last hour (needs {1})
+conecte o RadiaCode para medir	connect the RadiaCode to measure
+ESPECTRO (RADIACODE)	SPECTRUM (RADIACODE)
+contagens/s (faixas de meio pico)	counts/s (half-peak-wide bins)
+fundo: espectro acumulado do aparelho ({0})	background: the device's accumulated spectrum ({0})
+GEOMETRIA, APARELHO E MÉTODO	GEOMETRY, DEVICE AND METHOD
+o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)	the µSv/h is what the RadiaCode itself calculates (factory calibration, energy-based)
+soma das amostras do RadiaCode (a cada 0,5 s), em cada fase	sum of the RadiaCode's samples (every 0.5 s), in each phase
+Picos	Peaks
+para cada linha gama conhecida, as contagens líquidas numa janela em volta da energia comparadas com as das janelas vizinhas; conta como pico a partir de 3σ	for each known gamma line, the net counts in a window around the energy compared with those of the neighboring windows; it counts as a peak from 3σ up
+O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.	The µSv/h is the rate at the detector, in the measured position. It's not the dose of whoever holds the object and changes a lot with distance.
+O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.	The RadiaCode's crystal sees gamma and X-rays; beta barely enters the count.
+Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.	Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up.
+{0} µSv/h por CPM (para gama do Cs-137)	{0} µSv/h per CPM (for Cs-137 gamma)
+Medição de {0} (RadiaCode): {1} ± {2} CPM sobre o fundo ({3}σ) — {4}	Measurement of {0} (RadiaCode): {1} ± {2} CPM above background ({3}σ) — {4}
+RadiaCode: espectro para a medição: {0}	RadiaCode: spectrum for the measurement: {0}

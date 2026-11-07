@@ -1,5 +1,22 @@
 # Versões
 
+## 1.32.0
+- **Medir objeto com o RadiaCode**: novo campo "Aparelho" (RadiaCode ou
+  GMC-800). Da primeira vez, vem o RadiaCode se ele estiver conectado.
+  - As contagens vêm das amostras cruas do aparelho (a cada 0,5 s) e o
+    µSv/h é a média do que o próprio RadiaCode calcula em cada fase.
+  - **Fundo da casa** pelo RadiaCode: os minutos dele em casa da última
+    hora. Só vale se ele ficou parado no lugar da medição (no bolso o fundo
+    é outro), e a tela avisa.
+  - **Espectro**: o app guarda o espectro de cada fase (com o fundo da casa,
+    usa o espectro acumulado do aparelho na escala do tempo do objeto) e
+    mostra o gráfico no resultado e nas medições salvas, com as linhas gama
+    que subiram acima do fundo (Am-241, U-235, séries do tório e do rádio,
+    Cs-137, Co-60, K-40). É uma pista do radionuclídeo, não uma
+    identificação garantida.
+  - O **relatório em PDF** da medição ganhou o espectro e os textos do
+    RadiaCode (detector, calibração do aparelho, limitações).
+
 ## 1.31.0
 - **Resumo com o RadiaCode**: quando ele tem dado no período, o resumo
   começa por ele:

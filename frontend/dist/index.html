@@ -515,15 +515,22 @@
     </div>
 
     <div id="mNewPane">
-    <p class="small muted">Compara a contagem com o objeto perto do tubo com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.</p>
+    <p class="small muted">Compara a contagem com o objeto perto do aparelho com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.</p>
     <div class="m-grid">
       <div class="m-main">
     <label for="mName">Nome do objeto (opcional)</label>
     <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
-    <label for="mDist">Distância até o tubo (opcional)</label>
+    <label for="mDist" id="mDistLabel">Distância até o tubo (opcional)</label>
     <input type="text" id="mDist" autocomplete="off" list="mDistList" placeholder="ex.: encostado, 5 cm">
     <datalist id="mDistList"><option value="encostado"></option><option value="1 cm"></option><option value="5 cm"></option><option value="10 cm"></option><option value="30 cm"></option><option value="1 m"></option></datalist>
     <div class="m-opts">
+      <div>
+        <label for="mDev">Aparelho</label>
+        <select id="mDev">
+          <option value="radiacode">RadiaCode (com espectro)</option>
+          <option value="gmc">GMC-800</option>
+        </select>
+      </div>
       <div>
         <label for="mBgSrc">Fundo</label>
         <select id="mBgSrc">
@@ -598,6 +605,7 @@
             <span class="small muted">faixa = margem de erro</span>
           </div>
         </div>
+        <div class="m-spec" id="mSpec" hidden></div>
       </div>
     </div>
     </div>
@@ -630,6 +638,7 @@
           <div class="m-verdict" id="mdVerdict"><strong></strong><span class="small"></span></div>
           <div class="ri-tiles m-tiles" id="mdTiles"></div>
           <div id="mLiveSlotSaved"></div>
+          <div class="m-spec" id="mdSpec" hidden></div>
           <div class="m-detail-cols">
             <div><h4>As duas fases</h4><div id="mdStats"></div></div>
             <div><h4>Geometria / anotação</h4><p class="small" id="mdNote"></p><h4>O que esta medição consegue ver</h4><p class="small" id="mdLimits"></p></div>

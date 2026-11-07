@@ -1,0 +1,34 @@
+package app
+
+import (
+	"math"
+	"testing"
+)
+
+func TestFindPeaks(t *testing.T) {
+	const n = 1024
+	s := &MeasureSpectrum{A: [3]float64{0, 3, 0}, BgSec: 1000, ObjSec: 100, Bg: make([]uint32, n), Obj: make([]uint32, n)}
+	for i := 0; i < n; i++ {
+		s.Bg[i] = 1000 // 1 cps por canal
+		// objeto: o mesmo fundo + um contínuo (Compton) + o pico do Cs-137
+		e := s.energy(i)
+		g := 3000 / (9.2 * math.Sqrt(2*math.Pi)) * math.Exp(-math.Pow((e-661.7)/3/9.2, 2)/2)
+		s.Obj[i] = uint32(100 + 40 + g)
+	}
+	p := s.findPeaks()
+	if len(p) != 1 || p[0].Group != "Césio-137" || p[0].Sigma < 10 {
+		t.Fatalf("picos: %+v", p)
+	}
+	// sem pico, só o contínuo: nada
+	for i := range s.Obj {
+		s.Obj[i] = 140
+	}
+	if p := s.findPeaks(); len(p) != 0 {
+		t.Fatalf("achou pico no contínuo: %+v", p)
+	}
+	// sem espectro do fundo: não procura
+	s.Bg = nil
+	if s.findPeaks() != nil {
+		t.Fatal("sem fundo")
+	}
+}

@@ -566,8 +566,8 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .m-plot { flex: 1; position: relative; }
 .m-plot svg { width: 100%; height: 100%; display: block; }
 .m-live .legend { flex-wrap: wrap; gap: 6px 14px; margin-top: 6px; }
-.m-live .key { display: inline-flex; align-items: center; gap: 6px; }
-.m-live .key i { width: 16px; height: 0; border-top: 2px solid; display: inline-block; }
+.m-live .key, .m-spec .key { display: inline-flex; align-items: center; gap: 6px; }
+.m-live .key i, .m-spec .key i { width: 16px; height: 0; border-top: 2px solid; display: inline-block; flex: none; }
 .mk-live { border-color: rgba(110, 231, 160, .6) !important; border-top-width: 1px !important; }
 .mk-bg { border-color: #A3ADB4 !important; }
 .mk-obj { border-color: #5EEAD4 !important; }
@@ -980,6 +980,23 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-nums .val { font-size: 22px; color: var(--text); }
 .rc-cmp-chart, .rc-real-spec { width: 100%; }
 .rc-cmp-svg { width: 100%; height: 220px; display: block; }
+/* espectro da medição de objeto */
+.m-spec { margin-top: 12px; }
+.m-spec h4 { margin: 0 0 6px; }
+.m-spec-svg { width: 100%; height: auto; display: block; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; }
+.m-spec-svg .grid { stroke: var(--border); stroke-width: 1; }
+.m-spec-svg .ax { fill: var(--muted); font-size: 11px; font-family: var(--mono); }
+.m-spec-svg path { fill: none; stroke-linejoin: round; }
+.m-spec-svg path.obj { stroke: #5EEAD4; stroke-width: 1.8; }
+.m-spec-svg path.bg { stroke: #A3ADB4; stroke-width: 1.3; }
+.m-spec-svg .tick { stroke: var(--dim); stroke-width: 1.5; }
+.m-spec-svg .peak { stroke: var(--warn); stroke-width: 1; stroke-dasharray: 4 3; }
+.m-spec-svg .peak-l { fill: var(--warn); font-size: 11px; font-family: var(--mono); }
+.m-spec .legend { margin-top: 4px; display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.m-spec-txt { margin: 6px 0 0; }
+.m-spec-peaks { margin: 4px 0 0; padding-left: 18px; }
+.m-spec-peaks b { font-weight: 600; }
+.m-spec-peaks .mono { color: var(--muted); }
 .rc-cmp-svg .grid { stroke: var(--border); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .rc-cmp-svg .ax { fill: var(--muted); font-size: 11px; font-family: var(--mono, monospace); }
 .rc-cmp-svg path { fill: none; stroke-width: 1.6; vector-effect: non-scaling-stroke; }

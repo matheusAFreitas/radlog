@@ -1,6 +1,7 @@
 package app
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 	"strings"
@@ -8,6 +9,7 @@ import (
 	"time"
 
 	"radlog/internal/gmc"
+	"radlog/internal/radiacode"
 	"radlog/internal/store"
 )
 
@@ -502,5 +504,43 @@ func TestSavedMeasurements(t *testing.T) {
 	a.feedMeasure(0, 1, true)
 	if len(a.GetMeasurements()) != 0 {
 		t.Fatal("salvou medição do demo")
+	}
+}
+
+func TestRadiacodeMeasure(t *testing.T) {
+	a, _ := testApp(t)
+	a.settings.NoMeasureReport = true
+	bg := &MeasurePhase{Counts: 600, Seconds: 60, CPM: 600, ErrCPM: 24.5, USv: 0.10, Source: "casa"}
+	a.measure = MeasureState{Phase: "objeto", Seconds: 3, Device: "radiacode", Bg: bg, PhaseStart: time.Now().UnixMilli()}
+	// o GMC não entra numa medição do RadiaCode
+	a.feedMeasure(30, 5, false)
+	if a.GetMeasure().Elapsed != 0 {
+		t.Fatal("GMC entrou na medição do RadiaCode")
+	}
+	// 3 s de amostras de 0,5 s: 40 cps (20 contagens cada) e 0,3 µSv/h
+	for i := 0; i < 3; i++ {
+		a.rcMeasureSamples(radiacode.RawSamples{Period: 500 * time.Millisecond, CPS: []float64{40, 40}, DoseRate: []float64{0.3, 0.3}})
+	}
+	st := a.GetMeasure()
+	list := a.GetMeasurements()
+	if st.Phase != "pronto" || st.Obj == nil || st.Obj.Counts != 120 || math.Abs(st.Obj.USv-0.3) > 1e-9 || math.Abs(st.Result.NetUSv-0.2) > 1e-9 {
+		t.Fatalf("medição: %+v obj %+v res %+v", st, st.Obj, st.Result)
+	}
+	if len(list) != 1 || list[0].Device != "radiacode" || len(list[0].Samples) != 3 || list[0].Samples[0].CPS != 40 {
+		t.Fatalf("salva: %+v", list)
+	}
+}
+
+func TestSpecDiff(t *testing.T) {
+	s0 := &radiacode.Spectrum{Duration: 10 * time.Second, Counts: []uint32{1, 2, 3}}
+	s1 := &radiacode.Spectrum{Duration: 25 * time.Second, Counts: []uint32{4, 2, 9}, A1: 3}
+	d := specDiff(s0, s1)
+	if d.ObjSec != 15 || d.Obj[0] != 3 || d.Obj[1] != 0 || d.Obj[2] != 6 || d.A[1] != 3 {
+		t.Fatalf("diferença: %+v", d)
+	}
+	// zerado no meio: vale o segundo inteiro
+	s1.Counts[1] = 1
+	if d := specDiff(s0, s1); d.Obj[1] != 1 || d.ObjSec != 25 {
+		t.Fatalf("zerado: %+v", d)
 	}
 }

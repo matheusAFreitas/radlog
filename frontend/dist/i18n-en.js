@@ -1297,7 +1297,37 @@ const I18N_EN = {
 "RadiaCode: dose": "RadiaCode: dose",
 "RadiaCode: média": "RadiaCode: average",
 "RadiaCode: fora de casa": "RadiaCode: away from home",
-"RADIACODE (DOSÍMETRO PESSOAL)": "RADIACODE (PERSONAL DOSIMETER)"
+"RADIACODE (DOSÍMETRO PESSOAL)": "RADIACODE (PERSONAL DOSIMETER)",
+"Compara a contagem com o objeto perto do aparelho com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.": "Compares the count with the object near the device against the background and says whether the difference is real or just the natural variation of the count. In automatic mode, the measurement stops by itself once it can answer: strong objects in seconds, weak ones take longer.",
+"RadiaCode (com espectro)": "RadiaCode (with spectrum)",
+"Distância até o RadiaCode (opcional)": "Distance to the RadiaCode (optional)",
+"O RadiaCode não está conectado.": "The RadiaCode isn't connected.",
+"Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro).": "Home background: only valid if the RadiaCode spent the last hour sitting where you'll measure the object (in a pocket, the background is different).",
+"µSv/h no detector": "µSv/h at the detector",
+"Espectro do objeto e do fundo": "Spectrum of the object and of the background",
+"contagens/s em escala log": "counts/s on a log scale",
+"Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.": "No background spectrum: the object's peaks couldn't be told apart from the surroundings'.",
+"Nenhuma linha gama conhecida subiu acima do fundo (3σ).": "No known gamma line rose above the background (3σ).",
+"Linhas acima do fundo (uma pista do radionuclídeo, não uma identificação garantida):": "Lines above the background (a hint of the radionuclide, not a guaranteed identification):",
+"Amerício-241": "Americium-241",
+"Urânio-235": "Uranium-235",
+"Tório-232 (série)": "Thorium-232 (series)",
+"Rádio-226 (série do urânio)": "Radium-226 (uranium series)",
+"Césio-137": "Caesium-137",
+"Cobalto-60": "Cobalt-60",
+"Potássio-40": "Potassium-40",
+"Camisa de lampião antiga": "Old lantern mantle",
+"conecte o RadiaCode para medir": "connect the RadiaCode to measure",
+"ESPECTRO (RADIACODE)": "SPECTRUM (RADIACODE)",
+"contagens/s (faixas de meio pico)": "counts/s (half-peak-wide bins)",
+"GEOMETRIA, APARELHO E MÉTODO": "GEOMETRY, DEVICE AND METHOD",
+"o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)": "the µSv/h is what the RadiaCode itself calculates (factory calibration, energy-based)",
+"soma das amostras do RadiaCode (a cada 0,5 s), em cada fase": "sum of the RadiaCode's samples (every 0.5 s), in each phase",
+"Picos": "Peaks",
+"para cada linha gama conhecida, as contagens líquidas numa janela em volta da energia comparadas com as das janelas vizinhas; conta como pico a partir de 3σ": "for each known gamma line, the net counts in a window around the energy compared with those of the neighboring windows; it counts as a peak from 3σ up",
+"O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.": "The µSv/h is the rate at the detector, in the measured position. It's not the dose of whoever holds the object and changes a lot with distance.",
+"O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.": "The RadiaCode's crystal sees gamma and X-rays; beta barely enters the count.",
+"Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.": "Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up."
 },
 "patterns": [
 [
@@ -1674,6 +1704,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo: espectro acumulado do aparelho (",
+"^fundo: espectro acumulado do aparelho \\(((?:(?! · ).)+?)\\), na escala do tempo do objeto$",
+"background: the device's accumulated spectrum (${1}), scaled to the object's time",
+[
+"fundo: espectro acumulado do aparelho (",
+"), na escala do tempo do objeto"
+]
+],
+[
 "Sem contagens há ",
 "^Sem contagens há ((?:(?! · ).)+?): o tubo pode estar com defeito\\. Confira o contador\\.$",
 "No counts for ${1}: the tube may be faulty. Check the counter.",
@@ -1948,6 +1987,15 @@ const I18N_EN = {
 ]
 ],
 [
+"só ",
+"^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
+"only ${1} min of RadiaCode readings at home in the last hour (needs ${2})",
+[
+"só ",
+" min do RadiaCode em casa na última hora (precisa de "
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -2002,6 +2050,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Medição de ",
+"^Medição de ((?:(?! · ).)+?) \\(RadiaCode\\): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
+"Measurement of ${1} (RadiaCode): ${2} ± ${3} CPM above background (${4}σ) — ${5}",
+[
+"Medição de ",
+" (RadiaCode): ",
+" CPM sobre o fundo (",
+"σ) — "
+]
+],
+[
 "Dentro do normal — seu fundo costuma ficar entre ",
 "^Dentro do normal — seu fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
 "Within normal — your background usually stays between ${1} and ${2} CPM",
@@ -2034,6 +2093,16 @@ const I18N_EN = {
 "${1} in use by another program (close GQ's Data Viewer)",
 [
 " em uso por outro programa (feche o Data Viewer da GQ)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?)((?:(?! · ).)+?) µSv/h no detector$",
+"${1}${2} ± ${3} CPM above background · ${4}× the background · ≈ ${5}${6} µSv/h at the detector",
+[
+" CPM sobre o fundo · ",
+"× o fundo · ≈ ",
+" µSv/h no detector"
 ]
 ],
 [
@@ -2505,6 +2574,14 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo: espectro acumulado do aparelho (",
+"^fundo: espectro acumulado do aparelho \\(((?:(?! · ).)+?)\\)$",
+"background: the device's accumulated spectrum (${1})",
+[
+"fundo: espectro acumulado do aparelho ("
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\)$",
 "The difference is ${1} times the uncertainty (${2}σ)",
@@ -2687,6 +2764,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM \\(para gama do Cs\\-137\\)$",
+"${1} µSv/h per CPM (for Cs-137 gamma)",
+[
+" µSv/h por CPM (para gama do Cs-137)"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -2774,6 +2859,14 @@ const I18N_EN = {
 "· tempo morto +",
 "% (contador: ",
 " CPM)"
+]
+],
+[
+"RadiaCode: espectro para a medição: ",
+"^RadiaCode: espectro para a medição: ((?:(?! · ).)+?)$",
+"RadiaCode: spectrum for the measurement: ${1}",
+[
+"RadiaCode: espectro para a medição: "
 ]
 ],
 [
@@ -3584,6 +3677,15 @@ const I18N_EN = {
 ]
 ],
 [
+"± ",
+"^± ((?:(?! · ).)+?) · ≈ ((?:(?! · ).)+?) µSv/h no detector$",
+"± ${1} · ≈ ${2} µSv/h at the detector",
+[
+" · ≈ ",
+" µSv/h no detector"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -4323,6 +4425,14 @@ const I18N_EN = {
 "home background ${1} ± ${2}",
 [
 "fundo da casa "
+]
+],
+[
+"com o objeto (",
+"^com o objeto \\(((?:(?! · ).)+?)\\)$",
+"with the object (${1})",
+[
+"com o objeto ("
 ]
 ],
 [
@@ -5218,6 +5328,14 @@ const I18N_EN = {
 "${1}B× less",
 [
 " bi× menos"
+]
+],
+[
+"fundo (",
+"^fundo \\(((?:(?! · ).)+?)\\)$",
+"background (${1})",
+[
+"fundo ("
 ]
 ],
 [

@@ -21,6 +21,7 @@ import (
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
 	"radlog/internal/gmc"
+	"radlog/internal/radiacode"
 	"radlog/internal/store"
 )
 
@@ -370,6 +371,9 @@ type App struct {
 	periods      []Period        // fora de casa (periods.go)
 	measurements []SavedMeasure  // medições de objeto salvas (measure.go)
 	measSamples  []MeasureSample // segundos da medição em andamento
+	// RadiaCode: espectro no começo da fase atual e o do fundo já medido
+	measSpec0  *radiacode.Spectrum
+	measSpecBg *MeasureSpectrum
 }
 
 // NewApp cria o App.

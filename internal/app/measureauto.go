@@ -7,6 +7,8 @@ import (
 	"sort"
 	"strings"
 	"time"
+
+	"radlog/internal/radiacode"
 )
 
 // ---------- medir um objeto: modo automático e fundo da casa ----------
@@ -40,6 +42,7 @@ type MeasureOpts struct {
 	Seconds  int     `json:"seconds"` // manual: cada fase
 	MaxSec   int     `json:"maxSec"`  // automático: limite da fase do objeto
 	Pct      float64 `json:"pct"`     // automático: % do fundo que conta como "tem algo"
+	Device   string  `json:"device"`  // "gmc" (ou "") ou "radiacode"
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -53,9 +56,28 @@ type HomeBg struct {
 	To      int64   `json:"to"`
 	Why     string  `json:"why"` // por que não dá (OK = false)
 	Demo    bool    `json:"demo"`
+	// µSv/h do fundo (RadiaCode: média do aparelho; GMC: pela calibração)
+	USv    float64 `json:"usv"`
+	Device string  `json:"device"`
 }
 
-// GetHomeBackground devolve o fundo da casa da última hora.
+// GetHomeBackgroundDev devolve o fundo da casa da última hora pelo aparelho
+// escolhido ("gmc" ou "radiacode").
+func (a *App) GetHomeBackgroundDev(dev string) HomeBg {
+	if devName(dev) == "radiacode" {
+		return a.rcHomeBackground()
+	}
+	hb := a.GetHomeBackground()
+	hb.Device = "gmc"
+	if hb.OK {
+		a.mu.Lock()
+		hb.USv = a.convCalLocked().USv(hb.CPM)
+		a.mu.Unlock()
+	}
+	return hb
+}
+
+// GetHomeBackground devolve o fundo da casa da última hora (GMC).
 func (a *App) GetHomeBackground() HomeBg {
 	now := time.Now()
 	a.mu.Lock()
@@ -184,25 +206,40 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	if o.Seconds < 10 || o.Seconds > 1800 {
 		o.Seconds = 60
 	}
+	dev := devName(o.Device)
 	var hb HomeBg
 	if o.HomeBg {
-		hb = a.GetHomeBackground()
+		hb = a.GetHomeBackgroundDev(dev)
 		if !hb.OK {
 			return a.GetMeasure(), errors.New("fundo da casa indisponível: " + hb.Why)
 		}
 	}
+	// RadiaCode: espectro no começo (e o acumulado, que serve de fundo da casa)
+	var spec0 *radiacode.Spectrum
+	var specBg *MeasureSpectrum
+	if dev == "radiacode" {
+		if !a.rcConnected() {
+			return a.GetMeasure(), errors.New("conecte o RadiaCode para medir")
+		}
+		spec0 = a.rcSpectrumNow(false)
+		if o.HomeBg {
+			if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
+				specBg = &MeasureSpectrum{A: [3]float64{acc.A0, acc.A1, acc.A2}, Bg: acc.Counts, BgSec: acc.Duration.Seconds(), BgSrc: "acumulado"}
+			}
+		}
+	}
 	a.mu.Lock()
-	if a.dev == nil && !a.demo.Active {
+	if dev == "gmc" && a.dev == nil && !a.demo.Active {
 		st := a.measure
 		a.mu.Unlock()
 		return st, errors.New("conecte o contador (ou ligue o modo demo) para medir")
 	}
 	now := time.Now().UnixMilli()
-	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active,
-		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1}
+	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active && dev == "gmc",
+		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
-			USv: a.convCalLocked().USv(hb.CPM), Start: hb.From, End: hb.To, Source: "casa"}
+			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}
 		m.Bg = &bg
 		m.Phase = "objeto"
 		m.Seconds = o.Seconds
@@ -218,6 +255,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	}
 	a.measure = m
 	a.measSamples = nil
+	a.measSpec0, a.measSpecBg = spec0, specBg
 	st := a.measure
 	a.mu.Unlock()
 	go a.emit("measure", st)

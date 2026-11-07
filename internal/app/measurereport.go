@@ -6,6 +6,7 @@ import (
 	"math"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 	"time"
 
@@ -166,10 +167,21 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	if connected && info.Version != "" {
 		dev = info.Version
 	}
-	calTxt := fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM"
+	calTxt := fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM (para gama do Cs-137)"
 	dt := "desligada"
 	if lv.DeadTimeOn {
 		dt = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
+	}
+	if m.Device == "radiacode" {
+		a.rc.mu.Lock()
+		rs := a.rc.st
+		a.rc.mu.Unlock()
+		dev = "RadiaCode"
+		if rs.Model != "" {
+			dev = strings.TrimSpace(rs.Model + " " + rs.Serial)
+		}
+		calTxt = "o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)"
+		dt = ""
 	}
 	body := a.inLang(func() []byte { return renderMeasurePDF(*m, dev, calTxt, dt) })
 	if err := os.WriteFile(dst, body, 0o644); err != nil {
@@ -210,6 +222,11 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	extra := float64(len(tl)-1) * (ts + 3)
 	d.Text(pm, p.y+20+extra, pdf.Sans, 9, cMuted, period)
 	d.TextRight(pdf.W-pm, p.y, pdf.Sans, 8, cMuted, "GMC Monitor "+AppVersion)
+	rc := m.Device == "radiacode"
+	at := "no tubo"
+	if rc {
+		at = "no detector"
+	}
 	ry := p.y + 11
 	if device != "" {
 		d.TextRight(pdf.W-pm, ry, pdf.Sans, 8, cMuted, device)
@@ -254,7 +271,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	tiles := [][4]string{
 		{bgLabel, fmtBR(m.Bg.CPM, 1) + " CPM", "± " + fmtBR(m.Bg.ErrCPM, 1) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
 		{"Com o objeto", fmtBR(m.Obj.CPM, 1) + " CPM", "± " + fmtBR(m.Obj.ErrCPM, 1) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
-		{"Líquido (objeto − fundo)", sign + fmtBR(r.NetCPM, 1) + " CPM", "± " + fmtBR(r.NetErr, 1) + " CPM · ≈ " + fmtBR(r.NetUSv, 3) + " µSv/h no tubo", "m"},
+		{"Líquido (objeto − fundo)", sign + fmtBR(r.NetCPM, 1) + " CPM", "± " + fmtBR(r.NetErr, 1) + " CPM · ≈ " + fmtBR(r.NetUSv, 3) + " µSv/h " + at, "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
 	}
 	for i, tl := range tiles {
@@ -270,6 +287,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 		p.y += 16
 	} else {
 		p.measChart(m)
+	}
+	if m.Spectrum != nil && len(m.Spectrum.Obj) > 0 {
+		p.measSpectrum(m)
 	}
 
 	// distribuição
@@ -344,7 +364,11 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	p.kv(rows, 120)
 
 	// geometria e método
-	p.section("GEOMETRIA, CONTADOR E MÉTODO")
+	if rc {
+		p.section("GEOMETRIA, APARELHO E MÉTODO")
+	} else {
+		p.section("GEOMETRIA, CONTADOR E MÉTODO")
+	}
 	geo := strings.TrimSpace(m.Note)
 	if geo == "" {
 		geo = "não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)"
@@ -360,25 +384,45 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	if device == "" {
 		device = "contador não conectado na hora do relatório"
 	}
-	p.kv([][2]string{
+	method := [][2]string{
 		{"Distância", dist},
 		{"Geometria / anotação", geo},
 		{"Fundo", bgHow},
 		{"Contador", device},
-		{"Calibração", calTxt + " (para gama do Cs-137)"},
-		{"Tempo morto", deadTime},
-		{"Contagens", "soma do CPS do contador a cada segundo, em cada fase"},
-		{"Incerteza", "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"},
-		{"Significância", "líquido ÷ incerteza do líquido (σ)"},
-		{"Limite de detecção", "Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto"},
-	}, 120)
+		{"Calibração", calTxt},
+	}
+	if deadTime != "" {
+		method = append(method, [2]string{"Tempo morto", deadTime})
+	}
+	count := "soma do CPS do contador a cada segundo, em cada fase"
+	if rc {
+		count = "soma das amostras do RadiaCode (a cada 0,5 s), em cada fase"
+	}
+	method = append(method,
+		[2]string{"Contagens", count},
+		[2]string{"Incerteza", "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"},
+		[2]string{"Significância", "líquido ÷ incerteza do líquido (σ)"},
+		[2]string{"Limite de detecção", "Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto"},
+	)
+	if rc && m.Spectrum != nil {
+		method = append(method, [2]string{"Picos", "para cada linha gama conhecida, as contagens líquidas numa janela em volta da energia comparadas com as das janelas vizinhas; conta como pico a partir de 3σ"})
+	}
+	p.kv(method, 120)
 
 	p.section("LIMITAÇÕES")
-	for _, l := range []string{
+	lims := []string{
 		"O µSv/h é a taxa no tubo, na posição medida, com a calibração para Cs-137. Não é a dose de quem segura o objeto e muda muito com a distância.",
 		"O tubo do GMC-800 vê gama e parte do beta. Objetos que emitem mais beta (ex.: tungstênio toriado, vidro de urânio) podem dar CPM alto com µSv/h pouco confiável.",
 		"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RadiaCode).",
-	} {
+	}
+	if rc {
+		lims = []string{
+			"O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.",
+			"O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.",
+			"Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.",
+		}
+	}
+	for _, l := range lims {
 		lines := wrapText("• "+l, pdf.Sans, 7.5, cw, 3)
 		p.need(float64(len(lines))*9.5 + 3)
 		for i, ln := range lines {
@@ -562,4 +606,159 @@ func (p *reportPDF) measHist(title string, st measPhaseStats, x0, y0, w, h float
 	}
 	d.Polyline(curve, 0.9, cExp)
 	d.Line(x0, y0+h, x0+w, y0+h, 0.5, cLine, false)
+}
+
+// measSpectrum: espectro do RadiaCode com o objeto e o fundo (no mesmo
+// tempo), em escala log, com as linhas gama que subiram acima do fundo.
+func (p *reportPDF) measSpectrum(m SavedMeasure) {
+	s := m.Spectrum
+	bins := s.bins()
+	if len(bins) == 0 {
+		return
+	}
+	p.section("ESPECTRO (RADIACODE)")
+	d := p.d
+	p.need(175)
+	x0, y0, w, h := pm+30, p.y+8, pdf.W-2*pm-30, 120.0
+	lo, hi := math.Inf(1), 0.0
+	for _, b := range bins {
+		for _, v := range []float64{b.Obj, b.Bg} {
+			if v > 0 {
+				lo, hi = math.Min(lo, v), math.Max(hi, v)
+			}
+		}
+	}
+	if hi == 0 {
+		return
+	}
+	dlo, dhi := math.Floor(math.Log10(lo)), math.Ceil(math.Log10(hi))
+	if dhi <= dlo {
+		dhi = dlo + 1
+	}
+	e0, e1 := bins[0].E0, bins[len(bins)-1].E1
+	xv := func(e float64) float64 { return x0 + w*(e-e0)/(e1-e0) }
+	yv := func(v float64) float64 {
+		l := dlo
+		if v > 0 {
+			l = math.Max(dlo, math.Log10(v))
+		}
+		return y0 + h*(1-(l-dlo)/(dhi-dlo))
+	}
+	for dd := dlo; dd <= dhi; dd++ {
+		d.Line(x0, yv(math.Pow(10, dd)), x0+w, yv(math.Pow(10, dd)), 0.3, cLine, false)
+		d.TextRight(x0-4, yv(math.Pow(10, dd))+2.5, pdf.Mono, 6.5, cMuted, fmtSci(math.Pow(10, dd)))
+	}
+	for e := 0.0; e <= e1; e += 500 {
+		if e < e0 {
+			continue
+		}
+		x := xv(e)
+		d.Line(x, y0+h, x, y0+h+3, 0.5, cMuted, false)
+		lbl := fmtBR(e, 0)
+		lw := pdf.TextWidth(lbl, pdf.Mono, 6.5)
+		d.Text(x-lw/2, y0+h+11, pdf.Mono, 6.5, cMuted, lbl)
+	}
+	d.Text(x0+w-24, y0+h+20, pdf.Sans, 6.5, cMuted, "keV")
+	d.Text(pm, y0-3, pdf.Sans, 6.5, cMuted, "contagens/s (faixas de meio pico)")
+	for _, pk := range s.Peaks {
+		x := xv(pk.KeV)
+		d.Line(x, y0, x, y0+h, 0.6, cWarn, true)
+		d.Text(x+2, y0+8, pdf.Sans, 6.5, cWarn, fmt.Sprintf("%s %s", pk.Nuclide, fmtBR(pk.KeV, 1)))
+	}
+	// em degraus; faixa sem contagem nenhuma interrompe a linha
+	line := func(get func(specBin) float64, c pdf.RGB, wd float64) {
+		var seg [][2]float64
+		flush := func() {
+			if len(seg) > 1 {
+				d.Polyline(seg, wd, c)
+			}
+			seg = nil
+		}
+		for _, b := range bins {
+			v := get(b)
+			if v <= 0 {
+				flush()
+				continue
+			}
+			seg = append(seg, [2]float64{xv(b.E0), yv(v)}, [2]float64{xv(b.E1), yv(v)})
+		}
+		flush()
+	}
+	if bins[0].HasBg {
+		line(func(b specBin) float64 { return b.Bg }, pdf.Hex("#8C99A3"), 0.7)
+	}
+	line(func(b specBin) float64 { return b.Obj }, cAccent, 0.8)
+	d.Rect(x0, y0, w, h, nil, &cLine)
+	p.y = y0 + h + 30
+	lx := pm
+	leg := func(c pdf.RGB, txt string) {
+		d.Line(lx, p.y-2.5, lx+12, p.y-2.5, 1, c, false)
+		d.Text(lx+15, p.y, pdf.Sans, 7, cMuted, txt)
+		lx += 15 + pdf.TextWidth(txt, pdf.Sans, 7) + 12
+	}
+	leg(cAccent, fmt.Sprintf("com o objeto (%s)", specDur(s.ObjSec)))
+	if bins[0].HasBg {
+		if s.BgSrc == "acumulado" {
+			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectro acumulado do aparelho (%s)", fmtDurSec(s.BgSec)))
+		} else {
+			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo (%s)", specDur(s.BgSec)))
+		}
+	}
+	p.y += 16
+	var txt string
+	switch {
+	case !bins[0].HasBg:
+		txt = "Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente."
+	case len(s.Peaks) == 0:
+		txt = "Nenhuma linha gama conhecida subiu acima do fundo (3σ)."
+	default:
+		txt = "Linhas acima do fundo (uma pista do radionuclídeo, não uma identificação garantida):"
+	}
+	for i, ln := range wrapText(txt, pdf.Sans, 8, pdf.W-2*pm, 3) {
+		p.need(11)
+		d.Text(pm, p.y+float64(i)*10, pdf.Sans, 8, cInk, ln)
+		p.y += 10
+	}
+	// uma linha por fonte: nome e as energias
+	seen := map[string]bool{}
+	for _, pk := range s.Peaks {
+		if seen[pk.Group] {
+			continue
+		}
+		seen[pk.Group] = true
+		var kev []float64
+		for _, q := range s.Peaks {
+			if q.Group == pk.Group {
+				kev = append(kev, q.KeV)
+			}
+		}
+		sort.Float64s(kev)
+		var lines []string
+		for _, e := range kev {
+			lines = append(lines, fmtBR(e, 1))
+		}
+		p.need(11)
+		d.Text(pm+4, p.y+1, pdf.SansBold, 8, cInk, "•")
+		d.Text(pm+12, p.y+1, pdf.SansBold, 8, cInk, pk.Group)
+		gx := pm + 12 + pdf.TextWidth(pk.Group, pdf.SansBold, 8) + 6
+		d.Text(gx, p.y+1, pdf.Mono, 7.5, cMuted, strings.Join(lines, "; ")+" keV")
+		p.y += 11
+	}
+	p.y += 6
+}
+
+// fmtSci escreve uma potência de 10 de forma curta (0,01 · 1 · 100 · 1e4).
+func fmtSci(v float64) string {
+	if v >= 1e4 || v < 1e-3 {
+		return fmt.Sprintf("1e%d", int(math.Round(math.Log10(v))))
+	}
+	return strings.TrimRight(strings.TrimRight(strings.Replace(fmt.Sprintf("%.3f", v), ".", ",", 1), "0"), ",")
+}
+
+// specDur escreve o tempo de um espectro: segundos até 5 min.
+func specDur(sec float64) string {
+	if sec < 300 {
+		return fmt.Sprintf("%d s", int(math.Round(sec)))
+	}
+	return fmtDurSec(sec)
 }
