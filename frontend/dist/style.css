@@ -759,6 +759,13 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-search { display: grid; grid-template-columns: minmax(200px, 280px) minmax(0, 1fr); gap: 18px; align-items: start; }
 .rc-search-ctl { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
 .rc-search-ctl #rcTrend { margin-top: 6px; }
+.rc-sr-real { display: flex; flex-direction: column; gap: 6px; }
+.rc-sr-real[hidden], #rcSrSim[hidden] { display: none; }
+.rc-sr-read { display: flex; align-items: baseline; gap: 14px; flex-wrap: wrap; }
+.rc-sr-ratio { font-size: 28px; font-weight: 600; color: #6EE7A0; }
+.rc-sr-ratio.warn { color: #F5B84A; }
+.rc-sr-ratio.hot { color: #F0656A; }
+.rc-sr-read .mono { color: var(--text); }
 .rc-gauge { display: flex; flex-direction: column; align-items: center; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 10px; }
 .rc-gauge-svg { width: 100%; max-width: 260px; }
 .rc-gauge-lbl text { fill: var(--muted); font: 11px var(--mono); text-anchor: middle; }

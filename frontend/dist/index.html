@@ -812,22 +812,31 @@
       <p class="rc-use"><strong>Para você:</strong> no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como "celular", sem repetir o que o PC já tinha.</p>
     </article>
 
-    <article class="rc-card">
-      <div class="rc-head"><span class="rc-num mono">5</span><h3>Modo busca</h3><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></div>
-      <p>Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.</p>
+    <article class="rc-card" id="rcSrCard">
+      <div class="rc-head"><span class="rc-num mono">5</span><h3>Modo busca</h3><span id="rcSrSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSrLiveTag" hidden>ao vivo</span></div>
+      <p id="rcSrDesc">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.</p>
       <div class="rc-search">
         <div class="rc-gauge"><div id="rcGauge"></div><div class="rc-mult mono small" id="rcMult"><span data-m="1">×1</span><span data-m="10">×10</span><span data-m="100">×100</span><span data-m="1000">×1000</span></div></div>
         <div class="rc-search-ctl">
-          <label class="small muted" for="rcSrc">Fonte</label>
-          <select id="rcSrc"></select>
-          <label class="small muted" for="rcDist">Distância: <span class="mono" id="rcDistLbl"></span></label>
-          <input type="range" id="rcDist" min="0" max="2" step="0.01" value="1.48">
-          <label class="rc-inline small"><input type="checkbox" id="rcSound"> som (cliques)</label>
+          <div id="rcSrSim" class="rc-search-ctl">
+            <label class="small muted" for="rcSrc">Fonte</label>
+            <select id="rcSrc"></select>
+            <label class="small muted" for="rcDist">Distância: <span class="mono" id="rcDistLbl"></span></label>
+            <input type="range" id="rcDist" min="0" max="2" step="0.01" value="1.48">
+          </div>
+          <div id="rcSrReal" class="rc-sr-real" hidden>
+            <div class="rc-sr-read"><span class="rc-sr-ratio mono" id="rcSrRatio">–</span><span class="mono" id="rcSrUsv"></span></div>
+            <p class="mono small rc-info" id="rcSrRef"></p>
+            <p class="mono small rc-info" id="rcSrMax"></p>
+            <div class="rc-ctrl"><button type="button" class="btn small" id="rcSrHere">Usar o agora como normal</button><button type="button" class="btn small" id="rcSrRefReset" hidden>Voltar ao normal das 24 h</button><button type="button" class="btn small" id="rcSrMaxReset">Zerar máximo</button></div>
+          </div>
+          <label class="rc-inline small" id="rcSoundBox"><input type="checkbox" id="rcSound"> som (cliques)</label>
+          <label class="rc-inline small" id="rcSrSoundBox" hidden>Som <select id="rcSrSound"><option value="">desligado</option><option value="cliques">cliques</option><option value="tom">tom (mais agudo = mais forte)</option></select></label>
           <canvas id="rcTrend" class="rc-canvas"></canvas>
           <p class="mono small rc-info" id="rcSearchInfo"></p>
         </div>
       </div>
-      <p class="rc-use"><strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
+      <p class="rc-use" id="rcSrUse"><strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
     </article>
 
     <article class="rc-card">

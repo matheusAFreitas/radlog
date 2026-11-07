@@ -1,5 +1,20 @@
 # Versões
 
+## 1.45.0
+- **Modo busca de verdade** na aba RadiaCode (cartão 5), com o aparelho
+  conectado:
+  - usa as amostras de ~0,5 s que o RadiaCode manda e atualiza 2 vezes por
+    segundo, com escala automática (×1 a ×1000);
+  - média que se adapta: até 20 s enquanto a contagem fica parada, só o
+    último segundo quando ela pula;
+  - "× o normal" colorido (o normal é a mediana das últimas 24 h, ou o lugar
+    onde você estiver, com "Usar o agora como normal"), ≈ µSv/h e o máximo
+    com a hora (com "Zerar máximo");
+  - som: cliques (um por contagem) ou tom que fica mais agudo quanto mais
+    acima do normal, para procurar sem olhar a tela;
+  - tendência dos últimos 60 s com a linha do normal.
+  Sem o RadiaCode conectado, continua o exemplo simulado.
+
 ## 1.44.0
 - **Log do RadiaCode** na aba RadiaCode (cartão 4), no estilo da aba Log do
   app do celular:

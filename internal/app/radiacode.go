@@ -100,26 +100,29 @@ type RcStats struct {
 }
 
 type rcState struct {
-	statsM   sync.Mutex
-	stats    *RcStats
-	statsAt  time.Time
-	mu       sync.Mutex
-	st       RcState
-	dev      *radiacode.Device
-	min      rcMinute
-	wake     chan struct{}
-	fileM    sync.Mutex
-	ring     []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
-	today    rcToday
-	raw      rcRawLog
-	spec     rcSpecLog // espectro de minuto em minuto (espectrograma)
-	specSum  rcSpecCache
-	macc     rcMeasAcc // só a goroutine do rcRun mexe
-	dose     rcDoseLive
-	cfgLogAt time.Time
-	logCfgAt time.Time   // última "configuração alterada" no log do aparelho
-	bleNow   atomic.Bool // endereço Bluetooth novo: tentar já
-	doseLast rcDosePt    // último total gravado (protegido por fileM)
+	statsM      sync.Mutex
+	stats       *RcStats
+	statsAt     time.Time
+	mu          sync.Mutex
+	st          RcState
+	dev         *radiacode.Device
+	min         rcMinute
+	wake        chan struct{}
+	fileM       sync.Mutex
+	ring        []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
+	today       rcToday
+	raw         rcRawLog
+	spec        rcSpecLog // espectro de minuto em minuto (espectrograma)
+	specSum     rcSpecCache
+	macc        rcMeasAcc // só a goroutine do rcRun mexe
+	dose        rcDoseLive
+	cfgLogAt    time.Time
+	logCfgAt    time.Time    // última "configuração alterada" no log do aparelho
+	search      []rcSearchPt // modo busca: amostras curtas dos últimos minutos
+	searchRef   [2]float64
+	searchRefAt time.Time
+	bleNow      atomic.Bool // endereço Bluetooth novo: tentar já
+	doseLast    rcDosePt    // último total gravado (protegido por fileM)
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -508,6 +511,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			changed = true
 		case radiacode.RawSamples:
 			a.rcMeasureSamples(v)
+			a.rcSearchAdd(v, time.Now())
 		case radiacode.Rare:
 			a.rc.mu.Lock()
 			a.rc.st.Dose, a.rc.st.DoseSec, a.rc.st.Battery, a.rc.st.TempC, a.rc.st.HasRare = v.Dose, int64(v.Duration), v.Battery, v.TempC, true

@@ -1432,7 +1432,20 @@ const I18N_EN = {
 "no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como \"celular\", sem repetir o que o PC já tinha.": "in the phone app, Log tab → export (.csv). When you import it here, what the phone received away from home goes into the same log, marked \"phone\", without repeating what the PC already had.",
 "celular": "phone",
 "carregando na fonte externa": "charging from external power",
-"na fonte externa": "on external power"
+"na fonte externa": "on external power",
+"Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar.": "From your RadiaCode, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it.",
+"passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RadiaCode slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
+"sem referência": "no reference",
+"normal: ainda sem 24 h de dados; use \"Usar o agora como normal\"": "normal: no 24 h of data yet; use \"Use now as normal\"",
+"amostras de 0,5 s do aparelho": "0.5 s samples from the device",
+"sem amostras curtas: a taxa vem de 1 em 1 s": "no short samples: the rate comes every 1 s",
+"Bluetooth: chega com até 1–2 s de atraso": "Bluetooth: arrives up to 1–2 s late",
+"Usar o agora como normal": "Use now as normal",
+"Voltar ao normal das 24 h": "Back to the 24 h normal",
+"Zerar máximo": "Reset max",
+"desligado": "off",
+"cliques": "clicks",
+"tom (mais agudo = mais forte)": "tone (higher = stronger)"
 },
 "patterns": [
 [
@@ -2995,6 +3008,15 @@ const I18N_EN = {
 ]
 ],
 [
+"normal: ",
+"^normal: ((?:(?! · ).)+?) cps \\(mediana das últimas 24 h\\)$",
+"normal: ${1} cps (median of the last 24 h)",
+[
+"normal: ",
+" cps (mediana das últimas 24 h)"
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -3657,6 +3679,16 @@ const I18N_EN = {
 ]
 ],
 [
+"máximo: ",
+"^máximo: ((?:(?! · ).)+?) cps às ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)× o normal\\)$",
+"max: ${1} cps at ${2} (${3}× normal)",
+[
+"máximo: ",
+" cps às ",
+"× o normal)"
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -3833,6 +3865,15 @@ const I18N_EN = {
 [
 " CPM sobre o fundo (",
 "σ)"
+]
+],
+[
+"normal: ",
+"^normal: ((?:(?! · ).)+?) cps \\(marcado aqui\\)$",
+"normal: ${1} cps (marked here)",
+[
+"normal: ",
+" cps (marcado aqui)"
 ]
 ],
 [
@@ -5368,6 +5409,15 @@ const I18N_EN = {
 ]
 ],
 [
+"máximo: ",
+"^máximo: ((?:(?! · ).)+?) cps às ((?:(?! · ).)+?)$",
+"max: ${1} cps at ${2}",
+[
+"máximo: ",
+" cps às "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -5655,6 +5705,14 @@ const I18N_EN = {
 "≈ ${1} µSv/h now",
 [
 " µSv/h agora"
+]
+],
+[
+"(",
+"^\\(((?:(?! · ).)+?)× o normal\\)$",
+"(${1}× normal)",
+[
+"× o normal)"
 ]
 ],
 [
@@ -6280,6 +6338,14 @@ const I18N_EN = {
 "Battery: ${1}%",
 [
 "Bateria: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)× o normal$",
+"${1}× normal",
+[
+"× o normal"
 ]
 ],
 [

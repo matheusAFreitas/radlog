@@ -5542,6 +5542,19 @@ function makeDemoApi() {
       return { items: page.slice(0, limit), shown: sel.length, total: inR.length, kinds: k, more: page.length > limit, first: t0 };
     },
     ImportRcLog: async () => ({ file: "RadiaCode-log.csv", read: 57, added: 41, skipped: 1, from: Date.now() - 26 * 3600e3, to: Date.now() - 20 * 3600e3 }),
+    GetRcSearch: async (since) => {
+      // busca de mentira: fundo de 12 cps e, a cada 40 s, o aparelho passa
+      // perto de uma amostra (sobe até ~90 cps e volta)
+      const live = demoRcFake(), now = Date.now(), out = { live, now, pts: [], raw: true, cps: 12.3, usv: 0.15, refCps: 12.1, refUsv: 0.148, ble: false };
+      if (!live) return out;
+      const p0 = Math.max(since || now - 60e3, now - 60e3);
+      const rate = (t) => { const ph = (t / 1000) % 40; return 12 + (ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0); };
+      for (let t = Math.floor(p0 / 500) * 500 + 500; t <= now; t += 500) {
+        const lam = rate(t) * 0.5; let n = 0, L = Math.exp(-lam), pp = 1; do { n++; pp *= Math.random(); } while (pp > L); n--;
+        out.pts.push({ t, sec: 0.5, cps: n / 0.5, usv: (n / 0.5) * 0.0122 });
+      }
+      return out;
+    },
     AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),

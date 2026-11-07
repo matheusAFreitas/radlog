@@ -781,18 +781,21 @@
   const sr = { src: "torio", dist: 30, val: 8.4, trend: [], sound: false, ctx: null };
   function srRate() { const d = sr.dist, s = SRC[sr.src][1]; return 8.4 + s / (d * d); }
   function srTick() {
+    if (rcLive() && api.GetRcSearch) { srPoll(); return; }
+    if (sr.real) srMark(false);
     const rate = srRate(), n = poisson(rate * 0.5), inst = n / 0.5;
     sr.val += 0.4 * (inst - sr.val);
     sr.trend.push(inst); if (sr.trend.length > 120) sr.trend.shift();
     if (sr.sound && sr.ctx) srClicks(Math.min(n, 60));
     srDraw();
   }
-  function srClicks(n) {
+  function srClicks(n, dur = 0.5) {
     const ctx = sr.ctx, now = ctx.currentTime;
     if (!sr.buf) { const b = ctx.createBuffer(1, Math.round(ctx.sampleRate * 0.002), ctx.sampleRate); const d = b.getChannelData(0); for (let i = 0; i < d.length; i++) d[i] = (Math.random() * 2 - 1) * (1 - i / d.length); sr.buf = b; }
-    for (let k = 0; k < n; k++) { const s = ctx.createBufferSource(); s.buffer = sr.buf; const gn = ctx.createGain(); gn.gain.value = 0.35; s.connect(gn).connect(ctx.destination); s.start(now + Math.random() * 0.5); }
+    for (let k = 0; k < n; k++) { const s = ctx.createBufferSource(); s.buffer = sr.buf; const gn = ctx.createGain(); gn.gain.value = 0.35; s.connect(gn).connect(ctx.destination); s.start(now + Math.random() * dur); }
   }
   function srDraw() {
+    if (sr.real) { srDrawReal(); return; }
     const v = sr.val, mult = v < 100 ? 1 : v < 1000 ? 10 : v < 10000 ? 100 : 1000, frac = Math.min(1, v / (100 * mult));
     const ang = -120 + frac * 240;
     const nd = $("rcNeedle"); if (nd) nd.setAttribute("transform", `rotate(${ang.toFixed(1)} 120 120)`);
@@ -809,6 +812,136 @@
     sr.trend.forEach((y, i) => { const x = (i / 119) * w, yy = h - 4 - (y / m) * (h - 8); i ? g.lineTo(x, yy) : g.moveTo(x, yy); });
     g.strokeStyle = "#F0656A"; g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1;
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
+  }
+
+  // ---------- modo busca de verdade ----------
+  // A cada 0,5 s pergunta ao app o que chegou do aparelho (amostras de ~0,5 s)
+  // e mostra uma média que se adapta: longa (até 20 s) enquanto nada muda e
+  // curta (~1 s) quando a contagem pula, como os medidores de busca.
+  Object.assign(sr, { real: false, pts: [], hist: [], last: 0, busy: false, ref: 0, myRef: 0, refUsv: 0, k: 0, max: 0, maxAt: 0, sm: 0, raw: true, ble: false, mode: "", osc: null, oscGain: null });
+  function srMark(on) {
+    sr.real = on;
+    $("rcSrSimTags").hidden = on;
+    $("rcSrLiveTag").hidden = !on;
+    $("rcSrSim").hidden = on;
+    $("rcSrReal").hidden = !on;
+    $("rcSoundBox").hidden = on;
+    $("rcSrSoundBox").hidden = !on;
+    $("rcSrDesc").textContent = on
+      ? "Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
+      : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.";
+    $("rcSrUse").innerHTML = on
+      ? "<strong>Para você:</strong> passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação."
+      : "<strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.";
+    if (!on) srSound("");
+    else srSound($("rcSrSound").value);
+  }
+  async function srPoll() {
+    if (sr.busy) return;
+    sr.busy = true;
+    let r = null;
+    try { r = await api.GetRcSearch(sr.last); } catch (e) { r = null; }
+    sr.busy = false;
+    if (!r || !r.live) { if (sr.real) { srMark(false); srDraw(); } return; }
+    if (!sr.real) { sr.pts = []; sr.hist = []; sr.last = 0; sr.max = 0; srMark(true); }
+    sr.raw = r.raw; sr.ble = r.ble; sr.ref = r.refCps; sr.refUsv = r.refUsv;
+    if (r.cps > 0 && r.usv > 0) sr.k = r.usv / r.cps;
+    else if (!sr.k && r.refCps > 0) sr.k = r.refUsv / r.refCps;
+    const fresh = r.pts || [];
+    for (const p of fresh) {
+      if (sr.pts.length && p.t - sr.pts[sr.pts.length - 1].t > 3000) sr.pts = []; // caiu: recomeça
+      sr.pts.push(p);
+    }
+    if (fresh.length) sr.last = fresh[fresh.length - 1].t;
+    const cut = r.now - 180e3;
+    while (sr.pts.length && sr.pts[0].t < cut) sr.pts.shift();
+    sr.sm = srSmooth();
+    if (fresh.length) { sr.hist.push({ t: sr.last, v: sr.sm }); while (sr.hist.length && sr.hist[0].t < cut) sr.hist.shift(); }
+    if (sr.sm > sr.max) { sr.max = sr.sm; sr.maxAt = sr.pts.length ? sr.pts[sr.pts.length - 1].t : r.now; }
+    srPlay(fresh);
+    srDraw();
+  }
+  function srSmooth() {
+    const p = sr.pts; if (!p.length) return 0;
+    let c1 = 0, s1 = 0;
+    for (let i = p.length - 1; i >= 0 && s1 < 0.99; i--) { c1 += p[i].cps * p[i].sec; s1 += p[i].sec; }
+    const fast = c1 / s1;
+    let best = fast, c = 0, s = 0;
+    for (let j = p.length - 1; j >= 0 && s < 20; j--) {
+      c += p[j].cps * p[j].sec; s += p[j].sec;
+      const m = c / s, sig = Math.sqrt(Math.max(m, 0.5) / s1);
+      if (Math.abs(fast - m) > 3 * sig) break;
+      best = m;
+    }
+    return best;
+  }
+  const srRefNow = () => sr.myRef || sr.ref;
+  function srDrawReal() {
+    const v = sr.sm, mult = v < 100 ? 1 : v < 1000 ? 10 : v < 10000 ? 100 : 1000, frac = Math.min(1, v / (100 * mult));
+    const nd = $("rcNeedle"); if (nd) nd.setAttribute("transform", `rotate(${(-120 + frac * 240).toFixed(1)} 120 120)`);
+    const val = $("rcGaugeVal"); if (val) val.textContent = nf(v, v < 100 ? 2 : 0);
+    document.querySelectorAll("#rcMult span").forEach((el) => el.classList.toggle("on", +el.dataset.m === mult));
+    const lbl = $("rcGaugeTicks"); if (lbl) lbl.querySelectorAll("text").forEach((t, k) => { t.textContent = String(k * 20 * mult); });
+    const ref = srRefNow(), ratio = ref > 0 ? v / ref : 0, rt = $("rcSrRatio");
+    rt.textContent = ref > 0 ? `${nf(ratio, ratio < 10 ? 2 : 0)}× o normal` : "sem referência";
+    rt.classList.toggle("warn", ratio >= 1.5 && ratio < 3);
+    rt.classList.toggle("hot", ratio >= 3);
+    $("rcSrUsv").textContent = sr.k > 0 ? `≈ ${nf(v * sr.k, 3)} µSv/h` : "";
+    $("rcSrRef").textContent = ref > 0
+      ? (sr.myRef ? `normal: ${nf(ref, 2)} cps (marcado aqui)` : `normal: ${nf(ref, 2)} cps (mediana das últimas 24 h)`)
+      : "normal: ainda sem 24 h de dados; use \"Usar o agora como normal\"";
+    $("rcSrRefReset").hidden = !sr.myRef;
+    $("rcSrMax").textContent = sr.max > 0 ? `máximo: ${nf(sr.max, 2)} cps às ${fmtTime(sr.maxAt)}` + (ref > 0 ? ` (${nf(sr.max / ref, 2)}× o normal)` : "") : "";
+    $("rcSearchInfo").textContent = (sr.raw ? "amostras de 0,5 s do aparelho" : "sem amostras curtas: a taxa vem de 1 em 1 s") + (sr.ble ? " · Bluetooth: chega com até 1–2 s de atraso" : "");
+    // tendência: últimos 60 s, com o normal tracejado
+    const cv = $("rcTrend"); if (!cv) return;
+    const f = fit(cv, 90); if (!f) return;
+    const { g, w, h } = f; g.clearRect(0, 0, w, h);
+    const now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now(), win = sr.pts.filter((p) => p.t > now - 60e3);
+    const m = Math.max(15, ref * 1.6, ...win.map((p) => p.cps)) * 1.1;
+    const yOf = (y) => h - 4 - (y / m) * (h - 8), xOf = (t) => w - ((now - t) / 60e3) * w;
+    g.strokeStyle = css("--border"); g.beginPath(); g.moveTo(0, h - 0.5); g.lineTo(w, h - 0.5); g.stroke();
+    if (ref > 0) { g.setLineDash([3, 3]); g.strokeStyle = "rgba(110,231,160,.55)"; g.beginPath(); g.moveTo(0, yOf(ref)); g.lineTo(w, yOf(ref)); g.stroke(); g.setLineDash([]); }
+    g.beginPath();
+    win.forEach((p, i) => { const x = xOf(p.t), y = yOf(p.cps); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.strokeStyle = "rgba(240,101,106,.55)"; g.lineWidth = 1; g.stroke();
+    // a média que se adapta, por cima
+    g.beginPath();
+    sr.hist.filter((p) => p.t > now - 60e3).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    g.strokeStyle = "#F0656A"; g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1;
+    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
+  }
+  // som: cliques (um por contagem, espalhados no tempo da amostra) ou um tom
+  // que fica mais agudo quanto mais acima do normal
+  function srAudio() {
+    if (!sr.ctx) { try { sr.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { return null; } }
+    sr.ctx.resume();
+    return sr.ctx;
+  }
+  function srSound(mode) {
+    sr.mode = mode;
+    if (sr.osc) { try { sr.osc.stop(); } catch (e) { /* já parou */ } sr.osc = null; }
+    if (!mode) { if (sr.ctx && !sr.sound) sr.ctx.suspend(); return; }
+    const ctx = srAudio(); if (!ctx) return;
+    if (mode === "tom") {
+      sr.osc = ctx.createOscillator(); sr.oscGain = ctx.createGain();
+      sr.osc.type = "sine"; sr.oscGain.gain.value = 0.06;
+      sr.osc.connect(sr.oscGain).connect(ctx.destination); sr.osc.start();
+    }
+  }
+  function srPlay(fresh) {
+    if (!sr.real || !sr.mode || !sr.ctx) return;
+    if (sr.mode === "cliques") {
+      // uma amostra por vez, atrasada de 1 s para dar tempo de espalhar
+      for (const p of fresh) {
+        const n = Math.min(60, Math.round(p.cps * p.sec));
+        if (n > 0) srClicks(n, p.sec);
+      }
+    } else if (sr.osc) {
+      const ref = srRefNow() || sr.sm || 1, r = Math.max(0.5, sr.sm / ref);
+      const f = Math.min(1760, 220 * Math.pow(2, Math.log2(r) * 1.5 + 1));
+      sr.osc.frequency.setTargetAtTime(f, sr.ctx.currentTime, 0.12);
+    }
   }
   function gaugeSVG() {
     const cx = 120, cy = 120, r = 96, pt = (a, rr) => { const t = ((a - 90) * Math.PI) / 180; return [cx + rr * Math.cos(t), cy + rr * Math.sin(t)]; };
@@ -929,6 +1062,10 @@
       if (sr.sound && !sr.ctx) { try { sr.ctx = new (window.AudioContext || window.webkitAudioContext)(); } catch (err) { sr.sound = false; e.target.checked = false; } }
       if (sr.ctx && sr.sound) sr.ctx.resume();
     });
+    $("rcSrSound").addEventListener("change", (e) => srSound(e.target.value));
+    $("rcSrHere").addEventListener("click", () => { if (sr.sm > 0) { sr.myRef = sr.sm; srDraw(); } });
+    $("rcSrRefReset").addEventListener("click", () => { sr.myRef = 0; srDraw(); });
+    $("rcSrMaxReset").addEventListener("click", () => { sr.max = 0; srDraw(); });
     // KCl
     for (const id of ["rcKType", "rcKMass", "rcKMg", "rcKTime"]) $(id).addEventListener("input", kclCalc);
     $("rcKType").addEventListener("change", kclCalc);
@@ -956,6 +1093,7 @@
     realTick(true);
     sgLoad();
     lgLoad();
+    if (sr.real && sr.mode) srSound(sr.mode);
     drawAll();
     timers.forEach(clearInterval);
     timers = [
@@ -971,6 +1109,7 @@
     visible = false;
     timers.forEach(clearInterval);
     timers = [];
+    if (sr.osc) { try { sr.osc.stop(); } catch (e) { /* já parou */ } sr.osc = null; }
     if (sr.ctx) sr.ctx.suspend();
   }
   window.rcDemo = { show, hide };
