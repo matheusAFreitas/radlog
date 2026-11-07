@@ -1,6 +1,11 @@
 package app
 
 import (
+	"fmt"
+	"math"
+	"os"
+	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -101,5 +106,57 @@ func TestRainNow(t *testing.T) {
 	done := rainSpan{start: now.Add(-6 * time.Hour), end: now.Add(-5 * time.Hour)}
 	if r := rainNow([]rainSpan{done}, m, now, now, from, all); r != nil {
 		t.Fatalf("já fechada: %+v", r)
+	}
+}
+
+func TestRainImpactRadiacode(t *testing.T) {
+	a, _ := testApp(t)
+	a.settings.RainEnabled, a.settings.RainLat, a.settings.RainLon = true, -15.79, -47.88
+	now := time.Now().Truncate(time.Hour)
+	start := now.Add(-10 * 24 * time.Hour)
+	a.rain = &rainCache{V: rainCacheVersion, Lat: -15.79, Lon: -47.88, Hours: map[int64]float64{}}
+	for h := start; h.Before(now); h = h.Add(time.Hour) {
+		a.rain.Hours[h.Unix()] = 0
+	}
+	rains := []time.Time{now.Add(-8 * 24 * time.Hour), now.Add(-5*24*time.Hour + 6*time.Hour), now.Add(-2 * 24 * time.Hour)}
+	for _, r := range rains {
+		a.rain.Hours[r.Unix()] = 3
+	}
+	// RadiaCode: 12 cps (0,10 µSv/h) e +10% por 1,5 h depois da chuva
+	files := map[string]*strings.Builder{}
+	i := 0
+	for m := start; m.Before(now); m = m.Add(time.Minute) {
+		cps := 12 + float64((i*7)%5-2)*0.05
+		for _, r := range rains {
+			if d := m.Sub(r); d >= 30*time.Minute && d < 2*time.Hour {
+				cps *= 1.1
+			}
+		}
+		k := m.Format("2006-01")
+		if files[k] == nil {
+			files[k] = &strings.Builder{}
+			files[k].WriteString(rcHeader + "\n")
+		}
+		fmt.Fprintf(files[k], "%s,%g,%g,80\n", m.Format(time.RFC3339), cps, cps/120)
+		i++
+	}
+	_ = os.MkdirAll(a.rcDir(), 0o755)
+	for k, b := range files {
+		_ = os.WriteFile(filepath.Join(a.rcDir(), k+".csv"), []byte(b.String()), 0o644)
+	}
+	res, err := a.GetRainImpactDev("radiacode")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if res.Device != "radiacode" || res.N != 3 || math.Abs(res.USvPerCPM-1.0/7200) > 1e-6 {
+		t.Fatalf("RadiaCode: %+v", res)
+	}
+	// +10% de 720 CPM = +72 CPM
+	if res.Effect < 50 || res.AvgBase < 700 || res.AvgBase > 740 {
+		t.Fatalf("efeito %.1f base %.1f", res.Effect, res.AvgBase)
+	}
+	// o GMC não tem dado nenhum: nada medido
+	if g, _ := a.GetRainImpactDev("gmc"); g.N != 0 || g.Device != "gmc" {
+		t.Fatalf("GMC: %+v", g)
 	}
 }

@@ -1341,7 +1341,11 @@ const I18N_EN = {
 "Só há o valor de cada minuto do RadiaCode.": "Only the RadiaCode's per-minute values are available.",
 "Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.": "Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RadiaCode measured in it and the GMC-800 over the same time.",
 "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)": "no readings on the PC in this period (with the phone app connected, the data stays on the phone)",
-"não deu para calcular": "couldn't calculate"
+"não deu para calcular": "couldn't calculate",
+"Aparelho da conta da chuva": "Device for the rain analysis",
+"% acima da média das 2 h antes (RadiaCode)": "% above the average of the 2 h before (RadiaCode)",
+"A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
+"sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before"
 },
 "patterns": [
 [
@@ -2360,6 +2364,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) µSv/h · sem horários secos para comparar ainda$",
+"≈ ${1} µSv/h · no dry times to compare with yet",
+[
+" µSv/h · sem horários secos para comparar ainda"
+]
+],
+[
 "Contador voltou a contar depois de ",
 "^Contador voltou a contar depois de ((?:(?! · ).)+?) min em 0 CPM$",
 "Counter counting again after ${1} min at 0 CPM",
@@ -2450,6 +2462,24 @@ const I18N_EN = {
 [
 "Bluetooth: ",
 " (o celular está conectado nele?)"
+]
+],
+[
+"Antes da chuva: ",
+"^Antes da chuva: ((?:(?! · ).)+?) µSv/h · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)%\\)$",
+"Before the rain: ${1} µSv/h · last 15 min: ${2} (${3}%)",
+[
+"Antes da chuva: ",
+" µSv/h · últimos 15 min: ",
+"%)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) chuva\\(s\\) sem dados suficientes do RadiaCode$",
+"${1} rain(s) without enough RadiaCode data",
+[
+" chuva(s) sem dados suficientes do RadiaCode"
 ]
 ],
 [
@@ -3410,6 +3440,15 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) µSv/h · sobe ((?:(?! · ).)+?); sem chuva, ((?:(?! · ).)+?)$",
+"≈ ${1} µSv/h · rises ${2}; without rain, ${3}",
+[
+" µSv/h · sobe ",
+"; sem chuva, "
+]
+],
+[
 "Atenção · ",
 "^Atenção · ((?:(?! · ).)+?) CPM · GMC Monitor$",
 "Attention · ${1} CPM · GMC Monitor",
@@ -3978,6 +4017,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · chuva ((?:(?! · ).)+?) · sem chuva ((?:(?! · ).)+?)$",
+"${1} · rain ${2} · no rain ${3}",
+[
+" · chuva ",
+" · sem chuva "
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -4327,6 +4375,15 @@ const I18N_EN = {
 [
 "pico ao vivo ",
 " µSv/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) → ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)%\\) em ((?:(?! · ).)+?)$",
+"${1} → ${2} µSv/h (${3}%) in ${4}",
+[
+" µSv/h (",
+"%) em "
 ]
 ],
 [

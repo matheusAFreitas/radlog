@@ -1,5 +1,15 @@
 # Versões
 
+## 1.35.0
+- **Chuva com o RadiaCode**: a aba Chuva ganhou a escolha do aparelho
+  (RadiaCode ou GMC-800). Da primeira vez, vem o RadiaCode se ele já tiver
+  dado gravado: ele conta umas 30 vezes mais que o GMC, então a subida depois
+  da chuva aparece com bem menos ruído.
+  - A conta usa os minutos do RadiaCode em casa (fora de alertas e dos
+    períodos fora de casa), no CPM dele (cps × 60).
+  - Os resultados aparecem em % da base e em µSv/h: efeito da chuva, curva
+    média, cada chuva (antes → pico) e a chuva de agora.
+
 ## 1.34.0
 - **Fora de casa com o RadiaCode**: cada período mostra o que o RadiaCode
   mediu nele (dose, média comparada com o seu normal em casa, máximo, quanto

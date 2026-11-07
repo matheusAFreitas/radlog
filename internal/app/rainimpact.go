@@ -90,6 +90,10 @@ type RainImpact struct {
 	SkippedNoBg int           `json:"skippedNoData"` // chuvas sem dados suficientes
 	From        int64         `json:"from"`
 	Now         *RainNow      `json:"now"` // chuva em andamento ou recente
+	// aparelho: "gmc" ou "radiacode". No RadiaCode a conta é feita no CPM
+	// dele (cps × 60, que segue Poisson) e USvPerCPM converte para µSv/h.
+	Device    string  `json:"device"`
+	USvPerCPM float64 `json:"usvPerCPM"`
 }
 
 type rainRate struct {
@@ -248,22 +252,46 @@ func measureWindow(m map[int64]float64, t0 time.Time, now time.Time) (winStat, b
 	return w, true
 }
 
-// GetRainImpact calcula a tela "Chuva e radiação" (últimos 60 dias).
-func (a *App) GetRainImpact() (RainImpact, error) {
+// GetRainImpact calcula a tela "Chuva e radiação" (últimos 60 dias) com o
+// GMC.
+func (a *App) GetRainImpact() (RainImpact, error) { return a.GetRainImpactDev("gmc") }
+
+// GetRainImpactDev faz a mesma conta com o aparelho escolhido.
+func (a *App) GetRainImpactDev(dev string) (RainImpact, error) {
 	a.mu.Lock()
 	set := a.settings
 	a.mu.Unlock()
-	res := RainImpact{Enabled: set.RainEnabled && !(set.RainLat == 0 && set.RainLon == 0), Episodes: []RainEpisode{}, Curve: []RainCurvePt{}}
+	res := RainImpact{Enabled: set.RainEnabled && !(set.RainLat == 0 && set.RainLon == 0), Episodes: []RainEpisode{}, Curve: []RainCurvePt{}, Device: devName(dev)}
 	if !res.Enabled {
 		return res, nil
 	}
 	now := time.Now()
 	from := now.Add(-rainKeepDays * 24 * time.Hour)
-	pts, err := a.points(from.Add(-rainBaseWin), now.Add(time.Minute))
-	if err != nil {
-		return res, err
+	var pts []store.Point
+	if res.Device == devRC {
+		// minutos do RadiaCode em casa, fora de alertas, como CPM
+		var sumU, sumC float64
+		inAlert := a.alertChecker()
+		for _, p := range a.rcRange(from.Add(-rainBaseWin), now.Add(time.Minute)) {
+			if p.N < 20 || inAlert(p.T) {
+				continue
+			}
+			pts = append(pts, store.Point{T: p.T, CPM: p.CPS * 60})
+			sumU += p.USvh
+			sumC += p.CPS * 60
+		}
+		pts = a.homeOnly(pts)
+		if sumC > 0 {
+			res.USvPerCPM = sumU / sumC
+		}
+	} else {
+		var err error
+		pts, err = a.points(from.Add(-rainBaseWin), now.Add(time.Minute))
+		if err != nil {
+			return res, err
+		}
+		pts = a.homeOnly(pts)
 	}
-	pts = a.homeOnly(pts)
 	if len(pts) > 0 {
 		res.From = pts[0].T.UnixMilli()
 	}
@@ -341,6 +369,9 @@ func (a *App) GetRainImpact() (RainImpact, error) {
 		}
 	}
 	res.Now = rainNow(spans, m, now, latest, from, covered)
+	if res.Now != nil && res.Device == devRC && res.Now.Reason == "sem leituras do contador nas 2 h antes" {
+		res.Now.Reason = "sem leituras do RadiaCode nas 2 h antes"
+	}
 	res.N = len(res.Episodes)
 	if res.N > 0 {
 		res.AvgRise /= float64(res.N)

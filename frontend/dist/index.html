@@ -480,6 +480,10 @@
       </div>
       <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
     </div>
+    <div class="seg ri-dev" role="group" aria-label="Aparelho da conta da chuva" id="riDevSeg">
+      <button type="button" data-ridev="radiacode" aria-pressed="false">RadiaCode</button>
+      <button type="button" data-ridev="gmc" aria-pressed="false">GMC-800</button>
+    </div>
     <div>
     <div class="ri-now" id="riNow" hidden></div>
     <div class="ri-tiles" id="riTiles"></div>
@@ -496,7 +500,7 @@
       <div class="legend small muted ad-legend">
         <span class="key"><i style="border-color:#3DA5FF"></i>depois da chuva</span>
         <span class="key"><i style="border-color:#A3ADB4"></i>sem chuva (variação normal)</span>
-        <span class="small muted">CPM acima da média das 2 h antes</span>
+        <span class="small muted" id="riUnit">CPM acima da média das 2 h antes</span>
       </div>
     </div>
     <ul class="ri-list" id="riList"></ul>

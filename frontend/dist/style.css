@@ -515,6 +515,7 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .p-stats .p-gmc b { color: #6EE7A0; }
 .p-stats .warn { color: var(--att); }
 .p-total { margin: 0 0 8px; }
+.ri-dev { margin: 0 0 12px; display: inline-flex; width: auto; }
 .p-times { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
 .p-times input { min-width: 0; width: 100%; box-sizing: border-box; }
 .p-times label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--muted); }

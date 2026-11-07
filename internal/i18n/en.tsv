@@ -1899,3 +1899,13 @@ máx {0} CPM	max {0} CPM
 alertas: {0}	alerts: {0}
 sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)	no readings on the PC in this period (with the phone app connected, the data stays on the phone)
 não deu para calcular	couldn't calculate
+Aparelho da conta da chuva	Device for the rain analysis
+% acima da média das 2 h antes (RadiaCode)	% above the average of the 2 h before (RadiaCode)
+A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.	For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.
+{0} chuva(s) sem dados suficientes do RadiaCode	{0} rain(s) without enough RadiaCode data
+≈ {0} µSv/h · sobe {1}; sem chuva, {2}	≈ {0} µSv/h · rises {1}; without rain, {2}
+≈ {0} µSv/h · sem horários secos para comparar ainda	≈ {0} µSv/h · no dry times to compare with yet
+Antes da chuva: {0} µSv/h · últimos 15 min: {1} ({2}%)	Before the rain: {0} µSv/h · last 15 min: {1} ({2}%)
+{0} → {1} µSv/h ({2}%) em {3}	{0} → {1} µSv/h ({2}%) in {3}
+sem leituras do RadiaCode nas 2 h antes	no RadiaCode readings in the 2 h before
+{0} · chuva {1} · sem chuva {2}	{0} · rain {1} · no rain {2}

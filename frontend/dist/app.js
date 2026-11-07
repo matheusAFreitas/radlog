@@ -1714,6 +1714,10 @@ function renderRainSettings() {
 }
 
 function wireRain() {
+  document.querySelectorAll("#riDevSeg button").forEach((b) => b.addEventListener("click", () => {
+    localSet("riDev", b.dataset.ridev);
+    refreshRainImpact(true);
+  }));
   const search = async () => {
     const ul = $("placeList");
     ul.innerHTML = '<li class="muted small">buscando…</li>';
@@ -3807,9 +3811,20 @@ async function refreshRainImpact(force) {
   if (!force && Date.now() - riAt < 9 * 60e3 && state.ri) return;
   riAt = Date.now();
   let r;
-  try { r = await api.GetRainImpact(); } catch (e) { return; }
+  const dev = riDev();
+  document.querySelectorAll("#riDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ridev === dev)));
+  try { r = api.GetRainImpactDev ? await api.GetRainImpactDev(dev) : await api.GetRainImpact(); } catch (e) { return; }
+  if (dev !== riDev()) return; // trocou no meio
   state.ri = r;
   renderRainImpact(r);
+}
+
+// aparelho da conta: o escolhido antes ou, da primeira vez, o RadiaCode se ele
+// já tiver gravado algo (conta mais estável: muito mais contagens por minuto)
+function riDev() {
+  const v = localGet("riDev");
+  if (v === "gmc" || v === "radiacode") return v;
+  return state.rc.st && state.rc.st.lastT ? "radiacode" : "gmc";
 }
 
 const sgn = (v, d) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), d);
@@ -3834,7 +3849,10 @@ function renderRainNow(n) {
   else if (n.status === "contando") st = `Já entrou na conta; o resultado fecha às ${hhmm(n.resultAt)} (4 h depois do começo).`;
   else st = "Não vai entrar na conta: " + (n.prevEnd ? `choveu até as ${hhmm(n.prevEnd)}, menos de 3 h antes, então não há uma base limpa para comparar.` : n.reason + ".");
   let cmp = "";
-  if (n.hasBase && n.hasNow) cmp = `Antes da chuva: ${fmt(n.baseline, 1)} CPM · últimos 15 min: ${fmt(n.nowCPM, 1)} (${sgn(n.nowCPM - n.baseline, 1)})`;
+  const rc = state.ri && state.ri.device === "radiacode", k = (state.ri && state.ri.usvPerCPM) || 0;
+  if (n.hasBase && n.hasNow) cmp = rc
+    ? `Antes da chuva: ${fmt(n.baseline * k, 3)} µSv/h · últimos 15 min: ${fmt(n.nowCPM * k, 3)} (${sgn((n.nowCPM / n.baseline - 1) * 100, 1)}%)`
+    : `Antes da chuva: ${fmt(n.baseline, 1)} CPM · últimos 15 min: ${fmt(n.nowCPM, 1)} (${sgn(n.nowCPM - n.baseline, 1)})`;
   box.className = "ri-now " + cls;
   box.innerHTML = '<strong></strong><span class="small muted"></span><span class="small"></span><span class="small mono muted"></span>';
   box.children[0].textContent = since;
@@ -3845,13 +3863,18 @@ function renderRainNow(n) {
 }
 
 function renderRainImpact(r) {
+  state.ri = r;
   renderRainNow(r.now);
+  const rc = r.device === "radiacode", k = r.usvPerCPM || 0, base = r.avgBase || 1;
+  $("riUnit").textContent = rc ? "% acima da média das 2 h antes (RadiaCode)" : "CPM acima da média das 2 h antes";
   const tiles = $("riTiles"), list = $("riList");
   tiles.textContent = ""; list.textContent = "";
   $("riChartBox").hidden = !r.n;
   if (!r.n) {
-    $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes do contador` : "nenhuma chuva medida ainda";
-    tiles.innerHTML = '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto o CPM subiu depois e compara com horários sem chuva.</p>';
+    $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes ${rc ? "do RadiaCode" : "do contador"}` : "nenhuma chuva medida ainda";
+    tiles.innerHTML = rc
+      ? '<p class="small muted">A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
+      : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto o CPM subiu depois e compara com horários sem chuva.</p>';
     return;
   }
   $("riSub").textContent = `${r.n} chuva${r.n > 1 ? "s" : ""} medida${r.n > 1 ? "s" : ""} nos últimos 60 dias` + (r.dryN ? ` · comparado com ${r.dryN} horários sem chuva` : "");
@@ -3863,7 +3886,10 @@ function renderRainImpact(r) {
     tiles.appendChild(d);
   };
   const eff = r.dryN ? r.effect : r.avgRise;
-  tile("Efeito da chuva", `${sgn(eff, 1)} CPM`, r.dryN ? `sobe ${sgn(r.avgRise, 1)}; sem chuva, ${sgn(r.dryRise, 1)}` : "sem horários secos para comparar ainda");
+  if (rc) {
+    const pc = (v) => `${sgn((v / base) * 100, 1)}%`;
+    tile("Efeito da chuva", pc(eff), `≈ ${sgn(eff * k, 3)} µSv/h · ` + (r.dryN ? `sobe ${pc(r.avgRise)}; sem chuva, ${pc(r.dryRise)}` : "sem horários secos para comparar ainda"));
+  } else tile("Efeito da chuva", `${sgn(eff, 1)} CPM`, r.dryN ? `sobe ${sgn(r.avgRise, 1)}; sem chuva, ${sgn(r.dryRise, 1)}` : "sem horários secos para comparar ainda");
   tile("Pico", `~${durMin(r.peakMin)}`, "depois do começo da chuva");
   tile("Volta ao normal", r.backN ? `~${durMin(r.backMin)}` : "> 4 h", r.backN ? `em ${r.backN} de ${r.n}` : "não voltou em 4 h");
   drawRainCurve(r);
@@ -3877,14 +3903,18 @@ function renderRainImpact(r) {
     li.children[0].textContent = whenLabel(ep.start);
     li.children[1].innerHTML = "<span></span><span class=\"small muted mono\"></span>";
     li.children[1].children[0].textContent = `${fmt(ep.mm, 1)} mm (até ${fmt(ep.maxMMh, 0)} mm/h) · ${ep.source}`;
-    li.children[1].children[1].textContent = `${fmt(ep.baseline, 1)} → ${fmt(ep.peak, 1)} CPM (${sgn(ep.rise, 1)}) em ${durMin(Math.round((ep.peakAt - ep.start) / 60e3))} · ${back}`;
+    li.children[1].children[1].textContent = (rc
+      ? `${fmt(ep.baseline * k, 3)} → ${fmt(ep.peak * k, 3)} µSv/h (${sgn((ep.rise / ep.baseline) * 100, 1)}%)`
+      : `${fmt(ep.baseline, 1)} → ${fmt(ep.peak, 1)} CPM (${sgn(ep.rise, 1)})`) + ` em ${durMin(Math.round((ep.peakAt - ep.start) / 60e3))} · ${back}`;
     li.addEventListener("click", () => showRange(ep.start - 2 * 36e5, ep.start + 4 * 36e5));
     list.appendChild(li);
   }
 }
 
 function drawRainCurve(r) {
-  const pts = r.curve || [];
+  // RadiaCode: a curva em % da base (a escala do CPM dele é outra)
+  const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+  const pts = (r.curve || []).map((p) => (pc ? { min: p.min, rain: p.rain == null ? null : p.rain * pc, dry: p.dry == null ? null : p.dry * pc } : p));
   let lo = 0, hi = 1;
   for (const p of pts) for (const v of [p.rain, p.dry]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
   lo = Math.floor(lo - 0.5);
@@ -3892,7 +3922,7 @@ function drawRainCurve(r) {
   const x = (m) => ((m + 120) / 360) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
   const ys = $("riY").children;
-  for (let i = 0; i < 4; i++) { const v = Math.round(hi - ((hi - lo) / 3) * i); ys[i].textContent = v === 0 ? "0" : sgn(v, 0); }
+  for (let i = 0; i < 4; i++) { const v = Math.round(hi - ((hi - lo) / 3) * i); ys[i].textContent = v === 0 ? "0" : sgn(v, 0) + (pc ? "%" : ""); }
   const line = (key, color, w) => {
     let d = "", pen = "M";
     for (const p of pts) { if (p[key] == null) { pen = "M"; continue; } d += `${pen}${x(p.min).toFixed(1)} ${y(p[key]).toFixed(1)}`; pen = "L"; }
@@ -4840,7 +4870,9 @@ function setupRainImpact() {
     const tip = $("riTip");
     tip.hidden = false;
     const when = p.min < 0 ? `${durMin(-p.min)} antes` : `${durMin(p.min)} depois`;
-    tip.textContent = `${when} · chuva ${p.rain == null ? "—" : sgn(p.rain, 1)} · sem chuva ${p.dry == null ? "—" : sgn(p.dry, 1)} CPM`;
+    const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+    const v = (x) => (x == null ? "—" : pc ? sgn(x * pc, 1) + "%" : sgn(x, 1));
+    tip.textContent = `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM");
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("riCursor").hidden = true; $("riTip").hidden = true; });
@@ -5270,6 +5302,17 @@ function makeDemoApi() {
         r.rc = rc;
       }
       return r;
+    },
+    GetRainImpactDev: async (dev) => {
+      const r = await api.GetRainImpact();
+      if (dev !== "radiacode" || !r.enabled) return { ...r, device: "gmc" };
+      if (!demoRcFake()) return { enabled: true, episodes: [], curve: [], n: 0, skippedNoData: 0, device: "radiacode" };
+      // RadiaCode: ~720 CPM, a mesma subida em %
+      const f = 720 / 26.4, sc = (x) => (x == null ? x : x * f);
+      return { ...r, device: "radiacode", usvPerCPM: 0.1 / 720, avgBase: r.avgBase * f, avgRise: r.avgRise * f, dryRise: r.dryRise * f, effect: r.effect * f,
+        curve: r.curve.map((p) => ({ min: p.min, rain: sc(p.rain), dry: sc(p.dry) })),
+        now: r.now && { ...r.now, baseline: r.now.baseline * f, nowCPM: r.now.nowCPM * f },
+        episodes: r.episodes.map((e) => ({ ...e, baseline: e.baseline * f, peak: e.peak * f, rise: e.rise * f })) };
     },
     GetRainImpact: async () => {
       if (!settings.rainEnabled) return { enabled: false, episodes: [], curve: [], n: 0 };
