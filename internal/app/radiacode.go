@@ -99,20 +99,21 @@ type RcStats struct {
 }
 
 type rcState struct {
-	statsM  sync.Mutex
-	stats   *RcStats
-	statsAt time.Time
-	mu      sync.Mutex
-	st      RcState
-	dev     *radiacode.Device
-	min     rcMinute
-	wake    chan struct{}
-	fileM   sync.Mutex
-	ring    []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
-	today   rcToday
-	raw     rcRawLog
-	macc    rcMeasAcc // só a goroutine do rcRun mexe
-	dose    rcDoseLive
+	statsM   sync.Mutex
+	stats    *RcStats
+	statsAt  time.Time
+	mu       sync.Mutex
+	st       RcState
+	dev      *radiacode.Device
+	min      rcMinute
+	wake     chan struct{}
+	fileM    sync.Mutex
+	ring     []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
+	today    rcToday
+	raw      rcRawLog
+	macc     rcMeasAcc // só a goroutine do rcRun mexe
+	dose     rcDoseLive
+	cfgLogAt time.Time
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -510,6 +511,19 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			// é o próprio app acertando o relógio do aparelho
 			if v.ID == 17 || (v.ID == 3 && justConnected) {
 				continue
+			}
+			// "configuração alterada" vem a cada toque no menu do aparelho: anota
+			// uma vez por minuto
+			if v.ID == 3 {
+				a.rc.mu.Lock()
+				recent := time.Since(a.rc.cfgLogAt) < time.Minute
+				if !recent {
+					a.rc.cfgLogAt = time.Now()
+				}
+				a.rc.mu.Unlock()
+				if recent {
+					continue
+				}
 			}
 			a.logEvent("RadiaCode: " + radiacode.EventName(v.ID))
 		}

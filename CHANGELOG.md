@@ -1,5 +1,22 @@
 # Versões
 
+## 1.39.2
+- RadiaCode, dados brutos: agora é um arquivo por conexão
+  (`bruto/AAAA-MM-DD-HHMMSS.jsonl.gz`). Antes cada conexão era emendada no
+  arquivo do dia, e quando o app era fechado sem terminar o arquivo (ex.: na
+  atualização), o resto do dia ficava ilegível para os leitores comuns.
+- O backup leva a dose acumulada do aparelho (a última recebida); ao juntar
+  backups, fica a mais recente.
+- O nome do modelo aparece no log de conexão ("RadiaCode-102"), tirado do
+  número de série quando o aparelho não manda.
+- "RadiaCode: configuração alterada" entra no log no máximo uma vez por
+  minuto (cada toque no menu do aparelho gerava uma linha).
+- Espectro da medição: os picos ficaram mais rigorosos. O contínuo embaixo do
+  pico agora é estimado em escala log (ele cai quase exponencial), o pico tem
+  que se destacar pelo menos 5% do contínuo (50% abaixo de 100 keV) e o Co-60
+  só conta com as duas linhas (as do Bi-214 em volta de 1173 keV não viram
+  mais Co-60).
+
 ## 1.39.1
 - Medir objeto com os dois aparelhos: o gráfico agora mostra o segundo
   aparelho também, em µSv/h (rosa para o RadiaCode, verde para o GMC;

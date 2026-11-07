@@ -89,15 +89,46 @@ func (s *MeasureSpectrum) findPeaks() []SpecPeak {
 			continue
 		}
 		f := c.n / (lf.n + rt.n)
-		peak := c.net - f*(lf.net+rt.net)
+		// fundo embaixo do pico: o contínuo cai mais ou menos exponencial com
+		// a energia, então a média geométrica dos lados (reta no log) erra
+		// menos que a reta; com lado zerado ou negativo, vale a reta
+		base := f * (lf.net + rt.net)
+		if lf.net > 0 && rt.net > 0 {
+			base = c.n * math.Sqrt(lf.net/lf.n*rt.net/rt.n)
+		}
+		peak := c.net - base
 		vr := c.vr + f*f*(lf.vr+rt.vr)
 		if vr <= 0 {
+			continue
+		}
+		// além de 3σ, o pico tem que se destacar do contínuo (com muitas
+		// contagens, a curvatura do contínuo sozinha já passa de 3σ); embaixo
+		// de 100 keV o contínuo é mais torto, então pede mais
+		prom := 0.05
+		if l.kev < 100 {
+			prom = 0.5
+		}
+		if base > 0 && peak < prom*base {
 			continue
 		}
 		if sg := peak / math.Sqrt(vr); sg >= specPeakSigma {
 			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
 		}
 	}
+	// grupos de duas linhas que sempre vêm juntas (Co-60: 1173 e 1332): uma
+	// só é outra coisa (ex.: 1120 e 1238 do Bi-214 em volta de 1173)
+	need := map[string]int{"Cobalto-60": 2}
+	cnt := map[string]int{}
+	for _, p := range out {
+		cnt[p.Group]++
+	}
+	kept0 := out[:0]
+	for _, p := range out {
+		if n, ok := need[p.Group]; !ok || cnt[p.Group] >= n {
+			kept0 = append(kept0, p)
+		}
+	}
+	out = kept0
 	// linhas mais perto que a largura do pico (ex.: 583 do Tl-208 e 609 do
 	// Bi-214) não dá para separar: fica só a mais forte
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Sigma > out[j].Sigma })

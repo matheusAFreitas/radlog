@@ -132,6 +132,13 @@ func Open(tr Transport) (*Device, error) {
 	if s, err := d.readString(vsSerialNumber); err == nil {
 		d.Serial = strings.TrimRight(string(s), "\x00")
 	}
+	// a configuração do firmware 4.15 não traz o nome: sai do número de série
+	// (RC-102-015102 → RadiaCode-102)
+	if d.Model == "" {
+		if p := strings.Split(d.Serial, "-"); len(p) >= 2 && p[0] == "RC" {
+			d.Model = "RadiaCode-" + p[1]
+		}
+	}
 	return d, nil
 }
 

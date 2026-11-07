@@ -21,8 +21,11 @@ import (
 //
 // Para descobrir o que mais o aparelho oferece, o app guarda tudo o que ele
 // manda, como veio:
-//   - radiacode/bruto/AAAA-MM-DD.jsonl.gz: cada registro do DATA_BUF (em hex,
-//     com os campos que já se sabe ler), e o espectro a cada hora;
+//   - radiacode/bruto/AAAA-MM-DD-HHMMSS.jsonl.gz: cada registro do DATA_BUF
+//     (em hex, com os campos que já se sabe ler), e o espectro a cada hora.
+//     Um arquivo por conexão (até a 1.39 era um por dia, com cada conexão
+//     emendada no fim: se o app fosse fechado à força, o pedaço sem o fim do
+//     gzip estragava a leitura de tudo o que vinha depois);
 //   - radiacode/bruto/conexao-AAAAMMDD-HHMMSS.json: a cada conexão, todos os
 //     registradores e "strings virtuais" que dá para ler (inclusive as de
 //     formato desconhecido, como a cópia da memória).
@@ -58,11 +61,10 @@ func (a *App) rcRawWrite(v map[string]any) {
 	if l.day != day || l.gz == nil {
 		l.closeLocked()
 		os.MkdirAll(a.rcRawPath(""), 0o755)
-		f, err := os.OpenFile(a.rcRawPath(day+".jsonl.gz"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+		f, err := os.OpenFile(a.rcRawPath(day+"-"+now.Format("150405")+".jsonl.gz"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 		if err != nil {
 			return
 		}
-		// cada abertura vira um "membro" gzip novo no fim do arquivo (válido)
 		l.f, l.gz, l.day = f, gzip.NewWriter(f), day
 		l.enc = json.NewEncoder(l.gz)
 		l.lastFlush = now
@@ -191,6 +193,9 @@ func (a *App) rcBackupFiles() []string {
 		}
 		a.rc.raw.mu.Unlock()
 	}
+	if _, err := os.Stat(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
+		out = append(out, rcDirName+"/"+rcDoseFile)
+	}
 	raws, _ := filepath.Glob(filepath.Join(a.rcDir(), rcRawDir, "*"))
 	sort.Strings(raws)
 	for _, r := range raws {
@@ -214,6 +219,26 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 		}
 		os.MkdirAll(a.rcRawPath(""), 0o755)
 		os.WriteFile(dst, data, 0o644)
+		return 0
+	}
+	if rel == rcDirName+"/"+rcDoseFile {
+		// dose do aparelho: fica a mais recente
+		var in, have rcDoseSaved
+		if json.Unmarshal(data, &in) != nil || in.At == 0 {
+			return 0
+		}
+		a.rc.mu.Lock()
+		defer a.rc.mu.Unlock()
+		if b, err := os.ReadFile(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
+			_ = json.Unmarshal(b, &have)
+		}
+		if in.At > have.At {
+			_ = os.MkdirAll(a.rcDir(), 0o755)
+			_ = os.WriteFile(filepath.Join(a.rcDir(), rcDoseFile), data, 0o644)
+			if in.At > a.rc.dose.saved.At {
+				a.rc.dose.saved, a.rc.dose.loaded = in, true
+			}
+		}
 		return 0
 	}
 	if !strings.HasSuffix(name, ".csv") || strings.Contains(strings.TrimPrefix(rel, rcDirName+"/"), "/") {
