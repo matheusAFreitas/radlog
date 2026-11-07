@@ -349,8 +349,15 @@ function whenLabel(ms) {
   return isToday(ms) ? "hoje " + hhmm(ms) : isYesterday(ms) ? "ontem " + hhmm(ms) : ddmm(ms) + " " + hhmm(ms);
 }
 
+// alertas do RadiaCode: valores em µSv/h
+const isRcEv = (e) => !!e && e.device === "radiacode";
+const usvVal = (v) => `${fmt(v, usvDigits(v))} µSv/h`;
+const evVal = (e, v) => (isRcEv(e) ? usvVal(v) : `${fmt(v, 0)} CPM`);
+const evSig = (e, v) => (isRcEv(e) ? "" : sigTxt(v));
+
 function alertTitle(e) {
   const demo = e.demo || /^\[demo\] /.test(e.text) ? " (demo)" : "";
+  if (e.members && isRcEv(e)) return `${lvlName(e)} no RadiaCode: pico de ${evVal(e, e.peak)}${demo}`;
   if (e.members) return `${lvlName(e)}: pico de ${fmt(e.peak, 0)} CPM${demo}`;
   if (e.retro) return `${lvlName(e)}: pico de ${fmt(e.peak, 0)} CPM${demo}`;
   // alertas antigos diziam "(acima de 50)" mesmo com 50: o certo é "a partir de"
@@ -362,7 +369,7 @@ function alertSub(e) {
   if (e.startedAs) parts.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
   if (e.end) parts.push(`${hhmm(e.time)}–${hhmm(e.end)} · durou ${fmtDur(e.end - e.time)}`);
   else if (!e.active && e.level) parts.push("fim não registrado");
-  if (e.peak && (e.retro || e.peak > (e.cpm || 0))) parts.push(`pico ${fmt(e.peak, 0)} CPM${sigTxt(e.peak)} às ${(e.retro ? hhmm : hhmmss)(e.peakAt || e.time)}`);
+  if (e.peak && (e.retro || e.peak > (e.cpm || 0))) parts.push(`pico ${evVal(e, e.peak)}${evSig(e, e.peak)} às ${(e.retro ? hhmm : hhmmss)(e.peakAt || e.time)}`);
   return parts.join(" · ");
 }
 
@@ -378,12 +385,12 @@ function groupEpisodes(list) {
   let cur = null;
   for (const e of asc) {
     const end = e.active ? now : (e.end || e.time);
-    if (cur && !!e.demo === cur.demo && !!e.retro === cur.retro && e.time <= cur.until + 60000) {
+    if (cur && !!e.demo === cur.demo && !!e.retro === cur.retro && (e.device || "") === cur.device && e.time <= cur.until + 60000) {
       cur.members.push(e);
       cur.until = Math.max(cur.until, end);
       continue;
     }
-    cur = { members: [e], until: end, demo: !!e.demo, retro: !!e.retro };
+    cur = { members: [e], until: end, demo: !!e.demo, retro: !!e.retro, device: e.device || "" };
     eps.push(cur);
   }
   return eps.map((g) => {
@@ -426,6 +433,12 @@ function alertLi(e, withDate) {
     tag.title = "Aconteceu num período marcado como fora de casa";
     ttl.appendChild(tag);
   }
+  if (isRcEv(e) && e.members) {
+    const tag = document.createElement("span");
+    tag.className = "tag-retro tag-rc";
+    tag.textContent = "RadiaCode";
+    ttl.appendChild(tag);
+  }
   if (e.retro) {
     const tag = document.createElement("span");
     tag.className = "tag-retro";
@@ -460,19 +473,22 @@ function renderActive() {
   // num episódio os níveis de baixo vêm junto: mostra só o mais alto de cada
   // fonte (real/demo), com a hora em que os de baixo começaram
   const rank = { atencao: 1, alarme: 2, perigo: 3 };
-  const top = (demo) => Math.max(0, ...list.filter((x) => !!x.demo === demo).map((x) => rank[x.level] || 1));
-  const shown = list.filter((e) => (rank[e.level] || 1) === top(!!e.demo));
+  const src = (x) => (x.demo ? "demo" : isRcEv(x) ? "rc" : "gmc");
+  const top = (s) => Math.max(0, ...list.filter((x) => src(x) === s).map((x) => rank[x.level] || 1));
+  const shown = list.filter((e) => (rank[e.level] || 1) === top(src(e)));
   for (const e of shown) {
     const li = document.createElement("li");
     li.className = "on " + lvlCls(e);
     const demo = e.demo ? " (demo)" : "";
-    const lim = e.level === "alarme" ? (e.text.match(/limite (\d+)/) || [])[1] : e.level === "perigo" ? String(dangerCPM()) : null;
+    const rc = isRcEv(e), rl = (state.rc.st && state.rc.st.limits) || {};
+    const lim = rc ? ({ atencao: rl.attn, alarme: rl.alarm, perigo: rl.danger }[lvlCls(e)] || null)
+      : e.level === "alarme" ? (e.text.match(/limite (\d+)/) || [])[1] : e.level === "perigo" ? String(dangerCPM()) : null;
     li.innerHTML = `<span class="a-title"><span class="pulse" aria-hidden="true"></span></span><span class="a-meta"></span>`;
-    li.querySelector(".a-title").append(`${lvlName(e)} agora${demo}`);
+    li.querySelector(".a-title").append(`${lvlName(e)} agora${rc ? " no RadiaCode" : ""}${demo}`);
     li.querySelector(".a-meta").textContent =
-      `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${fmt(e.peak, 0)} CPM${sigTxt(e.peak)}` +
-      (lim ? ` · limite ${fmt(+lim, 0)}` : "");
-    for (const lower of list.filter((x) => !!x.demo === !!e.demo && (rank[x.level] || 1) < (rank[e.level] || 1)).sort((a, b) => a.time - b.time)) {
+      `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${evVal(e, e.peak)}${evSig(e, e.peak)}` +
+      (lim ? ` · limite ${rc ? usvVal(+lim) : fmt(+lim, 0)}` : "");
+    for (const lower of list.filter((x) => src(x) === src(e) && (rank[x.level] || 1) < (rank[e.level] || 1)).sort((a, b) => a.time - b.time)) {
       if (lower.time < e.time) li.querySelector(".a-meta").textContent += ` · ${lvlName(lower).toLowerCase()} desde ${hhmm(lower.time)}`;
     }
     ul.appendChild(li);
@@ -492,7 +508,10 @@ function renderAlertHistory(all) {
   const box = $("alertHistList");
   const f = state.alertFilter;
   document.querySelectorAll("#alertFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.af === f)));
-  const list = groupEpisodes(all).filter((e) => !f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"));
+  const dv = state.alertDev || "";
+  document.querySelectorAll("#alertDevFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.adev === dv)));
+  const list = groupEpisodes(all).filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
+    && (!dv || (dv === "radiacode") === isRcEv(e)));
   $("alertCount").textContent = list.length === 1 ? "1 alerta" : `${list.length} alertas`;
   box.textContent = "";
   if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; return; }
@@ -557,11 +576,13 @@ function drawAlertDetail(d) {
     return;
   }
   const e = d.event, lv = lvlCls(e), color = LVL_COLOR[lv] || LVL_COLOR.atencao;
-  $("adTitle").textContent = `${lvlName(e)} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
+  const rc = d.device === "radiacode";
+  const val = (v) => (rc ? usvVal(v) : `${fmt(v, 0)} CPM`);
+  $("adTitle").textContent = `${lvlName(e)}${rc ? " no RadiaCode" : ""} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
   const sub = [];
   sub.push(e.active ? `desde ${hhmm(e.time)} · ${fmtDur(d.end - e.time)}` : `${hhmmss(e.time)}–${hhmmss(d.end)} · durou ${fmtDur(d.end - e.time)}`);
-  if (e.peak) sub.push(`pico ${fmt(e.peak, 0)} CPM às ${hhmmss(e.peakAt || e.time)}` + (bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${fmt(bgNow(), 0)})` : ""));
-  sub.push(`limite ${fmt(d.limit, 0)} CPM`);
+  if (e.peak) sub.push(`pico ${val(e.peak)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${fmt(bgNow(), 0)})` : ""));
+  sub.push(`limite ${val(d.limit)}`);
   $("adSub").textContent = sub.join(" · ");
 
   const secs = d.seconds || [], mins = d.minutes || [];
@@ -573,7 +594,7 @@ function drawAlertDetail(d) {
   const x = (t) => Math.max(0, Math.min(W, ((t - t0) / (t1 - t0)) * W));
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   const ys = $("adY").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, 0);
+  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = rc ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
@@ -593,11 +614,11 @@ function drawAlertDetail(d) {
     }).join("");
     out += secs.length
       ? `<path d="${d1}" fill="none" stroke="#A3ADB4" stroke-opacity="0.55" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`
-      : `<path d="${d1}" fill="none" stroke="#6EE7A0" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      : `<path d="${d1}" fill="none" stroke="${rc ? "#F472B6" : "#6EE7A0"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
   }
   if (secs.length > 1) {
     const d2 = secs.map((p, i) => (i && p.t - secs[i - 1].t <= 10e3 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d2}" fill="none" stroke="#6EE7A0" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d2}" fill="none" stroke="${rc ? "#F472B6" : "#6EE7A0"}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   // pico (bolinha em HTML para não esticar)
@@ -607,19 +628,22 @@ function drawAlertDetail(d) {
     pk.style.left = (x(e.peakAt) / W) * 100 + "%";
     pk.style.top = (y(e.peak) / H) * 100 + "%";
     pk.style.background = color;
-    pk.title = `pico ${fmt(e.peak, 0)} CPM às ${hhmmss(e.peakAt)}`;
+    pk.title = `pico ${val(e.peak)} às ${hhmmss(e.peakAt)}`;
   }
   const xl = t1 - t0 <= 20 * 60e3 ? hhmmss : hhmm;
   const xs = $("adX").children;
   xs[0].textContent = xl(t0); xs[1].textContent = xl(t0 + (t1 - t0) / 2); xs[2].textContent = xl(t1);
   $("adLegend").innerHTML =
-    (secs.length ? '<span class="key"><i style="border-color:#6EE7A0"></i>leitura a cada segundo</span><span class="key"><i style="border-color:#A3ADB4"></i>valor do minuto (gráfico principal)</span>'
+    (rc ? (secs.length ? '<span class="key"><i style="border-color:#F472B6"></i>leitura ao vivo do RadiaCode (µSv/h)</span><span class="key"><i style="border-color:#A3ADB4"></i>valor do minuto</span>'
+      : '<span class="key"><i style="border-color:#F472B6"></i>valor do minuto do RadiaCode (µSv/h)</span>')
+      : secs.length ? '<span class="key"><i style="border-color:#6EE7A0"></i>leitura a cada segundo</span><span class="key"><i style="border-color:#A3ADB4"></i>valor do minuto (gráfico principal)</span>'
       : '<span class="key"><i style="border-color:#6EE7A0"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
   const note = $("adNote");
   note.hidden = !!(secs.length && d.detailed);
   note.textContent = e.retro ? "Alerta achado no histórico do contador: só há o valor de cada minuto."
+    : !secs.length && rc ? "Só há o valor de cada minuto do RadiaCode."
     : !secs.length ? "Só há o valor de cada minuto. O detalhe por segundo é guardado nos alertas ao vivo a partir da versão 0.22.0."
     : "O detalhe por segundo não cobre o alerta inteiro (o app foi fechado ou reaberto no meio).";
 }
@@ -639,7 +663,8 @@ function setupAlertDetail() {
     $("adCursor").style.left = ((p.t - t0) / (t1 - t0)) * 100 + "%";
     const tip = $("adTip");
     tip.hidden = false;
-    tip.textContent = p.m != null ? `${hhmm(p.m)} · ${fmt(p.cpm, 0)} CPM (minuto)` : `${hhmmss(p.t)} · ${fmt(p.cpm, 0)} CPM`;
+    const v = d.device === "radiacode" ? usvVal(p.cpm) : `${fmt(p.cpm, 0)} CPM`;
+    tip.textContent = p.m != null ? `${hhmm(p.m)} · ${v} (minuto)` : `${hhmmss(p.t)} · ${v}`;
     tip.style.left = Math.max(0, Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("adCursor").hidden = true; $("adTip").hidden = true; });
@@ -682,6 +707,10 @@ function wireAlertHistory() {
   $("btnEvents").addEventListener("click", openEvents);
   document.querySelectorAll("#alertFilter button").forEach((b) => b.addEventListener("click", async () => {
     state.alertFilter = b.dataset.af;
+    renderAlertHistory(await api.GetEvents("alerta"));
+  }));
+  document.querySelectorAll("#alertDevFilter button").forEach((b) => b.addEventListener("click", async () => {
+    state.alertDev = b.dataset.adev;
     renderAlertHistory(await api.GetEvents("alerta"));
   }));
 }
@@ -1823,6 +1852,18 @@ function measureLogReading(r) {
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
 }
 
+// alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que
+// o app abriu para ele
+function rcAlarmState(st) {
+  const lvl = st && st.state === "conectado" ? st.alertLevel || "" : "";
+  const al = lvl === "alarme" || lvl === "perigo", dg = lvl === "perigo";
+  const changed = al !== !!alarmCtl.rc || dg !== !!alarmCtl.rcDanger;
+  alarmCtl.rc = al;
+  alarmCtl.rcDanger = dg;
+  if (changed || alarmCtl.kind === "rc") updateAlarm();
+  setAttention("rc", !!lvl);
+}
+
 // RadiaCode medindo: a leitura ao vivo é o CPS do aparelho × 60
 function measureLogRc(rs) {
   const st = state.measureSt;
@@ -2719,15 +2760,19 @@ function updateAlarm() {
   const now = Date.now();
   const testing = alarmCtl.testUntil > now;
   const realOn = alarmCtl.real || alarmCtl.realDanger;
+  const rcOn = alarmCtl.rc || alarmCtl.rcDanger;
   const demoOn = alarmCtl.demo || alarmCtl.demoDanger;
-  const kind = realOn ? "real" : demoOn ? "demo" : testing ? "test" : null;
+  // GMC e RadiaCode juntos: mostra o mais grave (empate: o GMC)
+  const kind = realOn && !(alarmCtl.rcDanger && !alarmCtl.realDanger) ? "real" : rcOn ? "rc" : demoOn ? "demo" : testing ? "test" : null;
   const r = kind === "real" ? (state.demo.active ? state.lastReal : state.last) : kind === "demo" ? state.last : null;
   const sev = kind === "real" ? (alarmCtl.realDanger ? "perigo" : "alarme")
+    : kind === "rc" ? (alarmCtl.rcDanger ? "perigo" : "alarme")
     : kind === "demo" ? (alarmCtl.demoDanger ? "perigo" : "alarme")
     : kind === "test" ? alarmCtl.testSev : null;
   const limit = state.settings.alarmCPM || 100;
+  const rcs = state.rc.st || {}, rcl = rcs.limits || {};
   const cpm = kind === "test" ? (sev === "perigo" ? dangerCPM() * 1.2 : limit * 2.5) : r ? r.cpm : 0;
-  const fast = sev === "alarme" && cpm >= limit * 2;
+  const fast = sev === "alarme" && (kind === "rc" ? rcs.usvh >= (rcl.alarm || Infinity) * 2 : cpm >= limit * 2);
 
   if (kind !== alarmCtl.kind || sev !== alarmCtl.sev) {
     setTimeout(refreshChart, 0); // mostra ou tira as linhas dos limites no gráfico
@@ -2743,7 +2788,7 @@ function updateAlarm() {
       clearSnooze(); // perigo novo: toca mesmo que o alarme tenha sido silenciado
     } else if (sev === "alarme" && wasSev === "perigo") {
       clearSnooze(); // saiu do perigo e voltou ao alarme: segue o que estava no alarme
-    } else if (!was || kind === "real") {
+    } else if (!was || kind === "real" || kind === "rc") {
       alarmCtl.muted = false; // alarme novo (ou o real por cima do demo) volta a tocar
     }
   }
@@ -2768,8 +2813,8 @@ function updateAlarm() {
   bar.classList.toggle("muted", sev === "perigo" ? snoozed : alarmCtl.muted);
   if (!on) return;
 
-  const usv = kind === "test" ? cpm * (calK()) : r ? r.usv : 0;
-  const tag = { real: state.demo.active ? " REAL" : "", demo: " (demo)", test: " (teste)" }[kind];
+  const usv = kind === "test" ? cpm * (calK()) : kind === "rc" ? rcs.usvh || 0 : r ? r.usv : 0;
+  const tag = { real: state.demo.active ? " REAL" : "", rc: " · RADIACODE", demo: " (demo)", test: " (teste)" }[kind];
   const note = $("alarmNote");
   const sat = r && r.saturated ? r.satReason || "limite" : null;
   renderRise(sev === "perigo" && r ? r.rise : null, usv);
@@ -2781,7 +2826,9 @@ function updateAlarm() {
         : `caiu de repente após valor extremo · o tubo pode ter travado`;
     } else {
       $("alarmTitle").textContent = "PERIGO" + tag;
-      $("alarmDetail").textContent = `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · perigo a partir de ${fmt(dangerCPM(), 0)}`;
+      $("alarmDetail").textContent = kind === "rc"
+        ? `${usvVal(usv)} no RadiaCode · perigo a partir de ${usvVal(rcl.danger || 0)}`
+        : `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · perigo a partir de ${fmt(dangerCPM(), 0)}`;
     }
     note.textContent = PHONES;
     note.hidden = false;
@@ -2793,7 +2840,9 @@ function updateAlarm() {
     $("btnSilence").disabled = snoozed;
   } else {
     $("alarmTitle").textContent = "ALARME" + tag;
-    $("alarmDetail").textContent = `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · seu limite: ${fmt(limit, 0)}`;
+    $("alarmDetail").textContent = kind === "rc"
+      ? `${usvVal(usv)} no RadiaCode · ` + (rcl.device ? `alarme 2 do aparelho: ${usvVal(rcl.alarm || 0)}` : `limite ${usvVal(rcl.alarm || 0)}`)
+      : `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · seu limite: ${fmt(limit, 0)}`;
     note.hidden = true;
     fillGuide("alarmGuide", "alarmHint", guidance("alarme", usv));
     $("btnSilence").textContent = alarmCtl.muted ? "Som desligado" : "Silenciar";
@@ -3069,12 +3118,19 @@ function setAttention(which, on) {
 }
 
 function updateAttention() {
-  const kind = attnCtl.real ? "real" : attnCtl.demo ? "demo" : null;
+  const kind = attnCtl.real ? "real" : attnCtl.rc ? "rc" : attnCtl.demo ? "demo" : null;
   attnCtl.kind = kind;
   const show = !!kind && !attnCtl.dismissed && !alarmCtl.kind;
   $("attnBar").hidden = !show;
   document.body.classList.toggle("attention", show || (!!kind && !alarmCtl.kind));
   if (!show) return;
+  if (kind === "rc") {
+    const rs = state.rc.st || {}, l = rs.limits || {};
+    $("attnTitle").textContent = "Atenção · RadiaCode";
+    $("attnDetail").textContent = `${usvVal(rs.usvh || 0)} no RadiaCode · ` + (l.device ? `alarme 1 do aparelho: ${usvVal(l.attn || 0)}` : `atenção a partir de ${usvVal(l.attn || 0)}`);
+    fillGuide("attnGuide", "attnHint", guidance("atencao", rs.usvh || 0));
+    return;
+  }
   const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
   $("attnTitle").textContent = kind === "demo" ? "Atenção (demo)" : state.demo.active ? "Atenção (real)" : "Atenção";
   $("attnDetail").textContent = r
@@ -4113,6 +4169,7 @@ function renderRc(st) {
   if (!st) return;
   const prev = state.rc.st;
   state.rc.st = st;
+  rcAlarmState(st);
   const on = st.state === "conectado";
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
   // pílula no topo: só aparece quando tem algo a dizer
@@ -4509,6 +4566,7 @@ function renderRcSummary(t, rc, r) {
     rc.awayMinutes ? `${hm(rc.awayMinutes)} · média ${d(rc.awayAvg)} · máx ${d(rc.awayMax)} µSv/h` : "nenhum minuto fora de casa", "rc");
   const span = r.spanMinutes || Math.round((r.to - r.from) / 6e4);
   sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, `${fmt(rc.minutes, 0)} de ${fmt(span, 0)} min`, "rc");
+  sumTile(t, "Alertas", alertsText(rc), rc.peakAlert ? `pico ao vivo ${d(rc.peakAlert)} µSv/h` : "alarmes 1 e 2 do aparelho", rc.danger || rc.alarm ? "warn rc" : "rc");
 }
 
 function renderSummary(r, per) {
@@ -4786,6 +4844,8 @@ function makeDemoApi() {
     { time: now - 2 * 864e5 - 5 * 36e5, text: "Alarme (histórico do contador): pico de 134 CPM às 03:12 (limite 100)", kind: "alerta", level: "alarme", cpm: 58, peak: 134, peakAt: now - 2 * 864e5 - 4.6 * 36e5, end: now - 2 * 864e5 - 4.2 * 36e5, retro: true },
     { time: now - 3 * 864e5 - 9 * 36e5, text: "Atenção (histórico do contador): pico de 63 CPM às 10:40 (acima de 50)", kind: "alerta", level: "atencao", cpm: 52, peak: 63, peakAt: now - 3 * 864e5 - 8.8 * 36e5, end: now - 3 * 864e5 - 8.5 * 36e5, retro: true },
     { time: now - 6 * 864e5, text: "Alarme: 112 CPM (limite 100)", kind: "alerta", level: "alarme", cpm: 112, peak: 118, peakAt: now - 6 * 864e5 + 120e3, end: now - 6 * 864e5 + 600e3 },
+    { time: now - 5 * 36e5, text: "Atenção no RadiaCode: 0,412 µSv/h (alarme 1 do aparelho: 0,400)", kind: "alerta", level: "atencao", cpm: 0.412, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 420e3, device: "radiacode" },
+    { time: now - 5 * 36e5 + 150e3, text: "Alarme no RadiaCode: 1,24 µSv/h (alarme 2 do aparelho: 1,20)", kind: "alerta", level: "alarme", cpm: 1.24, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 260e3, device: "radiacode" },
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
@@ -4929,9 +4989,9 @@ function makeDemoApi() {
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   const demoRc = () => demoRcFake() && !demoRcCfg.off
-    ? { today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
+    ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
-        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: 0.095 + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
+        stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : "conectado", via: "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
     : { state: demoRcCfg.off ? "off" : "procurando", ble: demoRcCfg.ble, bleOK: true, off: demoRcCfg.off, raw: demoRcCfg.raw };
   const demoHomeBg = () => ({ ok: true, cpm: 20.4, errCPM: 0.6, minutes: 58, counts: 1183, from: Date.now() - 3600e3, to: Date.now() - 60e3, demo: true });
   const chartPreview = (period) => api._unused(period);
@@ -4978,6 +5038,15 @@ function makeDemoApi() {
     GetAlertDetail: async (id) => {
       const e = events.concat(demoAlerts).find((x) => x.id === id);
       if (!e) throw new Error("alerta não encontrado");
+      if (e.device === "radiacode") {
+        const end = e.end || Date.now(), from = e.time - 120e3, to = Math.min(Date.now(), end + 120e3);
+        const lim = e.level === "alarme" ? 1.2 : 0.4;
+        const f = (t) => (t >= e.time && t <= end ? lim + (e.peak - lim) * Math.exp(-Math.abs(t - e.peakAt) / 90e3) : 0.15) * (1 + (Math.random() - 0.5) * 0.12);
+        const seconds = [], minutes = [];
+        for (let t = from; t < to; t += 750) seconds.push({ t, cpm: f(t) });
+        for (let t = Math.floor(from / 6e4) * 6e4; t < to; t += 6e4) minutes.push({ t, cpm: f(t + 3e4) * 0.9 });
+        return { event: e, from, to, end, seconds, minutes, limit: lim, attention: 0.4, alarm: 1.2, danger: 10.1, detailed: true, device: "radiacode" };
+      }
       const end = e.active || !e.end ? Date.now() : e.end;
       const lim = +((e.text.match(/(?:a partir de|limite|acima de) (\d+)/) || [])[1] || 50);
       const live = !e.retro && Date.now() - e.time < 7 * 864e5;
@@ -4989,7 +5058,12 @@ function makeDemoApi() {
       for (let t = Math.floor(from / 6e4) * 6e4; t < to; t += 6e4) minutes.push({ t, cpm: Math.round(bump(t + 3e4)) });
       return { event: { ...e, active: !!e.active }, from, to, end, seconds, minutes, limit: lim, attention: 50, alarm: settings.alarmCPM, danger: 1000, detailed: live };
     },
-    GetActiveAlerts: async () => { const o = { perigo: 0, alarme: 1, atencao: 2 }; return demoAlerts.filter((e) => e.active).sort((x, y) => o[x.level] - o[y.level]); },
+    GetActiveAlerts: async () => {
+      const o = { perigo: 0, alarme: 1, atencao: 2 };
+      const lvl = demoRcFake() && localStorage.getItem("rcAlert");
+      const rc = lvl ? [{ id: 990, time: Date.now() - 95e3, kind: "alerta", level: lvl, device: "radiacode", active: true, cpm: 1.25, peak: 1.41, peakAt: Date.now() - 40e3, text: "Alarme no RadiaCode: 1,25 µSv/h (alarme 2 do aparelho: 1,20)" }] : [];
+      return demoAlerts.filter((e) => e.active).concat(rc).sort((x, y) => o[x.level] - o[y.level]);
+    },
     ListPorts: async () => [{ name: "COM5", description: "USB-SERIAL CH340", isUSB: true }, { name: "COM1", description: "", isUSB: false }],
     DetectPort: async () => "COM5",
     Connect: async (p) => { status = { ...status, state: "conectado", device: { ...dev, port: p } }; emit("status", status); return status.device; },

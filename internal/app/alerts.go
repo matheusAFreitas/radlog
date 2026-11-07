@@ -61,6 +61,7 @@ func parseEventRow(rec []string) (Event, bool) {
 		ev.End = t.UnixMilli()
 	}
 	ev.Retro = col(8) == "1"
+	ev.Device = col(9)
 	return ev, true
 }
 
@@ -84,7 +85,7 @@ func eventRow(e Event) []string {
 	if e.Retro {
 		retro = "1"
 	}
-	row := []string{ms(e.Time), e.Text, e.Kind, e.Level, num(e.CPM), num(e.Peak), ms(e.PeakAt), ms(e.End), retro}
+	row := []string{ms(e.Time), e.Text, e.Kind, e.Level, num(e.CPM), num(e.Peak), ms(e.PeakAt), ms(e.End), retro, e.Device}
 	for len(row) > 3 && row[len(row)-1] == "" {
 		row = row[:len(row)-1]
 	}
@@ -169,6 +170,9 @@ type alertStep struct {
 	AlarmOn       bool // alarme do usuário ligado e acima do limite agora
 	DangerStarted bool
 	DangerEnded   bool
+	// RadiaCode: CPM é µSv/h e os limites vêm do RcLim
+	Device string
+	RcLim  RcLimits
 }
 
 func (a *App) openAlert(level string, s alertStep) int64 {
@@ -181,8 +185,11 @@ func (a *App) openAlert(level string, s alertStep) int64 {
 	default:
 		text = fmt.Sprintf("Atenção: %.0f CPM (a partir de %d)", s.CPM, s.Lv.AttentionCPM)
 	}
+	if s.Device == devRC {
+		text = rcAlertText(level, s.CPM, s.RcLim)
+	}
 	ms := s.Now.UnixMilli()
-	ev := Event{Time: ms, Kind: kindAlert, Level: level, CPM: s.CPM, Peak: s.CPM, PeakAt: ms, Text: text}
+	ev := Event{Time: ms, Kind: kindAlert, Level: level, CPM: s.CPM, Peak: s.CPM, PeakAt: ms, Text: text, Device: s.Device}
 	if s.Demo {
 		ev.Text = demoPrefix + text
 	}
@@ -294,7 +301,26 @@ func (a *App) finishAlerts(ids []int64, now time.Time, demo bool) {
 	a.mu.Unlock()
 	if !demo {
 		a.saveEvents()
-		a.saveAlertSeconds(ids)
+		// os do RadiaCode guardam as leituras dele
+		var gmc []int64
+		var rc []Event
+		a.mu.Lock()
+		for _, id := range ids {
+			if e := a.eventLocked(id); e != nil && e.Device == devRC {
+				if e.End != 0 {
+					rc = append(rc, *e)
+				}
+			} else {
+				gmc = append(gmc, id)
+			}
+		}
+		a.mu.Unlock()
+		if len(gmc) > 0 {
+			a.saveAlertSeconds(gmc)
+		}
+		if len(rc) > 0 && a.dataDir != "" {
+			a.saveRcAlertSeconds(rc)
+		}
 	}
 	a.emit("event", Event{Kind: kindAlert})
 }
@@ -318,6 +344,9 @@ func (a *App) isActiveLocked(id int64) bool {
 	if id == a.alerts.attn || id == a.alerts.alarm || id == a.alerts.danger {
 		return true
 	}
+	if r := a.rcAlert.ids; id == r.attn || id == r.alarm || id == r.danger {
+		return true
+	}
 	return a.demo.Active && (id == a.demo.alerts.attn || id == a.demo.alerts.alarm || id == a.demo.alerts.danger)
 }
 
@@ -326,7 +355,8 @@ func (a *App) GetActiveAlerts() []Event {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	out := []Event{}
-	ids := []int64{a.alerts.danger, a.alerts.alarm, a.alerts.attn}
+	r := a.rcAlert.ids
+	ids := []int64{a.alerts.danger, a.alerts.alarm, a.alerts.attn, r.danger, r.alarm, r.attn}
 	if a.demo.Active {
 		ids = append([]int64{a.demo.alerts.danger, a.demo.alerts.alarm, a.demo.alerts.attn}, ids...)
 	}
@@ -515,6 +545,7 @@ func alertEpisodes(evs []Event, now time.Time) []alertEpisode {
 	sort.Slice(list, func(i, j int) bool { return list[i].Time < list[j].Time })
 	var out []alertEpisode
 	var demo, retro bool
+	var dev string
 	for _, e := range list {
 		end := e.End
 		if e.Active {
@@ -527,7 +558,7 @@ func alertEpisodes(evs []Event, now time.Time) []alertEpisode {
 		if lvl == "" {
 			lvl = "atencao"
 		}
-		if n := len(out); n > 0 && e.Demo == demo && e.Retro == retro && e.Time <= out[n-1].Until+60000 {
+		if n := len(out); n > 0 && e.Demo == demo && e.Retro == retro && e.Device == dev && e.Time <= out[n-1].Until+60000 {
 			ep := &out[n-1]
 			if levelRank[lvl] > levelRank[ep.Level] {
 				ep.Level = lvl
@@ -541,7 +572,7 @@ func alertEpisodes(evs []Event, now time.Time) []alertEpisode {
 			ep.IDs = append(ep.IDs, e.ID)
 			continue
 		}
-		demo, retro = e.Demo, e.Retro
+		demo, retro, dev = e.Demo, e.Retro, e.Device
 		out = append(out, alertEpisode{Level: lvl, Start: e.Time, Until: end, Peak: e.Peak, IDs: []int64{e.ID}})
 	}
 	return out

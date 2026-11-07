@@ -1,5 +1,20 @@
 # Versões
 
+## 1.33.0
+- **Alertas do RadiaCode**: o RadiaCode agora gera alertas como o GMC, em
+  µSv/h, com os limites do próprio aparelho:
+  - **atenção** = alarme 1 do RadiaCode, **alarme** = alarme 2, **perigo** =
+    o perigo do app convertido. Se você mudar os alarmes no aparelho, o app
+    relê sozinho;
+  - o PC avisa igual ao GMC: atenção bipa e mostra a faixa; alarme e perigo
+    tocam o som e trazem a janela para a frente (seguem as mesmas opções de
+    ligar/desligar);
+  - na aba **Alertas**, um filtro novo (Os dois · RadiaCode · GMC-800), a
+    etiqueta "RadiaCode" e o gráfico do alerta em µSv/h com a leitura ao vivo
+    dele;
+  - o **Resumo** e o **relatório em PDF** contam os alertas do RadiaCode no
+    bloco dele. Os números do GMC continuam só com os alertas do GMC.
+
 ## 1.32.0
 - **Medir objeto com o RadiaCode**: novo campo "Aparelho" (RadiaCode ou
   GMC-800). Da primeira vez, vem o RadiaCode se ele estiver conectado.

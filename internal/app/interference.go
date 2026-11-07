@@ -140,7 +140,7 @@ func (a *App) checkInterference(now time.Time, rawCPS float64) {
 	var flagged []int64
 	for i := range a.events {
 		e := &a.events[i]
-		if e.Kind != kindAlert || e.Retro || e.Demo {
+		if e.Kind != kindAlert || e.Retro || e.Demo || e.Device == devRC {
 			continue
 		}
 		st := time.UnixMilli(e.Time)

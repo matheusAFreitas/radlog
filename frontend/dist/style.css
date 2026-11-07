@@ -383,6 +383,7 @@ td { padding: 6px 0; }
 .alerts li .a-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
 .alerts li .a-sub { font-size: 12px; color: var(--dim); font-family: var(--mono); }
 .tag-retro { display: inline-block; font-size: 11px; font-family: var(--mono); color: var(--muted); border: 1px solid var(--border); border-radius: 6px; padding: 0 6px; margin-left: 6px; vertical-align: 1px; white-space: nowrap; }
+.tag-rc { color: #F472B6; border-color: rgba(244, 114, 182, .45); }
 .alerts-tools { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
 .alert-hist { max-height: min(60vh, 620px); overflow-y: auto; padding-right: 4px; }
 .alert-hist h3 { font-size: 13px; font-weight: 500; color: var(--muted); margin: 14px 0 4px; position: sticky; top: 0; background: var(--surface); padding: 4px 0; }

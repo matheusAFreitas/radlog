@@ -25,13 +25,19 @@ func (a *App) dangerStarted(cpm float64, demo bool) {
 }
 
 func (a *App) flagWindow(tag string, cpm float64, demo, raise bool) {
+	a.flagWindowText(tag, fmt.Sprintf("%.0f CPM", cpm), demo, raise)
+}
+
+// flagWindowText põe o alerta no título (com o valor já escrito) e, se
+// raise, traz a janela para a frente.
+func (a *App) flagWindowText(tag, value string, demo, raise bool) {
 	if a.ctx == nil {
 		return
 	}
 	if demo {
 		tag += " (demo)"
 	}
-	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %.0f CPM — %s", a.T(tag), cpm, appTitle))
+	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %s — %s", a.T(tag), a.T(value), appTitle))
 	// escondida na bandeja: sempre volta (escondida, o som pode não tocar)
 	if a.inTray.Load() {
 		raise = true
@@ -56,7 +62,7 @@ func (a *App) alarmEnded() {
 		return
 	}
 	a.mu.Lock()
-	any := a.alarmOn || a.dangerOn || (a.demo.Active && (a.demo.alarmOn || a.demo.dangerOn))
+	any := a.alarmOn || a.dangerOn || a.rcAlert.alarmOn || a.rcAlert.dangOn || (a.demo.Active && (a.demo.alarmOn || a.demo.dangerOn))
 	a.mu.Unlock()
 	if !any {
 		wruntime.WindowSetTitle(a.ctx, appTitle)

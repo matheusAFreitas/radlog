@@ -572,6 +572,7 @@ func renderReportPDF(r reportData) []byte {
 			{"Em casa", fmt.Sprintf("%s µSv em %s", fmtBR(rc.HomeDose, 2), fmtMinutes(rc.HomeMinutes))},
 			{"Fora de casa", away},
 			{"Cobertura", fmt.Sprintf("%s%% · %d min com leitura do RadiaCode", fmtBR(rc.Coverage*100, 0), rc.Minutes)},
+			{"Alertas", rcAlertsTxt(rc)},
 		}, 150)
 	}
 
@@ -977,4 +978,22 @@ func fmtSigned(v float64, dec int) string {
 		return "+" + fmtBR(v, dec)
 	}
 	return "−" + fmtBR(-v, dec)
+}
+
+// rcAlertsTxt resume os alertas do RadiaCode no período.
+func rcAlertsTxt(rc *RcSum) string {
+	var parts []string
+	if rc.Danger > 0 {
+		parts = append(parts, fmt.Sprintf("%d perigo", rc.Danger))
+	}
+	if rc.Alarm > 0 {
+		parts = append(parts, plural(rc.Alarm, "1 alarme", fmt.Sprintf("%d alarmes", rc.Alarm)))
+	}
+	if rc.Attention > 0 {
+		parts = append(parts, plural(rc.Attention, "1 atenção", fmt.Sprintf("%d atenções", rc.Attention)))
+	}
+	if len(parts) == 0 {
+		return "nenhum"
+	}
+	return strings.Join(parts, ", ") + " · maior pico " + usvTxt(rc.PeakAlert) + " µSv/h"
 }

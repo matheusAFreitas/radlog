@@ -1865,3 +1865,26 @@ Os picos são uma pista do radionuclídeo, não uma identificação garantida: c
 {0} µSv/h por CPM (para gama do Cs-137)	{0} µSv/h per CPM (for Cs-137 gamma)
 Medição de {0} (RadiaCode): {1} ± {2} CPM sobre o fundo ({3}σ) — {4}	Measurement of {0} (RadiaCode): {1} ± {2} CPM above background ({3}σ) — {4}
 RadiaCode: espectro para a medição: {0}	RadiaCode: spectrum for the measurement: {0}
+Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).	All radiation alerts, with date and time, from the GMC-800 (in CPM) and from the RadiaCode (in µSv/h, using the device's own alarms 1 and 2). The ones marked "from the counter" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).
+Aparelho dos alertas	Alert device
+Os dois	Both
+{0} no RadiaCode: pico de {1}	{0} on the RadiaCode: peak of {1}
+{0} agora no RadiaCode	{0} now on the RadiaCode
+Atenção no RadiaCode	Attention on the RadiaCode
+Alarme no RadiaCode	Alarm on the RadiaCode
+Perigo no RadiaCode	Danger on the RadiaCode
+{0} µSv/h no RadiaCode	{0} µSv/h on the RadiaCode
+alarme 1 do aparelho: {0}	device alarm 1: {0}
+alarme 2 do aparelho: {0}	device alarm 2: {0}
+alarmes 1 e 2 do aparelho	device alarms 1 and 2
+leitura ao vivo do RadiaCode (µSv/h)	RadiaCode live reading (µSv/h)
+valor do minuto	minute value
+valor do minuto do RadiaCode (µSv/h)	RadiaCode minute value (µSv/h)
+Só há o valor de cada minuto do RadiaCode.	Only the RadiaCode's per-minute values are available.
+Atenção no RadiaCode: {0} µSv/h (alarme 1 do aparelho: {1})	Attention on the RadiaCode: {0} µSv/h (device alarm 1: {1})
+Atenção no RadiaCode: {0} µSv/h (a partir de {1})	Attention on the RadiaCode: {0} µSv/h (from {1})
+Alarme no RadiaCode: {0} µSv/h (alarme 2 do aparelho: {1})	Alarm on the RadiaCode: {0} µSv/h (device alarm 2: {1})
+Alarme no RadiaCode: {0} µSv/h (limite {1})	Alarm on the RadiaCode: {0} µSv/h (limit {1})
+Perigo no RadiaCode: {0} µSv/h (a partir de {1})	Danger on the RadiaCode: {0} µSv/h (from {1})
+pico ao vivo {0} µSv/h	live peak {0} µSv/h
+maior pico {0} µSv/h	highest peak {0} µSv/h

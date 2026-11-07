@@ -182,6 +182,8 @@ type Event struct {
 	Retro  bool    `json:"retro,omitempty"`  // achado depois, no histórico do contador
 	Active bool    `json:"active,omitempty"` // acontecendo agora
 	Demo   bool    `json:"demo,omitempty"`
+	// aparelho do alerta: "" = GMC (CPM); "radiacode" (CPM e Peak em µSv/h)
+	Device string `json:"device,omitempty"`
 }
 
 const (
@@ -322,6 +324,7 @@ type App struct {
 	events   []Event
 	evSeq    int64    // último ID de evento
 	alerts   alertIDs // alertas reais abertos agora
+	rcAlert  rcAlertState
 
 	connMu sync.Mutex // uma conexão por vez
 

@@ -156,7 +156,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	lv := a.settings.Levels.norm()
 	var evs []Event
 	for _, e := range a.events {
-		if e.Kind == kindAlert && e.Time >= s.From && e.Time < s.To && (!e.Demo || demo) {
+		if e.Kind == kindAlert && e.Time >= s.From && e.Time < s.To && (!e.Demo || demo) && e.Device != devRC {
 			evs = append(evs, e)
 		}
 	}

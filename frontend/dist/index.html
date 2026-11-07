@@ -655,8 +655,13 @@
       <h2 id="alertsTitle">Histórico de alertas</h2>
       <button type="button" class="btn small" data-view="graficos">Voltar aos gráficos</button>
     </div>
-    <p class="small muted">Todos os alertas de radiação, com data e hora. Os marcados "do contador" foram achados depois, no histórico baixado do aparelho (aconteceram enquanto o app estava fechado ou desconectado).</p>
+    <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
     <div class="alerts-tools">
+      <div class="seg" role="group" aria-label="Aparelho dos alertas" id="alertDevFilter">
+        <button type="button" data-adev="" aria-pressed="true">Os dois</button>
+        <button type="button" data-adev="radiacode" aria-pressed="false">RadiaCode</button>
+        <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
+      </div>
       <div class="seg" role="group" aria-label="Filtrar alertas" id="alertFilter">
         <button type="button" data-af="" aria-pressed="true">Todos</button>
         <button type="button" data-af="live" aria-pressed="false">Ao vivo</button>

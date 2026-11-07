@@ -71,6 +71,9 @@ type RcState struct {
 	AttnUSv   float64 `json:"attnUSv"`
 	AlarmUSv  float64 `json:"alarmUSv"`
 	DangerUSv float64 `json:"dangerUSv"`
+	// alertas do RadiaCode: o nível aberto agora e os limites usados
+	AlertLevel string   `json:"alertLevel"`
+	Limits     RcLimits `json:"limits"`
 }
 
 // RcStats são as medidas do RadiaCode como as do GMC: fundo de casa, média
@@ -136,7 +139,9 @@ type rcMinute struct {
 // GetRadiacode devolve o estado do RadiaCode.
 func (a *App) GetRadiacode() RcState {
 	stats := a.rcStats()
+	lim := a.rcLimits()
 	a.mu.Lock()
+	alertLvl := a.rcAlertLevelLocked()
 	off, ble, noRaw := a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw
 	cal := a.convCalLocked()
 	lv := a.settings.Levels.norm()
@@ -158,6 +163,10 @@ func (a *App) GetRadiacode() RcState {
 	st.Stats = stats
 	st.Raw = !noRaw
 	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.attnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.dangerEnter())
+	st.AlertLevel, st.Limits = alertLvl, lim
+	if st.State != "conectado" {
+		st.AlertLevel = ""
+	}
 	a.rcTodayLocked()
 	st.Today = a.rc.today.sum
 	if a.rc.min.n > 0 { // minuto em andamento: conta o que já passou dele
@@ -413,8 +422,18 @@ func (a *App) rcRun(dev *radiacode.Device) {
 				break
 			}
 		}
+		for _, r := range recs {
+			// configuração mudou no aparelho: relê os alarmes (limites dos alertas)
+			if e, ok := r.(radiacode.Event); ok && e.ID == 3 {
+				if al, err := dev.Alarms(); err == nil {
+					a.rcSet(func(s *RcState) { s.Alarms = &al })
+				}
+				break
+			}
+		}
 	}
 	dev.Close()
+	a.rcAlertsOff()
 	a.rcFlushMinute()
 	a.rcRawClose()
 	a.rc.mu.Lock()
@@ -438,6 +457,14 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.st.USvh, a.rc.st.USvhErr = v.DoseRate, v.DoseErr
 			a.rc.mu.Unlock()
 			a.rcAddMinute(now, v.CPS, v.DoseRate)
+			// os primeiros segundos podem trazer leituras paradas no buffer do
+			// aparelho: os alertas só começam a olhar depois
+			a.rc.mu.Lock()
+			fresh := time.Since(time.UnixMilli(a.rc.st.Since)) < 5*time.Second
+			a.rc.mu.Unlock()
+			if !fresh {
+				a.rcAlertStep(now, v.DoseRate)
+			}
 			a.rc.mu.Lock()
 			a.rc.ring = append(a.rc.ring, rcSample{now, v.DoseRate, v.CPS})
 			if cut := now.Add(-liveWindow); a.rc.ring[0].t.Before(cut) {

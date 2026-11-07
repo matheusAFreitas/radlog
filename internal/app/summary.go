@@ -77,6 +77,11 @@ type RcSum struct {
 	AwayMax     float64   `json:"awayMax"`
 	AwayMaxAt   int64     `json:"awayMaxAt"`
 	Curve       []RcSumPt `json:"curve"`
+	// alertas do RadiaCode no período (por episódio) e o maior pico (µSv/h)
+	Attention int     `json:"attention"`
+	Alarm     int     `json:"alarm"`
+	Danger    int     `json:"danger"`
+	PeakAlert float64 `json:"peakAlert"`
 }
 
 // RcSumPt é um ponto da curva do RadiaCode no resumo (média do passo).
@@ -137,6 +142,27 @@ func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
 			pt.USv = &v
 		}
 		r.Curve = append(r.Curve, pt)
+	}
+	a.mu.Lock()
+	var evs []Event
+	for _, e := range a.events {
+		if e.Kind == kindAlert && e.Device == devRC && !e.Demo && e.Time >= from.UnixMilli() && e.Time < to.UnixMilli() {
+			c := e
+			c.Active = a.isActiveLocked(e.ID)
+			evs = append(evs, c)
+		}
+	}
+	a.mu.Unlock()
+	for _, ep := range alertEpisodes(evs, time.Now()) {
+		switch ep.Level {
+		case "perigo":
+			r.Danger++
+		case "alarme":
+			r.Alarm++
+		default:
+			r.Attention++
+		}
+		r.PeakAlert = math.Max(r.PeakAlert, ep.Peak)
 	}
 	return r
 }
@@ -275,7 +301,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	a.mu.Lock()
 	var evs []Event
 	for _, e := range a.events {
-		if e.Kind != kindAlert || e.Time < s.From || e.Time >= s.To || (e.Demo && !demo) {
+		if e.Kind != kindAlert || e.Time < s.From || e.Time >= s.To || (e.Demo && !demo) || e.Device == devRC {
 			continue
 		}
 		evs = append(evs, e)

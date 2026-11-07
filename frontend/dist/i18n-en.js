@@ -1327,7 +1327,18 @@ const I18N_EN = {
 "para cada linha gama conhecida, as contagens líquidas numa janela em volta da energia comparadas com as das janelas vizinhas; conta como pico a partir de 3σ": "for each known gamma line, the net counts in a window around the energy compared with those of the neighboring windows; it counts as a peak from 3σ up",
 "O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.": "The µSv/h is the rate at the detector, in the measured position. It's not the dose of whoever holds the object and changes a lot with distance.",
 "O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.": "The RadiaCode's crystal sees gamma and X-rays; beta barely enters the count.",
-"Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.": "Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up."
+"Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.": "Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up.",
+"Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 (in CPM) and from the RadiaCode (in µSv/h, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
+"Aparelho dos alertas": "Alert device",
+"Os dois": "Both",
+"Atenção no RadiaCode": "Attention on the RadiaCode",
+"Alarme no RadiaCode": "Alarm on the RadiaCode",
+"Perigo no RadiaCode": "Danger on the RadiaCode",
+"alarmes 1 e 2 do aparelho": "device alarms 1 and 2",
+"leitura ao vivo do RadiaCode (µSv/h)": "RadiaCode live reading (µSv/h)",
+"valor do minuto": "minute value",
+"valor do minuto do RadiaCode (µSv/h)": "RadiaCode minute value (µSv/h)",
+"Só há o valor de cada minuto do RadiaCode.": "Only the RadiaCode's per-minute values are available."
 },
 "patterns": [
 [
@@ -2141,6 +2152,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção no RadiaCode: ",
+"^Atenção no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(alarme 1 do aparelho: ((?:(?! · ).)+?)\\)$",
+"Attention on the RadiaCode: ${1} µSv/h (device alarm 1: ${2})",
+[
+"Atenção no RadiaCode: ",
+" µSv/h (alarme 1 do aparelho: "
+]
+],
+[
 "Dose medida no período escolhido no cartão de dose: ",
 "^Dose medida no período escolhido no cartão de dose: ((?:(?! · ).)+?)\\.$",
 "Dose measured in the period chosen on the dose card: ${1}.",
@@ -2185,6 +2205,15 @@ const I18N_EN = {
 " · mín ",
 " · máx ",
 " µSv/h"
+]
+],
+[
+"Alarme no RadiaCode: ",
+"^Alarme no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(alarme 2 do aparelho: ((?:(?! · ).)+?)\\)$",
+"Alarm on the RadiaCode: ${1} µSv/h (device alarm 2: ${2})",
+[
+"Alarme no RadiaCode: ",
+" µSv/h (alarme 2 do aparelho: "
 ]
 ],
 [
@@ -2452,6 +2481,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção no RadiaCode: ",
+"^Atenção no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Attention on the RadiaCode: ${1} µSv/h (from ${2})",
+[
+"Atenção no RadiaCode: ",
+" µSv/h (a partir de "
+]
+],
+[
 "Antes da chuva: ",
 "^Antes da chuva: ((?:(?! · ).)+?) CPM · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
 "Before the rain: ${1} CPM · last 15 min: ${2} (${3})",
@@ -2504,6 +2542,15 @@ const I18N_EN = {
 [
 "Fundo: juntando dados em casa (",
 " de 60 min)"
+]
+],
+[
+"Perigo no RadiaCode: ",
+"^Perigo no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Danger on the RadiaCode: ${1} µSv/h (from ${2})",
+[
+"Perigo no RadiaCode: ",
+" µSv/h (a partir de "
 ]
 ],
 [
@@ -2769,6 +2816,15 @@ const I18N_EN = {
 "${1} µSv/h per CPM (for Cs-137 gamma)",
 [
 " µSv/h por CPM (para gama do Cs-137)"
+]
+],
+[
+"Alarme no RadiaCode: ",
+"^Alarme no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(limite ((?:(?! · ).)+?)\\)$",
+"Alarm on the RadiaCode: ${1} µSv/h (limit ${2})",
+[
+"Alarme no RadiaCode: ",
+" µSv/h (limite "
 ]
 ],
 [
@@ -3806,6 +3862,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) no RadiaCode: pico de ((?:(?! · ).)+?)$",
+"${1} on the RadiaCode: peak of ${2}",
+[
+" no RadiaCode: pico de "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -3863,6 +3927,22 @@ const I18N_EN = {
 " · média ",
 " · máx ",
 " µSv/h"
+]
+],
+[
+"alarme 1 do aparelho: ",
+"^alarme 1 do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 1: ${1}",
+[
+"alarme 1 do aparelho: "
+]
+],
+[
+"alarme 2 do aparelho: ",
+"^alarme 2 do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 2: ${1}",
+[
+"alarme 2 do aparelho: "
 ]
 ],
 [
@@ -4193,6 +4273,31 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) agora no RadiaCode$",
+"${1} now on the RadiaCode",
+[
+" agora no RadiaCode"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h no RadiaCode$",
+"${1} µSv/h on the RadiaCode",
+[
+" µSv/h no RadiaCode"
+]
+],
+[
+"pico ao vivo ",
+"^pico ao vivo ((?:(?! · ).)+?) µSv/h$",
+"live peak ${1} µSv/h",
+[
+"pico ao vivo ",
+" µSv/h"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -4433,6 +4538,15 @@ const I18N_EN = {
 "with the object (${1})",
 [
 "com o objeto ("
+]
+],
+[
+"maior pico ",
+"^maior pico ((?:(?! · ).)+?) µSv/h$",
+"highest peak ${1} µSv/h",
+[
+"maior pico ",
+" µSv/h"
 ]
 ],
 [

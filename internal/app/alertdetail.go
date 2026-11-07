@@ -43,6 +43,8 @@ type AlertDetail struct {
 	Alarm     float64      `json:"alarm"`
 	Danger    float64      `json:"danger"`
 	Detailed  bool         `json:"detailed"` // tem os segundos de todo o alerta
+	// "radiacode": valores, limites e níveis em µSv/h
+	Device string `json:"device,omitempty"`
 }
 
 func (a *App) alertDir() string { return filepath.Join(a.dataDir, "alertas-detalhe") }
@@ -154,6 +156,9 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 	if e.End != 0 && !e.Active {
 		end = time.UnixMilli(e.End)
 	}
+	if e.Device == devRC {
+		return a.rcAlertDetail(e, end), nil
+	}
 	d := AlertDetail{
 		Event: e, End: end.UnixMilli(),
 		Limit: alertLimit(e, lv, alarm), Attention: float64(lv.AttentionCPM),
@@ -253,7 +258,7 @@ func (a *App) alertPeaks(from, to time.Time) []ChartPeak {
 	byAt := map[int64]int{}
 	var out []ChartPeak
 	for _, e := range a.events {
-		if e.Kind != kindAlert || e.Peak <= 0 || (e.Demo && !demo) {
+		if e.Kind != kindAlert || e.Peak <= 0 || (e.Demo && !demo) || e.Device == devRC {
 			continue
 		}
 		at := e.PeakAt
@@ -296,7 +301,7 @@ func (a *App) alertSamples(from, to time.Time) []sample {
 	}
 	var evs []Event
 	for _, e := range a.events {
-		if e.Kind != kindAlert || e.Demo || e.Retro || e.End == 0 {
+		if e.Kind != kindAlert || e.Demo || e.Retro || e.End == 0 || e.Device == devRC {
 			continue
 		}
 		if e.End+pre > f && e.Time-pre < t {
