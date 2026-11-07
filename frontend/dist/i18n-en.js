@@ -1668,7 +1668,71 @@ const I18N_EN = {
 "Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.": "If you download the counter's history, the minutes after that show up in the chart.",
 "RadiaCode desconectado": "RadiaCode disconnected",
 "app fechado": "app closed",
-"cinza = sem dados": "gray = no data"
+"cinza = sem dados": "gray = no data",
+"Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações).": "Each minute was compared with the limit in effect at that moment (settings history).",
+"*: há minutos sem registro do limite da época, comparados com o valor atual.": "*: some minutes have no record of the limit at the time and were compared with the current value.",
+"Pico: maior leitura ao vivo do alerta (janela de 60 s, consultada a cada segundo).": "Peak: highest live reading of the alert (60 s window, polled every second).",
+"Mín/méd/máx: minutos gravados no episódio.": "Min/avg/max: minutes recorded in the episode.",
+"(c): episódio encontrado no histórico do contador.": "(c): episode found in the counter's history.",
+"(d): episódio com interrupção de leitura (desconexão ou app fechado).": "(d): episode with a reading interruption (disconnection or app closed).",
+"*: limite pelo valor atual, sem registro do valor vigente na época.": "*: limit taken from the current value, with no record of the value in effect at the time.",
+"Dispersão próxima de 1: a variação observada é compatível com a flutuação estatística da contagem (Poisson).": "Dispersion close to 1: the observed variation is consistent with the statistical fluctuation of the count (Poisson).",
+"Dispersão acima de ~1,2: há variação além da flutuação estatística (precipitação, radônio, objetos próximos ou mudanças no ambiente).": "Dispersion above ~1.2: there is variation beyond statistical fluctuation (precipitation, radon, nearby objects or changes in the environment).",
+"Janela (até o fim do período)": "Window (up to the end of the period)",
+"Mudanças no período": "Changes in the period",
+"No início do período": "At the start of the period",
+"Ajuste": "Setting",
+"Máx (M)": "Max (M)",
+"Mín (M)": "Min (M)",
+"Média CPM (M)": "Average CPM (M)",
+"Mín/méd/máx (M)": "Min/avg/max (M)",
+"Pico (M)": "Peak (M)",
+"µSv/h (C)": "µSv/h (C)",
+"Dose µSv (C)": "Dose µSv (C)",
+"Mediana CPM (C)": "Median CPM (C)",
+"Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RadiaCode; E = estimativa externa ou extrapolação.": "Origin of values: M = measured by the counter (per-minute count and direct statistics of those counts); C = calculated by the app from the counts (conversion to µSv/h, dose, background, expected σ, alerts, coverage); R = reported by the RadiaCode; E = external estimate or extrapolation.",
+"Sem dado do GMC-800.": "No GMC-800 data.",
+"Disponível: o histórico cobre a janela inteira.": "Available: the history covers the whole window.",
+"Em formação: o primeiro dado está dentro da janela, e estatísticas dessa janela ainda não a representam por completo.": "Forming: the first reading is inside the window, and statistics for that window don't fully represent it yet.",
+"Regra dos episódios: um alerta abre quando a leitura ao vivo atinge o limite do nível e fecha quando ela cai abaixo de 90% dele (histerese).": "Episode rule: an alert opens when the live reading reaches the level's limit and closes when it drops below 90% of it (hysteresis).",
+"Alertas que se encostam (o seguinte começa até 1 min após o fim do anterior) formam um episódio, com o nível mais alto, o início do primeiro e o fim do último.": "Alerts that touch (the next starts up to 1 min after the previous one ends) form one episode, with the highest level, the start of the first and the end of the last.",
+"Se o contador desconecta com um alerta aberto e reconecta em até 15 min com a leitura ainda acima do limite, o episódio continua e o trecho sem leitura não entra na estatística; fechar o app encerra o episódio.": "If the counter disconnects with an alert open and reconnects within 15 min with the reading still above the limit, the episode continues and the stretch without readings is left out of the statistics; closing the app ends the episode.",
+"Episódios encontrados no histórico do contador (c) usam as leituras por minuto e terminam após 70 min sem dado.": "Episodes found in the counter's history (c) use the per-minute readings and end after 70 min without data.",
+"Valores tirados do histórico de configurações do app.": "Values taken from the app's settings history.",
+"Cada minuto e cada alerta foram avaliados com o valor vigente no momento; a calibração segue as versões descritas em \"Calibração no período\".": "Each minute and each alert was evaluated with the value in effect at the time; the calibration follows the versions described in \"Calibration in the period\".",
+"Não há registro de configurações para este período (o histórico de configurações começa na versão 2.1).": "There is no settings record for this period (the settings history starts in version 2.1).",
+"CONFIGURAÇÕES VIGENTES NO PERÍODO": "SETTINGS IN EFFECT IN THE PERIOD",
+"HISTÓRICO DISPONÍVEL (MATURIDADE)": "AVAILABLE HISTORY (MATURITY)",
+"desligado (limite operacional)": "off (operating limit)",
+"fundo atual: mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa, excluídos os períodos fora de casa e as medições de objeto": "current background: median of the last hour at home; 7 and 30 days: median of the per-minute readings at home, excluding away-from-home periods and object measurements",
+"calculada pelo app: soma, minuto a minuto, de µSv/h ÷ 60, com o µSv/h obtido do CPM pela calibração vigente em cada minuto. O GMC-800 não informa o acumulador interno de dose pela interface serial.": "calculated by the app: minute-by-minute sum of µSv/h ÷ 60, with µSv/h obtained from CPM by the calibration in effect in each minute. The GMC-800 does not report its internal dose accumulator over the serial interface.",
+"√média: desvio-padrão esperado apenas pela flutuação estatística de uma contagem de 1 minuto": "√mean: standard deviation expected from the statistical fluctuation of a 1-minute count alone",
+"interpolação linear entre as leituras ordenadas (tipo 7)": "linear interpolation between the sorted readings (type 7)",
+"maior valor observado no resumo e na tabela por dia: o maior minuto gravado ou, se superior, o pico ao vivo de um alerta (marcado com *). A estatística usa apenas os minutos gravados.": "highest value observed in the summary and in the per-day table: the highest recorded minute or, if higher, the live peak of an alert (marked with *). The statistics use only the recorded minutes.",
+"maior CPM da leitura ao vivo durante um alerta. O contador soma os últimos 60 s e o app consulta a cada segundo; como essa janela não coincide com o minuto do relógio gravado, o pico pode superar o maior minuto.": "highest live CPM during an alert. The counter sums the last 60 s and the app polls every second; since that window doesn't match the recorded clock minute, the peak can exceed the highest minute.",
+"minutos com leitura ÷ minutos do período até o fim do período ou o momento da geração, contados a partir do primeiro dado do contador": "minutes with readings ÷ minutes of the period up to the end of the period or the moment of generation, counted from the counter's first reading",
+"minuto sem leitura registrada (contador desconectado, app fechado sem histórico baixado); nunca é tratado como zero": "minute with no recorded reading (counter disconnected, app closed without downloaded history); never treated as zero",
+"radar/modelo meteorológico": "weather radar/model",
+"A contagem (CPM) não identifica o radionuclídeo nem o tipo de radiação.": "The count (CPM) doesn't identify the radionuclide or the type of radiation.",
+"A conversão CPM → µSv/h depende da calibração do tubo e da energia da radiação; para fontes com espectro diferente do de calibração, o erro pode ser grande.": "The CPM → µSv/h conversion depends on the tube calibration and the radiation energy; for sources with a spectrum different from the calibration one, the error can be large.",
+"A dose refere-se ao ponto onde o contador está instalado (monitor de área), não à dose de pessoas próximas. Não constitui dosimetria pessoal.": "The dose refers to the point where the counter is installed (area monitor), not to the dose of people nearby. It is not personal dosimetry.",
+"Médias de janelas \"em formação\" (histórico menor que a janela) não representam a janela inteira.": "Averages of \"forming\" windows (history shorter than the window) don't represent the whole window.",
+"Os limites do app são operacionais, definidos pelo usuário; não são limites regulamentares nem limiares de segurança.": "The app's limits are operational, set by the user; they are not regulatory limits or safety thresholds.",
+"Dose acumulada pelo aparelho (R)": "Dose accumulated by the device (R)",
+"Dose calculada pelo app (C)": "Dose calculated by the app (C)",
+"Média (R)": "Average (R)",
+"Mínimo · máximo (R)": "Minimum · maximum (R)",
+"não disponível: o registro dos totais do aparelho não cobre o início do período": "not available: the device's totals record doesn't cover the start of the period",
+"Disponível: o histórico cobre a janela inteira. Em formação: o primeiro dado está dentro da janela, e estatísticas dessa janela ainda não a representam por completo.": "Available: the history covers the whole window. Forming: the first reading is inside the window, and statistics for that window don't fully represent it yet.",
+"Atenção (d)": "Attention (d)",
+"Alarme (d)": "Alarm (d)",
+"Perigo (d)": "Danger (d)",
+"Atenção (c) (d)": "Attention (c) (d)",
+"Alarme (c) (d)": "Alarm (c) (d)",
+"Perigo (c) (d)": "Danger (c) (d)",
+"Atenção (c)": "Attention (c)",
+"Alarme (c)": "Alarm (c)",
+"Perigo (c)": "Danger (c)"
 },
 "patterns": [
 [
@@ -1990,6 +2054,23 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) sem leitura no período, em ((?:(?! · ).)+?) trecho\\(s\\)\\. Lacunas não são tratadas como zero em nenhum cálculo\\.$",
+"${1} without readings in the period, in ${2} stretch(es). Gaps are not treated as zero in any calculation.",
+[
+" sem leitura no período, em ",
+" trecho(s). Lacunas não são tratadas como zero em nenhum cálculo."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv \\(diferença entre os totais informados pelo aparelho; inclui o tempo fora do alcance do PC\\)$",
+"${1} µSv (difference between the totals reported by the device; includes the time out of the PC's reach)",
+[
+" µSv (diferença entre os totais informados pelo aparelho; inclui o tempo fora do alcance do PC)"
+]
+],
+[
 "Diferença de ",
 "^Diferença de ((?:(?! · ).)+?) σ: até \\~2σ é a variação natural da contagem; de 3σ para cima a diferença é real\\.$",
 "Difference of ${1} σ: up to ~2σ is the natural variation of the count; from 3σ up the difference is real.",
@@ -2041,6 +2122,14 @@ const I18N_EN = {
 [
 "Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ",
 " µSv"
+]
+],
+[
+"Não há registro de configurações para este período: o histórico de configurações começa em ",
+"^Não há registro de configurações para este período: o histórico de configurações começa em ((?:(?! · ).)+?)\\.$",
+"There is no settings record for this period: the settings history starts on ${1}.",
+[
+"Não há registro de configurações para este período: o histórico de configurações começa em "
 ]
 ],
 [
@@ -2515,6 +2604,14 @@ const I18N_EN = {
 [
 "atualização: não deu para salvar em ",
 "); usando a pasta de dados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) — valor atual; sem registro do valor vigente no início do período$",
+"${1} — current value; no record of the value in effect at the start of the period",
+[
+" — valor atual; sem registro do valor vigente no início do período"
 ]
 ],
 [
@@ -3273,6 +3370,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Primeiro dado do GMC-800: ",
+"^Primeiro dado do GMC\\-800: ((?:(?! · ).)+?) · do RadiaCode: ((?:(?! · ).)+?)\\.$",
+"First GMC-800 reading: ${1} · RadiaCode: ${2}.",
+[
+"Primeiro dado do GMC-800: ",
+" · do RadiaCode: "
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -3347,6 +3453,14 @@ const I18N_EN = {
 "${1} µSv/h per CPM at background (counter's curve)",
 [
 " µSv/h por CPM no fundo (curva do contador)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv \\(soma dos minutos registrados; média ((?:(?! · ).)+?)\\)$",
+"${1} µSv (sum of the recorded minutes; average ${2})",
+[
+" µSv (soma dos minutos registrados; média "
 ]
 ],
 [
@@ -3748,6 +3862,15 @@ const I18N_EN = {
 ]
 ],
 [
+"a partir de ",
+"^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional\\)$",
+"from ${1} CPM (operating limit)",
+[
+"a partir de ",
+" CPM (limite operacional)"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -3845,6 +3968,15 @@ const I18N_EN = {
 ]
 ],
 [
+"calculada pelo app · ≈ ",
+"^calculada pelo app · ≈ ((?:(?! · ).)+?) mSv/ano \\(E\\)$",
+"calculated by the app · ≈ ${1} mSv/year (E)",
+[
+"calculada pelo app · ≈ ",
+" mSv/ano (E)"
+]
+],
+[
 "Abaixo do normal (",
 "^Abaixo do normal \\(((?:(?! · ).)+?)\\) — sem problema$",
 "Below normal (${1}) — no problem",
@@ -3904,6 +4036,17 @@ const I18N_EN = {
 "${1} without readings since the first reading)",
 [
 " sem leitura desde o primeiro dado)"
+]
+],
+[
+"em formação (",
+"^em formação \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias\\) · ((?:(?! · ).)+?)% medido$",
+"forming (${1} of ${2} days) · ${3}% measured",
+[
+"em formação (",
+" de ",
+" dias) · ",
+"% medido"
 ]
 ],
 [
@@ -4090,6 +4233,17 @@ const I18N_EN = {
 ]
 ],
 [
+"disponível · ",
+"^disponível · ((?:(?! · ).)+?)% medido \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) min\\)$",
+"available · ${1}% measured (${2} of ${3} min)",
+[
+"disponível · ",
+"% medido (",
+" de ",
+" min)"
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -4167,6 +4321,14 @@ const I18N_EN = {
 [
 " de ",
 " min com leitura do RadiaCode"
+]
+],
+[
+"sem registro (histórico desde ",
+"^sem registro \\(histórico desde ((?:(?! · ).)+?)\\)$",
+"no record (history since ${1})",
+[
+"sem registro (histórico desde "
 ]
 ],
 [
@@ -4541,6 +4703,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Primeiro dado do GMC-800: ",
+"^Primeiro dado do GMC\\-800: ((?:(?! · ).)+?)\\.$",
+"First GMC-800 reading: ${1}.",
+[
+"Primeiro dado do GMC-800: "
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -4710,6 +4880,16 @@ const I18N_EN = {
 [
 "Atividade: começou (",
 " g)"
+]
+],
+[
+"alterado em ",
+"^alterado em ((?:(?! · ).)+?) de ((?:(?! · ).)+?) para ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"changed on ${1} from ${2} to ${3} (${4})",
+[
+"alterado em ",
+" de ",
+" para "
 ]
 ],
 [
@@ -5043,6 +5223,24 @@ const I18N_EN = {
 ]
 ],
 [
+"registrado em ",
+"^registrado em ((?:(?! · ).)+?) como ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"recorded on ${1} as ${2} (${3})",
+[
+"registrado em ",
+" como "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) µSv/h \\(C\\) · n = ((?:(?! · ).)+?) min$",
+"≈ ${1} µSv/h (C) · n = ${2} min",
+[
+" µSv/h (C) · n = ",
+" min"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -5358,6 +5556,16 @@ const I18N_EN = {
 ]
 ],
 [
+"alterado em ",
+"^alterado em ((?:(?! · ).)+?) de ((?:(?! · ).)+?) para ((?:(?! · ).)+?)$",
+"changed on ${1} from ${2} to ${3}",
+[
+"alterado em ",
+" de ",
+" para "
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -5537,6 +5745,16 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% medido \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) min\\)$",
+"${1}% measured (${2} of ${3} min)",
+[
+"% medido (",
+" de ",
+" min)"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -5671,6 +5889,15 @@ const I18N_EN = {
 [
 "média ",
 " segundos)"
+]
+],
+[
+"registrado em ",
+"^registrado em ((?:(?! · ).)+?) como ((?:(?! · ).)+?)$",
+"recorded on ${1} as ${2}",
+[
+"registrado em ",
+" como "
 ]
 ],
 [

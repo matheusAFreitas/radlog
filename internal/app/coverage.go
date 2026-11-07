@@ -177,36 +177,7 @@ func matWins(times []time.Time, first, now time.Time) []MatWin {
 
 // GetMaturity diz, para 1, 7, 30, 90 e 365 dias, se já existe histórico
 // para a janela inteira e quanto dela foi medido.
-func (a *App) GetMaturity() Maturity {
-	now := time.Now()
-	var m Maturity
-	gf := a.gmcFirst()
-	var gt []time.Time
-	if a.store != nil {
-		pts, _ := a.store.Range(now.AddDate(0, 0, -365), now.Add(time.Minute))
-		gt = make([]time.Time, len(pts))
-		for i, p := range pts {
-			gt[i] = p.T
-		}
-	}
-	if len(gt) > 0 && (gf.IsZero() || gt[0].Before(gf)) {
-		gf = gt[0]
-	}
-	m.GMC = matWins(gt, gf, now)
-	if !gf.IsZero() {
-		m.GMCFirst = gf.UnixMilli()
-	}
-	if rf := a.rcFirst(); !rf.IsZero() {
-		m.RCFirst = rf.UnixMilli()
-		rp := a.rcRange(now.AddDate(0, 0, -365), now.Add(time.Minute))
-		rt := make([]time.Time, len(rp))
-		for i, p := range rp {
-			rt[i] = p.T
-		}
-		m.RC = matWins(rt, rf, now)
-	}
-	return m
-}
+func (a *App) GetMaturity() Maturity { return a.maturityAt(time.Now()) }
 
 // pointsFirst é o primeiro dado do GMC, contando os minutos do demo que
 // estejam no período (o demo não grava no arquivo).

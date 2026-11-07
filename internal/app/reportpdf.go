@@ -536,15 +536,15 @@ func renderReportPDF(r reportData) []byte {
 	if r.AlertPeakMax > 0 {
 		alertSub += " · pico ao vivo " + fmtBR(r.AlertPeakMax, 0) + " CPM"
 	}
-	tiles := [][4]string{
-		{"Média (por minuto)", r.Avg + " CPM", fmt.Sprintf("≈ %s µSv/h · n = %d min", r.AvgUSv, st.N), "m"},
-		{"Dose no período", r.Dose + " µSv", "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (extrapolação)", "m"},
-		{"Fundo da casa", bg, bgSub, "m"},
-		{"Mínimo · máximo", r.Min + " · " + r.Max + " CPM", maxSub, "m"},
-		{"Alertas", r.Alerts, alertSub, "s"},
-		{"Chuva", rain, "radar/modelo do app", "s"},
-		{"Cobertura", fmtBR(ratio(st.N, r.HistMin)*100, 0) + "%", covSub + cover, "s"},
-		{"Medições de objeto", fmt.Sprint(len(r.Meas)), "no período", "m"},
+	tiles := [][5]string{
+		{"Média (por minuto)", r.Avg + " CPM", fmt.Sprintf("≈ %s µSv/h (C) · n = %d min", r.AvgUSv, st.N), "m", "M"},
+		{"Dose no período", r.Dose + " µSv", "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (E)", "m", "C"},
+		{"Fundo da casa", bg, bgSub, "m", "C"},
+		{"Mínimo · máximo", r.Min + " · " + r.Max + " CPM", maxSub, "m", "M"},
+		{"Alertas", r.Alerts, alertSub, "s", "C"},
+		{"Chuva", rain, "radar/modelo meteorológico", "s", "E"},
+		{"Cobertura", fmtBR(ratio(st.N, r.HistMin)*100, 0) + "%", covSub + cover, "s", "C"},
+		{"Medições de objeto", fmt.Sprint(len(r.Meas)), "no período", "m", "C"},
 	}
 	for i, t := range tiles {
 		x := pm + float64(i%4)*(tw+tg)
@@ -554,8 +554,13 @@ func renderReportPDF(r reportData) []byte {
 			f = pdf.SansBold
 		}
 		p.tile(x, y, tw, th, t[0], t[1], t[2], f)
+		d.TextRight(x+tw-8, y+13, pdf.SansBold, 6.5, cMuted, t[4])
 	}
 	p.y += 2*th + tg
+	for i, ln := range wrapText(originLegend, pdf.Sans, 6.8, pdf.W-2*pm, 2) {
+		d.Text(pm, p.y+10+float64(i)*8.5, pdf.Sans, 6.8, cMuted, ln)
+	}
+	p.y += 22
 
 	if rc := r.S.RC; rc != nil && rc.Minutes > 0 {
 		p.section("RADIACODE (DOSÍMETRO PESSOAL)")
@@ -569,10 +574,15 @@ func renderReportPDF(r reportData) []byte {
 		if rc.AwayMinutes > 0 {
 			away = fmt.Sprintf("%s µSv em %s · média %s · máximo %s (%s)", fmtBR(rc.AwayDose, 2), fmtMinutes(rc.AwayMinutes), u(rc.AwayAvg), u(rc.AwayMax), at(rc.AwayMaxAt))
 		}
+		dev := "não disponível: o registro dos totais do aparelho não cobre o início do período"
+		if rc.DevOK {
+			dev = fmt.Sprintf("%s µSv (diferença entre os totais informados pelo aparelho; inclui o tempo fora do alcance do PC)", fmtBR(rc.DevDose, 2))
+		}
 		p.kv([][2]string{
-			{"Dose no período", fmt.Sprintf("%s µSv (só os minutos medidos; média %s)", fmtBR(rc.Dose, 2), u(rc.Avg))},
-			{"Média", vs},
-			{"Mínimo · máximo", fmt.Sprintf("%s (%s) · %s (%s)", u(rc.Min), at(rc.MinAt), u(rc.Max), at(rc.MaxAt))},
+			{"Dose acumulada pelo aparelho (R)", dev},
+			{"Dose calculada pelo app (C)", fmt.Sprintf("%s µSv (soma dos minutos registrados; média %s)", fmtBR(rc.Dose, 2), u(rc.Avg))},
+			{"Média (R)", vs},
+			{"Mínimo · máximo (R)", fmt.Sprintf("%s (%s) · %s (%s)", u(rc.Min), at(rc.MinAt), u(rc.Max), at(rc.MaxAt))},
 			{"Em casa", fmt.Sprintf("%s µSv em %s", fmtBR(rc.HomeDose, 2), fmtMinutes(rc.HomeMinutes))},
 			{"Fora de casa", away},
 			{"Cobertura", rcCoverageTxt(rc)},
@@ -591,27 +601,28 @@ func renderReportPDF(r reportData) []byte {
 	if r.AlertPeakMax > 0 {
 		livePeak = fmtBR(r.AlertPeakMax, 0) + " CPM às " + r.alertPeakAt.Format("02/01 15:04")
 	}
-	rows := [][2]string{
-		{"Minutos com leitura (n)", fmt.Sprintf("%d", st.N)},
-		{"Média · mediana", fmtBR(st.Mean, 2) + " · " + fmtBR(st.Median, 1) + " CPM"},
-		{"Desvio-padrão real", fmtBR(st.SD, 2) + " CPM"},
-		{"σ esperado só pelo acaso (√média)", fmtBR(st.PoissonSD, 2) + " CPM"},
-		{"Dispersão (real ÷ acaso)", fmtBR(st.Dispersion, 2)},
-		{"P5 · P25 · P50", fmtBR(st.P5, 1) + " · " + fmtBR(st.P25, 1) + " · " + fmtBR(st.Median, 1)},
-		{"P75 · P95", fmtBR(st.P75, 1) + " · " + fmtBR(st.P95, 1)},
-		{"Mínimo · máximo (minutos gravados)", fmtBR(st.Min, 0) + " · " + fmtBR(st.Max, 0) + " CPM"},
-		{"Pico ao vivo (alertas, janela de 60 s)", livePeak},
+	rows := [][3]string{
+		{"Minutos com leitura (n)", fmt.Sprintf("%d", st.N), "M"},
+		{"Média · mediana", fmtBR(st.Mean, 2) + " · " + fmtBR(st.Median, 1) + " CPM", "M"},
+		{"Desvio-padrão real", fmtBR(st.SD, 2) + " CPM", "M"},
+		{"σ esperado só pelo acaso (√média)", fmtBR(st.PoissonSD, 2) + " CPM", "C"},
+		{"Dispersão (real ÷ acaso)", fmtBR(st.Dispersion, 2), "C"},
+		{"P5 · P25 · P50", fmtBR(st.P5, 1) + " · " + fmtBR(st.P25, 1) + " · " + fmtBR(st.Median, 1), "M"},
+		{"P75 · P95", fmtBR(st.P75, 1) + " · " + fmtBR(st.P95, 1), "M"},
+		{"Mínimo · máximo (minutos gravados)", fmtBR(st.Min, 0) + " · " + fmtBR(st.Max, 0) + " CPM", "M"},
+		{"Pico ao vivo (alertas, janela de 60 s)", livePeak, "M"},
 	}
 	colW := (pdf.W - 2*pm) * 0.46
 	for _, kv := range rows {
 		d.Text(pm, p.y+10, pdf.Sans, 8, cMuted, kv[0])
+		d.Text(pm+colW+5, p.y+10, pdf.SansBold, 6.5, cMuted, kv[2])
 		d.TextRight(pm+colW, p.y+10, pdf.Mono, 8, cInk, kv[1])
 		p.y += 13
 		d.Line(pm, p.y, pm+colW, p.y, 0.3, cLine, false)
 	}
-	disp := "Dispersão perto de 1: as leituras variam como o acaso explica."
+	disp := "Dispersão próxima de 1: a variação observada é compatível com a flutuação estatística da contagem (Poisson)."
 	if st.Dispersion >= 1.2 {
-		disp = "Dispersão acima de ~1,2: há variação além do acaso (chuva, radônio, objetos perto, mudanças no ambiente)."
+		disp = "Dispersão acima de ~1,2: há variação além da flutuação estatística (precipitação, radônio, objetos próximos ou mudanças no ambiente)."
 	}
 	for i, ln := range wrapText(disp, pdf.Sans, 7, colW, 3) {
 		d.Text(pm, p.y+11+float64(i)*9, pdf.Sans, 7, cMuted, ln)
@@ -639,7 +650,7 @@ func renderReportPDF(r reportData) []byte {
 		trows = append(trows, []string{dd.Label, fmtBR(dd.Avg, 1), fmtBR(dd.USv, 3), fmtBR(dd.Min, 0), mx, fmtBR(dd.Dose, 2), fmt.Sprintf("%d / 1440", dd.Minutes)})
 	}
 	cw := pdf.W - 2*pm
-	p.table([]string{"Dia", "Média CPM", "µSv/h", "Mín", "Máx", "Dose µSv", "Minutos"}, trows,
+	p.table([]string{"Dia", "Média CPM (M)", "µSv/h (C)", "Mín (M)", "Máx (M)", "Dose µSv (C)", "Minutos"}, trows,
 		[]float64{cw * .2, cw * .14, cw * .13, cw * .1, cw * .1, cw * .15, cw * .18},
 		[]bool{false, true, true, true, true, true, true}, []bool{false, true, true, true, true, true, true}, nil)
 	if starred {
@@ -666,7 +677,7 @@ func renderReportPDF(r reportData) []byte {
 		}
 		trows = append(trows, []string{b.Label, fmtBR(b.CPM, 1), fmtBR(b.USv, 3), fmt.Sprint(b.N), vs})
 	}
-	p.table([]string{"Janela", "Mediana CPM", "µSv/h", "Minutos em casa", "Média do período vs."}, trows,
+	p.table([]string{"Janela", "Mediana CPM (C)", "µSv/h (C)", "Minutos em casa", "Média do período vs."}, trows,
 		[]float64{cw * .32, cw * .15, cw * .13, cw * .18, cw * .22},
 		[]bool{false, true, true, true, true}, []bool{false, true, true, true, true}, nil)
 
@@ -677,6 +688,7 @@ func renderReportPDF(r reportData) []byte {
 		p.y += 18
 	} else {
 		trows = nil
+		limNow := false
 		eps := r.Episodes
 		for i := len(eps) - 1; i >= 0; i-- {
 			e := eps[i]
@@ -694,13 +706,21 @@ func renderReportPDF(r reportData) []byte {
 			if e.Retro {
 				lvl += " (c)"
 			}
-			trows = append(trows, []string{span, lvl, dur, mm, fmtBR(e.Peak, 0), fmt.Sprint(e.Limit), exc})
+			if e.Breaks > 0 || e.EndReason != "" {
+				lvl += " (d)"
+			}
+			lim := fmt.Sprint(e.Limit)
+			if e.LimitNow {
+				lim += "*"
+				limNow = true
+			}
+			trows = append(trows, []string{span, lvl, dur, mm, fmtBR(e.Peak, 0), lim, exc})
 		}
 		rev := make([]reportEpisode, len(eps))
 		for i := range eps {
 			rev[i] = eps[len(eps)-1-i]
 		}
-		p.table([]string{"Quando", "Nível", "Duração", "Mín/méd/máx (min)", "Pico", "Limite", "Acima do limite"}, trows,
+		p.table([]string{"Quando", "Nível", "Duração", "Mín/méd/máx (M)", "Pico (M)", "Limite", "Acima do limite"}, trows,
 			[]float64{cw * .2, cw * .15, cw * .1, cw * .17, cw * .09, cw * .09, cw * .2},
 			[]bool{false, false, true, true, true, true, true}, []bool{true, false, true, true, true, true, true},
 			func(i int) *pdf.RGB {
@@ -712,19 +732,42 @@ func renderReportPDF(r reportData) []byte {
 				}
 				return &cAtt
 			})
-		p.need(14)
-		d.Text(pm, p.y+10, pdf.Sans, 6.8, cMuted, "Pico: maior leitura ao vivo do alerta (janela de 60 s, lida por segundo). Mín/méd/máx: minutos gravados no episódio. (c): achado no histórico do contador.")
-		p.y += 14
+		note := "Pico: maior leitura ao vivo do alerta (janela de 60 s, consultada a cada segundo). Mín/méd/máx: minutos gravados no episódio. (c): episódio encontrado no histórico do contador. (d): episódio com interrupção de leitura (desconexão ou app fechado)."
+		if limNow {
+			note += " *: limite pelo valor atual, sem registro do valor vigente na época."
+		}
+		p.paragraph(note, 6.8, cMuted)
+		p.paragraph(episodeRule, 6.8, cMuted)
 		p.episodeCharts()
 	}
 
 	p.section("TEMPO ACIMA DOS LIMITES OPERACIONAIS")
 	trows = nil
+	aboveNow := false
 	for _, a := range r.Above {
-		trows = append(trows, []string{a.Label, fmt.Sprintf("≥ %d CPM", a.Limit), fmtMinutes(a.Minutes), fmtBR(float64(a.Minutes)/float64(st.N)*100, 2) + "%"})
+		lim := fmt.Sprintf("≥ %d CPM", a.Limit)
+		if len(a.Limits) > 1 {
+			var ls []string
+			for _, l := range a.Limits {
+				ls = append(ls, fmt.Sprint(l))
+			}
+			lim = "≥ " + strings.Join(ls, " → ") + " CPM"
+		} else if len(a.Limits) == 1 {
+			lim = fmt.Sprintf("≥ %d CPM", a.Limits[0])
+		}
+		if a.UsedNow {
+			lim += "*"
+			aboveNow = true
+		}
+		trows = append(trows, []string{a.Label, lim, fmtMinutes(a.Minutes), fmtBR(float64(a.Minutes)/float64(st.N)*100, 2) + "%"})
 	}
 	p.table([]string{"Limite", "A partir de", "Tempo (minutos gravados)", "Do tempo medido"}, trows,
 		[]float64{cw * .2, cw * .2, cw * .35, cw * .25}, []bool{false, true, true, true}, []bool{false, true, true, true}, nil)
+	if aboveNow {
+		p.paragraph("Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações). *: há minutos sem registro do limite da época, comparados com o valor atual.", 6.8, cMuted)
+	} else {
+		p.paragraph("Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações).", 6.8, cMuted)
+	}
 
 	p.section("LACUNAS (SEM LEITURA)")
 	missing := r.HistMin - st.N
@@ -732,7 +775,7 @@ func renderReportPDF(r reportData) []byte {
 		missing = 0
 	}
 	p.need(16)
-	d.Text(pm, p.y+11, pdf.Sans, 8, cInk, fmt.Sprintf("%s sem leitura no período, em %d trecho(s). Lacuna não conta como zero em nenhum cálculo.", fmtMinutes(missing), len(r.Gaps)))
+	d.Text(pm, p.y+11, pdf.Sans, 8, cInk, fmt.Sprintf("%s sem leitura no período, em %d trecho(s). Lacunas não são tratadas como zero em nenhum cálculo.", fmtMinutes(missing), len(r.Gaps)))
 	p.y += 16
 	if pre := r.SpanMin - r.HistMin; pre > 0 {
 		p.need(14)
@@ -758,6 +801,8 @@ func renderReportPDF(r reportData) []byte {
 			[]float64{cw * .3, cw * .3, cw * .4}, []bool{false, false, true}, []bool{true, true, true}, nil)
 	}
 
+	p.maturity()
+
 	if len(r.Meas) > 0 {
 		p.section("MEDIÇÕES DE OBJETO")
 		for _, m := range r.Meas {
@@ -765,16 +810,19 @@ func renderReportPDF(r reportData) []byte {
 		}
 	}
 
+	p.cfgPeriod()
+
 	p.section("CONFIGURAÇÕES E MÉTODO")
 	p.kv(r.Config, 150)
 
 	p.section("LIMITAÇÕES")
 	for _, l := range []string{
-		"A dose é a do contador (monitor de área) no lugar onde ele está, não a dose de quem está perto. Não é dosimetria pessoal.",
-		"A conversão CPM → µSv/h depende da calibração do tubo e da energia da radiação; com outras fontes ela pode errar bastante.",
-		"Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.",
-		"CPM sozinho não identifica o radionuclídeo nem o tipo de radiação.",
+		"A dose refere-se ao ponto onde o contador está instalado (monitor de área), não à dose de pessoas próximas. Não constitui dosimetria pessoal.",
+		"A conversão CPM → µSv/h depende da calibração do tubo e da energia da radiação; para fontes com espectro diferente do de calibração, o erro pode ser grande.",
+		"Os limites do app são operacionais, definidos pelo usuário; não são limites regulamentares nem limiares de segurança.",
+		"A contagem (CPM) não identifica o radionuclídeo nem o tipo de radiação.",
 		"Projeções (mSv/ano) são extrapolações do período, não medições.",
+		"Médias de janelas \"em formação\" (histórico menor que a janela) não representam a janela inteira.",
 	} {
 		lines := wrapText("• "+l, pdf.Sans, 7.5, pdf.W-2*pm, 3)
 		p.need(float64(len(lines))*9.5 + 3)
@@ -1013,4 +1061,148 @@ func rcCoverageTxt(rc *RcSum) string {
 		s += fmt.Sprintf(" desde o primeiro dado (%s) · %s%% do período inteiro", time.UnixMilli(rc.HistFrom).Format("02/01/2006 15:04"), fmtBR(rc.CoverageAll*100, 0))
 	}
 	return s
+}
+
+// originLegend explica as marcas de origem dos números (2.6).
+const originLegend = "Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RadiaCode; E = estimativa externa ou extrapolação."
+
+// episodeRule é a regra de agrupamento dos alertas em episódios.
+const episodeRule = "Regra dos episódios: um alerta abre quando a leitura ao vivo atinge o limite do nível e fecha quando ela cai abaixo de 90% dele (histerese). Alertas que se encostam (o seguinte começa até 1 min após o fim do anterior) formam um episódio, com o nível mais alto, o início do primeiro e o fim do último. Se o contador desconecta com um alerta aberto e reconecta em até 15 min com a leitura ainda acima do limite, o episódio continua e o trecho sem leitura não entra na estatística; fechar o app encerra o episódio. Episódios encontrados no histórico do contador (c) usam as leituras por minuto e terminam após 70 min sem dado."
+
+// paragraph escreve um texto corrido com quebra de linha.
+func (p *reportPDF) paragraph(txt string, size float64, c pdf.RGB) {
+	lines := wrapText(txt, pdf.Sans, size, pdf.W-2*pm, 8)
+	lh := size + 2.2
+	p.need(float64(len(lines))*lh + 6)
+	for i, ln := range lines {
+		p.d.Text(pm, p.y+size+3+float64(i)*lh, pdf.Sans, size, c, ln)
+	}
+	p.y += float64(len(lines))*lh + 6
+}
+
+// cfgPeriod é a tabela das configurações vigentes no período (2.6).
+func (p *reportPDF) cfgPeriod() {
+	r := p.r
+	p.section("CONFIGURAÇÕES VIGENTES NO PERÍODO")
+	if len(r.CfgRows) == 0 {
+		msg := "Não há registro de configurações para este período (o histórico de configurações começa na versão 2.1)."
+		if !r.CfgFirst.IsZero() {
+			msg = "Não há registro de configurações para este período: o histórico de configurações começa em " + r.CfgFirst.Format("02/01/2006 15:04") + "."
+		}
+		p.paragraph(msg, 8, cMuted)
+		return
+	}
+	cw := pdf.W - 2*pm
+	var rows [][]string
+	for _, c := range r.CfgRows {
+		start := c.AtStart
+		if !c.Known {
+			start = "sem registro (histórico desde " + r.CfgFirst.Format("02/01/2006") + ")"
+		}
+		ch := "nenhuma"
+		if len(c.Changes) > 0 {
+			var parts []string
+			for _, x := range c.Changes {
+				parts = append(parts, cfgChangeTxt(x))
+			}
+			ch = strings.Join(parts, "; ")
+		}
+		rows = append(rows, []string{c.Field, start, ch})
+	}
+	p.wrapTable([]string{"Ajuste", "No início do período", "Mudanças no período"}, rows, []float64{cw * .2, cw * .35, cw * .45})
+	p.paragraph("Valores tirados do histórico de configurações do app. Cada minuto e cada alerta foram avaliados com o valor vigente no momento; a calibração segue as versões descritas em \"Calibração no período\".", 6.8, cMuted)
+}
+
+// maturity é a tabela do histórico disponível em cada janela, terminando no
+// fim do período (2.6).
+func (p *reportPDF) maturity() {
+	m := p.r.Mature
+	if len(m.GMC) == 0 {
+		return
+	}
+	p.section("HISTÓRICO DISPONÍVEL (MATURIDADE)")
+	cw := pdf.W - 2*pm
+	win := func(d int) string {
+		switch d {
+		case 1:
+			return "24 h"
+		case 365:
+			return "1 ano"
+		}
+		return fmt.Sprintf("%d dias", d)
+	}
+	cell := func(w MatWin) string {
+		switch w.State {
+		case matWaiting:
+			return "aguardando dados"
+		case matForming:
+			return fmt.Sprintf("em formação (%s de %d dias) · %s%% medido", fmtBR(w.HistDays, 1), w.Days, fmtBR(w.Coverage*100, 0))
+		}
+		return fmt.Sprintf("disponível · %s%% medido (%d de %d min)", fmtBR(w.Coverage*100, 0), w.Minutes, w.HistMinutes)
+	}
+	head := []string{"Janela (até o fim do período)", "GMC-800"}
+	cols := []float64{cw * .32, cw * .68}
+	if len(m.RC) > 0 {
+		head = append(head, "RadiaCode")
+		cols = []float64{cw * .3, cw * .35, cw * .35}
+	}
+	var rows [][]string
+	for i, w := range m.GMC {
+		row := []string{win(w.Days), cell(w)}
+		if len(m.RC) > i {
+			row = append(row, cell(m.RC[i]))
+		}
+		rows = append(rows, row)
+	}
+	p.wrapTable(head, rows, cols)
+	first := "Primeiro dado do GMC-800: " + time.UnixMilli(m.GMCFirst).Format("02/01/2006 15:04")
+	if m.GMCFirst == 0 {
+		first = "Sem dado do GMC-800"
+	}
+	if m.RCFirst != 0 {
+		first += " · do RadiaCode: " + time.UnixMilli(m.RCFirst).Format("02/01/2006 15:04")
+	}
+	p.paragraph(first+".", 6.8, cMuted)
+	p.y -= 4
+	p.paragraph("Disponível: o histórico cobre a janela inteira. Em formação: o primeiro dado está dentro da janela, e estatísticas dessa janela ainda não a representam por completo.", 6.8, cMuted)
+}
+
+// wrapTable é uma tabela de texto com quebra de linha nas células.
+func (p *reportPDF) wrapTable(head []string, rows [][]string, cols []float64) {
+	const fs, lh = 7.5, 9.5
+	drawHead := func() {
+		x := pm
+		for i, h := range head {
+			p.d.Text(x+4, p.y+10, pdf.SansBold, 7.5, cMuted, h)
+			x += cols[i]
+		}
+		p.y += 15
+		p.d.Line(pm, p.y, pdf.W-pm, p.y, 0.6, cLine, false)
+	}
+	p.need(40)
+	drawHead()
+	for _, row := range rows {
+		cells := make([][]string, len(row))
+		n := 1
+		for i, c := range row {
+			cells[i] = wrapText(c, pdf.Sans, fs, cols[i]-8, 8)
+			if len(cells[i]) > n {
+				n = len(cells[i])
+			}
+		}
+		h := float64(n)*lh + 5
+		if p.y+h > pBot {
+			p.need(100)
+			drawHead()
+		}
+		x := pm
+		for i, ls := range cells {
+			for j, ln := range ls {
+				p.d.Text(x+4, p.y+10+float64(j)*lh, pdf.Sans, fs, cInk, ln)
+			}
+			x += cols[i]
+		}
+		p.y += h
+		p.d.Line(pm, p.y, pdf.W-pm, p.y, 0.3, cLine, false)
+	}
 }

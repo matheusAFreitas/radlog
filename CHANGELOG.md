@@ -1,5 +1,28 @@
 # Versões
 
+## 2.6.0
+- **Relatório: configurações vigentes no período.** Nova tabela com o valor
+  de cada ajuste no início do período e as mudanças dentro dele (data, de →
+  para, origem), tirada do histórico de configurações. Ajustes sem registro
+  da época aparecem em "Configurações e método" marcados como "valor atual".
+- **Limites da época:** o limite de cada episódio e o "tempo acima dos
+  limites" usam o valor vigente em cada momento (com "*" quando não há
+  registro e foi usado o valor atual; quando o limite mudou no período, a
+  tabela mostra "≥ 40 → 60 CPM").
+- **Medido × calculado em cada número:** marcas M (medido pelo contador), C
+  (calculado pelo app), R (informado pelo RadiaCode) e E (estimativa ou
+  extrapolação) nos cartões, na estatística e nos cabeçalhos das tabelas,
+  com a legenda logo abaixo dos cartões. No RadiaCode, a dose acumulada pelo
+  aparelho e a calculada pelo app aparecem separadas.
+- **Regra dos episódios** escrita no relatório (histerese de 90%, alertas que
+  se encostam em até 1 min, continuação após desconexão de até 15 min,
+  episódios do histórico do contador), e marca (d) nos episódios com
+  interrupção de leitura.
+- **Histórico disponível (maturidade):** tabela com 24 h, 7, 30, 90 dias e
+  1 ano até o fim do período, para o GMC e o RadiaCode.
+- Textos do relatório revistos para um tom técnico e formal (método,
+  limitações, dispersão, lacunas).
+
 ## 2.5.0
 - **Padrões do fundo** (novo quadro em Gráficos): mediana por hora do dia,
   com a faixa do 1º ao 3º quartil e a média; dia da semana; mês; e dia ×

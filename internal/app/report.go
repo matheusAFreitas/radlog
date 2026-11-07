@@ -77,6 +77,11 @@ type reportData struct {
 	dayKeys      []string    // "AAAA-MM-DD" de cada linha de Days
 	alertPeakAt  time.Time
 	MaxLive      bool // o máximo do resumo veio de um pico ao vivo
+
+	// 2.6: configurações que valeram no período e maturidade do histórico
+	CfgRows  []cfgPeriodRow
+	CfgFirst time.Time // primeiro registro do histórico de configurações
+	Mature   Maturity
 }
 
 type reportEpisode struct {
@@ -89,7 +94,10 @@ type reportEpisode struct {
 	PeakAt            time.Time
 	Limit             int
 	Retro             bool
-	DurSec            int // duração exata (do histórico: de minuto a minuto)
+	DurSec            int    // duração exata (do histórico: de minuto a minuto)
+	LimitNow          bool   // limite pelo valor atual (sem registro da época)
+	Breaks            int    // trechos sem leitura no meio (desconexão)
+	EndReason         string // terminou sem leitura (desconexão, app fechado)
 	// para o gráfico de antes e depois (só os episódios escolhidos)
 	Chart  bool
 	Around []store.Point // por minuto, 30 min antes e depois
@@ -100,6 +108,8 @@ type reportAbove struct {
 	Label   string
 	Limit   int
 	Minutes int
+	Limits  []int // limites vigentes no período, na ordem em que valeram
+	UsedNow bool  // algum minuto sem registro: usou o valor atual
 }
 
 func fmtBR(v float64, dec int) string {
@@ -266,6 +276,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		r.Gaps = findGaps(pts, cs.HistFrom, effTo)
 	}
 	r.DaysData = daysWithData(pts)
+	r.Mature = a.maturityAt(effTo)
 	r.Bins = histogram(pts, r.St.Mean)
 	if r.St.N > 0 {
 		r.Min = fmtBR(r.St.Min, 0)
@@ -321,6 +332,10 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	a.mu.Lock()
 	alarmCPM, alarmOn := a.settings.AlarmCPM, a.settings.AlarmEnabled
 	a.mu.Unlock()
+	a.cfgMu.Lock()
+	cfgHist := a.readCfgHist()
+	a.cfgMu.Unlock()
+	r.CfgRows, r.CfgFirst = cfgInPeriod(cfgHist, from, to)
 	limitOf := func(level string) int {
 		switch level {
 		case "perigo":
@@ -339,7 +354,13 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		st, en := time.UnixMilli(ep.Start), time.UnixMilli(ep.Until)
 		re := reportEpisode{Start: st, End: en, Level: levelName(ep.Level), LevelCls: ep.Level,
 			Minutes: int(math.Ceil(en.Sub(st).Minutes())), Peak: ep.Peak, Limit: limitOf(ep.Level),
-			DurSec: int(math.Round(en.Sub(st).Seconds())), PeakAt: st}
+			DurSec: int(math.Round(en.Sub(st).Seconds())), PeakAt: st, Breaks: len(ep.Breaks), EndReason: ep.EndReason}
+		// o limite que valia quando o episódio começou (histórico de configurações)
+		if l, ok := cfgLimitAt(cfgHist, ep.Level, ep.Start); ok {
+			re.Limit = l
+		} else {
+			re.LimitNow = true
+		}
 		if len(ep.IDs) > 0 {
 			re.Retro = evByID[ep.IDs[0]].Retro
 		}
@@ -413,11 +434,35 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			}
 		}
 	}
-	r.Above = append(r.Above, reportAbove{"Atenção", lv.AttentionCPM, minutesAtOrAbove(pts, float64(lv.AttentionCPM))})
-	if alarmOn {
-		r.Above = append(r.Above, reportAbove{"Alarme", alarmCPM, minutesAtOrAbove(pts, float64(alarmCPM))})
+	// tempo acima de cada limite, com o limite vigente em cada minuto
+	// (histórico de configurações; sem registro, o valor atual)
+	above := func(label, level string, cur int) reportAbove {
+		ra := reportAbove{Label: label, Limit: cur}
+		seen := map[int]bool{}
+		for _, p := range pts {
+			l, ok := cfgLimitAt(cfgHist, level, p.T.UnixMilli())
+			if !ok {
+				l = cur
+				if level == "alarme" && !alarmOn {
+					continue
+				}
+				ra.UsedNow = true
+			}
+			if !seen[l] {
+				seen[l] = true
+				ra.Limits = append(ra.Limits, l)
+			}
+			if p.CPM >= float64(l) {
+				ra.Minutes++
+			}
+		}
+		return ra
 	}
-	r.Above = append(r.Above, reportAbove{"Perigo", lv.DangerCPM, minutesAtOrAbove(pts, float64(lv.DangerCPM))})
+	r.Above = append(r.Above, above("Atenção", "atencao", lv.AttentionCPM))
+	if ra := above("Alarme", "alarme", alarmCPM); alarmOn || len(ra.Limits) > 0 {
+		r.Above = append(r.Above, ra)
+	}
+	r.Above = append(r.Above, above("Perigo", "perigo", lv.DangerCPM))
 
 	// alertas por episódio (o mais recente primeiro)
 	eps := alertEpisodes(evs, time.Now())
@@ -500,27 +545,50 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		dev = "contador não conectado na hora do relatório"
 	}
 	zone, _ := time.Now().Zone()
+	// ajustes que estão na tabela do período (com valor conhecido no início)
+	// saem daqui; sem registro da época, fica o valor atual, marcado como tal
+	known := map[string]bool{}
+	for _, c := range r.CfgRows {
+		if c.Known {
+			known[c.Field] = true
+		}
+	}
+	curVal := func(field, v string) [2]string {
+		return [2]string{field, v + " — valor atual; sem registro do valor vigente no início do período"}
+	}
 	r.Config = [][2]string{
 		{"Contador", dev},
 		{"Calibração", r.Cal + " (" + calSrc + ")"},
 		{"Calibração no período", calPeriod},
-		{"Dose do GMC", "calculada pelo app a partir do CPM de cada minuto; o contador não informa a dose que soma"},
-		{"Tempo morto", r.DeadTime},
-		{"Registro de cada minuto", traceSummary(r.Pts)},
-		{"Fundo de referência", bg},
-		{"Aviso de atenção", fmt.Sprintf("a partir de %d CPM (limite operacional configurado)", lv.AttentionCPM)},
-		{"Alarme", alarm + " (limite operacional configurado)"},
-		{"Alarme de perigo", fmt.Sprintf("a partir de %d CPM (limite operacional configurado)", lv.DangerCPM)},
-		{"Dose", "calculada pelo app: soma, minuto a minuto, de CPM × calibração ÷ 60. Não é o acumulador interno do contador."},
-		{"σ (Poisson)", "√média: a variação que o acaso sozinho dá numa contagem de 1 minuto"},
-		{"Percentis", "interpolação linear entre as leituras ordenadas"},
-		{"Máximo", "o maior valor visto, no resumo e na tabela por dia (igual ao app): o maior minuto gravado ou, se for maior, o pico ao vivo de um alerta (marcado com *). A estatística usa só os minutos gravados."},
-		{"Pico ao vivo", "maior CPM da leitura ao vivo durante um alerta: o contador soma os últimos 60 s e o app lê a cada segundo. Essa janela não coincide com o minuto do relógio que fica gravado, por isso o pico pode passar do maior minuto."},
-		{"Fundo atual", "mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa"},
-		{"Lacuna", "minuto sem leitura (cabo fora, app fechado sem histórico baixado); nunca conta como zero"},
+	}
+	if !known["Tempo morto"] {
+		r.Config = append(r.Config, curVal("Tempo morto", r.DeadTime))
+	}
+	r.Config = append(r.Config,
+		[2]string{"Registro de cada minuto", traceSummary(r.Pts)},
+		[2]string{"Fundo de referência", bg},
+	)
+	if !known["Aviso de atenção"] {
+		r.Config = append(r.Config, curVal("Aviso de atenção", fmt.Sprintf("a partir de %d CPM (limite operacional)", lv.AttentionCPM)))
+	}
+	if !known["Alarme"] {
+		r.Config = append(r.Config, curVal("Alarme", alarm+" (limite operacional)"))
+	}
+	if !known["Alarme de perigo"] {
+		r.Config = append(r.Config, curVal("Alarme de perigo", fmt.Sprintf("a partir de %d CPM (limite operacional)", lv.DangerCPM)))
+	}
+	r.Config = append(r.Config, [][2]string{
+		{"Dose do GMC", "calculada pelo app: soma, minuto a minuto, de µSv/h ÷ 60, com o µSv/h obtido do CPM pela calibração vigente em cada minuto. O GMC-800 não informa o acumulador interno de dose pela interface serial."},
+		{"σ (Poisson)", "√média: desvio-padrão esperado apenas pela flutuação estatística de uma contagem de 1 minuto"},
+		{"Percentis", "interpolação linear entre as leituras ordenadas (tipo 7)"},
+		{"Máximo", "maior valor observado no resumo e na tabela por dia: o maior minuto gravado ou, se superior, o pico ao vivo de um alerta (marcado com *). A estatística usa apenas os minutos gravados."},
+		{"Pico ao vivo", "maior CPM da leitura ao vivo durante um alerta. O contador soma os últimos 60 s e o app consulta a cada segundo; como essa janela não coincide com o minuto do relógio gravado, o pico pode superar o maior minuto."},
+		{"Fundo", "fundo atual: mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa, excluídos os períodos fora de casa e as medições de objeto"},
+		{"Cobertura", "minutos com leitura ÷ minutos do período até o fim do período ou o momento da geração, contados a partir do primeiro dado do contador"},
+		{"Lacuna", "minuto sem leitura registrada (contador desconectado, app fechado sem histórico baixado); nunca é tratado como zero"},
 		{"Horários", "hora local (" + zone + ")"},
 		{"Programa", "RadLog " + AppVersion},
-	}
+	}...)
 	return r, nil
 }
 
