@@ -21,6 +21,8 @@ const hhmm = (ms) => { const t = new Date(ms); return pad(t.getHours()) + ":" + 
 const ddmm = (ms) => { const t = new Date(ms); return pad(t.getDate()) + "/" + pad(t.getMonth() + 1); };
 const hhmmss = (ms) => { const t = new Date(ms); return hhmm(ms) + ":" + pad(t.getSeconds()); };
 const isShortRange = () => state.range === "15m" || state.range === "30m";
+const isLongRange = () => state.range === "7d" || state.range === "30d" || state.range === "1y";
+const HOURLY = ["15m", "30m", "1h", "3h", "6h", "12h", "24h"];
 const isToday = (ms) => new Date(ms).toDateString() === new Date().toDateString();
 const isYesterday = (ms) => { const y = new Date(); y.setDate(y.getDate() - 1); return new Date(ms).toDateString() === y.toDateString(); };
 const usvDigits = (v) => (v < 1 ? 3 : v < 10 ? 2 : 1);
@@ -50,7 +52,7 @@ const state = {
   heatMonthMode: localGet("heatMode", "dias") === "mes",
   heatMonth: (() => { const d = new Date(); return { y: d.getFullYear(), m: d.getMonth() + 1 }; })(),
   heatDataStart: 0, // início do mês da leitura mais antiga (ms)
-  dosePeriod: localGet("dosePeriod", "24h"),
+  dosePeriod: localGet("range", "1h"), // 2.12: o mesmo período da taxa
   doseLimit: localGet("doseLimit", "publico"),
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
   settings: {},
@@ -1110,9 +1112,10 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "graficos";
-const PAGES = { graficos: "pageGraficos", dose: "pageDose", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
+  if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
   if (!PAGES[v]) v = "graficos";
   const changed = state.view !== v;
   state.view = v;
@@ -1126,7 +1129,6 @@ async function showView(v, skipRender) {
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
   if (v === "graficos") refreshSub("graficos");
-  if (v === "dose") refreshDose();
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
@@ -1157,13 +1159,14 @@ function setSub(pg, sub, focus) {
     if (on && focus) b.focus();
   });
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
+  if (pg === "graficos") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
   if (changed && state.view === pg) refreshSub(pg);
 }
 
 function refreshSub(pg) {
   const s = state.sub[pg];
   if (pg === "graficos") {
-    if (s === "tempo") refreshChart();
+    if (s === "tempo") { refreshChart(); refreshDose(); }
     else if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
     else refreshBgTrend();
@@ -1224,7 +1227,7 @@ async function refreshChart() {
   c.rainErr = "";
   try { c.notes = (await api.GetNotes(c.from, c.to + 60e3)) || []; } catch (e) { c.notes = []; }
   if (my !== chartSeq) return;
-  if (state.settings.rainEnabled) {
+  if (state.settings.rainEnabled && c.to - c.from <= 8 * 864e5) { // chuva: até ~1 semana
     const [rain, radar] = await Promise.all([
       api.GetRain(c.from, c.to).catch((e) => { c.rainErr = errMsg(e); return []; }),
       api.GetRainRadar(c.from, c.to).catch(() => []),
@@ -1378,10 +1381,10 @@ async function refreshChart() {
     $("x1").textContent = f((t0 + tEnd) / 2);
     $("x2").textContent = f(tEnd);
   } else {
-    const lbl = state.range === "7d" ? ddmm : hhmm;
+    const lbl = state.range === "1y" ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); } : isLongRange() ? ddmm : hhmm;
     $("x0").textContent = lbl(c.from);
     $("x1").textContent = lbl((c.from + c.to) / 2);
-    $("x2").textContent = state.range === "7d" ? "hoje" : "agora";
+    $("x2").textContent = isLongRange() ? "hoje" : "agora";
   }
   // nos períodos curtos o gráfico usa leituras por segundo
   $("chartStats").dataset.short = String(isShortRange());
@@ -1411,7 +1414,7 @@ function setupChartHover() {
     cur.hidden = false;
     cur.style.left = (i / Math.max(1, c.values.length - 1)) * 100 + "%";
     tip.hidden = false;
-    const when = state.zoom ? chartTimeFmt(c)(t) : state.range === "7d" ? `${ddmm(t)} ${hhmm(t)}` : isShortRange() ? hhmmss(t) : hhmm(t);
+    const when = state.zoom ? chartTimeFmt(c)(t) : isLongRange() ? `${ddmm(t)} ${hhmm(t)}` : isShortRange() ? hhmmss(t) : hhmm(t);
     const rr = (c.radar || []).find((p) => t >= p.time && t < p.time + RADAR_STEP);
     const pk = (c.peaks || []).filter((p) => p.t >= t && p.t < t + (c.stepMs || 60000)).sort((a, b) => b.cpm - a.cpm)[0];
     const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
@@ -1577,16 +1580,50 @@ function hasRcData() {
 }
 state.doseSrc = localGet("doseSrc", "radiacode");
 
+// dose de um aparelho no período (ou no trecho)
+function fetchDose(src, range) {
+  return range
+    ? (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(range.from, range.to, state.doseLimit, src) : api.GetDoseRange(range.from, range.to, state.doseLimit))
+    : (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
+}
+
+// quadros da dose de cada aparelho: total, média e quanto do teto já foi
+function renderDevBoxes(box, list) {
+  box.textContent = "";
+  for (const d of list) {
+    const c = d.c, el = document.createElement("div");
+    el.className = "dd-box " + d.key;
+    const has = c && c.measuredMinutes > 0;
+    const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
+    const hours = has ? c.measuredMinutes / 60 : 0;
+    const rate = has && hours ? c.total / hours : null;
+    const pct = has && c.ceilingTotal > 0 ? (c.total / c.ceilingTotal) * 100 : 0;
+    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "do aparelho" : "calculada pelo app") : "calculada pelo app";
+    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
+    el.querySelector(".dd-name span").textContent = d.name;
+    el.querySelector(".dd-val b").textContent = tv;
+    el.querySelector(".dd-val > span").textContent = tu;
+    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
+    el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
+    el.querySelector(".meter").classList.toggle("over", pct > 100);
+    el.querySelector(".dd-pct").textContent = has && c.ceilingTotal > 0 ? `${fmt(pct, pct < 10 ? 1 : 0)}% do teto do período (${(c.limitName || "").toLowerCase()})` : "";
+    box.appendChild(el);
+  }
+}
+
 async function refreshDose() {
-  document.querySelectorAll("#doseSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.doseZoom && b.dataset.dperiod === state.dosePeriod)));
   $("doseLimit").value = state.doseLimit;
   const my = ++doseSeq;
-  const src = state.doseSrc;
-  const c = state.doseZoom
-    ? await (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(state.doseZoom.from, state.doseZoom.to, state.doseLimit, src) : api.GetDoseRange(state.doseZoom.from, state.doseZoom.to, state.doseLimit))
-    : await (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
+  const rcOn0 = hasRcData();
+  // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
+  // curva do outro aparelho vai junto, no mesmo eixo
+  const src = rcOn0 ? "radiacode" : "gmc";
+  const [c, c2] = await Promise.all([fetchDose(src, state.doseZoom), rcOn0 ? fetchDose("gmc", state.doseZoom).catch(() => null) : null]);
   if (my !== doseSeq) return;
   state.dose = c;
+  state.dose2 = c2;
+  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: c2 }, { key: "rc", name: "RadiaCode", c }] : [{ key: "gmc", name: "GMC-800", c }]);
+  $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
   dz.hidden = !state.doseZoom;
   if (state.doseZoom) {
@@ -1599,12 +1636,10 @@ async function refreshDose() {
 
   const isRc = c.device === "radiacode";
   const rcOn = hasRcData();
-  $("doseSrcSeg").hidden = !rcOn;
-  document.querySelectorAll("#doseSrcSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dsrc === (isRc ? "radiacode" : "gmc"))));
-  $("doseTitle").textContent = rcOn ? (isRc ? "Sua dose (RadiaCode)" : "Dose da casa (GMC-800)") : "Dose acumulada";
+  $("doseTitle").textContent = "Dose acumulada";
   const otherName = isRc ? "GMC-800 (casa)" : "RadiaCode (você)";
   renderDoseDevice();
-  $("doseOther").hidden = !(rcOn && c.otherMinutes > 0);
+  $("doseOther").hidden = true;
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
   $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose calculada pelo app";
   $("doseNote").textContent =
@@ -1657,7 +1692,7 @@ async function refreshDose() {
 
   // gráfico
   const n = c.times.length;
-  const top0 = Math.max(c.total, c.ceilingTotal) * 1.1 || 1;
+  const top0 = Math.max(c.total, c.ceilingTotal, c2 && c2.measuredMinutes ? c2.total : 0) * 1.1 || 1;
   const mag = Math.pow(10, Math.floor(Math.log10(top0)));
   const top = Math.ceil(top0 / mag * 2) / 2 * mag;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
@@ -1678,7 +1713,10 @@ async function refreshDose() {
     `<path d="${dosePath}L${W} ${H}L0 ${H}Z" fill="${dcol}" fill-opacity="0.10"/>` +
     `<path d="${path(c.background)}" fill="none" stroke="#A3ADB4" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>` +
     `<path d="${path(c.ceiling)}" fill="none" stroke="#F0656A" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
-    `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` +
+    (c2 && c2.measuredMinutes && c2.dose && c2.dose.length > 1
+      ? `<path d="${c2.dose.map((v, i) => (i ? "L" : "M") + ((i / (c2.dose.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
+      : "");
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
   ys[3].textContent = "0";
@@ -1690,7 +1728,7 @@ async function refreshDose() {
     $("dx2").textContent = f(c.to);
     return;
   }
-  const hourly = ["3h", "6h", "12h", "24h"].includes(state.dosePeriod);
+  const hourly = HOURLY.includes(state.dosePeriod);
   const lbl = hourly ? hhmm : state.dosePeriod === "1y"
     ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); }
     : ddmm;
@@ -1712,8 +1750,11 @@ function setupDoseHover() {
     cur.hidden = false;
     cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
     tip.hidden = false;
-    const when = ["3h", "6h", "12h", "24h"].includes(state.dosePeriod) ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
-    tip.textContent = `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
+    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
+    const c2 = state.dose2, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
+    tip.textContent = c2 && j2 >= 0
+      ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
+      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";
   });
@@ -1721,12 +1762,6 @@ function setupDoseHover() {
 }
 
 function wireDose() {
-  document.querySelectorAll("#doseSrcSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.doseSrc = b.dataset.dsrc; localSet("doseSrc", state.doseSrc); refreshDose();
-  }));
-  document.querySelectorAll("#doseSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.dosePeriod = b.dataset.dperiod; localSet("dosePeriod", state.dosePeriod); state.doseZoom = null; state.doseZoomStack = []; unlinkZoom(); refreshDose();
-  }));
   $("doseLimit").addEventListener("change", () => {
     state.doseLimit = $("doseLimit").value; localSet("doseLimit", state.doseLimit); refreshDose();
   });
@@ -1947,7 +1982,7 @@ function heatCellTime(i, hr) {
 function markHeatPick() {
   document.querySelectorAll("#heat .c.pick").forEach((e) => e.classList.remove("pick"));
   const p = state.heatPick;
-  if (!p || !state.heat || !state.zoom || state.zoom.from !== p.from || state.zoom.to !== p.to) return;
+  if (!p || !state.heat) return;
   const i = state.heat.days.indexOf(p.day);
   if (i < 0) return;
   document.querySelectorAll(`#heat .c[data-i="${i}"]`).forEach((c) => {
@@ -1956,19 +1991,91 @@ function markHeatPick() {
   });
 }
 
+// 2.12: o trecho abre logo embaixo do mapa (taxa e dose de cada aparelho),
+// sem sair da aba; "Abrir na aba Dose" leva o mesmo trecho para lá
 function openHeatRange(i, h0, h1) {
   const from = heatCellTime(i, h0), to = heatCellTime(i, h1) + 3600e3;
   state.heatPick = { day: state.heat.days[i], h0, h1, from, to };
-  state.zoom = { from, to };
-  state.zoomStack = [];
-  state.doseZoom = { from, to };
-  state.doseZoomStack = [];
-  state.zoomLinked = true;
-  refreshChart().then(markHeatPick);
-  refreshDose();
-  const card = $("cpmCard");
-  const r = card.getBoundingClientRect();
-  if (r.top < 0 || r.bottom > window.innerHeight) card.scrollIntoView({ behavior: "smooth", block: "start" });
+  markHeatPick();
+  $("heatTrecho").hidden = false;
+  renderHeatTrecho();
+  const card = $("heatTrecho");
+  requestAnimationFrame(() => {
+    const r = card.getBoundingClientRect();
+    if (r.bottom > window.innerHeight) card.scrollIntoView({ behavior: "smooth", block: "end" });
+  });
+}
+
+function closeHeatTrecho() {
+  state.heatPick = null;
+  markHeatPick();
+  $("heatTrecho").hidden = true;
+}
+
+let htSeq = 0;
+async function renderHeatTrecho() {
+  const p = state.heatPick;
+  if (!p) return;
+  const my = ++htSeq;
+  const rcOn = hasRcData();
+  const day = new Date(p.from);
+  $("htChip").textContent = `${ddmm(p.from)} · ${hhmm(p.from)}–${p.h1 === 23 ? "24:00" : hhmm(p.to)}`;
+  if (isToday(day)) $("htChip").textContent = "hoje · " + $("htChip").textContent.split(" · ")[1];
+  const range = { from: p.from, to: p.to };
+  const [ch, dg, dr] = await Promise.all([
+    api.GetChartRange(p.from, p.to).catch(() => null),
+    fetchDose("gmc", range).catch(() => null),
+    rcOn ? fetchDose("radiacode", range).catch(() => null) : null,
+  ]);
+  if (my !== htSeq || state.heatPick !== p) return;
+  state.ht = { ch, dg, dr };
+  renderDevBoxes($("htDevs"), rcOn ? [{ key: "gmc", name: "GMC-800", c: dg }, { key: "rc", name: "RadiaCode", c: dr }] : [{ key: "gmc", name: "GMC-800", c: dg }]);
+  $("htKeyRc").hidden = !rcOn;
+  // taxa
+  const VW = 600, RH = 120, DH = 100;
+  const g = ch ? ch.usv || [] : [], r = ch && rcOn ? ch.rc || [] : [];
+  const vals = g.concat(r).filter((v) => v != null && isFinite(v));
+  const attn = ch && ch.attentionUSv;
+  const rtop = niceTop(Math.max(...vals, 0.05) * 1.15);
+  const ry = (v) => RH - (v / rtop) * RH;
+  const line = (arr, n, yf, color) => {
+    let d = "", pen = false;
+    arr.forEach((v, k) => {
+      if (v == null || !isFinite(v)) { pen = false; return; }
+      d += (pen ? "L" : "M") + ((k / Math.max(1, n - 1)) * VW).toFixed(1) + " " + yf(v).toFixed(1);
+      pen = true;
+    });
+    return d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : "";
+  };
+  const grid = (h) => [0.5, h / 2, h - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="#2A3136" vector-effect="non-scaling-stroke"/>`).join("");
+  $("htRate").innerHTML = grid(RH) +
+    (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="#F5B84A" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
+    line(g, g.length, ry, "#6EE7A0") + line(r, r.length, ry, "#F472B6");
+  $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
+  // dose acumulada: cada aparelho a sua, teto do principal
+  const main = rcOn && dr && dr.measuredMinutes ? dr : dg;
+  const dtop0 = Math.max(dg ? dg.total : 0, dr ? dr.total : 0, main ? main.ceilingTotal : 0) * 1.1 || 1;
+  const dtop = niceTop(dtop0);
+  const dy = (v) => DH - (v / dtop) * DH;
+  $("htDose").innerHTML = grid(DH) +
+    (main && main.ceiling ? line(main.ceiling, main.ceiling.length, dy, "#F0656A") : "") +
+    (dg && dg.measuredMinutes ? line(dg.dose, dg.dose.length, dy, "#6EE7A0") : "") +
+    (dr && dr.measuredMinutes ? line(dr.dose, dr.dose.length, dy, "#F472B6") : "");
+  $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
+  $("htX0").textContent = hhmm(p.from);
+  $("htX1").textContent = hhmm((p.from + p.to) / 2);
+  $("htX2").textContent = p.h1 === 23 ? "24:00" : hhmm(p.to);
+  // valores por ponto ao passar o mouse
+  $("htRate").dataset.n = g.length;
+}
+
+function wireHeatTrecho() {
+  $("htClose").addEventListener("click", closeHeatTrecho);
+  $("htOpen").addEventListener("click", () => { const p = state.heatPick; if (p) showRange(p.from, p.to); });
+  $("htAway").addEventListener("click", () => {
+    const p = state.heatPick;
+    if (p) openPeriods({ from: p.from, to: p.to });
+  });
 }
 
 function wireHeat() {
@@ -2006,6 +2113,7 @@ function wireHeat() {
     openHeatRange(d.i, Math.min(d.h0, d.h1), Math.max(d.h0, d.h1));
   });
   window.addEventListener("scroll", hideHeatTip, { passive: true });
+  wireHeatTrecho();
   wireBgTrend();
   wirePatterns();
   document.querySelectorAll("#heatDevSeg button").forEach((b) => b.addEventListener("click", () => { state.heatDev = b.dataset.hdev; refreshHeat(); }));
@@ -2189,7 +2297,7 @@ function renderDoseDevice() {
   const el = $("doseDevice"), st = state.rc.st || {};
   const c = state.dose;
   const on = st.state === "conectado";
-  const rcCard = state.doseSrc === "radiacode";
+  const rcCard = !!(c && c.device === "radiacode");
   const show = rcCard && (st.doseLiveAt > 0 || on);
   el.hidden = !show;
   // com o total do aparelho: ele vira o número grande e a conta do app vai
@@ -2200,7 +2308,7 @@ function renderDoseDevice() {
     const dev = c && c.doseSource === "aparelho";
     const tot = dev ? c.appTotal : c && c.total, mins = dev ? c.appMinutes : c && c.measuredMinutes;
     if (!c || !mins) return "sem leituras gravadas no período";
-    const per = (document.querySelector('#doseSeg button[aria-pressed="true"]') || {}).textContent || "";
+    const per = state.doseZoom ? "" : (document.querySelector('#rangeSeg button[aria-pressed="true"]') || {}).textContent || "";
     const cov = (dev ? c.appCoverage : c.coverage) * 100;
     return `${doseTxt(tot)}` + (per ? ` em ${per.trim()}` : "") + ` (só os minutos que o PC gravou: ${fmt(cov, cov < 10 ? 1 : 0)}% do período)`;
   };
@@ -4479,7 +4587,8 @@ function wire() {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
   document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart(); markHeatPick();
+    state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
+    state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
   }));
 
   $("statusPill").addEventListener("click", () => openSettings("selPort"));
@@ -6909,7 +7018,7 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       return api._dose(f, f + Math.ceil(span / step) * step, step, limit);
     },
     GetDose: async (period, limit) => {
-      const [span, step] = { "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5] }[period] || [864e5, 3e5];
+      const [span, step] = { "15m": [9e5, 6e4], "30m": [18e5, 6e4], "1h": [36e5, 6e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5] }[period] || [864e5, 3e5];
       const to = Math.floor(Date.now() / 6e4) * 6e4 + 6e4;
       return api._dose(to - span, to, step, limit);
     },
@@ -6936,10 +7045,14 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
         times.push(e); dose.push(d); bg.push(b); ceil.push(b + al);
       }
       return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, doseSource: "app", calNote: "mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)", backgroundTotal: b, ceilingTotal: b + al,
-        allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY,
+        allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY, limitName: limY === 20 ? "Trabalhador exposto" : "Público",
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
     },
-    GetChartRange: async (from, to) => withPeaks(await chartRangePreview(from, to)),
+    GetChartRange: async (from, to) => {
+      const c = withPeaks(await chartRangePreview(from, to));
+      if (demoRcFake()) c.rc = (c.usv || []).map((v, i) => (v == null ? null : v * 0.6 + Math.sin(i / 3) * 0.004));
+      return c;
+    },
     _chartRange: async (from, to) => {
       const span = Math.max(12e4, to - from), step = span <= 36e5 ? 6e4 : span <= 864e5 ? 3e5 : 18e5;
       const f = Math.floor(Math.min(from, to) / step) * step, n = Math.ceil(span / step);
@@ -6968,7 +7081,7 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       return Object.assign(c, { avgUSv: u(c.avg), minUSv: u(c.min), maxUSv: u(c.max) });
     },
     _unused: async (period) => {
-      const [span, step] = { "15m": [9e5, 5e3], "30m": [18e5, 1e4], "24h": [864e5, 3e5], "7d": [6048e5, 18e5] }[period] || [3600e3, 6e4];
+      const [span, step] = { "15m": [9e5, 5e3], "30m": [18e5, 1e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 18e5], "30d": [2592e6, 72e5], "1y": [31536e6, 864e5] }[period] || [3600e3, 6e4];
       const to = Math.floor(Date.now() / step) * step + step, from = to - span;
       const n = span / step, sums = new Array(n).fill(0), cnt = new Array(n).fill(0);
       const all = range(from, to);

@@ -1838,7 +1838,17 @@ const I18N_EN = {
 "queda brusca": "sudden drop",
 "tempo do aviso de queda": "drop warning time",
 "compensar o tempo morto": "dead-time compensation",
-"tempo morto τ": "dead time τ"
+"tempo morto τ": "dead time τ",
+"Trecho selecionado": "Selected stretch",
+"Limpar o trecho": "Clear the stretch",
+"Abrir na aba Dose": "Open in the Dose tab",
+"Taxa de dose (µSv/h)": "Dose rate (µSv/h)",
+"Dose acumulada (µSv), cada aparelho a sua": "Accumulated dose (µSv), each device its own",
+"Taxa de dose dos aparelhos no trecho": "Dose rate of the devices in the stretch",
+"Dose acumulada de cada aparelho no trecho": "Accumulated dose of each device in the stretch",
+"público": "public",
+"trabalhador exposto": "occupationally exposed",
+"6 h": "6 h"
 },
 "patterns": [
 [
@@ -4530,6 +4540,16 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
+"${1} · RadiaCode ${2} · GMC-800 ${3} · ceiling ${4}",
+[
+" · RadiaCode ",
+" · GMC-800 ",
+" · teto "
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -4755,6 +4775,16 @@ const I18N_EN = {
 "${1} µSv/h per CPM at background (${2}; ${3})",
 [
 " µSv/h por CPM no fundo ("
+]
+],
+[
+"RadiaCode ",
+"^RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
+"RadiaCode ${1} · GMC-800 ${2} · ceiling ${3}",
+[
+"RadiaCode ",
+" · GMC-800 ",
+" · teto "
 ]
 ],
 [
@@ -5436,6 +5466,14 @@ const I18N_EN = {
 [
 " µSv/h (C) · n = ",
 " min"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% do teto do período \\(((?:(?! · ).)+?)\\)$",
+"${1}% of the period's ceiling (${2})",
+[
+"% do teto do período ("
 ]
 ],
 [
@@ -6568,6 +6606,14 @@ const I18N_EN = {
 [
 " de ",
 " min até agora"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h em média · ((?:(?! · ).)+?)$",
+"${1} µSv/h on average · ${2}",
+[
+" µSv/h em média · "
 ]
 ],
 [
@@ -8590,6 +8636,22 @@ const I18N_EN = {
 ]
 ],
 [
+"hoje · ",
+"^hoje · ((?:(?! · ).)+?)$",
+"today · ${1}",
+[
+"hoje · "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
+"${1} · ${2} to ${3}",
+[
+" às "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -8811,6 +8873,14 @@ const I18N_EN = {
 "Sat ${1}",
 [
 "sáb "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
+"${1} to ${2}",
+[
+" às "
 ]
 ],
 [

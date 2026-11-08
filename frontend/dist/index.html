@@ -44,7 +44,6 @@
   <nav class="side-nav" id="sideNav" aria-label="Páginas">
     <span class="side-group">Análise</span>
     <button type="button" data-view="graficos" aria-current="page"><span>Gráficos</span></button>
-    <button type="button" data-view="dose"><span>Dose</span></button>
     <button type="button" data-view="resumo"><span>Resumo</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
@@ -191,7 +190,7 @@
 <main class="pages" id="pages">
 <div class="page" id="pageGraficos">
   <nav class="subtabs" role="tablist" aria-label="Gráficos" data-page="graficos">
-    <button type="button" role="tab" data-sub="tempo" aria-selected="true">Ao longo do tempo</button>
+    <button type="button" role="tab" data-sub="tempo" aria-selected="true">Dose</button>
     <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1">Hora do dia</button>
     <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1">Padrões do fundo</button>
     <button type="button" role="tab" data-sub="tendencia" aria-selected="false" tabindex="-1">Tendência do fundo</button>
@@ -211,8 +210,11 @@
           <button type="button" data-range="15m" aria-pressed="false">15 min</button>
           <button type="button" data-range="30m" aria-pressed="false">30 min</button>
           <button type="button" data-range="1h" aria-pressed="true">1 h</button>
+          <button type="button" data-range="6h" aria-pressed="false">6 h</button>
           <button type="button" data-range="24h" aria-pressed="false">24 h</button>
           <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
+          <button type="button" data-range="30d" aria-pressed="false">30 dias</button>
+          <button type="button" data-range="1y" aria-pressed="false">1 ano</button>
         </div>
         </div>
       </div>
@@ -243,6 +245,65 @@
       <div class="legend small muted" id="legend">
         <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
+    </section>
+
+  <section class="card chart-card" id="doseCard" role="tabpanel" data-subpane="tempo">
+      <div class="chart-head">
+        <div>
+          <h2 id="doseTitle">Dose acumulada</h2>
+          <span class="mono muted small" id="doseSub">sem dados no período</span>
+        </div>
+      </div>
+
+      <div class="zoom-bar" id="doseZoomBar" hidden>
+        <span class="zoom-info"><strong id="doseZoomRange"></strong> <span class="mono small" id="doseZoomStats"></span></span>
+        <span class="zoom-btns">
+          <button type="button" class="btn small away-btn" id="btnDoseZoomAway">Marcar como fora de casa</button>
+          <button type="button" class="btn small" id="btnDoseZoomBack">Voltar</button>
+          <button type="button" class="btn small" id="btnDoseZoomOut">Sair do zoom</button>
+        </span>
+      </div>
+      <div class="dose-devs" id="doseDevs"></div>
+      <div class="dose-top">
+        <div class="dose-big" hidden>
+          <span class="value mono small-value" id="doseTotal">—</span>
+          <span class="unit">µSv</span>
+        </div>
+        <div class="dose-status" id="doseStatus"></div>
+        <p class="small muted mono dose-other" id="doseOther" hidden></p>
+        <p class="small mono dose-device" id="doseDevice" hidden></p>
+        <p class="dose-cmp small" id="doseCmp" hidden><span id="doseCmpTxt"></span> <button type="button" class="link small-link" data-regua="dose">ver na régua</button></p>
+        <label class="dose-limit">
+          <span class="small muted">Teto</span>
+          <select id="doseLimit">
+            <option value="publico">Público · 1 mSv/ano</option>
+            <option value="trabalhador">Trabalhador exposto · 20 mSv/ano</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="chart-body">
+        <div class="y-axis mono" id="doseY"><span></span><span></span><span></span><span>0</span></div>
+        <div class="plot-wrap">
+          <div class="plot" id="dosePlot">
+            <svg id="doseChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da dose acumulada, do fundo esperado e do teto"></svg>
+            <div class="cursor" id="doseCursor" hidden></div>
+            <div class="zoom-sel" id="doseZoomSel" hidden></div>
+            <div class="tip mono" id="doseTip" hidden></div>
+          </div>
+          <div class="x-axis mono"><span id="dx0"></span><span id="dx1"></span><span id="dx2"></span></div>
+        </div>
+      </div>
+      <div class="legend small muted dose-legend">
+        <span class="key"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="doseKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="sr-only" id="doseKeyTxt"></span>
+        <span class="key"><span class="swatch sw-bg" aria-hidden="true"></span>só o fundo natural</span>
+        <span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span>
+        <span class="away-key" id="doseAwayKey" hidden><i aria-hidden="true"></i>fora de casa</span>
+      </div>
+      <details class="note-d">
+        <summary class="small muted">Como o teto é calculado</summary>
+        <p class="small muted note" id="doseNote"></p>
+      </details>
     </section>
   <section class="card view-graficos" id="heatCard" role="tabpanel" data-subpane="hora" hidden>
       <div class="chart-head">
@@ -282,6 +343,22 @@
         <span class="heat-key"><i class="hk-away" aria-hidden="true"></i>fora de casa</span>
       </div>
     </section>
+  <section class="card heat-trecho" id="heatTrecho" role="tabpanel" data-subpane="hora" hidden>
+    <div class="chart-head">
+      <div class="ht-title"><h2>Trecho selecionado</h2><span class="ht-chip mono" id="htChip"></span><button type="button" class="ht-x" id="htClose" aria-label="Limpar o trecho">×</button></div>
+      <div class="row">
+        <button type="button" class="btn small away-btn" id="htAway">Marcar como fora de casa</button>
+        <button type="button" class="btn small" id="htOpen">Abrir na aba Dose</button>
+      </div>
+    </div>
+    <div class="dose-devs" id="htDevs"></div>
+    <span class="ht-lbl small muted" id="htRateLbl">Taxa de dose (µSv/h)</span>
+    <div class="ht-plot"><div class="ht-y mono" id="htRateY"></div><svg id="htRate" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="Taxa de dose dos aparelhos no trecho"></svg></div>
+    <span class="ht-lbl small muted">Dose acumulada (µSv), cada aparelho a sua</span>
+    <div class="ht-plot"><div class="ht-y mono" id="htDoseY"></div><svg id="htDose" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Dose acumulada de cada aparelho no trecho"></svg></div>
+    <div class="ht-x-axis mono"><span id="htX0"></span><span id="htX1"></span><span id="htX2"></span></div>
+    <div class="legend small muted"><span class="key"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
+  </section>
   <section class="card view-graficos" id="patCard" role="tabpanel" data-subpane="padroes" hidden>
       <div class="chart-head">
         <div>
@@ -355,78 +432,6 @@
         </div>
       </div>
       <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
-    </section>
-</div>
-<div class="page" id="pageDose" hidden>
-  <section class="card chart-card" id="doseCard">
-      <div class="chart-head">
-        <div>
-          <h2 id="doseTitle">Dose acumulada</h2>
-          <span class="mono muted small" id="doseSub">sem dados no período</span>
-        </div>
-        <div class="seg" role="group" aria-label="Aparelho da dose" id="doseSrcSeg" hidden>
-          <button type="button" data-dsrc="radiacode" aria-pressed="true">RadiaCode</button>
-          <button type="button" data-dsrc="gmc" aria-pressed="false">GMC-800</button>
-        </div>
-        <div class="seg" role="group" aria-label="Período da dose" id="doseSeg">
-          <button type="button" data-dperiod="3h" aria-pressed="false">3 h</button>
-          <button type="button" data-dperiod="6h" aria-pressed="false">6 h</button>
-          <button type="button" data-dperiod="12h" aria-pressed="false">12 h</button>
-          <button type="button" data-dperiod="24h" aria-pressed="true">24 h</button>
-          <button type="button" data-dperiod="7d" aria-pressed="false">7 dias</button>
-          <button type="button" data-dperiod="30d" aria-pressed="false">30 dias</button>
-          <button type="button" data-dperiod="1y" aria-pressed="false">1 ano</button>
-        </div>
-      </div>
-
-      <div class="zoom-bar" id="doseZoomBar" hidden>
-        <span class="zoom-info"><strong id="doseZoomRange"></strong> <span class="mono small" id="doseZoomStats"></span></span>
-        <span class="zoom-btns">
-          <button type="button" class="btn small away-btn" id="btnDoseZoomAway">Marcar como fora de casa</button>
-          <button type="button" class="btn small" id="btnDoseZoomBack">Voltar</button>
-          <button type="button" class="btn small" id="btnDoseZoomOut">Sair do zoom</button>
-        </span>
-      </div>
-      <div class="dose-top">
-        <div class="dose-big">
-          <span class="value mono small-value" id="doseTotal">—</span>
-          <span class="unit">µSv</span>
-        </div>
-        <div class="dose-status" id="doseStatus"></div>
-        <p class="small muted mono dose-other" id="doseOther" hidden></p>
-        <p class="small mono dose-device" id="doseDevice" hidden></p>
-        <p class="dose-cmp small" id="doseCmp" hidden><span id="doseCmpTxt"></span> <button type="button" class="link small-link" data-regua="dose">ver na régua</button></p>
-        <label class="dose-limit">
-          <span class="small muted">Teto</span>
-          <select id="doseLimit">
-            <option value="publico">Público · 1 mSv/ano</option>
-            <option value="trabalhador">Trabalhador exposto · 20 mSv/ano</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="chart-body">
-        <div class="y-axis mono" id="doseY"><span></span><span></span><span></span><span>0</span></div>
-        <div class="plot-wrap">
-          <div class="plot" id="dosePlot">
-            <svg id="doseChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da dose acumulada, do fundo esperado e do teto"></svg>
-            <div class="cursor" id="doseCursor" hidden></div>
-            <div class="zoom-sel" id="doseZoomSel" hidden></div>
-            <div class="tip mono" id="doseTip" hidden></div>
-          </div>
-          <div class="x-axis mono"><span id="dx0"></span><span id="dx1"></span><span id="dx2"></span></div>
-        </div>
-      </div>
-      <div class="legend small muted dose-legend">
-        <span class="key"><span class="swatch sw-dose" aria-hidden="true"></span><span id="doseKeyTxt">dose medida</span></span>
-        <span class="key"><span class="swatch sw-bg" aria-hidden="true"></span>só o fundo natural</span>
-        <span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span>
-        <span class="away-key" id="doseAwayKey" hidden><i aria-hidden="true"></i>fora de casa</span>
-      </div>
-      <details class="note-d">
-        <summary class="small muted">Como o teto é calculado</summary>
-        <p class="small muted note" id="doseNote"></p>
-      </details>
     </section>
 </div>
 <div class="page" id="pageResumo" hidden>

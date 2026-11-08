@@ -69,8 +69,8 @@ type DoseChart struct {
 	CalNote string `json:"calNote,omitempty"`
 }
 
-// GetDose monta o gráfico do dosímetro. period: "3h", "6h", "12h", "24h",
-// "7d", "30d" ou "1y".
+// GetDose monta o gráfico do dosímetro. period: "15m", "30m", "1h", "3h",
+// "6h", "12h", "24h", "7d", "30d" ou "1y".
 // limit: "publico" ou "trabalhador".
 //
 // Só os minutos com leitura entram na soma, e o fundo e o teto também só
@@ -84,6 +84,12 @@ func (a *App) GetDose(period, limit string) (DoseChart, error) {
 func (a *App) GetDoseSrc(period, limit, src string) (DoseChart, error) {
 	var span, step time.Duration
 	switch period {
+	case "15m": // 2.12: o mesmo período do gráfico da taxa
+		span, step = 15*time.Minute, time.Minute
+	case "30m":
+		span, step = 30*time.Minute, time.Minute
+	case "1h":
+		span, step = time.Hour, time.Minute
 	case "3h":
 		span, step = 3*time.Hour, time.Minute
 	case "6h":

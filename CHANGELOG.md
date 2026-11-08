@@ -1,5 +1,25 @@
 # Versões
 
+## 2.12.0
+- **Dose virou a primeira sub-aba de Gráficos.** "Ao longo do tempo" agora
+  se chama Dose e junta os dois gráficos: em cima a taxa de dose, embaixo a
+  dose acumulada. A página Dose saiu do menu.
+  - **Um período só** para os dois: 15 min, 30 min, 1 h, 6 h, 24 h, 7 dias,
+    30 dias e 1 ano (o gráfico da taxa ganhou 6 h, 30 dias e 1 ano; a dose
+    ganhou 15 min, 30 min e 1 h). O zoom num gráfico continua valendo para
+    o outro.
+  - **Dose de cada aparelho:** um quadro para o GMC-800 e outro para o
+    RadiaCode, com o total, a média em µSv/h, de onde vem a dose (do
+    aparelho ou calculada pelo app) e quanto do teto do período já foi. No
+    gráfico, uma curva para cada; o fundo e o teto seguem o RadiaCode
+    quando ele tem dado. Saiu o seletor RadiaCode/GMC-800 da dose.
+- **Trecho do mapa de calor sem trocar de aba.** Arrastar numa linha do
+  "Hora do dia" abre logo embaixo um quadro "Trecho selecionado" com a dose
+  de cada aparelho naquele trecho, a taxa de dose e a dose acumulada dos
+  dois. O × limpa; "Abrir na aba Dose" leva o mesmo trecho para os gráficos
+  completos e "Marcar como fora de casa" abre o período já preenchido.
+- A chuva no gráfico só é buscada em períodos de até uma semana.
+
 ## 2.11.1
 - **Faixa compacta em todas as páginas.** Ela só aparecia quando os quadros
   dos aparelhos saíam inteiros da tela; em páginas que rolam pouco (como o

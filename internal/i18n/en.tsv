@@ -2650,3 +2650,20 @@ tempo do aviso de queda	drop warning time
 compensar o tempo morto	dead-time compensation
 tempo morto τ	dead time τ
 A partir de {0} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.	From {0} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in Alerts → Danger alarm.
+Trecho selecionado	Selected stretch
+Limpar o trecho	Clear the stretch
+Abrir na aba Dose	Open in the Dose tab
+Taxa de dose (µSv/h)	Dose rate (µSv/h)
+Dose acumulada (µSv), cada aparelho a sua	Accumulated dose (µSv), each device its own
+Taxa de dose dos aparelhos no trecho	Dose rate of the devices in the stretch
+Dose acumulada de cada aparelho no trecho	Accumulated dose of each device in the stretch
+{0} µSv/h em média · {1}	{0} µSv/h on average · {1}
+{0}% do teto do período ({1})	{0}% of the period's ceiling ({1})
+público	public
+trabalhador exposto	occupationally exposed
+6 h	6 h
+hoje · {0}	today · {0}
+RadiaCode {0} · GMC-800 {1} · teto {2}	RadiaCode {0} · GMC-800 {1} · ceiling {2}
+{0} · RadiaCode {1} · GMC-800 {2} · teto {3}	{0} · RadiaCode {1} · GMC-800 {2} · ceiling {3}
+{0} às {1}	{0} to {1}
+{0} · {1} às {2}	{0} · {1} to {2}

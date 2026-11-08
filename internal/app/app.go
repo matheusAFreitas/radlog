@@ -1335,10 +1335,20 @@ func (a *App) GetChart(period string) (Chart, error) {
 		span, step = 15*time.Minute, 5*time.Second
 	case "30m":
 		span, step = 30*time.Minute, 10*time.Second
+	case "3h":
+		span, step = 3*time.Hour, time.Minute
+	case "6h":
+		span, step = 6*time.Hour, time.Minute
+	case "12h":
+		span, step = 12*time.Hour, 2*time.Minute
 	case "24h":
 		span, step = 24*time.Hour, 5*time.Minute
 	case "7d":
 		span, step = 7*24*time.Hour, 30*time.Minute
+	case "30d": // 2.12: o mesmo período da dose
+		span, step = 30*24*time.Hour, 2*time.Hour
+	case "1y":
+		span, step = 365*24*time.Hour, 24*time.Hour
 	default:
 		span, step = time.Hour, time.Minute
 	}
