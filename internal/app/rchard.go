@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"math"
 	"os"
-	"sort"
 	"sync"
 	"time"
+
+	"radlog/internal/core/stats"
 )
 
 // ---------- dureza ao longo do tempo (RadiaCode) ----------
@@ -223,15 +224,8 @@ func (a *App) GetRcHardness(fromMs, toMs int64, rowSec int) (RcHardness, error) 
 			rates = append(rates, h.tot/h.secs)
 		}
 	}
-	median := func(v []float64) float64 {
-		sort.Float64s(v)
-		if len(v)%2 == 1 {
-			return v[len(v)/2]
-		}
-		return (v[len(v)/2-1] + v[len(v)/2]) / 2
-	}
 	if len(ratios) >= 3 {
-		out.Ref, out.RefCPS = median(ratios), median(rates)
+		out.Ref, out.RefCPS = stats.Median(ratios), stats.Median(rates)
 	} else if sm > 0 && ss > 0 {
 		out.Ref, out.RefCPS = sh/sm, st/ss
 	}

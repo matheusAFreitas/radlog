@@ -20,31 +20,11 @@ import (
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
+	"radlog/internal/core/levels"
 	"radlog/internal/gmc"
 	"radlog/internal/radiacode"
 	"radlog/internal/store"
 )
-
-// Faixas de nível do manual do GMC-800 (nomes "atenção"/"alerta" do medidor
-// na tela). Os níveis que disparam avisos estão em levels.go.
-const (
-	manualAttnCPM = 50
-	warningCPM    = 100
-)
-
-// dangerStep atualiza o estado de perigo (não depende do alarme do usuário;
-// só dá para silenciar o som por um tempo, na tela).
-func dangerStep(on *bool, cpm float64, lv Levels) (started, ended bool) {
-	switch {
-	case cpm >= lv.dangerEnter() && !*on:
-		*on = true
-		return true, false
-	case cpm < lv.dangerExit() && *on:
-		*on = false
-		return false, true
-	}
-	return false, false
-}
 
 // Settings são as preferências salvas em config.json.
 type Settings struct {
@@ -94,7 +74,7 @@ type Settings struct {
 }
 
 func defaultSettings() Settings {
-	return Settings{AutoConnect: true, AlarmEnabled: true, AlarmCPM: warningCPM, AlarmSound: "sirene", AlarmRaise: true, AttentionEnabled: true, Levels: DefaultLevels(), AwayAskMin: awayAskDefault, TrayOnClose: true}
+	return Settings{AutoConnect: true, AlarmEnabled: true, AlarmCPM: levels.WarningCPM, AlarmSound: "sirene", AlarmRaise: true, AttentionEnabled: true, Levels: DefaultLevels(), AwayAskMin: awayAskDefault, TrayOnClose: true}
 }
 
 // Reading é a leitura ao vivo mandada para a tela a cada segundo.
@@ -126,22 +106,6 @@ type Reading struct {
 	// leitura está acima dele. Sigma vem nulo enquanto não houver fundo.
 	BgCPM float64  `json:"bgCPM"`
 	Sigma *float64 `json:"sigma"`
-}
-
-// attentionStep atualiza o estado de atenção e diz se um episódio começou.
-// A saída fica um pouco abaixo da entrada, para não ficar entrando e saindo
-// quando o valor oscila perto do nível.
-func attentionStep(on *bool, enabled bool, cpm float64, lv Levels) (started bool) {
-	switch {
-	case !enabled:
-		*on = false
-	case cpm >= lv.attnEnter() && !*on:
-		*on = true
-		return true
-	case cpm < lv.attnExit():
-		*on = false
-	}
-	return false
 }
 
 // DeviceInfo descreve o contador conectado.
@@ -237,14 +201,14 @@ func (a *App) withUSv(c Chart) Chart {
 	cal := a.convCalLocked()
 	tl := a.calTLLocked()
 	alarmCPM := a.settings.AlarmCPM
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
-		alarmCPM = warningCPM
+		alarmCPM = levels.WarningCPM
 	}
 	c.AlarmCPM, c.AlarmUSv = alarmCPM, cal.USv(float64(alarmCPM))
-	c.DangerCPM, c.DangerUSv = lv.DangerCPM, cal.USv(lv.dangerEnter())
-	c.AttentionCPM, c.AttentionUSv = lv.AttentionCPM, cal.USv(lv.attnEnter())
+	c.DangerCPM, c.DangerUSv = lv.DangerCPM, cal.USv(lv.DangerEnter())
+	c.AttentionCPM, c.AttentionUSv = lv.AttentionCPM, cal.USv(lv.AttnEnter())
 	if c.USv == nil {
 		c.USv = make([]*float64, len(c.Values))
 		var mn, mx *float64
@@ -501,12 +465,12 @@ func (a *App) loadSettings() Settings {
 		_ = json.Unmarshal(b, &s)
 	}
 	if s.AlarmCPM <= 0 {
-		s.AlarmCPM = warningCPM
+		s.AlarmCPM = levels.WarningCPM
 	}
 	if s.AlarmSound == "" {
 		s.AlarmSound = "sirene"
 	}
-	s.Levels = s.Levels.norm()
+	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
 	return s
 }
@@ -590,14 +554,14 @@ func (a *App) GetSettings() Settings {
 // SaveSettings grava as preferências.
 func (a *App) SaveSettings(s Settings) Settings {
 	if s.AlarmCPM <= 0 {
-		s.AlarmCPM = warningCPM
+		s.AlarmCPM = levels.WarningCPM
 	}
 	switch s.AlarmSound {
 	case "sirene", "bipes", "mudo":
 	default:
 		s.AlarmSound = "sirene"
 	}
-	s.Levels = s.Levels.norm()
+	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
@@ -907,7 +871,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 	why := ""
 	{
 		a.mu.Lock()
-		l := a.settings.Levels.norm()
+		l := a.settings.Levels.Norm()
 		a.mu.Unlock()
 		dt := "tempo morto desligado"
 		if l.DeadTimeOn {
@@ -1005,10 +969,10 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		// escala é dele)
 		rawCPM, rawCPS := cpm, cps
 		a.mu.Lock()
-		lvDT := a.settings.Levels.norm()
+		lvDT := a.settings.Levels.Norm()
 		a.mu.Unlock()
-		cpm = uint32(math.Round(lvDT.dtCPM(float64(rawCPM))))
-		cps = uint32(math.Round(lvDT.dtCPS(float64(rawCPS))))
+		cpm = uint32(math.Round(lvDT.DtCPM(float64(rawCPM))))
+		cps = uint32(math.Round(lvDT.DtCPS(float64(rawCPS))))
 
 		// Virou o minuto: grava o CPM medido no fim do minuto anterior
 		// (o CPM do contador já é a soma dos últimos 60 s).
@@ -1033,18 +997,18 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		ended := was && !a.alarmOn
 		alarmOn := a.alarmOn && set.AlarmEnabled
 		attnWas := a.attnOn
-		lv := set.Levels.norm()
-		attnStarted := attentionStep(&a.attnOn, set.AttentionEnabled, float64(cpm), lv)
+		lv := set.Levels.Norm()
+		attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(cpm), lv)
 		attnOn := a.attnOn
 		satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
 		dCPM := float64(cpm)
 		if satOn {
-			dCPM = math.Max(dCPM, lv.dangerEnter()) // saturado: o perigo continua valendo
+			dCPM = math.Max(dCPM, lv.DangerEnter()) // saturado: o perigo continua valendo
 		}
-		dangerStarted, dangerEnded := dangerStep(&a.dangerOn, dCPM, lv)
+		dangerStarted, dangerEnded := levels.DangerStep(&a.dangerOn, dCPM, lv)
 		dangerOn := a.dangerOn
 		if dangerStarted {
-			a.sat.rise = a.sat.riseFrom(now, cal.USv(lv.attnEnter()))
+			a.sat.rise = a.sat.riseFrom(now, cal.USv(lv.AttnEnter()))
 		}
 		if !dangerOn {
 			a.sat.rise = nil
@@ -1091,7 +1055,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		usv := cal.USv(float64(cpm))
 		r := Reading{
 			Time: now.UnixMilli(), CPM: cpm, CPS: cps,
-			USv: usv, MRh: usv / 10, Level: level(float64(cpm), lv), Alarm: alarmOn,
+			USv: usv, MRh: usv / 10, Level: levels.Level(float64(cpm), lv), Alarm: alarmOn,
 			Attention: attnOn, Danger: dangerOn,
 			Saturated: satOn, SatReason: satReason, Rise: rise,
 			NoCount: noCount,
@@ -1131,18 +1095,6 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			a.emit("reading", r)
 		}
 	}
-}
-
-func level(cpm float64, lv Levels) string {
-	switch {
-	case cpm >= lv.dangerEnter():
-		return "perigo"
-	case cpm >= warningCPM:
-		return "alerta"
-	case cpm >= manualAttnCPM:
-		return "atencao"
-	}
-	return "seguro"
 }
 
 func (a *App) lostConnection(err error) {
@@ -1253,7 +1205,7 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	h := gmc.ParseHistory(raw)
 	res.Records = len(h.Records)
 	a.mu.Lock()
-	lvDT := a.settings.Levels.norm()
+	lvDT := a.settings.Levels.Norm()
 	a.mu.Unlock()
 	pts := recordsToPoints(h.Records, lvDT)
 	added, ierr := a.store.ImportNew(pts)
@@ -1316,7 +1268,7 @@ func recordsToPoints(recs []gmc.Record, lv Levels) []store.Point {
 	for _, r := range recs {
 		switch r.Unit {
 		case "CPM":
-			c := math.Round(lv.dtCPM(float64(r.Count)))
+			c := math.Round(lv.DtCPM(float64(r.Count)))
 			pts = append(pts, traced(store.Point{T: r.Time, CPM: c, Src: store.SrcDevice}, float64(r.Count), lv, ""))
 		case "CPS":
 			m := r.Time.Add(-time.Second).Truncate(time.Minute).Unix()
@@ -1325,7 +1277,7 @@ func recordsToPoints(recs []gmc.Record, lv Levels) []store.Point {
 				x = &acc{}
 				perMin[m] = x
 			}
-			x.sum += lv.dtCPS(float64(r.Count))
+			x.sum += lv.DtCPS(float64(r.Count))
 			x.raw += float64(r.Count)
 			x.n++
 		}

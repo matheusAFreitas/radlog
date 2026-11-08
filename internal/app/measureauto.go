@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/radiacode"
 )
 
@@ -137,7 +138,7 @@ func (a *App) GetHomeBackground() HomeBg {
 // interferência), com a incerteza de Poisson ou a do espalhamento real, a
 // que for maior (chuva e variações do dia deixam o fundo mais solto).
 func homeBgFrom(mins []float64, from, to time.Time) HomeBg {
-	med := median(mins)
+	med := stats.Median(mins)
 	lim := med + 5*math.Sqrt(math.Max(med, 1))
 	var kept []float64
 	for _, v := range mins {

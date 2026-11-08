@@ -16,7 +16,7 @@ import (
 func TestTraceMinutes(t *testing.T) {
 	a := newTestApp(t)
 	m := time.Now().Truncate(time.Minute).Add(-3 * time.Minute)
-	lv := DefaultLevels().norm()
+	lv := DefaultLevels().Norm()
 	// sem correção
 	a.storeMinute(m, 27, 27, lv)
 	// com correção, saturação e interferência no minuto

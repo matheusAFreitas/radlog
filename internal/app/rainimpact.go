@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/store"
 )
 
@@ -376,9 +377,9 @@ func (a *App) GetRainImpactDev(dev string) (RainImpact, error) {
 	if res.N > 0 {
 		res.AvgRise /= float64(res.N)
 		res.AvgBase /= float64(res.N)
-		res.PeakMin = int(median(peaks))
+		res.PeakMin = int(stats.Median(peaks))
 		if len(backs) > 0 {
-			res.BackMin = int(median(backs))
+			res.BackMin = int(stats.Median(backs))
 			res.BackN = len(backs)
 		}
 	}

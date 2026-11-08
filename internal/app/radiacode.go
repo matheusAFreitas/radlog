@@ -14,6 +14,8 @@ import (
 	"sync/atomic"
 	"time"
 
+	"radlog/internal/core/levels"
+	"radlog/internal/core/stats"
 	"radlog/internal/radiacode"
 	"radlog/internal/store"
 )
@@ -168,11 +170,11 @@ func (a *App) GetRadiacode() RcState {
 	alertLvl := a.rcAlertLevelLocked()
 	off, ble, noRaw := a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw
 	cal := a.convCalLocked()
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	alarmCPM := a.settings.AlarmCPM
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
-		alarmCPM = warningCPM
+		alarmCPM = levels.WarningCPM
 	}
 	devToday, devOK := a.rcTodayDevice(time.Now())
 	a.rc.mu.Lock()
@@ -188,7 +190,7 @@ func (a *App) GetRadiacode() RcState {
 	st.Off, st.BLE, st.BLEOK = off, ble, radiacode.BLESupported
 	st.Stats = stats
 	st.Raw = !noRaw
-	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.attnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.dangerEnter())
+	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.AttnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.DangerEnter())
 	st.AlertLevel, st.Limits = alertLvl, lim
 	a.rcDoseFillLocked(&st, st.State == "conectado")
 	if st.State != "conectado" {
@@ -1038,7 +1040,7 @@ func (a *App) rcHomeBackground() HomeBg {
 	}
 	hb := homeBgFrom(mins, sp[0].T, sp[len(sp)-1].T.Add(time.Minute))
 	// µSv/h: média dos mesmos minutos que ficaram (sem os picos)
-	lim := median(mins) + 5*math.Sqrt(math.Max(median(mins), 1))
+	lim := stats.Median(mins) + 5*math.Sqrt(math.Max(stats.Median(mins), 1))
 	var su float64
 	k := 0
 	for _, p := range sp {

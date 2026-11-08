@@ -3,9 +3,9 @@ package app
 import (
 	"fmt"
 	"math"
-	"sort"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/store"
 )
 
@@ -44,7 +44,7 @@ func (a *App) backgroundCPM() (float64, bool) {
 			for i, p := range pts {
 				cpms[i] = p.CPM
 			}
-			v, ok = median(cpms), true
+			v, ok = stats.Median(cpms), true
 		}
 	}
 	a.mu.Lock()
@@ -53,33 +53,11 @@ func (a *App) backgroundCPM() (float64, bool) {
 	return v, ok
 }
 
-func median(v []float64) float64 {
-	s := append([]float64(nil), v...)
-	sort.Float64s(s)
-	n := len(s)
-	if n == 0 {
-		return 0
-	}
-	if n%2 == 1 {
-		return s[n/2]
-	}
-	return (s[n/2-1] + s[n/2]) / 2
-}
-
-// sigmaOf diz quantos desvios de Poisson o CPM está acima (ou abaixo) do fundo.
-func sigmaOf(cpm, bg float64) *float64 {
-	if bg <= 0 {
-		return nil
-	}
-	z := (cpm - bg) / math.Sqrt(bg)
-	return &z
-}
-
 // fillSigma completa a leitura com o fundo e o desvio.
 func (a *App) fillSigma(r *Reading) {
 	if bg, ok := a.backgroundCPM(); ok && bg > 0 {
 		r.BgCPM = bg
-		r.Sigma = sigmaOf(float64(r.CPM), bg)
+		r.Sigma = stats.Sigma(float64(r.CPM), bg)
 	}
 }
 

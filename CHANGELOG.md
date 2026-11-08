@@ -1,5 +1,19 @@
 # Versões
 
+## 2.19.0
+- **Arrumação por dentro, sem mudança na tela.** Preparação para o app
+  Android e para mexer no app com menos risco:
+  - os níveis (atenção, alerta, perigo), a correção de tempo morto e a
+    entrada e saída dos episódios de atenção e perigo foram para
+    `internal/core/levels`; a mediana e o desvio de Poisson, para
+    `internal/core/stats`. São pacotes sem interface nem Wails, com testes
+    próprios, que o Android vai reaproveitar junto com `internal/core/dose`;
+  - duas cópias da mediana que existiam no meio do código passaram a usar a
+    mesma função;
+  - a página Resumo saiu do `app.js` para um arquivo próprio
+    (`frontend/dist/resumo.js`), como a tela Agora. O `app.js` ficou com
+    cerca de 450 linhas a menos; as outras páginas saem uma por versão.
+
 ## 2.18.0
 - **Resumo repaginado.** O período e a comparação continuam iguais; muda a
   ordem do que aparece:

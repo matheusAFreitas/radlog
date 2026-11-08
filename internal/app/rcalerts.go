@@ -9,6 +9,8 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"radlog/internal/core/levels"
 )
 
 // ---------- alertas do RadiaCode ----------
@@ -42,13 +44,13 @@ type RcLimits struct {
 func (a *App) rcLimits() RcLimits {
 	a.mu.Lock()
 	cal := a.convCalLocked()
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	alarmCPM := a.settings.AlarmCPM
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
-		alarmCPM = warningCPM
+		alarmCPM = levels.WarningCPM
 	}
-	l := RcLimits{Attn: cal.USv(lv.attnEnter()), Alarm: cal.USv(float64(alarmCPM)), Danger: cal.USv(lv.dangerEnter())}
+	l := RcLimits{Attn: cal.USv(lv.AttnEnter()), Alarm: cal.USv(float64(alarmCPM)), Danger: cal.USv(lv.DangerEnter())}
 	a.rc.mu.Lock()
 	al := a.rc.st.Alarms
 	a.rc.mu.Unlock()

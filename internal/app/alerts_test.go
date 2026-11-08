@@ -7,6 +7,7 @@ import (
 	"testing"
 	"time"
 
+	"radlog/internal/core/levels"
 	"radlog/internal/gmc"
 	"radlog/internal/store"
 )
@@ -22,11 +23,11 @@ func TestAttentionStep(t *testing.T) {
 		{60, false, true}, {44, false, false}, {55, true, true},
 	}
 	for i, s := range steps {
-		if got := attentionStep(&on, true, s.cpm, DefaultLevels()); got != s.started || on != s.on {
+		if got := levels.AttentionStep(&on, true, s.cpm, DefaultLevels()); got != s.started || on != s.on {
 			t.Fatalf("passo %d (%v CPM): começou=%v ligado=%v", i, s.cpm, got, on)
 		}
 	}
-	if attentionStep(&on, false, 200, DefaultLevels()) || on {
+	if levels.AttentionStep(&on, false, 200, DefaultLevels()) || on {
 		t.Fatal("desligado não deveria avisar")
 	}
 }

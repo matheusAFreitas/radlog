@@ -10,30 +10,30 @@ import (
 )
 
 func TestDeadTime(t *testing.T) {
-	lv := DefaultLevels().norm()
-	if lv.dtCPM(30000) != 30000 || lv.dtCPS(500) != 500 {
+	lv := DefaultLevels().Norm()
+	if lv.DtCPM(30000) != 30000 || lv.DtCPS(500) != 500 {
 		t.Fatal("desligada não pode mudar nada")
 	}
 	lv.DeadTimeOn = true // τ = 200 µs
 	near := func(got, want, tol float64) bool { return math.Abs(got-want) <= tol }
 	// 500 pulsos/s: 500·0,0002 = 0,1 → ÷0,9
-	if g := lv.dtCPS(500); !near(g, 555.56, 0.01) {
+	if g := lv.DtCPS(500); !near(g, 555.56, 0.01) {
 		t.Fatalf("500 cps → %.2f", g)
 	}
-	if g := lv.dtCPM(30000); !near(g, 33333.3, 0.1) {
+	if g := lv.DtCPM(30000); !near(g, 33333.3, 0.1) {
 		t.Fatalf("30000 cpm → %.1f", g)
 	}
 	// fundo: praticamente nada
-	if g := lv.dtCPM(28); !near(g, 28.0026, 0.0001) {
+	if g := lv.DtCPM(28); !near(g, 28.0026, 0.0001) {
 		t.Fatalf("28 cpm → %.4f", g)
 	}
 	// teto de 10×
-	if g := lv.dtCPS(10000); !near(g, 100000, 0.5) {
+	if g := lv.DtCPS(10000); !near(g, 100000, 0.5) {
 		t.Fatalf("teto: %.1f", g)
 	}
 	// τ fora da faixa volta para dentro
 	lv.DeadTimeUs = 9999
-	if lv.norm().DeadTimeUs != 500 {
+	if lv.Norm().DeadTimeUs != 500 {
 		t.Fatal("τ não foi limitado a 500 µs")
 	}
 }
@@ -53,8 +53,8 @@ func TestRecordsToPointsDeadTime(t *testing.T) {
 		}
 		return -1
 	}
-	off := recordsToPoints(recs, DefaultLevels().norm())
-	lv := DefaultLevels().norm()
+	off := recordsToPoints(recs, DefaultLevels().Norm())
+	lv := DefaultLevels().Norm()
 	lv.DeadTimeOn = true
 	on := recordsToPoints(recs, lv)
 	if find(off, base) != 30000 || find(on, base) != 33333 {

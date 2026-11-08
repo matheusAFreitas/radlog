@@ -72,7 +72,7 @@ func (st *satState) step(now time.Time, usv, instUSv float64, lv Levels) (on, st
 		}
 		st.highAt, st.highUSv = now, math.Max(st.highUSv, instUSv)
 	} else if !st.highAt.IsZero() && now.Sub(st.highAt) <= satDropWin && instUSv < st.highUSv*0.1 {
-		st.holdUntil = now.Add(lv.satHold())
+		st.holdUntil = now.Add(lv.SatHold())
 		st.highAt, st.highUSv = time.Time{}, 0
 	}
 	if reason == "" && now.Before(st.holdUntil) {

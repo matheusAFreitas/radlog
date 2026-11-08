@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/core/levels"
 	"radlog/internal/store"
 )
 
@@ -282,18 +283,18 @@ func (a *App) demoLoop(stop chan struct{}) {
 		}
 		ended := was && !a.demo.alarmOn
 		attnWas := a.demo.attnOn
-		lv := set.Levels.norm()
-		attnStarted := attentionStep(&a.demo.attnOn, set.AttentionEnabled, cpm, lv)
+		lv := set.Levels.Norm()
+		attnStarted := levels.AttentionStep(&a.demo.attnOn, set.AttentionEnabled, cpm, lv)
 		attnOn := a.demo.attnOn
 		satOn, satStarted := a.demo.sat.step(now, rawCal.USv(cpm), rawCal.USv(float64(cps)*60), lv)
 		dCPM := cpm
 		if satOn {
-			dCPM = math.Max(dCPM, lv.dangerEnter())
+			dCPM = math.Max(dCPM, lv.DangerEnter())
 		}
-		dangerStarted, dangerEnded := dangerStep(&a.demo.dangerOn, dCPM, lv)
+		dangerStarted, dangerEnded := levels.DangerStep(&a.demo.dangerOn, dCPM, lv)
 		dangerOn := a.demo.dangerOn
 		if dangerStarted {
-			a.demo.sat.rise = a.demo.sat.riseFrom(now, cal.USv(lv.attnEnter()))
+			a.demo.sat.rise = a.demo.sat.riseFrom(now, cal.USv(lv.AttnEnter()))
 		}
 		if !dangerOn {
 			a.demo.sat.rise = nil
@@ -331,7 +332,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 		usv := cal.USv(cpm)
 		r := Reading{
 			Time: now.UnixMilli(), CPM: uint32(math.Round(cpm)), CPS: cps,
-			USv: usv, MRh: usv / 10, Level: level(cpm, lv), Alarm: alarmOn, Demo: true,
+			USv: usv, MRh: usv / 10, Level: levels.Level(cpm, lv), Alarm: alarmOn, Demo: true,
 			Attention: attnOn, Danger: dangerOn,
 			Saturated: satOn, SatReason: satReason, Rise: rise,
 		}
