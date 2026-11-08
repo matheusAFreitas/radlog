@@ -1803,7 +1803,10 @@ const I18N_EN = {
 "Leitura": "Reading",
 "a cada 1 s": "every 1 s",
 "Protocolo": "Protocol",
-"Versão do RadLog": "RadLog version"
+"Versão do RadLog": "RadLog version",
+"voltar ao topo": "back to top",
+"Voltar aos quadros": "Back to the panels",
+"Aparelhos agora (resumo)": "Devices now (summary)"
 },
 "patterns": [
 [
@@ -7068,6 +7071,14 @@ const I18N_EN = {
 [
 " de ",
 " min desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) alertas ativos$",
+"${1} active alerts",
+[
+" alertas ativos"
 ]
 ],
 [

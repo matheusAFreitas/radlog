@@ -86,6 +86,22 @@
 
 <div class="main">
 
+<div class="mini" id="mini" aria-label="Aparelhos agora (resumo)" hidden>
+  <button type="button" class="mini-dev" id="miniG" title="Voltar aos quadros">
+    <span class="dot" id="miniGDot" aria-hidden="true"></span><span class="mini-name">GMC-800</span>
+    <span class="mini-val mono" id="miniGVal">—</span><span class="mini-unit" id="miniGUnit">µSv/h</span>
+    <span class="mini-sec mono" id="miniGSec"></span><span class="mini-state" id="miniGState"></span>
+  </button>
+  <button type="button" class="mini-dev mini-rc" id="miniR" title="Voltar aos quadros" hidden>
+    <span class="dot" id="miniRDot" aria-hidden="true"></span><span class="mini-name">RadiaCode</span>
+    <span class="mini-val mono" id="miniRVal">—</span><span class="mini-unit" id="miniRUnit">µSv/h</span>
+    <span class="mini-sec mono" id="miniRSec"></span><span class="mini-state" id="miniRState"></span>
+  </button>
+  <button type="button" class="mini-alert" id="miniAlert" data-view="alertas" hidden><i aria-hidden="true"></i><span id="miniAlertText"></span></button>
+  <span class="inst-fill"></span>
+  <button type="button" class="mini-top" id="miniTop"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg><span>voltar ao topo</span></button>
+</div>
+
 <div class="progress" id="progress" hidden>
   <div class="progress-row">
     <span id="progressText">Lendo a memória do contador…</span>

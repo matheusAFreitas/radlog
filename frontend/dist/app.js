@@ -279,6 +279,20 @@ function tileState(pfx, lvl, word) {
   $(pfx + "TileState").textContent = word;
 }
 
+// faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
+// grande já for CPM/CPS) e o estado na cor do nível
+function miniDev(pfx, u, v, lvl, word, dotCls, stale) {
+  const el = $("mini" + pfx);
+  TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
+  el.classList.toggle("stale", !!stale);
+  $("mini" + pfx + "Dot").className = "dot" + dotCls;
+  $("mini" + pfx + "Val").textContent = v ? v[u] : "—";
+  $("mini" + pfx + "Unit").textContent = UNIT_TXT[u];
+  const k2 = u === "cpm" || u === "cps" ? "usv" : "cpm";
+  $("mini" + pfx + "Sec").textContent = v ? `${v[k2]} ${UNIT_TXT[k2]}` : "";
+  $("mini" + pfx + "State").textContent = word;
+}
+
 function renderGTile() {
   const r = state.last, s = state.status || {};
   const connected = s.state === "conectado";
@@ -302,6 +316,7 @@ function renderGTile() {
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word);
   tileFoot($("gTileFoot"), u, v, state.gDose);
+  miniDev("G", u, v, lvl, word, s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "", !live);
 }
 
 function renderRTile(st, o) {
@@ -325,6 +340,8 @@ function renderRTile(st, o) {
   const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : LV_WORD;
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
+  $("miniR").hidden = false;
+  miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
   const dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
   tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "");
@@ -339,6 +356,12 @@ function renderATile() {
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
   const lv = top ? { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
   tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
+  const ma = $("miniAlert");
+  ma.hidden = !top;
+  ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
+  $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
+  $("mini").classList.toggle("alerting", !!top);
+  ["atencao", "alerta", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
   const nav = $("navAlerts");
   nav.hidden = !top;
   nav.textContent = String(srcs.size);
@@ -360,6 +383,19 @@ function renderATile() {
   const bars = document.querySelector(".bars");
   if (!bars || !window.ResizeObserver) return;
   new ResizeObserver(() => document.documentElement.style.setProperty("--barsH", bars.offsetHeight + "px")).observe(bars);
+})();
+
+// a faixa aparece quando os quadros grandes saem da tela
+(() => {
+  const mini = $("mini"), inst = $("instruments");
+  if (!window.IntersectionObserver) return;
+  new IntersectionObserver(([e]) => {
+    const gone = !e.isIntersecting && e.boundingClientRect.top < 0;
+    mini.hidden = !gone;
+    requestAnimationFrame(() => mini.classList.toggle("in", gone));
+  }, { threshold: 0, rootMargin: "-40px 0px 0px 0px" }).observe(inst);
+  const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  ["miniG", "miniR", "miniTop"].forEach((id) => $(id).addEventListener("click", toTop));
 })();
 
 // a última hora de cada aparelho, desenhada pequena no quadro

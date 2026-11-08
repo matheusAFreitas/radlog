@@ -1,5 +1,14 @@
 # Versões
 
+## 2.10.0
+- **Faixa compacta dos aparelhos ao rolar.** Quando os quadros do topo saem
+  da tela, uma faixa fina fica presa em cima com cada aparelho numa linha:
+  conexão, valor, CPM e o estado na cor do nível (Seguro, Atenção, Alerta,
+  Perigo). Com alerta ativo aparece um selo com o nível e o aparelho (clicar
+  abre a página Alertas) e a borda da faixa muda de cor. Clicar num aparelho
+  ou em "voltar ao topo" volta aos quadros completos. Em janela estreita a
+  faixa mostra só o essencial.
+
 ## 2.9.1
 - **Sem rodapé.** A versão foi para o lado do nome, no topo do menu. "Leitura
   a cada 1 s" e "Protocolo GQ-RFC1201" ficam em Configurações, no quadro do

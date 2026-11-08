@@ -1383,3 +1383,32 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side .side-head .brand-word { padding: 0; }
 .side-ver { font-size: 12px; color: var(--dim); white-space: nowrap; }
 @media (max-width: 900px) { .side-head { padding: 0 8px 0 4px; } }
+
+/* 2.10: faixa compacta dos aparelhos ao rolar */
+.mini { position: fixed; z-index: 15; top: var(--barsH, 0px); left: 212px; right: 0; display: flex; align-items: center; gap: 22px; min-height: 44px; padding: 4px 22px; background: rgba(11, 14, 16, .94); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); transform: translateY(-100%); opacity: 0; transition: transform .18s ease, opacity .18s ease, border-color .4s; }
+.mini.in { transform: none; opacity: 1; }
+.mini-dev { display: flex; align-items: baseline; gap: 8px; min-width: 0; min-height: 36px; padding: 0 6px; margin: 0 -6px; border: 0; border-radius: 8px; background: transparent; color: inherit; text-align: left; }
+.mini-dev:hover { background: var(--surface-2); }
+.mini-dev .dot { align-self: center; }
+.mini-name { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.mini-val { font-size: 20px; font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mini-unit { font-size: 12px; color: var(--muted); white-space: nowrap; }
+.mini-sec { font-size: 13px; color: var(--muted); white-space: nowrap; }
+.mini-state { font-size: 13px; font-weight: 600; color: var(--dim); white-space: nowrap; }
+.mini-dev.stale .mini-val { color: var(--dim); }
+.mini-dev.lv-seguro .mini-state { color: var(--accent); }
+.mini-dev.lv-atencao .mini-state, .mini-dev.lv-nocount .mini-state { color: var(--att); }
+.mini-dev.lv-alerta .mini-state { color: var(--alarm); }
+.mini-dev.lv-perigo .mini-state { color: var(--warn); }
+.mini-alert { --c: var(--att); display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid var(--c); border-radius: 14px; background: transparent; color: var(--c); font-size: 12.5px; font-weight: 600; white-space: nowrap; }
+.mini-alert i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.mini-alert.lv-alerta { --c: var(--alarm); }
+.mini-alert.lv-perigo { --c: var(--warn); }
+.mini.lv-atencao { border-bottom-color: var(--att); }
+.mini.lv-alerta { border-bottom-color: var(--alarm); }
+.mini.lv-perigo { border-bottom-color: var(--warn); }
+.mini-top { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 8px; border: 0; border-radius: 8px; background: transparent; color: var(--muted); font-size: 13px; white-space: nowrap; }
+.mini-top:hover { color: var(--text); background: var(--surface-2); }
+@media (max-width: 1100px) { .mini { gap: 16px; } .mini-sec { display: none; } }
+@media (max-width: 900px) { .mini { left: 0; padding: 4px 14px; } .mini-top span { display: none; } }
+@media (max-width: 560px) { .mini-name, .mini-unit { display: none; } .mini-alert span { display: none; } .mini-alert { padding: 0 8px; } }
