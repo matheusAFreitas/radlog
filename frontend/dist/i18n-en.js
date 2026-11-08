@@ -1848,7 +1848,10 @@ const I18N_EN = {
 "Dose acumulada de cada aparelho no trecho": "Accumulated dose of each device in the stretch",
 "público": "public",
 "trabalhador exposto": "occupationally exposed",
-"6 h": "6 h"
+"6 h": "6 h",
+"Mostrar ou esconder no gráfico": "Show or hide on the chart",
+"no gráfico · clique para esconder": "on the chart · click to hide",
+"escondido do gráfico · clique para mostrar": "hidden from the chart · click to show"
 },
 "patterns": [
 [

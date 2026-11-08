@@ -253,6 +253,16 @@
           <h2 id="doseTitle">Dose acumulada</h2>
           <span class="mono muted small" id="doseSub">sem dados no período</span>
         </div>
+        <div class="seg" role="group" aria-label="Período da dose" id="doseRangeSeg">
+          <button type="button" data-range="15m" aria-pressed="false">15 min</button>
+          <button type="button" data-range="30m" aria-pressed="false">30 min</button>
+          <button type="button" data-range="1h" aria-pressed="true">1 h</button>
+          <button type="button" data-range="6h" aria-pressed="false">6 h</button>
+          <button type="button" data-range="24h" aria-pressed="false">24 h</button>
+          <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
+          <button type="button" data-range="30d" aria-pressed="false">30 dias</button>
+          <button type="button" data-range="1y" aria-pressed="false">1 ano</button>
+        </div>
       </div>
 
       <div class="zoom-bar" id="doseZoomBar" hidden>
@@ -358,7 +368,7 @@
     <span class="ht-lbl small muted">Dose acumulada (µSv), cada aparelho a sua</span>
     <div class="ht-plot"><div class="ht-y mono" id="htDoseY"></div><svg id="htDose" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Dose acumulada de cada aparelho no trecho"></svg></div>
     <div class="ht-x-axis mono"><span id="htX0"></span><span id="htX1"></span><span id="htX2"></span></div>
-    <div class="legend small muted"><span class="key"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
+    <div class="legend small muted"><span class="key" id="htKeyGmc"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
   </section>
   <section class="card view-graficos" id="patCard" role="tabpanel" data-subpane="padroes" hidden>
       <div class="chart-head">

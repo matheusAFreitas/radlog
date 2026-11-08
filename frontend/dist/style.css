@@ -1479,3 +1479,11 @@ html.set-dirty .main { padding-bottom: 72px; }
 .ht-x-axis { display: flex; justify-content: space-between; padding-left: 44px; font-size: 11px; color: var(--dim); }
 .chart-head > div.ht-title:first-child { flex-direction: row; align-items: center; gap: 10px; }
 .swatch.sw-ceil2 { border-top: 2px dotted #F0656A; }
+/* quadros da dose: clicar mostra/esconde o aparelho no gráfico */
+button.dd-box { font: inherit; color: inherit; text-align: left; cursor: pointer; transition: opacity .2s, border-color .2s; }
+button.dd-box:hover { border-color: #3A434A; }
+button.dd-box[aria-pressed="true"] { border-color: color-mix(in srgb, var(--c) 45%, var(--border)); }
+button.dd-box.off { opacity: .45; border-style: dashed; }
+button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--c); height: 5px; }
+.dd-state { font-size: 11px; color: var(--dim); }
+#doseCard .chart-head { flex-wrap: wrap; }

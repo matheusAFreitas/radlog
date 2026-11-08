@@ -1591,8 +1591,16 @@ function fetchDose(src, range) {
 function renderDevBoxes(box, list) {
   box.textContent = "";
   for (const d of list) {
-    const c = d.c, el = document.createElement("div");
+    const c = d.c, el = document.createElement(list.length > 1 ? "button" : "div");
     el.className = "dd-box " + d.key;
+    el.dataset.key = d.key;
+    if (list.length > 1) {
+      el.type = "button";
+      const on = !!state.doseShow[d.key];
+      el.classList.toggle("off", !on);
+      el.setAttribute("aria-pressed", String(on));
+      el.title = "Mostrar ou esconder no gráfico";
+    }
     const has = c && c.measuredMinutes > 0;
     const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
     const hours = has ? c.measuredMinutes / 60 : 0;
@@ -1607,12 +1615,81 @@ function renderDevBoxes(box, list) {
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
     el.querySelector(".dd-pct").textContent = has && c.ceilingTotal > 0 ? `${fmt(pct, pct < 10 ? 1 : 0)}% do teto do período (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})` : "";
+    if (list.length > 1) {
+      const s = document.createElement("span");
+      s.className = "dd-state";
+      s.textContent = state.doseShow[d.key] ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
+      el.appendChild(s);
+    }
     box.appendChild(el);
   }
 }
 
+// aparelhos à vista nos gráficos de dose (clicar no quadro do aparelho liga
+// e desliga); pelo menos um fica sempre visível
+state.doseShow = (() => { try { return Object.assign({ gmc: true, rc: true }, JSON.parse(localGet("doseShow", "{}"))); } catch (e) { return { gmc: true, rc: true }; } })();
+const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
+const devName = (k) => (k === "rc" ? "RadiaCode" : "GMC-800");
+const devColor = (k) => (k === "rc" ? "#F472B6" : "#6EE7A0");
+function toggleDoseDev(k) {
+  const s = state.doseShow;
+  s[k] = !s[k];
+  if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
+  localSet("doseShow", JSON.stringify(s));
+  document.querySelectorAll("button.dd-box").forEach((b) => {
+    const on = !!s[b.dataset.key];
+    b.classList.toggle("off", !on);
+    b.setAttribute("aria-pressed", String(on));
+    const st = b.querySelector(".dd-state");
+    if (st) st.textContent = on ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
+  });
+  drawDoseChart();
+  if (state.heatPick && state.ht) drawHeatTrecho();
+}
+document.addEventListener("click", (e) => { const b = e.target.closest(".dd-box"); if (b) toggleDoseDev(b.dataset.key); });
+
+function drawDoseChart() {
+  const c = state.dose, c2raw = state.dose2;
+  if (!c || !c.times || !c.times.length) return;
+  const k1 = devKey(c), c2 = c2raw && c2raw.measuredMinutes ? c2raw : null, k2 = c2 ? devKey(c2) : null;
+  // cada um com o seu teto; o do principal é a linha cheia, o do outro
+  // pontilhado (se o principal estiver escondido, o do outro vira cheio)
+  const show1 = !!(c.measuredMinutes && (state.doseShow[k1] || !c2)), show2 = !!(c2 && state.doseShow[k2]);
+  const n = c.times.length;
+  const vis = [show1 ? Math.max(c.total, c.ceilingTotal) : 0, show2 ? Math.max(c2.total, c2.ceilingTotal) : 0];
+  const top0 = Math.max(...vis) * 1.1 || 1;
+  const solid2 = show2 && !show1;
+  $("doseKeyCeil").textContent = show1 && c2 ? `teto do ${devName(k1)} (fundo + limite)` : solid2 ? `teto do ${devName(k2)} (fundo + limite)` : "teto (fundo + limite)";
+  $("doseKeyCeil2").hidden = !(show1 && show2);
+  $("doseKeyCeil2Txt").textContent = show1 && show2 ? `teto do ${devName(k2)}` : "";
+  $("doseKeyRc").hidden = !((k1 === "rc" && show1) || (k2 === "rc" && show2));
+  document.querySelector("#doseCard .dose-legend .sw-gmc").parentElement.hidden = !((k1 === "gmc" && show1) || (k2 === "gmc" && show2));
+  const mag = Math.pow(10, Math.floor(Math.log10(top0)));
+  const top = Math.ceil(top0 / mag * 2) / 2 * mag;
+  const y = (v) => H - (v / top) * H;
+  const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + ((arr.length <= 1 ? 0 : (i / (arr.length - 1)) * W)).toFixed(1) + " " + y(v).toFixed(1)).join("");
+  const grid = [0, 1, 2, 3].map((i) => {
+    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  }).join("");
+  const dt0 = c.times[0], dt1 = c.times[n - 1];
+  const dxt = (t) => Math.max(0, Math.min(W, ((t - dt0) / Math.max(1, dt1 - dt0)) * W));
+  const dAway = awayBands(dt0, dt1, dxt);
+  $("doseAwayKey").hidden = !dAway;
+  const fillOf = (cc, k) => `<path d="${path(cc.dose)}L${W} ${H}L0 ${H}Z" fill="${devColor(k)}" fill-opacity="0.10"/>`;
+  const lineOf = (arr, color, w, dash, op) => `<path d="${path(arr)}" fill="none" stroke="${color}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ""}${op ? ` stroke-opacity="${op}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  $("doseCard").classList.toggle("rc", k1 === "rc");
+  $("doseChart").innerHTML = grid + dAway +
+    (show1 ? fillOf(c, k1) + lineOf(c.background, "#A3ADB4", 1.5, "5 5") + lineOf(c.ceiling, "#F0656A", 2) + lineOf(c.dose, devColor(k1), 2) : "") +
+    (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, "#A3ADB4", 1.5, "5 5") + lineOf(c2.ceiling, "#F0656A", 2) : lineOf(c2.ceiling, "#F0656A", 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
+  const ys = $("doseY").children;
+  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
+  ys[3].textContent = "0";
+}
+
 async function refreshDose() {
   $("doseLimit").value = state.doseLimit;
+  document.querySelectorAll("#doseRangeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.doseZoom && b.dataset.range === state.dosePeriod)));
   const my = ++doseSeq;
   const rcOn0 = hasRcData();
   // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
@@ -1694,44 +1771,7 @@ async function refreshDose() {
   else line = `<strong>Acima do teto.</strong> Acima do fundo: ${doseTxt(excess)}; o permitido no período era ${doseTxt(c.allowance)}.`;
   st.innerHTML = `<span>${line}</span><div class="meter" aria-hidden="true"><div style="width:${Math.min(100, pct)}%"></div></div>`;
 
-  // gráfico
-  const n = c.times.length;
-  const top0 = Math.max(c.total, c.ceilingTotal, c2 && c2.measuredMinutes ? Math.max(c2.total, c2.ceilingTotal) : 0) * 1.1 || 1;
-  const has2 = !!(c2 && c2.measuredMinutes);
-  $("doseKeyCeil").textContent = has2 ? `teto do ${c.device === "radiacode" ? "RadiaCode" : "GMC-800"} (fundo + limite)` : "teto (fundo + limite)";
-  $("doseKeyCeil2").hidden = !has2;
-  $("doseKeyCeil2Txt").textContent = has2 ? `teto do ${c2.device === "radiacode" ? "RadiaCode" : "GMC-800"}` : "";
-  const mag = Math.pow(10, Math.floor(Math.log10(top0)));
-  const top = Math.ceil(top0 / mag * 2) / 2 * mag;
-  const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
-  const y = (v) => H - (v / top) * H;
-  const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
-  const dosePath = path(c.dose);
-  const grid = [0, 1, 2, 3].map((i) => {
-    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
-  const dt0 = c.times[0], dt1 = c.times[n - 1];
-  const dxt = (t) => Math.max(0, Math.min(W, ((t - dt0) / Math.max(1, dt1 - dt0)) * W));
-  const dAway = awayBands(dt0, dt1, dxt);
-  $("doseAwayKey").hidden = !dAway;
-  const dcol = isRc ? "#F472B6" : "#6EE7A0";
-  $("doseCard").classList.toggle("rc", isRc);
-  $("doseChart").innerHTML = grid + dAway +
-    `<path d="${dosePath}L${W} ${H}L0 ${H}Z" fill="${dcol}" fill-opacity="0.10"/>` +
-    `<path d="${path(c.background)}" fill="none" stroke="#A3ADB4" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>` +
-    `<path d="${path(c.ceiling)}" fill="none" stroke="#F0656A" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
-    `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` +
-    // teto do outro aparelho (cada um tem o seu fundo): pontilhado
-    (c2 && c2.measuredMinutes && c2.ceiling && c2.ceiling.length > 1
-      ? `<path d="${c2.ceiling.map((v, i) => (i ? "L" : "M") + ((i / (c2.ceiling.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="#F0656A" stroke-opacity=".75" stroke-width="1.5" stroke-dasharray="2 4" vector-effect="non-scaling-stroke"/>`
-      : "") +
-    (c2 && c2.measuredMinutes && c2.dose && c2.dose.length > 1
-      ? `<path d="${c2.dose.map((v, i) => (i ? "L" : "M") + ((i / (c2.dose.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="${c2.device === "radiacode" ? "#F472B6" : "#6EE7A0"}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
-      : "");
-  const ys = $("doseY").children;
-  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
-  ys[3].textContent = "0";
+  drawDoseChart();
 
   if (state.doseZoom) {
     const f = chartTimeFmt(c);
@@ -1763,8 +1803,10 @@ function setupDoseHover() {
     cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
     tip.hidden = false;
     const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
-    const c2 = state.dose2, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
-    tip.textContent = c2 && j2 >= 0
+    const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
+    if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
+      tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;
+    } else tip.textContent = c2 && j2 >= 0
       ? (c.device === "radiacode"
         ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
         : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RadiaCode ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
@@ -2042,45 +2084,53 @@ async function renderHeatTrecho() {
     rcOn ? fetchDose("radiacode", range).catch(() => null) : null,
   ]);
   if (my !== htSeq || state.heatPick !== p) return;
-  state.ht = { ch, dg, dr };
+  state.ht = { ch, dg, dr, rcOn };
+  drawHeatTrecho();
+}
+
+function drawHeatTrecho() {
+  const p = state.heatPick, h = state.ht;
+  if (!p || !h) return;
+  const { ch, dg, dr, rcOn } = h;
   renderDevBoxes($("htDevs"), rcOn ? [{ key: "gmc", name: "GMC-800", c: dg }, { key: "rc", name: "RadiaCode", c: dr }] : [{ key: "gmc", name: "GMC-800", c: dg }]);
-  $("htKeyRc").hidden = !rcOn;
+  const showG = !rcOn || state.doseShow.gmc, showR = rcOn && state.doseShow.rc;
+  $("htKeyRc").hidden = !showR;
+  $("htKeyGmc").hidden = !showG;
   // taxa
   const VW = 600, RH = 120, DH = 100;
-  const g = ch ? ch.usv || [] : [], r = ch && rcOn ? ch.rc || [] : [];
+  const g = ch && showG ? ch.usv || [] : [], r = ch && showR ? ch.rc || [] : [];
   const vals = g.concat(r).filter((v) => v != null && isFinite(v));
   const attn = ch && ch.attentionUSv;
   const rtop = niceTop(Math.max(...vals, 0.05) * 1.15);
   const ry = (v) => RH - (v / rtop) * RH;
-  const line = (arr, n, yf, color) => {
+  const line = (arr, n, yf, color, dash) => {
     let d = "", pen = false;
     arr.forEach((v, k) => {
       if (v == null || !isFinite(v)) { pen = false; return; }
       d += (pen ? "L" : "M") + ((k / Math.max(1, n - 1)) * VW).toFixed(1) + " " + yf(v).toFixed(1);
       pen = true;
     });
-    return d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="1.8" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : "";
+    return d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${dash ? 1.4 : 1.8}"${dash ? ` stroke-dasharray="${dash}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : "";
   };
-  const grid = (h) => [0.5, h / 2, h - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="#2A3136" vector-effect="non-scaling-stroke"/>`).join("");
+  const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="#2A3136" vector-effect="non-scaling-stroke"/>`).join("");
   $("htRate").innerHTML = grid(RH) +
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="#F5B84A" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
     line(g, g.length, ry, "#6EE7A0") + line(r, r.length, ry, "#F472B6");
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
-  // dose acumulada: cada aparelho a sua, teto do principal
-  const main = rcOn && dr && dr.measuredMinutes ? dr : dg;
-  const dtop0 = Math.max(dg ? dg.total : 0, dr ? dr.total : 0, main ? main.ceilingTotal : 0) * 1.1 || 1;
-  const dtop = niceTop(dtop0);
+  // dose acumulada: cada aparelho a sua, com o seu teto (o do RadiaCode cheio,
+  // o do GMC pontilhado quando os dois aparecem)
+  const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
+  const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
   const dy = (v) => DH - (v / dtop) * DH;
   $("htDose").innerHTML = grid(DH) +
-    (main && main.ceiling ? line(main.ceiling, main.ceiling.length, dy, "#F0656A") : "") +
-    (dg && dg.measuredMinutes ? line(dg.dose, dg.dose.length, dy, "#6EE7A0") : "") +
-    (dr && dr.measuredMinutes ? line(dr.dose, dr.dose.length, dy, "#F472B6") : "");
+    (R ? line(R.ceiling, R.ceiling.length, dy, "#F0656A") : "") +
+    (G ? line(G.ceiling, G.ceiling.length, dy, "#F0656A", R ? "2 4" : "") : "") +
+    (G ? line(G.dose, G.dose.length, dy, "#6EE7A0") : "") +
+    (R ? line(R.dose, R.dose.length, dy, "#F472B6") : "");
   $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
   $("htX0").textContent = hhmm(p.from);
   $("htX1").textContent = hhmm((p.from + p.to) / 2);
   $("htX2").textContent = p.h1 === 23 ? "24:00" : hhmm(p.to);
-  // valores por ponto ao passar o mouse
-  $("htRate").dataset.n = g.length;
 }
 
 function wireHeatTrecho() {
@@ -4600,7 +4650,7 @@ function wire() {
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.addEventListener("click", () => {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
-  document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#rangeSeg button, #doseRangeSeg button").forEach((b) => b.addEventListener("click", () => {
     state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
     state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
   }));

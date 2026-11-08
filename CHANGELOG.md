@@ -1,5 +1,16 @@
 # Versões
 
+## 2.13.0
+- **Período também na dose acumulada.** O seletor de período (15 min a
+  1 ano) aparece no quadro da dose acumulada, além do gráfico da taxa; os
+  dois continuam ligados: trocar num troca no outro.
+- **Mostrar ou esconder cada aparelho no gráfico da dose.** Clicar no
+  quadro do GMC-800 ou do RadiaCode tira a curva dele do gráfico (e o teto e
+  o fundo dele); clicar de novo volta. Dá para deixar os dois, só o
+  RadiaCode ou só o GMC-800; um deles fica sempre visível (esconder o único
+  que sobrou troca para o outro). Vale também para o trecho do mapa de
+  calor, e a escolha fica guardada.
+
 ## 2.12.2
 - **Dose do RadiaCode não fica mais parada.** A curva "do aparelho" usa os
   totais que o RadiaCode manda a cada ~4 min; se ele para de mandar (ou a

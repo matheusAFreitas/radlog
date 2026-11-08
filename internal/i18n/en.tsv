@@ -2669,3 +2669,7 @@ RadiaCode {0} · GMC-800 {1} · teto {2}	RadiaCode {0} · GMC-800 {1} · ceiling
 {0} · {1} às {2}	{0} · {1} to {2}
 teto do {0} (fundo + limite)	{0} ceiling (background + limit)
 teto do {0}	{0} ceiling
+Mostrar ou esconder no gráfico	Show or hide on the chart
+Período da dose	Dose period
+no gráfico · clique para esconder	on the chart · click to hide
+escondido do gráfico · clique para mostrar	hidden from the chart · click to show
