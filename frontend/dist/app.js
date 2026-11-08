@@ -1605,7 +1605,10 @@ function renderDevBoxes(box, list) {
     const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
     const hours = has ? c.measuredMinutes / 60 : 0;
     const rate = has && hours ? c.total / hours : null;
-    const pct = has && c.ceilingTotal > 0 ? (c.total / c.ceilingTotal) * 100 : 0;
+    // quanto do limite já foi: só o que passou do fundo natural conta (o
+    // limite não inclui a radiação natural), cada aparelho com o seu fundo
+    const excess = has ? Math.max(0, c.excess) : 0;
+    const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
     const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "do aparelho" : "calculada pelo app") : "calculada pelo app";
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
     el.querySelector(".dd-name span").textContent = d.name;
@@ -1614,7 +1617,9 @@ function renderDevBoxes(box, list) {
     el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
-    el.querySelector(".dd-pct").textContent = has && c.ceilingTotal > 0 ? `${fmt(pct, pct < 10 ? 1 : 0)}% do teto do período (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})` : "";
+    el.querySelector(".dd-pct").textContent = has && c.allowance > 0
+      ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
+      : "";
     if (list.length > 1) {
       const s = document.createElement("span");
       s.className = "dd-state";
@@ -1769,7 +1774,7 @@ async function refreshDose() {
   if (c.excess <= 0) line = "<strong>Dentro do teto.</strong> A dose ficou no nível do seu fundo natural.";
   else if (!over) line = `<strong>Dentro do teto.</strong> Acima do fundo: ${doseTxt(excess)} de ${doseTxt(c.allowance)} permitidos no período (${fmt(pct, pct < 10 ? 1 : 0)}%).`;
   else line = `<strong>Acima do teto.</strong> Acima do fundo: ${doseTxt(excess)}; o permitido no período era ${doseTxt(c.allowance)}.`;
-  st.innerHTML = `<span>${line}</span><div class="meter" aria-hidden="true"><div style="width:${Math.min(100, pct)}%"></div></div>`;
+  st.innerHTML = `<span>${line}</span>`;
 
   drawDoseChart();
 

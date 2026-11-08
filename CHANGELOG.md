@@ -1,5 +1,15 @@
 # Versões
 
+## 2.13.2
+- **Uma barra só por aparelho na dose.** As barras dos quadros do GMC-800 e
+  do RadiaCode comparavam a dose total com o teto (fundo + limite), e a
+  barra embaixo de "Dentro do teto" mostrava outra conta (o que passou do
+  fundo sobre o limite), com números bem diferentes. Agora a barra de cada
+  quadro mostra quanto do limite aquele aparelho já usou: só o que passou do
+  fundo natural dele conta, como no limite de verdade (ex.: "2,6% do limite
+  · 0,10 µSv acima do fundo, de 3,79 µSv permitidos"). A terceira barra
+  saiu; a frase "Dentro do teto" continua.
+
 ## 2.13.1
 - **Dose do RadiaCode não aparece mais como "desconectado" com ele
   conectado.** O aparelho só manda o total de dose a cada vários minutos, e a

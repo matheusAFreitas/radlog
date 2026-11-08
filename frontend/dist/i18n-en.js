@@ -3414,6 +3414,16 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% do limite · ((?:(?! · ).)+?) acima do fundo, de ((?:(?! · ).)+?) permitidos \\(((?:(?! · ).)+?)\\)$",
+"${1}% of the limit · ${2} above background, of ${3} allowed (${4})",
+[
+"% do limite · ",
+" acima do fundo, de ",
+" permitidos ("
+]
+],
+[
 "Acima do normal (",
 "^Acima do normal \\(((?:(?! · ).)+?)\\) — dificilmente é só variação$",
 "Above normal (${1}) — hardly just variation",
