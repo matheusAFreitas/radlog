@@ -323,7 +323,8 @@ function renderGTile() {
 
 function renderRTile(st, o) {
   const on = st.state === "conectado";
-  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
+  $("rTileDemo").hidden = !st.demo;
   $("rTileDot").className = "dot" + (on ? " on" : st.state === "conectando" ? " wait" : st.state === "erro" ? " err" : "");
   $("rTileConnText").textContent = on
     ? `RadiaCode · ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
@@ -1846,8 +1847,50 @@ function renderDemo() {
     if (document.activeElement !== $("demoCPM")) $("demoCPM").value = Math.round(d.cpm);
     if (document.activeElement !== $("demoSlider")) $("demoSlider").value = cpmToSlider(d.cpm);
     $("demoReal").checked = !!d.realistic;
+    $("demoRcOn").checked = !!d.rc;
+    $("demoRcCtl").hidden = !d.rc;
+    if (d.rc) {
+      if (document.activeElement !== $("demoRcUSv")) $("demoRcUSv").value = +(d.rcUSv || 0).toFixed(d.rcUSv < 1 ? 3 : 2);
+      if (document.activeElement !== $("demoRcSlider")) $("demoRcSlider").value = usvToSlider(d.rcUSv || 0);
+    }
+    renderDemoRcPresets();
   }
   renderStatus();
+}
+
+// RadiaCode simulado: µSv/h de 0,01 a 10.000 na escala logarítmica
+const sliderToUSv = (v) => Math.round(Math.pow(10, (v / 100) * 6 - 2) * 1000) / 1000;
+const usvToSlider = (u) => Math.round(((Math.log10(Math.max(0.01, u)) + 2) / 6) * 100);
+function renderDemoRcPresets() {
+  const box = $("demoRcPresets");
+  const st = (state.rc && state.rc.st) || {};
+  const l = st.limits || {};
+  const bg = (st.stats && st.stats.bgUSv) || 0.12;
+  const list = [[bg, "fundo"]];
+  if (l.attn) list.push([l.attn * 1.15, "atenção"]);
+  if (l.alarm) list.push([l.alarm * 1.15, "alerta"]);
+  if (l.danger) list.push([l.danger * 1.15, "perigo"]);
+  const key = list.map((x) => x[0].toFixed(3)).join("|");
+  if (box.dataset.key === key) return;
+  box.dataset.key = key;
+  box.textContent = "";
+  for (const [v, name] of list) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn small";
+    const r = v < 1 ? Math.round(v * 1000) / 1000 : v < 10 ? Math.round(v * 100) / 100 : Math.round(v * 10) / 10;
+    b.dataset.demoRc = r;
+    b.textContent = `${fmt(r, usvDigits(r))} · ${name}`;
+    box.appendChild(b);
+  }
+}
+let demoRcTimer = null;
+function sendDemoRc(on, usv) {
+  clearTimeout(demoRcTimer);
+  demoRcTimer = setTimeout(() => {
+    if (!api.SetDemoRc) return;
+    call(api.SetDemoRc, on, usv).then((st) => { state.demo = st; renderDemo(); });
+  }, 200);
 }
 
 function sendDemo(cpm) {
@@ -1870,6 +1913,29 @@ function wireDemo() {
     refreshAll();
   });
   $("btnDemoStop").addEventListener("click", () => $("btnDemo").click());
+  $("demoRcOn").addEventListener("change", () => {
+    const st = (state.rc && state.rc.st) || {};
+    const v = parseFloat($("demoRcUSv").value) || state.demo.rcUSv || (st.stats && st.stats.bgUSv) || 0.12;
+    sendDemoRc($("demoRcOn").checked, v);
+  });
+  $("demoRcUSv").addEventListener("input", () => {
+    const v = Math.min(10000, Math.max(0, parseFloat(String($("demoRcUSv").value).replace(",", ".")) || 0));
+    $("demoRcSlider").value = usvToSlider(v);
+    sendDemoRc(true, v);
+  });
+  $("demoRcSlider").addEventListener("input", () => {
+    const v = sliderToUSv(parseInt($("demoRcSlider").value, 10));
+    $("demoRcUSv").value = v;
+    sendDemoRc(true, v);
+  });
+  $("demoRcPresets").addEventListener("click", (e) => {
+    const b = e.target.closest("[data-demo-rc]");
+    if (!b) return;
+    const v = parseFloat(b.dataset.demoRc);
+    $("demoRcUSv").value = v;
+    $("demoRcSlider").value = usvToSlider(v);
+    sendDemoRc(true, v);
+  });
   $("demoCPM").addEventListener("input", () => {
     const v = Math.min(999999, Math.max(0, parseInt($("demoCPM").value, 10) || 0));
     $("demoSlider").value = cpmToSlider(v);
@@ -3664,13 +3730,13 @@ function updateAlarm() {
   updateAttention();
   const bar = $("alarmBar");
   bar.hidden = !on;
-  bar.classList.toggle("demo", kind === "demo" || kind === "test");
+  bar.classList.toggle("demo", kind === "demo" || kind === "test" || (kind === "rc" && !!(state.rc.st || {}).demo));
   bar.classList.toggle("perigo", sev === "perigo");
   bar.classList.toggle("muted", sev === "perigo" ? snoozed : alarmCtl.muted);
   if (!on) return;
 
   const usv = kind === "test" ? cpm * (calK()) : kind === "rc" ? rcs.usvh || 0 : r ? r.usv : 0;
-  const tag = { real: state.demo.active ? " REAL" : "", rc: " · RADIACODE", demo: " (demo)", test: " (teste)" }[kind];
+  const tag = { real: state.demo.active ? " REAL" : "", rc: (state.rc.st || {}).demo ? " (demo) · RADIACODE" : " · RADIACODE", demo: " (demo)", test: " (teste)" }[kind];
   const note = $("alarmNote");
   const sat = r && r.saturated ? r.satReason || "limite" : null;
   renderRise(sev === "perigo" && r ? r.rise : null, usv);
@@ -4004,7 +4070,7 @@ function updateAttention() {
   if (!show) return;
   if (kind === "rc") {
     const rs = state.rc.st || {}, l = rs.limits || {};
-    $("attnTitle").textContent = "Atenção · RadiaCode";
+    $("attnTitle").textContent = rs.demo ? "Atenção (demo) · RadiaCode" : "Atenção · RadiaCode";
     $("attnDetail").textContent = `${usvVal(rs.usvh || 0)} no RadiaCode · ` + (l.device ? `alarme 1 do aparelho: ${usvVal(l.attn || 0)}` : `atenção a partir de ${usvVal(l.attn || 0)}`);
     fillGuide("attnGuide", "attnHint", guidance("atencao", rs.usvh || 0));
     return;
@@ -5300,7 +5366,7 @@ function renderRc(st) {
   rcAlarmState(st);
   renderDoseDevice();
   const on = st.state === "conectado";
-  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
   // pílula no topo: só aparece quando tem algo a dizer
   $("navRcDot").hidden = st.state !== "erro";
   // aba
@@ -5345,7 +5411,7 @@ function renderRc(st) {
 // estado da conexão nas Configurações → RadiaCode (e o aviso de quando o
 // endereço escolhido conectou ou deu erro)
 function renderRcSetState(st, prev) {
-  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
   const txt = {
     conectado: `Conectado pelo ${via}` + (st.model || st.serial ? ` · ${[st.model, st.serial].filter(Boolean).join(" ")}` : ""),
     conectando: st.via ? `Conectando pelo ${via}…` : "Conectando…",
@@ -5397,7 +5463,7 @@ function renderRcMain(st) {
   document.body.classList.toggle("has-rc", show);
   renderHeroVia();
   if (!show) return;
-  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
   $("rcMainVia").textContent = st.state === "conectado" ? `· ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "· conectando…" : "· desconectado";
   $("rcMainVia").className = "rc-main-via mono" + (st.state === "conectado" ? " on" : "");
   $("rcMain").classList.toggle("stale", !live);
@@ -6519,7 +6585,14 @@ function makeDemoApi() {
   const demoFirst = () => Date.now() - 12 * 864e5;
   const rcHeat = (h) => { const k = 0.0061, sc = (rows) => rows.map((r) => r.map((v) => (v == null ? null : v * k))); return Object.assign({}, h, { device: "radiacode", values: sc(h.values), usv: sc(h.values), awayValues: sc(h.awayValues || []), hourAvg: h.hourAvg.map((v) => (v == null ? null : v * k)), min: h.min == null ? null : h.min * k, max: h.max == null ? null : h.max * k, alerts: {} }); };
   const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
-const demoRc = () => demoRcFake() && !demoRcCfg.off
+const demoRc = () => {
+    const st = demoRcReal();
+    if (!(demoSt && demoSt.active && demoSt.rc)) return st;
+    const u = demoSt.rcUSv || 0, l = st.limits || { attn: 0.4, alarm: 1.2, danger: 10.1 };
+    return Object.assign({ limits: l, stats: { bgUSv: 0.097 } }, st, { state: "conectado", via: st.state === "conectado" ? st.via : "demo", demo: true, time: Date.now(), usvh: u * (0.97 + Math.random() * 0.06), cps: u * 85, usvhErr: 8,
+      alertLevel: u >= l.danger ? "perigo" : u >= l.alarm ? "alarme" : u >= l.attn ? "atencao" : "", limits: l });
+  };
+  const demoRcReal = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
         alarms: { CountRate1: 20, CountRate2: 60, DoseRate1: 0.4, DoseRate2: 1.2, Dose1: 99999.99, Dose2: 99999.99, ShowSv: true, ShowCPM: true },
         stats: { bgUSv: 0.097, bgLo: 0.085, bgHi: 0.11, bgMinutes: 4000, avg1h: 0.099, n1h: 60, min24h: 0.071, max24h: 0.142, max24hAt: Date.now() - 5 * 3600e3, n24h: 1300, todayMinutes: 862 }, state: localStorage.getItem("rcFake2") ? "procurando" : demoRcCfg.st || "conectado", via: demoRcCfg.via || "usb", model: "RadiaCode-102", serial: "RC-102-001234", firmware: "4.14 (Sep 10 2026)", time: Date.now(), cps: 3.1 + Math.random() * 0.3, cpsErr: 9, usvh: ({ alarme: 1.38, perigo: 12.4, atencao: 0.47 }[localStorage.getItem("rcAlert")] || 0.095) + Math.random() * 0.01, usvhErr: 11, dose: 2.41, doseSec: 93600, doseLive: 2.41 + (Date.now() % 600000) / 3.6e7, doseLiveSec: 93600, doseLiveAt: Date.now(), doseLiveOn: !localStorage.getItem("rcFake2"), battery: 87, tempC: 24.5, hasRare: true, ble: demoRcCfg.ble, bleOK: true, off: false }
@@ -6614,7 +6687,8 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
     RestoreDeviceConfig: async () => "",
     SnapshotDeviceConfig: async () => {},
     GetDemo: async () => demoSt,
-    StartDemo: async (cpm, realistic) => (demoSt = { active: true, cpm, realistic }),
+    StartDemo: async (cpm, realistic) => (demoSt = Object.assign({}, demoSt, { active: true, cpm, realistic })),
+    SetDemoRc: async (on, usv) => { if (!demoSt.active) return demoSt; demoSt = Object.assign({}, demoSt, { rc: on, rcUSv: usv }); emit("radiacode", demoRc()); return demoSt; },
     StopDemo: async () => { demoAlerts = []; demoSt = { active: false, cpm: 20, realistic: false }; emit("event", { kind: "alerta" }); emit("demo", demoSt); return demoSt; },
     GetVersion: async () => "navegador",
     ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\RadLog\\Relatórios\\gmc-medicao-${id}.pdf`; },

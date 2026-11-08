@@ -133,6 +133,17 @@
       <label class="toggle"><span>Variar como um contador de verdade (o CPM leva até 1 min para chegar no valor)</span><input type="checkbox" id="demoReal"></label>
       <p class="small mono" id="demoRealLine">Leitura real: —</p>
     </div>
+    <div class="demo-controls demo-rc">
+      <label class="toggle"><span><strong>Simular o RadiaCode</strong> · quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando</span><input type="checkbox" id="demoRcOn"></label>
+      <div class="demo-rc-ctl" id="demoRcCtl" hidden>
+        <label for="demoRcUSv">Valor simulado do RadiaCode (µSv/h)</label>
+        <div class="row">
+          <input type="number" id="demoRcUSv" min="0" max="10000" step="0.01" inputmode="decimal">
+          <input type="range" id="demoRcSlider" min="0" max="100" step="1" aria-label="Valor simulado do RadiaCode em escala logarítmica">
+        </div>
+        <div class="row presets" id="demoRcPresets"></div>
+      </div>
+    </div>
   </section>
 
 <section class="instruments" id="instruments" aria-label="Aparelhos agora">

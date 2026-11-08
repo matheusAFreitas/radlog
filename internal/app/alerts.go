@@ -373,6 +373,9 @@ func (a *App) GetActiveAlerts() []Event {
 	ids := []int64{a.alerts.danger, a.alerts.alarm, a.alerts.attn, r.danger, r.alarm, r.attn}
 	if a.demo.Active {
 		ids = append([]int64{a.demo.alerts.danger, a.demo.alerts.alarm, a.demo.alerts.attn}, ids...)
+		if d := a.demo.rc; d != nil {
+			ids = append(ids, d.alert.ids.danger, d.alert.ids.alarm, d.alert.ids.attn)
+		}
 	}
 	for _, id := range ids {
 		if e := a.eventLocked(id); e != nil {

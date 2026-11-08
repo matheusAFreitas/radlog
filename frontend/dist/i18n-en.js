@@ -1854,7 +1854,13 @@ const I18N_EN = {
 "escondido do gráfico · clique para mostrar": "hidden from the chart · click to show",
 "esperando o próximo total do aparelho": "waiting for the next total from the device",
 "Pelo app:": "By the app:",
-"esperando o primeiro total (vem a cada 3 a 4 min)": "waiting for the first total (every 3 to 4 min)"
+"esperando o primeiro total (vem a cada 3 a 4 min)": "waiting for the first total (every 3 to 4 min)",
+"Simular o RadiaCode": "Simulate the RadiaCode",
+"· quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando": "· panel, alerts and charts with its own limits; the real device, if connected, keeps recording",
+"Valor simulado do RadiaCode (µSv/h)": "Simulated RadiaCode value (µSv/h)",
+"Valor simulado do RadiaCode em escala logarítmica": "Simulated RadiaCode value on a logarithmic scale",
+"simulado": "simulated",
+"Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode"
 },
 "patterns": [
 [
@@ -3688,6 +3694,15 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] RadiaCode simulado ligado (",
+"^\\[demo\\] RadiaCode simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
+"[demo] Simulated RadiaCode on (${1} µSv/h)",
+[
+"[demo] RadiaCode simulado ligado (",
+" µSv/h)"
+]
+],
+[
 "Antes da chuva: ",
 "^Antes da chuva: ((?:(?! · ).)+?) CPM · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
 "Before the rain: ${1} CPM · last 15 min: ${2} (${3})",
@@ -4271,6 +4286,15 @@ const I18N_EN = {
 " de ",
 " dias) · ",
 "% medido"
+]
+],
+[
+"RadiaCode simulado ligado (",
+"^RadiaCode simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
+"Simulated RadiaCode on (${1} µSv/h)",
+[
+"RadiaCode simulado ligado (",
+" µSv/h)"
 ]
 ],
 [
@@ -8141,6 +8165,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · atenção$",
+"${1} · attention",
+[
+" · atenção"
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -8354,6 +8386,22 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) · alerta$",
+"${1} · alert",
+[
+" · alerta"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · perigo$",
+"${1} · danger",
+[
+" · perigo"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
 [
@@ -8545,6 +8593,14 @@ const I18N_EN = {
 "${1} ceiling",
 [
 "teto do "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · fundo$",
+"${1} · background",
+[
+" · fundo"
 ]
 ],
 [

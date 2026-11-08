@@ -2682,3 +2682,15 @@ Pelo app:	By the app:
 total das {0}	total from {0}
 esperando o primeiro total (vem a cada 3 a 4 min)	waiting for the first total (every 3 to 4 min)
 {0} ({1}% do período gravado)	{0} ({1}% of the period recorded)
+Simular o RadiaCode	Simulate the RadiaCode
+· quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando	· panel, alerts and charts with its own limits; the real device, if connected, keeps recording
+Valor simulado do RadiaCode (µSv/h)	Simulated RadiaCode value (µSv/h)
+Valor simulado do RadiaCode em escala logarítmica	Simulated RadiaCode value on a logarithmic scale
+{0} · fundo	{0} · background
+{0} · atenção	{0} · attention
+{0} · alerta	{0} · alert
+{0} · perigo	{0} · danger
+simulado	simulated
+RadiaCode simulado ligado ({0} µSv/h)	Simulated RadiaCode on ({0} µSv/h)
+[demo] RadiaCode simulado ligado ({0} µSv/h)	[demo] Simulated RadiaCode on ({0} µSv/h)
+Atenção (demo) · RadiaCode	Attention (demo) · RadiaCode

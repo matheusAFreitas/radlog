@@ -1,5 +1,21 @@
 # Versões
 
+## 2.14.0
+- **Modo demo com RadiaCode.** No quadro do modo demo há agora "Simular o
+  RadiaCode": liga um RadiaCode de mentira com o µSv/h que você escolher
+  (campo, barra em escala logarítmica de 0,01 a 10.000 µSv/h e atalhos para
+  o fundo, a atenção, o alerta e o perigo, com os limites do próprio
+  RadiaCode).
+  - O quadro do RadiaCode, a faixa compacta, o quadro completo e o gráfico
+    ao longo do tempo usam o valor simulado, marcados como "demo" e
+    "simulado".
+  - Os alertas do RadiaCode (atenção, alarme e perigo), a faixa no topo e o
+    som funcionam como de verdade, com "(demo)" no título.
+  - "Variar como um contador de verdade" também vale para ele (a contagem
+    oscila como a do aparelho).
+  - Nada simulado vai para o disco: o RadiaCode de verdade, se estiver
+    conectado, continua sendo lido e gravado, e ao sair do demo tudo some.
+
 ## 2.13.3
 - **Dose do aparelho dentro do quadro do RadiaCode.** As duas linhas soltas
   embaixo dos quadros ("no aparelho, desde que foi zerado…" e "Calculado

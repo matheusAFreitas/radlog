@@ -69,6 +69,9 @@ type DemoState struct {
 	Active    bool    `json:"active"`
 	CPM       float64 `json:"cpm"`
 	Realistic bool    `json:"realistic"` // varia como contagem de verdade
+	// RadiaCode simulado (2.14)
+	Rc    bool    `json:"rc"`
+	RcUSv float64 `json:"rcUSv"`
 }
 
 type demoData struct {
@@ -81,6 +84,7 @@ type demoData struct {
 	dangerOn bool
 	sat      satState
 	alerts   alertIDs
+	rc       *demoRc
 }
 
 func (a *App) demoActive() bool {
@@ -141,6 +145,7 @@ func (a *App) StopDemo() DemoState {
 		return DemoState{}
 	}
 	close(a.demo.stop)
+	rcd := a.demo.rc
 	a.demo = demoData{}
 	a.measure = MeasureState{}
 	// tira os eventos do demo da lista
@@ -152,6 +157,18 @@ func (a *App) StopDemo() DemoState {
 	}
 	a.events = kept
 	a.mu.Unlock()
+	if rcd != nil {
+		a.finishDemoRcAlerts(rcd)
+		a.mu.Lock()
+		kept := a.events[:0]
+		for _, e := range a.events {
+			if !strings.HasPrefix(e.Text, demoPrefix) {
+				kept = append(kept, e)
+			}
+		}
+		a.events = kept
+		a.mu.Unlock()
+	}
 
 	a.alarmEnded()
 	a.emit("measure", MeasureState{})
@@ -161,6 +178,7 @@ func (a *App) StopDemo() DemoState {
 	a.emit("event", Event{Kind: kindAlert})
 	a.emit("event", Event{Kind: kindEvent})
 	a.emitActive()
+	a.emitRc()
 	return DemoState{}
 }
 
@@ -213,6 +231,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 			return
 		case <-ticker.C:
 		}
+		a.demoRcTick(rng, time.Now())
 		a.mu.Lock()
 		target, realistic := a.demo.CPM, a.demo.Realistic
 		cal := a.convCalLocked()

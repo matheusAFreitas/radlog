@@ -85,6 +85,8 @@ type RcState struct {
 	DoseLiveSec float64 `json:"doseLiveSec"`
 	DoseLiveAt  int64   `json:"doseLiveAt"`
 	DoseLiveOn  bool    `json:"doseLiveOn"`
+	// valor simulado (modo demo): nada disso vai para o disco
+	Demo bool `json:"demo,omitempty"`
 }
 
 // RcStats são as medidas do RadiaCode como as do GMC: fundo de casa, média
@@ -201,6 +203,9 @@ func (a *App) GetRadiacode() RcState {
 		l := a.rc.today.last
 		st.LastT, st.LastUSv, st.LastCPS = l.T.UnixMilli(), l.USvh, l.CPS
 	}
+	a.rc.mu.Unlock()
+	a.demoRcOverlay(&st)
+	a.rc.mu.Lock() // o defer acima destrava
 	return st
 }
 
@@ -867,6 +872,26 @@ func (a *App) withRc(c Chart) Chart {
 	} else {
 		for _, p := range a.rcRange(from, to) {
 			add(p.T, p.USvh)
+		}
+	}
+	if dpts, ok := a.demoRcSeries(from, to, step < time.Minute); ok {
+		dsum, dcnt := make([]float64, n), make([]int, n)
+		for _, p := range dpts {
+			for t := p.t; ; t = t.Add(step) {
+				i := int(t.Sub(from) / step)
+				if i >= 0 && i < n {
+					dsum[i] += p.cpm
+					dcnt[i]++
+				}
+				if step >= time.Minute || !t.Add(step).Before(p.t.Add(time.Second)) {
+					break
+				}
+			}
+		}
+		for i := range dsum {
+			if dcnt[i] > 0 {
+				sum[i], cnt[i] = dsum[i], dcnt[i]
+			}
 		}
 	}
 	var tot float64

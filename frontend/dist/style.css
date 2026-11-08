@@ -1489,3 +1489,6 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 #doseCard .chart-head { flex-wrap: wrap; }
 .dd-dev { display: flex; flex-direction: column; gap: 1px; color: var(--muted); font-size: 12px; }
 .dd-dev b { color: var(--text); font-weight: 500; }
+.demo-rc { margin-top: 4px; padding-top: 12px; border-top: 1px solid var(--border); }
+.demo-rc-ctl { display: flex; flex-direction: column; gap: 8px; }
+.demo-rc-ctl > label { font-size: 13px; color: var(--muted); }
