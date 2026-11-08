@@ -297,3 +297,31 @@ func TestRcDoseLive(t *testing.T) {
 		t.Fatalf("gravado: %+v", st)
 	}
 }
+
+// 2.13.1: reabrir (atualização) ou reconectar logo depois continua do total
+// estimado, em vez de ficar "desconectado" até o próximo envio do aparelho
+func TestRcDoseResume(t *testing.T) {
+	a := newTestApp(t)
+	t0 := time.Now().Add(-10 * time.Minute)
+	a.rc.mu.Lock()
+	a.rcDoseRareLocked(1.00, 3600, t0)
+	a.rc.dose.acc = 0.05
+	a.rcDoseSaveLiveLocked(t0.Add(5 * time.Minute))
+	// "outra abertura": esquece o que estava na memória
+	a.rc.dose = rcDoseLive{}
+	a.rcDoseResumeLocked(t0.Add(6 * time.Minute))
+	d := a.rc.dose
+	a.rc.mu.Unlock()
+	if !d.has || math.Abs(d.base-1.05) > 1e-9 || d.baseSec < 3600+5*60 {
+		t.Fatalf("não continuou: %+v", d)
+	}
+	// muito tempo depois: espera o aparelho
+	a.rc.mu.Lock()
+	a.rc.dose = rcDoseLive{}
+	a.rcDoseResumeLocked(t0.Add(30 * time.Minute))
+	has := a.rc.dose.has
+	a.rc.mu.Unlock()
+	if has {
+		t.Fatal("continuou de um total velho")
+	}
+}

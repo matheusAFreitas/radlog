@@ -33,6 +33,8 @@ type rcDoseSaved struct {
 	Dose float64 `json:"dose"` // µSv
 	Sec  float64 `json:"sec"`  // s de contagem
 	At   int64   `json:"at"`   // ms
+	// estimado pelo app ao fechar/cair a conexão (não é um total do aparelho)
+	Est bool `json:"est,omitempty"`
 }
 
 // rcDoseRareLocked recebe o total do aparelho (precisa de rc.mu).
@@ -41,6 +43,47 @@ func (a *App) rcDoseRareLocked(dose, sec float64, now time.Time) {
 	d.has, d.base, d.baseSec, d.baseAt, d.acc = true, dose, sec, now, 0
 	d.saved = rcDoseSaved{Dose: dose, Sec: sec, At: now.UnixMilli()}
 	d.loaded = true
+	a.rcDoseWriteLocked()
+}
+
+// rcDoseKeepGap é até quanto tempo depois de a conexão cair (ou o app fechar
+// para atualizar) o total estimado ainda vale ao reconectar: o aparelho só
+// manda o total a cada vários minutos, e sem isso a dose do aparelho ficava
+// "desconectada" até o próximo envio, mesmo conectado.
+const rcDoseKeepGap = 3 * time.Minute
+
+// rcDoseSaveLiveLocked grava o total estimado de agora (o último do aparelho
+// mais o que foi somado ao vivo) quando a conexão termina (precisa de rc.mu).
+func (a *App) rcDoseSaveLiveLocked(now time.Time) {
+	d := &a.rc.dose
+	if !d.has {
+		return
+	}
+	d.saved = rcDoseSaved{Dose: d.base + d.acc, Sec: d.baseSec + now.Sub(d.baseAt).Seconds(), At: now.UnixMilli(), Est: true}
+	a.rcDoseWriteLocked()
+}
+
+// rcDoseResumeLocked, ao conectar: se a conexão anterior terminou há pouco,
+// continua do total estimado dela; senão espera o próximo total do aparelho
+// (precisa de rc.mu).
+func (a *App) rcDoseResumeLocked(now time.Time) {
+	d := &a.rc.dose
+	d.has, d.lastRT = false, time.Time{}
+	if !d.loaded && a.dataDir != "" {
+		d.loaded = true
+		if b, err := os.ReadFile(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
+			_ = json.Unmarshal(b, &d.saved)
+		}
+	}
+	at := time.UnixMilli(d.saved.At)
+	if d.saved.At > 0 && !at.After(now) && now.Sub(at) <= rcDoseKeepGap {
+		gap := now.Sub(at).Seconds()
+		d.has, d.base, d.baseSec, d.baseAt, d.acc = true, d.saved.Dose, d.saved.Sec+gap, now, 0
+	}
+}
+
+func (a *App) rcDoseWriteLocked() {
+	d := &a.rc.dose
 	if a.dataDir == "" {
 		return
 	}

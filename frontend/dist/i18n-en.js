@@ -1851,7 +1851,8 @@ const I18N_EN = {
 "6 h": "6 h",
 "Mostrar ou esconder no gráfico": "Show or hide on the chart",
 "no gráfico · clique para esconder": "on the chart · click to hide",
-"escondido do gráfico · clique para mostrar": "hidden from the chart · click to show"
+"escondido do gráfico · clique para mostrar": "hidden from the chart · click to show",
+"esperando o próximo total do aparelho": "waiting for the next total from the device"
 },
 "patterns": [
 [

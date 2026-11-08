@@ -1,5 +1,24 @@
 # Versões
 
+## 2.13.1
+- **Dose do RadiaCode não aparece mais como "desconectado" com ele
+  conectado.** O aparelho só manda o total de dose a cada vários minutos, e a
+  cada reconexão (inclusive quando o app se atualiza) o app esperava o
+  próximo envio; até lá, a linha dizia "desconectado". Agora:
+  - ao fechar ou perder a conexão, o app guarda o total estimado (o último
+    do aparelho mais o que somou ao vivo) e, se reconectar em até 3 min,
+    continua dele;
+  - conectado e esperando o próximo total, a linha diz "esperando o próximo
+    total do aparelho".
+- **Bluetooth sem insistir a cada 30 s.** Quando o RadiaCode está no USB de
+  outro PC (ou com o celular), o app que procura pelo Bluetooth conectava,
+  caía em poucos segundos e tentava de novo a cada 30 s; o log do aparelho
+  mostrava "BLE: client connected / disconnected" o tempo todo. Cada
+  tentativa pode levar dados que iriam para quem está com ele no USB (como o
+  total de dose). Agora, a cada tentativa que não segura a conexão, o
+  intervalo dobra (30 s, 1, 2, 4, 8 até 16 min) e volta ao normal quando uma
+  conexão dura mais de 2 min.
+
 ## 2.13.0
 - **Período também na dose acumulada.** O seletor de período (15 min a
   1 ano) aparece no quadro da dose acumulada, além do gráfico da taxa; os

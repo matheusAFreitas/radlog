@@ -355,6 +355,12 @@ func (a *App) rcLoop() {
 	wake := a.rc.wake
 	a.rc.mu.Unlock()
 	lastBLE := time.Time{}
+	// tentativas pelo Bluetooth que não seguram a conexão (o aparelho está no
+	// USB de outro PC, ou o celular está com ele): espera cada vez mais entre
+	// uma e outra (30 s, 1, 2, 4, 8 até 16 min). Cada tentativa conecta no
+	// aparelho e pode levar dados que iriam para quem está com ele no USB.
+	bleFails := 0
+	bleGap := func() time.Duration { return rcRetryBLE << min(bleFails, 5) }
 	wait := func(d time.Duration) {
 		select {
 		case <-wake:
@@ -371,13 +377,17 @@ func (a *App) rcLoop() {
 		}
 		tr, err := radiacode.OpenUSB()
 		if errors.Is(err, radiacode.ErrNotFound) && ble != "" && radiacode.BLESupported {
-			if time.Since(lastBLE) < rcRetryBLE && !a.rc.bleNow.Swap(false) {
+			if time.Since(lastBLE) < bleGap() && !a.rc.bleNow.Swap(false) {
 				wait(rcRetryUSB)
 				continue
 			}
 			lastBLE = time.Now()
 			a.rcSet(func(s *RcState) { s.State, s.Err = "conectando", "" })
 			tr, err = radiacode.OpenBLE(ble)
+		}
+		viaBLE := err == nil && tr.Kind() == "bluetooth"
+		if err != nil && !errors.Is(err, radiacode.ErrNotFound) && !lastBLE.IsZero() && time.Since(lastBLE) < time.Minute {
+			bleFails++ // a tentativa pelo Bluetooth falhou
 		}
 		if err != nil {
 			if errors.Is(err, radiacode.ErrNotFound) {
@@ -394,10 +404,22 @@ func (a *App) rcLoop() {
 		if err != nil {
 			msg := err.Error()
 			a.rcSet(func(s *RcState) { s.State, s.Err = "erro", msg })
+			if viaBLE {
+				bleFails++
+			}
 			wait(rcRetryUSB)
 			continue
 		}
+		began := time.Now()
 		a.rcRun(dev)
+		if viaBLE {
+			if time.Since(began) < 2*time.Minute {
+				bleFails++
+				a.logf("RadiaCode: a conexão pelo Bluetooth caiu em %s; próxima tentativa em %s", time.Since(began).Round(time.Second), bleGap())
+			} else {
+				bleFails = 0
+			}
+		}
 		wait(2 * time.Second)
 	}
 }
@@ -409,7 +431,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	a.rc.dev = dev
 	// o total ao vivo recomeça no primeiro RareData desta conexão (até lá vale
 	// o último gravado)
-	a.rc.dose.has, a.rc.dose.lastRT = false, time.Time{}
+	a.rcDoseResumeLocked(time.Now())
 	prev := a.rc.st
 	a.rc.st = RcState{State: "conectado", Via: dev.Kind(), Model: dev.Model, Serial: dev.Serial, Firmware: dev.Firmware,
 		Since: time.Now().UnixMilli()}
@@ -477,6 +499,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	a.rcRawClose()
 	a.rc.mu.Lock()
 	a.rc.dev = nil
+	a.rcDoseSaveLiveLocked(time.Now())
 	if a.rc.st.State == "conectado" {
 		a.rc.st.State = "procurando"
 	}

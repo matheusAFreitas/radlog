@@ -473,6 +473,11 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) shutdown(ctx context.Context) {
 	a.logf("==== fechando o app")
 	a.beforeClose()
+	// o total estimado do RadiaCode, para a próxima abertura (ex.: atualização)
+	// continuar dele em vez de esperar o próximo envio do aparelho
+	a.rc.mu.Lock()
+	a.rcDoseSaveLiveLocked(time.Now())
+	a.rc.mu.Unlock()
 	a.stopTray()
 	a.mu.Lock()
 	if a.retryStop != nil {

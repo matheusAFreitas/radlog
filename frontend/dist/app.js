@@ -2386,7 +2386,7 @@ function renderDoseDevice() {
     $("doseCmp").hidden = !cmp;
     el.innerHTML = '<span class="dd-cap"></span><span class="dd-app"><b></b><span></span></span>';
     el.children[0].textContent = "no aparelho, desde que foi zerado" + (st.doseLiveSec ? ` · ${rcDur(st.doseLiveSec)} contando` : "") +
-      (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
+      (st.doseLiveOn ? " · ao vivo" : on ? ` · às ${whenLabel(st.doseLiveAt)} · esperando o próximo total do aparelho` : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
     el.children[1].children[0].textContent = "Calculado pelo app:";
     el.children[1].children[1].textContent = " " + appTxt();
     return;
@@ -2397,7 +2397,7 @@ function renderDoseDevice() {
   el.children[0].children[1].textContent = on && !(st.doseLiveAt > 0)
     ? " esperando o total do RadiaCode (ele manda a cada 3 a 4 min)"
     : ` ${fmt(st.doseLive, st.doseLive < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)} contando)` : "") +
-      (st.doseLiveOn ? " · ao vivo" : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
+      (st.doseLiveOn ? " · ao vivo" : on ? ` · às ${whenLabel(st.doseLiveAt)} · esperando o próximo total do aparelho` : ` · às ${whenLabel(st.doseLiveAt)}, desconectado`);
 }
 
 // alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que
