@@ -66,13 +66,18 @@ jobs:
       - name: Versão
         id: v
         run: echo "ver=${{ needs.check.outputs.ver }}" >> "$GITHUB_OUTPUT"
-      - name: go.sum
-        run: go mod tidy
+      - name: Dependências travadas (go.sum)
+        # o go.sum fica no repositório: confere as somas do que foi baixado e
+        # falha se go.mod/go.sum precisarem de "go mod tidy"
+        run: |
+          go mod download
+          go mod verify
+          go mod tidy -diff
       - name: Testes
         run: go test -tags webkit2_41 ./...
       - name: Windows (.exe)
         run: |
-          go install github.com/tc-hib/go-winres@latest
+          go install github.com/tc-hib/go-winres@v0.3.3
           go-winres make --in build/windows/winres.json
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -tags desktop,production \
             -ldflags "-w -s -H windowsgui" -o "out/RadLog-v${{ steps.v.outputs.ver }}.exe" .

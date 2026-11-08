@@ -29,10 +29,17 @@ jobs:
             echo "apt: tentativa $i falhou"; sleep 10
           done
           exit 1
-      - name: go.sum
-        run: go mod tidy
+      - name: Dependências travadas (go.sum)
+        # o go.sum fica no repositório: confere as somas do que foi baixado e
+        # falha se go.mod/go.sum precisarem de "go mod tidy"
+        run: |
+          go mod download
+          go mod verify
+          go mod tidy -diff
       - name: Testes
         run: go test -tags webkit2_41 ./...
+      - name: Testes com detector de corrida
+        run: go test -race -tags webkit2_41 ./internal/...
       - name: Compila (Windows e Linux)
         run: |
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -tags desktop,production -o /dev/null .

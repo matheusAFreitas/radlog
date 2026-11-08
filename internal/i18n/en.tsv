@@ -2696,3 +2696,6 @@ simulado	simulated
 RadiaCode simulado ligado ({0} µSv/h)	Simulated RadiaCode on ({0} µSv/h)
 [demo] RadiaCode simulado ligado ({0} µSv/h)	[demo] Simulated RadiaCode on ({0} µSv/h)
 Atenção (demo) · RadiaCode	Attention (demo) · RadiaCode
+Erro interno no app ({0}); detalhes no log técnico	Internal error in the app ({0}); details in the technical log
+Erro interno repetido no app ({0}); a tarefa parou. Feche e abra o RadLog	Repeated internal error in the app ({0}); the task stopped. Close and reopen RadLog
+erro interno na leitura ao vivo	internal error in live reading
