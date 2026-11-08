@@ -1780,7 +1780,8 @@ const I18N_EN = {
 "anexo não encontrado": "attachment not found",
 "sem motivo informado": "no reason given",
 "Configuração na época": "Settings at the time",
-"Anexos": "Attachments"
+"Anexos": "Attachments",
+"1 registro do RadiaCode": "1 RadiaCode record"
 },
 "patterns": [
 [
@@ -5571,6 +5572,14 @@ const I18N_EN = {
 "Changed since the measurement: ${1}",
 [
 "Mudou desde a medição: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registros do RadiaCode$",
+"${1} RadiaCode records",
+[
+" registros do RadiaCode"
 ]
 ],
 [

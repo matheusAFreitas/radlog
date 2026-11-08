@@ -557,6 +557,9 @@ type invResp struct {
 	Addrs  []string          `json:"addrs"`
 	Days   map[string]string `json:"days"`
 	Alerts []string          `json:"alerts"`
+	// 2.7.1: RadiaCode e anexos (nil = PC com versão antiga)
+	Rc     *rcInv   `json:"rc,omitempty"`
+	Anexos []string `json:"anexos,omitempty"`
 }
 
 func (a *App) handleInventory(peer string, body []byte) ([]byte, error) {
@@ -579,12 +582,17 @@ func (a *App) handleInventory(peer string, body []byte) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
-	return json.Marshal(invResp{ID: id, Name: hostName(), Addrs: localAddrs(port), Days: days, Alerts: a.alertFiles()})
+	rc := a.rcInventory()
+	return json.Marshal(invResp{ID: id, Name: hostName(), Addrs: localAddrs(port), Days: days, Alerts: a.alertFiles(), Rc: &rc, Anexos: a.attachInventory()})
 }
 
 type pullReq struct {
-	Days   []string `json:"days"`
-	Alerts []string `json:"alerts"`
+	Days    []string `json:"days"`
+	Alerts  []string `json:"alerts"`
+	RcDays  []string `json:"rcDays,omitempty"`
+	RcFiles []string `json:"rcFiles,omitempty"`
+	Anexos  []string `json:"anexos,omitempty"`
+	Rc      bool     `json:"rc,omitempty"` // quem pede entende o pacote novo
 }
 
 func (a *App) handlePull(peer string, body []byte) ([]byte, error) {
@@ -592,7 +600,7 @@ func (a *App) handlePull(peer string, body []byte) ([]byte, error) {
 	if err := json.Unmarshal(body, &req); err != nil {
 		return nil, err
 	}
-	return a.buildDelta(req.Days, req.Alerts)
+	return a.buildDelta(req)
 }
 
 func (a *App) handlePush(peer string, body []byte) ([]byte, error) {
@@ -693,7 +701,8 @@ func (a *App) alertFiles() []string {
 
 // buildDelta monta um "backup" só com os dias e segundos de alerta pedidos,
 // mais os alertas encerrados, períodos, medições e anotações (pequenos).
-func (a *App) buildDelta(days, alerts []string) ([]byte, error) {
+func (a *App) buildDelta(req pullReq) ([]byte, error) {
+	days, alerts := req.Days, req.Alerts
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
 	man, _ := json.Marshal(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)})
@@ -747,6 +756,14 @@ func (a *App) buildDelta(days, alerts []string) ([]byte, error) {
 			if f, err := zw.Create("alertas-detalhe/" + n); err == nil {
 				_, _ = f.Write(b)
 			}
+		}
+	}
+	if req.Rc {
+		if err := a.rcAddToDelta(zw, req.RcDays, req.RcFiles); err != nil {
+			return nil, err
+		}
+		if err := a.attachAddToDelta(zw, req.Anexos); err != nil {
+			return nil, err
 		}
 	}
 	if err := zw.Close(); err != nil {
@@ -1061,7 +1078,14 @@ func (a *App) syncOnce(peer syncPeer, myPort int, listening bool) (SyncResult, e
 		}
 	}
 	sort.Strings(want)
-	pb, _ := json.Marshal(pullReq{Days: want, Alerts: wantAlerts})
+	preq := pullReq{Days: want, Alerts: wantAlerts}
+	newPeer := inv.Rc != nil
+	if newPeer {
+		preq.Rc = true
+		preq.RcDays, preq.RcFiles = rcWant(*inv.Rc, a.rcInventory())
+		preq.Anexos = attachWant(inv.Anexos, a.attachInventory())
+	}
+	pb, _ := json.Marshal(preq)
 	z, err := a.syncCall(addr, peer, "pull", pb, 5*time.Minute)
 	if err != nil {
 		return res, err
@@ -1091,7 +1115,13 @@ func (a *App) syncOnce(peer syncPeer, myPort int, listening bool) (SyncResult, e
 		}
 	}
 	sort.Strings(give)
-	delta, err := a.buildDelta(give, giveAlerts)
+	greq := pullReq{Days: give, Alerts: giveAlerts}
+	if newPeer {
+		greq.Rc = true
+		greq.RcDays, greq.RcFiles = rcWant(a.rcInventory(), *inv.Rc)
+		greq.Anexos = attachWant(a.attachInventory(), inv.Anexos)
+	}
+	delta, err := a.buildDelta(greq)
 	if err != nil {
 		return res, err
 	}

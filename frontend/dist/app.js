@@ -3611,6 +3611,7 @@ function mergeTextJS(r) {
   const p = [];
   const add = (n, one, many) => { if (n === 1) p.push(`1 ${one}`); else if (n > 1) p.push(`${n} ${many}`); };
   add(r.minutes, "minuto de leitura", "minutos de leitura");
+  add(r.rcMinutes, "registro do RadiaCode", "registros do RadiaCode");
   add(r.events, "evento/alerta", "eventos/alertas");
   add(r.periods, "período fora de casa", "períodos fora de casa");
   add(r.measurements, "medição", "medições");

@@ -1,5 +1,23 @@
 # Versões
 
+## 2.7.1
+- **Sincronização entre PCs agora leva o RadiaCode.** Até aqui ela só
+  levava os minutos do GMC, os alertas, os períodos, as medições e as
+  anotações; os dados do RadiaCode ficavam só no PC em que ele estava
+  conectado. Agora vão também:
+  - os minutos, a dose e o log do aparelho, comparando um resumo por dia de
+    cada arquivo (só os dias diferentes são enviados);
+  - os espectros por minuto e os dados brutos já fechados (o arquivo que
+    ainda está sendo gravado vai na sincronização seguinte, depois de
+    fechado);
+  - a atividade (Bq) e a dose acumulada do aparelho;
+  - o histórico de configurações e as versões da calibração do GMC (um PC
+    que nunca leu o contador passa a usar a curva lida pelo outro);
+  - os anexos das medições.
+- O resultado da sincronização mostra quantos registros do RadiaCode
+  entraram. Os dois PCs precisam estar na 2.7.1; com um PC em versão
+  anterior, a sincronização continua só com o que já levava.
+
 ## 2.7.0
 - **Fotos e anexos nas medições de objeto:** em Medir objeto → Salvas,
   "Anexar foto ou arquivo" guarda fotos (do objeto, da posição no tubo) e

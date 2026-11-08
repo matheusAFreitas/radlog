@@ -495,7 +495,19 @@ func (a *App) calMerge(b []byte) {
 				break
 			}
 		}
-		if dup || v.Since == 0 {
+		if dup {
+			continue
+		}
+		if v.Since == 0 {
+			// o começo: se aqui é só o palpite de fábrica (este PC nunca leu o
+			// contador) e lá veio a curva lida do contador, fica a de lá
+			for i := range a.calHist.Versions {
+				w := &a.calHist.Versions[i]
+				if w.Since == 0 && w.Source == "padrão" && v.Source != "padrão" && len(v.Points) > 0 {
+					w.Points, w.Source, w.Factor, w.Note = v.Points, v.Source, v.Factor, v.Note
+					changed = true
+				}
+			}
 			continue
 		}
 		v.ID = a.calNextIDLocked()

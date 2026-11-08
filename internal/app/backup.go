@@ -198,6 +198,7 @@ func mergeText(r MergeResult) string {
 		}
 	}
 	add(r.Minutes, "minuto de leitura", "minutos de leitura")
+	add(r.RcMinutes, "registro do RadiaCode", "registros do RadiaCode")
 	add(r.Events, "evento/alerta", "eventos/alertas")
 	add(r.Periods, "período fora de casa", "períodos fora de casa")
 	add(r.Measurements, "medição", "medições")
