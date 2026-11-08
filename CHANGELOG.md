@@ -1,5 +1,14 @@
 # Versões
 
+## 2.14.1
+- **Fica claro que o número grande do RadiaCode é do aparelho.** No quadro
+  da dose acumulada, o valor em destaque já era a dose medida pelo próprio
+  RadiaCode no período (a mesma da curva no gráfico), mas o rótulo curto
+  "do aparelho" e a linha "No aparelho:" logo abaixo davam a entender que o
+  destaque era a conta do app. Agora o destaque diz "medida pelo aparelho no
+  período" e a linha do total desde que foi zerado virou "Contador do
+  aparelho:"; a conta do app continua em "Pelo app:".
+
 ## 2.14.0
 - **Modo demo com RadiaCode.** No quadro do modo demo há agora "Simular o
   RadiaCode": liga um RadiaCode de mentira com o µSv/h que você escolher

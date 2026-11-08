@@ -1854,6 +1854,8 @@ const I18N_EN = {
 "escondido do gráfico · clique para mostrar": "hidden from the chart · click to show",
 "esperando o próximo total do aparelho": "waiting for the next total from the device",
 "Pelo app:": "By the app:",
+"Contador do aparelho:": "Device counter:",
+"medida pelo aparelho no período": "measured by the device in the period",
 "esperando o primeiro total (vem a cada 3 a 4 min)": "waiting for the first total (every 3 to 4 min)",
 "Simular o RadiaCode": "Simulate the RadiaCode",
 "· quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando": "· panel, alerts and charts with its own limits; the real device, if connected, keeps recording",
