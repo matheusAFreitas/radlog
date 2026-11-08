@@ -1,5 +1,16 @@
 # Versões
 
+## 2.7.2
+- **Corrigido o degrau falso no dosímetro do RadiaCode.** A curva da dose
+  do aparelho tratava qualquer queda do total como "aparelho zerado" e
+  somava o total inteiro de novo (e o tempo contando inteiro, o que também
+  subia o fundo e o teto). Uma queda pequena acontece quando dois registros
+  do mesmo aparelho discordam por pouco (por exemplo, um total estimado num
+  PC e o lido logo depois). Agora só conta como zerado quando o tempo
+  contando e a dose caem para menos da metade; quedas pequenas não somam
+  nada. Vale para o gráfico, o total do período, o fundo, o teto e a "Dose
+  hoje" do aparelho.
+
 ## 2.7.1
 - **Sincronização entre PCs agora leva o RadiaCode.** Até aqui ela só
   levava os minutos do GMC, os alertas, os períodos, as medições e as

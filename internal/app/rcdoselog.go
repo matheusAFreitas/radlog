@@ -8,6 +8,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"math"
 	"os"
 	"path/filepath"
 	"sort"
@@ -99,20 +100,77 @@ func (a *App) rcDoseLog(from, to time.Time) []rcDosePt {
 }
 
 // rcDoseCurve monta o "contador contínuo" a partir dos totais: soma só o que
-// subiu (se o aparelho foi zerado, o total cai e a conta continua dali).
-// Devolve os pontos com a dose acumulada desde o primeiro.
+// subiu além do maior total já visto (se o aparelho foi zerado, a conta
+// continua do novo total). Devolve os pontos com a dose acumulada desde o
+// primeiro.
+//
+// Uma queda pequena não é zerar: com dois PCs anotando o mesmo aparelho, um
+// total estimado por um pode ficar um pouco acima do lido pelo outro logo
+// depois. Antes da 2.7.2 qualquer queda contava como zerado e somava o total
+// inteiro de novo (o degrau no gráfico).
 func rcDoseCurve(pts []rcDosePt) []rcDosePt {
-	out := make([]rcDosePt, 0, len(pts))
-	var v float64
+	resets := rcResets(pts)
+	dose := rcAccumulate(pts, resets, func(p rcDosePt) float64 { return p.Dose })
+	out := make([]rcDosePt, len(pts))
+	for i, p := range pts {
+		out[i] = rcDosePt{p.T, dose[i], p.Sec}
+	}
+	return out
+}
+
+// rcSecsCurve é o tempo contando, contínuo, com a mesma regra.
+func rcSecsCurve(pts []rcDosePt) []rcDosePt {
+	resets := rcResets(pts)
+	secs := rcAccumulate(pts, resets, func(p rcDosePt) float64 { return p.Sec })
+	out := make([]rcDosePt, len(pts))
+	for i, p := range pts {
+		out[i] = rcDosePt{T: p.T, Dose: secs[i]}
+	}
+	return out
+}
+
+// rcResets marca onde o aparelho foi zerado de verdade: o tempo contando (e
+// a dose) cai para menos da metade do maior já visto. Sem o tempo (registros
+// antigos), vale só a dose.
+func rcResets(pts []rcDosePt) []bool {
+	out := make([]bool, len(pts))
+	var hwD, hwS float64
 	for i, p := range pts {
 		if i > 0 {
-			d := p.Dose - pts[i-1].Dose
-			if d < 0 { // zerado no meio: conta o que veio depois do zero
-				d = p.Dose
+			switch {
+			case hwS >= 600:
+				out[i] = p.Sec < hwS*0.5 && p.Dose <= hwD*0.5+1e-6
+			case hwD > 0:
+				out[i] = p.Dose < hwD*0.5
 			}
-			v += d
 		}
-		out = append(out, rcDosePt{p.T, v, p.Sec})
+		if out[i] || i == 0 {
+			hwD, hwS = p.Dose, p.Sec
+			continue
+		}
+		hwD, hwS = math.Max(hwD, p.Dose), math.Max(hwS, p.Sec)
+	}
+	return out
+}
+
+// rcAccumulate soma o que a série subiu além do maior valor já visto desde o
+// último zerado; no zerado, soma o valor novo inteiro.
+func rcAccumulate(pts []rcDosePt, resets []bool, val func(rcDosePt) float64) []float64 {
+	out := make([]float64, len(pts))
+	var v, hw float64
+	for i, p := range pts {
+		x := val(p)
+		switch {
+		case i == 0:
+			hw = x
+		case resets[i]:
+			v += x
+			hw = x
+		case x > hw:
+			v += x - hw
+			hw = x
+		}
+		out[i] = v
 	}
 	return out
 }

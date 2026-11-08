@@ -314,18 +314,7 @@ func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Durat
 	}
 	curve := rcDoseCurve(raw)
 	// tempo contando, também contínuo (zerou: recomeça do que veio depois)
-	secs := make([]rcDosePt, len(raw))
-	var v float64
-	for i, p := range raw {
-		if i > 0 {
-			d := p.Sec - raw[i-1].Sec
-			if d < 0 {
-				d = p.Sec
-			}
-			v += d
-		}
-		secs[i] = rcDosePt{T: p.T, Dose: v}
-	}
+	secs := rcSecsCurve(raw)
 	first, last := raw[0].T, raw[len(raw)-1].T
 	start := from
 	if first.After(start) {
