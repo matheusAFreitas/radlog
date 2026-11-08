@@ -1796,7 +1796,10 @@ const I18N_EN = {
 "Aguardando…": "Waiting…",
 "Saturado": "Saturated",
 "Desconectado": "Disconnected",
-"RadL": "RadL"
+"RadL": "RadL",
+"Ao longo do tempo": "Over time",
+"Tendência do fundo": "Background trend",
+"Agora": "Now"
 },
 "patterns": [
 [

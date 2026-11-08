@@ -1080,7 +1080,7 @@ async function showView(v, skipRender) {
     const top = $("pages").getBoundingClientRect().top + window.scrollY - 12;
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
-  if (v === "graficos") { refreshChart(); refreshHeat(); refreshPatterns(); refreshBgTrend(); }
+  if (v === "graficos") refreshSub("graficos");
   if (v === "dose") refreshDose();
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
@@ -1091,6 +1091,55 @@ async function showView(v, skipRender) {
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
   if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
 }
+
+// sub-abas: Gráficos e RadiaCode mostram uma parte de cada vez (a última
+// escolhida volta quando abre o app)
+const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia"], radiacode: ["agora", "espectro", "espectrograma", "log", "busca", "atividade"] };
+state.sub = {};
+for (const pg of Object.keys(SUBS)) { const v = localGet("sub." + pg, ""); state.sub[pg] = SUBS[pg].includes(v) ? v : SUBS[pg][0]; }
+
+function setSub(pg, sub, focus) {
+  if (!SUBS[pg].includes(sub)) sub = SUBS[pg][0];
+  const changed = state.sub[pg] !== sub;
+  state.sub[pg] = sub;
+  localSet("sub." + pg, sub);
+  const page = $(PAGES[pg]);
+  page.querySelectorAll(".subtabs [data-sub]").forEach((b) => {
+    const on = b.dataset.sub === sub;
+    b.setAttribute("aria-selected", String(on));
+    b.tabIndex = on ? 0 : -1;
+    if (on && focus) b.focus();
+  });
+  page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
+  if (changed && state.view === pg) refreshSub(pg);
+}
+
+function refreshSub(pg) {
+  const s = state.sub[pg];
+  if (pg === "graficos") {
+    if (s === "tempo") refreshChart();
+    else if (s === "hora") refreshHeat();
+    else if (s === "padroes") refreshPatterns();
+    else refreshBgTrend();
+  }
+  // os gráficos do RadiaCode são canvas: redesenha com o tamanho de agora
+  if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
+}
+
+for (const pg of Object.keys(SUBS)) setSub(pg, state.sub[pg]);
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".subtabs [data-sub]");
+  if (b) setSub(b.closest(".subtabs").dataset.page, b.dataset.sub);
+});
+// setas e Home/End entre as sub-abas (padrão de abas)
+document.querySelectorAll(".subtabs").forEach((nav) => nav.addEventListener("keydown", (e) => {
+  const pg = nav.dataset.page, list = SUBS[pg], i = list.indexOf(state.sub[pg]);
+  const j = e.key === "ArrowRight" ? (i + 1) % list.length : e.key === "ArrowLeft" ? (i - 1 + list.length) % list.length
+    : e.key === "Home" ? 0 : e.key === "End" ? list.length - 1 : -1;
+  if (j < 0) return;
+  e.preventDefault();
+  setSub(pg, list[j], true);
+}));
 
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-view]");
@@ -3130,6 +3179,7 @@ function openPeriods(prefill) {
 
 // abre um trecho nos dois gráficos (mesmo jeito do mapa de calor)
 function showRange(from, to) {
+  setSub("graficos", "tempo");
   if (state.view !== "graficos") showView("graficos", true);
   state.zoom = { from, to }; state.zoomStack = [];
   state.doseZoom = { from, to }; state.doseZoomStack = [];
@@ -5515,7 +5565,7 @@ async function refreshCounterSync(cs) {
 
 let patSeq = 0;
 async function refreshPatterns() {
-  if (!api.GetPatterns || state.view !== "graficos") return;
+  if (!api.GetPatterns || state.view !== "graficos" || state.sub.graficos !== "padroes") return;
   const rcOn = hasRcData();
   $("patDevSeg").hidden = !rcOn;
   if (!rcOn) state.patDev = "";
@@ -5631,7 +5681,7 @@ function wirePatterns() {
 const BG_STATE = { estavel: "Estável", subindo: "Tendência de alta", descendo: "Tendência de queda", degrau: "Mudança brusca", insuficiente: "Ainda sem tendência" };
 let bgSeq = 0;
 async function refreshBgTrend() {
-  if (!api.GetBgTrend || state.view !== "graficos") return;
+  if (!api.GetBgTrend || state.view !== "graficos" || state.sub.graficos !== "tendencia") return;
   const days = state.bgDays || 30;
   document.querySelectorAll("#bgSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.bgdays === days)));
   const my = ++bgSeq;

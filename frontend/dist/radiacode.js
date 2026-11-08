@@ -1280,5 +1280,5 @@
     if (sr.osc) { try { sr.osc.stop(); } catch (e) { /* já parou */ } sr.osc = null; }
     if (sr.ctx) sr.ctx.suspend();
   }
-  window.rcDemo = { show, hide };
+  window.rcDemo = { show, hide, redraw: () => { if (visible) drawAll(); } };
 })();

@@ -1,5 +1,21 @@
 # Versões
 
+## 2.9.0
+- **Gráficos e RadiaCode em sub-abas.** As duas páginas mais longas agora
+  mostram uma parte de cada vez, numa barra de abas no topo, sem precisar
+  rolar por tudo:
+  - Gráficos: Ao longo do tempo, Hora do dia, Padrões do fundo e Tendência
+    do fundo.
+  - RadiaCode: Agora (o quadro completo, o aparelho e o lado a lado com o
+    GMC), Espectro, Espectrograma (com a dureza), Log, Modo busca e
+    Atividade (Bq).
+
+  A última aba escolhida em cada página volta quando o app abre. Clicar num
+  alerta ou no mapa de calor abre o trecho em "Ao longo do tempo". As abas
+  também andam pelas setas do teclado. Padrões e Tendência só são calculados
+  com a aba aberta.
+- Em página curta, o rodapé vai para o fim da janela.
+
 ## 2.8.1
 - **Marca nova.** O símbolo virou um trifólio de ondas: um anel com três
   arcos na posição das pás do símbolo de radiação. No topo do menu ele
