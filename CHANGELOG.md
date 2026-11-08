@@ -1,5 +1,17 @@
 # Versões
 
+## 2.12.2
+- **Dose do RadiaCode não fica mais parada.** A curva "do aparelho" usa os
+  totais que o RadiaCode manda a cada ~4 min; se ele para de mandar (ou a
+  conexão cai e volta), a curva e o teto ficavam retos depois do último
+  total, mesmo com o app gravando os minutos. Agora, depois do último total,
+  a curva segue com os minutos que o app gravou, e o fundo e o teto
+  continuam crescendo junto.
+- **Cada aparelho com o seu teto.** No gráfico da dose acumulada, o teto do
+  aparelho principal é a linha vermelha e o do outro aparece pontilhado;
+  antes só havia o teto de um, e a curva do outro parecia passar do limite
+  sem passar.
+
 ## 2.12.1
 - **Corrigido o gráfico de dose vazio num trecho sem RadiaCode.** Com o
   RadiaCode já usado alguma vez, a dose usava ele como aparelho principal

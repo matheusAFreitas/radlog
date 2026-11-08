@@ -39,3 +39,33 @@ func TestRcDoseCurveSmallDropIsNotReset(t *testing.T) {
 		t.Fatalf("sem tempo: %.3f (quero 0,30)", got)
 	}
 }
+
+// 2.12.2: depois do último total do aparelho, a curva segue com os minutos
+// do app (antes ficava parada, e o teto também)
+func TestRcDoseFromDeviceTail(t *testing.T) {
+	a := newTestApp(t)
+	to := time.Now().Truncate(time.Minute)
+	from := to.Add(-60 * time.Minute)
+	// totais do aparelho só até 30 min atrás
+	a.rcDoseLogAppend(from.Add(-time.Minute), 5.0, 1000)
+	a.rcDoseLogAppend(from.Add(30*time.Minute), 5.06, 1000+31*60)
+	var mins []doseMin
+	for k := 0; k < 60; k++ {
+		mins = append(mins, doseMin{T: from.Add(time.Duration(k) * time.Minute), USv: 0.12})
+	}
+	var c DoseChart
+	if !a.rcDoseFromDevice(&c, from, to, time.Minute, mins, 0.1/60, 0.11/60) {
+		t.Fatal("não usou o aparelho")
+	}
+	n := len(c.Dose)
+	if c.Dose[n-1] <= c.Dose[n/2]+0.04 {
+		t.Fatalf("a dose parou depois do último total: meio %v, fim %v", c.Dose[n/2], c.Dose[n-1])
+	}
+	if c.Ceiling[n-1] <= c.Ceiling[n/2]*1.5 {
+		t.Fatalf("o teto parou: meio %v, fim %v", c.Ceiling[n/2], c.Ceiling[n-1])
+	}
+	// os ~29 min depois do último total: 0,12 µSv/h → 0,058 µSv
+	if want := 0.06 + 29*0.12/60; math.Abs(c.Total-want) > 0.01 {
+		t.Fatalf("total %v, quero ~%v", c.Total, want)
+	}
+}

@@ -5007,6 +5007,15 @@ const I18N_EN = {
 ]
 ],
 [
+"teto do ",
+"^teto do ((?:(?! · ).)+?) \\(fundo \\+ limite\\)$",
+"${1} ceiling (background + limit)",
+[
+"teto do ",
+" (fundo + limite)"
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -8480,6 +8489,14 @@ const I18N_EN = {
 "Last: ${1}",
 [
 "Último: "
+]
+],
+[
+"teto do ",
+"^teto do ((?:(?! · ).)+?)$",
+"${1} ceiling",
+[
+"teto do "
 ]
 ],
 [

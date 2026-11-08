@@ -1478,3 +1478,4 @@ html.set-dirty .main { padding-bottom: 72px; }
 .ht-y { display: flex; flex-direction: column; justify-content: space-between; min-width: 36px; font-size: 11px; color: var(--dim); text-align: right; }
 .ht-x-axis { display: flex; justify-content: space-between; padding-left: 44px; font-size: 11px; color: var(--dim); }
 .chart-head > div.ht-title:first-child { flex-direction: row; align-items: center; gap: 10px; }
+.swatch.sw-ceil2 { border-top: 2px dotted #F0656A; }

@@ -327,14 +327,38 @@ func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Durat
 		start = first
 	}
 	d0, s0 := curveAt(curve, start), curveAt(secs, start)
+	// depois do último total do aparelho (ele manda a cada ~4 min; se parou
+	// de mandar ou a conexão caiu), segue com os minutos que o app gravou,
+	// em vez de ficar parado: a dose e o tempo contando continuam subindo
+	var tT []time.Time
+	var tD []float64 // dose somada até cada minuto depois do último total
+	for _, p := range mins {
+		if p.T.Before(last) {
+			continue
+		}
+		prev := 0.0
+		if len(tD) > 0 {
+			prev = tD[len(tD)-1]
+		}
+		tT, tD = append(tT, p.T), append(tD, prev+p.USv/60)
+	}
+	tail := func(t time.Time) (dose, minutes float64) {
+		k := sort.Search(len(tT), func(i int) bool { return !tT[i].Before(t) })
+		if k == 0 {
+			return 0, 0
+		}
+		return tD[k-1], float64(k)
+	}
 	at := func(t time.Time) (dose, minutes float64) {
 		if !t.After(start) {
 			return 0, 0
 		}
+		var td, tm float64
 		if t.After(last) {
+			td, tm = tail(t)
 			t = last
 		}
-		return curveAt(curve, t) - d0, (curveAt(secs, t) - s0) / 60
+		return curveAt(curve, t) - d0 + td, (curveAt(secs, t)-s0)/60 + tm
 	}
 	n := int(to.Sub(from) / step)
 	c.Times, c.Dose, c.Background, c.Ceiling = nil, nil, nil, nil

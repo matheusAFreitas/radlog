@@ -130,6 +130,7 @@ func TestDoseFromDevice(t *testing.T) {
 	}
 	// do primeiro total (-6 h) ao último (-10 min): 5 h 50 min a 0,15 µSv/h
 	want := 0.15 * (6*60 - 10 - 5) / 60.0 // os 5 min antes de zerar se perdem
+	want += 0.15 * 10 / 60                // 2.12.2: depois do último total, os minutos do app
 	if c.DoseSource != "aparelho" || math.Abs(c.Total-want) > 0.01 {
 		t.Fatalf("dose do aparelho: %v (%v) quer %v", c.Total, c.DoseSource, want)
 	}

@@ -1696,7 +1696,11 @@ async function refreshDose() {
 
   // gráfico
   const n = c.times.length;
-  const top0 = Math.max(c.total, c.ceilingTotal, c2 && c2.measuredMinutes ? c2.total : 0) * 1.1 || 1;
+  const top0 = Math.max(c.total, c.ceilingTotal, c2 && c2.measuredMinutes ? Math.max(c2.total, c2.ceilingTotal) : 0) * 1.1 || 1;
+  const has2 = !!(c2 && c2.measuredMinutes);
+  $("doseKeyCeil").textContent = has2 ? `teto do ${c.device === "radiacode" ? "RadiaCode" : "GMC-800"} (fundo + limite)` : "teto (fundo + limite)";
+  $("doseKeyCeil2").hidden = !has2;
+  $("doseKeyCeil2Txt").textContent = has2 ? `teto do ${c2.device === "radiacode" ? "RadiaCode" : "GMC-800"}` : "";
   const mag = Math.pow(10, Math.floor(Math.log10(top0)));
   const top = Math.ceil(top0 / mag * 2) / 2 * mag;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
@@ -1718,6 +1722,10 @@ async function refreshDose() {
     `<path d="${path(c.background)}" fill="none" stroke="#A3ADB4" stroke-width="1.5" stroke-dasharray="5 5" vector-effect="non-scaling-stroke"/>` +
     `<path d="${path(c.ceiling)}" fill="none" stroke="#F0656A" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
     `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` +
+    // teto do outro aparelho (cada um tem o seu fundo): pontilhado
+    (c2 && c2.measuredMinutes && c2.ceiling && c2.ceiling.length > 1
+      ? `<path d="${c2.ceiling.map((v, i) => (i ? "L" : "M") + ((i / (c2.ceiling.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="#F0656A" stroke-opacity=".75" stroke-width="1.5" stroke-dasharray="2 4" vector-effect="non-scaling-stroke"/>`
+      : "") +
     (c2 && c2.measuredMinutes && c2.dose && c2.dose.length > 1
       ? `<path d="${c2.dose.map((v, i) => (i ? "L" : "M") + ((i / (c2.dose.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="${c2.device === "radiacode" ? "#F472B6" : "#6EE7A0"}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
       : "");
