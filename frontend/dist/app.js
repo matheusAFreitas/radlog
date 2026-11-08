@@ -1606,7 +1606,7 @@ function renderDevBoxes(box, list) {
     el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
-    el.querySelector(".dd-pct").textContent = has && c.ceilingTotal > 0 ? `${fmt(pct, pct < 10 ? 1 : 0)}% do teto do período (${(c.limitName || "").toLowerCase()})` : "";
+    el.querySelector(".dd-pct").textContent = has && c.ceilingTotal > 0 ? `${fmt(pct, pct < 10 ? 1 : 0)}% do teto do período (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})` : "";
     box.appendChild(el);
   }
 }
@@ -1618,11 +1618,15 @@ async function refreshDose() {
   // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
   // curva do outro aparelho vai junto, no mesmo eixo
   const src = rcOn0 ? "radiacode" : "gmc";
-  const [c, c2] = await Promise.all([fetchDose(src, state.doseZoom), rcOn0 ? fetchDose("gmc", state.doseZoom).catch(() => null) : null]);
+  const [cA, cB] = await Promise.all([fetchDose(src, state.doseZoom), rcOn0 ? fetchDose("gmc", state.doseZoom).catch(() => null) : null]);
   if (my !== doseSeq) return;
+  // trecho sem RadiaCode (ex.: antes de ele existir): o GMC vira o principal
+  // (fundo, teto e eixo), senão o gráfico ficava vazio com o GMC tendo dado
+  const swap = rcOn0 && !(cA && cA.measuredMinutes) && cB && cB.measuredMinutes;
+  const c = swap ? cB : cA, c2 = swap ? cA : cB;
   state.dose = c;
   state.dose2 = c2;
-  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: c2 }, { key: "rc", name: "RadiaCode", c }] : [{ key: "gmc", name: "GMC-800", c }]);
+  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RadiaCode", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
   $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
   dz.hidden = !state.doseZoom;
@@ -1715,7 +1719,7 @@ async function refreshDose() {
     `<path d="${path(c.ceiling)}" fill="none" stroke="#F0656A" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
     `<path d="${dosePath}" fill="none" stroke="${dcol}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` +
     (c2 && c2.measuredMinutes && c2.dose && c2.dose.length > 1
-      ? `<path d="${c2.dose.map((v, i) => (i ? "L" : "M") + ((i / (c2.dose.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
+      ? `<path d="${c2.dose.map((v, i) => (i ? "L" : "M") + ((i / (c2.dose.length - 1)) * W).toFixed(1) + " " + y(v).toFixed(1)).join("")}" fill="none" stroke="${c2.device === "radiacode" ? "#F472B6" : "#6EE7A0"}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`
       : "");
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
@@ -1753,7 +1757,9 @@ function setupDoseHover() {
     const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
     const c2 = state.dose2, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
     tip.textContent = c2 && j2 >= 0
-      ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
+      ? (c.device === "radiacode"
+        ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
+        : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RadiaCode ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
       : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";

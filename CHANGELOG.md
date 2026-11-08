@@ -1,5 +1,15 @@
 # Versões
 
+## 2.12.1
+- **Corrigido o gráfico de dose vazio num trecho sem RadiaCode.** Com o
+  RadiaCode já usado alguma vez, a dose usava ele como aparelho principal
+  (fundo, teto e eixo); num trecho de antes dele existir, ou em que ele
+  estava desligado, o gráfico ficava em branco com "sem dados no período"
+  mesmo com o GMC-800 tendo medido (acontecia ao abrir um trecho do mapa de
+  calor na aba Dose). Agora o GMC vira o principal quando o RadiaCode não
+  tem dado no trecho.
+- "mSv" no teto não sai mais como "msv".
+
 ## 2.12.0
 - **Dose virou a primeira sub-aba de Gráficos.** "Ao longo do tempo" agora
   se chama Dose e junta os dois gráficos: em cima a taxa de dose, embaixo a
