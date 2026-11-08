@@ -449,6 +449,22 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rc.st.Alarms = &al
 	}
 	a.rc.mu.Unlock()
+	// fecha e limpa também se algo der panic no meio (goLoop reinicia o laço
+	// e o USB/Bluetooth precisa estar livre para a próxima conexão)
+	defer func() {
+		dev.Close()
+		a.rcAlertsOff()
+		a.rcFlushMinute()
+		a.rcRawClose()
+		a.rc.mu.Lock()
+		a.rc.dev = nil
+		a.rcDoseSaveLiveLocked(time.Now())
+		if a.rc.st.State == "conectado" {
+			a.rc.st.State = "procurando"
+		}
+		a.rc.mu.Unlock()
+		a.emitRc()
+	}()
 	via := map[string]string{"usb": "USB", "bluetooth": "Bluetooth"}[dev.Kind()]
 	a.logEvent(fmt.Sprintf("RadiaCode conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
@@ -498,18 +514,6 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			}
 		}
 	}
-	dev.Close()
-	a.rcAlertsOff()
-	a.rcFlushMinute()
-	a.rcRawClose()
-	a.rc.mu.Lock()
-	a.rc.dev = nil
-	a.rcDoseSaveLiveLocked(time.Now())
-	if a.rc.st.State == "conectado" {
-		a.rc.st.State = "procurando"
-	}
-	a.rc.mu.Unlock()
-	a.emitRc()
 }
 
 func (a *App) rcRecords(recs []radiacode.Record) {

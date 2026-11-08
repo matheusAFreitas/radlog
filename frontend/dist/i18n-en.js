@@ -1862,7 +1862,8 @@ const I18N_EN = {
 "Valor simulado do RadiaCode (µSv/h)": "Simulated RadiaCode value (µSv/h)",
 "Valor simulado do RadiaCode em escala logarítmica": "Simulated RadiaCode value on a logarithmic scale",
 "simulado": "simulated",
-"Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode"
+"Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode",
+"erro interno na leitura ao vivo": "internal error in live reading"
 },
 "patterns": [
 [
@@ -2627,6 +2628,15 @@ const I18N_EN = {
 [
 "Um pouco acima do normal (seu normal: ",
 " µSv/h) — pode ser só variação"
+]
+],
+[
+"Erro interno repetido no app (",
+"^Erro interno repetido no app \\(((?:(?! · ).)+?)\\); a tarefa parou\\. Feche e abra o RadLog$",
+"Repeated internal error in the app (${1}); the task stopped. Close and reopen RadLog",
+[
+"Erro interno repetido no app (",
+"); a tarefa parou. Feche e abra o RadLog"
 ]
 ],
 [
@@ -3458,6 +3468,15 @@ const I18N_EN = {
 "≈ ${1} µSv/h · no dry times to compare with yet",
 [
 " µSv/h · sem horários secos para comparar ainda"
+]
+],
+[
+"Erro interno no app (",
+"^Erro interno no app \\(((?:(?! · ).)+?)\\); detalhes no log técnico$",
+"Internal error in the app (${1}); details in the technical log",
+[
+"Erro interno no app (",
+"); detalhes no log técnico"
 ]
 ],
 [

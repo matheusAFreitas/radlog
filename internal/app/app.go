@@ -433,7 +433,7 @@ func (a *App) startup(ctx context.Context) {
 	a.loadNotes()
 	a.loadMeasurements()
 	a.loadRadar()
-	go a.radarLoop(nil)
+	a.goLoop("radarLoop", func() { a.radarLoop(nil) })
 	a.startTray()
 	a.inTray.Store(startedInTray())
 	if a.settings.StartWithWindows {
@@ -452,17 +452,18 @@ func (a *App) startup(ctx context.Context) {
 		st, _ = store.Open(filepath.Join(os.TempDir(), appDirName))
 	}
 	a.store = st
-	go a.scanRetroOnce()
-	go a.updateLoop()
-	go a.cleanOldVersionsLater()
-	go a.alertSecondsLoop()
-	go a.memoryWatch()
-	go a.syncLoop()
-	go a.rcLoop()
-	go func() { a.rcDoseBackfill(); a.rcLogBackfill() }()
+	// tarefas de fundo protegidas contra panic (panics.go)
+	a.goSafe("scanRetroOnce", a.scanRetroOnce)
+	a.goLoop("updateLoop", a.updateLoop)
+	a.goSafe("cleanOldVersionsLater", a.cleanOldVersionsLater)
+	a.goLoop("alertSecondsLoop", a.alertSecondsLoop)
+	a.goLoop("memoryWatch", a.memoryWatch)
+	a.goLoop("syncLoop", a.syncLoop)
+	a.goLoop("rcLoop", a.rcLoop)
+	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill() })
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
-		go a.autoReconnect(0)
+		a.goSafe("autoReconnect", func() { a.autoReconnect(0) })
 	}
 	if runtime.GOOS == "windows" {
 		// espera a versão anterior fechar de vez (troca de versão)
@@ -924,6 +925,16 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		a.logf("leitura ao vivo: encerrada em %s após %s (%d leituras, %d erros) — motivo: %s",
 			port, fmtMinutes(int(time.Since(began).Minutes())), reads, errs, why)
 	}()
+	// erro interno (panic) no laço: registra, solta a porta e reconecta como
+	// numa conexão perdida, em vez de fechar o app (panics.go). Roda antes do
+	// defer acima, que registra o motivo.
+	defer func() {
+		if r := recover(); r != nil {
+			a.recovered("poll", r)
+			why = fmt.Sprintf("erro interno: %v", r)
+			go a.lostConnection(fmt.Errorf("erro interno na leitura ao vivo"))
+		}
+	}()
 
 	for {
 		select {
@@ -1141,7 +1152,7 @@ func (a *App) lostConnection(err error) {
 	auto := a.settings.AutoConnect && !a.manualOff
 	a.mu.Unlock()
 	if auto {
-		go a.autoReconnect(3 * time.Second)
+		a.goSafe("autoReconnect", func() { a.autoReconnect(3 * time.Second) })
 	}
 }
 

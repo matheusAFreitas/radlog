@@ -1,5 +1,27 @@
 # Versões
 
+## 2.15.0
+- **Um erro interno não fecha mais o app.** As tarefas de fundo (leitura do
+  GMC, laço do RadiaCode, sincronização, chuva, atualização, alertas) agora
+  se protegem contra erro interno (panic). Antes, um pacote estranho do
+  Bluetooth, por exemplo, podia fechar o RadLog inteiro e a gravação parava
+  até alguém abrir de novo. Agora:
+  - o erro vai para o log técnico, com os detalhes para diagnóstico, e
+    aparece nos eventos como "Erro interno no app";
+  - a tarefa volta sozinha depois de 5 s, 10 s, 20 s… (até 5 min); se der
+    erro 10 vezes na mesma hora, para e avisa para fechar e abrir o app;
+  - na leitura do GMC, o erro solta a porta e reconecta como numa conexão
+    perdida; no RadiaCode, o USB ou o Bluetooth é liberado para a próxima
+    conexão.
+- **Testes de fuzz do protocolo do RadiaCode.** O DATA_BUF, o espectro e a
+  montagem das respostas em pedaços são testados com milhões de entradas
+  aleatórias (nenhuma derrubou o decodificador).
+- **Build com dependências travadas.** O `go.sum` passa a ficar no
+  repositório e o CI confere as somas (`go mod verify`) e falha se faltar
+  `go mod tidy`, em vez de baixar o que estiver lá na hora. O CI também roda
+  os testes com o detector de corrida, e o `go-winres` da release tem
+  versão fixa.
+
 ## 2.14.1
 - **Fica claro que o número grande do RadiaCode é do aparelho.** No quadro
   da dose acumulada, o valor em destaque já era a dose medida pelo próprio
