@@ -1795,7 +1795,8 @@ const I18N_EN = {
 "Ver histórico de alertas": "See alert history",
 "Aguardando…": "Waiting…",
 "Saturado": "Saturated",
-"Desconectado": "Disconnected"
+"Desconectado": "Disconnected",
+"RadL": "RadL"
 },
 "patterns": [
 [

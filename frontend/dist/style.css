@@ -1360,3 +1360,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .main { padding: 12px 14px 10px; }
 }
 @media (max-width: 420px) { .inst-val { font-size: 34px; } }
+
+/* 2.8.1: marca — o trifólio de ondas no lugar do "o" */
+.side .brand-word { display: block; gap: 0; padding: 4px 10px 14px; font-size: 21px; font-weight: 600; letter-spacing: -.01em; line-height: 1; white-space: nowrap; color: var(--text); }
+.brand-word .brand-o { display: inline-block; width: 1.06em; height: 1.06em; vertical-align: -.27em; margin: 0 -.01em 0 -.07em; color: var(--accent); }
+.side .brand-word svg { width: 1.06em; height: 1.06em; }
+@media (max-width: 900px) { .side .brand-word { padding: 0 8px 0 4px; font-size: 19px; } }

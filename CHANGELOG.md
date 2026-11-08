@@ -1,5 +1,13 @@
 # Versões
 
+## 2.8.1
+- **Marca nova.** O símbolo virou um trifólio de ondas: um anel com três
+  arcos na posição das pás do símbolo de radiação. No topo do menu ele
+  entra no lugar do "o" de RadLog; sozinho, é o ícone do programa, da barra
+  de tarefas e da bandeja (com a bolinha amarela, laranja ou vermelha em
+  atenção, alarme ou perigo, como antes). Nos tamanhos pequenos o traço é
+  mais grosso para continuar legível.
+
 ## 2.8.0
 - **Tela nova: menu na lateral e os aparelhos sempre em cima.** As abas e
   a coluna da esquerda deram lugar a um menu lateral (Análise: Gráficos,
