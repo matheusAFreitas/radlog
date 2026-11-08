@@ -17,6 +17,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"radlog/internal/updsig"
 )
 
 // ---------- atualização pelo GitHub (com clique) ----------
@@ -32,6 +34,7 @@ import (
 const (
 	updateRepo     = "matheusAFreitas/radlog"
 	updateSums     = "SHA256SUMS.txt"
+	updateSig      = updateSums + ".sig" // assinatura Ed25519 (updsig, 2.16)
 	updateEvery    = 24 * time.Hour
 	updateFirstIn  = 30 * time.Second
 	updateWaitTick = 5 * time.Second
@@ -56,7 +59,7 @@ type UpdateInfo struct {
 	Wait      string  `json:"wait"` // o que está segurando a troca
 	Error     string  `json:"error"`
 
-	asset, sums ghAsset
+	asset, sums, sig ghAsset
 }
 
 type ghAsset struct {
@@ -182,20 +185,26 @@ func (a *App) CheckUpdate() (UpdateInfo, error) {
 		return a.updateInfo(), err
 	}
 	asset, manual := pickAsset(rel.Assets)
-	var sums ghAsset
+	var sums, sig ghAsset
 	for _, x := range rel.Assets {
-		if x.Name == updateSums {
+		switch x.Name {
+		case updateSums:
 			sums = x
+		case updateSig:
+			sig = x
 		}
 	}
 	if manual == "" && sums.URL == "" {
 		manual = "a release não tem o " + updateSums + " para conferir o arquivo"
 	}
+	if manual == "" && sig.URL == "" {
+		manual = "a release não tem a assinatura (" + updateSig + "); baixe pela página e confira"
+	}
 	latest := strings.TrimPrefix(rel.Tag, "v")
 	avail := newerVersion(latest, AppVersion)
 	a.setUpdate(func(i *UpdateInfo) {
 		i.Latest, i.Available, i.Notes, i.URL = latest, avail, releaseNotes(rel.Body), rel.HTMLURL
-		i.CanAuto, i.Manual, i.asset, i.sums = manual == "", manual, asset, sums
+		i.CanAuto, i.Manual, i.asset, i.sums, i.sig = manual == "", manual, asset, sums, sig
 		i.CheckedAt, i.State, i.Error = time.Now().UnixMilli(), "", ""
 	})
 	if avail {
@@ -291,9 +300,9 @@ func (a *App) StartUpdate() error {
 		return nil
 	}
 	a.upd.busy = true
-	asset, sums := a.upd.info.asset, a.upd.info.sums
+	asset, sums, sig := a.upd.info.asset, a.upd.info.sums, a.upd.info.sig
 	a.upd.mu.Unlock()
-	go a.runUpdate(info.Latest, asset, sums)
+	a.goSafe("runUpdate", func() { a.runUpdate(info.Latest, asset, sums, sig) })
 	return nil
 }
 
@@ -310,7 +319,7 @@ func (a *App) CancelUpdate() {
 	}
 }
 
-func (a *App) runUpdate(version string, asset, sums ghAsset) {
+func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 	fail := func(err error) {
 		a.logf("atualização para %s falhou: %v", version, err)
 		a.setUpdate(func(i *UpdateInfo) { i.State, i.Error = "erro", err.Error() })
@@ -319,7 +328,7 @@ func (a *App) runUpdate(version string, asset, sums ghAsset) {
 		a.upd.mu.Unlock()
 	}
 	a.setUpdate(func(i *UpdateInfo) { i.State, i.Progress, i.Error, i.Wait = "baixando", 0, "", "" })
-	want, err := expectedSum(sums.URL, asset.Name)
+	want, err := expectedSum(sums.URL, sig.URL, asset.Name)
 	if err != nil {
 		fail(err)
 		return
@@ -482,23 +491,44 @@ func (a *App) cleanOldVersionsLater() {
 	}
 }
 
-// expectedSum lê o SHA-256 do arquivo no SHA256SUMS.txt da release.
-func expectedSum(url, name string) (string, error) {
+// expectedSum lê o SHA-256 do arquivo no SHA256SUMS.txt da release, depois
+// de conferir a assinatura dele (SHA256SUMS.txt.sig, updsig).
+func expectedSum(sumsURL, sigURL, name string) (string, error) {
+	b, err := fetchSmall(sumsURL, updateSums)
+	if err != nil {
+		return "", err
+	}
+	sig, err := fetchSmall(sigURL, updateSig)
+	if err != nil {
+		return "", err
+	}
+	return checkSums(b, sig, name, verifySums)
+}
+
+// verifySums confere a assinatura do SHA256SUMS.txt (troca só nos testes).
+var verifySums = updsig.Verify
+
+// checkSums confere a assinatura do SHA256SUMS.txt e acha a soma de name.
+func checkSums(sums, sig []byte, name string, verify func(data, sig []byte) bool) (string, error) {
+	if !verify(sums, sig) {
+		return "", errors.New("a assinatura do " + updateSums + " não confere; não vou instalar esta versão")
+	}
+	return parseSums(string(sums), name)
+}
+
+// fetchSmall baixa um arquivo pequeno da release (até 64 KB).
+func fetchSmall(url, what string) ([]byte, error) {
 	req, _ := http.NewRequest("GET", url, nil)
 	req.Header.Set("User-Agent", "RadLog-updater/"+AppVersion)
 	resp, err := updateClient.Do(req)
 	if err != nil {
-		return "", fmt.Errorf("não consegui baixar o %s: %w", updateSums, err)
+		return nil, fmt.Errorf("não consegui baixar o %s: %w", what, err)
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("%s: GitHub respondeu %s", updateSums, resp.Status)
+		return nil, fmt.Errorf("%s: GitHub respondeu %s", what, resp.Status)
 	}
-	b, err := io.ReadAll(io.LimitReader(resp.Body, 64<<10))
-	if err != nil {
-		return "", err
-	}
-	return parseSums(string(b), name)
+	return io.ReadAll(io.LimitReader(resp.Body, 64<<10))
 }
 
 // parseSums acha a linha "<sha256>  <arquivo>" (formato do sha256sum).

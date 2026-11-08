@@ -1863,7 +1863,9 @@ const I18N_EN = {
 "Valor simulado do RadiaCode em escala logarítmica": "Simulated RadiaCode value on a logarithmic scale",
 "simulado": "simulated",
 "Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode",
-"erro interno na leitura ao vivo": "internal error in live reading"
+"erro interno na leitura ao vivo": "internal error in live reading",
+"a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira": "the release has no signature (SHA256SUMS.txt.sig); download it from the page and check it",
+"a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão": "the SHA256SUMS.txt signature doesn't match; won't install this version"
 },
 "patterns": [
 [

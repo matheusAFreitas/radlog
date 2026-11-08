@@ -2699,3 +2699,5 @@ Atenção (demo) · RadiaCode	Attention (demo) · RadiaCode
 Erro interno no app ({0}); detalhes no log técnico	Internal error in the app ({0}); details in the technical log
 Erro interno repetido no app ({0}); a tarefa parou. Feche e abra o RadLog	Repeated internal error in the app ({0}); the task stopped. Close and reopen RadLog
 erro interno na leitura ao vivo	internal error in live reading
+a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira	the release has no signature (SHA256SUMS.txt.sig); download it from the page and check it
+a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão	the SHA256SUMS.txt signature doesn't match; won't install this version

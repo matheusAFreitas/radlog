@@ -98,6 +98,14 @@ jobs:
           cd out
           sha256sum *.exe *.AppImage *.tar.gz > SHA256SUMS.txt
           cat SHA256SUMS.txt
+      - name: Assinatura do SHA256SUMS.txt (o app 2.16+ só instala se conferir)
+        env:
+          RADLOG_SIGN_KEY: ${{ secrets.RADLOG_SIGN_KEY }}
+        run: |
+          # sem o segredo, ou com uma chave que não é a do app, o passo falha
+          # e nada é publicado (os apps 2.16+ recusariam a versão)
+          go run ./scripts/sign sign out/SHA256SUMS.txt
+          go run ./scripts/sign verify out/SHA256SUMS.txt
       - name: Notas da versão (do CHANGELOG)
         run: |
           awk -v v="## ${{ steps.v.outputs.ver }}" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md > notes.md
@@ -115,3 +123,4 @@ jobs:
             out/*.AppImage
             out/*.tar.gz
             out/SHA256SUMS.txt
+            out/SHA256SUMS.txt.sig
