@@ -1,5 +1,27 @@
 # Versões
 
+## 2.11.0
+- **Configurações viraram uma página.** Saiu a janela por cima do app:
+  Configurações é um item do menu, com os quadros dos aparelhos em cima
+  como nas outras páginas. As seções ficam numa coluna em grupos:
+  - Aparelhos: GMC-800, Conexão, RadiaCode.
+  - Medição: Calibração do GMC, Tempo morto do tubo, Geiger saturado.
+  - Avisos: Alarme, Aviso de atenção, Alarme de perigo, Fora de casa.
+  - App: Chuva no gráfico, Janela, Idioma, Atualizações.
+  - Dados: Sincronização, Backup, Relatórios, Dados, Histórico de
+    configurações.
+  - Sobre: versão, leitura e protocolo do GMC-800.
+- **Busca.** O campo ao lado do título filtra as seções pelo que está
+  escrito nelas (nomes dos ajustes, explicações e opções) e abre a primeira
+  que bate. Enter abre, Esc limpa.
+- **Barra de mudanças não salvas.** Ao mexer num ajuste que precisa de
+  Salvar, aparece uma barra fixa embaixo dizendo quantos e quais mudaram,
+  com Descartar e Salvar; a engrenagem do menu ganha uma bolinha. Dá para
+  sair da página e voltar sem perder o que estava mexendo. Salvar não fecha
+  mais nada: você continua onde estava.
+- Em janela estreita (menu em cima), as páginas compridas não cortam mais o
+  fim embaixo.
+
 ## 2.10.0
 - **Faixa compacta dos aparelhos ao rolar.** Quando os quadros do topo saem
   da tela, uma faixa fina fica presa em cima com cada aparelho numa linha:

@@ -1101,14 +1101,14 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "graficos";
-const PAGES = { graficos: "pageGraficos", dose: "pageDose", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode" };
+const PAGES = { graficos: "pageGraficos", dose: "pageDose", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
   if (!PAGES[v]) v = "graficos";
   const changed = state.view !== v;
   state.view = v;
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
-  document.querySelectorAll("#sideNav [data-view]").forEach((b) => {
+  document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
     if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
   // trocou de página com a tela rolada: volta para o começo da página
@@ -1126,6 +1126,7 @@ async function showView(v, skipRender) {
   if (v === "resumo") refreshSummary();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
   if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
+  if (v === "config") openSettings();
 }
 
 // sub-abas: Gráficos e RadiaCode mostram uma parte de cada vez (a última
@@ -3551,7 +3552,7 @@ function renderDangerNote() {
     el.textContent = `Seu limite (${fmt(v, 0)}) está acima do perigo do app (${fmt(d, 0)} CPM): quem toca é o alarme de perigo.`;
   } else {
     el.className = "danger-note";
-    el.textContent = `A partir de ${fmt(d, 0)} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em "Níveis do app".`;
+    el.textContent = `A partir de ${fmt(d, 0)} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.`;
   }
 }
 
@@ -3601,30 +3602,44 @@ function renderLevelEq() {
 
 // ---------- configurações: seções na lateral, uma de cada vez ----------
 
-const SET_GROUPS = [["Geral", "setGeneral"], ["Níveis do app", "setLevels"]];
+// grupos do menu das configurações, pelo título de cada seção
+const SET_GROUPS = [
+  ["Aparelhos", ["Contador", "Conexão", "RadiaCode"]],
+  ["Medição", ["Calibração do GMC", "Tempo morto do tubo", "Geiger saturado"]],
+  ["Avisos", ["Alarme", "Aviso de atenção", "Alarme de perigo", "Fora de casa"]],
+  ["App", ["Chuva no gráfico", "Janela", "Idioma", "Atualizações"]],
+  ["Dados", ["Sincronização", "Backup", "Relatórios", "Dados", "Histórico de configurações"]],
+  ["Sobre", ["Sobre"]],
+];
+const SET_NAMES = { Contador: "GMC-800" };
 const setSections = () => [...document.querySelectorAll("#settings .set-panel > fieldset")].filter((f) => !f.hidden);
 const slug = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 function buildSetNav() {
   const nav = $("setNav");
-  nav.textContent = "";
-  for (const [name, pid] of SET_GROUPS) {
-    const fs = [...$(pid).querySelectorAll(":scope > fieldset")].filter((f) => !f.hidden);
+  if (nav.childElementCount) return;
+  const byTitle = new Map(setSections().map((f) => [f.querySelector(":scope > legend").textContent.trim(), f]));
+  const used = new Set();
+  const add = (f, title) => {
+    if (!f.id) f.id = "sec-" + slug(title);
+    const b = document.createElement("button");
+    b.type = "button";
+    b.textContent = SET_NAMES[title] || title;
+    b.dataset.sec = f.id;
+    b.addEventListener("click", () => showSetSection(f.id));
+    nav.appendChild(b);
+    used.add(title);
+  };
+  for (const [name, titles] of SET_GROUPS) {
+    const fs = titles.filter((t) => byTitle.has(t));
     if (!fs.length) continue;
     const h = document.createElement("h4");
     h.textContent = name;
     nav.appendChild(h);
-    for (const f of fs) {
-      const title = f.querySelector(":scope > legend").textContent.trim();
-      if (!f.id) f.id = "sec-" + slug(title);
-      const b = document.createElement("button");
-      b.type = "button";
-      b.textContent = title;
-      b.dataset.sec = f.id;
-      b.addEventListener("click", () => showSetSection(f.id));
-      nav.appendChild(b);
-    }
+    for (const t of fs) add(byTitle.get(t), t);
   }
+  // alguma seção nova que não entrou num grupo: vai no fim, para não sumir
+  for (const [t, f] of byTitle) if (!used.has(t)) add(f, t);
 }
 
 function showSetSection(id) {
@@ -3635,10 +3650,12 @@ function showSetSection(id) {
   const lvOn = !!f.closest("#setLevels");
   $("setGeneral").hidden = lvOn;
   $("setLevels").hidden = !lvOn;
-  $("btnLevelsReset").hidden = !lvOn;
   document.querySelectorAll("#setNav button").forEach((b) => b.setAttribute("aria-current", String(b.dataset.sec === f.id)));
   state.setSec = f.id;
-  $("setContent").scrollTop = 0;
+  if (state.view === "config") {
+    const top = $("settings").getBoundingClientRect().top + window.scrollY - 60;
+    if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
+  }
   if (f.querySelector("#devcfg")) openDevCfg();
 }
 
@@ -3664,7 +3681,13 @@ document.addEventListener("click", async (e) => {
 function wireLevels() {
   for (const id of Object.keys(LV_FIELDS)) $(id).addEventListener("input", () => { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); });
   $("lvDTOn").addEventListener("change", renderDeadTime);
-  $("btnLevelsReset").addEventListener("click", () => { fillLevels(LV_DEFAULT); renderDangerNote(); renderAttnLabel(); });
+  $("btnLevelsReset").addEventListener("click", () => { fillLevels(LV_DEFAULT); renderDangerNote(); renderAttnLabel(); renderSetBar(); });
+  $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
+  $("setSearch").addEventListener("input", setSearch);
+  $("setSearch").addEventListener("keydown", (e) => {
+    if (e.key === "Enter") { const b = document.querySelector("#setNav button:not([hidden])"); if (b) b.click(); }
+    if (e.key === "Escape") { $("setSearch").value = ""; setSearch(); }
+  });
 }
 
 function renderAttnLabel() {
@@ -3918,6 +3941,14 @@ async function refreshAutostart() {
 }
 
 async function openSettings(focusId) {
+  if (state.view !== "config") { showView("config", true); }
+  $("aboutVer").textContent = $("appVersion").textContent || "—";
+  buildSetNav();
+  if (setDirty().length) { // volta com o que estava mexendo
+    if (typeof focusId === "string") showSetFor(focusId); else showSetSection(state.setSec);
+    renderStatus();
+    return;
+  }
   devCfgRead = false;
   refreshReportDir();
   refreshAutostart();
@@ -3937,7 +3968,6 @@ async function openSettings(focusId) {
   $("chkMeasReport").checked = !s.noMeasureReport;
   fillLevels(lv());
   renderAttnLabel();
-  buildSetNav();
   // (o botão da engrenagem chama com o evento do clique: só vale texto)
   if (typeof focusId === "string") showSetFor(focusId); else showSetSection(state.setSec);
   renderDangerNote();
@@ -3946,8 +3976,77 @@ async function openSettings(focusId) {
   renderCfgHist();
   renderCalHist();
   refreshCounterSync();
-  $("settings").showModal();
   await fillPorts();
+  setSnap();
+}
+
+// ---------- mudanças não salvas ----------
+// Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
+// próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+// nomes curtos na barra de mudanças
+const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
+  lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
+const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
+state.setSnap = null;
+function setSnap() {
+  state.setSnap = {};
+  for (const id of SET_SAVE_IDS()) if ($(id)) state.setSnap[id] = setVal($(id));
+  renderSetBar();
+}
+function setDirty() {
+  if (!state.setSnap) return [];
+  return SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+}
+function setFieldName(id) {
+  if (SET_FIELD_NAMES[id]) return SET_FIELD_NAMES[id];
+  const el = $(id);
+  const lab = document.querySelector(`label[for="${id}"]`) || el.closest("label");
+  let t = lab ? (lab.querySelector("span") || lab).textContent : "";
+  t = t.replace(/\s+/g, " ").trim().replace(/\s*\(.*\)$/, "");
+  const sec = el.closest("fieldset");
+  const leg = sec && sec.querySelector(":scope > legend");
+  return (t || (leg ? leg.textContent.trim() : id)).replace(/[:.]$/, "");
+}
+function renderSetBar() {
+  const d = setDirty();
+  $("setBar").hidden = !d.length;
+  document.documentElement.classList.toggle("set-dirty", d.length > 0);
+  $("btnSettings").classList.toggle("dirty", d.length > 0);
+  if (!d.length) return;
+  const names = [...new Set(d.map(setFieldName))];
+  const bar = $("setBarText");
+  bar.textContent = d.length === 1 ? "1 mudança não salva: " : `${d.length} mudanças não salvas: `;
+  names.slice(0, 4).forEach((n, i) => { if (i) bar.append(", "); const b = document.createElement("b"); b.textContent = n; bar.appendChild(b); });
+  if (names.length > 4) bar.append(` e mais ${names.length - 4}`);
+}
+document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
+document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
+
+// ---------- busca nas configurações ----------
+const setNorm = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+function setSearch() {
+  const q = setNorm($("setSearch").value.trim());
+  const secs = setSections();
+  let first = null, n = 0;
+  for (const b of document.querySelectorAll("#setNav button")) {
+    const f = $(b.dataset.sec);
+    const hay = setNorm(b.textContent + " " + f.textContent + " " + [...f.querySelectorAll("option")].map((o) => o.textContent).join(" "));
+    const ok = !q || hay.includes(q);
+    b.hidden = !ok;
+    if (ok) { n++; if (!first || (setNorm(b.textContent).includes(q) && !setNorm($(first).querySelector("legend").textContent).includes(q))) first = f.id; }
+  }
+  // títulos de grupo sem nenhuma seção visível somem
+  for (const h of document.querySelectorAll("#setNav h4")) {
+    let el = h.nextElementSibling, any = false;
+    while (el && el.tagName !== "H4") { if (!el.hidden) any = true; el = el.nextElementSibling; }
+    h.hidden = !any;
+  }
+  $("setSearchInfo").textContent = !q ? "" : n ? (n === 1 ? "1 seção" : `${n} seções`) : "nada encontrado";
+  const cur = secs.find((f) => f.id === state.setSec);
+  if (q && first && (!cur || document.querySelector(`#setNav button[data-sec="${cur.id}"]`).hidden)) showSetSection(first);
 }
 
 // versões da calibração do GMC (2.2)
@@ -4059,7 +4158,7 @@ function initCalHist() {
     if (!st) return;
     $("gmcDiagOut").textContent = st === "esperando" ? "esperando 90 s para ler de novo…" : `testando… (${st})`;
   });
-  on("calibration", () => { if ($("settings").open) renderCalHist(); });
+  on("calibration", () => { if (state.view === "config") renderCalHist(); });
 }
 
 // histórico de configurações (2.1)
@@ -4375,7 +4474,6 @@ function wire() {
   }));
 
   $("statusPill").addEventListener("click", () => openSettings("selPort"));
-  $("btnSettings").addEventListener("click", openSettings);
   $("btnConnectHint").addEventListener("click", () => openSettings("selPort")); // direto na seção Conexão
 
   $("btnRefresh").addEventListener("click", () => fillPorts($("selPort").value));
@@ -4397,7 +4495,6 @@ function wire() {
     try {
       await api.Connect(port);
       state.settings.port = port;
-      $("settings").close();
       toast("Conectado em " + port);
     } catch (e) {
       $("connMsg").textContent = String(e && e.message ? e.message : e);
@@ -4423,7 +4520,7 @@ function wire() {
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
-    $("settings").close();
+    setSnap();
     toast("Configurações salvas");
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));

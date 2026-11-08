@@ -2614,3 +2614,39 @@ voltar ao topo	back to top
 Voltar aos quadros	Back to the panels
 Aparelhos agora (resumo)	Devices now (summary)
 {0} alertas ativos	{0} active alerts
+Buscar ajuste	Search settings
+Buscar ajuste… (ex.: som, porta, backup)	Search settings… (e.g. sound, port, backup)
+Mudanças não salvas	Unsaved changes
+Descartar	Discard
+1 mudança não salva:	1 unsaved change:
+{0} mudanças não salvas:	{0} unsaved changes:
+e mais {0}	and {0} more
+1 seção	1 section
+{0} seções	{0} sections
+nada encontrado	nothing found
+Sobre	About
+Leitura do GMC-800	GMC-800 reading
+Código	Source code
+Versão	Version
+Avisos	Alerts
+App	App
+conectar sozinho	connect automatically
+som do alarme	alarm sound
+trazer a janela para a frente	bring window to front
+aviso de atenção	attention warning
+bandeja ao fechar	tray on close
+iniciar com o Windows	start with Windows
+procurar versão nova	check for new version
+apagar versões antigas	delete old versions
+idioma	language
+relatório da medição	measurement report
+pergunta de fora de casa	away-from-home question
+nível de atenção	attention level
+nível de perigo	danger level
+tempo do silenciar	snooze time
+fim da escala	end of scale
+queda brusca	sudden drop
+tempo do aviso de queda	drop warning time
+compensar o tempo morto	dead-time compensation
+tempo morto τ	dead time τ
+A partir de {0} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.	From {0} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in Alerts → Danger alarm.

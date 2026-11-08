@@ -1806,7 +1806,39 @@ const I18N_EN = {
 "Versão do RadLog": "RadLog version",
 "voltar ao topo": "back to top",
 "Voltar aos quadros": "Back to the panels",
-"Aparelhos agora (resumo)": "Devices now (summary)"
+"Aparelhos agora (resumo)": "Devices now (summary)",
+"Buscar ajuste": "Search settings",
+"Buscar ajuste… (ex.: som, porta, backup)": "Search settings… (e.g. sound, port, backup)",
+"Mudanças não salvas": "Unsaved changes",
+"Descartar": "Discard",
+"1 mudança não salva:": "1 unsaved change:",
+"1 seção": "1 section",
+"nada encontrado": "nothing found",
+"Sobre": "About",
+"Leitura do GMC-800": "GMC-800 reading",
+"Código": "Source code",
+"Versão": "Version",
+"Avisos": "Alerts",
+"App": "App",
+"conectar sozinho": "connect automatically",
+"som do alarme": "alarm sound",
+"trazer a janela para a frente": "bring window to front",
+"aviso de atenção": "attention warning",
+"bandeja ao fechar": "tray on close",
+"iniciar com o Windows": "start with Windows",
+"procurar versão nova": "check for new version",
+"apagar versões antigas": "delete old versions",
+"idioma": "language",
+"relatório da medição": "measurement report",
+"pergunta de fora de casa": "away-from-home question",
+"nível de atenção": "attention level",
+"nível de perigo": "danger level",
+"tempo do silenciar": "snooze time",
+"fim da escala": "end of scale",
+"queda brusca": "sudden drop",
+"tempo do aviso de queda": "drop warning time",
+"compensar o tempo morto": "dead-time compensation",
+"tempo morto τ": "dead time τ"
 },
 "patterns": [
 [
@@ -1973,6 +2005,15 @@ const I18N_EN = {
 "Deixe o ",
 " no objeto e o ",
 " com você (no bolso ou na mão): no fim, o app mostra quanto você recebeu enquanto o objeto era medido."
+]
+],
+[
+"A partir de ",
+"^A partir de ((?:(?! · ).)+?) CPM toca o alarme de perigo do app \\(vermelho\\), com prioridade sobre o seu\\. Ajuste em Avisos → Alarme de perigo\\.$",
+"From ${1} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in Alerts → Danger alarm.",
+[
+"A partir de ",
+" CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo."
 ]
 ],
 [
@@ -5968,6 +6009,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) mudanças não salvas:$",
+"${1} unsaved changes:",
+[
+" mudanças não salvas:"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -8522,6 +8571,22 @@ const I18N_EN = {
 "${1} attachments",
 [
 " anexos"
+]
+],
+[
+"e mais ",
+"^e mais ((?:(?! · ).)+?)$",
+"and ${1} more",
+[
+"e mais "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) seções$",
+"${1} sections",
+[
+" seções"
 ]
 ],
 [
