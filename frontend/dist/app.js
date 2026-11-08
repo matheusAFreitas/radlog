@@ -317,6 +317,8 @@ function renderGTile() {
     else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word);
+  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
+  agoraNow();
   tileFoot($("gTileFoot"), u, v, state.gDose);
   miniDev("G", u, v, lvl, word, s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "", !live);
 }
@@ -365,6 +367,7 @@ function renderATile() {
   $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
   $("mini").classList.toggle("alerting", !!top);
   ["atencao", "alerta", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
+  agoraNow();
   const nav = $("navAlerts");
   nav.hidden = !top;
   nav.textContent = String(srcs.size);
@@ -1112,8 +1115,8 @@ function wireLogs() {
 // O menu da esquerda troca a página; o painel dos aparelhos fica sempre em
 // cima. Gráficos é a página de abertura.
 
-state.view = "graficos";
-const PAGES = { graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+state.view = "agora"; // 2.17: a tela inicial é a "Agora"
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
@@ -1139,6 +1142,7 @@ async function showView(v, skipRender) {
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
   if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
   if (v === "config") openSettings();
+  if (v === "agora") refreshAgora();
 }
 
 // sub-abas: Gráficos e RadiaCode mostram uma parte de cada vez (a última
@@ -1826,7 +1830,7 @@ function setupDoseHover() {
 
 function wireDose() {
   $("doseLimit").addEventListener("change", () => {
-    state.doseLimit = $("doseLimit").value; localSet("doseLimit", state.doseLimit); refreshDose();
+    state.doseLimit = $("doseLimit").value; localSet("doseLimit", state.doseLimit); refreshDose(); agAt = 0; // o teto da Minha dose muda junto
   });
   setupDoseHover();
   setupDoseZoom();
@@ -5535,6 +5539,8 @@ function renderRcMain(st) {
   $("rcLevelMarker").hidden = usv == null;
   if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
   renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
+  state.rNow = { live, lvl, usv };
+  agoraNow();
   // medidas
   const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
@@ -6288,6 +6294,7 @@ async function init() {
   await refreshPeriods();
   await refreshMeasurements();
   await refreshAll();
+  refreshAgora(true);
   if (!hasGo) toast("Modo demonstração: abra pelo app para usar o contador de verdade.");
   // Garante que o gráfico de 7 dias e as datas "hoje/ontem" virem o dia.
   setInterval(refreshAll, 5 * 60 * 1000);
@@ -7169,6 +7176,33 @@ const demoRc = () => {
     },
     GetDoseSrc: async (period, limit, src) => api._doseSrc(await api.GetDose(period, limit), src),
     GetDoseRangeSrc: async (from, to, limit, src) => api._doseSrc(await api.GetDoseRange(from, to, limit), src),
+    // Minha dose (2.17): os mesmos cálculos da dose nos períodos do calendário
+    GetMyDose: async (limit) => {
+      const now = Math.floor(Date.now() / 6e4) * 6e4 + 6e4, d = new Date(now);
+      const day = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+      const wk = day - ((d.getDay() + 6) % 7) * 864e5;
+      const ps = [["dia", day], ["semana", wk], ["mes", new Date(d.getFullYear(), d.getMonth(), 1).getTime()], ["ano", new Date(d.getFullYear(), 0, 1).getTime()]];
+      const lim = limit === "trabalhador" ? 20 : 1;
+      const one = async (src) => {
+        const out = { device: src === "radiacode" ? "radiacode" : "gmc", hasData: false, periods: [], backgroundRate: 0 };
+        for (const [key, from] of ps) {
+          const c = await api.GetDoseRangeSrc(from, now, limit, src);
+          const above = c.backgroundTotal > 0 ? c.total / c.backgroundTotal - 1 : 0;
+          out.periods.push({ key, from, to: now, total: c.total, background: c.backgroundTotal, allowance: c.allowance, excess: c.excess, above, measuredMinutes: c.measuredMinutes, coverage: c.coverage, doseSource: c.doseSource });
+          if (c.measuredMinutes > 0) out.hasData = true;
+          out.backgroundRate = c.backgroundRate;
+          if (key === "ano") {
+            out.yearProjection = c.measuredMinutes ? (c.total / c.measuredMinutes) * 525960 : 0;
+            out.yearBackground = c.backgroundRate * 24 * 365.25;
+            out.yearCeiling = out.yearBackground + lim * 1000;
+          }
+        }
+        return out;
+      };
+      const personal = demoRcFake() ? await one("radiacode") : { device: "radiacode", hasData: false, periods: [], backgroundRate: 0 };
+      const home = await one("gmc");
+      return { now, limitName: "", limitMSvYear: lim, personal, home, default: personal.hasData ? "pessoal" : "casa" };
+    },
     _dose: (from, to, step, limit) => {
       const span = to - from;
       const p = range(from, to);

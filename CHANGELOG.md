@@ -1,5 +1,26 @@
 # Versões
 
+## 2.17.0
+- **Tela "Agora", a nova página inicial.** O app abre nela, e ela fica no
+  topo da barra lateral.
+  - **Uma frase no topo** responde se está tudo bem: "Tudo normal agora",
+    com a taxa da casa e a sua, e se a leitura está dentro do seu fundo; ou
+    qual alerta está ativo e em qual aparelho; ou que nenhum aparelho está
+    lendo.
+  - **Minha dose**: a dose de hoje, desta semana (desde segunda), deste mês
+    e deste ano, com quanto o fundo natural sozinho daria nos mesmos
+    minutos. Escolha entre "pessoal" (RadiaCode, que anda com você) e
+    "casa" (GMC-800); o app começa pelo RadiaCode quando ele tem dado no
+    ano. No ano, mostra quanto daria o ano inteiro nesse ritmo e uma barra
+    com a dose do ano, o fundo do ano inteiro e o teto (fundo + limite
+    escolhido na Dose acumulada).
+  - **Hoje**: as duas curvas das últimas 24 h, com o nível de atenção e os
+    trechos fora de casa, e a lista do dia (alertas, anotações e saídas).
+- As contas da Minha dose seguem as da Dose acumulada (só os minutos
+  medidos entram). Os períodos do calendário e a projeção do ano estão em
+  `internal/core/dose`, o primeiro pacote do núcleo sem interface, que o app
+  Android vai reaproveitar.
+
 ## 2.16.0
 - **Atualização assinada.** O app só instala uma versão nova se a
   assinatura do `SHA256SUMS.txt` conferir com a chave das releases do

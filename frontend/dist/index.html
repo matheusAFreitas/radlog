@@ -42,8 +42,9 @@
 <aside class="side" id="side">
   <div class="side-head"><div class="brand brand-word" role="img" aria-label="RadLog"><span aria-hidden="true">RadL</span><svg class="brand-o" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><circle cx="24" cy="24" r="9.4" stroke-width="4.6"/><path stroke-width="3" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/></svg><span aria-hidden="true">g</span></div><span class="side-ver mono" id="appVersion" title="Versão do RadLog"></span></div>
   <nav class="side-nav" id="sideNav" aria-label="Páginas">
+    <button type="button" data-view="agora" aria-current="page"><span>Agora</span></button>
     <span class="side-group">Análise</span>
-    <button type="button" data-view="graficos" aria-current="page"><span>Gráficos</span></button>
+    <button type="button" data-view="graficos"><span>Gráficos</span></button>
     <button type="button" data-view="resumo"><span>Resumo</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
@@ -199,7 +200,41 @@
 </section>
 
 <main class="pages" id="pages">
-<div class="page" id="pageGraficos">
+<div class="page" id="pageAgora">
+  <section class="card ag-say" id="agSay" aria-live="polite">
+    <div class="ag-say-text">
+      <h2 id="agSayTitle">Carregando…</h2>
+      <p class="muted" id="agSayText"></p>
+    </div>
+    <span class="chip mono" id="agSayBg" hidden></span>
+  </section>
+
+  <section class="card" id="agDose">
+    <div class="card-head">
+      <h2>Minha dose</h2>
+      <div class="seg" role="group" aria-label="Aparelho da dose" id="agDevSeg">
+        <button type="button" data-dev="pessoal" aria-pressed="true">pessoal</button>
+        <button type="button" data-dev="casa" aria-pressed="false">casa</button>
+      </div>
+    </div>
+    <p class="small muted" id="agDevNote"></p>
+    <div class="ag-cells" id="agCells"></div>
+    <div class="ag-bar" id="agBar" aria-hidden="true"><i class="ag-nat"></i><i class="ag-me"></i><i class="ag-cap"></i></div>
+    <div class="ag-leg small" id="agLeg"></div>
+  </section>
+
+  <section class="card" id="agDay">
+    <div class="card-head">
+      <h2>Hoje</h2>
+      <button type="button" class="btn small" data-view="graficos">Abrir nos gráficos</button>
+    </div>
+    <svg class="ag-chart" id="agChart" viewBox="0 0 800 120" preserveAspectRatio="none" role="img" aria-label="Taxa de dose nas últimas 24 horas"></svg>
+    <div class="ag-axis mono small"><span id="agAx0"></span><span id="agAx1"></span><span>agora</span></div>
+    <ul class="ag-items small" id="agItems"></ul>
+  </section>
+</div>
+
+<div class="page" id="pageGraficos" hidden>
   <nav class="subtabs" role="tablist" aria-label="Gráficos" data-page="graficos">
     <button type="button" role="tab" data-sub="tempo" aria-selected="true">Dose</button>
     <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1">Hora do dia</button>
@@ -1728,6 +1763,7 @@
 <script src="i18n.js"></script>
 <script src="regua.js"></script>
 <script src="radiacode.js"></script>
+<script src="agora.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
