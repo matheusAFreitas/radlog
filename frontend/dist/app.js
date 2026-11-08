@@ -1610,7 +1610,7 @@ function renderDevBoxes(box, list) {
     // limite não inclui a radiação natural), cada aparelho com o seu fundo
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "do aparelho" : "calculada pelo app") : "calculada pelo app";
+    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
@@ -2440,8 +2440,8 @@ function renderDoseDevice() {
     if (st.doseLiveAt > 0) {
       const v = st.doseLive;
       const when = st.doseLiveOn ? "ao vivo" : on ? `total das ${hhmm(st.doseLiveAt)}` : `${whenLabel(st.doseLiveAt)}, desconectado`;
-      lines.push(["No aparelho:", `${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)})` : "") + ` · ${when}`]);
-    } else lines.push(["No aparelho:", "esperando o primeiro total (vem a cada 3 a 4 min)"]);
+      lines.push(["Contador do aparelho:", `${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)})` : "") + ` · ${when}`]);
+    } else lines.push(["Contador do aparelho:", "esperando o primeiro total (vem a cada 3 a 4 min)"]);
     const dev = c.doseSource === "aparelho";
     const tot = dev ? c.appTotal : c.total, mins = dev ? c.appMinutes : c.measuredMinutes;
     const cov = (dev ? c.appCoverage : c.coverage) * 100;

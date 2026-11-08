@@ -2677,6 +2677,8 @@ esperando o próximo total do aparelho	waiting for the next total from the devic
 {0}% do limite · {1} acima do fundo, de {2} permitidos ({3})	{0}% of the limit · {1} above background, of {2} allowed ({3})
 No aparelho:	On the device:
 Pelo app:	By the app:
+Contador do aparelho:	Device counter:
+medida pelo aparelho no período	measured by the device in the period
 {0} µSv desde que foi zerado ({1})	{0} µSv since it was reset ({1})
 {0} µSv desde que foi zerado	{0} µSv since it was reset
 total das {0}	total from {0}
