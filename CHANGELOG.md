@@ -1,5 +1,11 @@
 # Versões
 
+## 2.9.1
+- **Sem rodapé.** A versão foi para o lado do nome, no topo do menu. "Leitura
+  a cada 1 s" e "Protocolo GQ-RFC1201" ficam em Configurações, no quadro do
+  contador, e a pasta de dados continua em Configurações → Dados → Abrir
+  pasta.
+
 ## 2.9.0
 - **Gráficos e RadiaCode em sub-abas.** As duas páginas mais longas agora
   mostram uma parte de cada vez, numa barra de abas no topo, sem precisar

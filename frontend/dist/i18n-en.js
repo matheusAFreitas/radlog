@@ -1799,7 +1799,11 @@ const I18N_EN = {
 "RadL": "RadL",
 "Ao longo do tempo": "Over time",
 "Tendência do fundo": "Background trend",
-"Agora": "Now"
+"Agora": "Now",
+"Leitura": "Reading",
+"a cada 1 s": "every 1 s",
+"Protocolo": "Protocol",
+"Versão do RadLog": "RadLog version"
 },
 "patterns": [
 [

@@ -4393,7 +4393,6 @@ function wire() {
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
-  $("footData").addEventListener("click", () => call(api.OpenDataFolder));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
 ;
@@ -5899,7 +5898,7 @@ async function init() {
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
   renderStatus();
-  try { $("appVersion").textContent = "v" + (await api.GetVersion()) + " · "; } catch (e) { /* sem versão */ }
+  try { const v = await api.GetVersion(); $("appVersion").textContent = /^\d/.test(v) ? "v" + v : v; } catch (e) { /* sem versão */ }
   try {
     state.platform = api.GetPlatform ? await api.GetPlatform() : "windows";
     // bandeja e iniciar com o sistema só existem no Windows
