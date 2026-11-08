@@ -1732,7 +1732,55 @@ const I18N_EN = {
 "Perigo (c) (d)": "Danger (c) (d)",
 "Atenção (c)": "Attention (c)",
 "Alarme (c)": "Alarm (c)",
-"Perigo (c)": "Danger (c)"
+"Perigo (c)": "Danger (c)",
+"Comparabilidade": "Comparability",
+"Marcar como não comparável": "Mark as not comparable",
+"Desmarcar": "Unmark",
+"Marcar": "Mark",
+"motivo: outro recipiente, outra posição, objeto partido…": "reason: another container, another position, broken object…",
+"Motivo": "Reason",
+"Configuração do contador na época": "Counter settings at the time",
+"Outras medições deste objeto": "Other measurements of this object",
+"Fotos e anexos": "Photos and attachments",
+"Anexar foto ou arquivo": "Attach photo or file",
+"Marcada como não comparável. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.": "Marked as not comparable. It stays saved, but should not be compared with the other measurements of this object.",
+"Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.": "Comparable with the other measurements of the same object (same name), if the distance and the settings are the same.",
+"Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.": "RadiaCode measurement: µSv/h comes from the device's own calibration.",
+"Sem registro: o histórico de configurações começa na versão 2.1.": "No record: the settings history starts in version 2.1.",
+"O resultado guardado usa a configuração da época.": "The saved result uses the settings of that time.",
+"Igual à de hoje.": "Same as today.",
+"calibração em uso": "calibration in use",
+"tempo morto": "dead time",
+"calibração do gmc": "GMC calibration",
+"Nenhuma outra medição com este nome. Dê o mesmo nome para medir o mesmo objeto de novo e acompanhar.": "No other measurement with this name. Use the same name to measure the same object again and follow it over time.",
+"não comparável": "not comparable",
+"comparável": "comparable",
+"marcada como não comparável": "marked as not comparable",
+"esta medição está marcada como não comparável": "this measurement is marked as not comparable",
+"outro aparelho": "another device",
+"outra distância": "another distance",
+"Nenhum anexo. Fotos do objeto e da posição no tubo ajudam a repetir a medição do mesmo jeito.": "No attachments. Photos of the object and of its position on the tube help repeat the measurement the same way.",
+"Abrir": "Open",
+"Remover": "Remove",
+"Memória do contador perto de encher": "Counter memory almost full",
+"Memória do contador praticamente cheia": "Counter memory practically full",
+"Há minutos para buscar no contador": "There are minutes to fetch from the counter",
+"Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos.": "When it fills up, new data may not be recorded or may overwrite the old data.",
+"Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.": "Download the history to keep everything in the app; then, to free up space, erase the memory from the counter's menu.",
+"O contador não está gravando na memória: minutos sem o app não podem ser recuperados.": "The counter is not recording to memory: minutes without the app can't be recovered.",
+"O último download foi interrompido antes do fim da memória.": "The last download was interrupted before the end of the memory.",
+"A memória do contador ainda não foi baixada por este app.": "The counter's memory hasn't been downloaded by this app yet.",
+"O contador não está gravando na memória (gravação desligada).": "The counter is not recording to memory (recording off).",
+"Dados novos podem não ser gravados ou podem sobrescrever os antigos.": "New data may not be recorded or may overwrite the old data.",
+"Baixe o histórico para guardar tudo no app.": "Download the history to keep everything in the app.",
+"Anexar à medição": "Attach to the measurement",
+"Fotos e documentos": "Photos and documents",
+"Todos os arquivos": "All files",
+"arquivo grande demais para mostrar aqui; use Abrir": "file too large to show here; use Open",
+"anexo não encontrado": "attachment not found",
+"sem motivo informado": "no reason given",
+"Configuração na época": "Settings at the time",
+"Anexos": "Attachments"
 },
 "patterns": [
 [
@@ -1950,6 +1998,25 @@ const I18N_EN = {
 ]
 ],
 [
+"Marcada como não comparável: ",
+"^Marcada como não comparável: ((?:(?! · ).)+?)\\. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto\\.$",
+"Marked as not comparable: ${1}. It stays saved, but should not be compared with the other measurements of this object.",
+[
+"Marcada como não comparável: ",
+". Ela continua salva, mas não deve ser comparada com as outras medições deste objeto."
+]
+],
+[
+"Depois dele, o app ficou ",
+"^Depois dele, o app ficou ((?:(?! · ).)+?) sem leitura \\(desde ((?:(?! · ).)+?)\\); a memória do contador pode ter esses minutos: baixe o histórico\\.$",
+"After it, the app went ${1} without readings (since ${2}); the counter's memory may have those minutes: download the history.",
+[
+"Depois dele, o app ficou ",
+" sem leitura (desde ",
+"); a memória do contador pode ter esses minutos: baixe o histórico."
+]
+],
+[
 "Pico suspeito de interferência: ",
 "^Pico suspeito de interferência: ((?:(?! · ).)+?) contagens em 1 s às ((?:(?! · ).)+?), com os 20 s em volta normais \\(esperado \\~((?:(?! · ).)+?) por segundo\\)\\.$",
 "Suspected interference peak: ${1} counts in 1 s at ${2}, with the surrounding 20 s normal (expected ~${3} per second).",
@@ -2068,6 +2135,17 @@ const I18N_EN = {
 "${1} µSv (difference between the totals reported by the device; includes the time out of the PC's reach)",
 [
 " µSv (diferença entre os totais informados pelo aparelho; inclui o tempo fora do alcance do PC)"
+]
+],
+[
+"A memória está cerca de ",
+"^A memória está cerca de ((?:(?! · ).)+?)% ocupada \\(estimado desde o download\\) e enche em cerca de ((?:(?! · ).)+?) no modo \"((?:(?! · ).)+?)\"\\.$",
+"The memory is about ${1}% full (estimated since the download) and fills up in about ${2} in \"${3}\" mode.",
+[
+"A memória está cerca de ",
+"% ocupada (estimado desde o download) e enche em cerca de ",
+" no modo \"",
+"\"."
 ]
 ],
 [
@@ -2236,6 +2314,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Memória do GMC perto de encher: cerca de ",
+"^Memória do GMC perto de encher: cerca de ((?:(?! · ).)+?)% ocupada \\(estimado desde o download de ((?:(?! · ).)+?)\\)\\.$",
+"GMC memory almost full: about ${1}% used (estimated since the download on ${2}).",
+[
+"Memória do GMC perto de encher: cerca de ",
+"% ocupada (estimado desde o download de ",
+")."
+]
+],
+[
 "O período começa ",
 "^O período começa ((?:(?! · ).)+?) antes do primeiro dado do contador \\(((?:(?! · ).)+?)\\); esse trecho não é lacuna\\.$",
 "The period starts ${1} before the counter's first reading (${2}); that stretch is not a gap.",
@@ -2395,6 +2483,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Em dia: último download em ",
+"^Em dia: último download em ((?:(?! · ).)+?) e nenhum trecho sem leitura no app desde então\\.$",
+"Up to date: last download on ${1} and no stretch without readings in the app since then.",
+[
+"Em dia: último download em ",
+" e nenhum trecho sem leitura no app desde então."
+]
+],
+[
 "Conectando a ",
 "^Conectando a ((?:(?! · ).)+?)… leva alguns segundos\\. Deixe o app do celular desconectado\\.$",
 "Connecting to ${1}… it takes a few seconds. Keep the phone app disconnected.",
@@ -2547,6 +2644,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Memória do GMC praticamente cheia: cerca de ",
+"^Memória do GMC praticamente cheia: cerca de ((?:(?! · ).)+?)% ocupada \\(estimado\\)\\.$",
+"GMC memory practically full: about ${1}% used (estimated).",
+[
+"Memória do GMC praticamente cheia: cerca de ",
+"% ocupada (estimado)."
+]
+],
+[
 "Perigo (histórico do contador): pico de ",
 "^Perigo \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Danger (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -2629,6 +2735,23 @@ const I18N_EN = {
 [
 "sem permissão para abrir ",
 " (talvez outro programa esteja usando)"
+]
+],
+[
+"A memória está cerca de ",
+"^A memória está cerca de ((?:(?! · ).)+?)% ocupada \\(estimado desde o download\\)\\.$",
+"The memory is about ${1}% full (estimated since the download).",
+[
+"A memória está cerca de ",
+"% ocupada (estimado desde o download)."
+]
+],
+[
+"marcada como não comparável com outras medições do mesmo objeto: ",
+"^marcada como não comparável com outras medições do mesmo objeto: ((?:(?! · ).)+?)$",
+"marked as not comparable with other measurements of the same object: ${1}",
+[
+"marcada como não comparável com outras medições do mesmo objeto: "
 ]
 ],
 [
@@ -3199,6 +3322,14 @@ const I18N_EN = {
 [
 "· possível interferência (",
 " contagens em 1 s às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) arquivo\\(s\\) guardado\\(s\\) com a medição no app: ((?:(?! · ).)+?)$",
+"${1} file(s) saved with the measurement in the app: ${2}",
+[
+" arquivo(s) guardado(s) com a medição no app: "
 ]
 ],
 [
@@ -5427,6 +5558,22 @@ const I18N_EN = {
 ]
 ],
 [
+"outra configuração (",
+"^outra configuração \\(((?:(?! · ).)+?)\\)$",
+"other settings (${1})",
+[
+"outra configuração ("
+]
+],
+[
+"Mudou desde a medição: ",
+"^Mudou desde a medição: ((?:(?! · ).)+?)$",
+"Changed since the measurement: ${1}",
+[
+"Mudou desde a medição: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -5752,6 +5899,22 @@ const I18N_EN = {
 "% medido (",
 " de ",
 " min)"
+]
+],
+[
+"Mudou desde então: ",
+"^Mudou desde então: ((?:(?! · ).)+?)\\.$",
+"Changed since then: ${1}.",
+[
+"Mudou desde então: "
+]
+],
+[
+"Último download em ",
+"^Último download em ((?:(?! · ).)+?)\\.$",
+"Last download on ${1}.",
+[
+"Último download em "
 ]
 ],
 [
@@ -6102,6 +6265,22 @@ const I18N_EN = {
 [
 "média ",
 " minutos)"
+]
+],
+[
+"Calibração em uso: ",
+"^Calibração em uso: ((?:(?! · ).)+?)$",
+"Calibration in use: ${1}",
+[
+"Calibração em uso: "
+]
+],
+[
+"Calibração do GMC: ",
+"^Calibração do GMC: ((?:(?! · ).)+?)$",
+"GMC calibration: ${1}",
+[
+"Calibração do GMC: "
 ]
 ],
 [
@@ -6460,6 +6639,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): maior que 25 MB$",
+"${1}: larger than 25 MB",
+[
+": maior que 25 MB"
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -6612,6 +6799,14 @@ const I18N_EN = {
 [
 "Média: ",
 " µSv/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): não encontrado$",
+"${1}: not found",
+[
+": não encontrado"
 ]
 ],
 [
@@ -7137,6 +7332,14 @@ const I18N_EN = {
 "${1} min over 1 day",
 [
 " min em 1 dia"
+]
+],
+[
+"Tempo morto: ",
+"^Tempo morto: ((?:(?! · ).)+?)$",
+"Dead time: ${1}",
+[
+"Tempo morto: "
 ]
 ],
 [
@@ -7893,6 +8096,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) \\(esta\\)$",
+"${1} (this one)",
+[
+" (esta)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
 [
@@ -8200,6 +8411,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) anexos$",
+"${1} attachments",
+[
+" anexos"
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -8301,6 +8520,14 @@ const I18N_EN = {
 "average ${1}",
 [
 "média "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) anexo$",
+"${1} attachment",
+[
+" anexo"
 ]
 ],
 [

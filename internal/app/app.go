@@ -456,6 +456,7 @@ func (a *App) startup(ctx context.Context) {
 	go a.updateLoop()
 	go a.cleanOldVersionsLater()
 	go a.alertSecondsLoop()
+	go a.memoryWatch()
 	go a.syncLoop()
 	go a.rcLoop()
 	go func() { a.rcDoseBackfill(); a.rcLogBackfill() }()
@@ -1243,6 +1244,10 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	res.Added = len(added)
 	res.Alerts = a.retroAlerts(added)
 	res.NewRanges = a.newRanges(added)
+	if len(raw) > 0 {
+		a.recordCounterSync(h, res, err == nil)
+		defer func() { a.emit("countersync", a.GetCounterSync()) }()
+	}
 
 	msg := fmt.Sprintf("Histórico baixado: %d registros, %d minutos novos", res.Records, res.Added)
 	switch res.Alerts {

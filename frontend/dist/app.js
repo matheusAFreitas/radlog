@@ -236,6 +236,7 @@ function renderStatus() {
 
   const connected = s.state === "conectado";
   $("btnHistory").disabled = !connected || s.downloading;
+  if ($("btnSyncDl")) $("btnSyncDl").disabled = !connected || s.downloading;
   $("clockChip").disabled = !connected || s.downloading;
   $("emptyHint").hidden = connected || s.state === "conectando" || state.demo.active;
 
@@ -2618,7 +2619,8 @@ function renderMeasureHistory() {
     b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
     b.querySelector(".mh-dot").classList.add(m.result.level);
     b.querySelector("strong").textContent = m.name;
-    b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}`;
+    b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}` + ((m.attachments || []).length ? ` · ${m.attachments.length} anexo${m.attachments.length > 1 ? "s" : ""}` : "");
+    if (m.notComparable) { const tg = document.createElement("span"); tg.className = "nc-tag"; tg.textContent = "não comparável"; b.querySelector("strong").appendChild(tg); }
     const net = b.querySelector(".m-item-net");
     net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${numU(Math.abs(m.result.netUSv))}`;
     net.title = "µSv/h acima do fundo";
@@ -2686,6 +2688,82 @@ function renderMeasureDetail() {
   const del = $("btnMdDel");
   del.dataset.sure = "";
   del.textContent = "Apagar";
+  renderMeasureExtra(m);
+}
+
+// 2.7: comparabilidade, configuração da época, outras medições e anexos
+let mCtxSeq = 0;
+async function renderMeasureExtra(m) {
+  $("mdComp").textContent = m.notComparable
+    ? `Marcada como não comparável${m.ncReason ? ": " + m.ncReason : ""}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.`
+    : "Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.";
+  $("btnMdComp").textContent = m.notComparable ? "Desmarcar" : "Marcar como não comparável";
+  $("mdCompForm").hidden = true;
+  renderAttachments(m);
+  const my = ++mCtxSeq;
+  let ctx = null;
+  if (api.GetMeasurementContext) { try { ctx = await api.GetMeasurementContext(m.id); } catch (e) { ctx = null; } }
+  if (my !== mCtxSeq) return;
+  const cfg = $("mdCfg");
+  if (isRcMeasure(m)) cfg.textContent = "Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.";
+  else if (!ctx || !ctx.cfgKnown) cfg.textContent = "Sem registro: o histórico de configurações começa na versão 2.1.";
+  else {
+    cfg.textContent = "";
+    for (const c of ctx.cfg.filter((x) => x.then)) { const sp = document.createElement("span"); sp.textContent = `${c.field}: ${c.then}`; cfg.append(sp, document.createElement("br")); }
+    const tail = document.createElement("span");
+    tail.textContent = ctx.changed.length ? `Mudou desde então: ${ctx.changed.join(", ")}.` : "Igual à de hoje.";
+    tail.className = ctx.changed.length ? "" : "muted";
+    cfg.appendChild(tail);
+    if (ctx.changed.length) { const t2 = document.createElement("span"); t2.textContent = " O resultado guardado usa a configuração da época."; cfg.appendChild(t2); }
+  }
+  const rel = $("mdRelated");
+  rel.textContent = "";
+  const list = (ctx && ctx.related) || [];
+  if (!list.length) { rel.innerHTML = '<span class="muted">Nenhuma outra medição com este nome. Dê o mesmo nome para medir o mesmo objeto de novo e acompanhar.</span>'; return; }
+  const tb = document.createElement("table");
+  tb.className = "m-rel";
+  const row = (id, when, net, dist, status, cls) => {
+    const tr = document.createElement("tr");
+    tr.className = cls;
+    const c = [when, net, dist, status].map((x) => { const td = document.createElement("td"); td.textContent = x; return td; });
+    if (id) { const b = document.createElement("button"); b.type = "button"; b.textContent = when; b.addEventListener("click", () => { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); }); c[0].textContent = ""; c[0].appendChild(b); }
+    tr.append(...c);
+    tb.appendChild(tr);
+  };
+  const netTxt = (v, e) => `${v >= 0 ? "+" : "−"}${numU(Math.abs(v))}` + (e ? ` ± ${numU(Math.abs(e))}` : "");
+  row(0, `${ddmm(m.time)} (esta)`, netTxt(m.result.netUSv, m.result.netCPM ? (m.result.netErr * m.result.netUSv) / m.result.netCPM : 0), m.distance || "—", m.notComparable ? "não comparável" : "", "cur");
+  for (const r of list) row(r.id, ddmm(r.time), netTxt(r.netUSv, r.netErrUSv), r.distance || "—", r.diff.length ? r.diff.join(", ") : "comparável", r.diff.length ? "nc" : "");
+  rel.appendChild(tb);
+}
+
+async function renderAttachments(m) {
+  const box = $("mdAttach");
+  box.textContent = "";
+  const list = m.attachments || [];
+  if (!list.length) { box.innerHTML = '<span class="small muted">Nenhum anexo. Fotos do objeto e da posição no tubo ajudam a repetir a medição do mesmo jeito.</span>'; return; }
+  for (const at of list) {
+    const card = document.createElement("div");
+    card.className = "m-att";
+    card.innerHTML = '<div class="thumb"></div><div class="meta"><span class="nm"></span><span class="muted"></span><span class="acts"><button type="button" data-act="open">Abrir</button><button type="button" data-act="rm">Remover</button></span></div>';
+    card.querySelector(".nm").textContent = at.name;
+    card.querySelector(".nm").title = at.name;
+    card.querySelector(".meta .muted").textContent = `${fmt(at.size / 1024, at.size < 10240 ? 1 : 0)} KB`;
+    const th = card.querySelector(".thumb");
+    const ext = (at.name.split(".").pop() || "").toUpperCase().slice(0, 4);
+    th.innerHTML = `<span>${escHtml(ext || "?")}</span>`;
+    if ((at.type || "").startsWith("image/") && at.size < 12 * 1048576 && api.GetMeasurementAttachment) {
+      api.GetMeasurementAttachment(m.id, at.file).then((u) => { const img = document.createElement("img"); img.src = u; img.alt = at.name; th.replaceChildren(img); }).catch(() => {});
+    }
+    const open = () => call(api.OpenMeasurementAttachment, m.id, at.file);
+    th.addEventListener("click", open);
+    card.querySelector('[data-act="open"]').addEventListener("click", open);
+    const rm = card.querySelector('[data-act="rm"]');
+    rm.addEventListener("click", async () => {
+      if (rm.dataset.sure !== "1") { rm.dataset.sure = "1"; rm.textContent = "Confirmar"; return; }
+      await call(api.RemoveMeasurementAttachment, m.id, at.file);
+    });
+    box.appendChild(card);
+  }
 }
 
 function wireMeasureSaved() {
@@ -2701,6 +2779,23 @@ function wireMeasureSaved() {
     if (!m) return;
     await call(api.UpdateMeasurement, m.id, $("mdEditName").value, $("mdEditNote").value);
     $("mdEditForm").hidden = true;
+  });
+  $("btnMdComp").addEventListener("click", async () => {
+    const m = cur();
+    if (!m) return;
+    if (m.notComparable) { await call(api.SetMeasurementComparable, m.id, true, ""); return; }
+    const f = $("mdCompForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdCompReason").focus();
+  });
+  $("btnMdCompSave").addEventListener("click", async () => {
+    const m = cur();
+    if (!m) return;
+    await call(api.SetMeasurementComparable, m.id, false, $("mdCompReason").value);
+    $("mdCompReason").value = "";
+  });
+  $("btnMdAttach").addEventListener("click", async () => {
+    const m = cur();
+    if (!m || !api.AddMeasurementAttachment) return;
+    try { await call(api.AddMeasurementAttachment, m.id); } catch (e) { /* erro já mostrado */ }
   });
   $("btnMdDel").addEventListener("click", async () => {
     const m = cur(), del = $("btnMdDel");
@@ -3579,6 +3674,7 @@ async function openSettings(focusId) {
   renderStatus();
   renderCfgHist();
   renderCalHist();
+  refreshCounterSync();
   $("settings").showModal();
   await fillPorts();
 }
@@ -4152,6 +4248,8 @@ function listen() {
     setAttention("real", !!r.attention);
   });
   on("stored", () => refreshAll());
+  on("countersync", (cs) => refreshCounterSync(cs));
+  $("btnSyncDl").addEventListener("click", () => $("btnHistory").click());
   on("measure", (st) => renderMeasure(st));
   on("history-progress", (p) => {
     // A memória para de ser lida na primeira página vazia, então o total real
@@ -4163,7 +4261,7 @@ function listen() {
 }
 
 async function refreshAll() {
-  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshPatterns(), refreshBgTrend(), refreshDaily(), refreshEvents(), refreshRainImpact()]);
+  await Promise.allSettled([refreshStats(), refreshChart(), refreshDose(), refreshHeat(), refreshPatterns(), refreshBgTrend(), refreshDaily(), refreshEvents(), refreshRainImpact(), refreshCounterSync()]);
 }
 
 // ---------- chuva × radiação ----------
@@ -5201,6 +5299,34 @@ function drawSumChartUSv(r, rc) {
     (rc.bgUSv ? '<span class="key"><i style="border-color:#F472B6;border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
 }
 
+// ---------- memória e sincronização do contador (2.7) ----------
+
+async function refreshCounterSync(cs) {
+  if (!cs) {
+    if (!api.GetCounterSync) return;
+    try { cs = await api.GetCounterSync(); } catch (e) { return; }
+  }
+  state.counterSync = cs;
+  const pct = fmt(cs.estPct, cs.estPct < 10 ? 1 : 0);
+  const memTxt = !cs.estPct ? "" : cs.fullIn > 0
+    ? `A memória está cerca de ${pct}% ocupada (estimado desde o download) e enche em cerca de ${fmtDuration(cs.fullIn)} no modo "${cs.saveMode}".`
+    : `A memória está cerca de ${pct}% ocupada (estimado desde o download).`;
+  $("iSync").textContent = cs.text + (memTxt ? " " + memTxt : "");
+  const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
+  const show = cs.state === "pendente" || warnMem;
+  const card = $("syncCard");
+  card.hidden = !show;
+  card.classList.toggle("cheia", cs.memLevel === "cheia");
+  $("btnHistory").classList.toggle("pending", show);
+  $("btnHistory").title = cs.text;
+  if (!show) return;
+  $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do contador praticamente cheia" : "Memória do contador perto de encher") : "Há minutos para buscar no contador";
+  $("syncText").textContent = warnMem
+    ? `${memTxt} Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.` + (cs.state === "pendente" ? " " + cs.text : "")
+    : cs.text;
+  $("btnSyncDl").disabled = $("btnHistory").disabled;
+}
+
 // ---------- padrões do fundo (2.5) ----------
 
 let patSeq = 0;
@@ -6082,6 +6208,20 @@ const demoRc = () => demoRcFake() && !demoRcCfg.off
       { t: Date.now() - 86400e3, campo: "Calibração do GMC", de: "", para: "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)", origem: "início do registro" },
       { t: Date.now() - 86400e3, campo: "Tempo morto", de: "", para: "desligado", origem: "início do registro" },
     ],
+    GetCounterSync: async () => ({ known: true, at: Date.now() - 2 * 864e5, complete: true, records: 4100, added: 32, memFirst: Date.now() - 30 * 864e5, memLast: Date.now() - 2 * 864e5, saveMode: "a cada minuto", saveOn: true,
+      usedBytes: 1720000, totalBytes: 2097152, usedPct: 82, estPct: 84.3, fullIn: 19 * 86400, memLevel: "atencao", state: "pendente", pendingMinutes: 412, pendingFrom: Date.now() - 864e5,
+      text: "Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico." }),
+    GetMeasurementContext: async (id) => {
+      const all = (await api.GetMeasurements()) || [], m = all.find((x) => x.id === id) || {};
+      const key = (n) => (n || "").toLowerCase().trim();
+      return { cfgKnown: true, changed: ["Calibração em uso"], cfg: [{ field: "Calibração em uso", then: "0,01014 µSv/h por CPM no fundo (curva do contador)", now: "0,00550 µSv/h por CPM no fundo (informado à mão)" }, { field: "Tempo morto", then: "desligado", now: "desligado" }],
+        related: all.filter((x) => x.id !== id && key(x.name) === key(m.name)).map((x) => ({ id: x.id, time: x.time, device: x.device || "", netUSv: x.result.netUSv, netErrUSv: 0.01, distance: x.distance || "", notComparable: !!x.notComparable, ncReason: x.ncReason || "", diff: x.notComparable ? ["marcada como não comparável"] : (x.distance || "") !== (m.distance || "") ? ["outra distância"] : [] })) };
+    },
+    SetMeasurementComparable: async (id, comparable, reason) => { const m = measurements.find((x) => x.id === id); if (m) { m.notComparable = !comparable; m.ncReason = comparable ? "" : reason; } setTimeout(() => emit("measurements", measurements.slice()), 0); },
+    AddMeasurementAttachment: async (id) => { const m = measurements.find((x) => x.id === id); if (m) { m.attachments = (m.attachments || []).concat([{ file: "foto.jpg", name: "foto.jpg", size: 182000, type: "image/jpeg", added: Date.now() }]); } setTimeout(() => emit("measurements", measurements.slice()), 0); return m ? m.attachments : []; },
+    RemoveMeasurementAttachment: async (id, file) => { const m = measurements.find((x) => x.id === id); if (m) m.attachments = (m.attachments || []).filter((a) => a.file !== file); setTimeout(() => emit("measurements", measurements.slice()), 0); },
+    GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="#6EE7A0"/></svg>'),
+    OpenMeasurementAttachment: async () => {},
     GetPatterns: async (days, dev) => {
       const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 1;
       const pts = range(from, now).map((q) => ({ t: q.t, v: q.cpm * k }));

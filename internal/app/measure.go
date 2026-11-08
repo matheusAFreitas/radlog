@@ -457,6 +457,11 @@ type SavedMeasure struct {
 	// com os dois aparelhos (ver measuredual.go)
 	Mode  string       `json:"mode,omitempty"`
 	Other *MeasureSide `json:"other,omitempty"`
+	// 2.7: marcada à mão como não comparável com as outras do mesmo objeto
+	// (outra geometria, outro recipiente…) e anexos (fotos, documentos)
+	NotComparable bool                `json:"notComparable,omitempty"`
+	NCReason      string              `json:"ncReason,omitempty"`
+	Attachments   []MeasureAttachment `json:"attachments,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }
@@ -546,6 +551,9 @@ func (a *App) DeleteMeasurement(id int64) error {
 	a.bgAt = time.Time{}
 	err := a.saveMeasurementsLocked()
 	a.mu.Unlock()
+	if a.dataDir != "" {
+		_ = os.RemoveAll(a.attachDir(id))
+	}
 	a.emit("measurements", a.GetMeasurements())
 	return err
 }

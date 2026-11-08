@@ -123,6 +123,13 @@
     </div>
   </section>
 
+  <section class="card sync-card" id="syncCard" hidden>
+    <div class="sync-row">
+      <div><strong id="syncTitle">Memória do contador</strong><p class="small" id="syncText"></p></div>
+      <button type="button" class="btn small accent" id="btnSyncDl">Baixar histórico</button>
+    </div>
+  </section>
+
   <div class="duo" id="duo">
   <section class="card hero" id="hero">
     <div class="hero-top">
@@ -742,6 +749,27 @@
             <div><h4>As duas fases</h4><div id="mdStats"></div></div>
             <div><h4>Geometria / anotação</h4><p class="small" id="mdNote"></p><h4>O que esta medição consegue ver</h4><p class="small" id="mdLimits"></p></div>
           </div>
+          <div class="m-extra">
+            <div>
+              <h4>Comparabilidade</h4>
+              <p class="small" id="mdComp"></p>
+              <div class="nr-form m-edit" id="mdCompForm" hidden>
+                <input type="text" id="mdCompReason" placeholder="motivo: outro recipiente, outra posição, objeto partido…" aria-label="Motivo">
+                <button type="button" class="btn small accent" id="btnMdCompSave">Marcar</button>
+              </div>
+              <button type="button" class="btn small" id="btnMdComp">Marcar como não comparável</button>
+              <h4>Configuração do contador na época</h4>
+              <p class="small" id="mdCfg"></p>
+            </div>
+            <div>
+              <h4>Outras medições deste objeto</h4>
+              <div id="mdRelated" class="small"></div>
+            </div>
+          </div>
+          <div class="m-attach">
+            <div class="m-attach-head"><h4>Fotos e anexos</h4><button type="button" class="btn small" id="btnMdAttach">Anexar foto ou arquivo</button></div>
+            <div class="m-attach-list" id="mdAttach"></div>
+          </div>
         </div>
       </section>
     </div>
@@ -1024,6 +1052,7 @@
         <dt>Porta</dt><dd class="mono" id="iPort">—</dd>
         <dt>Relógio</dt><dd class="mono" id="iClock">—</dd>
         <dt>Calibração</dt><dd class="mono" id="iCal">—</dd>
+        <dt>Memória</dt><dd id="iSync">—</dd>
       </dl>
 <div class="devcfg" id="devcfg">
       <h3 class="sub-head">Ajustes gravados no aparelho</h3>

@@ -183,7 +183,8 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		calTxt = "o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)"
 		dt = ""
 	}
-	body := a.inLang(func() []byte { return renderMeasurePDF(*m, dev, calTxt, dt) })
+	extra := a.measureExtraRows(*m)
+	body := a.inLang(func() []byte { return renderMeasurePDF(*m, dev, calTxt, dt, extra...) })
 	if err := os.WriteFile(dst, body, 0o644); err != nil {
 		return "", err
 	}
@@ -198,7 +199,7 @@ func asciiFold(s string) string {
 	return r.Replace(s)
 }
 
-func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
+func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows ...[2]string) []byte {
 	t0 := time.UnixMilli(m.Time)
 	title := "Medição: " + m.Name
 	home := m.Bg.Source == "casa"
@@ -412,6 +413,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string) []byte {
 	if deadTime != "" {
 		method = append(method, [2]string{"Tempo morto", deadTime})
 	}
+	method = append(method, extraRows...)
 	count := "soma do CPS do contador a cada segundo, em cada fase"
 	if rc {
 		count = "soma das amostras do RadiaCode (a cada 0,5 s), em cada fase"
@@ -833,4 +835,37 @@ func (p *reportPDF) measSide(m SavedMeasure, o *MeasureSide) {
 		rows = append(rows, [2]string{"Os dois juntos", o.Hint + " Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto."})
 	}
 	p.kv(rows, 120)
+}
+
+// measureExtraRows: comparabilidade, configuração da época e anexos (2.7).
+func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
+	var method [][2]string
+	if m.NotComparable {
+		why := m.NCReason
+		if why == "" {
+			why = "sem motivo informado"
+		}
+		method = append(method, [2]string{"Comparabilidade", "marcada como não comparável com outras medições do mesmo objeto: " + why})
+	}
+	if ctx, err := a.GetMeasurementContext(m.ID); err == nil && ctx.CfgKnown {
+		var then []string
+		for _, c := range ctx.Cfg {
+			if c.Then != "" {
+				then = append(then, strings.ToLower(c.Field[:1])+c.Field[1:]+": "+c.Then)
+			}
+		}
+		txt := strings.Join(then, "; ")
+		if len(ctx.Changed) > 0 {
+			txt += ". Mudou desde a medição: " + strings.ToLower(strings.Join(ctx.Changed, ", "))
+		}
+		method = append(method, [2]string{"Configuração na época", txt})
+	}
+	if len(m.Attachments) > 0 {
+		var names []string
+		for _, at := range m.Attachments {
+			names = append(names, at.Name)
+		}
+		method = append(method, [2]string{"Anexos", fmt.Sprintf("%d arquivo(s) guardado(s) com a medição no app: %s", len(m.Attachments), strings.Join(names, ", "))})
+	}
+	return method
 }

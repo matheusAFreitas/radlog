@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -102,6 +103,13 @@ func (a *App) writeBackup(w io.Writer) error {
 	alerts, _ := filepath.Glob(filepath.Join(a.alertDir(), "*.json"))
 	for _, f := range alerts {
 		files = append(files, "alertas-detalhe/"+filepath.Base(f))
+	}
+	anexos, _ := filepath.Glob(filepath.Join(a.dataDir, attachDirName, "*", "*"))
+	for _, f := range anexos {
+		rel, err := filepath.Rel(a.dataDir, f)
+		if err == nil {
+			files = append(files, filepath.ToSlash(rel))
+		}
 	}
 	files = append(files, a.rcBackupFiles()...)
 	for _, f := range files {
@@ -344,27 +352,43 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	}
 
 	// medições
+	attachIDs := map[int64]int64{} // id da medição no backup → id aqui
 	if f, ok := files["medicoes.json"]; ok {
 		if b, err := readZipFile(f); err == nil {
 			var list []SavedMeasure
 			if json.Unmarshal(b, &list) == nil {
 				a.mu.Lock()
 				var max int64
-				have := map[int64]bool{}
-				for _, m := range a.measurements {
-					have[m.Time/1000] = true
+				have := map[int64]int{} // segundo do início → índice
+				for i, m := range a.measurements {
+					have[m.Time/1000] = i
 					max = maxInt64(max, m.ID)
 				}
+				changed := false
 				for _, m := range list {
-					if have[m.Time/1000] {
+					if i, ok := have[m.Time/1000]; ok {
+						// a mesma medição: junta os anexos que faltam
+						local := &a.measurements[i]
+						attachIDs[m.ID] = local.ID
+						for _, at := range m.Attachments {
+							dup := false
+							for _, x := range local.Attachments {
+								dup = dup || x.File == at.File
+							}
+							if !dup {
+								local.Attachments = append(local.Attachments, at)
+								changed = true
+							}
+						}
 						continue
 					}
 					max++
+					attachIDs[m.ID] = max
 					m.ID = max
 					a.measurements = append(a.measurements, m)
 					res.Measurements++
 				}
-				if res.Measurements > 0 {
+				if res.Measurements > 0 || changed {
 					sort.Slice(a.measurements, func(i, j int) bool { return a.measurements[i].Time < a.measurements[j].Time })
 					_ = a.saveMeasurementsLocked()
 				}
@@ -394,6 +418,30 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	if f, ok := files[calHistFile]; ok {
 		if b, err := readZipFile(f); err == nil {
 			a.calMerge(b)
+		}
+	}
+
+	// anexos das medições (copia o que falta)
+	for n, f := range files {
+		parts := strings.Split(n, "/")
+		if len(parts) != 3 || parts[0] != attachDirName || parts[1] == "" || safeFileName(parts[2]) != parts[2] {
+			continue
+		}
+		bid, err := strconv.ParseInt(parts[1], 10, 64)
+		if err != nil {
+			continue
+		}
+		lid, ok := attachIDs[bid]
+		if !ok {
+			continue
+		}
+		dst := filepath.Join(a.attachDir(lid), parts[2])
+		if _, err := os.Stat(dst); err == nil {
+			continue
+		}
+		if b, err := readZipFile(f); err == nil {
+			_ = os.MkdirAll(filepath.Dir(dst), 0o755)
+			_ = os.WriteFile(dst, b, 0o644)
 		}
 	}
 

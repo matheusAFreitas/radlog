@@ -1,5 +1,30 @@
 # Versões
 
+## 2.7.0
+- **Fotos e anexos nas medições de objeto:** em Medir objeto → Salvas,
+  "Anexar foto ou arquivo" guarda fotos (do objeto, da posição no tubo) e
+  documentos junto da medição, em `medicoes-anexos/`. As fotos aparecem em
+  miniatura; qualquer anexo abre no programa padrão. Entram no backup (e
+  vão para a medição certa no outro PC) e são listados no PDF da medição.
+  Apagar a medição apaga os anexos.
+- **Marcar como não comparável**, com o motivo (outro recipiente, outra
+  posição…). A marca aparece na lista, no detalhe e no PDF.
+- **Outras medições deste objeto:** as medições com o mesmo nome aparecem
+  juntas, com o líquido ± incerteza, e o app diz quais não dá para comparar
+  direto (marcadas, outro aparelho, outra distância ou outra configuração).
+- **Configuração do contador na época:** cada medição do GMC mostra a
+  calibração e o tempo morto que valiam quando foi feita (pelo histórico de
+  configurações) e avisa se mudaram desde então; vai também para o PDF.
+- **Sincronização contador × app:** o app guarda cada download da memória
+  (`contador-sincronizacao.json`) e mostra um estado claro: em dia,
+  pendente (o app ficou sem leitura depois do último download e a memória
+  do contador pode ter esses minutos), sem gravação ou nunca baixado. Fica
+  em Configurações → Contador, no botão "Baixar histórico" (marcado quando
+  há o que buscar) e num aviso na tela principal.
+- **Aviso de memória quase cheia:** o uso da memória é estimado a partir do
+  último download e do modo de gravação; a partir de 80% (e de novo em 95%)
+  o app avisa uma vez, com quanto falta para encher.
+
 ## 2.6.0
 - **Relatório: configurações vigentes no período.** Nova tabela com o valor
   de cada ajuste no início do período e as mudanças dentro dele (data, de →

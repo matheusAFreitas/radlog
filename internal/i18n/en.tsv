@@ -2509,3 +2509,72 @@ Perigo (c) (d)	Danger (c) (d)
 Atenção (c)	Attention (c)
 Alarme (c)	Alarm (c)
 Perigo (c)	Danger (c)
+Comparabilidade	Comparability
+Marcar como não comparável	Mark as not comparable
+Desmarcar	Unmark
+Marcar	Mark
+motivo: outro recipiente, outra posição, objeto partido…	reason: another container, another position, broken object…
+Motivo	Reason
+Configuração do contador na época	Counter settings at the time
+Outras medições deste objeto	Other measurements of this object
+Fotos e anexos	Photos and attachments
+Anexar foto ou arquivo	Attach photo or file
+Marcada como não comparável: {0}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.	Marked as not comparable: {0}. It stays saved, but should not be compared with the other measurements of this object.
+Marcada como não comparável. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.	Marked as not comparable. It stays saved, but should not be compared with the other measurements of this object.
+Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.	Comparable with the other measurements of the same object (same name), if the distance and the settings are the same.
+Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.	RadiaCode measurement: µSv/h comes from the device's own calibration.
+Sem registro: o histórico de configurações começa na versão 2.1.	No record: the settings history starts in version 2.1.
+Calibração em uso: {0}	Calibration in use: {0}
+Tempo morto: {0}	Dead time: {0}
+Calibração do GMC: {0}	GMC calibration: {0}
+Mudou desde então: {0}.	Changed since then: {0}.
+O resultado guardado usa a configuração da época.	The saved result uses the settings of that time.
+Igual à de hoje.	Same as today.
+calibração em uso	calibration in use
+tempo morto	dead time
+calibração do gmc	GMC calibration
+Nenhuma outra medição com este nome. Dê o mesmo nome para medir o mesmo objeto de novo e acompanhar.	No other measurement with this name. Use the same name to measure the same object again and follow it over time.
+{0} (esta)	{0} (this one)
+não comparável	not comparable
+comparável	comparable
+marcada como não comparável	marked as not comparable
+esta medição está marcada como não comparável	this measurement is marked as not comparable
+outro aparelho	another device
+outra distância	another distance
+outra configuração ({0})	other settings ({0})
+Nenhum anexo. Fotos do objeto e da posição no tubo ajudam a repetir a medição do mesmo jeito.	No attachments. Photos of the object and of its position on the tube help repeat the measurement the same way.
+Abrir	Open
+Remover	Remove
+{0} anexo	{0} attachment
+{0} anexos	{0} attachments
+Memória do contador perto de encher	Counter memory almost full
+Memória do contador praticamente cheia	Counter memory practically full
+Há minutos para buscar no contador	There are minutes to fetch from the counter
+A memória está cerca de {0}% ocupada (estimado desde o download) e enche em cerca de {1} no modo "{2}".	The memory is about {0}% full (estimated since the download) and fills up in about {1} in "{2}" mode.
+A memória está cerca de {0}% ocupada (estimado desde o download).	The memory is about {0}% full (estimated since the download).
+Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos.	When it fills up, new data may not be recorded or may overwrite the old data.
+Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.	Download the history to keep everything in the app; then, to free up space, erase the memory from the counter's menu.
+Último download em {0}.	Last download on {0}.
+Depois dele, o app ficou {0} sem leitura (desde {1}); a memória do contador pode ter esses minutos: baixe o histórico.	After it, the app went {0} without readings (since {1}); the counter's memory may have those minutes: download the history.
+O contador não está gravando na memória: minutos sem o app não podem ser recuperados.	The counter is not recording to memory: minutes without the app can't be recovered.
+Em dia: último download em {0} e nenhum trecho sem leitura no app desde então.	Up to date: last download on {0} and no stretch without readings in the app since then.
+O último download foi interrompido antes do fim da memória.	The last download was interrupted before the end of the memory.
+A memória do contador ainda não foi baixada por este app.	The counter's memory hasn't been downloaded by this app yet.
+O contador não está gravando na memória (gravação desligada).	The counter is not recording to memory (recording off).
+Memória do GMC perto de encher: cerca de {0}% ocupada (estimado desde o download de {1}).	GMC memory almost full: about {0}% used (estimated since the download on {1}).
+Memória do GMC praticamente cheia: cerca de {0}% ocupada (estimado).	GMC memory practically full: about {0}% used (estimated).
+Dados novos podem não ser gravados ou podem sobrescrever os antigos.	New data may not be recorded or may overwrite the old data.
+Baixe o histórico para guardar tudo no app.	Download the history to keep everything in the app.
+Anexar à medição	Attach to the measurement
+Fotos e documentos	Photos and documents
+Todos os arquivos	All files
+arquivo grande demais para mostrar aqui; use Abrir	file too large to show here; use Open
+anexo não encontrado	attachment not found
+{0}: não encontrado	{0}: not found
+{0}: maior que 25 MB	{0}: larger than 25 MB
+marcada como não comparável com outras medições do mesmo objeto: {0}	marked as not comparable with other measurements of the same object: {0}
+sem motivo informado	no reason given
+Configuração na época	Settings at the time
+Mudou desde a medição: {0}	Changed since the measurement: {0}
+Anexos	Attachments
+{0} arquivo(s) guardado(s) com a medição no app: {1}	{0} file(s) saved with the measurement in the app: {1}
