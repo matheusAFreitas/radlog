@@ -1,5 +1,19 @@
 # Versões
 
+## 2.16.0
+- **Atualização assinada.** O app só instala uma versão nova se a
+  assinatura do `SHA256SUMS.txt` conferir com a chave das releases do
+  RadLog (Ed25519, embutida no app). Antes, o app só conferia se o arquivo
+  tinha chegado inteiro, pela soma que vem na própria release; quem
+  conseguisse publicar uma release falsa publicaria a soma junto. Agora:
+  - cada release traz o `SHA256SUMS.txt.sig`, gerado no GitHub com a chave
+    privada guardada como segredo;
+  - sem assinatura, ou com uma assinatura que não confere, o app não instala
+    e pede para baixar pela página;
+  - o job de release não publica nada se a chave faltar ou não for a do app.
+- Para conferir uma release à mão: `go run ./scripts/sign verify
+  SHA256SUMS.txt` (com o `.sig` na mesma pasta).
+
 ## 2.15.0
 - **Um erro interno não fecha mais o app.** As tarefas de fundo (leitura do
   GMC, laço do RadiaCode, sincronização, chuva, atualização, alertas) agora

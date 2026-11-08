@@ -1,7 +1,9 @@
 package app
 
 import (
+	"crypto/ed25519"
 	"crypto/sha256"
+	"encoding/base64"
 	"encoding/hex"
 	"encoding/json"
 	"net/http"
@@ -12,6 +14,8 @@ import (
 	"strings"
 	"testing"
 	"time"
+
+	"radlog/internal/updsig"
 )
 
 func TestVersionCompare(t *testing.T) {
@@ -59,16 +63,29 @@ func TestUpdateFlow(t *testing.T) {
 	h := sha256.Sum256(payload)
 	good := hex.EncodeToString(h[:])
 	sums := good
+	// chave de teste no lugar da das releases
+	_, priv, _ := ed25519.GenerateKey(nil)
+	pub := priv.Public().(ed25519.PublicKey)
+	oldVerify := verifySums
+	defer func() { verifySums = oldVerify }()
+	verifySums = func(data, sig []byte) bool { return updsig.VerifyWith(pub, data, sig) }
+	badSig := false
 	var srv *httptest.Server
 	srv = httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		switch r.URL.Path {
 		case "/latest":
 			_ = json.NewEncoder(w).Encode(ghRelease{Tag: "v99.0.0", Body: "- novidade\n\n---\n**Downloads:** x", HTMLURL: srv.URL + "/page",
-				Assets: []ghAsset{{Name: name, URL: srv.URL + "/bin", Size: int64(len(payload))}, {Name: updateSums, URL: srv.URL + "/sums"}}})
+				Assets: []ghAsset{{Name: name, URL: srv.URL + "/bin", Size: int64(len(payload))}, {Name: updateSums, URL: srv.URL + "/sums"}, {Name: updateSig, URL: srv.URL + "/sig"}}})
 		case "/bin":
 			_, _ = w.Write(payload)
 		case "/sums":
 			_, _ = w.Write([]byte(sums + "  " + name + "\n"))
+		case "/sig":
+			data := []byte(sums + "  " + name + "\n")
+			if badSig {
+				data = append(data, 'x')
+			}
+			_, _ = w.Write([]byte(base64.StdEncoding.EncodeToString(ed25519.Sign(priv, data)) + "\n"))
 		}
 	}))
 	defer srv.Close()
@@ -127,6 +144,22 @@ func TestUpdateFlow(t *testing.T) {
 		t.Fatal("deixou o arquivo que não confere")
 	}
 
+	// assinatura que não confere: recusa antes de baixar
+	sums, badSig = good, true
+	a3, _ := testApp(t)
+	if _, err := a3.CheckUpdate(); err != nil {
+		t.Fatal(err)
+	}
+	_ = a3.StartUpdate()
+	waitFor(t, "erro", func() bool { return a3.GetUpdateInfo().State == "erro" })
+	if e := a3.GetUpdateInfo().Error; !strings.Contains(e, "assinatura") {
+		t.Fatalf("erro: %q", e)
+	}
+	if _, err := os.Stat(path); err == nil {
+		t.Fatal("baixou com assinatura que não confere")
+	}
+	badSig = false
+
 	// pular esta versão
 	a2.SkipUpdate("99.0.0")
 	if !a2.GetUpdateInfo().Skipped {
@@ -149,5 +182,17 @@ func TestOldVersionsIn(t *testing.T) {
 	want := "GMC-Monitor-v1.0.0.exe,GMC-Monitor-v1.2.0-x86_64.AppImage,GMC-Monitor-v1.5.0.exe.part,RadLog-v1.9.0.exe"
 	if strings.Join(got, ",") != want {
 		t.Fatalf("apagaria %v", got)
+	}
+}
+
+func TestCheckSumsSignature(t *testing.T) {
+	sum := strings.Repeat("ab", 32)
+	text := []byte(sum + "  RadLog-v2.16.0.exe\n")
+	ok := func(data, sig []byte) bool { return string(sig) == "boa" }
+	if got, err := checkSums(text, []byte("boa"), "RadLog-v2.16.0.exe", ok); err != nil || got != sum {
+		t.Fatalf("assinatura boa: %q %v", got, err)
+	}
+	if _, err := checkSums(text, []byte("ruim"), "RadLog-v2.16.0.exe", ok); err == nil || !strings.Contains(err.Error(), "assinatura") {
+		t.Fatalf("assinatura ruim deveria recusar: %v", err)
 	}
 }
