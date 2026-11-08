@@ -1,5 +1,15 @@
 # Versões
 
+## 2.7.3
+- **Importar log do RadiaCode: novo formato aceito.** A exportação com a
+  unidade no cabeçalho ("Time;Timestamp;Event;Count Rate, cps;Dose rate,
+  Sv/h;…;Dose, Sv;Temperature") dava "nenhum registro reconhecido". Agora o
+  app acha as colunas pelos dois jeitos de nomear ("Real time"/"Time",
+  "Temp."/"Temperature", "Duration of d.a."/"Duration of dose
+  accumulation, sec."), usa a unidade do cabeçalho quando o valor vem só
+  com o número (Sv/h e Sv viram µSv/h e µSv), lê a hora com milissegundos e
+  aceita o Timestamp em decimal.
+
 ## 2.7.2
 - **Corrigido o degrau falso no dosímetro do RadiaCode.** A curva da dose
   do aparelho tratava qualquer queda do total como "aparelho zerado" e

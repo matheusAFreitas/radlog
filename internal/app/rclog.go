@@ -549,20 +549,54 @@ func parseMobileLog(b []byte) ([]RcLogItem, int, error) {
 	if len(rows) < 2 {
 		return nil, 0, errors.New("o arquivo não tem registros")
 	}
+	// colunas pelo nome; nas exportações em que a unidade vem no cabeçalho
+	// ("Dose rate, Sv/h"; valores só com o número), a unidade fica guardada
 	col := map[string]int{}
+	hdrUnit := map[string]string{}
 	for i, h := range rows[0] {
-		col[strings.ToLower(strings.TrimSpace(h))] = i
-	}
-	if _, ok := col["real time"]; !ok {
-		if _, ok2 := col["timestamp"]; !ok2 {
-			return nil, 0, errors.New("não parece o log do app do RadiaCode (falta a coluna \"Real time\")")
+		h = strings.TrimSpace(h)
+		low := strings.ToLower(h)
+		col[low] = i
+		if base, unit, ok := strings.Cut(h, ","); ok {
+			b := strings.ToLower(strings.TrimSpace(base))
+			if _, dup := col[b]; !dup {
+				col[b] = i
+				hdrUnit[b] = strings.TrimSpace(unit)
+			}
 		}
 	}
+	// nomes alternativos (app do celular × exportação do app de PC)
+	alias := map[string][]string{
+		"real time": {"time"}, "dr error": {"dose rate error"}, "temp.": {"temperature"},
+		"duration of d.a.": {"duration of dose accumulation"},
+	}
+	colOf := func(name string) (int, string, bool) {
+		for _, n := range append([]string{name}, alias[name]...) {
+			if i, ok := col[n]; ok {
+				return i, hdrUnit[n], true
+			}
+		}
+		return 0, "", false
+	}
+	_, _, hasT := colOf("real time")
+	_, _, hasTS := colOf("timestamp")
+	if !hasT && !hasTS {
+		return nil, 0, errors.New("não parece o log do app do RadiaCode (falta a coluna \"Real time\" ou \"Time\")")
+	}
 	get := func(r []string, name string) string {
-		if i, ok := col[name]; ok && i < len(r) {
+		if i, _, ok := colOf(name); ok && i < len(r) {
 			return strings.TrimSpace(r[i])
 		}
 		return ""
+	}
+	// número com unidade; sem unidade no valor, vale a do cabeçalho
+	numU := func(r []string, name string) (float64, string, bool) {
+		v, u, ok := numUnit(get(r, name))
+		if ok && u == "" {
+			_, hu, _ := colOf(name)
+			u = hu
+		}
+		return v, u, ok
 	}
 	var out []RcLogItem
 	skipped := 0
@@ -575,7 +609,7 @@ func parseMobileLog(b []byte) ([]RcLogItem, int, error) {
 		base := RcLogItem{T: t.UnixMilli(), Src: "celular"}
 		n := 0
 		// taxa de dose
-		if v, u, ok := numUnit(get(r, "dose rate")); ok {
+		if v, u, ok := numU(r, "dose rate"); ok {
 			if usv, ok := toUSv(v, u); ok {
 				it := base
 				it.Kind, it.USv = "taxa", usv
@@ -628,7 +662,7 @@ func parseMobileLog(b []byte) ([]RcLogItem, int, error) {
 			} else if strings.Contains(strings.ToLower(ch), "ext") {
 				it.Power = "externa"
 			}
-			if v, u, ok := numUnit(get(r, "dose")); ok {
+			if v, u, ok := numU(r, "dose"); ok {
 				if usv, ok := toUSv(v, u); ok {
 					it.Dose, it.HasDose = usv, true
 				}
@@ -657,10 +691,26 @@ func mobileTime(real, ts string) (time.Time, bool) {
 		for i := range v {
 			v[i], _ = strconv.Atoi(m[i+1])
 		}
-		return time.Date(v[0], time.Month(v[1]), v[2], v[3], v[4], v[5], 0, time.Local), true
+		ms := 0
+		if rest := real[len(m[0]):]; len(rest) > 1 && rest[0] == '.' { // "18:13:41.491"
+			frac := rest[1:]
+			for len(frac) < 3 {
+				frac += "0"
+			}
+			ms, _ = strconv.Atoi(frac[:3])
+		}
+		return time.Date(v[0], time.Month(v[1]), v[2], v[3], v[4], v[5], ms*1e6, time.Local), true
 	}
-	if ft, err := strconv.ParseUint(ts, 16, 64); err == nil && ft > 116444736000000000 {
-		return time.Unix(0, int64(ft-116444736000000000)*100), true
+	// FILETIME (intervalos de 100 ns desde 1601): em decimal (exportação do app
+	// de PC) ou em hexadecimal (app do celular)
+	const epoch, maxFT = 116444736000000000, 200000000000000000
+	if ft, err := strconv.ParseUint(ts, 10, 64); err == nil && ft > epoch && ft < maxFT {
+		// nessa exportação o número é a hora local (bate com a coluna Time)
+		u := time.Unix(0, int64(ft-epoch)*100).UTC()
+		return time.Date(u.Year(), u.Month(), u.Day(), u.Hour(), u.Minute(), u.Second(), u.Nanosecond(), time.Local), true
+	}
+	if ft, err := strconv.ParseUint(ts, 16, 64); err == nil && ft > epoch && ft < maxFT {
+		return time.Unix(0, int64(ft-epoch)*100), true
 	}
 	return time.Time{}, false
 }

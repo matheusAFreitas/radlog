@@ -141,3 +141,54 @@ func TestRcLogFromRaw(t *testing.T) {
 		t.Fatalf("evento: %+v", items[2])
 	}
 }
+
+// exportação com a unidade no cabeçalho ("Dose rate, Sv/h"), hora com
+// milissegundos e Timestamp em decimal
+func TestParseMobileLogPCExport(t *testing.T) {
+	b, err := os.ReadFile("testdata/rc-pc-export.csv")
+	if err != nil {
+		t.Fatal(err)
+	}
+	items, skipped, err := parseMobileLog(b)
+	if err != nil {
+		t.Fatal(err)
+	}
+	var rates, evs, rares int
+	for _, it := range items {
+		switch it.Kind {
+		case "taxa":
+			rates++
+		case "evento":
+			evs++
+		case "raro":
+			rares++
+		}
+	}
+	if skipped != 0 || rates != 8 || evs != 1 || rares != 11 {
+		t.Fatalf("taxas %d, eventos %d, raros %d, pulados %d", rates, evs, rares, skipped)
+	}
+	r := items[0]
+	want := time.Date(2026, 11, 6, 18, 13, 41, 491e6, time.Local).UnixMilli()
+	if r.Kind != "taxa" || r.T != want || math.Abs(r.USv-0.17425536) > 1e-6 || math.Abs(r.CPS-14.020833) > 1e-6 || r.USvErr != 17.3 {
+		t.Fatalf("primeira taxa: %+v", r)
+	}
+	var last RcLogItem
+	for _, it := range items {
+		if it.Kind == "raro" {
+			last = it
+		}
+	}
+	if !last.HasDose || math.Abs(last.Dose-0.02) > 1e-9 || last.DoseSec != 663 || !last.HasTemp || last.Temp != 26 {
+		t.Fatalf("último raro: %+v", last)
+	}
+	for _, it := range items {
+		if it.Kind == "evento" && it.Code != 1 {
+			t.Fatalf("evento: %+v", it)
+		}
+	}
+	// o Timestamp decimal sozinho dá a mesma hora da coluna Time (hora local)
+	ts, ok := mobileTime("", "134384624214910000")
+	if !ok || ts.UnixMilli() != want {
+		t.Fatalf("timestamp: %v", ts)
+	}
+}
