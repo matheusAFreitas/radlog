@@ -389,11 +389,20 @@ function renderATile() {
 (() => {
   const mini = $("mini"), inst = $("instruments");
   if (!window.IntersectionObserver) return;
-  new IntersectionObserver(([e]) => {
-    const gone = !e.isIntersecting && e.boundingClientRect.top < 0;
+  // aparece quando os valores dos quadros já saíram por cima (mais da
+  // metade do painel escondida), não só quando ele some inteiro: páginas
+  // curtas rolam pouco e o painel ficava cortado sem a faixa
+  let on = false;
+  const set = (gone) => {
+    if (gone === on) return;
+    on = gone;
     mini.hidden = !gone;
     requestAnimationFrame(() => mini.classList.toggle("in", gone));
-  }, { threshold: 0, rootMargin: "-40px 0px 0px 0px" }).observe(inst);
+  };
+  new IntersectionObserver(([e]) => {
+    const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--barsH")) || 0;
+    set(e.boundingClientRect.top < top && e.intersectionRatio < 0.55);
+  }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 1] }).observe(inst);
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   ["miniG", "miniR", "miniTop"].forEach((id) => $(id).addEventListener("click", toTop));
 })();

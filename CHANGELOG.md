@@ -1,5 +1,12 @@
 # Versões
 
+## 2.11.1
+- **Faixa compacta em todas as páginas.** Ela só aparecia quando os quadros
+  dos aparelhos saíam inteiros da tela; em páginas que rolam pouco (como o
+  Espectro do RadiaCode numa tela alta) os quadros ficavam cortados em cima
+  e a faixa não vinha. Agora ela aparece assim que mais da metade do painel
+  sai por cima.
+
 ## 2.11.0
 - **Configurações viraram uma página.** Saiu a janela por cima do app:
   Configurações é um item do menu, com os quadros dos aparelhos em cima
