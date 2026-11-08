@@ -1699,7 +1699,6 @@ function drawDoseChart() {
 
 async function refreshDose() {
   $("doseLimit").value = state.doseLimit;
-  document.querySelectorAll("#doseRangeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.doseZoom && b.dataset.range === state.dosePeriod)));
   const my = ++doseSeq;
   const rcOn0 = hasRcData();
   // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
@@ -4719,7 +4718,7 @@ function wire() {
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.addEventListener("click", () => {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
-  document.querySelectorAll("#rangeSeg button, #doseRangeSeg button").forEach((b) => b.addEventListener("click", () => {
+  document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
     state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
     state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
   }));
@@ -5701,6 +5700,7 @@ async function refreshSummary() {
   $("sumCmpSeg").hidden = s.mode !== "comparar";
   $("btnReport").hidden = s.mode !== "resumo";
   $("sumDays").hidden = !(s.mode === "comparar" && s.cmp === "dias");
+  $("sumSay").hidden = $("sumTop").hidden = s.mode !== "resumo";
   $("sumDay").value = s.day ? dateVal(s.day) : "";
   const periods = sumPeriods();
   if (s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); }
@@ -5792,8 +5792,104 @@ function renderRcSummary(t, rc, r) {
   sumTile(t, "Alertas", alertsText(rc), rc.peakAlert ? `pico ao vivo ${d(rc.peakAlert)} µSv/h` : "alarmes 1 e 2 do aparelho", rc.danger || rc.alarm ? "warn rc" : "rc");
 }
 
+// ---------- Resumo repaginado (2.18): frase, três números, casa × pessoal ----------
+
+const sumUSv = (v) => { const [n, u] = agSv(v); return `${n} ${u}`; };
+// lead vai junto na mesma frase para a tradução achar o texto inteiro
+const sumPct = (p, lead) => (lead ? lead + " " : "") + (Math.abs(p) < 5 ? "igual ao normal" : p > 0 ? `${fmt(p, 0)}% acima do normal` : `${fmt(-p, 0)}% abaixo do normal`);
+
+// a frase do topo: o período foi normal?
+function renderSumSay(r, rc) {
+  const c = (k) => (r[k] || 0) + ((rc && rc[k]) || 0);
+  const n = { danger: c("danger"), alarm: c("alarm"), attention: c("attention") };
+  const gAbove = r.minutes && r.bgOK && r.vsBgPct >= 20, rAbove = rc && rc.bgUSv && rc.vsBgPct >= 20;
+  let lv = "seguro", title;
+  const parts = [];
+  if (!r.minutes && !rc) {
+    lv = "off";
+    title = "Sem leituras nesse período.";
+    parts.push("Escolha outro período ou confira se os aparelhos estão gravando.");
+  } else {
+    if (n.danger) { lv = "perigo"; title = "Teve perigo no período."; }
+    else if (n.alarm) { lv = "alerta"; title = "Teve alarme no período."; }
+    else if (gAbove || rAbove) { lv = "atencao"; title = "Fundo acima do normal no período."; }
+    else if (n.attention) { lv = "atencao"; title = "Período normal, com alertas de atenção."; }
+    else title = "Período normal.";
+    if (r.minutes && r.bgOK) parts.push(sumPct(r.vsBgPct, "Casa"));
+    if (rc && rc.bgUSv) parts.push(sumPct(rc.vsBgPct, "RadiaCode"));
+    const cov = rc ? rc.coverage : r.coverage;
+    parts.push(`${fmt(cov * 100, 0)}% do tempo medido`);
+    if (rc && rc.awayMinutes) parts.push(`fora de casa: ${hm(rc.awayMinutes)}`);
+  }
+  $("sumSay").className = "sum-say ag-say lv-" + lv;
+  $("sumSayTitle").textContent = title;
+  $("sumSayText").textContent = parts.join(" · ");
+  const chip = $("sumSayChip");
+  chip.hidden = lv === "off";
+  chip.textContent = n.danger || n.alarm || n.attention ? alertsText(n) : "nenhum alerta";
+}
+
+function sumKpi(box, label, value, sub, cls) {
+  const d = document.createElement("div");
+  d.className = "sum-kpi" + (cls ? " " + cls : "");
+  d.innerHTML = '<span class="k"></span><span class="v"></span><span class="n"></span>';
+  d.children[0].textContent = label; d.children[1].textContent = value; d.children[2].textContent = sub || "";
+  box.appendChild(d);
+}
+
+// os três números: quanto (dose), comparado com o quê (fundo) e o pico
+function renderSumBig(r, rc) {
+  const box = $("sumBig");
+  box.textContent = "";
+  if (!r.minutes && !rc) return;
+  const d = (v) => fmt(v, usvDigits(v));
+  if (rc) sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RadiaCode · somada pelo aparelho" : `RadiaCode · ${fmt(rc.coverage * 100, 0)}% medido`, "rc");
+  else sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
+  if (r.minutes) {
+    sumKpi(box, "Fundo da casa", `${fmt(r.avg, 1)} CPM`, `≈ ${fmt(r.avgUSv, 3)} µSv/h · ` + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
+  } else if (rc.homeMinutes) {
+    const home = (rc.homeDose * 60) / rc.homeMinutes;
+    const p = rc.bgUSv ? ((home - rc.bgUSv) / rc.bgUSv) * 100 : 0;
+    sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RadiaCode em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
+  }
+  if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RadiaCode · ${atText(r, rc.maxAt)}`, "rc");
+  else sumKpi(box, "Pico", `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+}
+
+// casa × pessoal: quanto da dose do RadiaCode foi em casa e fora, e quanto o
+// RadiaCode marcou em relação ao GMC-800 (que fica parado em casa)
+function renderSumSplit(r, rc) {
+  const box = $("sumSplit");
+  box.hidden = !rc || !(rc.homeMinutes + rc.awayMinutes);
+  if (box.hidden) return;
+  const tot = rc.homeDose + rc.awayDose || 1, mins = rc.homeMinutes + rc.awayMinutes;
+  const hp = (rc.homeDose / tot) * 100, ap = 100 - hp;
+  const st = $("sumStack");
+  st.textContent = "";
+  const seg = (cls, pct, label) => {
+    if (pct <= 0) return;
+    const e = document.createElement("div");
+    e.className = cls;
+    e.style.width = pct.toFixed(1) + "%";
+    if (pct >= 14) e.textContent = label;
+    st.appendChild(e);
+  };
+  seg("home", hp, `em casa ${fmt(rc.homeDose, rc.homeDose < 10 ? 2 : 1)}`);
+  seg("away", rc.awayMinutes ? ap : 0, `fora ${fmt(rc.awayDose, rc.awayDose < 10 ? 2 : 1)}`);
+  const parts = [];
+  parts.push(rc.awayMinutes
+    ? `Fora de casa foi ${fmt((rc.awayMinutes / mins) * 100, 0)}% do tempo e ${fmt(ap, 0)}% da dose (µSv).`
+    : "Nenhum minuto fora de casa no período (µSv).");
+  if (r.minutes && r.avgUSv > 0 && rc.avg > 0) parts.push(`Razão pessoal ÷ casa: ${fmt(rc.avg / r.avgUSv, 2)} (RadiaCode ÷ GMC-800 em µSv/h).`);
+  $("sumSplitText").textContent = parts.join(" ");
+}
+
 function renderSummary(r, per) {
   $("sumSub").textContent = `${per[2]} · ${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + hhmm(per[1])}`;
+  const rc0 = r.rc && r.rc.minutes ? r.rc : null;
+  renderSumSay(r, rc0);
+  renderSumBig(r, rc0);
+  renderSumSplit(r, rc0);
   const t = $("sumTiles");
   t.textContent = "";
   $("sumTable").hidden = true;
@@ -5823,6 +5919,8 @@ function renderCompare(res, periods) {
   const [a, b] = res;
   $("sumSub").textContent = `${periods[0][2]} × ${periods[1][2]}`;
   $("sumTiles").textContent = "";
+  $("sumBig").textContent = "";
+  $("sumSplit").hidden = true;
   const tb = $("sumTable");
   tb.hidden = false;
   const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? " (igual)" : ` (${sgn(p, 0)}%)`; };
@@ -6218,6 +6316,9 @@ function wireReports() {
 function setupSummary() {
   $("btnReport").addEventListener("click", () => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label); });
   document.querySelectorAll("#sumModeSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.mode = b.dataset.smode; refreshSummary(); }));
+  // "detalhes" do Resumo lembra se estava aberto
+  $("sumDetails").open = localGet("sumDet", "") === "1";
+  $("sumDetails").addEventListener("toggle", (e) => localSet("sumDet", e.target.open ? "1" : ""));
   document.querySelectorAll("#sumPresetSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.preset = b.dataset.sp; state.sum.day = 0; refreshSummary(); }));
   document.querySelectorAll("#sumCmpSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.cmp = b.dataset.sc; refreshSummary(); }));
   $("sumDay").addEventListener("change", (e) => { state.sum.day = e.target.value ? parseDateVal(e.target.value) : 0; refreshSummary(); });

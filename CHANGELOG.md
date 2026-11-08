@@ -1,5 +1,24 @@
 # Versões
 
+## 2.18.0
+- **Resumo repaginado.** O período e a comparação continuam iguais; muda a
+  ordem do que aparece:
+  - **Uma frase no topo** diz se o período foi normal, se teve alerta
+    (atenção, alarme ou perigo, somando os dois aparelhos) ou se o fundo
+    ficou acima do normal, com a casa e o RadiaCode em relação ao normal de
+    cada um, quanto do tempo foi medido e quanto ficou fora de casa.
+  - **Três números**: a sua dose (RadiaCode; sem ele, a da casa pelo
+    GMC-800), o fundo da casa comparado com o seu normal e o pico.
+  - **Casa × pessoal**: quanto da dose do RadiaCode foi em casa e quanto
+    fora, a parte do tempo e da dose fora de casa e a razão entre o
+    RadiaCode e o GMC-800 em µSv/h (quanto você recebe em relação à casa).
+  - **Detalhes**: todos os números de antes, as lacunas, as anotações e o
+    histórico disponível ficam recolhidos e abrem com um clique. O app
+    lembra se estava aberto.
+- **Gráficos com um só seletor de período**, acima dos gráficos de CPM e de
+  dose. Os dois já andavam juntos; agora o botão repetido no gráfico da dose
+  saiu.
+
 ## 2.17.0
 - **Tela "Agora", a nova página inicial.** O app abre nela, e ela fica no
   topo da barra lateral.
