@@ -256,7 +256,7 @@ func (a *App) alertSecondsTick(now time.Time) {
 		c.Active = a.isActiveLocked(id)
 		evs = append(evs, c)
 	}
-	thr := a.settings.Levels.norm().attnExit()
+	thr := a.settings.Levels.Norm().AttnExit()
 	a.mu.Unlock()
 	if bgOK && bg > 0 {
 		thr = bg + 2*math.Sqrt(bg)

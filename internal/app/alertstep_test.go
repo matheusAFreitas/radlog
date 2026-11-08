@@ -9,7 +9,7 @@ import (
 // só o perigo é aberto. Ao descer, os níveis de baixo abrem um de cada vez.
 func TestAlertJumpOpensOnlyHighest(t *testing.T) {
 	a, _ := testApp(t)
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	now := time.Now()
 	var ids alertIDs
 	step := func(sec int, cpm float64, s alertStep) {

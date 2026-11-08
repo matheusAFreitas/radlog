@@ -8,6 +8,7 @@ import (
 	"testing"
 	"time"
 
+	"radlog/internal/core/levels"
 	"radlog/internal/gmc"
 	"radlog/internal/radiacode"
 	"radlog/internal/store"
@@ -208,17 +209,17 @@ func TestDangerLevel(t *testing.T) {
 	waitFor(t, "fim do perigo", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
 	a.StopDemo()
 
-	if level(999, DefaultLevels()) != "alerta" || level(1000, DefaultLevels()) != "perigo" {
+	if levels.Level(999, DefaultLevels()) != "alerta" || levels.Level(1000, DefaultLevels()) != "perigo" {
 		t.Fatal("level")
 	}
 	on := false
-	if s, _ := dangerStep(&on, 1000, DefaultLevels()); !s || !on {
+	if s, _ := levels.DangerStep(&on, 1000, DefaultLevels()); !s || !on {
 		t.Fatal("não entrou")
 	}
-	if _, e := dangerStep(&on, 901, DefaultLevels()); e || !on {
+	if _, e := levels.DangerStep(&on, 901, DefaultLevels()); e || !on {
 		t.Fatal("saiu acima de 900")
 	}
-	if _, e := dangerStep(&on, 899, DefaultLevels()); !e || on {
+	if _, e := levels.DangerStep(&on, 899, DefaultLevels()); !e || on {
 		t.Fatal("não saiu")
 	}
 }
@@ -307,7 +308,7 @@ func TestSaturationKeepsDanger(t *testing.T) {
 func TestCustomLevels(t *testing.T) {
 	a, _ := testApp(t)
 	a.settings.AlarmEnabled = false
-	a.settings.Levels = Levels{AttentionCPM: 80, DangerCPM: 300}.norm()
+	a.settings.Levels = Levels{AttentionCPM: 80, DangerCPM: 300}.Norm()
 	if a.settings.Levels.SnoozeMin != 5 || a.settings.Levels.SatMaxUSv != 2000 {
 		t.Fatalf("padrões: %+v", a.settings.Levels)
 	}
@@ -324,7 +325,7 @@ func TestCustomLevels(t *testing.T) {
 	a.StopDemo()
 
 	// valores absurdos e zeros voltam para limites razoáveis
-	n := Levels{AttentionCPM: -3, DangerCPM: 1, SnoozeMin: 999, SatHoldSec: 1}.norm()
+	n := Levels{AttentionCPM: -3, DangerCPM: 1, SnoozeMin: 999, SatHoldSec: 1}.Norm()
 	if n.AttentionCPM != 50 || n.DangerCPM != 50 || n.SnoozeMin != 60 || n.SatHoldSec != 5 {
 		t.Fatalf("norm: %+v", n)
 	}

@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/store"
 )
 
@@ -220,7 +221,7 @@ func (a *App) homeMedian(from, to time.Time) (float64, int) {
 	for i, p := range pts {
 		v[i] = p.CPM
 	}
-	return median(v), len(v)
+	return stats.Median(v), len(v)
 }
 
 // episodeSeconds junta os segundos gravados dos alertas que tocam

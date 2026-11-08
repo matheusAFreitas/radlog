@@ -167,7 +167,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	var evs []Event
 	for _, e := range a.events {
 		if e.Kind == kindAlert && e.Time >= s.From && e.Time < s.To && (!e.Demo || demo) && e.Device != devRC {

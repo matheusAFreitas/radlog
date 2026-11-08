@@ -5,6 +5,7 @@ import (
 	"sort"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/store"
 )
 
@@ -157,13 +158,6 @@ type doseMin struct {
 // de casa dele (µSv/h, mediana) com a origem.
 func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, string, error) {
 	now := time.Now()
-	median := func(v []float64) float64 {
-		sort.Float64s(v)
-		if len(v)%2 == 0 {
-			return (v[len(v)/2-1] + v[len(v)/2]) / 2
-		}
-		return v[len(v)/2]
-	}
 	if src == "radiacode" {
 		var out []doseMin
 		for _, p := range a.rcRange(from, to) {
@@ -188,7 +182,7 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 		if len(v) == 0 {
 			return out, 0, "", nil
 		}
-		return out, median(v), srcTxt, nil
+		return out, stats.Median(v), srcTxt, nil
 	}
 	pts, err := a.points(from, to) // com o demo ligado, inclui os minutos simulados
 	if err != nil {
@@ -219,7 +213,7 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 	for i, p := range bgPts {
 		cpms[i] = p.CPM
 	}
-	return out, cal.USv(median(cpms)), srcTxt, nil
+	return out, cal.USv(stats.Median(cpms)), srcTxt, nil
 }
 
 // buildDose monta o gráfico do dosímetro em [from, to).

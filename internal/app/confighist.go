@@ -38,7 +38,7 @@ func (a *App) cfgHistPath() string { return filepath.Join(a.dataDir, cfgHistFile
 // cfgSnapshotLocked descreve, campo a campo, a configuração atual. Chame com a.mu.
 func (a *App) cfgSnapshotLocked() map[string]string {
 	s := a.settings
-	lv := s.Levels.norm()
+	lv := s.Levels.Norm()
 	onOff := func(on bool, txt string) string {
 		if !on {
 			return "desligado"

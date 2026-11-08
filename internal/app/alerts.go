@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/core/levels"
 	"radlog/internal/store"
 )
 
@@ -406,7 +407,7 @@ type episode struct {
 }
 
 func findEpisodes(pts []store.Point, alarmCPM int, lv Levels) []episode {
-	enter, exit := lv.attnEnter(), lv.attnExit()
+	enter, exit := lv.AttnEnter(), lv.AttnExit()
 	if alarmCPM > 0 && float64(alarmCPM) < enter {
 		enter = float64(alarmCPM)
 		exit = enter * 0.9
@@ -450,7 +451,7 @@ func (a *App) retroAlerts(pts []store.Point) int {
 	}
 	a.mu.Lock()
 	alarmCPM := a.settings.AlarmCPM
-	lv := a.settings.Levels.norm()
+	lv := a.settings.Levels.Norm()
 	have := map[int64]bool{}
 	for _, e := range a.events {
 		if e.Kind == kindAlert && e.Retro {
@@ -459,7 +460,7 @@ func (a *App) retroAlerts(pts []store.Point) int {
 	}
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
-		alarmCPM = warningCPM
+		alarmCPM = levels.WarningCPM
 	}
 	sorted := append([]store.Point(nil), pts...)
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].T.Before(sorted[j].T) })
@@ -475,7 +476,7 @@ func (a *App) retroAlerts(pts []store.Point) int {
 			CPM: ep.first, Peak: ep.peak, PeakAt: ep.peakAt.UnixMilli(),
 			End: ep.last.Add(ep.step).UnixMilli(),
 		}
-		if ep.peak >= lv.dangerEnter() {
+		if ep.peak >= lv.DangerEnter() {
 			ev.Level = "perigo"
 			ev.Text = fmt.Sprintf("Perigo (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.peak, ep.peakAt.Format("15:04"), lv.DangerCPM)
 		} else if ep.peak >= float64(alarmCPM) {
