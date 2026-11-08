@@ -2734,3 +2734,35 @@ o fundo daria {0} {1}	background would give {0} {1}
 {0} {1} (fundo + {2} mSv/ano)	{0} {1} (background + {2} mSv/year)
 fora de casa até {0}	away from home until {0}
 {0}% medido	{0}% measured
+Período dos gráficos de CPM e de dose	Period of the CPM and dose charts
+Detalhes: todos os números, lacunas, anotações e histórico disponível	Details: all the numbers, gaps, notes and available history
+Casa × pessoal	Home × personal
+Escolha outro período ou confira se os aparelhos estão gravando.	Pick another period or check that the devices are recording.
+Teve perigo no período.	There was danger in the period.
+Teve alarme no período.	There was an alarm in the period.
+Fundo acima do normal no período.	Background above normal in the period.
+Período normal, com alertas de atenção.	Normal period, with attention alerts.
+Período normal.	Normal period.
+igual ao normal	same as normal
+{0}% acima do normal	{0}% above normal
+{0}% abaixo do normal	{0}% below normal
+Casa igual ao normal	Home same as normal
+Casa {0}% acima do normal	Home {0}% above normal
+Casa {0}% abaixo do normal	Home {0}% below normal
+RadiaCode igual ao normal	RadiaCode same as normal
+RadiaCode {0}% acima do normal	RadiaCode {0}% above normal
+RadiaCode {0}% abaixo do normal	RadiaCode {0}% below normal
+{0}% do tempo medido	{0}% of the time measured
+fora de casa: {0}	away from home: {0}
+nenhum alerta	no alerts
+Sua dose	Your dose
+Dose da casa	Home dose
+somada pelo aparelho	summed by the device
+normal ainda não calculado	normal not calculated yet
+pelo RadiaCode em casa	by the RadiaCode at home
+≈ {0} µSv/h	≈ {0} µSv/h
+em casa {0}	at home {0}
+fora {0}	away {0}
+Fora de casa foi {0}% do tempo e {1}% da dose (µSv).	Away from home was {0}% of the time and {1}% of the dose (µSv).
+Nenhum minuto fora de casa no período (µSv).	No minutes away from home in the period (µSv).
+Razão pessoal ÷ casa: {0} (RadiaCode ÷ GMC-800 em µSv/h).	Personal ÷ home ratio: {0} (RadiaCode ÷ GMC-800 in µSv/h).

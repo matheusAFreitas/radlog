@@ -241,6 +241,19 @@
     <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1">Padrões do fundo</button>
     <button type="button" role="tab" data-sub="tendencia" aria-selected="false" tabindex="-1">Tendência do fundo</button>
   </nav>
+  <div class="graf-period" data-subpane="tempo">
+    <span class="small muted">Período dos gráficos de CPM e de dose</span>
+    <div class="seg" role="group" aria-label="Período" id="rangeSeg">
+      <button type="button" data-range="15m" aria-pressed="false">15 min</button>
+      <button type="button" data-range="30m" aria-pressed="false">30 min</button>
+      <button type="button" data-range="1h" aria-pressed="true">1 h</button>
+      <button type="button" data-range="6h" aria-pressed="false">6 h</button>
+      <button type="button" data-range="24h" aria-pressed="false">24 h</button>
+      <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
+      <button type="button" data-range="30d" aria-pressed="false">30 dias</button>
+      <button type="button" data-range="1y" aria-pressed="false">1 ano</button>
+    </div>
+  </div>
   <section class="card chart-card view-graficos" id="cpmCard" role="tabpanel" data-subpane="tempo">
       <div class="chart-head">
         <div>
@@ -251,16 +264,6 @@
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
           <button type="button" data-cunit="cpm" aria-pressed="true">CPM</button>
           <button type="button" data-cunit="usv" aria-pressed="false">µSv/h</button>
-        </div>
-        <div class="seg" role="group" aria-label="Período" id="rangeSeg">
-          <button type="button" data-range="15m" aria-pressed="false">15 min</button>
-          <button type="button" data-range="30m" aria-pressed="false">30 min</button>
-          <button type="button" data-range="1h" aria-pressed="true">1 h</button>
-          <button type="button" data-range="6h" aria-pressed="false">6 h</button>
-          <button type="button" data-range="24h" aria-pressed="false">24 h</button>
-          <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
-          <button type="button" data-range="30d" aria-pressed="false">30 dias</button>
-          <button type="button" data-range="1y" aria-pressed="false">1 ano</button>
         </div>
         </div>
       </div>
@@ -298,16 +301,6 @@
         <div>
           <h2 id="doseTitle">Dose acumulada</h2>
           <span class="mono muted small" id="doseSub">sem dados no período</span>
-        </div>
-        <div class="seg" role="group" aria-label="Período da dose" id="doseRangeSeg">
-          <button type="button" data-range="15m" aria-pressed="false">15 min</button>
-          <button type="button" data-range="30m" aria-pressed="false">30 min</button>
-          <button type="button" data-range="1h" aria-pressed="true">1 h</button>
-          <button type="button" data-range="6h" aria-pressed="false">6 h</button>
-          <button type="button" data-range="24h" aria-pressed="false">24 h</button>
-          <button type="button" data-range="7d" aria-pressed="false">7 dias</button>
-          <button type="button" data-range="30d" aria-pressed="false">30 dias</button>
-          <button type="button" data-range="1y" aria-pressed="false">1 ano</button>
         </div>
       </div>
 
@@ -527,7 +520,22 @@
           <label>B <input type="date" id="sumDayB"></label>
         </span>
       </div>
-      <div class="ri-tiles sum-tiles" id="sumTiles"></div>
+      <div class="sum-say ag-say" id="sumSay" aria-live="polite">
+        <div class="ag-say-text">
+          <h3 id="sumSayTitle">Carregando…</h3>
+          <p class="muted" id="sumSayText"></p>
+        </div>
+        <span class="chip" id="sumSayChip" hidden></span>
+      </div>
+      <div class="sum-top" id="sumTop">
+        <div class="sum-big" id="sumBig"></div>
+        <div class="sum-split" id="sumSplit" hidden>
+          <h3>Casa × pessoal</h3>
+          <div class="sum-stack" id="sumStack" aria-hidden="true"></div>
+          <p class="small muted" id="sumSplitText"></p>
+        </div>
+      </div>
+      <table class="sum-table" id="sumTable" hidden></table>
       <div class="ri-chart">
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
@@ -540,10 +548,13 @@
         <div class="ad-x mono" id="sumX"><span></span><span></span><span></span></div>
         <div class="legend small muted ad-legend" id="sumLegend"></div>
       </div>
-      <table class="sum-table" id="sumTable" hidden></table>
-      <div class="sum-notes" id="sumGaps" hidden></div>
-      <div class="sum-notes" id="sumNotes" hidden></div>
-      <div class="sum-notes" id="sumMature" hidden></div>
+      <details class="sum-details" id="sumDetails">
+        <summary>Detalhes: todos os números, lacunas, anotações e histórico disponível</summary>
+        <div class="ri-tiles sum-tiles" id="sumTiles"></div>
+        <div class="sum-notes" id="sumGaps" hidden></div>
+        <div class="sum-notes" id="sumNotes" hidden></div>
+        <div class="sum-notes" id="sumMature" hidden></div>
+      </details>
       </div>
     </section>
 </div>

@@ -1887,7 +1887,26 @@ const I18N_EN = {
 "Nada marcado hoje: nenhum alerta, anotação ou saída de casa.": "Nothing marked today: no alert, note or time away from home.",
 "Abrir nos gráficos": "Open in charts",
 "Taxa de dose nas últimas 24 horas": "Dose rate over the last 24 hours",
-"só o fundo, no ano todo": "background only, whole year"
+"só o fundo, no ano todo": "background only, whole year",
+"Período dos gráficos de CPM e de dose": "Period of the CPM and dose charts",
+"Detalhes: todos os números, lacunas, anotações e histórico disponível": "Details: all the numbers, gaps, notes and available history",
+"Casa × pessoal": "Home × personal",
+"Escolha outro período ou confira se os aparelhos estão gravando.": "Pick another period or check that the devices are recording.",
+"Teve perigo no período.": "There was danger in the period.",
+"Teve alarme no período.": "There was an alarm in the period.",
+"Fundo acima do normal no período.": "Background above normal in the period.",
+"Período normal, com alertas de atenção.": "Normal period, with attention alerts.",
+"Período normal.": "Normal period.",
+"igual ao normal": "same as normal",
+"Casa igual ao normal": "Home same as normal",
+"RadiaCode igual ao normal": "RadiaCode same as normal",
+"nenhum alerta": "no alerts",
+"Sua dose": "Your dose",
+"Dose da casa": "Home dose",
+"somada pelo aparelho": "summed by the device",
+"normal ainda não calculado": "normal not calculated yet",
+"pelo RadiaCode em casa": "by the RadiaCode at home",
+"Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv)."
 },
 "patterns": [
 [
@@ -3083,6 +3102,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Razão pessoal ÷ casa: ",
+"^Razão pessoal ÷ casa: ((?:(?! · ).)+?) \\(RadiaCode ÷ GMC\\-800 em µSv/h\\)\\.$",
+"Personal ÷ home ratio: ${1} (RadiaCode ÷ GMC-800 in µSv/h).",
+[
+"Razão pessoal ÷ casa: ",
+" (RadiaCode ÷ GMC-800 em µSv/h)."
+]
+],
+[
 "ponto ",
 "^ponto ((?:(?! · ).)+?) dá ((?:(?! · ).)+?) CPM por µSv/h, fora da faixa plausível \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
 "point ${1} gives ${2} CPM per µSv/h, outside the plausible range (${3} to ${4})",
@@ -3501,6 +3529,16 @@ const I18N_EN = {
 [
 "Erro interno no app (",
 "); detalhes no log técnico"
+]
+],
+[
+"Fora de casa foi ",
+"^Fora de casa foi ((?:(?! · ).)+?)% do tempo e ((?:(?! · ).)+?)% da dose \\(µSv\\)\\.$",
+"Away from home was ${1}% of the time and ${2}% of the dose (µSv).",
+[
+"Fora de casa foi ",
+"% do tempo e ",
+"% da dose (µSv)."
 ]
 ],
 [
@@ -5109,6 +5147,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode ",
+"^RadiaCode ((?:(?! · ).)+?)% abaixo do normal$",
+"RadiaCode ${1}% below normal",
+[
+"RadiaCode ",
+"% abaixo do normal"
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -5228,6 +5275,15 @@ const I18N_EN = {
 "whole year at this rate: ${1} ${2}",
 [
 "no ano todo, nesse ritmo: "
+]
+],
+[
+"RadiaCode ",
+"^RadiaCode ((?:(?! · ).)+?)% acima do normal$",
+"RadiaCode ${1}% above normal",
+[
+"RadiaCode ",
+"% acima do normal"
 ]
 ],
 [
@@ -5822,6 +5878,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Casa ",
+"^Casa ((?:(?! · ).)+?)% abaixo do normal$",
+"Home ${1}% below normal",
+[
+"Casa ",
+"% abaixo do normal"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -5975,6 +6040,15 @@ const I18N_EN = {
 [
 "fundo de casa · ",
 " µSv/h"
+]
+],
+[
+"Casa ",
+"^Casa ((?:(?! · ).)+?)% acima do normal$",
+"Home ${1}% above normal",
+[
+"Casa ",
+"% acima do normal"
 ]
 ],
 [
@@ -6769,6 +6843,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% abaixo do normal$",
+"${1}% below normal",
+[
+"% abaixo do normal"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -6949,6 +7031,22 @@ const I18N_EN = {
 "away from home until ${1}",
 [
 "fora de casa até "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% acima do normal$",
+"${1}% above normal",
+[
+"% acima do normal"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% do tempo medido$",
+"${1}% of the time measured",
+[
+"% do tempo medido"
 ]
 ],
 [
@@ -7503,6 +7601,14 @@ const I18N_EN = {
 [
 "você em ",
 " µSv/h"
+]
+],
+[
+"fora de casa: ",
+"^fora de casa: ((?:(?! · ).)+?)$",
+"away from home: ${1}",
+[
+"fora de casa: "
 ]
 ],
 [
@@ -8734,6 +8840,22 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) µSv/h$",
+"≈ ${1} µSv/h",
+[
+" µSv/h"
+]
+],
+[
+"em casa ",
+"^em casa ((?:(?! · ).)+?)$",
+"at home ${1}",
+[
+"em casa "
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -9052,6 +9174,14 @@ const I18N_EN = {
 "peak ${1}",
 [
 "pico "
+]
+],
+[
+"fora ",
+"^fora ((?:(?! · ).)+?)$",
+"away ${1}",
+[
+"fora "
 ]
 ],
 [
