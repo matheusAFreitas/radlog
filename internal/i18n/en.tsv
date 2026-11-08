@@ -2701,3 +2701,36 @@ Erro interno repetido no app ({0}); a tarefa parou. Feche e abra o RadLog	Repeat
 erro interno na leitura ao vivo	internal error in live reading
 a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira	the release has no signature (SHA256SUMS.txt.sig); download it from the page and check it
 a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão	the SHA256SUMS.txt signature doesn't match; won't install this version
+Semana	Week
+Ano	Year
+pessoal	personal
+casa	home
+teto	ceiling
+igual	same
+neste ano	this year
+Minha dose	My dose
+Carregando…	Loading…
+Aparelho da dose	Dose device
+Tudo normal agora.	All normal now.
+Nenhum aparelho lendo agora.	No device reading right now.
+A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.	The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.
+Veja os detalhes em Alertas.	See the details in Alerts.
+dentro do seu fundo	within your background
+Dose pessoal, pelo RadiaCode (anda com você).	Personal dose, from the RadiaCode (it goes with you).
+Dose da casa, pelo GMC-800 (fica parado).	Home dose, from the GMC-800 (it stays put).
+O RadiaCode ainda não tem dado neste ano. Troque para "casa" para ver a do GMC-800.	The RadiaCode has no data this year yet. Switch to "home" to see the GMC-800's.
+O GMC-800 ainda não tem dado neste ano.	The GMC-800 has no data this year yet.
+Nada marcado hoje: nenhum alerta, anotação ou saída de casa.	Nothing marked today: no alert, note or time away from home.
+Abrir nos gráficos	Open in charts
+Taxa de dose nas últimas 24 horas	Dose rate over the last 24 hours
+só o fundo, no ano todo	background only, whole year
+Casa em {0} µSv/h	Home at {0} µSv/h
+você em {0} µSv/h	you at {0} µSv/h
+{0} σ acima do seu fundo	{0} σ above your background
+{0} no {1} agora.	{0} on the {1} now.
+fundo de casa · {0} µSv/h	home background · {0} µSv/h
+no ano todo, nesse ritmo: {0} {1}	whole year at this rate: {0} {1}
+o fundo daria {0} {1}	background would give {0} {1}
+{0} {1} (fundo + {2} mSv/ano)	{0} {1} (background + {2} mSv/year)
+fora de casa até {0}	away from home until {0}
+{0}% medido	{0}% measured

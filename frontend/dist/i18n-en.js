@@ -1865,7 +1865,29 @@ const I18N_EN = {
 "Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode",
 "erro interno na leitura ao vivo": "internal error in live reading",
 "a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira": "the release has no signature (SHA256SUMS.txt.sig); download it from the page and check it",
-"a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão": "the SHA256SUMS.txt signature doesn't match; won't install this version"
+"a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão": "the SHA256SUMS.txt signature doesn't match; won't install this version",
+"Semana": "Week",
+"Ano": "Year",
+"pessoal": "personal",
+"casa": "home",
+"teto": "ceiling",
+"igual": "same",
+"neste ano": "this year",
+"Minha dose": "My dose",
+"Carregando…": "Loading…",
+"Tudo normal agora.": "All normal now.",
+"Nenhum aparelho lendo agora.": "No device reading right now.",
+"A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.": "The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.",
+"Veja os detalhes em Alertas.": "See the details in Alerts.",
+"dentro do seu fundo": "within your background",
+"Dose pessoal, pelo RadiaCode (anda com você).": "Personal dose, from the RadiaCode (it goes with you).",
+"Dose da casa, pelo GMC-800 (fica parado).": "Home dose, from the GMC-800 (it stays put).",
+"O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.": "The RadiaCode has no data this year yet. Switch to \"home\" to see the GMC-800's.",
+"O GMC-800 ainda não tem dado neste ano.": "The GMC-800 has no data this year yet.",
+"Nada marcado hoje: nenhum alerta, anotação ou saída de casa.": "Nothing marked today: no alert, note or time away from home.",
+"Abrir nos gráficos": "Open in charts",
+"Taxa de dose nas últimas 24 horas": "Dose rate over the last 24 hours",
+"só o fundo, no ano todo": "background only, whole year"
 },
 "patterns": [
 [
@@ -5201,6 +5223,14 @@ const I18N_EN = {
 ]
 ],
 [
+"no ano todo, nesse ritmo: ",
+"^no ano todo, nesse ritmo: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"whole year at this rate: ${1} ${2}",
+[
+"no ano todo, nesse ritmo: "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -5784,6 +5814,15 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) ((?:(?! · ).)+?) \\(fundo \\+ ((?:(?! · ).)+?) mSv/ano\\)$",
+"${1} ${2} (background + ${3} mSv/year)",
+[
+" (fundo + ",
+" mSv/ano)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -5927,6 +5966,15 @@ const I18N_EN = {
 "${1} on the RadiaCode (demo)",
 [
 " no RadiaCode (demo)"
+]
+],
+[
+"fundo de casa · ",
+"^fundo de casa · ((?:(?! · ).)+?) µSv/h$",
+"home background · ${1} µSv/h",
+[
+"fundo de casa · ",
+" µSv/h"
 ]
 ],
 [
@@ -6148,6 +6196,14 @@ const I18N_EN = {
 "${1} unsaved changes:",
 [
 " mudanças não salvas:"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) σ acima do seu fundo$",
+"${1} σ above your background",
+[
+" σ acima do seu fundo"
 ]
 ],
 [
@@ -6888,6 +6944,14 @@ const I18N_EN = {
 ]
 ],
 [
+"fora de casa até ",
+"^fora de casa até ((?:(?! · ).)+?)$",
+"away from home until ${1}",
+[
+"fora de casa até "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -7273,6 +7337,14 @@ const I18N_EN = {
 ]
 ],
 [
+"o fundo daria ",
+"^o fundo daria ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"background would give ${1} ${2}",
+[
+"o fundo daria "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -7413,6 +7485,24 @@ const I18N_EN = {
 "${1} days with data",
 [
 " dias com dado"
+]
+],
+[
+"Casa em ",
+"^Casa em ((?:(?! · ).)+?) µSv/h$",
+"Home at ${1} µSv/h",
+[
+"Casa em ",
+" µSv/h"
+]
+],
+[
+"você em ",
+"^você em ((?:(?! · ).)+?) µSv/h$",
+"you at ${1} µSv/h",
+[
+"você em ",
+" µSv/h"
 ]
 ],
 [
@@ -7809,6 +7899,15 @@ const I18N_EN = {
 "${1} on the GMC-800",
 [
 " no GMC-800"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no ((?:(?! · ).)+?) agora\\.$",
+"${1} on the ${2} now.",
+[
+" no ",
+" agora."
 ]
 ],
 [
@@ -8624,6 +8723,14 @@ const I18N_EN = {
 "${1} · background",
 [
 " · fundo"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% medido$",
+"${1}% measured",
+[
+"% medido"
 ]
 ],
 [
