@@ -2675,3 +2675,10 @@ no gráfico · clique para esconder	on the chart · click to hide
 escondido do gráfico · clique para mostrar	hidden from the chart · click to show
 esperando o próximo total do aparelho	waiting for the next total from the device
 {0}% do limite · {1} acima do fundo, de {2} permitidos ({3})	{0}% of the limit · {1} above background, of {2} allowed ({3})
+No aparelho:	On the device:
+Pelo app:	By the app:
+{0} µSv desde que foi zerado ({1})	{0} µSv since it was reset ({1})
+{0} µSv desde que foi zerado	{0} µSv since it was reset
+total das {0}	total from {0}
+esperando o primeiro total (vem a cada 3 a 4 min)	waiting for the first total (every 3 to 4 min)
+{0} ({1}% do período gravado)	{0} ({1}% of the period recorded)

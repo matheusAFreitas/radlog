@@ -1852,7 +1852,9 @@ const I18N_EN = {
 "Mostrar ou esconder no gráfico": "Show or hide on the chart",
 "no gráfico · clique para esconder": "on the chart · click to hide",
 "escondido do gráfico · clique para mostrar": "hidden from the chart · click to show",
-"esperando o próximo total do aparelho": "waiting for the next total from the device"
+"esperando o próximo total do aparelho": "waiting for the next total from the device",
+"Pelo app:": "By the app:",
+"esperando o primeiro total (vem a cada 3 a 4 min)": "waiting for the first total (every 3 to 4 min)"
 },
 "patterns": [
 [
@@ -4802,6 +4804,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv desde que foi zerado \\(((?:(?! · ).)+?)\\)$",
+"${1} µSv since it was reset (${2})",
+[
+" µSv desde que foi zerado ("
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -5497,6 +5507,22 @@ const I18N_EN = {
 "${1}% of the period's ceiling (${2})",
 [
 "% do teto do período ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv desde que foi zerado$",
+"${1} µSv since it was reset",
+[
+" µSv desde que foi zerado"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) \\(((?:(?! · ).)+?)% do período gravado\\)$",
+"${1} (${2}% of the period recorded)",
+[
+"% do período gravado)"
 ]
 ],
 [
@@ -8104,6 +8130,14 @@ const I18N_EN = {
 "${1} devices",
 [
 " aparelhos"
+]
+],
+[
+"total das ",
+"^total das ((?:(?! · ).)+?)$",
+"total from ${1}",
+[
+"total das "
 ]
 ],
 [

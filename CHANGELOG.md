@@ -1,5 +1,12 @@
 # Versões
 
+## 2.13.3
+- **Dose do aparelho dentro do quadro do RadiaCode.** As duas linhas soltas
+  embaixo dos quadros ("no aparelho, desde que foi zerado…" e "Calculado
+  pelo app…") viraram duas linhas curtas dentro do quadro do RadiaCode:
+  "No aparelho: 4,990 µSv desde que foi zerado (33,8 h) · ao vivo" e "Pelo
+  app: 3,20 µSv (13% do período gravado)".
+
 ## 2.13.2
 - **Uma barra só por aparelho na dose.** As barras dos quadros do GMC-800 e
   do RadiaCode comparavam a dose total com o teto (fundo + limite), e a
