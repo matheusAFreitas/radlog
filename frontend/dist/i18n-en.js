@@ -1781,7 +1781,21 @@ const I18N_EN = {
 "sem motivo informado": "no reason given",
 "Configuração na época": "Settings at the time",
 "Anexos": "Attachments",
-"1 registro do RadiaCode": "1 RadiaCode record"
+"1 registro do RadiaCode": "1 RadiaCode record",
+"Páginas": "Pages",
+"Análise": "Analysis",
+"Registros": "Records",
+"Aparelhos": "Devices",
+"Aparelhos agora": "Devices now",
+"Dose": "Dose",
+"memória cheia": "memory full",
+"minutos para baixar": "minutes to download",
+"Nenhum alerta ativo": "No active alerts",
+"Nenhum alerta registrado ainda.": "No alerts recorded yet.",
+"Ver histórico de alertas": "See alert history",
+"Aguardando…": "Waiting…",
+"Saturado": "Saturated",
+"Desconectado": "Disconnected"
 },
 "patterns": [
 [
@@ -5722,6 +5736,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) no RadiaCode \\(demo\\)$",
+"${1} on the RadiaCode (demo)",
+[
+" no RadiaCode (demo)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -5924,6 +5946,14 @@ const I18N_EN = {
 "Last download on ${1}.",
 [
 "Último download em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no GMC\\-800 \\(demo\\)$",
+"${1} on the GMC-800 (demo)",
+[
+" no GMC-800 (demo)"
 ]
 ],
 [
@@ -6819,6 +6849,14 @@ const I18N_EN = {
 ]
 ],
 [
+"última leitura: ",
+"^última leitura: ((?:(?! · ).)+?)$",
+"last reading: ${1}",
+[
+"última leitura: "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -7352,6 +7390,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) no RadiaCode$",
+"${1} on the RadiaCode",
+[
+" no RadiaCode"
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -7537,6 +7583,22 @@ const I18N_EN = {
 [
 "mediana ",
 " CPM"
+]
+],
+[
+"memória em ",
+"^memória em ((?:(?! · ).)+?)%$",
+"memory at ${1}%",
+[
+"memória em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no GMC\\-800$",
+"${1} on the GMC-800",
+[
+" no GMC-800"
 ]
 ],
 [
@@ -7897,6 +7959,14 @@ const I18N_EN = {
 "dispersion ${1}",
 [
 "dispersão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) aparelhos$",
+"${1} devices",
+[
+" aparelhos"
 ]
 ],
 [
@@ -8288,6 +8358,14 @@ const I18N_EN = {
 "median ${1}",
 [
 "mediana "
+]
+],
+[
+"Último: ",
+"^Último: ((?:(?! · ).)+?)$",
+"Last: ${1}",
+[
+"Último: "
 ]
 ],
 [

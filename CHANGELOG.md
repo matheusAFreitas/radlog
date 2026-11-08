@@ -1,5 +1,29 @@
 # Versões
 
+## 2.8.0
+- **Tela nova: menu na lateral e os aparelhos sempre em cima.** As abas e
+  a coluna da esquerda deram lugar a um menu lateral (Análise: Gráficos,
+  Dose, Resumo; Registros: Alertas, Medir objeto, Fora de casa, Chuva;
+  Aparelhos: GMC-800, RadiaCode) e cada item abre uma página só dele, sem
+  precisar rolar por tudo. Baixar histórico, Modo demo, Eventos, Exportar
+  CSV e Configurações ficam no pé do menu. Em janela estreita o menu vira
+  uma faixa em cima.
+- **Painel dos aparelhos.** No topo de todas as páginas há um quadro para o
+  GMC-800, um para o RadiaCode (quando ele está ou já esteve conectado) e
+  um dos alertas. Cada quadro do aparelho mostra o valor em µSv/h, CPM e
+  CPS embaixo, a dose de hoje, a última hora num gráfico pequeno e a régua
+  das faixas. Clicar no valor abre a página do aparelho, com o quadro
+  completo (σ, faixas, médias), a memória do contador e o fundo diário.
+- **µSv/h como padrão nos dois aparelhos.** Quem estava em CPM passa para
+  µSv/h uma vez; depois vale a unidade que escolher na página do aparelho.
+- **Cor do nível só onde importa.** Na régua acende só a faixa em que a
+  leitura está (seguro, atenção ou alerta); as outras ficam apagadas. Em
+  atenção, alerta ou perigo a borda do quadro e a palavra do estado ficam
+  amarelas, laranja ou vermelhas, e o quadro dos alertas mostra o nível, o
+  aparelho, desde quando e o pico. O menu mostra quantos alertas estão
+  ativos e uma bolinha no GMC-800 quando a memória do contador pede
+  atenção.
+
 ## 2.7.3
 - **Importar log do RadiaCode: novo formato aceito.** A exportação com a
   unidade no cabeçalho ("Time;Timestamp;Event;Count Rate, cps;Dose rate,

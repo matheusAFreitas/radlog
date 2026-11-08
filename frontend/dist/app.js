@@ -32,8 +32,11 @@ const calK = () => (state.status && (state.status.usvPerCPM || (state.status.dev
 
 // ---------- estado ----------
 
+// 2.8: os dois aparelhos abrem em µSv/h; quem ainda estava no padrão antigo
+// (CPM) passa para µSv/h uma vez, depois vale o que escolher
+if (!localGet("unit28", "")) { localSet("unit", "usv"); localSet("unit28", "1"); }
 const state = {
-  unit: localGet("unit", "cpm"),
+  unit: localGet("unit", "usv"),
   range: localGet("range", "1h"),
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
@@ -155,6 +158,7 @@ function openSigmaHelp() {
 document.addEventListener("click", (e) => { if (e.target.closest("#btnSigmaHelp, .rc-sigma-help")) openSigmaHelp(); });
 
 function renderReading() {
+  renderGTile();
   const r = state.last;
   const connected = state.status.state === "conectado";
   const u = state.unit;
@@ -218,6 +222,173 @@ function renderReading() {
   $("hero").classList.toggle("alarm", !!(r.alarm || r.danger));
 }
 
+// ---------- painel dos aparelhos (2.8) ----------
+// Um quadro por aparelho, sempre em cima: o valor na unidade escolhida
+// (µSv/h de padrão), CPM e CPS embaixo, a última hora e a régua com só a
+// faixa atual acesa. Em atenção/alerta/perigo a borda e a palavra do estado
+// mudam de cor. O terceiro quadro resume os alertas.
+
+const UNIT_TXT = { cpm: "CPM", usv: "µSv/h", mrh: "mrem/h", cps: "CPS" };
+const LV_WORD = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" };
+const TILE_LV = ["seguro", "atencao", "alerta", "perigo", "nocount"];
+
+// valores em cada unidade; o CPS é a média do minuto (CPM ÷ 60)
+function tileVals(usv, cpm, cps) {
+  return {
+    usv: fmt(usv, usvDigits(usv)),
+    mrh: fmt(usv / 10, usvDigits(usv) + 1),
+    cpm: fmt(cpm, 0),
+    cps: fmt(cps == null ? cpm / 60 : cps, 2),
+  };
+}
+
+// rodapé: o que não está no número grande (CPM e CPS; µSv/h se o grande for
+// CPM ou CPS) e a dose de hoje
+function tileFoot(el, u, v, dose, doseSub) {
+  const keys = u === "cpm" ? ["usv", "cps"] : u === "cps" ? ["usv", "cpm"] : ["cpm", "cps"];
+  el.textContent = "";
+  const num = (t) => { const b = document.createElement("b"); b.className = "mono"; b.textContent = t; return b; };
+  for (const k of keys) {
+    const sp = document.createElement("span");
+    sp.append(num(v ? v[k] : "—"), " " + UNIT_TXT[k]);
+    el.appendChild(sp);
+  }
+  const sp = document.createElement("span");
+  sp.append("hoje", " ", num(dose == null ? "—" : fmt(dose, 2)), " µSv");
+  if (doseSub) { const s2 = document.createElement("span"); s2.className = "inst-sub"; s2.textContent = doseSub; sp.append(" ", s2); }
+  el.appendChild(sp);
+}
+
+// régua: p1/p2 são onde começam a 2ª e a 3ª faixa (0 a 1), pos é a leitura
+function tileScale(pfx, p1, p2, pos, t1, t2) {
+  const segs = $(pfx + "TileScale").querySelectorAll(".inst-segs span");
+  segs[0].style.flexGrow = p1;
+  segs[1].style.flexGrow = p2 - p1;
+  segs[2].style.flexGrow = 1 - p2;
+  const k1 = $(pfx + "Tick1"), k2 = $(pfx + "Tick2");
+  k1.style.left = p1 * 100 + "%"; k1.textContent = t1;
+  k2.style.left = p2 * 100 + "%"; k2.textContent = t2;
+  const m = $(pfx + "TileMark");
+  m.hidden = pos == null;
+  if (pos != null) m.style.left = Math.max(0, Math.min(1, pos)) * 100 + "%";
+}
+
+function tileState(pfx, lvl, word) {
+  const el = $(pfx + "Tile");
+  TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
+  $(pfx + "TileState").textContent = word;
+}
+
+function renderGTile() {
+  const r = state.last, s = state.status || {};
+  const connected = s.state === "conectado";
+  const live = !!r && (connected || state.demo.active);
+  const u = state.unit;
+  $("gTileUnit").textContent = UNIT_TXT[u];
+  $("gTileDemo").hidden = !state.demo.active;
+  $("gTile").classList.toggle("stale", !live);
+  const v = live ? tileVals(r.usv, r.cpm) : null;
+  $("gTileVal").textContent = v ? v[u] : "—";
+  // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
+  const k = calK();
+  const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
+  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
+  let lvl = "", word;
+  if (live) {
+    lvl = r.level;
+    word = LV_WORD[r.level] || "—";
+    if (r.saturated) word = "Saturado";
+    else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
+  } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
+  tileState("g", lvl, word);
+  tileFoot($("gTileFoot"), u, v, state.gDose);
+}
+
+function renderRTile(st, o) {
+  const on = st.state === "conectado";
+  const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
+  $("rTileDot").className = "dot" + (on ? " on" : st.state === "conectando" ? " wait" : st.state === "erro" ? " err" : "");
+  $("rTileConnText").textContent = on
+    ? `RadiaCode · ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
+    : st.state === "conectando" ? "RadiaCode · conectando…" : "RadiaCode · desconectado";
+  $("rTileConn").title = on ? `RadiaCode conectado pelo ${via}` : st.err || "RadiaCode";
+  const u = state.rcUnit;
+  $("rTileUnit").textContent = UNIT_TXT[u];
+  $("rTile").classList.toggle("stale", !o.live);
+  const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
+  $("rTileVal").textContent = v ? v[u] : "—";
+  $("rTileVal").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
+  // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
+  const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
+  const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
+  tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
+  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : LV_WORD;
+  if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
+  else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
+  const sx = st.stats || {};
+  const dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
+  tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "");
+}
+
+// alertas: o ativo mais alto (borda na cor do nível) ou o último que passou
+function renderATile() {
+  const list = state.activeAlerts || [];
+  const rank = { atencao: 1, alarme: 2, perigo: 3 };
+  const dev = (e) => (isRcEv(e) ? "RadiaCode" : "GMC-800");
+  const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1) || a.time - b.time)[0];
+  const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
+  const lv = top ? { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
+  tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
+  const nav = $("navAlerts");
+  nav.hidden = !top;
+  nav.textContent = String(srcs.size);
+  nav.className = "side-badge mono" + (lv ? " lv-" + lv : "");
+  if (top) {
+    $("aTileTitle").textContent = `${lvlName(top)} no ${dev(top)}` + (top.demo ? " (demo)" : "");
+    $("aTileText").textContent = `desde ${hhmm(top.time)} (${fmtDur(Date.now() - top.time)}) · pico ${evVal(top, top.peak)}`;
+    return;
+  }
+  $("aTileTitle").textContent = "Nenhum alerta ativo";
+  const e = state.lastAlert;
+  $("aTileText").textContent = e
+    ? `Último: ${whenLabel(e.time)} · ${lvlName(e)} no ${dev(e)}` + (e.end ? ` · ${fmtDur(e.end - e.time)}` : "") + (e.peak ? ` · pico ${evVal(e, e.peak)}` : "")
+    : "Nenhum alerta registrado ainda.";
+}
+
+// a faixa de atenção/alarme fica presa no topo: o menu começa embaixo dela
+(() => {
+  const bars = document.querySelector(".bars");
+  if (!bars || !window.ResizeObserver) return;
+  new ResizeObserver(() => document.documentElement.style.setProperty("--barsH", bars.offsetHeight + "px")).observe(bars);
+})();
+
+// a última hora de cada aparelho, desenhada pequena no quadro
+let sparkSeq = 0;
+async function refreshSpark() {
+  if (!api.GetChart) return;
+  const my = ++sparkSeq;
+  let c;
+  try { c = await api.GetChart("1h"); } catch (e) { return; }
+  if (my !== sparkSeq || !c) return;
+  drawSpark("gTileSpark", c.values);
+  drawSpark("rTileSpark", c.rc);
+}
+function drawSpark(id, vals) {
+  const pl = $(id).querySelector("polyline");
+  const pts = (vals || []).map((v, i) => [i, v]).filter((p) => p[1] != null && isFinite(p[1]));
+  if (pts.length < 2) { pl.setAttribute("points", ""); return; }
+  const n = Math.max(1, vals.length - 1);
+  // média de 3 pontos: a variação natural da contagem não vira serra, um
+  // aumento de verdade continua aparecendo
+  const sm = pts.map((p, k) => { const w = pts.slice(Math.max(0, k - 1), k + 2); return [p[0], w.reduce((a, q) => a + q[1], 0) / w.length]; });
+  pts.splice(0, pts.length, ...sm);
+  const ys = pts.map((p) => p[1]);
+  const lo0 = Math.min(...ys), hi0 = Math.max(...ys), mid = (lo0 + hi0) / 2;
+  // altura mínima de 60% do valor: o fundo parado fica quase reto
+  const span = Math.max(hi0 - lo0, Math.abs(mid) * 0.6, 1e-6), lo = mid - span / 2;
+  pl.setAttribute("points", pts.map(([i, v]) => `${(i / n * 160).toFixed(1)},${(37 - (v - lo) / span * 34).toFixed(1)}`).join(" "));
+}
+
 // ---------- conexão ----------
 
 function renderStatus() {
@@ -226,13 +397,14 @@ function renderStatus() {
   const dot = $("statusDot");
   dot.className = "dot" + (s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "");
   let text = "desconectado";
-  if (s.state === "conectado") text = `${d.version || "contador"} · ${d.port} · conectado`;
+  // no quadro do topo: modelo e porta (o "conectado" já é a bolinha verde)
+  if (s.state === "conectado") text = `${(d.version || "contador").replace(/Re ?[\d.]+$/, "")} · ${d.port}`;
   else if (s.state === "conectando") text = s.message || "conectando…";
   else if (s.state === "desconectado" && s.message) text = "desconectado · " + s.message;
   else if (s.state === "erro") text = s.message || "erro";
   $("statusText").textContent = text;
   const retrying = state.settings.autoConnect && s.state !== "conectado" && s.state !== "conectando" && s.message;
-  $("statusPill").title = retrying ? text + " — o app tenta de novo a cada 10 s" : text;
+  $("statusPill").title = retrying ? text + " — o app tenta de novo a cada 10 s" : s.state === "conectado" ? `${d.version || "contador"} · ${d.port} · conectado` : text;
 
   const connected = s.state === "conectado";
   $("btnHistory").disabled = !connected || s.downloading;
@@ -280,6 +452,8 @@ async function refreshStats() {
   $("hMin24").textContent = fmt(s.min24h, 0);
   $("hMax24").textContent = fmt(s.max24h, 0);
   $("hMax24Sub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
+  state.gDose = s.minutesToday ? s.doseToday : null;
+  renderGTile();
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)} · calculada pelo app (o GMC não informa a dose que soma)` : "";
@@ -472,6 +646,7 @@ state.alertFilter = "";
 function renderActive() {
   const ul = $("activeAlerts");
   const list = state.activeAlerts || [];
+  renderATile();
   ul.textContent = "";
   if (!list.length) {
     ul.innerHTML = '<li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li>';
@@ -695,6 +870,8 @@ async function refreshAlerts() {
   const ul = $("alerts");
   ul.textContent = "";
   const recent = groupEpisodes(all || []).filter((e) => !e.active).slice(0, 3);
+  state.lastAlert = recent[0] || null;
+  renderATile();
   if (!recent.length) ul.innerHTML = '<li class="muted">Nenhum alerta ainda.</li>';
   else recent.forEach((e) => {
     const li = alertLi(e, true);
@@ -883,21 +1060,28 @@ function wireLogs() {
 }
 
 
-// ---------- telas da coluna da direita ----------
-// Gráficos (padrão), Medir objeto, Alertas e Fora de casa ocupam o
-// lugar dos gráficos, com espaço de sobra; a leitura ao vivo continua à
-// esquerda.
+// ---------- páginas (2.8) ----------
+// O menu da esquerda troca a página; o painel dos aparelhos fica sempre em
+// cima. Gráficos é a página de abertura.
 
 state.view = "graficos";
-const VIEW_IDS = { resumo: "viewSummary", medir: "viewMeasure", alertas: "viewAlerts", fora: "viewPeriods", chuva: "viewRain", radiacode: "viewRadiacode" };
+const PAGES = { graficos: "pageGraficos", dose: "pageDose", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode" };
 
 async function showView(v, skipRender) {
-  if (!VIEW_IDS[v]) v = "graficos";
+  if (!PAGES[v]) v = "graficos";
+  const changed = state.view !== v;
   state.view = v;
-  document.querySelectorAll(".col-b .view-graficos").forEach((el) => { el.hidden = v !== "graficos"; });
-  for (const [k, id] of Object.entries(VIEW_IDS)) $(id).hidden = k !== v;
-  document.querySelectorAll("#viewTabs button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.view === v)));
-  if (v === "graficos") { refreshChart(); refreshDose(); refreshHeat(); refreshPatterns(); refreshBgTrend(); }
+  for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
+  document.querySelectorAll("#sideNav [data-view]").forEach((b) => {
+    if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+  // trocou de página com a tela rolada: volta para o começo da página
+  if (changed && !skipRender) {
+    const top = $("pages").getBoundingClientRect().top + window.scrollY - 12;
+    if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
+  }
+  if (v === "graficos") { refreshChart(); refreshHeat(); refreshPatterns(); refreshBgTrend(); }
+  if (v === "dose") refreshDose();
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
@@ -4755,13 +4939,7 @@ function renderRc(st) {
   const on = st.state === "conectado";
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
   // pílula no topo: só aparece quando tem algo a dizer
-  const pill = $("rcPill");
-  pill.hidden = st.state === "off" || st.state === "procurando";
-  $("rcDot").className = "dot " + (on ? "on" : st.state === "erro" ? "err" : "wait");
-  $("rcPillText").textContent = on
-    ? "RadiaCode" + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
-    : st.state === "conectando" ? "RadiaCode: conectando…" : "RadiaCode: erro";
-  pill.title = on ? `RadiaCode conectado pelo ${via}` : st.err || "RadiaCode";
+  $("navRcDot").hidden = st.state !== "erro";
   // aba
   $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "erro na conexão" }[st.state] || st.state;
   $("rcState").textContent = on ? `conectado · ${via}` : st.state;
@@ -4843,7 +5021,7 @@ function renderHeroVia() {
   const el = $("heroVia");
   const s = state.status || {}, d = s.device || {};
   const on = s.state === "conectado";
-  el.hidden = !document.body.classList.contains("has-rc");
+  el.hidden = false;
   el.textContent = on ? `· ${d.port || ""}` : state.demo && state.demo.active ? "" : "· desconectado";
   el.className = "rc-main-via gmc-via mono" + (on ? " on" : "");
 }
@@ -4852,9 +5030,8 @@ function renderRcMain(st) {
   const live = st.state === "conectado" && st.time;
   const show = st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
   $("rcMain").hidden = !show;
-  $("duo").classList.toggle("on", show);
+  $("rTile").hidden = !show;
   document.body.classList.toggle("has-rc", show);
-  $("heroEyebrow").textContent = show ? "GMC-800" : "Leitura atual";
   renderHeroVia();
   if (!show) return;
   const via = st.via === "bluetooth" ? "Bluetooth" : "USB";
@@ -4928,6 +5105,7 @@ function renderRcMain(st) {
   ["seguro", "atencao", "alerta", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   $("rcLevelMarker").hidden = usv == null;
   if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
+  renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
   // medidas
   const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
@@ -4982,7 +5160,6 @@ function wireRc() {
     // a tela de medir muda o aparelho padrão e o aviso quando o RadiaCode conecta/cai
     if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
   });
-  $("rcPill").addEventListener("click", () => showView("radiacode"));
   $("rcUnitSeg").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-unit]");
     if (!b) return;
@@ -5317,6 +5494,12 @@ async function refreshCounterSync(cs) {
   const show = cs.state === "pendente" || warnMem;
   const card = $("syncCard");
   card.hidden = !show;
+  $("navGmcDot").hidden = !show;
+  const gs = $("gTileSync");
+  gs.hidden = !show;
+  gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
+  gs.classList.toggle("full", cs.memLevel === "cheia");
+  gs.title = cs.text;
   card.classList.toggle("cheia", cs.memLevel === "cheia");
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;
@@ -5681,6 +5864,8 @@ async function init() {
   setInterval(refreshAll, 5 * 60 * 1000);
   // os gráficos de 15 e 30 min andam junto com as leituras por segundo
   setInterval(() => { if (isShortRange() && !state.zoom) refreshChart(); }, 5000);
+  refreshSpark();
+  setInterval(refreshSpark, 30e3);
 }
 
 init();

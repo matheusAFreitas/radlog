@@ -2580,3 +2580,25 @@ Anexos	Attachments
 {0} arquivo(s) guardado(s) com a medição no app: {1}	{0} file(s) saved with the measurement in the app: {1}
 1 registro do RadiaCode	1 RadiaCode record
 {0} registros do RadiaCode	{0} RadiaCode records
+Páginas	Pages
+Análise	Analysis
+Registros	Records
+Aparelhos	Devices
+Aparelhos agora	Devices now
+Dose	Dose
+memória em {0}%	memory at {0}%
+memória cheia	memory full
+minutos para baixar	minutes to download
+Nenhum alerta ativo	No active alerts
+Nenhum alerta registrado ainda.	No alerts recorded yet.
+Último: {0}	Last: {0}
+{0} no GMC-800	{0} on the GMC-800
+{0} no GMC-800 (demo)	{0} on the GMC-800 (demo)
+{0} no RadiaCode	{0} on the RadiaCode
+{0} no RadiaCode (demo)	{0} on the RadiaCode (demo)
+{0} aparelhos	{0} devices
+Ver histórico de alertas	See alert history
+Aguardando…	Waiting…
+Saturado	Saturated
+Desconectado	Disconnected
+última leitura: {0}	last reading: {0}
