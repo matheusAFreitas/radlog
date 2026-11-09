@@ -1,5 +1,16 @@
 # Versões
 
+## 2.20.0
+- **Mais arrumação por dentro, sem mudança na tela.**
+  - A busca dos episódios de alerta nos minutos do histórico do contador
+    (entrada no nível de atenção ou no alarme, se for menor, saída em 90%,
+    corte depois de 70 min sem dado) e o nível de cada episódio foram para
+    `internal/core/alerts`, com testes próprios. É o terceiro pacote do
+    núcleo que o app Android vai reaproveitar, junto com `levels` e `stats`.
+  - A página Alertas (títulos, lista com os episódios juntos e o gráfico de
+    cada alerta) saiu do `app.js` para `frontend/dist/alertas.js`. O
+    `app.js` ficou com cerca de 400 linhas a menos.
+
 ## 2.19.0
 - **Arrumação por dentro, sem mudança na tela.** Preparação para o app
   Android e para mexer no app com menos risco:
