@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/core/alerts"
 	"radlog/internal/core/levels"
 	"radlog/internal/store"
 )
@@ -396,53 +397,8 @@ func (a *App) emitActive() { a.emit("alerts", a.GetActiveAlerts()) }
 // ou desconectado), procura neles os episódios acima de 50 CPM (ou do limite
 // do alarme, se for menor) e anota um alerta com a data e a hora em que
 // aconteceram. Um episódio termina quando o valor cai abaixo de 45 CPM ou
-// quando falta dado por mais de 70 minutos.
-
-const retroGap = 70 * time.Minute
-
-type episode struct {
-	start, last, peakAt time.Time
-	first, peak         float64
-	step                time.Duration
-}
-
-func findEpisodes(pts []store.Point, alarmCPM int, lv Levels) []episode {
-	enter, exit := lv.AttnEnter(), lv.AttnExit()
-	if alarmCPM > 0 && float64(alarmCPM) < enter {
-		enter = float64(alarmCPM)
-		exit = enter * 0.9
-	}
-	var out []episode
-	var cur *episode
-	var prev time.Time
-	for _, p := range pts {
-		if cur != nil && p.T.Sub(prev) > retroGap {
-			out = append(out, *cur)
-			cur = nil
-		}
-		if cur == nil && p.CPM >= enter {
-			cur = &episode{start: p.T, last: p.T, peakAt: p.T, first: p.CPM, peak: p.CPM, step: time.Minute}
-		} else if cur != nil {
-			if p.CPM < exit {
-				out = append(out, *cur)
-				cur = nil
-			} else {
-				if d := p.T.Sub(cur.last); d > 0 && d <= retroGap {
-					cur.step = d
-				}
-				cur.last = p.T
-				if p.CPM > cur.peak {
-					cur.peak, cur.peakAt = p.CPM, p.T
-				}
-			}
-		}
-		prev = p.T
-	}
-	if cur != nil {
-		out = append(out, *cur)
-	}
-	return out
-}
+// quando falta dado por mais de 70 minutos (a conta está em
+// internal/core/alerts).
 
 // retroAlerts anota os episódios achados nos pontos novos. Devolve quantos.
 func (a *App) retroAlerts(pts []store.Point) int {
@@ -466,25 +422,29 @@ func (a *App) retroAlerts(pts []store.Point) int {
 	sort.Slice(sorted, func(i, j int) bool { return sorted[i].T.Before(sorted[j].T) })
 
 	n := 0
-	for _, ep := range findEpisodes(sorted, alarmCPM, lv) {
-		start := ep.start.UnixMilli()
+	samples := make([]alerts.Sample, len(sorted))
+	for i, p := range sorted {
+		samples[i] = alerts.Sample{T: p.T, CPM: p.CPM}
+	}
+	for _, ep := range alerts.Find(samples, alarmCPM, lv) {
+		start := ep.Start.UnixMilli()
 		if have[start] {
 			continue
 		}
 		ev := Event{
 			Time: start, Kind: kindAlert, Retro: true,
-			CPM: ep.first, Peak: ep.peak, PeakAt: ep.peakAt.UnixMilli(),
-			End: ep.last.Add(ep.step).UnixMilli(),
+			CPM: ep.First, Peak: ep.Peak, PeakAt: ep.PeakAt.UnixMilli(),
+			End: ep.End().UnixMilli(),
 		}
-		if ep.peak >= lv.DangerEnter() {
-			ev.Level = "perigo"
-			ev.Text = fmt.Sprintf("Perigo (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.peak, ep.peakAt.Format("15:04"), lv.DangerCPM)
-		} else if ep.peak >= float64(alarmCPM) {
-			ev.Level = "alarme"
-			ev.Text = fmt.Sprintf("Alarme (histórico do contador): pico de %.0f CPM às %s (limite %d)", ep.peak, ep.peakAt.Format("15:04"), alarmCPM)
-		} else {
-			ev.Level = "atencao"
-			ev.Text = fmt.Sprintf("Atenção (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.peak, ep.peakAt.Format("15:04"), lv.AttentionCPM)
+		ev.Level = alerts.Level(ep.Peak, alarmCPM, lv)
+		at := ep.PeakAt.Format("15:04")
+		switch ev.Level {
+		case "perigo":
+			ev.Text = fmt.Sprintf("Perigo (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.Peak, at, lv.DangerCPM)
+		case "alarme":
+			ev.Text = fmt.Sprintf("Alarme (histórico do contador): pico de %.0f CPM às %s (limite %d)", ep.Peak, at, alarmCPM)
+		default:
+			ev.Text = fmt.Sprintf("Atenção (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.Peak, at, lv.AttentionCPM)
 		}
 		a.mu.Lock()
 		a.evSeq++
