@@ -12,291 +12,350 @@ import (
 	"radlog/internal/store"
 )
 
-// ---------- papel dos aparelhos ----------
+// ---------- onde está cada aparelho ----------
 //
-// O normal é o GMC-800 parado em casa (monitor da casa) e o RadiaCode andando
-// com você (dosímetro pessoal). Às vezes os papéis trocam: o GMC sai com você
-// e o RadiaCode fica em casa. Cada troca é um trecho guardado em papeis.json
-// (To = 0: trocado até agora), e o papel de cada minuto sai dela:
-//   - trocado: o GMC está fora de casa (fica fora do fundo da casa, como um
-//     período "fora de casa") e o RadiaCode está em casa (entra no fundo dele
-//     mesmo dentro de um período "fora de casa", que nessa hora fala de você);
-//   - normal: nada muda em relação ao que já era.
-// A Minha dose junta os dois: a pessoal é a do aparelho que estava com você em
-// cada minuto, e a da casa a do que estava em casa.
+// Cada aparelho está "em casa" (parado, medindo a casa) ou "comigo" (anda com
+// você). O normal é o GMC-800 em casa e o RadiaCode com você, mas dá para
+// mudar cada um: levar o GMC junto, deixar o RadiaCode em casa, levar os dois
+// ou deixar os dois em casa (lado a lado, como na intercalibração). Cada
+// mudança é um trecho guardado em aparelhos.json (To = 0: até agora); fora
+// dos trechos vale o normal.
+//
+// O que muda com o local de cada minuto:
+//   - fundo da casa: um aparelho "em casa" sempre conta, mesmo dentro de um
+//     período "fora de casa" (que fala de você); sem trecho marcado, os
+//     períodos tiram os dois, como sempre foi;
+//   - Minha dose: a pessoal é a do aparelho com você (o RadiaCode, se os dois
+//     estão com você) e a da casa a do aparelho em casa (o GMC, se os dois
+//     estão em casa). Sem nenhum aparelho num papel, aquele minuto não conta.
 
-// RoleSwap é um trecho com os papéis trocados.
-type RoleSwap struct {
-	ID   int64  `json:"id"`
-	From int64  `json:"from"` // ms
-	To   int64  `json:"to"`   // ms; 0 = ainda trocado
-	Name string `json:"name"`
+// Locais.
+const (
+	WhereHome = "casa"
+	WhereMe   = "comigo"
+)
+
+// Stay é um trecho em que um aparelho ficou num local diferente do normal.
+type Stay struct {
+	ID     int64  `json:"id"`
+	Device string `json:"device"` // gmc, radiacode
+	Where  string `json:"where"`  // casa, comigo
+	From   int64  `json:"from"`   // ms
+	To     int64  `json:"to"`     // ms; 0 = até agora
+	Name   string `json:"name"`
 }
 
-// Roles diz o papel de agora e os trechos trocados.
-type Roles struct {
-	Swapped  bool       `json:"swapped"`  // trocado agora
-	Personal string     `json:"personal"` // aparelho com você agora (radiacode, gmc)
-	Home     string     `json:"home"`     // aparelho em casa agora
-	Swaps    []RoleSwap `json:"swaps"`    // do mais antigo ao mais novo
+// Whereabouts diz onde está cada aparelho agora e os trechos marcados.
+type Whereabouts struct {
+	GMC      string `json:"gmc"`       // casa, comigo
+	RC       string `json:"radiacode"` // casa, comigo
+	Personal string `json:"personal"`  // aparelho que dá a dose pessoal agora ("" = nenhum com você)
+	Home     string `json:"home"`      // aparelho que dá a dose da casa agora ("" = nenhum em casa)
+	Normal   bool   `json:"normal"`    // GMC em casa e RadiaCode com você
+	Stays    []Stay `json:"stays"`     // do mais antigo ao mais novo
 }
 
-const rolesFile = "papeis.json"
+const staysFile = "aparelhos.json"
 
-func (a *App) rolesPath() string { return filepath.Join(a.dataDir, rolesFile) }
+// whereDefault é o local normal de cada aparelho.
+func whereDefault(dev string) string {
+	if dev == devRC {
+		return WhereMe
+	}
+	return WhereHome
+}
 
-func (a *App) loadRoles() {
-	b, err := os.ReadFile(a.rolesPath())
+func validStay(s Stay) bool {
+	return (s.Device == "gmc" || s.Device == devRC) && (s.Where == WhereHome || s.Where == WhereMe)
+}
+
+func (a *App) staysPath() string { return filepath.Join(a.dataDir, staysFile) }
+
+func (a *App) loadStays() {
+	b, err := os.ReadFile(a.staysPath())
 	if err != nil {
 		return
 	}
-	var list []RoleSwap
+	var list []Stay
 	if json.Unmarshal(b, &list) == nil {
-		sort.Slice(list, func(i, j int) bool { return list[i].From < list[j].From })
-		a.swaps = list
+		kept := list[:0]
+		for _, s := range list {
+			if validStay(s) {
+				kept = append(kept, s)
+			}
+		}
+		sort.Slice(kept, func(i, j int) bool { return kept[i].From < kept[j].From })
+		a.stays = kept
 	}
 }
 
-func (a *App) saveRolesLocked() error {
+func (a *App) saveStaysLocked() error {
 	if a.dataDir == "" {
 		return nil
 	}
-	b, _ := json.MarshalIndent(a.swaps, "", "  ")
-	tmp := a.rolesPath() + ".tmp"
+	b, _ := json.MarshalIndent(a.stays, "", "  ")
+	tmp := a.staysPath() + ".tmp"
 	if err := os.WriteFile(tmp, b, 0o644); err != nil {
 		return err
 	}
-	return os.Rename(tmp, a.rolesPath())
+	return os.Rename(tmp, a.staysPath())
 }
 
-// swapEnd é o fim de um trecho (o aberto vai até depois de qualquer instante).
-func swapEnd(s RoleSwap) int64 {
+// stayEnd é o fim de um trecho (o aberto vai até depois de qualquer instante).
+func stayEnd(s Stay) int64 {
 	if s.To == 0 {
 		return 1<<62 - 1
 	}
 	return s.To
 }
 
-func (a *App) rolesLocked(now time.Time) Roles {
-	r := Roles{Personal: devRC, Home: "gmc", Swaps: append([]RoleSwap{}, a.swaps...)}
-	ms := now.UnixMilli()
-	for _, s := range a.swaps {
-		if ms >= s.From && ms < swapEnd(s) {
-			r.Swapped, r.Personal, r.Home = true, "gmc", devRC
-		}
-	}
-	return r
-}
-
-// GetRoles devolve o papel de agora e os trechos trocados.
-func (a *App) GetRoles() Roles {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.rolesLocked(time.Now())
-}
-
-func (a *App) rolesChangedLocked() Roles {
-	a.bgAt = time.Time{} // o fundo da casa muda: recalcula
-	return a.rolesLocked(time.Now())
-}
-
-func (a *App) emitRoles(r Roles) { a.emit("roles", r) }
-
-// SwapRoles troca os papéis a partir de agora (swap = true: o GMC vai com
-// você) ou desfaz a troca aberta (swap = false). name é opcional.
-func (a *App) SwapRoles(swap bool, name string) (Roles, error) {
-	return a.swapRoles(time.Now(), swap, name)
-}
-
-func (a *App) swapRoles(now time.Time, swap bool, name string) (Roles, error) {
-	ms := now.Truncate(time.Minute).UnixMilli()
-	a.mu.Lock()
-	open := -1
-	for i, s := range a.swaps {
-		if s.To == 0 {
-			open = i
-		}
+// pickRoles diz qual aparelho dá a dose pessoal e qual a da casa.
+func pickRoles(gmc, rc string) (personal, home string) {
+	switch {
+	case rc == WhereMe:
+		personal = devRC
+	case gmc == WhereMe:
+		personal = "gmc"
 	}
 	switch {
-	case swap && open >= 0:
-		r := a.rolesLocked(now)
-		a.mu.Unlock()
-		return r, nil // já trocado
-	case swap:
-		var max int64
-		for _, s := range a.swaps {
-			max = maxInt64(max, s.ID)
-		}
-		name = strings.TrimSpace(name)
-		if name == "" {
-			name = "Papéis trocados"
-		}
-		a.swaps = append(a.swaps, RoleSwap{ID: max + 1, From: ms, Name: name})
-	case open >= 0:
-		if ms <= a.swaps[open].From { // desfez no mesmo minuto: não sobra trecho
-			a.swaps = append(a.swaps[:open], a.swaps[open+1:]...)
-		} else {
-			a.swaps[open].To = ms
-		}
-	default:
-		r := a.rolesLocked(now)
-		a.mu.Unlock()
-		return r, nil // já normal
+	case gmc == WhereHome:
+		home = "gmc"
+	case rc == WhereHome:
+		home = devRC
 	}
-	err := a.saveRolesLocked()
-	r := a.rolesChangedLocked()
-	a.mu.Unlock()
-	if swap {
-		a.logEvent("Papéis trocados: o GMC-800 vai com você e o RadiaCode fica em casa")
-	} else {
-		a.logEvent("Papéis de volta ao normal: GMC-800 em casa e RadiaCode com você")
-	}
-	a.emitRoles(r)
-	return r, err
+	return
 }
 
-// SaveRoleSwap cria (ID 0) ou altera um trecho trocado já passado (para
-// marcar uma troca que você esqueceu de registrar na hora).
-func (a *App) SaveRoleSwap(s RoleSwap) (Roles, error) {
+func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
+	ms := now.UnixMilli()
+	w := Whereabouts{GMC: whereDefault("gmc"), RC: whereDefault(devRC), Stays: append([]Stay{}, a.stays...)}
+	for _, s := range a.stays {
+		if ms >= s.From && ms < stayEnd(s) {
+			if s.Device == devRC {
+				w.RC = s.Where
+			} else {
+				w.GMC = s.Where
+			}
+		}
+	}
+	w.Personal, w.Home = pickRoles(w.GMC, w.RC)
+	w.Normal = w.GMC == WhereHome && w.RC == WhereMe
+	return w
+}
+
+// GetWhereabouts diz onde está cada aparelho agora e os trechos marcados.
+func (a *App) GetWhereabouts() Whereabouts {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return a.whereaboutsLocked(time.Now())
+}
+
+func (a *App) staysChanged() Whereabouts {
+	a.mu.Lock()
+	a.bgAt = time.Time{} // o fundo da casa muda: recalcula
+	w := a.whereaboutsLocked(time.Now())
+	a.mu.Unlock()
+	a.emit("whereabouts", w)
+	return w
+}
+
+// SetWhere muda o local de um aparelho a partir de agora (device: gmc ou
+// radiacode; where: casa ou comigo). Voltar ao normal fecha o trecho aberto.
+func (a *App) SetWhere(device, where string) (Whereabouts, error) {
+	return a.setWhere(time.Now(), device, where)
+}
+
+func (a *App) setWhere(now time.Time, device, where string) (Whereabouts, error) {
+	if !validStay(Stay{Device: device, Where: where}) {
+		return a.GetWhereabouts(), errors.New("aparelho ou local inválido")
+	}
+	ms := now.Truncate(time.Minute).UnixMilli()
+	a.mu.Lock()
+	if cur := a.whereaboutsLocked(now); (device == devRC && cur.RC == where) || (device == "gmc" && cur.GMC == where) {
+		a.mu.Unlock()
+		return a.GetWhereabouts(), nil // já está lá
+	}
+	// fecha o trecho aberto desse aparelho
+	for i := 0; i < len(a.stays); i++ {
+		s := &a.stays[i]
+		if s.Device != device || s.To != 0 {
+			continue
+		}
+		if ms <= s.From { // mudou de novo no mesmo minuto: não sobra trecho
+			a.stays = append(a.stays[:i], a.stays[i+1:]...)
+			i--
+		} else {
+			s.To = ms
+		}
+	}
+	if where != whereDefault(device) {
+		var max int64
+		for _, s := range a.stays {
+			max = maxInt64(max, s.ID)
+		}
+		a.stays = append(a.stays, Stay{ID: max + 1, Device: device, Where: where, From: ms})
+		sort.Slice(a.stays, func(i, j int) bool { return a.stays[i].From < a.stays[j].From })
+	}
+	err := a.saveStaysLocked()
+	a.mu.Unlock()
+	name := map[string]string{"gmc": "GMC-800", devRC: "RadiaCode"}[device]
+	if where == WhereHome {
+		a.logEvent(name + " em casa")
+	} else {
+		a.logEvent(name + " com você")
+	}
+	return a.staysChanged(), err
+}
+
+// SaveStay cria (ID 0) ou altera um trecho já passado (para marcar uma
+// mudança que você esqueceu de registrar na hora).
+func (a *App) SaveStay(s Stay) (Whereabouts, error) {
+	if !validStay(s) {
+		return a.GetWhereabouts(), errors.New("aparelho ou local inválido")
+	}
 	if s.To != 0 && s.To < s.From {
 		s.From, s.To = s.To, s.From
 	}
 	if s.To != 0 && s.To-s.From < 60_000 {
-		return a.GetRoles(), errors.New("o trecho precisa ter pelo menos 1 minuto")
+		return a.GetWhereabouts(), errors.New("o trecho precisa ter pelo menos 1 minuto")
 	}
 	s.Name = strings.TrimSpace(s.Name)
-	if s.Name == "" {
-		s.Name = "Papéis trocados"
-	}
 	a.mu.Lock()
-	for _, q := range a.swaps {
-		if q.ID != s.ID && s.From < swapEnd(q) && q.From < swapEnd(s) {
-			r := a.rolesLocked(time.Now())
+	for _, q := range a.stays {
+		if q.ID != s.ID && q.Device == s.Device && s.From < stayEnd(q) && q.From < stayEnd(s) {
 			a.mu.Unlock()
-			return r, errors.New("esse trecho cruza com outro em que os papéis já estavam trocados")
+			return a.GetWhereabouts(), errors.New("esse trecho cruza com outro do mesmo aparelho")
 		}
 	}
 	if s.ID == 0 {
 		var max int64
-		for _, q := range a.swaps {
+		for _, q := range a.stays {
 			max = maxInt64(max, q.ID)
 		}
 		s.ID = max + 1
-		a.swaps = append(a.swaps, s)
+		a.stays = append(a.stays, s)
 	} else {
 		found := false
-		for i := range a.swaps {
-			if a.swaps[i].ID == s.ID {
-				a.swaps[i], found = s, true
+		for i := range a.stays {
+			if a.stays[i].ID == s.ID {
+				a.stays[i], found = s, true
 			}
 		}
 		if !found {
-			r := a.rolesLocked(time.Now())
 			a.mu.Unlock()
-			return r, errors.New("trecho não encontrado")
+			return a.GetWhereabouts(), errors.New("trecho não encontrado")
 		}
 	}
-	sort.Slice(a.swaps, func(i, j int) bool { return a.swaps[i].From < a.swaps[j].From })
-	err := a.saveRolesLocked()
-	r := a.rolesChangedLocked()
+	sort.Slice(a.stays, func(i, j int) bool { return a.stays[i].From < a.stays[j].From })
+	err := a.saveStaysLocked()
 	a.mu.Unlock()
-	a.emitRoles(r)
-	return r, err
+	return a.staysChanged(), err
 }
 
-// DeleteRoleSwap apaga um trecho trocado.
-func (a *App) DeleteRoleSwap(id int64) (Roles, error) {
+// DeleteStay apaga um trecho.
+func (a *App) DeleteStay(id int64) (Whereabouts, error) {
 	a.mu.Lock()
-	kept := a.swaps[:0]
-	for _, q := range a.swaps {
+	kept := a.stays[:0]
+	for _, q := range a.stays {
 		if q.ID != id {
 			kept = append(kept, q)
 		}
 	}
-	a.swaps = kept
-	err := a.saveRolesLocked()
-	r := a.rolesChangedLocked()
+	a.stays = kept
+	err := a.saveStaysLocked()
 	a.mu.Unlock()
-	a.emitRoles(r)
-	return r, err
+	return a.staysChanged(), err
 }
 
-// mergeRoleSwaps junta trechos vindos de um backup ou de outro PC. A chave é
-// o começo: um trecho aberto aqui que chegou fechado de lá é fechado.
-func (a *App) mergeRoleSwaps(list []RoleSwap) int {
+// mergeStays junta trechos vindos de um backup ou de outro PC. A chave é o
+// aparelho e o começo: um trecho aberto aqui que chegou fechado é fechado.
+func (a *App) mergeStays(list []Stay) int {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	key := func(s Stay) string { return s.Device + "@" + time.UnixMilli(s.From).UTC().Format(time.RFC3339) }
 	n := 0
 	var max int64
-	at := map[int64]int{}
-	for i, s := range a.swaps {
-		at[s.From] = i
+	at := map[string]int{}
+	for i, s := range a.stays {
+		at[key(s)] = i
 		max = maxInt64(max, s.ID)
 	}
 	for _, s := range list {
-		if s.To != 0 && s.To <= s.From {
+		if !validStay(s) || (s.To != 0 && s.To <= s.From) {
 			continue
 		}
-		if i, ok := at[s.From]; ok {
-			if a.swaps[i].To == 0 && s.To != 0 {
-				a.swaps[i].To = s.To
+		if i, ok := at[key(s)]; ok {
+			if a.stays[i].To == 0 && s.To != 0 {
+				a.stays[i].To = s.To
 				n++
 			}
 			continue
 		}
 		max++
 		s.ID = max
-		a.swaps = append(a.swaps, s)
-		at[s.From] = len(a.swaps) - 1
+		a.stays = append(a.stays, s)
+		at[key(s)] = len(a.stays) - 1
 		n++
 	}
 	if n > 0 {
-		sort.Slice(a.swaps, func(i, j int) bool { return a.swaps[i].From < a.swaps[j].From })
-		_ = a.saveRolesLocked()
+		sort.Slice(a.stays, func(i, j int) bool { return a.stays[i].From < a.stays[j].From })
+		_ = a.saveStaysLocked()
 		a.bgAt = time.Time{}
 	}
 	return n
 }
 
-// swappedChecker diz se um instante caiu num trecho trocado (cópia dos
-// trechos, para usar sem segurar o lock).
-func (a *App) swappedChecker() func(time.Time) bool {
+// whereChecker diz onde um aparelho estava num instante e se foi marcado
+// (cópia dos trechos, para usar sem segurar o lock).
+func (a *App) whereChecker(dev string) func(time.Time) (where string, marked bool) {
 	a.mu.Lock()
-	list := append([]RoleSwap{}, a.swaps...)
-	a.mu.Unlock()
-	if len(list) == 0 {
-		return func(time.Time) bool { return false }
+	var list []Stay
+	for _, s := range a.stays {
+		if s.Device == dev {
+			list = append(list, s)
+		}
 	}
-	return func(t time.Time) bool {
+	a.mu.Unlock()
+	def := whereDefault(dev)
+	return func(t time.Time) (string, bool) {
 		ms := t.UnixMilli()
 		for _, s := range list {
-			if ms >= s.From && ms < swapEnd(s) {
-				return true
+			if ms >= s.From && ms < stayEnd(s) {
+				return s.Where, true
 			}
 		}
-		return false
+		return def, false
 	}
 }
 
-// swapsIn diz se algum trecho trocado cruza [from, to).
-func (a *App) swapsIn(from, to time.Time) bool {
+// staysIn diz se algum trecho cruza [from, to).
+func (a *App) staysIn(from, to time.Time) bool {
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	f, t := from.UnixMilli(), to.UnixMilli()
-	for _, s := range a.swaps {
-		if s.From < t && f < swapEnd(s) {
+	for _, s := range a.stays {
+		if s.From < t && f < stayEnd(s) {
 			return true
 		}
 	}
 	return false
 }
 
-// rcAwayChecker é o "fora de casa" do RadiaCode: nos trechos trocados ele
-// está em casa; fora deles, valem os períodos marcados (como sempre foi).
-func (a *App) rcAwayChecker() func(time.Time) bool {
-	away, swapped := a.periodChecker(), a.swappedChecker()
-	return func(t time.Time) bool { return away(t) && !swapped(t) }
+// awayCheckerFor diz se um aparelho estava fora de casa: num período "fora de
+// casa", a não ser que ele tenha sido marcado em casa nessa hora.
+func (a *App) awayCheckerFor(dev string) func(time.Time) bool {
+	period, where := a.periodChecker(), a.whereChecker(dev)
+	return func(t time.Time) bool {
+		if !period(t) {
+			return false
+		}
+		w, marked := where(t)
+		return !(marked && w == WhereHome)
+	}
 }
+
+// rcAwayChecker é o "fora de casa" do RadiaCode.
+func (a *App) rcAwayChecker() func(time.Time) bool { return a.awayCheckerFor(devRC) }
 
 // rcHomeOnly tira os pontos do RadiaCode fora de casa e das medições.
 func (a *App) rcHomeOnly(pts []store.Point) []store.Point {
@@ -312,46 +371,54 @@ func (a *App) rcHomeOnly(pts []store.Point) []store.Point {
 }
 
 // roleDose é a dose de um papel ("pessoal" ou "casa") em [from, to): em
-// cada minuto, a do aparelho que tinha esse papel. Sem troca no período, é
-// a dose do próprio aparelho (com a dose que o RadiaCode soma, se houver).
-// Com troca, é a soma dos minutos gravados de cada um, e o fundo de cada
-// minuto é o do aparelho que mediu.
+// cada minuto, a do aparelho que tinha esse papel. Sem trecho marcado no
+// período, é a dose do próprio aparelho (com a dose que o RadiaCode soma, se
+// houver). Com trecho, é a soma dos minutos gravados de quem tinha o papel,
+// e o fundo de cada minuto é o do aparelho que mediu.
 func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role string) (DoseChart, error) {
-	normal := map[string]string{"pessoal": devRC, "casa": "gmc"}[role]
-	if normal == "" {
-		normal = "gmc"
+	if role != "pessoal" {
+		role = "casa"
 	}
-	if !a.swapsIn(from, to) {
-		return a.buildDose(from, to, step, limit, normal)
+	if !a.staysIn(from, to) {
+		return a.buildDose(from, to, step, limit, map[string]string{"pessoal": devRC, "casa": "gmc"}[role])
 	}
-	swapped := map[string]string{devRC: "gmc", "gmc": devRC}[normal]
 	lim, ok := doseLimits[limit]
 	if !ok {
 		lim = doseLimits["publico"]
 	}
-	np, nBg, _, err := a.doseSeries(normal, from, to)
+	rcPts, rcBg, _, err := a.doseSeries(devRC, from, to)
 	if err != nil {
 		return DoseChart{}, err
 	}
-	sp, sBg, _, err := a.doseSeries(swapped, from, to)
+	gPts, gBg, _, err := a.doseSeries("gmc", from, to)
 	if err != nil {
 		return DoseChart{}, err
 	}
-	isSwapped := a.swappedChecker()
+	whereG, whereR := a.whereChecker("gmc"), a.whereChecker(devRC)
+	pick := func(t time.Time) string {
+		g, _ := whereG(t)
+		r, _ := whereR(t)
+		p, h := pickRoles(g, r)
+		if role == "pessoal" {
+			return p
+		}
+		return h
+	}
+	normal := map[string]string{"pessoal": devRC, "casa": "gmc"}[role]
 	type rm struct {
-		T        time.Time
-		USv, Bg  float64 // µSv/h
-		fromSwap bool
+		T       time.Time
+		USv, Bg float64 // µSv/h
+		other   bool    // medido pelo aparelho que normalmente não tem esse papel
 	}
 	var mins []rm
-	for _, p := range np {
-		if !isSwapped(p.T) {
-			mins = append(mins, rm{p.T, p.USv, nBg, false})
+	for _, p := range rcPts {
+		if pick(p.T) == devRC {
+			mins = append(mins, rm{p.T, p.USv, rcBg, normal != devRC})
 		}
 	}
-	for _, p := range sp {
-		if isSwapped(p.T) {
-			mins = append(mins, rm{p.T, p.USv, sBg, true})
+	for _, p := range gPts {
+		if pick(p.T) == "gmc" {
+			mins = append(mins, rm{p.T, p.USv, gBg, normal != "gmc"})
 		}
 	}
 	sort.Slice(mins, func(i, j int) bool { return mins[i].T.Before(mins[j].T) })
@@ -373,7 +440,7 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 			bg += mins[i].Bg / 60
 			allow += limPerMin
 			c.MeasuredMinutes++
-			if mins[i].fromSwap {
+			if mins[i].other {
 				c.SwapMinutes++
 			}
 			i++

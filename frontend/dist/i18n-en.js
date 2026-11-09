@@ -1907,13 +1907,15 @@ const I18N_EN = {
 "normal ainda não calculado": "normal not calculated yet",
 "pelo RadiaCode em casa": "by the RadiaCode at home",
 "Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
-"Papéis trocados": "Roles swapped",
-"Papéis trocados: o GMC-800 vai com você e o RadiaCode fica em casa": "Roles swapped: the GMC-800 goes with you and the RadiaCode stays home",
-"Papéis de volta ao normal: GMC-800 em casa e RadiaCode com você": "Roles back to normal: GMC-800 at home and RadiaCode with you",
 "o trecho precisa ter pelo menos 1 minuto": "the stretch must be at least 1 minute long",
-"esse trecho cruza com outro em que os papéis já estavam trocados": "this stretch overlaps another one where the roles were already swapped",
 "trecho não encontrado": "stretch not found",
-"fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured"
+"fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured",
+"aparelho ou local inválido": "invalid device or place",
+"esse trecho cruza com outro do mesmo aparelho": "this stretch overlaps another one of the same device",
+"GMC-800 em casa": "GMC-800 at home",
+"GMC-800 com você": "GMC-800 with you",
+"RadiaCode em casa": "RadiaCode at home",
+"RadiaCode com você": "RadiaCode with you"
 },
 "patterns": [
 [

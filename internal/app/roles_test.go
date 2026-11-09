@@ -13,78 +13,94 @@ import (
 	"radlog/internal/store"
 )
 
-func TestSwapRoles(t *testing.T) {
+func TestSetWhere(t *testing.T) {
 	a := newTestApp(t)
 	t0 := time.Date(2026, 11, 9, 10, 0, 0, 0, time.Local)
+	w := func(at time.Time) Whereabouts { a.mu.Lock(); defer a.mu.Unlock(); return a.whereaboutsLocked(at) }
 
-	if r := a.GetRoles(); r.Swapped || r.Personal != devRC || r.Home != "gmc" {
-		t.Fatalf("normal: %+v", r)
+	if n := w(t0); !n.Normal || n.GMC != WhereHome || n.RC != WhereMe || n.Personal != devRC || n.Home != "gmc" {
+		t.Fatalf("normal: %+v", n)
 	}
-	r, err := a.swapRoles(t0, true, "  ")
-	if err != nil || len(r.Swaps) != 1 || r.Swaps[0].To != 0 || r.Swaps[0].Name != "Papéis trocados" {
-		t.Fatalf("trocar: %+v %v", r, err)
+	if _, err := a.setWhere(t0, "gmc", "rua"); err == nil {
+		t.Fatal("aceitou local inválido")
 	}
-	if r := a.rolesLocked(t0.Add(time.Hour)); !r.Swapped || r.Personal != "gmc" || r.Home != devRC {
-		t.Fatalf("trocado: %+v", r)
+	// leva o GMC também: os dois com você, ninguém em casa
+	if _, err := a.setWhere(t0, "gmc", WhereMe); err != nil {
+		t.Fatal(err)
 	}
-	// trocar de novo não abre outro trecho
-	if r, _ := a.swapRoles(t0.Add(time.Minute), true, "x"); len(r.Swaps) != 1 {
-		t.Fatalf("troca dupla: %+v", r.Swaps)
+	if n := w(t0.Add(time.Hour)); n.Normal || n.GMC != WhereMe || n.Personal != devRC || n.Home != "" {
+		t.Fatalf("os dois com você: %+v", n)
 	}
-	r, _ = a.swapRoles(t0.Add(90*time.Minute+30*time.Second), false, "")
-	if len(r.Swaps) != 1 || r.Swaps[0].To != t0.Add(90*time.Minute).UnixMilli() {
-		t.Fatalf("desfazer: %+v", r.Swaps)
+	// deixa o RadiaCode em casa: papéis trocados
+	a.setWhere(t0.Add(time.Hour), devRC, WhereHome)
+	if n := w(t0.Add(2 * time.Hour)); n.Personal != "gmc" || n.Home != devRC {
+		t.Fatalf("trocados: %+v", n)
 	}
-	// trocar e desfazer no mesmo minuto não deixa trecho
-	a.swapRoles(t0.Add(3*time.Hour), true, "")
-	if r, _ := a.swapRoles(t0.Add(3*time.Hour+20*time.Second), false, ""); len(r.Swaps) != 1 {
-		t.Fatalf("mesmo minuto: %+v", r.Swaps)
+	// GMC volta pra casa: os dois em casa (intercalibração)
+	a.setWhere(t0.Add(2*time.Hour), "gmc", WhereHome)
+	if n := w(t0.Add(3 * time.Hour)); n.Personal != "" || n.Home != "gmc" || len(n.Stays) != 2 {
+		t.Fatalf("os dois em casa: %+v", n)
+	}
+	// mesmo local de novo não abre trecho; mudar e voltar no mesmo minuto não deixa trecho
+	a.setWhere(t0.Add(3*time.Hour), "gmc", WhereHome)
+	a.setWhere(t0.Add(3*time.Hour), "gmc", WhereMe)
+	if r, _ := a.setWhere(t0.Add(3*time.Hour+30*time.Second), "gmc", WhereHome); len(r.Stays) != 2 {
+		t.Fatalf("mesmo minuto: %+v", r.Stays)
+	}
+	if s := a.GetWhereabouts().Stays; s[0].Device != "gmc" || s[0].To != t0.Add(2*time.Hour).UnixMilli() || s[1].Device != devRC || s[1].To != 0 {
+		t.Fatalf("trechos: %+v", s)
 	}
 
-	// trecho passado: não pode cruzar com outro
-	if _, err := a.SaveRoleSwap(RoleSwap{From: t0.Add(time.Hour).UnixMilli(), To: t0.Add(2 * time.Hour).UnixMilli()}); err == nil {
+	// trecho passado: não pode cruzar com outro do mesmo aparelho
+	if _, err := a.SaveStay(Stay{Device: "gmc", Where: WhereMe, From: t0.Add(time.Hour).UnixMilli(), To: t0.Add(5 * time.Hour).UnixMilli()}); err == nil {
 		t.Fatal("aceitou trecho cruzado")
 	}
-	r, err = a.SaveRoleSwap(RoleSwap{From: t0.Add(-5 * time.Hour).UnixMilli(), To: t0.Add(-4 * time.Hour).UnixMilli(), Name: "Feira"})
-	if err != nil || len(r.Swaps) != 2 || r.Swaps[0].Name != "Feira" {
-		t.Fatalf("salvar: %+v %v", r.Swaps, err)
+	r, err := a.SaveStay(Stay{Device: "gmc", Where: WhereMe, From: t0.Add(-5 * time.Hour).UnixMilli(), To: t0.Add(-4 * time.Hour).UnixMilli(), Name: " Feira "})
+	if err != nil || len(r.Stays) != 3 || r.Stays[0].Name != "Feira" {
+		t.Fatalf("salvar: %+v %v", r.Stays, err)
 	}
 
 	// volta do disco
 	b := newTestApp(t)
 	b.dataDir = a.dataDir
-	b.loadRoles()
-	if len(b.swaps) != 2 || b.swaps[1].To != t0.Add(90*time.Minute).UnixMilli() {
-		t.Fatalf("disco: %+v", b.swaps)
+	b.loadStays()
+	if len(b.stays) != 3 {
+		t.Fatalf("disco: %+v", b.stays)
 	}
 
-	// mescla (backup / outro PC): o aberto lá fecha aqui, o repetido não entra
+	// mescla (backup / outro PC): o aberto aqui fecha, o repetido não entra
 	c := newTestApp(t)
-	c.swapRoles(t0, true, "")
-	if n := c.mergeRoleSwaps(a.GetRoles().Swaps); n != 2 {
+	c.setWhere(t0, "gmc", WhereMe)
+	if n := c.mergeStays(a.GetWhereabouts().Stays); n != 3 {
 		t.Fatalf("mescla: %d", n)
 	}
-	if n := c.mergeRoleSwaps(a.GetRoles().Swaps); n != 0 {
+	if n := c.mergeStays(a.GetWhereabouts().Stays); n != 0 {
 		t.Fatalf("mescla repetida: %d", n)
 	}
-	if r := c.GetRoles(); len(r.Swaps) != 2 || r.Swaps[1].To == 0 || r.Swaps[0].ID == r.Swaps[1].ID {
-		t.Fatalf("depois da mescla: %+v", r.Swaps)
+	if s := c.GetWhereabouts().Stays; len(s) != 3 || s[1].To == 0 {
+		t.Fatalf("depois da mescla: %+v", s)
 	}
 
-	if r, _ := a.DeleteRoleSwap(r.Swaps[0].ID); len(r.Swaps) != 1 {
-		t.Fatalf("apagar: %+v", r.Swaps)
+	if r, _ := a.DeleteStay(r.Stays[0].ID); len(r.Stays) != 2 {
+		t.Fatalf("apagar: %+v", r.Stays)
 	}
 }
 
-func TestRolesAway(t *testing.T) {
+func TestWhereAway(t *testing.T) {
 	a := newTestApp(t)
 	t0 := time.Date(2026, 11, 9, 10, 0, 0, 0, time.Local)
 	at := func(m int) time.Time { return t0.Add(time.Duration(m) * time.Minute) }
-	// fora de casa 10:00–11:00; papéis trocados 10:30–12:00
-	if _, err := a.SavePeriod(Period{From: at(0).UnixMilli(), To: at(60).UnixMilli()}); err != nil {
+	// você fora de casa 10:00–11:00 e 12:00–13:00; RadiaCode marcado em casa 10:30–12:30
+	for _, p := range []Period{{From: at(0).UnixMilli(), To: at(60).UnixMilli()}, {From: at(120).UnixMilli(), To: at(180).UnixMilli()}} {
+		if _, err := a.SavePeriod(p); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if _, err := a.SaveStay(Stay{Device: devRC, Where: WhereHome, From: at(30).UnixMilli(), To: at(150).UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
-	if _, err := a.SaveRoleSwap(RoleSwap{From: at(30).UnixMilli(), To: at(120).UnixMilli()}); err != nil {
+	// GMC marcado com você 11:00–12:00 (você em casa: ainda é a casa)
+	if _, err := a.SaveStay(Stay{Device: "gmc", Where: WhereMe, From: at(60).UnixMilli(), To: at(120).UnixMilli()}); err != nil {
 		t.Fatal(err)
 	}
 	gmcAway, rcAway := a.awayChecker(), a.rcAwayChecker()
@@ -92,11 +108,12 @@ func TestRolesAway(t *testing.T) {
 		m       int
 		gmc, rc bool
 	}{
-		{-10, false, false}, // em casa, normal
-		{10, true, true},    // fora, normal: os dois saíram com você
-		{40, true, false},   // fora, trocado: o GMC está com você, o RadiaCode em casa
-		{90, true, false},   // trocado: o GMC está fora
-		{130, false, false}, // normal de novo
+		{-10, false, false}, // você em casa
+		{10, true, true},    // você fora, nada marcado: os dois fora, como sempre foi
+		{40, true, false},   // você fora, RadiaCode marcado em casa
+		{90, false, false},  // você em casa com o GMC
+		{130, true, false},  // você fora, RadiaCode ainda em casa
+		{170, true, true},   // você fora, nada marcado
 	} {
 		if g, r := gmcAway(at(c.m)), rcAway(at(c.m)); g != c.gmc || r != c.rc {
 			t.Errorf("%d min: GMC fora %v (quero %v), RadiaCode fora %v (quero %v)", c.m, g, c.gmc, r, c.rc)
@@ -129,6 +146,7 @@ func TestRoleDose(t *testing.T) {
 	a := newTestApp(t)
 	from := time.Now().Add(-48 * time.Hour).Truncate(time.Hour)
 	to := from.Add(4 * time.Hour)
+	h := func(n int) int64 { return from.Add(time.Duration(n) * time.Hour).UnixMilli() }
 	// 4 h dos dois aparelhos: GMC a 20 CPM, RadiaCode a 0,10 µSv/h
 	var pts []store.Point
 	for i := 0; i < 240; i++ {
@@ -138,40 +156,41 @@ func TestRoleDose(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeRc(t, a, from, 240, 0.10)
-	usvG, usvR := gmc.DefaultCalibration().USv(20), 0.10
+	g, r := gmc.DefaultCalibration().USv(20), 0.10
 
-	// sem troca: igual à dose do próprio aparelho
+	// nada marcado: igual à dose do próprio aparelho
 	p, err := a.roleDose(from, to, time.Hour, "publico", "pessoal")
 	if err != nil || p.Mixed || p.Device != devRC || p.MeasuredMinutes != 240 {
-		t.Fatalf("sem troca: %+v %v", p, err)
+		t.Fatalf("normal: %+v %v", p, err)
 	}
 
-	// a última hora com os papéis trocados
-	if _, err := a.SaveRoleSwap(RoleSwap{From: from.Add(3 * time.Hour).UnixMilli(), To: to.UnixMilli()}); err != nil {
-		t.Fatal(err)
+	// hora 1: os dois com você; hora 2: trocados; hora 3: os dois em casa
+	for _, s := range []Stay{
+		{Device: "gmc", Where: WhereMe, From: h(1), To: h(3)},
+		{Device: devRC, Where: WhereHome, From: h(2), To: h(4)},
+	} {
+		if _, err := a.SaveStay(s); err != nil {
+			t.Fatal(err)
+		}
 	}
 	for _, c := range []struct {
-		role         string
-		normal, swap float64
+		role       string
+		mins, swap int
+		total      float64
 	}{
-		{"pessoal", usvR, usvG},
-		{"casa", usvG, usvR},
+		{"pessoal", 180, 60, (120*r + 60*g) / 60}, // RC, RC, GMC, ninguém
+		{"casa", 180, 60, (60*g + 60*r + 60*g) / 60},
 	} {
 		d, err := a.roleDose(from, to, time.Hour, "publico", c.role)
 		if err != nil {
 			t.Fatal(err)
 		}
-		want := 180*c.normal/60 + 60*c.swap/60
-		if !d.Mixed || d.Device != "misto" || d.MeasuredMinutes != 240 || d.SwapMinutes != 60 || math.Abs(d.Total-want) > 1e-9 {
-			t.Errorf("%s: misto %v, %d min (%d trocados), total %v (quero %v)", c.role, d.Mixed, d.MeasuredMinutes, d.SwapMinutes, d.Total, want)
+		if !d.Mixed || d.Device != "misto" || d.MeasuredMinutes != c.mins || d.SwapMinutes != c.swap || math.Abs(d.Total-c.total) > 1e-9 {
+			t.Errorf("%s: misto %v, %d min (%d do outro), total %v (quero %v)", c.role, d.Mixed, d.MeasuredMinutes, d.SwapMinutes, d.Total, c.total)
 		}
 		// cada minuto contra o fundo do aparelho que mediu: nada acima
 		if math.Abs(d.Excess) > 1e-9 || len(d.Dose) != 4 || math.Abs(d.Dose[3]-d.Total) > 1e-9 {
 			t.Errorf("%s: excesso %v, curva %v", c.role, d.Excess, d.Dose)
 		}
-	}
-	// o GMC trocado sai do fundo da casa; o RadiaCode trocado entra
-	if bg := a.homeOnly(pts); len(bg) != 180 {
-		t.Errorf("fundo do GMC com %d min", len(bg))
 	}
 }

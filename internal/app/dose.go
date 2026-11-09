@@ -69,8 +69,9 @@ type DoseChart struct {
 	// cada minuto pela calibração que valia nele (CalNote diz qual).
 	CalNote string `json:"calNote,omitempty"`
 
-	// papéis trocados no período (roles.go): Mixed = a curva junta os dois
-	// aparelhos (Device = "misto"); SwapMinutes = minutos do aparelho trocado
+	// aparelho fora do local normal no período (roles.go): Mixed = a curva
+	// junta os dois aparelhos (Device = "misto"); SwapMinutes = minutos do
+	// aparelho que normalmente não tem esse papel
 	Mixed       bool `json:"mixed,omitempty"`
 	SwapMinutes int  `json:"swapMinutes,omitempty"`
 }

@@ -740,7 +740,7 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 	if f, err := zw.Create("eventos.csv"); err == nil {
 		_ = csv.NewWriter(f).WriteAll(rows)
 	}
-	for _, name := range []string{"fora-de-casa.json", rolesFile, "medicoes.json", "anotacoes.json"} {
+	for _, name := range []string{"fora-de-casa.json", staysFile, "medicoes.json", "anotacoes.json"} {
 		if b, err := os.ReadFile(filepath.Join(a.dataDir, name)); err == nil {
 			if f, err := zw.Create(name); err == nil {
 				_, _ = f.Write(b)

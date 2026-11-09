@@ -121,12 +121,9 @@ func (a *App) DeletePeriod(id int64) error {
 }
 
 // awayChecker diz se o GMC-800 estava fora de casa num instante: num período
-// marcado ou com os papéis trocados (roles.go). Para o RadiaCode, use
-// rcAwayChecker.
-func (a *App) awayChecker() func(time.Time) bool {
-	away, swapped := a.periodChecker(), a.swappedChecker()
-	return func(t time.Time) bool { return away(t) || swapped(t) }
-}
+// marcado, a não ser que ele tenha sido marcado em casa (roles.go). Para o
+// RadiaCode, use rcAwayChecker.
+func (a *App) awayChecker() func(time.Time) bool { return a.awayCheckerFor("gmc") }
 
 // periodChecker devolve uma função que diz se um instante está num período
 // fora de casa (cópia dos períodos, para usar sem segurar o lock).
@@ -149,7 +146,7 @@ func (a *App) periodChecker() func(time.Time) bool {
 	}
 }
 
-// homeOnly tira os pontos do GMC fora de casa (períodos e papéis trocados) e
+// homeOnly tira os pontos do GMC fora de casa (roles.go) e
 // das medições de objeto. Para o RadiaCode, use rcHomeOnly.
 func (a *App) homeOnly(pts []store.Point) []store.Point {
 	away := a.awayChecker()

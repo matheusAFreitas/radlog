@@ -354,7 +354,7 @@ type App struct {
 	radar        *radarStore      // chuva pelo radar (radar.go)
 	radarKick    chan struct{}    // busca o radar já (lugar novo)
 	periods      []Period         // fora de casa (periods.go)
-	swaps        []RoleSwap       // papéis trocados (roles.go)
+	stays        []Stay           // onde esteve cada aparelho (roles.go)
 	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
 	measSamples  []MeasureSample  // segundos da medição em andamento
 	measSamples2 []MeasureSample  // os do segundo aparelho (µSv/h)
@@ -395,7 +395,7 @@ func (a *App) startup(ctx context.Context) {
 	a.loadCalHist()
 	a.loadRain()
 	a.loadPeriods()
-	a.loadRoles()
+	a.loadStays()
 	a.loadNotes()
 	a.loadMeasurements()
 	a.loadRadar()

@@ -12,9 +12,9 @@ import (
 // (do calendário, até agora) de cada aparelho: o RadiaCode é a dose pessoal
 // (anda com você) e o GMC-800 é a da casa. Cada período usa a mesma conta da
 // Dose acumulada (buildDose): só os minutos medidos entram, e o fundo e o
-// limite crescem junto com eles. Com os papéis trocados em parte do período
-// (roles.go), a pessoal e a da casa juntam os minutos de cada aparelho no
-// papel certo (roleDose).
+// limite crescem junto com eles. Com um aparelho fora do local normal em
+// parte do período (roles.go), a pessoal e a da casa juntam os minutos de
+// cada aparelho no papel certo (roleDose).
 
 // MyDosePeriod é a dose de um aparelho num período do calendário.
 type MyDosePeriod struct {
@@ -29,15 +29,15 @@ type MyDosePeriod struct {
 	MeasuredMinutes int     `json:"measuredMinutes"`
 	Coverage        float64 `json:"coverage"`
 	DoseSource      string  `json:"doseSource"` // "aparelho" ou "app"
-	// papéis trocados em parte do período: a dose junta os dois aparelhos
-	// (roles.go) e SwapMinutes são os minutos do aparelho trocado
+	// aparelho fora do local normal em parte do período: a dose junta os dois
+	// (roles.go) e SwapMinutes são os minutos do que normalmente não tem o papel
 	Mixed       bool `json:"mixed,omitempty"`
 	SwapMinutes int  `json:"swapMinutes,omitempty"`
 }
 
 // MyDoseDevice é a Minha dose de um aparelho.
 type MyDoseDevice struct {
-	Device         string         `json:"device"` // radiacode, gmc: o aparelho com esse papel agora
+	Device         string         `json:"device"` // radiacode, gmc: o aparelho com esse papel agora ("" = nenhum)
 	HasData        bool           `json:"hasData"`
 	Periods        []MyDosePeriod `json:"periods"`
 	BackgroundRate float64        `json:"backgroundRate"` // µSv/h
@@ -53,9 +53,9 @@ type MyDose struct {
 	Now          int64        `json:"now"`
 	LimitName    string       `json:"limitName"`
 	LimitMSvYear float64      `json:"limitMSvYear"`
-	Personal     MyDoseDevice `json:"personal"` // com você (RadiaCode; o GMC-800 com os papéis trocados)
-	Home         MyDoseDevice `json:"home"`     // em casa (GMC-800; o RadiaCode com os papéis trocados)
-	Swapped      bool         `json:"swapped"`  // papéis trocados agora
+	Personal     MyDoseDevice `json:"personal"` // com você (normalmente o RadiaCode; roles.go)
+	Home         MyDoseDevice `json:"home"`     // em casa (normalmente o GMC-800; roles.go)
+	Normal       bool         `json:"normal"`   // GMC em casa e RadiaCode com você agora
 	Default      string       `json:"default"`  // "pessoal" se o RadiaCode tem dado no ano, senão "casa"
 }
 
@@ -73,9 +73,9 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 	}
 	out := MyDose{Now: now.UnixMilli(), LimitName: lim.Name, LimitMSvYear: lim.MSvYear}
 	a.mu.Lock()
-	roles := a.rolesLocked(now.Add(-time.Minute))
+	roles := a.whereaboutsLocked(now.Add(-time.Minute))
 	a.mu.Unlock()
-	out.Swapped = roles.Swapped
+	out.Normal = roles.Normal
 	for _, role := range []string{"pessoal", "casa"} {
 		d := MyDoseDevice{Device: roles.Home}
 		if role == "pessoal" {
