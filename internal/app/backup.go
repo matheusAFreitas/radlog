@@ -35,6 +35,7 @@ type MergeResult struct {
 	Minutes      int    `json:"minutes"`
 	Events       int    `json:"events"`
 	Periods      int    `json:"periods"`
+	RoleSwaps    int    `json:"roleSwaps"` // trechos com os papéis trocados
 	Measurements int    `json:"measurements"`
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
@@ -42,7 +43,7 @@ type MergeResult struct {
 }
 
 func (m MergeResult) total() int {
-	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
+	return m.Minutes + m.Events + m.Periods + m.RoleSwaps + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
 }
 
 // backupAppID marca os backups; os da 1.x (GMC Monitor) continuam valendo.
@@ -94,7 +95,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile}
+	files := []string{"eventos.csv", "fora-de-casa.json", rolesFile, "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -348,6 +349,16 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 					_ = a.savePeriodsLocked()
 				}
 				a.mu.Unlock()
+			}
+		}
+	}
+
+	// papéis trocados
+	if f, ok := files[rolesFile]; ok {
+		if b, err := readZipFile(f); err == nil {
+			var list []RoleSwap
+			if json.Unmarshal(b, &list) == nil {
+				res.RoleSwaps = a.mergeRoleSwaps(list)
 			}
 		}
 	}

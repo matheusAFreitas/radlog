@@ -2766,3 +2766,10 @@ fora {0}	away {0}
 Fora de casa foi {0}% do tempo e {1}% da dose (µSv).	Away from home was {0}% of the time and {1}% of the dose (µSv).
 Nenhum minuto fora de casa no período (µSv).	No minutes away from home in the period (µSv).
 Razão pessoal ÷ casa: {0} (RadiaCode ÷ GMC-800 em µSv/h).	Personal ÷ home ratio: {0} (RadiaCode ÷ GMC-800 in µSv/h).
+Papéis trocados	Roles swapped
+Papéis trocados: o GMC-800 vai com você e o RadiaCode fica em casa	Roles swapped: the GMC-800 goes with you and the RadiaCode stays home
+Papéis de volta ao normal: GMC-800 em casa e RadiaCode com você	Roles back to normal: GMC-800 at home and RadiaCode with you
+o trecho precisa ter pelo menos 1 minuto	the stretch must be at least 1 minute long
+esse trecho cruza com outro em que os papéis já estavam trocados	this stretch overlaps another one where the roles were already swapped
+trecho não encontrado	stretch not found
+fundo de casa de cada aparelho, nos minutos em que ele mediu	home background of each device, in the minutes it measured

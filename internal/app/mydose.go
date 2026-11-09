@@ -12,7 +12,9 @@ import (
 // (do calendário, até agora) de cada aparelho: o RadiaCode é a dose pessoal
 // (anda com você) e o GMC-800 é a da casa. Cada período usa a mesma conta da
 // Dose acumulada (buildDose): só os minutos medidos entram, e o fundo e o
-// limite crescem junto com eles.
+// limite crescem junto com eles. Com os papéis trocados em parte do período
+// (roles.go), a pessoal e a da casa juntam os minutos de cada aparelho no
+// papel certo (roleDose).
 
 // MyDosePeriod é a dose de um aparelho num período do calendário.
 type MyDosePeriod struct {
@@ -27,11 +29,15 @@ type MyDosePeriod struct {
 	MeasuredMinutes int     `json:"measuredMinutes"`
 	Coverage        float64 `json:"coverage"`
 	DoseSource      string  `json:"doseSource"` // "aparelho" ou "app"
+	// papéis trocados em parte do período: a dose junta os dois aparelhos
+	// (roles.go) e SwapMinutes são os minutos do aparelho trocado
+	Mixed       bool `json:"mixed,omitempty"`
+	SwapMinutes int  `json:"swapMinutes,omitempty"`
 }
 
 // MyDoseDevice é a Minha dose de um aparelho.
 type MyDoseDevice struct {
-	Device         string         `json:"device"` // radiacode, gmc
+	Device         string         `json:"device"` // radiacode, gmc: o aparelho com esse papel agora
 	HasData        bool           `json:"hasData"`
 	Periods        []MyDosePeriod `json:"periods"`
 	BackgroundRate float64        `json:"backgroundRate"` // µSv/h
@@ -47,8 +53,9 @@ type MyDose struct {
 	Now          int64        `json:"now"`
 	LimitName    string       `json:"limitName"`
 	LimitMSvYear float64      `json:"limitMSvYear"`
-	Personal     MyDoseDevice `json:"personal"` // RadiaCode
-	Home         MyDoseDevice `json:"home"`     // GMC-800
+	Personal     MyDoseDevice `json:"personal"` // com você (RadiaCode; o GMC-800 com os papéis trocados)
+	Home         MyDoseDevice `json:"home"`     // em casa (GMC-800; o RadiaCode com os papéis trocados)
+	Swapped      bool         `json:"swapped"`  // papéis trocados agora
 	Default      string       `json:"default"`  // "pessoal" se o RadiaCode tem dado no ano, senão "casa"
 }
 
@@ -65,20 +72,28 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 		lim = doseLimits["publico"]
 	}
 	out := MyDose{Now: now.UnixMilli(), LimitName: lim.Name, LimitMSvYear: lim.MSvYear}
-	for _, src := range []string{"radiacode", "gmc"} {
-		d := MyDoseDevice{Device: src}
+	a.mu.Lock()
+	roles := a.rolesLocked(now.Add(-time.Minute))
+	a.mu.Unlock()
+	out.Swapped = roles.Swapped
+	for _, role := range []string{"pessoal", "casa"} {
+		d := MyDoseDevice{Device: roles.Home}
+		if role == "pessoal" {
+			d.Device = roles.Personal
+		}
 		for _, p := range coredose.Calendar(now) {
 			step := p.To.Sub(p.From).Truncate(time.Minute)
 			if step < time.Minute {
 				step = time.Minute
 			}
-			c, err := a.buildDose(p.From, p.From.Add(step), step, limit, src)
+			c, err := a.roleDose(p.From, p.From.Add(step), step, limit, role)
 			if err != nil {
 				return out, err
 			}
 			mp := MyDosePeriod{Key: p.Key, From: c.From, To: c.To, Total: c.Total, Background: c.BackgroundTotal,
 				Allowance: c.Allowance, Excess: c.Excess, Above: coredose.Above(c.Total, c.BackgroundTotal),
-				MeasuredMinutes: c.MeasuredMinutes, Coverage: c.Coverage, DoseSource: c.DoseSource}
+				MeasuredMinutes: c.MeasuredMinutes, Coverage: c.Coverage, DoseSource: c.DoseSource,
+				Mixed: c.Mixed, SwapMinutes: c.SwapMinutes}
 			if c.MeasuredMinutes > 0 || c.Total > 0 {
 				d.HasData = true
 			}
@@ -90,7 +105,7 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 			}
 			d.Periods = append(d.Periods, mp)
 		}
-		if src == "radiacode" {
+		if role == "pessoal" {
 			out.Personal = d
 		} else {
 			out.Home = d

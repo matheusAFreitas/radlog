@@ -281,7 +281,7 @@ func (a *App) GetRainImpactDev(dev string) (RainImpact, error) {
 			sumU += p.USvh
 			sumC += p.CPS * 60
 		}
-		pts = a.homeOnly(pts)
+		pts = a.rcHomeOnly(pts)
 		if sumC > 0 {
 			res.USvPerCPM = sumU / sumC
 		}
