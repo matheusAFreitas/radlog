@@ -115,14 +115,14 @@ async function refreshChart() {
 
   const grid = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   const hline = (v, color, width) => `<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="${width}" stroke-dasharray="8 5" vector-effect="non-scaling-stroke"/>`;
-  let thr = top >= thrV ? hline(thrV, "#F5B84A", 1) : "";
+  let thr = top >= thrV ? hline(thrV, COR.att, 1) : "";
   const showAlarm = ringing && alarmV && alarmV <= top;
   const showDanger = ringing && dangerV && dangerV <= top;
-  if (showAlarm && !(dangerV && alarmV >= dangerV)) thr += hline(alarmV, "#F28C38", 2);
-  if (showDanger) thr += hline(dangerV, "#F0656A", 2);
+  if (showAlarm && !(dangerV && alarmV >= dangerV)) thr += hline(alarmV, COR.alarm, 2);
+  if (showDanger) thr += hline(dangerV, COR.warn, 2);
   const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
   $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
   $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;
@@ -173,17 +173,17 @@ async function refreshChart() {
   $("peakDots").innerHTML = (c.peaks || []).map((p) => {
     const i = Math.floor((p.t - c.from) / stepMs);
     if (i < 0 || i >= n) return "";
-    const col = { perigo: "#F0656A", alarme: "#F28C38" }[p.level] || "#F5B84A";
+    const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
     return `<i style="left:${((x(i) / W) * 100).toFixed(2)}%;top:${((y(peakV(p)) / H) * 100).toFixed(2)}%;background:${col}"></i>`;
   }).join("");
   // com o RadiaCode (aparelho principal), ele é a curva cheia e o GMC (casa)
   // vira uma linha de referência
   $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines + (rcLine
-    ? `<path d="${rcArea}" fill="#F472B6" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
-      `<path d="${rcLine}" fill="none" stroke="#F472B6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="#6EE7A0" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
+    : `<path d="${area}" fill="${COR.accent}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
 
   if (state.zoom) {
@@ -445,7 +445,7 @@ function renderDevBoxes(box, list) {
 // e desliga); pelo menos um fica sempre visível
 const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
 const devName = (k) => (k === "rc" ? "RadiaCode" : "GMC-800");
-const devColor = (k) => (k === "rc" ? "#F472B6" : "#6EE7A0");
+const devColor = (k) => (k === "rc" ? COR.rc : COR.accent);
 function toggleDoseDev(k) {
   const s = state.doseShow;
   s[k] = !s[k];
@@ -485,7 +485,7 @@ function drawDoseChart() {
   const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + ((arr.length <= 1 ? 0 : (i / (arr.length - 1)) * W)).toFixed(1) + " " + y(v).toFixed(1)).join("");
   const grid = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   const dt0 = c.times[0], dt1 = c.times[n - 1];
   const dxt = (t) => Math.max(0, Math.min(W, ((t - dt0) / Math.max(1, dt1 - dt0)) * W));
@@ -495,8 +495,8 @@ function drawDoseChart() {
   const lineOf = (arr, color, w, dash, op) => `<path d="${path(arr)}" fill="none" stroke="${color}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ""}${op ? ` stroke-opacity="${op}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   $("doseCard").classList.toggle("rc", k1 === "rc");
   $("doseChart").innerHTML = grid + dAway +
-    (show1 ? fillOf(c, k1) + lineOf(c.background, "#A3ADB4", 1.5, "5 5") + lineOf(c.ceiling, "#F0656A", 2) + lineOf(c.dose, devColor(k1), 2) : "") +
-    (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, "#A3ADB4", 1.5, "5 5") + lineOf(c2.ceiling, "#F0656A", 2) : lineOf(c2.ceiling, "#F0656A", 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
+    (show1 ? fillOf(c, k1) + lineOf(c.background, COR.muted, 1.5, "5 5") + lineOf(c.ceiling, COR.warn, 2) + lineOf(c.dose, devColor(k1), 2) : "") +
+    (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, COR.muted, 1.5, "5 5") + lineOf(c2.ceiling, COR.warn, 2) : lineOf(c2.ceiling, COR.warn, 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
   ys[3].textContent = "0";

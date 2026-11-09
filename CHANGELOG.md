@@ -1,5 +1,19 @@
 # Versões
 
+## 2.20.4
+- **Cores num lugar só, sem mudança na tela.** As cores da interface agora
+  saem das variáveis do guia de estilo, no começo do `style.css`.
+  - O `style.css` tinha dois blocos `:root`, e o segundo (da repaginação
+    1.10) trocava fundo, superfícies e borda. Ficou um bloco só, com os
+    valores que já estavam valendo, mais os que faltavam: `--rc`, `--alarm`,
+    `--accent-hover`, `--surface-hover`, `--border-hover`, `--attn-bg`,
+    `--attn-ink` e `--chart-grid`.
+  - Cerca de 45 cores escritas à mão no CSS viraram `var(--…)`.
+  - Os gráficos (SVG e canvas) pegam as cores de `frontend/dist/cores.js`,
+    que lê essas mesmas variáveis. Foram cerca de 110 trocas nos arquivos
+    JS. Cores próprias de um gráfico só (o roxo e o ciano das séries extras,
+    por exemplo) ficaram como estavam.
+
 ## 2.20.3
 - **Mais arrumação por dentro, sem mudança na tela.** A página Fora de casa
   (a lista de períodos, os números de cada período e o editor) saiu do

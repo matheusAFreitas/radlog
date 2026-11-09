@@ -180,15 +180,15 @@ function drawMeasureSrc(src) {
   for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : fmt(v, usvDigits(top * k)); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   if (src.bgFlat) {
     // fundo da casa: faixa reta (média ± σ) na medição toda
     const b = src.bgFlat, y1 = y(b.cpm + b.errCPM), y2 = y(b.cpm - b.errCPM);
-    out += `<rect x="0" y="${y1.toFixed(1)}" width="${W}" height="${Math.max(1, y2 - y1).toFixed(1)}" fill="#A3ADB4" fill-opacity="0.18"/>`;
-    out += `<line x1="0" y1="${y(b.cpm).toFixed(1)}" x2="${W}" y2="${y(b.cpm).toFixed(1)}" stroke="#A3ADB4" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<rect x="0" y="${y1.toFixed(1)}" width="${W}" height="${Math.max(1, y2 - y1).toFixed(1)}" fill="${COR.muted}" fill-opacity="0.18"/>`;
+    out += `<line x1="0" y1="${y(b.cpm).toFixed(1)}" x2="${W}" y2="${y(b.cpm).toFixed(1)}" stroke="${COR.muted}" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   }
-  for (const [phase, color] of [["fundo", "#A3ADB4"], ["objeto", "#5EEAD4"]]) {
+  for (const [phase, color] of [["fundo", COR.muted], ["objeto", "#5EEAD4"]]) {
     const pts = src.ph.filter((p) => p.phase === phase);
     if (!pts.length) continue;
     const up = pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg + p.err).toFixed(1)}`);
@@ -203,16 +203,16 @@ function drawMeasureSrc(src) {
   if (src.live.length > 1) {
     // quebra a linha nos intervalos (ex.: entre o fundo e o objeto)
     const d = src.live.map((p, i) => (i && p.t - src.live[i - 1].t <= 3000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || "#6EE7A0"}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || COR.accent}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
   }
   // segundo aparelho: a leitura dele em µSv/h, por cima
   if (oth.length > 1) {
     const d = oth.map((p, i) => (i && p.t - oth[i - 1].t <= 5000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.otherDev] || "#F472B6"}" stroke-width="1.6" stroke-dasharray="${src.otherRole === "voce" ? "5 3" : "0"}" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.otherDev] || COR.rc}" stroke-width="1.6" stroke-dasharray="${src.otherRole === "voce" ? "5 3" : "0"}" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   // legenda: de que aparelho é cada linha
-  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || "#6EE7A0";
+  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || COR.accent;
   $("mLiveKeyTxt").textContent = src.otherDev ? `${devLabel(src.dev)} ao vivo (no objeto)` : "leitura ao vivo";
   $("mOtherKey").hidden = !src.otherDev;
   if (src.otherDev) {
@@ -457,7 +457,7 @@ function renderMeasure(st) {
 // ---------- segundo aparelho (os dois perto, ou um com você) ----------
 
 const devLabel = (d) => (d === "radiacode" ? "RadiaCode" : "GMC-800");
-const DEV_COLOR = { radiacode: "#F472B6", gmc: "#6EE7A0" };
+const DEV_COLOR = { radiacode: COR.rc, gmc: COR.accent };
 
 // os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
 function renderMeasureDuo(st, running) {
@@ -687,7 +687,7 @@ const measureLabel = (ms) => { const x = measureAt(ms); return x ? ` · mediçã
 function measureBands(t0, t1, xt) {
   let out = "";
   for (const m of state.measurements || []) {
-    for (const [ph, color, op] of [[m.bg, "#A3ADB4", 0.14], [m.obj, "#5EEAD4", 0.24]]) {
+    for (const [ph, color, op] of [[m.bg, COR.muted, 0.14], [m.obj, "#5EEAD4", 0.24]]) {
       if (ph.source === "casa" || !(ph.end > t0 && ph.start < t1)) continue;
       const x1 = xt(Math.max(ph.start, t0)), x2 = xt(Math.min(ph.end, t1));
       out += `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(2, x2 - x1).toFixed(1)}" height="${H}" fill="${color}" fill-opacity="${op}"/>`;
