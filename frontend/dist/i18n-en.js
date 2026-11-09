@@ -1921,7 +1921,8 @@ const I18N_EN = {
 "Os dois fora do cálculo": "Both out of the calculation",
 "GMC-800 fora do cálculo": "GMC-800 out of the calculation",
 "RadiaCode fora do cálculo": "RadiaCode out of the calculation",
-"fora do cálculo": "out of the calculation"
+"fora do cálculo": "out of the calculation",
+"esse começo cai dentro de outro trecho já marcado": "that start falls inside another stretch already marked"
 },
 "patterns": [
 [

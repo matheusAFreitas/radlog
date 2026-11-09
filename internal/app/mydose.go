@@ -38,6 +38,7 @@ type MyDosePeriod struct {
 	// minutos em que o aparelho do papel não mandou leitura (desconectado,
 	// desligado ou fora do cálculo)
 	NoDataMinutes int `json:"noDataMinutes,omitempty"`
+	SatMinutes    int `json:"satMinutes,omitempty"` // GMC saturado: a dose é "pelo menos" (≥)
 }
 
 // MyDoseDevice é a Minha dose de um aparelho.
@@ -98,7 +99,7 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 			mp := MyDosePeriod{Key: p.Key, From: c.From, To: c.To, Total: c.Total, Background: c.BackgroundTotal,
 				Allowance: c.Allowance, Excess: c.Excess, Above: coredose.Above(c.Total, c.BackgroundTotal),
 				MeasuredMinutes: c.MeasuredMinutes, Coverage: c.Coverage, DoseSource: c.DoseSource,
-				Device: c.Device, Mixed: c.Mixed, SwapMinutes: c.SwapMinutes, GapMinutes: c.GapMinutes, NoDataMinutes: c.NoDataMinutes}
+				Device: c.Device, Mixed: c.Mixed, SwapMinutes: c.SwapMinutes, GapMinutes: c.GapMinutes, NoDataMinutes: c.NoDataMinutes, SatMinutes: c.SatMinutes}
 			if c.MeasuredMinutes > 0 || c.Total > 0 {
 				d.HasData = true
 			}

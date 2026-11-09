@@ -281,3 +281,66 @@ func TestDevLive(t *testing.T) {
 		t.Errorf("RadiaCode: %+v", r)
 	}
 }
+
+func TestSetWhereAt(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	// os dois com você desde 1 h atrás; o GMC quebrou há 2 h: o novo trecho
+	// começa logo depois do aberto, que fecha
+	if _, err := a.setWhere(now.Add(-time.Hour), WhereMe, WhereMe, ""); err != nil {
+		t.Fatal(err)
+	}
+	w, err := a.SetWhereAt(WhereOff, WhereMe, "quebrado", now.Add(-2*time.Hour).UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	ps := a.GetPeriods()
+	if len(ps) != 2 || ps[0].To != now.Add(-59*time.Minute).UnixMilli() || ps[1].From != ps[0].To || ps[1].GMC != WhereOff || ps[1].Name != "quebrado" || w.GMC != WhereOff {
+		t.Fatalf("trechos: %+v / %+v", ps, w)
+	}
+	// não volta para dentro de um trecho fechado
+	if _, err := a.SetWhereAt(WhereHome, WhereMe, "", now.Add(-90*time.Minute).UnixMilli()); err == nil {
+		t.Fatal("aceitou começo dentro de outro trecho")
+	}
+}
+
+func TestDeviceMarks(t *testing.T) {
+	a := newTestApp(t)
+	from := time.Now().Add(-48 * time.Hour).Truncate(time.Hour)
+	var pts []store.Point
+	for i := 0; i < 60; i++ {
+		if i >= 20 && i < 30 { // 10 min sem dado
+			continue
+		}
+		p := store.Point{T: from.Add(time.Duration(i) * time.Minute), CPM: 20, Src: store.SrcDevice}
+		switch {
+		case i >= 40 && i < 43:
+			p.CPM, p.Has, p.Obs = 9000, true, store.ObsSaturation
+		case i >= 50 && i < 53:
+			p.CPM = 0
+		case i == 45:
+			p.CPM = 0 // um minuto em 0 sozinho não conta
+		}
+		pts = append(pts, p)
+	}
+	if _, err := a.store.Import(pts); err != nil {
+		t.Fatal(err)
+	}
+	writeRc(t, a, from, 60, 0.1)
+	ms, err := a.GetDeviceMarks(from.UnixMilli(), from.Add(time.Hour).UnixMilli())
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := []DevMark{
+		{"gmc", "sem dado", from.Add(20 * time.Minute).UnixMilli(), from.Add(30 * time.Minute).UnixMilli()},
+		{"gmc", "saturando", from.Add(40 * time.Minute).UnixMilli(), from.Add(43 * time.Minute).UnixMilli()},
+		{"gmc", "sem contagens", from.Add(50 * time.Minute).UnixMilli(), from.Add(53 * time.Minute).UnixMilli()},
+	}
+	if fmt.Sprint(ms) != fmt.Sprint(want) {
+		t.Fatalf("marcas:\n%v\nquero\n%v", ms, want)
+	}
+	// a dose da casa diz que 3 min foram saturados (≥)
+	if d, _ := a.roleDose(from, from.Add(time.Hour), time.Hour, "publico", "casa"); d.SatMinutes != 3 {
+		t.Fatalf("saturados: %d", d.SatMinutes)
+	}
+}

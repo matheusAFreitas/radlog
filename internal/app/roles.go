@@ -136,8 +136,12 @@ type Whereabouts struct {
 // DevLive é o estado ao vivo de um aparelho.
 type DevLive struct {
 	Connected bool   `json:"connected"`
-	State     string `json:"state"` // lendo, saturado, sem dado
+	State     string `json:"state"` // lendo, saturado, sem contagens, sem dado
+	Since     int64  `json:"since"` // ms: começo de "sem contagens" (0 nos outros)
 	Last      int64  `json:"last"`  // ms do último minuto gravado (0 = nenhum em 2 dias)
+	// último minuto bom (contou, sem saturar): o "desde a última leitura boa"
+	// de tirar do cálculo
+	LastGood int64 `json:"lastGood"`
 	// RadiaCode longe do PC: ele continua somando a dose sozinho, e a dose
 	// pessoal sai do total dele quando reconectar
 	CountsOffline bool `json:"countsOffline,omitempty"`
@@ -150,11 +154,18 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 	g := DevLive{State: "sem dado"}
 	a.mu.Lock()
 	g.Connected = a.state == "conectado"
+	nc := a.noCount
 	a.mu.Unlock()
 	if a.store != nil {
 		if pts, _ := a.store.Range(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
 			last := pts[len(pts)-1]
 			g.Last = last.T.UnixMilli()
+			for i := len(pts) - 1; i >= 0; i-- {
+				if pts[i].CPM > 0 && !pts[i].HasObs(store.ObsSaturation) {
+					g.LastGood = pts[i].T.UnixMilli()
+					break
+				}
+			}
 			if now.Sub(last.T) <= fresh {
 				g.State = "lendo"
 				if last.HasObs(store.ObsSaturation) {
@@ -163,6 +174,9 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 			}
 		}
 	}
+	if nc.on && g.Connected {
+		g.State, g.Since = "sem contagens", nc.since.UnixMilli()
+	}
 	out["gmc"] = g
 	r := DevLive{State: "sem dado"}
 	a.rc.mu.Lock()
@@ -170,6 +184,7 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 	a.rc.mu.Unlock()
 	if pts := a.rcRange(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
 		r.Last = pts[len(pts)-1].T.UnixMilli()
+		r.LastGood = r.Last
 		if now.Sub(pts[len(pts)-1].T) <= fresh {
 			r.State = "lendo"
 		}
@@ -217,6 +232,33 @@ func (a *App) emitPeriods() {
 // opcional.
 func (a *App) SetWhere(gmc, rc, name string) (Whereabouts, error) {
 	return a.setWhere(time.Now(), gmc, rc, name)
+}
+
+// SetWhereAt é o SetWhere valendo desde fromMs (no passado: "desde a
+// última leitura boa" ao tirar um aparelho do cálculo). O trecho aberto é
+// fechado nesse instante; não pode voltar para antes de outro trecho.
+func (a *App) SetWhereAt(gmc, rc, name string, fromMs int64) (Whereabouts, error) {
+	now := time.Now()
+	if fromMs <= 0 || fromMs > now.UnixMilli() {
+		return a.setWhere(now, gmc, rc, name)
+	}
+	start := time.UnixMilli(fromMs)
+	a.mu.Lock()
+	for _, p := range a.periods {
+		if p.To != 0 && p.To > start.Truncate(time.Minute).UnixMilli() {
+			a.mu.Unlock()
+			return a.GetWhereabouts(), errors.New("esse começo cai dentro de outro trecho já marcado")
+		}
+		// o trecho aberto começou depois: o novo começa logo após o começo dele
+		if p.To == 0 && !start.After(time.UnixMilli(p.From)) {
+			start = time.UnixMilli(p.From).Add(time.Minute)
+		}
+	}
+	a.mu.Unlock()
+	if start.After(now) {
+		start = now
+	}
+	return a.setWhere(start, gmc, rc, name)
 }
 
 func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error) {
@@ -392,6 +434,9 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 	if !a.periodsIn(from, to) {
 		c, err := a.buildDose(from, to, step, limit, normal)
 		c.NoDataMinutes = max(c.HistMinutes-c.MeasuredMinutes, 0)
+		if normal == "gmc" {
+			c.SatMinutes = a.satMinutes(from, to, nil)
+		}
 		return c, err
 	}
 	lim, ok := doseLimits[limit]
@@ -498,7 +543,30 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 		c.HistFrom = cs.HistFrom.UnixMilli()
 	}
 	c.NoDataMinutes = max(cs.Hist-c.MeasuredMinutes-c.GapMinutes, 0)
+	c.SatMinutes = a.satMinutes(from, to, func(t time.Time) bool {
+		k := t.Truncate(time.Minute).UnixMilli()
+		return byMin[k].dev == "gmc"
+	})
 	return c, nil
+}
+
+// satMinutes conta os minutos do GMC saturado em [from, to) que entraram na
+// dose (use: nil = todos): a dose deles é "pelo menos" (≥).
+func (a *App) satMinutes(from, to time.Time, use func(time.Time) bool) int {
+	if a.store == nil {
+		return 0
+	}
+	pts, err := a.store.Range(from, to)
+	if err != nil {
+		return 0
+	}
+	n := 0
+	for _, p := range pts {
+		if p.HasObs(store.ObsSaturation) && (use == nil || use(p.T)) {
+			n++
+		}
+	}
+	return n
 }
 
 // roleGapMinutes são os minutos de [from, min(to, agora)) em que nenhum
@@ -527,4 +595,78 @@ func (a *App) roleGapMinutes(from, to time.Time, role string) int {
 		}
 	}
 	return int(ms / 60_000)
+}
+
+// DevMark é um trecho que o app detectou sozinho num aparelho (não é marcado
+// por você): sem dado (desconectado ou desligado), saturando ou sem
+// contagens.
+type DevMark struct {
+	Device string `json:"device"` // gmc, radiacode
+	Kind   string `json:"kind"`   // sem dado, saturando, sem contagens
+	From   int64  `json:"from"`   // ms
+	To     int64  `json:"to"`     // ms
+}
+
+// markGap é o buraco mínimo entre dois minutos gravados que vira "sem dado".
+const markGap = 3 * time.Minute
+
+// GetDeviceMarks devolve, de cada aparelho, os trechos sem dado, saturando e
+// sem contagens em [fromMs, toMs), para a linha do tempo de Fora de casa.
+func (a *App) GetDeviceMarks(fromMs, toMs int64) ([]DevMark, error) {
+	from, to := time.UnixMilli(fromMs), time.UnixMilli(toMs)
+	if now := time.Now(); to.After(now) {
+		to = now
+	}
+	out := []DevMark{}
+	add := func(dev, kind string, f, t time.Time) {
+		if n := len(out); n > 0 && out[n-1].Device == dev && out[n-1].Kind == kind && out[n-1].To >= f.UnixMilli() {
+			out[n-1].To = t.UnixMilli()
+			return
+		}
+		out = append(out, DevMark{dev, kind, f.UnixMilli(), t.UnixMilli()})
+	}
+	gaps := func(dev string, ts []time.Time) {
+		for i := 1; i < len(ts); i++ {
+			if ts[i].Sub(ts[i-1]) > markGap {
+				add(dev, "sem dado", ts[i-1].Add(time.Minute), ts[i])
+			}
+		}
+		if n := len(ts); n > 0 && to.Sub(ts[n-1]) > markGap {
+			add(dev, "sem dado", ts[n-1].Add(time.Minute), to)
+		}
+	}
+	if a.store != nil {
+		pts, err := a.store.Range(from, to)
+		if err != nil {
+			return out, err
+		}
+		ts := make([]time.Time, len(pts))
+		for i, p := range pts {
+			ts[i] = p.T
+		}
+		gaps("gmc", ts)
+		for _, p := range pts {
+			switch {
+			case p.HasObs(store.ObsSaturation):
+				add("gmc", "saturando", p.T, p.T.Add(time.Minute))
+			case p.CPM == 0:
+				add("gmc", "sem contagens", p.T, p.T.Add(time.Minute))
+			}
+		}
+	}
+	rc := a.rcRange(from, to)
+	ts := make([]time.Time, len(rc))
+	for i, p := range rc {
+		ts[i] = p.T
+	}
+	gaps(devRC, ts)
+	sort.SliceStable(out, func(i, j int) bool { return out[i].From < out[j].From })
+	// um minuto isolado em 0 CPM acontece; sem contagens é de 2 min para cima
+	kept := out[:0]
+	for _, m := range out {
+		if m.Kind != "sem contagens" || m.To-m.From >= 2*60_000 {
+			kept = append(kept, m)
+		}
+	}
+	return kept, nil
 }
