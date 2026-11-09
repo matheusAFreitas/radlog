@@ -1,5 +1,12 @@
 # Versões
 
+## 2.21.0
+- **Mais arrumação por dentro, sem mudança na tela.** A aba Dose dos
+  Gráficos (o gráfico de CPM com o zoom por arraste e a dose acumulada dos
+  dois aparelhos) saiu do `app.js` para `frontend/dist/graficos.js`. O
+  `app.js` ficou com cerca de 630 linhas a menos; desde a 2.18 já são
+  cerca de 1.500.
+
 ## 2.20.0
 - **Mais arrumação por dentro, sem mudança na tela.**
   - A busca dos episódios de alerta nos minutos do histórico do contador
