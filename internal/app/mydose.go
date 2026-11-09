@@ -35,6 +35,9 @@ type MyDosePeriod struct {
 	Mixed       bool   `json:"mixed,omitempty"`
 	SwapMinutes int    `json:"swapMinutes,omitempty"`
 	GapMinutes  int    `json:"gapMinutes,omitempty"` // minutos sem ninguém nesse papel
+	// minutos em que o aparelho do papel não mandou leitura (desconectado,
+	// desligado ou fora do cálculo)
+	NoDataMinutes int `json:"noDataMinutes,omitempty"`
 }
 
 // MyDoseDevice é a Minha dose de um aparelho.
@@ -95,7 +98,7 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 			mp := MyDosePeriod{Key: p.Key, From: c.From, To: c.To, Total: c.Total, Background: c.BackgroundTotal,
 				Allowance: c.Allowance, Excess: c.Excess, Above: coredose.Above(c.Total, c.BackgroundTotal),
 				MeasuredMinutes: c.MeasuredMinutes, Coverage: c.Coverage, DoseSource: c.DoseSource,
-				Device: c.Device, Mixed: c.Mixed, SwapMinutes: c.SwapMinutes, GapMinutes: c.GapMinutes}
+				Device: c.Device, Mixed: c.Mixed, SwapMinutes: c.SwapMinutes, GapMinutes: c.GapMinutes, NoDataMinutes: c.NoDataMinutes}
 			if c.MeasuredMinutes > 0 || c.Total > 0 {
 				d.HasData = true
 			}

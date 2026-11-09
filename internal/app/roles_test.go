@@ -209,3 +209,75 @@ func dropRc(t *testing.T, a *App, from, to time.Time) {
 		t.Fatal(err)
 	}
 }
+
+func TestWhereOff(t *testing.T) {
+	a := newTestApp(t)
+	from := time.Now().Add(-48 * time.Hour).Truncate(time.Hour)
+	to := from.Add(4 * time.Hour)
+	h := func(n int) int64 { return from.Add(time.Duration(n) * time.Hour).UnixMilli() }
+	var pts []store.Point
+	for i := 0; i < 240; i++ {
+		pts = append(pts, store.Point{T: from.Add(time.Duration(i) * time.Minute), CPM: 20, Src: store.SrcDevice})
+	}
+	if _, err := a.store.Import(pts); err != nil {
+		t.Fatal(err)
+	}
+	writeRc(t, a, from, 240, 0.10)
+	// hora 0: GMC fora do cálculo; hora 1: RadiaCode fora do cálculo;
+	// hora 2: normal, mas o RadiaCode não mandou nada; hora 3: normal
+	for _, p := range []Period{
+		{From: h(0), To: h(1), GMC: WhereOff, RC: WhereMe},
+		{From: h(1), To: h(2), GMC: WhereHome, RC: WhereOff},
+	} {
+		got, err := a.SavePeriod(p)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if p.GMC == WhereOff && got.Name != "GMC-800 fora do cálculo" {
+			t.Fatalf("nome: %q", got.Name)
+		}
+	}
+	dropRc(t, a, from.Add(2*time.Hour), from.Add(3*time.Hour))
+
+	gmcAway, rcAway := a.awayChecker(), a.rcAwayChecker()
+	at := func(n int) time.Time { return from.Add(time.Duration(n)*time.Hour + 30*time.Minute) }
+	if !gmcAway(at(0)) || rcAway(at(0)) || gmcAway(at(1)) || !rcAway(at(1)) {
+		t.Fatalf("fundo: GMC %v/%v RadiaCode %v/%v", gmcAway(at(0)), gmcAway(at(1)), rcAway(at(0)), rcAway(at(1)))
+	}
+	g, r := gmc.DefaultCalibration().USv(20), 0.10
+	for _, c := range []struct {
+		role              string
+		mins, gap, noData int
+		total             float64
+	}{
+		{"pessoal", 120, 60, 60, (60*r + 60*r) / 60}, // RC; ninguém; sem dado; RC
+		{"casa", 180, 60, 0, (60*g + 60*g + 60*g) / 60},
+	} {
+		d, err := a.roleDose(from, to, time.Hour, "publico", c.role)
+		if err != nil {
+			t.Fatal(err)
+		}
+		if d.MeasuredMinutes != c.mins || d.GapMinutes != c.gap || d.NoDataMinutes != c.noData || math.Abs(d.Total-c.total) > 1e-9 {
+			t.Errorf("%s: %d min, %d sem ninguém, %d sem dado, total %v (quero %d, %d, %d, %v)", c.role, d.MeasuredMinutes, d.GapMinutes, d.NoDataMinutes, d.Total, c.mins, c.gap, c.noData, c.total)
+		}
+	}
+	if _, err := a.SavePeriod(Period{From: h(5), To: h(6), GMC: "quebrado"}); err == nil {
+		t.Fatal("aceitou local inválido")
+	}
+}
+
+func TestDevLive(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	if _, err := a.store.Import([]store.Point{{T: now.Add(-time.Minute), CPM: 20, Src: store.SrcLive}}); err != nil {
+		t.Fatal(err)
+	}
+	writeRc(t, a, now.Add(-2*time.Hour), 10, 0.1)
+	w := a.GetWhereabouts()
+	if g := w.Live["gmc"]; g.State != "lendo" || g.Connected {
+		t.Errorf("GMC: %+v", g)
+	}
+	if r := w.Live[devRC]; r.State != "sem dado" || r.Last == 0 || !r.CountsOffline {
+		t.Errorf("RadiaCode: %+v", r)
+	}
+}

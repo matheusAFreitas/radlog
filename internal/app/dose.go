@@ -76,6 +76,9 @@ type DoseChart struct {
 	Mixed       bool `json:"mixed,omitempty"`
 	SwapMinutes int  `json:"swapMinutes,omitempty"`
 	GapMinutes  int  `json:"gapMinutes,omitempty"`
+	// minutos (desde o primeiro dado, até agora) em que o aparelho do papel
+	// não mandou leitura: desconectado, desligado ou fora do cálculo
+	NoDataMinutes int `json:"noDataMinutes,omitempty"`
 }
 
 // GetDose monta o gráfico do dosímetro. period: "15m", "30m", "1h", "3h",

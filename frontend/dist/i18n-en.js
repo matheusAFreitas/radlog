@@ -1917,7 +1917,11 @@ const I18N_EN = {
 "GMC-800 em casa, RadiaCode com você": "GMC-800 at home, RadiaCode with you",
 "GMC-800 em casa, RadiaCode em casa": "GMC-800 at home, RadiaCode at home",
 "GMC-800 com você, RadiaCode com você": "GMC-800 with you, RadiaCode with you",
-"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RadiaCode at home"
+"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RadiaCode at home",
+"Os dois fora do cálculo": "Both out of the calculation",
+"GMC-800 fora do cálculo": "GMC-800 out of the calculation",
+"RadiaCode fora do cálculo": "RadiaCode out of the calculation",
+"fora do cálculo": "out of the calculation"
 },
 "patterns": [
 [
@@ -6289,6 +6293,15 @@ const I18N_EN = {
 "${1} σ above your background",
 [
 " σ acima do seu fundo"
+]
+],
+[
+"GMC-800 ",
+"^GMC\\-800 ((?:(?! · ).)+?), RadiaCode ((?:(?! · ).)+?)$",
+"GMC-800 ${1}, RadiaCode ${2}",
+[
+"GMC-800 ",
+", RadiaCode "
 ]
 ],
 [

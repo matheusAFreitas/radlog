@@ -22,14 +22,23 @@ import (
 //	comigo  comigo     sem medição                RadiaCode; o GMC preenche as falhas
 //	casa    casa       GMC; o RadiaCode preenche  sem dosímetro
 //
+// Um aparelho também pode ficar "fora do cálculo" (quebrou, leitura não
+// confiável): sai do fundo e da dose, e o papel dele fica com o outro, se o
+// outro estiver no mesmo lugar, ou vira lacuna.
+//
 // Fundo da casa: o GMC só conta em casa; o RadiaCode conta em casa e também
-// com você enquanto o GMC está em casa (você em casa, como sempre foi), mas
-// não quando os dois saíram com você.
+// com você enquanto o GMC não está com você (você em casa, como sempre foi),
+// mas não quando os dois saíram com você nem fora do cálculo.
+//
+// Desconectado ou desligado não se marca: é minuto sem dado, que não entra
+// na dose nem no fundo (NoDataMinutes); o estado ao vivo de cada aparelho
+// vem em Whereabouts.Live.
 
 // Locais.
 const (
 	WhereHome = "casa"
 	WhereMe   = "comigo"
+	WhereOff  = "fora" // fora do cálculo
 )
 
 // normWhere confere o local de cada aparelho num trecho ("" = comigo).
@@ -41,7 +50,7 @@ func normWhere(gmc, rc string) (string, string, error) {
 		rc = WhereMe
 	}
 	for _, w := range []string{gmc, rc} {
-		if w != WhereHome && w != WhereMe {
+		if w != WhereHome && w != WhereMe && w != WhereOff {
 			return gmc, rc, errors.New("local inválido")
 		}
 	}
@@ -66,6 +75,12 @@ func periodWhere(p Period) (gmc, rc string) {
 // periodName é o nome padrão de um trecho.
 func periodName(gmc, rc string) string {
 	switch {
+	case gmc == WhereOff && rc == WhereOff:
+		return "Os dois fora do cálculo"
+	case gmc == WhereOff:
+		return "GMC-800 fora do cálculo"
+	case rc == WhereOff:
+		return "RadiaCode fora do cálculo"
 	case gmc == WhereMe && rc == WhereMe:
 		return "Levei os dois"
 	case gmc == WhereMe:
@@ -114,6 +129,54 @@ type Whereabouts struct {
 	Home     string  `json:"home"`      // aparelho da casa ("" = sem medição)
 	Since    int64   `json:"since"`     // ms: começo do trecho aberto (0 = normal)
 	Open     *Period `json:"open"`      // o trecho aberto, se houver
+	// estado ao vivo de cada aparelho (só em GetWhereabouts)
+	Live map[string]DevLive `json:"live,omitempty"`
+}
+
+// DevLive é o estado ao vivo de um aparelho.
+type DevLive struct {
+	Connected bool   `json:"connected"`
+	State     string `json:"state"` // lendo, saturado, sem dado
+	Last      int64  `json:"last"`  // ms do último minuto gravado (0 = nenhum em 2 dias)
+	// RadiaCode longe do PC: ele continua somando a dose sozinho, e a dose
+	// pessoal sai do total dele quando reconectar
+	CountsOffline bool `json:"countsOffline,omitempty"`
+}
+
+// devLive diz se cada aparelho está lendo agora.
+func (a *App) devLive(now time.Time) map[string]DevLive {
+	const fresh = 3 * time.Minute
+	out := map[string]DevLive{}
+	g := DevLive{State: "sem dado"}
+	a.mu.Lock()
+	g.Connected = a.state == "conectado"
+	a.mu.Unlock()
+	if a.store != nil {
+		if pts, _ := a.store.Range(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
+			last := pts[len(pts)-1]
+			g.Last = last.T.UnixMilli()
+			if now.Sub(last.T) <= fresh {
+				g.State = "lendo"
+				if last.HasObs(store.ObsSaturation) {
+					g.State = "saturado"
+				}
+			}
+		}
+	}
+	out["gmc"] = g
+	r := DevLive{State: "sem dado"}
+	a.rc.mu.Lock()
+	r.Connected = a.rc.st.State == "conectado"
+	a.rc.mu.Unlock()
+	if pts := a.rcRange(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
+		r.Last = pts[len(pts)-1].T.UnixMilli()
+		if now.Sub(pts[len(pts)-1].T) <= fresh {
+			r.State = "lendo"
+		}
+	}
+	r.CountsOffline = !r.Connected
+	out[devRC] = r
+	return out
 }
 
 func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
@@ -134,11 +197,14 @@ func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
 	return w
 }
 
-// GetWhereabouts diz onde está cada aparelho agora.
+// GetWhereabouts diz onde está cada aparelho agora e se está lendo.
 func (a *App) GetWhereabouts() Whereabouts {
+	now := time.Now()
 	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.whereaboutsLocked(time.Now())
+	w := a.whereaboutsLocked(now)
+	a.mu.Unlock()
+	w.Live = a.devLive(now)
+	return w
 }
 
 func (a *App) emitPeriods() {
@@ -155,7 +221,7 @@ func (a *App) SetWhere(gmc, rc, name string) (Whereabouts, error) {
 
 func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error) {
 	for _, w := range []string{gmc, rc} {
-		if w != WhereHome && w != WhereMe {
+		if w != WhereHome && w != WhereMe && w != WhereOff {
 			return a.GetWhereabouts(), errors.New("local inválido")
 		}
 	}
@@ -179,7 +245,7 @@ func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error)
 		}
 	}
 	if !(gmc == WhereHome && rc == WhereMe) {
-		var max int64
+		var max int64 // (os locais já foram conferidos acima)
 		for _, p := range a.periods {
 			max = maxInt64(max, p.ID)
 		}
@@ -201,7 +267,7 @@ func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error)
 	a.bgAt = time.Time{} // o fundo da casa muda: recalcula
 	err := a.savePeriodsLocked()
 	a.mu.Unlock()
-	where := map[string]string{WhereHome: "em casa", WhereMe: "com você"}
+	where := map[string]string{WhereHome: "em casa", WhereMe: "com você", WhereOff: "fora do cálculo"}
 	a.logEvent("GMC-800 " + where[gmc] + ", RadiaCode " + where[rc])
 	a.emitPeriods()
 	return a.GetWhereabouts(), err
@@ -270,15 +336,16 @@ func (a *App) whereChecker() func(time.Time) (gmc, rc string) {
 }
 
 // awayCheckerFor diz se um aparelho estava fora do fundo da casa: o GMC
-// quando estava com você; o RadiaCode quando os dois estavam com você.
+// quando não estava em casa; o RadiaCode quando os dois estavam com você ou
+// quando ele estava fora do cálculo.
 func (a *App) awayCheckerFor(dev string) func(time.Time) bool {
 	where := a.whereChecker()
 	return func(t time.Time) bool {
 		g, r := where(t)
 		if dev == devRC {
-			return r == WhereMe && g == WhereMe
+			return r == WhereOff || (r == WhereMe && g == WhereMe)
 		}
-		return g == WhereMe
+		return g != WhereHome
 	}
 }
 
@@ -323,7 +390,9 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 	}
 	normal := map[string]string{"pessoal": devRC, "casa": "gmc"}[role]
 	if !a.periodsIn(from, to) {
-		return a.buildDose(from, to, step, limit, normal)
+		c, err := a.buildDose(from, to, step, limit, normal)
+		c.NoDataMinutes = max(c.HistMinutes-c.MeasuredMinutes, 0)
+		return c, err
 	}
 	lim, ok := doseLimits[limit]
 	if !ok {
@@ -428,6 +497,7 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 	if cs.Pre > 0 && cs.Hist > 0 {
 		c.HistFrom = cs.HistFrom.UnixMilli()
 	}
+	c.NoDataMinutes = max(cs.Hist-c.MeasuredMinutes-c.GapMinutes, 0)
 	return c, nil
 }
 
