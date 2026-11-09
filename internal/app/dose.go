@@ -69,11 +69,13 @@ type DoseChart struct {
 	// cada minuto pela calibração que valia nele (CalNote diz qual).
 	CalNote string `json:"calNote,omitempty"`
 
-	// aparelho fora do local normal no período (roles.go): Mixed = a curva
-	// junta os dois aparelhos (Device = "misto"); SwapMinutes = minutos do
-	// aparelho que normalmente não tem esse papel
+	// aparelho fora do lugar de sempre no período (roles.go): Mixed = a
+	// curva junta os dois aparelhos (Device = "misto"); SwapMinutes = minutos
+	// do aparelho que normalmente não tem esse papel; GapMinutes = minutos em
+	// que nenhum aparelho tinha o papel (lacuna, não zero)
 	Mixed       bool `json:"mixed,omitempty"`
 	SwapMinutes int  `json:"swapMinutes,omitempty"`
+	GapMinutes  int  `json:"gapMinutes,omitempty"`
 }
 
 // GetDose monta o gráfico do dosímetro. period: "15m", "30m", "1h", "3h",

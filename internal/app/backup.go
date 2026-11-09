@@ -35,7 +35,6 @@ type MergeResult struct {
 	Minutes      int    `json:"minutes"`
 	Events       int    `json:"events"`
 	Periods      int    `json:"periods"`
-	Stays        int    `json:"stays"` // trechos de onde esteve cada aparelho
 	Measurements int    `json:"measurements"`
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
@@ -43,7 +42,7 @@ type MergeResult struct {
 }
 
 func (m MergeResult) total() int {
-	return m.Minutes + m.Events + m.Periods + m.Stays + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
+	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
 }
 
 // backupAppID marca os backups; os da 1.x (GMC Monitor) continuam valendo.
@@ -95,7 +94,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"eventos.csv", "fora-de-casa.json", staysFile, "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile}
+	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -328,37 +327,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if b, err := readZipFile(f); err == nil {
 			var list []Period
 			if json.Unmarshal(b, &list) == nil {
-				a.mu.Lock()
-				var max int64
-				have := map[string]bool{}
-				for _, p := range a.periods {
-					have[fmt.Sprintf("%d-%d", p.From, p.To)] = true
-					max = maxInt64(max, p.ID)
-				}
-				for _, p := range list {
-					if have[fmt.Sprintf("%d-%d", p.From, p.To)] || p.To <= p.From {
-						continue
-					}
-					max++
-					p.ID = max
-					a.periods = append(a.periods, p)
-					res.Periods++
-				}
-				if res.Periods > 0 {
-					sort.Slice(a.periods, func(i, j int) bool { return a.periods[i].From < a.periods[j].From })
-					_ = a.savePeriodsLocked()
-				}
-				a.mu.Unlock()
-			}
-		}
-	}
-
-	// onde esteve cada aparelho
-	if f, ok := files[staysFile]; ok {
-		if b, err := readZipFile(f); err == nil {
-			var list []Stay
-			if json.Unmarshal(b, &list) == nil {
-				res.Stays = a.mergeStays(list)
+				res.Periods = a.mergePeriods(list)
 			}
 		}
 	}

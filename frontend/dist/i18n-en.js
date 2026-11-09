@@ -1907,15 +1907,17 @@ const I18N_EN = {
 "normal ainda não calculado": "normal not calculated yet",
 "pelo RadiaCode em casa": "by the RadiaCode at home",
 "Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
-"o trecho precisa ter pelo menos 1 minuto": "the stretch must be at least 1 minute long",
-"trecho não encontrado": "stretch not found",
 "fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured",
-"aparelho ou local inválido": "invalid device or place",
-"esse trecho cruza com outro do mesmo aparelho": "this stretch overlaps another one of the same device",
-"GMC-800 em casa": "GMC-800 at home",
-"GMC-800 com você": "GMC-800 with you",
-"RadiaCode em casa": "RadiaCode at home",
-"RadiaCode com você": "RadiaCode with you"
+"local inválido": "invalid place",
+"GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar": "GMC-800 at home and RadiaCode with you is the usual: no need to mark it",
+"Levei os dois": "Took both",
+"Levei o GMC-800, deixei o RadiaCode": "Took the GMC-800, left the RadiaCode",
+"Deixei os dois em casa": "Left both at home",
+"esse trecho cruza com outro já marcado": "this stretch overlaps one already marked",
+"GMC-800 em casa, RadiaCode com você": "GMC-800 at home, RadiaCode with you",
+"GMC-800 em casa, RadiaCode em casa": "GMC-800 at home, RadiaCode at home",
+"GMC-800 com você, RadiaCode com você": "GMC-800 with you, RadiaCode with you",
+"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RadiaCode at home"
 },
 "patterns": [
 [
