@@ -1,5 +1,22 @@
 # Versões
 
+## 2.42.0
+- **Fita do dia no Agora**, no lugar do gráfico "Hoje" (que continua nos
+  Gráficos). O dia inteiro numa faixa, em pedaços de 10 minutos pintados
+  pelo nível da média: uma linha para a casa e outra para você, cada uma
+  pelo aparelho que estava nesse papel (onde está cada aparelho). Trecho
+  acima do seguro ganha a forma do nível em cima. Sem dado fica cinza
+  escuro, nunca verde.
+- Embaixo vêm os trechos de fora de casa (lilás) e a chuva (azul). Em cima
+  ficam as marcas: alertas com a forma do nível e anotações com o lápis.
+  Passar o mouse mostra o trecho (µSv/h de casa e de você, e qual
+  aparelho). Clicar abre os Gráficos centrados nele.
+- "Semana" empilha os últimos 7 dias, um por linha, com o nível mais alto
+  entre casa e você. Uma frase no topo resume o dia ou a semana.
+- No Resumo a fita mostra o dia escolhido, ou os dias do período um embaixo
+  do outro. No relatório em PDF entra a "Fita dos dias", logo depois do
+  gráfico.
+
 ## 2.41.0
 - **Dose em coisas conhecidas.** "2,9 µSv" não diz muito, então cada dose
   ganha duas linhas que traduzem o número. A primeira é quanto tempo do

@@ -2109,3 +2109,29 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .m-known { flex-direction: row; flex-wrap: wrap; gap: 0 var(--space-3); margin: var(--space-2) 0; }
 .m-known b { color: var(--text); font-weight: 600; }
 .m-known span:first-of-type { color: var(--accent); }
+
+/* fita do dia (2.42) */
+:root { --ft-none: #2A3136; }
+.ft-ctl { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
+.ft-say { margin: 0 0 var(--space-3); color: var(--text); }
+.fita { display: flex; flex-direction: column; gap: 6px; position: relative; cursor: pointer; }
+.ft-lane { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: center; }
+.ft-lb { font-size: var(--fs-caption); color: var(--muted); text-align: right; white-space: nowrap; }
+.ft-strip { position: relative; height: 22px; border-radius: 4px; overflow: hidden; background: var(--ft-none); }
+.ft-strip.thin { height: 10px; background: transparent; }
+.ft-strip svg { display: block; width: 100%; height: 100%; }
+.ft-strip .ft-future { fill: var(--bg); fill-opacity: .7; }
+.ft-marks { position: relative; height: 20px; }
+.ft-marks.ft-over { height: 12px; }
+.ft-mk { position: absolute; top: 0; transform: translateX(-50%); line-height: 0; }
+.ft-hours { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; }
+.ft-hours div { display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-caption); color: var(--dim); }
+.ft-tip { position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--border-hover, var(--border)); border-radius: var(--radius-sm); box-shadow: var(--shadow-float); padding: 6px 10px; font-size: var(--fs-caption); white-space: nowrap; z-index: 5; }
+.ft-cursor { position: absolute; top: 0; bottom: 18px; width: 1px; background: var(--text); opacity: .5; pointer-events: none; }
+.ft-legend { display: flex; gap: var(--space-4); flex-wrap: wrap; color: var(--muted); margin-top: var(--space-3); }
+.ft-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.ft-sw { width: 14px; height: 10px; border-radius: 2px; display: inline-block; }
+.ft-note { color: var(--dim); margin: var(--space-2) 0 0; cursor: default; }
+.fita:has(.ft-lane:nth-child(8)) .ft-strip { height: 14px; }
+.sum-fita { margin: var(--space-4) 0; }
+.sum-fita h3 { margin: 0 0 var(--space-2); }

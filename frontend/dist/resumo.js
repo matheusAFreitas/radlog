@@ -144,8 +144,8 @@ async function refreshSummary() {
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }
   if (my !== sumSeq) return;
   state.sumRes = { periods, res };
-  if (s.mode === "resumo") renderSummary(res[0], periods[0]);
-  else renderCompare(res, periods);
+  if (s.mode === "resumo") { renderSummary(res[0], periods[0]); renderSumFita(periods[0]); }
+  else { $("sumFita").parentElement.hidden = true; renderCompare(res, periods); }
   renderSumGaps(s.mode === "resumo" ? res[0] : null);
   renderSumNotes(periods[0][0], periods[0][1]);
   renderMaturity();

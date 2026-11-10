@@ -636,6 +636,7 @@ func renderReportPDF(r reportData) []byte {
 
 	p.section("µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)")
 	p.chart(r)
+	p.stripDays(r)
 
 	// estatística + histograma lado a lado
 	p.section("ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)")
@@ -1261,4 +1262,89 @@ func (p *reportPDF) wrapTable(head []string, rows [][]string, cols []float64) {
 		p.y += h
 		p.d.Line(pm, p.y, pdf.W-pm, p.y, 0.3, cLine, false)
 	}
+}
+
+// stripDays é a fita dos dias (2.42): um dia por linha, cada pedaço de 10 min
+// pintado pelo nível mais alto entre casa e você; sem dado fica cinza.
+func (p *reportPDF) stripDays(r reportData) {
+	if len(r.StripDays) == 0 || len(r.Strip.Slots) == 0 {
+		return
+	}
+	p.section("FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)")
+	d := p.d
+	const n = 144
+	lw := 52.0
+	x0, w := pm+lw, pdf.W-2*pm-lw
+	rh, gap := 9.0, 3.0
+	rank := map[string]int{"seguro": 1, "atencao": 2, "alarme": 3, "perigo": 4}
+	col := map[string]pdf.RGB{"seguro": cBand, "atencao": cAtt, "alarme": cAlarm, "perigo": cWarn}
+	wd := []string{"dom", "seg", "ter", "qua", "qui", "sex", "sáb"}
+	byDay := map[int64][]string{}
+	for _, s := range r.Strip.Slots {
+		t := time.UnixMilli(s.T)
+		day := time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, t.Location())
+		row := byDay[day.UnixMilli()]
+		if row == nil {
+			row = make([]string, n)
+			byDay[day.UnixMilli()] = row
+		}
+		i := int(t.Sub(day) / stripStep)
+		if i < 0 || i >= n {
+			continue
+		}
+		lv := s.Home
+		if rank[s.Pers] > rank[lv] {
+			lv = s.Pers
+		}
+		row[i] = lv
+	}
+	for _, day := range r.StripDays {
+		p.need(rh + gap + 14)
+		y := p.y + 4
+		d.TextRight(pm+lw-6, y+rh-1.5, pdf.Sans, 7, cMuted, wd[day.Weekday()]+" "+day.Format("02/01"))
+		d.Rect(x0, y, w, rh, &cGap, nil)
+		row := byDay[day.UnixMilli()]
+		for i := 0; i < n; {
+			j := i
+			for j < n && row != nil && row[j] == row[i] {
+				j++
+			}
+			if j == i {
+				j = i + 1
+			}
+			if row != nil {
+				if c, ok := col[row[i]]; ok {
+					d.Rect(x0+float64(i)*w/n, y, float64(j-i)*w/n, rh, &c, nil)
+				}
+			}
+			i = j
+		}
+		p.y += rh + gap
+	}
+	p.y += 4
+	for k, h := range []int{0, 6, 12, 18, 24} {
+		x := x0 + float64(h)/24*w
+		lbl := fmt.Sprintf("%02d", h)
+		switch k {
+		case 0:
+			d.Text(x, p.y+8, pdf.Mono, 6.5, cMuted, lbl)
+		case 4:
+			d.TextRight(x, p.y+8, pdf.Mono, 6.5, cMuted, lbl)
+		default:
+			d.Text(x-pdf.TextWidth(lbl, pdf.Mono, 6.5)/2, p.y+8, pdf.Mono, 6.5, cMuted, lbl)
+		}
+	}
+	p.y += 14
+	// legenda
+	x := pm + lw
+	for _, it := range []struct {
+		c pdf.RGB
+		t string
+	}{{cBand, "seguro"}, {cAtt, "atenção"}, {cAlarm, "alarme"}, {cWarn, "perigo"}, {cGap, "sem dado"}} {
+		c := it.c
+		d.Rect(x, p.y, 10, 6, &c, nil)
+		d.Text(x+13, p.y+5.5, pdf.Sans, 7, cMuted, it.t)
+		x += 20 + pdf.TextWidth(pdf.Tr(it.t), pdf.Sans, 7) + 10
+	}
+	p.y += 14
 }

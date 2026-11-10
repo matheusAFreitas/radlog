@@ -5207,6 +5207,32 @@ const demoRc = () => {
         allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY, limitName: limY === 20 ? "Trabalhador exposto" : "Público",
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
     },
+    // fita do dia (2.42): pedaços de 10 min, nível pela média; RC102 fingido a 0,6× o GMC
+    GetDayStrip: async (from, to) => {
+      const step = 6e5, f = Math.floor(from / step) * step, n = Math.ceil((Math.min(to, f + 8 * 864e5) - f) / step);
+      const lv = (u, b) => (u >= b[2] ? "perigo" : u >= b[1] ? "alarme" : u >= b[0] ? "atencao" : "seguro");
+      const gb = [50 * 0.0101, (settings.alarmCPM || 100) * 0.0101, 10.1], rb = [0.4, 1.2, 12];
+      const slots = [];
+      for (let i = 0; i < n; i++) {
+        const t = f + i * step, p = range(t, t + step), s = { t };
+        const o = periods.find((q) => q.from < t + step && (q.to || Infinity) > t);
+        if (o) s.away = true;
+        const g = o ? o.gmc || "comigo" : "casa";
+        if (p.length) {
+          const u = (p.reduce((x, q) => x + q.cpm, 0) / p.length) * 0.0101;
+          if (g === "casa") Object.assign(s, { home: lv(u, gb), homeUSv: u, homeDev: "gmc" });
+          else Object.assign(s, { pers: lv(u, gb), persUSv: u, persDev: "gmc" });
+          if (demoRcFake() && g === "casa") { const r = u * 0.6 + Math.sin(i / 3) * 0.004; Object.assign(s, { pers: lv(r, rb), persUSv: r, persDev: "radiacode" }); }
+        }
+        if (i % 144 >= 93 && i % 144 < 104 && t < Date.now() - 864e5) s.rain = 1.4;
+        slots.push(s);
+      }
+      const marks = events.concat(demoAlerts).filter((e) => e.kind === "alerta" && e.time >= f && e.time < to)
+        .map((e) => ({ t: e.time, kind: "alerta", level: e.level, device: /RC102/.test(e.text) ? "radiacode" : "", text: e.text }))
+        .concat(notes.filter((x) => x.time >= f && x.time < to).map((x) => ({ t: x.time, kind: "nota", text: x.text })))
+        .sort((x, y) => x.t - y.t);
+      return { from: f, to, stepMs: step, slots, marks };
+    },
     GetChartRange: async (from, to) => {
       const c = withPeaks(await chartRangePreview(from, to));
       if (demoRcFake()) {

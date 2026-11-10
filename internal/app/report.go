@@ -91,6 +91,9 @@ type reportData struct {
 	CfgRows  []cfgPeriodRow
 	CfgFirst time.Time // primeiro registro do histórico de configurações
 	Mature   Maturity
+	// fita dos dias (2.42): um dia por linha, em pedaços de 10 min
+	Strip     DayStrip
+	StripDays []time.Time
 }
 
 type reportEpisode struct {
@@ -636,6 +639,22 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		{"Horários", "hora local (" + zone + ")"},
 		{"Programa", "RadLog " + AppVersion},
 	}...)
+	// fita dos dias do período (até 31)
+	d0 := time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, from.Location())
+	for d := d0; d.Before(to) && len(r.StripDays) < 31; d = d.AddDate(0, 0, 1) {
+		r.StripDays = append(r.StripDays, d)
+	}
+	for i := 0; i < len(r.StripDays); i += 7 {
+		f := r.StripDays[i]
+		t := f.AddDate(0, 0, 7)
+		if t.After(to) {
+			t = to
+		}
+		if ds, err := a.GetDayStrip(f.UnixMilli(), t.UnixMilli()); err == nil {
+			r.Strip.Slots = append(r.Strip.Slots, ds.Slots...)
+			r.Strip.Marks = append(r.Strip.Marks, ds.Marks...)
+		}
+	}
 	return r, nil
 }
 
