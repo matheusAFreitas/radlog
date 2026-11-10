@@ -1162,7 +1162,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .cfg-hist-wrap { max-height: 320px; overflow: auto; border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .cfg-hist { border-collapse: collapse; font-size: var(--fs-label); width: 100%; }
 .cfg-hist th, .cfg-hist td { text-align: left; padding: 5px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.cfg-hist th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--card, var(--bg)); }
+.cfg-hist th { color: var(--muted); font-weight: 500; position: sticky; top: 0; background: var(--surface); }
 .cfg-hist td.when { font-family: var(--mono); white-space: nowrap; color: var(--muted); }
 .cfg-hist td.from { color: var(--muted); }
 
@@ -1225,7 +1225,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .m-attach { margin-top: 14px; }
 .m-attach-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .m-attach-list { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
-.m-att { width: 132px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: var(--fs-caption); background: var(--panel, transparent); }
+.m-att { width: 132px; border: 1px solid var(--border); border-radius: var(--radius-sm); overflow: hidden; font-size: var(--fs-caption); background: transparent; }
 .m-att .thumb { height: 96px; display: flex; align-items: center; justify-content: center; background: var(--bg); cursor: pointer; }
 .m-att .thumb img { max-width: 100%; max-height: 100%; object-fit: cover; }
 .m-att .thumb span { font-family: var(--mono); color: var(--muted); }

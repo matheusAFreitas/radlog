@@ -346,6 +346,8 @@ func (a *App) mergePeriods(list []Period) int {
 		}
 		max = maxInt64(max, p.ID)
 	}
+	list = append([]Period{}, list...)
+	sort.Slice(list, func(i, j int) bool { return list[i].From < list[j].From })
 	for _, p := range list {
 		if have[[2]int64{p.From, p.To}] || (p.To != 0 && p.To <= p.From) {
 			continue
@@ -356,10 +358,10 @@ func (a *App) mergePeriods(list []Period) int {
 			n++
 			continue
 		}
-		if p.To == 0 { // aberto lá, fechado (ou ausente) aqui: o daqui vale
-			if _, ok := open[p.From]; ok {
-				continue
-			}
+		// cruza com um que já está aqui (o aberto lá e fechado aqui, ou dois
+		// abertos): o daqui vale, senão o aparelho ficaria "fora" para sempre
+		if crossesPeriod(a.periods, p) {
+			continue
 		}
 		max++
 		p.ID = max
@@ -700,4 +702,15 @@ func (a *App) GetDeviceMarks(fromMs, toMs int64) ([]DevMark, error) {
 		}
 	}
 	return kept, nil
+}
+
+// crossesPeriod diz se p cruza com algum dos trechos (o aberto vai até agora
+// e além).
+func crossesPeriod(ps []Period, p Period) bool {
+	for _, q := range ps {
+		if p.From < periodEnd(q) && q.From < periodEnd(p) {
+			return true
+		}
+	}
+	return false
 }

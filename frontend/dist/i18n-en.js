@@ -2026,7 +2026,8 @@ const I18N_EN = {
 "eu não estava em casa": "I wasn't home",
 "eu não estava em casa (esqueci de levar os dois)": "I wasn't home (forgot to take both)",
 "Eu não estava em casa": "I wasn't home",
-"Eu estava em casa": "I was home"
+"Eu estava em casa": "I was home",
+"fora de casa até agora": "away from home until now"
 },
 "patterns": [
 [
