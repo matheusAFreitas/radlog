@@ -3036,6 +3036,7 @@ async function refreshAll() {
 let riAt = 0;
 async function refreshRainImpact(force) {
   if (state.view !== "chuva") return; // só calcula com a aba aberta
+  refreshPressure(force);
   if (!state.settings.rainEnabled) { renderRainOff(); return; }
   if (!force && Date.now() - riAt < 9 * 60e3 && state.ri) return;
   riAt = Date.now();
@@ -4993,6 +4994,33 @@ const demoRc = () => {
         r.rc = rc;
       }
       return r;
+    },
+    // pressão × radônio (2.44): 7 dias de exemplo, a pressão cai na 5ª e o
+    // fundo sobe ~3 h depois, além da subida de toda madrugada
+    GetPressureRadon: async (dev) => {
+      const devN = dev === "radiacode" ? "radiacode" : "gmc";
+      if (!settings.rainEnabled) return { enabled: false, device: devN, hours: [] };
+      const N = 169, t0 = Math.floor(Date.now() / 36e5) * 36e5 - (N - 1) * 36e5, P = [], F = [];
+      let seed = 11;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+      const g = () => (rnd() + rnd() + rnd() - 1.5) * 1.4;
+      for (let i = 0; i < N; i++) { const d = i / 24; P.push(1016 + 3 * Math.sin((d * 2 * Math.PI) / 3.5) - 11 * Math.exp(-Math.pow((d - 3.4) / 0.55, 2)) + 1.2 * Math.sin((i / 12) * Math.PI) + g() * 0.3); }
+      const base = devN === "radiacode" ? 0.1 : 0.148;
+      for (let i = 0; i < N; i++) {
+        const hr = new Date(t0 + i * 36e5).getHours(), night = Math.exp(-Math.pow((((hr + 18) % 24) - 12) / 3.5, 2)) * 0.022;
+        const p3 = P[Math.max(0, i - 3)], drop = Math.max(0, P[Math.max(0, i - 4)] - P[i]) * 0.0035;
+        F.push(base + night + Math.max(0, 1016 - p3) * 0.0016 + drop + g() * 0.004);
+      }
+      const corr = (lag) => { const xs = [], ys = []; for (let i = lag; i < N; i++) { xs.push(P[i - lag]); ys.push(F[i]); }
+        const mx = xs.reduce((a, v) => a + v, 0) / xs.length, my = ys.reduce((a, v) => a + v, 0) / ys.length; let sxy = 0, sxx = 0, syy = 0;
+        for (let i = 0; i < xs.length; i++) { sxy += (xs[i] - mx) * (ys[i] - my); sxx += (xs[i] - mx) ** 2; syy += (ys[i] - my) ** 2; } return sxy / Math.sqrt(sxx * syy); };
+      let lag = 0, r = corr(0);
+      for (let l = 1; l <= 12; l++) { const c = corr(l); if (Math.abs(c) > Math.abs(r)) { r = c; lag = l; } }
+      const rs = (r < 0 ? "−" : "") + Math.abs(r).toFixed(2).replace(".", ",");
+      return { enabled: true, device: devN, lag, r, days: 7, pairs: N - lag, status: "pista",
+        hours: P.map((p, i) => ({ t: t0 + i * 36e5, hPa: p, usv: F[i] })),
+        title: lag ? `Pista: quando a pressão cai, o fundo sobe cerca de ${lag} h depois.` : "Pista: quando a pressão cai, o fundo sobe quase ao mesmo tempo.",
+        text: `r = ${rs} em 7 dias. O sinal negativo quer dizer que um sobe quando o outro desce. Com menos de 28 dias isso ainda é uma pista.` };
     },
     GetRainImpactDev: async (dev) => {
       const r = await api.GetRainImpact();

@@ -1,5 +1,21 @@
 # Versões
 
+## 2.44.0
+- **A tela Chuva virou "Clima"** e ganhou **Pressão × radônio**. São dois
+  gráficos empilhados, com o mesmo cursor: a pressão do ar e o fundo em
+  casa (mediana de 1 h, fora de alertas) dos últimos 7 dias. Embaixo vem
+  uma frase que diz se o fundo sobe quando a pressão cai e quantas horas
+  depois. A conta é a correlação com 0 a 12 h de atraso, sobre até 90
+  dias. Com menos de 28 dias o resultado aparece como "pista", e a partir
+  daí como "relação". Funciona com o GMC-800 ou com o RC102, pelo mesmo
+  seletor da chuva.
+- A pressão vem do mesmo serviço da chuva (Open-Meteo, sem chave) e fica
+  guardada por um ano. Na primeira busca o app pega os últimos 92 dias.
+- **O backup não leva mais o lugar.** A latitude e a longitude da chuva e
+  do radar viram uma marca que não dá para reverter. Ela só serve para
+  saber, ao importar, se a chuva é do mesmo lugar. Backups antigos
+  continuam entrando.
+
 ## 2.43.1
 - A chuva de cada dia passa a ficar guardada para sempre, em
   chuva-dias.json (só a data e os mm, sem o lugar). A chuva por hora

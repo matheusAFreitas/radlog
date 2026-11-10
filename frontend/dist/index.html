@@ -64,7 +64,7 @@
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
     <button type="button" data-view="medir"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Medir objeto</span></button>
     <button type="button" data-view="fora"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11.5 8.5 6l6.5 5.5"/><path d="M4 10v10h8"/><path d="M14.5 16H22M19 13l3 3-3 3"/></svg><span>Fora de casa</span></button>
-    <button type="button" data-view="chuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Chuva</span></button>
+    <button type="button" data-view="chuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Clima</span></button>
     <span class="side-group">Aparelhos</span>
     <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
@@ -1105,7 +1105,13 @@
       <div class="view-body">
       <div class="dlg-head">
         <div>
-          <h2>Chuva e radiação</h2>
+          <h2>Clima</h2>
+          <p class="small muted">Chuva e pressão do ar mexem com o radônio, e o radônio mexe com o fundo da sua casa.</p>
+        </div>
+      </div>
+      <div class="dlg-head">
+        <div>
+          <h3>Chuva e radiação</h3>
           <span class="mono muted small" id="riSub">—</span>
         </div>
       </div>
@@ -1133,6 +1139,29 @@
         </div>
       </div>
       <ul class="ri-list" id="riList"></ul>
+      </div>
+      <div class="al-sec cl-press" id="clPress">
+        <div class="al-main">
+          <h3>Pressão × radônio</h3>
+          <span class="mono muted small" id="prSub">—</span>
+          <div class="cl-charts" id="prBox" hidden>
+            <svg class="al-chart" id="prPChart" viewBox="0 0 640 150" role="img" aria-label="Pressão do ar por hora"></svg>
+            <svg class="al-chart" id="prRChart" viewBox="0 0 640 176" role="img" aria-label="Fundo em casa, mediana de 1 hora"></svg>
+            <div class="ft-tip mono" id="prTip" hidden></div>
+          </div>
+          <div class="al-verdict" id="prVer" hidden></div>
+        </div>
+        <aside class="al-why">
+          <h4>Por que isso importa</h4>
+          <p><span>Radônio é um gás radioativo que sai do solo e dos tijolos.</span> <span>Ele não tem cheiro nem cor.</span> <span>Os "filhos" dele (bismuto-214 e chumbo-214) emitem gama, e é isso que os seus aparelhos veem subir.</span></p>
+          <ul>
+            <li>Pressão caindo: o ar do chão sai com mais facilidade e traz mais radônio. Costuma vir antes de frente fria e chuva.</li>
+            <li>De madrugada: casa fechada e ar parado juntam radônio. Por isso o fundo sobe à noite e cai de dia.</li>
+            <li>Chuva: lava os filhos do radônio do ar para o chão e dá um pico curto, como na parte de cima.</li>
+          </ul>
+          <p>Abrir a casa para ventilar é ALARA de graça.</p>
+          <p><span>Com uma semana de dados dá só uma pista.</span> <span>Com quatro semanas ou mais a relação fica confiável.</span></p>
+        </aside>
       </div>
       </div>
     </section>
@@ -2313,6 +2342,7 @@
 <script src="aparelho.js"></script>
 <script src="rcajustes.js"></script>
 <script src="alara.js"></script>
+<script src="clima.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
