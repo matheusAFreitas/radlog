@@ -1727,22 +1727,22 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 }
 
 /* o desenho do mostrador: base da faixa a 32%, parte acesa cheia, ponto na leitura */
-.dd-base, .dd-lit { fill: none; stroke-linecap: round; }
-.dd-base { opacity: .32; }
-.dd-base.on { opacity: 1; }
-.dd-b0 { stroke: var(--accent); }
-.dd-b1 { stroke: var(--att); }
-.dd-b2 { stroke: var(--alarm); }
-.dd-perigo { stroke: var(--warn); }
-.dd-lit { transition: d .4s; }
-.dd-pt { fill: var(--text); stroke: var(--surface); }
-.dd-lv { font-family: var(--mono); font-size: 3.4px; fill: var(--text); }
-.dd-ln { font-size: 2.8px; fill: var(--muted); }
-.dd-name { font-size: 4.2px; font-weight: 600; fill: var(--muted); }
-.dd-name.seguro { fill: var(--accent); }
-.dd-name.atencao, .dd-name.nocount { fill: var(--att); }
-.dd-name.alarme { fill: var(--alarm); }
-.dd-name.perigo { fill: var(--warn); }
+.dl-base, .dl-lit { fill: none; stroke-linecap: round; }
+.dl-base { opacity: .32; }
+.dl-base.on { opacity: 1; }
+.dl-b0 { stroke: var(--accent); }
+.dl-b1 { stroke: var(--att); }
+.dl-b2 { stroke: var(--alarm); }
+.dl-perigo { stroke: var(--warn); }
+.dl-lit { transition: d .4s; }
+.dl-pt { fill: var(--text); stroke: var(--surface); }
+.dl-lv { font-family: var(--mono); font-size: 3.4px; fill: var(--text); }
+.dl-ln { font-size: 2.8px; fill: var(--muted); }
+.dl-name { font-size: 4.2px; font-weight: 600; fill: var(--muted); }
+.dl-name.seguro { fill: var(--accent); }
+.dl-name.atencao, .dl-name.nocount { fill: var(--att); }
+.dl-name.alarme { fill: var(--alarm); }
+.dl-name.perigo { fill: var(--warn); }
 .hero-clock { display: block; }
 .hero-clock .clock-chip { min-height: 24px; margin-top: var(--space-1); padding: 0; gap: var(--space-1); border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--att); letter-spacing: 0; text-transform: none; }
 .hero-clock .clock-chip:not(.off) { display: none; }

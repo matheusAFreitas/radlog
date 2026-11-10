@@ -3,6 +3,9 @@
 ## 2.32.1
 - Mostrador grande da tela do aparelho: a forma do nível volta para o centro
   exato do anel (estava um pouco acima). O nome do nível fica embaixo dela.
+- Dose acumulada: os nomes "GMC-800" e "RadiaCode" nos quadros voltam ao
+  tamanho normal. O estilo do texto do mostrador novo tinha o mesmo nome de
+  classe e encolhia esses nomes.
 ## 2.32.0
 - **Ajustes do RadiaCode pelo app.** Em Configurações › RadiaCode, o bloco
   novo "Ajustes gravados no aparelho" mostra o que está no RadiaCode agora e

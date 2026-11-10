@@ -49,34 +49,34 @@ function devDialSvg(pos, lv, o = {}) {
   const w = o.w || 3.4, per = pos != null && pos >= 1;
   let s = "";
   for (let i = 0; i < 3; i++) {
-    const cls = per ? "dd-perigo" : "dd-b" + i;
-    s += `<path class="dd-base ${cls}${per ? " on" : ""}" d="${devSeg(i, 1)}" stroke-width="${w}"/>`;
+    const cls = per ? "dl-perigo" : "dl-b" + i;
+    s += `<path class="dl-base ${cls}${per ? " on" : ""}" d="${devSeg(i, 1)}" stroke-width="${w}"/>`;
     const f = pos == null ? 0 : Math.max(0, Math.min(1, pos * 3 - i));
-    if (!per && f > 0.002) s += `<path class="dd-lit ${cls}" d="${devSeg(i, f)}" stroke-width="${w}"/>`;
+    if (!per && f > 0.002) s += `<path class="dl-lit ${cls}" d="${devSeg(i, f)}" stroke-width="${w}"/>`;
   }
   if (pos != null && !per) {
     const b = Math.min(2, Math.floor(pos * 3)), f = Math.max(0, Math.min(1, pos * 3 - b)), a = devAng(b, f);
-    s += `<circle class="dd-pt" cx="${(24 + 19 * Math.cos(a)).toFixed(2)}" cy="${(24 - 19 * Math.sin(a)).toFixed(2)}" r="${(w * 0.62).toFixed(2)}" stroke-width="${(w * 0.28).toFixed(2)}"/>`;
+    s += `<circle class="dl-pt" cx="${(24 + 19 * Math.cos(a)).toFixed(2)}" cy="${(24 - 19 * Math.sin(a)).toFixed(2)}" r="${(w * 0.62).toFixed(2)}" stroke-width="${(w * 0.28).toFixed(2)}"/>`;
   }
   if (o.labels) {
     [-150, 90, -30].forEach((g, i) => {
       const a = g * Math.PI / 180, x = 24 + 25.4 * Math.cos(a), y = 24 - 25.4 * Math.sin(a);
       const anchor = i === 0 ? "end" : i === 2 ? "start" : "middle";
       const [v, name] = o.labels[i] || ["", ""];
-      s += `<text class="dd-lv" x="${x.toFixed(2)}" y="${(y + (i === 1 ? -0.3 : 1.2)).toFixed(2)}" text-anchor="${anchor}">${escHtml(v)}</text>` +
-        `<text class="dd-ln" x="${x.toFixed(2)}" y="${(y + (i === 1 ? 3.2 : 4.8)).toFixed(2)}" text-anchor="${anchor}">${escHtml(name)}</text>`;
+      s += `<text class="dl-lv" x="${x.toFixed(2)}" y="${(y + (i === 1 ? -0.3 : 1.2)).toFixed(2)}" text-anchor="${anchor}">${escHtml(v)}</text>` +
+        `<text class="dl-ln" x="${x.toFixed(2)}" y="${(y + (i === 1 ? 3.2 : 4.8)).toFixed(2)}" text-anchor="${anchor}">${escHtml(name)}</text>`;
     });
   }
   const shape = LV_PATH[lv];
   if (shape) {
     if (o.center) {
-      s += `<g class="dd-c lv-ico ${lv}" fill="currentColor" transform="translate(18.4 18.4) scale(.7)">${shape}</g>`;
-      if (o.name) s += `<text class="dd-name ${lv}" x="24" y="33.8" text-anchor="middle">${escHtml(o.name)}</text>`;
+      s += `<g class="dl-c lv-ico ${lv}" fill="currentColor" transform="translate(18.4 18.4) scale(.7)">${shape}</g>`;
+      if (o.name) s += `<text class="dl-name ${lv}" x="24" y="33.8" text-anchor="middle">${escHtml(o.name)}</text>`;
     } else {
-      s += `<g class="dd-c lv-ico ${lv}" fill="currentColor" transform="translate(17.6 17.6) scale(.8)">${shape}</g>`;
+      s += `<g class="dl-c lv-ico ${lv}" fill="currentColor" transform="translate(17.6 17.6) scale(.8)">${shape}</g>`;
     }
   } else if (o.center && o.name) {
-    s += `<text class="dd-name" x="24" y="25.6" text-anchor="middle">${escHtml(o.name)}</text>`;
+    s += `<text class="dl-name" x="24" y="25.6" text-anchor="middle">${escHtml(o.name)}</text>`;
   }
   return s;
 }
