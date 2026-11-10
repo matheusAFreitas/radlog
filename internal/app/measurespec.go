@@ -31,6 +31,8 @@ type specLine struct {
 // specLines são as linhas procuradas (as mais fortes de cada fonte comum).
 var specLines = []specLine{
 	{"Amerício-241", "Am-241", 59.5},
+	{"Urânio natural (Th-234, Pa-234m)", "Th-234", 63.3},
+	{"Urânio natural (Th-234, Pa-234m)", "Th-234", 92.6},
 	{"Urânio-235", "U-235", 185.7},
 	{"Tório-232 (série)", "Pb-212", 238.6},
 	{"Rádio-226 (série do urânio)", "Pb-214", 295.2},
@@ -39,6 +41,7 @@ var specLines = []specLine{
 	{"Rádio-226 (série do urânio)", "Bi-214", 609.3},
 	{"Césio-137", "Cs-137", 661.7},
 	{"Tório-232 (série)", "Ac-228", 911.2},
+	{"Urânio natural (Th-234, Pa-234m)", "Pa-234m", 1001.0},
 	{"Cobalto-60", "Co-60", 1173.2},
 	{"Cobalto-60", "Co-60", 1332.5},
 	{"Potássio-40", "K-40", 1460.8},

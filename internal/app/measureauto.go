@@ -45,6 +45,8 @@ type MeasureOpts struct {
 	Pct      float64 `json:"pct"`     // automático: % do fundo que conta como "tem algo"
 	Device   string  `json:"device"`  // "gmc" (ou "") ou "radiacode": o que fica no objeto
 	Mode     string  `json:"mode"`    // "", "ambos" (os dois perto) ou "voce" (o outro com a pessoa)
+	DistCM   float64 `json:"distCm"`  // 2.40: cm (0 = encostado; < 0 = lê do texto)
+	Size     string  `json:"size"`    // 2.40: pequeno ou espalhado
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -232,12 +234,12 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	// Radiacode: espectro no começo (e o acumulado, que serve de fundo da casa)
 	var spec0 *radiacode.Spectrum
 	var specBg *MeasureSpectrum
-	if dev == "radiacode" {
+	if dev == "radiacode" || (side != nil && side.Device == devRC) {
 		if !a.rcConnected() {
 			return a.GetMeasure(), errors.New("conecte o RC102 para medir")
 		}
 		spec0 = a.rcSpectrumNow(false)
-		if o.HomeBg {
+		if o.HomeBg || (side != nil && side.Role == "voce") {
 			if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
 				specBg = &MeasureSpectrum{A: [3]float64{acc.A0, acc.A1, acc.A2}, Bg: acc.Counts, BgSec: acc.Duration.Seconds(), BgSrc: "acumulado"}
 			}
@@ -250,7 +252,14 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		return st, errors.New("conecte o contador (ou ligue o modo demo) para medir")
 	}
 	now := time.Now().UnixMilli()
+	if o.DistCM < 0 {
+		o.DistCM = max(distCMFrom(o.Distance), 0)
+	}
+	if o.Size != "pequeno" && o.Size != "espalhado" {
+		o.Size = ""
+	}
 	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active && dev == "gmc",
+		DistCM: o.DistCM, Size: o.Size,
 		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
 	if side != nil {
 		m.Demo = false

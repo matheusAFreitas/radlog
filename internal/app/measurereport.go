@@ -841,6 +841,25 @@ func (p *reportPDF) measSide(m SavedMeasure, o *MeasureSide) {
 // measureExtraRows: comparabilidade, configuração da época e anexos (2.7).
 func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
 	var method [][2]string
+	if d := m.Derived; d != nil {
+		if d.Safe.OK {
+			txt := "a " + fmtBR(d.Safe.CM, 0) + " cm o extra do objeto cai para 10% do fundo"
+			if d.Safe.Below {
+				txt = "já na distância medida o extra do objeto fica abaixo de 10% do fundo"
+			}
+			if d.Safe.Approx {
+				txt += " (aproximada: objeto espalhado ou só uma distância medida)"
+			}
+			method = append(method, [2]string{"Distância segura", txt})
+		}
+		if d.Bq != nil && d.Bq.OK {
+			method = append(method, [2]string{"Atividade estimada", fmt.Sprintf("%s a %s de %s (ordem de grandeza; Γ = %s µSv·m²/h por MBq)",
+				fmtBq(d.Bq.Lo), fmtBq(d.Bq.Hi), d.Bq.Group, strings.Replace(fmt.Sprintf("%g", d.Bq.Gamma), ".", ",", 1))})
+		}
+		if d.InvSq != nil {
+			method = append(method, [2]string{"Duas distâncias", d.InvSq.Text})
+		}
+	}
 	if m.NotComparable {
 		why := m.NCReason
 		if why == "" {
@@ -869,4 +888,15 @@ func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
 		method = append(method, [2]string{"Anexos", fmt.Sprintf("%d arquivo(s) guardado(s) com a medição no app: %s", len(m.Attachments), strings.Join(names, ", "))})
 	}
 	return method
+}
+
+// fmtBq escreve a atividade com o prefixo certo (Bq, kBq, MBq).
+func fmtBq(v float64) string {
+	switch {
+	case v >= 1e6:
+		return fmtBR(v/1e6, 1) + " MBq"
+	case v >= 1e3:
+		return fmtBR(v/1e3, 1) + " kBq"
+	}
+	return fmtBR(v, 0) + " Bq"
 }

@@ -14,6 +14,36 @@
 - Na primeira atualização depois desta, o caminho muda uma última vez (de
   RadLog-vX.Y.Z.exe para RadLog.exe). Então fixe o ícone e responda ao
   firewall mais uma vez. Daí em diante o caminho não muda mais.
+## 2.40.0
+- Medir objeto virou um caminho em cinco etapas: preparar, procurar o ponto
+  mais forte, fundo, objeto e resultado. Na preparação ficam só o nome, a
+  distância (em cm, com atalhos), o aparelho (quatro cartões) e o tamanho do
+  objeto; fundo, tempo e o "tem algo" foram para "Ajustes da medição", com
+  os mesmos padrões de antes.
+- Procurar: leitura rápida (média de 5 s) do aparelho que fica no objeto,
+  com a seta de subindo ou descendo, o fundo e o pico. Dá para pular.
+- Durante a medição: os números (com o objeto, fundo, diferença líquida),
+  a barra de certeza até 5σ e o botão "Parar e ver o resultado". Com o RC102,
+  o espectro vai se formando por cima do fundo e o espectrograma mostra se
+  algo mudou no meio. Com o GMC-800, o gráfico em µSv/h ao vivo.
+- Resultado com uma frase no topo e quatro números (com o objeto, certeza,
+  taxa extra e distância segura, onde o extra cai a 10% do fundo). Com o
+  RC102 no objeto: isótopos prováveis com a confiança (quantas linhas da
+  série bateram) e a atividade em Bq como ordem de grandeza (faixa ÷2 a ×2),
+  só quando dá: isótopo identificado com constante conhecida, distância
+  informada e objeto pequeno; senão o cartão mostra o que faltou. O
+  espectro líquido (fundo descontado) com os picos marcados e uma tabela
+  técnica (contagens, CPS e CPM, σ, conversão usada).
+- Os dois no objeto: lado a lado, com "Concordam?". Um no objeto e outro com
+  você: "O que chegou até você", e com o RC102 com você, o espectro do que
+  chegou.
+- "Medir em outra distância" repete só a etapa do objeto com o mesmo fundo.
+  Com duas distâncias, o app confere se a radiação caiu pelo inverso do
+  quadrado; se caiu bem menos, avisa que o objeto é espalhado, a distância
+  segura fica aproximada e o Bq não sai.
+- A tabela de linhas do espectro ganhou o urânio natural (Th-234 em 63 e
+  93 keV, Pa-234m em 1001 keV). O relatório em PDF da medição traz a
+  distância segura, o Bq estimado e a conta das duas distâncias quando houver.
 
 ## 2.39.0
 - O app passa a ouvir o aviso de "fora da escala" do próprio Radiacode 102
