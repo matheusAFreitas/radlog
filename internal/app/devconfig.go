@@ -125,6 +125,9 @@ func (a *App) SetDeviceConfig(c gmc.Config800) (gmc.Config800, error) {
 		a.cal = result.Calibration
 		a.mu.Unlock()
 		a.saveLastCal(result.Calibration)
+		if !samePoints(before.Calibration.Points, result.Calibration.Points) {
+			a.counterCalChanged(before.Calibration.Points)
+		}
 		a.logEvent("Configuração do contador alterada: " + gmc.DescribeChanges(before, result))
 		if v, ok := result.Values["saveMode"]; ok {
 			a.mu.Lock()
@@ -167,6 +170,9 @@ func (a *App) RestoreDeviceConfig() (string, error) {
 		}
 		if err := d.WriteConfig(raw); err != nil {
 			return err
+		}
+		if cd, derr := gmc.DecodeConfig800(cur); err == nil && derr == nil && !samePoints(cd.Calibration.Points, dec.Calibration.Points) {
+			a.counterCalChanged(cd.Calibration.Points)
 		}
 		defer a.cfgRecord("você (cópia restaurada)")
 		a.mu.Lock()

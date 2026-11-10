@@ -2066,7 +2066,6 @@ const I18N_EN = {
 "com o fator novo": "with the new factor",
 "fundo da casa": "home background",
 "dose do GMC por dia": "GMC dose per day",
-"O contador não é mexido: o fator vale só no RadLog. Vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional.": "The counter is not touched: the factor applies only in RadLog. It becomes a new version in the calibration table; it can be undone, and recalculating the history is optional.",
 "Em uso a partir da aplicação.": "In use since it was applied.",
 "Intercalibrar de novo": "Cross-calibrate again",
 "Esquecer este resultado": "Forget this result",
@@ -2262,6 +2261,37 @@ const I18N_EN = {
 "Saturação do RadiaCode": "RadiaCode saturation",
 "OK": "OK",
 "procurando…": "searching…",
+"Calibrar o contador com a intercalibração": "Calibrate the counter with the cross-calibration",
+"calibração do app": "the app's calibration",
+"CPM hoje": "CPM now",
+"CPM sugerido": "suggested CPM",
+"Gravar no contador…": "Write to the counter…",
+"De fábrica": "Factory",
+"Anterior": "Previous",
+"a calibração de fábrica do GMC-800": "the GMC-800 factory calibration",
+"a que estava no contador antes do app mexer": "the one on the counter before the app changed it",
+"a que estava antes da última mudança": "the one before the last change",
+"Voltar à de fábrica": "Back to factory",
+"Voltar à anterior": "Back to previous",
+"Gravar a calibração nova no GMC-800?": "Write the new calibration to the GMC-800?",
+"O µSv/h de cada ponto fica igual.": "Each point keeps its µSv/h.",
+"A de fábrica já está guardada e continua guardada. A que está no contador agora vira a \"anterior\".": "The factory one is already saved and stays saved. The one on the counter now becomes the \"previous\".",
+"A calibração que está no contador agora fica guardada como a de fábrica.": "The calibration on the counter now is saved as the factory one.",
+"Os outros ajustes do contador não mudam. Não desconecte o cabo enquanto grava.": "The other counter settings don't change. Don't unplug the cable while it writes.",
+"Voltar à calibração de fábrica?": "Go back to the factory calibration?",
+"Voltar à calibração anterior?": "Go back to the previous calibration?",
+"Só os 6 pontos mudam. A que está no contador agora fica guardada como a \"anterior\".": "Only the 6 points change. The one on the counter now is saved as the \"previous\".",
+"Contador calibrado com o fator do app": "Counter calibrated with the app's factor",
+"Contador de volta à calibração de fábrica": "Counter back to the factory calibration",
+"Contador de volta à calibração anterior": "Counter back to the previous calibration",
+"a calibração do contador está travada (valores que o app não reconhece)": "the counter calibration is locked (values the app doesn't recognize)",
+"a calibração do contador não tem pontos válidos": "the counter calibration has no valid points",
+"o app não tem um fator em uso": "the app has no factor in use",
+"o contador já usa o mesmo fator do app": "the counter already uses the app's factor",
+"não há essa calibração guardada": "there is no such saved calibration",
+"o contador já está com essa calibração": "the counter already has that calibration",
+"O fator vale no RadLog e vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional. Para o contador mostrar o mesmo número na tela dele, use \"Calibrar o contador com a intercalibração\" no cartão de pontos logo abaixo.": "The factor applies in RadLog and becomes a new version in the calibration table; it can be undone, and recalculating the history is optional. To make the counter show the same number on its screen, use \"Calibrate the counter with the cross-calibration\" in the points card just below.",
+"Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.": "Writing the points below makes both show the same µSv/h.",
 "µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)": "µSv/h OVER THE PERIOD (ALL PER-MINUTE READINGS)",
 "ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)": "PER-MINUTE COUNT STATISTICS (CPM, WHAT THE COUNTER MEASURES)",
 "µSv/h de cada minuto": "µSv/h of each minute",
@@ -2274,6 +2304,15 @@ const I18N_EN = {
 "o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM.": "the GMC-800 measures counts (CPM); the report shows µSv/h, with each minute, peak and limit converted by the calibration in force at that moment. Limits recorded in CPM (before 2.29) are compared in CPM, as they triggered, and shown converted. The count statistics stay in CPM."
 },
 "patterns": [
+[
+"O µSv/h de cada ponto fica igual e o CPM é multiplicado por ",
+"^O µSv/h de cada ponto fica igual e o CPM é multiplicado por ((?:(?! · ).)+?)\\. A forma da curva continua, inclusive a compensação de tempo morto nos pontos de cima\\. A intercalibração mede só o fundo da casa; os pontos de cima seguem a forma da curva atual, não foram medidos\\.$",
+"Each point keeps its µSv/h and the CPM is multiplied by ${1}. The curve keeps its shape, including the dead-time compensation in the upper points. The cross-calibration only measures the home background; the upper points follow the shape of the current curve and were not measured.",
+[
+"O µSv/h de cada ponto fica igual e o CPM é multiplicado por ",
+". A forma da curva continua, inclusive a compensação de tempo morto nos pontos de cima. A intercalibração mede só o fundo da casa; os pontos de cima seguem a forma da curva atual, não foram medidos."
+]
+],
 [
 "A contagem do Geiger varia sozinha de um minuto para outro. Pelas suas leituras dos últimos 30 dias, o fundo fica em ",
 "^A contagem do Geiger varia sozinha de um minuto para outro\\. Pelas suas leituras dos últimos 30 dias, o fundo fica em ((?:(?! · ).)+?) CPM e quase todas as leituras \\(95%\\) caem entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM\\. Um pouco acima disso ainda pode ser acaso; acima de ((?:(?! · ).)+?) CPM dificilmente é\\.$",
@@ -2956,6 +2995,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Contador e app usam o mesmo fator: ",
+"^Contador e app usam o mesmo fator: ((?:(?! · ).)+?) µSv/h por CPM\\. Os dois mostram o mesmo µSv/h\\.$",
+"Counter and app use the same factor: ${1} µSv/h per CPM. Both show the same µSv/h.",
+[
+"Contador e app usam o mesmo fator: ",
+" µSv/h por CPM. Os dois mostram o mesmo µSv/h."
+]
+],
+[
 "",
 "^((?:(?! · ).)+?)σ: até \\~2σ é a variação natural da contagem; de 3σ para cima a diferença é real\\.$",
 "${1}σ: up to ~2σ is the natural variation of the count; from 3σ up the difference is real.",
@@ -3561,6 +3609,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Contador calibrado com o fator do app: ",
+"^Contador calibrado com o fator do app: ((?:(?! · ).)+?) µSv/h por CPM no fundo$",
+"Counter calibrated with the app's factor: ${1} µSv/h per CPM at background",
+[
+"Contador calibrado com o fator do app: ",
+" µSv/h por CPM no fundo"
+]
+],
+[
 "Igual ao fundo: se o objeto emite algo, é menos que +",
 "^Igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM\\.$",
 "Same as background: if the object emits anything, it's less than +${1} CPM.",
@@ -3738,6 +3795,14 @@ const I18N_EN = {
 " de ",
 " minutos com os dois · ",
 " fora da curva ficaram de fora"
+]
+],
+[
+"calibração do contador: não consegui guardar a cópia (",
+"^calibração do contador: não consegui guardar a cópia \\(((?:(?! · ).)+?)\\)$",
+"counter calibration: couldn't save the copy (${1})",
+[
+"calibração do contador: não consegui guardar a cópia ("
 ]
 ],
 [
@@ -3940,6 +4005,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Por isso a tela dele mostra uns ",
+"^Por isso a tela dele mostra uns ((?:(?! · ).)+?)% a menos que o app\\.$",
+"So its screen shows about ${1}% less than the app.",
+[
+"Por isso a tela dele mostra uns ",
+"% a menos que o app."
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -3976,6 +4050,15 @@ const I18N_EN = {
 " em ",
 " (só os minutos que o PC gravou: ",
 "% do período)"
+]
+],
+[
+"Por isso a tela dele mostra uns ",
+"^Por isso a tela dele mostra uns ((?:(?! · ).)+?)% a mais que o app\\.$",
+"So its screen shows about ${1}% more than the app.",
+[
+"Por isso a tela dele mostra uns ",
+"% a mais que o app."
 ]
 ],
 [
@@ -5630,6 +5713,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O app usa ",
+"^O app usa ((?:(?! · ).)+?) µSv/h por CPM \\(((?:(?! · ).)+?)\\)\\.$",
+"The app uses ${1} µSv/h per CPM (${2}).",
+[
+"O app usa ",
+" µSv/h por CPM (",
+")."
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -5886,6 +5979,14 @@ const I18N_EN = {
 [
 "Casa em ",
 " µSv/h pelo RadiaCode"
+]
+],
+[
+"Contador voltou à calibração ",
+"^Contador voltou à calibração ((?:(?! · ).)+?)$",
+"Counter went back to the ${1} calibration",
+[
+"Contador voltou à calibração "
 ]
 ],
 [
@@ -7414,6 +7515,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Pontos de hoje: ",
+"^Pontos de hoje: ((?:(?! · ).)+?) CPM$",
+"Current points: ${1} CPM",
+[
+"Pontos de hoje: ",
+" CPM"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -7903,6 +8013,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Pontos novos: ",
+"^Pontos novos: ((?:(?! · ).)+?) CPM$",
+"New points: ${1} CPM",
+[
+"Pontos novos: ",
+" CPM"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -8134,6 +8253,14 @@ const I18N_EN = {
 "sounds from ${1}",
 [
 "toca a partir de "
+]
+],
+[
+"O contador usa ",
+"^O contador usa ((?:(?! · ).)+?)\\.$",
+"The counter uses ${1}.",
+[
+"O contador usa "
 ]
 ],
 [
@@ -8607,6 +8734,14 @@ const I18N_EN = {
 "last contact ${1}",
 [
 "último contato "
+]
+],
+[
+"Em uso desde ",
+"^Em uso desde ((?:(?! · ).)+?)\\.$",
+"In use since ${1}.",
+[
+"Em uso desde "
 ]
 ],
 [
@@ -9271,6 +9406,23 @@ const I18N_EN = {
 [
 "Também: ",
 " no "
+]
+],
+[
+"guardada em ",
+"^guardada em ((?:(?! · ).)+?)$",
+"saved on ${1}",
+[
+"guardada em "
+]
+],
+[
+"Pontos: ",
+"^Pontos: ((?:(?! · ).)+?) CPM$",
+"Points: ${1} CPM",
+[
+"Pontos: ",
+" CPM"
 ]
 ],
 [

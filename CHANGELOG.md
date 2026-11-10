@@ -1,5 +1,19 @@
 # Versões
 
+## 2.37.0
+- **Calibrar o contador com a intercalibração.** No cartão "Pontos gravados
+  no contador" (Configurações › GMC-800 › Calibração), o app mostra os seis
+  pontos de hoje ao lado dos sugeridos com o fator em uso no app (por
+  exemplo, 0,00564 µSv/h por CPM da intercalibração com o RadiaCode) e grava
+  no GMC-800 com um botão. O µSv/h de cada ponto fica igual e o CPM é
+  escalado, então a forma da curva de fábrica continua. Depois disso a tela
+  do contador mostra o mesmo µSv/h que o app; no app nada muda.
+- Toda gravação que muda a calibração do contador guarda duas cópias dos
+  pontos: a de fábrica (a primeira que o app viu, nunca trocada) e a
+  anterior (a de antes da última mudança). "Voltar à de fábrica" e "Voltar à
+  anterior" gravam só os seis pontos; o resto da configuração fica como
+  está. A cópia completa da configuração de antes de gravar continua.
+
 ## 2.36.0
 - **Relatório em PDF em µSv/h, igual à tela.** O relatório do período passa
   a mostrar o GMC-800 em µSv/h. Cada minuto, pico e limite é convertido pela
