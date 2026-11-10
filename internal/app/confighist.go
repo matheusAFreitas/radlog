@@ -39,6 +39,7 @@ func (a *App) cfgHistPath() string { return filepath.Join(a.dataDir, cfgHistFile
 func (a *App) cfgSnapshotLocked() map[string]string {
 	s := a.settings
 	lv := s.Levels.Norm()
+	cal := a.convCalLocked()
 	onOff := func(on bool, txt string) string {
 		if !on {
 			return "desligado"
@@ -46,9 +47,9 @@ func (a *App) cfgSnapshotLocked() map[string]string {
 		return txt
 	}
 	m := map[string]string{
-		"Aviso de atenção":  onOff(s.AttentionEnabled, fmt.Sprintf("a partir de %d CPM", lv.AttentionCPM)),
-		"Alarme":            onOff(s.AlarmEnabled, fmt.Sprintf("a partir de %d CPM", s.AlarmCPM)),
-		"Alarme de perigo":  fmt.Sprintf("a partir de %d CPM", lv.DangerCPM),
+		"Aviso de atenção":  onOff(s.AttentionEnabled, "a partir de "+thrDesc(lv.AttentionUSv, lv.AttentionCPM, cal)),
+		"Alarme":            onOff(s.AlarmEnabled, "a partir de "+thrDesc(s.AlarmUSv, s.AlarmCPM, cal)),
+		"Alarme de perigo":  "a partir de " + thrDesc(lv.DangerUSv, lv.DangerCPM, cal),
 		"Tempo morto":       onOff(lv.DeadTimeOn, fmt.Sprintf("ligado, τ = %s µs", fmtBR(lv.DeadTimeUs, 0))),
 		"Saturação do GMC":  fmt.Sprintf("fim da escala %s µSv/h, queda brusca a partir de %s µSv/h", fmtBR(lv.SatMaxUSv, 0), fmtBR(lv.SatDropUSv, 0)),
 		"Calibração do GMC": calDesc(a.cal),

@@ -237,7 +237,8 @@ func (a *App) demoLoop(stop chan struct{}) {
 		target, realistic := a.demo.CPM, a.demo.Realistic
 		cal := a.convCalLocked()
 		rawCal := cal
-		set := a.settings
+		set := a.effLocked()
+		attnU, alarmU, dangerU := thrUSvLocked(a, set)
 		a.mu.Unlock()
 
 		var cpm float64
@@ -310,6 +311,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 
 		a.stepAlerts(&a.demo.alerts, alertStep{
 			Now: now, CPM: cpm, AlarmCPM: set.AlarmCPM, Demo: true, Lv: lv,
+			USv: cal.USv(cpm), AttnUSv: attnU, AlarmUSv: alarmU, DngrUSv: dangerU,
 			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
 			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
 			DangerStarted: dangerStarted, DangerEnded: dangerEnded,

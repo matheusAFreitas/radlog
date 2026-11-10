@@ -36,7 +36,7 @@ function reguaTaxaRefs() {
   const out = [...REGUA_TAXA];
   const cal = calK();
   const bg = (state.last && state.last.bgCPM) || state.bgCPM;
-  if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa (GMC-800)", d: `mediana dos últimos 30 dias: ${fmt(bg, 0)} CPM`, mine: true });
+  if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa (GMC-800)", d: "mediana dos últimos 30 dias", mine: true });
   const rs = (state.rc && state.rc.st && state.rc.st.stats) || {};
   if (rs.bgUSv > 0) out.push({ v: rs.bgUSv, t: "Fundo da sua casa (RadiaCode)", d: "mediana dos minutos em casa dos últimos 7 dias", mine: true, rc: true });
   const seen = new Set();
@@ -45,7 +45,7 @@ function reguaTaxaRefs() {
     const key = m.name.toLowerCase();
     if (seen.has(key) || seen.size >= 4) continue;
     seen.add(key);
-    out.push({ v: m.obj.usv, t: `${m.name}, encostado`, d: `sua medição de ${ddmm(m.time)} (${fmt(m.obj.cpm, 1)} CPM no total)`, mine: true });
+    out.push({ v: m.obj.usv, t: `${m.name}, encostado`, d: `sua medição de ${ddmm(m.time)}`, mine: true });
   }
   return out;
 }
@@ -123,7 +123,7 @@ function openRegua(which) {
   const rc = state.rc && state.rc.st;
   const rcNow = rc && rc.state === "conectado" && rc.time && rc.usvh > 0 ? rc.usvh : null;
   reguaLadder($("rgTaxa"), reguaTaxaRefs(), [
-    { v: nowUSv, t: nowUSv ? `Agora no GMC-800: ${fmt(r.cpm, 0)} CPM` : "", tag: "GMC-800" },
+    { v: nowUSv, t: nowUSv ? "Agora no GMC-800" : "", tag: "GMC-800" },
     { v: rcNow, t: "Agora no RadiaCode", tag: "RadiaCode", rc: true },
   ], "µSv/h");
   const d = state.dose;

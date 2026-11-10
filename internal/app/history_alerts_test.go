@@ -63,7 +63,7 @@ func TestRetroAlerts(t *testing.T) {
 	if attn.Level != "atencao" || !attn.Retro || attn.Time != at(10, 2) || attn.Peak != 72 || attn.PeakAt != at(10, 4) || attn.End != at(10, 7) {
 		t.Fatalf("atenção: %+v", attn)
 	}
-	if !strings.HasPrefix(attn.Text, "Atenção (histórico do contador): pico de 72 CPM às 10:04") {
+	if !strings.HasPrefix(attn.Text, "Atenção (histórico do contador): pico de "+uT(a, 72)+" às 10:04") {
 		t.Fatalf("texto: %q", attn.Text)
 	}
 	if alarm.Level != "alarme" || alarm.Time != at(14, 1) || alarm.Peak != 145 || alarm.End != at(14, 4) || alarm.Active {
@@ -196,7 +196,7 @@ func TestDangerLevel(t *testing.T) {
 	if l := active(); len(l) != 1 { // pulou do fundo para o perigo: só o perigo abre
 		t.Fatalf("ativos: %+v", l)
 	}
-	if l := active(); l[0].Text != "[demo] Perigo: 1200 CPM (a partir de 1000)" {
+	if l := active(); l[0].Text != "[demo] Perigo: "+uT(a, 1200)+" (a partir de "+uN(a, 1000)+")" {
 		t.Fatalf("texto: %q", l[0].Text)
 	}
 	// 950 ainda é perigo (só sai abaixo de 900)
@@ -319,7 +319,7 @@ func TestCustomLevels(t *testing.T) {
 	}
 	a.StartDemo(350, false)
 	waitFor(t, "perigo em 300", func() bool { l := a.GetActiveAlerts(); return len(l) > 0 && l[0].Level == "perigo" })
-	if l := a.GetActiveAlerts(); l[0].Text != "[demo] Perigo: 350 CPM (a partir de 300)" {
+	if l := a.GetActiveAlerts(); l[0].Text != "[demo] Perigo: "+uT(a, 350)+" (a partir de "+uN(a, 300)+")" {
 		t.Fatalf("texto: %q", l[0].Text)
 	}
 	a.StopDemo()

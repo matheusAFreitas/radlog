@@ -179,8 +179,9 @@ async function renderMaturity() {
 function bgVerdict(r) {
   if (!r.bgOK || r.avg == null) return "fundo ainda não calculado";
   const p = r.vsBgPct;
-  if (Math.abs(p) < 5) return `igual ao seu normal (${fmt(r.bgCPM, 0)})`;
-  return `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal (${fmt(r.bgCPM, 0)})`;
+  const bg = r.bgUSv ? usvVal(r.bgUSv) : `${fmt(r.bgCPM, 0)} CPM`;
+  if (Math.abs(p) < 5) return `igual ao seu normal (${bg})`;
+  return `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal (${bg})`;
 }
 const alertsText = (r) => {
   const parts = [];
@@ -281,14 +282,14 @@ function renderSumBig(r, rc) {
   if (rc) sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RadiaCode · somada pelo aparelho" : `RadiaCode · ${fmt(rc.coverage * 100, 0)}% medido`, "rc");
   else sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
   if (r.minutes) {
-    sumKpi(box, "Fundo da casa", `${fmt(r.avg, 1)} CPM`, `≈ ${fmt(r.avgUSv, 3)} µSv/h · ` + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
+    sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
     const home = (rc.homeDose * 60) / rc.homeMinutes;
     const p = rc.bgUSv ? ((home - rc.bgUSv) / rc.bgUSv) * 100 : 0;
     sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RadiaCode em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
   }
   if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RadiaCode · ${atText(r, rc.maxAt)}`, "rc");
-  else sumKpi(box, "Pico", `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+  else sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
 }
 
 // casa × pessoal: quanto da dose do RadiaCode foi em casa e fora, e quanto o
@@ -337,14 +338,14 @@ function renderSummary(r, per) {
     return;
   }
   if (rc) sumHead(t, "GMC-800 (casa)");
-  sumTile(t, "Média", `${fmt(r.avg, 1)} CPM`, bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
-  sumTile(t, "Máximo", `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
-  sumTile(t, "Mínimo", `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
+  sumTile(t, "Média", usvVal(r.avgUSv), bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
+  sumTile(t, "Máximo", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
+  sumTile(t, "Mínimo", r.minUSv != null ? usvVal(r.minUSv) : `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
   sumTile(t, "Dose (app)", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média · calculada pelo app`);
   const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
   sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, covText(r) + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
   if (r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
-  sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
+  sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${r.peakAlertUSv ? usvVal(r.peakAlertUSv) : fmt(r.peakAlert, 0) + " CPM"}` : "", r.danger || r.alarm ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   if (r.measurements) sumTile(t, "Medições", String(r.measurements), "de objetos");
   drawSumChart([{ r, color: COR.accent, label: rc ? "GMC-800" : per[2] }]);
@@ -361,9 +362,9 @@ function renderCompare(res, periods) {
   const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? " (igual)" : ` (${sgn(p, 0)}%)`; };
   const diff = (x, y, d, unit) => (x == null || y == null ? "—" : Math.abs(x - y) < Math.pow(10, -d) / 2 ? "igual" : `${sgn(x - y, d)}${unit}` + (y ? pctTxt(x, y) : ""));
   const rows = [
-    ["Média", a.avg, b.avg, 1, " CPM"],
-    ["Máximo", a.max, b.max, 0, " CPM"],
-    ["Mínimo", a.min, b.min, 0, " CPM"],
+    ["Média", a.avgUSv, b.avgUSv, 3, " µSv/h"],
+    ["Máximo", a.maxUSv, b.maxUSv, 3, " µSv/h"],
+    ["Mínimo", a.minUSv, b.minUSv, 3, " µSv/h"],
     ["Dose", a.dose, b.dose, 2, " µSv"],
   ];
   let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>A − B</th></tr></thead><tbody>`;
@@ -394,19 +395,22 @@ function drawSumChart(series) {
   const rc0 = series.length === 1 && series[0].r.rc && series[0].r.rc.minutes ? series[0].r.rc : null;
   if (rc0) return drawSumChartUSv(series[0].r, rc0);
   const n = Math.max(...series.map((s) => s.r.curve.length));
-  let top = 10;
-  for (const s of series) for (const p of s.r.curve) if (p.cpm != null) top = Math.max(top, p.cpm);
+  // GMC em µSv/h (2.29), cada ponto pela calibração do seu minuto
+  const k = calK();
+  const pu = (p) => (p.usv != null ? p.usv : p.cpm != null ? p.cpm * k : null);
+  let top = 0.05;
+  for (const s of series) for (const p of s.r.curve) if (pu(p) != null) top = Math.max(top, pu(p));
   top = niceTop(top * 1.15);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, 0);
+  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
-  const bg = series[0].r.bgOK ? series[0].r.bgCPM : 0;
+  const bg = series[0].r.bgOK ? series[0].r.bgUSv || series[0].r.bgCPM * k : 0;
   if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${COR.accent}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   for (const s of series.slice().reverse()) {
     let d = "", pen = "M";
-    s.r.curve.forEach((p, i) => { if (p.cpm == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(p.cpm).toFixed(1)}`; pen = "L"; });
+    s.r.curve.forEach((p, i) => { const v = pu(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; });
     out += `<path d="${d}" fill="none" stroke="${s.color}" stroke-width="${s === series[0] ? 2.2 : 1.6}" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
@@ -425,7 +429,7 @@ function drawSumChartUSv(r, rc) {
   const n = Math.max(r.curve.length, rc.curve.length);
   let top = 0.05;
   for (const p of rc.curve) if (p.usv != null) top = Math.max(top, p.usv);
-  for (const p of r.curve) if (p.cpm != null) top = Math.max(top, p.cpm * k);
+  for (const p of r.curve) if (p.cpm != null) top = Math.max(top, p.usv != null ? p.usv : p.cpm * k);
   top = niceTop(top * 1.15);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
@@ -434,7 +438,7 @@ function drawSumChartUSv(r, rc) {
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="${COR.rc}" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   const path = (pts, val) => { let d = "", pen = "M"; pts.forEach((p, i) => { const v = val(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; }); return d; };
-  out += `<path d="${path(r.curve, (p) => (p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.accent}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(r.curve, (p) => (p.usv != null ? p.usv : p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.accent}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="${COR.rc}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   svg.innerHTML = out;
   const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;

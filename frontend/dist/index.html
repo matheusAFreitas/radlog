@@ -278,8 +278,8 @@
         </div>
         <div class="chart-ctrls">
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
-          <button type="button" data-cunit="cpm" aria-pressed="true">CPM</button>
-          <button type="button" data-cunit="usv" aria-pressed="false">µSv/h</button>
+          <button type="button" data-cunit="usv" aria-pressed="true">µSv/h</button>
+          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes">CPM (análise)</button>
         </div>
         </div>
       </div>
@@ -307,9 +307,10 @@
           </div>
           <div class="x-axis mono"><span id="x0"></span><span id="x1"></span><span id="x2"></span></div>
         </div>
+        <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RadiaCode"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
     </section>
 
@@ -590,7 +591,7 @@
       <div class="dlg-head">
         <h2 id="alertsTitle">Histórico de alertas</h2>
       </div>
-      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
+      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
       <div class="alerts-tools">
         <div class="seg" role="group" aria-label="Aparelho dos alertas" id="alertDevFilter">
           <button type="button" data-adev="" aria-pressed="true">Os dois</button>
@@ -923,8 +924,8 @@
       </div>
 
       <div class="rc-mini">
-        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">CPM</span></div>
-        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">CPM</span></div>
+        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
+        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
 
@@ -935,8 +936,8 @@
     </section>
   <p class="ic-watch" id="gmcConcord" hidden></p>
   <section class="tiles" hidden>
-      <div class="card tile"><span class="tile-label">Média · 1 h · CPM</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
-      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">CPM</span></div>
+      <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
+      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
       <div class="card tile"><span class="tile-label">Máximo · 24 h</span><span class="tile-value mono" id="tMax">—</span><span class="tile-sub" id="tMaxSub">CPM</span></div>
     </section>
   <section class="card">
@@ -1349,8 +1350,9 @@
         <span id="alarmLabel">Alarme ligado</span>
         <input type="checkbox" id="chkAlarm">
       </label>
-      <label for="numAlarm">Tocar alarme a partir de (CPM)</label>
-      <input type="number" id="numAlarm" min="1" step="1" inputmode="numeric">
+      <label for="numAlarm">Tocar alarme a partir de (µSv/h)</label>
+      <input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal">
+      <p class="small muted lv-eq" data-eq="numAlarm"></p>
       <label for="selSound">Som</label>
       <select id="selSound">
         <option value="sirene">Sirene contínua</option>
@@ -1570,14 +1572,14 @@
       <p class="small muted set-note">Níveis que o app usa por conta própria, além do seu alarme. Valem para o contador e para o modo demo. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
       <fieldset>
         <legend>Aviso de atenção</legend>
-        <label for="lvAttn">A partir de (CPM)</label>
-        <input type="number" id="lvAttn" min="5" step="1" inputmode="numeric">
+        <label for="lvAttn">A partir de (µSv/h)</label>
+        <input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal">
         <p class="small muted lv-eq" data-eq="lvAttn"></p>
       </fieldset>
       <fieldset>
         <legend>Alarme de perigo</legend>
-        <label for="lvDanger">A partir de (CPM)</label>
-        <input type="number" id="lvDanger" min="50" step="1" inputmode="numeric">
+        <label for="lvDanger">A partir de (µSv/h)</label>
+        <input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal">
         <p class="small muted lv-eq" data-eq="lvDanger"></p>
         <label for="lvSnooze">"Silenciar" cala o som por (minutos)</label>
         <input type="number" id="lvSnooze" min="1" max="60" step="1" inputmode="numeric">
