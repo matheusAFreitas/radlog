@@ -1,5 +1,16 @@
 # Versões
 
+## 2.34.2
+- **"Onde está cada aparelho" mostra a conexão de verdade.** Com o
+  RadiaCode desconectado, o quadro do Agora ainda dizia "conectado" com o
+  ponto verde por até 3 minutos, porque olhava só se o último minuto gravado
+  era recente. Agora ele segue o mesmo estado do cartão do aparelho, muda na
+  hora em que a conexão cai ou volta, e mostra "conectando…" em âmbar
+  enquanto tenta.
+- Nos blocos do Agora, um aparelho desconectado não mostra mais CPM e CPS
+  como se fossem de agora: no lugar vai "última leitura às HH:MM", em cinza,
+  e a dose de hoje diz "até HH:MM", como no cartão do aparelho.
+
 ## 2.34.1
 - **O fim do período desconectado do RadiaCode não se perde mais.** Ao
   reconectar, o aparelho manda o que guardou na memória e também o que
