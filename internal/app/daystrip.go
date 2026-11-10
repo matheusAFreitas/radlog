@@ -26,6 +26,9 @@ type StripSlot struct {
 	PersDev string  `json:"persDev,omitempty"`
 	Away    bool    `json:"away,omitempty"`
 	Rain    float64 `json:"rain,omitempty"` // mm/h, só quando chove
+	// para a dose por origem (alara.go): minutos medidos e fundo do aparelho
+	persN  int
+	persBg float64
 }
 
 // StripMark é um alerta ou uma anotação na fita.
@@ -99,8 +102,10 @@ func (a *App) GetDayStrip(fromMs, toMs int64) (DayStrip, error) {
 	}
 	sums := map[key]*acc{}
 	mins := map[string]map[int64]float64{}
+	bgOf := map[string]float64{}
 	for _, dev := range []string{"gmc", devRC} {
-		pts, _, _, err := a.doseSeries(dev, from, to)
+		pts, bg, _, err := a.doseSeries(dev, from, to)
+		bgOf[dev] = bg
 		if err != nil {
 			return out, err
 		}
@@ -149,6 +154,7 @@ func (a *App) GetDayStrip(fromMs, toMs int64) (DayStrip, error) {
 				s.Home, s.HomeUSv, s.HomeDev = lv, best, bdev
 			} else {
 				s.Pers, s.PersUSv, s.PersDev = lv, best, bdev
+				s.persN, s.persBg = bn, bgOf[bdev]
 			}
 		}
 	}
