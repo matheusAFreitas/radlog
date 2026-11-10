@@ -1,5 +1,25 @@
 # Versões
 
+## 2.36.0
+- **Relatório em PDF em µSv/h, igual à tela.** O relatório do período passa
+  a mostrar o GMC-800 em µSv/h. Cada minuto, pico e limite é convertido pela
+  calibração que valia naquela hora, então trocar o fator não muda o passado.
+  Isso vale para:
+  - os cartões de média, mínimo e máximo, fundo da casa e pico ao vivo;
+  - o gráfico do período;
+  - as tabelas por dia, do fundo, dos episódios de alerta e do tempo acima
+    dos limites;
+  - os gráficos de 30 minutos antes e depois de cada episódio.
+- O CPM fica onde é a medida do aparelho: a estatística da contagem (σ,
+  dispersão, histograma), uma coluna de CPM médio por dia, a mediana do
+  fundo e a calibração.
+- **Limites da época certos.** Desde a 2.29 o histórico de configurações
+  grava os limites em µSv/h, e o relatório só entendia os antigos, em CPM:
+  marcava "valor atual" (*) em limites que tinham registro. Agora lê os dois.
+  Os limites em CPM continuam comparados em CPM, como tocavam, e aparecem
+  convertidos.
+- "Configurações e método" ganha a linha "Unidade", que explica a conversão.
+
 ## 2.35.3
 - **Histórico do RadiaCode sem o buraco do fim.** No segundo teste, a
   memória do aparelho voltou inteira, mas os últimos 2 minutos antes da

@@ -44,6 +44,18 @@ func percentile(sorted []float64, p float64) float64 {
 	return sorted[i] + (h-lo)*(sorted[i+1]-sorted[i])
 }
 
+// usvMinuteStats é a mesma estatística com cada minuto em µSv/h, pela
+// calibração que valia nele (2.36). Os campos de Poisson não valem em µSv/h.
+func usvMinuteStats(pts []store.Point, tl calTL) minuteStats {
+	u := make([]store.Point, len(pts))
+	for i, p := range pts {
+		u[i] = store.Point{T: p.T, CPM: tl.USv(p)}
+	}
+	s := calcMinuteStats(u)
+	s.PoissonSD, s.Dispersion = 0, 0
+	return s
+}
+
 func calcMinuteStats(pts []store.Point) minuteStats {
 	var s minuteStats
 	s.N = len(pts)
