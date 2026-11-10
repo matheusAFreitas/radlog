@@ -7,7 +7,7 @@
 // botão para voltar a cada uma. Só os 6 pontos mudam; o resto da
 // configuração do contador fica como está.
 
-const CC_SRC = { "intercalibração": "intercalibração com o RadiaCode", "você": "informado à mão", "contador": "curva do contador" };
+const CC_SRC = { "intercalibração": "intercalibração com o RC102", "você": "informado à mão", "contador": "curva do contador" };
 
 function ccDay(t) {
   return new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" });

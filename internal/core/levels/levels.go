@@ -23,7 +23,7 @@ type Levels struct {
 	SatMaxUSv    float64 `json:"satMaxUSv"`  // Geiger saturado: fim da escala
 	SatDropUSv   float64 `json:"satDropUSv"` // Geiger saturado: queda brusca a partir de
 	SatHoldSec   int     `json:"satHoldSec"` // aviso de queda brusca fica por
-	// RadiaCode saturado: fim da escala do aparelho (o 102 vai de 0,1 a
+	// Radiacode saturado: fim da escala do aparelho (o 102 vai de 0,1 a
 	// 1000 µSv/h pela especificação do fabricante); daí para cima a faixa do
 	// alarme mostra "≥"
 	RcSatUSv float64 `json:"rcSatUSv"`

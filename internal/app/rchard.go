@@ -10,7 +10,7 @@ import (
 	"radlog/internal/core/stats"
 )
 
-// ---------- dureza ao longo do tempo (RadiaCode) ----------
+// ---------- dureza ao longo do tempo (Radiacode) ----------
 //
 // Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a
 // 1.500 keV, relativa ao fundo da casa (1,00 = igual ao fundo). Sai dos
@@ -123,7 +123,7 @@ func (a *App) rcSpecSummary(name string) *rcSpecSum {
 	return s
 }
 
-// RcHardness é a contagem e a dureza do RadiaCode ao longo do tempo, em
+// RcHardness é a contagem e a dureza do Radiacode ao longo do tempo, em
 // linhas de RowSec segundos a partir de From.
 type RcHardness struct {
 	From    int64     `json:"from"`

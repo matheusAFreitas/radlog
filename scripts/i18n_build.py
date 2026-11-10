@@ -9,11 +9,7 @@ import json, os, re
 
 ROOT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..")
 exact, pats = {}, []
-for ln in open(os.path.join(ROOT, "internal/i18n/en.tsv"), encoding="utf-8"):
-    ln = ln.rstrip("\n")
-    if not ln or ln.startswith("#") or "\t" not in ln:
-        continue
-    pt, en = ln.split("\t", 1)
+def add(pt, en):
     if re.search(r"\{\d+\}", pt):
         parts = re.split(r"(\{\d+\})", pt)
         rx, order = "", []
@@ -32,6 +28,16 @@ for ln in open(os.path.join(ROOT, "internal/i18n/en.tsv"), encoding="utf-8"):
         pats.append([lit, "^" + rx + "$", out, pieces])
     else:
         exact[pt] = en
+
+for ln in open(os.path.join(ROOT, "internal/i18n/en.tsv"), encoding="utf-8"):
+    ln = ln.rstrip("\n")
+    if not ln or ln.startswith("#") or "\t" not in ln:
+        continue
+    pt, en = ln.split("\t", 1)
+    add(pt, en)
+    # textos gravados antes da 2.38.6 dizem "RadiaCode": traduz os dois jeitos
+    if "RC102" in pt and pt.replace("RC102", "RadiaCode") not in exact:
+        add(pt.replace("RC102", "RadiaCode"), en)
 # moldes com mais texto fixo primeiro (os mais específicos ganham)
 pats.sort(key=lambda p: -len(re.sub(r"\(\(\?:\(\?! · \)\.\)\+\?\)", "", p[1])))
 js = "// gerado por scripts/i18n_build.py a partir de internal/i18n/en.tsv: não edite à mão\n"

@@ -6,7 +6,7 @@
 // Usa as funções do app.js ($, fmt, state…), que já existem quando é chamada.
 
 const REGUA_TAXA = [
-  { v: 0.09, t: "Estrada, dentro do carro", d: "mapa do RadiaCode na Via Dutra: a lataria e a distância do chão cortam parte" },
+  { v: 0.09, t: "Estrada, dentro do carro", d: "mapa do RC102 na Via Dutra: a lataria e a distância do chão cortam parte" },
   { v: 4, t: "Avião em altitude de cruzeiro", d: "raios cósmicos; varia de ~2 a 6 com a altitude e a rota" },
   { v: 10, t: "Média permitida a quem trabalha com radiação", d: "20 mSv por ano ÷ 2.000 horas de trabalho" },
   { v: 1000, t: "1 mSv/h", d: "em 1 hora, o limite anual do público (fora o fundo natural)" },
@@ -38,7 +38,7 @@ function reguaTaxaRefs() {
   const bg = (state.last && state.last.bgCPM) || state.bgCPM;
   if (bg) out.push({ v: bg * cal, t: "Fundo da sua casa (GMC-800)", d: "mediana dos últimos 30 dias", mine: true });
   const rs = (state.rc && state.rc.st && state.rc.st.stats) || {};
-  if (rs.bgUSv > 0) out.push({ v: rs.bgUSv, t: "Fundo da sua casa (RadiaCode)", d: "mediana dos minutos em casa dos últimos 7 dias", mine: true, rc: true });
+  if (rs.bgUSv > 0) out.push({ v: rs.bgUSv, t: "Fundo da sua casa (RC102)", d: "mediana dos minutos em casa dos últimos 7 dias", mine: true, rc: true });
   const seen = new Set();
   for (const m of [...(state.measurements || [])].reverse()) {
     if (!m.result || m.result.level !== "sim" || !m.obj || !(m.obj.usv > 0)) continue;
@@ -80,7 +80,7 @@ function reguaRel(v, here) {
 }
 
 // escada: itens em ordem, com a barra em escala log e as linhas "agora" de
-// cada aparelho (GMC e RadiaCode) no meio. As relações ("3× mais") são com a
+// cada aparelho (GMC e Radiacode) no meio. As relações ("3× mais") são com a
 // primeira delas.
 function reguaLadder(el, refs, heres, unit) {
   const rows = refs.map((r) => ({ ...r })).sort((a, b) => a.v - b.v);
@@ -124,24 +124,24 @@ function openRegua(which) {
   const rcNow = rc && rc.state === "conectado" && rc.time && rc.usvh > 0 ? rc.usvh : null;
   reguaLadder($("rgTaxa"), reguaTaxaRefs(), [
     { v: nowUSv, t: nowUSv ? "Agora no GMC-800" : "", tag: "GMC-800" },
-    { v: rcNow, t: "Agora no RadiaCode", tag: "RadiaCode", rc: true },
+    { v: rcNow, t: "Agora no RC102", tag: "RC102", rc: true },
   ], "µSv/h");
   const d = state.dose;
   const doseHere = d && d.measuredMinutes ? d.total : null;
   const per = state.doseZoom ? "trecho do zoom" : (document.querySelector(`#rangeSeg button[data-range="${state.dosePeriod}"]`)?.textContent.trim() || "período");
   const lbl = d && d.measuredMinutes ? `Dose no contador (${per})` : "";
-  // o cartão de dose pode estar no RadiaCode (sua dose) ou no GMC (casa):
+  // o cartão de dose pode estar no Radiacode (sua dose) ou no GMC (casa):
   // entram os dois, no mesmo período
   const dRc = d && d.device === "radiacode";
   const gmcDose = dRc ? (d.otherMinutes ? d.otherTotal : null) : doseHere;
   const rcDose = dRc ? doseHere : d && d.otherMinutes ? d.otherTotal : rc && rc.today > 0 ? rc.today : null;
-  const rcLbl = dRc || (d && d.otherMinutes) ? `Sua dose no RadiaCode (${per})` : "Dose hoje no RadiaCode";
+  const rcLbl = dRc || (d && d.otherMinutes) ? `Sua dose no RC102 (${per})` : "Dose hoje no RC102";
   reguaLadder($("rgDose"), reguaDoseRefs(), [
     { v: gmcDose, t: `Dose no GMC-800 (${per})`, tag: "GMC-800" },
-    { v: rcDose, t: rcLbl, tag: "RadiaCode", rc: true },
+    { v: rcDose, t: rcLbl, tag: "RC102", rc: true },
   ], "µSv");
   $("rgTaxaSub").textContent = nowUSv || rcNow
-    ? [nowUSv ? `GMC-800 agora: ${reguaFmt(nowUSv, "µSv/h")} (calibração ${fmt(cal, 4)} µSv/h por CPM)` : "", rcNow ? `RadiaCode agora: ${reguaFmt(rcNow, "µSv/h")}` : ""].filter(Boolean).join(" · ") + "."
+    ? [nowUSv ? `GMC-800 agora: ${reguaFmt(nowUSv, "µSv/h")} (calibração ${fmt(cal, 4)} µSv/h por CPM)` : "", rcNow ? `RC102 agora: ${reguaFmt(rcNow, "µSv/h")}` : ""].filter(Boolean).join(" · ") + "."
     : "Sem leitura agora: a escada mostra só as referências.";
   $("rgDoseSub").textContent = doseHere ? `Dose medida no período escolhido no cartão de dose: ${reguaFmt(doseHere, "µSv")}.` : "Sem dose medida no período: a escada mostra só as referências.";
   showReguaTab(which === "dose" ? "dose" : "taxa");

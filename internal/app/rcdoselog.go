@@ -19,11 +19,11 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- histórico da dose do próprio RadiaCode ----------
+// ---------- histórico da dose do próprio Radiacode ----------
 //
 // Cada total que o aparelho manda (RareData, a cada 1 a 10 min) fica em
 // radiacode/dose-AAAA-MM.csv (hora,dose µSv,segundos contando). Com isso o
-// gráfico da dose do RadiaCode usa o número do aparelho, que continua
+// gráfico da dose do Radiacode usa o número do aparelho, que continua
 // contando mesmo desconectado: o que ele somou enquanto estava longe do PC
 // aparece quando volta.
 
@@ -220,7 +220,7 @@ func (a *App) rcDoseBackfill() {
 	}
 	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 	if len(pts) > 0 {
-		a.logf("RadiaCode: %d totais de dose recuperados dos dados brutos", len(pts))
+		a.logf("RC102: %d totais de dose recuperados dos dados brutos", len(pts))
 	}
 }
 

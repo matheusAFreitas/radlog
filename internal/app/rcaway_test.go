@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// rcWriteTest grava minutos do RadiaCode (src "" = ao vivo, "memoria" = da memória).
+// rcWriteTest grava minutos do Radiacode (src "" = ao vivo, "memoria" = da memória).
 func rcWriteTest(t *testing.T, a *App, from time.Time, mins int, usv float64, src string) {
 	t.Helper()
 	os.MkdirAll(a.rcDir(), 0o755)
@@ -67,7 +67,7 @@ func TestRcAwayAskFlow(t *testing.T) {
 		t.Fatalf("depois de reabrir: %+v", l2)
 	}
 
-	// "comigo, fora de casa": trecho GMC em casa, RadiaCode comigo, eu fora
+	// "comigo, fora de casa": trecho GMC em casa, Radiacode comigo, eu fora
 	away := a.rcAwayChecker()
 	if away(gapFrom.Add(time.Hour)) {
 		t.Fatal("fora antes de responder")
@@ -80,7 +80,7 @@ func TestRcAwayAskFlow(t *testing.T) {
 		t.Fatalf("trecho: %+v", p)
 	}
 	if !a.rcAwayChecker()(gapFrom.Add(time.Hour)) {
-		t.Fatal("RadiaCode não saiu do fundo da casa")
+		t.Fatal("RC102 não saiu do fundo da casa")
 	}
 	if a.awayChecker()(gapFrom.Add(time.Hour)) {
 		t.Fatal("o GMC ficou em casa")
@@ -121,13 +121,13 @@ func TestRcAwayAskFlow(t *testing.T) {
 func TestRcAwayPeriodRules(t *testing.T) {
 	a := newTestApp(t)
 	t0 := time.Date(2026, 11, 9, 10, 0, 0, 0, time.Local).UnixMilli()
-	// sem "eu não estava em casa", GMC em casa e RadiaCode comigo continua sendo o normal
+	// sem "eu não estava em casa", GMC em casa e Radiacode comigo continua sendo o normal
 	if _, err := a.SavePeriod(Period{From: t0, To: t0 + 3600_000, GMC: WhereHome, RC: WhereMe}); err == nil || !strings.Contains(err.Error(), "normal") {
 		t.Fatalf("aceitou o normal: %v", err)
 	}
 	p, err := a.SavePeriod(Period{From: t0, To: t0 + 3600_000, GMC: WhereHome, RC: WhereMe, NotHome: true, Name: " Feira "})
 	if err != nil || p.Name != "Feira" || !p.NotHome {
-		t.Fatalf("saí com o RadiaCode: %+v %v", p, err)
+		t.Fatalf("saí com o RC102: %+v %v", p, err)
 	}
 	// "eu não estava em casa" não vale com o GMC com você
 	q, err := a.SavePeriod(Period{From: t0 + 7200_000, To: t0 + 10800_000, GMC: WhereMe, RC: WhereMe, NotHome: true})

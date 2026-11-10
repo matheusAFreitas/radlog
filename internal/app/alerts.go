@@ -177,7 +177,7 @@ type alertStep struct {
 	// (0 = sem conversão: o texto sai em CPM)
 	USv                        float64
 	AttnUSv, AlarmUSv, DngrUSv float64
-	// RadiaCode: CPM é µSv/h e os limites vêm do RcLim
+	// Radiacode: CPM é µSv/h e os limites vêm do RcLim
 	Device string
 	RcLim  RcLimits
 }
@@ -289,7 +289,7 @@ func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 // Motivos de um alerta terminar sem a leitura voltar ao normal.
 const (
 	endDisconnected   = "contador desconectado"
-	endRcDisconnected = "RadiaCode desconectado"
+	endRcDisconnected = "RC102 desconectado"
 	endAppClosed      = "app fechado"
 )
 
@@ -327,7 +327,7 @@ func (a *App) finishAlerts(ids []int64, now time.Time, demo bool) {
 	a.mu.Unlock()
 	if !demo {
 		a.saveEvents()
-		// os do RadiaCode guardam as leituras dele
+		// os do Radiacode guardam as leituras dele
 		var gmc []int64
 		var rc []Event
 		a.mu.Lock()

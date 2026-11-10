@@ -100,7 +100,7 @@ func findUSBWin() (*usbFound, error) {
 	return nil, ErrNotFound
 }
 
-// FindUSB diz se tem um RadiaCode no USB (e qual driver ele está usando).
+// FindUSB diz se tem um Radiacode no USB (e qual driver ele está usando).
 func FindUSB() (string, error) {
 	f, err := findUSBWin()
 	if err != nil {
@@ -124,7 +124,7 @@ func OpenUSB() (Transport, error) {
 		last = err
 	}
 	if !strings.EqualFold(f.service, "WinUSB") {
-		return nil, fmt.Errorf("o RadiaCode está com o driver %q; o app precisa do WinUSB (%v)", f.service, last)
+		return nil, fmt.Errorf("o RC102 está com o driver %q; o app precisa do WinUSB (%v)", f.service, last)
 	}
 	return nil, last
 }
@@ -198,7 +198,7 @@ func (u *usbWin) Exchange(req []byte) ([]byte, error) {
 			return out, nil
 		}
 	}
-	return nil, fmt.Errorf("USB: o RadiaCode não respondeu")
+	return nil, fmt.Errorf("USB: o RC102 não respondeu")
 }
 
 func (u *usbWin) Close() error {

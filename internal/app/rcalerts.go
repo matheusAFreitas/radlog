@@ -13,11 +13,11 @@ import (
 	"radlog/internal/core/levels"
 )
 
-// ---------- alertas do RadiaCode ----------
+// ---------- alertas do Radiacode ----------
 //
 // Os mesmos três níveis do GMC, em µSv/h, com os limites do próprio aparelho:
-//   - atenção: alarme 1 do RadiaCode (DR_LEV1);
-//   - alarme:  alarme 2 do RadiaCode (DR_LEV2);
+//   - atenção: alarme 1 do Radiacode (DR_LEV1);
+//   - alarme:  alarme 2 do Radiacode (DR_LEV2);
 //   - perigo:  o perigo do app, convertido pela calibração do GMC.
 // Sem os limites do aparelho (não deu para ler), usa as faixas do app
 // convertidas. Sai do nível abaixo de 90% do limite, como no GMC. Os alertas
@@ -26,13 +26,13 @@ import (
 
 const devRC = "radiacode"
 
-// rcAlertState são os alertas abertos do RadiaCode (protegido por a.mu).
+// rcAlertState são os alertas abertos do Radiacode (protegido por a.mu).
 type rcAlertState struct {
 	ids                     alertIDs
 	attnOn, alarmOn, dangOn bool
 }
 
-// RcLimits são os limites dos alertas do RadiaCode, em µSv/h.
+// RcLimits são os limites dos alertas do Radiacode, em µSv/h.
 type RcLimits struct {
 	Attn   float64 `json:"attn"`
 	Alarm  float64 `json:"alarm"`
@@ -77,24 +77,24 @@ func usvTxt(v float64) string {
 	return fmtBR(v, 3)
 }
 
-// rcAlertText é o texto do alerta do RadiaCode.
+// rcAlertText é o texto do alerta do Radiacode.
 func rcAlertText(level string, usv float64, l RcLimits) string {
 	switch level {
 	case "perigo":
-		return fmt.Sprintf("Perigo no RadiaCode: %s µSv/h (a partir de %s)", usvTxt(usv), usvTxt(l.Danger))
+		return fmt.Sprintf("Perigo no RC102: %s µSv/h (a partir de %s)", usvTxt(usv), usvTxt(l.Danger))
 	case "alarme":
 		if l.Device {
-			return fmt.Sprintf("Alarme no RadiaCode: %s µSv/h (alarme 2 do aparelho: %s)", usvTxt(usv), usvTxt(l.Alarm))
+			return fmt.Sprintf("Alarme no RC102: %s µSv/h (alarme 2 do aparelho: %s)", usvTxt(usv), usvTxt(l.Alarm))
 		}
-		return fmt.Sprintf("Alarme no RadiaCode: %s µSv/h (limite %s)", usvTxt(usv), usvTxt(l.Alarm))
+		return fmt.Sprintf("Alarme no RC102: %s µSv/h (limite %s)", usvTxt(usv), usvTxt(l.Alarm))
 	}
 	if l.Device {
-		return fmt.Sprintf("Atenção no RadiaCode: %s µSv/h (alarme 1 do aparelho: %s)", usvTxt(usv), usvTxt(l.Attn))
+		return fmt.Sprintf("Atenção no RC102: %s µSv/h (alarme 1 do aparelho: %s)", usvTxt(usv), usvTxt(l.Attn))
 	}
-	return fmt.Sprintf("Atenção no RadiaCode: %s µSv/h (a partir de %s)", usvTxt(usv), usvTxt(l.Attn))
+	return fmt.Sprintf("Atenção no RC102: %s µSv/h (a partir de %s)", usvTxt(usv), usvTxt(l.Attn))
 }
 
-// rcAlertStep recebe cada leitura ao vivo do RadiaCode (µSv/h).
+// rcAlertStep recebe cada leitura ao vivo do Radiacode (µSv/h).
 func (a *App) rcAlertStep(now time.Time, usv float64) {
 	l := a.rcLimits()
 	a.mu.Lock()
@@ -124,7 +124,7 @@ func (a *App) rcAlertStep(now time.Time, usv float64) {
 		AlarmStarted: alarmStarted, AlarmEnded: alarmEnded, AlarmOn: alarmOn,
 		DangerStarted: dangStarted, DangerEnded: dangEnded,
 	})
-	val := usvTxt(usv) + " µSv/h no RadiaCode"
+	val := usvTxt(usv) + " µSv/h no RC102"
 	switch {
 	case dangStarted:
 		a.flagWindowText("PERIGO", val, false, true)
@@ -156,7 +156,7 @@ func (a *App) rcAlertLevelLocked() string {
 	return ""
 }
 
-// rcAlertsOff fecha os alertas do RadiaCode (desconectou).
+// rcAlertsOff fecha os alertas do Radiacode (desconectou).
 func (a *App) rcAlertsOff() {
 	a.mu.Lock()
 	a.rcAlert.attnOn, a.rcAlert.alarmOn, a.rcAlert.dangOn = false, false, false
@@ -169,10 +169,10 @@ func (a *App) rcAlertsOff() {
 	a.alarmEnded()
 }
 
-// rcAlertKey é o arquivo dos segundos de um alerta do RadiaCode.
+// rcAlertKey é o arquivo dos segundos de um alerta do Radiacode.
 func rcAlertKey(e Event) string { return fmt.Sprintf("%d-%s-rc.json", e.Time/1000, e.Level) }
 
-// rcAlertPoints são as leituras ao vivo do RadiaCode (µSv/h) entre from e to.
+// rcAlertPoints são as leituras ao vivo do Radiacode (µSv/h) entre from e to.
 func (a *App) rcAlertPoints(from, to time.Time) []AlertPoint {
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
@@ -185,7 +185,7 @@ func (a *App) rcAlertPoints(from, to time.Time) []AlertPoint {
 	return out
 }
 
-// saveRcAlertSeconds grava as leituras do alerta do RadiaCode (como o
+// saveRcAlertSeconds grava as leituras do alerta do Radiacode (como o
 // saveAlertSeconds do GMC).
 func (a *App) saveRcAlertSeconds(evs []Event) {
 	write := func() {
@@ -221,7 +221,7 @@ func (a *App) readRcAlertSeconds(e Event) []AlertPoint {
 	return pts
 }
 
-// rcAlertDetail monta o gráfico de um alerta do RadiaCode (µSv/h).
+// rcAlertDetail monta o gráfico de um alerta do Radiacode (µSv/h).
 func (a *App) rcAlertDetail(e Event, end time.Time) AlertDetail {
 	l := a.rcLimits()
 	now := time.Now()

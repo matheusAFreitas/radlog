@@ -9,7 +9,7 @@ import (
 	"time"
 )
 
-// fakeRC responde como um RadiaCode com firmware 4.12.
+// fakeRC responde como um Radiacode com firmware 4.12.
 type fakeRC struct {
 	dataBuf []byte
 	spec    []byte

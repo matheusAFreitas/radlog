@@ -1,4 +1,4 @@
-// Intercalibração com o RadiaCode e vigia semanal (ideia 6).
+// Intercalibração com o Radiacode e vigia semanal (ideia 6).
 //
 // Configurações › Calibração do GMC ganha o bloco da intercalibração: o botão
 // começa uma coleta de 24 h com os dois aparelhos encostados; no fim aparece
@@ -47,8 +47,8 @@ function icResultHtml(v) {
   const tubeOk = Math.abs(r.dispersion - 1) <= Math.max(0.1, 3 * r.dispersionErr);
   const k0Usv = r.gmcCpm * k0, kUsv = r.gmcCpm * r.k;
   let h = `<div class="ic-head"><span class="ic-big mono">${pct >= 0 ? "+" : "−"}${fmt(Math.abs(pct), 0)}%</span>` +
-    `<span>O GMC-800 estava lendo ${fmt(Math.abs(pct), 0)}% ${dir} do RadiaCode</span></div>` +
-    `<p class="small muted">Nas ${fmt(r.minutes / 60, 0)} h com os dois lado a lado, o mesmo fundo deu ${fmt(k0Usv, 3)} µSv/h no GMC-800 e ${fmt(r.rcUsvh, 3)} µSv/h no RadiaCode. O RadiaCode pesa cada contagem pela energia; o GMC usa uma curva de fábrica.</p>` +
+    `<span>O GMC-800 estava lendo ${fmt(Math.abs(pct), 0)}% ${dir} do RC102</span></div>` +
+    `<p class="small muted">Nas ${fmt(r.minutes / 60, 0)} h com os dois lado a lado, o mesmo fundo deu ${fmt(k0Usv, 3)} µSv/h no GMC-800 e ${fmt(r.rcUsvh, 3)} µSv/h no RC102. O RC102 pesa cada contagem pela energia; o GMC usa uma curva de fábrica.</p>` +
     `<dl class="info ic-facts">` +
     `<dt>fator novo</dt><dd class="mono">${fmt(r.k, 5)} µSv/h por CPM · hoje ${fmt(k0, 5)}</dd>` +
     `<dt>margem (95%)</dt><dd class="mono">entre ${fmt(r.lo, 5)} e ${fmt(r.hi, 5)} (±${fmt(r.rel95 * 100, 1)} %)</dd>` +
@@ -83,13 +83,13 @@ async function renderIntercal() {
       `<p class="small muted">Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro. Se mexer em um deles, cancele e comece de novo.</p>` +
       `<div class="row"><button type="button" class="btn small" data-ic="cancel">Cancelar a coleta</button></div>`;
   } else if (v.state === "poucos") {
-    box.innerHTML = `<p>A coleta terminou com só ${fmt(v.minutes, 0)} minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RadiaCode ficou conectado.</p>` +
+    box.innerHTML = `<p>A coleta terminou com só ${fmt(v.minutes, 0)} minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RC102 ficou conectado.</p>` +
       `<div class="row"><button type="button" class="btn small" data-ic="again">Começar de novo</button><button type="button" class="btn small" data-ic="forget">Fechar</button></div>`;
   } else if (v.state === "pronta" && v.result) {
     box.innerHTML = icResultHtml(v);
   } else {
-    box.innerHTML = `<p class="small muted">Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RadiaCode como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.</p>` +
-      `<div class="row"><button type="button" class="btn" data-ic="start">Intercalibrar com o RadiaCode</button></div>`;
+    box.innerHTML = `<p class="small muted">Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RC102 como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.</p>` +
+      `<div class="row"><button type="button" class="btn" data-ic="start">Intercalibrar com o RC102</button></div>`;
   }
 }
 
@@ -165,7 +165,7 @@ function demoIntercal() {
     GetIntercal: async () => view(),
     StartIntercal: async () => { d = { state: "pronta", start: Date.now() - 864e5, end: Date.now(), result: res() }; return view(); },
     CancelIntercal: async () => { d = { state: "parado" }; },
-    ApplyIntercal: async (skip) => { if (skip) d.skipped = true; else { d.applied = true; await api.SetGMCFactor(0.00564, "com o RadiaCode, coleta de " + new Date(d.start).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }), "intercalibração"); } return view(); },
+    ApplyIntercal: async (skip) => { if (skip) d.skipped = true; else { d.applied = true; await api.SetGMCFactor(0.00564, "com o RC102, coleta de " + new Date(d.start).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }), "intercalibração"); } return view(); },
     GetConcord: async () => ({ state: "aprendendo", learnedMin: 1260, text: "Aprendendo o normal dos dois em casa: 21 h juntos até agora; a vigia começa em " + new Date(Date.now() + 27 * 864e5).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }) + "." }),
   };
 }

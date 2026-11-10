@@ -557,7 +557,7 @@ type invResp struct {
 	Addrs  []string          `json:"addrs"`
 	Days   map[string]string `json:"days"`
 	Alerts []string          `json:"alerts"`
-	// 2.7.1: RadiaCode e anexos (nil = PC com versão antiga)
+	// 2.7.1: Radiacode e anexos (nil = PC com versão antiga)
 	Rc     *rcInv   `json:"rc,omitempty"`
 	Anexos []string `json:"anexos,omitempty"`
 }

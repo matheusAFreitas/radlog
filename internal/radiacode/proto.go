@@ -1,4 +1,4 @@
-// Package radiacode conversa com os RadiaCode 10x (101/102/103) por USB ou
+// Package radiacode conversa com os Radiacode 10x (101/102/103) por USB ou
 // Bluetooth.
 //
 // O protocolo é o mesmo nos dois meios: cada pedido é
@@ -30,7 +30,7 @@ type Transport interface {
 }
 
 // ErrNotFound: nenhum aparelho nesse meio.
-var ErrNotFound = errors.New("RadiaCode não encontrado")
+var ErrNotFound = errors.New("RC102 não encontrado")
 
 // comandos
 const (
@@ -79,7 +79,7 @@ const BaseLead = 128 * time.Second
 // 1 Sv = 100 R como o aparelho usa) para µSv e µSv/h.
 const DoseScale = 1e4
 
-// Device é um RadiaCode conectado.
+// Device é um Radiacode conectado.
 type Device struct {
 	tr       Transport
 	mu       sync.Mutex

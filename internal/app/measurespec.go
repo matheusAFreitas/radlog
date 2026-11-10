@@ -5,7 +5,7 @@ import (
 	"sort"
 )
 
-// ---------- espectro da medição de objeto (RadiaCode) ----------
+// ---------- espectro da medição de objeto (Radiacode) ----------
 //
 // Com o espectro de cada fase dá para ver em que energias o objeto sobe
 // acima do fundo. Para cada linha gama conhecida, compara as contagens
@@ -48,7 +48,7 @@ var specLines = []specLine{
 
 const specPeakSigma = 3.0
 
-// specFWHM é a largura dos picos do RadiaCode 10x (~9,8% em 662 keV,
+// specFWHM é a largura dos picos do Radiacode 10x (~9,8% em 662 keV,
 // crescendo com √E).
 func specFWHM(kev float64) float64 { return 65 * math.Sqrt(math.Max(kev, 1)/661.7) }
 

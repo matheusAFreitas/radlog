@@ -8,7 +8,7 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- modo busca (RadiaCode) ----------
+// ---------- modo busca (Radiacode) ----------
 //
 // O aparelho manda a contagem em amostras curtas (as "amostras cruas", de
 // ~0,5 s), junto com o resto, a cada leitura (1 vez por segundo). O modo

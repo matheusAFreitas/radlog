@@ -164,8 +164,8 @@ func TestHeatmapAlerts(t *testing.T) {
 	a.addEvent(Event{Time: at(-1, 6, 50).UnixMilli(), End: at(-1, 7, 10).UnixMilli(), Kind: kindAlert, Level: "atencao", CPM: 55, Peak: 61, Text: "Atenção: 55 CPM (acima de 50)"}, true)
 	a.addEvent(Event{Time: at(0, 1, 55).UnixMilli(), End: at(0, 1, 56).UnixMilli(), Kind: kindAlert, Level: "alarme", CPM: 120, Peak: 130, Retro: true, Text: "Alarme (histórico do contador)"}, true)
 	a.addEvent(Event{Time: at(-30, 1, 0).UnixMilli(), Kind: kindAlert, Level: "alarme", Text: "Alarme: fora do período"}, true)
-	// alerta do RadiaCode: não entra no mapa do GMC
-	a.addEvent(Event{Time: at(-2, 3, 0).UnixMilli(), End: at(-2, 3, 5).UnixMilli(), Kind: kindAlert, Level: "alarme", Device: devRC, Text: "RadiaCode: alarme"}, true)
+	// alerta do Radiacode: não entra no mapa do GMC
+	a.addEvent(Event{Time: at(-2, 3, 0).UnixMilli(), End: at(-2, 3, 5).UnixMilli(), Kind: kindAlert, Level: "alarme", Device: devRC, Text: "RC102: alarme"}, true)
 	a.logEvent("Contador conectado")
 
 	h, err := a.GetHeatmap(7)
@@ -515,10 +515,10 @@ func TestRadiacodeMeasure(t *testing.T) {
 	a.settings.NoMeasureReport = true
 	bg := &MeasurePhase{Counts: 600, Seconds: 60, CPM: 600, ErrCPM: 24.5, USv: 0.10, Source: "casa"}
 	a.measure = MeasureState{Phase: "objeto", Seconds: 3, Device: "radiacode", Bg: bg, PhaseStart: time.Now().UnixMilli()}
-	// o GMC não entra numa medição do RadiaCode
+	// o GMC não entra numa medição do Radiacode
 	a.feedMeasure(30, 5, false)
 	if a.GetMeasure().Elapsed != 0 {
-		t.Fatal("GMC entrou na medição do RadiaCode")
+		t.Fatal("GMC entrou na medição do RC102")
 	}
 	// 3 s de amostras de 0,5 s: 40 cps (20 contagens cada) e 0,3 µSv/h
 	for i := 0; i < 3; i++ {
@@ -553,7 +553,7 @@ func TestDualMeasure(t *testing.T) {
 	a.settings.NoMeasureReport = true
 	rcBg := &MeasurePhase{Counts: 43200, Seconds: 3600, CPM: 720, ErrCPM: 3.5, USv: 0.10, Source: "casa"}
 	gBg := &MeasurePhase{Counts: 1500, Seconds: 3600, CPM: 25, ErrCPM: 0.65, USv: 0.16, Source: "casa"}
-	// os dois perto: o objeto quase não muda o RadiaCode e triplica o GMC (beta)
+	// os dois perto: o objeto quase não muda o Radiacode e triplica o GMC (beta)
 	a.measure = MeasureState{Phase: "objeto", Seconds: 60, Device: "radiacode", Mode: "ambos", Bg: rcBg, PhaseStart: time.Now().UnixMilli(),
 		Other: &MeasureSide{Device: "gmc", Role: "objeto", Bg: gBg}}
 	for i := 0; i < 60; i++ {
@@ -576,7 +576,7 @@ func TestDualMeasure(t *testing.T) {
 		t.Fatalf("salva: %+v", list)
 	}
 
-	// um no objeto (GMC), outro com você (RadiaCode): dose da pessoa
+	// um no objeto (GMC), outro com você (Radiacode): dose da pessoa
 	a.measure = MeasureState{Phase: "objeto", Seconds: 30, Device: "gmc", Mode: "voce", Bg: gBg, PhaseStart: time.Now().UnixMilli(),
 		Other: &MeasureSide{Device: "radiacode", Role: "voce", BgUSv: 0.10}}
 	for i := 0; i < 30; i++ {

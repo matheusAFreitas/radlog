@@ -60,7 +60,7 @@ function whRole(place, w) {
   if (!here.length) return { src: "", why: "ninguém" };
   const m = here.filter(whMeasuring);
   if (m.length) return { src: m[0], both: place === "casa" && m.length === 2, sat: whLive(m[0]).state === "saturado", covers: m[0] !== here[0] ? here[0] : null };
-  // o RadiaCode longe do PC continua somando a dose sozinho
+  // o Radiacode longe do PC continua somando a dose sozinho
   if (place === "comigo" && here.includes("radiacode") && ["sem dado", "conectando"].includes(whLive("radiacode").state)) return { src: "radiacode", curve: true };
   return { src: "", why: "sem dado", dev: here[0] };
 }
@@ -74,14 +74,14 @@ function whLines(w) {
     ? (hr.why === "ninguém" ? { cls: "blank", t: "Casa sem medição", d: "Nenhum aparelho em casa. Fundo e dose da casa ficam em branco." }
       : { cls: "warnb", t: "Casa sem dado", d: `O ${WH_NAME[hr.dev]} está em casa, mas não manda leitura. Esses minutos ficam em branco.` })
     : { cls: hr.sat ? "warnb" : "", t: hr.both ? "Casa pelos dois" : `Casa pelo ${WH_NAME[hr.src]}`,
-      d: (hr.both ? "O GMC-800 mede a casa e o RadiaCode preenche se ele falhar." : hr.covers ? `Ele assume enquanto o ${WH_NAME[hr.covers]} não mede.` : hr.src === "gmc" ? "Como sempre." : "Ele entra no fundo da casa enquanto estiver lá."), sat: hr.sat ? satTxt : "" };
+      d: (hr.both ? "O GMC-800 mede a casa e o RC102 preenche se ele falhar." : hr.covers ? `Ele assume enquanto o ${WH_NAME[hr.covers]} não mede.` : hr.src === "gmc" ? "Como sempre." : "Ele entra no fundo da casa enquanto estiver lá."), sat: hr.sat ? satTxt : "" };
   const pers = !pr.src
     ? (pr.why === "ninguém" ? { cls: "blank", t: "Sem dosímetro com você", d: w.notHome ? "Você marcou que não estava em casa: sua dose fica em branco neste trecho." : "Sua dose fica em branco neste trecho." }
       : { cls: "warnb", t: "Sua dose sem dado", d: `O ${WH_NAME[pr.dev]} está com você, mas não manda leitura.` })
     : pr.homeRead ? { cls: pr.sat ? "warnb" : "", t: "Sua dose pela leitura de casa", d: "Os dois ficaram em casa, então você também estava. Se saiu e esqueceu de levar, marque \"eu não estava em casa\" no trecho e ele fica em branco.", sat: pr.sat ? satTxt : "" }
-    : pr.curve ? { cls: "", t: "Sua dose pelo RadiaCode", d: "Desconectado, mas ele continua somando a dose sozinho. Só a curva minuto a minuto fica faltando até reconectar." }
+    : pr.curve ? { cls: "", t: "Sua dose pelo RC102", d: "Desconectado, mas ele continua somando a dose sozinho. Só a curva minuto a minuto fica faltando até reconectar." }
     : { cls: pr.sat ? "warnb" : "", t: `Sua dose pelo ${WH_NAME[pr.src]}`,
-      d: (pr.covers ? `Ele assume enquanto o ${WH_NAME[pr.covers]} não mede.` : both ? "O GMC-800 vai junto e preenche se o RadiaCode falhar." : pr.src === "radiacode" ? "Como sempre." : "Ele sai do fundo da casa enquanto estiver com você."), sat: pr.sat ? satTxt : "" };
+      d: (pr.covers ? `Ele assume enquanto o ${WH_NAME[pr.covers]} não mede.` : both ? "O GMC-800 vai junto e preenche se o RC102 falhar." : pr.src === "radiacode" ? "Como sempre." : "Ele sai do fundo da casa enquanto estiver com você."), sat: pr.sat ? satTxt : "" };
   return { hr, pr, home, pers };
 }
 
@@ -148,7 +148,7 @@ function renderWhere() {
     at.textContent = hhmm(fromLast ? lastGood : Date.now());
     if (whIsNormal(whPending)) {
       b.textContent = "Voltar ao normal";
-      txt.append(b, " a partir de agora (", at, "): GMC-800 em casa, RadiaCode com você.");
+      txt.append(b, " a partir de agora (", at, "): GMC-800 em casa, RC102 com você.");
     } else {
       const l = whLines(whPending);
       b.textContent = whKind(whPending);

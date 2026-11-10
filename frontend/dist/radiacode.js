@@ -1,6 +1,6 @@
-// ---------- aba RadiaCode: exemplos simulados ----------
+// ---------- aba Radiacode: exemplos simulados ----------
 //
-// Tudo aqui usa dados SIMULADOS, no mesmo formato que o RadiaCode 102 manda
+// Tudo aqui usa dados SIMULADOS, no mesmo formato que o Radiacode 102 manda
 // (1024 canais com calibração de energia E = a0 + a1·c + a2·c²), para deixar
 // as telas prontas antes do aparelho chegar. Quando ele chegar, é trocar a
 // fonte dos dados (simulação → aparelho) e manter os desenhos.
@@ -191,7 +191,7 @@
     for (let i = 0; i < NCH; i++) sp.counts[i] += poisson(sp.rate[i] * dt);
     sp.t += dt;
   }
-  // ---------- espectro ao vivo (RadiaCode conectado) ----------
+  // ---------- espectro ao vivo (Radiacode conectado) ----------
   // O aparelho junta o espectro dele o tempo todo; a tela mostra o que entrou
   // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
@@ -419,7 +419,7 @@
   }
 
   // ---------- espectrograma de verdade (o que o app gravou do aparelho) ----------
-  // Com o RadiaCode conectado, o app guarda o espectro de cada minuto. Cada
+  // Com o Radiacode conectado, o app guarda o espectro de cada minuto. Cada
   // linha aqui junta um pedaço do período (1 min em 3 h, 30 min em 7 dias);
   // a mais recente fica embaixo.
   const SG_PER = { "3h": [3 * 3600, 60], "12h": [12 * 3600, 120], "24h": [24 * 3600, 300], "7d": [7 * 86400, 1800] };
@@ -466,7 +466,7 @@
     const note = $("rcSimNote"), before = sg.on ? $("rcLogCard").nextElementSibling : $("rcSgCard");
     if (note && before && note.nextElementSibling !== before) before.before(note);
     $("rcSgDesc").textContent = sg.on
-      ? "Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho)."
+      ? "Do seu RC102: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho)."
       : "Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.";
     // eixos
     const emax = sg.on ? sg.emax : SG_EMAX, step = emax > 2000 ? 500 : 250, ax = $("rcSgAxis");
@@ -498,7 +498,7 @@
     document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
     document.querySelector("#rcHardCard .lg-gap").hidden = !hdOn;
     $("rcHdDesc").textContent = hdOn
-      ? "Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva."
+      ? "Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva."
       : "Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.";
     $("rcHdUse").innerHTML = hdOn
       ? "<strong>Para você:</strong> se a contagem sobe e a dureza <b>cai</b>, costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza <b>sobe</b> junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece."
@@ -828,11 +828,11 @@
     $("rcSoundBox").hidden = on;
     $("rcSrSoundBox").hidden = !on;
     $("rcSrDesc").textContent = on
-      ? "Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
-      : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.";
+      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
+      : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.";
     $("rcSrUse").innerHTML = on
-      ? "<strong>Para você:</strong> passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação."
-      : "<strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.";
+      ? "<strong>Para você:</strong> passe o RC102 devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação."
+      : "<strong>Para você:</strong> passar o RC102 pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.";
     if (!on) srSound("");
     else srSound($("rcSrSound").value);
   }
@@ -966,7 +966,7 @@
   // Valores típicos para comparar (fontes no comentário de cada um).
   const ACT_PRESETS = {
     castanha: { name: "castanha-do-pará", mass: 500, nucs: ["Ra-226", "Ra-228", "K-40"],
-      hint: "Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RadiaCode é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\")." },
+      hint: "Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RC102 é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\")." },
     areia: { name: "areia monazítica", mass: 500, nucs: ["Th-232", "Ra-226", "K-40"],
       hint: "Areia seca, pote cheio. Típico: Th-232 de ~1.000 a 2.300 Bq/kg em praias de Marataízes (ES); solo comum tem ~45 Bq/kg (UNSCEAR 2000). Sai em menos de 1 h." },
     rocha: { name: "granito / porcelanato", mass: 500, nucs: ["K-40", "Ra-226", "Th-232"],
@@ -974,7 +974,7 @@
     urania: { name: "vidro ou esmalte de urânio", mass: 100, nucs: ["U-238", "Ra-226"],
       hint: "O urânio-238 sai pela linha de 1.001 keV (fraca): só funciona com peça forte. O rádio costuma ser baixo, porque o urânio foi purificado ao fazer o vidro." },
     comida: { name: "alimento", mass: 500, nucs: ["Cs-137", "K-40"],
-      hint: "Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RadiaCode enxerga: o resultado deve ser \"abaixo de\"." },
+      hint: "Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RC102 enxerga: o resultado deve ser \"abaixo de\"." },
     adubo: { name: "adubo de potássio", mass: 500, nucs: ["K-40"],
       hint: "Pelo K-40 o app calcula quanto potássio tem (31,7 Bq por grama de potássio)." },
     outro: { name: "", mass: 100, nucs: ["K-40", "Ra-226", "Th-232"], hint: "" },
@@ -1059,10 +1059,10 @@
     if (!$("rcActGeom").value) $("rcActGeom").value = (v.cal && v.cal.geometry) || "";
     const pr = ACT_PRESETS[act.preset];
     $("rcActHint").textContent = act.kind === "amostra" ? pr.hint : act.kind === "kcl"
-      ? "Pote cheio de sal, o RadiaCode encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar."
-      : "O eletrodo encostado no RadiaCode. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.";
+      ? "Pote cheio de sal, o RC102 encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar."
+      : "O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.";
     $("rcActStart").disabled = !v.connected;
-    $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : "Conecte o RadiaCode para medir.";
+    $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : "Conecte o RC102 para medir.";
     // em andamento
     if (running) actRenderRun(v);
     // gráfico
@@ -1076,7 +1076,7 @@
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
     const step = {
-      fundo: `<b>1. Fundo:</b> tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.`,
+      fundo: `<b>1. Fundo:</b> tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.`,
       trocar: `<b>2. Amostra:</b> coloque ${esc(o.name || "a amostra")} na posição (${esc(o.geometry || "a mesma da calibração")}) e clique em Começar.`,
       amostra: `<b>${o.newBg ? "3" : "1"}. Medindo:</b> ${esc(o.name || "")} (${nf(o.massG, 1)} g)`,
       pronto: `<b>Pronto:</b> ${esc(o.name || "")}`,
@@ -1247,7 +1247,7 @@
     $("rcSpecSimTag").hidden = rl.on;
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
-      ? "Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
+      ? "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
       : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";

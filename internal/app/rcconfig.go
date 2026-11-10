@@ -13,11 +13,11 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- ajustes gravados no RadiaCode ----------
+// ---------- ajustes gravados no Radiacode ----------
 //
-// Configurações › RadiaCode mostra os ajustes do próprio aparelho (alarmes,
+// Configurações › Radiacode mostra os ajustes do próprio aparelho (alarmes,
 // som e vibração, tela, unidades) como foram lidos agora, e grava só quando
-// a pessoa clica em "Gravar no RadiaCode". Antes de gravar, o app guarda uma
+// a pessoa clica em "Gravar no Radiacode". Antes de gravar, o app guarda uma
 // cópia do que estava; depois lê de volta e registra a mudança no histórico
 // de configurações. "Desfazer a última gravação" grava a cópia de volta.
 //
@@ -26,7 +26,7 @@ import (
 
 const rcCfgDir = "configuracao"
 
-var errRcOff = errors.New("RadiaCode desconectado: conecte para ver e mudar os ajustes do aparelho")
+var errRcOff = errors.New("RC102 desconectado: conecte para ver e mudar os ajustes do aparelho")
 
 func (a *App) rcCfgPath(name string) string { return filepath.Join(a.rcDir(), rcCfgDir, name) }
 
@@ -88,7 +88,7 @@ func (a *App) rcSettingsOut(s radiacode.Settings) RcSettings {
 	return out
 }
 
-// GetRcSettings lê os ajustes do RadiaCode. A primeira leitura de cada
+// GetRcSettings lê os ajustes do Radiacode. A primeira leitura de cada
 // conexão guarda uma cópia.
 func (a *App) GetRcSettings() (RcSettings, error) {
 	dev := a.rcDevice()
@@ -116,7 +116,7 @@ func (a *App) rcApply(next radiacode.Settings, what string) (RcSettings, error) 
 		return RcSettings{}, errRcOff
 	}
 	if !a.rcCfgBusy.CompareAndSwap(false, true) {
-		return RcSettings{}, errors.New("já estou gravando no RadiaCode")
+		return RcSettings{}, errors.New("já estou gravando no RC102")
 	}
 	defer a.rcCfgBusy.Store(false)
 	cur, err := dev.ReadSettings()
@@ -135,15 +135,15 @@ func (a *App) rcApply(next radiacode.Settings, what string) (RcSettings, error) 
 	got, n, werr := dev.WriteSettings(cur, next)
 	desc := radiacode.DescribeChanges(cur, got)
 	if desc != "nada mudou" {
-		a.logEvent("Ajustes do RadiaCode alterados" + what + ": " + desc)
-		a.cfgNote("Ajustes do RadiaCode", desc, "você (pelo app)")
+		a.logEvent("Ajustes do RC102 alterados" + what + ": " + desc)
+		a.cfgNote("Ajustes do RC102", desc, "você (pelo app)")
 	}
-	// os alertas do RadiaCode usam os alarmes 1 e 2 de taxa do aparelho
+	// os alertas do Radiacode usam os alarmes 1 e 2 de taxa do aparelho
 	if al, err := dev.Alarms(); err == nil {
 		a.rcSet(func(s *RcState) { s.Alarms = &al })
 	}
 	if werr != nil {
-		a.logEvent("Erro ao gravar os ajustes do RadiaCode: " + werr.Error())
+		a.logEvent("Erro ao gravar os ajustes do RC102: " + werr.Error())
 		return a.rcSettingsOut(got), fmt.Errorf("a gravação parou no %dº ajuste (%s); o que já foi gravado ficou, e a cópia de antes está salva", n+1, werr.Error())
 	}
 	if left := radiacode.DescribeChanges(got, next); left != "nada mudou" {
@@ -152,7 +152,7 @@ func (a *App) rcApply(next radiacode.Settings, what string) (RcSettings, error) 
 	return a.rcSettingsOut(got), nil
 }
 
-// SetRcSettings grava os ajustes no RadiaCode (só o que mudou).
+// SetRcSettings grava os ajustes no Radiacode (só o que mudou).
 func (a *App) SetRcSettings(next radiacode.Settings) (RcSettings, error) {
 	return a.rcApply(next, "")
 }
@@ -176,7 +176,7 @@ func (a *App) UndoRcSettings() (RcSettings, error) {
 	return out, err
 }
 
-// ResetRcDose zera a dose acumulada do RadiaCode.
+// ResetRcDose zera a dose acumulada do Radiacode.
 func (a *App) ResetRcDose() error {
 	dev := a.rcDevice()
 	if dev == nil {
@@ -185,12 +185,12 @@ func (a *App) ResetRcDose() error {
 	if err := dev.ResetDose(); err != nil {
 		return err
 	}
-	a.logEvent("Dose acumulada do RadiaCode zerada pelo app")
-	a.cfgNote("Dose acumulada do RadiaCode", "zerada", "você (pelo app)")
+	a.logEvent("Dose acumulada do RC102 zerada pelo app")
+	a.cfgNote("Dose acumulada do RC102", "zerada", "você (pelo app)")
 	return nil
 }
 
-// OpenRcConfigBackups abre a pasta das cópias dos ajustes do RadiaCode.
+// OpenRcConfigBackups abre a pasta das cópias dos ajustes do Radiacode.
 func (a *App) OpenRcConfigBackups() error {
 	_ = os.MkdirAll(a.rcCfgPath(""), 0o755)
 	return openFolder(a.rcCfgPath(""))

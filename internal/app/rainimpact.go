@@ -91,7 +91,7 @@ type RainImpact struct {
 	SkippedNoBg int           `json:"skippedNoData"` // chuvas sem dados suficientes
 	From        int64         `json:"from"`
 	Now         *RainNow      `json:"now"` // chuva em andamento ou recente
-	// aparelho: "gmc" ou "radiacode". No RadiaCode a conta é feita no CPM
+	// aparelho: "gmc" ou "radiacode". No Radiacode a conta é feita no CPM
 	// dele (cps × 60, que segue Poisson) e USvPerCPM converte para µSv/h.
 	Device    string  `json:"device"`
 	USvPerCPM float64 `json:"usvPerCPM"`
@@ -270,7 +270,7 @@ func (a *App) GetRainImpactDev(dev string) (RainImpact, error) {
 	from := now.Add(-rainKeepDays * 24 * time.Hour)
 	var pts []store.Point
 	if res.Device == devRC {
-		// minutos do RadiaCode em casa, fora de alertas, como CPM
+		// minutos do Radiacode em casa, fora de alertas, como CPM
 		var sumU, sumC float64
 		inAlert := a.alertChecker()
 		for _, p := range a.rcRange(from.Add(-rainBaseWin), now.Add(time.Minute)) {
@@ -371,7 +371,7 @@ func (a *App) GetRainImpactDev(dev string) (RainImpact, error) {
 	}
 	res.Now = rainNow(spans, m, now, latest, from, covered)
 	if res.Now != nil && res.Device == devRC && res.Now.Reason == "sem leituras do contador nas 2 h antes" {
-		res.Now.Reason = "sem leituras do RadiaCode nas 2 h antes"
+		res.Now.Reason = "sem leituras do RC102 nas 2 h antes"
 	}
 	res.N = len(res.Episodes)
 	if res.N > 0 {

@@ -1,6 +1,6 @@
 // Tela do aparelho (ajuste da 2.26.0, opção B aprovada pelo ACE em 10/11).
 //
-// Na página do GMC-800 e na do RadiaCode o valor aparece uma vez só: o
+// Na página do GMC-800 e na do Radiacode o valor aparece uma vez só: o
 // cartão grande do aparelho tem o mostrador fazendo o papel da régua (as três
 // faixas sempre à vista, apagadas, e acesas até a leitura, com um ponto na
 // leitura e os limites escritos nos vãos do anel). O quadro do próprio
@@ -196,7 +196,7 @@ function renderGmcConn() {
   via.textContent = conn === "wait" ? "· conectando…" : since ? `· desconectado há ${agoTxt(since)}` : "· desconectado";
   via.className = "rc-main-via gmc-via mono conn-" + conn;
 }
-// mostrador grande do RadiaCode (alarmes do aparelho; perigo no limite do
+// mostrador grande do Radiacode (alarmes do aparelho; perigo no limite do
 // app ou a 10× o alarme 2 enquanto não houver um limite próprio)
 function rcDialLimits(st, attn, alarm, own) {
   const lim = st.limits || {};
@@ -221,7 +221,7 @@ function renderRcDial(st, o) {
   renderRcConn(st);
 }
 
-// cartão do RadiaCode quando não está conectado (como o do GMC)
+// cartão do Radiacode quando não está conectado (como o do GMC)
 function renderRcConn(st) {
   const main = $("rcMain");
   if (!main) return;
@@ -230,12 +230,12 @@ function renderRcConn(st) {
   main.classList.toggle("conn-wait", conn === "wait");
   const via = st.via === "bluetooth" ? "Bluetooth" : st.via === "usb" ? "USB" : "";
   const why = st.state === "erro" && st.err ? devPlainWhy(st.err)
-    : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
+    : st.state === "off" ? "A procura está desligada em Configurações → Radiacode 102."
     : st.ble ? "Não apareceu no USB nem no Bluetooth. Ele está ligado e perto? O celular não está conectado nele?"
     : "Não apareceu no USB. O cabo está ligado?";
   devLost($("rLost"), {
-    conn, name: "RadiaCode", since, why,
-    tech: ["RadiaCode", st.ble, via, since ? `último contato ${atTxt(since)}` : ""].filter(Boolean).join(" · "),
+    conn, name: "RC102", since, why,
+    tech: ["RC102", st.ble, via, since ? `último contato ${atTxt(since)}` : ""].filter(Boolean).join(" · "),
     acts: [["rc-retry", "Procurar de novo"], ["rc-cfg", "Configurar conexão"]],
   });
   if (!conn) return;

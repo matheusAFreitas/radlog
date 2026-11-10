@@ -20,9 +20,9 @@ import (
 	"radlog/internal/store"
 )
 
-// ---------- RadiaCode 10x: conexão, leitura ao vivo e gravação ----------
+// ---------- Radiacode 10x: conexão, leitura ao vivo e gravação ----------
 //
-// O app procura o RadiaCode sozinho: primeiro no USB e, se tiver endereço
+// O app procura o Radiacode sozinho: primeiro no USB e, se tiver endereço
 // Bluetooth configurado (Linux), no Bluetooth. Se o celular estiver com o
 // aparelho, a conexão Bluetooth falha e o app tenta de novo depois: quando o
 // celular solta, o PC assume.
@@ -39,7 +39,7 @@ const (
 	rcCompareMax = 24 * 60
 )
 
-// RcState é o que a tela mostra do RadiaCode.
+// RcState é o que a tela mostra do Radiacode.
 type RcState struct {
 	State    string                 `json:"state"` // off, procurando, conectando, conectado, erro
 	Via      string                 `json:"via"`   // usb, bluetooth
@@ -78,7 +78,7 @@ type RcState struct {
 	AttnUSv   float64 `json:"attnUSv"`
 	AlarmUSv  float64 `json:"alarmUSv"`
 	DangerUSv float64 `json:"dangerUSv"`
-	// alertas do RadiaCode: o nível aberto agora e os limites usados
+	// alertas do Radiacode: o nível aberto agora e os limites usados
 	AlertLevel string   `json:"alertLevel"`
 	Limits     RcLimits `json:"limits"`
 	// dose acumulada do aparelho (desde que foi zerado), ao vivo quando
@@ -91,7 +91,7 @@ type RcState struct {
 	Demo bool `json:"demo,omitempty"`
 }
 
-// RcStats são as medidas do RadiaCode como as do GMC: fundo de casa, média
+// RcStats são as medidas do Radiacode como as do GMC: fundo de casa, média
 // da última hora e mínimo/máximo de 24 h (minutos gravados).
 type RcStats struct {
 	BgUSv     float64 `json:"bgUSv"` // mediana em casa (7 dias)
@@ -165,7 +165,7 @@ type rcMinute struct {
 	n        int
 }
 
-// GetRadiacode devolve o estado do RadiaCode.
+// GetRadiacode devolve o estado do Radiacode.
 func (a *App) GetRadiacode() RcState {
 	stats := a.rcStats()
 	lim := a.rcLimits()
@@ -320,7 +320,7 @@ func (a *App) SetRadiacode(on bool, ble string) RcState {
 	return a.GetRadiacode()
 }
 
-// ScanRadiacodeBLE procura RadiaCodes no Bluetooth (uns 6 s).
+// ScanRadiacodeBLE procura Radiacodes no Bluetooth (uns 6 s).
 func (a *App) ScanRadiacodeBLE() ([]radiacode.BLEDevice, error) {
 	list, err := radiacode.ScanBLE(6 * time.Second)
 	if err != nil {
@@ -426,7 +426,7 @@ func (a *App) rcLoop() {
 		if viaBLE {
 			if time.Since(began) < 2*time.Minute {
 				bleFails++
-				a.logf("RadiaCode: a conexão pelo Bluetooth caiu em %s; próxima tentativa em %s", time.Since(began).Round(time.Second), bleGap())
+				a.logf("RC102: a conexão pelo Bluetooth caiu em %s; próxima tentativa em %s", time.Since(began).Round(time.Second), bleGap())
 			} else {
 				bleFails = 0
 			}
@@ -485,7 +485,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.emitRc()
 	}()
 	via := map[string]string{"usb": "USB", "bluetooth": "Bluetooth"}[dev.Kind()]
-	a.logEvent(fmt.Sprintf("RadiaCode conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
+	a.logEvent(fmt.Sprintf("RC102 conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
 	a.rcRawSnapshot(dev)
 	a.rcTextLog(dev)
@@ -506,7 +506,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 				continue
 			}
 			msg := err.Error()
-			a.logEvent("RadiaCode desconectado: " + msg)
+			a.logEvent("RC102 desconectado: " + msg)
 			a.rcSet(func(s *RcState) { s.State, s.Err = "erro", msg })
 			break
 		}
@@ -613,7 +613,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 					continue
 				}
 			}
-			a.logEvent("RadiaCode: " + radiacode.EventName(v.ID))
+			a.logEvent("RC102: " + radiacode.EventName(v.ID))
 		}
 	}
 	if changed {
@@ -699,7 +699,7 @@ func (a *App) rcAppend(m rcMinute) bool {
 	return true
 }
 
-// RcPoint é um minuto gravado do RadiaCode.
+// RcPoint é um minuto gravado do Radiacode.
 type RcPoint struct {
 	T    time.Time
 	CPS  float64
@@ -763,20 +763,20 @@ type RcCompare struct {
 	T       []int64   `json:"t"`   // ms
 	GMC     []float64 `json:"gmc"` // µSv/h (calibração do GMC)
 	GMCCPM  []float64 `json:"gmcCPM"`
-	RC      []float64 `json:"rc"` // µSv/h do RadiaCode
+	RC      []float64 `json:"rc"` // µSv/h do RC102
 	RCCPS   []float64 `json:"rcCPS"`
 	Ratio   float64   `json:"ratio"` // média RC ÷ média GMC (µSv/h)
 	RatioE  float64   `json:"ratioErr"`
 	Corr    float64   `json:"corr"`    // correlação minuto a minuto
 	Minutes int       `json:"minutes"` // minutos com os dois
-	RCOnly  int       `json:"rcOnly"`  // minutos só do RadiaCode
-	// SuggestK é o µSv/h por CPM que faria o GMC bater com o RadiaCode na
+	RCOnly  int       `json:"rcOnly"`  // minutos só do RC102
+	// SuggestK é o µSv/h por CPM que faria o GMC bater com o Radiacode na
 	// média desses minutos (taxas baixas, sem a curva); CurK é o em uso.
 	SuggestK float64 `json:"suggestK"`
 	CurK     float64 `json:"curK"`
 }
 
-// GetRcCompare junta os últimos minutos do GMC e do RadiaCode (intercalibração).
+// GetRcCompare junta os últimos minutos do GMC e do Radiacode (intercalibração).
 func (a *App) GetRcCompare(minutes int) (RcCompare, error) {
 	if minutes <= 0 || minutes > rcCompareMax*7 {
 		minutes = 6 * 60
@@ -866,7 +866,7 @@ func blockRatioErr(rc, gmc []float64, size int) float64 {
 	return math.Sqrt(v/float64(len(rs)-1)) / math.Sqrt(float64(len(rs)))
 }
 
-// withRc põe a curva do RadiaCode (µSv/h) no gráfico, alinhada aos pontos do
+// withRc põe a curva do Radiacode (µSv/h) no gráfico, alinhada aos pontos do
 // GMC: nos passos de menos de 1 min usa as leituras ao vivo da última hora,
 // e nos outros a média dos minutos gravados.
 func (a *App) withRc(c Chart) Chart {
@@ -968,7 +968,7 @@ func (a *App) GetRcSpectrum(accum bool) (RcSpectrum, error) {
 	dev := a.rc.dev
 	a.rc.mu.Unlock()
 	if dev == nil {
-		return RcSpectrum{}, errors.New("RadiaCode não conectado")
+		return RcSpectrum{}, errors.New("RC102 não conectado")
 	}
 	var s radiacode.Spectrum
 	var err error
@@ -983,10 +983,10 @@ func (a *App) GetRcSpectrum(accum bool) (RcSpectrum, error) {
 	return RcSpectrum{Seconds: s.Duration.Seconds(), A: [3]float64{s.A0, s.A1, s.A2}, Counts: s.Counts, Accum: accum}, nil
 }
 
-// ---------- medição de objeto com o RadiaCode ----------
+// ---------- medição de objeto com o Radiacode ----------
 
 // rcMeasureSamples manda as contagens de cada segundo para a medição de
-// objeto (quando ela está usando o RadiaCode).
+// objeto (quando ela está usando o Radiacode).
 func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
 	a.mu.Lock()
 	active := (a.measure.Phase == "fundo" || a.measure.Phase == "objeto") &&
@@ -1019,7 +1019,7 @@ func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
 	}
 }
 
-// rcConnected diz se o RadiaCode está conectado.
+// rcConnected diz se o Radiacode está conectado.
 func (a *App) rcConnected() bool {
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
@@ -1042,13 +1042,13 @@ func (a *App) rcSpectrumNow(accum bool) *radiacode.Spectrum {
 		s, err = dev.Spectrum()
 	}
 	if err != nil {
-		a.logf("RadiaCode: espectro para a medição: %v", err)
+		a.logf("RC102: espectro para a medição: %v", err)
 		return nil
 	}
 	return &s
 }
 
-// rcHomeBackground é o fundo da casa da última hora pelo RadiaCode: minutos
+// rcHomeBackground é o fundo da casa da última hora pelo Radiacode: minutos
 // gravados em casa, fora de alertas e de medições (CPM = cps × 60; o µSv/h é
 // a média do que o aparelho calculou).
 func (a *App) rcHomeBackground() HomeBg {
@@ -1067,7 +1067,7 @@ func (a *App) rcHomeBackground() HomeBg {
 	sp = a.rcHomeOnly(sp)
 	if len(sp) < homeBgMinMins {
 		return HomeBg{Minutes: len(sp), Device: "radiacode",
-			Why: fmt.Sprintf("só %d min do RadiaCode em casa na última hora (precisa de %d)", len(sp), homeBgMinMins)}
+			Why: fmt.Sprintf("só %d min do RC102 em casa na última hora (precisa de %d)", len(sp), homeBgMinMins)}
 	}
 	mins := make([]float64, len(sp))
 	for i, p := range sp {

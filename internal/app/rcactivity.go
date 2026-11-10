@@ -17,7 +17,7 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- atividade (Bq) com o RadiaCode: medição ----------
+// ---------- atividade (Bq) com o Radiacode: medição ----------
 //
 // Uma medição tem duas fases: o fundo (nada perto) e a amostra (na posição
 // combinada). Em cada fase o app guarda o espectro do aparelho no começo e vai
@@ -183,7 +183,7 @@ func (a *App) actCal() ActCal {
 		json.Unmarshal(b, &c)
 	}
 	if c.Geometry == "" {
-		c.Geometry = "pote encostado no RadiaCode"
+		c.Geometry = "pote encostado no RC102"
 	}
 	return c
 }
@@ -285,7 +285,7 @@ func (a *App) StartActivity(o ActOpts) error {
 	}
 	s := a.rcSpectrumNow(false)
 	if s == nil {
-		return errors.New("RadiaCode não conectado")
+		return errors.New("RC102 não conectado")
 	}
 	now := time.Now()
 	r := &actRun{Opts: o, PhaseAt: now.UnixMilli()}
@@ -323,7 +323,7 @@ func (a *App) ActivityNext() error {
 	}
 	s := a.rcSpectrumNow(false)
 	if s == nil {
-		return errors.New("RadiaCode não conectado")
+		return errors.New("RC102 não conectado")
 	}
 	st.mu.Lock()
 	defer st.mu.Unlock()

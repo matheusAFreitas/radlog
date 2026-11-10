@@ -32,10 +32,10 @@ function measureLogReading(r) {
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
 }
 
-// dose acumulada do próprio RadiaCode (desde que foi zerado), no cartão de
+// dose acumulada do próprio Radiacode (desde que foi zerado), no cartão de
 // dose: anda ao vivo com ele conectado
-// dose do próprio RadiaCode (desde que foi zerado) e a conta do app, em duas
-// linhas curtas dentro do quadro do RadiaCode
+// dose do próprio Radiacode (desde que foi zerado) e a conta do app, em duas
+// linhas curtas dentro do quadro do Radiacode
 function renderDoseDevice() {
   const st = state.rc.st || {}, c = state.dose;
   $("doseDevice").hidden = true;
@@ -70,7 +70,7 @@ function placeRcDevLines() {
   el.hidden = !(state.rcDevLines || []).length;
 }
 
-// alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que
+// alertas do Radiacode: a faixa de alarme/atenção e o som seguem o nível que
 // o app abriu para ele
 function rcAlarmState(st) {
   const lvl = st && st.state === "conectado" ? st.alertLevel || "" : "";
@@ -82,7 +82,7 @@ function rcAlarmState(st) {
   setAttention("rc", !!lvl);
 }
 
-// RadiaCode medindo: a leitura ao vivo é o CPS do aparelho × 60
+// Radiacode medindo: a leitura ao vivo é o CPS do aparelho × 60
 function measureLogRc(rs) {
   const st = state.measureSt;
   if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !rs || rs.state !== "conectado") return;
@@ -260,7 +260,7 @@ const plusMinus = (v) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), 1);
 
 // ---------- medição em µSv/h ----------
 // As contas (incerteza, σ) são feitas nas contagens; a tela mostra tudo em
-// µSv/h. k = µSv/h por CPM: o RadiaCode tem a dose dele (k da fase), o GMC
+// µSv/h. k = µSv/h por CPM: o Radiacode tem a dose dele (k da fase), o GMC
 // usa a calibração.
 const rcK = () => { const s = state.rc.st || {}; return s.cps > 0 && s.usvh > 0 ? s.usvh / (s.cps * 60) : 0.1 / 720; };
 const devK = (dev) => (dev === "radiacode" ? rcK() : calK());
@@ -340,7 +340,7 @@ async function refreshHomeBg(force) {
   if (state.measureSt) renderMeasure(state.measureSt);
 }
 
-// aparelho da medição: o escolhido antes ou, da primeira vez, o RadiaCode
+// aparelho da medição: o escolhido antes ou, da primeira vez, o Radiacode
 // se estiver conectado
 const rcOnline = () => !!(state.rc.st && state.rc.st.state === "conectado");
 function measureDevDefault() {
@@ -366,7 +366,7 @@ function renderMeasure(st) {
   $("mObjDevBox").hidden = $("mDev").value !== "voce";
   const o = measureOpts();
   const rc = started ? isRcMeasure(st) : o.device === "radiacode";
-  $("mDistLabel").textContent = o.mode === "ambos" ? "Distância até os aparelhos (opcional)" : rc ? "Distância até o RadiaCode (opcional)" : "Distância até o tubo (opcional)";
+  $("mDistLabel").textContent = o.mode === "ambos" ? "Distância até os aparelhos (opcional)" : rc ? "Distância até o RC102 (opcional)" : "Distância até o tubo (opcional)";
   const home = started ? !!(st.bg && st.bg.source === "casa") : o.homeBg;
   const auto = started ? !!st.auto : o.auto;
   $("mPctBox").style.visibility = o.auto ? "" : "hidden";
@@ -374,11 +374,11 @@ function renderMeasure(st) {
   const hb = state.homeBg;
   // dica embaixo das opções
   $("mOptHint").textContent = !started ? [
-    (rc || o.mode) && !rcOnline() ? "O RadiaCode não está conectado." : "",
+    (rc || o.mode) && !rcOnline() ? "O RC102 não está conectado." : "",
     o.mode && state.status.state !== "conectado" ? "O GMC-800 não está conectado." : "",
-    o.mode === "ambos" ? "Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite." : "",
+    o.mode === "ambos" ? "Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RC102, quase só gama: comparando, dá uma pista do que o objeto emite." : "",
     o.mode === "voce" ? `Deixe o ${devLabel(o.device)} no objeto e o ${devLabel(o.device === "radiacode" ? "gmc" : "radiacode")} com você (no bolso ou na mão): no fim, o app mostra quanto você recebeu enquanto o objeto era medido.` : "",
-    o.homeBg ? (rc ? "Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro)." : "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).") : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
+    o.homeBg ? (rc ? "Fundo da casa: só vale se o RC102 passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro)." : "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).") : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
     o.auto ? `Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ${o.pct}% do fundo.` : "",
   ].filter(Boolean).join(" ") : "";
   // passo 1: fundo
@@ -456,7 +456,7 @@ function renderMeasure(st) {
 
 // ---------- segundo aparelho (os dois perto, ou um com você) ----------
 
-const devLabel = (d) => (d === "radiacode" ? "RadiaCode" : "GMC-800");
+const devLabel = (d) => (d === "radiacode" ? "RC102" : "GMC-800");
 const DEV_COLOR = { radiacode: COR.rc, gmc: COR.accent };
 
 // os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
@@ -526,10 +526,10 @@ function renderSideResult(box, m) {
   if (r) add("mono", `${sgnUS(r.netUSv)} ± ${uS(r.netErr, phK(o.obj, o.device))} sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo`);
   else add("small muted", "Sem leituras suficientes desse aparelho.");
   if (o.hint) add("small", o.hint);
-  add("small muted", "O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.");
+  add("small muted", "O GMC vê beta e gama; o RC102, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.");
 }
 
-// ---------- espectro da medição (RadiaCode) ----------
+// ---------- espectro da medição (Radiacode) ----------
 
 const kevTxt = (k) => k.toLocaleString(LOCALE, { useGrouping: false, maximumFractionDigits: 1, minimumFractionDigits: 1 });
 const specFWHM = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
@@ -780,7 +780,7 @@ function renderMeasureDetail() {
   const home = m.bg.source === "casa";
   const rc = isRcMeasure(m);
   $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "") +
-    (m.mode === "ambos" ? " · os dois aparelhos" : m.mode === "voce" ? ` · ${rc ? "RadiaCode" : "GMC-800"} no objeto, ${rc ? "GMC-800" : "RadiaCode"} com você` : rc ? " · RadiaCode" : "");
+    (m.mode === "ambos" ? " · os dois aparelhos" : m.mode === "voce" ? ` · ${rc ? "RC102" : "GMC-800"} no objeto, ${rc ? "GMC-800" : "RC102"} com você` : rc ? " · RC102" : "");
   const v = $("mdVerdict");
   v.className = "m-verdict " + r.level;
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
@@ -826,7 +826,7 @@ async function renderMeasureExtra(m) {
   if (api.GetMeasurementContext) { try { ctx = await api.GetMeasurementContext(m.id); } catch (e) { ctx = null; } }
   if (my !== mCtxSeq) return;
   const cfg = $("mdCfg");
-  if (isRcMeasure(m)) cfg.textContent = "Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.";
+  if (isRcMeasure(m)) cfg.textContent = "Medição do RC102: o µSv/h vem da calibração do próprio aparelho.";
   else if (!ctx || !ctx.cfgKnown) cfg.textContent = "Sem registro: o histórico de configurações começa na versão 2.1.";
   else {
     cfg.textContent = "";

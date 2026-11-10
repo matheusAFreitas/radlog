@@ -17,7 +17,7 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- dados brutos do RadiaCode ----------
+// ---------- dados brutos do Radiacode ----------
 //
 // Para descobrir o que mais o aparelho oferece, o app guarda tudo o que ele
 // manda, como veio:
@@ -29,7 +29,7 @@ import (
 //   - radiacode/bruto/conexao-AAAAMMDD-HHMMSS.json: a cada conexão, todos os
 //     registradores e "strings virtuais" que dá para ler (inclusive as de
 //     formato desconhecido, como a cópia da memória).
-// Entra no backup. Desliga em Configurações → RadiaCode.
+// Entra no backup. Desliga em Configurações → Radiacode.
 
 const rcRawDir = "bruto"
 
@@ -179,7 +179,7 @@ func (a *App) rcRawSnapshot(dev *radiacode.Device) {
 	os.WriteFile(a.rcRawPath("conexao-"+now.Format("20060102-150405")+".json"), b, 0o644)
 }
 
-// rcBackupFiles são os arquivos do RadiaCode que vão no backup.
+// rcBackupFiles são os arquivos do Radiacode que vão no backup.
 func (a *App) rcBackupFiles() []string {
 	var out []string
 	mins, _ := filepath.Glob(filepath.Join(a.rcDir(), "*.csv"))
@@ -214,7 +214,7 @@ func (a *App) rcBackupFiles() []string {
 	return out
 }
 
-// rcMergeFile junta um arquivo do RadiaCode vindo de um backup: os minutos
+// rcMergeFile junta um arquivo do Radiacode vindo de um backup: os minutos
 // (radiacode/AAAA-MM.csv) entram pela hora, sem repetir; os brutos só se o
 // arquivo não existir aqui. Devolve quantos minutos entraram.
 func (a *App) rcMergeFile(rel string, data []byte) int {
@@ -343,7 +343,7 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	return added
 }
 
-// SetRcRaw liga/desliga a gravação dos dados brutos do RadiaCode.
+// SetRcRaw liga/desliga a gravação dos dados brutos do Radiacode.
 func (a *App) SetRcRaw(on bool) RcState {
 	a.mu.Lock()
 	a.settings.RcNoRaw = !on
@@ -369,7 +369,7 @@ func (a *App) rcTextLog(dev *radiacode.Device) {
 
 // rcTextRepeat: a mesma mensagem do aparelho entra no log no máximo uma vez
 // nesse intervalo; as repetições viram uma contagem na próxima vez que ela
-// entra. O RadiaCode 102 (firmware 4.15) solta "Error: S1/S2 Data frame
+// entra. O Radiacode 102 (firmware 4.15) solta "Error: S1/S2 Data frame
 // corrupted!" a cada ~100 s: eram ~5 mil linhas por dia, o log.txt passava
 // de 2 MB em horas e o log-anterior.txt perdia o resto.
 const rcTextRepeat = time.Hour
@@ -422,7 +422,7 @@ func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
 			t.skipped[l.Text]++
 			continue
 		}
-		msg := fmt.Sprintf("RadiaCode (mensagem do aparelho, %s): %s", when.Format("15:04:05"), l.Text)
+		msg := fmt.Sprintf("RC102 (mensagem do aparelho, %s): %s", when.Format("15:04:05"), l.Text)
 		if n := t.skipped[l.Text]; n > 0 {
 			msg += fmt.Sprintf(" (repetiu mais %d vezes desde %s)", n, t.last[l.Text].Format("15:04"))
 		}

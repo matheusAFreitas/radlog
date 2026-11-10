@@ -84,12 +84,12 @@ func TestRcSettingsSetUndo(t *testing.T) {
 	if err != nil || got.DoseRate1 != 0.3 || got.Brightness != 5 || !got.CanUndo {
 		t.Fatalf("gravação: %+v %v", got, err)
 	}
-	// os alertas do RadiaCode passam a usar os alarmes novos
+	// os alertas do Radiacode passam a usar os alarmes novos
 	if l := a.rcLimits(); !l.Device || l.Attn != 0.3 || l.Alarm != 0.9 {
 		t.Fatalf("limites dos alertas: %+v", l)
 	}
 	h := a.GetConfigHistory()
-	if len(h) == 0 || h[0].Field != "Ajustes do RadiaCode" || !strings.Contains(h[0].To, "brilho: 1 → 5") {
+	if len(h) == 0 || h[0].Field != "Ajustes do RC102" || !strings.Contains(h[0].To, "brilho: 1 → 5") {
 		t.Fatalf("histórico: %+v", h)
 	}
 

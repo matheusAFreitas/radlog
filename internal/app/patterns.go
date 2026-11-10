@@ -14,7 +14,7 @@ import (
 // Mediana (com o intervalo interquartil) por hora do dia, por dia da semana
 // e por mês, e a comparação dia × noite. Só os minutos em casa, sem objeto
 // encostado e sem minutos saturados ou com interferência. GMC em CPM,
-// RadiaCode em µSv/h.
+// Radiacode em µSv/h.
 
 // PatStat resume um grupo de minutos.
 type PatStat struct {

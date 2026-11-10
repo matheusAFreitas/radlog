@@ -8,7 +8,7 @@ import (
 )
 
 // ErrNoBLE: Bluetooth não feito neste sistema.
-var ErrNoBLE = errors.New("Bluetooth com o RadiaCode só no Windows e no Linux")
+var ErrNoBLE = errors.New("Bluetooth com o RC102 só no Windows e no Linux")
 
 // BLESupported diz se este sistema conecta pelo Bluetooth.
 const BLESupported = false

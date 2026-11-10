@@ -75,8 +75,8 @@ func (a *App) GetPeriods() []Period {
 // o trecho aberto pela tela Agora fica sem fim (To = 0).
 func (a *App) SavePeriod(p Period) (Period, error) {
 	var err error
-	// GMC em casa e RadiaCode com você é o normal, a não ser que você não
-	// estivesse em casa (saiu com o RadiaCode): aí o trecho tira as leituras
+	// GMC em casa e Radiacode com você é o normal, a não ser que você não
+	// estivesse em casa (saiu com o Radiacode): aí o trecho tira as leituras
 	// dele do fundo da casa
 	if out := p.NotHome && p.GMC == WhereHome && p.RC == WhereMe; out {
 		// já está certo
@@ -162,11 +162,11 @@ func (a *App) DeletePeriod(id int64) error {
 }
 
 // awayChecker diz se o GMC-800 estava fora de casa num instante (roles.go).
-// Para o RadiaCode, use rcAwayChecker.
+// Para o Radiacode, use rcAwayChecker.
 func (a *App) awayChecker() func(time.Time) bool { return a.awayCheckerFor("gmc") }
 
 // homeOnly tira os pontos do GMC fora de casa (roles.go) e
-// das medições de objeto. Para o RadiaCode, use rcHomeOnly.
+// das medições de objeto. Para o Radiacode, use rcHomeOnly.
 func (a *App) homeOnly(pts []store.Point) []store.Point {
 	away := a.awayChecker()
 	measuring := a.measuringChecker()
@@ -185,7 +185,7 @@ type NewRange struct {
 	To      int64   `json:"to"`
 	Minutes int     `json:"minutes"`
 	AvgCPM  float64 `json:"avgCPM"`
-	// onde o RadiaCode provavelmente estava, para quando o trecho for fora de
+	// onde o Radiacode provavelmente estava, para quando o trecho for fora de
 	// casa: "casa" se ele estava conectado ao PC em boa parte do trecho
 	// (2.38.0); senão "comigo"
 	RcSuggest string `json:"rcSuggest"`

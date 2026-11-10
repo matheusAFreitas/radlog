@@ -377,9 +377,9 @@ function renderRTile(st, o) {
   $("rTileDemo").hidden = !st.demo;
   $("rTileDot").className = "dot" + (on ? " on" : st.state === "conectando" ? " wait" : st.state === "erro" ? " err" : "");
   $("rTileConnText").textContent = on
-    ? `RadiaCode · ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
-    : st.state === "conectando" ? "RadiaCode · conectando…" : "RadiaCode · desconectado";
-  $("rTileConn").title = on ? `RadiaCode conectado pelo ${via}` : st.err || "RadiaCode";
+    ? `Radiacode 102 · ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "")
+    : st.state === "conectando" ? "Radiacode 102 · conectando…" : "Radiacode 102 · desconectado";
+  $("rTileConn").title = on ? `Radiacode 102 conectado pelo ${via}` : st.err || "Radiacode 102";
   const u = state.rcUnit;
   $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
@@ -408,7 +408,7 @@ function renderRTile(st, o) {
 function renderATile() {
   const list = state.activeAlerts || [];
   const rank = { atencao: 1, alarme: 2, perigo: 3 };
-  const dev = (e) => (isRcEv(e) ? "RadiaCode" : "GMC-800");
+  const dev = (e) => (isRcEv(e) ? "RC102" : "GMC-800");
   const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1) || a.time - b.time)[0];
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
   const lv = top ? { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
@@ -505,7 +505,7 @@ function renderStatus() {
   dot.className = "dot" + (s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "");
   let text = "desconectado";
   // no quadro do topo: modelo e porta (o "conectado" já é a bolinha verde)
-  if (s.state === "conectado") text = `${(d.version || "contador").replace(/Re ?[\d.]+$/, "")} · ${d.port}`;
+  if (s.state === "conectado") text = `GQ GMC-800 · ${d.port}`;
   else if (s.state === "conectando") text = s.message || "conectando…";
   else if (s.state === "desconectado" && s.message) text = "desconectado · " + s.message;
   else if (s.state === "erro") text = s.message || "erro";
@@ -557,7 +557,7 @@ async function refreshStats() {
   $("tMin").textContent = u(s.min24h);
   $("tMax").textContent = u(s.max24h);
   $("tMaxSub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
-  // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o RadiaCode)
+  // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o Radiacode)
   $("hAvg1h").textContent = u(s.avg1h);
   $("hMin24").textContent = u(s.min24h);
   $("hMax24").textContent = u(s.max24h);
@@ -803,7 +803,7 @@ async function showView(v, skipRender) {
   if (v === "agora") refreshAgora();
 }
 
-// sub-abas: Gráficos e RadiaCode mostram uma parte de cada vez (a última
+// sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
 const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia"], radiacode: ["agora", "espectro", "espectrograma", "log", "busca", "atividade"] };
 state.sub = {};
@@ -834,7 +834,7 @@ function refreshSub(pg) {
     else if (s === "padroes") refreshPatterns();
     else refreshBgTrend();
   }
-  // os gráficos do RadiaCode são canvas: redesenha com o tamanho de agora
+  // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
 }
 
@@ -889,7 +889,7 @@ function renderDemo() {
   renderStatus();
 }
 
-// RadiaCode simulado: µSv/h de 0,01 a 10.000 na escala logarítmica
+// Radiacode simulado: µSv/h de 0,01 a 10.000 na escala logarítmica
 const sliderToUSv = (v) => Math.round(Math.pow(10, (v / 100) * 6 - 2) * 1000) / 1000;
 const usvToSlider = (u) => Math.round(((Math.log10(Math.max(0.01, u)) + 2) / 6) * 100);
 function renderDemoRcPresets() {
@@ -1013,7 +1013,7 @@ async function refreshHeat() {
   }
   const rcMap = h.device === "radiacode";
   const hv = (v, d) => (rcMap ? fmt(v, usvDigits(v)) : fmt(v, d));
-  $("heatUnit").textContent = rcMap ? "µSv/h médio (RadiaCode) · cinza = sem dados" : "CPM médio · cinza = sem dados";
+  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "CPM médio · cinza = sem dados";
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1195,7 +1195,7 @@ function drawHeatTrecho() {
   const p = state.heatPick, h = state.ht;
   if (!p || !h) return;
   const { ch, dg, dr, rcOn } = h;
-  renderDevBoxes($("htDevs"), rcOn ? [{ key: "gmc", name: "GMC-800", c: dg }, { key: "rc", name: "RadiaCode", c: dr }] : [{ key: "gmc", name: "GMC-800", c: dg }]);
+  renderDevBoxes($("htDevs"), rcOn ? [{ key: "gmc", name: "GMC-800", c: dg }, { key: "rc", name: "RC102", c: dr }] : [{ key: "gmc", name: "GMC-800", c: dg }]);
   const showG = !rcOn || state.doseShow.gmc, showR = rcOn && state.doseShow.rc;
   $("htKeyRc").hidden = !showR;
   $("htKeyGmc").hidden = !showG;
@@ -1220,7 +1220,7 @@ function drawHeatTrecho() {
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
     line(g, g.length, ry, COR.accent) + line(r, r.length, ry, COR.rc);
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
-  // dose acumulada: cada aparelho a sua, com o seu teto (o do RadiaCode cheio,
+  // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
   const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
   const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
@@ -1577,7 +1577,7 @@ function updateAlarm() {
   const realOn = alarmCtl.real || alarmCtl.realDanger;
   const rcOn = alarmCtl.rc || alarmCtl.rcDanger;
   const demoOn = alarmCtl.demo || alarmCtl.demoDanger;
-  // GMC e RadiaCode juntos: mostra o mais grave (empate: o GMC)
+  // GMC e Radiacode juntos: mostra o mais grave (empate: o GMC)
   const kind = realOn && !(alarmCtl.rcDanger && !alarmCtl.realDanger) ? "real" : rcOn ? "rc" : demoOn ? "demo" : testing ? "test" : null;
   const r = kind === "real" ? (state.demo.active ? state.lastReal : state.last) : kind === "demo" ? state.last : null;
   const sev = kind === "real" ? (alarmCtl.realDanger ? "perigo" : "alarme")
@@ -1634,7 +1634,7 @@ function updateAlarm() {
   // o perigo nunca fica calmo: silenciado, só ganha a etiqueta com a hora
   bar.classList.toggle("muted", !perigo && alarmCtl.muted);
 
-  const dev = kind === "rc" ? "RadiaCode" : "GMC-800";
+  const dev = kind === "rc" ? "RC102" : "GMC-800";
   const rcSat = kind === "rc" && rcs.usvh >= lv().rcSatUSv;
   const sat = rcSat ? "escala" : r && r.saturated ? r.satReason || "limite" : null;
   $("alarmIco").innerHTML = LV_PATH[sat ? "perigo" : sev];
@@ -1690,7 +1690,7 @@ const BAND_RANK = { atencao: 1, alarme: 2, perigo: 3 };
 function bandOtherOf(kind) {
   if (kind === "real" || kind === "demo") {
     const st = state.rc.st || {};
-    return { dev: "RadiaCode", lv: alarmCtl.rcDanger ? "perigo" : alarmCtl.rc ? "alarme" : attnCtl.rc ? "atencao" : null, usv: st.usvh || 0 };
+    return { dev: "RC102", lv: alarmCtl.rcDanger ? "perigo" : alarmCtl.rc ? "alarme" : attnCtl.rc ? "atencao" : null, usv: st.usvh || 0 };
   }
   if (kind === "rc") {
     const r = state.demo.active ? state.lastReal : state.last;
@@ -1704,7 +1704,7 @@ function bandOther(pfx, kind, lv, usv) {
   const o = lv ? bandOtherOf(kind) : null;
   const same = !!o && o.lv === lv;
   const also = !!o && !!o.lv && !same && BAND_RANK[o.lv] < BAND_RANK[lv];
-  const dev = kind === "rc" ? "RadiaCode" : "GMC-800";
+  const dev = kind === "rc" ? "RC102" : "GMC-800";
   $(pfx + "Both").hidden = $(pfx + "Agree").hidden = !same;
   $(pfx + "Also").hidden = !also;
   $(pfx + "Val").hidden = same;
@@ -1739,7 +1739,7 @@ function bandEpisode(kind, sev, usv) {
   if (real) {
     const ep = okCtl.ep || (okCtl.ep = { from: Date.now(), peak: 0, sev, dev: "" });
     if (BAND_RANK[sev] > BAND_RANK[ep.sev]) ep.sev = sev;
-    if (usv >= ep.peak) { ep.peak = usv; ep.dev = kind === "rc" ? "RadiaCode" : "GMC-800"; }
+    if (usv >= ep.peak) { ep.peak = usv; ep.dev = kind === "rc" ? "RC102" : "GMC-800"; }
     hideOkBar();
     return;
   }
@@ -1849,8 +1849,8 @@ function renderLevelEq() {
 // grava no aparelho (botão próprio); o resto vai pela barra "Salvar".
 
 const SET_LAYOUT = [
-  { group: "Aparelhos", id: "gmc", name: "GMC-800", tabs: [["con", "Conexão"], ["dev", "No aparelho"], ["cal", "Calibração"], ["tubo", "Tubo"], ["test", "Testes"]] },
-  { id: "rc", name: "RadiaCode", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
+  { group: "Aparelhos", id: "gmc", name: "GQ GMC-800", tabs: [["con", "Conexão"], ["dev", "No aparelho"], ["cal", "Calibração"], ["tubo", "Tubo"], ["test", "Testes"]] },
+  { id: "rc", name: "Radiacode 102", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
   { group: "Avisos", id: "alarm", name: "Alarmes e avisos" },
   { group: "App", id: "app", name: "Janela e tela" },
   { id: "data", name: "Dados e backup" },
@@ -1981,7 +1981,7 @@ function renderDevAlarms() {
   const cpm = devCfgRead && devCfg ? parseFloat($("dcAlarm").value) : NaN;
   $("devAlGmc").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM ≈ ${usvTxt(cpm * calK())}` : "conecte o GMC-800 para ver";
   const l = ((state.rc || {}).st || {}).limits || {};
-  $("devAlRc").textContent = l.device ? `${usvTxt(l.attn || 0)} e ${usvTxt(l.alarm || 0)}` : "conecte o RadiaCode para ver";
+  $("devAlRc").textContent = l.device ? `${usvTxt(l.attn || 0)} e ${usvTxt(l.alarm || 0)}` : "conecte o RC102 para ver";
 }
 
 // links para fora (Sobre › Código) abrem no navegador do sistema
@@ -2167,7 +2167,7 @@ function updateAttention() {
   let dev, usv, lim, fake;
   if (kind === "rc") {
     const rs = state.rc.st || {}, l = rs.limits || {};
-    dev = "RadiaCode";
+    dev = "RC102";
     usv = rs.usvh || 0;
     lim = l.device ? `alarme 1 do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
     fake = !!rs.demo;
@@ -2267,7 +2267,7 @@ function mergeTextJS(r) {
   const p = [];
   const add = (n, one, many) => { if (n === 1) p.push(`1 ${one}`); else if (n > 1) p.push(`${n} ${many}`); };
   add(r.minutes, "minuto de leitura", "minutos de leitura");
-  add(r.rcMinutes, "registro do RadiaCode", "registros do RadiaCode");
+  add(r.rcMinutes, "registro do RC102", "registros do RC102");
   add(r.events, "evento/alerta", "eventos/alertas");
   add(r.periods, "período fora de casa", "períodos fora de casa");
   add(r.measurements, "medição", "medições");
@@ -2353,7 +2353,7 @@ const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkA
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
-  lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RadiaCode", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
+  lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
 function setSnap() {
@@ -2436,7 +2436,7 @@ function setSearch() {
 
 // versões da calibração do GMC (2.2)
 const calWhen = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
-const calSrcTxt = (v) => v.origem === "intercalibração" ? "intercalibração com o RadiaCode" : v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
+const calSrcTxt = (v) => v.origem === "intercalibração" ? "intercalibração com o RC102" : v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
 async function renderCalHist() {
   if (!api.GetCalHistory) return;
   let h;
@@ -2472,7 +2472,7 @@ async function calSuggest() {
   let c;
   try { c = await api.GetRcCompare(6 * 60); } catch (e) { return; }
   if (!c || c.minutes < 60 || !(c.suggestK > 0)) return;
-  el.innerHTML = `Lado a lado com o RadiaCode (${fmt(c.minutes, 0)} min nas últimas 6 h): <strong class="mono">${fmt(c.suggestK, 5)}</strong> µSv/h por CPM faria o GMC bater com ele na média. <button type="button" class="btn small" id="calUseSug">Preencher</button>`;
+  el.innerHTML = `Lado a lado com o RC102 (${fmt(c.minutes, 0)} min nas últimas 6 h): <strong class="mono">${fmt(c.suggestK, 5)}</strong> µSv/h por CPM faria o GMC bater com ele na média. <button type="button" class="btn small" id="calUseSug">Preencher</button>`;
   el.hidden = false;
   $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").focus(); });
 }
@@ -2893,7 +2893,7 @@ function wire() {
   });
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
-    if (rcCfgDirty()) toast('Os ajustes do RadiaCode não foram para o aparelho: use "Gravar no RadiaCode" na seção RadiaCode.', true);
+    if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
     const alarm = parseFloat($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
@@ -3046,7 +3046,7 @@ async function refreshRainImpact(force) {
   renderRainImpact(r);
 }
 
-// aparelho da conta: o escolhido antes ou, da primeira vez, o RadiaCode se ele
+// aparelho da conta: o escolhido antes ou, da primeira vez, o Radiacode se ele
 // já tiver gravado algo (conta mais estável: muito mais contagens por minuto)
 function riDev() {
   const v = localGet("riDev");
@@ -3093,14 +3093,14 @@ function renderRainImpact(r) {
   state.ri = r;
   renderRainNow(r.now);
   const rc = r.device === "radiacode", k = r.usvPerCPM || 0, base = r.avgBase || 1;
-  $("riUnit").textContent = rc ? "% acima da média das 2 h antes (RadiaCode)" : "CPM acima da média das 2 h antes";
+  $("riUnit").textContent = rc ? "% acima da média das 2 h antes (RC102)" : "CPM acima da média das 2 h antes";
   const tiles = $("riTiles"), list = $("riList");
   tiles.textContent = ""; list.textContent = "";
   $("riChartBox").hidden = !r.n;
   if (!r.n) {
-    $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes ${rc ? "do RadiaCode" : "do contador"}` : "nenhuma chuva medida ainda";
+    $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes ${rc ? "do RC102" : "do contador"}` : "nenhuma chuva medida ainda";
     tiles.innerHTML = rc
-      ? '<p class="small muted">A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
+      ? '<p class="small muted">A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
       : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto o CPM subiu depois e compara com horários sem chuva.</p>';
     return;
   }
@@ -3139,7 +3139,7 @@ function renderRainImpact(r) {
 }
 
 function drawRainCurve(r) {
-  // RadiaCode: a curva em % da base (a escala do CPM dele é outra)
+  // Radiacode: a curva em % da base (a escala do CPM dele é outra)
   const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
   const pts = (r.curve || []).map((p) => (pc ? { min: p.min, rain: p.rain == null ? null : p.rain * pc, dry: p.dry == null ? null : p.dry * pc } : p));
   let lo = 0, hi = 1;
@@ -3410,7 +3410,7 @@ function wireSync() {
   if (api.GetSync) api.GetSync().then(renderSync).catch(() => {});
 }
 
-// ---------- RadiaCode (aparelho de verdade) ----------
+// ---------- Radiacode (aparelho de verdade) ----------
 
 state.rc = { st: null, cmpMin: 360, accum: false, log: true, spec: null };
 
@@ -3448,13 +3448,13 @@ function renderRc(st) {
   }
   $("rcDevInfo").textContent = on ? [st.model, st.serial && "série " + st.serial, st.firmware && "firmware " + st.firmware].filter(Boolean).join(" · ") : "";
   $("rcHelp").textContent = on ? "" : st.state === "erro" ? st.err
-    : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
-    : "Ligue o RadiaCode no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
+    : st.state === "off" ? "A procura está desligada em Configurações → Radiacode 102."
+    : "Ligue o RC102 no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
   $("rcHelp").className = "small muted";
   // com o cartão de cima à vista, o motivo e as ações estão no aviso de lá
   if (!on && (st.state === "conectando" || st.lastT > 0)) $("rcHelp").textContent = "";
   if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); refreshDose(); }
-  // RadiaCode como aparelho principal: na primeira vez, o gráfico vai para µSv/h
+  // Radiacode como aparelho principal: na primeira vez, o gráfico vai para µSv/h
   if (hasRcData() && !localGet("rcPrimaryUnit", "")) {
     localSet("rcPrimaryUnit", "1");
     if (state.chartUnit !== "usv") { state.chartUnit = "usv"; localSet("chartUnit", "usv"); refreshChart(); }
@@ -3473,7 +3473,7 @@ function renderRc(st) {
   else if ($("rcBLEInfo").textContent === noBLE) $("rcBLEInfo").textContent = "";
 }
 
-// estado da conexão nas Configurações → RadiaCode (e o aviso de quando o
+// estado da conexão nas Configurações → Radiacode (e o aviso de quando o
 // endereço escolhido conectou ou deu erro)
 function renderRcSetState(st, prev) {
   const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
@@ -3492,10 +3492,10 @@ function renderRcSetState(st, prev) {
   const info = $("rcBLEInfo");
   if (st.state === "conectado" && st.via === "bluetooth") {
     info.textContent = "";
-    toast("RadiaCode conectado pelo Bluetooth");
+    toast("RC102 conectado pelo Bluetooth");
     state.rc.pendingBLE = null;
   } else if (st.state === "conectado" && st.via === "usb") {
-    info.textContent = "O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.";
+    info.textContent = "O RC102 está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.";
     state.rc.pendingBLE = null;
   } else if (st.state === "erro" && prev && prev.state !== "erro") {
     info.textContent = "Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.";
@@ -3504,13 +3504,13 @@ function renderRcSetState(st, prev) {
   }
 }
 
-// quadro do RadiaCode na tela principal: cheio quando conectado, uma linha
+// quadro do Radiacode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
 state.rcUnit = localGet("rcUnit", "usv");
 
-// quadro do RadiaCode, com as mesmas informações do GMC: valor, dose de
+// quadro do Radiacode, com as mesmas informações do GMC: valor, dose de
 // hoje, normal/σ, régua e medidas
-// conexão do GMC no canto do quadro, como a do RadiaCode (só lado a lado)
+// conexão do GMC no canto do quadro, como a do Radiacode (só lado a lado)
 function renderHeroVia() {
   const el = $("heroVia");
   const s = state.status || {}, d = s.device || {};
@@ -3555,7 +3555,7 @@ function renderRcMain(st) {
   if (st.todayDevOK) {
     $("rcDoseToday").textContent = fmt(st.todayDev, 2);
     $("rcDoseTodaySub").textContent = "do aparelho";
-    $("rcDoseToday").title = `Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
+    $("rcDoseToday").title = `Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
   } else {
     $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
     $("rcDoseTodaySub").textContent = sx.todayMinutes ? `${sx.todayMinutes} min medidos · app` : "acumulados";
@@ -3574,7 +3574,7 @@ function renderRcMain(st) {
     else { text = `Dentro do normal — o nível de fundo costuma ficar entre ${fmt(sx.bgLo, d)} e ${fmt(sx.bgHi, d)} µSv/h`; }
     sig.textContent = text;
     sig.className = "sigma " + cls;
-    sig.title = `Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ${fmt(sx.bgUSv, d)} µSv/h (80% entre ${range}).`;
+    sig.title = `Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar ${fmt(sx.bgUSv, d)} µSv/h (80% entre ${range}).`;
     sig.hidden = false;
     $("rcMainSigmaVal").textContent = `${fmtSig(z)} · fundo ${fmt(sx.bgUSv, d)} µSv/h · 1σ = ${fmt(sd, usvDigits(sd))} µSv/h`;
     num.hidden = false;
@@ -3585,12 +3585,12 @@ function renderRcMain(st) {
     sig.hidden = false;
     num.hidden = true;
   } else { sig.hidden = true; num.hidden = true; }
-  // régua: os alarmes do próprio RadiaCode; sem eles, as faixas do app em
+  // régua: os alarmes do próprio Radiacode; sem eles, as faixas do app em
   // µSv/h (as mesmas do GMC-800)
   const al = st.alarms || {};
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
-  $("rcLevelHint").textContent = own ? "alarmes do RadiaCode" : "faixas do app em µSv/h";
+  $("rcLevelHint").textContent = own ? "alarmes do RC102" : "faixas do app em µSv/h";
   const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
   lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
   $("rcLevelName").className = "sr-only level-name " + lvl;
@@ -3619,7 +3619,7 @@ function drawRcCompare(c) {
   const box = $("rcCmpChart");
   if (!c || !c.minutes) {
     box.innerHTML = `<div class="rc-empty small muted">Sem minutos com os dois aparelhos nesse período.</div>`;
-    $("rcCmpStats").textContent = c && c.rcOnly ? `${c.rcOnly} min só do RadiaCode (GMC desconectado?)` : "";
+    $("rcCmpStats").textContent = c && c.rcOnly ? `${c.rcOnly} min só do RC102 (GMC desconectado?)` : "";
     return;
   }
   const W = 1000, H = 260, PL = 46, PB = 22, n = c.t.length;
@@ -3639,9 +3639,9 @@ function drawRcCompare(c) {
   }
   svg += `<text x="${PL}" y="${H - 4}" class="ax">${hhmm(t0)}</text><text x="${W - 8}" y="${H - 4}" text-anchor="end" class="ax">${hhmm(t1)}</text>`;
   svg += `<path d="${path(g)}" class="gmc"/><path d="${path(r)}" class="rc"/></svg>`;
-  box.innerHTML = svg + `<div class="rc-legend small"><span class="k gmc"></span>GMC-800 (µSv/h, média de 10 min) <span class="k rc"></span>RadiaCode</div>`;
+  box.innerHTML = svg + `<div class="rc-legend small"><span class="k gmc"></span>GMC-800 (µSv/h, média de 10 min) <span class="k rc"></span>RC102</div>`;
   const parts = [`${n} min juntos`];
-  if (c.ratio) parts.push(`RadiaCode ÷ GMC = ${fmt(c.ratio, 2)}${c.ratioErr ? ` ± ${fmt(c.ratioErr, 2)}` : ""}`);
+  if (c.ratio) parts.push(`RC102 ÷ GMC = ${fmt(c.ratio, 2)}${c.ratioErr ? ` ± ${fmt(c.ratioErr, 2)}` : ""}`);
   if (c.corr) parts.push(`correlação ${fmt(c.corr, 2)}`);
   if (n < 24 * 60) parts.push(`para o fator valer, junte 24 h (faltam ${rcDur((24 * 60 - n) * 60)})`);
   $("rcCmpStats").textContent = parts.join(" · ");
@@ -3651,7 +3651,7 @@ function wireRc() {
   on("radiacode", (st) => {
     renderRc(st);
     measureLogRc(st);
-    // a tela de medir muda o aparelho padrão e o aviso quando o RadiaCode conecta/cai
+    // a tela de medir muda o aparelho padrão e o aviso quando o Radiacode conecta/cai
     if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
   });
   $("rcUnitSeg").addEventListener("click", (e) => {
@@ -3672,7 +3672,7 @@ function wireRc() {
     info.textContent = "Procurando (uns 6 segundos)…";
     let list = [];
     try { list = await api.ScanRadiacodeBLE(); } catch (e) { info.textContent = errMsg(e); return; }
-    info.textContent = list.length ? "" : "Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?";
+    info.textContent = list.length ? "" : "Nenhum RC102 apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?";
     for (const d of list) {
       const li = document.createElement("li");
       const g = document.createElement("span");
@@ -4069,7 +4069,7 @@ function setupSummary() {
       const when = long ? `${WEEKDAY[new Date(p.t).getDay()]} ${ddmm(p.t)} ${hhmm(p.t)}` : hhmm(p.t);
       const rc = ser.length === 1 && s.r.rc && s.r.rc.minutes ? s.r.rc.curve[i] : null;
       const gu = p.usv != null ? p.usv : p.cpm != null ? p.cpm * calK() : null;
-      if (rc) return `${when}: RadiaCode ${rc.usv == null ? "sem dado" : usvTxt(rc.usv)} · GMC-800 ${gu == null ? "sem dado" : usvTxt(gu)}`;
+      if (rc) return `${when}: RC102 ${rc.usv == null ? "sem dado" : usvTxt(rc.usv)} · GMC-800 ${gu == null ? "sem dado" : usvTxt(gu)}`;
       return `${ser.length > 1 ? s.label + " " : ""}${when}: ${gu == null ? "sem dado" : usvTxt(gu)}`;
     }).filter(Boolean);
     const tip = $("sumTip");
@@ -4171,8 +4171,8 @@ function makeDemoApi() {
     { time: now - 2 * 864e5 - 5 * 36e5, text: "Alarme (histórico do contador): pico de 134 CPM às 03:12 (limite 100)", kind: "alerta", level: "alarme", cpm: 58, peak: 134, peakAt: now - 2 * 864e5 - 4.6 * 36e5, end: now - 2 * 864e5 - 4.2 * 36e5, retro: true },
     { time: now - 3 * 864e5 - 9 * 36e5, text: "Atenção (histórico do contador): pico de 63 CPM às 10:40 (acima de 50)", kind: "alerta", level: "atencao", cpm: 52, peak: 63, peakAt: now - 3 * 864e5 - 8.8 * 36e5, end: now - 3 * 864e5 - 8.5 * 36e5, retro: true },
     { time: now - 6 * 864e5, text: "Alarme: 112 CPM (limite 100)", kind: "alerta", level: "alarme", cpm: 112, peak: 118, peakAt: now - 6 * 864e5 + 120e3, end: now - 6 * 864e5 + 600e3 },
-    { time: now - 5 * 36e5, text: "Atenção no RadiaCode: 0,412 µSv/h (alarme 1 do aparelho: 0,400)", kind: "alerta", level: "atencao", cpm: 0.412, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 420e3, device: "radiacode" },
-    { time: now - 5 * 36e5 + 150e3, text: "Alarme no RadiaCode: 1,24 µSv/h (alarme 2 do aparelho: 1,20)", kind: "alerta", level: "alarme", cpm: 1.24, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 260e3, device: "radiacode" },
+    { time: now - 5 * 36e5, text: "Atenção no RC102: 0,412 µSv/h (alarme 1 do aparelho: 0,400)", kind: "alerta", level: "atencao", cpm: 0.412, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 420e3, device: "radiacode" },
+    { time: now - 5 * 36e5 + 150e3, text: "Alarme no RC102: 1,24 µSv/h (alarme 2 do aparelho: 1,20)", kind: "alerta", level: "alarme", cpm: 1.24, peak: 1.62, peakAt: now - 5 * 36e5 + 200e3, end: now - 5 * 36e5 + 260e3, device: "radiacode" },
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
@@ -4293,10 +4293,10 @@ function makeDemoApi() {
       if (o.role === "objeto" && o.bg) {
         o.result = compare(o.bg, o.cur); o.live = null;
         const g = o.device === "gmc" ? o.result : meas.result, r = o.device === "gmc" ? meas.result : o.result;
-        o.hint = g.sigma >= 3 && r.sigma < 2 ? "O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta)."
-          : g.sigma >= 3 && r.sigma < 3 ? "O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta."
-          : g.sigma >= 3 && r.sigma >= 3 ? (g.ratio - 1 > 2 * (r.ratio - 1) ? `Os dois viram, mas o GMC subiu bem mais (${fmt(g.ratio, 1)}× o fundo contra ${fmt(r.ratio, 1)}× no RadiaCode): além de gama, o objeto deve emitir beta.` : "Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama.")
-          : r.sigma >= 3 ? "Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco." : "Nenhum dos dois viu uma diferença clara.";
+        o.hint = g.sigma >= 3 && r.sigma < 2 ? "O GMC viu o objeto e o RC102 quase não: ele deve emitir principalmente beta (o cristal do RC102 quase não vê beta)."
+          : g.sigma >= 3 && r.sigma < 3 ? "O GMC viu claramente e o RC102 só um pouco: o objeto deve emitir bastante beta."
+          : g.sigma >= 3 && r.sigma >= 3 ? (g.ratio - 1 > 2 * (r.ratio - 1) ? `Os dois viram, mas o GMC subiu bem mais (${fmt(g.ratio, 1)}× o fundo contra ${fmt(r.ratio, 1)}× no RC102): além de gama, o objeto deve emitir beta.` : "Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama.")
+          : r.sigma >= 3 ? "Só o RC102 viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco." : "Nenhum dos dois viu uma diferença clara.";
       }
     }
     o.counts = 0; o.elapsed = 0; o.usvSum = 0; o.cur = null;
@@ -4336,7 +4336,7 @@ function makeDemoApi() {
     }
     emit("measure", { ...meas });
   }
-  // RadiaCode medindo no modo navegador: fundo ~12 cps, objeto ~19 cps
+  // Radiacode medindo no modo navegador: fundo ~12 cps, objeto ~19 cps
   setInterval(() => {
     const rcIn = meas.device === "radiacode" || (meas.other && meas.other.device === "radiacode");
     if (!rcIn || !demoRcFake() || (meas.phase !== "fundo" && meas.phase !== "objeto")) return;
@@ -4364,7 +4364,7 @@ function makeDemoApi() {
       peaks: [{ group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 260, sigma: 11 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 80, sigma: 5.2 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4.1 }] };
   };
   {
-    // uma medição salva do RadiaCode, com espectro
+    // uma medição salva do Radiacode, com espectro
     const t0 = Date.now() - 3 * 3600e3, sec = 95, samples = [];
     let cpm = 2300;
     for (let i = 0; i < sec; i++) { cpm = Math.max(1500, cpm + (Math.random() - 0.5) * 60); samples.push({ t: (i + 1) * 1000, phase: "objeto", cpm: Math.round(cpm), cps: Math.round(38 + (Math.random() - 0.5) * 12) }); }
@@ -4376,7 +4376,7 @@ function makeDemoApi() {
   }
   const demoSpecLive = { counts: null, seconds: 0, at: 0 };
   const demoRcCfg = { off: false, ble: "", raw: true };
-  // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
+  // localStorage rcFake=1: finge um Radiacode conectado (para ver a tela no demo)
   const usvEv = (e) => (e.kind !== "alerta" || e.device === "radiacode" ? e
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
@@ -4394,7 +4394,7 @@ function makeDemoApi() {
     ],
     sec() { return this.run ? Math.min(this.run.target || 1e9, ((Date.now() - this.run.at) / 1000) * 120) : 0; },
     start(o) {
-      if (!demoRcFake()) throw new Error("RadiaCode não conectado");
+      if (!demoRcFake()) throw new Error("RC102 não conectado");
       if (!(o.massG > 0)) throw new Error("informe a massa em gramas");
       o.name = o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : o.kind === "torio" ? "eletrodo de tório (" + o.pct + "% ThO₂)" : "amostra");
       this.run = { o, phase: o.newBg ? "fundo" : "amostra", at: Date.now(), target: o.newBg ? o.bgSec : o.smpSec, bgSec: o.newBg ? 0 : 7200 };
@@ -4537,7 +4537,7 @@ const demoRc = () => {
     GetActiveAlerts: async () => {
       const o = { perigo: 0, alarme: 1, atencao: 2 };
       const lvl = demoRcFake() && localStorage.getItem("rcAlert");
-      const rc = lvl ? [{ id: 990, time: Date.now() - 95e3, kind: "alerta", level: lvl, device: "radiacode", active: true, cpm: 1.25, peak: 1.41, peakAt: Date.now() - 40e3, text: "Alarme no RadiaCode: 1,25 µSv/h (alarme 2 do aparelho: 1,20)" }] : [];
+      const rc = lvl ? [{ id: 990, time: Date.now() - 95e3, kind: "alerta", level: lvl, device: "radiacode", active: true, cpm: 1.25, peak: 1.41, peakAt: Date.now() - 40e3, text: "Alarme no RC102: 1,25 µSv/h (alarme 2 do aparelho: 1,20)" }] : [];
       return demoAlerts.filter((e) => e.active).map(usvEv).concat(rc).sort((x, y) => o[x.level] - o[y.level]);
     },
     ListPorts: async () => [{ name: "COM5", description: "USB-SERIAL CH340", isUSB: true }, { name: "COM1", description: "", isUSB: false }],
@@ -4590,7 +4590,7 @@ const demoRc = () => {
       return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0, suggestK: 0.0055, curK: 0.01014 };
     },
     GetRcSpectrum: async (accum) => {
-      if (!demoRcFake()) throw new Error("RadiaCode não conectado");
+      if (!demoRcFake()) throw new Error("RC102 não conectado");
       // espectro de mentira: fundo (acumulado, 7 h) e o atual, que vai
       // juntando com um eletrodo de tório encostado
       const A = [5.43, 2.351, 0.000381], En = (i) => A[0] + A[1] * (i + 0.5) + A[2] * (i + 0.5) ** 2;
@@ -4812,14 +4812,14 @@ const demoRc = () => {
     GetHomeBackground: async () => demoHomeBg(),
     GetHomeBackgroundDev: async (dev) => {
       if (dev !== "radiacode") return { ...demoHomeBg(), usv: 20.4 * 0.0101, device: "gmc" };
-      if (!demoRcFake()) return { ok: false, minutes: 0, why: "só 0 min do RadiaCode em casa na última hora (precisa de 30)", device: "radiacode" };
+      if (!demoRcFake()) return { ok: false, minutes: 0, why: "só 0 min do RC102 em casa na última hora (precisa de 30)", device: "radiacode" };
       return { ok: true, cpm: 718, errCPM: 3.5, minutes: 57, counts: 40926, from: Date.now() - 3600e3, to: Date.now() - 60e3, usv: 0.092, device: "radiacode" };
     },
     StartMeasure: async (o) => {
       const maxSec = o.maxSec || 1800, pct = o.pct || 20;
       const mode = o.mode === "ambos" || o.mode === "voce" ? o.mode : "";
       const device = mode === "ambos" ? "radiacode" : o.device === "radiacode" ? "radiacode" : "gmc";
-      if ((device === "radiacode" || mode) && (!demoRcFake() || localStorage.getItem("rcFake2"))) throw new Error("conecte o RadiaCode para medir");
+      if ((device === "radiacode" || mode) && (!demoRcFake() || localStorage.getItem("rcFake2"))) throw new Error("conecte o RC102 para medir");
       meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
         auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
       if (mode) {
@@ -4877,7 +4877,7 @@ const demoRc = () => {
       for (let i = 1; i < p.length; i++) if (p[i].t - p[i - 1].t >= 10 * 6e4) { r.gapCount++; r.gaps.unshift({ from: p[i - 1].t + 6e4, to: p[i].t, minutes: Math.round((p[i].t - p[i - 1].t - 6e4) / 6e4), cause: "contador desconectado", open: false }); }
       if (span >= 6 * 36e5) { r.gapCount++; r.gaps.unshift({ from: from + 3 * 36e5, to: from + 3 * 36e5 + 42 * 6e4, minutes: 42, cause: "app fechado e sem histórico do contador", open: false }); }
       if (p.length > 30) { const m = r.avg; r.sd = Math.sqrt(m) * 1.04; r.dispersion = 1.04; }
-      if (demoRcFake() && p.length) { // RadiaCode fingido: segue o GMC um pouco abaixo
+      if (demoRcFake() && p.length) { // RC102 fingido: segue o GMC um pouco abaixo
         const k = 0.0101 * 0.6, rc = { minutes: p.length, coverage: r.coverage, coverageAll: r.coverageAll, histMinutes: r.histMinutes, spanMinutes: r.spanMinutes, histFrom: r.histFrom, dose: r.dose * 0.6, avg: r.avg * k, bgUSv: 20 * k, curve: [] };
         rc.vsBgPct = (rc.avg - rc.bgUSv) / rc.bgUSv * 100;
         rc.max = r.max * k; rc.maxAt = r.maxAt; rc.min = r.min * k; rc.minAt = r.minAt;
@@ -4892,7 +4892,7 @@ const demoRc = () => {
       const r = await api.GetRainImpact();
       if (dev !== "radiacode" || !r.enabled) return { ...r, device: "gmc" };
       if (!demoRcFake()) return { enabled: true, episodes: [], curve: [], n: 0, skippedNoData: 0, device: "radiacode" };
-      // RadiaCode: ~720 CPM, a mesma subida em %
+      // Radiacode: ~720 CPM, a mesma subida em %
       const f = 720 / 26.4, sc = (x) => (x == null ? x : x * f);
       return { ...r, device: "radiacode", usvPerCPM: 0.1 / 720, avgBase: r.avgBase * f, avgRise: r.avgRise * f, dryRise: r.dryRise * f, effect: r.effect * f,
         curve: r.curve.map((p) => ({ min: p.min, rain: sc(p.rain), dry: sc(p.dry) })),
@@ -4941,7 +4941,7 @@ const demoRc = () => {
       return out;
     },
     GetPeriods: async () => periods.slice(),
-    // "o RadiaCode estava fora de casa?": uma pergunta de exemplo (de ontem à tarde)
+    // "o Radiacode estava fora de casa?": uma pergunta de exemplo (de ontem à tarde)
     GetRcAwayAsks: async () => rcAsks.map((q) => ({ ...q })),
     AnswerRcAway: async (id, ans, from, to, name) => {
       const q = rcAsks.find((x) => x.id === id);
@@ -4963,8 +4963,8 @@ const demoRc = () => {
     DeleteMeasurement: async (id) => { measurements = measurements.filter((m) => m.id !== id); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     SavePeriod: async (p) => {
       const g = p.gmc || "comigo", r = p.radiacode || "comigo";
-      const out = !!p.notHome && g === "casa" && r === "comigo"; // saí com o RadiaCode (2.38.0)
-      if (g === "casa" && r === "comigo" && !out) throw new Error("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar");
+      const out = !!p.notHome && g === "casa" && r === "comigo"; // saí com o RC102 (2.38.0)
+      if (g === "casa" && r === "comigo" && !out) throw new Error("GMC-800 em casa e RC102 com você é o normal: não precisa marcar");
       const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
       if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
       if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
@@ -5074,7 +5074,7 @@ const demoRc = () => {
       const to = Math.floor(Date.now() / 6e4) * 6e4 + 6e4;
       return api._dose(to - span, to, step, limit);
     },
-    // RadiaCode fingido: dose um pouco abaixo da do GMC
+    // Radiacode fingido: dose um pouco abaixo da do GMC
     _doseSrc: (c, src) => {
       if (src !== "radiacode" || !demoRcFake()) return Object.assign(c, { device: "gmc", other: "radiacode", otherTotal: demoRcFake() ? c.total * 0.6 : 0, otherMinutes: demoRcFake() ? c.measuredMinutes : 0 });
       const k = 0.6, sc = (a) => a.map((v) => v * k);
@@ -5174,7 +5174,7 @@ const demoRc = () => {
       const c = await chartPreview(period);
       const u = (v) => (v == null ? null : v * 0.0101);
       withPeaks(c);
-      if (demoRcFake()) { // RadiaCode fingido: segue o GMC um pouco abaixo
+      if (demoRcFake()) { // RC102 fingido: segue o GMC um pouco abaixo
         c.rc = (c.usv || []).map((v, i) => (v == null || i < c.usv.length * 0.3 ? null : v * 0.9 + (Math.sin(i / 3) * 0.004)));
         const ok = c.rc.filter((v) => v != null);
         c.rcAvg = ok.length ? ok.reduce((a, b) => a + b, 0) / ok.length : null;

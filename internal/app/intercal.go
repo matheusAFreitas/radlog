@@ -12,9 +12,9 @@ import (
 	"radlog/internal/store"
 )
 
-// ---------- intercalibração com o RadiaCode e vigia semanal (ideia 6) ----------
+// ---------- intercalibração com o Radiacode e vigia semanal (ideia 6) ----------
 //
-// "Intercalibrar com o RadiaCode" marca o começo de uma coleta de 24 h com
+// "Intercalibrar com o Radiacode" marca o começo de uma coleta de 24 h com
 // os dois aparelhos encostados. No fim, a conta do core/intercal dá o fator
 // novo do GMC; aplicar vira uma versão da calibração (origem
 // "intercalibração"). O contador nunca é mexido.
@@ -26,7 +26,7 @@ const (
 	intercalFile = "intercalibracao.json"
 	intercalDur  = 24 * time.Hour
 	srcIntercal  = "intercalibração"
-	rcNMin       = 20 // minuto do RadiaCode com menos leituras = pedaço (conectou/caiu)
+	rcNMin       = 20 // minuto do RC102 com menos leituras = pedaço (conectou/caiu)
 )
 
 type intercalData struct {
@@ -48,7 +48,7 @@ type IntercalView struct {
 	CurK    float64          `json:"curK"`
 	K0      float64          `json:"k0"`
 	Result  *intercal.Result `json:"result,omitempty"`
-	Pct     float64          `json:"pct"` // quanto o GMC lia acima (+) ou abaixo (−) do RadiaCode, %
+	Pct     float64          `json:"pct"` // quanto o GMC lia acima (+) ou abaixo (−) do RC102, %
 	Applied bool             `json:"applied"`
 	Skipped bool             `json:"skipped"`
 }
@@ -174,7 +174,7 @@ func (a *App) GetIntercal() IntercalView {
 		}
 		d.Result = &r
 		_ = a.saveIntercal(d)
-		a.logEvent(fmt.Sprintf("Intercalibração com o RadiaCode terminou: %s µSv/h por CPM (±%s%%, %d minutos)",
+		a.logEvent(fmt.Sprintf("Intercalibração com o RC102 terminou: %s µSv/h por CPM (±%s%%, %d minutos)",
 			fmtBR(r.K, 5), fmtBR(r.Rel95*100, 1), r.Minutes))
 	}
 	v.State = "pronta"
@@ -193,7 +193,7 @@ func (a *App) StartIntercal() (IntercalView, error) {
 	if err := a.saveIntercal(d); err != nil {
 		return IntercalView{}, err
 	}
-	a.logEvent("Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos encostados)")
+	a.logEvent("Intercalibração com o RC102: coleta de 24 h começou (os dois aparelhos encostados)")
 	return a.GetIntercal(), nil
 }
 
@@ -201,7 +201,7 @@ func (a *App) StartIntercal() (IntercalView, error) {
 func (a *App) CancelIntercal() error {
 	d := a.loadIntercal()
 	if d.Start != 0 && d.Result == nil {
-		a.logEvent("Intercalibração com o RadiaCode: coleta cancelada")
+		a.logEvent("Intercalibração com o RC102: coleta cancelada")
 	}
 	return a.saveIntercal(intercalData{})
 }
@@ -218,7 +218,7 @@ func (a *App) ApplyIntercal(skip bool) (IntercalView, error) {
 		_ = a.saveIntercal(d)
 		return a.GetIntercal(), nil
 	}
-	note := "com o RadiaCode, coleta de " + time.UnixMilli(d.Start).Format("02/01")
+	note := "com o RC102, coleta de " + time.UnixMilli(d.Start).Format("02/01")
 	if err := a.setGMCFactor(d.Result.K, srcIntercal, note); err != nil {
 		return a.GetIntercal(), err
 	}
@@ -244,7 +244,7 @@ func (a *App) GetConcord() ConcordView {
 	now := time.Now()
 	s := time.UnixMilli(since)
 	if since == 0 {
-		// calibração desde o começo: o aprendizado começa no primeiro minuto do RadiaCode
+		// calibração desde o começo: o aprendizado começa no primeiro minuto do Radiacode
 		s = now.Add(-365 * 24 * time.Hour)
 		if f, ok := a.rcFirstMinute(); ok {
 			s = f
@@ -276,7 +276,7 @@ func concordText(w intercal.Watch) string {
 	case intercal.WatchOneWeek:
 		return fmt.Sprintf("Na última semana a razão ficou %s%% do normal. Se continuar assim mais uma semana, vira aviso.", signedPct(w.Last.Pct))
 	case intercal.WatchDrift:
-		return fmt.Sprintf("Os dois estão se afastando: %s%% do normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RadiaCode guardado em outro canto. Vale intercalibrar de novo.", signedPct(w.Last.Pct))
+		return fmt.Sprintf("Os dois estão se afastando: %s%% do normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RC102 guardado em outro canto. Vale intercalibrar de novo.", signedPct(w.Last.Pct))
 	}
 	return "Poucos minutos com os dois em casa para comparar (precisa de 12 h juntos na semana)."
 }
@@ -288,7 +288,7 @@ func signedPct(p float64) string {
 	return "−" + fmtBR(-p, 1)
 }
 
-// rcFirstMinute é o primeiro minuto gravado do RadiaCode.
+// rcFirstMinute é o primeiro minuto gravado do Radiacode.
 func (a *App) rcFirstMinute() (time.Time, bool) {
 	ents, err := os.ReadDir(a.rcDir())
 	if err != nil {

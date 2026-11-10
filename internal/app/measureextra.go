@@ -256,7 +256,7 @@ type MeasureRelated struct {
 	Time          int64   `json:"time"`
 	Device        string  `json:"device"`
 	NetUSv        float64 `json:"netUSv"`
-	NetErr        float64 `json:"netErr"` // CPM (GMC) ou cps (RadiaCode), como no resultado
+	NetErr        float64 `json:"netErr"` // CPM (GMC) ou cps (RC102), como no resultado
 	NetErrUSv     float64 `json:"netErrUSv"`
 	Distance      string  `json:"distance"`
 	NotComparable bool    `json:"notComparable"`

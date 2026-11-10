@@ -167,10 +167,10 @@ async function renderMaturity() {
   };
   const rc = m.rc && m.rc.length;
   let html = `<h3>Histórico disponível</h3><p class="small muted">Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas "em formação" ainda não representam a janela toda.</p>`;
-  html += `<table class="mat-table"><thead><tr><th>janela</th><th>GMC-800</th>${rc ? "<th>RadiaCode</th>" : ""}</tr></thead><tbody>`;
+  html += `<table class="mat-table"><thead><tr><th>janela</th><th>GMC-800</th>${rc ? "<th>RC102</th>" : ""}</tr></thead><tbody>`;
   m.gmc.forEach((w, i) => { html += `<tr><th>${winTxt(w.days)}</th>${cell(w)}${rc ? cell(m.rc[i]) : ""}</tr>`; });
   html += "</tbody></table>";
-  const first = [m.gmcFirst ? `GMC desde ${dayLabel(m.gmcFirst)} ${hhmm(m.gmcFirst)}` : "", m.rcFirst ? `RadiaCode desde ${dayLabel(m.rcFirst)} ${hhmm(m.rcFirst)}` : ""].filter(Boolean).join(" · ");
+  const first = [m.gmcFirst ? `GMC desde ${dayLabel(m.gmcFirst)} ${hhmm(m.gmcFirst)}` : "", m.rcFirst ? `RC102 desde ${dayLabel(m.rcFirst)} ${hhmm(m.rcFirst)}` : ""].filter(Boolean).join(" · ");
   if (first) html += `<p class="small muted">${first}</p>`;
   box.innerHTML = html;
   box.hidden = false;
@@ -208,13 +208,13 @@ function sumHead(box, text, cls) {
   box.appendChild(h);
 }
 
-// bloco do RadiaCode (seu dosímetro): dose, média, máximo e mínimo, e o tempo
+// bloco do Radiacode (seu dosímetro): dose, média, máximo e mínimo, e o tempo
 // em casa e fora
 function renderRcSummary(t, rc, r) {
   const d = (v) => fmt(v, usvDigits(v));
   const dose = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv`;
-  sumHead(t, "RadiaCode", "rc");
-  if (rc.devOK) sumTile(t, "Dose do aparelho", dose(rc.devDose), `somada pelo RadiaCode, também longe do PC · pelo app: ${dose(rc.dose)}`, "rc");
+  sumHead(t, "Radiacode 102", "rc");
+  if (rc.devOK) sumTile(t, "Dose do aparelho", dose(rc.devDose), `somada pelo RC102, também longe do PC · pelo app: ${dose(rc.dose)}`, "rc");
   else sumTile(t, "Dose (app)", dose(rc.dose), `≈ ${d(rc.avg)} µSv/h em média · só os minutos gravados`, "rc");
   const p = rc.vsBgPct;
   const vs = !rc.bgUSv ? "fundo em casa ainda não calculado" : Math.abs(p) < 5 ? `igual ao seu normal em casa (${d(rc.bgUSv)})` : `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal em casa (${d(rc.bgUSv)})`;
@@ -252,7 +252,7 @@ function renderSumSay(r, rc) {
     else if (n.attention) { lv = "atencao"; title = "Período normal, com alertas de atenção."; }
     else title = "Período normal.";
     if (r.minutes && r.bgOK) parts.push(sumPct(r.vsBgPct, "Casa"));
-    if (rc && rc.bgUSv) parts.push(sumPct(rc.vsBgPct, "RadiaCode"));
+    if (rc && rc.bgUSv) parts.push(sumPct(rc.vsBgPct, "RC102"));
     const cov = rc ? rc.coverage : r.coverage;
     parts.push(`${fmt(cov * 100, 0)}% do tempo medido`);
     if (rc && rc.awayMinutes) parts.push(`fora de casa: ${hm(rc.awayMinutes)}`);
@@ -279,21 +279,21 @@ function renderSumBig(r, rc) {
   box.textContent = "";
   if (!r.minutes && !rc) return;
   const d = (v) => fmt(v, usvDigits(v));
-  if (rc) sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RadiaCode · somada pelo aparelho" : `RadiaCode · ${fmt(rc.coverage * 100, 0)}% medido`, "rc");
+  if (rc) sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RC102 · somada pelo aparelho" : `RC102 · ${fmt(rc.coverage * 100, 0)}% medido`, "rc");
   else sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
   if (r.minutes) {
     sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
     const home = (rc.homeDose * 60) / rc.homeMinutes;
     const p = rc.bgUSv ? ((home - rc.bgUSv) / rc.bgUSv) * 100 : 0;
-    sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RadiaCode em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
+    sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RC102 em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
   }
-  if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RadiaCode · ${atText(r, rc.maxAt)}`, "rc");
+  if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RC102 · ${atText(r, rc.maxAt)}`, "rc");
   else sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
 }
 
-// casa × pessoal: quanto da dose do RadiaCode foi em casa e fora, e quanto o
-// RadiaCode marcou em relação ao GMC-800 (que fica parado em casa)
+// casa × pessoal: quanto da dose do Radiacode foi em casa e fora, e quanto o
+// Radiacode marcou em relação ao GMC-800 (que fica parado em casa)
 function renderSumSplit(r, rc) {
   const box = $("sumSplit");
   box.hidden = !rc || !(rc.homeMinutes + rc.awayMinutes);
@@ -316,7 +316,7 @@ function renderSumSplit(r, rc) {
   parts.push(rc.awayMinutes
     ? `Fora de casa foi ${fmt((rc.awayMinutes / mins) * 100, 0)}% do tempo e ${fmt(ap, 0)}% da dose (µSv).`
     : "Nenhum minuto fora de casa no período (µSv).");
-  if (r.minutes && r.avgUSv > 0 && rc.avg > 0) parts.push(`Razão pessoal ÷ casa: ${fmt(rc.avg / r.avgUSv, 2)} (RadiaCode ÷ GMC-800 em µSv/h).`);
+  if (r.minutes && r.avgUSv > 0 && rc.avg > 0) parts.push(`Razão pessoal ÷ casa: ${fmt(rc.avg / r.avgUSv, 2)} (RC102 ÷ GMC-800 em µSv/h).`);
   $("sumSplitText").textContent = parts.join(" ");
 }
 
@@ -332,12 +332,12 @@ function renderSummary(r, per) {
   const rc = r.rc && r.rc.minutes ? r.rc : null;
   if (rc) renderRcSummary(t, rc, r);
   if (!r.minutes) {
-    if (rc) { sumHead(t, "GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]); return; }
+    if (rc) { sumHead(t, "GQ GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]); return; }
     t.innerHTML = '<p class="small muted">Sem leituras nesse período.</p>';
     drawSumChart([]);
     return;
   }
-  if (rc) sumHead(t, "GMC-800 (casa)");
+  if (rc) sumHead(t, "GQ GMC-800 (casa)");
   sumTile(t, "Média", usvVal(r.avgUSv), bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
   sumTile(t, "Máximo", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
   sumTile(t, "Mínimo", r.minUSv != null ? usvVal(r.minUSv) : `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
@@ -378,9 +378,9 @@ function renderCompare(res, periods) {
     const ra = a.rc || {}, rb = b.rc || {};
     const v = (o, k, dd, u) => (o.minutes ? fmt(o[k], dd) + u : "—");
     const dd = (o, k, d2, u) => (o.minutes && o[k] != null ? o[k] : null);
-    row(["RadiaCode: dose", v(ra, "dose", 2, " µSv"), v(rb, "dose", 2, " µSv"), diff(dd(ra, "dose"), dd(rb, "dose"), 2, " µSv")]);
-    row(["RadiaCode: média", v(ra, "avg", 3, " µSv/h"), v(rb, "avg", 3, " µSv/h"), diff(dd(ra, "avg"), dd(rb, "avg"), 3, " µSv/h")]);
-    row(["RadiaCode: fora de casa", ra.minutes ? `${fmt(ra.awayDose, 2)} µSv em ${hm(ra.awayMinutes)}` : "—", rb.minutes ? `${fmt(rb.awayDose, 2)} µSv em ${hm(rb.awayMinutes)}` : "—", ""]);
+    row(["RC102: dose", v(ra, "dose", 2, " µSv"), v(rb, "dose", 2, " µSv"), diff(dd(ra, "dose"), dd(rb, "dose"), 2, " µSv")]);
+    row(["RC102: média", v(ra, "avg", 3, " µSv/h"), v(rb, "avg", 3, " µSv/h"), diff(dd(ra, "avg"), dd(rb, "avg"), 3, " µSv/h")]);
+    row(["RC102: fora de casa", ra.minutes ? `${fmt(ra.awayDose, 2)} µSv em ${hm(ra.awayMinutes)}` : "—", rb.minutes ? `${fmt(rb.awayDose, 2)} µSv em ${hm(rb.awayMinutes)}` : "—", ""]);
   }
   row(["Medido", hm(a.minutes), hm(b.minutes), Math.abs(a.minutes - b.minutes) > 0.1 * Math.max(a.minutes, b.minutes) ? "tempos bem diferentes: compare pela média" : ""]);
   row(["Alertas", alertsText(a), alertsText(b), ""]);
@@ -422,7 +422,7 @@ function drawSumChart(series) {
   series.forEach((s, i) => $("sumLegend").children[i].append(s.label));
 }
 
-// resumo com o RadiaCode: as duas curvas em µSv/h (o GMC pela calibração dele)
+// resumo com o Radiacode: as duas curvas em µSv/h (o GMC pela calibração dele)
 function drawSumChartUSv(r, rc) {
   const svg = $("sumChart");
   const k = calK();
@@ -445,6 +445,6 @@ function drawSumChartUSv(r, rc) {
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
-  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.rc + '"></i>RadiaCode (µSv/h)</span><span class="key"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
-    (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
+  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
+    (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RC102)</span>' : "");
 }

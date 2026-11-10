@@ -20,8 +20,8 @@ import (
 // "alertas-detalhe/" (veja "gravação dos segundos", abaixo).
 
 const (
-	alertPre      = 2 * time.Minute // folga em volta do alerta na tela (e no RadiaCode, o que é guardado)
-	alertMaxSecs  = 3 * time.Hour   // RadiaCode: alerta muito longo guarda no máximo isto
+	alertPre      = 2 * time.Minute // folga em volta do alerta na tela (e no RC102, o que é guardado)
+	alertMaxSecs  = 3 * time.Hour   // RC102: alerta muito longo guarda no máximo isto
 	alertMaxShown = 1500            // pontos por segundo mandados à tela
 )
 

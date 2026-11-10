@@ -10,7 +10,7 @@ import (
 // ---------- erro interno (panic) nas tarefas de fundo ----------
 //
 // O app fica dias na bandeja com várias goroutines (leitura do GMC, laço do
-// RadiaCode, sync, chuva, atualização...). Sem recover, um panic em qualquer
+// Radiacode, sync, chuva, atualização...). Sem recover, um panic em qualquer
 // uma delas (ex.: um pacote do Bluetooth cortado no meio que o decodificador
 // não esperava) fecha o processo inteiro e a gravação para até alguém abrir o
 // app de novo. Aqui o panic vira uma linha no log técnico (com a pilha), um

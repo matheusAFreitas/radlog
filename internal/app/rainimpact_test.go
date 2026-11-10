@@ -122,7 +122,7 @@ func TestRainImpactRadiacode(t *testing.T) {
 	for _, r := range rains {
 		a.rain.Hours[r.Unix()] = 3
 	}
-	// RadiaCode: 12 cps (0,10 µSv/h) e +10% por 1,5 h depois da chuva
+	// Radiacode: 12 cps (0,10 µSv/h) e +10% por 1,5 h depois da chuva
 	files := map[string]*strings.Builder{}
 	i := 0
 	for m := start; m.Before(now); m = m.Add(time.Minute) {
@@ -149,7 +149,7 @@ func TestRainImpactRadiacode(t *testing.T) {
 		t.Fatal(err)
 	}
 	if res.Device != "radiacode" || res.N != 3 || math.Abs(res.USvPerCPM-1.0/7200) > 1e-6 {
-		t.Fatalf("RadiaCode: %+v", res)
+		t.Fatalf("RC102: %+v", res)
 	}
 	// +10% de 720 CPM = +72 CPM
 	if res.Effect < 50 || res.AvgBase < 700 || res.AvgBase > 740 {

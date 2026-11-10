@@ -64,7 +64,7 @@ async function refreshChart() {
   const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
   for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
-  // RadiaCode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
+  // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
   const rcVals = usvMode ? c.rc || null : c.rcCPM || null;
@@ -88,7 +88,7 @@ async function refreshChart() {
   const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
   const ys = $("yAxis").children;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
-  // eixo da direita: CPM do RadiaCode
+  // eixo da direita: CPM do Radiacode
   const rcAxis = !usvMode && rcMax > 0;
   const rcTop = rcAxis ? Math.max(300, Math.ceil((rcMax * 1.15) / 300) * 300) : top;
   $("yAxisR").hidden = !rcAxis;
@@ -123,7 +123,7 @@ async function refreshChart() {
     out();
   }
   $("rcKey").hidden = !rcVals;
-  $("rcKeyText").textContent = usvMode ? "RadiaCode" : "RadiaCode (eixo da direita)";
+  $("rcKeyText").textContent = usvMode ? "RC102" : "RC102 (eixo da direita)";
 
   const grid = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
@@ -192,7 +192,7 @@ async function refreshChart() {
     const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
     return `<i style="left:${((x(i) / W) * 100).toFixed(2)}%;top:${((y(peakV(p)) / H) * 100).toFixed(2)}%;background:${col}"></i>`;
   }).join("");
-  // com o RadiaCode (aparelho principal), ele é a curva cheia e o GMC (casa)
+  // com o Radiacode (aparelho principal), ele é a curva cheia e o GMC (casa)
   // vira uma linha de referência
   $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines + (rcLine
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
@@ -223,8 +223,8 @@ async function refreshChart() {
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? (c.rcAvg != null ? `RadiaCode média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RadiaCode média ${fmt(c.rcAvgCPM, 0)} CPM` : "");
+      ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
+      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -253,7 +253,7 @@ function setupChartHover() {
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
     const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
-    const rcText = rcv == null ? "" : usvMode ? ` · RadiaCode ${fmt(rcv, usvDigits(rcv))} µSv/h` : ` · RadiaCode ${fmt(rcv, 0)} CPM`;
+    const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : ` · RC102 ${fmt(rcv, 0)} CPM`;
     tip.textContent = (v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
       : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
@@ -401,7 +401,7 @@ function fmtDose(v) {
 }
 const doseTxt = (v) => fmtDose(v).join(" ");
 
-// o RadiaCode já mandou algum dado (está conectado ou tem minuto gravado)
+// o Radiacode já mandou algum dado (está conectado ou tem minuto gravado)
 function hasRcData() {
   const st = state.rc && state.rc.st;
   return !!(st && (st.state === "conectado" || st.lastT > 0));
@@ -460,7 +460,7 @@ function renderDevBoxes(box, list) {
 // aparelhos à vista nos gráficos de dose (clicar no quadro do aparelho liga
 // e desliga); pelo menos um fica sempre visível
 const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
-const devName = (k) => (k === "rc" ? "RadiaCode" : "GMC-800");
+const devName = (k) => (k === "rc" ? "RC102" : "GMC-800");
 const devColor = (k) => (k === "rc" ? COR.rc : COR.accent);
 function toggleDoseDev(k) {
   const s = state.doseShow;
@@ -522,18 +522,18 @@ async function refreshDose() {
   $("doseLimit").value = state.doseLimit;
   const my = ++doseSeq;
   const rcOn0 = hasRcData();
-  // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
+  // o teto e o fundo seguem o Radiacode quando ele tem dado (a sua dose); a
   // curva do outro aparelho vai junto, no mesmo eixo
   const src = rcOn0 ? "radiacode" : "gmc";
   const [cA, cB] = await Promise.all([fetchDose(src, state.doseZoom), rcOn0 ? fetchDose("gmc", state.doseZoom).catch(() => null) : null]);
   if (my !== doseSeq) return;
-  // trecho sem RadiaCode (ex.: antes de ele existir): o GMC vira o principal
+  // trecho sem Radiacode (ex.: antes de ele existir): o GMC vira o principal
   // (fundo, teto e eixo), senão o gráfico ficava vazio com o GMC tendo dado
   const swap = rcOn0 && !(cA && cA.measuredMinutes) && cB && cB.measuredMinutes;
   const c = swap ? cB : cA, c2 = swap ? cA : cB;
   state.dose = c;
   state.dose2 = c2;
-  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RadiaCode", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
+  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RC102", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
   placeRcDevLines();
   $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
@@ -549,7 +549,7 @@ async function refreshDose() {
   const isRc = c.device === "radiacode";
   const rcOn = hasRcData();
   $("doseTitle").textContent = "Dose acumulada";
-  const otherName = isRc ? "GMC-800 (casa)" : "RadiaCode (você)";
+  const otherName = isRc ? "GMC-800 (casa)" : "RC102 (você)";
   renderDoseDevice();
   $("doseOther").hidden = true;
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
@@ -558,8 +558,8 @@ async function refreshDose() {
     "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido. " +
     (isRc
       ? (c.doseSource === "aparelho"
-        ? "A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
-        : "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.")
+        ? "A curva é a dose que o próprio RC102 soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
+        : "O RC102 mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.")
       : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas. " +
         "O GMC não informa a dose que soma na tela: esta é calculada pelo app, minuto a minuto, pela calibração que valia em cada minuto.");
   if (!isRc && c.calNote) {
@@ -639,8 +639,8 @@ function setupDoseHover() {
       tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;
     } else tip.textContent = c2 && j2 >= 0
       ? (c.device === "radiacode"
-        ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
-        : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RadiaCode ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
+        ? `${when} · RC102 ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
+        : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RC102 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
       : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";

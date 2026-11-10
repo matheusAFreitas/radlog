@@ -14,7 +14,7 @@ func TestMyDose(t *testing.T) {
 	a := newTestApp(t)
 	now := time.Now()
 	end := now.Truncate(time.Minute)
-	// última hora a 20 CPM no GMC (sem RadiaCode)
+	// última hora a 20 CPM no GMC (sem Radiacode)
 	var pts []store.Point
 	for i := 60; i >= 1; i-- {
 		pts = append(pts, store.Point{T: end.Add(-time.Duration(i) * time.Minute), CPM: 20, Src: store.SrcLive})

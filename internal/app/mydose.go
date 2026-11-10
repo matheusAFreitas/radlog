@@ -9,7 +9,7 @@ import (
 // ---------- Minha dose (2.17) ----------
 //
 // A tela "Agora" mostra a dose de hoje, desta semana, deste mês e deste ano
-// (do calendário, até agora) de cada aparelho: o RadiaCode é a dose pessoal
+// (do calendário, até agora) de cada aparelho: o Radiacode é a dose pessoal
 // (anda com você) e o GMC-800 é a da casa. Cada período usa a mesma conta da
 // Dose acumulada (buildDose): só os minutos medidos entram, e o fundo e o
 // limite crescem junto com eles. Com um aparelho fora do local normal em
@@ -59,10 +59,10 @@ type MyDose struct {
 	Now          int64        `json:"now"`
 	LimitName    string       `json:"limitName"`
 	LimitMSvYear float64      `json:"limitMSvYear"`
-	Personal     MyDoseDevice `json:"personal"` // com você (normalmente o RadiaCode; roles.go)
+	Personal     MyDoseDevice `json:"personal"` // com você (normalmente o RC102; roles.go)
 	Home         MyDoseDevice `json:"home"`     // em casa (normalmente o GMC-800; roles.go)
-	Normal       bool         `json:"normal"`   // GMC em casa e RadiaCode com você agora
-	Default      string       `json:"default"`  // "pessoal" se o RadiaCode tem dado no ano, senão "casa"
+	Normal       bool         `json:"normal"`   // GMC em casa e RC102 com você agora
+	Default      string       `json:"default"`  // "pessoal" se o RC102 tem dado no ano, senão "casa"
 }
 
 // GetMyDose monta a Minha dose dos dois aparelhos. limit: "publico" ou

@@ -595,7 +595,7 @@ func renderReportPDF(r reportData) []byte {
 	p.y += 22
 
 	if rc := r.S.RC; rc != nil && rc.Minutes > 0 {
-		p.section("RADIACODE (DOSÍMETRO PESSOAL)")
+		p.section("RADIACODE 102 (DOSÍMETRO PESSOAL)")
 		u := func(v float64) string { return fmtBR(v, usvDec(v)) + " µSv/h" }
 		at := func(ms int64) string { return time.UnixMilli(ms).Format("02/01 15:04") }
 		vs := "fundo em casa ainda não calculado"
@@ -1081,7 +1081,7 @@ func fmtSigned(v float64, dec int) string {
 	return "−" + fmtBR(-v, dec)
 }
 
-// rcAlertsTxt resume os alertas do RadiaCode no período.
+// rcAlertsTxt resume os alertas do Radiacode no período.
 func rcAlertsTxt(rc *RcSum) string {
 	var parts []string
 	if rc.Danger > 0 {
@@ -1100,7 +1100,7 @@ func rcAlertsTxt(rc *RcSum) string {
 }
 
 func rcCoverageTxt(rc *RcSum) string {
-	s := fmt.Sprintf("%s%% · %d de %d min com leitura do RadiaCode", fmtBR(rc.Coverage*100, 0), rc.Minutes, rc.HistMinutes)
+	s := fmt.Sprintf("%s%% · %d de %d min com leitura do RC102", fmtBR(rc.Coverage*100, 0), rc.Minutes, rc.HistMinutes)
 	if rc.HistMinutes < rc.SpanMinutes {
 		s += fmt.Sprintf(" desde o primeiro dado (%s) · %s%% do período inteiro", time.UnixMilli(rc.HistFrom).Format("02/01/2006 15:04"), fmtBR(rc.CoverageAll*100, 0))
 	}
@@ -1108,7 +1108,7 @@ func rcCoverageTxt(rc *RcSum) string {
 }
 
 // originLegend explica as marcas de origem dos números (2.6).
-const originLegend = "Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RadiaCode; E = estimativa externa ou extrapolação."
+const originLegend = "Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RC102; E = estimativa externa ou extrapolação."
 
 // episodeRule é a regra de agrupamento dos alertas em episódios.
 const episodeRule = "Regra dos episódios: um alerta abre quando a leitura ao vivo atinge o limite do nível e fecha quando ela cai abaixo de 90% dele (histerese). Alertas que se encostam (o seguinte começa até 1 min após o fim do anterior) formam um episódio, com o nível mais alto, o início do primeiro e o fim do último. Se o contador desconecta com um alerta aberto e reconecta em até 15 min com a leitura ainda acima do limite, o episódio continua e o trecho sem leitura não entra na estatística; fechar o app encerra o episódio. Episódios encontrados no histórico do contador (c) usam as leituras por minuto e terminam após 70 min sem dado."
@@ -1187,7 +1187,7 @@ func (p *reportPDF) maturity() {
 	head := []string{"Janela (até o fim do período)", "GMC-800"}
 	cols := []float64{cw * .32, cw * .68}
 	if len(m.RC) > 0 {
-		head = append(head, "RadiaCode")
+		head = append(head, "RC102")
 		cols = []float64{cw * .3, cw * .35, cw * .35}
 	}
 	var rows [][]string
@@ -1204,7 +1204,7 @@ func (p *reportPDF) maturity() {
 		first = "Sem dado do GMC-800"
 	}
 	if m.RCFirst != 0 {
-		first += " · do RadiaCode: " + time.UnixMilli(m.RCFirst).Format("02/01/2006 15:04")
+		first += " · do RC102: " + time.UnixMilli(m.RCFirst).Format("02/01/2006 15:04")
 	}
 	p.paragraph(first+".", 6.8, cMuted)
 	p.y -= 4

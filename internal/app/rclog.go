@@ -23,12 +23,12 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- log do RadiaCode (como o do app do celular) ----------
+// ---------- log do Radiacode (como o do app do celular) ----------
 //
 // O aparelho manda, além da taxa ao vivo, três tipos de registro que o app do
 // celular mostra na aba Log: a taxa de dose de ~96 em ~96 s (com a contagem),
 // os "raros" (temperatura, bateria e dose acumulada) e os eventos (ligou,
-// começou a carregar, alarme…). Sem ninguém conectado o RadiaCode guarda
+// começou a carregar, alarme…). Sem ninguém conectado o Radiacode guarda
 // esses registros na memória e manda tudo na próxima conexão, apagando o
 // que mandou (rcmemory.go): quem conectar primeiro, o PC ou o celular, leva.
 // Por isso o log do celular pode ser importado (o .csv que ele exporta) e
@@ -332,7 +332,7 @@ func (a *App) rcLogBackfill() {
 		}
 	}
 	if n := a.rcLogMerge(items); n > 0 {
-		a.logf("RadiaCode: %d registros do log recuperados dos dados brutos", n)
+		a.logf("RC102: %d registros do log recuperados dos dados brutos", n)
 	}
 	os.MkdirAll(a.rcDir(), 0o755)
 	os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
@@ -427,8 +427,8 @@ func (a *App) ImportRcLog() (RcLogImport, error) {
 		return RcLogImport{}, errors.New("sem janela")
 	}
 	src, err := wruntime.OpenFileDialog(a.ctx, wruntime.OpenDialogOptions{
-		Title:   "Importar o log do app do RadiaCode",
-		Filters: []wruntime.FileFilter{{DisplayName: "Log do RadiaCode (*.csv)", Pattern: "*.csv"}},
+		Title:   "Importar o log do app do RC102",
+		Filters: []wruntime.FileFilter{{DisplayName: "Log do RC102 (*.csv)", Pattern: "*.csv"}},
 	})
 	if err != nil || src == "" {
 		return RcLogImport{}, err
@@ -442,7 +442,7 @@ func (a *App) ImportRcLog() (RcLogImport, error) {
 	if err != nil {
 		return res, err
 	}
-	a.logEvent(fmt.Sprintf("Log do RadiaCode importado (%s): %d registros novos de %d", res.File, res.Added, res.Read))
+	a.logEvent(fmt.Sprintf("Log do RC102 importado (%s): %d registros novos de %d", res.File, res.Added, res.Read))
 	return res, nil
 }
 
@@ -483,7 +483,7 @@ func numUnit(s string) (float64, string, bool) {
 }
 
 // toUSv converte dose (µSv) ou taxa (µSv/h) para µSv; R vale 0,01 Sv, como
-// no app do RadiaCode. ok=false se a unidade não é conhecida.
+// no app do Radiacode. ok=false se a unidade não é conhecida.
 func toUSv(v float64, unit string) (float64, bool) {
 	u := strings.TrimSuffix(strings.TrimSuffix(strings.ReplaceAll(unit, "μ", "µ"), "/h"), "/hr")
 	mult := map[string]float64{"Sv": 1e6, "mSv": 1e3, "µSv": 1, "uSv": 1, "nSv": 1e-3,
@@ -526,7 +526,7 @@ var mobileEvents = map[string]int{
 	"memory snapshot": 18, "spectrum reset": 19, "count rate alarm 1": 20, "count rate alarm 2": 21, "count rate out of scale": 22,
 }
 
-// parseMobileLog lê o .csv do app do RadiaCode (Android/iOS/Windows): uma
+// parseMobileLog lê o .csv do app do Radiacode (Android/iOS/Windows): uma
 // linha por registro, com "Real time", "Count rate", "Dose rate", "Dose",
 // "Temp.", "Charge", "Event"… (as colunas são achadas pelo nome).
 func parseMobileLog(b []byte) ([]RcLogItem, int, error) {
@@ -583,7 +583,7 @@ func parseMobileLog(b []byte) ([]RcLogItem, int, error) {
 	_, _, hasT := colOf("real time")
 	_, _, hasTS := colOf("timestamp")
 	if !hasT && !hasTS {
-		return nil, 0, errors.New("não parece o log do app do RadiaCode (falta a coluna \"Real time\" ou \"Time\")")
+		return nil, 0, errors.New("não parece o log do app do RC102 (falta a coluna \"Real time\" ou \"Time\")")
 	}
 	get := func(r []string, name string) string {
 		if i, _, ok := colOf(name); ok && i < len(r) {

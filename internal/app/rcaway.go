@@ -14,14 +14,14 @@ import (
 	"radlog/internal/core/intercal"
 )
 
-// ---------- "o RadiaCode estava fora de casa?" (2.38.0) ----------
+// ---------- "o Radiacode estava fora de casa?" (2.38.0) ----------
 //
-// O normal é o RadiaCode com você e o app supõe que você estava em casa: o
+// O normal é o Radiacode com você e o app supõe que você estava em casa: o
 // que ele mede entra no fundo da casa dele. Quando ele some do PC por um
 // tempo (o mesmo mínimo da pergunta do GMC, Configurações) e volta, o app
 // pergunta onde ele estava, já com o que a memória do aparelho trouxe. A
 // resposta "comigo, fora de casa" vira um trecho de Fora de casa com o GMC em
-// casa, o RadiaCode com você e "eu não estava em casa": as leituras saem do
+// casa, o Radiacode com você e "eu não estava em casa": as leituras saem do
 // fundo da casa e do padrão por hora e continuam na dose.
 //
 // As perguntas sem resposta ficam em fora-perguntas.json até você responder
@@ -36,7 +36,7 @@ const (
 	rcAwayLook    = 35 * 24 * time.Hour // até onde procura o último minuto gravado
 )
 
-// RcAwayAsk é uma pergunta pendente: o RadiaCode ficou sem conexão de From a To.
+// RcAwayAsk é uma pergunta pendente: o Radiacode ficou sem conexão de From a To.
 type RcAwayAsk struct {
 	ID   int64 `json:"id"`
 	From int64 `json:"from"` // ms: fim do último minuto gravado antes de sumir
@@ -52,7 +52,7 @@ type RcAwayView struct {
 	MaxAt      int64   `json:"maxAt"`
 	DoseUSv    float64 `json:"doseUSv"`
 	GmcUSv     float64 `json:"gmcUSv"` // média do GMC no mesmo trecho (0 = sem)
-	// razão de contagens RadiaCode/GMC no trecho e a normal dos dias de antes
+	// razão de contagens Radiacode/GMC no trecho e a normal dos dias de antes
 	Ratio       float64 `json:"ratio"`
 	NormalRatio float64 `json:"normalRatio"`
 	Hint        string  `json:"hint"` // "fora", "casa" ou "" (sem dica)
@@ -89,7 +89,7 @@ func (a *App) saveRcAwayLocked() {
 	}
 }
 
-// rcLastMinuteBefore é o fim do último minuto do RadiaCode gravado antes de t
+// rcLastMinuteBefore é o fim do último minuto do Radiacode gravado antes de t
 // (zero = nenhum nas últimas semanas).
 func (a *App) rcLastMinuteBefore(t time.Time) time.Time {
 	pts := a.rcRange(t.Add(-rcAwayLook), t)
@@ -125,7 +125,7 @@ func (a *App) rcAwayDetect(from, to time.Time) {
 	added := a.addRcAwayLocked(ask, time.Now())
 	a.mu.Unlock()
 	if added {
-		a.logf("RadiaCode: ficou %s sem conexão (%s a %s); o app pergunta na tela Agora se ele estava fora de casa",
+		a.logf("RC102: ficou %s sem conexão (%s a %s); o app pergunta na tela Agora se ele estava fora de casa",
 			fmtMinutes(int(to.Sub(from)/time.Minute)), from.Format("02/01 15:04"), to.Format("02/01 15:04"))
 		a.emitRcAway()
 	}
@@ -200,7 +200,7 @@ func (a *App) GetRcAwayAsks() []RcAwayView {
 	return out
 }
 
-// rcAwayView monta o resumo do trecho: o que o RadiaCode trouxe, o GMC no
+// rcAwayView monta o resumo do trecho: o que o Radiacode trouxe, o GMC no
 // mesmo tempo e a dica pela razão de contagens.
 func (a *App) rcAwayView(q RcAwayAsk) RcAwayView {
 	v := RcAwayView{RcAwayAsk: q}
@@ -230,7 +230,7 @@ func (a *App) rcAwayView(q RcAwayAsk) RcAwayView {
 		}
 	}
 	v.Ratio, _ = countRatio(a.intercalPairs(from, to, false))
-	// o normal: os 3 dias antes, sem os trechos em que o RadiaCode estava fora
+	// o normal: os 3 dias antes, sem os trechos em que o Radiacode estava fora
 	away := a.rcAwayChecker()
 	before := a.intercalPairs(from.Add(-72*time.Hour), from, false)
 	kept := before[:0]
@@ -244,7 +244,7 @@ func (a *App) rcAwayView(q RcAwayAsk) RcAwayView {
 	return v
 }
 
-// countRatio é a razão de contagens RadiaCode/GMC de uns minutos (0 = poucos).
+// countRatio é a razão de contagens Radiacode/GMC de uns minutos (0 = poucos).
 func countRatio(ps []intercal.Pair) (float64, int) {
 	var g, c float64
 	for _, p := range ps {
@@ -259,7 +259,7 @@ func countRatio(ps []intercal.Pair) (float64, int) {
 
 const rcAwayMinPairs = 10
 
-// rcAwayHint compara a razão do trecho com a normal: longe dela, o RadiaCode
+// rcAwayHint compara a razão do trecho com a normal: longe dela, o Radiacode
 // mediu outro lugar; perto, parece que ficou em casa.
 func rcAwayHint(ratio, normal float64) string {
 	if ratio <= 0 || normal <= 0 {
@@ -337,7 +337,7 @@ func (a *App) UndoRcAway(ask RcAwayAsk, periodID int64) error {
 
 func (a *App) emitRcAway() { a.emit("rcaway", a.GetRcAwayAsks()) }
 
-// rcLiveMinutes conta os minutos do RadiaCode gravados ao vivo (conectado ao
+// rcLiveMinutes conta os minutos do Radiacode gravados ao vivo (conectado ao
 // PC) em [from, to); os que vieram da memória do aparelho não contam.
 func (a *App) rcLiveMinutes(from, to time.Time) int {
 	a.rc.fileM.Lock()

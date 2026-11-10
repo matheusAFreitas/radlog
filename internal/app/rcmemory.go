@@ -18,9 +18,9 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- memória do RadiaCode: o que ele gravou sem o app (2.30.0) ----------
+// ---------- memória do Radiacode: o que ele gravou sem o app (2.30.0) ----------
 //
-// Sozinho, o RadiaCode guarda na memória as últimas ~1000 h: a taxa de dose
+// Sozinho, o Radiacode guarda na memória as últimas ~1000 h: a taxa de dose
 // de 96 em 96 s (com as contagens), a dose acumulada, temperatura, bateria e
 // os eventos. Quando um app conecta, ele manda esse atraso no mesmo DATA_BUF
 // das leituras ao vivo, em lotes, com o bit "dado antigo" (0x8000) em cada
@@ -178,7 +178,7 @@ func (a *App) rcMemFlush() {
 		return
 	}
 	f := func(t time.Time) string { return t.Format("02/01 15:04") }
-	a.logEvent(fmt.Sprintf("RadiaCode: %d registros recuperados da memória do aparelho (%s a %s), %d minutos sem leitura preenchidos",
+	a.logEvent(fmt.Sprintf("RC102: %d registros recuperados da memória do aparelho (%s a %s), %d minutos sem leitura preenchidos",
 		m.recs, f(m.first), f(m.last), m.mins))
 }
 
@@ -456,7 +456,7 @@ func (a *App) rcMemRawBackfill() {
 	_ = os.MkdirAll(a.rcDir(), 0o755)
 	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 	if total > 0 {
-		a.logf("RadiaCode: %d registros da memória do aparelho repostos dos dados brutos (%d minutos preenchidos, %d linhas do log na hora errada retiradas)", total, mins, nd)
+		a.logf("RC102: %d registros da memória do aparelho repostos dos dados brutos (%d minutos preenchidos, %d linhas do log na hora errada retiradas)", total, mins, nd)
 	}
 }
 

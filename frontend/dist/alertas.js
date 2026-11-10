@@ -26,7 +26,7 @@ function whenLabel(ms) {
   return isToday(ms) ? "hoje " + hhmm(ms) : isYesterday(ms) ? "ontem " + hhmm(ms) : ddmm(ms) + " " + hhmm(ms);
 }
 
-// alertas do RadiaCode: valores em µSv/h
+// alertas do Radiacode: valores em µSv/h
 const isRcEv = (e) => !!e && e.device === "radiacode";
 const usvVal = (v) => `${fmt(v, usvDigits(v))} µSv/h`;
 // GMC em µSv/h desde a 2.29: o servidor manda o pico (peakUSv) e o valor do
@@ -39,7 +39,7 @@ const evSig = (e, v) => (isRcEv(e) ? "" : sigTxt(v));
 
 function alertTitle(e) {
   const demo = e.demo || /^\[demo\] /.test(e.text) ? " (demo)" : "";
-  if (e.members && isRcEv(e)) return `${lvlName(e)} no RadiaCode: pico de ${evVal(e, e.peak)}${demo}`;
+  if (e.members && isRcEv(e)) return `${lvlName(e)} no RC102: pico de ${evVal(e, e.peak)}${demo}`;
   if (e.members) return `${lvlName(e)}: pico de ${evVal(e, e.peak)}${demo}`;
   if (e.retro) return `${lvlName(e)}: pico de ${evVal(e, e.peak)}${demo}`;
   // alertas antigos diziam "(acima de 50)" mesmo com 50: o certo é "a partir de"
@@ -130,7 +130,7 @@ function alertLi(e, withDate) {
   if (isRcEv(e) && e.members) {
     const tag = document.createElement("span");
     tag.className = "tag-retro tag-rc";
-    tag.textContent = "RadiaCode";
+    tag.textContent = "RC102";
     ttl.appendChild(tag);
   }
   if (e.retro) {
@@ -177,7 +177,7 @@ function renderActive() {
     const lim = rc ? ({ atencao: rl.attn, alarme: rl.alarm, perigo: rl.danger }[lvlCls(e)] || null)
       : e.level === "alarme" ? alarmUSv() : e.level === "perigo" ? dangerUSv() : null;
     li.innerHTML = `<span class="a-title"><span class="pulse">${lvIcon(lvlCls(e) in { alarme: 1, perigo: 1 } ? lvlCls(e) : "atencao", 12)}</span></span><span class="a-meta"></span>`;
-    li.querySelector(".a-title").append(`${lvlName(e)} agora${rc ? " no RadiaCode" : ""}${demo}`);
+    li.querySelector(".a-title").append(`${lvlName(e)} agora${rc ? " no RC102" : ""}${demo}`);
     li.querySelector(".a-meta").textContent =
       `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${evVal(e, e.peak)}${evSig(e, e.peak)}` +
       (lim ? ` · limite ${usvVal(+lim)}` : "");
@@ -274,7 +274,7 @@ function drawAlertDetail(d) {
   const inUSv = rc || d.unit === "usv";
   const val = (v) => (inUSv ? usvVal(v) : `${fmt(v, 0)} CPM`);
   const peakV = rc || !inUSv ? e.peak : e.peakUSv || e.peak;
-  $("adTitle").textContent = `${lvlName(e)}${rc ? " no RadiaCode" : ""} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
+  $("adTitle").textContent = `${lvlName(e)}${rc ? " no RC102" : ""} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
   const sub = [];
   sub.push(e.active ? `desde ${hhmm(e.time)} · ${fmtDur(d.end - e.time)}` : `${hhmmss(e.time)}–${hhmmss(d.end)} · durou ${fmtDur(d.end - e.time)}`);
   if (e.peak) sub.push(`pico ${val(peakV)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)})` : ""));
@@ -332,8 +332,8 @@ function drawAlertDetail(d) {
   const xs = $("adX").children;
   xs[0].textContent = xl(t0); xs[1].textContent = xl(t0 + (t1 - t0) / 2); xs[2].textContent = xl(t1);
   $("adLegend").innerHTML =
-    (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RadiaCode (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
-      : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RadiaCode (µSv/h)</span>')
+    (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
+      : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
       : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
       : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
@@ -341,7 +341,7 @@ function drawAlertDetail(d) {
   const note = $("adNote");
   const notes = [];
   if (!(secs.length && d.detailed)) notes.push(e.retro ? "Alerta achado no histórico do contador: só há o valor de cada minuto."
-    : !secs.length && rc ? "Só há o valor de cada minuto do RadiaCode."
+    : !secs.length && rc ? "Só há o valor de cada minuto do RC102."
     : !secs.length ? "Só há o valor de cada minuto. O detalhe por segundo é guardado nos alertas ao vivo a partir da versão 0.22.0."
     : "O detalhe por segundo não cobre o alerta inteiro (o app foi fechado ou reaberto no meio).");
   if (ep && ep.alerts > 1) notes.push(`Faz parte de um episódio de ${ep.alerts} alertas, ${hhmm(ep.from)}–${hhmm(ep.to)} (nível mais alto: ${({ perigo: "perigo", alarme: "alarme" })[ep.level] || "atenção"}); o mínimo e a média são do episódio inteiro.`);

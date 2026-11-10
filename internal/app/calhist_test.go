@@ -32,7 +32,7 @@ func TestCalVersions(t *testing.T) {
 	}
 
 	// fator manual: vale a partir de agora, o passado continua igual
-	if err := a.SetGMCFactor(0.0055, "lado a lado com o RadiaCode"); err != nil {
+	if err := a.SetGMCFactor(0.0055, "lado a lado com o RC102"); err != nil {
 		t.Fatal(err)
 	}
 	if err := a.SetGMCFactor(0.0055, ""); err == nil {

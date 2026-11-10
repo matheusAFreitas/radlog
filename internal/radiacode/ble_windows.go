@@ -100,7 +100,7 @@ func guidString(g syscall.GUID) string {
 		g.Data1, g.Data2, g.Data3, g.Data4[0], g.Data4[1], g.Data4[2], g.Data4[3], g.Data4[4], g.Data4[5], g.Data4[6], g.Data4[7]))
 }
 
-// ScanBLE procura RadiaCodes pelos anúncios Bluetooth.
+// ScanBLE procura Radiacodes pelos anúncios Bluetooth.
 func ScanBLE(d time.Duration) ([]BLEDevice, error) {
 	if err := winrtInit(); err != nil {
 		return nil, fmt.Errorf("Bluetooth: WinRT não iniciou (%w)", err)
@@ -202,7 +202,7 @@ func OpenBLE(addr string) (Transport, error) {
 		return nil, fmt.Errorf("Bluetooth: %w", err)
 	}
 	if res == nil {
-		return nil, fmt.Errorf("RadiaCode %s não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)", fmtMAC(mac))
+		return nil, fmt.Errorf("RC102 %s não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)", fmtMAC(mac))
 	}
 	b := &bleWin{dev: (*bluetooth.BluetoothLEDevice)(res), as: newAssembler(), resp: make(chan []byte, 1)}
 	fail := func(err error) (Transport, error) { b.Close(); return nil, err }
@@ -258,7 +258,7 @@ func OpenBLE(addr string) (Transport, error) {
 	}
 	if b.write == nil || b.notify == nil {
 		if lastErr == nil {
-			lastErr = errors.New("o aparelho não mostrou o serviço do RadiaCode")
+			lastErr = errors.New("o aparelho não mostrou o serviço do RC102")
 		}
 		return fail(fmt.Errorf("Bluetooth: %w (o celular está conectado nele?)", lastErr))
 	}
@@ -451,7 +451,7 @@ func (b *bleWin) Exchange(req []byte) ([]byte, error) {
 		}
 		return out, nil
 	case <-time.After(10 * time.Second):
-		return nil, errors.New("Bluetooth: o RadiaCode não respondeu")
+		return nil, errors.New("Bluetooth: o RC102 não respondeu")
 	}
 }
 

@@ -12,21 +12,21 @@ import (
 // ---------- onde está cada aparelho ----------
 //
 // Cada aparelho está "em casa" (parado, medindo a casa) ou "comigo" (anda com
-// você). O normal é o GMC-800 em casa e o RadiaCode com você. Os trechos fora
+// você). O normal é o GMC-800 em casa e o Radiacode com você. Os trechos fora
 // do normal são os períodos de "Fora de casa" (periods.go), que dizem onde
 // estava cada um; os de antes, sem isso, são "os dois com você".
 //
-//	GMC     RadiaCode  casa (fundo e dose)        dose pessoal
-//	casa    comigo     GMC                        RadiaCode           (normal)
-//	comigo  casa       RadiaCode                  GMC                 (trocados)
-//	comigo  comigo     sem medição                RadiaCode; o GMC preenche as falhas
-//	casa    casa       GMC; o RadiaCode preenche  sem dosímetro
+//	GMC     Radiacode  casa (fundo e dose)        dose pessoal
+//	casa    comigo     GMC                        Radiacode           (normal)
+//	comigo  casa       Radiacode                  GMC                 (trocados)
+//	comigo  comigo     sem medição                Radiacode; o GMC preenche as falhas
+//	casa    casa       GMC; o Radiacode preenche  sem dosímetro
 //
 // Um aparelho também pode ficar "fora do cálculo" (quebrou, leitura não
 // confiável): sai do fundo e da dose, e o papel dele fica com o outro, se o
 // outro estiver no mesmo lugar, ou vira lacuna.
 //
-// Fundo da casa: o GMC só conta em casa; o RadiaCode conta em casa e também
+// Fundo da casa: o GMC só conta em casa; o Radiacode conta em casa e também
 // com você enquanto o GMC não está com você (você em casa, como sempre foi),
 // mas não quando os dois saíram com você nem fora do cálculo.
 //
@@ -55,7 +55,7 @@ func normWhere(gmc, rc string) (string, string, error) {
 		}
 	}
 	if gmc == WhereHome && rc == WhereMe {
-		return gmc, rc, errors.New("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar")
+		return gmc, rc, errors.New("GMC-800 em casa e RC102 com você é o normal: não precisa marcar")
 	}
 	return gmc, rc, nil
 }
@@ -80,18 +80,18 @@ func periodName(gmc, rc string) string {
 	case gmc == WhereOff:
 		return "GMC-800 fora do cálculo"
 	case rc == WhereOff:
-		return "RadiaCode fora do cálculo"
+		return "RC102 fora do cálculo"
 	case gmc == WhereMe && rc == WhereMe:
 		return "Levei os dois"
 	case gmc == WhereMe:
-		return "Levei o GMC-800, deixei o RadiaCode"
+		return "Levei o GMC-800, deixei o RC102"
 	default:
 		return "Deixei os dois em casa"
 	}
 }
 
-// periodNameOut é o nome padrão de "saí com o RadiaCode, o GMC ficou".
-const periodNameOut = "Saí com o RadiaCode"
+// periodNameOut é o nome padrão de "saí com o Radiacode, o GMC ficou".
+const periodNameOut = "Saí com o RC102"
 
 // periodEnd é o fim de um trecho (o aberto vai até depois de qualquer instante).
 func periodEnd(p Period) int64 {
@@ -139,7 +139,7 @@ func periodRoles(p Period) (personal, personalFill, home, homeFill string) {
 type Whereabouts struct {
 	GMC      string  `json:"gmc"`       // casa, comigo
 	RC       string  `json:"radiacode"` // casa, comigo
-	Normal   bool    `json:"normal"`    // GMC em casa e RadiaCode com você
+	Normal   bool    `json:"normal"`    // GMC em casa e RC102 com você
 	Personal string  `json:"personal"`  // aparelho da dose pessoal ("" = sem dosímetro)
 	Home     string  `json:"home"`      // aparelho da casa ("" = sem medição)
 	Since    int64   `json:"since"`     // ms: começo do trecho aberto (0 = normal)
@@ -158,7 +158,7 @@ type DevLive struct {
 	// último minuto bom (contou, sem saturar): o "desde a última leitura boa"
 	// de tirar do cálculo
 	LastGood int64 `json:"lastGood"`
-	// RadiaCode longe do PC: ele continua somando a dose sozinho, e a dose
+	// Radiacode longe do PC: ele continua somando a dose sozinho, e a dose
 	// pessoal sai do total dele quando reconectar
 	CountsOffline bool `json:"countsOffline,omitempty"`
 }
@@ -328,7 +328,7 @@ func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error)
 	err := a.savePeriodsLocked()
 	a.mu.Unlock()
 	where := map[string]string{WhereHome: "em casa", WhereMe: "com você", WhereOff: "fora do cálculo"}
-	a.logEvent("GMC-800 " + where[gmc] + ", RadiaCode " + where[rc])
+	a.logEvent("GMC-800 " + where[gmc] + ", RC102 " + where[rc])
 	a.emitPeriods()
 	return a.GetWhereabouts(), err
 }
@@ -415,9 +415,9 @@ func (a *App) rolesChecker() func(time.Time) (personal, personalFill, home, home
 }
 
 // awayCheckerFor diz se um aparelho estava fora do fundo da casa: o GMC
-// quando não estava em casa; o RadiaCode quando os dois estavam com você ou
+// quando não estava em casa; o Radiacode quando os dois estavam com você ou
 // quando ele estava fora do cálculo.
-// Com "eu não estava em casa" e o RadiaCode com você (2.38.0), ele também
+// Com "eu não estava em casa" e o Radiacode com você (2.38.0), ele também
 // estava fora (você saiu com ele e o GMC ficou).
 func (a *App) awayCheckerFor(dev string) func(time.Time) bool {
 	a.mu.Lock()
@@ -440,10 +440,10 @@ func (a *App) awayCheckerFor(dev string) func(time.Time) bool {
 	}
 }
 
-// rcAwayChecker é o "fora de casa" do RadiaCode.
+// rcAwayChecker é o "fora de casa" do Radiacode.
 func (a *App) rcAwayChecker() func(time.Time) bool { return a.awayCheckerFor(devRC) }
 
-// rcHomeOnly tira os pontos do RadiaCode fora de casa e das medições.
+// rcHomeOnly tira os pontos do Radiacode fora de casa e das medições.
 func (a *App) rcHomeOnly(pts []store.Point) []store.Point {
 	away := a.rcAwayChecker()
 	measuring := a.measuringChecker()
@@ -472,7 +472,7 @@ func (a *App) periodsIn(from, to time.Time) bool {
 // roleDose é a dose de um papel ("pessoal" ou "casa") em [from, to): em
 // cada minuto, a do aparelho que tinha esse papel (ou a do que preenche as
 // falhas dele). Sem trecho no período, é a dose do próprio aparelho (com a
-// dose que o RadiaCode soma, se houver). Com trecho, é a soma dos minutos
+// dose que o Radiacode soma, se houver). Com trecho, é a soma dos minutos
 // gravados, e o fundo de cada minuto é o do aparelho que mediu. Os minutos
 // em que ninguém tinha o papel são lacuna: não contam (GapMinutes).
 func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role string) (DoseChart, error) {

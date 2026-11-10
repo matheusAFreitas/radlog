@@ -14,11 +14,11 @@ import (
 	"time"
 )
 
-// ---------- sincronização entre PCs: RadiaCode, históricos e anexos (2.7.1) ----------
+// ---------- sincronização entre PCs: Radiacode, históricos e anexos (2.7.1) ----------
 //
 // Até a 2.7.0 a sincronização só levava os minutos do GMC, os alertas, os
 // períodos, as medições e as anotações. Agora leva também:
-//   - os arquivos do RadiaCode por linha (minutos, dose e log do aparelho),
+//   - os arquivos do Radiacode por linha (minutos, dose e log do aparelho),
 //     comparando um resumo por dia de cada arquivo, como nos minutos do GMC;
 //   - os arquivos que só são copiados (espectros por minuto, dados brutos),
 //     pelo nome, menos o que ainda está sendo gravado;
@@ -26,7 +26,7 @@ import (
 //     versões da calibração, sempre (são pequenos e a mescla não repete);
 //   - os anexos das medições, pela medição (início) e pelo nome.
 
-// rcInv é o inventário do RadiaCode de um PC.
+// rcInv é o inventário do Radiacode de um PC.
 type rcInv struct {
 	Days  map[string]string `json:"days"`  // "AAAA-MM.csv|2026-11-07" → "n:hash"
 	Files []string          `json:"files"` // "espectros/…", "bruto/…" (já fechados)
@@ -43,7 +43,7 @@ var rcInvCache = struct {
 	m map[string]rcInvFile
 }{m: map[string]rcInvFile{}}
 
-// rcLineFiles são os CSV do RadiaCode que se juntam linha a linha.
+// rcLineFiles são os CSV do Radiacode que se juntam linha a linha.
 func (a *App) rcLineFiles() []string {
 	ents, _ := os.ReadDir(a.rcDir())
 	var out []string
@@ -99,7 +99,7 @@ func (a *App) readRcLines(name string) []string {
 	return out
 }
 
-// rcInventory resume o que este PC tem do RadiaCode.
+// rcInventory resume o que este PC tem do Radiacode.
 func (a *App) rcInventory() rcInv {
 	inv := rcInv{Days: map[string]string{}, Files: []string{}}
 	if a.dataDir == "" {

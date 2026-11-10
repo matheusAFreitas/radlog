@@ -39,7 +39,7 @@ func TestDualHint(t *testing.T) {
 		g, r float64
 		want string
 	}{
-		{5, 1, "principalmente beta"}, {5, 2.5, "bastante beta"}, {1, 5, "Só o RadiaCode"}, {2.5, 5, "Só o RadiaCode"}, {1, 1, "Nenhum"},
+		{5, 1, "principalmente beta"}, {5, 2.5, "bastante beta"}, {1, 5, "Só o RC102"}, {2.5, 5, "Só o RC102"}, {1, 1, "Nenhum"},
 	}
 	for _, c := range cases {
 		if h := dualHint(MeasureResult{Sigma: c.g, Ratio: 2}, MeasureResult{Sigma: c.r, Ratio: 1.5}); !strings.Contains(h, c.want) {
@@ -48,7 +48,7 @@ func TestDualHint(t *testing.T) {
 	}
 }
 
-// fundo real do RadiaCode (7,4 h): sem fundo para subtrair, só o objeto
+// fundo real do Radiacode (7,4 h): sem fundo para subtrair, só o objeto
 // "igual ao fundo" não pode dar pico nenhum; e as linhas do Bi-214 (1120 e
 // 1238) em volta de 1173 não podem virar Co-60
 func TestFindPeaksBi214NotCo60(t *testing.T) {

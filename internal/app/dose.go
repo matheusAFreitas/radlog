@@ -56,9 +56,9 @@ type DoseChart struct {
 	Other        string  `json:"other"`
 	OtherTotal   float64 `json:"otherTotal"`
 	OtherMinutes int     `json:"otherMinutes"`
-	HasRC        bool    `json:"hasRC"` // o RadiaCode tem dado no período
+	HasRC        bool    `json:"hasRC"` // o RC102 tem dado no período
 
-	// RadiaCode: "aparelho" = a curva é a dose que o próprio aparelho soma
+	// Radiacode: "aparelho" = a curva é a dose que o próprio aparelho soma
 	// (continua contando desconectado); "app" = a soma dos minutos gravados.
 	// App* é a conta do app no mesmo período, para comparar.
 	DoseSource  string  `json:"doseSource"`
@@ -310,7 +310,7 @@ func (a *App) buildDose(from, to time.Time, step time.Duration, limit, src strin
 	return c, nil
 }
 
-// rcDoseFromDevice monta a curva com a dose do próprio RadiaCode (os totais
+// rcDoseFromDevice monta a curva com a dose do próprio Radiacode (os totais
 // que ele manda). O fundo e o teto crescem com o tempo em que o aparelho
 // contou (ele conta mesmo longe do PC). Devolve false se não há totais
 // suficientes no período (aí vale a soma dos minutos do app).

@@ -1,8 +1,8 @@
-// Ajustes gravados no RadiaCode (Configurações › RadiaCode).
+// Ajustes gravados no Radiacode (Configurações › Radiacode).
 //
 // Mostra o que foi lido do aparelho agora: alarmes de taxa, de dose e de
 // contagem, som e vibração (e o que faz cada um disparar), tela e unidades.
-// Nada vai para o aparelho sem o clique em "Gravar no RadiaCode", e o
+// Nada vai para o aparelho sem o clique em "Gravar no Radiacode", e o
 // confirm lista exatamente o que muda. O Go guarda a cópia de antes, grava só
 // os registros que mudaram, lê de volta e registra no histórico.
 
@@ -56,7 +56,7 @@ function rcHints() {
   const bg = st.stats && st.stats.bgUSv;
   const a1 = parseFloat($("rcDR1").value);
   // uma frase por <span>: cada uma é traduzida sozinha
-  const parts = [bg ? `Nível de fundo em casa pelo RadiaCode: ${fmt(bg, 3)} µSv/h.` : "Nível de fundo típico dentro de casa: perto de 0,1 µSv/h."];
+  const parts = [bg ? `Nível de fundo em casa pelo RC102: ${fmt(bg, 3)} µSv/h.` : "Nível de fundo típico dentro de casa: perto de 0,1 µSv/h."];
   if (bg && a1 > 0) parts.push(`O alarme 1 está em ${fmt(a1 / bg, 1)}× o nível de fundo.`);
   parts.push(`De fábrica: ${fmt(0.4, 2)} e ${fmt(1.2, 2)} µSv/h.`);
   const h = $("rcDRHint");
@@ -95,7 +95,7 @@ function fillRcCfg(c) {
   $("rcEnergy").textContent = `E(c) = ${fmt(c.energyA0, 2)} + ${fmt(c.energyA1, 3)}·c + ${fmt(c.energyA2, 6)}·c² keV`;
   const st = (state.rc && state.rc.st) || {};
   $("rcCfgFw").textContent = [st.model, st.firmware].filter(Boolean).join(" · ") || "—";
-  $("rcIntro").textContent = "Valores lidos do RadiaCode agora. Mude o que quiser e clique em \"Gravar no RadiaCode\".";
+  $("rcIntro").textContent = "Valores lidos do RC102 agora. Mude o que quiser e clique em \"Gravar no RC102\".";
   rcHints();
   setRcCfgEnabled(true);
 }
@@ -158,7 +158,7 @@ function rcCfgCheck(s) {
   return "";
 }
 
-// mudou algum ajuste do RadiaCode sem gravar?
+// mudou algum ajuste do Radiacode sem gravar?
 function rcCfgDirty() {
   if (!rcCfg || $("rcCfgSave").disabled) return false;
   try { return rcCfgDiff(rcCfg, readRcCfgForm()).length > 0; } catch (e) { return false; }
@@ -169,12 +169,12 @@ async function openRcCfg(force) {
   if (!rcOnlineReal()) {
     rcCfg = null;
     setRcCfgEnabled(false);
-    $("rcIntro").textContent = "Conecte o RadiaCode para ver e mudar os ajustes do aparelho.";
+    $("rcIntro").textContent = "Conecte o RC102 para ver e mudar os ajustes do aparelho.";
     return;
   }
   rcCfgRead = true;
   setRcCfgEnabled(false);
-  $("rcIntro").textContent = "Lendo os ajustes do RadiaCode…";
+  $("rcIntro").textContent = "Lendo os ajustes do RC102…";
   try {
     fillRcCfg(await api.GetRcSettings());
   } catch (e) {
@@ -220,21 +220,21 @@ function wireRcCfg() {
     const diff = rcCfgDiff(rcCfg, next);
     if (!diff.length) { toast("Nada mudou: o aparelho já está assim."); return; }
     const text = ["O app salva uma cópia do que está agora antes de gravar."];
-    if (next.doseRate1 !== rcCfg.doseRate1 || next.doseRate2 !== rcCfg.doseRate2) text.push("Os alertas do RadiaCode no app passam a usar os alarmes de taxa novos.");
-    if (!(await askConfirm({ title: "Gravar no RadiaCode?", diff, text, textAfter: text.length, ok: "Gravar" }))) return;
-    rcCfgRun("Gravando…", () => api.SetRcSettings(next), "Ajustes gravados no RadiaCode");
+    if (next.doseRate1 !== rcCfg.doseRate1 || next.doseRate2 !== rcCfg.doseRate2) text.push("Os alertas do RC102 no app passam a usar os alarmes de taxa novos.");
+    if (!(await askConfirm({ title: "Gravar no RC102?", diff, text, textAfter: text.length, ok: "Gravar" }))) return;
+    rcCfgRun("Gravando…", () => api.SetRcSettings(next), "Ajustes gravados no RC102");
   });
 
   $("rcUndo").addEventListener("click", async () => {
-    if (!(await askConfirm({ title: "Desfazer a última gravação?", text: "O app grava de volta no RadiaCode os ajustes de antes da última gravação.", ok: "Desfazer" }))) return;
+    if (!(await askConfirm({ title: "Desfazer a última gravação?", text: "O app grava de volta no RC102 os ajustes de antes da última gravação.", ok: "Desfazer" }))) return;
     rcCfgRun("Desfazendo…", () => api.UndoRcSettings(), "Ajustes de antes gravados de volta");
   });
 
   $("rcResetDose").addEventListener("click", async () => {
     const st = (state.rc && state.rc.st) || {};
     const d = st.doseLive || st.dose;
-    if (!(await askConfirm({ title: "Zerar a dose acumulada do RadiaCode?", rows: d > 0 ? [["Dose acumulada agora", rcDoseTxt(d)]] : null, note: "Não tem volta: o aparelho recomeça do zero.", ok: "Zerar a dose", danger: true }))) return;
-    rcCfgRun("Zerando…", async () => { await api.ResetRcDose(); return null; }, "Dose do RadiaCode zerada");
+    if (!(await askConfirm({ title: "Zerar a dose acumulada do RC102?", rows: d > 0 ? [["Dose acumulada agora", rcDoseTxt(d)]] : null, note: "Não tem volta: o aparelho recomeça do zero.", ok: "Zerar a dose", danger: true }))) return;
+    rcCfgRun("Zerando…", async () => { await api.ResetRcDose(); return null; }, "Dose do RC102 zerada");
   });
 
   // conectou ou caiu com a seção aberta: lê de novo ou trava

@@ -31,7 +31,7 @@ func TestSetWhere(t *testing.T) {
 	if n := w(t0.Add(time.Hour)); n.Normal || n.Personal != devRC || n.Home != "" || n.Open == nil || n.Open.Name != "Levei os dois" || n.Since != t0.UnixMilli() {
 		t.Fatalf("os dois com você: %+v", n)
 	}
-	// deixa o RadiaCode em casa: trocados
+	// deixa o Radiacode em casa: trocados
 	a.setWhere(t0.Add(time.Hour), WhereMe, WhereHome, " Feira ")
 	if n := w(t0.Add(2 * time.Hour)); n.Personal != "gmc" || n.Home != devRC || n.Open.Name != "Feira" {
 		t.Fatalf("trocados: %+v", n)
@@ -118,12 +118,12 @@ func TestWhereAway(t *testing.T) {
 		{190, false, false}, // normal
 	} {
 		if g, r := gmcAway(at(c.m)), rcAway(at(c.m)); g != c.gmc || r != c.rc {
-			t.Errorf("%d min: GMC fora %v (quero %v), RadiaCode fora %v (quero %v)", c.m, g, c.gmc, r, c.rc)
+			t.Errorf("%d min: GMC fora %v (quero %v), RC102 fora %v (quero %v)", c.m, g, c.gmc, r, c.rc)
 		}
 	}
 }
 
-// writeRc grava minutos do RadiaCode como o app grava.
+// writeRc grava minutos do Radiacode como o app grava.
 func writeRc(t *testing.T, a *App, from time.Time, n int, usv float64) {
 	t.Helper()
 	files := map[string]*strings.Builder{}
@@ -149,7 +149,7 @@ func TestRoleDose(t *testing.T) {
 	from := time.Now().Add(-48 * time.Hour).Truncate(time.Hour)
 	to := from.Add(4 * time.Hour)
 	h := func(n int) int64 { return from.Add(time.Duration(n) * time.Hour).UnixMilli() }
-	// 4 h dos dois aparelhos: GMC a 20 CPM, RadiaCode a 0,10 µSv/h
+	// 4 h dos dois aparelhos: GMC a 20 CPM, Radiacode a 0,10 µSv/h
 	var pts []store.Point
 	for i := 0; i < 240; i++ {
 		pts = append(pts, store.Point{T: from.Add(time.Duration(i) * time.Minute), CPM: 20, Src: store.SrcDevice})
@@ -166,7 +166,7 @@ func TestRoleDose(t *testing.T) {
 		t.Fatalf("normal: %+v %v", p, err)
 	}
 
-	// hora 1: os dois com você (o RadiaCode falha 30 min); hora 2: trocados; hora 3: os dois em casa
+	// hora 1: os dois com você (o Radiacode falha 30 min); hora 2: trocados; hora 3: os dois em casa
 	var ids []int64
 	for _, p := range []Period{
 		{From: h(1), To: h(2)},
@@ -210,7 +210,7 @@ func TestRoleDose(t *testing.T) {
 	}
 }
 
-// dropRc apaga os minutos do RadiaCode em [from, to) (o aparelho falhou).
+// dropRc apaga os minutos do Radiacode em [from, to) (o aparelho falhou).
 func dropRc(t *testing.T, a *App, from, to time.Time) {
 	t.Helper()
 	path := filepath.Join(a.rcDir(), from.Format("2006-01")+".csv")
@@ -244,8 +244,8 @@ func TestWhereOff(t *testing.T) {
 		t.Fatal(err)
 	}
 	writeRc(t, a, from, 240, 0.10)
-	// hora 0: GMC fora do cálculo; hora 1: RadiaCode fora do cálculo;
-	// hora 2: normal, mas o RadiaCode não mandou nada; hora 3: normal
+	// hora 0: GMC fora do cálculo; hora 1: Radiacode fora do cálculo;
+	// hora 2: normal, mas o Radiacode não mandou nada; hora 3: normal
 	for _, p := range []Period{
 		{From: h(0), To: h(1), GMC: WhereOff, RC: WhereMe},
 		{From: h(1), To: h(2), GMC: WhereHome, RC: WhereOff},
@@ -263,7 +263,7 @@ func TestWhereOff(t *testing.T) {
 	gmcAway, rcAway := a.awayChecker(), a.rcAwayChecker()
 	at := func(n int) time.Time { return from.Add(time.Duration(n)*time.Hour + 30*time.Minute) }
 	if !gmcAway(at(0)) || rcAway(at(0)) || gmcAway(at(1)) || !rcAway(at(1)) {
-		t.Fatalf("fundo: GMC %v/%v RadiaCode %v/%v", gmcAway(at(0)), gmcAway(at(1)), rcAway(at(0)), rcAway(at(1)))
+		t.Fatalf("fundo: GMC %v/%v RC102 %v/%v", gmcAway(at(0)), gmcAway(at(1)), rcAway(at(0)), rcAway(at(1)))
 	}
 	g, r := gmc.DefaultCalibration().USv(20), 0.10
 	for _, c := range []struct {
@@ -299,7 +299,7 @@ func TestDevLive(t *testing.T) {
 		t.Errorf("GMC: %+v", g)
 	}
 	if r := w.Live[devRC]; r.State != "sem dado" || r.Last == 0 || !r.CountsOffline {
-		t.Errorf("RadiaCode: %+v", r)
+		t.Errorf("RC102: %+v", r)
 	}
 }
 
