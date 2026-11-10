@@ -365,3 +365,31 @@ func TestDeviceMarks(t *testing.T) {
 		t.Fatalf("saturados: %d", d.SatMinutes)
 	}
 }
+
+// o backup de outro PC feito ainda fora de casa traz o trecho aberto; aqui ele
+// já foi fechado: não pode entrar de novo (deixaria o aparelho fora para sempre)
+func TestMergeOpenPeriodClosedHere(t *testing.T) {
+	t0 := time.Date(2026, 11, 9, 10, 0, 0, 0, time.Local)
+	lá := newTestApp(t)
+	lá.setWhere(t0, WhereMe, WhereMe, "")
+	aberto := lá.GetPeriods()
+
+	aqui := newTestApp(t)
+	aqui.setWhere(t0, WhereMe, WhereMe, "")
+	aqui.setWhere(t0.Add(2*time.Hour), WhereHome, WhereMe, "")
+	if n := aqui.mergePeriods(aberto); n != 0 {
+		t.Fatalf("entrou %d trecho(s)", n)
+	}
+	// outro aberto, começando depois do fechado daqui: também cruza
+	lá2 := newTestApp(t)
+	lá2.setWhere(t0.Add(time.Hour), WhereMe, WhereHome, "")
+	if n := aqui.mergePeriods(lá2.GetPeriods()); n != 0 {
+		t.Fatalf("entrou o aberto cruzado: %d", n)
+	}
+	aqui.mu.Lock()
+	w := aqui.whereaboutsLocked(t0.Add(5 * time.Hour))
+	aqui.mu.Unlock()
+	if !w.Normal || w.Open != nil {
+		t.Fatalf("depois da mescla: %+v", w)
+	}
+}

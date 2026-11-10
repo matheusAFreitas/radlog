@@ -1,5 +1,19 @@
 # Versões
 
+## 2.25.1
+- **Trecho aberto na mescla de backup.** Um backup feito em outro PC
+  enquanto você ainda estava fora traz o trecho "até agora". Se aqui ele já
+  tinha sido fechado, a mescla colocava o aberto de novo, por cima, e o
+  aparelho ficava "fora" para sempre. Agora um trecho que chega cruzando com
+  um que já existe aqui fica de fora (o daqui vale).
+- **Trecho aberto acompanha o relógio.** Com o app aberto por horas, o
+  trecho "até agora" parava na hora em que a lista foi carregada: a faixa
+  lilás nos gráficos e no Agora encurtava, o relatório e o "Ver" do trecho
+  cortavam o fim. Agora vai até o minuto atual, e o Agora diz "fora de casa
+  até agora" em vez de uma hora parada.
+- Cabeçalho da tabela de calibração e do histórico de configuração com o
+  fundo do cartão (usava uma cor que não existe no guia).
+
 ## 2.25.0
 - **Fundação do estilo, passo 5: "Alerta" vira "Alarme" no segundo nível.**
   Os níveis agora são Seguro, Atenção, Alarme e Perigo. "Alerta" continua
