@@ -351,8 +351,8 @@ function renderGTile() {
   $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
   dialVal("g", v ? v[u] : "—");
-  // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
-  const k = calK();
+  // os níveis do app (os mesmos que disparam os avisos), régua até 1,5× o alarme
+  const k = calK(), [tA, tB] = gmcThrCPM(), top = tB * 1.5;
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
   let lvl = "", word;
   if (live) {
@@ -362,7 +362,7 @@ function renderGTile() {
     else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
-  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
+  tileScale("g", tA / top, tB / top, live ? Math.min(r.cpm, top) / top : null, tick(tA), tick(tB));
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
   const gl = state.gLastSeen;
@@ -3580,8 +3580,8 @@ function renderRcMain(st) {
     sig.hidden = false;
     num.hidden = true;
   } else { sig.hidden = true; num.hidden = true; }
-  // régua: os alarmes do próprio RadiaCode (como a do GMC usa as faixas do
-  // manual dele); sem eles, as faixas do app em µSv/h
+  // régua: os alarmes do próprio RadiaCode; sem eles, as faixas do app em
+  // µSv/h (as mesmas do GMC-800)
   const al = st.alarms || {};
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;

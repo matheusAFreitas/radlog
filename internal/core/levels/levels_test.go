@@ -60,3 +60,19 @@ func TestNormAndDeadTime(t *testing.T) {
 		t.Fatalf("teto de 10×: %.1f", g)
 	}
 }
+
+func TestLevelWith(t *testing.T) {
+	lv := Default()
+	lv.AttentionCPM, lv.DangerCPM = 59, 1152
+	for _, c := range []struct {
+		cpm, alarm float64
+		want       string
+	}{
+		{37, 177, "seguro"}, {58, 177, "seguro"}, {59, 177, "atencao"}, {120, 177, "atencao"},
+		{177, 177, "alarme"}, {1151, 177, "alarme"}, {1152, 177, "perigo"}, {100, 0, "alarme"},
+	} {
+		if got := LevelWith(c.cpm, c.alarm, lv); got != c.want {
+			t.Errorf("LevelWith(%v, %v) = %s, quer %s", c.cpm, c.alarm, got, c.want)
+		}
+	}
+}

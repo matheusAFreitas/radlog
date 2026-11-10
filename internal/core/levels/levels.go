@@ -149,6 +149,24 @@ func Level(cpm float64, lv Levels) string {
 	return "seguro"
 }
 
+// LevelWith é o nível pelos limites do app, os mesmos que disparam os avisos:
+// atenção do app, alarme do usuário (alarmCPM; 0 = o padrão de 100 CPM) e
+// perigo. É o que vale para o mostrador e a cor da leitura do GMC-800.
+func LevelWith(cpm, alarmCPM float64, lv Levels) string {
+	if alarmCPM <= 0 {
+		alarmCPM = WarningCPM
+	}
+	switch {
+	case cpm >= lv.DangerEnter():
+		return "perigo"
+	case cpm >= alarmCPM:
+		return "alarme"
+	case cpm >= lv.AttnEnter():
+		return "atencao"
+	}
+	return "seguro"
+}
+
 // DangerStep atualiza o estado de perigo e diz se começou ou terminou. Não
 // depende do alarme do usuário (só dá para silenciar o som, na tela).
 func DangerStep(on *bool, cpm float64, lv Levels) (started, ended bool) {

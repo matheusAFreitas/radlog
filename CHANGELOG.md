@@ -1,5 +1,13 @@
 # Versões
 
+## 2.35.1
+- **O mostrador do GMC-800 segue os níveis das Configurações.** Os avisos
+  do GMC já disparavam pelos níveis de Configurações › Alarmes e avisos, mas
+  o mostrador, o bloco do Agora e a palavra do nível ("Seguro", "Atenção"…)
+  ainda usavam as faixas fixas do manual (50 e 100 CPM). Agora os três
+  usam os mesmos limites que tocam, como no RadiaCode, e a legenda diz
+  "faixas do app em µSv/h".
+
 ## 2.35.0
 - **Faixas de alarme novas.** Atenção, alarme e perigo agora são a mesma
   peça, com a forma de cada nível (triângulo, losango, octógono) e na mesma
