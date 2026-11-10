@@ -7,6 +7,14 @@
   inteiro. Os campos sobem para o topo. Continuam abertos os avisos que
   mudam, os valores medidos, as notas de uma linha, a escada de alarmes e os
   avisos de "não tem volta". A busca continua achando o que está dentro.
+
+## 2.38.1
+- Na tela de um aparelho, a fileira de cima volta a ser a mesma do Agora:
+  o quadro completo do outro aparelho (conexão, mostrador, nível, gráfico,
+  CPM/CPS e dose de hoje) ao lado dos alertas, só sem o quadro do aparelho
+  aberto. O cartão compacto da 2.37.1 saiu. Clicar no valor ou na conexão do
+  quadro abre a tela do outro aparelho, como no Agora.
+
 ## 2.38.0
 - **"O RadiaCode estava fora de casa?"** Quando o RadiaCode volta a conectar
   depois de ficar sem conexão pelo menos o tempo da pergunta de fora de casa
