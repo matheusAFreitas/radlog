@@ -2040,7 +2040,38 @@ const I18N_EN = {
 "o aparelho não está mandando contagens": "the device is not sending counts",
 "o tubo saturou; a taxa real é maior": "the tube is saturated; the real rate is higher",
 "passou o 1º limite do aparelho": "past the device's 1st limit",
-"passou o 2º limite do aparelho": "past the device's 2nd limit"
+"passou o 2º limite do aparelho": "past the device's 2nd limit",
+"Intercalibração com o RadiaCode": "Cross-calibration with the RadiaCode",
+"Intercalibrar com o RadiaCode": "Cross-calibrate with the RadiaCode",
+"intercalibração com o RadiaCode": "cross-calibration with the RadiaCode",
+"fator novo": "new factor",
+"margem (95%)": "margin (95%)",
+"coleta": "collection",
+"tubo do GMC": "GMC tube",
+"Hora a hora": "Hour by hour",
+"Cada ponto é o fator de uma hora, com a margem dele. A faixa é o fator novo, tirado da coleta inteira.": "Each point is the factor of one hour, with its margin. The band is the new factor, taken from the whole collection.",
+"Fator de cada hora da coleta": "Factor of each hour of the collection",
+"O que muda se aplicar": "What changes if applied",
+"GMC-800 hoje": "GMC-800 now",
+"com o fator novo": "with the new factor",
+"fundo da casa": "home background",
+"dose do GMC por dia": "GMC dose per day",
+"O contador não é mexido: o fator vale só no RadLog. Vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional.": "The counter is not touched: the factor applies only in RadLog. It becomes a new version in the calibration table; it can be undone, and recalculating the history is optional.",
+"Em uso a partir da aplicação.": "In use since it was applied.",
+"Intercalibrar de novo": "Cross-calibrate again",
+"Esquecer este resultado": "Forget this result",
+"Coletando.": "Collecting.",
+"Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro. Se mexer em um deles, cancele e comece de novo.": "Keep both devices touching, at the same height, neither shielding the other. If you move one of them, cancel and start over.",
+"Cancelar a coleta": "Cancel the collection",
+"Começar de novo": "Start over",
+"Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RadiaCode como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.": "Keep both devices touching, at the same height, neither shielding the other, for 24 h. The app does the math and suggests the GMC's new factor, with the RadiaCode as reference. Worth repeating every six months, or when you move the GMC.",
+"Manutenção.": "Maintenance.",
+"Abrir a calibração": "Open the calibration",
+"Coleta de 24 h começou": "24 h collection started",
+"Poucos minutos com os dois em casa para comparar (precisa de 12 h juntos na semana).": "Too few minutes with both at home to compare (it needs 12 h together in the week).",
+"a intercalibração ainda não terminou": "the cross-calibration hasn't finished yet",
+"Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos encostados)": "Cross-calibration with the RadiaCode: 24 h collection started (both devices touching)",
+"Intercalibração com o RadiaCode: coleta cancelada": "Cross-calibration with the RadiaCode: collection cancelled"
 },
 "patterns": [
 [
@@ -2093,12 +2124,32 @@ const I18N_EN = {
 ]
 ],
 [
+"Os dois estão se afastando: ",
+"^Os dois estão se afastando: ((?:(?! · ).)+?)% do normal há duas semanas\\. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RadiaCode guardado em outro canto\\. Vale intercalibrar de novo\\.$",
+"The devices are drifting apart: ${1}% from normal for two weeks. It may be the GMC tube, one of the devices moved, or the RadiaCode kept somewhere else. Worth cross-calibrating again.",
+[
+"Os dois estão se afastando: ",
+"% do normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RadiaCode guardado em outro canto. Vale intercalibrar de novo."
+]
+],
+[
 "fundo da casa: média dos ",
 "^fundo da casa: média dos ((?:(?! · ).)+?) min gravados antes da medição \\(em casa, fora de alertas e medições\\); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos$",
 "home background: average of the ${1} min recorded before the measurement (at home, outside alerts and measurements); the uncertainty is the larger of Poisson's and the real spread of the minutes",
 [
 "fundo da casa: média dos ",
 " min gravados antes da medição (em casa, fora de alertas e medições); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos"
+]
+],
+[
+"Nas ",
+"^Nas ((?:(?! · ).)+?) h com os dois lado a lado, o mesmo fundo deu ((?:(?! · ).)+?) µSv/h no GMC\\-800 e ((?:(?! · ).)+?) µSv/h no RadiaCode\\. O RadiaCode pesa cada contagem pela energia; o GMC usa uma curva de fábrica\\.$",
+"In the ${1} h with both side by side, the same background gave ${2} µSv/h on the GMC-800 and ${3} µSv/h on the RadiaCode. The RadiaCode weighs each count by its energy; the GMC uses a factory curve.",
+[
+"Nas ",
+" h com os dois lado a lado, o mesmo fundo deu ",
+" µSv/h no GMC-800 e ",
+" µSv/h no RadiaCode. O RadiaCode pesa cada contagem pela energia; o GMC usa uma curva de fábrica."
 ]
 ],
 [
@@ -2167,6 +2218,15 @@ const I18N_EN = {
 [
 "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +",
 "). Use o modo automático para mais certeza."
+]
+],
+[
+"A coleta terminou com só ",
+"^A coleta terminou com só ((?:(?! · ).)+?) minutos com os dois aparelhos medindo \\(precisa de pelo menos 60\\)\\. Confira se o RadiaCode ficou conectado\\.$",
+"The collection ended with only ${1} minutes with both devices measuring (it needs at least 60). Check that the RadiaCode stayed connected.",
+[
+"A coleta terminou com só ",
+" minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RadiaCode ficou conectado."
 ]
 ],
 [
@@ -2341,6 +2401,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Calibração do GMC: ",
+"^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, pela intercalibração com o RadiaCode \\(vale a partir de agora\\)$",
+"GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RadiaCode (applies from now on)",
+[
+"Calibração do GMC: ",
+" µSv/h por CPM no fundo, pela intercalibração com o RadiaCode (vale a partir de agora)"
+]
+],
+[
 "Radar indisponível agora (",
 "^Radar indisponível agora \\(((?:(?! · ).)+?)\\); usando o modelo do Open\\-Meteo, que pode não mostrar chuva bem localizada\\.$",
 "Radar unavailable now (${1}); using the Open-Meteo model, which may miss very local rain.",
@@ -2477,6 +2546,15 @@ const I18N_EN = {
 "There is no settings record for this period: the settings history starts on ${1}.",
 [
 "Não há registro de configurações para este período: o histórico de configurações começa em "
+]
+],
+[
+"Na última semana a razão ficou ",
+"^Na última semana a razão ficou ((?:(?! · ).)+?)% do normal\\. Se continuar assim mais uma semana, vira aviso\\.$",
+"Last week the ratio was ${1}% from normal. If it stays like this one more week, it becomes a warning.",
+[
+"Na última semana a razão ficou ",
+"% do normal. Se continuar assim mais uma semana, vira aviso."
 ]
 ],
 [
@@ -2684,6 +2762,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Aprendendo o normal dos dois em casa: ",
+"^Aprendendo o normal dos dois em casa: ((?:(?! · ).)+?) h juntos até agora; a vigia começa em ((?:(?! · ).)+?)\\.$",
+"Learning what is normal for both at home: ${1} h together so far; the watch starts on ${2}.",
+[
+"Aprendendo o normal dos dois em casa: ",
+" h juntos até agora; a vigia começa em "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) CPM \\(≈ ((?:(?! · ).)+?) µSv/h\\), mediana das leituras por minuto dos últimos 30 dias em casa$",
 "${1} CPM (≈ ${2} µSv/h), median of the per-minute readings of the last 30 days at home",
@@ -2823,6 +2910,17 @@ const I18N_EN = {
 [
 "Erro interno repetido no app (",
 "); a tarefa parou. Feche e abra o RadLog"
+]
+],
+[
+"Intercalibração com o RadiaCode terminou: ",
+"^Intercalibração com o RadiaCode terminou: ((?:(?! · ).)+?) µSv/h por CPM \\(±((?:(?! · ).)+?)%, ((?:(?! · ).)+?) minutos\\)$",
+"Cross-calibration with the RadiaCode finished: ${1} µSv/h per CPM (±${2}%, ${3} minutes)",
+[
+"Intercalibração com o RadiaCode terminou: ",
+" µSv/h por CPM (±",
+"%, ",
+" minutos)"
 ]
 ],
 [
@@ -3039,6 +3137,15 @@ const I18N_EN = {
 "marked as not comparable with other measurements of the same object: ${1}",
 [
 "marcada como não comparável com outras medições do mesmo objeto: "
+]
+],
+[
+"Os dois concordam: nos últimos 7 dias a razão ficou ",
+"^Os dois concordam: nos últimos 7 dias a razão ficou ((?:(?! · ).)+?)% do normal\\.$",
+"Both devices agree: over the last 7 days the ratio was ${1}% from normal.",
+[
+"Os dois concordam: nos últimos 7 dias a razão ficou ",
+"% do normal."
 ]
 ],
 [
@@ -3323,6 +3430,16 @@ const I18N_EN = {
 [
 "candidatos responderam (",
 "); mande o arquivo para análise"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) minutos com os dois · ((?:(?! · ).)+?) fora da curva ficaram de fora$",
+"${1} of ${2} minutes with both · ${3} outliers left out",
+[
+" de ",
+" minutos com os dois · ",
+" fora da curva ficaram de fora"
 ]
 ],
 [
@@ -3963,6 +4080,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O GMC-800 estava lendo ",
+"^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% abaixo do RadiaCode$",
+"The GMC-800 was reading ${1}% below the RadiaCode",
+[
+"O GMC-800 estava lendo ",
+"% abaixo do RadiaCode"
+]
+],
+[
 "Antes da chuva: ",
 "^Antes da chuva: ((?:(?! · ).)+?) CPM · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
 "Before the rain: ${1} CPM · last 15 min: ${2} (${3})",
@@ -4024,6 +4150,15 @@ const I18N_EN = {
 [
 "Perigo no RadiaCode: ",
 " µSv/h (a partir de "
+]
+],
+[
+"O GMC-800 estava lendo ",
+"^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% acima do RadiaCode$",
+"The GMC-800 was reading ${1}% above the RadiaCode",
+[
+"O GMC-800 estava lendo ",
+"% acima do RadiaCode"
 ]
 ],
 [
@@ -4092,6 +4227,14 @@ const I18N_EN = {
 "GMC-800 and RadiaCode out of the calculation since ${1}",
 [
 "GMC-800 e RadiaCode fora do cálculo desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) variância/média · fora do esperado \\(≈ 1\\)$",
+"${1} variance/mean · off the expected (≈ 1)",
+[
+" variância/média · fora do esperado (≈ 1)"
 ]
 ],
 [
@@ -4266,6 +4409,15 @@ const I18N_EN = {
 "If the object emits anything, it's less than +${1}.",
 [
 "Se o objeto emite algo, é menos que +"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) minutos com os dois · termina em ((?:(?! · ).)+?)\\.$",
+"${1} of ${2} minutes with both · ends ${3}.",
+[
+" de ",
+" minutos com os dois · termina em "
 ]
 ],
 [
@@ -4691,6 +4843,14 @@ const I18N_EN = {
 "The GMC-800 has had no counts for ${1}.",
 [
 "O GMC-800 está sem contagens há "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) variância/média · saudável \\(≈ 1\\)$",
+"${1} variance/mean · healthy (≈ 1)",
+[
+" variância/média · saudável (≈ 1)"
 ]
 ],
 [
@@ -5550,6 +5710,14 @@ const I18N_EN = {
 ]
 ],
 [
+"com o RadiaCode, coleta de ",
+"^com o RadiaCode, coleta de ((?:(?! · ).)+?)$",
+"with the RadiaCode, collection of ${1}",
+[
+"com o RadiaCode, coleta de "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -6049,6 +6217,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) minutos com os dois$",
+"${1} of ${2} minutes with both",
+[
+" de ",
+" minutos com os dois"
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -6163,6 +6340,15 @@ const I18N_EN = {
 "both with you since ${1}",
 [
 "os dois com você desde "
+]
+],
+[
+"Usar ",
+"^Usar ((?:(?! · ).)+?) a partir de agora$",
+"Use ${1} from now on",
+[
+"Usar ",
+" a partir de agora"
 ]
 ],
 [
@@ -6344,6 +6530,14 @@ const I18N_EN = {
 "out of the calculation since ${1}",
 [
 "fora do cálculo desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM · hoje ((?:(?! · ).)+?)$",
+"${1} µSv/h per CPM · now ${2}",
+[
+" µSv/h por CPM · hoje "
 ]
 ],
 [
@@ -7392,6 +7586,16 @@ const I18N_EN = {
 "no counts for ${1}",
 [
 "sem contagens há "
+]
+],
+[
+"entre ",
+"^entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) \\(±((?:(?! · ).)+?) %\\)$",
+"between ${1} and ${2} (±${3} %)",
+[
+"entre ",
+" (±",
+" %)"
 ]
 ],
 [

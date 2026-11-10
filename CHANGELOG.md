@@ -1,5 +1,22 @@
 # Versões
 
+## 2.28.0
+- **Intercalibrar com o RadiaCode, de dentro do app.** Em Configurações ›
+  Calibração do GMC, o botão novo começa uma coleta de 24 h com os dois
+  aparelhos encostados. No fim aparece o resultado com a mesma conta da
+  análise de 09/11: quanto o GMC lia acima ou abaixo do RadiaCode, o fator
+  novo com a margem de 95%, o fator hora a hora, a saúde do tubo e o que
+  muda no fundo e na dose. "Usar … a partir de agora" vira uma versão da
+  calibração com origem "intercalibração com o RadiaCode" (dá para
+  desfazer). O contador não é mexido.
+- **Vigia semanal dos dois aparelhos.** Nos minutos com os dois em casa, o
+  app compara a razão de contagens (cps do RadiaCode ÷ CPM do GMC) com o
+  normal das 4 primeiras semanas da calibração em uso. A frase aparece na
+  Calibração e na página do GMC-800; se a razão sair mais de 5% do normal
+  por duas semanas seguidas, entra um aviso de manutenção em Alertas.
+- A conta fica em `internal/core/intercal`, com teste; a coleta entra no
+  backup.
+
 ## 2.27.0
 - **Fundação do estilo, passo 6: espaço.** Os espaçamentos internos
   (padding, margin e gap) passam a usar a régua do guia: 4, 8, 12, 16, 20,
