@@ -1,5 +1,25 @@
 # Versões
 
+## 2.33.0
+- **Mostrador: só o símbolo no meio.** No mostrador grande da tela do
+  aparelho, o centro mostra só a forma do nível, maior. "Seguro", "Atenção",
+  "Alarme" e "Perigo" ficam escritos embaixo do anel, na cor do nível.
+- **Três estados de conexão, no mostrador e nos cartões:**
+  - conectado: a forma do nível, como antes;
+  - conectando: anel tracejado âmbar, com os arcos âmbar pulsando (parados
+    com "reduzir movimento"), e "Conectando…" embaixo;
+  - desconectado: um traço cinza, com os arcos cinza, sem parte acesa nem
+    ponto, e "Desconectado" embaixo.
+  Vale para o cartão grande, para o compacto do outro aparelho e para os
+  quadros da tela Agora.
+- **Cartão grande sem conexão:** o número grande vira "Última leitura às
+  HH:MM", em cinza, e as unidades, o σ e o "dentro do normal" somem. No topo
+  entra um aviso com o motivo (sem o endereço do aparelho; endereço e porta
+  ficam em "detalhes"), com "Procurar de novo" e "Configurar conexão" (no
+  GMC, "Escolher porta"). A dose de hoje mostra "até HH:MM".
+- O cartão "Aparelho" da aba RadiaCode perde a linha vermelha de erro e o
+  "erro na conexão" do título. Agora mostra o tipo de conexão, o último
+  contato e os botões.
 ## 2.32.1
 - Mostrador grande da tela do aparelho: a forma do nível volta para o centro
   exato do anel (estava um pouco acima). O nome do nível fica embaixo dela.

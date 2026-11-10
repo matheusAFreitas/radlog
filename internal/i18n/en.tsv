@@ -3150,3 +3150,22 @@ cópia {0} ilegível: {1}	copy {0} unreadable: {1}
 não gravei: {0}	didn't write: {0}
 o aparelho aceitou, mas leu de volta diferente: {0}	the device accepted it, but read back differently: {0}
 o aparelho recusou os registros {0}	the device refused registers {0}
+{0} desconectado desde {1}	{0} disconnected since {1}
+{0} desconectado	{0} disconnected
+desconectado há {0}	disconnected {0} ago
+· desconectado há {0}	· disconnected {0} ago
+menos de 1 min	less than 1 min
+Última leitura às {0}:	Last reading at {0}:
+Sem leituras ainda	No readings yet
+Conectando ao {0}…	Connecting to the {0}…
+A conexão caiu às {0}. O app tenta de novo sozinho.	The connection dropped at {0}. The app keeps retrying.
+último contato {0}	last contact {0}
+até {0}	until {0}
+do aparelho · até {0}	from the device · until {0}
+detalhes	details
+Escolher porta	Choose port
+última {0}	last {0}
+O GMC-800 não responde. O cabo USB está ligado?	The GMC-800 isn't answering. Is the USB cable plugged in?
+Não apareceu no USB nem no Bluetooth. Ele está ligado e perto? O celular não está conectado nele?	It didn't show up on USB or Bluetooth. Is it on and nearby? Is the phone connected to it?
+Não apareceu no USB. O cabo está ligado?	It didn't show up on USB. Is the cable plugged in?
+A procura está desligada em Configurações → RadiaCode.	Searching is turned off in Settings → RadiaCode.

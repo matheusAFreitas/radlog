@@ -336,6 +336,9 @@ function renderGTile() {
   $("gTileUnit").textContent = UNIT_TXT[u];
   $("gTileDemo").hidden = !state.demo.active;
   $("gTile").classList.toggle("stale", !live);
+  const gc = gmcConn();
+  $("gTile").classList.toggle("conn-off", gc === "off");
+  $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
   dialVal("g", v ? v[u] : "—");
   // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
@@ -369,6 +372,9 @@ function renderRTile(st, o) {
   const u = state.rcUnit;
   $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
+  const rcc = rcConn(st);
+  $("rTile").classList.toggle("conn-off", rcc === "off");
+  $("rTile").classList.toggle("conn-wait", rcc === "wait");
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
   dialVal("r", v ? v[u] : "—");
   $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
@@ -546,6 +552,7 @@ async function refreshStats() {
   renderGTile();
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
+  if (gmcConn()) renderGmcConn(); // desconectado: "até HH:MM"
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)} · calculada pelo app (o GMC não informa a dose que soma)` : "";
 }
 
@@ -2707,6 +2714,7 @@ function wire() {
 function listen() {
   on("reading", (r) => {
     state.last = r;
+    if (!r.demo) { state.gLastSeen = r; state.gOffSince = 0; } // a última leitura de verdade, para quando desconectar
     state.alarm = r.alarm;
     if (r.demo) { alarmCtl.demo = !!r.alarm; alarmCtl.demoDanger = !!r.danger; }
     else { alarmCtl.real = !!r.alarm; alarmCtl.realDanger = !!r.danger; state.lastReal = r; }
@@ -2726,6 +2734,7 @@ function listen() {
   on("status", (s) => {
     const was = state.status.state;
     state.status = s;
+    if (was === "conectado" && s.state !== "conectado") state.gOffSince = Date.now();
     if (s.state !== "conectado") { state.last = null; alarmCtl.real = false; alarmCtl.realDanger = false; attnCtl.real = false; updateAlarm(); updateAttention(); }
     renderStatus();
     if (was !== s.state) refreshStats();
@@ -3168,9 +3177,10 @@ function renderRc(st) {
   // pílula no topo: só aparece quando tem algo a dizer
   $("navRcDot").hidden = st.state !== "erro";
   // aba
-  $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "erro na conexão" }[st.state] || st.state;
-  $("rcState").textContent = on ? `conectado · ${via}` : st.state;
-  $("rcState").className = "rc-state mono small " + (on ? "ok" : st.state === "erro" ? "err" : "");
+  $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "desconectado" }[st.state] || st.state;
+  // o aviso de conexão fica no cartão de cima; aqui só o tipo e o último contato
+  $("rcState").textContent = on ? `conectado · ${via}` : [st.via ? via : "", st.lastT ? `último contato ${isToday(st.lastT) ? hhmm(st.lastT) : whenLabel(st.lastT)}` : st.state === "conectando" ? "conectando…" : "desconectado"].filter(Boolean).join(" · ");
+  $("rcState").className = "rc-state mono small " + (on ? "ok" : "");
   $("rcNums").hidden = !on;
   if (on) {
     $("rcUsv").textContent = st.time ? `${fmt(st.usvh, usvDigits(st.usvh))} µSv/h` : "—";
@@ -3186,7 +3196,9 @@ function renderRc(st) {
   $("rcHelp").textContent = on ? "" : st.state === "erro" ? st.err
     : st.state === "off" ? "A procura está desligada em Configurações → RadiaCode."
     : "Ligue o RadiaCode no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
-  $("rcHelp").className = "small " + (st.state === "erro" ? "warn-text" : "muted");
+  $("rcHelp").className = "small muted";
+  // com o cartão de cima à vista, o motivo e as ações estão no aviso de lá
+  if (!on && (st.state === "conectando" || st.lastT > 0)) $("rcHelp").textContent = "";
   if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); refreshDose(); }
   // RadiaCode como aparelho principal: na primeira vez, o gráfico vai para µSv/h
   if (hasRcData() && !localGet("rcPrimaryUnit", "")) {
@@ -3251,6 +3263,7 @@ function renderHeroVia() {
   el.hidden = false;
   el.textContent = on ? `· ${d.port || ""}` : state.demo && state.demo.active ? "" : "· desconectado";
   el.className = "rc-main-via gmc-via mono" + (on ? " on" : "");
+  if (gmcConn()) renderGmcConn();
 }
 
 function renderRcMain(st) {
