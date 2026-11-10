@@ -1,6 +1,6 @@
 # Versões
 
-## 2.21.0
+## 2.20.1
 - **Mais arrumação por dentro, sem mudança na tela.** A aba Dose dos
   Gráficos (o gráfico de CPM com o zoom por arraste e a dose acumulada dos
   dois aparelhos) saiu do `app.js` para `frontend/dist/graficos.js`. O
