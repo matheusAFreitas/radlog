@@ -1909,7 +1909,8 @@ const I18N_EN = {
 "somada pelo aparelho": "summed by the device",
 "normal ainda não calculado": "normal not calculated yet",
 "pelo RadiaCode em casa": "by the RadiaCode at home",
-"Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv)."
+"Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
+"memória do aparelho": "device memory"
 },
 "patterns": [
 [
@@ -2256,6 +2257,17 @@ const I18N_EN = {
 "O episódio terminou porque parou de chegar leitura (",
 ") às ",
 ", não porque a contagem voltou ao normal."
+]
+],
+[
+"RadiaCode: ",
+"^RadiaCode: ((?:(?! · ).)+?) registros recuperados da memória do aparelho \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\), ((?:(?! · ).)+?) minutos sem leitura preenchidos$",
+"RadiaCode: ${1} records recovered from the device memory (${2} to ${3}), ${4} minutes without a reading filled in",
+[
+"RadiaCode: ",
+" registros recuperados da memória do aparelho (",
+"), ",
+" minutos sem leitura preenchidos"
 ]
 ],
 [

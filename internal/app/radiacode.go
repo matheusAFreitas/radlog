@@ -133,6 +133,7 @@ type rcState struct {
 	bleNow      atomic.Bool // endereço Bluetooth novo: tentar já
 	doseLast    rcDosePt    // último total gravado (protegido por fileM)
 	texts       rcTexts     // mensagens do aparelho já passadas para o log
+	mem         rcMemTally  // o que veio da memória do aparelho nesta conexão
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -456,6 +457,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	// e o USB/Bluetooth precisa estar livre para a próxima conexão)
 	defer func() {
 		dev.Close()
+		a.rcMemFlush()
 		a.rcAlertsOff()
 		a.rcFlushMinute()
 		a.rcRawClose()
@@ -519,6 +521,13 @@ func (a *App) rcRun(dev *radiacode.Device) {
 }
 
 func (a *App) rcRecords(recs []radiacode.Record) {
+	// o que o aparelho guardou sem o app vai para a hora certa, não para agora
+	recs, old := splitOldRecords(recs)
+	if len(old) > 0 {
+		a.rcRecoverOld(old, time.Now())
+	} else {
+		a.rcMemFlush()
+	}
 	a.rcLogRecords(recs)
 	changed := false
 	for _, r := range recs {
