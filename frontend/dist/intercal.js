@@ -60,7 +60,7 @@ function icResultHtml(v) {
   h += `<h4 class="ic-sub">O que muda se aplicar</h4><table class="cfg-hist ic-cmp"><thead><tr><th></th><th>GMC-800 hoje</th><th>com o fator novo</th></tr></thead><tbody>` +
     `<tr><td>fundo da casa</td><td class="num mono">${fmt(k0Usv, 3)} µSv/h</td><td class="num mono">${fmt(kUsv, 3)} µSv/h</td></tr>` +
     `<tr><td>dose do GMC por dia</td><td class="num mono">${fmt(k0Usv * 24, 1)} µSv</td><td class="num mono">${fmt(kUsv * 24, 1)} µSv</td></tr></tbody></table>` +
-    `<p class="small muted">O contador não é mexido: o fator vale só no RadLog. Vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional.</p>`;
+    `<p class="small muted">O fator vale no RadLog e vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional. Para o contador mostrar o mesmo número na tela dele, use "Calibrar o contador com a intercalibração" no cartão de pontos logo abaixo.</p>`;
   if (v.applied) {
     h += `<p class="small ic-done">${lvIcon("seguro", 12)} Em uso a partir da aplicação.</p><div class="row"><button type="button" class="btn small" data-ic="again">Intercalibrar de novo</button></div>`;
   } else {

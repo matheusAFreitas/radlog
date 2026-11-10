@@ -1648,6 +1648,25 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 #gmcConcord { margin: 0 var(--space-1) var(--space-4); }
 .ic-maint { margin: 0 0 var(--space-3); border-color: var(--att); }
 
+/* calibrar o contador com o fator do app (2.37.0) */
+.cc { display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3); border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent); background: color-mix(in srgb, var(--accent) 6%, transparent); border-radius: var(--radius-md); }
+.cc-title { margin: 0; font-size: var(--fs-body); font-weight: 600; }
+.cc p { margin: 0; }
+table.cc-cmp { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+table.cc-cmp th, table.cc-cmp td { padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--border); text-align: left; }
+table.cc-cmp th { font-weight: 500; color: var(--muted); font-size: var(--fs-label); }
+table.cc-cmp .num { text-align: right; }
+table.cc-cmp .cc-grp { border-left: 1px solid var(--border); }
+table.cc-cmp td:first-child { color: var(--muted); }
+.cc-old { color: var(--dim); }
+.cc-new { color: var(--accent); }
+.cc-done { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--accent); }
+.cc-keep { margin: 0; display: flex; flex-direction: column; gap: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-2); }
+.cc-keep:first-child { border-top: 0; padding-top: 0; }
+.cc-saved { display: grid; grid-template-columns: 6.5em minmax(0, 1fr) auto; gap: var(--space-2); align-items: center; }
+.cc-saved dt { color: var(--muted); font-size: var(--fs-label); }
+.cc-saved dd { margin: 0; font-size: var(--fs-label); min-width: 0; }
+
 /* ---------- tela do aparelho (2.31.0) ----------
    O valor aparece uma vez só: o quadro do próprio aparelho sai da fileira de
    cima e o outro fica compacto ao lado dos alertas. O mostrador grande faz o

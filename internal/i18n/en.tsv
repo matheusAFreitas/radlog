@@ -2985,7 +2985,6 @@ GMC-800 hoje	GMC-800 now
 com o fator novo	with the new factor
 fundo da casa	home background
 dose do GMC por dia	GMC dose per day
-O contador não é mexido: o fator vale só no RadLog. Vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional.	The counter is not touched: the factor applies only in RadLog. It becomes a new version in the calibration table; it can be undone, and recalculating the history is optional.
 Em uso a partir da aplicação.	In use since it was applied.
 Intercalibrar de novo	Cross-calibrate again
 Usar {0} a partir de agora	Use {0} from now on
@@ -3236,3 +3235,49 @@ fim da escala {0} µSv/h	end of scale {0} µSv/h
 OK	OK
 {0}: pico de {1}	{0}: peak of {1}
 procurando…	searching…
+Calibrar o contador com a intercalibração	Calibrate the counter with the intercalibration
+intercalibração com o RadiaCode	intercalibration with the RadiaCode
+calibração do app	the app's calibration
+CPM hoje	CPM now
+CPM sugerido	suggested CPM
+O µSv/h de cada ponto fica igual e o CPM é multiplicado por {0}. A forma da curva continua, inclusive a compensação de tempo morto nos pontos de cima. A intercalibração mede só o fundo da casa; os pontos de cima seguem a forma da curva atual, não foram medidos.	Each point keeps its µSv/h and the CPM is multiplied by {0}. The curve keeps its shape, including the dead-time compensation in the upper points. The intercalibration only measures the home background; the upper points follow the shape of the current curve and were not measured.
+Gravar no contador…	Write to the counter…
+Contador e app usam o mesmo fator: {0} µSv/h por CPM. Os dois mostram o mesmo µSv/h.	Counter and app use the same factor: {0} µSv/h per CPM. Both show the same µSv/h.
+De fábrica	Factory
+Anterior	Previous
+a calibração de fábrica do GMC-800	the GMC-800 factory calibration
+a que estava no contador antes do app mexer	the one on the counter before the app changed it
+a que estava antes da última mudança	the one before the last change
+guardada em {0}	saved on {0}
+Voltar à de fábrica	Back to factory
+Voltar à anterior	Back to previous
+Gravar a calibração nova no GMC-800?	Write the new calibration to the GMC-800?
+Pontos de hoje: {0} CPM	Current points: {0} CPM
+Pontos novos: {0} CPM	New points: {0} CPM
+O µSv/h de cada ponto fica igual.	Each point keeps its µSv/h.
+A de fábrica já está guardada e continua guardada. A que está no contador agora vira a "anterior".	The factory one is already saved and stays saved. The one on the counter now becomes the "previous".
+A calibração que está no contador agora fica guardada como a de fábrica.	The calibration on the counter now is saved as the factory one.
+Os outros ajustes do contador não mudam. Não desconecte o cabo enquanto grava.	The other counter settings don't change. Don't unplug the cable while it writes.
+Voltar à calibração de fábrica?	Go back to the factory calibration?
+Voltar à calibração anterior?	Go back to the previous calibration?
+Pontos: {0} CPM	Points: {0} CPM
+Só os 6 pontos mudam. A que está no contador agora fica guardada como a "anterior".	Only the 6 points change. The one on the counter now is saved as the "previous".
+Contador calibrado com o fator do app	Counter calibrated with the app's factor
+Contador de volta à calibração de fábrica	Counter back to the factory calibration
+Contador de volta à calibração anterior	Counter back to the previous calibration
+Contador calibrado com o fator do app: {0} µSv/h por CPM no fundo	Counter calibrated with the app's factor: {0} µSv/h per CPM at background
+Contador voltou à calibração {0}	Counter went back to the {0} calibration
+calibração do contador: não consegui guardar a cópia ({0})	counter calibration: couldn't save the copy ({0})
+a calibração do contador está travada (valores que o app não reconhece)	the counter calibration is locked (values the app doesn't recognize)
+a calibração do contador não tem pontos válidos	the counter calibration has no valid points
+o app não tem um fator em uso	the app has no factor in use
+o contador já usa o mesmo fator do app	the counter already uses the app's factor
+não há essa calibração guardada	there is no such saved calibration
+o contador já está com essa calibração	the counter already has that calibration
+O fator vale no RadLog e vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional. Para o contador mostrar o mesmo número na tela dele, use "Calibrar o contador com a intercalibração" no cartão de pontos logo abaixo.	The factor applies in RadLog and becomes a new version in the calibration table; it can be undone, and recalculating the history is optional. To make the counter show the same number on its screen, use "Calibrate the counter with the intercalibration" in the points card just below.
+O app usa {0} µSv/h por CPM ({1}).	The app uses {0} µSv/h per CPM ({1}).
+Em uso desde {0}.	In use since {0}.
+O contador usa {0}.	The counter uses {0}.
+Por isso a tela dele mostra uns {0}% a mais que o app.	So its screen shows about {0}% more than the app.
+Por isso a tela dele mostra uns {0}% a menos que o app.	So its screen shows about {0}% less than the app.
+Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.	Writing the points below makes both show the same µSv/h.

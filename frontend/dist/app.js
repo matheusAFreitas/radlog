@@ -2717,6 +2717,7 @@ function fillDevCfg(c) {
     ? "Alguns campos ficaram travados porque o valor lido não é o esperado: " + probs.join("; ") + "."
     : "Por segurança a edição ficou bloqueada: a configuração não bate com o layout que o app conhece (" + probs.join("; ") + "). Pode ser outro firmware.";
   setDevCfgEnabled(!!c.editable);
+  renderCounterCal();
 }
 
 // lê os ajustes do aparelho quando a seção Contador aparece (uma vez por
@@ -2913,6 +2914,7 @@ function wire() {
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
   initIntercal();
+  initCounterCal();
   wireRcCfg();
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
@@ -4460,6 +4462,7 @@ const demoRc = () => {
   let api;
   api = {
     ...demoIntercal(),
+    ...demoCounterCal(),
     ...demoRcAjustes(),
     GetSettings: async () => settings,
     GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\RadLog-v2.0.0.exe", exists: false, current: false, disabled: false, started: false }),
