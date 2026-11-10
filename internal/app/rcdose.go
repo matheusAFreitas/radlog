@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-// ---------- dose acumulada do próprio RadiaCode ----------
+// ---------- dose acumulada do próprio Radiacode ----------
 //
 // O aparelho soma a dose o tempo todo (desde que foi zerado), conectado ou
 // não, e manda esse total a cada ~4 min (RareData). Entre um envio e outro o

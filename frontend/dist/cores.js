@@ -6,7 +6,7 @@ const COR = (() => {
   const v = (name, fallback) => css.getPropertyValue("--" + name).trim() || fallback;
   return Object.freeze({
     accent: v("accent", "#6EE7A0"), // GMC-800 e destaque
-    rc: v("rc", "#F472B6"), // RadiaCode
+    rc: v("rc", "#F472B6"), // RC102
     att: v("att", "#F5B84A"), // atenção
     alarm: v("alarm", "#F28C38"), // alarme
     warn: v("warn", "#F0656A"), // perigo

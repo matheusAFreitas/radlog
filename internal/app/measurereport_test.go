@@ -159,14 +159,14 @@ func TestMeasureReportRadiacode(t *testing.T) {
 	if !groups["Tório-232 (série)"] || groups["Césio-137"] || groups["Amerício-241"] {
 		t.Fatalf("picos do tório: %+v", sp.Peaks)
 	}
-	b := renderMeasurePDF(m, "RadiaCode-102 RC-102-000001", "o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)", "")
+	b := renderMeasurePDF(m, "RadiaCode-102 RC-102-000001", "o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)", "")
 	if !strings.HasPrefix(string(b), "%PDF-1.4") {
 		t.Fatal("não é PDF")
 	}
 	if out := os.Getenv("MEAS_OUT"); out != "" {
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-rc.pdf", b, 0o644)
 		en := pdfWithLang("en", func() []byte {
-			return renderMeasurePDF(m, "RadiaCode-102 RC-102-000001", "o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)", "")
+			return renderMeasurePDF(m, "RadiaCode-102 RC-102-000001", "o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)", "")
 		})
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-rc-en.pdf", en, 0o644)
 	}

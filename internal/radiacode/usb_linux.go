@@ -36,7 +36,7 @@ type usbLinux struct {
 	as *assembler
 }
 
-// FindUSB acha o primeiro RadiaCode ligado no USB e devolve o caminho dele.
+// FindUSB acha o primeiro Radiacode ligado no USB e devolve o caminho dele.
 func FindUSB() (string, error) {
 	devs, _ := filepath.Glob("/sys/bus/usb/devices/*")
 	for _, d := range devs {
@@ -64,14 +64,14 @@ func OpenUSB() (Transport, error) {
 	f, err := os.OpenFile(path, os.O_RDWR, 0)
 	if err != nil {
 		if os.IsPermission(err) {
-			return nil, fmt.Errorf("sem permissão em %s: instale a regra do udev do RadiaCode", path)
+			return nil, fmt.Errorf("sem permissão em %s: instale a regra do udev do RC102", path)
 		}
 		return nil, err
 	}
 	iface := uint32(0)
 	if err := ioctl(f, usbdevfsClaimInterface, uintptr(unsafe.Pointer(&iface))); err != nil {
 		f.Close()
-		return nil, fmt.Errorf("não consegui pegar o USB do RadiaCode (outro programa usando?): %w", err)
+		return nil, fmt.Errorf("não consegui pegar o USB do RC102 (outro programa usando?): %w", err)
 	}
 	u := &usbLinux{f: f, as: newAssembler()}
 	// descarta o que tiver sobrado de uma conversa anterior
@@ -130,7 +130,7 @@ func (u *usbLinux) Exchange(req []byte) ([]byte, error) {
 			return out, nil
 		}
 	}
-	return nil, fmt.Errorf("USB: o RadiaCode não respondeu")
+	return nil, fmt.Errorf("USB: o RC102 não respondeu")
 }
 
 func (u *usbLinux) Close() error {

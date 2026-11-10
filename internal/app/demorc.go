@@ -7,9 +7,9 @@ import (
 	"time"
 )
 
-// ---------- RadiaCode no modo demo (2.14) ----------
+// ---------- Radiacode no modo demo (2.14) ----------
 //
-// Com o demo ligado dá para simular também o RadiaCode: a tela, os alertas
+// Com o demo ligado dá para simular também o Radiacode: a tela, os alertas
 // (com os limites dele) e os gráficos usam um µSv/h escolhido. Como no GMC,
 // nada simulado vai para o disco; o aparelho de verdade, se conectado,
 // continua sendo lido e gravado.
@@ -39,7 +39,7 @@ func clampUSv(v float64) float64 {
 	return v
 }
 
-// SetDemoRc liga ou desliga o RadiaCode simulado e escolhe o valor (µSv/h).
+// SetDemoRc liga ou desliga o Radiacode simulado e escolhe o valor (µSv/h).
 // Só vale com o modo demo ligado.
 func (a *App) SetDemoRc(on bool, usv float64) DemoState {
 	usv = clampUSv(usv)
@@ -64,7 +64,7 @@ func (a *App) SetDemoRc(on bool, usv float64) DemoState {
 		a.finishDemoRcAlerts(ending)
 	}
 	if on && !was {
-		a.logDemoEvent(fmt.Sprintf("RadiaCode simulado ligado (%s µSv/h)", usvTxt(usv)), kindEvent)
+		a.logDemoEvent(fmt.Sprintf("RC102 simulado ligado (%s µSv/h)", usvTxt(usv)), kindEvent)
 	}
 	a.emit("demo", st)
 	a.emitRc()
@@ -72,7 +72,7 @@ func (a *App) SetDemoRc(on bool, usv float64) DemoState {
 	return st
 }
 
-// finishDemoRcAlerts fecha os alertas simulados do RadiaCode (saiu do demo
+// finishDemoRcAlerts fecha os alertas simulados do Radiacode (saiu do demo
 // ou desligou a simulação).
 func (a *App) finishDemoRcAlerts(d *demoRc) {
 	s := &d.alert
@@ -88,7 +88,7 @@ func (a *App) finishDemoRcAlerts(d *demoRc) {
 	a.emitActive()
 }
 
-// demoRcTick gera um segundo do RadiaCode simulado (chamado pelo demoLoop).
+// demoRcTick gera um segundo do Radiacode simulado (chamado pelo demoLoop).
 func (a *App) demoRcTick(rng *rand.Rand, now time.Time) {
 	a.mu.Lock()
 	d := a.demo.rc
@@ -122,7 +122,7 @@ func (a *App) demoRcTick(rng *rand.Rand, now time.Time) {
 	set := a.settings
 	a.mu.Unlock()
 
-	// alertas com os limites do RadiaCode, só na memória
+	// alertas com os limites do Radiacode, só na memória
 	l := a.rcLimits()
 	a.mu.Lock()
 	s := &d.alert
@@ -153,7 +153,7 @@ func (a *App) demoRcTick(rng *rand.Rand, now time.Time) {
 		AlarmStarted: alarmStarted, AlarmEnded: alarmEnded, AlarmOn: alarmOn,
 		DangerStarted: dangStarted, DangerEnded: dangEnded,
 	})
-	val := usvTxt(usv) + " µSv/h no RadiaCode"
+	val := usvTxt(usv) + " µSv/h no RC102"
 	switch {
 	case dangStarted:
 		a.flagWindowText("PERIGO", val, true, true)
@@ -169,7 +169,7 @@ func (a *App) demoRcTick(rng *rand.Rand, now time.Time) {
 	a.emitRc()
 }
 
-// demoRcOverlay põe o RadiaCode simulado no estado mostrado na tela.
+// demoRcOverlay põe o Radiacode simulado no estado mostrado na tela.
 func (a *App) demoRcOverlay(st *RcState) {
 	a.mu.Lock()
 	defer a.mu.Unlock()
@@ -179,7 +179,7 @@ func (a *App) demoRcOverlay(st *RcState) {
 	}
 	st.Demo = true
 	if st.State != "conectado" {
-		st.Via, st.Model = "demo", "RadiaCode (simulado)"
+		st.Via, st.Model = "demo", "RC102 (simulado)"
 	}
 	st.State = "conectado"
 	st.Time = time.Now().UnixMilli()
@@ -200,7 +200,7 @@ func (a *App) demoRcOverlay(st *RcState) {
 	}
 }
 
-// demoRcSeries devolve o RadiaCode simulado para o gráfico: por segundo
+// demoRcSeries devolve o Radiacode simulado para o gráfico: por segundo
 // (passo < 1 min) ou por minuto. ok = falso sem simulação.
 func (a *App) demoRcSeries(from, to time.Time, fine bool) (pts []sample, ok bool) {
 	a.mu.Lock()

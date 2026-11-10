@@ -79,17 +79,17 @@ type MeasureState struct {
 	Eta      int            `json:"eta"`
 	// aparelho que está medindo: "gmc" (ou "") e "radiacode"
 	Device string `json:"device"`
-	// espectro (RadiaCode), quando a medição termina
+	// espectro (Radiacode), quando a medição termina
 	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
 	// com os dois aparelhos: "ambos" (os dois perto) ou "voce" (um com a
 	// pessoa); Other é o segundo aparelho
 	Mode  string       `json:"mode,omitempty"`
 	Other *MeasureSide `json:"other,omitempty"`
-	// RadiaCode: soma do µSv/h do aparelho a cada segundo da fase atual
+	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
 }
 
-// MeasureSpectrum são os espectros do RadiaCode de cada fase (contagens por
+// MeasureSpectrum são os espectros do Radiacode de cada fase (contagens por
 // canal; energia = A0 + A1·canal + A2·canal²).
 type MeasureSpectrum struct {
 	A      [3]float64 `json:"a"`
@@ -126,7 +126,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	var spec0 *radiacode.Spectrum
 	if dev == "radiacode" {
 		if spec0 = a.rcSpectrumNow(false); spec0 == nil && !a.rcConnected() {
-			return a.GetMeasure(), errors.New("conecte o RadiaCode para medir")
+			return a.GetMeasure(), errors.New("conecte o RC102 para medir")
 		}
 	}
 	a.mu.Lock()
@@ -224,12 +224,12 @@ type measFeed struct {
 	dev    string  // gmc ou radiacode
 	cpm    float64 // leitura ao vivo (para o gráfico)
 	counts int     // contagens desse segundo
-	usv    float64 // RadiaCode: µSv/h do aparelho nesse segundo
+	usv    float64 // RC102: µSv/h do aparelho nesse segundo
 	demo   bool
 }
 
 // measPhaseLocked é o resultado da fase atual até agora. No GMC o µSv/h vem
-// da calibração; no RadiaCode, da média do que o próprio aparelho calculou.
+// da calibração; no Radiacode, da média do que o próprio aparelho calculou.
 func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
 	ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 	if devName(m.Device) == "radiacode" && m.Elapsed > 0 {
@@ -294,7 +294,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			}
 			via := ""
 			if f.dev == "radiacode" {
-				via = " (RadiaCode)"
+				via = " (RC102)"
 			}
 			k := 0.0
 			if ph.CPM > 0 {
@@ -451,7 +451,7 @@ type SavedMeasure struct {
 	Distance string `json:"distance,omitempty"`
 	// um registro por segundo (medições a partir da 0.20.3)
 	Samples []MeasureSample `json:"samples,omitempty"`
-	// aparelho que mediu ("" = GMC) e os espectros (RadiaCode)
+	// aparelho que mediu ("" = GMC) e os espectros (Radiacode)
 	Device   string           `json:"device,omitempty"`
 	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
 	// com os dois aparelhos (ver measuredual.go)

@@ -9,8 +9,8 @@ import (
 // ---------- medir um objeto com os dois aparelhos ----------
 //
 // Dois jeitos, além de um aparelho só:
-//   - "ambos": o RadiaCode e o GMC perto do objeto, medindo ao mesmo tempo,
-//     cada um contra o seu fundo. O GMC vê beta e gama; o cristal do RadiaCode
+//   - "ambos": o Radiacode e o GMC perto do objeto, medindo ao mesmo tempo,
+//     cada um contra o seu fundo. O GMC vê beta e gama; o cristal do Radiacode
 //     quase só gama. Comparando os dois dá para ter uma ideia do que o objeto
 //     emite.
 //   - "voce": um aparelho no objeto e o outro com a pessoa, para ver quanto
@@ -179,20 +179,20 @@ func sideDecide(m *MeasureState) string {
 	return autoDecide(*s.Live, *s.Bg, s.Elapsed, m.Pct)
 }
 
-// dualHint compara o GMC (beta e gama) com o RadiaCode (quase só gama).
+// dualHint compara o GMC (beta e gama) com o Radiacode (quase só gama).
 func dualHint(gmc, rc MeasureResult) string {
 	gs, rs := gmc.Sigma >= 3, rc.Sigma >= 3
 	switch {
 	case gs && rc.Sigma < 2:
-		return "O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta)."
+		return "O GMC viu o objeto e o RC102 quase não: ele deve emitir principalmente beta (o cristal do RC102 quase não vê beta)."
 	case gs && !rs:
-		return "O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta."
+		return "O GMC viu claramente e o RC102 só um pouco: o objeto deve emitir bastante beta."
 	case rs && !gs:
-		return "Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco."
+		return "Só o RC102 viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco."
 	case gs && rs:
 		relG, relR := gmc.Ratio-1, rc.Ratio-1
 		if relR > 0 && relG > 2*relR {
-			return fmt.Sprintf("Os dois viram, mas o GMC subiu bem mais (%s× o fundo contra %s× no RadiaCode): além de gama, o objeto deve emitir beta.",
+			return fmt.Sprintf("Os dois viram, mas o GMC subiu bem mais (%s× o fundo contra %s× no RC102): além de gama, o objeto deve emitir beta.",
 				fmtBR(gmc.Ratio, 1), fmtBR(rc.Ratio, 1))
 		}
 		return "Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama."
@@ -220,7 +220,7 @@ func (a *App) newSide(primary, mode string, homeBg bool) (*MeasureSide, error) {
 		s.Role = "voce"
 	}
 	if s.Device == devRC && !a.rcConnected() {
-		return nil, fmt.Errorf("conecte o RadiaCode para medir com os dois")
+		return nil, fmt.Errorf("conecte o RC102 para medir com os dois")
 	}
 	a.mu.Lock()
 	gmcOK, demo := a.dev != nil, a.demo.Active
@@ -244,7 +244,7 @@ func (a *App) newSide(primary, mode string, homeBg bool) (*MeasureSide, error) {
 	}
 	if homeBg {
 		if !hb.OK {
-			return nil, fmt.Errorf("fundo da casa do %s indisponível: %s", map[string]string{"gmc": "GMC-800", devRC: "RadiaCode"}[s.Device], hb.Why)
+			return nil, fmt.Errorf("fundo da casa do %s indisponível: %s", map[string]string{"gmc": "GMC-800", devRC: "RC102"}[s.Device], hb.Why)
 		}
 		s.Bg = &MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
 			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}

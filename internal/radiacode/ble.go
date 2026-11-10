@@ -2,7 +2,7 @@ package radiacode
 
 import "strings"
 
-// Bluetooth: o RadiaCode tem um serviço próprio com uma característica de
+// Bluetooth: o Radiacode tem um serviço próprio com uma característica de
 // escrita (pedidos em pedaços de 18 bytes, sem resposta) e uma de
 // notificação (as respostas chegam em pedaços).
 const (
@@ -11,7 +11,7 @@ const (
 	bleChunk      = 18
 )
 
-// BLEDevice é um RadiaCode visto pelo Bluetooth.
+// BLEDevice é um Radiacode visto pelo Bluetooth.
 type BLEDevice struct {
 	Address string `json:"address"`
 	Name    string `json:"name"`

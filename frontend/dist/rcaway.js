@@ -1,4 +1,4 @@
-// "O RadiaCode estava fora de casa?" (2.38.0): quando o RadiaCode volta
+// "O Radiacode estava fora de casa?" (2.38.0): quando o Radiacode volta
 // depois de ficar sem conexão, o cartão no topo do Agora pergunta onde ele
 // estava, com o que a memória do aparelho trouxe e uma dica pela razão de
 // contagens com o GMC. As perguntas sem resposta também aparecem em Fora de
@@ -40,7 +40,7 @@ function rcaTile(label, value, unit, cls) {
 }
 
 function rcaHintText(q) {
-  if (q.hint === "fora") return ["Parece que ele saiu de casa.", `Com o RadiaCode em casa, ele conta umas ${fmt(q.normalRatio, 0)} vezes o que o GMC conta. Nesse trecho foram ${fmt(q.ratio, 0)} vezes.`];
+  if (q.hint === "fora") return ["Parece que ele saiu de casa.", `Com o RC102 em casa, ele conta umas ${fmt(q.normalRatio, 0)} vezes o que o GMC conta. Nesse trecho foram ${fmt(q.ratio, 0)} vezes.`];
   if (q.hint === "casa") return ["Parece que ele ficou em casa.", `A razão de contagens com o GMC ficou perto da normal (${fmt(q.ratio, 0)} contra ${fmt(q.normalRatio, 0)}).`];
   if (!q.memMinutes) return ["", "A memória do aparelho não trouxe leituras desse trecho, então o app não tem dica."];
   if (!q.ratio || !q.normalRatio) return ["", "Poucos minutos com os dois aparelhos para comparar, então o app não tem dica."];
@@ -80,7 +80,7 @@ function renderRcAway() {
     if (rcaDone.ans === "fora" && p && p.id) {
       const c = document.createElement("span");
       c.className = "chip off"; c.textContent = "fora de casa";
-      t.append(c, ` Marcado: ${p.name} · RadiaCode com você, GMC-800 em casa · ${hhmm(p.from)}–${hhmm(p.to)}`);
+      t.append(c, ` Marcado: ${p.name} · RC102 com você, GMC-800 em casa · ${hhmm(p.from)}–${hhmm(p.to)}`);
     } else t.textContent = rcaDone.ans === "casa" ? "Ok, ficou como em casa." : "Ok, ficou sem marcar.";
     const u = document.createElement("button");
     u.type = "button"; u.className = "link"; u.textContent = "Desfazer";
@@ -96,7 +96,7 @@ function renderRcAway() {
   head.className = "rca-head";
   head.innerHTML = '<span class="dot rc" aria-hidden="true"></span>';
   const h = document.createElement("h2");
-  h.textContent = `O RadiaCode ficou ${hm(rcaMin(q))} sem conexão`;
+  h.textContent = `O RC102 ficou ${hm(rcaMin(q))} sem conexão`;
   const tag = document.createElement("span");
   tag.className = "chip off"; tag.textContent = "a responder";
   head.append(h, tag);
@@ -109,7 +109,7 @@ function renderRcAway() {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do RadiaCode", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
       rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
       rcaTile("dose no trecho", fmt(q.doseUSv, 2), "µSv"),
       rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
@@ -163,7 +163,7 @@ function rcaForm(q) {
   const f = document.createElement("div");
   f.className = "rca-form";
   const t = document.createElement("b");
-  t.textContent = "Quando você saiu e voltou com o RadiaCode?";
+  t.textContent = "Quando você saiu e voltou com o RC102?";
   const bar = document.createElement("div");
   bar.className = "rca-bar";
   const sel = document.createElement("i");
@@ -186,7 +186,7 @@ function rcaForm(q) {
   const to = document.createElement("input");
   to.type = "datetime-local"; to.value = toLocalInput(q.to);
   const name = document.createElement("input");
-  name.type = "text"; name.maxLength = 60; name.placeholder = "Saí com o RadiaCode";
+  name.type = "text"; name.maxLength = 60; name.placeholder = "Saí com o RC102";
   const sync = () => {
     const a = fromLocalInput(from.value), b = fromLocalInput(to.value), span = q.to - q.from;
     const pa = Math.max(0, Math.min(100, ((a - q.from) / span) * 100)), pb = Math.max(0, Math.min(100, ((b - q.from) / span) * 100));
@@ -229,7 +229,7 @@ function rcAwayRows(ul) {
     when.textContent = zoomRangeText(q.from, q.to);
     const what = document.createElement("div");
     what.className = "small muted";
-    what.textContent = "RadiaCode sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
+    what.textContent = "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
     t.append(c, when, what);
     const acts = document.createElement("div");
     acts.className = "acts";

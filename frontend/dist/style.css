@@ -37,10 +37,10 @@
   --warn-solid: #B3262C;  --warn-solid-ink: #7A1015;  --warn-solid-tint: #FFE3E4;
   --demo-solid: #8A5A00;  --demo-solid-ink: #5A3A00;
   --on-solid: #FFFFFF;    /* texto e botão sobre a faixa sólida do alarme */
-  --rc-ink: #F9A8D4;      /* rosa claro do RadiaCode (texto sobre fundo rosa) */
+  --rc-ink: #F9A8D4;      /* rosa claro do RC102 (texto sobre fundo rosa) */
   --warn-ink: #F28B8F;    /* vermelho claro (texto) */
   --text-soft: #C3CBD0;   /* log DEBUG */
-  --samp: #F2A33A;        /* amostras do RadiaCode */
+  --samp: #F2A33A;        /* amostras do RC102 */
   --gap: repeating-linear-gradient(135deg, #2A3136 0 4px, transparent 4px 8px); /* sem medição */
   --nosig: radial-gradient(circle, #6B7880 1.1px, transparent 1.5px) 0 0 / 5px 5px; /* sem dado */
   --outc: repeating-linear-gradient(45deg, #5A2A2D 0 3px, #2A1416 3px 6px); /* fora do cálculo */
@@ -664,7 +664,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 @media (max-width: 600px) { .note-when { grid-template-columns: 1fr; } }
 .note-when label { display: block; }
 
-/* aba RadiaCode (em construção) */
+/* aba RC102 (em construção) */
 .wip-tag { display: inline-block; font-size: var(--fs-micro); font-family: var(--mono); line-height: 1.5; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px dashed color-mix(in srgb, var(--att) 60%, transparent); color: var(--att); vertical-align: 1px; margin-left: var(--space-1); white-space: nowrap; }
 #viewTabs button[aria-pressed="true"] .wip-tag { color: var(--on-accent); border-color: color-mix(in srgb, var(--on-accent) 50%, transparent); }
 .rc-card p { margin: 0; font-size: var(--fs-body); }
@@ -684,7 +684,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .mh-stats { flex-basis: 100%; overflow-x: auto; padding-top: var(--space-1); }
 .mh-stats[hidden] { display: none; }
 
-/* exemplos simulados da aba RadiaCode */
+/* exemplos simulados da aba RC102 */
 .live-tag { display: inline-block; font-size: var(--fs-micro); font-family: var(--mono); line-height: 1.5; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent); color: var(--rc-ink); white-space: nowrap; }
 .sim-tag { display: inline-block; font-size: var(--fs-micro); font-family: var(--mono); line-height: 1.5; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--away) 50%, transparent); color: var(--away-ink); white-space: nowrap; }
 .rc-card { border: 1px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-4); background: var(--surface-2); display: flex; flex-direction: column; gap: var(--space-3); }
@@ -863,7 +863,7 @@ dialog#settings { width: min(1040px, calc(100vw - 32px)); height: min(780px, cal
 .devcfg .dc-grid fieldset { margin: 0; }
 .dc-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 
-/* ajustes do RadiaCode (mesmo desenho dos do contador) */
+/* ajustes do RC102 (mesmo desenho dos do contador) */
 .rccfg .rc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
 .rccfg .rc-pair label { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; font-size: var(--fs-label); color: var(--muted); }
 .rccfg .rc-pair input[type=number] { width: 100%; min-width: 0; }
@@ -1031,7 +1031,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .sync-pair #syncAddr { flex: 1 1 240px; }
 .sync-pair #syncPairCode { width: 9em; font-family: var(--mono); letter-spacing: 2px; }
 
-/* RadiaCode de verdade */
+/* RC102 de verdade */
 .rc-card.rc-real { border-style: solid; background: var(--surface); }
 .rc-pill { gap: var(--space-2); }
 .rc-state { color: var(--muted); }
@@ -1072,7 +1072,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-empty { padding: var(--space-8) 0; text-align: center; }
 @media (max-width: 900px) { .rc-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
-/* RadiaCode na tela principal: lado a lado com o GMC (GMC | RadiaCode) */
+/* RC102 na tela principal: lado a lado com o GMC (GMC | RC102) */
 .duo { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 .duo.on { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: stretch; }
 .duo.on .hero .value { font-size: var(--fs-reading-l); }
@@ -1133,7 +1133,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .duo.on .empty { grid-row: 8; margin-top: var(--space-3); }
 .duo.on .level-scale span { padding-right: var(--space-2); min-width: 0; }
 
-/* RadiaCode como aparelho principal: quadro dele à esquerda */
+/* RC102 como aparelho principal: quadro dele à esquerda */
 .duo.on .rc-main { grid-column: 1; }
 .duo.on .hero { justify-content: flex-start; grid-column: 2; }
 .legend .gmc-key { display: inline-flex; align-items: center; gap: var(--space-2); }
@@ -1142,7 +1142,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #doseCard.rc .sw-dose { border-color: var(--rc); }
 #doseSrcSeg { margin-left: auto; margin-right: var(--space-2); }
 
-/* resumo: blocos do RadiaCode e do GMC */
+/* resumo: blocos do RC102 e do GMC */
 #sumTiles .sum-head { grid-column: 1 / -1; margin: var(--space-2) 0 -2px; font-size: var(--fs-label); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 600; }
 #sumTiles .sum-head.rc { color: var(--rc); margin-top: 0; }
 #sumTiles .sum-none { grid-column: 1 / -1; margin: 0; }
@@ -1353,7 +1353,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side .brand-word svg { width: 1.06em; height: 1.06em; }
 @media (max-width: 900px) { .side .brand-word { padding: 0 var(--space-2) 0 var(--space-1); font-size: var(--fs-title); } }
 
-/* etapa 2: sub-abas das páginas Gráficos e RadiaCode */
+/* etapa 2: sub-abas das páginas Gráficos e RC102 */
 .subtabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: none; }
 .subtabs button { flex: 0 0 auto; min-height: 40px; padding: 0 var(--space-4); border: 0; border-radius: var(--radius-sm) var(--radius-sm) 0 0; background: transparent; color: var(--muted); font-size: var(--fs-label); white-space: nowrap; }
 .subtabs button:hover { color: var(--text); background: var(--surface-2); }
@@ -1629,7 +1629,7 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .wh-nothome { display: flex; gap: var(--space-2); align-items: center; color: var(--muted); }
 .wh-nothome[hidden] { display: none; }
 
-/* intercalibração com o RadiaCode e vigia (ideia 6) */
+/* intercalibração com o RC102 e vigia (ideia 6) */
 .ic { display: flex; flex-direction: column; gap: var(--space-2); }
 .ic-head { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; font-weight: 600; }
 .ic-big { font-size: var(--fs-number-l); color: var(--att); line-height: 1; }
@@ -1905,7 +1905,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
   .band .guide { grid-column: 1 / -1; }
 }
 
-/* ---------- "o RadiaCode estava fora de casa?" (2.38.0, rcaway.js) ---------- */
+/* ---------- "o RC102 estava fora de casa?" (2.38.0, rcaway.js) ---------- */
 .rca { padding: var(--space-5); gap: var(--space-4); border-radius: var(--radius-md); }
 .rca-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .rca-head .chip { margin-left: auto; }

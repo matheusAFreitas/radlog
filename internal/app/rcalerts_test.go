@@ -55,7 +55,7 @@ func TestRcAlerts(t *testing.T) {
 		}
 	}
 	a.mu.Unlock()
-	if att == nil || alm == nil || att.Peak != 1.5 || !strings.Contains(att.Text, "alarme 1 do aparelho: 0,400") || !strings.Contains(alm.Text, "Alarme no RadiaCode: 1,50 µSv/h") || alm.End == 0 {
+	if att == nil || alm == nil || att.Peak != 1.5 || !strings.Contains(att.Text, "alarme 1 do aparelho: 0,400") || !strings.Contains(alm.Text, "Alarme no RC102: 1,50 µSv/h") || alm.End == 0 {
 		t.Fatalf("alertas: %+v %+v", att, alm)
 	}
 	// 0,39 ainda está acima de 90% de 0,40: a atenção só fecha no 0,35
@@ -83,10 +83,10 @@ func TestRcAlerts(t *testing.T) {
 	if err != nil || d.Device != devRC || d.Limit != 1.2 || len(d.Seconds) == 0 || d.Alarm != 1.2 {
 		t.Fatalf("detalhe: %+v %v", d, err)
 	}
-	if v := rcAlertLimit(Event{Text: "Perigo no RadiaCode: 12,3 µSv/h (a partir de 10,1)"}, l); v != 10.1 {
+	if v := rcAlertLimit(Event{Text: "Perigo no RC102: 12,3 µSv/h (a partir de 10,1)"}, l); v != 10.1 {
 		t.Fatalf("limite do texto: %v", v)
 	}
-	// alertas do RadiaCode não entram nos picos do gráfico do GMC
+	// alertas do Radiacode não entram nos picos do gráfico do GMC
 	if p := a.alertPeaks(t0.Add(-time.Hour), time.Now()); len(p) != 0 {
 		t.Fatalf("picos: %+v", p)
 	}

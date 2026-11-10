@@ -6,7 +6,7 @@
 // inglês) por um diálogo do próprio app. Devolve uma Promise<boolean>.
 //
 //   askConfirm({
-//     title: "Gravar no RadiaCode?",
+//     title: "Gravar no Radiacode?",
 //     text: ["parágrafo", …],           // ou uma string
 //     rows: [["Hoje", "986 · 8546 CPM"]], // nome → valor (mono)
 //     diff: [["Brilho", "5", "7"]],      // nome, agora, depois

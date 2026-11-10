@@ -120,7 +120,8 @@ const I18N_EN = {
 "Atenção: 54 CPM (acima de 50)": "Attention: 54 CPM (above 50)",
 "Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. O potássio natural tem uma fração fixa de K-40, então a atividade do sal é conhecida e serve para conferir o aparelho.": "Activity (Bq) is how many atoms decay per second in the sample; dose (µSv) is how much of it reaches the body. Natural potassium has a fixed fraction of K-40, so the salt's activity is known and serves to check the device.",
 "Atividade com KCl": "Activity with KCl",
-"Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.": "Updates twice a second, with automatic scale (×1 to ×1000). Pick a source and move the distance, as if bringing the RadiaCode closer to it.",
+"Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.": "Updates twice a second, with automatic scale (×1 to ×1000). Pick a source and move the distance, as if bringing the RC102 closer to it.",
+"Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.": "Updates twice a second, with automatic scale (×1 to ×1000). Pick a source and move the distance, as if bringing the RC102 closer to it.",
 "Atualizando para a versão": "Updating to version",
 "Atualizações": "Updates",
 "Até": "To",
@@ -151,7 +152,8 @@ const I18N_EN = {
 "CPM médio antes e depois da chuva, comparado com horários sem chuva": "Average CPM before and after rain, compared with hours without rain",
 "CPM médio no período": "Average CPM in the period",
 "CPM médio · cinza = sem dados": "Average CPM · gray = no data",
-"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RadiaCode).": "CPM doesn't identify the radionuclide. For that, you need spectrometry (e.g., RadiaCode).",
+"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RC102).": "CPM doesn't identify the radionuclide. For that, you need spectrometry (e.g., RC102).",
+"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RadiaCode).": "CPM doesn't identify the radionuclide. For that, you need spectrometry (e.g., RC102).",
 "CPM por µSv/h": "CPM per µSv/h",
 "CPM sozinho não identifica o radionuclídeo nem o tipo de radiação.": "CPM alone doesn't identify the radionuclide or the type of radiation.",
 "CPM às": "CPM at",
@@ -399,7 +401,8 @@ const I18N_EN = {
 "Nível": "Level",
 "Nível perigoso. Afaste-se agora e leve as pessoas junto.": "Dangerous level. Move away now and take people with you.",
 "O QUE ESTA MEDIÇÃO CONSEGUE VER": "WHAT THIS MEASUREMENT CAN SEE",
-"O RadiaCode guarda sozinho as últimas 1.000 horas, em pontos como estes. Ao importar, cada minuto vira um ponto numa segunda curva no gráfico, e o que o GMC já gravou não muda.": "The RadiaCode keeps the last 1,000 hours on its own, in points like these. When importing, each minute becomes a point in a second curve on the chart, and what the GMC already recorded doesn't change.",
+"O RC102 guarda sozinho as últimas 1.000 horas, em pontos como estes. Ao importar, cada minuto vira um ponto numa segunda curva no gráfico, e o que o GMC já gravou não muda.": "The RC102 keeps the last 1,000 hours on its own, in points like these. When importing, each minute becomes a point in a second curve on the chart, and what the GMC already recorded doesn't change.",
+"O RadiaCode guarda sozinho as últimas 1.000 horas, em pontos como estes. Ao importar, cada minuto vira um ponto numa segunda curva no gráfico, e o que o GMC já gravou não muda.": "The RC102 keeps the last 1,000 hours on its own, in points like these. When importing, each minute becomes a point in a second curve on the chart, and what the GMC already recorded doesn't change.",
 "O Windows desativou o início do app (Gerenciador de Tarefas → Aplicativos de inicialização).": "Windows disabled the app's startup (Task Manager → Startup apps).",
 "O app não está buscando dados de chuva. Clique para ligar nas Configurações.": "The app isn't fetching rain data. Click to turn it on in Settings.",
 "O app vai apagar e regravar a configuração do contador (leva alguns segundos). Não desconecte o cabo nesse tempo.": "The app will erase and rewrite the counter configuration (takes a few seconds). Don't unplug the cable during that time.",
@@ -413,10 +416,12 @@ const I18N_EN = {
 "O que aconteceu": "What happened",
 "O que comparar": "What to compare",
 "O que esta medição consegue ver": "What this measurement can see",
-"O que está perto do RadiaCode": "What's near the RadiaCode",
+"O que está perto do RC102": "What's near the RC102",
+"O que está perto do RadiaCode": "What's near the RC102",
 "O que fazer": "What to do",
 "O que mostrar": "What to show",
-"O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam": "What the app will do with the RadiaCode 102 connected (USB or Bluetooth), in the order it will be ready. The charts below use",
+"O que o app vai fazer com o RC102 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam": "What the app will do with the RC102 102 connected (USB or Bluetooth), in the order it will be ready. The charts below use",
+"O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam": "What the app will do with the RC102 102 connected (USB or Bluetooth), in the order it will be ready. The charts below use",
 "O radar não cobre o seu local, então a chuva vem só do modelo do tempo (Open-Meteo), que pode não mostrar chuva bem localizada.": "The radar doesn't cover your location, so rain comes only from the weather model (Open-Meteo), which may miss very local rain.",
 "O nível de fundo aqui é": "Your background is",
 "O tubo do GMC-800 vê gama e parte do beta. Objetos que emitem mais beta (ex.: tungstênio toriado, vidro de urânio) podem dar CPM alto com µSv/h pouco confiável.": "The GMC-800 tube sees gamma and part of beta. Objects that emit more beta (e.g., thoriated tungsten, uranium glass) can give high CPM with unreliable µSv/h.",
@@ -425,7 +430,8 @@ const I18N_EN = {
 "Ocultar a cidade na tela (mostra só \"chuva configurada\")": "Hide the city on screen (shows only \"rain configured\")",
 "Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.": "Checks the releases at github.com/matheusAFreitas/radlog. Nothing is downloaded until you click Update.",
 "Onde mais aparece": "Where else it shows up",
-"Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RadiaCode and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
+"Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RC102 e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RC102 and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
+"Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RC102 and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
 "Ontem": "Yesterday",
 "Os ajustes do aparelho não foram para o contador: use \"Gravar no contador\" na seção Contador.": "The device settings didn't go to the counter: use \"Write to the counter\" in the Counter section.",
 "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
@@ -711,7 +717,8 @@ const I18N_EN = {
 "líquido ÷ incerteza do líquido (σ)": "net ÷ uncertainty of the net (σ)",
 "mSv/ano (extrapolação)": "mSv/year (extrapolation)",
 "maior CPM da leitura ao vivo durante um alerta: o contador soma os últimos 60 s e o app lê a cada segundo. Essa janela não coincide com o minuto do relógio que fica gravado, por isso o pico pode passar do maior minuto.": "highest CPM of the live reading during an alert: the counter sums the last 60 s and the app reads every second. This window doesn't line up with the clock minute that gets recorded, so the peak can exceed the highest minute.",
-"mapa do RadiaCode na Via Dutra: a lataria e a distância do chão cortam parte": "RadiaCode map on Via Dutra: the car body and the height above ground cut part of it",
+"mapa do RC102 na Via Dutra: a lataria e a distância do chão cortam parte": "RC102 map on Via Dutra: the car body and the height above ground cut part of it",
+"mapa do RadiaCode na Via Dutra: a lataria e a distância do chão cortam parte": "RC102 map on Via Dutra: the car body and the height above ground cut part of it",
 "mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa": "median of the last hour at home; 7 and 30 days: median of the per-minute readings at home",
 "mediana de 30 dias · média do período": "30-day median · period average",
 "mediana do período": "median of the period",
@@ -768,7 +775,8 @@ const I18N_EN = {
 "padrão por hora": "hourly pattern",
 "para conferir o arquivo": "to check the file",
 "parou de responder": "stopped responding",
-"passar o RadiaCode pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.": "sweep the RadiaCode over the samples on the bench and find the \"hot\" one. See how much distance matters: twice the distance gives a quarter of the radiation.",
+"passar o RC102 pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.": "sweep the RC102 over the samples on the bench and find the \"hot\" one. See how much distance matters: twice the distance gives a quarter of the radiation.",
+"passar o RadiaCode pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.": "sweep the RC102 over the samples on the bench and find the \"hot\" one. See how much distance matters: twice the distance gives a quarter of the radiation.",
 "pasta de dados": "data folder",
 "perigo": "danger",
 "perigo ativo": "danger active",
@@ -1186,29 +1194,52 @@ const I18N_EN = {
 "nenhuma diferença que dê para separar do fundo (chegou ao tempo máximo sem decidir)": "no difference that can be told apart from background (reached the time limit without deciding)",
 "provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou ao tempo máximo sem decidir)": "probably slightly radioactive; measure longer to confirm (reached the time limit without deciding)",
 ": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).": ": the object came out below background, so the background probably changed (another spot, rain).",
-"RadiaCode: desligou": "RadiaCode: turned off",
-"RadiaCode: ligou": "RadiaCode: turned on",
-"RadiaCode: desligou por bateria fraca": "RadiaCode: shut down on low battery",
-"RadiaCode: configuração alterada": "RadiaCode: settings changed",
-"RadiaCode: dose zerada": "RadiaCode: dose reset",
-"RadiaCode: evento do usuário": "RadiaCode: user event",
-"RadiaCode: alarme de bateria vazia": "RadiaCode: empty battery alarm",
-"RadiaCode: começou a carregar": "RadiaCode: started charging",
-"RadiaCode: parou de carregar": "RadiaCode: stopped charging",
-"RadiaCode: alarme 1 de taxa de dose": "RadiaCode: dose rate alarm 1",
-"RadiaCode: alarme 2 de taxa de dose": "RadiaCode: dose rate alarm 2",
-"RadiaCode: taxa de dose fora da escala": "RadiaCode: dose rate off scale",
-"RadiaCode: alarme 1 de dose": "RadiaCode: dose alarm 1",
-"RadiaCode: alarme 2 de dose": "RadiaCode: dose alarm 2",
-"RadiaCode: dose fora da escala": "RadiaCode: dose off scale",
-"RadiaCode: temperatura baixa demais": "RadiaCode: temperature too low",
-"RadiaCode: temperatura alta demais": "RadiaCode: temperature too high",
-"RadiaCode: mensagem de texto": "RadiaCode: text message",
-"RadiaCode: cópia da memória": "RadiaCode: memory snapshot",
-"RadiaCode: espectro zerado": "RadiaCode: spectrum reset",
-"RadiaCode: alarme 1 de contagem": "RadiaCode: count rate alarm 1",
-"RadiaCode: alarme 2 de contagem": "RadiaCode: count rate alarm 2",
-"RadiaCode: contagem fora da escala": "RadiaCode: count rate off scale",
+"RC102: desligou": "RC102: turned off",
+"RadiaCode: desligou": "RC102: turned off",
+"RC102: ligou": "RC102: turned on",
+"RadiaCode: ligou": "RC102: turned on",
+"RC102: desligou por bateria fraca": "RC102: shut down on low battery",
+"RadiaCode: desligou por bateria fraca": "RC102: shut down on low battery",
+"RC102: configuração alterada": "RC102: settings changed",
+"RadiaCode: configuração alterada": "RC102: settings changed",
+"RC102: dose zerada": "RC102: dose reset",
+"RadiaCode: dose zerada": "RC102: dose reset",
+"RC102: evento do usuário": "RC102: user event",
+"RadiaCode: evento do usuário": "RC102: user event",
+"RC102: alarme de bateria vazia": "RC102: empty battery alarm",
+"RadiaCode: alarme de bateria vazia": "RC102: empty battery alarm",
+"RC102: começou a carregar": "RC102: started charging",
+"RadiaCode: começou a carregar": "RC102: started charging",
+"RC102: parou de carregar": "RC102: stopped charging",
+"RadiaCode: parou de carregar": "RC102: stopped charging",
+"RC102: alarme 1 de taxa de dose": "RC102: dose rate alarm 1",
+"RadiaCode: alarme 1 de taxa de dose": "RC102: dose rate alarm 1",
+"RC102: alarme 2 de taxa de dose": "RC102: dose rate alarm 2",
+"RadiaCode: alarme 2 de taxa de dose": "RC102: dose rate alarm 2",
+"RC102: taxa de dose fora da escala": "RC102: dose rate off scale",
+"RadiaCode: taxa de dose fora da escala": "RC102: dose rate off scale",
+"RC102: alarme 1 de dose": "RC102: dose alarm 1",
+"RadiaCode: alarme 1 de dose": "RC102: dose alarm 1",
+"RC102: alarme 2 de dose": "RC102: dose alarm 2",
+"RadiaCode: alarme 2 de dose": "RC102: dose alarm 2",
+"RC102: dose fora da escala": "RC102: dose off scale",
+"RadiaCode: dose fora da escala": "RC102: dose off scale",
+"RC102: temperatura baixa demais": "RC102: temperature too low",
+"RadiaCode: temperatura baixa demais": "RC102: temperature too low",
+"RC102: temperatura alta demais": "RC102: temperature too high",
+"RadiaCode: temperatura alta demais": "RC102: temperature too high",
+"RC102: mensagem de texto": "RC102: text message",
+"RadiaCode: mensagem de texto": "RC102: text message",
+"RC102: cópia da memória": "RC102: memory snapshot",
+"RadiaCode: cópia da memória": "RC102: memory snapshot",
+"RC102: espectro zerado": "RC102: spectrum reset",
+"RadiaCode: espectro zerado": "RC102: spectrum reset",
+"RC102: alarme 1 de contagem": "RC102: count rate alarm 1",
+"RadiaCode: alarme 1 de contagem": "RC102: count rate alarm 1",
+"RC102: alarme 2 de contagem": "RC102: count rate alarm 2",
+"RadiaCode: alarme 2 de contagem": "RC102: count rate alarm 2",
+"RC102: contagem fora da escala": "RC102: count rate off scale",
+"RadiaCode: contagem fora da escala": "RC102: count rate off scale",
 "Aparelho": "Device",
 "Taxa de dose": "Dose rate",
 "Contagem": "Count",
@@ -1224,18 +1255,24 @@ const I18N_EN = {
 "Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).": "Below, what's still to come, with <b>simulated data</b> in the same format the device sends (1,024 energy channels).",
 "Abaixo, o que ainda vai ficar pronto, com": "Below, what's still to come, with",
 "no mesmo formato que o aparelho manda (1.024 canais de energia).": "in the same format the device sends (1,024 energy channels).",
-"O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.": "The app looks for the RadiaCode by itself: on USB and, if a Bluetooth address is set, over Bluetooth. If the phone is connected to it, the PC tries again later and takes over when the phone lets go.",
-"Procurar o RadiaCode": "Look for the RadiaCode",
+"O app procura o RC102 sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.": "The app looks for the RC102 by itself: on USB and, if a Bluetooth address is set, over Bluetooth. If the phone is connected to it, the PC tries again later and takes over when the phone lets go.",
+"O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.": "The app looks for the RC102 by itself: on USB and, if a Bluetooth address is set, over Bluetooth. If the phone is connected to it, the PC tries again later and takes over when the phone lets go.",
+"Procurar o RC102": "Look for the RC102",
+"Procurar o RadiaCode": "Look for the RC102",
 "Endereço Bluetooth (opcional)": "Bluetooth address (optional)",
 "ex.: 52:43:01:02:03:04": "e.g., 52:43:01:02:03:04",
 "Procurar no Bluetooth": "Search Bluetooth",
 "Procurando (uns 6 segundos)…": "Searching (about 6 seconds)…",
-"Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?": "No RadiaCode showed up. Is its Bluetooth on? Is the phone app disconnected?",
+"Nenhum RC102 apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?": "No RC102 showed up. Is its Bluetooth on? Is the phone app disconnected?",
+"Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?": "No RC102 showed up. Is its Bluetooth on? Is the phone app disconnected?",
 "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.": "On Windows, the Bluetooth connection isn't ready yet: use the USB cable.",
-"A procura está desligada em Configurações → RadiaCode.": "Searching is turned off in Settings → RadiaCode.",
-"Ligue o RadiaCode no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": "Plug the RadiaCode into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).",
-"Ligue o RadiaCode no USB do PC, ou configure o endereço Bluetooth.": "Plug the RadiaCode into the PC's USB, or set up the Bluetooth address.",
-"Ligue o RadiaCode no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.": "Plug the RadiaCode into the PC's USB. On Windows, for now, the connection is USB only.",
+"A procura está desligada em Configurações → Radiacode 102.": "Searching is off in Settings → Radiacode 102.",
+"Ligue o RC102 no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": "Plug the RC102 into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).",
+"Ligue o RadiaCode no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": "Plug the RC102 into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).",
+"Ligue o RC102 no USB do PC, ou configure o endereço Bluetooth.": "Plug the RC102 into the PC's USB, or set up the Bluetooth address.",
+"Ligue o RadiaCode no USB do PC, ou configure o endereço Bluetooth.": "Plug the RC102 into the PC's USB, or set up the Bluetooth address.",
+"Ligue o RC102 no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.": "Plug the RC102 into the PC's USB. On Windows, for now, the connection is USB only.",
+"Ligue o RadiaCode no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.": "Plug the RC102 into the PC's USB. On Windows, for now, the connection is USB only.",
 "procura desligada": "search off",
 "procurando no USB…": "searching USB…",
 "procurando no USB e no Bluetooth…": "searching USB and Bluetooth…",
@@ -1244,67 +1281,95 @@ const I18N_EN = {
 "procurando": "searching",
 "conectando": "connecting",
 "erro": "error",
-"RadiaCode: conectando…": "RadiaCode: connecting…",
-"RadiaCode: erro": "RadiaCode: error",
+"RC102: conectando…": "RC102: connecting…",
+"RadiaCode: conectando…": "RC102: connecting…",
+"RC102: erro": "RC102: error",
+"RadiaCode: erro": "RC102: error",
 "Sem minutos com os dois aparelhos nesse período.": "No minutes with both devices in this period.",
 "GMC-800 (µSv/h, média de 10 min)": "GMC-800 (µSv/h, 10-min average)",
-"RadiaCode não conectado": "RadiaCode not connected",
-"RadiaCode não encontrado": "RadiaCode not found",
-"USB: o RadiaCode não respondeu": "USB: the RadiaCode didn't respond",
+"RC102 não conectado": "RC102 not connected",
+"RadiaCode não conectado": "RC102 not connected",
+"RC102 não encontrado": "RC102 not found",
+"RadiaCode não encontrado": "RC102 not found",
+"USB: o RC102 não respondeu": "USB: the RC102 didn't respond",
+"USB: o RadiaCode não respondeu": "USB: the RC102 didn't respond",
 "Bluetooth: conexão perdida": "Bluetooth: connection lost",
-"Bluetooth: o RadiaCode não respondeu": "Bluetooth: the RadiaCode didn't respond",
-"Bluetooth: o aparelho não mostrou o serviço do RadiaCode": "Bluetooth: the device didn't show the RadiaCode service",
-"Bluetooth com o RadiaCode ainda só no Linux; no Windows, use o USB por enquanto": "Bluetooth with the RadiaCode is Linux-only for now; on Windows, use USB",
+"Bluetooth: o RC102 não respondeu": "Bluetooth: the RC102 didn't respond",
+"Bluetooth: o RadiaCode não respondeu": "Bluetooth: the RC102 didn't respond",
+"Bluetooth: o aparelho não mostrou o serviço do RC102": "Bluetooth: the device didn't show the RC102 service",
+"Bluetooth: o aparelho não mostrou o serviço do RadiaCode": "Bluetooth: the device didn't show the RC102 service",
+"Bluetooth com o RC102 ainda só no Linux; no Windows, use o USB por enquanto": "Bluetooth with the RC102 is Linux-only for now; on Windows, use USB",
+"Bluetooth com o RadiaCode ainda só no Linux; no Windows, use o USB por enquanto": "Bluetooth with the RC102 is Linux-only for now; on Windows, use USB",
 "nenhum adaptador Bluetooth": "no Bluetooth adapter",
 "o Bluetooth do PC está desligado": "the PC's Bluetooth is off",
 "sem interface USB aberta": "no USB interface opened",
-"RadiaCode (só em µSv/h)": "RadiaCode (µSv/h only)",
+"RC102 (só em µSv/h)": "RC102 (µSv/h only)",
+"RadiaCode (só em µSv/h)": "RC102 (µSv/h only)",
 "sem leituras ainda": "no readings yet",
-"Bluetooth com o RadiaCode só no Windows e no Linux": "Bluetooth with the RadiaCode only on Windows and Linux",
-"o aparelho não mostrou o serviço do RadiaCode": "the device didn't show the RadiaCode service",
+"Bluetooth com o RC102 só no Windows e no Linux": "Bluetooth with the RC102 only on Windows and Linux",
+"Bluetooth com o RadiaCode só no Windows e no Linux": "Bluetooth with the RC102 only on Windows and Linux",
+"o aparelho não mostrou o serviço do RC102": "the device didn't show the RC102 service",
+"o aparelho não mostrou o serviço do RadiaCode": "the device didn't show the RC102 service",
 "o Windows não respondeu a tempo": "Windows didn't respond in time",
 "faixas do app em µSv/h": "app ranges in µSv/h",
 "Média 1 h": "Average 1 h",
 "Mín 24 h": "Min 24 h",
 "Máx 24 h": "Max 24 h",
-"Unidade do RadiaCode": "RadiaCode unit",
+"Unidade do RC102": "RC102 unit",
+"Unidade do RadiaCode": "RC102 unit",
 "· desconectado": "· disconnected",
 "· conectando…": "· connecting…",
-"Guardar tudo o que o RadiaCode manda (dados brutos)": "Keep everything the RadiaCode sends (raw data)",
+"Guardar tudo o que o RC102 manda (dados brutos)": "Keep everything the RC102 sends (raw data)",
+"Guardar tudo o que o RadiaCode manda (dados brutos)": "Keep everything the RC102 sends (raw data)",
 "Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta": "To find out what else the device can offer: each record as it came, the spectrum every hour and, on each connection, all registers and the memory snapshot. Kept in the folder",
 "e entra no backup (alguns MB por dia).": "and included in the backup (a few MB per day).",
-"alarmes do RadiaCode": "RadiaCode alarms",
+"alarmes do RC102": "RC102 alarms",
+"alarmes do RadiaCode": "RC102 alarms",
 "Alarme 1": "Alarm 1",
 "Alarme 2": "Alarm 2",
 "Fundo da sua casa (GMC-800)": "Your home background (GMC-800)",
-"Fundo da sua casa (RadiaCode)": "Your home background (RadiaCode)",
+"Fundo da sua casa (RC102)": "Your home background (RC102)",
+"Fundo da sua casa (RadiaCode)": "Your home background (RC102)",
 "mediana dos minutos em casa dos últimos 7 dias": "median of the minutes at home over the last 7 days",
-"Agora no RadiaCode": "Now on the RadiaCode",
-"Dose hoje no RadiaCode": "Dose today on the RadiaCode",
+"Agora no RC102": "Now on the RC102",
+"Agora no RadiaCode": "Now on the RC102",
+"Dose hoje no RC102": "Dose today on the RC102",
+"Dose hoje no RadiaCode": "Dose today on the RC102",
 "≈ igual": "≈ same",
 "Chernobyl, 1986: bombeiros e operadores": "Chernobyl, 1986: firefighters and operators",
-"Sua dose (RadiaCode)": "Your dose (RadiaCode)",
+"Sua dose (RC102)": "Your dose (RC102)",
+"Sua dose (RadiaCode)": "Your dose (RC102)",
 "Dose da casa (GMC-800)": "Home dose (GMC-800)",
 "mediana em casa dos últimos 30 dias": "median at home over the last 30 days",
 "mediana em casa no período": "median at home in the period",
 "Aparelho da dose": "Dose device",
-"O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RadiaCode measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.",
+"O RC102 mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RC102 measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.",
+"O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.": "The RC102 measures external radiation (gamma) wherever you are, at home or out; inhaled radon and other internal sources are left out. Minutes without a reading (disconnected from the PC) don't count in any of the lines.",
 "GMC-800 (casa)": "GMC-800 (home)",
 "nenhum minuto fora de casa": "no minutes away from home",
 "fundo em casa ainda não calculado": "home background not calculated yet",
 "Sem leituras do GMC nesse período.": "No GMC readings in this period.",
-"RadiaCode (µSv/h)": "RadiaCode (µSv/h)",
+"RC102 (µSv/h)": "RC102 (µSv/h)",
+"RadiaCode (µSv/h)": "RC102 (µSv/h)",
 "GMC-800 (µSv/h)": "GMC-800 (µSv/h)",
-"seu normal em casa (RadiaCode)": "your normal at home (RadiaCode)",
-"RadiaCode: dose": "RadiaCode: dose",
-"RadiaCode: média": "RadiaCode: average",
-"RadiaCode: fora de casa": "RadiaCode: away from home",
+"seu normal em casa (RC102)": "your normal at home (RC102)",
+"seu normal em casa (RadiaCode)": "your normal at home (RC102)",
+"RC102: dose": "RC102: dose",
+"RadiaCode: dose": "RC102: dose",
+"RC102: média": "RC102: average",
+"RadiaCode: média": "RC102: average",
+"RC102: fora de casa": "RC102: away from home",
+"RadiaCode: fora de casa": "RC102: away from home",
 "RADIACODE (DOSÍMETRO PESSOAL)": "RADIACODE (PERSONAL DOSIMETER)",
 "Compara a contagem com o objeto perto do aparelho com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.": "Compares the count with the object near the device against the background and says whether the difference is real or just the natural variation of the count. In automatic mode, the measurement stops by itself once it can answer: strong objects in seconds, weak ones take longer.",
-"RadiaCode (com espectro)": "RadiaCode (with spectrum)",
-"Distância até o RadiaCode (opcional)": "Distance to the RadiaCode (optional)",
-"O RadiaCode não está conectado.": "The RadiaCode isn't connected.",
-"Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro).": "Home background: only valid if the RadiaCode spent the last hour sitting where you'll measure the object (in a pocket, the background is different).",
+"RC102 (com espectro)": "RC102 (with spectrum)",
+"RadiaCode (com espectro)": "RC102 (with spectrum)",
+"Distância até o RC102 (opcional)": "Distance to the RC102 (optional)",
+"Distância até o RadiaCode (opcional)": "Distance to the RC102 (optional)",
+"O RC102 não está conectado.": "The RC102 isn't connected.",
+"O RadiaCode não está conectado.": "The RC102 isn't connected.",
+"Fundo da casa: só vale se o RC102 passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro).": "Home background: only valid if the RC102 spent the last hour sitting where you'll measure the object (in a pocket, the background is different).",
+"Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro).": "Home background: only valid if the RC102 spent the last hour sitting where you'll measure the object (in a pocket, the background is different).",
 "µSv/h no detector": "µSv/h at the detector",
 "Espectro do objeto e do fundo": "Spectrum of the object and of the background",
 "contagens/s em escala log": "counts/s on a log scale",
@@ -1319,59 +1384,83 @@ const I18N_EN = {
 "Cobalto-60": "Cobalt-60",
 "Potássio-40": "Potassium-40",
 "Camisa de lampião antiga": "Old lantern mantle",
-"conecte o RadiaCode para medir": "connect the RadiaCode to measure",
+"conecte o RC102 para medir": "connect the RC102 to measure",
+"conecte o RadiaCode para medir": "connect the RC102 to measure",
 "ESPECTRO (RADIACODE)": "SPECTRUM (RADIACODE)",
 "contagens/s (faixas de meio pico)": "counts/s (half-peak-wide bins)",
 "GEOMETRIA, APARELHO E MÉTODO": "GEOMETRY, DEVICE AND METHOD",
-"o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)": "the µSv/h is what the RadiaCode itself calculates (factory calibration, energy-based)",
-"soma das amostras do RadiaCode (a cada 0,5 s), em cada fase": "sum of the RadiaCode's samples (every 0.5 s), in each phase",
+"o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)": "the µSv/h is what the RC102 itself calculates (factory calibration, energy-based)",
+"o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)": "the µSv/h is what the RC102 itself calculates (factory calibration, energy-based)",
+"soma das amostras do RC102 (a cada 0,5 s), em cada fase": "sum of the RC102's samples (every 0.5 s), in each phase",
+"soma das amostras do RadiaCode (a cada 0,5 s), em cada fase": "sum of the RC102's samples (every 0.5 s), in each phase",
 "Picos": "Peaks",
 "para cada linha gama conhecida, as contagens líquidas numa janela em volta da energia comparadas com as das janelas vizinhas; conta como pico a partir de 3σ": "for each known gamma line, the net counts in a window around the energy compared with those of the neighboring windows; it counts as a peak from 3σ up",
 "O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.": "The µSv/h is the rate at the detector, in the measured position. It's not the dose of whoever holds the object and changes a lot with distance.",
-"O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.": "The RadiaCode's crystal sees gamma and X-rays; beta barely enters the count.",
+"O cristal do RC102 vê gama e raio X; o beta quase não entra na contagem.": "The RC102's crystal sees gamma and X-rays; beta barely enters the count.",
+"O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.": "The RC102's crystal sees gamma and X-rays; beta barely enters the count.",
 "Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.": "Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up.",
-"Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 and the RadiaCode, in µSv/h (on the RadiaCode, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
+"Todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
+"Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
 "Aparelho dos alertas": "Alert device",
 "Os dois": "Both",
-"Atenção no RadiaCode": "Attention on the RadiaCode",
-"Alarme no RadiaCode": "Alarm on the RadiaCode",
-"Perigo no RadiaCode": "Danger on the RadiaCode",
+"Atenção no RC102": "Attention on the RC102",
+"Atenção no RadiaCode": "Attention on the RC102",
+"Alarme no RC102": "Alarm on the RC102",
+"Alarme no RadiaCode": "Alarm on the RC102",
+"Perigo no RC102": "Danger on the RC102",
+"Perigo no RadiaCode": "Danger on the RC102",
 "alarmes 1 e 2 do aparelho": "device alarms 1 and 2",
-"leitura ao vivo do RadiaCode (µSv/h)": "RadiaCode live reading (µSv/h)",
+"leitura ao vivo do RC102 (µSv/h)": "RC102 live reading (µSv/h)",
+"leitura ao vivo do RadiaCode (µSv/h)": "RC102 live reading (µSv/h)",
 "valor do minuto": "minute value",
-"valor do minuto do RadiaCode (µSv/h)": "RadiaCode minute value (µSv/h)",
-"Só há o valor de cada minuto do RadiaCode.": "Only the RadiaCode's per-minute values are available.",
-"Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.": "Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RadiaCode measured in it and the GMC-800 over the same time.",
+"valor do minuto do RC102 (µSv/h)": "RC102 minute value (µSv/h)",
+"valor do minuto do RadiaCode (µSv/h)": "RC102 minute value (µSv/h)",
+"Só há o valor de cada minuto do RC102.": "Only the RC102's per-minute values are available.",
+"Só há o valor de cada minuto do RadiaCode.": "Only the RC102's per-minute values are available.",
+"Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RC102 mediu nele e o GMC-800 no mesmo tempo.": "Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RC102 measured in it and the GMC-800 over the same time.",
+"Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.": "Mark when you (or the counter) were away from home. The readings still count toward the dose, but are left out of the home background, the daily background and the hourly pattern. Each period shows what the RC102 measured in it and the GMC-800 over the same time.",
 "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)": "no readings on the PC in this period (with the phone app connected, the data stays on the phone)",
 "não deu para calcular": "couldn't calculate",
 "Aparelho da conta da chuva": "Device for the rain analysis",
-"% acima da média das 2 h antes (RadiaCode)": "% above the average of the 2 h before (RadiaCode)",
-"A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RadiaCode connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
-"sem leituras do RadiaCode nas 2 h antes": "no RadiaCode readings in the 2 h before",
+"% acima da média das 2 h antes (RC102)": "% above the average of the 2 h before (RC102)",
+"% acima da média das 2 h antes (RadiaCode)": "% above the average of the 2 h before (RC102)",
+"A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RC102 connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
+"A cada chuva com o RadiaCode conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.": "For each rain with the RC102 connected to the PC at home, the app measures how much its reading rose afterwards and compares it with times without rain.",
+"sem leituras do RC102 nas 2 h antes": "no RC102 readings in the 2 h before",
+"sem leituras do RadiaCode nas 2 h antes": "no RC102 readings in the 2 h before",
 "No aparelho:": "On the device:",
-"esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RadiaCode's total (it sends it every 3 to 4 min)",
+"esperando o total do RC102 (ele manda a cada 3 a 4 min)": "waiting for the RC102's total (it sends it every 3 to 4 min)",
+"esperando o total do RadiaCode (ele manda a cada 3 a 4 min)": "waiting for the RC102's total (it sends it every 3 to 4 min)",
 "no aparelho, desde que foi zerado": "on the device, since it was last reset",
 "Calculado pelo app:": "Calculated by the app:",
 "sem leituras gravadas no período": "no recorded readings in the period",
 "Os dois perto do objeto": "Both near the object",
 "Um no objeto, outro com você": "One on the object, the other with you",
 "Qual fica no objeto": "Which one stays on the object",
-"GMC-800 no objeto, RadiaCode com você": "GMC-800 on the object, RadiaCode with you",
-"RadiaCode no objeto, GMC-800 com você": "RadiaCode on the object, GMC-800 with you",
+"GMC-800 no objeto, RC102 com você": "GMC-800 on the object, RC102 with you",
+"GMC-800 no objeto, RadiaCode com você": "GMC-800 on the object, RC102 with you",
+"RC102 no objeto, GMC-800 com você": "RC102 on the object, GMC-800 with you",
+"RadiaCode no objeto, GMC-800 com você": "RC102 on the object, GMC-800 with you",
 "Distância até os aparelhos (opcional)": "Distance to the devices (optional)",
 "O GMC-800 não está conectado.": "The GMC-800 isn't connected.",
-"Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite.": "Both near the object, at the same time. The GMC sees beta and gamma; the RadiaCode, almost only gamma: comparing them gives a hint of what the object emits.",
+"Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RC102, quase só gama: comparando, dá uma pista do que o objeto emite.": "Both near the object, at the same time. The GMC sees beta and gamma; the RC102, almost only gamma: comparing them gives a hint of what the object emits.",
+"Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite.": "Both near the object, at the same time. The GMC sees beta and gamma; the RC102, almost only gamma: comparing them gives a hint of what the object emits.",
 "Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).": "Shows how much you received while the object was being measured, at the position where the device was (pocket, hand…).",
 "Sem leituras suficientes desse aparelho.": "Not enough readings from this device.",
-"O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta).": "The GMC saw the object and the RadiaCode barely did: it probably emits mainly beta (the RadiaCode's crystal barely sees beta).",
-"O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta.": "The GMC saw it clearly and the RadiaCode only a little: the object probably emits a lot of beta.",
-"Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco.": "Only the RadiaCode saw it: it's much more sensitive to gamma than the GMC's tube, so the object probably emits weak gamma.",
+"O GMC viu o objeto e o RC102 quase não: ele deve emitir principalmente beta (o cristal do RC102 quase não vê beta).": "The GMC saw the object and the RC102 barely did: it probably emits mainly beta (the RC102's crystal barely sees beta).",
+"O GMC viu o objeto e o RadiaCode quase não: ele deve emitir principalmente beta (o cristal do RadiaCode quase não vê beta).": "The GMC saw the object and the RC102 barely did: it probably emits mainly beta (the RC102's crystal barely sees beta).",
+"O GMC viu claramente e o RC102 só um pouco: o objeto deve emitir bastante beta.": "The GMC saw it clearly and the RC102 only a little: the object probably emits a lot of beta.",
+"O GMC viu claramente e o RadiaCode só um pouco: o objeto deve emitir bastante beta.": "The GMC saw it clearly and the RC102 only a little: the object probably emits a lot of beta.",
+"Só o RC102 viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco.": "Only the RC102 saw it: it's much more sensitive to gamma than the GMC's tube, so the object probably emits weak gamma.",
+"Só o RadiaCode viu: ele é bem mais sensível a gama que o tubo do GMC, então o objeto deve emitir gama fraco.": "Only the RC102 saw it: it's much more sensitive to gamma than the GMC's tube, so the object probably emits weak gamma.",
 "Os dois viram, numa proporção parecida: o objeto deve emitir principalmente gama.": "Both saw it, in a similar proportion: the object probably emits mainly gamma.",
 "Nenhum dos dois viu uma diferença clara.": "Neither saw a clear difference.",
-"O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "The GMC sees beta and gamma; the RadiaCode, almost only gamma. Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
+"O GMC vê beta e gama; o RC102, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "The GMC sees beta and gamma; the RC102, almost only gamma. Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
+"O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "The GMC sees beta and gamma; the RC102, almost only gamma. Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
 "Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.": "Take it as a hint: the tube and the crystal sit at different spots relative to the object.",
 "os dois aparelhos": "both devices",
-"conecte o RadiaCode para medir com os dois": "connect the RadiaCode to measure with both",
+"conecte o RC102 para medir com os dois": "connect the RC102 to measure with both",
+"conecte o RadiaCode para medir com os dois": "connect the RC102 to measure with both",
 "desligue o modo demo para medir com os dois aparelhos": "turn off demo mode to measure with both devices",
 "conecte o GMC-800 para medir com os dois": "connect the GMC-800 to measure with both",
 "Dose recebida": "Dose received",
@@ -1386,13 +1475,16 @@ const I18N_EN = {
 "µSv/h acima do fundo": "µSv/h above background",
 "Gráfico da medição: leitura ao vivo e média de cada fase": "Measurement chart: live reading and average of each phase",
 "dose do aparelho": "device dose",
-"A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RadiaCode itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.",
+"A curva é a dose que o próprio RC102 soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RC102 itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.",
+"A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora.": "The curve is the dose the RC102 itself adds up: it keeps counting while disconnected, and what it added away from the PC shows up when it comes back (on the chart, spread over the time it was away). The background and the ceiling grow with the time it was counting. It measures external radiation (gamma) wherever you are; inhaled radon and other internal sources are left out.",
 "Conectando…": "Connecting…",
 "Procurando no USB e no Bluetooth…": "Searching on USB and Bluetooth…",
 "Procurando no USB…": "Searching on USB…",
 "Procura desligada": "Search turned off",
-"RadiaCode conectado pelo Bluetooth": "RadiaCode connected via Bluetooth",
-"O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.": "The RadiaCode is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.",
+"RC102 conectado pelo Bluetooth": "RC102 connected via Bluetooth",
+"RadiaCode conectado pelo Bluetooth": "RC102 connected via Bluetooth",
+"O RC102 está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.": "The RC102 is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.",
+"O RadiaCode está no cabo USB: o app usa o USB enquanto ele estiver ligado e passa para o Bluetooth quando você tirar o cabo.": "The RC102 is on the USB cable: the app uses USB while it's plugged in and switches to Bluetooth when you unplug it.",
 "Não deu para conectar pelo Bluetooth. O app do celular está conectado nele? O app tenta de novo sozinho a cada 30 segundos.": "Couldn't connect via Bluetooth. Is the phone app connected to it? The app retries on its own every 30 seconds.",
 "Neste computador a conexão Bluetooth não está disponível: use o cabo USB.": "Bluetooth isn't available on this computer: use the USB cable.",
 "acumulado do aparelho": "device's accumulated",
@@ -1400,7 +1492,8 @@ const I18N_EN = {
 "Desde o Recomeçar": "Since Restart",
 "Acumulado do aparelho": "Device's accumulated",
 "Qual espectro": "Which spectrum",
-"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RadiaCode: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.",
+"Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.",
+"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.",
 "do aparelho": "from the device",
 "Energia": "Energy",
 "3 h": "3 h",
@@ -1408,13 +1501,15 @@ const I18N_EN = {
 "24 h": "24 h",
 "até 1.500 keV": "up to 1,500 keV",
 "até 3.000 keV": "up to 3,000 keV",
-"Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho).": "From your RadiaCode: while it's connected, the app saves the spectrum of every minute. Each row is a slice of time (the most recent at the bottom), energy goes to the right and the color shows how many photons arrived at that energy. Dark gray: no data. Dimmer rows: the app was closed or the device disconnected, and the row shows the average over that interval (the device keeps counting on its own).",
+"Do seu RC102: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho).": "From your RC102: while it's connected, the app saves the spectrum of every minute. Each row is a slice of time (the most recent at the bottom), energy goes to the right and the color shows how many photons arrived at that energy. Dark gray: no data. Dimmer rows: the app was closed or the device disconnected, and the row shows the average over that interval (the device keeps counting on its own).",
+"Do seu RadiaCode: com ele conectado, o app guarda o espectro de cada minuto. Cada linha é um pedaço do tempo (o mais recente embaixo), a energia vai para a direita e a cor mostra quantos fótons chegaram naquela energia. Cinza escuro: sem dados. Linhas mais apagadas: o app estava fechado ou o aparelho desconectado, e a linha mostra a média do intervalo (o aparelho segue contando sozinho).": "From your RC102: while it's connected, the app saves the spectrum of every minute. Each row is a slice of time (the most recent at the bottom), energy goes to the right and the color shows how many photons arrived at that energy. Dark gray: no data. Dimmer rows: the app was closed or the device disconnected, and the row shows the average over that interval (the device keeps counting on its own).",
 "um espectro por minuto": "one spectrum per minute",
 "nada neste período": "nothing in this period",
 "ainda sem dados: a primeira linha aparece em até 2 minutos": "no data yet: the first row shows up within 2 minutes",
 "sem leitura nesse intervalo: média dele": "no reading in this interval: its average",
 "sem leitura (média)": "no reading (average)",
-"Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RadiaCode, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
 "se a contagem sobe e a dureza": "if the count rate goes up and hardness",
 ", costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza": ", it's usually radon (rain, closed house: its daughters sit almost entirely below 1,500 keV). If hardness",
 "junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece.": "goes up too, something with a high-energy line is nearby, like thorium (Tl-208 at 2,614 keV). Hover: the app adds up the spectra of that stretch, compares them with the background and says what it looks like.",
@@ -1423,20 +1518,24 @@ const I18N_EN = {
 "sem dados neste período": "no data in this period",
 "~Ra-226 (urânio/radônio)": "~Ra-226 (uranium/radon)",
 "Log": "Log",
-"Igual à aba Log do app do celular: a taxa de dose que o RadiaCode manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.": "Just like the Log tab in the phone app: the dose rate the RadiaCode sends every ~1.5 minutes, the temperature, battery and accumulated dose, and the events (powered on, charging, alarms). The device doesn't keep this to download later: each app only has what it received while connected. To bring in what stayed on the phone (away from home, for example), export the log in the phone app and import it here.",
+"Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.": "Just like the Log tab in the phone app: the dose rate the RC102 sends every ~1.5 minutes, the temperature, battery and accumulated dose, and the events (powered on, charging, alarms). The device doesn't keep this to download later: each app only has what it received while connected. To bring in what stayed on the phone (away from home, for example), export the log in the phone app and import it here.",
+"Igual à aba Log do app do celular: a taxa de dose que o RadiaCode manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.": "Just like the Log tab in the phone app: the dose rate the RC102 sends every ~1.5 minutes, the temperature, battery and accumulated dose, and the events (powered on, charging, alarms). The device doesn't keep this to download later: each app only has what it received while connected. To bring in what stayed on the phone (away from home, for example), export the log in the phone app and import it here.",
 "Mostrar:": "Show:",
 "Temperatura, bateria e dose": "Temperature, battery and dose",
 "Tudo": "All",
 "Importar do celular": "Import from phone",
 "dados": "data",
-"Ainda sem registros. Com o RadiaCode conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.": "No records yet. With the RadiaCode connected, the dose rate arrives every ~1.5 minutes and temperature and dose every few minutes.",
+"Ainda sem registros. Com o RC102 conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.": "No records yet. With the RC102 connected, the dose rate arrives every ~1.5 minutes and temperature and dose every few minutes.",
+"Ainda sem registros. Com o RadiaCode conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.": "No records yet. With the RC102 connected, the dose rate arrives every ~1.5 minutes and temperature and dose every few minutes.",
 "Mostrar mais antigos": "Show older",
 "no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como \"celular\", sem repetir o que o PC já tinha.": "in the phone app, Log tab → export (.csv). When you import it here, what the phone received away from home goes into the same log, marked \"phone\", without repeating what the PC already had.",
 "celular": "phone",
 "carregando na fonte externa": "charging from external power",
 "na fonte externa": "on external power",
-"Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar.": "From your RadiaCode, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it.",
-"passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RadiaCode slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
+"Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it.",
+"Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it.",
+"passe o RC102 devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RC102 slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
+"passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RC102 slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
 "sem referência": "no reference",
 "normal: ainda sem 24 h de dados; use \"Usar o agora como normal\"": "normal: no 24 h of data yet; use \"Use now as normal\"",
 "amostras de 0,5 s do aparelho": "0.5 s samples from the device",
@@ -1449,7 +1548,8 @@ const I18N_EN = {
 "cliques": "clicks",
 "tom (mais agudo = mais forte)": "tone (higher = stronger)",
 "Atividade (Bq)": "Activity (Bq)",
-"Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RadiaCode enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.": "Activity (Bq) is how many atoms decay per second in the sample; dose (µSv) is how much of that reaches the body. To know the activity, the app needs to know how much of each energy the RadiaCode sees in that position (the efficiency): this is measured once with known references, KCl (potassium) and, if you have one, the thorium electrode. After that you can measure samples in the same position.",
+"Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.": "Activity (Bq) is how many atoms decay per second in the sample; dose (µSv) is how much of that reaches the body. To know the activity, the app needs to know how much of each energy the RC102 sees in that position (the efficiency): this is measured once with known references, KCl (potassium) and, if you have one, the thorium electrode. After that you can measure samples in the same position.",
+"Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RadiaCode enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.": "Activity (Bq) is how many atoms decay per second in the sample; dose (µSv) is how much of that reaches the body. To know the activity, the app needs to know how much of each energy the RC102 sees in that position (the efficiency): this is measured once with known references, KCl (potassium) and, if you have one, the thorium electrode. After that you can measure samples in the same position.",
 "Tipo": "Type",
 "Medir amostra": "Measure sample",
 "Calibrar com KCl": "Calibrate with KCl",
@@ -1475,7 +1575,8 @@ const I18N_EN = {
 "até eu parar": "until I stop",
 "Começar": "Start",
 "amostra": "sample",
-"Limites: o cristal do RadiaCode é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.": "Limits: the RadiaCode crystal is small and the peaks are wide, so neighboring lines blend together (the app fits them all at once, but the uncertainty grows) and weak things, like food, need many hours. The sample can't be very different from the reference in density and size, and must always be in the same position.",
+"Limites: o cristal do RC102 é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.": "Limits: the RC102 crystal is small and the peaks are wide, so neighboring lines blend together (the app fits them all at once, but the uncertainty grows) and weak things, like food, need many hours. The sample can't be very different from the reference in density and size, and must always be in the same position.",
+"Limites: o cristal do RadiaCode é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.": "Limits: the RC102 crystal is small and the peaks are wide, so neighboring lines blend together (the app fits them all at once, but the uncertainty grows) and weak things, like food, need many hours. The sample can't be very different from the reference in density and size, and must always be in the same position.",
 "esquecer": "forget",
 "sem KCl: a escala vem do tório (aproximada)": "no KCl: the scale comes from thorium (approximate)",
 "sem calibração: os Bq são só um chute (±100%). Comece pelo KCl.": "no calibration: the Bq are just a guess (±100%). Start with KCl.",
@@ -1508,7 +1609,8 @@ const I18N_EN = {
 "sem linhas": "no lines",
 "Medidas anteriores": "Previous measurements",
 "1. Fundo:": "1. Background:",
-"tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.": "take the sample away (about 3 m) and leave the RadiaCode in its usual spot.",
+"tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.": "take the sample away (about 3 m) and leave the RC102 in its usual spot.",
+"tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.": "take the sample away (about 3 m) and leave the RC102 in its usual spot.",
 "2. Amostra:": "2. Sample:",
 "a amostra": "the sample",
 "a mesma da calibração": "the same as the calibration",
@@ -1519,8 +1621,10 @@ const I18N_EN = {
 "Encerrar agora": "End now",
 "Nova medida": "New measurement",
 "Os números aparecem depois de alguns segundos.": "The numbers show up after a few seconds.",
-"Pote cheio de sal, o RadiaCode encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "A jar full of salt, the RadiaCode touching it always the same way (note the position). With 500 g of pure KCl, 1 h already gives a good measurement; with lite salt, 2 h. The background is measured with the jar far away (about 3 m) and the device in the same place.",
-"O eletrodo encostado no RadiaCode. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.": "The electrode touching the RadiaCode. It gives the shape of the curve (how efficiency changes with energy): the three lines used come from the same branch of the series, so the age doesn't affect the shape, only the scale.",
+"Pote cheio de sal, o RC102 encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "A jar full of salt, the RC102 touching it always the same way (note the position). With 500 g of pure KCl, 1 h already gives a good measurement; with lite salt, 2 h. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"Pote cheio de sal, o RadiaCode encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "A jar full of salt, the RC102 touching it always the same way (note the position). With 500 g of pure KCl, 1 h already gives a good measurement; with lite salt, 2 h. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.": "The electrode touching the RC102. It gives the shape of the curve (how efficiency changes with energy): the three lines used come from the same branch of the series, so the age doesn't affect the shape, only the scale.",
+"O eletrodo encostado no RadiaCode. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.": "The electrode touching the RC102. It gives the shape of the curve (how efficiency changes with energy): the three lines used come from the same branch of the series, so the age doesn't affect the shape, only the scale.",
 "castanha-do-pará": "Brazil nuts",
 "areia monazítica": "monazite sand",
 "granito / porcelanato": "granite / porcelain tile",
@@ -1528,11 +1632,13 @@ const I18N_EN = {
 "alimento": "food",
 "adubo de potássio": "potash fertilizer",
 "outra coisa": "something else",
-"Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RadiaCode é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\").": "Ground or chopped nuts, jar full and tightly sealed ~3 weeks beforehand (for Ra-226). Typical: Ra-226 ≈ 105 and Ra-228 ≈ 99 Bq/kg on average over 30 lots (Acta Amazonica, 2012); another study found 24 and 26 Bq/kg. For the RadiaCode it's weak: expect 12 to 24 h and maybe just a limit (\"below\").",
+"Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RC102 é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\").": "Ground or chopped nuts, jar full and tightly sealed ~3 weeks beforehand (for Ra-226). Typical: Ra-226 ≈ 105 and Ra-228 ≈ 99 Bq/kg on average over 30 lots (Acta Amazonica, 2012); another study found 24 and 26 Bq/kg. For the RC102 it's weak: expect 12 to 24 h and maybe just a limit (\"below\").",
+"Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RadiaCode é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\").": "Ground or chopped nuts, jar full and tightly sealed ~3 weeks beforehand (for Ra-226). Typical: Ra-226 ≈ 105 and Ra-228 ≈ 99 Bq/kg on average over 30 lots (Acta Amazonica, 2012); another study found 24 and 26 Bq/kg. For the RC102 it's weak: expect 12 to 24 h and maybe just a limit (\"below\").",
 "Areia seca, pote cheio. Típico: Th-232 de ~1.000 a 2.300 Bq/kg em praias de Marataízes (ES); solo comum tem ~45 Bq/kg (UNSCEAR 2000). Sai em menos de 1 h.": "Dry sand, full jar. Typical: Th-232 from ~1,000 to 2,300 Bq/kg on beaches in Marataízes (ES, Brazil); ordinary soil has ~45 Bq/kg (UNSCEAR 2000). Done in under 1 h.",
 "Pedaços que caibam no pote, ou a peça encostada do mesmo jeito. Para comparar, a média do solo no mundo: K-40 ≈ 420, Ra-226 ≈ 32 e Th-232 ≈ 45 Bq/kg (UNSCEAR 2000).": "Pieces that fit in the jar, or the piece touching the device the same way. For comparison, the world soil average: K-40 ≈ 420, Ra-226 ≈ 32 and Th-232 ≈ 45 Bq/kg (UNSCEAR 2000).",
 "O urânio-238 sai pela linha de 1.001 keV (fraca): só funciona com peça forte. O rádio costuma ser baixo, porque o urânio foi purificado ao fazer o vidro.": "Uranium-238 comes from the 1,001 keV line (weak): it only works with a strong piece. Radium is usually low, because the uranium was purified when the glass was made.",
-"Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RadiaCode enxerga: o resultado deve ser \"abaixo de\".": "In ordinary food, what shows up is K-40 (potassium). Today's Cs-137 in Brazilian food is well below what the RadiaCode can see: the result should be \"below\".",
+"Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RC102 enxerga: o resultado deve ser \"abaixo de\".": "In ordinary food, what shows up is K-40 (potassium). Today's Cs-137 in Brazilian food is well below what the RC102 can see: the result should be \"below\".",
+"Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RadiaCode enxerga: o resultado deve ser \"abaixo de\".": "In ordinary food, what shows up is K-40 (potassium). Today's Cs-137 in Brazilian food is well below what the RC102 can see: the result should be \"below\".",
 "Pelo K-40 o app calcula quanto potássio tem (31,7 Bq por grama de potássio).": "From K-40 the app works out how much potassium there is (31.7 Bq per gram of potassium).",
 "informe a % de KCl (100 para KCl puro)": "enter the % of KCl (100 for pure KCl)",
 "informe a % de ThO₂ do eletrodo (2 no WT20)": "enter the electrode's % of ThO₂ (2 for WT20)",
@@ -1542,8 +1648,10 @@ const I18N_EN = {
 "não tem fundo salvo: meça um fundo novo": "there's no saved background: measure a new one",
 "o fundo salvo tem mais de 30 dias: meça um novo": "the saved background is more than 30 days old: measure a new one",
 "nenhuma medição em andamento": "no measurement in progress",
-"Conecte o RadiaCode para medir.": "Connect the RadiaCode to measure.",
-"pote encostado no RadiaCode": "jar touching the RadiaCode",
+"Conecte o RC102 para medir.": "Connect the RC102 to measure.",
+"Conecte o RadiaCode para medir.": "Connect the RC102 to measure.",
+"pote encostado no RC102": "jar touching the RC102",
+"pote encostado no RadiaCode": "jar touching the RC102",
 "Histórico de configurações": "Settings history",
 "Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.": "Everything that changes the comparison between periods is recorded with its date: limits, dead time, GMC calibration, saturation, memory recording mode and changes made to the counter by the app. It goes into the backup.",
 "quando": "when",
@@ -1663,12 +1771,14 @@ const I18N_EN = {
 "sábado": "Saturday",
 "domingo": "Sunday",
 "1 dia": "1 day",
-"µSv/h médio (RadiaCode)": "average µSv/h (RadiaCode)",
+"µSv/h médio (RC102)": "average µSv/h (RC102)",
+"µSv/h médio (RadiaCode)": "average µSv/h (RC102)",
 "Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.": "Median of the minutes at home (without object measurements and without saturated or interference minutes); the band goes from the 1st to the 3rd quartile. The day × night comparison uses the days with both halves measured (6 h or more of each) and compares each day with its own night, so one day's weather doesn't weigh in.",
 "Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio.": "When readings came back they were still high: the alert continued in the same episode.",
 "O tempo sem leitura não entra no mínimo nem na média.": "The time without readings is not part of the minimum or the average.",
 "Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.": "If you download the counter's history, the minutes after that show up in the chart.",
-"RadiaCode desconectado": "RadiaCode disconnected",
+"RC102 desconectado": "RC102 disconnected",
+"RadiaCode desconectado": "RC102 disconnected",
 "app fechado": "app closed",
 "cinza = sem dados": "gray = no data",
 "Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações).": "Each minute was compared with the limit in effect at that moment (settings history).",
@@ -1692,7 +1802,8 @@ const I18N_EN = {
 "µSv/h (C)": "µSv/h (C)",
 "Dose µSv (C)": "Dose µSv (C)",
 "Mediana CPM (C)": "Median CPM (C)",
-"Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RadiaCode; E = estimativa externa ou extrapolação.": "Origin of values: M = measured by the counter (per-minute count and direct statistics of those counts); C = calculated by the app from the counts (conversion to µSv/h, dose, background, expected σ, alerts, coverage); R = reported by the RadiaCode; E = external estimate or extrapolation.",
+"Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RC102; E = estimativa externa ou extrapolação.": "Origin of values: M = measured by the counter (per-minute count and direct statistics of those counts); C = calculated by the app from the counts (conversion to µSv/h, dose, background, expected σ, alerts, coverage); R = reported by the RC102; E = external estimate or extrapolation.",
+"Origem dos valores: M = medido pelo contador (contagem por minuto e estatística direta dessas contagens); C = calculado pelo app a partir das contagens (conversão para µSv/h, dose, fundo, σ esperado, alertas, cobertura); R = informado pelo RadiaCode; E = estimativa externa ou extrapolação.": "Origin of values: M = measured by the counter (per-minute count and direct statistics of those counts); C = calculated by the app from the counts (conversion to µSv/h, dose, background, expected σ, alerts, coverage); R = reported by the RC102; E = external estimate or extrapolation.",
 "Sem dado do GMC-800.": "No GMC-800 data.",
 "Disponível: o histórico cobre a janela inteira.": "Available: the history covers the whole window.",
 "Em formação: o primeiro dado está dentro da janela, e estatísticas dessa janela ainda não a representam por completo.": "Forming: the first reading is inside the window, and statistics for that window don't fully represent it yet.",
@@ -1747,7 +1858,8 @@ const I18N_EN = {
 "Anexar foto ou arquivo": "Attach photo or file",
 "Marcada como não comparável. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.": "Marked as not comparable. It stays saved, but should not be compared with the other measurements of this object.",
 "Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.": "Comparable with the other measurements of the same object (same name), if the distance and the settings are the same.",
-"Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.": "RadiaCode measurement: µSv/h comes from the device's own calibration.",
+"Medição do RC102: o µSv/h vem da calibração do próprio aparelho.": "RC102 measurement: µSv/h comes from the device's own calibration.",
+"Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.": "RC102 measurement: µSv/h comes from the device's own calibration.",
 "Sem registro: o histórico de configurações começa na versão 2.1.": "No record: the settings history starts in version 2.1.",
 "O resultado guardado usa a configuração da época.": "The saved result uses the settings of that time.",
 "Igual à de hoje.": "Same as today.",
@@ -1783,7 +1895,8 @@ const I18N_EN = {
 "sem motivo informado": "no reason given",
 "Configuração na época": "Settings at the time",
 "Anexos": "Attachments",
-"1 registro do RadiaCode": "1 RadiaCode record",
+"1 registro do RC102": "1 RC102 record",
+"1 registro do RadiaCode": "1 RC102 record",
 "Páginas": "Pages",
 "Análise": "Analysis",
 "Registros": "Records",
@@ -1859,12 +1972,16 @@ const I18N_EN = {
 "Contador do aparelho:": "Device counter:",
 "medida pelo aparelho no período": "measured by the device in the period",
 "esperando o primeiro total (vem a cada 3 a 4 min)": "waiting for the first total (every 3 to 4 min)",
-"Simular o RadiaCode": "Simulate the RadiaCode",
+"Simular o RC102": "Simulate the RC102",
+"Simular o RadiaCode": "Simulate the RC102",
 "· quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando": "· panel, alerts and charts with its own limits; the real device, if connected, keeps recording",
-"Valor simulado do RadiaCode (µSv/h)": "Simulated RadiaCode value (µSv/h)",
-"Valor simulado do RadiaCode em escala logarítmica": "Simulated RadiaCode value on a logarithmic scale",
+"Valor simulado do RC102 (µSv/h)": "Simulated RC102 value (µSv/h)",
+"Valor simulado do RadiaCode (µSv/h)": "Simulated RC102 value (µSv/h)",
+"Valor simulado do RC102 em escala logarítmica": "Simulated RC102 value on a logarithmic scale",
+"Valor simulado do RadiaCode em escala logarítmica": "Simulated RC102 value on a logarithmic scale",
 "simulado": "simulated",
-"Atenção (demo) · RadiaCode": "Attention (demo) · RadiaCode",
+"Atenção (demo) · RC102": "Attention (demo) · RC102",
+"Atenção (demo) · RadiaCode": "Attention (demo) · RC102",
 "erro interno na leitura ao vivo": "internal error in live reading",
 "a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira": "the release has no signature (SHA256SUMS.txt.sig); download it from the page and check it",
 "a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão": "the SHA256SUMS.txt signature doesn't match; won't install this version",
@@ -1879,11 +1996,14 @@ const I18N_EN = {
 "Carregando…": "Loading…",
 "Tudo normal agora.": "All normal now.",
 "Nenhum aparelho lendo agora.": "No device reading right now.",
-"A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.": "The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.",
+"A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RC102 para acompanhar ao vivo.": "The dose below is what was recorded. Connect the GMC-800 or the RC102 to follow it live.",
+"A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.": "The dose below is what was recorded. Connect the GMC-800 or the RC102 to follow it live.",
 "Veja os detalhes em Alertas.": "See the details in Alerts.",
-"Dose pessoal, pelo RadiaCode (anda com você).": "Personal dose, from the RadiaCode (it goes with you).",
+"Dose pessoal, pelo RC102 (anda com você).": "Personal dose, from the RC102 (it goes with you).",
+"Dose pessoal, pelo RadiaCode (anda com você).": "Personal dose, from the RC102 (it goes with you).",
 "Dose da casa, pelo GMC-800 (fica parado).": "Home dose, from the GMC-800 (it stays put).",
-"O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.": "The RadiaCode has no data this year yet. Switch to \"home\" to see the GMC-800's.",
+"O RC102 ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.": "The RC102 has no data this year yet. Switch to \"home\" to see the GMC-800's.",
+"O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.": "The RC102 has no data this year yet. Switch to \"home\" to see the GMC-800's.",
 "O GMC-800 ainda não tem dado neste ano.": "The GMC-800 has no data this year yet.",
 "Nada marcado hoje: nenhum alerta, anotação ou saída de casa.": "Nothing marked today: no alert, note or time away from home.",
 "Abrir nos gráficos": "Open in charts",
@@ -1900,28 +2020,37 @@ const I18N_EN = {
 "Período normal.": "Normal period.",
 "igual ao normal": "same as normal",
 "Casa igual ao normal": "Home same as normal",
-"RadiaCode igual ao normal": "RadiaCode same as normal",
+"RC102 igual ao normal": "RC102 same as normal",
+"RadiaCode igual ao normal": "RC102 same as normal",
 "nenhum alerta": "no alerts",
 "Sua dose": "Your dose",
 "Dose da casa": "Home dose",
 "somada pelo aparelho": "summed by the device",
 "normal ainda não calculado": "normal not calculated yet",
-"pelo RadiaCode em casa": "by the RadiaCode at home",
+"pelo RC102 em casa": "by the RC102 at home",
+"pelo RadiaCode em casa": "by the RC102 at home",
 "Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
 "memória do aparelho": "device memory",
 "fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured",
 "local inválido": "invalid place",
-"GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar": "GMC-800 at home and RadiaCode with you is the usual: no need to mark it",
+"GMC-800 em casa e RC102 com você é o normal: não precisa marcar": "GMC-800 at home and RC102 with you is the usual: no need to mark it",
+"GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar": "GMC-800 at home and RC102 with you is the usual: no need to mark it",
 "Levei os dois": "Took both",
-"Levei o GMC-800, deixei o RadiaCode": "Took the GMC-800, left the RadiaCode",
+"Levei o GMC-800, deixei o RC102": "Took the GMC-800, left the RC102",
+"Levei o GMC-800, deixei o RadiaCode": "Took the GMC-800, left the RC102",
 "Deixei os dois em casa": "Left both at home",
 "esse trecho cruza com outro já marcado": "this stretch overlaps one already marked",
-"GMC-800 em casa, RadiaCode com você": "GMC-800 at home, RadiaCode with you",
-"GMC-800 em casa, RadiaCode em casa": "GMC-800 at home, RadiaCode at home",
-"GMC-800 com você, RadiaCode com você": "GMC-800 with you, RadiaCode with you",
-"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RadiaCode at home",
+"GMC-800 em casa, RC102 com você": "GMC-800 at home, RC102 with you",
+"GMC-800 em casa, RadiaCode com você": "GMC-800 at home, RC102 with you",
+"GMC-800 em casa, RC102 em casa": "GMC-800 at home, RC102 at home",
+"GMC-800 em casa, RadiaCode em casa": "GMC-800 at home, RC102 at home",
+"GMC-800 com você, RC102 com você": "GMC-800 with you, RC102 with you",
+"GMC-800 com você, RadiaCode com você": "GMC-800 with you, RC102 with you",
+"GMC-800 com você, RC102 em casa": "GMC-800 with you, RC102 at home",
+"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RC102 at home",
 "Onde está cada aparelho": "Where each device is",
-"o normal: GMC-800 em casa, RadiaCode com você": "usual: GMC-800 at home, RadiaCode with you",
+"o normal: GMC-800 em casa, RC102 com você": "usual: GMC-800 at home, RC102 with you",
+"o normal: GMC-800 em casa, RadiaCode com você": "usual: GMC-800 at home, RC102 with you",
 "comigo": "with me",
 "opcional": "optional",
 "ex.: viagem, trilha": "e.g.: trip, hike",
@@ -1940,45 +2069,59 @@ const I18N_EN = {
 "misto": "mixed",
 "sem medição": "not measured",
 "Casa pelos dois": "Home by both",
-"O GMC-800 mede a casa e o RadiaCode preenche se ele falhar.": "The GMC-800 measures the home and the RadiaCode fills in if it fails.",
+"O GMC-800 mede a casa e o RC102 preenche se ele falhar.": "The GMC-800 measures the home and the RC102 fills in if it fails.",
+"O GMC-800 mede a casa e o RadiaCode preenche se ele falhar.": "The GMC-800 measures the home and the RC102 fills in if it fails.",
 "Casa sem medição": "Home not measured",
 "Fundo e dose da casa ficam em branco até um aparelho voltar.": "Home background and dose stay blank until a device is back.",
 "Casa pelo GMC-800": "Home by the GMC-800",
-"Casa pelo RadiaCode": "Home by the RadiaCode",
+"Casa pelo RC102": "Home by the RC102",
+"Casa pelo RadiaCode": "Home by the RC102",
 "Como sempre.": "As usual.",
 "Ele entra no fundo da casa enquanto estiver lá.": "It counts toward the home background while it's there.",
 "Sem dosímetro com você": "No dosimeter with you",
 "Sua dose fica em branco neste trecho.": "Your dose stays blank in this stretch.",
-"Sua dose pelo RadiaCode": "Your dose by the RadiaCode",
+"Sua dose pelo RC102": "Your dose by the RC102",
+"Sua dose pelo RadiaCode": "Your dose by the RC102",
 "Sua dose pelo GMC-800": "Your dose by the GMC-800",
-"O GMC-800 vai junto e preenche se o RadiaCode falhar.": "The GMC-800 goes along and fills in if the RadiaCode fails.",
+"O GMC-800 vai junto e preenche se o RC102 falhar.": "The GMC-800 goes along and fills in if the RC102 fails.",
+"O GMC-800 vai junto e preenche se o RadiaCode falhar.": "The GMC-800 goes along and fills in if the RC102 fails.",
 "Ele sai do fundo da casa enquanto estiver com você.": "It leaves the home background while it's with you.",
-"A casa fica sem medição; sua dose pelo RadiaCode.": "The home goes unmeasured; your dose by the RadiaCode.",
-"A casa passa a ser medida pelo RadiaCode; sua dose pelo GMC-800.": "The home is now measured by the RadiaCode; your dose by the GMC-800.",
+"A casa fica sem medição; sua dose pelo RC102.": "The home goes unmeasured; your dose by the RC102.",
+"A casa fica sem medição; sua dose pelo RadiaCode.": "The home goes unmeasured; your dose by the RC102.",
+"A casa passa a ser medida pelo RC102; sua dose pelo GMC-800.": "The home is now measured by the RC102; your dose by the GMC-800.",
+"A casa passa a ser medida pelo RadiaCode; sua dose pelo GMC-800.": "The home is now measured by the RC102; your dose by the GMC-800.",
 "A casa é medida pelos dois; sua dose fica sem dosímetro.": "The home is measured by both; your dose has no dosimeter.",
 ", a partir de agora (": ", from now on (",
 " a partir de agora (": " from now on (",
-"): GMC-800 em casa, RadiaCode com você.": "): GMC-800 at home, RadiaCode with you.",
+"): GMC-800 em casa, RC102 com você.": "): GMC-800 at home, RC102 with you.",
+"): GMC-800 em casa, RadiaCode com você.": "): GMC-800 at home, RC102 with you.",
 "GMC-800 comigo": "GMC-800 with me",
-"RadiaCode comigo": "RadiaCode with me",
+"RC102 comigo": "RC102 with me",
+"RadiaCode comigo": "RC102 with me",
 "GMC-800 em casa": "GMC-800 at home",
-"RadiaCode em casa": "RadiaCode at home",
+"RC102 em casa": "RC102 at home",
+"RadiaCode em casa": "RC102 at home",
 "Onde estava o GMC-800": "Where the GMC-800 was",
-"Onde estava o RadiaCode": "Where the RadiaCode was",
+"Onde estava o RC102": "Where the RC102 was",
+"Onde estava o RadiaCode": "Where the RC102 was",
 "Onde está o GMC-800": "Where the GMC-800 is",
-"Onde está o RadiaCode": "Where the RadiaCode is",
+"Onde está o RC102": "Where the RC102 is",
+"Onde está o RadiaCode": "Where the RC102 is",
 "Relatório em PDF só desse trecho": "PDF report of this stretch only",
 "Apagar este trecho? Os minutos voltam a contar como normais na dose e no fundo.": "Delete this stretch? Its minutes count as usual again in the dose and background.",
 "Nenhum trecho. Quando levar ou deixar um aparelho fora do lugar de sempre, marque na tela Agora ou adicione aqui.": "No stretches. When you take or leave a device out of its usual place, mark it on the Now screen or add it here.",
-"Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.": "Stretches when a device wasn't in its usual place (GMC-800 at home, RadiaCode with you). A device with you leaves the home background; its readings still count in the dose. Mark it on the Now screen or add a past stretch here.",
+"Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RC102 com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.": "Stretches when a device wasn't in its usual place (GMC-800 at home, RC102 with you). A device with you leaves the home background; its readings still count in the dose. Mark it on the Now screen or add a past stretch here.",
+"Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.": "Stretches when a device wasn't in its usual place (GMC-800 at home, RC102 with you). A device with you leaves the home background; its readings still count in the dose. Mark it on the Now screen or add a past stretch here.",
 "Os dois fora do cálculo": "Both out of the calculation",
 "GMC-800 fora do cálculo": "GMC-800 out of the calculation",
-"RadiaCode fora do cálculo": "RadiaCode out of the calculation",
+"RC102 fora do cálculo": "RC102 out of the calculation",
+"RadiaCode fora do cálculo": "RC102 out of the calculation",
 "fora do cálculo": "out of the calculation",
 "esse começo cai dentro de outro trecho já marcado": "that start falls inside another stretch already marked",
 "os dois em casa": "both at home",
 "os dois com você": "both with you",
-"GMC-800 e RadiaCode fora do cálculo": "GMC-800 and RadiaCode out of the calculation",
+"GMC-800 e RC102 fora do cálculo": "GMC-800 and RC102 out of the calculation",
+"GMC-800 e RadiaCode fora do cálculo": "GMC-800 and RC102 out of the calculation",
 "O tubo pode estar com defeito. Se estiver, tire do cálculo para não puxar o fundo para baixo.": "The tube may be faulty. If it is, take it out of the calculation so it doesn't drag the background down.",
 "Tirar do cálculo…": "Take out of the calculation…",
 "saturando": "saturating",
@@ -1998,19 +2141,24 @@ const I18N_EN = {
 "Sua dose sem dado.": "Your dose without data.",
 "Nenhum aparelho em casa. Fundo e dose da casa ficam em branco.": "No device at home. Home background and dose stay blank.",
 "O GMC-800 está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The GMC-800 is at home but isn't sending readings. Those minutes stay blank.",
-"O RadiaCode está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The RadiaCode is at home but isn't sending readings. Those minutes stay blank.",
+"O RC102 está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The RC102 is at home but isn't sending readings. Those minutes stay blank.",
+"O RadiaCode está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The RC102 is at home but isn't sending readings. Those minutes stay blank.",
 "O GMC-800 está com você, mas não manda leitura.": "The GMC-800 is with you but isn't sending readings.",
-"O RadiaCode está com você, mas não manda leitura.": "The RadiaCode is with you but isn't sending readings.",
+"O RC102 está com você, mas não manda leitura.": "The RC102 is with you but isn't sending readings.",
+"O RadiaCode está com você, mas não manda leitura.": "The RC102 is with you but isn't sending readings.",
 "Desconectado, mas ele continua somando a dose sozinho. Só a curva minuto a minuto fica faltando até reconectar.": "Disconnected, but it keeps adding up the dose on its own. Only the minute-by-minute curve is missing until it reconnects.",
 "Ele assume enquanto o GMC-800 não mede.": "It takes over while the GMC-800 isn't measuring.",
-"Ele assume enquanto o RadiaCode não mede.": "It takes over while the RadiaCode isn't measuring.",
+"Ele assume enquanto o RC102 não mede.": "It takes over while the RC102 isn't measuring.",
+"Ele assume enquanto o RadiaCode não mede.": "It takes over while the RC102 isn't measuring.",
 "Saturando: conta como pelo menos o valor lido (≥).": "Saturating: counts as at least the value read (≥).",
 "Casa sem medição.": "Home not measured.",
 "Sem dosímetro com você.": "No dosimeter with you.",
 "Casa pelos dois.": "Home by both.",
 "Casa pelo GMC-800.": "Home by the GMC-800.",
-"Casa pelo RadiaCode.": "Home by the RadiaCode.",
-"Sua dose pelo RadiaCode.": "Your dose by the RadiaCode.",
+"Casa pelo RC102.": "Home by the RC102.",
+"Casa pelo RadiaCode.": "Home by the RC102.",
+"Sua dose pelo RC102.": "Your dose by the RC102.",
+"Sua dose pelo RadiaCode.": "Your dose by the RC102.",
 "Sua dose pelo GMC-800.": "Your dose by the GMC-800.",
 "Falta medição agora.": "Measurement missing now.",
 "Medindo, com um aparelho fora do normal.": "Measuring, with a device out of the usual.",
@@ -2044,16 +2192,22 @@ const I18N_EN = {
 "Agora no GMC-800": "Now on the GMC-800",
 "CPM (análise)": "CPM (analysis)",
 "CPM ao longo do tempo (análise)": "CPM over time (analysis)",
-"CPM do RadiaCode": "RadiaCode CPM",
-"Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes": "Analysis chart: GMC-800 and RadiaCode counts, no limits or alarms",
+"CPM do RC102": "RC102 CPM",
+"CPM do RadiaCode": "RC102 CPM",
+"Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes": "Analysis chart: GMC-800 and RC102 counts, no limits or alarms",
+"Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes": "Analysis chart: GMC-800 and RC102 counts, no limits or alarms",
 "Média · 1 h": "Average · 1 h",
-"RadiaCode (eixo da direita)": "RadiaCode (right axis)",
+"RC102 (eixo da direita)": "RC102 (right axis)",
+"RadiaCode (eixo da direita)": "RC102 (right axis)",
 "Tocar alarme a partir de (µSv/h)": "Sound the alarm from (µSv/h)",
 "análise: sem limites nem alarmes (eles ficam no µSv/h)": "analysis: no limits or alarms (they stay on the µSv/h chart)",
 "leitura a cada segundo (µSv/h)": "reading every second (µSv/h)",
-"Intercalibração com o RadiaCode": "Cross-calibration with the RadiaCode",
-"Intercalibrar com o RadiaCode": "Cross-calibrate with the RadiaCode",
-"intercalibração com o RadiaCode": "cross-calibration with the RadiaCode",
+"Intercalibração com o RC102": "Cross-calibration with the RC102",
+"Intercalibração com o RadiaCode": "Cross-calibration with the RC102",
+"Intercalibrar com o RC102": "Cross-calibrate with the RC102",
+"Intercalibrar com o RadiaCode": "Cross-calibrate with the RC102",
+"intercalibração com o RC102": "cross-calibration with the RC102",
+"intercalibração com o RadiaCode": "cross-calibration with the RC102",
 "fator novo": "new factor",
 "margem (95%)": "margin (95%)",
 "coleta": "collection",
@@ -2073,14 +2227,17 @@ const I18N_EN = {
 "Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro. Se mexer em um deles, cancele e comece de novo.": "Keep both devices touching, at the same height, neither shielding the other. If you move one of them, cancel and start over.",
 "Cancelar a coleta": "Cancel the collection",
 "Começar de novo": "Start over",
-"Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RadiaCode como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.": "Keep both devices touching, at the same height, neither shielding the other, for 24 h. The app does the math and suggests the GMC's new factor, with the RadiaCode as reference. Worth repeating every six months, or when you move the GMC.",
+"Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RC102 como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.": "Keep both devices touching, at the same height, neither shielding the other, for 24 h. The app does the math and suggests the GMC's new factor, with the RC102 as reference. Worth repeating every six months, or when you move the GMC.",
+"Deixe os dois aparelhos encostados, na mesma altura, sem um blindar o outro, por 24 h. O app faz a conta e sugere o fator novo do GMC, com o RadiaCode como referência. Vale repetir a cada seis meses, ou quando mudar o GMC de lugar.": "Keep both devices touching, at the same height, neither shielding the other, for 24 h. The app does the math and suggests the GMC's new factor, with the RC102 as reference. Worth repeating every six months, or when you move the GMC.",
 "Manutenção.": "Maintenance.",
 "Abrir a calibração": "Open the calibration",
 "Coleta de 24 h começou": "24 h collection started",
 "Poucos minutos com os dois em casa para comparar (precisa de 12 h juntos na semana).": "Too few minutes with both at home to compare (it needs 12 h together in the week).",
 "a intercalibração ainda não terminou": "the cross-calibration hasn't finished yet",
-"Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos encostados)": "Cross-calibration with the RadiaCode: 24 h collection started (both devices touching)",
-"Intercalibração com o RadiaCode: coleta cancelada": "Cross-calibration with the RadiaCode: collection cancelled",
+"Intercalibração com o RC102: coleta de 24 h começou (os dois aparelhos encostados)": "Cross-calibration with the RC102: 24 h collection started (both devices touching)",
+"Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos encostados)": "Cross-calibration with the RC102: 24 h collection started (both devices touching)",
+"Intercalibração com o RC102: coleta cancelada": "Cross-calibration with the RC102: collection cancelled",
+"Intercalibração com o RadiaCode: coleta cancelada": "Cross-calibration with the RC102: collection cancelled",
 "abrir": "open",
 "Mostrador": "Dial",
 "alarme 1": "alarm 1",
@@ -2090,11 +2247,15 @@ const I18N_EN = {
 "Nível: Saturado": "Level: Saturated",
 "A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.": "The energy calibration says which energy (keV) each spectrum channel c sits at. It comes from the factory and the device adjusts it on its own with temperature, so the app doesn't write it.",
 "Ajustes de antes gravados de volta": "Previous settings written back",
-"Ajustes do RadiaCode": "RadiaCode settings",
-"Ajustes do RadiaCode alterados": "RadiaCode settings changed",
-"Ajustes do RadiaCode alterados (desfeito)": "RadiaCode settings changed (undone)",
+"Ajustes do RC102": "RC102 settings",
+"Ajustes do RadiaCode": "RC102 settings",
+"Ajustes do RC102 alterados": "RC102 settings changed",
+"Ajustes do RadiaCode alterados": "RC102 settings changed",
+"Ajustes do RC102 alterados (desfeito)": "RC102 settings changed (undone)",
+"Ajustes do RadiaCode alterados (desfeito)": "RC102 settings changed (undone)",
 "Ajustes do aparelho": "Device settings",
-"Ajustes gravados no RadiaCode": "Settings written to the RadiaCode",
+"Ajustes gravados no RC102": "Settings written to the RC102",
+"Ajustes gravados no RadiaCode": "Settings written to the RC102",
 "Alarme 1 (cps)": "Alarm 1 (cps)",
 "Alarme 1 (µSv)": "Alarm 1 (µSv)",
 "Alarme 1 (µSv/h)": "Alarm 1 (µSv/h)",
@@ -2119,47 +2280,63 @@ const I18N_EN = {
 "Calibração de energia": "Energy calibration",
 "Cliques": "Clicks",
 "Cliques: um estalo por fóton detectado, como num contador Geiger (só som).": "Clicks: one tick per detected photon, like a Geiger counter (sound only).",
-"Conecte o RadiaCode para ver e mudar os ajustes do aparelho.": "Connect the RadiaCode to see and change the device settings.",
+"Conecte o RC102 para ver e mudar os ajustes do aparelho.": "Connect the RC102 to see and change the device settings.",
+"Conecte o RadiaCode para ver e mudar os ajustes do aparelho.": "Connect the RC102 to see and change the device settings.",
 "Desfazendo…": "Undoing…",
 "Desfazer a última gravação": "Undo the last write",
-"Dose acumulada do RadiaCode": "RadiaCode accumulated dose",
-"Dose acumulada do RadiaCode zerada pelo app": "RadiaCode accumulated dose reset by the app",
-"Dose do RadiaCode zerada": "RadiaCode dose reset",
+"Dose acumulada do RC102": "RC102 accumulated dose",
+"Dose acumulada do RadiaCode": "RC102 accumulated dose",
+"Dose acumulada do RC102 zerada pelo app": "RC102 accumulated dose reset by the app",
+"Dose acumulada do RadiaCode zerada pelo app": "RC102 accumulated dose reset by the app",
+"Dose do RC102 zerada": "RC102 dose reset",
+"Dose do RadiaCode zerada": "RC102 dose reset",
 "Dose fora da escala": "Dose off scale",
-"Erro ao gravar os ajustes do RadiaCode:": "Error writing the RadiaCode settings:",
+"Erro ao gravar os ajustes do RC102:": "Error writing the RC102 settings:",
+"Erro ao gravar os ajustes do RadiaCode:": "Error writing the RC102 settings:",
 "Firmware": "Firmware",
 "Nível de fundo típico dentro de casa: perto de 0,1 µSv/h.": "Typical background level indoors: around 0.1 µSv/h.",
 "Gravando…": "Writing…",
-"Gravar de volta no RadiaCode os ajustes de antes da última gravação?": "Write back to the RadiaCode the settings from before the last write?",
-"Gravar no RadiaCode": "Write to the RadiaCode",
-"Gravar no RadiaCode:": "Write to the RadiaCode:",
-"Lendo os ajustes do RadiaCode…": "Reading the RadiaCode settings…",
+"Gravar de volta no RC102 os ajustes de antes da última gravação?": "Write back to the RC102 the settings from before the last write?",
+"Gravar de volta no RadiaCode os ajustes de antes da última gravação?": "Write back to the RC102 the settings from before the last write?",
+"Gravar no RC102": "Write to the RC102",
+"Gravar no RadiaCode": "Write to the RC102",
+"Gravar no RC102:": "Write to the RC102:",
+"Gravar no RadiaCode:": "Write to the RC102:",
+"Lendo os ajustes do RC102…": "Reading the RC102 settings…",
+"Lendo os ajustes do RadiaCode…": "Reading the RC102 settings…",
 "Nada mudou: o aparelho já está assim.": "Nothing changed: the device is already set that way.",
-"Nada vai para o aparelho sem você clicar em \"Gravar no RadiaCode\". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.": "Nothing goes to the device until you click \"Write to the RadiaCode\". Before writing, the app saves a copy of what was there and then reads it back to check.",
+"Nada vai para o aparelho sem você clicar em \"Gravar no RC102\". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.": "Nothing goes to the device until you click \"Write to the RC102\". Before writing, the app saves a copy of what was there and then reads it back to check.",
+"Nada vai para o aparelho sem você clicar em \"Gravar no RadiaCode\". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.": "Nothing goes to the device until you click \"Write to the RC102\". Before writing, the app saves a copy of what was there and then reads it back to check.",
 "Não consegui ler os ajustes:": "Couldn't read the settings:",
 "O alarme 2 de contagem precisa ser maior que o alarme 1.": "Count alarm 2 must be higher than alarm 1.",
 "O alarme 2 de dose não pode ser menor que o alarme 1.": "Dose alarm 2 can't be lower than alarm 1.",
 "O alarme 2 de taxa precisa ser maior que o alarme 1.": "Rate alarm 2 must be higher than alarm 1.",
-"O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.": "The device beeps when the current rate goes above the value. The app's RadiaCode alerts use these two numbers as attention and alarm.",
+"O aparelho apita quando a taxa de agora passa do valor. Os alertas do RC102 no app usam estes dois números como atenção e alarme.": "The device beeps when the current rate goes above the value. The app's RC102 alerts use these two numbers as attention and alarm.",
+"O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.": "The device beeps when the current rate goes above the value. The app's RC102 alerts use these two numbers as attention and alarm.",
 "O app salva uma cópia do que está agora antes. Continuar?": "The app saves a copy of the current settings first. Continue?",
 "O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.": "The same rate alarm, but in photons counted per second, without converting to dose.",
 "Orientação": "Orientation",
-"Os ajustes do RadiaCode não foram para o aparelho: use \"Gravar no RadiaCode\" na seção RadiaCode.": "The RadiaCode settings weren't sent to the device: use \"Write to the RadiaCode\" in the RadiaCode section.",
+"Os ajustes do RC102 não foram para o aparelho: use \"Gravar no RC102\" na seção RC102.": "The RC102 settings weren't sent to the device: use \"Write to the RC102\" in the RC102 section.",
+"Os ajustes do RadiaCode não foram para o aparelho: use \"Gravar no RadiaCode\" na seção RadiaCode.": "The RC102 settings weren't sent to the device: use \"Write to the RC102\" in the RC102 section.",
 "Os alarmes de contagem precisam ficar entre 0,1 e 50.000 cps.": "Count alarms must be between 0.1 and 50,000 cps.",
 "Os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h.": "Dose rate alarms must be between 0.01 and 1,000 µSv/h.",
-"Os alertas do RadiaCode no app passam a usar os alarmes de taxa novos.": "The app's RadiaCode alerts will use the new rate alarms.",
+"Os alertas do RC102 no app passam a usar os alarmes de taxa novos.": "The app's RC102 alerts will use the new rate alarms.",
+"Os alertas do RadiaCode no app passam a usar os alarmes de taxa novos.": "The app's RC102 alerts will use the new rate alarms.",
 "Preencha os alarmes de dose (a partir de 0,01 µSv) ou marque \"desligado\".": "Fill in the dose alarms (from 0.01 µSv) or tick \"off\".",
-"RadiaCode desconectado: conecte para ver e mudar os ajustes do aparelho": "RadiaCode disconnected: connect it to see and change the device settings",
+"RC102 desconectado: conecte para ver e mudar os ajustes do aparelho": "RC102 disconnected: connect it to see and change the device settings",
+"RadiaCode desconectado: conecte para ver e mudar os ajustes do aparelho": "RC102 disconnected: connect it to see and change the device settings",
 "Röntgen (µR, µR/h)": "Roentgen (µR, µR/h)",
 "Sievert (µSv, µSv/h)": "Sievert (µSv, µSv/h)",
 "Som e vibração": "Sound and vibration",
-"Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).": "Only changes what shows on the RadiaCode's display. The app keeps showing µSv/h. The sievert measures the effect on the body; the roentgen is an old unit of exposure in air (the device uses 1 Sv = 100 R).",
+"Só muda o que aparece no visor do RC102. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).": "Only changes what shows on the RC102's display. The app keeps showing µSv/h. The sievert measures the effect on the body; the roentgen is an old unit of exposure in air (the device uses 1 Sv = 100 R).",
+"Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).": "Only changes what shows on the RC102's display. The app keeps showing µSv/h. The sievert measures the effect on the body; the roentgen is an old unit of exposure in air (the device uses 1 Sv = 100 R).",
 "Taxa fora da escala": "Rate off scale",
 "Tela do aparelho": "Device screen",
 "Unidade de contagem": "Count unit",
 "Unidade de dose": "Dose unit",
 "Unidades na tela do aparelho": "Units on the device screen",
-"Valores lidos do RadiaCode agora. Mude o que quiser e clique em \"Gravar no RadiaCode\".": "Values read from the RadiaCode just now. Change what you want and click \"Write to the RadiaCode\".",
+"Valores lidos do RC102 agora. Mude o que quiser e clique em \"Gravar no RC102\".": "Values read from the RC102 just now. Change what you want and click \"Write to the RC102\".",
+"Valores lidos do RadiaCode agora. Mude o que quiser e clique em \"Gravar no RadiaCode\".": "Values read from the RC102 just now. Change what you want and click \"Write to the RC102\".",
 "Virada para a direita": "Turned to the right",
 "Virada para a esquerda": "Turned to the left",
 "Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.": "Sets the device's dose back to zero, like its own menu. It can't be undone. The app's dose history keeps the total from before and recognizes the reset.",
@@ -2179,7 +2356,8 @@ const I18N_EN = {
 "botões": "buttons",
 "brilho": "brightness",
 "dose fora da escala": "dose off scale",
-"já estou gravando no RadiaCode": "already writing to the RadiaCode",
+"já estou gravando no RC102": "already writing to the RC102",
+"já estou gravando no RadiaCode": "already writing to the RC102",
 "nada mudou": "nothing changed",
 "o alarme 2 de contagem precisa ser maior que o alarme 1": "count alarm 2 must be higher than alarm 1",
 "o alarme 2 de dose não pode ser menor que o alarme 1": "dose alarm 2 can't be lower than alarm 1",
@@ -2223,14 +2401,17 @@ const I18N_EN = {
 "Gravar no GMC-800": "Write to the GMC-800",
 "Janela e tela": "Window and display",
 "Mudar no GMC-800": "Change on the GMC-800",
-"Mudar no RadiaCode": "Change on the RadiaCode",
+"Mudar no RC102": "Change on the RC102",
+"Mudar no RadiaCode": "Change on the RC102",
 "No aparelho": "On the device",
 "O seu alarme: toca o som escolhido abaixo.": "Your alarm: plays the sound chosen below.",
 "Os níveis": "The levels",
-"Os três valem para o GMC-800 e para o RadiaCode.": "All three apply to the GMC-800 and to the RadiaCode.",
+"Os três valem para o GMC-800 e para o RC102.": "All three apply to the GMC-800 and to the RC102.",
+"Os três valem para o GMC-800 e para o RadiaCode.": "All three apply to the GMC-800 and to the RC102.",
 "Para medir o efeito da chuva no CPM, ligue \"Mostrar chuva no gráfico\" e escolha a cidade em Configurações → Janela e tela → Chuva no gráfico.": "To measure the effect of rain on CPM, turn on \"Show rain on the chart\" and choose the city in Settings → Window and display → Rain on the chart.",
 "Partes do GMC-800": "Parts of the GMC-800",
-"Partes do RadiaCode": "Parts of the RadiaCode",
+"Partes do RC102": "Parts of the RC102",
+"Partes do RadiaCode": "Parts of the RC102",
 "Pontos gravados no contador": "Points stored in the counter",
 "Procurar o aparelho": "Find the device",
 "Som do alarme": "Alarm sound",
@@ -2240,7 +2421,8 @@ const I18N_EN = {
 "Vermelho e sirene. Passa na frente do seu alarme e não desliga.": "Red and siren. Takes priority over your alarm and cannot be turned off.",
 "alarme desligado": "alarm off",
 "conecte o GMC-800 para ver": "connect the GMC-800 to see",
-"conecte o RadiaCode para ver": "connect the RadiaCode to see",
+"conecte o RC102 para ver": "connect the RC102 to see",
+"conecte o RadiaCode para ver": "connect the RC102 to see",
 "escala logarítmica": "logarithmic scale",
 "Ligar o som": "Turn sound on",
 "som desligado": "sound off",
@@ -2255,10 +2437,14 @@ const I18N_EN = {
 "TESTE": "TEST",
 "REAL": "REAL",
 "Some sozinha em 1 min.": "Goes away on its own in 1 min.",
-"RadiaCode saturado": "RadiaCode saturated",
-"Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com \"≥\" e avisa para não confiar nele.": "Default 1,000: the top of the RadiaCode 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with \"≥\" and warns not to trust it.",
-"fim da escala do RadiaCode": "RadiaCode end of scale",
-"Saturação do RadiaCode": "RadiaCode saturation",
+"RC102 saturado": "RC102 saturated",
+"RadiaCode saturado": "RC102 saturated",
+"Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com \"≥\" e avisa para não confiar nele.": "Default 1,000: the top of the RC102 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with \"≥\" and warns not to trust it.",
+"Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com \"≥\" e avisa para não confiar nele.": "Default 1,000: the top of the RC102 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with \"≥\" and warns not to trust it.",
+"fim da escala do RC102": "RC102 end of scale",
+"fim da escala do RadiaCode": "RC102 end of scale",
+"Saturação do RC102": "RC102 saturation",
+"Saturação do RadiaCode": "RC102 saturation",
 "OK": "OK",
 "procurando…": "searching…",
 "Calibrar o contador com a intercalibração": "Calibrate the counter with the cross-calibration",
@@ -2317,33 +2503,44 @@ const I18N_EN = {
 "Parece que ele ficou em casa.": "Looks like it stayed home.",
 "Parece que ele saiu de casa.": "Looks like it left home.",
 "Poucos minutos com os dois aparelhos para comparar, então o app não tem dica.": "Too few minutes with both devices to compare, so the app has no hint.",
-"Quando você saiu e voltou com o RadiaCode?": "When did you leave and come back with the RadiaCode?",
-"RadiaCode sem conexão,": "RadiaCode disconnected,",
-"Saí com o RadiaCode": "Went out with the RadiaCode",
+"Quando você saiu e voltou com o RC102?": "When did you leave and come back with the RC102?",
+"Quando você saiu e voltou com o RadiaCode?": "When did you leave and come back with the RC102?",
+"RC102 sem conexão,": "RC102 disconnected,",
+"RadiaCode sem conexão,": "RC102 disconnected,",
+"Saí com o RC102": "Went out with the RC102",
+"Saí com o RadiaCode": "Went out with the RC102",
 "Saí em": "Left at",
 "Voltei em": "Back at",
 "a memória do aparelho não trouxe leituras": "the device memory brought no readings",
 "dose no trecho": "dose in the stretch",
 "essa pergunta já foi respondida": "this question was already answered",
-"eu não estava em casa (saí com o RadiaCode)": "I wasn't home (I went out with the RadiaCode)",
+"eu não estava em casa (saí com o RC102)": "I wasn't home (I went out with the RC102)",
+"eu não estava em casa (saí com o RadiaCode)": "I wasn't home (I went out with the RC102)",
 "máximo": "maximum",
-"média do RadiaCode": "RadiaCode average",
+"média do RC102": "RC102 average",
+"média do RadiaCode": "RC102 average",
 "resposta inválida": "invalid answer",
 "sem leituras da memória": "no readings from memory",
-"sugestão: o RadiaCode estava conectado ao PC nesse trecho": "suggestion: the RadiaCode was connected to the PC in this stretch",
-"sugestão: o RadiaCode também ficou sem conexão nesse trecho": "suggestion: the RadiaCode was also disconnected in this stretch",
+"sugestão: o RC102 estava conectado ao PC nesse trecho": "suggestion: the RC102 was connected to the PC in this stretch",
+"sugestão: o RadiaCode estava conectado ao PC nesse trecho": "suggestion: the RC102 was connected to the PC in this stretch",
+"sugestão: o RC102 também ficou sem conexão nesse trecho": "suggestion: the RC102 was also disconnected in this stretch",
+"sugestão: o RadiaCode também ficou sem conexão nesse trecho": "suggestion: the RC102 was also disconnected in this stretch",
 "Desfazer": "Undo",
 "a responder": "to answer",
 "Responder": "Answer",
 "Onde ele estava?": "Where was it?",
 "Nome (opcional)": "Name (optional)",
-"RadiaCode sem conexão, sem leituras da memória": "RadiaCode disconnected, no readings from memory",
+"RC102 sem conexão, sem leituras da memória": "RC102 disconnected, no readings from memory",
+"RadiaCode sem conexão, sem leituras da memória": "RC102 disconnected, no readings from memory",
 "Como funciona": "How it works",
-"Gravar no RadiaCode?": "Write to the RadiaCode?",
+"Gravar no RC102?": "Write to the RC102?",
+"Gravar no RadiaCode?": "Write to the RC102?",
 "O app salva uma cópia do que está agora antes de gravar.": "The app saves a copy of the current settings before writing.",
 "Desfazer a última gravação?": "Undo the last write?",
-"O app grava de volta no RadiaCode os ajustes de antes da última gravação.": "The app writes back to the RadiaCode the settings from before the last write.",
-"Zerar a dose acumulada do RadiaCode?": "Reset the RadiaCode's accumulated dose?",
+"O app grava de volta no RC102 os ajustes de antes da última gravação.": "The app writes back to the RC102 the settings from before the last write.",
+"O app grava de volta no RadiaCode os ajustes de antes da última gravação.": "The app writes back to the RC102 the settings from before the last write.",
+"Zerar a dose acumulada do RC102?": "Reset the RC102's accumulated dose?",
+"Zerar a dose acumulada do RadiaCode?": "Reset the RC102's accumulated dose?",
 "Dose acumulada agora": "Accumulated dose now",
 "Não tem volta: o aparelho recomeça do zero.": "This can't be undone: the device starts again from zero.",
 "Pontos de hoje": "Current points",
@@ -2362,7 +2559,11 @@ const I18N_EN = {
 "Gravar": "Write",
 "Continuar?": "Continue?",
 "Novo": "New",
-"última hora": "last hour"
+"última hora": "last hour",
+"GQ GMC-800 (casa)": "GQ GMC-800 (home)",
+"RADIACODE 102 (DOSÍMETRO PESSOAL)": "RADIACODE 102 (PERSONAL DOSIMETER)",
+"Radiacode 102 · conectando…": "Radiacode 102 · connecting…",
+"Radiacode 102 · desconectado": "Radiacode 102 · disconnected"
 },
 "patterns": [
 [
@@ -2426,10 +2627,19 @@ const I18N_EN = {
 [
 "Os dois estão se afastando: ",
 "^Os dois estão se afastando: ((?:(?! · ).)+?)% do normal há duas semanas\\. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RadiaCode guardado em outro canto\\. Vale intercalibrar de novo\\.$",
-"The devices are drifting apart: ${1}% from normal for two weeks. It may be the GMC tube, one of the devices moved, or the RadiaCode kept somewhere else. Worth cross-calibrating again.",
+"The devices are drifting apart: ${1}% from normal for two weeks. It may be the GMC tube, one of the devices moved, or the RC102 kept somewhere else. Worth cross-calibrating again.",
 [
 "Os dois estão se afastando: ",
 "% do normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RadiaCode guardado em outro canto. Vale intercalibrar de novo."
+]
+],
+[
+"Os dois estão se afastando: ",
+"^Os dois estão se afastando: ((?:(?! · ).)+?)% do normal há duas semanas\\. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RC102 guardado em outro canto\\. Vale intercalibrar de novo\\.$",
+"The devices are drifting apart: ${1}% from normal for two weeks. It may be the GMC tube, one of the devices moved, or the RC102 kept somewhere else. Worth cross-calibrating again.",
+[
+"Os dois estão se afastando: ",
+"% do normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RC102 guardado em outro canto. Vale intercalibrar de novo."
 ]
 ],
 [
@@ -2453,7 +2663,7 @@ const I18N_EN = {
 [
 "Nas ",
 "^Nas ((?:(?! · ).)+?) h com os dois lado a lado, o mesmo fundo deu ((?:(?! · ).)+?) µSv/h no GMC\\-800 e ((?:(?! · ).)+?) µSv/h no RadiaCode\\. O RadiaCode pesa cada contagem pela energia; o GMC usa uma curva de fábrica\\.$",
-"In the ${1} h with both side by side, the same background gave ${2} µSv/h on the GMC-800 and ${3} µSv/h on the RadiaCode. The RadiaCode weighs each count by its energy; the GMC uses a factory curve.",
+"In the ${1} h with both side by side, the same background gave ${2} µSv/h on the GMC-800 and ${3} µSv/h on the RC102. The RC102 weighs each count by its energy; the GMC uses a factory curve.",
 [
 "Nas ",
 " h com os dois lado a lado, o mesmo fundo deu ",
@@ -2469,6 +2679,17 @@ const I18N_EN = {
 "A noite (18h–6h) fica ",
 "% acima do dia (",
 " dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite."
+]
+],
+[
+"Nas ",
+"^Nas ((?:(?! · ).)+?) h com os dois lado a lado, o mesmo fundo deu ((?:(?! · ).)+?) µSv/h no GMC\\-800 e ((?:(?! · ).)+?) µSv/h no RC102\\. O RC102 pesa cada contagem pela energia; o GMC usa uma curva de fábrica\\.$",
+"In the ${1} h with both side by side, the same background gave ${2} µSv/h on the GMC-800 and ${3} µSv/h on the RC102. The RC102 weighs each count by its energy; the GMC uses a factory curve.",
+[
+"Nas ",
+" h com os dois lado a lado, o mesmo fundo deu ",
+" µSv/h no GMC-800 e ",
+" µSv/h no RC102. O RC102 pesa cada contagem pela energia; o GMC usa uma curva de fábrica."
 ]
 ],
 [
@@ -2523,7 +2744,7 @@ const I18N_EN = {
 [
 "A coleta terminou com só ",
 "^A coleta terminou com só ((?:(?! · ).)+?) minutos com os dois aparelhos medindo \\(precisa de pelo menos 60\\)\\. Confira se o RadiaCode ficou conectado\\.$",
-"The collection ended with only ${1} minutes with both devices measuring (it needs at least 60). Check that the RadiaCode stayed connected.",
+"The collection ended with only ${1} minutes with both devices measuring (it needs at least 60). Check that the RC102 stayed connected.",
 [
 "A coleta terminou com só ",
 " minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RadiaCode ficou conectado."
@@ -2547,6 +2768,15 @@ const I18N_EN = {
 " µSv/h acima do fundo (Currie, 95%, com ",
 " s de fundo e ",
 " s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido."
+]
+],
+[
+"A coleta terminou com só ",
+"^A coleta terminou com só ((?:(?! · ).)+?) minutos com os dois aparelhos medindo \\(precisa de pelo menos 60\\)\\. Confira se o RC102 ficou conectado\\.$",
+"The collection ended with only ${1} minutes with both devices measuring (it needs at least 60). Check that the RC102 stayed connected.",
+[
+"A coleta terminou com só ",
+" minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RC102 ficou conectado."
 ]
 ],
 [
@@ -2628,7 +2858,7 @@ const I18N_EN = {
 [
 "Os dois viram, mas o GMC subiu bem mais (",
 "^Os dois viram, mas o GMC subiu bem mais \\(((?:(?! · ).)+?)× o fundo contra ((?:(?! · ).)+?)× no RadiaCode\\): além de gama, o objeto deve emitir beta\\.$",
-"Both saw it, but the GMC rose much more (${1}× the background against ${2}× on the RadiaCode): besides gamma, the object probably emits beta.",
+"Both saw it, but the GMC rose much more (${1}× the background against ${2}× on the RC102): besides gamma, the object probably emits beta.",
 [
 "Os dois viram, mas o GMC subiu bem mais (",
 "× o fundo contra ",
@@ -2652,6 +2882,16 @@ const I18N_EN = {
 "Depois dele, o app ficou ",
 " sem leitura (desde ",
 "); a memória do contador pode ter esses minutos: baixe o histórico."
+]
+],
+[
+"Os dois viram, mas o GMC subiu bem mais (",
+"^Os dois viram, mas o GMC subiu bem mais \\(((?:(?! · ).)+?)× o fundo contra ((?:(?! · ).)+?)× no RC102\\): além de gama, o objeto deve emitir beta\\.$",
+"Both saw it, but the GMC rose much more (${1}× the background against ${2}× on the RC102): besides gamma, the object probably emits beta.",
+[
+"Os dois viram, mas o GMC subiu bem mais (",
+"× o fundo contra ",
+"× no RC102): além de gama, o objeto deve emitir beta."
 ]
 ],
 [
@@ -2712,7 +2952,7 @@ const I18N_EN = {
 [
 "Calibração do GMC: ",
 "^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, pela intercalibração com o RadiaCode \\(vale a partir de agora\\)$",
-"GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RadiaCode (applies from now on)",
+"GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RC102 (applies from now on)",
 [
 "Calibração do GMC: ",
 " µSv/h por CPM no fundo, pela intercalibração com o RadiaCode (vale a partir de agora)"
@@ -2738,6 +2978,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Calibração do GMC: ",
+"^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, pela intercalibração com o RC102 \\(vale a partir de agora\\)$",
+"GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RC102 (applies from now on)",
+[
+"Calibração do GMC: ",
+" µSv/h por CPM no fundo, pela intercalibração com o RC102 (vale a partir de agora)"
+]
+],
+[
 "interferência: outro segundo suspeito às ",
 "^interferência: outro segundo suspeito às ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) contagens; esperado \\~((?:(?! · ).)+?)\\), aviso já dado há menos de 5 min$",
 "interference: another suspicious second at ${1} (${2} counts; expected ~${3}), warning already given less than 5 min ago",
@@ -2750,7 +2999,7 @@ const I18N_EN = {
 [
 "Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ",
 "^Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ((?:(?! · ).)+?) µSv/h \\(80% entre ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\)\\.$",
-"From the minutes at home over the last 7 days, the RadiaCode usually reads ${1} µSv/h (80% between ${2} and ${3} µSv/h).",
+"From the minutes at home over the last 7 days, the RC102 usually reads ${1} µSv/h (80% between ${2} and ${3} µSv/h).",
 [
 "Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ",
 " µSv/h (80% entre ",
@@ -2770,12 +3019,22 @@ const I18N_EN = {
 [
 "RadiaCode: ",
 "^RadiaCode: ((?:(?! · ).)+?) registros recuperados da memória do aparelho \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\), ((?:(?! · ).)+?) minutos sem leitura preenchidos$",
-"RadiaCode: ${1} records recovered from the device memory (${2} to ${3}), ${4} minutes without a reading filled in",
+"RC102: ${1} records recovered from the device memory (${2} to ${3}), ${4} minutes without a reading filled in",
 [
 "RadiaCode: ",
 " registros recuperados da memória do aparelho (",
 "), ",
 " minutos sem leitura preenchidos"
+]
+],
+[
+"Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar ",
+"^Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar ((?:(?! · ).)+?) µSv/h \\(80% entre ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h\\)\\.$",
+"From the minutes at home over the last 7 days, the RC102 usually reads ${1} µSv/h (80% between ${2} and ${3} µSv/h).",
+[
+"Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar ",
+" µSv/h (80% entre ",
+" µSv/h)."
 ]
 ],
 [
@@ -2843,9 +3102,20 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102: ",
+"^RC102: ((?:(?! · ).)+?) registros recuperados da memória do aparelho \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\), ((?:(?! · ).)+?) minutos sem leitura preenchidos$",
+"RC102: ${1} records recovered from the device memory (${2} to ${3}), ${4} minutes without a reading filled in",
+[
+"RC102: ",
+" registros recuperados da memória do aparelho (",
+"), ",
+" minutos sem leitura preenchidos"
+]
+],
+[
 "Com o RadiaCode em casa, ele conta umas ",
 "^Com o RadiaCode em casa, ele conta umas ((?:(?! · ).)+?) vezes o que o GMC conta\\. Nesse trecho foram ((?:(?! · ).)+?) vezes\\.$",
-"With the RadiaCode at home, it counts about ${1} times what the GMC counts. In this stretch it was ${2} times.",
+"With the RC102 at home, it counts about ${1} times what the GMC counts. In this stretch it was ${2} times.",
 [
 "Com o RadiaCode em casa, ele conta umas ",
 " vezes o que o GMC conta. Nesse trecho foram ",
@@ -2855,7 +3125,7 @@ const I18N_EN = {
 [
 "RadiaCode: ficou ",
 "^RadiaCode: ficou ((?:(?! · ).)+?) sem conexão \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\); o app pergunta na tela Agora se ele estava fora de casa$",
-"RadiaCode: disconnected for ${1} (${2} to ${3}); the app asks on the Now screen whether it was away from home",
+"RC102: disconnected for ${1} (${2} to ${3}); the app asks on the Now screen whether it was away from home",
 [
 "RadiaCode: ficou ",
 " sem conexão (",
@@ -2865,7 +3135,7 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
-"RadiaCode ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
+"RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
 [
 "RadiaCode ",
 " não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)"
@@ -2874,7 +3144,7 @@ const I18N_EN = {
 [
 "Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ",
 "^Somada pelo próprio RadiaCode, também longe do PC\\. Pelo app \\(só os minutos gravados\\): ((?:(?! · ).)+?) µSv$",
-"Added up by the RadiaCode itself, also away from the PC. By the app (only the recorded minutes): ${1} µSv",
+"Added up by the RC102 itself, also away from the PC. By the app (only the recorded minutes): ${1} µSv",
 [
 "Somada pelo próprio RadiaCode, também longe do PC. Pelo app (só os minutos gravados): ",
 " µSv"
@@ -2918,6 +3188,26 @@ const I18N_EN = {
 ]
 ],
 [
+"Com o RC102 em casa, ele conta umas ",
+"^Com o RC102 em casa, ele conta umas ((?:(?! · ).)+?) vezes o que o GMC conta\\. Nesse trecho foram ((?:(?! · ).)+?) vezes\\.$",
+"With the RC102 at home, it counts about ${1} times what the GMC counts. In this stretch it was ${2} times.",
+[
+"Com o RC102 em casa, ele conta umas ",
+" vezes o que o GMC conta. Nesse trecho foram ",
+" vezes."
+]
+],
+[
+"RC102: ficou ",
+"^RC102: ficou ((?:(?! · ).)+?) sem conexão \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\); o app pergunta na tela Agora se ele estava fora de casa$",
+"RC102: disconnected for ${1} (${2} to ${3}); the app asks on the Now screen whether it was away from home",
+[
+"RC102: ficou ",
+" sem conexão (",
+"); o app pergunta na tela Agora se ele estava fora de casa"
+]
+],
+[
 "Geiger saturado: a leitura chegou a ",
 "^Geiger saturado: a leitura chegou a ((?:(?! · ).)+?) µSv/h \\(fim da escala\\); o valor real pode ser maior$",
 "Geiger saturated: the reading reached ${1} µSv/h (end of scale); the real value may be higher",
@@ -2933,6 +3223,24 @@ const I18N_EN = {
 [
 " sem leitura no período, em ",
 " trecho(s). Lacuna não conta como zero em nenhum cálculo."
+]
+],
+[
+"RC102 ",
+"^RC102 ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
+"RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
+[
+"RC102 ",
+" não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)"
+]
+],
+[
+"Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ",
+"^Somada pelo próprio RC102, também longe do PC\\. Pelo app \\(só os minutos gravados\\): ((?:(?! · ).)+?) µSv$",
+"Added up by the RC102 itself, also away from the PC. By the app (only the recorded minutes): ${1} µSv",
+[
+"Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ",
+" µSv"
 ]
 ],
 [
@@ -3124,7 +3432,7 @@ const I18N_EN = {
 [
 "Zerar a dose acumulada do RadiaCode",
 "^Zerar a dose acumulada do RadiaCode((?:(?! · ).)+?)\\? Não tem volta: o aparelho recomeça do zero\\.$",
-"Reset the RadiaCode's accumulated dose${1}? It can't be undone: the device starts again from zero.",
+"Reset the RC102's accumulated dose${1}? It can't be undone: the device starts again from zero.",
 [
 "Zerar a dose acumulada do RadiaCode",
 "? Não tem volta: o aparelho recomeça do zero."
@@ -3192,6 +3500,15 @@ const I18N_EN = {
 [
 "Dose pessoal pela leitura de casa",
 " (os dois ficaram em casa, e você também)."
+]
+],
+[
+"Zerar a dose acumulada do RC102",
+"^Zerar a dose acumulada do RC102((?:(?! · ).)+?)\\? Não tem volta: o aparelho recomeça do zero\\.$",
+"Reset the RC102's accumulated dose${1}? It can't be undone: the device starts again from zero.",
+[
+"Zerar a dose acumulada do RC102",
+"? Não tem volta: o aparelho recomeça do zero."
 ]
 ],
 [
@@ -3303,7 +3620,7 @@ const I18N_EN = {
 [
 "Intercalibração com o RadiaCode terminou: ",
 "^Intercalibração com o RadiaCode terminou: ((?:(?! · ).)+?) µSv/h por CPM \\(±((?:(?! · ).)+?)%, ((?:(?! · ).)+?) minutos\\)$",
-"Cross-calibration with the RadiaCode finished: ${1} µSv/h per CPM (±${2}%, ${3} minutes)",
+"Cross-calibration with the RC102 finished: ${1} µSv/h per CPM (±${2}%, ${3} minutes)",
 [
 "Intercalibração com o RadiaCode terminou: ",
 " µSv/h por CPM (±",
@@ -3408,6 +3725,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Intercalibração com o RC102 terminou: ",
+"^Intercalibração com o RC102 terminou: ((?:(?! · ).)+?) µSv/h por CPM \\(±((?:(?! · ).)+?)%, ((?:(?! · ).)+?) minutos\\)$",
+"Cross-calibration with the RC102 finished: ${1} µSv/h per CPM (±${2}%, ${3} minutes)",
+[
+"Intercalibração com o RC102 terminou: ",
+" µSv/h por CPM (±",
+"%, ",
+" minutos)"
+]
+],
+[
 "Atenção (histórico do contador): pico de ",
 "^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Attention (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -3439,7 +3767,7 @@ const I18N_EN = {
 [
 "GMC-800 agora: ",
 "^GMC\\-800 agora: ((?:(?! · ).)+?) \\(calibração ((?:(?! · ).)+?) µSv/h por CPM\\) · RadiaCode agora: ((?:(?! · ).)+?)\\.$",
-"GMC-800 now: ${1} (calibration ${2} µSv/h per CPM) · RadiaCode now: ${3}.",
+"GMC-800 now: ${1} (calibration ${2} µSv/h per CPM) · RC102 now: ${3}.",
 [
 "GMC-800 agora: ",
 " (calibração ",
@@ -3501,7 +3829,7 @@ const I18N_EN = {
 [
 "não consegui pegar o USB do RadiaCode (outro programa usando?): ",
 "^não consegui pegar o USB do RadiaCode \\(outro programa usando\\?\\): ((?:(?! · ).)+?)$",
-"couldn't claim the RadiaCode's USB (another program using it?): ${1}",
+"couldn't claim the RC102's USB (another program using it?): ${1}",
 [
 "não consegui pegar o USB do RadiaCode (outro programa usando?): "
 ]
@@ -3635,6 +3963,16 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 agora: ",
+"^GMC\\-800 agora: ((?:(?! · ).)+?) \\(calibração ((?:(?! · ).)+?) µSv/h por CPM\\) · RC102 agora: ((?:(?! · ).)+?)\\.$",
+"GMC-800 now: ${1} (calibration ${2} µSv/h per CPM) · RC102 now: ${3}.",
+[
+"GMC-800 agora: ",
+" (calibração ",
+" µSv/h por CPM) · RC102 agora: "
+]
+],
+[
 "Alarme (histórico do contador): pico de ",
 "^Alarme \\(histórico do contador\\): pico de ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
 "Alarm (counter history): peak of ${1} µSv/h at ${2} (limit ${3})",
@@ -3663,9 +4001,17 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui pegar o USB do RC102 (outro programa usando?): ",
+"^não consegui pegar o USB do RC102 \\(outro programa usando\\?\\): ((?:(?! · ).)+?)$",
+"couldn't claim the RC102's USB (another program using it?): ${1}",
+[
+"não consegui pegar o USB do RC102 (outro programa usando?): "
+]
+],
+[
 "RadiaCode fora de casa, somando os períodos: ",
 "^RadiaCode fora de casa, somando os períodos: ((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?) medidos\\.$",
-"RadiaCode away from home, adding up the periods: ${1} µSv over ${2} measured.",
+"RC102 away from home, adding up the periods: ${1} µSv over ${2} measured.",
 [
 "RadiaCode fora de casa, somando os períodos: ",
 " µSv em ",
@@ -3739,7 +4085,7 @@ const I18N_EN = {
 [
 "o RadiaCode está com o driver ",
 "^o RadiaCode está com o driver ((?:(?! · ).)+?); o app precisa do WinUSB \\(((?:(?! · ).)+?)\\)$",
-"the RadiaCode is using the ${1} driver; the app needs WinUSB (${2})",
+"the RC102 is using the ${1} driver; the app needs WinUSB (${2})",
 [
 "o RadiaCode está com o driver ",
 "; o app precisa do WinUSB ("
@@ -3765,7 +4111,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
-"${1} of ${2} min with RadiaCode readings since the first reading (${3})",
+"${1} of ${2} min with RC102 readings since the first reading (${3})",
 [
 " de ",
 " min com leitura do RadiaCode desde o primeiro dado ("
@@ -3774,10 +4120,20 @@ const I18N_EN = {
 [
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
-"only ${1} min of RadiaCode readings at home in the last hour (needs ${2})",
+"only ${1} min of RC102 readings at home in the last hour (needs ${2})",
 [
 "só ",
 " min do RadiaCode em casa na última hora (precisa de "
+]
+],
+[
+"RC102 fora de casa, somando os períodos: ",
+"^RC102 fora de casa, somando os períodos: ((?:(?! · ).)+?) µSv em ((?:(?! · ).)+?) medidos\\.$",
+"RC102 away from home, adding up the periods: ${1} µSv over ${2} measured.",
+[
+"RC102 fora de casa, somando os períodos: ",
+" µSv em ",
+" medidos."
 ]
 ],
 [
@@ -3818,7 +4174,7 @@ const I18N_EN = {
 [
 "Razão pessoal ÷ casa: ",
 "^Razão pessoal ÷ casa: ((?:(?! · ).)+?) \\(RadiaCode ÷ GMC\\-800 em µSv/h\\)\\.$",
-"Personal ÷ home ratio: ${1} (RadiaCode ÷ GMC-800 in µSv/h).",
+"Personal ÷ home ratio: ${1} (RC102 ÷ GMC-800 in µSv/h).",
 [
 "Razão pessoal ÷ casa: ",
 " (RadiaCode ÷ GMC-800 em µSv/h)."
@@ -3827,7 +4183,7 @@ const I18N_EN = {
 [
 "Dose da casa, pelo aparelho que fica parado: o RadiaCode",
 "^Dose da casa, pelo aparelho que fica parado: o RadiaCode((?:(?! · ).)+?)\\.$",
-"Home dose, from the device that stays put: the RadiaCode${1}.",
+"Home dose, from the device that stays put: the RC102${1}.",
 [
 "Dose da casa, pelo aparelho que fica parado: o RadiaCode"
 ]
@@ -3862,7 +4218,7 @@ const I18N_EN = {
 [
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?) \\(RadiaCode\\): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
-"Measurement of ${1} (RadiaCode): ${2} ± ${3} CPM above background (${4}σ) — ${5}",
+"Measurement of ${1} (RC102): ${2} ± ${3} CPM above background (${4}σ) — ${5}",
 [
 "Medição de ",
 " (RadiaCode): ",
@@ -3933,6 +4289,15 @@ const I18N_EN = {
 ]
 ],
 [
+"o RC102 está com o driver ",
+"^o RC102 está com o driver ((?:(?! · ).)+?); o app precisa do WinUSB \\(((?:(?! · ).)+?)\\)$",
+"the RC102 is using the ${1} driver; the app needs WinUSB (${2})",
+[
+"o RC102 está com o driver ",
+"; o app precisa do WinUSB ("
+]
+],
+[
 "",
 "^((?:(?! · ).)+?)((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo · ((?:(?! · ).)+?)× o fundo · ≈ ((?:(?! · ).)+?)((?:(?! · ).)+?) µSv/h no detector$",
 "${1}${2} ± ${3} CPM above background · ${4}× the background · ≈ ${5}${6} µSv/h at the detector",
@@ -3940,6 +4305,15 @@ const I18N_EN = {
 " CPM sobre o fundo · ",
 "× o fundo · ≈ ",
 " µSv/h no detector"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RC102 desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"${1} of ${2} min with RC102 readings since the first reading (${3})",
+[
+" de ",
+" min com leitura do RC102 desde o primeiro dado ("
 ]
 ],
 [
@@ -3980,16 +4354,25 @@ const I18N_EN = {
 [
 "sem permissão em ",
 "^sem permissão em ((?:(?! · ).)+?): instale a regra do udev do RadiaCode$",
-"no permission on ${1}: install the RadiaCode udev rule",
+"no permission on ${1}: install the RC102 udev rule",
 [
 "sem permissão em ",
 ": instale a regra do udev do RadiaCode"
 ]
 ],
 [
+"só ",
+"^só ((?:(?! · ).)+?) min do RC102 em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
+"only ${1} min of RC102 readings at home in the last hour (needs ${2})",
+[
+"só ",
+" min do RC102 em casa na última hora (precisa de "
+]
+],
+[
 "Atenção no RadiaCode: ",
 "^Atenção no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(alarme 1 do aparelho: ((?:(?! · ).)+?)\\)$",
-"Attention on the RadiaCode: ${1} µSv/h (device alarm 1: ${2})",
+"Attention on the RC102: ${1} µSv/h (device alarm 1: ${2})",
 [
 "Atenção no RadiaCode: ",
 " µSv/h (alarme 1 do aparelho: "
@@ -4033,7 +4416,7 @@ const I18N_EN = {
 [
 "RadiaCode média ",
 "^RadiaCode média ((?:(?! · ).)+?) · GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
-"RadiaCode average ${1} · GMC-800 average ${2} · min ${3} · max ${4} µSv/h",
+"RC102 average ${1} · GMC-800 average ${2} · min ${3} · max ${4} µSv/h",
 [
 "RadiaCode média ",
 " · GMC-800 média ",
@@ -4045,7 +4428,7 @@ const I18N_EN = {
 [
 "Alarme no RadiaCode: ",
 "^Alarme no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(alarme 2 do aparelho: ((?:(?! · ).)+?)\\)$",
-"Alarm on the RadiaCode: ${1} µSv/h (device alarm 2: ${2})",
+"Alarm on the RC102: ${1} µSv/h (device alarm 2: ${2})",
 [
 "Alarme no RadiaCode: ",
 " µSv/h (alarme 2 do aparelho: "
@@ -4054,9 +4437,26 @@ const I18N_EN = {
 [
 "somada pelo RadiaCode, também longe do PC · pelo app: ",
 "^somada pelo RadiaCode, também longe do PC · pelo app: ((?:(?! · ).)+?)$",
-"added up by the RadiaCode, also away from the PC · by the app: ${1}",
+"added up by the RC102, also away from the PC · by the app: ${1}",
 [
 "somada pelo RadiaCode, também longe do PC · pelo app: "
+]
+],
+[
+"Razão pessoal ÷ casa: ",
+"^Razão pessoal ÷ casa: ((?:(?! · ).)+?) \\(RC102 ÷ GMC\\-800 em µSv/h\\)\\.$",
+"Personal ÷ home ratio: ${1} (RC102 ÷ GMC-800 in µSv/h).",
+[
+"Razão pessoal ÷ casa: ",
+" (RC102 ÷ GMC-800 em µSv/h)."
+]
+],
+[
+"Dose da casa, pelo aparelho que fica parado: o RC102",
+"^Dose da casa, pelo aparelho que fica parado: o RC102((?:(?! · ).)+?)\\.$",
+"Home dose, from the device that stays put: the RC102${1}.",
+[
+"Dose da casa, pelo aparelho que fica parado: o RC102"
 ]
 ],
 [
@@ -4078,6 +4478,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Medição de ",
+"^Medição de ((?:(?! · ).)+?) \\(RC102\\): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
+"Measurement of ${1} (RC102): ${2} ± ${3} CPM above background (${4}σ) — ${5}",
+[
+"Medição de ",
+" (RC102): ",
+" CPM sobre o fundo (",
+"σ) — "
+]
+],
+[
 "fim da escala ",
 "^fim da escala ((?:(?! · ).)+?) µSv/h, queda brusca a partir de ((?:(?! · ).)+?) µSv/h$",
 "end of scale ${1} µSv/h, sudden drop from ${2} µSv/h",
@@ -4090,7 +4501,7 @@ const I18N_EN = {
 [
 "Lado a lado com o RadiaCode (",
 "^Lado a lado com o RadiaCode \\(((?:(?! · ).)+?) min nas últimas 6 h\\):$",
-"Side by side with the RadiaCode (${1} min in the last 6 h):",
+"Side by side with the RC102 (${1} min in the last 6 h):",
 [
 "Lado a lado com o RadiaCode (",
 " min nas últimas 6 h):"
@@ -4165,7 +4576,7 @@ const I18N_EN = {
 [
 "Marcado: ",
 "^Marcado: ((?:(?! · ).)+?) · RadiaCode com você, GMC\\-800 em casa · ((?:(?! · ).)+?)–((?:(?! · ).)+?)$",
-"Marked: ${1} · RadiaCode with you, GMC-800 at home · ${2}–${3}",
+"Marked: ${1} · RC102 with you, GMC-800 at home · ${2}–${3}",
 [
 "Marcado: ",
 " · RadiaCode com você, GMC-800 em casa · "
@@ -4195,6 +4606,24 @@ const I18N_EN = {
 [
 "automático: chegou ao tempo máximo (",
 ") sem decidir"
+]
+],
+[
+"sem permissão em ",
+"^sem permissão em ((?:(?! · ).)+?): instale a regra do udev do RC102$",
+"no permission on ${1}: install the RC102 udev rule",
+[
+"sem permissão em ",
+": instale a regra do udev do RC102"
+]
+],
+[
+"Atenção no RC102: ",
+"^Atenção no RC102: ((?:(?! · ).)+?) µSv/h \\(alarme 1 do aparelho: ((?:(?! · ).)+?)\\)$",
+"Attention on the RC102: ${1} µSv/h (device alarm 1: ${2})",
+[
+"Atenção no RC102: ",
+" µSv/h (alarme 1 do aparelho: "
 ]
 ],
 [
@@ -4254,6 +4683,35 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RC102 average ${1} · GMC-800 average ${2} · min ${3} · max ${4} µSv/h",
+[
+"RC102 média ",
+" · GMC-800 média ",
+" · mín ",
+" · máx ",
+" µSv/h"
+]
+],
+[
+"Alarme no RC102: ",
+"^Alarme no RC102: ((?:(?! · ).)+?) µSv/h \\(alarme 2 do aparelho: ((?:(?! · ).)+?)\\)$",
+"Alarm on the RC102: ${1} µSv/h (device alarm 2: ${2})",
+[
+"Alarme no RC102: ",
+" µSv/h (alarme 2 do aparelho: "
+]
+],
+[
+"somada pelo RC102, também longe do PC · pelo app: ",
+"^somada pelo RC102, também longe do PC · pelo app: ((?:(?! · ).)+?)$",
+"added up by the RC102, also away from the PC · by the app: ${1}",
+[
+"somada pelo RC102, também longe do PC · pelo app: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) arquivo\\(s\\) guardado\\(s\\) com a medição no app: ((?:(?! · ).)+?)$",
 "${1} file(s) saved with the measurement in the app: ${2}",
@@ -4301,7 +4759,7 @@ const I18N_EN = {
 [
 "RadiaCode (você) no mesmo período: ",
 "^RadiaCode \\(você\\) no mesmo período: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) medidos$",
-"RadiaCode (you) in the same period: ${1} over ${2} measured",
+"RC102 (you) in the same period: ${1} over ${2} measured",
 [
 "RadiaCode (você) no mesmo período: ",
 " em ",
@@ -4314,6 +4772,15 @@ const I18N_EN = {
 "≈ ${1} µSv/h · no dry times to compare with yet",
 [
 " µSv/h · sem horários secos para comparar ainda"
+]
+],
+[
+"Lado a lado com o RC102 (",
+"^Lado a lado com o RC102 \\(((?:(?! · ).)+?) min nas últimas 6 h\\):$",
+"Side by side with the RC102 (${1} min in the last 6 h):",
+[
+"Lado a lado com o RC102 (",
+" min nas últimas 6 h):"
 ]
 ],
 [
@@ -4412,6 +4879,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Marcado: ",
+"^Marcado: ((?:(?! · ).)+?) · RC102 com você, GMC\\-800 em casa · ((?:(?! · ).)+?)–((?:(?! · ).)+?)$",
+"Marked: ${1} · RC102 with you, GMC-800 at home · ${2}–${3}",
+[
+"Marcado: ",
+" · RC102 com você, GMC-800 em casa · "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -4460,7 +4936,7 @@ const I18N_EN = {
 [
 "Nível de fundo em casa pelo RadiaCode: ",
 "^Nível de fundo em casa pelo RadiaCode: ((?:(?! · ).)+?) µSv/h\\.$",
-"Background level at home from the RadiaCode: ${1} µSv/h.",
+"Background level at home from the RC102: ${1} µSv/h.",
 [
 "Nível de fundo em casa pelo RadiaCode: ",
 " µSv/h."
@@ -4478,7 +4954,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) chuva\\(s\\) sem dados suficientes do RadiaCode$",
-"${1} rain(s) without enough RadiaCode data",
+"${1} rain(s) without enough RC102 data",
 [
 " chuva(s) sem dados suficientes do RadiaCode"
 ]
@@ -4505,7 +4981,7 @@ const I18N_EN = {
 [
 "Primeiro dado do GMC-800: ",
 "^Primeiro dado do GMC\\-800: ((?:(?! · ).)+?) · do RadiaCode: ((?:(?! · ).)+?)\\.$",
-"First GMC-800 reading: ${1} · RadiaCode: ${2}.",
+"First GMC-800 reading: ${1} · RC102: ${2}.",
 [
 "Primeiro dado do GMC-800: ",
 " · do RadiaCode: "
@@ -4544,7 +5020,7 @@ const I18N_EN = {
 [
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h · RadiaCode média ((?:(?! · ).)+?)$",
-"average ${1} · min ${2} · max ${3} µSv/h · RadiaCode average ${4}",
+"average ${1} · min ${2} · max ${3} µSv/h · RC102 average ${4}",
 [
 "média ",
 " · mín ",
@@ -4553,9 +5029,19 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 (você) no mesmo período: ",
+"^RC102 \\(você\\) no mesmo período: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) medidos$",
+"RC102 (you) in the same period: ${1} over ${2} measured",
+[
+"RC102 (você) no mesmo período: ",
+" em ",
+" medidos"
+]
+],
+[
 "Atenção no RadiaCode: ",
 "^Atenção no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
-"Attention on the RadiaCode: ${1} µSv/h (from ${2})",
+"Attention on the RC102: ${1} µSv/h (from ${2})",
 [
 "Atenção no RadiaCode: ",
 " µSv/h (a partir de "
@@ -4599,7 +5085,7 @@ const I18N_EN = {
 [
 "[demo] RadiaCode simulado ligado (",
 "^\\[demo\\] RadiaCode simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
-"[demo] Simulated RadiaCode on (${1} µSv/h)",
+"[demo] Simulated RC102 on (${1} µSv/h)",
 [
 "[demo] RadiaCode simulado ligado (",
 " µSv/h)"
@@ -4608,7 +5094,7 @@ const I18N_EN = {
 [
 "O GMC-800 estava lendo ",
 "^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% abaixo do RadiaCode$",
-"The GMC-800 was reading ${1}% below the RadiaCode",
+"The GMC-800 was reading ${1}% below the RC102",
 [
 "O GMC-800 estava lendo ",
 "% abaixo do RadiaCode"
@@ -4672,7 +5158,7 @@ const I18N_EN = {
 [
 "Perigo no RadiaCode: ",
 "^Perigo no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
-"Danger on the RadiaCode: ${1} µSv/h (from ${2})",
+"Danger on the RC102: ${1} µSv/h (from ${2})",
 [
 "Perigo no RadiaCode: ",
 " µSv/h (a partir de "
@@ -4681,7 +5167,7 @@ const I18N_EN = {
 [
 "O GMC-800 estava lendo ",
 "^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% acima do RadiaCode$",
-"The GMC-800 was reading ${1}% above the RadiaCode",
+"The GMC-800 was reading ${1}% above the RC102",
 [
 "O GMC-800 estava lendo ",
 "% acima do RadiaCode"
@@ -4733,7 +5219,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) min só do RadiaCode \\(GMC desconectado\\?\\)$",
-"${1} min from the RadiaCode only (GMC disconnected?)",
+"${1} min from the RC102 only (GMC disconnected?)",
 [
 " min só do RadiaCode (GMC desconectado?)"
 ]
@@ -4758,7 +5244,7 @@ const I18N_EN = {
 [
 "GMC-800 e RadiaCode fora do cálculo desde ",
 "^GMC\\-800 e RadiaCode fora do cálculo desde ((?:(?! · ).)+?)$",
-"GMC-800 and RadiaCode out of the calculation since ${1}",
+"GMC-800 and RC102 out of the calculation since ${1}",
 [
 "GMC-800 e RadiaCode fora do cálculo desde "
 ]
@@ -4769,6 +5255,15 @@ const I18N_EN = {
 "${1} variance/mean · off the expected (≈ 1)",
 [
 " variância/média · fora do esperado (≈ 1)"
+]
+],
+[
+"Nível de fundo em casa pelo RC102: ",
+"^Nível de fundo em casa pelo RC102: ((?:(?! · ).)+?) µSv/h\\.$",
+"Background level at home from the RC102: ${1} µSv/h.",
+[
+"Nível de fundo em casa pelo RC102: ",
+" µSv/h."
 ]
 ],
 [
@@ -4810,6 +5305,23 @@ const I18N_EN = {
 "background: the device's accumulated spectrum (${1})",
 [
 "fundo: espectro acumulado do aparelho ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) chuva\\(s\\) sem dados suficientes do RC102$",
+"${1} rain(s) without enough RC102 data",
+[
+" chuva(s) sem dados suficientes do RC102"
+]
+],
+[
+"Primeiro dado do GMC-800: ",
+"^Primeiro dado do GMC\\-800: ((?:(?! · ).)+?) · do RC102: ((?:(?! · ).)+?)\\.$",
+"First GMC-800 reading: ${1} · RC102: ${2}.",
+[
+"Primeiro dado do GMC-800: ",
+" · do RC102: "
 ]
 ],
 [
@@ -4867,6 +5379,26 @@ const I18N_EN = {
 ]
 ],
 [
+"média ",
+"^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h · RC102 média ((?:(?! · ).)+?)$",
+"average ${1} · min ${2} · max ${3} µSv/h · RC102 average ${4}",
+[
+"média ",
+" · mín ",
+" · máx ",
+" µSv/h · RC102 média "
+]
+],
+[
+"Atenção no RC102: ",
+"^Atenção no RC102: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Attention on the RC102: ${1} µSv/h (from ${2})",
+[
+"Atenção no RC102: ",
+" µSv/h (a partir de "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) µSv \\(o que o objeto somou nesse tempo\\)$",
 "${1} µSv (what the object added in that time)",
@@ -4893,11 +5425,29 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] RC102 simulado ligado (",
+"^\\[demo\\] RC102 simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
+"[demo] Simulated RC102 on (${1} µSv/h)",
+[
+"[demo] RC102 simulado ligado (",
+" µSv/h)"
+]
+],
+[
 "≈ ",
 "^≈ ((?:(?! · ).)+?) CPM no GMC\\-800 com a calibração atual$",
 "≈ ${1} CPM on the GMC-800 with the current calibration",
 [
 " CPM no GMC-800 com a calibração atual"
+]
+],
+[
+"O GMC-800 estava lendo ",
+"^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% abaixo do RC102$",
+"The GMC-800 was reading ${1}% below the RC102",
+[
+"O GMC-800 estava lendo ",
+"% abaixo do RC102"
 ]
 ],
 [
@@ -4939,7 +5489,7 @@ const I18N_EN = {
 [
 "RadiaCode conectado (",
 "^RadiaCode conectado \\(((?:(?! · ).)+?)\\) · ((?:(?! · ).)+?) ((?:(?! · ).)+?) · firmware ((?:(?! · ).)+?)$",
-"RadiaCode connected (${1}) · ${2} ${3} · firmware ${4}",
+"RC102 connected (${1}) · ${2} ${3} · firmware ${4}",
 [
 "RadiaCode conectado (",
 ") · ",
@@ -4955,11 +5505,29 @@ const I18N_EN = {
 ]
 ],
 [
+"Perigo no RC102: ",
+"^Perigo no RC102: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Danger on the RC102: ${1} µSv/h (from ${2})",
+[
+"Perigo no RC102: ",
+" µSv/h (a partir de "
+]
+],
+[
 "Se o objeto emite algo, é menos que +",
 "^Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?)\\.$",
 "If the object emits anything, it's less than +${1}.",
 [
 "Se o objeto emite algo, é menos que +"
+]
+],
+[
+"O GMC-800 estava lendo ",
+"^O GMC\\-800 estava lendo ((?:(?! · ).)+?)% acima do RC102$",
+"The GMC-800 was reading ${1}% above the RC102",
+[
+"O GMC-800 estava lendo ",
+"% acima do RC102"
 ]
 ],
 [
@@ -4974,7 +5542,7 @@ const I18N_EN = {
 [
 "RadiaCode sem conexão, a memória trouxe ",
 "^RadiaCode sem conexão, a memória trouxe ((?:(?! · ).)+?)$",
-"RadiaCode disconnected, the memory brought ${1}",
+"RC102 disconnected, the memory brought ${1}",
 [
 "RadiaCode sem conexão, a memória trouxe "
 ]
@@ -5053,8 +5621,16 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) min só do RC102 \\(GMC desconectado\\?\\)$",
+"${1} min from the RC102 only (GMC disconnected?)",
+[
+" min só do RC102 (GMC desconectado?)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?): RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?) CPM\\)$",
-"${1}: RadiaCode ${2} · GMC-800 ${3} µSv/h (${4} CPM)",
+"${1}: RC102 ${2} · GMC-800 ${3} µSv/h (${4} CPM)",
 [
 ": RadiaCode ",
 " · GMC-800 ",
@@ -5073,7 +5649,7 @@ const I18N_EN = {
 [
 "Alarme no RadiaCode: ",
 "^Alarme no RadiaCode: ((?:(?! · ).)+?) µSv/h \\(limite ((?:(?! · ).)+?)\\)$",
-"Alarm on the RadiaCode: ${1} µSv/h (limit ${2})",
+"Alarm on the RC102: ${1} µSv/h (limit ${2})",
 [
 "Alarme no RadiaCode: ",
 " µSv/h (limite "
@@ -5095,6 +5671,14 @@ const I18N_EN = {
 [
 "a partir de ",
 " CPM (limite operacional)"
+]
+],
+[
+"GMC-800 e RC102 fora do cálculo desde ",
+"^GMC\\-800 e RC102 fora do cálculo desde ((?:(?! · ).)+?)$",
+"GMC-800 and RC102 out of the calculation since ${1}",
+[
+"GMC-800 e RC102 fora do cálculo desde "
 ]
 ],
 [
@@ -5196,7 +5780,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode$",
-"${1}% · ${2} of ${3} min with RadiaCode readings",
+"${1}% · ${2} of ${3} min with RC102 readings",
 [
 "% · ",
 " de ",
@@ -5250,9 +5834,19 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 conectado (",
+"^RC102 conectado \\(((?:(?! · ).)+?)\\) · ((?:(?! · ).)+?) ((?:(?! · ).)+?) · firmware ((?:(?! · ).)+?)$",
+"RC102 connected (${1}) · ${2} ${3} · firmware ${4}",
+[
+"RC102 conectado (",
+") · ",
+" · firmware "
+]
+],
+[
 "RadiaCode: espectro para a medição: ",
 "^RadiaCode: espectro para a medição: ((?:(?! · ).)+?)$",
-"RadiaCode: spectrum for the measurement: ${1}",
+"RC102: spectrum for the measurement: ${1}",
 [
 "RadiaCode: espectro para a medição: "
 ]
@@ -5288,7 +5882,7 @@ const I18N_EN = {
 [
 "RadiaCode simulado ligado (",
 "^RadiaCode simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
-"Simulated RadiaCode on (${1} µSv/h)",
+"Simulated RC102 on (${1} µSv/h)",
 [
 "RadiaCode simulado ligado (",
 " µSv/h)"
@@ -5300,6 +5894,14 @@ const I18N_EN = {
 "Accumulated dose on the device now: ${1}.",
 [
 "Dose acumulada no aparelho agora: "
+]
+],
+[
+"RC102 sem conexão, a memória trouxe ",
+"^RC102 sem conexão, a memória trouxe ((?:(?! · ).)+?)$",
+"RC102 disconnected, the memory brought ${1}",
+[
+"RC102 sem conexão, a memória trouxe "
 ]
 ],
 [
@@ -5369,6 +5971,26 @@ const I18N_EN = {
 "${1}% below your normal at home (${2})",
 [
 "% abaixo do seu normal em casa ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): RC102 ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?) CPM\\)$",
+"${1}: RC102 ${2} · GMC-800 ${3} µSv/h (${4} CPM)",
+[
+": RC102 ",
+" · GMC-800 ",
+" µSv/h (",
+" CPM)"
+]
+],
+[
+"Alarme no RC102: ",
+"^Alarme no RC102: ((?:(?! · ).)+?) µSv/h \\(limite ((?:(?! · ).)+?)\\)$",
+"Alarm on the RC102: ${1} µSv/h (limit ${2})",
+[
+"Alarme no RC102: ",
+" µSv/h (limite "
 ]
 ],
 [
@@ -5577,7 +6199,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) min com leitura do RadiaCode$",
-"${1}% · ${2} min with RadiaCode readings",
+"${1}% · ${2} min with RC102 readings",
 [
 "% · ",
 " min com leitura do RadiaCode"
@@ -5585,8 +6207,18 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RC102$",
+"${1}% · ${2} of ${3} min with RC102 readings",
+[
+"% · ",
+" de ",
+" min com leitura do RC102"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RadiaCode$",
-"${1} of ${2} min with RadiaCode readings",
+"${1} of ${2} min with RC102 readings",
 [
 " de ",
 " min com leitura do RadiaCode"
@@ -5603,7 +6235,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) · RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
-"${1} · RadiaCode ${2} · GMC-800 ${3} · ceiling ${4}",
+"${1} · RC102 ${2} · GMC-800 ${3} · ceiling ${4}",
 [
 " · RadiaCode ",
 " · GMC-800 ",
@@ -5613,7 +6245,7 @@ const I18N_EN = {
 [
 "Com você em ",
 "^Com você em ((?:(?! · ).)+?) µSv/h pelo RadiaCode$",
-"With you at ${1} µSv/h by the RadiaCode",
+"With you at ${1} µSv/h by the RC102",
 [
 "Com você em ",
 " µSv/h pelo RadiaCode"
@@ -5709,6 +6341,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102: espectro para a medição: ",
+"^RC102: espectro para a medição: ((?:(?! · ).)+?)$",
+"RC102: spectrum for the measurement: ${1}",
+[
+"RC102: espectro para a medição: "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)% do seu normal\\)$",
 "average ${1} µSv/h (${2}% vs. your normal)",
@@ -5738,6 +6378,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 simulado ligado (",
+"^RC102 simulado ligado \\(((?:(?! · ).)+?) µSv/h\\)$",
+"Simulated RC102 on (${1} µSv/h)",
+[
+"RC102 simulado ligado (",
+" µSv/h)"
+]
+],
+[
 "Com você em ",
 "^Com você em ((?:(?! · ).)+?) µSv/h pelo GMC\\-800$",
 "With you at ${1} µSv/h by the GMC-800",
@@ -5749,7 +6398,7 @@ const I18N_EN = {
 [
 "RadiaCode fora do cálculo desde ",
 "^RadiaCode fora do cálculo desde ((?:(?! · ).)+?)$",
-"RadiaCode out of the calculation since ${1}",
+"RC102 out of the calculation since ${1}",
 [
 "RadiaCode fora do cálculo desde "
 ]
@@ -5930,7 +6579,7 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
-"RadiaCode ${1} · GMC-800 ${2} · ceiling ${3}",
+"RC102 ${1} · GMC-800 ${2} · ceiling ${3}",
 [
 "RadiaCode ",
 " · GMC-800 ",
@@ -5967,7 +6616,7 @@ const I18N_EN = {
 [
 "O RadiaCode ficou ",
 "^O RadiaCode ficou ((?:(?! · ).)+?) sem conexão$",
-"The RadiaCode was disconnected for ${1}",
+"The RC102 was disconnected for ${1}",
 [
 "O RadiaCode ficou ",
 " sem conexão"
@@ -6071,6 +6720,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% · ((?:(?! · ).)+?) min com leitura do RC102$",
+"${1}% · ${2} min with RC102 readings",
+[
+"% · ",
+" min com leitura do RC102"
+]
+],
+[
 "≈ ",
 "^≈ ((?:(?! · ).)+?) µSv/h · sobe ((?:(?! · ).)+?); sem chuva, ((?:(?! · ).)+?)$",
 "≈ ${1} µSv/h · rises ${2}; without rain, ${3}",
@@ -6117,6 +6775,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) min com leitura do RC102$",
+"${1} of ${2} min with RC102 readings",
+[
+" de ",
+" min com leitura do RC102"
+]
+],
+[
 "Primeiro dado do GMC-800: ",
 "^Primeiro dado do GMC\\-800: ((?:(?! · ).)+?)\\.$",
 "First GMC-800 reading: ${1}.",
@@ -6125,12 +6792,31 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · RC102 ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
+"${1} · RC102 ${2} · GMC-800 ${3} · ceiling ${4}",
+[
+" · RC102 ",
+" · GMC-800 ",
+" · teto "
+]
+],
+[
 "Casa em ",
 "^Casa em ((?:(?! · ).)+?) µSv/h pelo RadiaCode$",
-"Home at ${1} µSv/h by the RadiaCode",
+"Home at ${1} µSv/h by the RC102",
 [
 "Casa em ",
 " µSv/h pelo RadiaCode"
+]
+],
+[
+"Com você em ",
+"^Com você em ((?:(?! · ).)+?) µSv/h pelo RC102$",
+"With you at ${1} µSv/h by the RC102",
+[
+"Com você em ",
+" µSv/h pelo RC102"
 ]
 ],
 [
@@ -6147,6 +6833,14 @@ const I18N_EN = {
 "the device memory brought ${1}",
 [
 "a memória do aparelho trouxe "
+]
+],
+[
+"Radiacode 102 conectado pelo ",
+"^Radiacode 102 conectado pelo ((?:(?! · ).)+?)$",
+"Radiacode 102 connected via ${1}",
+[
+"Radiacode 102 conectado pelo "
 ]
 ],
 [
@@ -6229,7 +6923,7 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?)% abaixo do normal$",
-"RadiaCode ${1}% below normal",
+"RC102 ${1}% below normal",
 [
 "RadiaCode ",
 "% abaixo do normal"
@@ -6242,6 +6936,14 @@ const I18N_EN = {
 [
 "Casa em ",
 " µSv/h pelo GMC-800"
+]
+],
+[
+"RC102 fora do cálculo desde ",
+"^RC102 fora do cálculo desde ((?:(?! · ).)+?)$",
+"RC102 out of the calculation since ${1}",
+[
+"RC102 fora do cálculo desde "
 ]
 ],
 [
@@ -6369,7 +7071,7 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?)% acima do normal$",
-"RadiaCode ${1}% above normal",
+"RC102 ${1}% above normal",
 [
 "RadiaCode ",
 "% acima do normal"
@@ -6378,7 +7080,7 @@ const I18N_EN = {
 [
 "com o RadiaCode, coleta de ",
 "^com o RadiaCode, coleta de ((?:(?! · ).)+?)$",
-"with the RadiaCode, collection of ${1}",
+"with the RC102, collection of ${1}",
 [
 "com o RadiaCode, coleta de "
 ]
@@ -6494,7 +7196,7 @@ const I18N_EN = {
 [
 "Sua dose no RadiaCode (",
 "^Sua dose no RadiaCode \\(((?:(?! · ).)+?)\\)$",
-"Your dose on the RadiaCode (${1})",
+"Your dose on the RC102 (${1})",
 [
 "Sua dose no RadiaCode ("
 ]
@@ -6525,6 +7227,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 ",
+"^RC102 ((?:(?! · ).)+?) · GMC\\-800 ((?:(?! · ).)+?) · teto ((?:(?! · ).)+?)$",
+"RC102 ${1} · GMC-800 ${2} · ceiling ${3}",
+[
+"RC102 ",
+" · GMC-800 ",
+" · teto "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) σ acima do nível de fundo$",
 "${1} σ above your background",
@@ -6539,6 +7251,15 @@ const I18N_EN = {
 [
 "Alarme: ",
 " µSv/h (limite "
+]
+],
+[
+"O RC102 ficou ",
+"^O RC102 ficou ((?:(?! · ).)+?) sem conexão$",
+"The RC102 was disconnected for ${1}",
+[
+"O RC102 ficou ",
+" sem conexão"
 ]
 ],
 [
@@ -6629,7 +7350,7 @@ const I18N_EN = {
 [
 "RadiaCode conectado pelo ",
 "^RadiaCode conectado pelo ((?:(?! · ).)+?)$",
-"RadiaCode connected via ${1}",
+"RC102 connected via ${1}",
 [
 "RadiaCode conectado pelo "
 ]
@@ -6765,6 +7486,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Casa em ",
+"^Casa em ((?:(?! · ).)+?) µSv/h pelo RC102$",
+"Home at ${1} µSv/h by the RC102",
+[
+"Casa em ",
+" µSv/h pelo RC102"
+]
+],
+[
 "a última leitura boa (",
 "^a última leitura boa \\(((?:(?! · ).)+?)\\)$",
 "the last good reading (${1})",
@@ -6851,7 +7581,7 @@ const I18N_EN = {
 [
 "RadiaCode desconectado: ",
 "^RadiaCode desconectado: ((?:(?! · ).)+?)$",
-"RadiaCode disconnected: ${1}",
+"RC102 disconnected: ${1}",
 [
 "RadiaCode desconectado: "
 ]
@@ -6897,6 +7627,15 @@ const I18N_EN = {
 [
 "sem leitura por ",
 " no meio"
+]
+],
+[
+"RC102 ",
+"^RC102 ((?:(?! · ).)+?)% abaixo do normal$",
+"RC102 ${1}% below normal",
+[
+"RC102 ",
+"% abaixo do normal"
 ]
 ],
 [
@@ -6954,7 +7693,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) no RadiaCode: pico de ((?:(?! · ).)+?)$",
-"${1} on the RadiaCode: peak of ${2}",
+"${1} on the RC102: peak of ${2}",
 [
 " no RadiaCode: pico de "
 ]
@@ -6994,7 +7733,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) registros do RadiaCode$",
-"${1} RadiaCode records",
+"${1} RC102 records",
 [
 " registros do RadiaCode"
 ]
@@ -7015,6 +7754,15 @@ const I18N_EN = {
 [
 "Casa ",
 "% abaixo do normal"
+]
+],
+[
+"RC102 ",
+"^RC102 ((?:(?! · ).)+?)% acima do normal$",
+"RC102 ${1}% above normal",
+[
+"RC102 ",
+"% acima do normal"
 ]
 ],
 [
@@ -7040,6 +7788,14 @@ const I18N_EN = {
 [
 "Usar ",
 " a partir de agora"
+]
+],
+[
+"com o RC102, coleta de ",
+"^com o RC102, coleta de ((?:(?! · ).)+?)$",
+"with the RC102, collection of ${1}",
+[
+"com o RC102, coleta de "
 ]
 ],
 [
@@ -7121,6 +7877,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Sua dose no RC102 (",
+"^Sua dose no RC102 \\(((?:(?! · ).)+?)\\)$",
+"Your dose on the RC102 (${1})",
+[
+"Sua dose no RC102 ("
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) · média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
 "${1} · average ${2} · max ${3} µSv/h",
@@ -7193,7 +7957,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) no RadiaCode \\(demo\\)$",
-"${1} on the RadiaCode (demo)",
+"${1} on the RC102 (demo)",
 [
 " no RadiaCode (demo)"
 ]
@@ -7235,7 +7999,7 @@ const I18N_EN = {
 [
 "· RadiaCode média ",
 "^· RadiaCode média ((?:(?! · ).)+?) CPM$",
-"· RadiaCode average ${1} CPM",
+"· RC102 average ${1} CPM",
 [
 "· RadiaCode média ",
 " CPM"
@@ -7347,6 +8111,14 @@ const I18N_EN = {
 [
 " CPM (",
 " min até "
+]
+],
+[
+"RC102 conectado pelo ",
+"^RC102 conectado pelo ((?:(?! · ).)+?)$",
+"RC102 connected via ${1}",
+[
+"RC102 conectado pelo "
 ]
 ],
 [
@@ -7489,7 +8261,7 @@ const I18N_EN = {
 [
 "GMC-800 ",
 "^GMC\\-800 ((?:(?! · ).)+?), RadiaCode ((?:(?! · ).)+?)$",
-"GMC-800 ${1}, RadiaCode ${2}",
+"GMC-800 ${1}, RC102 ${2}",
 [
 "GMC-800 ",
 ", RadiaCode "
@@ -7571,6 +8343,14 @@ const I18N_EN = {
 [
 "chuva ",
 " mm (modelo)"
+]
+],
+[
+"RC102 desconectado: ",
+"^RC102 desconectado: ((?:(?! · ).)+?)$",
+"RC102 disconnected: ${1}",
+[
+"RC102 desconectado: "
 ]
 ],
 [
@@ -7802,15 +8582,23 @@ const I18N_EN = {
 [
 "RadiaCode agora: ",
 "^RadiaCode agora: ((?:(?! · ).)+?)\\.$",
-"RadiaCode now: ${1}.",
+"RC102 now: ${1}.",
 [
 "RadiaCode agora: "
 ]
 ],
 [
 "",
+"^((?:(?! · ).)+?) no RC102: pico de ((?:(?! · ).)+?)$",
+"${1} on the RC102: peak of ${2}",
+[
+" no RC102: pico de "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) agora no RadiaCode$",
-"${1} now on the RadiaCode",
+"${1} now on the RC102",
 [
 " agora no RadiaCode"
 ]
@@ -7818,7 +8606,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) µSv/h no RadiaCode$",
-"${1} µSv/h on the RadiaCode",
+"${1} µSv/h on the RC102",
 [
 " µSv/h no RadiaCode"
 ]
@@ -7901,6 +8689,14 @@ const I18N_EN = {
 "GMC calibration: ${1}",
 [
 "Calibração do GMC: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registros do RC102$",
+"${1} RC102 records",
+[
+" registros do RC102"
 ]
 ],
 [
@@ -8076,7 +8872,7 @@ const I18N_EN = {
 [
 "RadiaCode ÷ GMC = ",
 "^RadiaCode ÷ GMC = ((?:(?! · ).)+?)$",
-"RadiaCode ÷ GMC = ${1}",
+"RC102 ÷ GMC = ${1}",
 [
 "RadiaCode ÷ GMC = "
 ]
@@ -8134,6 +8930,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) no RC102 \\(demo\\)$",
+"${1} on the RC102 (demo)",
+[
+" no RC102 (demo)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) µSv/h em média · ((?:(?! · ).)+?)$",
 "${1} µSv/h on average · ${2}",
 [
@@ -8154,6 +8958,15 @@ const I18N_EN = {
 "out of the calculation · ${1}",
 [
 "fora do cálculo · "
+]
+],
+[
+"· RC102 média ",
+"^· RC102 média ((?:(?! · ).)+?) CPM$",
+"· RC102 average ${1} CPM",
+[
+"· RC102 média ",
+" CPM"
 ]
 ],
 [
@@ -8381,6 +9194,15 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 ",
+"^GMC\\-800 ((?:(?! · ).)+?), RC102 ((?:(?! · ).)+?)$",
+"GMC-800 ${1}, RC102 ${2}",
+[
+"GMC-800 ",
+", RC102 "
+]
+],
+[
 "sem contagens há ",
 "^sem contagens há ((?:(?! · ).)+?)$",
 "no counts for ${1}",
@@ -8536,7 +9358,7 @@ const I18N_EN = {
 [
 "RadiaCode média ",
 "^RadiaCode média ((?:(?! · ).)+?)$",
-"RadiaCode average ${1}",
+"RC102 average ${1}",
 [
 "RadiaCode média "
 ]
@@ -8544,7 +9366,7 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) µSv/h$",
-"RadiaCode ${1} µSv/h",
+"RC102 ${1} µSv/h",
 [
 "RadiaCode ",
 " µSv/h"
@@ -8799,6 +9621,30 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 agora: ",
+"^RC102 agora: ((?:(?! · ).)+?)\\.$",
+"RC102 now: ${1}.",
+[
+"RC102 agora: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) agora no RC102$",
+"${1} now on the RC102",
+[
+" agora no RC102"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h no RC102$",
+"${1} µSv/h on the RC102",
+[
+" µSv/h no RC102"
+]
+],
+[
 "nível de fundo ",
 "^nível de fundo ((?:(?! · ).)+?)$",
 "your background ${1}",
@@ -8867,7 +9713,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) pelo RadiaCode$",
-"${1} by the RadiaCode",
+"${1} by the RC102",
 [
 " pelo RadiaCode"
 ]
@@ -8971,6 +9817,14 @@ const I18N_EN = {
 "valid for ${1} more",
 [
 "vale por mais "
+]
+],
+[
+"RC102 ÷ GMC = ",
+"^RC102 ÷ GMC = ((?:(?! · ).)+?)$",
+"RC102 ÷ GMC = ${1}",
+[
+"RC102 ÷ GMC = "
 ]
 ],
 [
@@ -9300,7 +10154,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) no RadiaCode$",
-"${1} on the RadiaCode",
+"${1} on the RC102",
 [
 " no RadiaCode"
 ]
@@ -9473,6 +10327,23 @@ const I18N_EN = {
 "connected · ${1}",
 [
 "conectado · "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?)$",
+"RC102 average ${1}",
+[
+"RC102 média "
+]
+],
+[
+"RC102 ",
+"^RC102 ((?:(?! · ).)+?) µSv/h$",
+"RC102 ${1} µSv/h",
+[
+"RC102 ",
+" µSv/h"
 ]
 ],
 [
@@ -9755,6 +10626,14 @@ const I18N_EN = {
 "slope ${1}",
 [
 "inclinação "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) pelo RC102$",
+"${1} by the RC102",
+[
+" pelo RC102"
 ]
 ],
 [
@@ -10219,6 +11098,14 @@ const I18N_EN = {
 "${1} (this one)",
 [
 " (esta)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no RC102$",
+"${1} on the RC102",
+[
+" no RC102"
 ]
 ],
 [

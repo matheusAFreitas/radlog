@@ -70,7 +70,7 @@ type DemoState struct {
 	Active    bool    `json:"active"`
 	CPM       float64 `json:"cpm"`
 	Realistic bool    `json:"realistic"` // varia como contagem de verdade
-	// RadiaCode simulado (2.14)
+	// Radiacode simulado (2.14)
 	Rc    bool    `json:"rc"`
 	RcUSv float64 `json:"rcUSv"`
 }

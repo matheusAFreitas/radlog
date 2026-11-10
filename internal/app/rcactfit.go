@@ -5,14 +5,14 @@ import (
 	"sort"
 )
 
-// ---------- atividade (Bq) com o RadiaCode: física e ajuste dos picos ----------
+// ---------- atividade (Bq) com o Radiacode: física e ajuste dos picos ----------
 //
 // Atividade de uma linha gama: A = N / (ε · y · t), com N as contagens do
 // pico (amostra − fundo no mesmo tempo), ε a eficiência do aparelho naquela
 // energia e naquela posição (o que a calibração mede), y a fração de
 // decaimentos que solta aquele gama e t o tempo.
 //
-// No cristal do RadiaCode os picos são largos (~10% em 662 keV) e linhas
+// No cristal do Radiacode os picos são largos (~10% em 662 keV) e linhas
 // vizinhas se misturam (583 do tório e 609 do rádio, 338 e 352…). Por isso
 // cada região é ajustada com gaussianas de posição e largura conhecidas (uma
 // por linha da região) mais uma reta: com posição e largura fixas o ajuste é

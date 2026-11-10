@@ -58,7 +58,7 @@ type HomeBg struct {
 	To      int64   `json:"to"`
 	Why     string  `json:"why"` // por que não dá (OK = false)
 	Demo    bool    `json:"demo"`
-	// µSv/h do fundo (RadiaCode: média do aparelho; GMC: pela calibração)
+	// µSv/h do fundo (Radiacode: média do aparelho; GMC: pela calibração)
 	USv    float64 `json:"usv"`
 	Device string  `json:"device"`
 }
@@ -213,7 +213,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		o.Mode = ""
 	}
 	if o.Mode == "ambos" {
-		dev = devRC // o RadiaCode comanda (conta muito mais, decide antes)
+		dev = devRC // o RC102 comanda (conta muito mais, decide antes)
 	}
 	var side *MeasureSide
 	if o.Mode != "" {
@@ -229,12 +229,12 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 			return a.GetMeasure(), errors.New("fundo da casa indisponível: " + hb.Why)
 		}
 	}
-	// RadiaCode: espectro no começo (e o acumulado, que serve de fundo da casa)
+	// Radiacode: espectro no começo (e o acumulado, que serve de fundo da casa)
 	var spec0 *radiacode.Spectrum
 	var specBg *MeasureSpectrum
 	if dev == "radiacode" {
 		if !a.rcConnected() {
-			return a.GetMeasure(), errors.New("conecte o RadiaCode para medir")
+			return a.GetMeasure(), errors.New("conecte o RC102 para medir")
 		}
 		spec0 = a.rcSpectrumNow(false)
 		if o.HomeBg {

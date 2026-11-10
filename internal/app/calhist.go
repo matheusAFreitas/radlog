@@ -33,7 +33,7 @@ type CalVersion struct {
 	Since  int64          `json:"desde"` // ms; 0 = desde o começo
 	Points []gmc.CalPoint `json:"pontos"`
 	// Factor é o µSv/h por CPM no fundo informado à mão (ex.: comparando
-	// com o RadiaCode); a curva do contador é escalada para ele. 0 = a
+	// com o Radiacode); a curva do contador é escalada para ele. 0 = a
 	// curva do contador como ela é.
 	Factor float64 `json:"fator,omitempty"`
 	Source string  `json:"origem"` // "contador", "você", "início"
@@ -361,7 +361,7 @@ func (a *App) setGMCFactor(k float64, source, note string) error {
 	if k == 0 {
 		a.logEvent("Calibração do GMC: voltou à curva do contador (vale a partir de agora)")
 	} else if source == srcIntercal {
-		a.logEvent(fmt.Sprintf("Calibração do GMC: %s µSv/h por CPM no fundo, pela intercalibração com o RadiaCode (vale a partir de agora)", fmtBR(k, 5)))
+		a.logEvent(fmt.Sprintf("Calibração do GMC: %s µSv/h por CPM no fundo, pela intercalibração com o RC102 (vale a partir de agora)", fmtBR(k, 5)))
 	} else {
 		a.logEvent(fmt.Sprintf("Calibração do GMC: %s µSv/h por CPM no fundo, informado à mão (vale a partir de agora)", fmtBR(k, 5)))
 	}

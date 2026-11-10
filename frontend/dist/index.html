@@ -65,8 +65,8 @@
     <button type="button" data-view="fora"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11.5 8.5 6l6.5 5.5"/><path d="M4 10v10h8"/><path d="M14.5 16H22M19 13l3 3-3 3"/></svg><span>Fora de casa</span></button>
     <button type="button" data-view="chuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Chuva</span></button>
     <span class="side-group">Aparelhos</span>
-    <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
-    <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>RadiaCode</span><span class="side-dot" id="navRcDot" hidden></span></button>
+    <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
+    <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
   </nav>
   <span class="side-fill"></span>
   <div class="side-tools">
@@ -106,7 +106,7 @@
     <span class="mini-sec mono" id="miniGSec"></span><span class="mini-state" id="miniGState"></span>
   </button>
   <button type="button" class="mini-dev mini-rc" id="miniR" title="Voltar aos quadros" hidden>
-    <span class="dot" id="miniRDot" aria-hidden="true"></span><span class="mini-name">RadiaCode</span>
+    <span class="dot" id="miniRDot" aria-hidden="true"></span><span class="mini-name">RC102</span>
     <span class="mini-val mono" id="miniRVal">—</span><span class="mini-unit" id="miniRUnit">µSv/h</span>
     <span class="mini-sec mono" id="miniRSec"></span><span class="mini-state" id="miniRState"></span>
   </button>
@@ -148,12 +148,12 @@
       <p class="small mono" id="demoRealLine">Leitura real: —</p>
     </div>
     <div class="demo-controls demo-rc">
-      <label class="toggle"><span><strong>Simular o RadiaCode</strong> · quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando</span><input type="checkbox" id="demoRcOn"></label>
+      <label class="toggle"><span><strong>Simular o RC102</strong> · quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando</span><input type="checkbox" id="demoRcOn"></label>
       <div class="demo-rc-ctl" id="demoRcCtl" hidden>
-        <label for="demoRcUSv">Valor simulado do RadiaCode (µSv/h)</label>
+        <label for="demoRcUSv">Valor simulado do RC102 (µSv/h)</label>
         <div class="row">
           <input type="number" id="demoRcUSv" min="0" max="10000" step="0.01" inputmode="decimal">
-          <input type="range" id="demoRcSlider" min="0" max="100" step="1" aria-label="Valor simulado do RadiaCode em escala logarítmica">
+          <input type="range" id="demoRcSlider" min="0" max="100" step="1" aria-label="Valor simulado do RC102 em escala logarítmica">
         </div>
         <div class="row presets" id="demoRcPresets"></div>
       </div>
@@ -182,7 +182,7 @@
     </article>
     <article class="inst inst-rc" id="rTile" hidden>
       <header class="inst-head">
-        <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">RadiaCode</span></button>
+        <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">Radiacode 102</span></button>
         <span class="inst-fill"></span>
       </header>
       <div class="inst-read" data-view="radiacode">
@@ -216,13 +216,13 @@
   <section class="card wh-card" id="whCard">
     <div class="wh-head">
       <h2>Onde está cada aparelho <span class="chip off" id="whChip" hidden></span></h2>
-      <span class="small muted">o normal: GMC-800 em casa, RadiaCode com você</span>
+      <span class="small muted">o normal: GMC-800 em casa, RC102 com você</span>
     </div>
     <div class="wh-rows">
-      <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
+      <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GQ GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
         <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
-      <div class="wh-row"><div class="t"><b><span class="dot rc"></span>RadiaCode</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>
-        <div class="seg loc" role="group" aria-label="Onde está o RadiaCode" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+      <div class="wh-row"><div class="t"><b><span class="dot rc"></span>Radiacode 102</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>
+        <div class="seg loc" role="group" aria-label="Onde está o RC102" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
     </div>
     <div id="whSuggest"></div>
     <div class="wh-sheet" id="whSheet" hidden>
@@ -293,7 +293,7 @@
         <div class="chart-ctrls">
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
           <button type="button" data-cunit="usv" aria-pressed="true">µSv/h</button>
-          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes">CPM (análise)</button>
+          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes">CPM (análise)</button>
         </div>
         </div>
       </div>
@@ -321,10 +321,10 @@
           </div>
           <div class="x-axis mono"><span id="x0"></span><span id="x1"></span><span id="x2"></span></div>
         </div>
-        <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RadiaCode"><span></span><span></span><span></span><span></span></div>
+        <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RC102"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RC102</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
     </section>
 
@@ -376,7 +376,7 @@
         </div>
       </div>
       <div class="legend small muted dose-legend">
-        <span class="key"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="doseKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="sr-only" id="doseKeyTxt"></span>
+        <span class="key"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="doseKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RC102</span><span class="sr-only" id="doseKeyTxt"></span>
         <span class="key"><span class="swatch sw-bg" aria-hidden="true"></span>só o fundo natural</span>
         <span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span><span id="doseKeyCeil">teto (fundo + limite)</span></span>
         <span class="key" id="doseKeyCeil2" hidden><span class="swatch sw-ceil2" aria-hidden="true"></span><span id="doseKeyCeil2Txt"></span></span>
@@ -396,7 +396,7 @@
         <div class="heat-ctrl">
         <div class="seg" role="group" aria-label="Aparelho do mapa" id="heatDevSeg" hidden>
           <button type="button" data-hdev="" aria-pressed="true">GMC-800</button>
-          <button type="button" data-hdev="radiacode" aria-pressed="false">RadiaCode</button>
+          <button type="button" data-hdev="radiacode" aria-pressed="false">RC102</button>
         </div>
         <div class="seg" role="group" aria-label="Dias no mapa" id="heatSeg">
           <button type="button" data-hdays="7" aria-pressed="false">7 dias</button>
@@ -439,7 +439,7 @@
     <span class="ht-lbl small muted">Dose acumulada (µSv), cada aparelho a sua</span>
     <div class="ht-plot"><div class="ht-y mono" id="htDoseY"></div><svg id="htDose" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Dose acumulada de cada aparelho no trecho"></svg></div>
     <div class="ht-x-axis mono"><span id="htX0"></span><span id="htX1"></span><span id="htX2"></span></div>
-    <div class="legend small muted"><span class="key" id="htKeyGmc"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RadiaCode</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
+    <div class="legend small muted"><span class="key" id="htKeyGmc"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RC102</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
   </section>
   <section class="card view-graficos" id="patCard" role="tabpanel" data-subpane="padroes" hidden>
       <div class="chart-head">
@@ -450,7 +450,7 @@
         <div class="heat-ctrl">
           <div class="seg" role="group" aria-label="Aparelho dos padrões" id="patDevSeg" hidden>
             <button type="button" data-pdev="" aria-pressed="true">GMC-800</button>
-            <button type="button" data-pdev="radiacode" aria-pressed="false">RadiaCode</button>
+            <button type="button" data-pdev="radiacode" aria-pressed="false">RC102</button>
           </div>
           <div class="seg" role="group" aria-label="Janela dos padrões" id="patSeg">
             <button type="button" data-pdays="30" aria-pressed="false">30 dias</button>
@@ -605,11 +605,11 @@
       <div class="dlg-head">
         <h2 id="alertsTitle">Histórico de alertas</h2>
       </div>
-      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
+      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
       <div class="alerts-tools">
         <div class="seg" role="group" aria-label="Aparelho dos alertas" id="alertDevFilter">
           <button type="button" data-adev="" aria-pressed="true">Os dois</button>
-          <button type="button" data-adev="radiacode" aria-pressed="false">RadiaCode</button>
+          <button type="button" data-adev="radiacode" aria-pressed="false">RC102</button>
           <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
         </div>
         <div class="seg" role="group" aria-label="Filtrar alertas" id="alertFilter">
@@ -669,7 +669,7 @@
         <div>
           <label for="mDev">Aparelho</label>
           <select id="mDev">
-            <option value="radiacode">RadiaCode (com espectro)</option>
+            <option value="radiacode">RC102 (com espectro)</option>
             <option value="gmc">GMC-800</option>
             <option value="ambos">Os dois perto do objeto</option>
             <option value="voce">Um no objeto, outro com você</option>
@@ -678,8 +678,8 @@
         <div id="mObjDevBox" hidden>
           <label for="mObjDev">Qual fica no objeto</label>
           <select id="mObjDev">
-            <option value="gmc">GMC-800 no objeto, RadiaCode com você</option>
-            <option value="radiacode">RadiaCode no objeto, GMC-800 com você</option>
+            <option value="gmc">GMC-800 no objeto, RC102 com você</option>
+            <option value="radiacode">RC102 no objeto, GMC-800 com você</option>
           </select>
         </div>
         <div>
@@ -832,7 +832,7 @@
       <div class="dlg-head">
         <div>
           <h2 id="periodsTitle">Fora de casa</h2>
-          <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
+          <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RC102 com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
         </div>
         <button type="button" class="btn small" id="btnPeriodAdd">Adicionar trecho passado</button>
       </div>
@@ -857,7 +857,7 @@
         </div>
       </div>
       <div class="seg ri-dev" role="group" aria-label="Aparelho da conta da chuva" id="riDevSeg">
-        <button type="button" data-ridev="radiacode" aria-pressed="false">RadiaCode</button>
+        <button type="button" data-ridev="radiacode" aria-pressed="false">RC102</button>
         <button type="button" data-ridev="gmc" aria-pressed="false">GMC-800</button>
       </div>
       <div>
@@ -896,7 +896,7 @@
         <div class="reading">
           <div class="read-head">
             <div class="read-main">
-              <span class="eyebrow"><span id="heroEyebrow">GMC-800</span><span class="rc-main-via gmc-via mono" id="heroVia"></span> <span class="demo-tag" id="demoTag" hidden>demo</span></span><span class="hero-clock" id="heroClock"></span>
+              <span class="eyebrow"><span id="heroEyebrow">GQ GMC-800</span><span class="rc-main-via gmc-via mono" id="heroVia"></span> <span class="demo-tag" id="demoTag" hidden>demo</span></span><span class="hero-clock" id="heroClock"></span>
               <div class="value-row">
                 <span class="value" id="readValue">—</span>
                 <span class="unit" id="readUnit">CPM</span>
@@ -957,7 +957,7 @@
     </section>
 </div>
 <div class="page" id="pageRadiacode" hidden>
-  <nav class="subtabs" role="tablist" aria-label="RadiaCode" data-page="radiacode">
+  <nav class="subtabs" role="tablist" aria-label="RC102" data-page="radiacode">
     <button type="button" role="tab" data-sub="agora" aria-selected="true">Agora</button>
     <button type="button" role="tab" data-sub="espectro" aria-selected="false" tabindex="-1">Espectro</button>
     <button type="button" role="tab" data-sub="espectrograma" aria-selected="false" tabindex="-1">Espectrograma</button>
@@ -971,7 +971,7 @@
         <div class="reading">
         <div class="read-head">
           <div class="read-main">
-            <span class="eyebrow">RadiaCode <span class="rc-main-via mono" id="rcMainVia"></span></span>
+            <span class="eyebrow">Radiacode 102 <span class="rc-main-via mono" id="rcMainVia"></span></span>
             <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
           </div>
           <div class="hero-spark" aria-hidden="true"><svg id="rHeroSpark" viewBox="0 0 160 40" preserveAspectRatio="none"><polyline points=""/></svg><span class="tile-sub">última hora</span></div>
@@ -987,7 +987,7 @@
         <span class="sigma" id="rcMainSigma" hidden></span>
         <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
         </div>
-        <div class="seg" role="group" aria-label="Unidade do RadiaCode" id="rcUnitSeg">
+        <div class="seg" role="group" aria-label="Unidade do RC102" id="rcUnitSeg">
           <button type="button" data-unit="cpm" aria-pressed="false">CPM</button>
           <button type="button" data-unit="usv" aria-pressed="true">µSv/h</button>
           <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
@@ -998,7 +998,7 @@
       <div class="hero-dial">
         <svg class="dev-dial" id="rHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
         <div class="hero-dial-state" id="rHeroState">—</div>
-        <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint">alarmes do RadiaCode</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
+        <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint">alarmes do RC102</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
       <div class="rc-mini">
         <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
@@ -1011,7 +1011,7 @@
       <div class="view-body">
       <div class="dlg-head">
         <div>
-          <h2>RadiaCode</h2>
+          <h2>Radiacode 102</h2>
           <span class="mono muted small" id="rcSub">procurando no USB…</span>
         </div>
       </div>
@@ -1049,7 +1049,7 @@
         <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
         <p id="rcSpecDesc">Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
         <div class="rc-ctrl">
-          <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RadiaCode"></div>
+          <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RC102"></div>
           <div class="seg rc-seg" id="rcSpecMode" aria-label="Qual espectro" hidden><button type="button" data-m="agora" aria-pressed="true">Desde o Recomeçar</button><button type="button" data-m="acc" aria-pressed="false">Acumulado do aparelho</button></div>
         </div>
         <div class="rc-ctrl">
@@ -1100,7 +1100,7 @@
       <div class="subpane" role="tabpanel" data-subpane="log" hidden>
       <article class="rc-card" id="rcLogCard">
         <div class="rc-head"><span class="rc-num mono">4</span><h3>Log</h3><span class="live-tag">do aparelho</span></div>
-        <p>Igual à aba Log do app do celular: a taxa de dose que o RadiaCode manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
+        <p>Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
         <div class="rc-ctrl rc-log-bar">
           <span class="small muted">Mostrar:</span>
           <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
@@ -1110,7 +1110,7 @@
         </div>
         <p class="small" id="rcLogMsg" hidden></p>
         <div class="rc-log-wrap"><table class="rc-log rc-mlog"><thead><tr><th></th><th>data e hora</th><th colspan="2">dados</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
-        <p class="small muted rc-log-empty" id="rcLogEmpty" hidden>Ainda sem registros. Com o RadiaCode conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.</p>
+        <p class="small muted rc-log-empty" id="rcLogEmpty" hidden>Ainda sem registros. Com o RC102 conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.</p>
         <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogMore" hidden>Mostrar mais antigos</button></div>
         <p class="rc-use"><strong>Para você:</strong> no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como "celular", sem repetir o que o PC já tinha.</p>
       </article>
@@ -1119,7 +1119,7 @@
       <div class="subpane" role="tabpanel" data-subpane="busca" hidden>
       <article class="rc-card" id="rcSrCard">
         <div class="rc-head"><span class="rc-num mono">5</span><h3>Modo busca</h3><span id="rcSrSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSrLiveTag" hidden>ao vivo</span></div>
-        <p id="rcSrDesc">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RadiaCode dela.</p>
+        <p id="rcSrDesc">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.</p>
         <div class="rc-search">
           <div class="rc-gauge"><div id="rcGauge"></div><div class="rc-mult mono small" id="rcMult"><span data-m="1">×1</span><span data-m="10">×10</span><span data-m="100">×100</span><span data-m="1000">×1000</span></div></div>
           <div class="rc-search-ctl">
@@ -1141,14 +1141,14 @@
             <p class="mono small rc-info" id="rcSearchInfo"></p>
           </div>
         </div>
-        <p class="rc-use" id="rcSrUse"><strong>Para você:</strong> passar o RadiaCode pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
+        <p class="rc-use" id="rcSrUse"><strong>Para você:</strong> passar o RC102 pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
       </article>
       </div>
 
       <div class="subpane" role="tabpanel" data-subpane="atividade" hidden>
       <article class="rc-card" id="rcActCard">
         <div class="rc-head"><span class="rc-num mono">6</span><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
-        <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RadiaCode enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p>
+        <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p>
         <div class="rc-act-cal" id="rcActCal"></div>
         <div id="rcActForm">
           <div class="seg rc-seg" id="rcActKind" aria-label="Tipo"><button type="button" data-k="amostra" aria-pressed="true">Medir amostra</button><button type="button" data-k="kcl" aria-pressed="false">Calibrar com KCl</button><button type="button" data-k="torio" aria-pressed="false">Calibrar com tório</button></div>
@@ -1179,7 +1179,7 @@
         <div class="rc-plot" id="rcActPlot" hidden><canvas id="rcActSpec" class="rc-canvas"></canvas></div>
         <p class="small muted rc-legend" id="rcActLegend" hidden><span class="lg-samp">amostra</span><span class="lg-bg">fundo</span></p>
         <div id="rcActHist"></div>
-        <p class="small muted">Limites: o cristal do RadiaCode é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.</p>
+        <p class="small muted">Limites: o cristal do RC102 é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.</p>
       </article>
 
       <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>
@@ -1201,7 +1201,7 @@
     <nav class="set-nav" id="setNav" aria-label="Seções das configurações"></nav>
     <div class="set-content" id="setContent">
   <section class="set-sec" data-sec="gmc" hidden>
-    <h2 class="set-sec-title">GMC-800</h2>
+    <h2 class="set-sec-title">GQ GMC-800</h2>
     <div class="set-tabs" role="tablist" aria-label="Partes do GMC-800"></div>
     <div class="set-tab" data-tab="con" hidden>
     <div class="set-cards">
@@ -1334,7 +1334,7 @@
         <button type="button" class="btn" id="calKReset" hidden>Voltar à curva do contador</button>
       </div>
       <p class="small" id="calKHint" hidden></p>
-      <h3 class="sub-head">Intercalibração com o RadiaCode</h3>
+      <h3 class="sub-head">Intercalibração com o RC102</h3>
       <div class="ic" id="icBox"></div>
       <p class="ic-watch" id="icWatch" hidden></p>
       <h3 class="sub-head">Versões</h3>
@@ -1435,14 +1435,14 @@
 
   </section>
   <section class="set-sec" data-sec="rc" hidden>
-    <h2 class="set-sec-title">RadiaCode</h2>
-    <div class="set-tabs" role="tablist" aria-label="Partes do RadiaCode"></div>
+    <h2 class="set-sec-title">Radiacode 102</h2>
+    <div class="set-tabs" role="tablist" aria-label="Partes do RC102"></div>
     <div class="set-tab" data-tab="con" hidden>
     <div class="set-cards">
     <fieldset>
       <legend>Procurar o aparelho</legend>
       <label class="toggle">
-        <span>Procurar o RadiaCode</span>
+        <span>Procurar o RC102</span>
         <input type="checkbox" id="chkRcOn">
       </label>
       <p class="rc-set-state small" id="rcSetState"><span class="dot" id="rcSetDot"></span><span id="rcSetText"></span></p>
@@ -1455,24 +1455,24 @@
       <p class="small muted" id="rcBLEInfo"></p>
       <details class="how">
         <summary>Como funciona</summary>
-        <p class="small muted">O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
+        <p class="small muted">O app procura o RC102 sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
       </details>
     </fieldset>
 
     <fieldset>
-      <legend>RadiaCode saturado</legend>
+      <legend>RC102 saturado</legend>
       <label for="lvRcSat">Fim da escala (µSv/h)</label>
       <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
       <details class="how">
         <summary>Como funciona</summary>
-        <p class="small muted">Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+        <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
       </details>
     </fieldset>
 
     <fieldset>
       <legend>Dados brutos</legend>
       <label class="toggle">
-        <span>Guardar tudo o que o RadiaCode manda (dados brutos)</span>
+        <span>Guardar tudo o que o RC102 manda (dados brutos)</span>
         <input type="checkbox" id="chkRcRaw">
       </label>
       <details class="how">
@@ -1484,9 +1484,9 @@
     </div>
     <div class="set-tab" data-tab="dev" hidden>
     <div class="devcfg rccfg" id="rcCfg">
-      <p class="small muted" id="rcIntro">Conecte o RadiaCode para ver e mudar os ajustes do aparelho.</p>
+      <p class="small muted" id="rcIntro">Conecte o RC102 para ver e mudar os ajustes do aparelho.</p>
       <div class="dc-grid" id="rcCfgBody">
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Alarmes de taxa de dose</legend>
         <div class="rc-pair">
           <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
@@ -1495,11 +1495,11 @@
         <p class="small muted" id="rcDRHint"></p>
         <details class="how">
           <summary>Como funciona</summary>
-          <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.</p>
+          <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RC102 no app usam estes dois números como atenção e alarme.</p>
         </details>
       </fieldset>
 
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Alarmes de dose acumulada</legend>
         <div class="rc-pair">
           <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
@@ -1516,7 +1516,7 @@
         </details>
       </fieldset>
 
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Som e vibração</legend>
         <label class="toggle"><span>Som</span><input type="checkbox" id="rcSoundOn"></label>
         <label class="toggle"><span>Vibração</span><input type="checkbox" id="rcVibroOn"></label>
@@ -1532,7 +1532,7 @@
         </details>
       </fieldset>
 
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Tela do aparelho</legend>
         <label for="rcBrt">Brilho: <span class="mono" id="rcBrtOut"></span></label>
         <input type="range" id="rcBrt" min="0" max="9" step="1">
@@ -1550,7 +1550,7 @@
         </details>
       </fieldset>
 
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Unidades na tela do aparelho</legend>
         <label for="rcUnitDose">Dose</label>
         <select id="rcUnitDose"><option value="1">Sievert (µSv, µSv/h)</option><option value="0">Röntgen (µR, µR/h)</option></select>
@@ -1558,11 +1558,11 @@
         <select id="rcUnitCnt"><option value="0">por segundo (cps)</option><option value="1">por minuto (cpm)</option></select>
         <details class="how">
           <summary>Como funciona</summary>
-          <p class="small muted">Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
+          <p class="small muted">Só muda o que aparece no visor do RC102. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
         </details>
       </fieldset>
 
-      <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
+      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
         <legend>Alarmes de contagem</legend>
         <div class="rc-pair">
           <label>Alarme 1 (cps)<input type="number" id="rcCR1" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
@@ -1573,7 +1573,7 @@
           <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
         </details>
       </fieldset>
-      <fieldset data-dev="RadiaCode" class="dev-card rc ro-card">
+      <fieldset data-dev="RC102" class="dev-card rc ro-card">
         <legend>Só leitura</legend>
         <dl class="info">
           <dt>Calibração de energia</dt><dd class="mono" id="rcEnergy">—</dd>
@@ -1584,7 +1584,7 @@
           <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
         </details>
       </fieldset>
-      <fieldset data-dev="RadiaCode" class="dev-card rc rc-reset-card">
+      <fieldset data-dev="RC102" class="dev-card rc rc-reset-card">
         <legend>Zerar a dose acumulada</legend>
         <p class="small muted">Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.</p>
         <button type="button" class="btn" id="rcResetDose" disabled>Zerar a dose</button>
@@ -1592,13 +1592,13 @@
       </div>
 
 
-      <p class="small muted">Nada vai para o aparelho sem você clicar em "Gravar no RadiaCode". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.</p>
+      <p class="small muted">Nada vai para o aparelho sem você clicar em "Gravar no RC102". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.</p>
       <div class="dc-foot">
         <div class="row">
           <button type="button" class="btn" id="rcUndo" disabled>Desfazer a última gravação</button>
           <button type="button" class="btn" id="rcBackups">Ver cópias</button>
         </div>
-        <button type="button" class="btn accent" id="rcCfgSave" disabled>Gravar no RadiaCode</button>
+        <button type="button" class="btn accent" id="rcCfgSave" disabled>Gravar no RC102</button>
       </div>
 </div>
     </div>
@@ -1641,7 +1641,7 @@
         </div>
       </div>
       <p class="small" id="dangerNote" hidden></p>
-      <p class="small muted">Os três valem para o GMC-800 e para o RadiaCode. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
+      <p class="small muted">Os três valem para o GMC-800 e para o RC102. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
     </fieldset>
 
     <fieldset>
@@ -1670,11 +1670,11 @@
       <p class="small muted">Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:</p>
       <dl class="info">
         <dt>GMC-800</dt><dd class="mono" id="devAlGmc">—</dd>
-        <dt>RadiaCode 1 e 2</dt><dd class="mono" id="devAlRc">—</dd>
+        <dt>RC102 1 e 2</dt><dd class="mono" id="devAlRc">—</dd>
       </dl>
       <div class="row-btns">
         <button type="button" class="link small-link" data-setgo="gmc/dev">Mudar no GMC-800</button>
-        <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RadiaCode</button>
+        <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RC102</button>
       </div>
     </fieldset>
 
@@ -1892,7 +1892,7 @@
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
       </button>
     </div>
-    <p class="small muted">Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.</p>
+    <p class="small muted">Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RC102 e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.</p>
     <div class="seg" id="rgTabs" role="group" aria-label="Taxa ou dose">
       <button type="button" data-rg="taxa" aria-pressed="true">Taxa agora (µSv/h)</button>
       <button type="button" data-rg="dose" aria-pressed="false">Dose recebida (µSv)</button>

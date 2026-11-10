@@ -22,7 +22,7 @@ func TestRcMinutesAndCompare(t *testing.T) {
 	for i := 30; i >= 2; i-- {
 		m := now.Add(-time.Duration(i) * time.Minute)
 		pts = append(pts, store.Point{T: m, CPM: 20 + float64(i%2)*2, Src: "live"})
-		// RadiaCode: 2 leituras por minuto, µSv/h acompanhando o GMC
+		// Radiacode: 2 leituras por minuto, µSv/h acompanhando o GMC
 		usv := 0.10 + float64(i%2)*0.01
 		a.rcAddMinute(m.Add(5*time.Second), 3.0, usv)
 		a.rcAddMinute(m.Add(35*time.Second), 3.2, usv)
@@ -92,7 +92,7 @@ func TestRcTodayAndChart(t *testing.T) {
 	// a mesma curva em CPM do aparelho (3 cps = 180 CPM)
 	for i, v := range c.RCCPM {
 		if (v == nil) != (c.RC[i] == nil) || (v != nil && math.Abs(*v-180) > 1e-9) {
-			t.Fatalf("CPM do RadiaCode no ponto %d: %v", i, v)
+			t.Fatalf("CPM do RC102 no ponto %d: %v", i, v)
 		}
 	}
 	if c.RCAvgCPM == nil || math.Abs(*c.RCAvgCPM-180) > 1e-9 {
@@ -150,7 +150,7 @@ func TestRcRawAndBackup(t *testing.T) {
 	if err := a.writeBackup(&buf); err != nil {
 		t.Fatal(err)
 	}
-	// outro PC sem nada do RadiaCode recebe o backup
+	// outro PC sem nada do Radiacode recebe o backup
 	b := newTestApp(t)
 	zp := filepath.Join(t.TempDir(), "b.zip")
 	os.WriteFile(zp, buf.Bytes(), 0o644)
@@ -196,7 +196,7 @@ func TestDoseRadiacode(t *testing.T) {
 		t.Fatal(err)
 	}
 	if c.Device != "radiacode" || c.MeasuredMinutes != 120 || math.Abs(c.Total-0.24) > 1e-6 || math.Abs(c.BackgroundRate-0.12) > 1e-9 {
-		t.Fatalf("RadiaCode: %+v", c)
+		t.Fatalf("RC102: %+v", c)
 	}
 	if c.OtherMinutes != 120 || math.Abs(c.OtherTotal-120*a.convCalLocked().USv(20)/60) > 1e-6 || !c.HasRC {
 		t.Fatalf("casa: %v %v", c.OtherMinutes, c.OtherTotal)
@@ -232,7 +232,7 @@ func TestSummaryAndReportRadiacode(t *testing.T) {
 	}
 	rc := s.RC
 	if rc == nil || rc.Minutes != 90 || rc.AwayMinutes != 30 || math.Abs(rc.AwayDose-0.15) > 1e-6 || math.Abs(rc.HomeDose-0.12) > 1e-6 || rc.Max != 0.30 {
-		t.Fatalf("resumo do RadiaCode: %+v", rc)
+		t.Fatalf("resumo do RC102: %+v", rc)
 	}
 	r, err := a.buildReport(now.Add(-2*time.Hour).UnixMilli(), now.UnixMilli(), "teste")
 	if err != nil {
@@ -255,7 +255,7 @@ func TestRcHomeBackground(t *testing.T) {
 	a.rcFlushMinute()
 	hb := a.GetHomeBackgroundDev("radiacode")
 	if !hb.OK || hb.Device != "radiacode" || hb.Minutes != 50 || math.Abs(hb.CPM-600) > 1e-6 || math.Abs(hb.USv-0.08) > 1e-9 {
-		t.Fatalf("fundo do RadiaCode: %+v", hb)
+		t.Fatalf("fundo do RC102: %+v", hb)
 	}
 	// Poisson: 30 000 contagens em 50 min → ±3,46 CPM
 	if math.Abs(hb.ErrCPM-math.Sqrt(30000)/50) > 0.01 {

@@ -37,20 +37,20 @@ function agoraNow() {
   const rd = [];
   // aparelho fora do cálculo não entra na frase
   if (g.live && g.usv != null && wh.gmc !== "fora") rd.push([gHome, `${fmt(g.usv, 3)} µSv/h pelo GMC-800`]);
-  if (r.live && r.usv != null && wh.radiacode !== "fora") rd.push([rHome, `${fmt(r.usv, 3)} µSv/h pelo RadiaCode`]);
+  if (r.live && r.usv != null && wh.radiacode !== "fora") rd.push([rHome, `${fmt(r.usv, 3)} µSv/h pelo RC102`]);
   const moved = !gHome || rHome;
   for (const [home, v] of rd) {
-    if (!moved) parts.push(home ? `Casa em ${v.replace(" pelo GMC-800", "")}` : `você em ${v.replace(" pelo RadiaCode", "")}`);
+    if (!moved) parts.push(home ? `Casa em ${v.replace(" pelo GMC-800", "")}` : `você em ${v.replace(" pelo RC102", "")}`);
     else parts.push(home ? `Casa em ${v}` : `Com você em ${v}`);
   }
   if (top) {
     lv = { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao";
-    title = `${lvlName(top)} no ${isRcEv(top) ? "RadiaCode" : "GMC-800"} agora.`;
+    title = `${lvlName(top)} no ${isRcEv(top) ? "RC102" : "GMC-800"} agora.`;
     text = parts.concat("Veja os detalhes em Alertas.").join(" · ");
   } else if (!g.live && !r.live) {
     lv = "off";
     title = "Nenhum aparelho lendo agora.";
-    text = "A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.";
+    text = "A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RC102 para acompanhar ao vivo.";
   } else {
     // saúde e lugar de cada aparelho (onde.js): falta medição num papel, ou algum fora do normal
     const cw = whCur(), L = whLines(cw);
@@ -94,7 +94,7 @@ function renderAgDose() {
   // o aparelho com esse papel agora (onde.js); "" = nenhum
   const now = d.device === undefined ? (dev === "pessoal" ? "radiacode" : "gmc") : d.device;
   const since = state.where && state.where.since ? ` desde ${hhmm(state.where.since)}` : "";
-  const devName = { radiacode: "RadiaCode", gmc: "GMC-800" };
+  const devName = { radiacode: "RC102", gmc: "GMC-800" };
   // por que ninguém faz esse papel agora
   const wc = whCur(), outs = ["gmc", "radiacode"].filter((x) => wc[x] === "fora").map((x) => devName[x]);
   const why = outs.length ? `${outs.join(" e ")} fora do cálculo${since}` : null;
@@ -102,11 +102,11 @@ function renderAgDose() {
     ? (!now ? `Dose pessoal: nenhum aparelho está com você agora (${why || "os dois em casa" + since}).`
       : now === "gmc" && wc.gmc === "casa" ? `Dose pessoal pela leitura de casa${since} (os dois ficaram em casa, e você também).`
       : now === "gmc" ? `Dose pessoal, pelo aparelho que está com você: o GMC-800${since}.`
-      : d.hasData ? "Dose pessoal, pelo RadiaCode (anda com você)." : "O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.")
+      : d.hasData ? "Dose pessoal, pelo RC102 (anda com você)." : "O RC102 ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.")
     : (!now ? `Dose da casa: nenhum aparelho em casa agora (${why || "os dois com você" + since}).`
-      : now === "radiacode" ? `Dose da casa, pelo aparelho que fica parado: o RadiaCode${since}.`
+      : now === "radiacode" ? `Dose da casa, pelo aparelho que fica parado: o RC102${since}.`
       : d.hasData ? "Dose da casa, pelo GMC-800 (fica parado)." : "O GMC-800 ainda não tem dado neste ano.");
-  // RadiaCode com você mas longe do PC: a dose segue no aparelho, a curva não
+  // Radiacode com você mas longe do PC: a dose segue no aparelho, a curva não
   const rl = whLive("radiacode");
   if (dev === "pessoal" && whRole("comigo", whCur()).curve && rl.last) $("agDevNote").textContent += ` Curva incompleta desde ${hhmm(rl.last)}.`;
   const box = $("agCells");
@@ -282,7 +282,7 @@ async function refreshAgDay() {
     for (const e of (await api.GetEvents("alerta")) || []) {
       if (e.time < from) continue;
       const dur = e.end ? ` · ${Math.max(1, Math.round((e.end - e.time) / 6e4))} min` : e.active ? " · agora" : "";
-      items.push([e.time, `${lvlName(e)} no ${isRcEv(e) ? "RadiaCode" : "GMC-800"}${dur}`]);
+      items.push([e.time, `${lvlName(e)} no ${isRcEv(e) ? "RC102" : "GMC-800"}${dur}`]);
     }
   } catch (e) { /* sem alertas */ }
   try {

@@ -51,7 +51,7 @@ func syncPull(t *testing.T, a, b *App) MergeResult {
 func TestSyncRadiacode(t *testing.T) {
 	win, lin := newTestApp(t), newTestApp(t)
 	cut := time.Now().Truncate(time.Minute).Add(-3 * time.Hour)
-	// o RadiaCode esteve no Windows até "cut" e no Linux depois
+	// o Radiacode esteve no Windows até "cut" e no Linux depois
 	writeRcMinutes(t, win, cut.Add(-5*time.Hour), 300, 0.10)
 	writeRcMinutes(t, lin, cut, 120, 0.12)
 	// espectro fechado no Linux, dose do aparelho e um arquivo de log
@@ -62,7 +62,7 @@ func TestSyncRadiacode(t *testing.T) {
 
 	res := syncPull(t, win, lin)
 	if res.RcMinutes != 120 {
-		t.Fatalf("minutos do RadiaCode no Windows: %d", res.RcMinutes)
+		t.Fatalf("minutos do RC102 no Windows: %d", res.RcMinutes)
 	}
 	if pts := win.rcRange(cut.Add(-5*time.Hour), cut.Add(3*time.Hour)); len(pts) != 420 {
 		t.Fatalf("Windows: %d minutos", len(pts))
@@ -130,7 +130,7 @@ func TestSyncAttachmentsAndCalibration(t *testing.T) {
 	if len(vs) != 2 || vs[0].Source != "contador" || vs[0].Points[0].CPM != 1500 || vs[1].Factor != 0.0055 {
 		t.Fatalf("calibração no Linux: %+v", vs)
 	}
-	// o pacote de um PC antigo (sem Rc) não leva nada do RadiaCode
+	// o pacote de um PC antigo (sem Rc) não leva nada do Radiacode
 	z, _ := win.buildDelta(pullReq{})
 	zr, _ := zip.NewReader(bytes.NewReader(z), int64(len(z)))
 	for _, f := range zr.File {

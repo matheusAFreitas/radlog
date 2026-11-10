@@ -5,7 +5,7 @@ import (
 	"time"
 )
 
-// ---------- dose do RadiaCode pelo próprio aparelho (2.2) ----------
+// ---------- dose do Radiacode pelo próprio aparelho (2.2) ----------
 //
 // O app soma os minutos que gravou; o aparelho soma o tempo todo, conectado
 // ou não. Quando o registro dos totais do aparelho cobre o começo do período,

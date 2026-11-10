@@ -1,12 +1,12 @@
-// Package intercal faz a intercalibração do GMC com o RadiaCode (ideia 6):
+// Package intercal faz a intercalibração do GMC com o Radiacode (ideia 6):
 // com os dois aparelhos encostados, o fator do GMC (µSv/h por CPM) é a soma
-// do µSv/h do RadiaCode dividida pela soma do CPM do GMC nos minutos em que
+// do µSv/h do Radiacode dividida pela soma do CPM do GMC nos minutos em que
 // os dois mediram. É a mesma conta do intercal.py da análise de 09/11.
 //
 // Tem também a vigia semanal: depois de calibrado, compara a razão de
-// CONTAGENS dos dois (cps do RadiaCode ÷ CPM do GMC) nos minutos em que os
+// CONTAGENS dos dois (cps do Radiacode ÷ CPM do GMC) nos minutos em que os
 // dois estavam em casa com a razão normal das primeiras semanas. A razão de
-// µSv/h não serve para a vigia porque o µSv/h por contagem do RadiaCode muda
+// µSv/h não serve para a vigia porque o µSv/h por contagem do Radiacode muda
 // com a mistura de energias do fundo (radônio).
 //
 // Não depende da interface nem do Wails: o app Android vai usar o mesmo
@@ -24,8 +24,8 @@ import (
 type Pair struct {
 	T      time.Time
 	Counts float64 // contagens do GMC no minuto (CPM bruto)
-	USvh   float64 // µSv/h do RadiaCode no minuto
-	CPS    float64 // cps do RadiaCode no minuto
+	USvh   float64 // µSv/h do RC102 no minuto
+	CPS    float64 // cps do RC102 no minuto
 }
 
 // Hour é o fator de uma hora da coleta.
@@ -46,12 +46,12 @@ type Result struct {
 	Minutes  int     `json:"minutes"`  // minutos que entraram
 	Outliers int     `json:"outliers"` // minutos fora da curva que ficaram de fora
 	GMCCPM   float64 `json:"gmcCpm"`   // CPM médio do GMC
-	RCUSvh   float64 `json:"rcUsvh"`   // µSv/h médio do RadiaCode
+	RCUSvh   float64 `json:"rcUsvh"`   // µSv/h médio do RC102
 	// Dispersion é variância/média do CPM minuto a minuto: perto de 1 num
 	// tubo saudável (contagem de Poisson).
 	Dispersion    float64 `json:"dispersion"`
 	DispersionErr float64 `json:"dispersionErr"`
-	CountRatio    float64 `json:"countRatio"` // contagens do RadiaCode por contagem do GMC
+	CountRatio    float64 `json:"countRatio"` // contagens do RC102 por contagem do GMC
 	Hours         []Hour  `json:"hours"`
 }
 
@@ -158,7 +158,7 @@ func Compute(in []Pair) (Result, error) {
 	k := sR / sG
 	relPois := hypot0(sG, sC)
 
-	// jackknife por blocos de 1 h (o µSv/h do RadiaCode é suavizado: minutos
+	// jackknife por blocos de 1 h (o µSv/h do Radiacode é suavizado: minutos
 	// vizinhos não são independentes)
 	w0 := keep[0].T
 	type acc struct {

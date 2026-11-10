@@ -25,7 +25,7 @@ const fromLocalInput = (s) => (s ? new Date(s).getTime() : NaN);
 
 let periodEditing = 0;
 
-// números de um período: RadiaCode (você) e GMC-800 no mesmo tempo (state.periodSum fica no app.js)
+// números de um período: Radiacode (você) e GMC-800 no mesmo tempo (state.periodSum fica no app.js)
 function periodSummary(p) {
   const to = Math.min(pTo(p), Date.now());
   const key = `${p.from}-${to}`;
@@ -59,9 +59,9 @@ function periodStatsEl(p) {
       const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
       if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
       if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
-      line("p-rc", "RadiaCode", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
+      line("p-rc", "RC102", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
     } else {
-      line("p-rc", "RadiaCode", "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)");
+      line("p-rc", "RC102", "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)");
     }
     if (s.minutes) {
       const parts = [`média ${fmt(s.avg, 1)} CPM`, `máx ${fmt(s.max, 0)} CPM`];
@@ -73,7 +73,7 @@ function periodStatsEl(p) {
   return box;
 }
 
-// total do RadiaCode fora de casa (todos os períodos)
+// total do Radiacode fora de casa (todos os períodos)
 async function renderPeriodTotal() {
   const el = $("periodTotal");
   const list = state.periods || [];
@@ -82,22 +82,22 @@ async function renderPeriodTotal() {
   let dose = 0, min = 0;
   for (const s of sums) if (s && s.rc && s.rc.minutes) { dose += s.rc.dose; min += s.rc.minutes; }
   el.hidden = !min;
-  if (min) el.textContent = `RadiaCode fora de casa, somando os períodos: ${fmt(dose, dose < 10 ? 2 : 1)} µSv em ${hm(min)} medidos.`;
+  if (min) el.textContent = `RC102 fora de casa, somando os períodos: ${fmt(dose, dose < 10 ? 2 : 1)} µSv em ${hm(min)} medidos.`;
 }
 
-const WH_NAME = { gmc: "GMC-800", radiacode: "RadiaCode" };
+const WH_NAME = { gmc: "GMC-800", radiacode: "RC102" };
 const WH_NORMAL = { gmc: "casa", radiacode: "comigo" };
 const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo", notHome: !!p.notHome });
-// saí com o RadiaCode e deixei o GMC (2.38.0): o RadiaCode fora do fundo da casa
+// saí com o Radiacode e deixei o GMC (2.38.0): o Radiacode fora do fundo da casa
 const whOut = (w) => w.gmc === "casa" && w.radiacode === "comigo" && !!w.notHome;
 const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" };
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
-  : w.radiacode === "fora" ? "RadiaCode fora do cálculo"
+  : w.radiacode === "fora" ? "RC102 fora do cálculo"
   : w.gmc === "comigo" && w.radiacode === "comigo" ? "Levei os dois"
-  : w.gmc === "comigo" ? "Levei o GMC-800, deixei o RadiaCode"
+  : w.gmc === "comigo" ? "Levei o GMC-800, deixei o RC102"
   : w.radiacode === "casa" ? "Deixei os dois em casa"
-  : whOut(w) ? "Saí com o RadiaCode" : "normal");
+  : whOut(w) ? "Saí com o RC102" : "normal");
 const whDur = (a, b) => hm(Math.max(1, Math.round((b - a) / 60000)));
 
 // faixa de cada aparelho nos últimos 7 dias: lilás fora do lugar de sempre
@@ -232,11 +232,11 @@ function periodForm(p, onDone) {
   nhBox.type = "checkbox"; nhBox.checked = !!p.notHome;
   const nhTxt = document.createElement("span");
   nh.append(nhBox, nhTxt);
-  // os dois em casa: esqueci de levar; GMC em casa e RadiaCode comigo: saí com ele (2.38.0)
+  // os dois em casa: esqueci de levar; GMC em casa e Radiacode comigo: saí com ele (2.38.0)
   const both = () => pick(segG) === "casa" && (pick(segR) === "casa" || pick(segR) === "comigo");
   const syncNh = () => {
     nh.hidden = !both();
-    nhTxt.textContent = pick(segR) === "comigo" ? " eu não estava em casa (saí com o RadiaCode)" : " eu não estava em casa (esqueci de levar os dois)";
+    nhTxt.textContent = pick(segR) === "comigo" ? " eu não estava em casa (saí com o RC102)" : " eu não estava em casa (esqueci de levar os dois)";
   };
   [segG, segR].forEach((x) => x.addEventListener("click", () => setTimeout(syncNh, 0)));
   const err = document.createElement("div");
@@ -411,7 +411,7 @@ function askNewRanges(ranges) {
     name.type = "text"; name.maxLength = 60; name.placeholder = "Fora de casa"; name.setAttribute("aria-label", "Nome do período");
     const save = document.createElement("button");
     save.type = "button"; save.className = "btn small accent"; save.textContent = "Salvar";
-    // o GMC estava com você; o RadiaCode pode ter ficado em casa (2.38.0)
+    // o GMC estava com você; o Radiacode pode ter ficado em casa (2.38.0)
     const who = document.createElement("div");
     who.className = "nr-who small";
     const gl = document.createElement("span");
@@ -419,9 +419,9 @@ function askNewRanges(ranges) {
     gl.append("GMC-800 com você");
     const rl = document.createElement("span");
     rl.innerHTML = '<span class="dot rc"></span> ';
-    rl.append("RadiaCode");
+    rl.append("RC102");
     const seg = document.createElement("div");
-    seg.className = "seg loc"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Onde estava o RadiaCode");
+    seg.className = "seg loc"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Onde estava o RC102");
     const sug = r.rcSuggest === "casa" ? "casa" : "comigo";
     for (const [v, t] of [["comigo", "comigo"], ["casa", "em casa"]]) {
       const b = document.createElement("button");
@@ -432,7 +432,7 @@ function askNewRanges(ranges) {
     }
     const hint = document.createElement("span");
     hint.className = "muted";
-    hint.textContent = sug === "casa" ? "sugestão: o RadiaCode estava conectado ao PC nesse trecho" : "sugestão: o RadiaCode também ficou sem conexão nesse trecho";
+    hint.textContent = sug === "casa" ? "sugestão: o RC102 estava conectado ao PC nesse trecho" : "sugestão: o RC102 também ficou sem conexão nesse trecho";
     rl.appendChild(seg);
     who.append(gl, rl, hint);
     form.append(who, name, save);

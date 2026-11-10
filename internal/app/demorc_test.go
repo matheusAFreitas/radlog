@@ -6,7 +6,7 @@ import (
 	"time"
 )
 
-// 2.14: RadiaCode simulado no demo: aparece na tela, abre alerta só na
+// 2.14: Radiacode simulado no demo: aparece na tela, abre alerta só na
 // memória e some ao sair do demo
 func TestDemoRc(t *testing.T) {
 	a := newTestApp(t)

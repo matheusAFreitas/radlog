@@ -214,7 +214,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		HasData:   s.Minutes > 0,
 	}
 	if connected && info.Version != "" {
-		r.Device = info.Version
+		r.Device = "GQ GMC-800"
 		if info.Serial != "" {
 			r.Device += " · série " + info.Serial
 		}

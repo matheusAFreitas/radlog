@@ -176,11 +176,11 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		a.rc.mu.Lock()
 		rs := a.rc.st
 		a.rc.mu.Unlock()
-		dev = "RadiaCode"
+		dev = "RC102"
 		if rs.Model != "" {
 			dev = strings.TrimSpace(rs.Model + " " + rs.Serial)
 		}
-		calTxt = "o µSv/h é o que o próprio RadiaCode calcula (calibração de fábrica, por energia)"
+		calTxt = "o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)"
 		dt = ""
 	}
 	extra := a.measureExtraRows(*m)
@@ -417,7 +417,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	method = append(method, extraRows...)
 	count := "soma do CPS do contador a cada segundo, em cada fase"
 	if rc {
-		count = "soma das amostras do RadiaCode (a cada 0,5 s), em cada fase"
+		count = "soma das amostras do RC102 (a cada 0,5 s), em cada fase"
 	}
 	method = append(method,
 		[2]string{"Contagens", count},
@@ -434,12 +434,12 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	lims := []string{
 		"O µSv/h é a taxa no tubo, na posição medida, com a calibração para Cs-137. Não é a dose de quem segura o objeto e muda muito com a distância.",
 		"O tubo do GMC-800 vê gama e parte do beta. Objetos que emitem mais beta (ex.: tungstênio toriado, vidro de urânio) podem dar CPM alto com µSv/h pouco confiável.",
-		"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RadiaCode).",
+		"CPM não identifica o radionuclídeo. Para isso, é preciso espectrometria (ex.: RC102).",
 	}
 	if rc {
 		lims = []string{
 			"O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.",
-			"O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.",
+			"O cristal do RC102 vê gama e raio X; o beta quase não entra na contagem.",
 			"Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.",
 		}
 	}
@@ -640,7 +640,7 @@ func (p *reportPDF) measHist(title string, st measPhaseStats, x0, y0, w, h float
 	d.Line(x0, y0+h, x0+w, y0+h, 0.5, cLine, false)
 }
 
-// measSpectrum: espectro do RadiaCode com o objeto e o fundo (no mesmo
+// measSpectrum: espectro do Radiacode com o objeto e o fundo (no mesmo
 // tempo), em escala log, com as linhas gama que subiram acima do fundo.
 func (p *reportPDF) measSpectrum(m SavedMeasure) {
 	s := m.Spectrum
@@ -797,7 +797,7 @@ func specDur(sec float64) string {
 
 // measSide: o segundo aparelho (os dois perto, ou um com a pessoa).
 func (p *reportPDF) measSide(m SavedMeasure, o *MeasureSide) {
-	name := map[string]string{"gmc": "GMC-800", devRC: "RadiaCode"}[devName(o.Device)]
+	name := map[string]string{"gmc": "GMC-800", devRC: "RC102"}[devName(o.Device)]
 	u := func(v float64) string { return usvTxt(v) + " µSv/h" }
 	if o.Role == "voce" {
 		p.section("COM VOCÊ: " + strings.ToUpper(name))

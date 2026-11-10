@@ -20,7 +20,7 @@ func poisson(r *rand.Rand, mean float64) float64 {
 	}
 }
 
-// pares sintéticos: GMC ~ Poisson(cpm), RadiaCode com cps ~ 28× o GMC/60 e
+// pares sintéticos: GMC ~ Poisson(cpm), Radiacode com cps ~ 28× o GMC/60 e
 // µSv/h = k × CPM esperado (com um pouco de ruído)
 func synth(seed int64, start time.Time, minutes int, cpm, k, ratio float64) []Pair {
 	r := rand.New(rand.NewSource(seed))

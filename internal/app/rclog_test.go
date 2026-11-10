@@ -114,7 +114,7 @@ func TestRcLog(t *testing.T) {
 	if p := b.GetRcLog(0, 0, []string{"taxa", "raro", "evento"}, 100, 0); p.Total != 8 {
 		t.Fatalf("no outro PC: %d", p.Total)
 	}
-	// os minutos do RadiaCode não confundem o log com minutos
+	// os minutos do Radiacode não confundem o log com minutos
 	if len(b.rcRange(day.Add(-48*time.Hour), time.Now())) != 0 {
 		t.Fatalf("log virou minuto")
 	}

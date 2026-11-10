@@ -38,7 +38,7 @@ type MergeResult struct {
 	Measurements int    `json:"measurements"`
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
-	RcMinutes    int    `json:"rcMinutes"` // minutos do RadiaCode
+	RcMinutes    int    `json:"rcMinutes"` // minutos do RC102
 }
 
 func (m MergeResult) total() int {
@@ -198,7 +198,7 @@ func mergeText(r MergeResult) string {
 		}
 	}
 	add(r.Minutes, "minuto de leitura", "minutos de leitura")
-	add(r.RcMinutes, "registro do RadiaCode", "registros do RadiaCode")
+	add(r.RcMinutes, "registro do RC102", "registros do RC102")
 	add(r.Events, "evento/alerta", "eventos/alertas")
 	add(r.Periods, "período fora de casa", "períodos fora de casa")
 	add(r.Measurements, "medição", "medições")
@@ -402,7 +402,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 	}
 
-	// intercalibração com o RadiaCode: só entra se aqui não houver nenhuma
+	// intercalibração com o Radiacode: só entra se aqui não houver nenhuma
 	if f, ok := files[intercalFile]; ok && a.loadIntercal().Start == 0 {
 		if b, err := readZipFile(f); err == nil {
 			var d intercalData
@@ -455,7 +455,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 	}
 
-	// RadiaCode: minutos (junta pela hora) e dados brutos (copia o que falta)
+	// Radiacode: minutos (junta pela hora) e dados brutos (copia o que falta)
 	for n, f := range files {
 		b, err := func() ([]byte, error) {
 			if !strings.HasPrefix(n, rcDirName+"/") {

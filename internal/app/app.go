@@ -62,11 +62,11 @@ type Settings struct {
 	NoSyncAuto bool `json:"noSyncAuto"`
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
-	// RadiaCode (radiacode.go): não procurar o aparelho; endereço Bluetooth
+	// Radiacode (radiacode.go): não procurar o aparelho; endereço Bluetooth
 	// (Linux) para quando não estiver no USB. Só mudam por SetRadiacode.
 	RcOff bool   `json:"rcOff"`
 	RcBLE string `json:"rcBLE"`
-	// não guardar os dados brutos do RadiaCode (radiacode/bruto)
+	// não guardar os dados brutos do Radiacode (radiacode/bruto)
 	RcNoRaw bool `json:"rcNoRaw"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
@@ -151,7 +151,7 @@ type Event struct {
 	// aparelho do alerta: "" = GMC (CPM); "radiacode" (CPM e Peak em µSv/h)
 	Device string `json:"device,omitempty"`
 	// por que terminou sem a leitura voltar ao normal (2.5): "contador
-	// desconectado", "RadiaCode desconectado", "app fechado"; "" = voltou
+	// desconectado", "Radiacode desconectado", "app fechado"; "" = voltou
 	EndReason string `json:"endReason,omitempty"`
 	// GMC (2.29): o valor que disparou e o pico em µSv/h, pela calibração
 	// que valia na hora (preenchido ao mandar para a tela; não vai pro CSV)
@@ -196,10 +196,10 @@ type Chart struct {
 	// trecho antigo com passo menor que 1 min: o detalhe por segundo só
 	// existe perto dos alertas (o resto é o valor do minuto)
 	FineAlertsOnly bool `json:"fineAlertsOnly"`
-	// RadiaCode no mesmo período, em µSv/h (nil se não tem dado)
+	// Radiacode no mesmo período, em µSv/h (nil se não tem dado)
 	RC    []*float64 `json:"rc"`
 	RCAvg *float64   `json:"rcAvg"`
-	// o mesmo RadiaCode em CPM (contagens do aparelho), para o gráfico
+	// o mesmo Radiacode em CPM (contagens do aparelho), para o gráfico
 	// analítico de CPM; tem bem mais contagens que o GMC por µSv/h
 	RCCPM    []*float64 `json:"rcCPM"`
 	RCAvgCPM *float64   `json:"rcAvgCPM"`
@@ -324,7 +324,7 @@ type App struct {
 	info     DeviceInfo
 	cal      gmc.Calibration
 	calHist  calHistData // versões da calibração (2.2)
-	rcDevT   rcDevToday  // dose de hoje do RadiaCode pelo aparelho
+	rcDevT   rcDevToday  // dose de hoje do RC102 pelo aparelho
 	firsts   firstCache  // primeiro dado de cada aparelho
 	state    string
 	message  string
@@ -338,7 +338,7 @@ type App struct {
 
 	downloading    atomic.Bool
 	cfgBusy        atomic.Bool // gravando/lendo a configuração do contador
-	rcCfgBusy      atomic.Bool // gravando os ajustes do RadiaCode
+	rcCfgBusy      atomic.Bool // gravando os ajustes do RC102
 	cfgBackedUp    bool        // já salvou a cópia da config nesta conexão
 	cfgSnapshot    []byte      // "foto" da config para comparar
 	cancelDownload chan struct{}
@@ -366,7 +366,7 @@ type App struct {
 	interf   interferenceDetector
 	upd      updater
 	sync     syncState // sincronização entre PCs (sync.go)
-	rc       rcState   // RadiaCode (radiacode.go)
+	rc       rcState   // RC102 (radiacode.go)
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -381,7 +381,7 @@ type App struct {
 	radar        *radarStore   // chuva pelo radar (radar.go)
 	radarKick    chan struct{} // busca o radar já (lugar novo)
 	periods      []Period      // fora de casa (periods.go)
-	rcAsks       []RcAwayAsk   // "o RadiaCode estava fora de casa?" sem resposta (rcaway.go)
+	rcAsks       []RcAwayAsk   // "o RC102 estava fora de casa?" sem resposta (rcaway.go)
 	rcAsksLoaded bool
 	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
 	measSamples  []MeasureSample  // segundos da medição em andamento
@@ -390,7 +390,7 @@ type App struct {
 	cfgMu        sync.Mutex       // histórico de configurações
 	devSaveMode  string           // modo de gravação da memória do GMC (lido ao conectar)
 	alertWatch   map[int64]bool   // alertas do GMC com segundos sendo gravados
-	// RadiaCode: espectro no começo da fase atual e o do fundo já medido
+	// Radiacode: espectro no começo da fase atual e o do fundo já medido
 	measSpec0  *radiacode.Spectrum
 	measSpecBg *MeasureSpectrum
 }
@@ -472,7 +472,7 @@ func (a *App) startup(ctx context.Context) {
 func (a *App) shutdown(ctx context.Context) {
 	a.logf("==== fechando o app")
 	a.beforeClose()
-	// o total estimado do RadiaCode, para a próxima abertura (ex.: atualização)
+	// o total estimado do Radiacode, para a próxima abertura (ex.: atualização)
 	// continuar dele em vez de esperar o próximo envio do aparelho
 	a.rc.mu.Lock()
 	a.rcDoseSaveLiveLocked(time.Now())

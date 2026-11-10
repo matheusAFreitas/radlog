@@ -31,7 +31,7 @@ func adapterPath(objs map[dbus.ObjectPath]map[string]map[string]dbus.Variant) db
 
 func str(v dbus.Variant) string { s, _ := v.Value().(string); return s }
 
-// ScanBLE procura RadiaCodes por alguns segundos.
+// ScanBLE procura Radiacodes por alguns segundos.
 func ScanBLE(d time.Duration) ([]BLEDevice, error) {
 	conn, err := dbus.SystemBus()
 	if err != nil {
@@ -132,7 +132,7 @@ func OpenBLE(addr string) (Transport, error) {
 		}
 		a.Call("org.bluez.Adapter1.StopDiscovery", 0)
 		if _, ok := objs[devPath]; !ok {
-			return fail(fmt.Errorf("RadiaCode %s não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)", addr))
+			return fail(fmt.Errorf("RC102 %s não apareceu no Bluetooth (ligado e perto? o celular não está conectado nele?)", addr))
 		}
 	}
 	dev := conn.Object(bluez, devPath)
@@ -162,7 +162,7 @@ func OpenBLE(addr string) (Transport, error) {
 	}
 	if wr == "" || nt == "" {
 		dev.Call("org.bluez.Device1.Disconnect", 0)
-		return fail(fmt.Errorf("Bluetooth: o aparelho não mostrou o serviço do RadiaCode"))
+		return fail(fmt.Errorf("Bluetooth: o aparelho não mostrou o serviço do RC102"))
 	}
 	b := &bleLinux{conn: conn, dev: dev, write: conn.Object(bluez, wr), notify: nt,
 		sig: make(chan *dbus.Signal, 64), resp: make(chan []byte, 1), as: newAssembler(), done: make(chan struct{})}
@@ -258,7 +258,7 @@ func (b *bleLinux) Exchange(req []byte) ([]byte, error) {
 		}
 		return out, nil
 	case <-time.After(10 * time.Second):
-		return nil, fmt.Errorf("Bluetooth: o RadiaCode não respondeu")
+		return nil, fmt.Errorf("Bluetooth: o RC102 não respondeu")
 	}
 }
 

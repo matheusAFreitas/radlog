@@ -1,5 +1,14 @@
 # Versões
 
+## 2.38.6
+- Nomes dos aparelhos padronizados. Nos títulos (menu, quadros do Agora,
+  cartão grande e título de cada aparelho, "Onde está cada aparelho",
+  Configurações e o cabeçalho do relatório em PDF) aparece o nome completo:
+  "GQ GMC-800" e "Radiacode 102". No meio de frases, alertas, legendas,
+  tabelas e na barra compacta fica o abreviado: "GMC-800" e "RC102". A marca
+  passa a ser escrita "Radiacode". Textos antigos já gravados com "RadiaCode"
+  continuam traduzidos no inglês.
+
 ## 2.38.5
 - No Resumo, o símbolo do nível no "Período normal." (e nos outros vereditos)
   ganhou espaço até o texto, como no resto do app.

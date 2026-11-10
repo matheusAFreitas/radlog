@@ -148,7 +148,7 @@ type Maturity struct {
 	GMCFirst int64    `json:"gmcFirst"` // ms; 0 = sem dado
 	RCFirst  int64    `json:"rcFirst"`
 	GMC      []MatWin `json:"gmc"`
-	RC       []MatWin `json:"rc"` // vazio se o RadiaCode nunca gravou
+	RC       []MatWin `json:"rc"` // vazio se o RC102 nunca gravou
 }
 
 // matWins monta as janelas a partir dos instantes dos minutos gravados.

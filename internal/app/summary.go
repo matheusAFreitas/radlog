@@ -64,15 +64,15 @@ type Summary struct {
 	// estatística do fundo (em casa, sem medição de objeto)
 	SD         *float64 `json:"sd"`         // desvio-padrão real dos minutos
 	Dispersion *float64 `json:"dispersion"` // SD ÷ √média (1 = só acaso)
-	// o RadiaCode no mesmo período (nil se não tem dado dele)
+	// o Radiacode no mesmo período (nil se não tem dado dele)
 	RC *RcSum `json:"rc"`
 }
 
-// RcSum é o resumo do RadiaCode (seu dosímetro) num período, em µSv/h e µSv,
+// RcSum é o resumo do Radiacode (seu dosímetro) num período, em µSv/h e µSv,
 // separando o tempo em casa e fora de casa.
 type RcSum struct {
 	Minutes     int       `json:"minutes"`
-	Coverage    float64   `json:"coverage"`    // desde o primeiro dado do RadiaCode, até agora
+	Coverage    float64   `json:"coverage"`    // desde o primeiro dado do RC102, até agora
 	CoverageAll float64   `json:"coverageAll"` // no período inteiro, até agora
 	SpanMinutes int       `json:"spanMinutes"`
 	HistMinutes int       `json:"histMinutes"`
@@ -98,20 +98,20 @@ type RcSum struct {
 	DevDose float64 `json:"devDose"`
 	DevOK   bool    `json:"devOK"`
 	DevUpTo int64   `json:"devUpTo"`
-	// alertas do RadiaCode no período (por episódio) e o maior pico (µSv/h)
+	// alertas do Radiacode no período (por episódio) e o maior pico (µSv/h)
 	Attention int     `json:"attention"`
 	Alarm     int     `json:"alarm"`
 	Danger    int     `json:"danger"`
 	PeakAlert float64 `json:"peakAlert"`
 }
 
-// RcSumPt é um ponto da curva do RadiaCode no resumo (média do passo).
+// RcSumPt é um ponto da curva do Radiacode no resumo (média do passo).
 type RcSumPt struct {
 	T   int64    `json:"t"`
 	USv *float64 `json:"usv"`
 }
 
-// rcSummary resume o RadiaCode em [from, to), com os mesmos passos da curva
+// rcSummary resume o Radiacode em [from, to), com os mesmos passos da curva
 // do GMC.
 func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
 	pts := a.rcRange(from, to)

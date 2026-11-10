@@ -14,9 +14,9 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- espectrograma do RadiaCode ----------
+// ---------- espectrograma do Radiacode ----------
 //
-// A cada minuto, com o RadiaCode conectado, o app lê o espectro atual do
+// A cada minuto, com o Radiacode conectado, o app lê o espectro atual do
 // aparelho e guarda a diferença para a leitura anterior (o que chegou naquele
 // minuto), em radiacode/espectros/AAAA-MM-DD-HHMMSS.jsonl.gz (um arquivo por
 // dia e por vez que o app abre). Cada linha:

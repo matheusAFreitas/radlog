@@ -1,4 +1,4 @@
-// RadLog: registro de radiação do contador Geiger GQ GMC-800 e do RadiaCode.
+// RadLog: registro de radiação do contador Geiger GQ GMC-800 e do Radiacode.
 // O app fica em internal/app; aqui só entra a interface embutida.
 package main
 

@@ -212,7 +212,7 @@ func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
 	return a.heatmapFromDev(first, days, "")
 }
 
-// heatmapFromDev: dev "" = GMC; devRC = RadiaCode (µSv/h nos valores).
+// heatmapFromDev: dev "" = GMC; devRC = Radiacode (µSv/h nos valores).
 func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, error) {
 	var pts []store.Point
 	var err error
