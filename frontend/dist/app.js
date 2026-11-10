@@ -47,7 +47,9 @@ const state = {
   measurements: [], // medições de objeto salvas
   doseZoom: null,
   doseZoomStack: [],
-  chartUnit: localGet("chartUnit", "cpm"),
+  // µSv/h é o gráfico principal desde a 2.29 (o de CPM ficou só de análise):
+  // quem estava no CPM volta uma vez para o µSv/h
+  chartUnit: localGet("unitUSv229", "") ? localGet("chartUnit", "usv") : (localSet("unitUSv229", "1"), localSet("chartUnit", "usv"), "usv"),
   mMode: localGet("mMode", "nova"),
   heatDays: parseInt(localGet("heatDays", "14"), 10) || 14,
   heatMonthMode: localGet("heatMode", "dias") === "mes",
@@ -104,12 +106,14 @@ function renderSigma(r) {
   num.hidden = false;
   const z = r.sigma, bg = r.bgCPM, sd = Math.sqrt(bg);
   const lo = Math.max(0, Math.round(bg - 2 * sd)), hi = Math.round(bg + 2 * sd), far = Math.round(bg + 3 * sd);
-  const range = `seu normal: ${lo} a ${hi} CPM`;
+  // a faixa em µSv/h (a conta do σ continua em contagens, no detalhe)
+  const k = calK(), uu = (c) => fmt(c * k, usvDigits(hi * k));
+  const range = `seu normal: ${uu(lo)} a ${uu(hi)} µSv/h`;
   let text, cls = "";
   if (z >= 3) { text = `Acima do normal (${range}) — dificilmente é só variação`; cls = "high"; }
   else if (z >= 2) { text = `Um pouco acima do normal (${range}) — pode ser só variação`; cls = "mid"; }
   else if (z <= -2) { text = `Abaixo do normal (${range}) — sem problema`; }
-  else { text = `Dentro do normal — seu fundo costuma ficar entre ${lo} e ${hi} CPM`; }
+  else { text = `Dentro do normal — seu fundo costuma ficar entre ${uu(lo)} e ${uu(hi)} µSv/h`; }
   el.textContent = text;
   el.className = "sigma " + cls;
   el.title = `A contagem do Geiger varia sozinha de um minuto para outro. Pelas suas leituras dos últimos 30 dias, o fundo fica em ${fmt(bg, 0)} CPM e quase todas as leituras (95%) caem entre ${lo} e ${hi} CPM. Um pouco acima disso ainda pode ser acaso; acima de ${far} CPM dificilmente é.`;
@@ -205,8 +209,8 @@ function renderReading() {
     el.hidden = false;
   }
 
-  const names = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" };
-  $("levelName").textContent = names[r.level] || "—";
+  const names = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
+  lvLabel($("levelName"), r.level, names[r.level] || "—", 16);
   $("levelName").className = "level-name " + r.level;
   // 0 CPM por minutos seguidos: defeito, não "seguro"
   if (r.noCount && !r.saturated) {
@@ -214,7 +218,7 @@ function renderReading() {
     el.textContent = `Sem contagens há ${fmtDur(Date.now() - r.noCountSince)}: o tubo pode estar com defeito. Confira o contador.`;
     el.className = "sigma high";
     el.hidden = false;
-    $("levelName").textContent = "Sem contagens";
+    lvLabel($("levelName"), "nocount", "Sem contagens", 16);
     $("levelName").className = "level-name nocount";
   }
   if (r.noCount && !state.noCountToast && !r.saturated) toast("Sem contagens há 2 min: confira o contador", true);
@@ -228,12 +232,12 @@ function renderReading() {
 // ---------- painel dos aparelhos (2.8) ----------
 // Um quadro por aparelho, sempre em cima: o valor na unidade escolhida
 // (µSv/h de padrão), CPM e CPS embaixo, a última hora e a régua com só a
-// faixa atual acesa. Em atenção/alerta/perigo a borda e a palavra do estado
+// faixa atual acesa. Em atenção/alarme/perigo a borda e a palavra do estado
 // mudam de cor. O terceiro quadro resume os alertas.
 
 const UNIT_TXT = { cpm: "CPM", usv: "µSv/h", mrh: "mrem/h", cps: "CPS" };
-const LV_WORD = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" };
-const TILE_LV = ["seguro", "atencao", "alerta", "perigo", "nocount"];
+const LV_WORD = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
+const TILE_LV = ["seguro", "atencao", "alarme", "perigo", "nocount"];
 
 // valores em cada unidade; o CPS é a média do minuto (CPM ÷ 60)
 function tileVals(usv, cpm, cps) {
@@ -262,24 +266,51 @@ function tileFoot(el, u, v, dose, doseSub) {
   el.appendChild(sp);
 }
 
-// régua: p1/p2 são onde começam a 2ª e a 3ª faixa (0 a 1), pos é a leitura
+// mostrador (ideia 1): o arco de fora do logo enche pelos três pedaços, um por
+// faixa (seguro, atenção, alarme); p1/p2 são onde começam a 2ª e a 3ª faixa
+// (0 a 1) e pos é a leitura. No perigo o anel fica inteiro (cor pela classe).
+const DIAL_SEG = [[34.07, 40.11, 13.93, 40.11], [5.01, 24.66, 15.08, 7.22], [32.92, 7.22, 42.99, 24.66]];
+function dialPath(frac) {
+  let d = "", rem = Math.max(0, Math.min(1, frac)) * 3;
+  for (let i = 0; i < 3 && rem > 0; i++) {
+    const p = DIAL_SEG[i], f = Math.min(1, rem);
+    rem -= f;
+    const a0 = Math.atan2(24 - p[1], p[0] - 24);
+    let a1 = Math.atan2(24 - p[3], p[2] - 24);
+    if (a1 > a0) a1 -= 2 * Math.PI;
+    const ae = a0 + (a1 - a0) * f;
+    d += `M${(24 + 19 * Math.cos(a0)).toFixed(2)} ${(24 - 19 * Math.sin(a0)).toFixed(2)}A19 19 0 0 1 ${(24 + 19 * Math.cos(ae)).toFixed(2)} ${(24 - 19 * Math.sin(ae)).toFixed(2)}`;
+  }
+  return d;
+}
 function tileScale(pfx, p1, p2, pos, t1, t2) {
-  const segs = $(pfx + "TileScale").querySelectorAll(".inst-segs span");
-  segs[0].style.flexGrow = p1;
-  segs[1].style.flexGrow = p2 - p1;
-  segs[2].style.flexGrow = 1 - p2;
-  const k1 = $(pfx + "Tick1"), k2 = $(pfx + "Tick2");
-  k1.style.left = p1 * 100 + "%"; k1.textContent = t1;
-  k2.style.left = p2 * 100 + "%"; k2.textContent = t2;
-  const m = $(pfx + "TileMark");
-  m.hidden = pos == null;
-  if (pos != null) m.style.left = Math.max(0, Math.min(1, pos)) * 100 + "%";
+  let f = null;
+  if (pos != null) f = pos < p1 ? pos / p1 / 3 : pos < p2 ? 1 / 3 + (pos - p1) / (p2 - p1) / 3 : 2 / 3 + (pos - p2) / (1 - p2) / 3;
+  $(pfx + "TileArc").setAttribute("d", f == null ? "" : dialPath($(pfx + "Tile").classList.contains("lv-perigo") ? 1 : Math.max(f, 0.02)));
+  $(pfx + "TileDial").querySelector("title")?.remove();
+  $(pfx + "TileDial").insertAdjacentHTML("afterbegin", `<title>atenção a partir de ${t1} · alarme a partir de ${t2}</title>`);
 }
 
-function tileState(pfx, lvl, word) {
+// frase do nível ao lado do mostrador (só nos quadros dos aparelhos)
+const LV_SAY = {
+  seguro: "dentro do fundo de sempre",
+  atencao: "acima do limite de atenção",
+  alarme: "passou o limite de alarme",
+  perigo: "acima do limite de perigo",
+  nocount: "o aparelho não está mandando contagens",
+};
+function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  $(pfx + "TileState").textContent = word;
+  lvLabel($(pfx + "TileState"), lvl, word, pfx === "a" ? 14 : 18);
+  const sayEl = $(pfx + "TileSay");
+  if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
+}
+// número dentro do anel: encolhe quando não cabe
+function dialVal(pfx, txt) {
+  const el = $(pfx + "TileVal");
+  el.textContent = txt;
+  el.setAttribute("font-size", txt.length > 6 ? "3.4" : txt.length > 4 ? "4.2" : "5.2");
 }
 
 // faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
@@ -293,7 +324,7 @@ function miniDev(pfx, u, v, lvl, word, dotCls, stale) {
   $("mini" + pfx + "Unit").textContent = UNIT_TXT[u];
   const k2 = u === "cpm" || u === "cps" ? "usv" : "cpm";
   $("mini" + pfx + "Sec").textContent = v ? `${v[k2]} ${UNIT_TXT[k2]}` : "";
-  $("mini" + pfx + "State").textContent = word;
+  lvLabel($("mini" + pfx + "State"), lvl, word, 12);
 }
 
 function renderGTile() {
@@ -305,11 +336,10 @@ function renderGTile() {
   $("gTileDemo").hidden = !state.demo.active;
   $("gTile").classList.toggle("stale", !live);
   const v = live ? tileVals(r.usv, r.cpm) : null;
-  $("gTileVal").textContent = v ? v[u] : "—";
+  dialVal("g", v ? v[u] : "—");
   // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
   const k = calK();
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
-  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   let lvl = "", word;
   if (live) {
     lvl = r.level;
@@ -317,7 +347,8 @@ function renderGTile() {
     if (r.saturated) word = "Saturado";
     else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
-  tileState("g", lvl, word);
+  tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
+  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
   tileFoot($("gTileFoot"), u, v, state.gDose);
@@ -337,15 +368,16 @@ function renderRTile(st, o) {
   $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
-  $("rTileVal").textContent = v ? v[u] : "—";
-  $("rTileVal").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
+  dialVal("r", v ? v[u] : "—");
+  $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
-  tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
-  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : LV_WORD;
-  if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
+  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : LV_WORD;
+  const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
+  if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
+  tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
   $("miniR").hidden = false;
   miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
@@ -360,18 +392,20 @@ function renderATile() {
   const dev = (e) => (isRcEv(e) ? "RadiaCode" : "GMC-800");
   const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1) || a.time - b.time)[0];
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
-  const lv = top ? { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
+  const lv = top ? { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
   tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
   const ma = $("miniAlert");
   ma.hidden = !top;
   ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
+  ma.querySelector("i").innerHTML = lvIcon(lv, 12);
   $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
   $("mini").classList.toggle("alerting", !!top);
-  ["atencao", "alerta", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
+  ["atencao", "alarme", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
   agoraNow();
   const nav = $("navAlerts");
   nav.hidden = !top;
   nav.textContent = String(srcs.size);
+  if (lv) nav.insertAdjacentHTML("afterbegin", lvIcon(lv, 10, "Nível: " + LV_WORD[lv]));
   nav.className = "side-badge mono" + (lv ? " lv-" + lv : "");
   if (top) {
     $("aTileTitle").textContent = `${lvlName(top)} no ${dev(top)}` + (top.demo ? " (demo)" : "");
@@ -494,16 +528,18 @@ async function refreshStats() {
   const s = await api.GetStats();
   state.bgCPM = s.bgCPM || null;
   const cal = calK();
-  $("tAvg").textContent = fmt(s.avg1h, 1);
-  $("tAvgSub").textContent = s.avg1h == null ? "CPM" : `≈ ${fmt(s.avg1h * cal, 3)} µSv/h`;
-  $("tMin").textContent = fmt(s.min24h, 0);
-  $("tMax").textContent = fmt(s.max24h, 0);
-  $("tMaxSub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
+  // em µSv/h desde a 2.29 (a última hora e o último dia: calibração de agora)
+  const u = (v) => (v == null ? "—" : fmt(v * cal, usvDigits(v * cal)));
+  $("tAvg").textContent = u(s.avg1h);
+  $("tAvgSub").textContent = s.avg1h == null ? "µSv/h" : `µSv/h · ${fmt(s.avg1h, 1)} CPM`;
+  $("tMin").textContent = u(s.min24h);
+  $("tMax").textContent = u(s.max24h);
+  $("tMaxSub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o RadiaCode)
-  $("hAvg1h").textContent = fmt(s.avg1h, 1);
-  $("hMin24").textContent = fmt(s.min24h, 0);
-  $("hMax24").textContent = fmt(s.max24h, 0);
-  $("hMax24Sub").textContent = s.max24h == null ? "CPM" : `CPM às ${hhmm(s.max24hAt)}`;
+  $("hAvg1h").textContent = u(s.avg1h);
+  $("hMin24").textContent = u(s.min24h);
+  $("hMax24").textContent = u(s.max24h);
+  $("hMax24Sub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
   state.gDose = s.minutesToday ? s.doseToday : null;
   renderGTile();
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
@@ -543,8 +579,8 @@ function renderList(ul, list, max, empty, alerts) {
     const li = document.createElement("li");
     if (alerts) {
       const d = document.createElement("span");
-      d.className = "dot-a " + (/Alarme/.test(e.text) ? "alarm" : "att");
-      d.setAttribute("aria-hidden", "true");
+      d.className = "dot-a";
+      d.innerHTML = lvIcon(/Perigo/.test(e.text) ? "perigo" : /Alarme/.test(e.text) ? "alarme" : "atencao", 12);
       li.appendChild(d);
     }
     const t = document.createElement("time");
@@ -839,7 +875,7 @@ function renderDemoRcPresets() {
   const bg = (st.stats && st.stats.bgUSv) || 0.12;
   const list = [[bg, "fundo"]];
   if (l.attn) list.push([l.attn * 1.15, "atenção"]);
-  if (l.alarm) list.push([l.alarm * 1.15, "alerta"]);
+  if (l.alarm) list.push([l.alarm * 1.15, "alarme"]);
   if (l.danger) list.push([l.danger * 1.15, "perigo"]);
   const key = list.map((x) => x[0].toFixed(3)).join("|");
   if (box.dataset.key === key) return;
@@ -1392,6 +1428,13 @@ function lv() {
   return out;
 }
 const dangerCPM = () => lv().dangerCPM;
+// limites do GMC em µSv/h (o que a pessoa escolhe desde a 2.29); sem o valor
+// salvo, sai do CPM pela calibração atual
+const usv3 = (v) => (v > 0 ? Number(v.toPrecision(3)) : 0);
+const attnUSv = () => { const l = (state.settings && state.settings.levels) || {}; return l.attentionUSv > 0 ? l.attentionUSv : lv().attentionCPM * calK(); };
+const dangerUSv = () => { const l = (state.settings && state.settings.levels) || {}; return l.dangerUSv > 0 ? l.dangerUSv : dangerCPM() * calK(); };
+const alarmUSv = () => { const s = state.settings || {}; return s.alarmUSv > 0 ? s.alarmUSv : (s.alarmCPM || 100) * calK(); };
+const usvTxt = (v) => `${fmt(v, usvDigits(v))} µSv/h`;
 const snoozeMs = () => lv().snoozeMin * 60000;
 const alarmCtl = {
   kind: null, sev: null, muted: false, snoozeUntil: 0, snoozeTimer: null, sound: null,
@@ -1576,7 +1619,7 @@ function updateAlarm() {
       $("alarmTitle").textContent = "PERIGO" + tag;
       $("alarmDetail").textContent = kind === "rc"
         ? `${usvVal(usv)} no RadiaCode · perigo a partir de ${usvVal(rcl.danger || 0)}`
-        : `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · perigo a partir de ${fmt(dangerCPM(), 0)}`;
+        : `${usvTxt(usv)} · perigo a partir de ${usvTxt(dangerUSv())}`;
     }
     note.textContent = PHONES;
     note.hidden = false;
@@ -1590,7 +1633,7 @@ function updateAlarm() {
     $("alarmTitle").textContent = "ALARME" + tag;
     $("alarmDetail").textContent = kind === "rc"
       ? `${usvVal(usv)} no RadiaCode · ` + (rcl.device ? `alarme 2 do aparelho: ${usvVal(rcl.alarm || 0)}` : `limite ${usvVal(rcl.alarm || 0)}`)
-      : `${fmt(cpm, 0)} CPM · ${fmt(usv, usvDigits(usv))} µSv/h · seu limite: ${fmt(limit, 0)}`;
+      : `${usvTxt(usv)} · seu limite: ${usvTxt(alarmUSv())}`;
     note.hidden = true;
     fillGuide("alarmGuide", "alarmHint", guidance("alarme", usv));
     $("btnSilence").textContent = alarmCtl.muted ? "Som desligado" : "Silenciar";
@@ -1616,24 +1659,27 @@ function renderRise(rise, usvNow) {
 
 // aviso nas Configurações sobre o alarme de perigo
 function renderDangerNote() {
-  const v = parseInt($("numAlarm").value, 10) || 0;
+  const v = parseFloat($("numAlarm").value) || 0;
   const el = $("dangerNote");
-  const d = parseInt($("lvDanger").value, 10) || dangerCPM();
+  const d = parseFloat($("lvDanger").value) || dangerUSv();
   if (v >= d) {
     el.className = "danger-note warn";
-    el.textContent = `Seu limite (${fmt(v, 0)}) está acima do perigo do app (${fmt(d, 0)} CPM): quem toca é o alarme de perigo.`;
+    el.textContent = `Seu limite (${usvTxt(v)}) está acima do perigo do app (${usvTxt(d)}): quem toca é o alarme de perigo.`;
   } else {
     el.className = "danger-note";
-    el.textContent = `A partir de ${fmt(d, 0)} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.`;
+    el.textContent = `A partir de ${usvTxt(d)} toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.`;
   }
 }
 
 // ---------- aba "Níveis do app" ----------
 
-const LV_FIELDS = { lvAttn: "attentionCPM", lvDanger: "dangerCPM", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvDTUs: "deadTimeUs" };
+const LV_FIELDS = { lvAttn: "attentionUSv", lvDanger: "dangerUSv", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvDTUs: "deadTimeUs" };
 
 function fillLevels(l) {
   for (const [id, k] of Object.entries(LV_FIELDS)) $(id).value = l[k] ?? LV_DEFAULT[k];
+  // limites em µSv/h: sem o valor salvo, o equivalente do CPM antigo
+  if (!(l.attentionUSv > 0)) $("lvAttn").value = usv3((l.attentionCPM || LV_DEFAULT.attentionCPM) * calK());
+  if (!(l.dangerUSv > 0)) $("lvDanger").value = usv3((l.dangerCPM || LV_DEFAULT.dangerCPM) * calK());
   $("lvDTOn").checked = !!l.deadTimeOn;
   renderLevelEq();
   renderDeadTime();
@@ -1659,6 +1705,9 @@ function readLevels() {
     const v = parseFloat($(id).value);
     out[k] = v > 0 ? (k.endsWith("USv") || k === "deadTimeUs" ? v : Math.round(v)) : LV_DEFAULT[k];
   }
+  // em branco: o padrão do app, em µSv/h pela calibração atual
+  if (!(out.attentionUSv > 0)) out.attentionUSv = usv3(LV_DEFAULT.attentionCPM * calK());
+  if (!(out.dangerUSv > 0)) out.dangerUSv = usv3(LV_DEFAULT.dangerCPM * calK());
   out.deadTimeOn = $("lvDTOn").checked;
   return out;
 }
@@ -1668,7 +1717,7 @@ function renderLevelEq() {
   const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
     const v = parseFloat($(el.dataset.eq).value) || 0;
-    el.textContent = v ? `≈ ${fmt(v * k, usvDigits(v * k))} µSv/h com a calibração atual` : "";
+    el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM no GMC-800 com a calibração atual` : "";
   });
 }
 
@@ -1763,8 +1812,8 @@ function wireLevels() {
 }
 
 function renderAttnLabel() {
-  const v = parseInt($("lvAttn").value, 10) || lv().attentionCPM;
-  $("attnToggleLabel").textContent = `Aviso de atenção a partir de ${fmt(v, 0)} CPM (amarelo e 3 bipes)`;
+  const v = parseFloat($("lvAttn").value) || attnUSv();
+  $("attnToggleLabel").textContent = `Aviso de atenção a partir de ${usvTxt(v)} (amarelo e 3 bipes)`;
 }
 
 function clearSnooze() {
@@ -1904,8 +1953,8 @@ function updateAttention() {
   const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
   $("attnTitle").textContent = kind === "demo" ? "Atenção (demo)" : state.demo.active ? "Atenção (real)" : "Atenção";
   $("attnDetail").textContent = r
-    ? `${fmt(r.cpm, 0)} CPM · ${fmt(r.usv, usvDigits(r.usv))} µSv/h · atenção a partir de ${fmt(lv().attentionCPM, 0)}`
-    : `atenção a partir de ${fmt(lv().attentionCPM, 0)} CPM`;
+    ? `${usvTxt(r.usv)} · atenção a partir de ${usvTxt(attnUSv())}`
+    : `atenção a partir de ${usvTxt(attnUSv())}`;
   fillGuide("attnGuide", "attnHint", guidance("atencao", r ? r.usv : 0));
 }
 
@@ -1940,7 +1989,7 @@ function wireAlarm() {
   };
   $("btnTestAlarm").addEventListener("click", () => test("alarme"));
   $("btnTestDanger").addEventListener("click", () => test("perigo"));
-  $("numAlarm").addEventListener("input", renderDangerNote);
+  $("numAlarm").addEventListener("input", () => { renderDangerNote(); renderLevelEq(); });
   wireLevels();
 }
 
@@ -2026,7 +2075,8 @@ async function openSettings(focusId) {
   refreshAutostart();
   const s = state.settings;
   $("chkAuto").checked = !!s.autoConnect;
-  $("numAlarm").value = s.alarmCPM || 100;
+  $("numAlarm").value = usv3(alarmUSv());
+  renderLevelEq();
   $("selSound").value = s.alarmSound || "sirene";
   $("chkRaise").checked = s.alarmRaise !== false;
   $("chkAttn").checked = s.attentionEnabled !== false;
@@ -2577,10 +2627,10 @@ function wire() {
   });
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
-    const alarm = parseInt($("numAlarm").value, 10);
+    const alarm = parseFloat($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
-      alarmCPM: alarm > 0 ? alarm : 100,
+      alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
       alarmSound: $("selSound").value,
       alarmRaise: $("chkRaise").checked,
       attentionEnabled: $("chkAttn").checked,
@@ -2680,7 +2730,7 @@ function listen() {
   on("realReading", (r) => {
     // leitura real enquanto o demo está ligado (o alarme real continua valendo)
     const line = $("demoRealLine");
-    line.textContent = `Leitura real: ${fmt(r.cpm, 0)} CPM · ${fmt(r.usv, usvDigits(r.usv))} µSv/h` + (r.danger ? " · PERIGO REAL" : r.alarm ? " · ALARME REAL" : "");
+    line.textContent = `Leitura real: ${usvTxt(r.usv)}` + (r.danger ? " · PERIGO REAL" : r.alarm ? " · ALARME REAL" : "");
     line.classList.toggle("alarm", !!(r.alarm || r.danger));
     state.lastReal = r;
     state.realAlarm = !!(r.alarm || r.danger);
@@ -3265,11 +3315,11 @@ function renderRcMain(st) {
   $("rcLevelHint").textContent = own ? "alarmes do RadiaCode" : "faixas do app em µSv/h";
   $("rcLevelScale").innerHTML = own
     ? `<span>0</span><span>${fmt(attn, 2)} · alarme 1</span><span>${fmt(alarm, 2)} · alarme 2</span>`
-    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alerta</span>`;
-  const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alerta" : usv >= attn ? "atencao" : "seguro";
-  $("rcLevelName").textContent = (own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" })[lvl] || "—";
+    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alarme</span>`;
+  const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
+  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
   $("rcLevelName").className = "level-name " + lvl;
-  ["seguro", "atencao", "alerta", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
+  ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   $("rcLevelMarker").hidden = usv == null;
   if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
   renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
@@ -3335,12 +3385,6 @@ function wireRc() {
     state.rcUnit = b.dataset.unit;
     localSet("rcUnit", state.rcUnit);
     if (state.rc.st) renderRcMain(state.rc.st);
-  });
-  $("rcKey").addEventListener("click", () => {
-    if (state.chartUnit === "usv") return;
-    state.chartUnit = "usv";
-    localSet("chartUnit", "usv");
-    refreshChart();
   });
   $("btnRcRetry").addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
   $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
@@ -3749,8 +3793,9 @@ function setupSummary() {
       if (!p) return "";
       const when = long ? `${WEEKDAY[new Date(p.t).getDay()]} ${ddmm(p.t)} ${hhmm(p.t)}` : hhmm(p.t);
       const rc = ser.length === 1 && s.r.rc && s.r.rc.minutes ? s.r.rc.curve[i] : null;
-      if (rc) return `${when}: RadiaCode ${rc.usv == null ? "sem dado" : fmt(rc.usv, usvDigits(rc.usv)) + " µSv/h"} · GMC-800 ${p.cpm == null ? "sem dado" : fmt(p.cpm * calK(), usvDigits(p.cpm * calK())) + " µSv/h (" + fmt(p.cpm, 1) + " CPM)"}`;
-      return `${ser.length > 1 ? s.label + " " : ""}${when}: ${p.cpm == null ? "sem dado" : fmt(p.cpm, 1) + " CPM"}`;
+      const gu = p.usv != null ? p.usv : p.cpm != null ? p.cpm * calK() : null;
+      if (rc) return `${when}: RadiaCode ${rc.usv == null ? "sem dado" : usvTxt(rc.usv)} · GMC-800 ${gu == null ? "sem dado" : usvTxt(gu)}`;
+      return `${ser.length > 1 ? s.label + " " : ""}${when}: ${gu == null ? "sem dado" : usvTxt(gu)}`;
     }).filter(Boolean);
     const tip = $("sumTip");
     tip.hidden = false;
@@ -3912,14 +3957,14 @@ function makeDemoApi() {
         changed = true;
       }
       if (changed) { emit("event", { kind: "alerta" }); }
-      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alerta" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
+      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alarme" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
       feed(Math.max(0, Math.round(c / 60 + (Math.random() - 0.5) * 2)));
       emit("realReading", { time: Date.now(), cpm: 21, cps: 0, usv: 0.137, mrh: 0.0137, level: "seguro", alarm: false });
       return;
     }
     if (status.state !== "conectado") return;
     const cpm = Math.round(20 + (Math.random() - 0.5) * 12);
-    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0101, mrh: cpm * 0.00101, level: cpm >= 100 ? "alerta" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
+    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0101, mrh: cpm * 0.00101, level: cpm >= 100 ? "alarme" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
     // os dois perto: o GMC vê mais o objeto (beta)
     feed(meas.other && meas.other.role === "objeto" && meas.phase === "objeto" ? (Math.random() < 0.9 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0) : Math.random() < 0.33 ? 1 : 0);
   }, 1000);
@@ -4053,6 +4098,8 @@ function makeDemoApi() {
   const demoSpecLive = { counts: null, seconds: 0, at: 0 };
   const demoRcCfg = { off: false, ble: "", raw: true };
   // localStorage rcFake=1: finge um RadiaCode conectado (para ver a tela no demo)
+  const usvEv = (e) => (e.kind !== "alerta" || e.device === "radiacode" ? e
+    : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
@@ -4179,7 +4226,8 @@ const demoRc = () => {
     ChooseReportDir: async () => { settings.reportDir = "D:\\Radiação\\Relatórios"; return api.GetReportDir(); },
     ResetReportDir: async () => { settings.reportDir = ""; return api.GetReportDir(); },
     OpenReportDir: async () => {},
-    GetEvents: async (kind) => events.concat(demoAlerts).filter((e) => !kind || e.kind === kind).sort((x, y) => y.time - x.time),
+    // como o servidor (2.29): alertas do GMC levam o fator da hora e o pico em µSv/h
+    GetEvents: async (kind) => events.concat(demoAlerts).filter((e) => !kind || e.kind === kind).map(usvEv).sort((x, y) => y.time - x.time),
     GetAlertDetail: async (id) => {
       const e = events.concat(demoAlerts).find((x) => x.id === id);
       if (!e) throw new Error("alerta não encontrado");
@@ -4201,13 +4249,14 @@ const demoRc = () => {
       const seconds = [], minutes = [];
       if (live) for (let t = Math.ceil(from / 1e3) * 1e3; t < to; t += 2e3) seconds.push({ t, cpm: Math.max(5, Math.round(bump(t) + (Math.random() - 0.5) * 6)) });
       for (let t = Math.floor(from / 6e4) * 6e4; t < to; t += 6e4) minutes.push({ t, cpm: Math.round(bump(t + 3e4)) });
-      return { event: { ...e, active: !!e.active }, from, to, end, seconds, minutes, limit: lim, attention: 50, alarm: settings.alarmCPM, danger: 1000, detailed: live };
+      const K = 0.0101, cv = (l) => l.map((q) => ({ ...q, cpm: q.cpm * K }));
+      return { event: usvEv({ ...e, active: !!e.active }), from, to, end, seconds: cv(seconds), minutes: cv(minutes), limit: lim * K, limitCPM: lim, attention: 50 * K, alarm: (settings.alarmCPM || 100) * K, danger: 1000 * K, detailed: live, unit: "usv" };
     },
     GetActiveAlerts: async () => {
       const o = { perigo: 0, alarme: 1, atencao: 2 };
       const lvl = demoRcFake() && localStorage.getItem("rcAlert");
       const rc = lvl ? [{ id: 990, time: Date.now() - 95e3, kind: "alerta", level: lvl, device: "radiacode", active: true, cpm: 1.25, peak: 1.41, peakAt: Date.now() - 40e3, text: "Alarme no RadiaCode: 1,25 µSv/h (alarme 2 do aparelho: 1,20)" }] : [];
-      return demoAlerts.filter((e) => e.active).concat(rc).sort((x, y) => o[x.level] - o[y.level]);
+      return demoAlerts.filter((e) => e.active).map(usvEv).concat(rc).sort((x, y) => o[x.level] - o[y.level]);
     },
     ListPorts: async () => [{ name: "COM5", description: "USB-SERIAL CH340", isUSB: true }, { name: "COM1", description: "", isUSB: false }],
     DetectPort: async () => "COM5",
@@ -4530,10 +4579,10 @@ const demoRc = () => {
       if (p.length) {
         let sum = 0, mx = p[0], mn = p[0];
         for (const q of p) { sum += q.cpm; if (q.cpm > mx.cpm) mx = q; if (q.cpm < mn.cpm) mn = q; r.dose += q.cpm * 0.0101 / 60; }
-        r.avg = sum / p.length; r.max = mx.cpm; r.maxAt = mx.t; r.min = mn.cpm; r.minAt = mn.t; r.avgUSv = r.avg * 0.0101; r.vsBgPct = (r.avg - 20) / 20 * 100;
+        r.avg = sum / p.length; r.max = mx.cpm; r.maxAt = mx.t; r.min = mn.cpm; r.minAt = mn.t; r.avgUSv = r.avg * 0.0101; r.maxUSv = r.max * 0.0101; r.minUSv = r.min * 0.0101; r.bgUSv = 20 * 0.0101; r.vsBgPct = (r.avg - 20) / 20 * 100;
       }
       for (let t = from; t < to; t += step) { const q = range(t, t + step); r.curve.push({ t, cpm: q.length ? q.reduce((a, b) => a + b.cpm, 0) / q.length : null }); }
-      for (const e of events.concat(demoAlerts)) if (e.kind === "alerta" && e.time >= from && e.time < to) { r[e.level === "perigo" ? "danger" : e.level === "alarme" ? "alarm" : "attention"]++; r.peakAlert = Math.max(r.peakAlert, e.peak || 0); }
+      for (const e of events.concat(demoAlerts)) if (e.kind === "alerta" && e.time >= from && e.time < to) { r[e.level === "perigo" ? "danger" : e.level === "alarme" ? "alarm" : "attention"]++; r.peakAlert = Math.max(r.peakAlert, e.peak || 0); r.peakAlertUSv = r.peakAlert * 0.0101; }
       if (settings.rainEnabled && span > 20 * 36e5) { r.rainMM = 3.4; r.rainHours = 2; }
       const effTo = Math.min(to, Date.now());
       r.spanMinutes = Math.round((effTo - from) / 6e4);
@@ -4799,7 +4848,10 @@ const demoRc = () => {
     },
     GetChartRange: async (from, to) => {
       const c = withPeaks(await chartRangePreview(from, to));
-      if (demoRcFake()) c.rc = (c.usv || []).map((v, i) => (v == null ? null : v * 0.6 + Math.sin(i / 3) * 0.004));
+      if (demoRcFake()) {
+        c.rc = (c.usv || []).map((v, i) => (v == null ? null : v * 0.6 + Math.sin(i / 3) * 0.004));
+        c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
+      }
       return c;
     },
     _chartRange: async (from, to) => {
@@ -4826,6 +4878,9 @@ const demoRc = () => {
         c.rc = (c.usv || []).map((v, i) => (v == null || i < c.usv.length * 0.3 ? null : v * 0.9 + (Math.sin(i / 3) * 0.004)));
         const ok = c.rc.filter((v) => v != null);
         c.rcAvg = ok.length ? ok.reduce((a, b) => a + b, 0) / ok.length : null;
+        // CPM do aparelho: umas 28× as contagens do GMC (≈ 4950 CPM por µSv/h)
+        c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
+        c.rcAvgCPM = c.rcAvg == null ? null : c.rcAvg * 4950;
       }
       return Object.assign(c, { avgUSv: u(c.avg), minUSv: u(c.min), maxUSv: u(c.max) });
     },

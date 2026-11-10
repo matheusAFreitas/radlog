@@ -144,7 +144,7 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		}
 	}
 	cal := a.convCalLocked()
-	lv := a.settings.Levels.Norm()
+	lv := a.effLocked().Levels.Norm()
 	info, connected := a.info, a.state == "conectado"
 	a.mu.Unlock()
 	if m == nil {

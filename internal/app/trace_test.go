@@ -63,6 +63,9 @@ func TestTraceMinutes(t *testing.T) {
 
 func TestConfigHistory(t *testing.T) {
 	a := newTestApp(t)
+	a.mu.Lock()
+	a.migrateThrLocked() // como na abertura do app: limites em µSv/h
+	a.mu.Unlock()
 	a.cfgRecord("app")
 	h := a.GetConfigHistory()
 	if len(h) != 7 || h[0].Source != "início do registro" || h[0].From != "" {
@@ -77,7 +80,7 @@ func TestConfigHistory(t *testing.T) {
 	// mudar o tempo morto e o alarme pelas Configurações
 	s := a.GetSettings()
 	s.Levels.DeadTimeOn = true
-	s.AlarmCPM = 120
+	s.AlarmUSv = 1.2
 	a.SaveSettings(s)
 	h = a.GetConfigHistory()
 	if len(h) != 9 {
@@ -90,7 +93,7 @@ func TestConfigHistory(t *testing.T) {
 	if c := got["Tempo morto"]; c.From != "desligado" || c.To != "ligado, τ = 200 µs" || c.Source != "você" {
 		t.Fatalf("tempo morto: %+v", c)
 	}
-	if c := got["Alarme"]; c.From != "a partir de 100 CPM" || c.To != "a partir de 120 CPM" {
+	if c := got["Alarme"]; c.From != "a partir de 1,01 µSv/h" || c.To != "a partir de 1,20 µSv/h" {
 		t.Fatalf("alarme: %+v", c)
 	}
 	// calibração nova lida do contador e modo da memória

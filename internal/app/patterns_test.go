@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"os"
 	"path/filepath"
+	"radlog/internal/gmc"
 	"strings"
 	"testing"
 	"time"
@@ -162,7 +163,8 @@ func TestDisconnectMarksAlerts(t *testing.T) {
 		t.Fatal(err)
 	}
 	ep := d.Episode
-	if ep == nil || ep.Src != "minutos" || ep.N != 10 || ep.Min != 61 || ep.Max != 70 || math.Abs(ep.Mean-65.5) > 1e-9 || ep.EndReason != endDisconnected {
+	k := gmc.DefaultCalibration().USv(100) / 100 // em µSv/h desde a 2.28
+	if ep == nil || ep.Src != "minutos" || ep.N != 10 || math.Abs(ep.Min-61*k) > 1e-9 || math.Abs(ep.Max-70*k) > 1e-9 || math.Abs(ep.Mean-65.5*k) > 1e-9 || ep.EndReason != endDisconnected {
 		t.Fatalf("episódio: %+v", ep)
 	}
 }

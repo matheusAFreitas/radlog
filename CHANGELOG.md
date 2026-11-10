@@ -1,5 +1,110 @@
 # Versões
 
+## 2.27.0
+- **Fundação do estilo, passo 6: espaço.** Os espaçamentos internos
+  (padding, margin e gap) passam a usar a régua do guia: 4, 8, 12, 16, 20,
+  24 e 32 px (`--space-*`). Os valores fora da régua sobem para o degrau
+  mais próximo (6 vira 8, 10 vira 12, 14 vira 16, 18 vira 20, 22 vira 24),
+  então o app fica um pouco mais arejado. Ajustes finos de 1 a 3 px e
+  recuos grandes continuam como estavam.
+
+## 2.26.0
+- **Cada nível tem forma, não só cor.** Seguro é círculo, Atenção é
+  triângulo, Alarme é losango e Perigo é octógono com uma faixa; "sem
+  contagens" é um triângulo vazado. A forma aparece antes do nome do nível
+  no Agora, no Resumo, nos quadros dos aparelhos, no selo de Alertas da barra
+  lateral, na lista de alertas, na legenda e nas linhas de limite dos
+  gráficos, no ícone da bandeja e na coluna de nível do relatório PDF. Dá pra
+  ler o nível sem distinguir cores.
+- **Mostrador no lugar do número e da régua.** Nos quadros do GMC-800 e do
+  RadiaCode, o número grande e a régua de três faixas viraram o mostrador do
+  logo: o valor fica dentro do anel, o arco de fora enche conforme a leitura
+  (um terço por faixa, no sentido do relógio) e tudo pega a cor do nível. Ao
+  lado, o nível em letra grande e uma frase curta ("dentro do fundo de
+  sempre", "passou o limite de alarme"...). Passando o mouse no mostrador
+  aparecem os limites.
+- **Ponto de conexão vira anel.** O ponto ao lado do nome do aparelho agora é
+  um anel, para não confundir com o círculo do nível Seguro.
+
+## 2.25.1
+- **Trecho aberto na mescla de backup.** Um backup feito em outro PC
+  enquanto você ainda estava fora traz o trecho "até agora". Se aqui ele já
+  tinha sido fechado, a mescla colocava o aberto de novo, por cima, e o
+  aparelho ficava "fora" para sempre. Agora um trecho que chega cruzando com
+  um que já existe aqui fica de fora (o daqui vale).
+- **Trecho aberto acompanha o relógio.** Com o app aberto por horas, o
+  trecho "até agora" parava na hora em que a lista foi carregada: a faixa
+  lilás nos gráficos e no Agora encurtava, o relatório e o "Ver" do trecho
+  cortavam o fim. Agora vai até o minuto atual, e o Agora diz "fora de casa
+  até agora" em vez de uma hora parada.
+- Cabeçalho da tabela de calibração e do histórico de configuração com o
+  fundo do cartão (usava uma cor que não existe no guia).
+
+## 2.25.0
+- **Fundação do estilo, passo 5: "Alerta" vira "Alarme" no segundo nível.**
+  Os níveis agora são Seguro, Atenção, Alarme e Perigo. "Alerta" continua
+  sendo o aviso ou o episódio (página Alertas, "Nenhum alerta ativo").
+  - O botão do modo demo e a régua do RadiaCode dizem "150 · alarme" e
+    "· alarme".
+  - O segundo nível fica laranja em todo lugar: no quadro, no menu, na
+    faixa compacta e na frase do Agora (que estava com fundo vermelho). O
+    valor do RadiaCode em Perigo passa a vermelho (estava laranja).
+  - Por dentro: o núcleo (`internal/core/levels`) devolve "alarme", as
+    classes `lv-alerta` viraram `lv-alarme` e saiu a tradução de uma chave
+    para a outra.
+
+## 2.24.0
+- **Fundação do estilo, passo 4: cores restantes.**
+  - **Anotação em cinza.** A marca de anotação nos gráficos sai do roxo,
+    que se confundia com o lilás de "fora de casa", e fica cinza, com o
+    tracejado de sempre. O lilás passa a ser só "fora de casa / fora do
+    lugar".
+  - As cores que ainda estavam escritas à mão viraram tokens no style.css
+    (`--away`, `--obj`, `--info`, as faixas sólidas do alarme e do modo
+    demo, os trilhos e as faixas do quadro de nível) e no JS dos gráficos
+    (`COR.away`, `COR.obj`, `COR.info`, `COR.note`). Fora do `:root` só
+    sobra o degradê do espectro, que é cor de dado.
+  - As transparências agora derivam do token com `color-mix` e ficam em
+    poucas intensidades (6%, 12%, 24% e 50%). Alguns fundos e contornos
+    ficam um pouco mais claros ou mais escuros.
+  - Corrigidas duas cores de reserva erradas (um azul no lugar do verde e
+    um fundo antigo).
+
+## 2.23.0
+- **Fundação do estilo, passo 3: raios.** Os 19 arredondamentos de canto
+  que o app usava viraram os 5 do guia, em 153 lugares: `--radius-xs` (4)
+  para barrinhas, células e etiquetas pequenas, `--radius-sm` (8) para
+  botão, campo e aba, `--radius-md` (10) para segmentado e caixas internas,
+  `--radius-lg` (14) para cartões e `--radius-pill` para chips. Só sobram
+  `50%` (pontos redondos) e `0`. Os cantos mudam 1 ou 2 px em alguns
+  lugares.
+
+## 2.22.0
+- **Fundação do estilo, passo 2: tipo.** Os 29 tamanhos de fonte que o app
+  usava viraram os 11 degraus do guia (`--fs-micro` a `--fs-reading-xl`),
+  em todos os 220 lugares do style.css. A tela muda pouco:
+  - 10 px sobe para 11 (as etiquetas "ao vivo" e "simulado" ficam legíveis);
+  - 14 px vira 15 no texto corrido e 13 em botões, tabelas e etiquetas;
+  - 17 vira 16; 18 e 20 viram 19; 24 e 26 viram 28 (números de quadro);
+  - as leituras grandes de 34 a 44 viram 40; 64 vira 56; 68 e 76 viram 88
+    (e 56 em tela estreita).
+  Sobra só um `font-size: 0`, que esconde o texto do menu recolhido.
+
+## 2.21.2
+- **Fundação do estilo, passo 1: tokens e limpeza.** Arrumação interna do
+  style.css, sem mudança na tela (conferido comparando o estilo calculado
+  de cada elemento em todas as telas do modo demo, antes e depois).
+  - O `:root` ganhou os tokens do guia que faltavam: os 11 degraus de tipo
+    (`--fs-*`), os 5 raios (`--radius-*`), a régua de espaço (`--space-*`),
+    a sombra de elemento flutuante e as cores que ainda estavam soltas
+    (fora de casa, anotação, Medir objeto, informação e as faixas sólidas
+    do alarme). Os próximos passos passam a usar esses nomes.
+  - Regras do mesmo seletor escritas duas ou três vezes foram juntadas num
+    lugar só (de 79 para 34; as que sobraram dependem da ordem em relação a
+    outra regra e ficam para os passos seguintes).
+  - `!important` caiu de 19 para 3 (ficam `[hidden]` e os dois do modo
+    duo); os outros viraram seletores um pouco mais específicos.
+
 ## 2.21.1
 - **Atualização automática volta a achar a versão mais nova.** A 2.20.5 e a
   2.21.0 saíram com dois minutos de diferença, e a 2.20.5 terminou de

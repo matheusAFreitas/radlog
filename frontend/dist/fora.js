@@ -6,15 +6,17 @@
 
 // o trecho aberto (to = 0: até agora) vira "até agora" para as contas da tela
 const normPeriods = (list) => (list || []).map((p) => (p.to ? p : { ...p, open: true, to: Date.now() }));
+// fim de um trecho agora (o aberto anda junto com o relógio, não para na hora em que a lista chegou)
+const pTo = (p) => (p.open ? Math.max(p.to, Date.now()) : p.to);
 
-const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < p.to) || null;
+const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < pTo(p)) || null;
 const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${p.name}` : ""; };
 
 // faixas lilás no gráfico para os períodos fora de casa
 function awayBands(t0, t1, xt) {
-  return (state.periods || []).filter((p) => p.to > t0 && p.from < t1).map((p) => {
-    const x1 = xt(Math.max(p.from, t0)), x2 = xt(Math.min(p.to, t1));
-    return `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${H}" fill="#B79CFF" fill-opacity="0.13"/>`;
+  return (state.periods || []).filter((p) => pTo(p) > t0 && p.from < t1).map((p) => {
+    const x1 = xt(Math.max(p.from, t0)), x2 = xt(Math.min(pTo(p), t1));
+    return `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${H}" fill="${COR.away}" fill-opacity="0.13"/>`;
   }).join("");
 }
 
@@ -25,10 +27,10 @@ let periodEditing = 0;
 
 // números de um período: RadiaCode (você) e GMC-800 no mesmo tempo (state.periodSum fica no app.js)
 function periodSummary(p) {
-  const to = Math.min(p.to, Date.now());
+  const to = Math.min(pTo(p), Date.now());
   const key = `${p.from}-${to}`;
   // período que ainda está acontecendo: refaz a conta a cada abertura
-  if (!state.periodSum[key] || p.to > Date.now()) state.periodSum[key] = api.GetSummary(p.from, to).catch(() => null);
+  if (!state.periodSum[key] || p.open) state.periodSum[key] = api.GetSummary(p.from, to).catch(() => null);
   return state.periodSum[key];
 }
 
@@ -139,8 +141,8 @@ function renderTimeline() {
     const bar = lane("", dev);
     for (const p of state.periods || []) {
       const at = whOf(p)[dev];
-      if (at === WH_NORMAL[dev] || p.to <= t0) continue;
-      const a = pct(p.from), b = pct(p.to);
+      if (at === WH_NORMAL[dev] || pTo(p) <= t0) continue;
+      const a = pct(p.from), b = pct(pTo(p));
       const i = document.createElement("i");
       i.title = `${p.name} · ${zoomRangeText(p.from, p.to)}`;
       i.style.cssText = `left:${a}%;width:${Math.max(0.6, b - a)}%;background:var(${at === "fora" ? "--outc" : "--swap"})`;
@@ -285,7 +287,7 @@ function renderPeriods() {
     kind.hidden = p.name === whKind(w);
     const when = document.createElement("div");
     when.className = "when";
-    when.textContent = p.open ? `desde ${zoomRangeText(p.from, p.from).split(" ")[0]} ${hhmm(p.from)} · ${whDur(p.from, p.to)} até agora` : zoomRangeText(p.from, p.to);
+    when.textContent = p.open ? `desde ${zoomRangeText(p.from, p.from).split(" ")[0]} ${hhmm(p.from)} · ${whDur(p.from, pTo(p))} até agora` : zoomRangeText(p.from, p.to);
     const who = document.createElement("div");
     who.className = "who";
     for (const dev of ["gmc", "radiacode"]) {
@@ -308,8 +310,8 @@ function renderPeriods() {
       return x;
     };
     if (p.open) btn("Voltar ao normal", "accent", () => call(api.SetWhere, "casa", "comigo", ""));
-    btn("Ver", "", () => showRange(p.from, p.to));
-    btn("Relatório (PDF)", "", (e) => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name, e.currentTarget), "Relatório em PDF só desse trecho");
+    btn("Ver", "", () => showRange(p.from, pTo(p)));
+    btn("Relatório (PDF)", "", (e) => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, e.currentTarget), "Relatório em PDF só desse trecho");
     btn(p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); });
     btn("Apagar…", "danger-btn", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); });
     li.append(t, acts);

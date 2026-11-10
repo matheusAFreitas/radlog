@@ -13,12 +13,16 @@ const (
 
 // Levels são os níveis do app.
 type Levels struct {
-	AttentionCPM int     `json:"attentionCPM"` // aviso de atenção
-	DangerCPM    int     `json:"dangerCPM"`    // alarme de perigo
-	SnoozeMin    int     `json:"snoozeMin"`    // "Silenciar" no perigo dura isso
-	SatMaxUSv    float64 `json:"satMaxUSv"`    // Geiger saturado: fim da escala
-	SatDropUSv   float64 `json:"satDropUSv"`   // Geiger saturado: queda brusca a partir de
-	SatHoldSec   int     `json:"satHoldSec"`   // aviso de queda brusca fica por
+	AttentionCPM int `json:"attentionCPM"` // aviso de atenção
+	DangerCPM    int `json:"dangerCPM"`    // alarme de perigo
+	// os mesmos dois em µSv/h (2.29): é o que a pessoa escolhe; o CPM acima
+	// sai deles pela calibração em uso (0 = ainda não migrado)
+	AttentionUSv float64 `json:"attentionUSv"`
+	DangerUSv    float64 `json:"dangerUSv"`
+	SnoozeMin    int     `json:"snoozeMin"`  // "Silenciar" no perigo dura isso
+	SatMaxUSv    float64 `json:"satMaxUSv"`  // Geiger saturado: fim da escala
+	SatDropUSv   float64 `json:"satDropUSv"` // Geiger saturado: queda brusca a partir de
+	SatHoldSec   int     `json:"satHoldSec"` // aviso de queda brusca fica por
 	// Compensação de tempo morto (modelo não paralisável, como no Rad Pro):
 	// taxa real = medida ÷ (1 − medida × τ), com o fator limitado a 10×.
 	DeadTimeOn bool    `json:"deadTimeOn"`
@@ -68,6 +72,12 @@ func (l Levels) Norm() Levels {
 	d := Default()
 	l.AttentionCPM = clampInt(l.AttentionCPM, 5, 100000, d.AttentionCPM)
 	l.DangerCPM = clampInt(l.DangerCPM, 50, 10000000, d.DangerCPM)
+	if l.AttentionUSv > 0 {
+		l.AttentionUSv = clampF(l.AttentionUSv, 0.01, 1e4, 0)
+	}
+	if l.DangerUSv > 0 {
+		l.DangerUSv = clampF(l.DangerUSv, 0.05, 1e5, 0)
+	}
 	l.SnoozeMin = clampInt(l.SnoozeMin, 1, 60, d.SnoozeMin)
 	l.SatMaxUSv = clampF(l.SatMaxUSv, 10, 1e6, d.SatMaxUSv)
 	l.SatDropUSv = clampF(l.SatDropUSv, 1, 1e6, d.SatDropUSv)
@@ -119,14 +129,14 @@ func (l Levels) SatHold() time.Duration {
 	return time.Duration(l.SatHoldSec) * time.Second
 }
 
-// Level classifica um CPM: "perigo" (nível do app), "alerta" e "atencao"
+// Level classifica um CPM: "perigo" (nível do app), "alarme" e "atencao"
 // (faixas do manual) ou "seguro".
 func Level(cpm float64, lv Levels) string {
 	switch {
 	case cpm >= lv.DangerEnter():
 		return "perigo"
 	case cpm >= WarningCPM:
-		return "alerta"
+		return "alarme"
 	case cpm >= ManualAttnCPM:
 		return "atencao"
 	}

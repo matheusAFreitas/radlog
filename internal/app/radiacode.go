@@ -171,8 +171,9 @@ func (a *App) GetRadiacode() RcState {
 	alertLvl := a.rcAlertLevelLocked()
 	off, ble, noRaw := a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw
 	cal := a.convCalLocked()
-	lv := a.settings.Levels.Norm()
-	alarmCPM := a.settings.AlarmCPM
+	eff := a.effLocked()
+	lv := eff.Levels.Norm()
+	alarmCPM := eff.AlarmCPM
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
 		alarmCPM = levels.WarningCPM
@@ -847,12 +848,14 @@ func (a *App) withRc(c Chart) Chart {
 	step := time.Duration(c.StepMs) * time.Millisecond
 	from := time.UnixMilli(c.Times[0])
 	to := from.Add(time.Duration(n) * step)
-	sum := make([]float64, n)
+	sum, sumC := make([]float64, n), make([]float64, n)
 	cnt := make([]int, n)
-	add := func(t time.Time, v float64) {
+	// v em µSv/h, cpm em contagens por minuto (o gráfico analítico, 2.29)
+	add := func(t time.Time, v, cpm float64) {
 		i := int(t.Sub(from) / step)
 		if i >= 0 && i < n {
 			sum[i] += v
+			sumC[i] += cpm
 			cnt[i]++
 		}
 	}
@@ -861,7 +864,7 @@ func (a *App) withRc(c Chart) Chart {
 		ring := append([]rcSample(nil), a.rc.ring...)
 		a.rc.mu.Unlock()
 		for _, s := range ring {
-			add(s.t, s.usv)
+			add(s.t, s.usv, s.cps*60)
 		}
 		// mais antigo que a memória: o valor do minuto em cada ponto
 		lim := to
@@ -871,13 +874,13 @@ func (a *App) withRc(c Chart) Chart {
 		if lim.After(from) {
 			for _, p := range a.rcRange(from.Truncate(time.Minute), lim) {
 				for t := p.T; t.Before(p.T.Add(time.Minute)) && t.Before(lim); t = t.Add(step) {
-					add(t, p.USvh)
+					add(t, p.USvh, p.CPS*60)
 				}
 			}
 		}
 	} else {
 		for _, p := range a.rcRange(from, to) {
-			add(p.T, p.USvh)
+			add(p.T, p.USvh, p.CPS*60)
 		}
 	}
 	if dpts, ok := a.demoRcSeries(from, to, step < time.Minute); ok {
@@ -897,25 +900,28 @@ func (a *App) withRc(c Chart) Chart {
 		for i := range dsum {
 			if dcnt[i] > 0 {
 				sum[i], cnt[i] = dsum[i], dcnt[i]
+				sumC[i] = dsum[i] * rcDemoCPSPerUSv * 60
 			}
 		}
 	}
-	var tot float64
+	var tot, totC float64
 	k := 0
-	rc := make([]*float64, n)
+	rc, rcC := make([]*float64, n), make([]*float64, n)
 	for i := range sum {
 		if cnt[i] > 0 {
-			v := sum[i] / float64(cnt[i])
-			rc[i] = &v
+			v, vc := sum[i]/float64(cnt[i]), sumC[i]/float64(cnt[i])
+			rc[i], rcC[i] = &v, &vc
 			tot += v
+			totC += vc
 			k++
 		}
 	}
 	if k == 0 {
 		return c
 	}
-	avg := tot / float64(k)
+	avg, avgC := tot/float64(k), totC/float64(k)
 	c.RC, c.RCAvg = rc, &avg
+	c.RCCPM, c.RCAvgCPM = rcC, &avgC
 	return c
 }
 

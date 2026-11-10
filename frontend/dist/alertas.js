@@ -29,16 +29,26 @@ function whenLabel(ms) {
 // alertas do RadiaCode: valores em µSv/h
 const isRcEv = (e) => !!e && e.device === "radiacode";
 const usvVal = (v) => `${fmt(v, usvDigits(v))} µSv/h`;
-const evVal = (e, v) => (isRcEv(e) ? usvVal(v) : `${fmt(v, 0)} CPM`);
+// GMC em µSv/h desde a 2.29: o servidor manda o pico (peakUSv) e o valor do
+// começo (usv) já convertidos pela calibração da hora; CPM só sem eles
+const evVal = (e, v) => (isRcEv(e) ? usvVal(v)
+  : v === e.peak && e.peakUSv ? usvVal(e.peakUSv)
+  : v === e.cpm && e.usv ? usvVal(e.usv)
+  : `${fmt(v, 0)} CPM`);
 const evSig = (e, v) => (isRcEv(e) ? "" : sigTxt(v));
 
 function alertTitle(e) {
   const demo = e.demo || /^\[demo\] /.test(e.text) ? " (demo)" : "";
   if (e.members && isRcEv(e)) return `${lvlName(e)} no RadiaCode: pico de ${evVal(e, e.peak)}${demo}`;
-  if (e.members) return `${lvlName(e)}: pico de ${fmt(e.peak, 0)} CPM${demo}`;
-  if (e.retro) return `${lvlName(e)}: pico de ${fmt(e.peak, 0)} CPM${demo}`;
+  if (e.members) return `${lvlName(e)}: pico de ${evVal(e, e.peak)}${demo}`;
+  if (e.retro) return `${lvlName(e)}: pico de ${evVal(e, e.peak)}${demo}`;
   // alertas antigos diziam "(acima de 50)" mesmo com 50: o certo é "a partir de"
-  return e.text.replace(/^\[demo\] /, "").replace(/\(acima de (\d+)\)/, "(a partir de $1)") + demo;
+  let t = e.text.replace(/^\[demo\] /, "").replace(/\(acima de (\d+)\)/, "(a partir de $1)");
+  // alertas do GMC gravados em CPM (antes da 2.29): mostra em µSv/h, com a
+  // calibração da hora do alerta (a mesma razão do usv/cpm do evento)
+  const k = isRcEv(e) ? 0 : e.usvPerCPM || (e.usv && e.cpm ? e.usv / e.cpm : 0);
+  if (k) t = t.replace(/^(\S+): (\d+) CPM \((limite|a partir de) (\d+)\)/, (m, lv, v, w, lim) => `${lv}: ${usvVal(+v * k)} (${w} ${fmt(+lim * k, usvDigits(+lim * k))})`);
+  return t + demo;
 }
 
 function alertSub(e) {
@@ -89,7 +99,7 @@ function groupEpisodes(list) {
       time: first.time,
       end: active || !ended ? 0 : Math.max(...ms.map((x) => x.end)),
       active,
-      peak: pk.peak, peakAt: pk.peakAt,
+      peak: pk.peak, peakAt: pk.peakAt, peakUSv: pk.peakUSv,
       startedAs: lvlCls(first) !== lvlCls(top) ? { level: lvlCls(first), time: first.time } : null,
       upAt: top.time,
       members: ms,
@@ -100,8 +110,8 @@ function groupEpisodes(list) {
 function alertLi(e, withDate) {
   const li = document.createElement("li");
   const d = document.createElement("span");
-  d.className = "dot-a " + ({ perigo: "danger", alarme: "alarm" }[lvlCls(e)] || "att");
-  d.setAttribute("aria-hidden", "true");
+  d.className = "dot-a";
+  d.innerHTML = lvIcon({ perigo: "perigo", alarme: "alarme" }[lvlCls(e)] || "atencao", 12);
   const t = document.createElement("time");
   t.dateTime = new Date(e.time).toISOString();
   t.textContent = withDate ? whenLabel(e.time) : hhmm(e.time);
@@ -149,7 +159,7 @@ function renderActive() {
   renderATile();
   ul.textContent = "";
   if (!list.length) {
-    ul.innerHTML = '<li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li>';
+    ul.innerHTML = `<li class="none">${lvIcon("seguro", 12)}Nenhum alerta agora.</li>`;
     return;
   }
   const now = Date.now();
@@ -165,12 +175,12 @@ function renderActive() {
     const demo = e.demo ? " (demo)" : "";
     const rc = isRcEv(e), rl = (state.rc.st && state.rc.st.limits) || {};
     const lim = rc ? ({ atencao: rl.attn, alarme: rl.alarm, perigo: rl.danger }[lvlCls(e)] || null)
-      : e.level === "alarme" ? (e.text.match(/limite (\d+)/) || [])[1] : e.level === "perigo" ? String(dangerCPM()) : null;
-    li.innerHTML = `<span class="a-title"><span class="pulse" aria-hidden="true"></span></span><span class="a-meta"></span>`;
+      : e.level === "alarme" ? alarmUSv() : e.level === "perigo" ? dangerUSv() : null;
+    li.innerHTML = `<span class="a-title"><span class="pulse">${lvIcon(lvlCls(e) in { alarme: 1, perigo: 1 } ? lvlCls(e) : "atencao", 12)}</span></span><span class="a-meta"></span>`;
     li.querySelector(".a-title").append(`${lvlName(e)} agora${rc ? " no RadiaCode" : ""}${demo}`);
     li.querySelector(".a-meta").textContent =
       `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${evVal(e, e.peak)}${evSig(e, e.peak)}` +
-      (lim ? ` · limite ${rc ? usvVal(+lim) : fmt(+lim, 0)}` : "");
+      (lim ? ` · limite ${usvVal(+lim)}` : "");
     for (const lower of list.filter((x) => src(x) === src(e) && (rank[x.level] || 1) < (rank[e.level] || 1)).sort((a, b) => a.time - b.time)) {
       if (lower.time < e.time) li.querySelector(".a-meta").textContent += ` · ${lvlName(lower).toLowerCase()} desde ${hhmm(lower.time)}`;
     }
@@ -259,11 +269,15 @@ function drawAlertDetail(d) {
   }
   const e = d.event, lv = lvlCls(e), color = LVL_COLOR[lv] || LVL_COLOR.atencao;
   const rc = d.device === "radiacode";
-  const val = (v) => (rc ? usvVal(v) : `${fmt(v, 0)} CPM`);
+  // o detalhe do GMC vem em µSv/h (unit "usv"); o pico do evento segue em
+  // CPM (para o σ) e tem o peakUSv ao lado
+  const inUSv = rc || d.unit === "usv";
+  const val = (v) => (inUSv ? usvVal(v) : `${fmt(v, 0)} CPM`);
+  const peakV = rc || !inUSv ? e.peak : e.peakUSv || e.peak;
   $("adTitle").textContent = `${lvlName(e)}${rc ? " no RadiaCode" : ""} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
   const sub = [];
   sub.push(e.active ? `desde ${hhmm(e.time)} · ${fmtDur(d.end - e.time)}` : `${hhmmss(e.time)}–${hhmmss(d.end)} · durou ${fmtDur(d.end - e.time)}`);
-  if (e.peak) sub.push(`pico ${val(e.peak)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${fmt(bgNow(), 0)})` : ""));
+  if (e.peak) sub.push(`pico ${val(peakV)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)})` : ""));
   sub.push(`limite ${val(d.limit)}`);
   const ep = d.episode;
   if (ep && ep.n) sub.push(`mín ${val(ep.min)} · média ${val(ep.mean)} (${fmt(ep.n, 0)} ${ep.src === "segundos" ? "segundos" : "minutos"})`);
@@ -271,14 +285,14 @@ function drawAlertDetail(d) {
 
   const secs = d.seconds || [], mins = d.minutes || [];
   const t0 = d.from, t1 = Math.max(d.to, t0 + 60e3);
-  let top = Math.max(d.limit || 0, e.peak || 0);
+  let top = Math.max(d.limit || 0, peakV || 0);
   for (const p of secs) top = Math.max(top, p.cpm);
   for (const p of mins) top = Math.max(top, p.cpm);
   top = niceTop(top * 1.12);
   const x = (t) => Math.max(0, Math.min(W, ((t - t0) / (t1 - t0)) * W));
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   const ys = $("adY").children;
-  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = rc ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
+  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = inUSv ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
@@ -310,9 +324,9 @@ function drawAlertDetail(d) {
     const pk = $("adPeak");
     pk.hidden = false;
     pk.style.left = (x(e.peakAt) / W) * 100 + "%";
-    pk.style.top = (y(e.peak) / H) * 100 + "%";
+    pk.style.top = (y(peakV) / H) * 100 + "%";
     pk.style.background = color;
-    pk.title = `pico ${val(e.peak)} às ${hhmmss(e.peakAt)}`;
+    pk.title = `pico ${val(peakV)} às ${hhmmss(e.peakAt)}`;
   }
   const xl = t1 - t0 <= 20 * 60e3 ? hhmmss : hhmm;
   const xs = $("adX").children;
@@ -320,7 +334,7 @@ function drawAlertDetail(d) {
   $("adLegend").innerHTML =
     (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RadiaCode (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
       : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RadiaCode (µSv/h)</span>')
-      : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
+      : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
       : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
@@ -352,7 +366,7 @@ function setupAlertDetail() {
     $("adCursor").style.left = ((p.t - t0) / (t1 - t0)) * 100 + "%";
     const tip = $("adTip");
     tip.hidden = false;
-    const v = d.device === "radiacode" ? usvVal(p.cpm) : `${fmt(p.cpm, 0)} CPM`;
+    const v = d.device === "radiacode" || d.unit === "usv" ? usvVal(p.cpm) : `${fmt(p.cpm, 0)} CPM`;
     tip.textContent = p.m != null ? `${hhmm(p.m)} · ${v} (minuto)` : `${hhmmss(p.t)} · ${v}`;
     tip.style.left = Math.max(0, Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4)) + "px";
   });

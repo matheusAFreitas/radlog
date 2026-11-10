@@ -44,7 +44,7 @@ function agoraNow() {
     else parts.push(home ? `Casa em ${v}` : `Com você em ${v}`);
   }
   if (top) {
-    lv = { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao";
+    lv = { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao";
     title = `${lvlName(top)} no ${isRcEv(top) ? "RadiaCode" : "GMC-800"} agora.`;
     text = parts.concat("Veja os detalhes em Alertas.").join(" · ");
   } else if (!g.live && !r.live) {
@@ -66,7 +66,7 @@ function agoraNow() {
     }
   }
   box.className = "card ag-say lv-" + lv;
-  $("agSayTitle").textContent = title;
+  lvLabel($("agSayTitle"), lv, title, 20);
   $("agSayText").textContent = text;
   const d = agDose && (agDev() === "pessoal" ? agDose.personal : agDose.home);
   const chip = $("agSayBg");
@@ -244,9 +244,9 @@ async function refreshAgDay() {
   const t0 = c.times[0], t1 = c.times[n - 1];
   const xt = (t) => ((t - t0) / Math.max(1, t1 - t0)) * W;
   for (const p of state.periods || []) {
-    if (p.to < t0 || p.from > t1) continue;
+    if (pTo(p) < t0 || p.from > t1) continue;
     const r = document.createElementNS(ns, "rect");
-    const a = xt(Math.max(p.from, t0)), b = xt(Math.min(p.to, t1));
+    const a = xt(Math.max(p.from, t0)), b = xt(Math.min(pTo(p), t1));
     r.setAttribute("x", a); r.setAttribute("y", 0); r.setAttribute("width", Math.max(1, b - a)); r.setAttribute("height", H);
     r.setAttribute("fill", "rgba(138, 180, 248, .10)");
     svg.appendChild(r);
@@ -280,8 +280,8 @@ async function refreshAgDay() {
     for (const nt of (await api.GetNotes(from, now)) || []) items.push([nt.time, nt.text]);
   } catch (e) { /* sem anotações */ }
   for (const p of state.periods || []) {
-    if (p.to < from || p.from > now) continue;
-    items.push([Math.max(p.from, from), `fora de casa até ${hhmm(p.to)}` + (p.name ? ` · ${p.name}` : "")]);
+    if (pTo(p) < from || p.from > now) continue;
+    items.push([Math.max(p.from, from), (p.open ? "fora de casa até agora" : `fora de casa até ${hhmm(p.to)}`) + (p.name ? ` · ${p.name}` : "")]);
   }
   items.sort((a, b) => a[0] - b[0]);
   const ul = $("agItems");

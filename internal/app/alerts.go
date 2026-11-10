@@ -173,6 +173,10 @@ type alertStep struct {
 	AlarmOn       bool // alarme do usuário ligado e acima do limite agora
 	DangerStarted bool
 	DangerEnded   bool
+	// GMC (2.29): a leitura e os limites em µSv/h, para o texto do alerta
+	// (0 = sem conversão: o texto sai em CPM)
+	USv                        float64
+	AttnUSv, AlarmUSv, DngrUSv float64
 	// RadiaCode: CPM é µSv/h e os limites vêm do RcLim
 	Device string
 	RcLim  RcLimits
@@ -180,10 +184,16 @@ type alertStep struct {
 
 func (a *App) openAlert(level string, s alertStep) int64 {
 	var text string
-	switch level {
-	case "perigo":
+	switch {
+	case s.USv > 0 && level == "perigo":
+		text = fmt.Sprintf("Perigo: %s µSv/h (a partir de %s)", fmtUSv(s.USv), fmtUSv(s.DngrUSv))
+	case s.USv > 0 && level == "alarme":
+		text = fmt.Sprintf("Alarme: %s µSv/h (limite %s)", fmtUSv(s.USv), fmtUSv(s.AlarmUSv))
+	case s.USv > 0:
+		text = fmt.Sprintf("Atenção: %s µSv/h (a partir de %s)", fmtUSv(s.USv), fmtUSv(s.AttnUSv))
+	case level == "perigo":
 		text = fmt.Sprintf("Perigo: %.0f CPM (a partir de %d)", s.CPM, s.Lv.DangerCPM)
-	case "alarme":
+	case level == "alarme":
 		text = fmt.Sprintf("Alarme: %.0f CPM (limite %d)", s.CPM, s.AlarmCPM)
 	default:
 		text = fmt.Sprintf("Atenção: %.0f CPM (a partir de %d)", s.CPM, s.Lv.AttentionCPM)
@@ -383,6 +393,7 @@ func (a *App) GetActiveAlerts() []Event {
 		if e := a.eventLocked(id); e != nil {
 			c := *e
 			c.Active = true
+			a.evUSvLocked(&c)
 			out = append(out, c)
 		}
 	}
@@ -406,8 +417,11 @@ func (a *App) retroAlerts(pts []store.Point) int {
 		return 0
 	}
 	a.mu.Lock()
-	alarmCPM := a.settings.AlarmCPM
-	lv := a.settings.Levels.Norm()
+	eff := a.effLocked()
+	alarmCPM := eff.AlarmCPM
+	lv := eff.Levels.Norm()
+	attnU, alarmU, dangerU := thrUSvLocked(a, eff)
+	tl := a.calTLLocked()
 	have := map[int64]bool{}
 	for _, e := range a.events {
 		if e.Kind == kindAlert && e.Retro {
@@ -438,13 +452,14 @@ func (a *App) retroAlerts(pts []store.Point) int {
 		}
 		ev.Level = alerts.Level(ep.Peak, alarmCPM, lv)
 		at := ep.PeakAt.Format("15:04")
+		peak := fmtUSv(tl.USvAt(ep.PeakAt, ep.Peak))
 		switch ev.Level {
 		case "perigo":
-			ev.Text = fmt.Sprintf("Perigo (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.Peak, at, lv.DangerCPM)
+			ev.Text = fmt.Sprintf("Perigo (histórico do contador): pico de %s µSv/h às %s (a partir de %s)", peak, at, fmtUSv(dangerU))
 		case "alarme":
-			ev.Text = fmt.Sprintf("Alarme (histórico do contador): pico de %.0f CPM às %s (limite %d)", ep.Peak, at, alarmCPM)
+			ev.Text = fmt.Sprintf("Alarme (histórico do contador): pico de %s µSv/h às %s (limite %s)", peak, at, fmtUSv(alarmU))
 		default:
-			ev.Text = fmt.Sprintf("Atenção (histórico do contador): pico de %.0f CPM às %s (a partir de %d)", ep.Peak, at, lv.AttentionCPM)
+			ev.Text = fmt.Sprintf("Atenção (histórico do contador): pico de %s µSv/h às %s (a partir de %s)", peak, at, fmtUSv(attnU))
 		}
 		a.mu.Lock()
 		a.evSeq++

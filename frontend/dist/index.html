@@ -127,7 +127,7 @@
       <div class="row presets">
         <button type="button" class="btn small" data-demo="20">20 · fundo</button>
         <button type="button" class="btn small" data-demo="70">70 · atenção</button>
-        <button type="button" class="btn small" data-demo="150">150 · alerta</button>
+        <button type="button" class="btn small" data-demo="150">150 · alarme</button>
         <button type="button" class="btn small" data-demo="1000">1.000</button>
         <button type="button" class="btn small" data-demo="10000">10.000</button>
       </div>
@@ -155,17 +155,12 @@
       <span id="statusText">desconectado</span>
     </button>
         <span class="inst-fill"></span>
-        <span class="inst-state" id="gTileState">—</span>
       </header>
       <div class="inst-read" data-view="gmc">
-        <span class="inst-val mono" id="gTileVal">—</span><span class="inst-unit" id="gTileUnit">µSv/h</span>
-        <span class="demo-tag" id="gTileDemo" hidden>demo</span>
-        <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
-      </div>
-      <div class="inst-scale" id="gTileScale" aria-hidden="true">
-        <div class="inst-segs"><span class="s-safe"></span><span class="s-att"></span><span class="s-high"></span></div>
-        <i class="inst-mark" id="gTileMark" hidden></i>
-        <span class="inst-tick" id="gTick1"></span><span class="inst-tick" id="gTick2"></span>
+        <svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
+        <div class="inst-say"><span class="inst-state" id="gTileState">—</span><span class="inst-sub-say" id="gTileSay"></span>
+        <div class="inst-say-row"><span class="demo-tag" id="gTileDemo" hidden>demo</span>
+        <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot"><span id="gTileFoot"></span><span class="inst-fill"></span><button type="button" class="link small-link inst-warn" id="gTileSync" hidden></button><button type="button" class="pill clock-chip" id="clockChip" title="Sincronizar o relógio do contador com o do PC" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -176,17 +171,12 @@
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">RadiaCode</span></button>
         <span class="inst-fill"></span>
-        <span class="inst-state" id="rTileState">—</span>
       </header>
       <div class="inst-read" data-view="radiacode">
-        <span class="inst-val mono" id="rTileVal">—</span><span class="inst-unit" id="rTileUnit">µSv/h</span>
-        <span class="demo-tag" id="rTileDemo" hidden>demo</span>
-        <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
-      </div>
-      <div class="inst-scale" id="rTileScale" aria-hidden="true">
-        <div class="inst-segs"><span class="s-safe"></span><span class="s-att"></span><span class="s-high"></span></div>
-        <i class="inst-mark" id="rTileMark" hidden></i>
-        <span class="inst-tick" id="rTick1"></span><span class="inst-tick" id="rTick2"></span>
+        <svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
+        <div class="inst-say"><span class="inst-state" id="rTileState">—</span><span class="inst-sub-say" id="rTileSay"></span>
+        <div class="inst-say-row"><span class="demo-tag" id="rTileDemo" hidden>demo</span>
+        <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
     </article>
@@ -288,8 +278,8 @@
         </div>
         <div class="chart-ctrls">
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
-          <button type="button" data-cunit="cpm" aria-pressed="true">CPM</button>
-          <button type="button" data-cunit="usv" aria-pressed="false">µSv/h</button>
+          <button type="button" data-cunit="usv" aria-pressed="true">µSv/h</button>
+          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes">CPM (análise)</button>
         </div>
         </div>
       </div>
@@ -309,6 +299,7 @@
           <div class="plot" id="plot">
             <svg id="chart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho."></svg>
             <div class="peak-dots" id="peakDots"></div>
+            <div class="thr-marks" id="thrMarks" aria-hidden="true"></div>
             <div class="note-marks" id="noteMarks"></div>
             <div class="cursor" id="cursor" hidden></div>
             <div class="zoom-sel" id="zoomSel" hidden></div>
@@ -316,9 +307,10 @@
           </div>
           <div class="x-axis mono"><span id="x0"></span><span id="x1"></span><span id="x2"></span></div>
         </div>
+        <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RadiaCode"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
     </section>
 
@@ -598,7 +590,7 @@
       <div class="dlg-head">
         <h2 id="alertsTitle">Histórico de alertas</h2>
       </div>
-      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
+      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
       <div class="alerts-tools">
         <div class="seg" role="group" aria-label="Aparelho dos alertas" id="alertDevFilter">
           <button type="button" data-adev="" aria-pressed="true">Os dois</button>
@@ -925,14 +917,14 @@
           <div class="marker" id="levelMarker" hidden></div>
         </div>
         <div class="level-scale mono">
-          <span>0</span><span>50 · atenção</span><span>100 · alerta</span>
+          <span>0</span><span>50 · atenção</span><span>100 · alarme</span>
         </div>
         <div class="level-foot"><button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
 
       <div class="rc-mini">
-        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">CPM</span></div>
-        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">CPM</span></div>
+        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
+        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
 
@@ -942,8 +934,8 @@
       </div>
     </section>
   <section class="tiles" hidden>
-      <div class="card tile"><span class="tile-label">Média · 1 h · CPM</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
-      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">CPM</span></div>
+      <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
+      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
       <div class="card tile"><span class="tile-label">Máximo · 24 h</span><span class="tile-value mono" id="tMax">—</span><span class="tile-sub" id="tMaxSub">CPM</span></div>
     </section>
   <section class="card">
@@ -1356,8 +1348,9 @@
         <span id="alarmLabel">Alarme ligado</span>
         <input type="checkbox" id="chkAlarm">
       </label>
-      <label for="numAlarm">Tocar alarme a partir de (CPM)</label>
-      <input type="number" id="numAlarm" min="1" step="1" inputmode="numeric">
+      <label for="numAlarm">Tocar alarme a partir de (µSv/h)</label>
+      <input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal">
+      <p class="small muted lv-eq" data-eq="numAlarm"></p>
       <label for="selSound">Som</label>
       <select id="selSound">
         <option value="sirene">Sirene contínua</option>
@@ -1574,14 +1567,14 @@
       <p class="small muted set-note">Níveis que o app usa por conta própria, além do seu alarme. Valem para o contador e para o modo demo. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
       <fieldset>
         <legend>Aviso de atenção</legend>
-        <label for="lvAttn">A partir de (CPM)</label>
-        <input type="number" id="lvAttn" min="5" step="1" inputmode="numeric">
+        <label for="lvAttn">A partir de (µSv/h)</label>
+        <input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal">
         <p class="small muted lv-eq" data-eq="lvAttn"></p>
       </fieldset>
       <fieldset>
         <legend>Alarme de perigo</legend>
-        <label for="lvDanger">A partir de (CPM)</label>
-        <input type="number" id="lvDanger" min="50" step="1" inputmode="numeric">
+        <label for="lvDanger">A partir de (µSv/h)</label>
+        <input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal">
         <p class="small muted lv-eq" data-eq="lvDanger"></p>
         <label for="lvSnooze">"Silenciar" cala o som por (minutos)</label>
         <input type="number" id="lvSnooze" min="1" max="60" step="1" inputmode="numeric">

@@ -14,30 +14,37 @@ import (
 type SumPt struct {
 	T   int64    `json:"t"` // ms
 	CPM *float64 `json:"cpm"`
+	USv *float64 `json:"usv"` // o mesmo ponto em µSv/h (calibração de cada minuto)
 }
 
 // Summary é o resumo de [From, To).
 type Summary struct {
-	From         int64    `json:"from"`
-	To           int64    `json:"to"`
-	Minutes      int      `json:"minutes"`     // minutos com leitura
-	Coverage     float64  `json:"coverage"`    // 0..1, desde o primeiro dado e só até agora
-	CoverageAll  float64  `json:"coverageAll"` // 0..1 do período inteiro (até agora)
-	AwayMinutes  int      `json:"awayMinutes"`
-	Avg          *float64 `json:"avg"`
-	Min          *float64 `json:"min"`
-	Max          *float64 `json:"max"`
-	MinAt        int64    `json:"minAt"`
-	MaxAt        int64    `json:"maxAt"`
-	AvgUSv       float64  `json:"avgUSv"`
-	Dose         float64  `json:"dose"` // µSv no período (só o que foi medido)
-	BgCPM        float64  `json:"bgCPM"`
-	BgOK         bool     `json:"bgOK"`
-	VsBgPct      float64  `json:"vsBgPct"` // média em relação ao fundo, em %
-	Attention    int      `json:"attention"`
-	Alarm        int      `json:"alarm"`
-	Danger       int      `json:"danger"`
-	PeakAlert    float64  `json:"peakAlert"` // maior pico de alerta (CPM)
+	From        int64    `json:"from"`
+	To          int64    `json:"to"`
+	Minutes     int      `json:"minutes"`     // minutos com leitura
+	Coverage    float64  `json:"coverage"`    // 0..1, desde o primeiro dado e só até agora
+	CoverageAll float64  `json:"coverageAll"` // 0..1 do período inteiro (até agora)
+	AwayMinutes int      `json:"awayMinutes"`
+	Avg         *float64 `json:"avg"`
+	Min         *float64 `json:"min"`
+	Max         *float64 `json:"max"`
+	MinAt       int64    `json:"minAt"`
+	MaxAt       int64    `json:"maxAt"`
+	AvgUSv      float64  `json:"avgUSv"`
+	Dose        float64  `json:"dose"` // µSv no período (só o que foi medido)
+	BgCPM       float64  `json:"bgCPM"`
+	BgOK        bool     `json:"bgOK"`
+	VsBgPct     float64  `json:"vsBgPct"` // média em relação ao fundo, em %
+	Attention   int      `json:"attention"`
+	Alarm       int      `json:"alarm"`
+	Danger      int      `json:"danger"`
+	PeakAlert   float64  `json:"peakAlert"` // maior pico de alerta (CPM)
+	// os mesmos em µSv/h (2.29: a tela do GMC mostra µSv/h; CPM só na
+	// tabela técnica), cada um pela calibração da sua hora
+	MinUSv       *float64 `json:"minUSv"`
+	MaxUSv       *float64 `json:"maxUSv"`
+	BgUSv        float64  `json:"bgUSv"`
+	PeakAlertUSv float64  `json:"peakAlertUSv"`
 	RainMM       float64  `json:"rainMM"`
 	RainHours    int      `json:"rainHours"`
 	RainKnown    bool     `json:"rainKnown"`
@@ -265,7 +272,7 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	step := summaryStep(to.Sub(from))
 	s.StepMs = step.Milliseconds()
 	n := int(math.Ceil(float64(to.Sub(from)) / float64(step)))
-	sums := make([]float64, n)
+	sums, usums := make([]float64, n), make([]float64, n)
 	cnt := make([]int, n)
 	total, utotal := 0.0, 0.0
 	for _, p := range pts {
@@ -282,15 +289,16 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 			s.AwayMinutes++
 		}
 		if s.Max == nil || v > *s.Max {
-			x := v
-			s.Max, s.MaxAt = &x, p.T.UnixMilli()
+			x, xu := v, u
+			s.Max, s.MaxAt, s.MaxUSv = &x, p.T.UnixMilli(), &xu
 		}
 		if s.Min == nil || v < *s.Min {
-			x := v
-			s.Min, s.MinAt = &x, p.T.UnixMilli()
+			x, xu := v, u
+			s.Min, s.MinAt, s.MinUSv = &x, p.T.UnixMilli(), &xu
 		}
 		if i := int(p.T.Sub(from) / step); i >= 0 && i < n {
 			sums[i] += v
+			usums[i] += u
 			cnt[i]++
 		}
 	}
@@ -304,13 +312,16 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 	for i := 0; i < n; i++ {
 		pt := SumPt{T: from.Add(time.Duration(i) * step).UnixMilli()}
 		if cnt[i] > 0 {
-			v := sums[i] / float64(cnt[i])
-			pt.CPM = &v
+			v, u := sums[i]/float64(cnt[i]), usums[i]/float64(cnt[i])
+			pt.CPM, pt.USv = &v, &u
 		}
 		s.Curve = append(s.Curve, pt)
 	}
 	if bg, ok := a.backgroundCPM(); ok && bg > 0 {
 		s.BgCPM, s.BgOK = bg, true
+		a.mu.Lock()
+		s.BgUSv = a.convCalLocked().USv(bg) // o fundo é dos últimos 30 dias: calibração de agora
+		a.mu.Unlock()
 		if s.Avg != nil {
 			s.VsBgPct = (*s.Avg - bg) / bg * 100
 		}
@@ -336,13 +347,16 @@ func (a *App) GetSummary(fromMs, toMs int64) (Summary, error) {
 		default:
 			s.Attention++
 		}
-		s.PeakAlert = math.Max(s.PeakAlert, ep.Peak)
+		if ep.Peak > s.PeakAlert {
+			s.PeakAlert = ep.Peak
+			s.PeakAlertUSv = tl.USvAt(time.UnixMilli(ep.Start), ep.Peak)
+		}
 	}
 	if s.Max != nil && s.PeakAlert > *s.Max {
 		for _, p := range a.alertPeaks(from, to) {
 			if p.CPM == s.PeakAlert {
-				x := p.CPM
-				s.Max, s.MaxAt = &x, p.T
+				x, xu := p.CPM, tl.USvAt(time.UnixMilli(p.T), p.CPM)
+				s.Max, s.MaxAt, s.MaxUSv = &x, p.T, &xu
 			}
 		}
 	}
