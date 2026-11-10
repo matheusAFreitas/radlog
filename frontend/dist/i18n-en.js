@@ -2260,7 +2260,8 @@ const I18N_EN = {
 "Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com \"≥\" e avisa para não confiar nele.": "Default 1,000: the top of the RadiaCode 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with \"≥\" and warns not to trust it.",
 "fim da escala do RadiaCode": "RadiaCode end of scale",
 "Saturação do RadiaCode": "RadiaCode saturation",
-"OK": "OK"
+"OK": "OK",
+"procurando…": "searching…"
 },
 "patterns": [
 [
@@ -9631,6 +9632,14 @@ const I18N_EN = {
 "Vibration: ${1}",
 [
 "Vibração: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): pico de ((?:(?! · ).)+?)$",
+"${1}: peak of ${2}",
+[
+": pico de "
 ]
 ],
 [
