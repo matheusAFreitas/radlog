@@ -47,13 +47,14 @@ func (a *App) cfgSnapshotLocked() map[string]string {
 		return txt
 	}
 	m := map[string]string{
-		"Aviso de atenção":  onOff(s.AttentionEnabled, "a partir de "+thrDesc(lv.AttentionUSv, lv.AttentionCPM, cal)),
-		"Alarme":            onOff(s.AlarmEnabled, "a partir de "+thrDesc(s.AlarmUSv, s.AlarmCPM, cal)),
-		"Alarme de perigo":  "a partir de " + thrDesc(lv.DangerUSv, lv.DangerCPM, cal),
-		"Tempo morto":       onOff(lv.DeadTimeOn, fmt.Sprintf("ligado, τ = %s µs", fmtBR(lv.DeadTimeUs, 0))),
-		"Saturação do GMC":  fmt.Sprintf("fim da escala %s µSv/h, queda brusca a partir de %s µSv/h", fmtBR(lv.SatMaxUSv, 0), fmtBR(lv.SatDropUSv, 0)),
-		"Calibração do GMC": calDesc(a.cal),
-		"Calibração em uso": a.calInUseDesc(),
+		"Aviso de atenção":       onOff(s.AttentionEnabled, "a partir de "+thrDesc(lv.AttentionUSv, lv.AttentionCPM, cal)),
+		"Alarme":                 onOff(s.AlarmEnabled, "a partir de "+thrDesc(s.AlarmUSv, s.AlarmCPM, cal)),
+		"Alarme de perigo":       "a partir de " + thrDesc(lv.DangerUSv, lv.DangerCPM, cal),
+		"Tempo morto":            onOff(lv.DeadTimeOn, fmt.Sprintf("ligado, τ = %s µs", fmtBR(lv.DeadTimeUs, 0))),
+		"Saturação do GMC":       fmt.Sprintf("fim da escala %s µSv/h, queda brusca a partir de %s µSv/h", fmtBR(lv.SatMaxUSv, 0), fmtBR(lv.SatDropUSv, 0)),
+		"Saturação do RadiaCode": fmt.Sprintf("fim da escala %s µSv/h", fmtBR(lv.RcSatUSv, 0)),
+		"Calibração do GMC":      calDesc(a.cal),
+		"Calibração em uso":      a.calInUseDesc(),
 	}
 	if a.devSaveMode != "" {
 		m["Gravação na memória do GMC"] = a.devSaveMode

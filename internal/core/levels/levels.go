@@ -23,6 +23,10 @@ type Levels struct {
 	SatMaxUSv    float64 `json:"satMaxUSv"`  // Geiger saturado: fim da escala
 	SatDropUSv   float64 `json:"satDropUSv"` // Geiger saturado: queda brusca a partir de
 	SatHoldSec   int     `json:"satHoldSec"` // aviso de queda brusca fica por
+	// RadiaCode saturado: fim da escala do aparelho (o 102 vai de 0,1 a
+	// 1000 µSv/h pela especificação do fabricante); daí para cima a faixa do
+	// alarme mostra "≥"
+	RcSatUSv float64 `json:"rcSatUSv"`
 	// Compensação de tempo morto (modelo não paralisável, como no Rad Pro):
 	// taxa real = medida ÷ (1 − medida × τ), com o fator limitado a 10×.
 	DeadTimeOn bool    `json:"deadTimeOn"`
@@ -38,6 +42,7 @@ func Default() Levels {
 		SatMaxUSv:    2000, // fim da escala do GMC-800 (manual)
 		SatDropUSv:   1000,
 		SatHoldSec:   60,
+		RcSatUSv:     1000,
 		DeadTimeOn:   false,
 		DeadTimeUs:   200, // típico do M4011 (Rad Pro: 50–200 µs); ajuste se souber o do seu tubo
 	}
@@ -82,6 +87,7 @@ func (l Levels) Norm() Levels {
 	l.SatMaxUSv = clampF(l.SatMaxUSv, 10, 1e6, d.SatMaxUSv)
 	l.SatDropUSv = clampF(l.SatDropUSv, 1, 1e6, d.SatDropUSv)
 	l.SatHoldSec = clampInt(l.SatHoldSec, 5, 3600, d.SatHoldSec)
+	l.RcSatUSv = clampF(l.RcSatUSv, 1, 1e6, d.RcSatUSv)
 	l.DeadTimeUs = clampF(l.DeadTimeUs, 5, 500, d.DeadTimeUs)
 	return l
 }

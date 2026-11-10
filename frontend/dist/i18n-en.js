@@ -2242,7 +2242,25 @@ const I18N_EN = {
 "alarme desligado": "alarm off",
 "conecte o GMC-800 para ver": "connect the GMC-800 to see",
 "conecte o RadiaCode para ver": "connect the RadiaCode to see",
-"escala logarítmica": "logarithmic scale"
+"escala logarítmica": "logarithmic scale",
+"Ligar o som": "Turn sound on",
+"som desligado": "sound off",
+"Voltou ao normal": "Back to normal",
+"os dois concordam: não é defeito de um aparelho": "both agree: it isn't one device failing",
+"Ver no histórico": "See in history",
+"fora da escala do aparelho": "beyond the device's range",
+"acima do que o aparelho mede": "above what the device can measure",
+"caiu de repente após valor extremo": "dropped suddenly after an extreme value",
+"o tubo pode ter travado": "the tube may have locked up",
+"DEMO": "DEMO",
+"TESTE": "TEST",
+"REAL": "REAL",
+"Some sozinha em 1 min.": "Goes away on its own in 1 min.",
+"RadiaCode saturado": "RadiaCode saturated",
+"Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com \"≥\" e avisa para não confiar nele.": "Default 1,000: the top of the RadiaCode 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with \"≥\" and warns not to trust it.",
+"fim da escala do RadiaCode": "RadiaCode end of scale",
+"Saturação do RadiaCode": "RadiaCode saturation",
+"OK": "OK"
 },
 "patterns": [
 [
@@ -7339,6 +7357,23 @@ const I18N_EN = {
 ]
 ],
 [
+"Voltou ao normal às ",
+"^Voltou ao normal às ((?:(?! · ).)+?)$",
+"Back to normal at ${1}",
+[
+"Voltou ao normal às "
+]
+],
+[
+"fim da escala ",
+"^fim da escala ((?:(?! · ).)+?) µSv/h$",
+"end of scale ${1} µSv/h",
+[
+"fim da escala ",
+" µSv/h"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -7581,6 +7616,22 @@ const I18N_EN = {
 "Last reading at ${1}:",
 [
 "Última leitura às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) nos dois aparelhos$",
+"${1} on both devices",
+[
+" nos dois aparelhos"
+]
+],
+[
+"perigo a partir de ",
+"^perigo a partir de ((?:(?! · ).)+?)$",
+"danger from ${1}",
+[
+"perigo a partir de "
 ]
 ],
 [
@@ -8230,6 +8281,14 @@ const I18N_EN = {
 "disconnected ${1} ago",
 [
 "desconectado há "
+]
+],
+[
+"som pausado até ",
+"^som pausado até ((?:(?! · ).)+?)$",
+"sound paused until ${1}",
+[
+"som pausado até "
 ]
 ],
 [
@@ -9166,6 +9225,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Também: ",
+"^Também: ((?:(?! · ).)+?) no ((?:(?! · ).)+?)$",
+"Also: ${1} on the ${2}",
+[
+"Também: ",
+" no "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -9819,6 +9887,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) saturado$",
+"${1} saturated",
+[
+" saturado"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
 [
@@ -10228,6 +10304,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) h ((?:(?! · ).)+?) min$",
+"${1} h ${2} min",
+[
+" min"
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -10489,6 +10573,22 @@ const I18N_EN = {
 "until ${1}",
 [
 "até "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no ((?:(?! · ).)+?)$",
+"${1} on the ${2}",
+[
+" no "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) min$",
+"${1} min",
+[
+" min"
 ]
 ],
 [

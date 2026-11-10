@@ -1,5 +1,32 @@
 # Versões
 
+## 2.35.0
+- **Faixas de alarme novas.** Atenção, alarme e perigo agora são a mesma
+  peça, com a forma de cada nível (triângulo, losango, octógono) e na mesma
+  ordem nos três: nível e aparelho, número, limite; embaixo, o que fazer; à
+  direita, os botões. A faixa cresce com a gravidade: a atenção é fina e
+  âmbar, o alarme é laranja cheio e o perigo é vermelho, alto e com o número
+  grande.
+- Silenciado aparece de outro jeito. No alarme, a faixa escurece e mostra
+  "som desligado". No perigo, ela continua vermelha e ganha "som pausado até
+  HH:MM". Nos dois casos o botão vira "Ligar o som".
+- Os telefones de emergência viram etiquetas que dá para selecionar e
+  copiar.
+- Demo e teste ganham listras e a etiqueta DEMO ou TESTE. Uma leitura real
+  com o demo ligado leva a etiqueta REAL.
+- **Os dois aparelhos tocando ao mesmo tempo** continuam numa faixa só:
+  manda o nível mais grave (no empate, o GMC), e o outro aparece na linha
+  "Também: …". Se os dois estão no mesmo nível, a faixa diz "… nos dois
+  aparelhos", mostra os dois números e avisa que os dois concordam, ou seja,
+  não é defeito de um aparelho só. Continua sendo um som só.
+- **RadiaCode saturado:** a partir do fim da escala do aparelho (padrão
+  1.000 µSv/h, o fim da faixa do 102 pela especificação do fabricante;
+  ajuste em Configurações › RadiaCode › Conexão), a faixa mostra "≥" e "Não
+  confie no número", como já fazia no GMC.
+- **Voltou ao normal (novo):** quando um alarme real acaba, aparece por
+  1 min uma tira verde com a hora, o nível, quanto durou, o pico e o link
+  para o histórico. Não aparece depois de demo nem de teste.
+
 ## 2.34.2
 - **"Onde está cada aparelho" mostra a conexão de verdade.** Com o
   RadiaCode desconectado, o quadro do Agora ainda dizia "conectado" com o

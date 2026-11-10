@@ -278,25 +278,11 @@ table.cal .bad { color: var(--warn); }
 
 /* alarme */
 .bars { position: sticky; top: 0; z-index: 21; }
-.bar-row { display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
 .hint { font-size: var(--fs-label); opacity: .95; }
 .guide { margin: var(--space-3) 0 2px 48px; padding: 0 0 0 var(--space-5); display: flex; flex-direction: column; gap: var(--space-2); font-size: var(--fs-body); line-height: 1.45; max-width: 1100px; }
 .guide a { color: inherit; }
-.alarm-btn.alt { background: transparent; color: var(--on-solid); border-color: rgba(255, 255, 255, .7); }
-.alarm-btn.alt:hover:not(:disabled) { background: rgba(255, 255, 255, .12); border-color: var(--on-solid); }
-.alarm-text { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.alarm-text strong { font-size: var(--fs-number); letter-spacing: .06em; }
-.alarm-text span { font-size: var(--fs-body); }
-.alarm-btn { background: var(--on-solid); color: var(--warn-solid-ink); border-color: var(--on-solid); font-weight: 600; }
-.alarm-btn:hover:not(:disabled) { background: var(--warn-solid-tint); border-color: var(--warn-solid-tint); }
-.alarm-bar.demo { background: var(--demo-solid); }
 
 /* aviso de atenção (50 CPM) e alertas */
-.attn-bar { padding: var(--space-3) var(--space-6); background: var(--attn-bg); color: var(--attn-ink); border-bottom: 2px solid var(--att); }
-.attn-bar .guide { margin-left: 36px; }
-.attn-bar strong { font-size: var(--fs-heading); color: var(--att); }
-.attn-bar .alarm-text span { font-size: var(--fs-label); }
-.attn-btn { background: transparent; color: var(--attn-ink); border-color: var(--att); }
 body.attention .hero { border-color: var(--att); }
 body.attention .hero .value { color: var(--att); }
 .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); }
@@ -328,7 +314,6 @@ td { border-top: 1px solid var(--border); padding: var(--space-2) 0; }
   .layout { flex-wrap: nowrap; }
 }
 
-.alarm-bar .alarm-btn.alt, .alarm-bar.demo .alarm-btn.alt { color: var(--on-solid); }
 .wrap { margin: 0 auto; display: flex; flex-direction: column; max-width: 1880px; padding: var(--space-4) var(--space-5) var(--space-4); gap: var(--space-4); padding-bottom: var(--space-3); }
 @media (min-width: 1500px) {
   .col-a .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -449,16 +434,7 @@ td { border-top: 1px solid var(--border); padding: var(--space-2) 0; }
 
 /* ---------- dois níveis de alarme ----------
    atenção = amarelo · alarme do usuário = laranja · perigo do app = vermelho.
-   Demo e teste ficam com listras por cima (a cor é do nível). */
-.alarm-bar { padding: var(--space-3) var(--space-6); color: var(--on-solid); box-shadow: 0 6px 30px rgba(0, 0, 0, .5); background: var(--alarm-solid); }
-.alarm-bar .alarm-btn { color: var(--alarm-solid-ink); }
-.alarm-bar.muted { background: var(--alarm-solid-off); }
-.alarm-bar.perigo { background: var(--warn-solid); }
-.alarm-bar.perigo .alarm-btn { color: var(--warn-solid-ink); }
-.alarm-bar.perigo.muted { background: var(--warn-solid-ink); }
-.alarm-bar.demo:not(.perigo) { background-color: var(--alarm-solid); }
-.alarm-bar.demo .alarm-btn { color: var(--alarm-solid-ink); }
-.alarm-bar.demo.perigo .alarm-btn { color: var(--warn-solid-ink); }
+   A faixa em si fica no bloco "faixas de alarme" (2.35.0). */
 body.alarming .hero .value { color: var(--alarm); }
 body.alarming.danger .hero .value { color: var(--warn); }
 .hero.alarm { border-color: var(--alarm); }
@@ -479,9 +455,7 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .heat-key .hk-danger { background: var(--warn); }
 .heat-tip .ht-alarm { font-weight: 600; color: var(--alarm); }
 .heat-tip .ht-danger { color: var(--warn); font-weight: 600; }
-.alarm-bar .alarm-btn.alt, .alarm-bar.perigo .alarm-btn.alt, .alarm-bar.demo .alarm-btn.alt, .alarm-bar.demo.perigo .alarm-btn.alt { color: var(--on-solid); }
 
-.alarm-text .alarm-rise { font-size: var(--fs-body); }
 
 /* linhas dos limites no gráfico durante o alarme */
 .leg-thr { display: inline-flex; align-items: center; gap: var(--space-2); margin-left: var(--space-3); font-weight: 600; }
@@ -492,7 +466,6 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .leg-thr.danger { color: var(--warn); }
 .leg-thr.danger.off-scale i { border-top-style: dotted; }
 
-.alarm-text .alarm-note { font-weight: 600; opacity: .95; font-size: var(--fs-body); }
 
 /* zoom no gráfico */
 .zoom-sel { position: absolute; top: 0; bottom: 0; background: color-mix(in srgb, var(--accent) 12%, transparent); border-left: 1px solid var(--accent); border-right: 1px solid var(--accent); pointer-events: none; }
@@ -1851,3 +1824,81 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 @media (max-width: 760px) { .set-nav-st { display: none; } #settings .set-nav button { justify-content: center; } }
 @media (max-width: 480px) { .lv-ladder { grid-template-columns: minmax(0, 1fr); } .lv-step { border-right: 0; border-bottom: 1px solid var(--border); } .lv-step:last-child { border-bottom: 0; } }
 @media (prefers-reduced-motion: reduce) { .set-flash { animation: none; } .lv-bar i { transition: none; } }
+
+/* ---------- faixas de alarme (2.35.0) ----------
+   Uma peça só para atenção, alarme e perigo, com as formas dos níveis e o
+   tamanho subindo com a gravidade. Mesma ordem nas três: forma, nível e
+   aparelho, número, limite; embaixo, o que fazer; à direita, os botões. */
+:root { --band-att-bg: #231C10; --band-alarm-ink: #1C0F04; --band-alarm-off: #28190D; --band-danger: #8E1D24; --band-danger-2: #A3232B; --band-danger-ink: #FFF4F4; --band-ok-bg: #0F1C15; }
+.band { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px 18px; align-items: center; padding: 14px var(--space-6); position: relative; }
+.band .ico { width: 30px; height: 30px; grid-row: 1 / 3; align-self: start; margin-top: 2px; }
+.band .head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; min-width: 0; }
+.band .lvl { font-weight: 700; font-size: 17px; letter-spacing: .01em; }
+.band .val { font-family: var(--mono); font-variant-numeric: tabular-nums; font-weight: 600; }
+.band .lim { font-family: var(--mono); font-size: var(--fs-label); opacity: .85; }
+.band .msg { grid-column: 2; min-width: 0; display: grid; gap: 2px; justify-items: start; }
+.band .hint, .band .say, .band .rise { font-size: var(--fs-body); }
+.band .acts { grid-column: 3; grid-row: 1 / 3; display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: flex-end; align-self: center; position: relative; z-index: 1; }
+.band-btn { font: inherit; cursor: pointer; border-radius: var(--radius-sm); padding: 7px 14px; font-size: 14px; font-weight: 600; border: 1px solid currentColor; background: transparent; color: inherit; white-space: nowrap; }
+.band-btn.solid { border-color: transparent; }
+.band-btn:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+.band .btag { font-family: var(--mono); font-size: var(--fs-micro); font-weight: 600; letter-spacing: .06em; padding: 1px 7px; border-radius: var(--radius-pill); border: 1px solid currentColor; background: transparent; color: inherit; align-self: center; }
+.band .chip { display: inline-flex; align-items: center; font-size: var(--fs-label); padding: 2px 10px; border-radius: var(--radius-pill); }
+.band .also { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 6px; padding: 5px 10px; border-radius: var(--radius-sm); background: rgba(0, 0, 0, .22); font-size: var(--fs-label); max-width: 100%; }
+.band .also svg { width: 13px; height: 13px; flex: none; }
+.band .also b { font-family: var(--mono); font-weight: 600; }
+.band .also .lv-ico.atencao { color: var(--att); } .band .also .lv-ico.alarme { color: var(--alarm); } .band .also .lv-ico.perigo { color: var(--warn); }
+.band .both { display: flex; flex-wrap: wrap; gap: 4px 24px; align-items: baseline; font-size: 14px; }
+.band .both .val { margin-left: 4px; }
+.band .agree { opacity: .85; }
+.band .guide { grid-column: 2 / -1; margin: 6px 0 0; padding-left: 20px; }
+.band .phones { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); margin-top: 6px; }
+.band .phones .phone { font-size: var(--fs-label); padding: 3px 10px; border-radius: 6px; user-select: all; background: rgba(0, 0, 0, .25); }
+
+/* atenção: fina, fundo escuro e texto âmbar */
+.band.atencao { background: var(--band-att-bg); color: var(--text); border-bottom: 1px solid rgba(245, 184, 74, .45); padding-block: 10px; }
+.band.atencao .ico { width: 22px; height: 22px; grid-row: 1; color: var(--att); }
+.band.atencao .lvl { color: var(--att); font-size: 15px; }
+.band.atencao .val { color: var(--att); }
+.band.atencao .acts .band-btn { color: var(--att); font-size: var(--fs-label); padding: 5px 12px; }
+.band.atencao .also { background: rgba(255, 255, 255, .05); }
+
+/* alarme: laranja cheio; silenciado, escurece e a faixa continua */
+.band.alarme { background: var(--alarm); color: var(--band-alarm-ink); box-shadow: var(--shadow-float); }
+.band.alarme .val { font-size: 26px; }
+.band.alarme .band-btn.solid { background: var(--band-alarm-ink); color: var(--alarm); }
+.band.alarme .chip { background: rgba(28, 15, 4, .14); }
+.band.alarme .also .lv-ico { color: var(--band-alarm-ink); }
+.band.alarme.muted { background: var(--band-alarm-off); color: var(--text); border-bottom: 2px solid var(--alarm); }
+.band.alarme.muted .ico, .band.alarme.muted .lvl, .band.alarme.muted .val, .band.alarme.muted .band-btn { color: var(--alarm); }
+.band.alarme.muted .band-btn.solid { background: var(--alarm); color: var(--band-alarm-ink); }
+.band.alarme.muted .chip { background: rgba(242, 140, 56, .14); color: var(--alarm); }
+.band.alarme.muted .also { background: rgba(255, 255, 255, .05); }
+.band.alarme.muted .also .lv-ico.atencao { color: var(--att); }
+
+/* perigo: a mais alta, vermelha escura, número grande */
+.band.perigo { background: linear-gradient(180deg, var(--band-danger-2), var(--band-danger)); color: var(--band-danger-ink); padding-block: 18px; box-shadow: var(--shadow-float); }
+.band.perigo .ico { width: 40px; height: 40px; }
+.band.perigo .lvl { font-size: 22px; }
+.band.perigo .val { font-size: 36px; line-height: 1.1; }
+.band.perigo .say { font-weight: 600; font-size: var(--fs-heading); }
+.band.perigo .rise { opacity: .9; }
+.band.perigo .band-btn.solid { background: var(--band-danger-ink); color: var(--band-danger); }
+.band.perigo .chip { background: rgba(0, 0, 0, .25); }
+.band.perigo .also .lv-ico { color: var(--band-danger-ink); }
+
+/* demo e teste: listras por cima, para nunca parecer real */
+.band.demo::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(-45deg, rgba(255, 255, 255, .07) 0 10px, transparent 10px 22px); }
+
+/* voltou ao normal: tira verde por 1 min com o pico */
+.band.ok { background: var(--band-ok-bg); color: var(--text); border-bottom: 1px solid rgba(110, 231, 160, .45); padding-block: 10px; }
+.band.ok .ico { width: 22px; height: 22px; grid-row: 1; color: var(--accent); }
+.band.ok .lvl { color: var(--accent); font-size: 15px; }
+.band.ok .hint { color: var(--muted); font-size: var(--fs-label); }
+.band.ok .acts .band-btn { color: var(--accent); font-size: var(--fs-label); padding: 5px 12px; }
+
+@media (max-width: 760px) {
+  .band { grid-template-columns: auto minmax(0, 1fr); padding-inline: var(--space-4); }
+  .band .acts { grid-column: 1 / -1; grid-row: auto; justify-content: flex-start; }
+  .band .guide { grid-column: 1 / -1; }
+}
