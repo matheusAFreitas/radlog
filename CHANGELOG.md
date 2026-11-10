@@ -1,5 +1,20 @@
 # Versões
 
+## 2.40.1
+- **Ícone da bandeja fica onde você deixou depois de atualizar.** O Windows
+  lembra se o ícone fica fixo na barra ou escondido na setinha pelo caminho
+  do .exe, e cada versão vinha com um nome novo (RadLog-vX.Y.Z.exe). Por
+  isso, a cada atualização ele achava que era outro programa e escondia o
+  ícone. Agora o atualizador põe a versão nova sempre como `RadLog.exe`, na
+  pasta das versões (Documentos\RadLog\Versões). A anterior vira
+  `RadLog.old.exe` e é apagada junto com as versões antigas.
+- O mesmo vale para a pergunta do Firewall do Windows ao aceitar conexões
+  da sincronização: a regra é pelo caminho do .exe, então ela para de
+  aparecer a cada versão.
+- Na primeira atualização depois desta, o caminho muda uma última vez (de
+  RadLog-vX.Y.Z.exe para RadLog.exe). Então fixe o ícone e responda ao
+  firewall mais uma vez. Daí em diante o caminho não muda mais.
+
 ## 2.39.0
 - O app passa a ouvir o aviso de "fora da escala" do próprio Radiacode 102
   (taxa de dose ou contagem acima do que ele mede). Com o aviso, a faixa de
