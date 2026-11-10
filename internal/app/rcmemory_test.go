@@ -85,7 +85,7 @@ func TestRcRecoverOld(t *testing.T) {
 
 func TestRcMinutesFromDB(t *testing.T) {
 	t0 := time.Date(2026, 11, 10, 3, 1, 36, 0, time.UTC)
-	m := rcMinutesFromDB([]radiacode.DoseRateDB{{T: t0, CPS: 10, DoseRate: 0.1}})
+	m := rcMinutesFromDB([]radiacode.DoseRateDB{{T: t0, CPS: 10, DoseRate: 0.1}}, time.Time{})
 	// 3:00:00 → 3:01:36: 60 s no minuto 3:00 e 36 s no 3:01
 	if len(m) != 2 || m[0].sec != 60 || m[1].sec != 36 || m[0].cps/m[0].sec != 10 {
 		t.Fatalf("%+v", m)
@@ -109,5 +109,58 @@ func TestSplitOldBeforeConnection(t *testing.T) {
 	}
 	if _, old := splitOldRecords(recs, time.Time{}); len(old) != 1 {
 		t.Fatalf("sem conexão: %d antigos (quero só o marcado)", len(old))
+	}
+}
+
+// 2º teste de 10/11: o lote terminou em 15:09:22, o ponto seguinte (15:10:58)
+// chegou 20 s depois da conexão (15:11:52) e o que fecha em 15:12:34 cobre o
+// fim do minuto da conexão. Os minutos pela metade são completados.
+func TestRcMemCompletesPartialMinutes(t *testing.T) {
+	a := newTestApp(t)
+	at := func(h, m, s int) time.Time { return time.Date(2026, 11, 10, h, m, s, 0, time.Local) }
+	since := at(15, 11, 52)
+	a.rc.st.Since = since.UnixMilli()
+	lead := radiacode.BaseLead
+	db := func(tt time.Time, usv float64, fl uint16) radiacode.DoseRateDB {
+		return radiacode.DoseRateDB{T: tt.Add(lead), CPS: 12.5, DoseRate: usv, Flags: fl}
+	}
+	// na conexão: o fim do lote (15:07:46 e 15:09:22)
+	a.rcRecoverOld([]radiacode.Record{db(at(15, 7, 46), 0.2, 0x1000), db(at(15, 9, 22), 0.2, 0x1000)}, since.Add(2*time.Second))
+	// o minuto da conexão fecha ao vivo com 8 s
+	a.rcWriteMinute(rcMinute{t: at(15, 11, 0), cps: 8 * 12.5, usv: 8 * 0.1, n: 8})
+	// 20 s depois, o ponto que fecha em 15:10:58 (sem marca, antes da conexão)
+	live, old := splitOldRecords([]radiacode.Record{db(at(15, 10, 58), 0.14, 0x3000)}, since)
+	if len(old) != 1 || len(live) != 0 {
+		t.Fatalf("15:10:58: ao vivo %d, antigos %d", len(live), len(old))
+	}
+	a.rcRecoverOld(old, since.Add(27*time.Second))
+	// o que fecha em 15:12:34 começa antes da conexão: entra só esse pedaço
+	live, old = splitOldRecords([]radiacode.Record{db(at(15, 12, 34), 0.16, 0x1000)}, since)
+	if len(old) != 1 || len(live) != 0 {
+		t.Fatalf("15:12:34: ao vivo %d, antigos %d", len(live), len(old))
+	}
+	a.rcRecoverOld(old, since.Add(2*time.Minute))
+
+	got := map[string]RcPoint{}
+	for _, p := range a.rcRange(at(15, 0, 0), at(15, 20, 0)) {
+		got[p.T.Format("15:04")] = p
+	}
+	want := map[string]int{"15:08": 60, "15:09": 60, "15:10": 60, "15:11": 60}
+	for k, n := range want {
+		if got[k].N != n {
+			t.Errorf("%s: n = %d, quero %d (%+v)", k, got[k].N, n, got[k])
+		}
+	}
+	// 15:11 = 52 s da memória (0,16) + 8 s ao vivo (0,1) = 0,152
+	if u := got["15:11"].USvh; u < 0.1519 || u > 0.1521 {
+		t.Errorf("15:11: %.4f µSv/h, quero 0,152", u)
+	}
+	// nada depois da conexão vem da memória
+	if p, ok := got["15:12"]; ok {
+		t.Errorf("15:12 não devia existir: %+v", p)
+	}
+	b, _ := os.ReadFile(filepath.Join(a.rcDir(), "2026-11.csv"))
+	if c := strings.Count(string(b), "T15:11:00"); c != 1 {
+		t.Errorf("15:11 em %d linhas:\n%s", c, b)
 	}
 }

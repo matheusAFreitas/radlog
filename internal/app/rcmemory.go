@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 
@@ -68,7 +69,13 @@ func splitOldRecords(recs []radiacode.Record, since time.Time) (live, old []radi
 			live = append(live, r)
 			continue
 		}
-		before := since.Unix() > 0 && !r.When().IsZero() && rcOldTime(r).Before(since)
+		t := rcOldTime(r)
+		if _, ok := r.(radiacode.DoseRateDB); ok {
+			// o ponto de 96 s fecha em T: o primeiro depois da conexão ainda
+			// cobre um pedaço de antes dela (o resto do minuto da conexão)
+			t = t.Add(-rcMemStep)
+		}
+		before := since.Unix() > 0 && !r.When().IsZero() && t.Before(since)
 		if isOld || before {
 			old = append(old, r)
 		} else {
@@ -142,7 +149,7 @@ func (a *App) rcRecoverOldSince(old []radiacode.Record, now, since time.Time) (n
 		return
 	}
 	a.rcLogMerge(items)
-	mins = a.rcMinuteMerge(rcMinutesFromDB(rates), since.Truncate(time.Minute))
+	mins = a.rcMinuteMerge(rcMinutesFromDB(rates, since), since)
 	if len(doses) > 0 {
 		sort.Slice(doses, func(i, j int) bool { return doses[i].T.Before(doses[j].T) })
 		a.rcDoseMerge(doses)
@@ -182,14 +189,19 @@ type rcMemMinute struct {
 }
 
 // rcMinutesFromDB espalha cada ponto de 96 s (que fecha em T) pelos minutos
-// que ele cobre, pesando pelos segundos de cada um.
-func rcMinutesFromDB(pts []radiacode.DoseRateDB) []rcMemMinute {
+// que ele cobre, pesando pelos segundos de cada um. Só conta o que é de
+// antes de until (o começo da conexão; zero = tudo): dali em diante vale a
+// leitura ao vivo.
+func rcMinutesFromDB(pts []radiacode.DoseRateDB, until time.Time) []rcMemMinute {
 	by := map[int64]*rcMemMinute{}
 	for _, p := range pts {
 		if p.CPS < 0 || p.DoseRate < 0 || math.IsNaN(p.CPS) || math.IsNaN(p.DoseRate) {
 			continue
 		}
 		from, to := p.T.Add(-rcMemStep), p.T
+		if !until.IsZero() && to.After(until) {
+			to = until
+		}
 		for m := from.Truncate(time.Minute); m.Before(to); m = m.Add(time.Minute) {
 			a, b := m, m.Add(time.Minute)
 			if from.After(a) {
@@ -230,8 +242,10 @@ func (m rcMemMinute) csvLine() string {
 }
 
 // rcMinuteMerge põe os minutos que vieram da memória nos arquivos do mês,
-// só onde não havia leitura e antes de until (o começo desta conexão), em
-// ordem. Devolve quantos entraram.
+// antes de until (o começo desta conexão), em ordem. Um minuto sem leitura
+// entra inteiro; um que já tinha só um pedaço (o fim de um lote, ou o minuto
+// da conexão, com os segundos ao vivo) é completado, pesando pelos segundos,
+// desde que a soma caiba no minuto. Devolve quantos entraram.
 func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 	byMonth := map[string][]rcMemMinute{}
 	for _, m := range mins {
@@ -251,35 +265,69 @@ func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 	for name, add := range byMonth {
 		path := filepath.Join(a.rcDir(), name)
 		type line struct {
-			t int64
-			s string
+			t    int64
+			s    string
+			drop bool
 		}
 		var lines []line
-		have := map[int64]bool{}
+		have := map[int64]*rcMemMinute{} // o que já está gravado em cada minuto
+		idx := map[int64][]int{}
 		if b, err := os.ReadFile(path); err == nil {
 			sc := bufio.NewScanner(bytes.NewReader(b))
 			for sc.Scan() {
 				l := sc.Text()
-				k, _, ok := strings.Cut(l, ",")
-				if !ok {
-					continue
-				}
-				t, err := time.Parse(time.RFC3339, k)
+				f := strings.Split(l, ",")
+				t, err := time.Parse(time.RFC3339, f[0])
 				if err != nil {
 					continue // cabeçalho
 				}
-				m := t.Truncate(time.Minute).Unix()
-				have[m] = true
-				lines = append(lines, line{t.Unix(), l})
+				m := t.Truncate(time.Minute)
+				k := m.Unix()
+				h := have[k]
+				if h == nil {
+					h = &rcMemMinute{t: m}
+					have[k] = h
+				}
+				if len(f) >= 4 {
+					cps, e1 := strconv.ParseFloat(f[1], 64)
+					usv, e2 := strconv.ParseFloat(f[2], 64)
+					n, e3 := strconv.Atoi(f[3])
+					if e1 == nil && e2 == nil && e3 == nil && n > 0 {
+						h.cps += cps * float64(n)
+						h.usv += usv * float64(n)
+						h.sec += float64(n)
+					} else {
+						h.sec = 60 // linha que não dá para somar: fica como está
+					}
+				} else {
+					h.sec = 60
+				}
+				idx[k] = append(idx[k], len(lines))
+				lines = append(lines, line{t: t.Unix(), s: l})
 			}
 		}
 		n := 0
 		for _, m := range add {
-			if k := m.t.Unix(); !have[k] {
-				have[k] = true
-				lines = append(lines, line{k, m.csvLine()})
+			k := m.t.Unix()
+			h := have[k]
+			if h == nil {
+				have[k] = &rcMemMinute{t: m.t, cps: m.cps, usv: m.usv, sec: m.sec}
+				lines = append(lines, line{t: k, s: m.csvLine()})
 				n++
+				continue
 			}
+			if h.sec >= 59.5 || h.sec+m.sec > 61 {
+				continue // já está cheio (ou isso já entrou)
+			}
+			h.cps += m.cps
+			h.usv += m.usv
+			h.sec += m.sec
+			for _, i := range idx[k] {
+				lines[i].drop = true
+			}
+			idx[k] = []int{len(lines)}
+			lines = append(lines, line{t: k, s: h.csvLine()})
+			n++
 		}
 		if n == 0 {
 			continue
@@ -288,7 +336,9 @@ func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 		var buf bytes.Buffer
 		buf.WriteString(rcHeader + "\n")
 		for _, l := range lines {
-			buf.WriteString(l.s + "\n")
+			if !l.drop {
+				buf.WriteString(l.s + "\n")
+			}
 		}
 		tmp := path + ".tmp"
 		if os.WriteFile(tmp, buf.Bytes(), 0o644) == nil && os.Rename(tmp, path) == nil {
