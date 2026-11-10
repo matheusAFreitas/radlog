@@ -1,5 +1,13 @@
 # Versões
 
+## 2.21.1
+- **Atualização automática volta a achar a versão mais nova.** A 2.20.5 e a
+  2.21.0 saíram com dois minutos de diferença, e a 2.20.5 terminou de
+  publicar por último: o GitHub marcou ela como a mais recente e o app
+  (que pergunta só pela mais recente) não oferecia a 2.21.0. Agora as
+  releases saem uma por vez, na ordem, e a última publicada é marcada como
+  a mais recente. Nada muda no app em si.
+
 ## 2.21.0
 - **Onde está cada aparelho.** Na tela Agora, um cartão novo diz onde está o
   GMC-800 e onde está o RadiaCode: em casa, com você ou fora do cálculo. O
