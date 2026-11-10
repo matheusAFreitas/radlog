@@ -735,7 +735,7 @@
   const fmtTime = (t) => new Date(t).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
   const fmtDur = (s) => { s = Math.round(s); const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return (d ? d + "d " : "") + h + ":" + pad2(m) + ":" + pad2(ss); };
   function lgRow(it) {
-    const src = it.src === "celular" ? '<span class="src">celular</span>' : "";
+    const src = it.src === "celular" ? '<span class="src">celular</span>' : it.src === "memoria" ? '<span class="src">memória do aparelho</span>' : "";
     const when = `<td class="when mono"><b>${fmtDate(it.t)}</b><span>${fmtTime(it.t)}</span>${src}</td>`;
     let data = "";
     if (it.kind === "taxa") {

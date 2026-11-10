@@ -311,7 +311,7 @@ func rcRareFromRaw(lines [][]byte) []rcDosePt {
 		}
 		seen[cur] = true
 		for _, r := range radiacode.DecodeDataBuf(buf, time.Unix(0, 0)) {
-			if v, ok := r.(radiacode.Rare); ok {
+			if v, ok := r.(radiacode.Rare); ok && !v.Old() { // os da memória não têm a hora do "pc"
 				out = append(out, rcDosePt{time.UnixMilli(cur), v.Dose, float64(v.Duration)})
 			}
 		}

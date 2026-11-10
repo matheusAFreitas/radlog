@@ -2764,6 +2764,8 @@ Fora de casa foi {0}% do tempo e {1}% da dose (µSv).	Away from home was {0}% of
 Nenhum minuto fora de casa no período (µSv).	No minutes away from home in the period (µSv).
 Razão pessoal ÷ casa: {0} (RadiaCode ÷ GMC-800 em µSv/h).	Personal ÷ home ratio: {0} (RadiaCode ÷ GMC-800 in µSv/h).
 (repetiu mais {0} vezes desde {1})	(repeated {0} more times since {1})
+memória do aparelho	device memory
+RadiaCode: {0} registros recuperados da memória do aparelho ({1} a {2}), {3} minutos sem leitura preenchidos	RadiaCode: {0} records recovered from the device memory ({1} to {2}), {3} minutes without a reading filled in
 fundo de casa de cada aparelho, nos minutos em que ele mediu	home background of each device, in the minutes it measured
 local inválido	invalid place
 GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar	GMC-800 at home and RadiaCode with you is the usual: no need to mark it

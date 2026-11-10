@@ -70,6 +70,11 @@ const (
 	sfrDSLev2     = 0x8015
 )
 
+// BaseLead é quanto o instante zero das leituras ao vivo fica à frente do
+// momento em que o relógio do aparelho foi zerado (como na biblioteca aberta).
+// Os registros que vêm da memória contam do momento zerado mesmo.
+const BaseLead = 128 * time.Second
+
 // DoseScale converte o valor do protocolo (dose em R e taxa em R/h, com
 // 1 Sv = 100 R como o aparelho usa) para µSv e µSv/h.
 const DoseScale = 1e4
@@ -102,7 +107,7 @@ func Open(tr Transport) (*Device, error) {
 		tr.Close()
 		return nil, err
 	}
-	d.base = time.Now().Add(128 * time.Second)
+	d.base = time.Now().Add(BaseLead)
 	if maj, min, date, err := d.fwVersion(); err == nil {
 		d.Firmware = fmt.Sprintf("%d.%d (%s)", maj, min, date)
 		if maj < 4 || (maj == 4 && min < 8) {
@@ -330,6 +335,10 @@ type RealTime struct {
 	Flags, RTFlags    uint16
 }
 
+// FlagOld é o bit dos registros que o aparelho guardou na memória enquanto
+// ninguém estava conectado e só agora está mandando ("dado antigo").
+const FlagOld = 0x8000
+
 // DoseRateDB: ponto do histórico do aparelho (o que ele guarda na memória).
 type DoseRateDB struct {
 	T        time.Time
@@ -339,6 +348,9 @@ type DoseRateDB struct {
 	DoseErr  float64 // %
 	Flags    uint16
 }
+
+// Old diz se o ponto veio da memória do aparelho (gravado sem o app).
+func (r DoseRateDB) Old() bool { return r.Flags&FlagOld != 0 }
 
 // Rare: dose acumulada, temperatura e bateria.
 type Rare struct {
@@ -350,6 +362,9 @@ type Rare struct {
 	Flags    uint16
 }
 
+// Old diz se o registro veio da memória do aparelho (gravado sem o app).
+func (r Rare) Old() bool { return r.Flags&FlagOld != 0 }
+
 // Event: algo que aconteceu no aparelho (alarme, carga, desligou…).
 type Event struct {
 	T     time.Time
@@ -357,6 +372,13 @@ type Event struct {
 	Param int
 	Flags uint16
 }
+
+// Old diz se o evento veio da memória do aparelho (gravado sem o app).
+func (r Event) Old() bool { return r.Flags&FlagOld != 0 }
+
+// rateEvent: alarmes e "fora da escala" de taxa e de contagem trazem a taxa
+// (f32) e o erro (u16) depois do evento.
+func rateEvent(id int) bool { return (id >= 9 && id <= 14) || (id >= 20 && id <= 22) }
 
 // RawSamples são as amostras cruas do aparelho (cps de cada janela curta,
 // ~0,5 s), chegam uma vez por segundo. Contagens = CPS × Period.
@@ -451,32 +473,17 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			err = r.skip(8)
 		case eid == 0 && gid == 2:
 			var p DoseRateDB
-			var cr, dr float32
-			var de uint16
-			p.Count, _ = r.u32()
-			cr, _ = r.f32()
-			dr, _ = r.f32()
-			de, _ = r.u16()
-			p.Flags, err = r.u16()
-			if err == nil {
-				p.T, p.CPS, p.DoseRate, p.DoseErr = t, float64(cr), float64(dr)*DoseScale, float64(de)/10
+			if p, err = readDoseRateDB(r, t); err == nil {
 				out = append(out, p)
 			}
 		case eid == 0 && gid == 3:
 			var p Rare
-			var dose float32
-			var temp, chg uint16
-			p.Duration, _ = r.u32()
-			dose, _ = r.f32()
-			temp, _ = r.u16()
-			chg, _ = r.u16()
-			p.Flags, err = r.u16()
-			if err == nil {
-				p.T, p.Dose = t, float64(dose)*DoseScale
-				p.TempC, p.Battery = (float64(temp)-2000)/100, float64(chg)/100
+			if p, err = readRare(r, t); err == nil {
 				out = append(out, p)
 			}
-		case eid == 0 && (gid == 4 || gid == 5):
+		case eid == 0 && gid == 4: // contador de dose: u32 + flags
+			err = r.skip(6)
+		case eid == 0 && gid == 5:
 			err = r.skip(16)
 		case eid == 0 && gid == 6:
 			err = r.skip(6)
@@ -486,6 +493,9 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			id, _ = r.u8()
 			p, _ = r.u8()
 			e.Flags, err = r.u16()
+			if err == nil && rateEvent(int(id)) {
+				err = r.skip(6) // taxa (f32) e erro (u16) do alarme
+			}
 			if err == nil {
 				e.T, e.ID, e.Param = t, int(id), int(p)
 				out = append(out, e)
@@ -509,12 +519,39 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			if err == nil && rs.Period > 0 && rs.Period < time.Minute {
 				out = append(out, rs)
 			}
-		case eid == 1 && gid >= 2 && gid <= 3:
+		case eid == 1 && (gid == 2 || gid == 3):
+			// lote: n registros, um a cada "unidade" × 10 ms, do mais antigo
+			// para o mais novo. É assim que o aparelho manda o que guardou na
+			// memória enquanto ninguém estava conectado.
+			var n uint16
+			var unit uint32
+			n, _ = r.u16()
+			unit, err = r.u32()
+			size := map[uint8]int{2: 16, 3: 14}[gid]
+			if err == nil && r.left() < int(n)*size {
+				return out // lote cortado: não dá para confiar no resto
+			}
+			step := time.Duration(unit) * 10 * time.Millisecond
+			for i := 0; i < int(n) && err == nil; i++ {
+				ti := t.Add(time.Duration(i) * step)
+				if gid == 2 {
+					var p DoseRateDB
+					if p, err = readDoseRateDB(r, ti); err == nil {
+						out = append(out, p)
+					}
+				} else {
+					var p Rare
+					if p, err = readRare(r, ti); err == nil {
+						out = append(out, p)
+					}
+				}
+			}
+		case eid == 1 && gid == 4:
 			var n uint16
 			n, _ = r.u16()
 			_, err = r.u32()
 			if err == nil {
-				err = r.skip(int(n) * []int{0, 8, 16, 14}[gid])
+				err = r.skip(int(n) * 6)
 			}
 		default:
 			return out // tipo desconhecido: não dá para saber o tamanho
@@ -524,6 +561,35 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 		}
 	}
 	return out
+}
+
+func readDoseRateDB(r *buf, t time.Time) (DoseRateDB, error) {
+	var p DoseRateDB
+	var cr, dr float32
+	var de uint16
+	p.Count, _ = r.u32()
+	cr, _ = r.f32()
+	dr, _ = r.f32()
+	de, _ = r.u16()
+	var err error
+	p.Flags, err = r.u16()
+	p.T, p.CPS, p.DoseRate, p.DoseErr = t, float64(cr), float64(dr)*DoseScale, float64(de)/10
+	return p, err
+}
+
+func readRare(r *buf, t time.Time) (Rare, error) {
+	var p Rare
+	var dose float32
+	var temp, chg uint16
+	p.Duration, _ = r.u32()
+	dose, _ = r.f32()
+	temp, _ = r.u16()
+	chg, _ = r.u16()
+	var err error
+	p.Flags, err = r.u16()
+	p.T, p.Dose = t, float64(dose)*DoseScale
+	p.TempC, p.Battery = (float64(temp)-2000)/100, float64(chg)/100
+	return p, err
 }
 
 // ---------- espectro ----------

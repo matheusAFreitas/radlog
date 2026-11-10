@@ -1,5 +1,22 @@
 # Versões
 
+## 2.30.0
+- **O RadiaCode não perde mais o que mediu com o PC desligado.** Sozinho, o
+  aparelho guarda na memória as últimas ~1000 h (a taxa de 96 em 96 s, a
+  dose, temperatura, bateria e eventos) e manda tudo quando conecta, marcado
+  como "dado antigo". O app jogava esses lotes fora. Agora cada registro vai
+  para a hora em que foi medido, com a hora do próprio aparelho:
+  - os minutos sem leitura ganham a taxa da memória (marcados como
+    `memoria`, com os segundos cobertos), e o que o app gravou ao vivo nunca
+    é trocado;
+  - o log do aparelho ganha as linhas, com a etiqueta "memória do aparelho";
+  - a dose acumulada entra no histórico de dose.
+  No fim vem um aviso no histórico: quantos registros, de quando a quando e
+  quantos minutos foram preenchidos.
+- O aparelho apaga da memória o que manda. Se o app do celular conectar
+  antes, é ele que leva; aí o caminho é importar o log do celular.
+- Alarmes do RadiaCode (que trazem a taxa junto) e o contador de dose não
+  embaralham mais a leitura do resto do pacote.
 ## 2.29.0
 - **GMC-800 em µSv/h.** Os limites do GMC (alarme, aviso de atenção e alarme
   de perigo) agora são escolhidos em µSv/h nas Configurações; o app acha o
