@@ -1,5 +1,12 @@
 # Versões
 
+## 2.20.2
+- **Mais arrumação por dentro, sem mudança na tela.** A página Medir objeto
+  (a medição com fundo e objeto, o gráfico durante a medição, o segundo
+  aparelho, o espectro do RadiaCode e as medições salvas) saiu do `app.js`
+  para `frontend/dist/medir.js`. O `app.js` ficou com cerca de 930 linhas a
+  menos; desde a 2.18 já são cerca de 2.400.
+
 ## 2.20.1
 - **Mais arrumação por dentro, sem mudança na tela.** A aba Dose dos
   Gráficos (o gráfico de CPM com o zoom por arraste e a dose acumulada dos
