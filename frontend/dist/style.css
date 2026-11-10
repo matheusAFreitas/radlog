@@ -1295,23 +1295,28 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst-fill { flex: 1 1 auto; }
 .inst-name { color: var(--muted); }
 .inst-state { font-weight: 600; white-space: nowrap; color: var(--dim); display: inline-flex; align-items: center; gap: 6px; }
-.inst-read { display: flex; align-items: flex-end; gap: 6px; min-width: 0; cursor: pointer; }
-.inst-val { font-size: var(--fs-reading-m); line-height: 1; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
-.inst-unit { padding-bottom: 3px; font-size: var(--fs-body); color: var(--muted); white-space: nowrap; }
+.inst-read { display: flex; align-items: center; gap: var(--space-4); min-width: 0; cursor: pointer; }
 .inst-read .demo-tag { align-self: center; }
 .inst-spark { flex: 1 1 auto; min-width: 48px; height: 38px; margin-left: 10px; overflow: visible; }
 .inst-spark polyline { fill: none; stroke: var(--sc); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inst-rc { --sc: var(--rc); }
-.inst.stale .inst-val { color: var(--dim); }
 .inst.stale .inst-spark { opacity: .5; }
 .inst.lv-atencao, .inst.lv-nocount { --lvc: var(--att); }
 .inst.lv-alarme { --lvc: var(--alarm); }
 .inst.lv-perigo { --lvc: var(--warn); }
 /* mostrador no logo (ideia 1): o arco de fora enche pelas três faixas */
-.dial { width: 56px; height: 56px; flex: none; align-self: center; margin-right: var(--space-2); }
+.dial { width: 148px; height: 148px; flex: none; align-self: center; overflow: visible; }
+.dial-val { font-family: var(--mono); font-weight: 500; fill: var(--text); letter-spacing: -.02em; }
+.dial-unit { font-size: 2.8px; fill: var(--dim); }
+.inst.stale .dial-val { fill: var(--dim); }
+.inst-say { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-self: center; }
+.inst-say .inst-state { font-size: var(--fs-number); white-space: normal; }
+.inst-sub-say { color: var(--muted); font-size: var(--fs-body); }
+.inst-say-row { display: flex; align-items: center; gap: 6px; min-width: 0; margin-top: var(--space-2); }
+.inst-say-row .inst-spark { margin-left: 0; }
 .dial-track { fill: none; stroke: var(--chart-grid); stroke-width: 3; stroke-linecap: round; }
 .dial-arc { fill: none; stroke: var(--lvc, var(--accent)); stroke-width: 3; stroke-linecap: round; transition: d .4s; }
-.dial-ring { fill: none; stroke: var(--lvc, var(--accent)); stroke-width: 1.6; }
+.dial-ring { fill: none; stroke: var(--lvc, var(--accent)); stroke-width: 2; }
 .inst.stale .dial-ring { stroke: var(--dim); }
 .inst-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; font-size: var(--fs-label); color: var(--muted); }
 #gTileFoot { display: contents; }
@@ -1352,7 +1357,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .side-foot .pill { margin: 0; }
   .main { padding: 12px 14px 10px; }
 }
-@media (max-width: 420px) { .inst-val { font-size: var(--fs-reading-m); } }
+@media (max-width: 420px) { .dial { width: 104px; height: 104px; } }
 
 /* 2.8.1: marca — o trifólio de ondas no lugar do "o" */
 .side .brand-word { display: block; gap: 0; padding: 4px 10px 14px; font-size: var(--fs-number); font-weight: 600; letter-spacing: -.01em; line-height: 1; white-space: nowrap; color: var(--text); }

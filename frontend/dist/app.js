@@ -287,10 +287,26 @@ function tileScale(pfx, p1, p2, pos, t1, t2) {
   $(pfx + "TileDial").insertAdjacentHTML("afterbegin", `<title>atenção a partir de ${t1} · alarme a partir de ${t2}</title>`);
 }
 
-function tileState(pfx, lvl, word) {
+// frase do nível ao lado do mostrador (só nos quadros dos aparelhos)
+const LV_SAY = {
+  seguro: "dentro do fundo de sempre",
+  atencao: "acima do limite de atenção",
+  alarme: "passou o limite de alarme",
+  perigo: "acima do limite de perigo",
+  nocount: "o aparelho não está mandando contagens",
+};
+function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  lvLabel($(pfx + "TileState"), lvl, word, 14);
+  lvLabel($(pfx + "TileState"), lvl, word, pfx === "a" ? 14 : 18);
+  const sayEl = $(pfx + "TileSay");
+  if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
+}
+// número dentro do anel: encolhe quando não cabe
+function dialVal(pfx, txt) {
+  const el = $(pfx + "TileVal");
+  el.textContent = txt;
+  el.setAttribute("font-size", txt.length > 6 ? "3.4" : txt.length > 4 ? "4.2" : "5.2");
 }
 
 // faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
@@ -316,7 +332,7 @@ function renderGTile() {
   $("gTileDemo").hidden = !state.demo.active;
   $("gTile").classList.toggle("stale", !live);
   const v = live ? tileVals(r.usv, r.cpm) : null;
-  $("gTileVal").textContent = v ? v[u] : "—";
+  dialVal("g", v ? v[u] : "—");
   // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
   const k = calK();
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
@@ -327,7 +343,7 @@ function renderGTile() {
     if (r.saturated) word = "Saturado";
     else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
-  tileState("g", lvl, word);
+  tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
   tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
@@ -348,13 +364,14 @@ function renderRTile(st, o) {
   $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
-  $("rTileVal").textContent = v ? v[u] : "—";
-  $("rTileVal").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
+  dialVal("r", v ? v[u] : "—");
+  $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
   const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : LV_WORD;
-  if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
+  const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
+  if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
   tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
   $("miniR").hidden = false;

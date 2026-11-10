@@ -8,10 +8,13 @@
   lateral, na lista de alertas, na legenda e nas linhas de limite dos
   gráficos, no ícone da bandeja e na coluna de nível do relatório PDF. Dá pra
   ler o nível sem distinguir cores.
-- **Mostrador no lugar da régua.** Nos quadros do GMC-800 e do RadiaCode, a
-  régua de três faixas virou um mostrador no desenho do logo: o arco enche
-  conforme a leitura (um terço por faixa) e pega a cor do nível. Passando o
-  mouse aparecem os limites.
+- **Mostrador no lugar do número e da régua.** Nos quadros do GMC-800 e do
+  RadiaCode, o número grande e a régua de três faixas viraram o mostrador do
+  logo: o valor fica dentro do anel, o arco de fora enche conforme a leitura
+  (um terço por faixa, no sentido do relógio) e tudo pega a cor do nível. Ao
+  lado, o nível em letra grande e uma frase curta ("dentro do fundo de
+  sempre", "passou o limite de alarme"...). Passando o mouse no mostrador
+  aparecem os limites.
 - **Ponto de conexão vira anel.** O ponto ao lado do nome do aparelho agora é
   um anel, para não confundir com o círculo do nível Seguro.
 
