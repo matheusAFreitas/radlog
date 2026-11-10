@@ -151,12 +151,17 @@ function fmtLim(x, u) {
   return fmt(x, x < 1 ? 2 : 1);
 }
 
-// mostrador grande do GMC-800 (faixas do manual: 50 / 100 CPM; perigo no
-// limite do app)
+// os três níveis do app (Configurações › Alarmes e avisos) em CPM pela
+// calibração atual: são eles que disparam os avisos do GMC-800
+function gmcThrCPM() {
+  const k = calK();
+  return [attnUSv() / k, alarmUSv() / k, dangerUSv() / k];
+}
+// mostrador grande do GMC-800, com os níveis do app
 function renderGmcDial(r, lvl, word) {
   const el = $("gHeroDial");
   if (!el) return;
-  const u = state.unit, t = [50, 100, dangerCPM()], conn = gmcConn();
+  const u = state.unit, t = gmcThrCPM(), conn = gmcConn();
   const labels = t.map((c, i) => [fmtLim(gmcInUnit(c, u), u), ["atenção", "alarme", "perigo"][i]]);
   const pos = r ? (lvl === "perigo" ? 1.01 : devDialPos(r.cpm, t)) : null;
   el.innerHTML = devDialSvg(pos, lvl, { w: 3.4, labels, center: true, conn });
@@ -287,7 +292,7 @@ function renderDevMini() {
     if (g.live && r) {
       lv = g.lvl;
       word = r.noCount ? "Sem contagens" : LV_WORD[g.lvl] || "—";
-      pos = g.lvl === "perigo" ? 1.01 : devDialPos(r.cpm, [50, 100, dangerCPM()]);
+      pos = g.lvl === "perigo" ? 1.01 : devDialPos(r.cpm, gmcThrCPM());
       val = fmt(r.usv, usvDigits(r.usv));
     } else word = $("gTileState").textContent || "—";
     dose = state.gDose;

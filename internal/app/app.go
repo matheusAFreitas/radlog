@@ -1096,7 +1096,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		usv := cal.USv(float64(cpm))
 		r := Reading{
 			Time: now.UnixMilli(), CPM: cpm, CPS: cps,
-			USv: usv, MRh: usv / 10, Level: levels.Level(float64(cpm), lv), Alarm: alarmOn,
+			USv: usv, MRh: usv / 10, Level: levels.LevelWith(float64(cpm), float64(set.AlarmCPM), lv), Alarm: alarmOn,
 			Attention: attnOn, Danger: dangerOn,
 			Saturated: satOn, SatReason: satReason, Rise: rise,
 			NoCount: noCount,

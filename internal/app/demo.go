@@ -334,7 +334,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 		usv := cal.USv(cpm)
 		r := Reading{
 			Time: now.UnixMilli(), CPM: uint32(math.Round(cpm)), CPS: cps,
-			USv: usv, MRh: usv / 10, Level: levels.Level(cpm, lv), Alarm: alarmOn, Demo: true,
+			USv: usv, MRh: usv / 10, Level: levels.LevelWith(cpm, float64(set.AlarmCPM), lv), Alarm: alarmOn, Demo: true,
 			Attention: attnOn, Danger: dangerOn,
 			Saturated: satOn, SatReason: satReason, Rise: rise,
 		}
