@@ -215,3 +215,17 @@ func TestDataBufFirmware415(t *testing.T) {
 		t.Fatalf("brutos: %+v", split)
 	}
 }
+
+// evento "taxa de dose fora da escala" traz a taxa junto
+func TestDataBufOffscaleEvent(t *testing.T) {
+	db := le(uint8(0), uint8(0), uint8(7), int32(0), uint8(EvRateOffscale), uint8(0), uint16(0), float32(0.12), uint16(5))
+	db = append(db, le(uint8(1), uint8(0), uint8(7), int32(0), uint8(EvCountOffscale), uint8(0), uint16(0), float32(9000), uint16(5))...)
+	recs := decodeDataBuf(db, time.Now())
+	if len(recs) != 2 {
+		t.Fatalf("registros: %+v", recs)
+	}
+	e, c := recs[0].(Event), recs[1].(Event)
+	if !e.Offscale() || math.Abs(e.Rate-0.12*DoseScale) > 1e-3 || !c.Offscale() || c.Rate != 9000 {
+		t.Fatalf("eventos: %+v %+v", e, c)
+	}
+}

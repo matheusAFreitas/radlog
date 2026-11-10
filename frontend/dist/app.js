@@ -1635,7 +1635,8 @@ function updateAlarm() {
   bar.classList.toggle("muted", !perigo && alarmCtl.muted);
 
   const dev = kind === "rc" ? "RC102" : "GMC-800";
-  const rcSat = kind === "rc" && rcs.usvh >= lv().rcSatUSv;
+  // o próprio aparelho avisou "fora da escala", ou passou do fim da escala configurado
+  const rcSat = kind === "rc" && (!!rcs.offscale || rcs.usvh >= lv().rcSatUSv);
   const sat = rcSat ? "escala" : r && r.saturated ? r.satReason || "limite" : null;
   $("alarmIco").innerHTML = LV_PATH[sat ? "perigo" : sev];
   const tag = fake ? (kind === "test" ? "TESTE" : "DEMO") : kind === "real" && state.demo.active ? "REAL" : "";

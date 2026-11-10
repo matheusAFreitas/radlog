@@ -86,7 +86,10 @@ type RcState struct {
 	DoseLive    float64 `json:"doseLive"`
 	DoseLiveSec float64 `json:"doseLiveSec"`
 	DoseLiveAt  int64   `json:"doseLiveAt"`
-	DoseLiveOn  bool    `json:"doseLiveOn"`
+	// Offscale: o próprio aparelho avisou "fora da escala" (taxa ou
+	// contagem) e a leitura ainda não caiu; vale junto com levels.rcSatUSv
+	Offscale   bool `json:"offscale"`
+	DoseLiveOn bool `json:"doseLiveOn"`
 	// valor simulado (modo demo): nada disso vai para o disco
 	Demo bool `json:"demo,omitempty"`
 }
@@ -126,6 +129,8 @@ type rcState struct {
 	macc         rcMeasAcc // só a goroutine do rcRun mexe
 	dose         rcDoseLive
 	cfgLogAt     time.Time
+	offRef       float64      // µSv/h no aviso de "fora da escala"
+	offAt        time.Time    // quando chegou o aviso
 	logCfgAt     time.Time    // última "configuração alterada" no log do aparelho
 	search       []rcSearchPt // modo busca: amostras curtas dos últimos minutos
 	searchRef    [2]float64
@@ -405,7 +410,7 @@ func (a *App) rcLoop() {
 				a.rcSet(func(s *RcState) { s.State, s.Err = "procurando", "" })
 			} else {
 				msg := err.Error()
-				a.rcSet(func(s *RcState) { s.State, s.Err = "erro", msg })
+				a.rcSet(func(s *RcState) { s.State, s.Err, s.Offscale = "erro", msg, false })
 			}
 			wait(rcRetryUSB)
 			continue
@@ -414,7 +419,7 @@ func (a *App) rcLoop() {
 		dev, err := radiacode.Open(tr)
 		if err != nil {
 			msg := err.Error()
-			a.rcSet(func(s *RcState) { s.State, s.Err = "erro", msg })
+			a.rcSet(func(s *RcState) { s.State, s.Err, s.Offscale = "erro", msg, false })
 			if viaBLE {
 				bleFails++
 			}
@@ -507,7 +512,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			}
 			msg := err.Error()
 			a.logEvent("RC102 desconectado: " + msg)
-			a.rcSet(func(s *RcState) { s.State, s.Err = "erro", msg })
+			a.rcSet(func(s *RcState) { s.State, s.Err, s.Offscale = "erro", msg, false })
 			break
 		}
 		fails = 0
@@ -559,6 +564,7 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rc.mu.Lock()
 			a.rc.st.Time, a.rc.st.CPS, a.rc.st.CPSErr = now.UnixMilli(), v.CPS, v.CPSErr
 			a.rc.st.USvh, a.rc.st.USvhErr = v.DoseRate, v.DoseErr
+			a.rcOffscaleStepLocked(v.DoseRate, now)
 			a.rcDoseRTLocked(v.DoseRate, now)
 			a.rc.mu.Unlock()
 			a.rcAddMinute(now, v.CPS, v.DoseRate)
@@ -592,6 +598,12 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 			a.rcDoseLogAppend(time.Now(), v.Dose, float64(v.Duration))
 			changed = true
 		case radiacode.Event:
+			if v.Offscale() {
+				a.rc.mu.Lock()
+				a.rcOffscaleSetLocked(v, time.Now())
+				a.rc.mu.Unlock()
+				changed = true
+			}
 			a.rc.mu.Lock()
 			justConnected := time.Since(time.UnixMilli(a.rc.st.Since)) < 20*time.Second
 			a.rc.mu.Unlock()
@@ -618,6 +630,33 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 	}
 	if changed {
 		a.emitRc()
+	}
+}
+
+// ---------- fora da escala ----------
+
+// rcOffscaleSetLocked marca o "fora da escala" que o aparelho avisou. A
+// referência é a leitura daquele momento: o aviso vale até a leitura cair
+// para menos da metade dela.
+func (a *App) rcOffscaleSetLocked(e radiacode.Event, now time.Time) {
+	ref := a.rc.st.USvh
+	if e.ID == radiacode.EvRateOffscale && e.Rate > ref {
+		ref = e.Rate
+	}
+	if !a.rc.st.Offscale || ref > a.rc.offRef {
+		a.rc.offRef = ref
+	}
+	a.rc.st.Offscale, a.rc.offAt = true, now
+}
+
+// rcOffscaleStepLocked desfaz o aviso quando a leitura cai para menos da
+// metade da referência (ou, sem referência, 2 min depois do aviso).
+func (a *App) rcOffscaleStepLocked(usv float64, now time.Time) {
+	if !a.rc.st.Offscale {
+		return
+	}
+	if (a.rc.offRef > 0 && usv < a.rc.offRef/2) || (a.rc.offRef <= 0 && now.Sub(a.rc.offAt) > 2*time.Minute) {
+		a.rc.st.Offscale, a.rc.offRef = false, 0
 	}
 }
 

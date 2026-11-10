@@ -334,3 +334,21 @@ func TestRcDoseResume(t *testing.T) {
 		t.Fatal("continuou de um total velho")
 	}
 }
+
+// "fora da escala" avisado pelo aparelho: vale até a leitura cair à metade
+func TestRcOffscale(t *testing.T) {
+	a := newTestApp(t)
+	a.rcRecords([]radiacode.Record{radiacode.RealTime{CPS: 9000, DoseRate: 900}})
+	a.rcRecords([]radiacode.Record{radiacode.Event{ID: radiacode.EvRateOffscale, Rate: 1000}})
+	if !a.GetRadiacode().Offscale {
+		t.Fatal("aviso não marcou")
+	}
+	a.rcRecords([]radiacode.Record{radiacode.RealTime{CPS: 8000, DoseRate: 800}})
+	if !a.GetRadiacode().Offscale {
+		t.Fatal("desmarcou cedo")
+	}
+	a.rcRecords([]radiacode.Record{radiacode.RealTime{CPS: 100, DoseRate: 10}})
+	if a.GetRadiacode().Offscale {
+		t.Fatal("não desmarcou quando a leitura caiu")
+	}
+}

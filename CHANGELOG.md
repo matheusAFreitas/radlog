@@ -1,5 +1,14 @@
 # Versões
 
+## 2.39.0
+- O app passa a ouvir o aviso de "fora da escala" do próprio Radiacode 102
+  (taxa de dose ou contagem acima do que ele mede). Com o aviso, a faixa de
+  alarme mostra "RC102 saturado · fora da escala do aparelho" e o "Onde está
+  cada aparelho" mostra "saturando", mesmo abaixo do fim da escala ajustado
+  em Configurações. O aviso vale até a leitura cair para menos da metade do
+  valor em que ele chegou. O fim da escala do app continua valendo como
+  segunda trava.
+
 ## 2.38.6
 - Nomes dos aparelhos padronizados. Nos títulos (menu, quadros do Agora,
   cartão grande e título de cada aparelho, "Onde está cada aparelho",
