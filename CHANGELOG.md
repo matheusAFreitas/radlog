@@ -1,5 +1,16 @@
 # Versões
 
+## 2.35.2
+- **Histórico do RadiaCode sem o buraco do fim.** No segundo teste, a
+  memória do aparelho voltou inteira, mas os últimos 2 minutos antes da
+  reconexão ficavam vazios ou pela metade. Isso acontecia por dois motivos.
+  O último ponto de 96 s chega uns 20 s depois de conectar, e o minuto em
+  que ele caía já tinha uma parte gravada, então ele era ignorado. E o ponto
+  seguinte cobre o começo do minuto da conexão, mas era tratado como leitura
+  ao vivo. Agora os minutos pela metade são completados, pesando pelos
+  segundos de cada parte, sem passar de 60 s. E o pedaço de antes da
+  conexão entra também no minuto em que o RadiaCode foi conectado.
+
 ## 2.35.1
 - **O mostrador do GMC-800 segue os níveis das Configurações.** Os avisos
   do GMC já disparavam pelos níveis de Configurações › Alarmes e avisos, mas
