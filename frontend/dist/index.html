@@ -648,119 +648,238 @@
 <div class="page" id="pageMedir" hidden>
   <section class="card view view-measure" id="viewMeasure">
       <div class="view-body">
-      <div class="dlg-head">
-        <h2 id="measureTitle">Medir um objeto</h2>
-      </div>
-      <div class="seg m-mode" role="group" aria-label="Nova medição ou medições salvas" id="mModeSeg">
-        <button type="button" data-mmode="nova" aria-pressed="true">Nova medição</button>
-        <button type="button" data-mmode="salvas" aria-pressed="false">Medições salvas <span id="mHistCount"></span></button>
+      <div class="dlg-head m-head">
+        <h2 id="measureTitle">Medir objeto</h2>
+        <div class="seg m-mode" role="group" aria-label="Nova medição ou medições salvas" id="mModeSeg">
+          <button type="button" data-mmode="nova" aria-pressed="true">Nova medição</button>
+          <button type="button" data-mmode="salvas" aria-pressed="false">Medições salvas <span id="mHistCount"></span></button>
+        </div>
       </div>
 
       <div id="mNewPane">
-      <p class="small muted">Compara a contagem com o objeto perto do aparelho com a do fundo e diz se a diferença é real ou só a variação natural da contagem. No automático, a medição para sozinha quando já dá para responder: objetos fortes em segundos, os fracos levam mais.</p>
-      <div class="m-grid">
-        <div class="m-main">
-      <label for="mName">Nome do objeto (opcional)</label>
-      <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
-      <label for="mDist" id="mDistLabel">Distância até o tubo (opcional)</label>
-      <input type="text" id="mDist" autocomplete="off" list="mDistList" placeholder="ex.: encostado, 5 cm">
-      <datalist id="mDistList"><option value="encostado"></option><option value="1 cm"></option><option value="5 cm"></option><option value="10 cm"></option><option value="30 cm"></option><option value="1 m"></option></datalist>
-      <div class="m-opts">
-        <div>
-          <label for="mDev">Aparelho</label>
-          <select id="mDev">
-            <option value="radiacode">RC102 (com espectro)</option>
-            <option value="gmc">GMC-800</option>
-            <option value="ambos">Os dois perto do objeto</option>
-            <option value="voce">Um no objeto, outro com você</option>
-          </select>
-        </div>
-        <div id="mObjDevBox" hidden>
-          <label for="mObjDev">Qual fica no objeto</label>
-          <select id="mObjDev">
-            <option value="gmc">GMC-800 no objeto, RC102 com você</option>
-            <option value="radiacode">RC102 no objeto, GMC-800 com você</option>
-          </select>
-        </div>
-        <div>
-          <label for="mBgSrc">Fundo</label>
-          <select id="mBgSrc">
-            <option value="casa" selected>Fundo da casa (última hora)</option>
-            <option value="medir">Medir agora, com o objeto longe</option>
-          </select>
-        </div>
-        <div>
-          <label for="mSecs">Tempo</label>
-          <select id="mSecs">
-            <option value="auto600">Automático, até 10 min</option>
-            <option value="auto1800" selected>Automático, até 30 min</option>
-            <option value="auto3600">Automático, até 1 h</option>
-            <option value="30">Fixo: 30 s</option>
-            <option value="60">Fixo: 1 min</option>
-            <option value="120">Fixo: 2 min</option>
-            <option value="300">Fixo: 5 min</option>
-          </select>
-        </div>
-        <div id="mPctBox">
-          <label for="mPct">Conta como “tem algo”</label>
-          <select id="mPct">
-            <option value="50">+50% do fundo (mais rápido)</option>
-            <option value="20" selected>+20% do fundo</option>
-            <option value="10">+10% do fundo (mais lento)</option>
-          </select>
-        </div>
-      </div>
-      <p class="small muted" id="mOptHint"></p>
+      <ol class="m-steps" id="mSteps" aria-label="Etapas da medição">
+        <li data-step="prep"><span class="m-step-n" aria-hidden="true">1</span>Preparar</li>
+        <li data-step="busca"><span class="m-step-n" aria-hidden="true">2</span>Procurar</li>
+        <li data-step="fundo"><span class="m-step-n" aria-hidden="true">3</span>Fundo</li>
+        <li data-step="objeto"><span class="m-step-n" aria-hidden="true">4</span>Objeto</li>
+        <li data-step="result"><span class="m-step-n" aria-hidden="true">5</span>Resultado</li>
+      </ol>
 
-      <div class="m-duo" id="mDuo" hidden></div>
-      <div class="m-step" id="mStepBg">
-        <div class="m-step-head"><strong id="mBgTitle">1. Fundo</strong><span class="mono small" id="mBgVal">—</span></div>
-        <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
-        <button type="button" class="btn" id="btnMeasureBg">Medir o fundo</button>
-      </div>
-      <div class="m-step" id="mStepObj">
-        <div class="m-step-head"><strong>2. Com o objeto</strong><span class="mono small" id="mObjVal">—</span></div>
-        <div class="bar"><div class="bar-fill" id="mObjFill"></div></div>
-        <div class="small m-live-line" id="mObjLive" hidden></div>
-        <button type="button" class="btn" id="btnMeasureObj" disabled>Medir com o objeto</button>
-      </div>
-      <div class="m-result" id="mResult" hidden>
-        <strong id="mVerdict"></strong>
-        <span class="mono" id="mNumbers"></span>
-        <div id="mStats"></div>
-        <span class="small muted" id="mExplain"></span>
-        <div class="m-other-res" id="mOtherRes" hidden></div>
-        <span class="small m-saved" id="mSaved" hidden>Salva e marcada no gráfico de CPM. <button type="button" class="link small-link" id="btnMOpenSaved">Ver em Medições salvas</button></span>
-        <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span> <button type="button" class="btn small" id="btnMReportOpen" hidden>Abrir relatório</button><button type="button" class="btn small" id="btnMReportMake" hidden>Relatório (PDF)</button></div>
-      </div>
-      <div class="dlg-foot spread">
-        <button type="button" class="btn" id="btnMeasureReset">Recomeçar</button>
-      </div>
-        </div>
-        <div class="m-side" id="mLiveSlotNew">
-          <div class="m-live" id="mLive">
-            <div class="m-live-head">
-              <h3><span id="mLiveTitle">Durante a medição</span> <span class="small muted" id="mLiveSub"></span></h3>
-              <button type="button" class="btn small" id="btnMLiveBack" hidden>Voltar à medição atual</button>
-            </div>
-            <div class="m-chart-wrap">
-              <div class="y-axis mono" id="mY"><span></span><span></span><span></span><span>0</span></div>
-              <div class="plot m-plot" id="mPlot">
-                <svg id="mChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da medição: leitura ao vivo e média de cada fase"></svg>
-                <div class="cursor" id="mCursor" hidden></div>
-                <div class="tip mono" id="mTip" hidden></div>
+      <!-- 1. preparar -->
+      <div class="m-pane" id="mPanePrep">
+        <div class="m-prep-row">
+          <div class="m-field">
+            <label for="mName">O que vai medir <span class="muted">opcional</span></label>
+            <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
+          </div>
+          <div class="m-field">
+            <label for="mDistCm">Distância do objeto até o aparelho <span class="m-tag mono">usada no Bq e na distância segura</span></label>
+            <div class="m-dist" id="mDistBox">
+              <input type="number" id="mDistCm" min="0" max="500" step="0.5" inputmode="decimal" aria-label="Distância em centímetros"><span class="muted">cm</span>
+              <div class="seg" role="group" aria-label="Distâncias comuns" id="mDistSeg">
+                <button type="button" data-dist="0" aria-pressed="false">encostado</button>
+                <button type="button" data-dist="5" aria-pressed="false">5 cm</button>
+                <button type="button" data-dist="10" aria-pressed="false">10 cm</button>
+                <button type="button" data-dist="30" aria-pressed="false">30 cm</button>
               </div>
             </div>
-            <div class="legend small muted">
-              <span class="key"><i class="mk-live" id="mLiveKey" aria-hidden="true"></i><span id="mLiveKeyTxt">leitura ao vivo</span></span>
-              <span class="key" id="mOtherKey" hidden><i id="mOtherKeyI" aria-hidden="true"></i><span id="mOtherKeyTxt"></span></span>
-              <span class="key"><i class="mk-bg" aria-hidden="true"></i>média do fundo</span>
-              <span class="key"><i class="mk-obj" aria-hidden="true"></i>média com o objeto</span>
-              <span class="small muted">faixa = margem de erro</span>
+          </div>
+        </div>
+        <div class="m-field">
+          <span class="m-label" id="mDevLabel">Com qual aparelho</span>
+          <div class="m-devs" role="radiogroup" aria-labelledby="mDevLabel" id="mDevs">
+            <button type="button" role="radio" class="m-dev" data-dev="radiacode" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i>RC102</strong><span>Mais sensível e com espectro.</span><span class="mono">isótopos · espectrograma · Bq estimado</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="gmc" aria-checked="false"><strong><i class="m-dot gmc" aria-hidden="true"></i>GMC-800</strong><span>Só contagem, sem espectro.</span><span class="mono">tem algo ou não · distância segura</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="ambos" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i><i class="m-dot gmc" aria-hidden="true"></i>Os dois no objeto</strong><span>Um confere o outro.</span><span class="mono">tudo do RC102 + concordância</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="voce" aria-checked="false"><strong>Um no objeto, outro com você</strong><span>Quanto você recebe manuseando.</span><span class="mono">tem algo ou não · sua dose no período</span></button>
+          </div>
+          <div class="m-objdev" id="mObjDevBox" hidden>
+            <span class="small muted">no objeto:</span>
+            <div class="seg" role="group" aria-label="Qual aparelho fica no objeto" id="mObjDevSeg">
+              <button type="button" data-objdev="gmc" aria-pressed="false">GMC-800</button>
+              <button type="button" data-objdev="radiacode" aria-pressed="false">RC102</button>
+            </div>
+            <span class="small muted" id="mObjDevHint"></span>
+          </div>
+        </div>
+        <div class="m-field">
+          <span class="m-label" id="mSizeLabel">Tamanho do objeto</span>
+          <div class="seg m-size" role="group" aria-labelledby="mSizeLabel" id="mSizeSeg">
+            <button type="button" data-size="pequeno" aria-pressed="false">pequeno (fonte, pedra, relógio)</button>
+            <button type="button" data-size="espalhado" aria-pressed="false">espalhado (prato, azulejo, areia)</button>
+          </div>
+          <span class="small muted" id="mSizeHint">O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.</span>
+        </div>
+        <details class="m-adj" id="mAdj">
+          <summary>Ajustes da medição: fundo, tempo e quando conta como “tem algo”</summary>
+          <div class="m-adj-grid">
+            <div class="m-field">
+              <span class="m-label" id="mBgLabel">Fundo</span>
+              <div class="seg" role="group" aria-labelledby="mBgLabel" id="mBgSeg">
+                <button type="button" data-bg="medir" aria-pressed="false">medir agora</button>
+                <button type="button" data-bg="casa" aria-pressed="false">fundo da casa (última hora)</button>
+              </div>
+              <span class="small muted" id="mHomeBgLine"></span>
+            </div>
+            <div class="m-field">
+              <label for="mSecs">Tempo</label>
+              <select id="mSecs">
+                <option value="auto600">automático, até 10 min</option>
+                <option value="auto1800" selected>automático, até 30 min</option>
+                <option value="auto3600">automático, até 1 h</option>
+                <option value="30">fixo: 30 s</option>
+                <option value="60">fixo: 1 min</option>
+                <option value="120">fixo: 2 min</option>
+                <option value="300">fixo: 5 min</option>
+              </select>
+            </div>
+            <div class="m-field" id="mPctBox">
+              <span class="m-label" id="mPctLabel">Conta como “tem algo”</span>
+              <div class="seg" role="group" aria-labelledby="mPctLabel" id="mPctSeg">
+                <button type="button" data-pct="10" aria-pressed="false">+10%</button>
+                <button type="button" data-pct="20" aria-pressed="false">+20%</button>
+                <button type="button" data-pct="50" aria-pressed="false">+50%</button>
+              </div>
+              <span class="small muted">do fundo; menor acha coisas mais fracas, mas demora mais</span>
             </div>
           </div>
-          <div class="m-spec" id="mSpec" hidden></div>
+        </details>
+        <p class="small m-warn" id="mOptHint" hidden></p>
+        <div class="m-go">
+          <button type="button" class="btn accent" id="btnMStart">Começar</button>
+          <span class="small muted">Primeiro você procura o ponto mais forte. Dá pra pular.</span>
         </div>
+      </div>
+
+      <!-- 2. procurar -->
+      <div class="m-pane" id="mPaneBusca" hidden>
+        <h3>Passe o aparelho devagar em volta do objeto</h3>
+        <p class="small muted">A tela mostra só se está subindo ou descendo, rápido, sem média longa. Quando achar o ponto mais forte, pare ali.</p>
+        <div class="m-busca">
+          <div class="m-busca-main">
+            <div class="m-busca-val"><span class="mono" id="mBuscaVal">—</span><span class="muted">µSv/h</span></div>
+            <div class="m-busca-trend" id="mBuscaTrend" aria-live="polite">esperando a leitura</div>
+            <div class="m-busca-bar" aria-hidden="true"><div class="m-busca-fill" id="mBuscaFill"></div><i class="m-busca-bg" id="mBuscaBgMk"></i><i class="m-busca-pk" id="mBuscaPkMk"></i></div>
+            <div class="m-busca-scale mono small muted"><span id="mBuscaBgTxt">fundo</span><span id="mBuscaPkTxt">pico —</span></div>
+          </div>
+          <svg class="m-busca-spark" id="mBuscaSpark" viewBox="0 0 240 80" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+        </div>
+        <p class="small muted" id="mBuscaDev"></p>
+        <div class="m-go">
+          <button type="button" class="btn accent" id="btnMBuscaOk">Achei o ponto, medir aqui</button>
+          <button type="button" class="btn" id="btnMBuscaSkip">Pular</button>
+          <button type="button" class="btn" id="btnMBuscaBack">Voltar</button>
+        </div>
+      </div>
+
+      <!-- 3. fundo -->
+      <div class="m-pane" id="mPaneFundo" hidden>
+        <h3 id="mFundoTitle">Afaste o objeto pelo menos 2 metros</h3>
+        <p class="small muted" id="mFundoText">O app mede o fundo do lugar para descontar depois.</p>
+        <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
+        <div class="m-bar-scale mono small muted"><span id="mBgElapsed">0 s</span><span id="mBgTotal"></span></div>
+        <div class="m-kv"><span id="mBgValK">fundo até agora</span><span class="mono" id="mBgVal">—</span></div>
+        <div class="m-kv" id="mBgOtherRow" hidden><span id="mBgOtherK"></span><span class="mono" id="mBgOtherV">—</span></div>
+        <div class="m-go">
+          <button type="button" class="btn accent" id="btnMObjGo" hidden>Medir o objeto</button>
+          <button type="button" class="btn" id="btnMUseHome">Já tenho, usar o fundo da casa</button>
+          <button type="button" class="btn" id="btnMBgCancel">Cancelar</button>
+        </div>
+        <span class="small muted" id="mFundoHint"></span>
+      </div>
+
+      <!-- 4. objeto -->
+      <div class="m-pane" id="mPaneObj" hidden>
+        <div class="m-obj-head">
+          <h3 id="mObjTitle">Objeto na frente do aparelho</h3>
+          <button type="button" class="btn" id="btnMStop">Parar e ver o resultado</button>
+        </div>
+        <div class="m-obj-grid">
+          <div class="m-obj-nums">
+            <div id="mObjMain"></div>
+            <div class="m-sig">
+              <span class="small muted">certeza de que a diferença é real</span>
+              <div class="m-sig-bar" aria-hidden="true"><div class="m-sig-fill" id="mSigFill"></div><i class="m-sig-mk"></i></div>
+              <div class="m-sig-scale mono small muted"><span>0σ</span><span>3σ: real</span><span>5σ</span></div>
+            </div>
+            <div class="m-kv"><span>tempo</span><span class="mono" id="mObjTime">0 s</span></div>
+            <div id="mObjOther"></div>
+            <p class="small muted" id="mObjSay">Para sozinho quando já der pra responder.</p>
+          </div>
+          <div class="m-obj-viz">
+            <div class="m-viz m-spec" id="mLiveSpecBox" hidden></div>
+            <div class="m-viz" id="mSgBox" hidden>
+              <div class="m-viz-head"><h4 id="mSgTitle">Espectrograma</h4><span class="small muted">cada linha é um instante; mais claro = mais contagens</span></div>
+              <canvas id="mSg" height="120" aria-label="Espectrograma da medição"></canvas>
+              <div class="m-bar-scale mono small muted"><span>0</span><span>energia →</span><span id="mSgMax">3000 keV</span></div>
+            </div>
+            <div class="m-side" id="mLiveSlotNew">
+              <div class="m-live" id="mLive">
+                <div class="m-live-head">
+                  <h3><span id="mLiveTitle">Durante a medição</span> <span class="small muted" id="mLiveSub"></span></h3>
+                  <button type="button" class="btn small" id="btnMLiveBack" hidden>Voltar à medição atual</button>
+                </div>
+                <div class="m-chart-wrap">
+                  <div class="y-axis mono" id="mY"><span></span><span></span><span></span><span>0</span></div>
+                  <div class="plot m-plot" id="mPlot">
+                    <svg id="mChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico da medição: leitura ao vivo e média de cada fase"></svg>
+                    <div class="cursor" id="mCursor" hidden></div>
+                    <div class="tip mono" id="mTip" hidden></div>
+                  </div>
+                </div>
+                <div class="legend small muted">
+                  <span class="key"><i class="mk-live" id="mLiveKey" aria-hidden="true"></i><span id="mLiveKeyTxt">leitura ao vivo</span></span>
+                  <span class="key" id="mOtherKey" hidden><i id="mOtherKeyI" aria-hidden="true"></i><span id="mOtherKeyTxt"></span></span>
+                  <span class="key"><i class="mk-bg" aria-hidden="true"></i>média do fundo</span>
+                  <span class="key"><i class="mk-obj" aria-hidden="true"></i>média com o objeto</span>
+                  <span class="small muted">faixa = margem de erro</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 5. resultado -->
+      <div class="m-pane" id="mPaneResult" hidden>
+        <div class="m-banner" id="mBanner">
+          <span class="m-banner-ico" aria-hidden="true">!</span>
+          <div><h3 id="mVerdict"></h3><p class="small" id="mBannerText"></p></div>
+        </div>
+        <div class="m-rtiles" id="mTilesNew"></div>
+        <div class="m-rcards" id="mRCards"></div>
+        <div class="m-viz m-spec" id="mSpec" hidden></div>
+        <div class="m-viz" id="mNetSpecBox" hidden>
+          <div class="m-viz-head"><h4 id="mNetSpecTitle">Espectro do objeto, fundo descontado</h4><span class="small muted">picos marcados com o isótopo</span></div>
+          <div id="mNetSpec"></div>
+        </div>
+        <div class="m-viz m-tech">
+          <h4>Detalhes técnicos</h4>
+          <dl class="m-techl" id="mTech"></dl>
+          <div id="mStats"></div>
+          <span class="small muted" id="mExplain"></span>
+        </div>
+        <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span></div>
+        <div class="m-go m-res-actions">
+          <button type="button" class="btn accent" id="btnMOpenSaved">Ver em Medições salvas</button>
+          <button type="button" class="btn" id="btnMAgain">Medir em outra distância</button>
+          <button type="button" class="btn" id="btnMReportOpen" hidden>Abrir relatório</button>
+          <button type="button" class="btn" id="btnMReportMake" hidden>Relatório em PDF</button>
+          <button type="button" class="btn" id="btnMeasureReset">Nova medição</button>
+        </div>
+        <div class="m-again" id="mAgainBox" hidden>
+          <label for="mAgainCm">Nova distância</label>
+          <div class="m-dist"><input type="number" id="mAgainCm" min="0.5" max="500" step="0.5" inputmode="decimal"><span class="muted">cm</span>
+            <div class="seg" role="group" aria-label="Distâncias comuns" id="mAgainSeg">
+              <button type="button" data-dist="5" aria-pressed="false">5 cm</button>
+              <button type="button" data-dist="10" aria-pressed="false">10 cm</button>
+              <button type="button" data-dist="20" aria-pressed="false">20 cm</button>
+              <button type="button" data-dist="30" aria-pressed="false">30 cm</button>
+            </div>
+            <button type="button" class="btn accent" id="btnMAgainGo">Medir</button>
+          </div>
+        </div>
+        <p class="small muted" id="mSaved">“Medir em outra distância” repete só a etapa do objeto, com o mesmo fundo. Com duas distâncias, o app confere se a radiação cai pelo inverso do quadrado: se cair, a distância segura e o Bq ficam mais confiáveis; se não cair, o objeto é espalhado e o app avisa.</p>
       </div>
       </div>
 

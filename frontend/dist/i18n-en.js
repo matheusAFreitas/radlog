@@ -2563,7 +2563,155 @@ const I18N_EN = {
 "GQ GMC-800 (casa)": "GQ GMC-800 (home)",
 "RADIACODE 102 (DOSÍMETRO PESSOAL)": "RADIACODE 102 (PERSONAL DOSIMETER)",
 "Radiacode 102 · conectando…": "Radiacode 102 · connecting…",
-"Radiacode 102 · desconectado": "Radiacode 102 · disconnected"
+"Radiacode 102 · desconectado": "Radiacode 102 · disconnected",
+"A tela mostra só se está subindo ou descendo, rápido, sem média longa. Quando achar o ponto mais forte, pare ali.": "The screen only shows whether it's going up or down, fast, without a long average. When you find the strongest spot, stop there.",
+"Achei o ponto, medir aqui": "Found it, measure here",
+"Sem o fundo da casa desse aparelho, só a dose total.": "Without this device's home background, only the total dose.",
+"Afaste o objeto pelo menos 2 metros": "Move the object at least 2 meters away",
+"Ainda não dá pra dizer. Esperando mais contagens.": "Can't tell yet. Waiting for more counts.",
+"Talvez um pouco acima. Esperando mais contagens para ter certeza.": "Maybe a little above. Waiting for more counts to be sure.",
+"Já dá pra dizer que tem algo. Mais um pouco para afinar o número.": "It's already clear there's something. A bit longer to refine the number.",
+"Juntando contagens…": "Collecting counts…",
+"Para sozinho quando já der pra responder.": "Stops on its own once it can answer.",
+"Ajustes da medição: fundo, tempo e quando conta como “tem algo”": "Measurement settings: background, time and what counts as “something there”",
+"Os dois aparelhos, lado a lado": "Both devices, side by side",
+"Os dois no objeto": "Both on the object",
+"O objeto emite radiação acima do fundo": "The object emits radiation above background",
+"O objeto talvez emita um pouco acima do fundo": "The object may emit a little above background",
+"Nenhuma diferença do fundo que dê para ver": "No visible difference from background",
+"A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.": "The difference is much larger than the natural variation of the count. The µSv/h value holds for the object at the measured distance; at 1 meter it's much less.",
+"Coloque o objeto no ponto mais forte e comece. O fundo medido agora é descontado no resultado.": "Put the object at the strongest spot and start. The background measured now is subtracted in the result.",
+"Com o RC102 com você, você vê o espectro do que chega até você.": "With the RC102 on you, you see the spectrum of what reaches you.",
+"Com o RadiaCode com você, você vê o espectro do que chega até você.": "With the RC102 on you, you see the spectrum of what reaches you.",
+"Com o RC102 no objeto, você ganha o espectro e os isótopos.": "With the RC102 on the object, you get the spectrum and the isotopes.",
+"Com o RadiaCode no objeto, você ganha o espectro e os isótopos.": "With the RC102 on the object, you get the spectrum and the isotopes.",
+"Com qual aparelho": "With which device",
+"Concordam? Sim.": "Do they agree? Yes.",
+"Concordam? Não totalmente.": "Do they agree? Not fully.",
+"Detalhes técnicos": "Technical details",
+"Distância do objeto até o aparelho": "Distance from the object to the device",
+"Duas distâncias": "Two distances",
+"Espectro do objeto, fundo descontado": "Object spectrum, background subtracted",
+"Espectro do que chegou até você, fundo descontado": "Spectrum of what reached you, background subtracted",
+"Fundo pronto. Agora o objeto na frente do aparelho": "Background done. Now the object in front of the device",
+"Objeto na frente do aparelho": "Object in front of the device",
+"Isótopos prováveis": "Likely isotopes",
+"Já tenho, usar o fundo da casa": "I already have it, use the home background",
+"esperando a leitura": "waiting for the reading",
+"estável": "steady",
+"▲ subindo": "▲ rising",
+"▼ descendo": "▼ falling",
+"Mais sensível e com espectro.": "More sensitive, with a spectrum.",
+"Medir em outra distância": "Measure at another distance",
+"Medir o objeto": "Measure the object",
+"Medição do modo demo: não fica salva.": "Demo mode measurement: not saved.",
+"No automático, o fundo é medido por 5 min. Com o fundo da casa, pula esta etapa.": "In automatic mode, the background is measured for 5 min. With the home background, this step is skipped.",
+"Não dá pra estimar com segurança nesta medição.": "It can't be estimated reliably from this measurement.",
+"O aparelho mede taxa de dose; passar para Bq exige saber o isótopo, a distância e que a fonte seja pequena.": "The device measures dose rate; turning that into Bq requires knowing the isotope, the distance and that the source is small.",
+"O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.": "The Bq is only estimated for a small object. For a spread-out object, the distance calculation doesn't hold.",
+"O GMC vê beta e gama; o RC102, quase só gama. O tubo e o cristal ficam em lugares diferentes do objeto, então vale como pista.": "The GMC sees beta and gamma; the RC102 almost only gamma. The tube and the crystal sit at different spots on the object, so take it as a hint.",
+"O GMC vê beta e gama; o RadiaCode, quase só gama. O tubo e o cristal ficam em lugares diferentes do objeto, então vale como pista.": "The GMC sees beta and gamma; the RC102 almost only gamma. The tube and the crystal sit at different spots on the object, so take it as a hint.",
+"O app mede o fundo do lugar para descontar depois.": "The app measures the background of the spot to subtract it later.",
+"O app mede o fundo do lugar para descontar depois. Com o RC102, guarda também o espectro do fundo.": "The app measures the background of the spot to subtract it later. With the RC102, it also keeps the background spectrum.",
+"O app mede o fundo do lugar para descontar depois. Com o RadiaCode, guarda também o espectro do fundo.": "The app measures the background of the spot to subtract it later. With the RC102, it also keeps the background spectrum.",
+"O que chegou até você": "What reached you",
+"O que vai medir": "What you're measuring",
+"Parar e ver o resultado": "Stop and see the result",
+"Parando…": "Stopping…",
+"Passe o aparelho devagar em volta do objeto": "Move the device slowly around the object",
+"Pista pelo espectro, não identificação garantida. Mais tempo de medição deixa a confiança maior.": "A hint from the spectrum, not a guaranteed identification. A longer measurement raises the confidence.",
+"Preparar": "Prepare",
+"Resultado": "Result",
+"Primeiro você procura o ponto mais forte. Dá pra pular.": "First you look for the strongest spot. You can skip it.",
+"Pular": "Skip",
+"Quanto você recebe manuseando.": "How much you get while handling it.",
+"RC102 + GMC-800 no objeto": "RC102 + GMC-800 on the object",
+"RadiaCode + GMC-800 no objeto": "RC102 + GMC-800 on the object",
+"Espectro · RC102 com você": "Spectrum · RC102 with you",
+"Espectro · RadiaCode com você": "Spectrum · RC102 with you",
+"Só contagem, sem espectro.": "Counts only, no spectrum.",
+"Tamanho do objeto": "Object size",
+"Um confere o outro.": "One checks the other.",
+"abaixo de 2σ: cabe no acaso": "below 2σ: within chance",
+"entre 2σ e 3σ: talvez": "between 2σ and 3σ: maybe",
+"acima de 3σ: diferença real": "above 3σ: real difference",
+"aparelho": "device",
+"aparelho com você": "device with you",
+"fundo da casa (última hora)": "home background (last hour)",
+"cada linha é um instante; mais claro = mais contagens": "each row is a moment; brighter = more counts",
+"certeza": "certainty",
+"certeza de que a diferença é real": "certainty that the difference is real",
+"com você enquanto mexe no objeto": "with you while handling the object",
+"contagens do fundo": "background counts",
+"contagens com o objeto": "counts with the object",
+"contagens/s acima do fundo, por faixa de energia": "counts/s above background, per energy band",
+"conversão para dose": "conversion to dose",
+"diferença líquida": "net difference",
+"distância": "distance",
+"distância informada": "distance given",
+"distância segura": "safe distance",
+"do fundo; menor acha coisas mais fracas, mas demora mais": "of background; lower finds weaker things but takes longer",
+"energia →": "energy →",
+"espalhado (prato, azulejo, areia)": "spread out (plate, tile, sand)",
+"pequeno (fonte, pedra, relógio)": "small (source, stone, watch)",
+"pequeno (fonte pontual)": "small (point source)",
+"espalhado": "spread out",
+"extra por estar perto": "extra from being close",
+"isótopo identificado com confiança": "isotope identified with confidence",
+"isótopos · espectrograma · Bq estimado": "isotopes · spectrogram · estimated Bq",
+"limite “tem algo”": "“something there” limit",
+"≥ 3σ (tempo fixo)": "≥ 3σ (fixed time)",
+"medido com o RC102 no objeto (tem espectro)": "measured with the RC102 on the object (has a spectrum)",
+"medido com o RadiaCode no objeto (tem espectro)": "measured with the RC102 on the object (has a spectrum)",
+"medir agora": "measure now",
+"no objeto:": "on the object:",
+"o objeto não ficou claramente acima do fundo": "the object wasn't clearly above background",
+"informe a distância (encostado não dá para usar na conta)": "give the distance (touching can't be used in the calculation)",
+"sem o fundo em µSv/h": "no background in µSv/h",
+"objeto claramente acima do fundo": "object clearly above background",
+"objeto pequeno, como uma fonte pontual": "small object, like a point source",
+"onde o extra cai a 10% do fundo": "where the extra drops to 10% of background",
+"onde o extra cai a 10% do fundo (aproximada)": "where the extra drops to 10% of background (approximate)",
+"já aqui o extra fica abaixo de 10% do fundo": "already here the extra stays below 10% of background",
+"picos marcados com o isótopo": "peaks labeled with the isotope",
+"sua dose nesta medição": "your dose in this measurement",
+"tamanho": "size",
+"taxa agora": "rate now",
+"taxa extra": "extra rate",
+"tem algo ou não · distância segura": "something there or not · safe distance",
+"tem algo ou não · sua dose no período": "something there or not · your dose over the period",
+"tudo do RC102 + concordância": "everything from the RC102 + agreement",
+"tudo do RadiaCode + concordância": "everything from the RC102 + agreement",
+"usada no Bq e na distância segura": "used for the Bq and the safe distance",
+"× o fundo": "× the background",
+"σ da diferença": "σ of the difference",
+"“Medir em outra distância” repete só a etapa do objeto, com o mesmo fundo. Com duas distâncias, o app confere se a radiação cai pelo inverso do quadrado: se cair, a distância segura e o Bq ficam mais confiáveis; se não cair, o objeto é espalhado e o app avisa.": "“Measure at another distance” repeats only the object step, with the same background. With two distances, the app checks whether the radiation falls off with the inverse square: if it does, the safe distance and the Bq are more reliable; if not, the object is spread out and the app tells you.",
+"Sem o espectro do fundo, não deu para separar os picos do objeto dos do ambiente.": "Without the background spectrum, the object's peaks couldn't be told apart from the surroundings'.",
+"Relatório em PDF": "PDF report",
+"Nova distância": "New distance",
+"Escreva a nova distância em cm.": "Type the new distance in cm.",
+"termine a medição antes de medir em outra distância": "finish the measurement before measuring at another distance",
+"fundo medido": "background measured",
+"fundo até agora": "background so far",
+"Etapas da medição": "Measurement steps",
+"Distâncias comuns": "Common distances",
+"Distância em centímetros": "Distance in centimeters",
+"Qual aparelho fica no objeto": "Which device stays on the object",
+"automático, até 10 min": "automatic, up to 10 min",
+"automático, até 30 min": "automatic, up to 30 min",
+"automático, até 1 h": "automatic, up to 1 h",
+"fixo: 30 s": "fixed: 30 s",
+"fixo: 1 min": "fixed: 1 min",
+"fixo: 2 min": "fixed: 2 min",
+"fixo: 5 min": "fixed: 5 min",
+"Urânio natural (Th-234, Pa-234m)": "Natural uranium (Th-234, Pa-234m)",
+"Espectrograma da medição": "Measurement spectrogram",
+"Espectro líquido do objeto": "Net spectrum of the object",
+"Distância segura": "Safe distance",
+"já na distância medida o extra do objeto fica abaixo de 10% do fundo": "already at the measured distance the object's extra stays below 10% of background",
+"já na distância medida o extra do objeto fica abaixo de 10% do fundo (aproximada: objeto espalhado ou só uma distância medida)": "already at the measured distance the object's extra stays below 10% of background (approximate: spread-out object or only one distance measured)",
+"Atividade estimada": "Estimated activity",
+"Medir": "Measure"
 },
 "patterns": [
 [
@@ -2702,6 +2850,30 @@ const I18N_EN = {
 ]
 ],
 [
+"De ",
+"^De ((?:(?! · ).)+?) para ((?:(?! · ).)+?) a radiação caiu ((?:(?! · ).)+?) \\(o inverso do quadrado dá ((?:(?! · ).)+?)\\): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis\\.$",
+"From ${1} to ${2} the radiation dropped ${3} (the inverse square gives ${4}): the object behaves like a small source, so the safe distance and the Bq are more reliable.",
+[
+"De ",
+" para ",
+" a radiação caiu ",
+" (o inverso do quadrado dá ",
+"): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis."
+]
+],
+[
+"De ",
+"^De ((?:(?! · ).)+?) para ((?:(?! · ).)+?) a radiação caiu mais que o inverso do quadrado \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\): confira as distâncias; o detector fica alguns milímetros para dentro da caixa\\.$",
+"From ${1} to ${2} the radiation dropped more than the inverse square (${3} vs ${4}): check the distances; the detector sits a few millimeters inside the case.",
+[
+"De ",
+" para ",
+" a radiação caiu mais que o inverso do quadrado (",
+" contra ",
+"): confira as distâncias; o detector fica alguns milímetros para dentro da caixa."
+]
+],
+[
 "Parou em ",
 "^Parou em ((?:(?! · ).)+?), quando deu para garantir que o objeto sobe menos de ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)\\. Para procurar algo mais fraco, escolha “\\+10% do fundo”\\.$",
 "Stopped at ${1}, once it could guarantee the object adds less than ${2}% of background (+${3} CPM). To look for something weaker, pick “+10% of background”.",
@@ -2710,6 +2882,18 @@ const I18N_EN = {
 ", quando deu para garantir que o objeto sobe menos de ",
 "% do fundo (+",
 " CPM). Para procurar algo mais fraco, escolha “+10% do fundo”."
+]
+],
+[
+"De ",
+"^De ((?:(?! · ).)+?) para ((?:(?! · ).)+?) a radiação caiu menos que o inverso do quadrado \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\): o objeto deve ser espalhado, então a distância segura é só aproximada\\.$",
+"From ${1} to ${2} the radiation dropped less than the inverse square (${3} vs ${4}): the object is probably spread out, so the safe distance is only approximate.",
+[
+"De ",
+" para ",
+" a radiação caiu menos que o inverso do quadrado (",
+" contra ",
+"): o objeto deve ser espalhado, então a distância segura é só aproximada."
 ]
 ],
 [
@@ -2939,6 +3123,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Fundo da casa: ",
+"^Fundo da casa: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) min até ((?:(?! · ).)+?)\\)\\. Só vale se o RadiaCode passou a última hora parado no lugar onde vai medir\\.$",
+"Home background: ${1} (${2} min until ${3}). Only valid if the RC102 spent the last hour still at the spot where you'll measure.",
+[
+"Fundo da casa: ",
+" min até ",
+"). Só vale se o RadiaCode passou a última hora parado no lugar onde vai medir."
+]
+],
+[
 "Faz parte de um episódio de ",
 "^Faz parte de um episódio de ((?:(?! · ).)+?) alertas, ((?:(?! · ).)+?)–((?:(?! · ).)+?) \\(nível mais alto: ((?:(?! · ).)+?)\\); o mínimo e a média são do episódio inteiro\\.$",
 "Part of an episode of ${1} alerts, ${2}–${3} (highest level: ${4}); the minimum and average are for the whole episode.",
@@ -2978,6 +3172,24 @@ const I18N_EN = {
 ]
 ],
 [
+"a ",
+"^a ((?:(?! · ).)+?) cm o extra do objeto cai para 10% do fundo \\(aproximada: objeto espalhado ou só uma distância medida\\)$",
+"at ${1} cm the object's extra drops to 10% of background (approximate: spread-out object or only one distance measured)",
+[
+" cm o extra do objeto cai para 10% do fundo (aproximada: objeto espalhado ou só uma distância medida)"
+]
+],
+[
+"Fundo da casa: ",
+"^Fundo da casa: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) min até ((?:(?! · ).)+?)\\)\\. Só vale se o RC102 passou a última hora parado no lugar onde vai medir\\.$",
+"Home background: ${1} (${2} min until ${3}). Only valid if the RC102 spent the last hour still at the spot where you'll measure.",
+[
+"Fundo da casa: ",
+" min até ",
+"). Só vale se o RC102 passou a última hora parado no lugar onde vai medir."
+]
+],
+[
 "Calibração do GMC: ",
 "^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, pela intercalibração com o RC102 \\(vale a partir de agora\\)$",
 "GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RC102 (applies from now on)",
@@ -3014,6 +3226,15 @@ const I18N_EN = {
 "O episódio terminou porque parou de chegar leitura (",
 ") às ",
 ", não porque a contagem voltou ao normal."
+]
+],
+[
+"Lendo o ",
+"^Lendo o ((?:(?! · ).)+?) \\(média dos últimos 5 s\\)\\. Vale também para achar o lado mais forte de um objeto grande\\.$",
+"Reading the ${1} (average of the last 5 s). Also works to find the strongest side of a large object.",
+[
+"Lendo o ",
+" (média dos últimos 5 s). Vale também para achar o lado mais forte de um objeto grande."
 ]
 ],
 [
@@ -3301,6 +3522,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Estimativa de ordem de grandeza para ",
+"^Estimativa de ordem de grandeza para ((?:(?! · ).)+?), pela taxa de dose a ((?:(?! · ).)+?) \\(Γ = ((?:(?! · ).)+?) µSv·m²/h por MBq\\)\\.$",
+"Order-of-magnitude estimate for ${1}, from the dose rate at ${2} (Γ = ${3} µSv·m²/h per MBq).",
+[
+"Estimativa de ordem de grandeza para ",
+", pela taxa de dose a ",
+" (Γ = ",
+" µSv·m²/h por MBq)."
+]
+],
+[
 "Seu limite (",
 "^Seu limite \\(((?:(?! · ).)+?)\\) está acima do perigo do app \\(((?:(?! · ).)+?) CPM\\): quem toca é o alarme de perigo\\.$",
 "Your limit (${1}) is above the app's danger level (${2} CPM): the danger alarm is the one that sounds.",
@@ -3509,6 +3741,15 @@ const I18N_EN = {
 [
 "Zerar a dose acumulada do RC102",
 "? Não tem volta: o aparelho recomeça do zero."
+]
+],
+[
+"Acima do nível de fundo (",
+"^Acima do nível de fundo \\(((?:(?! · ).)+?)\\): é o que o objeto somou na sua dose nesse tempo\\.$",
+"Above the background level (${1}): that's what the object added to your dose in that time.",
+[
+"Acima do nível de fundo (",
+"): é o que o objeto somou na sua dose nesse tempo."
 ]
 ],
 [
@@ -3733,6 +3974,16 @@ const I18N_EN = {
 " µSv/h por CPM (±",
 "%, ",
 " minutos)"
+]
+],
+[
+"Fundo da casa: ",
+"^Fundo da casa: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) min até ((?:(?! · ).)+?)\\)\\. Meça no lugar de sempre do contador\\.$",
+"Home background: ${1} (${2} min until ${3}). Measure at the counter's usual spot.",
+[
+"Fundo da casa: ",
+" min até ",
+"). Meça no lugar de sempre do contador."
 ]
 ],
 [
@@ -4154,6 +4405,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Fundo da casa indisponível: ",
+"^Fundo da casa indisponível: ((?:(?! · ).)+?)\\. O app mede o fundo na hora\\.$",
+"Home background unavailable: ${1}. The app measures the background right away.",
+[
+"Fundo da casa indisponível: ",
+". O app mede o fundo na hora."
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -4260,6 +4520,16 @@ const I18N_EN = {
 "counter calibration: couldn't save the copy (${1})",
 [
 "calibração do contador: não consegui guardar a cópia ("
+]
+],
+[
+"Deixe o ",
+"^Deixe o ((?:(?! · ).)+?) no objeto e o ((?:(?! · ).)+?) com você \\(no bolso ou na mão\\)\\.$",
+"Leave the ${1} on the object and the ${2} with you (in a pocket or in your hand).",
+[
+"Deixe o ",
+" no objeto e o ",
+" com você (no bolso ou na mão)."
 ]
 ],
 [
@@ -4526,6 +4796,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Fundo pronto. Agora o objeto na frente do aparelho, ",
+"^Fundo pronto\\. Agora o objeto na frente do aparelho, ((?:(?! · ).)+?)$",
+"Background done. Now the object in front of the device, ${1}",
+[
+"Fundo pronto. Agora o objeto na frente do aparelho, "
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -4580,6 +4858,25 @@ const I18N_EN = {
 [
 "Marcado: ",
 " · RadiaCode com você, GMC-800 em casa · "
+]
+],
+[
+"isótopo com constante de dose conhecida (",
+"^isótopo com constante de dose conhecida \\(((?:(?! · ).)+?) não tem\\)$",
+"isotope with a known dose constant (${1} has none)",
+[
+"isótopo com constante de dose conhecida (",
+" não tem)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) a ((?:(?! · ).)+?) de ((?:(?! · ).)+?) \\(ordem de grandeza; Γ = ((?:(?! · ).)+?) µSv·m²/h por MBq\\)$",
+"${1} to ${2} of ${3} (order of magnitude; Γ = ${4} µSv·m²/h per MBq)",
+[
+" de ",
+" (ordem de grandeza; Γ = ",
+" µSv·m²/h por MBq)"
 ]
 ],
 [
@@ -5101,6 +5398,22 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h por CPS \\(média do próprio RadiaCode\\)$",
+"${1} µSv/h per CPS (the RC102's own average)",
+[
+" µSv/h por CPS (média do próprio RadiaCode)"
+]
+],
+[
+"a ",
+"^a ((?:(?! · ).)+?) cm o extra do objeto cai para 10% do fundo$",
+"at ${1} cm the object's extra drops to 10% of background",
+[
+" cm o extra do objeto cai para 10% do fundo"
+]
+],
+[
 "Antes da chuva: ",
 "^Antes da chuva: ((?:(?! · ).)+?) CPM · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
 "Before the rain: ${1} CPM · last 15 min: ${2} (${3})",
@@ -5273,6 +5586,14 @@ const I18N_EN = {
 [
 "Mais ",
 " trechos a responder em Fora de casa."
+]
+],
+[
+"+",
+"^\\+((?:(?! · ).)+?)% do fundo e ≥ 3σ \\(para sozinho com 4σ\\)$",
+"+${1}% of background and ≥ 3σ (stops on its own at 4σ)",
+[
+"% do fundo e ≥ 3σ (para sozinho com 4σ)"
 ]
 ],
 [
@@ -5451,6 +5772,22 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h por CPS \\(média do próprio RC102\\)$",
+"${1} µSv/h per CPS (the RC102's own average)",
+[
+" µSv/h por CPS (média do próprio RC102)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h por CPM \\(calibração do GMC\\-800\\)$",
+"${1} µSv/h per CPM (GMC-800 calibration)",
+[
+" µSv/h por CPM (calibração do GMC-800)"
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -5545,6 +5882,17 @@ const I18N_EN = {
 "RC102 disconnected, the memory brought ${1}",
 [
 "RadiaCode sem conexão, a memória trouxe "
+]
+],
+[
+"Ficou ",
+"^Ficou ((?:(?! · ).)+?)× o fundo \\(((?:(?! · ).)+?)\\), com ((?:(?! · ).)+?)σ de certeza\\.$",
+"Came out at ${1}× the background (${2}), with ${3}σ certainty.",
+[
+"Ficou ",
+"× o fundo (",
+"), com ",
+"σ de certeza."
 ]
 ],
 [
@@ -5734,6 +6082,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) em ((?:(?! · ).)+?) s \\(((?:(?! · ).)+?) CPS · ((?:(?! · ).)+?) CPM\\) · fundo da casa$",
+"${1} in ${2} s (${3} CPS · ${4} CPM) · home background",
+[
+" em ",
+" s (",
+" CPS · ",
+" CPM) · fundo da casa"
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -5794,6 +6153,22 @@ const I18N_EN = {
 [
 "calculada pelo app · ≈ ",
 " mSv/ano (E)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) talvez emita um pouco acima do fundo$",
+"${1} may emit a little above background",
+[
+" talvez emita um pouco acima do fundo"
+]
+],
+[
+"com você enquanto mexe no objeto (",
+"^com você enquanto mexe no objeto \\(((?:(?! · ).)+?)\\)$",
+"with you while handling the object (${1})",
+[
+"com você enquanto mexe no objeto ("
 ]
 ],
 [
@@ -6049,6 +6424,14 @@ const I18N_EN = {
 "${1} variance/mean · healthy (≈ 1)",
 [
 " variância/média · saudável (≈ 1)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): nenhuma diferença que dê para ver$",
+"${1}: no visible difference",
+[
+": nenhuma diferença que dê para ver"
 ]
 ],
 [
@@ -6620,6 +7003,22 @@ const I18N_EN = {
 [
 "O RadiaCode ficou ",
 " sem conexão"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) emite radiação acima do fundo$",
+"${1} emits radiation above background",
+[
+" emite radiação acima do fundo"
+]
+],
+[
+"Objeto na frente do aparelho, ",
+"^Objeto na frente do aparelho, ((?:(?! · ).)+?)$",
+"Object in front of the device, ${1}",
+[
+"Objeto na frente do aparelho, "
 ]
 ],
 [
@@ -8022,6 +8421,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) em ((?:(?! · ).)+?) s \\(((?:(?! · ).)+?) CPS · ((?:(?! · ).)+?) CPM\\)$",
+"${1} in ${2} s (${3} CPS · ${4} CPM)",
+[
+" em ",
+" s (",
+" CPS · ",
+" CPM)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -8268,6 +8678,16 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) keV · ((?:(?! · ).)+?) de ((?:(?! · ).)+?) linhas$",
+"${1} · ${2} keV · ${3} of ${4} lines",
+[
+" keV · ",
+" de ",
+" linhas"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -8461,6 +8881,16 @@ const I18N_EN = {
 [
 "Pontos de hoje: ",
 " CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) keV · ((?:(?! · ).)+?) de ((?:(?! · ).)+?) linha$",
+"${1} · ${2} keV · ${3} of ${4} line",
+[
+" keV · ",
+" de ",
+" linha"
 ]
 ],
 [
@@ -8992,6 +9422,24 @@ const I18N_EN = {
 [
 "Pontos novos: ",
 " CPM"
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) · ((?:(?! · ).)+?)× o fundo$",
+"background ${1} · ${2}× the background",
+[
+"fundo ",
+"× o fundo"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · \\~((?:(?! · ).)+?) para decidir$",
+"${1} · ~${2} to decide",
+[
+" · ~",
+" para decidir"
 ]
 ],
 [
@@ -9968,6 +10416,22 @@ const I18N_EN = {
 ]
 ],
 [
+"Tempo fixo: ",
+"^Tempo fixo: ((?:(?! · ).)+?)\\.$",
+"Fixed time: ${1}.",
+[
+"Tempo fixo: "
+]
+],
+[
+"± ",
+"^± ((?:(?! · ).)+?) · encostado$",
+"± ${1} · touching",
+[
+" · encostado"
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -10653,6 +11117,14 @@ const I18N_EN = {
 ]
 ],
 [
+"confiança ",
+"^confiança ((?:(?! · ).)+?)%$",
+"confidence ${1}%",
+[
+"confiança "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -11157,6 +11629,14 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo do ",
+"^fundo do ((?:(?! · ).)+?)$",
+"${1} background",
+[
+"fundo do "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -11580,6 +12060,23 @@ const I18N_EN = {
 "${1} back",
 [
 " voltou"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)Bq a ((?:(?! · ).)+?)Bq$",
+"${1}Bq to ${2}Bq",
+[
+"Bq a ",
+"Bq"
+]
+],
+[
+"± ",
+"^± ((?:(?! · ).)+?) · a ((?:(?! · ).)+?)$",
+"± ${1} · at ${2}",
+[
+" · a "
 ]
 ],
 [
