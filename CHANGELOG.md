@@ -1,5 +1,24 @@
 # Versões
 
+## 2.31.0
+- **Tela do aparelho: o valor aparece uma vez só.** Na página do GMC-800 e
+  na do RadiaCode, o quadro do próprio aparelho sai da fileira de cima. O
+  outro aparelho fica compacto ao lado dos alertas, com um mostrador pequeno,
+  e abre a tela dele no clique. A tela Agora não muda.
+- **O mostrador grande faz o papel da régua.** A barra das faixas saiu. As
+  três faixas ficam sempre à vista, apagadas, e acendem até a leitura, com um
+  ponto branco nela. Os limites ficam escritos nos vãos do anel, na unidade
+  escolhida. O verde e o amarelo são lineares entre os limites; o laranja vai
+  do limite de alarme até o de perigo em escala log. No perigo o anel inteiro
+  fica vermelho.
+  - GMC-800: 50 / 100 CPM do manual e o limite de perigo do app.
+  - RadiaCode: alarme 1 e alarme 2 do aparelho; perigo no limite do app ou a
+    10× o alarme 2 enquanto não houver um limite próprio.
+- O aviso de relógio do GMC fora da hora vai para o cartão grande na página
+  dele.
+- Textos do nível de fundo mais claros: "dentro do fundo de sempre" virou
+  "no nível de fundo habitual", e "seu fundo" virou "nível de fundo" nas
+  frases do Agora, do σ, da Medição e do relatório.
 ## 2.30.0
 - **O RadiaCode não perde mais o que mediu com o PC desligado.** Sozinho, o
   aparelho guarda na memória as últimas ~1000 h (a taxa de 96 em 96 s, a

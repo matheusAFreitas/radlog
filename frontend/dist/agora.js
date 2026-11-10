@@ -61,7 +61,7 @@ function agoraNow() {
       text = [L.home, L.pers].filter((x) => x.cls === "warnb" && !x.sat).map((x) => x.d).join(" ");
     } else {
       title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
-      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "dentro do seu fundo" : `${fmt(g.sigma, 1)} σ acima do seu fundo`);
+      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : `${fmt(g.sigma, 1)} σ acima do nível de fundo`);
       text = parts.join(" · ");
     }
   }

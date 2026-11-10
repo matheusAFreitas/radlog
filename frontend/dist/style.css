@@ -1666,3 +1666,67 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .ic-watch.bad { color: var(--warn); }
 #gmcConcord { margin: 0 var(--space-1) var(--space-4); }
 .ic-maint { margin: 0 0 var(--space-3); border-color: var(--att); }
+
+/* ---------- tela do aparelho (2.31.0) ----------
+   O valor aparece uma vez só: o quadro do próprio aparelho sai da fileira de
+   cima e o outro fica compacto ao lado dos alertas. O mostrador grande faz o
+   papel da régua (faixas sempre à vista, acesas até a leitura). */
+.instruments[data-page="gmc"] #gTile, .instruments[data-page="gmc"] #rTile,
+.instruments[data-page="radiacode"] #gTile, .instruments[data-page="radiacode"] #rTile { display: none; }
+@media (min-width: 622px) {
+  .instruments[data-page="gmc"], .instruments[data-page="radiacode"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .instruments[data-page] .inst.inst-alerts { grid-column: auto; display: flex; }
+  .instruments[data-page] .inst-alerts > .inst-fill { display: block; }
+  .instruments[data-page]:has(#devMini[hidden]) .inst.inst-alerts { grid-column: 1 / -1; }
+}
+.dev-mini { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: center; gap: 2px var(--space-4); padding: var(--space-3) var(--space-4); border-radius: var(--radius-lg); text-align: left; color: var(--text); font: inherit; cursor: pointer; transition: border-color .4s; }
+.dev-mini:hover { border-color: var(--border-hover); }
+.dev-mini.lv-atencao, .dev-mini.lv-nocount { border-color: var(--att); }
+.dev-mini.lv-alarme { border-color: var(--alarm); }
+.dev-mini.lv-perigo { border-color: var(--warn); }
+.dm-dial { width: 56px; height: 56px; grid-row: 1 / 4; }
+.dm-name { font-size: var(--fs-caption); color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dm-val { font-size: var(--fs-heading); font-weight: 600; }
+.dm-val small { font-size: var(--fs-caption); color: var(--muted); font-weight: 400; margin-left: var(--space-1); }
+.dm-sub { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); font-size: var(--fs-caption); color: var(--muted); }
+.dm-state { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 600; }
+.dm-state.seguro { color: var(--accent); }
+.dm-state.atencao, .dm-state.nocount { color: var(--att); }
+.dm-state.alarme { color: var(--alarm); }
+.dm-state.perigo { color: var(--warn); }
+.dm-go { color: var(--text); text-decoration: underline; text-underline-offset: 3px; }
+
+.hero, .rc-main { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-6); align-items: center; }
+.hero > *, .rc-main > * { grid-column: 1 / -1; }
+.hero > .hero-dial, .rc-main > .hero-dial { grid-column: 1; grid-row: 1; }
+.hero > .hero-top, .rc-main > .hero-top { grid-column: 2; grid-row: 1; }
+.hero-dial { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
+.dev-dial { width: 240px; max-width: 100%; height: auto; display: block; overflow: visible; }
+.hero-dial-cap { font-size: var(--fs-caption); color: var(--muted); text-align: center; }
+@media (max-width: 760px) {
+  .hero, .rc-main { grid-template-columns: minmax(0, 1fr); }
+  .hero > .hero-dial, .rc-main > .hero-dial, .hero > .hero-top, .rc-main > .hero-top { grid-column: 1; grid-row: auto; }
+  .hero > .hero-dial, .rc-main > .hero-dial { order: -1; margin-bottom: var(--space-2); }
+  .dev-dial { width: 220px; }
+}
+
+/* o desenho do mostrador: base da faixa a 32%, parte acesa cheia, ponto na leitura */
+.dd-base, .dd-lit { fill: none; stroke-linecap: round; }
+.dd-base { opacity: .32; }
+.dd-base.on { opacity: 1; }
+.dd-b0 { stroke: var(--accent); }
+.dd-b1 { stroke: var(--att); }
+.dd-b2 { stroke: var(--alarm); }
+.dd-perigo { stroke: var(--warn); }
+.dd-lit { transition: d .4s; }
+.dd-pt { fill: var(--text); stroke: var(--surface); }
+.dd-lv { font-family: var(--mono); font-size: 3.4px; fill: var(--text); }
+.dd-ln { font-size: 2.8px; fill: var(--muted); }
+.dd-name { font-size: 4.2px; font-weight: 600; fill: var(--muted); }
+.dd-name.seguro { fill: var(--accent); }
+.dd-name.atencao, .dd-name.nocount { fill: var(--att); }
+.dd-name.alarme { fill: var(--alarm); }
+.dd-name.perigo { fill: var(--warn); }
+.hero-clock { display: block; }
+.hero-clock .clock-chip { min-height: 24px; margin-top: var(--space-1); padding: 0; gap: var(--space-1); border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--att); letter-spacing: 0; text-transform: none; }
+.hero-clock .clock-chip:not(.off) { display: none; }

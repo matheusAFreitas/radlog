@@ -433,7 +433,7 @@ function renderDevBoxes(box, list) {
     const hours = has ? c.measuredMinutes / 60 : 0;
     const rate = has && hours ? c.total / hours : null;
     // quanto do limite já foi: só o que passou do fundo natural conta (o
-    // limite não inclui a radiação natural), cada aparelho com o seu fundo
+    // limite não inclui a radiação natural), cada aparelho com esse nível de fundo
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
     const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
@@ -555,7 +555,7 @@ async function refreshDose() {
   $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
   $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose calculada pelo app";
   $("doseNote").textContent =
-    "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido. " +
+    "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido. " +
     (isRc
       ? (c.doseSource === "aparelho"
         ? "A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
@@ -597,7 +597,7 @@ async function refreshDose() {
   const over = c.excess > c.allowance;
   st.className = "dose-status" + (over ? " over" : "");
   let line;
-  if (c.excess <= 0) line = "<strong>Dentro do teto.</strong> A dose ficou no nível do seu fundo natural.";
+  if (c.excess <= 0) line = "<strong>Dentro do teto.</strong> A dose ficou no nível da radiação de fundo natural.";
   else if (!over) line = `<strong>Dentro do teto.</strong> Acima do fundo: ${doseTxt(excess)} de ${doseTxt(c.allowance)} permitidos no período (${fmt(pct, pct < 10 ? 1 : 0)}%).`;
   else line = `<strong>Acima do teto.</strong> Acima do fundo: ${doseTxt(excess)}; o permitido no período era ${doseTxt(c.allowance)}.`;
   st.innerHTML = `<span>${line}</span>`;

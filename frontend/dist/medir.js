@@ -482,7 +482,7 @@ function renderMeasureDuo(st, running) {
     if (o.role === "voce") {
       if (st.phase === "objeto") {
         parts.push(cntTxt(o.counts), `sua dose ${fmt(o.dose || 0, 4)} µSv`);
-        if (o.bgUSv) parts.push(`seu fundo ${usvVal(o.bgUSv)}`);
+        if (o.bgUSv) parts.push(`nível de fundo ${usvVal(o.bgUSv)}`);
       } else parts.push("a sua dose começa a contar quando o objeto for medido");
     } else {
       parts.push(`${cntTxt(o.counts)} nesta fase`);
@@ -516,8 +516,8 @@ function renderSideResult(box, m) {
     const secs = m.obj ? m.obj.seconds : 0;
     add("mono", `${fmt(o.dose, 4)} µSv em ${fmtMin(secs)} · média ${usvVal(o.avgUSv)} · máx ${usvVal(o.maxUSv)}`);
     if (o.bgUSv) add("small", o.excess > 0
-      ? `Acima do seu fundo (${usvVal(o.bgUSv)}): +${fmt(o.excess, 4)} µSv, o que o objeto somou na sua dose nesse tempo.`
-      : `Igual ao seu fundo (${usvVal(o.bgUSv)}): o objeto não somou nada que dê para ver na sua dose.`);
+      ? `Acima do nível de fundo (${usvVal(o.bgUSv)}): +${fmt(o.excess, 4)} µSv, o que o objeto somou na sua dose nesse tempo.`
+      : `Igual ao nível de fundo (${usvVal(o.bgUSv)}): o objeto não somou nada que dê para ver na sua dose.`);
     add("small muted", "Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).");
     return;
   }

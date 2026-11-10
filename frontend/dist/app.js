@@ -113,7 +113,7 @@ function renderSigma(r) {
   if (z >= 3) { text = `Acima do normal (${range}) — dificilmente é só variação`; cls = "high"; }
   else if (z >= 2) { text = `Um pouco acima do normal (${range}) — pode ser só variação`; cls = "mid"; }
   else if (z <= -2) { text = `Abaixo do normal (${range}) — sem problema`; }
-  else { text = `Dentro do normal — seu fundo costuma ficar entre ${uu(lo)} e ${uu(hi)} µSv/h`; }
+  else { text = `Dentro do normal — o nível de fundo costuma ficar entre ${uu(lo)} e ${uu(hi)} µSv/h`; }
   el.textContent = text;
   el.className = "sigma " + cls;
   el.title = `A contagem do Geiger varia sozinha de um minuto para outro. Pelas suas leituras dos últimos 30 dias, o fundo fica em ${fmt(bg, 0)} CPM e quase todas as leituras (95%) caem entre ${lo} e ${hi} CPM. Um pouco acima disso ainda pode ser acaso; acima de ${far} CPM dificilmente é.`;
@@ -148,16 +148,16 @@ function openSigmaHelp() {
   const now = r && r.cpm != null ? `<p>Agora: <b class="mono">${fmt(r.cpm, 0)} CPM</b> → (${fmt(r.cpm, 0)} − ${fmt(bg, 0)}) ÷ ${fmt(sd, 1)} = <b class="mono">${fmtSig(sigmaOf(r.cpm, bg))}</b>.</p>` : "";
   box.innerHTML = `
     <p><b>σ (sigma)</b> é o desvio padrão: o tamanho típico da variação natural da contagem. Os decaimentos acontecem ao acaso, então o número de pulsos por minuto varia sozinho, mesmo sem nada mudar. Numa contagem assim (de Poisson), <b>1σ = raiz da média</b>.</p>
-    <p>O seu fundo é <b class="mono">${fmt(bg, 1)} CPM</b> (mediana dos últimos 30 dias), então <b class="mono">1σ = √${fmt(bg, 1)} ≈ ${fmt(sd, 1)} CPM</b>. Uma leitura "em σ" é quantos desses passos ela está acima ou abaixo do fundo: (leitura − fundo) ÷ σ.</p>
+    <p>O nível de fundo aqui é <b class="mono">${fmt(bg, 1)} CPM</b> (mediana dos últimos 30 dias), então <b class="mono">1σ = √${fmt(bg, 1)} ≈ ${fmt(sd, 1)} CPM</b>. Uma leitura "em σ" é quantos desses passos ela está acima ou abaixo do fundo: (leitura − fundo) ÷ σ.</p>
     ${now}
     <h3>Quão raro é, pelo acaso, num minuto</h3>
-    <div class="sg-tbl-wrap"><table class="m-stats mono sg-tbl"><thead><tr><th>acima de</th><th>com o seu fundo</th><th>chance por minuto</th><th>só por acaso</th></tr></thead><tbody>${rows}</tbody></table></div>
-    <p class="small muted">Calculado com a distribuição de Poisson do seu fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).</p>
+    <div class="sg-tbl-wrap"><table class="m-stats mono sg-tbl"><thead><tr><th>acima de</th><th>com esse nível de fundo</th><th>chance por minuto</th><th>só por acaso</th></tr></thead><tbody>${rows}</tbody></table></div>
+    <p class="small muted">Calculado com a distribuição de Poisson desse nível de fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).</p>
     <h3>Onde mais aparece</h3>
     <ul class="sg-list">
       <li><b>± na medição de objeto</b>: a incerteza de 1σ de cada parte. 284,2 ± 7,5 CPM quer dizer que o valor de verdade está a ±7,5 em ~68% das vezes, ±15 em ~95%.</li>
       <li><b>A diferença em σ</b>: diferença ÷ incerteza combinada. 244,6 ± 8,0 = 30σ: na prática, impossível ser acaso. Abaixo de 2σ, pode ser só variação.</li>
-      <li><b>Médias têm σ menor</b>: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (${fmt(Math.sqrt(bg / 60), 2)} CPM com o seu fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais.</li>
+      <li><b>Médias têm σ menor</b>: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (${fmt(Math.sqrt(bg / 60), 2)} CPM com esse nível de fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais.</li>
       <li><b>Mais tempo, menos incerteza</b>: a incerteza relativa é 1 ÷ √contagens. 100 contagens dão ±10%; 10.000 dão ±1%.</li>
     </ul>`;
   $("sigmaDlg").showModal();
@@ -180,8 +180,8 @@ function renderReading() {
     $("readSigma").hidden = true;
     $("readSigmaNum").hidden = true;
     $("levelName").textContent = "—";
-    $("levelName").className = "level-name";
-    $("levelMarker").hidden = true;
+    $("levelName").className = "sr-only level-name";
+    renderGmcDial(null, "", "");
     $("hero").classList.remove("alarm");
     return;
   }
@@ -210,8 +210,9 @@ function renderReading() {
   }
 
   const names = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
-  lvLabel($("levelName"), r.level, names[r.level] || "—", 16);
-  $("levelName").className = "level-name " + r.level;
+  let dLv = r.level, dWord = names[r.level] || "—";
+  lvLabel($("levelName"), r.level, dWord, 16);
+  $("levelName").className = "sr-only level-name " + r.level;
   // 0 CPM por minutos seguidos: defeito, não "seguro"
   if (r.noCount && !r.saturated) {
     const el = $("readSigma");
@@ -219,13 +220,13 @@ function renderReading() {
     el.className = "sigma high";
     el.hidden = false;
     lvLabel($("levelName"), "nocount", "Sem contagens", 16);
-    $("levelName").className = "level-name nocount";
+    $("levelName").className = "sr-only level-name nocount";
+    dLv = "nocount"; dWord = "Sem contagens";
   }
+  if (r.saturated) dWord = "Saturado";
   if (r.noCount && !state.noCountToast && !r.saturated) toast("Sem contagens há 2 min: confira o contador", true);
   state.noCountToast = !!r.noCount;
-  const m = $("levelMarker");
-  m.hidden = false;
-  m.style.left = Math.min(r.cpm, 150) / 150 * 100 + "%";
+  renderGmcDial(r, dLv, dWord);
   $("hero").classList.toggle("alarm", !!(r.alarm || r.danger));
 }
 
@@ -293,7 +294,7 @@ function tileScale(pfx, p1, p2, pos, t1, t2) {
 
 // frase do nível ao lado do mostrador (só nos quadros dos aparelhos)
 const LV_SAY = {
-  seguro: "dentro do fundo de sempre",
+  seguro: "no nível de fundo habitual",
   atencao: "acima do limite de atenção",
   alarme: "passou o limite de alarme",
   perigo: "acima do limite de perigo",
@@ -352,6 +353,7 @@ function renderGTile() {
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
   tileFoot($("gTileFoot"), u, v, state.gDose);
+  renderDevMini();
   miniDev("G", u, v, lvl, word, s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "", !live);
 }
 
@@ -768,6 +770,7 @@ async function showView(v, skipRender) {
   }
   if (v === "graficos") refreshSub("graficos");
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
+  renderDevMini();
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
   if (v === "fora") renderPeriods();
@@ -3296,7 +3299,7 @@ function renderRcMain(st) {
     if (z >= 3) { text = `Acima do normal (seu normal: ${range}) — dificilmente é só variação`; cls = "high"; }
     else if (z >= 2) { text = `Um pouco acima do normal (seu normal: ${range}) — pode ser só variação`; cls = "mid"; }
     else if (z <= -2) { text = `Abaixo do normal (seu normal: ${range}) — sem problema`; }
-    else { text = `Dentro do normal — seu fundo costuma ficar entre ${fmt(sx.bgLo, d)} e ${fmt(sx.bgHi, d)} µSv/h`; }
+    else { text = `Dentro do normal — o nível de fundo costuma ficar entre ${fmt(sx.bgLo, d)} e ${fmt(sx.bgHi, d)} µSv/h`; }
     sig.textContent = text;
     sig.className = "sigma " + cls;
     sig.title = `Pelos minutos em casa dos últimos 7 dias, o RadiaCode costuma marcar ${fmt(sx.bgUSv, d)} µSv/h (80% entre ${range}).`;
@@ -3316,18 +3319,15 @@ function renderRcMain(st) {
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
   $("rcLevelHint").textContent = own ? "alarmes do RadiaCode" : "faixas do app em µSv/h";
-  $("rcLevelScale").innerHTML = own
-    ? `<span>0</span><span>${fmt(attn, 2)} · alarme 1</span><span>${fmt(alarm, 2)} · alarme 2</span>`
-    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alarme</span>`;
   const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
   lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
-  $("rcLevelName").className = "level-name " + lvl;
+  $("rcLevelName").className = "sr-only level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
-  $("rcLevelMarker").hidden = usv == null;
-  if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
+  renderRcDial(st, { usv, cps, lvl, own, attn, alarm });
   renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
   state.rNow = { live, lvl, usv };
   agoraNow();
+  renderDevMini();
   // medidas
   const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
