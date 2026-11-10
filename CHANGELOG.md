@@ -1,5 +1,19 @@
 # Versões
 
+## 2.41.0
+- **Dose em coisas conhecidas.** "2,9 µSv" não diz muito, então cada dose
+  ganha duas linhas que traduzem o número. A primeira é quanto tempo do
+  fundo da sua casa aquilo dá ("≈ 22 h do fundo da sua casa", "≈ 3
+  semanas…"), que é a comparação mais honesta. A segunda é uma coisa
+  conhecida da Régua de radiação que dê um número entre 1 e 30: bananas,
+  horas de voo, raios-X ou tomografias de tórax. Se nenhuma der, não
+  aparece. Nunca compara com acidentes, e o número fica com no máximo dois
+  dígitos, porque é ordem de grandeza.
+- Aparece nas células da Minha dose (hoje, semana, mês e ano), no cartão de
+  dose dos Gráficos, no Resumo, na "dose extra" do Medir objeto com um
+  aparelho com você e no relatório em PDF. Clicar abre a Régua de radiação
+  na escada da dose.
+
 ## 2.40.1
 - **Ícone da bandeja fica onde você deixou depois de atualizar.** O Windows
   lembra se o ícone fica fixo na barra ou escondido na setinha pelo caminho

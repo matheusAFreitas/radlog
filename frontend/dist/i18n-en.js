@@ -2711,7 +2711,12 @@ const I18N_EN = {
 "já na distância medida o extra do objeto fica abaixo de 10% do fundo": "already at the measured distance the object's extra stays below 10% of background",
 "já na distância medida o extra do objeto fica abaixo de 10% do fundo (aproximada: objeto espalhado ou só uma distância medida)": "already at the measured distance the object's extra stays below 10% of background (approximate: spread-out object or only one distance measured)",
 "Atividade estimada": "Estimated activity",
-"Medir": "Measure"
+"Medir": "Measure",
+"menos de 1 min do fundo da sua casa": "less than 1 min of your home background",
+"≈ meia hora de voo": "≈ half an hour of flight",
+"≈ meia banana": "≈ half a banana",
+"ver na régua de radiação": "see on the radiation ruler",
+"dose extra": "extra dose"
 },
 "patterns": [
 [
@@ -6898,6 +6903,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) semanas do fundo da sua casa$",
+"≈ ${1} weeks of your home background",
+[
+" semanas do fundo da sua casa"
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -7019,6 +7032,14 @@ const I18N_EN = {
 "Object in front of the device, ${1}",
 [
 "Objeto na frente do aparelho, "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) semana do fundo da sua casa$",
+"≈ ${1} week of your home background",
+[
+" semana do fundo da sua casa"
 ]
 ],
 [
@@ -7243,6 +7264,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) meses do fundo da sua casa$",
+"≈ ${1} months of your home background",
+[
+" meses do fundo da sua casa"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -7343,6 +7372,22 @@ const I18N_EN = {
 "RC102 out of the calculation since ${1}",
 [
 "RC102 fora do cálculo desde "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) dias do fundo da sua casa$",
+"≈ ${1} days of your home background",
+[
+" dias do fundo da sua casa"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) anos do fundo da sua casa$",
+"≈ ${1} years of your home background",
+[
+" anos do fundo da sua casa"
 ]
 ],
 [
@@ -7482,6 +7527,38 @@ const I18N_EN = {
 "with the RC102, collection of ${1}",
 [
 "com o RadiaCode, coleta de "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) min do fundo da sua casa$",
+"≈ ${1} min of your home background",
+[
+" min do fundo da sua casa"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) dia do fundo da sua casa$",
+"≈ ${1} day of your home background",
+[
+" dia do fundo da sua casa"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) mês do fundo da sua casa$",
+"≈ ${1} month of your home background",
+[
+" mês do fundo da sua casa"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) ano do fundo da sua casa$",
+"≈ ${1} year of your home background",
+[
+" ano do fundo da sua casa"
 ]
 ],
 [
@@ -7910,6 +7987,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) h do fundo da sua casa$",
+"≈ ${1} h of your home background",
+[
+" h do fundo da sua casa"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -8207,6 +8292,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) tomografias de tórax$",
+"≈ ${1} chest CT scans",
+[
+" tomografias de tórax"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -8429,6 +8522,14 @@ const I18N_EN = {
 " s (",
 " CPS · ",
 " CPM)"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) tomografia de tórax$",
+"≈ ${1} chest CT scan",
+[
+" tomografia de tórax"
 ]
 ],
 [
@@ -9168,6 +9269,14 @@ const I18N_EN = {
 "danger from ${1}",
 [
 "perigo a partir de "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) raio\\-X de tórax$",
+"≈ ${1} chest X-ray",
+[
+" raio-X de tórax"
 ]
 ],
 [
@@ -10207,6 +10316,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) horas de voo$",
+"≈ ${1} hours of flight",
+[
+" horas de voo"
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -10429,6 +10546,14 @@ const I18N_EN = {
 "± ${1} · touching",
 [
 " · encostado"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) hora de voo$",
+"≈ ${1} hour of flight",
+[
+" hora de voo"
 ]
 ],
 [
@@ -11361,6 +11486,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) bananas$",
+"≈ ${1} bananas",
+[
+" bananas"
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -11634,6 +11767,14 @@ const I18N_EN = {
 "${1} background",
 [
 "fundo do "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) banana$",
+"≈ ${1} banana",
+[
+" banana"
 ]
 ],
 [

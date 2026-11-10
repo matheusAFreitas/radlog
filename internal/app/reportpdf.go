@@ -76,7 +76,7 @@ func (p *reportPDF) tile(x, y, w, h float64, k, v, sub string, vf pdf.Font) {
 		size -= 0.5
 	}
 	p.d.Text(x+8, y+31, vf, size, cInk, pdf.Fit(v, vf, size, w-16))
-	for i, ln := range wrapText(sub, pdf.Sans, 7, w-16, 2) {
+	for i, ln := range wrapText(sub, pdf.Sans, 7, w-16, 3) {
 		p.d.Text(x+8, y+43+float64(i)*9, pdf.Sans, 7, cMuted, ln)
 	}
 }
@@ -540,7 +540,7 @@ func renderReportPDF(r reportData) []byte {
 	// cartões 4 x 2
 	tg := 8.0
 	tw := (pdf.W - 2*pm - 3*tg) / 4
-	th := 60.0
+	th := 68.0
 	bg, bgSub := "—", "ainda sem fundo"
 	if r.Bg != "" {
 		bg, bgSub = r.BgUSv+" µSv/h", "mediana de 30 dias ("+r.Bg+" CPM) · média do período "+r.VsBg
@@ -568,9 +568,13 @@ func renderReportPDF(r reportData) []byte {
 	if r.AlertPeakMaxU > 0 {
 		alertSub += " · pico ao vivo " + fmtU(r.AlertPeakMaxU) + " µSv/h"
 	}
+	doseSub := "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (E)"
+	if r.Known != "" {
+		doseSub = r.Known + " · ≈ " + r.DoseYear + " mSv/ano (E)"
+	}
 	tiles := [][5]string{
 		{"Média (por minuto)", fmtU(ust.Mean) + " µSv/h", fmt.Sprintf("contagem %s CPM (M) · n = %d min", r.Avg, st.N), "m", "C"},
-		{"Dose no período", r.Dose + " µSv", "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (E)", "m", "C"},
+		{"Dose no período", r.Dose + " µSv", doseSub, "m", "C"},
 		{"Fundo da casa", bg, bgSub, "m", "C"},
 		{"Mínimo · máximo", fmtU(ust.Min) + " · " + fmtU(maxU) + " µSv/h", maxSub, "m", "C"},
 		{"Alertas", r.Alerts, alertSub, "s", "C"},
@@ -609,6 +613,14 @@ func renderReportPDF(r reportData) []byte {
 		dev := "não disponível: o registro dos totais do aparelho não cobre o início do período"
 		if rc.DevOK {
 			dev = fmt.Sprintf("%s µSv (diferença entre os totais informados pelo aparelho; inclui o tempo fora do alcance do PC)", fmtBR(rc.DevDose, 2))
+		}
+		// em coisas conhecidas, pela dose que vale (a do aparelho, se tiver)
+		rcDose := rc.Dose
+		if rc.DevOK {
+			rcDose = rc.DevDose
+		}
+		if kn := doseKnown(rcDose, rc.BgUSv); kn != "" {
+			dev += " · " + kn
 		}
 		p.kv([][2]string{
 			{"Dose acumulada pelo aparelho (R)", dev},

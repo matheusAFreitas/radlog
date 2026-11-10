@@ -271,6 +271,7 @@ function sumKpi(box, label, value, sub, cls) {
   d.innerHTML = '<span class="k"></span><span class="v"></span><span class="n"></span>';
   d.children[0].textContent = label; d.children[1].textContent = value; d.children[2].textContent = sub || "";
   box.appendChild(d);
+  return d;
 }
 
 // os três números: quanto (dose), comparado com o quê (fundo) e o pico
@@ -279,8 +280,11 @@ function renderSumBig(r, rc) {
   box.textContent = "";
   if (!r.minutes && !rc) return;
   const d = (v) => fmt(v, usvDigits(v));
-  if (rc) sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RC102 · somada pelo aparelho" : `RC102 · ${fmt(rc.coverage * 100, 0)}% medido`, "rc");
-  else sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
+  const k = rc ? sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RC102 · somada pelo aparelho" : `RC102 · ${fmt(rc.coverage * 100, 0)}% medido`, "rc")
+    : sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
+  // em coisas conhecidas (2.41): tempo de fundo da casa e uma referência da régua
+  const kn = doseKnownEl(rc ? (rc.devOK ? rc.devDose : rc.dose) : r.dose, rc && rc.bgUSv > 0 ? rc.bgUSv : null, "sum-known");
+  if (kn) k.appendChild(kn);
   if (r.minutes) {
     sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
