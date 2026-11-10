@@ -21,10 +21,6 @@ const RC_DIRS = ["automática", "virada para a direita", "virada para a esquerda
 
 let rcCfg = null, rcCfgRead = false, rcCfgBusy = false;
 
-// confirm com várias linhas: traduz linha por linha (o confirm traduz o
-// texto inteiro de uma vez e juntaria as linhas)
-const rcConfirm = (msg) => confirm(LANG === "en" ? msg.split("\n").map(tr).join("\n") : msg);
-
 const rcOnlineReal = () => { const st = state.rc && state.rc.st; return !!(st && st.state === "conectado" && !st.demo); };
 
 function rcDoseTxt(v) {
@@ -124,10 +120,10 @@ function readRcCfgForm() {
   return s;
 }
 
-// lista, em português, o que muda de a para b (para o confirm)
+// o que muda de a para b: [ajuste, agora, depois] (para a confirmação)
 function rcCfgDiff(a, b) {
   const out = [];
-  const f = (name, x, y) => { if (x !== y) out.push(`• ${name}: ${x} → ${y}`); };
+  const f = (name, x, y) => { if (x !== y) out.push([name, x, y]); };
   const u = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv/h`;
   f("Alarme 1 de taxa", u(a.doseRate1), u(b.doseRate1));
   f("Alarme 2 de taxa", u(a.doseRate2), u(b.doseRate2));
@@ -223,22 +219,21 @@ function wireRcCfg() {
     if (err) { toast(err, true); return; }
     const diff = rcCfgDiff(rcCfg, next);
     if (!diff.length) { toast("Nada mudou: o aparelho já está assim."); return; }
-    let msg = "Gravar no RadiaCode:\n\n" + diff.join("\n");
-    if (next.doseRate1 !== rcCfg.doseRate1 || next.doseRate2 !== rcCfg.doseRate2) msg += "\n\nOs alertas do RadiaCode no app passam a usar os alarmes de taxa novos.";
-    if (!rcConfirm(msg + "\n\nO app salva uma cópia do que está agora antes. Continuar?")) return;
+    const text = ["O app salva uma cópia do que está agora antes de gravar."];
+    if (next.doseRate1 !== rcCfg.doseRate1 || next.doseRate2 !== rcCfg.doseRate2) text.push("Os alertas do RadiaCode no app passam a usar os alarmes de taxa novos.");
+    if (!(await askConfirm({ title: "Gravar no RadiaCode?", diff, text, textAfter: text.length, ok: "Gravar" }))) return;
     rcCfgRun("Gravando…", () => api.SetRcSettings(next), "Ajustes gravados no RadiaCode");
   });
 
   $("rcUndo").addEventListener("click", async () => {
-    if (!confirm("Gravar de volta no RadiaCode os ajustes de antes da última gravação?")) return;
+    if (!(await askConfirm({ title: "Desfazer a última gravação?", text: "O app grava de volta no RadiaCode os ajustes de antes da última gravação.", ok: "Desfazer" }))) return;
     rcCfgRun("Desfazendo…", () => api.UndoRcSettings(), "Ajustes de antes gravados de volta");
   });
 
   $("rcResetDose").addEventListener("click", async () => {
     const st = (state.rc && state.rc.st) || {};
     const d = st.doseLive || st.dose;
-    const now = d > 0 ? ` (agora: ${rcDoseTxt(d)})` : "";
-    if (!confirm(`Zerar a dose acumulada do RadiaCode${now}? Não tem volta: o aparelho recomeça do zero.`)) return;
+    if (!(await askConfirm({ title: "Zerar a dose acumulada do RadiaCode?", rows: d > 0 ? [["Dose acumulada agora", rcDoseTxt(d)]] : null, note: "Não tem volta: o aparelho recomeça do zero.", ok: "Zerar a dose", danger: true }))) return;
     rcCfgRun("Zerando…", async () => { await api.ResetRcDose(); return null; }, "Dose do RadiaCode zerada");
   });
 

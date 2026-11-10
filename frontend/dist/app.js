@@ -2789,9 +2789,9 @@ function wireDevCfg() {
     const next = readDevCfgForm();
     const a = next.values.alarmCPM;
     if (!(a >= 1 && a <= 999999)) { toast("O limite do alarme precisa ficar entre 1 e 999999 CPM.", true); return; }
-    let msg = "O app vai apagar e regravar a configuração do contador (leva alguns segundos). Não desconecte o cabo nesse tempo.";
-    if (calChanged(next)) msg += "\n\nA CALIBRAÇÃO vai mudar: isso altera o µSv/h mostrado pelo contador e pelo app.";
-    if (!confirm(msg + "\n\nContinuar?")) return;
+    const text = ["O app vai apagar e regravar a configuração do contador (leva alguns segundos)."];
+    if (calChanged(next)) text.push("A calibração vai mudar: isso altera o µSv/h mostrado pelo contador e pelo app.");
+    if (!(await askConfirm({ title: "Gravar no GMC-800?", text, note: "Não desconecte o cabo nesse tempo.", ok: "Gravar" }))) return;
     setDevCfgEnabled(false);
     $("dcSaveBtn").textContent = "Gravando…";
     try {
@@ -2809,7 +2809,7 @@ function wireDevCfg() {
   });
 
   $("dcRestore").addEventListener("click", async () => {
-    if (!confirm("Escolha uma cópia salva para gravar de volta no contador. A configuração atual também é salva antes. Continuar?")) return;
+    if (!(await askConfirm({ title: "Restaurar uma cópia no GMC-800?", text: "Escolha uma cópia salva para gravar de volta no contador. A configuração atual também é salva antes.", ok: "Escolher a cópia" }))) return;
     setDevCfgEnabled(false);
     try {
       const name = await api.RestoreDeviceConfig();

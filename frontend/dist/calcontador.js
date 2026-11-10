@@ -17,6 +17,14 @@ function ccList(pts) {
   return (pts || []).map((p) => fmt(p.cpm, 0)).join(" / ");
 }
 
+// pontos de antes e depois, lado a lado (para a confirmação)
+function ccDiff(a, b) {
+  a = a || []; b = b || [];
+  const n = Math.max(a.length, b.length), out = [];
+  for (let i = 0; i < n; i++) out.push([`Ponto ${i + 1}`, a[i] ? `${fmt(a[i].cpm, 0)} CPM` : "—", b[i] ? `${fmt(b[i].cpm, 0)} CPM` : "—"]);
+  return out;
+}
+
 function ccSavedRow(label, s, key) {
   if (!s) return "";
   const what = key === "fabrica" ? (s.fabrica ? "a calibração de fábrica do GMC-800" : "a que estava no contador antes do app mexer") : "a que estava antes da última mudança";
@@ -79,21 +87,23 @@ async function ccWrite(fn, okMsg) {
 function initCounterCal() {
   const box = $("ccBox");
   if (!box) return;
-  box.addEventListener("click", (e) => {
+  box.addEventListener("click", async (e) => {
     const b = e.target.closest("button[data-cc]");
     if (!b || !ccView) return;
     const k = b.dataset.cc;
     if (k === "gravar") {
       const s = ccView.suggested, d = ccView.device;
-      let msg = "Gravar a calibração nova no GMC-800?\n\n" + `Pontos de hoje: ${ccList(d)} CPM\n` + `Pontos novos: ${ccList(s)} CPM\n` + "O µSv/h de cada ponto fica igual.";
-      msg += ccView.factory ? "\n\nA de fábrica já está guardada e continua guardada. A que está no contador agora vira a \"anterior\"." : "\n\nA calibração que está no contador agora fica guardada como a de fábrica.";
-      msg += "\n\nOs outros ajustes do contador não mudam. Não desconecte o cabo enquanto grava.";
-      if (!confirm(msg)) return;
+      const text = [
+        "O µSv/h de cada ponto fica igual.",
+        ccView.factory ? "A de fábrica já está guardada e continua guardada. A que está no contador agora vira a \"anterior\"." : "A calibração que está no contador agora fica guardada como a de fábrica.",
+        "Os outros ajustes do contador não mudam.",
+      ];
+      if (!(await askConfirm({ title: "Gravar a calibração nova no GMC-800?", diff: ccDiff(d, s), diffHead: ["Ponto", "Hoje", "Novo"], text, textAfter: text.length, note: "Não desconecte o cabo enquanto grava.", ok: "Gravar" }))) return;
       ccWrite(api.CalibrateCounter, "Contador calibrado com o fator do app");
     } else if (k === "fabrica" || k === "anterior") {
       const s = k === "fabrica" ? ccView.factory : ccView.previous;
       const q = k === "fabrica" ? "Voltar à calibração de fábrica?" : "Voltar à calibração anterior?";
-      if (!confirm(q + "\n\n" + `Pontos: ${ccList(s.pontos)} CPM\n` + "Só os 6 pontos mudam. A que está no contador agora fica guardada como a \"anterior\".")) return;
+      if (!(await askConfirm({ title: q, diff: ccDiff(ccView.device, s.pontos), diffHead: ["Ponto", "Agora", "Depois"], text: "Só os 6 pontos mudam. A que está no contador agora fica guardada como a \"anterior\".", textAfter: 1, note: "Não desconecte o cabo enquanto grava.", ok: "Voltar" }))) return;
       ccWrite(() => api.RestoreCounterCal(k), k === "fabrica" ? "Contador de volta à calibração de fábrica" : "Contador de volta à calibração anterior");
     }
   });

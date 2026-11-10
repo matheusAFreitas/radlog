@@ -1941,3 +1941,22 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings details.how > summary:hover, #settings details.how[open] > summary { color: var(--text); }
 #settings details.how > summary:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
 #settings details.how > p { margin-top: var(--space-2); }
+
+/* confirmação no estilo do app (confirma.js) */
+dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
+.cfm-dlg .dlg { gap: var(--space-4); }
+.cfm-body { display: flex; flex-direction: column; gap: var(--space-3); font-size: var(--fs-body); }
+.cfm-p { margin: 0; color: var(--muted); }
+.cfm-rows { display: grid; grid-template-columns: auto 1fr; gap: var(--space-1) var(--space-4); margin: 0; padding: var(--space-3) var(--space-4); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.cfm-rows dt { color: var(--muted); font-size: var(--fs-label); align-self: center; }
+.cfm-rows dd { margin: 0; overflow-wrap: anywhere; }
+.cfm-diff { display: grid; grid-template-columns: 1fr auto auto; max-height: 40vh; overflow: auto; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
+.cfm-dh, .cfm-dr { display: contents; }
+.cfm-diff span { padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); }
+.cfm-dh span { border-top: 0; color: var(--muted); font-size: var(--fs-caption); }
+.cfm-diff .cfm-was { color: var(--muted); text-decoration: line-through; text-decoration-color: color-mix(in srgb, var(--muted) 60%, transparent); }
+.cfm-diff .cfm-new { color: var(--text); font-weight: 600; }
+.cfm-note { margin: 0; padding: var(--space-2) var(--space-3); border-left: 3px solid var(--att); border-radius: var(--radius-xs); background: color-mix(in srgb, var(--att) 10%, transparent); color: var(--text); }
+.cfm-note.danger { border-left-color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
+.btn.danger { background: var(--warn-solid); color: #fff; border-color: var(--warn-solid); font-weight: 600; }
+.btn.danger:hover:not(:disabled) { background: color-mix(in srgb, var(--warn-solid) 85%, #fff); border-color: var(--warn-solid); }

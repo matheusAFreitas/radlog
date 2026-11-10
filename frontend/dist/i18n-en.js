@@ -2338,7 +2338,30 @@ const I18N_EN = {
 "Onde ele estava?": "Where was it?",
 "Nome (opcional)": "Name (optional)",
 "RadiaCode sem conexão, sem leituras da memória": "RadiaCode disconnected, no readings from memory",
-"Como funciona": "How it works"
+"Como funciona": "How it works",
+"Gravar no RadiaCode?": "Write to the RadiaCode?",
+"O app salva uma cópia do que está agora antes de gravar.": "The app saves a copy of the current settings before writing.",
+"Desfazer a última gravação?": "Undo the last write?",
+"O app grava de volta no RadiaCode os ajustes de antes da última gravação.": "The app writes back to the RadiaCode the settings from before the last write.",
+"Zerar a dose acumulada do RadiaCode?": "Reset the RadiaCode's accumulated dose?",
+"Dose acumulada agora": "Accumulated dose now",
+"Não tem volta: o aparelho recomeça do zero.": "This can't be undone: the device starts again from zero.",
+"Pontos de hoje": "Current points",
+"Pontos novos": "New points",
+"Pontos": "Points",
+"Os outros ajustes do contador não mudam.": "The counter's other settings don't change.",
+"Não desconecte o cabo enquanto grava.": "Don't unplug the cable while it writes.",
+"Gravar no GMC-800?": "Write to the GMC-800?",
+"O app vai apagar e regravar a configuração do contador (leva alguns segundos).": "The app will erase and rewrite the counter's configuration (takes a few seconds).",
+"A calibração vai mudar: isso altera o µSv/h mostrado pelo contador e pelo app.": "The calibration will change: this alters the µSv/h shown by the counter and the app.",
+"Não desconecte o cabo nesse tempo.": "Don't unplug the cable during that time.",
+"Restaurar uma cópia no GMC-800?": "Restore a copy to the GMC-800?",
+"Escolha uma cópia salva para gravar de volta no contador. A configuração atual também é salva antes.": "Choose a saved copy to write back to the counter. The current configuration is also saved first.",
+"Escolher a cópia": "Choose the copy",
+"Depois": "After",
+"Gravar": "Write",
+"Continuar?": "Continue?",
+"Novo": "New"
 },
 "patterns": [
 [
@@ -10789,6 +10812,14 @@ const I18N_EN = {
 "Open ${1}",
 [
 "Abrir "
+]
+],
+[
+"Ponto ",
+"^Ponto ((?:(?! · ).)+?)$",
+"Point ${1}",
+[
+"Ponto "
 ]
 ],
 [
