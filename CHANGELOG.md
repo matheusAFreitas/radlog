@@ -1,6 +1,6 @@
 # Versões
 
-## 2.27.0
+## 2.30.0
 - **O RadiaCode não perde mais o que mediu com o PC desligado.** Sozinho, o
   aparelho guarda na memória as últimas ~1000 h (a taxa de 96 em 96 s, a
   dose, temperatura, bateria e eventos) e manda tudo quando conecta, marcado
@@ -17,6 +17,81 @@
   antes, é ele que leva; aí o caminho é importar o log do celular.
 - Alarmes do RadiaCode (que trazem a taxa junto) e o contador de dose não
   embaralham mais a leitura do resto do pacote.
+## 2.29.0
+- **GMC-800 em µSv/h.** Os limites do GMC (alarme, aviso de atenção e alarme
+  de perigo) agora são escolhidos em µSv/h nas Configurações; o app acha o
+  CPM equivalente pela calibração em uso. Na atualização os limites antigos
+  viram µSv/h sem mudar o ponto em que tocam. Se a calibração mudar, o que
+  fica fixo é o µSv/h.
+- Alertas (lista, detalhe e título da janela), Resumo e os números do Agora
+  mostram o GMC em µSv/h, cada valor pela calibração da hora; os alertas
+  antigos gravados em CPM também aparecem convertidos.
+- **Gráfico principal em µSv/h**: é o único com as linhas de limite, os
+  alarmes e os picos, e passa a abrir por padrão.
+- **"CPM (análise)"**: o gráfico de CPM fica só para análise, sem limites nem
+  alarmes, e ganha o RadiaCode com escala própria no eixo da direita (ele
+  conta umas 28 vezes mais que o GMC; na mesma escala a linha do GMC
+  sumiria).
+- CPM e CPS continuam onde são medida do aparelho: configuração do contador,
+  calibração, tempo morto, explicação do σ e mapa de padrões.
+
+## 2.28.0
+- **Intercalibrar com o RadiaCode, de dentro do app.** Em Configurações ›
+  Calibração do GMC, o botão novo começa uma coleta de 24 h com os dois
+  aparelhos encostados. No fim aparece o resultado com a mesma conta da
+  análise de 09/11: quanto o GMC lia acima ou abaixo do RadiaCode, o fator
+  novo com a margem de 95%, o fator hora a hora, a saúde do tubo e o que
+  muda no fundo e na dose. "Usar … a partir de agora" vira uma versão da
+  calibração com origem "intercalibração com o RadiaCode" (dá para
+  desfazer). O contador não é mexido.
+- **Vigia semanal dos dois aparelhos.** Nos minutos com os dois em casa, o
+  app compara a razão de contagens (cps do RadiaCode ÷ CPM do GMC) com o
+  normal das 4 primeiras semanas da calibração em uso. A frase aparece na
+  Calibração e na página do GMC-800; se a razão sair mais de 5% do normal
+  por duas semanas seguidas, entra um aviso de manutenção em Alertas.
+- A conta fica em `internal/core/intercal`, com teste; a coleta entra no
+  backup.
+
+## 2.27.0
+- **Fundação do estilo, passo 6: espaço.** Os espaçamentos internos
+  (padding, margin e gap) passam a usar a régua do guia: 4, 8, 12, 16, 20,
+  24 e 32 px (`--space-*`). Os valores fora da régua sobem para o degrau
+  mais próximo (6 vira 8, 10 vira 12, 14 vira 16, 18 vira 20, 22 vira 24),
+  então o app fica um pouco mais arejado. Ajustes finos de 1 a 3 px e
+  recuos grandes continuam como estavam.
+
+## 2.26.0
+- **Cada nível tem forma, não só cor.** Seguro é círculo, Atenção é
+  triângulo, Alarme é losango e Perigo é octógono com uma faixa; "sem
+  contagens" é um triângulo vazado. A forma aparece antes do nome do nível
+  no Agora, no Resumo, nos quadros dos aparelhos, no selo de Alertas da barra
+  lateral, na lista de alertas, na legenda e nas linhas de limite dos
+  gráficos, no ícone da bandeja e na coluna de nível do relatório PDF. Dá pra
+  ler o nível sem distinguir cores.
+- **Mostrador no lugar do número e da régua.** Nos quadros do GMC-800 e do
+  RadiaCode, o número grande e a régua de três faixas viraram o mostrador do
+  logo: o valor fica dentro do anel, o arco de fora enche conforme a leitura
+  (um terço por faixa, no sentido do relógio) e tudo pega a cor do nível. Ao
+  lado, o nível em letra grande e uma frase curta ("dentro do fundo de
+  sempre", "passou o limite de alarme"...). Passando o mouse no mostrador
+  aparecem os limites.
+- **Ponto de conexão vira anel.** O ponto ao lado do nome do aparelho agora é
+  um anel, para não confundir com o círculo do nível Seguro.
+
+## 2.25.1
+- **Trecho aberto na mescla de backup.** Um backup feito em outro PC
+  enquanto você ainda estava fora traz o trecho "até agora". Se aqui ele já
+  tinha sido fechado, a mescla colocava o aberto de novo, por cima, e o
+  aparelho ficava "fora" para sempre. Agora um trecho que chega cruzando com
+  um que já existe aqui fica de fora (o daqui vale).
+- **Trecho aberto acompanha o relógio.** Com o app aberto por horas, o
+  trecho "até agora" parava na hora em que a lista foi carregada: a faixa
+  lilás nos gráficos e no Agora encurtava, o relatório e o "Ver" do trecho
+  cortavam o fim. Agora vai até o minuto atual, e o Agora diz "fora de casa
+  até agora" em vez de uma hora parada.
+- Cabeçalho da tabela de calibração e do histórico de configuração com o
+  fundo do cartão (usava uma cor que não existe no guia).
+
 ## 2.25.0
 - **Fundação do estilo, passo 5: "Alerta" vira "Alarme" no segundo nível.**
   Os níveis agora são Seguro, Atenção, Alarme e Perigo. "Alerta" continua

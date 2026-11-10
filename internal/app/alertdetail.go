@@ -48,6 +48,10 @@ type AlertDetail struct {
 	Device string `json:"device,omitempty"`
 	// o episódio inteiro (alertas que se encostam), com mínimo e média (2.5)
 	Episode *AlertEp `json:"episode,omitempty"`
+	// "usv" (GMC desde a 2.29): pontos, limites e episódio em µSv/h; o
+	// limite em CPM fica em LimitCPM, para o σ
+	Unit     string  `json:"unit,omitempty"`
+	LimitCPM float64 `json:"limitCPM,omitempty"`
 
 	allSecs []AlertPoint // segundos sem afinar (para a estatística)
 }
@@ -256,7 +260,7 @@ func (a *App) alertSecondsTick(now time.Time) {
 		c.Active = a.isActiveLocked(id)
 		evs = append(evs, c)
 	}
-	thr := a.settings.Levels.Norm().AttnExit()
+	thr := a.effLocked().Levels.Norm().AttnExit()
 	a.mu.Unlock()
 	if bgOK && bg > 0 {
 		thr = bg + 2*math.Sqrt(bg)
@@ -342,7 +346,10 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 	}
 	e := *ep
 	e.Active = a.isActiveLocked(e.ID)
-	lv, alarm := a.settings.Levels, a.settings.AlarmCPM
+	a.evUSvLocked(&e)
+	eff := a.effLocked()
+	lv, alarm := eff.Levels, eff.AlarmCPM
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 
 	now := time.Now()
@@ -414,7 +421,38 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 		d.Seconds = []AlertPoint{}
 	}
 	a.fillEpisode(&d)
+	detailToUSv(&d, tl, eff)
 	return d, nil
+}
+
+// detailToUSv passa o detalhe de um alerta do GMC para µSv/h (2.29): cada
+// ponto pela calibração da hora dele; os limites são os escolhidos.
+func detailToUSv(d *AlertDetail, tl calTL, eff Settings) {
+	at := time.UnixMilli(d.Event.Time)
+	conv := func(t int64, v float64) float64 { return tl.USvAt(time.UnixMilli(t), v) }
+	for i := range d.Seconds {
+		d.Seconds[i].CPM = conv(d.Seconds[i].T, d.Seconds[i].CPM)
+	}
+	for i := range d.Minutes {
+		d.Minutes[i].CPM = conv(d.Minutes[i].T, d.Minutes[i].CPM)
+	}
+	lv := eff.Levels
+	pick := func(usv, cpm float64) float64 {
+		if usv > 0 {
+			return usv
+		}
+		return tl.USvAt(at, cpm)
+	}
+	d.LimitCPM = d.Limit
+	d.Limit = tl.USvAt(at, d.Limit)
+	d.Attention = pick(lv.AttentionUSv, d.Attention)
+	d.Alarm = pick(eff.AlarmUSv, d.Alarm)
+	d.Danger = pick(lv.DangerUSv, d.Danger)
+	if ep := d.Episode; ep != nil {
+		ep.Peak, ep.Min, ep.Mean, ep.Median, ep.Max = conv(d.Event.Time, ep.Peak), conv(d.Event.Time, ep.Min),
+			conv(d.Event.Time, ep.Mean), conv(d.Event.Time, ep.Median), conv(d.Event.Time, ep.Max)
+	}
+	d.Unit = "usv"
 }
 
 // thinMax reduz a lista para no máximo n pontos sem perder os picos.

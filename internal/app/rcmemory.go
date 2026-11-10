@@ -14,7 +14,7 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- memória do RadiaCode: o que ele gravou sem o app (2.27.0) ----------
+// ---------- memória do RadiaCode: o que ele gravou sem o app (2.30.0) ----------
 //
 // Sozinho, o RadiaCode guarda na memória as últimas ~1000 h: a taxa de dose
 // de 96 em 96 s (com as contagens), a dose acumulada, temperatura, bateria e
@@ -23,7 +23,7 @@ import (
 // registro, e apaga da memória o que mandou: quem conectar primeiro (o PC ou
 // o celular) leva.
 //
-// Até a 2.26 o app jogava esses lotes fora e teria posto tudo na hora da
+// Até a 2.29 o app jogava esses lotes fora e teria posto tudo na hora da
 // reconexão. Agora cada registro antigo vai para o seu lugar, com a hora do
 // próprio aparelho:
 //   - taxa (96 s) → os minutos de radiacode/AAAA-MM.csv que não tinham

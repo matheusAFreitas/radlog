@@ -53,7 +53,9 @@ async function refreshChart() {
 
   const usvMode = state.chartUnit === "usv";
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cunit === state.chartUnit)));
-  $("chartTitle").textContent = usvMode ? "µSv/h ao longo do tempo" : "CPM ao longo do tempo";
+  // o gráfico em µSv/h é o principal (limites, alarmes e picos); o de CPM é
+  // só de análise: as contagens de cada aparelho, sem nenhum alarme (2.29)
+  $("chartTitle").textContent = usvMode ? "µSv/h ao longo do tempo" : "CPM ao longo do tempo (análise)";
   const vals = (usvMode ? c.usv : c.values) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
@@ -61,12 +63,17 @@ async function refreshChart() {
   // picos dos alertas (leitura de segundo): entram na escala e viram ponto
   const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
-  for (const p of c.peaks || []) max = Math.max(max, peakV(p));
-  // RadiaCode: só no gráfico em µSv/h (é a unidade que os dois têm em comum)
-  const rcVals = usvMode && c.rc ? c.rc : null;
-  if (rcVals) for (const v of rcVals) if (v != null && v > max) max = v;
+  for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
+  // RadiaCode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
+  // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
+  // escala a linha do GMC sumiria no chão do gráfico)
+  const rcVals = usvMode ? c.rc || null : c.rcCPM || null;
+  let rcMax = 0;
+  if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
+  if (usvMode) max = Math.max(max, rcMax);
   // durante um alarme, mostra as linhas do seu limite e do perigo do app
-  const ringing = !!alarmCtl.kind;
+  // (só no µSv/h: o gráfico de CPM não mostra alarme)
+  const ringing = usvMode && !!alarmCtl.kind;
   const alarmV = usvMode ? c.alarmUSv : c.alarmCPM;
   const dangerV = usvMode ? c.dangerUSv : c.dangerCPM;
   const testDanger = alarmCtl.kind === "test" && alarmCtl.sev === "perigo";
@@ -76,11 +83,16 @@ async function refreshChart() {
   let want = max;
   if (ringing && alarmV) want = Math.max(want, alarmV);
   if (dangerInScale) want = Math.max(want, dangerV);
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : Math.max(60, Math.ceil((want * 1.15) / 20) * 20);
+  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
   c.top = top;
   const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
   const ys = $("yAxis").children;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
+  // eixo da direita: CPM do RadiaCode
+  const rcAxis = !usvMode && rcMax > 0;
+  const rcTop = rcAxis ? Math.max(300, Math.ceil((rcMax * 1.15) / 300) * 300) : top;
+  $("yAxisR").hidden = !rcAxis;
+  if (rcAxis) { const yr = $("yAxisR").children; for (let i = 0; i < 4; i++) yr[i].textContent = fmt(rcTop - (rcTop / 3) * i, 0); }
 
   const n = vals.length;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
@@ -106,23 +118,27 @@ async function refreshChart() {
       }
       pts = [];
     };
-    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push([x(i).toFixed(1), y(v).toFixed(1)]); });
+    const yr = (v) => H - (v / rcTop) * H;
+    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push([x(i).toFixed(1), (usvMode ? y(v) : yr(v)).toFixed(1)]); });
     out();
   }
-  $("rcKey").hidden = !c.rc;
-  $("rcKey").classList.toggle("off", !usvMode);
-  $("rcKeyText").textContent = usvMode ? "RadiaCode" : "RadiaCode (só em µSv/h)";
+  $("rcKey").hidden = !rcVals;
+  $("rcKeyText").textContent = usvMode ? "RadiaCode" : "RadiaCode (eixo da direita)";
 
   const grid = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   const hline = (v, color, width) => `<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="${width}" stroke-dasharray="8 5" vector-effect="non-scaling-stroke"/>`;
-  let thr = top >= thrV ? hline(thrV, COR.att, 1) : "";
+  let thr = usvMode && top >= thrV ? hline(thrV, COR.att, 1) : "";
   const showAlarm = ringing && alarmV && alarmV <= top;
   const showDanger = ringing && dangerV && dangerV <= top;
   if (showAlarm && !(dangerV && alarmV >= dangerV)) thr += hline(alarmV, COR.alarm, 2);
   if (showDanger) thr += hline(dangerV, COR.warn, 2);
+  // forma do nível na ponta direita de cada linha de limite (ideia 12)
+  const mark = (v, lv) => `<span style="top:${((y(v) / H) * 100).toFixed(2)}%">${lvIcon(lv, 10)}</span>`;
+  $("thrMarks").innerHTML = (usvMode && top >= thrV ? mark(thrV, "atencao") : "") +
+    (showAlarm && !(dangerV && alarmV >= dangerV) ? mark(alarmV, "alarme") : "") + (showDanger ? mark(dangerV, "perigo") : "");
   const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
   $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
   $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;
@@ -170,7 +186,7 @@ async function refreshChart() {
   $("noteKey").hidden = !(c.notes || []).length;
   // ponto de cada pico, em cima do ponto do gráfico daquele trecho
   const stepMs = c.stepMs || 60000;
-  $("peakDots").innerHTML = (c.peaks || []).map((p) => {
+  $("peakDots").innerHTML = (usvMode ? c.peaks || [] : []).map((p) => {
     const i = Math.floor((p.t - c.from) / stepMs);
     if (i < 0 || i >= n) return "";
     const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
@@ -200,15 +216,15 @@ async function refreshChart() {
   }
   // nos períodos curtos o gráfico usa leituras por segundo
   $("chartStats").dataset.short = String(isShortRange());
-  const attnC = c.attentionCPM || 50;
   $("legendText").textContent = usvMode
-    ? `atenção: ${fmt(c.attentionUSv, 3)} µSv/h`
-    : `atenção: ${fmt(attnC, 0)} CPM`;
+    ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
+    : "análise: sem limites nem alarmes (eles ficam no µSv/h)";
+  $("legDash").hidden = !usvMode;
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
       ? (c.rcAvg != null ? `RadiaCode média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)}`;
+      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RadiaCode média ${fmt(c.rcAvgCPM, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -230,17 +246,17 @@ function setupChartHover() {
     const rr = (c.radar || []).find((p) => t >= p.time && t < p.time + RADAR_STEP);
     const pk = (c.peaks || []).filter((p) => p.t >= t && p.t < t + (c.stepMs || 60000)).sort((a, b) => b.cpm - a.cpm)[0];
     const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
-    const pkText = pk && !(pk.retro && v != null && Math.round(pk.cpm) === Math.round(usvMode ? v / kU : v))
+    const pkText = usvMode && pk && !(pk.retro && v != null && Math.round(pk.cpm) === Math.round(usvMode ? v / kU : v))
       ? ` · pico ${usvMode ? fmt(pk.cpm * kU, usvDigits(pk.cpm * kU)) + " µSv/h" : fmt(pk.cpm, 0) + " CPM"} às ${hhmmss(pk.t)}` : "";
     const rh = rr ? null : (c.rain || []).find((p) => t >= p.time && t < p.time + 3600e3 && p.mm >= 0.1);
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
-    const rcv = c.rc ? c.rc[i] : null;
-    const rcText = rcv != null ? ` · RadiaCode ${fmt(rcv, usvDigits(rcv))} µSv/h` : "";
+    const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
+    const rcText = rcv == null ? "" : usvMode ? ` · RadiaCode ${fmt(rcv, usvDigits(rcv))} µSv/h` : ` · RadiaCode ${fmt(rcv, 0)} CPM`;
     tip.textContent = (v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
-      : `${when} · ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
+      : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
   });

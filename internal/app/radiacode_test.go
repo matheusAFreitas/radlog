@@ -89,6 +89,15 @@ func TestRcTodayAndChart(t *testing.T) {
 	if k != 10 || c.RCAvg == nil {
 		t.Fatalf("curva: %d pontos", k)
 	}
+	// a mesma curva em CPM do aparelho (3 cps = 180 CPM)
+	for i, v := range c.RCCPM {
+		if (v == nil) != (c.RC[i] == nil) || (v != nil && math.Abs(*v-180) > 1e-9) {
+			t.Fatalf("CPM do RadiaCode no ponto %d: %v", i, v)
+		}
+	}
+	if c.RCAvgCPM == nil || math.Abs(*c.RCAvgCPM-180) > 1e-9 {
+		t.Fatalf("média em CPM: %v", c.RCAvgCPM)
+	}
 	// período curto (passo de 5 s): minutos gravados viram pontos também
 	c, _ = a.GetChart("15m")
 	k = 0

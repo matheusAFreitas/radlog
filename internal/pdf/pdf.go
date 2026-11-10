@@ -405,3 +405,16 @@ func (d *Doc) Bytes(title, producer string) []byte {
 	fmt.Fprintf(&out, "trailer\n<< /Size %d /Root 1 0 R /Info %d 0 R >>\nstartxref\n%d\n%%%%EOF\n", len(offs)+1, info, xref)
 	return out.Bytes()
 }
+
+// Polygon preenche um polígono fechado.
+func (d *Doc) Polygon(pts [][2]float64, fill RGB) {
+	if len(pts) < 3 {
+		return
+	}
+	d.color(fill, true)
+	fmt.Fprintf(d.cur, "%.2f %.2f m\n", pts[0][0], H-pts[0][1])
+	for _, p := range pts[1:] {
+		fmt.Fprintf(d.cur, "%.2f %.2f l\n", p[0], H-p[1])
+	}
+	d.cur.WriteString("h f\n")
+}
