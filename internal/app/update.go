@@ -348,6 +348,13 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 		return
 	}
 	a.logf("atualização: %s baixado e conferido (SHA-256 %s…) em %s", asset.Name, want[:12], path)
+	if runtime.GOOS == "windows" {
+		if fixed, err := installFixed(path); err != nil {
+			a.logf("atualização: não deu para pôr como %s (%v); abrindo %s", fixedExe, err, filepath.Base(path))
+		} else {
+			path = fixed
+		}
+	}
 
 	// espera o CPM normal
 	for {
@@ -375,6 +382,49 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 		return
 	}
 	a.quitApp()
+}
+
+// ---------- nome fixo no Windows ----------
+//
+// O Windows guarda pelo caminho do .exe se o ícone fica fixo na barra ou
+// escondido na setinha, e também a regra do firewall da sincronização. Com
+// um nome por versão (RadLog-vX.Y.Z.exe), cada atualização parecia outro
+// programa: o ícone voltava para a setinha e o firewall perguntava de novo.
+// Agora a versão baixada e conferida vira sempre RadLog.exe na pasta das
+// versões. Um .exe aberto não pode ser sobrescrito, mas pode ser renomeado:
+// o atual vira RadLog.old.exe (apagado depois, com as versões antigas) e o
+// novo assume o nome. Se algo falhar, abre o arquivo com o nome da versão,
+// como antes.
+
+const (
+	fixedExe = "RadLog.exe"
+	oldExe   = "RadLog.old.exe"
+)
+
+// installFixed renomeia o .exe baixado para RadLog.exe na mesma pasta e
+// devolve o caminho novo.
+func installFixed(path string) (string, error) {
+	dir := filepath.Dir(path)
+	fixed := filepath.Join(dir, fixedExe)
+	if sameExe(path, fixed) {
+		return path, nil
+	}
+	old := filepath.Join(dir, oldExe)
+	_ = os.Remove(old) // sobra da troca anterior
+	moved := false
+	if _, err := os.Stat(fixed); err == nil {
+		if err := os.Rename(fixed, old); err != nil {
+			return path, err
+		}
+		moved = true
+	}
+	if err := os.Rename(path, fixed); err != nil {
+		if moved {
+			_ = os.Rename(old, fixed)
+		}
+		return path, err
+	}
+	return fixed, nil
 }
 
 // updateDir é a pasta das versões, só do app: Documentos\RadLog\Versões
@@ -409,7 +459,7 @@ func (a *App) OpenVersionsDir() error {
 // apaga os .exe (ou AppImages) de versões mais antigas que ela: os da pasta
 // das versões e os da pasta de onde veio a versão anterior (normalmente
 // Downloads). Só arquivos com o nome das releases (RadLog-vX.Y.Z.exe ou,
-// da 1.x, GMC-Monitor-vX.Y.Z.exe),
+// da 1.x, GMC-Monitor-vX.Y.Z.exe) e o RadLog.old.exe da troca de nome fixo,
 // nunca a versão que está aberta nem uma mais nova.
 
 const (
@@ -437,6 +487,11 @@ func oldVersionsIn(dir, self string) []string {
 		}
 		if m[3] == ".part" || newerVersion(AppVersion, m[1]) {
 			out = append(out, p)
+		}
+	}
+	if p := filepath.Join(dir, oldExe); !sameExe(p, self) {
+		if st, err := os.Stat(p); err == nil && !st.IsDir() {
+			out = append(out, p) // a versão anterior, de antes da troca
 		}
 	}
 	return out
