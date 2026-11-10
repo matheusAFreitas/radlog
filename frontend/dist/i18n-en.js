@@ -2828,7 +2828,37 @@ const I18N_EN = {
 "Acima do normal": "Above normal",
 "Medir de novo": "Measure again",
 "O teste de blindagem está em andamento. Termine ou cancele ele antes de começar este.": "The shielding test is running. Finish or cancel it before starting this one.",
-"O teste de distância está em andamento. Termine ou cancele ele antes de começar este.": "The distance test is running. Finish or cancel it before starting this one."
+"O teste de distância está em andamento. Termine ou cancele ele antes de começar este.": "The distance test is running. Finish or cancel it before starting this one.",
+"Clima": "Weather",
+"Chuva e pressão do ar mexem com o radônio, e o radônio mexe com o fundo da sua casa.": "Rain and air pressure move radon around, and radon moves your home background.",
+"Pressão × radônio": "Pressure × radon",
+"Radônio é um gás radioativo que sai do solo e dos tijolos.": "Radon is a radioactive gas that comes out of the ground and the bricks.",
+"Ele não tem cheiro nem cor.": "It has no smell and no colour.",
+"Os \"filhos\" dele (bismuto-214 e chumbo-214) emitem gama, e é isso que os seus aparelhos veem subir.": "Its \"daughters\" (bismuth-214 and lead-214) emit gamma, and that is what your devices see going up.",
+"Pressão caindo: o ar do chão sai com mais facilidade e traz mais radônio. Costuma vir antes de frente fria e chuva.": "Falling pressure: air from the ground comes out more easily and brings more radon. It usually comes before a cold front and rain.",
+"De madrugada: casa fechada e ar parado juntam radônio. Por isso o fundo sobe à noite e cai de dia.": "Late at night: a closed house and still air build up radon. That is why the background rises at night and falls during the day.",
+"Chuva: lava os filhos do radônio do ar para o chão e dá um pico curto, como na parte de cima.": "Rain: washes radon daughters out of the air onto the ground and gives a short peak, as in the section above.",
+"Abrir a casa para ventilar é ALARA de graça.": "Opening the house to air it out is free ALARA.",
+"Com uma semana de dados dá só uma pista.": "With one week of data it is only a hint.",
+"Com quatro semanas ou mais a relação fica confiável.": "With four weeks or more the relationship becomes reliable.",
+"Pressão do ar por hora": "Air pressure per hour",
+"Fundo em casa, mediana de 1 hora": "Home background, 1-hour median",
+"Pressão do ar (hPa)": "Air pressure (hPa)",
+"sem pressão": "no pressure",
+"Ainda não há pressão guardada.": "No pressure stored yet.",
+"Ela vem do mesmo serviço da chuva e chega na próxima busca.": "It comes from the same service as the rain and arrives with the next update.",
+"Ainda não dá para comparar.": "Not enough to compare yet.",
+"Precisa de pelo menos 3 dias com a pressão e o fundo em casa juntos.": "It needs at least 3 days with both the pressure and the home background.",
+"Com menos de 28 dias isso ainda é uma pista.": "With less than 28 days this is still a hint.",
+"Com 28 dias ou mais, a relação já é confiável.": "With 28 days or more, the relationship is reliable.",
+"Não deu para ver relação com a pressão.": "No clear relationship with pressure.",
+"A pressão variou pouco, ou o radônio da sua casa depende mais de outra coisa (ventilação, horário).": "The pressure changed little, or the radon in your house depends more on something else (ventilation, time of day).",
+"Pista: quando a pressão cai, o fundo sobe quase ao mesmo tempo.": "Hint: when the pressure falls, the background rises almost at the same time.",
+"Relação: quando a pressão cai, o fundo sobe quase ao mesmo tempo.": "Relationship: when the pressure falls, the background rises almost at the same time.",
+"O sinal negativo quer dizer que um sobe quando o outro desce.": "The negative sign means one goes up when the other goes down.",
+"Pista: aqui o fundo sobe junto com a pressão, ao contrário do comum.": "Hint: here the background rises together with the pressure, the opposite of usual.",
+"Relação: aqui o fundo sobe junto com a pressão, ao contrário do comum.": "Relationship: here the background rises together with the pressure, the opposite of usual.",
+"Pode ser outra coisa que muda junto, como a casa fechada à noite.": "It may be something else that changes at the same time, like the house being closed at night."
 },
 "patterns": [
 [
@@ -4396,6 +4426,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Relação: quando a pressão cai, o fundo sobe cerca de ",
+"^Relação: quando a pressão cai, o fundo sobe cerca de ((?:(?! · ).)+?) h depois\\.$",
+"Relationship: when the pressure falls, the background rises about ${1} h later.",
+[
+"Relação: quando a pressão cai, o fundo sobe cerca de ",
+" h depois."
+]
+],
+[
 "Dentro do normal — o nível de fundo costuma ficar entre ",
 "^Dentro do normal — o nível de fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
 "Within normal — your background usually stays between ${1} and ${2} CPM",
@@ -4475,6 +4514,15 @@ const I18N_EN = {
 [
 "Contador calibrado com o fator do app: ",
 " µSv/h por CPM no fundo"
+]
+],
+[
+"Pista: quando a pressão cai, o fundo sobe cerca de ",
+"^Pista: quando a pressão cai, o fundo sobe cerca de ((?:(?! · ).)+?) h depois\\.$",
+"Hint: when the pressure falls, the background rises about ${1} h later.",
+[
+"Pista: quando a pressão cai, o fundo sobe cerca de ",
+" h depois."
 ]
 ],
 [
@@ -5607,6 +5655,15 @@ const I18N_EN = {
 [
 " avisos, ",
 " dias com trecho acima do seguro."
+]
+],
+[
+"Fundo em casa pelo ",
+"^Fundo em casa pelo ((?:(?! · ).)+?) \\(µSv/h, mediana de 1 h\\)$",
+"Home background from the ${1} (µSv/h, 1-hour median)",
+[
+"Fundo em casa pelo ",
+" (µSv/h, mediana de 1 h)"
 ]
 ],
 [
@@ -8820,6 +8877,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Até agora são ",
+"^Até agora são ((?:(?! · ).)+?) horas\\.$",
+"So far there are ${1} hours.",
+[
+"Até agora são ",
+" horas."
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -10633,6 +10699,16 @@ const I18N_EN = {
 "≈ ${1} hours of flight",
 [
 " horas de voo"
+]
+],
+[
+"r = ",
+"^r = ((?:(?! · ).)+?) em ((?:(?! · ).)+?) dias\\.$",
+"r = ${1} over ${2} days.",
+[
+"r = ",
+" em ",
+" dias."
 ]
 ],
 [

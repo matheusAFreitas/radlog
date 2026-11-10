@@ -2177,3 +2177,8 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .al-chart { width: 100%; height: auto; display: block; }
 .al-ax { font-family: var(--mono); font-size: 11px; fill: var(--dim); }
 .al-lb { font-family: var(--sans); font-size: 13px; fill: var(--muted); }
+
+/* Clima: pressão × radônio (2.44) */
+.cl-press { margin-top: var(--space-4); }
+.cl-charts { position: relative; display: grid; gap: 2px; }
+.cl-charts .ft-tip { top: 0; }

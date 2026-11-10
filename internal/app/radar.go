@@ -48,8 +48,9 @@ type radarStore struct {
 	V       int                  `json:"v"`
 	Lat     float64              `json:"lat"`
 	Lon     float64              `json:"lon"`
-	Points  map[int64]RadarPoint `json:"points"`  // unix (s) -> leitura
-	Covered *bool                `json:"covered"` // o local tem cobertura de radar?
+	Place   string               `json:"place,omitempty"` // só no backup (backupplace.go)
+	Points  map[int64]RadarPoint `json:"points"`          // unix (s) -> leitura
+	Covered *bool                `json:"covered"`         // o local tem cobertura de radar?
 	Fetched time.Time            `json:"fetched"`
 	Err     string               `json:"err"`
 }

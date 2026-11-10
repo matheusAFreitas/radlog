@@ -86,6 +86,9 @@ func (a *App) writeBackup(w io.Writer) error {
 			}
 			return err
 		}
+		if rel == "chuva.json" || rel == "chuva-radar.json" {
+			b = hidePlace(b) // o lugar não sai do PC
+		}
 		f, err := zw.Create(rel)
 		if err != nil {
 			return err
@@ -475,10 +478,18 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			var c rainCache
 			if json.Unmarshal(b, &c) == nil && c.V == rainCacheVersion {
 				a.mu.Lock()
-				if a.rain != nil && a.rain.Lat == c.Lat && a.rain.Lon == c.Lon {
+				if a.rain != nil && samePlace(a.rain.Lat, a.rain.Lon, c.Lat, c.Lon, c.Place) {
 					for k, v := range c.Hours {
 						if _, ok := a.rain.Hours[k]; !ok {
 							a.rain.Hours[k] = v
+						}
+					}
+					if a.rain.Press == nil {
+						a.rain.Press = map[int64]float64{}
+					}
+					for k, v := range c.Press {
+						if _, ok := a.rain.Press[k]; !ok {
+							a.rain.Press[k] = v
 						}
 					}
 				}
@@ -496,7 +507,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			var r radarStore
 			if json.Unmarshal(b, &r) == nil && r.V == radarVersion {
 				a.mu.Lock()
-				if a.radar != nil && a.radar.Lat == r.Lat && a.radar.Lon == r.Lon {
+				if a.radar != nil && samePlace(a.radar.Lat, a.radar.Lon, r.Lat, r.Lon, r.Place) {
 					for k, v := range r.Points {
 						if _, ok := a.radar.Points[k]; !ok {
 							a.radar.Points[k] = v

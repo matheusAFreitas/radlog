@@ -177,8 +177,11 @@ type rainCache struct {
 	V       int               `json:"v"`
 	Lat     float64           `json:"lat"`
 	Lon     float64           `json:"lon"`
+	Place   string            `json:"place,omitempty"` // só no backup (backupplace.go)
 	Fetched time.Time         `json:"fetched"`
 	Hours   map[int64]float64 `json:"hours"` // unix (s) do início da hora -> mm
+	// pressão na superfície (hPa) na hora cheia: unix (s) -> hPa (2.44)
+	Press map[int64]float64 `json:"press,omitempty"`
 }
 
 // fetchRain busca os últimos 7 dias + hoje e junta ao que já tinha.
@@ -208,7 +211,7 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 	q := url.Values{}
 	q.Set("latitude", fmt.Sprintf("%.4f", lat))
 	q.Set("longitude", fmt.Sprintf("%.4f", lon))
-	q.Set("hourly", "precipitation")
+	q.Set("hourly", "precipitation,surface_pressure")
 	// primeira busca (ou cache curto): pega 31 dias para trás, para a tela
 	// "Chuva e radiação" ter com o que comparar; depois, só 7
 	past := "31"
@@ -221,6 +224,13 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 				break
 			}
 		}
+		// primeira busca com pressão: pega os 92 dias que o serviço guarda,
+		// para a conta pressão × radônio já sair com mais de 28 dias
+		if len(c.Press) == 0 {
+			past = "92"
+		}
+	} else {
+		past = "92"
 	}
 	a.mu.Unlock()
 	q.Set("past_days", past)
@@ -230,6 +240,7 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 		Hourly struct {
 			Time          []string   `json:"time"`
 			Precipitation []*float64 `json:"precipitation"`
+			Pressure      []*float64 `json:"surface_pressure"`
 		} `json:"hourly"`
 	}
 	if err := getJSON(forecastURL+"?"+q.Encode(), &body); err != nil {
@@ -243,12 +254,20 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 	if a.rain == nil || a.rain.Lat != lat || a.rain.Lon != lon || a.rain.V != rainCacheVersion {
 		a.rain = &rainCache{V: rainCacheVersion, Lat: lat, Lon: lon, Hours: map[int64]float64{}}
 	}
+	if a.rain.Press == nil {
+		a.rain.Press = map[int64]float64{}
+	}
+	now := time.Now()
 	for i, ts := range body.Hourly.Time {
-		if i >= len(body.Hourly.Precipitation) || body.Hourly.Precipitation[i] == nil {
-			continue
-		}
 		t, err := time.Parse("2006-01-02T15:04", ts)
 		if err != nil {
+			continue
+		}
+		// a pressão é a da hora cheia; a previsão (futuro) não entra
+		if i < len(body.Hourly.Pressure) && body.Hourly.Pressure[i] != nil && !t.After(now) {
+			a.rain.Press[t.Unix()] = *body.Hourly.Pressure[i]
+		}
+		if i >= len(body.Hourly.Precipitation) || body.Hourly.Precipitation[i] == nil {
 			continue
 		}
 		// o valor das 16:00 é a chuva das 15:00 às 16:00
@@ -263,6 +282,13 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 	for k := range a.rain.Hours {
 		if k < cut {
 			delete(a.rain.Hours, k)
+		}
+	}
+	// a pressão fica um ano (uma hora são poucos bytes)
+	pcut := time.Now().Add(-pressKeepDays * 24 * time.Hour).Unix()
+	for k := range a.rain.Press {
+		if k < pcut {
+			delete(a.rain.Press, k)
 		}
 	}
 	a.rain.Fetched = time.Now()

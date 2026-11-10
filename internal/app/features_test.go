@@ -175,7 +175,7 @@ func TestRain(t *testing.T) {
 			fmt.Fprint(w, `{"results":[{"name":"Brasília","admin1":"Distrito Federal","country":"Brasil","latitude":-15.79,"longitude":-47.88}]}`)
 			return
 		}
-		if r.URL.Query().Get("hourly") != "precipitation" || r.URL.Query().Get("timezone") != "GMT" {
+		if r.URL.Query().Get("hourly") != "precipitation,surface_pressure" || r.URL.Query().Get("timezone") != "GMT" {
 			http.Error(w, "parâmetros", 400)
 			return
 		}
