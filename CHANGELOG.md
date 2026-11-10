@@ -5,6 +5,10 @@
   hora, o mesmo do quadro do Agora, no espaço vazio entre a leitura e a
   "Dose hoje". No RadiaCode, a "Dose hoje" vai para o canto de cima, como no
   GMC-800.
+- No Agora, a faixa "Tudo normal agora" some quando está tudo normal. Ela
+  continua aparecendo com alerta ativo, sem aparelho lendo, quando falta
+  medição ou com um aparelho fora do normal. O selo "fundo de casa" foi para
+  o cabeçalho da Minha dose, de onde vem esse número.
 
 ## 2.38.3
 - Cada item do menu lateral ganhou um ícone, no mesmo traço dos de baixo:

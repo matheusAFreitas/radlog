@@ -1970,3 +1970,4 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .hero-spark:has(polyline[points=""]) { visibility: hidden; }
 .hero.conn-off .hero-spark, .hero.conn-wait .hero-spark, .rc-main.conn-off .hero-spark, .rc-main.conn-wait .hero-spark { opacity: .45; }
 @media (max-width: 900px) { .hero-spark { display: none !important; } }
+.ag-dose-title { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; min-width: 0; }

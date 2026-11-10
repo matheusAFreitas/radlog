@@ -209,7 +209,6 @@
       <h2 id="agSayTitle">Carregando…</h2>
       <p class="muted" id="agSayText"></p>
     </div>
-    <span class="chip mono" id="agSayBg" hidden></span>
   </section>
 
   <section class="card rca" id="rcAwayBox" aria-live="polite" hidden></section>
@@ -242,7 +241,7 @@
 
   <section class="card" id="agDose">
     <div class="card-head">
-      <h2>Minha dose</h2>
+      <div class="ag-dose-title"><h2>Minha dose</h2><span class="chip mono" id="agSayBg" hidden></span></div>
       <div class="seg" role="group" aria-label="Aparelho da dose" id="agDevSeg">
         <button type="button" data-dev="pessoal" aria-pressed="true">pessoal</button>
         <button type="button" data-dev="casa" aria-pressed="false">casa</button>
