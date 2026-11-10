@@ -140,7 +140,7 @@ async function refreshChart() {
     const x1 = xt(t1), x2 = xt(t2);
     return `<rect x="${x1.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" fill-opacity="${op}"/>`;
   };
-  const rainBars = rainy.map((p) => bar(p.time, p.time + 3600e3, Math.max(4, Math.min(1, p.mm / 5) * H * 0.3), "#7CC7FF", 0.3)).join("") +
+  const rainBars = rainy.map((p) => bar(p.time, p.time + 3600e3, Math.max(4, Math.min(1, p.mm / 5) * H * 0.3), COR.info, 0.3)).join("") +
     radarWet.map((p) => bar(p.time, p.time + RADAR_STEP, Math.max(4, Math.min(1, p.mmh / 10) * H * 0.3), "#3DA5FF", 0.6)).join("");
   $("rainKey").hidden = !rainy.length && !radarWet.length;
   $("rainKey").lastChild.textContent = radarWet.length ? (rainy.length ? "chuva (radar · modelo)" : "chuva (radar)") : "chuva (modelo)";
@@ -161,11 +161,11 @@ async function refreshChart() {
     m.addEventListener("mousedown", (e) => e.stopPropagation());
     m.addEventListener("click", (e) => { e.stopPropagation(); openNote(nt); });
     $("noteMarks").appendChild(m);
-    const line = `<line x1="${nx.toFixed(1)}" y1="0" x2="${nx.toFixed(1)}" y2="${H}" stroke="#B794F6" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+    const line = `<line x1="${nx.toFixed(1)}" y1="0" x2="${nx.toFixed(1)}" y2="${H}" stroke="${COR.note}" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
     if (!nt.end) return line;
     const ex = noteX(Math.min(nt.end, tEnd));
-    return `<rect x="${nx.toFixed(1)}" y="0" width="${Math.max(1, ex - nx).toFixed(1)}" height="${H}" fill="#B794F6" fill-opacity="0.10"/>` + line +
-      `<line x1="${ex.toFixed(1)}" y1="0" x2="${ex.toFixed(1)}" y2="${H}" stroke="#B794F6" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+    return `<rect x="${nx.toFixed(1)}" y="0" width="${Math.max(1, ex - nx).toFixed(1)}" height="${H}" fill="${COR.note}" fill-opacity="0.10"/>` + line +
+      `<line x1="${ex.toFixed(1)}" y1="0" x2="${ex.toFixed(1)}" y2="${H}" stroke="${COR.note}" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   $("noteKey").hidden = !(c.notes || []).length;
   // ponto de cada pico, em cima do ponto do gráfico daquele trecho

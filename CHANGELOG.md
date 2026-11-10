@@ -1,5 +1,22 @@
 # Versões
 
+## 2.24.0
+- **Fundação do estilo, passo 4: cores restantes.**
+  - **Anotação em cinza.** A marca de anotação nos gráficos sai do roxo,
+    que se confundia com o lilás de "fora de casa", e fica cinza, com o
+    tracejado de sempre. O lilás passa a ser só "fora de casa / fora do
+    lugar".
+  - As cores que ainda estavam escritas à mão viraram tokens no style.css
+    (`--away`, `--obj`, `--info`, as faixas sólidas do alarme e do modo
+    demo, os trilhos e as faixas do quadro de nível) e no JS dos gráficos
+    (`COR.away`, `COR.obj`, `COR.info`, `COR.note`). Fora do `:root` só
+    sobra o degradê do espectro, que é cor de dado.
+  - As transparências agora derivam do token com `color-mix` e ficam em
+    poucas intensidades (6%, 12%, 24% e 50%). Alguns fundos e contornos
+    ficam um pouco mais claros ou mais escuros.
+  - Corrigidas duas cores de reserva erradas (um azul no lugar do verde e
+    um fundo antigo).
+
 ## 2.23.0
 - **Fundação do estilo, passo 3: raios.** Os 19 arredondamentos de canto
   que o app usava viraram os 5 do guia, em 153 lugares: `--radius-xs` (4)

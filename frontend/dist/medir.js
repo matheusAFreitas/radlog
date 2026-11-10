@@ -188,7 +188,7 @@ function drawMeasureSrc(src) {
     out += `<rect x="0" y="${y1.toFixed(1)}" width="${W}" height="${Math.max(1, y2 - y1).toFixed(1)}" fill="${COR.muted}" fill-opacity="0.18"/>`;
     out += `<line x1="0" y1="${y(b.cpm).toFixed(1)}" x2="${W}" y2="${y(b.cpm).toFixed(1)}" stroke="${COR.muted}" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   }
-  for (const [phase, color] of [["fundo", COR.muted], ["objeto", "#5EEAD4"]]) {
+  for (const [phase, color] of [["fundo", COR.muted], ["objeto", COR.obj]]) {
     const pts = src.ph.filter((p) => p.phase === phase);
     if (!pts.length) continue;
     const up = pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg + p.err).toFixed(1)}`);
@@ -197,7 +197,7 @@ function drawMeasureSrc(src) {
     out += `<path d="M${pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg).toFixed(1)}`).join("L")}" fill="none" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
     if (phase === "objeto") {
       const xs = x(pts[0].t).toFixed(1);
-      out += `<line x1="${xs}" y1="0" x2="${xs}" y2="${H}" stroke="#5EEAD4" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+      out += `<line x1="${xs}" y1="0" x2="${xs}" y2="${H}" stroke="${COR.obj}" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
     }
   }
   if (src.live.length > 1) {
@@ -687,14 +687,14 @@ const measureLabel = (ms) => { const x = measureAt(ms); return x ? ` · mediçã
 function measureBands(t0, t1, xt) {
   let out = "";
   for (const m of state.measurements || []) {
-    for (const [ph, color, op] of [[m.bg, COR.muted, 0.14], [m.obj, "#5EEAD4", 0.24]]) {
+    for (const [ph, color, op] of [[m.bg, COR.muted, 0.14], [m.obj, COR.obj, 0.24]]) {
       if (ph.source === "casa" || !(ph.end > t0 && ph.start < t1)) continue;
       const x1 = xt(Math.max(ph.start, t0)), x2 = xt(Math.min(ph.end, t1));
       out += `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(2, x2 - x1).toFixed(1)}" height="${H}" fill="${color}" fill-opacity="${op}"/>`;
     }
     if (m.obj.start > t0 && m.obj.start < t1) {
       const x = xt(m.obj.start).toFixed(1);
-      out += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#5EEAD4" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+      out += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="${COR.obj}" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
     }
   }
   return out;

@@ -14,7 +14,7 @@ const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${p.name}` :
 function awayBands(t0, t1, xt) {
   return (state.periods || []).filter((p) => p.to > t0 && p.from < t1).map((p) => {
     const x1 = xt(Math.max(p.from, t0)), x2 = xt(Math.min(p.to, t1));
-    return `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${H}" fill="#B79CFF" fill-opacity="0.13"/>`;
+    return `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${H}" fill="${COR.away}" fill-opacity="0.13"/>`;
   }).join("");
 }
 
