@@ -1,5 +1,11 @@
 # Versões
 
+## 2.43.1
+- A chuva de cada dia passa a ficar guardada para sempre, em
+  chuva-dias.json (só a data e os mm, sem o lugar). A chuva por hora
+  continua só 60 dias. É a base do calendário do ano, que vem depois.
+  Entra no backup.
+
 ## 2.43.0
 - **Tela nova "ALARA"** em Análise (ícone de escudo). ALARA é "tão baixo
   quanto razoavelmente possível": a tela mostra de onde vem a sua dose e

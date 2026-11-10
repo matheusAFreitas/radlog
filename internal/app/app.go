@@ -375,8 +375,9 @@ type App struct {
 	bgOK  bool
 	bgAt  time.Time
 
-	measure      MeasureState // medição de objeto (measure.go)
-	rain         *rainCache   // chuva (weather.go)
+	measure      MeasureState   // medição de objeto (measure.go)
+	rain         *rainCache     // chuva (weather.go)
+	rainDays     *rainDaysStore // chuva por dia, para sempre (raindays.go)
 	rainSt       rainState
 	radar        *radarStore   // chuva pelo radar (radar.go)
 	radarKick    chan struct{} // busca o radar já (lugar novo)
