@@ -1,5 +1,16 @@
 # Versões
 
+## 2.22.0
+- **Fundação do estilo, passo 2: tipo.** Os 29 tamanhos de fonte que o app
+  usava viraram os 11 degraus do guia (`--fs-micro` a `--fs-reading-xl`),
+  em todos os 220 lugares do style.css. A tela muda pouco:
+  - 10 px sobe para 11 (as etiquetas "ao vivo" e "simulado" ficam legíveis);
+  - 14 px vira 15 no texto corrido e 13 em botões, tabelas e etiquetas;
+  - 17 vira 16; 18 e 20 viram 19; 24 e 26 viram 28 (números de quadro);
+  - as leituras grandes de 34 a 44 viram 40; 64 vira 56; 68 e 76 viram 88
+    (e 56 em tela estreita).
+  Sobra só um `font-size: 0`, que esconde o texto do menu recolhido.
+
 ## 2.21.2
 - **Fundação do estilo, passo 1: tokens e limpeza.** Arrumação interna do
   style.css, sem mudança na tela (conferido comparando o estilo calculado
