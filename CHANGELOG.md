@@ -1,5 +1,14 @@
 # Versões
 
+## 2.23.0
+- **Fundação do estilo, passo 3: raios.** Os 19 arredondamentos de canto
+  que o app usava viraram os 5 do guia, em 153 lugares: `--radius-xs` (4)
+  para barrinhas, células e etiquetas pequenas, `--radius-sm` (8) para
+  botão, campo e aba, `--radius-md` (10) para segmentado e caixas internas,
+  `--radius-lg` (14) para cartões e `--radius-pill` para chips. Só sobram
+  `50%` (pontos redondos) e `0`. Os cantos mudam 1 ou 2 px em alguns
+  lugares.
+
 ## 2.22.0
 - **Fundação do estilo, passo 2: tipo.** Os 29 tamanhos de fonte que o app
   usava viraram os 11 degraus do guia (`--fs-micro` a `--fs-reading-xl`),
