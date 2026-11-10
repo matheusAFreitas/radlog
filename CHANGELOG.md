@@ -1,5 +1,17 @@
 # Versões
 
+## 2.38.3
+- Cada item do menu lateral ganhou um ícone, no mesmo traço dos de baixo:
+  mostrador no Agora, linha nos Gráficos, caderno no Resumo, sino nos
+  Alertas, mira no Medir objeto, casa com seta no Fora de casa, nuvem na
+  Chuva e os dois aparelhos. O ícone do item aberto fica na cor de destaque.
+- As confirmações antes de gravar nos aparelhos saem da caixa do sistema
+  ("wails.localhost says", com OK/Cancel em inglês) e viram uma janela do
+  próprio app, com botões em português. Gravar no RadiaCode mostra uma tabela
+  com cada ajuste, o valor de agora e o de depois. A calibração do GMC-800
+  mostra os 6 pontos de hoje e os novos. Zerar a dose tem o botão em vermelho.
+  O foco começa no Cancelar, e Esc também cancela.
+
 ## 2.38.2
 - **Configurações: explicações recolhidas em "Como funciona".** Em 23
   cartões, o texto que só explica (como funciona, de onde vem o número,
