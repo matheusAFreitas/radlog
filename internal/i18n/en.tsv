@@ -264,6 +264,7 @@ Geiger saturado: a leitura caiu de repente depois de um valor extremo; o tubo po
 Geiger saturado: acima do que o aparelho mede; o real pode ser maior	Geiger saturated: above what the device measures; the real value may be higher
 Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior	Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher
 Geometria / anotação	Geometry / note
+Gerando…	Generating…
 Gerando o relatório…	Generating the report…
 Gerar de novo	Generate again
 Gerar o relatório da medição de objeto sozinho, no fim da medição	Generate the object measurement report automatically at the end of the measurement
@@ -695,6 +696,7 @@ interferência	interference
 interpolação linear entre as leituras ordenadas	linear interpolation between the sorted readings
 já estou baixando o histórico	I'm already downloading the history
 já estou mexendo na configuração do contador	I'm already working on the counter configuration
+já estou gerando um relatório; espere ele abrir	I'm already generating a report; wait for it to open
 leitura a cada segundo	reading every second
 leitura ao vivo	live reading
 leitura ao vivo sem resposta em 6 s (	live reading with no answer in 6 s (
@@ -1206,6 +1208,7 @@ porta fechada ({0})	port closed ({0})
 {0} não encontrada	{0} not found
 falhou: {0}	failed: {0}
 lenta, {0} ms	slow, {0} ms
+voltou a responder	responding again
 voltou a responder depois de {0} erro(s)	responding again after {0} error(s)
 {0} sem leitura no período)	{0} without readings in the period)
 seu normal: {0} a {1} CPM	your normal: {0} to {1} CPM
@@ -2766,3 +2769,4 @@ fora {0}	away {0}
 Fora de casa foi {0}% do tempo e {1}% da dose (µSv).	Away from home was {0}% of the time and {1}% of the dose (µSv).
 Nenhum minuto fora de casa no período (µSv).	No minutes away from home in the period (µSv).
 Razão pessoal ÷ casa: {0} (RadiaCode ÷ GMC-800 em µSv/h).	Personal ÷ home ratio: {0} (RadiaCode ÷ GMC-800 in µSv/h).
+(repetiu mais {0} vezes desde {1})	(repeated {0} more times since {1})

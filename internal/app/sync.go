@@ -989,7 +989,9 @@ func (a *App) SyncNow(id string) (SyncResult, error) {
 	res, err := a.syncOnce(peer, myPort, listening)
 	s.mu.Lock()
 	s.running = false
+	prevErr := ""
 	if p := s.peerLocked(id); p != nil {
+		prevErr = p.LastError
 		p.LastTry = time.Now().UnixMilli()
 		if err != nil {
 			p.LastError = err.Error()
@@ -1000,9 +1002,16 @@ func (a *App) SyncNow(id string) (SyncResult, error) {
 		_ = a.syncSaveLocked()
 	}
 	s.mu.Unlock()
+	// o mesmo erro a cada 10 min (o outro PC desligado) entra no log uma vez
+	// só, e de novo quando muda ou quando volta a responder
 	if err != nil {
-		a.logf("sincronização com %s: %v", peer.Name, err)
-	} else if res.Got.total()+res.Sent.total() > 0 {
+		if err.Error() != prevErr {
+			a.logf("sincronização com %s: %v", peer.Name, err)
+		}
+	} else if prevErr != "" {
+		a.logf("sincronização com %s: voltou a responder", peer.Name)
+	}
+	if err == nil && res.Got.total()+res.Sent.total() > 0 {
 		a.logf("sincronização com %s (%s): trouxe %s; levou %s", peer.Name, res.Addr, mergeText(res.Got), mergeText(res.Sent))
 	}
 	a.emitSync()

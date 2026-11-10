@@ -3666,18 +3666,38 @@ function wireBgTrend() {
 
 // ---------- relatórios em PDF ----------
 
-async function exportMeasureReport(id) {
+// Enquanto o PDF é gerado, os botões de relatório mostram "Gerando…" e
+// ficam travados: sem isso o clique parecia não ter feito nada, e cada
+// clique a mais virava outro PDF.
+const REPORT_BTNS = ["btnReport", "btnZoomReport", "btnMReportMake", "btnMdReport"];
+let reportBusy = false;
+function setReportBusy(on, btn) {
+  reportBusy = on;
+  const btns = REPORT_BTNS.map((id) => $(id)).concat(btn && !REPORT_BTNS.includes(btn.id) ? [btn] : []).filter(Boolean);
+  for (const b of btns) {
+    if (on) { b.dataset.idleText = b.textContent; b.textContent = "Gerando…"; }
+    else if (b.dataset.idleText) { b.textContent = b.dataset.idleText; delete b.dataset.idleText; }
+    b.disabled = on;
+    b.classList.toggle("is-busy", on);
+    b.setAttribute("aria-busy", on ? "true" : "false");
+  }
+}
+async function runReport(btn, make) {
+  if (reportBusy) return;
+  setReportBusy(true, btn);
   try {
-    const f = await api.ExportMeasureReport(id);
+    const f = await make();
     if (f) toast("Relatório salvo: " + f.split(/[\\/]/).pop());
   } catch (e) { toast(errMsg(e), true); }
+  finally { setReportBusy(false, btn); }
 }
 
-async function exportReport(from, to, label) {
-  try {
-    const f = await api.ExportReport(Math.round(from), Math.round(to), label);
-    if (f) toast("Relatório salvo: " + f.split(/[\\/]/).pop());
-  } catch (e) { toast(errMsg(e), true); }
+function exportMeasureReport(id, btn) {
+  return runReport(btn, () => api.ExportMeasureReport(id));
+}
+
+function exportReport(from, to, label, btn) {
+  return runReport(btn, () => api.ExportReport(Math.round(from), Math.round(to), label));
 }
 
 function renderReportDir(d) {
@@ -3689,19 +3709,19 @@ async function refreshReportDir() { try { renderReportDir(await api.GetReportDir
 
 function wireReports() {
   $("btnMReportOpen").addEventListener("click", () => call(api.OpenReportFile, $("mReport").dataset.path));
-  $("btnMReportMake").addEventListener("click", () => exportMeasureReport(+$("mReport").dataset.id));
+  $("btnMReportMake").addEventListener("click", (e) => exportMeasureReport(+$("mReport").dataset.id, e.currentTarget));
   $("btnReportDir").addEventListener("click", async () => { try { renderReportDir(await api.ChooseReportDir()); } catch (e) { toast(errMsg(e), true); } });
   $("btnOpenReportDir").addEventListener("click", () => call(api.OpenReportDir));
   $("btnResetReportDir").addEventListener("click", async () => renderReportDir(await api.ResetReportDir()));
-  $("btnZoomReport").addEventListener("click", () => {
+  $("btnZoomReport").addEventListener("click", (e) => {
     if (!state.zoom) return;
     const p = state.heatPick && state.heatPick.from === state.zoom.from && state.heatPick.to === state.zoom.to;
-    exportReport(state.zoom.from, state.zoom.to, p ? "padrão por hora" : "trecho selecionado");
+    exportReport(state.zoom.from, state.zoom.to, p ? "padrão por hora" : "trecho selecionado", e.currentTarget);
   });
 }
 
 function setupSummary() {
-  $("btnReport").addEventListener("click", () => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label); });
+  $("btnReport").addEventListener("click", (e) => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label, e.currentTarget); });
   document.querySelectorAll("#sumModeSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.mode = b.dataset.smode; refreshSummary(); }));
   // "detalhes" do Resumo lembra se estava aberto
   $("sumDetails").open = localGet("sumDet", "") === "1";
@@ -4725,7 +4745,7 @@ const demoRc = () => {
       const avg = ok.length ? ok.reduce((x, v) => x + v, 0) / ok.length : null;
       return { from: f, to: f + n * step, stepMs: step, times, values: vals, usv: vals.map((v) => (v == null ? null : v * 0.0101)),
         avg, min: ok.length ? Math.min(...ok) : null, max: ok.length ? Math.max(...ok) : null,
-        avgUSv: avg == null ? null : avg * 0.0101, minUSv: null, maxUSv: null,
+        avgUSv: avg == null ? null : avg * 0.0101, minUSv: ok.length ? Math.min(...ok) * 0.0101 : null, maxUSv: ok.length ? Math.max(...ok) * 0.0101 : null,
         attentionCPM: 50, attentionUSv: 50 * 0.0101, alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0101, dangerCPM: 1000, dangerUSv: 10.1 };
     },
     GetChart: async (period) => {

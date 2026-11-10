@@ -162,7 +162,7 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		slug = "objeto"
 	}
 	t := time.UnixMilli(m.Time)
-	dst := uniquePath(filepath.Join(dir, fmt.Sprintf("gmc-medicao-%s-%s.pdf", slug, t.Format("2006-01-02_15h04"))))
+	want := filepath.Join(dir, fmt.Sprintf("gmc-medicao-%s-%s.pdf", slug, t.Format("2006-01-02_15h04")))
 	dev := ""
 	if connected && info.Version != "" {
 		dev = info.Version
@@ -185,7 +185,8 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	}
 	extra := a.measureExtraRows(*m)
 	body := a.inLang(func() []byte { return renderMeasurePDF(*m, dev, calTxt, dt, extra...) })
-	if err := os.WriteFile(dst, body, 0o644); err != nil {
+	dst, err := a.writeReportFile(want, body)
+	if err != nil {
 		return "", err
 	}
 	a.logf("relatório da medição salvo: %s", dst)

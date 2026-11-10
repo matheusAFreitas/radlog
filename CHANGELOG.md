@@ -1,5 +1,26 @@
 # Versões
 
+## 2.20.5
+- **Relatório em PDF de novo rápido, e com aviso enquanto gera.** O
+  relatório de uma semana levava cerca de 40 s, sem nenhum sinal na tela:
+  a tabela "Configurações no período" cortava o texto comprido uma letra
+  por vez, medindo tudo de novo a cada letra. Agora sai em menos de 0,1 s,
+  igual ao de antes. Enquanto gera, o botão mostra "Gerando…" e fica
+  travado; cliques a mais não viram outros PDFs, e relatórios gerados ao
+  mesmo tempo não gravam mais um por cima do outro.
+- **Log sem enxurrada.** O RadiaCode 102 manda "Error: S1/S2 Data frame
+  corrupted!" a cada ~100 s, e cada uma ia para o log.txt (16 mil linhas
+  em dois dias, o log girava em horas). Agora a mesma mensagem entra no
+  máximo uma vez por hora, com a contagem das repetições, e reconectar não
+  repete as que já entraram. "Sincronização com … não respondeu" entra uma
+  vez, e de novo só quando o erro muda ou o outro PC volta a responder.
+- **Dose acumulada do GMC-800 não "estoura" mais ao trocar o fator.** Com
+  um fator novo valendo só daqui em diante, a dose do período continuava no
+  fator antigo, mas o fundo de referência já vinha no novo: 111% do limite
+  sem a radiação ter mudado. Agora o fundo usa, minuto a minuto, a mesma
+  calibração que a dose.
+- No modo navegador, o zoom do gráfico em µSv/h mostrava "mín — · máx —".
+
 ## 2.20.4
 - **Cores num lugar só, sem mudança na tela.** As cores da interface agora
   saem das variáveis do guia de estilo, no começo do `style.css`.
