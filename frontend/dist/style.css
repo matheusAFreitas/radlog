@@ -1727,3 +1727,6 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .dd-name.atencao, .dd-name.nocount { fill: var(--att); }
 .dd-name.alarme { fill: var(--alarm); }
 .dd-name.perigo { fill: var(--warn); }
+.hero-clock { display: block; }
+.hero-clock .clock-chip { min-height: 24px; margin-top: var(--space-1); padding: 0; gap: var(--space-1); border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--att); letter-spacing: 0; text-transform: none; }
+.hero-clock .clock-chip:not(.off) { display: none; }

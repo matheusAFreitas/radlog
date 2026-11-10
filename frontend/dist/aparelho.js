@@ -132,7 +132,11 @@ function renderDevMini() {
   const box = $("devMini"), page = state.view;
   if (!box) return;
   const inst = $("instruments");
-  inst.dataset.page = DEV_PAGES[page] ? page : "";
+  if (DEV_PAGES[page]) inst.dataset.page = page; else delete inst.dataset.page;
+  // o aviso do relógio do GMC mora no quadro dele; na página do GMC o quadro
+  // some, então o aviso vai para o cartão grande
+  const clk = $("clockChip"), home = page === "gmc" ? $("heroClock") : $("gTileSync").parentNode;
+  if (clk && home && clk.parentNode !== home) home.appendChild(clk);
   if (!DEV_PAGES[page]) { box.hidden = true; return; }
   const other = page === "gmc" ? "r" : "g";
   if (other === "r" && $("rTile").hidden) { box.hidden = true; return; }
