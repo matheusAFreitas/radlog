@@ -255,12 +255,18 @@
 
   <section class="card" id="agDay">
     <div class="card-head">
-      <h2>Hoje</h2>
-      <button type="button" class="btn small" data-view="graficos">Abrir nos gráficos</button>
+      <h2>Fita do dia</h2>
+      <div class="ft-ctl">
+        <div class="seg" role="group" aria-label="Período da fita" id="ftSeg">
+          <button type="button" data-ft="dia" aria-pressed="true">hoje</button>
+          <button type="button" data-ft="semana" aria-pressed="false">semana</button>
+        </div>
+        <button type="button" class="btn small" data-view="graficos">Abrir nos gráficos</button>
+      </div>
     </div>
-    <svg class="ag-chart" id="agChart" viewBox="0 0 800 120" preserveAspectRatio="none" role="img" aria-label="Taxa de dose nas últimas 24 horas"></svg>
-    <div class="ag-axis mono small"><span id="agAx0"></span><span id="agAx1"></span><span>agora</span></div>
-    <ul class="ag-items small" id="agItems"></ul>
+    <p class="ft-say" id="ftSay"></p>
+    <div class="fita" id="ftBox"></div>
+    <div class="ft-legend small" id="ftLeg"></div>
   </section>
 </div>
 
@@ -566,6 +572,12 @@
           <div class="sum-stack" id="sumStack" aria-hidden="true"></div>
           <p class="small muted" id="sumSplitText"></p>
         </div>
+      </div>
+      <div class="sum-fita" hidden>
+        <h3>Fita</h3>
+        <p class="ft-say" id="sumFitaSay"></p>
+        <div class="fita" id="sumFita"></div>
+        <div class="ft-legend small" id="sumFitaLeg"></div>
       </div>
       <table class="sum-table" id="sumTable" hidden></table>
       <div class="ri-chart">
@@ -2164,6 +2176,7 @@
 <script src="confirma.js"></script>
 <script src="cores.js"></script>
 <script src="regua.js"></script>
+<script src="fita.js"></script>
 <script src="radiacode.js"></script>
 <script src="agora.js"></script>
 <script src="resumo.js"></script>

@@ -2716,7 +2716,17 @@ const I18N_EN = {
 "≈ meia hora de voo": "≈ half an hour of flight",
 "≈ meia banana": "≈ half a banana",
 "ver na régua de radiação": "see on the radiation ruler",
-"dose extra": "extra dose"
+"dose extra": "extra dose",
+"Fita do dia": "Day strip",
+"Fita": "Strip",
+"Período da fita": "Strip period",
+"semana": "week",
+"marcas": "marks",
+"seguro": "safe",
+"casa: sem dado": "home: no data",
+"com você: sem dado": "with you: no data",
+"Cada linha junta casa e você: vale o nível mais alto dos dois.": "Each row combines home and you: the higher level of the two counts.",
+"FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)": "DAY STRIPS (10-MIN PIECES; THE HIGHER LEVEL BETWEEN HOME AND YOU COUNTS)"
 },
 "patterns": [
 [
@@ -4419,6 +4429,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) avisos curtos, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: ${2} short alerts, every 10-min stretch at the safe level.",
+[
+" avisos curtos, nenhum trecho de 10 min acima do seguro."
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -4535,6 +4553,14 @@ const I18N_EN = {
 "Deixe o ",
 " no objeto e o ",
 " com você (no bolso ou na mão)."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) aviso curto, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: ${2} short alert, every 10-min stretch at the safe level.",
+[
+" aviso curto, nenhum trecho de 10 min acima do seguro."
 ]
 ],
 [
@@ -5419,6 +5445,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) avisos, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, ${3} days with a stretch above safe.",
+[
+" avisos, ",
+" dias com trecho acima do seguro."
+]
+],
+[
 "Antes da chuva: ",
 "^Antes da chuva: ((?:(?! · ).)+?) CPM · últimos 15 min: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
 "Before the rain: ${1} CPM · last 15 min: ${2} (${3})",
@@ -5497,6 +5532,24 @@ const I18N_EN = {
 "${1} · the device memory brought no readings",
 [
 " · a memória do aparelho não trouxe leituras"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) aviso, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: ${2} alert, ${3} days with a stretch above safe.",
+[
+" aviso, ",
+" dias com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) avisos, ((?:(?! · ).)+?) dia com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, ${3} day with a stretch above safe.",
+[
+" avisos, ",
+" dia com trecho acima do seguro."
 ]
 ],
 [
@@ -5599,6 +5652,15 @@ const I18N_EN = {
 "+${1}% of background and ≥ 3σ (stops on its own at 4σ)",
 [
 "% do fundo e ≥ 3σ (para sozinho com 4σ)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) aviso, ((?:(?! · ).)+?) dia com trecho acima do seguro\\.$",
+"${1}: ${2} alert, ${3} day with a stretch above safe.",
+[
+" aviso, ",
+" dia com trecho acima do seguro."
 ]
 ],
 [
@@ -6044,6 +6106,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): dia tranquilo, tudo no nível seguro\\.$",
+"${1}: a quiet day, everything at the safe level.",
+[
+": dia tranquilo, tudo no nível seguro."
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -6282,6 +6352,14 @@ const I18N_EN = {
 "RC102 disconnected, the memory brought ${1}",
 [
 "RC102 sem conexão, a memória trouxe "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) min acima do seguro, sem alerta\\.$",
+"${1}: ${2} min above safe, without alerts.",
+[
+" min acima do seguro, sem alerta."
 ]
 ],
 [
@@ -8132,6 +8210,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): tudo no nível seguro\\.$",
+"${1}: everything at the safe level.",
+[
+": tudo no nível seguro."
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -8786,6 +8872,14 @@ const I18N_EN = {
 " keV · ",
 " de ",
 " linhas"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): sem leitura ainda\\.$",
+"${1}: nothing read yet.",
+[
+": sem leitura ainda."
 ]
 ],
 [
@@ -10003,6 +10097,14 @@ const I18N_EN = {
 "sound paused until ${1}",
 [
 "som pausado até "
+]
+],
+[
+"Fora de casa: ",
+"^Fora de casa: ((?:(?! · ).)+?)\\.$",
+"Away from home: ${1}.",
+[
+"Fora de casa: "
 ]
 ],
 [
@@ -11250,6 +11352,23 @@ const I18N_EN = {
 ]
 ],
 [
+"chuva ",
+"^chuva ((?:(?! · ).)+?) mm/h$",
+"rain ${1} mm/h",
+[
+"chuva ",
+" mm/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) avisos\\.$",
+"${1}: ${2} alerts.",
+[
+" avisos."
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -11491,6 +11610,30 @@ const I18N_EN = {
 "≈ ${1} bananas",
 [
 " bananas"
+]
+],
+[
+"com você: ",
+"^com você: ((?:(?! · ).)+?)$",
+"with you: ${1}",
+[
+"com você: "
+]
+],
+[
+"anotação: ",
+"^anotação: ((?:(?! · ).)+?)$",
+"note: ${1}",
+[
+"anotação: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) aviso\\.$",
+"${1}: ${2} alert.",
+[
+" aviso."
 ]
 ],
 [
@@ -12349,6 +12492,14 @@ const I18N_EN = {
 ]
 ],
 [
+"casa: ",
+"^casa: ((?:(?! · ).)+?)$",
+"home: ${1}",
+[
+"casa: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) dias$",
 "${1} days",
@@ -12506,6 +12657,62 @@ const I18N_EN = {
 "${1} min",
 [
 " min"
+]
+],
+[
+"dom ",
+"^dom ((?:(?! · ).)+?)$",
+"Sun ${1}",
+[
+"dom "
+]
+],
+[
+"seg ",
+"^seg ((?:(?! · ).)+?)$",
+"Mon ${1}",
+[
+"seg "
+]
+],
+[
+"ter ",
+"^ter ((?:(?! · ).)+?)$",
+"Tue ${1}",
+[
+"ter "
+]
+],
+[
+"qua ",
+"^qua ((?:(?! · ).)+?)$",
+"Wed ${1}",
+[
+"qua "
+]
+],
+[
+"qui ",
+"^qui ((?:(?! · ).)+?)$",
+"Thu ${1}",
+[
+"qui "
+]
+],
+[
+"sex ",
+"^sex ((?:(?! · ).)+?)$",
+"Fri ${1}",
+[
+"sex "
+]
+],
+[
+"sáb ",
+"^sáb ((?:(?! · ).)+?)$",
+"Sat ${1}",
+[
+"sáb "
 ]
 ],
 [

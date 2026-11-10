@@ -3573,3 +3573,38 @@ menos de 1 min do fundo da sua casa	less than 1 min of your home background
 ≈ meia banana	≈ half a banana
 ver na régua de radiação	see on the radiation ruler
 dose extra	extra dose
+# 2.42: fita do dia
+Fita do dia	Day strip
+Fita	Strip
+Período da fita	Strip period
+semana	week
+marcas	marks
+seguro	safe
+casa: {0}	home: {0}
+com você: {0}	with you: {0}
+casa: sem dado	home: no data
+com você: sem dado	with you: no data
+chuva {0} mm/h	rain {0} mm/h
+anotação: {0}	note: {0}
+{0}: sem leitura ainda.	{0}: nothing read yet.
+{0}: dia tranquilo, tudo no nível seguro.	{0}: a quiet day, everything at the safe level.
+{0}: {1} aviso.	{0}: {1} alert.
+{0}: {1} avisos.	{0}: {1} alerts.
+{0}: {1} min acima do seguro, sem alerta.	{0}: {1} min above safe, without alerts.
+Fora de casa: {0}.	Away from home: {0}.
+{0}: tudo no nível seguro.	{0}: everything at the safe level.
+{0}: {1} aviso curto, nenhum trecho de 10 min acima do seguro.	{0}: {1} short alert, every 10-min stretch at the safe level.
+{0}: {1} avisos curtos, nenhum trecho de 10 min acima do seguro.	{0}: {1} short alerts, every 10-min stretch at the safe level.
+{0}: {1} aviso, {2} dia com trecho acima do seguro.	{0}: {1} alert, {2} day with a stretch above safe.
+{0}: {1} aviso, {2} dias com trecho acima do seguro.	{0}: {1} alert, {2} days with a stretch above safe.
+{0}: {1} avisos, {2} dia com trecho acima do seguro.	{0}: {1} alerts, {2} day with a stretch above safe.
+{0}: {1} avisos, {2} dias com trecho acima do seguro.	{0}: {1} alerts, {2} days with a stretch above safe.
+Cada linha junta casa e você: vale o nível mais alto dos dois.	Each row combines home and you: the higher level of the two counts.
+FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)	DAY STRIPS (10-MIN PIECES; THE HIGHER LEVEL BETWEEN HOME AND YOU COUNTS)
+dom {0}	Sun {0}
+seg {0}	Mon {0}
+ter {0}	Tue {0}
+qua {0}	Wed {0}
+qui {0}	Thu {0}
+sex {0}	Fri {0}
+sáb {0}	Sat {0}
