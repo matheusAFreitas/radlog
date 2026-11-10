@@ -281,7 +281,7 @@ func rcLogFromRaw(lines [][]byte) []RcLogItem {
 			return
 		}
 		seen[cur] = true
-		live, _ := splitOldRecords(radiacode.DecodeDataBuf(buf, time.Unix(0, 0))) // os da memória não têm a hora do "pc"
+		live, _ := splitOldRecords(radiacode.DecodeDataBuf(buf, time.Unix(0, 0)), time.Time{}) // os da memória não têm a hora do "pc"
 		for _, r := range live {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 3 {
 				if cur-cfgAt < 60e3 {

@@ -91,3 +91,23 @@ func TestRcMinutesFromDB(t *testing.T) {
 		t.Fatalf("%+v", m)
 	}
 }
+
+// O buffer recente chega sem a marca de antigo: vale a hora de antes da conexão.
+func TestSplitOldBeforeConnection(t *testing.T) {
+	since := time.Date(2026, 11, 10, 13, 48, 43, 0, time.Local)
+	lead := radiacode.BaseLead
+	recs := []radiacode.Record{
+		radiacode.DoseRateDB{T: since.Add(-30*time.Minute + lead), Flags: 0x1000}, // buffer recente
+		radiacode.DoseRateDB{T: since.Add(-60*time.Minute + lead), Flags: 0x9000}, // memória
+		radiacode.DoseRateDB{T: since.Add(2*time.Minute + lead), Flags: 0x1000},   // ao vivo
+		radiacode.RealTime{T: since.Add(-time.Minute + lead), CPS: 1},             // tempo real fica
+		radiacode.Rare{Dose: 1}, // sem hora: ao vivo
+	}
+	live, old := splitOldRecords(recs, since)
+	if len(old) != 2 || len(live) != 3 {
+		t.Fatalf("ao vivo %d, antigos %d", len(live), len(old))
+	}
+	if _, old := splitOldRecords(recs, time.Time{}); len(old) != 1 {
+		t.Fatalf("sem conexão: %d antigos (quero só o marcado)", len(old))
+	}
+}

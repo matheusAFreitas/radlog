@@ -1,5 +1,18 @@
 # Versões
 
+## 2.34.1
+- **O fim do período desconectado do RadiaCode não se perde mais.** Ao
+  reconectar, o aparelho manda o que guardou na memória e também o que
+  ainda estava no buffer recente, e esse buffer vem sem a marca de "dado
+  antigo". No teste de 10/11, de 12:39 a 13:12 veio marcado e foi para a
+  hora certa, mas de 13:14 a 13:46 entrou como leitura ao vivo, na hora da
+  reconexão, e o gráfico ficou com o buraco. Agora tudo o que foi medido
+  antes do começo da conexão vai para a hora em que foi medido, com a marca
+  ou sem.
+- Na primeira vez que abre, o app relê os dados brutos das reconexões já
+  gravadas, preenche os minutos que ficaram vazios desse jeito e tira do
+  log do aparelho as linhas que tinham caído na hora da reconexão.
+
 ## 2.34.0
 - **Configurações repaginadas.** O menu da esquerda cai de 20 itens para 6:
   GMC-800, RadiaCode, Alarmes e avisos, Janela e tela, Dados e backup, e

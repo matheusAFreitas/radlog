@@ -456,7 +456,7 @@ func (a *App) startup(ctx context.Context) {
 	a.goLoop("memoryWatch", a.memoryWatch)
 	a.goLoop("syncLoop", a.syncLoop)
 	a.goLoop("rcLoop", a.rcLoop)
-	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill() })
+	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
 		a.goSafe("autoReconnect", func() { a.autoReconnect(0) })

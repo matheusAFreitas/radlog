@@ -3,6 +3,9 @@ package app
 import (
 	"bufio"
 	"bytes"
+	"encoding/binary"
+	"encoding/hex"
+	"encoding/json"
 	"fmt"
 	"math"
 	"os"
@@ -46,8 +49,12 @@ type rcMemTally struct {
 	first, last time.Time
 }
 
-// splitOldRecords separa os registros que vieram da memória do aparelho.
-func splitOldRecords(recs []radiacode.Record) (live, old []radiacode.Record) {
+// splitOldRecords separa os registros que vieram da memória do aparelho: os
+// marcados como "dado antigo" e os medidos antes de since (o começo da
+// conexão). Ao reconectar, o aparelho manda junto o que estava no buffer
+// recente, ainda sem a marca: no teste de 10/11, 12:39–13:12 veio marcado e
+// 13:14–13:46 não. since zero (ou 1970: fora de uma conexão) = só a marca.
+func splitOldRecords(recs []radiacode.Record, since time.Time) (live, old []radiacode.Record) {
 	for _, r := range recs {
 		isOld := false
 		switch v := r.(type) {
@@ -57,8 +64,12 @@ func splitOldRecords(recs []radiacode.Record) (live, old []radiacode.Record) {
 			isOld = v.Old()
 		case radiacode.Event:
 			isOld = v.Old()
+		default:
+			live = append(live, r)
+			continue
 		}
-		if isOld {
+		before := since.Unix() > 0 && !r.When().IsZero() && rcOldTime(r).Before(since)
+		if isOld || before {
 			old = append(old, r)
 		} else {
 			live = append(live, r)
@@ -77,14 +88,32 @@ func (a *App) rcRecoverOld(old []radiacode.Record, now time.Time) {
 	a.rc.mu.Lock()
 	since := time.UnixMilli(a.rc.st.Since)
 	a.rc.mu.Unlock()
+	n, mins, first, last := a.rcRecoverOldSince(old, now, since)
+	if n == 0 {
+		return
+	}
+	a.rc.mu.Lock()
+	m := &a.rc.mem
+	m.recs += n
+	m.mins += mins
+	if m.first.IsZero() || first.Before(m.first) {
+		m.first = first
+	}
+	if last.After(m.last) {
+		m.last = last
+	}
+	a.rc.mu.Unlock()
+}
+
+// rcRecoverOldSince grava os registros antigos de uma conexão que começou em
+// since (só os minutos de antes dela podem ser preenchidos).
+func (a *App) rcRecoverOldSince(old []radiacode.Record, now, since time.Time) (n, mins int, first, last time.Time) {
 	if since.IsZero() || since.After(now) {
 		since = now
 	}
 	var items []RcLogItem
 	var rates []radiacode.DoseRateDB
 	var doses []rcDosePt
-	var first, last time.Time
-	n := 0
 	for _, r := range old {
 		t := rcOldTime(r)
 		if t.After(now) || now.Sub(t) > rcMemMaxAge {
@@ -113,21 +142,12 @@ func (a *App) rcRecoverOld(old []radiacode.Record, now time.Time) {
 		return
 	}
 	a.rcLogMerge(items)
-	mins := a.rcMinuteMerge(rcMinutesFromDB(rates), since.Truncate(time.Minute))
+	mins = a.rcMinuteMerge(rcMinutesFromDB(rates), since.Truncate(time.Minute))
 	if len(doses) > 0 {
 		sort.Slice(doses, func(i, j int) bool { return doses[i].T.Before(doses[j].T) })
 		a.rcDoseMerge(doses)
 	}
 	a.rc.mu.Lock()
-	m := &a.rc.mem
-	m.recs += n
-	m.mins += mins
-	if m.first.IsZero() || first.Before(m.first) {
-		m.first = first
-	}
-	if last.After(m.last) {
-		m.last = last
-	}
 	if mins > 0 {
 		a.rc.today.loaded = false // a dose de hoje relê os minutos
 		a.rc.stats = nil
@@ -138,6 +158,7 @@ func (a *App) rcRecoverOld(old []radiacode.Record, now time.Time) {
 		a.firsts.rcKnown = false
 		a.firsts.mu.Unlock()
 	}
+	return n, mins, first, last
 }
 
 // rcMemFlush registra no histórico o que veio da memória (uma vez por lote).
@@ -275,4 +296,177 @@ func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 		}
 	}
 	return added
+}
+
+// ---------- reposição a partir dos dados brutos (2.34.1, uma vez) ----------
+//
+// Até a 2.34.0 só ia para a hora certa o que vinha com a marca de "dado
+// antigo"; o resto do atraso (o buffer recente do aparelho) entrava como se
+// fosse ao vivo, na hora da reconexão. Os dados brutos guardam tudo: na
+// primeira vez que abre, o app relê as leituras dos 2 primeiros minutos de
+// cada conexão, põe o que foi medido antes dela na hora certa e tira do log
+// as linhas que tinham caído na hora da reconexão.
+
+const (
+	rcMemRawMark   = "memoria-reposta"
+	rcMemRawWindow = 2 * time.Minute
+)
+
+// rcConnStarts são os começos de conexão gravados nos dados brutos.
+func (a *App) rcConnStarts() []time.Time {
+	files, _ := filepath.Glob(a.rcRawPath("conexao-*.json"))
+	var out []time.Time
+	for _, f := range files {
+		n := strings.TrimSuffix(strings.TrimPrefix(filepath.Base(f), "conexao-"), ".json")
+		if t, err := time.ParseInLocation("20060102-150405", n, time.Local); err == nil {
+			out = append(out, t)
+		}
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].Before(out[j]) })
+	return out
+}
+
+// rcRawRead é uma resposta do DATA_BUF guardada nos dados brutos.
+type rcRawRead struct {
+	pc   time.Time
+	base time.Time
+	buf  []byte
+}
+
+// rcRawReads remonta as respostas (as linhas com o mesmo "pc"). A base de
+// tempo sai do primeiro registro: t = base + deslocamento × 10 ms.
+func rcRawReads(lines [][]byte) []rcRawRead {
+	var out []rcRawRead
+	for _, ln := range lines {
+		var r struct {
+			PC  int64  `json:"pc"`
+			T   int64  `json:"t"`
+			Hex string `json:"hex"`
+		}
+		if json.Unmarshal(ln, &r) != nil || r.Hex == "" || r.PC == 0 {
+			continue
+		}
+		h, err := hex.DecodeString(r.Hex)
+		if err != nil {
+			continue
+		}
+		if n := len(out); n == 0 || out[n-1].pc.UnixMilli() != r.PC {
+			if len(h) < 7 {
+				continue
+			}
+			off := int32(binary.LittleEndian.Uint32(h[3:7]))
+			base := time.UnixMilli(r.T).Add(-time.Duration(off) * 10 * time.Millisecond)
+			out = append(out, rcRawRead{pc: time.UnixMilli(r.PC), base: base})
+		}
+		out[len(out)-1].buf = append(out[len(out)-1].buf, h...)
+	}
+	return out
+}
+
+// rcMemRawBackfill faz a reposição (uma vez).
+func (a *App) rcMemRawBackfill() {
+	if a.dataDir == "" {
+		return
+	}
+	mark := filepath.Join(a.rcDir(), rcMemRawMark)
+	if _, err := os.Stat(mark); err == nil {
+		return
+	}
+	starts := a.rcConnStarts()
+	files, _ := filepath.Glob(a.rcRawPath("*.jsonl.gz"))
+	sort.Strings(files)
+	total, mins := 0, 0
+	var drop []RcLogItem
+	for _, f := range files {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			continue
+		}
+		for _, rd := range rcRawReads(gzipLinesTolerant(b)) {
+			i := sort.Search(len(starts), func(i int) bool { return starts[i].After(rd.pc) }) - 1
+			if i < 0 || rd.pc.Sub(starts[i]) > rcMemRawWindow {
+				continue
+			}
+			_, old := splitOldRecords(radiacode.DecodeDataBuf(rd.buf, rd.base), starts[i])
+			if len(old) == 0 {
+				continue
+			}
+			for _, r := range old {
+				// a linha que a versão antiga gravou na hora da reconexão
+				if it := rcLogFromRecord(r, rd.pc); it != nil {
+					drop = append(drop, *it)
+				}
+			}
+			n, m, _, _ := a.rcRecoverOldSince(old, rd.pc, starts[i])
+			total += n
+			mins += m
+		}
+	}
+	nd := a.rcLogDropNear(drop, 5*time.Second)
+	_ = os.MkdirAll(a.rcDir(), 0o755)
+	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
+	if total > 0 {
+		a.logf("RadiaCode: %d registros da memória do aparelho repostos dos dados brutos (%d minutos preenchidos, %d linhas do log na hora errada retiradas)", total, mins, nd)
+	}
+}
+
+// rcLogDropNear tira do log as linhas iguais às de items (menos a origem),
+// com hora até tol de distância, que não vieram da memória.
+func (a *App) rcLogDropNear(items []RcLogItem, tol time.Duration) int {
+	if len(items) == 0 {
+		return 0
+	}
+	key := func(it RcLogItem) string {
+		it.Src, it.T = "", 0
+		return it.csvLine()
+	}
+	want := map[string][]int64{}
+	byFile := map[string]bool{}
+	for _, it := range items {
+		want[key(it)] = append(want[key(it)], it.T)
+		byFile[rcLogFileName(time.UnixMilli(it.T))] = true
+	}
+	a.rc.fileM.Lock()
+	defer a.rc.fileM.Unlock()
+	n := 0
+	for name := range byFile {
+		path := filepath.Join(a.rcDir(), name)
+		b, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+		var out bytes.Buffer
+		out.WriteString(rcLogHeader + "\n")
+		removed := 0
+		sc := bufio.NewScanner(bytes.NewReader(b))
+		for sc.Scan() {
+			l := sc.Text()
+			it, ok := parseRcLogLine(l)
+			if !ok {
+				continue
+			}
+			if it.Src != rcMemSrc {
+				hit := false
+				for _, t := range want[key(it)] {
+					if d := it.T - t; d > -tol.Milliseconds() && d < tol.Milliseconds() {
+						hit = true
+						break
+					}
+				}
+				if hit {
+					removed++
+					continue
+				}
+			}
+			out.WriteString(l + "\n")
+		}
+		if removed == 0 {
+			continue
+		}
+		tmp := path + ".tmp"
+		if os.WriteFile(tmp, out.Bytes(), 0o644) == nil && os.Rename(tmp, path) == nil {
+			n += removed
+		}
+	}
+	return n
 }

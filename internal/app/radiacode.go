@@ -524,7 +524,10 @@ func (a *App) rcRun(dev *radiacode.Device) {
 
 func (a *App) rcRecords(recs []radiacode.Record) {
 	// o que o aparelho guardou sem o app vai para a hora certa, não para agora
-	recs, old := splitOldRecords(recs)
+	a.rc.mu.Lock()
+	since := time.UnixMilli(a.rc.st.Since)
+	a.rc.mu.Unlock()
+	recs, old := splitOldRecords(recs, since)
 	if len(old) > 0 {
 		a.rcRecoverOld(old, time.Now())
 	} else {
