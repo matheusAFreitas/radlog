@@ -1,5 +1,13 @@
 # Versões
 
+## 2.38.2
+- **Configurações: explicações recolhidas em "Como funciona".** Em 23
+  cartões, o texto que só explica (como funciona, de onde vem o número,
+  quando usar) fica fechado no pé do cartão; um clique abre e mostra o texto
+  inteiro. Os campos sobem para o topo. Continuam abertos os avisos que
+  mudam, os valores medidos, as notas de uma linha, a escada de alarmes e os
+  avisos de "não tem volta". A busca continua achando o que está dentro.
+
 ## 2.38.1
 - Na tela de um aparelho, a fileira de cima volta a ser a mesma do Agora:
   o quadro completo do outro aparelho (conexão, mostrador, nível, gráfico,

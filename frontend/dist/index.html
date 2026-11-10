@@ -1271,7 +1271,10 @@
           <option value="30">30 s</option>
           <option value="60">60 s (sem estimativa)</option>
         </select>
-        <p class="small muted">A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
@@ -1319,7 +1322,6 @@
     <div class="set-cards">
     <fieldset id="setCalHist" class="set-wide">
       <legend>Fator que o app usa</legend>
-      <p class="small muted">Converte o CPM em µSv/h e em dose. Cada mudança vira uma versão com a data em que passou a valer: o que já foi medido continua com a calibração da época.</p>
       <dl class="info">
         <dt>Em uso</dt><dd class="mono" id="calNow">—</dd>
         <dt>Do contador</dt><dd class="mono" id="calDev">—</dd>
@@ -1330,7 +1332,6 @@
         <button type="button" class="btn" id="calKApply">Usar a partir de agora</button>
         <button type="button" class="btn" id="calKReset" hidden>Voltar à curva do contador</button>
       </div>
-      <p class="small muted">Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.</p>
       <p class="small" id="calKHint" hidden></p>
       <h3 class="sub-head">Intercalibração com o RadiaCode</h3>
       <div class="ic" id="icBox"></div>
@@ -1338,7 +1339,12 @@
       <h3 class="sub-head">Versões</h3>
       <div class="cfg-hist-wrap"><table class="cfg-hist cal-ver"><thead><tr><th>desde</th><th>até</th><th>µSv/h por CPM</th><th>origem</th><th>minutos</th><th></th></tr></thead><tbody id="calVerBody"></tbody></table></div>
       <div class="notice cal-cmp" id="calCmp" hidden></div>
-      <p class="small muted">Recalcular o histórico é opcional: aplica uma versão também antes da data dela, sem mudar nenhuma leitura gravada. Dá para desfazer a qualquer momento, e a exportação marca cada minuto com a calibração usada.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Converte o CPM em µSv/h e em dose. Cada mudança vira uma versão com a data em que passou a valer: o que já foi medido continua com a calibração da época.</p>
+        <p class="small muted">Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.</p>
+        <p class="small muted">Recalcular o histórico é opcional: aplica uma versão também antes da data dela, sem mudar nenhuma leitura gravada. Dá para desfazer a qualquer momento, e a exportação marca cada minuto com a calibração usada.</p>
+      </details>
     </fieldset>
 
       <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit dc-cal set-wide" id="dcCalCard">
@@ -1370,9 +1376,12 @@
         <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
         <label for="lvDTUs">Tempo morto τ (µs)</label>
         <input type="number" id="lvDTUs" min="5" max="500" step="1" inputmode="decimal">
-        <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
-        <p class="small muted">A calibração de fábrica do GMC-800 já compensa essas perdas nos pontos de cima (menos CPM por µSv/h em taxa alta). Com a correção ligada, o app converte em µSv/h pela reta do 1º ponto, para não compensar duas vezes. No fundo da casa não muda nada.</p>
         <div class="lv-dt-wrap"><table class="m-stats mono lv-dt" id="lvDTTable"></table></div>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
+          <p class="small muted">A calibração de fábrica do GMC-800 já compensa essas perdas nos pontos de cima (menos CPM por µSv/h em taxa alta). Com a correção ligada, o app converte em µSv/h pela reta do 1º ponto, para não compensar duas vezes. No fundo da casa não muda nada.</p>
+        </details>
     </fieldset>
 
     <fieldset>
@@ -1382,9 +1391,12 @@
         <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
         <label for="lvSatDrop">Queda brusca a partir de (µSv/h)</label>
         <input type="number" id="lvSatDrop" min="1" step="1" inputmode="decimal">
-        <p class="small muted">Se a leitura passar disso e despencar em segundos, o tubo pode ter travado.</p>
         <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
         <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Se a leitura passar disso e despencar em segundos, o tubo pode ter travado.</p>
+        </details>
     </fieldset>
     </div>
     </div>
@@ -1392,8 +1404,11 @@
     <div class="set-cards">
     <fieldset>
       <legend>Testar o contador</legend>
-      <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
       <div class="row"><button type="button" class="btn" id="btnGmcDiag">Testar o contador</button><span class="small muted" id="gmcDiagOut"></span></div>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
+      </details>
     </fieldset>
 
     <fieldset>
@@ -1425,7 +1440,6 @@
     <div class="set-cards">
     <fieldset>
       <legend>Procurar o aparelho</legend>
-      <p class="small muted">O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
       <label class="toggle">
         <span>Procurar o RadiaCode</span>
         <input type="checkbox" id="chkRcOn">
@@ -1438,13 +1452,20 @@
       </div>
       <ul class="sync-list" id="rcBLEFound"></ul>
       <p class="small muted" id="rcBLEInfo"></p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">O app procura o RadiaCode sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
+      </details>
     </fieldset>
 
     <fieldset>
       <legend>RadiaCode saturado</legend>
       <label for="lvRcSat">Fim da escala (µSv/h)</label>
       <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
-      <p class="small muted">Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+      </details>
     </fieldset>
 
     <fieldset>
@@ -1453,7 +1474,10 @@
         <span>Guardar tudo o que o RadiaCode manda (dados brutos)</span>
         <input type="checkbox" id="chkRcRaw">
       </label>
-      <p class="small muted">Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta <span class="mono">radiacode/bruto</span> e entra no backup (alguns MB por dia).</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta <span class="mono">radiacode/bruto</span> e entra no backup (alguns MB por dia).</p>
+      </details>
     </fieldset>
     </div>
     </div>
@@ -1463,17 +1487,19 @@
       <div class="dc-grid" id="rcCfgBody">
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
         <legend>Alarmes de taxa de dose</legend>
-        <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.</p>
         <div class="rc-pair">
           <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
           <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
         </div>
         <p class="small muted" id="rcDRHint"></p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
         <legend>Alarmes de dose acumulada</legend>
-        <p class="small muted">Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.</p>
         <div class="rc-pair">
           <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
           <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
@@ -1483,6 +1509,10 @@
           <label class="rc-check"><input type="checkbox" id="rcDS2Off"> alarme 2 desligado</label>
         </div>
         <p class="small muted" id="rcDSHint"></p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
@@ -1495,7 +1525,10 @@
             <tbody id="rcCtrlRows"></tbody>
           </table>
         </div>
-        <p class="small muted">Cliques: um estalo por fóton detectado, como num contador Geiger (só som).</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Cliques: um estalo por fóton detectado, como num contador Geiger (só som).</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
@@ -1510,7 +1543,10 @@
           <option value="1">Virada para a direita</option>
           <option value="2">Virada para a esquerda</option>
         </select>
-        <p class="small muted">Brilho alto e tela acesa por mais tempo gastam mais bateria.</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Brilho alto e tela acesa por mais tempo gastam mais bateria.</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
@@ -1519,16 +1555,22 @@
         <select id="rcUnitDose"><option value="1">Sievert (µSv, µSv/h)</option><option value="0">Röntgen (µR, µR/h)</option></select>
         <label for="rcUnitCnt">Contagem</label>
         <select id="rcUnitCnt"><option value="0">por segundo (cps)</option><option value="1">por minuto (cpm)</option></select>
-        <p class="small muted">Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
+        </details>
       </fieldset>
 
       <fieldset data-dev="RadiaCode" class="dev-card rc dc-edit">
         <legend>Alarmes de contagem</legend>
-        <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
         <div class="rc-pair">
           <label>Alarme 1 (cps)<input type="number" id="rcCR1" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
           <label>Alarme 2 (cps)<input type="number" id="rcCR2" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
         </div>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
+        </details>
       </fieldset>
       <fieldset data-dev="RadiaCode" class="dev-card rc ro-card">
         <legend>Só leitura</legend>
@@ -1536,7 +1578,10 @@
           <dt>Calibração de energia</dt><dd class="mono" id="rcEnergy">—</dd>
           <dt>Firmware</dt><dd class="mono" id="rcCfgFw">—</dd>
         </dl>
-        <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
+        </details>
       </fieldset>
       <fieldset data-dev="RadiaCode" class="dev-card rc rc-reset-card">
         <legend>Zerar a dose acumulada</legend>
@@ -1653,7 +1698,10 @@
         <input type="checkbox" id="chkAutostart">
       </label>
       <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
-      <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+      </details>
     </fieldset>
 
     <fieldset>
@@ -1664,12 +1712,14 @@
         <option value="pt">Português</option>
         <option value="en">English</option>
       </select>
-      <p class="small muted">Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.</p>
+      </details>
     </fieldset>
 
     <fieldset class="set-wide">
       <legend>Chuva no gráfico</legend>
-      <p class="small muted">Marca a chuva da sua cidade no gráfico de CPM. Com o app aberto, lê o radar meteorológico (RainViewer) a cada 10 min. Para os horários sem radar (app fechado, histórico baixado do contador), usa o modelo do tempo do Open-Meteo, menos preciso. A chuva traz para o chão produtos do radônio do ar e costuma dar picos leves que somem em algumas horas.</p>
       <label class="toggle">
         <span>Mostrar chuva no gráfico</span>
         <input type="checkbox" id="chkRain">
@@ -1686,6 +1736,10 @@
         <input type="checkbox" id="chkRainHide">
       </label>
       <p class="small" id="rainStatusSet"></p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Marca a chuva da sua cidade no gráfico de CPM. Com o app aberto, lê o radar meteorológico (RainViewer) a cada 10 min. Para os horários sem radar (app fechado, histórico baixado do contador), usa o modelo do tempo do Open-Meteo, menos preciso. A chuva traz para o chão produtos do radônio do ar e costuma dar picos leves que somem em algumas horas.</p>
+      </details>
     </fieldset>
     </div>
   </section>
@@ -1698,12 +1752,14 @@
         <button type="button" class="btn" id="btnBackup">Fazer backup (.zip)</button>
         <button type="button" class="btn" id="btnImportBackup">Importar backup…</button>
       </div>
-      <p class="small muted">Importar junta só o que falta: o que já existe aqui não muda.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Importar junta só o que falta: o que já existe aqui não muda.</p>
+      </details>
     </fieldset>
 
     <fieldset>
       <legend>Relatórios</legend>
-      <p class="small muted">Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
       <p class="small mono path" id="reportDir">—</p>
       <div class="row">
         <button type="button" class="btn" id="btnReportDir">Escolher pasta…</button>
@@ -1714,11 +1770,14 @@
         <span>Gerar o relatório da medição de objeto sozinho, no fim da medição</span>
         <input type="checkbox" id="chkMeasReport">
       </label>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
+      </details>
     </fieldset>
 
     <fieldset class="set-wide">
       <legend>Sincronização</legend>
-      <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
       <label class="toggle">
         <span>Aceitar conexões de outros PCs (este PC aparece na rede)</span>
         <input type="checkbox" id="chkSyncListen">
@@ -1745,6 +1804,10 @@
         <button type="button" class="btn small accent" id="btnSyncPair">Parear</button>
       </div>
       <p class="small" id="syncPairMsg"></p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
+      </details>
     </fieldset>
 
     <fieldset>
@@ -1755,9 +1818,12 @@
 
     <fieldset id="setCfgHist" class="set-wide">
       <legend>Histórico de configurações</legend>
-      <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
       <div class="cfg-hist-wrap"><table class="cfg-hist"><thead><tr><th>quando</th><th>o quê</th><th>de</th><th>para</th><th>origem</th></tr></thead><tbody id="cfgHistBody"></tbody></table></div>
       <p class="small muted" id="cfgHistEmpty" hidden>Ainda nada registrado.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
+      </details>
     </fieldset>
     </div>
   </section>
@@ -1776,7 +1842,10 @@
         <input type="checkbox" id="chkCleanOld">
       </label>
       <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
-      <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
+      </details>
     </fieldset>
 
     <fieldset id="sec-sobre">
