@@ -1910,6 +1910,7 @@ const I18N_EN = {
 "normal ainda não calculado": "normal not calculated yet",
 "pelo RadiaCode em casa": "by the RadiaCode at home",
 "Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
+"memória do aparelho": "device memory",
 "fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured",
 "local inválido": "invalid place",
 "GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar": "GMC-800 at home and RadiaCode with you is the usual: no need to mark it",
@@ -2483,6 +2484,17 @@ const I18N_EN = {
 "O episódio terminou porque parou de chegar leitura (",
 ") às ",
 ", não porque a contagem voltou ao normal."
+]
+],
+[
+"RadiaCode: ",
+"^RadiaCode: ((?:(?! · ).)+?) registros recuperados da memória do aparelho \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\), ((?:(?! · ).)+?) minutos sem leitura preenchidos$",
+"RadiaCode: ${1} records recovered from the device memory (${2} to ${3}), ${4} minutes without a reading filled in",
+[
+"RadiaCode: ",
+" registros recuperados da memória do aparelho (",
+"), ",
+" minutos sem leitura preenchidos"
 ]
 ],
 [

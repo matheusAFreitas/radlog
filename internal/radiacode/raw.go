@@ -33,7 +33,7 @@ var recFormats = map[[2]int]recFmt{
 	{0, 1}: {"RawData", []string{"count_rate:f", "dose_rate:f"}},
 	{0, 2}: {"DoseRateDB", []string{"count:I", "count_rate:f", "dose_rate:f", "dose_rate_err:H", "flags:H"}},
 	{0, 3}: {"RareData", []string{"duration:I", "dose:f", "temperature:H", "charge_level:H", "flags:H"}},
-	{0, 4}: {"UserData", []string{"count:I", "count_rate:f", "dose_rate:f", "dose_rate_err:H", "flags:H"}},
+	{0, 4}: {"DoseCounter", []string{"dose_counter:I", "flags:H"}},
 	{0, 5}: {"SheduleData", []string{"count:I", "count_rate:f", "dose_rate:f", "dose_rate_err:H", "flags:H"}},
 	{0, 6}: {"AccelData", []string{"acc_x:H", "acc_y:H", "acc_z:H"}},
 	{0, 7}: {"Event", []string{"event:B", "event_param1:B", "flags:H"}},
@@ -42,7 +42,7 @@ var recFormats = map[[2]int]recFmt{
 }
 
 // amostras em bloco (eid 1): tamanho de cada amostra
-var blockSizes = map[int]int{1: 8, 2: 16, 3: 14}
+var blockSizes = map[int]int{1: 8, 2: 16, 3: 14, 4: 6}
 
 func fieldSize(t byte) int {
 	switch t {
@@ -107,6 +107,12 @@ func SplitDataBuf(b []byte, base time.Time) []RawRec {
 				q += fieldSize(t)
 			}
 			p += size
+			if eid == 0 && gid == 7 && rateEvent(int(r.Fields["event"])) && len(b)-p >= 6 {
+				// alarme: taxa e erro depois do evento
+				r.Fields["rate"] = float64(math.Float32frombits(binary.LittleEndian.Uint32(b[p:])))
+				r.Fields["rate_err"] = float64(binary.LittleEndian.Uint16(b[p+4:]))
+				p += 6
+			}
 		} else if sz, ok := blockSizes[gid]; ok && eid == 1 {
 			r.Name = fmt.Sprintf("Bloco%d", gid)
 			if len(b)-p < 6 {

@@ -28,10 +28,11 @@ import (
 // O aparelho manda, além da taxa ao vivo, três tipos de registro que o app do
 // celular mostra na aba Log: a taxa de dose de ~96 em ~96 s (com a contagem),
 // os "raros" (temperatura, bateria e dose acumulada) e os eventos (ligou,
-// começou a carregar, alarme…). O RadiaCode não guarda esses registros para
-// baixar depois: cada app (o do PC e o do celular) só tem o que recebeu
-// enquanto estava conectado. Por isso o log do celular pode ser importado
-// (o .csv que ele exporta) e junta com o do PC.
+// começou a carregar, alarme…). Sem ninguém conectado o RadiaCode guarda
+// esses registros na memória e manda tudo na próxima conexão, apagando o
+// que mandou (rcmemory.go): quem conectar primeiro, o PC ou o celular, leva.
+// Por isso o log do celular pode ser importado (o .csv que ele exporta) e
+// junta com o do PC.
 //
 // radiacode/log-AAAA-MM.csv, uma linha por registro, com a hora do PC.
 
@@ -280,7 +281,8 @@ func rcLogFromRaw(lines [][]byte) []RcLogItem {
 			return
 		}
 		seen[cur] = true
-		for _, r := range radiacode.DecodeDataBuf(buf, time.Unix(0, 0)) {
+		live, _ := splitOldRecords(radiacode.DecodeDataBuf(buf, time.Unix(0, 0))) // os da memória não têm a hora do "pc"
+		for _, r := range live {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 3 {
 				if cur-cfgAt < 60e3 {
 					continue
