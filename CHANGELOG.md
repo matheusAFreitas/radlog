@@ -1,5 +1,20 @@
 # Versões
 
+## 2.21.2
+- **Fundação do estilo, passo 1: tokens e limpeza.** Arrumação interna do
+  style.css, sem mudança na tela (conferido comparando o estilo calculado
+  de cada elemento em todas as telas do modo demo, antes e depois).
+  - O `:root` ganhou os tokens do guia que faltavam: os 11 degraus de tipo
+    (`--fs-*`), os 5 raios (`--radius-*`), a régua de espaço (`--space-*`),
+    a sombra de elemento flutuante e as cores que ainda estavam soltas
+    (fora de casa, anotação, Medir objeto, informação e as faixas sólidas
+    do alarme). Os próximos passos passam a usar esses nomes.
+  - Regras do mesmo seletor escritas duas ou três vezes foram juntadas num
+    lugar só (de 79 para 34; as que sobraram dependem da ordem em relação a
+    outra regra e ficam para os passos seguintes).
+  - `!important` caiu de 19 para 3 (ficam `[hidden]` e os dois do modo
+    duo); os outros viraram seletores um pouco mais específicos.
+
 ## 2.21.1
 - **Atualização automática volta a achar a versão mais nova.** A 2.20.5 e a
   2.21.0 saíram com dois minutos de diferença, e a 2.20.5 terminou de
