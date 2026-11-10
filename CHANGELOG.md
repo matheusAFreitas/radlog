@@ -1,5 +1,11 @@
 # Versões
 
+## 2.20.3
+- **Mais arrumação por dentro, sem mudança na tela.** A página Fora de casa
+  (a lista de períodos, os números de cada período e o editor) saiu do
+  `app.js` para `frontend/dist/fora.js`. O `app.js` ficou com cerca de 210
+  linhas a menos; desde a 2.18 já são cerca de 2.600.
+
 ## 2.20.2
 - **Mais arrumação por dentro, sem mudança na tela.** A página Medir objeto
   (a medição com fundo e objeto, o gráfico durante a medição, o segundo
