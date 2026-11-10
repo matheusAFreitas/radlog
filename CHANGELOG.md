@@ -1,5 +1,26 @@
 # Versões
 
+## 2.43.0
+- **Tela nova "ALARA"** em Análise (ícone de escudo). ALARA é "tão baixo
+  quanto razoavelmente possível": a tela mostra de onde vem a sua dose e
+  deixa testar os três jeitos de baixar com os seus aparelhos.
+- **De onde vem a sua dose**: os últimos 7 dias divididos em fundo em casa,
+  fundo fora de casa e acima do fundo. Cada trecho acima do fundo ganha um
+  nome (medição de objeto, alarme, saída de casa, anotação) e abre nos
+  Gráficos com um clique.
+- **Tempo**: taxa × minutos dá a dose, com a comparação com coisas
+  conhecidas e o que sobraria ao dobro e ao quádruplo da distância.
+- **Teste de distância**: mede a fonte em 5, 10, 20 e 40 cm (dá para mudar),
+  cada ponto até a incerteza ficar abaixo de 10% (no máximo 5 min), tira o
+  fundo da casa e ajusta a curva do inverso do quadrado. Diz se seguiu a
+  regra, caiu mais devagar (fonte grande) ou não bateu, e avisa o ponto que
+  sumiu no fundo.
+- **Teste de blindagem**: sem nada × com o material no meio, com quanto
+  cortou e a incerteza. Se a diferença for menor que duas vezes a
+  incerteza, diz que não deu para ver.
+- Os dois testes usam o motor do Medir objeto e ficam salvos em Medições
+  salvas.
+
 ## 2.42.0
 - **Fita do dia no Agora**, no lugar do gráfico "Hoje" (que continua nos
   Gráficos). O dia inteiro numa faixa, em pedaços de 10 minutos pintados

@@ -92,6 +92,11 @@ type MeasureState struct {
 	Size    string          `json:"size,omitempty"`
 	Prev    []MeasureAt     `json:"prev,omitempty"`
 	Derived *MeasureDerived `json:"derived,omitempty"`
+	// 2.43 (ALARA): teste de distância ou de blindagem; a fase do objeto para
+	// quando a incerteza da taxa líquida fica abaixo de RelErr (ou em Seconds)
+	Test     string  `json:"test,omitempty"` // distancia, blindagem
+	Material string  `json:"material,omitempty"`
+	RelErr   float64 `json:"relErr,omitempty"`
 	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
 	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
@@ -357,6 +362,8 @@ func (a *App) feedMeasureDev(f measFeed) {
 		m.Live = &live
 		if m.stopReq && m.Elapsed >= measStopMinSec {
 			stop = "manual"
+		} else if m.RelErr > 0 && m.Elapsed >= relErrMinSec && live.NetCPM > 0 && live.NetErr <= m.RelErr*live.NetCPM {
+			stop = "precisao" // teste do ALARA: a incerteza já ficou pequena
 		} else if m.Auto {
 			stop = autoDecide(live, *m.Bg, m.Elapsed, m.Pct)
 			// os dois perto: só para quando os dois já tiverem resposta
@@ -409,7 +416,8 @@ func (a *App) feedMeasureDev(f measFeed) {
 				}
 				save = &SavedMeasure{Name: name, Time: when, Bg: *m.Bg, Obj: ph, Result: r, Distance: m.Distance,
 					Samples: append([]MeasureSample(nil), a.measSamples...),
-					DistCM:  m.DistCM, Size: m.Size, Prev: append([]MeasureAt(nil), m.Prev...)}
+					DistCM:  m.DistCM, Size: m.Size, Prev: append([]MeasureAt(nil), m.Prev...),
+					Test: m.Test, Material: m.Material}
 				if f.dev == "radiacode" {
 					save.Device = "radiacode"
 				}
@@ -453,7 +461,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		a.mu.Lock()
 		if m := &a.measure; m.Result != nil && m.Bg != nil && m.Obj != nil {
 			m.Derived = deriveMeasure(deriveIn{device: m.Device, mode: m.Mode, bg: *m.Bg, obj: *m.Obj, r: *m.Result,
-				spec: m.Spectrum, distCM: m.DistCM, size: m.Size, prev: m.Prev})
+				spec: m.Spectrum, distCM: m.DistCM, size: m.Size, prev: m.Prev, test: m.Test})
 			if save != nil {
 				save.Derived = m.Derived
 			}
@@ -579,6 +587,9 @@ type SavedMeasure struct {
 	Size    string          `json:"size,omitempty"`
 	Prev    []MeasureAt     `json:"prev,omitempty"`
 	Derived *MeasureDerived `json:"derived,omitempty"`
+	// 2.43: teste do ALARA (distancia, blindagem) e o material da blindagem
+	Test     string `json:"test,omitempty"`
+	Material string `json:"material,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }

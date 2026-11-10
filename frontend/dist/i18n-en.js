@@ -2726,7 +2726,109 @@ const I18N_EN = {
 "casa: sem dado": "home: no data",
 "com você: sem dado": "with you: no data",
 "Cada linha junta casa e você: vale o nível mais alto dos dois.": "Each row combines home and you: the higher level of the two counts.",
-"FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)": "DAY STRIPS (10-MIN PIECES; THE HIGHER LEVEL BETWEEN HOME AND YOU COUNTS)"
+"FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)": "DAY STRIPS (10-MIN PIECES; THE HIGHER LEVEL BETWEEN HOME AND YOU COUNTS)",
+"ALARA quer dizer \"tão baixo quanto razoavelmente possível\".": "ALARA means \"as low as reasonably achievable\".",
+"Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.": "There is no good dose, so you remove what you can without getting in the way of life.",
+"São três jeitos: tempo, distância e blindagem.": "There are three ways: time, distance and shielding.",
+"De onde vem a sua dose": "Where your dose comes from",
+"Por que isso importa": "Why it matters",
+"O fundo natural é quase tudo, e é normal.": "Natural background is almost all of it, and that is normal.",
+"Ele vem do solo e das paredes, do radônio no ar, dos raios cósmicos e até do potássio do seu corpo.": "It comes from the ground and the walls, from radon in the air, from cosmic rays and even from the potassium in your body.",
+"Não dá para zerar.": "It cannot be brought to zero.",
+"O ALARA trabalha na fatia de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.": "ALARA works on the top slice, the dose that came from something: an object you measured, a peak, a different place.",
+"É nessa parte que tempo, distância e blindagem fazem diferença.": "That is the part where time, distance and shielding make a difference.",
+"Cada linha da tabela abre o momento no gráfico.": "Each table row opens that moment in the chart.",
+"Tempo: quanto custa ficar perto": "Time: what it costs to stay close",
+"Taxa no lugar (µSv/h)": "Rate at the spot (µSv/h)",
+"Dose = taxa × tempo.": "Dose = rate × time.",
+"A taxa (µSv/h) é a velocidade e a dose (µSv) é a distância percorrida.": "The rate (µSv/h) is the speed and the dose (µSv) is the distance travelled.",
+"Metade do tempo dá metade da dose.": "Half the time gives half the dose.",
+"A comparação com o fundo da sua casa ajuda a ter noção do tamanho.": "Comparing with your home background gives a sense of scale.",
+"Teste de distância: o inverso do quadrado": "Distance test: the inverse square law",
+"Distâncias (cm)": "Distances (cm)",
+"Aparelho do teste": "Device for the test",
+"Parar esta distância": "Stop this distance",
+"Cancelar o teste": "Cancel the test",
+"Parar esta fase": "Stop this phase",
+"medido (acima do fundo), com a incerteza": "measured (above background), with uncertainty",
+"o que o inverso do quadrado prevê": "what the inverse square law predicts",
+"fundo de casa": "home background",
+"medido (µSv/h)": "measured (µSv/h)",
+"previsto": "predicted",
+"A radiação de uma fonte pequena se espalha como a luz de uma lâmpada.": "Radiation from a small source spreads out like the light from a bulb.",
+"A 2× a distância, a mesma quantidade se espalha por uma área 4× maior.": "At 2× the distance, the same amount spreads over an area 4× larger.",
+"Por isso dobrar a distância deixa ¼ da taxa.": "That is why doubling the distance leaves ¼ of the rate.",
+"Como o teste funciona: o app mede cada distância até a incerteza ficar abaixo de 10% (no máximo 5 min) e tira o fundo da sua casa.": "How the test works: the app measures each distance until the uncertainty drops below 10% (5 min at most) and subtracts your home background.",
+"Meça do centro do cristal (a marca no corpo do aparelho), não da ponta.": "Measure from the centre of the crystal (the mark on the body of the device), not from the tip.",
+"Encostado demais a regra falha. Por isso o primeiro ponto é 5 cm e não 0.": "Too close, the rule breaks down. That is why the first point is 5 cm and not 0.",
+"Longe, a fonte some no fundo. O app avisa quando o sinal fica do tamanho do fundo.": "Far away, the source disappears into the background. The app tells you when the signal gets as small as the background.",
+"Se a queda for mais lenta que a curva, a fonte é grande ou espalhada (um piso, uma bancada, várias peças).": "If it falls more slowly than the curve, the source is large or spread out (a floor, a bench, several pieces).",
+"Teste de blindagem: antes × depois": "Shielding test: before × after",
+"Material": "Material",
+"ex.: livro de 3 cm": "e.g. a 3 cm book",
+"Minutos em cada fase": "Minutes in each phase",
+"Medir com o material": "Measure with the material",
+"Blindar é pôr matéria no caminho.": "Shielding means putting matter in the way.",
+"Cada camada segura uma parte da radiação.": "Each layer stops part of the radiation.",
+"Materiais densos e grossos seguram mais, e a gama de energia alta passa mais fácil.": "Dense, thick materials stop more, and high-energy gamma gets through more easily.",
+"Mesma posição nas duas fases. Se o aparelho mexer, o teste mede a distância em vez do material.": "Same position in both phases. If the device moves, the test measures the distance instead of the material.",
+"A incerteza decide. Se a diferença for menor que duas vezes a incerteza, o app diz \"não deu para ver\" em vez de inventar um número. Medir mais tempo ajuda.": "The uncertainty decides. If the difference is smaller than twice the uncertainty, the app says \"no clear difference\" instead of making up a number. Measuring longer helps.",
+"Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RC102, parte do que o GMC via era beta. O RC102 mede gama.": "Tip with both devices: if a sheet of paper drops the GMC-800 count and does not change the RC102 one, part of what the GMC saw was beta. The RC102 measures gamma.",
+"Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RadiaCode, parte do que o GMC via era beta. O RadiaCode mede gama.": "Tip with both devices: if a sheet of paper drops the GMC-800 count and does not change the RC102 one, part of what the GMC saw was beta. The RC102 measures gamma.",
+"Divisão da dose da semana": "Breakdown of the week's dose",
+"Taxa acima do fundo em cada distância e a curva do inverso do quadrado": "Rate above background at each distance and the inverse square curve",
+"Taxa acima do fundo sem nada e com o material": "Rate above background with nothing and with the material",
+"RC102 e GMC-800 com você": "RC102 and GMC-800 with you",
+"RadiaCode e GMC-800 com você": "RC102 and GMC-800 with you",
+"nenhum aparelho com você": "no device with you",
+"µSv na semana": "µSv this week",
+"mSv na semana": "mSv this week",
+"Fundo em casa": "Background at home",
+"Fundo fora de casa": "Background away from home",
+"Nenhum trecho acima do fundo nesses dias: tudo foi fundo natural.": "Nothing above background in these days: it was all natural background.",
+"taxa da leitura de agora": "rate from the current reading",
+"taxa de exemplo": "example rate",
+"taxa escrita à mão": "rate typed by hand",
+"Pelo inverso do quadrado, só a parte acima do fundo cai.": "By the inverse square law, only the part above background falls.",
+"O fundo continua o mesmo onde você estiver na casa.": "The background stays the same wherever you are in the house.",
+"resultado": "result",
+"1. sem nada": "1. with nothing",
+"2. com o material no meio": "2. with the material in between",
+"3. resultado": "3. result",
+"Outra medição está em andamento (Medir objeto). Termine ou cancele por lá antes de começar o teste.": "Another measurement is running (Measure object). Finish or cancel it there before starting the test.",
+"esperando o sinal subir acima do fundo": "waiting for the signal to rise above background",
+"Pronto. Ponha o material entre a fonte e o aparelho sem mexer em mais nada, e clique no botão abaixo.": "Done. Put the material between the source and the device without moving anything else, and click the button below.",
+"Teste salvo em Medições salvas.": "Test saved in Saved measurements.",
+"Use uma fonte pequena (pedra, relógio, a camisa de lampião). O fundo é o da sua casa na última hora.": "Use a small source (a rock, a watch, a lantern mantle). The background is your home's over the last hour.",
+"Escolha um material e deixe a fonte e o aparelho fixos nas duas fases.": "Pick a material and keep the source and the device fixed in both phases.",
+"sumiu no fundo": "lost in the background",
+"sem nada": "with nothing",
+"com o material": "with the material",
+"Teste de distância": "Distance test",
+"Não deu para ver a fonte.": "The source could not be seen.",
+"Nas distâncias medidas a taxa não ficou acima do fundo. Aproxime a fonte ou meça mais tempo.": "At the measured distances the rate did not rise above background. Bring the source closer or measure longer.",
+"Seguiu o inverso do quadrado.": "Followed the inverse square law.",
+"Cada vez que a distância dobrou, a taxa acima do fundo caiu para cerca de ¼.": "Each time the distance doubled, the rate above background fell to about ¼.",
+"A fonte se comporta como pequena: afastar um palmo já corta muito.": "The source behaves like a small one: stepping back a hand's width already cuts a lot.",
+"Caiu mais devagar que o previsto.": "Fell more slowly than predicted.",
+"Longe, a taxa ficou acima da curva.": "Far away, the rate stayed above the curve.",
+"A fonte deve ser grande ou espalhada (piso, bancada, várias peças).": "The source is probably large or spread out (a floor, a bench, several pieces).",
+"Perto de uma fonte assim, afastar ajuda menos.": "Near a source like that, moving away helps less.",
+"Bem longe dela, a regra do quadrado volta a valer.": "Well away from it, the square law applies again.",
+"Não bateu bem com a curva.": "Did not match the curve well.",
+"Pode ter sido a posição entre uma medida e outra.": "The position may have changed between one measurement and the next.",
+"Vale repetir com o aparelho sempre na mesma linha, medindo do centro do cristal.": "Worth repeating with the device always on the same line, measuring from the centre of the crystal.",
+"Sem nada no meio, a fonte não ficou acima do fundo.": "With nothing in between, the source did not rise above background.",
+"Assim não dá para medir o corte.": "So the reduction cannot be measured.",
+"Aproxime a fonte do aparelho ou meça mais tempo em cada fase.": "Bring the source closer to the device or measure longer in each phase.",
+"Não deu para ver diferença.": "No clear difference.",
+"Meça mais tempo em cada fase, ou o material corta pouco essa radiação.": "Measure longer in each phase, or the material barely cuts this radiation.",
+"Subiu com o material no meio.": "Went up with the material in between.",
+"Confira se o aparelho ficou no mesmo lugar nas duas fases: mudar a distância muda mais que o material.": "Check that the device stayed in the same place in both phases: changing the distance changes more than the material.",
+"Acima do normal": "Above normal",
+"Medir de novo": "Measure again",
+"O teste de blindagem está em andamento. Termine ou cancele ele antes de começar este.": "The shielding test is running. Finish or cancel it before starting this one.",
+"O teste de distância está em andamento. Termine ou cancele ele antes de começar este.": "The distance test is running. Finish or cancel it before starting this one."
 },
 "patterns": [
 [
@@ -3404,6 +3506,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Pronto. Ponha a fonte a ",
+"^Pronto\\. Ponha a fonte a ((?:(?! · ).)+?) cm do centro do cristal, na mesma linha, e clique no botão abaixo\\.$",
+"Done. Put the source ${1} cm from the centre of the crystal, on the same line, and click the button below.",
+[
+"Pronto. Ponha a fonte a ",
+" cm do centro do cristal, na mesma linha, e clique no botão abaixo."
+]
+],
+[
 "automático: parou quando deu para garantir que o objeto sobe menos que ",
 "^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
 "automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
@@ -3586,6 +3697,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Com o material no meio, a taxa acima do fundo caiu de ",
+"^Com o material no meio, a taxa acima do fundo caiu de ((?:(?! · ).)+?) para ((?:(?! · ).)+?) µSv/h, na mesma posição\\.$",
+"With the material in between, the rate above background fell from ${1} to ${2} µSv/h, in the same position.",
+[
+"Com o material no meio, a taxa acima do fundo caiu de ",
+" para ",
+" µSv/h, na mesma posição."
+]
+],
+[
 "O período começa ",
 "^O período começa ((?:(?! · ).)+?) antes do primeiro dado do contador \\(((?:(?! · ).)+?)\\); esse trecho não é lacuna\\.$",
 "The period starts ${1} before the counter's first reading (${2}); that stretch is not a gap.",
@@ -3621,6 +3742,15 @@ const I18N_EN = {
 "Acima do nível de fundo (",
 "): +",
 " µSv, o que o objeto somou na sua dose nesse tempo."
+]
+],
+[
+"Essa taxa está no nível do fundo da sua casa (",
+"^Essa taxa está no nível do fundo da sua casa \\(((?:(?! · ).)+?) µSv/h\\): não há fonte para afastar\\.$",
+"This rate is at the level of your home background (${1} µSv/h): there is no source to move away from.",
+[
+"Essa taxa está no nível do fundo da sua casa (",
+" µSv/h): não há fonte para afastar."
 ]
 ],
 [
@@ -4180,6 +4310,23 @@ const I18N_EN = {
 ]
 ],
 [
+"Se a fonte for pequena e você ficar ao dobro da distância: ",
+"^Se a fonte for pequena e você ficar ao dobro da distância: ((?:(?! · ).)+?) µSv\\.$",
+"If the source is small and you stay at twice the distance: ${1} µSv.",
+[
+"Se a fonte for pequena e você ficar ao dobro da distância: ",
+" µSv."
+]
+],
+[
+"A ",
+"^A ((?:(?! · ).)+?) a fonte quase sumiu no fundo: esse ponto pesa pouco na conta\\.$",
+"At ${1} the source almost vanished into the background: that point weighs little in the fit.",
+[
+" a fonte quase sumiu no fundo: esse ponto pesa pouco na conta."
+]
+],
+[
 "Precisão do líquido: ±",
 "^Precisão do líquido: ±((?:(?! · ).)+?)%\\. Para ±10%: ((?:(?! · ).)+?) em cada fase; para ±5%: ((?:(?! · ).)+?)\\.$",
 "Precision of the net value: ±${1}%. For ±10%: ${2} in each phase; for ±5%: ${3}.",
@@ -4381,6 +4528,15 @@ const I18N_EN = {
 [
 " de ",
 " min com leitura do RadiaCode desde o primeiro dado ("
+]
+],
+[
+"A diferença (",
+"^A diferença \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?)\\) ficou menor que duas vezes a incerteza\\.$",
+"The difference (${1} ± ${2}) was smaller than twice the uncertainty.",
+[
+"A diferença (",
+") ficou menor que duas vezes a incerteza."
 ]
 ],
 [
@@ -6168,6 +6324,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Com o material no meio: ",
+"^Com o material no meio: ((?:(?! · ).)+?) de no máximo ((?:(?! · ).)+?)$",
+"With the material in between: ${1} of at most ${2}",
+[
+"Com o material no meio: ",
+" de no máximo "
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -6892,6 +7057,15 @@ const I18N_EN = {
 "${1} · the device memory brought ${2}",
 [
 " · a memória do aparelho trouxe "
+]
+],
+[
+"Sem nada no meio: ",
+"^Sem nada no meio: ((?:(?! · ).)+?) de no máximo ((?:(?! · ).)+?)$",
+"With nothing in between: ${1} of at most ${2}",
+[
+"Sem nada no meio: ",
+" de no máximo "
 ]
 ],
 [
@@ -7640,6 +7814,15 @@ const I18N_EN = {
 ]
 ],
 [
+"incerteza ",
+"^incerteza ((?:(?! · ).)+?)% \\(para em 10%\\)$",
+"uncertainty ${1}% (stops at 10%)",
+[
+"incerteza ",
+"% (para em 10%)"
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -7814,6 +7997,15 @@ const I18N_EN = {
 [
 "O RC102 ficou ",
 " sem conexão"
+]
+],
+[
+"Medindo a ",
+"^Medindo a ((?:(?! · ).)+?): ((?:(?! · ).)+?) de no máximo ((?:(?! · ).)+?)$",
+"Measuring at ${1}: ${2} of at most ${3}",
+[
+"Medindo a ",
+" de no máximo "
 ]
 ],
 [
@@ -8383,6 +8575,15 @@ const I18N_EN = {
 "≈ ${1} chest CT scans",
 [
 " tomografias de tórax"
+]
+],
+[
+"taxa da medição \"",
+"^taxa da medição \"((?:(?! · ).)+?)\" \\(((?:(?! · ).)+?)\\)$",
+"rate from the measurement \"${1}\" (${2})",
+[
+"taxa da medição \"",
+"\" ("
 ]
 ],
 [
@@ -9086,6 +9287,15 @@ const I18N_EN = {
 " keV · ",
 " de ",
 " linha"
+]
+],
+[
+"Ao quádruplo: ",
+"^Ao quádruplo: ((?:(?! · ).)+?) µSv\\.$",
+"At four times: ${1} µSv.",
+[
+"Ao quádruplo: ",
+" µSv."
 ]
 ],
 [
@@ -11164,6 +11374,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Cortou ",
+"^Cortou ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)\\.$",
+"Cut ${1} ± ${2}.",
+[
+"Cortou "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -11366,6 +11584,23 @@ const I18N_EN = {
 "${1}: ${2} alerts.",
 [
 " avisos."
+]
+],
+[
+"Medir a ",
+"^Medir a ((?:(?! · ).)+?) cm$",
+"Measure at ${1} cm",
+[
+"Medir a ",
+" cm"
+]
+],
+[
+"Blindagem: ",
+"^Blindagem: ((?:(?! · ).)+?)$",
+"Shielding: ${1}",
+[
+"Blindagem: "
 ]
 ],
 [
@@ -11918,6 +12153,14 @@ const I18N_EN = {
 "≈ ${1} banana",
 [
 " banana"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com você$",
+"${1} with you",
+[
+" com você"
 ]
 ],
 [
@@ -12713,6 +12956,14 @@ const I18N_EN = {
 "Sat ${1}",
 [
 "sáb "
+]
+],
+[
+"com ",
+"^com ((?:(?! · ).)+?)$",
+"with ${1}",
+[
+"com "
 ]
 ],
 [

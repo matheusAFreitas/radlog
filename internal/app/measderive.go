@@ -90,6 +90,9 @@ type MeasureDerived struct {
 	Safe     SafeDist    `json:"safe"`
 	Bq       *BqEstimate `json:"bq,omitempty"` // só com o RC102 no objeto
 	InvSq    *InvSq      `json:"invSq,omitempty"`
+	// 2.43: testes do ALARA (alara.go)
+	Dist   *DistFit   `json:"dist,omitempty"`
+	Shield *ShieldCut `json:"shield,omitempty"`
 }
 
 // isoGamma são as constantes de taxa de dose (equivalente de dose ambiente,
@@ -172,6 +175,7 @@ type deriveIn struct {
 	distCM float64          // 0 = encostado ou não informada
 	size   string           // pequeno ou espalhado ("" = não disse)
 	prev   []MeasureAt
+	test   string // 2.43: distancia, blindagem ("" = medição comum)
 }
 
 // deriveMeasure faz as contas do resultado.
@@ -189,6 +193,12 @@ func deriveMeasure(in deriveIn) *MeasureDerived {
 	}
 	real := in.r.Level == "sim" && in.r.NetUSv > 0
 	d.InvSq = invSquare(in)
+	switch in.test {
+	case "distancia":
+		d.Dist = distFit(in, k)
+	case "blindagem":
+		d.Shield = shieldCut(in, k)
+	}
 	// distância segura
 	switch {
 	case !real:

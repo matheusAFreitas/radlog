@@ -47,6 +47,11 @@ type MeasureOpts struct {
 	Mode     string  `json:"mode"`    // "", "ambos" (os dois perto) ou "voce" (o outro com a pessoa)
 	DistCM   float64 `json:"distCm"`  // 2.40: cm (0 = encostado; < 0 = lê do texto)
 	Size     string  `json:"size"`    // 2.40: pequeno ou espalhado
+	// 2.43 (ALARA): teste de distância ou blindagem, material e a incerteza
+	// relativa em que a fase do objeto para (0 = não para por isso)
+	Test     string  `json:"test"`
+	Material string  `json:"material"`
+	RelErr   float64 `json:"relErr"`
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -259,7 +264,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		o.Size = ""
 	}
 	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active && dev == "gmc",
-		DistCM: o.DistCM, Size: o.Size,
+		DistCM: o.DistCM, Size: o.Size, Test: alaraTest(o.Test), Material: strings.TrimSpace(o.Material), RelErr: math.Min(math.Max(o.RelErr, 0), 0.5),
 		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
 	if side != nil {
 		m.Demo = false

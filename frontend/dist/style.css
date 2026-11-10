@@ -2135,3 +2135,45 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .fita:has(.ft-lane:nth-child(8)) .ft-strip { height: 14px; }
 .sum-fita { margin: var(--space-4) 0; }
 .sum-fita h3 { margin: 0 0 var(--space-2); }
+
+/* ALARA (2.43) */
+.al-sec { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: var(--space-4); align-items: start; padding: var(--space-4) 0; border-top: 1px solid var(--border); }
+.al-sec:first-of-type { border-top: 0; }
+@media (max-width: 900px) { .al-sec { grid-template-columns: 1fr; } }
+.al-main { display: grid; gap: var(--space-3); min-width: 0; }
+.al-main h3 { margin: 0; }
+.al-why { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); background: var(--bg); display: grid; gap: var(--space-2); min-width: 0; }
+.al-why h4 { margin: 0; color: var(--accent); font-size: var(--fs-label); font-weight: 600; }
+.al-why p, .al-why li { margin: 0; color: var(--muted); font-size: var(--fs-label); }
+.al-why ul { margin: 0; padding-left: 18px; display: grid; gap: 4px; }
+.al-big { font-size: 30px; font-weight: 600; line-height: 1.1; }
+.al-big small { font-size: 14px; color: var(--muted); font-weight: 400; }
+.al-bar { width: 100%; height: 36px; display: block; }
+.al-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; color: var(--muted); }
+.al-legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.al-legend i.ln { height: 2px; width: 14px; border-radius: 1px; vertical-align: 3px; }
+.al-tbl th.n { text-align: right; }
+.al-tbl td.n { text-align: right; font-family: var(--mono); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.al-click { cursor: pointer; }
+.al-click:hover td { background: var(--surface-2); }
+.al-row { display: flex; flex-wrap: wrap; gap: var(--space-3) var(--space-4); align-items: end; }
+.al-f { display: grid; gap: 4px; font-size: var(--fs-caption); color: var(--dim); }
+.al-f input[type=number] { width: 110px; }
+.al-f input[type=text] { width: 180px; }
+.al-eq { display: flex; flex-direction: column; gap: 2px; color: var(--muted); }
+.al-alt { display: flex; flex-direction: column; gap: 2px; color: var(--muted); }
+.al-alt b { color: var(--text); font-weight: 500; }
+.al-steps { display: flex; flex-wrap: wrap; gap: 8px; }
+.al-steps span { font-size: var(--fs-caption); border: 1px solid var(--border); border-radius: 999px; padding: 3px 10px; color: var(--muted); }
+.al-steps span.on { border-color: var(--accent); color: var(--text); }
+.al-steps span.now { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.al-msg { margin: 0; color: var(--muted); }
+.al-msg.warn { color: var(--warn); }
+.al-verdict { display: grid; gap: 2px; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface-2); border: 1px solid var(--border-hover, var(--border)); }
+.al-verdict.ok { border-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+.al-verdict.meh { border-color: color-mix(in srgb, var(--att) 45%, transparent); }
+.al-verdict b { font-size: 15px; }
+.al-verdict span { color: var(--muted); font-size: var(--fs-label); }
+.al-chart { width: 100%; height: auto; display: block; }
+.al-ax { font-family: var(--mono); font-size: 11px; fill: var(--dim); }
+.al-lb { font-family: var(--sans); font-size: 13px; fill: var(--muted); }

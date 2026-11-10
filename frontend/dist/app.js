@@ -773,7 +773,7 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
-const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alara: "pageAlara", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
@@ -797,6 +797,7 @@ async function showView(v, skipRender) {
   if (v === "fora") renderPeriods();
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
+  if (v === "alara") refreshAlara();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
   if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
   if (v === "config") openSettings();
@@ -4312,6 +4313,7 @@ function makeDemoApi() {
       const part = phaseOf(meas.counts, meas.elapsed);
       meas.live = compare(meas.bg, part);
       if (meas.stopReq && meas.elapsed >= 5) { stop = "manual"; meas.stopReq = false; }
+      else if (meas.relErr > 0 && meas.elapsed >= 20 && meas.live.netCPM > 0 && meas.live.netErr <= meas.relErr * meas.live.netCPM) stop = "precisao";
       else if (meas.auto) {
         if (meas.elapsed >= 20 && meas.live.sigma >= 4) stop = "achou";
         else if (meas.elapsed >= 20 && Math.max(meas.live.netCPM, 0) + 2 * meas.live.netErr < thrOf(meas.bg, meas.pct)) stop = "nada";
@@ -4346,11 +4348,51 @@ function makeDemoApi() {
   setInterval(() => {
     const rcIn = meas.device === "radiacode" || (meas.other && meas.other.device === "radiacode");
     if (!rcIn || !demoRcFake() || (meas.phase !== "fundo" && meas.phase !== "objeto")) return;
-    const lam = meas.other && meas.other.device === "radiacode" && meas.other.role === "voce" ? 14 : meas.phase === "objeto" ? 19 : 12;
+    let lam = meas.other && meas.other.device === "radiacode" && meas.other.role === "voce" ? 14 : meas.phase === "objeto" ? 19 : 12;
+    // testes do ALARA: a fonte cai com a distância (quase k/r²) e o material corta 30%
+    if (meas.phase === "objeto" && meas.test === "distancia" && meas.distCm > 0) lam = 12 + 40 * (25 + 4) / (meas.distCm ** 2 + 4);
+    if (meas.phase === "objeto" && meas.test === "blindagem") lam = 12 + 20 * ((meas.prev || []).length ? 0.7 : 1);
     let k = 0, p = 1; const L = Math.exp(-lam); for (;;) { p *= Math.random(); if (p <= L) break; k++; }
     emit("radiacode", { ...demoRc(), cps: lam + (Math.random() - 0.5) * 2 });
     feed(k, "radiacode");
   }, 1000);
+  // testes do ALARA (alara.go), para o modo navegador
+  const demoDist = (m, k) => {
+    const pts = (m.prev || []).filter((p) => p.distCm > 0 && p.errUSv > 0).map((p) => ({ cm: p.distCm, netUSv: p.netUSv, errUSv: p.errUSv, seconds: p.seconds }));
+    if (m.distCm > 0) pts.push({ cm: m.distCm, netUSv: m.result.netUSv, errUSv: m.result.netErr * k, seconds: m.obj.seconds });
+    pts.sort((a, b) => a.cm - b.cm);
+    const f = { points: pts, k: 0, chi2: 0 };
+    if (pts.length < 2) return f;
+    let sxy = 0, sxx = 0;
+    for (const p of pts) { const x = 1 / p.cm ** 2, w = 1 / p.errUSv ** 2; sxy += w * x * p.netUSv; sxx += w * x * x; }
+    f.k = sxy / sxx;
+    let chi = 0;
+    for (const p of pts) { p.predict = f.k / p.cm ** 2; p.lost = p.netUSv < 2 * p.errUSv; chi += ((p.netUSv - p.predict) / p.errUSv) ** 2; }
+    f.chi2 = chi / (pts.length - 1);
+    const slow = pts.length >= 3 && pts.slice(2).every((p) => p.netUSv > p.predict + p.errUSv);
+    if (f.k <= 0) Object.assign(f, { verdict: "torto", title: "Não deu para ver a fonte.", text: "Nas distâncias medidas a taxa não ficou acima do fundo. Aproxime a fonte ou meça mais tempo." });
+    else if (f.chi2 <= 2) Object.assign(f, { verdict: "seguiu", title: "Seguiu o inverso do quadrado.", text: "Cada vez que a distância dobrou, a taxa acima do fundo caiu para cerca de ¼. A fonte se comporta como pequena: afastar um palmo já corta muito." });
+    else if (slow) Object.assign(f, { verdict: "devagar", title: "Caiu mais devagar que o previsto.", text: "Longe, a taxa ficou acima da curva. A fonte deve ser grande ou espalhada (piso, bancada, várias peças). Perto de uma fonte assim, afastar ajuda menos. Bem longe dela, a regra do quadrado volta a valer." });
+    else Object.assign(f, { verdict: "torto", title: "Não bateu bem com a curva.", text: "Pode ter sido a posição entre uma medida e outra. Vale repetir com o aparelho sempre na mesma linha, medindo do centro do cristal." });
+    const lost = pts.filter((p) => p.lost).map((p) => fmt(p.cm, 0) + " cm");
+    if (lost.length) f.text += ` A ${lost.join(" e ")} a fonte quase sumiu no fundo: esse ponto pesa pouco na conta.`;
+    return f;
+  };
+  const demoShield = (m, k) => {
+    const a = (m.prev || [])[m.prev.length - 1];
+    if (!a) return null;
+    const s = { material: m.material || "", beforeUSv: a.netUSv, beforeErr: a.errUSv, afterUSv: m.result.netUSv, afterErr: m.result.netErr * k, beforeSecs: a.seconds, afterSecs: m.obj.seconds };
+    if (s.beforeUSv <= 2 * s.beforeErr) return Object.assign(s, { title: "Sem nada no meio, a fonte não ficou acima do fundo.", text: "Assim não dá para medir o corte. Aproxime a fonte do aparelho ou meça mais tempo em cada fase." });
+    const q = s.afterUSv / s.beforeUSv, rel = s.beforeErr / s.beforeUSv;
+    s.cut = 1 - q;
+    s.cutErr = s.afterUSv > 0 ? Math.abs(q) * Math.hypot(s.afterErr / s.afterUSv, rel) : Math.hypot(s.afterErr / s.beforeUSv, rel);
+    s.seen = Math.abs(s.cut) >= 2 * s.cutErr;
+    const pc = (v) => fmt(Math.round(v * 100), 0) + "%";
+    if (!s.seen) Object.assign(s, { title: "Não deu para ver diferença.", text: `A diferença (${pc(s.cut)} ± ${pc(s.cutErr)}) ficou menor que duas vezes a incerteza. Meça mais tempo em cada fase, ou o material corta pouco essa radiação.` });
+    else if (s.cut > 0) Object.assign(s, { title: `Cortou ${pc(s.cut)} ± ${pc(s.cutErr)}.`, text: `Com o material no meio, a taxa acima do fundo caiu de ${fmt(s.beforeUSv, usvDigits(s.beforeUSv))} para ${fmt(Math.max(s.afterUSv, 0), usvDigits(Math.max(s.afterUSv, 0)))} µSv/h, na mesma posição.` });
+    else Object.assign(s, { title: "Subiu com o material no meio.", text: "Confira se o aparelho ficou no mesmo lugar nas duas fases: mudar a distância muda mais que o material." });
+    return s;
+  };
   // contas do resultado (measderive.go), para o modo navegador
   const demoDerive = (m) => {
     const r = m.result, k = m.obj.cpm > 0 ? m.obj.usv / m.obj.cpm : 0, real = r.level === "sim" && r.netUSv > 0, d = m.distCm || 0;
@@ -4365,6 +4407,8 @@ function makeDemoApi() {
         : `${dd} mais que o inverso do quadrado (${a} contra ${b}): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.` };
       out.invSq = inv;
     }
+    if (m.test === "distancia") out.dist = demoDist(m, k);
+    if (m.test === "blindagem") out.shield = demoShield(m, k);
     if (!real) out.safe.why = "o objeto não ficou claramente acima do fundo";
     else if (!(d > 0)) out.safe.why = "informe a distância (encostado não dá para usar na conta)";
     else { const x = d * Math.sqrt(r.netUSv / (0.1 * m.bg.usv)); out.safe = { ok: true, cm: Math.max(x, d), below: x < d, approx: m.size !== "pequeno" || !inv || !inv.ok }; }
@@ -4882,6 +4926,7 @@ const demoRc = () => {
       if ((device === "radiacode" || mode) && (!demoRcFake() || localStorage.getItem("rcFake2"))) throw new Error("conecte o RC102 para medir");
       meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
         distCm: o.distCm > 0 ? o.distCm : 0, size: o.size || "", prev: [], derived: null, spectrum: null,
+        test: o.test === "distancia" || o.test === "blindagem" ? o.test : "", material: (o.material || "").trim(), relErr: Math.min(Math.max(o.relErr || 0, 0), 0.5),
         auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
       if (mode) {
         const od = device === "radiacode" ? "gmc" : "radiacode", oh = await api.GetHomeBackgroundDev(od);
@@ -5206,6 +5251,23 @@ const demoRc = () => {
       return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, doseSource: "app", calNote: "mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)", backgroundTotal: b, ceilingTotal: b + al,
         allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY, limitName: limY === 20 ? "Trabalhador exposto" : "Público",
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
+    },
+    // de onde vem a dose (2.43): pela fita, com o fundo fingido do RC102 a 0,092
+    GetDoseOrigin: async (days) => {
+      const to = Date.now(), from = to - (days || 7) * 864e5, s = await api.GetDayStrip(from, to);
+      const o = { from, to, device: demoRcFake() ? "radiacode" : "gmc", total: 0, homeBg: 0, awayBg: 0, above: 0, minutes: 0, items: [], homeBgRate: demoRcFake() ? 0.092 : 0.206 };
+      for (const x of s.slots) {
+        if (!x.pers && !x.home) continue;
+        const u = x.persUSv || x.homeUSv, d = u * 10 / 60, bg = o.homeBgRate;
+        o.total += d; o.minutes += 10;
+        const base = u > bg * 1.2 ? bg * 10 / 60 : d;
+        o.above += d - base;
+        if (x.away) o.awayBg += base; else o.homeBg += base;
+      }
+      o.items = [{ from: to - 40 * 6e4, to: to - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
+        { from: to - 5 * 36e5, to: to - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }];
+      o.above += 0.033; o.total += 0.033;
+      return o;
     },
     // fita do dia (2.42): pedaços de 10 min, nível pela média; RC102 fingido a 0,6× o GMC
     GetDayStrip: async (from, to) => {
