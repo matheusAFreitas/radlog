@@ -3428,7 +3428,7 @@ function renderRc(st) {
   // aba
   $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "desconectado" }[st.state] || st.state;
   // o aviso de conexão fica no cartão de cima; aqui só o tipo e o último contato
-  $("rcState").textContent = on ? `conectado · ${via}` : [st.via ? via : "", st.lastT ? `último contato ${isToday(st.lastT) ? hhmm(st.lastT) : whenLabel(st.lastT)}` : st.state === "conectando" ? "conectando…" : "desconectado"].filter(Boolean).join(" · ");
+  $("rcState").textContent = on ? `conectado · ${via}` : [st.via ? via : "", st.lastT ? `último contato ${isToday(st.lastT) ? hhmm(st.lastT) : whenLabel(st.lastT)}` : st.state === "conectando" ? "conectando…" : st.state === "procurando" ? "procurando…" : "desconectado"].filter(Boolean).join(" · ");
   $("rcState").className = "rc-state mono small " + (on ? "ok" : "");
   $("rcNums").hidden = !on;
   if (on) {

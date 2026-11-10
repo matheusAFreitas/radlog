@@ -10,6 +10,14 @@
   ao vivo. Agora os minutos pela metade são completados, pesando pelos
   segundos de cada parte, sem passar de 60 s. E o pedaço de antes da
   conexão entra também no minuto em que o RadiaCode foi conectado.
+## 2.35.2
+- **"Ver na régua" voltou a abrir.** Nas telas do GMC-800 e do RadiaCode o
+  link do mostrador não fazia nada: a régua ainda procurava o seletor de
+  período da dose que saiu na 2.12. Agora usa o período dos gráficos.
+- Em inglês, o título dos alertas do GMC em µSv/h ("Alarme: pico de 1,35
+  µSv/h") ficava em português; agora sai traduzido.
+- O bloco "Aparelho" do RadiaCode diz "procurando…" enquanto o app procura,
+  em vez de "desconectado", igual à linha de cima.
 
 ## 2.35.1
 - **O mostrador do GMC-800 segue os níveis das Configurações.** Os avisos
