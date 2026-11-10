@@ -90,10 +90,18 @@ h2 { margin: 0; font-size: var(--fs-heading); font-weight: 600; }
 .brand svg { color: var(--accent); }
 .pill { display: flex; align-items: center; gap: 8px; padding: 6px 12px; border: 1px solid var(--border); border-radius: var(--radius-pill); font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); max-width: 520px; }
 .pill span:last-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--dim); flex: none; }
-.dot.on { background: var(--accent); }
-.dot.wait { background: var(--att); }
-.dot.err { background: var(--warn); }
+/* ponto de conexão: anel vazado (não é nível; o círculo cheio é o "seguro") */
+.dot { width: 8px; height: 8px; border-radius: 50%; border: 2px solid var(--dim); background: transparent; flex: none; }
+.dot.on { border-color: var(--accent); }
+.dot.wait { border-color: var(--att); }
+.dot.err { border-color: var(--warn); }
+.dot[style*="background"] { border: 0; }
+/* forma do nível (ideia 12): a cor vem do nível, o desenho do cores.js */
+.lv-ico { display: inline-block; flex: none; vertical-align: -0.15em; }
+.lv-ico.seguro { color: var(--accent); }
+.lv-ico.atencao, .lv-ico.nocount { color: var(--att); }
+.lv-ico.alarme { color: var(--alarm); }
+.lv-ico.perigo { color: var(--warn); }
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 
 .btn { min-height: 44px; padding: 0 16px; display: inline-flex; align-items: center; gap: 8px; background: var(--surface-2); color: var(--text); border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: var(--fs-label); }
@@ -133,7 +141,7 @@ h2 { margin: 0; font-size: var(--fs-heading); font-weight: 600; }
 .seg button { min-width: 52px; padding: 0 12px; border: 0; border-radius: var(--radius-sm); background: transparent; font-family: var(--mono); font-size: var(--fs-label); }
 .seg button:hover { color: var(--text); }
 .level-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
-.level-name { font-weight: 600; color: var(--muted); }
+.level-name { font-weight: 600; color: var(--muted); display: inline-flex; align-items: center; gap: 6px; }
 .level-name.seguro { color: var(--accent); }
 .level-name.atencao { color: var(--att); }
 .level-bar > div:not(.marker) { flex: 1; opacity: .85; }
@@ -289,8 +297,7 @@ body.attention .hero { border-color: var(--att); }
 body.attention .hero .value { color: var(--att); }
 .card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
 .small-link { font-family: var(--sans); font-size: var(--fs-label); }
-.alerts li .dot-a { width: 8px; height: 8px; border-radius: 50%; flex: none; margin-top: 7px; }
-.alerts li .dot-a.att { background: var(--att); }
+.alerts li .dot-a { display: inline-flex; flex: none; margin-top: 4px; }
 #eventsList { max-height: 60vh; overflow-y: auto; }
 /* layout mais denso: menos espaço vazio e, em telas largas, três colunas */
 
@@ -393,7 +400,7 @@ td { border-top: 1px solid var(--border); padding: 6px 0; }
 .dot-ok { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); flex: none; }
 .active-alerts li.on { border: 1px solid var(--att); border-left-width: 4px; border-radius: var(--radius-md); padding: 10px 14px; background: color-mix(in srgb, var(--att) 6%, transparent); display: flex; flex-direction: column; gap: 2px; }
 .active-alerts .a-title { font-weight: 600; font-size: var(--fs-body); display: flex; align-items: center; gap: 8px; }
-.active-alerts .a-title .pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--att); animation: apulse 1.2s ease-in-out infinite; }
+.active-alerts .a-title .pulse { display: inline-flex; animation: apulse 1.2s ease-in-out infinite; }
 .active-alerts .a-meta { font-family: var(--mono); font-size: var(--fs-label); color: var(--muted); }
 @keyframes apulse { 50% { opacity: .25; } }
 @media (prefers-reduced-motion: reduce) { .active-alerts .a-title .pulse { animation: none; } }
@@ -460,12 +467,8 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .row-btns { display: flex; gap: 8px; flex-wrap: wrap; }
 
 /* níveis nas listas e no mapa de calor */
-.alerts li .dot-a.alarm { background: var(--alarm); }
-.alerts li .dot-a.danger { background: var(--warn); }
 .active-alerts li.on.alarme { border-color: var(--alarm); background: color-mix(in srgb, var(--alarm) 12%, transparent); }
-.active-alerts li.alarme .a-title .pulse { background: var(--alarm); }
 .active-alerts li.on.perigo { border-color: var(--warn); background: color-mix(in srgb, var(--warn) 12%, transparent); }
-.active-alerts li.perigo .a-title .pulse { background: var(--warn); }
 .heat .c.alarm { background: var(--alarm); }
 .heat .c.danger { background: var(--warn); }
 .heat-key .hk-alarm { background: var(--alarm); }
@@ -479,6 +482,8 @@ body.danger .hero.alarm { border-color: var(--warn); }
 /* linhas dos limites no gráfico durante o alarme */
 .leg-thr { display: inline-flex; align-items: center; gap: 6px; margin-left: 10px; font-weight: 600; }
 .leg-thr i { width: 18px; border-top: 2px dashed currentColor; }
+.thr-marks { position: absolute; inset: 0; pointer-events: none; }
+.thr-marks span { position: absolute; right: -14px; transform: translateY(-50%); line-height: 0; }
 .leg-thr.alarm { color: var(--alarm); }
 .leg-thr.danger { color: var(--warn); }
 .leg-thr.danger.off-scale i { border-top-style: dotted; }
@@ -1247,7 +1252,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 36px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
 .side-nav button:hover { background: var(--surface-2); color: var(--text); }
 .side-nav button[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 500; box-shadow: inset 3px 0 0 var(--accent); }
-.side-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-caption); font-weight: 600; background: var(--att); color: var(--on-accent); }
+.side-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: var(--fs-caption); font-weight: 600; background: var(--att); color: var(--on-accent); }
+.side-badge .lv-ico { color: var(--on-accent); }
 .side-badge.lv-alarme { background: var(--alarm); }
 .side-badge.lv-perigo { background: var(--warn); }
 .side-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--att); flex: none; }
@@ -1288,7 +1294,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst .clock-chip:not(.off) { display: none; }
 .inst-fill { flex: 1 1 auto; }
 .inst-name { color: var(--muted); }
-.inst-state { font-weight: 600; white-space: nowrap; color: var(--dim); }
+.inst-state { font-weight: 600; white-space: nowrap; color: var(--dim); display: inline-flex; align-items: center; gap: 6px; }
 .inst-read { display: flex; align-items: flex-end; gap: 6px; min-width: 0; cursor: pointer; }
 .inst-val { font-size: var(--fs-reading-m); line-height: 1; font-weight: 500; letter-spacing: -.02em; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .inst-unit { padding-bottom: 3px; font-size: var(--fs-body); color: var(--muted); white-space: nowrap; }
@@ -1297,15 +1303,16 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst-spark polyline { fill: none; stroke: var(--sc); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
 .inst-rc { --sc: var(--rc); }
 .inst.stale .inst-val { color: var(--dim); }
-.inst.stale .inst-spark, .inst.stale .inst-mark { opacity: .5; }
-.inst-scale { position: relative; height: 26px; }
-.inst-segs { position: absolute; left: 0; right: 0; top: 4px; height: 6px; display: flex; gap: 3px; }
-.inst-segs span { flex: 1 1 0; border-radius: var(--radius-xs); transition: background-color .4s; }
-.inst-segs .s-safe { background: color-mix(in srgb, var(--accent) 25%, var(--surface)); }
-.inst-segs .s-att { background: color-mix(in srgb, var(--att) 30%, var(--surface)); }
-.inst-segs .s-high { background: color-mix(in srgb, var(--warn) 30%, var(--surface)); }
-.inst-mark { position: absolute; top: 0; width: 3px; height: 14px; margin-left: -1.5px; border-radius: var(--radius-xs); background: var(--text); box-shadow: 0 0 0 2px var(--surface); transition: left .4s; }
-.inst-tick { position: absolute; top: 13px; transform: translateX(-50%); font-family: var(--mono); font-size: var(--fs-micro); color: var(--dim); white-space: nowrap; }
+.inst.stale .inst-spark { opacity: .5; }
+.inst.lv-atencao, .inst.lv-nocount { --lvc: var(--att); }
+.inst.lv-alarme { --lvc: var(--alarm); }
+.inst.lv-perigo { --lvc: var(--warn); }
+/* mostrador no logo (ideia 1): o arco de fora enche pelas três faixas */
+.dial { width: 56px; height: 56px; flex: none; align-self: center; margin-right: var(--space-2); }
+.dial-track { fill: none; stroke: var(--chart-grid); stroke-width: 3; stroke-linecap: round; }
+.dial-arc { fill: none; stroke: var(--lvc, var(--accent)); stroke-width: 3; stroke-linecap: round; transition: d .4s; }
+.dial-ring { fill: none; stroke: var(--lvc, var(--accent)); stroke-width: 1.6; }
+.inst.stale .dial-ring { stroke: var(--dim); }
 .inst-foot { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 16px; font-size: var(--fs-label); color: var(--muted); }
 #gTileFoot { display: contents; }
 .inst-foot b { color: var(--text); font-weight: 500; }
@@ -1317,10 +1324,6 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst-al-link { align-self: flex-start; }
 
 /* só a faixa da leitura acende; borda e estado na cor do nível */
-.inst.lv-seguro .s-safe { background: var(--accent); }
-.inst.lv-atencao .s-att { background: var(--att); }
-.inst.lv-alarme .s-high { background: var(--alarm); }
-.inst.lv-perigo .s-high { background: var(--warn); }
 .inst.lv-seguro .inst-state { color: var(--accent); }
 .inst.lv-atencao, .inst.lv-nocount { --sc: var(--att); border-color: var(--att); background: linear-gradient(180deg, color-mix(in srgb, var(--att) 6%, transparent), transparent 70%), var(--surface); }
 .inst.lv-alarme { --sc: var(--alarm); border-color: var(--alarm); background: linear-gradient(180deg, color-mix(in srgb, var(--alarm) 12%, transparent), transparent 70%), var(--surface); }
@@ -1384,14 +1387,14 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .mini-val { font-size: var(--fs-title); font-weight: 500; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .mini-unit { font-size: var(--fs-caption); color: var(--muted); white-space: nowrap; }
 .mini-sec { font-size: var(--fs-label); color: var(--muted); white-space: nowrap; }
-.mini-state { font-size: var(--fs-label); font-weight: 600; color: var(--dim); white-space: nowrap; }
+.mini-state { font-size: var(--fs-label); font-weight: 600; color: var(--dim); white-space: nowrap; display: inline-flex; align-items: center; gap: 5px; }
 .mini-dev.stale .mini-val { color: var(--dim); }
 .mini-dev.lv-seguro .mini-state { color: var(--accent); }
 .mini-dev.lv-atencao .mini-state, .mini-dev.lv-nocount .mini-state { color: var(--att); }
 .mini-dev.lv-alarme .mini-state { color: var(--alarm); }
 .mini-dev.lv-perigo .mini-state { color: var(--warn); }
 .mini-alert { --c: var(--att); display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid var(--c); border-radius: var(--radius-lg); background: transparent; color: var(--c); font-size: var(--fs-label); font-weight: 600; white-space: nowrap; }
-.mini-alert i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
+.mini-alert i { display: inline-flex; }
 .mini-alert.lv-alarme { --c: var(--alarm); }
 .mini-alert.lv-perigo { --c: var(--warn); }
 .mini.lv-atencao { border-bottom-color: var(--att); }
@@ -1492,7 +1495,7 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .ag-say.lv-alarme { background: linear-gradient(90deg, color-mix(in srgb, var(--alarm) 12%, transparent), var(--surface) 60%); }
 .ag-say.lv-perigo { background: linear-gradient(90deg, color-mix(in srgb, var(--warn) 12%, transparent), var(--surface) 60%); }
 .ag-say.lv-off { background: var(--surface); }
-.ag-say h2 { font-size: var(--fs-title); }
+.ag-say h2 { font-size: var(--fs-title); display: flex; align-items: center; gap: var(--space-3); }
 .ag-say-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
 .chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border: 1px solid var(--border); border-radius: var(--radius-pill); font-size: var(--fs-caption); color: var(--muted); white-space: nowrap; }
 .ag-cells { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
@@ -1552,8 +1555,8 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 
 /* ---------- onde está cada aparelho (onde.js) ---------- */
 .chip.off { color: var(--swap); border-color: color-mix(in srgb, var(--away) 50%, transparent); background: color-mix(in srgb, var(--away) 6%, transparent); }
-.dot.gmc { background: var(--accent); }
-.dot.rc { background: var(--rc); }
+.dot.gmc { background: var(--accent); border: 0; }
+.dot.rc { background: var(--rc); border: 0; }
 .wh-card { display: flex; flex-direction: column; gap: 12px; }
 .wh-card.off { border-color: color-mix(in srgb, var(--away) 50%, transparent); background: linear-gradient(90deg, color-mix(in srgb, var(--away) 6%, transparent), transparent 55%), var(--surface); }
 .wh-head { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; }

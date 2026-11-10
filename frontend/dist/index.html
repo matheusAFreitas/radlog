@@ -158,14 +158,10 @@
         <span class="inst-state" id="gTileState">—</span>
       </header>
       <div class="inst-read" data-view="gmc">
+        <svg class="dial" id="gTileDial" viewBox="0 0 48 48" aria-hidden="true"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/></svg>
         <span class="inst-val mono" id="gTileVal">—</span><span class="inst-unit" id="gTileUnit">µSv/h</span>
         <span class="demo-tag" id="gTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
-      </div>
-      <div class="inst-scale" id="gTileScale" aria-hidden="true">
-        <div class="inst-segs"><span class="s-safe"></span><span class="s-att"></span><span class="s-high"></span></div>
-        <i class="inst-mark" id="gTileMark" hidden></i>
-        <span class="inst-tick" id="gTick1"></span><span class="inst-tick" id="gTick2"></span>
       </div>
       <footer class="inst-foot"><span id="gTileFoot"></span><span class="inst-fill"></span><button type="button" class="link small-link inst-warn" id="gTileSync" hidden></button><button type="button" class="pill clock-chip" id="clockChip" title="Sincronizar o relógio do contador com o do PC" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -179,14 +175,10 @@
         <span class="inst-state" id="rTileState">—</span>
       </header>
       <div class="inst-read" data-view="radiacode">
+        <svg class="dial" id="rTileDial" viewBox="0 0 48 48" aria-hidden="true"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/></svg>
         <span class="inst-val mono" id="rTileVal">—</span><span class="inst-unit" id="rTileUnit">µSv/h</span>
         <span class="demo-tag" id="rTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
-      </div>
-      <div class="inst-scale" id="rTileScale" aria-hidden="true">
-        <div class="inst-segs"><span class="s-safe"></span><span class="s-att"></span><span class="s-high"></span></div>
-        <i class="inst-mark" id="rTileMark" hidden></i>
-        <span class="inst-tick" id="rTick1"></span><span class="inst-tick" id="rTick2"></span>
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
     </article>
@@ -309,6 +301,7 @@
           <div class="plot" id="plot">
             <svg id="chart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho."></svg>
             <div class="peak-dots" id="peakDots"></div>
+            <div class="thr-marks" id="thrMarks" aria-hidden="true"></div>
             <div class="note-marks" id="noteMarks"></div>
             <div class="cursor" id="cursor" hidden></div>
             <div class="zoom-sel" id="zoomSel" hidden></div>
@@ -318,7 +311,7 @@
         </div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="dash" aria-hidden="true"></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RadiaCode</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
     </section>
 

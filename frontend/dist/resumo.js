@@ -257,7 +257,7 @@ function renderSumSay(r, rc) {
     if (rc && rc.awayMinutes) parts.push(`fora de casa: ${hm(rc.awayMinutes)}`);
   }
   $("sumSay").className = "sum-say ag-say lv-" + lv;
-  $("sumSayTitle").textContent = title;
+  lvLabel($("sumSayTitle"), lv, title, 20);
   $("sumSayText").textContent = parts.join(" · ");
   const chip = $("sumSayChip");
   chip.hidden = lv === "off";

@@ -206,7 +206,7 @@ function renderReading() {
   }
 
   const names = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
-  $("levelName").textContent = names[r.level] || "—";
+  lvLabel($("levelName"), r.level, names[r.level] || "—", 16);
   $("levelName").className = "level-name " + r.level;
   // 0 CPM por minutos seguidos: defeito, não "seguro"
   if (r.noCount && !r.saturated) {
@@ -214,7 +214,7 @@ function renderReading() {
     el.textContent = `Sem contagens há ${fmtDur(Date.now() - r.noCountSince)}: o tubo pode estar com defeito. Confira o contador.`;
     el.className = "sigma high";
     el.hidden = false;
-    $("levelName").textContent = "Sem contagens";
+    lvLabel($("levelName"), "nocount", "Sem contagens", 16);
     $("levelName").className = "level-name nocount";
   }
   if (r.noCount && !state.noCountToast && !r.saturated) toast("Sem contagens há 2 min: confira o contador", true);
@@ -262,24 +262,35 @@ function tileFoot(el, u, v, dose, doseSub) {
   el.appendChild(sp);
 }
 
-// régua: p1/p2 são onde começam a 2ª e a 3ª faixa (0 a 1), pos é a leitura
+// mostrador (ideia 1): o arco de fora do logo enche pelos três pedaços, um por
+// faixa (seguro, atenção, alarme); p1/p2 são onde começam a 2ª e a 3ª faixa
+// (0 a 1) e pos é a leitura. No perigo o anel fica inteiro (cor pela classe).
+const DIAL_SEG = [[34.07, 40.11, 13.93, 40.11], [5.01, 24.66, 15.08, 7.22], [32.92, 7.22, 42.99, 24.66]];
+function dialPath(frac) {
+  let d = "", rem = Math.max(0, Math.min(1, frac)) * 3;
+  for (let i = 0; i < 3 && rem > 0; i++) {
+    const p = DIAL_SEG[i], f = Math.min(1, rem);
+    rem -= f;
+    const a0 = Math.atan2(24 - p[1], p[0] - 24);
+    let a1 = Math.atan2(24 - p[3], p[2] - 24);
+    if (a1 > a0) a1 -= 2 * Math.PI;
+    const ae = a0 + (a1 - a0) * f;
+    d += `M${(24 + 19 * Math.cos(a0)).toFixed(2)} ${(24 - 19 * Math.sin(a0)).toFixed(2)}A19 19 0 0 1 ${(24 + 19 * Math.cos(ae)).toFixed(2)} ${(24 - 19 * Math.sin(ae)).toFixed(2)}`;
+  }
+  return d;
+}
 function tileScale(pfx, p1, p2, pos, t1, t2) {
-  const segs = $(pfx + "TileScale").querySelectorAll(".inst-segs span");
-  segs[0].style.flexGrow = p1;
-  segs[1].style.flexGrow = p2 - p1;
-  segs[2].style.flexGrow = 1 - p2;
-  const k1 = $(pfx + "Tick1"), k2 = $(pfx + "Tick2");
-  k1.style.left = p1 * 100 + "%"; k1.textContent = t1;
-  k2.style.left = p2 * 100 + "%"; k2.textContent = t2;
-  const m = $(pfx + "TileMark");
-  m.hidden = pos == null;
-  if (pos != null) m.style.left = Math.max(0, Math.min(1, pos)) * 100 + "%";
+  let f = null;
+  if (pos != null) f = pos < p1 ? pos / p1 / 3 : pos < p2 ? 1 / 3 + (pos - p1) / (p2 - p1) / 3 : 2 / 3 + (pos - p2) / (1 - p2) / 3;
+  $(pfx + "TileArc").setAttribute("d", f == null ? "" : dialPath($(pfx + "Tile").classList.contains("lv-perigo") ? 1 : Math.max(f, 0.02)));
+  $(pfx + "TileDial").querySelector("title")?.remove();
+  $(pfx + "TileDial").insertAdjacentHTML("afterbegin", `<title>atenção a partir de ${t1} · alarme a partir de ${t2}</title>`);
 }
 
 function tileState(pfx, lvl, word) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  $(pfx + "TileState").textContent = word;
+  lvLabel($(pfx + "TileState"), lvl, word, 14);
 }
 
 // faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
@@ -293,7 +304,7 @@ function miniDev(pfx, u, v, lvl, word, dotCls, stale) {
   $("mini" + pfx + "Unit").textContent = UNIT_TXT[u];
   const k2 = u === "cpm" || u === "cps" ? "usv" : "cpm";
   $("mini" + pfx + "Sec").textContent = v ? `${v[k2]} ${UNIT_TXT[k2]}` : "";
-  $("mini" + pfx + "State").textContent = word;
+  lvLabel($("mini" + pfx + "State"), lvl, word, 12);
 }
 
 function renderGTile() {
@@ -309,7 +320,6 @@ function renderGTile() {
   // faixas do manual do GMC-800: 50 e 100 CPM, régua até 150 (como no quadro dele)
   const k = calK();
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
-  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   let lvl = "", word;
   if (live) {
     lvl = r.level;
@@ -318,6 +328,7 @@ function renderGTile() {
     else if (r.noCount) { lvl = "nocount"; word = "Sem contagens"; }
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word);
+  tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
   tileFoot($("gTileFoot"), u, v, state.gDose);
@@ -342,10 +353,10 @@ function renderRTile(st, o) {
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
-  tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
   const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : LV_WORD;
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
+  tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
   $("miniR").hidden = false;
   miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
@@ -365,6 +376,7 @@ function renderATile() {
   const ma = $("miniAlert");
   ma.hidden = !top;
   ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
+  ma.querySelector("i").innerHTML = lvIcon(lv, 12);
   $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
   $("mini").classList.toggle("alerting", !!top);
   ["atencao", "alarme", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
@@ -372,6 +384,7 @@ function renderATile() {
   const nav = $("navAlerts");
   nav.hidden = !top;
   nav.textContent = String(srcs.size);
+  if (lv) nav.insertAdjacentHTML("afterbegin", lvIcon(lv, 10, "Nível: " + LV_WORD[lv]));
   nav.className = "side-badge mono" + (lv ? " lv-" + lv : "");
   if (top) {
     $("aTileTitle").textContent = `${lvlName(top)} no ${dev(top)}` + (top.demo ? " (demo)" : "");
@@ -543,8 +556,8 @@ function renderList(ul, list, max, empty, alerts) {
     const li = document.createElement("li");
     if (alerts) {
       const d = document.createElement("span");
-      d.className = "dot-a " + (/Alarme/.test(e.text) ? "alarm" : "att");
-      d.setAttribute("aria-hidden", "true");
+      d.className = "dot-a";
+      d.innerHTML = lvIcon(/Perigo/.test(e.text) ? "perigo" : /Alarme/.test(e.text) ? "alarme" : "atencao", 12);
       li.appendChild(d);
     }
     const t = document.createElement("time");
@@ -3267,7 +3280,7 @@ function renderRcMain(st) {
     ? `<span>0</span><span>${fmt(attn, 2)} · alarme 1</span><span>${fmt(alarm, 2)} · alarme 2</span>`
     : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alarme</span>`;
   const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
-  $("rcLevelName").textContent = (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—";
+  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
   $("rcLevelName").className = "level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   $("rcLevelMarker").hidden = usv == null;

@@ -123,6 +123,10 @@ async function refreshChart() {
   const showDanger = ringing && dangerV && dangerV <= top;
   if (showAlarm && !(dangerV && alarmV >= dangerV)) thr += hline(alarmV, COR.alarm, 2);
   if (showDanger) thr += hline(dangerV, COR.warn, 2);
+  // forma do nível na ponta direita de cada linha de limite (ideia 12)
+  const mark = (v, lv) => `<span style="top:${((y(v) / H) * 100).toFixed(2)}%">${lvIcon(lv, 10)}</span>`;
+  $("thrMarks").innerHTML = (top >= thrV ? mark(thrV, "atencao") : "") +
+    (showAlarm && !(dangerV && alarmV >= dangerV) ? mark(alarmV, "alarme") : "") + (showDanger ? mark(dangerV, "perigo") : "");
   const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
   $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
   $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;

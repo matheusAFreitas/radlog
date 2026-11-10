@@ -21,6 +21,7 @@ var (
 	cAtt    = pdf.Hex("#C98A12")
 	cAlarm  = pdf.Hex("#D06A1E")
 	cWarn   = pdf.Hex("#C8383E")
+	cWhite  = pdf.Hex("#FFFFFF")
 	cBand   = pdf.Hex("#A9DDBF") // faixa mín–máx do gráfico
 	cGap    = pdf.Hex("#ECEFF1") // sem dado
 	cAttBg  = pdf.Hex("#FCEFD3")
@@ -144,7 +145,7 @@ func (p *reportPDF) table(head []string, rows [][]string, cols []float64, right 
 			col := cInk
 			if i == 1 && rowColor != nil {
 				if rc := rowColor(ri); rc != nil {
-					p.d.Rect(x+4, p.y+5, 5, 5, rc, nil)
+					p.levelShape(x+3.5, p.y+4.5, 7, *rc)
 					p.d.Text(x+13, p.y+11, f, 8, col, pdf.Fit(c, f, 8, cols[i]-17))
 					x += cols[i]
 					continue
@@ -159,6 +160,29 @@ func (p *reportPDF) table(head []string, rows [][]string, cols []float64, right 
 		}
 		p.y += 15
 		p.d.Line(pm, p.y, pdf.W-pm, p.y, 0.3, cLine, false)
+	}
+}
+
+// levelShape desenha a forma do nível (ideia 12) numa caixa size × size em
+// (x, y): triângulo (atenção), losango (alarme) e octógono com faixa
+// (perigo). Imprime bem em preto e branco. A forma sai da cor do nível.
+func (p *reportPDF) levelShape(x, y, size float64, c pdf.RGB) {
+	s := size / 16
+	pt := func(xs ...float64) [][2]float64 {
+		var out [][2]float64
+		for i := 0; i+1 < len(xs); i += 2 {
+			out = append(out, [2]float64{x + xs[i]*s, y + xs[i+1]*s})
+		}
+		return out
+	}
+	switch c {
+	case cWarn:
+		p.d.Polygon(pt(5.1, 1, 10.9, 1, 15, 5.1, 15, 10.9, 10.9, 15, 5.1, 15, 1, 10.9, 1, 5.1), c)
+		p.d.Rect(x+4*s, y+6.9*s, 8*s, 2.2*s, &cWhite, nil)
+	case cAlarm:
+		p.d.Polygon(pt(8, .6, 15.4, 8, 8, 15.4, .6, 8), c)
+	default:
+		p.d.Polygon(pt(8, 1.2, 15.2, 14.4, .8, 14.4), c)
 	}
 }
 
