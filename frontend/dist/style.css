@@ -1235,6 +1235,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side-group { font-size: var(--fs-caption); color: var(--dim); padding: var(--space-4) var(--space-3) var(--space-1); }
 .side-nav .side-group:first-child { padding-top: var(--space-1); }
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
+.side-nav button .side-ico { flex: none; width: 18px; height: 18px; margin-right: calc(var(--space-3) - var(--space-2)); color: var(--muted); }
+.side-nav button .side-ico + span { flex: 1; }
+.side-nav button[aria-current="page"] .side-ico { color: var(--accent); }
 .side-nav button:hover { background: var(--surface-2); color: var(--text); }
 .side-nav button[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 500; box-shadow: inset 3px 0 0 var(--accent); }
 .side-badge { min-width: 20px; height: 20px; padding: 0 var(--space-2); border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; gap: 3px; font-size: var(--fs-caption); font-weight: 600; background: var(--att); color: var(--on-accent); }

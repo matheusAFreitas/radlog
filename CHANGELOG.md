@@ -1,5 +1,11 @@
 # Versões
 
+## 2.38.3
+- Cada item do menu lateral ganhou um ícone, no mesmo traço dos de baixo:
+  mostrador no Agora, linha nos Gráficos, caderno no Resumo, sino nos
+  Alertas, mira no Medir objeto, casa com seta no Fora de casa, nuvem na
+  Chuva e os dois aparelhos. O ícone do item aberto fica na cor de destaque.
+
 ## 2.38.2
 - **Configurações: explicações recolhidas em "Como funciona".** Em 23
   cartões, o texto que só explica (como funciona, de onde vem o número,
