@@ -64,7 +64,7 @@ A conversão CPM → µSv/h depende da calibração do tubo e da energia da radi
 A diferença em σ	The difference in σ
 A diferença está perto do limite da variação natural. Repita com 5 minutos para ter certeza.	The difference is close to the limit of natural variation. Repeat with 5 minutes to be sure.
 A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto encostado no contador; a 1 metro é muito menos.	The difference is much larger than the natural variation of the count. The µSv/h value applies to the object touching the counter; at 1 meter it's much less.
-A dose ficou no nível do seu fundo natural.	The dose stayed at your natural background level.
+A dose ficou no nível da radiação de fundo natural.	The dose stayed at your natural background level.
 A dose é a do contador (monitor de área) no lugar onde ele está, não a dose de quem está perto. Não é dosimetria pessoal.	The dose is the counter's (area monitor) at the place where it is, not the dose of whoever is nearby. It's not personal dosimetry.
 A eficiência no pico (0,1%) é um chute para o 102 encostado num pacote; com o aparelho, ela vai ser medida com o próprio KCl. O tempo de medição vale para o fundo e para o sal.	The peak efficiency (0.1%) is a guess for the 102 against a package; with the device, it will be measured with the KCl itself. The measuring time applies to both the background and the salt.
 A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.	The estimate projects the CPM before a full minute closes. At 60 s the screen shows only the real count of the last minute.
@@ -156,7 +156,7 @@ CPM sozinho não identifica o radionuclídeo nem o tipo de radiação.	CPM alone
 CPM às	CPM at
 Cabe décadas, mas um pico de poucos minutos some dentro da média da hora.	Holds decades, but a peak of a few minutes disappears inside the hour's average.
 Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.	Each photon that arrives is counted in its energy channel. Over time, each isotope's peaks show up. Hover over a peak to see which isotope usually appears there. The dashed line is the background expected in the same time.
-Calculado com a distribuição de Poisson do seu fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).	Calculated with your background's Poisson distribution. That's why up to 3σ happens every day: there are 1,440 minutes. A peak of 4σ or more deserves a look (rain? something near the counter?).
+Calculado com a distribuição de Poisson desse nível de fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).	Calculated with your background's Poisson distribution. That's why up to 3σ happens every day: there are 1,440 minutes. A peak of 4σ or more deserves a look (rain? something near the counter?).
 Calibração	Calibration
 Cancelar edição	Cancel editing
 Chernobyl, 1986: o "pé de elefante"	Chernobyl, 1986: the "elephant's foot"
@@ -417,7 +417,7 @@ O que fazer	What to do
 O que mostrar	What to show
 O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam	What the app will do with the RadiaCode 102 connected (USB or Bluetooth), in the order it will be ready. The charts below use
 O radar não cobre o seu local, então a chuva vem só do modelo do tempo (Open-Meteo), que pode não mostrar chuva bem localizada.	The radar doesn't cover your location, so rain comes only from the weather model (Open-Meteo), which may miss very local rain.
-O seu fundo é	Your background is
+O nível de fundo aqui é	Your background is
 O tubo do GMC-800 vê gama e parte do beta. Objetos que emitem mais beta (ex.: tungstênio toriado, vidro de urânio) podem dar CPM alto com µSv/h pouco confiável.	The GMC-800 tube sees gamma and part of beta. Objects that emit more beta (e.g., thoriated tungsten, uranium glass) can give high CPM with unreliable µSv/h.
 O µSv/h é a taxa no tubo, na posição medida, com a calibração para Cs-137. Não é a dose de quem segura o objeto e muda muito com a distância.	The µSv/h is the rate at the tube, in the measured position, with the Cs-137 calibration. It's not the dose of whoever holds the object and changes a lot with distance.
 Objeto ÷ fundo	Object ÷ background
@@ -427,7 +427,7 @@ Onde mais aparece	Where else it shows up
 Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.	Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RadiaCode and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.
 Ontem	Yesterday
 Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.	The device settings didn't go to the counter: use "Write to the counter" in the Counter section.
-Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido.	CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.
+Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.	CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.
 Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.	The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.
 Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.	The same 180 minutes: count (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.
 Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.	PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.
@@ -617,7 +617,7 @@ com mais dias de dados dá para ver se o fundo muda com a hora	with more days of
 com o objeto	with the object
 com o objeto (média de 10 s)	with the object (10 s average)
 com o sal	with the salt
-com o seu fundo	with your background
+com esse nível de fundo	with your background
 começam os efeitos agudos (enjoo de radiação)	acute effects begin (radiation sickness)
 começo da chuva	start of the rain
 conectado	connected
@@ -902,7 +902,7 @@ volume do alarme	alarm volume
 ({0} acima do fundo de {1})	({0} above the background of {1})
 +{0} alertas nesta hora	+{0} alerts in this hour
 3 erros seguidos em {0} ({1}), com a porta ainda na lista	3 errors in a row on {0} ({1}), with the port still in the list
-: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto ({0} CPM com o seu fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais.	: the 60-minute average varies √60 ≈ 7.7 times less than 1 minute ({0} CPM with your background). So, in the hourly pattern, +1.8 CPM in an hour may already be 2σ or more.
+: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto ({0} CPM com esse nível de fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais.	: the 60-minute average varies √60 ≈ 7.7 times less than 1 minute ({0} CPM with your background). So, in the hourly pattern, +1.8 CPM in an hour may already be 2σ or more.
 A contagem do Geiger varia sozinha de um minuto para outro. Pelas suas leituras dos últimos 30 dias, o fundo fica em {0} CPM e quase todas as leituras (95%) caem entre {1} e {2} CPM. Um pouco acima disso ainda pode ser acaso; acima de {3} CPM dificilmente é.	The Geiger count varies on its own from one minute to the next. From your readings over the last 30 days, the background sits at {0} CPM and almost all readings (95%) fall between {1} and {2} CPM. A little above that can still be chance; above {3} CPM it hardly is.
 A diferença vale {0} vezes a incerteza ({1}σ)	The difference is {0} times the uncertainty ({1}σ)
 A partir de {0} CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em "Níveis do app".	From {0} CPM the app's danger alarm sounds (red), with priority over yours. Adjust it in "App levels".
@@ -926,7 +926,7 @@ CPM às {0}	CPM at {0}
 Choveu das {0} às {1}	It rained from {0} to {1}
 Contador conectado ({0} em {1})	Counter connected ({0} on {1})
 Contador voltou a contar depois de {0} min em 0 CPM	Counter counting again after {0} min at 0 CPM
-Dentro do normal — seu fundo costuma ficar entre {0} e {1} CPM	Within normal — your background usually stays between {0} and {1} CPM
+Dentro do normal — o nível de fundo costuma ficar entre {0} e {1} CPM	Within normal — your background usually stays between {0} and {1} CPM
 Diferença de {0} σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.	Difference of {0} σ: up to ~2σ is the natural variation of the count; from 3σ up the difference is real.
 Dose medida no período escolhido no cartão de dose: {0}.	Dose measured in the period chosen on the dose card: {0}.
 Dose no contador ({0})	Dose on the counter ({0})
@@ -1753,7 +1753,7 @@ média {0} · mín {1} · máx {2} µSv/h · RadiaCode média {3}	average {0} ·
 última leitura (ontem {0})	last reading (yesterday {0})
 última leitura ({0} {1})	last reading ({0} {1})
 conectado pelo {0}, bateria {1}%	connected via {0}, battery {1}%
-Dentro do normal — seu fundo costuma ficar entre {0} e {1} µSv/h	Within normal — your background usually stays between {0} and {1} µSv/h
+Dentro do normal — o nível de fundo costuma ficar entre {0} e {1} µSv/h	Within normal — your background usually stays between {0} and {1} µSv/h
 Acima do normal (seu normal: {0} a {1} µSv/h) — dificilmente é só variação	Above normal (your normal: {0} to {1} µSv/h) — hardly just variation
 Um pouco acima do normal (seu normal: {0} a {1} µSv/h) — pode ser só variação	Slightly above normal (your normal: {0} to {1} µSv/h) — may be just variation
 Abaixo do normal (seu normal: {0} a {1} µSv/h) — sem problema	Below normal (your normal: {0} to {1} µSv/h) — no problem
@@ -1934,12 +1934,12 @@ Deixe o {0} no objeto e o {1} com você (no bolso ou na mão): no fim, o app mos
 Com você ({0}): começa a contar quando o objeto for medido.	With you ({0}): starts counting when the object is measured.
 Com você ({0}): {1} µSv até agora	With you ({0}): {1} µSv so far
 agora {0}	now {0}
-seu fundo {0}	your background {0}
+nível de fundo {0}	your background {0}
 {0}: {1} contagens	{0}: {1} counts
 {0}: {1} ± {2} CPM sobre o fundo ({3}σ)	{0}: {1} ± {2} CPM above background ({3}σ)
 Com você ({0})	With you ({0})
-Acima do seu fundo ({0}): +{1} µSv, o que o objeto somou na sua dose nesse tempo.	Above your background ({0}): +{1} µSv, what the object added to your dose in that time.
-Igual ao seu fundo ({0}): o objeto não somou nada que dê para ver na sua dose.	Same as your background ({0}): the object added nothing visible to your dose.
+Acima do nível de fundo ({0}): +{1} µSv, o que o objeto somou na sua dose nesse tempo.	Above your background ({0}): +{1} µSv, what the object added to your dose in that time.
+Igual ao nível de fundo ({0}): o objeto não somou nada que dê para ver na sua dose.	Same as your background ({0}): the object added nothing visible to your dose.
 Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).	Shows how much you received while the object was being measured, at the position where the device was (pocket, hand…).
 {0} (também perto do objeto)	{0} (also near the object)
 Sem leituras suficientes desse aparelho.	Not enough readings from this device.
@@ -1962,7 +1962,7 @@ TAMBÉM PERTO DO OBJETO: {0}	ALSO NEAR THE OBJECT: {0}
 Dose recebida	Dose received
 {0} µSv em {1}, enquanto o objeto era medido	{0} µSv over {1}, while the object was being measured
 Média · máximo	Average · maximum
-Seu fundo em casa	Your home background
+Nível de fundo em casa	Your home background
 Acima do fundo	Above background
 {0} µSv (o que o objeto somou nesse tempo)	{0} µSv (what the object added in that time)
 {0} ± {1} CPM ({2} contagens em {3} s)	{0} ± {1} CPM ({2} counts in {3} s)
@@ -2713,7 +2713,6 @@ Tudo normal agora.	All normal now.
 Nenhum aparelho lendo agora.	No device reading right now.
 A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.	The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.
 Veja os detalhes em Alertas.	See the details in Alerts.
-dentro do seu fundo	within your background
 Dose pessoal, pelo RadiaCode (anda com você).	Personal dose, from the RadiaCode (it goes with you).
 Dose da casa, pelo GMC-800 (fica parado).	Home dose, from the GMC-800 (it stays put).
 O RadiaCode ainda não tem dado neste ano. Troque para "casa" para ver a do GMC-800.	The RadiaCode has no data this year yet. Switch to "home" to see the GMC-800's.
@@ -2724,7 +2723,7 @@ Taxa de dose nas últimas 24 horas	Dose rate over the last 24 hours
 só o fundo, no ano todo	background only, whole year
 Casa em {0} µSv/h	Home at {0} µSv/h
 você em {0} µSv/h	you at {0} µSv/h
-{0} σ acima do seu fundo	{0} σ above your background
+{0} σ acima do nível de fundo	{0} σ above your background
 {0} no {1} agora.	{0} on the {1} now.
 fundo de casa · {0} µSv/h	home background · {0} µSv/h
 no ano todo, nesse ritmo: {0} {1}	whole year at this rate: {0} {1}
@@ -2923,7 +2922,7 @@ Nível: Alarme	Level: Alarm
 Nível: Perigo	Level: Danger
 Nível: Sem contagens	Level: No counts
 atenção a partir de {0} · alarme a partir de {1}	attention from {0} · alarm from {1}
-dentro do fundo de sempre	within the usual background
+no nível de fundo habitual	at the usual background level
 acima do limite de atenção	above the attention limit
 passou o limite de alarme	past the alarm limit
 acima do limite de perigo	above the danger limit

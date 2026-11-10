@@ -16,6 +16,9 @@
     10× o alarme 2 enquanto não houver um limite próprio.
 - O aviso de relógio do GMC fora da hora vai para o cartão grande na página
   dele.
+- Textos do nível de fundo mais claros: "dentro do fundo de sempre" virou
+  "no nível de fundo habitual", e "seu fundo" virou "nível de fundo" nas
+  frases do Agora, do σ, da Medição e do relatório.
 ## 2.30.0
 - **O RadiaCode não perde mais o que mediu com o PC desligado.** Sozinho, o
   aparelho guarda na memória as últimas ~1000 h (a taxa de 96 em 96 s, a

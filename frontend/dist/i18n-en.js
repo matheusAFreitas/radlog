@@ -65,7 +65,7 @@ const I18N_EN = {
 "A diferença em σ": "The difference in σ",
 "A diferença está perto do limite da variação natural. Repita com 5 minutos para ter certeza.": "The difference is close to the limit of natural variation. Repeat with 5 minutes to be sure.",
 "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto encostado no contador; a 1 metro é muito menos.": "The difference is much larger than the natural variation of the count. The µSv/h value applies to the object touching the counter; at 1 meter it's much less.",
-"A dose ficou no nível do seu fundo natural.": "The dose stayed at your natural background level.",
+"A dose ficou no nível da radiação de fundo natural.": "The dose stayed at your natural background level.",
 "A dose é a do contador (monitor de área) no lugar onde ele está, não a dose de quem está perto. Não é dosimetria pessoal.": "The dose is the counter's (area monitor) at the place where it is, not the dose of whoever is nearby. It's not personal dosimetry.",
 "A eficiência no pico (0,1%) é um chute para o 102 encostado num pacote; com o aparelho, ela vai ser medida com o próprio KCl. O tempo de medição vale para o fundo e para o sal.": "The peak efficiency (0.1%) is a guess for the 102 against a package; with the device, it will be measured with the KCl itself. The measuring time applies to both the background and the salt.",
 "A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.": "The estimate projects the CPM before a full minute closes. At 60 s the screen shows only the real count of the last minute.",
@@ -157,7 +157,7 @@ const I18N_EN = {
 "CPM às": "CPM at",
 "Cabe décadas, mas um pico de poucos minutos some dentro da média da hora.": "Holds decades, but a peak of a few minutes disappears inside the hour's average.",
 "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.": "Each photon that arrives is counted in its energy channel. Over time, each isotope's peaks show up. Hover over a peak to see which isotope usually appears there. The dashed line is the background expected in the same time.",
-"Calculado com a distribuição de Poisson do seu fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).": "Calculated with your background's Poisson distribution. That's why up to 3σ happens every day: there are 1,440 minutes. A peak of 4σ or more deserves a look (rain? something near the counter?).",
+"Calculado com a distribuição de Poisson desse nível de fundo. Por isso até 3σ acontece todo dia: são 1.440 minutos. Um pico de 4σ ou mais já pede uma olhada (chuva? algo perto do contador?).": "Calculated with your background's Poisson distribution. That's why up to 3σ happens every day: there are 1,440 minutes. A peak of 4σ or more deserves a look (rain? something near the counter?).",
 "Calibração": "Calibration",
 "Cancelar edição": "Cancel editing",
 "Chernobyl, 1986: o \"pé de elefante\"": "Chernobyl, 1986: the \"elephant's foot\"",
@@ -418,7 +418,7 @@ const I18N_EN = {
 "O que mostrar": "What to show",
 "O que o app vai fazer com o RadiaCode 102 conectado (USB ou Bluetooth), na ordem em que vai ficar pronto. Os gráficos abaixo usam": "What the app will do with the RadiaCode 102 connected (USB or Bluetooth), in the order it will be ready. The charts below use",
 "O radar não cobre o seu local, então a chuva vem só do modelo do tempo (Open-Meteo), que pode não mostrar chuva bem localizada.": "The radar doesn't cover your location, so rain comes only from the weather model (Open-Meteo), which may miss very local rain.",
-"O seu fundo é": "Your background is",
+"O nível de fundo aqui é": "Your background is",
 "O tubo do GMC-800 vê gama e parte do beta. Objetos que emitem mais beta (ex.: tungstênio toriado, vidro de urânio) podem dar CPM alto com µSv/h pouco confiável.": "The GMC-800 tube sees gamma and part of beta. Objects that emit more beta (e.g., thoriated tungsten, uranium glass) can give high CPM with unreliable µSv/h.",
 "O µSv/h é a taxa no tubo, na posição medida, com a calibração para Cs-137. Não é a dose de quem segura o objeto e muda muito com a distância.": "The µSv/h is the rate at the tube, in the measured position, with the Cs-137 calibration. It's not the dose of whoever holds the object and changes a lot with distance.",
 "Objeto ÷ fundo": "Object ÷ background",
@@ -428,7 +428,7 @@ const I18N_EN = {
 "Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RadiaCode e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.": "Where you are among known references, to get a sense of scale. Values are typical and rounded; green lines are yours (home and saved measurements), pink ones are from the RadiaCode and red ones are from the biggest accidents (Goiânia, Chernobyl and Fukushima). The bar is on a logarithmic scale: each step is 10 times more.",
 "Ontem": "Yesterday",
 "Os ajustes do aparelho não foram para o contador: use \"Gravar no contador\" na seção Contador.": "The device settings didn't go to the counter: use \"Write to the counter\" in the Counter section.",
-"Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
+"Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
 "Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.": "The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.",
 "Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
 "Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.": "PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.",
@@ -617,7 +617,7 @@ const I18N_EN = {
 "com o objeto": "with the object",
 "com o objeto (média de 10 s)": "with the object (10 s average)",
 "com o sal": "with the salt",
-"com o seu fundo": "with your background",
+"com esse nível de fundo": "with your background",
 "começam os efeitos agudos (enjoo de radiação)": "acute effects begin (radiation sickness)",
 "começo da chuva": "start of the rain",
 "conectado": "connected",
@@ -1377,7 +1377,7 @@ const I18N_EN = {
 "conecte o GMC-800 para medir com os dois": "connect the GMC-800 to measure with both",
 "Dose recebida": "Dose received",
 "Média · máximo": "Average · maximum",
-"Seu fundo em casa": "Your home background",
+"Nível de fundo em casa": "Your home background",
 "Acima do fundo": "Above background",
 "Os dois juntos": "Both together",
 "A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados).": "Each line's uncertainty is Poisson's: square root of the counts, converted to µSv/h. The difference's combines both (root of the sum of squares).",
@@ -1882,7 +1882,6 @@ const I18N_EN = {
 "Nenhum aparelho lendo agora.": "No device reading right now.",
 "A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.": "The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.",
 "Veja os detalhes em Alertas.": "See the details in Alerts.",
-"dentro do seu fundo": "within your background",
 "Dose pessoal, pelo RadiaCode (anda com você).": "Personal dose, from the RadiaCode (it goes with you).",
 "Dose da casa, pelo GMC-800 (fica parado).": "Home dose, from the GMC-800 (it stays put).",
 "O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.": "The RadiaCode has no data this year yet. Switch to \"home\" to see the GMC-800's.",
@@ -2034,7 +2033,7 @@ const I18N_EN = {
 "Nível: Alarme": "Level: Alarm",
 "Nível: Perigo": "Level: Danger",
 "Nível: Sem contagens": "Level: No counts",
-"dentro do fundo de sempre": "within the usual background",
+"no nível de fundo habitual": "at the usual background level",
 "acima do limite de atenção": "above the attention limit",
 "passou o limite de alarme": "past the alarm limit",
 "acima do limite de perigo": "above the danger limit",
@@ -2152,6 +2151,15 @@ const I18N_EN = {
 ]
 ],
 [
+": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
+"^: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto \\(((?:(?! · ).)+?) CPM com esse nível de fundo\\)\\. Por isso, no padrão por hora, \\+1,8 CPM numa hora já pode ser 2σ ou mais\\.$",
+": the 60-minute average varies √60 ≈ 7.7 times less than 1 minute (${1} CPM with your background). So, in the hourly pattern, +1.8 CPM in an hour may already be 2σ or more.",
+[
+": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
+" CPM com esse nível de fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais."
+]
+],
+[
 "fundo da casa: média dos ",
 "^fundo da casa: média dos ((?:(?! · ).)+?) min gravados antes da medição \\(em casa, fora de alertas e medições\\); a incerteza é a maior entre a de Poisson e a do espalhamento real dos minutos$",
 "home background: average of the ${1} min recorded before the measurement (at home, outside alerts and measurements); the uncertainty is the larger of Poisson's and the real spread of the minutes",
@@ -2169,15 +2177,6 @@ const I18N_EN = {
 " h com os dois lado a lado, o mesmo fundo deu ",
 " µSv/h no GMC-800 e ",
 " µSv/h no RadiaCode. O RadiaCode pesa cada contagem pela energia; o GMC usa uma curva de fábrica."
-]
-],
-[
-": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
-"^: a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto \\(((?:(?! · ).)+?) CPM com o seu fundo\\)\\. Por isso, no padrão por hora, \\+1,8 CPM numa hora já pode ser 2σ ou mais\\.$",
-": the 60-minute average varies √60 ≈ 7.7 times less than 1 minute (${1} CPM with your background). So, in the hourly pattern, +1.8 CPM in an hour may already be 2σ or more.",
-[
-": a média de 60 minutos varia √60 ≈ 7,7 vezes menos que 1 minuto (",
-" CPM com o seu fundo). Por isso, no padrão por hora, +1,8 CPM numa hora já pode ser 2σ ou mais."
 ]
 ],
 [
@@ -2738,11 +2737,30 @@ const I18N_EN = {
 ]
 ],
 [
+"Acima do nível de fundo (",
+"^Acima do nível de fundo \\(((?:(?! · ).)+?)\\): \\+((?:(?! · ).)+?) µSv, o que o objeto somou na sua dose nesse tempo\\.$",
+"Above your background (${1}): +${2} µSv, what the object added to your dose in that time.",
+[
+"Acima do nível de fundo (",
+"): +",
+" µSv, o que o objeto somou na sua dose nesse tempo."
+]
+],
+[
 "não vou gravar: a configuração do contador tem valores que o app não reconhece (",
 "^não vou gravar: a configuração do contador tem valores que o app não reconhece \\(((?:(?! · ).)+?)\\)$",
 "won't write: the counter configuration has values the app doesn't recognize (${1})",
 [
 "não vou gravar: a configuração do contador tem valores que o app não reconhece ("
+]
+],
+[
+"Igual ao nível de fundo (",
+"^Igual ao nível de fundo \\(((?:(?! · ).)+?)\\): o objeto não somou nada que dê para ver na sua dose\\.$",
+"Same as your background (${1}): the object added nothing visible to your dose.",
+[
+"Igual ao nível de fundo (",
+"): o objeto não somou nada que dê para ver na sua dose."
 ]
 ],
 [
@@ -2801,16 +2819,6 @@ const I18N_EN = {
 ]
 ],
 [
-"Acima do seu fundo (",
-"^Acima do seu fundo \\(((?:(?! · ).)+?)\\): \\+((?:(?! · ).)+?) µSv, o que o objeto somou na sua dose nesse tempo\\.$",
-"Above your background (${1}): +${2} µSv, what the object added to your dose in that time.",
-[
-"Acima do seu fundo (",
-"): +",
-" µSv, o que o objeto somou na sua dose nesse tempo."
-]
-],
-[
 "Aprendendo o normal dos dois em casa: ",
 "^Aprendendo o normal dos dois em casa: ((?:(?! · ).)+?) h juntos até agora; a vigia começa em ((?:(?! · ).)+?)\\.$",
 "Learning what is normal for both at home: ${1} h together so far; the watch starts on ${2}.",
@@ -2826,15 +2834,6 @@ const I18N_EN = {
 [
 " CPM (≈ ",
 " µSv/h), mediana das leituras por minuto dos últimos 30 dias em casa"
-]
-],
-[
-"Igual ao seu fundo (",
-"^Igual ao seu fundo \\(((?:(?! · ).)+?)\\): o objeto não somou nada que dê para ver na sua dose\\.$",
-"Same as your background (${1}): the object added nothing visible to your dose.",
-[
-"Igual ao seu fundo (",
-"): o objeto não somou nada que dê para ver na sua dose."
 ]
 ],
 [
@@ -3192,6 +3191,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Dentro do normal — o nível de fundo costuma ficar entre ",
+"^Dentro do normal — o nível de fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) µSv/h$",
+"Within normal — your background usually stays between ${1} and ${2} µSv/h",
+[
+"Dentro do normal — o nível de fundo costuma ficar entre ",
+" µSv/h"
+]
+],
+[
 "A memória está cerca de ",
 "^A memória está cerca de ((?:(?! · ).)+?)% ocupada \\(estimado desde o download\\)\\.$",
 "The memory is about ${1}% full (estimated since the download).",
@@ -3274,6 +3282,15 @@ const I18N_EN = {
 "Alarme (histórico do contador): pico de ",
 " µSv/h às ",
 " (limite "
+]
+],
+[
+"Dentro do normal — o nível de fundo costuma ficar entre ",
+"^Dentro do normal — o nível de fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
+"Within normal — your background usually stays between ${1} and ${2} CPM",
+[
+"Dentro do normal — o nível de fundo costuma ficar entre ",
+" CPM"
 ]
 ],
 [
@@ -3430,15 +3447,6 @@ const I18N_EN = {
 ]
 ],
 [
-"Dentro do normal — seu fundo costuma ficar entre ",
-"^Dentro do normal — seu fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) µSv/h$",
-"Within normal — your background usually stays between ${1} and ${2} µSv/h",
-[
-"Dentro do normal — seu fundo costuma ficar entre ",
-" µSv/h"
-]
-],
-[
 "Razão pessoal ÷ casa: ",
 "^Razão pessoal ÷ casa: ((?:(?! · ).)+?) \\(RadiaCode ÷ GMC\\-800 em µSv/h\\)\\.$",
 "Personal ÷ home ratio: ${1} (RadiaCode ÷ GMC-800 in µSv/h).",
@@ -3519,15 +3527,6 @@ const I18N_EN = {
 " de ",
 " minutos com os dois · ",
 " fora da curva ficaram de fora"
-]
-],
-[
-"Dentro do normal — seu fundo costuma ficar entre ",
-"^Dentro do normal — seu fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
-"Within normal — your background usually stays between ${1} and ${2} CPM",
-[
-"Dentro do normal — seu fundo costuma ficar entre ",
-" CPM"
 ]
 ],
 [
@@ -5984,6 +5983,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) σ acima do nível de fundo$",
+"${1} σ above your background",
+[
+" σ acima do nível de fundo"
+]
+],
+[
 "Alarme: ",
 "^Alarme: ((?:(?! · ).)+?) µSv/h \\(limite ((?:(?! · ).)+?)\\)$",
 "Alarm: ${1} µSv/h (limit ${2})",
@@ -6918,14 +6925,6 @@ const I18N_EN = {
 "${1} unsaved changes:",
 [
 " mudanças não salvas:"
-]
-],
-[
-"",
-"^((?:(?! · ).)+?) σ acima do seu fundo$",
-"${1} σ above your background",
-[
-" σ acima do seu fundo"
 ]
 ],
 [
@@ -8117,6 +8116,14 @@ const I18N_EN = {
 ]
 ],
 [
+"nível de fundo ",
+"^nível de fundo ((?:(?! · ).)+?)$",
+"your background ${1}",
+[
+"nível de fundo "
+]
+],
+[
 "Conectado pelo ",
 "^Conectado pelo ((?:(?! · ).)+?)$",
 "Connected via ${1}",
@@ -9123,14 +9130,6 @@ const I18N_EN = {
 [
 "máx ",
 " µSv/h"
-]
-],
-[
-"seu fundo ",
-"^seu fundo ((?:(?! · ).)+?)$",
-"your background ${1}",
-[
-"seu fundo "
 ]
 ],
 [

@@ -807,7 +807,7 @@ func (p *reportPDF) measSide(m SavedMeasure, o *MeasureSide) {
 		}
 		if o.BgUSv > 0 {
 			rows = append(rows,
-				[2]string{"Seu fundo em casa", u(o.BgUSv)},
+				[2]string{"Nível de fundo em casa", u(o.BgUSv)},
 				[2]string{"Acima do fundo", fmt.Sprintf("%s µSv (o que o objeto somou nesse tempo)", fmtBR(o.Excess, 4))})
 		}
 		p.kv(rows, 120)
