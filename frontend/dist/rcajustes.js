@@ -244,7 +244,7 @@ function wireRcCfg() {
 
   // conectou ou caiu com a seção aberta: lê de novo ou trava
   on("radiacode", () => {
-    if (state.view !== "config" || $("rcCfg").closest("fieldset").classList.contains("sec-off")) return;
+    if (state.view !== "config" || !setShown($("rcCfg"))) return;
     if (rcOnlineReal() && !rcCfgRead) openRcCfg();
     else if (!rcOnlineReal() && rcCfg) { rcCfgRead = false; openRcCfg(); }
   });

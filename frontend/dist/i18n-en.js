@@ -437,7 +437,6 @@ const I18N_EN = {
 "Padrão 2.000: o máximo do GMC-800 pelo manual.": "Default 2,000: the GMC-800's maximum according to the manual.",
 "Padrão por hora do dia": "Hour-of-day pattern",
 "Para mapear ajustes que o app ainda não conhece (como ligar/desligar o alarme): tire a foto, mude só esse ajuste no menu do contador e compare.": "To map settings the app doesn't know yet (like turning the alarm on/off): take the snapshot, change only that setting in the counter menu and compare.",
-"Para medir o efeito da chuva no CPM, ligue \"Mostrar chuva no gráfico\" e escolha a cidade em Configurações → Geral → Chuva no gráfico.": "To measure the effect of rain on CPM, turn on \"Show rain on the chart\" and choose the city in Settings → General → Rain on the chart.",
 "Para você:": "For you:",
 "Parece ruído elétrico (celular encostado, fonte, motor), não radiação": "Looks like electrical noise (phone touching it, power supply, motor), not radiation",
 "Passeio no parque": "Walk in the park",
@@ -2209,7 +2208,41 @@ const I18N_EN = {
 "Escolher porta": "Choose port",
 "O GMC-800 não responde. O cabo USB está ligado?": "The GMC-800 isn't answering. Is the USB cable plugged in?",
 "Não apareceu no USB nem no Bluetooth. Ele está ligado e perto? O celular não está conectado nele?": "It didn't show up on USB or Bluetooth. Is it on and nearby? Is the phone connected to it?",
-"Não apareceu no USB. O cabo está ligado?": "It didn't show up on USB. Is the cable plugged in?"
+"Não apareceu no USB. O cabo está ligado?": "It didn't show up on USB. Is the cable plugged in?",
+"Abaixo da atenção. Sem som.": "Below attention. No sound.",
+"Ajustes encontrados": "Settings found",
+"Alarmes e avisos": "Alarms and warnings",
+"Alarmes que tocam nos aparelhos": "Alarms that sound on the devices",
+"Amarelo e 3 bipes.": "Yellow and 3 beeps.",
+"Atualizações e sobre": "Updates and about",
+"Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:": "Each device also beeps on its own, with its own numbers. In µSv/h, to compare with the ones above:",
+"Dados brutos": "Raw data",
+"Dados e backup": "Data and backup",
+"Depois do tempo, se continuar alto, volta a tocar.": "After that time, if it is still high, it sounds again.",
+"Fator que o app usa": "Factor the app uses",
+"Feito por": "Made by",
+"Gravar no GMC-800": "Write to the GMC-800",
+"Janela e tela": "Window and display",
+"Mudar no GMC-800": "Change on the GMC-800",
+"Mudar no RadiaCode": "Change on the RadiaCode",
+"No aparelho": "On the device",
+"O seu alarme: toca o som escolhido abaixo.": "Your alarm: plays the sound chosen below.",
+"Os níveis": "The levels",
+"Os três valem para o GMC-800 e para o RadiaCode.": "All three apply to the GMC-800 and to the RadiaCode.",
+"Para medir o efeito da chuva no CPM, ligue \"Mostrar chuva no gráfico\" e escolha a cidade em Configurações → Janela e tela → Chuva no gráfico.": "To measure the effect of rain on CPM, turn on \"Show rain on the chart\" and choose the city in Settings → Window and display → Rain on the chart.",
+"Partes do GMC-800": "Parts of the GMC-800",
+"Partes do RadiaCode": "Parts of the RadiaCode",
+"Pontos gravados no contador": "Points stored in the counter",
+"Procurar o aparelho": "Find the device",
+"Som do alarme": "Alarm sound",
+"Testes": "Tests",
+"Tubo": "Tube",
+"Vai junto com os outros ajustes do contador e passa pela mesma confirmação.": "Goes together with the other counter settings and through the same confirmation.",
+"Vermelho e sirene. Passa na frente do seu alarme e não desliga.": "Red and siren. Takes priority over your alarm and cannot be turned off.",
+"alarme desligado": "alarm off",
+"conecte o GMC-800 para ver": "connect the GMC-800 to see",
+"conecte o RadiaCode para ver": "connect the RadiaCode to see",
+"escala logarítmica": "logarithmic scale"
 },
 "patterns": [
 [
@@ -8005,6 +8038,14 @@ const I18N_EN = {
 ]
 ],
 [
+"toca a partir de ",
+"^toca a partir de ((?:(?! · ).)+?)$",
+"sounds from ${1}",
+[
+"toca a partir de "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -10171,6 +10212,22 @@ const I18N_EN = {
 ]
 ],
 [
+"versão ",
+"^versão ((?:(?! · ).)+?)$",
+"version ${1}",
+[
+"versão "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) CPM ≈ ((?:(?! · ).)+?)$",
+"${1} CPM ≈ ${2}",
+[
+" CPM ≈ "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -10446,6 +10503,12 @@ const I18N_EN = {
 "v",
 "^v((?:(?! · ).)+?) ·$",
 "v${1} ·",
+[]
+],
+[
+"",
+"^((?:(?! · ).)+?) e ((?:(?! · ).)+?)$",
+"${1} and ${2}",
 []
 ],
 [

@@ -492,12 +492,6 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .leg-thr.danger { color: var(--warn); }
 .leg-thr.danger.off-scale i { border-top-style: dotted; }
 
-/* configurações em abas */
-.set-tabs { align-self: flex-start; }
-.set-tabs button[aria-selected="true"] { background: var(--accent); color: var(--on-accent); font-weight: 600; }
-.set-panel { display: flex; flex-direction: column; gap: var(--space-5); }
-.set-panel[hidden] { display: none; }
-#setLevels > .btn { align-self: flex-start; }
 .alarm-text .alarm-note { font-weight: 600; opacity: .95; font-size: var(--fs-body); }
 
 /* zoom no gráfico */
@@ -840,8 +834,6 @@ dialog#settings { width: min(1040px, calc(100vw - 32px)); height: min(780px, cal
 .set-nav button:hover { color: var(--text); background: var(--surface); }
 .set-nav button[aria-current="true"] { color: var(--text); background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); font-weight: 600; }
 .set-content { overflow-y: auto; padding: var(--space-6) var(--space-8) var(--space-8); }
-#settings .set-panel > fieldset.sec-off { display: none; }
-#settings .set-panel > fieldset > legend { font-size: var(--fs-title); font-weight: 600; padding: 0 0 var(--space-3); }
 #settings .set-note { padding: var(--space-3) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); }
 .set-foot { padding: var(--space-3) var(--space-5); border-top: 1px solid var(--border); background: var(--surface); justify-content: flex-end; gap: var(--space-3); }
 .set-foot #btnLevelsReset { margin-right: auto; }
@@ -1446,7 +1438,6 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #settings .set-nav button { min-height: 34px; padding: var(--space-2) var(--space-3); font-size: var(--fs-label); }
 #settings .set-nav button[aria-current="true"] { background: var(--surface-2); font-weight: 500; box-shadow: inset 3px 0 0 var(--accent); }
 #settings .set-content { overflow: visible; padding: 0 0 var(--space-6); min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6) var(--space-6); }
-#settings .set-panel > fieldset { border-top: 0; padding: 0; gap: var(--space-3); max-width: 860px; }
 #settings .set-note { max-width: 860px; }
 .set-bar { position: fixed; z-index: 14; left: 212px; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
 .set-bar > i { width: 8px; height: 8px; border-radius: 50%; background: var(--att); flex: none; }
@@ -1796,3 +1787,66 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .inst.conn-wait .dial-track { stroke: var(--att); opacity: .5; animation: dl-pulse 1.4s ease-in-out infinite; }
 .inst.conn-off .dial-arc, .inst.conn-wait .dial-arc { display: none; }
 .inst.stale .inst-spark polyline { stroke: var(--dim); }
+
+/* ---------- configurações (2.34): 6 seções, abas nos aparelhos, cartões ----------
+   Cartão = fieldset com borda. data-dev mostra o selo do aparelho (grava nele,
+   botão próprio); sem selo, fica no app e vai pela barra "Salvar". */
+#settings .set-content { background: transparent; border: 0; border-radius: 0; padding: 0 0 var(--space-12); display: flex; flex-direction: column; gap: var(--space-4); }
+.set-sec, .set-tab { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
+.set-sec[hidden], .set-tab[hidden] { display: none; }
+.set-sec-title { margin: 0; font-size: var(--fs-title); font-weight: 600; }
+.set-tabs { display: flex; gap: 2px; margin-top: calc(-1 * var(--space-2)); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
+.set-tabs button { flex: none; min-height: 38px; padding: var(--space-2) var(--space-3); margin-bottom: -1px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: var(--fs-label); cursor: pointer; white-space: nowrap; }
+.set-tabs button:hover { color: var(--text); }
+#settings .set-tabs button[aria-selected="true"] { background: none; color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
+.set-tabs button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
+.set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
+.set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
+#settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
+#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend { float: left; width: 100%; padding: 0 0 var(--space-1); font-size: var(--fs-heading); font-weight: 600; }
+#settings fieldset.dev-card > legend { padding-right: 96px; }
+#settings fieldset.dev-card::after { content: attr(data-dev); position: absolute; top: calc(var(--space-4) + 2px); right: var(--space-4); padding: 1px 8px; border: 1px solid var(--accent-line); border-radius: var(--radius-pill); color: var(--accent); font-family: var(--mono); font-size: var(--fs-micro); line-height: 1.6; }
+#settings fieldset.dev-card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)); }
+#settings fieldset.dev-card.rc { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rc) 25%, var(--border)); }
+#settings fieldset.dev-card.rc::after { border-color: color-mix(in srgb, var(--rc) 50%, transparent); color: var(--rc-ink); }
+#settings .rc-reset-card > .btn { align-self: flex-start; }
+#settings .dc-cal .dc-foot { margin-top: var(--space-2); padding-top: var(--space-3); border-top: 1px solid var(--border); }
+#settings .set-nav button { display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 1px; }
+.set-nav-st { display: flex; align-items: center; gap: 6px; max-width: 100%; overflow: hidden; color: var(--dim); font-size: var(--fs-caption); font-weight: 400; white-space: nowrap; text-overflow: ellipsis; }
+.set-nav-st[hidden], .set-nav-st .dot[hidden] { display: none; }
+.set-nav-st .dot { width: 7px; height: 7px; border-width: 2px; }
+.set-search-wrap { position: relative; flex: 0 1 360px; min-width: 200px; display: flex; }
+.set-search-wrap .set-search { flex: 1; }
+.set-results { position: absolute; z-index: 30; top: calc(100% + 6px); left: 0; right: 0; display: flex; flex-direction: column; padding: var(--space-1); background: var(--surface-2); border: 1px solid var(--border-hover); border-radius: var(--radius-md); box-shadow: var(--shadow-float); }
+.set-results[hidden] { display: none; }
+.set-results button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: var(--space-2) var(--space-3); background: none; border: 0; border-radius: var(--radius-sm); color: var(--text); font: inherit; font-size: var(--fs-label); text-align: left; cursor: pointer; }
+.set-results button:hover, .set-results button:focus-visible { background: var(--surface); outline: none; }
+.set-res-path { color: var(--dim); font-size: var(--fs-caption); }
+.set-flash { animation: set-flash 1.6s ease-out; }
+@keyframes set-flash { from { box-shadow: inset 0 0 0 2px var(--accent); } }
+.lv-bar { display: flex; height: 8px; margin-top: var(--space-1); border-radius: var(--radius-pill); overflow: hidden; background: var(--border); }
+.lv-bar i { display: block; height: 100%; transition: width .2s; }
+.lv-bar .seguro { background: var(--accent); }
+.lv-bar .atencao { background: var(--att); }
+.lv-bar .alarme { background: var(--alarm); }
+.lv-bar .perigo { background: var(--warn); }
+.lv-bar.no-attn .atencao, .lv-bar.no-alarm .alarme { opacity: .3; }
+.lv-scale { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--dim); font-size: var(--fs-micro); }
+.lv-ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
+.lv-step { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding: var(--space-3); background: var(--bg); border-right: 1px solid var(--border); }
+.lv-step:last-child { border-right: 0; }
+.lv-step > label:not(.toggle) { color: var(--dim); font-size: var(--fs-caption); }
+.lv-step input[type="number"] { width: 100%; }
+.lv-step .toggle { min-height: 32px; font-size: var(--fs-label); margin-top: auto; }
+.lv-name { display: flex; align-items: center; gap: var(--space-2); font-size: var(--fs-label); font-weight: 600; }
+.lv-step.atencao .lv-name { color: var(--att); }
+.lv-step.alarme .lv-name { color: var(--alarm); }
+.lv-step.perigo .lv-name { color: var(--warn); }
+#lvCard .link { vertical-align: baseline; }
+#devAlarms dd { text-align: right; }
+#settings .ext-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
+@media (max-width: 1100px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .lv-ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lv-step:nth-child(2) { border-right: 0; } .lv-step:nth-child(-n+2) { border-bottom: 1px solid var(--border); } }
+@media (max-width: 760px) { .set-nav-st { display: none; } #settings .set-nav button { justify-content: center; } }
+@media (max-width: 480px) { .lv-ladder { grid-template-columns: minmax(0, 1fr); } .lv-step { border-right: 0; border-bottom: 1px solid var(--border); } .lv-step:last-child { border-bottom: 0; } }
+@media (prefers-reduced-motion: reduce) { .set-flash { animation: none; } .lv-bar i { transition: none; } }

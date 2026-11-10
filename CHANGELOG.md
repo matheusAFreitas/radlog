@@ -1,5 +1,30 @@
 # Versões
 
+## 2.34.0
+- **Configurações repaginadas.** O menu da esquerda cai de 20 itens para 6:
+  GMC-800, RadiaCode, Alarmes e avisos, Janela e tela, Dados e backup, e
+  Atualizações e sobre. Cada item mostra uma linha de estado (conectado,
+  procurando, a partir de quanto o alarme toca, versão). Nenhum ajuste saiu
+  do app; só mudaram de lugar.
+- **Um lugar por aparelho, com abas.** GMC-800: Conexão, No aparelho,
+  Calibração, Tubo e Testes. RadiaCode: Conexão e No aparelho. A Calibração
+  do GMC junta o fator que o app usa (com a intercalibração e as versões) e
+  os 6 pontos gravados no contador, que antes ficavam em lugares separados.
+  Tempo morto e tubo saturado foram para a aba Tubo; "Testar o contador",
+  "Descobrir onde fica um ajuste" e a tensão do tubo, para Testes.
+- **RadiaCode sem o "Avançado".** Alarmes de contagem, calibração de energia,
+  firmware e "Zerar a dose acumulada" ficam junto dos outros ajustes, em No
+  aparelho.
+- **Selo do aparelho.** Os cartões que gravam no aparelho têm o selo
+  "GMC-800" (verde) ou "RadiaCode" (rosa) e o botão de gravar dele. O resto
+  fica no app e continua indo pela barra "Salvar".
+- **Alarmes e avisos numa escada só.** Atenção, alarme e perigo lado a lado,
+  com a forma e a cor de cada nível e uma barra que acompanha os números. Os
+  alarmes que tocam nos próprios aparelhos aparecem embaixo, em µSv/h, com
+  atalho para mudar. "Fora de casa" também fica aqui.
+- **Busca lista os ajustes.** Digitar mostra os cartões encontrados com o
+  caminho (ex.: "GMC-800 › Tubo") e abre direto na aba certa.
+- **Sobre** com o link do projeto no GitHub e o autor.
 ## 2.33.0
 - **Mostrador: só o símbolo no meio.** No mostrador grande da tela do
   aparelho, o centro mostra só a forma do nível, maior. "Seguro", "Atenção",

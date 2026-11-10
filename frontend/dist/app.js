@@ -509,6 +509,7 @@ function renderStatus() {
   $("iModel").textContent = connected ? d.version : "—";
   $("iSerial").textContent = connected && d.serial ? d.serial : "—";
   $("iPort").textContent = connected ? d.port : "—";
+  renderSetNavStatus();
   $("clockChip").hidden = !connected;
   if (connected) {
     const drift = d.clockDrift || 0;
@@ -1675,10 +1676,10 @@ function renderDangerNote() {
   if (v >= d) {
     el.className = "danger-note warn";
     el.textContent = `Seu limite (${usvTxt(v)}) está acima do perigo do app (${usvTxt(d)}): quem toca é o alarme de perigo.`;
-  } else {
-    el.className = "danger-note";
-    el.textContent = `A partir de ${usvTxt(d)} toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.`;
   }
+  // a escada já mostra o perigo ao lado do seu alarme: o aviso só aparece
+  // quando o seu limite passa do perigo
+  el.hidden = !(v >= d);
 }
 
 // ---------- aba "Níveis do app" ----------
@@ -1731,77 +1732,162 @@ function renderLevelEq() {
   });
 }
 
-// ---------- configurações: seções na lateral, uma de cada vez ----------
+// ---------- configurações: 6 seções na lateral, com abas nos aparelhos ----------
+//
+// Cada seção é um <section class="set-sec" data-sec=…> do index.html; as dos
+// aparelhos têm abas (<div class="set-tab" data-tab=…>). Cartão com data-dev
+// grava no aparelho (botão próprio); o resto vai pela barra "Salvar".
 
-// grupos do menu das configurações, pelo título de cada seção
-const SET_GROUPS = [
-  ["Aparelhos", ["Contador", "Conexão", "RadiaCode"]],
-  ["Medição", ["Calibração do GMC", "Tempo morto do tubo", "Geiger saturado"]],
-  ["Avisos", ["Alarme", "Aviso de atenção", "Alarme de perigo", "Fora de casa"]],
-  ["App", ["Chuva no gráfico", "Janela", "Idioma", "Atualizações"]],
-  ["Dados", ["Sincronização", "Backup", "Relatórios", "Dados", "Histórico de configurações"]],
-  ["Sobre", ["Sobre"]],
+const SET_LAYOUT = [
+  { group: "Aparelhos", id: "gmc", name: "GMC-800", tabs: [["con", "Conexão"], ["dev", "No aparelho"], ["cal", "Calibração"], ["tubo", "Tubo"], ["test", "Testes"]] },
+  { id: "rc", name: "RadiaCode", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
+  { group: "Avisos", id: "alarm", name: "Alarmes e avisos" },
+  { group: "App", id: "app", name: "Janela e tela" },
+  { id: "data", name: "Dados e backup" },
+  { id: "about", name: "Atualizações e sobre" },
 ];
-const SET_NAMES = { Contador: "GMC-800" };
-const setSections = () => [...document.querySelectorAll("#settings .set-panel > fieldset")].filter((f) => !f.hidden);
-const slug = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+state.setSec = "gmc";
+state.setTab = { gmc: "con", rc: "con" };
+const setSecEl = (id) => document.querySelector(`#settings .set-sec[data-sec="${id}"]`);
+const setLay = (id) => SET_LAYOUT.find((x) => x.id === id);
+// o elemento está na seção e na aba abertas agora
+function setShown(el) { return !!el && !el.closest("[hidden]"); }
 
 function buildSetNav() {
   const nav = $("setNav");
   if (nav.childElementCount) return;
-  const byTitle = new Map(setSections().map((f) => [f.querySelector(":scope > legend").textContent.trim(), f]));
-  const used = new Set();
-  const add = (f, title) => {
-    if (!f.id) f.id = "sec-" + slug(title);
+  for (const L of SET_LAYOUT) {
+    if (L.group) {
+      const h = document.createElement("h4");
+      h.textContent = L.group;
+      nav.appendChild(h);
+    }
     const b = document.createElement("button");
     b.type = "button";
-    b.textContent = SET_NAMES[title] || title;
-    b.dataset.sec = f.id;
-    b.addEventListener("click", () => showSetSection(f.id));
+    b.dataset.sec = L.id;
+    b.innerHTML = `<span class="set-nav-nm"></span><span class="set-nav-st" id="setSt-${L.id}" hidden><span class="dot"></span><span></span></span>`;
+    b.firstChild.textContent = L.name;
+    b.addEventListener("click", () => showSetSection(L.id));
     nav.appendChild(b);
-    used.add(title);
-  };
-  for (const [name, titles] of SET_GROUPS) {
-    const fs = titles.filter((t) => byTitle.has(t));
-    if (!fs.length) continue;
-    const h = document.createElement("h4");
-    h.textContent = name;
-    nav.appendChild(h);
-    for (const t of fs) add(byTitle.get(t), t);
+    if (!L.tabs) continue;
+    const bar = setSecEl(L.id).querySelector(".set-tabs");
+    for (const [k, name] of L.tabs) {
+      const t = document.createElement("button");
+      t.type = "button";
+      t.setAttribute("role", "tab");
+      t.dataset.tab = k;
+      t.textContent = name;
+      t.addEventListener("click", () => showSetSection(L.id, k));
+      bar.appendChild(t);
+    }
   }
-  // alguma seção nova que não entrou num grupo: vai no fim, para não sumir
-  for (const [t, f] of byTitle) if (!used.has(t)) add(f, t);
+  document.querySelectorAll("#lvCard .lv-name").forEach((el) => lvLabel(el, el.dataset.lv, el.textContent.trim(), 13));
+  renderSetNavStatus();
 }
 
-function showSetSection(id) {
-  const all = setSections();
-  const f = all.find((x) => x.id === id) || all[0];
-  if (!f) return;
-  for (const x of all) x.classList.toggle("sec-off", x !== f);
-  const lvOn = !!f.closest("#setLevels");
-  $("setGeneral").hidden = lvOn;
-  $("setLevels").hidden = !lvOn;
-  document.querySelectorAll("#setNav button").forEach((b) => b.setAttribute("aria-current", String(b.dataset.sec === f.id)));
-  state.setSec = f.id;
+function showSetSection(id, tab) {
+  buildSetNav();
+  const L = setLay(id) || SET_LAYOUT[0];
+  if (L.tabs && tab && L.tabs.some((t) => t[0] === tab)) state.setTab[L.id] = tab;
+  document.querySelectorAll("#settings .set-sec").forEach((x) => { x.hidden = x.dataset.sec !== L.id; });
+  const sec = setSecEl(L.id);
+  if (L.tabs) {
+    const cur = state.setTab[L.id];
+    sec.querySelectorAll(":scope > .set-tab").forEach((t) => { t.hidden = t.dataset.tab !== cur; });
+    sec.querySelectorAll(".set-tabs button").forEach((b) => b.setAttribute("aria-selected", String(b.dataset.tab === cur)));
+  }
+  document.querySelectorAll("#setNav button").forEach((b) => b.setAttribute("aria-current", String(b.dataset.sec === L.id)));
+  state.setSec = L.id;
   if (state.view === "config") {
     const top = $("settings").getBoundingClientRect().top + window.scrollY - 60;
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
-  if (f.querySelector("#devcfg")) openDevCfg();
-  if (f.querySelector("#rcCfg")) openRcCfg();
+  if (["devcfg", "dcCalCard", "dcTube"].some((k) => setShown($(k)))) openDevCfg();
+  if (setShown($("rcCfg"))) openRcCfg();
+  if (L.id === "alarm") { renderLadder(); renderDevAlarms(); openDevCfg().then(renderDevAlarms); }
 }
 
-// abre a seção onde está um campo (ex.: "txtPlace" → Chuva)
-function showSetFor(elId) {
-  const f = $(elId) && $(elId).closest("#settings .set-panel > fieldset");
-  if (f) showSetSection(f.id);
+// abre a seção e a aba onde está um campo (ex.: "txtPlace" → Janela e tela)
+function showSetFor(elId, flash) {
+  const el = $(elId);
+  const sec = el && el.closest(".set-sec");
+  if (!sec) return;
+  const t = el.closest(".set-tab");
+  showSetSection(sec.dataset.sec, t ? t.dataset.tab : null);
+  const card = el.closest("fieldset") || el;
+  if (flash) {
+    card.scrollIntoView({ block: "nearest" });
+    card.classList.remove("set-flash");
+    void card.offsetWidth;
+    card.classList.add("set-flash");
+  }
 }
 
-function showSetTab(which) { // compatível com o jeito antigo (abas)
-  const all = setSections();
-  const f = which === "levels" ? all.find((x) => x.closest("#setLevels")) : all[0];
-  if (f) showSetSection(f.id);
+// linha de estado embaixo de cada seção no menu
+function renderSetNavStatus() {
+  if (!$("setSt-gmc")) return;
+  const put = (id, text, dot) => {
+    const el = $("setSt-" + id);
+    el.hidden = !text;
+    el.lastChild.textContent = text || "";
+    el.firstChild.className = "dot" + (dot ? " " + dot : "");
+    el.firstChild.hidden = !dot;
+  };
+  const s = state.status || {}, d = s.device || {};
+  put("gmc", s.state === "conectado" ? `conectado · ${d.port}` : s.state === "conectando" ? "conectando…" : "desconectado",
+    s.state === "conectado" ? "on" : s.state === "erro" ? "err" : s.state === "conectando" ? "wait" : "off");
+  const rt = $("rcSetText") && $("rcSetText").textContent;
+  put("rc", rt || "", ($("rcSetDot").className.match(/\b(on|err|wait)\b/) || [])[1] || "off");
+  const set = state.settings || {};
+  put("alarm", !set.alarmEnabled ? "alarme desligado" : `toca a partir de ${usvTxt(alarmUSv())}`, "");
+  put("about", $("appVersion") && $("appVersion").textContent ? `versão ${$("appVersion").textContent.replace(/^v/, "")}` : "", "");
 }
+
+// escada dos níveis: a barra em cima acompanha os três números
+function renderLadder() {
+  const bar = $("lvBar");
+  if (!bar) return;
+  const a = parseFloat($("lvAttn").value) || attnUSv();
+  const al = parseFloat($("numAlarm").value) || alarmUSv();
+  const p = parseFloat($("lvDanger").value) || dangerUSv();
+  const lo = Math.min(a, al, p) / 10, hi = Math.max(a, al, p) * 1.5;
+  const pos = (v) => Math.max(0, Math.min(100, (Math.log10(v / lo) / Math.log10(hi / lo)) * 100));
+  const xs = [pos(Math.min(a, al)), pos(Math.max(a, al)), pos(p)];
+  // atenção acima do alarme: a faixa amarela some (o alarme já toca antes)
+  const w = a <= al ? [xs[0], xs[1] - xs[0], Math.max(0, xs[2] - xs[1]), 100 - xs[2]] : [xs[0], 0, Math.max(0, xs[2] - xs[0]), 100 - xs[2]];
+  [...bar.children].forEach((i, k) => { i.style.width = w[k] + "%"; });
+  bar.classList.toggle("no-attn", !$("chkAttn").checked);
+  bar.classList.toggle("no-alarm", !$("chkAlarm").checked);
+  $("lvScale").innerHTML = "";
+  for (const v of [lo, hi]) { const sp = document.createElement("span"); sp.textContent = usvTxt(v); $("lvScale").appendChild(sp); }
+  $("lvScale").insertBefore(Object.assign(document.createElement("span"), { textContent: "escala logarítmica" }), $("lvScale").lastChild);
+}
+document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
+document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
+
+// alarmes que tocam nos próprios aparelhos, em µSv/h para comparar
+function renderDevAlarms() {
+  if (!$("devAlGmc")) return;
+  const cpm = devCfgRead && devCfg ? parseFloat($("dcAlarm").value) : NaN;
+  $("devAlGmc").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM ≈ ${usvTxt(cpm * calK())}` : "conecte o GMC-800 para ver";
+  const l = ((state.rc || {}).st || {}).limits || {};
+  $("devAlRc").textContent = l.device ? `${usvTxt(l.attn || 0)} e ${usvTxt(l.alarm || 0)}` : "conecte o RadiaCode para ver";
+}
+
+// links para fora (Sobre › Código) abrem no navegador do sistema
+document.addEventListener("click", (e) => {
+  const a = e.target.closest && e.target.closest("a[data-ext]");
+  if (!a) return;
+  e.preventDefault();
+  if (window.runtime && window.runtime.BrowserOpenURL) window.runtime.BrowserOpenURL(a.href); else window.open(a.href, "_blank");
+});
+
+document.addEventListener("click", (e) => {
+  const b = e.target.closest && e.target.closest("[data-setgo]");
+  if (!b) return;
+  const [sec, tab] = b.dataset.setgo.split("/");
+  showSetSection(sec, tab);
+});
 
 document.addEventListener("click", async (e) => {
   if (!e.target.closest("#btnFixAutostart")) return;
@@ -1817,15 +1903,27 @@ function wireLevels() {
   $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
   $("setSearch").addEventListener("input", setSearch);
   $("setSearch").addEventListener("keydown", (e) => {
-    if (e.key === "Enter") { const b = document.querySelector("#setNav button:not([hidden])"); if (b) b.click(); }
+    if (e.key === "Enter") { const b = document.querySelector("#setResults button"); if (b) b.click(); }
     if (e.key === "Escape") { $("setSearch").value = ""; setSearch(); }
+    if (e.key === "ArrowDown") { const b = document.querySelector("#setResults button"); if (b) { e.preventDefault(); b.focus(); } }
   });
+  $("setResults").addEventListener("keydown", (e) => {
+    if (e.key !== "ArrowDown" && e.key !== "ArrowUp" && e.key !== "Escape") return;
+    e.preventDefault();
+    if (e.key === "Escape") { $("setSearch").focus(); return; }
+    const bs = [...$("setResults").querySelectorAll("button")], i = bs.indexOf(document.activeElement);
+    const n = bs[i + (e.key === "ArrowDown" ? 1 : -1)];
+    if (n) n.focus(); else if (e.key === "ArrowUp") $("setSearch").focus();
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".set-search-wrap")) $("setResults").hidden = true; });
+  // o botão "Gravar no GMC-800" da Calibração é o mesmo da aba No aparelho
+  $("dcCalSave").addEventListener("click", () => $("dcSaveBtn").click());
+  const mirror = () => { $("dcCalSave").disabled = $("dcSaveBtn").disabled; $("dcCalSave").textContent = $("dcSaveBtn").textContent; };
+  new MutationObserver(mirror).observe($("dcSaveBtn"), { attributes: true, attributeFilter: ["disabled"], childList: true, characterData: true, subtree: true });
+  mirror();
 }
 
-function renderAttnLabel() {
-  const v = parseFloat($("lvAttn").value) || attnUSv();
-  $("attnToggleLabel").textContent = `Aviso de atenção a partir de ${usvTxt(v)} (amarelo e 3 bipes)`;
-}
+function renderAttnLabel() { renderLadder(); } // a escada mostra o valor; o rótulo é só "Ligado"
 
 function clearSnooze() {
   alarmCtl.snoozeUntil = 0;
@@ -2027,7 +2125,9 @@ async function fillPorts(selectName) {
 }
 
 function renderAlarmLabel() {
-  $("alarmLabel").textContent = "Alarme ligado";
+  $("alarmLabel").textContent = "Ligado";
+  renderSetNavStatus();
+  renderLadder();
 }
 
 // ---------- backup ----------
@@ -2162,25 +2262,45 @@ document.addEventListener("change", (e) => { if (e.target.closest && e.target.cl
 // ---------- busca nas configurações ----------
 const setNorm = (t) => t.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
 function setSearch() {
-  const q = setNorm($("setSearch").value.trim());
-  const secs = setSections();
-  let first = null, n = 0;
-  for (const b of document.querySelectorAll("#setNav button")) {
-    const f = $(b.dataset.sec);
-    const hay = setNorm(b.textContent + " " + f.textContent + " " + [...f.querySelectorAll("option")].map((o) => o.textContent).join(" "));
-    const ok = !q || hay.includes(q);
-    b.hidden = !ok;
-    if (ok) { n++; if (!first || (setNorm(b.textContent).includes(q) && !setNorm($(first).querySelector("legend").textContent).includes(q))) first = f.id; }
+  const q = setNorm($("setSearch").value.trim()).replace(/[^a-z0-9µ]+/g, " ").trim();
+  const box = $("setResults");
+  box.innerHTML = "";
+  if (!q) { box.hidden = true; $("setSearchInfo").textContent = ""; return; }
+  buildSetNav();
+  const hits = [];
+  // cada cartão é um resultado; o caminho diz a seção e a aba
+  for (const f of document.querySelectorAll("#settings .set-sec fieldset")) {
+    if (f.closest("fieldset") !== f && f.parentElement.closest("fieldset")) continue;
+    if (f.hidden) continue;
+    const leg = f.querySelector(":scope > legend");
+    if (!leg) continue;
+    const sec = f.closest(".set-sec"), tab = f.closest(".set-tab"), L = setLay(sec.dataset.sec);
+    const title = setNorm(leg.textContent);
+    const hay = setNorm(L.name + " " + f.textContent + " " + [...f.querySelectorAll("option")].map((o) => o.textContent).join(" "));
+    if (!(" " + hay.replace(/[^a-z0-9µ]+/g, " ")).includes(" " + q)) continue; // começo de palavra
+    hits.push({ f, L, tab: tab && L.tabs.find((t) => t[0] === tab.dataset.tab), score: title.includes(q) ? 0 : 1 });
   }
-  // títulos de grupo sem nenhuma seção visível somem
-  for (const h of document.querySelectorAll("#setNav h4")) {
-    let el = h.nextElementSibling, any = false;
-    while (el && el.tagName !== "H4") { if (!el.hidden) any = true; el = el.nextElementSibling; }
-    h.hidden = !any;
+  hits.sort((x, y) => x.score - y.score);
+  for (const h of hits.slice(0, 8)) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.setAttribute("role", "option");
+    const t = document.createElement("span");
+    t.textContent = h.f.querySelector(":scope > legend").textContent.trim();
+    const p = document.createElement("span");
+    p.className = "set-res-path";
+    p.append(Object.assign(document.createElement("span"), { textContent: h.L.name }));
+    if (h.tab) { p.append(" › "); p.append(Object.assign(document.createElement("span"), { textContent: h.tab[1] })); }
+    b.append(t, p);
+    b.addEventListener("click", () => {
+      if (!h.f.id) h.f.id = "set-card-" + Math.random().toString(36).slice(2, 8);
+      box.hidden = true;
+      showSetFor(h.f.id, true);
+    });
+    box.appendChild(b);
   }
-  $("setSearchInfo").textContent = !q ? "" : n ? (n === 1 ? "1 seção" : `${n} seções`) : "nada encontrado";
-  const cur = secs.find((f) => f.id === state.setSec);
-  if (q && first && (!cur || document.querySelector(`#setNav button[data-sec="${cur.id}"]`).hidden)) showSetSection(first);
+  box.hidden = !hits.length;
+  $("setSearchInfo").textContent = hits.length ? "" : "nada encontrado";
 }
 
 // versões da calibração do GMC (2.2)
@@ -2379,7 +2499,7 @@ function renderSaveAdvice() {
 }
 
 function setDevCfgEnabled(on) {
-  qsa("#devcfg fieldset.dc-edit").forEach((f) => { f.disabled = !on; });
+  qsa("#devcfg fieldset.dc-edit, #dcCalCard").forEach((f) => { f.disabled = !on; });
   $("dcSaveBtn").disabled = !on;
   if (on && devCfg) {
     const locked = new Set(devCfg.locked || []);
@@ -2808,7 +2928,7 @@ function renderRainOff() {
   $("riSub").textContent = "chuva desligada";
   $("riChartBox").hidden = true;
   $("riList").textContent = "";
-  $("riTiles").innerHTML = '<p class="small muted">Para medir o efeito da chuva no CPM, ligue "Mostrar chuva no gráfico" e escolha a cidade em Configurações → Geral → Chuva no gráfico.</p>';
+  $("riTiles").innerHTML = '<p class="small muted">Para medir o efeito da chuva no CPM, ligue "Mostrar chuva no gráfico" e escolha a cidade em Configurações → Janela e tela → Chuva no gráfico.</p>';
 }
 
 function renderRainNow(n) {
@@ -3213,6 +3333,7 @@ function renderRc(st) {
   if (document.activeElement !== $("rcBLE")) $("rcBLE").value = st.ble || "";
   $("btnRcBLEScan").disabled = !st.bleOK;
   renderRcSetState(st, prev);
+  renderSetNavStatus();
   const noBLE = "Neste computador a conexão Bluetooth não está disponível: use o cabo USB.";
   if (!st.bleOK) $("rcBLEInfo").textContent = noBLE;
   else if ($("rcBLEInfo").textContent === noBLE) $("rcBLEInfo").textContent = "";
