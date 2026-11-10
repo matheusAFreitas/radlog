@@ -4311,7 +4311,8 @@ function makeDemoApi() {
     if (meas.phase === "objeto") {
       const part = phaseOf(meas.counts, meas.elapsed);
       meas.live = compare(meas.bg, part);
-      if (meas.auto) {
+      if (meas.stopReq && meas.elapsed >= 5) { stop = "manual"; meas.stopReq = false; }
+      else if (meas.auto) {
         if (meas.elapsed >= 20 && meas.live.sigma >= 4) stop = "achou";
         else if (meas.elapsed >= 20 && Math.max(meas.live.netCPM, 0) + 2 * meas.live.netErr < thrOf(meas.bg, meas.pct)) stop = "nada";
         else if (meas.elapsed >= meas.seconds) stop = "limite";
@@ -4327,12 +4328,16 @@ function makeDemoApi() {
         const r = compare(meas.bg, ph);
         r.stop = stop;
         if (r.level !== "sim") r.limit = Math.max(r.netCPM, 0) + 2 * r.netErr;
-        if (stop === "nada") { r.level = "nada"; r.verdict = `igual ao fundo: se o objeto emite algo, é menos que +${fmt(r.limit, 1)} CPM`; }
+        if (stop === "nada") { r.level = "nada"; r.verdict = `igual ao fundo: se o objeto emite algo, é menos que +${usvTxt(r.limit * (ph.cpm > 0 ? ph.usv / ph.cpm : 0.0101))}`; }
         if (stop === "limite" && r.level !== "sim") r.verdict += " (chegou ao tempo máximo sem decidir)";
         if (meas.auto) { r.pct = meas.pct; r.threshold = thrOf(meas.bg, meas.pct); }
         meas.result = r; meas.live = null; meas.eta = -1;
-        if (meas.device === "radiacode") meas.spectrum = demoMeasSpec(meas.elapsed, meas.bg.source === "casa");
+        if (meas.device === "radiacode" || (meas.other && meas.other.device === "radiacode")) {
+          meas.spectrum = demoMeasSpec(meas.elapsed, meas.bg.source === "casa");
+          if (meas.device !== "radiacode") meas.spectrum.role = "voce";
+        }
         if (endedPh === "objeto") endSide("objeto");
+        meas.derived = demoDerive(meas);
       }
     }
     emit("measure", { ...meas });
@@ -4341,10 +4346,46 @@ function makeDemoApi() {
   setInterval(() => {
     const rcIn = meas.device === "radiacode" || (meas.other && meas.other.device === "radiacode");
     if (!rcIn || !demoRcFake() || (meas.phase !== "fundo" && meas.phase !== "objeto")) return;
-    const lam = meas.other && meas.other.device === "radiacode" && meas.other.role === "voce" ? 14 : meas.phase === "objeto" ? 13.5 : 12;
+    const lam = meas.other && meas.other.device === "radiacode" && meas.other.role === "voce" ? 14 : meas.phase === "objeto" ? 19 : 12;
     let k = 0, p = 1; const L = Math.exp(-lam); for (;;) { p *= Math.random(); if (p <= L) break; k++; }
     emit("radiacode", { ...demoRc(), cps: lam + (Math.random() - 0.5) * 2 });
     feed(k, "radiacode");
+  }, 1000);
+  // contas do resultado (measderive.go), para o modo navegador
+  const demoDerive = (m) => {
+    const r = m.result, k = m.obj.cpm > 0 ? m.obj.usv / m.obj.cpm : 0, real = r.level === "sim" && r.netUSv > 0, d = m.distCm || 0;
+    const out = { netUSv: r.netUSv, errUSv: r.netErr * k, bgUSv: m.bg.usv, safe: { ok: false } };
+    let inv = null;
+    const pv = (m.prev || []).filter((p) => p.distCm > 0 && p.level === "sim" && Math.abs(p.distCm - d) >= 0.5).pop();
+    if (pv && real && d > 0) {
+      const ratio = pv.netUSv / r.netUSv, expect = (d / pv.distCm) ** 2, pow = Math.log(ratio) / Math.log(d / pv.distCm), okp = Math.abs(pow - 2) <= 0.35;
+      const a = `${fmt(Math.max(ratio, 1 / ratio), 1)}×`, b = `${fmt(Math.max(expect, 1 / expect), 1)}×`, dd = `De ${fmt(pv.distCm, 0)} cm para ${fmt(d, 0)} cm a radiação caiu`;
+      inv = { ok: okp, power: pow, text: okp ? `${dd} ${a} (o inverso do quadrado dá ${b}): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis.`
+        : pow < 2 ? `${dd} menos que o inverso do quadrado (${a} contra ${b}): o objeto deve ser espalhado, então a distância segura é só aproximada.`
+        : `${dd} mais que o inverso do quadrado (${a} contra ${b}): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.` };
+      out.invSq = inv;
+    }
+    if (!real) out.safe.why = "o objeto não ficou claramente acima do fundo";
+    else if (!(d > 0)) out.safe.why = "informe a distância (encostado não dá para usar na conta)";
+    else { const x = d * Math.sqrt(r.netUSv / (0.1 * m.bg.usv)); out.safe = { ok: true, cm: Math.max(x, d), below: x < d, approx: m.size !== "pequeno" || !inv || !inv.ok }; }
+    if (m.device !== "radiacode") return out;
+    out.isotopes = m.spectrum && m.spectrum.role !== "voce" ? [{ group: "Tório-232 (série)", nuclides: ["Pb-212", "Tl-208"], kev: [238.6, 583.2, 2614.5], lines: 3, of: 4, conf: 0.84 }] : [];
+    const top = out.isotopes[0], g = top ? { "Tório-232 (série)": 0.2 }[top.group] || 0 : 0;
+    const checks = [
+      { text: "medido com o RC102 no objeto (tem espectro)", ok: true }, { text: "objeto claramente acima do fundo", ok: real },
+      { text: "isótopo identificado com confiança", ok: !!top && top.conf >= 0.6 && g > 0 }, { text: "distância informada", ok: d > 0 },
+      { text: "objeto pequeno, como uma fonte pontual", ok: m.size === "pequeno" && !(inv && !inv.ok && inv.power < 2) }];
+    const bq = { ok: checks.every((c) => c.ok), checks };
+    if (bq.ok) { bq.bq = (r.netUSv * (d / 100) ** 2 / g) * 1e6; bq.lo = bq.bq / 2; bq.hi = bq.bq * 2; bq.group = top.group; bq.gamma = g; }
+    out.bq = bq;
+    return out;
+  };
+  // procurando o ponto mais forte no modo navegador: o RC102 fingido sobe e
+  // desce como se estivesse chegando perto do objeto e se afastando
+  setInterval(() => {
+    if (!demoRcFake() || typeof state === "undefined" || !state.mBusca) return;
+    const near = 0.5 + 0.5 * Math.sin(Date.now() / 4000), usvh = 0.092 + 0.42 * near * near + (Math.random() - 0.5) * 0.01;
+    emit("radiacode", { ...demoRc(), usvh, cps: usvh / 0.092 * 12 });
   }, 1000);
   // espectro de mentira: contínuo + linhas do tório (camisa de lampião)
   const demoSpecArr = (sec, cont, peaks) => {
@@ -4805,9 +4846,27 @@ const demoRc = () => {
       }, 400);
     },
     GetMeasure: async () => ({ ...meas }),
+    StopMeasure: async () => { if (meas.phase === "objeto") meas.stopReq = true; return { ...meas }; },
+    MeasureAgainAt: async (distance, cm) => {
+      if (meas.phase !== "pronto" || !meas.result) throw new Error("termine a medição antes de medir em outra distância");
+      const k = meas.obj.cpm > 0 ? meas.obj.usv / meas.obj.cpm : 0;
+      meas.prev = [...(meas.prev || []), { distance: meas.distance, distCm: meas.distCm, netUSv: meas.result.netUSv, errUSv: meas.result.netErr * k, sigma: meas.result.sigma, level: meas.result.level, seconds: meas.obj.seconds }];
+      meas.distance = distance; meas.distCm = cm; meas.derived = null; meas.spectrum = null;
+      if (meas.other) Object.assign(meas.other, { counts: 0, elapsed: 0, usvSum: 0, obj: null, result: null, live: null, hint: "", dose: 0, maxUSv: 0, excess: 0 });
+      return api.StartMeasurePhase("objeto", 0, "");
+    },
+    GetMeasureLive: async () => {
+      const rcIn = meas.device === "radiacode" || (meas.other && meas.other.device === "radiacode");
+      if (!rcIn || (meas.phase !== "fundo" && meas.phase !== "objeto") || !meas.elapsed) return { phase: meas.phase };
+      const sp = demoMeasSpec(meas.elapsed, !!(meas.bg && meas.bg.source === "casa"));
+      if (meas.device !== "radiacode") sp.role = "voce";
+      if (meas.phase === "fundo") { sp.obj = sp.bg; sp.objSec = meas.elapsed; delete sp.bg; sp.peaks = []; }
+      else if (meas.elapsed < 20) sp.peaks = sp.peaks.slice(0, 1);
+      return { phase: meas.phase, spectrum: sp };
+    },
     StartMeasurePhase: async (phase, secs, name) => {
       if (phase === "fundo") meas = { phase, seconds: secs || 60, elapsed: 0, counts: 0, name, demo: demoSt.active, bg: null, obj: null, result: null, eta: -1 };
-      else { if (!meas.bg) throw new Error("meça o fundo primeiro"); Object.assign(meas, { phase, elapsed: 0, counts: 0, obj: null, result: null, live: null, eta: -1, name: name || meas.name }); if (meas.auto) meas.seconds = meas.maxSec; }
+      else { if (!meas.bg) throw new Error("meça o fundo primeiro"); Object.assign(meas, { phase, elapsed: 0, counts: 0, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), derived: null, spectrum: null, stopReq: false, name: name || meas.name }); if (meas.auto) meas.seconds = meas.maxSec; }
       emit("measure", { ...meas }); return { ...meas };
     },
     GetHomeBackground: async () => demoHomeBg(),
@@ -4822,6 +4881,7 @@ const demoRc = () => {
       const device = mode === "ambos" ? "radiacode" : o.device === "radiacode" ? "radiacode" : "gmc";
       if ((device === "radiacode" || mode) && (!demoRcFake() || localStorage.getItem("rcFake2"))) throw new Error("conecte o RC102 para medir");
       meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
+        distCm: o.distCm > 0 ? o.distCm : 0, size: o.size || "", prev: [], derived: null, spectrum: null,
         auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
       if (mode) {
         const od = device === "radiacode" ? "gmc" : "radiacode", oh = await api.GetHomeBackgroundDev(od);

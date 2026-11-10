@@ -85,8 +85,17 @@ type MeasureState struct {
 	// pessoa); Other é o segundo aparelho
 	Mode  string       `json:"mode,omitempty"`
 	Other *MeasureSide `json:"other,omitempty"`
+	// 2.40: distância em cm (0 = encostado ou não informada), tamanho do
+	// objeto (pequeno, espalhado), as medições anteriores do mesmo objeto em
+	// outras distâncias e as contas do resultado
+	DistCM  float64         `json:"distCm"`
+	Size    string          `json:"size,omitempty"`
+	Prev    []MeasureAt     `json:"prev,omitempty"`
+	Derived *MeasureDerived `json:"derived,omitempty"`
 	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
+	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
+	stopReq bool
 }
 
 // MeasureSpectrum são os espectros do Radiacode de cada fase (contagens por
@@ -100,6 +109,8 @@ type MeasureSpectrum struct {
 	ObjSec float64    `json:"objSec"`
 	// linhas gama que subiram acima do fundo (pista do radionuclídeo)
 	Peaks []SpecPeak `json:"peaks,omitempty"`
+	// "voce" = espectro do RC102 que estava com a pessoa (não no objeto)
+	Role string `json:"role,omitempty"`
 }
 
 // devName é o nome do aparelho da medição ("" conta como GMC).
@@ -122,9 +133,10 @@ func (a *App) GetMeasure() MeasureState {
 func (a *App) StartMeasurePhase(phase string, seconds int, name string) (MeasureState, error) {
 	a.mu.Lock()
 	dev := devName(a.measure.Device)
+	rcIn := measRcInvolved(&a.measure)
 	a.mu.Unlock()
 	var spec0 *radiacode.Spectrum
-	if dev == "radiacode" {
+	if rcIn {
 		if spec0 = a.rcSpectrumNow(false); spec0 == nil && !a.rcConnected() {
 			return a.GetMeasure(), errors.New("conecte o RC102 para medir")
 		}
@@ -155,6 +167,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
 		a.measure.Spectrum, a.measure.usvSum = nil, 0
+		a.measure.Derived, a.measure.stopReq = nil, false
 		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
 			a.measure.Seconds = a.measure.MaxSec
@@ -184,6 +197,87 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	st := a.measureSnapLocked()
 	go a.emit("measure", st)
 	return st, nil
+}
+
+// measStopMinSec: antes disso o "parar agora" espera (poucas contagens).
+const measStopMinSec = 5
+
+// measRcInvolved diz se o RC102 participa da medição (no objeto ou com a
+// pessoa): aí o app guarda o espectro de cada fase.
+func measRcInvolved(m *MeasureState) bool {
+	return devName(m.Device) == devRC || (m.Other != nil && m.Other.Device == devRC)
+}
+
+// StopMeasure termina a fase do objeto agora (com pelo menos alguns
+// segundos), com o resultado do que já juntou.
+func (a *App) StopMeasure() MeasureState {
+	a.mu.Lock()
+	if a.measure.Phase == "objeto" {
+		a.measure.stopReq = true
+	}
+	st := a.measureSnapLocked()
+	a.mu.Unlock()
+	return st
+}
+
+// MeasureAgainAt mede o objeto de novo em outra distância, com o mesmo
+// fundo: a medição que terminou fica em Prev para a conta do inverso do
+// quadrado.
+func (a *App) MeasureAgainAt(distance string, distCM float64) (MeasureState, error) {
+	a.mu.Lock()
+	m := &a.measure
+	if m.Phase != "pronto" || m.Result == nil || m.Bg == nil || m.Obj == nil {
+		st := a.measureSnapLocked()
+		a.mu.Unlock()
+		return st, errors.New("termine a medição antes de medir em outra distância")
+	}
+	k := 0.0
+	if m.Obj.CPM > 0 {
+		k = m.Obj.USv / m.Obj.CPM
+	}
+	m.Prev = append(m.Prev, MeasureAt{Distance: m.Distance, DistCM: m.DistCM, NetUSv: m.Result.NetUSv, ErrUSv: m.Result.NetErr * k,
+		Sigma: m.Result.Sigma, Level: m.Result.Level, Seconds: m.Obj.Seconds})
+	m.Distance = strings.TrimSpace(distance)
+	if distCM < 0 {
+		distCM = 0
+	}
+	m.DistCM = distCM
+	a.mu.Unlock()
+	return a.StartMeasurePhase("objeto", 0, "")
+}
+
+// MeasureLive é o espectro que está se formando na fase atual (RC102).
+type MeasureLive struct {
+	Phase    string           `json:"phase"`
+	Spectrum *MeasureSpectrum `json:"spectrum,omitempty"`
+}
+
+// GetMeasureLive lê o espectro do aparelho e devolve o que entrou desde o
+// começo da fase (na fase do objeto, com o fundo e os picos).
+func (a *App) GetMeasureLive() MeasureLive {
+	a.mu.Lock()
+	m := a.measure
+	spec0, bg := a.measSpec0, a.measSpecBg
+	a.mu.Unlock()
+	out := MeasureLive{Phase: m.Phase}
+	if (m.Phase != "fundo" && m.Phase != "objeto") || !measRcInvolved(&m) || spec0 == nil {
+		return out
+	}
+	part := specDiff(spec0, a.rcSpectrumNow(false))
+	if part == nil {
+		return out
+	}
+	if devName(m.Device) != devRC {
+		part.Role = "voce"
+	}
+	if m.Phase == "objeto" && bg != nil && len(bg.Bg) == len(part.Obj) {
+		part.Bg, part.BgSec, part.BgSrc = bg.Bg, bg.BgSec, bg.BgSrc
+		if part.ObjSec >= 5 {
+			part.Peaks = part.findPeaks()
+		}
+	}
+	out.Spectrum = part
+	return out
 }
 
 // CancelMeasure descarta a medição em andamento.
@@ -261,7 +355,9 @@ func (a *App) feedMeasureDev(f measFeed) {
 		part := a.measPhaseLocked(m)
 		live := compareMeasure(*m.Bg, part, a.convCalLocked().USv)
 		m.Live = &live
-		if m.Auto {
+		if m.stopReq && m.Elapsed >= measStopMinSec {
+			stop = "manual"
+		} else if m.Auto {
 			stop = autoDecide(live, *m.Bg, m.Elapsed, m.Pct)
 			// os dois perto: só para quando os dois já tiverem resposta
 			if stop != "" && sideDecide(m) == "" {
@@ -285,7 +381,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			m.Obj = &ph
 			r := compareMeasure(*m.Bg, ph, a.convCalLocked().USv)
 			finishResult(&r, stop, *m.Bg, m.Pct, m.Auto)
-			m.Result, m.Live, m.Eta = &r, nil, -1
+			m.Result, m.Live, m.Eta, m.stopReq = &r, nil, -1, false
 			a.finishSideLocked(m)
 			m.Phase = "pronto"
 			name := m.Name
@@ -312,7 +408,8 @@ func (a *App) feedMeasureDev(f measFeed) {
 					when = ph.Start
 				}
 				save = &SavedMeasure{Name: name, Time: when, Bg: *m.Bg, Obj: ph, Result: r, Distance: m.Distance,
-					Samples: append([]MeasureSample(nil), a.measSamples...)}
+					Samples: append([]MeasureSample(nil), a.measSamples...),
+					DistCM:  m.DistCM, Size: m.Size, Prev: append([]MeasureAt(nil), m.Prev...)}
 				if f.dev == "radiacode" {
 					save.Device = "radiacode"
 				}
@@ -323,8 +420,9 @@ func (a *App) feedMeasureDev(f measFeed) {
 			}
 		}
 	}
+	rcIn := measRcInvolved(m)
 	a.mu.Unlock()
-	if ended != "" && f.dev == "radiacode" {
+	if ended != "" && rcIn {
 		// espectro da fase = o do aparelho agora menos o do começo da fase
 		sp := a.rcSpectrumNow(false)
 		a.mu.Lock()
@@ -340,12 +438,26 @@ func (a *App) feedMeasureDev(f measFeed) {
 				ms.Bg, ms.BgSec, ms.BgSrc = b.Bg, b.BgSec, b.BgSrc
 			}
 			ms.Peaks = ms.findPeaks()
+			if devName(a.measure.Device) != devRC {
+				ms.Role = "voce" // o RC102 estava com a pessoa
+			}
 			a.measure.Spectrum = &ms
 			if save != nil {
 				save.Spectrum = &ms
 			}
 		}
 		a.measSpec0 = nil
+		a.mu.Unlock()
+	}
+	if ended == "objeto" {
+		a.mu.Lock()
+		if m := &a.measure; m.Result != nil && m.Bg != nil && m.Obj != nil {
+			m.Derived = deriveMeasure(deriveIn{device: m.Device, mode: m.Mode, bg: *m.Bg, obj: *m.Obj, r: *m.Result,
+				spec: m.Spectrum, distCM: m.DistCM, size: m.Size, prev: m.Prev})
+			if save != nil {
+				save.Derived = m.Derived
+			}
+		}
 		a.mu.Unlock()
 	}
 	if save != nil {
@@ -462,6 +574,11 @@ type SavedMeasure struct {
 	NotComparable bool                `json:"notComparable,omitempty"`
 	NCReason      string              `json:"ncReason,omitempty"`
 	Attachments   []MeasureAttachment `json:"attachments,omitempty"`
+	// 2.40: ver MeasureState
+	DistCM  float64         `json:"distCm,omitempty"`
+	Size    string          `json:"size,omitempty"`
+	Prev    []MeasureAt     `json:"prev,omitempty"`
+	Derived *MeasureDerived `json:"derived,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }
