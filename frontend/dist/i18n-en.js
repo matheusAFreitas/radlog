@@ -2027,7 +2027,20 @@ const I18N_EN = {
 "eu não estava em casa (esqueci de levar os dois)": "I wasn't home (forgot to take both)",
 "Eu não estava em casa": "I wasn't home",
 "Eu estava em casa": "I was home",
-"fora de casa até agora": "away from home until now"
+"fora de casa até agora": "away from home until now",
+"Nível: Seguro": "Level: Safe",
+"Nível: Atenção": "Level: Attention",
+"Nível: Alarme": "Level: Alarm",
+"Nível: Perigo": "Level: Danger",
+"Nível: Sem contagens": "Level: No counts",
+"dentro do fundo de sempre": "within the usual background",
+"acima do limite de atenção": "above the attention limit",
+"passou o limite de alarme": "past the alarm limit",
+"acima do limite de perigo": "above the danger limit",
+"o aparelho não está mandando contagens": "the device is not sending counts",
+"o tubo saturou; a taxa real é maior": "the tube is saturated; the real rate is higher",
+"passou o 1º limite do aparelho": "past the device's 1st limit",
+"passou o 2º limite do aparelho": "past the device's 2nd limit"
 },
 "patterns": [
 [
@@ -4111,6 +4124,15 @@ const I18N_EN = {
 "background: the device's accumulated spectrum (${1})",
 [
 "fundo: espectro acumulado do aparelho ("
+]
+],
+[
+"atenção a partir de ",
+"^atenção a partir de ((?:(?! · ).)+?) · alarme a partir de ((?:(?! · ).)+?)$",
+"attention from ${1} · alarm from ${2}",
+[
+"atenção a partir de ",
+" · alarme a partir de "
 ]
 ],
 [

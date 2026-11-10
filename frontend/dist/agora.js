@@ -66,7 +66,7 @@ function agoraNow() {
     }
   }
   box.className = "card ag-say lv-" + lv;
-  $("agSayTitle").textContent = title;
+  lvLabel($("agSayTitle"), lv, title, 20);
   $("agSayText").textContent = text;
   const d = agDose && (agDev() === "pessoal" ? agDose.personal : agDose.home);
   const chip = $("agSayBg");

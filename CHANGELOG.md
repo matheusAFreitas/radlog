@@ -1,5 +1,23 @@
 # Versões
 
+## 2.26.0
+- **Cada nível tem forma, não só cor.** Seguro é círculo, Atenção é
+  triângulo, Alarme é losango e Perigo é octógono com uma faixa; "sem
+  contagens" é um triângulo vazado. A forma aparece antes do nome do nível
+  no Agora, no Resumo, nos quadros dos aparelhos, no selo de Alertas da barra
+  lateral, na lista de alertas, na legenda e nas linhas de limite dos
+  gráficos, no ícone da bandeja e na coluna de nível do relatório PDF. Dá pra
+  ler o nível sem distinguir cores.
+- **Mostrador no lugar do número e da régua.** Nos quadros do GMC-800 e do
+  RadiaCode, o número grande e a régua de três faixas viraram o mostrador do
+  logo: o valor fica dentro do anel, o arco de fora enche conforme a leitura
+  (um terço por faixa, no sentido do relógio) e tudo pega a cor do nível. Ao
+  lado, o nível em letra grande e uma frase curta ("dentro do fundo de
+  sempre", "passou o limite de alarme"...). Passando o mouse no mostrador
+  aparecem os limites.
+- **Ponto de conexão vira anel.** O ponto ao lado do nome do aparelho agora é
+  um anel, para não confundir com o círculo do nível Seguro.
+
 ## 2.25.1
 - **Trecho aberto na mescla de backup.** Um backup feito em outro PC
   enquanto você ainda estava fora traz o trecho "até agora". Se aqui ele já

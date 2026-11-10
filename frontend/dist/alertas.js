@@ -100,8 +100,8 @@ function groupEpisodes(list) {
 function alertLi(e, withDate) {
   const li = document.createElement("li");
   const d = document.createElement("span");
-  d.className = "dot-a " + ({ perigo: "danger", alarme: "alarm" }[lvlCls(e)] || "att");
-  d.setAttribute("aria-hidden", "true");
+  d.className = "dot-a";
+  d.innerHTML = lvIcon({ perigo: "perigo", alarme: "alarme" }[lvlCls(e)] || "atencao", 12);
   const t = document.createElement("time");
   t.dateTime = new Date(e.time).toISOString();
   t.textContent = withDate ? whenLabel(e.time) : hhmm(e.time);
@@ -149,7 +149,7 @@ function renderActive() {
   renderATile();
   ul.textContent = "";
   if (!list.length) {
-    ul.innerHTML = '<li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li>';
+    ul.innerHTML = `<li class="none">${lvIcon("seguro", 12)}Nenhum alerta agora.</li>`;
     return;
   }
   const now = Date.now();
@@ -166,7 +166,7 @@ function renderActive() {
     const rc = isRcEv(e), rl = (state.rc.st && state.rc.st.limits) || {};
     const lim = rc ? ({ atencao: rl.attn, alarme: rl.alarm, perigo: rl.danger }[lvlCls(e)] || null)
       : e.level === "alarme" ? (e.text.match(/limite (\d+)/) || [])[1] : e.level === "perigo" ? String(dangerCPM()) : null;
-    li.innerHTML = `<span class="a-title"><span class="pulse" aria-hidden="true"></span></span><span class="a-meta"></span>`;
+    li.innerHTML = `<span class="a-title"><span class="pulse">${lvIcon(lvlCls(e) in { alarme: 1, perigo: 1 } ? lvlCls(e) : "atencao", 12)}</span></span><span class="a-meta"></span>`;
     li.querySelector(".a-title").append(`${lvlName(e)} agora${rc ? " no RadiaCode" : ""}${demo}`);
     li.querySelector(".a-meta").textContent =
       `desde ${hhmm(e.time)} (${fmtDur(now - e.time)}) · pico ${evVal(e, e.peak)}${evSig(e, e.peak)}` +
