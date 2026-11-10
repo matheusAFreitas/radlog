@@ -167,7 +167,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
-	lv := a.settings.Levels.Norm()
+	lv := a.effLocked().Levels.Norm()
 	var evs []Event
 	for _, e := range a.events {
 		if e.Kind == kindAlert && e.Time >= s.From && e.Time < s.To && (!e.Demo || demo) && e.Device != devRC {
@@ -330,7 +330,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 
 	// episódios com a estatística dos minutos de dentro e o limite passado
 	a.mu.Lock()
-	alarmCPM, alarmOn := a.settings.AlarmCPM, a.settings.AlarmEnabled
+	alarmCPM, alarmOn := a.effLocked().AlarmCPM, a.settings.AlarmEnabled
 	a.mu.Unlock()
 	a.cfgMu.Lock()
 	cfgHist := a.readCfgHist()

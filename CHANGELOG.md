@@ -1,5 +1,23 @@
 # Versões
 
+## 2.29.0
+- **GMC-800 em µSv/h.** Os limites do GMC (alarme, aviso de atenção e alarme
+  de perigo) agora são escolhidos em µSv/h nas Configurações; o app acha o
+  CPM equivalente pela calibração em uso. Na atualização os limites antigos
+  viram µSv/h sem mudar o ponto em que tocam. Se a calibração mudar, o que
+  fica fixo é o µSv/h.
+- Alertas (lista, detalhe e título da janela), Resumo e os números do Agora
+  mostram o GMC em µSv/h, cada valor pela calibração da hora; os alertas
+  antigos gravados em CPM também aparecem convertidos.
+- **Gráfico principal em µSv/h**: é o único com as linhas de limite, os
+  alarmes e os picos, e passa a abrir por padrão.
+- **"CPM (análise)"**: o gráfico de CPM fica só para análise, sem limites nem
+  alarmes, e ganha o RadiaCode com escala própria no eixo da direita (ele
+  conta umas 28 vezes mais que o GMC; na mesma escala a linha do GMC
+  sumiria).
+- CPM e CPS continuam onde são medida do aparelho: configuração do contador,
+  calibração, tempo morto, explicação do σ e mapa de padrões.
+
 ## 2.28.0
 - **Intercalibrar com o RadiaCode, de dentro do app.** Em Configurações ›
   Calibração do GMC, o botão novo começa uma coleta de 24 h com os dois

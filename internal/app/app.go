@@ -31,9 +31,11 @@ type Settings struct {
 	Port         string `json:"port"`
 	AutoConnect  bool   `json:"autoConnect"`
 	AlarmEnabled bool   `json:"alarmEnabled"`
-	AlarmCPM     int    `json:"alarmCPM"`
-	AlarmSound   string `json:"alarmSound"` // sirene, bipes, mudo
-	AlarmRaise   bool   `json:"alarmRaise"` // trazer a janela para a frente
+	AlarmCPM     int    `json:"alarmCPM"` // derivado de AlarmUSv (thresholds.go)
+	// limite do alarme em µSv/h (2.29): é o que a pessoa escolhe
+	AlarmUSv   float64 `json:"alarmUSv"`
+	AlarmSound string  `json:"alarmSound"` // sirene, bipes, mudo
+	AlarmRaise bool    `json:"alarmRaise"` // trazer a janela para a frente
 	// Aviso de atenção a partir de 50 CPM (faixa do manual), mais leve que o alarme.
 	AttentionEnabled bool `json:"attentionEnabled"`
 	// Chuva no gráfico (Open-Meteo), pelo local escolhido.
@@ -151,6 +153,12 @@ type Event struct {
 	// por que terminou sem a leitura voltar ao normal (2.5): "contador
 	// desconectado", "RadiaCode desconectado", "app fechado"; "" = voltou
 	EndReason string `json:"endReason,omitempty"`
+	// GMC (2.29): o valor que disparou e o pico em µSv/h, pela calibração
+	// que valia na hora (preenchido ao mandar para a tela; não vai pro CSV)
+	USv     float64 `json:"usv,omitempty"`
+	PeakUSv float64 `json:"peakUSv,omitempty"`
+	// µSv/h por CPM na hora do alerta (converte os textos antigos em CPM)
+	USvPerCPM float64 `json:"usvPerCPM,omitempty"`
 }
 
 const (
@@ -191,6 +199,10 @@ type Chart struct {
 	// RadiaCode no mesmo período, em µSv/h (nil se não tem dado)
 	RC    []*float64 `json:"rc"`
 	RCAvg *float64   `json:"rcAvg"`
+	// o mesmo RadiaCode em CPM (contagens do aparelho), para o gráfico
+	// analítico de CPM; tem bem mais contagens que o GMC por µSv/h
+	RCCPM    []*float64 `json:"rcCPM"`
+	RCAvgCPM *float64   `json:"rcAvgCPM"`
 }
 
 // withUSv preenche as séries em µSv/h. Cada valor sai da versão da
@@ -200,15 +212,23 @@ func (a *App) withUSv(c Chart) Chart {
 	a.mu.Lock()
 	cal := a.convCalLocked()
 	tl := a.calTLLocked()
-	alarmCPM := a.settings.AlarmCPM
-	lv := a.settings.Levels.Norm()
+	eff := a.effLocked()
+	alarmCPM := eff.AlarmCPM
+	lv := eff.Levels.Norm()
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
 		alarmCPM = levels.WarningCPM
 	}
-	c.AlarmCPM, c.AlarmUSv = alarmCPM, cal.USv(float64(alarmCPM))
-	c.DangerCPM, c.DangerUSv = lv.DangerCPM, cal.USv(lv.DangerEnter())
-	c.AttentionCPM, c.AttentionUSv = lv.AttentionCPM, cal.USv(lv.AttnEnter())
+	// os limites em µSv/h são os escolhidos (não os do CPM arredondado)
+	usvOr := func(v float64, cpm float64) float64 {
+		if v > 0 {
+			return v
+		}
+		return cal.USv(cpm)
+	}
+	c.AlarmCPM, c.AlarmUSv = alarmCPM, usvOr(eff.AlarmUSv, float64(alarmCPM))
+	c.DangerCPM, c.DangerUSv = lv.DangerCPM, usvOr(lv.DangerUSv, lv.DangerEnter())
+	c.AttentionCPM, c.AttentionUSv = lv.AttentionCPM, usvOr(lv.AttentionUSv, lv.AttnEnter())
 	if c.USv == nil {
 		c.USv = make([]*float64, len(c.Values))
 		var mn, mx *float64
@@ -398,6 +418,11 @@ func (a *App) startup(ctx context.Context) {
 	renameAutostart() // tira o "GMC Monitor" da 1.x do início com o Windows
 	a.loadLastCal()
 	a.loadCalHist()
+	a.mu.Lock()
+	if a.migrateThrLocked() { // limites antigos em CPM: passam a µSv/h
+		a.saveSettingsLocked()
+	}
+	a.mu.Unlock()
 	a.loadRain()
 	a.loadPeriods()
 	a.loadNotes()
@@ -551,10 +576,11 @@ func (a *App) emit(name string, data any) {
 // ---------- métodos chamados pela interface ----------
 
 // GetSettings devolve as preferências.
+// Os limites em CPM saem já derivados dos µSv/h, pela calibração de agora.
 func (a *App) GetSettings() Settings {
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	return a.settings
+	return a.effLocked()
 }
 
 // SaveSettings grava as preferências.
@@ -569,6 +595,9 @@ func (a *App) SaveSettings(s Settings) Settings {
 	}
 	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
+	if s.AlarmUSv > 0 {
+		s.AlarmUSv = clampThr(s.AlarmUSv, 0.01, 1e4)
+	}
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
@@ -581,6 +610,8 @@ func (a *App) SaveSettings(s Settings) Settings {
 		a.kickRadarLocked()
 	}
 	a.settings = s
+	a.migrateThrLocked() // limite em branco: sai do CPM pela calibração
+	s = a.effLocked()
 	a.saveSettingsLocked()
 	a.mu.Unlock()
 	a.cfgRecord("você")
@@ -630,6 +661,7 @@ func (a *App) GetEvents(kind string) []Event {
 	for i := len(a.events) - 1; i >= 0; i-- {
 		if e := a.events[i]; kind == "" || e.Kind == kind {
 			e.Active = a.isActiveLocked(e.ID)
+			a.evUSvLocked(&e)
 			out = append(out, e)
 		}
 	}
@@ -990,8 +1022,9 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 
 		a.mu.Lock()
 		cal := a.convCalLocked()
-		rawCal := a.cal // o que o contador mandou (sem correção): curva dele
-		set := a.settings
+		rawCal := a.cal      // o que o contador mandou (sem correção): curva dele
+		set := a.effLocked() // limites em CPM pela calibração de agora
+		attnU, alarmU, dangerU := thrUSvLocked(a, set)
 		alarm := set.AlarmEnabled && int(cpm) >= set.AlarmCPM
 		was := a.alarmOn
 		started := alarm && !a.alarmOn
@@ -1041,6 +1074,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		}
 		a.stepAlerts(&a.alerts, alertStep{
 			Now: now, CPM: float64(cpm), AlarmCPM: set.AlarmCPM, Lv: lv,
+			USv: cal.USv(float64(cpm)), AttnUSv: attnU, AlarmUSv: alarmU, DngrUSv: dangerU,
 			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
 			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
 			DangerStarted: dangerStarted, DangerEnded: dangerEnded,

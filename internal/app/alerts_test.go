@@ -58,7 +58,7 @@ func TestAlertsSeparatedFromEvents(t *testing.T) {
 	a.StartDemo(150, false)
 	time.Sleep(1500 * time.Millisecond)
 	al := a.GetEvents(kindAlert)
-	if len(al) < 3 || al[0].Text != "[demo] Alarme: 150 CPM (limite 100)" || al[1].Text != "[demo] Atenção: 60 CPM (a partir de 50)" {
+	if len(al) < 3 || al[0].Text != "[demo] Alarme: "+uT(a, 150)+" (limite "+uN(a, 100)+")" || al[1].Text != "[demo] Atenção: "+uT(a, 60)+" (a partir de "+uN(a, 50)+")" {
 		t.Fatalf("alertas do demo: %+v", al)
 	}
 	if ev := a.GetEvents(kindEvent); ev[0].Text != "[demo] Modo demo ligado (60 CPM)" {

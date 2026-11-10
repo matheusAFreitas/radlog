@@ -1331,7 +1331,7 @@ const I18N_EN = {
 "O µSv/h é a taxa no detector, na posição medida. Não é a dose de quem segura o objeto e muda muito com a distância.": "The µSv/h is the rate at the detector, in the measured position. It's not the dose of whoever holds the object and changes a lot with distance.",
 "O cristal do RadiaCode vê gama e raio X; o beta quase não entra na contagem.": "The RadiaCode's crystal sees gamma and X-rays; beta barely enters the count.",
 "Os picos são uma pista do radionuclídeo, não uma identificação garantida: com poucas contagens eles somem no ruído, e linhas vizinhas (ex.: 186 keV do U-235 e do Ra-226) se confundem.": "Peaks are a hint of the radionuclide, not a guaranteed identification: with few counts they vanish into the noise, and neighboring lines (e.g. 186 keV from U-235 and Ra-226) get mixed up.",
-"Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 (in CPM) and from the RadiaCode (in µSv/h, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
+"Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).": "All radiation alerts, with date and time, from the GMC-800 and the RadiaCode, in µSv/h (on the RadiaCode, using the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).",
 "Aparelho dos alertas": "Alert device",
 "Os dois": "Both",
 "Atenção no RadiaCode": "Attention on the RadiaCode",
@@ -2041,6 +2041,17 @@ const I18N_EN = {
 "o tubo saturou; a taxa real é maior": "the tube is saturated; the real rate is higher",
 "passou o 1º limite do aparelho": "past the device's 1st limit",
 "passou o 2º limite do aparelho": "past the device's 2nd limit",
+"A partir de (µSv/h)": "From (µSv/h)",
+"Agora no GMC-800": "Now on the GMC-800",
+"CPM (análise)": "CPM (analysis)",
+"CPM ao longo do tempo (análise)": "CPM over time (analysis)",
+"CPM do RadiaCode": "RadiaCode CPM",
+"Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes": "Analysis chart: GMC-800 and RadiaCode counts, no limits or alarms",
+"Média · 1 h": "Average · 1 h",
+"RadiaCode (eixo da direita)": "RadiaCode (right axis)",
+"Tocar alarme a partir de (µSv/h)": "Sound the alarm from (µSv/h)",
+"análise: sem limites nem alarmes (eles ficam no µSv/h)": "analysis: no limits or alarms (they stay on the µSv/h chart)",
+"leitura a cada segundo (µSv/h)": "reading every second (µSv/h)",
 "Intercalibração com o RadiaCode": "Cross-calibration with the RadiaCode",
 "Intercalibrar com o RadiaCode": "Cross-calibrate with the RadiaCode",
 "intercalibração com o RadiaCode": "cross-calibration with the RadiaCode",
@@ -2286,6 +2297,15 @@ const I18N_EN = {
 "Chegou ao tempo máximo (",
 ") sem decidir. Se o objeto emite algo, é menos que +",
 " CPM; para ir além, aumente o tempo máximo."
+]
+],
+[
+"A partir de ",
+"^A partir de ((?:(?! · ).)+?) toca o alarme de perigo do app \\(vermelho\\), com prioridade sobre o seu\\. Ajuste em Avisos → Alarme de perigo\\.$",
+"From ${1} the app's danger alarm sounds (red), with priority over yours. Adjust it in Alerts → Danger alarm.",
+[
+"A partir de ",
+" toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo."
 ]
 ],
 [
@@ -2724,6 +2744,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Seu limite (",
+"^Seu limite \\(((?:(?! · ).)+?)\\) está acima do perigo do app \\(((?:(?! · ).)+?)\\): quem toca é o alarme de perigo\\.$",
+"Your limit (${1}) is above the app's danger level (${2}): the danger alarm is the one that sounds.",
+[
+"Seu limite (",
+") está acima do perigo do app (",
+"): quem toca é o alarme de perigo."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): cabe na variação natural da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): within the natural variation of the count.",
@@ -2971,6 +3001,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção (histórico do contador): pico de ",
+"^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Attention (counter history): peak of ${1} µSv/h at ${2} (from ${3})",
+[
+"Atenção (histórico do contador): pico de ",
+" µSv/h às ",
+" (a partir de "
+]
+],
+[
 "leitura ao vivo: encerrada em ",
 "^leitura ao vivo: encerrada em ((?:(?! · ).)+?) após ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) leituras, ((?:(?! · ).)+?) erros\\) — motivo: ((?:(?! · ).)+?)$",
 "live reading: ended on ${1} after ${2} (${3} readings, ${4} errors) — reason: ${5}",
@@ -2987,6 +3027,16 @@ const I18N_EN = {
 "Bluetooth: couldn't search (is the PC's Bluetooth on?) ${1}",
 [
 "Bluetooth: não deu para procurar (o Bluetooth do PC está ligado?) "
+]
+],
+[
+"Perigo (histórico do contador): pico de ",
+"^Perigo \\(histórico do contador\\): pico de ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Danger (counter history): peak of ${1} µSv/h at ${2} (from ${3})",
+[
+"Perigo (histórico do contador): pico de ",
+" µSv/h às ",
+" (a partir de "
 ]
 ],
 [
@@ -3195,6 +3245,16 @@ const I18N_EN = {
 "Precisão do líquido: ±",
 "%. Para ±10%: ",
 " com o objeto; para ±5%: "
+]
+],
+[
+"Alarme (histórico do contador): pico de ",
+"^Alarme \\(histórico do contador\\): pico de ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"Alarm (counter history): peak of ${1} µSv/h at ${2} (limit ${3})",
+[
+"Alarme (histórico do contador): pico de ",
+" µSv/h às ",
+" (limite "
 ]
 ],
 [
@@ -3722,6 +3782,15 @@ const I18N_EN = {
 [
 "Não há minutos gravados antes de ",
 " para recalcular."
+]
+],
+[
+"Aviso de atenção a partir de ",
+"^Aviso de atenção a partir de ((?:(?! · ).)+?) \\(amarelo e 3 bipes\\)$",
+"Attention warning from ${1} (yellow and 3 beeps)",
+[
+"Aviso de atenção a partir de ",
+" (amarelo e 3 bipes)"
 ]
 ],
 [
@@ -4347,6 +4416,14 @@ const I18N_EN = {
 [
 "forma da curva pelo tório em ",
 ": inclinação"
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) CPM no GMC\\-800 com a calibração atual$",
+"≈ ${1} CPM on the GMC-800 with the current calibration",
+[
+" CPM no GMC-800 com a calibração atual"
 ]
 ],
 [
@@ -5044,6 +5121,17 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPM",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPM"
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -5168,6 +5256,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção: ",
+"^Atenção: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Attention: ${1} µSv/h (from ${2})",
+[
+"Atenção: ",
+" µSv/h (a partir de "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -5232,6 +5329,15 @@ const I18N_EN = {
 "GMC-800 out of the calculation since ${1}",
 [
 "GMC-800 fora do cálculo desde "
+]
+],
+[
+"Perigo: ",
+"^Perigo: ((?:(?! · ).)+?) µSv/h \\(a partir de ((?:(?! · ).)+?)\\)$",
+"Danger: ${1} µSv/h (from ${2})",
+[
+"Perigo: ",
+" µSv/h (a partir de "
 ]
 ],
 [
@@ -5859,6 +5965,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Alarme: ",
+"^Alarme: ((?:(?! · ).)+?) µSv/h \\(limite ((?:(?! · ).)+?)\\)$",
+"Alarm: ${1} µSv/h (limit ${2})",
+[
+"Alarme: ",
+" µSv/h (limite "
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -6343,6 +6458,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · atenção a partir de ((?:(?! · ).)+?)$",
+"${1} · attention from ${2}",
+[
+" · atenção a partir de "
+]
+],
+[
 "Usar ",
 "^Usar ((?:(?! · ).)+?) a partir de agora$",
 "Use ${1} from now on",
@@ -6530,6 +6653,23 @@ const I18N_EN = {
 "out of the calculation since ${1}",
 [
 "fora do cálculo desde "
+]
+],
+[
+"· RadiaCode média ",
+"^· RadiaCode média ((?:(?! · ).)+?) CPM$",
+"· RadiaCode average ${1} CPM",
+[
+"· RadiaCode média ",
+" CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · perigo a partir de ((?:(?! · ).)+?)$",
+"${1} · danger from ${2}",
+[
+" · perigo a partir de "
 ]
 ],
 [
@@ -6930,6 +7070,14 @@ const I18N_EN = {
 [
 "registrado em ",
 " como "
+]
+],
+[
+"atenção a partir de ",
+"^atenção a partir de ((?:(?! · ).)+?)$",
+"attention from ${1}",
+[
+"atenção a partir de "
 ]
 ],
 [
@@ -8016,6 +8164,22 @@ const I18N_EN = {
 ]
 ],
 [
+"sua medição de ",
+"^sua medição de ((?:(?! · ).)+?)$",
+"your measurement from ${1}",
+[
+"sua medição de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · seu limite: ((?:(?! · ).)+?)$",
+"${1} · your limit: ${2}",
+[
+" · seu limite: "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -8198,6 +8362,14 @@ const I18N_EN = {
 "${1} by the GMC-800",
 [
 " pelo GMC-800"
+]
+],
+[
+"Leitura real: ",
+"^Leitura real: ((?:(?! · ).)+?)$",
+"Real reading: ${1}",
+[
+"Leitura real: "
 ]
 ],
 [
@@ -8390,6 +8562,14 @@ const I18N_EN = {
 "${1} on the RadiaCode",
 [
 " no RadiaCode"
+]
+],
+[
+"pico ao vivo ",
+"^pico ao vivo ((?:(?! · ).)+?)$",
+"live peak ${1}",
+[
+"pico ao vivo "
 ]
 ],
 [
@@ -8619,6 +8799,15 @@ const I18N_EN = {
 "saturating · ${1}",
 [
 "saturando · "
+]
+],
+[
+"µSv/h · ",
+"^µSv/h · ((?:(?! · ).)+?) CPM$",
+"µSv/h · ${1} CPM",
+[
+"µSv/h · ",
+" CPM"
 ]
 ],
 [
@@ -9247,6 +9436,14 @@ const I18N_EN = {
 "${1} no data",
 [
 " sem dado"
+]
+],
+[
+"µSv/h às ",
+"^µSv/h às ((?:(?! · ).)+?)$",
+"µSv/h at ${1}",
+[
+"µSv/h às "
 ]
 ],
 [

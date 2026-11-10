@@ -1868,7 +1868,7 @@ Os picos são uma pista do radionuclídeo, não uma identificação garantida: c
 {0} µSv/h por CPM (para gama do Cs-137)	{0} µSv/h per CPM (for Cs-137 gamma)
 Medição de {0} (RadiaCode): {1} ± {2} CPM sobre o fundo ({3}σ) — {4}	Measurement of {0} (RadiaCode): {1} ± {2} CPM above background ({3}σ) — {4}
 RadiaCode: espectro para a medição: {0}	RadiaCode: spectrum for the measurement: {0}
-Todos os alertas de radiação, com data e hora, do GMC-800 (em CPM) e do RadiaCode (em µSv/h, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).	All radiation alerts, with date and time, from the GMC-800 (in CPM) and from the RadiaCode (in µSv/h, using the device's own alarms 1 and 2). The ones marked "from the counter" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).
+Todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).	All radiation alerts, with date and time, from the GMC-800 and the RadiaCode, in µSv/h (on the RadiaCode, using the device's own alarms 1 and 2). The ones marked "from the counter" were found later, in the history downloaded from the GMC (they happened while the app was closed or disconnected).
 Aparelho dos alertas	Alert device
 Os dois	Both
 {0} no RadiaCode: pico de {1}	{0} on the RadiaCode: peak of {1}
@@ -2929,6 +2929,38 @@ o aparelho não está mandando contagens	the device is not sending counts
 o tubo saturou; a taxa real é maior	the tube is saturated; the real rate is higher
 passou o 1º limite do aparelho	past the device's 1st limit
 passou o 2º limite do aparelho	past the device's 2nd limit
+A partir de (µSv/h)	From (µSv/h)
+Agora no GMC-800	Now on the GMC-800
+CPM (análise)	CPM (analysis)
+CPM ao longo do tempo (análise)	CPM over time (analysis)
+CPM do RadiaCode	RadiaCode CPM
+Gráfico de análise: contagens do GMC-800 e do RadiaCode, sem limites nem alarmes	Analysis chart: GMC-800 and RadiaCode counts, no limits or alarms
+Média · 1 h	Average · 1 h
+RadiaCode (eixo da direita)	RadiaCode (right axis)
+Tocar alarme a partir de (µSv/h)	Sound the alarm from (µSv/h)
+análise: sem limites nem alarmes (eles ficam no µSv/h)	analysis: no limits or alarms (they stay on the µSv/h chart)
+leitura a cada segundo (µSv/h)	reading every second (µSv/h)
+A partir de {0} toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo.	From {0} the app's danger alarm sounds (red), with priority over yours. Adjust it in Alerts → Danger alarm.
+Alarme (histórico do contador): pico de {0} µSv/h às {1} (limite {2})	Alarm (counter history): peak of {0} µSv/h at {1} (limit {2})
+Atenção (histórico do contador): pico de {0} µSv/h às {1} (a partir de {2})	Attention (counter history): peak of {0} µSv/h at {1} (from {2})
+Perigo (histórico do contador): pico de {0} µSv/h às {1} (a partir de {2})	Danger (counter history): peak of {0} µSv/h at {1} (from {2})
+Alarme: {0} µSv/h (limite {1})	Alarm: {0} µSv/h (limit {1})
+Atenção: {0} µSv/h (a partir de {1})	Attention: {0} µSv/h (from {1})
+Perigo: {0} µSv/h (a partir de {1})	Danger: {0} µSv/h (from {1})
+Aviso de atenção a partir de {0} (amarelo e 3 bipes)	Attention warning from {0} (yellow and 3 beeps)
+GMC-800 média {0} · mín {1} · máx {2} CPM	GMC-800 average {0} · min {1} · max {2} CPM
+Leitura real: {0}	Real reading: {0}
+Seu limite ({0}) está acima do perigo do app ({1}): quem toca é o alarme de perigo.	Your limit ({0}) is above the app's danger level ({1}): the danger alarm is the one that sounds.
+atenção a partir de {0}	attention from {0}
+pico ao vivo {0}	live peak {0}
+sua medição de {0}	your measurement from {0}
+µSv/h às {0}	µSv/h at {0}
+· RadiaCode média {0} CPM	· RadiaCode average {0} CPM
+≈ {0} CPM no GMC-800 com a calibração atual	≈ {0} CPM on the GMC-800 with the current calibration
+{0} · atenção a partir de {1}	{0} · attention from {1}
+{0} · perigo a partir de {1}	{0} · danger from {1}
+{0} · seu limite: {1}	{0} · your limit: {1}
+µSv/h · {0} CPM	µSv/h · {0} CPM
 Intercalibração com o RadiaCode	Cross-calibration with the RadiaCode
 Intercalibrar com o RadiaCode	Cross-calibrate with the RadiaCode
 intercalibração com o RadiaCode	cross-calibration with the RadiaCode

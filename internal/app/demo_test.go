@@ -91,7 +91,7 @@ func TestDemoDoesNotTouchFiles(t *testing.T) {
 	for _, e := range evs {
 		joined += e.Text + " | "
 	}
-	if !strings.Contains(joined, "[demo] Alarme: 500 CPM") {
+	if !strings.Contains(joined, "[demo] Alarme: "+uT(a, 500)) {
 		t.Fatalf("eventos: %s", joined)
 	}
 
