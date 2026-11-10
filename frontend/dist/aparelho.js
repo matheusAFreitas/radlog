@@ -283,7 +283,7 @@ function renderDevMini() {
   if (other === "r" && $("rTile").hidden) { box.hidden = true; return; }
   box.hidden = false;
   box.dataset.view = other === "g" ? "gmc" : "radiacode";
-  let pos = null, lv = "", word = "—", val = "—", name, via, dose, conn, lastT = 0, lastV = null;
+  let lv = "", word = "—", name, via, dose, conn, lastT = 0, lastV = null;
   if (other === "g") {
     const g = state.gNow || {}, r = state.last;
     name = "GMC-800";
@@ -292,8 +292,6 @@ function renderDevMini() {
     if (g.live && r) {
       lv = g.lvl;
       word = r.noCount ? "Sem contagens" : LV_WORD[g.lvl] || "—";
-      pos = g.lvl === "perigo" ? 1.01 : devDialPos(r.cpm, gmcThrCPM());
-      val = fmt(r.usv, usvDigits(r.usv));
     } else word = $("gTileState").textContent || "—";
     dose = state.gDose;
     const ls = state.gLastSeen;
@@ -306,11 +304,8 @@ function renderDevMini() {
     via = st.state === "conectado" ? (st.via === "bluetooth" ? "Bluetooth" : "USB") + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : "";
     if (n.live && n.usv != null) {
       const al = st.alarms || {}, own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
-      const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01;
       lv = n.lvl;
       word = (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : LV_WORD)[n.lvl] || "—";
-      pos = n.lvl === "perigo" ? 1.01 : devDialPos(n.usv, rcDialLimits(st, attn, alarm, own));
-      val = fmt(n.usv, usvDigits(n.usv));
     } else word = $("rTileState").textContent || "—";
     const sx = st.stats || {};
     dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
@@ -318,13 +313,21 @@ function renderDevMini() {
     lastV = st.lastUSv;
   }
   if (conn) { lv = ""; via = conn === "wait" ? "conectando…" : lastT ? `desconectado há ${agoTxt(lastT)}` : "desconectado"; }
-  box.className = "card dev-mini " + (other === "g" ? "dm-gmc" : "dm-rc") + (lv ? " lv-" + lv : "") + (conn ? " conn-" + conn : "");
-  const valHtml = conn
-    ? (lastT && lastV != null ? `<span class="dm-val dm-last mono">última ${fmt(lastV, usvDigits(lastV))}<small>µSv/h às ${escHtml(atTxt(lastT))}</small></span>` : `<span class="dm-val dm-last mono">—</span>`)
-    : `<span class="dm-val mono">${val}<small>µSv/h</small></span>`;
-  box.innerHTML = `<svg class="dm-dial" viewBox="2 2 44 44" aria-hidden="true">${devDialSvg(pos, lv, { w: 4.2, conn })}</svg>` +
-    `<span class="dm-name mono">${escHtml(name)}${via ? ` · <span class="dm-via">${escHtml(via)}</span>` : ""}</span>` + valHtml +
-    `<span class="dm-sub">${conn ? "" : `<span class="dm-state"></span>${dose != null ? `<span>hoje ${fmt(dose, 2)} µSv</span>` : ""}`}<span class="dm-go">abrir</span></span>`;
+  // o mostrador é o mesmo do bloco do aparelho no Agora (anel com o valor,
+  // arco embaixo, mesmas cores e estados), só menor: copia o que ele já desenhou
+  const tile = $(other + "Tile");
+  const tcls = ["stale", "conn-off", "conn-wait", ...TILE_LV.map((l) => "lv-" + l)].filter((c) => tile.classList.contains(c));
+  box.className = "card dev-mini " + (other === "g" ? "dm-gmc" : "dm-rc") + (lv ? " lv-" + lv : "") + (conn ? " conn-" + conn : "") + " " + tcls.map((c) => "dm-t-" + c).join(" ");
+  const dial = $(other + "TileDial").cloneNode(true);
+  dial.removeAttribute("id");
+  dial.querySelectorAll("[id]").forEach((e) => e.removeAttribute("id"));
+  dial.querySelector("title")?.remove();
+  dial.setAttribute("class", "dial dm-dial");
+  dial.setAttribute("aria-hidden", "true");
+  const last = conn ? (lastT && lastV != null ? `<span class="dm-last mono">última ${fmt(lastV, usvDigits(lastV))} µSv/h às ${escHtml(atTxt(lastT))}</span>` : `<span class="dm-last mono">—</span>`) : "";
+  box.innerHTML = `<span class="dm-name mono">${escHtml(name)}${via ? ` · <span class="dm-via">${escHtml(via)}</span>` : ""}</span>` +
+    `<span class="dm-sub">${conn ? last : `<span class="dm-state"></span>${dose != null ? `<span>hoje ${fmt(dose, 2)} µSv</span>` : ""}`}<span class="dm-go">abrir</span></span>`;
+  box.prepend(dial);
   if (!conn) lvLabel(box.querySelector(".dm-state"), lv, word, 12);
   box.setAttribute("aria-label", `Abrir ${name}`);
 }
