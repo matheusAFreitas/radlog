@@ -318,7 +318,7 @@ func (d *Device) Alarms() (AlarmLimits, error) {
 		CountRate1: float64(v[0]) / 10, CountRate2: float64(v[1]) / 10,
 		DoseRate1: float64(v[2]) / 100, DoseRate2: float64(v[3]) / 100, // µR/h → µSv/h
 		Dose1: float64(v[4]) / 100, Dose2: float64(v[5]) / 100,
-		ShowSv: v[6]>>24 != 0, ShowCPM: v[7]>>24 != 0, // booleano no 4º byte
+		ShowSv: byteVal(v[6]) != 0, ShowCPM: byteVal(v[7]) != 0, // booleano (byte baixo; a biblioteca lê no alto)
 	}, nil
 }
 

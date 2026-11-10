@@ -1,5 +1,28 @@
 # Versões
 
+## 2.32.0
+- **Ajustes do RadiaCode pelo app.** Em Configurações › RadiaCode, o bloco
+  novo "Ajustes gravados no aparelho" mostra o que está no RadiaCode agora e
+  deixa mudar: alarmes 1 e 2 de taxa de dose (µSv/h), de dose acumulada
+  (µSv, ou desligado) e, no Avançado, de contagem (cps); som e vibração, e o
+  que faz cada um disparar (alarmes, fora da escala, botões, cliques); brilho,
+  tempo para apagar a tela e orientação; unidades no visor (Sv/R, cps/cpm).
+  Cada grupo explica para que serve. Na aba RadiaCode, o botão "Ajustes do
+  aparelho" leva direto para lá.
+- Nada vai para o aparelho sem clicar em "Gravar no RadiaCode", e a
+  confirmação lista o que muda. Antes de gravar, o app salva uma cópia (pasta
+  radiacode/configuracao), grava só o que mudou, lê de volta para conferir e
+  registra no histórico de configurações e no log. "Desfazer a última
+  gravação" põe de volta o que estava.
+- Os alertas do RadiaCode no app continuam usando os alarmes 1 e 2 de taxa do
+  aparelho, então mudar esses dois muda os alertas também (a confirmação
+  avisa).
+- **Zerar a dose acumulada** do RadiaCode pelo app, com confirmação (não tem
+  volta).
+- Só leitura: a calibração de energia (keV por canal) e o firmware.
+- Correção: as unidades do aparelho (Sv/R e cps/cpm) eram lidas no byte
+  errado e saíam sempre como R e cps.
+
 ## 2.31.0
 - **Tela do aparelho: o valor aparece uma vez só.** Na página do GMC-800 e
   na do RadiaCode, o quadro do próprio aparelho sai da fileira de cima. O
