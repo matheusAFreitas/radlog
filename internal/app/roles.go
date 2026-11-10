@@ -90,6 +90,9 @@ func periodName(gmc, rc string) string {
 	}
 }
 
+// periodNameOut é o nome padrão de "saí com o RadiaCode, o GMC ficou".
+const periodNameOut = "Saí com o RadiaCode"
+
 // periodEnd é o fim de um trecho (o aberto vai até depois de qualquer instante).
 func periodEnd(p Period) int64 {
 	if p.To == 0 {
@@ -223,7 +226,7 @@ func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
 			}
 		}
 	}
-	w.Normal = w.GMC == WhereHome && w.RC == WhereMe
+	w.Normal = w.GMC == WhereHome && w.RC == WhereMe && !w.NotHome
 	return w
 }
 
@@ -414,12 +417,24 @@ func (a *App) rolesChecker() func(time.Time) (personal, personalFill, home, home
 // awayCheckerFor diz se um aparelho estava fora do fundo da casa: o GMC
 // quando não estava em casa; o RadiaCode quando os dois estavam com você ou
 // quando ele estava fora do cálculo.
+// Com "eu não estava em casa" e o RadiaCode com você (2.38.0), ele também
+// estava fora (você saiu com ele e o GMC ficou).
 func (a *App) awayCheckerFor(dev string) func(time.Time) bool {
-	where := a.whereChecker()
+	a.mu.Lock()
+	list := append([]Period{}, a.periods...)
+	a.mu.Unlock()
 	return func(t time.Time) bool {
-		g, r := where(t)
+		g, r, out := WhereHome, WhereMe, false
+		ms := t.UnixMilli()
+		for _, p := range list {
+			if ms >= p.From && ms < periodEnd(p) {
+				g, r = periodWhere(p)
+				out = p.NotHome && r == WhereMe
+				break
+			}
+		}
 		if dev == devRC {
-			return r == WhereOff || (r == WhereMe && g == WhereMe)
+			return r == WhereOff || (r == WhereMe && (g == WhereMe || out))
 		}
 		return g != WhereHome
 	}

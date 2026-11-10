@@ -1921,3 +1921,31 @@ table.cc-cmp td:first-child { color: var(--muted); }
   .band .acts { grid-column: 1 / -1; grid-row: auto; justify-content: flex-start; }
   .band .guide { grid-column: 1 / -1; }
 }
+
+/* ---------- "o RadiaCode estava fora de casa?" (2.38.0, rcaway.js) ---------- */
+.rca { padding: var(--space-5); gap: var(--space-4); border-radius: var(--radius-md); }
+.rca-head { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.rca-head .chip { margin-left: auto; }
+.rca-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--space-3); }
+.rca-tile { background: var(--surface-2); border-radius: var(--radius-sm); padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
+.rca-num { font-size: var(--fs-number); font-weight: 500; }
+.rca-num.gmc { color: var(--accent); }
+.rca-hint { background: var(--surface-2); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); line-height: 1.5; }
+.rca-hint strong { color: var(--away-ink); }
+.rca-ask, .rca-form { display: flex; flex-direction: column; gap: var(--space-3); }
+.rca-ask .row-btns, .rca-fields { display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center; }
+.rca-fields { align-items: flex-end; }
+.rca-fields label { display: flex; flex-direction: column; gap: var(--space-1); }
+.rca-fields input { min-height: 44px; padding: 0 var(--space-3); background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font: inherit; }
+.btn.rca-out { color: var(--away-ink); border-color: color-mix(in srgb, var(--away) 50%, transparent); }
+.btn.rca-out.sug { background: var(--away); border-color: var(--away); color: var(--on-accent); font-weight: 600; }
+.btn.sug:not(.rca-out) { border-color: var(--accent-line); color: var(--accent); }
+.rca-bar { position: relative; height: 28px; border-radius: var(--radius-sm); background: repeating-linear-gradient(90deg, color-mix(in srgb, var(--rc) 22%, transparent) 0 6px, transparent 6px 9px); }
+.rca-bar i { position: absolute; top: 0; bottom: 0; border: 2px solid var(--away); border-radius: var(--radius-sm); background: color-mix(in srgb, var(--away) 12%, transparent); box-sizing: border-box; }
+.rca-ends { display: flex; justify-content: space-between; }
+.rca-done { flex-direction: row; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
+.rca-done > span { flex: 1; display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.chip.rca-pending { border-style: dashed; }
+.nr-form:has(.nr-who) { flex-wrap: wrap; }
+.nr-who { flex-basis: 100%; display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
+.nr-who > span { display: inline-flex; align-items: center; gap: var(--space-2); }
