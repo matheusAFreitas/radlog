@@ -38,8 +38,18 @@ func TestSetWhere(t *testing.T) {
 	}
 	// GMC volta: os dois em casa
 	a.setWhere(t0.Add(2*time.Hour), WhereHome, WhereHome, "")
-	if n := w(t0.Add(3 * time.Hour)); n.Personal != "" || n.Home != "gmc" {
+	// os dois em casa: você também estava, a dose pessoal usa a leitura de casa
+	if n := w(t0.Add(3 * time.Hour)); n.Personal != "gmc" || n.Home != "gmc" || n.NotHome {
 		t.Fatalf("os dois em casa: %+v", n)
+	}
+	// "eu não estava em casa": sem dosímetro
+	op := *w(t0.Add(3 * time.Hour)).Open
+	op.NotHome = true
+	if _, err := a.SavePeriod(op); err != nil {
+		t.Fatal(err)
+	}
+	if n := w(t0.Add(3 * time.Hour)); n.Personal != "" || n.Home != "gmc" || !n.NotHome {
+		t.Fatalf("os dois em casa, eu fora: %+v", n)
 	}
 	// o mesmo de novo não abre trecho; mudar e voltar no mesmo minuto não deixa trecho
 	a.setWhere(t0.Add(3*time.Hour), WhereHome, WhereHome, "")
@@ -157,24 +167,35 @@ func TestRoleDose(t *testing.T) {
 	}
 
 	// hora 1: os dois com você (o RadiaCode falha 30 min); hora 2: trocados; hora 3: os dois em casa
+	var ids []int64
 	for _, p := range []Period{
 		{From: h(1), To: h(2)},
 		{From: h(2), To: h(3), GMC: WhereMe, RC: WhereHome},
 		{From: h(3), To: h(4), GMC: WhereHome, RC: WhereHome},
 	} {
-		if _, err := a.SavePeriod(p); err != nil {
+		q, err := a.SavePeriod(p)
+		if err != nil {
 			t.Fatal(err)
 		}
+		ids = append(ids, q.ID)
 	}
 	dropRc(t, a, from.Add(60*time.Minute), from.Add(90*time.Minute))
-	for _, c := range []struct {
+	cases := []struct {
 		role            string
 		mins, swap, gap int
 		total           float64
+		notHome         bool
 	}{
-		{"pessoal", 180, 90, 60, (60*r + 30*g + 30*r + 60*g) / 60}, // RC; RC (GMC nas falhas); GMC; ninguém
-		{"casa", 180, 60, 60, (60*g + 60*r + 60*g) / 60},           // GMC; ninguém; RC; GMC
-	} {
+		{"pessoal", 240, 150, 0, (60*r + 30*g + 30*r + 60*g + 60*g) / 60, false}, // RC; RC (GMC nas falhas); GMC; leitura de casa
+		{"casa", 180, 60, 60, (60*g + 60*r + 60*g) / 60, false},                  // GMC; ninguém; RC; GMC
+		{"pessoal", 180, 90, 60, (60*r + 30*g + 30*r + 60*g) / 60, true},         // ...; eu não estava em casa: ninguém
+	}
+	for _, c := range cases {
+		if c.notHome {
+			if _, err := a.SavePeriod(Period{ID: ids[2], From: h(3), To: h(4), GMC: WhereHome, RC: WhereHome, NotHome: true}); err != nil {
+				t.Fatal(err)
+			}
+		}
 		d, err := a.roleDose(from, to, time.Hour, "publico", c.role)
 		if err != nil {
 			t.Fatal(err)

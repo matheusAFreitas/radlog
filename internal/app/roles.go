@@ -120,6 +120,18 @@ func pickRoles(gmc, rc string) (personal, personalFill, home, homeFill string) {
 	return
 }
 
+// periodRoles é o pickRoles de um trecho: com os dois em casa você também
+// estava em casa (a dose pessoal usa a leitura de casa), a não ser que o
+// trecho diga "eu não estava em casa".
+func periodRoles(p Period) (personal, personalFill, home, homeFill string) {
+	g, r := periodWhere(p)
+	personal, personalFill, home, homeFill = pickRoles(g, r)
+	if g == WhereHome && r == WhereHome && !p.NotHome {
+		personal, personalFill = home, homeFill
+	}
+	return
+}
+
 // Whereabouts diz onde está cada aparelho agora.
 type Whereabouts struct {
 	GMC      string  `json:"gmc"`       // casa, comigo
@@ -128,6 +140,7 @@ type Whereabouts struct {
 	Personal string  `json:"personal"`  // aparelho da dose pessoal ("" = sem dosímetro)
 	Home     string  `json:"home"`      // aparelho da casa ("" = sem medição)
 	Since    int64   `json:"since"`     // ms: começo do trecho aberto (0 = normal)
+	NotHome  bool    `json:"notHome"`   // os dois em casa, mas você não estava
 	Open     *Period `json:"open"`      // o trecho aberto, se houver
 	// estado ao vivo de cada aparelho (só em GetWhereabouts)
 	Live map[string]DevLive `json:"live,omitempty"`
@@ -196,10 +209,13 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 
 func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
 	w := Whereabouts{GMC: WhereHome, RC: WhereMe}
+	w.Personal, _, w.Home, _ = pickRoles(w.GMC, w.RC)
 	ms := now.UnixMilli()
 	for i, p := range a.periods {
 		if ms >= p.From && ms < periodEnd(p) {
 			w.GMC, w.RC = periodWhere(p)
+			w.NotHome = p.NotHome
+			w.Personal, _, w.Home, _ = periodRoles(p)
 			w.Since = p.From
 			if p.To == 0 {
 				q := a.periods[i]
@@ -208,7 +224,6 @@ func (a *App) whereaboutsLocked(now time.Time) Whereabouts {
 		}
 	}
 	w.Normal = w.GMC == WhereHome && w.RC == WhereMe
-	w.Personal, _, w.Home, _ = pickRoles(w.GMC, w.RC)
 	return w
 }
 
@@ -377,6 +392,23 @@ func (a *App) whereChecker() func(time.Time) (gmc, rc string) {
 	}
 }
 
+// rolesChecker diz quem tinha cada papel num instante (periodRoles do
+// trecho, ou o normal fora deles).
+func (a *App) rolesChecker() func(time.Time) (personal, personalFill, home, homeFill string) {
+	a.mu.Lock()
+	list := append([]Period{}, a.periods...)
+	a.mu.Unlock()
+	return func(t time.Time) (string, string, string, string) {
+		ms := t.UnixMilli()
+		for _, p := range list {
+			if ms >= p.From && ms < periodEnd(p) {
+				return periodRoles(p)
+			}
+		}
+		return pickRoles(WhereHome, WhereMe)
+	}
+}
+
 // awayCheckerFor diz se um aparelho estava fora do fundo da casa: o GMC
 // quando não estava em casa; o RadiaCode quando os dois estavam com você ou
 // quando ele estava fora do cálculo.
@@ -451,9 +483,9 @@ func (a *App) roleDose(from, to time.Time, step time.Duration, limit, role strin
 	if err != nil {
 		return DoseChart{}, err
 	}
-	where := a.whereChecker()
+	roles := a.rolesChecker()
 	pick := func(t time.Time) (main, fill string) {
-		p, pf, h, hf := pickRoles(where(t))
+		p, pf, h, hf := roles(t)
 		if role == "pessoal" {
 			return p, pf
 		}
@@ -581,8 +613,7 @@ func (a *App) roleGapMinutes(from, to time.Time, role string) int {
 	a.mu.Unlock()
 	var ms int64
 	for _, p := range list {
-		g, r := periodWhere(p)
-		pm, _, h, _ := pickRoles(g, r)
+		pm, _, h, _ := periodRoles(p)
 		if (role == "pessoal" && pm != "") || (role != "pessoal" && h != "") {
 			continue
 		}

@@ -32,6 +32,9 @@ type Period struct {
 	// trechos de antes da 2.25)
 	GMC string `json:"gmc,omitempty"`
 	RC  string `json:"radiacode,omitempty"`
+	// os dois em casa e você também saiu (esqueceu de levar): a dose pessoal
+	// fica em branco em vez de usar a leitura de casa
+	NotHome bool `json:"notHome,omitempty"`
 }
 
 func (a *App) periodsPath() string { return filepath.Join(a.dataDir, "fora-de-casa.json") }
@@ -75,6 +78,7 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 	if p.GMC, p.RC, err = normWhere(p.GMC, p.RC); err != nil {
 		return p, err
 	}
+	p.NotHome = p.NotHome && p.GMC == WhereHome && p.RC == WhereHome
 	if p.To != 0 && p.To < p.From {
 		p.From, p.To = p.To, p.From
 	}
