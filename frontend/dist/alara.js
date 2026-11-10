@@ -23,8 +23,9 @@ async function refreshAlOrigin() {
   if (!api.GetDoseOrigin) return;
   let o;
   try { o = await api.GetDoseOrigin(7); } catch (e) { return; }
-  const dev = { radiacode: "RC102", gmc: "GMC-800", misto: "RC102 e GMC-800" }[o.device] || "";
-  $("alOrSub").textContent = dev ? `Últimos 7 dias · ${dev} com você` : "Últimos 7 dias · nenhum aparelho com você";
+  // o GMC-800 fica em casa: quando ele entra, é a dose pela leitura de casa
+  const dev = { radiacode: "RC102 com você", gmc: "pela leitura de casa (GMC-800)", misto: "RC102 com você e leitura de casa (GMC-800)" }[o.device] || "nenhum aparelho com você";
+  $("alOrSub").textContent = `Últimos 7 dias · ${dev}`;
   const [tv, tu] = agSv(o.minutes ? o.total : null);
   $("alOrTot").innerHTML = "";
   $("alOrTot").append(tv, " ", Object.assign(document.createElement("small"), { textContent: tu ? `${tu} na semana` : "" }));
@@ -60,7 +61,7 @@ async function refreshAlOrigin() {
   for (const it of o.items) {
     const tr = tb.insertRow();
     tr.className = "al-click";
-    tr.title = "abrir nos gráficos";
+    tr.title = "Abrir nos gráficos";
     tr.insertCell().textContent = it.label;
     const wd = new Date(it.from).toLocaleDateString(LOCALE, { weekday: "short" }).replace(".", "");
     tr.insertCell().textContent = `${wd} ${hhmm(it.from)} · ${fmtDur(it.to - it.from)}`;
@@ -82,6 +83,12 @@ function alRateDefault() {
   const r = (state.rNow && state.rNow.live && state.rNow.usv) || (state.gNow && state.gNow.live && state.gNow.usv);
   if (r > 0) return [r, "taxa da leitura de agora"];
   return [0.5, "taxa de exemplo"];
+}
+
+// dose do card Tempo com as mesmas casas do número grande (agSv)
+function alDose(v) {
+  const [dv, du] = agSv(v);
+  return `${dv} ${du}`;
 }
 
 function renderAlTempo() {
@@ -106,7 +113,7 @@ function renderAlTempo() {
   if (bg > 0 && r > bg) {
     const net = r - bg, d2 = ((bg + net / 4) * m) / 60, d4 = ((bg + net / 16) * m) / 60;
     const b = document.createElement("b");
-    b.append(Object.assign(document.createElement("span"), { textContent: `Se a fonte for pequena e você ficar ao dobro da distância: ${alNum(d2, d2 < 1 ? 3 : 2)} µSv.` }), " ", Object.assign(document.createElement("span"), { textContent: `Ao quádruplo: ${alNum(d4, d4 < 1 ? 3 : 2)} µSv.` }));
+    b.append(Object.assign(document.createElement("span"), { textContent: `Se a fonte for pequena e você ficar ao dobro da distância: ${alDose(d2)}.` }), " ", Object.assign(document.createElement("span"), { textContent: `Ao quádruplo: ${alDose(d4)}.` }));
     const p = document.createElement("span");
     p.append(Object.assign(document.createElement("span"), { textContent: "Pelo inverso do quadrado, só a parte acima do fundo cai." }), " ", Object.assign(document.createElement("span"), { textContent: "O fundo continua o mesmo onde você estiver na casa." }));
     alt.append(b, p);

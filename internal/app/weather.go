@@ -157,7 +157,7 @@ func getJSON(u string, v any) error {
 	}
 	resp, err := httpClient.Do(req)
 	if err != nil {
-		return fmt.Errorf("sem acesso ao serviço de clima: %w", err)
+		return fmt.Errorf("sem acesso ao serviço de clima: %w", noURL(err))
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode != http.StatusOK {
