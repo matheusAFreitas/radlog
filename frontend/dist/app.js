@@ -1781,6 +1781,7 @@ function showSetSection(id) {
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
   if (f.querySelector("#devcfg")) openDevCfg();
+  if (f.querySelector("#rcCfg")) openRcCfg();
 }
 
 // abre a seção onde está um campo (ex.: "txtPlace" → Chuva)
@@ -2074,6 +2075,7 @@ async function openSettings(focusId) {
     return;
   }
   devCfgRead = false;
+  rcCfgRead = false;
   refreshReportDir();
   refreshAutostart();
   const s = state.settings;
@@ -2632,6 +2634,7 @@ function wire() {
   });
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
+    if (rcCfgDirty()) toast('Os ajustes do RadiaCode não foram para o aparelho: use "Gravar no RadiaCode" na seção RadiaCode.', true);
     const alarm = parseFloat($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
@@ -2654,6 +2657,7 @@ function wire() {
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
   initIntercal();
+  wireRcCfg();
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
@@ -4193,6 +4197,7 @@ const demoRc = () => {
   let api;
   api = {
     ...demoIntercal(),
+    ...demoRcAjustes(),
     GetSettings: async () => settings,
     GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\RadLog-v2.0.0.exe", exists: false, current: false, disabled: false, started: false }),
     FixAutostart: async () => ({}),
