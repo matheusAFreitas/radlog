@@ -2089,7 +2089,121 @@ const I18N_EN = {
 "alarme 2": "alarm 2",
 "Nível: Alarme 1": "Level: Alarm 1",
 "Nível: Alarme 2": "Level: Alarm 2",
-"Nível: Saturado": "Level: Saturated"
+"Nível: Saturado": "Level: Saturated",
+"A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.": "The energy calibration says which energy (keV) each spectrum channel c sits at. It comes from the factory and the device adjusts it on its own with temperature, so the app doesn't write it.",
+"Ajustes de antes gravados de volta": "Previous settings written back",
+"Ajustes do RadiaCode": "RadiaCode settings",
+"Ajustes do RadiaCode alterados": "RadiaCode settings changed",
+"Ajustes do RadiaCode alterados (desfeito)": "RadiaCode settings changed (undone)",
+"Ajustes do aparelho": "Device settings",
+"Ajustes gravados no RadiaCode": "Settings written to the RadiaCode",
+"Alarme 1 (cps)": "Alarm 1 (cps)",
+"Alarme 1 (µSv)": "Alarm 1 (µSv)",
+"Alarme 1 (µSv/h)": "Alarm 1 (µSv/h)",
+"Alarme 1 de contagem": "Count alarm 1",
+"Alarme 1 de dose": "Dose alarm 1",
+"Alarme 1 de taxa": "Rate alarm 1",
+"Alarme 2 (cps)": "Alarm 2 (cps)",
+"Alarme 2 (µSv)": "Alarm 2 (µSv)",
+"Alarme 2 (µSv/h)": "Alarm 2 (µSv/h)",
+"Alarme 2 de contagem": "Count alarm 2",
+"Alarme 2 de dose": "Dose alarm 2",
+"Alarme 2 de taxa": "Rate alarm 2",
+"Alarmes de contagem": "Count alarms",
+"Alarmes de dose acumulada": "Accumulated dose alarms",
+"Alarmes de taxa de dose": "Dose rate alarms",
+"Apagar a tela depois de": "Turn off the screen after",
+"Automática (gira com o aparelho)": "Automatic (turns with the device)",
+"Avançado: alarmes de contagem e calibração de energia": "Advanced: count alarms and energy calibration",
+"Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.": "Warns when the dose added up since the last reset reaches a total. For comparison: the annual limit for the public is 1 mSv (1,000 µSv) on top of natural background.",
+"Botões": "Buttons",
+"Brilho alto e tela acesa por mais tempo gastam mais bateria.": "High brightness and a screen that stays on longer use more battery.",
+"Calibração de energia": "Energy calibration",
+"Cliques": "Clicks",
+"Cliques: um estalo por fóton detectado, como num contador Geiger (só som).": "Clicks: one tick per detected photon, like a Geiger counter (sound only).",
+"Conecte o RadiaCode para ver e mudar os ajustes do aparelho.": "Connect the RadiaCode to see and change the device settings.",
+"Desfazendo…": "Undoing…",
+"Desfazer a última gravação": "Undo the last write",
+"Dose acumulada do RadiaCode": "RadiaCode accumulated dose",
+"Dose acumulada do RadiaCode zerada pelo app": "RadiaCode accumulated dose reset by the app",
+"Dose do RadiaCode zerada": "RadiaCode dose reset",
+"Dose fora da escala": "Dose off scale",
+"Erro ao gravar os ajustes do RadiaCode:": "Error writing the RadiaCode settings:",
+"Firmware": "Firmware",
+"Nível de fundo típico dentro de casa: perto de 0,1 µSv/h.": "Typical background level indoors: around 0.1 µSv/h.",
+"Gravando…": "Writing…",
+"Gravar de volta no RadiaCode os ajustes de antes da última gravação?": "Write back to the RadiaCode the settings from before the last write?",
+"Gravar no RadiaCode": "Write to the RadiaCode",
+"Gravar no RadiaCode:": "Write to the RadiaCode:",
+"Lendo os ajustes do RadiaCode…": "Reading the RadiaCode settings…",
+"Nada mudou: o aparelho já está assim.": "Nothing changed: the device is already set that way.",
+"Nada vai para o aparelho sem você clicar em \"Gravar no RadiaCode\". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.": "Nothing goes to the device until you click \"Write to the RadiaCode\". Before writing, the app saves a copy of what was there and then reads it back to check.",
+"Não consegui ler os ajustes:": "Couldn't read the settings:",
+"O alarme 2 de contagem precisa ser maior que o alarme 1.": "Count alarm 2 must be higher than alarm 1.",
+"O alarme 2 de dose não pode ser menor que o alarme 1.": "Dose alarm 2 can't be lower than alarm 1.",
+"O alarme 2 de taxa precisa ser maior que o alarme 1.": "Rate alarm 2 must be higher than alarm 1.",
+"O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.": "The device beeps when the current rate goes above the value. The app's RadiaCode alerts use these two numbers as attention and alarm.",
+"O app salva uma cópia do que está agora antes. Continuar?": "The app saves a copy of the current settings first. Continue?",
+"O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.": "The same rate alarm, but in photons counted per second, without converting to dose.",
+"Orientação": "Orientation",
+"Os ajustes do RadiaCode não foram para o aparelho: use \"Gravar no RadiaCode\" na seção RadiaCode.": "The RadiaCode settings weren't sent to the device: use \"Write to the RadiaCode\" in the RadiaCode section.",
+"Os alarmes de contagem precisam ficar entre 0,1 e 50.000 cps.": "Count alarms must be between 0.1 and 50,000 cps.",
+"Os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h.": "Dose rate alarms must be between 0.01 and 1,000 µSv/h.",
+"Os alertas do RadiaCode no app passam a usar os alarmes de taxa novos.": "The app's RadiaCode alerts will use the new rate alarms.",
+"Preencha os alarmes de dose (a partir de 0,01 µSv) ou marque \"desligado\".": "Fill in the dose alarms (from 0.01 µSv) or tick \"off\".",
+"RadiaCode desconectado: conecte para ver e mudar os ajustes do aparelho": "RadiaCode disconnected: connect it to see and change the device settings",
+"Röntgen (µR, µR/h)": "Roentgen (µR, µR/h)",
+"Sievert (µSv, µSv/h)": "Sievert (µSv, µSv/h)",
+"Som e vibração": "Sound and vibration",
+"Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).": "Only changes what shows on the RadiaCode's display. The app keeps showing µSv/h. The sievert measures the effect on the body; the roentgen is an old unit of exposure in air (the device uses 1 Sv = 100 R).",
+"Taxa fora da escala": "Rate off scale",
+"Tela do aparelho": "Device screen",
+"Unidade de contagem": "Count unit",
+"Unidade de dose": "Dose unit",
+"Unidades na tela do aparelho": "Units on the device screen",
+"Valores lidos do RadiaCode agora. Mude o que quiser e clique em \"Gravar no RadiaCode\".": "Values read from the RadiaCode just now. Change what you want and click \"Write to the RadiaCode\".",
+"Virada para a direita": "Turned to the right",
+"Virada para a esquerda": "Turned to the left",
+"Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.": "Sets the device's dose back to zero, like its own menu. It can't be undone. The app's dose history keeps the total from before and recognizes the reset.",
+"Zerar a dose": "Reset the dose",
+"Zerar a dose acumulada": "Reset the accumulated dose",
+"Zerando…": "Resetting…",
+"ainda não há gravação para desfazer": "there's no write to undo yet",
+"alarme 1 de taxa": "rate alarm 1",
+"alarme 2 de taxa": "rate alarm 2",
+"alarme 1 de dose": "dose alarm 1",
+"alarme 2 de dose": "dose alarm 2",
+"alarme 1 de contagem": "count alarm 1",
+"alarme 2 de contagem": "count alarm 2",
+"alarme 1 desligado": "alarm 1 off",
+"alarme 2 desligado": "alarm 2 off",
+"automática": "automatic",
+"botões": "buttons",
+"brilho": "brightness",
+"dose fora da escala": "dose off scale",
+"já estou gravando no RadiaCode": "already writing to the RadiaCode",
+"nada mudou": "nothing changed",
+"o alarme 2 de contagem precisa ser maior que o alarme 1": "count alarm 2 must be higher than alarm 1",
+"o alarme 2 de dose não pode ser menor que o alarme 1": "dose alarm 2 can't be lower than alarm 1",
+"o alarme 2 de taxa de dose precisa ser maior que o alarme 1": "dose rate alarm 2 must be higher than alarm 1",
+"o brilho vai de 0 a 9": "brightness goes from 0 to 9",
+"orientação": "orientation",
+"orientação da tela desconhecida": "unknown screen orientation",
+"os alarmes de contagem precisam ficar entre 0,1 e 50.000 cps": "count alarms must be between 0.1 and 50,000 cps",
+"os alarmes de dose precisam ficar entre 0,01 µSv e 10 Sv": "dose alarms must be between 0.01 µSv and 10 Sv",
+"os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h": "dose rate alarms must be between 0.01 and 1,000 µSv/h",
+"por minuto (cpm)": "per minute (cpm)",
+"por segundo (cps)": "per second (cps)",
+"sem pasta de dados": "no data folder",
+"som": "sound",
+"som em:": "sound on:",
+"taxa fora da escala": "rate off scale",
+"tempo para apagar a tela desconhecido": "unknown screen-off time",
+"unidade de contagem": "count unit",
+"unidade de dose": "dose unit",
+"vibração em:": "vibration on:",
+"virada para a direita": "turned to the right",
+"virada para a esquerda": "turned to the left"
 },
 "patterns": [
 [
@@ -2606,6 +2720,16 @@ const I18N_EN = {
 ]
 ],
 [
+"a gravação parou no ",
+"^a gravação parou no ((?:(?! · ).)+?)º ajuste \\(((?:(?! · ).)+?)\\); o que já foi gravado ficou, e a cópia de antes está salva$",
+"the write stopped at setting ${1} (${2}); what was already written stays, and the copy from before is saved",
+[
+"a gravação parou no ",
+"º ajuste (",
+"); o que já foi gravado ficou, e a cópia de antes está salva"
+]
+],
+[
 "Geiger saturado: a leitura chegou a ",
 "^Geiger saturado: a leitura chegou a ((?:(?! · ).)+?) µSv/h \\(fim da escala\\); o valor real pode ser maior$",
 "Geiger saturated: the reading reached ${1} µSv/h (end of scale); the real value may be higher",
@@ -2788,6 +2912,15 @@ const I18N_EN = {
 "Seu limite (",
 ") está acima do perigo do app (",
 "): quem toca é o alarme de perigo."
+]
+],
+[
+"Zerar a dose acumulada do RadiaCode",
+"^Zerar a dose acumulada do RadiaCode((?:(?! · ).)+?)\\? Não tem volta: o aparelho recomeça do zero\\.$",
+"Reset the RadiaCode's accumulated dose${1}? It can't be undone: the device starts again from zero.",
+[
+"Zerar a dose acumulada do RadiaCode",
+"? Não tem volta: o aparelho recomeça do zero."
 ]
 ],
 [
@@ -3991,6 +4124,14 @@ const I18N_EN = {
 ]
 ],
 [
+"o aparelho aceitou, mas leu de volta diferente: ",
+"^o aparelho aceitou, mas leu de volta diferente: ((?:(?! · ).)+?)$",
+"the device accepted it, but read back differently: ${1}",
+[
+"o aparelho aceitou, mas leu de volta diferente: "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -4034,6 +4175,15 @@ const I18N_EN = {
 "Antes da chuva: ",
 " µSv/h · últimos 15 min: ",
 "%)"
+]
+],
+[
+"Nível de fundo em casa pelo RadiaCode: ",
+"^Nível de fundo em casa pelo RadiaCode: ((?:(?! · ).)+?) µSv/h\\.$",
+"Background level at home from the RadiaCode: ${1} µSv/h.",
+[
+"Nível de fundo em casa pelo RadiaCode: ",
+" µSv/h."
 ]
 ],
 [
@@ -4634,6 +4784,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O alarme 1 está em ",
+"^O alarme 1 está em ((?:(?! · ).)+?)× o nível de fundo\\.$",
+"Alarm 1 is at ${1}× the background level.",
+[
+"O alarme 1 está em ",
+"× o nível de fundo."
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -4819,6 +4978,14 @@ const I18N_EN = {
 [
 "RadiaCode simulado ligado (",
 " µSv/h)"
+]
+],
+[
+"Dose acumulada no aparelho agora: ",
+"^Dose acumulada no aparelho agora: ((?:(?! · ).)+?)\\.$",
+"Accumulated dose on the device now: ${1}.",
+[
+"Dose acumulada no aparelho agora: "
 ]
 ],
 [
@@ -5280,6 +5447,14 @@ const I18N_EN = {
 [
 "Atenção: ",
 " µSv/h (a partir de "
+]
+],
+[
+"o aparelho recusou os registros ",
+"^o aparelho recusou os registros ((?:(?! · ).)+?)$",
+"the device refused registers ${1}",
+[
+"o aparelho recusou os registros "
 ]
 ],
 [
@@ -6498,6 +6673,15 @@ const I18N_EN = {
 [
 "Usar ",
 " a partir de agora"
+]
+],
+[
+"De fábrica: ",
+"^De fábrica: ((?:(?! · ).)+?) e ((?:(?! · ).)+?) µSv/h\\.$",
+"Factory default: ${1} and ${2} µSv/h.",
+[
+"De fábrica: ",
+" µSv/h."
 ]
 ],
 [
@@ -7765,6 +7949,15 @@ const I18N_EN = {
 ]
 ],
 [
+"cópia ",
+"^cópia ((?:(?! · ).)+?) ilegível: ((?:(?! · ).)+?)$",
+"copy ${1} unreadable: ${2}",
+[
+"cópia ",
+" ilegível: "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -8399,6 +8592,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Vibração em \"",
+"^Vibração em \"((?:(?! · ).)+?)\"$",
+"Vibration on \"${1}\"",
+[
+"Vibração em \""
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -8837,6 +9038,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não gravei: ",
+"^não gravei: ((?:(?! · ).)+?)$",
+"didn't write: ${1}",
+[
+"não gravei: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -8998,6 +9207,14 @@ const I18N_EN = {
 "no data · ${1}",
 [
 "sem dado · "
+]
+],
+[
+"(agora: ",
+"^\\(agora: ((?:(?! · ).)+?)\\)$",
+"(now: ${1})",
+[
+"(agora: "
 ]
 ],
 [
@@ -9218,6 +9435,14 @@ const I18N_EN = {
 "${1} · attention",
 [
 " · atenção"
+]
+],
+[
+"Vibração: ",
+"^Vibração: ((?:(?! · ).)+?)$",
+"Vibration: ${1}",
+[
+"Vibração: "
 ]
 ],
 [
@@ -9462,6 +9687,14 @@ const I18N_EN = {
 "µSv/h at ${1}",
 [
 "µSv/h às "
+]
+],
+[
+"Som em \"",
+"^Som em \"((?:(?! · ).)+?)\"$",
+"Sound on \"${1}\"",
+[
+"Som em \""
 ]
 ],
 [
@@ -9845,6 +10078,12 @@ const I18N_EN = {
 ]
 ],
 [
+"• ",
+"^• ((?:(?! · ).)+?): ((?:(?! · ).)+?) → ((?:(?! · ).)+?)$",
+"• ${1}: ${2} → ${3}",
+[]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -10010,6 +10249,14 @@ const I18N_EN = {
 "away ${1}",
 [
 "fora "
+]
+],
+[
+"Som: ",
+"^Som: ((?:(?! · ).)+?)$",
+"Sound: ${1}",
+[
+"Som: "
 ]
 ],
 [

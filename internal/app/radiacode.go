@@ -108,32 +108,33 @@ type RcStats struct {
 }
 
 type rcState struct {
-	statsM      sync.Mutex
-	stats       *RcStats
-	statsAt     time.Time
-	mu          sync.Mutex
-	st          RcState
-	dev         *radiacode.Device
-	min         rcMinute
-	wake        chan struct{}
-	fileM       sync.Mutex
-	ring        []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
-	today       rcToday
-	raw         rcRawLog
-	spec        rcSpecLog // espectro de minuto em minuto (espectrograma)
-	specSum     rcSpecCache
-	act         actState  // medição de atividade (Bq)
-	macc        rcMeasAcc // só a goroutine do rcRun mexe
-	dose        rcDoseLive
-	cfgLogAt    time.Time
-	logCfgAt    time.Time    // última "configuração alterada" no log do aparelho
-	search      []rcSearchPt // modo busca: amostras curtas dos últimos minutos
-	searchRef   [2]float64
-	searchRefAt time.Time
-	bleNow      atomic.Bool // endereço Bluetooth novo: tentar já
-	doseLast    rcDosePt    // último total gravado (protegido por fileM)
-	texts       rcTexts     // mensagens do aparelho já passadas para o log
-	mem         rcMemTally  // o que veio da memória do aparelho nesta conexão
+	statsM       sync.Mutex
+	stats        *RcStats
+	statsAt      time.Time
+	mu           sync.Mutex
+	st           RcState
+	dev          *radiacode.Device
+	min          rcMinute
+	wake         chan struct{}
+	fileM        sync.Mutex
+	ring         []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
+	today        rcToday
+	raw          rcRawLog
+	spec         rcSpecLog // espectro de minuto em minuto (espectrograma)
+	specSum      rcSpecCache
+	act          actState  // medição de atividade (Bq)
+	macc         rcMeasAcc // só a goroutine do rcRun mexe
+	dose         rcDoseLive
+	cfgLogAt     time.Time
+	logCfgAt     time.Time    // última "configuração alterada" no log do aparelho
+	search       []rcSearchPt // modo busca: amostras curtas dos últimos minutos
+	searchRef    [2]float64
+	searchRefAt  time.Time
+	bleNow       atomic.Bool // endereço Bluetooth novo: tentar já
+	doseLast     rcDosePt    // último total gravado (protegido por fileM)
+	texts        rcTexts     // mensagens do aparelho já passadas para o log
+	mem          rcMemTally  // o que veio da memória do aparelho nesta conexão
+	cfgReadSince time.Time   // conexão em que os ajustes já foram copiados
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a

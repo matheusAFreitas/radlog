@@ -1009,6 +1009,7 @@
         <div class="rc-ctrl">
           <button type="button" class="btn small" id="btnRcRetry">Procurar de novo</button>
           <button type="button" class="btn small" id="btnRcSettings">Configurar conexão</button>
+          <button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button>
         </div>
       </article>
 
@@ -1408,6 +1409,112 @@
         <input type="checkbox" id="chkRcRaw">
       </label>
       <p class="small muted">Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta <span class="mono">radiacode/bruto</span> e entra no backup (alguns MB por dia).</p>
+
+<div class="devcfg rccfg" id="rcCfg">
+      <h3 class="sub-head">Ajustes gravados no aparelho</h3>
+      <p class="small muted" id="rcIntro">Conecte o RadiaCode para ver e mudar os ajustes do aparelho.</p>
+      <div class="dc-grid" id="rcCfgBody">
+      <fieldset class="dc-edit">
+        <legend>Alarmes de taxa de dose</legend>
+        <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RadiaCode no app usam estes dois números como atenção e alarme.</p>
+        <div class="rc-pair">
+          <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+          <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+        </div>
+        <p class="small muted" id="rcDRHint"></p>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Alarmes de dose acumulada</legend>
+        <p class="small muted">Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.</p>
+        <div class="rc-pair">
+          <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+          <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+        </div>
+        <div class="rc-pair">
+          <label class="rc-check"><input type="checkbox" id="rcDS1Off"> alarme 1 desligado</label>
+          <label class="rc-check"><input type="checkbox" id="rcDS2Off"> alarme 2 desligado</label>
+        </div>
+        <p class="small muted" id="rcDSHint"></p>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Som e vibração</legend>
+        <label class="toggle"><span>Som</span><input type="checkbox" id="rcSoundOn"></label>
+        <label class="toggle"><span>Vibração</span><input type="checkbox" id="rcVibroOn"></label>
+        <div class="table-box">
+          <table class="rc-ctrl-tbl">
+            <thead><tr><th scope="col">Quando</th><th scope="col">Som</th><th scope="col">Vibração</th></tr></thead>
+            <tbody id="rcCtrlRows"></tbody>
+          </table>
+        </div>
+        <p class="small muted">Cliques: um estalo por fóton detectado, como num contador Geiger (só som).</p>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Tela do aparelho</legend>
+        <label for="rcBrt">Brilho: <span class="mono" id="rcBrtOut"></span></label>
+        <input type="range" id="rcBrt" min="0" max="9" step="1">
+        <label for="rcOff">Apagar a tela depois de</label>
+        <select id="rcOff"></select>
+        <label for="rcDir">Orientação</label>
+        <select id="rcDir">
+          <option value="0">Automática (gira com o aparelho)</option>
+          <option value="1">Virada para a direita</option>
+          <option value="2">Virada para a esquerda</option>
+        </select>
+        <p class="small muted">Brilho alto e tela acesa por mais tempo gastam mais bateria.</p>
+      </fieldset>
+
+      <fieldset class="dc-edit">
+        <legend>Unidades na tela do aparelho</legend>
+        <label for="rcUnitDose">Dose</label>
+        <select id="rcUnitDose"><option value="1">Sievert (µSv, µSv/h)</option><option value="0">Röntgen (µR, µR/h)</option></select>
+        <label for="rcUnitCnt">Contagem</label>
+        <select id="rcUnitCnt"><option value="0">por segundo (cps)</option><option value="1">por minuto (cpm)</option></select>
+        <p class="small muted">Só muda o que aparece no visor do RadiaCode. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
+      </fieldset>
+
+      <details class="discover rc-adv">
+        <summary>Avançado: alarmes de contagem e calibração de energia</summary>
+        <div class="dc-grid">
+        <fieldset class="dc-edit">
+          <legend>Alarmes de contagem</legend>
+          <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
+          <div class="rc-pair">
+            <label>Alarme 1 (cps)<input type="number" id="rcCR1" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
+            <label>Alarme 2 (cps)<input type="number" id="rcCR2" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
+          </div>
+        </fieldset>
+        <fieldset>
+          <legend>Só leitura</legend>
+          <dl class="info">
+            <dt>Calibração de energia</dt><dd class="mono" id="rcEnergy">—</dd>
+            <dt>Firmware</dt><dd class="mono" id="rcCfgFw">—</dd>
+          </dl>
+          <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
+        </fieldset>
+        </div>
+      </details>
+      </div>
+
+      <div class="rc-reset">
+        <div>
+          <strong>Zerar a dose acumulada</strong>
+          <p class="small muted">Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.</p>
+        </div>
+        <button type="button" class="btn" id="rcResetDose" disabled>Zerar a dose</button>
+      </div>
+
+      <p class="small muted">Nada vai para o aparelho sem você clicar em "Gravar no RadiaCode". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.</p>
+      <div class="dc-foot">
+        <div class="row">
+          <button type="button" class="btn" id="rcUndo" disabled>Desfazer a última gravação</button>
+          <button type="button" class="btn" id="rcBackups">Ver cópias</button>
+        </div>
+        <button type="button" class="btn accent" id="rcCfgSave" disabled>Gravar no RadiaCode</button>
+      </div>
+</div>
     </fieldset>
 
     <fieldset>
@@ -1778,6 +1885,7 @@
 <script src="onde.js"></script>
 <script src="intercal.js"></script>
 <script src="aparelho.js"></script>
+<script src="rcajustes.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

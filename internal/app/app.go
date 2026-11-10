@@ -338,6 +338,7 @@ type App struct {
 
 	downloading    atomic.Bool
 	cfgBusy        atomic.Bool // gravando/lendo a configuração do contador
+	rcCfgBusy      atomic.Bool // gravando os ajustes do RadiaCode
 	cfgBackedUp    bool        // já salvou a cópia da config nesta conexão
 	cfgSnapshot    []byte      // "foto" da config para comparar
 	cancelDownload chan struct{}

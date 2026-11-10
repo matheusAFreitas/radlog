@@ -898,6 +898,22 @@ dialog#settings { width: min(1040px, calc(100vw - 32px)); height: min(780px, cal
 .devcfg .dc-grid fieldset { margin: 0; }
 .dc-foot { display: flex; justify-content: space-between; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 
+/* ajustes do RadiaCode (mesmo desenho dos do contador) */
+.rccfg .rc-pair { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-3); }
+.rccfg .rc-pair label { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; font-size: var(--fs-label); color: var(--muted); }
+.rccfg .rc-pair input[type=number] { width: 100%; min-width: 0; }
+.rccfg #rcEnergy { font-size: var(--fs-label); }
+.rccfg .rc-pair label.rc-check { flex-direction: row; align-items: center; gap: var(--space-2); }
+.rccfg .rc-adv { grid-column: 1 / -1; }
+.rccfg .rc-adv .dc-grid { margin-top: var(--space-3); }
+table.rc-ctrl-tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-label); }
+table.rc-ctrl-tbl th, table.rc-ctrl-tbl td { padding: var(--space-1) var(--space-2); text-align: center; border-bottom: 1px solid var(--border); }
+table.rc-ctrl-tbl th[scope="row"], table.rc-ctrl-tbl thead th:first-child { text-align: left; font-weight: 400; }
+table.rc-ctrl-tbl thead th { color: var(--muted); font-weight: 500; }
+.rc-reset { display: flex; justify-content: space-between; align-items: center; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.rc-reset > div { flex: 1 1 260px; }
+.rc-reset p { margin: var(--space-1) 0 0; }
+
 /* ===== repaginação 1.10 ===== */
 body { background: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%), var(--bg); }
 
