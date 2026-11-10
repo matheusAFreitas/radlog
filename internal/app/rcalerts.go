@@ -44,8 +44,9 @@ type RcLimits struct {
 func (a *App) rcLimits() RcLimits {
 	a.mu.Lock()
 	cal := a.convCalLocked()
-	lv := a.settings.Levels.Norm()
-	alarmCPM := a.settings.AlarmCPM
+	eff := a.effLocked()
+	lv := eff.Levels.Norm()
+	alarmCPM := eff.AlarmCPM
 	a.mu.Unlock()
 	if alarmCPM <= 0 {
 		alarmCPM = levels.WarningCPM

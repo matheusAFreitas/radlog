@@ -3,11 +3,13 @@ package app
 import (
 	"encoding/json"
 	"fmt"
+	"math"
 	"os"
 	"path/filepath"
 	"testing"
 	"time"
 
+	"radlog/internal/gmc"
 	"radlog/internal/store"
 )
 
@@ -54,14 +56,15 @@ func TestAlertDetail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if d.Limit != 100 || !d.Detailed || len(d.Seconds) < 300 || len(d.Minutes) == 0 {
+	k := gmc.DefaultCalibration().USv(100) / 100 // µSv/h por CPM (reta)
+	if d.Unit != "usv" || d.LimitCPM != 100 || math.Abs(d.Limit-100*k) > 1e-9 || !d.Detailed || len(d.Seconds) < 300 || len(d.Minutes) == 0 {
 		t.Fatalf("detalhe: limite %v detalhado %v segundos %d minutos %d", d.Limit, d.Detailed, len(d.Seconds), len(d.Minutes))
 	}
 	peak := 0.0
 	for _, p := range d.Seconds {
 		peak = max(peak, p.CPM)
 	}
-	if peak != 130 {
+	if math.Abs(peak-130*k) > 1e-9 || math.Abs(d.Event.PeakUSv-130*k) > 1e-9 {
 		t.Fatalf("pico %v", peak)
 	}
 	if d.From > start.Add(-2*time.Minute+time.Second).UnixMilli() {
@@ -105,7 +108,7 @@ func TestAlertDetail(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(d3.Seconds) != 0 || d3.Detailed || d3.Limit != 50 || d3.To-d3.From < (20*time.Minute).Milliseconds() {
+	if len(d3.Seconds) != 0 || d3.Detailed || d3.LimitCPM != 50 || d3.To-d3.From < (20*time.Minute).Milliseconds() {
 		t.Fatalf("retro: %+v", d3)
 	}
 	if _, err := a.GetAlertDetail(99999); err == nil {

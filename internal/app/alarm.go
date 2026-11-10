@@ -25,7 +25,10 @@ func (a *App) dangerStarted(cpm float64, demo bool) {
 }
 
 func (a *App) flagWindow(tag string, cpm float64, demo, raise bool) {
-	a.flagWindowText(tag, fmt.Sprintf("%.0f CPM", cpm), demo, raise)
+	a.mu.Lock()
+	usv := a.convCalLocked().USv(cpm)
+	a.mu.Unlock()
+	a.flagWindowText(tag, fmtUSv(usv)+" µSv/h", demo, raise)
 }
 
 // flagWindowText põe o alerta no título (com o valor já escrito) e, se
