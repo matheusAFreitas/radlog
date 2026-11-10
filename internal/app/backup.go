@@ -473,12 +473,20 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	}
 
 	// chuva (só se for o mesmo lugar)
+	rainSame := false
 	if f, ok := files["chuva.json"]; ok {
 		if b, err := readZipFile(f); err == nil {
 			var c rainCache
 			if json.Unmarshal(b, &c) == nil && c.V == rainCacheVersion {
 				a.mu.Lock()
-				if a.rain != nil && samePlace(a.rain.Lat, a.rain.Lon, c.Lat, c.Lon, c.Place) {
+				if a.rain != nil {
+					same, ok := samePlace(a.rain.Lat, a.rain.Lon, c.Lat, c.Lon, c.Place)
+					if !ok {
+						same = samePressure(a.rain.Press, c.Press)
+					}
+					rainSame = same
+				}
+				if rainSame {
 					for k, v := range c.Hours {
 						if _, ok := a.rain.Hours[k]; !ok {
 							a.rain.Hours[k] = v
@@ -507,7 +515,13 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			var r radarStore
 			if json.Unmarshal(b, &r) == nil && r.V == radarVersion {
 				a.mu.Lock()
-				if a.radar != nil && samePlace(a.radar.Lat, a.radar.Lon, r.Lat, r.Lon, r.Place) {
+				same := rainSame // o radar do backup é do mesmo lugar que a chuva dele
+				if a.radar != nil {
+					if s, ok := samePlace(a.radar.Lat, a.radar.Lon, r.Lat, r.Lon, r.Place); ok {
+						same = s
+					}
+				}
+				if a.radar != nil && same {
 					for k, v := range r.Points {
 						if _, ok := a.radar.Points[k]; !ok {
 							a.radar.Points[k] = v
