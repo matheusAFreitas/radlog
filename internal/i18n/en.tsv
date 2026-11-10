@@ -3206,3 +3206,31 @@ toca a partir de {0}	sounds from {0}
 versão {0}	version {0}
 {0} CPM ≈ {1}	{0} CPM ≈ {1}
 {0} e {1}	{0} and {1}
+{0} no {1}	{0} on the {1}
+som pausado até {0}	sound paused until {0}
+Ligar o som	Turn sound on
+som desligado	sound off
+Voltou ao normal às {0}	Back to normal at {0}
+Voltou ao normal	Back to normal
+{0} nos dois aparelhos	{0} on both devices
+Também: {0} no {1}	Also: {0} on the {1}
+os dois concordam: não é defeito de um aparelho	both agree: it isn't one device failing
+Ver no histórico	See in history
+{0} saturado	{0} saturated
+fora da escala do aparelho	beyond the device's range
+acima do que o aparelho mede	above what the device can measure
+caiu de repente após valor extremo	dropped suddenly after an extreme value
+o tubo pode ter travado	the tube may have locked up
+perigo a partir de {0}	danger from {0}
+DEMO	DEMO
+TESTE	TEST
+REAL	REAL
+Some sozinha em 1 min.	Goes away on its own in 1 min.
+RadiaCode saturado	RadiaCode saturated
+Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.	Default 1,000: the top of the RadiaCode 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with "≥" and warns not to trust it.
+fim da escala do RadiaCode	RadiaCode end of scale
+Saturação do RadiaCode	RadiaCode saturation
+fim da escala {0} µSv/h	end of scale {0} µSv/h
+{0} min	{0} min
+{0} h {1} min	{0} h {1} min
+OK	OK

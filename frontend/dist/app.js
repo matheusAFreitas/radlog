@@ -1442,7 +1442,7 @@ let audio = null;
 //          para desligar nem trocar; "Silenciar" cala por 5 min e, se ainda
 //          estiver alto, volta a tocar). O perigo tem prioridade sobre o alarme.
 // níveis do app (aba "Níveis do app" nas Configurações)
-const LV_DEFAULT = { attentionCPM: 50, dangerCPM: 1000, snoozeMin: 5, satMaxUSv: 2000, satDropUSv: 1000, satHoldSec: 60, deadTimeOn: false, deadTimeUs: 200 };
+const LV_DEFAULT = { attentionCPM: 50, dangerCPM: 1000, snoozeMin: 5, satMaxUSv: 2000, satDropUSv: 1000, satHoldSec: 60, rcSatUSv: 1000, deadTimeOn: false, deadTimeUs: 200 };
 function lv() {
   const out = Object.assign({}, LV_DEFAULT);
   const s = (state.settings && state.settings.levels) || {};
@@ -1618,49 +1618,146 @@ function updateAlarm() {
   const on = !!kind;
   document.body.classList.toggle("alarming", on);
   document.body.classList.toggle("danger", sev === "perigo");
+  const usv = kind === "test" ? cpm * (calK()) : kind === "rc" ? rcs.usvh || 0 : r ? r.usv : 0;
+  bandEpisode(kind, sev, usv);
   updateAttention();
   const bar = $("alarmBar");
   bar.hidden = !on;
-  bar.classList.toggle("demo", kind === "demo" || kind === "test" || (kind === "rc" && !!(state.rc.st || {}).demo));
-  bar.classList.toggle("perigo", sev === "perigo");
-  bar.classList.toggle("muted", sev === "perigo" ? snoozed : alarmCtl.muted);
   if (!on) return;
+  const fake = kind === "demo" || kind === "test" || (kind === "rc" && !!rcs.demo);
+  const perigo = sev === "perigo";
+  bar.classList.toggle("demo", fake);
+  bar.classList.toggle("perigo", perigo);
+  bar.classList.toggle("alarme", !perigo);
+  // o perigo nunca fica calmo: silenciado, só ganha a etiqueta com a hora
+  bar.classList.toggle("muted", !perigo && alarmCtl.muted);
 
-  const usv = kind === "test" ? cpm * (calK()) : kind === "rc" ? rcs.usvh || 0 : r ? r.usv : 0;
-  const tag = { real: state.demo.active ? " REAL" : "", rc: (state.rc.st || {}).demo ? " (demo) · RADIACODE" : " · RADIACODE", demo: " (demo)", test: " (teste)" }[kind];
-  const note = $("alarmNote");
-  const sat = r && r.saturated ? r.satReason || "limite" : null;
-  renderRise(sev === "perigo" && r ? r.rise : null, usv);
-  if (sev === "perigo") {
-    if (sat) {
-      $("alarmTitle").textContent = "GEIGER SATURADO" + tag;
-      $("alarmDetail").textContent = sat === "limite"
-        ? `acima do que o aparelho mede · o real pode ser maior que ${fmt(usv, usv >= 100 ? 0 : usvDigits(usv))} µSv/h`
-        : `caiu de repente após valor extremo · o tubo pode ter travado`;
-    } else {
-      $("alarmTitle").textContent = "PERIGO" + tag;
-      $("alarmDetail").textContent = kind === "rc"
-        ? `${usvVal(usv)} no RadiaCode · perigo a partir de ${usvVal(rcl.danger || 0)}`
-        : `${usvTxt(usv)} · perigo a partir de ${usvTxt(dangerUSv())}`;
-    }
-    note.textContent = PHONES;
-    note.hidden = false;
-    const g = guidance("perigo", sat ? 1000 : usv);
-    g.steps = g.steps.filter((t) => t !== PHONES); // os telefones já ficam à vista na faixa
-    fillGuide("alarmGuide", "alarmHint", g);
-    if (sat) $("alarmHint").textContent = "Não confie no número. Afaste-se agora.";
-    $("btnSilence").textContent = snoozed ? `Silenciado até ${hhmm(alarmCtl.snoozeUntil)}` : "Silenciar 5 min";
-    $("btnSilence").disabled = snoozed;
+  const dev = kind === "rc" ? "RadiaCode" : "GMC-800";
+  const rcSat = kind === "rc" && rcs.usvh >= lv().rcSatUSv;
+  const sat = rcSat ? "escala" : r && r.saturated ? r.satReason || "limite" : null;
+  $("alarmIco").innerHTML = LV_PATH[sat ? "perigo" : sev];
+  const tag = fake ? (kind === "test" ? "TESTE" : "DEMO") : kind === "real" && state.demo.active ? "REAL" : "";
+  $("alarmTag").textContent = tag;
+  $("alarmTag").hidden = !tag;
+  $("alarmVal").textContent = (sat ? "≥ " : "") + (usv >= 100 ? `${fmt(usv, 0)} µSv/h` : usvTxt(usv));
+  if (sat) {
+    $("alarmTitle").textContent = `${dev} saturado`;
+    $("alarmDetail").textContent = sat === "escala" ? "fora da escala do aparelho"
+      : sat === "limite" ? "acima do que o aparelho mede" : "caiu de repente após valor extremo · o tubo pode ter travado";
   } else {
-    $("alarmTitle").textContent = "ALARME" + tag;
-    $("alarmDetail").textContent = kind === "rc"
-      ? `${usvVal(usv)} no RadiaCode · ` + (rcl.device ? `alarme 2 do aparelho: ${usvVal(rcl.alarm || 0)}` : `limite ${usvVal(rcl.alarm || 0)}`)
-      : `${usvTxt(usv)} · seu limite: ${usvTxt(alarmUSv())}`;
-    note.hidden = true;
-    fillGuide("alarmGuide", "alarmHint", guidance("alarme", usv));
-    $("btnSilence").textContent = alarmCtl.muted ? "Som desligado" : "Silenciar";
-    $("btnSilence").disabled = alarmCtl.muted;
+    $("alarmTitle").textContent = `${BAND_NAME[sev]} no ${dev}`;
+    $("alarmDetail").textContent = perigo
+      ? `perigo a partir de ${kind === "rc" ? usvTxt(rcl.danger || 0) : usvTxt(dangerUSv())}`
+      : kind === "rc" ? (rcl.device ? `alarme 2 do aparelho: ${usvTxt(rcl.alarm || 0)}` : `limite ${usvTxt(rcl.alarm || 0)}`)
+      : `seu limite: ${usvTxt(alarmUSv())}`;
   }
+  // o outro aparelho: no mesmo nível, os dois números lado a lado; abaixo,
+  // a linha "Também"
+  bandOther("alarm", kind, sat ? null : sev, usv);
+  if (sat) $("alarmBoth").hidden = $("alarmAgree").hidden = true;
+  $("alarmChip").hidden = perigo || !alarmCtl.muted;
+  renderRise(perigo && r ? r.rise : null, usv);
+  const g = guidance(perigo ? "perigo" : "alarme", sat ? 1000 : usv);
+  if (perigo) g.steps = g.steps.filter((t) => t !== PHONES); // os telefones já ficam à vista na faixa
+  fillGuide("alarmGuide", "alarmHint", g);
+  if (sat) $("alarmHint").textContent = "Não confie no número. Afaste-se agora.";
+  const note = $("alarmNote");
+  note.hidden = !perigo;
+  if (perigo) {
+    const key = PHONES + (snoozed ? alarmCtl.snoozeUntil : "");
+    if (note.dataset.key !== key) {
+      note.dataset.key = key;
+      note.textContent = "";
+      for (const t of PHONES.split(" · ")) { const sp = document.createElement("span"); sp.className = "phone mono"; sp.textContent = t; note.appendChild(sp); }
+      if (snoozed) { const c = document.createElement("span"); c.className = "chip"; c.textContent = `som pausado até ${hhmm(alarmCtl.snoozeUntil)}`; note.appendChild(c); }
+    }
+  }
+  const quiet = perigo ? snoozed : alarmCtl.muted;
+  const btn = $("btnSilence");
+  btn.textContent = quiet ? "Ligar o som" : perigo ? "Silenciar 5 min" : "Silenciar";
+  btn.classList.toggle("solid", !quiet);
+  btn.disabled = false;
+}
+
+// nomes dos níveis na faixa ("Alarme no GMC-800") e na linha "Também"
+const BAND_NAME = { atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
+const BAND_LOW = { atencao: "atenção", alarme: "alarme", perigo: "perigo" };
+const BAND_RANK = { atencao: 1, alarme: 2, perigo: 3 };
+
+// nível e valor de agora do aparelho que não é o da faixa
+function bandOtherOf(kind) {
+  if (kind === "real" || kind === "demo") {
+    const st = state.rc.st || {};
+    return { dev: "RadiaCode", lv: alarmCtl.rcDanger ? "perigo" : alarmCtl.rc ? "alarme" : attnCtl.rc ? "atencao" : null, usv: st.usvh || 0 };
+  }
+  if (kind === "rc") {
+    const r = state.demo.active ? state.lastReal : state.last;
+    return { dev: "GMC-800", lv: alarmCtl.realDanger ? "perigo" : alarmCtl.real ? "alarme" : attnCtl.real ? "atencao" : null, usv: r ? r.usv : 0 };
+  }
+  return null;
+}
+
+// pfx "alarm" ou "attn": preenche "nos dois aparelhos" ou a linha "Também"
+function bandOther(pfx, kind, lv, usv) {
+  const o = lv ? bandOtherOf(kind) : null;
+  const same = !!o && o.lv === lv;
+  const also = !!o && !!o.lv && !same && BAND_RANK[o.lv] < BAND_RANK[lv];
+  const dev = kind === "rc" ? "RadiaCode" : "GMC-800";
+  $(pfx + "Both").hidden = $(pfx + "Agree").hidden = !same;
+  $(pfx + "Also").hidden = !also;
+  $(pfx + "Val").hidden = same;
+  if (same) {
+    $(pfx + "Title").textContent = `${BAND_NAME[lv]} nos dois aparelhos`;
+    const box = $(pfx + "Both");
+    box.textContent = "";
+    [[dev, usv, false], [o.dev, o.usv, true]].forEach(([d, v, unit]) => {
+      const sp = document.createElement("span"), b = document.createElement("b");
+      b.className = "val";
+      b.textContent = fmt(v, usvDigits(v));
+      sp.append(d + " ", b);
+      if (unit) sp.append(" µSv/h");
+      box.appendChild(sp);
+    });
+  }
+  if (also) {
+    const box = $(pfx + "Also");
+    box.innerHTML = `<svg class="lv-ico ${o.lv}" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">${LV_PATH[o.lv]}</svg>`;
+    const sp = document.createElement("span"), b = document.createElement("b");
+    b.textContent = fmt(o.usv, usvDigits(o.usv));
+    sp.append(`Também: ${BAND_LOW[o.lv]} no ${o.dev}`, " · ", b, " µSv/h");
+    box.appendChild(sp);
+  }
+}
+
+// "Voltou ao normal": guarda o pico de cada episódio real e, quando acaba,
+// mostra a tira verde por 60 s (não depois de demo nem de teste)
+const okCtl = { ep: null, timer: null };
+function bandEpisode(kind, sev, usv) {
+  const real = kind === "real" || (kind === "rc" && !(state.rc.st || {}).demo);
+  if (real) {
+    const ep = okCtl.ep || (okCtl.ep = { from: Date.now(), peak: 0, sev, dev: "" });
+    if (BAND_RANK[sev] > BAND_RANK[ep.sev]) ep.sev = sev;
+    if (usv >= ep.peak) { ep.peak = usv; ep.dev = kind === "rc" ? "RadiaCode" : "GMC-800"; }
+    hideOkBar();
+    return;
+  }
+  if (kind) { okCtl.ep = null; hideOkBar(); return; } // demo ou teste por cima: sem tira verde
+  const ep = okCtl.ep;
+  okCtl.ep = null;
+  if (ep && ep.peak > 0 && !attnCtl.kind) showOkBar(ep);
+}
+function showOkBar(ep) {
+  const now = Date.now(), min = Math.max(1, Math.round((now - ep.from) / 60000));
+  $("okTitle").textContent = `Voltou ao normal às ${hhmm(now)}`;
+  $("okDetail").textContent = `${BAND_LOW[ep.sev]} no ${ep.dev} · ${min < 60 ? min + " min" : Math.floor(min / 60) + " h " + (min % 60) + " min"} · pico ${usvTxt(ep.peak)}`;
+  $("okBar").hidden = false;
+  clearTimeout(okCtl.timer);
+  okCtl.timer = setTimeout(hideOkBar, 60000);
+}
+function hideOkBar() {
+  clearTimeout(okCtl.timer);
+  okCtl.timer = null;
+  $("okBar").hidden = true;
 }
 
 // como a leitura chegou ao perigo (ajuda a saber se foi você ou a fonte que se moveu)
@@ -1695,7 +1792,7 @@ function renderDangerNote() {
 
 // ---------- aba "Níveis do app" ----------
 
-const LV_FIELDS = { lvAttn: "attentionUSv", lvDanger: "dangerUSv", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvDTUs: "deadTimeUs" };
+const LV_FIELDS = { lvAttn: "attentionUSv", lvDanger: "dangerUSv", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvRcSat: "rcSatUSv", lvDTUs: "deadTimeUs" };
 
 function fillLevels(l) {
   for (const [id, k] of Object.entries(LV_FIELDS)) $(id).value = l[k] ?? LV_DEFAULT[k];
@@ -2063,23 +2160,42 @@ function updateAttention() {
   $("attnBar").hidden = !show;
   document.body.classList.toggle("attention", show || (!!kind && !alarmCtl.kind));
   if (!show) return;
+  if (!$("okBar").hidden) hideOkBar();
+  $("attnIco").innerHTML = LV_PATH.atencao;
+  let dev, usv, lim, fake;
   if (kind === "rc") {
     const rs = state.rc.st || {}, l = rs.limits || {};
-    $("attnTitle").textContent = rs.demo ? "Atenção (demo) · RadiaCode" : "Atenção · RadiaCode";
-    $("attnDetail").textContent = `${usvVal(rs.usvh || 0)} no RadiaCode · ` + (l.device ? `alarme 1 do aparelho: ${usvVal(l.attn || 0)}` : `atenção a partir de ${usvVal(l.attn || 0)}`);
-    fillGuide("attnGuide", "attnHint", guidance("atencao", rs.usvh || 0));
-    return;
+    dev = "RadiaCode";
+    usv = rs.usvh || 0;
+    lim = l.device ? `alarme 1 do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
+    fake = !!rs.demo;
+  } else {
+    const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
+    dev = "GMC-800";
+    usv = r ? r.usv : 0;
+    lim = `atenção a partir de ${usvTxt(attnUSv())}`;
+    fake = kind === "demo";
   }
-  const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
-  $("attnTitle").textContent = kind === "demo" ? "Atenção (demo)" : state.demo.active ? "Atenção (real)" : "Atenção";
-  $("attnDetail").textContent = r
-    ? `${usvTxt(r.usv)} · atenção a partir de ${usvTxt(attnUSv())}`
-    : `atenção a partir de ${usvTxt(attnUSv())}`;
-  fillGuide("attnGuide", "attnHint", guidance("atencao", r ? r.usv : 0));
+  const tag = fake ? "DEMO" : kind === "real" && state.demo.active ? "REAL" : "";
+  $("attnBar").classList.toggle("demo", fake);
+  $("attnTag").textContent = tag;
+  $("attnTag").hidden = !tag;
+  $("attnTitle").textContent = `Atenção no ${dev}`;
+  $("attnVal").textContent = usvTxt(usv);
+  $("attnDetail").textContent = lim;
+  bandOther("attn", kind, "atencao", usv);
+  fillGuide("attnGuide", "attnHint", guidance("atencao", usv));
 }
 
 function silenceAlarm() {
   if (!alarmCtl.kind) return;
+  // já silenciado: o mesmo botão liga o som de novo
+  if (alarmCtl.sev === "perigo" ? alarmCtl.snoozeUntil > Date.now() : alarmCtl.muted) {
+    if (alarmCtl.sev === "perigo") clearSnooze();
+    else alarmCtl.muted = false;
+    updateAlarm();
+    return;
+  }
   if (alarmCtl.sev === "perigo") {
     // perigo: só por 5 min; se ainda estiver alto, volta a tocar
     alarmCtl.snoozeUntil = Date.now() + snoozeMs();
@@ -2096,6 +2212,8 @@ function wireAlarm() {
   $("btnAttnOk").addEventListener("click", () => { attnCtl.dismissed = true; updateAttention(); });
   $("btnAttnGuide").addEventListener("click", () => toggleGuide("btnAttnGuide", "attnGuide"));
   $("btnAlarmGuide").addEventListener("click", () => toggleGuide("btnAlarmGuide", "alarmGuide"));
+  $("btnOkClose").addEventListener("click", hideOkBar);
+  $("btnOkHist").addEventListener("click", () => { hideOkBar(); showView("alertas"); });
   wireAlertHistory();
   document.addEventListener("keydown", (e) => {
     if (e.key !== "Escape" || !alarmCtl.kind) return;
@@ -2233,7 +2351,7 @@ const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkA
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
-  lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
+  lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RadiaCode", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
 function setSnap() {

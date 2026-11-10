@@ -8,33 +8,46 @@
 </head>
 <body>
 <div class="bars">
-  <div class="attn-bar" id="attnBar" role="status" hidden>
-    <div class="bar-row">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/></svg>
-      <div class="alarm-text">
-        <strong id="attnTitle">Atenção</strong>
-        <span class="mono" id="attnDetail"></span>
-        <span class="hint" id="attnHint"></span>
-      </div>
-      <button type="button" class="btn small attn-btn" id="btnAttnGuide" aria-expanded="false" aria-controls="attnGuide">O que fazer</button>
-      <button type="button" class="btn small attn-btn" id="btnAttnOk">OK</button>
+  <div class="band atencao" id="attnBar" role="status" hidden>
+    <svg class="ico" id="attnIco" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"></svg>
+    <div class="head"><span class="lvl" id="attnTitle">Atenção</span><span class="btag" id="attnTag" hidden></span><span class="val" id="attnVal"></span><span class="lim" id="attnDetail"></span></div>
+    <div class="msg">
+      <span class="both" id="attnBoth" hidden></span>
+      <span class="agree" id="attnAgree" hidden>os dois concordam: não é defeito de um aparelho</span>
+      <span class="also" id="attnAlso" hidden></span>
+      <span class="hint" id="attnHint"></span>
+    </div>
+    <div class="acts">
+      <button type="button" class="band-btn" id="btnAttnGuide" aria-expanded="false" aria-controls="attnGuide">O que fazer</button>
+      <button type="button" class="band-btn" id="btnAttnOk">OK</button>
     </div>
     <ol class="guide" id="attnGuide" hidden></ol>
   </div>
-  <div class="alarm-bar" id="alarmBar" role="alert" hidden>
-    <div class="bar-row">
-      <svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/><path d="M12 9v4M12 17h.01"/></svg>
-      <div class="alarm-text">
-        <strong id="alarmTitle">ALARME</strong>
-        <span class="mono" id="alarmDetail"></span>
-        <span class="hint" id="alarmHint"></span>
-        <span class="alarm-rise" id="alarmRise" hidden></span>
-        <span class="alarm-note" id="alarmNote" hidden></span>
-      </div>
-      <button type="button" class="btn alarm-btn alt" id="btnAlarmGuide" aria-expanded="false" aria-controls="alarmGuide">O que fazer</button>
-      <button type="button" class="btn alarm-btn" id="btnSilence">Silenciar</button>
+  <div class="band alarme" id="alarmBar" role="alert" hidden>
+    <svg class="ico" id="alarmIco" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"></svg>
+    <div class="head"><span class="lvl" id="alarmTitle">Alarme</span><span class="btag" id="alarmTag" hidden></span><span class="val" id="alarmVal"></span><span class="lim" id="alarmDetail"></span><span class="chip" id="alarmChip" hidden>som desligado</span></div>
+    <div class="msg">
+      <span class="both" id="alarmBoth" hidden></span>
+      <span class="agree" id="alarmAgree" hidden>os dois concordam: não é defeito de um aparelho</span>
+      <span class="also" id="alarmAlso" hidden></span>
+      <span class="say" id="alarmHint"></span>
+      <span class="rise" id="alarmRise" hidden></span>
+      <div class="phones" id="alarmNote" hidden></div>
+    </div>
+    <div class="acts">
+      <button type="button" class="band-btn" id="btnAlarmGuide" aria-expanded="false" aria-controls="alarmGuide">O que fazer</button>
+      <button type="button" class="band-btn solid" id="btnSilence">Silenciar</button>
     </div>
     <ol class="guide" id="alarmGuide" hidden></ol>
+  </div>
+  <div class="band ok" id="okBar" role="status" hidden>
+    <svg class="ico" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/></svg>
+    <div class="head"><span class="lvl" id="okTitle">Voltou ao normal</span><span class="lim" id="okDetail"></span></div>
+    <div class="msg"><span class="hint">Some sozinha em 1 min.</span></div>
+    <div class="acts">
+      <button type="button" class="band-btn" id="btnOkHist">Ver no histórico</button>
+      <button type="button" class="band-btn" id="btnOkClose">OK</button>
+    </div>
   </div>
 </div>
 <div class="shell">
@@ -1423,6 +1436,13 @@
       </div>
       <ul class="sync-list" id="rcBLEFound"></ul>
       <p class="small muted" id="rcBLEInfo"></p>
+    </fieldset>
+
+    <fieldset>
+      <legend>RadiaCode saturado</legend>
+      <label for="lvRcSat">Fim da escala (µSv/h)</label>
+      <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
+      <p class="small muted">Padrão 1.000: o fim da faixa do RadiaCode 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
     </fieldset>
 
     <fieldset>
