@@ -252,11 +252,21 @@ function tileVals(usv, cpm, cps) {
 
 // rodapé: o que não está no número grande (CPM e CPS; µSv/h se o grande for
 // CPM ou CPS) e a dose de hoje
-function tileFoot(el, u, v, dose, doseSub) {
+// lost: aparelho desconectado ou conectando ({t} = hora da última leitura):
+// no lugar das outras unidades vai "última leitura às HH:MM" em cinza, e a
+// dose diz "até HH:MM", como no cartão do aparelho
+function tileFoot(el, u, v, dose, doseSub, lost) {
   const keys = u === "cpm" ? ["usv", "cps"] : u === "cps" ? ["usv", "cpm"] : ["cpm", "cps"];
   el.textContent = "";
   const num = (t) => { const b = document.createElement("b"); b.className = "mono"; b.textContent = t; return b; };
-  for (const k of keys) {
+  if (lost) {
+    const sp = document.createElement("span");
+    sp.className = "inst-sub";
+    sp.textContent = lost.t ? `última leitura às ${atTxt(lost.t)}` : "sem leituras ainda";
+    el.appendChild(sp);
+    if (lost.t) doseSub = (doseSub ? doseSub + " · " : "") + `até ${atTxt(lost.t)}`;
+  }
+  for (const k of lost ? [] : keys) {
     const sp = document.createElement("span");
     sp.append(num(v ? v[k] : "—"), " " + UNIT_TXT[k]);
     el.appendChild(sp);
@@ -355,7 +365,8 @@ function renderGTile() {
   tileScale("g", 1 / 3, 2 / 3, live ? Math.min(r.cpm, 150) / 150 : null, tick(50), tick(100));
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
-  tileFoot($("gTileFoot"), u, v, state.gDose);
+  const gl = state.gLastSeen;
+  tileFoot($("gTileFoot"), u, v, state.gDose, "", gc ? { t: (gl && gl.time) || state.gOffSince || 0 } : null);
   renderDevMini();
   miniDev("G", u, v, lvl, word, s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "", !live);
 }
@@ -390,7 +401,7 @@ function renderRTile(st, o) {
   miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
   const dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
-  tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "");
+  tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "", rcc ? { t: st.lastT || 0 } : null);
 }
 
 // alertas: o ativo mais alto (borda na cor do nível) ou o último que passou

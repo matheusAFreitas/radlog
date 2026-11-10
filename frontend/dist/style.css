@@ -1638,6 +1638,7 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .hstat.nosig, .wh-row .t .hstat.nosig { color: var(--dim); } .hstat.nosig .hd { background: var(--dim); }
 .hstat.sat, .hstat.zero, .wh-row .t .hstat.sat, .wh-row .t .hstat.zero { color: var(--alarm); } .hstat.sat .hd, .hstat.zero .hd { background: var(--alarm); }
 .hstat.out, .wh-row .t .hstat.out { color: var(--warn); } .hstat.out .hd { background: var(--warn); }
+.hstat.wait, .wh-row .t .hstat.wait { color: var(--att); } .hstat.wait .hd { background: var(--att); }
 .wh-row.dead { border-color: color-mix(in srgb, var(--warn) 50%, transparent); }
 .wh-row.dead .t b { color: var(--muted); }
 .chip.dead { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 50%, transparent); background: color-mix(in srgb, var(--warn) 6%, transparent); }

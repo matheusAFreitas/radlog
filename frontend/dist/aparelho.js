@@ -264,6 +264,7 @@ document.addEventListener("click", async (e) => {
 
 // o outro aparelho, compacto ao lado dos alertas
 function renderDevMini() {
+  if (typeof whConnSync === "function") whConnSync();
   const box = $("devMini"), page = state.view;
   if (!box) return;
   const inst = $("instruments");

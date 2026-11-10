@@ -13,7 +13,26 @@ const WH_ICON_ME = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" 
 
 const whCur = () => { const w = state.where || {}; return { gmc: w.gmc || "casa", radiacode: w.radiacode || "comigo", notHome: !!w.notHome }; };
 const whIsNormal = (w) => w.gmc === "casa" && w.radiacode === "comigo";
-const whLive = (dev) => ((state.where && state.where.live) || {})[dev] || { connected: false, state: "sem dado" };
+// o estado que vem do app (GetWhereabouts) é conferido a cada 30 s; a conexão
+// em si vem na hora pelos eventos de status, e manda: desconectado não fica
+// "conectado" só porque o último minuto gravado ainda é recente
+function whConn(dev) { return dev === "gmc" ? gmcConn() : rcConn(); }
+function whLive(dev) {
+  const l = ((state.where && state.where.live) || {})[dev] || { connected: false, state: "sem dado" };
+  const c = whConn(dev);
+  if (c === "wait") return { ...l, connected: false, state: "conectando" };
+  if (c === "off" && l.state !== "sem dado") return { ...l, connected: false, state: "sem dado" };
+  return l;
+}
+// quando a conexão de um aparelho muda, o quadro é refeito na hora
+let whConnKey = null;
+function whConnSync() {
+  const k = whConn("gmc") + "|" + whConn("radiacode");
+  if (k === whConnKey) return;
+  const first = whConnKey === null;
+  whConnKey = k;
+  if (!first && !whPending) refreshWhere();
+}
 // aparelhos que estão saindo do cálculo agora (pedem motivo e "desde quando")
 const whNewOff = (p) => { const c = whCur(); return ["gmc", "radiacode"].filter((d) => p[d] === "fora" && c[d] !== "fora"); };
 
@@ -24,6 +43,7 @@ function whHealth(dev, w) {
   if (l.state === "sem contagens") return { cls: "zero", t: `sem contagens há ${hm(Math.max(1, Math.round((Date.now() - l.since) / 6e4)))}` };
   if (l.state === "saturado") return { cls: "sat", t: "saturando" };
   if (l.state === "lendo") return { cls: "", t: "conectado" };
+  if (l.state === "conectando") return { cls: "wait", t: "conectando…" };
   return { cls: "nosig", t: l.last ? `desconectado desde ${hhmm(l.last)}` : "desconectado" };
 }
 const whMeasuring = (dev) => { const s = whLive(dev).state; return s === "lendo" || s === "saturado"; };
@@ -41,7 +61,7 @@ function whRole(place, w) {
   const m = here.filter(whMeasuring);
   if (m.length) return { src: m[0], both: place === "casa" && m.length === 2, sat: whLive(m[0]).state === "saturado", covers: m[0] !== here[0] ? here[0] : null };
   // o RadiaCode longe do PC continua somando a dose sozinho
-  if (place === "comigo" && here.includes("radiacode") && whLive("radiacode").state === "sem dado") return { src: "radiacode", curve: true };
+  if (place === "comigo" && here.includes("radiacode") && ["sem dado", "conectando"].includes(whLive("radiacode").state)) return { src: "radiacode", curve: true };
   return { src: "", why: "sem dado", dev: here[0] };
 }
 
