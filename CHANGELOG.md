@@ -1,5 +1,9 @@
 # Versões
 
+## 2.38.5
+- No Resumo, o símbolo do nível no "Período normal." (e nos outros vereditos)
+  ganhou espaço até o texto, como no resto do app.
+
 ## 2.38.4
 - O cartão grande das telas GMC-800 e RadiaCode ganhou o gráfico da última
   hora, o mesmo do quadro do Agora, no espaço vazio entre a leitura e a

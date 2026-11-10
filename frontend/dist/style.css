@@ -1516,7 +1516,7 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 /* ---------- Resumo repaginado (2.18) ---------- */
 .sum-say { display: flex; border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-5); }
 .sum-say[hidden], .sum-top[hidden] { display: none; }
-.sum-say h3 { font-size: var(--fs-heading); margin: 0; }
+.sum-say h3 { font-size: var(--fs-heading); margin: 0; display: flex; align-items: center; gap: var(--space-2); }
 .sum-say p { margin: 0; }
 .sum-top { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: var(--space-3); align-items: stretch; }
 .sum-top:has(.sum-split[hidden]) { grid-template-columns: minmax(0, 1fr); }
