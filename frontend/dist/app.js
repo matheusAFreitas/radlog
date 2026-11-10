@@ -477,6 +477,8 @@ async function refreshSpark() {
   if (my !== sparkSeq || !c) return;
   drawSpark("gTileSpark", c.values);
   drawSpark("rTileSpark", c.rc);
+  drawSpark("gHeroSpark", c.values);
+  drawSpark("rHeroSpark", c.rc);
 }
 function drawSpark(id, vals) {
   const pl = $(id).querySelector("polyline");

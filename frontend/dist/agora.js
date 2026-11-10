@@ -29,7 +29,7 @@ function agoraNow() {
   const rank = { atencao: 1, alarme: 2, perigo: 3 };
   const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1))[0];
   const box = $("agSay");
-  let lv = "seguro", title, text;
+  let lv = "seguro", title, text, calm = false;
   const parts = [];
   // quem está em casa e quem está com você (onde.js)
   const wh = state.where || {};
@@ -61,13 +61,21 @@ function agoraNow() {
       text = [L.home, L.pers].filter((x) => x.cls === "warnb" && !x.sat).map((x) => x.d).join(" ");
     } else {
       title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
+      // tudo normal: a faixa some (só aparece quando tem algo a dizer)
+      calm = !odd;
       if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : `${fmt(g.sigma, 1)} σ acima do nível de fundo`);
       text = parts.join(" · ");
     }
   }
+  box.hidden = calm;
   box.className = "card ag-say lv-" + lv;
   lvLabel($("agSayTitle"), lv, title, 20);
   $("agSayText").textContent = text;
+  agBgChip();
+}
+
+// selo do fundo de casa no cabeçalho da Minha dose (acompanha pessoal/casa)
+function agBgChip() {
   const d = agDose && (agDev() === "pessoal" ? agDose.personal : agDose.home);
   const chip = $("agSayBg");
   chip.hidden = !(d && d.backgroundRate > 0);
@@ -81,6 +89,7 @@ function renderAgDose() {
   const dev = agDev();
   document.querySelectorAll("#agDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dev === dev)));
   const d = dev === "pessoal" ? agDose.personal : agDose.home;
+  agBgChip();
   $("agDose").classList.toggle("rc", dev === "pessoal");
   // o aparelho com esse papel agora (onde.js); "" = nenhum
   const now = d.device === undefined ? (dev === "pessoal" ? "radiacode" : "gmc") : d.device;
