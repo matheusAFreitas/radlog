@@ -2361,7 +2361,8 @@ const I18N_EN = {
 "Depois": "After",
 "Gravar": "Write",
 "Continuar?": "Continue?",
-"Novo": "New"
+"Novo": "New",
+"última hora": "last hour"
 },
 "patterns": [
 [
