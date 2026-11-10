@@ -1684,10 +1684,8 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .dev-mini.lv-atencao, .dev-mini.lv-nocount { border-color: var(--att); }
 .dev-mini.lv-alarme { border-color: var(--alarm); }
 .dev-mini.lv-perigo { border-color: var(--warn); }
-.dm-dial { width: 56px; height: 56px; grid-row: 1 / 4; }
+.dm-dial { width: 100px; height: 100px; grid-row: 1 / 3; align-self: center; }
 .dm-name { font-size: var(--fs-caption); color: var(--muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.dm-val { font-size: var(--fs-heading); font-weight: 600; }
-.dm-val small { font-size: var(--fs-caption); color: var(--muted); font-weight: 400; margin-left: var(--space-1); }
 .dm-sub { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-3); font-size: var(--fs-caption); color: var(--muted); }
 .dm-state { display: inline-flex; align-items: center; gap: var(--space-1); font-weight: 600; }
 .dm-state.seguro { color: var(--accent); }
@@ -1921,3 +1919,17 @@ table.cc-cmp td:first-child { color: var(--muted); }
   .band .acts { grid-column: 1 / -1; grid-row: auto; justify-content: flex-start; }
   .band .guide { grid-column: 1 / -1; }
 }
+
+/* cartão pequeno do outro aparelho (2.37.1): o mesmo mostrador do bloco do
+   Agora, copiado dele, com as mesmas cores e estados */
+.dev-mini.dm-t-lv-atencao, .dev-mini.dm-t-lv-nocount { --lvc: var(--att); }
+.dev-mini.dm-t-lv-alarme { --lvc: var(--alarm); }
+.dev-mini.dm-t-lv-perigo { --lvc: var(--warn); }
+.dev-mini.dm-t-stale .dial-val { fill: var(--dim); }
+.dev-mini.dm-t-stale .dial-ring { stroke: var(--dim); }
+.dev-mini.dm-t-conn-off .dial-ring, .dev-mini.dm-t-conn-off .dial-val, .dev-mini.dm-t-conn-off .dial-unit,
+.dev-mini.dm-t-conn-wait .dial-val, .dev-mini.dm-t-conn-wait .dial-unit, .dev-mini.dm-t-conn-off .dial-arc, .dev-mini.dm-t-conn-wait .dial-arc { display: none; }
+.dev-mini.dm-t-conn-off .dial-dash { display: inline; }
+.dev-mini.dm-t-conn-wait .dial-ring { stroke: var(--att); stroke-dasharray: 3.6 3; }
+.dev-mini.dm-t-conn-wait .dial-track { stroke: var(--att); opacity: .5; animation: dl-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dev-mini.dm-t-conn-wait .dial-track { animation: none; } }

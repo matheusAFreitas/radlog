@@ -1,5 +1,13 @@
 # Versões
 
+## 2.37.1
+- Na tela de um aparelho, o cartão pequeno do outro aparelho usa o mesmo
+  mostrador dos blocos do Agora: o anel com o valor e "µSv/h" dentro e o
+  arco embaixo, com as mesmas cores, só que menor. O número que aparecia ao
+  lado do mostrador saiu, para não repetir. Desconectado, o centro mostra um
+  traço cinza, com "última … às HH:MM" ao lado; conectando, o anel fica
+  tracejado em âmbar.
+
 ## 2.37.0
 - **Calibrar o contador com a intercalibração.** No cartão "Pontos gravados
   no contador" (Configurações › GMC-800 › Calibração), o app mostra os seis
