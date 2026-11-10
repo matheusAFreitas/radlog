@@ -254,6 +254,10 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 		// o valor das 16:00 é a chuva das 15:00 às 16:00
 		a.rain.Hours[t.Add(-time.Hour).Unix()] = *body.Hourly.Precipitation[i]
 	}
+	// antes de apagar as horas velhas, a soma por dia vai para chuva-dias.json
+	if a.mergeRainDaysLocked(a.rain.Hours) {
+		a.saveRainDaysLocked()
+	}
 	// guarda só os últimos 60 dias
 	cut := time.Now().Add(-60 * 24 * time.Hour).Unix()
 	for k := range a.rain.Hours {
@@ -271,6 +275,13 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 }
 
 func (a *App) loadRain() {
+	a.loadRainDays()
+	defer func() {
+		// primeira vez com chuva-dias.json: já passa as horas guardadas
+		if a.rain != nil && a.mergeRainDaysLocked(a.rain.Hours) {
+			a.saveRainDaysLocked()
+		}
+	}()
 	b, err := os.ReadFile(a.rainPath())
 	if err != nil {
 		return
