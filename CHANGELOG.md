@@ -1,5 +1,25 @@
 # Versões
 
+## 2.44.1
+- **Nada do lugar no backup.** Na 2.44.0, a coordenada da chuva virava uma
+  marca no backup. Só que as cidades possíveis são poucas, então dava para
+  testar todas e descobrir qual era. Agora o backup não leva nada do lugar:
+  nem coordenada, nem marca. Ao importar, o app reconhece se a chuva é da
+  mesma cidade comparando a pressão das horas que os dois já têm, porque a
+  pressão na superfície muda de um lugar para outro. Backups antigos
+  continuam sendo reconhecidos como antes.
+- A mensagem de erro do radar e do serviço de clima não guarda mais o
+  endereço pedido, que trazia a coordenada ou o pedaço do mapa. Antes ela ia
+  junto no backup quando o radar falhava.
+- Clima: o gráfico da semana converte cada hora pela calibração que valia
+  naquela hora, como os Gráficos. Antes, as horas anteriores à troca do
+  fator saíam com o fator novo.
+- ALARA: "De onde vem a sua dose" diz "pela leitura de casa (GMC-800)"
+  quando a dose vem do GMC-800, em vez de "GMC-800 com você". No card Tempo,
+  as doses a 2× e 4× da distância saem com as mesmas casas que o número
+  grande. A dica "Abrir nos gráficos" das linhas da tabela agora é
+  traduzida no inglês.
+
 ## 2.44.0
 - **A tela Chuva virou "Clima"** e ganhou **Pressão × radônio**. São dois
   gráficos empilhados, com o mesmo cursor: a pressão do ar e o fundo em

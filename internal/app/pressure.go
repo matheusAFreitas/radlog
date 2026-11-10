@@ -187,7 +187,7 @@ func (a *App) GetPressureRadon(dev string) (PressRadon, error) {
 			press[k] = v
 		}
 	}
-	cal := a.convCalLocked()
+	tl := a.calTLLocked()
 	a.mu.Unlock()
 	dev = devName(dev)
 	enabled := set.RainEnabled && !(set.RainLat == 0 && set.RainLon == 0)
@@ -232,7 +232,7 @@ func (a *App) GetPressureRadon(dev string) (PressRadon, error) {
 		if v, ok := bg[t.Unix()]; ok {
 			u := v
 			if dev != devRC {
-				u = cal.USv(v)
+				u = tl.USvAt(t, v) // a calibração que valia naquela hora, como nos Gráficos
 			}
 			h.USv = &u
 		}

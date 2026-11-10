@@ -2858,7 +2858,12 @@ const I18N_EN = {
 "O sinal negativo quer dizer que um sobe quando o outro desce.": "The negative sign means one goes up when the other goes down.",
 "Pista: aqui o fundo sobe junto com a pressão, ao contrário do comum.": "Hint: here the background rises together with the pressure, the opposite of usual.",
 "Relação: aqui o fundo sobe junto com a pressão, ao contrário do comum.": "Relationship: here the background rises together with the pressure, the opposite of usual.",
-"Pode ser outra coisa que muda junto, como a casa fechada à noite.": "It may be something else that changes at the same time, like the house being closed at night."
+"Pode ser outra coisa que muda junto, como a casa fechada à noite.": "It may be something else that changes at the same time, like the house being closed at night.",
+"RC102 com você": "RC102 with you",
+"RadiaCode com você": "RC102 with you",
+"pela leitura de casa (GMC-800)": "from the home reading (GMC-800)",
+"RC102 com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
+"RadiaCode com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)"
 },
 "patterns": [
 [

@@ -140,7 +140,7 @@ func tileOf(lat, lon float64, z, size int) (x, y, px, py int) {
 func radarGet(url string) (*http.Response, error) {
 	resp, err := radarClient.Get(url)
 	if err != nil {
-		return nil, fmt.Errorf("sem acesso ao radar: %w", err)
+		return nil, fmt.Errorf("sem acesso ao radar: %w", noURL(err))
 	}
 	if resp.StatusCode != http.StatusOK {
 		resp.Body.Close()
