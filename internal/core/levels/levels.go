@@ -119,14 +119,14 @@ func (l Levels) SatHold() time.Duration {
 	return time.Duration(l.SatHoldSec) * time.Second
 }
 
-// Level classifica um CPM: "perigo" (nível do app), "alerta" e "atencao"
+// Level classifica um CPM: "perigo" (nível do app), "alarme" e "atencao"
 // (faixas do manual) ou "seguro".
 func Level(cpm float64, lv Levels) string {
 	switch {
 	case cpm >= lv.DangerEnter():
 		return "perigo"
 	case cpm >= WarningCPM:
-		return "alerta"
+		return "alarme"
 	case cpm >= ManualAttnCPM:
 		return "atencao"
 	}

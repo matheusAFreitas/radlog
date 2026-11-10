@@ -88,7 +88,7 @@ type Reading struct {
 	DTPct  float64 `json:"dtPct,omitempty"`
 	USv    float64 `json:"usv"`
 	MRh    float64 `json:"mrh"`   // mrem/h (1 mrem = 10 µSv, exato)
-	Level  string  `json:"level"` // seguro, atencao, alerta, perigo
+	Level  string  `json:"level"` // seguro, atencao, alarme, perigo
 	Alarm  bool    `json:"alarm"`
 	// Perigo: passou de 1000 CPM. Vale mesmo com o alarme desligado.
 	Danger bool `json:"danger"`

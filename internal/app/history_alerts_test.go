@@ -209,7 +209,7 @@ func TestDangerLevel(t *testing.T) {
 	waitFor(t, "fim do perigo", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
 	a.StopDemo()
 
-	if levels.Level(999, DefaultLevels()) != "alerta" || levels.Level(1000, DefaultLevels()) != "perigo" {
+	if levels.Level(999, DefaultLevels()) != "alarme" || levels.Level(1000, DefaultLevels()) != "perigo" {
 		t.Fatal("level")
 	}
 	on := false
