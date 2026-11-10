@@ -1,5 +1,8 @@
 # Versões
 
+## 2.31.1
+- Mostrador grande da tela do aparelho: a forma do nível volta para o centro
+  exato do anel (estava um pouco acima). O nome do nível fica embaixo dela.
 ## 2.31.0
 - **Tela do aparelho: o valor aparece uma vez só.** Na página do GMC-800 e
   na do RadiaCode, o quadro do próprio aparelho sai da fileira de cima. O

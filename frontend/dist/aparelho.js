@@ -43,7 +43,8 @@ function devAng(i, f) {
 
 // o desenho do mostrador. lv: nível (cor do centro); pos: devDialPos (null =
 // sem leitura); labels: [[valor, nome] × 3] nos vãos; center: forma + nome do
-// nível no meio (grande) ou só a forma (pequeno)
+// nível no meio (grande) ou só a forma (pequeno). A forma fica no centro
+// exato do anel; o nome do nível vai embaixo dela, acima do arco de baixo
 function devDialSvg(pos, lv, o = {}) {
   const w = o.w || 3.4, per = pos != null && pos >= 1;
   let s = "";
@@ -69,8 +70,8 @@ function devDialSvg(pos, lv, o = {}) {
   const shape = LV_PATH[lv];
   if (shape) {
     if (o.center) {
-      s += `<g class="dd-c lv-ico ${lv}" fill="currentColor" transform="translate(18.4 ${o.name ? 13.2 : 18.4}) scale(.7)">${shape}</g>`;
-      if (o.name) s += `<text class="dd-name ${lv}" x="24" y="29.6" text-anchor="middle">${escHtml(o.name)}</text>`;
+      s += `<g class="dd-c lv-ico ${lv}" fill="currentColor" transform="translate(18.4 18.4) scale(.7)">${shape}</g>`;
+      if (o.name) s += `<text class="dd-name ${lv}" x="24" y="33.8" text-anchor="middle">${escHtml(o.name)}</text>`;
     } else {
       s += `<g class="dd-c lv-ico ${lv}" fill="currentColor" transform="translate(17.6 17.6) scale(.8)">${shape}</g>`;
     }
