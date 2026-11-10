@@ -292,6 +292,12 @@ type App struct {
 	dataDir string
 	store   *store.Store
 
+	// reportBusy: um relatório de período por vez (cliques repetidos enquanto
+	// gera viravam dezenas de PDFs no mesmo arquivo); reportFileMu escolhe o
+	// nome livre e grava sem outro relatório pegar o mesmo nome no meio
+	reportBusy   sync.Mutex
+	reportFileMu sync.Mutex
+
 	mu       sync.Mutex
 	settings Settings
 	dev      *gmc.Device

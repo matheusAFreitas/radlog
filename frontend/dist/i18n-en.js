@@ -265,6 +265,7 @@ const I18N_EN = {
 "Geiger saturado: acima do que o aparelho mede; o real pode ser maior": "Geiger saturated: above what the device measures; the real value may be higher",
 "Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior": "Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher",
 "Geometria / anotação": "Geometry / note",
+"Gerando…": "Generating…",
 "Gerando o relatório…": "Generating the report…",
 "Gerar de novo": "Generate again",
 "Gerar o relatório da medição de objeto sozinho, no fim da medição": "Generate the object measurement report automatically at the end of the measurement",
@@ -695,6 +696,7 @@ const I18N_EN = {
 "interpolação linear entre as leituras ordenadas": "linear interpolation between the sorted readings",
 "já estou baixando o histórico": "I'm already downloading the history",
 "já estou mexendo na configuração do contador": "I'm already working on the counter configuration",
+"já estou gerando um relatório; espere ele abrir": "I'm already generating a report; wait for it to open",
 "leitura a cada segundo": "reading every second",
 "leitura ao vivo": "live reading",
 "leitura ao vivo sem resposta em 6 s (": "live reading with no answer in 6 s (",
@@ -900,6 +902,7 @@ const I18N_EN = {
 "evento": "event",
 "começou": "started",
 "terminou": "finished",
+"voltou a responder": "responding again",
 "Atenção agora": "Attention now",
 "Alarme agora": "Alarm now",
 "Perigo agora": "Danger now",
@@ -4916,6 +4919,15 @@ const I18N_EN = {
 "${1} µSv since it was reset (${2})",
 [
 " µSv desde que foi zerado ("
+]
+],
+[
+"(repetiu mais ",
+"^\\(repetiu mais ((?:(?! · ).)+?) vezes desde ((?:(?! · ).)+?)\\)$",
+"(repeated ${1} more times since ${2})",
+[
+"(repetiu mais ",
+" vezes desde "
 ]
 ],
 [

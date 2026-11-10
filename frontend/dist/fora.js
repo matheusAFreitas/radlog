@@ -106,7 +106,7 @@ function renderPeriods() {
     const rep = document.createElement("button");
     rep.type = "button"; rep.className = "btn small"; rep.textContent = "Relatório (PDF)";
     rep.title = "Relatório em PDF só desse trecho fora de casa";
-    rep.addEventListener("click", () => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name));
+    rep.addEventListener("click", (e) => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name, e.currentTarget));
     const head = document.createElement("div");
     head.className = "p-head";
     head.append(txt, see, rep, ed, del);
