@@ -1233,7 +1233,7 @@ const I18N_EN = {
 "Procurando (uns 6 segundos)…": "Searching (about 6 seconds)…",
 "Nenhum RadiaCode apareceu. O Bluetooth dele está ligado? O app do celular está desconectado?": "No RadiaCode showed up. Is its Bluetooth on? Is the phone app disconnected?",
 "No Windows, a conexão Bluetooth ainda não está pronta: use o cabo USB.": "On Windows, the Bluetooth connection isn't ready yet: use the USB cable.",
-"A procura está desligada em Configurações → RadiaCode.": "Searching is off in Settings → RadiaCode.",
+"A procura está desligada em Configurações → RadiaCode.": "Searching is turned off in Settings → RadiaCode.",
 "Ligue o RadiaCode no USB do PC, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": "Plug the RadiaCode into the PC's USB, or keep it nearby with Bluetooth on (and the phone app disconnected).",
 "Ligue o RadiaCode no USB do PC, ou configure o endereço Bluetooth.": "Plug the RadiaCode into the PC's USB, or set up the Bluetooth address.",
 "Ligue o RadiaCode no USB do PC. No Windows, por enquanto, a conexão é só pelo USB.": "Plug the RadiaCode into the PC's USB. On Windows, for now, the connection is USB only.",
@@ -2203,7 +2203,13 @@ const I18N_EN = {
 "unidade de dose": "dose unit",
 "vibração em:": "vibration on:",
 "virada para a direita": "turned to the right",
-"virada para a esquerda": "turned to the left"
+"virada para a esquerda": "turned to the left",
+"Sem leituras ainda": "No readings yet",
+"detalhes": "details",
+"Escolher porta": "Choose port",
+"O GMC-800 não responde. O cabo USB está ligado?": "The GMC-800 isn't answering. Is the USB cable plugged in?",
+"Não apareceu no USB nem no Bluetooth. Ele está ligado e perto? O celular não está conectado nele?": "It didn't show up on USB or Bluetooth. Is it on and nearby? Is the phone connected to it?",
+"Não apareceu no USB. O cabo está ligado?": "It didn't show up on USB. Is the cable plugged in?"
 },
 "patterns": [
 [
@@ -4007,6 +4013,15 @@ const I18N_EN = {
 [
 "Dose da casa: nenhum aparelho em casa agora (",
 ")."
+]
+],
+[
+"A conexão caiu às ",
+"^A conexão caiu às ((?:(?! · ).)+?)\\. O app tenta de novo sozinho\\.$",
+"The connection dropped at ${1}. The app keeps retrying.",
+[
+"A conexão caiu às ",
+". O app tenta de novo sozinho."
 ]
 ],
 [
@@ -7283,6 +7298,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) desconectado desde ((?:(?! · ).)+?)$",
+"${1} disconnected since ${2}",
+[
+" desconectado desde "
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -7520,6 +7543,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Última leitura às ",
+"^Última leitura às ((?:(?! · ).)+?):$",
+"Last reading at ${1}:",
+[
+"Última leitura às "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -7729,6 +7760,22 @@ const I18N_EN = {
 "out of the calculation · ${1}",
 [
 "fora do cálculo · "
+]
+],
+[
+"· desconectado há ",
+"^· desconectado há ((?:(?! · ).)+?)$",
+"· disconnected ${1} ago",
+[
+"· desconectado há "
+]
+],
+[
+"do aparelho · até ",
+"^do aparelho · até ((?:(?! · ).)+?)$",
+"from the device · until ${1}",
+[
+"do aparelho · até "
 ]
 ],
 [
@@ -8137,6 +8184,14 @@ const I18N_EN = {
 ]
 ],
 [
+"desconectado há ",
+"^desconectado há ((?:(?! · ).)+?)$",
+"disconnected ${1} ago",
+[
+"desconectado há "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -8396,6 +8451,22 @@ const I18N_EN = {
 "${1} · your limit: ${2}",
 [
 " · seu limite: "
+]
+],
+[
+"Conectando ao ",
+"^Conectando ao ((?:(?! · ).)+?)…$",
+"Connecting to the ${1}…",
+[
+"Conectando ao "
+]
+],
+[
+"último contato ",
+"^último contato ((?:(?! · ).)+?)$",
+"last contact ${1}",
+[
+"último contato "
 ]
 ],
 [
@@ -8797,6 +8868,14 @@ const I18N_EN = {
 "live peak ${1}",
 [
 "pico ao vivo "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) desconectado$",
+"${1} disconnected",
+[
+" desconectado"
 ]
 ],
 [
@@ -10084,6 +10163,14 @@ const I18N_EN = {
 []
 ],
 [
+"última ",
+"^última ((?:(?! · ).)+?)$",
+"last ${1}",
+[
+"última "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -10337,6 +10424,14 @@ const I18N_EN = {
 "${1} to ${2}",
 [
 " às "
+]
+],
+[
+"até ",
+"^até ((?:(?! · ).)+?)$",
+"until ${1}",
+[
+"até "
 ]
 ],
 [

@@ -157,7 +157,7 @@
         <span class="inst-fill"></span>
       </header>
       <div class="inst-read" data-view="gmc">
-        <svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
+        <svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
         <div class="inst-say"><span class="inst-state" id="gTileState">—</span><span class="inst-sub-say" id="gTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="gTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
@@ -173,7 +173,7 @@
         <span class="inst-fill"></span>
       </header>
       <div class="inst-read" data-view="radiacode">
-        <svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
+        <svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg>
         <div class="inst-say"><span class="inst-state" id="rTileState">—</span><span class="inst-sub-say" id="rTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="rTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
@@ -895,6 +895,8 @@
               <span class="tile-sub" id="tDoseSub">acumulados</span>
             </div>
           </div>
+          <div class="dev-lost" id="gLost" hidden></div>
+          <p class="read-last mono" id="gLast"></p>
           <span class="alt" id="readAlt">sem contador conectado</span>
           <span class="sigma" id="readSigma" hidden></span>
           <span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span>
@@ -909,6 +911,7 @@
 
       <div class="hero-dial">
         <svg class="dev-dial" id="gHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
+        <div class="hero-dial-state" id="gHeroState">—</div>
         <div class="hero-dial-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint">faixas do manual do GMC-800</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
 
@@ -963,6 +966,8 @@
             <span class="tile-sub" id="rcDoseTodaySub"></span>
           </div>
         </div>
+        <div class="dev-lost" id="rLost" hidden></div>
+        <p class="read-last mono" id="rLast"></p>
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
         <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
@@ -977,6 +982,7 @@
 
       <div class="hero-dial">
         <svg class="dev-dial" id="rHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
+        <div class="hero-dial-state" id="rHeroState">—</div>
         <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint">alarmes do RadiaCode</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
       <div class="rc-mini">

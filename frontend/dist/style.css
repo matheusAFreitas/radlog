@@ -1738,11 +1738,61 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .dl-pt { fill: var(--text); stroke: var(--surface); }
 .dl-lv { font-family: var(--mono); font-size: 3.4px; fill: var(--text); }
 .dl-ln { font-size: 2.8px; fill: var(--muted); }
-.dl-name { font-size: 4.2px; font-weight: 600; fill: var(--muted); }
-.dl-name.seguro { fill: var(--accent); }
-.dl-name.atencao, .dl-name.nocount { fill: var(--att); }
-.dl-name.alarme { fill: var(--alarm); }
-.dl-name.perigo { fill: var(--warn); }
 .hero-clock { display: block; }
 .hero-clock .clock-chip { min-height: 24px; margin-top: var(--space-1); padding: 0; gap: var(--space-1); border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--att); letter-spacing: 0; text-transform: none; }
 .hero-clock .clock-chip:not(.off) { display: none; }
+
+/* ---------- estados de conexão no mostrador e nos cartões (2.33.0) ----------
+   Conectado: forma do nível no meio. Conectando: anel tracejado âmbar, arcos
+   âmbar pulsando. Desconectado: traço cinza, arcos cinza sem parte acesa. */
+.dl-off { stroke: var(--chart-grid); opacity: 1; }
+.dl-wait { stroke: var(--att); opacity: .5; }
+.dl-c-off { color: var(--muted); }
+.dl-c-wait { color: var(--att); }
+.dl-lv.dim { fill: var(--dim); }
+@keyframes dl-pulse { 50% { opacity: .35; } }
+.dl-sweep { animation: dl-pulse 1.4s ease-in-out infinite; }
+@media (prefers-reduced-motion: reduce) { .dl-sweep, .inst.conn-wait .dial-track { animation: none; } }
+.hero-dial-state { font-size: var(--fs-heading); font-weight: 600; color: var(--muted); line-height: 1.2; margin-top: calc(-1 * var(--space-2)); }
+.hero-dial-state.seguro { color: var(--accent); }
+.hero-dial-state.atencao, .hero-dial-state.nocount, .hero-dial-state.conn-wait { color: var(--att); }
+.hero-dial-state.alarme { color: var(--alarm); }
+.hero-dial-state.perigo { color: var(--warn); }
+
+/* cartão grande sem conexão: aviso, a última leitura no lugar do número */
+.read-last { display: none; margin: 0; color: var(--muted); font-size: var(--fs-body); }
+.read-last b { font-size: var(--fs-number-l); font-weight: 500; color: var(--muted); margin: 0 var(--space-1); }
+.hero.conn-off .read-last, .hero.conn-wait .read-last, .rc-main.conn-off .read-last, .rc-main.conn-wait .read-last { display: block; }
+.hero.conn-off .value-row, .hero.conn-wait .value-row, .rc-main.conn-off .value-row, .rc-main.conn-wait .value-row,
+.hero.conn-off .alt, .hero.conn-wait .alt, .rc-main.conn-off .alt, .rc-main.conn-wait .alt,
+.hero.conn-off .sigma, .hero.conn-wait .sigma, .rc-main.conn-off .sigma, .rc-main.conn-wait .sigma,
+.hero.conn-off .sigma-line, .hero.conn-wait .sigma-line, .rc-main.conn-off .sigma-line, .rc-main.conn-wait .sigma-line,
+.hero.conn-off .hero-top > .seg, .hero.conn-wait .hero-top > .seg, .rc-main.conn-off .hero-top > .seg, .rc-main.conn-wait .hero-top > .seg { display: none !important; }
+.rc-main-via.conn-off, .gmc-via.conn-off { color: var(--warn); }
+.rc-main-via.conn-wait, .gmc-via.conn-wait { color: var(--att); }
+.hero.conn-off, .rc-main.conn-off, .hero.conn-wait, .rc-main.conn-wait { --glow: transparent; border-color: var(--border); }
+.dev-lost { display: flex; flex-direction: column; gap: var(--space-2); max-width: 560px; margin: var(--space-2) 0; padding: var(--space-3) var(--space-4); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--warn) 6%, transparent); }
+.dev-lost.wait { border-color: color-mix(in srgb, var(--att) 45%, transparent); background: color-mix(in srgb, var(--att) 6%, transparent); }
+.dev-lost .dl-h { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: var(--fs-heading); }
+.dev-lost .dl-dot { width: 9px; height: 9px; border-radius: 50%; border: 2px solid var(--warn); flex: none; }
+.dev-lost.wait .dl-dot { border-color: var(--att); }
+.dev-lost .dl-why { margin: 0; color: var(--muted); }
+.dev-lost .dl-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.dev-lost .btn.pri { border-color: var(--accent); color: var(--accent); }
+.dev-lost .dl-tech { font-size: var(--fs-caption); color: var(--dim); }
+.dev-lost .dl-tech summary { cursor: pointer; }
+
+/* compacto sem conexão */
+.dev-mini.conn-off .dm-via { color: var(--warn); }
+.dev-mini.conn-wait .dm-via { color: var(--att); }
+.dm-last { color: var(--muted); font-weight: 500; }
+
+/* quadros da tela Agora sem conexão */
+.dial-dash { display: none; fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; }
+.inst.conn-off .dial-ring, .inst.conn-off .dial-val, .inst.conn-off .dial-unit,
+.inst.conn-wait .dial-val, .inst.conn-wait .dial-unit { display: none; }
+.inst.conn-off .dial-dash { display: inline; }
+.inst.conn-wait .dial-ring { stroke: var(--att); stroke-dasharray: 3.6 3; }
+.inst.conn-wait .dial-track { stroke: var(--att); opacity: .5; animation: dl-pulse 1.4s ease-in-out infinite; }
+.inst.conn-off .dial-arc, .inst.conn-wait .dial-arc { display: none; }
+.inst.stale .inst-spark polyline { stroke: var(--dim); }
