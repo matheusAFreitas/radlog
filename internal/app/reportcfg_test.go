@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"math"
 	"os"
 	"strings"
 	"testing"
@@ -59,7 +60,10 @@ func TestReportConfigPeriodAndMaturity(t *testing.T) {
 	if strings.Contains(cfg, "Aviso de atenção=") || strings.Contains(cfg, "Tempo morto=") || !strings.Contains(cfg, "Alarme=") || !strings.Contains(cfg, "valor atual") {
 		t.Fatalf("método:\n%s", cfg)
 	}
-	if a0 := r.Above[0]; len(a0.Limits) != 2 || a0.Limits[0] != 40 || a0.Limits[1] != 60 || a0.UsedNow {
+	// limites em CPM da época viram µSv/h pela calibração de então (2.36)
+	k := r.uAt(base, 100) / 100
+	near := func(a, b float64) bool { return math.Abs(a-b) < 1e-9 }
+	if a0 := r.Above[0]; len(a0.Limits) != 2 || !near(a0.Limits[0], 40*k) || !near(a0.Limits[1], 60*k) || a0.UsedNow {
 		t.Fatalf("tempo acima (atenção): %+v", a0)
 	}
 	if len(r.Mature.GMC) != 5 || r.Mature.GMC[0].State == matWaiting {
@@ -91,5 +95,21 @@ func TestCfgLimitAt(t *testing.T) {
 	}
 	if l, _ := cfgLimitAt(h, "perigo", 400); l != 1000 {
 		t.Fatalf("perigo: %d", l)
+	}
+}
+
+// desde a 2.29 o histórico guarda o limite em µSv/h
+func TestCfgLimitUSvAt(t *testing.T) {
+	base := time.Date(2026, 11, 1, 0, 0, 0, 0, time.Local)
+	h := []ConfigChange{
+		{T: base.UnixMilli(), Field: "Aviso de atenção", To: "a partir de 50 CPM"},
+		{T: base.Add(time.Hour).UnixMilli(), Field: "Aviso de atenção", From: "a partir de 50 CPM", To: "a partir de 0,564 µSv/h"},
+	}
+	var tl calTL
+	if u, cpm, ok := cfgLimitUSvAt(h, "atencao", base.Add(time.Minute).UnixMilli(), tl); !ok || cpm != 50 || math.Abs(u-tl.USvAt(base, 50)) > 1e-12 {
+		t.Fatalf("em CPM: %v %v %v", u, cpm, ok)
+	}
+	if u, cpm, ok := cfgLimitUSvAt(h, "atencao", base.Add(2*time.Hour).UnixMilli(), tl); !ok || cpm != 0 || u != 0.564 {
+		t.Fatalf("em µSv/h: %v %v %v", u, cpm, ok)
 	}
 }

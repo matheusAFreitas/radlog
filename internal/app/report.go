@@ -25,6 +25,8 @@ type reportDay struct {
 	USv, Dose     float64
 	Minutes       int
 	LivePeak      float64 // maior pico ao vivo (janela de 60 s) de alerta no dia; 0 = nenhum
+	// os mesmos em µSv/h, cada minuto pela calibração que valia nele (2.36)
+	MinU, MaxU, LivePeakU float64
 }
 
 type reportAlert struct {
@@ -75,8 +77,15 @@ type reportData struct {
 	AlertPeakMax float64     // maior pico ao vivo dos alertas (janela de 60 s); só alertas ao vivo
 	BgRows       []reportBg  // fundo: última hora, 7 dias, 30 dias
 	dayKeys      []string    // "AAAA-MM-DD" de cada linha de Days
-	alertPeakAt  time.Time
-	MaxLive      bool // o máximo do resumo veio de um pico ao vivo
+
+	// µSv/h (2.36): o relatório mostra o GMC na unidade da tela; o CPM fica
+	// só na estatística da contagem e no método
+	tl            calTL       // calibração de cada minuto
+	USt           minuteStats // estatística dos minutos em µSv/h
+	AlertPeakMaxU float64     // AlertPeakMax em µSv/h
+	BgU           float64     // fundo de 30 dias em µSv/h
+	alertPeakAt   time.Time
+	MaxLive       bool // o máximo do resumo veio de um pico ao vivo
 
 	// 2.6: configurações que valeram no período e maturidade do histórico
 	CfgRows  []cfgPeriodRow
@@ -93,11 +102,13 @@ type reportEpisode struct {
 	Peak              float64 // pico do alerta (ao vivo: janela de 60 s lida por segundo)
 	PeakAt            time.Time
 	Limit             int
-	Retro             bool
-	DurSec            int    // duração exata (do histórico: de minuto a minuto)
-	LimitNow          bool   // limite pelo valor atual (sem registro da época)
-	Breaks            int    // trechos sem leitura no meio (desconexão)
-	EndReason         string // terminou sem leitura (desconexão, app fechado)
+	// em µSv/h, pela calibração da hora (2.36)
+	MinU, MeanU, MaxU, PeakU, LimitU float64
+	Retro                            bool
+	DurSec                           int    // duração exata (do histórico: de minuto a minuto)
+	LimitNow                         bool   // limite pelo valor atual (sem registro da época)
+	Breaks                           int    // trechos sem leitura no meio (desconexão)
+	EndReason                        string // terminou sem leitura (desconexão, app fechado)
 	// para o gráfico de antes e depois (só os episódios escolhidos)
 	Chart  bool
 	Around []store.Point // por minuto, 30 min antes e depois
@@ -106,11 +117,21 @@ type reportEpisode struct {
 
 type reportAbove struct {
 	Label   string
-	Limit   int
+	Limit   float64 // µSv/h (2.36)
 	Minutes int
-	Limits  []int // limites vigentes no período, na ordem em que valeram
-	UsedNow bool  // algum minuto sem registro: usou o valor atual
+	Limits  []float64 // limites vigentes no período (µSv/h), na ordem em que valeram
+	UsedNow bool      // algum minuto sem registro: usou o valor atual
 }
+
+// uPt é o µSv/h de um minuto gravado, pela calibração que valia nele.
+func (r reportData) uPt(p store.Point) float64 { return r.tl.USv(p) }
+
+// uAt converte um CPM sem minuto gravado (pico ao vivo, limite) pela
+// calibração de t.
+func (r reportData) uAt(t time.Time, cpm float64) float64 { return r.tl.USvAt(t, cpm) }
+
+// fmtU escreve um µSv/h com as casas da tela (3 algarismos significativos).
+func fmtU(v float64) string { return fmtBR(v, usvDec(v)) }
 
 func fmtBR(v float64, dec int) string {
 	s := fmt.Sprintf("%.*f", dec, v)
@@ -167,7 +188,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
-	lv := a.effLocked().Levels.Norm()
+	eff := a.effLocked()
+	lv := eff.Levels.Norm()
+	attnU, alarmU, dangerU := thrUSvLocked(a, eff)
 	var evs []Event
 	for _, e := range a.events {
 		if e.Kind == kindAlert && e.Time >= s.From && e.Time < s.To && (!e.Demo || demo) && e.Device != devRC {
@@ -217,7 +240,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 	if s.BgOK && s.BgCPM > 0 {
 		r.Bg = fmtBR(s.BgCPM, 1)
-		r.BgUSv = fmtBR(cal.USv(s.BgCPM), 3)
+		r.BgU = cal.USv(s.BgCPM)
+		r.BgUSv = fmtU(r.BgU)
 		if s.Avg != nil {
 			sign := "+"
 			if s.VsBgPct < 0 {
@@ -268,8 +292,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	if now := time.Now(); effTo.After(now) {
 		effTo = now
 	}
-	r.From, r.To, r.Pts = from, effTo, pts
+	r.From, r.To, r.Pts, r.tl = from, effTo, pts, tl
 	r.St = calcMinuteStats(pts)
+	r.USt = usvMinuteStats(pts, tl)
 	cs := coverageSpan(from, to, a.pointsFirst(pts), time.Now())
 	r.SpanMin, r.HistMin, r.HistFrom = cs.Span, cs.Hist, cs.HistFrom
 	if cs.Hist > 0 {
@@ -289,8 +314,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	// por dia
 	if err == nil {
 		type acc struct {
-			sum, usum, dose, min, max float64
-			n                         int
+			sum, usum, dose, min, max, umin, umax float64
+			n                                     int
 		}
 		byDay := map[int64]*acc{}
 		var keys []int64
@@ -301,17 +326,19 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			y, m, d := p.T.Date()
 			k := time.Date(y, m, d, 0, 0, 0, 0, p.T.Location()).UnixMilli()
 			x := byDay[k]
+			u := tl.USv(p) // pela calibração que valia nesse minuto
 			if x == nil {
-				x = &acc{min: p.CPM, max: p.CPM}
+				x = &acc{min: p.CPM, max: p.CPM, umin: u, umax: u}
 				byDay[k] = x
 				keys = append(keys, k)
 			}
 			x.sum += p.CPM
-			u := tl.USv(p) // pela calibração que valia nesse minuto
 			x.usum += u
 			x.dose += u / 60
 			x.min = math.Min(x.min, p.CPM)
 			x.max = math.Max(x.max, p.CPM)
+			x.umin = math.Min(x.umin, u)
+			x.umax = math.Max(x.umax, u)
 			x.n++
 		}
 		sort.Slice(keys, func(i, j int) bool { return keys[i] < keys[j] })
@@ -323,6 +350,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			r.Days = append(r.Days, reportDay{
 				Label: wd[t.Weekday()] + " " + t.Format("02/01"),
 				Avg:   avg, Min: x.min, Max: x.max, USv: x.usum / float64(x.n), Dose: x.dose, Minutes: x.n,
+				MinU: x.umin, MaxU: x.umax,
 			})
 			r.dayKeys = append(r.dayKeys, t.Format("2006-01-02"))
 		}
@@ -345,11 +373,21 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		}
 		return lv.AttentionCPM
 	}
+	// o mesmo em µSv/h: o escolhido hoje (desde a 2.29 é o µSv/h que fica fixo)
+	limitUOf := func(level string) float64 {
+		switch level {
+		case "perigo":
+			return dangerU
+		case "alarme":
+			return alarmU
+		}
+		return attnU
+	}
 	evByID := map[int64]Event{}
 	for _, e := range evs {
 		evByID[e.ID] = e
 	}
-	livePeakDay := map[string]float64{}
+	livePeakDay, livePeakDayU := map[string]float64{}, map[string]float64{}
 	for _, ep := range alertEpisodes(evs, time.Now()) {
 		st, en := time.UnixMilli(ep.Start), time.UnixMilli(ep.Until)
 		re := reportEpisode{Start: st, End: en, Level: levelName(ep.Level), LevelCls: ep.Level,
@@ -358,8 +396,11 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		// o limite que valia quando o episódio começou (histórico de configurações)
 		if l, ok := cfgLimitAt(cfgHist, ep.Level, ep.Start); ok {
 			re.Limit = l
+		}
+		if u, _, ok := cfgLimitUSvAt(cfgHist, ep.Level, ep.Start, tl); ok {
+			re.LimitU = u
 		} else {
-			re.LimitNow = true
+			re.LimitU, re.LimitNow = limitUOf(ep.Level), true
 		}
 		if len(ep.IDs) > 0 {
 			re.Retro = evByID[ep.IDs[0]].Retro
@@ -384,19 +425,25 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		in := pointsIn(pts, st.Truncate(time.Minute), en)
 		if ms := calcMinuteStats(in); ms.N > 0 {
 			re.N, re.MinC, re.MeanC, re.MaxC = ms.N, ms.Min, ms.Mean, ms.Max
+			mu := usvMinuteStats(in, tl)
+			re.MinU, re.MeanU, re.MaxU = mu.Min, mu.Mean, mu.Max
 		}
+		re.PeakU = tl.USvAt(re.PeakAt, ep.Peak)
 		if !re.Retro {
 			if ep.Peak > r.AlertPeakMax {
 				r.AlertPeakMax, r.alertPeakAt = ep.Peak, re.PeakAt
 			}
+			r.AlertPeakMaxU = math.Max(r.AlertPeakMaxU, re.PeakU)
 			k := re.PeakAt.Format("2006-01-02")
 			livePeakDay[k] = math.Max(livePeakDay[k], ep.Peak)
+			livePeakDayU[k] = math.Max(livePeakDayU[k], re.PeakU)
 		}
 		r.Episodes = append(r.Episodes, re)
 	}
 	for i := range r.Days {
 		if v, ok := livePeakDay[r.dayKeys[i]]; ok {
 			r.Days[i].LivePeak = v
+			r.Days[i].LivePeakU = livePeakDayU[r.dayKeys[i]]
 		}
 	}
 	// máximo do relatório = o mesmo do app: o maior valor visto, contando o
@@ -436,11 +483,12 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 	// tempo acima de cada limite, com o limite vigente em cada minuto
 	// (histórico de configurações; sem registro, o valor atual)
-	above := func(label, level string, cur int) reportAbove {
+	above := func(label, level string, cur float64) reportAbove {
 		ra := reportAbove{Label: label, Limit: cur}
-		seen := map[int]bool{}
+		seen := map[string]bool{}
 		for _, p := range pts {
-			l, ok := cfgLimitAt(cfgHist, level, p.T.UnixMilli())
+			u := tl.USv(p)
+			l, cpm, ok := cfgLimitUSvAt(cfgHist, level, p.T.UnixMilli(), tl)
 			if !ok {
 				l = cur
 				if level == "alarme" && !alarmOn {
@@ -448,21 +496,22 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 				}
 				ra.UsedNow = true
 			}
-			if !seen[l] {
-				seen[l] = true
+			if k := fmtU(l); !seen[k] {
+				seen[k] = true
 				ra.Limits = append(ra.Limits, l)
 			}
-			if p.CPM >= float64(l) {
+			// limite gravado em CPM (antes da 2.29): o que tocava era o CPM
+			if (cpm > 0 && p.CPM >= float64(cpm)) || (cpm == 0 && u >= l*(1-1e-9)) {
 				ra.Minutes++
 			}
 		}
 		return ra
 	}
-	r.Above = append(r.Above, above("Atenção", "atencao", lv.AttentionCPM))
-	if ra := above("Alarme", "alarme", alarmCPM); alarmOn || len(ra.Limits) > 0 {
+	r.Above = append(r.Above, above("Atenção", "atencao", attnU))
+	if ra := above("Alarme", "alarme", alarmU); alarmOn || len(ra.Limits) > 0 {
 		r.Above = append(r.Above, ra)
 	}
-	r.Above = append(r.Above, above("Perigo", "perigo", lv.DangerCPM))
+	r.Above = append(r.Above, above("Perigo", "perigo", dangerU))
 
 	// alertas por episódio (o mais recente primeiro)
 	eps := alertEpisodes(evs, time.Now())
@@ -473,7 +522,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		if ep.Until > ep.Start {
 			span += "–" + time.UnixMilli(ep.Until).Format("15:04") + " (" + fmtMinutes(int(math.Round(float64(ep.Until-ep.Start)/60000))) + ")"
 		}
-		pk := fmtBR(ep.Peak, 0) + " CPM"
+		pk := fmtU(tl.USvAt(st, ep.Peak)) + " µSv/h"
 		if s.BgCPM > 0 {
 			pk += fmt.Sprintf(" (%sσ)", fmtBR((ep.Peak-s.BgCPM)/math.Sqrt(s.BgCPM), 1))
 		}
@@ -534,7 +583,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	}
 	alarm := "desligado"
 	if alarmOn {
-		alarm = fmt.Sprintf("a partir de %d CPM", alarmCPM)
+		alarm = fmt.Sprintf("a partir de %s µSv/h (≈ %d CPM com a calibração atual; limite operacional)", fmtU(alarmU), alarmCPM)
 	}
 	bg := "ainda sem fundo"
 	if s.BgOK && s.BgCPM > 0 {
@@ -569,13 +618,13 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		[2]string{"Fundo de referência", bg},
 	)
 	if !known["Aviso de atenção"] {
-		r.Config = append(r.Config, curVal("Aviso de atenção", fmt.Sprintf("a partir de %d CPM (limite operacional)", lv.AttentionCPM)))
+		r.Config = append(r.Config, curVal("Aviso de atenção", fmt.Sprintf("a partir de %s µSv/h (≈ %d CPM com a calibração atual; limite operacional)", fmtU(attnU), lv.AttentionCPM)))
 	}
 	if !known["Alarme"] {
-		r.Config = append(r.Config, curVal("Alarme", alarm+" (limite operacional)"))
+		r.Config = append(r.Config, curVal("Alarme", alarm))
 	}
 	if !known["Alarme de perigo"] {
-		r.Config = append(r.Config, curVal("Alarme de perigo", fmt.Sprintf("a partir de %d CPM (limite operacional)", lv.DangerCPM)))
+		r.Config = append(r.Config, curVal("Alarme de perigo", fmt.Sprintf("a partir de %s µSv/h (≈ %d CPM com a calibração atual; limite operacional)", fmtU(dangerU), lv.DangerCPM)))
 	}
 	r.Config = append(r.Config, [][2]string{
 		{"Dose do GMC", "calculada pelo app: soma, minuto a minuto, de µSv/h ÷ 60, com o µSv/h obtido do CPM pela calibração vigente em cada minuto. O GMC-800 não informa o acumulador interno de dose pela interface serial."},
@@ -583,6 +632,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		{"Percentis", "interpolação linear entre as leituras ordenadas (tipo 7)"},
 		{"Máximo", "maior valor observado no resumo e na tabela por dia: o maior minuto gravado ou, se superior, o pico ao vivo de um alerta (marcado com *). A estatística usa apenas os minutos gravados."},
 		{"Pico ao vivo", "maior CPM da leitura ao vivo durante um alerta. O contador soma os últimos 60 s e o app consulta a cada segundo; como essa janela não coincide com o minuto do relógio gravado, o pico pode superar o maior minuto."},
+		{"Unidade", "o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM."},
 		{"Fundo", "fundo atual: mediana da última hora em casa; 7 e 30 dias: mediana das leituras por minuto em casa, excluídos os períodos fora de casa e as medições de objeto"},
 		{"Cobertura", "minutos com leitura ÷ minutos do período até o fim do período ou o momento da geração, contados a partir do primeiro dado do contador"},
 		{"Lacuna", "minuto sem leitura registrada (contador desconectado, app fechado sem histórico baixado); nunca é tratado como zero"},

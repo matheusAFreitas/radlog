@@ -25,7 +25,7 @@ func TestRenderReport(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if r.Alerts != "1 alarme" || len(r.AlertList) != 1 || r.AlertList[0].Peak[:3] != "134" {
+	if r.Alerts != "1 alarme" || len(r.AlertList) != 1 || !strings.HasPrefix(r.AlertList[0].Peak, fmtU(r.uAt(time.UnixMilli(T), 134))+" µSv/h") {
 		t.Fatalf("alertas: %q %+v", r.Alerts, r.AlertList)
 	}
 	b := renderReportPDF(r)

@@ -5,6 +5,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -103,6 +104,33 @@ func cfgLimitAt(hist []ConfigChange, level string, t int64) (int, bool) {
 	}
 	n, err := strconv.Atoi(m[1])
 	return n, err == nil
+}
+
+var cfgUSvRe = regexp.MustCompile(`a partir de ([\d.,]+) µSv/h`)
+
+// cfgLimitUSvAt é o limite de um nível em t, em µSv/h (2.36). Desde a 2.29 o
+// histórico grava o limite em µSv/h; antes, em CPM, e aí cpm > 0 e o µSv/h
+// sai da calibração de t (o que tocava era o CPM).
+func cfgLimitUSvAt(hist []ConfigChange, level string, t int64, tl calTL) (usv float64, cpm int, ok bool) {
+	field := map[string]string{"perigo": "Alarme de perigo", "alarme": "Alarme"}[level]
+	if field == "" {
+		field = "Aviso de atenção"
+	}
+	v, ok := cfgValueAt(hist, field, t)
+	if !ok {
+		return 0, 0, false
+	}
+	if m := cfgCPMRe.FindStringSubmatch(v); m != nil {
+		if n, err := strconv.Atoi(m[1]); err == nil {
+			return tl.USvAt(time.UnixMilli(t), float64(n)), n, true
+		}
+	}
+	if m := cfgUSvRe.FindStringSubmatch(v); m != nil {
+		if u, err := strconv.ParseFloat(strings.Replace(m[1], ",", ".", 1), 64); err == nil && u > 0 {
+			return u, 0, true
+		}
+	}
+	return 0, 0, false
 }
 
 // cfgChangeTxt descreve uma mudança para a tabela do relatório.

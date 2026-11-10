@@ -2261,7 +2261,17 @@ const I18N_EN = {
 "fim da escala do RadiaCode": "RadiaCode end of scale",
 "Saturação do RadiaCode": "RadiaCode saturation",
 "OK": "OK",
-"procurando…": "searching…"
+"procurando…": "searching…",
+"µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)": "µSv/h OVER THE PERIOD (ALL PER-MINUTE READINGS)",
+"ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)": "PER-MINUTE COUNT STATISTICS (CPM, WHAT THE COUNTER MEASURES)",
+"µSv/h de cada minuto": "µSv/h of each minute",
+"Média µSv/h (C)": "Average µSv/h (C)",
+"Mín µSv/h": "Min µSv/h",
+"Máx µSv/h": "Max µSv/h",
+"Mín/méd/máx µSv/h": "Min/avg/max µSv/h",
+"Pico µSv/h": "Peak µSv/h",
+"Limite µSv/h": "Limit µSv/h",
+"o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM.": "the GMC-800 measures counts (CPM); the report shows µSv/h, with each minute, peak and limit converted by the calibration in force at that moment. Limits recorded in CPM (before 2.29) are compared in CPM, as they triggered, and shown converted. The count statistics stay in CPM."
 },
 "patterns": [
 [
@@ -3181,6 +3191,16 @@ const I18N_EN = {
 [
 "fundo: espectro acumulado do aparelho (",
 "), na escala do tempo do objeto"
+]
+],
+[
+"a partir de ",
+"^a partir de ((?:(?! · ).)+?) µSv/h \\(≈ ((?:(?! · ).)+?) CPM com a calibração atual; limite operacional\\)$",
+"from ${1} µSv/h (≈ ${2} CPM with the current calibration; operating limit)",
+[
+"a partir de ",
+" µSv/h (≈ ",
+" CPM com a calibração atual; limite operacional)"
 ]
 ],
 [
@@ -4251,6 +4271,15 @@ const I18N_EN = {
 [
 "Nível de fundo em casa pelo RadiaCode: ",
 " µSv/h."
+]
+],
+[
+"mediana de 30 dias (",
+"^mediana de 30 dias \\(((?:(?! · ).)+?) CPM\\) · média do período ((?:(?! · ).)+?)$",
+"30-day median (${1} CPM) · period average ${2}",
+[
+"mediana de 30 dias (",
+" CPM) · média do período "
 ]
 ],
 [
@@ -5687,6 +5716,16 @@ const I18N_EN = {
 [
 "(repetiu mais ",
 " vezes desde "
+]
+],
+[
+"contagem ",
+"^contagem ((?:(?! · ).)+?) CPM \\(M\\) · n = ((?:(?! · ).)+?) min$",
+"count ${1} CPM (M) · n = ${2} min",
+[
+"contagem ",
+" CPM (M) · n = ",
+" min"
 ]
 ],
 [
