@@ -1,5 +1,13 @@
 # Versões
 
+## 2.27.0
+- **Fundação do estilo, passo 6: espaço.** Os espaçamentos internos
+  (padding, margin e gap) passam a usar a régua do guia: 4, 8, 12, 16, 20,
+  24 e 32 px (`--space-*`). Os valores fora da régua sobem para o degrau
+  mais próximo (6 vira 8, 10 vira 12, 14 vira 16, 18 vira 20, 22 vira 24),
+  então o app fica um pouco mais arejado. Ajustes finos de 1 a 3 px e
+  recuos grandes continuam como estavam.
+
 ## 2.26.0
 - **Cada nível tem forma, não só cor.** Seguro é círculo, Atenção é
   triângulo, Alarme é losango e Perigo é octógono com uma faixa; "sem
