@@ -171,6 +171,7 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 	a.mu.Lock()
 	g.Connected = a.state == "conectado"
 	nc := a.noCount
+	rcSat := a.effLocked().Levels.Norm().RcSatUSv
 	a.mu.Unlock()
 	if a.store != nil {
 		if pts, _ := a.store.Range(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
@@ -197,12 +198,17 @@ func (a *App) devLive(now time.Time) map[string]DevLive {
 	r := DevLive{State: "sem dado"}
 	a.rc.mu.Lock()
 	r.Connected = a.rc.st.State == "conectado"
+	// fora da escala: o aviso do próprio aparelho ou o fim da escala do app
+	rcOver := r.Connected && (a.rc.st.Offscale || (rcSat > 0 && a.rc.st.USvh >= rcSat))
 	a.rc.mu.Unlock()
 	if pts := a.rcRange(now.Add(-48*time.Hour), now.Add(time.Minute)); len(pts) > 0 {
 		r.Last = pts[len(pts)-1].T.UnixMilli()
 		r.LastGood = r.Last
 		if now.Sub(pts[len(pts)-1].T) <= fresh {
 			r.State = "lendo"
+			if rcOver {
+				r.State = "saturado"
+			}
 		}
 	}
 	r.CountsOffline = !r.Connected

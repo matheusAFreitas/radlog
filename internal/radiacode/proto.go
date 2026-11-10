@@ -371,7 +371,19 @@ type Event struct {
 	ID    int
 	Param int
 	Flags uint16
+	// Rate: a taxa que veio junto nos eventos de alarme e de "fora da
+	// escala" (µSv/h nos de taxa de dose, cps nos de contagem)
+	Rate float64
 }
+
+// Eventos de "fora da escala" (o aparelho passou do que consegue medir).
+const (
+	EvRateOffscale  = 11 // taxa de dose
+	EvCountOffscale = 22 // contagem
+)
+
+// Offscale diz se o evento é de taxa ou contagem fora da escala.
+func (r Event) Offscale() bool { return r.ID == EvRateOffscale || r.ID == EvCountOffscale }
 
 // Old diz se o evento veio da memória do aparelho (gravado sem o app).
 func (r Event) Old() bool { return r.Flags&FlagOld != 0 }
@@ -494,7 +506,16 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			p, _ = r.u8()
 			e.Flags, err = r.u16()
 			if err == nil && rateEvent(int(id)) {
-				err = r.skip(6) // taxa (f32) e erro (u16) do alarme
+				// taxa (f32) e erro (u16) do alarme
+				var rate float32
+				if rate, err = r.f32(); err == nil {
+					err = r.skip(2)
+				}
+				if id >= 9 && id <= 14 {
+					e.Rate = float64(rate) * DoseScale
+				} else {
+					e.Rate = float64(rate)
+				}
 			}
 			if err == nil {
 				e.T, e.ID, e.Param = t, int(id), int(p)
