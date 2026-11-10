@@ -257,11 +257,17 @@ func (p *reportPDF) chart(r reportData) {
 	attn := 0.0
 	for _, a := range r.Above {
 		if a.Label == "Atenção" {
-			attn = float64(a.Limit)
+			attn = a.Limit
 		}
 	}
-	top := math.Max(r.St.Max*1.08, r.S.BgCPM*1.6)
-	if attn > 0 && r.St.Max >= attn*0.6 {
+	// em µSv/h (2.36), cada minuto pela calibração que valia nele
+	us := make([]float64, len(r.Pts))
+	for i, pt := range r.Pts {
+		us[i] = r.uPt(pt)
+	}
+	bgU := r.BgU
+	top := math.Max(r.USt.Max*1.08, bgU*1.6)
+	if attn > 0 && r.USt.Max >= attn*0.6 {
 		top = math.Max(top, attn*1.1)
 	}
 	// um pico isolado muito alto achataria o resto: a escala para pouco
@@ -269,24 +275,22 @@ func (p *reportPDF) chart(r reportData) {
 	// com o valor escrito em cima
 	clipped := false
 	if len(r.Pts) > 0 {
-		v := make([]float64, len(r.Pts))
-		for i, pt := range r.Pts {
-			v[i] = pt.CPM
-		}
+		v := append([]float64(nil), us...)
 		sort.Float64s(v)
-		lim := math.Max(percentile(v, .999)*1.25, r.S.BgCPM*1.8)
+		lim := math.Max(percentile(v, .999)*1.25, bgU*1.8)
 		if attn > 0 {
 			lim = math.Max(lim, attn*1.25)
 		}
-		if r.St.Max > lim*1.15 {
+		if r.USt.Max > lim*1.15 {
 			top, clipped = lim, true
 		}
 	}
 	if top <= 0 {
-		top = 10
+		top = 0.1
 	}
-	stepY := math.Max(1, niceStep(top/5))
-	top = math.Ceil(top/stepY) * stepY
+	stepY := niceStep(top / 5)
+	top = math.Ceil(top/stepY-1e-9) * stepY
+	stepDec := int(math.Max(0, -math.Floor(math.Log10(stepY)+1e-9)))
 	yv := func(v float64) float64 { return y0 + h*(1-math.Min(v, top)/top) }
 	xOf := func(t time.Time) float64 { return x0 + w*float64(t.Sub(from))/float64(span) }
 
@@ -314,10 +318,10 @@ func (p *reportPDF) chart(r reportData) {
 	// grade
 	for v := 0.0; v <= top+1e-9; v += stepY {
 		p.d.Line(x0, yv(v), x0+w, yv(v), 0.3, cLine, false)
-		p.d.TextRight(x0-4, yv(v)+2.5, pdf.Mono, 6.5, cMuted, fmtBR(v, 0))
+		p.d.TextRight(x0-4, yv(v)+2.5, pdf.Mono, 6.5, cMuted, fmtBR(v, stepDec))
 	}
-	if r.S.BgCPM > 0 {
-		p.d.Line(x0, yv(r.S.BgCPM), x0+w, yv(r.S.BgCPM), 0.7, cMuted, true)
+	if bgU > 0 {
+		p.d.Line(x0, yv(bgU), x0+w, yv(bgU), 0.7, cMuted, true)
 	}
 	if attn > 0 && attn <= top {
 		p.d.Line(x0, yv(attn), x0+w, yv(attn), 0.7, cAtt, true)
@@ -331,12 +335,12 @@ func (p *reportPDF) chart(r reportData) {
 		// cabe um ponto por minuto: linha direta, quebrando nas lacunas
 		var seg [][2]float64
 		var prev time.Time
-		for _, pt := range pts {
+		for i, pt := range pts {
 			if len(seg) > 0 && pt.T.Sub(prev) >= 90*time.Second {
 				p.d.Polyline(seg, 0.8, cAccent)
 				seg = nil
 			}
-			seg = append(seg, [2]float64{xOf(pt.T), yv(pt.CPM)})
+			seg = append(seg, [2]float64{xOf(pt.T), yv(us[i])})
 			prev = pt.T
 		}
 		p.d.Polyline(seg, 0.8, cAccent)
@@ -346,19 +350,20 @@ func (p *reportPDF) chart(r reportData) {
 			n             int
 		}
 		cs := make([]col, cols)
-		for _, pt := range pts {
+		for j, pt := range pts {
 			i := int(float64(pt.T.Sub(from)) / float64(span) * float64(cols))
 			if i < 0 || i >= cols {
 				continue
 			}
 			c := &cs[i]
-			if c.n == 0 || pt.CPM < c.min {
-				c.min = pt.CPM
+			u := us[j]
+			if c.n == 0 || u < c.min {
+				c.min = u
 			}
-			if c.n == 0 || pt.CPM > c.max {
-				c.max = pt.CPM
+			if c.n == 0 || u > c.max {
+				c.max = u
 			}
-			c.sum += pt.CPM
+			c.sum += u
 			c.n++
 		}
 		cw := w / float64(cols)
@@ -391,9 +396,9 @@ func (p *reportPDF) chart(r reportData) {
 			v float64
 		}
 		var sp []spike
-		for _, pt := range pts {
-			if pt.CPM > top {
-				sp = append(sp, spike{pt.T, pt.CPM})
+		for i, pt := range pts {
+			if us[i] > top {
+				sp = append(sp, spike{pt.T, us[i]})
 			}
 		}
 		sort.Slice(sp, func(i, j int) bool { return sp[i].v > sp[j].v })
@@ -417,13 +422,13 @@ func (p *reportPDF) chart(r reportData) {
 			shown++
 			p.d.Line(x-2.5, y0+4, x, y0+0.5, 0.8, cWarn, false)
 			p.d.Line(x, y0+0.5, x+2.5, y0+4, 0.8, cWarn, false)
-			lbl := fmtBR(k.v, 0)
+			lbl := fmtU(k.v)
 			p.d.Text(x+4, y0+8, pdf.Mono, 6.5, cWarn, lbl)
 		}
 	}
 	p.d.Rect(x0, y0, w, h, nil, &cLine)
 	p.timeAxis(x0, w, y0+h, from, to)
-	p.d.Text(pm, y0-4+0, pdf.Sans, 6.5, cMuted, "CPM")
+	p.d.Text(pm, y0-4+0, pdf.Sans, 6.5, cMuted, "µSv/h")
 	p.y = y0 + h + 22
 
 	// legenda
@@ -445,7 +450,7 @@ func (p *reportPDF) chart(r reportData) {
 		item(cBand, fmt.Sprintf("faixa mín–máx (cada coluna ≈ %s)", fmtMinutes(int(math.Round(perCol.Minutes())))), false)
 		item(cAccent, "média da coluna", false)
 	} else {
-		item(cAccent, "CPM de cada minuto", false)
+		item(cAccent, "µSv/h de cada minuto", false)
 	}
 	item(cMuted, "fundo", true)
 	if attn > 0 && attn <= top {
@@ -538,7 +543,7 @@ func renderReportPDF(r reportData) []byte {
 	th := 60.0
 	bg, bgSub := "—", "ainda sem fundo"
 	if r.Bg != "" {
-		bg, bgSub = r.Bg+" CPM", "mediana de 30 dias · média do período "+r.VsBg
+		bg, bgSub = r.BgUSv+" µSv/h", "mediana de 30 dias ("+r.Bg+" CPM) · média do período "+r.VsBg
 	}
 	rain := r.Rain
 	if rain == "" {
@@ -552,19 +557,22 @@ func renderReportPDF(r reportData) []byte {
 	if r.Away != "" {
 		cover += " · " + r.Away + " fora de casa"
 	}
-	maxSub := r.MinAt + " · " + r.MaxAt
-	if r.MaxLive {
-		maxSub += " · máx. = pico ao vivo (maior minuto: " + fmtBR(st.Max, 0) + ")"
+	ust := r.USt
+	maxU, maxAt := ust.Max, ust.MaxAt
+	maxSub := ust.MinAt.Format("02/01 15:04") + " · " + ust.MaxAt.Format("02/01 15:04")
+	if r.AlertPeakMaxU > maxU {
+		maxU, maxAt = r.AlertPeakMaxU, r.alertPeakAt
+		maxSub = ust.MinAt.Format("02/01 15:04") + " · " + maxAt.Format("02/01 15:04") + " · máx. = pico ao vivo (maior minuto: " + fmtU(ust.Max) + ")"
 	}
 	alertSub := "contados por episódio"
-	if r.AlertPeakMax > 0 {
-		alertSub += " · pico ao vivo " + fmtBR(r.AlertPeakMax, 0) + " CPM"
+	if r.AlertPeakMaxU > 0 {
+		alertSub += " · pico ao vivo " + fmtU(r.AlertPeakMaxU) + " µSv/h"
 	}
 	tiles := [][5]string{
-		{"Média (por minuto)", r.Avg + " CPM", fmt.Sprintf("≈ %s µSv/h (C) · n = %d min", r.AvgUSv, st.N), "m", "M"},
+		{"Média (por minuto)", fmtU(ust.Mean) + " µSv/h", fmt.Sprintf("contagem %s CPM (M) · n = %d min", r.Avg, st.N), "m", "C"},
 		{"Dose no período", r.Dose + " µSv", "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (E)", "m", "C"},
 		{"Fundo da casa", bg, bgSub, "m", "C"},
-		{"Mínimo · máximo", r.Min + " · " + r.Max + " CPM", maxSub, "m", "M"},
+		{"Mínimo · máximo", fmtU(ust.Min) + " · " + fmtU(maxU) + " µSv/h", maxSub, "m", "C"},
 		{"Alertas", r.Alerts, alertSub, "s", "C"},
 		{"Chuva", rain, "radar/modelo meteorológico", "s", "E"},
 		{"Cobertura", fmtBR(ratio(st.N, r.HistMin)*100, 0) + "%", covSub + cover, "s", "C"},
@@ -614,11 +622,11 @@ func renderReportPDF(r reportData) []byte {
 		}, 150)
 	}
 
-	p.section("CPM AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)")
+	p.section("µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)")
 	p.chart(r)
 
 	// estatística + histograma lado a lado
-	p.section("ESTATÍSTICA DAS LEITURAS POR MINUTO")
+	p.section("ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)")
 	p.need(165)
 	top := p.y
 	livePeak := "— (nenhum alerta ao vivo)"
@@ -666,16 +674,16 @@ func renderReportPDF(r reportData) []byte {
 	var trows [][]string
 	starred := false
 	for _, dd := range r.Days {
-		mx := fmtBR(dd.Max, 0)
-		if dd.LivePeak > dd.Max {
-			mx = fmtBR(dd.LivePeak, 0) + "*"
+		mx := fmtU(dd.MaxU)
+		if dd.LivePeakU > dd.MaxU {
+			mx = fmtU(dd.LivePeakU) + "*"
 			starred = true
 		}
-		trows = append(trows, []string{dd.Label, fmtBR(dd.Avg, 1), fmtBR(dd.USv, 3), fmtBR(dd.Min, 0), mx, fmtBR(dd.Dose, 2), fmt.Sprintf("%d / 1440", dd.Minutes)})
+		trows = append(trows, []string{dd.Label, fmtU(dd.USv), fmtU(dd.MinU), mx, fmtBR(dd.Dose, 2), fmtBR(dd.Avg, 1), fmt.Sprintf("%d / 1440", dd.Minutes)})
 	}
 	cw := pdf.W - 2*pm
-	p.table([]string{"Dia", "Média CPM (M)", "µSv/h (C)", "Mín (M)", "Máx (M)", "Dose µSv (C)", "Minutos"}, trows,
-		[]float64{cw * .2, cw * .14, cw * .13, cw * .1, cw * .1, cw * .15, cw * .18},
+	p.table([]string{"Dia", "Média µSv/h (C)", "Mín µSv/h", "Máx µSv/h", "Dose µSv (C)", "Média CPM (M)", "Minutos"}, trows,
+		[]float64{cw * .18, cw * .15, cw * .12, cw * .12, cw * .14, cw * .13, cw * .16},
 		[]bool{false, true, true, true, true, true, true}, []bool{false, true, true, true, true, true, true}, nil)
 	if starred {
 		p.need(14)
@@ -699,9 +707,9 @@ func renderReportPDF(r reportData) []byte {
 			}
 			vs = sign + fmtBR(pc, 1) + "%"
 		}
-		trows = append(trows, []string{b.Label, fmtBR(b.CPM, 1), fmtBR(b.USv, 3), fmt.Sprint(b.N), vs})
+		trows = append(trows, []string{b.Label, fmtU(b.USv), fmtBR(b.CPM, 1), fmt.Sprint(b.N), vs})
 	}
-	p.table([]string{"Janela", "Mediana CPM (C)", "µSv/h (C)", "Minutos em casa", "Média do período vs."}, trows,
+	p.table([]string{"Janela", "µSv/h (C)", "Mediana CPM (C)", "Minutos em casa", "Média do período vs."}, trows,
 		[]float64{cw * .32, cw * .15, cw * .13, cw * .18, cw * .22},
 		[]bool{false, true, true, true, true}, []bool{false, true, true, true, true}, nil)
 
@@ -719,9 +727,12 @@ func renderReportPDF(r reportData) []byte {
 			span := e.Start.Format("02/01 15:04") + "–" + e.End.Format("15:04")
 			mm := "—"
 			if e.N > 0 {
-				mm = fmtBR(e.MinC, 0) + " / " + fmtBR(e.MeanC, 1) + " / " + fmtBR(e.MaxC, 0)
+				mm = fmtU(e.MinU) + " / " + fmtU(e.MeanU) + " / " + fmtU(e.MaxU)
 			}
-			exc := fmt.Sprintf("+%s (×%s)", fmtBR(e.Peak-float64(e.Limit), 0), fmtBR(e.Peak/float64(e.Limit), 2))
+			exc := "—"
+			if e.LimitU > 0 {
+				exc = fmt.Sprintf("+%s (×%s)", fmtU(math.Max(0, e.PeakU-e.LimitU)), fmtBR(e.PeakU/e.LimitU, 2))
+			}
 			dur := fmtSeconds(e.DurSec)
 			if e.Retro {
 				dur = "≈ " + fmtMinutes(e.Minutes) // histórico: só minuto a minuto
@@ -733,19 +744,19 @@ func renderReportPDF(r reportData) []byte {
 			if e.Breaks > 0 || e.EndReason != "" {
 				lvl += " (d)"
 			}
-			lim := fmt.Sprint(e.Limit)
+			lim := fmtU(e.LimitU)
 			if e.LimitNow {
 				lim += "*"
 				limNow = true
 			}
-			trows = append(trows, []string{span, lvl, dur, mm, fmtBR(e.Peak, 0), lim, exc})
+			trows = append(trows, []string{span, lvl, dur, mm, fmtU(e.PeakU), lim, exc})
 		}
 		rev := make([]reportEpisode, len(eps))
 		for i := range eps {
 			rev[i] = eps[len(eps)-1-i]
 		}
-		p.table([]string{"Quando", "Nível", "Duração", "Mín/méd/máx (M)", "Pico (M)", "Limite", "Acima do limite"}, trows,
-			[]float64{cw * .2, cw * .15, cw * .1, cw * .17, cw * .09, cw * .09, cw * .2},
+		p.table([]string{"Quando", "Nível", "Duração", "Mín/méd/máx µSv/h", "Pico µSv/h", "Limite µSv/h", "Acima do limite"}, trows,
+			[]float64{cw * .2, cw * .13, cw * .1, cw * .22, cw * .1, cw * .1, cw * .15},
 			[]bool{false, false, true, true, true, true, true}, []bool{true, false, true, true, true, true, true},
 			func(i int) *pdf.RGB {
 				switch rev[i].LevelCls {
@@ -769,15 +780,15 @@ func renderReportPDF(r reportData) []byte {
 	trows = nil
 	aboveNow := false
 	for _, a := range r.Above {
-		lim := fmt.Sprintf("≥ %d CPM", a.Limit)
+		lim := "≥ " + fmtU(a.Limit) + " µSv/h"
 		if len(a.Limits) > 1 {
 			var ls []string
 			for _, l := range a.Limits {
-				ls = append(ls, fmt.Sprint(l))
+				ls = append(ls, fmtU(l))
 			}
-			lim = "≥ " + strings.Join(ls, " → ") + " CPM"
+			lim = "≥ " + strings.Join(ls, " → ") + " µSv/h"
 		} else if len(a.Limits) == 1 {
-			lim = fmt.Sprintf("≥ %d CPM", a.Limits[0])
+			lim = "≥ " + fmtU(a.Limits[0]) + " µSv/h"
 		}
 		if a.UsedNow {
 			lim += "*"
@@ -859,7 +870,7 @@ func renderReportPDF(r reportData) []byte {
 	return d.Bytes(pdf.Tr(r.Title+" · "+r.Period), "RadLog "+AppVersion)
 }
 
-// episodeCharts desenha, para os episódios escolhidos, o CPM de 30 min antes
+// episodeCharts desenha, para os episódios escolhidos, o µSv/h de 30 min antes
 // até 30 min depois: minutos gravados (verde) e, se houver, a leitura ao vivo
 // por segundo (cinza), com o limite e o fundo tracejados.
 func (p *reportPDF) episodeCharts() {
@@ -899,20 +910,29 @@ func (p *reportPDF) episodeCharts() {
 		case "perigo":
 			lc, bgc = cWarn, cDngBg
 		}
-		title := e.Start.Format("02/01 15:04") + " · " + e.Level + " · pico " + fmtBR(e.Peak, 0)
+		title := e.Start.Format("02/01 15:04") + " · " + e.Level + " · pico " + fmtU(e.PeakU) + " µSv/h"
 		d.Text(x0, p.y+9, pdf.SansBold, 7, cInk, pdf.Fit(title, pdf.SansBold, 7, cw))
 
 		w0 := e.Start.Add(-30 * time.Minute).Truncate(time.Minute)
 		w1 := e.End.Add(31 * time.Minute).Truncate(time.Minute)
 		span := w1.Sub(w0)
-		top := math.Max(e.Peak, float64(e.Limit))
-		for _, pt := range e.Around {
-			top = math.Max(top, pt.CPM)
+		// em µSv/h (2.36): minutos pela calibração de cada um, segundos pela da hora
+		au := make([]float64, len(e.Around))
+		for k, pt := range e.Around {
+			au[k] = p.r.uPt(pt)
 		}
-		for _, sp := range e.Secs {
-			top = math.Max(top, sp.CPM)
+		su := make([]float64, len(e.Secs))
+		for k, sp := range e.Secs {
+			su[k] = p.r.uAt(time.UnixMilli(sp.T), sp.CPM)
 		}
-		top = math.Max(1, top*1.12)
+		top := math.Max(e.PeakU, e.LimitU)
+		for _, v := range au {
+			top = math.Max(top, v)
+		}
+		for _, v := range su {
+			top = math.Max(top, v)
+		}
+		top = math.Max(0.01, top*1.12)
 		xOf := func(t time.Time) float64 { return x0 + cw*float64(t.Sub(w0))/float64(span) }
 		yv := func(v float64) float64 { return y0 + ch*(1-math.Min(math.Max(v, 0), top)/top) }
 
@@ -921,16 +941,16 @@ func (p *reportPDF) episodeCharts() {
 			ex2 = ex1 + 1
 		}
 		d.Rect(ex1, y0, ex2-ex1, ch, &bgc, nil)
-		if p.r.S.BgCPM > 0 && p.r.S.BgCPM < top {
-			d.Line(x0, yv(p.r.S.BgCPM), x0+cw, yv(p.r.S.BgCPM), 0.5, cMuted, true)
+		if bgU := p.r.BgU; bgU > 0 && bgU < top {
+			d.Line(x0, yv(bgU), x0+cw, yv(bgU), 0.5, cMuted, true)
 		}
-		if float64(e.Limit) < top {
-			d.Line(x0, yv(float64(e.Limit)), x0+cw, yv(float64(e.Limit)), 0.6, lc, true)
+		if e.LimitU > 0 && e.LimitU < top {
+			d.Line(x0, yv(e.LimitU), x0+cw, yv(e.LimitU), 0.6, lc, true)
 		}
 		// por segundo
 		var seg [][2]float64
 		var prev int64
-		for _, sp := range e.Secs {
+		for k, sp := range e.Secs {
 			t := time.UnixMilli(sp.T)
 			if t.Before(w0) || t.After(w1) {
 				continue
@@ -939,14 +959,14 @@ func (p *reportPDF) episodeCharts() {
 				d.Polyline(seg, 0.4, cSec)
 				seg = nil
 			}
-			seg = append(seg, [2]float64{xOf(t), yv(sp.CPM)})
+			seg = append(seg, [2]float64{xOf(t), yv(su[k])})
 			prev = sp.T
 		}
 		d.Polyline(seg, 0.4, cSec)
 		// por minuto
 		seg = nil
 		var pt0 time.Time
-		for _, pt := range e.Around {
+		for k, pt := range e.Around {
 			if pt.T.Before(w0) || !pt.T.Before(w1) {
 				continue
 			}
@@ -954,17 +974,17 @@ func (p *reportPDF) episodeCharts() {
 				d.Polyline(seg, 0.9, cAccent)
 				seg = nil
 			}
-			seg = append(seg, [2]float64{xOf(pt.T.Add(30 * time.Second)), yv(pt.CPM)})
+			seg = append(seg, [2]float64{xOf(pt.T.Add(30 * time.Second)), yv(au[k])})
 			pt0 = pt.T
 		}
 		d.Polyline(seg, 0.9, cAccent)
 		// pico
 		if !e.PeakAt.IsZero() && !e.PeakAt.Before(w0) && e.PeakAt.Before(w1) {
-			px, py := xOf(e.PeakAt), yv(e.Peak)
+			px, py := xOf(e.PeakAt), yv(e.PeakU)
 			d.Rect(px-1.3, py-1.3, 2.6, 2.6, &lc, nil)
 		}
 		d.Rect(x0, y0, cw, ch, nil, &cLine)
-		d.Text(x0+2, y0+7, pdf.Mono, 5.8, cMuted, fmtBR(top, 0))
+		d.Text(x0+2, y0+7, pdf.Mono, 5.8, cMuted, fmtU(top)+" µSv/h")
 		d.Text(x0, y0+ch+8, pdf.Mono, 6, cMuted, w0.Format("15:04"))
 		d.TextRight(x0+cw, y0+ch+8, pdf.Mono, 6, cMuted, w1.Format("15:04"))
 		dur := fmtSeconds(e.DurSec)
@@ -973,7 +993,7 @@ func (p *reportPDF) episodeCharts() {
 		}
 		mid := dur
 		if e.N > 0 {
-			mid += " · méd. " + fmtBR(e.MeanC, 1)
+			mid += " · méd. " + fmtU(e.MeanU)
 		}
 		mw := pdf.TextWidth(mid, pdf.Sans, 6.2)
 		d.Text(x0+cw/2-mw/2, y0+ch+8, pdf.Sans, 6.2, cMuted, mid)

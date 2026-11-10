@@ -2053,7 +2053,7 @@ const I18N_EN = {
 "leitura a cada segundo (µSv/h)": "reading every second (µSv/h)",
 "Intercalibração com o RadiaCode": "Cross-calibration with the RadiaCode",
 "Intercalibrar com o RadiaCode": "Cross-calibrate with the RadiaCode",
-"intercalibração com o RadiaCode": "intercalibration with the RadiaCode",
+"intercalibração com o RadiaCode": "cross-calibration with the RadiaCode",
 "fator novo": "new factor",
 "margem (95%)": "margin (95%)",
 "coleta": "collection",
@@ -2261,7 +2261,7 @@ const I18N_EN = {
 "Saturação do RadiaCode": "RadiaCode saturation",
 "OK": "OK",
 "procurando…": "searching…",
-"Calibrar o contador com a intercalibração": "Calibrate the counter with the intercalibration",
+"Calibrar o contador com a intercalibração": "Calibrate the counter with the cross-calibration",
 "calibração do app": "the app's calibration",
 "CPM hoje": "CPM now",
 "CPM sugerido": "suggested CPM",
@@ -2290,14 +2290,24 @@ const I18N_EN = {
 "o contador já usa o mesmo fator do app": "the counter already uses the app's factor",
 "não há essa calibração guardada": "there is no such saved calibration",
 "o contador já está com essa calibração": "the counter already has that calibration",
-"O fator vale no RadLog e vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional. Para o contador mostrar o mesmo número na tela dele, use \"Calibrar o contador com a intercalibração\" no cartão de pontos logo abaixo.": "The factor applies in RadLog and becomes a new version in the calibration table; it can be undone, and recalculating the history is optional. To make the counter show the same number on its screen, use \"Calibrate the counter with the intercalibration\" in the points card just below.",
-"Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.": "Writing the points below makes both show the same µSv/h."
+"O fator vale no RadLog e vira uma versão nova na tabela de calibração; dá para desfazer, e recalcular o histórico é opcional. Para o contador mostrar o mesmo número na tela dele, use \"Calibrar o contador com a intercalibração\" no cartão de pontos logo abaixo.": "The factor applies in RadLog and becomes a new version in the calibration table; it can be undone, and recalculating the history is optional. To make the counter show the same number on its screen, use \"Calibrate the counter with the cross-calibration\" in the points card just below.",
+"Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.": "Writing the points below makes both show the same µSv/h.",
+"µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)": "µSv/h OVER THE PERIOD (ALL PER-MINUTE READINGS)",
+"ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)": "PER-MINUTE COUNT STATISTICS (CPM, WHAT THE COUNTER MEASURES)",
+"µSv/h de cada minuto": "µSv/h of each minute",
+"Média µSv/h (C)": "Average µSv/h (C)",
+"Mín µSv/h": "Min µSv/h",
+"Máx µSv/h": "Max µSv/h",
+"Mín/méd/máx µSv/h": "Min/avg/max µSv/h",
+"Pico µSv/h": "Peak µSv/h",
+"Limite µSv/h": "Limit µSv/h",
+"o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM.": "the GMC-800 measures counts (CPM); the report shows µSv/h, with each minute, peak and limit converted by the calibration in force at that moment. Limits recorded in CPM (before 2.29) are compared in CPM, as they triggered, and shown converted. The count statistics stay in CPM."
 },
 "patterns": [
 [
 "O µSv/h de cada ponto fica igual e o CPM é multiplicado por ",
 "^O µSv/h de cada ponto fica igual e o CPM é multiplicado por ((?:(?! · ).)+?)\\. A forma da curva continua, inclusive a compensação de tempo morto nos pontos de cima\\. A intercalibração mede só o fundo da casa; os pontos de cima seguem a forma da curva atual, não foram medidos\\.$",
-"Each point keeps its µSv/h and the CPM is multiplied by ${1}. The curve keeps its shape, including the dead-time compensation in the upper points. The intercalibration only measures the home background; the upper points follow the shape of the current curve and were not measured.",
+"Each point keeps its µSv/h and the CPM is multiplied by ${1}. The curve keeps its shape, including the dead-time compensation in the upper points. The cross-calibration only measures the home background; the upper points follow the shape of the current curve and were not measured.",
 [
 "O µSv/h de cada ponto fica igual e o CPM é multiplicado por ",
 ". A forma da curva continua, inclusive a compensação de tempo morto nos pontos de cima. A intercalibração mede só o fundo da casa; os pontos de cima seguem a forma da curva atual, não foram medidos."
@@ -3229,6 +3239,16 @@ const I18N_EN = {
 [
 "fundo: espectro acumulado do aparelho (",
 "), na escala do tempo do objeto"
+]
+],
+[
+"a partir de ",
+"^a partir de ((?:(?! · ).)+?) µSv/h \\(≈ ((?:(?! · ).)+?) CPM com a calibração atual; limite operacional\\)$",
+"from ${1} µSv/h (≈ ${2} CPM with the current calibration; operating limit)",
+[
+"a partir de ",
+" µSv/h (≈ ",
+" CPM com a calibração atual; limite operacional)"
 ]
 ],
 [
@@ -4334,6 +4354,15 @@ const I18N_EN = {
 [
 "Nível de fundo em casa pelo RadiaCode: ",
 " µSv/h."
+]
+],
+[
+"mediana de 30 dias (",
+"^mediana de 30 dias \\(((?:(?! · ).)+?) CPM\\) · média do período ((?:(?! · ).)+?)$",
+"30-day median (${1} CPM) · period average ${2}",
+[
+"mediana de 30 dias (",
+" CPM) · média do período "
 ]
 ],
 [
@@ -5780,6 +5809,16 @@ const I18N_EN = {
 [
 "(repetiu mais ",
 " vezes desde "
+]
+],
+[
+"contagem ",
+"^contagem ((?:(?! · ).)+?) CPM \\(M\\) · n = ((?:(?! · ).)+?) min$",
+"count ${1} CPM (M) · n = ${2} min",
+[
+"contagem ",
+" CPM (M) · n = ",
+" min"
 ]
 ],
 [
