@@ -1,5 +1,31 @@
 # Versões
 
+## 2.21.0
+- **Onde está cada aparelho.** Na tela Agora, um cartão novo diz onde está o
+  GMC-800 e onde está o RadiaCode: em casa, com você ou fora do cálculo. O
+  normal continua sendo o GMC-800 em casa e o RadiaCode com você. Mudar
+  abre uma linha com o que vai acontecer, um nome opcional e Confirmar.
+  - **Dose pessoal:** vem de quem está com você. Com os dois com você, o
+    RadiaCode mede e o GMC-800 preenche as falhas dele. Com os dois em casa,
+    vale a leitura de casa (você também estava em casa); se saiu e esqueceu
+    os dois, marque "eu não estava em casa" e o trecho fica em branco.
+  - **Casa e fundo:** vêm de quem está em casa. Com os dois em casa, o
+    GMC-800 mede e o RadiaCode preenche. Aparelho com você não entra no
+    fundo de casa.
+  - **Fora do cálculo:** para aparelho quebrado, em manutenção ou com
+    leitura não confiável. Dá para valer desde a última leitura boa. Com o
+    GMC-800 sem nenhuma contagem por uns minutos, o app sugere tirar do
+    cálculo para o tubo com defeito não puxar o fundo para baixo.
+  - **Estado ao vivo** de cada aparelho: conectado, desconectado desde
+    HH:MM, saturando ou sem contagens. A frase do topo diz quando falta
+    medição. Minutos saturados contam pelo valor lido, com "≥" na dose.
+  - **Minha dose** mostra quem mediu cada período (o aparelho, "misto" ou
+    "sem medição") e quanto foi de cada um.
+- **Fora de casa virou a lista de trechos.** Linha do tempo dos últimos 7
+  dias por aparelho, com as falhas marcadas (sem dado, saturando, sem
+  contagens), e um formulário para trecho passado com onde estava cada um.
+  Os trechos antigos continuam valendo como "Levei os dois".
+
 ## 2.20.5
 - **Relatório em PDF de novo rápido, e com aviso enquanto gera.** O
   relatório de uma semana levava cerca de 40 s, sem nenhum sinal na tela:

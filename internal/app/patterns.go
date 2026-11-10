@@ -100,7 +100,7 @@ func (a *App) GetPatterns(days int, dev string) (Patterns, error) {
 		if f := a.rcFirst(); !f.IsZero() {
 			out.First = f.UnixMilli()
 		}
-		away, measuring := a.awayChecker(), a.measuringChecker()
+		away, measuring := a.rcAwayChecker(), a.measuringChecker()
 		for _, r := range a.rcRange(from, to) {
 			if !away(r.T) && !measuring(r.T) {
 				vals = append(vals, patVal{r.T, r.USvh})

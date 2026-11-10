@@ -236,7 +236,7 @@ func (a *App) rcStats() *RcStats {
 			sp = append(sp, store.Point{T: p.T, CPM: p.USvh})
 		}
 	}
-	sp = a.homeOnly(sp)
+	sp = a.rcHomeOnly(sp)
 	if len(sp) >= 60 {
 		v := make([]float64, len(sp))
 		for i, p := range sp {
@@ -1029,7 +1029,7 @@ func (a *App) rcHomeBackground() HomeBg {
 		byT[p.T.Unix()] = p
 		sp = append(sp, store.Point{T: p.T, CPM: p.CPS * 60})
 	}
-	sp = a.homeOnly(sp)
+	sp = a.rcHomeOnly(sp)
 	if len(sp) < homeBgMinMins {
 		return HomeBg{Minutes: len(sp), Device: "radiacode",
 			Why: fmt.Sprintf("só %d min do RadiaCode em casa na última hora (precisa de %d)", len(sp), homeBgMinMins)}

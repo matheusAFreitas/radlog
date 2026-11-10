@@ -111,7 +111,7 @@ func (a *App) rcSummary(from, to time.Time, step time.Duration, n int) *RcSum {
 	if len(pts) == 0 {
 		return nil
 	}
-	away := a.awayChecker()
+	away := a.rcAwayChecker()
 	r := &RcSum{Minutes: len(pts)}
 	sums, cnt := make([]float64, n), make([]int, n)
 	for i, p := range pts {

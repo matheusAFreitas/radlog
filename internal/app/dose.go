@@ -68,6 +68,19 @@ type DoseChart struct {
 	// GMC: o contador não informa a dose que soma; a do app sai do CPM de
 	// cada minuto pela calibração que valia nele (CalNote diz qual).
 	CalNote string `json:"calNote,omitempty"`
+
+	// aparelho fora do lugar de sempre no período (roles.go): Mixed = a
+	// curva junta os dois aparelhos (Device = "misto"); SwapMinutes = minutos
+	// do aparelho que normalmente não tem esse papel; GapMinutes = minutos em
+	// que nenhum aparelho tinha o papel (lacuna, não zero)
+	Mixed       bool `json:"mixed,omitempty"`
+	SwapMinutes int  `json:"swapMinutes,omitempty"`
+	GapMinutes  int  `json:"gapMinutes,omitempty"`
+	// minutos (desde o primeiro dado, até agora) em que o aparelho do papel
+	// não mandou leitura: desconectado, desligado ou fora do cálculo
+	NoDataMinutes int `json:"noDataMinutes,omitempty"`
+	// minutos com o GMC saturado na dose: ela é "pelo menos" (≥)
+	SatMinutes int `json:"satMinutes,omitempty"`
 }
 
 // GetDose monta o gráfico do dosímetro. period: "15m", "30m", "1h", "3h",
@@ -170,7 +183,7 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 				sp = append(sp, store.Point{T: p.T, CPM: p.USvh})
 			}
 			var v []float64
-			for _, p := range a.homeOnly(sp) {
+			for _, p := range a.rcHomeOnly(sp) {
 				v = append(v, p.CPM)
 			}
 			return v
