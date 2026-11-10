@@ -265,6 +265,7 @@ const I18N_EN = {
 "Geiger saturado: acima do que o aparelho mede; o real pode ser maior": "Geiger saturated: above what the device measures; the real value may be higher",
 "Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior": "Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher",
 "Geometria / anotação": "Geometry / note",
+"Gerando…": "Generating…",
 "Gerando o relatório…": "Generating the report…",
 "Gerar de novo": "Generate again",
 "Gerar o relatório da medição de objeto sozinho, no fim da medição": "Generate the object measurement report automatically at the end of the measurement",
@@ -695,6 +696,7 @@ const I18N_EN = {
 "interpolação linear entre as leituras ordenadas": "linear interpolation between the sorted readings",
 "já estou baixando o histórico": "I'm already downloading the history",
 "já estou mexendo na configuração do contador": "I'm already working on the counter configuration",
+"já estou gerando um relatório; espere ele abrir": "I'm already generating a report; wait for it to open",
 "leitura a cada segundo": "reading every second",
 "leitura ao vivo": "live reading",
 "leitura ao vivo sem resposta em 6 s (": "live reading with no answer in 6 s (",
@@ -900,6 +902,7 @@ const I18N_EN = {
 "evento": "event",
 "começou": "started",
 "terminou": "finished",
+"voltou a responder": "responding again",
 "Atenção agora": "Attention now",
 "Alarme agora": "Alarm now",
 "Perigo agora": "Danger now",
@@ -1906,7 +1909,124 @@ const I18N_EN = {
 "somada pelo aparelho": "summed by the device",
 "normal ainda não calculado": "normal not calculated yet",
 "pelo RadiaCode em casa": "by the RadiaCode at home",
-"Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv)."
+"Nenhum minuto fora de casa no período (µSv).": "No minutes away from home in the period (µSv).",
+"fundo de casa de cada aparelho, nos minutos em que ele mediu": "home background of each device, in the minutes it measured",
+"local inválido": "invalid place",
+"GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar": "GMC-800 at home and RadiaCode with you is the usual: no need to mark it",
+"Levei os dois": "Took both",
+"Levei o GMC-800, deixei o RadiaCode": "Took the GMC-800, left the RadiaCode",
+"Deixei os dois em casa": "Left both at home",
+"esse trecho cruza com outro já marcado": "this stretch overlaps one already marked",
+"GMC-800 em casa, RadiaCode com você": "GMC-800 at home, RadiaCode with you",
+"GMC-800 em casa, RadiaCode em casa": "GMC-800 at home, RadiaCode at home",
+"GMC-800 com você, RadiaCode com você": "GMC-800 with you, RadiaCode with you",
+"GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RadiaCode at home",
+"Onde está cada aparelho": "Where each device is",
+"o normal: GMC-800 em casa, RadiaCode com você": "usual: GMC-800 at home, RadiaCode with you",
+"comigo": "with me",
+"opcional": "optional",
+"ex.: viagem, trilha": "e.g.: trip, hike",
+"ex.: viagem": "e.g.: trip",
+"no lugar de sempre": "in its usual place",
+"fora do lugar de sempre": "out of its usual place",
+"Voltar ao normal": "Back to normal",
+"Renomear": "Rename",
+"Apagar…": "Delete…",
+"Adicionar trecho": "Add stretch",
+"Adicionar trecho passado": "Add past stretch",
+"Trecho salvo": "Stretch saved",
+"Trecho adicionado": "Stretch added",
+"Últimos 7 dias": "Last 7 days",
+"valendo agora": "in effect now",
+"misto": "mixed",
+"sem medição": "not measured",
+"Casa pelos dois": "Home by both",
+"O GMC-800 mede a casa e o RadiaCode preenche se ele falhar.": "The GMC-800 measures the home and the RadiaCode fills in if it fails.",
+"Casa sem medição": "Home not measured",
+"Fundo e dose da casa ficam em branco até um aparelho voltar.": "Home background and dose stay blank until a device is back.",
+"Casa pelo GMC-800": "Home by the GMC-800",
+"Casa pelo RadiaCode": "Home by the RadiaCode",
+"Como sempre.": "As usual.",
+"Ele entra no fundo da casa enquanto estiver lá.": "It counts toward the home background while it's there.",
+"Sem dosímetro com você": "No dosimeter with you",
+"Sua dose fica em branco neste trecho.": "Your dose stays blank in this stretch.",
+"Sua dose pelo RadiaCode": "Your dose by the RadiaCode",
+"Sua dose pelo GMC-800": "Your dose by the GMC-800",
+"O GMC-800 vai junto e preenche se o RadiaCode falhar.": "The GMC-800 goes along and fills in if the RadiaCode fails.",
+"Ele sai do fundo da casa enquanto estiver com você.": "It leaves the home background while it's with you.",
+"A casa fica sem medição; sua dose pelo RadiaCode.": "The home goes unmeasured; your dose by the RadiaCode.",
+"A casa passa a ser medida pelo RadiaCode; sua dose pelo GMC-800.": "The home is now measured by the RadiaCode; your dose by the GMC-800.",
+"A casa é medida pelos dois; sua dose fica sem dosímetro.": "The home is measured by both; your dose has no dosimeter.",
+", a partir de agora (": ", from now on (",
+" a partir de agora (": " from now on (",
+"): GMC-800 em casa, RadiaCode com você.": "): GMC-800 at home, RadiaCode with you.",
+"GMC-800 comigo": "GMC-800 with me",
+"RadiaCode comigo": "RadiaCode with me",
+"GMC-800 em casa": "GMC-800 at home",
+"RadiaCode em casa": "RadiaCode at home",
+"Onde estava o GMC-800": "Where the GMC-800 was",
+"Onde estava o RadiaCode": "Where the RadiaCode was",
+"Onde está o GMC-800": "Where the GMC-800 is",
+"Onde está o RadiaCode": "Where the RadiaCode is",
+"Relatório em PDF só desse trecho": "PDF report of this stretch only",
+"Apagar este trecho? Os minutos voltam a contar como normais na dose e no fundo.": "Delete this stretch? Its minutes count as usual again in the dose and background.",
+"Nenhum trecho. Quando levar ou deixar um aparelho fora do lugar de sempre, marque na tela Agora ou adicione aqui.": "No stretches. When you take or leave a device out of its usual place, mark it on the Now screen or add it here.",
+"Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.": "Stretches when a device wasn't in its usual place (GMC-800 at home, RadiaCode with you). A device with you leaves the home background; its readings still count in the dose. Mark it on the Now screen or add a past stretch here.",
+"Os dois fora do cálculo": "Both out of the calculation",
+"GMC-800 fora do cálculo": "GMC-800 out of the calculation",
+"RadiaCode fora do cálculo": "RadiaCode out of the calculation",
+"fora do cálculo": "out of the calculation",
+"esse começo cai dentro de outro trecho já marcado": "that start falls inside another stretch already marked",
+"os dois em casa": "both at home",
+"os dois com você": "both with you",
+"GMC-800 e RadiaCode fora do cálculo": "GMC-800 and RadiaCode out of the calculation",
+"O tubo pode estar com defeito. Se estiver, tire do cálculo para não puxar o fundo para baixo.": "The tube may be faulty. If it is, take it out of the calculation so it doesn't drag the background down.",
+"Tirar do cálculo…": "Take out of the calculation…",
+"saturando": "saturating",
+"quebrado": "broken",
+"em manutenção": "under maintenance",
+"desligado de propósito": "turned off on purpose",
+"leitura não confiável": "unreliable reading",
+"valendo desde": "in effect from",
+"Valendo desde": "In effect from",
+"a última leitura boa": "the last good reading",
+"escolha acima ou escreva": "pick above or type",
+"ex.: quebrado": "e.g.: broken",
+"Nome ou motivo": "Name or reason",
+"Casa sem dado": "Home without data",
+"Casa sem dado.": "Home without data.",
+"Sua dose sem dado": "Your dose without data",
+"Sua dose sem dado.": "Your dose without data.",
+"Nenhum aparelho em casa. Fundo e dose da casa ficam em branco.": "No device at home. Home background and dose stay blank.",
+"O GMC-800 está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The GMC-800 is at home but isn't sending readings. Those minutes stay blank.",
+"O RadiaCode está em casa, mas não manda leitura. Esses minutos ficam em branco.": "The RadiaCode is at home but isn't sending readings. Those minutes stay blank.",
+"O GMC-800 está com você, mas não manda leitura.": "The GMC-800 is with you but isn't sending readings.",
+"O RadiaCode está com você, mas não manda leitura.": "The RadiaCode is with you but isn't sending readings.",
+"Desconectado, mas ele continua somando a dose sozinho. Só a curva minuto a minuto fica faltando até reconectar.": "Disconnected, but it keeps adding up the dose on its own. Only the minute-by-minute curve is missing until it reconnects.",
+"Ele assume enquanto o GMC-800 não mede.": "It takes over while the GMC-800 isn't measuring.",
+"Ele assume enquanto o RadiaCode não mede.": "It takes over while the RadiaCode isn't measuring.",
+"Saturando: conta como pelo menos o valor lido (≥).": "Saturating: counts as at least the value read (≥).",
+"Casa sem medição.": "Home not measured.",
+"Sem dosímetro com você.": "No dosimeter with you.",
+"Casa pelos dois.": "Home by both.",
+"Casa pelo GMC-800.": "Home by the GMC-800.",
+"Casa pelo RadiaCode.": "Home by the RadiaCode.",
+"Sua dose pelo RadiaCode.": "Your dose by the RadiaCode.",
+"Sua dose pelo GMC-800.": "Your dose by the GMC-800.",
+"Falta medição agora.": "Measurement missing now.",
+"Medindo, com um aparelho fora do normal.": "Measuring, with a device out of the usual.",
+"saturando ou sem contagens": "saturating or no counts",
+"sem contagens": "no counts",
+", a partir de": ", from",
+"sem leitura": "no reading",
+"Sua dose pela leitura de casa": "Your dose from the home reading",
+"Sua dose pela leitura de casa.": "Your dose from the home reading.",
+"Os dois ficaram em casa, então você também estava. Se saiu e esqueceu de levar, marque \"eu não estava em casa\" no trecho e ele fica em branco.": "Both stayed home, so you were home too. If you went out and forgot to take them, mark \"I wasn't home\" on the stretch and it stays blank.",
+"Você marcou que não estava em casa: sua dose fica em branco neste trecho.": "You marked that you weren't home: your dose stays blank in this stretch.",
+"eu não estava em casa": "I wasn't home",
+"eu não estava em casa (esqueci de levar os dois)": "I wasn't home (forgot to take both)",
+"Eu não estava em casa": "I wasn't home",
+"Eu estava em casa": "I was home"
 },
 "patterns": [
 [
@@ -2577,6 +2697,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Dose pessoal pela leitura de casa",
+"^Dose pessoal pela leitura de casa((?:(?! · ).)+?) \\(os dois ficaram em casa, e você também\\)\\.$",
+"Personal dose from the home reading${1} (both stayed home, and so did you).",
+[
+"Dose pessoal pela leitura de casa",
+" (os dois ficaram em casa, e você também)."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): é real, não variação da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): it's real, not count variation.",
@@ -3075,6 +3204,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Dose pessoal, pelo aparelho que está com você: o GMC-800",
+"^Dose pessoal, pelo aparelho que está com você: o GMC\\-800((?:(?! · ).)+?)\\.$",
+"Personal dose, from the device that is with you: the GMC-800${1}.",
+[
+"Dose pessoal, pelo aparelho que está com você: o GMC-800"
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -3108,6 +3245,14 @@ const I18N_EN = {
 [
 "Razão pessoal ÷ casa: ",
 " (RadiaCode ÷ GMC-800 em µSv/h)."
+]
+],
+[
+"Dose da casa, pelo aparelho que fica parado: o RadiaCode",
+"^Dose da casa, pelo aparelho que fica parado: o RadiaCode((?:(?! · ).)+?)\\.$",
+"Home dose, from the device that stays put: the RadiaCode${1}.",
+[
+"Dose da casa, pelo aparelho que fica parado: o RadiaCode"
 ]
 ],
 [
@@ -3209,6 +3354,15 @@ const I18N_EN = {
 " CPM sobre o fundo · ",
 "× o fundo · ≈ ",
 " µSv/h no detector"
+]
+],
+[
+"Dose pessoal: nenhum aparelho está com você agora (",
+"^Dose pessoal: nenhum aparelho está com você agora \\(((?:(?! · ).)+?)\\)\\.$",
+"Personal dose: no device is with you now (${1}).",
+[
+"Dose pessoal: nenhum aparelho está com você agora (",
+")."
 ]
 ],
 [
@@ -3493,6 +3647,15 @@ const I18N_EN = {
 "% do limite · ",
 " acima do fundo, de ",
 " permitidos ("
+]
+],
+[
+"Dose da casa: nenhum aparelho em casa agora (",
+"^Dose da casa: nenhum aparelho em casa agora \\(((?:(?! · ).)+?)\\)\\.$",
+"Home dose: no device at home now (${1}).",
+[
+"Dose da casa: nenhum aparelho em casa agora (",
+")."
 ]
 ],
 [
@@ -3907,6 +4070,14 @@ const I18N_EN = {
 "${1} µSv/h per CPM at background (entered by hand)",
 [
 " µSv/h por CPM no fundo (informado à mão)"
+]
+],
+[
+"GMC-800 e RadiaCode fora do cálculo desde ",
+"^GMC\\-800 e RadiaCode fora do cálculo desde ((?:(?! · ).)+?)$",
+"GMC-800 and RadiaCode out of the calculation since ${1}",
+[
+"GMC-800 e RadiaCode fora do cálculo desde "
 ]
 ],
 [
@@ -4492,6 +4663,14 @@ const I18N_EN = {
 ]
 ],
 [
+"O GMC-800 está sem contagens há ",
+"^O GMC\\-800 está sem contagens há ((?:(?! · ).)+?)\\.$",
+"The GMC-800 has had no counts for ${1}.",
+[
+"O GMC-800 está sem contagens há "
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -4673,6 +4852,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Com você em ",
+"^Com você em ((?:(?! · ).)+?) µSv/h pelo RadiaCode$",
+"With you at ${1} µSv/h by the RadiaCode",
+[
+"Com você em ",
+" µSv/h pelo RadiaCode"
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -4780,6 +4968,23 @@ const I18N_EN = {
 ]
 ],
 [
+"Com você em ",
+"^Com você em ((?:(?! · ).)+?) µSv/h pelo GMC\\-800$",
+"With you at ${1} µSv/h by the GMC-800",
+[
+"Com você em ",
+" µSv/h pelo GMC-800"
+]
+],
+[
+"RadiaCode fora do cálculo desde ",
+"^RadiaCode fora do cálculo desde ((?:(?! · ).)+?)$",
+"RadiaCode out of the calculation since ${1}",
+[
+"RadiaCode fora do cálculo desde "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -4836,6 +5041,14 @@ const I18N_EN = {
 "máximo: ",
 " cps às ",
 "× o normal)"
+]
+],
+[
+"GMC-800 fora do cálculo desde ",
+"^GMC\\-800 fora do cálculo desde ((?:(?! · ).)+?)$",
+"GMC-800 out of the calculation since ${1}",
+[
+"GMC-800 fora do cálculo desde "
 ]
 ],
 [
@@ -4916,6 +5129,15 @@ const I18N_EN = {
 "${1} µSv since it was reset (${2})",
 [
 " µSv desde que foi zerado ("
+]
+],
+[
+"(repetiu mais ",
+"^\\(repetiu mais ((?:(?! · ).)+?) vezes desde ((?:(?! · ).)+?)\\)$",
+"(repeated ${1} more times since ${2})",
+[
+"(repetiu mais ",
+" vezes desde "
 ]
 ],
 [
@@ -5070,6 +5292,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Casa em ",
+"^Casa em ((?:(?! · ).)+?) µSv/h pelo RadiaCode$",
+"Home at ${1} µSv/h by the RadiaCode",
+[
+"Casa em ",
+" µSv/h pelo RadiaCode"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -5153,6 +5384,15 @@ const I18N_EN = {
 [
 "RadiaCode ",
 "% abaixo do normal"
+]
+],
+[
+"Casa em ",
+"^Casa em ((?:(?! · ).)+?) µSv/h pelo GMC\\-800$",
+"Home at ${1} µSv/h by the GMC-800",
+[
+"Casa em ",
+" µSv/h pelo GMC-800"
 ]
 ],
 [
@@ -5644,18 +5884,26 @@ const I18N_EN = {
 ],
 [
 "",
-"^((?:(?! · ).)+?) µSv desde que foi zerado$",
-"${1} µSv since it was reset",
-[
-" µSv desde que foi zerado"
-]
-],
-[
-"",
 "^((?:(?! · ).)+?) \\(((?:(?! · ).)+?)% do período gravado\\)$",
 "${1} (${2}% of the period recorded)",
 [
 "% do período gravado)"
+]
+],
+[
+"a última leitura boa (",
+"^a última leitura boa \\(((?:(?! · ).)+?)\\)$",
+"the last good reading (${1})",
+[
+"a última leitura boa ("
+]
+],
+[
+"Curva incompleta desde ",
+"^Curva incompleta desde ((?:(?! · ).)+?)\\.$",
+"Curve incomplete since ${1}.",
+[
+"Curva incompleta desde "
 ]
 ],
 [
@@ -5887,6 +6135,14 @@ const I18N_EN = {
 ]
 ],
 [
+"os dois com você desde ",
+"^os dois com você desde ((?:(?! · ).)+?)$",
+"both with you since ${1}",
+[
+"os dois com você desde "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -6049,6 +6305,22 @@ const I18N_EN = {
 [
 "Casa ",
 "% acima do normal"
+]
+],
+[
+"os dois em casa desde ",
+"^os dois em casa desde ((?:(?! · ).)+?)$",
+"both at home since ${1}",
+[
+"os dois em casa desde "
+]
+],
+[
+"fora do cálculo desde ",
+"^fora do cálculo desde ((?:(?! · ).)+?)$",
+"out of the calculation since ${1}",
+[
+"fora do cálculo desde "
 ]
 ],
 [
@@ -6278,6 +6550,23 @@ const I18N_EN = {
 "${1} σ above your background",
 [
 " σ acima do seu fundo"
+]
+],
+[
+"fora do normal desde ",
+"^fora do normal desde ((?:(?! · ).)+?)$",
+"out of the usual since ${1}",
+[
+"fora do normal desde "
+]
+],
+[
+"GMC-800 ",
+"^GMC\\-800 ((?:(?! · ).)+?), RadiaCode ((?:(?! · ).)+?)$",
+"GMC-800 ${1}, RadiaCode ${2}",
+[
+"GMC-800 ",
+", RadiaCode "
 ]
 ],
 [
@@ -6647,6 +6936,23 @@ const I18N_EN = {
 ]
 ],
 [
+"desde ",
+"^desde ((?:(?! · ).)+?) · ((?:(?! · ).)+?) até agora$",
+"since ${1} · ${2} so far",
+[
+"desde ",
+" até agora"
+]
+],
+[
+"desconectado desde ",
+"^desconectado desde ((?:(?! · ).)+?)$",
+"disconnected since ${1}",
+[
+"desconectado desde "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -6851,6 +7157,14 @@ const I18N_EN = {
 ]
 ],
 [
+"fora do cálculo · ",
+"^fora do cálculo · ((?:(?! · ).)+?)$",
+"out of the calculation · ${1}",
+[
+"fora do cálculo · "
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -7050,6 +7364,14 @@ const I18N_EN = {
 ]
 ],
 [
+"sem contagens há ",
+"^sem contagens há ((?:(?! · ).)+?)$",
+"no counts for ${1}",
+[
+"sem contagens há "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -7218,6 +7540,14 @@ const I18N_EN = {
 "last reading: ${1}",
 [
 "última leitura: "
+]
+],
+[
+"sem contagens · ",
+"^sem contagens · ((?:(?! · ).)+?)$",
+"no counts · ${1}",
+[
+"sem contagens · "
 ]
 ],
 [
@@ -7443,6 +7773,22 @@ const I18N_EN = {
 ]
 ],
 [
+"com você desde ",
+"^com você desde ((?:(?! · ).)+?)$",
+"with you since ${1}",
+[
+"com você desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) pelo RadiaCode$",
+"${1} by the RadiaCode",
+[
+" pelo RadiaCode"
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -7609,6 +7955,22 @@ const I18N_EN = {
 "away from home: ${1}",
 [
 "fora de casa: "
+]
+],
+[
+"em casa desde ",
+"^em casa desde ((?:(?! · ).)+?)$",
+"at home since ${1}",
+[
+"em casa desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) pelo GMC\\-800$",
+"${1} by the GMC-800",
+[
+" pelo GMC-800"
 ]
 ],
 [
@@ -8018,6 +8380,22 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) sem medição$",
+"${1} not measured",
+[
+" sem medição"
+]
+],
+[
+"saturando · ",
+"^saturando · ((?:(?! · ).)+?)$",
+"saturating · ${1}",
+[
+"saturando · "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -8170,6 +8548,14 @@ const I18N_EN = {
 "slope ${1}",
 [
 "inclinação "
+]
+],
+[
+"sem dado · ",
+"^sem dado · ((?:(?! · ).)+?)$",
+"no data · ${1}",
+[
+"sem dado · "
 ]
 ],
 [
@@ -8630,6 +9016,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) sem dado$",
+"${1} no data",
+[
+" sem dado"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
 [
@@ -8832,14 +9226,6 @@ const I18N_EN = {
 ]
 ],
 [
-"",
-"^((?:(?! · ).)+?)% medido$",
-"${1}% measured",
-[
-"% medido"
-]
-],
-[
 "≈ ",
 "^≈ ((?:(?! · ).)+?) µSv/h$",
 "≈ ${1} µSv/h",
@@ -8990,14 +9376,6 @@ const I18N_EN = {
 "${1} attachments",
 [
 " anexos"
-]
-],
-[
-"e mais ",
-"^e mais ((?:(?! · ).)+?)$",
-"and ${1} more",
-[
-"e mais "
 ]
 ],
 [

@@ -141,3 +141,39 @@ func TestDoseFromDevice(t *testing.T) {
 		t.Fatalf("minutos %d", c.MeasuredMinutes)
 	}
 }
+
+// Trocar o fator hoje (sem recálculo retroativo) não pode fazer a dose do
+// período passar do teto: o fundo usa, minuto a minuto, a mesma calibração
+// que a dose. Com o recálculo ligado, os dois passam para o fator novo.
+func TestDoseBackgroundSameCalibration(t *testing.T) {
+	a := newTestApp(t)
+	a.loadCalHist()
+	now := time.Now().Truncate(time.Minute)
+	var pts []store.Point
+	for i := 3 * 24 * 60; i >= 1; i-- {
+		pts = append(pts, store.Point{T: now.Add(-time.Duration(i) * time.Minute), CPM: 27, Src: store.SrcLive})
+	}
+	if _, err := a.store.Import(pts); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.SetGMCFactor(0.00564, "intercalibração"); err != nil {
+		t.Fatal(err)
+	}
+	from, to := now.Add(-3*24*time.Hour).UnixMilli(), now.UnixMilli()
+	c, err := a.GetDoseRange(from, to, "publico")
+	if err != nil {
+		t.Fatal(err)
+	}
+	avg := c.Total / float64(c.MeasuredMinutes) * 60
+	if math.Abs(c.BackgroundRate-avg) > 1e-6 || math.Abs(c.Excess) > 1e-3 {
+		t.Fatalf("fundo %v µSv/h × dose média %v µSv/h, excesso %v", c.BackgroundRate, avg, c.Excess)
+	}
+	h := a.GetCalHistory()
+	if err := a.SetCalRetro(h.Versions[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	c, _ = a.GetDoseRange(from, to, "publico")
+	if math.Abs(c.BackgroundRate-27*0.00564) > 1e-6 || math.Abs(c.Excess) > 1e-3 {
+		t.Fatalf("com recálculo: fundo %v, excesso %v", c.BackgroundRate, c.Excess)
+	}
+}

@@ -132,6 +132,7 @@ type rcState struct {
 	searchRefAt time.Time
 	bleNow      atomic.Bool // endereço Bluetooth novo: tentar já
 	doseLast    rcDosePt    // último total gravado (protegido por fileM)
+	texts       rcTexts     // mensagens do aparelho já passadas para o log
 }
 
 // rcMeasAcc junta as amostras cruas (~0,5 s) em segundos inteiros para a
@@ -235,7 +236,7 @@ func (a *App) rcStats() *RcStats {
 			sp = append(sp, store.Point{T: p.T, CPM: p.USvh})
 		}
 	}
-	sp = a.homeOnly(sp)
+	sp = a.rcHomeOnly(sp)
 	if len(sp) >= 60 {
 		v := make([]float64, len(sp))
 		for i, p := range sp {
@@ -471,8 +472,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	a.logEvent(fmt.Sprintf("RadiaCode conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
 	a.rcRawSnapshot(dev)
-	texts := map[string]bool{}
-	a.rcTextLog(dev, texts)
+	a.rcTextLog(dev)
 	fails := 0
 	tick := time.NewTicker(rcPollEvery)
 	defer tick.Stop()
@@ -502,7 +502,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rcActTick(dev)
 		for _, r := range recs {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 17 { // mensagem de texto nova
-				a.rcTextLog(dev, texts)
+				a.rcTextLog(dev)
 				break
 			}
 		}
@@ -1029,7 +1029,7 @@ func (a *App) rcHomeBackground() HomeBg {
 		byT[p.T.Unix()] = p
 		sp = append(sp, store.Point{T: p.T, CPM: p.CPS * 60})
 	}
-	sp = a.homeOnly(sp)
+	sp = a.rcHomeOnly(sp)
 	if len(sp) < homeBgMinMins {
 		return HomeBg{Minutes: len(sp), Device: "radiacode",
 			Why: fmt.Sprintf("só %d min do RadiaCode em casa na última hora (precisa de %d)", len(sp), homeBgMinMins)}

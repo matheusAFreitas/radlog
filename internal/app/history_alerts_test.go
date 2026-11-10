@@ -383,7 +383,7 @@ func TestAwayPeriods(t *testing.T) {
 		t.Fatalf("fundo sem marcar: %v", bg)
 	}
 	p, err := a.SavePeriod(Period{From: now.Add(-60 * time.Minute).UnixMilli(), To: now.UnixMilli(), Name: "  "})
-	if err != nil || p.ID != 1 || p.Name != "Fora de casa" {
+	if err != nil || p.ID != 1 || p.Name != "Levei os dois" {
 		t.Fatalf("salvar: %+v %v", p, err)
 	}
 	// com 25% fora a 80 CPM, a mediana já era 20; o teste forte é o dia e o mapa
@@ -409,7 +409,7 @@ func TestAwayPeriods(t *testing.T) {
 	b := NewApp()
 	b.dataDir = dir
 	b.loadPeriods()
-	if l := b.GetPeriods(); len(l) != 1 || l[0].Name != "Fora de casa" {
+	if l := b.GetPeriods(); len(l) != 1 || l[0].Name != "Levei os dois" {
 		t.Fatalf("disco: %+v", l)
 	}
 	p.Name = "Passeio"

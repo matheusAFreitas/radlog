@@ -356,24 +356,78 @@ func (a *App) SetRcRaw(on bool) RcState {
 	return a.GetRadiacode()
 }
 
-// rcTextLog passa as mensagens internas do aparelho para o log.txt (só as
-// que ainda não passaram nesta conexão).
-func (a *App) rcTextLog(dev *radiacode.Device, seen map[string]bool) {
+// rcTextLog passa as mensagens internas do aparelho para o log.txt.
+func (a *App) rcTextLog(dev *radiacode.Device) {
 	lines, err := dev.TextMessages()
 	if err != nil {
 		return
 	}
-	now := time.Now()
+	for _, msg := range a.rc.texts.take(lines, time.Now()) {
+		a.logf("%s", msg)
+	}
+}
+
+// rcTextRepeat: a mesma mensagem do aparelho entra no log no máximo uma vez
+// nesse intervalo; as repetições viram uma contagem na próxima vez que ela
+// entra. O RadiaCode 102 (firmware 4.15) solta "Error: S1/S2 Data frame
+// corrupted!" a cada ~100 s: eram ~5 mil linhas por dia, o log.txt passava
+// de 2 MB em horas e o log-anterior.txt perdia o resto.
+const rcTextRepeat = time.Hour
+
+// rcTexts lembra as mensagens já vistas entre conexões (ao reconectar, o
+// aparelho devolve as antigas de novo) e junta as repetidas.
+type rcTexts struct {
+	mu      sync.Mutex
+	seen    map[string][]time.Time // texto → quando cada uma aconteceu
+	last    map[string]time.Time   // texto → quando entrou no log pela última vez
+	skipped map[string]int         // texto → repetições desde então
+}
+
+func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
+	t.mu.Lock()
+	defer t.mu.Unlock()
+	if t.seen == nil {
+		t.seen, t.last, t.skipped = map[string][]time.Time{}, map[string]time.Time{}, map[string]int{}
+	}
+	for k, ws := range t.seen { // não cresce sem fim
+		keep := ws[:0]
+		for _, w := range ws {
+			if now.Sub(w) <= 48*time.Hour {
+				keep = append(keep, w)
+			}
+		}
+		if len(keep) == 0 {
+			delete(t.seen, k)
+		} else {
+			t.seen[k] = keep
+		}
+	}
+	var out []string
 	for _, l := range lines {
 		when := now.Add(-time.Duration(l.AgoSec) * time.Second)
-		// a mesma mensagem lida de novo vem com outro "segundos atrás":
-		// a chave usa o minuto em que aconteceu
-		key := when.Truncate(time.Minute).Format("15:04") + "|" + l.Text
-		alt := when.Add(-30*time.Second).Truncate(time.Minute).Format("15:04") + "|" + l.Text
-		if seen[key] || seen[alt] {
+		// a mesma mensagem lida de novo vem com outro "segundos atrás"
+		// (arredondamento e a hora da leitura): até 5 s de diferença é ela
+		dup := false
+		for _, w := range t.seen[l.Text] {
+			if d := when.Sub(w); d > -5*time.Second && d < 5*time.Second {
+				dup = true
+				break
+			}
+		}
+		if dup {
 			continue
 		}
-		seen[key] = true
-		a.logf("RadiaCode (mensagem do aparelho, %s): %s", when.Format("15:04:05"), l.Text)
+		t.seen[l.Text] = append(t.seen[l.Text], when)
+		if prev, ok := t.last[l.Text]; ok && when.Sub(prev) < rcTextRepeat {
+			t.skipped[l.Text]++
+			continue
+		}
+		msg := fmt.Sprintf("RadiaCode (mensagem do aparelho, %s): %s", when.Format("15:04:05"), l.Text)
+		if n := t.skipped[l.Text]; n > 0 {
+			msg += fmt.Sprintf(" (repetiu mais %d vezes desde %s)", n, t.last[l.Text].Format("15:04"))
+		}
+		t.last[l.Text], t.skipped[l.Text] = when, 0
+		out = append(out, msg)
 	}
+	return out
 }

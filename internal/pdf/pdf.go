@@ -97,12 +97,16 @@ func splitSym(s string) []pdfRun {
 
 // winAnsi converte UTF-8 para os bytes da WinAnsiEncoding (o que não existe
 // nela vira um equivalente simples).
+var (
+	winAnsiRepl    = map[rune]string{'σ': "s", '≈': "~", '→': "->", '−': "-", 'τ': "t", '×': "x", '≥': ">=", '≤': "<="}
+	winAnsiSpecial = map[rune]byte{'€': 0x80, '‚': 0x82, '„': 0x84, '…': 0x85, '–': 0x96, '—': 0x97, '‘': 0x91, '’': 0x92, '“': 0x93, '”': 0x94, '•': 0x95}
+)
+
 func winAnsi(s string) []byte {
-	repl := map[rune]string{'σ': "s", '≈': "~", '→': "->", '−': "-", 'τ': "t", '×': "x", '…': "...", '≥': ">=", '≤': "<="}
-	special := map[rune]byte{'€': 0x80, '‚': 0x82, '„': 0x84, '…': 0x85, '–': 0x96, '—': 0x97, '‘': 0x91, '’': 0x92, '“': 0x93, '”': 0x94, '•': 0x95}
-	var out []byte
+	repl, special := winAnsiRepl, winAnsiSpecial
+	out := make([]byte, 0, len(s))
 	for _, r := range s {
-		if t, ok := repl[r]; ok && r != '…' {
+		if t, ok := repl[r]; ok {
 			out = append(out, t...)
 			continue
 		}
@@ -141,18 +145,18 @@ var helvW = [...]int{278, 278, 355, 556, 556, 889, 667, 191, 333, 333, 389, 584,
 	333, 556, 556, 500, 556, 556, 278, 556, 556, 222, 222, 500, 222, 833, 556, 556,
 	556, 556, 333, 500, 278, 556, 500, 722, 500, 500, 500, 334, 260, 334, 584}
 
-// letra base dos acentuados (para medir a largura)
-func baseLetter(c byte) byte {
+// letra base dos acentuados (para medir a largura); tabela montada uma vez
+// (antes era refeita a cada caractere medido)
+var baseLetters = func() (t [256]byte) {
 	const from = "ÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜàáâãäçèéêëìíîïñòóôõöùúûü"
 	const to = "AAAAACEEEEIIIINOOOOOUUUUaaaaaceeeeiiiinooooouuuu"
-	fr := []rune(from)
-	for i, r := range fr {
-		if byte(r) == c {
-			return to[i]
-		}
+	for i, r := range []rune(from) {
+		t[byte(r)] = to[i]
 	}
-	return 0
-}
+	return t
+}()
+
+func baseLetter(c byte) byte { return baseLetters[c] }
 
 // ---------- tradução ----------
 //
@@ -202,7 +206,11 @@ func MarkTranslated(s string) {
 }
 
 func TextWidth(s string, f Font, size float64) float64 {
-	s = Tr(s)
+	return rawWidth(Tr(s), f, size)
+}
+
+// rawWidth mede o texto como está (sem passar pelo tradutor).
+func rawWidth(s string, f Font, size float64) float64 {
 	total := 0.0
 	for _, run := range splitSym(s) {
 		if run.sym {
@@ -280,18 +288,29 @@ func (d *Doc) TextRight(xr, y float64, f Font, size float64, c RGB, s string) {
 	d.Text(xr-TextWidth(s, f, size), y, f, size, c, s)
 }
 
-// Fit corta o texto com "..." para caber na largura.
+// Fit corta o texto com "..." para caber na largura. A largura só cresce
+// com o tamanho do prefixo, então a busca é binária: antes tirava uma letra
+// por vez e media o texto inteiro a cada uma (quadrático: um texto longo na
+// tabela de configurações levava 40 s para caber).
 func Fit(s string, f Font, size, w float64) string {
 	s = Tr(s)
-	if TextWidth(s, f, size) <= w {
+	if rawWidth(s, f, size) <= w {
 		return s
 	}
 	r := []rune(s)
-	for len(r) > 1 && TextWidth(string(r)+"...", f, size) > w {
-		r = r[:len(r)-1]
-		MarkTranslated(string(r) + "...")
+	lo, hi := 1, len(r) // maior n em [1, len) com r[:n]+"..." cabendo; 1 se nada cabe
+	if hi < 1 {
+		hi = 1
 	}
-	out := string(r) + "..."
+	for lo < hi {
+		mid := (lo + hi + 1) / 2
+		if mid < len(r) && rawWidth(string(r[:mid])+"...", f, size) <= w {
+			lo = mid
+		} else {
+			hi = mid - 1
+		}
+	}
+	out := string(r[:lo]) + "..."
 	MarkTranslated(out)
 	return out
 }

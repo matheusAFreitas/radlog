@@ -264,6 +264,7 @@ Geiger saturado: a leitura caiu de repente depois de um valor extremo; o tubo po
 Geiger saturado: acima do que o aparelho mede; o real pode ser maior	Geiger saturated: above what the device measures; the real value may be higher
 Geiger saturado: caiu de repente depois de um valor extremo; o real pode ser bem maior	Geiger saturated: suddenly dropped after an extreme value; the real value may be much higher
 Geometria / anotação	Geometry / note
+Gerando…	Generating…
 Gerando o relatório…	Generating the report…
 Gerar de novo	Generate again
 Gerar o relatório da medição de objeto sozinho, no fim da medição	Generate the object measurement report automatically at the end of the measurement
@@ -695,6 +696,7 @@ interferência	interference
 interpolação linear entre as leituras ordenadas	linear interpolation between the sorted readings
 já estou baixando o histórico	I'm already downloading the history
 já estou mexendo na configuração do contador	I'm already working on the counter configuration
+já estou gerando um relatório; espere ele abrir	I'm already generating a report; wait for it to open
 leitura a cada segundo	reading every second
 leitura ao vivo	live reading
 leitura ao vivo sem resposta em 6 s (	live reading with no answer in 6 s (
@@ -1206,6 +1208,7 @@ porta fechada ({0})	port closed ({0})
 {0} não encontrada	{0} not found
 falhou: {0}	failed: {0}
 lenta, {0} ms	slow, {0} ms
+voltou a responder	responding again
 voltou a responder depois de {0} erro(s)	responding again after {0} error(s)
 {0} sem leitura no período)	{0} without readings in the period)
 seu normal: {0} a {1} CPM	your normal: {0} to {1} CPM
@@ -2620,7 +2623,6 @@ Mudanças não salvas	Unsaved changes
 Descartar	Discard
 1 mudança não salva:	1 unsaved change:
 {0} mudanças não salvas:	{0} unsaved changes:
-e mais {0}	and {0} more
 1 seção	1 section
 {0} seções	{0} sections
 nada encontrado	nothing found
@@ -2670,17 +2672,14 @@ RadiaCode {0} · GMC-800 {1} · teto {2}	RadiaCode {0} · GMC-800 {1} · ceiling
 teto do {0} (fundo + limite)	{0} ceiling (background + limit)
 teto do {0}	{0} ceiling
 Mostrar ou esconder no gráfico	Show or hide on the chart
-Período da dose	Dose period
 no gráfico · clique para esconder	on the chart · click to hide
 escondido do gráfico · clique para mostrar	hidden from the chart · click to show
 esperando o próximo total do aparelho	waiting for the next total from the device
 {0}% do limite · {1} acima do fundo, de {2} permitidos ({3})	{0}% of the limit · {1} above background, of {2} allowed ({3})
-No aparelho:	On the device:
 Pelo app:	By the app:
 Contador do aparelho:	Device counter:
 medida pelo aparelho no período	measured by the device in the period
 {0} µSv desde que foi zerado ({1})	{0} µSv since it was reset ({1})
-{0} µSv desde que foi zerado	{0} µSv since it was reset
 total das {0}	total from {0}
 esperando o primeiro total (vem a cada 3 a 4 min)	waiting for the first total (every 3 to 4 min)
 {0} ({1}% do período gravado)	{0} ({1}% of the period recorded)
@@ -2710,7 +2709,6 @@ igual	same
 neste ano	this year
 Minha dose	My dose
 Carregando…	Loading…
-Aparelho da dose	Dose device
 Tudo normal agora.	All normal now.
 Nenhum aparelho lendo agora.	No device reading right now.
 A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.	The dose below is what was recorded. Connect the GMC-800 or the RadiaCode to follow it live.
@@ -2733,7 +2731,6 @@ no ano todo, nesse ritmo: {0} {1}	whole year at this rate: {0} {1}
 o fundo daria {0} {1}	background would give {0} {1}
 {0} {1} (fundo + {2} mSv/ano)	{0} {1} (background + {2} mSv/year)
 fora de casa até {0}	away from home until {0}
-{0}% medido	{0}% measured
 Período dos gráficos de CPM e de dose	Period of the CPM and dose charts
 Detalhes: todos os números, lacunas, anotações e histórico disponível	Details: all the numbers, gaps, notes and available history
 Casa × pessoal	Home × personal
@@ -2766,3 +2763,154 @@ fora {0}	away {0}
 Fora de casa foi {0}% do tempo e {1}% da dose (µSv).	Away from home was {0}% of the time and {1}% of the dose (µSv).
 Nenhum minuto fora de casa no período (µSv).	No minutes away from home in the period (µSv).
 Razão pessoal ÷ casa: {0} (RadiaCode ÷ GMC-800 em µSv/h).	Personal ÷ home ratio: {0} (RadiaCode ÷ GMC-800 in µSv/h).
+(repetiu mais {0} vezes desde {1})	(repeated {0} more times since {1})
+fundo de casa de cada aparelho, nos minutos em que ele mediu	home background of each device, in the minutes it measured
+local inválido	invalid place
+GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar	GMC-800 at home and RadiaCode with you is the usual: no need to mark it
+Levei os dois	Took both
+Levei o GMC-800, deixei o RadiaCode	Took the GMC-800, left the RadiaCode
+Deixei os dois em casa	Left both at home
+esse trecho cruza com outro já marcado	this stretch overlaps one already marked
+GMC-800 em casa, RadiaCode com você	GMC-800 at home, RadiaCode with you
+GMC-800 em casa, RadiaCode em casa	GMC-800 at home, RadiaCode at home
+GMC-800 com você, RadiaCode com você	GMC-800 with you, RadiaCode with you
+GMC-800 com você, RadiaCode em casa	GMC-800 with you, RadiaCode at home
+Onde está cada aparelho	Where each device is
+o normal: GMC-800 em casa, RadiaCode com você	usual: GMC-800 at home, RadiaCode with you
+comigo	with me
+opcional	optional
+ex.: viagem, trilha	e.g.: trip, hike
+ex.: viagem	e.g.: trip
+no lugar de sempre	in its usual place
+fora do lugar de sempre	out of its usual place
+Voltar ao normal	Back to normal
+Renomear	Rename
+Apagar…	Delete…
+Adicionar trecho	Add stretch
+Adicionar trecho passado	Add past stretch
+Trecho salvo	Stretch saved
+Trecho adicionado	Stretch added
+Últimos 7 dias	Last 7 days
+valendo agora	in effect now
+misto	mixed
+sem medição	not measured
+Casa pelos dois	Home by both
+O GMC-800 mede a casa e o RadiaCode preenche se ele falhar.	The GMC-800 measures the home and the RadiaCode fills in if it fails.
+Casa sem medição	Home not measured
+Fundo e dose da casa ficam em branco até um aparelho voltar.	Home background and dose stay blank until a device is back.
+Casa pelo GMC-800	Home by the GMC-800
+Casa pelo RadiaCode	Home by the RadiaCode
+Como sempre.	As usual.
+Ele entra no fundo da casa enquanto estiver lá.	It counts toward the home background while it's there.
+Sem dosímetro com você	No dosimeter with you
+Sua dose fica em branco neste trecho.	Your dose stays blank in this stretch.
+Sua dose pelo RadiaCode	Your dose by the RadiaCode
+Sua dose pelo GMC-800	Your dose by the GMC-800
+O GMC-800 vai junto e preenche se o RadiaCode falhar.	The GMC-800 goes along and fills in if the RadiaCode fails.
+Ele sai do fundo da casa enquanto estiver com você.	It leaves the home background while it's with you.
+A casa fica sem medição; sua dose pelo RadiaCode.	The home goes unmeasured; your dose by the RadiaCode.
+A casa passa a ser medida pelo RadiaCode; sua dose pelo GMC-800.	The home is now measured by the RadiaCode; your dose by the GMC-800.
+A casa é medida pelos dois; sua dose fica sem dosímetro.	The home is measured by both; your dose has no dosimeter.
+, a partir de agora (	, from now on (
+ a partir de agora (	 from now on (
+): GMC-800 em casa, RadiaCode com você.	): GMC-800 at home, RadiaCode with you.
+fora do normal desde {0}	out of the usual since {0}
+em casa desde {0}	at home since {0}
+com você desde {0}	with you since {0}
+desde {0} · {1} até agora	since {0} · {1} so far
+GMC-800 comigo	GMC-800 with me
+RadiaCode comigo	RadiaCode with me
+GMC-800 em casa	GMC-800 at home
+RadiaCode em casa	RadiaCode at home
+Onde estava o GMC-800	Where the GMC-800 was
+Onde estava o RadiaCode	Where the RadiaCode was
+Onde está o GMC-800	Where the GMC-800 is
+Onde está o RadiaCode	Where the RadiaCode is
+Relatório em PDF só desse trecho	PDF report of this stretch only
+Apagar este trecho? Os minutos voltam a contar como normais na dose e no fundo.	Delete this stretch? Its minutes count as usual again in the dose and background.
+Nenhum trecho. Quando levar ou deixar um aparelho fora do lugar de sempre, marque na tela Agora ou adicione aqui.	No stretches. When you take or leave a device out of its usual place, mark it on the Now screen or add it here.
+Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.	Stretches when a device wasn't in its usual place (GMC-800 at home, RadiaCode with you). A device with you leaves the home background; its readings still count in the dose. Mark it on the Now screen or add a past stretch here.
+Dose pessoal: nenhum aparelho está com você agora ({0}).	Personal dose: no device is with you now ({0}).
+Dose da casa: nenhum aparelho em casa agora ({0}).	Home dose: no device at home now ({0}).
+Dose pessoal, pelo aparelho que está com você: o GMC-800{0}.	Personal dose, from the device that is with you: the GMC-800{0}.
+Dose da casa, pelo aparelho que fica parado: o RadiaCode{0}.	Home dose, from the device that stays put: the RadiaCode{0}.
+{0} pelo RadiaCode	{0} by the RadiaCode
+{0} pelo GMC-800	{0} by the GMC-800
+{0} sem medição	{0} not measured
+Casa em {0} µSv/h pelo GMC-800	Home at {0} µSv/h by the GMC-800
+Casa em {0} µSv/h pelo RadiaCode	Home at {0} µSv/h by the RadiaCode
+Com você em {0} µSv/h pelo GMC-800	With you at {0} µSv/h by the GMC-800
+Com você em {0} µSv/h pelo RadiaCode	With you at {0} µSv/h by the RadiaCode
+Os dois fora do cálculo	Both out of the calculation
+GMC-800 fora do cálculo	GMC-800 out of the calculation
+RadiaCode fora do cálculo	RadiaCode out of the calculation
+GMC-800 {0}, RadiaCode {1}	GMC-800 {0}, RadiaCode {1}
+fora do cálculo	out of the calculation
+esse começo cai dentro de outro trecho já marcado	that start falls inside another stretch already marked
+os dois em casa	both at home
+os dois em casa desde {0}	both at home since {0}
+os dois com você	both with you
+os dois com você desde {0}	both with you since {0}
+GMC-800 fora do cálculo desde {0}	GMC-800 out of the calculation since {0}
+RadiaCode fora do cálculo desde {0}	RadiaCode out of the calculation since {0}
+GMC-800 e RadiaCode fora do cálculo	GMC-800 and RadiaCode out of the calculation
+GMC-800 e RadiaCode fora do cálculo desde {0}	GMC-800 and RadiaCode out of the calculation since {0}
+fora do cálculo desde {0}	out of the calculation since {0}
+fora do cálculo · {0}	out of the calculation · {0}
+sem contagens há {0}	no counts for {0}
+O GMC-800 está sem contagens há {0}.	The GMC-800 has had no counts for {0}.
+O tubo pode estar com defeito. Se estiver, tire do cálculo para não puxar o fundo para baixo.	The tube may be faulty. If it is, take it out of the calculation so it doesn't drag the background down.
+Tirar do cálculo…	Take out of the calculation…
+saturando	saturating
+desconectado desde {0}	disconnected since {0}
+quebrado	broken
+em manutenção	under maintenance
+desligado de propósito	turned off on purpose
+leitura não confiável	unreliable reading
+valendo desde	in effect from
+Valendo desde	In effect from
+a última leitura boa	the last good reading
+a última leitura boa ({0})	the last good reading ({0})
+escolha acima ou escreva	pick above or type
+ex.: quebrado	e.g.: broken
+Nome ou motivo	Name or reason
+Casa sem dado	Home without data
+Casa sem dado.	Home without data.
+Sua dose sem dado	Your dose without data
+Sua dose sem dado.	Your dose without data.
+Nenhum aparelho em casa. Fundo e dose da casa ficam em branco.	No device at home. Home background and dose stay blank.
+O GMC-800 está em casa, mas não manda leitura. Esses minutos ficam em branco.	The GMC-800 is at home but isn't sending readings. Those minutes stay blank.
+O RadiaCode está em casa, mas não manda leitura. Esses minutos ficam em branco.	The RadiaCode is at home but isn't sending readings. Those minutes stay blank.
+O GMC-800 está com você, mas não manda leitura.	The GMC-800 is with you but isn't sending readings.
+O RadiaCode está com você, mas não manda leitura.	The RadiaCode is with you but isn't sending readings.
+Desconectado, mas ele continua somando a dose sozinho. Só a curva minuto a minuto fica faltando até reconectar.	Disconnected, but it keeps adding up the dose on its own. Only the minute-by-minute curve is missing until it reconnects.
+Ele assume enquanto o GMC-800 não mede.	It takes over while the GMC-800 isn't measuring.
+Ele assume enquanto o RadiaCode não mede.	It takes over while the RadiaCode isn't measuring.
+Saturando: conta como pelo menos o valor lido (≥).	Saturating: counts as at least the value read (≥).
+Casa sem medição.	Home not measured.
+Sem dosímetro com você.	No dosimeter with you.
+Casa pelos dois.	Home by both.
+Casa pelo GMC-800.	Home by the GMC-800.
+Casa pelo RadiaCode.	Home by the RadiaCode.
+Sua dose pelo RadiaCode.	Your dose by the RadiaCode.
+Sua dose pelo GMC-800.	Your dose by the GMC-800.
+Falta medição agora.	Measurement missing now.
+Medindo, com um aparelho fora do normal.	Measuring, with a device out of the usual.
+Curva incompleta desde {0}.	Curve incomplete since {0}.
+{0} sem dado	{0} no data
+saturando ou sem contagens	saturating or no counts
+sem contagens	no counts
+sem contagens · {0}	no counts · {0}
+saturando · {0}	saturating · {0}
+sem dado · {0}	no data · {0}
+, a partir de	, from
+sem leitura	no reading
+Sua dose pela leitura de casa	Your dose from the home reading
+Sua dose pela leitura de casa.	Your dose from the home reading.
+Os dois ficaram em casa, então você também estava. Se saiu e esqueceu de levar, marque "eu não estava em casa" no trecho e ele fica em branco.	Both stayed home, so you were home too. If you went out and forgot to take them, mark "I wasn't home" on the stretch and it stays blank.
+Você marcou que não estava em casa: sua dose fica em branco neste trecho.	You marked that you weren't home: your dose stays blank in this stretch.
+eu não estava em casa	I wasn't home
+eu não estava em casa (esqueci de levar os dois)	I wasn't home (forgot to take both)
+Eu não estava em casa	I wasn't home
+Eu estava em casa	I was home
+Dose pessoal pela leitura de casa{0} (os dois ficaram em casa, e você também).	Personal dose from the home reading{0} (both stayed home, and so did you).

@@ -128,3 +128,38 @@ func TestFmtSeconds(t *testing.T) {
 		}
 	}
 }
+
+// Relatórios gravados ao mesmo tempo com o mesmo nome não se sobrescrevem:
+// cada um fica com o seu arquivo (r.pdf, r-2.pdf, ...).
+func TestWriteReportFileConcurrent(t *testing.T) {
+	a := newTestApp(t)
+	want := filepath.Join(t.TempDir(), "r.pdf")
+	const n = 8
+	got := make(chan string, n)
+	for i := 0; i < n; i++ {
+		go func(i int) {
+			p, err := a.writeReportFile(want, []byte{byte('a' + i)})
+			if err != nil {
+				t.Error(err)
+			}
+			got <- p
+		}(i)
+	}
+	seen := map[string]bool{}
+	for i := 0; i < n; i++ {
+		seen[<-got] = true
+	}
+	if len(seen) != n {
+		t.Fatalf("esperava %d arquivos diferentes, vieram %d: %v", n, len(seen), seen)
+	}
+}
+
+// Um segundo pedido de relatório enquanto o primeiro gera volta na hora.
+func TestExportReportBusy(t *testing.T) {
+	a := newTestApp(t)
+	a.reportBusy.Lock()
+	defer a.reportBusy.Unlock()
+	if _, err := a.ExportReport(0, 1, "x"); err != errReportBusy {
+		t.Fatalf("esperava errReportBusy, veio %v", err)
+	}
+}

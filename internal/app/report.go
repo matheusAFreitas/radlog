@@ -673,9 +673,41 @@ func uniquePath(p string) string {
 	}
 }
 
+// writeReportFile grava o PDF com um nome livre (uniquePath) e devolve o
+// caminho. O nome é escolhido na hora de gravar, sob reportFileMu: antes era
+// escolhido antes de montar o relatório, e relatórios gerados ao mesmo tempo
+// pegavam o mesmo nome e se sobrescreviam.
+func (a *App) writeReportFile(want string, body []byte) (string, error) {
+	a.reportFileMu.Lock()
+	defer a.reportFileMu.Unlock()
+	dst := uniquePath(want)
+	f, err := os.OpenFile(dst, os.O_WRONLY|os.O_CREATE|os.O_EXCL, 0o644)
+	if err != nil {
+		return "", err
+	}
+	if _, err := f.Write(body); err != nil {
+		f.Close()
+		_ = os.Remove(dst)
+		return "", err
+	}
+	if err := f.Close(); err != nil {
+		_ = os.Remove(dst)
+		return "", err
+	}
+	return dst, nil
+}
+
+// errReportBusy: já há um relatório sendo gerado.
+var errReportBusy = errors.New("já estou gerando um relatório; espere ele abrir")
+
 // ExportReport salva o relatório (PDF) do período na pasta dos relatórios e
-// abre no leitor padrão. Devolve o caminho completo.
+// abre no leitor padrão. Devolve o caminho completo. Um por vez: um segundo
+// pedido enquanto o primeiro gera volta com errReportBusy.
 func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
+	if !a.reportBusy.TryLock() {
+		return "", errReportBusy
+	}
+	defer a.reportBusy.Unlock()
 	dir := a.reportDir().Dir
 	if dir == "" {
 		return "", errors.New("não achei uma pasta para salvar (escolha uma nas Configurações → Relatórios)")
@@ -696,13 +728,13 @@ func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
 	} else {
 		span += "_a_" + to.Add(-time.Millisecond).Format("2006-01-02")
 	}
-	dst := uniquePath(filepath.Join(dir, fmt.Sprintf("gmc-relatorio-%s-%s.pdf", slug, span)))
 	r, err := a.buildReport(fromMs, toMs, label)
 	if err != nil {
 		return "", err
 	}
 	body := a.inLang(func() []byte { return renderReportPDF(r) })
-	if err := os.WriteFile(dst, body, 0o644); err != nil {
+	dst, err := a.writeReportFile(filepath.Join(dir, fmt.Sprintf("gmc-relatorio-%s-%s.pdf", slug, span)), body)
+	if err != nil {
 		return "", err
 	}
 	a.logf("relatório salvo: %s", dst)

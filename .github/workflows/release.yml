@@ -16,6 +16,13 @@ on:
 permissions:
   contents: write
 
+# uma release por vez, na ordem dos pushes: duas seguidas (ex.: 2.20.5 e
+# 2.21.0) corriam juntas e a mais velha terminava por último, virando a
+# "latest" que o atualizador do app consulta
+concurrency:
+  group: release
+  cancel-in-progress: false
+
 jobs:
   check:
     runs-on: ubuntu-24.04
@@ -118,6 +125,7 @@ jobs:
           tag_name: v${{ steps.v.outputs.ver }}
           target_commitish: ${{ github.sha }}
           body_path: notes.md
+          make_latest: true
           files: |
             out/*.exe
             out/*.AppImage
