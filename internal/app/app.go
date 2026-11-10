@@ -378,9 +378,11 @@ type App struct {
 	measure      MeasureState // medição de objeto (measure.go)
 	rain         *rainCache   // chuva (weather.go)
 	rainSt       rainState
-	radar        *radarStore      // chuva pelo radar (radar.go)
-	radarKick    chan struct{}    // busca o radar já (lugar novo)
-	periods      []Period         // fora de casa (periods.go)
+	radar        *radarStore   // chuva pelo radar (radar.go)
+	radarKick    chan struct{} // busca o radar já (lugar novo)
+	periods      []Period      // fora de casa (periods.go)
+	rcAsks       []RcAwayAsk   // "o RadiaCode estava fora de casa?" sem resposta (rcaway.go)
+	rcAsksLoaded bool
 	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
 	measSamples  []MeasureSample  // segundos da medição em andamento
 	measSamples2 []MeasureSample  // os do segundo aparelho (µSv/h)

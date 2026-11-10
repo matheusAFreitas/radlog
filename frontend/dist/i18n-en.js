@@ -2301,7 +2301,43 @@ const I18N_EN = {
 "Mín/méd/máx µSv/h": "Min/avg/max µSv/h",
 "Pico µSv/h": "Peak µSv/h",
 "Limite µSv/h": "Limit µSv/h",
-"o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM.": "the GMC-800 measures counts (CPM); the report shows µSv/h, with each minute, peak and limit converted by the calibration in force at that moment. Limits recorded in CPM (before 2.29) are compared in CPM, as they triggered, and shown converted. The count statistics stay in CPM."
+"o GMC-800 mede contagens (CPM); o relatório mostra µSv/h, com cada minuto, pico e limite convertidos pela calibração que valia naquele momento. Limites gravados em CPM (antes da 2.29) são comparados em CPM, como tocavam, e aparecem convertidos. A estatística da contagem fica em CPM.": "the GMC-800 measures counts (CPM); the report shows µSv/h, with each minute, peak and limit converted by the calibration in force at that moment. Limits recorded in CPM (before 2.29) are compared in CPM, as they triggered, and shown converted. The count statistics stay in CPM.",
+"\"Comigo, fora de casa\": essas medições saem do fundo da casa e do padrão por hora, e continuam na sua dose.": "\"With me, away from home\": these readings leave the home background and the hourly pattern, and still count toward your dose.",
+"A memória do aparelho não trouxe leituras desse trecho, então o app não tem dica.": "The device memory brought no readings for this stretch, so the app has no hint.",
+"A volta precisa ser depois da saída.": "The return has to be after you left.",
+"Ajustar horário": "Adjust times",
+"Comigo, fora de casa": "With me, away from home",
+"GMC-800 com você": "GMC-800 with you",
+"GMC-800 em casa, mesmo horário": "GMC-800 at home, same time",
+"Mais 1 trecho a responder em Fora de casa.": "1 more stretch to answer in Away from home.",
+"Não sei": "Not sure",
+"O tempo sem conexão fora desse horário fica como em casa (o normal).": "The disconnected time outside these hours stays as at home (the normal).",
+"Ok, ficou como em casa.": "Ok, kept as at home.",
+"Ok, ficou sem marcar.": "Ok, left unmarked.",
+"Parece que ele ficou em casa.": "Looks like it stayed home.",
+"Parece que ele saiu de casa.": "Looks like it left home.",
+"Poucos minutos com os dois aparelhos para comparar, então o app não tem dica.": "Too few minutes with both devices to compare, so the app has no hint.",
+"Quando você saiu e voltou com o RadiaCode?": "When did you leave and come back with the RadiaCode?",
+"RadiaCode sem conexão,": "RadiaCode disconnected,",
+"Saí com o RadiaCode": "Went out with the RadiaCode",
+"Saí em": "Left at",
+"Voltei em": "Back at",
+"a memória do aparelho não trouxe leituras": "the device memory brought no readings",
+"dose no trecho": "dose in the stretch",
+"essa pergunta já foi respondida": "this question was already answered",
+"eu não estava em casa (saí com o RadiaCode)": "I wasn't home (I went out with the RadiaCode)",
+"máximo": "maximum",
+"média do RadiaCode": "RadiaCode average",
+"resposta inválida": "invalid answer",
+"sem leituras da memória": "no readings from memory",
+"sugestão: o RadiaCode estava conectado ao PC nesse trecho": "suggestion: the RadiaCode was connected to the PC in this stretch",
+"sugestão: o RadiaCode também ficou sem conexão nesse trecho": "suggestion: the RadiaCode was also disconnected in this stretch",
+"Desfazer": "Undo",
+"a responder": "to answer",
+"Responder": "Answer",
+"Onde ele estava?": "Where was it?",
+"Nome (opcional)": "Name (optional)",
+"RadiaCode sem conexão, sem leituras da memória": "RadiaCode disconnected, no readings from memory"
 },
 "patterns": [
 [
@@ -2782,6 +2818,26 @@ const I18N_EN = {
 ]
 ],
 [
+"Com o RadiaCode em casa, ele conta umas ",
+"^Com o RadiaCode em casa, ele conta umas ((?:(?! · ).)+?) vezes o que o GMC conta\\. Nesse trecho foram ((?:(?! · ).)+?) vezes\\.$",
+"With the RadiaCode at home, it counts about ${1} times what the GMC counts. In this stretch it was ${2} times.",
+[
+"Com o RadiaCode em casa, ele conta umas ",
+" vezes o que o GMC conta. Nesse trecho foram ",
+" vezes."
+]
+],
+[
+"RadiaCode: ficou ",
+"^RadiaCode: ficou ((?:(?! · ).)+?) sem conexão \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\); o app pergunta na tela Agora se ele estava fora de casa$",
+"RadiaCode: disconnected for ${1} (${2} to ${3}); the app asks on the Now screen whether it was away from home",
+[
+"RadiaCode: ficou ",
+" sem conexão (",
+"); o app pergunta na tela Agora se ele estava fora de casa"
+]
+],
+[
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
 "RadiaCode ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
@@ -2899,6 +2955,16 @@ const I18N_EN = {
 [
 "Poucos dias com dia e noite medidos (",
 "; precisa de 3, com 6 h ou mais de cada metade)."
+]
+],
+[
+"A razão de contagens com o GMC ficou entre a normal e a de fora (",
+"^A razão de contagens com o GMC ficou entre a normal e a de fora \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\): sem dica\\.$",
+"The count ratio with the GMC was between the normal and an away one (${1} vs ${2}): no hint.",
+[
+"A razão de contagens com o GMC ficou entre a normal e a de fora (",
+" contra ",
+"): sem dica."
 ]
 ],
 [
@@ -3413,6 +3479,16 @@ const I18N_EN = {
 "couldn't claim the RadiaCode's USB (another program using it?): ${1}",
 [
 "não consegui pegar o USB do RadiaCode (outro programa usando?): "
+]
+],
+[
+"A razão de contagens com o GMC ficou perto da normal (",
+"^A razão de contagens com o GMC ficou perto da normal \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\)\\.$",
+"The count ratio with the GMC stayed close to the normal (${1} vs ${2}).",
+[
+"A razão de contagens com o GMC ficou perto da normal (",
+" contra ",
+")."
 ]
 ],
 [
@@ -4062,6 +4138,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Marcado: ",
+"^Marcado: ((?:(?! · ).)+?) · RadiaCode com você, GMC\\-800 em casa · ((?:(?! · ).)+?)–((?:(?! · ).)+?)$",
+"Marked: ${1} · RadiaCode with you, GMC-800 at home · ${2}–${3}",
+[
+"Marcado: ",
+" · RadiaCode com você, GMC-800 em casa · "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -4578,6 +4663,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · a memória do aparelho não trouxe leituras$",
+"${1} · the device memory brought no readings",
+[
+" · a memória do aparelho não trouxe leituras"
+]
+],
+[
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
 "Measurement of ${1}: ${2} ± ${3} CPM above background (${4}σ) — ${5}",
@@ -4651,6 +4744,15 @@ const I18N_EN = {
 "${1} variance/mean · off the expected (≈ 1)",
 [
 " variância/média · fora do esperado (≈ 1)"
+]
+],
+[
+"Mais ",
+"^Mais ((?:(?! · ).)+?) trechos a responder em Fora de casa\\.$",
+"${1} more stretches to answer in Away from home.",
+[
+"Mais ",
+" trechos a responder em Fora de casa."
 ]
 ],
 [
@@ -4842,6 +4944,14 @@ const I18N_EN = {
 [
 " de ",
 " minutos com os dois · termina em "
+]
+],
+[
+"RadiaCode sem conexão, a memória trouxe ",
+"^RadiaCode sem conexão, a memória trouxe ((?:(?! · ).)+?)$",
+"RadiaCode disconnected, the memory brought ${1}",
+[
+"RadiaCode sem conexão, a memória trouxe "
 ]
 ],
 [
@@ -5637,6 +5747,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · a memória do aparelho trouxe ((?:(?! · ).)+?)$",
+"${1} · the device memory brought ${2}",
+[
+" · a memória do aparelho trouxe "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -5822,6 +5940,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O RadiaCode ficou ",
+"^O RadiaCode ficou ((?:(?! · ).)+?) sem conexão$",
+"The RadiaCode was disconnected for ${1}",
+[
+"O RadiaCode ficou ",
+" sem conexão"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -5987,6 +6114,14 @@ const I18N_EN = {
 "Counter went back to the ${1} calibration",
 [
 "Contador voltou à calibração "
+]
+],
+[
+"a memória do aparelho trouxe ",
+"^a memória do aparelho trouxe ((?:(?! · ).)+?)$",
+"the device memory brought ${1}",
+[
+"a memória do aparelho trouxe "
 ]
 ],
 [
@@ -8264,6 +8399,14 @@ const I18N_EN = {
 ]
 ],
 [
+"a memória trouxe ",
+"^a memória trouxe ((?:(?! · ).)+?)$",
+"the memory brought ${1}",
+[
+"a memória trouxe "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -9427,6 +9570,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) desconectou$",
+"${1} disconnected",
+[
+" desconectou"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -10509,6 +10660,14 @@ const I18N_EN = {
 "${1} h ${2} min",
 [
 " min"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) voltou$",
+"${1} back",
+[
+" voltou"
 ]
 ],
 [

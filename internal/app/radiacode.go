@@ -454,12 +454,24 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	if alErr == nil {
 		a.rc.st.Alarms = &al
 	}
+	since := time.UnixMilli(a.rc.st.Since)
 	a.rc.mu.Unlock()
+	// "estava fora de casa?": o último minuto gravado antes desta conexão
+	// (a memória do aparelho ainda não chegou); pergunta depois que ela chegar
+	gapFrom := a.rcLastMinuteBefore(since)
+	asked := false
+	askAway := func() {
+		if !asked {
+			asked = true
+			a.rcAwayDetect(gapFrom, since)
+		}
+	}
 	// fecha e limpa também se algo der panic no meio (goLoop reinicia o laço
 	// e o USB/Bluetooth precisa estar livre para a próxima conexão)
 	defer func() {
 		dev.Close()
 		a.rcMemFlush()
+		askAway()
 		a.rcAlertsOff()
 		a.rcFlushMinute()
 		a.rcRawClose()
@@ -501,6 +513,10 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		fails = 0
 		a.rcRawRecords(raw, dev.Base())
 		a.rcRecords(recs)
+		if !asked && time.Since(since) >= rcAwayWait {
+			a.rcMemFlush()
+			askAway()
+		}
 		a.rcRawSpectrum(dev)
 		a.rcSpecTick(dev)
 		a.rcActTick(dev)

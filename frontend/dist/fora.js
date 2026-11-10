@@ -87,14 +87,17 @@ async function renderPeriodTotal() {
 
 const WH_NAME = { gmc: "GMC-800", radiacode: "RadiaCode" };
 const WH_NORMAL = { gmc: "casa", radiacode: "comigo" };
-const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo" });
+const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo", notHome: !!p.notHome });
+// saí com o RadiaCode e deixei o GMC (2.38.0): o RadiaCode fora do fundo da casa
+const whOut = (w) => w.gmc === "casa" && w.radiacode === "comigo" && !!w.notHome;
 const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" };
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
   : w.radiacode === "fora" ? "RadiaCode fora do cálculo"
   : w.gmc === "comigo" && w.radiacode === "comigo" ? "Levei os dois"
   : w.gmc === "comigo" ? "Levei o GMC-800, deixei o RadiaCode"
-  : w.radiacode === "casa" ? "Deixei os dois em casa" : "normal");
+  : w.radiacode === "casa" ? "Deixei os dois em casa"
+  : whOut(w) ? "Saí com o RadiaCode" : "normal");
 const whDur = (a, b) => hm(Math.max(1, Math.round((b - a) / 60000)));
 
 // faixa de cada aparelho nos últimos 7 dias: lilás fora do lugar de sempre
@@ -141,7 +144,7 @@ function renderTimeline() {
     const bar = lane("", dev);
     for (const p of state.periods || []) {
       const at = whOf(p)[dev];
-      if (at === WH_NORMAL[dev] || pTo(p) <= t0) continue;
+      if ((at === WH_NORMAL[dev] && !(dev === "radiacode" && whOut(whOf(p)))) || pTo(p) <= t0) continue;
       const a = pct(p.from), b = pct(pTo(p));
       const i = document.createElement("i");
       i.title = `${p.name} · ${zoomRangeText(p.from, p.to)}`;
@@ -227,9 +230,14 @@ function periodForm(p, onDone) {
   nh.className = "wh-nothome small";
   const nhBox = document.createElement("input");
   nhBox.type = "checkbox"; nhBox.checked = !!p.notHome;
-  nh.append(nhBox, " eu não estava em casa (esqueci de levar os dois)");
-  const both = () => pick(segG) === "casa" && pick(segR) === "casa";
-  const syncNh = () => { nh.hidden = !both(); };
+  const nhTxt = document.createElement("span");
+  nh.append(nhBox, nhTxt);
+  // os dois em casa: esqueci de levar; GMC em casa e RadiaCode comigo: saí com ele (2.38.0)
+  const both = () => pick(segG) === "casa" && (pick(segR) === "casa" || pick(segR) === "comigo");
+  const syncNh = () => {
+    nh.hidden = !both();
+    nhTxt.textContent = pick(segR) === "comigo" ? " eu não estava em casa (saí com o RadiaCode)" : " eu não estava em casa (esqueci de levar os dois)";
+  };
   [segG, segR].forEach((x) => x.addEventListener("click", () => setTimeout(syncNh, 0)));
   const err = document.createElement("div");
   err.className = "wh-err"; err.setAttribute("role", "alert"); err.hidden = true;
@@ -264,8 +272,9 @@ function renderPeriods() {
   if (periodAdding) add.appendChild(periodForm(periodAdding, () => { periodAdding = null; renderPeriods(); }));
   const ul = $("periodList");
   ul.textContent = "";
+  if (typeof rcAwayRows === "function") rcAwayRows(ul);
   if (!state.periods.length) {
-    ul.innerHTML = '<li class="muted small">Nenhum trecho. Quando levar ou deixar um aparelho fora do lugar de sempre, marque na tela Agora ou adicione aqui.</li>';
+    if (!ul.children.length) ul.innerHTML = '<li class="muted small">Nenhum trecho. Quando levar ou deixar um aparelho fora do lugar de sempre, marque na tela Agora ou adicione aqui.</li>';
     renderPeriodTotal();
     return;
   }
@@ -292,7 +301,7 @@ function renderPeriods() {
     who.className = "who";
     for (const dev of ["gmc", "radiacode"]) {
       const c = document.createElement("span");
-      c.className = "chip" + (w[dev] === "fora" ? " dead" : w[dev] !== WH_NORMAL[dev] ? " off" : "");
+      c.className = "chip" + (w[dev] === "fora" ? " dead" : w[dev] !== WH_NORMAL[dev] || (dev === "radiacode" && whOut(w)) ? " off" : "");
       c.innerHTML = `<span class="dot ${dev === "gmc" ? "gmc" : "rc"}"></span>`;
       c.append(`${WH_NAME[dev]} ${WH_LOCTXT[w[dev]]}`);
       who.appendChild(c);
@@ -402,13 +411,38 @@ function askNewRanges(ranges) {
     name.type = "text"; name.maxLength = 60; name.placeholder = "Fora de casa"; name.setAttribute("aria-label", "Nome do período");
     const save = document.createElement("button");
     save.type = "button"; save.className = "btn small accent"; save.textContent = "Salvar";
-    form.append(name, save);
+    // o GMC estava com você; o RadiaCode pode ter ficado em casa (2.38.0)
+    const who = document.createElement("div");
+    who.className = "nr-who small";
+    const gl = document.createElement("span");
+    gl.innerHTML = '<span class="dot gmc"></span> ';
+    gl.append("GMC-800 com você");
+    const rl = document.createElement("span");
+    rl.innerHTML = '<span class="dot rc"></span> ';
+    rl.append("RadiaCode");
+    const seg = document.createElement("div");
+    seg.className = "seg loc"; seg.setAttribute("role", "group"); seg.setAttribute("aria-label", "Onde estava o RadiaCode");
+    const sug = r.rcSuggest === "casa" ? "casa" : "comigo";
+    for (const [v, t] of [["comigo", "comigo"], ["casa", "em casa"]]) {
+      const b = document.createElement("button");
+      b.type = "button"; b.dataset.v = v; b.textContent = t;
+      b.setAttribute("aria-pressed", String(v === sug));
+      b.addEventListener("click", () => seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))));
+      seg.appendChild(b);
+    }
+    const hint = document.createElement("span");
+    hint.className = "muted";
+    hint.textContent = sug === "casa" ? "sugestão: o RadiaCode estava conectado ao PC nesse trecho" : "sugestão: o RadiaCode também ficou sem conexão nesse trecho";
+    rl.appendChild(seg);
+    who.append(gl, rl, hint);
+    form.append(who, name, save);
     const done = (msg) => { li.classList.add("answered"); home.hidden = out.hidden = true; form.hidden = true; const s = document.createElement("span"); s.className = "small muted"; s.textContent = msg; li.appendChild(s); };
     home.addEventListener("click", () => done("em casa"));
     out.addEventListener("click", () => { form.hidden = false; name.focus(); });
     const doSave = async () => {
       try {
-        const p = await api.SavePeriod({ id: 0, from: r.from, to: r.to, name: name.value });
+        const rc = seg.querySelector('[aria-pressed="true"]').dataset.v;
+        const p = await api.SavePeriod({ id: 0, from: r.from, to: r.to, name: name.value, gmc: "comigo", radiacode: rc });
         done(`marcado: ${p.name}`);
       } catch (e) { toast(errMsg(e), true); }
     };

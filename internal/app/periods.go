@@ -75,16 +75,24 @@ func (a *App) GetPeriods() []Period {
 // o trecho aberto pela tela Agora fica sem fim (To = 0).
 func (a *App) SavePeriod(p Period) (Period, error) {
 	var err error
-	if p.GMC, p.RC, err = normWhere(p.GMC, p.RC); err != nil {
+	// GMC em casa e RadiaCode com você é o normal, a não ser que você não
+	// estivesse em casa (saiu com o RadiaCode): aí o trecho tira as leituras
+	// dele do fundo da casa
+	if out := p.NotHome && p.GMC == WhereHome && p.RC == WhereMe; out {
+		// já está certo
+	} else if p.GMC, p.RC, err = normWhere(p.GMC, p.RC); err != nil {
 		return p, err
 	}
-	p.NotHome = p.NotHome && p.GMC == WhereHome && p.RC == WhereHome
+	p.NotHome = p.NotHome && p.GMC == WhereHome && (p.RC == WhereHome || p.RC == WhereMe)
 	if p.To != 0 && p.To < p.From {
 		p.From, p.To = p.To, p.From
 	}
 	p.Name = strings.TrimSpace(p.Name)
 	if p.Name == "" {
 		p.Name = periodName(p.GMC, p.RC)
+		if p.NotHome && p.RC == WhereMe {
+			p.Name = periodNameOut
+		}
 	}
 	a.mu.Lock()
 	if p.To == 0 {
@@ -177,6 +185,10 @@ type NewRange struct {
 	To      int64   `json:"to"`
 	Minutes int     `json:"minutes"`
 	AvgCPM  float64 `json:"avgCPM"`
+	// onde o RadiaCode provavelmente estava, para quando o trecho for fora de
+	// casa: "casa" se ele estava conectado ao PC em boa parte do trecho
+	// (2.38.0); senão "comigo"
+	RcSuggest string `json:"rcSuggest"`
 }
 
 const (
@@ -207,7 +219,11 @@ func (a *App) newRanges(pts []store.Point) []NewRange {
 		if away(start) && away(last) {
 			return
 		}
-		out = append(out, NewRange{From: start.UnixMilli(), To: end.UnixMilli(), Minutes: n, AvgCPM: sum / float64(n)})
+		sug := WhereMe
+		if live := a.rcLiveMinutes(start, end); live*2 >= int(end.Sub(start)/time.Minute) {
+			sug = WhereHome
+		}
+		out = append(out, NewRange{From: start.UnixMilli(), To: end.UnixMilli(), Minutes: n, AvgCPM: sum / float64(n), RcSuggest: sug})
 	}
 	for _, p := range sorted[1:] {
 		if p.T.Sub(last) > newRangeGap {

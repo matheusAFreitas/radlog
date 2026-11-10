@@ -1,5 +1,27 @@
 # Versões
 
+## 2.38.0
+- **"O RadiaCode estava fora de casa?"** Quando o RadiaCode volta a conectar
+  depois de ficar sem conexão pelo menos o tempo da pergunta de fora de casa
+  (Configurações, padrão 15 min), o app espera a memória do aparelho chegar e
+  pergunta num cartão no topo do Agora onde ele estava. O cartão mostra o que a
+  memória trouxe (média, máximo e dose do trecho), o GMC-800 em casa no mesmo
+  horário e uma dica pela razão de contagens entre os dois: longe da normal,
+  "parece que ele saiu de casa"; perto, "parece que ele ficou em casa".
+- Respostas: **Comigo, fora de casa** marca o trecho (GMC-800 em casa,
+  RadiaCode com você, você fora); as leituras do RadiaCode saem do fundo da
+  casa e do padrão por hora e continuam na sua dose. **Em casa** não marca
+  nada (é o normal). **Não sei** some sem marcar. "Ajustar horário" muda a
+  saída e a volta, porque parte do tempo sem conexão pode ter sido em casa. Dá
+  para desfazer logo depois.
+- Pergunta sem resposta fica no cartão e aparece em Fora de casa como "a
+  responder". Trecho que já está marcado não é perguntado.
+- Fora de casa: o trecho "GMC-800 em casa, RadiaCode comigo" agora pode ser
+  marcado à mão com "eu não estava em casa (saí com o RadiaCode)".
+- **Correção:** ao marcar "Fora de casa" num trecho que veio da memória do
+  GMC-800, o app marcava os dois aparelhos como "com você". Agora ele pergunta
+  onde estava o RadiaCode, já sugerindo "em casa" se ele estava conectado ao
+  PC nesse trecho e "comigo" se não estava.
 ## 2.37.1
 - Na tela de um aparelho, o cartão pequeno do outro aparelho usa o mesmo
   mostrador dos blocos do Agora: o anel com o valor e "µSv/h" dentro e o

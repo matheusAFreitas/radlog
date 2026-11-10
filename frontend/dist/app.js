@@ -2981,6 +2981,7 @@ function listen() {
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
   on("measurements", (list) => { state.measurements = list || []; renderMeasureHistory(); drawMeasureChart(); refreshChart(); });
   on("periods", (list) => { state.periods = normPeriods(list); renderPeriods(); refreshAll(); });
+  on("rcaway", onRcAway);
   on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
     const was = state.status.state;
@@ -4120,6 +4121,7 @@ async function init() {
   } catch (e) { /* segue */ }
   await refreshRainStatus();
   await refreshPeriods();
+  await refreshRcAway();
   await refreshWhere();
   await refreshMeasurements();
   await refreshAll();
@@ -4203,6 +4205,9 @@ function makeDemoApi() {
     return { gmc: one("gmc"), radiacode: one("radiacode") };
   };
   let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 }];
+  const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
+  const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
+  let rcAsks = rcAsksAll.slice();
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
   let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
@@ -4541,8 +4546,8 @@ const demoRc = () => {
     DownloadHistory: async () => {
       const d = new Date(); d.setHours(0, 0, 0, 0);
       return { records: 900, added: 720, newRanges: [
-        { from: d.getTime() + 1 * 36e5, to: d.getTime() + 7.5 * 36e5, minutes: 390, avgCPM: 19.6 },
-        { from: d.getTime() - 864e5 + 13 * 36e5, to: d.getTime() - 864e5 + 17.25 * 36e5, minutes: 255, avgCPM: 31.4 },
+        { from: d.getTime() + 1 * 36e5, to: d.getTime() + 7.5 * 36e5, minutes: 390, avgCPM: 19.6, rcSuggest: "casa" },
+        { from: d.getTime() - 864e5 + 13 * 36e5, to: d.getTime() - 864e5 + 17.25 * 36e5, minutes: 255, avgCPM: 31.4, rcSuggest: "comigo" },
       ] };
     },
     CancelDownload: async () => {},
@@ -4934,16 +4939,34 @@ const demoRc = () => {
       return out;
     },
     GetPeriods: async () => periods.slice(),
+    // "o RadiaCode estava fora de casa?": uma pergunta de exemplo (de ontem à tarde)
+    GetRcAwayAsks: async () => rcAsks.map((q) => ({ ...q })),
+    AnswerRcAway: async (id, ans, from, to, name) => {
+      const q = rcAsks.find((x) => x.id === id);
+      if (!q) throw new Error("essa pergunta já foi respondida");
+      let p = { id: 0 };
+      if (ans === "fora") p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name, gmc: "casa", radiacode: "comigo", notHome: true });
+      rcAsks = rcAsks.filter((x) => x.id !== id);
+      setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
+      return p;
+    },
+    UndoRcAway: async (ask, pid) => {
+      if (pid) await api.DeletePeriod(pid);
+      const q = rcAsksAll.find((x) => x.id === ask.id);
+      if (q && !rcAsks.some((x) => x.id === q.id)) rcAsks.push(q);
+      setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
+    },
     GetMeasurements: async () => measurements.slice(),
     UpdateMeasurement: async (id, name, note) => { measurements = measurements.map((m) => (m.id === id ? { ...m, name: name.trim() || m.name, note: note.trim() } : m)); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     DeleteMeasurement: async (id) => { measurements = measurements.filter((m) => m.id !== id); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     SavePeriod: async (p) => {
       const g = p.gmc || "comigo", r = p.radiacode || "comigo";
-      if (g === "casa" && r === "comigo") throw new Error("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar");
+      const out = !!p.notHome && g === "casa" && r === "comigo"; // saí com o RadiaCode (2.38.0)
+      if (g === "casa" && r === "comigo" && !out) throw new Error("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar");
       const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
       if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
       if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
-      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && r === "casa", name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r }) };
+      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && (r === "casa" || r === "comigo"), name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r, notHome: out }) };
       if (p.id) periods = periods.map((q) => (q.id === p.id ? p : q));
       else { p.id = Math.max(0, ...periods.map((q) => q.id)) + 1; periods.push(p); }
       periods.sort((a, b) => a.from - b.from);
