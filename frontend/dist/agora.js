@@ -119,7 +119,7 @@ function renderAgDose() {
   const [yn, yu] = agSv(year ? year.total : null);
   const [bn, bu] = agSv(d.yearBackground);
   const [cn, cu] = agSv(d.yearCeiling);
-  item(dev === "pessoal" ? "#F472B6" : "var(--accent)", "neste ano", `${yn} ${yu}`);
+  item(dev === "pessoal" ? COR.rc : "var(--accent)", "neste ano", `${yn} ${yu}`);
   item("rgba(163, 173, 180, .5)", "só o fundo, no ano todo", `${bn} ${bu}`);
   item("var(--warn)", "teto", `${cn} ${cu} (fundo + ${fmt(agDose.limitMSvYear, 0)} mSv/ano)`);
   agoraNow();
@@ -188,8 +188,8 @@ async function refreshAgDay() {
     l.setAttribute("vector-effect", "non-scaling-stroke");
     svg.appendChild(l);
   }
-  const lg = agLine(g, x, y, "#6EE7A0");
-  const lr = agLine(rc, x, y, "#F472B6");
+  const lg = agLine(g, x, y, COR.accent);
+  const lr = agLine(rc, x, y, COR.rc);
   if (lg) svg.appendChild(lg);
   if (lr) svg.appendChild(lr);
   $("agAx0").textContent = hhmm(t0);

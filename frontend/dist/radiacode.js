@@ -273,8 +273,8 @@
       g.font = "11px " + css("--mono"); g.textAlign = "left";
       let row = 0;
       for (const p of [...rl.peaks].sort((a, b) => a.kev - b.kev)) {
-        const x = xOf(p.kev); g.strokeStyle = "#F0656A"; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); g.setLineDash([]);
-        g.fillStyle = "#F0656A"; g.fillText(`${p.nuclide} ${nf(p.kev, 0)}`, Math.min(x + 3, L + pw - 70), T + 24 + (row++ % 3) * 12);
+        const x = xOf(p.kev); g.strokeStyle = COR.warn; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); g.setLineDash([]);
+        g.fillStyle = COR.warn; g.fillText(`${p.nuclide} ${nf(p.kev, 0)}`, Math.min(x + 3, L + pw - 70), T + 24 + (row++ % 3) * 12);
       }
     }
     // cursor
@@ -562,7 +562,7 @@
     g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
     for (let k = 0; k <= 4; k++) {
       const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
-      g.fillStyle = "#6EE7A0"; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), 0), L - 6, y + 4);
+      g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), 0), L - 6, y + 4);
       g.fillStyle = "#B79CFF"; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
     }
     g.fillStyle = css("--dim"); g.textAlign = "center";
@@ -574,7 +574,7 @@
       for (let t = 0; t < tl.shown; t++) { const x = xOf(t), y = yf(arr[t]); t ? g.lineTo(x, y) : g.moveTo(x, y); }
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
-    line(tl.cps, yC, "#6EE7A0");
+    line(tl.cps, yC, COR.accent);
     line(tl.hard, yH, "#B79CFF");
     if (tl.hover != null && tl.hover < tl.shown) { const x = xOf(tl.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
@@ -610,7 +610,7 @@
     g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
     for (let k = 0; k <= 4; k++) {
       const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
-      g.fillStyle = "#6EE7A0"; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), cmax < 20 ? 1 : 0), L - 6, y + 4);
+      g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), cmax < 20 ? 1 : 0), L - 6, y + 4);
       g.fillStyle = "#B79CFF"; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
     }
     const long = d.to - d.from > 26 * 3600e3;
@@ -647,7 +647,7 @@
       }
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
-    line(d.cps, yC, "#6EE7A0");
+    line(d.cps, yC, COR.accent);
     line(d.hard, yH, "#B79CFF");
     if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
     if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
@@ -705,7 +705,7 @@
   // aparelho e o que veio do celular (importado).
   const LOG_IC = {
     taxa: '<svg viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="14" height="16" rx="2.5"/><path d="M7 9h6M7 13h3"/><circle cx="17" cy="16" r="4.2" fill="#0D1012"/><path d="M17 14v2l1.3 1"/></svg>',
-    evento: '<svg viewBox="0 0 24 24" fill="#F5B84A" stroke="#F5B84A" stroke-width="1.6" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.5 4L17 12H6z"/></svg>',
+    evento: '<svg viewBox="0 0 24 24" fill="' + COR.att + '" stroke="' + COR.att + '" stroke-width="1.6" stroke-linejoin="round"><path d="M6 21V4"/><path d="M6 4h11l-2.5 4L17 12H6z"/></svg>',
     raro: '<svg viewBox="0 0 24 24" fill="none" stroke="#A78BFA" stroke-width="1.8" stroke-linecap="round"><path d="M8 14.5V5a2 2 0 0 1 4 0v9.5a3.5 3.5 0 1 1-4 0z"/><path d="M10 9v7"/><rect x="15" y="7" width="6" height="12" rx="1.5"/><path d="M17 5h2M16.5 13h3M16.5 16h3"/></svg>',
   };
   const lg = { kinds: new Set(["taxa", "evento", "raro"]), period: 0, items: [], more: false, busy: false, shown: 0, total: 0, loaded: false };
@@ -810,7 +810,7 @@
     g.strokeStyle = css("--border"); g.beginPath(); g.moveTo(0, h - 0.5); g.lineTo(w, h - 0.5); g.stroke();
     g.beginPath();
     sr.trend.forEach((y, i) => { const x = (i / 119) * w, yy = h - 4 - (y / m) * (h - 8); i ? g.lineTo(x, yy) : g.moveTo(x, yy); });
-    g.strokeStyle = "#F0656A"; g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = COR.warn; g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1;
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
   }
 
@@ -908,7 +908,7 @@
     // a média que se adapta, por cima
     g.beginPath();
     sr.hist.filter((p) => p.t > now - 60e3).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
-    g.strokeStyle = "#F0656A"; g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = COR.warn; g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1;
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
   }
   // som: cliques (um por contagem, espalhados no tempo da amostra) ou um tom
@@ -948,14 +948,14 @@
     let ticks = "", labels = "";
     for (let k = 0; k <= 50; k++) {
       const a = -120 + (k / 50) * 240, big = k % 10 === 0, [x1, y1] = pt(a, r), [x2, y2] = pt(a, r - (big ? 12 : 6));
-      const col = k > 40 ? "#F0656A" : k > 30 ? "#F5B84A" : "#6EE7A0";
+      const col = k > 40 ? COR.warn : k > 30 ? COR.att : COR.accent;
       ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${big ? 2 : 1}" stroke-opacity="${big ? 1 : 0.7}"/>`;
       if (big) { const [lx, ly] = pt(a, r - 26); labels += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}">0</text>`; }
     }
     return `<svg viewBox="0 0 240 200" class="rc-gauge-svg" role="img" aria-label="Mostrador de contagem">
       ${ticks}<g id="rcGaugeTicks" class="rc-gauge-lbl">${labels}</g>
-      <g id="rcNeedle"><line x1="120" y1="120" x2="120" y2="36" stroke="#F0656A" stroke-width="3" stroke-linecap="round"/></g>
-      <circle cx="120" cy="120" r="7" fill="#F0656A"/>
+      <g id="rcNeedle"><line x1="120" y1="120" x2="120" y2="36" stroke="${COR.warn}" stroke-width="3" stroke-linecap="round"/></g>
+      <circle cx="120" cy="120" r="7" fill="${COR.warn}"/>
       <text x="120" y="162" class="rc-gauge-num" id="rcGaugeVal">0</text>
       <text x="120" y="182" class="rc-gauge-unit">cps</text></svg>`;
   }
@@ -1118,7 +1118,7 @@
       g.strokeStyle = col; g.stroke();
     };
     path(ch.smp, "#F2A33A", "rgba(242,163,58,.25)");
-    path(ch.bg, "#A3ADB4", null);
+    path(ch.bg, COR.muted, null);
     // linhas dos radionuclídeos da medida
     const ids = (v.opts && v.opts.nuclides) || [], seen = new Set();
     g.setLineDash([3, 3]); g.strokeStyle = "#B79CFF"; g.fillStyle = "#B79CFF"; g.textAlign = "left";

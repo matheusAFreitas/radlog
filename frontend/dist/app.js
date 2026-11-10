@@ -566,7 +566,7 @@ state.alertSel = null;
 // Níveis, componente, busca, histograma empilhado por nível (clicar numa
 // barra dá zoom nela) e "ao vivo" (atualiza a cada 3 s com a janela aberta).
 
-const LG_COLORS = { DEBUG: "#5F6A71", INFO: "#7CB7FF", WARN: "#F5B84A", ERROR: "#F0656A" };
+const LG_COLORS = { DEBUG: "#5F6A71", INFO: "#7CB7FF", WARN: COR.att, ERROR: COR.warn };
 const LG_RANGES = { "15m": 15 * 60e3, "1h": 3600e3, "24h": 86400e3, "7d": 7 * 86400e3, all: 0 };
 state.lg = { range: localGet("lgRange", "24h"), levels: (localGet("lgLevels", "INFO,WARN,ERROR")).split(",").filter(Boolean), comp: "", text: "", zoom: null, res: null };
 state.evTab = "log";
@@ -1154,10 +1154,10 @@ function drawHeatTrecho() {
     });
     return d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${dash ? 1.4 : 1.8}"${dash ? ` stroke-dasharray="${dash}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : "";
   };
-  const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="#2A3136" vector-effect="non-scaling-stroke"/>`).join("");
+  const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="${COR.grid}" vector-effect="non-scaling-stroke"/>`).join("");
   $("htRate").innerHTML = grid(RH) +
-    (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="#F5B84A" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
-    line(g, g.length, ry, "#6EE7A0") + line(r, r.length, ry, "#F472B6");
+    (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
+    line(g, g.length, ry, COR.accent) + line(r, r.length, ry, COR.rc);
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
   // dose acumulada: cada aparelho a sua, com o seu teto (o do RadiaCode cheio,
   // o do GMC pontilhado quando os dois aparecem)
@@ -1165,10 +1165,10 @@ function drawHeatTrecho() {
   const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
   const dy = (v) => DH - (v / dtop) * DH;
   $("htDose").innerHTML = grid(DH) +
-    (R ? line(R.ceiling, R.ceiling.length, dy, "#F0656A") : "") +
-    (G ? line(G.ceiling, G.ceiling.length, dy, "#F0656A", R ? "2 4" : "") : "") +
-    (G ? line(G.dose, G.dose.length, dy, "#6EE7A0") : "") +
-    (R ? line(R.dose, R.dose.length, dy, "#F472B6") : "");
+    (R ? line(R.ceiling, R.ceiling.length, dy, COR.warn) : "") +
+    (G ? line(G.ceiling, G.ceiling.length, dy, COR.warn, R ? "2 4" : "") : "") +
+    (G ? line(G.dose, G.dose.length, dy, COR.accent) : "") +
+    (R ? line(R.dose, R.dose.length, dy, COR.rc) : "");
   $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
   $("htX0").textContent = hhmm(p.from);
   $("htX1").textContent = hhmm((p.from + p.to) / 2);
@@ -2831,10 +2831,10 @@ function drawRainCurve(r) {
   };
   const x0 = x(0).toFixed(1), y0 = y(0).toFixed(1);
   $("riChart").innerHTML =
-    `<line x1="0" y1="${y0}" x2="${W}" y2="${y0}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>` +
+    `<line x1="0" y1="${y0}" x2="${W}" y2="${y0}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>` +
     `<rect x="${x0}" y="0" width="${(x(240) - x(0)).toFixed(1)}" height="${H}" fill="#3DA5FF" fill-opacity="0.05"/>` +
     `<line x1="${x0}" y1="0" x2="${x0}" y2="${H}" stroke="#3DA5FF" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>` +
-    line("dry", "#A3ADB4", 1.5) + line("rain", "#3DA5FF", 2.5);
+    line("dry", COR.muted, 1.5) + line("rain", "#3DA5FF", 2.5);
 }
 
 // ---------- anotações ----------
@@ -3453,7 +3453,7 @@ async function refreshPatterns() {
 function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : fmt(v, usvDigits(v)); }
 
 function drawPatterns(p) {
-  const rc = p.device === "radiacode", color = rc ? "#F472B6" : "#6EE7A0";
+  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.accent;
   const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
   $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
     : `${fmt(p.minutes, 0)} min em casa (${p.unit})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
@@ -3472,7 +3472,7 @@ function drawPatterns(p) {
     const x = (h) => (h / 23) * W;
     const y = (v) => PH - ((v - lo) / (hi - lo)) * PH;
     for (let i = 0; i < 4; i++) ys[i].textContent = patVal(p, hi - ((hi - lo) / 3) * i);
-    let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? PH - 0.5 : i === 0 ? 0.5 : (PH / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+    let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? PH - 0.5 : i === 0 ? 0.5 : (PH / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
     // noite (18h–6h) com fundo levemente mais escuro
     out += `<rect x="0" y="0" width="${x(6).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/><rect x="${x(18).toFixed(1)}" y="0" width="${(W - x(18)).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/>`;
     const ok = hs.map((h, i) => ({ h, i })).filter((q) => q.h.n >= 30);
@@ -3481,10 +3481,10 @@ function drawPatterns(p) {
       const bot = ok.slice().reverse().map((q) => `${x(q.i).toFixed(1)} ${y(q.h.p25).toFixed(1)}`).join(" L");
       out += `<path d="M${top} L${bot} Z" fill="${color}" fill-opacity="0.15"/>`;
       out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.median).toFixed(1)}`).join(" L")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
-      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="#E9EDEF" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
+      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="${COR.text}" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
     }
     svg.innerHTML = out;
-    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:#E9EDEF;border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
+    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
   }
   // dia × noite
   const dn = $("patDN");
@@ -3590,25 +3590,25 @@ function drawBgTrend(tr) {
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, hi - lo < 6 ? 1 : 0);
-  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
-  if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="#A3ADB4" fill-opacity="0.06"/>`;
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="${COR.muted}" fill-opacity="0.06"/>`;
   const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = val(p); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
-  out += `<path d="${path((p) => p.mean)}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path((p) => p.mean)}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path((p) => p.median)}" fill="none" stroke="#7DD3FC" stroke-width="1.4" stroke-dasharray="5 3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="#E9EDEF" fill-opacity="0.75"/>`;
+  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="${COR.text}" fill-opacity="0.75"/>`;
   if (f.state === "subindo" || f.state === "descendo") {
-    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   } else if (f.state === "degrau") {
-    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   const lab = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
   const xs = $("bgX").children;
   xs[0].textContent = lab(tr.from); xs[1].textContent = lab((tr.from + tr.to) / 2); xs[2].textContent = "agora";
-  $("bgLegend").innerHTML = '<span class="key"><i style="border-color:#6EE7A0"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
+  $("bgLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.accent + '"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
     '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
-    (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:#F5B84A;border-top-style:dashed"></i>tendência</span>' : "") +
-    (forming ? '<span class="key"><i class="sw" style="background:#A3ADB4"></i>antes do primeiro dado</span>' : "") + " (CPM)";
+    (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:' + COR.att + ';border-top-style:dashed"></i>tendência</span>' : "") +
+    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (CPM)";
 
   // dispersão de cada dia
   const dsvg = $("bgDisp"), DH = 80;
@@ -3617,10 +3617,10 @@ function drawBgTrend(tr) {
   const dys = $("bgDY").children;
   dys[0].textContent = fmt(dtop, 1); dys[1].textContent = fmt(dtop / 2, 1); dys[2].textContent = "0";
   const bw = Math.max(2, (DAY_MS / (tr.to - tr.from)) * W * 0.7);
-  let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="#A3ADB4" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+  let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="${COR.muted}" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
   for (const d of daily) {
     const h = (Math.min(dtop, d.dispersion) / dtop) * DH, cx = x(d.day + DAY_MS / 2);
-    const col = d.dispersion >= 1.2 ? "#F5B84A" : "#6EE7A0";
+    const col = d.dispersion >= 1.2 ? COR.att : COR.accent;
     dout += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${(DH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" fill-opacity="${d.full ? 0.7 : 0.3}"/>`;
   }
   dsvg.innerHTML = dout;
@@ -4338,7 +4338,7 @@ const demoRc = () => {
     SetMeasurementComparable: async (id, comparable, reason) => { const m = measurements.find((x) => x.id === id); if (m) { m.notComparable = !comparable; m.ncReason = comparable ? "" : reason; } setTimeout(() => emit("measurements", measurements.slice()), 0); },
     AddMeasurementAttachment: async (id) => { const m = measurements.find((x) => x.id === id); if (m) { m.attachments = (m.attachments || []).concat([{ file: "foto.jpg", name: "foto.jpg", size: 182000, type: "image/jpeg", added: Date.now() }]); } setTimeout(() => emit("measurements", measurements.slice()), 0); return m ? m.attachments : []; },
     RemoveMeasurementAttachment: async (id, file) => { const m = measurements.find((x) => x.id === id); if (m) m.attachments = (m.attachments || []).filter((a) => a.file !== file); setTimeout(() => emit("measurements", measurements.slice()), 0); },
-    GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="#6EE7A0"/></svg>'),
+    GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="' + COR.accent + '"/></svg>'),
     OpenMeasurementAttachment: async () => {},
     GetPatterns: async (days, dev) => {
       const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 1;
