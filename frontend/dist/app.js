@@ -180,8 +180,8 @@ function renderReading() {
     $("readSigma").hidden = true;
     $("readSigmaNum").hidden = true;
     $("levelName").textContent = "—";
-    $("levelName").className = "level-name";
-    $("levelMarker").hidden = true;
+    $("levelName").className = "sr-only level-name";
+    renderGmcDial(null, "", "");
     $("hero").classList.remove("alarm");
     return;
   }
@@ -210,8 +210,9 @@ function renderReading() {
   }
 
   const names = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
-  lvLabel($("levelName"), r.level, names[r.level] || "—", 16);
-  $("levelName").className = "level-name " + r.level;
+  let dLv = r.level, dWord = names[r.level] || "—";
+  lvLabel($("levelName"), r.level, dWord, 16);
+  $("levelName").className = "sr-only level-name " + r.level;
   // 0 CPM por minutos seguidos: defeito, não "seguro"
   if (r.noCount && !r.saturated) {
     const el = $("readSigma");
@@ -219,13 +220,13 @@ function renderReading() {
     el.className = "sigma high";
     el.hidden = false;
     lvLabel($("levelName"), "nocount", "Sem contagens", 16);
-    $("levelName").className = "level-name nocount";
+    $("levelName").className = "sr-only level-name nocount";
+    dLv = "nocount"; dWord = "Sem contagens";
   }
+  if (r.saturated) dWord = "Saturado";
   if (r.noCount && !state.noCountToast && !r.saturated) toast("Sem contagens há 2 min: confira o contador", true);
   state.noCountToast = !!r.noCount;
-  const m = $("levelMarker");
-  m.hidden = false;
-  m.style.left = Math.min(r.cpm, 150) / 150 * 100 + "%";
+  renderGmcDial(r, dLv, dWord);
   $("hero").classList.toggle("alarm", !!(r.alarm || r.danger));
 }
 
@@ -352,6 +353,7 @@ function renderGTile() {
   state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
   agoraNow();
   tileFoot($("gTileFoot"), u, v, state.gDose);
+  renderDevMini();
   miniDev("G", u, v, lvl, word, s.state === "conectado" ? " on" : s.state === "conectando" ? " wait" : s.state === "erro" ? " err" : "", !live);
 }
 
@@ -768,6 +770,7 @@ async function showView(v, skipRender) {
   }
   if (v === "graficos") refreshSub("graficos");
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
+  renderDevMini();
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
   if (v === "fora") renderPeriods();
@@ -3316,18 +3319,15 @@ function renderRcMain(st) {
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
   $("rcLevelHint").textContent = own ? "alarmes do RadiaCode" : "faixas do app em µSv/h";
-  $("rcLevelScale").innerHTML = own
-    ? `<span>0</span><span>${fmt(attn, 2)} · alarme 1</span><span>${fmt(alarm, 2)} · alarme 2</span>`
-    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alarme</span>`;
   const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
   lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
-  $("rcLevelName").className = "level-name " + lvl;
+  $("rcLevelName").className = "sr-only level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
-  $("rcLevelMarker").hidden = usv == null;
-  if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
+  renderRcDial(st, { usv, cps, lvl, own, attn, alarm });
   renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
   state.rNow = { live, lvl, usv };
   agoraNow();
+  renderDevMini();
   // medidas
   const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";

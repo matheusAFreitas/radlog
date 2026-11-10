@@ -3011,3 +3011,11 @@ Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos en
 Intercalibração com o RadiaCode: coleta cancelada	Cross-calibration with the RadiaCode: collection cancelled
 Calibração do GMC: {0} µSv/h por CPM no fundo, pela intercalibração com o RadiaCode (vale a partir de agora)	GMC calibration: {0} µSv/h per CPM at background, from the cross-calibration with the RadiaCode (applies from now on)
 com o RadiaCode, coleta de {0}	with the RadiaCode, collection of {0}
+abrir	open
+Abrir {0}	Open {0}
+Mostrador	Dial
+alarme 1	alarm 1
+alarme 2	alarm 2
+Nível: Alarme 1	Level: Alarm 1
+Nível: Alarme 2	Level: Alarm 2
+Nível: Saturado	Level: Saturated

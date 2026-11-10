@@ -2082,7 +2082,14 @@ const I18N_EN = {
 "Poucos minutos com os dois em casa para comparar (precisa de 12 h juntos na semana).": "Too few minutes with both at home to compare (it needs 12 h together in the week).",
 "a intercalibração ainda não terminou": "the cross-calibration hasn't finished yet",
 "Intercalibração com o RadiaCode: coleta de 24 h começou (os dois aparelhos encostados)": "Cross-calibration with the RadiaCode: 24 h collection started (both devices touching)",
-"Intercalibração com o RadiaCode: coleta cancelada": "Cross-calibration with the RadiaCode: collection cancelled"
+"Intercalibração com o RadiaCode: coleta cancelada": "Cross-calibration with the RadiaCode: collection cancelled",
+"abrir": "open",
+"Mostrador": "Dial",
+"alarme 1": "alarm 1",
+"alarme 2": "alarm 2",
+"Nível: Alarme 1": "Level: Alarm 1",
+"Nível: Alarme 2": "Level: Alarm 2",
+"Nível: Saturado": "Level: Saturated"
 },
 "patterns": [
 [
@@ -9936,6 +9943,14 @@ const I18N_EN = {
 "${1} attachment",
 [
 " anexo"
+]
+],
+[
+"Abrir ",
+"^Abrir ((?:(?! · ).)+?)$",
+"Open ${1}",
+[
+"Abrir "
 ]
 ],
 [

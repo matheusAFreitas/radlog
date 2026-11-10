@@ -180,6 +180,7 @@
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
     </article>
+    <button type="button" class="card dev-mini" id="devMini" hidden></button>
     <article class="inst inst-alerts" id="aTile">
       <header class="inst-head"><span class="inst-name">Alertas</span><span class="inst-fill"></span><span class="inst-state" id="aTileState"></span></header>
       <div class="inst-al-title" id="aTileTitle">Nenhum alerta ativo</div>
@@ -906,21 +907,9 @@
         </div>
       </div>
 
-      <div class="level">
-        <div class="level-head">
-          <span class="level-name" id="levelName">—</span>
-          <span class="muted small" id="levelHint">faixas do manual do GMC-800</span>
-        </div>
-        <div class="level-bar">
-          <div class="seg-safe"></div>
-          <div class="seg-att"></div>
-          <div class="seg-warn"></div>
-          <div class="marker" id="levelMarker" hidden></div>
-        </div>
-        <div class="level-scale mono">
-          <span>0</span><span>50 · atenção</span><span>100 · alarme</span>
-        </div>
-        <div class="level-foot"><button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
+      <div class="hero-dial">
+        <svg class="dev-dial" id="gHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
+        <div class="hero-dial-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint">faixas do manual do GMC-800</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
 
       <div class="rc-mini">
@@ -986,19 +975,9 @@
         </div>
       </div>
 
-      <div class="level">
-        <div class="level-head">
-          <span class="level-name" id="rcLevelName">—</span>
-          <span class="muted small" id="rcLevelHint">alarmes do RadiaCode</span>
-        </div>
-        <div class="level-bar">
-          <div class="seg-safe"></div>
-          <div class="seg-att"></div>
-          <div class="seg-warn"></div>
-          <div class="marker" id="rcLevelMarker" hidden></div>
-        </div>
-        <div class="level-scale mono" id="rcLevelScale"><span>0</span><span>—</span><span>—</span></div>
-        <div class="level-foot"><button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
+      <div class="hero-dial">
+        <svg class="dev-dial" id="rHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
+        <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint">alarmes do RadiaCode</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
       <div class="rc-mini">
         <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
@@ -1798,6 +1777,7 @@
 <script src="fora.js"></script>
 <script src="onde.js"></script>
 <script src="intercal.js"></script>
+<script src="aparelho.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
