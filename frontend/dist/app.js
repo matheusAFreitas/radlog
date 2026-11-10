@@ -43,6 +43,7 @@ const state = {
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
   periods: [],     // fora de casa
+  where: null,     // onde está cada aparelho (onde.js)
   measurements: [], // medições de objeto salvas
   doseZoom: null,
   doseZoomStack: [],
@@ -204,7 +205,7 @@ function renderReading() {
     el.hidden = false;
   }
 
-  const names = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" };
+  const names = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
   $("levelName").textContent = names[r.level] || "—";
   $("levelName").className = "level-name " + r.level;
   // 0 CPM por minutos seguidos: defeito, não "seguro"
@@ -227,12 +228,12 @@ function renderReading() {
 // ---------- painel dos aparelhos (2.8) ----------
 // Um quadro por aparelho, sempre em cima: o valor na unidade escolhida
 // (µSv/h de padrão), CPM e CPS embaixo, a última hora e a régua com só a
-// faixa atual acesa. Em atenção/alerta/perigo a borda e a palavra do estado
+// faixa atual acesa. Em atenção/alarme/perigo a borda e a palavra do estado
 // mudam de cor. O terceiro quadro resume os alertas.
 
 const UNIT_TXT = { cpm: "CPM", usv: "µSv/h", mrh: "mrem/h", cps: "CPS" };
-const LV_WORD = { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" };
-const TILE_LV = ["seguro", "atencao", "alerta", "perigo", "nocount"];
+const LV_WORD = { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" };
+const TILE_LV = ["seguro", "atencao", "alarme", "perigo", "nocount"];
 
 // valores em cada unidade; o CPS é a média do minuto (CPM ÷ 60)
 function tileVals(usv, cpm, cps) {
@@ -342,7 +343,7 @@ function renderRTile(st, o) {
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
   tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
-  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : LV_WORD;
+  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : LV_WORD;
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—");
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
   $("miniR").hidden = false;
@@ -359,14 +360,14 @@ function renderATile() {
   const dev = (e) => (isRcEv(e) ? "RadiaCode" : "GMC-800");
   const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1) || a.time - b.time)[0];
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
-  const lv = top ? { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
+  const lv = top ? { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
   tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
   const ma = $("miniAlert");
   ma.hidden = !top;
   ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
   $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
   $("mini").classList.toggle("alerting", !!top);
-  ["atencao", "alerta", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
+  ["atencao", "alarme", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
   agoraNow();
   const nav = $("navAlerts");
   nav.hidden = !top;
@@ -733,7 +734,7 @@ async function showView(v, skipRender) {
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
-  if (v === "fora") { renderPeriods(); editPeriod(null); }
+  if (v === "fora") renderPeriods();
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
@@ -838,7 +839,7 @@ function renderDemoRcPresets() {
   const bg = (st.stats && st.stats.bgUSv) || 0.12;
   const list = [[bg, "fundo"]];
   if (l.attn) list.push([l.attn * 1.15, "atenção"]);
-  if (l.alarm) list.push([l.alarm * 1.15, "alerta"]);
+  if (l.alarm) list.push([l.alarm * 1.15, "alarme"]);
   if (l.danger) list.push([l.danger * 1.15, "perigo"]);
   const key = list.map((x) => x[0].toFixed(3)).join("|");
   if (box.dataset.key === key) return;
@@ -2638,6 +2639,7 @@ function wire() {
   wireMeasure();
   setupMeasureHover();
   wirePeriods();
+  wireWhere();
 }
 
 // ---------- eventos vindos do Go ----------
@@ -2659,7 +2661,8 @@ function listen() {
   on("notes", () => { refreshChart(); if (state.view === "resumo") refreshSummary(); });
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
   on("measurements", (list) => { state.measurements = list || []; renderMeasureHistory(); drawMeasureChart(); refreshChart(); });
-  on("periods", (list) => { state.periods = list || []; renderPeriods(); refreshAll(); });
+  on("periods", (list) => { state.periods = normPeriods(list); renderPeriods(); refreshAll(); });
+  on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
     const was = state.status.state;
     state.status = s;
@@ -3262,11 +3265,11 @@ function renderRcMain(st) {
   $("rcLevelHint").textContent = own ? "alarmes do RadiaCode" : "faixas do app em µSv/h";
   $("rcLevelScale").innerHTML = own
     ? `<span>0</span><span>${fmt(attn, 2)} · alarme 1</span><span>${fmt(alarm, 2)} · alarme 2</span>`
-    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alerta</span>`;
-  const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alerta" : usv >= attn ? "atencao" : "seguro";
-  $("rcLevelName").textContent = (own ? { seguro: "Seguro", atencao: "Alarme 1", alerta: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alerta: "Alerta", perigo: "Perigo" })[lvl] || "—";
+    : `<span>0</span><span>${fmt(attn, 2)} · atenção</span><span>${fmt(alarm, 2)} · alarme</span>`;
+  const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
+  $("rcLevelName").textContent = (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—";
   $("rcLevelName").className = "level-name " + lvl;
-  ["seguro", "atencao", "alerta", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
+  ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   $("rcLevelMarker").hidden = usv == null;
   if (usv != null) $("rcLevelMarker").style.left = Math.min(usv, top) / top * 100 + "%";
   renderRTile(st, { usv, cps, live, lvl, own, attn, alarm, top });
@@ -3800,6 +3803,7 @@ async function init() {
   } catch (e) { /* segue */ }
   await refreshRainStatus();
   await refreshPeriods();
+  await refreshWhere();
   await refreshMeasurements();
   await refreshAll();
   refreshAgora(true);
@@ -3859,6 +3863,28 @@ function makeDemoApi() {
     { id: 2, name: "Medição antiga", note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
       obj: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5 + 90e3, end: mt - 864e5 + 150e3 },
       result: { netCPM: 0, netErr: 7.2, netUSv: 0, ratio: 1, sigma: 0, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" } }].sort((a, b) => a.time - b.time);
+  const mockWhere = () => {
+    const now = Date.now();
+    const o = periods.find((q) => now >= q.from && now < (q.to || Infinity));
+    const g = o ? o.gmc || "comigo" : "casa", r = o ? o.radiacode || "comigo" : "comigo";
+    const nh = !!(o && o.notHome && g === "casa" && r === "casa");
+    const pers = r === "comigo" ? "radiacode" : g === "comigo" ? "gmc" : g === "casa" && r === "casa" && !nh ? "gmc" : "", home = g === "casa" ? "gmc" : r === "casa" ? "radiacode" : "";
+    return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo", personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
+  };
+  // estado ao vivo de mentira: ?whlive=gmc:zero,radiacode:off (zero, sat, off) para ver as falhas
+  const mockLive = () => {
+    const now = Date.now(), want = {};
+    for (const kv of (new URLSearchParams(location.search).get("whlive") || "").split(",")) { const [d, v] = kv.split(":"); if (d) want[d] = v; }
+    const one = (dev) => {
+      const v = want[dev];
+      if (v === "zero") return { connected: true, state: "sem contagens", since: now - 14 * 6e4, last: now, lastGood: now - 15 * 6e4 };
+      if (v === "sat") return { connected: true, state: "saturado", since: now - 3 * 6e4, last: now, lastGood: now - 4 * 6e4 };
+      if (v === "off") return { connected: false, state: "sem dado", since: 0, last: now - 42 * 6e4, lastGood: now - 42 * 6e4 };
+      const on = dev === "gmc" || demoRcFake();
+      return on ? { connected: true, state: "lendo", since: 0, last: now, lastGood: now } : { connected: false, state: "sem dado", since: 0, last: 0, lastGood: 0 };
+    };
+    return { gmc: one("gmc"), radiacode: one("radiacode") };
+  };
   let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
@@ -3886,14 +3912,14 @@ function makeDemoApi() {
         changed = true;
       }
       if (changed) { emit("event", { kind: "alerta" }); }
-      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alerta" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
+      emit("reading", { time: Date.now(), cpm: c, cps: Math.round(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alarme" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
       feed(Math.max(0, Math.round(c / 60 + (Math.random() - 0.5) * 2)));
       emit("realReading", { time: Date.now(), cpm: 21, cps: 0, usv: 0.137, mrh: 0.0137, level: "seguro", alarm: false });
       return;
     }
     if (status.state !== "conectado") return;
     const cpm = Math.round(20 + (Math.random() - 0.5) * 12);
-    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0101, mrh: cpm * 0.00101, level: cpm >= 100 ? "alerta" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
+    emit("reading", { time: Date.now(), cpm, cps: Math.round(cpm / 60), usv: cpm * 0.0101, mrh: cpm * 0.00101, level: cpm >= 100 ? "alarme" : cpm >= 50 ? "atencao" : "seguro", alarm: false, attention: cpm >= 50, bgCPM: 20, sigma: (cpm - 20) / Math.sqrt(20) });
     // os dois perto: o GMC vê mais o objeto (beta)
     feed(meas.other && meas.other.role === "objeto" && meas.phase === "objeto" ? (Math.random() < 0.9 ? 1 : 0) + (Math.random() < 0.3 ? 1 : 0) : Math.random() < 0.33 ? 1 : 0);
   }, 1000);
@@ -4588,15 +4614,40 @@ const demoRc = () => {
     UpdateMeasurement: async (id, name, note) => { measurements = measurements.map((m) => (m.id === id ? { ...m, name: name.trim() || m.name, note: note.trim() } : m)); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     DeleteMeasurement: async (id) => { measurements = measurements.filter((m) => m.id !== id); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     SavePeriod: async (p) => {
-      if (!(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
-      p = { ...p, name: (p.name || "").trim() || "Fora de casa" };
+      const g = p.gmc || "comigo", r = p.radiacode || "comigo";
+      if (g === "casa" && r === "comigo") throw new Error("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar");
+      const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
+      if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
+      if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
+      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && r === "casa", name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r }) };
       if (p.id) periods = periods.map((q) => (q.id === p.id ? p : q));
       else { p.id = Math.max(0, ...periods.map((q) => q.id)) + 1; periods.push(p); }
       periods.sort((a, b) => a.from - b.from);
-      setTimeout(() => emit("periods", periods.slice()), 0);
+      setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0);
       return p;
     },
-    DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => emit("periods", periods.slice()), 0); },
+    DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0); },
+    GetWhereabouts: async () => mockWhere(),
+    SetWhereAt: async (g, r, name, from) => {
+      const w = await api.SetWhere(g, r, name);
+      const o = periods.find((q) => q.to === 0);
+      if (o && from < o.from) { o.from = Math.floor(from / 6e4) * 6e4; setTimeout(() => emit("periods", periods.slice()), 0); }
+      return mockWhere();
+    },
+    GetDeviceMarks: async (from, to) => {
+      const h = Math.floor((Date.now() - 864e5) / 36e5) * 36e5;
+      return [{ device: "radiacode", kind: "sem dado", from: h - 5 * 36e5, to: h - 2 * 36e5 }, { device: "gmc", kind: "saturando", from: h + 36e5, to: h + 36e5 + 9e5 },
+        { device: "gmc", kind: "sem contagens", from: h - 3 * 864e5, to: h - 3 * 864e5 + 2 * 36e5 }].filter((m) => m.to > from && m.from < to);
+    },
+    SetWhere: async (g, r, name) => {
+      const now = Math.floor(Date.now() / 6e4) * 6e4;
+      const cur = mockWhere();
+      if (cur.gmc === g && cur.radiacode === r) return cur;
+      periods = periods.filter((q) => !(q.to === 0 && now - q.from < 6e4)).map((q) => (q.to === 0 ? { ...q, to: now } : q));
+      if (!(g === "casa" && r === "comigo")) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || whKind({ gmc: g, radiacode: r }), gmc: g, radiacode: r });
+      setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0);
+      return mockWhere();
+    },
     GetDataStart: async () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() - 1, 1).getTime(); },
     GetHeatmapMonth: async (y, m) => {
       const first = new Date(y, m - 1, 1), t = new Date(); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 1);
@@ -4709,7 +4760,26 @@ const demoRc = () => {
       };
       const personal = demoRcFake() ? await one("radiacode") : { device: "radiacode", hasData: false, periods: [], backgroundRate: 0 };
       const home = await one("gmc");
-      return { now, limitName: "", limitMSvYear: lim, personal, home, default: personal.hasData ? "pessoal" : "casa" };
+      // trechos fora do normal: só marca quem mediu (o modo navegador não refaz a conta)
+      const w = mockWhere();
+      for (const [d, role] of [[personal, "personal"], [home, "home"]]) {
+        d.device = w[role];
+        for (const p of d.periods) {
+          let other = 0, gap = 0;
+          for (const q of periods) {
+            const f = Math.max(q.from, p.from), t = Math.min(q.to || now, now);
+            if (t <= f) continue;
+            const g = q.gmc || "comigo", r = q.radiacode || "comigo";
+            const has = role === "personal" ? (r === "comigo" || g === "comigo" || (g === "casa" && r === "casa" && !q.notHome)) : (g === "casa" || r === "casa");
+            const swapped = role === "personal" ? r !== "comigo" && g !== "fora" : g !== "casa" && r === "casa";
+            if (!has) gap += (t - f) / 6e4; else if (swapped) other += (t - f) / 6e4;
+          }
+          p.gapMinutes = Math.round(gap); p.swapMinutes = Math.round(Math.min(other, p.measuredMinutes));
+          p.device = p.swapMinutes ? "misto" : role === "personal" ? "radiacode" : "gmc";
+          p.mixed = !!p.swapMinutes;
+        }
+      }
+      return { now, limitName: "", limitMSvYear: lim, personal, home, normal: w.normal, default: personal.hasData ? "pessoal" : "casa" };
     },
     _dose: (from, to, step, limit) => {
       const span = to - from;

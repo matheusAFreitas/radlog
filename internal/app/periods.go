@@ -14,17 +14,27 @@ import (
 
 // ---------- períodos fora de casa ----------
 //
-// O usuário marca trechos em que o contador estava fora de casa (passeio,
-// viagem...). As leituras continuam guardadas e entram na dose, mas ficam fora
-// de tudo que descreve o fundo da casa: a mediana do fundo (e o "normal" da
-// leitura), o fundo e o teto do dosímetro, o fundo diário e o padrão por hora.
+// O usuário marca trechos em que os aparelhos não estavam no lugar de sempre
+// (passeio, viagem...). Desde a "onde está cada aparelho" (roles.go), cada
+// trecho diz onde estava cada um; os trechos antigos, sem isso, são "os dois
+// com você". As leituras continuam guardadas e entram na dose, mas o aparelho
+// fora de casa fica fora de tudo que descreve o fundo da casa: a mediana do
+// fundo (e o "normal" da leitura), o fundo e o teto do dosímetro, o fundo
+// diário e o padrão por hora.
 
 // Period é um trecho marcado.
 type Period struct {
 	ID   int64  `json:"id"`
 	From int64  `json:"from"` // ms
-	To   int64  `json:"to"`   // ms
+	To   int64  `json:"to"`   // ms; 0 = até agora (aberto pela tela Agora)
 	Name string `json:"name"`
+	// onde estava cada aparelho: "casa" ou "comigo" ("" = comigo, como nos
+	// trechos de antes da 2.25)
+	GMC string `json:"gmc,omitempty"`
+	RC  string `json:"radiacode,omitempty"`
+	// os dois em casa e você também saiu (esqueceu de levar): a dose pessoal
+	// fica em branco em vez de usar a leitura de casa
+	NotHome bool `json:"notHome,omitempty"`
 }
 
 func (a *App) periodsPath() string { return filepath.Join(a.dataDir, "fora-de-casa.json") }
@@ -60,19 +70,42 @@ func (a *App) GetPeriods() []Period {
 	return append([]Period{}, a.periods...)
 }
 
-// SavePeriod cria (ID 0) ou altera um período.
+// SavePeriod cria (ID 0) ou altera um período. Sem GMC e RC, é "os dois com
+// você" (como os períodos de antes). Um trecho não pode cruzar com outro, e só
+// o trecho aberto pela tela Agora fica sem fim (To = 0).
 func (a *App) SavePeriod(p Period) (Period, error) {
-	if p.To < p.From {
-		p.From, p.To = p.To, p.From
+	var err error
+	if p.GMC, p.RC, err = normWhere(p.GMC, p.RC); err != nil {
+		return p, err
 	}
-	if p.To-p.From < 60_000 {
-		return p, errors.New("o período precisa ter pelo menos 1 minuto")
+	p.NotHome = p.NotHome && p.GMC == WhereHome && p.RC == WhereHome
+	if p.To != 0 && p.To < p.From {
+		p.From, p.To = p.To, p.From
 	}
 	p.Name = strings.TrimSpace(p.Name)
 	if p.Name == "" {
-		p.Name = "Fora de casa"
+		p.Name = periodName(p.GMC, p.RC)
 	}
 	a.mu.Lock()
+	if p.To == 0 {
+		open := false
+		for _, q := range a.periods {
+			open = open || (q.ID == p.ID && q.To == 0)
+		}
+		if !open {
+			a.mu.Unlock()
+			return p, errors.New("o período precisa ter pelo menos 1 minuto")
+		}
+	} else if p.To-p.From < 60_000 {
+		a.mu.Unlock()
+		return p, errors.New("o período precisa ter pelo menos 1 minuto")
+	}
+	for _, q := range a.periods {
+		if q.ID != p.ID && p.From < periodEnd(q) && q.From < periodEnd(p) {
+			a.mu.Unlock()
+			return p, errors.New("esse trecho cruza com outro já marcado")
+		}
+	}
 	if p.ID == 0 {
 		var max int64
 		for _, q := range a.periods {
@@ -97,9 +130,9 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 	}
 	sort.Slice(a.periods, func(i, j int) bool { return a.periods[i].From < a.periods[j].From })
 	a.bgAt = time.Time{} // o fundo muda: recalcula
-	err := a.savePeriodsLocked()
+	err = a.savePeriodsLocked()
 	a.mu.Unlock()
-	a.emit("periods", a.GetPeriods())
+	a.emitPeriods()
 	return p, err
 }
 
@@ -116,32 +149,16 @@ func (a *App) DeletePeriod(id int64) error {
 	a.bgAt = time.Time{}
 	err := a.savePeriodsLocked()
 	a.mu.Unlock()
-	a.emit("periods", a.GetPeriods())
+	a.emitPeriods()
 	return err
 }
 
-// awayChecker devolve uma função que diz se um instante está num período
-// fora de casa (cópia dos períodos, para usar sem segurar o lock).
-func (a *App) awayChecker() func(time.Time) bool {
-	a.mu.Lock()
-	list := append([]Period{}, a.periods...)
-	a.mu.Unlock()
-	if len(list) == 0 {
-		return func(time.Time) bool { return false }
-	}
-	return func(t time.Time) bool {
-		ms := t.UnixMilli()
-		// poucos períodos: busca simples
-		for _, p := range list {
-			if ms >= p.From && ms < p.To {
-				return true
-			}
-		}
-		return false
-	}
-}
+// awayChecker diz se o GMC-800 estava fora de casa num instante (roles.go).
+// Para o RadiaCode, use rcAwayChecker.
+func (a *App) awayChecker() func(time.Time) bool { return a.awayCheckerFor("gmc") }
 
-// homeOnly tira os pontos dos períodos fora de casa e das medições de objeto.
+// homeOnly tira os pontos do GMC fora de casa (roles.go) e
+// das medições de objeto. Para o RadiaCode, use rcHomeOnly.
 func (a *App) homeOnly(pts []store.Point) []store.Point {
 	away := a.awayChecker()
 	measuring := a.measuringChecker()

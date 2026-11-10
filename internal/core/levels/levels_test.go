@@ -7,7 +7,7 @@ import (
 
 func TestLevel(t *testing.T) {
 	lv := Default()
-	cases := map[float64]string{20: "seguro", 50: "atencao", 99: "atencao", 100: "alerta", 999: "alerta", 1000: "perigo"}
+	cases := map[float64]string{20: "seguro", 50: "atencao", 99: "atencao", 100: "alarme", 999: "alarme", 1000: "perigo"}
 	for cpm, want := range cases {
 		if got := Level(cpm, lv); got != want {
 			t.Errorf("Level(%v) = %q, quero %q", cpm, got, want)

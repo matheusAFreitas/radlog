@@ -31,10 +31,20 @@ function agoraNow() {
   const box = $("agSay");
   let lv = "seguro", title, text;
   const parts = [];
-  if (g.live && g.usv != null) parts.push(`Casa em ${fmt(g.usv, 3)} µSv/h`);
-  if (r.live && r.usv != null) parts.push(`você em ${fmt(r.usv, 3)} µSv/h`);
+  // quem está em casa e quem está com você (onde.js)
+  const wh = state.where || {};
+  const gHome = (wh.gmc || "casa") === "casa", rHome = wh.radiacode === "casa";
+  const rd = [];
+  // aparelho fora do cálculo não entra na frase
+  if (g.live && g.usv != null && wh.gmc !== "fora") rd.push([gHome, `${fmt(g.usv, 3)} µSv/h pelo GMC-800`]);
+  if (r.live && r.usv != null && wh.radiacode !== "fora") rd.push([rHome, `${fmt(r.usv, 3)} µSv/h pelo RadiaCode`]);
+  const moved = !gHome || rHome;
+  for (const [home, v] of rd) {
+    if (!moved) parts.push(home ? `Casa em ${v.replace(" pelo GMC-800", "")}` : `você em ${v.replace(" pelo RadiaCode", "")}`);
+    else parts.push(home ? `Casa em ${v}` : `Com você em ${v}`);
+  }
   if (top) {
-    lv = { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao";
+    lv = { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao";
     title = `${lvlName(top)} no ${isRcEv(top) ? "RadiaCode" : "GMC-800"} agora.`;
     text = parts.concat("Veja os detalhes em Alertas.").join(" · ");
   } else if (!g.live && !r.live) {
@@ -42,9 +52,18 @@ function agoraNow() {
     title = "Nenhum aparelho lendo agora.";
     text = "A dose abaixo é a que ficou gravada. Conecte o GMC-800 ou o RadiaCode para acompanhar ao vivo.";
   } else {
-    title = "Tudo normal agora.";
-    if (g.live && g.sigma != null) parts.push(g.sigma < 2 ? "dentro do seu fundo" : `${fmt(g.sigma, 1)} σ acima do seu fundo`);
-    text = parts.join(" · ");
+    // saúde e lugar de cada aparelho (onde.js): falta medição num papel, ou algum fora do normal
+    const cw = whCur(), L = whLines(cw);
+    const lacking = [L.hr, L.pr].some((x) => !x.src && x.why === "sem dado");
+    const odd = ["gmc", "radiacode"].some((dv) => cw[dv] === "fora" || (cw[dv] !== "fora" && ["saturado", "sem contagens"].includes(whLive(dv).state)));
+    if (lacking) {
+      lv = "atencao"; title = "Falta medição agora.";
+      text = [L.home, L.pers].filter((x) => x.cls === "warnb" && !x.sat).map((x) => x.d).join(" ");
+    } else {
+      title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
+      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "dentro do seu fundo" : `${fmt(g.sigma, 1)} σ acima do seu fundo`);
+      text = parts.join(" · ");
+    }
   }
   box.className = "card ag-say lv-" + lv;
   $("agSayTitle").textContent = title;
@@ -63,9 +82,24 @@ function renderAgDose() {
   document.querySelectorAll("#agDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dev === dev)));
   const d = dev === "pessoal" ? agDose.personal : agDose.home;
   $("agDose").classList.toggle("rc", dev === "pessoal");
+  // o aparelho com esse papel agora (onde.js); "" = nenhum
+  const now = d.device === undefined ? (dev === "pessoal" ? "radiacode" : "gmc") : d.device;
+  const since = state.where && state.where.since ? ` desde ${hhmm(state.where.since)}` : "";
+  const devName = { radiacode: "RadiaCode", gmc: "GMC-800" };
+  // por que ninguém faz esse papel agora
+  const wc = whCur(), outs = ["gmc", "radiacode"].filter((x) => wc[x] === "fora").map((x) => devName[x]);
+  const why = outs.length ? `${outs.join(" e ")} fora do cálculo${since}` : null;
   $("agDevNote").textContent = dev === "pessoal"
-    ? (d.hasData ? "Dose pessoal, pelo RadiaCode (anda com você)." : "O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.")
-    : (d.hasData ? "Dose da casa, pelo GMC-800 (fica parado)." : "O GMC-800 ainda não tem dado neste ano.");
+    ? (!now ? `Dose pessoal: nenhum aparelho está com você agora (${why || "os dois em casa" + since}).`
+      : now === "gmc" && wc.gmc === "casa" ? `Dose pessoal pela leitura de casa${since} (os dois ficaram em casa, e você também).`
+      : now === "gmc" ? `Dose pessoal, pelo aparelho que está com você: o GMC-800${since}.`
+      : d.hasData ? "Dose pessoal, pelo RadiaCode (anda com você)." : "O RadiaCode ainda não tem dado neste ano. Troque para \"casa\" para ver a do GMC-800.")
+    : (!now ? `Dose da casa: nenhum aparelho em casa agora (${why || "os dois com você" + since}).`
+      : now === "radiacode" ? `Dose da casa, pelo aparelho que fica parado: o RadiaCode${since}.`
+      : d.hasData ? "Dose da casa, pelo GMC-800 (fica parado)." : "O GMC-800 ainda não tem dado neste ano.");
+  // RadiaCode com você mas longe do PC: a dose segue no aparelho, a curva não
+  const rl = whLive("radiacode");
+  if (dev === "pessoal" && whRole("comigo", whCur()).curve && rl.last) $("agDevNote").textContent += ` Curva incompleta desde ${hhmm(rl.last)}.`;
   const box = $("agCells");
   box.textContent = "";
   const periods = d.periods && d.periods.length ? d.periods : Object.keys(AG_KEYS).map((key) => ({ key, total: 0, measuredMinutes: 0 }));
@@ -74,11 +108,25 @@ function renderAgDose() {
     cell.className = "ag-cell" + (p.key === "dia" ? " now" : "");
     const k = document.createElement("span");
     k.className = "k";
-    k.textContent = AG_KEYS[p.key] || p.key;
+    const kl = document.createElement("span");
+    kl.textContent = AG_KEYS[p.key] || p.key;
+    k.appendChild(kl);
+    // quem mediu (onde está cada aparelho): o aparelho, misto ou ninguém
+    const main = dev === "pessoal" ? "radiacode" : "gmc", other = main === "radiacode" ? "gmc" : "radiacode";
+    const swap = p.swapMinutes || 0, gap = p.gapMinutes || 0, meas = p.measuredMinutes || 0;
+    const nod = p.noDataMinutes || 0, sat = p.satMinutes || 0;
+    const tag = document.createElement("span");
+    tag.className = "wh-src";
+    if (swap && swap < meas) { tag.classList.add("mixed"); tag.innerHTML = '<span class="dot" style="background:var(--swap)"></span>'; tag.append("misto"); }
+    else if (!meas && gap) { tag.classList.add("mixed"); tag.textContent = "sem medição"; cell.classList.add("blankv"); }
+    else if (!meas && nod) { tag.classList.add("mixed"); tag.textContent = "sem dado"; cell.classList.add("blankv"); }
+    else { const who = swap ? other : main; tag.innerHTML = `<span class="dot ${who === "gmc" ? "gmc" : "rc"}"></span>`; tag.append(devName[who]); }
+    k.appendChild(tag);
     const v = document.createElement("span");
     v.className = "v";
     const [num, unit] = agSv(p.measuredMinutes || p.total ? p.total : null);
-    v.textContent = num;
+    // minutos saturados contam pelo valor lido: a dose real é pelo menos isso
+    v.textContent = (sat && meas ? "≥ " : "") + num;
     if (unit) { const u = document.createElement("small"); u.textContent = unit; v.appendChild(u); }
     const n = document.createElement("span");
     n.className = "n";
@@ -92,7 +140,29 @@ function renderAgDose() {
       n.textContent = `o fundo daria ${bn} ${bu}` + (pct >= 1 ? ` · +${pct}%` : pct <= -1 ? ` · ${pct}%` : " · igual");
       if (pct >= 10) n.classList.add("up");
     } else n.textContent = `${fmt(p.coverage * 100, 0)}% medido`;
-    cell.append(k, v, n);
+    cell.append(k, v);
+    if (swap || gap || (nod && meas)) {
+      const tot = meas + gap + nod || 1;
+      const bar = document.createElement("div");
+      bar.className = "wh-mix";
+      bar.setAttribute("aria-hidden", "true");
+      const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--accent)");
+      for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nosig)"]]) {
+        const i = document.createElement("i");
+        i.style.width = `${(w / tot) * 100}%`;
+        i.style.background = bg;
+        bar.appendChild(i);
+      }
+      cell.appendChild(bar);
+      const parts = [];
+      const pc = (x) => { const v = (x / tot) * 100; return v < 1 ? "<1%" : `${Math.round(v)}%`; };
+      if (swap) parts.push(`${pc(swap)} pelo ${devName[other]}`);
+      if (gap) parts.push(`${pc(gap)} sem medição`);
+      if (nod) parts.push(`${pc(nod)} sem dado`);
+      n.textContent = parts.join(" · ");
+      n.classList.remove("up");
+    }
+    cell.append(n);
     box.appendChild(cell);
   }
   // barra do ano: o que já foi, o que só o fundo daria no ano inteiro, e o teto

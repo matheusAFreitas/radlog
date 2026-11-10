@@ -327,27 +327,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if b, err := readZipFile(f); err == nil {
 			var list []Period
 			if json.Unmarshal(b, &list) == nil {
-				a.mu.Lock()
-				var max int64
-				have := map[string]bool{}
-				for _, p := range a.periods {
-					have[fmt.Sprintf("%d-%d", p.From, p.To)] = true
-					max = maxInt64(max, p.ID)
-				}
-				for _, p := range list {
-					if have[fmt.Sprintf("%d-%d", p.From, p.To)] || p.To <= p.From {
-						continue
-					}
-					max++
-					p.ID = max
-					a.periods = append(a.periods, p)
-					res.Periods++
-				}
-				if res.Periods > 0 {
-					sort.Slice(a.periods, func(i, j int) bool { return a.periods[i].From < a.periods[j].From })
-					_ = a.savePeriodsLocked()
-				}
-				a.mu.Unlock()
+				res.Periods = a.mergePeriods(list)
 			}
 		}
 	}

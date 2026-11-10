@@ -13,5 +13,9 @@ const COR = (() => {
     text: v("text", "#E9EDEF"),
     muted: v("muted", "#A3ADB4"),
     grid: v("chart-grid", "#2A3136"), // linhas de grade dos gráficos
+    away: v("away", "#B79CFF"), // fora de casa / fora do lugar
+    obj: v("obj", "#5EEAD4"), // Medir objeto
+    info: v("info", "#7CC7FF"), // chuva, informação
+    note: v("note", "#A3ADB4"), // anotação (cinza)
   });
 })();

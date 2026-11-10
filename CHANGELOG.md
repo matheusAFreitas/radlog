@@ -1,6 +1,6 @@
 # Versões
 
-## 2.22.0
+## 2.27.0
 - **O RadiaCode não perde mais o que mediu com o PC desligado.** Sozinho, o
   aparelho guarda na memória as últimas ~1000 h (a taxa de 96 em 96 s, a
   dose, temperatura, bateria e eventos) e manda tudo quando conecta, marcado
@@ -17,6 +17,104 @@
   antes, é ele que leva; aí o caminho é importar o log do celular.
 - Alarmes do RadiaCode (que trazem a taxa junto) e o contador de dose não
   embaralham mais a leitura do resto do pacote.
+## 2.25.0
+- **Fundação do estilo, passo 5: "Alerta" vira "Alarme" no segundo nível.**
+  Os níveis agora são Seguro, Atenção, Alarme e Perigo. "Alerta" continua
+  sendo o aviso ou o episódio (página Alertas, "Nenhum alerta ativo").
+  - O botão do modo demo e a régua do RadiaCode dizem "150 · alarme" e
+    "· alarme".
+  - O segundo nível fica laranja em todo lugar: no quadro, no menu, na
+    faixa compacta e na frase do Agora (que estava com fundo vermelho). O
+    valor do RadiaCode em Perigo passa a vermelho (estava laranja).
+  - Por dentro: o núcleo (`internal/core/levels`) devolve "alarme", as
+    classes `lv-alerta` viraram `lv-alarme` e saiu a tradução de uma chave
+    para a outra.
+
+## 2.24.0
+- **Fundação do estilo, passo 4: cores restantes.**
+  - **Anotação em cinza.** A marca de anotação nos gráficos sai do roxo,
+    que se confundia com o lilás de "fora de casa", e fica cinza, com o
+    tracejado de sempre. O lilás passa a ser só "fora de casa / fora do
+    lugar".
+  - As cores que ainda estavam escritas à mão viraram tokens no style.css
+    (`--away`, `--obj`, `--info`, as faixas sólidas do alarme e do modo
+    demo, os trilhos e as faixas do quadro de nível) e no JS dos gráficos
+    (`COR.away`, `COR.obj`, `COR.info`, `COR.note`). Fora do `:root` só
+    sobra o degradê do espectro, que é cor de dado.
+  - As transparências agora derivam do token com `color-mix` e ficam em
+    poucas intensidades (6%, 12%, 24% e 50%). Alguns fundos e contornos
+    ficam um pouco mais claros ou mais escuros.
+  - Corrigidas duas cores de reserva erradas (um azul no lugar do verde e
+    um fundo antigo).
+
+## 2.23.0
+- **Fundação do estilo, passo 3: raios.** Os 19 arredondamentos de canto
+  que o app usava viraram os 5 do guia, em 153 lugares: `--radius-xs` (4)
+  para barrinhas, células e etiquetas pequenas, `--radius-sm` (8) para
+  botão, campo e aba, `--radius-md` (10) para segmentado e caixas internas,
+  `--radius-lg` (14) para cartões e `--radius-pill` para chips. Só sobram
+  `50%` (pontos redondos) e `0`. Os cantos mudam 1 ou 2 px em alguns
+  lugares.
+
+## 2.22.0
+- **Fundação do estilo, passo 2: tipo.** Os 29 tamanhos de fonte que o app
+  usava viraram os 11 degraus do guia (`--fs-micro` a `--fs-reading-xl`),
+  em todos os 220 lugares do style.css. A tela muda pouco:
+  - 10 px sobe para 11 (as etiquetas "ao vivo" e "simulado" ficam legíveis);
+  - 14 px vira 15 no texto corrido e 13 em botões, tabelas e etiquetas;
+  - 17 vira 16; 18 e 20 viram 19; 24 e 26 viram 28 (números de quadro);
+  - as leituras grandes de 34 a 44 viram 40; 64 vira 56; 68 e 76 viram 88
+    (e 56 em tela estreita).
+  Sobra só um `font-size: 0`, que esconde o texto do menu recolhido.
+
+## 2.21.2
+- **Fundação do estilo, passo 1: tokens e limpeza.** Arrumação interna do
+  style.css, sem mudança na tela (conferido comparando o estilo calculado
+  de cada elemento em todas as telas do modo demo, antes e depois).
+  - O `:root` ganhou os tokens do guia que faltavam: os 11 degraus de tipo
+    (`--fs-*`), os 5 raios (`--radius-*`), a régua de espaço (`--space-*`),
+    a sombra de elemento flutuante e as cores que ainda estavam soltas
+    (fora de casa, anotação, Medir objeto, informação e as faixas sólidas
+    do alarme). Os próximos passos passam a usar esses nomes.
+  - Regras do mesmo seletor escritas duas ou três vezes foram juntadas num
+    lugar só (de 79 para 34; as que sobraram dependem da ordem em relação a
+    outra regra e ficam para os passos seguintes).
+  - `!important` caiu de 19 para 3 (ficam `[hidden]` e os dois do modo
+    duo); os outros viraram seletores um pouco mais específicos.
+
+## 2.21.1
+- **Atualização automática volta a achar a versão mais nova.** A 2.20.5 e a
+  2.21.0 saíram com dois minutos de diferença, e a 2.20.5 terminou de
+  publicar por último: o GitHub marcou ela como a mais recente e o app
+  (que pergunta só pela mais recente) não oferecia a 2.21.0. Agora as
+  releases saem uma por vez, na ordem, e a última publicada é marcada como
+  a mais recente. Nada muda no app em si.
+
+## 2.21.0
+- **Onde está cada aparelho.** Na tela Agora, um cartão novo diz onde está o
+  GMC-800 e onde está o RadiaCode: em casa, com você ou fora do cálculo. O
+  normal continua sendo o GMC-800 em casa e o RadiaCode com você. Mudar
+  abre uma linha com o que vai acontecer, um nome opcional e Confirmar.
+  - **Dose pessoal:** vem de quem está com você. Com os dois com você, o
+    RadiaCode mede e o GMC-800 preenche as falhas dele. Com os dois em casa,
+    vale a leitura de casa (você também estava em casa); se saiu e esqueceu
+    os dois, marque "eu não estava em casa" e o trecho fica em branco.
+  - **Casa e fundo:** vêm de quem está em casa. Com os dois em casa, o
+    GMC-800 mede e o RadiaCode preenche. Aparelho com você não entra no
+    fundo de casa.
+  - **Fora do cálculo:** para aparelho quebrado, em manutenção ou com
+    leitura não confiável. Dá para valer desde a última leitura boa. Com o
+    GMC-800 sem nenhuma contagem por uns minutos, o app sugere tirar do
+    cálculo para o tubo com defeito não puxar o fundo para baixo.
+  - **Estado ao vivo** de cada aparelho: conectado, desconectado desde
+    HH:MM, saturando ou sem contagens. A frase do topo diz quando falta
+    medição. Minutos saturados contam pelo valor lido, com "≥" na dose.
+  - **Minha dose** mostra quem mediu cada período (o aparelho, "misto" ou
+    "sem medição") e quanto foi de cada um.
+- **Fora de casa virou a lista de trechos.** Linha do tempo dos últimos 7
+  dias por aparelho, com as falhas marcadas (sem dado, saturando, sem
+  contagens), e um formulário para trecho passado com onde estava cada um.
+  Os trechos antigos continuam valendo como "Levei os dois".
 
 ## 2.20.5
 - **Relatório em PDF de novo rápido, e com aviso enquanto gera.** O

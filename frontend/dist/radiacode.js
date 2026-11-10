@@ -279,7 +279,7 @@
     }
     // cursor
     if (sp.hover != null) {
-      const x = xOf(sp.hover); g.strokeStyle = "#B79CFF"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke();
+      const x = xOf(sp.hover); g.strokeStyle = COR.away; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke();
     }
     g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText(LANG === "en" ? "energy (keV)" : "energia (keV)", L + pw, T + 12);
     // números
@@ -563,7 +563,7 @@
     for (let k = 0; k <= 4; k++) {
       const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
       g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), 0), L - 6, y + 4);
-      g.fillStyle = "#B79CFF"; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
+      g.fillStyle = COR.away; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
     }
     g.fillStyle = css("--dim"); g.textAlign = "center";
     for (let t = 0; t <= TL_N; t += 30) g.fillText("min " + t, xOf(Math.min(t, TL_N - 1)), h - 6);
@@ -575,7 +575,7 @@
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
     line(tl.cps, yC, COR.accent);
-    line(tl.hard, yH, "#B79CFF");
+    line(tl.hard, yH, COR.away);
     if (tl.hover != null && tl.hover < tl.shown) { const x = xOf(tl.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
   function hdHover(ev) {
@@ -611,7 +611,7 @@
     for (let k = 0; k <= 4; k++) {
       const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
       g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), cmax < 20 ? 1 : 0), L - 6, y + 4);
-      g.fillStyle = "#B79CFF"; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
+      g.fillStyle = COR.away; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
     }
     const long = d.to - d.from > 26 * 3600e3;
     g.fillStyle = css("--dim");
@@ -648,7 +648,7 @@
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
     line(d.cps, yC, COR.accent);
-    line(d.hard, yH, "#B79CFF");
+    line(d.hard, yH, COR.away);
     if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
     if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
@@ -1121,7 +1121,7 @@
     path(ch.bg, COR.muted, null);
     // linhas dos radionuclídeos da medida
     const ids = (v.opts && v.opts.nuclides) || [], seen = new Set();
-    g.setLineDash([3, 3]); g.strokeStyle = "#B79CFF"; g.fillStyle = "#B79CFF"; g.textAlign = "left";
+    g.setLineDash([3, 3]); g.strokeStyle = COR.away; g.fillStyle = COR.away; g.textAlign = "left";
     for (const nu of v.nuclides || []) if (ids.includes(nu.id)) for (const e of nu.kevs || []) {
       if (seen.has(e)) continue; seen.add(e);
       const x = xOf(e); g.beginPath(); g.moveTo(x, T0); g.lineTo(x, T0 + ph); g.stroke();
