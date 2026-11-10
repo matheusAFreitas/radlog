@@ -1,5 +1,12 @@
 # Versões
 
+## 2.38.2
+- **Configurações: explicações recolhidas em "Como funciona".** Em 23
+  cartões, o texto que só explica (como funciona, de onde vem o número,
+  quando usar) fica fechado no pé do cartão; um clique abre e mostra o texto
+  inteiro. Os campos sobem para o topo. Continuam abertos os avisos que
+  mudam, os valores medidos, as notas de uma linha, a escada de alarmes e os
+  avisos de "não tem volta". A busca continua achando o que está dentro.
 ## 2.38.0
 - **"O RadiaCode estava fora de casa?"** Quando o RadiaCode volta a conectar
   depois de ficar sem conexão pelo menos o tempo da pergunta de fora de casa

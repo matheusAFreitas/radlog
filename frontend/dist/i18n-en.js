@@ -2337,7 +2337,8 @@ const I18N_EN = {
 "Responder": "Answer",
 "Onde ele estava?": "Where was it?",
 "Nome (opcional)": "Name (optional)",
-"RadiaCode sem conexão, sem leituras da memória": "RadiaCode disconnected, no readings from memory"
+"RadiaCode sem conexão, sem leituras da memória": "RadiaCode disconnected, no readings from memory",
+"Como funciona": "How it works"
 },
 "patterns": [
 [

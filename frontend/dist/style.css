@@ -1960,3 +1960,12 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .dev-mini.dm-t-conn-wait .dial-ring { stroke: var(--att); stroke-dasharray: 3.6 3; }
 .dev-mini.dm-t-conn-wait .dial-track { stroke: var(--att); opacity: .5; animation: dl-pulse 1.4s ease-in-out infinite; }
 @media (prefers-reduced-motion: reduce) { .dev-mini.dm-t-conn-wait .dial-track { animation: none; } }
+
+/* "Como funciona" (2.38.2): o texto que só explica fica fechado no pé do cartão */
+#settings details.how { margin-top: var(--space-1); color: var(--muted); font-size: var(--fs-label); }
+#settings details.how > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--dim); font-size: var(--fs-caption); cursor: pointer; list-style: none; border-radius: var(--radius-xs); }
+#settings details.how > summary::-webkit-details-marker { display: none; }
+#settings details.how > summary::before { content: "?"; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid currentColor; border-radius: 50%; box-sizing: border-box; font-size: 10px; font-weight: 600; line-height: 1; }
+#settings details.how > summary:hover, #settings details.how[open] > summary { color: var(--text); }
+#settings details.how > summary:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+#settings details.how > p { margin-top: var(--space-2); }
