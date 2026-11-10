@@ -581,6 +581,7 @@
       <div class="card-head">
         <h2>Alertas ativos</h2>
       </div>
+      <p class="notice ic-maint" id="icMaint" role="status" hidden></p>
       <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li></ul>
       <h3 class="sub-head">Últimos alertas</h3>
       <ul class="events alerts" id="alerts"><li class="muted">Nenhum alerta.</li></ul>
@@ -933,6 +934,7 @@
         <button type="button" class="btn accent" id="btnConnectHint">Conectar</button>
       </div>
     </section>
+  <p class="ic-watch" id="gmcConcord" hidden></p>
   <section class="tiles" hidden>
       <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
       <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
@@ -1531,6 +1533,9 @@
       </div>
       <p class="small muted">Escala a curva do contador (a forma dela continua). Vale a partir de agora; o histórico não muda.</p>
       <p class="small" id="calKHint" hidden></p>
+      <h3 class="sub-head">Intercalibração com o RadiaCode</h3>
+      <div class="ic" id="icBox"></div>
+      <p class="ic-watch" id="icWatch" hidden></p>
       <h3 class="sub-head">Versões</h3>
       <div class="cfg-hist-wrap"><table class="cfg-hist cal-ver"><thead><tr><th>desde</th><th>até</th><th>µSv/h por CPM</th><th>origem</th><th>minutos</th><th></th></tr></thead><tbody id="calVerBody"></tbody></table></div>
       <div class="notice cal-cmp" id="calCmp" hidden></div>
@@ -1792,6 +1797,7 @@
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="onde.js"></script>
+<script src="intercal.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

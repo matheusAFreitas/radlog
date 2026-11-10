@@ -2173,7 +2173,7 @@ function setSearch() {
 
 // versões da calibração do GMC (2.2)
 const calWhen = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
-const calSrcTxt = (v) => v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
+const calSrcTxt = (v) => v.origem === "intercalibração" ? "intercalibração com o RadiaCode" : v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
 async function renderCalHist() {
   if (!api.GetCalHistory) return;
   let h;
@@ -2198,6 +2198,8 @@ async function renderCalHist() {
   }).join("");
   $("calCmp").hidden = true;
   calSuggest();
+  renderIntercal();
+  renderConcord();
 }
 
 async function calSuggest() {
@@ -2648,6 +2650,7 @@ function wire() {
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
+  initIntercal();
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
@@ -4189,6 +4192,7 @@ const demoRc = () => {
   const chartPreview = (period) => api._unused(period);
   let api;
   api = {
+    ...demoIntercal(),
     GetSettings: async () => settings,
     GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\RadLog-v2.0.0.exe", exists: false, current: false, disabled: false, started: false }),
     FixAutostart: async () => ({}),
@@ -4486,7 +4490,7 @@ const demoRc = () => {
       const vs = d.vers.map((v, i) => ({ ...v, ate: d.vers[i + 1] ? d.vers[i + 1].desde : 0, k: v.fator || 0.01014, devK: 0.01014, atual: i === d.vers.length - 1, minutos: i === d.vers.length - 1 ? Math.round((now - v.desde) / 6e4) : 40320 }));
       return { versions: vs.reverse(), retro: d.retro, devK: 0.01014 };
     },
-    SetGMCFactor: async (k) => { demoCal.vers.push({ id: demoCal.vers.length + 1, desde: Date.now(), fator: k, origem: "você", pontos: [] }); },
+    SetGMCFactor: async (k, note, src) => { demoCal.vers.push({ id: demoCal.vers.length + 1, desde: Date.now(), fator: k, origem: src || "você", nota: note || "", pontos: [] }); },
     SetCalRetro: async (id) => { demoCal.retro = id; },
     CompareCal: async (id) => { const v = demoCal.vers.find((x) => x.id === id) || {}; const f = (v.fator || 0.01014) / 0.01014; return { id, from: Date.now() - 28 * 86400e3, to: v.desde, minutes: 40320, doseOrig: 81.2, doseNew: 81.2 * f, avgOrig: 0.121, avgNew: 0.121 * f, maxOrig: 0.42, maxNew: 0.42 * f, changePct: (f - 1) * 100 }; },
     DiagnoseGMCDose: async () => ({ path: "C:\\Users\\voce\\AppData\\Roaming\\RadLog\\diagnostico-dose-gmc-2026-11-07_101500.txt", verdict: "nenhum comando de leitura informa a dose do aparelho; o app continua calculando a dose", unknown: [], changed: [], cfgChanged: 0 }),

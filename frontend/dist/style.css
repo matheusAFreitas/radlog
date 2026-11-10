@@ -1644,3 +1644,25 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 #whBack { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 .wh-nothome { display: flex; gap: var(--space-2); align-items: center; color: var(--muted); }
 .wh-nothome[hidden] { display: none; }
+
+/* intercalibração com o RadiaCode e vigia (ideia 6) */
+.ic { display: flex; flex-direction: column; gap: var(--space-2); }
+.ic-head { display: flex; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; font-weight: 600; }
+.ic-big { font-size: var(--fs-number-l); color: var(--att); line-height: 1; }
+.ic-sub { margin: var(--space-3) 0 0; font-size: var(--fs-body); font-weight: 600; }
+.ic-chart { width: 100%; max-width: 560px; height: auto; display: block; }
+.ic-band { fill: color-mix(in srgb, var(--accent) 18%, transparent); }
+.ic-mid { stroke: var(--accent); stroke-width: 1.5; }
+.ic-err { stroke: var(--muted); stroke-width: 1.2; }
+.ic-dot { fill: var(--text); }
+.ic-tick { font-family: var(--mono); font-size: var(--fs-micro); fill: var(--dim); }
+.ic-cmp { max-width: 560px; }
+.ic-bar { height: 8px; border-radius: var(--radius-pill); background: var(--surface-2); overflow: hidden; max-width: 560px; }
+.ic-bar i { display: block; height: 100%; background: var(--accent); transition: width .4s; }
+.ic-done { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--accent); }
+.ic-watch { margin: var(--space-2) 0 0; font-size: var(--fs-label); color: var(--muted); }
+.ic-watch.ok { color: var(--accent); }
+.ic-watch.warn { color: var(--att); }
+.ic-watch.bad { color: var(--warn); }
+#gmcConcord { margin: 0 var(--space-1) var(--space-4); }
+.ic-maint { margin: 0 0 var(--space-3); border-color: var(--att); }

@@ -336,7 +336,11 @@ func (a *App) GetCalHistory() CalHistory {
 
 // SetGMCFactor cria uma versão nova, valendo a partir de agora, com o µSv/h
 // por CPM no fundo informado (0 = volta à curva do contador).
-func (a *App) SetGMCFactor(k float64, note string) error {
+func (a *App) SetGMCFactor(k float64, note string) error { return a.setGMCFactor(k, "você", note) }
+
+// setGMCFactor grava a versão nova com a origem dada ("você" ou
+// "intercalibração").
+func (a *App) setGMCFactor(k float64, source, note string) error {
 	if k != 0 && (k < 0.0005 || k > 0.1) {
 		return errors.New("fator fora da faixa (0,0005 a 0,1 µSv/h por CPM)")
 	}
@@ -350,12 +354,14 @@ func (a *App) SetGMCFactor(k float64, note string) error {
 			return errors.New("esse já é o fator em uso")
 		}
 	}
-	v := CalVersion{ID: a.calNextIDLocked(), Since: time.Now().UnixMilli(), Points: pts, Factor: k, Source: "você", Note: note}
+	v := CalVersion{ID: a.calNextIDLocked(), Since: time.Now().UnixMilli(), Points: pts, Factor: k, Source: source, Note: note}
 	a.calHist.Versions = append(a.calHist.Versions, v)
 	a.saveCalHistLocked()
 	a.mu.Unlock()
 	if k == 0 {
 		a.logEvent("Calibração do GMC: voltou à curva do contador (vale a partir de agora)")
+	} else if source == srcIntercal {
+		a.logEvent(fmt.Sprintf("Calibração do GMC: %s µSv/h por CPM no fundo, pela intercalibração com o RadiaCode (vale a partir de agora)", fmtBR(k, 5)))
 	} else {
 		a.logEvent(fmt.Sprintf("Calibração do GMC: %s µSv/h por CPM no fundo, informado à mão (vale a partir de agora)", fmtBR(k, 5)))
 	}

@@ -94,7 +94,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile}
+	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", cfgHistFile, calHistFile, intercalFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -399,6 +399,16 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	if f, ok := files[calHistFile]; ok {
 		if b, err := readZipFile(f); err == nil {
 			a.calMerge(b)
+		}
+	}
+
+	// intercalibração com o RadiaCode: só entra se aqui não houver nenhuma
+	if f, ok := files[intercalFile]; ok && a.loadIntercal().Start == 0 {
+		if b, err := readZipFile(f); err == nil {
+			var d intercalData
+			if json.Unmarshal(b, &d) == nil && d.Start > 0 {
+				_ = a.saveIntercal(d)
+			}
 		}
 	}
 
