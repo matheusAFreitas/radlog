@@ -172,6 +172,11 @@ function renderAgDose() {
       n.classList.remove("up");
     }
     cell.append(n);
+    // em coisas conhecidas: tempo de fundo da casa e banana, voo, raio-X
+    if (p.measuredMinutes || p.total) {
+      const kn = doseKnownEl(p.total, d.backgroundRate || null, "ag-known");
+      if (kn) cell.append(kn);
+    }
     box.appendChild(cell);
   }
   // barra do ano: o que já foi, o que só o fundo daria no ano inteiro, e o teto

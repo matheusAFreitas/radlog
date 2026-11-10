@@ -3550,3 +3550,26 @@ já na distância medida o extra do objeto fica abaixo de 10% do fundo (aproxima
 Atividade estimada	Estimated activity
 {0} a {1} de {2} (ordem de grandeza; Γ = {3} µSv·m²/h por MBq)	{0} to {1} of {2} (order of magnitude; Γ = {3} µSv·m²/h per MBq)
 Medir	Measure
+# 2.41: dose em coisas conhecidas
+menos de 1 min do fundo da sua casa	less than 1 min of your home background
+≈ {0} min do fundo da sua casa	≈ {0} min of your home background
+≈ {0} h do fundo da sua casa	≈ {0} h of your home background
+≈ {0} dia do fundo da sua casa	≈ {0} day of your home background
+≈ {0} dias do fundo da sua casa	≈ {0} days of your home background
+≈ {0} semana do fundo da sua casa	≈ {0} week of your home background
+≈ {0} semanas do fundo da sua casa	≈ {0} weeks of your home background
+≈ {0} mês do fundo da sua casa	≈ {0} month of your home background
+≈ {0} meses do fundo da sua casa	≈ {0} months of your home background
+≈ {0} ano do fundo da sua casa	≈ {0} year of your home background
+≈ {0} anos do fundo da sua casa	≈ {0} years of your home background
+≈ {0} tomografia de tórax	≈ {0} chest CT scan
+≈ {0} tomografias de tórax	≈ {0} chest CT scans
+≈ {0} raio-X de tórax	≈ {0} chest X-ray
+≈ {0} hora de voo	≈ {0} hour of flight
+≈ {0} horas de voo	≈ {0} hours of flight
+≈ {0} banana	≈ {0} banana
+≈ {0} bananas	≈ {0} bananas
+≈ meia hora de voo	≈ half an hour of flight
+≈ meia banana	≈ half a banana
+ver na régua de radiação	see on the radiation ruler
+dose extra	extra dose

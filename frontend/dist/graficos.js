@@ -581,9 +581,11 @@ async function refreshDose() {
   }
 
   const [tv, tu] = fmtDose(c.total);
-  const cmp = doseCompare(c.total);
-  $("doseCmpTxt").textContent = cmp;
-  $("doseCmp").hidden = !cmp;
+  const cmp = doseKnown(c.total, c.backgroundRate || homeBgUSv());
+  const ct = $("doseCmpTxt");
+  ct.textContent = "";
+  cmp.forEach((l, i) => { if (i) ct.append(" · "); const s = document.createElement("span"); s.textContent = l; ct.appendChild(s); });
+  $("doseCmp").hidden = !cmp.length;
   $("doseTotal").textContent = tv;
   $("doseTotal").nextElementSibling.textContent = tu;
   renderDoseDevice();

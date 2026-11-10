@@ -52,7 +52,7 @@ type reportData struct {
 	S                                         Summary
 	HasData                                   bool
 	Avg, AvgUSv, Min, Max, MinAt, MaxAt       string
-	Dose, DoseYear, XRay, Bg, BgUSv, VsBg     string
+	Dose, DoseYear, Known, Bg, BgUSv, VsBg    string
 	Coverage, Away                            string
 	Alerts                                    string
 	Rain                                      string
@@ -233,11 +233,6 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		r.MaxAt = time.UnixMilli(s.MaxAt).Format("02/01 15:04")
 	}
 	r.Dose = fmtBR(s.Dose, 2)
-	if xr := s.Dose / 20; xr >= 1 {
-		r.XRay = "≈ " + fmtBR(xr, 1) + " raios-X de tórax · "
-	} else if xr >= 0.001 {
-		r.XRay = fmt.Sprintf("≈ 1/%.0f de um raio-X de tórax · ", 1/xr)
-	}
 	if s.BgOK && s.BgCPM > 0 {
 		r.Bg = fmtBR(s.BgCPM, 1)
 		r.BgU = cal.USv(s.BgCPM)
@@ -250,6 +245,8 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			r.VsBg = sign + fmtBR(s.VsBgPct, 1) + "%"
 		}
 	}
+	// dose em coisas conhecidas (2.41): tempo de fundo da casa e uma referência
+	r.Known = doseKnown(s.Dose, r.BgU)
 	r.Coverage = fmtBR(s.Coverage*100, 0) + "%"
 	if s.AwayMinutes > 0 {
 		r.Away = fmtMinutes(s.AwayMinutes)

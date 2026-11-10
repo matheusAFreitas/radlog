@@ -567,7 +567,7 @@ async function refreshStats() {
   $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
   if (gmcConn()) renderGmcConn(); // desconectado: "até HH:MM"
-  $("heroDose").title = s.minutesToday ? `Hoje: ${doseCompare(s.doseToday)} · calculada pelo app (o GMC não informa a dose que soma)` : "";
+  $("heroDose").title = s.minutesToday ? `Hoje: ${doseKnown(s.doseToday, homeBgUSv()).join(" · ")} · calculada pelo app (o GMC não informa a dose que soma)` : "";
 }
 
 async function refreshDaily() {

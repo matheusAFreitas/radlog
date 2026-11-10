@@ -104,16 +104,87 @@ function reguaLadder(el, refs, heres, unit) {
   }
 }
 
-// frase curta para a dose: "≈ 1/3 de um raio-X de tórax"
-function doseCompare(uSv) {
+// ---------- dose em coisas conhecidas (2.41) ----------
+//
+// "2,9 µSv" não diz muito. Cada dose ganha duas linhas: quanto tempo de fundo
+// da casa isso é (a comparação mais honesta) e uma coisa conhecida da régua
+// que dê um número entre 1 e 30. Nunca compara com acidentes. É ordem de
+// grandeza: no máximo dois dígitos.
+
+// da maior para a menor; a primeira que der entre 1 e 30 vale
+const DOSE_KNOWN = [
+  { v: 7000, one: "tomografia de tórax", many: "tomografias de tórax" },
+  { v: 20, one: "raio-X de tórax", many: "raios-X de tórax" },
+  { v: 4, one: "hora de voo", many: "horas de voo", half: "≈ meia hora de voo" },
+  { v: 0.1, one: "banana", many: "bananas", half: "≈ meia banana" },
+];
+
+// "≈ 1", "≈ 2,5", "≈ 12", "≈ 120": meio a meio até 10, depois dois dígitos
+function knownNum(x) {
+  if (x < 10) return Math.max(1, Math.round(x * 2) / 2);
+  if (x < 100) return Math.round(x);
+  const p = Math.pow(10, Math.floor(Math.log10(x)) - 1);
+  return Math.round(x / p) * p;
+}
+const knownTxt = (n) => fmt(n, n % 1 ? 1 : 0);
+
+// tempo de fundo da casa: "≈ 6 h do fundo da sua casa"
+function doseHomeTime(uSv, bg) {
+  if (!(uSv > 0) || !(bg > 0)) return "";
+  const h = uSv / bg;
+  const one = (n, a, b) => `≈ ${knownTxt(n)} ${n === 1 ? a : b} do fundo da sua casa`;
+  if (h < 1 / 60) return "menos de 1 min do fundo da sua casa";
+  if (h < 1) return `≈ ${knownTxt(knownNum(h * 60))} min do fundo da sua casa`;
+  if (h < 24) return `≈ ${knownTxt(knownNum(h))} h do fundo da sua casa`;
+  const d = h / 24;
+  if (d < 14) return one(knownNum(d), "dia", "dias");
+  if (d < 61) return one(knownNum(d / 7), "semana", "semanas");
+  if (d < 335) return one(knownNum(d / 30.44), "mês", "meses");
+  return one(knownNum(d / 365.25), "ano", "anos");
+}
+
+// coisa conhecida: "≈ 29 bananas", "≈ 3 horas de voo"; "" se nenhuma der
+function doseKnownThing(uSv) {
   if (!(uSv > 0)) return "";
-  const parts = [];
-  const xr = uSv / 20;
-  if (xr >= 0.001 && xr < 1) parts.push(`≈ 1/${fmt(Math.round(1 / xr), 0)} de um raio-X de tórax`);
-  else if (xr >= 1 && xr < 350) parts.push(`≈ ${fmt(xr, xr < 10 ? 1 : 0)} raios-X de tórax`);
-  const tc = uSv / 7000;
-  if (uSv >= 700) parts.push(`≈ ${fmt(tc, tc < 10 ? (tc < 1 ? 2 : 1) : 0)} ${tc < 1.5 ? "tomografia" : "tomografias"} de tórax`);
-  return parts.slice(0, 2).join(" · ");
+  for (const k of DOSE_KNOWN) {
+    const x = uSv / k.v;
+    if (x >= 0.75 && x <= 30.5) {
+      const n = knownNum(x);
+      return `≈ ${knownTxt(n)} ${n === 1 ? k.one : k.many}`;
+    }
+  }
+  const last = DOSE_KNOWN[DOSE_KNOWN.length - 1], x = uSv / last.v;
+  return x >= 0.4 && x < 0.75 ? last.half : "";
+}
+
+function doseKnown(uSv, bg) {
+  return [doseHomeTime(uSv, bg), doseKnownThing(uSv)].filter(Boolean);
+}
+
+// fundo da casa em µSv/h (o que a régua usa), para quem não tem o próprio
+function homeBgUSv() {
+  const bg = (state.last && state.last.bgCPM) || state.bgCPM;
+  if (bg) return bg * calK();
+  const rs = (state.rc && state.rc.st && state.rc.st.stats) || {};
+  return rs.bgUSv > 0 ? rs.bgUSv : 0;
+}
+
+// as duas linhas, clicáveis: abrem a régua de dose. Cada linha num span
+// (a tradução é por frase inteira).
+function doseKnownEl(uSv, bg, cls) {
+  const lines = doseKnown(uSv, bg == null ? homeBgUSv() : bg);
+  if (!lines.length) return null;
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "dose-known" + (cls ? " " + cls : "");
+  b.dataset.regua = "dose";
+  b.title = "ver na régua de radiação";
+  for (const l of lines) {
+    const s = document.createElement("span");
+    s.textContent = l;
+    b.appendChild(s);
+  }
+  return b;
 }
 
 function openRegua(which) {
