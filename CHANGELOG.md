@@ -1,6 +1,6 @@
 # Versões
 
-## 2.35.2
+## 2.35.3
 - **Histórico do RadiaCode sem o buraco do fim.** No segundo teste, a
   memória do aparelho voltou inteira, mas os últimos 2 minutos antes da
   reconexão ficavam vazios ou pela metade. Isso acontecia por dois motivos.
