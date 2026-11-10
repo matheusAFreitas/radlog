@@ -44,7 +44,7 @@ function agoraNow() {
     else parts.push(home ? `Casa em ${v}` : `Com você em ${v}`);
   }
   if (top) {
-    lv = { alarme: "alerta", perigo: "perigo" }[lvlCls(top)] || "atencao";
+    lv = { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao";
     title = `${lvlName(top)} no ${isRcEv(top) ? "RadiaCode" : "GMC-800"} agora.`;
     text = parts.concat("Veja os detalhes em Alertas.").join(" · ");
   } else if (!g.live && !r.live) {

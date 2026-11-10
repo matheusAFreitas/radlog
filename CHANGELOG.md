@@ -1,5 +1,18 @@
 # Versões
 
+## 2.25.0
+- **Fundação do estilo, passo 5: "Alerta" vira "Alarme" no segundo nível.**
+  Os níveis agora são Seguro, Atenção, Alarme e Perigo. "Alerta" continua
+  sendo o aviso ou o episódio (página Alertas, "Nenhum alerta ativo").
+  - O botão do modo demo e a régua do RadiaCode dizem "150 · alarme" e
+    "· alarme".
+  - O segundo nível fica laranja em todo lugar: no quadro, no menu, na
+    faixa compacta e na frase do Agora (que estava com fundo vermelho). O
+    valor do RadiaCode em Perigo passa a vermelho (estava laranja).
+  - Por dentro: o núcleo (`internal/core/levels`) devolve "alarme", as
+    classes `lv-alerta` viraram `lv-alarme` e saiu a tradução de uma chave
+    para a outra.
+
 ## 2.24.0
 - **Fundação do estilo, passo 4: cores restantes.**
   - **Anotação em cinza.** A marca de anotação nos gráficos sai do roxo,

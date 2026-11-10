@@ -26,10 +26,10 @@
 1 hora	1 hour
 1 mSv por ano, além do fundo natural e de exames médicos	1 mSv per year, on top of natural background and medical exams
 1. Fundo	1. Background
-100 · alerta	100 · alert
+100 · alarme	100 · alarm
 134 com síndrome aguda da radiação, com doses de menos de 2,1 até 16 Gy; 28 morreram em até 3 meses	134 with acute radiation syndrome, with doses from under 2.1 up to 16 Gy; 28 died within 3 months
 14 dias	14 days
-150 · alerta	150 · alert
+150 · alarme	150 · alarm
 1σ = raiz da média	1σ = square root of the mean
 2. Com o objeto	2. With the object
 20 mSv por ano (média de 5 anos)	20 mSv per year (5-year average)
@@ -2689,7 +2689,7 @@ Valor simulado do RadiaCode (µSv/h)	Simulated RadiaCode value (µSv/h)
 Valor simulado do RadiaCode em escala logarítmica	Simulated RadiaCode value on a logarithmic scale
 {0} · fundo	{0} · background
 {0} · atenção	{0} · attention
-{0} · alerta	{0} · alert
+{0} · alarme	{0} · alarm
 {0} · perigo	{0} · danger
 simulado	simulated
 RadiaCode simulado ligado ({0} µSv/h)	Simulated RadiaCode on ({0} µSv/h)

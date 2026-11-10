@@ -452,7 +452,7 @@ body.alarming .hero .value { color: var(--alarm); }
 body.alarming.danger .hero .value { color: var(--warn); }
 .hero.alarm { border-color: var(--alarm); }
 body.danger .hero.alarm { border-color: var(--warn); }
-.level-name.alerta { color: var(--alarm); }
+.level-name.alarme { color: var(--alarm); }
 .level-name.perigo { color: var(--warn); }
 
 .danger-note { color: var(--muted); border-left: 3px solid var(--warn); padding: 6px 10px; background: color-mix(in srgb, var(--warn) 6%, transparent); border-radius: var(--radius-xs); }
@@ -1120,10 +1120,11 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .duo.on + .tiles { display: none; }
 .rc-main { --glow: color-mix(in srgb, var(--accent) 6%, transparent); background: linear-gradient(180deg, var(--glow), transparent 55%), var(--surface); transition: --glow .8s ease, border-color .4s; }
 .rc-main.lv-atencao { --glow: color-mix(in srgb, var(--att) 12%, transparent); border-color: var(--att); }
-.rc-main.lv-alerta { --glow: color-mix(in srgb, var(--alarm) 24%, transparent); border-color: var(--alarm); }
+.rc-main.lv-alarme { --glow: color-mix(in srgb, var(--alarm) 24%, transparent); border-color: var(--alarm); }
 .rc-main.lv-perigo { --glow: color-mix(in srgb, var(--warn) 24%, transparent); border-color: var(--warn); }
 .rc-main.lv-atencao .rc-main-val { color: var(--att); }
-.rc-main.lv-alerta .rc-main-val, .rc-main.lv-perigo .rc-main-val { color: var(--alarm); }
+.rc-main.lv-alarme .rc-main-val { color: var(--alarm); }
+.rc-main.lv-perigo .rc-main-val { color: var(--warn); }
 .rc-main.stale { --glow: transparent; }
 
 /* lado a lado: os dois quadros com a mesma estrutura, linha por linha
@@ -1247,7 +1248,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side-nav button:hover { background: var(--surface-2); color: var(--text); }
 .side-nav button[aria-current="page"] { background: var(--surface-2); color: var(--text); font-weight: 500; box-shadow: inset 3px 0 0 var(--accent); }
 .side-badge { min-width: 20px; height: 20px; padding: 0 6px; border-radius: var(--radius-md); display: inline-flex; align-items: center; justify-content: center; font-size: var(--fs-caption); font-weight: 600; background: var(--att); color: var(--on-accent); }
-.side-badge.lv-alerta { background: var(--alarm); }
+.side-badge.lv-alarme { background: var(--alarm); }
 .side-badge.lv-perigo { background: var(--warn); }
 .side-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--att); flex: none; }
 #navRcDot { background: var(--warn); }
@@ -1318,16 +1319,16 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 /* só a faixa da leitura acende; borda e estado na cor do nível */
 .inst.lv-seguro .s-safe { background: var(--accent); }
 .inst.lv-atencao .s-att { background: var(--att); }
-.inst.lv-alerta .s-high { background: var(--alarm); }
+.inst.lv-alarme .s-high { background: var(--alarm); }
 .inst.lv-perigo .s-high { background: var(--warn); }
 .inst.lv-seguro .inst-state { color: var(--accent); }
 .inst.lv-atencao, .inst.lv-nocount { --sc: var(--att); border-color: var(--att); background: linear-gradient(180deg, color-mix(in srgb, var(--att) 6%, transparent), transparent 70%), var(--surface); }
-.inst.lv-alerta { --sc: var(--alarm); border-color: var(--alarm); background: linear-gradient(180deg, color-mix(in srgb, var(--alarm) 12%, transparent), transparent 70%), var(--surface); }
+.inst.lv-alarme { --sc: var(--alarm); border-color: var(--alarm); background: linear-gradient(180deg, color-mix(in srgb, var(--alarm) 12%, transparent), transparent 70%), var(--surface); }
 .inst.lv-perigo { --sc: var(--warn); border-color: var(--warn); background: linear-gradient(180deg, color-mix(in srgb, var(--warn) 12%, transparent), transparent 70%), var(--surface); }
 .inst.lv-atencao .inst-state, .inst.lv-nocount .inst-state, .inst.lv-atencao .inst-al-title { color: var(--att); }
-.inst.lv-alerta .inst-state, .inst.lv-alerta .inst-al-title { color: var(--alarm); }
+.inst.lv-alarme .inst-state, .inst.lv-alarme .inst-al-title { color: var(--alarm); }
 .inst.lv-perigo .inst-state, .inst.lv-perigo .inst-al-title { color: var(--warn); }
-.inst-rc.lv-atencao, .inst-rc.lv-alerta, .inst-rc.lv-perigo { --sc: var(--rc); }
+.inst-rc.lv-atencao, .inst-rc.lv-alarme, .inst-rc.lv-perigo { --sc: var(--rc); }
 
 /* páginas: gráfico maior, já que agora ocupa a largura toda */
 #pageGraficos #cpmCard .y-axis, #pageGraficos #cpmCard .plot, #pageDose .y-axis, #pageDose .plot { height: 260px; }
@@ -1387,14 +1388,14 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .mini-dev.stale .mini-val { color: var(--dim); }
 .mini-dev.lv-seguro .mini-state { color: var(--accent); }
 .mini-dev.lv-atencao .mini-state, .mini-dev.lv-nocount .mini-state { color: var(--att); }
-.mini-dev.lv-alerta .mini-state { color: var(--alarm); }
+.mini-dev.lv-alarme .mini-state { color: var(--alarm); }
 .mini-dev.lv-perigo .mini-state { color: var(--warn); }
 .mini-alert { --c: var(--att); display: inline-flex; align-items: center; gap: 6px; min-height: 28px; padding: 0 10px; border: 1px solid var(--c); border-radius: var(--radius-lg); background: transparent; color: var(--c); font-size: var(--fs-label); font-weight: 600; white-space: nowrap; }
 .mini-alert i { width: 6px; height: 6px; border-radius: 50%; background: var(--c); }
-.mini-alert.lv-alerta { --c: var(--alarm); }
+.mini-alert.lv-alarme { --c: var(--alarm); }
 .mini-alert.lv-perigo { --c: var(--warn); }
 .mini.lv-atencao { border-bottom-color: var(--att); }
-.mini.lv-alerta { border-bottom-color: var(--alarm); }
+.mini.lv-alarme { border-bottom-color: var(--alarm); }
 .mini.lv-perigo { border-bottom-color: var(--warn); }
 .mini-top { display: inline-flex; align-items: center; gap: 6px; min-height: 32px; padding: 0 8px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); white-space: nowrap; }
 .mini-top:hover { color: var(--text); background: var(--surface-2); }
@@ -1488,7 +1489,8 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .ag-say { flex-direction: row; justify-content: space-between; align-items: center; gap: 18px; flex-wrap: wrap;
   background: linear-gradient(90deg, var(--accent-soft), var(--surface) 60%); }
 .ag-say.lv-atencao { background: linear-gradient(90deg, color-mix(in srgb, var(--att) 12%, transparent), var(--surface) 60%); }
-.ag-say.lv-alerta, .ag-say.lv-perigo { background: linear-gradient(90deg, color-mix(in srgb, var(--warn) 12%, transparent), var(--surface) 60%); }
+.ag-say.lv-alarme { background: linear-gradient(90deg, color-mix(in srgb, var(--alarm) 12%, transparent), var(--surface) 60%); }
+.ag-say.lv-perigo { background: linear-gradient(90deg, color-mix(in srgb, var(--warn) 12%, transparent), var(--surface) 60%); }
 .ag-say.lv-off { background: var(--surface); }
 .ag-say h2 { font-size: var(--fs-title); }
 .ag-say-text { display: flex; flex-direction: column; gap: 4px; min-width: 0; }

@@ -246,7 +246,7 @@ function renderSumSay(r, rc) {
     parts.push("Escolha outro período ou confira se os aparelhos estão gravando.");
   } else {
     if (n.danger) { lv = "perigo"; title = "Teve perigo no período."; }
-    else if (n.alarm) { lv = "alerta"; title = "Teve alarme no período."; }
+    else if (n.alarm) { lv = "alarme"; title = "Teve alarme no período."; }
     else if (gAbove || rAbove) { lv = "atencao"; title = "Fundo acima do normal no período."; }
     else if (n.attention) { lv = "atencao"; title = "Período normal, com alertas de atenção."; }
     else title = "Período normal.";
