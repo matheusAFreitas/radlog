@@ -227,7 +227,7 @@ function renderAlertHistory(all) {
 
 // ---------- gráfico detalhado do alerta (tela Alertas) ----------
 
-const LVL_COLOR = { atencao: "#F5B84A", alarme: "#F28C38", perigo: "#F0656A" };
+const LVL_COLOR = { atencao: COR.att, alarme: COR.alarm, perigo: COR.warn };
 
 function selectAlert(id) {
   state.alertSel = id;
@@ -281,7 +281,7 @@ function drawAlertDetail(d) {
   for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = rc ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
   }).join("");
   // faixa do alerta
   const xa = x(e.time), xb = x(d.end);
@@ -297,12 +297,12 @@ function drawAlertDetail(d) {
       return `${cont ? "L" : "M"}${a.toFixed(1)} ${yy}L${b.toFixed(1)} ${yy}`;
     }).join("");
     out += secs.length
-      ? `<path d="${d1}" fill="none" stroke="#A3ADB4" stroke-opacity="0.55" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`
-      : `<path d="${d1}" fill="none" stroke="${rc ? "#F472B6" : "#6EE7A0"}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      ? `<path d="${d1}" fill="none" stroke="${COR.muted}" stroke-opacity="0.55" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`
+      : `<path d="${d1}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
   }
   if (secs.length > 1) {
     const d2 = secs.map((p, i) => (i && p.t - secs[i - 1].t <= 10e3 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d2}" fill="none" stroke="${rc ? "#F472B6" : "#6EE7A0"}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d2}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   // pico (bolinha em HTML para não esticar)
@@ -318,10 +318,10 @@ function drawAlertDetail(d) {
   const xs = $("adX").children;
   xs[0].textContent = xl(t0); xs[1].textContent = xl(t0 + (t1 - t0) / 2); xs[2].textContent = xl(t1);
   $("adLegend").innerHTML =
-    (rc ? (secs.length ? '<span class="key"><i style="border-color:#F472B6"></i>leitura ao vivo do RadiaCode (µSv/h)</span><span class="key"><i style="border-color:#A3ADB4"></i>valor do minuto</span>'
-      : '<span class="key"><i style="border-color:#F472B6"></i>valor do minuto do RadiaCode (µSv/h)</span>')
-      : secs.length ? '<span class="key"><i style="border-color:#6EE7A0"></i>leitura a cada segundo</span><span class="key"><i style="border-color:#A3ADB4"></i>valor do minuto (gráfico principal)</span>'
-      : '<span class="key"><i style="border-color:#6EE7A0"></i>valor do minuto (gráfico principal)</span>') +
+    (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RadiaCode (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
+      : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RadiaCode (µSv/h)</span>')
+      : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
+      : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
   const note = $("adNote");

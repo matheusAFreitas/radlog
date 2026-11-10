@@ -209,6 +209,32 @@
     <span class="chip mono" id="agSayBg" hidden></span>
   </section>
 
+  <section class="card wh-card" id="whCard">
+    <div class="wh-head">
+      <h2>Onde está cada aparelho <span class="chip off" id="whChip" hidden></span></h2>
+      <span class="small muted">o normal: GMC-800 em casa, RadiaCode com você</span>
+    </div>
+    <div class="wh-rows">
+      <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
+        <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+      <div class="wh-row"><div class="t"><b><span class="dot rc"></span>RadiaCode</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>
+        <div class="seg loc" role="group" aria-label="Onde está o RadiaCode" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+    </div>
+    <div id="whSuggest"></div>
+    <div class="wh-sheet" id="whSheet" hidden>
+      <p id="whSheetTxt"></p>
+      <div class="wh-reasons" id="whReasons" hidden><button type="button" class="chip" data-r="quebrado">quebrado</button><button type="button" class="chip" data-r="em manutenção">em manutenção</button><button type="button" class="chip" data-r="desligado de propósito">desligado de propósito</button><button type="button" class="chip" data-r="leitura não confiável">leitura não confiável</button></div>
+      <div class="row" id="whWhenRow" hidden><span class="small muted">valendo desde</span><div class="seg" role="group" aria-label="Valendo desde" id="whWhenSeg"><button type="button" data-w="now" aria-pressed="true">agora</button><button type="button" data-w="last" aria-pressed="false" id="whWhenLast">a última leitura boa</button></div></div>
+      <div class="row">
+        <div class="wh-field"><label for="whName" id="whNameLab">Nome <em>opcional</em></label><input type="text" id="whName" maxlength="60" placeholder="ex.: viagem, trilha"></div>
+        <button type="button" class="btn accent" id="whOk">Confirmar</button>
+        <button type="button" class="btn" id="whNo">Cancelar</button>
+      </div>
+    </div>
+    <div class="wh-conseq" id="whConseq"></div>
+    <div id="whBack"></div>
+  </section>
+
   <section class="card" id="agDose">
     <div class="card-head">
       <h2>Minha dose</h2>
@@ -797,29 +823,20 @@
   <section class="card view view-periods" id="viewPeriods">
       <div class="view-body">
       <div class="dlg-head">
-        <h2 id="periodsTitle">Fora de casa</h2>
+        <div>
+          <h2 id="periodsTitle">Fora de casa</h2>
+          <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RadiaCode com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
+        </div>
+        <button type="button" class="btn small" id="btnPeriodAdd">Adicionar trecho passado</button>
       </div>
-      <p class="small muted">Marque quando você (ou o contador) estava fora de casa. As leituras continuam na dose, mas não entram no fundo da casa, no fundo diário nem no padrão por hora. Cada período mostra o que o RadiaCode mediu nele e o GMC-800 no mesmo tempo.</p>
-      <div class="p-grid">
-      <div>
+      <div class="card">
+        <div class="wh-head"><h3>Últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></div>
+        <div class="wh-tl" id="whTimeline"></div>
+        <div class="wh-legend"><span><i style="background:var(--surface-2);border:1px solid var(--border-hover)"></i>no lugar de sempre</span><span><i style="background:var(--swap)"></i>fora do lugar de sempre</span><span><i style="background:var(--nosig);border:1px solid var(--border-hover)"></i>sem dado</span><span><i style="background:var(--alarm)"></i>saturando ou sem contagens</span><span><i style="background:var(--outc)"></i>fora do cálculo</span></div>
+      </div>
       <p class="small p-total" id="periodTotal" hidden></p>
-      <ul class="periods" id="periodList"></ul>
-      </div>
-      <fieldset id="periodForm">
-        <legend id="periodFormTitle">Novo período</legend>
-        <label for="pName">Nome</label>
-        <input type="text" id="pName" maxlength="60" placeholder="Fora de casa">
-        <div class="p-times">
-          <label>Início<input type="datetime-local" id="pFrom"></label>
-          <label>Fim<input type="datetime-local" id="pTo"></label>
-        </div>
-        <p class="small p-err" id="pErr" hidden></p>
-        <div class="row-btns">
-          <button type="button" class="btn accent" id="btnPeriodSave">Salvar período</button>
-          <button type="button" class="btn" id="btnPeriodNew" hidden>Cancelar edição</button>
-        </div>
-      </fieldset>
-      </div>
+      <div id="periodAddForm"></div>
+      <ul class="wh-list" id="periodList"></ul>
         </div>
     </section>
 </div>
@@ -1772,11 +1789,16 @@
 
 <script src="i18n-en.js"></script>
 <script src="i18n.js"></script>
+<script src="cores.js"></script>
 <script src="regua.js"></script>
 <script src="radiacode.js"></script>
 <script src="agora.js"></script>
 <script src="resumo.js"></script>
 <script src="alertas.js"></script>
+<script src="graficos.js"></script>
+<script src="medir.js"></script>
+<script src="fora.js"></script>
+<script src="onde.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

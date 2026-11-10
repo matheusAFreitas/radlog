@@ -43,6 +43,7 @@ const state = {
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
   periods: [],     // fora de casa
+  where: null,     // onde está cada aparelho (onde.js)
   measurements: [], // medições de objeto salvas
   doseZoom: null,
   doseZoomStack: [],
@@ -566,7 +567,7 @@ state.alertSel = null;
 // Níveis, componente, busca, histograma empilhado por nível (clicar numa
 // barra dá zoom nela) e "ao vivo" (atualiza a cada 3 s com a janela aberta).
 
-const LG_COLORS = { DEBUG: "#5F6A71", INFO: "#7CB7FF", WARN: "#F5B84A", ERROR: "#F0656A" };
+const LG_COLORS = { DEBUG: "#5F6A71", INFO: "#7CB7FF", WARN: COR.att, ERROR: COR.warn };
 const LG_RANGES = { "15m": 15 * 60e3, "1h": 3600e3, "24h": 86400e3, "7d": 7 * 86400e3, all: 0 };
 state.lg = { range: localGet("lgRange", "24h"), levels: (localGet("lgLevels", "INFO,WARN,ERROR")).split(",").filter(Boolean), comp: "", text: "", zoom: null, res: null };
 state.evTab = "log";
@@ -733,7 +734,7 @@ async function showView(v, skipRender) {
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
-  if (v === "fora") { renderPeriods(); editPeriod(null); }
+  if (v === "fora") renderPeriods();
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
@@ -797,640 +798,10 @@ document.addEventListener("click", (e) => {
   if (b) showView(b.dataset.view);
 });
 
-// ---------- gráfico ----------
+// ---------- gráficos (a página está em graficos.js) ----------
 
-const W = 600, H = 200;
-
-// teto "redondo" para o eixo (1, 2, 2,5 ou 5 vezes uma potência de 10)
-function niceTop(v) {
-  if (!(v > 0)) return 1;
-  const mag = Math.pow(10, Math.floor(Math.log10(v)));
-  for (const m of [1, 2, 2.5, 5, 10]) if (m * mag >= v) return m * mag;
-  return 10 * mag;
-}
-
-// formato de hora conforme o passo e o tamanho do período
-function chartTimeFmt(c) {
-  const crossesDay = new Date(c.from).toDateString() !== new Date((c.to || c.from) - 1).toDateString();
-  if (crossesDay) return (t) => `${ddmm(t)} ${hhmm(t)}`;
-  if ((c.stepMs || 60000) < 60000) return hhmmss;
-  return hhmm;
-}
-
-let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no meio)
-
-async function refreshChart() {
-  const my = ++chartSeq;
-  const c = state.zoom ? await api.GetChartRange(state.zoom.from, state.zoom.to) : await api.GetChart(state.range);
-  if (my !== chartSeq) return;
-  state.chart = c;
-  c.rain = [];
-  c.radar = [];
-  c.rainErr = "";
-  try { c.notes = (await api.GetNotes(c.from, c.to + 60e3)) || []; } catch (e) { c.notes = []; }
-  if (my !== chartSeq) return;
-  if (state.settings.rainEnabled && c.to - c.from <= 8 * 864e5) { // chuva: até ~1 semana
-    const [rain, radar] = await Promise.all([
-      api.GetRain(c.from, c.to).catch((e) => { c.rainErr = errMsg(e); return []; }),
-      api.GetRainRadar(c.from, c.to).catch(() => []),
-    ]);
-    if (my !== chartSeq) return;
-    c.rain = rain || [];
-    c.radar = radar || [];
-  }
-  document.querySelectorAll("#rangeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.zoom && b.dataset.range === state.range)));
-  renderZoomBar(c);
-
-  const usvMode = state.chartUnit === "usv";
-  document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cunit === state.chartUnit)));
-  $("chartTitle").textContent = usvMode ? "µSv/h ao longo do tempo" : "CPM ao longo do tempo";
-  const vals = (usvMode ? c.usv : c.values) || [];
-  const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
-  let max = 0;
-  for (const v of vals) if (v != null && v > max) max = v;
-  // picos dos alertas (leitura de segundo): entram na escala e viram ponto
-  const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
-  const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
-  for (const p of c.peaks || []) max = Math.max(max, peakV(p));
-  // RadiaCode: só no gráfico em µSv/h (é a unidade que os dois têm em comum)
-  const rcVals = usvMode && c.rc ? c.rc : null;
-  if (rcVals) for (const v of rcVals) if (v != null && v > max) max = v;
-  // durante um alarme, mostra as linhas do seu limite e do perigo do app
-  const ringing = !!alarmCtl.kind;
-  const alarmV = usvMode ? c.alarmUSv : c.alarmCPM;
-  const dangerV = usvMode ? c.dangerUSv : c.dangerCPM;
-  const testDanger = alarmCtl.kind === "test" && alarmCtl.sev === "perigo";
-  // o perigo só entra na escala se a leitura estiver perto dele; se não,
-  // aparece na legenda como "acima da escala" (para não achatar o gráfico)
-  const dangerInScale = ringing && dangerV && (alarmCtl.sev === "perigo" || max >= dangerV * 0.4) && !testDanger;
-  let want = max;
-  if (ringing && alarmV) want = Math.max(want, alarmV);
-  if (dangerInScale) want = Math.max(want, dangerV);
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : Math.max(60, Math.ceil((want * 1.15) / 20) * 20);
-  c.top = top;
-  const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
-  const ys = $("yAxis").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
-
-  const n = vals.length;
-  const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
-  const y = (v) => H - (v / top) * H;
-
-  let line = "", area = "", seg = [];
-  const flush = () => {
-    if (!seg.length) return;
-    line += "M" + seg.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L");
-    if (seg.length === 1) line += "l0.01 0";
-    area += `M${seg[0][0].toFixed(1)} ${H}L` + seg.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L") + `L${seg[seg.length - 1][0].toFixed(1)} ${H}Z`;
-    seg = [];
-  };
-  vals.forEach((v, i) => { if (v == null) flush(); else seg.push([x(i), y(v)]); });
-  flush();
-  let rcLine = "", rcArea = "";
-  if (rcVals) {
-    let pts = [];
-    const out = () => {
-      if (pts.length) {
-        rcLine += "M" + pts.map((p) => p.join(" ")).join("L") + (pts.length === 1 ? "l0.01 0" : "");
-        rcArea += `M${pts[0][0]} ${H}L` + pts.map((p) => p.join(" ")).join("L") + `L${pts[pts.length - 1][0]} ${H}Z`;
-      }
-      pts = [];
-    };
-    rcVals.forEach((v, i) => { if (v == null) out(); else pts.push([x(i).toFixed(1), y(v).toFixed(1)]); });
-    out();
-  }
-  $("rcKey").hidden = !c.rc;
-  $("rcKey").classList.toggle("off", !usvMode);
-  $("rcKeyText").textContent = usvMode ? "RadiaCode" : "RadiaCode (só em µSv/h)";
-
-  const grid = [0, 1, 2, 3].map((i) => {
-    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
-  const hline = (v, color, width) => `<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="${width}" stroke-dasharray="8 5" vector-effect="non-scaling-stroke"/>`;
-  let thr = top >= thrV ? hline(thrV, "#F5B84A", 1) : "";
-  const showAlarm = ringing && alarmV && alarmV <= top;
-  const showDanger = ringing && dangerV && dangerV <= top;
-  if (showAlarm && !(dangerV && alarmV >= dangerV)) thr += hline(alarmV, "#F28C38", 2);
-  if (showDanger) thr += hline(dangerV, "#F0656A", 2);
-  const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
-  $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
-  $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;
-  $("legDanger").hidden = !ringing || !dangerV;
-  $("legDanger").lastChild.textContent = `perigo do app: ${fmtV(dangerV)}` + (showDanger ? "" : " (acima da escala)");
-  $("legDanger").classList.toggle("off-scale", !showDanger);
-  const tEnd = c.times && c.times.length ? c.times[c.times.length - 1] : c.to;
-  const xt = (t) => Math.max(0, Math.min(W, ((t - c.from) / Math.max(1, tEnd - c.from)) * W));
-  // radar (medido, a cada 10 min) tem prioridade; o modelo só preenche as
-  // horas em que não há leitura do radar
-  const radarWet = c.radar.filter((p) => p.mmh > 0);
-  const radarHour = (t) => c.radar.some((p) => p.time >= t && p.time < t + 3600e3);
-  const rainy = c.rain.filter((p) => p.mm >= 0.1 && !radarHour(p.time));
-  const bar = (t1, t2, h, fill, op) => {
-    const x1 = xt(t1), x2 = xt(t2);
-    return `<rect x="${x1.toFixed(1)}" y="${(H - h).toFixed(1)}" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${h.toFixed(1)}" fill="${fill}" fill-opacity="${op}"/>`;
-  };
-  const rainBars = rainy.map((p) => bar(p.time, p.time + 3600e3, Math.max(4, Math.min(1, p.mm / 5) * H * 0.3), "#7CC7FF", 0.3)).join("") +
-    radarWet.map((p) => bar(p.time, p.time + RADAR_STEP, Math.max(4, Math.min(1, p.mmh / 10) * H * 0.3), "#3DA5FF", 0.6)).join("");
-  $("rainKey").hidden = !rainy.length && !radarWet.length;
-  $("rainKey").lastChild.textContent = radarWet.length ? (rainy.length ? "chuva (radar · modelo)" : "chuva (radar)") : "chuva (modelo)";
-  const away = awayBands(c.from, tEnd, xt);
-  $("awayKey").hidden = !away;
-  const meas = measureBands(c.from, tEnd, xt);
-  $("measKey").hidden = !meas;
-  // anotações: linha tracejada roxa e uma marca clicável no topo
-  const noteX = (t) => xt(t);
-  $("noteMarks").innerHTML = "";
-  const noteLines = (c.notes || []).map((nt) => {
-    const nx = noteX(Math.max(nt.time, c.from));
-    const m = document.createElement("button");
-    m.type = "button";
-    m.className = "note-mark";
-    m.style.left = ((nx / W) * 100).toFixed(2) + "%";
-    m.title = `${nt.end ? hhmm(nt.time) + "–" + hhmm(nt.end) : hhmm(nt.time)} · ${nt.text} (clique para editar)`;
-    m.addEventListener("mousedown", (e) => e.stopPropagation());
-    m.addEventListener("click", (e) => { e.stopPropagation(); openNote(nt); });
-    $("noteMarks").appendChild(m);
-    const line = `<line x1="${nx.toFixed(1)}" y1="0" x2="${nx.toFixed(1)}" y2="${H}" stroke="#B794F6" stroke-width="1.2" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
-    if (!nt.end) return line;
-    const ex = noteX(Math.min(nt.end, tEnd));
-    return `<rect x="${nx.toFixed(1)}" y="0" width="${Math.max(1, ex - nx).toFixed(1)}" height="${H}" fill="#B794F6" fill-opacity="0.10"/>` + line +
-      `<line x1="${ex.toFixed(1)}" y1="0" x2="${ex.toFixed(1)}" y2="${H}" stroke="#B794F6" stroke-opacity="0.5" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
-  $("noteKey").hidden = !(c.notes || []).length;
-  // ponto de cada pico, em cima do ponto do gráfico daquele trecho
-  const stepMs = c.stepMs || 60000;
-  $("peakDots").innerHTML = (c.peaks || []).map((p) => {
-    const i = Math.floor((p.t - c.from) / stepMs);
-    if (i < 0 || i >= n) return "";
-    const col = { perigo: "#F0656A", alarme: "#F28C38" }[p.level] || "#F5B84A";
-    return `<i style="left:${((x(i) / W) * 100).toFixed(2)}%;top:${((y(peakV(p)) / H) * 100).toFixed(2)}%;background:${col}"></i>`;
-  }).join("");
-  // com o RadiaCode (aparelho principal), ele é a curva cheia e o GMC (casa)
-  // vira uma linha de referência
-  $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines + (rcLine
-    ? `<path d="${rcArea}" fill="#F472B6" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
-      `<path d="${rcLine}" fill="none" stroke="#F472B6" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="#6EE7A0" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
-  $("gmcKey").hidden = !rcLine;
-
-  if (state.zoom) {
-    const f = chartTimeFmt(c);
-    const t0 = c.times && c.times.length ? c.times[0] : c.from;
-    $("x0").textContent = f(t0);
-    $("x1").textContent = f((t0 + tEnd) / 2);
-    $("x2").textContent = f(tEnd);
-  } else {
-    const lbl = state.range === "1y" ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); } : isLongRange() ? ddmm : hhmm;
-    $("x0").textContent = lbl(c.from);
-    $("x1").textContent = lbl((c.from + c.to) / 2);
-    $("x2").textContent = isLongRange() ? "hoje" : "agora";
-  }
-  // nos períodos curtos o gráfico usa leituras por segundo
-  $("chartStats").dataset.short = String(isShortRange());
-  const attnC = c.attentionCPM || 50;
-  $("legendText").textContent = usvMode
-    ? `atenção: ${fmt(c.attentionUSv, 3)} µSv/h`
-    : `atenção: ${fmt(attnC, 0)} CPM`;
-  $("chartStats").textContent = c.avg == null
-    ? "sem dados no período"
-    : usvMode
-      ? (c.rcAvg != null ? `RadiaCode média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)}`;
-}
-
-function setupChartHover() {
-  const plot = $("plot");
-  plot.addEventListener("mousemove", (ev) => {
-    const c = state.chart;
-    if (!c || !c.values || !c.values.length) return;
-    const r = plot.getBoundingClientRect();
-    const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-    const i = Math.round(f * (c.values.length - 1));
-    const usvMode = state.chartUnit === "usv";
-    const v = (usvMode ? c.usv : c.values)[i];
-    const t = c.times[i];
-    const cur = $("cursor"), tip = $("tip");
-    cur.hidden = false;
-    cur.style.left = (i / Math.max(1, c.values.length - 1)) * 100 + "%";
-    tip.hidden = false;
-    const when = state.zoom ? chartTimeFmt(c)(t) : isLongRange() ? `${ddmm(t)} ${hhmm(t)}` : isShortRange() ? hhmmss(t) : hhmm(t);
-    const rr = (c.radar || []).find((p) => t >= p.time && t < p.time + RADAR_STEP);
-    const pk = (c.peaks || []).filter((p) => p.t >= t && p.t < t + (c.stepMs || 60000)).sort((a, b) => b.cpm - a.cpm)[0];
-    const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
-    const pkText = pk && !(pk.retro && v != null && Math.round(pk.cpm) === Math.round(usvMode ? v / kU : v))
-      ? ` · pico ${usvMode ? fmt(pk.cpm * kU, usvDigits(pk.cpm * kU)) + " µSv/h" : fmt(pk.cpm, 0) + " CPM"} às ${hhmmss(pk.t)}` : "";
-    const rh = rr ? null : (c.rain || []).find((p) => t >= p.time && t < p.time + 3600e3 && p.mm >= 0.1);
-    const half = Math.max(60e3, c.stepMs || 60000);
-    const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
-    const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
-    const rcv = c.rc ? c.rc[i] : null;
-    const rcText = rcv != null ? ` · RadiaCode ${fmt(rcv, usvDigits(rcv))} µSv/h` : "";
-    tip.textContent = (v == null ? `${when} · sem dados`
-      : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
-      : `${when} · ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
-    const left = (ev.clientX - r.left) + 12;
-    tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
-  });
-  plot.addEventListener("mouseleave", () => { $("cursor").hidden = true; $("tip").hidden = true; });
-  // dois cliques: anotar naquele momento
-  plot.addEventListener("dblclick", (ev) => {
-    const c = state.chart;
-    if (!c || !c.times || !c.times.length) return;
-    const r = plot.getBoundingClientRect();
-    const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-    const i = Math.round(f * (c.times.length - 1));
-    openNote({ id: 0, time: Math.min(Date.now(), c.times[i]), text: "" });
-  });
-  setupChartZoom();
-}
-
-// ---------- zoom: arrastar no gráfico ----------
-
-function chartTimeAt(c, frac) {
-  const t0 = c.times && c.times.length ? c.times[0] : c.from;
-  const t1 = c.times && c.times.length ? c.times[c.times.length - 1] : c.to;
-  return t0 + Math.min(1, Math.max(0, frac)) * (t1 - t0);
-}
-
-// arrastar num gráfico para escolher um trecho (usado no CPM e na dose)
-function attachDragZoom(plot, sel, getChart, onZoom) {
-  let x0 = null;
-  const frac = (ev) => { const r = plot.getBoundingClientRect(); return { f: (ev.clientX - r.left) / r.width, w: r.width }; };
-  plot.addEventListener("mousedown", (ev) => {
-    const c = getChart();
-    if (ev.button !== 0 || !c || !c.times || !c.times.length) return;
-    ev.preventDefault();
-    x0 = frac(ev).f;
-    sel.style.left = x0 * 100 + "%";
-    sel.style.width = "0";
-    sel.hidden = false;
-  });
-  window.addEventListener("mousemove", (ev) => {
-    if (x0 == null) return;
-    const f = Math.min(1, Math.max(0, frac(ev).f));
-    sel.style.left = Math.min(x0, f) * 100 + "%";
-    sel.style.width = Math.abs(f - x0) * 100 + "%";
-  });
-  window.addEventListener("mouseup", (ev) => {
-    if (x0 == null) return;
-    const { f, w } = frac(ev);
-    const lo = Math.min(x0, f), hi = Math.max(x0, f);
-    x0 = null;
-    sel.hidden = true;
-    if ((hi - lo) * w < 8) return; // foi só um clique
-    const c = getChart();
-    // a dica do mouse era do gráfico antigo
-    plot.querySelectorAll(".tip, .cursor").forEach((el) => { el.hidden = true; });
-    onZoom(Math.round(chartTimeAt(c, lo)), Math.round(chartTimeAt(c, hi)));
-  });
-}
-
-function zoomRangeText(t0, t1) {
-  const sameDay = new Date(t0).toDateString() === new Date(t1 - 1).toDateString();
-  const day = isToday(t0) ? "hoje" : isYesterday(t0) ? "ontem" : ddmm(t0);
-  return sameDay
-    ? `${day} ${hhmm(t0)}–${hhmm(t1)} (${fmtDur(t1 - t0)})`
-    : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)} (${fmtDur(t1 - t0)})`;
-}
-
-const stepText = (ms) => (ms < 60000 ? `${Math.round(ms / 1000)} s` : fmtDur(ms));
-
-function setupChartZoom() {
-  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, (from, to) => {
-    if (state.zoom) state.zoomStack.push(state.zoom);
-    else state.zoomStack = [];
-    state.zoom = { from, to };
-    unlinkZoom();
-    refreshChart();
-  });
-  $("btnZoomBack").addEventListener("click", () => { state.zoom = state.zoomStack.pop() || null; unlinkZoom(); refreshChart(); });
-  $("btnZoomOut").addEventListener("click", resetAllZoom);
-}
-
-// Um só "Sair do zoom": tira o zoom dos dois gráficos (e a seleção do mapa).
-// Ele aparece no primeiro gráfico com zoom; o outro mostra só o "Voltar".
-function resetAllZoom() {
-  state.zoom = null; state.zoomStack = [];
-  state.doseZoom = null; state.doseZoomStack = [];
-  state.zoomLinked = false;
-  state.heatPick = null;
-  refreshChart();
-  refreshDose();
-  markHeatPick();
-}
-
-// Zoom vindo do mapa de calor deixa os dois gráficos no mesmo trecho; mexer
-// no zoom de um deles separa os dois.
-function unlinkZoom() {
-  if (!state.zoomLinked) return;
-  state.zoomLinked = false;
-  refreshChart();
-  refreshDose();
-}
-
-function renderZoomButtons() {
-  $("btnZoomOut").hidden = !state.zoom;
-  $("btnDoseZoomOut").hidden = !state.doseZoom || !!state.zoom;
-  $("btnZoomBack").hidden = !state.zoomStack.length;
-  $("btnDoseZoomBack").hidden = !state.doseZoomStack.length;
-}
-
-function setupDoseZoom() {
-  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, (from, to) => {
-    if (state.doseZoom) state.doseZoomStack.push(state.doseZoom);
-    else state.doseZoomStack = [];
-    state.doseZoom = { from, to };
-    unlinkZoom();
-    refreshDose();
-  });
-  $("btnDoseZoomBack").addEventListener("click", () => { state.doseZoom = state.doseZoomStack.pop() || null; unlinkZoom(); refreshDose(); });
-  $("btnDoseZoomOut").addEventListener("click", resetAllZoom);
-}
-
-function renderZoomBar(c) {
-  markHeatPick();
-  const bar = $("zoomBar");
-  bar.hidden = !state.zoom;
-  if (!state.zoom) return;
-  const t0 = c.times && c.times.length ? c.times[0] : c.from;
-  const t1 = c.to;
-  $("zoomRange").textContent = zoomRangeText(t0, t1);
-  const n = (c.values || []).filter((v) => v != null).length;
-  const hours = (n * (c.stepMs || 60000)) / 3600e3;
-  const dose = c.avgUSv != null ? c.avgUSv * hours : null;
-  const step = stepText(c.stepMs || 60000);
-  $("zoomStats").textContent = c.avg == null ? "· sem dados nesse trecho"
-    : `· dose ≈ ${fmt(dose, dose < 1 ? 3 : 2)} µSv · um ponto a cada ${step}` + (c.fineAlertsOnly ? " (por segundo só perto dos alertas)" : "");
-  renderZoomButtons();
-}
-
-// ---------- dose acumulada (dosímetro) ----------
-
-function fmtDose(v) {
-  if (v >= 1000) return [fmt(v / 1000, v >= 10000 ? 1 : 2), "mSv"];
-  return [fmt(v, v < 10 ? 2 : v < 100 ? 1 : 0), "µSv"];
-}
-const doseTxt = (v) => fmtDose(v).join(" ");
-
-// o RadiaCode já mandou algum dado (está conectado ou tem minuto gravado)
-function hasRcData() {
-  const st = state.rc && state.rc.st;
-  return !!(st && (st.state === "conectado" || st.lastT > 0));
-}
 state.doseSrc = localGet("doseSrc", "radiacode");
-
-// dose de um aparelho no período (ou no trecho)
-function fetchDose(src, range) {
-  return range
-    ? (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(range.from, range.to, state.doseLimit, src) : api.GetDoseRange(range.from, range.to, state.doseLimit))
-    : (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
-}
-
-// quadros da dose de cada aparelho: total, média e quanto do teto já foi
-function renderDevBoxes(box, list) {
-  box.textContent = "";
-  for (const d of list) {
-    const c = d.c, el = document.createElement(list.length > 1 ? "button" : "div");
-    el.className = "dd-box " + d.key;
-    el.dataset.key = d.key;
-    if (list.length > 1) {
-      el.type = "button";
-      const on = !!state.doseShow[d.key];
-      el.classList.toggle("off", !on);
-      el.setAttribute("aria-pressed", String(on));
-      el.title = "Mostrar ou esconder no gráfico";
-    }
-    const has = c && c.measuredMinutes > 0;
-    const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
-    const hours = has ? c.measuredMinutes / 60 : 0;
-    const rate = has && hours ? c.total / hours : null;
-    // quanto do limite já foi: só o que passou do fundo natural conta (o
-    // limite não inclui a radiação natural), cada aparelho com o seu fundo
-    const excess = has ? Math.max(0, c.excess) : 0;
-    const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
-    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
-    el.querySelector(".dd-name span").textContent = d.name;
-    el.querySelector(".dd-val b").textContent = tv;
-    el.querySelector(".dd-val > span").textContent = tu;
-    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
-    el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
-    el.querySelector(".meter").classList.toggle("over", pct > 100);
-    el.querySelector(".dd-pct").textContent = has && c.allowance > 0
-      ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
-      : "";
-    if (list.length > 1) {
-      const s = document.createElement("span");
-      s.className = "dd-state";
-      s.textContent = state.doseShow[d.key] ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
-      el.appendChild(s);
-    }
-    box.appendChild(el);
-  }
-}
-
-// aparelhos à vista nos gráficos de dose (clicar no quadro do aparelho liga
-// e desliga); pelo menos um fica sempre visível
 state.doseShow = (() => { try { return Object.assign({ gmc: true, rc: true }, JSON.parse(localGet("doseShow", "{}"))); } catch (e) { return { gmc: true, rc: true }; } })();
-const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
-const devName = (k) => (k === "rc" ? "RadiaCode" : "GMC-800");
-const devColor = (k) => (k === "rc" ? "#F472B6" : "#6EE7A0");
-function toggleDoseDev(k) {
-  const s = state.doseShow;
-  s[k] = !s[k];
-  if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
-  localSet("doseShow", JSON.stringify(s));
-  document.querySelectorAll("button.dd-box").forEach((b) => {
-    const on = !!s[b.dataset.key];
-    b.classList.toggle("off", !on);
-    b.setAttribute("aria-pressed", String(on));
-    const st = b.querySelector(".dd-state");
-    if (st) st.textContent = on ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
-  });
-  drawDoseChart();
-  if (state.heatPick && state.ht) drawHeatTrecho();
-}
-document.addEventListener("click", (e) => { const b = e.target.closest(".dd-box"); if (b) toggleDoseDev(b.dataset.key); });
-
-function drawDoseChart() {
-  const c = state.dose, c2raw = state.dose2;
-  if (!c || !c.times || !c.times.length) return;
-  const k1 = devKey(c), c2 = c2raw && c2raw.measuredMinutes ? c2raw : null, k2 = c2 ? devKey(c2) : null;
-  // cada um com o seu teto; o do principal é a linha cheia, o do outro
-  // pontilhado (se o principal estiver escondido, o do outro vira cheio)
-  const show1 = !!(c.measuredMinutes && (state.doseShow[k1] || !c2)), show2 = !!(c2 && state.doseShow[k2]);
-  const n = c.times.length;
-  const vis = [show1 ? Math.max(c.total, c.ceilingTotal) : 0, show2 ? Math.max(c2.total, c2.ceilingTotal) : 0];
-  const top0 = Math.max(...vis) * 1.1 || 1;
-  const solid2 = show2 && !show1;
-  $("doseKeyCeil").textContent = show1 && c2 ? `teto do ${devName(k1)} (fundo + limite)` : solid2 ? `teto do ${devName(k2)} (fundo + limite)` : "teto (fundo + limite)";
-  $("doseKeyCeil2").hidden = !(show1 && show2);
-  $("doseKeyCeil2Txt").textContent = show1 && show2 ? `teto do ${devName(k2)}` : "";
-  $("doseKeyRc").hidden = !((k1 === "rc" && show1) || (k2 === "rc" && show2));
-  document.querySelector("#doseCard .dose-legend .sw-gmc").parentElement.hidden = !((k1 === "gmc" && show1) || (k2 === "gmc" && show2));
-  const mag = Math.pow(10, Math.floor(Math.log10(top0)));
-  const top = Math.ceil(top0 / mag * 2) / 2 * mag;
-  const y = (v) => H - (v / top) * H;
-  const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + ((arr.length <= 1 ? 0 : (i / (arr.length - 1)) * W)).toFixed(1) + " " + y(v).toFixed(1)).join("");
-  const grid = [0, 1, 2, 3].map((i) => {
-    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
-  const dt0 = c.times[0], dt1 = c.times[n - 1];
-  const dxt = (t) => Math.max(0, Math.min(W, ((t - dt0) / Math.max(1, dt1 - dt0)) * W));
-  const dAway = awayBands(dt0, dt1, dxt);
-  $("doseAwayKey").hidden = !dAway;
-  const fillOf = (cc, k) => `<path d="${path(cc.dose)}L${W} ${H}L0 ${H}Z" fill="${devColor(k)}" fill-opacity="0.10"/>`;
-  const lineOf = (arr, color, w, dash, op) => `<path d="${path(arr)}" fill="none" stroke="${color}" stroke-width="${w}"${dash ? ` stroke-dasharray="${dash}"` : ""}${op ? ` stroke-opacity="${op}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-  $("doseCard").classList.toggle("rc", k1 === "rc");
-  $("doseChart").innerHTML = grid + dAway +
-    (show1 ? fillOf(c, k1) + lineOf(c.background, "#A3ADB4", 1.5, "5 5") + lineOf(c.ceiling, "#F0656A", 2) + lineOf(c.dose, devColor(k1), 2) : "") +
-    (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, "#A3ADB4", 1.5, "5 5") + lineOf(c2.ceiling, "#F0656A", 2) : lineOf(c2.ceiling, "#F0656A", 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
-  const ys = $("doseY").children;
-  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
-  ys[3].textContent = "0";
-}
-
-async function refreshDose() {
-  $("doseLimit").value = state.doseLimit;
-  const my = ++doseSeq;
-  const rcOn0 = hasRcData();
-  // o teto e o fundo seguem o RadiaCode quando ele tem dado (a sua dose); a
-  // curva do outro aparelho vai junto, no mesmo eixo
-  const src = rcOn0 ? "radiacode" : "gmc";
-  const [cA, cB] = await Promise.all([fetchDose(src, state.doseZoom), rcOn0 ? fetchDose("gmc", state.doseZoom).catch(() => null) : null]);
-  if (my !== doseSeq) return;
-  // trecho sem RadiaCode (ex.: antes de ele existir): o GMC vira o principal
-  // (fundo, teto e eixo), senão o gráfico ficava vazio com o GMC tendo dado
-  const swap = rcOn0 && !(cA && cA.measuredMinutes) && cB && cB.measuredMinutes;
-  const c = swap ? cB : cA, c2 = swap ? cA : cB;
-  state.dose = c;
-  state.dose2 = c2;
-  renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RadiaCode", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
-  placeRcDevLines();
-  $("doseKeyRc").hidden = !rcOn0;
-  const dz = $("doseZoomBar");
-  dz.hidden = !state.doseZoom;
-  if (state.doseZoom) {
-    $("doseZoomRange").textContent = zoomRangeText(c.from, c.to);
-    $("doseZoomStats").textContent = state.zoomLinked
-      ? `· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero`
-      : `· dose acumulada só nesse trecho, começando do zero · um ponto a cada ${stepText(c.stepMs)}`;
-  }
-  renderZoomButtons();
-
-  const isRc = c.device === "radiacode";
-  const rcOn = hasRcData();
-  $("doseTitle").textContent = "Dose acumulada";
-  const otherName = isRc ? "GMC-800 (casa)" : "RadiaCode (você)";
-  renderDoseDevice();
-  $("doseOther").hidden = true;
-  $("doseOther").textContent = c.otherMinutes > 0 ? `${otherName} no mesmo período: ${doseTxt(c.otherTotal)} em ${fmtDur(c.otherMinutes * 60e3)} medidos` : "";
-  $("doseKeyTxt").textContent = c.doseSource === "aparelho" ? "dose do aparelho" : "dose calculada pelo app";
-  $("doseNote").textContent =
-    "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é o seu fundo medido mais o limite anual, proporcional ao tempo medido. " +
-    (isRc
-      ? (c.doseSource === "aparelho"
-        ? "A curva é a dose que o próprio RadiaCode soma: ele continua contando desconectado, e o que somou longe do PC aparece quando ele volta (no gráfico, distribuído pelo tempo em que esteve fora). O fundo e o teto crescem com o tempo em que ele contou. Ele mede a radiação externa (gama) onde você estiver; radônio inalado e outras fontes internas ficam de fora."
-        : "O RadiaCode mede a radiação externa (gama) onde você estiver, em casa ou fora; radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura (desconectado do PC) não entram em nenhuma das linhas.")
-      : "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas. " +
-        "O GMC não informa a dose que soma na tela: esta é calculada pelo app, minuto a minuto, pela calibração que valia em cada minuto.");
-  if (!isRc && c.calNote) {
-    const a = document.createElement("span"), b = document.createElement("span");
-    a.textContent = " Calibração:";
-    b.textContent = " " + c.calNote;
-    $("doseNote").append(a, b);
-  }
-
-  if (!c.measuredMinutes) {
-    $("doseTotal").textContent = "—";
-    $("doseCmp").hidden = true;
-    $("doseSub").textContent = "sem dados no período";
-    $("doseStatus").textContent = "";
-    $("doseChart").innerHTML = "";
-    ["dx0", "dx1", "dx2"].forEach((id) => { $(id).textContent = ""; });
-    renderDoseDevice();
-    return;
-  }
-
-  const [tv, tu] = fmtDose(c.total);
-  const cmp = doseCompare(c.total);
-  $("doseCmpTxt").textContent = cmp;
-  $("doseCmp").hidden = !cmp;
-  $("doseTotal").textContent = tv;
-  $("doseTotal").nextElementSibling.textContent = tu;
-  renderDoseDevice();
-  const cov = c.coverage * 100;
-  const perYear = c.backgroundRate * 8766 / 1000; // mSv por ano no ritmo do fundo
-  $("doseSub").textContent = `fundo ${fmt(c.backgroundRate, 3)} µSv/h (${c.backgroundSource}) · ≈ ${fmt(perYear, perYear < 10 ? 2 : 1)} mSv/ano nesse ritmo · ${fmt(cov, cov < 10 ? 1 : 0)}% ` + (c.histFrom ? `medido desde o primeiro dado (${dayLabel(c.histFrom)})` : "do período medido");
-
-  const st = $("doseStatus");
-  const excess = Math.max(0, c.excess);
-  const pct = c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-  const over = c.excess > c.allowance;
-  st.className = "dose-status" + (over ? " over" : "");
-  let line;
-  if (c.excess <= 0) line = "<strong>Dentro do teto.</strong> A dose ficou no nível do seu fundo natural.";
-  else if (!over) line = `<strong>Dentro do teto.</strong> Acima do fundo: ${doseTxt(excess)} de ${doseTxt(c.allowance)} permitidos no período (${fmt(pct, pct < 10 ? 1 : 0)}%).`;
-  else line = `<strong>Acima do teto.</strong> Acima do fundo: ${doseTxt(excess)}; o permitido no período era ${doseTxt(c.allowance)}.`;
-  st.innerHTML = `<span>${line}</span>`;
-
-  drawDoseChart();
-
-  if (state.doseZoom) {
-    const f = chartTimeFmt(c);
-    $("dx0").textContent = f(c.from);
-    $("dx1").textContent = f((c.from + c.to) / 2);
-    $("dx2").textContent = f(c.to);
-    return;
-  }
-  const hourly = HOURLY.includes(state.dosePeriod);
-  const lbl = hourly ? hhmm : state.dosePeriod === "1y"
-    ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); }
-    : ddmm;
-  $("dx0").textContent = lbl(c.from);
-  $("dx1").textContent = lbl((c.from + c.to) / 2);
-  $("dx2").textContent = hourly ? "agora" : "hoje";
-}
-
-function setupDoseHover() {
-  const plot = $("dosePlot");
-  plot.addEventListener("mousemove", (ev) => {
-    const c = state.dose;
-    if (!c || !c.times || !c.times.length || !c.measuredMinutes) return;
-    const r = plot.getBoundingClientRect();
-    const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
-    const i = Math.round(f * (c.times.length - 1));
-    const t = c.times[i];
-    const cur = $("doseCursor"), tip = $("doseTip");
-    cur.hidden = false;
-    cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
-    tip.hidden = false;
-    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
-    const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
-    if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
-      tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;
-    } else tip.textContent = c2 && j2 >= 0
-      ? (c.device === "radiacode"
-        ? `${when} · RadiaCode ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
-        : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RadiaCode ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
-      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
-    const left = (ev.clientX - r.left) + 12;
-    tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";
-  });
-  plot.addEventListener("mouseleave", () => { $("doseCursor").hidden = true; $("doseTip").hidden = true; });
-}
-
-function wireDose() {
-  $("doseLimit").addEventListener("change", () => {
-    state.doseLimit = $("doseLimit").value; localSet("doseLimit", state.doseLimit); refreshDose(); agAt = 0; // o teto da Minha dose muda junto
-  });
-  setupDoseHover();
-  setupDoseZoom();
-}
 
 // ---------- modo demo ----------
 
@@ -1784,10 +1155,10 @@ function drawHeatTrecho() {
     });
     return d ? `<path d="${d}" fill="none" stroke="${color}" stroke-width="${dash ? 1.4 : 1.8}"${dash ? ` stroke-dasharray="${dash}"` : ""} stroke-linejoin="round" vector-effect="non-scaling-stroke"/>` : "";
   };
-  const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="#2A3136" vector-effect="non-scaling-stroke"/>`).join("");
+  const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="${COR.grid}" vector-effect="non-scaling-stroke"/>`).join("");
   $("htRate").innerHTML = grid(RH) +
-    (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="#F5B84A" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
-    line(g, g.length, ry, "#6EE7A0") + line(r, r.length, ry, "#F472B6");
+    (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
+    line(g, g.length, ry, COR.accent) + line(r, r.length, ry, COR.rc);
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
   // dose acumulada: cada aparelho a sua, com o seu teto (o do RadiaCode cheio,
   // o do GMC pontilhado quando os dois aparecem)
@@ -1795,10 +1166,10 @@ function drawHeatTrecho() {
   const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
   const dy = (v) => DH - (v / dtop) * DH;
   $("htDose").innerHTML = grid(DH) +
-    (R ? line(R.ceiling, R.ceiling.length, dy, "#F0656A") : "") +
-    (G ? line(G.ceiling, G.ceiling.length, dy, "#F0656A", R ? "2 4" : "") : "") +
-    (G ? line(G.dose, G.dose.length, dy, "#6EE7A0") : "") +
-    (R ? line(R.dose, R.dose.length, dy, "#F472B6") : "");
+    (R ? line(R.ceiling, R.ceiling.length, dy, COR.warn) : "") +
+    (G ? line(G.ceiling, G.ceiling.length, dy, COR.warn, R ? "2 4" : "") : "") +
+    (G ? line(G.dose, G.dose.length, dy, COR.accent) : "") +
+    (R ? line(R.dose, R.dose.length, dy, COR.rc) : "");
   $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
   $("htX0").textContent = hhmm(p.from);
   $("htX1").textContent = hhmm((p.from + p.to) / 2);
@@ -1996,1153 +1367,8 @@ async function refreshRainStatus() {
   renderRainStatus();
 }
 
-// ---------- medir um objeto ----------
-
-// ---------- gráfico durante a medição ----------
-// CPM ao vivo (linha fina) e a média acumulada de cada fase com a margem de
-// erro (faixa), segundo a segundo.
-
-const mlog = { start: 0, live: [], ph: [], demo: false, other: [] };
-
-function measureLogStep(st) {
-  const active = st.phase === "fundo" || st.phase === "objeto";
-  if (!st.phase) { mlog.start = 0; mlog.live = []; mlog.ph = []; mlog.other = []; return; }
-  const fresh = st.elapsed <= 1 && (st.phase === "fundo" || (st.phase === "objeto" && st.bg && st.bg.source === "casa"));
-  if (fresh) { mlog.start = Date.now(); mlog.live = []; mlog.ph = []; mlog.other = []; mlog.demo = !!st.demo; state.mSel = null; if (state.mMode === "salvas") setMeasureMode("nova"); }
-  if (!mlog.start) mlog.start = Date.now();
-  if (active && st.elapsed > 0) {
-    const m = st.elapsed / 60;
-    // ao recomeçar a fase do objeto, tira o que tinha dela
-    if (st.phase === "objeto" && st.elapsed <= 1) mlog.ph = mlog.ph.filter((p) => p.phase !== "objeto");
-    mlog.ph.push({ t: Date.now(), phase: st.phase, avg: st.counts / m, err: Math.sqrt(Math.max(st.counts, 1)) / m });
-  }
-}
-
-function measureLogReading(r) {
-  const st = state.measureSt;
-  if (!st || (st.phase !== "fundo" && st.phase !== "objeto")) return;
-  // GMC como segundo aparelho: vai para a linha dele (µSv/h)
-  if (st.other && st.other.device === "gmc" && !r.demo) { mlog.other.push({ t: Date.now(), usv: r.usv, phase: st.phase }); return; }
-  if (!!r.demo !== !!st.demo || isRcMeasure(st)) return;
-  mlog.live.push({ t: Date.now(), cpm: r.cpm });
-}
-
-// dose acumulada do próprio RadiaCode (desde que foi zerado), no cartão de
-// dose: anda ao vivo com ele conectado
-// dose do próprio RadiaCode (desde que foi zerado) e a conta do app, em duas
-// linhas curtas dentro do quadro do RadiaCode
-function renderDoseDevice() {
-  const st = state.rc.st || {}, c = state.dose;
-  $("doseDevice").hidden = true;
-  const on = st.state === "conectado";
-  const lines = [];
-  if (c && c.device === "radiacode" && (st.doseLiveAt > 0 || on)) {
-    if (st.doseLiveAt > 0) {
-      const v = st.doseLive;
-      const when = st.doseLiveOn ? "ao vivo" : on ? `total das ${hhmm(st.doseLiveAt)}` : `${whenLabel(st.doseLiveAt)}, desconectado`;
-      lines.push(["Contador do aparelho:", `${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)})` : "") + ` · ${when}`]);
-    } else lines.push(["Contador do aparelho:", "esperando o primeiro total (vem a cada 3 a 4 min)"]);
-    const dev = c.doseSource === "aparelho";
-    const tot = dev ? c.appTotal : c.total, mins = dev ? c.appMinutes : c.measuredMinutes;
-    const cov = (dev ? c.appCoverage : c.coverage) * 100;
-    if (mins) lines.push(["Pelo app:", `${doseTxt(tot)} (${fmt(cov, cov < 10 ? 1 : 0)}% do período gravado)`]);
-  }
-  state.rcDevLines = lines;
-  placeRcDevLines();
-}
-function placeRcDevLines() {
-  const box = document.querySelector("#doseDevs .dd-box.rc");
-  if (!box) return;
-  let el = box.querySelector(".dd-dev");
-  if (!el) { el = document.createElement("span"); el.className = "dd-dev small"; box.insertBefore(el, box.querySelector(".meter")); }
-  el.textContent = "";
-  for (const [k, v] of state.rcDevLines || []) {
-    const row = document.createElement("span"), b = document.createElement("b");
-    b.textContent = k;
-    row.append(b, " " + v);
-    el.appendChild(row);
-  }
-  el.hidden = !(state.rcDevLines || []).length;
-}
-
-// alertas do RadiaCode: a faixa de alarme/atenção e o som seguem o nível que
-// o app abriu para ele
-function rcAlarmState(st) {
-  const lvl = st && st.state === "conectado" ? st.alertLevel || "" : "";
-  const al = lvl === "alarme" || lvl === "perigo", dg = lvl === "perigo";
-  const changed = al !== !!alarmCtl.rc || dg !== !!alarmCtl.rcDanger;
-  alarmCtl.rc = al;
-  alarmCtl.rcDanger = dg;
-  if (changed || alarmCtl.kind === "rc") updateAlarm();
-  setAttention("rc", !!lvl);
-}
-
-// RadiaCode medindo: a leitura ao vivo é o CPS do aparelho × 60
-function measureLogRc(rs) {
-  const st = state.measureSt;
-  if (!st || (st.phase !== "fundo" && st.phase !== "objeto") || !rs || rs.state !== "conectado") return;
-  if (st.other && st.other.device === "radiacode") {
-    const lo = mlog.other[mlog.other.length - 1];
-    if (!lo || Date.now() - lo.t >= 500) mlog.other.push({ t: Date.now(), usv: rs.usvh, phase: st.phase });
-    return;
-  }
-  if (!isRcMeasure(st)) return;
-  const last = mlog.live[mlog.live.length - 1];
-  if (last && Date.now() - last.t < 500) return;
-  mlog.live.push({ t: Date.now(), cpm: rs.cps * 60 });
-}
-
-// fonte do gráfico: a medição em andamento ou uma salva (clicada na lista)
-function liveMeasureSrc() {
-  const st = state.measureSt || {};
-  const home = st.bg && st.bg.source === "casa";
-  // eixo: até o fim previsto (no automático, o que falta pela estimativa)
-  let expectSec = (st.seconds || 60) * (home ? 1 : 2) + 15;
-  if (st.auto && st.phase === "objeto") {
-    const before = mlog.start ? Math.max(0, (Date.now() - mlog.start) / 1000 - st.elapsed) : 0;
-    expectSec = before + st.elapsed + (st.eta >= 0 ? st.eta : 60) + 5;
-  } else if (st.auto && st.phase === "fundo") expectSec = st.seconds + 60;
-  else if (st.phase !== "fundo" && st.phase !== "objeto") expectSec = 1; // terminou: o eixo vai até o último ponto
-  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st),
-    dev: isRcMeasure(st) ? "radiacode" : "gmc", other: st.other ? mlog.other : null, otherDev: st.other && st.other.device, otherRole: st.other && st.other.role };
-}
-
-function savedMeasureSrc(m) {
-  const home = m.bg.source === "casa";
-  const start = home ? m.obj.start : m.bg.start;
-  const live = [], ph = [];
-  const acc = {};
-  for (const s of m.samples || []) {
-    const t = start + s.t;
-    if (s.cpm > 0) live.push({ t, cpm: s.cpm });
-    const a = (acc[s.phase] = acc[s.phase] || { counts: 0, n: 0 });
-    a.counts += s.cps;
-    a.n++;
-    const min = a.n / 60;
-    ph.push({ t, phase: s.phase, avg: a.counts / min, err: Math.sqrt(Math.max(a.counts, 1)) / min });
-  }
-  const o = m.other;
-  const other = o && o.samples ? o.samples.filter((s) => s.usv > 0).map((s) => ({ t: start + s.t, usv: s.usv, phase: s.phase })) : null;
-  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m),
-    dev: isRcMeasure(m) ? "radiacode" : "gmc", other, otherDev: o && o.device, otherRole: o && o.role };
-}
-
-function drawMeasureChart() {
-  const sel = state.mSel ? (state.measurements || []).find((m) => m.id === state.mSel) : null;
-  if (state.mSel && !sel) state.mSel = null;
-  $("btnMLiveBack").hidden = true;
-  $("mLiveTitle").textContent = sel ? "Segundo a segundo" : "Durante a medição";
-  if (sel && !(sel.samples && sel.samples.length)) {
-    state.mSrc = null;
-    $("mChart").innerHTML = "";
-    $("mLiveSub").textContent = "— essa medição é de antes da 0.20.3 e não tem os dados por segundo";
-    return;
-  }
-  drawMeasureSrc(sel ? savedMeasureSrc(sel) : liveMeasureSrc());
-}
-
-function drawMeasureSrc(src) {
-  state.mSrc = src;
-  const svg = $("mChart");
-  if (!src.start || (!src.live.length && !src.ph.length)) {
-    svg.innerHTML = "";
-    $("mLiveSub").textContent = "— comece a medição";
-    const ys = $("mY").children;
-    for (let i = 0; i < 4; i++) ys[i].textContent = i === 3 ? "0" : "";
-    return;
-  }
-  const t0 = src.start;
-  const k = src.k || calK();
-  const oth = (src.other || []).map((p) => ({ t: p.t, cpm: p.usv / k })); // na escala do principal
-  const tAll = [...src.live.map((p) => p.t), ...src.ph.map((p) => p.t), ...oth.map((p) => p.t)];
-  // o eixo vai até o fim previsto da medição (fundo + objeto), para ir enchendo
-  const expected = src.done ? 0 : (src.expectSec || src.seconds * 2 + 15) * 1000;
-  const t1 = Math.max(t0 + expected, t0 + 10e3, ...tAll);
-  src.t1 = t1;
-  let top = 0;
-  for (const p of src.live) top = Math.max(top, p.cpm);
-  for (const p of oth) top = Math.max(top, p.cpm);
-  // a média dos primeiros segundos pula muito (1 contagem em 1 s = 60 CPM):
-  // ela não entra na escala; a faixa de erro também pode passar do topo
-  const first = {};
-  for (const p of src.ph) { if (!(p.phase in first)) first[p.phase] = p.t; if (p.t - first[p.phase] >= 5000) top = Math.max(top, p.avg); }
-  if (src.bgFlat) top = Math.max(top, src.bgFlat.cpm + src.bgFlat.errCPM);
-  top = Math.max(10, Math.ceil((top * 1.15) / 10) * 10);
-  const x = (t) => ((t - t0) / (t1 - t0)) * W;
-  const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
-  // o gráfico fica em CPM por dentro; os números saem em µSv/h
-  const ys = $("mY").children;
-  for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : fmt(v, usvDigits(top * k)); }
-  let out = [0, 1, 2, 3].map((i) => {
-    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
-  if (src.bgFlat) {
-    // fundo da casa: faixa reta (média ± σ) na medição toda
-    const b = src.bgFlat, y1 = y(b.cpm + b.errCPM), y2 = y(b.cpm - b.errCPM);
-    out += `<rect x="0" y="${y1.toFixed(1)}" width="${W}" height="${Math.max(1, y2 - y1).toFixed(1)}" fill="#A3ADB4" fill-opacity="0.18"/>`;
-    out += `<line x1="0" y1="${y(b.cpm).toFixed(1)}" x2="${W}" y2="${y(b.cpm).toFixed(1)}" stroke="#A3ADB4" stroke-width="2" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
-  }
-  for (const [phase, color] of [["fundo", "#A3ADB4"], ["objeto", "#5EEAD4"]]) {
-    const pts = src.ph.filter((p) => p.phase === phase);
-    if (!pts.length) continue;
-    const up = pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg + p.err).toFixed(1)}`);
-    const dn = pts.slice().reverse().map((p) => `${x(p.t).toFixed(1)} ${y(p.avg - p.err).toFixed(1)}`);
-    out += `<path d="M${up.join("L")}L${dn.join("L")}Z" fill="${color}" fill-opacity="0.18"/>`;
-    out += `<path d="M${pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg).toFixed(1)}`).join("L")}" fill="none" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
-    if (phase === "objeto") {
-      const xs = x(pts[0].t).toFixed(1);
-      out += `<line x1="${xs}" y1="0" x2="${xs}" y2="${H}" stroke="#5EEAD4" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
-    }
-  }
-  if (src.live.length > 1) {
-    // quebra a linha nos intervalos (ex.: entre o fundo e o objeto)
-    const d = src.live.map((p, i) => (i && p.t - src.live[i - 1].t <= 3000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || "#6EE7A0"}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
-  }
-  // segundo aparelho: a leitura dele em µSv/h, por cima
-  if (oth.length > 1) {
-    const d = oth.map((p, i) => (i && p.t - oth[i - 1].t <= 5000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.otherDev] || "#F472B6"}" stroke-width="1.6" stroke-dasharray="${src.otherRole === "voce" ? "5 3" : "0"}" vector-effect="non-scaling-stroke"/>`;
-  }
-  svg.innerHTML = out;
-  // legenda: de que aparelho é cada linha
-  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || "#6EE7A0";
-  $("mLiveKeyTxt").textContent = src.otherDev ? `${devLabel(src.dev)} ao vivo (no objeto)` : "leitura ao vivo";
-  $("mOtherKey").hidden = !src.otherDev;
-  if (src.otherDev) {
-    $("mOtherKeyI").style.borderColor = DEV_COLOR[src.otherDev];
-    $("mOtherKeyI").style.borderTopStyle = src.otherRole === "voce" ? "dashed" : "solid";
-    $("mOtherKeyTxt").textContent = `${devLabel(src.otherDev)} ao vivo (${src.otherRole === "voce" ? "com você" : "no objeto"})`;
-  }
-  const last = (ph) => { const l = src.ph.filter((p) => p.phase === ph); return l[l.length - 1]; };
-  const b = last("fundo"), o = last("objeto");
-  const parts = [];
-  if (b) parts.push(`fundo ${numU(b.avg * k)} ± ${numU(b.err * k)}`);
-  else if (src.bgFlat) parts.push(`fundo da casa ${numU(src.bgFlat.cpm * k)} ± ${numU(src.bgFlat.errCPM * k)}`);
-  if (o) parts.push(`objeto ${numU(o.avg * k)} ± ${numU(o.err * k)}`);
-  $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " µSv/h" : "";
-}
-
-function setupMeasureHover() {
-  const plot = $("mPlot");
-  plot.addEventListener("mousemove", (ev) => {
-    const src = state.mSrc;
-    if (!src || !src.start || !(src.live.length || src.ph.length)) return;
-    const r = plot.getBoundingClientRect();
-    const t0 = src.start, t1 = src.t1;
-    const t = t0 + ((ev.clientX - r.left) / r.width) * (t1 - t0);
-    const near = (arr) => (arr.length ? arr.reduce((a, p) => (Math.abs(p.t - t) < Math.abs(a.t - t) ? p : a), arr[0]) : null);
-    const lv = near(src.live), ph = near(src.ph);
-    const ref = lv || ph;
-    $("mCursor").hidden = false;
-    $("mCursor").style.left = ((ref.t - t0) / (t1 - t0)) * 100 + "%";
-    const tip = $("mTip");
-    tip.hidden = false;
-    const k = src.k || calK();
-    const ov = src.other && src.other.length ? near(src.other) : null;
-    tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ${src.otherDev ? devLabel(src.dev) : "ao vivo"} ${uS(lv.cpm, k)}` : "") +
-      (ov && Math.abs(ov.t - ref.t) < 5000 ? ` · ${devLabel(src.otherDev)} ${usvVal(ov.usv)}` : "") + (ph ? ` · média (${ph.phase}) ${numU(ph.avg * k)} ± ${numU(ph.err * k)} µSv/h` : "");
-    tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px";
-  });
-  plot.addEventListener("mouseleave", () => { $("mCursor").hidden = true; $("mTip").hidden = true; });
-  $("btnMLiveBack").addEventListener("click", () => setMeasureMode("nova"));
-}
-
-// tabela com as contas da medição: contagens, tempo, taxa média e a
-// incerteza de Poisson (1σ = raiz das contagens, levada para CPM)
-const plusMinus = (v) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), 1);
-
-// ---------- medição em µSv/h ----------
-// As contas (incerteza, σ) são feitas nas contagens; a tela mostra tudo em
-// µSv/h. k = µSv/h por CPM: o RadiaCode tem a dose dele (k da fase), o GMC
-// usa a calibração.
-const rcK = () => { const s = state.rc.st || {}; return s.cps > 0 && s.usvh > 0 ? s.usvh / (s.cps * 60) : 0.1 / 720; };
-const devK = (dev) => (dev === "radiacode" ? rcK() : calK());
-const phK = (ph, dev) => (ph && ph.cpm > 0 && ph.usv > 0 ? ph.usv / ph.cpm : devK(dev));
-const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
-const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
-const sgnUS = (v) => (v >= 0 ? "+" : "−") + usvVal(Math.abs(v));
-const numU = (v) => fmt(v, v === 0 ? 0 : usvDigits(Math.abs(v)));
-const cntTxt = (n) => `${(n || 0).toLocaleString(LOCALE)} ${n === 1 ? "contagem" : "contagens"}`;
-
-function measureStats(m) {
-  const tbl = document.createElement("table");
-  tbl.className = "m-stats mono";
-  const row = (cells, cls) => {
-    const tr = document.createElement("tr");
-    if (cls) tr.className = cls;
-    cells.forEach((c, i) => { const td = document.createElement(i === 0 ? "th" : "td"); td.textContent = c; tr.appendChild(td); });
-    return tr;
-  };
-  const thead = document.createElement("thead");
-  thead.appendChild(row(["", "contagens", "tempo", "µSv/h", "± 1σ"]));
-  const tb = document.createElement("tbody");
-  const dev = isRcMeasure(m) ? "radiacode" : "gmc";
-  for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
-    if (!x) continue;
-    const k = phK(x, dev);
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), numU(x.cpm * k), `±${numU(x.errCPM * k)}`]));
-  }
-  const r = m.result;
-  if (r) {
-    const k = phK(m.obj, dev);
-    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv)), `±${numU(r.netErr * k)}`], "m-diff"));
-  }
-  tbl.append(thead, tb);
-  const box = document.createElement("div");
-  box.className = "m-stats-box";
-  box.appendChild(tbl);
-  if (r) {
-    const p = document.createElement("p");
-    p.className = "small muted";
-    const sig = Math.abs(r.sigma);
-    p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados). ` +
-      `A diferença vale ${fmt(sig, 1)} vezes a incerteza (${fmt(sig, 1)}σ)` +
-      (r.sigma >= 3 ? ": é real, não variação da contagem." : r.sigma >= 2 ? ": provavelmente real, mas vale repetir." : r.sigma <= -3 ? ": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)." : ": cabe na variação natural da contagem.");
-    box.appendChild(p);
-  }
-  return box;
-}
-
-// opções da tela de medir (lembradas entre as vezes)
-function measureOpts() {
-  const t = $("mSecs").value, auto = t.startsWith("auto");
-  return {
-    name: $("mName").value, distance: $("mDist").value, auto, homeBg: $("mBgSrc").value === "casa", ...measureDevOpts(),
-    seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat($("mPct").value),
-  };
-}
-
-// aparelho no objeto e modo (os dois perto, ou um com você)
-function measureDevOpts() {
-  const v = $("mDev").value;
-  if (v === "ambos") return { device: "radiacode", mode: "ambos" };
-  if (v === "voce") return { device: $("mObjDev").value, mode: "voce" };
-  return { device: v, mode: "" };
-}
-
-async function refreshHomeBg(force) {
-  const dev = measureDevOpts().device;
-  if (!force && state.homeBgAt && state.homeBgDev === dev && Date.now() - state.homeBgAt < 30e3) return;
-  state.homeBgAt = Date.now();
-  state.homeBgDev = dev;
-  if (state.homeBg && state.homeBg.device !== dev) state.homeBg = null;
-  let hb;
-  try { hb = await api.GetHomeBackgroundDev(dev); } catch (e) { hb = { ok: false, why: errMsg(e), device: dev }; }
-  if (measureDevOpts().device !== dev) return; // trocou de aparelho no meio
-  state.homeBg = { ...hb, device: dev };
-  if (state.measureSt) renderMeasure(state.measureSt);
-}
-
-// aparelho da medição: o escolhido antes ou, da primeira vez, o RadiaCode
-// se estiver conectado
-const rcOnline = () => !!(state.rc.st && state.rc.st.state === "conectado");
-function measureDevDefault() {
-  if (localGet("m-mDev")) return;
-  const want = rcOnline() ? "radiacode" : "gmc";
-  if ($("mDev").value !== want) { $("mDev").value = want; state.homeBgAt = 0; }
-}
-const isRcMeasure = (x) => (x && x.device) === "radiacode";
-
-const fmtMin = (sec) => (sec < 90 ? `${Math.max(1, Math.round(sec))} s` : `${Math.round(sec / 60)} min`);
-
-function renderMeasure(st) {
-  state.measureSt = st;
-  measureLogStep(st);
-  drawMeasureChart();
-  const running = st.phase === "fundo" || st.phase === "objeto";
-  const started = running || !!st.bg;
-  $("measureTitle").textContent = "Medir um objeto" + (st.demo ? " (demo)" : "");
-  for (const id of ["mSecs", "mBgSrc", "mPct", "mDist", "mDev", "mObjDev"]) $(id).disabled = started;
-  if (!started) measureDevDefault();
-  else if (st.mode) { $("mDev").value = st.mode; if (st.mode === "voce") $("mObjDev").value = st.device === "radiacode" ? "radiacode" : "gmc"; }
-  else if (st.device) $("mDev").value = st.device === "radiacode" ? "radiacode" : "gmc";
-  $("mObjDevBox").hidden = $("mDev").value !== "voce";
-  const o = measureOpts();
-  const rc = started ? isRcMeasure(st) : o.device === "radiacode";
-  $("mDistLabel").textContent = o.mode === "ambos" ? "Distância até os aparelhos (opcional)" : rc ? "Distância até o RadiaCode (opcional)" : "Distância até o tubo (opcional)";
-  const home = started ? !!(st.bg && st.bg.source === "casa") : o.homeBg;
-  const auto = started ? !!st.auto : o.auto;
-  $("mPctBox").style.visibility = o.auto ? "" : "hidden";
-  if (!started) refreshHomeBg(false);
-  const hb = state.homeBg;
-  // dica embaixo das opções
-  $("mOptHint").textContent = !started ? [
-    (rc || o.mode) && !rcOnline() ? "O RadiaCode não está conectado." : "",
-    o.mode && state.status.state !== "conectado" ? "O GMC-800 não está conectado." : "",
-    o.mode === "ambos" ? "Os dois perto do objeto, ao mesmo tempo. O GMC vê beta e gama; o RadiaCode, quase só gama: comparando, dá uma pista do que o objeto emite." : "",
-    o.mode === "voce" ? `Deixe o ${devLabel(o.device)} no objeto e o ${devLabel(o.device === "radiacode" ? "gmc" : "radiacode")} com você (no bolso ou na mão): no fim, o app mostra quanto você recebeu enquanto o objeto era medido.` : "",
-    o.homeBg ? (rc ? "Fundo da casa: só vale se o RadiaCode passou a última hora parado no lugar onde vai medir o objeto (no bolso, o fundo é outro)." : "Fundo da casa: meça o objeto no lugar de sempre do contador (o fundo muda de um canto para outro).") : "O fundo é medido primeiro, com o objeto longe (2 m ou mais)" + (o.auto ? ", por 5 min." : ", pelo mesmo tempo do objeto."),
-    o.auto ? `Para quando o objeto estiver claramente acima do fundo, ou quando der para garantir que ele sobe menos de ${o.pct}% do fundo.` : "",
-  ].filter(Boolean).join(" ") : "";
-  // passo 1: fundo
-  $("mBgTitle").textContent = home ? "1. Fundo da casa" : "1. Fundo";
-  $("btnMeasureBg").hidden = home;
-  $("btnMeasureBg").disabled = running;
-  $("btnMeasureBg").textContent = st.bg ? "Medir o fundo de novo" : "Medir o fundo";
-  const objReady = !running && (st.bg ? true : home && hb && hb.ok);
-  $("btnMeasureObj").disabled = !objReady;
-  $("btnMeasureObj").textContent = st.obj ? "Medir de novo com o objeto" : "Medir com o objeto";
-  const k = mK(st);
-  const prog = (phase, fill, val, done) => {
-    if (st.phase === phase) {
-      const auto = phase === "objeto" && st.auto;
-      const total = auto ? (st.eta >= 0 ? st.elapsed + st.eta : st.seconds) : st.seconds;
-      $(fill).style.width = Math.min(100, (st.elapsed / Math.max(1, total)) * 100) + "%";
-      // até agora: taxa e incerteza com as contagens já feitas
-      const so = st.elapsed > 0 ? ` · ${numU(st.counts * 60 / st.elapsed * k)} ± ${uS(Math.sqrt(Math.max(st.counts, 1)) * 60 / st.elapsed, k)}` : "";
-      $(val).textContent = (auto ? `${Math.floor(st.elapsed / 60)}:${pad(st.elapsed % 60)}` : `${st.elapsed}/${st.seconds} s`) + ` · ${st.counts} contagens${so}`;
-    } else if (done) {
-      $(fill).style.width = "100%";
-      const dk = phK(done, isRcMeasure(st) ? "radiacode" : "gmc");
-      $(val).textContent = done.source === "casa"
-        ? `${numU(done.cpm * dk)} ± ${uS(done.errCPM, dk)} (${Math.round(done.seconds / 60)} min até ${hhmm(done.end)})`
-        : `${numU(done.cpm * dk)} ± ${uS(done.errCPM, dk)} (${done.counts} contagens em ${done.seconds} s)`;
-    } else {
-      $(fill).style.width = "0%";
-      $(val).textContent = "—";
-    }
-  };
-  if (!st.bg && home) {
-    // ainda não começou: mostra o fundo da casa que vai ser usado
-    $("mBgFill").style.width = hb && hb.ok ? "100%" : "0%";
-    const hk = hb && hb.ok && hb.cpm > 0 && hb.usv > 0 ? hb.usv / hb.cpm : devK(measureDevOpts().device);
-    $("mBgVal").textContent = !hb ? "…" : hb.ok ? `${numU(hb.cpm * hk)} ± ${uS(hb.errCPM, hk)} (${hb.minutes} min até ${hhmm(hb.to)})` : hb.why;
-  } else prog("fundo", "mBgFill", "mBgVal", st.bg);
-  prog("objeto", "mObjFill", "mObjVal", st.obj);
-  // os dois aparelhos ao vivo
-  renderMeasureDuo(st, running);
-  renderSideResult($("mOtherRes"), st.phase === "pronto" ? st : null);
-  // resultado parcial ao vivo
-  const lv = st.phase === "objeto" ? st.live : null;
-  $("mObjLive").hidden = !lv;
-  if (lv) {
-    const sig = lv.sigma;
-    let what = sig >= 3 ? "parece radioativo" : sig >= 2 ? "talvez um pouco acima" : "ainda não dá para dizer";
-    let when = "";
-    if (st.auto) when = st.elapsed < 20 ? " · juntando contagens…" : st.eta > 0 ? ` · ~${fmtMin(st.eta)} para decidir` : " · pode ir até o tempo máximo";
-    $("mObjLive").innerHTML = `Até agora: <b>${(lv.netUSv >= 0 ? "+" : "−") + numU(Math.abs(lv.netUSv))} ± ${uS(lv.netErr, k)}</b> sobre o fundo (${fmt(sig, 1)}σ) · ${what}${when}`;
-  }
-  const r = st.result;
-  $("mResult").hidden = !r;
-  $("mSaved").hidden = !st.savedId;
-  if (st.savedId) state.mLastSaved = st.savedId;
-  const rp = $("mReport");
-  rp.hidden = !st.savedId;
-  if (st.savedId) {
-    $("mReportText").textContent = st.reportPath ? "Relatório salvo: " + st.reportPath.split(/[\\/]/).pop()
-      : st.reportError ? "Relatório não saiu: " + st.reportError : state.settings.noMeasureReport ? "" : "Gerando o relatório…";
-    $("btnMReportOpen").hidden = !st.reportPath;
-    $("btnMReportMake").hidden = !!st.reportPath;
-    rp.dataset.id = st.savedId;
-    rp.dataset.path = st.reportPath || "";
-  }
-  if (!r) return;
-  $("mResult").className = "m-result " + r.level;
-  $("mVerdict").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
-  $("mStats").replaceChildren(measureStats({ bg: st.bg, obj: st.obj, result: r }));
-  const sign = r.netCPM >= 0 ? "+" : "−";
-  const ok = phK(st.obj, rc ? "radiacode" : "gmc");
-  $("mNumbers").textContent = `${(r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv))} ± ${uS(r.netErr, ok)} sobre o fundo ${rc ? "no detector" : "no tubo"} · ${fmt(r.ratio, 1)}× o fundo · ${fmt(r.sigma, 1)}σ`;
-  $("mExplain").textContent = measureExplain(r, st.obj, auto, ok);
-  renderMeasSpec($("mSpec"), st.spectrum);
-}
-
-// ---------- segundo aparelho (os dois perto, ou um com você) ----------
-
-const devLabel = (d) => (d === "radiacode" ? "RadiaCode" : "GMC-800");
-const DEV_COLOR = { radiacode: "#F472B6", gmc: "#6EE7A0" };
-
-// os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
-function renderMeasureDuo(st, running) {
-  const box = $("mDuo"), o = st.other;
-  box.hidden = !(running && o);
-  if (box.hidden) { box.textContent = ""; return; }
-  const pDev = isRcMeasure(st) ? "radiacode" : "gmc";
-  const last = (state.demo.active ? state.lastReal : state.last) || {};
-  const pNow = pDev === "radiacode" ? (state.rc.st || {}).usvh : last.usv;
-  const k = mK(st);
-  const rows = [];
-  // aparelho principal (no objeto)
-  {
-    const parts = [`agora ${pNow != null ? usvVal(pNow) : "—"}`, `${cntTxt(st.counts)} nesta fase`];
-    if (st.elapsed > 0) parts.push(`média ${uS(st.counts * 60 / st.elapsed, k)}`);
-    if (st.phase === "objeto" && st.live) parts.push(`${sgnUS(st.live.netUSv)} sobre o fundo (${fmt(st.live.sigma, 1)}σ)`);
-    rows.push([`${devLabel(pDev)} · no objeto`, parts.join(" · ")]);
-  }
-  // segundo aparelho
-  {
-    const parts = [`agora ${o.nowUSv ? usvVal(o.nowUSv) : "—"}`];
-    if (o.role === "voce") {
-      if (st.phase === "objeto") {
-        parts.push(cntTxt(o.counts), `sua dose ${fmt(o.dose || 0, 4)} µSv`);
-        if (o.bgUSv) parts.push(`seu fundo ${usvVal(o.bgUSv)}`);
-      } else parts.push("a sua dose começa a contar quando o objeto for medido");
-    } else {
-      parts.push(`${cntTxt(o.counts)} nesta fase`);
-      const ok = phK(o.bg, o.device);
-      if (o.elapsed > 0) parts.push(`média ${uS(o.counts * 60 / o.elapsed, ok)}`);
-      if (st.phase === "objeto" && o.live) parts.push(`${sgnUS(o.live.netUSv)} sobre o fundo (${fmt(o.live.sigma, 1)}σ)`);
-    }
-    rows.push([`${devLabel(o.device)} · ${o.role === "voce" ? "com você" : "no objeto"}`, parts.join(" · ")]);
-  }
-  box.textContent = "";
-  for (const [title, text] of rows) {
-    const d = document.createElement("div");
-    d.className = "m-duo-row";
-    d.innerHTML = "<strong></strong><span class=\"mono\"></span>";
-    d.children[0].textContent = title;
-    d.children[1].textContent = text;
-    box.appendChild(d);
-  }
-}
-
-// resultado do segundo aparelho (medição terminada ou salva)
-function renderSideResult(box, m) {
-  const o = m && m.other;
-  box.hidden = !o;
-  if (!o) { box.textContent = ""; return; }
-  const name = devLabel(o.device);
-  box.textContent = "";
-  const add = (cls, text) => { const e = document.createElement(cls === "strong" ? "strong" : "span"); if (cls !== "strong") e.className = cls; e.textContent = text; box.appendChild(e); return e; };
-  if (o.role === "voce") {
-    add("strong", `Com você (${name})`);
-    const secs = m.obj ? m.obj.seconds : 0;
-    add("mono", `${fmt(o.dose, 4)} µSv em ${fmtMin(secs)} · média ${usvVal(o.avgUSv)} · máx ${usvVal(o.maxUSv)}`);
-    if (o.bgUSv) add("small", o.excess > 0
-      ? `Acima do seu fundo (${usvVal(o.bgUSv)}): +${fmt(o.excess, 4)} µSv, o que o objeto somou na sua dose nesse tempo.`
-      : `Igual ao seu fundo (${usvVal(o.bgUSv)}): o objeto não somou nada que dê para ver na sua dose.`);
-    add("small muted", "Mostra quanto você recebeu enquanto o objeto era medido, na posição em que o aparelho estava (bolso, mão…).");
-    return;
-  }
-  add("strong", `${name} (também perto do objeto)`);
-  const r = o.result;
-  if (r) add("mono", `${sgnUS(r.netUSv)} ± ${uS(r.netErr, phK(o.obj, o.device))} sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo`);
-  else add("small muted", "Sem leituras suficientes desse aparelho.");
-  if (o.hint) add("small", o.hint);
-  add("small muted", "O GMC vê beta e gama; o RadiaCode, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.");
-}
-
-// ---------- espectro da medição (RadiaCode) ----------
-
-const kevTxt = (k) => k.toLocaleString(LOCALE, { useGrouping: false, maximumFractionDigits: 1, minimumFractionDigits: 1 });
-const specFWHM = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
-const SPEC_LINES = [
-  ["Am-241", 59.5], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
-  ["Cs-137", 661.7], ["Ac-228", 911.2], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5],
-];
-// faixas de meio pico (iguais às do PDF), em contagens/s
-function measSpecBins(sp) {
-  const en = (ch) => { const c = ch + 0.5; return sp.a[0] + sp.a[1] * c + sp.a[2] * c * c; };
-  const n = sp.obj.length, lo = 20, hi = Math.min(3000, en(n - 1));
-  const hasBg = !!(sp.bg && sp.bg.length === n && sp.bgSec > 0);
-  const bins = [];
-  for (let e = lo; e < hi;) { const w = Math.max(specFWHM(e) / 2, 2 * sp.a[1]); bins.push({ e0: e, e1: Math.min(e + w, hi), obj: 0, bg: 0 }); e += w; }
-  let j = 0;
-  for (let i = 0; i < n; i++) {
-    const e = en(i);
-    if (e < lo || e >= hi) continue;
-    while (j < bins.length - 1 && e >= bins[j].e1) j++;
-    bins[j].obj += sp.obj[i] / sp.objSec;
-    if (hasBg) bins[j].bg += sp.bg[i] / sp.bgSec;
-  }
-  return { bins, hasBg };
-}
-
-const specDur = (sec) => (sec < 300 ? `${Math.round(sec)} s` : rcDur(sec) || fmtMin(sec));
-function renderMeasSpec(box, sp) {
-  box.hidden = !(sp && sp.obj && sp.obj.length && sp.objSec > 0 && sp.a && sp.a[1] > 0);
-  if (box.hidden) { box.textContent = ""; return; }
-  const { bins, hasBg } = measSpecBins(sp);
-  if (!bins.length) { box.hidden = true; return; }
-  const W = 640, H = 210, PL = 44, PR = 10, PT = 18, PB = 22;
-  let lo = Infinity, hi = 0;
-  for (const b of bins) for (const v of [b.obj, b.bg]) if (v > 0) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
-  if (!hi) { box.hidden = true; return; }
-  const dlo = Math.floor(Math.log10(lo)), dhi = Math.max(dlo + 1, Math.ceil(Math.log10(hi)));
-  const e0 = bins[0].e0, e1 = bins[bins.length - 1].e1;
-  const x = (e) => PL + ((e - e0) / (e1 - e0)) * (W - PL - PR);
-  const y = (v) => PT + (H - PT - PB) * (1 - ((v > 0 ? Math.max(dlo, Math.log10(v)) : dlo) - dlo) / (dhi - dlo));
-  let g = "";
-  for (let d = dlo; d <= dhi; d++) {
-    const yy = y(10 ** d).toFixed(1);
-    g += `<line x1="${PL}" x2="${W - PR}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 5}" y="${(+yy + 4).toFixed(1)}" text-anchor="end" class="ax">${d >= 4 || d < -3 ? "1e" + d : fmt(10 ** d, Math.max(0, -d))}</text>`;
-  }
-  for (let e = 500; e < e1; e += 500) g += `<line x1="${x(e).toFixed(1)}" x2="${x(e).toFixed(1)}" y1="${PT}" y2="${H - PB}" class="grid"/><text x="${x(e).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="ax">${e}</text>`;
-  g += `<text x="${W - PR}" y="${H - 6}" text-anchor="end" class="ax">keV</text>`;
-  // linhas conhecidas: risco embaixo; as que subiram acima do fundo, tracejado com nome
-  const found = sp.peaks || [];
-  for (const [nuc, e] of SPEC_LINES) {
-    if (e < e0 || e > e1 || found.some((p) => p.kev === e)) continue;
-    g += `<line x1="${x(e).toFixed(1)}" x2="${x(e).toFixed(1)}" y1="${H - PB - 6}" y2="${H - PB}" class="tick"><title>${nuc} · ${kevTxt(e)} keV</title></line>`;
-  }
-  // nomes que não cabem lado a lado descem uma linha
-  const rows = [];
-  for (const p of [...found].sort((a, b) => a.kev - b.kev)) {
-    if (p.kev < e0 || p.kev > e1) continue;
-    const xx = x(p.kev), lbl = `${p.nuclide} ${kevTxt(p.kev)}`, w = lbl.length * 6.8 + 6;
-    const right = xx + 3 + w > W - PR; // perto da borda: escreve à esquerda do risco
-    const a0 = right ? xx - 3 - w : xx, a1 = right ? xx : xx + 3 + w;
-    let r = rows.findIndex((end) => end < a0);
-    if (r < 0) { r = rows.length; rows.push(0); }
-    rows[r] = Math.max(rows[r], a1);
-    g += `<line x1="${xx.toFixed(1)}" x2="${xx.toFixed(1)}" y1="${PT}" y2="${H - PB}" class="peak"/><text x="${(right ? xx - 3 : xx + 3).toFixed(1)}" y="${PT + 9 + r * 12}" text-anchor="${right ? "end" : "start"}" class="peak-l">${lbl}</text>`;
-  }
-  const path = (get) => {
-    let d = "", pen = false;
-    for (const b of bins) {
-      const v = get(b);
-      if (!(v > 0)) { pen = false; continue; }
-      d += `${pen ? "L" : "M"}${x(b.e0).toFixed(1)} ${y(v).toFixed(1)}L${x(b.e1).toFixed(1)} ${y(v).toFixed(1)}`;
-      pen = true;
-    }
-    return d;
-  };
-  if (hasBg) g += `<path d="${path((b) => b.bg)}" class="bg"/>`;
-  g += `<path d="${path((b) => b.obj)}" class="obj"/>`;
-  const bgTxt = !hasBg ? "" : sp.bgSrc === "acumulado" ? `fundo: espectro acumulado do aparelho (${rcDur(sp.bgSec) || fmtMin(sp.bgSec)}), na escala do tempo do objeto` : `fundo (${specDur(sp.bgSec)})`;
-  let txt = "";
-  const groups = new Map();
-  if (!hasBg) txt = "Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.";
-  else if (!found.length) txt = "Nenhuma linha gama conhecida subiu acima do fundo (3σ).";
-  else {
-    txt = "Linhas acima do fundo (uma pista do radionuclídeo, não uma identificação garantida):";
-    for (const p of found) { if (!groups.has(p.group)) groups.set(p.group, []); groups.get(p.group).push(p.kev); }
-  }
-  box.innerHTML = `<h4>Espectro</h4><svg viewBox="0 0 ${W} ${H}" class="m-spec-svg" role="img" aria-label="Espectro do objeto e do fundo">${g}</svg>
-    <div class="legend small muted"><span class="key"><i class="mk-obj" aria-hidden="true"></i>com o objeto (${specDur(sp.objSec)})</span>${hasBg ? `<span class="key"><i class="mk-bg" aria-hidden="true"></i>${bgTxt}</span>` : ""}<span>contagens/s em escala log</span></div>
-    <p class="small m-spec-txt"></p><ul class="small m-spec-peaks"></ul>`;
-  box.querySelector(".m-spec-txt").textContent = txt;
-  const ul = box.querySelector(".m-spec-peaks");
-  for (const [gname, ks] of groups) {
-    const li = document.createElement("li");
-    const b = document.createElement("b");
-    b.textContent = gname;
-    const k = document.createElement("span");
-    k.className = "mono";
-    k.textContent = ks.sort((a, b2) => a - b2).map(kevTxt).join("; ") + " keV";
-    li.append(b, " ", k);
-    ul.appendChild(li);
-  }
-}
-
-function measureExplain(r, obj, auto, k) {
-  const t = obj ? fmtMin(obj.seconds) : "";
-  k = k || 1;
-  if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
-  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${uS(r.threshold, k)}). Para procurar algo mais fraco, escolha “+10% do fundo”.`;
-  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" ? "" : ` Se o objeto emite algo, é menos que +${uS(r.limit, k)}; para ir além, aumente o tempo máximo.`);
-  return {
-    sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto encostado no contador; a 1 metro é muito menos.",
-    talvez: "A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.",
-    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit ? ` (menos que +${uS(r.limit, k)})` : "") + ". Use o modo automático para mais certeza.",
-  }[r.level];
-}
-
-function wireMeasure() {
-  for (const id of ["mSecs", "mBgSrc", "mPct", "mDev", "mObjDev"]) {
-    const v = localGet("m-" + id);
-    if (v && [...$(id).options].some((o) => o.value === v)) $(id).value = v;
-    $(id).addEventListener("change", () => { localSet("m-" + id, $(id).value); if (id === "mDev" || id === "mObjDev") refreshHomeBg(true); renderMeasure(state.measureSt || {}); });
-  }
-  $("btnMeasureBg").addEventListener("click", async () => {
-    try {
-      const st = state.measureSt || {};
-      // fundo de novo no meio de uma medição: recomeça com as mesmas opções
-      renderMeasure(await api.StartMeasure({ ...measureOpts(), homeBg: false }));
-      if (st.bg) toast("Medindo o fundo de novo.");
-    } catch (e) { toast(errMsg(e), true); }
-  });
-  $("btnMeasureObj").addEventListener("click", async () => {
-    try {
-      const st = state.measureSt || {};
-      if (st.bg) renderMeasure(await api.StartMeasurePhase("objeto", 0, $("mName").value));
-      else renderMeasure(await api.StartMeasure(measureOpts()));
-    } catch (e) { toast(errMsg(e), true); }
-  });
-  $("btnMeasureReset").addEventListener("click", async () => {
-    renderMeasure(await api.CancelMeasure());
-    refreshHomeBg(true);
-  });
-}
-
-// ---------- medições salvas ----------
-
-const measureAt = (ms) => {
-  for (const m of state.measurements || []) {
-    if (ms >= m.obj.start - 30e3 && ms <= m.obj.end + 30e3) return [m, "com o objeto"];
-    if (m.bg.source !== "casa" && ms >= m.bg.start - 30e3 && ms <= m.bg.end + 30e3) return [m, "fundo"];
-  }
-  return null;
-};
-const measureLabel = (ms) => { const x = measureAt(ms); return x ? ` · medição: ${x[0].name} (${x[1]})` : ""; };
-
-// faixas da medição: cinza no fundo, verde-água com o objeto
-function measureBands(t0, t1, xt) {
-  let out = "";
-  for (const m of state.measurements || []) {
-    for (const [ph, color, op] of [[m.bg, "#A3ADB4", 0.14], [m.obj, "#5EEAD4", 0.24]]) {
-      if (ph.source === "casa" || !(ph.end > t0 && ph.start < t1)) continue;
-      const x1 = xt(Math.max(ph.start, t0)), x2 = xt(Math.min(ph.end, t1));
-      out += `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(2, x2 - x1).toFixed(1)}" height="${H}" fill="${color}" fill-opacity="${op}"/>`;
-    }
-    if (m.obj.start > t0 && m.obj.start < t1) {
-      const x = xt(m.obj.start).toFixed(1);
-      out += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="#5EEAD4" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
-    }
-  }
-  return out;
-}
-
-const verdictWord = { sim: "radioativo", talvez: "talvez", nada: "sem diferença" };
-
-// ---------- medições salvas: lista à esquerda, detalhes à direita ----------
-
-function setMeasureMode(mode) {
-  state.mMode = mode === "salvas" ? "salvas" : "nova";
-  localSet("mMode", state.mMode);
-  const saved = state.mMode === "salvas";
-  document.querySelectorAll("#mModeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.mmode === state.mMode)));
-  $("mNewPane").hidden = saved;
-  $("mSavedPane").hidden = !saved;
-  $(saved ? "mLiveSlotSaved" : "mLiveSlotNew").prepend($("mLive"));
-  if (saved) {
-    const list = state.measurements || [];
-    if (!list.some((m) => m.id === state.mSel)) state.mSel = list.length ? list[list.length - 1].id : null;
-  } else {
-    state.mSel = null;
-  }
-  renderMeasureHistory();
-  drawMeasureChart();
-}
-
-function renderMeasureHistory() {
-  const ul = $("mHistList");
-  const all = [...(state.measurements || [])].reverse();
-  $("mHistCount").textContent = all.length ? `(${all.length})` : "";
-  const q = ($("mSearch").value || "").trim().toLowerCase();
-  const list = q ? all.filter((m) => (m.name + " " + (m.note || "")).toLowerCase().includes(q)) : all;
-  ul.textContent = "";
-  if (!all.length) ul.innerHTML = '<li class="muted small">Nenhuma medição salva ainda.</li>';
-  else if (!list.length) ul.innerHTML = '<li class="muted small">Nenhuma medição com esse nome.</li>';
-  for (const m of list) {
-    const li = document.createElement("li");
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "m-item" + (state.mSel === m.id ? " sel" : "");
-    b.dataset.id = m.id;
-    b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
-    b.querySelector(".mh-dot").classList.add(m.result.level);
-    b.querySelector("strong").textContent = m.name;
-    b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}` + ((m.attachments || []).length ? ` · ${m.attachments.length} anexo${m.attachments.length > 1 ? "s" : ""}` : "");
-    if (m.notComparable) { const tg = document.createElement("span"); tg.className = "nc-tag"; tg.textContent = "não comparável"; b.querySelector("strong").appendChild(tg); }
-    const net = b.querySelector(".m-item-net");
-    net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${numU(Math.abs(m.result.netUSv))}`;
-    net.title = "µSv/h acima do fundo";
-    b.addEventListener("click", () => { state.mSel = m.id; renderMeasureHistory(); drawMeasureChart(); });
-    li.appendChild(b);
-    ul.appendChild(li);
-  }
-  renderMeasureDetail();
-}
-
-// limite de detecção (Currie) e tempo para uma precisão, como no PDF
-// Currie com tempos diferentes (igual ao measurereport.go)
-const mDetLimit = (bg, objSec) => {
-  if (!(bg.seconds > 0)) return 0;
-  const tb = bg.seconds / 60, to = (objSec || bg.seconds) / 60, rb = bg.counts / tb;
-  return 2.71 / to + 3.29 * Math.sqrt(rb / to + rb / tb);
-};
-// fundo fixo (da casa): segundos com o objeto para o líquido ter precisão rel
-const mObjSecsFor = (bg, obj, rel) => {
-  const net = obj.cpm - bg.cpm, q = (rel * net) ** 2 - bg.errCPM ** 2;
-  return net > 0 && q > 0 ? (obj.cpm / q) * 60 : Infinity;
-};
-const mSecsFor = (bg, obj, rel) => {
-  const rb = bg.cpm / 60, ro = obj.cpm / 60, net = ro - rb;
-  return net > 0 ? (rb + ro) / (rel * rel * net * net) : Infinity;
-};
-const mDurTxt = (s) => (!isFinite(s) || s > 30 * 864e2 ? "—" : s < 90 ? `${Math.ceil(s)} s` : s < 5400 ? `${Math.ceil(s / 60)} min` : `${fmt(s / 3600, 1)} h`);
-
-function renderMeasureDetail() {
-  const m = (state.measurements || []).find((x) => x.id === state.mSel);
-  $("mDetailEmpty").hidden = !!m;
-  $("mDetailBody").hidden = !m;
-  if (!m) return;
-  const r = m.result;
-  $("mdName").textContent = m.name;
-  const home = m.bg.source === "casa";
-  const rc = isRcMeasure(m);
-  $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "") +
-    (m.mode === "ambos" ? " · os dois aparelhos" : m.mode === "voce" ? ` · ${rc ? "RadiaCode" : "GMC-800"} no objeto, ${rc ? "GMC-800" : "RadiaCode"} com você` : rc ? " · RadiaCode" : "");
-  const v = $("mdVerdict");
-  v.className = "m-verdict " + r.level;
-  v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
-  v.querySelector("span").textContent = `${fmt(r.sigma, 1)}σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.`;
-  const t = $("mdTiles");
-  t.textContent = "";
-  const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
-  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${uS(m.bg.errCPM, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${uS(m.obj.errCPM, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)} ` + (rc ? "no detector" : "no tubo"), r.level === "sim" ? "warn" : "");
-  sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
-  $("mdStats").replaceChildren(measureStats(m));
-  renderMeasSpec($("mdSpec"), m.spectrum);
-  renderSideResult($("mdOther"), m);
-  $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
-  $("mdNote").classList.toggle("muted", !m.note);
-  let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
-  if (r.limit) lim += ` Se o objeto emite algo, é menos que +${uS(r.limit, ok)}.`;
-  if (r.netCPM > 0) lim += home
-    ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`
-    : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
-  if (r.stop) lim = measureExplain(r, m.obj, true, ok) + " " + lim;
-  $("mdLimits").textContent = lim;
-  $("mdEditName").value = m.name;
-  $("mdEditNote").value = m.note || "";
-  const del = $("btnMdDel");
-  del.dataset.sure = "";
-  del.textContent = "Apagar";
-  renderMeasureExtra(m);
-}
-
-// 2.7: comparabilidade, configuração da época, outras medições e anexos
-let mCtxSeq = 0;
-async function renderMeasureExtra(m) {
-  $("mdComp").textContent = m.notComparable
-    ? `Marcada como não comparável${m.ncReason ? ": " + m.ncReason : ""}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.`
-    : "Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.";
-  $("btnMdComp").textContent = m.notComparable ? "Desmarcar" : "Marcar como não comparável";
-  $("mdCompForm").hidden = true;
-  renderAttachments(m);
-  const my = ++mCtxSeq;
-  let ctx = null;
-  if (api.GetMeasurementContext) { try { ctx = await api.GetMeasurementContext(m.id); } catch (e) { ctx = null; } }
-  if (my !== mCtxSeq) return;
-  const cfg = $("mdCfg");
-  if (isRcMeasure(m)) cfg.textContent = "Medição do RadiaCode: o µSv/h vem da calibração do próprio aparelho.";
-  else if (!ctx || !ctx.cfgKnown) cfg.textContent = "Sem registro: o histórico de configurações começa na versão 2.1.";
-  else {
-    cfg.textContent = "";
-    for (const c of ctx.cfg.filter((x) => x.then)) { const sp = document.createElement("span"); sp.textContent = `${c.field}: ${c.then}`; cfg.append(sp, document.createElement("br")); }
-    const tail = document.createElement("span");
-    tail.textContent = ctx.changed.length ? `Mudou desde então: ${ctx.changed.join(", ")}.` : "Igual à de hoje.";
-    tail.className = ctx.changed.length ? "" : "muted";
-    cfg.appendChild(tail);
-    if (ctx.changed.length) { const t2 = document.createElement("span"); t2.textContent = " O resultado guardado usa a configuração da época."; cfg.appendChild(t2); }
-  }
-  const rel = $("mdRelated");
-  rel.textContent = "";
-  const list = (ctx && ctx.related) || [];
-  if (!list.length) { rel.innerHTML = '<span class="muted">Nenhuma outra medição com este nome. Dê o mesmo nome para medir o mesmo objeto de novo e acompanhar.</span>'; return; }
-  const tb = document.createElement("table");
-  tb.className = "m-rel";
-  const row = (id, when, net, dist, status, cls) => {
-    const tr = document.createElement("tr");
-    tr.className = cls;
-    const c = [when, net, dist, status].map((x) => { const td = document.createElement("td"); td.textContent = x; return td; });
-    if (id) { const b = document.createElement("button"); b.type = "button"; b.textContent = when; b.addEventListener("click", () => { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); }); c[0].textContent = ""; c[0].appendChild(b); }
-    tr.append(...c);
-    tb.appendChild(tr);
-  };
-  const netTxt = (v, e) => `${v >= 0 ? "+" : "−"}${numU(Math.abs(v))}` + (e ? ` ± ${numU(Math.abs(e))}` : "");
-  row(0, `${ddmm(m.time)} (esta)`, netTxt(m.result.netUSv, m.result.netCPM ? (m.result.netErr * m.result.netUSv) / m.result.netCPM : 0), m.distance || "—", m.notComparable ? "não comparável" : "", "cur");
-  for (const r of list) row(r.id, ddmm(r.time), netTxt(r.netUSv, r.netErrUSv), r.distance || "—", r.diff.length ? r.diff.join(", ") : "comparável", r.diff.length ? "nc" : "");
-  rel.appendChild(tb);
-}
-
-async function renderAttachments(m) {
-  const box = $("mdAttach");
-  box.textContent = "";
-  const list = m.attachments || [];
-  if (!list.length) { box.innerHTML = '<span class="small muted">Nenhum anexo. Fotos do objeto e da posição no tubo ajudam a repetir a medição do mesmo jeito.</span>'; return; }
-  for (const at of list) {
-    const card = document.createElement("div");
-    card.className = "m-att";
-    card.innerHTML = '<div class="thumb"></div><div class="meta"><span class="nm"></span><span class="muted"></span><span class="acts"><button type="button" data-act="open">Abrir</button><button type="button" data-act="rm">Remover</button></span></div>';
-    card.querySelector(".nm").textContent = at.name;
-    card.querySelector(".nm").title = at.name;
-    card.querySelector(".meta .muted").textContent = `${fmt(at.size / 1024, at.size < 10240 ? 1 : 0)} KB`;
-    const th = card.querySelector(".thumb");
-    const ext = (at.name.split(".").pop() || "").toUpperCase().slice(0, 4);
-    th.innerHTML = `<span>${escHtml(ext || "?")}</span>`;
-    if ((at.type || "").startsWith("image/") && at.size < 12 * 1048576 && api.GetMeasurementAttachment) {
-      api.GetMeasurementAttachment(m.id, at.file).then((u) => { const img = document.createElement("img"); img.src = u; img.alt = at.name; th.replaceChildren(img); }).catch(() => {});
-    }
-    const open = () => call(api.OpenMeasurementAttachment, m.id, at.file);
-    th.addEventListener("click", open);
-    card.querySelector('[data-act="open"]').addEventListener("click", open);
-    const rm = card.querySelector('[data-act="rm"]');
-    rm.addEventListener("click", async () => {
-      if (rm.dataset.sure !== "1") { rm.dataset.sure = "1"; rm.textContent = "Confirmar"; return; }
-      await call(api.RemoveMeasurementAttachment, m.id, at.file);
-    });
-    box.appendChild(card);
-  }
-}
-
-function wireMeasureSaved() {
-  document.querySelectorAll("#mModeSeg button").forEach((b) => b.addEventListener("click", () => setMeasureMode(b.dataset.mmode)));
-  $("mSearch").addEventListener("input", renderMeasureHistory);
-  const cur = () => (state.measurements || []).find((x) => x.id === state.mSel);
-  $("btnMOpenSaved").addEventListener("click", () => { const id = state.mLastSaved; setMeasureMode("salvas"); if (id) { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); } });
-  $("btnMdReport").addEventListener("click", () => { const m = cur(); if (m) exportMeasureReport(m.id); });
-  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3); });
-  $("btnMdEdit").addEventListener("click", () => { const f = $("mdEditForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdEditName").focus(); });
-  $("btnMdSave").addEventListener("click", async () => {
-    const m = cur();
-    if (!m) return;
-    await call(api.UpdateMeasurement, m.id, $("mdEditName").value, $("mdEditNote").value);
-    $("mdEditForm").hidden = true;
-  });
-  $("btnMdComp").addEventListener("click", async () => {
-    const m = cur();
-    if (!m) return;
-    if (m.notComparable) { await call(api.SetMeasurementComparable, m.id, true, ""); return; }
-    const f = $("mdCompForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdCompReason").focus();
-  });
-  $("btnMdCompSave").addEventListener("click", async () => {
-    const m = cur();
-    if (!m) return;
-    await call(api.SetMeasurementComparable, m.id, false, $("mdCompReason").value);
-    $("mdCompReason").value = "";
-  });
-  $("btnMdAttach").addEventListener("click", async () => {
-    const m = cur();
-    if (!m || !api.AddMeasurementAttachment) return;
-    try { await call(api.AddMeasurementAttachment, m.id); } catch (e) { /* erro já mostrado */ }
-  });
-  $("btnMdDel").addEventListener("click", async () => {
-    const m = cur(), del = $("btnMdDel");
-    if (!m) return;
-    if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
-    state.mSel = null;
-    await call(api.DeleteMeasurement, m.id);
-  });
-}
-
-async function refreshMeasurements() {
-  try { state.measurements = (await api.GetMeasurements()) || []; } catch (e) { state.measurements = []; }
-  renderMeasureHistory();
-}
-
-// ---------- fora de casa ----------
-
-const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < p.to) || null;
-const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${p.name}` : ""; };
-
-// faixas lilás no gráfico para os períodos fora de casa
-function awayBands(t0, t1, xt) {
-  return (state.periods || []).filter((p) => p.to > t0 && p.from < t1).map((p) => {
-    const x1 = xt(Math.max(p.from, t0)), x2 = xt(Math.min(p.to, t1));
-    return `<rect x="${x1.toFixed(1)}" y="0" width="${Math.max(1, x2 - x1).toFixed(1)}" height="${H}" fill="#B79CFF" fill-opacity="0.13"/>`;
-  }).join("");
-}
-
-const toLocalInput = (ms) => { const d = new Date(ms); return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`; };
-const fromLocalInput = (s) => (s ? new Date(s).getTime() : NaN);
-
-let periodEditing = 0;
-
-// números de um período: RadiaCode (você) e GMC-800 no mesmo tempo
+// ---------- fora de casa (o resto está em fora.js) ----------
 state.periodSum = {};
-function periodSummary(p) {
-  const to = Math.min(p.to, Date.now());
-  const key = `${p.from}-${to}`;
-  // período que ainda está acontecendo: refaz a conta a cada abertura
-  if (!state.periodSum[key] || p.to > Date.now()) state.periodSum[key] = api.GetSummary(p.from, to).catch(() => null);
-  return state.periodSum[key];
-}
-
-function periodStatsEl(p) {
-  const box = document.createElement("div");
-  box.className = "p-stats mono";
-  box.textContent = "…";
-  periodSummary(p).then((s) => {
-    box.textContent = "";
-    if (!s) { box.textContent = "não deu para calcular"; return; }
-    const line = (cls, label, text, warn) => {
-      const d = document.createElement("div");
-      d.className = cls;
-      const b = document.createElement("b");
-      b.textContent = label;
-      const t = document.createElement("span");
-      t.textContent = text;
-      if (warn) t.className = "warn";
-      d.append(b, t);
-      box.appendChild(d);
-    };
-    const rc = s.rc && s.rc.minutes ? s.rc : null;
-    if (rc) {
-      const dg = (v) => fmt(v, usvDigits(v));
-      const vs = rc.bgUSv ? (Math.abs(rc.vsBgPct) < 5 ? " (igual ao seu normal)" : ` (${rc.vsBgPct > 0 ? "+" : "−"}${fmt(Math.abs(rc.vsBgPct), 0)}% do seu normal)`) : "";
-      const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
-      if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
-      if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
-      line("p-rc", "RadiaCode", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
-    } else {
-      line("p-rc", "RadiaCode", "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)");
-    }
-    if (s.minutes) {
-      const parts = [`média ${fmt(s.avg, 1)} CPM`, `máx ${fmt(s.max, 0)} CPM`];
-      if (s.coverage < 0.95) parts.push(`${fmt(s.coverage * 100, 0)}% medido`);
-      if (s.danger || s.alarm || s.attention) parts.push(`alertas: ${alertsText(s)}`);
-      line("p-gmc", "GMC-800", parts.join(" · "));
-    } else line("p-gmc", "GMC-800", "sem leitura");
-  });
-  return box;
-}
-
-// total do RadiaCode fora de casa (todos os períodos)
-async function renderPeriodTotal() {
-  const el = $("periodTotal");
-  const list = state.periods || [];
-  if (!list.length) { el.hidden = true; return; }
-  const sums = await Promise.all(list.map(periodSummary));
-  let dose = 0, min = 0;
-  for (const s of sums) if (s && s.rc && s.rc.minutes) { dose += s.rc.dose; min += s.rc.minutes; }
-  el.hidden = !min;
-  if (min) el.textContent = `RadiaCode fora de casa, somando os períodos: ${fmt(dose, dose < 10 ? 2 : 1)} µSv em ${hm(min)} medidos.`;
-}
-
-function renderPeriods() {
-  const ul = $("periodList");
-  ul.textContent = "";
-  if (!state.periods.length) { ul.innerHTML = '<li class="muted small">Nenhum período marcado.</li>'; renderPeriodTotal(); return; }
-  renderPeriodTotal();
-  for (const p of [...state.periods].reverse()) {
-    const li = document.createElement("li");
-    li.className = "p-row";
-    const txt = document.createElement("span");
-    txt.innerHTML = `<strong></strong> <span class="mono small muted"></span>`;
-    txt.firstChild.textContent = p.name;
-    txt.lastChild.textContent = zoomRangeText(p.from, p.to);
-    const ed = document.createElement("button");
-    ed.type = "button"; ed.className = "btn small"; ed.textContent = "Editar";
-    ed.addEventListener("click", () => editPeriod(p));
-    const see = document.createElement("button");
-    see.type = "button"; see.className = "btn small"; see.textContent = "Ver";
-    see.addEventListener("click", () => showRange(p.from, p.to));
-    const del = document.createElement("button");
-    del.type = "button"; del.className = "btn small danger-btn"; del.textContent = "Apagar";
-    del.addEventListener("click", async () => {
-      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
-      await call(api.DeletePeriod, p.id);
-    });
-    const rep = document.createElement("button");
-    rep.type = "button"; rep.className = "btn small"; rep.textContent = "Relatório (PDF)";
-    rep.title = "Relatório em PDF só desse trecho fora de casa";
-    rep.addEventListener("click", () => exportReport(p.from, Math.min(p.to, Date.now()), "Fora de casa: " + p.name));
-    const head = document.createElement("div");
-    head.className = "p-head";
-    head.append(txt, see, rep, ed, del);
-    li.append(head, periodStatsEl(p));
-    ul.appendChild(li);
-  }
-}
-
-function editPeriod(p) {
-  periodEditing = p ? p.id || 0 : 0;
-  $("periodFormTitle").textContent = periodEditing ? "Editar período" : "Novo período";
-  $("btnPeriodNew").hidden = !periodEditing;
-  $("pName").value = p ? p.name || "" : "";
-  const now = Date.now();
-  $("pFrom").value = toLocalInput(p && p.from ? p.from : now - 3 * 3600e3);
-  $("pTo").value = toLocalInput(p && p.to ? p.to : now);
-  $("pErr").hidden = true;
-}
-
-function openPeriods(prefill) {
-  renderPeriods();
-  editPeriod(prefill || null);
-  showView("fora", true);
-  if (prefill) $("pName").focus();
-}
-
-// abre um trecho nos dois gráficos (mesmo jeito do mapa de calor)
-function showRange(from, to) {
-  setSub("graficos", "tempo");
-  if (state.view !== "graficos") showView("graficos", true);
-  state.zoom = { from, to }; state.zoomStack = [];
-  state.doseZoom = { from, to }; state.doseZoomStack = [];
-  state.zoomLinked = true;
-  refreshChart(); refreshDose();
-  $("cpmCard").scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-async function refreshPeriods() {
-  try { state.periods = (await api.GetPeriods()) || []; } catch (e) { state.periods = []; }
-  state.periodSum = {};
-  renderPeriods();
-}
-
-// Depois de baixar o histórico: pergunta se os trechos novos foram fora de casa
-function askNewRanges(ranges) {
-  const ul = $("newRangeList");
-  ul.textContent = "";
-  const bg = state.last && state.last.bgCPM ? state.last.bgCPM : null;
-  for (const r of ranges) {
-    const li = document.createElement("li");
-    li.className = "nr";
-    const txt = document.createElement("span");
-    txt.innerHTML = "<strong></strong> <span class=\"mono small muted\"></span>";
-    txt.firstChild.textContent = zoomRangeText(r.from, r.to);
-    txt.lastChild.textContent = `média ${fmt(r.avgCPM, 1)} CPM` + (bg ? ` · seu normal em casa: ${fmt(bg, 0)}` : "");
-    // resumo do trecho: máximo, dose, alertas, chuva
-    const sum = document.createElement("span");
-    sum.className = "nr-sum small mono muted";
-    txt.appendChild(sum);
-    api.GetSummary(r.from, r.to).then((s) => {
-      const parts = [`máx ${fmt(s.max, 0)} CPM ${atText(s, s.maxAt)}`, `mín ${fmt(s.min, 0)}`, `dose ${fmt(s.dose, 2)} µSv`, `alertas: ${alertsText(s)}`];
-      if (s.rainKnown) parts.push(s.rainHours ? `choveu ${fmt(s.rainMM, 1)} mm` : "sem chuva");
-      sum.textContent = parts.join(" · ");
-    }).catch(() => {});
-    const home = document.createElement("button");
-    home.type = "button"; home.className = "btn small"; home.textContent = "Em casa";
-    const out = document.createElement("button");
-    out.type = "button"; out.className = "btn small away-btn"; out.textContent = "Fora de casa";
-    const form = document.createElement("div");
-    form.className = "nr-form";
-    form.hidden = true;
-    const name = document.createElement("input");
-    name.type = "text"; name.maxLength = 60; name.placeholder = "Fora de casa"; name.setAttribute("aria-label", "Nome do período");
-    const save = document.createElement("button");
-    save.type = "button"; save.className = "btn small accent"; save.textContent = "Salvar";
-    form.append(name, save);
-    const done = (msg) => { li.classList.add("answered"); home.hidden = out.hidden = true; form.hidden = true; const s = document.createElement("span"); s.className = "small muted"; s.textContent = msg; li.appendChild(s); };
-    home.addEventListener("click", () => done("em casa"));
-    out.addEventListener("click", () => { form.hidden = false; name.focus(); });
-    const doSave = async () => {
-      try {
-        const p = await api.SavePeriod({ id: 0, from: r.from, to: r.to, name: name.value });
-        done(`marcado: ${p.name}`);
-      } catch (e) { toast(errMsg(e), true); }
-    };
-    save.addEventListener("click", doSave);
-    name.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); doSave(); } });
-    li.append(txt, home, out, form);
-    ul.appendChild(li);
-  }
-  $("newDataDlg").showModal();
-}
-
-function wirePeriods() {
-  $("btnZoomAway").addEventListener("click", () => state.zoom && openPeriods({ from: state.zoom.from, to: state.zoom.to }));
-  $("btnZoomNote").addEventListener("click", () => state.zoom && openNote({ id: 0, time: state.zoom.from, end: Math.min(Date.now(), state.zoom.to), text: "" }));
-  $("btnDoseZoomAway").addEventListener("click", () => state.doseZoom && openPeriods({ from: state.doseZoom.from, to: state.doseZoom.to }));
-  $("btnPeriodNew").addEventListener("click", () => editPeriod(null));
-  $("btnPeriodSave").addEventListener("click", async () => {
-    const from = fromLocalInput($("pFrom").value), to = fromLocalInput($("pTo").value);
-    const err = $("pErr");
-    if (!(from < to)) { err.textContent = "O fim precisa ser depois do início."; err.hidden = false; return; }
-    try {
-      await api.SavePeriod({ id: periodEditing, from, to, name: $("pName").value });
-      toast("Período salvo");
-      editPeriod(null);
-    } catch (e) { err.textContent = errMsg(e); err.hidden = false; }
-  });
-}
 
 // ---------- alarme ----------
 //
@@ -4413,6 +2639,7 @@ function wire() {
   wireMeasure();
   setupMeasureHover();
   wirePeriods();
+  wireWhere();
 }
 
 // ---------- eventos vindos do Go ----------
@@ -4434,7 +2661,8 @@ function listen() {
   on("notes", () => { refreshChart(); if (state.view === "resumo") refreshSummary(); });
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
   on("measurements", (list) => { state.measurements = list || []; renderMeasureHistory(); drawMeasureChart(); refreshChart(); });
-  on("periods", (list) => { state.periods = list || []; renderPeriods(); refreshAll(); });
+  on("periods", (list) => { state.periods = normPeriods(list); renderPeriods(); refreshAll(); });
+  on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
     const was = state.status.state;
     state.status = s;
@@ -4606,10 +2834,10 @@ function drawRainCurve(r) {
   };
   const x0 = x(0).toFixed(1), y0 = y(0).toFixed(1);
   $("riChart").innerHTML =
-    `<line x1="0" y1="${y0}" x2="${W}" y2="${y0}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>` +
+    `<line x1="0" y1="${y0}" x2="${W}" y2="${y0}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>` +
     `<rect x="${x0}" y="0" width="${(x(240) - x(0)).toFixed(1)}" height="${H}" fill="#3DA5FF" fill-opacity="0.05"/>` +
     `<line x1="${x0}" y1="0" x2="${x0}" y2="${H}" stroke="#3DA5FF" stroke-width="1" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>` +
-    line("dry", "#A3ADB4", 1.5) + line("rain", "#3DA5FF", 2.5);
+    line("dry", COR.muted, 1.5) + line("rain", "#3DA5FF", 2.5);
 }
 
 // ---------- anotações ----------
@@ -5228,7 +3456,7 @@ async function refreshPatterns() {
 function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : fmt(v, usvDigits(v)); }
 
 function drawPatterns(p) {
-  const rc = p.device === "radiacode", color = rc ? "#F472B6" : "#6EE7A0";
+  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.accent;
   const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
   $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
     : `${fmt(p.minutes, 0)} min em casa (${p.unit})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
@@ -5247,7 +3475,7 @@ function drawPatterns(p) {
     const x = (h) => (h / 23) * W;
     const y = (v) => PH - ((v - lo) / (hi - lo)) * PH;
     for (let i = 0; i < 4; i++) ys[i].textContent = patVal(p, hi - ((hi - lo) / 3) * i);
-    let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? PH - 0.5 : i === 0 ? 0.5 : (PH / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+    let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? PH - 0.5 : i === 0 ? 0.5 : (PH / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
     // noite (18h–6h) com fundo levemente mais escuro
     out += `<rect x="0" y="0" width="${x(6).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/><rect x="${x(18).toFixed(1)}" y="0" width="${(W - x(18)).toFixed(1)}" height="${PH}" fill="#000" fill-opacity="0.18"/>`;
     const ok = hs.map((h, i) => ({ h, i })).filter((q) => q.h.n >= 30);
@@ -5256,10 +3484,10 @@ function drawPatterns(p) {
       const bot = ok.slice().reverse().map((q) => `${x(q.i).toFixed(1)} ${y(q.h.p25).toFixed(1)}`).join(" L");
       out += `<path d="M${top} L${bot} Z" fill="${color}" fill-opacity="0.15"/>`;
       out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.median).toFixed(1)}`).join(" L")}" fill="none" stroke="${color}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
-      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="#E9EDEF" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
+      out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="${COR.text}" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
     }
     svg.innerHTML = out;
-    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:#E9EDEF;border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
+    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
   }
   // dia × noite
   const dn = $("patDN");
@@ -5365,25 +3593,25 @@ function drawBgTrend(tr) {
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, hi - lo < 6 ? 1 : 0);
-  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
-  if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="#A3ADB4" fill-opacity="0.06"/>`;
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="${COR.muted}" fill-opacity="0.06"/>`;
   const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = val(p); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
-  out += `<path d="${path((p) => p.mean)}" fill="none" stroke="#6EE7A0" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path((p) => p.mean)}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path((p) => p.median)}" fill="none" stroke="#7DD3FC" stroke-width="1.4" stroke-dasharray="5 3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="#E9EDEF" fill-opacity="0.75"/>`;
+  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="${COR.text}" fill-opacity="0.75"/>`;
   if (f.state === "subindo" || f.state === "descendo") {
-    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   } else if (f.state === "degrau") {
-    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="#F5B84A" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   const lab = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
   const xs = $("bgX").children;
   xs[0].textContent = lab(tr.from); xs[1].textContent = lab((tr.from + tr.to) / 2); xs[2].textContent = "agora";
-  $("bgLegend").innerHTML = '<span class="key"><i style="border-color:#6EE7A0"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
+  $("bgLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.accent + '"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
     '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
-    (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:#F5B84A;border-top-style:dashed"></i>tendência</span>' : "") +
-    (forming ? '<span class="key"><i class="sw" style="background:#A3ADB4"></i>antes do primeiro dado</span>' : "") + " (CPM)";
+    (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:' + COR.att + ';border-top-style:dashed"></i>tendência</span>' : "") +
+    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (CPM)";
 
   // dispersão de cada dia
   const dsvg = $("bgDisp"), DH = 80;
@@ -5392,10 +3620,10 @@ function drawBgTrend(tr) {
   const dys = $("bgDY").children;
   dys[0].textContent = fmt(dtop, 1); dys[1].textContent = fmt(dtop / 2, 1); dys[2].textContent = "0";
   const bw = Math.max(2, (DAY_MS / (tr.to - tr.from)) * W * 0.7);
-  let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="#A3ADB4" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
+  let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="${COR.muted}" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
   for (const d of daily) {
     const h = (Math.min(dtop, d.dispersion) / dtop) * DH, cx = x(d.day + DAY_MS / 2);
-    const col = d.dispersion >= 1.2 ? "#F5B84A" : "#6EE7A0";
+    const col = d.dispersion >= 1.2 ? COR.att : COR.accent;
     dout += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${(DH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" fill-opacity="${d.full ? 0.7 : 0.3}"/>`;
   }
   dsvg.innerHTML = dout;
@@ -5441,18 +3669,38 @@ function wireBgTrend() {
 
 // ---------- relatórios em PDF ----------
 
-async function exportMeasureReport(id) {
+// Enquanto o PDF é gerado, os botões de relatório mostram "Gerando…" e
+// ficam travados: sem isso o clique parecia não ter feito nada, e cada
+// clique a mais virava outro PDF.
+const REPORT_BTNS = ["btnReport", "btnZoomReport", "btnMReportMake", "btnMdReport"];
+let reportBusy = false;
+function setReportBusy(on, btn) {
+  reportBusy = on;
+  const btns = REPORT_BTNS.map((id) => $(id)).concat(btn && !REPORT_BTNS.includes(btn.id) ? [btn] : []).filter(Boolean);
+  for (const b of btns) {
+    if (on) { b.dataset.idleText = b.textContent; b.textContent = "Gerando…"; }
+    else if (b.dataset.idleText) { b.textContent = b.dataset.idleText; delete b.dataset.idleText; }
+    b.disabled = on;
+    b.classList.toggle("is-busy", on);
+    b.setAttribute("aria-busy", on ? "true" : "false");
+  }
+}
+async function runReport(btn, make) {
+  if (reportBusy) return;
+  setReportBusy(true, btn);
   try {
-    const f = await api.ExportMeasureReport(id);
+    const f = await make();
     if (f) toast("Relatório salvo: " + f.split(/[\\/]/).pop());
   } catch (e) { toast(errMsg(e), true); }
+  finally { setReportBusy(false, btn); }
 }
 
-async function exportReport(from, to, label) {
-  try {
-    const f = await api.ExportReport(Math.round(from), Math.round(to), label);
-    if (f) toast("Relatório salvo: " + f.split(/[\\/]/).pop());
-  } catch (e) { toast(errMsg(e), true); }
+function exportMeasureReport(id, btn) {
+  return runReport(btn, () => api.ExportMeasureReport(id));
+}
+
+function exportReport(from, to, label, btn) {
+  return runReport(btn, () => api.ExportReport(Math.round(from), Math.round(to), label));
 }
 
 function renderReportDir(d) {
@@ -5464,19 +3712,19 @@ async function refreshReportDir() { try { renderReportDir(await api.GetReportDir
 
 function wireReports() {
   $("btnMReportOpen").addEventListener("click", () => call(api.OpenReportFile, $("mReport").dataset.path));
-  $("btnMReportMake").addEventListener("click", () => exportMeasureReport(+$("mReport").dataset.id));
+  $("btnMReportMake").addEventListener("click", (e) => exportMeasureReport(+$("mReport").dataset.id, e.currentTarget));
   $("btnReportDir").addEventListener("click", async () => { try { renderReportDir(await api.ChooseReportDir()); } catch (e) { toast(errMsg(e), true); } });
   $("btnOpenReportDir").addEventListener("click", () => call(api.OpenReportDir));
   $("btnResetReportDir").addEventListener("click", async () => renderReportDir(await api.ResetReportDir()));
-  $("btnZoomReport").addEventListener("click", () => {
+  $("btnZoomReport").addEventListener("click", (e) => {
     if (!state.zoom) return;
     const p = state.heatPick && state.heatPick.from === state.zoom.from && state.heatPick.to === state.zoom.to;
-    exportReport(state.zoom.from, state.zoom.to, p ? "padrão por hora" : "trecho selecionado");
+    exportReport(state.zoom.from, state.zoom.to, p ? "padrão por hora" : "trecho selecionado", e.currentTarget);
   });
 }
 
 function setupSummary() {
-  $("btnReport").addEventListener("click", () => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label); });
+  $("btnReport").addEventListener("click", (e) => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label, e.currentTarget); });
   document.querySelectorAll("#sumModeSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.mode = b.dataset.smode; refreshSummary(); }));
   // "detalhes" do Resumo lembra se estava aberto
   $("sumDetails").open = localGet("sumDet", "") === "1";
@@ -5555,6 +3803,7 @@ async function init() {
   } catch (e) { /* segue */ }
   await refreshRainStatus();
   await refreshPeriods();
+  await refreshWhere();
   await refreshMeasurements();
   await refreshAll();
   refreshAgora(true);
@@ -5614,6 +3863,28 @@ function makeDemoApi() {
     { id: 2, name: "Medição antiga", note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
       obj: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5 + 90e3, end: mt - 864e5 + 150e3 },
       result: { netCPM: 0, netErr: 7.2, netUSv: 0, ratio: 1, sigma: 0, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" } }].sort((a, b) => a.time - b.time);
+  const mockWhere = () => {
+    const now = Date.now();
+    const o = periods.find((q) => now >= q.from && now < (q.to || Infinity));
+    const g = o ? o.gmc || "comigo" : "casa", r = o ? o.radiacode || "comigo" : "comigo";
+    const nh = !!(o && o.notHome && g === "casa" && r === "casa");
+    const pers = r === "comigo" ? "radiacode" : g === "comigo" ? "gmc" : g === "casa" && r === "casa" && !nh ? "gmc" : "", home = g === "casa" ? "gmc" : r === "casa" ? "radiacode" : "";
+    return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo", personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
+  };
+  // estado ao vivo de mentira: ?whlive=gmc:zero,radiacode:off (zero, sat, off) para ver as falhas
+  const mockLive = () => {
+    const now = Date.now(), want = {};
+    for (const kv of (new URLSearchParams(location.search).get("whlive") || "").split(",")) { const [d, v] = kv.split(":"); if (d) want[d] = v; }
+    const one = (dev) => {
+      const v = want[dev];
+      if (v === "zero") return { connected: true, state: "sem contagens", since: now - 14 * 6e4, last: now, lastGood: now - 15 * 6e4 };
+      if (v === "sat") return { connected: true, state: "saturado", since: now - 3 * 6e4, last: now, lastGood: now - 4 * 6e4 };
+      if (v === "off") return { connected: false, state: "sem dado", since: 0, last: now - 42 * 6e4, lastGood: now - 42 * 6e4 };
+      const on = dev === "gmc" || demoRcFake();
+      return on ? { connected: true, state: "lendo", since: 0, last: now, lastGood: now } : { connected: false, state: "sem dado", since: 0, last: 0, lastGood: 0 };
+    };
+    return { gmc: one("gmc"), radiacode: one("radiacode") };
+  };
   let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
@@ -6113,7 +4384,7 @@ const demoRc = () => {
     SetMeasurementComparable: async (id, comparable, reason) => { const m = measurements.find((x) => x.id === id); if (m) { m.notComparable = !comparable; m.ncReason = comparable ? "" : reason; } setTimeout(() => emit("measurements", measurements.slice()), 0); },
     AddMeasurementAttachment: async (id) => { const m = measurements.find((x) => x.id === id); if (m) { m.attachments = (m.attachments || []).concat([{ file: "foto.jpg", name: "foto.jpg", size: 182000, type: "image/jpeg", added: Date.now() }]); } setTimeout(() => emit("measurements", measurements.slice()), 0); return m ? m.attachments : []; },
     RemoveMeasurementAttachment: async (id, file) => { const m = measurements.find((x) => x.id === id); if (m) m.attachments = (m.attachments || []).filter((a) => a.file !== file); setTimeout(() => emit("measurements", measurements.slice()), 0); },
-    GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="#6EE7A0"/></svg>'),
+    GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="' + COR.accent + '"/></svg>'),
     OpenMeasurementAttachment: async () => {},
     GetPatterns: async (days, dev) => {
       const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 1;
@@ -6343,15 +4614,40 @@ const demoRc = () => {
     UpdateMeasurement: async (id, name, note) => { measurements = measurements.map((m) => (m.id === id ? { ...m, name: name.trim() || m.name, note: note.trim() } : m)); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     DeleteMeasurement: async (id) => { measurements = measurements.filter((m) => m.id !== id); setTimeout(() => emit("measurements", measurements.slice()), 0); },
     SavePeriod: async (p) => {
-      if (!(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
-      p = { ...p, name: (p.name || "").trim() || "Fora de casa" };
+      const g = p.gmc || "comigo", r = p.radiacode || "comigo";
+      if (g === "casa" && r === "comigo") throw new Error("GMC-800 em casa e RadiaCode com você é o normal: não precisa marcar");
+      const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
+      if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
+      if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
+      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && r === "casa", name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r }) };
       if (p.id) periods = periods.map((q) => (q.id === p.id ? p : q));
       else { p.id = Math.max(0, ...periods.map((q) => q.id)) + 1; periods.push(p); }
       periods.sort((a, b) => a.from - b.from);
-      setTimeout(() => emit("periods", periods.slice()), 0);
+      setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0);
       return p;
     },
-    DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => emit("periods", periods.slice()), 0); },
+    DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0); },
+    GetWhereabouts: async () => mockWhere(),
+    SetWhereAt: async (g, r, name, from) => {
+      const w = await api.SetWhere(g, r, name);
+      const o = periods.find((q) => q.to === 0);
+      if (o && from < o.from) { o.from = Math.floor(from / 6e4) * 6e4; setTimeout(() => emit("periods", periods.slice()), 0); }
+      return mockWhere();
+    },
+    GetDeviceMarks: async (from, to) => {
+      const h = Math.floor((Date.now() - 864e5) / 36e5) * 36e5;
+      return [{ device: "radiacode", kind: "sem dado", from: h - 5 * 36e5, to: h - 2 * 36e5 }, { device: "gmc", kind: "saturando", from: h + 36e5, to: h + 36e5 + 9e5 },
+        { device: "gmc", kind: "sem contagens", from: h - 3 * 864e5, to: h - 3 * 864e5 + 2 * 36e5 }].filter((m) => m.to > from && m.from < to);
+    },
+    SetWhere: async (g, r, name) => {
+      const now = Math.floor(Date.now() / 6e4) * 6e4;
+      const cur = mockWhere();
+      if (cur.gmc === g && cur.radiacode === r) return cur;
+      periods = periods.filter((q) => !(q.to === 0 && now - q.from < 6e4)).map((q) => (q.to === 0 ? { ...q, to: now } : q));
+      if (!(g === "casa" && r === "comigo")) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || whKind({ gmc: g, radiacode: r }), gmc: g, radiacode: r });
+      setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0);
+      return mockWhere();
+    },
     GetDataStart: async () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth() - 1, 1).getTime(); },
     GetHeatmapMonth: async (y, m) => {
       const first = new Date(y, m - 1, 1), t = new Date(); t.setHours(0, 0, 0, 0); t.setDate(t.getDate() + 1);
@@ -6464,7 +4760,26 @@ const demoRc = () => {
       };
       const personal = demoRcFake() ? await one("radiacode") : { device: "radiacode", hasData: false, periods: [], backgroundRate: 0 };
       const home = await one("gmc");
-      return { now, limitName: "", limitMSvYear: lim, personal, home, default: personal.hasData ? "pessoal" : "casa" };
+      // trechos fora do normal: só marca quem mediu (o modo navegador não refaz a conta)
+      const w = mockWhere();
+      for (const [d, role] of [[personal, "personal"], [home, "home"]]) {
+        d.device = w[role];
+        for (const p of d.periods) {
+          let other = 0, gap = 0;
+          for (const q of periods) {
+            const f = Math.max(q.from, p.from), t = Math.min(q.to || now, now);
+            if (t <= f) continue;
+            const g = q.gmc || "comigo", r = q.radiacode || "comigo";
+            const has = role === "personal" ? (r === "comigo" || g === "comigo" || (g === "casa" && r === "casa" && !q.notHome)) : (g === "casa" || r === "casa");
+            const swapped = role === "personal" ? r !== "comigo" && g !== "fora" : g !== "casa" && r === "casa";
+            if (!has) gap += (t - f) / 6e4; else if (swapped) other += (t - f) / 6e4;
+          }
+          p.gapMinutes = Math.round(gap); p.swapMinutes = Math.round(Math.min(other, p.measuredMinutes));
+          p.device = p.swapMinutes ? "misto" : role === "personal" ? "radiacode" : "gmc";
+          p.mixed = !!p.swapMinutes;
+        }
+      }
+      return { now, limitName: "", limitMSvYear: lim, personal, home, normal: w.normal, default: personal.hasData ? "pessoal" : "casa" };
     },
     _dose: (from, to, step, limit) => {
       const span = to - from;
@@ -6500,7 +4815,7 @@ const demoRc = () => {
       const avg = ok.length ? ok.reduce((x, v) => x + v, 0) / ok.length : null;
       return { from: f, to: f + n * step, stepMs: step, times, values: vals, usv: vals.map((v) => (v == null ? null : v * 0.0101)),
         avg, min: ok.length ? Math.min(...ok) : null, max: ok.length ? Math.max(...ok) : null,
-        avgUSv: avg == null ? null : avg * 0.0101, minUSv: null, maxUSv: null,
+        avgUSv: avg == null ? null : avg * 0.0101, minUSv: ok.length ? Math.min(...ok) * 0.0101 : null, maxUSv: ok.length ? Math.max(...ok) * 0.0101 : null,
         attentionCPM: 50, attentionUSv: 50 * 0.0101, alarmCPM: settings.alarmCPM || 100, alarmUSv: (settings.alarmCPM || 100) * 0.0101, dangerCPM: 1000, dangerUSv: 10.1 };
     },
     GetChart: async (period) => {

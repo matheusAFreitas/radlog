@@ -202,7 +202,6 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 		return nil, 0, "", err
 	}
 	a.mu.Lock()
-	cal := a.convCalLocked()
 	tl := a.calTLLocked()
 	a.mu.Unlock()
 	out := make([]doseMin, len(pts))
@@ -222,11 +221,15 @@ func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, st
 	if len(bgPts) == 0 {
 		return out, 0, "", nil
 	}
-	cpms := make([]float64, len(bgPts))
+	// cada minuto do fundo pela calibração que valia nele, como a dose: com
+	// a calibração atual, trocar o fator (ex.: 0,01014 → 0,00564) baixava o
+	// fundo na hora enquanto a dose do período seguia no fator antigo, e o
+	// "acima do fundo" estourava o teto sem a radiação ter mudado
+	usvs := make([]float64, len(bgPts))
 	for i, p := range bgPts {
-		cpms[i] = p.CPM
+		usvs[i] = tl.USv(p)
 	}
-	return out, cal.USv(stats.Median(cpms)), srcTxt, nil
+	return out, stats.Median(usvs), srcTxt, nil
 }
 
 // buildDose monta o gráfico do dosímetro em [from, to).

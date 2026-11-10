@@ -1,5 +1,86 @@
 # Versões
 
+## 2.21.0
+- **Onde está cada aparelho.** Na tela Agora, um cartão novo diz onde está o
+  GMC-800 e onde está o RadiaCode: em casa, com você ou fora do cálculo. O
+  normal continua sendo o GMC-800 em casa e o RadiaCode com você. Mudar
+  abre uma linha com o que vai acontecer, um nome opcional e Confirmar.
+  - **Dose pessoal:** vem de quem está com você. Com os dois com você, o
+    RadiaCode mede e o GMC-800 preenche as falhas dele. Com os dois em casa,
+    vale a leitura de casa (você também estava em casa); se saiu e esqueceu
+    os dois, marque "eu não estava em casa" e o trecho fica em branco.
+  - **Casa e fundo:** vêm de quem está em casa. Com os dois em casa, o
+    GMC-800 mede e o RadiaCode preenche. Aparelho com você não entra no
+    fundo de casa.
+  - **Fora do cálculo:** para aparelho quebrado, em manutenção ou com
+    leitura não confiável. Dá para valer desde a última leitura boa. Com o
+    GMC-800 sem nenhuma contagem por uns minutos, o app sugere tirar do
+    cálculo para o tubo com defeito não puxar o fundo para baixo.
+  - **Estado ao vivo** de cada aparelho: conectado, desconectado desde
+    HH:MM, saturando ou sem contagens. A frase do topo diz quando falta
+    medição. Minutos saturados contam pelo valor lido, com "≥" na dose.
+  - **Minha dose** mostra quem mediu cada período (o aparelho, "misto" ou
+    "sem medição") e quanto foi de cada um.
+- **Fora de casa virou a lista de trechos.** Linha do tempo dos últimos 7
+  dias por aparelho, com as falhas marcadas (sem dado, saturando, sem
+  contagens), e um formulário para trecho passado com onde estava cada um.
+  Os trechos antigos continuam valendo como "Levei os dois".
+
+## 2.20.5
+- **Relatório em PDF de novo rápido, e com aviso enquanto gera.** O
+  relatório de uma semana levava cerca de 40 s, sem nenhum sinal na tela:
+  a tabela "Configurações no período" cortava o texto comprido uma letra
+  por vez, medindo tudo de novo a cada letra. Agora sai em menos de 0,1 s,
+  igual ao de antes. Enquanto gera, o botão mostra "Gerando…" e fica
+  travado; cliques a mais não viram outros PDFs, e relatórios gerados ao
+  mesmo tempo não gravam mais um por cima do outro.
+- **Log sem enxurrada.** O RadiaCode 102 manda "Error: S1/S2 Data frame
+  corrupted!" a cada ~100 s, e cada uma ia para o log.txt (16 mil linhas
+  em dois dias, o log girava em horas). Agora a mesma mensagem entra no
+  máximo uma vez por hora, com a contagem das repetições, e reconectar não
+  repete as que já entraram. "Sincronização com … não respondeu" entra uma
+  vez, e de novo só quando o erro muda ou o outro PC volta a responder.
+- **Dose acumulada do GMC-800 não "estoura" mais ao trocar o fator.** Com
+  um fator novo valendo só daqui em diante, a dose do período continuava no
+  fator antigo, mas o fundo de referência já vinha no novo: 111% do limite
+  sem a radiação ter mudado. Agora o fundo usa, minuto a minuto, a mesma
+  calibração que a dose.
+- No modo navegador, o zoom do gráfico em µSv/h mostrava "mín — · máx —".
+
+## 2.20.4
+- **Cores num lugar só, sem mudança na tela.** As cores da interface agora
+  saem das variáveis do guia de estilo, no começo do `style.css`.
+  - O `style.css` tinha dois blocos `:root`, e o segundo (da repaginação
+    1.10) trocava fundo, superfícies e borda. Ficou um bloco só, com os
+    valores que já estavam valendo, mais os que faltavam: `--rc`, `--alarm`,
+    `--accent-hover`, `--surface-hover`, `--border-hover`, `--attn-bg`,
+    `--attn-ink` e `--chart-grid`.
+  - Cerca de 45 cores escritas à mão no CSS viraram `var(--…)`.
+  - Os gráficos (SVG e canvas) pegam as cores de `frontend/dist/cores.js`,
+    que lê essas mesmas variáveis. Foram cerca de 110 trocas nos arquivos
+    JS. Cores próprias de um gráfico só (o roxo e o ciano das séries extras,
+    por exemplo) ficaram como estavam.
+
+## 2.20.3
+- **Mais arrumação por dentro, sem mudança na tela.** A página Fora de casa
+  (a lista de períodos, os números de cada período e o editor) saiu do
+  `app.js` para `frontend/dist/fora.js`. O `app.js` ficou com cerca de 210
+  linhas a menos; desde a 2.18 já são cerca de 2.600.
+
+## 2.20.2
+- **Mais arrumação por dentro, sem mudança na tela.** A página Medir objeto
+  (a medição com fundo e objeto, o gráfico durante a medição, o segundo
+  aparelho, o espectro do RadiaCode e as medições salvas) saiu do `app.js`
+  para `frontend/dist/medir.js`. O `app.js` ficou com cerca de 930 linhas a
+  menos; desde a 2.18 já são cerca de 2.400.
+
+## 2.20.1
+- **Mais arrumação por dentro, sem mudança na tela.** A aba Dose dos
+  Gráficos (o gráfico de CPM com o zoom por arraste e a dose acumulada dos
+  dois aparelhos) saiu do `app.js` para `frontend/dist/graficos.js`. O
+  `app.js` ficou com cerca de 630 linhas a menos; desde a 2.18 já são
+  cerca de 1.500.
+
 ## 2.20.0
 - **Mais arrumação por dentro, sem mudança na tela.**
   - A busca dos episódios de alerta nos minutos do histórico do contador

@@ -331,7 +331,7 @@ function renderSummary(r, per) {
   const rc = r.rc && r.rc.minutes ? r.rc : null;
   if (rc) renderRcSummary(t, rc, r);
   if (!r.minutes) {
-    if (rc) { sumHead(t, "GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: "#6EE7A0", label: "GMC-800" }]); return; }
+    if (rc) { sumHead(t, "GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]); return; }
     t.innerHTML = '<p class="small muted">Sem leituras nesse período.</p>';
     drawSumChart([]);
     return;
@@ -347,7 +347,7 @@ function renderSummary(r, per) {
   sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${fmt(r.peakAlert, 0)} CPM` : "", r.danger || r.alarm ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   if (r.measurements) sumTile(t, "Medições", String(r.measurements), "de objetos");
-  drawSumChart([{ r, color: "#6EE7A0", label: rc ? "GMC-800" : per[2] }]);
+  drawSumChart([{ r, color: COR.accent, label: rc ? "GMC-800" : per[2] }]);
 }
 
 function renderCompare(res, periods) {
@@ -366,7 +366,7 @@ function renderCompare(res, periods) {
     ["Mínimo", a.min, b.min, 0, " CPM"],
     ["Dose", a.dose, b.dose, 2, " µSv"],
   ];
-  let html = `<thead><tr><th></th><th><i class="sw" style="background:#6EE7A0"></i></th><th><i class="sw" style="background:#A3ADB4"></i></th><th>A − B</th></tr></thead><tbody>`;
+  let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>A − B</th></tr></thead><tbody>`;
   tb.innerHTML = html + "</tbody>";
   const head = tb.querySelectorAll("th");
   head[1].append(" " + periods[0][2]); head[2].append(" " + periods[1][2]);
@@ -384,7 +384,7 @@ function renderCompare(res, periods) {
   row(["Medido", hm(a.minutes), hm(b.minutes), Math.abs(a.minutes - b.minutes) > 0.1 * Math.max(a.minutes, b.minutes) ? "tempos bem diferentes: compare pela média" : ""]);
   row(["Alertas", alertsText(a), alertsText(b), ""]);
   row(["Chuva", rainText(a), rainText(b), ""]);
-  drawSumChart([{ r: a, color: "#6EE7A0", label: periods[0][2] }, { r: b, color: "#A3ADB4", label: periods[1][2] }]);
+  drawSumChart([{ r: a, color: COR.accent, label: periods[0][2] }, { r: b, color: COR.muted, label: periods[1][2] }]);
 }
 
 function drawSumChart(series) {
@@ -401,9 +401,9 @@ function drawSumChart(series) {
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, 0);
-  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   const bg = series[0].r.bgOK ? series[0].r.bgCPM : 0;
-  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="#6EE7A0" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${COR.accent}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   for (const s of series.slice().reverse()) {
     let d = "", pen = "M";
     s.r.curve.forEach((p, i) => { if (p.cpm == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(p.cpm).toFixed(1)}`; pen = "L"; });
@@ -414,7 +414,7 @@ function drawSumChart(series) {
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(series[0].r.to);
-  $("sumLegend").innerHTML = series.map((s) => `<span class="key"><i style="border-color:${s.color}"></i></span>`).join("") + (bg ? '<span class="key"><i style="border-color:#6EE7A0;border-top-style:dashed;opacity:.5"></i>seu normal</span>' : "");
+  $("sumLegend").innerHTML = series.map((s) => `<span class="key"><i style="border-color:${s.color}"></i></span>`).join("") + (bg ? '<span class="key"><i style="border-color:' + COR.accent + ';border-top-style:dashed;opacity:.5"></i>seu normal</span>' : "");
   series.forEach((s, i) => $("sumLegend").children[i].append(s.label));
 }
 
@@ -431,16 +431,16 @@ function drawSumChartUSv(r, rc) {
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
   for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
-  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="#2A3136" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
-  if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="#F472B6" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
+  if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="${COR.rc}" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   const path = (pts, val) => { let d = "", pen = "M"; pts.forEach((p, i) => { const v = val(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; }); return d; };
-  out += `<path d="${path(r.curve, (p) => (p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="#6EE7A0" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-  out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="#F472B6" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(r.curve, (p) => (p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.accent}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="${COR.rc}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   svg.innerHTML = out;
   const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
-  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:#F472B6"></i>RadiaCode (µSv/h)</span><span class="key"><i style="border-color:#6EE7A0"></i>GMC-800 (µSv/h)</span>' +
-    (rc.bgUSv ? '<span class="key"><i style="border-color:#F472B6;border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
+  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.rc + '"></i>RadiaCode (µSv/h)</span><span class="key"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
+    (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RadiaCode)</span>' : "");
 }
