@@ -51,6 +51,10 @@ type Settings struct {
 	AwayAskMin int `json:"awayAskMin"`
 	// fechar a janela deixa o app rodando na bandeja (tray.go)
 	TrayOnClose bool `json:"trayOnClose"`
+	// ícone da bandeja: false = a leitura em µSv/h (trayicon.go); true = o
+	// logo com a bolinha. TrayDevice: "" automático, "gmc" ou "radiacode".
+	TrayPlain  bool   `json:"trayPlain"`
+	TrayDevice string `json:"trayDevice"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
@@ -354,8 +358,10 @@ type App struct {
 	trayMu    sync.Mutex
 	trayItems []trayItem // itens do menu da bandeja (para trocar o idioma)
 	trayTip   string
-	lang      string // idioma da interface já resolvido ("pt" ou "en"); a tela informa
-	trayLevel string
+	lang      string  // idioma da interface já resolvido ("pt" ou "en"); a tela informa
+	trayKey   string  // ícone atual (texto, nível, aparelho)
+	trayGmc   trayDev // última leitura do GMC-800 para o ícone
+	trayDemo  bool
 	notes     []Note // anotações no gráfico (notes.go)
 
 	alarmOn  bool
@@ -630,6 +636,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 		a.logAutostart()
 	}
 	a.emitRain()
+	a.trayRefresh() // número ou logo, aparelho do ícone
 	return s
 }
 
@@ -654,6 +661,7 @@ func (a *App) setState(state, msg string) {
 	st := a.statusLocked()
 	a.mu.Unlock()
 	a.emit("status", st)
+	a.trayGmcConn(state)
 }
 
 // GetEvents devolve os eventos mais recentes, do mais novo para o mais velho.
@@ -829,7 +837,7 @@ func (a *App) disconnect(errMsg string) bool {
 		reason = endAppClosed
 	}
 	a.closeAlerts(&a.alerts, time.Now(), false, reason)
-	a.trayShow("RadLog · contador desconectado", "")
+	a.trayGmcConn("desconectado")
 	if d == nil {
 		return false
 	}
@@ -1122,7 +1130,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			trayLvl = "atencao"
 		}
 		if !a.isDemo() {
-			a.trayTick(cpm, usv, trayLvl, noCount, false) // no demo, o ícone mostra o demo
+			a.trayTick(usv, trayLvl, noCount, satOn, false) // no demo, o ícone mostra o demo
 		}
 		a.mu.Lock()
 		a.live.add(now, float64(cpm))

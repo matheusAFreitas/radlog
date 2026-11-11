@@ -3765,3 +3765,17 @@ pela leitura de casa (GMC-800)	from the home reading (GMC-800)
 RC102 com você e leitura de casa (GMC-800)	RC102 with you and the home reading (GMC-800)
 Sem alertas	No alerts
 Abrir a página do aparelho	Open the device page
+Mostrar a leitura no ícone da bandeja	Show the reading on the tray icon
+Aparelho no ícone	Device on the icon
+Automático (o mais grave)	Automatic (the most severe)
+O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.	Windows usually hides new icons inside the ^ arrow. To always see the number, drag the RadLog icon onto the taskbar, next to the clock.
+O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.	The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.
+leitura no ícone	reading on the icon
+aparelho no ícone	device on the icon
+{0} · {1} µSv/h · {2}	{0} · {1} µSv/h · {2}
+{0} no {1} · {2} µSv/h	{0} on the {1} · {2} µSv/h
+{0} conectando…	{0} connecting…
+{0} saturado · acima de {1} µSv/h	{0} saturated · above {1} µSv/h
+{0} saturado · o valor real é maior	{0} saturated · the real value is higher
+{0} sem contagens · confira o aparelho	{0} no counts · check the device
+ATENÇÃO	ATTENTION

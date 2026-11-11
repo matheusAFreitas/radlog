@@ -1,5 +1,20 @@
 # Versões
 
+## 2.47.0
+- **A leitura no ícone da bandeja.** Com a janela fechada, o ícone perto do
+  relógio mostra o número em µSv/h, em até 3 caracteres (,12 · 1,4 · 48 ·
+  1k). Quando está tudo seguro, o número sai na cor do aparelho (verde do
+  GMC-800, rosa do RC102). Em atenção, alarme e perigo, o quadradinho ganha
+  a cor do nível. Saturado mostra MAX. Sem contagens mostra 0 em laranja.
+  Conectando aparece como um anel tracejado e desconectado como um tracinho
+  cinza. O ícone é desenhado pixel a pixel em 16, 20, 24 e 32 px, para
+  ficar nítido em qualquer escala da tela.
+- No automático, o ícone mostra o GMC-800, a não ser que o RC102 esteja num
+  nível mais grave. Em Configurações › Janela dá para fixar o aparelho ou
+  voltar ao logo de antes.
+- A dica do ícone agora fica em µSv/h (antes estava em CPM) e mostra os dois
+  aparelhos, uma linha cada.
+
 ## 2.45.0
 - **Barra compacta.** Os quadros grandes dos aparelhos ficam só no Agora.
   Nas outras telas, uma faixa fina fica presa no topo desde o começo, com a

@@ -43,6 +43,7 @@ func (a *App) startTray() {
 			a.trayItems = []trayItem{{open, "Abrir o RadLog", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
 			a.trayMu.Unlock()
 			a.trayReady.Store(true)
+			go a.trayRefresh()
 			for {
 				select {
 				case <-open.ClickedCh:
@@ -62,30 +63,35 @@ func (a *App) stopTray() {
 	}
 }
 
-// trayShow atualiza a dica e o ícone (só quando mudam).
-func (a *App) trayShow(tip, level string) {
+// trayApply troca a dica e o ícone (só quando mudam). Com o número
+// desligado (plain), volta o logo com a bolinha do nível.
+func (a *App) trayApply(tip string, plain bool, level, key string, mk func() []byte) {
 	if !a.trayReady.Load() {
 		return
 	}
 	a.trayMu.Lock()
 	defer a.trayMu.Unlock()
-	tip = a.T(tip)
 	if tip != a.trayTip {
 		a.trayTip = tip
 		systray.SetTooltip(tip)
 	}
-	if level != a.trayLevel {
-		a.trayLevel = level
-		switch level {
-		case "perigo":
-			systray.SetIcon(trayIconDanger)
-		case "alarme":
-			systray.SetIcon(trayIconAlarm)
-		case "atencao":
-			systray.SetIcon(trayIconAttn)
-		default:
-			systray.SetIcon(trayIcon)
-		}
+	if key == a.trayKey {
+		return
+	}
+	a.trayKey = key
+	if !plain {
+		systray.SetIcon(mk())
+		return
+	}
+	switch level {
+	case "perigo":
+		systray.SetIcon(trayIconDanger)
+	case "alarme":
+		systray.SetIcon(trayIconAlarm)
+	case "atencao":
+		systray.SetIcon(trayIconAttn)
+	default:
+		systray.SetIcon(trayIcon)
 	}
 }
 
@@ -192,5 +198,5 @@ func (a *App) trayRelabel() {
 		t.it.SetTitle(a.T(t.title))
 		t.it.SetTooltip(a.T(t.tip))
 	}
-	a.trayTip = "" // a próxima dica sai no idioma novo
+	a.trayTip, a.trayKey = "", "" // a próxima dica sai no idioma novo (e o número com . ou ,)
 }

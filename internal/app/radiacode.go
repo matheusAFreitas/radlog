@@ -308,7 +308,10 @@ func (a *App) rcTodayLocked() {
 	}
 }
 
-func (a *App) emitRc() { a.emit("radiacode", a.GetRadiacode()) }
+func (a *App) emitRc() {
+	a.emit("radiacode", a.GetRadiacode())
+	a.trayRefresh()
+}
 
 // SetRadiacode liga/desliga a procura e grava o endereço Bluetooth.
 func (a *App) SetRadiacode(on bool, ble string) RcState {
