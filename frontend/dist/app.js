@@ -351,6 +351,8 @@ function renderGTile() {
   $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
   dialVal("g", v ? v[u] : "—");
+  // mrem/h pequeno embaixo do mostrador (ACE 11/11); só quando o grande é µSv/h
+  $("gTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
   // os níveis do app (os mesmos que disparam os avisos), régua até 1,5× o alarme
   const k = calK(), [tA, tB] = gmcThrCPM(), top = tB * 1.5;
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));

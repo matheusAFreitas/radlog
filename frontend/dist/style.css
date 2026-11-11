@@ -1297,6 +1297,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst.lv-perigo { --lvc: var(--warn); }
 /* mostrador no logo (ideia 1): o arco de fora enche pelas três faixas */
 .dial { width: 148px; height: 148px; flex: none; align-self: center; overflow: visible; }
+.dial-col { display: flex; flex-direction: column; align-items: center; flex: none; align-self: center; }
+.dial-alt { font-size: var(--fs-label); color: var(--dim); margin-top: -6px; min-height: 1em; }
 .dial-val { font-family: var(--mono); font-weight: 500; fill: var(--text); letter-spacing: -.02em; }
 .dial-unit { font-size: 2.8px; fill: var(--dim); }
 .inst.stale .dial-val { fill: var(--dim); }

@@ -10,6 +10,7 @@
 - Quadro dos aparelhos: sai a frase "no nível de fundo habitual" ao lado do
   "Seguro", e a fita do pulso perde as legendas "Os últimos 10 segundos" e
   "cada risco é uma contagem".
+- Quadro do GMC-800: o valor em mrem/h aparece pequeno embaixo do mostrador.
 - ALARA: "Por que isso importa" agora abre e fecha, e as explicações mais
   longas foram para "Como funciona", como na aba do Radiacode 102.
 
