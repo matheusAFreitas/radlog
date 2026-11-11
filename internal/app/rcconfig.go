@@ -190,6 +190,19 @@ func (a *App) ResetRcDose() error {
 	return nil
 }
 
+// ResetRcSpectrum recomeça o espectro da tela do Radiacode.
+func (a *App) ResetRcSpectrum() error {
+	dev := a.rcDevice()
+	if dev == nil {
+		return errRcOff
+	}
+	if err := dev.ResetSpectrum(); err != nil {
+		return err
+	}
+	a.logEvent("Espectro da tela do RC102 recomeçado pelo app")
+	return nil
+}
+
 // ResetRcSpecAccum registra que o espectro acumulado do Radiacode foi
 // zerado no RadLog. O RC102 não deixa apagar o acumulado dele (ver
 // radiacode/settings.go); a tela guarda a foto de agora e mostra só o que

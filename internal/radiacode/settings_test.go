@@ -189,6 +189,18 @@ func TestResetDose(t *testing.T) {
 	}
 }
 
+func TestResetSpectrum(t *testing.T) {
+	f := newFakeRegs()
+	d := &Device{tr: f}
+	if err := d.ResetSpectrum(); err != nil {
+		t.Fatalf("recomeçar: %v", err)
+	}
+	f.refuse[vsSpectrum] = true
+	if err := d.ResetSpectrum(); err == nil {
+		t.Fatal("recusa passou como ok")
+	}
+}
+
 func TestOffTimesFromConfig(t *testing.T) {
 	if o := OffTimesFromConfig("x=1\nVSFR_DISP_OFF_TIME=\"5 s;10 s\"\n"); len(o) != 2 || o[1] != "10 s" {
 		t.Fatal(o)

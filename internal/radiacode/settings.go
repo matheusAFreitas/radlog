@@ -317,6 +317,20 @@ func (d *Device) ResetDose() error {
 	return nil
 }
 
+// ResetSpectrum recomeça o espectro da tela do aparelho (o mesmo que segurar
+// ▼ no RC102 ou o Restart do app oficial). As contagens não se perdem: o
+// firmware soma o espectro da tela dentro do acumulado antes de zerá-lo.
+func (d *Device) ResetSpectrum() error {
+	r, err := d.execute(cmdWrVirtString, append(u32(vsSpectrum), u32(0)...))
+	if err != nil {
+		return err
+	}
+	if ret, err := r.u32(); err != nil || ret != 1 {
+		return fmt.Errorf("o aparelho recusou recomeçar o espectro")
+	}
+	return nil
+}
+
 // O espectro acumulado de longo prazo (0x205) não tem como ser zerado por
 // fora: no firmware do RC102 o WR_VIRT_STRING só aceita 0xf1, 0x200, 0x202,
 // 0x204 e 0x207, e o 0x200/0x207 (o "Recomeçar" e o Restart do app oficial)
