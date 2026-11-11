@@ -2864,8 +2864,6 @@ const I18N_EN = {
 "pela leitura de casa (GMC-800)": "from the home reading (GMC-800)",
 "RC102 com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
 "RadiaCode com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
-"Sem alertas": "No alerts",
-"Abrir a página do aparelho": "Open the device page",
 "Então pode ser só coincidência.": "So it may be just a coincidence.",
 "Com mais dias a resposta fica mais clara.": "With more days the answer gets clearer.",
 "Com 28 dias ou mais e passando no teste de acaso, a relação é confiável.": "With 28 days or more and passing the chance test, the relationship is reliable.",
