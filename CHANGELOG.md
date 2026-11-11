@@ -5,6 +5,10 @@
   contador do próprio aparelho, e agora a soma que o app fez com os minutos
   gravados aparece pequena ao lado ("app 0,52"), para conferir. Ela costuma
   ficar um pouco abaixo, porque o app não vê o tempo longe do PC.
+- Isótopos no "Acumulado do aparelho": o retroespalhamento de uma fonte
+  forte (o morro largo em 184 keV do Cs-137, 218 do K-40) não vira mais
+  U-235 ou Pb-212 falso. Uma linha nesse ponto só fica se tiver pelo menos
+  30% das contagens do pico que a explicaria.
 
 ## 2.62.1
 - Isótopos no "Acumulado do aparelho": além de passar do contínuo, o pico

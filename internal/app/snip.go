@@ -156,5 +156,35 @@ func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
 			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
 		}
 	}
+	return dropBackscatter(out)
+}
+
+// dropBackscatter tira os picos que caem no retroespalhamento de um pico bem
+// mais forte. O gama que bate na parede atrás do cristal e volta chega com
+// E/(1+2E/511) (184 keV no Cs-137, 218 no K-40, 233 no Tl-208), num morro
+// umas 2,5× mais largo que um pico, com 10 a 25% das contagens dele. Esse
+// morro passa por pico no SNIP e nas janelas dos lados e vira U-235 em 186 ou
+// Pb-212 em 239. Uma linha a menos de 1 FWHM desse ponto só fica se tiver
+// pelo menos 30% das contagens do pico que a explicaria: o Pb-212 do tório é
+// muito mais forte que o Tl-208, o Pb-214 de 295 passa da metade do Bi-214
+// de 609.
+func dropBackscatter(ps []SpecPeak) []SpecPeak {
+	var out []SpecPeak
+	for _, q := range ps {
+		keep := true
+		for _, p := range ps {
+			if p.KeV < 300 {
+				continue
+			}
+			eb := p.KeV / (1 + 2*p.KeV/511)
+			if math.Abs(q.KeV-eb) < specFWHM(eb) && q.Net < 0.3*p.Net {
+				keep = false
+				break
+			}
+		}
+		if keep {
+			out = append(out, q)
+		}
+	}
 	return out
 }
