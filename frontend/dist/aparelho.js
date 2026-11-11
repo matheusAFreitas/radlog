@@ -81,6 +81,7 @@ function devDialSvg(pos, lv, o = {}) {
       if (!conn) s += `<text class="dl-ln" x="${x.toFixed(2)}" y="${(y + (i === 1 ? 3.2 : 4.8)).toFixed(2)}" text-anchor="${anchor}">${escHtml(name)}</text>`;
     });
   }
+  if (!conn && o.center) s += `<circle class="dl-pulse" cx="24" cy="24" r="12.6"/>`;
   if (conn) s += `<g class="dl-c dl-c-${conn}" transform="${o.center ? "translate(15.2 15.2) scale(1.1)" : "translate(18.4 18.4) scale(.7)"}">${DL_CONN_ICON[conn](o.center ? 1.5 : 1.9)}</g>`;
   else if (LV_PATH[lv]) s += `<g class="dl-c lv-ico ${lv}" fill="currentColor" transform="${tf}">${LV_PATH[lv]}</g>`;
   return s;

@@ -2029,6 +2029,26 @@
     </fieldset>
 
     <fieldset>
+      <legend>Pulso da contagem</legend>
+      <label class="toggle">
+        <span>Piscar o mostrador a cada contagem</span>
+        <input type="checkbox" id="chkPulse" checked>
+      </label>
+      <p class="small muted">O anel do meio pisca de leve a cada contagem do aparelho. Desliga sozinho se o Windows estiver sem efeitos de animação.</p>
+      <label class="toggle">
+        <span>Mostrar a fita dos últimos 10 segundos</span>
+        <input type="checkbox" id="chkPulseStrip">
+      </label>
+      <p class="small muted">Um risco por contagem, embaixo do cartão de cada aparelho no Agora e na tela do aparelho. Só aparece com o pulso ligado: desligando o pulso, a fita some e esta opção fica apagada.</p>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Uma piscada é sempre uma contagem. Com o fundo de casa, o GMC-800 dá uma piscada a cada 3 segundos, mais ou menos; numa subida, as piscadas aceleram e dá para perceber antes de ler o número. As piscadas não vêm em ritmo certo: é o decaimento radioativo sendo aleatório.</p>
+        <p class="small muted">No GMC-800 cada piscada é uma contagem de verdade; só o instante dentro do segundo é sorteado.</p>
+        <p class="small muted">O RC102 manda a taxa, não cada contagem: o ritmo é o real, as piscadas são sorteadas a partir dele.</p>
+      </details>
+    </fieldset>
+
+    <fieldset>
       <legend>Tamanho e espaço</legend>
       <span class="small muted" id="uiScaleLbl">Tamanho de tudo (texto, números e gráficos)</span>
       <div class="seg ui-seg" role="group" aria-labelledby="uiScaleLbl" id="segUiScale"><button type="button" data-v="0.9">90%</button><button type="button" data-v="1">100%</button><button type="button" data-v="1.08">108%</button><button type="button" data-v="1.15">115%</button><button type="button" data-v="1.3">130%</button><button type="button" data-v="1.5">150%</button></div>
@@ -2405,6 +2425,7 @@
 <script src="alertas.js"></script>
 <script src="graficos.js"></script>
 <script src="ano.js"></script>
+<script src="pulso.js"></script>
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>
