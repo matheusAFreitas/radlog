@@ -385,8 +385,8 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	if !rainOn || len(press) == 0 {
 		pr.State, pr.Ev = "na", "Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela)."
 	} else {
-		var last float64
-		lastK := int64(0)
+		var last, first float64
+		lastK, firstK := int64(0), int64(math.MaxInt64)
 		hi := math.Inf(-1)
 		for k, v := range press {
 			tk := time.Unix(k, 0)
@@ -396,6 +396,9 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 			if k > lastK {
 				lastK, last = k, v
 			}
+			if k < firstK {
+				firstK, first = k, v
+			}
 			hi = math.Max(hi, v)
 		}
 		switch {
@@ -404,7 +407,16 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 		case hi-last >= whyPressHPa:
 			pr.State, pr.Ev = "yes", fmt.Sprintf("A pressão caiu %s hPa nas 12 horas antes.", whyNum(hi-last, 1))
 		default:
-			pr.State, pr.Ev = "no", fmt.Sprintf("A pressão mudou %s hPa nas 12 horas antes.", whyNum(hi-last, 1))
+			// a variação de verdade na janela, com o sentido
+			pr.State = "no"
+			switch d := last - first; {
+			case math.Abs(d) < 0.05:
+				pr.Ev = "A pressão ficou estável nas 12 horas antes."
+			case d > 0:
+				pr.Ev = fmt.Sprintf("A pressão subiu %s hPa nas 12 horas antes.", whyNum(d, 1))
+			default:
+				pr.Ev = fmt.Sprintf("A pressão caiu %s hPa nas 12 horas antes.", whyNum(-d, 1))
+			}
 		}
 	}
 	// objeto ou anotação perto

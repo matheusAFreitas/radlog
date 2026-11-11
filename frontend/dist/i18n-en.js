@@ -3193,7 +3193,8 @@ const I18N_EN = {
 "Mudei de lugar": "I moved it",
 "Referência do fundo recomeça hoje": "Background reference restarts today",
 "Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)": "I moved the GMC-800 (the reference background restarts here)",
-"o dia não pode ficar no futuro": "the day cannot be in the future"
+"o dia não pode ficar no futuro": "the day cannot be in the future",
+"A pressão ficou estável nas 12 horas antes.": "Pressure stayed steady in the 12 hours before."
 },
 "patterns": [
 [
@@ -6825,6 +6826,15 @@ const I18N_EN = {
 "Pressure changed ${1} hPa in the 12 hours before.",
 [
 "A pressão mudou ",
+" hPa nas 12 horas antes."
+]
+],
+[
+"A pressão subiu ",
+"^A pressão subiu ((?:(?! · ).)+?) hPa nas 12 horas antes\\.$",
+"Pressure rose ${1} hPa in the 12 hours before.",
+[
+"A pressão subiu ",
 " hPa nas 12 horas antes."
 ]
 ],
