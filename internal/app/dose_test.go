@@ -177,3 +177,50 @@ func TestDoseBackgroundSameCalibration(t *testing.T) {
 		t.Fatalf("com recálculo: fundo %v, excesso %v", c.BackgroundRate, c.Excess)
 	}
 }
+
+// o pico de uma medição de objeto (aparelho encostado nele) não entra na
+// dose: aqueles minutos valem o fundo (2.46)
+func TestDoseSkipsObjectMeasure(t *testing.T) {
+	dir := t.TempDir()
+	st, err := store.Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	a := NewApp()
+	a.dataDir, a.store, a.cal = dir, st, gmc.DefaultCalibration()
+	end := time.Now().Truncate(time.Minute)
+	var pts []store.Point
+	for i := 600; i >= 1; i-- {
+		cpm := 20.0
+		if i > 300 && i <= 310 {
+			cpm = 220
+		}
+		pts = append(pts, store.Point{T: end.Add(-time.Duration(i) * time.Minute), CPM: cpm, Src: store.SrcLive})
+	}
+	if _, err := st.Import(pts); err != nil {
+		t.Fatal(err)
+	}
+	objFrom, objTo := end.Add(-310*time.Minute), end.Add(-300*time.Minute)
+	a.measurements = []SavedMeasure{{ID: 1, Name: "pedra", Time: objFrom.Add(-5 * time.Minute).UnixMilli(),
+		Obj: MeasurePhase{Start: objFrom.UnixMilli(), End: objTo.UnixMilli()}}}
+	c, err := a.GetDose("24h", "publico")
+	if err != nil {
+		t.Fatal(err)
+	}
+	usv := gmc.DefaultCalibration().USv
+	if want := 600 * usv(20) / 60; math.Abs(c.Total-want) > 1e-9 {
+		t.Fatalf("total %v, queria só o fundo %v", c.Total, want)
+	}
+	// o RC102 "com você" não é tirado
+	if a.onObjectChecker(devRC)(objFrom.Add(time.Minute)) {
+		t.Fatal("RC102 não estava no objeto")
+	}
+	a.measurements[0].Other = &MeasureSide{Device: devRC, Role: "voce"}
+	if a.onObjectChecker(devRC)(objFrom.Add(time.Minute)) {
+		t.Fatal("RC102 com você não está no objeto")
+	}
+	a.measurements[0].Other.Role = "objeto"
+	if !a.onObjectChecker(devRC)(objFrom.Add(time.Minute)) {
+		t.Fatal("os dois no objeto")
+	}
+}
