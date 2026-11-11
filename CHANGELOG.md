@@ -7,6 +7,10 @@
   desligado o tempo todo.
 - Espectrograma do Radiacode 102: a lupa 4×4 saiu; ficam "sem lupa" e a
   lupa 5×5 (quem estava com a 4×4 passa para a 5×5).
+- Comparação do Resumo (achados da QA): dia no futuro não quebra mais o
+  gráfico; sem porcentagem na dose quando os tempos medidos são muito
+  diferentes; subtítulo, "(igual)" e "nenhum" traduzidos no inglês.
+- "Ver os alertas do período" já leva até o filtro do período.
 
 ## 2.64.0
 - Resumo mais enxuto: uma frase, três números e um gráfico na primeira vista.

@@ -3243,7 +3243,8 @@ const I18N_EN = {
 "Escolher a data": "Pick the date",
 "Compara dois períodos": "Compares two periods",
 "Mostrar todos os alertas": "Show all alerts",
-"µSv/h no período": "µSv/h in the period"
+"µSv/h no período": "µSv/h in the period",
+"nenhum": "none"
 },
 "patterns": [
 [
@@ -13596,6 +13597,14 @@ const I18N_EN = {
 "week of ${1}",
 [
 "semana de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) \\(igual\\)$",
+"${1} (same)",
+[
+" (igual)"
 ]
 ],
 [
