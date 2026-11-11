@@ -1,0 +1,60 @@
+name: limpar-releases
+
+# Avulso (11/11): apaga as releases antigas do GitHub e deixa só os marcos.
+# Só a release some (os arquivos para baixar); a tag do git fica, então o
+# código de toda versão continua no repo. A release "latest" (a que o
+# atualizador do app consulta) nunca é apagada. Roda à mão:
+# Actions → limpar-releases → Run workflow. Com "apagar" desmarcado só lista
+# o que sairia. Depois de usado, este arquivo sai do repo.
+on:
+  workflow_dispatch:
+    inputs:
+      apagar:
+        description: "Apagar de verdade (desmarcado = só listar)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+
+# mesma fila do release.yml: nunca roda no meio de um build de release
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  limpar:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      # marcos que ficam
+      MANTER: "v1.46.1 v2.0.0 v2.16.0 v2.20.0 v2.37.0 v2.51.0"
+    steps:
+      - name: Limpar
+        run: |
+          set -euo pipefail
+          LATEST=$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name)
+          [ -n "$LATEST" ] || { echo "não achei a latest"; exit 1; }
+          echo "latest: $LATEST (fica)"
+          gh api --paginate "repos/$GH_REPO/releases?per_page=100" --jq '.[].tag_name' > todas.txt
+          echo "total: $(wc -l < todas.txt)"
+          : > sai.txt
+          while read -r t; do
+            [ "$t" = "$LATEST" ] && continue
+            case " $MANTER " in *" $t "*) echo "fica: $t"; continue;; esac
+            echo "$t" >> sai.txt
+          done < todas.txt
+          echo "sai: $(wc -l < sai.txt)"
+          cat sai.txt
+          if [ "${{ inputs.apagar }}" != "true" ]; then
+            echo "só listando; marque 'apagar' para apagar"
+            exit 0
+          fi
+          while read -r t; do
+            # sem --cleanup-tag: a tag do git fica
+            gh release delete "$t" --yes
+            echo "apagada: $t"
+          done < sai.txt
+          echo "restam: $(gh api --paginate "repos/$GH_REPO/releases?per_page=100" --jq '.[].tag_name' | wc -l)"
+          [ "$(gh api "repos/$GH_REPO/releases/latest" --jq .tag_name)" = "$LATEST" ] || { echo "a latest mudou!"; exit 1; }
