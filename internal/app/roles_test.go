@@ -393,3 +393,26 @@ func TestMergeOpenPeriodClosedHere(t *testing.T) {
 		t.Fatalf("depois da mescla: %+v", w)
 	}
 }
+
+func TestLeaveHome(t *testing.T) {
+	a := newTestApp(t)
+	t0 := time.Date(2026, 11, 9, 10, 0, 0, 0, time.Local)
+	w := func(at time.Time) Whereabouts { a.mu.Lock(); defer a.mu.Unlock(); return a.whereaboutsLocked(at) }
+	// saí só com o RC102: o GMC-800 segue como fundo da casa, você fora
+	if _, err := a.setWhereOut(t0, WhereHome, WhereMe, "", true); err != nil {
+		t.Fatal(err)
+	}
+	if n := w(t0.Add(time.Hour)); n.Normal || !n.NotHome || n.RC != WhereMe || n.Open == nil || n.Open.Name != periodNameOut {
+		t.Fatalf("saí com o RC102: %+v", n)
+	}
+	// voltei: o SetWhere normal fecha o trecho (antes não fazia nada)
+	a.setWhere(t0.Add(2*time.Hour), WhereHome, WhereMe, "")
+	if n := w(t0.Add(3 * time.Hour)); !n.Normal || n.Open != nil {
+		t.Fatalf("voltei: %+v", n)
+	}
+	// levando o GMC-800 o trecho é comum, sem a marca
+	a.setWhereOut(t0.Add(4*time.Hour), WhereMe, WhereMe, "", true)
+	if n := w(t0.Add(5 * time.Hour)); n.NotHome || n.GMC != WhereMe {
+		t.Fatalf("levei os dois: %+v", n)
+	}
+}

@@ -1,5 +1,17 @@
 # Versões
 
+## 2.48.0
+- **Busca rápida (Ctrl+K).** Abre em qualquer tela, ou pelo "Buscar" no
+  menu. Acha ações, telas, cartões das Configurações e medições salvas, sem
+  ligar para acentos e também por apelido ("som" acha o Som do alarme, "pdf"
+  acha o relatório). Digitar um horário, como "14:30", abre os gráficos de
+  hoje nesse ponto. As setas escolhem, Enter abre e Esc fecha.
+- **Botão do logo no canto.** Um clique abre três ações: anotar agora, saí
+  de casa / voltei e medir um objeto. "Saí de casa" pergunta quem vai junto,
+  já marcado como da última vez. O botão some durante uma medição de objeto
+  e com o alarme tocando.
+- **Atalho N** para anotar agora, quando o foco não está num campo de texto.
+
 ## 2.47.0
 - **A leitura no ícone da bandeja.** Com a janela fechada, o ícone perto do
   relógio mostra o número em µSv/h, em até 3 caracteres (,12 · 1,4 · 48 ·

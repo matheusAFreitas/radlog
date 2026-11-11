@@ -285,15 +285,37 @@ func (a *App) SetWhereAt(gmc, rc, name string, fromMs int64) (Whereabouts, error
 	return a.setWhere(start, gmc, rc, name)
 }
 
+// LeaveHome é o "Saí de casa" do botão do logo e da busca (2.48): abre um
+// trecho fora de casa com quem vai junto. O GMC-800 indo junto é um trecho
+// comum; ficando, é "eu não estava em casa" (o fundo da casa segue nele).
+// "Voltei" é o SetWhere de volta ao normal.
+func (a *App) LeaveHome(gmcGoes, rcGoes bool) (Whereabouts, error) {
+	gmc, rc := WhereHome, WhereHome
+	if gmcGoes {
+		gmc = WhereMe
+	}
+	if rcGoes {
+		rc = WhereMe
+	}
+	return a.setWhereOut(time.Now(), gmc, rc, "", !gmcGoes)
+}
+
 func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error) {
+	return a.setWhereOut(now, gmc, rc, name, false)
+}
+
+// setWhereOut é o setWhere com "você não estava em casa" (só vale com o
+// GMC-800 em casa).
+func (a *App) setWhereOut(now time.Time, gmc, rc, name string, notHome bool) (Whereabouts, error) {
 	for _, w := range []string{gmc, rc} {
 		if w != WhereHome && w != WhereMe && w != WhereOff {
 			return a.GetWhereabouts(), errors.New("local inválido")
 		}
 	}
+	notHome = notHome && gmc == WhereHome && rc != WhereOff
 	ms := now.Truncate(time.Minute).UnixMilli()
 	a.mu.Lock()
-	if cur := a.whereaboutsLocked(now); cur.GMC == gmc && cur.RC == rc {
+	if cur := a.whereaboutsLocked(now); cur.GMC == gmc && cur.RC == rc && cur.NotHome == notHome {
 		a.mu.Unlock()
 		return a.GetWhereabouts(), nil // já está assim
 	}
@@ -310,7 +332,7 @@ func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error)
 			p.To = ms
 		}
 	}
-	if !(gmc == WhereHome && rc == WhereMe) {
+	if !(gmc == WhereHome && rc == WhereMe && !notHome) {
 		var max int64 // (os locais já foram conferidos acima)
 		for _, p := range a.periods {
 			max = maxInt64(max, p.ID)
@@ -318,8 +340,11 @@ func (a *App) setWhere(now time.Time, gmc, rc, name string) (Whereabouts, error)
 		name = strings.TrimSpace(name)
 		if name == "" {
 			name = periodName(gmc, rc)
+			if notHome && rc == WhereMe {
+				name = periodNameOut
+			}
 		}
-		p := Period{ID: max + 1, From: ms, Name: name}
+		p := Period{ID: max + 1, From: ms, Name: name, NotHome: notHome}
 		p.GMC, p.RC = gmc, rc
 		// um trecho marcado depois de agora (raro: relógio voltou) não pode cruzar
 		for _, q := range a.periods {

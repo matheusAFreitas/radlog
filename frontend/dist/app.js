@@ -849,6 +849,7 @@ async function showView(v, skipRender) {
   if (!PAGES[v]) v = "graficos";
   const changed = state.view !== v;
   state.view = v;
+  qkTrack(v);
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
   if (window.miniApply) window.miniApply();
   document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
@@ -3038,6 +3039,7 @@ function wire() {
   setupMeasureHover();
   wirePeriods();
   wireWhere();
+  wireBusca();
 }
 
 // ---------- eventos vindos do Go ----------
@@ -4269,9 +4271,9 @@ function makeDemoApi() {
     const now = Date.now();
     const o = periods.find((q) => now >= q.from && now < (q.to || Infinity));
     const g = o ? o.gmc || "comigo" : "casa", r = o ? o.radiacode || "comigo" : "comigo";
-    const nh = !!(o && o.notHome && g === "casa" && r === "casa");
+    const nh = !!(o && o.notHome && g === "casa" && r !== "fora");
     const pers = r === "comigo" ? "radiacode" : g === "comigo" ? "gmc" : g === "casa" && r === "casa" && !nh ? "gmc" : "", home = g === "casa" ? "gmc" : r === "casa" ? "radiacode" : "";
-    return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo", personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
+    return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo" && !nh, personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
   };
   // estado ao vivo de mentira: ?whlive=gmc:zero,radiacode:off (zero, sat, off) para ver as falhas
   const mockLive = () => {
@@ -5200,12 +5202,13 @@ const demoRc = () => {
       return [{ device: "radiacode", kind: "sem dado", from: h - 5 * 36e5, to: h - 2 * 36e5 }, { device: "gmc", kind: "saturando", from: h + 36e5, to: h + 36e5 + 9e5 },
         { device: "gmc", kind: "sem contagens", from: h - 3 * 864e5, to: h - 3 * 864e5 + 2 * 36e5 }].filter((m) => m.to > from && m.from < to);
     },
-    SetWhere: async (g, r, name) => {
+    LeaveHome: async (gGoes, rGoes) => api.SetWhere(gGoes ? "comigo" : "casa", rGoes ? "comigo" : "casa", "", !gGoes),
+    SetWhere: async (g, r, name, notHome) => {
       const now = Math.floor(Date.now() / 6e4) * 6e4;
-      const cur = mockWhere();
-      if (cur.gmc === g && cur.radiacode === r) return cur;
+      const cur = mockWhere(), nh = !!notHome && g === "casa" && r !== "fora";
+      if (cur.gmc === g && cur.radiacode === r && cur.notHome === nh) return cur;
       periods = periods.filter((q) => !(q.to === 0 && now - q.from < 6e4)).map((q) => (q.to === 0 ? { ...q, to: now } : q));
-      if (!(g === "casa" && r === "comigo")) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || whKind({ gmc: g, radiacode: r }), gmc: g, radiacode: r });
+      if (!(g === "casa" && r === "comigo" && !nh)) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || (nh && r === "comigo" ? "Saí com o RC102" : whKind({ gmc: g, radiacode: r })), gmc: g, radiacode: r, notHome: nh });
       setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0);
       return mockWhere();
     },
