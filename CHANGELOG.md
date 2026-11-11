@@ -1,5 +1,8 @@
 # Versões
 
+## 2.65.1
+- Alertas: a contagem diz "+ 1 confirmado" no singular.
+
 ## 2.65.0
 - Alertas repaginado: uma lista só, separada por dia, com o detalhe do
   alerta escolhido ao lado (pico, duração e limite em destaque, gráfico,
