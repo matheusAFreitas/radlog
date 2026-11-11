@@ -2879,7 +2879,36 @@ const I18N_EN = {
 "O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RadiaCode esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
 "leitura no ícone": "reading on the icon",
 "aparelho no ícone": "device on the icon",
-"ATENÇÃO": "ATTENTION"
+"ATENÇÃO": "ATTENTION",
+"Buscar (Ctrl+K)": "Search (Ctrl+K)",
+"Buscar telas, ações e ajustes": "Search screens, actions and settings",
+"Ações": "Actions",
+"Telas": "Screens",
+"Ajustes": "Settings",
+"Abertas há pouco": "Recently opened",
+"Ir para um horário": "Go to a time",
+"escolher": "choose",
+"fechar": "close",
+"ajuste": "setting",
+"Ações rápidas": "Quick actions",
+"Resultados": "Results",
+"Anotar agora": "Add note now",
+"nota presa a este minuto": "note pinned to this minute",
+"Saí de casa": "I left home",
+"pergunta quem vai junto": "asks who goes with you",
+"Voltei": "I'm back",
+"encerra o período fora de casa": "ends the away-from-home period",
+"abre o Medir objeto no passo 1": "opens Measure object at step 1",
+"Relatório em PDF do Resumo": "Summary PDF report",
+"do período escolhido no Resumo": "for the period chosen in Summary",
+"Silenciar o alarme": "Silence the alarm",
+"a faixa continua até o nível baixar": "the banner stays until the level drops",
+"hoje, centrado nesse minuto": "today, centered on that minute",
+"Tente o nome de uma tela, \"nota\" ou \"alarme\".": "Try a screen name, \"note\" or \"alarm\".",
+"Quem vai com você?": "Who's going with you?",
+"vai comigo": "goes with me",
+"fica em casa": "stays home",
+"Já vem marcado como da última vez.": "Already checked like last time."
 },
 "patterns": [
 [
@@ -4880,6 +4909,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Bem-vindo de volta · período fora de casa encerrado às ",
+"^Bem\\-vindo de volta · período fora de casa encerrado às ((?:(?! · ).)+?)$",
+"Welcome back · away-from-home period ended at ${1}",
+[
+"Bem-vindo de volta · período fora de casa encerrado às "
+]
+],
+[
 "Aviso de atenção a partir de ",
 "^Aviso de atenção a partir de ((?:(?! · ).)+?) CPM \\(amarelo e 3 bipes\\)$",
 "Attention warning from ${1} CPM (yellow and 3 beeps)",
@@ -5566,6 +5603,15 @@ const I18N_EN = {
 [
 "Primeiro dado do GMC-800: ",
 " · do RadiaCode: "
+]
+],
+[
+"Fora de casa desde ",
+"^Fora de casa desde ((?:(?! · ).)+?) · nenhum aparelho com você$",
+"Away from home since ${1} · no device with you",
+[
+"Fora de casa desde ",
+" · nenhum aparelho com você"
 ]
 ],
 [
@@ -7304,6 +7350,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Fora de casa desde ",
+"^Fora de casa desde ((?:(?! · ).)+?) · ((?:(?! · ).)+?) com você$",
+"Away from home since ${1} · ${2} with you",
+[
+"Fora de casa desde ",
+" com você"
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -8415,6 +8470,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Nada encontrado para \"",
+"^Nada encontrado para \"((?:(?! · ).)+?)\"\\.$",
+"Nothing found for \"${1}\".",
+[
+"Nada encontrado para \"",
+"\"."
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -9240,6 +9304,14 @@ const I18N_EN = {
 "${1}: nothing read yet.",
 [
 ": sem leitura ainda."
+]
+],
+[
+"Abrir os gráficos em ",
+"^Abrir os gráficos em ((?:(?! · ).)+?)$",
+"Open charts at ${1}",
+[
+"Abrir os gráficos em "
 ]
 ],
 [
@@ -10477,6 +10549,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Configurações › ",
+"^Configurações › ((?:(?! · ).)+?)$",
+"Settings › ${1}",
+[
+"Configurações › "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -10802,6 +10882,14 @@ const I18N_EN = {
 "r = ",
 " em ",
 " dias."
+]
+],
+[
+"Saí de casa às ",
+"^Saí de casa às ((?:(?! · ).)+?)$",
+"I left home at ${1}",
+[
+"Saí de casa às "
 ]
 ],
 [
