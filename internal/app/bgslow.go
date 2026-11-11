@@ -189,7 +189,7 @@ func (a *App) bgSlow(now time.Time) (BgSlow, error) {
 	for i := range out.Days {
 		dd := &out.Days[i]
 		if len(per[i]) >= bsDayMin {
-			dd.GM = bsMedian(per[i])
+			dd.GM = stats.MedianCounts(per[i]) // contagens inteiras: sem degraus de ~5%
 			dd.Valid = !dd.Rain && dd.GM > 0
 		}
 		if len(rc[i]) >= bsRCDayMin {

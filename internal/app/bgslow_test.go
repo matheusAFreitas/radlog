@@ -1,8 +1,12 @@
 package app
 
 import (
+	"math"
+	"math/rand"
 	"testing"
 	"time"
+
+	"radlog/internal/core/stats"
 )
 
 // bsSeries monta 120 dias com GMC e RC dados por dia (i = 0 é o mais antigo).
@@ -147,5 +151,32 @@ func TestBgSlowFromStore(t *testing.T) {
 	}
 	if _, err := a.MarkBgMoved(time.Now().Add(48 * time.Hour).UnixMilli()); err == nil {
 		t.Fatal("dia no futuro")
+	}
+}
+
+// Com contagens de Poisson de verdade, a subida medida acompanha a real
+// (antes, a mediana inteira andava em degraus de ~5% e decidia o limiar).
+// A subida aqui é de uma vez: a partir de 8% conta como degrau.
+func TestBgSlowPoisson(t *testing.T) {
+	r := rand.New(rand.NewSource(11))
+	for _, c := range []struct {
+		base, rise float64
+		warn       bool
+	}{{20.4, 0.05, false}, {25, 0.06, false}, {18, 0.13, true}, {20.4, 0.08, true}, {22, 0, false}} {
+		o := bsSeries(func(i int) float64 {
+			lam := c.base
+			if i >= bsDays-21 {
+				lam *= 1 + c.rise
+			}
+			v := make([]float64, 1440)
+			for j := range v {
+				v[j] = poissonR(r, lam)
+			}
+			return stats.MedianCounts(v)
+		}, func(i int) float64 { return 0 })
+		bsAnalyze(&o)
+		if math.Abs(o.Rise-c.rise) > 0.02 || (o.State != "ok") != c.warn {
+			t.Fatalf("base %.1f subida %.0f%%: medida %.1f%% estado %s", c.base, c.rise*100, o.Rise*100, o.State)
+		}
 	}
 }

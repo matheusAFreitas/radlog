@@ -161,15 +161,18 @@ func (a *App) yearMonthCalc(m0, today time.Time) ([]YearDay, error) {
 		tl := a.calTLLocked()
 		a.mu.Unlock()
 		per := make([][]float64, len(days))
+		cpm := make([][]float64, len(days))
 		for _, p := range bgClean(a.homeOnly(raw)) {
 			if i, ok := dayOf(p.T); ok {
 				per[i] = append(per[i], tl.USv(p))
+				cpm[i] = append(cpm[i], p.CPM)
 			}
 		}
 		for i, v := range per {
 			if len(v) > 0 {
 				days[i].N = len(v)
-				days[i].Bg = stats.Median(v)
+				// mediana interpolada: a comum anda em degraus de ~5% com ~20 CPM
+				days[i].Bg = stats.MedianCountsScaled(cpm[i], v)
 			}
 		}
 	}

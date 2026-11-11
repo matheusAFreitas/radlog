@@ -126,13 +126,19 @@ func (a *App) whySeries(dev string, from, t time.Time) whyDev {
 			}
 		}
 	}
+	// GMC-800: contagens inteiras, mediana interpolada (a comum anda em
+	// degraus de ~5% com ~20 CPM); RC102: taxa contínua, mediana comum
+	med, medU := stats.Median, func(c, u []float64) float64 { return stats.Median(u) }
+	if dev != devRC {
+		med, medU = stats.MedianCounts, stats.MedianCountsScaled
+	}
 	if len(homeCPM) >= 60 {
-		d.norm, d.normUSv = stats.Median(homeCPM), stats.Median(homeUSv)
+		d.norm, d.normUSv = med(homeCPM), medU(homeCPM, homeUSv)
 	}
 	for h := range byHour {
 		d.hourN[h] = len(byHour[h])
 		if len(byHour[h]) > 0 {
-			d.hourMed[h] = stats.Median(byHour[h])
+			d.hourMed[h] = med(byHour[h])
 		}
 	}
 	return d
