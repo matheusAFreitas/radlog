@@ -334,8 +334,8 @@ func (d *Device) ResetSpectrum() error {
 // O espectro acumulado de longo prazo (0x205) não tem como ser zerado por
 // fora: no firmware do RC102 o WR_VIRT_STRING só aceita 0xf1, 0x200, 0x202,
 // 0x204 e 0x207, e o 0x200/0x207 (o "Recomeçar" e o Restart do app oficial)
-// soma o espectro atual dentro do acumulado antes de zerar o atual. Por isso
-// o app zera o acumulado só do lado dele (ResetRcSpecAccum).
+// soma o espectro atual dentro do acumulado antes de zerar o atual. O app
+// mostra o acumulado como ele é.
 
 // ---------- texto das mudanças ----------
 
