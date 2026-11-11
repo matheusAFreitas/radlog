@@ -55,6 +55,10 @@ type Settings struct {
 	// logo com a bolinha. TrayDevice: "" automático, "gmc" ou "radiacode".
 	TrayPlain  bool   `json:"trayPlain"`
 	TrayDevice string `json:"trayDevice"`
+	// tamanho de tudo (0,9 a 1,5; 0 = 100%) e espaço entre as coisas
+	// ("" normal, "compacto", "confortavel"), por PC (uiscale.go)
+	UIScale   float64 `json:"uiScale"`
+	UIDensity string  `json:"uiDensity"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
@@ -513,6 +517,7 @@ func (a *App) loadSettings() Settings {
 	}
 	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
+	s.UIScale, s.UIDensity = normUIScale(s.UIScale), normUIDensity(s.UIDensity)
 	return s
 }
 

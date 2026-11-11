@@ -48,22 +48,24 @@
   --mono: "Plex Mono", "Cascadia Mono", Consolas, monospace;
 
   /* tipo: os 9 degraus do guia + micro, number-l e reading-m */
-  --fs-micro: 11px;
-  --fs-caption: 12px;
-  --fs-label: 13px;
-  --fs-body: 15px;
-  --fs-heading: 16px;
-  --fs-title: 19px;
-  --fs-number: 22px;
-  --fs-number-l: 28px;
-  --fs-reading-m: 40px;
-  --fs-reading-l: 56px;
-  --fs-reading-xl: 88px;
+  --fs-micro: calc(11px * var(--ui-scale, 1));
+  --fs-caption: calc(12px * var(--ui-scale, 1));
+  --fs-label: calc(13px * var(--ui-scale, 1));
+  --fs-body: calc(15px * var(--ui-scale, 1));
+  --fs-heading: calc(16px * var(--ui-scale, 1));
+  --fs-title: calc(19px * var(--ui-scale, 1));
+  --fs-number: calc(22px * var(--ui-scale, 1));
+  --fs-number-l: calc(28px * var(--ui-scale, 1));
+  --fs-reading-m: calc(40px * var(--ui-scale, 1));
+  --fs-reading-l: calc(56px * var(--ui-scale, 1));
+  --fs-reading-xl: calc(88px * var(--ui-scale, 1));
   /* raios */
   --radius-xs: 4px; --radius-sm: 8px; --radius-md: 10px; --radius-lg: 14px; --radius-pill: 999px;
   /* espaço */
-  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px; --space-5: 20px;
-  --space-6: 24px; --space-8: 32px; --space-12: 48px;
+  /* tamanho e espaço (Configurações › Janela, 2.49): --ui-scale e --ui-density */
+  --space-1: calc(4px * var(--ui-density, 1)); --space-2: calc(8px * var(--ui-density, 1)); --space-3: calc(12px * var(--ui-density, 1));
+  --space-4: calc(16px * var(--ui-density, 1)); --space-5: calc(20px * var(--ui-density, 1));
+  --space-6: calc(24px * var(--ui-density, 1)); --space-8: calc(32px * var(--ui-density, 1)); --space-12: calc(48px * var(--ui-density, 1));
   /* sombra: só o que flutua (toast, dica, menu, diálogo, barras fixas); cartões sem sombra */
   --shadow-float: 0 8px 24px rgba(0, 0, 0, .45);
   --shadow-mark: 0 0 0 2px var(--bg);
@@ -2272,3 +2274,6 @@ dialog.qk-dlg:not([open]) { display: none; }
 @media (max-width: 900px) { .side-quick .sq-t, .side-quick .sq-k { display: none; } .side-quick { margin: 0; padding: 0 var(--space-2); } }
 body:has(.qk-fab:not([hidden])) .toasts { right: 84px; }
 body:has(.set-bar:not([hidden])) .qk-fab { bottom: 86px; }
+/* tamanho e espaço (2.49) */
+.ui-seg { margin: var(--space-1) 0 var(--space-2); }
+.ui-seg button { min-height: 32px; }
