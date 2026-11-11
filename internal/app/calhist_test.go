@@ -58,6 +58,10 @@ func TestCalVersions(t *testing.T) {
 	if !near(tl.USv(dt), 100000*0.0055) {
 		t.Fatalf("tempo morto: %v", tl.USv(dt))
 	}
+	// fundo por dia: todos os dias com a calibração de agora
+	if days, _ := a.GetDaily(3); len(days) == 0 || !near(days[len(days)-1].USv, 100*0.0055) {
+		t.Fatalf("fundo por dia: %+v", days)
+	}
 	if !strings.Contains(tl.Tag(fut), ":manual") || strings.Contains(tl.Tag(old), "manual") {
 		t.Fatalf("tags: %q %q", tl.Tag(old), tl.Tag(fut))
 	}

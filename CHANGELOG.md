@@ -1,6 +1,9 @@
 # Versões
 
 ## 2.65.1
+- Fundo por dia: o µSv/h de todos os dias usa a calibração de agora. Antes
+  cada minuto usava a da época, e a troca de calibração de 10/11 parecia
+  uma queda de 45% no fundo.
 - Alertas: a contagem diz "+ 1 confirmado" no singular.
 
 ## 2.65.0

@@ -1613,7 +1613,8 @@ func (a *App) GetStats() (Stats, error) {
 	return s, nil
 }
 
-// GetDaily devolve a média de cada um dos últimos dias que têm dados.
+// GetDaily devolve a média de cada um dos últimos dias que têm dados, em
+// µSv/h pela calibração de agora (dá para comparar os dias entre si).
 func (a *App) GetDaily(days int) ([]DayStat, error) {
 	if days <= 0 || days > 60 {
 		days = 7
@@ -1644,7 +1645,9 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 			byDay[k] = x
 		}
 		x.sum += p.CPM
-		x.usv += tl.USv(p)
+		// com a calibração de agora (2.65.1): com a de cada minuto, a troca de
+		// calibração parecia uma queda do fundo na Tendência do fundo
+		x.usv += tl.USvAt(now, p.CPM)
 		x.n++
 	}
 	var out []DayStat
