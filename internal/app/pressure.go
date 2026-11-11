@@ -48,7 +48,8 @@ type PressRadon struct {
 	R       float64     `json:"r"`      // correlação no atraso escolhido
 	Days    int         `json:"days"`   // dias que entraram na conta
 	Pairs   int         `json:"pairs"`  // horas com os dois
-	Status  string      `json:"status"` // sem, pouco, pista, relacao
+	Status  string      `json:"status"` // sem, pouco, fraca, acaso, pista, relacao
+	Chance  float64     `json:"chance"` // teste de acaso: fração dos deslocamentos com |r| desse tamanho
 	Title   string      `json:"title"`
 	Text    string      `json:"text"`
 }
@@ -99,7 +100,79 @@ func pressCorr(press, bg map[int64]float64, lag int) (r float64, pairs int, days
 	return sxy / math.Sqrt(sxx*syy), n, len(dayset)
 }
 
-// pressVerdict escolhe o atraso de maior |r| e escreve a frase.
+// deDaily tira de uma série horária a média de cada hora do dia (hora
+// local). Pressão e fundo têm ciclo diário próprio (a maré da pressão, duas
+// vezes por dia; a casa fechada à noite), e dois ciclos diários se parecem
+// sem um causar o outro. Sem o ciclo, sobra a variação de um dia para outro,
+// que é a que mexe com o radônio (2.46).
+func deDaily(m map[int64]float64) map[int64]float64 {
+	var sum [24]float64
+	var n [24]int
+	for t, v := range m {
+		h := time.Unix(t, 0).Hour()
+		sum[h] += v
+		n[h]++
+	}
+	out := make(map[int64]float64, len(m))
+	for t, v := range m {
+		h := time.Unix(t, 0).Hour()
+		out[t] = v - sum[h]/float64(n[h])
+	}
+	return out
+}
+
+// bestLag acha o atraso (0 a pressMaxLag h) de maior |r| com pares bastantes.
+func bestLag(press, bg map[int64]float64) (lag int, r float64, pairs, days int) {
+	r, pairs, days = pressCorr(press, bg, 0)
+	for l := 1; l <= pressMaxLag; l++ {
+		rr, n, d := pressCorr(press, bg, l)
+		if n >= pressMinPairs && (pairs < pressMinPairs || math.Abs(rr) > math.Abs(r)) {
+			lag, r, pairs, days = l, rr, n, d
+		}
+	}
+	return
+}
+
+const (
+	pressShifts   = 99 // deslocamentos no teste de acaso
+	pressMinShift = 48 // horas: deslocamento mínimo (mais que um ciclo do tempo)
+	pressAlpha    = 0.05
+)
+
+// pressChance é o teste de acaso: desloca o fundo no tempo (dando a volta
+// no fim), o que mantém o jeito de cada série mas desfaz qualquer ligação
+// com a pressão, e conta em quantos deslocamentos o melhor |r| de 0 a 12 h
+// ficou do tamanho do encontrado. Devolve a fração (0 a 1); 1 se não há
+// dias bastantes para deslocar.
+func pressChance(press, bg map[int64]float64, absR float64) float64 {
+	if len(bg) == 0 {
+		return 1
+	}
+	lo, hi := int64(math.MaxInt64), int64(math.MinInt64)
+	for t := range bg {
+		lo, hi = min(lo, t), max(hi, t)
+	}
+	span := (hi-lo)/3600 + 1 // horas
+	if span < 2*pressMinShift+24 {
+		return 1
+	}
+	hits := 0
+	for k := 1; k <= pressShifts; k++ {
+		s := pressMinShift + (span-2*pressMinShift)*int64(k)/(pressShifts+1)
+		moved := make(map[int64]float64, len(bg))
+		for t, v := range bg {
+			h := ((t-lo)/3600 + s) % span
+			moved[lo+h*3600] = v
+		}
+		if _, r, n, _ := bestLag(press, moved); n >= pressMinPairs && math.Abs(r) >= absR {
+			hits++
+		}
+	}
+	return float64(hits+1) / float64(pressShifts+1)
+}
+
+// pressVerdict tira o ciclo do dia, escolhe o atraso de maior |r|, faz o
+// teste de acaso e escreve a frase.
 func pressVerdict(press, bg map[int64]float64) PressRadon {
 	out := PressRadon{}
 	if len(press) == 0 {
@@ -108,14 +181,8 @@ func pressVerdict(press, bg map[int64]float64) PressRadon {
 		out.Text = "Ela vem do mesmo serviço da chuva e chega na próxima busca."
 		return out
 	}
-	best := 0
-	bestR, bestN, bestD := pressCorr(press, bg, 0)
-	for lag := 1; lag <= pressMaxLag; lag++ {
-		r, n, d := pressCorr(press, bg, lag)
-		if n >= pressMinPairs && (bestN < pressMinPairs || math.Abs(r) > math.Abs(bestR)) {
-			best, bestR, bestN, bestD = lag, r, n, d
-		}
-	}
+	pd, bd := deDaily(press), deDaily(bg)
+	best, bestR, bestN, bestD := bestLag(pd, bd)
 	out.Lag, out.R, out.Pairs, out.Days = best, bestR, bestN, bestD
 	if bestN < pressMinPairs {
 		out.Status = "pouco"
@@ -123,20 +190,30 @@ func pressVerdict(press, bg map[int64]float64) PressRadon {
 		out.Text = fmt.Sprintf("Precisa de pelo menos 3 dias com a pressão e o fundo em casa juntos. Até agora são %d horas.", bestN)
 		return out
 	}
+	out.Chance = 1.0
+	if math.Abs(bestR) >= pressWeakR {
+		out.Chance = pressChance(pd, bd, math.Abs(bestR))
+	}
 	trust := bestD >= pressTrustDays
 	out.Status = "pista"
 	if trust {
 		out.Status = "relacao"
 	}
-	rTxt := fmt.Sprintf("r = %s em %d dias.", pressNum(bestR, 2), bestD)
+	rTxt := fmt.Sprintf("r = %s em %d dias, sem o ciclo do dia.", pressNum(bestR, 2), bestD)
+	chTxt := fmt.Sprintf("Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em %s%% das vezes.", pressNum(out.Chance*100, 0))
 	tail := "Com menos de 28 dias isso ainda é uma pista."
 	if trust {
-		tail = "Com 28 dias ou mais, a relação já é confiável."
+		tail = "Com 28 dias ou mais e passando no teste de acaso, a relação é confiável."
 	}
 	switch {
 	case math.Abs(bestR) < pressWeakR:
+		out.Status = "fraca"
 		out.Title = "Não deu para ver relação com a pressão."
 		out.Text = rTxt + " A pressão variou pouco, ou o radônio da sua casa depende mais de outra coisa (ventilação, horário)."
+	case out.Chance >= pressAlpha:
+		out.Status = "acaso"
+		out.Title = "Não deu para ver relação com a pressão."
+		out.Text = rTxt + " " + chTxt + " Então pode ser só coincidência. Com mais dias a resposta fica mais clara."
 	case bestR < 0:
 		pre := "Pista: "
 		if trust {
@@ -147,14 +224,14 @@ func pressVerdict(press, bg map[int64]float64) PressRadon {
 		} else {
 			out.Title = pre + fmt.Sprintf("quando a pressão cai, o fundo sobe cerca de %d h depois.", best)
 		}
-		out.Text = rTxt + " O sinal negativo quer dizer que um sobe quando o outro desce. " + tail
+		out.Text = rTxt + " O sinal negativo quer dizer que um sobe quando o outro desce. " + chTxt + " " + tail
 	default:
 		pre := "Pista: "
 		if trust {
 			pre = "Relação: "
 		}
 		out.Title = pre + "aqui o fundo sobe junto com a pressão, ao contrário do comum."
-		out.Text = rTxt + " Pode ser outra coisa que muda junto, como a casa fechada à noite. " + tail
+		out.Text = rTxt + " Pode ser outra coisa que muda junto, como a casa fechada à noite. " + chTxt + " " + tail
 	}
 	return out
 }

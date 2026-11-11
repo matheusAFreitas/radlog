@@ -51,3 +51,30 @@ func TestPressVerdict(t *testing.T) {
 		t.Fatalf("pouco: %+v", v)
 	}
 }
+
+// dois ciclos diários se parecem sem um causar o outro: sem o ciclo do dia,
+// não sobra relação (2.46)
+func TestPressVerdictDailyCycle(t *testing.T) {
+	t0 := time.Date(2026, 9, 1, 0, 0, 0, 0, time.Local).Unix()
+	p, b := map[int64]float64{}, map[int64]float64{}
+	seed := uint32(7)
+	rnd := func() float64 { seed = seed*1664525 + 1013904223; return float64(seed>>8)/float64(1<<24) - 0.5 }
+	walk := 0.0
+	for h := 0; h < 40*24; h++ {
+		k := t0 + int64(h)*3600
+		hr := float64(time.Unix(k, 0).Hour())
+		walk += rnd()
+		p[k] = 1013 + 1.2*math.Cos(2*math.Pi*hr/12) + 0.3*walk // maré + tempo
+		b[k] = 20 - 2*math.Cos(2*math.Pi*hr/12) + 0.2*rnd()    // só o ciclo da casa
+	}
+	if v := pressVerdict(p, b); strings.HasPrefix(v.Title, "Relação") || strings.HasPrefix(v.Title, "Pista") {
+		t.Fatalf("ciclo diário virou relação: %+v", v)
+	}
+	// com ligação de verdade (a parte do tempo), continua achando
+	for k := range b {
+		b[k] -= 0.8 * (p[k] - 1013 - 1.2*math.Cos(2*math.Pi*float64(time.Unix(k, 0).Hour())/12))
+	}
+	if v := pressVerdict(p, b); v.Status != "relacao" || v.Chance >= pressAlpha {
+		t.Fatalf("relação de verdade: %+v", v)
+	}
+}

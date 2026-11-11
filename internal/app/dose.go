@@ -168,8 +168,25 @@ type doseMin struct {
 }
 
 // doseSeries são os minutos medidos de um aparelho em [from, to), e o fundo
-// de casa dele (µSv/h, mediana) com a origem.
+// de casa dele (µSv/h, mediana) com a origem. Nos minutos em que o aparelho
+// estava encostado num objeto (Medir objeto, testes do ALARA), a leitura é do
+// objeto, não de quem mede: o minuto vale o fundo de casa (2.46).
 func (a *App) doseSeries(src string, from, to time.Time) ([]doseMin, float64, string, error) {
+	out, bg, txt, err := a.doseSeriesRaw(src, from, to)
+	if err != nil || bg <= 0 {
+		return out, bg, txt, err
+	}
+	onObj := a.onObjectChecker(src)
+	for i := range out {
+		if out[i].USv > bg && onObj(out[i].T) {
+			out[i].USv = bg
+		}
+	}
+	return out, bg, txt, nil
+}
+
+// doseSeriesRaw é o doseSeries sem tirar os minutos no objeto.
+func (a *App) doseSeriesRaw(src string, from, to time.Time) ([]doseMin, float64, string, error) {
 	now := time.Now()
 	if src == "radiacode" {
 		var out []doseMin
@@ -359,6 +376,29 @@ func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Durat
 		}
 		return tD[k-1], float64(k)
 	}
+	// o que o aparelho somou encostado num objeto (Medir objeto, ALARA): sai
+	// da dose, fica só o fundo daqueles minutos (2.46)
+	var cT []time.Time
+	var cD []float64
+	if bgPerMin > 0 {
+		onObj := a.onObjectChecker(devRC)
+		for _, p := range a.rcRange(start, last) {
+			if ex := p.USvh/60 - bgPerMin; ex > 0 && onObj(p.T) {
+				prev := 0.0
+				if len(cD) > 0 {
+					prev = cD[len(cD)-1]
+				}
+				cT, cD = append(cT, p.T), append(cD, prev+ex)
+			}
+		}
+	}
+	cut := func(t time.Time) float64 {
+		k := sort.Search(len(cT), func(i int) bool { return !cT[i].Before(t) })
+		if k == 0 {
+			return 0
+		}
+		return cD[k-1]
+	}
 	at := func(t time.Time) (dose, minutes float64) {
 		if !t.After(start) {
 			return 0, 0
@@ -368,7 +408,7 @@ func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Durat
 			td, tm = tail(t)
 			t = last
 		}
-		return curveAt(curve, t) - d0 + td, (curveAt(secs, t)-s0)/60 + tm
+		return math.Max(0, curveAt(curve, t)-d0-cut(t)) + td, (curveAt(secs, t)-s0)/60 + tm
 	}
 	n := int(to.Sub(from) / step)
 	c.Times, c.Dose, c.Background, c.Ceiling = nil, nil, nil, nil

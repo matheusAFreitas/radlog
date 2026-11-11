@@ -707,6 +707,42 @@ func (a *App) measuringChecker() func(time.Time) bool {
 	}
 }
 
+// onObjectChecker diz se o aparelho dev estava encostado num objeto: da
+// fase do fundo ao fim da última distância de uma medição (ou teste do
+// ALARA) em que ele era o aparelho principal ou o segundo "no objeto". O
+// aparelho "com você" do modo um-no-objeto-outro-com-você não conta.
+func (a *App) onObjectChecker(dev string) func(time.Time) bool {
+	dev = devName(dev)
+	a.mu.Lock()
+	var spans [][2]int64
+	add := func(m SavedMeasure) {
+		on := devName(m.Device) == dev
+		if o := m.Other; o != nil && o.Role == "objeto" && devName(o.Device) == dev {
+			on = true
+		}
+		if on && m.Obj.End > 0 {
+			from := m.Time
+			if from == 0 || from > m.Obj.Start {
+				from = m.Obj.Start
+			}
+			spans = append(spans, [2]int64{from - 60_000, m.Obj.End + 60_000})
+		}
+	}
+	for _, m := range a.measurements {
+		add(m)
+	}
+	a.mu.Unlock()
+	return func(t time.Time) bool {
+		ms := t.UnixMilli()
+		for _, s := range spans {
+			if ms >= s[0] && ms < s[1] {
+				return true
+			}
+		}
+		return false
+	}
+}
+
 // autoMeasureReport gera o PDF da medição que acabou de terminar (sem abrir:
 // a tela mostra "Abrir relatório").
 func (a *App) autoMeasureReport(id int64) {

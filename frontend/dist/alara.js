@@ -85,9 +85,13 @@ function alRateDefault() {
   return [0.5, "taxa de exemplo"];
 }
 
-// dose do card Tempo com as mesmas casas do número grande (agSv)
+// dose do card Tempo: as mesmas casas no número grande e nas frases (3 casas
+// abaixo de 0,1 µSv, senão o 2× e o 4× viravam 0,01 e 0,00)
+function alSv(v) {
+  return v != null && isFinite(v) && Math.abs(v) < 0.1 ? [fmt(v, 3), "µSv"] : agSv(v);
+}
 function alDose(v) {
-  const [dv, du] = agSv(v);
+  const [dv, du] = alSv(v);
   return `${dv} ${du}`;
 }
 
@@ -102,18 +106,22 @@ function renderAlTempo() {
   const m = Math.max(1, Math.min(6000, parseFloat(String($("alMin").value).replace(",", ".")) || 1));
   const bg = AL.bg || homeBgUSv();
   const d = (r * m) / 60;
-  const [dv, du] = agSv(d);
+  // o custo de ficar perto é o que passa do fundo: o fundo você pega em
+  // qualquer canto da casa (2.46). Sem fundo conhecido, mostra o total.
+  const ex = bg > 0 ? (Math.max(0, r - bg) * m) / 60 : d;
+  const [dv, du] = alSv(ex);
   $("alTDose").innerHTML = "";
-  $("alTDose").append(dv, Object.assign(document.createElement("small"), { textContent: " " + du }));
+  $("alTDose").append(dv, Object.assign(document.createElement("small"), { textContent: " " + du + (bg > 0 ? " acima do fundo" : "") }));
   const eq = $("alTEq");
   eq.textContent = "";
-  for (const l of doseKnown(d, bg)) eq.appendChild(Object.assign(document.createElement("span"), { textContent: l }));
+  if (ex > 0) for (const l of doseKnown(ex, bg)) eq.appendChild(Object.assign(document.createElement("span"), { textContent: l }));
+  if (bg > 0) eq.appendChild(Object.assign(document.createElement("span"), { textContent: `No lugar, ${alDose(d)} no total: ${alDose((bg * m) / 60)} disso é o fundo, que você receberia em qualquer canto da casa.` }));
   const alt = $("alTAlt");
   alt.textContent = "";
   if (bg > 0 && r > bg) {
-    const net = r - bg, d2 = ((bg + net / 4) * m) / 60, d4 = ((bg + net / 16) * m) / 60;
+    const net = r - bg, d2 = (net / 4 * m) / 60, d4 = (net / 16 * m) / 60;
     const b = document.createElement("b");
-    b.append(Object.assign(document.createElement("span"), { textContent: `Se a fonte for pequena e você ficar ao dobro da distância: ${alDose(d2)}.` }), " ", Object.assign(document.createElement("span"), { textContent: `Ao quádruplo: ${alDose(d4)}.` }));
+    b.append(Object.assign(document.createElement("span"), { textContent: `Se a fonte for pequena e você ficar ao dobro da distância: ${alDose(d2)} acima do fundo.` }), " ", Object.assign(document.createElement("span"), { textContent: `Ao quádruplo: ${alDose(d4)} acima do fundo.` }));
     const p = document.createElement("span");
     p.append(Object.assign(document.createElement("span"), { textContent: "Pelo inverso do quadrado, só a parte acima do fundo cai." }), " ", Object.assign(document.createElement("span"), { textContent: "O fundo continua o mesmo onde você estiver na casa." }));
     alt.append(b, p);
