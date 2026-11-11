@@ -1,5 +1,20 @@
 # Versões
 
+## 2.60.0
+- **Zerar o espectro acumulado do RC102.** O Radiacode 102 guarda dois
+  espectros: o atual, que aparece na tela e zera pelo menu, e o acumulado,
+  de longo prazo, que ele não mostra nem deixa zerar. No modo "Acumulado
+  do aparelho" da aba Espectro, o botão Recomeçar vira "Zerar o
+  acumulado…" e manda o comando ao aparelho, com confirmação. Se o
+  aparelho recusar, o app zera só na tela: guarda uma foto daquela hora e
+  mostra só o que veio depois.
+- O acumulado é relido a cada 30 s nesse modo, e na hora em que você entra
+  nele. Antes era relido a cada 10 min, então o tempo ficava parado e um
+  reset demorava a aparecer.
+- Sem isótopo achado, a dica embaixo do espectro fala só do arrastar.
+- O texto da aba Espectro explica o morro grande abaixo de uns 200 keV:
+  são fótons espalhados, não um isótopo.
+
 ## 2.59.0
 - **Confirmação cruzada.** Quando o GQ GMC-800 ou o Radiacode 102 entra em
   atenção ou alarme e os dois estão no mesmo lugar (os dois em casa ou os

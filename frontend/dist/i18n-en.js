@@ -2964,8 +2964,8 @@ const I18N_EN = {
 "sem lupa": "no magnifier",
 "lupa 4×4": "magnifier 4×4",
 "lupa 5×5": "magnifier 5×5",
-"Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there.",
-"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there.",
+"Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there. The big hump on the left, below about 200 keV, isn't an isotope: it's photons that lost energy along the way (scattered), and it shows up in every spectrum.",
+"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there. The big hump on the left, below about 200 keV, isn't an isotope: it's photons that lost energy along the way (scattered), and it shows up in every spectrum.",
 "Fundo de casa, dia a dia": "Home background, day by day",
 "Minha dose, dia a dia": "My dose, day by day",
 "Fundo de casa · GMC-800": "Home background · GMC-800",
@@ -3206,7 +3206,24 @@ const I18N_EN = {
 "Para conferir, os dois precisam estar no mesmo lugar, conectados e sem medir objeto.": "To cross-check, both need to be in the same place, connected and not measuring an object.",
 "10 min antes": "10 min before",
 "+5 min": "+5 min",
-"subida sobre o fundo de cada um": "rise above each device's background"
+"subida sobre o fundo de cada um": "rise above each device's background",
+"Arraste no espectro para ver um trecho de perto.": "Drag across the spectrum to see a stretch up close.",
+"Zerar o acumulado…": "Reset the accumulated…",
+"Zerar o espectro acumulado do RC102?": "Reset the RC102's accumulated spectrum?",
+"Zerar o espectro acumulado do RadiaCode?": "Reset the RC102's accumulated spectrum?",
+"Acumulado agora": "Accumulated now",
+"Não tem volta: o aparelho recomeça o acumulado do zero. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.": "This can't be undone: the device starts the accumulated spectrum from zero. It's also the home background (the dashed line), which builds up again over the next hours.",
+"Zerar o acumulado": "Reset the accumulated",
+"O RC102 não aceitou zerar o acumulado; zerado só no app": "The RC102 didn't accept resetting the accumulated spectrum; reset in the app only",
+"O RadiaCode não aceitou zerar o acumulado; zerado só no app": "The RC102 didn't accept resetting the accumulated spectrum; reset in the app only",
+"Espectro acumulado do RC102 zerado": "RC102 accumulated spectrum reset",
+"Espectro acumulado do RadiaCode zerado": "RC102 accumulated spectrum reset",
+"O RC102 recusou zerar o espectro acumulado; zerado só no app": "The RC102 refused to reset the accumulated spectrum; reset in the app only",
+"O RadiaCode recusou zerar o espectro acumulado; zerado só no app": "The RC102 refused to reset the accumulated spectrum; reset in the app only",
+"Espectro acumulado do RC102 zerado pelo app": "RC102 accumulated spectrum reset by the app",
+"Espectro acumulado do RadiaCode zerado pelo app": "RC102 accumulated spectrum reset by the app",
+"Espectro acumulado do RC102": "RC102 accumulated spectrum",
+"Espectro acumulado do RadiaCode": "RC102 accumulated spectrum"
 },
 "patterns": [
 [
@@ -10605,6 +10622,14 @@ const I18N_EN = {
 "The ${1} didn't rise along with it.",
 [
 " não subiu junto."
+]
+],
+[
+"Não deu para zerar: ",
+"^Não deu para zerar: ((?:(?! · ).)+?)$",
+"Couldn't reset: ${1}",
+[
+"Não deu para zerar: "
 ]
 ],
 [

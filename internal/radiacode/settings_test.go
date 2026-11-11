@@ -9,10 +9,11 @@ import (
 // fakeRegs é um aparelho com registradores de verdade (valores de um
 // RadiaCode-102 com firmware 4.15, lidos em 10/11/2026).
 type fakeRegs struct {
-	regs   map[uint32]uint32
-	writes []uint32
-	resets int
-	refuse map[uint32]bool
+	regs      map[uint32]uint32
+	writes    []uint32
+	resets    int
+	accResets int
+	refuse    map[uint32]bool
 }
 
 func newFakeRegs() *fakeRegs {
@@ -56,6 +57,14 @@ func (f *fakeRegs) Exchange(req []byte) ([]byte, error) {
 			f.regs[id] = binary.LittleEndian.Uint32(args[4:])
 			f.writes = append(f.writes, id)
 		}
+		body = le(uint32(1))
+	case cmdWrVirtString:
+		id, n := binary.LittleEndian.Uint32(args), binary.LittleEndian.Uint32(args[4:])
+		if f.refuse[id] || n != 0 {
+			body = le(uint32(0))
+			break
+		}
+		f.accResets++
 		body = le(uint32(1))
 	case cmdRdVirtString:
 		cfg := []byte("[DeviceParams]\nVSFR_DISP_OFF_TIME=\"5 s;10 s;15 s;30 s;2 min;5 min\"\nDispBacklight=0-9\n")
@@ -174,6 +183,18 @@ func TestResetDose(t *testing.T) {
 	d := &Device{tr: f}
 	if err := d.ResetDose(); err != nil || f.resets != 1 {
 		t.Fatalf("zerar: %v (%d)", err, f.resets)
+	}
+}
+
+func TestResetSpecAccum(t *testing.T) {
+	f := newFakeRegs()
+	d := &Device{tr: f}
+	if err := d.ResetSpecAccum(); err != nil || f.accResets != 1 {
+		t.Fatalf("zerar: %v (%d)", err, f.accResets)
+	}
+	f.refuse[vsSpecAccum] = true
+	if err := d.ResetSpecAccum(); err != ErrRefused {
+		t.Fatalf("recusa: %v", err)
 	}
 }
 

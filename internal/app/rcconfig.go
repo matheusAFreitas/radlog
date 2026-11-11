@@ -190,6 +190,25 @@ func (a *App) ResetRcDose() error {
 	return nil
 }
 
+// ResetRcSpecAccum zera o espectro acumulado do Radiacode. Devolve
+// "recusado" se o aparelho não aceitou (aí a tela zera só no app).
+func (a *App) ResetRcSpecAccum() (string, error) {
+	dev := a.rcDevice()
+	if dev == nil {
+		return "", errRcOff
+	}
+	if err := dev.ResetSpecAccum(); err != nil {
+		if errors.Is(err, radiacode.ErrRefused) {
+			a.logEvent("O RC102 recusou zerar o espectro acumulado; zerado só no app")
+			return "recusado", nil
+		}
+		return "", err
+	}
+	a.logEvent("Espectro acumulado do RC102 zerado pelo app")
+	a.cfgNote("Espectro acumulado do RC102", "zerado", "você (pelo app)")
+	return "ok", nil
+}
+
 // OpenRcConfigBackups abre a pasta das cópias dos ajustes do Radiacode.
 func (a *App) OpenRcConfigBackups() error {
 	_ = os.MkdirAll(a.rcCfgPath(""), 0o755)
