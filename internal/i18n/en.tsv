@@ -3961,3 +3961,86 @@ Os últimos 10 segundos	The last 10 seconds
 cada risco é uma contagem	each tick is one count
 piscar a cada contagem	blink on every count
 fita dos últimos 10 segundos	last-10-seconds strip
+Por que subiu?	Why did it rise?
+Por que?	Why?
+apoia	supports
+não apoia	doesn't support
+Acaso	Chance
+Conferindo…	Checking…
+O mais provável	Most likely
+Sem dado	No data
+O que os dados apoiam	What the data supports
+O que foi conferido e não apoia	What was checked and doesn't support it
+Não é diagnóstico: o painel confere as causas comuns com os seus dados.	Not a diagnosis: the panel checks the common causes against your data.
+Não deu para conferir agora.	Couldn't check right now.
+nota ou medição de objeto	note or object measurement
+normal	normal
+µSv/h · cada gráfico com a sua escala, nunca menor que ±25% do normal, para o ruído não parecer subida	µSv/h · each chart on its own scale, never narrower than ±25% of normal, so noise doesn't look like a rise
+Abrir a tela Clima	Open the Weather screen
+Abrir Padrões do fundo	Open Background patterns
+Abrir Medir objeto	Open Measure object
+Abrir Fora de casa	Open Away from home
+Abrir a tela do {0}	Open the {0} screen
+Saída de casa	Leaving home
+Pressão caindo	Falling pressure
+Radônio da noite	Night-time radon
+Objeto ou fonte perto	Object or source nearby
+Coisa do aparelho	The device itself
+Os dois aparelhos viram	Both devices saw it
+Agora, no {0}	Now, on the {0}
+{0} no {1} · agora	{0} on the {1} · now
+{0} no {1} · {2}	{0} on the {1} · {2}
+O fundo subiu {0}% desde {1}	The background rose {0}% since {1}
+O RC102 subiu {0}% desde {1}	The RC102 rose {0}% since {1}
+O fundo está {0}% abaixo do normal desde {1}	The background has been {0}% below normal since {1}
+O {0} está {1}% abaixo do normal desde {2}	The {0} has been {1}% below normal since {2}
+Sem dados do {0} nas 12 horas antes	No {0} data in the 12 hours before
+Ainda não dá para saber o normal do {0}	It's too early to know the {0}'s normal
+O painel precisa das leituras do aparelho nas horas antes e de alguns dias de fundo em casa para comparar.	The panel needs the device's readings in the hours before and a few days of home background to compare.
+O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.	Decay is random, so the count varies on its own. Up to about 2 σ that's normal and happens all the time.
+A subida é de {0} σ. Variações assim aparecem várias vezes por dia.	The rise is {0} σ. Variations like this show up several times a day.
+A subida é de {0} σ. O acaso não chega nisso.	The rise is {0} σ. Chance doesn't get there.
+Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só.	If it were the environment, both would rise together. That's what separates real radiation from something in one device.
+Sem dado: o {0} não tem leituras nessa hora.	No data: the {0} has no readings at that time.
+O {0} também subiu, {1}% no mesmo trecho.	The {0} rose too, {1}% over the same stretch.
+O {0} ficou parado (+{1}%, {2} σ).	The {0} stayed put (+{1}%, {2} σ).
+O {0} ficou parado (−{1}%, {2} σ).	The {0} stayed put (−{1}%, {2} σ).
+Fora de casa o fundo muda: granito, prédios, solo, altitude e avião sobem a dose. Isso entra na Minha dose, não no fundo de casa.	Away from home the background changes: granite, buildings, soil, altitude and flying raise the dose. That goes into My dose, not into the home background.
+O {0} está fora de casa desde {1}.	The {0} has been away from home since {1}.
+O {0} estava em casa.	The {0} was at home.
+A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.	Rain brings radon's decay products in the air down to the ground. They have short half-lives (minutes), so the rise lasts a few hours and goes away on its own.
+Sem dado: a chuva não está ligada (Configurações › Janela e tela).	No data: rain is off (Settings › Window and screen).
+Sem dado de chuva nessa hora.	No rain data at that time.
+Choveu {0} mm nas 4 horas antes, a partir de {1}.	It rained {0} mm in the 4 hours before, from {1}.
+Na sua casa, a chuva costuma subir o fundo uns {0}%.	At your home, rain usually raises the background by about {0}%.
+Não choveu nas 4 horas antes.	It didn't rain in the 4 hours before.
+Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.	With the house closed and the air still, radon coming out of the floor and walls builds up. During the day, with windows open and wind, it spreads out.
+Sem dado: ainda são poucos dias para saber o padrão de cada hora.	No data: still too few days to know each hour's pattern.
+O {0} estava fora de casa.	The {0} was away from home.
+Às {0}h o seu fundo costuma ficar {1}% acima da média do dia.	At {0}h your background is usually {1}% above the day's average.
+Às {0}h o seu fundo costuma ficar só {1}% acima da média do dia.	At {0}h your background is usually only {1}% above the day's average.
+Às {0}h o seu fundo costuma ficar na média do dia.	At {0}h your background is usually at the day's average.
+Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.	When air pressure drops, more radon comes out of the soil and walls, and the home background rises a few hours later.
+Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela).	No pressure data (it comes with rain, in Settings › Window and screen).
+Sem dado de pressão nessa hora.	No pressure data at that time.
+A pressão caiu {0} hPa nas 12 horas antes.	Pressure dropped {0} hPa in the 12 hours before.
+A pressão mudou {0} hPa nas 12 horas antes.	Pressure changed {0} hPa in the 12 hours before.
+Um objeto perto do aparelho sobe muito a leitura dele, e quase nada a do outro aparelho. Para medir direito, use o Medir objeto.	An object near a device raises its reading a lot, and the other device's barely at all. To measure properly, use Measure object.
+Anotação às {0}: "{1}".	Note at {0}: "{1}".
+Medição de objeto às {0}.	Object measurement at {0}.
+Nenhuma medição de objeto nem anotação desde {0}.	No object measurement or note since {0}.
+Confira se o {0} foi mexido ou ficou perto de alguma coisa nova, e o cabo. Ruído no tubo também faz a contagem pular.	Check whether the {0} was moved or ended up near something new, and the cable. Tube noise also makes the count jump.
+A subida é do tamanho do acaso.	The rise is the size of chance.
+Os dois aparelhos subiram juntos.	Both devices rose together.
+Sem o {0} para comparar.	No {0} to compare with.
+Outra causa explica a subida.	Another cause explains the rise.
+Só o {0} subiu, sem chuva, sem nota e fora da hora do radônio.	Only the {0} rose, with no rain, no note and outside radon hours.
+Provavelmente é só o acaso.	Probably just chance.
+A subida é de {0} σ, o tipo de variação que acontece várias vezes por dia.	The rise is {0} σ, the kind of variation that happens several times a day.
+O {0} saiu de casa às {1} e subiu fora.	The {0} left home at {1} and rose while away.
+Esta é a hora em que o radônio costuma subir na sua casa.	This is the time when radon usually rises at your home.
+Nenhuma das causas comuns apoia.	None of the common causes supports it.
+Os dois aparelhos subiram juntos, então é radiação de verdade.	Both devices rose together, so it's real radiation.
+Só o {0} subiu: é o que estava perto dele, não a casa.	Only the {0} rose: it's what was near it, not the house.
+Só o {0} subiu. Pode ser coisa do aparelho.	Only the {0} rose. It may be the device.
+O {0} não subiu junto.	The {0} didn't rise along with it.

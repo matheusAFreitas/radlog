@@ -1,5 +1,27 @@
 # Versões
 
+## 2.55.0
+- **"Por que subiu?"** Quando a leitura sobe, um painel lateral confere as
+  causas comuns com os seus próprios dados. Para cada causa ele diz se os
+  dados **apoiam**, **não apoiam** ou se está **sem dado**, mostra a
+  evidência e explica por que aquilo faz subir. As causas conferidas:
+  - acaso (a subida em σ);
+  - os dois aparelhos (o outro subiu junto?);
+  - chuva nas 4 h antes;
+  - radônio da hora do dia;
+  - pressão caindo;
+  - objeto ou anotação perto;
+  - saída de casa;
+  - coisa do aparelho.
+- **No topo**, uma frase com o mais provável. Embaixo, dois gráficos
+  empilhados das 12 h antes, cada um com a sua escala (nunca menor que ±25%
+  do normal), com a chuva, fora de casa e notas marcadas.
+- **Onde fica o botão:**
+  - na faixa de alarme, ao lado do Silenciar;
+  - em cada alerta da lista (olha a hora daquele alerta);
+  - no Agora, quando o fundo está acima do normal ("Por que?").
+- Não é diagnóstico: é um atalho para não cruzar quatro telas.
+
 ## 2.54.0
 - **Pulso da contagem.** O anel do meio do mostrador pisca de leve a cada
   contagem do aparelho, como o clique de um Geiger, só que sem som. Uma

@@ -149,6 +149,12 @@ function alertLi(e, withDate) {
     box.appendChild(sp);
   }
   li.append(d, t, box);
+  if (api.GetWhyRise) {
+    const w = document.createElement("button");
+    w.type = "button"; w.className = "link small-link a-why"; w.textContent = "Por que subiu?";
+    w.addEventListener("click", (ev) => { ev.stopPropagation(); whyFromAlert(e); });
+    li.appendChild(w);
+  }
   return li;
 }
 

@@ -3025,7 +3025,53 @@ const I18N_EN = {
 "Os últimos 10 segundos": "The last 10 seconds",
 "cada risco é uma contagem": "each tick is one count",
 "piscar a cada contagem": "blink on every count",
-"fita dos últimos 10 segundos": "last-10-seconds strip"
+"fita dos últimos 10 segundos": "last-10-seconds strip",
+"Por que subiu?": "Why did it rise?",
+"Por que?": "Why?",
+"apoia": "supports",
+"não apoia": "doesn't support",
+"Acaso": "Chance",
+"Conferindo…": "Checking…",
+"O mais provável": "Most likely",
+"Sem dado": "No data",
+"O que os dados apoiam": "What the data supports",
+"O que foi conferido e não apoia": "What was checked and doesn't support it",
+"Não é diagnóstico: o painel confere as causas comuns com os seus dados.": "Not a diagnosis: the panel checks the common causes against your data.",
+"Não deu para conferir agora.": "Couldn't check right now.",
+"nota ou medição de objeto": "note or object measurement",
+"normal": "normal",
+"µSv/h · cada gráfico com a sua escala, nunca menor que ±25% do normal, para o ruído não parecer subida": "µSv/h · each chart on its own scale, never narrower than ±25% of normal, so noise doesn't look like a rise",
+"Abrir a tela Clima": "Open the Weather screen",
+"Abrir Padrões do fundo": "Open Background patterns",
+"Abrir Medir objeto": "Open Measure object",
+"Abrir Fora de casa": "Open Away from home",
+"Saída de casa": "Leaving home",
+"Pressão caindo": "Falling pressure",
+"Radônio da noite": "Night-time radon",
+"Objeto ou fonte perto": "Object or source nearby",
+"Coisa do aparelho": "The device itself",
+"Os dois aparelhos viram": "Both devices saw it",
+"O painel precisa das leituras do aparelho nas horas antes e de alguns dias de fundo em casa para comparar.": "The panel needs the device's readings in the hours before and a few days of home background to compare.",
+"O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.": "Decay is random, so the count varies on its own. Up to about 2 σ that's normal and happens all the time.",
+"Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só.": "If it were the environment, both would rise together. That's what separates real radiation from something in one device.",
+"Fora de casa o fundo muda: granito, prédios, solo, altitude e avião sobem a dose. Isso entra na Minha dose, não no fundo de casa.": "Away from home the background changes: granite, buildings, soil, altitude and flying raise the dose. That goes into My dose, not into the home background.",
+"A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.": "Rain brings radon's decay products in the air down to the ground. They have short half-lives (minutes), so the rise lasts a few hours and goes away on its own.",
+"Sem dado: a chuva não está ligada (Configurações › Janela e tela).": "No data: rain is off (Settings › Window and screen).",
+"Sem dado de chuva nessa hora.": "No rain data at that time.",
+"Não choveu nas 4 horas antes.": "It didn't rain in the 4 hours before.",
+"Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.": "With the house closed and the air still, radon coming out of the floor and walls builds up. During the day, with windows open and wind, it spreads out.",
+"Sem dado: ainda são poucos dias para saber o padrão de cada hora.": "No data: still too few days to know each hour's pattern.",
+"Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.": "When air pressure drops, more radon comes out of the soil and walls, and the home background rises a few hours later.",
+"Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela).": "No pressure data (it comes with rain, in Settings › Window and screen).",
+"Sem dado de pressão nessa hora.": "No pressure data at that time.",
+"Um objeto perto do aparelho sobe muito a leitura dele, e quase nada a do outro aparelho. Para medir direito, use o Medir objeto.": "An object near a device raises its reading a lot, and the other device's barely at all. To measure properly, use Measure object.",
+"A subida é do tamanho do acaso.": "The rise is the size of chance.",
+"Os dois aparelhos subiram juntos.": "Both devices rose together.",
+"Outra causa explica a subida.": "Another cause explains the rise.",
+"Provavelmente é só o acaso.": "Probably just chance.",
+"Esta é a hora em que o radônio costuma subir na sua casa.": "This is the time when radon usually rises at your home.",
+"Nenhuma das causas comuns apoia.": "None of the common causes supports it.",
+"Os dois aparelhos subiram juntos, então é radiação de verdade.": "Both devices rose together, so it's real radiation."
 },
 "patterns": [
 [
@@ -3388,6 +3434,15 @@ const I18N_EN = {
 [
 "Marcada como não comparável: ",
 ". Ela continua salva, mas não deve ser comparada com as outras medições deste objeto."
+]
+],
+[
+"Confira se o ",
+"^Confira se o ((?:(?! · ).)+?) foi mexido ou ficou perto de alguma coisa nova, e o cabo\\. Ruído no tubo também faz a contagem pular\\.$",
+"Check whether the ${1} was moved or ended up near something new, and the cable. Tube noise also makes the count jump.",
+[
+"Confira se o ",
+" foi mexido ou ficou perto de alguma coisa nova, e o cabo. Ruído no tubo também faz a contagem pular."
 ]
 ],
 [
@@ -4298,6 +4353,15 @@ const I18N_EN = {
 ]
 ],
 [
+"A subida é de ",
+"^A subida é de ((?:(?! · ).)+?) σ, o tipo de variação que acontece várias vezes por dia\\.$",
+"The rise is ${1} σ, the kind of variation that happens several times a day.",
+[
+"A subida é de ",
+" σ, o tipo de variação que acontece várias vezes por dia."
+]
+],
+[
 "Sem contagens há ",
 "^Sem contagens há ((?:(?! · ).)+?): o tubo pode estar com defeito\\. Confira o contador\\.$",
 "No counts for ${1}: the tube may be faulty. Check the counter.",
@@ -4525,6 +4589,15 @@ const I18N_EN = {
 "${1} — current value; no record of the value in effect at the start of the period",
 [
 " — valor atual; sem registro do valor vigente no início do período"
+]
+],
+[
+"A subida é de ",
+"^A subida é de ((?:(?! · ).)+?) σ\\. Variações assim aparecem várias vezes por dia\\.$",
+"The rise is ${1} σ. Variations like this show up several times a day.",
+[
+"A subida é de ",
+" σ. Variações assim aparecem várias vezes por dia."
 ]
 ],
 [
@@ -4846,6 +4919,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Só o ",
+"^Só o ((?:(?! · ).)+?) subiu, sem chuva, sem nota e fora da hora do radônio\\.$",
+"Only the ${1} rose, with no rain, no note and outside radon hours.",
+[
+"Só o ",
+" subiu, sem chuva, sem nota e fora da hora do radônio."
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RC102 readings at home in the last hour (needs ${2})",
@@ -4896,6 +4978,16 @@ const I18N_EN = {
 "${1}: ${2} short alerts, every 10-min stretch at the safe level.",
 [
 " avisos curtos, nenhum trecho de 10 min acima do seguro."
+]
+],
+[
+"Às ",
+"^Às ((?:(?! · ).)+?)h o seu fundo costuma ficar só ((?:(?! · ).)+?)% acima da média do dia\\.$",
+"At ${1}h your background is usually only ${2}% above the day's average.",
+[
+"Às ",
+"h o seu fundo costuma ficar só ",
+"% acima da média do dia."
 ]
 ],
 [
@@ -5103,6 +5195,16 @@ const I18N_EN = {
 "Welcome back · away-from-home period ended at ${1}",
 [
 "Bem-vindo de volta · período fora de casa encerrado às "
+]
+],
+[
+"Às ",
+"^Às ((?:(?! · ).)+?)h o seu fundo costuma ficar ((?:(?! · ).)+?)% acima da média do dia\\.$",
+"At ${1}h your background is usually ${2}% above the day's average.",
+[
+"Às ",
+"h o seu fundo costuma ficar ",
+"% acima da média do dia."
 ]
 ],
 [
@@ -5399,6 +5501,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Só o ",
+"^Só o ((?:(?! · ).)+?) subiu: é o que estava perto dele, não a casa\\.$",
+"Only the ${1} rose: it's what was near it, not the house.",
+[
+"Só o ",
+" subiu: é o que estava perto dele, não a casa."
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -5564,6 +5675,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Na sua casa, a chuva costuma subir o fundo uns ",
+"^Na sua casa, a chuva costuma subir o fundo uns ((?:(?! · ).)+?)%\\.$",
+"At your home, rain usually raises the background by about ${1}%.",
+[
+"Na sua casa, a chuva costuma subir o fundo uns ",
+"%."
+]
+],
+[
 "Acima do normal (",
 "^Acima do normal \\(((?:(?! · ).)+?)\\) — dificilmente é só variação$",
 "Above normal (${1}) — hardly just variation",
@@ -5704,6 +5824,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Às ",
+"^Às ((?:(?! · ).)+?)h o seu fundo costuma ficar na média do dia\\.$",
+"At ${1}h your background is usually at the day's average.",
+[
+"Às ",
+"h o seu fundo costuma ficar na média do dia."
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -5765,6 +5894,14 @@ const I18N_EN = {
 [
 "mediana de 30 dias (",
 " CPM) · média do período "
+]
+],
+[
+"Nenhuma medição de objeto nem anotação desde ",
+"^Nenhuma medição de objeto nem anotação desde ((?:(?! · ).)+?)\\.$",
+"No object measurement or note since ${1}.",
+[
+"Nenhuma medição de objeto nem anotação desde "
 ]
 ],
 [
@@ -6068,6 +6205,24 @@ const I18N_EN = {
 ]
 ],
 [
+"A subida é de ",
+"^A subida é de ((?:(?! · ).)+?) σ\\. O acaso não chega nisso\\.$",
+"The rise is ${1} σ. Chance doesn't get there.",
+[
+"A subida é de ",
+" σ. O acaso não chega nisso."
+]
+],
+[
+"Choveu ",
+"^Choveu ((?:(?! · ).)+?) mm nas 4 horas antes, a partir de ((?:(?! · ).)+?)\\.$",
+"It rained ${1} mm in the 4 hours before, from ${2}.",
+[
+"Choveu ",
+" mm nas 4 horas antes, a partir de "
+]
+],
+[
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
 "Measurement of ${1}: ${2} ± ${3} CPM above background (${4}σ) — ${5}",
@@ -6237,6 +6392,24 @@ const I18N_EN = {
 ]
 ],
 [
+"Sem dado: o ",
+"^Sem dado: o ((?:(?! · ).)+?) não tem leituras nessa hora\\.$",
+"No data: the ${1} has no readings at that time.",
+[
+"Sem dado: o ",
+" não tem leituras nessa hora."
+]
+],
+[
+"Só o ",
+"^Só o ((?:(?! · ).)+?) subiu\\. Pode ser coisa do aparelho\\.$",
+"Only the ${1} rose. It may be the device.",
+[
+"Só o ",
+" subiu. Pode ser coisa do aparelho."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\)$",
 "The difference is ${1} times the uncertainty (${2}σ)",
@@ -6370,6 +6543,15 @@ const I18N_EN = {
 ]
 ],
 [
+"A pressão mudou ",
+"^A pressão mudou ((?:(?! · ).)+?) hPa nas 12 horas antes\\.$",
+"Pressure changed ${1} hPa in the 12 hours before.",
+[
+"A pressão mudou ",
+" hPa nas 12 horas antes."
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -6475,6 +6657,15 @@ const I18N_EN = {
 "× o fundo (",
 "), com ",
 "σ de certeza."
+]
+],
+[
+"A pressão caiu ",
+"^A pressão caiu ((?:(?! · ).)+?) hPa nas 12 horas antes\\.$",
+"Pressure dropped ${1} hPa in the 12 hours before.",
+[
+"A pressão caiu ",
+" hPa nas 12 horas antes."
 ]
 ],
 [
@@ -6692,6 +6883,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O fundo está ",
+"^O fundo está ((?:(?! · ).)+?)% abaixo do normal desde ((?:(?! · ).)+?)$",
+"The background has been ${1}% below normal since ${2}",
+[
+"O fundo está ",
+"% abaixo do normal desde "
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -6884,6 +7084,23 @@ const I18N_EN = {
 "${1}: ${2} min above safe, without alerts.",
 [
 " min acima do seguro, sem alerta."
+]
+],
+[
+"Ainda não dá para saber o normal do ",
+"^Ainda não dá para saber o normal do ((?:(?! · ).)+?)$",
+"It's too early to know the ${1}'s normal",
+[
+"Ainda não dá para saber o normal do "
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) também subiu, ((?:(?! · ).)+?)% no mesmo trecho\\.$",
+"The ${1} rose too, ${2}% over the same stretch.",
+[
+" também subiu, ",
+"% no mesmo trecho."
 ]
 ],
 [
@@ -7143,6 +7360,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) saiu de casa às ((?:(?! · ).)+?) e subiu fora\\.$",
+"The ${1} left home at ${2} and rose while away.",
+[
+" saiu de casa às ",
+" e subiu fora."
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -7268,6 +7494,15 @@ const I18N_EN = {
 " · mín ",
 " · máx ",
 " CPM"
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) está ((?:(?! · ).)+?)% abaixo do normal desde ((?:(?! · ).)+?)$",
+"The ${1} has been ${2}% below normal since ${3}",
+[
+" está ",
+"% abaixo do normal desde "
 ]
 ],
 [
@@ -7460,6 +7695,15 @@ const I18N_EN = {
 [
 "O dia de maior dose foi ",
 " µSv."
+]
+],
+[
+"Sem dados do ",
+"^Sem dados do ((?:(?! · ).)+?) nas 12 horas antes$",
+"No ${1} data in the 12 hours before",
+[
+"Sem dados do ",
+" nas 12 horas antes"
 ]
 ],
 [
@@ -7954,6 +8198,24 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) ficou parado \\(\\+((?:(?! · ).)+?)%, ((?:(?! · ).)+?) σ\\)\\.$",
+"The ${1} stayed put (+${2}%, ${3} σ).",
+[
+" ficou parado (+",
+"%, ",
+" σ)."
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) está fora de casa desde ((?:(?! · ).)+?)\\.$",
+"The ${1} has been away from home since ${2}.",
+[
+" está fora de casa desde "
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -8070,6 +8332,16 @@ const I18N_EN = {
 "≈ ${1} years of your home background",
 [
 " anos do fundo da sua casa"
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) ficou parado \\(−((?:(?! · ).)+?)%, ((?:(?! · ).)+?) σ\\)\\.$",
+"The ${1} stayed put (−${2}%, ${3} σ).",
+[
+" ficou parado (−",
+"%, ",
+" σ)."
 ]
 ],
 [
@@ -8445,6 +8717,15 @@ const I18N_EN = {
 [
 "Medindo a ",
 " de no máximo "
+]
+],
+[
+"O RadiaCode subiu ",
+"^O RadiaCode subiu ((?:(?! · ).)+?)% desde ((?:(?! · ).)+?)$",
+"The RC102 rose ${1}% since ${2}",
+[
+"O RadiaCode subiu ",
+"% desde "
 ]
 ],
 [
@@ -8867,6 +9148,14 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) estava fora de casa\\.$",
+"The ${1} was away from home.",
+[
+" estava fora de casa."
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -9041,6 +9330,14 @@ const I18N_EN = {
 [
 "taxa da medição \"",
 "\" ("
+]
+],
+[
+"Medição de objeto às ",
+"^Medição de objeto às ((?:(?! · ).)+?)\\.$",
+"Object measurement at ${1}.",
+[
+"Medição de objeto às "
 ]
 ],
 [
@@ -9292,6 +9589,33 @@ const I18N_EN = {
 [
 "dose ",
 " µSv no RadiaCode"
+]
+],
+[
+"O fundo subiu ",
+"^O fundo subiu ((?:(?! · ).)+?)% desde ((?:(?! · ).)+?)$",
+"The background rose ${1}% since ${2}",
+[
+"O fundo subiu ",
+"% desde "
+]
+],
+[
+"O RC102 subiu ",
+"^O RC102 subiu ((?:(?! · ).)+?)% desde ((?:(?! · ).)+?)$",
+"The RC102 rose ${1}% since ${2}",
+[
+"O RC102 subiu ",
+"% desde "
+]
+],
+[
+"Sem o ",
+"^Sem o ((?:(?! · ).)+?) para comparar\\.$",
+"No ${1} to compare with.",
+[
+"Sem o ",
+" para comparar."
 ]
 ],
 [
@@ -9798,6 +10122,14 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) não subiu junto\\.$",
+"The ${1} didn't rise along with it.",
+[
+" não subiu junto."
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -10092,6 +10424,14 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) estava em casa\\.$",
+"The ${1} was at home.",
+[
+" estava em casa."
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -10370,6 +10710,16 @@ const I18N_EN = {
 [
 "dose ",
 " µSv no RC102"
+]
+],
+[
+"Anotação às ",
+"^Anotação às ((?:(?! · ).)+?): \"((?:(?! · ).)+?)\"\\.$",
+"Note at ${1}: \"${2}\".",
+[
+"Anotação às ",
+": \"",
+"\"."
 ]
 ],
 [
@@ -10858,6 +11208,14 @@ const I18N_EN = {
 [
 "mediana ",
 " µSv/dia"
+]
+],
+[
+"Abrir a tela do ",
+"^Abrir a tela do ((?:(?! · ).)+?)$",
+"Open the ${1} screen",
+[
+"Abrir a tela do "
 ]
 ],
 [
@@ -12022,6 +12380,15 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) no ((?:(?! · ).)+?) · agora$",
+"${1} on the ${2} · now",
+[
+" no ",
+" · agora"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -12534,6 +12901,14 @@ const I18N_EN = {
 [
 "choveu ",
 " mm"
+]
+],
+[
+"Agora, no ",
+"^Agora, no ((?:(?! · ).)+?)$",
+"Now, on the ${1}",
+[
+"Agora, no "
 ]
 ],
 [
@@ -13269,6 +13644,14 @@ const I18N_EN = {
 "± ${1} · at ${2}",
 [
 " · a "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no ((?:(?! · ).)+?) · ((?:(?! · ).)+?)$",
+"${1} on the ${2} · ${3}",
+[
+" no "
 ]
 ],
 [
