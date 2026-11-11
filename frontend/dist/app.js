@@ -4949,6 +4949,26 @@ const demoRc = () => {
       }
       return { year: y, first, today, days };
     },
+    GetWhyRise: async (dev, at) => {
+      const t = Math.floor((at || Date.now()) / 6e4) * 6e4 + 6e4, from = t - 12 * 3600e3, bins = [];
+      let seed = 11;
+      const nz = () => { seed = (seed * 16807) % 2147483647; return (seed / 2147483647 - 0.5) * 2; };
+      const bump = (i) => { const d = i - 40; return d < 0 ? 0 : 0.11 * Math.exp(-d / 10) * (1 - Math.exp(-d / 1.5)); };
+      for (let i = 0; i < 72; i++) bins.push({ t: from + i * 6e5, g: 0.110 * (1 + (i > 24 ? 0.07 : 0) + bump(i) + 0.025 * nz()), r: 0.098 * (1 + (i > 24 ? 0.07 : 0) + bump(i) * 0.9 + 0.025 * nz()) });
+      const hh = (ms) => { const d = new Date(ms); return pad(d.getHours()) + ":" + pad(d.getMinutes()); };
+      return { device: dev, at: t, now: !at, from: from + 40 * 6e5, pct: 18, sigma: 14.2, acaso: false, head: `O fundo subiu 18% desde ${hh(from + 40 * 6e5)}`,
+        verdict: `Choveu 12,4 mm nas 4 horas antes, a partir de ${hh(from + 38 * 6e5)}. Esta é a hora em que o radônio costuma subir na sua casa. Os dois aparelhos subiram juntos, então é radiação de verdade.`,
+        gNorm: 0.110, rNorm: 0.098, bins, rain: [[from + 38 * 6e5, from + 47 * 6e5]], marks: [],
+        causes: [
+          { key: "chuva", state: "yes", title: "Chuva", ev: `Choveu 12,4 mm nas 4 horas antes, a partir de ${hh(from + 38 * 6e5)}. Na sua casa, a chuva costuma subir o fundo uns 9%.`, more: "A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.", link: "chuva", linkText: "Abrir a tela Clima" },
+          { key: "radonio", state: "yes", title: "Radônio da noite", ev: "Às 3h o seu fundo costuma ficar 7,5% acima da média do dia.", more: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", link: "padroes", linkText: "Abrir Padrões do fundo" },
+          { key: "ambos", state: "yes", title: "Os dois aparelhos viram", ev: "O RC102 também subiu, 16% no mesmo trecho.", more: "Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só." },
+          { key: "acaso", state: "no", title: "Acaso", ev: "A subida é de 14 σ. O acaso não chega nisso.", more: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora." },
+          { key: "pressao", state: "no", title: "Pressão caindo", ev: "A pressão mudou 1,2 hPa nas 12 horas antes.", more: "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.", link: "chuva", linkText: "Abrir a tela Clima" },
+          { key: "objeto", state: "no", title: "Objeto ou fonte perto", ev: `Nenhuma medição de objeto nem anotação desde ${hh(from + 34 * 6e5)}.`, more: "Um objeto perto do aparelho sobe muito a leitura dele, e quase nada a do outro aparelho. Para medir direito, use o Medir objeto." },
+          { key: "aparelho", state: "no", title: "Coisa do aparelho", ev: "Os dois aparelhos subiram juntos.", more: "Confira se o GMC-800 foi mexido ou ficou perto de alguma coisa nova, e o cabo. Ruído no tubo também faz a contagem pular.", link: "gmc", linkText: "Abrir a tela do GMC-800" },
+        ] };
+    },
     GetBgTrend: async (days) => {
       const now = Date.now(), to = Math.floor(now / 6e4) * 6e4 + 6e4, from = to - days * 864e5;
       const step = days <= 7 ? 36e5 : days <= 30 ? 108e5 : days <= 90 ? 432e5 : 864e5;

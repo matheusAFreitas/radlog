@@ -71,6 +71,9 @@ function agoraNow() {
   box.className = "card ag-say lv-" + lv;
   lvLabel($("agSayTitle"), lv, title, 20);
   $("agSayText").textContent = text;
+  // fundo acima do normal sem alerta: "Por que?" (porque.js)
+  const why = $("agWhy");
+  if (why) why.hidden = !(api.GetWhyRise && !top && g.live && gHome && g.sigma != null && g.sigma >= 2);
   agBgChip();
 }
 
