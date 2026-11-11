@@ -222,7 +222,7 @@
   async function realTick(force) {
     if (!rcLive()) { if (rl.on) { rl.on = false; EN = SIM_EN; DE = SIM_DE; spMark(); spDraw(); } return; }
     if (!rl.on) { rl.on = true; rl.base = null; spMark(); }
-    if ((!sp.run && !force) || rl.busy) return;
+    if ((!sp.run && !force && rl.mode !== "acc") || rl.busy) return;
     // pelo Bluetooth a leitura do espectro é mais lenta: lê a cada 6 s
     const every = state.rc.st.via === "bluetooth" ? 6000 : 2000;
     if (!force && rl.readAt && Date.now() - rl.readAt < every - 200) return;
@@ -1515,7 +1515,8 @@
       : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";
-    $("rcSpecReset").hidden = rl.on && rl.mode === "acc";
+    // o acumulado é o total do aparelho: nada nele se pausa nem se zera
+    $("rcSpecReset").hidden = $("rcSpecPlay").hidden = rl.on && rl.mode === "acc";
   }
   function drawAll() { spDraw(); sgDraw(); hdDraw(); srDraw(); if (act.v) actRender(); }
   function show() {
