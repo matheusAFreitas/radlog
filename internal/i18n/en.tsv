@@ -4244,3 +4244,22 @@ césio	cesium
 cobalto	cobalt
 app {0}	app {0}
 O número grande é o do RC102. "app" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.	The big number is the RC102's. "app" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC.
+Hoje, {0}	Today, {0}
+Ontem, {0}	Yesterday, {0}
+Esta semana, {0}	This week, {0}
+Semana passada, {0}	Last week, {0}
+semana de {0}	week of {0}
+‹ Voltar ao resumo	‹ Back to summary
+Mais números	More numbers
+em casa {0} · fora {1} µSv	at home {0} · away {1} µSv
+Ver os alertas do período	See the period's alerts
+≈ {0}% de um raio-X de tórax	≈ {0}% of a chest X-ray
+menos de 1% de um raio-X de tórax	less than 1% of a chest X-ray
+Fora de casa: {0}, {1}% da dose	Away from home: {0}, {1}% of the dose
+Período anterior	Previous period
+Próximo período	Next period
+Escolher a data	Pick the date
+Compara dois períodos	Compares two periods
+Mostrar todos os alertas	Show all alerts
+µSv/h no período	µSv/h in the period
+fora {0} µSv	away {0} µSv

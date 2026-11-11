@@ -100,19 +100,50 @@ async function renderSumNotes(from, to) {
 
 // ---------- resumo e comparação ----------
 
-// períodos [de, até, rótulo] conforme o que está escolhido
+// período do Resumo (2.64): {tipo: dia | semana | mes, âncora}. A âncora é o
+// começo do período; 0 é o período atual.
+function sumStart(kind, t) {
+  return kind === "semana" ? startWeek(t) : kind === "mes" ? startMonth(t, 0) : startDay(t);
+}
+const sumNext = (kind, t0) => (kind === "semana" ? addDays(t0, 7) : kind === "mes" ? startMonth(t0, 1) : addDays(t0, 1));
+const sumPrev = (kind, t0) => (kind === "semana" ? addDays(t0, -7) : kind === "mes" ? startMonth(t0, -1) : addDays(t0, -1));
+
+function sumStep(dir) {
+  const s = state.sum, cur = sumStart(s.kind, Date.now());
+  const t0 = s.anchor || cur;
+  const t = dir < 0 ? sumPrev(s.kind, t0) : sumNext(s.kind, t0);
+  if (t > cur) return;
+  s.anchor = t >= cur ? 0 : t;
+  refreshSummary();
+}
+
+// [rótulo da tela, rótulo do PDF] do período: "Hoje, qua 11/11", "Esta
+// semana, 09–15/11", "Novembro"
+function sumLabels(kind, t0) {
+  const now = Date.now(), wd = (t) => new Date(t).toLocaleDateString(LOCALE, { weekday: "short" }).replace(".", "");
+  if (kind === "semana") {
+    const end = addDays(t0, 6), cur = t0 === startWeek(now), last = t0 === addDays(startWeek(now), -7);
+    const span = `${pad(new Date(t0).getDate())}${new Date(t0).getMonth() === new Date(end).getMonth() ? "" : "/" + pad(new Date(t0).getMonth() + 1)}–${ddmm(end)}`;
+    return [cur ? `Esta semana, ${span}` : last ? `Semana passada, ${span}` : span, cur ? "esta semana" : last ? "semana passada" : `semana de ${ddmm(t0)}`];
+  }
+  if (kind === "mes") {
+    const d = new Date(t0), m = d.toLocaleDateString(LOCALE, { month: "long" });
+    const txt = m.charAt(0).toUpperCase() + m.slice(1) + (d.getFullYear() === new Date(now).getFullYear() ? "" : " " + d.getFullYear());
+    return [txt, t0 === startMonth(now, 0) ? "este mês" : t0 === startMonth(now, -1) ? "mês passado" : txt];
+  }
+  const d0 = startDay(now), dd = `${wd(t0)} ${ddmm(t0)}`;
+  if (t0 === d0) return [`Hoje, ${dd}`, "hoje"];
+  if (t0 === addDays(d0, -1)) return [`Ontem, ${dd}`, "ontem"];
+  return [dd, dayLabel(t0)];
+}
+
+// períodos [de, até, rótulo do PDF, rótulo da tela] conforme o que está escolhido
 function sumPeriods() {
-  const now = Date.now(), s = state.sum, d0 = startDay(now), w0 = startWeek(now);
+  const now = Date.now(), s = state.sum, d0 = startDay(now);
   if (s.mode === "resumo") {
-    if (s.day) return [[s.day, addDays(s.day, 1), dayLabel(s.day)]];
-    return [{
-      hoje: [d0, now, "hoje"],
-      ontem: [addDays(d0, -1), d0, "ontem"],
-      semana: [w0, now, "esta semana"],
-      "semana-passada": [addDays(w0, -7), w0, "semana passada"],
-      mes: [startMonth(now, 0), now, "este mês"],
-      "mes-passado": [startMonth(now, -1), startMonth(now, 0), "mês passado"],
-    }[s.preset]];
+    const t0 = s.anchor || sumStart(s.kind, now);
+    const [txt, pdf] = sumLabels(s.kind, t0);
+    return [[t0, Math.min(now, sumNext(s.kind, t0)), pdf, txt]];
   }
   if (s.cmp === "7d") return [[now - 7 * DAY_MS, now, "últimos 7 dias"], [now - 14 * DAY_MS, now - 7 * DAY_MS, "7 dias antes"]];
   if (s.cmp === "dias") {
@@ -127,38 +158,44 @@ let sumSeq = 0;
 async function refreshSummary() {
   if (state.view !== "resumo") return;
   const s = state.sum;
-  document.querySelectorAll("#sumModeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.smode === s.mode)));
-  document.querySelectorAll("#sumPresetSeg button").forEach((b) => b.setAttribute("aria-pressed", String(s.mode === "resumo" && !s.day && b.dataset.sp === s.preset)));
+  const res0 = s.mode === "resumo";
+  document.querySelectorAll("#sumKindSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sk === s.kind)));
   document.querySelectorAll("#sumCmpSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sc === s.cmp)));
-  $("sumPresetSeg").hidden = s.mode !== "resumo";
-  $("sumDay").parentElement.hidden = s.mode !== "resumo";
-  $("sumCmpSeg").hidden = s.mode !== "comparar";
-  $("btnReport").hidden = s.mode !== "resumo";
+  $("sumKindSeg").hidden = $("sumNav").hidden = !res0;
+  $("btnSumCmp").hidden = !res0;
+  $("btnSumBack").hidden = res0;
+  $("sumCmpSeg").hidden = res0;
+  $("btnReport").hidden = !res0;
   $("sumDays").hidden = !(s.mode === "comparar" && s.cmp === "dias");
-  $("sumSay").hidden = $("sumTop").hidden = s.mode !== "resumo";
-  $("sumDay").value = s.day ? dateVal(s.day) : "";
+  $("sumSay").hidden = $("sumTop").hidden = !res0;
+  $("sumDetails").hidden = !res0;
   const periods = sumPeriods();
+  if (res0) {
+    $("sumWhen").textContent = periods[0][3];
+    $("sumNext").disabled = !s.anchor;
+    $("sumDay").value = dateVal(periods[0][0]);
+    $("sumDay").max = dateVal(Date.now());
+  }
   if (s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); }
   const my = ++sumSeq;
   let res;
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }
   if (my !== sumSeq) return;
   state.sumRes = { periods, res };
-  if (s.mode === "resumo") { renderSummary(res[0], periods[0]); renderSumFita(periods[0]); }
-  else { $("sumFita").parentElement.hidden = true; renderCompare(res, periods); }
-  renderSumGaps(s.mode === "resumo" ? res[0] : null);
+  if (res0) renderSummary(res[0], periods[0]);
+  else { $("sumPlot").closest(".sum-chart").hidden = false; renderCompare(res, periods); sumOverlayClear(); }
+  renderSumGaps(res0 ? res[0] : null);
   renderSumNotes(periods[0][0], periods[0][1]);
-  renderMaturity();
 }
 
 // maturidade do histórico (2.3): para cada janela, se já existe histórico
 // para ela inteira e quanto foi medido
 const MAT_STATE = { disponivel: "disponível", formacao: "em formação", aguardando: "aguardando dados" };
 async function renderMaturity() {
-  const box = $("sumMature");
-  if (!api.GetMaturity) { box.hidden = true; return; }
+  const box = $("sumMature"), card = $("setMature");
+  if (!api.GetMaturity) { card.hidden = true; return; }
   let m;
-  try { m = await api.GetMaturity(); } catch (e) { box.hidden = true; return; }
+  try { m = await api.GetMaturity(); } catch (e) { card.hidden = true; return; }
   const winTxt = (d) => (d === 1 ? "24 h" : d === 365 ? "1 ano" : `${d} dias`);
   const cell = (w) => {
     if (!w || w.state === "aguardando") return `<td class="mat aguardando">${MAT_STATE.aguardando}</td>`;
@@ -166,14 +203,14 @@ async function renderMaturity() {
     return `<td class="mat ${w.state}"><span>${st}</span><br><span class="muted">${fmt(w.coverage * 100, 0)}% medido · ${fmt(w.minutes, 0)} de ${fmt(w.histMinutes, 0)} min</span></td>`;
   };
   const rc = m.rc && m.rc.length;
-  let html = `<h3>Histórico disponível</h3><p class="small muted">Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas "em formação" ainda não representam a janela toda.</p>`;
+  let html = `<p class="small muted">Para cada janela (até agora): se o histórico já cobre a janela inteira e quanto dela foi medido, contando desde o primeiro dado do aparelho. Médias de janelas "em formação" ainda não representam a janela toda.</p>`;
   html += `<table class="mat-table"><thead><tr><th>janela</th><th>GMC-800</th>${rc ? "<th>RC102</th>" : ""}</tr></thead><tbody>`;
   m.gmc.forEach((w, i) => { html += `<tr><th>${winTxt(w.days)}</th>${cell(w)}${rc ? cell(m.rc[i]) : ""}</tr>`; });
   html += "</tbody></table>";
   const first = [m.gmcFirst ? `GMC desde ${dayLabel(m.gmcFirst)} ${hhmm(m.gmcFirst)}` : "", m.rcFirst ? `RC102 desde ${dayLabel(m.rcFirst)} ${hhmm(m.rcFirst)}` : ""].filter(Boolean).join(" · ");
   if (first) html += `<p class="small muted">${first}</p>`;
   box.innerHTML = html;
-  box.hidden = false;
+  card.hidden = false;
 }
 
 function bgVerdict(r) {
@@ -206,26 +243,6 @@ function sumHead(box, text, cls) {
   h.className = "sum-head " + (cls || "");
   h.textContent = text;
   box.appendChild(h);
-}
-
-// bloco do Radiacode (seu dosímetro): dose, média, máximo e mínimo, e o tempo
-// em casa e fora
-function renderRcSummary(t, rc, r) {
-  const d = (v) => fmt(v, usvDigits(v));
-  const dose = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv`;
-  sumHead(t, "Radiacode 102", "rc");
-  if (rc.devOK) sumTile(t, "Dose do aparelho", dose(rc.devDose), `somada pelo RC102, também longe do PC · pelo app: ${dose(rc.dose)}`, "rc");
-  else sumTile(t, "Dose (app)", dose(rc.dose), `≈ ${d(rc.avg)} µSv/h em média · só os minutos gravados`, "rc");
-  const p = rc.vsBgPct;
-  const vs = !rc.bgUSv ? "fundo em casa ainda não calculado" : Math.abs(p) < 5 ? `igual ao seu normal em casa (${d(rc.bgUSv)})` : `${fmt(Math.abs(p), 0)}% ${p > 0 ? "acima" : "abaixo"} do seu normal em casa (${d(rc.bgUSv)})`;
-  sumTile(t, "Média", `${d(rc.avg)} µSv/h`, vs, rc.bgUSv && p >= 20 ? "warn rc" : "rc");
-  sumTile(t, "Máximo", `${d(rc.max)} µSv/h`, atText(r, rc.maxAt), "rc");
-  sumTile(t, "Mínimo", `${d(rc.min)} µSv/h`, atText(r, rc.minAt), "rc");
-  sumTile(t, "Em casa", dose(rc.homeDose), `${hm(rc.homeMinutes)} medidos`, "rc");
-  sumTile(t, "Fora de casa", rc.awayMinutes ? dose(rc.awayDose) : "—",
-    rc.awayMinutes ? `${hm(rc.awayMinutes)} · média ${d(rc.awayAvg)} · máx ${d(rc.awayMax)} µSv/h` : "nenhum minuto fora de casa", "rc");
-  sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, covText({ ...rc, ongoing: r.ongoing }), "rc");
-  sumTile(t, "Alertas", alertsText(rc), rc.peakAlert ? `pico ao vivo ${d(rc.peakAlert)} µSv/h` : "alarmes 1 e 2 do aparelho", rc.danger || rc.alarm ? "warn rc" : "rc");
 }
 
 // ---------- Resumo repaginado (2.18): frase, três números, casa × pessoal ----------
@@ -274,6 +291,37 @@ function sumKpi(box, label, value, sub, cls) {
   return d;
 }
 
+// raio-X de tórax (20 µSv, o mesmo da régua), sempre o mesmo no Resumo
+// (ACE, 11/11): abaixo de 1, porcentagem; de 1 para cima, quantos
+function doseXray(uSv) {
+  if (!(uSv > 0)) return "";
+  const x = uSv / 20;
+  if (x < 0.01) return "menos de 1% de um raio-X de tórax";
+  if (x < 1) {
+    const p = x * 100, r = p <= 20 ? Math.max(1, Math.round(p)) : Math.round(p / 5) * 5;
+    if (r < 100) return `≈ ${fmt(r, 0)}% de um raio-X de tórax`;
+  }
+  const n = knownNum(x);
+  return `≈ ${knownTxt(n)} ${n === 1 ? "raio-X de tórax" : "raios-X de tórax"}`;
+}
+
+// em casa × fora, embaixo da dose: só se houve minuto fora no período
+function sumAwayBar(k, rc) {
+  if (!rc || !rc.awayMinutes) return;
+  const tot = rc.homeDose + rc.awayDose;
+  if (!(tot > 0)) return;
+  const d = (v) => fmt(v, v < 10 ? 2 : 1);
+  const w = document.createElement("div");
+  w.className = "sum-away";
+  w.innerHTML = '<div class="sum-away-bar" aria-hidden="true"><i class="home"></i><i class="away"></i></div><span class="small muted"></span>';
+  const hp = (rc.homeDose / tot) * 100;
+  w.querySelector(".home").style.width = hp.toFixed(1) + "%";
+  w.querySelector(".away").style.width = (100 - hp).toFixed(1) + "%";
+  w.lastElementChild.textContent = `em casa ${d(rc.homeDose)} · fora ${d(rc.awayDose)} µSv`;
+  w.title = `Fora de casa: ${hm(rc.awayMinutes)}, ${fmt(100 - hp, 0)}% da dose`;
+  k.appendChild(w);
+}
+
 // os três números: quanto (dose), comparado com o quê (fundo) e o pico
 function renderSumBig(r, rc) {
   const box = $("sumBig");
@@ -282,9 +330,10 @@ function renderSumBig(r, rc) {
   const d = (v) => fmt(v, usvDigits(v));
   const k = rc ? sumKpi(box, "Sua dose", sumUSv(rc.devOK ? rc.devDose : rc.dose), rc.devOK ? "RC102 · somada pelo aparelho" : `RC102 · ${fmt(rc.coverage * 100, 0)}% medido`, "rc")
     : sumKpi(box, "Dose da casa", sumUSv(r.dose), `GMC-800 · ${fmt(r.coverage * 100, 0)}% medido`);
-  // em coisas conhecidas (2.41): tempo de fundo da casa e uma referência da régua
-  const kn = doseKnownEl(rc ? (rc.devOK ? rc.devDose : rc.dose) : r.dose, rc && rc.bgUSv > 0 ? rc.bgUSv : null, "sum-known");
+  // em coisas conhecidas: horas do fundo da casa e o raio-X de tórax
+  const kn = doseKnownEl(rc ? (rc.devOK ? rc.devDose : rc.dose) : r.dose, rc && rc.bgUSv > 0 ? rc.bgUSv : null, "sum-known", doseXray);
   if (kn) k.appendChild(kn);
+  sumAwayBar(k, rc);
   if (r.minutes) {
     sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
@@ -296,63 +345,160 @@ function renderSumBig(r, rc) {
   else sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
 }
 
-// casa × pessoal: quanto da dose do Radiacode foi em casa e fora, e quanto o
-// Radiacode marcou em relação ao GMC-800 (que fica parado em casa)
-function renderSumSplit(r, rc) {
-  const box = $("sumSplit");
-  box.hidden = !rc || !(rc.homeMinutes + rc.awayMinutes);
-  if (box.hidden) return;
-  const tot = rc.homeDose + rc.awayDose || 1, mins = rc.homeMinutes + rc.awayMinutes;
-  const hp = (rc.homeDose / tot) * 100, ap = 100 - hp;
-  const st = $("sumStack");
-  st.textContent = "";
-  const seg = (cls, pct, label) => {
-    if (pct <= 0) return;
-    const e = document.createElement("div");
-    e.className = cls;
-    e.style.width = pct.toFixed(1) + "%";
-    if (pct >= 14) e.textContent = label;
-    st.appendChild(e);
-  };
-  seg("home", hp, `em casa ${fmt(rc.homeDose, rc.homeDose < 10 ? 2 : 1)}`);
-  seg("away", rc.awayMinutes ? ap : 0, `fora ${fmt(rc.awayDose, rc.awayDose < 10 ? 2 : 1)}`);
-  const parts = [];
-  parts.push(rc.awayMinutes
-    ? `Fora de casa foi ${fmt((rc.awayMinutes / mins) * 100, 0)}% do tempo e ${fmt(ap, 0)}% da dose (µSv).`
-    : "Nenhum minuto fora de casa no período (µSv).");
-  if (r.minutes && r.avgUSv > 0 && rc.avg > 0) parts.push(`Razão pessoal ÷ casa: ${fmt(rc.avg / r.avgUSv, 2)} (RC102 ÷ GMC-800 em µSv/h).`);
-  $("sumSplitText").textContent = parts.join(" ");
-}
-
+// "Mais números" (2.64): só o que não está em cima. Média, Máximo e Dose
+// saíram (repetiam o Fundo, o Pico e a Sua dose); Alertas vira link.
 function renderSummary(r, per) {
-  $("sumSub").textContent = `${per[2]} · ${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + hhmm(per[1])}`;
-  const rc0 = r.rc && r.rc.minutes ? r.rc : null;
-  renderSumSay(r, rc0);
-  renderSumBig(r, rc0);
-  renderSumSplit(r, rc0);
+  $("sumSub").textContent = `${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + hhmm(per[1])}`;
+  const rc = r.rc && r.rc.minutes ? r.rc : null;
+  renderSumSay(r, rc);
+  renderSumBig(r, rc);
   const t = $("sumTiles");
   t.textContent = "";
   $("sumTable").hidden = true;
-  const rc = r.rc && r.rc.minutes ? r.rc : null;
-  if (rc) renderRcSummary(t, rc, r);
-  if (!r.minutes) {
-    if (rc) { sumHead(t, "GQ GMC-800 (casa)"); t.insertAdjacentHTML("beforeend", '<p class="small muted sum-none">Sem leituras do GMC nesse período.</p>'); drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]); return; }
-    t.innerHTML = '<p class="small muted">Sem leituras nesse período.</p>';
-    drawSumChart([]);
-    return;
+  const d = (v) => fmt(v, usvDigits(v));
+  if (rc) sumTile(t, "Mínimo", `${d(rc.min)} µSv/h`, `RC102 · ${atText(r, rc.minAt)}`, "rc");
+  else if (r.minutes) sumTile(t, "Mínimo", r.minUSv != null ? usvVal(r.minUSv) : `${fmt(r.min, 0)} CPM`, `GMC-800 · ${atText(r, r.minAt)}`);
+  if (rc) sumTile(t, "Medido", `${fmt(rc.coverage * 100, 0)}%`, "RC102 · " + covText({ ...rc, ongoing: r.ongoing }), "rc");
+  else if (r.minutes) {
+    const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
+    sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, "GMC-800 · " + covText(r) + days);
   }
-  if (rc) sumHead(t, "GQ GMC-800 (casa)");
-  sumTile(t, "Média", usvVal(r.avgUSv), bgVerdict(r), r.bgOK && r.vsBgPct >= 20 ? "warn" : "");
-  sumTile(t, "Máximo", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, atText(r, r.maxAt));
-  sumTile(t, "Mínimo", r.minUSv != null ? usvVal(r.minUSv) : `${fmt(r.min, 0)} CPM`, atText(r, r.minAt));
-  sumTile(t, "Dose (app)", `${fmt(r.dose, r.dose < 10 ? 2 : 1)} µSv`, `≈ ${fmt(r.avgUSv, 3)} µSv/h em média · calculada pelo app`);
-  const days = r.spanMinutes > 1440 && r.daysData ? ` · ${r.daysData} ${r.daysData === 1 ? "dia" : "dias"} com dado` : "";
-  sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, covText(r) + days + (r.awayMinutes ? ` · ${hm(r.awayMinutes)} fora de casa` : ""));
-  if (r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
-  sumTile(t, "Alertas", alertsText(r), r.peakAlert ? `pico ao vivo ${r.peakAlertUSv ? usvVal(r.peakAlertUSv) : fmt(r.peakAlert, 0) + " CPM"}` : "", r.danger || r.alarm ? "warn" : "");
+  if (r.minutes && r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `GMC-800 · σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
-  if (r.measurements) sumTile(t, "Medições", String(r.measurements), "de objetos");
-  drawSumChart([{ r, color: COR.accent, label: rc ? "GMC-800" : per[2] }]);
+  const n = (k) => (r[k] || 0) + ((rc && rc[k]) || 0);
+  if (n("danger") + n("alarm") + n("attention")) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "link small-link sum-alerts-link";
+    b.textContent = "Ver os alertas do período";
+    b.addEventListener("click", () => openAlertsRange(per[0], per[1], per[3] || per[2]));
+    t.appendChild(b);
+  }
+  const chart = $("sumPlot").closest(".sum-chart");
+  chart.hidden = !r.minutes && !rc;
+  if (chart.hidden) { drawSumChart([]); sumOverlayClear(); return; }
+  drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]);
+  renderSumOverlay(per);
+}
+
+// abre os Alertas só com os do período (o filtro some ao sair de lá)
+async function openAlertsRange(from, to, label) {
+  const all = await api.GetEvents("alerta");
+  await showView("alertas", true);
+  state.alertRange = { from, to, label };
+  renderAlertHistory(all || []);
+}
+
+// ---------- gráfico do Resumo: faixa de nível, marcas e fora de casa ----------
+//
+// Um gráfico só no lugar da fita + gráfico: a cor do nível vira uma faixa fina
+// embaixo (a mesma lógica da fita, fita.js), as marcas (atenção, alarme,
+// anotação) ficam em cima e o tempo fora de casa pinta o fundo de lilás.
+// Dia: pedaços de 10 min. Semana e mês: um pedaço por dia (o nível mais alto).
+
+const SUM_LV_TXT = { seguro: "seguro", atencao: "atenção", alarme: "alarme", perigo: "perigo" };
+let sumOvSeq = 0;
+
+function sumOverlayClear() {
+  sumOvSeq++;
+  $("sumBand").innerHTML = "";
+  $("sumMarks").innerHTML = "";
+  $("sumPlot").classList.remove("has-band", "has-marks");
+  const aw = $("sumChart").querySelector(".sum-away-bg");
+  if (aw) aw.remove();
+}
+
+async function renderSumOverlay(per) {
+  const my = ++sumOvSeq;
+  if (!api.GetDayStrip) return;
+  const ser = state.sumSeries && state.sumSeries[0];
+  if (!ser) return;
+  const t0 = per[0], t1 = per[1];
+  let s;
+  try { s = await ftFetch(startDay(t0), t1); } catch (e) { return; }
+  if (my !== sumOvSeq) return;
+  // o gráfico vai do primeiro ao último ponto da curva (por índice)
+  const c = ser.r.rc && ser.r.rc.minutes && ser.r.rc.curve.length >= ser.r.curve.length ? ser.r.rc.curve : ser.r.curve;
+  const x0 = c.length ? c[0].t : t0, x1 = c.length > 1 ? c[c.length - 1].t : t1;
+  const span = Math.max(1, x1 - x0);
+  const pct = (t) => Math.max(0, Math.min(100, ((t - x0) / span) * 100));
+  const lvOf = (sl) => {
+    const a = FT_RANK[sl.home] || 0, b = FT_RANK[sl.pers] || 0;
+    return a || b ? (a >= b ? sl.home : sl.pers) : null;
+  };
+  const slots = (s.slots || []).filter((sl) => sl.t >= t0 && sl.t < t1);
+  const multi = t1 - t0 > DAY_MS * 1.1;
+  // faixa de nível
+  const runs = [];
+  if (multi) {
+    const byDay = new Map();
+    for (const sl of slots) {
+      const lv = lvOf(sl);
+      if (!lv) continue;
+      const d0 = startDay(sl.t), cur = byDay.get(d0);
+      if (!cur || FT_RANK[lv] > FT_RANK[cur]) byDay.set(d0, lv);
+    }
+    for (const [d0, lv] of byDay) runs.push([d0, addDays(d0, 1), lv]);
+  } else {
+    for (const sl of slots) {
+      const lv = lvOf(sl);
+      if (!lv) continue;
+      const last = runs[runs.length - 1];
+      if (last && last[2] === lv && last[1] === sl.t) last[1] = sl.t + 6e5;
+      else runs.push([sl.t, sl.t + 6e5, lv]);
+    }
+  }
+  $("sumBand").innerHTML = runs.map(([a, b, lv]) => {
+    const l = pct(a), w = Math.max(0.2, pct(b) - l);
+    return `<i style="left:${l}%;width:${w}%;background:${FT_COL[lv]}${lv === "seguro" ? ";opacity:.55" : ""}"></i>`;
+  }).join("");
+  // fora de casa: fundo lilás no trecho
+  const away = [];
+  for (const sl of slots) {
+    if (!sl.away) continue;
+    const last = away[away.length - 1];
+    if (last && last[1] === sl.t) last[1] = sl.t + 6e5;
+    else away.push([sl.t, sl.t + 6e5]);
+  }
+  const svg = $("sumChart");
+  const old = svg.querySelector(".sum-away-bg");
+  if (old) old.remove();
+  if (away.length) {
+    const g = document.createElementNS("http://www.w3.org/2000/svg", "g");
+    g.setAttribute("class", "sum-away-bg");
+    g.innerHTML = away.map(([a, b]) => `<rect x="${((pct(a) / 100) * W).toFixed(1)}" y="0" width="${Math.max(1, ((pct(b) - pct(a)) / 100) * W).toFixed(1)}" height="${H}" fill="var(--away)" fill-opacity=".14"/>`).join("");
+    svg.insertBefore(g, svg.firstChild);
+  }
+  // marcas em cima (alertas com a forma do nível, anotações com o lápis)
+  const esc = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
+  const marks = (s.marks || []).filter((m) => m.t >= t0 && m.t < t1);
+  $("sumMarks").innerHTML = marks.map((m) => {
+    const ico = m.kind === "nota" ? FT_PEN : LV_PATH[m.level] ? ftShape(m.level, 12) : ftShape("atencao", 12);
+    const tip = (multi ? `${ddmm(m.t)} ` : "") + ftMarkTip(m);
+    return `<span class="sum-mk" style="left:${pct(m.t)}%" title="${esc(tip)}">${ico}</span>`;
+  }).join("");
+  $("sumPlot").classList.toggle("has-band", runs.length > 0);
+  $("sumPlot").classList.toggle("has-marks", marks.length > 0);
+  sumLegendExtra(runs, away.length > 0, marks);
+}
+
+// legenda dinâmica: só o que tem no período
+function sumLegendExtra(runs, away, marks) {
+  const lg = $("sumLegend");
+  lg.querySelectorAll(".sum-lg-x").forEach((e) => e.remove());
+  const add = (html, txt) => {
+    const sp = document.createElement("span");
+    sp.className = "key sum-lg-x";
+    sp.innerHTML = html;
+    sp.append(txt);
+    lg.appendChild(sp);
+  };
+  const lvs = new Set(runs.map((r) => r[2]));
+  for (const m of marks) if (m.kind !== "nota") lvs.add(LV_PATH[m.level] ? m.level : "atencao");
+  if (lvs.has("seguro")) add('<i class="ft-sw" style="background:var(--accent);opacity:.55"></i>', "seguro");
+  for (const lv of ["atencao", "alarme", "perigo"]) if (lvs.has(lv)) add(ftShape(lv, 11), SUM_LV_TXT[lv]);
+  if (away) add('<i class="ft-sw" style="background:var(--away);opacity:.5"></i>', "fora de casa");
+  if (marks.some((m) => m.kind === "nota")) add(FT_PEN, "anotação");
 }
 
 function renderCompare(res, periods) {
@@ -360,7 +506,6 @@ function renderCompare(res, periods) {
   $("sumSub").textContent = `${periods[0][2]} × ${periods[1][2]}`;
   $("sumTiles").textContent = "";
   $("sumBig").textContent = "";
-  $("sumSplit").hidden = true;
   const tb = $("sumTable");
   tb.hidden = false;
   const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? " (igual)" : ` (${sgn(p, 0)}%)`; };

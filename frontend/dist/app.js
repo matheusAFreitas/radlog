@@ -779,6 +779,7 @@ const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResum
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
   if (!PAGES[v]) v = "graficos";
+  if (v !== "alertas") state.alertRange = null; // o filtro de período vale só na ida pelo Resumo
   const changed = state.view !== v;
   state.view = v;
   qkTrack(v);
@@ -1923,6 +1924,7 @@ function showSetSection(id, tab) {
   if (["devcfg", "dcCalCard", "dcTube"].some((k) => setShown($(k)))) openDevCfg();
   if (setShown($("rcCfg"))) openRcCfg();
   if (L.id === "alarm") { renderLadder(); renderDevAlarms(); openDevCfg().then(renderDevAlarms); }
+  if (L.id === "data") renderMaturity();
 }
 
 // abre a seção e a aba onde está um campo (ex.: "txtPlace" → Janela e tela)
@@ -3818,7 +3820,7 @@ function wireRc() {
 
 // ---------- resumo e comparação ----------
 
-state.sum = { mode: "resumo", preset: "hoje", cmp: "hoje-ontem", day: 0, dayA: 0, dayB: 0 };
+state.sum = { mode: "resumo", kind: "dia", anchor: 0, cmp: "hoje-ontem", dayA: 0, dayB: 0 };
 const DAY_MS = 864e5;
 const startDay = (t) => { const d = new Date(t); d.setHours(0, 0, 0, 0); return d.getTime(); };
 const addDays = (t, n) => { const d = new Date(t); d.setDate(d.getDate() + n); return d.getTime(); };
@@ -4156,13 +4158,17 @@ function wireReports() {
 
 function setupSummary() {
   $("btnReport").addEventListener("click", (e) => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label, e.currentTarget); });
-  document.querySelectorAll("#sumModeSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.mode = b.dataset.smode; refreshSummary(); }));
-  // "detalhes" do Resumo lembra se estava aberto
+  $("btnSumCmp").addEventListener("click", () => { state.sum.mode = "comparar"; refreshSummary(); });
+  $("btnSumBack").addEventListener("click", () => { state.sum.mode = "resumo"; refreshSummary(); });
+  // "Mais números" do Resumo lembra se estava aberto
   $("sumDetails").open = localGet("sumDet", "") === "1";
   $("sumDetails").addEventListener("toggle", (e) => localSet("sumDet", e.target.open ? "1" : ""));
-  document.querySelectorAll("#sumPresetSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.preset = b.dataset.sp; state.sum.day = 0; refreshSummary(); }));
+  document.querySelectorAll("#sumKindSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.kind = b.dataset.sk; state.sum.anchor = 0; refreshSummary(); }));
   document.querySelectorAll("#sumCmpSeg button").forEach((b) => b.addEventListener("click", () => { state.sum.cmp = b.dataset.sc; refreshSummary(); }));
-  $("sumDay").addEventListener("change", (e) => { state.sum.day = e.target.value ? parseDateVal(e.target.value) : 0; refreshSummary(); });
+  $("sumPrev").addEventListener("click", () => sumStep(-1));
+  $("sumNext").addEventListener("click", () => sumStep(1));
+  $("sumWhen").addEventListener("click", () => { const i = $("sumDay"); try { i.showPicker(); } catch (e) { i.focus(); i.click(); } });
+  $("sumDay").addEventListener("change", (e) => { if (e.target.value) { state.sum.anchor = sumStart(state.sum.kind, parseDateVal(e.target.value)); refreshSummary(); } });
   $("sumDayA").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayA = parseDateVal(e.target.value); refreshSummary(); } });
   $("sumDayB").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayB = parseDateVal(e.target.value); refreshSummary(); } });
   const plot = $("sumPlot");

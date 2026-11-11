@@ -1,5 +1,22 @@
 # Versões
 
+## 2.64.0
+- Resumo mais enxuto: uma frase, três números e um gráfico na primeira vista.
+- Período por Dia, Semana ou Mês, com as setas ‹ › para andar ("Hoje, qua
+  11/11", "Esta semana, 09–15/11", "Novembro"). Clicar na data abre o
+  calendário. "Comparar" virou um botão ao lado do PDF.
+- Sua dose em coisas conhecidas: as horas do fundo da casa e o raio-X de
+  tórax ("≈ 13% de um raio-X de tórax"). A banana continua na régua.
+- Quando você saiu de casa, uma barrinha embaixo da dose mostra quanto foi em
+  casa e quanto foi fora.
+- Um gráfico só no lugar da fita + gráfico: a cor do nível vira uma faixa fina
+  embaixo, os alertas e as anotações ficam em cima e o tempo fora de casa
+  pinta o fundo de lilás. A legenda mostra só o que tem no período.
+- "Mais números" (fechado, lembra o último estado): Mínimo, Medido, Dispersão,
+  Chuva, um link para os alertas do período, lacunas e anotações. Média,
+  Máximo e Dose saíram, porque repetiam os números de cima.
+- "Histórico disponível" foi para Configurações › Dados. O PDF não muda.
+
 ## 2.63.0
 - "Minha dose hoje" do Radiacode 102: o número grande continua sendo o
   contador do próprio aparelho, e agora a soma que o app fez com os minutos

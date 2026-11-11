@@ -2533,3 +2533,28 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .cx-leg .sw { display: inline-block; width: 16px; }
 .cx-leg .sw.sq { width: 12px; height: 10px; border-radius: 2px; opacity: .25; }
 .cx-unit { font-size: var(--fs-caption); }
+
+/* ---------- Resumo enxuto (2.64) ---------- */
+.sum-top { grid-template-columns: minmax(0, 1fr); }
+.sum-nav { display: inline-flex; align-items: center; gap: var(--space-1); }
+.sum-nav[hidden] { display: none; }
+.sum-nav .btn:disabled { opacity: .35; cursor: default; }
+.sum-when { position: relative; display: inline-flex; }
+#sumWhen { min-width: 15ch; justify-content: center; }
+.sum-when input[type="date"] { position: absolute; inset: 0; opacity: 0; pointer-events: none; padding: 0; border: 0; }
+.sum-chart { padding-top: var(--space-4); }
+.sum-marks { position: absolute; left: 0; right: 0; top: -17px; height: 14px; pointer-events: none; }
+.sum-mk { position: absolute; top: 0; transform: translateX(-50%); line-height: 0; pointer-events: auto; cursor: default; }
+.sum-band { position: absolute; left: 0; right: 0; bottom: -12px; height: 8px; border-radius: var(--radius-xs); overflow: hidden; display: none; background: var(--ft-none); }
+.has-band .sum-band { display: block; }
+.sum-band i { position: absolute; top: 0; bottom: 0; }
+.sum-chart .ad-x { margin-top: var(--space-4); }
+.sum-away { margin-top: var(--space-2); display: flex; flex-direction: column; gap: var(--space-1); }
+.sum-away-bar { display: flex; height: 6px; border-radius: 3px; overflow: hidden; background: var(--surface-2); }
+.sum-away-bar .home { background: var(--accent); }
+.sum-away-bar .away { background: var(--away); }
+.sum-alerts-link { grid-column: 1 / -1; justify-self: start; }
+.sum-details > summary { cursor: pointer; }
+.chip.alert-range { cursor: pointer; color: var(--text); }
+.ad-legend .sum-lg-x i.ft-sw { border: 0; width: 12px; height: 8px; border-radius: var(--radius-xs); display: inline-block; }
+.sum-chart[hidden] { display: none; }

@@ -157,8 +157,8 @@ function doseKnownThing(uSv) {
   return x >= 0.4 && x < 0.75 ? last.half : "";
 }
 
-function doseKnown(uSv, bg) {
-  return [doseHomeTime(uSv, bg), doseKnownThing(uSv)].filter(Boolean);
+function doseKnown(uSv, bg, thing) {
+  return [doseHomeTime(uSv, bg), (thing || doseKnownThing)(uSv)].filter(Boolean);
 }
 
 // fundo da casa em µSv/h (o que a régua usa), para quem não tem o próprio
@@ -170,9 +170,10 @@ function homeBgUSv() {
 }
 
 // as duas linhas, clicáveis: abrem a régua de dose. Cada linha num span
-// (a tradução é por frase inteira).
-function doseKnownEl(uSv, bg, cls) {
-  const lines = doseKnown(uSv, bg == null ? homeBgUSv() : bg);
+// (a tradução é por frase inteira). thing troca a coisa conhecida (o Resumo
+// usa sempre o raio-X de tórax).
+function doseKnownEl(uSv, bg, cls, thing) {
+  const lines = doseKnown(uSv, bg == null ? homeBgUSv() : bg, thing);
   if (!lines.length) return null;
   const b = document.createElement("button");
   b.type = "button";

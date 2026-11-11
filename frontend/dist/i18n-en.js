@@ -3234,7 +3234,17 @@ const I18N_EN = {
 "césio": "cesium",
 "cobalto": "cobalt",
 "O número grande é o do RC102. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.": "The big number is the RC102's. \"app\" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC.",
-"O número grande é o do RadiaCode. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.": "The big number is the RC102's. \"app\" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC."
+"O número grande é o do RadiaCode. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.": "The big number is the RC102's. \"app\" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC.",
+"‹ Voltar ao resumo": "‹ Back to summary",
+"Mais números": "More numbers",
+"Ver os alertas do período": "See the period's alerts",
+"menos de 1% de um raio-X de tórax": "less than 1% of a chest X-ray",
+"Período anterior": "Previous period",
+"Próximo período": "Next period",
+"Escolher a data": "Pick the date",
+"Compara dois períodos": "Compares two periods",
+"Mostrar todos os alertas": "Show all alerts",
+"µSv/h no período": "µSv/h in the period"
 },
 "patterns": [
 [
@@ -9218,6 +9228,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?)% de um raio\\-X de tórax$",
+"≈ ${1}% of a chest X-ray",
+[
+"% de um raio-X de tórax"
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -9480,6 +9498,15 @@ const I18N_EN = {
 [
 "Nada encontrado para \"",
 "\"."
+]
+],
+[
+"Fora de casa: ",
+"^Fora de casa: ((?:(?! · ).)+?), ((?:(?! · ).)+?)% da dose$",
+"Away from home: ${1}, ${2}% of the dose",
+[
+"Fora de casa: ",
+"% da dose"
 ]
 ],
 [
@@ -10644,6 +10671,16 @@ const I18N_EN = {
 ]
 ],
 [
+"em casa ",
+"^em casa ((?:(?! · ).)+?) · fora ((?:(?! · ).)+?) µSv$",
+"at home ${1} · away ${2} µSv",
+[
+"em casa ",
+" · fora ",
+" µSv"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -11798,6 +11835,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Semana passada, ",
+"^Semana passada, ((?:(?! · ).)+?)$",
+"Last week, ${1}",
+[
+"Semana passada, "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -12641,6 +12686,14 @@ const I18N_EN = {
 [
 "só ",
 " h de dado"
+]
+],
+[
+"Esta semana, ",
+"^Esta semana, ((?:(?! · ).)+?)$",
+"This week, ${1}",
+[
+"Esta semana, "
 ]
 ],
 [
@@ -13539,6 +13592,14 @@ const I18N_EN = {
 ]
 ],
 [
+"semana de ",
+"^semana de ((?:(?! · ).)+?)$",
+"week of ${1}",
+[
+"semana de "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -13828,6 +13889,15 @@ const I18N_EN = {
 "${1} with you",
 [
 " com você"
+]
+],
+[
+"fora ",
+"^fora ((?:(?! · ).)+?) µSv$",
+"away ${1} µSv",
+[
+"fora ",
+" µSv"
 ]
 ],
 [
@@ -14290,6 +14360,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Ontem, ",
+"^Ontem, ((?:(?! · ).)+?)$",
+"Yesterday, ${1}",
+[
+"Ontem, "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -14439,6 +14517,14 @@ const I18N_EN = {
 "only on ${1}",
 [
 "só no "
+]
+],
+[
+"Hoje, ",
+"^Hoje, ((?:(?! · ).)+?)$",
+"Today, ${1}",
+[
+"Hoje, "
 ]
 ],
 [
