@@ -1,6 +1,7 @@
 package radiacode
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -316,6 +317,23 @@ func (d *Device) ResetDose() error {
 	}
 	return nil
 }
+
+// ResetSpecAccum zera o espectro acumulado do aparelho (o de longo prazo,
+// que ele não mostra na tela nem zera pelo menu): grava uma string vazia
+// nele, como a biblioteca do Radiacode faz para zerar o espectro atual.
+func (d *Device) ResetSpecAccum() error {
+	r, err := d.execute(cmdWrVirtString, append(u32(vsSpecAccum), u32(0)...))
+	if err != nil {
+		return err
+	}
+	if ret, err := r.u32(); err != nil || ret != 1 {
+		return ErrRefused
+	}
+	return nil
+}
+
+// ErrRefused: o aparelho respondeu, mas não aceitou o comando.
+var ErrRefused = errors.New("o RC102 recusou o comando")
 
 // ---------- texto das mudanças ----------
 

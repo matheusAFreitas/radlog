@@ -197,6 +197,35 @@
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
+  // zerado só no app (o aparelho recusou zerar o acumulado): guarda a foto
+  // daquela hora e mostra só o que veio depois; se o acumulado do aparelho
+  // voltou a zero por outro caminho, a foto não vale mais
+  function accBaseGet() { try { return JSON.parse(localGet("rcAccBase", "null")); } catch (e) { return null; } }
+  function accMinusBase(a) {
+    const b = accBaseGet();
+    if (!b || !b.counts || b.counts.length !== a.counts.length || a.seconds < b.seconds) { if (b) localSet("rcAccBase", "null"); return a; }
+    const c = new Array(a.counts.length);
+    for (let i = 0; i < c.length; i++) { c[i] = a.counts[i] - b.counts[i]; if (c[i] < 0) { localSet("rcAccBase", "null"); return a; } }
+    return Object.assign({}, a, { counts: c, seconds: a.seconds - b.seconds });
+  }
+  async function accZero() {
+    const a = rl.acc;
+    const ok = await askConfirm({ title: "Zerar o espectro acumulado do RC102?", rows: a ? [["Acumulado agora", fmtT(a.seconds) + " · " + Math.round(a.counts.reduce((x, y) => x + y, 0)).toLocaleString(LOCALE) + " contagens"]] : null, note: "Não tem volta: o aparelho recomeça o acumulado do zero. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.", ok: "Zerar o acumulado", danger: true });
+    if (!ok) return;
+    try {
+      const r = await api.ResetRcSpecAccum();
+      if (r === "recusado") {
+        const raw = await api.GetRcSpectrum(true);
+        localSet("rcAccBase", JSON.stringify({ counts: raw.counts, seconds: raw.seconds }));
+        toast("O RC102 não aceitou zerar o acumulado; zerado só no app");
+      } else {
+        localSet("rcAccBase", "null");
+        toast("Espectro acumulado do RC102 zerado");
+      }
+    } catch (e) { toast("Não deu para zerar: " + ((e && e.message) || e), true); return; }
+    rl.acc = null; rl.accAt = 0; rl.accPeaks = []; pk.sel = null; pk.range = null; pk.win = null;
+    spDraw(); realTick(true);
+  }
   function realCounts() {
     if (rl.mode === "acc") return rl.acc ? { c: rl.acc.counts, t: rl.acc.seconds } : null;
     if (!rl.last) return null;
@@ -223,12 +252,15 @@
         if (!rl.base) rl.base = s;
         if (rl.n !== s.counts.length || !rl.cal || rl.cal.join() !== s.a.join()) { rl.n = s.counts.length; rl.cal = s.a; EN = calEN(s.a, rl.n); DE = Float64Array.from(EN, (e, i) => (i + 1 < rl.n ? EN[i + 1] - e : e - EN[i - 1])); }
       }
-      if (!rl.acc || Date.now() - rl.accAt > 10 * 60e3) {
-        const a = await api.GetRcSpectrum(true);
+      // no modo "Acumulado do aparelho" relê a cada 30 s (o tempo anda e um reset
+      // no aparelho aparece logo); no outro modo ele é só o fundo, a cada 10 min
+      if (!rl.acc || Date.now() - rl.accAt > (rl.mode === "acc" ? 30e3 : 10 * 60e3)) {
+        let a = await api.GetRcSpectrum(true);
+        if (a && a.counts && a.counts.length) a = accMinusBase(a);
         if (a && a.counts && a.counts.length) {
           rl.acc = a; rl.accAt = Date.now();
           // isótopos do acumulado: picos acima do contínuo (sem fundo para tirar)
-          if (api.AnalyzeSpectrum && a.seconds > 60) rl.accPeaks = (await api.AnalyzeSpectrum({ a: rl.cal || a.a, obj: Array.from(a.counts, Math.round), objSec: a.seconds, bg: new Array(a.counts.length).fill(0), bgSec: 1 })) || [];
+          rl.accPeaks = api.AnalyzeSpectrum && a.seconds > 60 ? (await api.AnalyzeSpectrum({ a: rl.cal || a.a, obj: Array.from(a.counts, Math.round), objSec: a.seconds, bg: new Array(a.counts.length).fill(0), bgSec: 1 })) || [] : [];
         }
       }
       // picos (no Go, igual à medição de objeto), a cada ~10 s
@@ -377,6 +409,9 @@
     if (pk.sel && !list.some((o) => o.nuclide === pk.sel)) { pk.sel = null; if (!pk.range) pk.win = null; }
     const key = list.map((o) => o.nuclide + ":" + SURE(o.sigma)[1] + ":" + o.lines.map((l) => l.kev).join(",")).join("|") + "#" + pk.sel;
     box.hidden = !list.length;
+    // sem isótopo achado, a dica só fala do arrastar
+    const hint = $("rcDragHint");
+    if (hint) hint.textContent = list.length ? "Clique num isótopo ou arraste no espectro para ver um trecho de perto." : "Arraste no espectro para ver um trecho de perto.";
     if (box.dataset.k === key) return;
     box.dataset.k = key;
     box.textContent = "";
@@ -1382,6 +1417,7 @@
     $("rcSpecSpeed").addEventListener("change", (e) => { sp.speed = +e.target.value; });
     $("rcSpecPlay").addEventListener("click", () => { sp.run = !sp.run; spMark(); if (sp.run && rl.on) realTick(); });
     $("rcSpecReset").addEventListener("click", () => {
+      if (rl.on && rl.mode === "acc") { accZero(); return; }
       if (rl.on) { rl.base = rl.last; rl.peaks = []; rl.peaksAt = Date.now(); spDraw(); realTick(true); return; }
       spReset();
     });
@@ -1389,6 +1425,7 @@
       pk.sel = null; pk.range = null; pk.win = null;
       const b = e.target.closest("button[data-m]"); if (!b) return;
       rl.mode = b.dataset.m; spMark(); spDraw();
+      if (rl.mode === "acc" && rl.on && Date.now() - rl.accAt > 30e3) { rl.accAt = 0; realTick(true); }
     });
     $("rcSpec").addEventListener("mousemove", spHover);
     $("rcSpec").addEventListener("mousedown", (ev) => {
@@ -1492,10 +1529,11 @@
     $("rcSpecSimTag").hidden = rl.on;
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
-      ? "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
+      ? "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro."
       : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";
+    $("rcSpecReset").textContent = rl.on && rl.mode === "acc" ? "Zerar o acumulado…" : "Recomeçar";
   }
   function drawAll() { spDraw(); sgDraw(); hdDraw(); srDraw(); if (act.v) actRender(); }
   function show() {
