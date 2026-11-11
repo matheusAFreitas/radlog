@@ -181,9 +181,11 @@ func tubeBursts(h *TubeHealth, pts []store.Point) {
 	h.BurstState = "ok"
 	if len(h.Bursts) > tubeBurstMax {
 		h.BurstState = "warn"
-		for hr, c := range hours {
-			if c*2 >= len(h.Bursts) {
-				h.BurstHour = hr
+		// a hora com mais rajadas, se tiver metade delas; no empate, a menor
+		best := 0
+		for hr := 0; hr < 24; hr++ {
+			if c := hours[hr]; c > best && c*2 >= len(h.Bursts) {
+				best, h.BurstHour = c, hr
 			}
 		}
 	}

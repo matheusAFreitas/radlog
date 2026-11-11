@@ -1,5 +1,15 @@
 # Versões
 
+## 2.58.1
+- Tela do GQ GMC-800 a 130% e 150% (Configurações › Janela) com a janela
+  estreita: o cartão grande não passa mais da largura. A "Dose hoje" desce
+  para baixo do gráfico da última hora quando não cabe ao lado.
+- "Por que subiu?": na linha da pressão, quando ela não apoia, o texto
+  mostra a variação real nas 12 horas, com o sentido ("subiu", "caiu" ou
+  "ficou estável"). Antes, com a pressão subindo, aparecia "mudou 0,0 hPa".
+- Saúde do tubo: a hora que se repete nas rajadas não troca mais entre um
+  recálculo e outro quando duas horas empatam (fica a menor).
+
 ## 2.58.0
 - **Subida lenta do fundo.** Cartão novo "Fundo nas últimas semanas" no
   topo de Gráficos › Tendência do fundo. Ele compara a mediana das
