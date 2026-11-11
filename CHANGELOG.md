@@ -1,5 +1,10 @@
 # Versões
 
+## 2.61.1
+- Espectro do Radiacode 102: sai o "Zerar o acumulado…". O "Acumulado do
+  aparelho" volta a mostrar o valor real que o RC102 guarda, sem zerar no
+  app (o zerado no RadLog de antes deixa de valer).
+
 ## 2.61.0
 - Espectro do Radiacode 102: o "Recomeçar" agora zera o espectro da tela do
   próprio aparelho (igual a segurar ▼ ou ao Restart do app oficial), e a

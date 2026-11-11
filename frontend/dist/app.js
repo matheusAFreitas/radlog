@@ -4783,7 +4783,6 @@ const demoRc = () => {
       return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0, suggestK: 0.0055, curK: 0.01014 };
     },
     ResetRcSpectrum: async () => { if (!demoRcFake()) throw new Error("RC102 não conectado"); },
-    ResetRcSpecAccum: async () => { if (!demoRcFake()) throw new Error("RC102 não conectado"); return "app"; },
     GetRcSpectrum: async (accum) => {
       if (!demoRcFake()) throw new Error("RC102 não conectado");
       // espectro de mentira: fundo (acumulado, 7 h) e o atual, que vai

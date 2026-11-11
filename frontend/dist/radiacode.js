@@ -197,30 +197,9 @@
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
-  // zerado no RadLog (o RC102 não deixa apagar o acumulado dele): guarda a
-  // foto daquela hora e mostra só o que veio depois; se o acumulado do
-  // aparelho voltou a zero por outro caminho, a foto não vale mais
-  function accBaseGet() { try { return JSON.parse(localGet("rcAccBase", "null")); } catch (e) { return null; } }
-  function accMinusBase(a) {
-    const b = accBaseGet();
-    if (!b || !b.counts || b.counts.length !== a.counts.length || a.seconds < b.seconds) { if (b) localSet("rcAccBase", "null"); return a; }
-    const c = new Array(a.counts.length);
-    for (let i = 0; i < c.length; i++) { c[i] = a.counts[i] - b.counts[i]; if (c[i] < 0) { localSet("rcAccBase", "null"); return a; } }
-    return Object.assign({}, a, { counts: c, seconds: a.seconds - b.seconds });
-  }
-  async function accZero() {
-    const a = rl.acc;
-    const ok = await askConfirm({ title: "Zerar o espectro acumulado do RC102?", rows: a ? [["Acumulado agora", fmtT(a.seconds) + " · " + Math.round(a.counts.reduce((x, y) => x + y, 0)).toLocaleString(LOCALE) + " contagens"]] : null, note: "O RC102 não deixa apagar o acumulado dele, então o RadLog zera do lado dele: daqui pra frente mostra só o que vier depois. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.", ok: "Zerar o acumulado", danger: true });
-    if (!ok) return;
-    try {
-      const raw = await api.GetRcSpectrum(true);
-      await api.ResetRcSpecAccum();
-      localSet("rcAccBase", JSON.stringify({ counts: raw.counts, seconds: raw.seconds }));
-      toast("Zerado no RadLog (o RC102 não deixa apagar o dele)");
-    } catch (e) { toast("Não deu para zerar: " + ((e && e.message) || e), true); return; }
-    rl.acc = null; rl.accAt = 0; rl.accPeaks = []; pk.sel = null; pk.range = null; pk.win = null;
-    spDraw(); realTick(true);
-  }
+  // o acumulado do aparelho é mostrado como ele é (não dá para zerar); a foto
+  // do "zerado no RadLog" da 2.60/2.61.0 deixa de valer
+  try { localSet("rcAccBase", "null"); } catch (e) {}
   // "Recomeçar" zera o espectro da tela do RC102 (as contagens vão para o
   // acumulado do aparelho); a tela do app passa a mostrar o mesmo que a dele
   async function screenReset() {
@@ -259,7 +238,6 @@
       // no aparelho aparece logo); no outro modo ele é só o fundo, a cada 10 min
       if (!rl.acc || Date.now() - rl.accAt > (rl.mode === "acc" ? 30e3 : 10 * 60e3)) {
         let a = await api.GetRcSpectrum(true);
-        if (a && a.counts && a.counts.length) a = accMinusBase(a);
         if (a && a.counts && a.counts.length) {
           rl.acc = a; rl.accAt = Date.now();
           // isótopos do acumulado: picos acima do contínuo (sem fundo para tirar)
@@ -1420,7 +1398,6 @@
     $("rcSpecSpeed").addEventListener("change", (e) => { sp.speed = +e.target.value; });
     $("rcSpecPlay").addEventListener("click", () => { sp.run = !sp.run; spMark(); if (sp.run && rl.on) realTick(); });
     $("rcSpecReset").addEventListener("click", () => {
-      if (rl.on && rl.mode === "acc") { accZero(); return; }
       if (rl.on) { screenReset(); return; }
       spReset();
     });
@@ -1536,7 +1513,7 @@
       : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";
-    $("rcSpecReset").textContent = rl.on && rl.mode === "acc" ? "Zerar o acumulado…" : "Recomeçar";
+    $("rcSpecReset").hidden = rl.on && rl.mode === "acc";
   }
   function drawAll() { spDraw(); sgDraw(); hdDraw(); srDraw(); if (act.v) actRender(); }
   function show() {

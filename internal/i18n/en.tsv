@@ -4220,14 +4220,6 @@ vai e vem normal do {0} (±2σ)	normal back and forth of {0} (±2σ)
 {0}: sem dado neste trecho	{0}: no data in this stretch
 subida sobre o fundo de cada um	rise above each device's background
 Arraste no espectro para ver um trecho de perto.	Drag across the spectrum to see a stretch up close.
-Zerar o acumulado…	Reset the accumulated…
-Zerar o espectro acumulado do RC102?	Reset the RC102's accumulated spectrum?
-Acumulado agora	Accumulated now
-O RC102 não deixa apagar o acumulado dele, então o RadLog zera do lado dele: daqui pra frente mostra só o que vier depois. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.	The RC102 doesn't allow erasing its own accumulated spectrum, so RadLog resets it on its side: from now on it shows only what comes after. It's also the home background (the dashed line), which builds up again over the next hours.
-Zerado no RadLog (o RC102 não deixa apagar o dele)	Reset in RadLog (the RC102 doesn't allow erasing its own)
-Espectro acumulado do RC102 zerado no RadLog	RC102 accumulated spectrum reset in RadLog
-zerado no RadLog	reset in RadLog
-Zerar o acumulado	Reset the accumulated
 Não deu para zerar: {0}	Couldn't reset: {0}
 Espectro acumulado do RC102	RC102 accumulated spectrum
 Recomeçar o espectro da tela do RC102?	Restart the spectrum on the RC102's screen?

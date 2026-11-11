@@ -7,7 +7,7 @@
   "RT_MANIFEST": {
     "#1": {
       "0409": {
-        "identity": { "name": "RadLog", "version": "2.61.0.0" },
+        "identity": { "name": "RadLog", "version": "2.61.1.0" },
         "description": "RadLog",
         "minimum-os": "win10",
         "execution-level": "as invoker",
@@ -34,9 +34,9 @@
           "0409": {
             "CompanyName": "ACE",
             "FileDescription": "RadLog",
-            "FileVersion": "2.61.0",
+            "FileVersion": "2.61.1",
             "ProductName": "RadLog",
-            "ProductVersion": "2.61.0"
+            "ProductVersion": "2.61.1"
           }
         }
       }
