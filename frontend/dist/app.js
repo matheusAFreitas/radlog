@@ -392,7 +392,7 @@ function renderRTile(st, o) {
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
-  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : LV_WORD;
+  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : LV_WORD;
   const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
@@ -3602,8 +3602,8 @@ function renderRcMain(st) {
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
   $("rcLevelHint").textContent = own ? "alarmes do RC102" : "faixas do app em µSv/h";
-  const lvl = usv == null ? "" : !own && st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
-  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
+  const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
+  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
   $("rcLevelName").className = "sr-only level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   renderRcDial(st, { usv, cps, lvl, own, attn, alarm });
