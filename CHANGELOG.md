@@ -1,5 +1,25 @@
 # Versões
 
+## 2.57.0
+- **Saúde do tubo.** Cartão novo na tela do GQ GMC-800 que confere, com o
+  que o app já gravou, se o tubo Geiger está contando direito. São quatro
+  conferências:
+  - conta sem falhar (nenhum trecho de 2 min ou mais em 0 CPM em 30 dias);
+  - varia só pelo acaso (dispersão de cada dia até 1,2, com o histograma
+    dos minutos contra a curva de Poisson);
+  - sem rajadas estranhas (até 3 em 30 dias);
+  - sensibilidade estável (razão de contagens RC102 ÷ GMC-800 com os dois
+    em casa dentro de ±5% em 90 dias).
+- Cada conferência diz "tudo certo", "vale olhar" ou "sem dado", sem usar
+  os níveis de radiação, e explica o que mede. O cartão recalcula uma vez
+  por dia, depois das 06:00, ou no botão "Conferir agora". Nada é escrito
+  no aparelho.
+- Enquanto alguma conferência estiver em "vale olhar", aparece um aviso
+  informativo no topo de Alertas. Ele não é alarme, some sozinho quando
+  volta a "tudo certo" e não vai para o histórico.
+- Em Configurações › GQ GMC-800 › Testar o contador, uma linha resume a
+  saúde do tubo.
+
 ## 2.56.2
 - **README novo.** A página do projeto no GitHub agora descreve o app como
   ele é hoje: os dois aparelhos, as telas, os alarmes, a atualização

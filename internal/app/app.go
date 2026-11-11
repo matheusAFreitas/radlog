@@ -397,6 +397,8 @@ type App struct {
 	rainDays     *rainDaysStore // chuva por dia, para sempre (raindays.go)
 	yearMu       sync.Mutex
 	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
+	tubeMu       sync.Mutex
+	tubeCache    *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
 	rainSt       rainState
 	radar        *radarStore   // chuva pelo radar (radar.go)
 	radarKick    chan struct{} // busca o radar já (lugar novo)

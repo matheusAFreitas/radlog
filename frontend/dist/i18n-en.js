@@ -3075,7 +3075,64 @@ const I18N_EN = {
 "O logo pisca com": "The logo blinks with",
 "O mesmo aparelho do ícone da bandeja": "The same device as the tray icon",
 "Nenhum (logo parado)": "None (logo stays still)",
-"aparelho do logo": "logo device"
+"aparelho do logo": "logo device",
+"Saúde do tubo": "Tube health",
+"Saúde do tubo.": "Tube health.",
+"O tubo está contando direito": "The tube is counting properly",
+"O resto está normal. Abaixo tem o que foi visto e o que conferir.": "The rest is normal. Below is what was found and what to check.",
+"Ainda sem dado para conferir": "No data to check yet",
+"O cartão começa a conferir quando o GMC-800 tiver leituras gravadas.": "The card starts checking once the GMC-800 has saved readings.",
+"A conferência com dado passou.": "The check with data passed.",
+"Uma ficou sem dado.": "One had no data.",
+"Conta sem falhar": "Counts without gaps",
+"Varia só pelo acaso": "Varies only by chance",
+"Sem rajadas estranhas": "No odd bursts",
+"Sensibilidade estável": "Stable sensitivity",
+"conta sem falhar": "counts without gaps",
+"varia só pelo acaso": "varies only by chance",
+"sem rajadas estranhas": "no odd bursts",
+"sensibilidade estável": "stable sensitivity",
+"tudo certo": "all good",
+"vale olhar": "worth a look",
+"Conferir agora": "Check now",
+"Usa só o que o app já gravou. Nada é escrito no aparelho.": "Uses only what the app has already saved. Nothing is written to the device.",
+"Nenhum período sem contagens nos últimos": "No period without counts in the last",
+"Parou de contar": "It stopped counting",
+"1 vez": "once",
+"Confira o cabo USB e se o GMC-800 desligou sozinho (bateria).": "Check the USB cable and whether the GMC-800 turned itself off (battery).",
+"Sem dado: nenhuma leitura do GMC-800 nos últimos 30 dias.": "No data: no GMC-800 readings in the last 30 days.",
+"Sem dado: ainda não há um dia inteiro com o GMC-800 em casa, sem chuva e sem medição.": "No data: there is not yet a full day with the GMC-800 at home, without rain or measurements.",
+": os seus minutos seguem a curva do acaso.": ": your minutes follow the chance curve.",
+"Nenhuma rajada suspeita em": "No suspicious burst in",
+"Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800.": "A repeating time looks like electrical interference: see what turns on at that hour near the GMC-800.",
+"rajadas suspeitas em 30 dias.": "suspicious bursts in 30 days.",
+"Veja se algum aparelho elétrico ficou perto do GMC-800.": "Check whether some electrical device was left near the GMC-800.",
+"Sem dado ainda: os dois aparelhos precisam ficar juntos em casa por pelo menos duas semanas (uma no começo e outra no fim dos 90 dias).": "No data yet: both devices need to be at home together for at least two weeks (one at the start and one at the end of the 90 days).",
+"Sem dado: o RC102 não ficou em casa junto com o GMC-800 nos últimos 30 dias.": "No data: the RC102 was not at home together with the GMC-800 in the last 30 days.",
+"Sem dado: o RadiaCode não ficou em casa junto com o GMC-800 nos últimos 30 dias.": "No data: the RC102 was not at home together with the GMC-800 in the last 30 days.",
+"Razão RC102 ÷ GMC-800:": "RC102 ÷ GMC-800 ratio:",
+"Razão RadiaCode ÷ GMC-800:": "RC102 ÷ GMC-800 ratio:",
+"O tubo conta igual.": "The tube counts the same.",
+"O GMC-800 está contando menos que antes.": "The GMC-800 is counting less than before.",
+"O GMC-800 está contando mais que antes.": "The GMC-800 is counting more than before.",
+"Vale refazer a intercalibração.": "It is worth redoing the intercalibration.",
+"O aviso \"sem contagens\" dispara quando o tubo passa 2 minutos sem nenhum pulso. Com o fundo de casa ele dá umas 20 contagens por minuto, então 2 minutos zerados quase nunca acontecem por acaso.": "The \"no counts\" warning fires when the tube goes 2 minutes without any pulse. With the home background it gives about 20 counts per minute, so 2 minutes at zero almost never happen by chance.",
+"Um tubo saudável nunca fica minutos sem pulso com o fundo de casa. Se parou e voltou sozinho, costuma ser cabo, bateria ou o aparelho travado, mais que o tubo.": "A healthy tube never goes minutes without a pulse at the home background. If it stopped and came back by itself, it is usually the cable, the battery or the device freezing, more than the tube.",
+"Se o tubo só conta radiação, o número de pulsos em cada minuto segue uma curva conhecida, a de Poisson: a largura dela é a raiz da média (√20 ≈ 4,5). A dispersão é a largura real dividida por essa. Perto de 1, é só o acaso. Bem acima de 1, tem alguma coisa a mais mexendo na contagem.": "If the tube only counts radiation, the number of pulses in each minute follows a known curve, the Poisson one: its width is the square root of the mean (√20 ≈ 4.5). The dispersion is the real width divided by that. Near 1, it is just chance. Well above 1, something else is moving the count.",
+"Rajada é um segundo com muito mais pulso do que a média permitiria, seguido de volta ao normal. Radiação de verdade não faz isso. Motor, fonte de computador e carregador perto do tubo fazem.": "A burst is one second with far more pulses than the mean would allow, followed by a return to normal. Real radiation does not do that. Motors, computer power supplies and chargers near the tube do.",
+"Em casa, os dois aparelhos veem a mesma radiação. Se o RC102 conta umas 28 vezes mais que o GMC-800 hoje, deveria continuar assim. Se a razão muda e o RC102 está firme, foi o GMC-800 que mudou.": "At home, both devices see the same radiation. If the RC102 counts about 28 times more than the GMC-800 today, it should stay that way. If the ratio changes and the RC102 is steady, the GMC-800 is what changed.",
+"Em casa, os dois aparelhos veem a mesma radiação. Se o RadiaCode conta umas 28 vezes mais que o GMC-800 hoje, deveria continuar assim. Se a razão muda e o RadiaCode está firme, foi o GMC-800 que mudou.": "At home, both devices see the same radiation. If the RC102 counts about 28 times more than the GMC-800 today, it should stay that way. If the ratio changes and the RC102 is steady, the GMC-800 is what changed.",
+"contagens em 1 minuto": "counts in 1 minute",
+"seus minutos (30 dias)": "your minutes (30 days)",
+"se fosse só o acaso (Poisson)": "if it were only chance (Poisson)",
+"faixa de ±5%": "±5% band",
+"Histograma das contagens por minuto contra a curva do acaso": "Histogram of counts per minute against the chance curve",
+"Razão de contagens RC102 por GMC-800 em 90 dias": "RC102 to GMC-800 count ratio over 90 days",
+"Razão de contagens RadiaCode por GMC-800 em 90 dias": "RC102 to GMC-800 count ratio over 90 days",
+"Ver no GQ GMC-800": "See on the GQ GMC-800",
+"ver o cartão": "see the card",
+"Vale olhar:": "Worth a look:",
+"Não é alarme: é sobre o aparelho, não sobre a radiação.": "Not an alarm: it is about the device, not the radiation."
 },
 "patterns": [
 [
@@ -3191,6 +3248,16 @@ const I18N_EN = {
 "A noite (18h–6h) fica ",
 "% acima do dia (",
 " dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite."
+]
+],
+[
+", acima de 1,2 em ",
+"^, acima de 1,2 em ((?:(?! · ).)+?) dos últimos ((?:(?! · ).)+?) dias: a contagem varia mais do que o acaso explica, e não foi chuva nem objeto\\. Pode ser ruído no tubo ou interferência elétrica\\.$",
+", above 1.2 on ${1} of the last ${2} days: the count varies more than chance explains, and it was not rain or an object. It may be tube noise or electrical interference.",
+[
+", acima de 1,2 em ",
+" dos últimos ",
+" dias: a contagem varia mais do que o acaso explica, e não foi chuva nem objeto. Pode ser ruído no tubo ou interferência elétrica."
 ]
 ],
 [
@@ -4375,6 +4442,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Vale olhar: ",
+"^Vale olhar: ((?:(?! · ).)+?)\\. Não é alarme: é sobre o aparelho, não sobre a radiação\\.$",
+"Worth a look: ${1}. Not an alarm: it is about the device, not the radiation.",
+[
+"Vale olhar: ",
+". Não é alarme: é sobre o aparelho, não sobre a radiação."
+]
+],
+[
 "· dose acumulada só nesse trecho, começando do zero · um ponto a cada ",
 "^· dose acumulada só nesse trecho, começando do zero · um ponto a cada ((?:(?! · ).)+?)$",
 "· accumulated dose only in this span, starting from zero · one point every ${1}",
@@ -5429,6 +5505,15 @@ const I18N_EN = {
 ]
 ],
 [
+"rajadas suspeitas em 30 dias, a maioria perto das ",
+"^rajadas suspeitas em 30 dias, a maioria perto das ((?:(?! · ).)+?)h\\.$",
+"suspicious bursts in 30 days, most of them around ${1}:00.",
+[
+"rajadas suspeitas em 30 dias, a maioria perto das ",
+"h."
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -6227,6 +6312,15 @@ const I18N_EN = {
 ]
 ],
 [
+"rajadas suspeitas em 30 dias (",
+"^rajadas suspeitas em 30 dias \\(((?:(?! · ).)+?)\\)\\. Normal\\.$",
+"suspicious bursts in 30 days (${1}). Normal.",
+[
+"rajadas suspeitas em 30 dias (",
+"). Normal."
+]
+],
+[
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
 "Measurement of ${1}: ${2} ± ${3} CPM above background (${4}σ) — ${5}",
@@ -6411,6 +6505,15 @@ const I18N_EN = {
 [
 "Só o ",
 " subiu. Pode ser coisa do aparelho."
+]
+],
+[
+"rajada suspeita em 30 dias (",
+"^rajada suspeita em 30 dias \\(((?:(?! · ).)+?)\\)\\. Normal\\.$",
+"suspicious burst in 30 days (${1}). Normal.",
+[
+"rajada suspeita em 30 dias (",
+"). Normal."
 ]
 ],
 [
@@ -7108,6 +7211,15 @@ const I18N_EN = {
 ]
 ],
 [
+"As ",
+"^As ((?:(?! · ).)+?) conferências com dado passaram\\.$",
+"The ${1} checks with data passed.",
+[
+"As ",
+" conferências com dado passaram."
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -7708,6 +7820,15 @@ const I18N_EN = {
 [
 "Sem dados do ",
 " nas 12 horas antes"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) contagens: ((?:(?! · ).)+?) minutos \\(acaso: ((?:(?! · ).)+?)\\)$",
+"${1} counts: ${2} minutes (chance: ${3})",
+[
+" contagens: ",
+" minutos (acaso: "
 ]
 ],
 [
@@ -10436,6 +10557,22 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ficaram sem dado\\.$",
+"${1} had no data.",
+[
+" ficaram sem dado."
+]
+],
+[
+"conferido ontem às ",
+"^conferido ontem às ((?:(?! · ).)+?)$",
+"checked yesterday at ${1}",
+[
+"conferido ontem às "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -10727,6 +10864,14 @@ const I18N_EN = {
 ]
 ],
 [
+"conferido hoje às ",
+"^conferido hoje às ((?:(?! · ).)+?)$",
+"checked today at ${1}",
+[
+"conferido hoje às "
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -10983,6 +11128,23 @@ const I18N_EN = {
 "the memory brought ${1}",
 [
 "a memória trouxe "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) dias com leitura$",
+"${1} days with readings",
+[
+" dias com leitura"
+]
+],
+[
+"em 90 dias (",
+"^em 90 dias \\(((?:(?! · ).)+?)\\)\\.$",
+"in 90 days (${1}).",
+[
+"em 90 dias (",
+")."
 ]
 ],
 [
@@ -11565,6 +11727,22 @@ const I18N_EN = {
 [
 "pico ",
 " µSv/h às "
+]
+],
+[
+"Saúde do tubo: ",
+"^Saúde do tubo: ((?:(?! · ).)+?)$",
+"Tube health: ${1}",
+[
+"Saúde do tubo: "
+]
+],
+[
+"A última foi ",
+"^A última foi ((?:(?! · ).)+?)\\.$",
+"The last one was ${1}.",
+[
+"A última foi "
 ]
 ],
 [
@@ -12392,6 +12570,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Vale olhar: ",
+"^Vale olhar: ((?:(?! · ).)+?)$",
+"Worth a look: ${1}",
+[
+"Vale olhar: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -12620,6 +12806,14 @@ const I18N_EN = {
 [
 "pico ",
 " µSv/h"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) dias atrás$",
+"${1} days ago",
+[
+" dias atrás"
 ]
 ],
 [
@@ -12913,6 +13107,14 @@ const I18N_EN = {
 "Now, on the ${1}",
 [
 "Agora, no "
+]
+],
+[
+"conferido ",
+"^conferido ((?:(?! · ).)+?)$",
+"checked ${1}",
+[
+"conferido "
 ]
 ],
 [
@@ -13792,6 +13994,14 @@ const I18N_EN = {
 "home: ${1}",
 [
 "casa: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) vezes$",
+"${1} times",
+[
+" vezes"
 ]
 ],
 [
