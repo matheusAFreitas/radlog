@@ -1,5 +1,17 @@
 # Versões
 
+## 2.45.0
+- **Barra compacta.** Os quadros grandes dos aparelhos ficam só no Agora.
+  Nas outras telas, uma faixa fina fica presa no topo desde o começo, com a
+  leitura dos dois aparelhos, o nível e a última hora em miniatura. Clicar
+  num aparelho abre a página dele.
+- A faixa mostra sempre os alertas: "Sem alertas" quando está tudo calmo,
+  ou o nível, o aparelho e há quanto tempo. Clicar leva a Alertas.
+- Quando a memória do GMC-800 está perto de encher ou o relógio dele está
+  fora, aparece um aviso na faixa que leva à página do contador.
+- Se um aparelho não está no lugar de sempre, a faixa mostra onde ele está.
+- Em janelas estreitas a faixa encurta os nomes (GMC, RC) e os avisos.
+
 ## 2.44.1
 - **Nada do lugar no backup.** Na 2.44.0, a coordenada da chuva virava uma
   marca no backup. Só que as cidades possíveis são poucas, então dava para

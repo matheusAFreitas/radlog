@@ -413,11 +413,12 @@ function renderATile() {
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
   const lv = top ? { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
   tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
+  // chip de alertas da faixa (2.45): sempre visível; sem alerta, "Sem alertas"
   const ma = $("miniAlert");
-  ma.hidden = !top;
-  ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
-  ma.querySelector("i").innerHTML = lvIcon(lv, 12);
-  $("miniAlertText").textContent = top ? (list.length > 1 && srcs.size > 1 ? `${srcs.size} alertas ativos` : `${lvlName(top)} no ${dev(top)}`) : "";
+  ma.className = "mini-alert" + (lv ? " lv-" + lv : " none");
+  ma.querySelector("i").innerHTML = top ? lvIcon(lv, 12) : "";
+  miniSpans($("miniAlertText"), top ? (list.length > 1 && srcs.size > 1 ? [`${srcs.size} alertas ativos`] : [`${lvlName(top)} no ${dev(top)}`, (LANG === "en" ? `${fmtDur(Date.now() - top.time)} ago` : `há ${fmtDur(Date.now() - top.time)}`)]) : ["Sem alertas"]);
+  $("miniAlertN").textContent = String(top ? srcs.size : 0);
   $("mini").classList.toggle("alerting", !!top);
   ["atencao", "alarme", "perigo"].forEach((l) => $("mini").classList.toggle("lv-" + l, lv === l));
   agoraNow();
@@ -452,20 +453,82 @@ function renderATile() {
   // aparece quando os valores dos quadros já saíram por cima (mais da
   // metade do painel escondida), não só quando ele some inteiro: páginas
   // curtas rolam pouco e o painel ficava cortado sem a faixa
-  let on = false;
-  const set = (gone) => {
-    if (gone === on) return;
+  // 2.45: fora do Agora os quadros grandes somem e a faixa fica fixa no topo
+  // desde o começo; o observador só vale no Agora
+  let on = false, gone = false;
+  const set = (g) => {
+    gone = g;
+    if (state.view !== "agora" || g === on) return;
+    on = g;
+    mini.hidden = !g;
+    requestAnimationFrame(() => mini.classList.toggle("in", g));
+  };
+  window.miniApply = () => {
+    const ag = state.view === "agora";
+    document.body.dataset.view = state.view;
+    mini.classList.toggle("pinned", !ag);
+    $("miniTop").hidden = !ag;
+    for (const [id, pg] of [["miniG", "gmc"], ["miniR", "radiacode"]]) {
+      const here = state.view === pg;
+      $(id).classList.toggle("here", here);
+      $(id).disabled = here;
+      $(id).title = ag ? "Voltar aos quadros" : here ? "" : "Abrir a página do aparelho";
+    }
+    if (!ag) { on = true; mini.hidden = false; mini.classList.add("in"); return; }
     on = gone;
     mini.hidden = !gone;
-    requestAnimationFrame(() => mini.classList.toggle("in", gone));
+    mini.classList.toggle("in", gone);
   };
   new IntersectionObserver(([e]) => {
     const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--barsH")) || 0;
     set(e.boundingClientRect.top < top && e.intersectionRatio < 0.55);
   }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 1] }).observe(inst);
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
-  ["miniG", "miniR", "miniTop"].forEach((id) => $(id).addEventListener("click", toTop));
+  $("miniTop").addEventListener("click", toTop);
+  $("miniG").addEventListener("click", () => (state.view === "agora" ? toTop() : showView("gmc")));
+  $("miniR").addEventListener("click", () => (state.view === "agora" ? toTop() : showView("radiacode")));
 })();
+
+// chip de manutenção da faixa: o mesmo aviso do rodapé do quadro do GMC-800
+// (memória perto de encher, relógio fora); leva à página do contador
+function renderMiniMaint() {
+  const gs = $("gTileSync"), clk = $("clockChip"), parts = [];
+  let short = "";
+  if (gs && !gs.hidden && gs.dataset.mem === "1") {
+    parts.push(gs.textContent);
+    const m = gs.textContent.match(/\d+%/);
+    short = m ? m[0] : "!";
+  }
+  if (clk && !clk.hidden && clk.classList.contains("off")) {
+    parts.push($("clockText").textContent);
+    if (!short) short = "!";
+  }
+  const b = $("miniMaint");
+  b.hidden = !parts.length;
+  miniSpans($("miniMaintText"), parts);
+  $("miniMaintShort").textContent = short;
+  b.title = parts.join(" · ");
+}
+
+// cada parte num span, para a tradução pegar uma frase por vez
+function miniSpans(el, parts) {
+  el.textContent = "";
+  parts.forEach((x, i) => {
+    if (i) el.append(" · ");
+    el.append(Object.assign(document.createElement("span"), { textContent: x }));
+  });
+}
+
+// selo de lugar na faixa: só quando o aparelho está fora do lugar de sempre
+function renderMiniPlace() {
+  const w = state.where || {};
+  const g = w.gmc || "casa", r = w.radiacode || "comigo";
+  const word = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" };
+  $("miniGPlace").hidden = g === "casa";
+  $("miniGPlace").textContent = word[g] || "";
+  $("miniRPlace").hidden = r === "comigo";
+  $("miniRPlace").textContent = word[r] || "";
+}
 
 // a última hora de cada aparelho, desenhada pequena no quadro
 let sparkSeq = 0;
@@ -477,12 +540,15 @@ async function refreshSpark() {
   if (my !== sparkSeq || !c) return;
   drawSpark("gTileSpark", c.values);
   drawSpark("rTileSpark", c.rc);
+  drawSpark("miniGSpark", c.values);
+  drawSpark("miniRSpark", c.rc);
   drawSpark("gHeroSpark", c.values);
   drawSpark("rHeroSpark", c.rc);
 }
 function drawSpark(id, vals) {
   const pl = $(id).querySelector("polyline");
   const pts = (vals || []).map((v, i) => [i, v]).filter((p) => p[1] != null && isFinite(p[1]));
+  $(id).classList.toggle("empty", pts.length < 2);
   if (pts.length < 2) { pl.setAttribute("points", ""); return; }
   const n = Math.max(1, vals.length - 1);
   // média de 3 pontos: a variação natural da contagem não vira serra, um
@@ -524,12 +590,14 @@ function renderStatus() {
   $("iPort").textContent = connected ? d.port : "—";
   renderSetNavStatus();
   $("clockChip").hidden = !connected;
+  renderMiniMaint();
   if (connected) {
     const drift = d.clockDrift || 0;
     const clock = Math.abs(drift) <= 2 ? "certo" : `${fmt(Math.abs(drift), 0)} s ${drift > 0 ? "adiantado" : "atrasado"}`;
     $("iClock").textContent = clock;
     $("clockText").textContent = "relógio " + clock;
     $("clockChip").classList.toggle("off", Math.abs(drift) > 2);
+    renderMiniMaint();
     const cal = d.calibration || {};
     $("iCal").textContent = `${cal.source || "padrão"} · ${fmt(d.usvPerCPM, 4)} µSv/h por CPM`;
   } else {
@@ -773,6 +841,7 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
+document.body.dataset.view = "agora";
 const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alara: "pageAlara", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
@@ -781,6 +850,7 @@ async function showView(v, skipRender) {
   const changed = state.view !== v;
   state.view = v;
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
+  if (window.miniApply) window.miniApply();
   document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
     if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
@@ -3744,7 +3814,9 @@ async function refreshCounterSync(cs) {
   gs.hidden = !show;
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
+  gs.dataset.mem = warnMem ? "1" : "";
   gs.title = cs.text;
+  renderMiniMaint();
   card.classList.toggle("cheia", cs.memLevel === "cheia");
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;

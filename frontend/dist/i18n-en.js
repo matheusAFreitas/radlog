@@ -2863,7 +2863,9 @@ const I18N_EN = {
 "RadiaCode com você": "RC102 with you",
 "pela leitura de casa (GMC-800)": "from the home reading (GMC-800)",
 "RC102 com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
-"RadiaCode com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)"
+"RadiaCode com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
+"Sem alertas": "No alerts",
+"Abrir a página do aparelho": "Open the device page"
 },
 "patterns": [
 [
