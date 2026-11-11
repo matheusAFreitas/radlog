@@ -4169,8 +4169,10 @@ function setupSummary() {
   $("sumNext").addEventListener("click", () => sumStep(1));
   $("sumWhen").addEventListener("click", () => { const i = $("sumDay"); try { i.showPicker(); } catch (e) { i.focus(); i.click(); } });
   $("sumDay").addEventListener("change", (e) => { if (e.target.value) { state.sum.anchor = sumStart(state.sum.kind, parseDateVal(e.target.value)); refreshSummary(); } });
-  $("sumDayA").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayA = parseDateVal(e.target.value); refreshSummary(); } });
-  $("sumDayB").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayB = parseDateVal(e.target.value); refreshSummary(); } });
+  // dia no futuro não tem o que comparar: volta para hoje
+  const cmpDay = (v) => Math.min(parseDateVal(v), startDay(Date.now()));
+  $("sumDayA").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayA = cmpDay(e.target.value); refreshSummary(); } });
+  $("sumDayB").addEventListener("change", (e) => { if (e.target.value) { state.sum.dayB = cmpDay(e.target.value); refreshSummary(); } });
   const plot = $("sumPlot");
   plot.addEventListener("mousemove", (ev) => {
     const ser = state.sumSeries;

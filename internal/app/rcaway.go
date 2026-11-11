@@ -30,10 +30,10 @@ import (
 const (
 	rcAwayFile    = "fora-perguntas.json"
 	rcAwayWait    = 90 * time.Second    // conectado há isso: a memória já chegou
-	rcAwayMaxGap  = 14 * 24 * time.Hour // mais que isso não é "saí de casa"
+	rcAwayMaxGap  = 40 * 24 * time.Hour // ≈ a memória do aparelho (~1000 h); viagem longa também pergunta (ACE, 11/11)
 	rcAwayKeep    = 30 * 24 * time.Hour // pergunta mais velha some sozinha
 	rcAwayMaxList = 20
-	rcAwayLook    = 35 * 24 * time.Hour // até onde procura o último minuto gravado
+	rcAwayLook    = 45 * 24 * time.Hour // até onde procura o último minuto gravado
 )
 
 // RcAwayAsk é uma pergunta pendente: o Radiacode ficou sem conexão de From a To.

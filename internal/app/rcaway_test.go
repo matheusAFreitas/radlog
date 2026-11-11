@@ -149,8 +149,11 @@ func TestRcAwayHint(t *testing.T) {
 		t.Error("sem último minuto não pergunta")
 	}
 	now := time.Now()
-	if rcAwayGap(now.Add(-15*24*time.Hour), now, time.Minute) {
-		t.Error("sumiço de 15 dias não é passeio")
+	if !rcAwayGap(now.Add(-21*24*time.Hour), now, time.Minute) {
+		t.Error("viagem de 3 semanas deveria perguntar")
+	}
+	if rcAwayGap(now.Add(-41*24*time.Hour), now, time.Minute) {
+		t.Error("mais que a memória do aparelho (≈ 40 dias) não pergunta")
 	}
 	if !rcAwayGap(now.Add(-20*time.Minute), now, 15*time.Minute) {
 		t.Error("20 min com mínimo de 15 deveria perguntar")

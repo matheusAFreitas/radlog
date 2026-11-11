@@ -533,7 +533,7 @@
   // ---------- lupa no espectrograma (2.52) ----------
   // um quadrado de N×N pixels em volta do cursor, ampliado, com as contagens
   // de cada pixel; embaixo, o tempo e a faixa de energia do pixel do meio
-  const lp = { n: (() => { try { const v = localStorage.getItem("rcLoupe"); return v === "0" || v === "4" ? +v : 5; } catch (e) { return 5; } })() };
+  const lp = { n: (() => { try { const v = localStorage.getItem("rcLoupe"); return v === "0" ? 0 : 5; /* a 4×4 saiu na 2.64.1: vira 5×5 */ } catch (e) { return 5; } })() };
   function loupeHtml(cell, rows, cols, y, x, lm) {
     const N = lp.n, h0 = Math.floor((N - 1) / 2);
     let html = `<div class="rc-loupe" style="grid-template-columns:repeat(${N},1fr)">`;

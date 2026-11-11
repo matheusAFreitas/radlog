@@ -176,7 +176,7 @@ async function refreshSummary() {
     $("sumDay").value = dateVal(periods[0][0]);
     $("sumDay").max = dateVal(Date.now());
   }
-  if (s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); }
+  if (s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); $("sumDayA").max = $("sumDayB").max = dateVal(Date.now()); }
   const my = ++sumSeq;
   let res;
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }
@@ -387,6 +387,7 @@ async function openAlertsRange(from, to, label) {
   await showView("alertas", true);
   state.alertRange = { from, to, label };
   renderAlertHistory(all || []);
+  $("alertRangeChip").scrollIntoView({ block: "center" });
 }
 
 // ---------- gráfico do Resumo: faixa de nível, marcas e fora de casa ----------
@@ -503,18 +504,23 @@ function sumLegendExtra(runs, away, marks) {
 
 function renderCompare(res, periods) {
   const [a, b] = res;
-  $("sumSub").textContent = `${periods[0][2]} × ${periods[1][2]}`;
+  const sub = $("sumSub");
+  sub.textContent = "";
+  const sp = (t) => { const e = document.createElement("span"); e.textContent = t; return e; };
+  sub.append(sp(periods[0][2]), " × ", sp(periods[1][2]));
   $("sumTiles").textContent = "";
   $("sumBig").textContent = "";
   const tb = $("sumTable");
   tb.hidden = false;
+  // tempos medidos muito diferentes: a dose não dá para comparar em %
+  const fair = Math.abs(a.minutes - b.minutes) <= 0.1 * Math.max(a.minutes, b.minutes);
   const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? " (igual)" : ` (${sgn(p, 0)}%)`; };
-  const diff = (x, y, d, unit) => (x == null || y == null ? "—" : Math.abs(x - y) < Math.pow(10, -d) / 2 ? "igual" : `${sgn(x - y, d)}${unit}` + (y ? pctTxt(x, y) : ""));
+  const diff = (x, y, d, unit, timed) => (x == null || y == null ? "—" : Math.abs(x - y) < Math.pow(10, -d) / 2 ? "igual" : `${sgn(x - y, d)}${unit}` + (y && (!timed || fair) ? pctTxt(x, y) : ""));
   const rows = [
     ["Média", a.avgUSv, b.avgUSv, 3, " µSv/h"],
     ["Máximo", a.maxUSv, b.maxUSv, 3, " µSv/h"],
     ["Mínimo", a.minUSv, b.minUSv, 3, " µSv/h"],
-    ["Dose", a.dose, b.dose, 2, " µSv"],
+    ["Dose", a.dose, b.dose, 2, " µSv", true],
   ];
   let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>A − B</th></tr></thead><tbody>`;
   tb.innerHTML = html + "</tbody>";
@@ -522,12 +528,12 @@ function renderCompare(res, periods) {
   head[1].append(" " + periods[0][2]); head[2].append(" " + periods[1][2]);
   const body = tb.querySelector("tbody");
   const row = (cells) => { const tr = document.createElement("tr"); cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); td.textContent = c; tr.appendChild(td); }); body.appendChild(tr); };
-  for (const [n, x, y, d, u] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u)]);
+  for (const [n, x, y, d, u, timed] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u, timed)]);
   if ((a.rc && a.rc.minutes) || (b.rc && b.rc.minutes)) {
     const ra = a.rc || {}, rb = b.rc || {};
     const v = (o, k, dd, u) => (o.minutes ? fmt(o[k], dd) + u : "—");
     const dd = (o, k, d2, u) => (o.minutes && o[k] != null ? o[k] : null);
-    row(["RC102: dose", v(ra, "dose", 2, " µSv"), v(rb, "dose", 2, " µSv"), diff(dd(ra, "dose"), dd(rb, "dose"), 2, " µSv")]);
+    row(["RC102: dose", v(ra, "dose", 2, " µSv"), v(rb, "dose", 2, " µSv"), diff(dd(ra, "dose"), dd(rb, "dose"), 2, " µSv", Math.abs((ra.minutes || 0) - (rb.minutes || 0)) <= 0.1 * Math.max(ra.minutes || 0, rb.minutes || 0))]);
     row(["RC102: média", v(ra, "avg", 3, " µSv/h"), v(rb, "avg", 3, " µSv/h"), diff(dd(ra, "avg"), dd(rb, "avg"), 3, " µSv/h")]);
     row(["RC102: fora de casa", ra.minutes ? `${fmt(ra.awayDose, 2)} µSv em ${hm(ra.awayMinutes)}` : "—", rb.minutes ? `${fmt(rb.awayDose, 2)} µSv em ${hm(rb.awayMinutes)}` : "—", ""]);
   }
@@ -543,7 +549,8 @@ function drawSumChart(series) {
   if (!series.length) { svg.innerHTML = ""; $("sumLegend").textContent = ""; return; }
   const rc0 = series.length === 1 && series[0].r.rc && series[0].r.rc.minutes ? series[0].r.rc : null;
   if (rc0) return drawSumChartUSv(series[0].r, rc0);
-  const n = Math.max(...series.map((s) => s.r.curve.length));
+  const n = Math.max(...series.map((s) => (s.r.curve || []).length));
+  if (!n || !(series[0].r.curve || []).length) { svg.innerHTML = ""; $("sumLegend").textContent = ""; [...$("sumX").children].forEach((e) => (e.textContent = "")); return; }
   // GMC em µSv/h (2.29), cada ponto pela calibração do seu minuto
   const k = calK();
   const pu = (p) => (p.usv != null ? p.usv : p.cpm != null ? p.cpm * k : null);
@@ -591,6 +598,7 @@ function drawSumChartUSv(r, rc) {
   out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="${COR.rc}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   svg.innerHTML = out;
   const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;
+  if (!c0.length) return;
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
