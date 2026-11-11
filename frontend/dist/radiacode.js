@@ -197,9 +197,9 @@
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
-  // zerado só no app (o aparelho recusou zerar o acumulado): guarda a foto
-  // daquela hora e mostra só o que veio depois; se o acumulado do aparelho
-  // voltou a zero por outro caminho, a foto não vale mais
+  // zerado no RadLog (o RC102 não deixa apagar o acumulado dele): guarda a
+  // foto daquela hora e mostra só o que veio depois; se o acumulado do
+  // aparelho voltou a zero por outro caminho, a foto não vale mais
   function accBaseGet() { try { return JSON.parse(localGet("rcAccBase", "null")); } catch (e) { return null; } }
   function accMinusBase(a) {
     const b = accBaseGet();
@@ -210,18 +210,13 @@
   }
   async function accZero() {
     const a = rl.acc;
-    const ok = await askConfirm({ title: "Zerar o espectro acumulado do RC102?", rows: a ? [["Acumulado agora", fmtT(a.seconds) + " · " + Math.round(a.counts.reduce((x, y) => x + y, 0)).toLocaleString(LOCALE) + " contagens"]] : null, note: "Não tem volta: o aparelho recomeça o acumulado do zero. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.", ok: "Zerar o acumulado", danger: true });
+    const ok = await askConfirm({ title: "Zerar o espectro acumulado do RC102?", rows: a ? [["Acumulado agora", fmtT(a.seconds) + " · " + Math.round(a.counts.reduce((x, y) => x + y, 0)).toLocaleString(LOCALE) + " contagens"]] : null, note: "O RC102 não deixa apagar o acumulado dele, então o RadLog zera do lado dele: daqui pra frente mostra só o que vier depois. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.", ok: "Zerar o acumulado", danger: true });
     if (!ok) return;
     try {
-      const r = await api.ResetRcSpecAccum();
-      if (r === "recusado") {
-        const raw = await api.GetRcSpectrum(true);
-        localSet("rcAccBase", JSON.stringify({ counts: raw.counts, seconds: raw.seconds }));
-        toast("O RC102 não aceitou zerar o acumulado; zerado só no app");
-      } else {
-        localSet("rcAccBase", "null");
-        toast("Espectro acumulado do RC102 zerado");
-      }
+      const raw = await api.GetRcSpectrum(true);
+      await api.ResetRcSpecAccum();
+      localSet("rcAccBase", JSON.stringify({ counts: raw.counts, seconds: raw.seconds }));
+      toast("Zerado no RadLog (o RC102 não deixa apagar o dele)");
     } catch (e) { toast("Não deu para zerar: " + ((e && e.message) || e), true); return; }
     rl.acc = null; rl.accAt = 0; rl.accPeaks = []; pk.sel = null; pk.range = null; pk.win = null;
     spDraw(); realTick(true);

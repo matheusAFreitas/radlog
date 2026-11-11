@@ -1,7 +1,6 @@
 package radiacode
 
 import (
-	"errors"
 	"fmt"
 	"math"
 	"strings"
@@ -318,46 +317,11 @@ func (d *Device) ResetDose() error {
 	return nil
 }
 
-// ResetSpecAccum zera o espectro acumulado do aparelho (o de longo prazo,
-// que ele não mostra na tela nem zera pelo menu). O formato não é público:
-// tenta, em ordem, gravar uma string vazia no próprio acumulado (como a
-// biblioteca do Radiacode zera o espectro atual) e no SPEC_RESET (0x207),
-// vazio e com um u32 0. Só conta como zerado se o tempo do acumulado lido
-// depois caiu. Devolve qual jeito funcionou (vai para o log) ou ErrRefused.
-func (d *Device) ResetSpecAccum() (string, error) {
-	before, err := d.SpectrumAccum()
-	if err != nil {
-		return "", err
-	}
-	tries := []struct {
-		name string
-		args []byte
-	}{
-		{"0x205 vazio", append(u32(vsSpecAccum), u32(0)...)},
-		{"0x207 vazio", append(u32(vsSpecReset), u32(0)...)},
-		{"0x207 u32 0", append(append(u32(vsSpecReset), u32(4)...), u32(0)...)},
-	}
-	for _, t := range tries {
-		r, err := d.execute(cmdWrVirtString, t.args)
-		if err != nil {
-			return "", err
-		}
-		if ret, err := r.u32(); err != nil || ret != 1 {
-			continue
-		}
-		after, err := d.SpectrumAccum()
-		if err != nil {
-			return "", err
-		}
-		if after.Duration < before.Duration || (before.Duration == 0 && after.Duration == 0) {
-			return t.name, nil
-		}
-	}
-	return "", ErrRefused
-}
-
-// ErrRefused: o aparelho respondeu, mas não aceitou o comando.
-var ErrRefused = errors.New("o RC102 recusou o comando")
+// O espectro acumulado de longo prazo (0x205) não tem como ser zerado por
+// fora: no firmware do RC102 o WR_VIRT_STRING só aceita 0xf1, 0x200, 0x202,
+// 0x204 e 0x207, e o 0x200/0x207 (o "Recomeçar" e o Restart do app oficial)
+// soma o espectro atual dentro do acumulado antes de zerar o atual. Por isso
+// o app zera o acumulado só do lado dele (ResetRcSpecAccum).
 
 // ---------- texto das mudanças ----------
 

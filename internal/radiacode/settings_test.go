@@ -2,7 +2,6 @@ package radiacode
 
 import (
 	"encoding/binary"
-	"fmt"
 	"strings"
 	"testing"
 )
@@ -10,13 +9,11 @@ import (
 // fakeRegs é um aparelho com registradores de verdade (valores de um
 // RadiaCode-102 com firmware 4.15, lidos em 10/11/2026).
 type fakeRegs struct {
-	regs      map[uint32]uint32
-	writes    []uint32
-	resets    int
-	accResets int
-	accSec    uint32
-	accWay    string
-	refuse    map[uint32]bool
+	regs   map[uint32]uint32
+	writes []uint32
+	resets int
+	accSec uint32
+	refuse map[uint32]bool
 }
 
 func newFakeRegs() *fakeRegs {
@@ -62,15 +59,9 @@ func (f *fakeRegs) Exchange(req []byte) ([]byte, error) {
 		}
 		body = le(uint32(1))
 	case cmdWrVirtString:
-		id, n := binary.LittleEndian.Uint32(args), binary.LittleEndian.Uint32(args[4:])
-		if f.refuse[id] {
+		if f.refuse[binary.LittleEndian.Uint32(args)] {
 			body = le(uint32(0))
 			break
-		}
-		// o aparelho aceita, mas só zera com o jeito certo (f.accWay)
-		if fmt.Sprintf("%#x/%d", id, n) == f.accWay {
-			f.accResets++
-			f.accSec = 0
 		}
 		body = le(uint32(1))
 	case cmdRdVirtString:
@@ -195,30 +186,6 @@ func TestResetDose(t *testing.T) {
 	d := &Device{tr: f}
 	if err := d.ResetDose(); err != nil || f.resets != 1 {
 		t.Fatalf("zerar: %v (%d)", err, f.resets)
-	}
-}
-
-func TestResetSpecAccum(t *testing.T) {
-	for _, c := range []struct{ way, want string }{
-		{"0x205/0", "0x205 vazio"}, {"0x207/0", "0x207 vazio"}, {"0x207/4", "0x207 u32 0"},
-	} {
-		f := newFakeRegs()
-		f.accSec, f.accWay = 5000, c.way
-		d := &Device{tr: f}
-		if how, err := d.ResetSpecAccum(); err != nil || how != c.want || f.accResets != 1 {
-			t.Fatalf("%s: %q %v (%d)", c.way, how, err, f.accResets)
-		}
-	}
-	// aceita tudo e não zera nada, ou recusa tudo: recusado
-	f := newFakeRegs()
-	f.accSec = 5000
-	d := &Device{tr: f}
-	if _, err := d.ResetSpecAccum(); err != ErrRefused {
-		t.Fatalf("nada zerou: %v", err)
-	}
-	f.refuse[vsSpecAccum], f.refuse[vsSpecReset] = true, true
-	if _, err := d.ResetSpecAccum(); err != ErrRefused {
-		t.Fatalf("recusa: %v", err)
 	}
 }
 

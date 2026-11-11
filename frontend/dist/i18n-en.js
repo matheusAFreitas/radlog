@@ -3212,16 +3212,14 @@ const I18N_EN = {
 "Zerar o espectro acumulado do RC102?": "Reset the RC102's accumulated spectrum?",
 "Zerar o espectro acumulado do RadiaCode?": "Reset the RC102's accumulated spectrum?",
 "Acumulado agora": "Accumulated now",
-"Não tem volta: o aparelho recomeça o acumulado do zero. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.": "This can't be undone: the device starts the accumulated spectrum from zero. It's also the home background (the dashed line), which builds up again over the next hours.",
+"O RC102 não deixa apagar o acumulado dele, então o RadLog zera do lado dele: daqui pra frente mostra só o que vier depois. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.": "The RC102 doesn't allow erasing its own accumulated spectrum, so RadLog resets it on its side: from now on it shows only what comes after. It's also the home background (the dashed line), which builds up again over the next hours.",
+"O RadiaCode não deixa apagar o acumulado dele, então o RadLog zera do lado dele: daqui pra frente mostra só o que vier depois. Ele também é o fundo da casa (a linha tracejada), que volta a se formar nas próximas horas.": "The RC102 doesn't allow erasing its own accumulated spectrum, so RadLog resets it on its side: from now on it shows only what comes after. It's also the home background (the dashed line), which builds up again over the next hours.",
+"Zerado no RadLog (o RC102 não deixa apagar o dele)": "Reset in RadLog (the RC102 doesn't allow erasing its own)",
+"Zerado no RadLog (o RadiaCode não deixa apagar o dele)": "Reset in RadLog (the RC102 doesn't allow erasing its own)",
+"Espectro acumulado do RC102 zerado no RadLog": "RC102 accumulated spectrum reset in RadLog",
+"Espectro acumulado do RadiaCode zerado no RadLog": "RC102 accumulated spectrum reset in RadLog",
+"zerado no RadLog": "reset in RadLog",
 "Zerar o acumulado": "Reset the accumulated",
-"O RC102 não aceitou zerar o acumulado; zerado só no app": "The RC102 didn't accept resetting the accumulated spectrum; reset in the app only",
-"O RadiaCode não aceitou zerar o acumulado; zerado só no app": "The RC102 didn't accept resetting the accumulated spectrum; reset in the app only",
-"Espectro acumulado do RC102 zerado": "RC102 accumulated spectrum reset",
-"Espectro acumulado do RadiaCode zerado": "RC102 accumulated spectrum reset",
-"O RC102 recusou zerar o espectro acumulado; zerado só no app": "The RC102 refused to reset the accumulated spectrum; reset in the app only",
-"O RadiaCode recusou zerar o espectro acumulado; zerado só no app": "The RC102 refused to reset the accumulated spectrum; reset in the app only",
-"Espectro acumulado do RC102 zerado pelo app": "RC102 accumulated spectrum reset by the app",
-"Espectro acumulado do RadiaCode zerado pelo app": "RC102 accumulated spectrum reset by the app",
 "Espectro acumulado do RC102": "RC102 accumulated spectrum",
 "Espectro acumulado do RadiaCode": "RC102 accumulated spectrum"
 },
@@ -5835,14 +5833,6 @@ const I18N_EN = {
 ]
 ],
 [
-"Espectro acumulado do RadiaCode zerado pelo app (",
-"^Espectro acumulado do RadiaCode zerado pelo app \\(((?:(?! · ).)+?)\\)$",
-"RC102 accumulated spectrum reset by the app (${1})",
-[
-"Espectro acumulado do RadiaCode zerado pelo app ("
-]
-],
-[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -6172,14 +6162,6 @@ const I18N_EN = {
 [
 "Às ",
 "h o seu fundo costuma ficar na média do dia."
-]
-],
-[
-"Espectro acumulado do RC102 zerado pelo app (",
-"^Espectro acumulado do RC102 zerado pelo app \\(((?:(?! · ).)+?)\\)$",
-"RC102 accumulated spectrum reset by the app (${1})",
-[
-"Espectro acumulado do RC102 zerado pelo app ("
 ]
 ],
 [
