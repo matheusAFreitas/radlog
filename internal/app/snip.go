@@ -122,6 +122,36 @@ func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
 		if peak < 0.015*b {
 			continue
 		}
+		// e tem que ter forma de pico: subir acima das duas janelas dos lados
+		// (como no modo com fundo). Embaixo de uma borda Compton o contínuo no
+		// log fica côncavo e o SNIP passa por baixo do platô; um platô ou uma
+		// borda não sobem acima dos lados, um pico sobe. No fim da escala
+		// (Tl-208 em 2614), sem janela à direita, fica só o SNIP.
+		if l.kev+3*h <= emax && l.kev-3*h >= s.energy(0) {
+			var c, lf, rt, cn, ln, rn float64
+			for i := range y {
+				switch e := s.energy(i); {
+				case e >= l.kev-h && e < l.kev+h:
+					c += y[i]
+					cn++
+				case e >= l.kev-3*h && e < l.kev-h:
+					lf += y[i]
+					ln++
+				case e >= l.kev+h && e < l.kev+3*h:
+					rt += y[i]
+					rn++
+				}
+			}
+			if ln == 0 || rn == 0 || lf <= 0 || rt <= 0 {
+				continue
+			}
+			side := cn * math.Sqrt(lf/ln*rt/rn)
+			f := cn / (ln + rn)
+			ex := c - side
+			if ex < 0.015*side || ex/math.Sqrt(c+f*f*(lf+rt)) < 5 {
+				continue
+			}
+		}
 		if sg := peak / math.Sqrt(vr); sg >= 5 {
 			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
 		}

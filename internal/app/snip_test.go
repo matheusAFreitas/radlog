@@ -10,6 +10,12 @@ import (
 // contagens): fundo da casa com rádio, tório e potássio, mais um contínuo
 // liso e enorme de beta (o teste encostado nos eletrodos de tório)
 func synthAccum(withBg bool, beta float64, seed int64) *MeasureSpectrum {
+	return synthAccumCs(withBg, beta, 0, seed)
+}
+
+// synthAccumCs soma uma fonte de Cs-137 (pico em 662 e platô Compton até a
+// borda de 477 keV, borrada pela resolução) com csN contagens no pico
+func synthAccumCs(withBg bool, beta, csN float64, seed int64) *MeasureSpectrum {
 	const n = 1024
 	r := rand.New(rand.NewSource(seed))
 	s := &MeasureSpectrum{A: [3]float64{5.43, 2.351, 0.000381}, BgSec: 1, ObjSec: 435600, Bg: make([]uint32, n), Obj: make([]uint32, n)}
@@ -23,6 +29,12 @@ func synthAccum(withBg bool, beta float64, seed int64) *MeasureSpectrum {
 		// contínuo do fundo (≈ 5 milhões de contagens) e o beta (liso)
 		c := 9000 * math.Exp(-e/250) * de
 		c += beta * (0.75*math.Exp(-e/55) + 0.22*math.Exp(-e/170) + 0.03*math.Exp(-e/700)) * de
+		if csN > 0 {
+			// platô com 3× as contagens do pico, subindo 30% até a borda
+			sg := specFWHM(477) / 2.355
+			c += 3 * csN / 477 * (1 + 0.3*e/477) * 0.5 * math.Erfc((e-477)/(sg*math.Sqrt2)) * de
+			c += g(e, 661.7, csN) * de
+		}
 		if withBg {
 			for _, p := range [][2]float64{{238.6, 60e3}, {295.2, 45e3}, {351.9, 80e3}, {583.2, 25e3}, {609.3, 70e3}, {911.2, 18e3}, {1120.3, 18e3}, {1460.8, 30e3}, {1764.5, 15e3}, {2614.5, 12e3}} {
 				c += g(e, p[0], p[1]) * de
@@ -70,5 +82,18 @@ func TestFindPeaksSnipAccum(t *testing.T) {
 	}
 	if got["Co-60"] || got["Cs-137"] || got["Am-241"] {
 		t.Errorf("isótopo que não está lá: %+v", p)
+	}
+}
+
+// QA: um Cs-137 no acumulado não pode virar rádio, tório nem urânio (o platô
+// Compton fica côncavo no log e o SNIP passava por baixo dele)
+func TestFindPeaksSnipCompton(t *testing.T) {
+	for _, n := range []float64{2e5, 2e6} {
+		for seed := int64(1); seed <= 5; seed++ {
+			p := synthAccumCs(false, 120000, n, seed).findPeaks()
+			if len(p) != 1 || p[0].Nuclide != "Cs-137" {
+				t.Fatalf("cs %.0f seed %d: %+v", n, seed, p)
+			}
+		}
 	}
 }

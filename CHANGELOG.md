@@ -1,5 +1,11 @@
 # Versões
 
+## 2.62.1
+- Isótopos no "Acumulado do aparelho": além de passar do contínuo, o pico
+  tem que subir acima das duas janelas vizinhas. Assim, o platô Compton de
+  uma fonte (Cs-137, ou o K-40 do sal light) não vira rádio, tório ou urânio
+  que não estão lá.
+
 ## 2.62.0
 - Espectro do Radiacode 102: o "Acumulado do aparelho" agora mostra os
   isótopos. Como ele não tem fundo para subtrair e pode ter um contínuo
