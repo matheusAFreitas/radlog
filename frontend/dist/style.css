@@ -1297,6 +1297,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst.lv-perigo { --lvc: var(--warn); }
 /* mostrador no logo (ideia 1): o arco de fora enche pelas três faixas */
 .dial { width: 148px; height: 148px; flex: none; align-self: center; overflow: visible; }
+.dial-col { display: flex; flex-direction: column; align-items: center; flex: none; align-self: center; }
+.dial-alt { font-size: var(--fs-label); color: var(--dim); margin-top: -6px; min-height: 1em; }
 .dial-val { font-family: var(--mono); font-weight: 500; fill: var(--text); letter-spacing: -.02em; }
 .dial-unit { font-size: 2.8px; fill: var(--dim); }
 .inst.stale .dial-val { fill: var(--dim); }
@@ -1937,13 +1939,13 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .nr-who > span { display: inline-flex; align-items: center; gap: var(--space-2); }
 
 /* "Como funciona" (2.38.2): o texto que só explica fica fechado no pé do cartão */
-:is(#settings, .rc-card) details.how { margin-top: var(--space-1); color: var(--muted); font-size: var(--fs-label); }
-:is(#settings, .rc-card) details.how > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--dim); font-size: var(--fs-caption); cursor: pointer; list-style: none; border-radius: var(--radius-xs); }
-:is(#settings, .rc-card) details.how > summary::-webkit-details-marker { display: none; }
-:is(#settings, .rc-card) details.how > summary::before { content: "?"; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid currentColor; border-radius: 50%; box-sizing: border-box; font-size: 10px; font-weight: 600; line-height: 1; }
-:is(#settings, .rc-card) details.how > summary:hover, :is(#settings, .rc-card) details.how[open] > summary { color: var(--text); }
-:is(#settings, .rc-card) details.how > summary:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
-:is(#settings, .rc-card) details.how > p { margin-top: var(--space-2); }
+:is(#settings, .rc-card, #pageAlara) details.how { margin-top: var(--space-1); color: var(--muted); font-size: var(--fs-label); }
+:is(#settings, .rc-card, #pageAlara) details.how > summary { display: inline-flex; align-items: center; gap: 6px; min-height: 28px; color: var(--dim); font-size: var(--fs-caption); cursor: pointer; list-style: none; border-radius: var(--radius-xs); }
+:is(#settings, .rc-card, #pageAlara) details.how > summary::-webkit-details-marker { display: none; }
+:is(#settings, .rc-card, #pageAlara) details.how > summary::before { content: "?"; display: inline-flex; align-items: center; justify-content: center; width: 15px; height: 15px; border: 1.5px solid currentColor; border-radius: 50%; box-sizing: border-box; font-size: 10px; font-weight: 600; line-height: 1; }
+:is(#settings, .rc-card, #pageAlara) details.how > summary:hover, :is(#settings, .rc-card, #pageAlara) details.how[open] > summary { color: var(--text); }
+:is(#settings, .rc-card, #pageAlara) details.how > summary:focus-visible { outline: 2px solid var(--accent-line); outline-offset: 2px; }
+:is(#settings, .rc-card, #pageAlara) details.how > p { margin-top: var(--space-2); }
 
 /* confirmação no estilo do app (confirma.js) */
 dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
@@ -2558,3 +2560,8 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .chip.alert-range { cursor: pointer; color: var(--text); }
 .ad-legend .sum-lg-x i.ft-sw { border: 0; width: 12px; height: 8px; border-radius: var(--radius-xs); display: inline-block; }
 .sum-chart[hidden] { display: none; }
+.a-detail[hidden] { display: none; }
+#pageAlara .al-why details.how > :is(p, ul) { margin-top: var(--space-2); }
+#pageAlara .al-why ul { padding-left: var(--space-4); display: grid; gap: var(--space-1); }
+#pageAlara details.al-how-why > summary { color: var(--accent); font-size: var(--fs-label); font-weight: 600; }
+.al-cx-ok { margin-left: var(--space-2); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }

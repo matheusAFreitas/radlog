@@ -114,7 +114,7 @@ function renderAlTempo() {
   $("alTDose").append(dv, Object.assign(document.createElement("small"), { textContent: " " + du + (bg > 0 ? " acima do fundo" : "") }));
   const eq = $("alTEq");
   eq.textContent = "";
-  if (ex > 0) for (const l of doseKnown(ex, bg)) eq.appendChild(Object.assign(document.createElement("span"), { textContent: l }));
+  if (ex > 0) for (const l of doseKnown(ex, bg, doseXray)) /* raio-X no lugar da banana (ACE, 11/11) */ eq.appendChild(Object.assign(document.createElement("span"), { textContent: l }));
   if (bg > 0) eq.appendChild(Object.assign(document.createElement("span"), { textContent: `No lugar, ${alDose(d)} no total: ${alDose((bg * m) / 60)} disso é o fundo, que você receberia em qualquer canto da casa.` }));
   const alt = $("alTAlt");
   alt.textContent = "";

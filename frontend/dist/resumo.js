@@ -176,7 +176,7 @@ async function refreshSummary() {
     $("sumDay").value = dateVal(periods[0][0]);
     $("sumDay").max = dateVal(Date.now());
   }
-  if (s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); $("sumDayA").max = $("sumDayB").max = dateVal(Date.now()); }
+  if (!res0 && s.cmp === "dias") { $("sumDayA").value = dateVal(periods[0][0]); $("sumDayB").value = dateVal(periods[1][0]); $("sumDayA").max = $("sumDayB").max = dateVal(Date.now()); }
   const my = ++sumSeq;
   let res;
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }

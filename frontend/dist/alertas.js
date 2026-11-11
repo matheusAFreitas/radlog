@@ -205,6 +205,21 @@ function tickActive() {
   renderActive();
 }
 
+// alertas do GMC-800 confirmados pelo RC102 (id → true/false)
+const AL_CX_OK = new Map();
+let alCxBusy = false;
+async function alCxFetch(eps, all) {
+  if (alCxBusy || !api.GetCrossChecks) return;
+  const need = eps.filter((e) => !isRcEv(e) && !e.retro && !e.active && !AL_CX_OK.has(e.id));
+  if (!need.length) return;
+  alCxBusy = true;
+  let res = [];
+  try { res = await api.GetCrossChecks(need.map((e) => ({ dev: "gmc", from: e.time, to: e.end || 0 }))); } catch (err) { res = []; }
+  alCxBusy = false;
+  need.forEach((e, i) => AL_CX_OK.set(e.id, !!(res[i] && res[i].state === "ok")));
+  if (state.alertDev === "radiacode" && need.some((e) => AL_CX_OK.get(e.id))) renderAlertHistory(all);
+}
+
 function renderAlertHistory(all) {
   const box = $("alertHistList");
   const f = state.alertFilter;
@@ -215,11 +230,18 @@ function renderAlertHistory(all) {
   const chip = $("alertRangeChip");
   chip.hidden = !rg;
   if (rg) chip.firstElementChild.textContent = rg.label;
-  const list = groupEpisodes(all).filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
-    && (!dv || (dv === "radiacode") === isRcEv(e)) && (!rg || (e.time >= rg.from && e.time < rg.to)));
+  const eps = groupEpisodes(all);
+  // no filtro RC102 entram também os alertas do GMC-800 que o RC102 confirmou
+  // (ACE, 11/11); a confirmação vem do GetCrossChecks e fica guardada
+  if (dv === "radiacode") alCxFetch(eps, all);
+  const devOk = (e) => !dv || (dv === "radiacode" ? isRcEv(e) || AL_CX_OK.get(e.id) === true : !isRcEv(e));
+  const list = eps.filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
+    && devOk(e) && (!rg || (e.time >= rg.from && e.time < rg.to)));
   $("alertCount").textContent = list.length === 1 ? "1 alerta" : `${list.length} alertas`;
   box.textContent = "";
-  if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; return; }
+  // lista vazia: o detalhe do alerta de antes não pode ficar na tela
+  $("aDetail").hidden = !list.length;
+  if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; state.alertSel = null; state.ad = null; return; }
   let day = "", ul = null;
   for (const e of list) {
     const dt = new Date(e.time);
@@ -234,6 +256,12 @@ function renderAlertHistory(all) {
       box.append(h, ul);
     }
     const li = alertLi(e, false);
+    if (dv === "radiacode" && !isRcEv(e)) {
+      const t = document.createElement("span");
+      t.className = "chip small al-cx-ok";
+      t.textContent = "GMC-800";
+      li.querySelector(".a-text")?.appendChild(t);
+    }
     if (e.active) li.querySelector(".a-text > span").append(" — ativo agora");
     li.classList.add("pick");
     li.classList.toggle("sel", e.id === state.alertSel);
