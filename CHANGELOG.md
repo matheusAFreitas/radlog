@@ -4,6 +4,10 @@
 - **Fita dos últimos 10 segundos andando suave.** Na 2.56.0 a fita andava
   aos saltos, de casa em casa, e parecia travada. Agora cada risco anda de
   pixel em pixel a cada quadro, sem perder a largura certa da 2.56.0.
+- **Símbolo de perigo no Radiacode 102.** Com os alarmes do próprio
+  aparelho na régua, o mostrador e o cartão do RC102 paravam em "Alarme 2"
+  (losango) mesmo acima do limite de perigo, enquanto a faixa do topo e os
+  alertas já diziam perigo. Agora os três concordam.
 
 ## 2.56.0
 - **Fita dos últimos 10 segundos sem riscos tortos.** Com a escala de 125%
