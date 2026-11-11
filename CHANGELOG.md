@@ -1,5 +1,12 @@
 # Versões
 
+## 2.60.2
+- Aba Espectro do Radiacode 102: o texto grande de explicação foi para
+  "Como funciona", que abre ao clicar, como nas Configurações.
+- O texto passa a dizer que "Desde o Recomeçar" só marca isótopos acima
+  do fundo da casa; os do próprio fundo aparecem no "Acumulado do
+  aparelho" depois de algumas horas.
+
 ## 2.60.1
 - "Zerar o acumulado…": no teste com o aparelho real, o RC102 recusou o
   primeiro jeito de zerar. Agora o app tenta mais dois (pelo SPEC_RESET do
