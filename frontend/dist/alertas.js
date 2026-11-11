@@ -211,8 +211,12 @@ function renderAlertHistory(all) {
   document.querySelectorAll("#alertFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.af === f)));
   const dv = state.alertDev || "";
   document.querySelectorAll("#alertDevFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.adev === dv)));
+  const rg = state.alertRange;
+  const chip = $("alertRangeChip");
+  chip.hidden = !rg;
+  if (rg) chip.firstElementChild.textContent = rg.label;
   const list = groupEpisodes(all).filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
-    && (!dv || (dv === "radiacode") === isRcEv(e)));
+    && (!dv || (dv === "radiacode") === isRcEv(e)) && (!rg || (e.time >= rg.from && e.time < rg.to)));
   $("alertCount").textContent = list.length === 1 ? "1 alerta" : `${list.length} alertas`;
   box.textContent = "";
   if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; return; }
@@ -423,6 +427,10 @@ function wireAlertHistory() {
     state.alertFilter = b.dataset.af;
     renderAlertHistory(await api.GetEvents("alerta"));
   }));
+  $("alertRangeChip").addEventListener("click", async () => {
+    state.alertRange = null;
+    renderAlertHistory(await api.GetEvents("alerta"));
+  });
   document.querySelectorAll("#alertDevFilter button").forEach((b) => b.addEventListener("click", async () => {
     state.alertDev = b.dataset.adev;
     renderAlertHistory(await api.GetEvents("alerta"));

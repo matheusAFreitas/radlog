@@ -576,23 +576,25 @@
           <span class="mono muted small" id="sumSub">—</span>
         </div>
         <div class="row">
+          <button type="button" class="btn small" id="btnSumCmp" title="Compara dois períodos">Comparar</button>
+          <button type="button" class="btn small" id="btnSumBack" hidden>‹ Voltar ao resumo</button>
           <button type="button" class="btn small" id="btnReport" title="Salva o relatório do período em PDF">Relatório (PDF)</button>
         </div>
       </div>
       <div class="sum-tools">
-        <div class="seg" role="group" aria-label="Resumo ou comparação" id="sumModeSeg">
-          <button type="button" data-smode="resumo" aria-pressed="true">Resumo</button>
-          <button type="button" data-smode="comparar" aria-pressed="false">Comparar</button>
+        <div class="seg" role="group" aria-label="Período" id="sumKindSeg">
+          <button type="button" data-sk="dia" aria-pressed="true">Dia</button>
+          <button type="button" data-sk="semana" aria-pressed="false">Semana</button>
+          <button type="button" data-sk="mes" aria-pressed="false">Mês</button>
         </div>
-        <div class="seg" role="group" aria-label="Período" id="sumPresetSeg">
-          <button type="button" data-sp="hoje" aria-pressed="true">Hoje</button>
-          <button type="button" data-sp="ontem" aria-pressed="false">Ontem</button>
-          <button type="button" data-sp="semana" aria-pressed="false">Esta semana</button>
-          <button type="button" data-sp="semana-passada" aria-pressed="false">Semana passada</button>
-          <button type="button" data-sp="mes" aria-pressed="false">Este mês</button>
-          <button type="button" data-sp="mes-passado" aria-pressed="false">Mês passado</button>
+        <div class="sum-nav" id="sumNav">
+          <button type="button" class="btn small icon" id="sumPrev" title="Período anterior" aria-label="Período anterior">‹</button>
+          <span class="sum-when">
+            <button type="button" class="btn small" id="sumWhen" title="Escolher a data">Hoje</button>
+            <input type="date" id="sumDay" tabindex="-1" aria-hidden="true">
+          </span>
+          <button type="button" class="btn small icon" id="sumNext" title="Próximo período" aria-label="Próximo período">›</button>
         </div>
-        <label class="sum-day">Dia <input type="date" id="sumDay"></label>
         <div class="seg" role="group" aria-label="O que comparar" id="sumCmpSeg" hidden>
           <button type="button" data-sc="hoje-ontem" aria-pressed="true">Hoje × ontem</button>
           <button type="button" data-sc="7d" aria-pressed="false">7 dias × 7 dias antes</button>
@@ -612,24 +614,15 @@
       </div>
       <div class="sum-top" id="sumTop">
         <div class="sum-big" id="sumBig"></div>
-        <div class="sum-split" id="sumSplit" hidden>
-          <h3>Casa × pessoal</h3>
-          <div class="sum-stack" id="sumStack" aria-hidden="true"></div>
-          <p class="small muted" id="sumSplitText"></p>
-        </div>
-      </div>
-      <div class="sum-fita" hidden>
-        <h3>Fita</h3>
-        <p class="ft-say" id="sumFitaSay"></p>
-        <div class="fita" id="sumFita"></div>
-        <div class="ft-legend small" id="sumFitaLeg"></div>
       </div>
       <table class="sum-table" id="sumTable" hidden></table>
-      <div class="ri-chart">
+      <div class="ri-chart sum-chart">
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
           <div class="plot m-plot" id="sumPlot">
-            <svg id="sumChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="CPM médio no período"></svg>
+            <div class="sum-marks" id="sumMarks"></div>
+            <svg id="sumChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="µSv/h no período"></svg>
+            <div class="sum-band" id="sumBand"></div>
             <div class="cursor" id="sumCursor" hidden></div>
             <div class="tip mono" id="sumTip" hidden></div>
           </div>
@@ -638,11 +631,10 @@
         <div class="legend small muted ad-legend" id="sumLegend"></div>
       </div>
       <details class="sum-details" id="sumDetails">
-        <summary>Detalhes: todos os números, lacunas, anotações e histórico disponível</summary>
+        <summary>Mais números</summary>
         <div class="ri-tiles sum-tiles" id="sumTiles"></div>
         <div class="sum-notes" id="sumGaps" hidden></div>
         <div class="sum-notes" id="sumNotes" hidden></div>
-        <div class="sum-notes" id="sumMature" hidden></div>
       </details>
       </div>
     </section>
@@ -798,6 +790,7 @@
           <button type="button" data-af="retro" aria-pressed="false">Do contador</button>
           <button type="button" data-af="alarme" aria-pressed="false">Só alarmes</button>
         </div>
+        <button type="button" class="chip alert-range" id="alertRangeChip" title="Mostrar todos os alertas" hidden><span></span> ✕</button>
         <span class="small muted" id="alertCount"></span>
       </div>
       <div class="a-grid">
@@ -2186,6 +2179,11 @@
       <legend>Dados</legend>
       <p class="small muted mono path" id="dataDir">—</p>
       <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
+    </fieldset>
+
+    <fieldset id="setMature" class="set-wide">
+      <legend>Histórico disponível</legend>
+      <div class="sum-notes" id="sumMature"><p class="small muted">Carregando…</p></div>
     </fieldset>
 
     <fieldset id="setCfgHist" class="set-wide">
