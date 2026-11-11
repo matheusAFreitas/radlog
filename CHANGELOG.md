@@ -1,5 +1,30 @@
 # Versões
 
+## 2.58.0
+- **Subida lenta do fundo.** Cartão novo "Fundo nas últimas semanas" no
+  topo de Gráficos › Tendência do fundo. Ele compara a mediana das
+  últimas 2 semanas com a dos meses antes (120 a 30 dias atrás) e avisa
+  quando o fundo de casa subiu de verdade, coisa que o alarme não pega
+  porque nenhum dia parece diferente do anterior.
+- Só entram dias com o GMC-800 em casa, pelo menos 12 h medidas, sem chuva
+  no dia, sem medir objeto e sem minutos de alarme ou interferência. A conta
+  é em contagens: trocar a calibração não vira subida.
+- "Vale olhar" quando as 2 semanas ficam 10% ou mais acima da referência e
+  10 dos últimos 14 dias passam de +5%. O cartão diz se foi o ambiente ou o
+  aparelho conferindo com a contagem do RC102 nos minutos com os dois em
+  casa, e separa a subida aos poucos de um degrau (pulo de uma semana para a
+  outra que fica).
+- Gráfico de 120 dias em % da referência: pontos por dia e mediana de 7 dias
+  do GMC-800, mediana do RC102, dias de chuva em círculo azul, faixa de ±5%
+  e linha de +10%. Passar o mouse mostra o dia em µSv/h.
+- "O que conferir" aparece quando dá "vale olhar" ou degrau, e um aviso
+  informativo fica no topo de Alertas enquanto durar (não é alarme, some
+  sozinho e não vai para o histórico).
+- "Mudei o aparelho de lugar" entrou no menu do logo e na busca (Ctrl+K), e
+  como atalho no cartão quando dá degrau: a referência recomeça nesse dia e
+  fica uma nota no gráfico. "Desfazer a marca" volta a referência antiga.
+- Recalcula uma vez por dia, depois das 06:00, junto da Saúde do tubo.
+
 ## 2.57.0
 - **Saúde do tubo.** Cartão novo na tela do GQ GMC-800 que confere, com o
   que o app já gravou, se o tubo Geiger está contando direito. São quatro

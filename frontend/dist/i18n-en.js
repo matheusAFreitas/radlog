@@ -3132,7 +3132,68 @@ const I18N_EN = {
 "Ver no GQ GMC-800": "See on the GQ GMC-800",
 "ver o cartão": "see the card",
 "Vale olhar:": "Worth a look:",
-"Não é alarme: é sobre o aparelho, não sobre a radiação.": "Not an alarm: it is about the device, not the radiation."
+"Não é alarme: é sobre o aparelho, não sobre a radiação.": "Not an alarm: it is about the device, not the radiation.",
+"Fundo nas últimas semanas": "Background over recent weeks",
+"GQ GMC-800 em casa": "GQ GMC-800 at home",
+"O fundo de casa está estável": "Home background is stable",
+"Você marcou que mudou o GMC-800 de lugar. O app junta 30 dias válidos no lugar novo antes de comparar de novo.": "You marked that you moved the GMC-800. The app collects 30 valid days in the new spot before comparing again.",
+"Para comparar, o app precisa de uns 30 dias válidos de fundo em casa como referência, mais 2 semanas recentes. Até lá o cartão só mostra o gráfico.": "To compare, the app needs about 30 valid days of home background as a reference, plus 2 recent weeks. Until then the card only shows the chart.",
+"Sem o RC102 em casa nas duas épocas, não dá para saber se foi o ambiente ou o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo.": "Without the RC102 at home in both periods, there is no way to tell the environment from the device. It is still a low background, but worth finding out why.",
+"Sem o RadiaCode em casa nas duas épocas, não dá para saber se foi o ambiente ou o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo.": "Without the RC102 at home in both periods, there is no way to tell the environment from the device. It is still a low background, but worth finding out why.",
+"Referência": "Reference",
+"Referência (lugar novo)": "Reference (new spot)",
+"mediana de 120 a 30 dias atrás": "median from 120 to 30 days ago",
+"Últimas 2 semanas": "Last 2 weeks",
+"esperando a referência": "waiting for the reference",
+"mesma conta, com a contagem do RC102": "same math, with the RC102 counts",
+"mesma conta, com a contagem do RadiaCode": "same math, with the RC102 counts",
+"sem o RC102 em casa nas duas épocas": "no RC102 at home in both periods",
+"sem o RadiaCode em casa nas duas épocas": "no RC102 at home in both periods",
+"GMC-800 (mediana de 7 dias)": "GMC-800 (7-day median)",
+"cada dia": "each day",
+"chuva (fora da conta)": "rain (left out)",
+"referência": "reference",
+"últimas 2 semanas": "last 2 weeks",
+"+10%: vale olhar": "+10%: worth a look",
+"mudou de lugar": "moved",
+"Ainda não há nenhum dia com 12 h do GMC-800 em casa.": "There is no day yet with 12 h of the GMC-800 at home.",
+"O que conferir": "What to check",
+"Casa mais fechada:": "House kept closed:",
+"o radônio do chão e das paredes acumula quando a casa fica fechada. Janelas abertas umas horas por dia costumam baixar o fundo.": "radon from the floor and walls builds up when the house stays closed. Opening windows a few hours a day usually lowers the background.",
+"Algo novo em casa:": "Something new at home:",
+"bancada ou piso de granito, revestimento cerâmico, areia, adubo com potássio, luminária ou relógio antigo. Dá para usar o \"Medir objeto\" com o RC102 para achar.": "a granite counter or floor, ceramic tiles, sand, potassium fertilizer, an old lamp or clock. You can use \"Measure object\" with the RC102 to find it.",
+"bancada ou piso de granito, revestimento cerâmico, areia, adubo com potássio, luminária ou relógio antigo. Dá para usar o \"Medir objeto\" com o RadiaCode para achar.": "a granite counter or floor, ceramic tiles, sand, potassium fertilizer, an old lamp or clock. You can use \"Measure object\" with the RC102 to find it.",
+"Época do ano:": "Time of year:",
+"se a referência é de meses mais ventilados, um pouco de subida é esperado. O Calendário do ano mostra se aconteceu no ano passado.": "if the reference comes from better ventilated months, some rise is expected. The year calendar shows whether it happened last year.",
+"Saúde do tubo:": "Tube health:",
+"veja se a sensibilidade ou a dispersão mudaram no cartão da tela do GMC-800.": "check whether sensitivity or dispersion changed on the card in the GMC-800 screen.",
+"a conta é em contagens, então trocar o fator não muda nada aqui. Se mudou, foi o tubo contando diferente.": "the math uses counts, so changing the factor changes nothing here. If it moved, the tube is counting differently.",
+"Interferência:": "Interference:",
+"fonte, carregador ou aparelho novo ligado perto do GMC-800 pode somar pulsos falsos.": "a power supply, charger or new device switched on near the GMC-800 can add false pulses.",
+"Mudou o GMC-800 de lugar?": "Did you move the GMC-800?",
+"Perto de parede, piso ou janela diferente o fundo muda. Se mudou, marque abaixo: o app começa uma referência nova a partir desse dia.": "Near a different wall, floor or window the background changes. If you moved it, mark it below: the app starts a new reference from that day.",
+"Chegou algo novo perto dele?": "Something new near it?",
+"Granito, cerâmica, luminária antiga. Afaste e veja se volta.": "Granite, ceramics, an old lamp. Move it away and see if it goes back down.",
+"Desfazer a marca": "Undo the mark",
+"Só dias em casa, sem chuva e sem medir objeto. Recalcula todo dia às 06:00.": "Only days at home, without rain and without measuring objects. Recalculated every day at 06:00.",
+"Subiu de uma vez e ficou.": "It rose at once and stayed.",
+"Sem o RC102 em casa para comparar.": "No RC102 at home to compare.",
+"Sem o RadiaCode em casa para comparar.": "No RC102 at home to compare.",
+"O RC102 subiu junto: é o ambiente.": "The RC102 rose too: it is the environment.",
+"O RadiaCode subiu junto: é o ambiente.": "The RC102 rose too: it is the environment.",
+"O RC102 não subiu: veja a Saúde do tubo.": "The RC102 did not rise: check Tube health.",
+"O RadiaCode não subiu: veja a Saúde do tubo.": "The RC102 did not rise: check Tube health.",
+"Não é alarme.": "Not an alarm.",
+"Abrir em Gráficos › Tendência do fundo": "Open in Charts › Background trend",
+"chuva, fora da conta": "rain, left out",
+"Mudei o aparelho de lugar": "I moved the device",
+"a referência do fundo recomeça hoje": "the background reference restarts today",
+"A referência do fundo recomeça nesse dia e fica uma nota no gráfico.": "The background reference restarts that day and a note is left on the chart.",
+"A referência do fundo recomeça hoje. O app junta 30 dias no lugar novo antes de comparar de novo e deixa uma nota no gráfico.": "The background reference restarts today. The app collects 30 days in the new spot before comparing again and leaves a note on the chart.",
+"Mudei de lugar": "I moved it",
+"Referência do fundo recomeça hoje": "Background reference restarts today",
+"Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)": "I moved the GMC-800 (the reference background restarts here)",
+"o dia não pode ficar no futuro": "the day cannot be in the future"
 },
 "patterns": [
 [
@@ -3272,6 +3333,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. O RadiaCode em casa não mudou, então foi algo perto do GMC\\-800\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. The RC102 at home did not change, so it was something near the GMC-800. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. O RadiaCode em casa não mudou, então foi algo perto do GMC-800. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
+]
+],
+[
 "Parou em ",
 "^Parou em ((?:(?! · ).)+?): a diferença passou de 4σ, bem acima da variação natural da contagem\\. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos\\.$",
 "Stopped at ${1}: the difference went past 4σ, well above the natural variation of the count. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.",
@@ -3290,6 +3360,15 @@ const I18N_EN = {
 " a radiação caiu ",
 " (o inverso do quadrado dá ",
 "): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis."
+]
+],
+[
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. O RC102 em casa não mudou, então foi algo perto do GMC\\-800\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. The RC102 at home did not change, so it was something near the GMC-800. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. O RC102 em casa não mudou, então foi algo perto do GMC-800. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
 ]
 ],
 [
@@ -3314,6 +3393,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. Não há RadiaCode em casa nas duas épocas para comparar\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. There is no RC102 at home in both periods to compare. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. Não há RadiaCode em casa nas duas épocas para comparar. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
+]
+],
+[
 "Parou em ",
 "^Parou em ((?:(?! · ).)+?), quando deu para garantir que o objeto sobe menos de ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)\\. Para procurar algo mais fraco, escolha “\\+10% do fundo”\\.$",
 "Stopped at ${1}, once it could guarantee the object adds less than ${2}% of background (+${3} CPM). To look for something weaker, pick “+10% of background”.",
@@ -3334,6 +3422,15 @@ const I18N_EN = {
 " a radiação caiu menos que o inverso do quadrado (",
 " contra ",
 "): o objeto deve ser espalhado, então a distância segura é só aproximada."
+]
+],
+[
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. Não há RC102 em casa nas duas épocas para comparar\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. There is no RC102 at home in both periods to compare. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. Não há RC102 em casa nas duas épocas para comparar. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
 ]
 ],
 [
@@ -3433,6 +3530,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O RadiaCode em casa subiu junto (",
+"^O RadiaCode em casa subiu junto \\(((?:(?! · ).)+?)\\), então é o ambiente, não o aparelho\\. Ainda é fundo baixo, mas vale descobrir o motivo\\.$",
+"The RC102 at home rose too (${1}), so it is the environment, not the device. It is still a low background, but worth finding out why.",
+[
+"O RadiaCode em casa subiu junto (",
+"), então é o ambiente, não o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo."
+]
+],
+[
 "Chegou ao tempo máximo (",
 "^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM; para ir além, aumente o tempo máximo\\.$",
 "Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2} CPM; to go further, raise the time limit.",
@@ -3452,6 +3558,24 @@ const I18N_EN = {
 ]
 ],
 [
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. O RadiaCode em casa subiu junto\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. The RC102 at home rose too. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. O RadiaCode em casa subiu junto. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
+]
+],
+[
+"O RC102 em casa subiu junto (",
+"^O RC102 em casa subiu junto \\(((?:(?! · ).)+?)\\), então é o ambiente, não o aparelho\\. Ainda é fundo baixo, mas vale descobrir o motivo\\.$",
+"The RC102 at home rose too (${1}), so it is the environment, not the device. It is still a low background, but worth finding out why.",
+[
+"O RC102 em casa subiu junto (",
+"), então é o ambiente, não o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo."
+]
+],
+[
 "Chegou ao tempo máximo (",
 "^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?); para ir além, aumente o tempo máximo\\.$",
 "Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2}; to go further, raise the time limit.",
@@ -3459,6 +3583,15 @@ const I18N_EN = {
 "Chegou ao tempo máximo (",
 ") sem decidir. Se o objeto emite algo, é menos que +",
 "; para ir além, aumente o tempo máximo."
+]
+],
+[
+"Subiu de uma vez (",
+"^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. O RC102 em casa subiu junto\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
+"It rose at once (${1}) and stayed. The RC102 at home rose too. Did you move the device or put something new near it?",
+[
+"Subiu de uma vez (",
+") e ficou. O RC102 em casa subiu junto. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
 ]
 ],
 [
@@ -3821,6 +3954,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Últimas 2 semanas ",
+"^Últimas 2 semanas ((?:(?! · ).)+?) em relação à referência\\. Isso é o vai e vem normal do radônio e do tempo\\.$",
+"Last 2 weeks ${1} against the reference. That is the normal back and forth of radon and weather.",
+[
+"Últimas 2 semanas ",
+" em relação à referência. Isso é o vai e vem normal do radônio e do tempo."
+]
+],
+[
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
 "RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
@@ -3969,6 +4111,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O RadiaCode em casa ficou igual (",
+"^O RadiaCode em casa ficou igual \\(((?:(?! · ).)+?)\\)\\. Isso aponta para o aparelho, não para o ambiente\\.$",
+"The RC102 at home stayed the same (${1}). That points to the device, not the environment.",
+[
+"O RadiaCode em casa ficou igual (",
+"). Isso aponta para o aparelho, não para o ambiente."
+]
+],
+[
 "leitura ao vivo: iniciada em ",
 "^leitura ao vivo: iniciada em ((?:(?! · ).)+?) \\(GETCPM \\+ GETCPS a cada 1 s, prazo de ((?:(?! · ).)+?) s por comando, ((?:(?! · ).)+?)\\)$",
 "live reading: started on ${1} (GETCPM + GETCPS every 1 s, ${2} s timeout per command, ${3})",
@@ -4083,6 +4234,15 @@ const I18N_EN = {
 "No lugar, ",
 " no total: ",
 " disso é o fundo, que você receberia em qualquer canto da casa."
+]
+],
+[
+"O RC102 em casa ficou igual (",
+"^O RC102 em casa ficou igual \\(((?:(?! · ).)+?)\\)\\. Isso aponta para o aparelho, não para o ambiente\\.$",
+"The RC102 at home stayed the same (${1}). That points to the device, not the environment.",
+[
+"O RC102 em casa ficou igual (",
+"). Isso aponta para o aparelho, não para o ambiente."
 ]
 ],
 [
@@ -6432,6 +6592,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O fundo de casa subiu devagar: ",
+"^O fundo de casa subiu devagar: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) semanas$",
+"Home background rose slowly: ${1} over ${2} weeks",
+[
+"O fundo de casa subiu devagar: ",
+" em ",
+" semanas"
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -7220,6 +7390,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Nova referência desde ",
+"^Nova referência desde ((?:(?! · ).)+?): faltam ((?:(?! · ).)+?) dias$",
+"New reference since ${1}: ${2} days to go",
+[
+"Nova referência desde ",
+": faltam ",
+" dias"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -7622,6 +7802,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Só o GMC-800 subiu: ",
+"^Só o GMC\\-800 subiu: ((?:(?! · ).)+?) em ((?:(?! · ).)+?) semanas$",
+"Only the GMC-800 rose: ${1} over ${2} weeks",
+[
+"Só o GMC-800 subiu: ",
+" em ",
+" semanas"
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -7950,6 +8140,14 @@ const I18N_EN = {
 [
 "fundo ",
 " µSv/h (mediana do dia)"
+]
+],
+[
+"Mudou o GMC-800 de lugar em ",
+"^Mudou o GMC\\-800 de lugar em ((?:(?! · ).)+?)\\?$",
+"Did you move the GMC-800 on ${1}?",
+[
+"Mudou o GMC-800 de lugar em "
 ]
 ],
 [
@@ -8341,6 +8539,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Mudei o aparelho de lugar em ",
+"^Mudei o aparelho de lugar em ((?:(?! · ).)+?)$",
+"I moved the device on ${1}",
+[
+"Mudei o aparelho de lugar em "
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -8467,6 +8673,14 @@ const I18N_EN = {
 " ficou parado (−",
 "%, ",
 " σ)."
+]
+],
+[
+"O fundo mudou de patamar em ",
+"^O fundo mudou de patamar em ((?:(?! · ).)+?)$",
+"Background stepped up on ${1}",
+[
+"O fundo mudou de patamar em "
 ]
 ],
 [
@@ -8656,6 +8870,15 @@ const I18N_EN = {
 [
 " saturado · acima de ",
 " µSv/h"
+]
+],
+[
+"Ainda medindo: faltam ",
+"^Ainda medindo: faltam ((?:(?! · ).)+?) dias$",
+"Still measuring: ${1} days to go",
+[
+"Ainda medindo: faltam ",
+" dias"
 ]
 ],
 [
@@ -9463,6 +9686,15 @@ const I18N_EN = {
 "Object measurement at ${1}.",
 [
 "Medição de objeto às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias acima de \\+5%$",
+"${1} of ${2} days above +5%",
+[
+" de ",
+" dias acima de +5%"
 ]
 ],
 [

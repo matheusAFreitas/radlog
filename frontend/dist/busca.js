@@ -19,6 +19,7 @@ const QK_IC = {
   pdf: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 1.5h5.5L12.5 4.5V14.5H4z"/><path d="M9.5 1.5v3h3"/></svg>',
   bell: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"/><path d="M6.5 14h3"/></svg>',
   mute: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.2h2.2L8 4v8L5.2 9.8H3Z"/><path d="M10.5 6l3 4M13.5 6l-3 4"/></svg>',
+  moved: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h9M8 5l3 3-3 3"/><path d="M13.5 3v10"/></svg>',
   clock: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>',
 };
 
@@ -51,6 +52,7 @@ function qkMeasuring() {
 function qkActions() {
   const a = [
     { g: "Ações", ic: QK_IC.note, t: "Anotar agora", s: "nota presa a este minuto", k: "N", kw: "nota anotacao escrever", run: qkNote },
+    { g: "Ações", ic: QK_IC.moved, t: "Mudei o aparelho de lugar", s: "a referência do fundo recomeça hoje", kw: "mudei lugar mover aparelho gmc fundo referencia", run: () => bsMarkMoved() },
     qkAway()
       ? { g: "Ações", ic: QK_IC.back, t: "Voltei", s: "encerra o período fora de casa", kw: "voltar casa chegar fora", run: qkBack, c: "away" }
       : { g: "Ações", ic: QK_IC.out, t: "Saí de casa", s: "pergunta quem vai junto", kw: "sair fora rua viagem", run: qkAskAway, c: "away" },
@@ -339,7 +341,7 @@ function qkFab(open) {
   qkSheetClose();
   const menu = $("qkFabMenu");
   menu.textContent = "";
-  qkActions().slice(0, 3).forEach((it) => {
+  qkActions().slice(0, 4).forEach((it) => {
     const b = document.createElement("button");
     b.type = "button";
     b.append(it.t);
