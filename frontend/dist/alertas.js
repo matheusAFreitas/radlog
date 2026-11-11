@@ -257,7 +257,7 @@ function renderAlertHistory(all) {
   const list = eps.filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
     && devOk(e) && (!rg || (e.time >= rg.from && e.time < rg.to)));
   const nOwn = list.filter(own).length, nOt = list.length - nOwn;
-  $("alertCount").textContent = (nOwn === 1 ? "1 alerta" : `${nOwn} alertas`) + (nOt ? ` + ${nOt} confirmados` : "");
+  $("alertCount").textContent = (nOwn === 1 ? "1 alerta" : `${nOwn} alertas`) + (nOt === 1 ? " + 1 confirmado" : nOt ? ` + ${nOt} confirmados` : "");
   // o detalhe sai da lista antes de limpar (abaixo de 900 px ele mora nela)
   const det = $("aDetail");
   if (box.contains(det)) document.querySelector("#pageAlertas .a-grid").appendChild(det);
