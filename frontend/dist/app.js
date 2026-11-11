@@ -4951,6 +4951,8 @@ const demoRc = () => {
       }
       return { year: y, first, today, days };
     },
+    GetCrossCheck: async (dev, from, to, series) => cxDemo(dev, from, to, series),
+    GetCrossChecks: async (reqs) => reqs.map((r) => cxDemo(r.dev, r.from, r.to, false)),
     GetBgSlow: async () => bsDemo(localGet("fundoDemo", "amb"), +localGet("fundoMoved", 0)),
     MarkBgMoved: async (d) => { const t = new Date(d || Date.now()); t.setHours(0, 0, 0, 0); localSet("fundoMoved", t.getTime()); return bsDemo(localGet("fundoDemo", "amb"), t.getTime()); },
     ClearBgMoved: async () => { localSet("fundoMoved", 0); return bsDemo(localGet("fundoDemo", "amb"), 0); },

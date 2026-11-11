@@ -304,6 +304,18 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 			both.Ev = fmt.Sprintf("O %s ficou parado (−%s%%, %s σ).", on, whyPct(opct), whyNum(math.Abs(oz), 1))
 		}
 	}
+	// num alerta, vale a confirmação cruzada dele (a mesma da faixa e da lista)
+	if f, to, ok := a.alertSpanAt(dev, t); ok {
+		cc := a.GetCrossCheck(dev, f, to, false)
+		switch cc.State {
+		case "ok":
+			both.State, both.Ev = "yes", cc.Text
+		case "no":
+			both.State, both.Ev = "no", cc.Text
+		default:
+			both.State, both.Ev = "na", cc.Text
+		}
+	}
 	C = append(C, both)
 	// fora de casa (o aparelho da subida)
 	awayAt := a.awayCheckerFor(dev)
