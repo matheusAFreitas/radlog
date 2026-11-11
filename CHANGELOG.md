@@ -11,6 +11,8 @@
   "Seguro", e a fita do pulso perde as legendas "Os últimos 10 segundos" e
   "cada risco é uma contagem".
 - Quadro do GMC-800: o valor em mrem/h aparece pequeno embaixo do mostrador.
+- Resumo: voltar da comparação de dois dias não deixa mais a tabela e o
+  gráfico da comparação na tela.
 - ALARA: "Por que isso importa" agora abre e fecha, e as explicações mais
   longas foram para "Como funciona", como na aba do Radiacode 102.
 
