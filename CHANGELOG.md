@@ -1,5 +1,11 @@
 # Versões
 
+## 2.63.0
+- "Minha dose hoje" do Radiacode 102: o número grande continua sendo o
+  contador do próprio aparelho, e agora a soma que o app fez com os minutos
+  gravados aparece pequena ao lado ("app 0,52"), para conferir. Ela costuma
+  ficar um pouco abaixo, porque o app não vê o tempo longe do PC.
+
 ## 2.62.1
 - Isótopos no "Acumulado do aparelho": além de passar do contínuo, o pico
   tem que subir acima das duas janelas vizinhas. Assim, o platô Compton de

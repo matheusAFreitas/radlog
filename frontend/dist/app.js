@@ -3565,12 +3565,16 @@ function renderRcMain(st) {
   // dose de hoje
   if (st.todayDevOK) {
     $("rcDoseToday").textContent = fmt(st.todayDev, 2);
-    rcParts($("rcDoseTodaySub"), ["desde 00:00", rcAwayToday()]);
+    rcParts($("rcDoseTodaySub"), ["desde 00:00", rcAwayToday(), sx.todayMinutes || st.today ? `app ${fmt(st.today, 2)}` : ""]);
+    const chk = $("rcDoseTodaySub").lastElementChild;
+    if (chk && (sx.todayMinutes || st.today)) chk.className = "dose-chk";
     $("rcDoseToday").title = `Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
+    $("rcDoseTodaySub").title = "O número grande é o do RC102. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.";
   } else {
     $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
     rcParts($("rcDoseTodaySub"), [sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "desde 00:00", rcAwayToday()]);
     $("rcDoseToday").title = "Calculada pelo app: só os minutos que o PC gravou";
+    $("rcDoseTodaySub").title = "";
   }
   // normal / σ, pelo fundo em casa dos últimos 7 dias
   const sig = $("rcMainSigma"), num = $("rcMainSigmaNum");

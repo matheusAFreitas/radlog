@@ -3232,7 +3232,9 @@ const I18N_EN = {
 "tecnécio": "technetium",
 "iodo": "iodine",
 "césio": "cesium",
-"cobalto": "cobalt"
+"cobalto": "cobalt",
+"O número grande é o do RC102. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.": "The big number is the RC102's. \"app\" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC.",
+"O número grande é o do RadiaCode. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.": "The big number is the RC102's. \"app\" is the sum the app made from the recorded minutes only, as a check: it is usually a bit lower, because the app does not see the time away from the PC."
 },
 "patterns": [
 [
@@ -14661,6 +14663,14 @@ const I18N_EN = {
 "with ${1}",
 [
 "com "
+]
+],
+[
+"app ",
+"^app ((?:(?! · ).)+?)$",
+"app ${1}",
+[
+"app "
 ]
 ],
 [
