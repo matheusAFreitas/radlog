@@ -19,6 +19,14 @@
   volta a "tudo certo" e não vai para o histórico.
 - Em Configurações › GQ GMC-800 › Testar o contador, uma linha resume a
   saúde do tubo.
+- **Fita dos últimos 10 segundos mais estável.**
+  - Quando 3 ou 4 contagens caíam juntas por acaso, a fita trocava de jeito
+    de desenhar (riscos de alturas diferentes × todos cheios). Agora a
+    altura só passa a contar com taxa alta de verdade.
+  - As contagens do mesmo quadro saem espalhadas no tempo, e não mais
+    grudadas num ponto só.
+  - Depois que o Windows segura a animação (por exemplo com a ferramenta
+    de captura aberta), o RC102 repõe o trecho em vez de deixar um buraco.
 
 ## 2.56.2
 - **README novo.** A página do projeto no GitHub agora descreve o app como
