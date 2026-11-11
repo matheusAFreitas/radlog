@@ -4120,3 +4120,73 @@ Ver no GQ GMC-800	See on the GQ GMC-800
 ver o cartão	see the card
 Vale olhar:	Worth a look:
 Não é alarme: é sobre o aparelho, não sobre a radiação.	Not an alarm: it is about the device, not the radiation.
+Fundo nas últimas semanas	Background over recent weeks
+GQ GMC-800 em casa	GQ GMC-800 at home
+O fundo de casa está estável	Home background is stable
+O fundo de casa subiu devagar: {0} em {1} semanas	Home background rose slowly: {0} over {1} weeks
+Só o GMC-800 subiu: {0} em {1} semanas	Only the GMC-800 rose: {0} over {1} weeks
+O fundo mudou de patamar em {0}	Background stepped up on {0}
+Ainda medindo: faltam {0} dias	Still measuring: {0} days to go
+Nova referência desde {0}: faltam {1} dias	New reference since {0}: {1} days to go
+Você marcou que mudou o GMC-800 de lugar. O app junta 30 dias válidos no lugar novo antes de comparar de novo.	You marked that you moved the GMC-800. The app collects 30 valid days in the new spot before comparing again.
+Para comparar, o app precisa de uns 30 dias válidos de fundo em casa como referência, mais 2 semanas recentes. Até lá o cartão só mostra o gráfico.	To compare, the app needs about 30 valid days of home background as a reference, plus 2 recent weeks. Until then the card only shows the chart.
+Últimas 2 semanas {0} em relação à referência. Isso é o vai e vem normal do radônio e do tempo.	Last 2 weeks {0} against the reference. That is the normal back and forth of radon and weather.
+Subiu de uma vez ({0}) e ficou. Não há RC102 em casa nas duas épocas para comparar. Mudou o aparelho de lugar ou chegou algo novo perto dele?	It rose at once ({0}) and stayed. There is no RC102 at home in both periods to compare. Did you move the device or put something new near it?
+Subiu de uma vez ({0}) e ficou. O RC102 em casa subiu junto. Mudou o aparelho de lugar ou chegou algo novo perto dele?	It rose at once ({0}) and stayed. The RC102 at home rose too. Did you move the device or put something new near it?
+Subiu de uma vez ({0}) e ficou. O RC102 em casa não mudou, então foi algo perto do GMC-800. Mudou o aparelho de lugar ou chegou algo novo perto dele?	It rose at once ({0}) and stayed. The RC102 at home did not change, so it was something near the GMC-800. Did you move the device or put something new near it?
+Sem o RC102 em casa nas duas épocas, não dá para saber se foi o ambiente ou o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo.	Without the RC102 at home in both periods, there is no way to tell the environment from the device. It is still a low background, but worth finding out why.
+O RC102 em casa subiu junto ({0}), então é o ambiente, não o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo.	The RC102 at home rose too ({0}), so it is the environment, not the device. It is still a low background, but worth finding out why.
+O RC102 em casa ficou igual ({0}). Isso aponta para o aparelho, não para o ambiente.	The RC102 at home stayed the same ({0}). That points to the device, not the environment.
+Referência	Reference
+Referência (lugar novo)	Reference (new spot)
+mediana de 120 a 30 dias atrás	median from 120 to 30 days ago
+Últimas 2 semanas	Last 2 weeks
+esperando a referência	waiting for the reference
+{0} de {1} dias acima de +5%	{0} of {1} days above +5%
+RC102 em casa	RC102 at home
+mesma conta, com a contagem do RC102	same math, with the RC102 counts
+sem o RC102 em casa nas duas épocas	no RC102 at home in both periods
+GMC-800 (mediana de 7 dias)	GMC-800 (7-day median)
+cada dia	each day
+chuva (fora da conta)	rain (left out)
+referência	reference
+últimas 2 semanas	last 2 weeks
++10%: vale olhar	+10%: worth a look
+mudou de lugar	moved
+Ainda não há nenhum dia com 12 h do GMC-800 em casa.	There is no day yet with 12 h of the GMC-800 at home.
+O que conferir	What to check
+Casa mais fechada:	House kept closed:
+o radônio do chão e das paredes acumula quando a casa fica fechada. Janelas abertas umas horas por dia costumam baixar o fundo.	radon from the floor and walls builds up when the house stays closed. Opening windows a few hours a day usually lowers the background.
+Algo novo em casa:	Something new at home:
+bancada ou piso de granito, revestimento cerâmico, areia, adubo com potássio, luminária ou relógio antigo. Dá para usar o "Medir objeto" com o RC102 para achar.	a granite counter or floor, ceramic tiles, sand, potassium fertilizer, an old lamp or clock. You can use "Measure object" with the RC102 to find it.
+Época do ano:	Time of year:
+se a referência é de meses mais ventilados, um pouco de subida é esperado. O Calendário do ano mostra se aconteceu no ano passado.	if the reference comes from better ventilated months, some rise is expected. The year calendar shows whether it happened last year.
+Saúde do tubo:	Tube health:
+veja se a sensibilidade ou a dispersão mudaram no cartão da tela do GMC-800.	check whether sensitivity or dispersion changed on the card in the GMC-800 screen.
+Calibração:	Calibration:
+a conta é em contagens, então trocar o fator não muda nada aqui. Se mudou, foi o tubo contando diferente.	the math uses counts, so changing the factor changes nothing here. If it moved, the tube is counting differently.
+Interferência:	Interference:
+fonte, carregador ou aparelho novo ligado perto do GMC-800 pode somar pulsos falsos.	a power supply, charger or new device switched on near the GMC-800 can add false pulses.
+Mudou o GMC-800 de lugar?	Did you move the GMC-800?
+Perto de parede, piso ou janela diferente o fundo muda. Se mudou, marque abaixo: o app começa uma referência nova a partir desse dia.	Near a different wall, floor or window the background changes. If you moved it, mark it below: the app starts a new reference from that day.
+Chegou algo novo perto dele?	Something new near it?
+Granito, cerâmica, luminária antiga. Afaste e veja se volta.	Granite, ceramics, an old lamp. Move it away and see if it goes back down.
+Mudei o aparelho de lugar em {0}	I moved the device on {0}
+Desfazer a marca	Undo the mark
+Só dias em casa, sem chuva e sem medir objeto. Recalcula todo dia às 06:00.	Only days at home, without rain and without measuring objects. Recalculated every day at 06:00.
+Subiu de uma vez e ficou.	It rose at once and stayed.
+Sem o RC102 em casa para comparar.	No RC102 at home to compare.
+O RC102 subiu junto: é o ambiente.	The RC102 rose too: it is the environment.
+O RC102 não subiu: veja a Saúde do tubo.	The RC102 did not rise: check Tube health.
+Não é alarme.	Not an alarm.
+Abrir em Gráficos › Tendência do fundo	Open in Charts › Background trend
+chuva, fora da conta	rain, left out
+Mudei o aparelho de lugar	I moved the device
+a referência do fundo recomeça hoje	the background reference restarts today
+Mudou o GMC-800 de lugar em {0}?	Did you move the GMC-800 on {0}?
+A referência do fundo recomeça nesse dia e fica uma nota no gráfico.	The background reference restarts that day and a note is left on the chart.
+A referência do fundo recomeça hoje. O app junta 30 dias no lugar novo antes de comparar de novo e deixa uma nota no gráfico.	The background reference restarts today. The app collects 30 days in the new spot before comparing again and leaves a note on the chart.
+Mudei de lugar	I moved it
+Referência do fundo recomeça hoje	Background reference restarts today
+Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)	I moved the GMC-800 (the reference background restarts here)
+o dia não pode ficar no futuro	the day cannot be in the future

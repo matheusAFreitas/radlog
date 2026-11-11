@@ -491,6 +491,7 @@
       </div>
       <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
     </section>
+  <section class="card view-graficos tube-card" id="slowCard" data-subpane="tendencia" aria-label="Fundo nas últimas semanas" hidden></section>
   <section class="card view-graficos" id="bgCard" role="tabpanel" data-subpane="tendencia" hidden>
       <div class="chart-head">
         <div>
@@ -772,6 +773,7 @@
       </div>
       <p class="notice ic-maint" id="icMaint" role="status" hidden></p>
       <p class="notice tube-notice" id="tubeNotice" role="status" hidden></p>
+      <p class="notice slow-notice" id="slowNotice" role="status" hidden></p>
       <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li></ul>
       <h3 class="sub-head">Últimos alertas</h3>
       <ul class="events alerts" id="alerts"><li class="muted">Nenhum alerta.</li></ul>
@@ -2439,6 +2441,7 @@
 <script src="pulso.js"></script>
 <script src="porque.js"></script>
 <script src="tubo.js"></script>
+<script src="fundo.js"></script>
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>

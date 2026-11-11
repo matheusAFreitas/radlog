@@ -66,6 +66,8 @@ type Settings struct {
 	// aparelho do "O" do logo: "" igual ao ícone da bandeja, "gmc",
 	// "radiacode" ou "nenhum"
 	PulseLogo string `json:"pulseLogo"`
+	// subida lenta do fundo (bgslow.go): dia em que o GMC-800 mudou de lugar
+	BgMoved int64 `json:"bgMoved"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
@@ -399,6 +401,7 @@ type App struct {
 	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
 	tubeMu       sync.Mutex
 	tubeCache    *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
+	bgSlowCache  *BgSlow     // subida lenta do fundo, junto da saúde do tubo (bgslow.go)
 	rainSt       rainState
 	radar        *radarStore   // chuva pelo radar (radar.go)
 	radarKick    chan struct{} // busca o radar já (lugar novo)
@@ -627,6 +630,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
+	s.BgMoved = a.settings.BgMoved                                                       // só por MarkBgMoved/ClearBgMoved
 	s.SkipVersion = a.settings.SkipVersion                                               // muda só por SkipUpdate
 	s.RcOff, s.RcBLE, s.RcNoRaw = a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw // só por SetRadiacode/SetRcRaw
 	old := a.settings

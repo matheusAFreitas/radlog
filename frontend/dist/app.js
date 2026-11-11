@@ -4951,6 +4951,9 @@ const demoRc = () => {
       }
       return { year: y, first, today, days };
     },
+    GetBgSlow: async () => bsDemo(localGet("fundoDemo", "amb"), +localGet("fundoMoved", 0)),
+    MarkBgMoved: async (d) => { const t = new Date(d || Date.now()); t.setHours(0, 0, 0, 0); localSet("fundoMoved", t.getTime()); return bsDemo(localGet("fundoDemo", "amb"), t.getTime()); },
+    ClearBgMoved: async () => { localSet("fundoMoved", 0); return bsDemo(localGet("fundoDemo", "amb"), 0); },
     GetTubeHealth: async () => {
       // cenário pelo localStorage "tuboDemo": ok (padrão), ruido, sens, falha, semrc
       const sc = localGet("tuboDemo", "ok"), now = Date.now(), day0 = new Date(); day0.setHours(0, 0, 0, 0);
