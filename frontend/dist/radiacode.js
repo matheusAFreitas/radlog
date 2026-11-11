@@ -1506,7 +1506,7 @@
     $("rcActCancel").addEventListener("click", async () => { await api.CancelActivity(); actLoad(); });
     $("rcActCal").addEventListener("click", async (e) => { const b = e.target.closest("[data-forget]"); if (!b) return; await api.ForgetActivityCal(b.dataset.forget); actLoad(); });
     new ResizeObserver(() => { if (visible) drawAll(); }).observe($("viewRadiacode"));
-    // Espectro: Acumulado ou Ao longo do tempo (espectrograma e dureza)
+    // Espectro: espectro (acumulado) ou espectrograma (com a dureza)
     const sv = $("rcSpecView");
     const setSv = (v) => {
       sv.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));

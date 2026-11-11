@@ -1345,7 +1345,7 @@
   <section class="card view" id="viewRadiacode">
       <div class="view-body">
       <div class="subpane" role="tabpanel" data-subpane="espectro" hidden>
-      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" aria-pressed="true">Acumulado</button><button type="button" data-v="tempo" aria-pressed="false">Ao longo do tempo</button></div>
+      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" aria-pressed="true">Espectro</button><button type="button" data-v="tempo" aria-pressed="false">Espectrograma</button></div>
       <div class="rc-specv" data-specview="acc">
       <article class="rc-card">
         <div class="rc-head"><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
@@ -1382,7 +1382,7 @@
 
       <article class="rc-card" id="rcSgCard">
         <div class="rc-head"><h3>Espectrograma</h3><span id="rcSgSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSgLiveTag" hidden>do aparelho</span></div>
-        <p id="rcSgDesc">Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
+        <details class="how rc-how"><summary>Como funciona</summary><p id="rcSgDesc" class="small muted">Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p></details>
         <div class="rc-ctrl" id="rcSgCtrl" hidden>
           <div class="seg rc-seg rc-per" id="rcSgPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div>
           <div class="seg rc-seg" id="rcSgE" aria-label="Energia"><button type="button" data-e="1500" aria-pressed="true">até 1.500 keV</button><button type="button" data-e="3000" aria-pressed="false">até 3.000 keV</button></div>
@@ -1397,7 +1397,7 @@
 
       <article class="rc-card" id="rcHardCard">
         <div class="rc-head"><h3>Dureza nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
-        <p id="rcHdDesc">Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
+        <details class="how rc-how"><summary>Como funciona</summary><p id="rcHdDesc" class="small muted">Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p></details>
         <div class="rc-ctrl" id="rcHdCtrl" hidden><div class="seg rc-seg rc-per" id="rcHdPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div></div>
         <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
         <p class="small muted rc-legend"><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span><span class="lg-gap" hidden>sem leitura (média)</span></p>
@@ -1409,7 +1409,7 @@
       <div class="subpane" role="tabpanel" data-subpane="busca" hidden>
       <article class="rc-card" id="rcSrCard">
         <div class="rc-head"><h3>Modo busca</h3><span id="rcSrSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSrLiveTag" hidden>ao vivo</span></div>
-        <p id="rcSrDesc">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.</p>
+        <details class="how rc-how"><summary>Como funciona</summary><p id="rcSrDesc" class="small muted">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.</p></details>
         <div class="rc-search">
           <div class="rc-gauge"><div id="rcGauge"></div><div class="rc-mult mono small" id="rcMult"><span data-m="1">×1</span><span data-m="10">×10</span><span data-m="100">×100</span><span data-m="1000">×1000</span></div></div>
           <div class="rc-search-ctl">
@@ -1437,7 +1437,7 @@
       <div class="subpane" role="tabpanel" data-subpane="atividade" hidden>
       <article class="rc-card" id="rcActCard">
         <div class="rc-head"><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
-        <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p>
+        <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p></details>
         <div class="rc-act-cal" id="rcActCal"></div>
         <div id="rcActForm">
           <div class="seg rc-seg" id="rcActKind" aria-label="Tipo"><button type="button" data-k="amostra" aria-pressed="true">Medir amostra</button><button type="button" data-k="kcl" aria-pressed="false">Calibrar com KCl</button><button type="button" data-k="torio" aria-pressed="false">Calibrar com tório</button></div>
@@ -1477,7 +1477,7 @@
       <div class="subpane" role="tabpanel" data-subpane="log" hidden>
       <article class="rc-card" id="rcLogCard">
         <div class="rc-head"><h3>Log</h3><span class="live-tag">do aparelho</span></div>
-        <p>Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
+        <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p></details>
         <div class="rc-ctrl rc-log-bar">
           <span class="small muted">Mostrar:</span>
           <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>

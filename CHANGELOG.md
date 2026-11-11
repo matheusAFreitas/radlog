@@ -1,5 +1,12 @@
 # Versões
 
+## 2.60.3
+- Aba do Radiacode 102: os textos de explicação de todos os cartões
+  (Espectrograma, Dureza, Fonte simulada, Atividade, Log) também ficam em
+  "Como funciona", como no Espectro.
+- Os botões dentro do Espectro passam a se chamar "Espectro" e
+  "Espectrograma" (antes "Acumulado" e "Ao longo do tempo").
+
 ## 2.60.2
 - Aba Espectro do Radiacode 102: o texto grande de explicação foi para
   "Como funciona", que abre ao clicar, como nas Configurações.
