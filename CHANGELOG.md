@@ -5,6 +5,9 @@
   tem que subir acima das duas janelas vizinhas. Assim, o platô Compton de
   uma fonte (Cs-137, ou o K-40 do sal light) não vira rádio, tório ou urânio
   que não estão lá.
+- No "Zoom no pico" (e no cursor), o nome do elemento aparece sempre junto
+  da origem: "bismuto · filho do radônio", "tálio · série do tório", como o
+  K-40 já aparecia como potássio.
 
 ## 2.62.0
 - Espectro do Radiacode 102: o "Acumulado do aparelho" agora mostra os

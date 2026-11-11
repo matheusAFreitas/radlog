@@ -3219,7 +3219,20 @@ const I18N_EN = {
 "Ao vivo, do seu RC102: é o mesmo espectro da tela do aparelho. Cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Para medir uma amostra, encoste-a e clique em Recomeçar (o aparelho zera junto).": "Live, from your RC102: it's the same spectrum as on the device's screen. Each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. To measure a sample, put it against the device and click Restart (the device resets too).",
 "Ao vivo, do seu RadiaCode: é o mesmo espectro da tela do aparelho. Cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Para medir uma amostra, encoste-a e clique em Recomeçar (o aparelho zera junto).": "Live, from your RC102: it's the same spectrum as on the device's screen. Each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. To measure a sample, put it against the device and click Restart (the device resets too).",
 "vem do Rádio-226 (série do urânio)": "comes from Radium-226 (uranium series)",
-"vem do Tório-232 (série)": "comes from Thorium-232 (series)"
+"vem do Tório-232 (série)": "comes from Thorium-232 (series)",
+"artificial": "artificial",
+"medicina nuclear": "nuclear medicine",
+"chumbo": "lead",
+"bismuto": "bismuth",
+"tálio": "thallium",
+"actínio": "actinium",
+"tório": "thorium",
+"protactínio": "protactinium",
+"amerício": "americium",
+"tecnécio": "technetium",
+"iodo": "iodine",
+"césio": "cesium",
+"cobalto": "cobalt"
 },
 "patterns": [
 [

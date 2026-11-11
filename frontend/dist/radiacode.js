@@ -100,6 +100,13 @@
     [1332.5, "Co-60", "artificial"], [1460.8, "K-40", "potássio"], [1764.5, "Bi-214", "filho do radônio"],
     [2204.1, "Bi-214", "filho do radônio"], [2614.5, "Tl-208", "série do tório"],
   ];
+  // o nome do elemento sempre junto (ACE): "bismuto · filho do radônio",
+  // como no K-40, que já aparece como potássio
+  const ELEM = { Pb: "chumbo", Bi: "bismuto", Tl: "tálio", Ac: "actínio", Th: "tório", Pa: "protactínio", Am: "amerício", Tc: "tecnécio", I: "iodo", Cs: "césio", Co: "cobalto", K: "potássio" };
+  for (const l of LIB) {
+    const el = /^[A-Z][a-z]?-\d/.test(l[1]) ? ELEM[l[1].split("-")[0]] : null;
+    if (el && l[2] !== el) l[2] = l[2] ? el + " · " + l[2] : el;
+  }
   function libNear(e) {
     const tol = 1.2 * sig(e);
     return LIB.filter(([le]) => Math.abs(le - e) <= tol).sort((a, b) => Math.abs(a[0] - e) - Math.abs(b[0] - e)).slice(0, 2);
