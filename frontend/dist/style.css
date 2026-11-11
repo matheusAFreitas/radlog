@@ -2562,3 +2562,4 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 #pageAlara .al-why details.how > :is(p, ul) { margin-top: var(--space-2); }
 #pageAlara .al-why ul { padding-left: var(--space-4); display: grid; gap: var(--space-1); }
 #pageAlara details.al-how-why > summary { color: var(--accent); font-size: var(--fs-label); font-weight: 600; }
+.al-cx-ok { margin-left: var(--space-2); color: var(--accent); border-color: color-mix(in srgb, var(--accent) 45%, transparent); }

@@ -3,6 +3,10 @@
 ## 2.64.2
 - Histórico de alertas: quando o filtro esvazia a lista (ex.: RC102 sem
   alertas), o detalhe do alerta escolhido antes some junto.
+- Histórico de alertas: no filtro RC102 entram também os alertas do GMC-800
+  que o RC102 confirmou, com a marca "GMC-800".
+- ALARA: a dose em coisas conhecidas usa o raio-X de tórax no lugar da
+  banana, como no Resumo.
 - Quadro dos aparelhos: sai a frase "no nível de fundo habitual" ao lado do
   "Seguro", e a fita do pulso perde as legendas "Os últimos 10 segundos" e
   "cada risco é uma contagem".
