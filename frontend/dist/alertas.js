@@ -148,6 +148,8 @@ function alertLi(e, withDate) {
     sp.textContent = sub;
     box.appendChild(sp);
   }
+  const cx = typeof cxSlot === "function" ? cxSlot(e) : null;
+  if (cx) box.appendChild(cx);
   li.append(d, t, box);
   if (api.GetWhyRise) {
     const w = document.createElement("button");
@@ -263,6 +265,7 @@ async function loadAlertDetail() {
 
 function drawAlertDetail(d) {
   state.ad = d;
+  if (typeof cxDetail === "function") cxDetail(d);
   const svg = $("adChart");
   $("adPeak").hidden = true;
   $("btnAdOpen").hidden = !d;
