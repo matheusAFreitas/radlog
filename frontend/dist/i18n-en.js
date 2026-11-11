@@ -3071,7 +3071,11 @@ const I18N_EN = {
 "Provavelmente é só o acaso.": "Probably just chance.",
 "Esta é a hora em que o radônio costuma subir na sua casa.": "This is the time when radon usually rises at your home.",
 "Nenhuma das causas comuns apoia.": "None of the common causes supports it.",
-"Os dois aparelhos subiram juntos, então é radiação de verdade.": "Both devices rose together, so it's real radiation."
+"Os dois aparelhos subiram juntos, então é radiação de verdade.": "Both devices rose together, so it's real radiation.",
+"O logo pisca com": "The logo blinks with",
+"O mesmo aparelho do ícone da bandeja": "The same device as the tray icon",
+"Nenhum (logo parado)": "None (logo stays still)",
+"aparelho do logo": "logo device"
 },
 "patterns": [
 [

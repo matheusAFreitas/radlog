@@ -2341,6 +2341,7 @@ async function openSettings(focusId) {
   $("selTrayDev").disabled = !!s.trayPlain;
   $("chkPulse").checked = !s.pulseOff;
   $("chkPulseStrip").checked = !!s.pulseStrip;
+  $("selPulseLogo").value = s.pulseLogo || "";
   PU.preview = null; pulseApply();
   $("chkUpdCheck").checked = !s.noUpdateCheck;
   $("chkCleanOld").checked = !s.keepOldVersions;
@@ -2364,10 +2365,10 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
-  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
@@ -2927,6 +2928,7 @@ function wire() {
       trayDevice: $("selTrayDev").value,
       pulseOff: !$("chkPulse").checked,
       pulseStrip: $("chkPulseStrip").checked,
+      pulseLogo: $("selPulseLogo").value,
       noUpdateCheck: !$("chkUpdCheck").checked,
       keepOldVersions: !$("chkCleanOld").checked,
       lang: $("selLang").value,

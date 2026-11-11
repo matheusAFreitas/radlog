@@ -1,5 +1,16 @@
 # Versões
 
+## 2.56.0
+- **Fita dos últimos 10 segundos sem riscos tortos.** Com a escala de 125%
+  do Windows, a fita ficava com meio pixel esticado e os riscos saíam com
+  larguras e alturas diferentes. Agora o desenho bate pixel com pixel com
+  a tela, cada risco anda de casa em casa sem mudar de largura e todos têm
+  a mesma altura (só numa taxa alta, com várias contagens na mesma casa,
+  a altura passa a contar quantas foram).
+- **Escolher o aparelho do logo.** Em Configurações › Janela e tela ›
+  Pulso da contagem, "O logo pisca com": o mesmo aparelho do ícone da
+  bandeja (como antes), GQ GMC-800, Radiacode 102 ou nenhum.
+
 ## 2.55.0
 - **"Por que subiu?"** Quando a leitura sobe, um painel lateral confere as
   causas comuns com os seus próprios dados. Para cada causa ele diz se os
