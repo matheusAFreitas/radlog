@@ -15,6 +15,21 @@
 - A dica do ícone agora fica em µSv/h (antes estava em CPM) e mostra os dois
   aparelhos, uma linha cada.
 
+## 2.46.0
+- **Medir objeto não vira dose sua.** Quando o RC102 está encostado num
+  objeto em Medir objeto, aqueles minutos passam a contar só como fundo na
+  Minha dose, na fita do dia, no ALARA e no total do aparelho. Antes, a
+  leitura alta do objeto entrava como se fosse dose recebida por você.
+- **Pressão × radônio mais rigorosa.** O app tira o ciclo do dia do fundo e
+  da pressão antes de comparar, porque os dois sobem e descem com a hora e
+  isso fabricava relação. Depois faz um teste de acaso: desloca o fundo no
+  tempo várias vezes e vê quantas vezes uma relação daquele tamanho aparece
+  sozinha. Só chama de relação com 28 dias ou mais e passando no teste; se
+  não passar, diz que pode ser coincidência.
+- **ALARA: Tempo mostra o que passa do fundo.** O número grande agora é a
+  dose a mais por ficar no lugar, e a linha de baixo mostra o total e quanto
+  disso é fundo. As contas de 2× e 4× da distância também mostram só o extra.
+
 ## 2.45.0
 - **Barra compacta.** Os quadros grandes dos aparelhos ficam só no Agora.
   Nas outras telas, uma faixa fina fica presa no topo desde o começo, com a

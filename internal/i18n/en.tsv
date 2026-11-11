@@ -3765,6 +3765,16 @@ pela leitura de casa (GMC-800)	from the home reading (GMC-800)
 RC102 com você e leitura de casa (GMC-800)	RC102 with you and the home reading (GMC-800)
 Sem alertas	No alerts
 Abrir a página do aparelho	Open the device page
+r = {0} em {1} dias, sem o ciclo do dia.	r = {0} over {1} days, without the daily cycle.
+Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em {0}% das vezes.	Shifting the background in time, a relationship this strong showed up by chance in {0}% of the tries.
+Então pode ser só coincidência.	So it may be just a coincidence.
+Com mais dias a resposta fica mais clara.	With more days the answer gets clearer.
+Com 28 dias ou mais e passando no teste de acaso, a relação é confiável.	With 28 days or more and passing the chance test, the relationship is reliable.
+µSv acima do fundo	µSv above background
+mSv acima do fundo	mSv above background
+No lugar, {0} no total: {1} disso é o fundo, que você receberia em qualquer canto da casa.	At the spot, {0} in total: {1} of it is background, which you would get anywhere in the house.
+Se a fonte for pequena e você ficar ao dobro da distância: {0} acima do fundo.	If the source is small and you stay at twice the distance: {0} above background.
+Ao quádruplo: {0} acima do fundo.	At four times: {0} above background.
 Mostrar a leitura no ícone da bandeja	Show the reading on the tray icon
 Aparelho no ícone	Device on the icon
 Automático (o mais grave)	Automatic (the most severe)

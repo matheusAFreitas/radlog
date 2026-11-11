@@ -2866,6 +2866,11 @@ const I18N_EN = {
 "RadiaCode com você e leitura de casa (GMC-800)": "RC102 with you and the home reading (GMC-800)",
 "Sem alertas": "No alerts",
 "Abrir a página do aparelho": "Open the device page",
+"Então pode ser só coincidência.": "So it may be just a coincidence.",
+"Com mais dias a resposta fica mais clara.": "With more days the answer gets clearer.",
+"Com 28 dias ou mais e passando no teste de acaso, a relação é confiável.": "With 28 days or more and passing the chance test, the relationship is reliable.",
+"µSv acima do fundo": "µSv above background",
+"mSv acima do fundo": "mSv above background",
 "Mostrar a leitura no ícone da bandeja": "Show the reading on the tray icon",
 "Aparelho no ícone": "Device on the icon",
 "Automático (o mais grave)": "Automatic (the most severe)",
@@ -3601,6 +3606,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em ",
+"^Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em ((?:(?! · ).)+?)% das vezes\\.$",
+"Shifting the background in time, a relationship this strong showed up by chance in ${1}% of the tries.",
+[
+"Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em ",
+"% das vezes."
+]
+],
+[
 "Geiger saturado: a leitura chegou a ",
 "^Geiger saturado: a leitura chegou a ((?:(?! · ).)+?) µSv/h \\(fim da escala\\); o valor real pode ser maior$",
 "Geiger saturated: the reading reached ${1} µSv/h (end of scale); the real value may be higher",
@@ -3760,6 +3774,16 @@ const I18N_EN = {
 "O período começa ",
 " antes do primeiro dado do contador (",
 "); esse trecho não é lacuna."
+]
+],
+[
+"No lugar, ",
+"^No lugar, ((?:(?! · ).)+?) no total: ((?:(?! · ).)+?) disso é o fundo, que você receberia em qualquer canto da casa\\.$",
+"At the spot, ${1} in total: ${2} of it is background, which you would get anywhere in the house.",
+[
+"No lugar, ",
+" no total: ",
+" disso é o fundo, que você receberia em qualquer canto da casa."
 ]
 ],
 [
@@ -3991,6 +4015,15 @@ const I18N_EN = {
 [
 "Em dia: último download em ",
 " e nenhum trecho sem leitura no app desde então."
+]
+],
+[
+"Se a fonte for pequena e você ficar ao dobro da distância: ",
+"^Se a fonte for pequena e você ficar ao dobro da distância: ((?:(?! · ).)+?) acima do fundo\\.$",
+"If the source is small and you stay at twice the distance: ${1} above background.",
+[
+"Se a fonte for pequena e você ficar ao dobro da distância: ",
+" acima do fundo."
 ]
 ],
 [
@@ -6756,6 +6789,16 @@ const I18N_EN = {
 ]
 ],
 [
+"r = ",
+"^r = ((?:(?! · ).)+?) em ((?:(?! · ).)+?) dias, sem o ciclo do dia\\.$",
+"r = ${1} over ${2} days, without the daily cycle.",
+[
+"r = ",
+" em ",
+" dias, sem o ciclo do dia."
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) sem contagens · confira o aparelho$",
 "${1} no counts · check the device",
@@ -7249,6 +7292,15 @@ const I18N_EN = {
 "≈ ${1} weeks of your home background",
 [
 " semanas do fundo da sua casa"
+]
+],
+[
+"Ao quádruplo: ",
+"^Ao quádruplo: ((?:(?! · ).)+?) acima do fundo\\.$",
+"At four times: ${1} above background.",
+[
+"Ao quádruplo: ",
+" acima do fundo."
 ]
 ],
 [
