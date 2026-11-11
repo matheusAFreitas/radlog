@@ -62,8 +62,12 @@ jobs:
           # a partir da 3ª, troca o espelho da Azure pelo oficial (o runner lista
           # o espelho em apt-mirrors.txt, não só no sources)
           for i in 1 2 3 4; do
-            if [ "$i" -ge 3 ]; then
+            if [ "$i" -eq 3 ]; then
               sudo sed -i 's#http://azure.archive.ubuntu.com#http://archive.ubuntu.com#g' /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true
+            fi
+            if [ "$i" -eq 4 ]; then
+              # a porta 80 do Ubuntu também pode estar fora: espelho em https
+              sudo sed -i 's#http://archive.ubuntu.com#https://mirrors.edge.kernel.org#g' /etc/apt/apt-mirrors.txt /etc/apt/sources.list /etc/apt/sources.list.d/*.sources 2>/dev/null || true
             fi
             sudo timeout 150 apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 update \
               && sudo timeout 300 apt-get -o Acquire::Retries=2 -o Acquire::http::Timeout=20 install -y libgtk-3-dev libwebkit2gtk-4.1-dev \
