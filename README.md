@@ -1,223 +1,170 @@
 # RadLog
 
+Registro de radiação ionizante para dois aparelhos: o contador Geiger
+**GQ GMC-800** (monitor de área, parado em casa) e o **Radiacode 102**
+(dosímetro pessoal com espectrômetro, anda com você). Feito em Go + Wails,
+para Windows e Linux, em português (com tradução para inglês).
+
+O app lê os aparelhos pela USB (o Radiacode 102 também pelo Bluetooth),
+guarda uma leitura por minuto e mostra tudo em µSv/h: leitura ao vivo,
+gráficos, dose, alertas, espectro, clima × radiação, medição de objetos e
+relatórios em PDF. Os dados ficam só no seu computador.
+
+Versão atual: veja as [Releases](../../releases) e o [CHANGELOG](CHANGELOG.md).
+
 > Até a 1.x se chamava **GMC Monitor**. A 2.0 leva os dados sozinha para a
-> pasta nova na primeira vez que abre. Veja o [ROADMAP](docs/ROADMAP.md).
+> pasta nova na primeira vez que abre.
 
-Registro de radiação para o contador Geiger **GQ GMC-800** e o
-**RadiaCode**, feito em Go + Wails, para
-Windows e Linux. Lê o contador pela USB a cada segundo, guarda uma leitura por
-minuto e mostra tudo numa tela só: leitura ao vivo, gráficos, dose acumulada,
-alertas, chuva × radiação, medição de objetos, relatórios em PDF e um log
-técnico com níveis.
-
-Versão atual: veja `internal/app/version.go` e o [CHANGELOG](CHANGELOG.md).
-
-## Baixar
+## Baixar e atualizar
 
 Os arquivos prontos ficam em **[Releases](../../releases)**:
 
-- Windows: `RadLog-vX.exe` (não precisa instalar; o WebView2 já vem no
-  Windows 10/11).
-- Linux: `RadLog-vX-x86_64.AppImage`, ou o `.tar.gz` com o binário e o
-  `install.sh`. Precisa da WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0`).
+- **Windows**: `RadLog-vX.Y.Z.exe`. Não precisa instalar; o WebView2 já vem
+  no Windows 10/11.
+- **Linux**: `RadLog-vX.Y.Z-x86_64.AppImage`, ou o
+  `radlog-vX.Y.Z-linux-x86_64.tar.gz` com o binário e o `install.sh`. Precisa
+  da WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0`).
 
-Para atualizar, abra a versão nova com a antiga aberta: a antiga fecha e passa
-o lugar para a nova sozinha.
+O app procura versão nova ao abrir e uma vez por dia. Antes de instalar, ele
+confere o SHA-256 do arquivo baixado e a **assinatura Ed25519** da lista de
+somas (`SHA256SUMS.txt.sig`): sem assinatura válida, a versão é recusada.
+Também dá para trocar à mão: abra a versão nova com a antiga aberta, e a
+antiga fecha e passa o lugar.
 
-## O que ele faz
+## As telas
 
-- Leitura ao vivo em CPM, µSv/h, mrem/h ou CPS, com as faixas do manual
-  (abaixo de 50 CPM seguro, 50–99 atenção, 100+ alerta).
-- Converte para µSv/h usando a **calibração gravada no próprio contador**
-  (guarda a última lida; se nunca leu, usa a de fábrica do GMC-800: 986 CPM = 10 µSv/h, ≈ 0,0101 µSv/h por CPM).
-  A calibração tem versões com data: um fator novo (por exemplo, comparando com o RadiaCode) vale a partir
-  de quando foi aplicado, e o histórico só é recalculado se você pedir (dá para desfazer).
-- Gráfico em CPM ou µSv/h, de 15 min, 30 min, 1 h, 24 h e 7 dias, média/mínimo/máximo e dose acumulada no dia.
-  Arrastando no gráfico dá zoom num trecho, com a resolução mais fina disponível.
-- **Dosímetro**: dose acumulada em 3 h, 6 h, 12 h, 24 h, 7 dias, 30 dias ou 1 ano, comparada
-  com o fundo natural e com um teto (fundo + limite anual da CNEN/ICRP para o
-  público, 1 mSv/ano, ou para trabalhador exposto, 20 mSv/ano). Os limites não
-  contam a radiação natural, por isso o teto parte do seu fundo medido.
-- Diz em palavras se a leitura atual está **dentro do normal** para o seu
-  fundo (faixa onde caem 95% das leituras pela estatística de Poisson; acima
-  de 3 desvios dificilmente é acaso).
-- **Medir um objeto**: fundo e objeto pelo mesmo tempo, diferença com margem
-  de erro e veredito. As medições ficam salvas e marcadas no gráfico.
-- Projeção da dose em um ano no ritmo atual.
-- **Mapa de calor** hora × dia da média de CPM.
-- Períodos **fora de casa**: as leituras entram na dose, mas não no fundo da casa.
-- **Chuva** no gráfico de CPM (radar RainViewer a cada 10 min + modelo Open-Meteo, opcional), com aviso de
-  quando está buscando, desligada ou sem acesso.
-- Baixa o histórico da memória do contador, salva uma cópia bruta (`.bin`)
-  e junta as leituras às do app.
-- Mostra se o relógio do contador está certo e acerta com o do PC num clique.
-- **Ajustes do contador** pelo app: gravação na memória, estimativa rápida (FET),
-  limite/volume do alarme, vibração, som de clique, volume da voz, modo escuro,
-  brilho, economia de energia, LED e os **6 pontos de calibração**. A tensão do
-  tubo aparece só para leitura.
-  Antes de gravar, salva uma cópia da configuração em `configuracao\` e confere
-  lendo de volta; se der errado, tenta voltar a anterior. Campos com valor
-  estranho ficam travados, e se a calibração não parecer válida (outro layout de
-  firmware) nada é gravado.
-- Recomenda o intervalo de gravação (a cada minuto) e mostra quanto da memória
-  do contador está ocupado e quanto tempo o espaço livre dura em cada modo.
-- **Descobrir onde fica um ajuste**: tira uma "foto" da configuração, você muda
-  algo no menu do contador e o app mostra quais bytes mudaram.
-- Aviso de atenção a partir de 50 CPM (faixa amarela e 3 bipes).
-- **Alertas ativos** na tela principal (desde quando, pico) e os 3 últimos;
-  histórico completo de alertas com filtros.
-- **Alertas retroativos**: ao baixar o histórico, os trechos acima de 50 CPM
-  (ou do limite do alarme) que aconteceram com o app fechado viram alertas com
-  a data e a hora certas.
-- Alarme a partir de um limite de CPM: sirene ou bipes em loop, faixa
-  laranja, título da janela e janela trazida para a frente.
-- **Alarme de perigo** (padrão 1.000 CPM): vermelho, som próprio mais forte,
-  não pode ser desligado (só silenciado por um tempo) e tem prioridade sobre o
-  alarme do usuário.
-- Aba **Níveis do app** nas Configurações: atenção, perigo, tempo do
-  "Silenciar" e limites do Geiger saturado.
-- Aviso de **Geiger saturado** (fim da escala ou queda brusca depois de um
-  valor extremo) e de como a leitura subiu até o perigo.
-- **Modo demo** para testar alarme e gráficos com um valor simulado, sem mexer
-  nos arquivos (as leituras reais continuam sendo gravadas).
-- **Resumo** de hoje, ontem, da semana ou de qualquer dia (média comparada
-  ao seu normal, máximo, mínimo, dose, tempo medido, alertas, chuva) e
-  **comparação** de dois períodos (hoje × ontem até a mesma hora, 7 dias × 7
-  dias antes, dois dias quaisquer), com as curvas sobrepostas.
-- Ao baixar o histórico, cada trecho novo (ex.: a noite) vem com um resumo:
-  máximo, dose, alertas e chuva.
-- **Chuva × radiação**: efeito médio da chuva no CPM, comparado com horários
-  sem chuva, e a chuva em andamento.
-- **Gráfico de cada alerta**, com o detalhe por segundo dos alertas ao vivo.
-- **Ícone na bandeja** (muda de cor em atenção, alarme e perigo, inclusive no
-  demo) e iniciar com o Windows.
-- **Backup** (.zip); importar só junta o que falta (serve para levar os dados
-  de um PC para outro, Windows ou Linux).
-- Log técnico (`log.txt`) e `diagnostico.txt` para investigar travamentos da
-  porta; leitura e reconexão com prazo.
-- Exporta tudo para CSV.
-- Reconecta sozinho se o cabo cair.
+- **Agora**: os dois aparelhos lado a lado, cada um com mostrador, nível
+  (seguro, atenção, alarme, perigo, sempre com cor **e** símbolo), frase
+  dizendo se está dentro do normal, gráfico da última hora e a fita do dia.
+  O anel do mostrador pode piscar a cada contagem (pulso da contagem).
+- **Gráficos**: ao longo do tempo (com zoom arrastando), por hora do dia,
+  padrões, tendência e o **calendário do ano** (fundo de casa ou sua dose,
+  dia a dia).
+- **Resumo**: hoje, ontem, a semana ou qualquer dia, comparação de
+  períodos e **relatório em PDF**.
+- **ALARA**: de onde vem a sua dose e testes de tempo, distância e
+  blindagem.
+- **Alertas**: ativos e histórico, com o gráfico de cada um e o painel
+  **"Por que subiu?"**, que confere as causas comuns (acaso, o outro
+  aparelho, chuva, radônio, pressão, objeto, saída de casa) com os seus
+  dados.
+- **Medir objeto**: fundo e objeto pelo mesmo tempo, diferença com margem
+  de erro, veredito e a dose comparada com coisas conhecidas.
+- **Fora de casa**: períodos em que o Radiacode 102 saiu com você; entram
+  na dose, mas não no fundo da casa.
+- **Clima**: chuva (radar RainViewer e modelo Open-Meteo) e pressão
+  × radônio. Opcional; a cidade fica só nos ajustes deste PC.
+- **GQ GMC-800**: leitura, histórico da memória do contador, relógio,
+  ajustes do aparelho e calibração (inclusive gravar no próprio contador o
+  fator da intercalibração com o Radiacode 102).
+- **Radiacode 102**: leitura, espectro acumulado com isótopos e zoom no
+  pico, espectro ao longo do tempo, busca, atividade (Bq), log, ajustes e
+  alarmes do aparelho, e o histórico que ele gravou longe do PC.
+- **Configurações**: alarmes e níveis do app, janela e tela (tamanho,
+  densidade, número no ícone da bandeja, pulso), dados, backup e
+  sincronização entre PCs.
+
+Busca rápida com **Ctrl+K**. O logo é um botão para anotar, marcar saída de
+casa e medir um objeto.
+
+## Alarmes
+
+- Faixas do app em µSv/h (atenção, alarme e perigo), por aparelho. O nível
+  **perigo** não pode ser desligado, só silenciado por um tempo.
+- O Radiacode 102 também pode usar os alarmes do próprio aparelho.
+- Aviso de Geiger saturado e de leitura fora da escala.
+- Alertas retroativos: o que passou do limite com o app fechado vira alerta
+  com a hora certa quando o histórico é baixado.
+- Ícone na bandeja com a leitura na cor do nível; alarme e perigo trazem a
+  janela para a frente.
 
 ## Onde ficam os dados
 
-`%AppData%\RadLog\` (o botão "pasta de dados" no rodapé abre):
+Windows: `%AppData%\RadLog\`. Linux: `~/.config/RadLog/`. O botão "pasta de
+dados" abre a pasta. O que tem lá:
 
-- `leituras\AAAA-MM.csv` — uma linha por minuto, abre direto no Excel
-- `historico\*.bin` — cópias brutas da memória do contador
-- `configuracao\*.bin` — cópias da configuração do contador
-- `eventos.csv` — eventos e alertas (colunas: data, texto, tipo, nível, CPM, pico, hora do pico, fim, retroativo)
-- `medicoes.json` — medições de objeto salvas
-- `fora-de-casa.json` — períodos marcados como fora de casa
-- `alertas-retro.ok` — marca que o histórico antigo já foi conferido
-- `chuva.json` — chuva por hora baixada do Open-Meteo (se ligado)
-- `alertas-detalhe/` — leituras por segundo de cada alerta ao vivo (para o gráfico do alerta)
-- `chuva-radar.json` — chuva lida no radar (RainViewer) a cada 10 min, 60 dias
-- `memoria.json` — uso da memória do contador no último histórico baixado
-- `config.json` — configurações
-- `log.txt` (e `log-anterior.txt`) — log técnico; `diagnostico.txt` — estado do app quando algo travou
-- `anotacoes.json` — anotações do gráfico
+- `leituras/AAAA-MM.csv`: uma linha por minuto de cada aparelho, abre no
+  Excel;
+- `historico/` e `configuracao/`: cópias brutas da memória e da
+  configuração do contador;
+- `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
+  alertas, medições, saídas de casa e anotações;
+- `chuva*.json`: chuva e pressão (se o Clima estiver ligado);
+- `config.json`: configurações; `log.txt` e `diagnostico.txt`: log técnico.
 
-No Linux, a pasta é `~/.config/RadLog/`. Na primeira abertura da 2.0, o app
-copia a pasta antiga (`GMC Monitor`), confere arquivo por arquivo, guarda um
-backup dela em `migracao\` e só então a apaga (`migrado-de-gmc-monitor.json`
-diz o que foi feito).
+O **backup** (.zip) junta só o que falta ao importar e serve para levar os
+dados de um PC para outro, Windows ou Linux. Localização e cidade nunca vão
+para PDF, relatório ou backup.
 
 ## Compilar
 
-Precisa do [Go](https://go.dev/dl/) (1.22 ou mais novo) e do WebView2, que já
-vem no Windows 10/11. Não precisa do Wails CLI nem de Node.
+Precisa do [Go](https://go.dev/dl/) 1.22 ou mais novo. Não precisa do Wails
+CLI nem de Node: a interface é HTML, CSS e JS puros em `frontend/dist/`.
 
-Na pasta do projeto:
+Windows (precisa do WebView2, que já vem no Windows 10/11):
 
 ```
 scripts\build.bat
 ```
 
-Isso baixa as dependências (`go mod tidy`), roda os testes e gera
-`RadLog.exe`.
-
-As releases são geradas pelo GitHub Actions (`.github/workflows/release.yml`):
-uma tag `vX.Y.Z` igual ao `AppVersion` de `internal/app/version.go` compila o `.exe`, o
-AppImage e o `.tar.gz` e publica com o trecho da versão no CHANGELOG.
-
-### Linux
-
-O pacote `radlog-vX-linux-x86_64.tar.gz` já traz o binário pronto, o
-`install.sh` (atalho no menu) e o `build-appimage.sh` (gera o AppImage; os
-arquivos ficam em `build/linux/`). Precisa da WebKitGTK 4.1 instalada
-(`sudo apt install libwebkit2gtk-4.1-0`).
-
-Para compilar no próprio Linux:
+Linux:
 
 ```
 sudo apt install golang libgtk-3-dev libwebkit2gtk-4.1-dev   # Debian/Ubuntu
 ./scripts/build-linux.sh
 ```
 
-Para ler o contador sem root, o usuário precisa estar no grupo `dialout`
-(`sudo usermod -aG dialout $USER` e entrar de novo). A porta aparece como
-`/dev/ttyUSB0`. No Linux não há ícone na bandeja, "iniciar com o sistema"
-(o resto é igual, e o backup de um abre no outro).
-
-## Estrutura
-
-```
-main.go                     embute a interface e chama o app
-internal/app/               o app (um pacote Go só; os métodos exportados de App
-                            são o que a interface chama)
-  run.go                    abre a janela (Wails), uma cópia só, troca de versão
-  app.go                    conexão, leitura ao vivo, histórico, gráficos
-  alerts.go, alarm.go       alertas ativos, retroativos, episódios, eventos.csv
-  levels.go, saturation.go  níveis do app, tempo morto, Geiger saturado
-  dose.go, stats.go         dosímetro, fundo, desvios (σ), mapa de calor
-  summary.go, report*.go    resumo de período e relatório em PDF
-  measure.go                medir um objeto
-  weather.go, radar.go,     chuva (Open-Meteo e radar RainViewer) e
-  rainimpact.go             chuva × radiação
-  devconfig.go, memory.go   ajustes e memória do contador
-  backup.go                 backup .zip (gerar e importar mesclando)
-  applog.go, logs.go        log técnico e o visor dele
-  tray*.go, icons/          ícone na bandeja e iniciar com o Windows
-  handoff*.go, webview.go   troca automática de versão, pasta do WebView2
-  watchdog.go               leitura travada, fechamento e diagnóstico
-  demo.go, notes.go,        modo demo, anotações, períodos fora de casa
-  periods.go
-internal/gmc/               protocolo do contador (serial, comandos, calibração, histórico)
-internal/store/             gravação das leituras em CSV mensal
-internal/pdf/               gerador de PDF mínimo, sem dependências
-frontend/dist/              interface (HTML, CSS e JS puros, sem build)
-build/windows/              ícone e manifesto do .exe (go-winres)
-build/linux/                AppImage, atalho (.desktop) e install.sh
-scripts/                    build.bat (Windows) e build-linux.sh
-docs/ROADMAP.md             o que está planejado
-```
+Para ler os aparelhos sem root no Linux, o usuário precisa estar no grupo
+`dialout` (`sudo usermod -aG dialout $USER` e entrar de novo).
 
 A interface também abre direto no navegador (`frontend/dist/index.html`) em
-**modo demonstração**, com dados falsos — útil para mexer no visual sem o
-contador.
+**modo demonstração**, com dados falsos dos dois aparelhos.
+
+### Releases
+
+O GitHub Actions (`.github/workflows/release.yml`) compila o `.exe`, o
+AppImage e o `.tar.gz` quando a versão de `internal/app/version.go` muda no
+`main`, assina o `SHA256SUMS.txt` e publica com o trecho da versão no
+CHANGELOG.
 
 ## Testes
 
 ```
-go test ./...
+go test ./internal/...
 ```
 
-Os testes usam um GMC-800 simulado com respostas gravadas de um aparelho real.
-`app_e2e_test.go` testa o app inteiro contra uma porta serial simulada (só roda
-com a variável `GMC_TEST_PORT` definida).
+Os testes do GMC-800 usam respostas gravadas de um aparelho real.
 
-## Observações sobre o protocolo
+## Estrutura
+
+```
+main.go                 embute a interface e chama o app
+internal/app/           o app (os métodos exportados de App são o que a interface chama)
+internal/gmc/           protocolo do GQ GMC-800 (serial, calibração, histórico)
+internal/radiacode/     protocolo do Radiacode 102 (USB e Bluetooth)
+internal/core/          contas puras: alertas, dose, intercalibração, níveis, estatística
+internal/store/         leituras em CSV mensal
+internal/pdf/           gerador de PDF mínimo, sem dependências
+internal/i18n/          tradução (en.tsv)
+internal/updsig/        chave pública que confere as atualizações
+frontend/dist/          interface (um arquivo .js por tela)
+build/                  ícone, manifesto do .exe e arquivos do Linux
+scripts/                build e ferramentas de tradução
+```
+
+## Observações sobre o GMC-800
 
 O GMC-800 diz seguir o GQ-RFC1201, mas na prática difere: CPM e CPS vêm em
 4 bytes, a configuração tem 512 bytes com layout próprio e o `SPIR` às vezes
-manda um byte a mais. A configuração é gravada com `ECFG`, `WCFG[endereço alto][endereço baixo][valor]`
-e `CFGUPDATE`, como a GQ explicou no fórum para os modelos de 512 bytes. Os detalhes foram conferidos com o projeto
-[PyGMC](https://pypi.org/project/pygmc), que testou num GMC-800 real.
+manda um byte a mais. A configuração é gravada com `ECFG`,
+`WCFG[endereço alto][endereço baixo][valor]` e `CFGUPDATE`. Os detalhes
+foram conferidos com o projeto [PyGMC](https://pypi.org/project/pygmc).
 
 ## Licença
 
 Código sob a licença MIT (veja [LICENSE](LICENSE)). Fontes IBM Plex sob a SIL
 Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`).
 
-Não é um produto da GQ Electronics. "GMC" e "GQ" são marcas deles; o app só
-fala com o contador pelo protocolo público GQ-RFC1201.
+Não é um produto da GQ Electronics nem da Radiacode. "GMC" e "GQ" são marcas
+da GQ Electronics; "Radiacode" é marca da Radiacode. O app só fala com os
+aparelhos pelos protocolos deles.
