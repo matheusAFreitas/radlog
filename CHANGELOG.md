@@ -1,5 +1,16 @@
 # Versões
 
+## 2.58.2
+- A mediana do fundo do GQ GMC-800 agora é interpolada. Com umas 20
+  contagens por minuto, a mediana comum só andava de 1 em 1 contagem, em
+  degraus de ~5%, e era esse arredondamento que decidia os limiares de +10%
+  e +5% da subida lenta do fundo. A mediana nova anda suave e continua
+  resistente a picos. Ela entra em três lugares:
+  - na subida lenta do fundo (mediana de cada dia);
+  - no Calendário do ano (cor de cada dia em Fundo de casa);
+  - no "Por que subiu?" (o normal e a mediana de cada hora). Antes, o
+    "subiu X%" já saía uns 2% acima.
+
 ## 2.58.1
 - Tela do GQ GMC-800 a 130% e 150% (Configurações › Janela) com a janela
   estreita: o cartão grande não passa mais da largura. A "Dose hoje" desce

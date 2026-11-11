@@ -2,6 +2,7 @@ package stats
 
 import (
 	"math"
+	"math/rand"
 	"testing"
 )
 
@@ -36,5 +37,42 @@ func TestSigma(t *testing.T) {
 	}
 	if z := Sigma(20, 25); z == nil || math.Abs(*z+1) > 1e-9 {
 		t.Fatalf("Sigma(20, 25) = %v, quero -1", z)
+	}
+}
+
+func TestMedianCounts(t *testing.T) {
+	if MedianCounts(nil) != 0 {
+		t.Fatal("vazio")
+	}
+	// 20 e 21 meio a meio: 20,5 (a comum também dá 20,5)
+	if m := MedianCounts([]float64{20, 21, 20, 21}); math.Abs(m-20.5) > 1e-9 {
+		t.Fatalf("%v", m)
+	}
+	// um valor só repetido: o próprio valor
+	if m := MedianCounts([]float64{7, 7, 7}); m != 7 {
+		t.Fatalf("%v", m)
+	}
+	// Poisson: a interpolada acompanha a média de perto, a comum anda de 1 em 1
+	r := rand.New(rand.NewSource(3))
+	for _, lam := range []float64{18, 20.4, 22.03, 25} {
+		v := make([]float64, 20000)
+		for i := range v {
+			v[i] = float64(poissonT(r, lam))
+		}
+		// a interpolada fica a uma distância quase fixa de λ (sem degraus)
+		if m := MedianCounts(v); math.Abs(m-(lam-1.0/6)) > 0.12 {
+			t.Fatalf("λ %.2f: %.3f", lam, m)
+		}
+	}
+}
+
+func poissonT(r *rand.Rand, l float64) int {
+	L, k, p := math.Exp(-l), 0, 1.0
+	for {
+		p *= r.Float64()
+		if p <= L {
+			return k
+		}
+		k++
 	}
 }
