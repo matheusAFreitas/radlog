@@ -3288,6 +3288,20 @@ const I18N_EN = {
 ],
 [
 "Mudança brusca por volta de ",
+"^Mudança brusca por volta de ((?:(?! · ).)+?): o fundo passou de ((?:(?! · ).)+?) para ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)%\\), com ((?:(?! · ).)+?) dias antes e ((?:(?! · ).)+?) depois\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"Abrupt change around ${1}: the background went from ${2} to ${3} µSv/h (${4}%), with ${5} days before and ${6} after. It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"Mudança brusca por volta de ",
+": o fundo passou de ",
+" para ",
+" µSv/h (",
+"%), com ",
+" dias antes e ",
+" depois. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"Mudança brusca por volta de ",
 "^Mudança brusca por volta de ((?:(?! · ).)+?): o fundo passou de ((?:(?! · ).)+?) para ((?:(?! · ).)+?) CPM \\(((?:(?! · ).)+?)%\\), com ((?:(?! · ).)+?) dias antes e ((?:(?! · ).)+?) depois\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
 "Abrupt change around ${1}: the background went from ${2} to ${3} CPM (${4}%), with ${5} days before and ${6} after. It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
 [
@@ -3298,6 +3312,30 @@ const I18N_EN = {
 "%), com ",
 " dias antes e ",
 " depois. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"O fundo desceu cerca de ",
+"^O fundo desceu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) µSv/h por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"The background fell about ${1}% in ${2} days (${3} ± ${4} µSv/h per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"O fundo desceu cerca de ",
+"% em ",
+" dias (",
+" µSv/h por dia, ",
+" dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"O fundo subiu cerca de ",
+"^O fundo subiu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) µSv/h por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
+"The background rose about ${1}% in ${2} days (${3} ± ${4} µSv/h per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
+[
+"O fundo subiu cerca de ",
+"% em ",
+" dias (",
+" µSv/h por dia, ",
+" dias completos). É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
 ]
 ],
 [
@@ -3770,6 +3808,17 @@ const I18N_EN = {
 ", este .exe ",
 "), desativado no Windows ",
 ", abriu com o Windows "
+]
+],
+[
+"Sem tendência: a média dos dias variou dentro do esperado (",
+"^Sem tendência: a média dos dias variou dentro do esperado \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) µSv/h por dia, ((?:(?! · ).)+?)% no período, ((?:(?! · ).)+?) dias completos\\)\\.$",
+"No trend: the daily average varied within what's expected (${1} ± ${2} µSv/h per day, ${3}% over the period, ${4} complete days).",
+[
+"Sem tendência: a média dos dias variou dentro do esperado (",
+" µSv/h por dia, ",
+"% no período, ",
+" dias completos)."
 ]
 ],
 [

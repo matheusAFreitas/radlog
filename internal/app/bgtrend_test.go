@@ -3,6 +3,7 @@ package app
 import (
 	"math"
 	"math/rand"
+	"strings"
 	"testing"
 	"time"
 
@@ -40,17 +41,21 @@ func TestBgFitSynthetic(t *testing.T) {
 	start := time.Date(2026, 9, 1, 0, 0, 0, 0, time.Local)
 	for seed := int64(1); seed <= 5; seed++ {
 		// só ruído: estável
-		f := bgFitDays(bgDaily(synthDays(seed, start, 30, func(int) float64 { return 20 })))
+		f := bgFitDays(bgDaily(synthDays(seed, start, 30, func(int) float64 { return 20 })), 0)
+		// com a calibração: o texto vai em µSv/h (2.65.2)
+		if g := bgFitDays(bgDaily(synthDays(seed, start, 30, func(int) float64 { return 20 })), 0.005); !strings.Contains(g.Text, "µSv/h por dia") || strings.Contains(g.Text, "CPM") {
+			t.Fatalf("texto em µSv/h: %s", g.Text)
+		}
 		if f.State != "estavel" || f.DaysUsed != 30 {
 			t.Fatalf("ruído (semente %d): %s — %s", seed, f.State, f.Text)
 		}
 		// rampa de 20 a 26 em 30 dias: subindo, ~30%
-		f = bgFitDays(bgDaily(synthDays(seed, start, 30, func(d int) float64 { return 20 + 6*float64(d)/29 })))
+		f = bgFitDays(bgDaily(synthDays(seed, start, 30, func(d int) float64 { return 20 + 6*float64(d)/29 })), 0)
 		if f.State != "subindo" || math.Abs(f.ChangePct-30) > 6 || math.Abs(f.Slope-6.0/29) > 0.05 {
 			t.Fatalf("rampa (semente %d): %s %.1f%% %.3f — %s", seed, f.State, f.ChangePct, f.Slope, f.Text)
 		}
 		// descendo
-		f = bgFitDays(bgDaily(synthDays(seed, start, 30, func(d int) float64 { return 26 - 6*float64(d)/29 })))
+		f = bgFitDays(bgDaily(synthDays(seed, start, 30, func(d int) float64 { return 26 - 6*float64(d)/29 })), 0)
 		if f.State != "descendo" {
 			t.Fatalf("rampa para baixo (semente %d): %s — %s", seed, f.State, f.Text)
 		}
@@ -60,19 +65,19 @@ func TestBgFitSynthetic(t *testing.T) {
 				return 20
 			}
 			return 24
-		})))
+		})), 0)
 		if f.State != "degrau" || f.StepAt != start.AddDate(0, 0, 15).UnixMilli() || math.Abs(f.StepTo-f.StepFrom-4) > 0.6 {
 			t.Fatalf("degrau (semente %d): %s em %v, %.1f → %.1f — %s", seed, f.State, time.UnixMilli(f.StepAt), f.StepFrom, f.StepTo, f.Text)
 		}
 	}
 	// poucos dias
-	if f := bgFitDays(bgDaily(synthDays(1, start, 5, func(int) float64 { return 20 }))); f.State != "insuficiente" {
+	if f := bgFitDays(bgDaily(synthDays(1, start, 5, func(int) float64 { return 20 })), 0); f.State != "insuficiente" {
 		t.Fatalf("5 dias: %s", f.State)
 	}
 	// dia com menos de 12 h não entra
 	pts := synthDays(1, start, 8, func(int) float64 { return 20 })
 	pts = pts[:7*1440+600]
-	if f := bgFitDays(bgDaily(pts)); f.DaysUsed != 7 {
+	if f := bgFitDays(bgDaily(pts), 0); f.DaysUsed != 7 {
 		t.Fatalf("dia incompleto entrou: %d", f.DaysUsed)
 	}
 }
