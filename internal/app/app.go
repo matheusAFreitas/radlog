@@ -63,6 +63,9 @@ type Settings struct {
 	// contagem (ligado, a não ser que PulseOff) e a fita dos últimos 10 s
 	PulseOff   bool `json:"pulseOff"`
 	PulseStrip bool `json:"pulseStrip"`
+	// aparelho do "O" do logo: "" igual ao ícone da bandeja, "gmc",
+	// "radiacode" ou "nenhum"
+	PulseLogo string `json:"pulseLogo"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia

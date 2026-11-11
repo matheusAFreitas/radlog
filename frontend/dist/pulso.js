@@ -55,10 +55,14 @@ function pulseLevel(dev) {
 function pulseColor(dev) {
   return getComputedStyle(document.documentElement).getPropertyValue(PU_LV_VAR[pulseLevel(dev)] || "--accent").trim() || "#6EE7A0";
 }
-// aparelho do logo: o mesmo do ícone da bandeja (automático: o GMC-800, a
+// aparelho do logo: o escolhido em Configurações (2.55.1) ou, em "igual
+// à bandeja", o mesmo do ícone da bandeja (automático: o GMC-800, a
 // não ser que o RC102 esteja num nível mais grave ou o GMC não esteja lendo)
 function pulseLogoDev() {
-  const pick = (state.settings || {}).trayDevice;
+  const p = PU.preview, s = state.settings || {};
+  const own = p ? p.logo : s.pulseLogo || "";
+  if (own === "nenhum") return "";
+  const pick = own || s.trayDevice;
   if (pick === "gmc" || pick === "radiacode") return pulseLive(pick) ? pick : "";
   const g = pulseLive("gmc"), r = pulseLive("radiacode");
   if (g && r) {
@@ -166,29 +170,41 @@ function pulseTapes(wall) {
   for (const [host, dev] of PU_TAPE_HOSTS) {
     const el = pulseTapeEl(host, dev);
     if (!el || el.hidden || el.getClientRects().length === 0) continue;
+    // o canvas tem exatamente pixels inteiros da tela (com escala de 125%
+    // do Windows, 100% de largura dava meio pixel e o navegador esticava o
+    // desenho, deixando riscos de larguras diferentes)
     const cv = el.querySelector("canvas"), dpr = window.devicePixelRatio || 1;
-    const w = Math.max(1, Math.round(cv.clientWidth * dpr)), hh = Math.max(1, Math.round(cv.clientHeight * dpr));
-    if (cv.width !== w || cv.height !== hh) { cv.width = w; cv.height = hh; }
+    const box = el.clientWidth || cv.parentNode.clientWidth;
+    const w = Math.max(1, Math.floor(box * dpr)), hh = Math.max(1, Math.round(36 * dpr));
+    if (cv.width !== w || cv.height !== hh) {
+      cv.width = w; cv.height = hh;
+      cv.style.width = w / dpr + "px"; cv.style.height = hh / dpr + "px";
+    }
     const g = cv.getContext("2d");
     g.clearRect(0, 0, w, hh);
     g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#20272C";
-    g.fillRect(0, hh - dpr, w, dpr);
-    // um risco por coluna de pixel; com muita contagem, a altura cresce com
-    // o número daquela coluna
-    const cols = new Float64Array(w);
-    for (const [t, n] of PU.ticks[dev]) {
-      const x = Math.floor(w - (wall - t) / PU_TAPE_MS * w);
-      if (x >= 0 && x < w) cols[x] += n;
+    g.fillRect(0, hh - Math.round(dpr), w, Math.round(dpr));
+    // casas de largura fixa (risco + vão), presas ao relógio: a fita anda
+    // de casa em casa e cada risco mantém a mesma largura enquanto anda
+    const lw = Math.max(1, Math.round(1.5 * dpr)), cell = lw + Math.max(1, Math.round(dpr));
+    const n = Math.floor(w / cell), cellMs = PU_TAPE_MS / n, nowC = Math.floor(wall / cellMs);
+    const cols = new Float64Array(n);
+    for (const [t, k] of PU.ticks[dev]) {
+      const i = n - 1 - (nowC - Math.floor(t / cellMs));
+      if (i >= 0 && i < n) cols[i] += k;
     }
     let mx = 1;
-    for (let x = 0; x < w; x++) if (cols[x] > mx) mx = cols[x];
+    for (let i = 0; i < n; i++) if (cols[i] > mx) mx = cols[i];
     g.fillStyle = pulseColor(dev);
-    const top = 4 * dpr, full = hh - top - dpr, lw = Math.max(1, Math.round(1.5 * dpr));
-    for (let x = 0; x < w; x++) {
-      if (!cols[x]) continue;
-      const f = mx > 1 ? 0.25 + 0.75 * Math.log1p(cols[x]) / Math.log1p(mx) : 1;
-      const hgt = Math.max(2 * dpr, full * f);
-      g.fillRect(x - (lw >> 1), hh - dpr - hgt, lw, hgt);
+    // todos os riscos na mesma altura; só quando chegam muitas contagens na
+    // mesma casa (taxa alta) a altura passa a contar quantas foram
+    const base = hh - Math.round(dpr), top = Math.round(4 * dpr), full = base - top;
+    const x0 = w - n * cell;
+    for (let i = 0; i < n; i++) {
+      if (!cols[i]) continue;
+      const f = mx >= 4 ? 0.25 + 0.75 * Math.log1p(cols[i]) / Math.log1p(mx) : 1;
+      const hgt = Math.max(Math.round(2 * dpr), Math.round(full * f));
+      g.fillRect(x0 + i * cell, base - hgt, lw, hgt);
     }
   }
 }
@@ -214,6 +230,8 @@ function pulseApply() {
   }
   const strip = $("chkPulseStrip");
   if (strip) { strip.disabled = !on; strip.closest("label").classList.toggle("off", !on); }
+  const sl = $("selPulseLogo");
+  if (sl) sl.disabled = !on;
   if (on) pulseKick();
 }
 
@@ -225,11 +243,12 @@ function pulseInit() {
   document.querySelectorAll(".brand-o circle").forEach((c) => c.classList.add("brand-ring"));
   document.addEventListener("visibilitychange", () => { PU.queue.length = 0; pulseApply(); });
   const prev = () => {
-    PU.preview = { off: !$("chkPulse").checked, strip: $("chkPulseStrip").checked };
+    PU.preview = { off: !$("chkPulse").checked, strip: $("chkPulseStrip").checked, logo: $("selPulseLogo").value };
     pulseApply();
   };
   $("chkPulse").addEventListener("change", prev);
   $("chkPulseStrip").addEventListener("change", prev);
+  $("selPulseLogo").addEventListener("change", prev);
   setInterval(pulseApply, 2000); // conectou, caiu, mudou de nível
 }
 document.addEventListener("DOMContentLoaded", pulseInit);
