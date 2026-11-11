@@ -1,5 +1,12 @@
 # Versões
 
+## 2.60.1
+- "Zerar o acumulado…": no teste com o aparelho real, o RC102 recusou o
+  primeiro jeito de zerar. Agora o app tenta mais dois (pelo SPEC_RESET do
+  aparelho) e só dá por zerado se o tempo do acumulado lido depois caiu.
+  O log diz qual jeito funcionou. Se nenhum funcionar, continua zerando
+  só no app, como na 2.60.0.
+
 ## 2.60.0
 - **Zerar o espectro acumulado do RC102.** O Radiacode 102 guarda dois
   espectros: o atual, que aparece na tela e zera pelo menu, e o acumulado,

@@ -5835,6 +5835,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Espectro acumulado do RadiaCode zerado pelo app (",
+"^Espectro acumulado do RadiaCode zerado pelo app \\(((?:(?! · ).)+?)\\)$",
+"RC102 accumulated spectrum reset by the app (${1})",
+[
+"Espectro acumulado do RadiaCode zerado pelo app ("
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -6164,6 +6172,14 @@ const I18N_EN = {
 [
 "Às ",
 "h o seu fundo costuma ficar na média do dia."
+]
+],
+[
+"Espectro acumulado do RC102 zerado pelo app (",
+"^Espectro acumulado do RC102 zerado pelo app \\(((?:(?! · ).)+?)\\)$",
+"RC102 accumulated spectrum reset by the app (${1})",
+[
+"Espectro acumulado do RC102 zerado pelo app ("
 ]
 ],
 [

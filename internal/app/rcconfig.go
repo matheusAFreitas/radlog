@@ -197,14 +197,15 @@ func (a *App) ResetRcSpecAccum() (string, error) {
 	if dev == nil {
 		return "", errRcOff
 	}
-	if err := dev.ResetSpecAccum(); err != nil {
+	how, err := dev.ResetSpecAccum()
+	if err != nil {
 		if errors.Is(err, radiacode.ErrRefused) {
 			a.logEvent("O RC102 recusou zerar o espectro acumulado; zerado só no app")
 			return "recusado", nil
 		}
 		return "", err
 	}
-	a.logEvent("Espectro acumulado do RC102 zerado pelo app")
+	a.logEvent("Espectro acumulado do RC102 zerado pelo app (" + how + ")")
 	a.cfgNote("Espectro acumulado do RC102", "zerado", "você (pelo app)")
 	return "ok", nil
 }
