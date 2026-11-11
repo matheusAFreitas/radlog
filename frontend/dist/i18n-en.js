@@ -3244,7 +3244,25 @@ const I18N_EN = {
 "Compara dois períodos": "Compares two periods",
 "Mostrar todos os alertas": "Show all alerts",
 "µSv/h no período": "µSv/h in the period",
-"nenhum": "none"
+"nenhum": "none",
+"Nenhum alerta agora": "No alert right now",
+"Nenhum alerta neste filtro.": "No alerts for this filter.",
+"Tipo de alerta": "Alert type",
+"Durou": "Lasted",
+"do GMC-800": "from the GMC-800",
+"do RC102": "from the RC102",
+"do RadiaCode": "from the RC102",
+"o RC102 confirmou": "confirmed by the RC102",
+"o RadiaCode confirmou": "confirmed by the RC102",
+"o GMC-800 confirmou": "confirmed by the GMC-800",
+"Subida sobre o fundo de cada aparelho": "Rise above each device's background",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "Here are all the radiation alerts, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"do contador\" foram achados depois, no histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "Here are all the radiation alerts, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones marked \"from the counter\" were found later, in the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Quando um aparelho apita, o outro confere. No filtro de um aparelho entram também os alertas do outro que ele confirmou, um pouco mais apagados.": "When one device goes off, the other one checks. A device's filter also shows the other device's alerts that it confirmed, a little dimmer.",
+"Fundo por dia": "Background by day",
+"Média de cada dia do GQ GMC-800 em casa.": "Average of each day from the GQ GMC-800 at home.",
+"Ver mais": "Show more",
+"Conferindo o tubo…": "Checking the tube…"
 },
 "patterns": [
 [
@@ -9669,6 +9687,33 @@ const I18N_EN = {
 "The ${1} was away from home.",
 [
 " estava fora de casa."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) alertas \\+ ((?:(?! · ).)+?) confirmados$",
+"${1} alerts + ${2} confirmed",
+[
+" alertas + ",
+" confirmados"
+]
+],
+[
+"1 alerta + ",
+"^1 alerta \\+ ((?:(?! · ).)+?) confirmados$",
+"1 alert + ${1} confirmed",
+[
+"1 alerta + ",
+" confirmados"
+]
+],
+[
+"pico ",
+"^pico ((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)$",
+"peak ${1} above the background of ${2}",
+[
+"pico ",
+" acima do fundo de "
 ]
 ],
 [

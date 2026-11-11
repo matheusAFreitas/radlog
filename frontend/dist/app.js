@@ -573,18 +573,22 @@ async function refreshStats() {
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseKnown(s.doseToday, homeBgUSv()).join(" · ")} · calculada pelo app (o GMC não informa a dose que soma)` : "";
 }
 
+// Fundo por dia (Gráficos › Tendência do fundo, 2.65): 14 dias e "Ver mais"
+let dailyN = 14;
 async function refreshDaily() {
-  const days = await api.GetDaily(7);
+  // GetDaily conta dias do calendário (até 60): pede um a mais para saber se tem mais
+  const days = await api.GetDaily(Math.min(60, dailyN + 1));
   const tb = $("days");
   tb.textContent = "";
+  $("btnDaysMore").hidden = dailyN >= 60 || !days || !days.some((d) => d.day < startDay(Date.now()) - (dailyN - 1) * 864e5);
   if (!days || !days.length) {
     tb.innerHTML = '<tr><td colspan="3" class="muted">Sem leituras guardadas.</td></tr>';
     return;
   }
-  for (const d of days) {
+  for (const d of days.slice(0, dailyN)) {
     const tr = document.createElement("tr");
     const label = isToday(d.day) ? "hoje" : isYesterday(d.day) ? "ontem" : ddmm(d.day);
-    for (const [txt, cls] of [[label, ""], [fmt(d.cpm, 1), "num"], [fmt(d.usv, 3), "num"]]) {
+    for (const [txt, cls] of [[label, ""], [fmt(d.usv, 3), "num"], [fmt(d.cpm, 1), "num"]]) {
       const td = document.createElement("td");
       td.textContent = txt;
       if (cls) td.className = cls;
@@ -811,7 +815,7 @@ async function showView(v, skipRender) {
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"] };
+const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"] };
 state.sub = {};
 // 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
 if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
@@ -832,6 +836,8 @@ function setSub(pg, sub, focus) {
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
   if (pg === "graficos") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
   if (changed && state.view === pg) refreshSub(pg);
+  // fora da aba Agora a fileira de cima volta a mostrar os dois aparelhos (2.65)
+  if (DEV_PAGES[pg]) renderDevMini();
 }
 
 function refreshSub(pg) {
@@ -846,6 +852,7 @@ function refreshSub(pg) {
   // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
   if (pg === "radiacode" && s === "agora") refreshRc24();
+  if (pg === "gmc" && s === "tubo" && typeof tbLoad === "function" && !TB.h) tbLoad();
 }
 
 for (const pg of Object.keys(SUBS)) setSub(pg, state.sub[pg]);
@@ -865,7 +872,10 @@ document.querySelectorAll(".subtabs").forEach((nav) => nav.addEventListener("key
 
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-view]");
-  if (b) showView(b.dataset.view);
+  if (!b) return;
+  // o quadro do aparelho da própria página (fora da aba Agora) volta para a aba Agora
+  if (b.dataset.view === state.view && SUBS[state.view]) setSub(state.view, "agora");
+  showView(b.dataset.view);
 });
 
 // ---------- gráficos (a página está em graficos.js) ----------
@@ -4162,6 +4172,7 @@ function setupSummary() {
   $("btnReport").addEventListener("click", (e) => { const [from, to, label] = sumPeriods()[0]; exportReport(from, to, label, e.currentTarget); });
   $("btnSumCmp").addEventListener("click", () => { state.sum.mode = "comparar"; refreshSummary(); });
   $("btnSumBack").addEventListener("click", () => { state.sum.mode = "resumo"; refreshSummary(); });
+  $("btnDaysMore").addEventListener("click", () => { dailyN = 60; refreshDaily(); });
   // "Mais números" do Resumo lembra se estava aberto
   $("sumDetails").open = localGet("sumDet", "") === "1";
   $("sumDetails").addEventListener("toggle", (e) => localSet("sumDet", e.target.open ? "1" : ""));

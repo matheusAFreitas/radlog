@@ -1,5 +1,22 @@
 # Versões
 
+## 2.65.0
+- Alertas repaginado: uma lista só, separada por dia, com o detalhe do
+  alerta escolhido ao lado (pico, duração e limite em destaque, gráfico,
+  conferência com o outro aparelho, "Por que subiu?" e "Ver nos gráficos").
+  Em cima fica só o que está acontecendo agora; os filtros ficam numa linha
+  e a explicação foi para "Como funciona".
+- Alertas: no filtro de um aparelho entram também os alertas do outro que
+  ele confirmou, um pouco mais apagados ("do GMC-800 · o RC102 confirmou" e
+  o contrário). Se o alerta aberto sai da lista, abre o primeiro; se a lista
+  fica vazia, o detalhe diz "Nenhum alerta neste filtro".
+- GQ GMC-800 ganha abas, Agora e Saúde do tubo, como a do Radiacode 102.
+- O fundo diário virou "Fundo por dia" em Gráficos › Tendência do fundo:
+  µSv/h antes do CPM, 14 dias e "Ver mais".
+- Na tela de um aparelho, fora da aba Agora, a fileira de cima mostra os
+  dois aparelhos e os Alertas. Clicar no quadro do aparelho da página volta
+  para a aba Agora.
+
 ## 2.64.2
 - Histórico de alertas: quando o filtro esvazia a lista (ex.: RC102 sem
   alertas), o detalhe do alerta escolhido antes some junto.

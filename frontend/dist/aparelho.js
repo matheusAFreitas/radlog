@@ -274,11 +274,14 @@ function renderDevMini() {
   const page = state.view;
   const inst = $("instruments");
   if (!inst) return;
-  // na tela de um aparelho, a fileira de cima é a mesma do Agora, só sem o
-  // quadro do aparelho aberto (o valor dele já está no cartão grande)
-  if (DEV_PAGES[page]) inst.dataset.page = page; else delete inst.dataset.page;
+  // na tela de um aparelho, na aba Agora, a fileira de cima é a mesma do
+  // Agora, só sem o quadro do aparelho aberto (o valor dele já está no cartão
+  // grande); nas outras abas mostra os três quadros (ACE, 11/11)
+  const own = DEV_PAGES[page] && (!state.sub || state.sub[page] === "agora");
+  if (own) inst.dataset.page = page; else delete inst.dataset.page;
+  inst.dataset.devpage = DEV_PAGES[page] ? page : "";
   // o aviso do relógio do GMC mora no quadro dele; na página do GMC o quadro
   // some, então o aviso vai para o cartão grande
-  const clk = $("clockChip"), home = page === "gmc" ? $("heroClock") : $("gTileSync").parentNode;
+  const clk = $("clockChip"), home = own && page === "gmc" ? $("heroClock") : $("gTileSync").parentNode;
   if (clk && home && clk.parentNode !== home) home.appendChild(clk);
 }

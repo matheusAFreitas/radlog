@@ -8,7 +8,8 @@
 // state.alertFilter, state.activeAlerts) é criado no app.js.
 
 // ---------- alertas ----------
-// Card: alertas ativos + os 3 últimos. Modal: histórico completo.
+// Uma lista só (2.65): o que está ativo em cima, a lista por dia à esquerda e
+// o detalhe do escolhido à direita (spec ux/alertas2.html).
 
 const lvlCls = (e) => e.level || (/^(\[demo\] )?Perigo/.test(e.text) ? "perigo" : /^(\[demo\] )?Alarme/.test(e.text) ? "alarme" : "atencao");
 const lvlName = (e) => ({ perigo: "Perigo", alarme: "Alarme" }[lvlCls(e)] || "Atenção");
@@ -107,18 +108,30 @@ function groupEpisodes(list) {
   }).sort((x, y) => y.time - x.time);
 }
 
-function alertLi(e, withDate) {
+// linha da lista (2.65, spec ux/alertas2.html): 1ª linha hora, nível e pico;
+// 2ª duração e marcas. O resto (σ, limite, horários) fica no detalhe.
+function alertLi(e, other) {
   const li = document.createElement("li");
   const d = document.createElement("span");
   d.className = "dot-a";
   d.innerHTML = lvIcon({ perigo: "perigo", alarme: "alarme" }[lvlCls(e)] || "atencao", 12);
   const t = document.createElement("time");
+  t.className = "mono";
   t.dateTime = new Date(e.time).toISOString();
-  t.textContent = withDate ? whenLabel(e.time) : hhmm(e.time);
+  t.textContent = hhmm(e.time);
   const box = document.createElement("span");
   box.className = "a-text";
   const ttl = document.createElement("span");
-  ttl.textContent = alertTitle(e);
+  ttl.className = "a-ttl";
+  const demo = e.demo || /^\[demo\] /.test(e.text || "") ? " (demo)" : "";
+  ttl.textContent = e.peak ? `${lvlName(e)} · pico ${evVal(e, e.peak)}${demo}` : alertTitle(e);
+  if (e.active) ttl.append(" · ativo agora");
+  if (isRcEv(e) && !other) {
+    const tag = document.createElement("span");
+    tag.className = "tag-retro tag-rc";
+    tag.textContent = "RC102";
+    ttl.appendChild(tag);
+  }
   const ap = periodAt(e.time);
   if (ap) {
     const tag = document.createElement("span");
@@ -127,39 +140,33 @@ function alertLi(e, withDate) {
     tag.title = "Aconteceu num período marcado como fora de casa";
     ttl.appendChild(tag);
   }
-  if (isRcEv(e) && e.members) {
-    const tag = document.createElement("span");
-    tag.className = "tag-retro tag-rc";
-    tag.textContent = "RC102";
-    ttl.appendChild(tag);
-  }
+  box.appendChild(ttl);
+  const sub = document.createElement("span");
+  sub.className = "a-sub";
+  const dur = document.createElement("span");
+  dur.textContent = e.end ? fmtDur(e.end - e.time) : e.active ? `desde ${hhmm(e.time)}` : "fim não registrado";
+  sub.appendChild(dur);
   if (e.retro) {
     const tag = document.createElement("span");
     tag.className = "tag-retro";
     tag.textContent = "do contador";
     tag.title = "Achado no histórico baixado do contador";
-    ttl.appendChild(tag);
+    sub.appendChild(tag);
   }
-  box.appendChild(ttl);
-  const sub = alertSub(e);
-  if (sub) {
-    const sp = document.createElement("span");
-    sp.className = "a-sub";
-    sp.textContent = sub;
-    box.appendChild(sp);
+  if (other) {
+    const tag = document.createElement("span");
+    tag.className = "al-other-tag";
+    tag.textContent = isRcEv(e) ? "do RC102 · o GMC-800 confirmou" : "do GMC-800 · o RC102 confirmou";
+    sub.appendChild(tag);
+  } else {
+    const cx = typeof cxSlot === "function" ? cxSlot(e) : null;
+    if (cx) sub.appendChild(cx);
   }
-  const cx = typeof cxSlot === "function" ? cxSlot(e) : null;
-  if (cx) box.appendChild(cx);
+  box.appendChild(sub);
   li.append(d, t, box);
-  if (api.GetWhyRise) {
-    const w = document.createElement("button");
-    w.type = "button"; w.className = "link small-link a-why"; w.textContent = "Por que subiu?";
-    w.addEventListener("click", (ev) => { ev.stopPropagation(); whyFromAlert(e); });
-    li.appendChild(w);
-  }
+  if (other) li.classList.add("other");
   return li;
 }
-
 
 function renderActive() {
   const ul = $("activeAlerts");
@@ -167,7 +174,7 @@ function renderActive() {
   renderATile();
   ul.textContent = "";
   if (!list.length) {
-    ul.innerHTML = `<li class="none">${lvIcon("seguro", 12)}Nenhum alerta agora.</li>`;
+    ul.innerHTML = `<li class="none">${lvIcon("seguro", 12)}<b>Nenhum alerta agora</b></li>`;
     return;
   }
   const now = Date.now();
@@ -205,25 +212,38 @@ function tickActive() {
   renderActive();
 }
 
-// alertas do GMC-800 confirmados pelo RC102 (id → true/false)
+// alertas de um aparelho confirmados pelo outro (id → true/false): no filtro
+// de um aparelho entram também os do outro que ele confirmou (ACE, 11/11)
 const AL_CX_OK = new Map();
 let alCxBusy = false;
-async function alCxFetch(eps, all) {
+async function alCxFetch(eps, all, dv) {
   if (alCxBusy || !api.GetCrossChecks) return;
-  const need = eps.filter((e) => !isRcEv(e) && !e.retro && !e.active && !AL_CX_OK.has(e.id));
+  const otherDev = (e) => (dv === "radiacode" ? !isRcEv(e) : isRcEv(e));
+  const need = eps.filter((e) => otherDev(e) && !e.retro && !e.active && !(e.demo && hasGo) && !AL_CX_OK.has(e.id));
   if (!need.length) return;
   alCxBusy = true;
   let res = [];
-  try { res = await api.GetCrossChecks(need.map((e) => ({ dev: "gmc", from: e.time, to: e.end || 0 }))); } catch (err) { res = []; }
+  try { res = await api.GetCrossChecks(need.map((e) => ({ dev: isRcEv(e) ? "radiacode" : "gmc", from: e.time, to: e.end || 0 }))); } catch (err) { res = []; }
   alCxBusy = false;
   need.forEach((e, i) => AL_CX_OK.set(e.id, !!(res[i] && res[i].state === "ok")));
-  if (state.alertDev === "radiacode" && need.some((e) => AL_CX_OK.get(e.id))) renderAlertHistory(all);
+  if ((state.alertDev || "") === dv && need.some((e) => AL_CX_OK.get(e.id))) renderAlertHistory(all);
 }
+
+// abaixo de 900 px o detalhe vai para baixo do alerta escolhido
+const AL_NARROW = window.matchMedia ? window.matchMedia("(max-width: 900px)") : null;
+function alPlaceDetail() {
+  const det = $("aDetail"), grid = det && det.parentNode && det.closest(".a-grid");
+  if (!det) return;
+  const li = AL_NARROW && AL_NARROW.matches ? document.querySelector("#alertHistList li.pick.sel") : null;
+  if (li) { if (li.nextSibling !== det) li.after(det); }
+  else { const g = document.querySelector("#pageAlertas .a-grid"); if (det.parentNode !== g) g.appendChild(det); }
+}
+if (AL_NARROW && AL_NARROW.addEventListener) AL_NARROW.addEventListener("change", alPlaceDetail);
 
 function renderAlertHistory(all) {
   const box = $("alertHistList");
   const f = state.alertFilter;
-  document.querySelectorAll("#alertFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.af === f)));
+  $("alertFilter").value = f || "";
   const dv = state.alertDev || "";
   document.querySelectorAll("#alertDevFilter button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.adev === dv)));
   const rg = state.alertRange;
@@ -231,17 +251,25 @@ function renderAlertHistory(all) {
   chip.hidden = !rg;
   if (rg) chip.firstElementChild.textContent = rg.label;
   const eps = groupEpisodes(all);
-  // no filtro RC102 entram também os alertas do GMC-800 que o RC102 confirmou
-  // (ACE, 11/11); a confirmação vem do GetCrossChecks e fica guardada
-  if (dv === "radiacode") alCxFetch(eps, all);
-  const devOk = (e) => !dv || (dv === "radiacode" ? isRcEv(e) || AL_CX_OK.get(e.id) === true : !isRcEv(e));
+  if (dv) alCxFetch(eps, all, dv);
+  const own = (e) => !dv || (dv === "radiacode" ? isRcEv(e) : !isRcEv(e));
+  const devOk = (e) => own(e) || AL_CX_OK.get(e.id) === true;
   const list = eps.filter((e) => (!f || (f === "retro" ? e.retro : f === "live" ? !e.retro : lvlCls(e) !== "atencao"))
     && devOk(e) && (!rg || (e.time >= rg.from && e.time < rg.to)));
-  $("alertCount").textContent = list.length === 1 ? "1 alerta" : `${list.length} alertas`;
+  const nOwn = list.filter(own).length, nOt = list.length - nOwn;
+  $("alertCount").textContent = (nOwn === 1 ? "1 alerta" : `${nOwn} alertas`) + (nOt ? ` + ${nOt} confirmados` : "");
+  // o detalhe sai da lista antes de limpar (abaixo de 900 px ele mora nela)
+  const det = $("aDetail");
+  if (box.contains(det)) document.querySelector("#pageAlertas .a-grid").appendChild(det);
   box.textContent = "";
-  // lista vazia: o detalhe do alerta de antes não pode ficar na tela
-  $("aDetail").hidden = !list.length;
-  if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; state.alertSel = null; state.ad = null; return; }
+  // lista vazia: o detalhe diz que não tem nada (o alerta de antes não fica)
+  if (!list.length) {
+    box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>';
+    state.alertSel = null; state.ad = null; adSeq++;
+    alDetailEmpty(true);
+    return;
+  }
+  alDetailEmpty(false);
   let day = "", ul = null;
   for (const e of list) {
     const dt = new Date(e.time);
@@ -250,19 +278,12 @@ function renderAlertHistory(all) {
       day = key;
       const h = document.createElement("h3");
       h.textContent = isToday(e.time) ? "Hoje" : isYesterday(e.time) ? "Ontem" :
-        dt.toLocaleDateString(LOCALE, { weekday: "long", day: "2-digit", month: "2-digit", year: "numeric" });
+        dt.toLocaleDateString(LOCALE, { weekday: "long", day: "2-digit", month: "2-digit", year: dt.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
       ul = document.createElement("ul");
       ul.className = "events alerts";
       box.append(h, ul);
     }
-    const li = alertLi(e, false);
-    if (dv === "radiacode" && !isRcEv(e)) {
-      const t = document.createElement("span");
-      t.className = "chip small al-cx-ok";
-      t.textContent = "GMC-800";
-      li.querySelector(".a-text")?.appendChild(t);
-    }
-    if (e.active) li.querySelector(".a-text > span").append(" — ativo agora");
+    const li = alertLi(e, !own(e));
     li.classList.add("pick");
     li.classList.toggle("sel", e.id === state.alertSel);
     li.tabIndex = 0;
@@ -271,8 +292,18 @@ function renderAlertHistory(all) {
     li.dataset.id = e.id;
     ul.appendChild(li);
   }
+  state.alertList = list;
   if (!list.some((e) => e.id === state.alertSel)) selectAlert(list[0].id);
-  else if (!state.ad || state.ad.event.id !== state.alertSel || state.ad.event.active || list.find((e) => e.id === state.alertSel).active) loadAlertDetail();
+  else {
+    alPlaceDetail();
+    if (!state.ad || state.ad.event.id !== state.alertSel || state.ad.event.active || list.find((e) => e.id === state.alertSel).active) loadAlertDetail();
+  }
+}
+
+function alDetailEmpty(on) {
+  $("adEmpty").hidden = !on;
+  $("adBody").hidden = on;
+  $("adTitle").parentNode.hidden = on;
 }
 
 // ---------- gráfico detalhado do alerta (tela Alertas) ----------
@@ -282,6 +313,7 @@ const LVL_COLOR = { atencao: COR.att, alarme: COR.alarm, perigo: COR.warn };
 function selectAlert(id) {
   state.alertSel = id;
   document.querySelectorAll("#alertHistList li.pick").forEach((li) => li.classList.toggle("sel", +li.dataset.id === id));
+  alPlaceDetail();
   loadAlertDetail();
 }
 
@@ -301,9 +333,12 @@ function drawAlertDetail(d) {
   const svg = $("adChart");
   $("adPeak").hidden = true;
   $("btnAdOpen").hidden = !d;
+  $("btnAdWhy").hidden = !d || !api.GetWhyRise;
   if (!d) {
     svg.innerHTML = "";
     $("adTitle").textContent = "Detalhe do alerta";
+    $("adWhen").textContent = "";
+    for (const k of ["adPk", "adDur", "adLim"]) $(k).textContent = "—";
     $("adSub").textContent = "Não achei esse alerta.";
     $("adNote").hidden = true;
     return;
@@ -315,14 +350,24 @@ function drawAlertDetail(d) {
   const inUSv = rc || d.unit === "usv";
   const val = (v) => (inUSv ? usvVal(v) : `${fmt(v, 0)} CPM`);
   const peakV = rc || !inUSv ? e.peak : e.peakUSv || e.peak;
-  $("adTitle").textContent = `${lvlName(e)}${rc ? " no RC102" : ""} · ${whenLabel(e.time)}` + (e.active ? " · ativo agora" : "");
+  $("adTitle").textContent = `${lvlName(e)} no ${rc ? "RC102" : "GMC-800"}` + (e.active ? " · ativo agora" : "");
+  const dt = new Date(e.time);
+  $("adWhen").textContent = `${dt.toLocaleDateString(LOCALE, { weekday: "long" })}, ${ddmm(e.time)} ${hhmm(e.time)}`;
+  // os 3 números: pico, duração e limite
+  const num = (v) => (inUSv ? fmt(v, usvDigits(v)) : fmt(v, 0));
+  $("adPk").textContent = e.peak ? num(peakV) : "—";
+  $("adPkSub").textContent = e.peak ? `${inUSv ? "µSv/h" : "CPM"} às ${hhmmss(e.peakAt || e.time)}` : "";
+  $("adDur").textContent = fmtDur(d.end - e.time);
+  $("adDurSub").textContent = e.active ? `desde ${hhmm(e.time)}` : `${hhmm(e.time)}–${hhmm(d.end)}`;
+  $("adLim").textContent = d.limit ? num(d.limit) : "—";
+  $("adLim").nextElementSibling.textContent = inUSv ? "µSv/h" : "CPM";
   const sub = [];
-  sub.push(e.active ? `desde ${hhmm(e.time)} · ${fmtDur(d.end - e.time)}` : `${hhmmss(e.time)}–${hhmmss(d.end)} · durou ${fmtDur(d.end - e.time)}`);
-  if (e.peak) sub.push(`pico ${val(peakV)} às ${hhmmss(e.peakAt || e.time)}` + (!rc && bgNow() ? ` (${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)})` : ""));
-  sub.push(`limite ${val(d.limit)}`);
+  if (e.startedAs) sub.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
+  if (e.peak && !rc && bgNow()) sub.push(`pico ${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)}`);
   const ep = d.episode;
   if (ep && ep.n) sub.push(`mín ${val(ep.min)} · média ${val(ep.mean)} (${fmt(ep.n, 0)} ${ep.src === "segundos" ? "segundos" : "minutos"})`);
   $("adSub").textContent = sub.join(" · ");
+  $("adSub").hidden = !sub.length;
 
   const secs = d.seconds || [], mins = d.minutes || [];
   const t0 = d.from, t1 = Math.max(d.to, t0 + 60e3);
@@ -413,6 +458,12 @@ function setupAlertDetail() {
   });
   plot.addEventListener("mouseleave", () => { $("adCursor").hidden = true; $("adTip").hidden = true; });
   $("btnAdOpen").addEventListener("click", () => { const d = state.ad; if (d) showRange(d.from, Math.max(d.to, d.from + 2 * 60e3)); });
+  $("btnAdWhy").addEventListener("click", () => {
+    const d = state.ad;
+    if (!d) return;
+    const e = (state.alertList || []).find((x) => x.id === state.alertSel) || d.event;
+    whyFromAlert(e);
+  });
   // alerta ativo: atualiza o gráfico a cada 5 s enquanto a tela Alertas estiver aberta
   setInterval(() => { if (state.view === "alertas" && state.ad && state.ad.event.active) loadAlertDetail(); }, 5000);
 }
@@ -421,19 +472,8 @@ async function refreshAlerts() {
   const [all, active] = await Promise.all([api.GetEvents("alerta"), api.GetActiveAlerts()]);
   state.activeAlerts = active || [];
   renderActive();
-  const ul = $("alerts");
-  ul.textContent = "";
-  const recent = groupEpisodes(all || []).filter((e) => !e.active).slice(0, 3);
-  state.lastAlert = recent[0] || null;
+  state.lastAlert = groupEpisodes(all || []).find((e) => !e.active) || null;
   renderATile();
-  if (!recent.length) ul.innerHTML = '<li class="muted">Nenhum alerta ainda.</li>';
-  else recent.forEach((e) => {
-    const li = alertLi(e, true);
-    li.classList.add("pick");
-    li.title = "Ver o gráfico deste alerta";
-    li.addEventListener("click", () => { state.alertSel = e.id; showView("alertas"); });
-    ul.appendChild(li);
-  });
   if (state.view === "alertas") renderAlertHistory(all || []);
 }
 
@@ -451,10 +491,10 @@ function wireAlertHistory() {
   setupRainImpact();
   setupSummary();
   $("btnEvents").addEventListener("click", openEvents);
-  document.querySelectorAll("#alertFilter button").forEach((b) => b.addEventListener("click", async () => {
-    state.alertFilter = b.dataset.af;
+  $("alertFilter").addEventListener("change", async () => {
+    state.alertFilter = $("alertFilter").value;
     renderAlertHistory(await api.GetEvents("alerta"));
-  }));
+  });
   $("alertRangeChip").addEventListener("click", async () => {
     state.alertRange = null;
     renderAlertHistory(await api.GetEvents("alerta"));
