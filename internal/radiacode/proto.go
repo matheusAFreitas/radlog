@@ -55,7 +55,6 @@ const (
 	vsSpectrum      = 0x200
 	vsEnergyCalib   = 0x202
 	vsSpecAccum     = 0x205
-	vsSpecReset     = 0x207
 )
 
 // registradores virtuais

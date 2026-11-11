@@ -190,24 +190,30 @@ func (a *App) ResetRcDose() error {
 	return nil
 }
 
-// ResetRcSpecAccum zera o espectro acumulado do Radiacode. Devolve
-// "recusado" se o aparelho não aceitou (aí a tela zera só no app).
-func (a *App) ResetRcSpecAccum() (string, error) {
+// ResetRcSpectrum recomeça o espectro da tela do Radiacode.
+func (a *App) ResetRcSpectrum() error {
 	dev := a.rcDevice()
 	if dev == nil {
+		return errRcOff
+	}
+	if err := dev.ResetSpectrum(); err != nil {
+		return err
+	}
+	a.logEvent("Espectro da tela do RC102 recomeçado pelo app")
+	return nil
+}
+
+// ResetRcSpecAccum registra que o espectro acumulado do Radiacode foi
+// zerado no RadLog. O RC102 não deixa apagar o acumulado dele (ver
+// radiacode/settings.go); a tela guarda a foto de agora e mostra só o que
+// veio depois.
+func (a *App) ResetRcSpecAccum() (string, error) {
+	if a.rcDevice() == nil {
 		return "", errRcOff
 	}
-	how, err := dev.ResetSpecAccum()
-	if err != nil {
-		if errors.Is(err, radiacode.ErrRefused) {
-			a.logEvent("O RC102 recusou zerar o espectro acumulado; zerado só no app")
-			return "recusado", nil
-		}
-		return "", err
-	}
-	a.logEvent("Espectro acumulado do RC102 zerado pelo app (" + how + ")")
-	a.cfgNote("Espectro acumulado do RC102", "zerado", "você (pelo app)")
-	return "ok", nil
+	a.logEvent("Espectro acumulado do RC102 zerado no RadLog")
+	a.cfgNote("Espectro acumulado do RC102", "zerado no RadLog", "você (pelo app)")
+	return "app", nil
 }
 
 // OpenRcConfigBackups abre a pasta das cópias dos ajustes do Radiacode.

@@ -4782,7 +4782,8 @@ const demoRc = () => {
       for (let i = 0; i < n; i++) { const g = 0.1 + 0.02 * Math.sin(i / 60) + (Math.random() - 0.5) * 0.04; t.push(Date.now() - (n - i) * 60e3); gmc.push(g); rc.push(g * 0.92 + (Math.random() - 0.5) * 0.02); }
       return { t, gmc, rc, gmcCPM: gmc.map((v) => v * 150), rcCPS: rc.map((v) => v * 30), ratio: 0.92, ratioErr: 0.01, corr: 0.81, minutes: n, rcOnly: 0, suggestK: 0.0055, curK: 0.01014 };
     },
-    ResetRcSpecAccum: async () => { if (!demoRcFake()) throw new Error("RC102 não conectado"); return "ok"; },
+    ResetRcSpectrum: async () => { if (!demoRcFake()) throw new Error("RC102 não conectado"); },
+    ResetRcSpecAccum: async () => { if (!demoRcFake()) throw new Error("RC102 não conectado"); return "app"; },
     GetRcSpectrum: async (accum) => {
       if (!demoRcFake()) throw new Error("RC102 não conectado");
       // espectro de mentira: fundo (acumulado, 7 h) e o atual, que vai

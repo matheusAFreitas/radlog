@@ -1,5 +1,17 @@
 # Versões
 
+## 2.61.0
+- Espectro do Radiacode 102: o "Recomeçar" agora zera o espectro da tela do
+  próprio aparelho (igual a segurar ▼ ou ao Restart do app oficial), e a
+  opção "Tela do aparelho" (antes "Desde o Recomeçar") mostra exatamente o
+  que está na tela do RC102. As contagens não se perdem: vão para o
+  Acumulado do aparelho.
+- "Zerar o acumulado…" zera direto no RadLog. O firmware do aparelho não tem
+  comando que apague o espectro acumulado, e o "Recomeçar" soma o espectro da
+  tela dentro dele. A tentativa da 2.60.1 zerava de tabela o espectro da tela;
+  não faz mais isso. O aviso agora diz "Zerado no RadLog (o RC102 não deixa
+  apagar o dele)".
+
 ## 2.60.3
 - Aba do Radiacode 102: os textos de explicação de todos os cartões
   (Espectrograma, Dureza, Fonte simulada, Atividade, Log) também ficam em
