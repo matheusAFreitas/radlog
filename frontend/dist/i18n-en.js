@@ -2916,7 +2916,29 @@ const I18N_EN = {
 "compacto": "compact",
 "Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; \"Salvar\" guarda neste PC.": "Compact fits more on screen; comfortable is better from a distance or on a touch screen. The change shows right away; \"Save\" keeps it on this PC.",
 "espaço": "spacing",
-"e": "and"
+"e": "and",
+"Busca": "Search",
+"Minha dose hoje": "My dose today",
+"Dose no aparelho": "Dose on the device",
+"desde que foi zerada": "since it was reset",
+"µSv desde que foi zerada": "µSv since it was reset",
+"mSv desde que foi zerada": "mSv since it was reset",
+"Sem leituras do RC102 nesse período.": "No RC102 readings in this period.",
+"Sem leituras do RadiaCode nesse período.": "No RC102 readings in this period.",
+"−6 h … agora": "−6 h … now",
+"−24 h … agora": "−24 h … now",
+"−7 dias … agora": "−7 days … now",
+"desde 00:00": "since 00:00",
+"Contagem (cps)": "Count rate (cps)",
+"Dureza (1,00 = igual ao fundo)": "Hardness (1.00 = same as background)",
+"energia (keV)": "energy (keV)",
+"eficiência": "efficiency",
+"incerteza": "uncertainty",
+"Lado a lado com o RC102": "Side by side with the RC102",
+"Lado a lado com o RadiaCode": "Side by side with the RC102",
+"Do seu RC102, no mesmo período do espectrograma: contagem em cima e dureza embaixo. Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate on top and hardness below. Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RadiaCode, no mesmo período do espectrograma: contagem em cima e dureza embaixo. Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate on top and hardness below. Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Os mesmos 180 minutos: contagem em cima e dureza embaixo. Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count on top and hardness below. Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point."
 },
 "patterns": [
 [
@@ -9823,6 +9845,15 @@ const I18N_EN = {
 ]
 ],
 [
+"linhas em ",
+"^linhas em ((?:(?! · ).)+?) e ((?:(?! · ).)+?) µSv/h$",
+"lines at ${1} and ${2} µSv/h",
+[
+"linhas em ",
+" µSv/h"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -10565,6 +10596,15 @@ const I18N_EN = {
 ]
 ],
 [
+"linhas em ",
+"^linhas em ((?:(?! · ).)+?) µSv/h$",
+"line at ${1} µSv/h",
+[
+"linhas em ",
+" µSv/h"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -11134,6 +11174,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Últimas ",
+"^Últimas ((?:(?! · ).)+?) horas$",
+"Last ${1} hours",
+[
+"Últimas ",
+" horas"
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -11669,6 +11718,15 @@ const I18N_EN = {
 "${1} connecting…",
 [
 " conectando…"
+]
+],
+[
+"em ",
+"^em ((?:(?! · ).)+?) contando$",
+"${1} counting",
+[
+"em ",
+" contando"
 ]
 ],
 [

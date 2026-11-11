@@ -498,11 +498,8 @@
     document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
     document.querySelector("#rcHardCard .lg-gap").hidden = !hdOn;
     $("rcHdDesc").textContent = hdOn
-      ? "Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva."
-      : "Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.";
-    $("rcHdUse").innerHTML = hdOn
-      ? "<strong>Para você:</strong> se a contagem sobe e a dureza <b>cai</b>, costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza <b>sobe</b> junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece."
-      : "<strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.";
+      ? "Do seu RC102, no mesmo período do espectrograma: contagem em cima e dureza embaixo. Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva."
+      : "Os mesmos 180 minutos: contagem em cima e dureza embaixo. Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.";
     const hi = $("rcHdInfo");
     hi.hidden = !hdOn;
     if (hdOn) hi.textContent = sg.hd.ref > 0 ? `fundo da casa: ${nf(sg.hd.refCps, 2)} cps · dureza 1,00 = ${nf(sg.hd.ref * 100, 2)}% acima de 1.500 keV` : "fundo da casa: ainda pouco dado (precisa de algumas horas gravadas)";
@@ -546,11 +543,31 @@
     sgDraw(); hdDraw();
   }
 
+  // contagem e dureza em dois gráficos empilhados, com o mesmo tempo (2.51):
+  // nada de dois eixos no mesmo gráfico
+  const HD_H = 280;
+  const hdX = (w) => { const L = 44, R = 10; return { L, R, pw: w - L - R }; };
+  function hdPanels(h) {
+    const T = 22, B = 22, gap = 34, ph = (h - T - B - gap) / 2;
+    return { T1: T, T2: T + ph + gap, ph, B };
+  }
+  function hdFrame(g, L, pw, P, c, hd) {
+    g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
+    for (const [T0, lo, hi, dig, color] of [[P.T1, 0, c.max, c.dig, COR.accent], [P.T2, hd.min, hd.max, 2, COR.away]]) {
+      for (let k = 0; k <= 2; k++) {
+        const y = T0 + (P.ph * k) / 2; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
+        g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText(nf(hi - ((hi - lo) * k) / 2, dig), L - 6, y + 4);
+      }
+      g.fillStyle = color; g.textAlign = "left"; g.font = "12px " + css("--sans");
+      g.fillText(T0 === P.T1 ? tr("Contagem (cps)") : tr("Dureza (1,00 = igual ao fundo)"), L, T0 - 8);
+      g.font = "11px " + css("--mono");
+    }
+  }
   function hdDraw() {
     const cv = $("rcHard"); if (!cv) return;
     if (sg.on && sg.hd) { hdDrawReal(cv); return; }
-    const f = fit(cv, 200); if (!f) return;
-    const { g, w, h } = f, L = 40, R = 44, T = 10, B = 22, pw = w - L - R, ph = h - T - B;
+    const f = fit(cv, HD_H); if (!f) return;
+    const { g, w, h } = f, { L, pw } = hdX(w), P = hdPanels(h), T = P.T1, ph = P.T2 + P.ph - P.T1;
     g.clearRect(0, 0, w, h);
     const xOf = (t) => L + (t / (TL_N - 1)) * pw;
     // faixas dos eventos
@@ -558,13 +575,8 @@
     g.fillStyle = "rgba(94,234,212,.16)"; g.fillRect(xOf(ELEC[0]), T, xOf(ELEC[1]) - xOf(ELEC[0]), ph);
     const cmax = Math.max(12, ...tl.cps.slice(0, Math.max(1, tl.shown))) * 1.1;
     const hs = tl.hard.slice(0, Math.max(1, tl.shown)), hmin = Math.min(0.6, ...hs) * 0.95, hmax = Math.max(1.4, ...hs) * 1.05;
-    const yC = (v) => T + ph - (v / cmax) * ph, yH = (v) => T + ph - ((v - hmin) / (hmax - hmin)) * ph;
-    g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
-    for (let k = 0; k <= 4; k++) {
-      const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
-      g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), 0), L - 6, y + 4);
-      g.fillStyle = COR.away; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
-    }
+    const yC = (v) => P.T1 + P.ph - (v / cmax) * P.ph, yH = (v) => P.T2 + P.ph - ((v - hmin) / (hmax - hmin)) * P.ph;
+    hdFrame(g, L, pw, P, { max: cmax, dig: 0 }, { min: hmin, max: hmax });
     g.fillStyle = css("--dim"); g.textAlign = "center";
     for (let t = 0; t <= TL_N; t += 30) g.fillText("min " + t, xOf(Math.min(t, TL_N - 1)), h - 6);
     // dureza 1,0 (fundo)
@@ -580,7 +592,7 @@
   }
   function hdHover(ev) {
     if (sg.on && sg.hd) { hdHoverReal(ev); return; }
-    const cv = $("rcHard"), r = cv.getBoundingClientRect(), L = 40, R = 44, pw = r.width - L - R;
+    const cv = $("rcHard"), r = cv.getBoundingClientRect(), { L, pw } = hdX(r.width);
     const t = Math.round(((ev.clientX - r.left - L) / pw) * (TL_N - 1));
     if (t < 0 || t >= tl.shown) { tl.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); return; }
     tl.hover = t;
@@ -590,10 +602,9 @@
   }
 
   // ---------- dureza de verdade ----------
-  const hdX = (w) => { const L = 40, R = 44; return { L, R, pw: w - L - R }; };
   function hdDrawReal(cv) {
-    const d = sg.hd, f = fit(cv, 200); if (!f) return;
-    const { g, w, h } = f, { L, pw } = hdX(w), T = 10, B = 22, ph = h - T - B, n = d.cps.length;
+    const d = sg.hd, f = fit(cv, HD_H); if (!f) return;
+    const { g, w, h } = f, { L, pw } = hdX(w), P = hdPanels(h), T = P.T1, ph = P.T2 + P.ph - P.T1, n = d.cps.length;
     g.clearRect(0, 0, w, h);
     const xOf = (k) => L + ((k + 0.5) / n) * pw, bw = pw / n;
     // chuva e intervalos sem leitura
@@ -606,13 +617,8 @@
     d.hard.forEach((v, k) => { if (v > 0) hs.push(v - d.hardErr[k], v + d.hardErr[k]); });
     const cmax = Math.max(d.refCps * 1.6, ...cs, 1) * 1.1;
     const hmin = Math.min(0.6, ...hs) * 0.95, hmax = Math.max(1.4, ...hs) * 1.05;
-    const yC = (v) => T + ph - (v / cmax) * ph, yH = (v) => T + ph - ((v - hmin) / (hmax - hmin)) * ph;
-    g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
-    for (let k = 0; k <= 4; k++) {
-      const y = T + (ph * k) / 4; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
-      g.fillStyle = COR.accent; g.textAlign = "right"; g.fillText(nf(cmax * (1 - k / 4), cmax < 20 ? 1 : 0), L - 6, y + 4);
-      g.fillStyle = COR.away; g.textAlign = "left"; g.fillText(nf(hmax - ((hmax - hmin) * k) / 4, 2), L + pw + 6, y + 4);
-    }
+    const yC = (v) => P.T1 + P.ph - (v / cmax) * P.ph, yH = (v) => P.T2 + P.ph - ((v - hmin) / (hmax - hmin)) * P.ph;
+    hdFrame(g, L, pw, P, { max: cmax, dig: cmax < 20 ? 1 : 0 }, { min: hmin, max: hmax });
     const long = d.to - d.from > 26 * 3600e3;
     g.fillStyle = css("--dim");
     for (let k = 0; k <= 4; k++) {
@@ -830,9 +836,6 @@
     $("rcSrDesc").textContent = on
       ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
       : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.";
-    $("rcSrUse").innerHTML = on
-      ? "<strong>Para você:</strong> passe o RC102 devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação."
-      : "<strong>Para você:</strong> passar o RC102 pelas amostras na bancada e achar qual é a \"quente\". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.";
     if (!on) srSound("");
     else srSound($("rcSrSound").value);
   }
@@ -1001,8 +1004,12 @@
     else parts.push(v.cal && v.cal.th ? "sem KCl: a escala vem do tório (aproximada)" : "<span class=\"warn-text\">sem calibração: os Bq são só um chute (±100%). Comece pelo KCl.</span>");
     if (c.th) parts.push(`forma da curva pelo tório em ${fmtDate(c.th.t)}: inclinação <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span><button type="button" class="link" data-forget="torio">esquecer</button>`);
     else parts.push(`forma da curva: estimada (inclinação −1,3 ± 0,4); o tório melhora`);
-    const row = [250, 500, 1000, 1500, 2000, 2500].map((e, i) => `${e} keV: ${fmtPct(v.calEff[i])} ±${nf(v.calErr[i] * 100, 0)}%`).join(" · ");
-    return parts.join("<br>") + `<br><span class="mono">${row}</span>`;
+    // eficiência em cada energia: uma tabela pequena em vez da linha técnica
+    const es = [250, 500, 1000, 1500, 2000, 2500];
+    const tab = `<table class="rc-act-eff"><thead><tr><th>${tr("energia (keV)")}</th>${es.map((e) => `<th class="mono">${nf(e, 0)}</th>`).join("")}</tr></thead><tbody>` +
+      `<tr><th>${tr("eficiência")}</th>${es.map((_, i) => `<td class="mono">${fmtPct(v.calEff[i])}</td>`).join("")}</tr>` +
+      `<tr><th>${tr("incerteza")}</th>${es.map((_, i) => `<td class="mono">±${nf(v.calErr[i] * 100, 0)}%</td>`).join("")}</tr></tbody></table>`;
+    return parts.join("<br>") + `<div class="rc-act-eff-wrap" data-no-tr>${tab}</div>`;
   }
   function actNucRows(list, massG, live) {
     if (!list || !list.length) return "";
@@ -1236,6 +1243,18 @@
     $("rcActCancel").addEventListener("click", async () => { await api.CancelActivity(); actLoad(); });
     $("rcActCal").addEventListener("click", async (e) => { const b = e.target.closest("[data-forget]"); if (!b) return; await api.ForgetActivityCal(b.dataset.forget); actLoad(); });
     new ResizeObserver(() => { if (visible) drawAll(); }).observe($("viewRadiacode"));
+    // Espectro: Acumulado ou Ao longo do tempo (espectrograma e dureza)
+    const sv = $("rcSpecView");
+    const setSv = (v) => {
+      sv.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+      document.querySelectorAll("[data-specview]").forEach((el) => { el.hidden = el.dataset.specview !== v; });
+      try { localStorage.setItem("rcSpecView", v); } catch (e) { /* sem armazenamento */ }
+      if (visible) requestAnimationFrame(drawAll);
+    };
+    sv.addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) setSv(b.dataset.v); });
+    let sv0 = "acc";
+    try { sv0 = localStorage.getItem("rcSpecView") === "tempo" ? "tempo" : "acc"; } catch (e) { /* sem armazenamento */ }
+    setSv(sv0);
     spMark();
   }
   function spMark() {

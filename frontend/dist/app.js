@@ -481,6 +481,7 @@ async function refreshSpark() {
   drawSpark("rHeroSpark", c.rc);
 }
 function drawSpark(id, vals) {
+  if (!$(id)) return;
   const pl = $(id).querySelector("polyline");
   const pts = (vals || []).map((v, i) => [i, v]).filter((p) => p[1] != null && isFinite(p[1]));
   if (pts.length < 2) { pl.setAttribute("points", ""); return; }
@@ -800,15 +801,17 @@ async function showView(v, skipRender) {
   if (v === "resumo") refreshSummary();
   if (v === "alara") refreshAlara();
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
-  if (v === "radiacode") { refreshRcCompare(); if (api.GetRadiacode) renderRc(await api.GetRadiacode()); }
+  if (v === "radiacode") { if (api.GetRadiacode) renderRc(await api.GetRadiacode()); refreshRc24(); }
   if (v === "config") openSettings();
   if (v === "agora") refreshAgora();
 }
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia"], radiacode: ["agora", "espectro", "espectrograma", "log", "busca", "atividade"] };
+const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia"], radiacode: ["agora", "espectro", "busca", "atividade", "log"] };
 state.sub = {};
+// 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
+if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
 for (const pg of Object.keys(SUBS)) { const v = localGet("sub." + pg, ""); state.sub[pg] = SUBS[pg].includes(v) ? v : SUBS[pg][0]; }
 
 function setSub(pg, sub, focus) {
@@ -838,6 +841,7 @@ function refreshSub(pg) {
   }
   // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
+  if (pg === "radiacode" && s === "agora") refreshRc24();
 }
 
 for (const pg of Object.keys(SUBS)) setSub(pg, state.sub[pg]);
@@ -3446,30 +3450,17 @@ function renderRc(st) {
   const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
   // pílula no topo: só aparece quando tem algo a dizer
   $("navRcDot").hidden = st.state !== "erro";
-  // aba
-  $("rcSub").textContent = on ? `conectado pelo ${via}` : { off: "procura desligada", procurando: "procurando no USB" + (st.ble ? " e no Bluetooth" : "") + "…", conectando: "conectando…", erro: "desconectado" }[st.state] || st.state;
-  // o aviso de conexão fica no cartão de cima; aqui só o tipo e o último contato
+  // o aviso de conexão fica no cartão de cima; aqui (sem o cartão) só o tipo e o último contato
   $("rcState").textContent = on ? `conectado · ${via}` : [st.via ? via : "", st.lastT ? `último contato ${isToday(st.lastT) ? hhmm(st.lastT) : whenLabel(st.lastT)}` : st.state === "conectando" ? "conectando…" : st.state === "procurando" ? "procurando…" : "desconectado"].filter(Boolean).join(" · ");
   $("rcState").className = "rc-state mono small " + (on ? "ok" : "");
-  $("rcNums").hidden = !on;
-  if (on) {
-    $("rcUsv").textContent = st.time ? `${fmt(st.usvh, usvDigits(st.usvh))} µSv/h` : "—";
-    $("rcUsvErr").textContent = st.time ? `± ${fmt(st.usvhErr, 0)}%` : "";
-    $("rcCps").textContent = st.time ? `${fmt(st.cps, 2)} cps` : "—";
-    $("rcCpsErr").textContent = st.time ? `± ${fmt(st.cpsErr, 0)}% · ${fmt(st.cps * 60, 0)} CPM` : "";
-    $("rcDose").textContent = st.doseLiveAt ? `${fmt(st.doseLive, st.doseLive < 10 ? 3 : 2)} µSv` : "—";
-    $("rcDoseSince").textContent = st.doseLiveAt && st.doseLiveSec ? `em ${rcDur(st.doseLiveSec)}` + (st.doseLiveOn ? "" : ` · às ${hhmm(st.doseLiveAt)}`) : "";
-    $("rcBat").textContent = st.hasRare ? `${fmt(st.battery, 0)}%` : "—";
-    $("rcTemp").textContent = st.hasRare ? `${fmt(st.tempC, 1)} °C` : "";
-  }
-  $("rcDevInfo").textContent = on ? [st.model, st.serial && "série " + st.serial, st.firmware && "firmware " + st.firmware].filter(Boolean).join(" · ") : "";
+  $("rcEyebrow").title = on ? [st.model, st.serial && "série " + st.serial, st.firmware && "firmware " + st.firmware].filter(Boolean).join(" · ") : "";
   $("rcHelp").textContent = on ? "" : st.state === "erro" ? st.err
     : st.state === "off" ? "A procura está desligada em Configurações → Radiacode 102."
     : "Ligue o RC102 no USB do PC" + (st.bleOK ? (st.ble ? ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado)." : ", ou configure o endereço Bluetooth.") : ". No Windows, por enquanto, a conexão é só pelo USB.");
   $("rcHelp").className = "small muted";
   // com o cartão de cima à vista, o motivo e as ações estão no aviso de lá
   if (!on && (st.state === "conectando" || st.lastT > 0)) $("rcHelp").textContent = "";
-  if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); refreshDose(); }
+  if (on && (!prev || prev.state !== "conectado")) { refreshRcCompare(); refreshChart(); refreshDose(); refreshRc24(); }
   // Radiacode como aparelho principal: na primeira vez, o gráfico vai para µSv/h
   if (hasRcData() && !localGet("rcPrimaryUnit", "")) {
     localSet("rcPrimaryUnit", "1");
@@ -3522,7 +3513,8 @@ function renderRcSetState(st, prev) {
 
 // quadro do Radiacode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
-state.rcUnit = localGet("rcUnit", "usv");
+// desde a 2.51 o RC102 mostra só µSv/h em destaque (CPM e cps na linha de baixo)
+state.rcUnit = "usv";
 
 // quadro do Radiacode, com as mesmas informações do GMC: valor, dose de
 // hoje, normal/σ, régua e medidas
@@ -3541,40 +3533,34 @@ function renderRcMain(st) {
   const live = st.state === "conectado" && st.time;
   const show = st.state === "conectado" || st.state === "conectando" || st.lastT > 0;
   $("rcMain").hidden = !show;
+  $("rcNone").hidden = show;
+  $("rc24Card").hidden = !show;
   $("rTile").hidden = !show;
   document.body.classList.toggle("has-rc", show);
   renderHeroVia();
   if (!show) return;
   const via = st.demo ? "simulado" : st.via === "bluetooth" ? "Bluetooth" : "USB";
-  $("rcMainVia").textContent = st.state === "conectado" ? `· ${via}` + (st.hasRare ? ` · ${fmt(st.battery, 0)}%` : "") : st.state === "conectando" ? "· conectando…" : "· desconectado";
+  $("rcMainVia").textContent = st.state === "conectado" ? "" : st.state === "conectando" ? "· conectando…" : "· desconectado";
   $("rcMainVia").className = "rc-main-via mono" + (st.state === "conectado" ? " on" : "");
+  renderRcChips(st, via);
   $("rcMain").classList.toggle("stale", !live);
   const sx = st.stats || {};
   // valor (ao vivo ou o último gravado, apagado)
   const usv = live ? st.usvh : st.lastT ? st.lastUSv : null;
   const cps = live ? st.cps : st.lastT ? st.lastCPS : null;
   const u = state.rcUnit;
-  document.querySelectorAll("#rcUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === u)));
   $("rcMainUnit").textContent = { usv: "µSv/h", mrh: "mrem/h", cps: "CPS", cpm: "CPM" }[u];
   const v = usv == null ? null : { usv, mrh: usv / 10, cps, cpm: cps * 60 }[u];
   $("rcMainVal").textContent = v == null ? "—" : u === "usv" ? fmt(v, usvDigits(v)) : u === "mrh" ? fmt(v, usvDigits(v * 10) + 1) : u === "cps" ? fmt(v, 2) : fmt(v, 0);
-  const vs = usv == null ? "" : `${fmt(usv, usvDigits(usv))} µSv/h`;
-  // mesmas linhas do quadro do GMC em cada unidade
-  const alt = usv == null ? "" : {
-    cpm: `≈ ${vs} · ${fmt(cps, 1)} CPS`,
-    usv: `${fmt(cps * 60, 0)} CPM · ${fmt(usv / 10, usvDigits(usv) + 1)} mrem/h`,
-    mrh: `${fmt(cps * 60, 0)} CPM · ${vs}`,
-    cps: `${fmt(cps * 60, 0)} CPM · ${vs}`,
-  }[u];
-  $("rcMainAlt").textContent = live ? `${alt} · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
+  $("rcMainAlt").textContent = live ? `${fmt(cps * 60, 0)} CPM · ${fmt(cps, 1)} cps · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
   if (st.todayDevOK) {
     $("rcDoseToday").textContent = fmt(st.todayDev, 2);
-    $("rcDoseTodaySub").textContent = "do aparelho";
+    rcParts($("rcDoseTodaySub"), ["desde 00:00", rcAwayToday()]);
     $("rcDoseToday").title = `Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
   } else {
     $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
-    $("rcDoseTodaySub").textContent = sx.todayMinutes ? `${sx.todayMinutes} min medidos · app` : "acumulados";
+    rcParts($("rcDoseTodaySub"), [sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "desde 00:00", rcAwayToday()]);
     $("rcDoseToday").title = "Calculada pelo app: só os minutos que o PC gravou";
   }
   // normal / σ, pelo fundo em casa dos últimos 7 dias
@@ -3622,10 +3608,103 @@ function renderRcMain(st) {
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
   $("rcMax24At").textContent = sx.n24h ? `µSv/h às ${hhmm(sx.max24hAt)}` : "µSv/h";
+  // dose que o próprio aparelho soma desde que foi zerado
+  if (st.doseLiveAt) {
+    const mSv = st.doseLive >= 1000, v = mSv ? st.doseLive / 1000 : st.doseLive;
+    $("rcDevDose").textContent = fmt(v, v < 10 ? (mSv ? 2 : 3) : 2);
+    $("rcDevDoseSub").textContent = `${mSv ? "mSv" : "µSv"} desde que foi zerada`;
+    $("rcDevDose").title = st.doseLiveSec ? `em ${rcDur(st.doseLiveSec)} contando` + (st.doseLiveOn ? "" : ` · às ${hhmm(st.doseLiveAt)}`) : "";
+  } else { $("rcDevDose").textContent = "—"; $("rcDevDoseSub").textContent = "desde que foi zerada"; }
+}
+
+// etiquetas ao lado do nome: conexão, onde está, bateria e temperatura
+function renderRcChips(st, via) {
+  const box = $("rcChips"), on = st.state === "conectado";
+  const where = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" }[((state.where || {}).radiacode) || "comigo"];
+  const chips = [];
+  if (on) chips.push(["on", via]);
+  chips.push(["", where]);
+  if (on && st.hasRare) chips.push(["", `bateria ${fmt(st.battery, 0)}%`], ["", `${fmt(st.tempC, 0)} °C`]);
+  const key = chips.map((c) => c.join(":")).join("|");
+  if (box.dataset.k === key) return;
+  box.dataset.k = key;
+  box.textContent = "";
+  for (const [cls, text] of chips) {
+    const s = document.createElement("span");
+    s.className = "chip rc-chip" + (cls ? " " + cls : "");
+    s.textContent = text;
+    box.appendChild(s);
+  }
+}
+
+// cada parte num span (a tradução não atravessa o " · ")
+function rcParts(el, parts) {
+  el.textContent = "";
+  parts.filter(Boolean).forEach((t, i) => {
+    if (i) el.append(" · ");
+    const s = document.createElement("span");
+    s.textContent = t;
+    el.appendChild(s);
+  });
+}
+
+// quanto tempo o RC102 passou fora de casa hoje ("1 h 20 fora de casa")
+function rcAwayToday() {
+  const t0 = startDay(Date.now()), now = Date.now();
+  let ms = 0;
+  for (const p of state.periods || []) {
+    const a = Math.max(p.from, t0), b = Math.min(pTo(p), now);
+    if (b > a) ms += b - a;
+  }
+  const min = Math.round(ms / 6e4);
+  if (min < 1) return "";
+  return `${min < 60 ? min + " min" : Math.floor(min / 60) + " h" + (min % 60 ? " " + pad(min % 60) : "")} fora de casa`;
+}
+
+// gráfico das últimas horas do RC102, com os trechos fora de casa
+state.rc24 = { h: +localGet("rc24h", "24") || 24, seq: 0 };
+async function refreshRc24() {
+  if (!api.GetChartRange || state.view !== "radiacode" || state.sub.radiacode !== "agora" || $("rc24Card").hidden) return;
+  const my = ++state.rc24.seq, h = state.rc24.h, now = Date.now();
+  let c;
+  try { c = await api.GetChartRange(now - h * 3600e3, now); } catch (e) { return; }
+  if (my !== state.rc24.seq || !c) return;
+  drawRc24(c, now - h * 3600e3, now);
+}
+function drawRc24(c, t0, t1) {
+  const box = $("rc24Chart"), h = state.rc24.h;
+  $("rc24Title").textContent = h === 168 ? "Últimos 7 dias" : `Últimas ${h} horas`;
+  const W = 1000, H = 150, PT = 8, PB = 18;
+  const vals = (c.rc || []).map((v, i) => [c.times[i], v]).filter((p) => p[1] != null && isFinite(p[1]));
+  let top = 0;
+  for (const [, v] of vals) top = Math.max(top, v);
+  top = Math.max(0.25, top * 1.15);
+  const step = top <= 0.5 ? 0.1 : top <= 1.2 ? 0.2 : top <= 3 ? 0.5 : Math.pow(10, Math.floor(Math.log10(top / 2)));
+  const x = (t) => ((t - t0) / (t1 - t0)) * W, y = (v) => PT + (1 - v / top) * (H - PT - PB);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-24-svg" aria-hidden="true">`;
+  let away = false;
+  for (const p of state.periods || []) {
+    const a = Math.max(p.from, t0), b = Math.min(pTo(p), t1);
+    if (b <= a) continue;
+    away = true;
+    svg += `<rect x="${x(a).toFixed(1)}" y="0" width="${Math.max(1, x(b) - x(a)).toFixed(1)}" height="${H - PB}" class="away"/>`;
+  }
+  const lines = [];
+  for (let v = step; v < top; v += step) { lines.push(v); svg += `<line x1="0" x2="${W}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="grid"/>`; }
+  // linha com buracos onde não há leitura (mais de 3 passos sem dado)
+  const gap = (c.stepMs || 60e3) * 3;
+  let d = "", prev = 0;
+  for (const [t, v] of vals) { d += `${d && t - prev <= gap ? "L" : "M"}${x(t).toFixed(1)},${y(v).toFixed(1)}`; prev = t; }
+  svg += `<path d="${d}" class="rc"/></svg>`;
+  box.innerHTML = vals.length ? svg : `<div class="rc-empty small muted">Sem leituras do RC102 nesse período.</div>`;
+  $("rc24AwayKey").hidden = !away;
+  const ls = lines.slice(0, 2).map((v) => fmt(v, step < 0.1 ? 2 : 1));
+  rcParts($("rc24Info"), [ls.length === 2 ? `linhas em ${ls[0]} e ${ls[1]} µSv/h` : ls.length ? `linhas em ${ls[0]} µSv/h` : "", h === 168 ? "−7 dias … agora" : `−${h} h … agora`]);
 }
 
 async function refreshRcCompare() {
-  if (!api.GetRcCompare || state.view !== "radiacode") return;
+  // o cartão mora em Configurações › GQ GMC-800 › Calibração (2.51)
+  if (!api.GetRcCompare || !$("rcCmpCard").offsetParent) return;
   let c;
   try { c = await api.GetRcCompare(state.rc.cmpMin); } catch (e) { $("rcCmpStats").textContent = errMsg(e); return; }
   drawRcCompare(c);
@@ -3670,15 +3749,19 @@ function wireRc() {
     // a tela de medir muda o aparelho padrão e o aviso quando o Radiacode conecta/cai
     if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
   });
-  $("rcUnitSeg").addEventListener("click", (e) => {
-    const b = e.target.closest("button[data-unit]");
+  for (const id of ["btnRcRetry", "btnRcRetrySet"]) $(id).addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
+  for (const id of ["btnRcSettings", "btnRcConn"]) $(id).addEventListener("click", () => openSettings("chkRcOn"));
+  $("rc24Range").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-h]");
     if (!b) return;
-    state.rcUnit = b.dataset.unit;
-    localSet("rcUnit", state.rcUnit);
-    if (state.rc.st) renderRcMain(state.rc.st);
+    state.rc24.h = +b.dataset.h;
+    localSet("rc24h", String(state.rc24.h));
+    $("rc24Range").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
+    refreshRc24();
   });
-  $("btnRcRetry").addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
-  $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
+  $("rc24Range").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(+x.dataset.h === state.rc24.h)));
+  // o lado a lado (agora nas Configurações) atualiza quando aparece
+  new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) refreshRcCompare(); }).observe($("rcCmpCard"));
   $("chkRcOn").addEventListener("change", async (e) => renderRc(await call(api.SetRadiacode, e.target.checked, $("rcBLE").value)));
   $("chkRcRaw").addEventListener("change", async (e) => renderRc(await call(api.SetRcRaw, e.target.checked)));
   $("rcBLE").addEventListener("change", async () => renderRc(await call(api.SetRadiacode, $("chkRcOn").checked, $("rcBLE").value)));
@@ -3716,7 +3799,7 @@ function wireRc() {
     $("rcCmpRange").querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b)));
     refreshRcCompare();
   });
-  setInterval(() => { if (state.view === "radiacode" && state.rc.st && state.rc.st.state === "conectado") refreshRcCompare(); }, 60e3);
+  setInterval(() => { if (state.rc.st && state.rc.st.state === "conectado") { refreshRcCompare(); refreshRc24(); } }, 60e3);
   if (api.GetRadiacode) api.GetRadiacode().then(renderRc).catch(() => {});
 }
 
