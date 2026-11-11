@@ -1315,8 +1315,19 @@
             <select id="rcSpecSpeed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select></label>
           <label class="rc-inline small"><input type="checkbox" id="rcSpecBg" checked> fundo por cima</label>
         </div>
+        <div class="rc-isos" id="rcIsos" role="group" aria-label="Isótopos mais detectados" hidden></div>
         <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
         <p class="mono small rc-info" id="rcSpecInfo"></p>
+        <p class="small muted rc-drag-hint" id="rcDragHint">Clique num isótopo ou arraste no espectro para ver um trecho de perto.</p>
+        <div class="rc-zoom" id="rcZoom" hidden>
+          <div class="rc-zoom-head"><h4 id="rcZoomTitle">Zoom no pico</h4><span class="small muted" id="rcZoomSub"></span><button type="button" class="link small-link" id="rcZoomClose">fechar</button></div>
+          <div class="rc-zoom-body">
+            <div class="rc-plot"><canvas id="rcZoomCv" class="rc-canvas"></canvas></div>
+            <dl class="rc-zoom-stats" id="rcZoomStats"></dl>
+          </div>
+          <p class="small muted rc-legend rc-zoom-key"><span class="lg-ch">canais</span><span class="lg-fit">curva ajustada</span><span class="lg-base">linha de base</span><span class="lg-fwhm">largura na metade da altura</span></p>
+          <p class="small rc-zoom-warn" id="rcZoomWarn" hidden></p>
+        </div>
       </article>
 
       </div>
@@ -1334,7 +1345,7 @@
           <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
             <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
         </div>
-        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="mono small muted" id="rcSgInfo"></span></div>
+        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="seg rc-seg" id="rcLoupe" role="group" aria-label="Lupa"><button type="button" data-n="0" aria-pressed="false">sem lupa</button><button type="button" data-n="4" aria-pressed="false">lupa 4×4</button><button type="button" data-n="5" aria-pressed="true">lupa 5×5</button></span><span class="mono small muted" id="rcSgInfo"></span></div>
       </article>
 
       <article class="rc-card" id="rcHardCard">
