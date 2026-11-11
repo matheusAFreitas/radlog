@@ -2408,3 +2408,51 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .why-disc { margin-top: var(--space-4); }
 .a-why { margin-left: auto; white-space: nowrap; }
 .ag-why { margin-top: var(--space-2); }
+
+/* ---------- saúde do tubo (2.57) ---------- */
+.tube-card { padding: var(--space-5); gap: var(--space-3); }
+.tb-head { display: flex; flex-wrap: wrap; align-items: baseline; justify-content: space-between; gap: var(--space-1) var(--space-3); }
+.tb-head h2 { margin: 0; }
+.tb-sum { display: flex; gap: var(--space-3); align-items: flex-start; padding: var(--space-3) var(--space-4); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); }
+.tb-sum p { margin: var(--space-1) 0 0; }
+.tb-ico { width: 20px; height: 20px; flex: none; }
+.tb-sum .tb-ico { width: 26px; height: 26px; }
+.tb-ico.ok circle { fill: #1F4030; }
+.tb-ico.ok path { fill: none; stroke: var(--accent); stroke-width: 2.1; stroke-linecap: round; stroke-linejoin: round; }
+.tb-ico.warn circle { fill: #3a2c12; }
+.tb-ico.warn path { stroke: var(--att); stroke-width: 2.2; stroke-linecap: round; }
+.tb-ico.warn circle.dot { fill: var(--att); }
+.tb-ico.na circle { fill: none; stroke: var(--dim); stroke-width: 1.6; stroke-dasharray: 2.6 2.2; }
+.tb-checks { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+@media (max-width: 760px) { .tb-checks { grid-template-columns: 1fr; } }
+.tb-ck { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.tb-ck.warn { border-color: color-mix(in srgb, var(--att) 45%, var(--border)); }
+.tb-top { display: flex; align-items: center; gap: var(--space-2); }
+.tb-tt { font-weight: 600; flex: 1; }
+.tb-st { font-size: var(--fs-caption); color: var(--dim); }
+.tb-ck.ok .tb-st { color: var(--accent); }
+.tb-ck.warn .tb-st { color: var(--att); }
+.tb-ev { margin: 0; color: var(--text-soft); }
+.tb-ev b { color: var(--text); }
+.tb-viz { width: 100%; height: 96px; display: block; }
+.tb-hist rect { fill: #43986A; }
+.tb-hist rect:hover { fill: var(--accent); }
+.tb-hist polyline { fill: none; stroke: var(--text); stroke-width: 1.6; stroke-dasharray: 4 3; vector-effect: non-scaling-stroke; }
+.tb-ratio { height: 80px; }
+.tb-ratio .tb-band { fill: var(--accent); fill-opacity: .07; }
+.tb-ratio .tb-base { stroke: var(--border-hover, #34404A); stroke-dasharray: 3 3; vector-effect: non-scaling-stroke; }
+.tb-ratio polyline { fill: none; stroke: var(--text); stroke-width: 2; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.tb-ratio circle { fill: var(--text); }
+.tb-ck.warn .tb-ratio polyline, .tb-ck.warn .tb-ratio circle { stroke: var(--att); }
+.tb-ck.warn .tb-ratio circle { fill: var(--att); }
+.tb-ax { display: flex; justify-content: space-between; font-size: var(--fs-micro); color: var(--dim); }
+.tb-leg { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-4); color: var(--dim); }
+.tb-leg span { display: inline-flex; align-items: center; gap: var(--space-1); }
+.tb-leg .sw { display: inline-block; }
+.tb-leg .sw-bar { width: 10px; height: 10px; border-radius: 2px; background: #43986A; }
+.tb-leg .sw-dash { width: 16px; border-top: 2px dashed var(--text); }
+.tb-leg .sw-band { width: 12px; height: 10px; border-radius: 2px; background: color-mix(in srgb, var(--accent) 18%, transparent); }
+.tb-foot { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.tb-tip { position: fixed; z-index: 50; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm); background: var(--surface-2); border: 1px solid var(--border); pointer-events: none; white-space: nowrap; }
+.tube-notice { margin: 0 0 var(--space-3); border-color: var(--att); }
+.tube-line { margin: var(--space-2) 0 0; }

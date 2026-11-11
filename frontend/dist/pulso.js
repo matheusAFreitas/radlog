@@ -123,19 +123,32 @@ function pulseKick() {
 function pulseLoop(now) {
   PU.raf = 0;
   if (!pulseOn() || document.hidden) { PU.queue.length = 0; pulseApply(); return; }
-  const dt = Math.min(250, Math.max(0, now - PU.last));
+  // depois de uma pausa (o Windows segura a animação quando a janela fica
+  // coberta, por exemplo pela ferramenta de captura) o RC102 repõe o trecho
+  // inteiro, até 10 s, em vez de deixar um buraco na fita
+  const dt = Math.min(PU_TAPE_MS, Math.max(0, now - PU.last));
   PU.last = now;
   const wall = Date.now();
   // GMC: as contagens sorteadas que já chegaram
+  // (cada uma entra na fita no próprio instante, não todas no do quadro)
   let g = 0;
-  while (PU.queue.length && PU.queue[0].t <= now) g += PU.queue.shift().w;
-  if (!pulseLive("gmc")) { g = 0; PU.queue.length = 0; }
+  const gt = [];
+  while (PU.queue.length && PU.queue[0].t <= now) { const q = PU.queue.shift(); g += q.w; gt.push([wall - (now - q.t), q.w]); }
+  if (!pulseLive("gmc")) { g = 0; gt.length = 0; PU.queue.length = 0; }
   // RC102: Poisson com a taxa do aparelho
   const st = (state.rc && state.rc.st) || {};
   let r = 0;
   if (pulseLive("radiacode")) { PU.rate.radiacode = st.cps; r = pulsePoisson(st.cps * dt / 1000); }
-  if (g > 0) { pulseFlash("gmc", now); PU.ticks.gmc.push([wall, g]); }
-  if (r > 0) { pulseFlash("radiacode", now); PU.ticks.radiacode.push([wall, r]); }
+  if (g > 0) { pulseFlash("gmc", now); PU.ticks.gmc.push(...gt); }
+  if (r > 0) {
+    pulseFlash("radiacode", now);
+    // as contagens do quadro espalhadas pelo intervalo dele (sem isso, 2 ou 3
+    // caíam no mesmo ponto e a fita trocava de jeito de desenhar)
+    const m = Math.min(r, 2000), at = [];
+    for (let i = 0; i < m; i++) at.push(wall - Math.random() * dt);
+    at.sort((a, b) => a - b);
+    for (const t of at) PU.ticks.radiacode.push([t, r / m]);
+  }
   for (const k of ["gmc", "radiacode"]) {
     const a = PU.ticks[k];
     while (a.length && wall - a[0][0] > PU_TAPE_MS) a.shift();
@@ -191,18 +204,23 @@ function pulseTapes(wall) {
     const lw = Math.max(1, Math.round(1.5 * dpr)), cell = lw + Math.max(1, Math.round(dpr));
     const pxMs = w / PU_TAPE_MS, cellMs = cell / pxMs;
     const cnt = new Map();
-    let mx = 1;
+    let mx = 1, tot = 0;
     for (const [t, k] of PU.ticks[dev]) {
       const c = Math.floor(t / cellMs), v = (cnt.get(c) || 0) + k;
       cnt.set(c, v);
+      tot += k;
       if (v > mx) mx = v;
     }
+    // a altura só passa a contar quando a taxa é alta de verdade (em média
+    // mais de 1,5 contagem por casa nos 10 s), não por um acaso de 3 ou 4
+    // juntas: antes a fita alternava entre os dois jeitos de desenhar
+    const busy = tot / Math.max(1, w / cell) >= 1.5 && mx > 1;
     g.fillStyle = pulseColor(dev);
     const base = hh - Math.round(dpr), top = Math.round(4 * dpr), full = base - top;
     for (const [t, k] of PU.ticks[dev]) {
       const x = Math.round(w - (wall - t) * pxMs) - lw;
       if (x < 0 || x > w - lw) continue;
-      const f = mx >= 4 ? 0.25 + 0.75 * Math.log1p(cnt.get(Math.floor(t / cellMs))) / Math.log1p(mx) : 1;
+      const f = busy ? 0.25 + 0.75 * Math.log1p(cnt.get(Math.floor(t / cellMs))) / Math.log1p(mx) : 1;
       const hgt = Math.max(Math.round(2 * dpr), Math.round(full * f));
       g.fillRect(x, base - hgt, lw, hgt);
     }

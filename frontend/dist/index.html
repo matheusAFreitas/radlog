@@ -771,6 +771,7 @@
         <h2>Alertas ativos</h2>
       </div>
       <p class="notice ic-maint" id="icMaint" role="status" hidden></p>
+      <p class="notice tube-notice" id="tubeNotice" role="status" hidden></p>
       <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li></ul>
       <h3 class="sub-head">Últimos alertas</h3>
       <ul class="events alerts" id="alerts"><li class="muted">Nenhum alerta.</li></ul>
@@ -1264,6 +1265,7 @@
       </div>
     </section>
   <p class="ic-watch" id="gmcConcord" hidden></p>
+  <section class="card tube-card" id="tubeCard" hidden></section>
   <section class="tiles" hidden>
       <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
       <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
@@ -1717,6 +1719,7 @@
     <fieldset>
       <legend>Testar o contador</legend>
       <div class="row"><button type="button" class="btn" id="btnGmcDiag">Testar o contador</button><span class="small muted" id="gmcDiagOut"></span></div>
+      <p class="small tube-line"><span id="tubeLine">Saúde do tubo: sem dado</span> · <button type="button" class="link small-link" data-tubeopen="1">ver o cartão</button></p>
       <details class="how">
         <summary>Como funciona</summary>
         <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
@@ -2435,6 +2438,7 @@
 <script src="ano.js"></script>
 <script src="pulso.js"></script>
 <script src="porque.js"></script>
+<script src="tubo.js"></script>
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>
@@ -2447,5 +2451,6 @@
 <script src="clima.js"></script>
 <script src="busca.js"></script>
 <script src="app.js"></script>
+<div class="tb-tip mono small" id="tubeTip" hidden></div>
 </body>
 </html>

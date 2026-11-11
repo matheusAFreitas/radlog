@@ -4951,6 +4951,30 @@ const demoRc = () => {
       }
       return { year: y, first, today, days };
     },
+    GetTubeHealth: async () => {
+      // cenário pelo localStorage "tuboDemo": ok (padrão), ruido, sens, falha, semrc
+      const sc = localGet("tuboDemo", "ok"), now = Date.now(), day0 = new Date(); day0.setHours(0, 0, 0, 0);
+      const D = sc === "ruido" ? 1.65 : 1.04, lam = 19.6, pois = (l, k) => { let p = Math.exp(-l); for (let i = 1; i <= k; i++) p *= l / i; return p; };
+      const hist = [];
+      for (let k = 4; k <= 40; k++) {
+        let p = pois(lam, k);
+        if (D > 1.05) { p = 0; const sd = Math.sqrt((D - 1) * lam); for (let j = -3; j <= 3; j += 0.5) p += Math.exp(-j * j / 2) * pois(Math.max(1, lam + j * sd), k); p /= Math.sqrt(2 * Math.PI) * 2; }
+        hist.push({ k, n: Math.round(p * 43200), ref: pois(lam, k) * 43200 });
+      }
+      const drift = sc === "sens" ? 0.18 : sc === "ruido" ? -0.1 : 0;
+      const ratio = [];
+      for (let i = 0; i < 88; i++) ratio.push({ day: day0.getTime() - (87 - i) * 864e5, r: 28.05 * (1 + drift * i / 87) + 0.12 * Math.sin(i * 0.9) * Math.cos(i * 0.37) });
+      const r0 = 28.05, r1 = ratio[87].r, chg = r1 / r0 - 1;
+      const at = new Date(); at.setHours(6, 0, 0, 0);
+      return {
+        at: at.getTime(), first: now - 120 * 864e5,
+        gaps: sc === "falha" ? [{ at: now - 3 * 864e5, min: 14 }, { at: now - 1.5 * 864e5, min: 125 }] : [], gapsState: sc === "falha" ? "warn" : "ok", gapDays: 30,
+        disp: D, dispDays: 30, dispHigh: sc === "ruido" ? 6 : 0, dispLast: 7, hist, dispState: sc === "ruido" ? "warn" : "ok",
+        bursts: sc === "ruido" ? Array.from({ length: 31 }, (_, i) => now - (30 - i) * 864e5) : [now - 9 * 864e5], burstHour: sc === "ruido" ? 19 : -1, burstState: sc === "ruido" ? "warn" : "ok",
+        ratio: sc === "semrc" ? [] : ratio, r0: sc === "semrc" ? 0 : r0, r1: sc === "semrc" ? 0 : r1, ratioChg: sc === "semrc" ? 0 : chg, ratioWhy: sc === "semrc" ? "semrc" : "",
+        ratioState: sc === "semrc" ? "na" : Math.abs(chg) >= 0.05 ? "warn" : "ok",
+      };
+    },
     GetWhyRise: async (dev, at) => {
       const t = Math.floor((at || Date.now()) / 6e4) * 6e4 + 6e4, from = t - 12 * 3600e3, bins = [];
       let seed = 11;
