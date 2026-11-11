@@ -5,6 +5,8 @@
   longas, de até 40 dias sem conexão (antes, só até 14 dias). É mais ou menos
   o que a memória do aparelho guarda (~1000 h). Vale também com o PC
   desligado o tempo todo.
+- Espectrograma do Radiacode 102: a lupa 4×4 saiu; ficam "sem lupa" e a
+  lupa 5×5 (quem estava com a 4×4 passa para a 5×5).
 
 ## 2.64.0
 - Resumo mais enxuto: uma frase, três números e um gráfico na primeira vista.
