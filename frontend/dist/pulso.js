@@ -184,27 +184,27 @@ function pulseTapes(wall) {
     g.clearRect(0, 0, w, hh);
     g.fillStyle = getComputedStyle(document.documentElement).getPropertyValue("--border").trim() || "#20272C";
     g.fillRect(0, hh - Math.round(dpr), w, Math.round(dpr));
-    // casas de largura fixa (risco + vão), presas ao relógio: a fita anda
-    // de casa em casa e cada risco mantém a mesma largura enquanto anda
+    // cada risco anda suave, de pixel em pixel da tela, sempre com a mesma
+    // largura (posição arredondada para um pixel inteiro). A altura é a
+    // mesma para todos; só numa taxa alta, com várias contagens na mesma
+    // casa (risco + vão, presa ao relógio), ela passa a contar quantas foram.
     const lw = Math.max(1, Math.round(1.5 * dpr)), cell = lw + Math.max(1, Math.round(dpr));
-    const n = Math.floor(w / cell), cellMs = PU_TAPE_MS / n, nowC = Math.floor(wall / cellMs);
-    const cols = new Float64Array(n);
-    for (const [t, k] of PU.ticks[dev]) {
-      const i = n - 1 - (nowC - Math.floor(t / cellMs));
-      if (i >= 0 && i < n) cols[i] += k;
-    }
+    const pxMs = w / PU_TAPE_MS, cellMs = cell / pxMs;
+    const cnt = new Map();
     let mx = 1;
-    for (let i = 0; i < n; i++) if (cols[i] > mx) mx = cols[i];
+    for (const [t, k] of PU.ticks[dev]) {
+      const c = Math.floor(t / cellMs), v = (cnt.get(c) || 0) + k;
+      cnt.set(c, v);
+      if (v > mx) mx = v;
+    }
     g.fillStyle = pulseColor(dev);
-    // todos os riscos na mesma altura; só quando chegam muitas contagens na
-    // mesma casa (taxa alta) a altura passa a contar quantas foram
     const base = hh - Math.round(dpr), top = Math.round(4 * dpr), full = base - top;
-    const x0 = w - n * cell;
-    for (let i = 0; i < n; i++) {
-      if (!cols[i]) continue;
-      const f = mx >= 4 ? 0.25 + 0.75 * Math.log1p(cols[i]) / Math.log1p(mx) : 1;
+    for (const [t, k] of PU.ticks[dev]) {
+      const x = Math.round(w - (wall - t) * pxMs) - lw;
+      if (x < 0 || x > w - lw) continue;
+      const f = mx >= 4 ? 0.25 + 0.75 * Math.log1p(cnt.get(Math.floor(t / cellMs))) / Math.log1p(mx) : 1;
       const hgt = Math.max(Math.round(2 * dpr), Math.round(full * f));
-      g.fillRect(x0 + i * cell, base - hgt, lw, hgt);
+      g.fillRect(x, base - hgt, lw, hgt);
     }
   }
 }

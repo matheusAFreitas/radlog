@@ -1,5 +1,10 @@
 # Versões
 
+## 2.56.1
+- **Fita dos últimos 10 segundos andando suave.** Na 2.56.0 a fita andava
+  aos saltos, de casa em casa, e parecia travada. Agora cada risco anda de
+  pixel em pixel a cada quadro, sem perder a largura certa da 2.56.0.
+
 ## 2.56.0
 - **Fita dos últimos 10 segundos sem riscos tortos.** Com a escala de 125%
   do Windows, a fita ficava com meio pixel esticado e os riscos saíam com
