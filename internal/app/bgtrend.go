@@ -115,7 +115,11 @@ func (a *App) GetBgTrend(days int) (BgTrend, error) {
 	for _, d := range out.Daily {
 		out.Minutes += d.N
 	}
-	out.Fit = bgFitDays(out.Daily)
+	// os textos do ajuste em µSv/h, pela calibração de agora (2.65.2)
+	a.mu.Lock()
+	k := a.convCalLocked().USv(100) / 100
+	a.mu.Unlock()
+	out.Fit = bgFitDays(out.Daily, k)
 	return out, nil
 }
 
@@ -208,8 +212,17 @@ func bgDaily(pts []store.Point) []BgDay {
 
 // bgFitDays procura tendência na média aparada dos dias completos: reta
 // (rampa) e dois níveis (degrau). Só avisa quando a mudança é grande perto
-// da variação entre os dias e passa de 5% do nível.
-func bgFitDays(days []BgDay) BgFit {
+// da variação entre os dias e passa de 5% do nível. k converte CPM em µSv/h
+// nos textos (0: os textos ficam em CPM).
+func bgFitDays(days []BgDay, k float64) BgFit {
+	unit, lv, sl := "CPM", func(v float64) string { return fmtBR(v, 1) }, func(v float64) string { return fmtSigned(v, 2) }
+	slErr := func(v float64) string { return fmtBR(v, 2) }
+	if k > 0 {
+		unit = "µSv/h"
+		lv = func(v float64) string { return fmtBR(v*k, 3) }
+		sl = func(v float64) string { return fmtSigned(v*k, 4) }
+		slErr = func(v float64) string { return fmtBR(v*k, 4) }
+	}
 	var xs, ys []float64
 	var ts []int64
 	for _, d := range days {
@@ -297,20 +310,20 @@ func bgFitDays(days []BgDay) BgFit {
 	case bestK > 0 && stepT >= 4 && my > 0 && math.Abs(m2b-m1b)/my >= 0.05 && bestSS < 0.6*ssLin:
 		f.State = "degrau"
 		f.StepAt, f.StepFrom, f.StepTo = ts[bestK], m1b, m2b
-		f.Text = fmt.Sprintf("Mudança brusca por volta de %s: o fundo passou de %s para %s CPM (%s%%), com %d dias antes e %d depois.",
-			time.UnixMilli(f.StepAt).Format("02/01"), fmtBR(m1b, 1), fmtBR(m2b, 1), fmtSigned((m2b/m1b-1)*100, 0), bestK, n-bestK) + caveat
+		f.Text = fmt.Sprintf("Mudança brusca por volta de %s: o fundo passou de %s para %s %s (%s%%), com %d dias antes e %d depois.",
+			time.UnixMilli(f.StepAt).Format("02/01"), lv(m1b), lv(m2b), unit, fmtSigned((m2b/m1b-1)*100, 0), bestK, n-bestK) + caveat
 	case slopeT >= 3 && math.Abs(f.ChangePct) >= 5:
 		f.State = "subindo"
 		if slope < 0 {
 			f.State = "descendo"
 		}
-		f.Text = fmt.Sprintf("O fundo %s cerca de %s%% em %d dias (%s ± %s CPM por dia, %d dias completos).",
+		f.Text = fmt.Sprintf("O fundo %s cerca de %s%% em %d dias (%s ± %s %s por dia, %d dias completos).",
 			map[bool]string{true: "subiu", false: "desceu"}[slope > 0], fmtBR(math.Abs(f.ChangePct), 0), int(math.Round(span))+1,
-			fmtSigned(slope, 2), fmtBR(f.SlopeErr, 2), n) + caveat
+			sl(slope), slErr(f.SlopeErr), unit, n) + caveat
 	default:
 		f.State = "estavel"
-		f.Text = fmt.Sprintf("Sem tendência: a média dos dias variou dentro do esperado (%s ± %s CPM por dia, %s%% no período, %d dias completos).",
-			fmtSigned(slope, 2), fmtBR(f.SlopeErr, 2), fmtSigned(f.ChangePct, 1), n)
+		f.Text = fmt.Sprintf("Sem tendência: a média dos dias variou dentro do esperado (%s ± %s %s por dia, %s%% no período, %d dias completos).",
+			sl(slope), slErr(f.SlopeErr), unit, fmtSigned(f.ChangePct, 1), n)
 	}
 	return f
 }

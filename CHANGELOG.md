@@ -1,5 +1,10 @@
 # Versões
 
+## 2.65.2
+- Tendência do fundo: o gráfico "Fundo ao longo do tempo" e o texto da
+  tendência agora estão em µSv/h, pela calibração de agora, como o resto do
+  GMC-800. A dispersão continua em contagens, porque é técnica.
+
 ## 2.65.1
 - Fundo por dia: o µSv/h de todos os dias usa a calibração de agora. Antes
   cada minuto usava a da época, e a troca de calibração de 10/11 parecia

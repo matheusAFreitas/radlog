@@ -4027,27 +4027,28 @@ function drawBgTrend(tr) {
 
   // gráfico: média e mediana móveis, a média aparada de cada dia (pontos) e
   // a reta ou o degrau quando há aviso
-  const svg = $("bgChart");
+  // em µSv/h pela calibração de agora (2.65.2; o servidor manda em CPM)
+  const svg = $("bgChart"), k = calK(), u = (v) => (v == null ? null : v * k);
   let lo = Infinity, hi = -Infinity;
-  for (const p of pts) for (const v of [p.mean, p.median]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
-  for (const d of daily) if (d.full) { lo = Math.min(lo, d.trimmed); hi = Math.max(hi, d.trimmed); }
+  for (const p of pts) for (const v of [u(p.mean), u(p.median)]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
+  for (const d of daily) if (d.full) { lo = Math.min(lo, u(d.trimmed)); hi = Math.max(hi, u(d.trimmed)); }
   const ys = $("bgY").children;
   if (!isFinite(lo)) { svg.innerHTML = ""; for (const e of ys) e.textContent = ""; $("bgLegend").textContent = ""; $("bgDisp").innerHTML = ""; for (const e of $("bgX").children) e.textContent = ""; return; }
-  const pad = Math.max(1, (hi - lo) * 0.15);
-  lo = Math.max(0, Math.floor(lo - pad)); hi = Math.ceil(hi + pad);
+  const pad = Math.max(k, (hi - lo) * 0.15), q = 0.005;
+  lo = Math.max(0, Math.floor((lo - pad) / q) * q); hi = Math.ceil((hi + pad) / q) * q;
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, hi - lo < 6 ? 1 : 0);
+  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, 3);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="${COR.muted}" fill-opacity="0.06"/>`;
-  const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = val(p); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
+  const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = u(val(p)); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
   out += `<path d="${path((p) => p.mean)}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path((p) => p.median)}" fill="none" stroke="#7DD3FC" stroke-width="1.4" stroke-dasharray="5 3" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
-  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(d.trimmed).toFixed(1)}" r="2.6" fill="${COR.text}" fill-opacity="0.75"/>`;
+  for (const d of daily) if (d.full) out += `<circle cx="${x(d.day + DAY_MS / 2).toFixed(1)}" cy="${y(u(d.trimmed)).toFixed(1)}" r="2.6" fill="${COR.text}" fill-opacity="0.75"/>`;
   if (f.state === "subindo" || f.state === "descendo") {
-    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(f.fitFrom).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(f.fitTo).toFixed(1)}" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<line x1="${x(f.fitT0 + DAY_MS / 2).toFixed(1)}" y1="${y(u(f.fitFrom)).toFixed(1)}" x2="${x(f.fitT1 + DAY_MS / 2).toFixed(1)}" y2="${y(u(f.fitTo)).toFixed(1)}" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   } else if (f.state === "degrau") {
-    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(f.stepFrom).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(f.stepTo).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="M${x(f.fitT0).toFixed(1)} ${y(u(f.stepFrom)).toFixed(1)}H${x(f.stepAt).toFixed(1)}V${y(u(f.stepTo)).toFixed(1)}H${x(f.fitT1 + DAY_MS).toFixed(1)}" fill="none" stroke="${COR.att}" stroke-width="1.6" stroke-dasharray="6 4" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   const lab = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
@@ -4056,7 +4057,7 @@ function drawBgTrend(tr) {
   $("bgLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.accent + '"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
     '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
     (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:' + COR.att + ';border-top-style:dashed"></i>tendência</span>' : "") +
-    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (CPM)";
+    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (µSv/h)";
 
   // dispersão de cada dia
   const dsvg = $("bgDisp"), DH = 80;
@@ -4091,7 +4092,7 @@ function wireBgTrend() {
     $("bgCursor").style.left = (((best.t - tr.from) / (tr.to - tr.from)) * 100) + "%";
     const tip = $("bgTip");
     tip.hidden = false;
-    tip.textContent = `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean, 1)} · mediana ${fmt(best.median, 1)} CPM · n = ${fmt(best.n, 0)} min`);
+    tip.textContent = `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`);
     const left = ((best.t - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
