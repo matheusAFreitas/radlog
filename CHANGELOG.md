@@ -1,5 +1,10 @@
 # Versões
 
+## 2.56.2
+- **README novo.** A página do projeto no GitHub agora descreve o app como
+  ele é hoje: os dois aparelhos, as telas, os alarmes, a atualização
+  assinada, onde ficam os dados, como compilar e a estrutura do código.
+
 ## 2.56.1
 - **Fita dos últimos 10 segundos andando suave.** Na 2.56.0 a fita andava
   aos saltos, de casa em casa, e parecia travada. Agora cada risco anda de
