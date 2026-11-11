@@ -1985,10 +1985,22 @@
         <span>Iniciar com o Windows (abre na bandeja)</span>
         <input type="checkbox" id="chkAutostart">
       </label>
+      <label class="toggle">
+        <span>Mostrar a leitura no ícone da bandeja</span>
+        <input type="checkbox" id="chkTrayNum">
+      </label>
+      <label for="selTrayDev">Aparelho no ícone</label>
+      <select id="selTrayDev">
+        <option value="">Automático (o mais grave)</option>
+        <option value="gmc">GQ GMC-800</option>
+        <option value="radiacode">Radiacode 102</option>
+      </select>
+      <p class="small muted">O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.</p>
       <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
       <details class="how">
         <summary>Como funciona</summary>
         <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+        <p class="small muted">O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.</p>
       </details>
     </fieldset>
 

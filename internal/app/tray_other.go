@@ -6,13 +6,13 @@ package app
 
 const trayAvailable = false
 
-func (a *App) startTray()                 {}
-func (a *App) stopTray()                  {}
-func (a *App) trayShow(tip, level string) {}
-func setAutostart(on bool) error          { return nil }
-func autostartPath() string               { return "" }
-func startupDisabled() bool               { return false }
-func enableStartup() error                { return nil }
+func (a *App) startTray()                                                            {}
+func (a *App) stopTray()                                                             {}
+func (a *App) trayApply(tip string, plain bool, level, key string, mk func() []byte) {}
+func setAutostart(on bool) error                                                     { return nil }
+func autostartPath() string                                                          { return "" }
+func startupDisabled() bool                                                          { return false }
+func enableStartup() error                                                           { return nil }
 
 type trayItem struct{}
 

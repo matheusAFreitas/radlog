@@ -174,7 +174,7 @@ func (a *App) StopDemo() DemoState {
 	a.alarmEnded()
 	a.emit("measure", MeasureState{})
 	a.emit("demo", DemoState{})
-	a.trayShow(appTitle, "")                 // a próxima leitura real atualiza o ícone
+	a.trayGmcConn("")                        // a próxima leitura real atualiza o ícone
 	a.emit("stored", time.Now().UnixMilli()) // a tela recarrega com os dados reais
 	a.emit("event", Event{Kind: kindAlert})
 	a.emit("event", Event{Kind: kindEvent})
@@ -349,7 +349,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 		case attnOn:
 			trayLvl = "atencao"
 		}
-		a.trayTick(r.CPM, usv, trayLvl, false, true)
+		a.trayTick(usv, trayLvl, false, r.Saturated, true)
 		a.emit("reading", r)
 	}
 }

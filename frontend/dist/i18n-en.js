@@ -2870,7 +2870,16 @@ const I18N_EN = {
 "Com mais dias a resposta fica mais clara.": "With more days the answer gets clearer.",
 "Com 28 dias ou mais e passando no teste de acaso, a relação é confiável.": "With 28 days or more and passing the chance test, the relationship is reliable.",
 "µSv acima do fundo": "µSv above background",
-"mSv acima do fundo": "mSv above background"
+"mSv acima do fundo": "mSv above background",
+"Mostrar a leitura no ícone da bandeja": "Show the reading on the tray icon",
+"Aparelho no ícone": "Device on the icon",
+"Automático (o mais grave)": "Automatic (the most severe)",
+"O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.": "Windows usually hides new icons inside the ^ arrow. To always see the number, drag the RadLog icon onto the taskbar, next to the clock.",
+"O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
+"O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RadiaCode esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
+"leitura no ícone": "reading on the icon",
+"aparelho no ícone": "device on the icon",
+"ATENÇÃO": "ATTENTION"
 },
 "patterns": [
 [
@@ -6790,6 +6799,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) sem contagens · confira o aparelho$",
+"${1} no counts · check the device",
+[
+" sem contagens · confira o aparelho"
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -7173,6 +7190,14 @@ const I18N_EN = {
 [
 "Sem nada no meio: ",
 " de no máximo "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) saturado · o valor real é maior$",
+"${1} saturated · the real value is higher",
+[
+" saturado · o valor real é maior"
 ]
 ],
 [
@@ -7936,6 +7961,15 @@ const I18N_EN = {
 [
 "incerteza ",
 "% (para em 10%)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) saturado · acima de ((?:(?! · ).)+?) µSv/h$",
+"${1} saturated · above ${2} µSv/h",
+[
+" saturado · acima de ",
+" µSv/h"
 ]
 ],
 [
@@ -11212,6 +11246,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) no ((?:(?! · ).)+?) · ((?:(?! · ).)+?) µSv/h$",
+"${1} on the ${2} · ${3} µSv/h",
+[
+" no ",
+" µSv/h"
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -11514,6 +11557,22 @@ const I18N_EN = {
 "Cut ${1} ± ${2}.",
 [
 "Cortou "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) µSv/h · ((?:(?! · ).)+?)$",
+"${1} · ${2} µSv/h · ${3}",
+[
+" µSv/h · "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) conectando…$",
+"${1} connecting…",
+[
+" conectando…"
 ]
 ],
 [

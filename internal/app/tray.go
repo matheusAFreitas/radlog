@@ -69,24 +69,120 @@ func (a *App) onBeforeClose() (prevent bool) {
 	return false
 }
 
-// trayTick atualiza a dica do ícone a cada leitura.
-func (a *App) trayTick(cpm uint32, usv float64, level string, noCount, demo bool) {
-	tip := fmt.Sprintf("RadLog · %d CPM · %.3f µSv/h", cpm, usv)
-	switch {
-	case level == "perigo":
-		tip = fmt.Sprintf("PERIGO · %d CPM · RadLog", cpm)
-	case level == "alarme":
-		tip = fmt.Sprintf("ALARME · %d CPM · RadLog", cpm)
-	case level == "atencao":
-		tip = fmt.Sprintf("Atenção · %d CPM · RadLog", cpm)
-	case noCount:
-		tip = "Sem contagens · confira o contador · RadLog"
-		level = "alarme"
+// trayTick guarda a leitura do GMC-800 e atualiza o ícone e a dica.
+func (a *App) trayTick(usv float64, level string, noCount, sat, demo bool) {
+	a.trayMu.Lock()
+	a.trayGmc = trayDev{Name: "GMC-800", Key: "gmc", State: "ok", USv: usv, Level: level, NoCount: noCount, Sat: sat}
+	a.trayDemo = demo
+	a.trayMu.Unlock()
+	a.trayRefresh()
+}
+
+// trayGmcConn segue a conexão do GMC-800 (conectando, desconectado).
+func (a *App) trayGmcConn(state string) {
+	a.trayMu.Lock()
+	switch state {
+	case "conectado":
+		a.trayMu.Unlock()
+		return // a primeira leitura traz o valor
+	case "": // saiu do demo: a próxima leitura real atualiza o valor
+		a.trayDemo = false
+		a.trayMu.Unlock()
+		a.trayRefresh()
+		return
+	case "conectando":
+		a.trayGmc = trayDev{Name: "GMC-800", Key: "gmc", State: "wait"}
+	default:
+		a.trayGmc = trayDev{Name: "GMC-800", Key: "gmc", State: "off"}
 	}
+	a.trayDemo = false
+	a.trayMu.Unlock()
+	a.trayRefresh()
+}
+
+// trayRc lê o RC102 para o ícone e a dica.
+func (a *App) trayRc() (d trayDev, show bool) {
+	a.rc.mu.Lock()
+	st := a.rc.st
+	a.rc.mu.Unlock()
+	a.demoRcOverlay(&st)
+	now := time.Now()
+	a.mu.Lock()
+	rcOff := a.settings.RcOff && !st.Demo
+	lvl := a.rcAlertLevelLocked()
+	satAt := a.effLocked().Levels.RcSatUSv
+	away := a.whereaboutsLocked(now).NotHome
+	a.mu.Unlock()
+	if st.Demo {
+		lvl = st.AlertLevel
+	}
+	d = trayDev{Name: "RC102", Key: "rc", State: "off", SatAbove: satAt, Away: away}
+	switch st.State {
+	case "conectado":
+		d.State = "ok"
+		d.USv, d.Level = st.USvh, lvl
+		d.Sat = st.Offscale || (satAt > 0 && st.USvh >= satAt)
+		if d.Sat {
+			d.Level = "perigo"
+		}
+	case "conectando":
+		d.State = "wait"
+	}
+	return d, !rcOff
+}
+
+// trayRefresh monta o ícone (número do aparelho escolhido) e a dica (os
+// dois aparelhos, uma linha cada).
+func (a *App) trayRefresh() {
+	if !trayAvailable || !a.trayReady.Load() {
+		return
+	}
+	r, showRc := a.trayRc()
+	a.mu.Lock()
+	plain, choice := a.settings.TrayPlain, a.settings.TrayDevice
+	a.mu.Unlock()
+	sep := ","
+	if a.uiLang() == "en" {
+		sep = "."
+	}
+	a.trayMu.Lock()
+	g, demo := a.trayGmc, a.trayDemo
+	a.trayMu.Unlock()
+	if g.Name == "" {
+		g = trayDev{Name: "GMC-800", Key: "gmc", State: "off"}
+	}
+	if !showRc {
+		r.State = "off"
+		if choice == "radiacode" {
+			choice = ""
+		}
+	}
+	me := trayPick(choice, g, r)
+	other := r
+	if me.Key == "rc" {
+		other = g
+	}
+	lines := []string{a.T(trayLine(me, sep))}
+	if showRc || other.Key == "gmc" {
+		lines = append(lines, a.T(trayLine(other, sep)))
+	}
+	lines = append(lines, "RadLog")
+	tip := strings.Join(lines, "\n")
 	if demo {
 		tip = "DEMO · " + tip
 	}
-	a.trayShow(tip, level)
+	if n := []rune(tip); len(n) > 127 { // limite do Windows
+		tip = string(n[:127])
+	}
+	txt, lvl := trayText(me, sep)
+	if me.State != "ok" {
+		lvl = ""
+	}
+	key := fmt.Sprintf("%s|%s|%s|%s", me.Key, me.State, txt, lvl)
+	if plain {
+		key = "plain|" + lvl
+	}
+	a.trayApply(tip, plain, lvl, key, func() []byte { return trayICO(me, sep) })
 }
 
 func (a *App) isDemo() bool {
