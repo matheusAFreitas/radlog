@@ -3194,7 +3194,19 @@ const I18N_EN = {
 "Referência do fundo recomeça hoje": "Background reference restarts today",
 "Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)": "I moved the GMC-800 (the reference background restarts here)",
 "o dia não pode ficar no futuro": "the day cannot be in the future",
-"A pressão ficou estável nas 12 horas antes.": "Pressure stayed steady in the 12 hours before."
+"A pressão ficou estável nas 12 horas antes.": "Pressure stayed steady in the 12 hours before.",
+"Sem como conferir: medindo um objeto.": "Can't cross-check: measuring an object.",
+"sem como conferir": "no cross-check",
+"Conferido com o outro aparelho": "Checked against the other device",
+"Os dois subiram nos mesmos minutos: é radiação de verdade, no lugar onde os dois estão.": "Both rose in the same minutes: it is real radiation, where both devices are.",
+"Só o RC102 subiu. O GMC-800, que conta bem menos, ficou dentro do vai e vem normal dele. Se havia algo perto só do RC102, afaste e veja se volta.": "Only the RC102 rose. The GMC-800, which counts much less, stayed within its normal back and forth. If something was close only to the RC102, move it away and see if it goes back down.",
+"Só o RadiaCode subiu. O GMC-800, que conta bem menos, ficou dentro do vai e vem normal dele. Se havia algo perto só do RadiaCode, afaste e veja se volta.": "Only the RC102 rose. The GMC-800, which counts much less, stayed within its normal back and forth. If something was close only to the RC102, move it away and see if it goes back down.",
+"Só o GMC-800 subiu. O RC102, que conta umas 30 vezes mais, ficou dentro do vai e vem normal dele. Se havia algo perto só do GMC-800, afaste e veja se volta. Se não havia nada, veja a Saúde do tubo.": "Only the GMC-800 rose. The RC102, which counts about 30 times more, stayed within its normal back and forth. If something was close only to the GMC-800, move it away and see if it goes back down. If there was nothing, check Tube health.",
+"Só o GMC-800 subiu. O RadiaCode, que conta umas 30 vezes mais, ficou dentro do vai e vem normal dele. Se havia algo perto só do GMC-800, afaste e veja se volta. Se não havia nada, veja a Saúde do tubo.": "Only the GMC-800 rose. The RC102, which counts about 30 times more, stayed within its normal back and forth. If something was close only to the GMC-800, move it away and see if it goes back down. If there was nothing, check Tube health.",
+"Para conferir, os dois precisam estar no mesmo lugar, conectados e sem medir objeto.": "To cross-check, both need to be in the same place, connected and not measuring an object.",
+"10 min antes": "10 min before",
+"+5 min": "+5 min",
+"subida sobre o fundo de cada um": "rise above each device's background"
 },
 "patterns": [
 [
@@ -4028,6 +4040,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) não viu: ((?:(?! · ).)+?) sobre o fundo dele\\. Pode ser algo perto só do ((?:(?! · ).)+?), interferência ou o aparelho\\.$",
+"${1} saw nothing: ${2} above its background. It may be something close only to ${3}, interference or the device.",
+[
+" não viu: ",
+" sobre o fundo dele. Pode ser algo perto só do ",
+", interferência ou o aparelho."
+]
+],
+[
 "Com o RC102 em casa, ele conta umas ",
 "^Com o RC102 em casa, ele conta umas ((?:(?! · ).)+?) vezes o que o GMC conta\\. Nesse trecho foram ((?:(?! · ).)+?) vezes\\.$",
 "With the RC102 at home, it counts about ${1} times what the GMC counts. In this stretch it was ${2} times.",
@@ -4215,6 +4237,15 @@ const I18N_EN = {
 "Com o material no meio, a taxa acima do fundo caiu de ",
 " para ",
 " µSv/h, na mesma posição."
+]
+],
+[
+"A resposta sai quando o ",
+"^A resposta sai quando o ((?:(?! · ).)+?) juntar contagens suficientes\\. Até lá, fica em \"conferindo\"\\.$",
+"The answer comes when ${1} has collected enough counts. Until then it stays at \"checking\".",
+[
+"A resposta sai quando o ",
+" juntar contagens suficientes. Até lá, fica em \"conferindo\"."
 ]
 ],
 [
@@ -5007,6 +5038,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Conferindo com o ",
+"^Conferindo com o ((?:(?! · ).)+?): ele é menos sensível e precisa de mais uns ((?:(?! · ).)+?)\\.$",
+"Checking with ${1}: it is less sensitive and needs about ${2} more.",
+[
+"Conferindo com o ",
+": ele é menos sensível e precisa de mais uns "
+]
+],
+[
 "Dentro do normal — o nível de fundo costuma ficar entre ",
 "^Dentro do normal — o nível de fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
 "Within normal — your background usually stays between ${1} and ${2} CPM",
@@ -5449,6 +5489,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Confirmado pelo ",
+"^Confirmado pelo ((?:(?! · ).)+?): ele também subiu ((?:(?! · ).)+?) sobre o fundo dele\\.$",
+"Confirmed by ${1}: it also rose ${2} above its background.",
+[
+"Confirmado pelo ",
+": ele também subiu ",
+" sobre o fundo dele."
+]
+],
+[
 "Aviso de atenção a partir de ",
 "^Aviso de atenção a partir de ((?:(?! · ).)+?) CPM \\(amarelo e 3 bipes\\)$",
 "Attention warning from ${1} CPM (yellow and 3 beeps)",
@@ -5580,6 +5630,14 @@ const I18N_EN = {
 "Home dose, from the device that stays put: the RC102${1}.",
 [
 "Dose da casa, pelo aparelho que fica parado: o RC102"
+]
+],
+[
+"Sem como conferir: a subida foi curta demais para o ",
+"^Sem como conferir: a subida foi curta demais para o ((?:(?! · ).)+?)\\.$",
+"Can't cross-check: the rise was too short for ${1}.",
+[
+"Sem como conferir: a subida foi curta demais para o "
 ]
 ],
 [
@@ -5819,6 +5877,15 @@ const I18N_EN = {
 [
 "Aviso de atenção a partir de ",
 " (amarelo e 3 bipes)"
+]
+],
+[
+"Sem como conferir: o ",
+"^Sem como conferir: o ((?:(?! · ).)+?) está com você, fora de casa\\.$",
+"Can't cross-check: ${1} is with you, away from home.",
+[
+"Sem como conferir: o ",
+" está com você, fora de casa."
 ]
 ],
 [
@@ -6839,6 +6906,24 @@ const I18N_EN = {
 ]
 ],
 [
+"Conferindo com o ",
+"^Conferindo com o ((?:(?! · ).)+?): precisa de mais uns ((?:(?! · ).)+?)\\.$",
+"Checking with ${1}: needs about ${2} more.",
+[
+"Conferindo com o ",
+": precisa de mais uns "
+]
+],
+[
+"Sem como conferir: o ",
+"^Sem como conferir: o ((?:(?! · ).)+?) está desconectado\\.$",
+"Can't cross-check: ${1} is disconnected.",
+[
+"Sem como conferir: o ",
+" está desconectado."
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -7255,6 +7340,15 @@ const I18N_EN = {
 "with you while handling the object (${1})",
 [
 "com você enquanto mexe no objeto ("
+]
+],
+[
+"Sem como conferir: o ",
+"^Sem como conferir: o ((?:(?! · ).)+?) ficou em casa\\.$",
+"Can't cross-check: ${1} stayed at home.",
+[
+"Sem como conferir: o ",
+" ficou em casa."
 ]
 ],
 [
@@ -8694,6 +8788,15 @@ const I18N_EN = {
 ]
 ],
 [
+"vai e vem normal do ",
+"^vai e vem normal do ((?:(?! · ).)+?) \\(±2σ\\)$",
+"normal back and forth of ${1} (±2σ)",
+[
+"vai e vem normal do ",
+" (±2σ)"
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -9705,6 +9808,14 @@ const I18N_EN = {
 [
 " de ",
 " dias acima de +5%"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): sem dado neste trecho$",
+"${1}: no data in this stretch",
+[
+": sem dado neste trecho"
 ]
 ],
 [
@@ -11114,6 +11225,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Conferindo com o ",
+"^Conferindo com o ((?:(?! · ).)+?)…$",
+"Checking with ${1}…",
+[
+"Conferindo com o "
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -11390,6 +11509,14 @@ const I18N_EN = {
 ]
 ],
 [
+"conferindo com o ",
+"^conferindo com o ((?:(?! · ).)+?)$",
+"checking with ${1}",
+[
+"conferindo com o "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -11624,6 +11751,14 @@ const I18N_EN = {
 "Open the ${1} screen",
 [
 "Abrir a tela do "
+]
+],
+[
+"confirmado pelo ",
+"^confirmado pelo ((?:(?! · ).)+?)$",
+"confirmed by ${1}",
+[
+"confirmado pelo "
 ]
 ],
 [
@@ -13059,6 +13194,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) \\(apitou\\)$",
+"${1} (went off)",
+[
+" (apitou)"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -14103,6 +14246,14 @@ const I18N_EN = {
 ]
 ],
 [
+"alerta ",
+"^alerta ((?:(?! · ).)+?)$",
+"alert ${1}",
+[
+"alerta "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -14244,6 +14395,14 @@ const I18N_EN = {
 "${1} times",
 [
 " vezes"
+]
+],
+[
+"só no ",
+"^só no ((?:(?! · ).)+?)$",
+"only on ${1}",
+[
+"só no "
 ]
 ],
 [

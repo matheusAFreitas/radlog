@@ -4,7 +4,7 @@ import "runtime"
 
 // AppVersion é a versão do app. Ao mudar, atualize também build/windows/winres.json
 // e o CHANGELOG.md.
-const AppVersion = "2.58.2"
+const AppVersion = "2.59.0"
 
 // GetVersion devolve a versão do app.
 func (a *App) GetVersion() string { return AppVersion }

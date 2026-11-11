@@ -1,5 +1,30 @@
 # Versões
 
+## 2.59.0
+- **Confirmação cruzada.** Quando o GQ GMC-800 ou o Radiacode 102 entra em
+  atenção ou alarme e os dois estão no mesmo lugar (os dois em casa ou os
+  dois com você), o app confere no outro aparelho. A comparação é pela
+  subida sobre o fundo de cada um, em %, e não pelo µSv/h, então a
+  calibração não interfere.
+- Uma linha nova na faixa diz o resultado, atualizada a cada 5 s:
+  - "Confirmado pelo RC102": o outro subiu acima de 3σ e pelo menos 40% do
+    que o primeiro subiu;
+  - "Conferindo": o outro ainda não juntou contagens para ver uma subida
+    desse tamanho, com o tempo que falta (no máximo 15 min);
+  - "não viu": já daria para ver com folga e o outro ficou abaixo de 2σ.
+    Na faixa de atenção, aparece também o botão "Por que subiu?";
+  - "Sem como conferir": os aparelhos estão em lugares diferentes, o outro
+    está desconectado ou tem uma medição de objeto em andamento.
+- No perigo a faixa não ganha a linha, mas o resultado fica no alerta. Se o
+  outro aparelho também passou do limite, continua a linha "Também" de
+  sempre. A confirmação nunca cala nem atrasa o alarme.
+- Em Alertas, cada alerta ganhou um selo com o resultado ("confirmado pelo
+  RC102", "só no GMC-800"...). O alerta aberto mostra um gráfico de 10 min
+  antes a 5 min depois, com a subida dos dois aparelhos sobre o fundo de
+  cada um.
+- O "Por que subiu?" usa o mesmo resultado na causa "Os dois aparelhos
+  viram".
+
 ## 2.58.2
 - A mediana do fundo do GQ GMC-800 agora é interpolada. Com umas 20
   contagens por minuto, a mediana comum só andava de 1 em 1 contagem, em
