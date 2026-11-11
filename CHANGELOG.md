@@ -1,5 +1,26 @@
 # Versões
 
+## 2.51.0
+- **Aba do Radiacode 102 repaginada (1ª parte).** São 5 subabas: Agora,
+  Espectro, Busca, Atividade (Bq) e Log.
+- **Agora:**
+  - A leitura aparece uma vez só, em µSv/h; CPM e cps ficam na linha de baixo.
+  - Conexão, onde ele está, bateria e temperatura viram etiquetas ao lado do
+    nome.
+  - A dose de hoje mostra quanto tempo ele passou fora de casa.
+  - A dose somada no aparelho entra junto da média e do mínimo e máximo de
+    24 h.
+  - Um gráfico novo mostra as últimas 6 h, 24 h ou 7 dias, com os trechos
+    fora de casa.
+  - "Procurar de novo" e "Configurar conexão" viram um botão só, "Conexão".
+- **Espectro:** tem "Acumulado" e "Ao longo do tempo". Este segundo junta o
+  espectrograma (com a cor de sempre) e a dureza, agora em dois gráficos
+  empilhados: contagem em cima e dureza embaixo, sem dois eixos.
+- Saem os textos "Para você" e os números dos blocos.
+- A calibração da Atividade vira uma tabela pequena.
+- "Lado a lado com o RC102" mudou para Configurações › GQ GMC-800 ›
+  Calibração.
+
 ## 2.50.0
 - **A barra compacta volta a ser como antes da 2.45.0.** Os quadros grandes
   aparecem de novo em todas as telas, e a faixa de cima só surge ao rolar a

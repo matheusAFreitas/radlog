@@ -1243,10 +1243,9 @@
   <nav class="subtabs" role="tablist" aria-label="RC102" data-page="radiacode">
     <button type="button" role="tab" data-sub="agora" aria-selected="true">Agora</button>
     <button type="button" role="tab" data-sub="espectro" aria-selected="false" tabindex="-1">Espectro</button>
-    <button type="button" role="tab" data-sub="espectrograma" aria-selected="false" tabindex="-1">Espectrograma</button>
-    <button type="button" role="tab" data-sub="log" aria-selected="false" tabindex="-1">Log</button>
-    <button type="button" role="tab" data-sub="busca" aria-selected="false" tabindex="-1">Modo busca</button>
+    <button type="button" role="tab" data-sub="busca" aria-selected="false" tabindex="-1">Busca</button>
     <button type="button" role="tab" data-sub="atividade" aria-selected="false" tabindex="-1">Atividade (Bq)</button>
+    <button type="button" role="tab" data-sub="log" aria-selected="false" tabindex="-1">Log</button>
   </nav>
   <div class="subpane" role="tabpanel" data-subpane="agora">
   <section class="card rc-main" id="rcMain" hidden>
@@ -1254,12 +1253,11 @@
         <div class="reading">
         <div class="read-head">
           <div class="read-main">
-            <span class="eyebrow">Radiacode 102 <span class="rc-main-via mono" id="rcMainVia"></span></span>
+            <span class="eyebrow rc-eyebrow" id="rcEyebrow">Radiacode 102 <span class="rc-main-via mono" id="rcMainVia"></span><span class="rc-chips" id="rcChips"></span></span>
             <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
           </div>
-          <div class="hero-spark" aria-hidden="true"><svg id="rHeroSpark" viewBox="0 0 160 40" preserveAspectRatio="none"><polyline points=""/></svg><span class="tile-sub">última hora</span></div>
           <div class="hero-dose">
-            <span class="tile-label">Dose hoje</span>
+            <span class="tile-label">Minha dose hoje</span>
             <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u">µSv</span></span>
             <span class="tile-sub" id="rcDoseTodaySub"></span>
           </div>
@@ -1269,12 +1267,7 @@
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
         <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
-        </div>
-        <div class="seg" role="group" aria-label="Unidade do RC102" id="rcUnitSeg">
-          <button type="button" data-unit="cpm" aria-pressed="false">CPM</button>
-          <button type="button" data-unit="usv" aria-pressed="true">µSv/h</button>
-          <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
-          <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
+        <div class="rc-acts"><button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button><button type="button" class="btn small" id="btnRcConn">Conexão</button></div>
         </div>
       </div>
 
@@ -1287,49 +1280,28 @@
         <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
         <div><span class="tile-label">Mín 24 h</span><span class="mono" id="rcMin24">—</span><span class="tile-sub">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="rcMax24">—</span><span class="tile-sub" id="rcMax24At"></span></div>
+        <div><span class="tile-label">Dose no aparelho</span><span class="mono" id="rcDevDose">—</span><span class="tile-sub" id="rcDevDoseSub"></span></div>
       </div>
+    </section>
+    <section class="card rc-24" id="rc24Card" hidden>
+      <div class="rc-24-head"><h3 id="rc24Title">Últimas 24 horas</h3>
+        <div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div></div>
+      <div class="rc-24-chart" id="rc24Chart"></div>
+      <p class="small muted rc-24-key"><span><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
+    </section>
+    <section class="card rc-none" id="rcNone" hidden>
+      <div class="rc-head"><h3>Radiacode 102</h3><span class="rc-state mono small" id="rcState">procurando</span></div>
+      <p class="small muted" id="rcHelp"></p>
+      <div class="rc-ctrl"><button type="button" class="btn small" id="btnRcRetry">Procurar de novo</button><button type="button" class="btn small" id="btnRcSettings">Conexão</button></div>
     </section>
   </div>
   <section class="card view" id="viewRadiacode">
       <div class="view-body">
-      <div class="dlg-head">
-        <div>
-          <h2>Radiacode 102</h2>
-          <span class="mono muted small" id="rcSub">procurando no USB…</span>
-        </div>
-      </div>
-
-      <div class="subpane" role="tabpanel" data-subpane="agora">
-      <article class="rc-card rc-real rc-live" id="rcLive">
-        <div class="rc-head"><h3>Aparelho</h3><span class="rc-state mono small" id="rcState">procurando</span></div>
-        <div class="rc-nums" id="rcNums" hidden>
-          <div><span class="lbl">Taxa de dose</span><span class="val mono" id="rcUsv">—</span><span class="small muted mono" id="rcUsvErr"></span></div>
-          <div><span class="lbl">Contagem</span><span class="val mono" id="rcCps">—</span><span class="small muted mono" id="rcCpsErr"></span></div>
-          <div><span class="lbl">Dose acumulada</span><span class="val mono" id="rcDose">—</span><span class="small muted mono" id="rcDoseSince"></span></div>
-          <div><span class="lbl">Bateria</span><span class="val mono" id="rcBat">—</span><span class="small muted mono" id="rcTemp"></span></div>
-        </div>
-        <p class="small muted" id="rcHelp"></p>
-        <p class="small muted mono" id="rcDevInfo"></p>
-        <div class="rc-ctrl">
-          <button type="button" class="btn small" id="btnRcRetry">Procurar de novo</button>
-          <button type="button" class="btn small" id="btnRcSettings">Configurar conexão</button>
-          <button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button>
-        </div>
-      </article>
-
-      <article class="rc-card rc-real" id="rcCmpCard">
-        <div class="rc-head"><h3>Lado a lado com o GMC</h3>
-          <div class="seg" id="rcCmpRange"><button type="button" data-min="60">1 h</button><button type="button" data-min="360" aria-pressed="true">6 h</button><button type="button" data-min="1440">24 h</button><button type="button" data-min="10080">7 d</button></div>
-        </div>
-        <p class="small muted">Para a intercalibração: deixe os dois aparelhos juntos, na mesma altura, sem um blindar o outro, por pelo menos 24 h. Cada ponto é um minuto em que os dois mediram; os dois em µSv/h (o GMC pela calibração dele).</p>
-        <div class="rc-cmp-chart" id="rcCmpChart"></div>
-        <p class="small mono" id="rcCmpStats"></p>
-      </article>
-      </div>
-
       <div class="subpane" role="tabpanel" data-subpane="espectro" hidden>
+      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" aria-pressed="true">Acumulado</button><button type="button" data-v="tempo" aria-pressed="false">Ao longo do tempo</button></div>
+      <div class="rc-specv" data-specview="acc">
       <article class="rc-card">
-        <div class="rc-head"><span class="rc-num mono">1</span><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
+        <div class="rc-head"><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
         <p id="rcSpecDesc">Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
         <div class="rc-ctrl">
           <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RC102"></div>
@@ -1345,16 +1317,13 @@
         </div>
         <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
         <p class="mono small rc-info" id="rcSpecInfo"></p>
-        <p class="rc-use" id="rcSpecUse"><strong>Para você:</strong> no eletrodo, os picos do tório (Pb-212 em 239 keV, Tl-208 em 583 e 2.614 keV, Ac-228 em 911 keV) e o raio X do próprio tungstênio perto de 59 keV. No detector de fumaça, um pico só, do amerício, em 59,5 keV. No sal light, o K-40 em 1.460 keV cresce devagar: precisa de tempo.</p>
       </article>
 
       </div>
-
-      <div class="subpane" role="tabpanel" data-subpane="espectrograma" hidden>
-      <p class="small muted" id="rcSimNote">Abaixo, o que ainda vai ficar pronto, com <b>dados simulados</b> no mesmo formato que o aparelho manda (1.024 canais de energia).</p>
+      <div class="rc-specv" data-specview="tempo" hidden>
 
       <article class="rc-card" id="rcSgCard">
-        <div class="rc-head"><span class="rc-num mono">2</span><h3>Espectrograma</h3><span id="rcSgSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSgLiveTag" hidden>do aparelho</span></div>
+        <div class="rc-head"><h3>Espectrograma</h3><span id="rcSgSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSgLiveTag" hidden>do aparelho</span></div>
         <p id="rcSgDesc">Três horas comprimidas: cada linha é 1 minuto, o tempo desce, a energia vai para a direita e a cor mostra quanto chegou. Neste exemplo chove do minuto 30 ao 80, e o eletrodo fica perto do minuto 118 ao 135.</p>
         <div class="rc-ctrl" id="rcSgCtrl" hidden>
           <div class="seg rc-seg rc-per" id="rcSgPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div>
@@ -1366,42 +1335,22 @@
             <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
         </div>
         <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="mono small muted" id="rcSgInfo"></span></div>
-        <p class="rc-use"><strong>Para você:</strong> durante a chuva aparecem os traços do Pb-214 (295 e 352 keV) e do Bi-214 (609 keV), que somem devagar depois; o eletrodo aparece como uma faixa forte que começa e termina de repente.</p>
       </article>
 
       <article class="rc-card" id="rcHardCard">
-        <div class="rc-head"><span class="rc-num mono">3</span><h3>Dureza nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
+        <div class="rc-head"><h3>Dureza nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
         <p id="rcHdDesc">Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p>
         <div class="rc-ctrl" id="rcHdCtrl" hidden><div class="seg rc-seg rc-per" id="rcHdPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div></div>
         <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
-        <p class="small muted rc-legend"><span class="lg-cps">contagem (cps)</span><span class="lg-hard">dureza</span><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span><span class="lg-gap" hidden>sem leitura (média)</span></p>
+        <p class="small muted rc-legend"><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span><span class="lg-gap" hidden>sem leitura (média)</span></p>
         <p class="mono small muted" id="rcHdInfo" hidden></p>
-        <p class="rc-use" id="rcHdUse"><strong>Para você:</strong> as duas subidas aumentam a contagem, mas a chuva <b>abaixa</b> a dureza (os filhos do radônio ficam quase todos abaixo de 1.500 keV) e o tório <b>sobe</b> (o pico do Tl-208 em 2.614 keV). Passe o mouse: quando a subida é grande o bastante, o app diz com o que ela parece.</p>
       </article>
       </div>
 
-      <div class="subpane" role="tabpanel" data-subpane="log" hidden>
-      <article class="rc-card" id="rcLogCard">
-        <div class="rc-head"><span class="rc-num mono">4</span><h3>Log</h3><span class="live-tag">do aparelho</span></div>
-        <p>Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
-        <div class="rc-ctrl rc-log-bar">
-          <span class="small muted">Mostrar:</span>
-          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
-          <span class="mono small" id="rcLogCount"></span>
-          <div class="seg rc-seg" id="rcLogPeriod" aria-label="Período"><button type="button" data-p="1" aria-pressed="false">Hoje</button><button type="button" data-p="7" aria-pressed="false">7 dias</button><button type="button" data-p="30" aria-pressed="false">30 dias</button><button type="button" data-p="0" aria-pressed="true">Tudo</button></div>
-          <button type="button" class="btn small" id="rcLogImport">Importar do celular</button>
-        </div>
-        <p class="small" id="rcLogMsg" hidden></p>
-        <div class="rc-log-wrap"><table class="rc-log rc-mlog"><thead><tr><th></th><th>data e hora</th><th colspan="2">dados</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
-        <p class="small muted rc-log-empty" id="rcLogEmpty" hidden>Ainda sem registros. Com o RC102 conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.</p>
-        <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogMore" hidden>Mostrar mais antigos</button></div>
-        <p class="rc-use"><strong>Para você:</strong> no app do celular, aba Log → exportar (.csv). Importando aqui, o que o celular recebeu fora de casa entra no mesmo log, marcado como "celular", sem repetir o que o PC já tinha.</p>
-      </article>
       </div>
-
       <div class="subpane" role="tabpanel" data-subpane="busca" hidden>
       <article class="rc-card" id="rcSrCard">
-        <div class="rc-head"><span class="rc-num mono">5</span><h3>Modo busca</h3><span id="rcSrSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSrLiveTag" hidden>ao vivo</span></div>
+        <div class="rc-head"><h3>Modo busca</h3><span id="rcSrSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcSrLiveTag" hidden>ao vivo</span></div>
         <p id="rcSrDesc">Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.</p>
         <div class="rc-search">
           <div class="rc-gauge"><div id="rcGauge"></div><div class="rc-mult mono small" id="rcMult"><span data-m="1">×1</span><span data-m="10">×10</span><span data-m="100">×100</span><span data-m="1000">×1000</span></div></div>
@@ -1424,13 +1373,12 @@
             <p class="mono small rc-info" id="rcSearchInfo"></p>
           </div>
         </div>
-        <p class="rc-use" id="rcSrUse"><strong>Para você:</strong> passar o RC102 pelas amostras na bancada e achar qual é a "quente". Veja como a distância pesa: o dobro da distância dá um quarto da radiação.</p>
       </article>
       </div>
 
       <div class="subpane" role="tabpanel" data-subpane="atividade" hidden>
       <article class="rc-card" id="rcActCard">
-        <div class="rc-head"><span class="rc-num mono">6</span><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
+        <div class="rc-head"><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
         <p>Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p>
         <div class="rc-act-cal" id="rcActCal"></div>
         <div id="rcActForm">
@@ -1467,6 +1415,25 @@
 
       <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>
       </div>
+
+      <div class="subpane" role="tabpanel" data-subpane="log" hidden>
+      <article class="rc-card" id="rcLogCard">
+        <div class="rc-head"><h3>Log</h3><span class="live-tag">do aparelho</span></div>
+        <p>Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p>
+        <div class="rc-ctrl rc-log-bar">
+          <span class="small muted">Mostrar:</span>
+          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
+          <span class="mono small" id="rcLogCount"></span>
+          <div class="seg rc-seg" id="rcLogPeriod" aria-label="Período"><button type="button" data-p="1" aria-pressed="false">Hoje</button><button type="button" data-p="7" aria-pressed="false">7 dias</button><button type="button" data-p="30" aria-pressed="false">30 dias</button><button type="button" data-p="0" aria-pressed="true">Tudo</button></div>
+          <button type="button" class="btn small" id="rcLogImport">Importar do celular</button>
+        </div>
+        <p class="small" id="rcLogMsg" hidden></p>
+        <div class="rc-log-wrap"><table class="rc-log rc-mlog"><thead><tr><th></th><th>data e hora</th><th colspan="2">dados</th></tr></thead><tbody id="rcLogBody"></tbody></table></div>
+        <p class="small muted rc-log-empty" id="rcLogEmpty" hidden>Ainda sem registros. Com o RC102 conectado, a taxa chega a cada ~1,5 minuto e a temperatura e a dose a cada poucos minutos.</p>
+        <div class="rc-ctrl"><button type="button" class="btn small" id="rcLogMore" hidden>Mostrar mais antigos</button></div>
+      </article>
+      </div>
+
       </div>
     </section>
 </div>
@@ -1631,6 +1598,16 @@
       </details>
     </fieldset>
 
+    <fieldset class="set-wide rc-cmp-set" id="rcCmpCard">
+        <legend>Lado a lado com o RC102</legend>
+        <div class="rc-head">
+          <div class="seg" id="rcCmpRange"><button type="button" data-min="60">1 h</button><button type="button" data-min="360" aria-pressed="true">6 h</button><button type="button" data-min="1440">24 h</button><button type="button" data-min="10080">7 d</button></div>
+        </div>
+        <p class="small muted">Para a intercalibração: deixe os dois aparelhos juntos, na mesma altura, sem um blindar o outro, por pelo menos 24 h. Cada ponto é um minuto em que os dois mediram; os dois em µSv/h (o GMC pela calibração dele).</p>
+        <div class="rc-cmp-chart" id="rcCmpChart"></div>
+        <p class="small mono" id="rcCmpStats"></p>
+      </fieldset>
+
       <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit dc-cal set-wide" id="dcCalCard">
         <legend>Pontos gravados no contador</legend>
         <p class="small muted">Seis pontos que convertem CPM em µSv/h, no contador e no app. Só mude se souber o valor certo para o seu tubo (por exemplo, medido com uma fonte de referência).</p>
@@ -1729,6 +1706,7 @@
         <input type="checkbox" id="chkRcOn">
       </label>
       <p class="rc-set-state small" id="rcSetState"><span class="dot" id="rcSetDot"></span><span id="rcSetText"></span></p>
+      <button type="button" class="btn small" id="btnRcRetrySet">Procurar de novo</button>
       <label for="rcBLE">Endereço Bluetooth (opcional)</label>
       <div class="upd-row">
         <input type="text" id="rcBLE" class="mono" placeholder="ex.: 52:43:01:02:03:04" autocomplete="off" spellcheck="false">
