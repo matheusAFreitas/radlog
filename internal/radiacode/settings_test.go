@@ -2,6 +2,7 @@ package radiacode
 
 import (
 	"encoding/binary"
+	"fmt"
 	"strings"
 	"testing"
 )
@@ -13,6 +14,8 @@ type fakeRegs struct {
 	writes    []uint32
 	resets    int
 	accResets int
+	accSec    uint32
+	accWay    string
 	refuse    map[uint32]bool
 }
 
@@ -60,13 +63,22 @@ func (f *fakeRegs) Exchange(req []byte) ([]byte, error) {
 		body = le(uint32(1))
 	case cmdWrVirtString:
 		id, n := binary.LittleEndian.Uint32(args), binary.LittleEndian.Uint32(args[4:])
-		if f.refuse[id] || n != 0 {
+		if f.refuse[id] {
 			body = le(uint32(0))
 			break
 		}
-		f.accResets++
+		// o aparelho aceita, mas só zera com o jeito certo (f.accWay)
+		if fmt.Sprintf("%#x/%d", id, n) == f.accWay {
+			f.accResets++
+			f.accSec = 0
+		}
 		body = le(uint32(1))
 	case cmdRdVirtString:
+		if binary.LittleEndian.Uint32(args) == vsSpecAccum {
+			sp := le(f.accSec, float32(0), float32(3), float32(0), uint32(1), uint32(2), uint32(3))
+			body = append(le(uint32(1), uint32(len(sp))), sp...)
+			break
+		}
 		cfg := []byte("[DeviceParams]\nVSFR_DISP_OFF_TIME=\"5 s;10 s;15 s;30 s;2 min;5 min\"\nDispBacklight=0-9\n")
 		body = append(le(uint32(1), uint32(len(cfg))), cfg...)
 	}
@@ -187,13 +199,25 @@ func TestResetDose(t *testing.T) {
 }
 
 func TestResetSpecAccum(t *testing.T) {
-	f := newFakeRegs()
-	d := &Device{tr: f}
-	if err := d.ResetSpecAccum(); err != nil || f.accResets != 1 {
-		t.Fatalf("zerar: %v (%d)", err, f.accResets)
+	for _, c := range []struct{ way, want string }{
+		{"0x205/0", "0x205 vazio"}, {"0x207/0", "0x207 vazio"}, {"0x207/4", "0x207 u32 0"},
+	} {
+		f := newFakeRegs()
+		f.accSec, f.accWay = 5000, c.way
+		d := &Device{tr: f}
+		if how, err := d.ResetSpecAccum(); err != nil || how != c.want || f.accResets != 1 {
+			t.Fatalf("%s: %q %v (%d)", c.way, how, err, f.accResets)
+		}
 	}
-	f.refuse[vsSpecAccum] = true
-	if err := d.ResetSpecAccum(); err != ErrRefused {
+	// aceita tudo e não zera nada, ou recusa tudo: recusado
+	f := newFakeRegs()
+	f.accSec = 5000
+	d := &Device{tr: f}
+	if _, err := d.ResetSpecAccum(); err != ErrRefused {
+		t.Fatalf("nada zerou: %v", err)
+	}
+	f.refuse[vsSpecAccum], f.refuse[vsSpecReset] = true, true
+	if _, err := d.ResetSpecAccum(); err != ErrRefused {
 		t.Fatalf("recusa: %v", err)
 	}
 }

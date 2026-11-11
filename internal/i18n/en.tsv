@@ -4231,3 +4231,4 @@ Não deu para zerar: {0}	Couldn't reset: {0}
 O RC102 recusou zerar o espectro acumulado; zerado só no app	The RC102 refused to reset the accumulated spectrum; reset in the app only
 Espectro acumulado do RC102 zerado pelo app	RC102 accumulated spectrum reset by the app
 Espectro acumulado do RC102	RC102 accumulated spectrum
+Espectro acumulado do RC102 zerado pelo app ({0})	RC102 accumulated spectrum reset by the app ({0})

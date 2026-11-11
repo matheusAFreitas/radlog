@@ -319,17 +319,41 @@ func (d *Device) ResetDose() error {
 }
 
 // ResetSpecAccum zera o espectro acumulado do aparelho (o de longo prazo,
-// que ele não mostra na tela nem zera pelo menu): grava uma string vazia
-// nele, como a biblioteca do Radiacode faz para zerar o espectro atual.
-func (d *Device) ResetSpecAccum() error {
-	r, err := d.execute(cmdWrVirtString, append(u32(vsSpecAccum), u32(0)...))
+// que ele não mostra na tela nem zera pelo menu). O formato não é público:
+// tenta, em ordem, gravar uma string vazia no próprio acumulado (como a
+// biblioteca do Radiacode zera o espectro atual) e no SPEC_RESET (0x207),
+// vazio e com um u32 0. Só conta como zerado se o tempo do acumulado lido
+// depois caiu. Devolve qual jeito funcionou (vai para o log) ou ErrRefused.
+func (d *Device) ResetSpecAccum() (string, error) {
+	before, err := d.SpectrumAccum()
 	if err != nil {
-		return err
+		return "", err
 	}
-	if ret, err := r.u32(); err != nil || ret != 1 {
-		return ErrRefused
+	tries := []struct {
+		name string
+		args []byte
+	}{
+		{"0x205 vazio", append(u32(vsSpecAccum), u32(0)...)},
+		{"0x207 vazio", append(u32(vsSpecReset), u32(0)...)},
+		{"0x207 u32 0", append(append(u32(vsSpecReset), u32(4)...), u32(0)...)},
 	}
-	return nil
+	for _, t := range tries {
+		r, err := d.execute(cmdWrVirtString, t.args)
+		if err != nil {
+			return "", err
+		}
+		if ret, err := r.u32(); err != nil || ret != 1 {
+			continue
+		}
+		after, err := d.SpectrumAccum()
+		if err != nil {
+			return "", err
+		}
+		if after.Duration < before.Duration || (before.Duration == 0 && after.Duration == 0) {
+			return t.name, nil
+		}
+	}
+	return "", ErrRefused
 }
 
 // ErrRefused: o aparelho respondeu, mas não aceitou o comando.
