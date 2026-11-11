@@ -1,5 +1,11 @@
 # Versões
 
+## 2.50.0
+- **A barra compacta volta a ser como antes da 2.45.0.** Os quadros grandes
+  aparecem de novo em todas as telas, e a faixa de cima só surge ao rolar a
+  página, com os dois aparelhos, o alerta e o "voltar ao topo". O resto que
+  veio depois (bandeja, busca, tamanho da janela) continua igual.
+
 ## 2.49.0
 - **Tamanho e espaço da janela.** Em Configurações › Janela e tela dá para
   escolher o tamanho de tudo (90%, 100%, 108%, 115%, 130% ou 150%: texto,

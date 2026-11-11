@@ -1399,7 +1399,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .mini-top:hover { color: var(--text); background: var(--surface-2); }
 @media (max-width: 1100px) { .mini { gap: var(--space-4); } .mini-sec { display: none; } }
 @media (max-width: 900px) { .mini { left: 0; padding: var(--space-1) var(--space-4); } .mini-top span { display: none; } }
-@media (max-width: 560px) { .mini-unit { display: none; } .mini-alert { padding: 0 var(--space-2); } }
+@media (max-width: 560px) { .mini-name, .mini-unit { display: none; } .mini-alert span { display: none; } .mini-alert { padding: 0 var(--space-2); } }
 
 /* 2.11: Configurações como página */
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
@@ -2184,49 +2184,6 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .cl-press { margin-top: var(--space-4); }
 .cl-charts { position: relative; display: grid; gap: 2px; }
 .cl-charts .ft-tip { top: 0; }
-
-/* barra compacta (2.45): quadros grandes só no Agora; nas outras telas a
-   faixa fica presa no topo da área da página desde o começo */
-.main { container: main / inline-size; }
-body:not([data-view="agora"]) .instruments { display: none; }
-.mini.pinned { position: sticky; left: auto; right: auto; top: var(--barsH, 0px); transform: none; opacity: 1; transition: border-color .4s; margin: calc(-1 * var(--space-4)) calc(-1 * var(--space-6)) 0; flex-wrap: wrap; row-gap: var(--space-1); }
-@media (max-width: 1100px) { .mini.pinned { margin: calc(-1 * var(--space-3)) calc(-1 * var(--space-4)) 0; } }
-.mini { min-height: 48px; }
-.mini-dev.here { cursor: default; }
-.mini-dev.here:hover { background: transparent; }
-.mini-dev.here .mini-name { color: var(--text); }
-.mini-dev:disabled { opacity: 1; }
-.nm-short { display: none; }
-.mini-place { font-size: var(--fs-caption); color: var(--away-ink); border: 1px solid color-mix(in srgb, var(--away) 55%, transparent); border-radius: var(--radius-pill); padding: 0 8px; white-space: nowrap; align-self: center; }
-.mini-spark { width: 56px; height: 18px; align-self: center; flex: none; }
-.mini-spark polyline { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-linejoin: round; }
-.mini-dev.lv-atencao .mini-spark polyline, .mini-dev.lv-nocount .mini-spark polyline { stroke: var(--att); }
-.mini-dev.lv-alarme .mini-spark polyline { stroke: var(--alarm); }
-.mini-dev.lv-perigo .mini-spark polyline { stroke: var(--warn); }
-.mini-dev.stale .mini-spark polyline { stroke: var(--dim); }
-.mini-dev.lv-atencao .mini-val { color: var(--att); }
-.mini-dev.lv-alarme .mini-val { color: var(--alarm); }
-.mini-val:empty, .mini-dev.stale .mini-val { color: var(--dim); }
-.mini-chips { margin-left: auto; display: inline-flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; justify-content: flex-end; }
-.mini-alert.none { --c: var(--border); color: var(--dim); font-weight: 400; }
-.mini-alert.none i { display: none; }
-.mini-alert:not(.none) i { animation: miniPulse 1.6s ease-in-out infinite; }
-@keyframes miniPulse { 50% { opacity: .35; } }
-@media (prefers-reduced-motion: reduce) { .mini-alert i { animation: none !important; } }
-.mini-maint { display: inline-flex; align-items: center; gap: var(--space-2); min-height: 28px; padding: 0 var(--space-3); border: 1px solid var(--att); border-radius: var(--radius-lg); background: transparent; color: var(--att); font-size: var(--fs-label); white-space: nowrap; }
-.ma-short, .mm-short { display: none; }
-@container main (max-width: 940px) {
-  .mini-spark, .mini-sec { display: none; }
-}
-@container main (max-width: 620px) {
-  .nm-long, .ma-long, .mm-long { display: none; }
-  .nm-short, .ma-short, .mm-short { display: inline; }
-  .mini-val { font-size: var(--fs-heading); }
-  .mini-dev.lv-seguro .mini-state { display: none; }
-}
-.mini-spark.empty { display: none; }
-.mini { flex-wrap: wrap; row-gap: var(--space-1); }
-.mini-dev { flex: none; }
 
 /* busca rápida (Ctrl+K) e botão do logo (2.48) */
 .side-quick { display: flex; align-items: center; gap: var(--space-2); margin: 0 0 var(--space-2); min-height: 34px; padding: 0 var(--space-2) 0 var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface); color: var(--dim); font: inherit; font-size: var(--fs-label); text-align: left; cursor: pointer; }

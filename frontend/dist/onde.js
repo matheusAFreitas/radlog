@@ -86,7 +86,6 @@ function whLines(w) {
 }
 
 function renderWhere() {
-  if (typeof renderMiniPlace === "function") renderMiniPlace();
   const card = $("whCard");
   if (!card) return;
   const c = whCur(), off = !whIsNormal(c), w = state.where || {};
