@@ -1,5 +1,28 @@
 # Versões
 
+## 2.54.0
+- **Pulso da contagem.** O anel do meio do mostrador pisca de leve a cada
+  contagem do aparelho, como o clique de um Geiger, só que sem som. Uma
+  piscada é sempre uma contagem.
+  - Com o fundo de casa, o GMC-800 dá uma piscada a cada 3 segundos, mais
+    ou menos. Numa subida, as piscadas aceleram.
+  - Quanto mais contagem, mais curta a piscada: de 0,4 s até 70 ms.
+- **O logo pisca junto,** com o aparelho do ícone da bandeja. Só o anel
+  pisca; o número e o resto da tela ficam parados.
+- **De onde vêm as contagens:**
+  - no GMC-800 elas vêm de verdade do GETCPS, e só o instante dentro do
+    segundo é sorteado;
+  - o RC102 manda a taxa, então as piscadas são sorteadas a partir dela.
+- **Fita "Os últimos 10 segundos"** (opcional): um risco por contagem,
+  embaixo do cartão de cada aparelho no Agora e na tela do aparelho.
+- **Configurações › Janela e tela › Pulso da contagem:**
+  - "Piscar o mostrador a cada contagem" (vem ligado);
+  - "Mostrar a fita dos últimos 10 segundos" (vem desligado; só vale com o
+    pulso ligado).
+
+  O pulso desliga sozinho com o Windows sem efeitos de animação e com a
+  janela escondida na bandeja.
+
 ## 2.53.0
 - **Calendário do ano** (Gráficos › Ano). Mostra o ano inteiro numa tela,
   um quadradinho por dia, pintado pelo dia comparado com a **sua média do

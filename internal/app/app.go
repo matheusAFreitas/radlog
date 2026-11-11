@@ -59,6 +59,10 @@ type Settings struct {
 	// ("" normal, "compacto", "confortavel"), por PC (uiscale.go)
 	UIScale   float64 `json:"uiScale"`
 	UIDensity string  `json:"uiDensity"`
+	// pulso da contagem (pulso.js): o anel do mostrador pisca a cada
+	// contagem (ligado, a não ser que PulseOff) e a fita dos últimos 10 s
+	PulseOff   bool `json:"pulseOff"`
+	PulseStrip bool `json:"pulseStrip"`
 	// iniciar com o Windows, direto na bandeja
 	StartWithWindows bool `json:"startWithWindows"`
 	// atualização pelo GitHub (update.go): procura ao abrir e uma vez por dia
