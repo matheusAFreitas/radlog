@@ -1,5 +1,14 @@
 # Versões
 
+## 2.64.2
+- Histórico de alertas: quando o filtro esvazia a lista (ex.: RC102 sem
+  alertas), o detalhe do alerta escolhido antes some junto.
+- Quadro dos aparelhos: sai a frase "no nível de fundo habitual" ao lado do
+  "Seguro", e a fita do pulso perde as legendas "Os últimos 10 segundos" e
+  "cada risco é uma contagem".
+- ALARA: "Por que isso importa" agora abre e fecha, e as explicações mais
+  longas foram para "Como funciona", como na aba do Radiacode 102.
+
 ## 2.64.1
 - "O RC102 estava fora de casa?": agora pergunta também depois de viagens
   longas, de até 40 dias sem conexão (antes, só até 14 dias). É mais ou menos

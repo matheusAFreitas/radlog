@@ -219,7 +219,9 @@ function renderAlertHistory(all) {
     && (!dv || (dv === "radiacode") === isRcEv(e)) && (!rg || (e.time >= rg.from && e.time < rg.to)));
   $("alertCount").textContent = list.length === 1 ? "1 alerta" : `${list.length} alertas`;
   box.textContent = "";
-  if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; return; }
+  // lista vazia: o detalhe do alerta de antes não pode ficar na tela
+  $("aDetail").hidden = !list.length;
+  if (!list.length) { box.innerHTML = '<p class="muted small">Nenhum alerta aqui.</p>'; state.alertSel = null; state.ad = null; return; }
   let day = "", ul = null;
   for (const e of list) {
     const dt = new Date(e.time);

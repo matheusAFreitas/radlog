@@ -304,7 +304,7 @@ function tileScale(pfx, p1, p2, pos, t1, t2) {
 
 // frase do nível ao lado do mostrador (só nos quadros dos aparelhos)
 const LV_SAY = {
-  seguro: "no nível de fundo habitual",
+  seguro: "", // "seguro" já diz tudo (ACE, 11/11)
   atencao: "acima do limite de atenção",
   alarme: "passou o limite de alarme",
   perigo: "acima do limite de perigo",

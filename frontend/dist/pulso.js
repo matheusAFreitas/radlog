@@ -172,8 +172,8 @@ function pulseTapeEl(host, dev) {
     el.dataset.dev = dev;
     el.title = dev === "gmc" ? "No GMC-800 cada piscada é uma contagem de verdade; só o instante dentro do segundo é sorteado."
       : "O RC102 manda a taxa, não cada contagem: o ritmo é o real, as piscadas são sorteadas a partir dele.";
-    el.innerHTML = `<div class="pu-head small"><span>Os últimos 10 segundos</span><span class="muted">cada risco é uma contagem</span></div>` +
-      `<canvas aria-hidden="true"></canvas><div class="pu-ax mono"><span>−10 s</span><span>−5 s</span><span>agora</span></div>`;
+    // sem legenda em cima: a linha já se explica (ACE, 11/11)
+    el.innerHTML = `<canvas aria-hidden="true"></canvas><div class="pu-ax mono"><span>−10 s</span><span>−5 s</span><span>agora</span></div>`;
     h.appendChild(el);
   }
   return el;
