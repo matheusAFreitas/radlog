@@ -130,6 +130,8 @@ function tbRender() {
     s += `<div class="tb-foot"><button type="button" class="btn small" id="btnTubeCheck"${TB.busy ? " disabled" : ""}>Conferir agora</button><span class="small muted">Usa só o que o app já gravou. Nada é escrito no aparelho.</span></div>`;
     card.innerHTML = s;
     card.hidden = false;
+    const te = $("tubeEmpty");
+    if (te) te.hidden = true;
   }
   // aviso informativo em Alertas: só enquanto durar
   const n = $("tubeNotice");
@@ -158,7 +160,7 @@ function tubeInit() {
   if (!api.GetTubeHealth) return;
   document.addEventListener("click", (e) => {
     if (e.target.closest("#btnTubeCheck")) tbLoad(true);
-    else if (e.target.closest("[data-tubeopen]")) { showView("gmc"); setTimeout(() => { const c = $("tubeCard"); if (c) c.scrollIntoView({ block: "start" }); }, 50); }
+    else if (e.target.closest("[data-tubeopen]")) { setSub("gmc", "tubo"); showView("gmc"); }
   });
   const hs = (e) => {
     const r = e.target.closest && e.target.closest(".tb-hist rect"), tip = $("tubeTip");

@@ -528,6 +528,17 @@
       </div>
       <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
     </section>
+  <section class="card view-graficos days-card" id="daysCard" data-subpane="tendencia" hidden>
+      <h2>Fundo por dia</h2>
+      <p class="small muted">Média de cada dia do GQ GMC-800 em casa.</p>
+      <div class="table-box">
+        <table>
+          <thead><tr><th scope="col">Dia</th><th scope="col" class="num">µSv/h</th><th scope="col" class="num">CPM</th></tr></thead>
+          <tbody id="days"><tr><td colspan="3" class="muted">Sem leituras guardadas.</td></tr></tbody>
+        </table>
+      </div>
+      <button type="button" class="link small-link" id="btnDaysMore" hidden>Ver mais</button>
+    </section>
   <section class="card view-graficos yc-card" id="ycCard" role="tabpanel" data-subpane="ano" hidden>
       <div class="chart-head">
         <div>
@@ -773,44 +784,47 @@
     </section>
 </div>
 <div class="page" id="pageAlertas" hidden>
-  <section class="card" id="alertsCard">
-      <div class="card-head">
-        <h2>Alertas ativos</h2>
-      </div>
+  <section class="card view al-page" id="alertsCard">
+      <h2>Alertas</h2>
+      <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span><b>Nenhum alerta agora</b></li></ul>
       <p class="notice ic-maint" id="icMaint" role="status" hidden></p>
       <p class="notice tube-notice" id="tubeNotice" role="status" hidden></p>
       <p class="notice slow-notice" id="slowNotice" role="status" hidden></p>
-      <ul class="active-alerts" id="activeAlerts"><li class="none"><span class="dot-ok" aria-hidden="true"></span>Nenhum alerta agora.</li></ul>
-      <h3 class="sub-head">Últimos alertas</h3>
-      <ul class="events alerts" id="alerts"><li class="muted">Nenhum alerta.</li></ul>
-    </section>
-  <section class="card view " id="viewAlerts">
-      <div class="view-body">
-      <div class="dlg-head">
-        <h2 id="alertsTitle">Histórico de alertas</h2>
-      </div>
-      <p class="small muted">Todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC (aconteceram enquanto o app estava fechado ou desconectado).</p>
       <div class="alerts-tools">
         <div class="seg" role="group" aria-label="Aparelho dos alertas" id="alertDevFilter">
           <button type="button" data-adev="" aria-pressed="true">Os dois</button>
           <button type="button" data-adev="radiacode" aria-pressed="false">RC102</button>
           <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
         </div>
-        <div class="seg" role="group" aria-label="Filtrar alertas" id="alertFilter">
-          <button type="button" data-af="" aria-pressed="true">Todos</button>
-          <button type="button" data-af="live" aria-pressed="false">Ao vivo</button>
-          <button type="button" data-af="retro" aria-pressed="false">Do contador</button>
-          <button type="button" data-af="alarme" aria-pressed="false">Só alarmes</button>
-        </div>
+        <select id="alertFilter" aria-label="Tipo de alerta">
+          <option value="">Todos</option>
+          <option value="live">Ao vivo</option>
+          <option value="retro">Do contador</option>
+          <option value="alarme">Só alarmes</option>
+        </select>
         <button type="button" class="chip alert-range" id="alertRangeChip" title="Mostrar todos os alertas" hidden><span></span> ✕</button>
+        <span class="inst-fill"></span>
         <span class="small muted" id="alertCount"></span>
       </div>
       <div class="a-grid">
-        <div id="alertHistList" class="alert-hist"></div>
+        <div class="al-col">
+          <div id="alertHistList" class="alert-hist"></div>
+          <details class="how al-how"><summary>Como funciona</summary>
+            <p class="small muted">Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.</p>
+            <p class="small muted">Quando um aparelho apita, o outro confere. No filtro de um aparelho entram também os alertas do outro que ele confirmou, um pouco mais apagados.</p>
+          </details>
+        </div>
         <div class="a-detail" id="aDetail">
-          <div class="m-live-head">
+          <div class="ad-head">
             <h3 id="adTitle">Detalhe do alerta</h3>
-            <button type="button" class="btn small" id="btnAdOpen" hidden>Ver nos gráficos</button>
+            <span class="small muted mono" id="adWhen"></span>
+          </div>
+          <p class="small muted ad-empty" id="adEmpty" hidden>Nenhum alerta neste filtro.</p>
+          <div class="ad-body" id="adBody">
+          <div class="ad-nums" id="adNums">
+            <div><span class="tile-label">Pico</span><span class="mono" id="adPk">—</span><span class="tile-sub" id="adPkSub"></span></div>
+            <div><span class="tile-label">Durou</span><span class="mono" id="adDur">—</span><span class="tile-sub" id="adDurSub"></span></div>
+            <div><span class="tile-label">Limite</span><span class="mono" id="adLim">—</span><span class="tile-sub">µSv/h</span></div>
           </div>
           <p class="small muted mono ad-sub" id="adSub">Clique num alerta da lista.</p>
           <div class="m-chart-wrap">
@@ -826,9 +840,13 @@
           <div class="legend small muted ad-legend" id="adLegend"></div>
           <p class="small muted" id="adNote" hidden></p>
           <div class="ad-cross" id="adCross" hidden></div>
+          <div class="ad-acts">
+            <button type="button" class="btn small accent" id="btnAdWhy" hidden>Por que subiu?</button>
+            <button type="button" class="btn small" id="btnAdOpen" hidden>Ver nos gráficos</button>
+          </div>
+          </div>
         </div>
       </div>
-        </div>
     </section>
 </div>
 <div class="page" id="pageMedir" hidden>
@@ -1225,6 +1243,11 @@
       <button type="button" class="btn small accent" id="btnSyncDl">Baixar histórico</button>
     </div>
   </section>
+  <nav class="subtabs" role="tablist" aria-label="GMC-800" data-page="gmc">
+    <button type="button" role="tab" data-sub="agora" aria-selected="true">Agora</button>
+    <button type="button" role="tab" data-sub="tubo" aria-selected="false" tabindex="-1">Saúde do tubo</button>
+  </nav>
+  <div class="subpane" role="tabpanel" data-subpane="agora">
   <section class="card hero" id="hero">
       <div class="hero-top">
         <div class="reading">
@@ -1275,20 +1298,15 @@
       </div>
     </section>
   <p class="ic-watch" id="gmcConcord" hidden></p>
+  </div>
+  <div class="subpane" role="tabpanel" data-subpane="tubo">
   <section class="card tube-card" id="tubeCard" hidden></section>
+  <p class="small muted tube-empty" id="tubeEmpty">Conferindo o tubo…</p>
+  </div>
   <section class="tiles" hidden>
       <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
       <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
       <div class="card tile"><span class="tile-label">Máximo · 24 h</span><span class="tile-value mono" id="tMax">—</span><span class="tile-sub" id="tMaxSub">CPM</span></div>
-    </section>
-  <section class="card">
-      <h2>Fundo diário</h2>
-      <div class="table-box">
-        <table>
-          <thead><tr><th scope="col">Dia</th><th scope="col" class="num">CPM</th><th scope="col" class="num">µSv/h</th></tr></thead>
-          <tbody id="days"><tr><td colspan="3" class="muted">Sem leituras guardadas.</td></tr></tbody>
-        </table>
-      </div>
     </section>
 </div>
 <div class="page" id="pageRadiacode" hidden>
