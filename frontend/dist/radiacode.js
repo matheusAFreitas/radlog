@@ -405,7 +405,9 @@
       const [pt, cls] = SURE(o.sigma);
       b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${esc(o.nuclide)}</span><span class="rc-iso-s ${cls}">${pt}</span>` +
         `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>`;
-      b.title = `${o.group} · ${nf(o.sigma, 0)} σ`;
+      // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
+      // gama; o título diz de qual família ele vem
+      b.title = `${/série/.test(o.group) ? "vem do " : ""}${o.group} · ${nf(o.sigma, 0)} σ`;
       box.appendChild(b);
     }
   }
