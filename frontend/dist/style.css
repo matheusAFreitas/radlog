@@ -2303,3 +2303,47 @@ body:has(.set-bar:not([hidden])) .qk-fab { bottom: 86px; }
 .rc-loupe i.none { background: var(--surface-2); }
 .rc-loupe i.mid { outline: 2px solid #fff; outline-offset: -2px; }
 #rcSgTip { max-width: 240px; }
+
+/* ---------- calendário do ano (Gráficos › Ano, 2.53) ---------- */
+.yc-card { position: relative; }
+.yc-tools { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+.yc-year { display: inline-flex; align-items: center; gap: var(--space-2); }
+.yc-year .mono { min-width: 4ch; text-align: center; font-size: var(--fs-heading); }
+.yc-checks { display: flex; gap: var(--space-4); flex-wrap: wrap; color: var(--muted); margin: var(--space-2) 0 var(--space-3); }
+.yc-checks label { display: inline-flex; align-items: center; gap: var(--space-1); cursor: pointer; }
+.yc-scroll { overflow-x: auto; padding-bottom: var(--space-1); }
+.yc-cal { display: block; width: 100%; height: auto; outline: none; }
+.yc-cal:focus-visible { box-shadow: 0 0 0 2px var(--accent-line); border-radius: var(--radius-xs); }
+.yc-lbl { fill: var(--dim); font-size: 9px; font-family: var(--sans); }
+.yc-c { cursor: pointer; }
+.yc-c:hover { stroke: var(--text); stroke-width: 1; }
+.yc-c.sel { stroke: var(--text); stroke-width: 1.5; }
+.yc-none { fill: none; stroke: #34404A; stroke-dasharray: 2 2; }
+.yc-fut { fill: none; stroke: #1E252B; }
+.yc-away { stroke: var(--away); stroke-width: 1.5; }
+.yc-rain { fill: var(--info); pointer-events: none; }
+.yc-lv { pointer-events: none; }
+.yc-legend { flex-wrap: wrap; gap: var(--space-1) var(--space-4); margin-top: var(--space-2); }
+.yc-it { display: inline-flex; align-items: center; gap: var(--space-1); }
+.yc-it .lv-ico { margin-right: -2px; }
+.yc-ramp { display: inline-flex; gap: 2px; }
+.yc-ramp i { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+.yc-day { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-top: var(--space-3); padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); }
+.yc-day-lines { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-3); align-items: center; }
+.yc-tip { z-index: 5; white-space: normal; width: max-content; max-width: 300px; line-height: 1.5; }
+.yc-tip .muted, .yc-day .muted { color: var(--muted); }
+.yc-lvl { display: inline-flex; align-items: center; gap: var(--space-1); }
+.yc-away-t { color: var(--away-ink); }
+.yc-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); margin-top: var(--space-4); }
+@media (max-width: 760px) { .yc-grid { grid-template-columns: 1fr; } }
+.yc-months { display: grid; grid-template-columns: repeat(12, 1fr); gap: var(--space-1); align-items: end; height: 92px; }
+.yc-m { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; gap: 4px; height: 100%; font-size: var(--fs-micro); color: var(--dim); }
+.yc-m .bar { width: 100%; max-width: 22px; background: var(--accent-line); border-radius: 3px 3px 0 0; }
+.yc-m.none .bar { height: 6px; background: none; border: 1px dashed #34404A; border-bottom: 0; }
+.yc-say p { margin: 0 0 var(--space-2); }
+.yc-tbl { overflow-x: auto; margin-top: var(--space-2); }
+.yc-table { border-collapse: collapse; width: 100%; font-size: var(--fs-caption); }
+.yc-table th, .yc-table td { padding: var(--space-1) var(--space-2); border-bottom: 1px solid var(--border); text-align: left; }
+.yc-table th { color: var(--muted); font-weight: 500; }
+.yc-table .n { text-align: right; }
+#ycTblBtn { margin-top: var(--space-3); }

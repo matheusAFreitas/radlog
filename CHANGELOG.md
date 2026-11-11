@@ -1,5 +1,30 @@
 # Versões
 
+## 2.53.0
+- **Calendário do ano** (Gráficos › Ano). Mostra o ano inteiro numa tela,
+  um quadradinho por dia, pintado pelo dia comparado com a **sua média do
+  ano**: do mais escuro (bem abaixo) ao verde forte (bem acima).
+- **Fundo de casa ou Minha dose** no mesmo botão:
+  - o fundo é a mediana dos minutos em casa do GMC-800;
+  - a dose é a do RC102 no dia, com borda lilás nos dias em que ele saiu de
+    casa.
+- **Marcas nos dias:**
+  - a forma do nível mais grave nos dias com alarme;
+  - uma risquinha azul nos dias de chuva;
+  - vazio tracejado nos dias sem dado;
+  - cor mais fraca com menos de 12 h de dado.
+- **Ao passar o mouse**, aparece o dia em texto, com o pico do alarme em
+  µSv/h e a hora. **Clicar** fixa o dia embaixo, com "Abrir este dia nos
+  gráficos". Pelo teclado, as setas andam entre os dias e Enter abre.
+- **Embaixo do calendário:**
+  - "Mês a mês", com as medianas;
+  - "O que o ano mostrou", com frases tiradas dos seus dados (meses frios ×
+    quentes, chuva × seco, o dia mais alto);
+  - a tabela por mês.
+- O resumo de cada dia é guardado por mês e só é refeito quando algo
+  daquele mês muda. A chuva por dia já é guardada para sempre desde a
+  2.43.1.
+
 ## 2.52.0
 - **Aba do Radiacode 102 repaginada (2ª parte).** Em cima do espectro
   aparece uma fileira com os **isótopos mais detectados**. Ela vai do mais

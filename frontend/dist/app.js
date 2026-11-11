@@ -808,7 +808,7 @@ async function showView(v, skipRender) {
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia"], radiacode: ["agora", "espectro", "busca", "atividade", "log"] };
+const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"] };
 state.sub = {};
 // 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
 if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
@@ -837,6 +837,7 @@ function refreshSub(pg) {
     if (s === "tempo") { refreshChart(); refreshDose(); }
     else if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
+    else if (s === "ano") refreshYearCal();
     else refreshBgTrend();
   }
   // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
@@ -4919,6 +4920,29 @@ const demoRc = () => {
     },
     GetHeatmapDev: async (days, dev) => { const h = await api.GetHeatmap(days); return dev === "radiacode" ? rcHeat(h) : h; },
     GetHeatmapMonthDev: async (y, m, dev) => { const h = await api.GetHeatmapMonth(y, m); return dev === "radiacode" ? rcHeat(h) : h; },
+    GetYearCal: async (year) => {
+      const now = new Date(), today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+      const first = now.getFullYear() - 1, y = year >= first && year <= now.getFullYear() ? year : now.getFullYear();
+      let seed = y * 31 + 7;
+      const rnd = () => { seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; };
+      const gauss = () => Math.sqrt(-2 * Math.log(rnd() + 1e-9)) * Math.cos(2 * Math.PI * rnd());
+      const start = new Date(first, 1, 16).getTime(), days = [];
+      for (let t = new Date(y, 0, 1); t.getFullYear() === y && t.getTime() <= today; t.setDate(t.getDate() + 1)) {
+        const k = t.getTime(), m = t.getMonth(), doy = Math.round((k - new Date(y, 0, 1)) / 864e5);
+        const d = { day: k, n: 0 };
+        if (k >= start && !(m === 3 && t.getDate() >= 8 && t.getDate() < 12)) {
+          const season = Math.cos(2 * Math.PI * (doy - 196) / 365), rain = rnd() < (m >= 10 || m <= 2 ? .42 : .18);
+          d.n = k === today ? Math.floor((now - k) / 6e4) : rnd() < .06 ? 200 + Math.floor(rnd() * 400) : 1380 + Math.floor(rnd() * 60);
+          d.bg = 0.105 * (1 + 0.035 * season + 0.012 * gauss() + (rain ? 0.04 : 0));
+          if (rain) { d.rain = true; d.mm = Math.round((2 + rnd() * 25) * 10) / 10; } else if (rnd() < .1) d.mm = 0.2;
+          if (rnd() < .025) { d.lvl = rnd() < .7 ? "atencao" : "alarme"; d.peak = d.lvl === "alarme" ? .8 + rnd() * 1.2 : .32 + rnd() * .3; d.peakAt = k + Math.floor(rnd() * 864e5); }
+          d.away = rnd() < .22; d.doseN = d.n; d.dose = Math.max(.6, (2.5 + .25 * season + .25 * gauss()) * (d.away ? .92 : 1)) * d.n / 1440;
+          if (m === 6 && t.getDate() === 22) { d.away = true; d.dose = 7.9; }
+        }
+        days.push(d);
+      }
+      return { year: y, first, today, days };
+    },
     GetBgTrend: async (days) => {
       const now = Date.now(), to = Math.floor(now / 6e4) * 6e4 + 6e4, from = to - days * 864e5;
       const step = days <= 7 ? 36e5 : days <= 30 ? 108e5 : days <= 90 ? 432e5 : 864e5;
