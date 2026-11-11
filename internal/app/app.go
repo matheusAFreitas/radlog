@@ -388,6 +388,8 @@ type App struct {
 	measure      MeasureState   // medição de objeto (measure.go)
 	rain         *rainCache     // chuva (weather.go)
 	rainDays     *rainDaysStore // chuva por dia, para sempre (raindays.go)
+	yearMu       sync.Mutex
+	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
 	rainSt       rainState
 	radar        *radarStore   // chuva pelo radar (radar.go)
 	radarKick    chan struct{} // busca o radar já (lugar novo)

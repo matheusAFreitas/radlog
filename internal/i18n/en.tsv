@@ -3885,3 +3885,67 @@ sem lupa	no magnifier
 lupa 4×4	magnifier 4×4
 lupa 5×5	magnifier 5×5
 Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.	Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there.
+Fundo de casa, dia a dia	Home background, day by day
+Minha dose, dia a dia	My dose, day by day
+Fundo de casa · GMC-800	Home background · GMC-800
+Minha dose · RC102	My dose · RC102
+marcar dias de chuva	mark rainy days
+marcar dias com alarme	mark days with alarms
+bem abaixo	well below
+bem acima da sua média	well above your average
+menos de 12 h de dado	under 12 h of data
+choveu	rained
+nível mais grave do dia	worst level of the day
+RC102 fora de casa	RC102 away from home
+Mês a mês	Month by month
+Ver como tabela	Show as table
+Esconder tabela	Hide table
+O que o ano mostrou	What the year showed
+ver este dia	see this day
+Abrir este dia nos gráficos	Open this day in the charts
+Dia mais baixo	Lowest day
+Dia mais alto	Highest day
+Dias com alarme	Days with alarms
+Dias de chuva	Rainy days
+Dias com dado	Days with data
+Mediana (µSv/h)	Median (µSv/h)
+Mediana (µSv/dia)	Median (µSv/day)
+na sua média	at your average
+ainda não chegou	not here yet
+RC102 saiu de casa	RC102 left home
+Ano anterior	Previous year
+Ano seguinte	Next year
+O que pintar	What to color
+Calendário do ano, um quadradinho por dia	Year calendar, one square per day
+sem dados do GMC-800 neste ano	no GMC-800 data this year
+sem dados do RC102 neste ano	no RC102 data this year
+sem um dia com 12 h de dado ainda	no day with 12 h of data yet
+1 dia com dado	1 day with data
+{0} dias com dado	{0} days with data
+sua média do ano: {0} µSv/h	your average this year: {0} µSv/h
+sua média do ano: {0} µSv por dia	your average this year: {0} µSv per day
+mediana {0} µSv/h	median {0} µSv/h
+mediana {0} µSv/dia	median {0} µSv/day
+fundo {0} µSv/h (mediana do dia)	background {0} µSv/h (day's median)
+dose {0} µSv no RC102	dose {0} µSv on the RC102
+{0}% acima da sua média	{0}% above your average
+{0}% abaixo da sua média	{0}% below your average
+só {0} h de dado	only {0} h of data
+choveu {0} mm	rained {0} mm
+pico {0} µSv/h às {1}	peak {0} µSv/h at {1}
+pico {0} µSv/h	peak {0} µSv/h
+sem dado do GMC-800: o app estava fechado ou o contador desligado	no GMC-800 data: the app was closed or the counter was off
+sem dado do RC102 neste dia	no RC102 data on this day
+Junho a agosto ficaram {0}% acima de novembro a março. Com a casa mais fechada no frio, o radônio se acumula mais.	June to August were {0}% above November to March. With the house more closed up in the cold, radon builds up more.
+Junho a agosto ficaram {0}% abaixo de novembro a março.	June to August were {0}% below November to March.
+Nos dias de chuva o fundo ficou {0}% acima dos dias secos. É a chuva trazendo para o chão os produtos do radônio do ar.	On rainy days the background was {0}% above dry days. That's rain bringing radon's decay products in the air down to the ground.
+Nos dias de chuva o fundo ficou {0}% abaixo dos dias secos.	On rainy days the background was {0}% below dry days.
+O dia mais alto foi {0}, {1}% acima da sua média.	The highest day was {0}, {1}% above your average.
+Somando os dias com dado, o RC102 marcou {0} mSv no ano até agora.	Adding up the days with data, the RC102 recorded {0} mSv this year so far.
+Nos dias com saída de casa a dose ficou {0}% abaixo dos dias só em casa. Fora, o fundo costuma ser mais baixo que dentro de casa, por causa do radônio.	On days you went out the dose was {0}% below days spent only at home. Outside, the background is usually lower than indoors, because of radon.
+Nos dias com saída de casa a dose ficou {0}% acima dos dias só em casa.	On days you went out the dose was {0}% above days spent only at home.
+O dia de maior dose foi {0}: {1} µSv.	The highest-dose day was {0}: {1} µSv.
+Ainda é 1 mês. O calendário fica mais útil depois de um ano.	Only 1 month so far. The calendar gets more useful after a year.
+Ainda são {0} meses. O calendário fica mais útil depois de um ano.	Only {0} months so far. The calendar gets more useful after a year.
+Mediana de cada mês. A barra começa um pouco abaixo do mês mais baixo, para a diferença aparecer; os valores estão ao passar o mouse e na tabela.	Median of each month. The bar starts a little below the lowest month so the difference shows; the values are on hover and in the table.
+Cor = o dia comparado com a sua média do ano (a mediana dos dias com 12 h ou mais de dado), não um número absoluto. O fundo do dia é a mediana dos minutos em casa do GMC-800, sem medição de objeto e sem minutos saturados ou com interferência; com umas 20 mil contagens por dia, o acaso mexe menos de 1% no valor, então 2% de diferença já é de verdade. Na Minha dose, a cor é a dose do dia no RC102. Cor mais fraca: menos de 12 h de dado.	Color = the day compared with your average for the year (the median of days with 12 h or more of data), not an absolute number. The day's background is the median of the GMC-800's minutes at home, without object measurements and without saturated or interfered minutes; with about 20 thousand counts a day, chance moves the value by less than 1%, so a 2% difference is real. In My dose, the color is the day's dose on the RC102. Fainter color: under 12 h of data.

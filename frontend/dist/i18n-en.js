@@ -2965,7 +2965,54 @@ const I18N_EN = {
 "lupa 4×4": "magnifier 4×4",
 "lupa 5×5": "magnifier 5×5",
 "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there.",
-"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there."
+"Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. It counts since Restart; to measure a sample, put it against the device and click Restart. The dashed line is the home background (the device's accumulated spectrum) over the same time; the isotopes found are marked above their peaks. Hover over a peak to see which isotope usually shows up there.",
+"Fundo de casa, dia a dia": "Home background, day by day",
+"Minha dose, dia a dia": "My dose, day by day",
+"Fundo de casa · GMC-800": "Home background · GMC-800",
+"Minha dose · RC102": "My dose · RC102",
+"Minha dose · RadiaCode": "My dose · RC102",
+"marcar dias de chuva": "mark rainy days",
+"marcar dias com alarme": "mark days with alarms",
+"bem abaixo": "well below",
+"bem acima da sua média": "well above your average",
+"menos de 12 h de dado": "under 12 h of data",
+"choveu": "rained",
+"nível mais grave do dia": "worst level of the day",
+"RC102 fora de casa": "RC102 away from home",
+"RadiaCode fora de casa": "RC102 away from home",
+"Mês a mês": "Month by month",
+"Ver como tabela": "Show as table",
+"Esconder tabela": "Hide table",
+"O que o ano mostrou": "What the year showed",
+"ver este dia": "see this day",
+"Abrir este dia nos gráficos": "Open this day in the charts",
+"Dia mais baixo": "Lowest day",
+"Dia mais alto": "Highest day",
+"Dias com alarme": "Days with alarms",
+"Dias de chuva": "Rainy days",
+"Dias com dado": "Days with data",
+"Mediana (µSv/h)": "Median (µSv/h)",
+"Mediana (µSv/dia)": "Median (µSv/day)",
+"na sua média": "at your average",
+"ainda não chegou": "not here yet",
+"RC102 saiu de casa": "RC102 left home",
+"RadiaCode saiu de casa": "RC102 left home",
+"Ano anterior": "Previous year",
+"Ano seguinte": "Next year",
+"O que pintar": "What to color",
+"Calendário do ano, um quadradinho por dia": "Year calendar, one square per day",
+"sem dados do GMC-800 neste ano": "no GMC-800 data this year",
+"sem dados do RC102 neste ano": "no RC102 data this year",
+"sem dados do RadiaCode neste ano": "no RC102 data this year",
+"sem um dia com 12 h de dado ainda": "no day with 12 h of data yet",
+"1 dia com dado": "1 day with data",
+"sem dado do GMC-800: o app estava fechado ou o contador desligado": "no GMC-800 data: the app was closed or the counter was off",
+"sem dado do RC102 neste dia": "no RC102 data on this day",
+"sem dado do RadiaCode neste dia": "no RC102 data on this day",
+"Ainda é 1 mês. O calendário fica mais útil depois de um ano.": "Only 1 month so far. The calendar gets more useful after a year.",
+"Mediana de cada mês. A barra começa um pouco abaixo do mês mais baixo, para a diferença aparecer; os valores estão ao passar o mouse e na tabela.": "Median of each month. The bar starts a little below the lowest month so the difference shows; the values are on hover and in the table.",
+"Cor = o dia comparado com a sua média do ano (a mediana dos dias com 12 h ou mais de dado), não um número absoluto. O fundo do dia é a mediana dos minutos em casa do GMC-800, sem medição de objeto e sem minutos saturados ou com interferência; com umas 20 mil contagens por dia, o acaso mexe menos de 1% no valor, então 2% de diferença já é de verdade. Na Minha dose, a cor é a dose do dia no RC102. Cor mais fraca: menos de 12 h de dado.": "Color = the day compared with your average for the year (the median of days with 12 h or more of data), not an absolute number. The day's background is the median of the GMC-800's minutes at home, without object measurements and without saturated or interfered minutes; with about 20 thousand counts a day, chance moves the value by less than 1%, so a 2% difference is real. In My dose, the color is the day's dose on the RC102. Fainter color: under 12 h of data.",
+"Cor = o dia comparado com a sua média do ano (a mediana dos dias com 12 h ou mais de dado), não um número absoluto. O fundo do dia é a mediana dos minutos em casa do GMC-800, sem medição de objeto e sem minutos saturados ou com interferência; com umas 20 mil contagens por dia, o acaso mexe menos de 1% no valor, então 2% de diferença já é de verdade. Na Minha dose, a cor é a dose do dia no RadiaCode. Cor mais fraca: menos de 12 h de dado.": "Color = the day compared with your average for the year (the median of days with 12 h or more of data), not an absolute number. The day's background is the median of the GMC-800's minutes at home, without object measurements and without saturated or interfered minutes; with about 20 thousand counts a day, chance moves the value by less than 1%, so a 2% difference is real. In My dose, the color is the day's dose on the RC102. Fainter color: under 12 h of data."
 },
 "patterns": [
 [
@@ -3125,6 +3172,15 @@ const I18N_EN = {
 " a radiação caiu mais que o inverso do quadrado (",
 " contra ",
 "): confira as distâncias; o detector fica alguns milímetros para dentro da caixa."
+]
+],
+[
+"Nos dias com saída de casa a dose ficou ",
+"^Nos dias com saída de casa a dose ficou ((?:(?! · ).)+?)% abaixo dos dias só em casa\\. Fora, o fundo costuma ser mais baixo que dentro de casa, por causa do radônio\\.$",
+"On days you went out the dose was ${1}% below days spent only at home. Outside, the background is usually lower than indoors, because of radon.",
+[
+"Nos dias com saída de casa a dose ficou ",
+"% abaixo dos dias só em casa. Fora, o fundo costuma ser mais baixo que dentro de casa, por causa do radônio."
 ]
 ],
 [
@@ -3304,6 +3360,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Nos dias de chuva o fundo ficou ",
+"^Nos dias de chuva o fundo ficou ((?:(?! · ).)+?)% acima dos dias secos\\. É a chuva trazendo para o chão os produtos do radônio do ar\\.$",
+"On rainy days the background was ${1}% above dry days. That's rain bringing radon's decay products in the air down to the ground.",
+[
+"Nos dias de chuva o fundo ficou ",
+"% acima dos dias secos. É a chuva trazendo para o chão os produtos do radônio do ar."
+]
+],
+[
 "Marcada como não comparável: ",
 "^Marcada como não comparável: ((?:(?! · ).)+?)\\. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto\\.$",
 "Marked as not comparable: ${1}. It stays saved, but should not be compared with the other measurements of this object.",
@@ -3341,6 +3406,15 @@ const I18N_EN = {
 " contagens em 1 s às ",
 ", com os 20 s em volta normais (esperado ~",
 " por segundo)."
+]
+],
+[
+"Junho a agosto ficaram ",
+"^Junho a agosto ficaram ((?:(?! · ).)+?)% acima de novembro a março\\. Com a casa mais fechada no frio, o radônio se acumula mais\\.$",
+"June to August were ${1}% above November to March. With the house more closed up in the cold, radon builds up more.",
+[
+"Junho a agosto ficaram ",
+"% acima de novembro a março. Com a casa mais fechada no frio, o radônio se acumula mais."
 ]
 ],
 [
@@ -4297,6 +4371,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Nos dias com saída de casa a dose ficou ",
+"^Nos dias com saída de casa a dose ficou ((?:(?! · ).)+?)% acima dos dias só em casa\\.$",
+"On days you went out the dose was ${1}% above days spent only at home.",
+[
+"Nos dias com saída de casa a dose ficou ",
+"% acima dos dias só em casa."
+]
+],
+[
 "Atenção (histórico do contador): pico de ",
 "^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Attention (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -4342,6 +4425,15 @@ const I18N_EN = {
 [
 "Memória do GMC praticamente cheia: cerca de ",
 "% ocupada (estimado)."
+]
+],
+[
+"Somando os dias com dado, o RadiaCode marcou ",
+"^Somando os dias com dado, o RadiaCode marcou ((?:(?! · ).)+?) mSv no ano até agora\\.$",
+"Adding up the days with data, the RC102 recorded ${1} mSv this year so far.",
+[
+"Somando os dias com dado, o RadiaCode marcou ",
+" mSv no ano até agora."
 ]
 ],
 [
@@ -4492,6 +4584,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Ainda são ",
+"^Ainda são ((?:(?! · ).)+?) meses\\. O calendário fica mais útil depois de um ano\\.$",
+"Only ${1} months so far. The calendar gets more useful after a year.",
+[
+"Ainda são ",
+" meses. O calendário fica mais útil depois de um ano."
+]
+],
+[
 "Precisão do líquido: ±",
 "^Precisão do líquido: ±((?:(?! · ).)+?)%\\. Para ±10%: ((?:(?! · ).)+?) em cada fase; para ±5%: ((?:(?! · ).)+?)\\.$",
 "Precision of the net value: ±${1}%. For ±10%: ${2} in each phase; for ±5%: ${3}.",
@@ -4567,6 +4668,15 @@ const I18N_EN = {
 [
 "Relação: quando a pressão cai, o fundo sobe cerca de ",
 " h depois."
+]
+],
+[
+"Somando os dias com dado, o RC102 marcou ",
+"^Somando os dias com dado, o RC102 marcou ((?:(?! · ).)+?) mSv no ano até agora\\.$",
+"Adding up the days with data, the RC102 recorded ${1} mSv this year so far.",
+[
+"Somando os dias com dado, o RC102 marcou ",
+" mSv no ano até agora."
 ]
 ],
 [
@@ -4903,6 +5013,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Nos dias de chuva o fundo ficou ",
+"^Nos dias de chuva o fundo ficou ((?:(?! · ).)+?)% abaixo dos dias secos\\.$",
+"On rainy days the background was ${1}% below dry days.",
+[
+"Nos dias de chuva o fundo ficou ",
+"% abaixo dos dias secos."
+]
+],
+[
 "esta versão (",
 "^esta versão \\(((?:(?! · ).)+?)\\) é mais nova que a última publicada \\(((?:(?! · ).)+?)\\)((?:(?! · ).)+?)$",
 "this version (${1}) is newer than the latest published (${2})${3}",
@@ -5179,6 +5298,15 @@ const I18N_EN = {
 "Background done. Now the object in front of the device, ${1}",
 [
 "Fundo pronto. Agora o objeto na frente do aparelho, "
+]
+],
+[
+"Junho a agosto ficaram ",
+"^Junho a agosto ficaram ((?:(?! · ).)+?)% abaixo de novembro a março\\.$",
+"June to August were ${1}% below November to March.",
+[
+"Junho a agosto ficaram ",
+"% abaixo de novembro a março."
 ]
 ],
 [
@@ -5915,6 +6043,15 @@ const I18N_EN = {
 [
 " avisos, ",
 " dia com trecho acima do seguro."
+]
+],
+[
+"O dia mais alto foi ",
+"^O dia mais alto foi ((?:(?! · ).)+?), ((?:(?! · ).)+?)% acima da sua média\\.$",
+"The highest day was ${1}, ${2}% above your average.",
+[
+"O dia mais alto foi ",
+"% acima da sua média."
 ]
 ],
 [
@@ -7304,6 +7441,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O dia de maior dose foi ",
+"^O dia de maior dose foi ((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv\\.$",
+"The highest-dose day was ${1}: ${2} µSv.",
+[
+"O dia de maior dose foi ",
+" µSv."
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -7413,6 +7559,15 @@ const I18N_EN = {
 [
 "Fora de casa desde ",
 " com você"
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) µSv/h \\(mediana do dia\\)$",
+"background ${1} µSv/h (day's median)",
+[
+"fundo ",
+" µSv/h (mediana do dia)"
 ]
 ],
 [
@@ -7545,6 +7700,15 @@ const I18N_EN = {
 "≈ ${1} week of your home background",
 [
 " semana do fundo da sua casa"
+]
+],
+[
+"sua média do ano: ",
+"^sua média do ano: ((?:(?! · ).)+?) µSv por dia$",
+"your average this year: ${1} µSv per day",
+[
+"sua média do ano: ",
+" µSv por dia"
 ]
 ],
 [
@@ -8681,6 +8845,15 @@ const I18N_EN = {
 ]
 ],
 [
+"sua média do ano: ",
+"^sua média do ano: ((?:(?! · ).)+?) µSv/h$",
+"your average this year: ${1} µSv/h",
+[
+"sua média do ano: ",
+" µSv/h"
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -9100,6 +9273,15 @@ const I18N_EN = {
 ]
 ],
 [
+"dose ",
+"^dose ((?:(?! · ).)+?) µSv no RadiaCode$",
+"dose ${1} µSv on the RC102",
+[
+"dose ",
+" µSv no RadiaCode"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -9372,6 +9554,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% abaixo da sua média$",
+"${1}% below your average",
+[
+"% abaixo da sua média"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -9584,6 +9774,14 @@ const I18N_EN = {
 [
 "Ao quádruplo: ",
 " µSv."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% acima da sua média$",
+"${1}% above your average",
+[
+"% acima da sua média"
 ]
 ],
 [
@@ -10153,6 +10351,15 @@ const I18N_EN = {
 ]
 ],
 [
+"dose ",
+"^dose ((?:(?! · ).)+?) µSv no RC102$",
+"dose ${1} µSv on the RC102",
+[
+"dose ",
+" µSv no RC102"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -10632,6 +10839,15 @@ const I18N_EN = {
 ]
 ],
 [
+"mediana ",
+"^mediana ((?:(?! · ).)+?) µSv/dia$",
+"median ${1} µSv/day",
+[
+"mediana ",
+" µSv/dia"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -10968,6 +11184,15 @@ const I18N_EN = {
 ]
 ],
 [
+"pico ",
+"^pico ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?)$",
+"peak ${1} µSv/h at ${2}",
+[
+"pico ",
+" µSv/h às "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -11210,6 +11435,23 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) dias com dado$",
+"${1} days with data",
+[
+" dias com dado"
+]
+],
+[
+"mediana ",
+"^mediana ((?:(?! · ).)+?) µSv/h$",
+"median ${1} µSv/h",
+[
+"mediana ",
+" µSv/h"
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -11424,6 +11666,15 @@ const I18N_EN = {
 [
 " no ",
 " µSv/h"
+]
+],
+[
+"só ",
+"^só ((?:(?! · ).)+?) h de dado$",
+"only ${1} h of data",
+[
+"só ",
+" h de dado"
 ]
 ],
 [
@@ -11979,6 +12230,15 @@ const I18N_EN = {
 ]
 ],
 [
+"pico ",
+"^pico ((?:(?! · ).)+?) µSv/h$",
+"peak ${1} µSv/h",
+[
+"pico ",
+" µSv/h"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -12252,6 +12512,15 @@ const I18N_EN = {
 "Size: ${1}%",
 [
 "Tamanho: "
+]
+],
+[
+"choveu ",
+"^choveu ((?:(?! · ).)+?) mm$",
+"rained ${1} mm",
+[
+"choveu ",
+" mm"
 ]
 ],
 [

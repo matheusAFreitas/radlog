@@ -278,6 +278,7 @@
     <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1">Hora do dia</button>
     <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1">Padrões do fundo</button>
     <button type="button" role="tab" data-sub="tendencia" aria-selected="false" tabindex="-1">Tendência do fundo</button>
+    <button type="button" role="tab" data-sub="ano" aria-selected="false" tabindex="-1">Ano</button>
   </nav>
   <div class="graf-period" data-subpane="tempo">
     <span class="small muted">Período dos gráficos de CPM e de dose</span>
@@ -522,6 +523,44 @@
         </div>
       </div>
       <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
+    </section>
+  <section class="card view-graficos yc-card" id="ycCard" role="tabpanel" data-subpane="ano" hidden>
+      <div class="chart-head">
+        <div>
+          <h2 id="ycTitle">Fundo de casa, dia a dia</h2>
+          <span class="mono muted small" id="ycSub">sem dados ainda</span>
+        </div>
+        <div class="yc-tools">
+          <div class="seg" role="group" aria-label="O que pintar" id="ycMode">
+            <button type="button" data-v="bg" aria-pressed="true">Fundo de casa · GMC-800</button>
+            <button type="button" data-v="dose" aria-pressed="false">Minha dose · RC102</button>
+          </div>
+          <div class="yc-year" role="group" aria-label="Ano">
+            <button type="button" class="btn small" id="ycPrev" aria-label="Ano anterior">‹</button>
+            <span class="mono" id="ycYear" data-no-tr>—</span>
+            <button type="button" class="btn small" id="ycNext" aria-label="Ano seguinte">›</button>
+          </div>
+        </div>
+      </div>
+      <div class="yc-checks small">
+        <label><input type="checkbox" id="ycRain" checked> marcar dias de chuva</label>
+        <label><input type="checkbox" id="ycAlr" checked> marcar dias com alarme</label>
+      </div>
+      <div class="yc-scroll"><svg id="ycCal" class="yc-cal" tabindex="0" role="img" aria-label="Calendário do ano, um quadradinho por dia"></svg></div>
+      <div class="legend small muted yc-legend" id="ycLegend"></div>
+      <div class="yc-day small" id="ycDay" hidden></div>
+      <div class="yc-grid">
+        <div>
+          <h3 class="sub-head">Mês a mês</h3>
+          <div class="yc-months" id="ycMonths"></div>
+          <p class="small muted">Mediana de cada mês. A barra começa um pouco abaixo do mês mais baixo, para a diferença aparecer; os valores estão ao passar o mouse e na tabela.</p>
+        </div>
+        <div class="yc-say" id="ycSay"></div>
+      </div>
+      <button type="button" class="link small-link" id="ycTblBtn" aria-expanded="false">Ver como tabela</button>
+      <div class="yc-tbl" id="ycTbl" hidden></div>
+      <p class="small muted">Cor = o dia comparado com a sua média do ano (a mediana dos dias com 12 h ou mais de dado), não um número absoluto. O fundo do dia é a mediana dos minutos em casa do GMC-800, sem medição de objeto e sem minutos saturados ou com interferência; com umas 20 mil contagens por dia, o acaso mexe menos de 1% no valor, então 2% de diferença já é de verdade. Na Minha dose, a cor é a dose do dia no RC102. Cor mais fraca: menos de 12 h de dado.</p>
+      <div class="tip yc-tip" id="ycTip" hidden></div>
     </section>
 </div>
 <div class="page" id="pageResumo" hidden>
@@ -2365,6 +2404,7 @@
 <script src="resumo.js"></script>
 <script src="alertas.js"></script>
 <script src="graficos.js"></script>
+<script src="ano.js"></script>
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>
