@@ -2908,7 +2908,17 @@ const I18N_EN = {
 "Quem vai com você?": "Who's going with you?",
 "vai comigo": "goes with me",
 "fica em casa": "stays home",
-"Já vem marcado como da última vez.": "Already checked like last time."
+"Já vem marcado como da última vez.": "Already checked like last time.",
+"Tamanho e espaço": "Size and spacing",
+"Tamanho de tudo (texto, números e gráficos)": "Size of everything (text, numbers and charts)",
+"Atalhos:": "Shortcuts:",
+"para voltar a 100%.": "to go back to 100%.",
+"Espaço entre as coisas": "Spacing between things",
+"confortável": "comfortable",
+"compacto": "compact",
+"Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; \"Salvar\" guarda neste PC.": "Compact fits more on screen; comfortable is better from a distance or on a touch screen. The change shows right away; \"Save\" keeps it on this PC.",
+"espaço": "spacing",
+"e": "and"
 },
 "patterns": [
 [
@@ -12151,6 +12161,14 @@ const I18N_EN = {
 "${1}: ${2} alert.",
 [
 " aviso."
+]
+],
+[
+"Tamanho: ",
+"^Tamanho: ((?:(?! · ).)+?)%$",
+"Size: ${1}%",
+[
+"Tamanho: "
 ]
 ],
 [

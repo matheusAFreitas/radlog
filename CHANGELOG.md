@@ -1,5 +1,12 @@
 # Versões
 
+## 2.49.0
+- **Tamanho e espaço da janela.** Em Configurações › Janela e tela dá para
+  escolher o tamanho de tudo (90%, 100%, 108%, 115%, 130% ou 150%: texto,
+  números e gráficos juntos) e o espaço entre as coisas (confortável, normal
+  ou compacto). A mudança aparece na hora e fica guardada neste PC.
+- Atalhos: Ctrl + e Ctrl − mudam o tamanho, e Ctrl 0 volta a 100%.
+
 ## 2.48.0
 - **Busca rápida (Ctrl+K).** Abre em qualquer tela, ou pelo "Buscar" no
   menu. Acha ações, telas, cartões das Configurações e medições salvas, sem

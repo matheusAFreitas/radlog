@@ -2006,6 +2006,18 @@
     </fieldset>
 
     <fieldset>
+      <legend>Tamanho e espaço</legend>
+      <span class="small muted" id="uiScaleLbl">Tamanho de tudo (texto, números e gráficos)</span>
+      <div class="seg ui-seg" role="group" aria-labelledby="uiScaleLbl" id="segUiScale"><button type="button" data-v="0.9">90%</button><button type="button" data-v="1">100%</button><button type="button" data-v="1.08">108%</button><button type="button" data-v="1.15">115%</button><button type="button" data-v="1.3">130%</button><button type="button" data-v="1.5">150%</button></div>
+      <input type="hidden" id="valUiScale">
+      <p class="small muted">Atalhos: <kbd>Ctrl</kbd> <kbd>+</kbd>, <kbd>Ctrl</kbd> <kbd>−</kbd> e <kbd>Ctrl</kbd> <kbd>0</kbd> para voltar a 100%.</p>
+      <span class="small muted" id="uiDensLbl">Espaço entre as coisas</span>
+      <div class="seg ui-seg" role="group" aria-labelledby="uiDensLbl" id="segUiDensity"><button type="button" data-v="confortavel">confortável</button><button type="button" data-v="">normal</button><button type="button" data-v="compacto">compacto</button></div>
+      <input type="hidden" id="valUiDensity">
+      <p class="small muted">Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; "Salvar" guarda neste PC.</p>
+    </fieldset>
+
+    <fieldset>
       <legend>Idioma</legend>
       <label for="selLang">Idioma do app</label>
       <select id="selLang" data-no-tr>

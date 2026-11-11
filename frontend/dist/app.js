@@ -2399,6 +2399,8 @@ async function openSettings(focusId) {
   $("numAwayAsk").value = s.awayAskMin || 15;
   $("chkTray").checked = s.trayOnClose !== false;
   $("chkAutostart").checked = !!s.startWithWindows;
+  uiSegSet(s.uiScale || 1, s.uiDensity || "");
+  applyUi(s.uiScale, s.uiDensity);
   $("chkTrayNum").checked = !s.trayPlain;
   $("selTrayDev").value = s.trayDevice || "";
   $("selTrayDev").disabled = !!s.trayPlain;
@@ -2424,10 +2426,10 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
-  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", selTrayDev: "aparelho no ícone", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
@@ -2968,6 +2970,7 @@ function wire() {
     }
   });
   $("chkTrayNum").addEventListener("change", () => { $("selTrayDev").disabled = !$("chkTrayNum").checked; });
+  wireUiScale();
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
     if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
@@ -2981,6 +2984,8 @@ function wire() {
       trayOnClose: $("chkTray").checked,
       startWithWindows: $("chkAutostart").checked,
       trayPlain: !$("chkTrayNum").checked,
+      uiScale: parseFloat($("valUiScale").value) || 1,
+      uiDensity: $("valUiDensity").value,
       trayDevice: $("selTrayDev").value,
       noUpdateCheck: !$("chkUpdCheck").checked,
       keepOldVersions: !$("chkCleanOld").checked,
@@ -4189,6 +4194,7 @@ async function init() {
   listen();
   try {
     state.settings = await api.GetSettings();
+    applyUi(state.settings.uiScale, state.settings.uiDensity);
     if (hasGo) { syncLang(state.settings.lang); if (api.SetUILang) api.SetUILang(LANG).catch(() => {}); }
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
@@ -5470,4 +5476,49 @@ const demoRc = () => {
     },
   };
   return api;
+}
+
+// ---------- tamanho e espaço da janela (2.49) ----------
+// --ui-scale multiplica os tokens de fonte e --ui-density os de espaço
+// (style.css). A prévia é ao vivo; "Salvar" guarda. Ctrl +/−/0 muda e já
+// salva.
+const UI_STEPS = [0.9, 1, 1.08, 1.15, 1.3, 1.5];
+const UI_DENS = { compacto: 0.8, confortavel: 1.2 };
+function applyUi(scale, dens) {
+  const r = document.documentElement.style;
+  r.setProperty("--ui-scale", String(scale > 0 ? scale : 1));
+  r.setProperty("--ui-density", String(UI_DENS[dens] || 1));
+}
+function uiSegSet(scale, dens) {
+  $("valUiScale").value = String(scale);
+  $("valUiDensity").value = dens;
+  document.querySelectorAll("#segUiScale button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === +scale)));
+  document.querySelectorAll("#segUiDensity button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === dens)));
+}
+function wireUiScale() {
+  const pick = () => {
+    uiSegSet(parseFloat($("valUiScale").value) || 1, $("valUiDensity").value);
+    applyUi(parseFloat($("valUiScale").value), $("valUiDensity").value);
+    $("valUiScale").dispatchEvent(new Event("change", { bubbles: true }));
+  };
+  document.querySelectorAll("#segUiScale button").forEach((b) => b.addEventListener("click", () => { $("valUiScale").value = b.dataset.v; pick(); }));
+  document.querySelectorAll("#segUiDensity button").forEach((b) => b.addEventListener("click", () => { $("valUiDensity").value = b.dataset.v; pick(); }));
+  document.addEventListener("keydown", async (e) => {
+    if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+    const k = e.key;
+    if (!["+", "=", "-", "_", "0"].includes(k)) return;
+    e.preventDefault();
+    const cur = state.settings.uiScale || 1;
+    let i = UI_STEPS.findIndex((s) => s >= cur - 1e-6);
+    if (i < 0) i = 1;
+    const next = k === "0" ? 1 : UI_STEPS[Math.max(0, Math.min(UI_STEPS.length - 1, i + (k === "-" || k === "_" ? -1 : 1)))];
+    if (next === cur) return;
+    applyUi(next, state.settings.uiDensity);
+    try { await saveSettings({ uiScale: next }); } catch (err) { return; }
+    if (state.setSnap) { uiSegSet(next, $("valUiDensity").value); state.setSnap.valUiScale = String(next); renderSetBar(); }
+    document.querySelectorAll("#toasts .toast.ui-size").forEach((t) => t.remove()); // um aviso só
+    toast(`Tamanho: ${Math.round(next * 100)}%`);
+    const t = $("toasts").lastElementChild;
+    if (t) t.classList.add("ui-size");
+  });
 }
