@@ -1,5 +1,14 @@
 # Versões
 
+## 2.62.0
+- Espectro do Radiacode 102: o "Acumulado do aparelho" agora mostra os
+  isótopos. Como ele não tem fundo para subtrair e pode ter um contínuo
+  enorme (como o beta do teste com tório), o app tira esse contínuo com o
+  SNIP, técnica padrão de espectroscopia, e só marca o que sobra como pico
+  (pelo menos 5σ e 1,5% acima do contínuo, acima de 100 keV).
+- No "Acumulado do aparelho" o botão Pausar também sai: é o total do
+  aparelho, e ele continua se atualizando sozinho.
+
 ## 2.61.2
 - Isótopos do Radiacode 102: o texto ao passar o mouse diz de onde o
   isótopo vem, por exemplo "vem do Rádio-226 (série do urânio)" no Pb-214.

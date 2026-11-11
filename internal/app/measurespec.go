@@ -81,41 +81,53 @@ func (s *MeasureSpectrum) findPeaks() []SpecPeak {
 		}
 		return w
 	}
+	// sem fundo (o acumulado do aparelho): o contínuo vem do SNIP
+	bgZero := true
+	for _, b := range s.Bg {
+		if b != 0 {
+			bgZero = false
+			break
+		}
+	}
 	var out []SpecPeak
-	for _, l := range specLines {
-		h := 0.6 * specFWHM(l.kev)
-		if l.kev+3*h > emax || l.kev-3*h < s.energy(0) {
-			continue
-		}
-		c, lf, rt := sum(l.kev-h, l.kev+h), sum(l.kev-3*h, l.kev-h), sum(l.kev+h, l.kev+3*h)
-		if c.n == 0 || lf.n+rt.n == 0 {
-			continue
-		}
-		f := c.n / (lf.n + rt.n)
-		// fundo embaixo do pico: o contínuo cai mais ou menos exponencial com
-		// a energia, então a média geométrica dos lados (reta no log) erra
-		// menos que a reta; com lado zerado ou negativo, vale a reta
-		base := f * (lf.net + rt.net)
-		if lf.net > 0 && rt.net > 0 {
-			base = c.n * math.Sqrt(lf.net/lf.n*rt.net/rt.n)
-		}
-		peak := c.net - base
-		vr := c.vr + f*f*(lf.vr+rt.vr)
-		if vr <= 0 {
-			continue
-		}
-		// além de 3σ, o pico tem que se destacar do contínuo (com muitas
-		// contagens, a curvatura do contínuo sozinha já passa de 3σ); embaixo
-		// de 100 keV o contínuo é mais torto, então pede mais
-		prom := 0.05
-		if l.kev < 100 {
-			prom = 0.5
-		}
-		if base > 0 && peak < prom*base {
-			continue
-		}
-		if sg := peak / math.Sqrt(vr); sg >= specPeakSigma {
-			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
+	if bgZero {
+		out = s.findPeaksSnip()
+	} else {
+		for _, l := range specLines {
+			h := 0.6 * specFWHM(l.kev)
+			if l.kev+3*h > emax || l.kev-3*h < s.energy(0) {
+				continue
+			}
+			c, lf, rt := sum(l.kev-h, l.kev+h), sum(l.kev-3*h, l.kev-h), sum(l.kev+h, l.kev+3*h)
+			if c.n == 0 || lf.n+rt.n == 0 {
+				continue
+			}
+			f := c.n / (lf.n + rt.n)
+			// fundo embaixo do pico: o contínuo cai mais ou menos exponencial com
+			// a energia, então a média geométrica dos lados (reta no log) erra
+			// menos que a reta; com lado zerado ou negativo, vale a reta
+			base := f * (lf.net + rt.net)
+			if lf.net > 0 && rt.net > 0 {
+				base = c.n * math.Sqrt(lf.net/lf.n*rt.net/rt.n)
+			}
+			peak := c.net - base
+			vr := c.vr + f*f*(lf.vr+rt.vr)
+			if vr <= 0 {
+				continue
+			}
+			// além de 3σ, o pico tem que se destacar do contínuo (com muitas
+			// contagens, a curvatura do contínuo sozinha já passa de 3σ); embaixo
+			// de 100 keV o contínuo é mais torto, então pede mais
+			prom := 0.05
+			if l.kev < 100 {
+				prom = 0.5
+			}
+			if base > 0 && peak < prom*base {
+				continue
+			}
+			if sg := peak / math.Sqrt(vr); sg >= specPeakSigma {
+				out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
+			}
 		}
 	}
 	// grupos de duas linhas que sempre vêm juntas (Co-60: 1173 e 1332): uma
