@@ -1,5 +1,21 @@
 # Versões
 
+## 2.52.0
+- **Aba do Radiacode 102 repaginada (2ª parte).** Em cima do espectro
+  aparece uma fileira com os **isótopos mais detectados**. Ela vai do mais
+  forte para o mais fraco, mostra as linhas achadas e tem um selo de certeza
+  (certo, provável, fraco). Cada um fica marcado no gráfico. Também vale no
+  acumulado do aparelho.
+- **Zoom na crista:**
+  - Clicar num isótopo, ou arrastar no espectro, abre os canais daquele
+    trecho com a linha de base e a curva ajustada.
+  - Ao lado ficam a crista em keV, a largura (FWHM e resolução em %), as
+    contagens do pico com a incerteza e quantos σ acima do fundo.
+  - Avisa quando tem outro pico perto.
+- **Lupa no espectrograma:** passando o mouse, aparece um quadrado de 5×5
+  ou 4×4 pixels ampliado. Ele mostra as contagens de cada pixel, o tempo e
+  a faixa de energia do pixel do meio.
+
 ## 2.51.0
 - **Aba do Radiacode 102 repaginada (1ª parte).** São 5 subabas: Agora,
   Espectro, Busca, Atividade (Bq) e Log.

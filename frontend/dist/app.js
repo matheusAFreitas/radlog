@@ -4962,7 +4962,12 @@ const demoRc = () => {
     CancelActivity: async () => { demoAct.run = null; },
     CloseActivity: async () => { demoAct.run = null; },
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
-    AnalyzeSpectrum: async (sp) => (sp.objSec > 20 ? [
+    // acumulado do aparelho (sem fundo): as linhas do fundo natural
+    AnalyzeSpectrum: async (sp) => (sp.bgSec === 1 ? [
+      { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 44000, sigma: 125 }, { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: 21000, sigma: 60 },
+      { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 30000, sigma: 80 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 1764.5, net: 2000, sigma: 9 },
+      { group: "Potássio-40", nuclide: "K-40", kev: 1460.8, net: 9000, sigma: 40 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 900, sigma: 7 },
+      { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 4 }] : sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),

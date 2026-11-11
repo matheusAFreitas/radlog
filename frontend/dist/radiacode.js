@@ -195,7 +195,7 @@
   // O aparelho junta o espectro dele o tempo todo; a tela mostra o que entrou
   // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
-  const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], peaksAt: 0, n: NCH };
+  const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
   function realCounts() {
     if (rl.mode === "acc") return rl.acc ? { c: rl.acc.counts, t: rl.acc.seconds } : null;
@@ -223,7 +223,14 @@
         if (!rl.base) rl.base = s;
         if (rl.n !== s.counts.length || !rl.cal || rl.cal.join() !== s.a.join()) { rl.n = s.counts.length; rl.cal = s.a; EN = calEN(s.a, rl.n); DE = Float64Array.from(EN, (e, i) => (i + 1 < rl.n ? EN[i + 1] - e : e - EN[i - 1])); }
       }
-      if (!rl.acc || Date.now() - rl.accAt > 10 * 60e3) { const a = await api.GetRcSpectrum(true); if (a && a.counts && a.counts.length) { rl.acc = a; rl.accAt = Date.now(); } }
+      if (!rl.acc || Date.now() - rl.accAt > 10 * 60e3) {
+        const a = await api.GetRcSpectrum(true);
+        if (a && a.counts && a.counts.length) {
+          rl.acc = a; rl.accAt = Date.now();
+          // isótopos do acumulado: picos acima do contínuo (sem fundo para tirar)
+          if (api.AnalyzeSpectrum && a.seconds > 60) rl.accPeaks = (await api.AnalyzeSpectrum({ a: rl.cal || a.a, obj: Array.from(a.counts, Math.round), objSec: a.seconds, bg: new Array(a.counts.length).fill(0), bgSec: 1 })) || [];
+        }
+      }
       // picos (no Go, igual à medição de objeto), a cada ~10 s
       const rc = realCounts();
       if (rc && rl.acc && rl.mode === "agora" && rc.t > 5 && Date.now() - rl.peaksAt > 10e3 && api.AnalyzeSpectrum) {
@@ -268,13 +275,27 @@
     for (let i = 0; i < nch; i++) { if (EN[i] > EMAX) break; g.lineTo(xOf(EN[i]), yOf(counts[i])); }
     g.lineTo(xOf(Math.min(EMAX, EN[nch - 1])), T + ph); g.closePath();
     g.fillStyle = "rgba(242,163,58,.55)"; g.fill(); g.strokeStyle = acc; g.lineWidth = 1; g.stroke();
-    // linhas que subiram acima do fundo (ao vivo)
-    if (real && rl.mode === "agora") {
-      g.font = "11px " + css("--mono"); g.textAlign = "left";
-      let row = 0;
-      for (const p of [...rl.peaks].sort((a, b) => a.kev - b.kev)) {
-        const x = xOf(p.kev); g.strokeStyle = COR.warn; g.setLineDash([4, 3]); g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); g.setLineDash([]);
-        g.fillStyle = COR.warn; g.fillText(`${p.nuclide} ${nf(p.kev, 0)}`, Math.min(x + 3, L + pw - 70), T + 24 + (row++ % 3) * 12);
+    // trecho do zoom (ou o que está sendo arrastado)
+    const win = pk.drag ? [Math.min(pk.drag[0], pk.drag[1]), Math.max(pk.drag[0], pk.drag[1])] : pk.win;
+    if (win) {
+      const x1 = xOf(win[0]), x2 = xOf(win[1]);
+      g.fillStyle = "rgba(255,255,255,.06)"; g.fillRect(x1, T, x2 - x1, ph);
+      g.strokeStyle = "rgba(255,255,255,.35)"; g.setLineDash([3, 3]); g.strokeRect(x1 + 0.5, T + 0.5, x2 - x1, ph); g.setLineDash([]);
+    }
+    // isótopos achados: um risquinho em cada linha e o nome em cima da mais forte
+    const peaks = real ? curPeaks() : [];
+    if (peaks.length) {
+      const chOf = (e) => { let c = 0; for (let i = 0; i < nch; i++) if (Math.abs(EN[i] - e) < Math.abs(EN[c] - e)) c = i; return c; };
+      const top = (e) => { const c = chOf(e); let m = 0; for (let i = Math.max(0, c - 3); i <= Math.min(nch - 1, c + 3); i++) m = Math.max(m, counts[i]); return Math.max(T + 14, yOf(m) - 6); };
+      g.font = "11px " + css("--mono"); g.textAlign = "center";
+      const best = {};
+      for (const p of peaks) if (!best[p.nuclide] || p.sigma > best[p.nuclide].sigma) best[p.nuclide] = p;
+      for (const p of peaks) {
+        if (p.kev > EMAX) continue;
+        const on = pk.sel === p.nuclide, x = xOf(p.kev), y = top(p.kev);
+        g.strokeStyle = on ? COR.text : COR.muted; g.lineWidth = on ? 2 : 1;
+        g.beginPath(); g.moveTo(x + 0.5, y); g.lineTo(x + 0.5, y - 8); g.stroke(); g.lineWidth = 1;
+        if (best[p.nuclide] === p) { g.fillStyle = on ? COR.text : COR.muted; g.fillText(p.nuclide, Math.min(Math.max(x, L + 24), L + pw - 24), y - 12); }
       }
     }
     // cursor
@@ -300,8 +321,12 @@
         else txt += tNow < 60 ? " · juntando contagens…" : " · igual ao fundo";
       }
       $("rcSpecInfo").innerHTML = txt;
+      isoRender(peaks);
+      zoomDraw(counts);
       return;
     }
+    isoRender([]);
+    zoomDraw(sp.counts);
     // números
     const tot = sp.counts.reduce((a, b) => a + b, 0), cps = sp.t ? tot / sp.t : 0, err = tot ? 100 / Math.sqrt(tot) : 0;
     let net = "";
@@ -315,6 +340,7 @@
   function spHover(ev) {
     const cv = $("rcSpec"), r = cv.getBoundingClientRect(), L = 44, R = 10, pw = r.width - L - R;
     const x = ev.clientX - r.left;
+    if (pk.drag) { pk.drag[1] = Math.min(3000, Math.max(0, ((x - L) / pw) * 3000)); }
     if (x < L || x > L + pw) { sp.hover = null; tip($("rcSpecTip"), null); spDraw(); return; }
     const e = ((x - L) / pw) * 3000;
     sp.hover = e;
@@ -326,8 +352,175 @@
     spDraw();
   }
 
-  // =====================================================================
-  // 2 e 3. linha do tempo simulada: espectrograma e dureza
+  // ---------- isótopos mais detectados e zoom na crista (2.52) ----------
+  // Os picos vêm do Go (AnalyzeSpectrum): ao vivo, comparados com o fundo da
+  // casa; no acumulado do aparelho, acima do contínuo. Cada isótopo vira uma
+  // etiqueta com as linhas achadas e um selo de certeza; clicar (ou arrastar
+  // no espectro) abre o zoom: os canais do trecho, a linha de base, a
+  // gaussiana ajustada e a crista.
+  const pk = { sel: null, win: null, range: null, drag: null };
+  const curPeaks = () => (rl.on ? (rl.mode === "acc" ? rl.accPeaks : rl.peaks) || [] : []);
+  const SURE = (sg) => (sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
+  function isoList(peaks) {
+    const by = {};
+    for (const p of peaks) {
+      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0 });
+      o.lines.push(p);
+      o.sigma = Math.max(o.sigma, p.sigma);
+    }
+    const out = Object.values(by).sort((a, b) => b.sigma - a.sigma);
+    for (const o of out) o.lines.sort((a, b) => b.sigma - a.sigma);
+    return out;
+  }
+  function isoRender(peaks) {
+    const box = $("rcIsos"), list = isoList(peaks);
+    if (pk.sel && !list.some((o) => o.nuclide === pk.sel)) { pk.sel = null; if (!pk.range) pk.win = null; }
+    const key = list.map((o) => o.nuclide + ":" + SURE(o.sigma)[1] + ":" + o.lines.map((l) => l.kev).join(",")).join("|") + "#" + pk.sel;
+    box.hidden = !list.length;
+    if (box.dataset.k === key) return;
+    box.dataset.k = key;
+    box.textContent = "";
+    for (const o of list) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "rc-iso" + (pk.sel === o.nuclide ? " on" : "");
+      b.dataset.nuc = o.nuclide;
+      b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
+      const [pt, cls] = SURE(o.sigma);
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${esc(o.nuclide)}</span><span class="rc-iso-s ${cls}">${pt}</span>` +
+        `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>`;
+      b.title = `${o.group} · ${nf(o.sigma, 0)} σ`;
+      box.appendChild(b);
+    }
+  }
+  function isoPick(nuc) {
+    if (pk.sel === nuc) { zoomClose(); return; }
+    const o = isoList(curPeaks()).find((x) => x.nuclide === nuc);
+    if (!o) return;
+    const e = o.lines[0].kev, w = 2.5 * fwhm(e);
+    pk.sel = nuc; pk.range = null; pk.win = [Math.max(15, e - w), e + w];
+    spDraw();
+  }
+  function zoomClose() { pk.sel = null; pk.range = null; pk.win = null; $("rcZoom").hidden = true; spDraw(); }
+  // canal fracionário → energia
+  const enAt = (x) => { const i = Math.max(0, Math.min(EN.length - 2, Math.floor(x))), f = x - i; return EN[i] + (EN[i + 1] - EN[i]) * f; };
+  // ajusta base linear + gaussiana nos canais do trecho
+  function fitPeak(counts, e0, e1, hint) {
+    const idx = [];
+    for (let i = 0; i < counts.length; i++) if (EN[i] >= e0 && EN[i] <= e1) idx.push(i);
+    if (idx.length < 8) return null;
+    const c = idx.map((i) => counts[i]), n = c.length, k = Math.max(2, Math.min(4, Math.floor(n / 8)));
+    const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
+    const bl = avg(c.slice(0, k)), br = avg(c.slice(n - k)), base = (j) => bl + ((br - bl) * (j - (k - 1) / 2)) / Math.max(1, n - 1 - (k - 1));
+    const net = c.map((v, j) => v - base(j));
+    // começo: crista no canal mais alto (ou perto da linha procurada)
+    let m = 0;
+    if (hint != null) { let d = 1e9; idx.forEach((i, j) => { if (Math.abs(EN[i] - hint) < d) { d = Math.abs(EN[i] - hint); m = j; } }); for (let j = Math.max(0, m - 3); j <= Math.min(n - 1, m + 3); j++) if (net[j] > net[m]) m = j; }
+    else for (let j = 1; j < n; j++) if (net[j] > net[m]) m = j;
+    const dE = (EN[idx[n - 1]] - EN[idx[0]]) / Math.max(1, n - 1);
+    let A = Math.max(1, net[m]), mu = m, s = Math.max(0.8, sig(EN[idx[m]]) / dE);
+    // Gauss-Newton em (A, µ, s), pesos 1/contagem
+    for (let it = 0; it < 12; it++) {
+      let JTJ = [[0, 0, 0], [0, 0, 0], [0, 0, 0]], JTr = [0, 0, 0];
+      for (let j = 0; j < n; j++) {
+        const z = (j - mu) / s, e = Math.exp(-0.5 * z * z), f = A * e, wgt = 1 / Math.max(1, c[j]);
+        const J = [e, (f * z) / s, (f * z * z) / s], r = net[j] - f;
+        for (let a = 0; a < 3; a++) { JTr[a] += wgt * J[a] * r; for (let b = 0; b < 3; b++) JTJ[a][b] += wgt * J[a] * J[b]; }
+      }
+      for (let a = 0; a < 3; a++) JTJ[a][a] *= 1.001;
+      const d = solve3(JTJ, JTr);
+      if (!d) break;
+      A += d[0]; mu += Math.max(-2, Math.min(2, d[1])); s += Math.max(-s / 2, Math.min(s, d[2]));
+      if (!(A > 0) || !(s > 0.3) || mu < 0 || mu > n - 1) return { idx, c, base, net, ok: false };
+    }
+    const muCh = idx[0] + mu, dEmu = enAt(muCh + 0.5) - enAt(muCh - 0.5), crest = enAt(muCh);
+    const sKeV = s * dEmu, fw = 2.355 * sKeV, area = A * s * Math.sqrt(2 * Math.PI);
+    let tot = 0, bsum = 0;
+    for (let j = 0; j < n; j++) if (Math.abs(j - mu) <= 1.27 * s * 2.355 / 2 * 1.2) { tot += c[j]; bsum += base(j); }
+    const unc = Math.sqrt(Math.max(1, tot + bsum * (2 / k)));
+    return { idx, c, base, net, ok: true, A, mu, s, crest, fw, res: (fw / crest) * 100, area, unc, sig: area / unc };
+  }
+  function solve3(M, v) {
+    const a = M.map((r, i) => [...r, v[i]]);
+    for (let i = 0; i < 3; i++) {
+      let p = i; for (let r = i + 1; r < 3; r++) if (Math.abs(a[r][i]) > Math.abs(a[p][i])) p = r;
+      if (Math.abs(a[p][i]) < 1e-12) return null;
+      [a[i], a[p]] = [a[p], a[i]];
+      for (let r = 0; r < 3; r++) if (r !== i) { const f = a[r][i] / a[i][i]; for (let k = i; k < 4; k++) a[r][k] -= f * a[i][k]; }
+    }
+    return [a[0][3] / a[0][0], a[1][3] / a[1][1], a[2][3] / a[2][2]];
+  }
+  function zoomDraw(counts) {
+    const box = $("rcZoom");
+    if (!pk.win || !counts) { box.hidden = true; return; }
+    const sel = pk.sel ? isoList(curPeaks()).find((o) => o.nuclide === pk.sel) : null;
+    const hint = sel ? sel.lines[0].kev : null;
+    const f = fitPeak(counts, pk.win[0], pk.win[1], hint);
+    box.hidden = false;
+    const lib = sel ? LIB.find((l) => Math.abs(l[0] - hint) < 3) : null;
+    $("rcZoomTitle").textContent = sel ? `${tr("Zoom no pico")} · ${sel.nuclide}` : `${tr("Zoom no trecho")} · ${nf(pk.win[0], 0)}–${nf(pk.win[1], 0)} keV`;
+    $("rcZoomSub").textContent = lib && lib[2] ? tr(lib[2]) : "";
+    const cv = $("rcZoomCv"), F = fit(cv, 220);
+    const st = $("rcZoomStats"), warn = $("rcZoomWarn");
+    if (!F) return;
+    const { g, w, h } = F, L = 10, R = 10, T = 26, B = 22, pw = w - L - R, ph = h - T - B;
+    g.clearRect(0, 0, w, h);
+    if (!f) { g.fillStyle = css("--dim"); g.font = "12px " + css("--sans"); g.textAlign = "center"; g.fillText(tr("Trecho estreito demais: arraste uma faixa maior."), w / 2, h / 2); st.innerHTML = ""; warn.hidden = true; return; }
+    const n = f.c.length, bw = pw / n, xOf = (j) => L + (j + 0.5) * bw;
+    // eixo começa um pouco abaixo do menor canal: o pico aparece, não o contínuo
+    let max = 1, min = Infinity; for (const v of f.c) { max = Math.max(max, v); min = Math.min(min, v); }
+    if (f.ok) max = Math.max(max, f.base(f.mu) + f.A);
+    max *= 1.08;
+    const lo = Math.max(0, min - (max - min) * 0.25);
+    const yOf = (v) => T + ph - (Math.max(0, v - lo) / (max - lo)) * ph;
+    // canais
+    g.fillStyle = "rgba(242,163,58,.38)";
+    for (let j = 0; j < n; j++) { const y = yOf(f.c[j]); g.fillRect(L + j * bw + 0.5, y, Math.max(1, bw - 1), T + ph - y); }
+    // linha de base
+    g.strokeStyle = css("--muted"); g.setLineDash([5, 4]); g.beginPath(); g.moveTo(xOf(0), yOf(f.base(0))); g.lineTo(xOf(n - 1), yOf(f.base(n - 1))); g.stroke(); g.setLineDash([]);
+    // eixo de energia
+    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono");
+    [[0, "left"], [Math.floor((n - 1) / 2), "center"], [n - 1, "right"]].forEach(([j, al]) => { g.textAlign = al; g.fillText(nf(EN[f.idx[j]], 0) + (j === n - 1 ? " keV" : ""), al === "left" ? L : al === "right" ? L + pw : xOf(j), h - 6); });
+    // picos vizinhos dentro do trecho
+    const near = curPeaks().filter((p) => p.kev > pk.win[0] && p.kev < pk.win[1] && (!f.ok || Math.abs(p.kev - f.crest) > 0.45 * f.fw));
+    g.textAlign = "center"; g.fillStyle = css("--muted"); g.font = "11px " + css("--sans");
+    for (const p of near) { let j = 0; f.idx.forEach((i, q) => { if (Math.abs(EN[i] - p.kev) < Math.abs(EN[f.idx[j]] - p.kev)) j = q; }); g.fillText(`${tr("outro pico")}: ${p.nuclide} ${nf(p.kev, 0)} keV`, Math.min(Math.max(xOf(j), L + 80), L + pw - 80), T + 4); }
+    if (f.ok) {
+      // curva ajustada
+      g.strokeStyle = COR.text; g.lineWidth = 2; g.beginPath();
+      for (let q = 0; q <= 200; q++) { const j = (q / 200) * (n - 1), z = (j - f.mu) / f.s, v = f.base(j) + f.A * Math.exp(-0.5 * z * z); q ? g.lineTo(xOf(j), yOf(v)) : g.moveTo(xOf(j), yOf(v)); }
+      g.stroke(); g.lineWidth = 1;
+      // crista e FWHM
+      const xc = xOf(f.mu), yc = yOf(f.base(f.mu) + f.A), yh = yOf(f.base(f.mu) + f.A / 2), hw = 1.1774 * f.s * bw;
+      g.setLineDash([2, 3]); g.strokeStyle = COR.text; g.beginPath(); g.moveTo(xc + 0.5, yc); g.lineTo(xc + 0.5, T + ph); g.stroke(); g.setLineDash([]);
+      g.fillStyle = COR.text; g.beginPath(); g.arc(xc, yc, 3.5, 0, 7); g.fill();
+      g.font = "12px " + css("--mono"); g.textAlign = xc > L + pw - 120 ? "right" : "left"; g.fillText(`${tr("crista")} ${nf(f.crest, 1)} keV`, xc + (g.textAlign === "right" ? -8 : 8), Math.max(T - 8, yc - 8));
+      g.strokeStyle = COR.att; g.lineWidth = 2; g.beginPath(); g.moveTo(xc - hw, yh); g.lineTo(xc + hw, yh); g.stroke(); g.lineWidth = 1;
+      g.fillStyle = COR.att; g.font = "11px " + css("--mono"); g.textAlign = "left"; g.fillText("FWHM", Math.min(xc + hw + 6, L + pw - 34), yh + 4);
+      const row = (k, v) => `<dt>${tr(k)}</dt><dd class="mono" data-no-tr>${v}</dd>`;
+      st.innerHTML = row("Crista", `${nf(f.crest, 1)} keV`) + row("Largura (FWHM)", `${nf(f.fw, 1)} keV · ${tr("resolução")} ${nf(f.res, 1)}%`) +
+        row("Contagens do pico", `${Math.round(f.area).toLocaleString(LOCALE)} ± ${Math.round(f.unc).toLocaleString(LOCALE)}`) + row("Acima do fundo", `${nf(f.sig, f.sig < 10 ? 1 : 0)} σ`);
+    } else st.innerHTML = `<dt>${tr("Sem pico claro neste trecho")}</dt>`;
+    warn.hidden = !near.length || !f.ok;
+    if (!warn.hidden) warn.textContent = tr("Tem outro pico perto: a largura e as contagens podem sair maiores que as de verdade.");
+  }
+
+  // ---------- lupa no espectrograma (2.52) ----------
+  // um quadrado de N×N pixels em volta do cursor, ampliado, com as contagens
+  // de cada pixel; embaixo, o tempo e a faixa de energia do pixel do meio
+  const lp = { n: (() => { try { const v = localStorage.getItem("rcLoupe"); return v === "0" || v === "4" ? +v : 5; } catch (e) { return 5; } })() };
+  function loupeHtml(cell, rows, cols, y, x, lm) {
+    const N = lp.n, h0 = Math.floor((N - 1) / 2);
+    let html = `<div class="rc-loupe" style="grid-template-columns:repeat(${N},1fr)">`;
+    for (let dy = -h0; dy < N - h0; dy++) for (let dx = -h0; dx < N - h0; dx++) {
+      const yy = y + dy, xx = x + dx, v = yy >= 0 && yy < rows && xx >= 0 && xx < cols ? cell(yy, xx) : null;
+      const mid = dy === 0 && dx === 0;
+      if (v == null) { html += `<i class="${mid ? "mid " : ""}none"></i>`; continue; }
+      const [r, gg, b] = cmap(Math.log1p(v.rate) / lm), dark = r * 0.3 + gg * 0.59 + b * 0.11 > 140;
+      html += `<i class="${mid ? "mid" : ""}" style="background:rgb(${r},${gg},${b});color:${dark ? "#0D1012" : "#E9EDEF"}">${Math.round(v.n)}</i>`;
+    }
+    return html + "</div>";
+  }
   // =====================================================================
   const TL_N = 180, TL_DT = 60; // 180 linhas de 1 minuto
   const RAIN = [30, 80], ELEC = [118, 135];
@@ -414,7 +607,13 @@
     if (t < 0 || t >= tl.shown) { tl.hover = null; tip($("rcSgTip"), null); sgDraw(); return; }
     tl.hover = t;
     const ev2 = tlLabel(t), near = libNear(e);
-    tip($("rcSgTip"), `<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
+    let lh = "";
+    if (lp.n) {
+      const W = Math.ceil(SG_COLS / 2), x = Math.min(W - 1, Math.floor(((ev.clientX - r.left) / r.width) * W));
+      const cell = (yy, xx) => (yy < tl.shown ? { rate: ((tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0)) / 2, n: (tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0) } : null);
+      lh = loupeHtml(cell, TL_N, W, t, x, Math.log1p(tl.max)) + `<span class="mono">${nf(EN[2 * x], 0)}–${nf(EN[Math.min(NCH - 1, 2 * x + 2)], 0)} keV · ${tr("pixel do meio")}</span><br>`;
+    }
+    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
   }
 
@@ -534,6 +733,11 @@
     if (!row) html += "<br>sem dados";
     else {
       const b = Math.min(d.bins - 1, Math.floor((e / d.eMax) * d.bins)), near = libNear(e);
+      if (lp.n) {
+        const bwk = d.eMax / d.bins;
+        const cell = (yy, xx) => (d.rows[yy] ? { rate: d.rows[yy][xx], n: (d.rows[yy][xx] * d.secs[yy]) / 60 } : null);
+        html = loupeHtml(cell, H, d.bins, k, b, Math.log1p(sg.max)) + html + `<br><span class="mono">${nf(b * bwk, 0)}–${nf((b + 1) * bwk, 0)} keV · ${tr("pixel do meio")}</span>`;
+      }
       html += `<br><span class="mono">${nf(d.cps[k], 2)} cps · ${nf(e, 0)} keV · ${nf(row[b], 2)} por min</span>`;
       if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
       else if (d.secs[k] < d.rowSec * 0.9) html += `<br>${nf((d.secs[k] / d.rowSec) * 100, 0)}% do tempo com dados`;
@@ -1182,10 +1386,32 @@
       spReset();
     });
     $("rcSpecMode").addEventListener("click", (e) => {
+      pk.sel = null; pk.range = null; pk.win = null;
       const b = e.target.closest("button[data-m]"); if (!b) return;
       rl.mode = b.dataset.m; spMark(); spDraw();
     });
     $("rcSpec").addEventListener("mousemove", spHover);
+    $("rcSpec").addEventListener("mousedown", (ev) => {
+      const r = $("rcSpec").getBoundingClientRect(), pw = r.width - 54, e = ((ev.clientX - r.left - 44) / pw) * 3000;
+      if (e < 0 || e > 3000) return;
+      pk.drag = [e, e];
+      ev.preventDefault();
+    });
+    window.addEventListener("mouseup", () => {
+      if (!pk.drag) return;
+      const [a, b] = pk.drag, lo = Math.min(a, b), hi = Math.max(a, b);
+      pk.drag = null;
+      if (hi - lo >= 20) { pk.sel = null; pk.range = [lo, hi]; pk.win = [lo, hi]; spDraw(); return; }
+      // clique perto de um pico achado: abre o isótopo dele
+      const p = curPeaks().filter((q) => Math.abs(q.kev - a) < 0.6 * fwhm(q.kev)).sort((x, y) => Math.abs(x.kev - a) - Math.abs(y.kev - a))[0];
+      if (p) isoPick(p.nuclide); else spDraw();
+    });
+    $("rcIsos").addEventListener("click", (e) => { const b = e.target.closest("button[data-nuc]"); if (b) isoPick(b.dataset.nuc); });
+    $("rcZoomClose").addEventListener("click", zoomClose);
+    const lpSeg = $("rcLoupe");
+    const lpMark = () => lpSeg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === lp.n)));
+    lpSeg.addEventListener("click", (e) => { const b = e.target.closest("button[data-n]"); if (!b) return; lp.n = +b.dataset.n; try { localStorage.setItem("rcLoupe", String(lp.n)); } catch (er) { /* sem armazenamento */ } lpMark(); });
+    lpMark();
     $("rcSpec").addEventListener("mouseleave", () => { sp.hover = null; tip($("rcSpecTip"), null); spDraw(); });
     spRate();
     // linha do tempo
@@ -1266,7 +1492,7 @@
     $("rcSpecSimTag").hidden = rl.on;
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
-      ? "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
+      ? "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Passe o mouse num pico para ver qual isótopo costuma aparecer ali."
       : "Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.";
     $("rcSpecLog").textContent = sp.log ? "Escala: log" : "Escala: linear";
     $("rcSpecPlay").textContent = sp.run ? "Pausar" : "Continuar";
