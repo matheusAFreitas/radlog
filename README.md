@@ -1,4 +1,9 @@
-# RadLog
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+    <img src="docs/logo-light.svg" alt="RadLog" width="300">
+  </picture>
+</p>
 
 Registro de radiação ionizante para dois aparelhos: o contador Geiger
 **GQ GMC-800** (monitor de área, parado em casa) e o **Radiacode 102**
@@ -11,6 +16,9 @@ gráficos, dose, alertas, espectro, clima × radiação, medição de objetos e
 relatórios em PDF. Os dados ficam só no seu computador.
 
 Versão atual: veja as [Releases](../../releases) e o [CHANGELOG](CHANGELOG.md).
+O app de Android (3.0, para levar o Radiacode 102 no bolso) está a caminho.
+
+![Tela Agora, com o GQ GMC-800 e o Radiacode 102 lado a lado](docs/prints/agora.png)
 
 > Até a 1.x se chamava **GMC Monitor**. A 2.0 leva os dados sozinha para a
 > pasta nova na primeira vez que abre.
@@ -36,43 +44,93 @@ antiga fecha e passa o lugar.
 - **Agora**: os dois aparelhos lado a lado, cada um com mostrador, nível
   (seguro, atenção, alarme, perigo, sempre com cor **e** símbolo), frase
   dizendo se está dentro do normal, gráfico da última hora e a fita do dia.
-  O anel do mostrador pode piscar a cada contagem (pulso da contagem).
+  Embaixo do µSv/h vem o mesmo valor em mrem/h, pequeno. O anel do
+  mostrador pode piscar a cada contagem (pulso da contagem).
 - **Gráficos**: ao longo do tempo (com zoom arrastando), por hora do dia,
-  padrões, tendência e o **calendário do ano** (fundo de casa ou sua dose,
-  dia a dia).
-- **Resumo**: hoje, ontem, a semana ou qualquer dia, comparação de
-  períodos e **relatório em PDF**.
+  padrões, **tendência** (fundo por dia em µSv/h pela calibração atual e
+  subida lenta do fundo) e o **calendário do ano** (fundo de casa ou sua
+  dose, dia a dia).
+- **Resumo**: Dia, Semana ou Mês com setas para andar no tempo, uma frase
+  com o que importa, a dose comparada com um raio-X de tórax, quanto tempo
+  ficou em casa e fora, o gráfico com a fita dos dias e as saídas de casa
+  do período. Também compara dois dias e gera o **relatório em PDF**.
 - **ALARA**: de onde vem a sua dose e testes de tempo, distância e
-  blindagem.
-- **Alertas**: ativos e histórico, com o gráfico de cada um e o painel
-  **"Por que subiu?"**, que confere as causas comuns (acaso, o outro
-  aparelho, chuva, radônio, pressão, objeto, saída de casa) com os seus
-  dados.
+  blindagem; a explicação fica recolhida em "Por que isso importa".
+- **Alertas**: uma lista só, dos dois aparelhos, com o detalhe ao lado
+  (gráfico, duração, pico). Cada alerta diz se o outro aparelho
+  **confirmou** a subida (confirmação cruzada), e o painel **"Por que
+  subiu?"** confere as causas comuns (acaso, o outro aparelho, chuva,
+  radônio, pressão, objeto, saída de casa) com os seus dados.
 - **Medir objeto**: fundo e objeto pelo mesmo tempo, diferença com margem
   de erro, veredito e a dose comparada com coisas conhecidas.
-- **Fora de casa**: períodos em que o Radiacode 102 saiu com você; entram
-  na dose, mas não no fundo da casa.
+- **Fora de casa**: períodos em que você saiu levando o Radiacode 102;
+  entram na dose, mas não no fundo da casa. Cada saída mostra só o
+  aparelho que foi junto, e o app pergunta "Voltou para casa?" quando o
+  RC102 volta a ler o fundo de casa. O **Resumo da saída** traz horário,
+  dose, pico, gráfico, o espectro da saída comparado com o de casa e o que
+  o aparelho registrou (bateria, temperatura, avisos).
 - **Clima**: chuva (radar RainViewer e modelo Open-Meteo) e pressão
   × radônio. Opcional; a cidade fica só nos ajustes deste PC.
-- **GQ GMC-800**: leitura, histórico da memória do contador, relógio,
-  ajustes do aparelho e calibração (inclusive gravar no próprio contador o
-  fator da intercalibração com o Radiacode 102).
-- **Radiacode 102**: leitura, espectro acumulado com isótopos e zoom no
-  pico, espectro ao longo do tempo, busca, atividade (Bq), log, ajustes e
-  alarmes do aparelho, e o histórico que ele gravou longe do PC.
+- **GQ GMC-800**: abas **Agora** (leitura, histórico da memória do
+  contador, relógio, ajustes do aparelho e calibração, inclusive gravar no
+  próprio contador o fator da intercalibração com o Radiacode 102) e
+  **Saúde do tubo** (se o Geiger está contando como deveria).
+- **Radiacode 102**: leitura, **Tela do aparelho** (o espectro que o RC102
+  mostra e que o botão Recomeçar zera) e **Acumulado do aparelho** (o
+  espectro de longo prazo, só leitura), os dois com isótopos e zoom no
+  pico; **Espectrograma** (espectro ao longo do tempo), busca, atividade
+  (Bq), log, ajustes e alarmes do aparelho, e o histórico que ele gravou
+  longe do PC. Cada cartão explica o que mostra em "Como funciona".
 - **Configurações**: alarmes e níveis do app, janela e tela (tamanho,
   densidade, número no ícone da bandeja, pulso), dados, backup e
   sincronização entre PCs.
 
+| Resumo | Alertas |
+|---|---|
+| ![Resumo do dia](docs/prints/resumo.png) | ![Alertas com o detalhe ao lado](docs/prints/alertas.png) |
+| **Radiacode 102** | **Fora de casa** |
+| ![Aba do Radiacode 102](docs/prints/radiacode.png) | ![Saídas de casa](docs/prints/fora.png) |
+
+Os prints são do modo demonstração, com dados de mentira.
+
 Busca rápida com **Ctrl+K**. O logo é um botão para anotar, marcar saída de
 casa e medir um objeto.
+
+## Dose
+
+A sua dose vem do Radiacode 102. O valor principal é o **contador do
+próprio aparelho**; ao lado aparece a soma que o app fez com as leituras de
+minuto a minuto ("app 0,84"), como conferência. O GMC-800 fica parado em
+casa e mede o ambiente, não a sua dose.
+
+## Relatório em PDF
+
+O botão **Relatório (PDF)** abre um diálogo para escolher entre
+**Completo** e **Só o resumo**, e se entram as anotações e as configurações
+(o app lembra da escolha):
+
+1. **Resumo**: uma frase, quatro números, o gráfico dos dois aparelhos com
+   as saídas de casa marcadas e a fita dos dias. A dose vem comparada com a
+   que você teria ficando em casa: normal, acima do normal ou alta.
+2. **Por dia**: fundo de casa, sua dose, pico e alertas de cada dia; a
+   lista de alertas (confirmados ou não pelo outro aparelho), as saídas de
+   casa, as medições, a chuva e as anotações.
+3. **Espectro**: o espectro do Radiacode 102 no período e o de cada saída,
+   comparados com o de casa, com os isótopos achados.
+4. **Anexo técnico** (A1 a A8): estatística, dias, fundo, episódios,
+   leituras acima do limite, falhas, configurações e limites.
+
+O PDF nunca leva GPS nem nome de lugar.
+
+<p align="center"><img src="docs/prints/pdf.png" alt="Página 1 do relatório em PDF" width="420"></p>
 
 ## Alarmes
 
 - Faixas do app em µSv/h (atenção, alarme e perigo), por aparelho. O nível
   **perigo** não pode ser desligado, só silenciado por um tempo.
 - O Radiacode 102 também pode usar os alarmes do próprio aparelho.
-- Aviso de Geiger saturado e de leitura fora da escala.
+- Aviso de Geiger saturado, de leitura fora da escala e de **subida lenta
+  do fundo** (quando o fundo de casa sobe aos poucos ao longo de semanas).
 - Alertas retroativos: o que passou do limite com o app fechado vira alerta
   com a hora certa quando o histórico é baixado.
 - Ícone na bandeja com a leitura na cor do nível; alarme e perigo trazem a
@@ -125,7 +183,8 @@ A interface também abre direto no navegador (`frontend/dist/index.html`) em
 O GitHub Actions (`.github/workflows/release.yml`) compila o `.exe`, o
 AppImage e o `.tar.gz` quando a versão de `internal/app/version.go` muda no
 `main`, assina o `SHA256SUMS.txt` e publica com o trecho da versão no
-CHANGELOG.
+CHANGELOG. Quando o segredo `NOTION_TOKEN` existe, um passo a mais registra
+a versão no quadro do projeto no Notion.
 
 ## Testes
 
