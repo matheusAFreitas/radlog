@@ -1,5 +1,20 @@
 # Versões
 
+## 2.67.0
+- Resumo da saída: quando uma saída com o RC102 fecha ("Voltei" ou "Voltar
+  ao normal"), aparece o aviso "Saída fechada" com "Ver o resumo da saída".
+  O resumo junta o que o RC102 viu fora: dose (com horas do fundo de casa e
+  raio-X de tórax), média comparada com o fundo de casa do dia, pico,
+  alertas, o gráfico minuto a minuto, o espectro da saída inteira contra o de
+  casa no mesmo tempo (com as linhas que subiram mais que em casa) e como o
+  aparelho estava (bateria, temperatura e avisos).
+- O título é o nome da saída em Fora de casa, editável ali mesmo pelo lápis;
+  com o nome padrão, aparece "Saída de ter 10/11".
+- Resumo: uma faixa lilás para cada saída do período, logo abaixo da frase,
+  com dose, média e pico e o botão "Abrir resumo da saída". Em Fora de casa,
+  o botão "Resumo da saída" abre o mesmo painel.
+- Resumo: o fim do dia aparece como 24:00 em vez de 00:00.
+
 ## 2.66.1
 - Fora de casa: cada trecho mostra só os aparelhos que foram junto (o que
   ficou em casa não aparece nos chips nem nos números).

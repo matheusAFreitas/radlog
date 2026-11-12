@@ -996,7 +996,7 @@ function renderMeasSpec(box, sp, opt) {
   };
   if (hasBg) g += `<path d="${path((b) => b.bg)}" class="bg"/>`;
   g += `<path d="${path((b) => b.obj)}" class="obj"/>`;
-  const bgTxt = !hasBg ? "" : sp.bgSrc === "acumulado" ? `fundo: espectro acumulado do aparelho (${rcDur(sp.bgSec) || fmtMin(sp.bgSec)}), na escala do tempo do objeto` : `fundo (${specDur(sp.bgSec)})`;
+  const bgTxt = !hasBg ? "" : opt.bgLabel ? opt.bgLabel : sp.bgSrc === "acumulado" ? `fundo: espectro acumulado do aparelho (${rcDur(sp.bgSec) || fmtMin(sp.bgSec)}), na escala do tempo do objeto` : `fundo (${specDur(sp.bgSec)})`;
   let txt = "";
   const groups = new Map();
   if (!hasBg) txt = "Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.";

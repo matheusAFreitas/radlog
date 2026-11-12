@@ -315,6 +315,7 @@ function renderPeriods() {
     t.className = "t";
     const b = document.createElement("b");
     b.textContent = p.name;
+    if (p.name !== whKind(whOf(p))) b.dataset.noTr = "";
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);
@@ -349,6 +350,7 @@ function renderPeriods() {
       return x;
     };
     if (p.open) btn("Voltar ao normal", "accent", () => call(api.SetWhere, "casa", "comigo", ""));
+    if (isTripP(p)) btn("Resumo da saída", "away-btn", () => openTrip(p.id), "Dose, gráfico, espectro e como o RC102 estava");
     btn("Ver", "", () => showRange(p.from, pTo(p)));
     btn("Relatório (PDF)", "", (e) => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, e.currentTarget), "Relatório em PDF só desse trecho");
     btn(p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); });

@@ -168,6 +168,7 @@ async function refreshSummary() {
   $("btnReport").hidden = !res0;
   $("sumDays").hidden = !(s.mode === "comparar" && s.cmp === "dias");
   $("sumSay").hidden = $("sumTop").hidden = !res0;
+  if (!res0) renderSumTrips(null);
   $("sumDetails").hidden = !res0;
   const periods = sumPeriods();
   if (res0) {
@@ -348,9 +349,10 @@ function renderSumBig(r, rc) {
 // "Mais números" (2.64): só o que não está em cima. Média, Máximo e Dose
 // saíram (repetiam o Fundo, o Pico e a Sua dose); Alertas vira link.
 function renderSummary(r, per) {
-  $("sumSub").textContent = `${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + hhmm(per[1])}`;
+  $("sumSub").textContent = `${dayLabel(per[0])} ${hhmm(per[0])} → ${per[1] >= Date.now() - 6e4 ? "agora" : dayLabel(per[1] - 1) + " " + (hhmm(per[1]) === "00:00" ? "24:00" : hhmm(per[1]))}`;
   const rc = r.rc && r.rc.minutes ? r.rc : null;
   renderSumSay(r, rc);
+  renderSumTrips(per);
   renderSumBig(r, rc);
   const t = $("sumTiles");
   t.textContent = "";

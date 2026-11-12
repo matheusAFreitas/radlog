@@ -2602,3 +2602,56 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .al-page .ad-sub[hidden] { display: none; }
 .ad-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
 .alert-hist .a-detail h3 { position: static; text-transform: none; letter-spacing: 0; font-size: var(--fs-heading); font-weight: 600; color: var(--text); background: none; margin: 0; padding: 0; }
+
+/* ---------- resumo da saída (2.67.0, ux/saida.html) ---------- */
+.trip-toast { display: flex; flex-direction: column; gap: var(--space-1); border-color: color-mix(in srgb, var(--away) 55%, transparent); }
+.trip-toast .acts { display: flex; gap: var(--space-2); margin-top: var(--space-2); }
+.sum-trips { display: flex; flex-direction: column; gap: var(--space-2); }
+.sum-trips[hidden] { display: none; }
+.sum-trip { display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid color-mix(in srgb, var(--away) 45%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--away) 7%, var(--surface)); }
+.sum-trip .ic { display: grid; place-items: center; width: 34px; height: 34px; border-radius: var(--radius-sm); background: color-mix(in srgb, var(--away) 18%, transparent); color: var(--away-ink); flex: none; }
+.sum-trip .t { display: flex; flex-direction: column; min-width: 0; flex: 1; }
+.sum-trip .t b { font-weight: 600; }
+.sum-trip .nums { display: flex; gap: var(--space-4); }
+.sum-trip .nums span { display: flex; flex-direction: column; }
+.sum-trip .nums i { font-style: normal; font-size: var(--fs-caption); color: var(--dim); font-family: inherit; }
+.sum-trip .nums b { font-weight: 500; font-size: var(--fs-body); }
+@media (max-width: 760px) { .sum-trip { flex-wrap: wrap; } .sum-trip .nums { order: 3; width: 100%; } }
+dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
+.trip-head { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.trip-kicker { font-size: var(--fs-caption); color: var(--away-ink); text-transform: uppercase; letter-spacing: .06em; }
+.trip-head h2 { display: flex; align-items: baseline; gap: var(--space-2); flex-wrap: wrap; }
+.trip-head h2 input { font: inherit; font-size: var(--fs-body); min-width: 260px; }
+.trip-edit { font-size: var(--fs-caption); font-weight: 400; }
+.trip-top { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-3); }
+.trip-meta { margin: 0; }
+.trip-acts { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+.trip-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-3); margin-bottom: var(--space-3); }
+.trip-kpis .sum-kpi.up .v { color: var(--att); }
+@media (max-width: 760px) { .trip-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.trip-card { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); background: var(--surface-2); min-width: 0; }
+.trip-card-h { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2); }
+.trip-card-h h3 { font-size: var(--fs-body); margin: 0; }
+.trip-chart { margin-bottom: var(--space-3); }
+.trip-svg { width: 100%; height: auto; display: block; }
+.trip-svg .grid { stroke: var(--border); stroke-width: 1; }
+.trip-svg .ax { fill: var(--muted); font-size: var(--fs-micro); font-family: var(--mono); }
+.trip-svg .line { fill: none; stroke: var(--rc); stroke-width: 1.6; stroke-linejoin: round; }
+.trip-svg .home { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 4 4; }
+.trip-row { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: var(--space-3); align-items: start; }
+@media (max-width: 860px) { .trip-row { grid-template-columns: 1fr; } }
+.trip-spec .m-spec-svg path.obj { stroke: var(--rc); }
+.trip-spec .m-spec-svg path.bg { stroke-dasharray: 4 3; }
+.trip-spec .m-spec-svg .peak { stroke: var(--away); }
+.trip-spec .m-spec-svg .peak-l { fill: var(--away-ink); }
+.trip-spec .key i.mk-obj { border-color: var(--rc); }
+.trip-spec .key i.mk-bg { border-top-style: dashed; }
+.trip-lines-h { margin: var(--space-3) 0 var(--space-1); color: var(--muted); }
+.trip-lines { display: flex; flex-wrap: wrap; gap: var(--space-1); }
+.trip-lines .chip { font-size: var(--fs-caption); }
+.trip-lines .chip.more { color: var(--rc); border-color: color-mix(in srgb, var(--rc) 55%, transparent); }
+.trip-dev dl { display: grid; grid-template-columns: auto 1fr; gap: var(--space-3) var(--space-4); margin: 0; }
+.trip-dev dt { color: var(--muted); font-size: var(--fs-label); }
+.trip-dev dd { margin: 0; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.trip-bat { display: block; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
+.trip-bat i { display: block; height: 100%; background: var(--accent); }
