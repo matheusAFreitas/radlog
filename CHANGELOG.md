@@ -1,5 +1,16 @@
 # Versões
 
+## 2.70.0
+- "De onde vem" (detalhe do isótopo na aba Espectro) ganha:
+  - a linha do decaimento: a série ou cadeia do isótopo, do pai até o
+    estável, com o que decai por α ou β e a meia-vida de cada passo. O
+    isótopo aberto fica em rosa e os que fazem pico no RC102 ganham o γ.
+    Séries longas aparecem resumidas, com "ver a série inteira"; o ramo do
+    Bi-212 (64% β, 36% α) aparece lado a lado. Dados conferidos na tabela
+    da SUNY Potsdam / ENSDF (spec ux/isotopos.html, item 2c);
+  - a linha "Uso" nos isótopos artificiais e no Ra-226 e U-235: medicina
+    (em azul), indústria, casa, energia, antigo (item 2d).
+
 ## 2.69.1
 - Resumo da saída: o "Espectro da saída" compara em casa × fora de casa.
   Cada isótopo tem duas barras (fora em rosa, casa em branco), com as
