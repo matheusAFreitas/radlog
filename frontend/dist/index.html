@@ -1373,7 +1373,14 @@
       <div class="rc-specv" data-specview="acc">
       <article class="rc-card">
         <div class="rc-head"><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
-        <details class="how rc-how"><summary>Como funciona</summary><p id="rcSpecDesc" class="small muted">Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p></details>
+        <details class="how rc-how"><summary>Como funciona</summary><p id="rcSpecDesc" class="small muted">Cada fóton que chega é contado no canal da energia dele. Com o tempo, os picos de cada isótopo aparecem. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. A linha tracejada é o fundo esperado no mesmo tempo.</p>
+          <div class="rc-how-iso small muted">
+            <p><b>O que é um pico.</b> Cada isótopo solta raios gama com energias fixas, como uma impressão digital. Quando muitos gamas com a mesma energia batem no cristal do RC102, aparece um pico naquela energia. Então sim: um pico quer dizer que radiação daquele material passou pelo aparelho.</p>
+            <p><b>"certo"</b> quer dizer as duas coisas juntas: o pico é forte (10 σ ou mais) e a energia só pode ser desse isótopo (bate com a linha e os vizinhos foram descartados, ou outro pico da mesma família apareceu). <b>"provável"</b>: o pico existe, mas é mais fraco (5 a 10 σ) ou outro isótopo emite na mesma energia e não deu para descartar. <b>"fraco"</b> (só ao vivo): entre 3 e 5 σ, pode ser acaso.</p>
+            <p><b>σ (sigma)</b> mede o quanto o pico passa da flutuação normal das contagens. 5 σ já é menos de 1 chance em 1,7 milhão de ser acaso.</p>
+            <p><b>O que "certo" não diz:</b> quanto material tem, nem se é perigoso, nem que ele está aí agora. No Acumulado do aparelho entra tudo desde que o RC102 começou a somar, incluindo testes antigos.</p>
+            <p><b>α β γ rX.</b> O que o isótopo emite. O RC102 enxerga bem γ e rX (fazem picos), vê β só os de energia alta, que atravessam a carcaça, e eles viram uma rampa lisa, sem pico (o elétron sai com energia diferente a cada vez), e não vê α. O símbolo em laranja é o que fez o pico. Clique num isótopo para ver por que ele foi declarado e de onde vem.</p>
+          </div></details>
         <div class="rc-ctrl">
           <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RC102"></div>
           <div class="seg rc-seg" id="rcSpecMode" aria-label="Qual espectro" hidden><button type="button" data-m="agora" aria-pressed="true">Tela do aparelho</button><button type="button" data-m="acc" aria-pressed="false">Acumulado do aparelho</button></div>
@@ -1393,10 +1400,14 @@
         <div class="rc-zoom" id="rcZoom" hidden>
           <div class="rc-zoom-head"><h4 id="rcZoomTitle">Zoom no pico</h4><span class="small muted" id="rcZoomSub"></span><button type="button" class="link small-link" id="rcZoomClose">fechar</button></div>
           <div class="rc-zoom-body">
-            <div class="rc-plot"><canvas id="rcZoomCv" class="rc-canvas"></canvas></div>
+            <div class="rc-zoom-main">
+              <div class="rc-plot"><canvas id="rcZoomCv" class="rc-canvas"></canvas></div>
+              <p class="small muted rc-legend rc-zoom-key" id="rcZoomKey"><span class="lg-ch">canais</span><span class="lg-fit">curva ajustada</span><span class="lg-base">linha de base</span><span class="lg-fwhm">largura na metade da altura</span></p>
+              <p class="small muted rc-legend rc-zoom-key" id="rcZoomKeyIso" hidden><span class="lg-ch">canais</span><span class="lg-base" id="rcZoomBaseKey">contínuo (sem o pico)</span><span class="lg-net">o que sobra: o pico</span></p>
+            </div>
             <dl class="rc-zoom-stats" id="rcZoomStats"></dl>
+            <div class="rc-why" id="rcWhy" hidden></div>
           </div>
-          <p class="small muted rc-legend rc-zoom-key"><span class="lg-ch">canais</span><span class="lg-fit">curva ajustada</span><span class="lg-base">linha de base</span><span class="lg-fwhm">largura na metade da altura</span></p>
           <p class="small rc-zoom-warn" id="rcZoomWarn" hidden></p>
         </div>
       </article>

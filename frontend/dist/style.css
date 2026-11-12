@@ -2282,7 +2282,12 @@ body:has(.set-bar:not([hidden])) .qk-fab { bottom: 86px; }
 .rc-iso:hover { border-color: var(--border-hover); }
 .rc-iso.on { border-color: var(--rc); box-shadow: inset 0 0 0 1px var(--rc); }
 .rc-iso-n { font-weight: 600; font-size: var(--fs-label); }
-.rc-iso-e { grid-column: 1 / -1; font-size: var(--fs-caption); color: var(--muted); }
+.rc-iso-e { font-size: var(--fs-caption); color: var(--muted); }
+/* o que o isótopo emite (2.69): em laranja o que fez o pico */
+.rc-ems { display: inline-flex; gap: 3px; justify-self: end; }
+.rc-em { font-family: var(--mono); font-size: 10px; line-height: 14px; padding: 0 4px; border: 1px solid var(--border-hover); border-radius: var(--radius-xs); color: var(--muted); cursor: help; }
+.rc-em.made { background: #F2A33A; border-color: #F2A33A; color: #0D1012; font-weight: 600; }
+.rc-zoom-head .rc-ems { margin-left: var(--space-2); vertical-align: 1px; }
 .rc-iso-s { justify-self: end; font-size: 11px; padding: 0 6px; border-radius: var(--radius-pill); border: 1px solid currentColor; }
 .rc-iso-s.sure { color: var(--accent); }
 .rc-iso-s.likely { color: var(--info); }
@@ -2298,12 +2303,50 @@ body:has(.set-bar:not([hidden])) .qk-fab { bottom: 86px; }
 @media (max-width: 760px) { .rc-zoom-body { grid-template-columns: minmax(0, 1fr); } }
 .rc-zoom-stats { display: grid; grid-template-columns: auto 1fr; gap: var(--space-2) var(--space-4); margin: 0; font-size: var(--fs-label); }
 .rc-zoom-stats dt { color: var(--muted); }
+.rc-zoom-stats dt:only-child { grid-column: 1 / -1; line-height: 1.5; }
 .rc-zoom-stats dd { margin: 0; }
 .rc-zoom-key .lg-ch::before { background: rgba(242, 163, 58, .5); height: 10px; }
 .rc-zoom-key .lg-fit::before { background: var(--text); }
 .rc-zoom-key .lg-base::before { background: repeating-linear-gradient(90deg, var(--muted) 0 4px, transparent 4px 7px); }
 .rc-zoom-key .lg-fwhm::before { background: var(--att); }
 .rc-zoom-warn { margin: 0; color: var(--att); }
+/* detalhe "Por que X" (2.69) */
+.rc-zoom-main { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; }
+.rc-zoom.iso .rc-zoom-body { grid-template-columns: minmax(0, 1.3fr) minmax(280px, 1fr); grid-template-areas: "main why" "stats why"; grid-template-rows: auto 1fr; align-items: start; }
+.rc-zoom.iso .rc-zoom-main { grid-area: main; }
+.rc-zoom.iso .rc-zoom-stats { grid-area: stats; font-size: var(--fs-caption); }
+.rc-why { grid-area: why; display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.rc-why[hidden] { display: none; }
+@media (max-width: 760px) { .rc-zoom.iso .rc-zoom-body { grid-template-columns: minmax(0, 1fr); grid-template-areas: "main" "stats" "why"; } }
+.rc-zoom-key .lg-net::before { background: rgba(110, 231, 160, .6); height: 10px; }
+.rc-why-cards { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.rc-why-card { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); display: flex; flex-direction: column; gap: 2px; }
+.rc-why-card > span { font-size: var(--fs-caption); color: var(--muted); }
+.rc-why-card b.sure { color: var(--accent); } .rc-why-card b.likely { color: var(--info); } .rc-why-card b.weak { color: var(--muted); }
+.rc-why-bars { display: grid; grid-template-columns: repeat(3, 1fr); gap: 3px; margin-top: 4px; }
+.rc-why-bars i { height: 4px; border-radius: 2px; background: var(--border); }
+.rc-why-bars.sure i.on { background: var(--accent); } .rc-why-bars.likely i.on { background: var(--info); } .rc-why-bars.weak i.on { background: var(--muted); }
+.rc-why h5, .rc-why h6 { margin: 0; font-size: var(--fs-label); }
+.rc-why h6 { font-weight: 400; color: var(--muted); font-size: var(--fs-caption); }
+.rc-why-list, .rc-why-fam { list-style: none; margin: 0; padding: 0; }
+.rc-why-list li { display: grid; grid-template-columns: 18px 1fr; gap: var(--space-2); padding: var(--space-2) 0; border-top: 1px solid var(--border); }
+.rc-why-list li:first-child { border-top: 0; }
+.rc-why-list li div { display: flex; flex-direction: column; gap: 2px; }
+.rc-why-list li b { font-weight: 500; font-size: var(--fs-label); }
+.rc-why-list li div > span { font-size: var(--fs-caption); color: var(--muted); }
+.rc-why-mk { color: var(--accent); }
+.rc-why-list li.warn .rc-why-mk { color: var(--att); font-weight: 700; text-align: center; }
+.rc-why-from { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-2) var(--space-3); }
+.rc-why-from summary { cursor: pointer; font-size: var(--fs-label); }
+.rc-why-from p { margin: var(--space-2) 0; font-size: var(--fs-label); line-height: 1.5; }
+.rc-why-from dl { display: grid; grid-template-columns: auto 1fr; gap: 2px var(--space-3); margin: 0; font-size: var(--fs-caption); }
+.rc-why-from dt { color: var(--muted); } .rc-why-from dd { margin: 0; }
+.rc-why-tag { font-family: var(--mono); font-size: 11px; padding: 0 6px; border-radius: var(--radius-pill); border: 1px solid currentColor; margin-left: var(--space-2); }
+.rc-why-tag.nat { color: var(--accent); } .rc-why-tag.art { color: var(--away); }
+.rc-why-fam li { display: flex; justify-content: space-between; gap: var(--space-3); padding: 4px 0; border-top: 1px dashed var(--border); font-size: var(--fs-caption); }
+.rc-why-fam .seen { color: var(--accent); }
+.rc-how-iso p { margin: var(--space-2) 0 0; }
+.rc-how-iso b { color: var(--text); font-weight: 600; }
 .rc-loupe { display: grid; gap: 1px; margin-bottom: var(--space-2); background: var(--bg); }
 .rc-loupe i { font-style: normal; font-family: var(--mono); font-size: 11px; min-width: 30px; height: 26px; display: grid; place-items: center; }
 .rc-loupe i.none { background: var(--surface-2); }
@@ -2667,3 +2710,4 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
 .rep-mode[aria-checked="true"] { border-color: var(--accent-line); background: var(--accent-soft); }
 .rep-mode b { font-weight: 600; }
 @media (max-width: 560px) { .rep-modes { grid-template-columns: 1fr; } }
+.rc-zoom-key span[hidden], .rc-zoom-key[hidden] { display: none; }

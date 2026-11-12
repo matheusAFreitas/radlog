@@ -1,5 +1,28 @@
 # Versões
 
+## 2.69.0
+- Isótopos explicados na aba Radiacode 102 › Espectro (spec ux/isotopos.html):
+  - a etiqueta mostra o que o isótopo emite (α β γ rX), com o que fez o pico
+    em laranja e uma dica em cada símbolo;
+  - "certo" agora quer dizer duas coisas: o pico é forte (10 σ) e a energia
+    é mesmo desse isótopo (vizinhos descartados ou outro pico da mesma
+    família achado). Senão, fica "provável";
+  - clicar no isótopo abre "Por que X": o trecho com a mesma base que o app
+    usou para achar o pico, o que sobra acima dela, os números da detecção e
+    a lista do que foi conferido;
+  - "De onde vem", recolhido: nome por extenso, natural ou artificial,
+    meia-vida e onde costuma aparecer. "Outros da série" mostra o que mais
+    da família apareceu;
+  - "Como funciona" do espectro explica pico, σ e os selos.
+- Corrigido: no Acumulado do aparelho o zoom do Pb-212 dizia "Sem pico claro"
+  e listava o próprio Pb-212 como "outro pico". Agora usa o contínuo da
+  detecção (o SNIP) em vez de uma reta.
+- Corrigido: os nomes dos picos não ficam mais um em cima do outro no
+  gráfico do espectro e no zoom de um trecho arrastado. Num trecho largo, o
+  zoom pede para arrastar em volta de um pico só.
+- O cursor no espectro diz de onde vêm os picos que não são isótopo (raio X
+  do chumbo e do tungstênio, aniquilação em 511 keV).
+
 ## 2.68.5
 - O mrem/h agora aparece também no RC102: pequeno embaixo do mostrador no
   Agora (e no topo das outras telas) e na leitura da aba do Radiacode 102,
