@@ -4344,6 +4344,8 @@ function makeDemoApi() {
   let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
+  // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
+  if (localGet("rcBack", "") === "1") rcAsksAll.splice(0, 1, { id: rcY, from: rcY, to: rcY + 130 * 6e4, kind: "volta", period: 99, since: rcY + 4 * 6e4, name: "Saí de casa", memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" });
   let rcAsks = rcAsksAll.slice();
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
@@ -5291,13 +5293,14 @@ const demoRc = () => {
       const q = rcAsks.find((x) => x.id === id);
       if (!q) throw new Error("essa pergunta já foi respondida");
       let p = { id: 0 };
+      if (ans === "voltei") p = { id: q.period, from: q.since, to: to || q.to, name: q.name };
       if (ans === "fora") p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name, gmc: "casa", radiacode: "comigo", notHome: true });
       rcAsks = rcAsks.filter((x) => x.id !== id);
       setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
       return p;
     },
     UndoRcAway: async (ask, pid) => {
-      if (pid) await api.DeletePeriod(pid);
+      if (pid && ask.kind !== "volta") await api.DeletePeriod(pid);
       const q = rcAsksAll.find((x) => x.id === ask.id);
       if (q && !rcAsks.some((x) => x.id === q.id)) rcAsks.push(q);
       setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
