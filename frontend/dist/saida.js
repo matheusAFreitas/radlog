@@ -239,14 +239,20 @@ function niceStep(x) {
 }
 
 // por que uma linha subiu (só as naturais; nunca é diagnóstico)
-const TRIP_WHY = {
-  "K-40": "K-40 mais alto é comum perto de granito, tijolo, cimento e solo.",
-  "Bi-214": "Bi-214 e Pb-214 vêm do radônio: sobem em lugar fechado, subsolo e metrô.",
-  "Pb-214": "Bi-214 e Pb-214 vêm do radônio: sobem em lugar fechado, subsolo e metrô.",
-  "Tl-208": "Tl-208, Ac-228 e Pb-212 vêm do tório: comum em granito, areia e tijolo.",
-  "Ac-228": "Tl-208, Ac-228 e Pb-212 vêm do tório: comum em granito, areia e tijolo.",
-  "Pb-212": "Tl-208, Ac-228 e Pb-212 vêm do tório: comum em granito, areia e tijolo.",
+// a frase cita só os isótopos que subiram (2.69.1)
+const TRIP_WHY_FAM = {
+  "K-40": ["k", "{n} mais alto é comum perto de granito, tijolo, cimento e solo."],
+  "Bi-214": ["ra", "{n} {v} do radônio: sobe em lugar fechado, subsolo e metrô."],
+  "Pb-214": ["ra", "{n} {v} do radônio: sobe em lugar fechado, subsolo e metrô."],
+  "Tl-208": ["th", "{n} {v} do tório: comum em granito, areia e tijolo."],
+  "Ac-228": ["th", "{n} {v} do tório: comum em granito, areia e tijolo."],
+  "Pb-212": ["th", "{n} {v} do tório: comum em granito, areia e tijolo."],
 };
+function tripWhy(lines) {
+  const by = {};
+  for (const l of lines) { const f = TRIP_WHY_FAM[l.nuclide]; if (l.more && f) (by[f[0]] || (by[f[0]] = { t: f[1], n: new Set() })).n.add(l.nuclide); }
+  return Object.values(by).map(({ t, n }) => { const a = [...n]; return t.replace("{n}", a.length > 1 ? a.slice(0, -1).join(", ") + (LANG === "en" ? " and " : " e ") + a[a.length - 1] : a[0]).replace("{v}", a.length > 1 ? "vêm" : "vem").replace("sobe", a.length > 1 ? "sobem" : "sobe"); });
+}
 
 function tripSpecCard(s) {
   const sp = s.spec;
@@ -267,28 +273,50 @@ function tripSpecCard(s) {
   box.querySelector(".m-spec-txt").remove();
   box.querySelector(".m-spec-peaks").remove();
   const lines = s.lines || [];
-  if (lines.length) {
+  if (lines.length && sp.bgSec > 0 && lines.some((l) => l.out != null)) {
+    // em casa × fora de casa (2.69.1): cada linha com o pico dos dois lados,
+    // fora em rosa e casa em branco, como a legenda do gráfico
     const t = document.createElement("p");
     t.className = "small trip-lines-h";
-    t.textContent = sp.bgSec > 0 ? "O que apareceu mais que em casa" : "Linhas que apareceram";
-    const ul = document.createElement("div");
-    ul.className = "trip-lines";
+    t.innerHTML = `<span>Em casa × fora de casa</span><span class="trip-cmp-key"><i class="out"></i>fora de casa<i class="home"></i>em casa</span>`;
+    const box2 = document.createElement("div");
+    box2.className = "trip-cmp";
+    const top = Math.max(...lines.map((l) => Math.max(l.out || 0, l.home || 0)), 1e-9);
     for (const l of lines) {
-      const ch = document.createElement("span");
-      ch.className = "chip mono" + (l.more ? " more" : "");
-      const v = !l.hasHome ? "" : l.more ? ` · ${l.pct >= 0 ? "+" : "−"}${fmt(Math.abs(l.pct), 0)}%` : " · igual";
-      ch.textContent = `${l.nuclide} · ${fmt(l.kev, 0)} keV${v}`;
-      ch.title = l.group;
-      ul.appendChild(ch);
+      const r = document.createElement("div");
+      r.className = "trip-cmp-row";
+      r.title = l.group;
+      const bar = (v, cls) => `<span class="trip-cmp-bar ${cls}"><i style="width:${Math.max(1, (100 * (v || 0)) / top).toFixed(1)}%"></i><b class="mono">${fmt(v || 0, (v || 0) < 10 ? 1 : 0)}/min</b></span>`;
+      const pct = l.home > 0 ? ` ${l.pct >= 0 ? "+" : "−"}${fmt(Math.abs(l.pct), 0)}%` : "";
+      const verdict = l.more ? `<span class="trip-cmp-v more">mais que em casa${pct}</span>` : l.less ? `<span class="trip-cmp-v less">menos que em casa${pct}</span>` : `<span class="trip-cmp-v">igual a casa</span>`;
+      r.innerHTML = `<span class="mono trip-cmp-n" data-no-tr>${l.nuclide} · ${fmt(l.kev, 0)} keV</span><span class="trip-cmp-bars">${bar(l.out, "out")}${bar(l.home, "home")}</span>${verdict}`;
+      box2.appendChild(r);
     }
-    c.append(t, ul);
-    const why = [...new Set(lines.filter((l) => l.more && TRIP_WHY[l.nuclide]).map((l) => TRIP_WHY[l.nuclide]))];
+    const note = document.createElement("p");
+    note.className = "small muted";
+    note.textContent = "Contagens por minuto só no pico, acima do contínuo de cada espectro. \"Mais\" ou \"menos\" só quando a diferença passa de 3σ.";
+    c.append(t, box2, note);
+    const why = tripWhy(lines);
     if (lines.some((l) => l.more)) {
       const p = document.createElement("p");
       p.className = "small muted";
       p.textContent = (why.length ? why.join(" ") + " " : "") + "Não é perigo: só mostra de onde veio a diferença.";
       c.appendChild(p);
     }
+  } else if (lines.length) {
+    const t = document.createElement("p");
+    t.className = "small trip-lines-h";
+    t.textContent = "Linhas que apareceram";
+    const ul = document.createElement("div");
+    ul.className = "trip-lines";
+    for (const l of lines) {
+      const ch = document.createElement("span");
+      ch.className = "chip mono";
+      ch.textContent = `${l.nuclide} · ${fmt(l.kev, 0)} keV`;
+      ch.title = l.group;
+      ul.appendChild(ch);
+    }
+    c.append(t, ul);
   } else {
     const p = document.createElement("p");
     p.className = "small muted";

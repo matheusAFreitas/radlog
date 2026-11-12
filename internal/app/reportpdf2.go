@@ -530,12 +530,15 @@ func (p *reportPDF) specLines(ls []TripLine, hasHome bool) {
 		p.paragraph("Nenhuma linha gama conhecida se destacou no período.", 7.5, cMuted)
 		return
 	}
-	var more, same []string
+	var more, less, same []string
 	for _, l := range ls {
 		t := fmt.Sprintf("%s %s keV", l.Nuclide, fmtBR(l.KeV, 0))
 		if l.More {
 			t += fmt.Sprintf(" (%s%%)", fmtSigned(l.Pct, 0))
 			more = append(more, t)
+		} else if l.Less {
+			t += fmt.Sprintf(" (%s%%)", fmtSigned(l.Pct, 0))
+			less = append(less, t)
 		} else {
 			same = append(same, t)
 		}
@@ -548,6 +551,9 @@ func (p *reportPDF) specLines(ls []TripLine, hasHome bool) {
 		p.paragraph("Mais que em casa (acima de 3σ): "+strings.Join(more, " · ")+".", 7.5, cInk)
 	} else {
 		p.paragraph("Nenhuma linha passou de 3σ acima de casa.", 7.5, cInk)
+	}
+	if len(less) > 0 {
+		p.paragraph("Menos que em casa: "+strings.Join(less, " · ")+".", 7.5, cMuted)
 	}
 	if len(same) > 0 {
 		p.paragraph("Iguais a casa: "+strings.Join(same, " · ")+".", 7.5, cMuted)

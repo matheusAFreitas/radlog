@@ -72,6 +72,15 @@ func TestTripSummary(t *testing.T) {
 	if k40 == nil || !k40.More || !k40.HasHome || k40.Pct < 10 {
 		t.Fatalf("K-40: %+v (linhas %+v)", k40, s.Lines)
 	}
+	// "mais que em casa" nunca com o pico menor que o de casa (2.69.1)
+	if k40.Out <= k40.Home {
+		t.Fatalf("K-40 subiu mas fora %v ≤ casa %v", k40.Out, k40.Home)
+	}
+	for _, l := range s.Lines {
+		if (l.More && l.Pct < 0) || (l.Less && l.Pct > 0) || (l.More && l.Less) {
+			t.Fatalf("linha contraditória: %+v", l)
+		}
+	}
 	if !s.HasBat || s.Bat0 != 92 || s.Bat1 != 71 || !s.HasTemp || s.TempMin != 24 || s.TempMax != 31 {
 		t.Fatalf("aparelho: %+v", s)
 	}
