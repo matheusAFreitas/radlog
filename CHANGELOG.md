@@ -1,5 +1,14 @@
 # Versões
 
+## 2.68.1
+- PDF: saída de casa levando só o GMC-800 (sem o RC102) agora aparece em
+  "Saídas de casa", com a média e o pico do GMC-800, e na faixa lilás do
+  gráfico. A tabela ganhou a coluna "Levou".
+- PDF: "Fundo da casa" (página 1 e "Em resumo") e a coluna "Casa" do Por
+  dia usam só os minutos com o GMC-800 em casa.
+- PDF: sem dados do RC102, o título do gráfico fica só "GMC-800 (casa)".
+- PDF: no A1, "Pico ao vivo (60 s)" não passa mais por cima do valor.
+
 ## 2.68.0
 - Relatório PDF novo (spec aprovada pelo ACE). Ao clicar em "Relatório
   (PDF)" o app pergunta: "Completo" ou "Só o resumo", incluir as anotações e

@@ -164,6 +164,14 @@ func alertsCountTxt(danger, alarm, attn int) string {
 	return strings.Join(parts, " · ")
 }
 
+// homeMean é o fundo da casa: a média do GMC-800 só com ele em casa.
+func (r *reportData) homeMean() float64 {
+	if r.HomeN > 0 {
+		return r.HomeU
+	}
+	return r.USt.Mean
+}
+
 func (p *reportPDF) pageSummary() {
 	d, r := p.d, p.r
 	s, rc := r.S, r.S.RC
@@ -210,7 +218,7 @@ func (p *reportPDF) pageSummary() {
 	if s.BgOK {
 		bgSub = pctNormal("GMC-800 ·", s.VsBgPct)
 	}
-	p.tile(x(1), y, tw, th, "Fundo da casa", fmtU(r.USt.Mean)+" µSv/h", bgSub, pdf.MonoBold)
+	p.tile(x(1), y, tw, th, "Fundo da casa", fmtU(r.homeMean())+" µSv/h", bgSub, pdf.MonoBold)
 	// 3. pico
 	if rc != nil && rc.Max >= r.USt.Max {
 		p.tile(x(2), y, tw, th, "Pico", fmtU(rc.Max)+" µSv/h", "RC102 · "+time.UnixMilli(rc.MaxAt).Format("02/01 15:04"), pdf.MonoBold)
@@ -233,7 +241,11 @@ func (p *reportPDF) pageSummary() {
 	p.tile(x(3), y, tw, th, "Alertas", alertsCountTxt(s.Danger+rd, s.Alarm+ra, s.Attention+rt), alSub, pdf.SansBold)
 	p.y += th + 4
 
-	p.section("µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA) E RC102 (VOCÊ)")
+	if rc != nil && rc.Minutes > 0 && len(rc.Curve) > 0 {
+		p.section("µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA) E RC102 (VOCÊ)")
+	} else {
+		p.section("µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA)")
+	}
 	p.chart(r)
 	p.stripDays(r)
 
@@ -245,10 +257,10 @@ func (p *reportPDF) pageSummary() {
 			fmtBR(v.Dose, 2), map[string]string{"normal": "perto", "acima": "acima", "alto": "bem acima"}[v.Level], fmtBR(v.Expected, 2)))
 	}
 	if s.BgOK {
-		lines = append(lines, "O fundo da casa (GMC-800) ficou em "+fmtU(r.USt.Mean)+" µSv/h: "+strings.ToLower(pctNormal("", s.VsBgPct)[1:])+".")
+		lines = append(lines, "O fundo da casa (GMC-800) ficou em "+fmtU(r.homeMean())+" µSv/h: "+strings.ToLower(pctNormal("", s.VsBgPct)[1:])+".")
 	}
 	if len(r.Trips) > 0 {
-		lines = append(lines, fmt.Sprintf("Saídas de casa com o RC102: %d (página 2).", len(r.Trips)))
+		lines = append(lines, fmt.Sprintf("Saídas de casa: %d (página 2).", len(r.Trips)))
 	}
 	if len(r.Episodes) > 0 || (rc != nil && rc.Danger+rc.Alarm+rc.Attention > 0) {
 		lines = append(lines, "Os alertas estão listados na página 2 e detalhados no anexo (A4).")
@@ -311,19 +323,27 @@ func (p *reportPDF) pageDays() {
 	}
 
 	if len(r.Trips) > 0 {
-		p.section("SAÍDAS DE CASA (COM O RC102)")
+		p.section("SAÍDAS DE CASA")
 		rows = nil
 		for _, t := range r.Trips {
-			dose, pk := "—", "—"
+			dev, dose, pk := "RC102", "—", "—"
 			if t.HasDose {
 				dose = fmtBR(t.Dose, 2)
+			}
+			if t.GMC {
+				dev = "GMC-800"
+				if t.AvgU > 0 {
+					dose = "média " + fmtU(t.AvgU) + " µSv/h"
+				}
+			}
+			if t.Peak > 0 {
 				pk = fmtU(t.Peak) + " às " + t.PeakAt.Format("15:04")
 			}
-			rows = append(rows, []string{t.Title, t.From.Format("02/01 15:04") + " → " + t.To.Format("15:04"), fmtMinutes(int(t.To.Sub(t.From).Minutes())), dose, pk})
+			rows = append(rows, []string{t.Title, dev, t.From.Format("02/01 15:04") + " → " + t.To.Format("15:04"), fmtMinutes(int(t.To.Sub(t.From).Minutes())), dose, pk})
 		}
-		p.table([]string{"Saída", "Horário", "Duração", "Dose µSv", "Pico µSv/h"}, rows,
-			[]float64{cw * .28, cw * .24, cw * .14, cw * .14, cw * .2},
-			[]bool{false, false, true, true, true}, []bool{false, true, true, true, true}, nil)
+		p.table([]string{"Saída", "Levou", "Horário", "Duração", "Dose µSv", "Pico µSv/h"}, rows,
+			[]float64{cw * .22, cw * .1, cw * .2, cw * .1, cw * .18, cw * .2},
+			[]bool{false, false, false, true, true, true}, []bool{false, false, true, true, true, true}, nil)
 	}
 
 	p.measures()
@@ -354,11 +374,17 @@ func (p *reportPDF) pageSpectrum() {
 		p.specChart(r.Spec, pm, pdf.W-2*pm, 200, "no período", "em casa (mesmo tempo)")
 		p.specLines(r.SpecLines, r.Spec.BgSec > 0)
 	}
-	if len(r.Trips) > 0 {
+	var rcTrips []reportTrip
+	for _, t := range r.Trips {
+		if !t.GMC {
+			rcTrips = append(rcTrips, t)
+		}
+	}
+	if len(rcTrips) > 0 {
 		p.section("ESPECTRO DE CADA SAÍDA DE CASA")
 		gap := 14.0
 		w := (pdf.W - 2*pm - gap) / 2
-		for i, t := range r.Trips {
+		for i, t := range rcTrips {
 			if i%2 == 0 {
 				p.need(150)
 			}
@@ -388,7 +414,7 @@ func (p *reportPDF) pageSpectrum() {
 				p.y = math.Max(p.y, p.tripY2)
 			}
 		}
-		if len(r.Trips)%2 == 1 {
+		if len(rcTrips)%2 == 1 {
 			p.y = math.Max(p.y, p.tripY2)
 		}
 	}

@@ -97,6 +97,8 @@ type reportData struct {
 	// relatório novo (2.68, report2.go)
 	Opts      reportOpts
 	Verdict   reportDoseVerdict
+	HomeU     float64 // média do GMC-800 só com ele em casa (µSv/h)
+	HomeN     int     // minutos dessa média
 	Days2     []reportDay2
 	Alerts2   []reportAlert2
 	Trips     []reportTrip

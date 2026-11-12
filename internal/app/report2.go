@@ -54,6 +54,8 @@ type reportTrip struct {
 	PeakAt   time.Time
 	Spec     *MeasureSpectrum
 	SpecRows int
+	GMC      bool    // levou só o GMC-800 (sem o RC102): média e pico dele
+	AvgU     float64 // média do GMC-800 na saída, µSv/h
 }
 
 // reportDoseVerdict compara a sua dose com a de ficar em casa (ACE, 12/11).
@@ -98,6 +100,17 @@ func doseVerdict(rc *RcSum, span time.Duration) reportDoseVerdict {
 func (a *App) reportExtras(r *reportData, o reportOpts) {
 	r.Opts = o
 	r.Verdict = doseVerdict(r.S.RC, r.To.Sub(r.From))
+	// fundo da casa: só os minutos com o GMC-800 em casa
+	var hs float64
+	for _, pt := range a.homeOnly(r.Pts) {
+		if !pt.T.Before(r.From) && pt.T.Before(r.To) {
+			hs += r.tl.USv(pt)
+			r.HomeN++
+		}
+	}
+	if r.HomeN > 0 {
+		r.HomeU = hs / float64(r.HomeN)
+	}
 	if o.Summary {
 		return
 	}
@@ -114,7 +127,8 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 	}
 	var periods []Period
 	for _, p := range a.periods {
-		if isTrip(p) && periodEnd(p) > r.From.UnixMilli() && p.From < r.To.UnixMilli() {
+		g, _ := periodWhere(p)
+		if (isTrip(p) || g == WhereMe) && periodEnd(p) > r.From.UnixMilli() && p.From < r.To.UnixMilli() {
 			periods = append(periods, p)
 		}
 	}
@@ -144,10 +158,30 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 	}
 	sort.Slice(r.Alerts2, func(i, j int) bool { return r.Alerts2[i].Start.Before(r.Alerts2[j].Start) })
 
-	// por dia: casa (GMC-800), sua dose (RC102), pico e alertas
-	gmcDay := map[string]reportDay{}
+	// por dia: casa (GMC-800, só os minutos em casa), sua dose (RC102), pico e alertas
+	type homeAcc struct {
+		sum, max float64
+		n        int
+	}
+	homeDay := map[string]*homeAcc{}
+	for _, pt := range a.homeOnly(r.Pts) {
+		if pt.T.Before(r.From) || !pt.T.Before(r.To) {
+			continue
+		}
+		k := pt.T.Format("2006-01-02")
+		h := homeDay[k]
+		if h == nil {
+			h = &homeAcc{}
+			homeDay[k] = h
+		}
+		u := r.tl.USv(pt)
+		h.sum += u
+		h.max = math.Max(h.max, u)
+		h.n++
+	}
+	live := map[string]float64{}
 	for i, d := range r.Days {
-		gmcDay[r.dayKeys[i]] = d
+		live[r.dayKeys[i]] = d.LivePeakU
 	}
 	d0 := time.Date(r.From.Year(), r.From.Month(), r.From.Day(), 0, 0, 0, 0, r.From.Location())
 	for d := d0; d.Before(r.To) && len(r.Days2) < 92; d = d.AddDate(0, 0, 1) {
@@ -159,9 +193,9 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 			t = r.To
 		}
 		row := reportDay2{Label: weekdayBR(d) + " " + d.Format("02/01")}
-		if g, ok := gmcDay[d.Format("2006-01-02")]; ok {
-			row.HomeU, row.HasHome = g.USv, true
-			row.Peak, row.PeakDev = math.Max(g.MaxU, g.LivePeakU), "GMC-800"
+		if h := homeDay[d.Format("2006-01-02")]; h != nil && h.n > 0 {
+			row.HomeU, row.HasHome = h.sum/float64(h.n), true
+			row.Peak, row.PeakDev = math.Max(h.max, live[d.Format("2006-01-02")]), "GMC-800"
 		}
 		if rc := a.rcSummary(f, t, t.Sub(f)+time.Minute, 1); rc != nil && rc.Minutes > 0 {
 			row.Dose, row.HasDose = rc.Dose, true
@@ -184,6 +218,33 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 
 	// saídas de casa: horário, dose e pico (e o espectro de cada uma)
 	for _, p := range periods {
+		if !isTrip(p) { // saída só com o GMC-800: média e pico dele
+			tr := reportTrip{Title: tripReportTitle(p), From: time.UnixMilli(p.From), To: time.UnixMilli(periodEnd(p)), GMC: true}
+			if tr.From.Before(r.From) {
+				tr.From = r.From
+			}
+			if tr.To.After(r.To) {
+				tr.To = r.To
+			}
+			var sum float64
+			var n int
+			for _, pt := range r.Pts {
+				if pt.T.Before(tr.From) || !pt.T.Before(tr.To) {
+					continue
+				}
+				u := r.tl.USv(pt)
+				sum += u
+				n++
+				if u > tr.Peak {
+					tr.Peak, tr.PeakAt = u, pt.T
+				}
+			}
+			if n > 0 {
+				tr.AvgU = sum / float64(n)
+			}
+			r.Trips = append(r.Trips, tr)
+			continue
+		}
 		ts := a.tripSummary(p, now)
 		tr := reportTrip{Title: tripReportTitle(p), From: time.UnixMilli(ts.From), To: time.UnixMilli(ts.To), Spec: ts.Spec, SpecRows: ts.SpecRows}
 		if rc := ts.RC; rc != nil && rc.Minutes > 0 {
