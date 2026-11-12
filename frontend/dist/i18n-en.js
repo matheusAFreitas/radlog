@@ -3269,7 +3269,9 @@ const I18N_EN = {
 "Ainda estou fora": "Still away",
 "\"Voltei\" fecha o trecho fora de casa nesse horário e tudo volta ao normal.": "\"I'm back\" closes the away stretch at that time and everything goes back to normal.",
 "Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".": "Ok, the stretch stays open. When you get back, use \"I'm back\".",
-"A volta precisa ser depois da saída e não pode estar no futuro.": "The return has to be after you left and can't be in the future."
+"A volta precisa ser depois da saída e não pode estar no futuro.": "The return has to be after you left and can't be in the future.",
+"quase sem leitura nesse trecho": "barely any readings in this stretch",
+"Não estava comigo": "Wasn't with me"
 },
 "patterns": [
 [
@@ -6914,6 +6916,15 @@ const I18N_EN = {
 [
 "rajada suspeita em 30 dias (",
 "). Normal."
+]
+],
+[
+"Marca o ",
+"^Marca o ((?:(?! · ).)+?) como fora do cálculo neste trecho$",
+"Marks the ${1} as left out of the calculation in this stretch",
+[
+"Marca o ",
+" como fora do cálculo neste trecho"
 ]
 ],
 [
@@ -14932,6 +14943,14 @@ const I18N_EN = {
 "app ${1}",
 [
 "app "
+]
+],
+[
+"máx ",
+"^máx ((?:(?! · ).)+?)$",
+"max ${1}",
+[
+"máx "
 ]
 ],
 [

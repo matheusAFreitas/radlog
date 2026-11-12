@@ -34,9 +34,16 @@ function periodSummary(p) {
   return state.periodSum[key];
 }
 
+// só os aparelhos que foram junto (ACE, 12/11): o que ficou em casa mede a casa
+const whWent = (p) => { const w = whOf(p); return ["radiacode", "gmc"].filter((d) => w[d] === "comigo"); };
+// menos que isso do trecho medido: o aparelho provavelmente não foi junto
+const P_FEW = 0.1;
+
 function periodStatsEl(p) {
   const box = document.createElement("div");
   box.className = "p-stats mono";
+  const went = whWent(p);
+  if (!went.length) { box.hidden = true; return box; }
   box.textContent = "…";
   periodSummary(p).then((s) => {
     box.textContent = "";
@@ -51,24 +58,45 @@ function periodStatsEl(p) {
       if (warn) t.className = "warn";
       d.append(b, t);
       box.appendChild(d);
+      return d;
     };
-    const rc = s.rc && s.rc.minutes ? s.rc : null;
-    if (rc) {
-      const dg = (v) => fmt(v, usvDigits(v));
-      const vs = rc.bgUSv ? (Math.abs(rc.vsBgPct) < 5 ? " (igual ao seu normal)" : ` (${rc.vsBgPct > 0 ? "+" : "−"}${fmt(Math.abs(rc.vsBgPct), 0)}% do seu normal)`) : "";
-      const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
-      if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
-      if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
-      line("p-rc", "RC102", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
-    } else {
-      line("p-rc", "RC102", "sem leitura no PC nesse período (com o app do celular conectado, os dados ficam no celular)");
+    // marcado "comigo" mas quase sem leitura: oferece tirar do cálculo
+    const few = (dev, cls) => {
+      const d = line(cls, WH_NAME[dev], `quase sem leitura nesse trecho`);
+      if (p.open) return;
+      const b = document.createElement("button");
+      b.type = "button"; b.className = "link small-link"; b.textContent = "Não estava comigo";
+      b.title = `Marca o ${WH_NAME[dev]} como fora do cálculo neste trecho`;
+      b.addEventListener("click", async () => {
+        const w = whOf(p), nw = { ...w, [dev]: "fora" };
+        const name = p.name === whKind(w) ? "" : p.name;
+        try { await api.SavePeriod({ id: p.id, from: p.from, to: p.to, name, gmc: nw.gmc, radiacode: nw.radiacode, notHome: p.notHome }); }
+        catch (e) { toast(errMsg(e), true); }
+      });
+      d.append(" ", b);
+    };
+    const dg = (v) => fmt(v, usvDigits(v));
+    if (went.includes("radiacode")) {
+      const rc = s.rc && s.rc.minutes ? s.rc : null;
+      if (!rc || rc.coverageAll < P_FEW) few("radiacode", "p-rc");
+      else {
+        const vs = rc.bgUSv ? (Math.abs(rc.vsBgPct) < 5 ? " (igual ao seu normal)" : ` (${rc.vsBgPct > 0 ? "+" : "−"}${fmt(Math.abs(rc.vsBgPct), 0)}% do seu normal)`) : "";
+        const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
+        if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
+        if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
+        line("p-rc", "RC102", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
+      }
     }
-    if (s.minutes) {
-      const parts = [`média ${fmt(s.avg, 1)} CPM`, `máx ${fmt(s.max, 0)} CPM`];
-      if (s.coverage < 0.95) parts.push(`${fmt(s.coverage * 100, 0)}% medido`);
-      if (s.danger || s.alarm || s.attention) parts.push(`alertas: ${alertsText(s)}`);
-      line("p-gmc", "GMC-800", parts.join(" · "));
-    } else line("p-gmc", "GMC-800", "sem leitura");
+    if (went.includes("gmc")) {
+      if (!s.minutes || s.coverageAll < P_FEW) few("gmc", "p-gmc");
+      else {
+        // em µSv/h com a calibração de cada minuto, como no relatório
+        const parts = [`média ${usvVal(s.avgUSv)}`, `máx ${s.maxUSv != null ? usvVal(s.maxUSv) : fmt(s.max, 0) + " CPM"}`];
+        if (s.coverage < 0.95) parts.push(`${fmt(s.coverage * 100, 0)}% medido`);
+        if (s.danger || s.alarm || s.attention) parts.push(`alertas: ${alertsText(s)}`);
+        line("p-gmc", "GMC-800", parts.join(" · "));
+      }
+    }
   });
   return box;
 }
@@ -300,6 +328,8 @@ function renderPeriods() {
     const who = document.createElement("div");
     who.className = "who";
     for (const dev of ["gmc", "radiacode"]) {
+      // só o que foi junto (ou saiu do cálculo); o que ficou em casa não aparece
+      if (w[dev] === "casa") continue;
       const c = document.createElement("span");
       c.className = "chip" + (w[dev] === "fora" ? " dead" : w[dev] !== WH_NORMAL[dev] || (dev === "radiacode" && whOut(w)) ? " off" : "");
       c.innerHTML = `<span class="dot ${dev === "gmc" ? "gmc" : "rc"}"></span>`;

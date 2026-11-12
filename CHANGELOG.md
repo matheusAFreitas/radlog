@@ -1,5 +1,14 @@
 # Versões
 
+## 2.66.1
+- Fora de casa: cada trecho mostra só os aparelhos que foram junto (o que
+  ficou em casa não aparece nos chips nem nos números).
+- Fora de casa: os números do GMC-800 agora estão em µSv/h, com a
+  calibração de cada minuto, como no relatório.
+- Fora de casa: aparelho marcado como "comigo" com menos de 10% do trecho
+  medido mostra "quase sem leitura nesse trecho" e o botão "Não estava
+  comigo", que tira o aparelho do cálculo naquele trecho.
+
 ## 2.66.0
 - Fora de casa: com um "Saí de casa" aberto e o RC102 junto, quando o RC102
   volta a conectar no PC depois do tempo mínimo sem conexão (15 min por
