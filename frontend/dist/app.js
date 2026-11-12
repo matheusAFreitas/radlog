@@ -4341,7 +4341,9 @@ function makeDemoApi() {
     };
     return { gmc: one("gmc"), radiacode: one("radiacode") };
   };
-  let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 }];
+  const d1 = new Date(now - 864e5).setHours(0, 0, 0, 0);
+  let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
+    { id: 2, name: "Centro e metrô", from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
   // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
