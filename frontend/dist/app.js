@@ -4346,13 +4346,12 @@ function demoPeakDetail(sp, peaks) {
     return { ...p, center: cw > 0 ? ce / cw : 0, cont: Math.max(b, 1), half: h, side: 0 };
   });
 }
-// versões que o modo demonstração mostra no "Atualizações e sobre"; ao refazer
-// os prints do README, acerte para a versão atual e a seguinte (U4)
-const DEMO_VER_OLD = "2.70.0", DEMO_VER = "2.71.0";
 function makeDemoApi() {
   let demoSync = { id: "a", name: "ACENULL", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "parrot", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
-  let demoUpd = { current: DEMO_VER_OLD, latest: DEMO_VER, available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
+  // versões que o modo demonstração mostra em "Atualizações e sobre"; ao refazer
+  // os prints do README, acerte para a versão atual e a seguinte (U4)
+  let demoUpd = { current: "2.70.0", latest: "2.71.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
     notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
@@ -5168,7 +5167,7 @@ const demoRc = () => {
     SetPeerAddrs: async () => demoSync,
     ForgetPeer: async () => demoSync,
     GetUpdateInfo: async () => demoUpd,
-    CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: DEMO_VER, available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
+    CheckUpdate: async () => { demoUpd = { ...demoUpd, available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },
     CancelUpdate: async () => { demoUpd = { ...demoUpd, state: "cancelado" }; emit("update", demoUpd); },
     StartUpdate: async () => {
