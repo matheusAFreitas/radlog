@@ -4490,6 +4490,15 @@ const I18N_EN = {
 ]
 ],
 [
+"configurações: não consegui ler o config.json (",
+"^configurações: não consegui ler o config\\.json \\(((?:(?! · ).)+?)\\); voltei ao padrão e guardei o arquivo em ((?:(?! · ).)+?)$",
+"settings: couldn't read config.json (${1}); went back to the defaults and kept the file at ${2}",
+[
+"configurações: não consegui ler o config.json (",
+"); voltei ao padrão e guardei o arquivo em "
+]
+],
+[
 "automático: parou quando deu para garantir que o objeto sobe menos que ",
 "^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
 "automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
@@ -6487,6 +6496,14 @@ const I18N_EN = {
 [
 "RadiaCode voltou a conectar às ",
 ": voltou para casa?"
+]
+],
+[
+"configurações: não consegui gravar o config.json: ",
+"^configurações: não consegui gravar o config\\.json: ((?:(?! · ).)+?)$",
+"settings: couldn't save config.json: ${1}",
+[
+"configurações: não consegui gravar o config.json: "
 ]
 ],
 [

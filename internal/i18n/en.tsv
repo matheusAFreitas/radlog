@@ -4683,3 +4683,5 @@ ponteiros de relógio, radioterapia antiga	watch hands, early radiotherapy
 Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração	Couldn't read the settings (damaged file): they went back to the defaults. Check the alarms and the calibration
 o arquivo da release ({0}) não é o da versão {1}; baixe pela página e confira	the release file ({0}) isn't the one for version {1}; download it from the page and check it
 o arquivo da release ({0}) não é o da versão {1}; não vou instalar	the release file ({0}) isn't the one for version {1}; I won't install it
+configurações: não consegui ler o config.json ({0}); voltei ao padrão e guardei o arquivo em {1}	settings: couldn't read config.json ({0}); went back to the defaults and kept the file at {1}
+configurações: não consegui gravar o config.json: {0}	settings: couldn't save config.json: {0}

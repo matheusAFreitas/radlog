@@ -220,7 +220,7 @@ func (a *App) CheckUpdate() (UpdateInfo, error) {
 	// velha. O nome do arquivo, que está assinado, tem de trazer a versão
 	// anunciada.
 	if manual == "" && !assetIsVersion(asset.Name, latest) {
-		manual = "o arquivo da release (" + asset.Name + ") não é o da versão " + latest + "; baixe pela página e confira"
+		manual = fmt.Sprintf("o arquivo da release (%s) não é o da versão %s; baixe pela página e confira", asset.Name, latest)
 	}
 	avail := newerVersion(latest, AppVersion)
 	a.setUpdate(func(i *UpdateInfo) {

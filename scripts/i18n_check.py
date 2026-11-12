@@ -22,7 +22,8 @@ for l in open(TSV, encoding="utf-8"):
 
 out = subprocess.run([sys.executable, os.path.join(ROOT, "scripts/i18n_extract.py")],
                      capture_output=True, text=True, encoding="utf-8", check=True).stdout
-miss = sorted({l.split("\t", 1)[1] for l in out.splitlines() if "\t" in l} - keys)
+# "#…" é comentário de arquivo gravado (ex.: o .ilegiveis do store), não tela
+miss = sorted({l.split("\t", 1)[1] for l in out.splitlines() if "\t" in l and not l.split("\t", 1)[1].startswith("#")} - keys)
 
 if "--atualizar" in sys.argv:
     with open(PEND, "w", encoding="utf-8") as f:
