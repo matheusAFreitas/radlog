@@ -195,7 +195,6 @@ alarme de bateria vazia
 alarme sirene volume barulho
 alterado em {0} de {1} para {2}{3}
 anotação:
-anotações
 antes-de-restaurar
 aqui o fundo sobe junto com a pressão, ao contrário do comum.
 as-bad
@@ -299,7 +298,6 @@ marcada como não comparável com outras medições do mesmo objeto:
 mat aguardando
 mediana · média {0} · {1} min
 medição de objeto
-medições
 menos que em casa{0}
 mensagem de texto
 migrado-de-gmc-monitor.json
