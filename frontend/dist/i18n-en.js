@@ -3314,7 +3314,66 @@ const I18N_EN = {
 "Bateria e temperatura vêm do histórico do próprio RC102, que chega quando ele conecta no PC.": "Battery and temperature come from the RC102's own history, which arrives when it connects to the PC.",
 "Bateria e temperatura vêm do histórico do próprio RadiaCode, que chega quando ele conecta no PC.": "Battery and temperature come from the RC102's own history, which arrives when it connects to the PC.",
 "Dose, gráfico, espectro e como o RC102 estava": "Dose, chart, spectrum and how the RC102 was doing",
-"Dose, gráfico, espectro e como o RadiaCode estava": "Dose, chart, spectrum and how the RC102 was doing"
+"Dose, gráfico, espectro e como o RadiaCode estava": "Dose, chart, spectrum and how the RC102 was doing",
+"Sem os minutos de dose do RC102 nessa saída: o histórico dele chega quando ele conecta no PC.": "No RC102 dose minutes for this trip: its history arrives when it connects to the PC.",
+"Sem os minutos de dose do RadiaCode nessa saída: o histórico dele chega quando ele conecta no PC.": "No RC102 dose minutes for this trip: its history arrives when it connects to the PC.",
+"Completo": "Full",
+"Só o resumo": "Summary only",
+"Gerar PDF": "Create PDF",
+"Anexo técnico": "Technical appendix",
+"ALERTAS": "ALERTS",
+"Saída": "Trip",
+"ANOTAÇÕES": "NOTES",
+"CHUVA": "RAIN",
+"Resumo, por dia, alertas, espectro do RC102 e o anexo técnico.": "Summary, by day, alerts, RC102 spectrum and the technical appendix.",
+"Resumo, por dia, alertas, espectro do RadiaCode e o anexo técnico.": "Summary, by day, alerts, RC102 spectrum and the technical appendix.",
+"A página 1. Para mostrar para alguém.": "Page 1. To show someone.",
+"Incluir as anotações": "Include notes",
+"Incluir o anexo de configurações vigentes": "Include the appendix of settings in effect",
+"O app lembra a última escolha. Papel branco, para imprimir; nunca entra localização.": "The app remembers your last choice. White paper, for printing; location never goes in.",
+"O que entra no PDF": "What goes in the PDF",
+"fundo de casa do RC102 ainda não calculado": "RC102 home background not calculated yet",
+"fundo de casa do RadiaCode ainda não calculado": "RC102 home background not calculated yet",
+"µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA) E RC102 (VOCÊ)": "µSv/h OVER THE PERIOD: GMC-800 (HOME) AND RC102 (YOU)",
+"µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA) E RadiaCode (VOCÊ)": "µSv/h OVER THE PERIOD: GMC-800 (HOME) AND RC102 (YOU)",
+"EM RESUMO": "IN SHORT",
+"Os alertas estão listados na página 2 e detalhados no anexo (A4).": "The alerts are listed on page 2 and detailed in the appendix (A4).",
+"Casa µSv/h": "Home µSv/h",
+"Sua dose µSv": "Your dose µSv",
+"O outro aparelho": "The other device",
+"confirmado": "confirmed",
+"não confirmado": "not confirmed",
+"SAÍDAS DE CASA (COM O RC102)": "TRIPS AWAY FROM HOME (WITH THE RC102)",
+"SAÍDAS DE CASA (COM O RadiaCode)": "TRIPS AWAY FROM HOME (WITH THE RC102)",
+"ESPECTRO DO RC102 NO PERÍODO × EM CASA (MESMO TEMPO)": "RC102 SPECTRUM IN THE PERIOD × AT HOME (SAME TIME)",
+"ESPECTRO DO RadiaCode NO PERÍODO × EM CASA (MESMO TEMPO)": "RC102 SPECTRUM IN THE PERIOD × AT HOME (SAME TIME)",
+"ESPECTRO DE CADA SAÍDA DE CASA": "SPECTRUM OF EACH TRIP AWAY FROM HOME",
+"sem espectro desta saída": "no spectrum for this trip",
+"Espectro somado das leituras que o app guarda a cada minuto (e, com o RC102 longe do PC, da leitura que cobre o tempo todo fora). Em casa: no período, o tempo fora das saídas; numa saída, as 24 h antes dela. As curvas estão por segundo, para comparar tempos diferentes. Linhas de isótopo são uma pista, não uma identificação garantida.": "Spectrum summed from the readings the app saves every minute (and, with the RC102 away from the PC, from the reading that covers the whole time away). At home: in the period, the time outside trips; for a trip, the 24 h before it. Curves are per second, to compare different times. Isotope lines are a hint, not a guaranteed identification.",
+"Espectro somado das leituras que o app guarda a cada minuto (e, com o RadiaCode longe do PC, da leitura que cobre o tempo todo fora). Em casa: no período, o tempo fora das saídas; numa saída, as 24 h antes dela. As curvas estão por segundo, para comparar tempos diferentes. Linhas de isótopo são uma pista, não uma identificação garantida.": "Spectrum summed from the readings the app saves every minute (and, with the RC102 away from the PC, from the reading that covers the whole time away). At home: in the period, the time outside trips; for a trip, the 24 h before it. Curves are per second, to compare different times. Isotope lines are a hint, not a guaranteed identification.",
+"Nenhuma linha gama conhecida se destacou no período.": "No known gamma line stood out in the period.",
+"Nenhuma linha passou de 3σ acima de casa.": "No line went 3σ above home.",
+"A1 · Estatística da contagem (CPM), por dia na contagem e o RC102 em detalhe": "A1 · Count statistics (CPM), by day in counts and the RC102 in detail",
+"A1 · Estatística da contagem (CPM), por dia na contagem e o RadiaCode em detalhe": "A1 · Count statistics (CPM), by day in counts and the RC102 in detail",
+"A2 · Fundo da casa: agora × 7 dias × 30 dias": "A2 · Home background: now × 7 days × 30 days",
+"A3 · Tempo acima dos limites operacionais": "A3 · Time above the operating limits",
+"A4 · Episódios de alerta (30 min antes e depois)": "A4 · Alert episodes (30 min before and after)",
+"A5 · Lacunas (sem leitura)": "A5 · Gaps (no reading)",
+"A6 · Histórico disponível (maturidade)": "A6 · History available (maturity)",
+"A7 · Configurações e método": "A7 · Settings and method",
+"A8 · Limitações": "A8 · Limitations",
+"A1 · ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)": "A1 · PER-MINUTE COUNT STATISTICS (CPM, WHAT THE COUNTER MEASURES)",
+"A1 · POR DIA, NA CONTAGEM DO GMC-800": "A1 · BY DAY, IN GMC-800 COUNTS",
+"A1 · RADIACODE 102 EM DETALHE": "A1 · RADIACODE 102 IN DETAIL",
+"A2 · FUNDO DA CASA: AGORA × 7 DIAS × 30 DIAS": "A2 · HOME BACKGROUND: NOW × 7 DAYS × 30 DAYS",
+"A3 · TEMPO ACIMA DOS LIMITES OPERACIONAIS": "A3 · TIME ABOVE THE OPERATING LIMITS",
+"A4 · EPISÓDIOS DE ALERTA DO GMC-800": "A4 · GMC-800 ALERT EPISODES",
+"A4 · EPISÓDIOS: 30 MIN ANTES E DEPOIS": "A4 · EPISODES: 30 MIN BEFORE AND AFTER",
+"A5 · LACUNAS (SEM LEITURA)": "A5 · GAPS (NO READING)",
+"A6 · HISTÓRICO DISPONÍVEL (MATURIDADE)": "A6 · HISTORY AVAILABLE (MATURITY)",
+"A7 · CONFIGURAÇÕES VIGENTES NO PERÍODO": "A7 · SETTINGS IN EFFECT IN THE PERIOD",
+"A7 · CONFIGURAÇÕES E MÉTODO": "A7 · SETTINGS AND METHOD",
+"A8 · LIMITAÇÕES": "A8 · LIMITATIONS"
 },
 "patterns": [
 [
@@ -4177,6 +4236,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Sua dose no período foi ",
+"^Sua dose no período foi ((?:(?! · ).)+?) µSv, bem acima do que você teria recebido ficando em casa \\(((?:(?! · ).)+?) µSv\\)\\.$",
+"Your dose in the period was ${1} µSv, well above what you would have received staying home (${2} µSv).",
+[
+"Sua dose no período foi ",
+" µSv, bem acima do que você teria recebido ficando em casa (",
+" µSv)."
+]
+],
+[
 "automático: parou quando deu para garantir que o objeto sobe menos que ",
 "^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
 "automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
@@ -4308,6 +4377,26 @@ const I18N_EN = {
 ". O RadiaCode voltou a conectar no PC às ",
 ", depois de ",
 " sem conexão."
+]
+],
+[
+"Sua dose no período foi ",
+"^Sua dose no período foi ((?:(?! · ).)+?) µSv, perto do que você teria recebido ficando em casa \\(((?:(?! · ).)+?) µSv\\)\\.$",
+"Your dose in the period was ${1} µSv, close to what you would have received staying home (${2} µSv).",
+[
+"Sua dose no período foi ",
+" µSv, perto do que você teria recebido ficando em casa (",
+" µSv)."
+]
+],
+[
+"Sua dose no período foi ",
+"^Sua dose no período foi ((?:(?! · ).)+?) µSv, acima do que você teria recebido ficando em casa \\(((?:(?! · ).)+?) µSv\\)\\.$",
+"Your dose in the period was ${1} µSv, above what you would have received staying home (${2} µSv).",
+[
+"Sua dose no período foi ",
+" µSv, acima do que você teria recebido ficando em casa (",
+" µSv)."
 ]
 ],
 [
@@ -6338,6 +6427,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O fundo da casa (GMC-800) ficou em ",
+"^O fundo da casa \\(GMC\\-800\\) ficou em ((?:(?! · ).)+?) µSv/h: ((?:(?! · ).)+?)\\.$",
+"The home background (GMC-800) was ${1} µSv/h: ${2}.",
+[
+"O fundo da casa (GMC-800) ficou em ",
+" µSv/h: "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -6426,6 +6524,15 @@ const I18N_EN = {
 [
 "RC102 voltou a conectar às ",
 ": voltou para casa?"
+]
+],
+[
+"Saídas de casa com o RadiaCode: ",
+"^Saídas de casa com o RadiaCode: ((?:(?! · ).)+?) \\(página 2\\)\\.$",
+"Trips away from home with the RC102: ${1} (page 2).",
+[
+"Saídas de casa com o RadiaCode: ",
+" (página 2)."
 ]
 ],
 [
@@ -6756,6 +6863,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) no período \\(radar/modelo meteorológico\\)\\.$",
+"${1} in the period (radar/weather model).",
+[
+" no período (radar/modelo meteorológico)."
+]
+],
+[
 "Medição de ",
 "^Medição de ((?:(?! · ).)+?): ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) CPM sobre o fundo \\(((?:(?! · ).)+?)σ\\) — ((?:(?! · ).)+?)$",
 "Measurement of ${1}: ${2} ± ${3} CPM above background (${4}σ) — ${5}",
@@ -6874,6 +6989,15 @@ const I18N_EN = {
 "O fundo de casa subiu devagar: ",
 " em ",
 " semanas"
+]
+],
+[
+"Saídas de casa com o RC102: ",
+"^Saídas de casa com o RC102: ((?:(?! · ).)+?) \\(página 2\\)\\.$",
+"Trips away from home with the RC102: ${1} (page 2).",
+[
+"Saídas de casa com o RC102: ",
+" (página 2)."
 ]
 ],
 [
@@ -7726,6 +7850,14 @@ const I18N_EN = {
 "Nova referência desde ",
 ": faltam ",
 " dias"
+]
+],
+[
+"Mais que em casa (acima de 3σ): ",
+"^Mais que em casa \\(acima de 3σ\\): ((?:(?! · ).)+?)\\.$",
+"More than at home (above 3σ): ${1}.",
+[
+"Mais que em casa (acima de 3σ): "
 ]
 ],
 [
@@ -8621,6 +8753,14 @@ const I18N_EN = {
 ]
 ],
 [
+"≈ ",
+"^≈ ((?:(?! · ).)+?) mSv/ano no ritmo do período$",
+"≈ ${1} mSv/year at the period's rate",
+[
+" mSv/ano no ritmo do período"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -9022,6 +9162,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode (média de cada ",
+"^RadiaCode \\(média de cada ((?:(?! · ).)+?)\\)$",
+"RC102 (average of each ${1})",
+[
+"RadiaCode (média de cada "
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -9227,6 +9375,16 @@ const I18N_EN = {
 "Dose ",
 " µSv · pico ",
 " µSv/h às "
+]
+],
+[
+"ficando em casa: ",
+"^ficando em casa: ((?:(?! · ).)+?) µSv \\(((?:(?! · ).)+?)%\\)$",
+"staying home: ${1} µSv (${2}%)",
+[
+"ficando em casa: ",
+" µSv (",
+"%)"
 ]
 ],
 [
@@ -9707,6 +9865,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Linhas que apareceram: ",
+"^Linhas que apareceram: ((?:(?! · ).)+?)\\.$",
+"Lines that showed up: ${1}.",
+[
+"Linhas que apareceram: "
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -9901,6 +10067,23 @@ const I18N_EN = {
 "${1} alerts + 1 confirmed",
 [
 " alertas + 1 confirmado"
+]
+],
+[
+"GMC-800: ",
+"^GMC\\-800: ((?:(?! · ).)+?) · RadiaCode: ((?:(?! · ).)+?)$",
+"GMC-800: ${1} · RC102: ${2}",
+[
+"GMC-800: ",
+" · RadiaCode: "
+]
+],
+[
+"RC102 (média de cada ",
+"^RC102 \\(média de cada ((?:(?! · ).)+?)\\)$",
+"RC102 (average of each ${1})",
+[
+"RC102 (média de cada "
 ]
 ],
 [
@@ -10688,6 +10871,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Acima do normal para ",
+"^Acima do normal para ((?:(?! · ).)+?)$",
+"Above normal for ${1}",
+[
+"Acima do normal para "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -10934,6 +11125,15 @@ const I18N_EN = {
 "em casa ",
 " · fora ",
 " µSv"
+]
+],
+[
+"GMC-800: ",
+"^GMC\\-800: ((?:(?! · ).)+?) · RC102: ((?:(?! · ).)+?)$",
+"GMC-800: ${1} · RC102: ${2}",
+[
+"GMC-800: ",
+" · RC102: "
 ]
 ],
 [
@@ -11578,6 +11778,15 @@ const I18N_EN = {
 ]
 ],
 [
+"no ritmo: ",
+"^no ritmo: ((?:(?! · ).)+?) mSv/ano$",
+"at this rate: ${1} mSv/year",
+[
+"no ritmo: ",
+" mSv/ano"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -11859,6 +12068,14 @@ const I18N_EN = {
 "checking with ${1}",
 [
 "conferindo com o "
+]
+],
+[
+"Iguais a casa: ",
+"^Iguais a casa: ((?:(?! · ).)+?)\\.$",
+"Same as home: ${1}.",
+[
+"Iguais a casa: "
 ]
 ],
 [
@@ -12476,6 +12693,14 @@ const I18N_EN = {
 ]
 ],
 [
+"no período (",
+"^no período \\(((?:(?! · ).)+?)\\)$",
+"in the period (${1})",
+[
+"no período ("
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -12977,6 +13202,14 @@ const I18N_EN = {
 ]
 ],
 [
+"na saída (",
+"^na saída \\(((?:(?! · ).)+?)\\)$",
+"on the trip (${1})",
+[
+"na saída ("
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -13341,6 +13574,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Normal para ",
+"^Normal para ((?:(?! · ).)+?)$",
+"Normal for ${1}",
+[
+"Normal para "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -13593,6 +13834,15 @@ const I18N_EN = {
 "${1}× home (${2})",
 [
 "× casa ("
+]
+],
+[
+"página ",
+"^página ((?:(?! · ).)+?) de ((?:(?! · ).)+?)$",
+"page ${1} of ${2}",
+[
+"página ",
+" de "
 ]
 ],
 [
@@ -13918,6 +14168,14 @@ const I18N_EN = {
 "I'm back at ${1}",
 [
 "Voltei às "
+]
+],
+[
+"Alto para ",
+"^Alto para ((?:(?! · ).)+?)$",
+"High for ${1}",
+[
+"Alto para "
 ]
 ],
 [

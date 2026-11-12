@@ -1,5 +1,26 @@
 # Versões
 
+## 2.68.0
+- Relatório PDF novo (spec aprovada pelo ACE). Ao clicar em "Relatório
+  (PDF)" o app pergunta: "Completo" ou "Só o resumo", incluir as anotações e
+  incluir o anexo das configurações vigentes. Lembra a última escolha.
+- Página 1, o resumo: a frase do período, 4 números (sua dose com o
+  veredito Normal / Acima do normal / Alto comparado a ficar em casa e o
+  ritmo em mSv/ano, fundo da casa, pico e alertas), um gráfico com o
+  GMC-800 e o RC102 e as saídas de casa em lilás, a fita dos dias e "Em
+  resumo".
+- Página 2: por dia (casa, sua dose, pico e alertas), os alertas dos dois
+  aparelhos com a confirmação do outro, as saídas de casa, as medições de
+  objeto, a chuva e as anotações.
+- Página 3: o espectro do RC102 no período contra o de casa e um de cada
+  saída.
+- Anexo técnico com sumário (A1 a A8): tudo o que o relatório tinha antes.
+  O rodapé diz "página N de M".
+- Resumo da saída: sem os minutos de dose do RC102, o painel avisa isso sem
+  contradizer o espectro e o estado do aparelho.
+- Resumo: o fim do dia aparece como 00:00 do dia seguinte (em inglês saía
+  metade traduzida).
+
 ## 2.67.0
 - Resumo da saída: quando uma saída com o RC102 fecha ("Voltei" ou "Voltar
   ao normal"), aparece o aviso "Saída fechada" com "Ver o resumo da saída".
