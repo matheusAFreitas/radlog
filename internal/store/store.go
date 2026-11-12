@@ -208,7 +208,7 @@ func (s *Store) ImportNew(pts []Point) ([]Point, error) {
 	var added []Point
 	for _, list := range byMonth {
 		path := s.monthFile(list[0].T)
-		existing, err := readFile(path)
+		existing, bad, err := readFileBad(path)
 		if err != nil {
 			return added, err
 		}
@@ -228,6 +228,11 @@ func (s *Store) ImportNew(pts []Point) ([]Point, error) {
 			continue
 		}
 		sort.Slice(merged, func(i, j int) bool { return merged[i].T.Before(merged[j].T) })
+		// o arquivo vai ser regravado só com o que foi lido: as linhas
+		// ilegíveis vão antes para um arquivo ao lado
+		if err := keepBad(path, bad); err != nil {
+			return added, err
+		}
 		if err := writeFile(path, merged); err != nil {
 			return added, err
 		}
@@ -280,59 +285,140 @@ func writeFile(path string, pts []Point) error {
 }
 
 func readFile(path string) ([]Point, error) {
+	pts, _, err := readFileBad(path)
+	return pts, err
+}
+
+// readFileBad é o readFile que devolve também as linhas que não deu para ler.
+func readFileBad(path string) ([]Point, []string, error) {
 	f, err := os.Open(path)
 	if errors.Is(err, fs.ErrNotExist) {
-		return nil, nil
+		return nil, nil, nil
 	}
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 	defer f.Close()
-	return ParseCSV(f), nil
+	pts, bad := parseCSV(f)
+	return pts, bad, nil
 }
 
 // ParseCSV lê pontos no formato dos arquivos de leituras (para importar um
-// backup). Linhas quebradas são ignoradas.
+// backup). Linhas quebradas são ignoradas, uma a uma.
 func ParseCSV(rd io.Reader) []Point {
-	r := csv.NewReader(rd)
-	r.FieldsPerRecord = -1
-	var out []Point
+	pts, _ := parseCSV(rd)
+	return pts
+}
+
+// maxLine é o maior tamanho de linha aceito; o resto de uma linha maior
+// (lixo de uma gravação cortada) conta como linha ilegível.
+const maxLine = 64 << 10
+
+// parseCSV lê linha por linha e devolve os pontos e as linhas ilegíveis.
+//
+// Até a 2.70.0 o arquivo inteiro passava por um leitor de CSV só, que parava
+// na primeira linha com erro (uma aspa solta, de uma gravação cortada por
+// queda de energia): o resto do mês sumia da tela e, na importação seguinte,
+// o arquivo era regravado sem ele. Agora cada linha é lida sozinha e uma
+// linha ruim só perde a si mesma.
+func parseCSV(rd io.Reader) (out []Point, bad []string) {
+	br := bufio.NewReaderSize(rd, 64<<10)
 	for {
-		rec, err := r.Read()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return out // linha quebrada no fim (queda de energia): ignora o resto
-		}
-		if len(rec) < 2 || strings.HasPrefix(rec[0], "data") {
-			continue
-		}
-		t, err1 := time.Parse(time.RFC3339, rec[0])
-		v, err2 := strconv.ParseFloat(rec[1], 64)
-		if err1 != nil || err2 != nil {
-			continue
-		}
-		src := SrcLive
-		if len(rec) > 2 {
-			src = rec[2]
-		}
-		p := Point{T: t.Local(), CPM: v, Src: src}
-		if len(rec) >= 7 && rec[3] != "" {
-			raw, e1 := strconv.ParseFloat(rec[3], 64)
-			corr, e2 := strconv.ParseFloat(rec[4], 64)
-			if e1 == nil && e2 == nil {
-				p.Has, p.Raw, p.Corr = true, raw, corr
-				p.DTOn = rec[6] == "ligado"
-				p.TauUs, _ = strconv.ParseFloat(rec[5], 64)
-				if len(rec) > 7 {
-					p.Obs = rec[7]
-				}
+		line, err := readLine(br)
+		if t := strings.TrimSpace(strings.Trim(line, "\x00")); t != "" {
+			if p, ok, skip := parseLine(t); ok {
+				out = append(out, p)
+			} else if !skip {
+				bad = append(bad, t)
 			}
 		}
-		out = append(out, p)
+		if err != nil {
+			return out, bad
+		}
 	}
-	return out
+}
+
+// readLine lê uma linha de qualquer tamanho, guardando no máximo maxLine.
+func readLine(br *bufio.Reader) (string, error) {
+	var sb strings.Builder
+	for {
+		chunk, more, err := br.ReadLine()
+		if sb.Len() < maxLine {
+			sb.Write(chunk)
+		}
+		if err != nil || !more {
+			return sb.String(), err
+		}
+	}
+}
+
+// splitLine separa os campos de uma linha. Os arquivos do app nunca têm
+// aspas nem vírgula dentro de um campo; uma linha com aspas (editada no
+// Excel, por exemplo) passa pelo leitor de CSV.
+func splitLine(line string) ([]string, bool) {
+	if !strings.Contains(line, `"`) {
+		return strings.Split(line, ","), true
+	}
+	r := csv.NewReader(strings.NewReader(line))
+	r.FieldsPerRecord = -1
+	rec, err := r.Read()
+	return rec, err == nil
+}
+
+// parseLine lê uma linha. skip = cabeçalho (não é ponto nem linha ruim).
+func parseLine(line string) (p Point, ok, skip bool) {
+	rec, good := splitLine(line)
+	if !good || len(rec) < 2 {
+		return p, false, false
+	}
+	if strings.HasPrefix(rec[0], "data") {
+		return p, false, true
+	}
+	t, err1 := time.Parse(time.RFC3339, rec[0])
+	v, err2 := strconv.ParseFloat(rec[1], 64)
+	if err1 != nil || err2 != nil {
+		return p, false, false
+	}
+	src := SrcLive
+	if len(rec) > 2 {
+		src = rec[2]
+	}
+	p = Point{T: t.Local(), CPM: v, Src: src}
+	if len(rec) >= 7 && rec[3] != "" {
+		raw, e1 := strconv.ParseFloat(rec[3], 64)
+		corr, e2 := strconv.ParseFloat(rec[4], 64)
+		if e1 == nil && e2 == nil {
+			p.Has, p.Raw, p.Corr = true, raw, corr
+			p.DTOn = rec[6] == "ligado"
+			p.TauUs, _ = strconv.ParseFloat(rec[5], 64)
+			if len(rec) > 7 {
+				p.Obs = rec[7]
+			}
+		}
+	}
+	return p, true, false
+}
+
+// keepBad guarda as linhas ilegíveis de um mês em <mês>.csv.ilegivel antes
+// de o arquivo ser regravado, para nada ser jogado fora.
+func keepBad(path string, bad []string) error {
+	if len(bad) == 0 {
+		return nil
+	}
+	f, err := os.OpenFile(path+".ilegivel", os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		return err
+	}
+	w := bufio.NewWriter(f)
+	fmt.Fprintf(w, "# linhas que o RadLog não conseguiu ler, tiradas em %s\n", time.Now().Format(time.RFC3339))
+	for _, l := range bad {
+		fmt.Fprintln(w, l)
+	}
+	if err := w.Flush(); err != nil {
+		f.Close()
+		return err
+	}
+	return f.Close()
 }
 
 // load lê dos arquivos os pontos em [from, to).

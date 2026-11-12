@@ -138,6 +138,18 @@ func pickAsset(assets []ghAsset) (ghAsset, string) {
 	return ghAsset{}, "sem atualização automática neste sistema"
 }
 
+// assetIsVersion diz se name é o arquivo de release da versão ver
+// (RadLog-vX.Y.Z.exe ou RadLog-vX.Y.Z-x86_64.AppImage).
+func assetIsVersion(name, ver string) bool {
+	m := releaseName.FindStringSubmatch(name)
+	if m == nil || m[3] != "" {
+		return false
+	}
+	a, ok1 := parseVersion(m[1])
+	b, ok2 := parseVersion(ver)
+	return ok1 && ok2 && a == b
+}
+
 // releaseNotes tira o rodapé de downloads das notas.
 func releaseNotes(body string) string {
 	if i := strings.Index(body, "\n---"); i >= 0 {
@@ -201,6 +213,15 @@ func (a *App) CheckUpdate() (UpdateInfo, error) {
 		manual = "a release não tem a assinatura (" + updateSig + "); baixe pela página e confira"
 	}
 	latest := strings.TrimPrefix(rel.Tag, "v")
+	// A assinatura cobre o SHA256SUMS.txt (nome e soma de cada arquivo), mas
+	// não a etiqueta da release. Sem esta conferência, quem conseguisse
+	// publicar uma release poderia pôr um .exe antigo, com a soma e a
+	// assinatura antigas, sob uma etiqueta nova, e o app instalaria a versão
+	// velha. O nome do arquivo, que está assinado, tem de trazer a versão
+	// anunciada.
+	if manual == "" && !assetIsVersion(asset.Name, latest) {
+		manual = "o arquivo da release (" + asset.Name + ") não é o da versão " + latest + "; baixe pela página e confira"
+	}
 	avail := newerVersion(latest, AppVersion)
 	a.setUpdate(func(i *UpdateInfo) {
 		i.Latest, i.Available, i.Notes, i.URL = latest, avail, releaseNotes(rel.Body), rel.HTMLURL
@@ -328,6 +349,10 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 		a.upd.mu.Unlock()
 	}
 	a.setUpdate(func(i *UpdateInfo) { i.State, i.Progress, i.Error, i.Wait = "baixando", 0, "", "" })
+	if !assetIsVersion(asset.Name, version) {
+		fail(fmt.Errorf("o arquivo da release (%s) não é o da versão %s; não vou instalar", asset.Name, version))
+		return
+	}
 	want, err := expectedSum(sums.URL, sig.URL, asset.Name)
 	if err != nil {
 		fail(err)

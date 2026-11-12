@@ -103,7 +103,7 @@ jobs:
           echo "$V" > "$P/VERSION"
           (cd "$P" && sh build-appimage.sh)
           mv "$P/RadLog-v$V-x86_64.AppImage" out/
-          rm -rf "$P/RadLog.AppDir" "$P/appimagetool"
+          rm -rf "$P/RadLog.AppDir" "$P/appimagetool" "$P/appimage-runtime"
           tar -C out -czf "out/radlog-v$V-linux-x86_64.tar.gz" "radlog-v$V-linux-x86_64"
       - name: SHA-256 dos arquivos (o atualizador do app confere)
         run: |
