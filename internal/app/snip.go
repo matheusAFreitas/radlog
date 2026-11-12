@@ -55,7 +55,8 @@ func snipBase(y []float64, width func(i int) int) []float64 {
 // subtrair (o acumulado do aparelho), medindo cada pico acima do contínuo do
 // SNIP. Com dezenas de milhões de contagens qualquer ondinha passa de 3σ,
 // então pede 5σ e que o pico tenha pelo menos 1,5% do contínuo embaixo dele.
-func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
+// snipContinuum é o contínuo do SNIP embaixo do espectro inteiro.
+func (s *MeasureSpectrum) snipContinuum() []float64 {
 	n := len(s.Obj)
 	y := make([]float64, n)
 	for i, c := range s.Obj {
@@ -88,7 +89,16 @@ func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
 		}
 		sm[i] = a / float64(c)
 	}
-	base := snipBase(sm, width)
+	return snipBase(sm, width)
+}
+
+func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
+	n := len(s.Obj)
+	y := make([]float64, n)
+	for i, c := range s.Obj {
+		y[i] = float64(c)
+	}
+	base := s.snipContinuum()
 	emax := s.energy(n - 1)
 	var out []SpecPeak
 	for _, l := range specLines {
@@ -153,7 +163,7 @@ func (s *MeasureSpectrum) findPeaksSnip() []SpecPeak {
 			}
 		}
 		if sg := peak / math.Sqrt(vr); sg >= 5 {
-			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
+			out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg, Center: ce / peak, Cont: b, Half: h})
 		}
 	}
 	return dropBackscatter(out)

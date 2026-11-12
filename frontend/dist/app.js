@@ -4306,6 +4306,37 @@ init();
 // ---------- modo demonstração (só no navegador, sem o Go) ----------
 
 var demoBus;
+// ---------- espectro no modo demonstração (2.69) ----------
+// cópia em JS do contínuo do SNIP (snip.go) e dos números que o Go devolve
+// por pico (centro do que sobra, contínuo embaixo, meia janela)
+const demoEn = (a, i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) ** 2;
+const demoFW = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
+function demoSnip(sp) {
+  const y = sp.obj, n = y.length, a = sp.a;
+  const wd = (i) => { const e = demoEn(a, i), de = demoEn(a, i + 1) - e; return de <= 0 ? 1 : Math.max(1, Math.round(demoFW(e) / de)); };
+  const sm = y.map((_, i) => { const k = wd(i); let s = 0, c = 0; for (let j = i - k; j <= i + k; j++) if (j >= 0 && j < n) { s += y[j]; c++; } return s / c; });
+  let v = sm.map((x) => Math.log(Math.max(x, 0) + 1)), maxW = 0;
+  for (let i = 0; i < n; i++) maxW = Math.max(maxW, wd(i));
+  for (let p = maxW; p >= 1; p--) {
+    const t = v.slice();
+    for (let i = p; i < n - p; i++) { if (p > wd(i)) continue; const m = (v[i - p] + v[i + p]) / 2; if (m < t[i]) t[i] = m; }
+    v = t;
+  }
+  return v.map((x) => Math.max(0, Math.exp(x) - 1));
+}
+function demoPeakDetail(sp, peaks) {
+  const acc = sp.bgSec === 1, base = acc ? demoSnip(sp) : null, k = acc ? 0 : sp.objSec / sp.bgSec;
+  return peaks.map((p) => {
+    const h = 0.6 * demoFW(p.kev);
+    let ce = 0, cw = 0, b = 0;
+    for (let i = 0; i < sp.obj.length; i++) {
+      const e = demoEn(sp.a, i); if (e < p.kev - h || e >= p.kev + h) continue;
+      const bi = acc ? base[i] : sp.bg[i] * k, v = sp.obj[i] - bi;
+      b += bi; if (v > 0) { ce += v * e; cw += v; }
+    }
+    return { ...p, center: cw > 0 ? ce / cw : 0, cont: Math.max(b, 1), half: h, side: 0 };
+  });
+}
 function makeDemoApi() {
   let demoSync = { id: "a", name: "ACENULL", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "parrot", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
@@ -4851,7 +4882,7 @@ const demoRc = () => {
       const rate = (i, th) => {
         const e = En(i); if (e < 20) return 0;
         const pk = (pe, r) => { const sg = 65 * Math.sqrt(pe / 661.7) / 2.355; return r * 2.35 / (sg * 2.5066) * Math.exp(-(((e - pe) / sg) ** 2) / 2); };
-        let v = 0.035 * Math.exp(-e / 350) + pk(1460.8, 0.08) + pk(609.3, 0.06) + pk(351.9, 0.06);
+        let v = 0.035 * Math.exp(-e / 350) + pk(1460.8, 0.08) + pk(609.3, 0.06) + pk(351.9, 0.06) + pk(295.2, 0.03) + pk(238.6, 0.04) + pk(2614.5, 0.01) + pk(1764.5, 0.01);
         if (th) v += 0.09 * Math.exp(-e / 300) + pk(238.6, 3) + pk(583.2, 1) + pk(911.2, 0.5) + pk(2614.5, 0.4) + pk(75, 1.5);
         return v;
       };
@@ -5104,12 +5135,15 @@ const demoRc = () => {
     CancelActivity: async () => { demoAct.run = null; },
     CloseActivity: async () => { demoAct.run = null; },
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
+    // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
+    SpectrumContinuum: async (sp) => demoSnip(sp),
     // acumulado do aparelho (sem fundo): as linhas do fundo natural
-    AnalyzeSpectrum: async (sp) => (sp.bgSec === 1 ? [
+    AnalyzeSpectrum: async (sp) => demoPeakDetail(sp, sp.bgSec === 1 ? [
+      { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 5200, sigma: 22 },
       { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 44000, sigma: 125 }, { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: 21000, sigma: 60 },
       { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 30000, sigma: 80 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 1764.5, net: 2000, sigma: 9 },
       { group: "Potássio-40", nuclide: "K-40", kev: 1460.8, net: 9000, sigma: 40 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 900, sigma: 7 },
-      { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 4 }] : sp.objSec > 20 ? [
+      { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 6 }] : sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),

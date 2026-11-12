@@ -112,6 +112,78 @@
     return LIB.filter(([le]) => Math.abs(le - e) <= tol).sort((a, b) => Math.abs(a[0] - e) - Math.abs(b[0] - e)).slice(0, 2);
   }
 
+  // ---------- o que cada isótopo emite e de onde vem (2.69, spec ux/isotopos.html) ----------
+  // x = raio X (aparece como "rX"). O que fez o pico no RC102 fica em laranja:
+  // as linhas procuradas são todas gama.
+  const EMIT = { "Am-241": "αγx", "Th-234": "βγ", "U-235": "αγx", "Ra-226": "αγ", "Pb-210": "βγx", "Pb-212": "βγx", "Pb-214": "βγx", "Bi-212": "αβγ", "Bi-214": "βγ", "Tl-208": "βγ", "Ac-228": "βγx", "Pa-234m": "βγ", "Cs-137": "βγx", "Co-60": "βγ", "K-40": "βγ", "Tc-99m": "γx", "I-131": "βγ" };
+  const EMIT_TIP = {
+    α: "Alfa: partícula pesada (2 prótons e 2 nêutrons). Para numa folha de papel. O RC102 não vê.",
+    β: "Beta: elétron rápido. Para em alguns milímetros de plástico ou alumínio. O RC102 vê os de energia alta, mas como rampa lisa, sem pico.",
+    γ: "Gama: onda de luz (fóton) muito energética, com energia fixa para cada isótopo. É o que faz os picos.",
+    x: "Raio X: fóton mais fraco, que sai da nuvem de elétrons do átomo. Faz picos abaixo de 100 keV.",
+  };
+  const emitHtml = (nuc) => (EMIT[nuc] ? `<span class="rc-ems">${[...EMIT[nuc]].map((s) => `<span class="rc-em${s === "γ" ? " made" : ""}" title="${esc(tr(EMIT_TIP[s]))}" data-no-tr>${s === "x" ? "rX" : s}</span>`).join("")}</span>` : "");
+  // [natural?, nome por extenso, de onde vem, meia-vida, onde aparece]
+  const ORIGIN = {
+    "K-40": [1, "Potássio-40", "Uma parte pequena (0,012%) de todo potássio é radioativa desde a formação da Terra. Está no solo, no cimento, nos alimentos e no seu próprio corpo.", "1,25 bilhão de anos", "em tudo que tem potássio: banana, feijão, adubo, granito"],
+    "Pb-212": [1, "Chumbo-212", "\"Neto\" do tório-232, que existe nas rochas e no solo. Também chega pelo ar, depois do gás torônio (radônio-220).", "10,6 horas", "solo, materiais de construção, eletrodos de solda com tório, camisas de lampião antigas"],
+    "Tl-208": [1, "Tálio-208", "Também da série do tório, perto do fim. O gama de 2.615 keV é o de maior energia que costuma aparecer na natureza.", "3 minutos", "os mesmos lugares do Pb-212"],
+    "Ac-228": [1, "Actínio-228", "Série do tório, logo depois do rádio-228.", "6,1 horas", "os mesmos lugares do Pb-212"],
+    "Bi-212": [1, "Bismuto-212", "Série do tório, filho do Pb-212.", "61 minutos", "os mesmos lugares do Pb-212"],
+    "Pb-214": [1, "Chumbo-214", "Filho do radônio-222, gás que sai do solo e dos materiais de construção (série do urânio). Gruda na poeira do ar.", "27 minutos", "ar de casa fechada, porão; sobe com chuva"],
+    "Bi-214": [1, "Bismuto-214", "Vem logo depois do Pb-214, também filho do radônio. Some em poucas horas quando o radônio vai embora.", "20 minutos", "ar de casa fechada; sobe na chuva (a chuva traz o que estava no ar)"],
+    "Pb-210": [1, "Chumbo-210", "Série do urânio, depois do radônio. Fica muito mais tempo que os outros filhos do radônio e se acumula na poeira.", "22 anos", "poeira antiga, filtros"],
+    "Ra-226": [1, "Rádio-226", "Série do urânio; é ele que vira o gás radônio.", "1.600 anos", "minerais de urânio, ponteiros luminosos de relógios antigos"],
+    "U-235": [1, "Urânio-235", "0,72% de todo urânio natural. Enriquecido, é o combustível dos reatores.", "704 milhões de anos", "minerais de urânio, vidro de urânio (verde que brilha na luz negra)"],
+    "Th-234": [1, "Tório-234", "Filho direto do urânio-238; aparece em qualquer coisa com urânio.", "24 dias", "minerais de urânio, vidro de urânio, cerâmica laranja antiga"],
+    "Pa-234m": [1, "Protactínio-234m", "Filho do Th-234, série do urânio. Solta um β muito forte.", "1,2 minuto", "os mesmos lugares do Th-234"],
+    "Cs-137": [0, "Césio-137", "Sai da fissão do urânio: reatores, testes nucleares das décadas de 1950 e 60, Chernobyl, Fukushima e o acidente de Goiânia (1987).", "30 anos", "fontes de calibração, um pouco no solo do mundo todo (dos testes)"],
+    "Co-60": [0, "Cobalto-60", "Feito em reator, de propósito.", "5,3 anos", "radioterapia, esterilização de alimentos e material médico, inspeção de solda; às vezes em sucata de aço contaminada"],
+    "Am-241": [0, "Amerício-241", "Vem do plutônio formado nos reatores.", "432 anos", "detector de fumaça do tipo iônico"],
+    "Tc-99m": [0, "Tecnécio-99m", "Feito para medicina nuclear (cintilografia).", "6 horas", "em quem fez exame há pouco tempo"],
+    "I-131": [0, "Iodo-131", "Produto de fissão; usado em tratamento de tireoide.", "8 dias", "em quem fez tratamento há pouco tempo"],
+  };
+  // picos que não são isótopo: só uma frase de onde vêm
+  const NOT_ISO = [
+    [/raio X do chumbo/, "Não é um isótopo: raio X que sai da blindagem de chumbo quando um gama bate nela."],
+    [/raio X do tungstênio/, "Não é um isótopo: raio X do tungstênio, que sai de eletrodos de solda e de blindagens quando um gama bate neles."],
+    [/aniquilação/, "Não é um isótopo: quando um pósitron encontra um elétron, os dois somem e viram dois gamas de 511 keV."],
+  ];
+  // família (série) de cada isótopo: outra linha da mesma família confirma a identidade
+  const FAM = { "Pb-212": "th", "Tl-208": "th", "Ac-228": "th", "Bi-212": "th", "Pb-214": "u", "Bi-214": "u", "Pb-210": "u", "Ra-226": "u", "Th-234": "u", "Pa-234m": "u" };
+  const FAM_NAME = { th: "série do tório", u: "série do urânio" };
+  // as linhas que o Go procura (specLines em measurespec.go)
+  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
+    ["Cs-137", 661.7], ["Ac-228", 911.2], ["Pa-234m", 1001], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5]];
+  // biblioteca com um isótopo por entrada ("Ra-226 / U-235" vira duas)
+  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => [e, x, d]));
+  const isIso = (n) => /^[A-Z][a-z]?-\d/.test(n);
+  // largura do pico como o Go mede (specFWHM)
+  const goFW = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
+  // É esse isótopo mesmo? Vizinhos a menos de 1 FWHM de cada linha achada:
+  // descartados se nenhuma outra linha procurada deles apareceu; senão ficam
+  // como "pode ser também". Outra linha da mesma família achada confirma.
+  function isoIdent(o, peaks, acc) {
+    const found = new Set(peaks.map((p) => p.nuclide));
+    const fam = FAM[o.nuclide] ? peaks.filter((p) => p.nuclide !== o.nuclide && FAM[p.nuclide] === FAM[o.nuclide]) : [];
+    const own = o.lines.length > 1;
+    const neigh = [], seen = new Set();
+    for (const l of o.lines) {
+      const fw = fwhm(l.kev);
+      for (const [le, n, d] of LIBN) {
+        if (n === o.nuclide || Math.abs(le - l.kev) >= fw || seen.has(n)) continue;
+        seen.add(n);
+        if (!isIso(n)) { neigh.push({ n, le, d, out: false, why: "other" }); continue; }
+        const others = SEARCHED.filter(([sn, se]) => sn === n && Math.abs(se - l.kev) >= fw && (!acc || se >= 100)).map(([, se]) => se);
+        if (!others.length) neigh.push({ n, le, d, out: false, why: "alone" });
+        else if (found.has(n)) neigh.push({ n, le, d, out: false, why: "found", others });
+        else neigh.push({ n, le, d, out: true, others });
+      }
+    }
+    const ok = neigh.every((x) => x.out) || own || fam.length > 0;
+    return { ok, neigh, fam, own };
+  }
+
   // ---------- sorteio de Poisson ----------
   function poisson(l) {
     if (l <= 0) return 0;
@@ -248,7 +320,10 @@
         if (a && a.counts && a.counts.length) {
           rl.acc = a; rl.accAt = Date.now();
           // isótopos do acumulado: picos acima do contínuo (sem fundo para tirar)
-          rl.accPeaks = api.AnalyzeSpectrum && a.seconds > 60 ? (await api.AnalyzeSpectrum({ a: rl.cal || a.a, obj: Array.from(a.counts, Math.round), objSec: a.seconds, bg: new Array(a.counts.length).fill(0), bgSec: 1 })) || [] : [];
+          const req = { a: rl.cal || a.a, obj: Array.from(a.counts, Math.round), objSec: a.seconds, bg: new Array(a.counts.length).fill(0), bgSec: 1 };
+          rl.accPeaks = api.AnalyzeSpectrum && a.seconds > 60 ? (await api.AnalyzeSpectrum(req)) || [] : [];
+          // o contínuo do SNIP, para o detalhe do isótopo desenhar a mesma base (2.69)
+          rl.cont = api.SpectrumContinuum && a.seconds > 60 ? (await api.SpectrumContinuum(req)) || null : null;
         }
       }
       // picos (no Go, igual à medição de objeto), a cada ~10 s
@@ -264,6 +339,26 @@
   const GROUP_SHORT = { "Tório-232 (série)": "~Th-232 (tório)", "Rádio-226 (série do urânio)": "~Ra-226 (urânio/radônio)", "Urânio-235": "~U-235",
     "Amerício-241": "~Am-241", "Césio-137": "~Cs-137", "Cobalto-60": "~Co-60", "Potássio-40": "~K-40 (potássio)" };
 
+  // nomes de picos sem um em cima do outro (2.69): cada um fica na primeira
+  // altura (a partir da preferida, andando dy) em que não encosta nos já postos
+  function placeLabels(g, items, dy, yMin, yMax) {
+    const done = [];
+    for (const it of items.slice().sort((a, b) => a.x - b.x)) {
+      const wd = g.measureText(it.text).width + 8;
+      let x = it.x;
+      if (it.clamp) x = Math.min(Math.max(x, it.clamp[0] + wd / 2), it.clamp[1] - wd / 2);
+      let y = it.y;
+      for (let k = 0; k < 8; k++) {
+        if (!done.some((d) => Math.abs(d.x - x) < (d.w + wd) / 2 && Math.abs(d.y - y) < 12)) break;
+        const ny = y + dy;
+        if (ny < yMin || ny > yMax) break;
+        y = ny;
+      }
+      done.push({ x, y, w: wd });
+      it.px = x; it.py = y;
+    }
+    return items;
+  }
   function spDraw() {
     const cv = $("rcSpec"); if (!cv) return;
     const real = rl.on ? realCounts() : null;
@@ -310,13 +405,15 @@
       g.font = "11px " + css("--mono"); g.textAlign = "center";
       const best = {};
       for (const p of peaks) if (!best[p.nuclide] || p.sigma > best[p.nuclide].sigma) best[p.nuclide] = p;
+      const names = [];
       for (const p of peaks) {
         if (p.kev > EMAX) continue;
         const on = pk.sel === p.nuclide, x = xOf(p.kev), y = top(p.kev);
         g.strokeStyle = on ? COR.text : COR.muted; g.lineWidth = on ? 2 : 1;
         g.beginPath(); g.moveTo(x + 0.5, y); g.lineTo(x + 0.5, y - 8); g.stroke(); g.lineWidth = 1;
-        if (best[p.nuclide] === p) { g.fillStyle = on ? COR.text : COR.muted; g.fillText(p.nuclide, Math.min(Math.max(x, L + 24), L + pw - 24), y - 12); }
+        if (best[p.nuclide] === p) names.push({ x, y: y - 12, text: p.nuclide, on, clamp: [L, L + pw] });
       }
+      for (const it of placeLabels(g, names, -13, T + 10, T + ph)) { g.fillStyle = it.on ? COR.text : COR.muted; g.fillText(it.text, it.px, it.py); }
     }
     // cursor
     if (sp.hover != null) {
@@ -367,7 +464,9 @@
     let ch = 0; for (let i = 0; i < EN.length; i++) if (Math.abs(EN[i] - e) < Math.abs(EN[ch] - e)) ch = i;
     const rc = rl.on ? realCounts() : null, cnt = rc ? rc.c : sp.counts;
     const near = libNear(e);
-    const lib = near.length ? near.map(([le, n, d]) => `<b>${esc(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${esc(d)})</span>` : ""}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
+    // o que não é isótopo (raio X, aniquilação) diz de onde vem (2.69)
+    const notIso = (n) => { const m = NOT_ISO.find(([re]) => re.test(n)); return m ? `<br><span class="muted">${esc(tr(m[1]))}</span>` : ""; };
+    const lib = near.length ? near.map(([le, n, d]) => `<b>${esc(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${esc(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
     tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(cnt[ch] || 0)} contagens</span><br>${lib}`, x, ev.clientY - r.top);
     spDraw();
   }
@@ -392,10 +491,14 @@
     for (const o of out) o.lines.sort((a, b) => b.sigma - a.sigma);
     return out;
   }
+  // "certo" pede também a identidade (2.69): sem vizinho que não deu para
+  // descartar, ou outra linha da mesma família achada
+  const sureOf = (o) => { const r = SURE(o.sigma); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
+  function isoListId(peaks) { const list = isoList(peaks); for (const o of list) o.id = isoIdent(o, peaks, isAccMode()); return list; }
   function isoRender(peaks) {
-    const box = $("rcIsos"), list = isoList(peaks);
+    const box = $("rcIsos"), list = isoListId(peaks);
     if (pk.sel && !list.some((o) => o.nuclide === pk.sel)) { pk.sel = null; if (!pk.range) pk.win = null; }
-    const key = list.map((o) => o.nuclide + ":" + SURE(o.sigma)[1] + ":" + o.lines.map((l) => l.kev).join(",")).join("|") + "#" + pk.sel;
+    const key = list.map((o) => o.nuclide + ":" + sureOf(o)[1] + ":" + o.lines.map((l) => l.kev).join(",")).join("|") + "#" + pk.sel;
     box.hidden = !list.length;
     // sem isótopo achado, a dica só fala do arrastar
     const hint = $("rcDragHint");
@@ -409,9 +512,9 @@
       b.className = "rc-iso" + (pk.sel === o.nuclide ? " on" : "");
       b.dataset.nuc = o.nuclide;
       b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
-      const [pt, cls] = SURE(o.sigma);
-      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${esc(o.nuclide)}</span><span class="rc-iso-s ${cls}">${pt}</span>` +
-        `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>`;
+      const [pt, cls] = sureOf(o);
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${esc(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
+        `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>${emitHtml(o.nuclide)}`;
       // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
       // gama; o título diz de qual família ele vem
       b.title = `${/série/.test(o.group) ? "vem do " : ""}${o.group} · ${nf(o.sigma, 0)} σ`;
@@ -426,17 +529,20 @@
     pk.sel = nuc; pk.range = null; pk.win = [Math.max(15, e - w), e + w];
     spDraw();
   }
-  function zoomClose() { pk.sel = null; pk.range = null; pk.win = null; $("rcZoom").hidden = true; spDraw(); }
+  function zoomClose() { pk.sel = null; pk.fromOpen = false; pk.range = null; pk.win = null; $("rcZoom").hidden = true; spDraw(); }
   // canal fracionário → energia
   const enAt = (x) => { const i = Math.max(0, Math.min(EN.length - 2, Math.floor(x))), f = x - i; return EN[i] + (EN[i + 1] - EN[i]) * f; };
   // ajusta base linear + gaussiana nos canais do trecho
-  function fitPeak(counts, e0, e1, hint) {
+  function fitPeak(counts, e0, e1, hint, cont) {
     const idx = [];
     for (let i = 0; i < counts.length; i++) if (EN[i] >= e0 && EN[i] <= e1) idx.push(i);
     if (idx.length < 8) return null;
     const c = idx.map((i) => counts[i]), n = c.length, k = Math.max(2, Math.min(4, Math.floor(n / 8)));
     const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length;
-    const bl = avg(c.slice(0, k)), br = avg(c.slice(n - k)), base = (j) => bl + ((br - bl) * (j - (k - 1) / 2)) / Math.max(1, n - 1 - (k - 1));
+    const bl = avg(c.slice(0, k)), br = avg(c.slice(n - k));
+    // no acumulado a base é o contínuo do SNIP (o mesmo da detecção): em
+    // volta de 239 keV ele desce curvado, e a reta entre as pontas fica acima
+    const base = cont ? (j) => cont[idx[Math.max(0, Math.min(n - 1, Math.round(j)))]] : (j) => bl + ((br - bl) * (j - (k - 1) / 2)) / Math.max(1, n - 1 - (k - 1));
     const net = c.map((v, j) => v - base(j));
     // começo: crista no canal mais alto (ou perto da linha procurada)
     let m = 0;
@@ -478,9 +584,15 @@
   function zoomDraw(counts) {
     const box = $("rcZoom");
     if (!pk.win || !counts) { box.hidden = true; return; }
-    const sel = pk.sel ? isoList(curPeaks()).find((o) => o.nuclide === pk.sel) : null;
-    const hint = sel ? sel.lines[0].kev : null;
-    const f = fitPeak(counts, pk.win[0], pk.win[1], hint);
+    const sel = pk.sel ? isoListId(curPeaks()).find((o) => o.nuclide === pk.sel) : null;
+    if (sel) { isoZoomDraw(counts, sel); return; }
+    zoomMode(false);
+    const hint = null;
+    const f = fitPeak(counts, pk.win[0], pk.win[1], hint, isAccMode() && rl.cont && rl.cont.length === counts.length ? rl.cont : null);
+    // trecho largo (mais de uns 5 picos de largura): não ajusta crista nenhuma
+    const wide = pk.win[1] - pk.win[0] > 5 * fwhm((pk.win[0] + pk.win[1]) / 2);
+    if (f && wide) f.ok = false;
+    document.querySelectorAll("#rcZoomKey .lg-fit, #rcZoomKey .lg-fwhm").forEach((e) => { e.hidden = !(f && f.ok); });
     box.hidden = false;
     const lib = sel ? LIB.find((l) => Math.abs(l[0] - hint) < 3) : null;
     $("rcZoomTitle").textContent = sel ? `${tr("Zoom no pico")} · ${sel.nuclide}` : `${tr("Zoom no trecho")} · ${nf(pk.win[0], 0)}–${nf(pk.win[1], 0)} keV`;
@@ -502,14 +614,19 @@
     g.fillStyle = "rgba(242,163,58,.38)";
     for (let j = 0; j < n; j++) { const y = yOf(f.c[j]); g.fillRect(L + j * bw + 0.5, y, Math.max(1, bw - 1), T + ph - y); }
     // linha de base
-    g.strokeStyle = css("--muted"); g.setLineDash([5, 4]); g.beginPath(); g.moveTo(xOf(0), yOf(f.base(0))); g.lineTo(xOf(n - 1), yOf(f.base(n - 1))); g.stroke(); g.setLineDash([]);
+    g.strokeStyle = css("--muted"); g.setLineDash([5, 4]); g.beginPath(); for (let j = 0; j < n; j++) j ? g.lineTo(xOf(j), yOf(f.base(j))) : g.moveTo(xOf(j), yOf(f.base(j))); g.stroke(); g.setLineDash([]);
     // eixo de energia
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono");
     [[0, "left"], [Math.floor((n - 1) / 2), "center"], [n - 1, "right"]].forEach(([j, al]) => { g.textAlign = al; g.fillText(nf(EN[f.idx[j]], 0) + (j === n - 1 ? " keV" : ""), al === "left" ? L : al === "right" ? L + pw : xOf(j), h - 6); });
     // picos vizinhos dentro do trecho
-    const near = curPeaks().filter((p) => p.kev > pk.win[0] && p.kev < pk.win[1] && (!f.ok || Math.abs(p.kev - f.crest) > 0.45 * f.fw));
-    g.textAlign = "center"; g.fillStyle = css("--muted"); g.font = "11px " + css("--sans");
-    for (const p of near) { let j = 0; f.idx.forEach((i, q) => { if (Math.abs(EN[i] - p.kev) < Math.abs(EN[f.idx[j]] - p.kev)) j = q; }); g.fillText(`${tr("outro pico")}: ${p.nuclide} ${nf(p.kev, 0)} keV`, Math.min(Math.max(xOf(j), L + 80), L + pw - 80), T + 4); }
+    const near = curPeaks().filter((p) => p.nuclide !== pk.sel && p.kev > pk.win[0] && p.kev < pk.win[1] && (!f.ok || Math.abs(p.kev - f.crest) > 0.45 * f.fw));
+    // risquinho embaixo e nome curto em cima, em linhas que não se encostam (2.69)
+    g.textAlign = "center"; g.font = "11px " + css("--mono"); g.strokeStyle = css("--muted");
+    const tags = near.map((p) => { let j = 0; f.idx.forEach((i, q) => { if (Math.abs(EN[i] - p.kev) < Math.abs(EN[f.idx[j]] - p.kev)) j = q; }); return { x: xOf(j), y: T + 4, text: `${p.nuclide} ${nf(p.kev, 0)}`, clamp: [L, L + pw] }; });
+    for (const t of placeLabels(g, tags, 13, T + 4, T + 4 + 13 * 3)) {
+      g.beginPath(); g.moveTo(t.x + 0.5, T + ph); g.lineTo(t.x + 0.5, T + ph - 6); g.stroke();
+      g.fillStyle = css("--muted"); g.fillText(t.text, t.px, t.py);
+    }
     if (f.ok) {
       // curva ajustada
       g.strokeStyle = COR.text; g.lineWidth = 2; g.beginPath();
@@ -525,9 +642,147 @@
       const row = (k, v) => `<dt>${tr(k)}</dt><dd class="mono" data-no-tr>${v}</dd>`;
       st.innerHTML = row("Crista", `${nf(f.crest, 1)} keV`) + row("Largura (FWHM)", `${nf(f.fw, 1)} keV · ${tr("resolução")} ${nf(f.res, 1)}%`) +
         row("Contagens do pico", `${Math.round(f.area).toLocaleString(LOCALE)} ± ${Math.round(f.unc).toLocaleString(LOCALE)}`) + row("Acima do fundo", `${nf(f.sig, f.sig < 10 ? 1 : 0)} σ`);
-    } else st.innerHTML = `<dt>${tr("Sem pico claro neste trecho")}</dt>`;
+    } else st.innerHTML = `<dt>${tr(wide ? "Trecho largo, com vários picos: arraste em volta de um pico só para medir a crista." : "Sem pico claro neste trecho")}</dt>`;
     warn.hidden = !near.length || !f.ok;
     if (!warn.hidden) warn.textContent = tr("Tem outro pico perto: a largura e as contagens podem sair maiores que as de verdade.");
+  }
+
+
+  // ---------- detalhe "Por que X" (2.69) ----------
+  // Mostra a mesma conta da detecção: a base que o Go usou (o contínuo do SNIP
+  // no acumulado, o fundo da casa mais a base dos lados ao vivo), o que sobra
+  // acima dela e as checagens que o pico passou.
+  const isAccMode = () => rl.on && rl.mode === "acc";
+  function zoomBase(p) {
+    if (isAccMode()) return rl.cont && rl.cont.length === EN.length ? (i) => rl.cont[i] : null;
+    const real = rl.on ? realCounts() : null;
+    if (!real || !rl.acc || !(rl.acc.seconds > 0) || rl.acc.counts.length !== EN.length) return null;
+    const k = real.t / rl.acc.seconds, side = p.side || 0;
+    return (i) => rl.acc.counts[i] * k + side;
+  }
+  const chk = (ok, head, body) => `<li class="${ok ? "ok" : "warn"}"><span class="rc-why-mk" aria-hidden="true">${ok ? "✓" : "!"}</span><div><b>${head}</b><span>${body}</span></div></li>`;
+  function whyHtml(o, peaks) {
+    const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = esc(o.nuclide);
+    const fw = goFW(p.kev), tol = 0.2 * fw;
+    const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
+    const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
+    const ident = id.ok ? [tr("Sim"), 3, "sure"] : [tr("Provavelmente"), 2, "likely"];
+    let h = `<div class="rc-why-cards"><div class="rc-why-card"><span>${tr("O pico existe?")}</span><b class="${exist[2]}">${exist[0]}</b>${meter(exist[1], exist[2])}</div>` +
+      `<div class="rc-why-card"><span>${tr(`É ${o.nuclide} mesmo?`)}</span><b class="${ident[2]}">${ident[0]}</b>${meter(ident[1], ident[2])}</div></div>`;
+    h += `<h5>${tr(`Por que ${o.nuclide}`)}</h5><ul class="rc-why-list">`;
+    const E = nf(p.center || p.kev, 0);
+    h += chk(true, tr(`Tem um pico em ${E} keV`), acc ? tr("Sobe acima do contínuo e acima dos dois lados. Um degrau ou um morro largo não passam aqui.") : tr("Sobe acima do fundo da casa e acima dos dois lados."));
+    const sg = nf(o.sigma, o.sigma < 10 ? 1 : 0);
+    if (o.sigma >= 5) h += chk(true, tr("Não é flutuação"), tr(`${sg} σ: a chance de ser só ruído é praticamente zero.`) + " " + (acc ? tr("Precisa de pelo menos 5 σ para entrar na lista e 10 σ para \"certo\".") : tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ.")));
+    else h += chk(false, tr("Pode ser flutuação"), tr(`${sg} σ: pode ser acaso.`) + " " + tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ."));
+    if (p.center) {
+      const d = Math.abs(p.center - p.kev);
+      h += chk(d <= tol, tr(`A energia bate com o ${o.nuclide} (${nf(p.kev, 1)} keV)`), tr(`O centro caiu a ${nf(d, 1)} keV da linha.`) + " " + (acc ? tr(`O app aceita até ${nf(tol, 0)} keV aqui (um quinto da largura de um pico nessa energia).`) : d <= tol ? tr(`Dentro de ${nf(tol, 0)} keV (um quinto da largura de um pico nessa energia).`) : tr("Mais longe que o normal: pode ter outro pico do lado.")));
+    }
+    if (acc) {
+      // o eco (retroespalhamento) de um pico mais alto cai em E/(1+2E/511)
+      const echo = peaks.find((q) => q.kev >= 300 && Math.abs(p.kev - q.kev / (1 + (2 * q.kev) / 511)) < goFW(q.kev / (1 + (2 * q.kev) / 511)));
+      h += chk(true, tr("Não é eco de outro pico"), echo
+        ? tr(`O eco do ${echo.nuclide} (${nf(echo.kev, 0)} keV) cai perto daqui, mas este pico tem mais de 30% das contagens dele: é forte demais para ser só eco.`)
+        : tr(`O gama que bate na parede atrás do cristal volta com menos energia e faz um morro falso. Nenhum pico forte acima daqui explicaria ${E} keV.`));
+    }
+    if (!id.neigh.length) h += chk(true, tr("Nenhum outro isótopo emite perto"), tr(`Nenhuma linha da biblioteca cai a menos de uma largura de pico (${nf(fwhm(p.kev), 0)} keV) daqui.`));
+    for (const x of id.neigh) {
+      const desc = x.d ? `, ${tr(x.d)}` : "";
+      if (x.out) h += chk(true, tr(`Descartado: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`, tr(`Ele também emite perto daqui, mas os outros picos dele (${x.others.map((e) => nf(e, 0)).join(", ")} keV) não apareceram.`));
+      else h += chk(id.ok, tr(`Pode ser também: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`,
+        (x.why === "found" ? tr("Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar.") : x.why === "alone" ? tr("Ele emite nessa mesma energia e não tem outro pico forte para conferir.") : tr("Essa energia também aparece sem ser de isótopo.")) + (id.ok && (id.own || id.fam.length) ? " " + tr("Mesmo assim, outro pico da mesma família apareceu (veja abaixo).") : ""));
+    }
+    if (id.own) h += chk(true, tr(`Outro pico do ${o.nuclide} apareceu`), tr(`${o.lines.slice(1).map((l) => nf(l.kev, 0)).join(", ")} keV: o mesmo isótopo em outra energia.`));
+    if (id.fam.length) h += chk(true, tr("Outro pico da mesma família apareceu"), `${[...new Set(id.fam.map((q) => `${q.nuclide} ${nf(q.kev, 0)} keV`))].map(esc).join(", ")}: ${tr(`confirma a ${FAM_NAME[FAM[o.nuclide]]}.`)}`);
+    h += "</ul>";
+    // de onde vem (fechado por padrão)
+    const og = ORIGIN[o.nuclide];
+    if (og) {
+      const [nat, name, txt, half, where] = og, fam = FAM[o.nuclide];
+      h += `<details class="rc-why-from"${pk.fromOpen ? " open" : ""}><summary>${tr("De onde vem")} <span class="rc-why-tag ${nat ? "nat" : "art"}">${tr(nat ? "natural" : "artificial")}</span></summary>` +
+        `<p><b><span data-no-tr>${nuc}</span> (${esc(tr(name))})</b> ${esc(tr(txt))}</p><dl>` +
+        `<dt>${tr("Origem")}</dt><dd>${tr(nat ? "natural" : "artificial")}${fam ? " · " + tr(FAM_NAME[fam]) : ""}</dd>` +
+        `<dt>${tr("Meia-vida")}</dt><dd>${esc(tr(half))}</dd><dt>${tr("Onde aparece")}</dt><dd>${esc(tr(where))}</dd></dl></details>`;
+    }
+    // outros da série: as linhas procuradas da mesma família, achadas ou não
+    if (FAM[o.nuclide]) {
+      const mine = new Set(o.lines.map((l) => l.kev));
+      const rows = SEARCHED.filter(([n, e]) => FAM[n] === FAM[o.nuclide] && !(n === o.nuclide && mine.has(e)) && (!acc || e >= 100))
+        .map(([n, e]) => { const f = peaks.find((q) => q.nuclide === n && Math.abs(q.kev - e) < 1); return `<li><span data-no-tr>${esc(n)} · ${nf(e, 0)} keV</span><span class="${f ? "seen" : "muted"}">${f ? tr(`apareceu · ${nf(f.sigma, 0)} σ`) : tr("não apareceu")}</span></li>`; });
+      if (rows.length) h += `<h6>${tr(`Outros da ${FAM_NAME[FAM[o.nuclide]]} no espectro`)}</h6><ul class="rc-why-fam">${rows.join("")}</ul>`;
+    }
+    return h;
+  }
+  // zoom do trecho (arrastar) ou detalhe do isótopo (clicar na etiqueta)
+  function zoomMode(iso) {
+    $("rcZoom").classList.toggle("iso", iso);
+    $("rcZoomKey").hidden = iso; $("rcZoomKeyIso").hidden = !iso;
+    if (!iso) { $("rcWhy").hidden = true; $("rcZoomSub").textContent = ""; }
+  }
+  function isoZoomDraw(counts, o) {
+    const box = $("rcZoom"), p = o.lines[0], acc = isAccMode();
+    box.hidden = false; zoomMode(true);
+    const lib = LIBN.find((l) => l[1] === o.nuclide);
+    $("rcZoomTitle").textContent = o.nuclide;
+    $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${esc(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
+    $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
+    $("rcZoomWarn").hidden = true;
+    // o detalhe só é refeito quando muda alguma coisa (o "De onde vem" aberto fica aberto)
+    const why = $("rcWhy"), key = [o.nuclide, sureOf(o)[1], o.lines.map((l) => l.kev).join(","), Math.round(o.sigma), acc, curPeaks().map((q) => q.nuclide + q.kev).join(",")].join("|");
+    why.hidden = false;
+    if (why.dataset.k !== key) { why.dataset.k = key; why.innerHTML = whyHtml(o, curPeaks()); }
+    const st = $("rcZoomStats"), row = (k, v) => `<dt>${k}</dt><dd class="mono" data-no-tr>${v}</dd>`;
+    const unc = o.sigma > 0 ? p.net / p.sigma : 0;
+    st.innerHTML = row(tr(`Linha do ${o.nuclide}`), `${nf(p.kev, 1)} keV`) +
+      (p.center ? row(tr("Centro do que sobrou"), `${nf(p.center, 1)} keV · ${tr(`${nf(Math.abs(p.center - p.kev), 1)} keV de diferença`)}`) : "") +
+      row(tr("Contagens do pico"), `${Math.round(p.net).toLocaleString(LOCALE)} ± ${Math.round(unc).toLocaleString(LOCALE)}`) +
+      row(tr(acc ? "Acima do contínuo" : "Acima do fundo da casa"), `${p.cont > 0 ? nf((p.net / p.cont) * 100, 1) + "% · " : ""}${nf(p.sigma, p.sigma < 10 ? 1 : 0)} σ`);
+    const cv = $("rcZoomCv"), F = fit(cv, 220);
+    if (!F) return;
+    const { g, w, h } = F, L = 10, R = 10, T = 26, B = 22, pw = w - L - R, ph = h - T - B;
+    g.clearRect(0, 0, w, h);
+    const idx = [];
+    for (let i = 0; i < counts.length; i++) if (EN[i] >= pk.win[0] && EN[i] <= pk.win[1]) idx.push(i);
+    const n = idx.length;
+    if (n < 4) return;
+    let bf = zoomBase(p);
+    if (!bf) { // sem a base da detecção: reta entre as pontas
+      const avg = (a) => a.reduce((x, y) => x + y, 0) / a.length, c0 = avg(idx.slice(0, 3).map((i) => counts[i])), c1 = avg(idx.slice(-3).map((i) => counts[i]));
+      bf = (i) => c0 + ((c1 - c0) * (i - idx[0])) / Math.max(1, idx[n - 1] - idx[0]);
+    }
+    const c = idx.map((i) => counts[i]), b = idx.map((i) => bf(i));
+    let max = 1, min = Infinity;
+    for (let j = 0; j < n; j++) { max = Math.max(max, c[j], b[j]); min = Math.min(min, c[j], b[j]); }
+    max *= 1.08;
+    const lo = Math.max(0, min - (max - min) * 0.25);
+    const bw = pw / n, xOf = (j) => L + (j + 0.5) * bw, yOf = (v) => T + ph - (Math.max(0, v - lo) / (max - lo)) * ph;
+    const jOf = (e) => { let q = 0; for (let j = 1; j < n; j++) if (Math.abs(EN[idx[j]] - e) < Math.abs(EN[idx[q]] - e)) q = j; return q; };
+    const half = p.half || 0.6 * goFW(p.kev);
+    // canais; o que sobra acima da base, dentro da janela da detecção, em verde
+    for (let j = 0; j < n; j++) {
+      const y = yOf(c[j]), x = L + j * bw + 0.5, ww = Math.max(1, bw - 1);
+      g.fillStyle = "rgba(242,163,58,.38)"; g.fillRect(x, y, ww, T + ph - y);
+      if (c[j] > b[j] && Math.abs(EN[idx[j]] - p.kev) < half) { g.fillStyle = "rgba(110,231,160,.55)"; g.fillRect(x, y, ww, yOf(b[j]) - y); }
+    }
+    // a base da detecção
+    g.strokeStyle = css("--text"); g.globalAlpha = 0.7; g.setLineDash([5, 4]); g.beginPath();
+    for (let j = 0; j < n; j++) j ? g.lineTo(xOf(j), yOf(b[j])) : g.moveTo(xOf(j), yOf(b[j]));
+    g.stroke(); g.setLineDash([]); g.globalAlpha = 1;
+    // eixo
+    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono");
+    [[0, "left"], [Math.floor((n - 1) / 2), "center"], [n - 1, "right"]].forEach(([j, al]) => { g.textAlign = al; g.fillText(nf(EN[idx[j]], 0) + (j === n - 1 ? " keV" : ""), al === "left" ? L : al === "right" ? L + pw : xOf(j), h - 6); });
+    // linha da biblioteca (rosa, embaixo) e centro do que sobrou (em cima)
+    const xl = xOf(jOf(p.kev));
+    g.fillStyle = COR.rc || css("--rc"); g.font = "11px " + css("--mono"); g.textAlign = "center";
+    g.fillText(`${o.nuclide} ${nf(p.kev, 1)}`, Math.min(Math.max(xl, L + 50), L + pw - 50), T + ph - 6);
+    if (p.center) {
+      const jc = jOf(p.center), xc = xOf(jc), yc = yOf(c[jc]);
+      g.setLineDash([2, 3]); g.strokeStyle = COR.text; g.beginPath(); g.moveTo(xc + 0.5, yc); g.lineTo(xc + 0.5, T + ph); g.stroke(); g.setLineDash([]);
+      g.fillStyle = COR.text; g.beginPath(); g.arc(xc, yc, 3.5, 0, 7); g.fill();
+      g.font = "12px " + css("--mono"); g.textAlign = xc > L + pw - 120 ? "right" : "left";
+      g.fillText(`${tr("pico")} ${nf(p.center, 1)} keV`, xc + (g.textAlign === "right" ? -8 : 8), Math.max(T - 8, yc - 8));
+    }
   }
 
   // ---------- lupa no espectrograma (2.52) ----------
@@ -1434,6 +1689,8 @@
     });
     $("rcIsos").addEventListener("click", (e) => { const b = e.target.closest("button[data-nuc]"); if (b) isoPick(b.dataset.nuc); });
     $("rcZoomClose").addEventListener("click", zoomClose);
+    // o "De onde vem" lembra se ficou aberto enquanto o detalhe se refaz
+    $("rcWhy").addEventListener("toggle", (e) => { if (e.target.classList.contains("rc-why-from")) pk.fromOpen = e.target.open; }, true);
     const lpSeg = $("rcLoupe");
     const lpMark = () => lpSeg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === lp.n)));
     lpSeg.addEventListener("click", (e) => { const b = e.target.closest("button[data-n]"); if (!b) return; lp.n = +b.dataset.n; try { localStorage.setItem("rcLoupe", String(lp.n)); } catch (er) { /* sem armazenamento */ } lpMark(); });

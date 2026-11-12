@@ -21,6 +21,13 @@ type SpecPeak struct {
 	KeV     float64 `json:"kev"`
 	Net     float64 `json:"net"`   // contagens do pico (acima dos lados)
 	Sigma   float64 `json:"sigma"` // pico ÷ incerteza
+	// para o detalhe "Por que X" (2.69): o centro do que sobrou acima da base,
+	// o contínuo (ou fundo) somado embaixo do pico, a meia janela em keV e,
+	// ao vivo, a base dos lados por canal (acima do fundo da casa)
+	Center float64 `json:"center,omitempty"`
+	Cont   float64 `json:"cont,omitempty"`
+	Half   float64 `json:"half,omitempty"`
+	Side   float64 `json:"side,omitempty"`
 }
 
 type specLine struct {
@@ -126,7 +133,24 @@ func (s *MeasureSpectrum) findPeaks() []SpecPeak {
 				continue
 			}
 			if sg := peak / math.Sqrt(vr); sg >= specPeakSigma {
-				out = append(out, SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg})
+				// centro do que sobra acima do fundo da casa e da base dos lados
+				side := base / c.n
+				var ce, cw, bk float64
+				for i := range s.Obj {
+					if e := s.energy(i); e >= l.kev-h && e < l.kev+h {
+						bi := float64(s.Bg[i]) * k
+						bk += bi
+						if v := float64(s.Obj[i]) - bi - side; v > 0 {
+							ce += v * e
+							cw += v
+						}
+					}
+				}
+				p := SpecPeak{Group: l.group, Nuclide: l.nuclide, KeV: l.kev, Net: peak, Sigma: sg, Cont: bk + base, Half: h, Side: side}
+				if cw > 0 {
+					p.Center = ce / cw
+				}
+				out = append(out, p)
 			}
 		}
 	}
@@ -204,6 +228,16 @@ func (s *MeasureSpectrum) bins() []specBin {
 		}
 	}
 	return out
+}
+
+// SpectrumContinuum devolve o contínuo do SNIP embaixo do espectro (o mesmo
+// que findPeaksSnip usa no acumulado do aparelho), para o detalhe do isótopo
+// desenhar a mesma base da detecção.
+func (a *App) SpectrumContinuum(s MeasureSpectrum) []float64 {
+	if len(s.Obj) == 0 || s.A[1] <= 0 {
+		return []float64{}
+	}
+	return s.snipContinuum()
 }
 
 // AnalyzeSpectrum procura as linhas conhecidas num espectro com o fundo (a

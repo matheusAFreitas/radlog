@@ -166,3 +166,24 @@ func TestDropBackscatter(t *testing.T) {
 		t.Fatalf("%v", got)
 	}
 }
+
+// o detalhe "Por que X" (2.69) usa o centro, o contínuo e a mesma base do SNIP
+func TestFindPeaksSnipDetail(t *testing.T) {
+	s := synthAccum(true, 120000, 7)
+	cont := (&App{}).SpectrumContinuum(*s)
+	if len(cont) != len(s.Obj) {
+		t.Fatalf("contínuo com %d canais, espectro com %d", len(cont), len(s.Obj))
+	}
+	ps := s.findPeaks()
+	if len(ps) == 0 {
+		t.Fatal("nenhum pico")
+	}
+	for _, p := range ps {
+		if p.Cont <= 0 || p.Half <= 0 {
+			t.Errorf("%s %v: contínuo %v, meia janela %v", p.Nuclide, p.KeV, p.Cont, p.Half)
+		}
+		if math.Abs(p.Center-p.KeV) > 0.2*specFWHM(p.KeV)+1e-9 {
+			t.Errorf("%s %v: centro %v longe da linha", p.Nuclide, p.KeV, p.Center)
+		}
+	}
+}
