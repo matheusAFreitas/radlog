@@ -4570,3 +4570,18 @@ quanto material tem, nem se é perigoso, nem que ele está aí agora. No Acumula
 α β γ rX.	α β γ rX.
 O que o isótopo emite. O RC102 enxerga bem γ e rX (fazem picos), vê β só os de energia alta, que atravessam a carcaça, e eles viram uma rampa lisa, sem pico (o elétron sai com energia diferente a cada vez), e não vê α. O símbolo em laranja é o que fez o pico. Clique num isótopo para ver por que ele foi declarado e de onde vem.	What the isotope gives off. The RC102 sees γ and rX well (they make peaks); of β it sees only the high-energy ones that get through the case, and they become a smooth slope with no peak (the electron leaves with a different energy each time); it doesn't see α. The orange symbol is what made the peak. Click an isotope to see why it was named and where it comes from.
 Sim	Yes
+Em casa × fora de casa	At home × away from home
+igual a casa	same as at home
+mais que em casa {0}	more than at home {0}
+menos que em casa {0}	less than at home {0}
+Contagens por minuto só no pico, acima do contínuo de cada espectro. "Mais" ou "menos" só quando a diferença passa de 3σ.	Counts per minute in the peak only, above each spectrum's continuum. "More" or "less" only when the difference goes beyond 3σ.
+{0} mais alto é comum perto de granito, tijolo, cimento e solo.	Higher {0} is common near granite, brick, cement and soil.
+{0} vem do radônio: sobe em lugar fechado, subsolo e metrô.	{0} comes from radon: it rises in closed places, basements and the subway.
+{0} vêm do radônio: sobem em lugar fechado, subsolo e metrô.	{0} come from radon: they rise in closed places, basements and the subway.
+{0} vem do tório: comum em granito, areia e tijolo.	{0} comes from thorium: common in granite, sand and brick.
+{0} vêm do tório: comum em granito, areia e tijolo.	{0} come from thorium: common in granite, sand and brick.
+Menos que em casa: {0}.	Less than at home: {0}.
+mais que em casa	more than at home
+menos que em casa	less than at home
+Sim, junto com {0}	Yes, together with {0}
+Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar: os dois devem somar nesse pico.	It emits near here and another of its peaks showed up, so it can't be ruled out: the two probably add up in this peak.

@@ -1,5 +1,17 @@
 # Versões
 
+## 2.69.1
+- Resumo da saída: o "Espectro da saída" compara em casa × fora de casa.
+  Cada isótopo tem duas barras (fora em rosa, casa em branco), com as
+  contagens por minuto só no pico, e diz se ficou mais, menos ou igual a
+  casa (só muda acima de 3σ). Antes a conta usava a janela inteira, com o
+  contínuo, e um pico que subiu podia aparecer com "-20%".
+- A frase de baixo cita só os isótopos que subiram. No PDF entra também
+  "Menos que em casa".
+- Detalhe do isótopo: o "Pode ser também" vira uma ressalva neutra (•)
+  quando a identidade já foi confirmada, e o cartão diz "Sim, junto com X"
+  quando o vizinho também foi achado (os dois devem somar no pico).
+
 ## 2.69.0
 - Isótopos explicados na aba Radiacode 102 › Espectro (spec ux/isotopos.html):
   - a etiqueta mostra o que o isótopo emite (α β γ rX), com o que fez o pico

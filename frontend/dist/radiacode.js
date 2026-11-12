@@ -660,13 +660,16 @@
     const k = real.t / rl.acc.seconds, side = p.side || 0;
     return (i) => rl.acc.counts[i] * k + side;
   }
-  const chk = (ok, head, body) => `<li class="${ok ? "ok" : "warn"}"><span class="rc-why-mk" aria-hidden="true">${ok ? "✓" : "!"}</span><div><b>${head}</b><span>${body}</span></div></li>`;
+  // ok: ✓ verde; false: ! amarelo; "note": • neutro (ressalva, nem a favor nem contra)
+  const chk = (ok, head, body) => `<li class="${ok === "note" ? "note" : ok ? "ok" : "warn"}"><span class="rc-why-mk" aria-hidden="true">${ok === "note" ? "•" : ok ? "✓" : "!"}</span><div><b>${head}</b><span>${body}</span></div></li>`;
   function whyHtml(o, peaks) {
     const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = esc(o.nuclide);
     const fw = goFW(p.kev), tol = 0.2 * fw;
     const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
     const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
-    const ident = id.ok ? [tr("Sim"), 3, "sure"] : [tr("Provavelmente"), 2, "likely"];
+    // vizinho que também foi achado: os dois devem somar nesse pico (QA 2.69.0)
+    const mix = id.neigh.filter((x) => !x.out && x.why === "found").map((x) => x.n);
+    const ident = !id.ok ? [tr("Provavelmente"), 2, "likely"] : mix.length ? [tr(`Sim, junto com ${mix.join(", ")}`), 2, "sure"] : [tr("Sim"), 3, "sure"];
     let h = `<div class="rc-why-cards"><div class="rc-why-card"><span>${tr("O pico existe?")}</span><b class="${exist[2]}">${exist[0]}</b>${meter(exist[1], exist[2])}</div>` +
       `<div class="rc-why-card"><span>${tr(`É ${o.nuclide} mesmo?`)}</span><b class="${ident[2]}">${ident[0]}</b>${meter(ident[1], ident[2])}</div></div>`;
     h += `<h5>${tr(`Por que ${o.nuclide}`)}</h5><ul class="rc-why-list">`;
@@ -690,8 +693,8 @@
     for (const x of id.neigh) {
       const desc = x.d ? `, ${tr(x.d)}` : "";
       if (x.out) h += chk(true, tr(`Descartado: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`, tr(`Ele também emite perto daqui, mas os outros picos dele (${x.others.map((e) => nf(e, 0)).join(", ")} keV) não apareceram.`));
-      else h += chk(id.ok, tr(`Pode ser também: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`,
-        (x.why === "found" ? tr("Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar.") : x.why === "alone" ? tr("Ele emite nessa mesma energia e não tem outro pico forte para conferir.") : tr("Essa energia também aparece sem ser de isótopo.")) + (id.ok && (id.own || id.fam.length) ? " " + tr("Mesmo assim, outro pico da mesma família apareceu (veja abaixo).") : ""));
+      else h += chk(id.ok ? "note" : false, tr(`Pode ser também: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`,
+        (x.why === "found" ? tr("Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar: os dois devem somar nesse pico.") : x.why === "alone" ? tr("Ele emite nessa mesma energia e não tem outro pico forte para conferir.") : tr("Essa energia também aparece sem ser de isótopo.")) + (id.ok && (id.own || id.fam.length) ? " " + tr("Mesmo assim, outro pico da mesma família apareceu (veja abaixo).") : ""));
     }
     if (id.own) h += chk(true, tr(`Outro pico do ${o.nuclide} apareceu`), tr(`${o.lines.slice(1).map((l) => nf(l.kev, 0)).join(", ")} keV: o mesmo isótopo em outra energia.`));
     if (id.fam.length) h += chk(true, tr("Outro pico da mesma família apareceu"), `${[...new Set(id.fam.map((q) => `${q.nuclide} ${nf(q.kev, 0)} keV`))].map(esc).join(", ")}: ${tr(`confirma a ${FAM_NAME[FAM[o.nuclide]]}.`)}`);

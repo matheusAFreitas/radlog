@@ -3500,7 +3500,13 @@ const I18N_EN = {
 "α β γ rX.": "α β γ rX.",
 "O que o isótopo emite. O RC102 enxerga bem γ e rX (fazem picos), vê β só os de energia alta, que atravessam a carcaça, e eles viram uma rampa lisa, sem pico (o elétron sai com energia diferente a cada vez), e não vê α. O símbolo em laranja é o que fez o pico. Clique num isótopo para ver por que ele foi declarado e de onde vem.": "What the isotope gives off. The RC102 sees γ and rX well (they make peaks); of β it sees only the high-energy ones that get through the case, and they become a smooth slope with no peak (the electron leaves with a different energy each time); it doesn't see α. The orange symbol is what made the peak. Click an isotope to see why it was named and where it comes from.",
 "O que o isótopo emite. O RadiaCode enxerga bem γ e rX (fazem picos), vê β só os de energia alta, que atravessam a carcaça, e eles viram uma rampa lisa, sem pico (o elétron sai com energia diferente a cada vez), e não vê α. O símbolo em laranja é o que fez o pico. Clique num isótopo para ver por que ele foi declarado e de onde vem.": "What the isotope gives off. The RC102 sees γ and rX well (they make peaks); of β it sees only the high-energy ones that get through the case, and they become a smooth slope with no peak (the electron leaves with a different energy each time); it doesn't see α. The orange symbol is what made the peak. Click an isotope to see why it was named and where it comes from.",
-"Sim": "Yes"
+"Sim": "Yes",
+"Em casa × fora de casa": "At home × away from home",
+"igual a casa": "same as at home",
+"Contagens por minuto só no pico, acima do contínuo de cada espectro. \"Mais\" ou \"menos\" só quando a diferença passa de 3σ.": "Counts per minute in the peak only, above each spectrum's continuum. \"More\" or \"less\" only when the difference goes beyond 3σ.",
+"mais que em casa": "more than at home",
+"menos que em casa": "less than at home",
+"Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar: os dois devem somar nesse pico.": "It emits near here and another of its peaks showed up, so it can't be ruled out: the two probably add up in this peak."
 },
 "patterns": [
 [
@@ -5587,6 +5593,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) mais alto é comum perto de granito, tijolo, cimento e solo\\.$",
+"Higher ${1} is common near granite, brick, cement and soil.",
+[
+" mais alto é comum perto de granito, tijolo, cimento e solo."
+]
+],
+[
 "Igual ao fundo: se o objeto emite algo, é menos que +",
 "^Igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM\\.$",
 "Same as background: if the object emits anything, it's less than +${1} CPM.",
@@ -5756,6 +5770,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) vêm do radônio: sobem em lugar fechado, subsolo e metrô\\.$",
+"${1} come from radon: they rise in closed places, basements and the subway.",
+[
+" vêm do radônio: sobem em lugar fechado, subsolo e metrô."
+]
+],
+[
 "ponto ",
 "^ponto ((?:(?! · ).)+?) dá ((?:(?! · ).)+?) CPM por µSv/h, fora da faixa plausível \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
 "point ${1} gives ${2} CPM per µSv/h, outside the plausible range (${3} to ${4})",
@@ -5854,6 +5876,14 @@ const I18N_EN = {
 [
 "Nos dias de chuva o fundo ficou ",
 "% abaixo dos dias secos."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) vem do radônio: sobe em lugar fechado, subsolo e metrô\\.$",
+"${1} comes from radon: it rises in closed places, basements and the subway.",
+[
+" vem do radônio: sobe em lugar fechado, subsolo e metrô."
 ]
 ],
 [
@@ -6519,6 +6549,22 @@ const I18N_EN = {
 "Fora de casa foi ",
 "% do tempo e ",
 "% da dose (µSv)."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) vem do tório: comum em granito, areia e tijolo\\.$",
+"${1} comes from thorium: common in granite, sand and brick.",
+[
+" vem do tório: comum em granito, areia e tijolo."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) vêm do tório: comum em granito, areia e tijolo\\.$",
+"${1} come from thorium: common in granite, sand and brick.",
+[
+" vêm do tório: comum em granito, areia e tijolo."
 ]
 ],
 [
@@ -11112,6 +11158,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Menos que em casa: ",
+"^Menos que em casa: ((?:(?! · ).)+?)\\.$",
+"Less than at home: ${1}.",
+[
+"Menos que em casa: "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -12037,6 +12091,14 @@ const I18N_EN = {
 ]
 ],
 [
+"menos que em casa ",
+"^menos que em casa ((?:(?! · ).)+?)$",
+"less than at home ${1}",
+[
+"menos que em casa "
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -12342,6 +12404,14 @@ const I18N_EN = {
 "${1} keV off",
 [
 " keV de diferença"
+]
+],
+[
+"mais que em casa ",
+"^mais que em casa ((?:(?! · ).)+?)$",
+"more than at home ${1}",
+[
+"mais que em casa "
 ]
 ],
 [
@@ -12964,6 +13034,14 @@ const I18N_EN = {
 "in the period (${1})",
 [
 "no período ("
+]
+],
+[
+"Sim, junto com ",
+"^Sim, junto com ((?:(?! · ).)+?)$",
+"Yes, together with ${1}",
+[
+"Sim, junto com "
 ]
 ],
 [

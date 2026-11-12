@@ -20,9 +20,14 @@ type TripLine struct {
 	Nuclide string  `json:"nuclide"`
 	Group   string  `json:"group"`
 	KeV     float64 `json:"kev"`
-	Pct     float64 `json:"pct"`  // saída ÷ casa − 1, em %, na janela do pico
-	More    bool    `json:"more"` // passou de 3σ acima de casa
+	Pct     float64 `json:"pct"`  // saída ÷ casa − 1, em %, só o pico (acima do contínuo)
+	More    bool    `json:"more"` // o pico passou de 3σ acima do de casa
+	Less    bool    `json:"less"` // o pico ficou 3σ abaixo do de casa
 	HasHome bool    `json:"hasHome"`
+	// contagens por minuto só no pico (acima do contínuo de cada espectro),
+	// na saída e em casa: "em casa × fora de casa" (2.69.1)
+	Out  float64 `json:"out"`
+	Home float64 `json:"home"`
 }
 
 // TripEvent é um aviso do aparelho no intervalo.
@@ -245,18 +250,27 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 		// "mais que em casa": as linhas que passam de 3σ acima de casa
 		vs := &MeasureSpectrum{A: ref, Obj: obj, ObjSec: objSec, Bg: bg, BgSec: bgSec}
 		more := vs.findPeaks()
+		// o pico de cada lado, cada um acima do próprio contínuo: o contínuo da
+		// saída e o de casa são diferentes (outro lugar, outro espalhamento), e
+		// comparar a janela inteira dava "-20%" num pico que subiu
+		objC := (&MeasureSpectrum{A: ref, Obj: obj}).snipContinuum()
+		bgC := (&MeasureSpectrum{A: ref, Obj: bg}).snipContinuum()
 		seen := map[float64]bool{}
 		add := func(pk SpecPeak) {
 			if seen[pk.KeV] {
 				return
 			}
 			seen[pk.KeV] = true
-			l := TripLine{Nuclide: pk.Nuclide, Group: pk.Group, KeV: pk.KeV}
-			for _, m := range more {
-				l.More = l.More || m.KeV == pk.KeV
+			l := TripLine{Nuclide: pk.Nuclide, Group: pk.Group, KeV: pk.KeV, HasHome: true}
+			o, oe := tripPeakRate(sp, obj, objC, objSec, pk.KeV)
+			h, he := tripPeakRate(sp, bg, bgC, bgSec, pk.KeV)
+			l.Out, l.Home = math.Max(o, 0), math.Max(h, 0)
+			if l.Home > 0 {
+				l.Pct = (l.Out/l.Home - 1) * 100
 			}
-			if o, h := tripWindow(sp, pk.KeV); h > 0 {
-				l.Pct, l.HasHome = (o/h-1)*100, true
+			if e := math.Hypot(oe, he); e > 0 {
+				z := (o - h) / e
+				l.More, l.Less = z > 3, z < -3
 			}
 			out.Lines = append(out.Lines, l)
 		}
@@ -280,24 +294,21 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 	out.Spec = sp
 }
 
-// tripWindow são as contagens por segundo da saída e de casa em volta de um pico.
-func tripWindow(s *MeasureSpectrum, kev float64) (obj, bg float64) {
+// tripPeakRate são as contagens por minuto do pico acima do contínuo (cont,
+// do SNIP), e a incerteza, numa janela de ±0,6 FWHM em volta da linha.
+func tripPeakRate(s *MeasureSpectrum, y []uint32, cont []float64, sec, kev float64) (rate, err float64) {
+	if sec <= 0 || len(cont) != len(y) {
+		return 0, 0
+	}
 	h := 0.6 * specFWHM(kev)
-	for i := range s.Obj {
+	var net, vr float64
+	for i := range y {
 		if e := s.energy(i); e >= kev-h && e < kev+h {
-			obj += float64(s.Obj[i])
-			if i < len(s.Bg) {
-				bg += float64(s.Bg[i])
-			}
+			net += float64(y[i]) - cont[i]
+			vr += float64(y[i])
 		}
 	}
-	if s.ObjSec > 0 {
-		obj /= s.ObjSec
-	}
-	if s.BgSec > 0 {
-		bg /= s.BgSec
-	}
-	return
+	return net / sec * 60, math.Sqrt(vr) / sec * 60
 }
 
 // tripWarn são os avisos do aparelho que entram no resumo: alarmes 1 e 2,

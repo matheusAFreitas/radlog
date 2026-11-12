@@ -5424,7 +5424,8 @@ const demoRc = () => {
       return {
         period: p, from: p.from, to, open: !p.to, defaultName: p.name === whKind(whOf(p)), rc, stepMs: step, homeUSv: 0.157, homeSrc: "gmc",
         spec: { a, obj, objSec: (to - p.from) / 1000, bg, bgSec: 86400, peaks }, specRows: 1,
-        lines: [{ nuclide: "K-40", group: "Potássio-40", kev: 1460.8, pct: 60, more: true, hasHome: true }, { nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", kev: 609.3, pct: 2, more: false, hasHome: true }, { nuclide: "Tl-208", group: "Tório-232 (série)", kev: 2614.5, pct: -3, more: false, hasHome: true }],
+        lines: [{ nuclide: "K-40", group: "Potássio-40", kev: 1460.8, pct: 60, more: true, hasHome: true, out: 4.8, home: 3.0 }, { nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", kev: 351.9, pct: -22, less: true, hasHome: true, out: 6.2, home: 7.95 },
+          { nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", kev: 609.3, pct: 2, more: false, hasHome: true, out: 9.1, home: 8.9 }, { nuclide: "Tl-208", group: "Tório-232 (série)", kev: 2614.5, pct: -3, more: false, hasHome: true, out: 1.2, home: 1.24 }],
         hasBat: true, bat0: 92, bat1: 71, hasTemp: true, tempMin: 24, tempMax: 31, tempMaxAt: p.from + (to - p.from) * 0.47, events: [],
       };
     },
