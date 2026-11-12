@@ -7,6 +7,8 @@ import (
 	"testing"
 	"time"
 
+	"radlog/internal/i18n"
+	"radlog/internal/pdf"
 	"radlog/internal/store"
 )
 
@@ -115,6 +117,9 @@ func TestReportNewPages(t *testing.T) {
 	if out := os.Getenv("REPORT2_OUT"); out != "" {
 		_ = os.WriteFile(out, full, 0o644)
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-resumo.pdf", short, 0o644)
+		r.Opts.Summary, r.pages = false, 0
+		en := pdf.WithTranslator(func(s string) string { return i18n.T("en", s) }, func() []byte { return renderReportPDF(r) })
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-en.pdf", en, 0o644)
 	}
 }
 
