@@ -2655,3 +2655,12 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
 .trip-dev dd { margin: 0; display: flex; flex-direction: column; gap: 3px; min-width: 0; }
 .trip-bat { display: block; height: 5px; border-radius: 3px; background: var(--border); overflow: hidden; }
 .trip-bat i { display: block; height: 100%; background: var(--accent); }
+
+/* ---------- diálogo do relatório (2.68.0, ux/pdf.html) ---------- */
+.rep-dlg { display: flex; flex-direction: column; gap: var(--space-3); }
+.rep-modes { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-2); }
+.rep-mode { display: flex; flex-direction: column; gap: 4px; text-align: left; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--surface-2); color: var(--text); cursor: pointer; font: inherit; }
+.rep-mode:hover { border-color: var(--border-hover); }
+.rep-mode[aria-checked="true"] { border-color: var(--accent-line); background: var(--accent-soft); }
+.rep-mode b { font-weight: 600; }
+@media (max-width: 560px) { .rep-modes { grid-template-columns: 1fr; } }

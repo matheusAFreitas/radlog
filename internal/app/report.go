@@ -94,6 +94,16 @@ type reportData struct {
 	// fita dos dias (2.42): um dia por linha, em pedaços de 10 min
 	Strip     DayStrip
 	StripDays []time.Time
+	// relatório novo (2.68, report2.go)
+	Opts      reportOpts
+	Verdict   reportDoseVerdict
+	Days2     []reportDay2
+	Alerts2   []reportAlert2
+	Trips     []reportTrip
+	Spec      *MeasureSpectrum
+	SpecLines []TripLine
+	Notes     []Note
+	pages     int // total de páginas (da primeira passada), para "página N de M"
 }
 
 type reportEpisode struct {
@@ -655,6 +665,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 			r.Strip.Marks = append(r.Strip.Marks, ds.Marks...)
 		}
 	}
+	a.reportExtras(&r, a.reportOptsSaved())
 	return r, nil
 }
 
@@ -769,6 +780,27 @@ var errReportBusy = errors.New("já estou gerando um relatório; espere ele abri
 // ExportReport salva o relatório (PDF) do período na pasta dos relatórios e
 // abre no leitor padrão. Devolve o caminho completo. Um por vez: um segundo
 // pedido enquanto o primeiro gera volta com errReportBusy.
+// ExportReportWith salva as escolhas do diálogo "Relatório (PDF)" (2.68) e
+// gera o relatório: mode "completo" ou "resumo", as anotações e o anexo das
+// configurações vigentes.
+func (a *App) ExportReportWith(fromMs, toMs int64, label, mode string, notes, cfg bool) (string, error) {
+	if mode != "resumo" {
+		mode = "completo"
+	}
+	a.mu.Lock()
+	a.settings.ReportMode, a.settings.ReportNotes, a.settings.ReportNoCfg = mode, notes, !cfg
+	a.saveSettingsLocked()
+	a.mu.Unlock()
+	return a.ExportReport(fromMs, toMs, label)
+}
+
+// reportOptsSaved são as últimas escolhas do diálogo.
+func (a *App) reportOptsSaved() reportOpts {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	return reportOpts{Summary: a.settings.ReportMode == "resumo", Notes: a.settings.ReportNotes, Cfg: !a.settings.ReportNoCfg}
+}
+
 func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
 	if !a.reportBusy.TryLock() {
 		return "", errReportBusy

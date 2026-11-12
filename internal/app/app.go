@@ -90,6 +90,11 @@ type Settings struct {
 	// pasta dos relatórios em PDF; vazio = Documentos/RadLog/Relatórios
 	// (report.go; só muda por ChooseReportDir)
 	ReportDir string `json:"reportDir"`
+	// relatório em PDF (2.68): "completo" ("") ou "resumo", anotações e o
+	// anexo das configurações vigentes (só mudam por ExportReportWith)
+	ReportMode  string `json:"reportMode"`
+	ReportNotes bool   `json:"reportNotes"`
+	ReportNoCfg bool   `json:"reportNoCfg"`
 }
 
 func defaultSettings() Settings {
@@ -630,6 +635,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	a.mu.Lock()
 	s.Port = a.settings.Port // a porta é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
+	s.ReportMode, s.ReportNotes, s.ReportNoCfg = a.settings.ReportMode, a.settings.ReportNotes, a.settings.ReportNoCfg
 	s.BgMoved = a.settings.BgMoved                                                       // só por MarkBgMoved/ClearBgMoved
 	s.SkipVersion = a.settings.SkipVersion                                               // muda só por SkipUpdate
 	s.RcOff, s.RcBLE, s.RcNoRaw = a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw // só por SetRadiacode/SetRcRaw

@@ -3000,6 +3000,7 @@ function wire() {
   setupMeasureHover();
   wirePeriods();
   wireTrip();
+  wireReportDlg();
   wireWhere();
   wireBusca();
 }
@@ -4146,8 +4147,35 @@ function exportMeasureReport(id, btn) {
   return runReport(btn, () => api.ExportMeasureReport(id));
 }
 
+// Relatório (PDF) (2.68): o diálogo pergunta completo × só o resumo, as
+// anotações e o anexo das configurações; o app lembra a última escolha
+let repPending = null;
 function exportReport(from, to, label, btn) {
-  return runReport(btn, () => api.ExportReport(Math.round(from), Math.round(to), label));
+  if (!api.ExportReportWith) return runReport(btn, () => api.ExportReport(Math.round(from), Math.round(to), label));
+  repPending = { from, to, label, btn };
+  const st = state.settings || {};
+  const mode = st.reportMode === "resumo" ? "resumo" : "completo";
+  document.querySelectorAll("#repModes .rep-mode").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === mode)));
+  $("repNotes").checked = !!st.reportNotes;
+  $("repCfg").checked = !st.reportNoCfg;
+  $("repSub").textContent = `${label} · ${dayLabel(from)} ${hhmm(from)} → ${dayLabel(Math.min(to, Date.now()) - 1)} ${hhmm(Math.min(to, Date.now()))}`;
+  $("repDlg").showModal();
+}
+function wireReportDlg() {
+  document.querySelectorAll("#repModes .rep-mode").forEach((b) => b.addEventListener("click", () => {
+    document.querySelectorAll("#repModes .rep-mode").forEach((x) => x.setAttribute("aria-checked", String(x === b)));
+  }));
+  $("btnRepGo").addEventListener("click", () => {
+    const q = repPending;
+    if (!q) return;
+    const mode = document.querySelector('#repModes .rep-mode[aria-checked="true"]').dataset.mode;
+    const notes = $("repNotes").checked, cfg = $("repCfg").checked;
+    Object.assign(state.settings, { reportMode: mode, reportNotes: notes, reportNoCfg: !cfg });
+    $("repDlg").close();
+    repPending = null;
+    runReport(q.btn, () => api.ExportReportWith(Math.round(q.from), Math.round(q.to), q.label, mode, notes, cfg));
+  });
+  $("btnRepCancel").addEventListener("click", () => { repPending = null; $("repDlg").close(); });
 }
 
 function renderReportDir(d) {
@@ -4728,6 +4756,7 @@ const demoRc = () => {
       return { entries: hits.slice().reverse().slice(0, q.limit || 1000), total: hits.length, counts, comps: Object.entries(comps).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count), buckets, bucketMs: step, from, to };
     },
     ExportReport: async () => { throw new Error("no modo navegador não dá para salvar arquivo; abra pelo app"); },
+    ExportReportWith: async () => { throw new Error("no modo navegador não dá para salvar arquivo; abra pelo app"); },
     GetReportDir: async () => ({ dir: settings.reportDir || "C:\\Users\\voce\\Documents\\RadLog\\Relatórios", default: !settings.reportDir }),
     ChooseReportDir: async () => { settings.reportDir = "D:\\Radiação\\Relatórios"; return api.GetReportDir(); },
     ResetReportDir: async () => { settings.reportDir = ""; return api.GetReportDir(); },

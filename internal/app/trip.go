@@ -137,14 +137,14 @@ func (a *App) tripSummary(p Period, now time.Time) TripSummary {
 	return out
 }
 
-// rcSpecRowsIn são as linhas gravadas do espectrograma que tocam [fromMs, toMs].
-func (a *App) rcSpecRowsIn(fromMs, toMs int64) []rcSpecRow {
+// rcSpecEach passa por cada linha gravada do espectrograma que toca
+// [fromMs, toMs], sem guardar todas (um mês são dezenas de milhares).
+func (a *App) rcSpecEach(fromMs, toMs int64, fn func(r rcSpecRow)) {
 	if a.dataDir == "" {
-		return nil
+		return
 	}
 	a.rcSpecFlush()
 	names, days := a.rcSpecFiles()
-	var rows []rcSpecRow
 	for i, name := range names {
 		// uma linha que cobre a saída inteira pode ser gravada no dia seguinte
 		if days[i].UnixMilli() > toMs+24*3600e3 || days[i].AddDate(0, 0, 1).UnixMilli() < fromMs {
@@ -152,12 +152,10 @@ func (a *App) rcSpecRowsIn(fromMs, toMs int64) []rcSpecRow {
 		}
 		for _, r := range a.rcSpecRead(name) {
 			if r.T > fromMs && float64(r.T)-r.S*1000 < float64(toMs) {
-				rows = append(rows, r)
+				fn(r)
 			}
 		}
 	}
-	sort.Slice(rows, func(i, j int) bool { return rows[i].T < rows[j].T })
-	return rows
 }
 
 // tripMinHome: com menos que isso de casa nas 24 h antes, procura em 7 dias.
@@ -166,72 +164,86 @@ const tripMinHome = 3600.0
 // tripSpectrum soma as linhas do espectrograma que caem na saída (com o
 // RC102 longe do PC, a primeira linha depois que ele volta cobre a saída
 // inteira) e compara com o espectro de casa antes da saída.
-func (a *App) tripSpectrum(out *TripSummary) {
-	// a linha da volta só é gravada quando o RC102 reconecta: procura até 1 dia depois
-	rows := a.rcSpecRowsIn(out.From-7*24*3600e3, out.To+24*3600e3)
-	if len(rows) == 0 {
-		return
-	}
-	// a calibração e o número de canais da linha mais nova da saída
+func (a *App) tripSpectrum(out *TripSummary) { a.spectrumVsHome(out, false) }
+
+// spectrumVsHome: com inside (o relatório de um período), "em casa" são as
+// linhas do próprio período fora das saídas; sem casa suficiente dentro,
+// vale o de antes, como na saída.
+func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 	inTrip := func(r rcSpecRow) bool {
 		r0, r1 := float64(r.T)-r.S*1000, float64(r.T)
 		ov := math.Min(r1, float64(out.To)) - math.Max(r0, float64(out.From))
 		// conta se a maior parte da linha cai na saída (ou se ela cobre quase toda a saída)
 		return ov > 0 && (ov >= 0.5*(r1-r0) || ov >= 0.8*float64(out.To-out.From))
 	}
-	var ref *rcSpecRow
-	for i := range rows {
-		if inTrip(rows[i]) {
-			ref = &rows[i]
-		}
-	}
-	if ref == nil || len(ref.C) == 0 {
-		return
-	}
-	nch := len(ref.C)
-	obj := make([]uint32, nch)
-	var objSec float64
-	for _, r := range rows {
-		if len(r.C) != nch || !inTrip(r) {
-			continue
-		}
-		for i, c := range r.C {
-			obj[i] += c
-		}
-		objSec += r.S
-		out.SpecRows++
-	}
-	if objSec <= 0 {
-		return
-	}
 	away := a.rcAwayChecker()
-	home := func(win int64) ([]uint32, float64) {
-		bg := make([]uint32, nch)
-		var sec float64
-		for _, r := range rows {
-			r0 := r.T - int64(r.S*1000)
-			if len(r.C) != nch || r.T > out.From || r0 < out.From-win || away(time.UnixMilli(r.T-int64(r.S*500))) {
-				continue
-			}
-			for i, c := range r.C {
-				bg[i] += c
-			}
-			sec += r.S
+	var (
+		nch           int
+		ref           [3]float64
+		obj, bgIn     []uint32
+		objSec, bgIns float64
+		bg24, bg7     []uint32
+		bg24s, bg7sec float64
+	)
+	addTo := func(dst []uint32, c []uint32) {
+		for i, v := range c {
+			dst[i] += v
 		}
-		return bg, sec
 	}
-	bg, bgSec := home(24 * 3600e3)
-	if bgSec < tripMinHome {
-		bg, bgSec = home(7 * 24 * 3600e3)
+	// a linha da volta só é gravada quando o RC102 reconecta: procura até 1 dia depois
+	a.rcSpecEach(out.From-7*24*3600e3, out.To+24*3600e3, func(r rcSpecRow) {
+		if len(r.C) == 0 {
+			return
+		}
+		if nch == 0 {
+			nch = len(r.C)
+			obj, bg24, bg7, bgIn = make([]uint32, nch), make([]uint32, nch), make([]uint32, nch), make([]uint32, nch)
+		}
+		if len(r.C) != nch {
+			return
+		}
+		if inTrip(r) {
+			addTo(obj, r.C)
+			objSec += r.S
+			ref = r.A
+			out.SpecRows++
+			if inside && !away(time.UnixMilli(r.T-int64(r.S*500))) {
+				addTo(bgIn, r.C)
+				bgIns += r.S
+			}
+			return
+		}
+		r0 := r.T - int64(r.S*1000)
+		if r.T > out.From || away(time.UnixMilli(r.T-int64(r.S*500))) {
+			return
+		}
+		if r0 >= out.From-7*24*3600e3 {
+			addTo(bg7, r.C)
+			bg7sec += r.S
+		}
+		if r0 >= out.From-24*3600e3 {
+			addTo(bg24, r.C)
+			bg24s += r.S
+		}
+	})
+	if objSec <= 0 || ref[1] <= 0 {
+		out.SpecRows = 0
+		return
 	}
-	sp := &MeasureSpectrum{A: ref.A, Obj: obj, ObjSec: objSec}
+	bg, bgSec := bg24, bg24s
+	if inside && bgIns >= tripMinHome {
+		bg, bgSec = bgIn, bgIns
+	} else if bgSec < tripMinHome {
+		bg, bgSec = bg7, bg7sec
+	}
+	sp := &MeasureSpectrum{A: ref, Obj: obj, ObjSec: objSec}
 	// as linhas da saída: o SNIP no espectro dela sozinho, como no Acumulado
-	alone := &MeasureSpectrum{A: ref.A, Obj: obj, ObjSec: objSec, Bg: make([]uint32, nch), BgSec: 1}
+	alone := &MeasureSpectrum{A: ref, Obj: obj, ObjSec: objSec, Bg: make([]uint32, nch), BgSec: 1}
 	sp.Peaks = alone.findPeaks()
 	if bgSec > 0 {
 		sp.Bg, sp.BgSec = bg, bgSec
 		// "mais que em casa": as linhas que passam de 3σ acima de casa
-		vs := &MeasureSpectrum{A: ref.A, Obj: obj, ObjSec: objSec, Bg: bg, BgSec: bgSec}
+		vs := &MeasureSpectrum{A: ref, Obj: obj, ObjSec: objSec, Bg: bg, BgSec: bgSec}
 		more := vs.findPeaks()
 		seen := map[float64]bool{}
 		add := func(pk SpecPeak) {

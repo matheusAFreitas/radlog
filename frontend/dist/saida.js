@@ -167,11 +167,13 @@ function renderTrip(s) {
   top.className = "trip-top";
   top.append(meta, acts);
   body.appendChild(top);
+  const other = !!(s.spec || s.hasBat || s.hasTemp || (s.events || []).length);
   if (!rc) {
     const p = document.createElement("p");
     p.className = "muted";
-    p.textContent = "Sem leitura do RC102 nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.";
+    p.textContent = other ? "Sem os minutos de dose do RC102 nessa saída: o histórico dele chega quando ele conecta no PC." : "Sem leitura do RC102 nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.";
     body.appendChild(p);
+    if (!other) return;
   } else {
     // os quatro números
     const k = document.createElement("div");

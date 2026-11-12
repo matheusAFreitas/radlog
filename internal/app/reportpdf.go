@@ -28,6 +28,9 @@ var (
 	cAlmBg  = pdf.Hex("#FBE1CC")
 	cDngBg  = pdf.Hex("#F8D5D6")
 	cExp    = pdf.Hex("#8A6BBE") // curva de Poisson
+	cRC     = pdf.Hex("#D9468F") // RC102 (rosa do app, mais escuro para o papel)
+	cAway   = pdf.Hex("#7A5BD0") // fora de casa
+	cAwayBg = pdf.Hex("#ECE5FB")
 )
 
 const (
@@ -40,12 +43,18 @@ type reportPDF struct {
 	y    float64
 	page int
 	r    reportData
+	// espectros das saídas, dois por linha (reportpdf2.go)
+	tripY, tripY2 float64
 }
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
 	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("RadLog "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
-	p.d.TextRight(pdf.W-pm, pdf.H-24, pdf.Sans, 7.5, cMuted, fmt.Sprintf("página %d", p.page))
+	pg := fmt.Sprintf("página %d", p.page)
+	if p.r.pages > 0 {
+		pg = fmt.Sprintf("página %d de %d", p.page, p.r.pages)
+	}
+	p.d.TextRight(pdf.W-pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pg)
 }
 
 func (p *reportPDF) need(h float64) {
@@ -267,6 +276,16 @@ func (p *reportPDF) chart(r reportData) {
 	}
 	bgU := r.BgU
 	top := math.Max(r.USt.Max*1.08, bgU*1.6)
+	// a curva do RC102 (2.68): média de cada passo do resumo, em rosa
+	var rcCurve []RcSumPt
+	if rc := r.S.RC; rc != nil && rc.Minutes > 0 {
+		rcCurve = rc.Curve
+		for _, q := range rcCurve {
+			if q.USv != nil {
+				top = math.Max(top, *q.USv*1.08)
+			}
+		}
+	}
 	if attn > 0 && r.USt.Max >= attn*0.6 {
 		top = math.Max(top, attn*1.1)
 	}
@@ -313,6 +332,19 @@ func (p *reportPDF) chart(r reportData) {
 		x1, x2 := xOf(g.From), xOf(g.To)
 		if x2-x1 >= 0.4 {
 			p.d.Rect(x1, y0, x2-x1, h, &cGap, nil)
+		}
+	}
+	// saídas de casa em lilás
+	for _, tr := range r.Trips {
+		f, t := tr.From, tr.To
+		if f.Before(from) {
+			f = from
+		}
+		if t.After(to) {
+			t = to
+		}
+		if x1, x2 := xOf(f), xOf(t); x2 > x1 {
+			p.d.Rect(x1, y0, x2-x1, h, &cAwayBg, nil)
 		}
 	}
 	// grade
@@ -389,6 +421,19 @@ func (p *reportPDF) chart(r reportData) {
 		}
 		p.d.Polyline(seg, 0.7, cAccent)
 	}
+	if len(rcCurve) > 0 {
+		step := time.Duration(r.S.StepMs) * time.Millisecond
+		var seg [][2]float64
+		for _, q := range rcCurve {
+			if q.USv == nil {
+				p.d.Polyline(seg, 0.9, cRC)
+				seg = nil
+				continue
+			}
+			seg = append(seg, [2]float64{xOf(time.UnixMilli(q.T).Add(step / 2)), yv(*q.USv)})
+		}
+		p.d.Polyline(seg, 0.9, cRC)
+	}
 	if clipped {
 		// marca os picos cortados (os 4 maiores, sem encavalar)
 		type spike struct {
@@ -452,7 +497,13 @@ func (p *reportPDF) chart(r reportData) {
 	} else {
 		item(cAccent, "µSv/h de cada minuto", false)
 	}
+	if len(rcCurve) > 0 {
+		item(cRC, "RC102 (média de cada "+fmtMinutes(int(r.S.StepMs/60000))+")", false)
+	}
 	item(cMuted, "fundo", true)
+	if len(r.Trips) > 0 {
+		item(cAwayBg, "fora de casa", false)
+	}
 	if attn > 0 && attn <= top {
 		item(cAtt, "atenção", true)
 	}
@@ -509,9 +560,9 @@ func (p *reportPDF) histChart(bins []histBin, x0, y0, w, h float64) {
 	}
 }
 
-func renderReportPDF(r reportData) []byte {
-	p := &reportPDF{d: pdf.New(), y: 50, page: 1, r: r}
+func (p *reportPDF) header() {
 	d := p.d
+	r := p.r
 	// cabeçalho
 	d.Text(pm, p.y+4, pdf.SansBold, 18, cInk, r.Title)
 	// período com nome comprido (ex.: "Fora de casa: …"): quebra, não corta
@@ -530,76 +581,17 @@ func renderReportPDF(r reportData) []byte {
 	d.Line(pm, p.y, pdf.W-pm, p.y, 1.5, cInk, false)
 	p.y += 12
 
-	if !r.HasData || r.St.N == 0 {
-		d.Text(pm, p.y+12, pdf.Sans, 10, cMuted, "Sem leituras guardadas neste período.")
-		p.footer()
-		return d.Bytes(pdf.Tr(r.Title), "RadLog "+AppVersion)
-	}
+}
+
+func (p *reportPDF) annexRC() {
+	d := p.d
+	r := p.r
 	st := r.St
-
-	// cartões 4 x 2
-	tg := 8.0
-	tw := (pdf.W - 2*pm - 3*tg) / 4
-	th := 68.0
-	bg, bgSub := "—", "ainda sem fundo"
-	if r.Bg != "" {
-		bg, bgSub = r.BgUSv+" µSv/h", "mediana de 30 dias ("+r.Bg+" CPM) · média do período "+r.VsBg
-	}
-	rain := r.Rain
-	if rain == "" {
-		rain = "—"
-	}
-	cover := fmt.Sprintf("%d dia(s) com dado", r.DaysData)
-	covSub := fmt.Sprintf("%d de %d min · ", st.N, r.HistMin)
-	if r.HistMin < r.SpanMin {
-		covSub = fmt.Sprintf("%d de %d min desde %s · ", st.N, r.HistMin, r.HistFrom.Format("02/01 15:04"))
-	}
-	if r.Away != "" {
-		cover += " · " + r.Away + " fora de casa"
-	}
-	ust := r.USt
-	maxU, maxAt := ust.Max, ust.MaxAt
-	maxSub := ust.MinAt.Format("02/01 15:04") + " · " + ust.MaxAt.Format("02/01 15:04")
-	if r.AlertPeakMaxU > maxU {
-		maxU, maxAt = r.AlertPeakMaxU, r.alertPeakAt
-		maxSub = ust.MinAt.Format("02/01 15:04") + " · " + maxAt.Format("02/01 15:04") + " · máx. = pico ao vivo (maior minuto: " + fmtU(ust.Max) + ")"
-	}
-	alertSub := "contados por episódio"
-	if r.AlertPeakMaxU > 0 {
-		alertSub += " · pico ao vivo " + fmtU(r.AlertPeakMaxU) + " µSv/h"
-	}
-	doseSub := "calculada pelo app · ≈ " + r.DoseYear + " mSv/ano (E)"
-	if r.Known != "" {
-		doseSub = r.Known + " · ≈ " + r.DoseYear + " mSv/ano (E)"
-	}
-	tiles := [][5]string{
-		{"Média (por minuto)", fmtU(ust.Mean) + " µSv/h", fmt.Sprintf("contagem %s CPM (M) · n = %d min", r.Avg, st.N), "m", "C"},
-		{"Dose no período", r.Dose + " µSv", doseSub, "m", "C"},
-		{"Fundo da casa", bg, bgSub, "m", "C"},
-		{"Mínimo · máximo", fmtU(ust.Min) + " · " + fmtU(maxU) + " µSv/h", maxSub, "m", "C"},
-		{"Alertas", r.Alerts, alertSub, "s", "C"},
-		{"Chuva", rain, "radar/modelo meteorológico", "s", "E"},
-		{"Cobertura", fmtBR(ratio(st.N, r.HistMin)*100, 0) + "%", covSub + cover, "s", "C"},
-		{"Medições de objeto", fmt.Sprint(len(r.Meas)), "no período", "m", "C"},
-	}
-	for i, t := range tiles {
-		x := pm + float64(i%4)*(tw+tg)
-		y := p.y + float64(i/4)*(th+tg)
-		f := pdf.MonoBold
-		if t[3] == "s" {
-			f = pdf.SansBold
-		}
-		p.tile(x, y, tw, th, t[0], t[1], t[2], f)
-		d.TextRight(x+tw-8, y+13, pdf.SansBold, 6.5, cMuted, t[4])
-	}
-	p.y += 2*th + tg
-	for i, ln := range wrapText(originLegend, pdf.Sans, 6.8, pdf.W-2*pm, 2) {
-		d.Text(pm, p.y+10+float64(i)*8.5, pdf.Sans, 6.8, cMuted, ln)
-	}
-	p.y += 22
-
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
 	if rc := r.S.RC; rc != nil && rc.Minutes > 0 {
-		p.section("RADIACODE 102 (DOSÍMETRO PESSOAL)")
+		p.section("A1 · RADIACODE 102 EM DETALHE")
 		u := func(v float64) string { return fmtBR(v, usvDec(v)) + " µSv/h" }
 		at := func(ms int64) string { return time.UnixMilli(ms).Format("02/01 15:04") }
 		vs := "fundo em casa ainda não calculado"
@@ -634,12 +626,16 @@ func renderReportPDF(r reportData) []byte {
 		}, 150)
 	}
 
-	p.section("µSv/h AO LONGO DO PERÍODO (TODAS AS LEITURAS POR MINUTO)")
-	p.chart(r)
-	p.stripDays(r)
+}
 
-	// estatística + histograma lado a lado
-	p.section("ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)")
+func (p *reportPDF) annexStats() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A1 · ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)")
 	p.need(165)
 	top := p.y
 	livePeak := "— (nenhum alerta ao vivo)"
@@ -683,8 +679,17 @@ func renderReportPDF(r reportData) []byte {
 	d.Text(hx+67, ly, pdf.Sans, 7, cMuted, "só acaso (Poisson, mesma média)")
 	p.y = math.Max(p.y+30, ly+8)
 
-	p.section("POR DIA")
+}
+
+func (p *reportPDF) annexDays() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
 	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A1 · POR DIA, NA CONTAGEM DO GMC-800")
+	trows = nil
 	starred := false
 	for _, dd := range r.Days {
 		mx := fmtU(dd.MaxU)
@@ -694,7 +699,7 @@ func renderReportPDF(r reportData) []byte {
 		}
 		trows = append(trows, []string{dd.Label, fmtU(dd.USv), fmtU(dd.MinU), mx, fmtBR(dd.Dose, 2), fmtBR(dd.Avg, 1), fmt.Sprintf("%d / 1440", dd.Minutes)})
 	}
-	cw := pdf.W - 2*pm
+	cw = pdf.W - 2*pm
 	p.table([]string{"Dia", "Média µSv/h (C)", "Mín µSv/h", "Máx µSv/h", "Dose µSv (C)", "Média CPM (M)", "Minutos"}, trows,
 		[]float64{cw * .18, cw * .15, cw * .12, cw * .12, cw * .14, cw * .13, cw * .16},
 		[]bool{false, true, true, true, true, true, true}, []bool{false, true, true, true, true, true, true}, nil)
@@ -704,7 +709,16 @@ func renderReportPDF(r reportData) []byte {
 		p.y += 14
 	}
 
-	p.section("FUNDO DA CASA: AGORA × 7 DIAS × 30 DIAS")
+}
+
+func (p *reportPDF) annexBg() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A2 · FUNDO DA CASA: AGORA × 7 DIAS × 30 DIAS")
 	trows = nil
 	for _, b := range r.BgRows {
 		if !b.OK {
@@ -726,7 +740,16 @@ func renderReportPDF(r reportData) []byte {
 		[]float64{cw * .32, cw * .15, cw * .13, cw * .18, cw * .22},
 		[]bool{false, true, true, true, true}, []bool{false, true, true, true, true}, nil)
 
-	p.section("ALERTAS (EPISÓDIOS)")
+}
+
+func (p *reportPDF) annexEpisodes() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A4 · EPISÓDIOS DE ALERTA DO GMC-800")
 	if len(r.Episodes) == 0 {
 		p.need(20)
 		d.Text(pm, p.y+12, pdf.Sans, 8.5, cMuted, "Nenhum alerta no período.")
@@ -789,7 +812,16 @@ func renderReportPDF(r reportData) []byte {
 		p.episodeCharts()
 	}
 
-	p.section("TEMPO ACIMA DOS LIMITES OPERACIONAIS")
+}
+
+func (p *reportPDF) annexAbove() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A3 · TEMPO ACIMA DOS LIMITES OPERACIONAIS")
 	trows = nil
 	aboveNow := false
 	for _, a := range r.Above {
@@ -817,7 +849,16 @@ func renderReportPDF(r reportData) []byte {
 		p.paragraph("Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações).", 6.8, cMuted)
 	}
 
-	p.section("LACUNAS (SEM LEITURA)")
+}
+
+func (p *reportPDF) annexGaps() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A5 · LACUNAS (SEM LEITURA)")
 	missing := r.HistMin - st.N
 	if missing < 0 {
 		missing = 0
@@ -849,8 +890,15 @@ func renderReportPDF(r reportData) []byte {
 			[]float64{cw * .3, cw * .3, cw * .4}, []bool{false, false, true}, []bool{true, true, true}, nil)
 	}
 
-	p.maturity()
+}
 
+func (p *reportPDF) measures() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
 	if len(r.Meas) > 0 {
 		p.section("MEDIÇÕES DE OBJETO")
 		for _, m := range r.Meas {
@@ -858,12 +906,34 @@ func renderReportPDF(r reportData) []byte {
 		}
 	}
 
-	p.cfgPeriod()
+}
 
-	p.section("CONFIGURAÇÕES E MÉTODO")
+func (p *reportPDF) annexConfig() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A7 · CONFIGURAÇÕES E MÉTODO")
 	p.kv(r.Config, 150)
 
-	p.section("LIMITAÇÕES")
+	p.y += 4
+	for i, ln := range wrapText(originLegend, pdf.Sans, 6.8, pdf.W-2*pm, 2) {
+		d.Text(pm, p.y+10+float64(i)*8.5, pdf.Sans, 6.8, cMuted, ln)
+	}
+	p.y += 22
+
+}
+
+func (p *reportPDF) annexLimits() {
+	d := p.d
+	r := p.r
+	st := r.St
+	cw := pdf.W - 2*pm
+	var trows [][]string
+	_, _, _, _ = d, st, cw, trows
+	p.section("A8 · LIMITAÇÕES")
 	for _, l := range []string{
 		"A dose refere-se ao ponto onde o contador está instalado (monitor de área), não à dose de pessoas próximas. Não constitui dosimetria pessoal.",
 		"A conversão CPM → µSv/h depende da calibração do tubo e da energia da radiação; para fontes com espectro diferente do de calibração, o erro pode ser grande.",
@@ -879,8 +949,6 @@ func renderReportPDF(r reportData) []byte {
 		}
 		p.y += float64(len(lines))*9.5 + 3
 	}
-	p.footer()
-	return d.Bytes(pdf.Tr(r.Title+" · "+r.Period), "RadLog "+AppVersion)
 }
 
 // episodeCharts desenha, para os episódios escolhidos, o µSv/h de 30 min antes
@@ -897,7 +965,7 @@ func (p *reportPDF) episodeCharts() {
 		return
 	}
 	d := p.d
-	p.section("EPISÓDIOS: 30 MIN ANTES E DEPOIS")
+	p.section("A4 · EPISÓDIOS: 30 MIN ANTES E DEPOIS")
 	if len(eps) < len(p.r.Episodes) {
 		p.need(14)
 		d.Text(pm, p.y+10, pdf.Sans, 7, cMuted, fmt.Sprintf("Os %d episódios mais graves e mais altos de %d.", len(eps), len(p.r.Episodes)))
@@ -1140,7 +1208,7 @@ func (p *reportPDF) paragraph(txt string, size float64, c pdf.RGB) {
 // cfgPeriod é a tabela das configurações vigentes no período (2.6).
 func (p *reportPDF) cfgPeriod() {
 	r := p.r
-	p.section("CONFIGURAÇÕES VIGENTES NO PERÍODO")
+	p.section("A7 · CONFIGURAÇÕES VIGENTES NO PERÍODO")
 	if len(r.CfgRows) == 0 {
 		msg := "Não há registro de configurações para este período (o histórico de configurações começa na versão 2.1)."
 		if !r.CfgFirst.IsZero() {
@@ -1177,7 +1245,7 @@ func (p *reportPDF) maturity() {
 	if len(m.GMC) == 0 {
 		return
 	}
-	p.section("HISTÓRICO DISPONÍVEL (MATURIDADE)")
+	p.section("A6 · HISTÓRICO DISPONÍVEL (MATURIDADE)")
 	cw := pdf.W - 2*pm
 	win := func(d int) string {
 		switch d {
@@ -1275,7 +1343,7 @@ func (p *reportPDF) stripDays(r reportData) {
 	const n = 144
 	lw := 52.0
 	x0, w := pm+lw, pdf.W-2*pm-lw
-	rh, gap := 9.0, 3.0
+	rh, gap := 6.0, 2.0
 	rank := map[string]int{"seguro": 1, "atencao": 2, "alarme": 3, "perigo": 4}
 	col := map[string]pdf.RGB{"seguro": cBand, "atencao": cAtt, "alarme": cAlarm, "perigo": cWarn}
 	wd := []string{"dom", "seg", "ter", "qua", "qui", "sex", "sáb"}
