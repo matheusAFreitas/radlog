@@ -1,0 +1,504 @@
+# Textos sem tradução que já existiam (ver scripts/i18n_check.py).
+% abaixo do normal
+% acima do normal
+(aproximada: objeto espalhado ou só uma distância medida)
+(curva do contador)
+(igual ao seu normal)
+(informado à mão)
+(já pareado)
+(menos que +{0})
+(sem resposta)
+({0}{1}% do seu normal)
+({0}× o fundo)
+) : tr("não apareceu")}
+); baixe pela página e confira
+); mande o arquivo para análise
+, ou configure o endereço Bluetooth.
+, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).
+, recalculando o histórico de antes dela
+,,,,sem registro (antes da 2.1),
+- **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor.
+0,00550 µSv/h por CPM no fundo (informado à mão)
+0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)
+0,01014 µSv/h por CPM no fundo (curva do contador)
+1. Configuração (GETCFG) lida duas vezes
+1ª leitura
+24 h até {0} {1} ·
+2ª leitura
+3. Comandos candidatos (não documentados)
+: ""} (fora do padrão)
+: "mediana de 120 a 30 dias atrás"} · {0} dias
+: maior que 25 MB
+: não encontrado
+A diferença ({0} ± {1}) ficou menor que duas vezes a incerteza. Meça mais tempo em cada fase, ou o material corta pouco essa radiação.
+A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.
+A noite (18h–6h) fica {0}% acima do dia (+{1} ± {2} {3}, {4} dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.
+A pressão mudou 1,2 hPa nas 12 horas antes.
+A subida é de 14 σ. O acaso não chega nisso.
+ALARME no {0} · {1} µSv/h
+ATENÇÃO no {0} · {1} µSv/h
+Abaixo do normal (seu normal: {0}) — sem problema
+Abrir a tela do GMC-800
+Acima do normal (seu normal: {0}) — dificilmente é só variação
+Agora, no GMC-800
+Agora, no RC102
+Alarme no RC102: 1,24 µSv/h (alarme 2 do aparelho: 1,20)
+Alarme no RC102: 1,25 µSv/h (alarme 2 do aparelho: 1,20)
+Anotação ·
+Aprendendo o normal dos dois em casa: 21 h juntos até agora; a vigia começa em
+Assim não dá para medir o corte. Aproxime a fonte do aparelho ou meça mais tempo em cada fase.
+Atenção no RC102: 0,412 µSv/h (alarme 1 do aparelho: 0,400)
+Atenção no {0}
+Automático (idioma do sistema) · Automatic
+Buscando agora…
+C:\Users\voce\Documents\RadLog\Versões
+C:\\Users\\voce\\Documents\\RadLog\\Relatórios\\gmc-medicao-{0}.pdf
+COM VOCÊ:
+CONFIGURATION
+CPM do ponto ${i + 1}
+Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações). *: há minutos sem registro do limite da época, comparados com o valor atual.
+Cada vez que a distância dobrou, a taxa acima do fundo caiu para cerca de ¼. A fonte se comporta como pequena: afastar um palmo já corta muito.
+Casa em {0}
+Centro e metrô
+Choveu 12,4 mm nas 4 horas antes, a partir de {0}. Esta é a hora em que o radônio costuma subir na sua casa. Os dois aparelhos subiram juntos, então é radiação de verdade.
+Choveu 12,4 mm nas 4 horas antes, a partir de {0}. Na sua casa, a chuva costuma subir o fundo uns 9%.
+Com o RC102, guarda também o espectro do fundo.
+Com o material no meio
+Com você em {0}
+Conclusão:
+Conferindo com o {0}: ele é menos sensível e precisa de mais uns 40 s.
+Conferindo com o {0}: precisa de mais uns 40 s.
+Configurações ›
+Configurações › Alarme
+Confira se o GMC-800 foi mexido ou ficou perto de alguma coisa nova, e o cabo. Ruído no tubo também faz a contagem pular.
+Confirmado pelo {0}: ele também subiu +{1}% sobre o fundo dele.
+Contador voltou à calibração
+Dados levados de "GMC Monitor" para "RadLog": {0} arquivos, conferidos; backup da pasta antiga em migracao/
+De {0} cm para {1} cm a radiação caiu
+De {0} para {1} a radiação caiu mais que o inverso do quadrado ({2}× contra {3}×): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.
+De {0} para {1} a radiação caiu menos que o inverso do quadrado ({2}× contra {3}×): o objeto deve ser espalhado, então a distância segura é só aproximada.
+De {0} para {1} a radiação caiu {2}× (o inverso do quadrado dá {3}×): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis.
+Deslocando o fundo no tempo, uma relação desse tamanho apareceu por acaso em {0}{1}as vezes.
+Diagnóstico da dose do GMC:
+ERRO interno em {0}: {1} vezes na última hora, não vou reiniciar
+ERRO interno em {0}: {1} {2}
+Ele assume enquanto o {0} não mede.
+Então pode ser só coincidência. Com mais dias a resposta fica mais clara.
+Espectrograma · com você
+Fundo da casa: {0} ({1} min até {2}).
+Fundo de casa em porcentagem da referência, 120 dias
+Fundo pronto. Agora o objeto na frente do aparelho{0}
+GMC-800 agora: {0} (calibração {1} µSv/h por CPM)
+GQ GMC-800 em casa · conferido {0}
+Hoje: {0} · calculada pelo app (o GMC não informa a dose que soma)
+Importar o log do app do RC102
+KCl: {0}Bq de K-40 esperados · eficiência medida em 1.460 keV:
+Ligue o RC102 no USB do PC
+Linhas que apareceram:
+Log do RC102 (*.csv)
+Log do RC102 importado ({0}): {1} registros novos de {2}
+Longe, a taxa ficou acima da curva. A fonte deve ser grande ou espalhada (piso, bancada, várias peças). Perto de uma fonte assim, afastar ajuda menos. Bem longe dela, a regra do quadrado volta a valer.
+Mais que em casa (acima de 3σ):
+Marcada como não comparável{0}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.
+Matheus Alves de Freitas
+Medir objeto · Banana com casca
+Medição de {0}{1}: {2}{3} ± {4} µSv/h sobre o fundo ({5}σ) — {6}
+Memória do GMC praticamente cheia: cerca de {0}% ocupada (estimado). Dados novos podem não ser gravados ou podem sobrescrever os antigos.
+Memória do contador
+Menos que em casa:
+Meça no lugar de sempre do contador.
+Mudança brusca por volta de {0}: o fundo passou de {1} para {2} {3} ({4}%), com {5} dias antes e {6} depois.
+Média: {0} → {1} µSv/h · máximo: {2} → {3} µSv/h
+Na sua casa
+Na última semana a razão ficou {0}{1}o normal. Se continuar assim mais uma semana, vira aviso.
+Nada foi gravado no contador: só comandos de leitura.
+Não conectou:
+Não consegui importar:
+Não consegui terminar a mudança da pasta de dados para RadLog:
+Não deu para aceitar conexões:
+Não deu para recomeçar:
+Não há RC102 em casa nas duas épocas para comparar.
+Não há registro de configurações para este período: o histórico de configurações começa em
+Nível:
+Nível: {0}
+O GMC-800 estava lendo {0}% {1} do RC102
+O RC102 em casa não mudou, então foi algo perto do GMC-800.
+O RC102 em casa subiu junto.
+O RC102 também subiu, 16% no mesmo trecho.
+O app usa {0} µSv/h por CPM ({1}).{2} O contador usa {3}. {4} Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.
+O episódio terminou porque parou de chegar leitura ({0}) às {1}, não porque a contagem voltou ao normal. Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.
+O fundo da casa (GMC-800) ficou em
+O fundo subiu 18% desde {0}
+O fundo subiu {0}{1}esde {2}
+O fundo {0} cerca de {1}% em {2} dias ({3} ± {4} {5} por dia, {6} dias completos).
+O período começa {0} antes do primeiro dado do GMC ({1} {2}); esse trecho não conta como lacuna.
+O {0} está com você, mas não manda leitura.
+O {0} está em casa, mas não manda leitura. Esses minutos ficam em branco.
+O {0} não viu: +2% sobre o fundo dele. Pode ser algo perto só do {1}, interferência ou o aparelho.
+Objeto na frente do aparelho{0}
+Os dois concordam: nos últimos 7 dias a razão ficou {0}{1}o normal.
+Os dois estão se afastando: {0}{1}o normal há duas semanas. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RC102 guardado em outro canto. Vale intercalibrar de novo.
+PERIGO no {0} · {1} µSv/h
+Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar {0} µSv/h (80% entre {1}).
+Pico: maior leitura ao vivo do alerta (janela de 60 s, consultada a cada segundo). Mín/méd/máx: minutos gravados no episódio. (c): episódio encontrado no histórico do contador. (d): episódio com interrupção de leitura (desconexão ou app fechado).
+Pode ter sido a posição entre uma medida e outra. Vale repetir com o aparelho sempre na mesma linha, medindo do centro do cristal.
+Português
+Poucos dias completos para falar de tendência: {0} de 7 (um dia conta com pelo menos 12 h medidas em casa).
+Precisa de pelo menos 3 dias com a pressão e o fundo em casa juntos. Até agora são {0} horas.
+Primeiro dado do GMC-800:
+Público
+RC102 (mensagem do aparelho, {0}): {1}
+RC102 (média de cada
+RC102 (você)
+RC102 desconectado:
+RC102 durante a saída
+RC102: a conexão pelo Bluetooth caiu em {0}; próxima tentativa em {1}
+RC102: voltou a conectar às {0} com "{1}" aberto; o app pergunta na tela Agora se você voltou para casa
+RC102: {0} registros da memória do aparelho repostos dos dados brutos ({1} minutos preenchidos, {2} linhas do log na hora errada retiradas)
+RC102: {0} registros do log recuperados dos dados brutos
+RC102: {0} totais de dose recuperados dos dados brutos
+RadLog {0} — diagnóstico da dose do GMC Contador: {1} Leituras: {2} e {3}
+Regra dos episódios: um alerta abre quando a leitura ao vivo atinge o limite do nível e fecha quando ela cai abaixo de 90{0}ele (histerese). Alertas que se encostam (o seguinte começa até 1 min após o fim do anterior) formam um episódio, com o nível mais alto, o início do primeiro e o fim do último. Se o contador desconecta com um alerta aberto e reconecta em até 15 min com a leitura ainda acima do limite, o episódio continua e o trecho sem leitura não entra na estatística; fechar o app encerra o episódio. Episódios encontrados no histórico do contador (c) usam as leituras por minuto e terminam após 70 min sem dado.
+Relação:
+Saída de
+Saída de ter 10/11
+Saúde do tubo: sem dado
+Saúde do tubo: {0} · {1}
+Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo
+Sem dado do GMC-800
+Sem leitura de {0} a {1} ({2}). Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio. O tempo sem leitura não entra no mínimo nem na média.
+Sem nada no meio
+Sem tendência: a média dos dias variou dentro do esperado (+0,03 ± 0,05 CPM por dia, +1,2% no período, {0} dias completos).
+Sem tendência: a média dos dias variou dentro do esperado ({0} ± {1} {2} por dia, {3}% no período, {4} dias completos).
+Sua dose no período foi {0} µSv, {1} do que você teria recebido ficando em casa ({2} µSv).
+Subiu de uma vez ({0}) e ficou. {1} Mudou o aparelho de lugar ou chegou algo novo perto dele?
+Só vale se o RC102 passou a última hora parado no lugar onde vai medir.
+TAMBÉM PERTO DO OBJETO:
+Um pouco acima do normal (seu normal: {0}) — pode ser só variação
+Valores tirados do histórico de configurações do app. Cada minuto e cada alerta foram avaliados com o valor vigente no momento; a calibração segue as versões descritas em "Calibração no período".
+Vibração: ${c.name}
+[data-no-tr]
+a assinatura do
+a partir de
+a partir de 100 CPM
+a partir de 120 CPM
+a partir de agora (
+a release não tem a assinatura (
+abaixo de {0}Bq
+abaixo de {0}Bq/kg
+acima do fundo
+acumulado do aparelho · {0} · {1} contagens · {2} cps
+aguardando
+alarme 1 de taxa de dose
+alarme 2 de taxa de dose
+alarme de bateria vazia
+alarme sirene volume barulho
+alterado em {0} de {1} para {2}{3}
+anotação:
+antes-de-restaurar
+aqui o fundo sobe junto com a pressão, ao contrário do comum.
+as-bad
+as-info small
+atualização: não deu para pôr como {0} ({1}); abrindo {2}
+até HH:MM
+até agora
+automático: parou quando deu para garantir que o objeto sobe menos que {0}{1}o fundo (+{2} µSv/h)
+buscando chuva{0}…
+calibracao-contador.json
+chuva ligada{0} · aguardando a primeira busca
+chuva-dias.json
+chuva-radar.json
+chuva.json
+chuva{0} ·
+cm o extra do objeto cai para 10{0}o fundo
+com o RC102, coleta de
+com você ·
+começou a carregar
+conferência falhou em {0}
+configuracao
+configuracoes-historico.jsonl
+configuração alterada
+contador-sincronizacao.json
+contagem fora da escala
+cópia da memória
+cópia feita, mas o backup da pasta antiga falhou ({0}); ela não foi apagada
+de fábrica
+desde o primeiro dado ({0}) · {1}{2}o período inteiro
+desde {0} {1} · {2} até agora
+desligou por bateria fraca
+detalhe de alerta
+detalhes de alerta
+dias com leitura
+dl-perigo
+do GMC-800 · o RC102 confirmou
+do RC102 · o GMC-800 confirmou
+do fundo da sua casa
+do período medido
+eficiência até agora: {0} ± {1}%{2}
+eletrodo de tório
+eletrodo de tório (
+em 90 dias ({0}{1}%).
+em formação
+em {0} · {1}
+em-dia
+erro em {0}: {1}
+espectro: formato de valor {0} desconhecido
+esse trecho não existe mais
+evento do usuário
+evento/alerta
+ficando em casa:
+filtrar por ${escHtml(e.comp)}
+fora da escala
+fora de casa:
+fora do esperado (≈ 1)
+fora-de-casa.json
+fundo da casa indisponível:
+fundo da casa: {0} cps · dureza 1,00 = {1}% acima de 1.500 keV
+fundo {0} µSv/h ({1}) · ≈ {2} mSv/ano nesse ritmo · {3}%
+fundo-pronto
+fundo.json
+github.com/go-ole/go-ole
+github.com/godbus/dbus/v5
+github.com/matheusAFreitas/radlog
+github.com/saltosystems/winrt-go
+github.com/saltosystems/winrt-go/windows/devices/bluetooth
+github.com/saltosystems/winrt-go/windows/devices/bluetooth/advertisement
+github.com/saltosystems/winrt-go/windows/devices/bluetooth/genericattributeprofile
+github.com/saltosystems/winrt-go/windows/foundation
+github.com/saltosystems/winrt-go/windows/storage/streams
+github.com/wailsapp/wails/v2
+github.com/wailsapp/wails/v2/pkg/options
+github.com/wailsapp/wails/v2/pkg/options/assetserver
+github.com/wailsapp/wails/v2/pkg/options/windows
+github.com/wailsapp/wails/v2/pkg/runtime
+h do fundo da sua casa
+hoje ·
+hoje às {0}
+hoje-ontem
+hora de voo
+hora,cps,usvh,n
+hora,dose,seg
+hora,tipo,usvh,usvh_erro_pct,cps,cps_erro_pct,contagens,temp_c,bateria_pct,fonte,dose_usv,dose_seg,evento,codigo,param,origem
+horas de voo
+identificado com confiança
+igual ao fundo: se o objeto emite algo, é menos que +{0}
+informe a {0}e KCl (100 para KCl puro)
+informe a {0}e ThO₂ do eletrodo (2 no WT20)
+intercalibração
+início
+isótopo com constante de dose conhecida (
+já na distância medida o extra do objeto fica abaixo de 10{0}o fundo
+já tem outro trecho marcado depois desse
+leitura {0}: veio {1} bytes, esperava {2}
+lv-perigo
+mSv/ano no ritmo do período
+mais alto por volta das {0}h ({1}{2}) · mais baixo por volta das {3}h ({4}{5})
+mais que em casa{0}
+marcada como não comparável com outras medições do mesmo objeto:
+mat aguardando
+mediana · média {0} · {1} min
+medição de objeto
+menos que em casa{0}
+mensagem de texto
+migrado-de-gmc-monitor.json
+migração GMC Monitor → RadLog adiada: {0} (usando a pasta antiga {1})
+migração GMC Monitor → RadLog: {0} (usando {1})
+migração GMC Monitor → RadLog: {0} arquivos copiados ({1} KB), {2} já existiam; backup {3}; pasta antiga apagada: {4} {5}
+min do fundo da sua casa
+minuto de leitura
+minutos de leitura
+mudei lugar mover aparelho gmc fundo referencia
+mudei o aparelho de lugar
+mudou no período ·
+mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)
+máx
+média {0} µSv/h{1}
+média {0} · mediana {1} µSv/h · n = {2} min
+média · máximo
+mês
+mín {0} · média {1} ({2} {3})
+na
+nenhum byte mudou: a dose acumulada não fica na configuração
+nenhum registro reconhecido no arquivo
+ninguém
+no
+no RC102
+no USB e no Bluetooth…
+no USB…
+no detector
+no período (radar/modelo meteorológico).
+no ritmo:
+no route
+no total
+no tubo
+no-alarm
+no-attn
+não confere; não vou instalar esta versão
+não consegui apagar a pasta antiga:
+não consegui ler a configuração
+não consegui ler o arquivo: {0}
+não consegui ler os serviços (status {0})
+não parece o log do app do RC102 (falta a coluna "Real time" ou "Time")
+não tem)
+o RC102 estava fora de casa?
+o aparelho recusou recomeçar o espectro
+o arquivo não tem registros
+o valor real é maior
+o zip ficou com {0} de {1} arquivos
+ontem às {0}
+os
+os/exec
+outra configuração (
+outra cópia do app ainda aberta
+parou de carregar
+pasta antiga apagada em
+pedaço sem cabeçalho ({0} bytes)
+pelo menos
+período fora de casa
+períodos fora de casa
+pico {0} às {1}
+pico {0}{1} às {2}
+pote de 500 mL encostado
+página N de M
+quando a pressão cai, o fundo sobe cerca de {0} h depois.
+quando a pressão cai, o fundo sobe quase ao mesmo tempo.
+r = {0} em 7 dias. O sinal negativo quer dizer que um sobe quando o outro desce. Com menos de 28 dias isso ainda é uma pista.
+raio-X de tórax
+raios-X de tórax
+rajadas suspeitas em 30 dias{0}
+rc-em made
+rc-em${s ===
+registrado em {0} como {1}{2}
+registro do RC102
+registros do RC102
+relatórios levados para Documentos/RadLog/Relatórios ({0})
+relatórios: não consegui levar tudo para Documentos/RadLog: {0}
+resposta maior que o anunciado ({0} > {1})
+saturado · o valor real é maior
+saudável (≈ 1)
+sem
+sem contagens · confira o aparelho
+sem pontos
+sem registro (histórico desde
+sem-gravacao
+silenciar alarme som parar
+sincronização com {0}: voltou a responder
+série
+só 0 min do RC102 em casa na última hora (precisa de 30)
+tamanho de resposta absurdo: {0}
+taxa de dose fora da escala
+tb-ico na
+testar alarme som sirene
+tomografia de tórax
+tomografias de tórax
+trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas
+um espectro por minuto · gravando desde {0} {1}
+uma-semana
+vem do
+você em {0}
+voltar casa chegar fora
+voltou ao fundo
+vêm
+{0} (recebi {1} de {2} bytes)
+{0} Contador e app usam o mesmo fator: {1} µSv/h por CPM. Os dois mostram o mesmo µSv/h.
+{0} Em uso a partir da aplicação.
+{0} Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.
+{0} alarme{1}
+{0} ao vivo ({1})
+{0} chuva(s) sem dados suficientes {1}
+{0} cps · {1} keV · {2} por min
+{0} de {1} minutos com os dois{2}
+{0} desde que foi zerada
+{0} em 30 dias ({1}). Normal.
+{0} fora do cálculo{1}
+{0} mais que o inverso do quadrado ({1} contra {2}): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.
+{0} menos que o inverso do quadrado ({1} contra {2}): o objeto deve ser espalhado, então a distância segura é só aproximada.
+{0} min em casa · {1} {2} com dado
+{0} na semana
+{0} no RC102: pico de {1}{2}
+{0} no mesmo período: {1} em {2} medidos
+{0} no {1} · {2} · pico {3}
+{0} variância/média · {1}
+{0} {1} (2ª leitura)
+{0} {1} (o inverso do quadrado dá {2}): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis.
+{0} {1} Vale refazer a intercalibração.
+{0} {1}, o primeiro às {2}
+{0} ± {1} sobre o fundo · {2}σ · {3}× o fundo
+{0} µSv em {1} · média {2} · máx {3}
+{0} µSv/h por CPM no fundo
+{0} µSv/h por CPM no fundo (versão {1}, {2}
+{0} µSv/h por CPM · {1}
+{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} CPM · n = {5} min
+{0} · no objeto
+{0} · {1} (minuto)
+{0} · {1} g · amostra {2} · fundo {3} · {4}{5}
+{0} · {1} keV · {2} de {3} {4}
+{0}% dos minutos
+{0}% medido · {1} de {2} min
+{0}% · {1} de {2} min desde o primeiro dado ({3}) · {4}{5}o período inteiro ({6} min)
+{0}, desconectado
+{0}: pico de {1}{2}
+{0}: reiniciando em {1} (erro interno nº {2} na última hora)
+{0}: {1} de no máximo {2}
+{0}: {1} {2}, nenhum trecho de 10 min acima do seguro.
+{0}: {1} {2}, {3} {4} com trecho acima do seguro.
+{0}alarme
+{0}anotação
+{0}atenção
+{0}chuva
+{0}fora de casa
+{0}h · mediana {1} · quartis {2}–{3} · média {4} {5} · {6} min em {7} {8}
+{0}h · sem dados
+{0}perigo
+{0}sem dado
+{n} mais alto é comum perto de granito, tijolo, cimento e solo.
+{n} {v} do radônio: sobe em lugar fechado, subsolo e metrô.
+{n} {v} do tório: comum em granito, areia e tijolo.
+}${/^estável/.test(n[3]) ?
+µSv/dia
+µSv/h do ponto ${i + 1}
+µSv/h médio (RC102) · cinza = sem dados
+µSv/h no RC102
+µSv/h por CPM (para gama do Cs-137)
+· Bluetooth: chega com até 1–2 s de atraso
+· acima do fundo ({0} cps a mais), sem linha conhecida ainda
+· chuva {0} (radar)
+· chuva {0} mm (modelo)
+· chuva, fora da conta
+· de {0} {1} a {2} {3}
+· do RC102:
+· esperando o sinal subir acima do fundo
+· fundo da casa
+· fundo da casa (
+· fundo de
+· histórico recalculado
+· histórico recalculado com a versão {0}
+· igual ao fundo
+· incerteza {0}% (para em 10%)
+· janela em formação ({0} de {1} dias)
+· mais alto por volta das {0}h, mais baixo por volta das {1}h
+· média ({0}) {1} ± {2} µSv/h
+· nada neste período
+· no objeto
+· os dois aparelhos
+· sumiu no fundo
+· tracejado: fundo de casa
+· {0} no objeto, {1} com você
+· {0} sem leitura
+· {0}% do período inteiro
+· ~{0} para decidir
+· às {0}
+Às 3h o seu fundo costuma ficar 7,5% acima da média do dia.
+ÀÁÂÃÄÇÈÉÊËÌÍÎÏÑÒÓÔÕÖÙÚÛÜàáâãäçèéêëìíîïñòóôõöùúûü
+É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo.
+Últimas 24 horas
+Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico.
+Último download em {0}. Depois dele, o app ficou {1} sem leitura (desde {2}); a memória do contador pode ter esses minutos: baixe o histórico.
+Último download em {0}. O contador não está gravando na memória: minutos sem o app não podem ser recuperados.
+Último: {0} · {1} no {2}
+Últimos 7 dias · em casa · {0}
+Últimos 7 dias · {0}
+às
+última leitura {0}
+— valor atual; sem registro do valor vigente no início do período
+≈ {0} {1} do fundo da sua casa

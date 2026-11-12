@@ -663,7 +663,7 @@ func (a *App) actMerge(name string, data []byte) {
 		cur, _ := os.ReadFile(a.actPath(name))
 		if cur == nil || newer(cur, data, at) {
 			os.MkdirAll(a.actPath(""), 0o755)
-			os.WriteFile(a.actPath(name), data, 0o644)
+			_ = writeFileAtomic(a.actPath(name), data, 0o644)
 		}
 	case actBgFile:
 		at := func(b []byte) int64 {
@@ -676,7 +676,7 @@ func (a *App) actMerge(name string, data []byte) {
 		cur, _ := os.ReadFile(a.actPath(name))
 		if cur == nil || newer(cur, data, at) {
 			os.MkdirAll(a.actPath(""), 0o755)
-			os.WriteFile(a.actPath(name), data, 0o644)
+			_ = writeFileAtomic(a.actPath(name), data, 0o644)
 		}
 	case actResFile:
 		cur, _ := os.ReadFile(a.actPath(name))
@@ -695,6 +695,6 @@ func (a *App) actMerge(name string, data []byte) {
 			}
 		}
 		os.MkdirAll(a.actPath(""), 0o755)
-		os.WriteFile(a.actPath(name), []byte(strings.Join(lines, "\n")+"\n"), 0o644)
+		_ = writeFileAtomic(a.actPath(name), []byte(strings.Join(lines, "\n")+"\n"), 0o644)
 	}
 }

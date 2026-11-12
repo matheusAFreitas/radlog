@@ -9,22 +9,22 @@ import (
 //
 // "2,9 µSv" não diz muito. Cada dose ganha duas linhas: quanto tempo de fundo
 // da casa isso é (a comparação mais honesta) e uma coisa conhecida da régua
-// (banana, voo, raio-X, tomografia) que dê um número entre 1 e 30. Nunca
+// (voo, raio-X, tomografia; a banana saiu na auditoria de 12/11: o corpo
+// mantém o potássio constante, comer banana não soma dose) que dê um número entre 1 e 30. Nunca
 // compara com acidentes. É ordem de grandeza: no máximo dois dígitos. A tela
 // faz a mesma conta em regua.js (doseKnown).
 
 type knownRef struct {
 	v         float64 // µSv
 	one, many string
-	half      string // "≈ meia banana" (só a menor)
+	half      string // "≈ meia hora de voo" (só a menor)
 }
 
 // da maior para a menor; a primeira que der entre 1 e 30 vale
 var doseKnownRefs = []knownRef{
 	{7000, "tomografia de tórax", "tomografias de tórax", ""},
 	{20, "raio-X de tórax", "raios-X de tórax", ""},
-	{4, "hora de voo", "horas de voo", ""},
-	{0.1, "banana", "bananas", "≈ meia banana"},
+	{4, "hora de voo", "horas de voo", "≈ meia hora de voo"},
 }
 
 // knownNum arredonda: meio a meio até 10, depois dois dígitos.
@@ -77,7 +77,7 @@ func doseHomeTime(uSv, bg float64) string {
 	return one(knownNum(d/365.25), "ano", "anos")
 }
 
-// doseKnownThing: "≈ 29 bananas", "≈ 3 horas de voo"; "" se nenhuma der.
+// doseKnownThing: "≈ 3 horas de voo", "≈ 1 raio-X de tórax"; "" se nenhuma der.
 func doseKnownThing(uSv float64) string {
 	if !(uSv > 0) {
 		return ""

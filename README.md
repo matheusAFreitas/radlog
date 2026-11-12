@@ -161,7 +161,7 @@ into a PDF, report or backup.
 
 ## Building
 
-Requires [Go](https://go.dev/dl/) 1.22 or newer. No Wails CLI or Node needed:
+Requires [Go](https://go.dev/dl/) 1.26 or newer (the CI uses 1.27). No Wails CLI or Node needed:
 the interface is plain HTML, CSS and JS in `frontend/dist/`.
 
 Windows (needs WebView2, which ships with Windows 10/11):

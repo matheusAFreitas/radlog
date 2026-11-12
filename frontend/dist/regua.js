@@ -19,7 +19,7 @@ const REGUA_TAXA = [
 ];
 
 const REGUA_DOSE = [
-  { v: 0.1, t: "Comer uma banana", d: "potássio-40 da banana; a \"dose de banana\" é uma unidade informal" },
+  { v: 0.1, t: "Comer uma banana", d: "potássio-40 da banana; o corpo mantém o potássio constante, então na prática comer banana não soma dose" },
   { v: 20, t: "Raio-X de tórax", d: "um exame comum, de frente" },
   { v: 1000, t: "Limite anual do público", d: "1 mSv por ano, além do fundo natural e de exames médicos" },
   { v: 7000, t: "Tomografia de tórax", d: "~7 mSv; varia com o aparelho e o protocolo" },
@@ -116,7 +116,6 @@ const DOSE_KNOWN = [
   { v: 7000, one: "tomografia de tórax", many: "tomografias de tórax" },
   { v: 20, one: "raio-X de tórax", many: "raios-X de tórax" },
   { v: 4, one: "hora de voo", many: "horas de voo", half: "≈ meia hora de voo" },
-  { v: 0.1, one: "banana", many: "bananas", half: "≈ meia banana" },
 ];
 
 // "≈ 1", "≈ 2,5", "≈ 12", "≈ 120": meio a meio até 10, depois dois dígitos
@@ -143,7 +142,7 @@ function doseHomeTime(uSv, bg) {
   return one(knownNum(d / 365.25), "ano", "anos");
 }
 
-// coisa conhecida: "≈ 29 bananas", "≈ 3 horas de voo"; "" se nenhuma der
+// coisa conhecida: "≈ 3 horas de voo", "≈ 1 raio-X de tórax"; "" se nenhuma der
 function doseKnownThing(uSv) {
   if (!(uSv > 0)) return "";
   for (const k of DOSE_KNOWN) {

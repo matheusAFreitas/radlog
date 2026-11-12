@@ -483,6 +483,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rcAlertsOff()
 		a.rcFlushMinute()
 		a.rcRawClose()
+		a.rcSpecClose()
 		a.rc.mu.Lock()
 		a.rc.dev = nil
 		a.rcDoseSaveLiveLocked(time.Now())

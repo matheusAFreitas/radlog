@@ -268,7 +268,12 @@ func (p *reportPDF) pageSummary() {
 	for _, l := range lines {
 		p.paragraph("• "+l, 8, cInk)
 	}
+	// os números são estimativas (auditoria de 12/11, R1)
+	p.paragraph(pdfEstimate, 7, cMuted)
 }
+
+// pdfEstimate: o µSv/h dos aparelhos é estimativa, não dose oficial (R1).
+const pdfEstimate = "Os µSv/h e as doses deste relatório são estimativas dos próprios aparelhos: eles medem a radiação no ambiente e são calibrados para o césio-137. Servem para comparar dias e lugares; não são uma dose oficial, que só vem de um dosímetro de trabalho lido por um laboratório."
 
 // ---------- página 2: por dia, alertas, saídas, medições, chuva, anotações ----------
 

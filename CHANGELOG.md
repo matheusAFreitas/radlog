@@ -1,5 +1,68 @@
 # Versões
 
+## 2.70.2
+Blocos 2 e 3 da auditoria de 12/11: ferramentas e textos.
+
+- Radioproteção: "Minha dose" ganha um "Como funciona" e o PDF uma frase
+  na primeira página dizendo que o µSv/h dos aparelhos é uma estimativa
+  (calibrados para o césio-137, medindo o ambiente): bom para comparar dias
+  e lugares, não é uma dose oficial.
+- A banana sai das comparações de dose ("≈ 29 bananas"). Fica só na régua,
+  em "Dose recebida", com a ressalva de que o corpo mantém o potássio
+  constante e comer banana não soma dose.
+- Emergência: o telefone 24 h passa a ser o da ANSN, (21) 99304-9453
+  (gov.br/ansn, página de emergência radiológica). Em inglês, a faixa
+  mostra o número geral de emergência (911 nos EUA, 112 na Europa) e diz
+  "no Brasil" antes dos números daqui.
+- Isótopos: o Pb-212 é "descendente" do tório-232 (era "neto") e o Ac-228
+  tem uma meia-vida só, 6,15 horas.
+- Em inglês, a frase da memória do GMC-800 sai traduzida inteira (saía
+  misturada). O modo demonstração não anuncia mais a "v1.18.0".
+- Dados: o arquivo do mês das leituras vai para o disco antes de trocar de
+  nome. As saídas de casa, as anotações e as medições ganham a mesma
+  proteção do config.json: gravação por arquivo temporário e, se o arquivo
+  estiver estragado, cópia em `.ilegivel` e aviso em Eventos, em vez de
+  começar vazio e sobrescrever. As medições de atividade do RC102 também
+  passam a ser gravadas por arquivo temporário.
+- Ferramentas: Go 1.27 (o 1.24 saiu de suporte) e Wails 2.17.1, fora da
+  faixa do aviso de segurança CVE-2026-34157, com as dependências
+  atualizadas. As ações do GitHub ficam presas pelo commit.
+- CI: teste de tela (as 11 páginas no modo demonstração, em 1280 e 412 px,
+  nos dois idiomas), testes no Windows, staticcheck, govulncheck e uma
+  conferência que reprova frase nova sem tradução. Código morto removido.
+
+**English**
+
+Blocks 2 and 3 of the 12 Nov audit: tools and texts.
+
+- Radiation protection: "My dose" gets a "How it works" and the PDF a line
+  on its first page saying that the devices' µSv/h is an estimate
+  (calibrated for caesium-137, measuring the surroundings): good for
+  comparing days and places, not an official dose.
+- The banana leaves the dose comparisons ("≈ 29 bananas"). It stays only on
+  the scale, under "Dose received", with the note that the body keeps its
+  potassium constant and eating a banana adds no dose.
+- Emergency: the 24 h number is now ANSN's, (21) 99304-9453 (gov.br/ansn,
+  radiological emergency page). In English the banner shows the general
+  emergency number (911 in the US, 112 in Europe) and says "in Brazil"
+  before the Brazilian numbers.
+- Isotopes: Pb-212 is a "descendant" of thorium-232 (it said "grandchild")
+  and Ac-228 has a single half-life, 6.15 hours.
+- In English, the GMC-800 memory sentence is translated whole (it came out
+  mixed). Demo mode no longer announces "v1.18.0".
+- Data: the readings month file reaches the disk before it is renamed.
+  Trips away from home, notes and measurements get the same protection as
+  config.json: written through a temporary file and, if the file is
+  damaged, a copy in `.ilegivel` and a notice in Events instead of starting
+  empty and overwriting it. RC102 activity measurements are also written
+  through a temporary file.
+- Tools: Go 1.27 (1.24 is out of support) and Wails 2.17.1, outside the
+  range of security advisory CVE-2026-34157, with dependencies updated.
+  GitHub actions are pinned by commit.
+- CI: screen test (the 11 pages in demo mode, at 1280 and 412 px, in both
+  languages), tests on Windows, staticcheck, govulncheck and a check that
+  fails on new text without a translation. Dead code removed.
+
 ## 2.70.1
 Primeiro bloco da auditoria de 12/11: dados e segurança. Nada muda na tela.
 

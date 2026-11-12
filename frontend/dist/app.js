@@ -2067,12 +2067,14 @@ function clearSnooze() {
 
 // ---------- o que fazer (orientações nos avisos) ----------
 //
-// Princípios de proteção radiológica: tempo, distância e blindagem. Contatos
-// da CNEN (gov.br/cnen, "Emergência radiológica"): horário comercial
-// (21) 2442-8539; plantão 24 h (21) 98368-0763.
+// Princípios de proteção radiológica: tempo, distância e blindagem. Contato
+// da ANSN, que assumiu a fiscalização da CNEN (gov.br/ansn, "Emergência
+// radiológica", modificada em 21/08/2026): plantão 24 h (21) 99304-9453,
+// coordenador do plantão (21) 99299-2620. Em inglês a faixa diz "no Brasil"
+// e dá os números gerais de emergência (auditoria de 12/11, R3 e R4).
 
 // Textos curtos: dá para ler em segundos, no meio de um alarme.
-const PHONES = "CNEN 24 h: (21) 98368-0763 · Bombeiros: 193";
+const PHONES = "ANSN 24 h: (21) 99304-9453 · Bombeiros: 193";
 
 function guidance(kind, usv) {
   if (kind === "perigo" && usv < 10) usv = 10; // perigo sempre usa as orientações fortes
@@ -3862,7 +3864,11 @@ async function refreshCounterSync(cs) {
   const memTxt = !cs.estPct ? "" : cs.fullIn > 0
     ? `A memória está cerca de ${pct}% ocupada (estimado desde o download) e enche em cerca de ${fmtDuration(cs.fullIn)} no modo "${cs.saveMode}".`
     : `A memória está cerca de ${pct}% ocupada (estimado desde o download).`;
-  $("iSync").textContent = cs.text + (memTxt ? " " + memTxt : "");
+  // duas frases em dois spans: juntas num texto só, a tradução não achava o
+  // molde e saía misturada (auditoria de 12/11, U3)
+  const iSync = $("iSync");
+  iSync.replaceChildren(Object.assign(document.createElement("span"), { textContent: cs.text }));
+  if (memTxt) iSync.append(" ", Object.assign(document.createElement("span"), { textContent: memTxt }));
   const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
   const show = cs.state === "pendente" || warnMem;
   const card = $("syncCard");
@@ -4343,7 +4349,9 @@ function demoPeakDetail(sp, peaks) {
 function makeDemoApi() {
   let demoSync = { id: "a", name: "ACENULL", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "parrot", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
-  let demoUpd = { current: "1.17.1", latest: "1.18.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
+  // versões que o modo demonstração mostra em "Atualizações e sobre"; ao refazer
+  // os prints do README, acerte para a versão atual e a seguinte (U4)
+  let demoUpd = { current: "2.70.0", latest: "2.71.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
     notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
@@ -5159,7 +5167,7 @@ const demoRc = () => {
     SetPeerAddrs: async () => demoSync,
     ForgetPeer: async () => demoSync,
     GetUpdateInfo: async () => demoUpd,
-    CheckUpdate: async () => { demoUpd = { ...demoUpd, latest: "1.18.0", available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
+    CheckUpdate: async () => { demoUpd = { ...demoUpd, available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },
     CancelUpdate: async () => { demoUpd = { ...demoUpd, state: "cancelado" }; emit("update", demoUpd); },
     StartUpdate: async () => {

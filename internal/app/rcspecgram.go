@@ -124,6 +124,14 @@ func (a *App) rcSpecAdd(serial string, now time.Time, s radiacode.Spectrum) {
 	l.gz.Flush() // uma linha por minuto: já fica legível se o app fechar à força
 }
 
+// rcSpecClose fecha o arquivo do espectrograma (ao desconectar: no Windows
+// um arquivo aberto não pode ser movido nem apagado).
+func (a *App) rcSpecClose() {
+	a.rc.spec.mu.Lock()
+	a.rc.spec.closeLocked()
+	a.rc.spec.mu.Unlock()
+}
+
 func (l *rcSpecLog) closeLocked() {
 	if l.gz != nil {
 		l.gz.Close()

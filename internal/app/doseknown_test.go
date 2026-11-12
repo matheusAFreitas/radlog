@@ -8,11 +8,11 @@ func TestDoseKnown(t *testing.T) {
 		usv  float64
 		want string
 	}{
-		{2.9, "≈ 1 dia do fundo da sua casa · ≈ 29 bananas"},
-		{0.72, "≈ 6 h do fundo da sua casa · ≈ 7 bananas"},
+		{2.9, "≈ 1 dia do fundo da sua casa · ≈ meia hora de voo"},
+		{0.72, "≈ 6 h do fundo da sua casa"},
 		{12, "≈ 4 dias do fundo da sua casa · ≈ 3 horas de voo"},
 		{60, "≈ 3 semanas do fundo da sua casa · ≈ 3 raios-X de tórax"},
-		{0.05, "≈ 25 min do fundo da sua casa · ≈ meia banana"},
+		{0.05, "≈ 25 min do fundo da sua casa"},
 		{0.001, "menos de 1 min do fundo da sua casa"},
 		{1051, "≈ 1 ano do fundo da sua casa"},
 		{20, "≈ 7 dias do fundo da sua casa · ≈ 1 raio-X de tórax"},
@@ -22,7 +22,7 @@ func TestDoseKnown(t *testing.T) {
 			t.Errorf("%v µSv: %q (queria %q)", c.usv, got, c.want)
 		}
 	}
-	if got := doseKnown(2.9, 0); got != "≈ 29 bananas" {
+	if got := doseKnown(8, 0); got != "≈ 2 horas de voo" {
 		t.Errorf("sem fundo: %q", got)
 	}
 	if doseKnown(0, bg) != "" {

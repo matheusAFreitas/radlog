@@ -787,7 +787,7 @@ porta travada	port locked
 porta travou	port locked up
 portas (depois de 3 erros)	ports (after 3 errors)
 potássio	potassium
-potássio-40 da banana; a "dose de banana" é uma unidade informal	potassium-40 in the banana; the "banana dose" is an informal unit
+potássio-40 da banana; o corpo mantém o potássio constante, então na prática comer banana não soma dose	potassium-40 in the banana; the body keeps its potassium constant, so in practice eating a banana adds no dose
 provavelmente um pouco radioativo; meça por mais tempo para confirmar	probably slightly radioactive; measure longer to confirm
 pósitron	positron
 radar sem imagens agora	no radar images right now
@@ -1294,8 +1294,6 @@ Modo demo	Demo mode
 Nenhuma cidade escolhida.	No city chosen.
 Nome	Name
 Objeto	Object
-Objeto desconhecido? CNEN 24 h: (21) 98368-0763 · Bombeiros: 193	Unknown object? CNEN 24 h: (21) 98368-0763 · Fire department: 193
-CNEN 24 h: (21) 98368-0763 · Bombeiros: 193	CNEN 24 h: (21) 98368-0763 · Fire department: 193
 Pausar	Pause
 Continuar	Resume
 Ponto	Point
@@ -4450,7 +4448,7 @@ Protactínio-234m	Protactinium-234m
 Tecnécio-99m	Technetium-99m
 Iodo-131	Iodine-131
 Uma parte pequena (0,012%) de todo potássio é radioativa desde a formação da Terra. Está no solo, no cimento, nos alimentos e no seu próprio corpo.	A small part (0.012%) of all potassium has been radioactive since the Earth formed. It is in soil, cement, food and your own body.
-"Neto" do tório-232, que existe nas rochas e no solo. Também chega pelo ar, depois do gás torônio (radônio-220).	A "grandchild" of thorium-232, which is in rocks and soil. It also arrives through the air, after thoron gas (radon-220).
+Descendente do tório-232, que existe nas rochas e no solo. Também chega pelo ar, depois do gás torônio (radônio-220).	A descendant of thorium-232, which is in rocks and soil. It also arrives through the air, after thoron gas (radon-220).
 Também da série do tório, perto do fim. O gama de 2.615 keV é o de maior energia que costuma aparecer na natureza.	Also from the thorium series, near the end. Its 2,615 keV gamma is the highest-energy one usually found in nature.
 Série do tório, logo depois do rádio-228.	Thorium series, right after radium-228.
 Série do tório, filho do Pb-212.	Thorium series, daughter of Pb-212.
@@ -4683,3 +4681,18 @@ ponteiros de relógio, radioterapia antiga	watch hands, early radiotherapy
 Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração	Couldn't read the settings (damaged file): they went back to the defaults. Check the alarms and the calibration
 o arquivo da release ({0}) não é o da versão {1}; baixe pela página e confira	the release file ({0}) isn't the one for version {1}; download it from the page and check it
 o arquivo da release ({0}) não é o da versão {1}; não vou instalar	the release file ({0}) isn't the one for version {1}; I won't install it
+configurações: não consegui ler o config.json ({0}); voltei ao padrão e guardei o arquivo em {1}	settings: couldn't read config.json ({0}); went back to the defaults and kept the file at {1}
+configurações: não consegui gravar o config.json: {0}	settings: couldn't save config.json: {0}
+Objeto desconhecido? ANSN 24 h: (21) 99304-9453 · Bombeiros: 193	Unknown object? Call your local emergency number (911 in the US, 112 in Europe). In Brazil: ANSN 24 h (21) 99304-9453 · fire department 193
+ANSN 24 h: (21) 99304-9453 · Bombeiros: 193	Local emergency number (911 in the US, 112 in Europe) · In Brazil: ANSN 24 h (21) 99304-9453, fire department 193
+ANSN 24 h: (21) 99304-9453	In Brazil: ANSN 24 h (21) 99304-9453
+Bombeiros: 193	Emergency: 911 (US), 112 (Europe), 193 (Brazil)
+Os µSv/h e as doses deste relatório são estimativas dos próprios aparelhos: eles medem a radiação no ambiente e são calibrados para o césio-137. Servem para comparar dias e lugares; não são uma dose oficial, que só vem de um dosímetro de trabalho lido por um laboratório.	The µSv/h values and doses in this report are estimates from the devices themselves: they measure radiation in the surroundings and are calibrated for caesium-137. They are good for comparing days and places; they are not an official dose, which only comes from a work dosimeter read by a laboratory.
+O µSv/h dos dois aparelhos é uma estimativa.	The µSv/h from both devices is an estimate.
+Eles medem a radiação no ambiente e são calibrados para a energia do césio-137; o GMC-800 não distingue energia, então pode ler um pouco a mais ou a menos conforme a fonte.	They measure radiation in the surroundings and are calibrated for the energy of caesium-137; the GMC-800 can't tell energies apart, so it may read a little high or low depending on the source.
+Os limites com que o app compara valem para a dose no corpo.	The limits the app compares against apply to the dose in the body.
+O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.	The number is good for comparing days and places, but it isn't an official dose: that only comes from a work dosimeter read by a laboratory.
+saídas de casa	trips away from home
+{0}: não consegui ler o {1} ({2}); comecei vazio e guardei o arquivo em {3}	{0}: couldn't read {1} ({2}); started empty and kept the file at {3}
+anotações	notes
+medições	measurements

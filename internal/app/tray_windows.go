@@ -40,7 +40,7 @@ func (a *App) startTray() {
 			systray.AddSeparator()
 			quit := systray.AddMenuItem(a.T("Sair"), a.T("Fecha o app (para de monitorar)"))
 			a.trayMu.Lock()
-			a.trayItems = []trayItem{{open, "Abrir o RadLog", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
+			a.tray.items = []trayItem{{open, "Abrir o RadLog", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
 			a.trayMu.Unlock()
 			a.trayReady.Store(true)
 			a.goSafe("trayRefresh", a.trayRefresh)
@@ -71,14 +71,14 @@ func (a *App) trayApply(tip string, plain bool, level, key string, mk func() []b
 	}
 	a.trayMu.Lock()
 	defer a.trayMu.Unlock()
-	if tip != a.trayTip {
-		a.trayTip = tip
+	if tip != a.tray.tip {
+		a.tray.tip = tip
 		systray.SetTooltip(tip)
 	}
-	if key == a.trayKey {
+	if key == a.tray.key {
 		return
 	}
-	a.trayKey = key
+	a.tray.key = key
 	if !plain {
 		systray.SetIcon(mk())
 		return
@@ -182,6 +182,14 @@ func autostartPath() string {
 	return strings.TrimSpace(v)
 }
 
+// trayState: o que a bandeja mostra agora (para trocar o idioma e não
+// redesenhar o ícone à toa)
+type trayState struct {
+	items []trayItem
+	tip   string
+	key   string
+}
+
 type trayItem struct {
 	it         *systray.MenuItem
 	title, tip string
@@ -194,9 +202,9 @@ func (a *App) trayRelabel() {
 	}
 	a.trayMu.Lock()
 	defer a.trayMu.Unlock()
-	for _, t := range a.trayItems {
+	for _, t := range a.tray.items {
 		t.it.SetTitle(a.T(t.title))
 		t.it.SetTooltip(a.T(t.tip))
 	}
-	a.trayTip, a.trayKey = "", "" // a próxima dica sai no idioma novo (e o número com . ou ,)
+	a.tray.tip, a.tray.key = "", "" // a próxima dica sai no idioma novo (e o número com . ou ,)
 }

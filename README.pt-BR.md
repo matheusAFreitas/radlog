@@ -163,7 +163,7 @@ para PDF, relatório ou backup.
 
 ## Compilar
 
-Precisa do [Go](https://go.dev/dl/) 1.22 ou mais novo. Não precisa do Wails
+Precisa do [Go](https://go.dev/dl/) 1.26 ou mais novo (o CI usa o 1.27). Não precisa do Wails
 CLI nem de Node: a interface é HTML, CSS e JS puros em `frontend/dist/`.
 
 Windows (precisa do WebView2, que já vem no Windows 10/11):
