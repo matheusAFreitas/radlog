@@ -17,9 +17,6 @@ import (
 // em /etc/udev/rules.d/99-radiacode.rules.
 
 const (
-	usbVID = 0x0483
-	usbPID = 0xf123
-
 	usbdevfsBulk             = 0xC0185502 // _IOWR('U', 2, struct usbdevfs_bulktransfer) em 64 bits
 	usbdevfsClaimInterface   = 0x8004550F
 	usbdevfsReleaseInterface = 0x80045510

@@ -374,13 +374,12 @@ type App struct {
 	quitting  atomic.Bool
 	trayReady atomic.Bool
 	trayMu    sync.Mutex
-	trayItems []trayItem // itens do menu da bandeja (para trocar o idioma)
-	trayTip   string
-	lang      string  // idioma da interface já resolvido ("pt" ou "en"); a tela informa
-	trayKey   string  // ícone atual (texto, nível, aparelho)
-	trayGmc   trayDev // última leitura do GMC-800 para o ícone
-	trayDemo  bool
-	notes     []Note // anotações no gráfico (notes.go)
+	//lint:ignore U1000 usado só no Windows (tray_windows.go)
+	tray     trayState // menu, dica e ícone da bandeja
+	lang     string    // idioma da interface já resolvido ("pt" ou "en"); a tela informa
+	trayGmc  trayDev   // última leitura do GMC-800 para o ícone
+	trayDemo bool
+	notes    []Note // anotações no gráfico (notes.go)
 
 	alarmOn  bool
 	attnOn   bool
@@ -810,7 +809,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 		info.USvPerCPM = cal.Points[0].USv / cal.Points[0].CPM
 	}
 	if dt, err := withTimeout(6*time.Second, d.DateTime); err == nil {
-		info.ClockDrift = math.Round(dt.Sub(time.Now()).Seconds())
+		info.ClockDrift = math.Round(time.Until(dt).Seconds())
 	}
 
 	stop := make(chan struct{})
@@ -1217,7 +1216,7 @@ func (a *App) SyncClock() (float64, error) {
 	}
 	drift := 0.0
 	if dt, err := d.DateTime(); err == nil {
-		drift = math.Round(dt.Sub(time.Now()).Seconds())
+		drift = math.Round(time.Until(dt).Seconds())
 	}
 	a.mu.Lock()
 	a.info.ClockDrift = drift

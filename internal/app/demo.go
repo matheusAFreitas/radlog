@@ -88,12 +88,6 @@ type demoData struct {
 	rc       *demoRc
 }
 
-func (a *App) demoActive() bool {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return a.demo.Active
-}
-
 // GetDemo devolve o estado do modo demo.
 func (a *App) GetDemo() DemoState {
 	a.mu.Lock()

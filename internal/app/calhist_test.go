@@ -177,13 +177,13 @@ func TestGMCDiagReport(t *testing.T) {
 	binary.BigEndian.PutUint32(cfg2[200:], math.Float32bits(1.25))
 	r1 := gmcDiagRound{cfg: cfg, ans: map[string][]byte{"GETVER": []byte("GMC-800Re1.23")}, err: map[string]string{}}
 	r2 := gmcDiagRound{cfg: cfg, ans: map[string][]byte{"GETVER": []byte("GMC-800Re1.23")}, err: map[string]string{}}
-	out, txt := gmcDiagReport(r1, r2)
+	out, _ := gmcDiagReport(r1, r2)
 	if out.CfgChanged != 0 || len(out.Unknown) != 0 || !strings.Contains(out.Verdict, "continua calculando") {
 		t.Fatalf("sem nada: %+v", out)
 	}
 	r2.cfg = cfg2
 	r2.ans["GETDOSE"] = []byte{0, 0, 1, 2}
-	out, txt = gmcDiagReport(r1, r2)
+	out, txt := gmcDiagReport(r1, r2)
 	if out.CfgChanged == 0 || len(out.Unknown) != 1 || !strings.Contains(txt, "float BE 0 → 1.25") || !strings.Contains(txt, "GETDOSE") {
 		t.Fatalf("com mudança: %+v\n%s", out, txt)
 	}

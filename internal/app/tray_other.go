@@ -14,7 +14,7 @@ func autostartPath() string                                                     
 func startupDisabled() bool                                                          { return false }
 func enableStartup() error                                                           { return nil }
 
-type trayItem struct{}
+type trayState struct{}
 
 func (a *App) trayRelabel() {}
 

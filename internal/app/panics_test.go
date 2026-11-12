@@ -75,7 +75,7 @@ func TestRunLoopStopsWhenClosing(t *testing.T) {
 func TestGoSafeRecovers(t *testing.T) {
 	a := newTestApp(t)
 	done := make(chan struct{})
-	a.goSafe("testeUmaVez", func() { defer close(done); var m map[string]int; m["x"] = 1 })
+	a.goSafe("testeUmaVez", func() { defer close(done); panic("teste") })
 	<-done
 	deadline := time.Now().Add(2 * time.Second)
 	for time.Now().Before(deadline) {

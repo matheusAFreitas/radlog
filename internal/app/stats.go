@@ -207,11 +207,6 @@ func (a *App) GetDataStart() int64 {
 	return time.Date(t.Year(), t.Month(), 1, 0, 0, 0, 0, t.Location()).UnixMilli()
 }
 
-// heatmapFrom monta o mapa de calor de days dias a partir de first (meia-noite).
-func (a *App) heatmapFrom(first time.Time, days int) (Heatmap, error) {
-	return a.heatmapFromDev(first, days, "")
-}
-
 // heatmapFromDev: dev "" = GMC; devRC = Radiacode (µSv/h nos valores).
 func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, error) {
 	var pts []store.Point
