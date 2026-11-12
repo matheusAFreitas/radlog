@@ -1537,109 +1537,112 @@
     <div class="set-tabs" role="tablist" aria-label="Partes do GMC-800"></div>
     <div class="set-tab" data-tab="con" hidden>
     <div class="set-cards">
-    <fieldset>
-      <legend>Contador</legend>
-      <dl class="info">
-        <dt>Modelo</dt><dd class="mono" id="iModel">—</dd>
-        <dt title="O número que o contador manda pela USB (GETSERIAL). É o que a GQ usa para gerar a atualização de firmware (o arquivo vem com esse número). A tela Sobre do GMC-800 mostra outro código, de 12 bytes.">Série (USB)</dt><dd class="mono" id="iSerial">—</dd>
-        <dt>Porta</dt><dd class="mono" id="iPort">—</dd>
-        <dt>Relógio</dt><dd class="mono" id="iClock">—</dd>
-        <dt>Calibração</dt><dd class="mono" id="iCal">—</dd>
-        <dt>Memória</dt><dd id="iSync">—</dd>
-      </dl>
-    </fieldset>
-
-    <fieldset>
-      <legend>Conexão</legend>
-      <label for="selPort">Porta</label>
-      <div class="row">
-        <select id="selPort"></select>
-        <button type="button" class="btn" id="btnRefresh">Atualizar</button>
-        <button type="button" class="btn" id="btnDetect">Procurar</button>
-      </div>
-      <div class="row">
-        <button type="button" class="btn accent" id="btnConnect">Conectar</button>
-        <span class="small muted" id="connMsg"></span>
-      </div>
-      <label class="toggle">
-        <span>Conectar sozinho ao abrir o app</span>
-        <input type="checkbox" id="chkAuto">
-      </label>
-    </fieldset>
+    <div class="set-col">
+      <fieldset>
+        <legend>Contador</legend>
+        <dl class="info">
+          <dt>Modelo</dt><dd class="mono" id="iModel">—</dd>
+          <dt title="O número que o contador manda pela USB (GETSERIAL). É o que a GQ usa para gerar a atualização de firmware (o arquivo vem com esse número). A tela Sobre do GMC-800 mostra outro código, de 12 bytes.">Série (USB)</dt><dd class="mono" id="iSerial">—</dd>
+          <dt>Porta</dt><dd class="mono" id="iPort">—</dd>
+          <dt>Relógio</dt><dd class="mono" id="iClock">—</dd>
+          <dt>Calibração</dt><dd class="mono" id="iCal">—</dd>
+          <dt>Memória</dt><dd id="iSync">—</dd>
+        </dl>
+      </fieldset>
     </div>
+    <div class="set-col">
+      <fieldset>
+        <legend>Conexão</legend>
+        <label for="selPort">Porta</label>
+        <div class="row">
+          <select id="selPort"></select>
+          <button type="button" class="btn" id="btnRefresh">Atualizar</button>
+          <button type="button" class="btn" id="btnDetect">Procurar</button>
+        </div>
+        <div class="row">
+          <button type="button" class="btn accent" id="btnConnect">Conectar</button>
+          <span class="small muted" id="connMsg"></span>
+        </div>
+        <label class="toggle">
+          <span>Conectar sozinho ao abrir o app</span>
+          <input type="checkbox" id="chkAuto">
+        </label>
+      </fieldset>
+    </div>
+  </div>
     </div>
     <div class="set-tab" data-tab="dev" hidden>
     <div class="devcfg" id="devcfg">
       <p class="small muted" id="dcIntro">Lendo a configuração do contador…</p>
     <div class="notice" id="dcProblems" hidden></div>
     <div class="dc-grid" id="dcBody">
-      <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
-        <legend>Memória</legend>
-        <label for="dcSave">Gravar leituras na memória</label>
-        <select id="dcSave" data-key="saveMode">
-          <option value="0">Desligada</option>
-          <option value="1">A cada segundo (CPS)</option>
-          <option value="2">A cada minuto (CPM) — recomendado</option>
-          <option value="3">A cada hora (CPM)</option>
-          <option value="4">Por limiar, a cada segundo</option>
-          <option value="5">Por limiar, a cada minuto</option>
-        </select>
-        <p class="small muted" id="dcSaveHint"></p>
-        <p class="small mono" id="dcMem"></p>
-        <div class="rec" id="dcRec" hidden>
-          <span>Recomendado: <strong>a cada minuto</strong>.</span>
-          <button type="button" class="btn small" id="dcUseRec">Usar o recomendado</button>
-        </div>
-      </fieldset>
-
-      <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
-        <legend>Medição</legend>
-        <label for="dcFet">Estimativa rápida (FET)</label>
-        <select id="dcFet" data-key="fastEstimate">
-          <option value="3">Dinâmica (padrão)</option>
-          <option value="5">5 s</option>
-          <option value="10">10 s</option>
-          <option value="15">15 s</option>
-          <option value="20">20 s</option>
-          <option value="30">30 s</option>
-          <option value="60">60 s (sem estimativa)</option>
-        </select>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
-        <legend>Alarme do aparelho</legend>
-        <label for="dcAlarm">Limite (CPM)</label>
-        <input type="number" id="dcAlarm" data-key="alarmCPM" min="1" max="999999" step="1" inputmode="numeric">
-        <label for="dcVol">Volume do alarme: <span class="mono" data-out="alarmVolume"></span></label>
-        <input type="range" id="dcVol" data-key="alarmVolume" min="0" max="15" step="1">
-        <label class="toggle"><span>Vibração</span><input type="checkbox" data-key="vibration"></label>
-      </fieldset>
-
-      <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
-        <legend>Som</legend>
-        <label class="toggle"><span>Clique a cada contagem</span><input type="checkbox" data-key="clickSound"></label>
-        <label for="dcVoice">Volume da voz: <span class="mono" data-out="voiceVolume"></span></label>
-        <input type="range" id="dcVoice" data-key="voiceVolume" min="0" max="15" step="1">
-      </fieldset>
-
-      <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
-        <legend>Tela</legend>
-        <label for="dcTheme">Tema</label>
-        <select id="dcTheme" data-key="theme"></select>
-        <label for="dcLight">Brilho: <span class="mono" data-out="backlight"></span></label>
-        <input type="range" id="dcLight" data-key="backlight" min="0" max="30" step="1">
-        <label for="dcPower">Economia de energia</label>
-        <select id="dcPower" data-key="powerSaving">
-          <option value="0">Escurecer a tela</option>
-          <option value="1">Apagar a tela</option>
-          <option value="2">Desligada</option>
-        </select>
-        <label class="toggle"><span>LED de contagem</span><input type="checkbox" data-key="led"></label>
-      </fieldset>
+      <div class="set-col">
+        <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
+          <legend>Memória</legend>
+          <label for="dcSave">Gravar leituras na memória</label>
+          <select id="dcSave" data-key="saveMode">
+            <option value="0">Desligada</option>
+            <option value="1">A cada segundo (CPS)</option>
+            <option value="2">A cada minuto (CPM) — recomendado</option>
+            <option value="3">A cada hora (CPM)</option>
+            <option value="4">Por limiar, a cada segundo</option>
+            <option value="5">Por limiar, a cada minuto</option>
+          </select>
+          <p class="small muted" id="dcSaveHint"></p>
+          <p class="small mono" id="dcMem"></p>
+          <div class="rec" id="dcRec" hidden>
+            <span>Recomendado: <strong>a cada minuto</strong>.</span>
+            <button type="button" class="btn small" id="dcUseRec">Usar o recomendado</button>
+          </div>
+        </fieldset>
+        <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
+          <legend>Medição</legend>
+          <label for="dcFet">Estimativa rápida (FET)</label>
+          <select id="dcFet" data-key="fastEstimate">
+            <option value="3">Dinâmica (padrão)</option>
+            <option value="5">5 s</option>
+            <option value="10">10 s</option>
+            <option value="15">15 s</option>
+            <option value="20">20 s</option>
+            <option value="30">30 s</option>
+            <option value="60">60 s (sem estimativa)</option>
+          </select>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">A estimativa projeta o CPM antes de fechar um minuto inteiro. Em 60 s a tela mostra só a contagem real do último minuto.</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
+          <legend>Som</legend>
+          <label class="toggle"><span>Clique a cada contagem</span><input type="checkbox" data-key="clickSound"></label>
+          <label for="dcVoice">Volume da voz: <span class="mono" data-out="voiceVolume"></span></label>
+          <input type="range" id="dcVoice" data-key="voiceVolume" min="0" max="15" step="1">
+        </fieldset>
+      </div>
+      <div class="set-col">
+        <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
+          <legend>Alarme do aparelho</legend>
+          <label for="dcAlarm">Limite (CPM)</label>
+          <input type="number" id="dcAlarm" data-key="alarmCPM" min="1" max="999999" step="1" inputmode="numeric">
+          <label for="dcVol">Volume do alarme: <span class="mono" data-out="alarmVolume"></span></label>
+          <input type="range" id="dcVol" data-key="alarmVolume" min="0" max="15" step="1">
+          <label class="toggle"><span>Vibração</span><input type="checkbox" data-key="vibration"></label>
+        </fieldset>
+        <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
+          <legend>Tela</legend>
+          <label for="dcTheme">Tema</label>
+          <select id="dcTheme" data-key="theme"></select>
+          <label for="dcLight">Brilho: <span class="mono" data-out="backlight"></span></label>
+          <input type="range" id="dcLight" data-key="backlight" min="0" max="30" step="1">
+          <label for="dcPower">Economia de energia</label>
+          <select id="dcPower" data-key="powerSaving">
+            <option value="0">Escurecer a tela</option>
+            <option value="1">Apagar a tela</option>
+            <option value="2">Desligada</option>
+          </select>
+          <label class="toggle"><span>LED de contagem</span><input type="checkbox" data-key="led"></label>
+        </fieldset>
+      </div>
     </div>
     <p class="small muted">Antes de gravar, o app salva uma cópia da configuração atual e confere lendo de volta. Se algo der errado, dá para voltar com "Restaurar cópia".</p>
     <div class="dc-foot">
@@ -1714,66 +1717,71 @@
     </div>
     <div class="set-tab" data-tab="tubo" hidden>
     <div class="set-cards">
-    <fieldset>
-        <legend>Tempo morto do tubo</legend>
-        <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
-        <label for="lvDTUs">Tempo morto τ (µs)</label>
-        <input type="number" id="lvDTUs" min="5" max="500" step="1" inputmode="decimal">
-        <div class="lv-dt-wrap"><table class="m-stats mono lv-dt" id="lvDTTable"></table></div>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
-          <p class="small muted">A calibração de fábrica do GMC-800 já compensa essas perdas nos pontos de cima (menos CPM por µSv/h em taxa alta). Com a correção ligada, o app converte em µSv/h pela reta do 1º ponto, para não compensar duas vezes. No fundo da casa não muda nada.</p>
-        </details>
-    </fieldset>
-
-    <fieldset>
-        <legend>Geiger saturado</legend>
-        <label for="lvSatMax">Fim da escala (µSv/h)</label>
-        <input type="number" id="lvSatMax" min="10" step="1" inputmode="decimal">
-        <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
-        <label for="lvSatDrop">Queda brusca a partir de (µSv/h)</label>
-        <input type="number" id="lvSatDrop" min="1" step="1" inputmode="decimal">
-        <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
-        <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Se a leitura passar disso e despencar em segundos, o tubo pode ter travado.</p>
-        </details>
-    </fieldset>
+    <div class="set-col">
+      <fieldset>
+          <legend>Tempo morto do tubo</legend>
+          <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
+          <label for="lvDTUs">Tempo morto τ (µs)</label>
+          <input type="number" id="lvDTUs" min="5" max="500" step="1" inputmode="decimal">
+          <div class="lv-dt-wrap"><table class="m-stats mono lv-dt" id="lvDTTable"></table></div>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Depois de cada pulso, o tubo fica "cego" por um instante e perde contagens em radiação alta. A correção usa a mesma conta do Rad Pro: real = medida ÷ (1 − medida × τ), até no máximo 10×. Padrão 200 µs, típico do M4011 (o Rad Pro cita 50 a 200 µs). Vale para a leitura ao vivo e para o histórico baixado daqui em diante; o que já está gravado não muda.</p>
+            <p class="small muted">A calibração de fábrica do GMC-800 já compensa essas perdas nos pontos de cima (menos CPM por µSv/h em taxa alta). Com a correção ligada, o app converte em µSv/h pela reta do 1º ponto, para não compensar duas vezes. No fundo da casa não muda nada.</p>
+          </details>
+      </fieldset>
     </div>
+    <div class="set-col">
+      <fieldset>
+          <legend>Geiger saturado</legend>
+          <label for="lvSatMax">Fim da escala (µSv/h)</label>
+          <input type="number" id="lvSatMax" min="10" step="1" inputmode="decimal">
+          <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
+          <label for="lvSatDrop">Queda brusca a partir de (µSv/h)</label>
+          <input type="number" id="lvSatDrop" min="1" step="1" inputmode="decimal">
+          <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
+          <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Se a leitura passar disso e despencar em segundos, o tubo pode ter travado.</p>
+          </details>
+      </fieldset>
+    </div>
+  </div>
     </div>
     <div class="set-tab" data-tab="test" hidden>
     <div class="set-cards">
-    <fieldset>
-      <legend>Testar o contador</legend>
-      <div class="row"><button type="button" class="btn" id="btnGmcDiag">Testar o contador</button><span class="small muted" id="gmcDiagOut"></span></div>
-      <p class="small tube-line"><span id="tubeLine">Saúde do tubo: sem dado</span> · <button type="button" class="link small-link" data-tubeopen="1">ver o cartão</button></p>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>Descobrir onde fica um ajuste</legend>
-
-        <p class="small muted">Para mapear ajustes que o app ainda não conhece (como ligar/desligar o alarme): tire a foto, mude só esse ajuste no menu do contador e compare.</p>
-        <div class="row">
-          <button type="button" class="btn" id="dcSnap">1. Tirar foto</button>
-          <button type="button" class="btn" id="dcDiff" disabled>2. Comparar</button>
-        </div>
-        <ul class="events mono small" id="dcDiffOut"></ul>
-    </fieldset>
-
-    <fieldset>
+    <div class="set-col">
+      <fieldset>
+        <legend>Testar o contador</legend>
+        <div class="row"><button type="button" class="btn" id="btnGmcDiag">Testar o contador</button><span class="small muted" id="gmcDiagOut"></span></div>
+        <p class="small tube-line"><span id="tubeLine">Saúde do tubo: sem dado</span> · <button type="button" class="link small-link" data-tubeopen="1">ver o cartão</button></p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">O protocolo da GQ não tem comando para a dose que o GMC-800 soma na tela, então a dose do GMC é calculada pelo app. Este teste só lê o contador (cerca de 2 min) e grava um relatório para conferir se há algum comando não documentado.</p>
+        </details>
+      </fieldset>
+    </div>
+    <div class="set-col">
+      <fieldset>
+        <legend>Descobrir onde fica um ajuste</legend>
+  
+          <p class="small muted">Para mapear ajustes que o app ainda não conhece (como ligar/desligar o alarme): tire a foto, mude só esse ajuste no menu do contador e compare.</p>
+          <div class="row">
+            <button type="button" class="btn" id="dcSnap">1. Tirar foto</button>
+            <button type="button" class="btn" id="dcDiff" disabled>2. Comparar</button>
+          </div>
+          <ul class="events mono small" id="dcDiffOut"></ul>
+      </fieldset>
+    </div>
+    <fieldset class="set-wide">
       <legend>Só leitura</legend>
         <dl class="info">
           <dt>Tensão do tubo</dt><dd class="mono" id="dcTube">—</dd>
         </dl>
         <p class="small muted">A tensão do tubo é ajuste de fábrica. Mudar sem instrumento para medir pode distorcer as leituras ou encurtar a vida do tubo, então o app não grava esse campo.</p>
       </fieldset>
-    </div>
+  </div>
     </div>
 
   </section>
@@ -1782,158 +1790,159 @@
     <div class="set-tabs" role="tablist" aria-label="Partes do RC102"></div>
     <div class="set-tab" data-tab="con" hidden>
     <div class="set-cards">
-    <fieldset>
-      <legend>Procurar o aparelho</legend>
-      <label class="toggle">
-        <span>Procurar o RC102</span>
-        <input type="checkbox" id="chkRcOn">
-      </label>
-      <p class="rc-set-state small" id="rcSetState"><span class="dot" id="rcSetDot"></span><span id="rcSetText"></span></p>
-      <button type="button" class="btn small" id="btnRcRetrySet">Procurar de novo</button>
-      <label for="rcBLE">Endereço Bluetooth (opcional)</label>
-      <div class="upd-row">
-        <input type="text" id="rcBLE" class="mono" placeholder="ex.: 52:43:01:02:03:04" autocomplete="off" spellcheck="false">
-        <button type="button" class="btn small" id="btnRcBLEScan">Procurar no Bluetooth</button>
-      </div>
-      <ul class="sync-list" id="rcBLEFound"></ul>
-      <p class="small muted" id="rcBLEInfo"></p>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">O app procura o RC102 sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>RC102 saturado</legend>
-      <label for="lvRcSat">Fim da escala (µSv/h)</label>
-      <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>Dados brutos</legend>
-      <label class="toggle">
-        <span>Guardar tudo o que o RC102 manda (dados brutos)</span>
-        <input type="checkbox" id="chkRcRaw">
-      </label>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta <span class="mono">radiacode/bruto</span> e entra no backup (alguns MB por dia).</p>
-      </details>
-    </fieldset>
+    <div class="set-col">
+      <fieldset>
+        <legend>Procurar o aparelho</legend>
+        <label class="toggle">
+          <span>Procurar o RC102</span>
+          <input type="checkbox" id="chkRcOn">
+        </label>
+        <p class="rc-set-state small" id="rcSetState"><span class="dot" id="rcSetDot"></span><span id="rcSetText"></span></p>
+        <button type="button" class="btn small" id="btnRcRetrySet">Procurar de novo</button>
+        <label for="rcBLE">Endereço Bluetooth (opcional)</label>
+        <div class="upd-row">
+          <input type="text" id="rcBLE" class="mono" placeholder="ex.: 52:43:01:02:03:04" autocomplete="off" spellcheck="false">
+          <button type="button" class="btn small" id="btnRcBLEScan">Procurar no Bluetooth</button>
+        </div>
+        <ul class="sync-list" id="rcBLEFound"></ul>
+        <p class="small muted" id="rcBLEInfo"></p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">O app procura o RC102 sozinho: no USB e, se tiver endereço Bluetooth, no Bluetooth. Se o celular estiver conectado nele, o PC tenta de novo depois e assume quando o celular soltar.</p>
+        </details>
+      </fieldset>
     </div>
+    <div class="set-col">
+      <fieldset>
+        <legend>RC102 saturado</legend>
+        <label for="lvRcSat">Fim da escala (µSv/h)</label>
+        <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend>Dados brutos</legend>
+        <label class="toggle">
+          <span>Guardar tudo o que o RC102 manda (dados brutos)</span>
+          <input type="checkbox" id="chkRcRaw">
+        </label>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Para descobrir o que mais dá para aproveitar do aparelho: cada registro como veio, o espectro a cada hora e, a cada conexão, todos os registradores e a cópia da memória. Fica na pasta <span class="mono">radiacode/bruto</span> e entra no backup (alguns MB por dia).</p>
+        </details>
+      </fieldset>
+    </div>
+  </div>
     </div>
     <div class="set-tab" data-tab="dev" hidden>
     <div class="devcfg rccfg" id="rcCfg">
       <p class="small muted" id="rcIntro">Conecte o RC102 para ver e mudar os ajustes do aparelho.</p>
       <div class="dc-grid" id="rcCfgBody">
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Alarmes de taxa de dose</legend>
-        <div class="rc-pair">
-          <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
-          <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
-        </div>
-        <p class="small muted" id="rcDRHint"></p>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RC102 no app usam estes dois números como atenção e alarme.</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Alarmes de dose acumulada</legend>
-        <div class="rc-pair">
-          <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
-          <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
-        </div>
-        <div class="rc-pair">
-          <label class="rc-check"><input type="checkbox" id="rcDS1Off"> alarme 1 desligado</label>
-          <label class="rc-check"><input type="checkbox" id="rcDS2Off"> alarme 2 desligado</label>
-        </div>
-        <p class="small muted" id="rcDSHint"></p>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Som e vibração</legend>
-        <label class="toggle"><span>Som</span><input type="checkbox" id="rcSoundOn"></label>
-        <label class="toggle"><span>Vibração</span><input type="checkbox" id="rcVibroOn"></label>
-        <div class="table-box">
-          <table class="rc-ctrl-tbl">
-            <thead><tr><th scope="col">Quando</th><th scope="col">Som</th><th scope="col">Vibração</th></tr></thead>
-            <tbody id="rcCtrlRows"></tbody>
-          </table>
-        </div>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Cliques: um estalo por fóton detectado, como num contador Geiger (só som).</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Tela do aparelho</legend>
-        <label for="rcBrt">Brilho: <span class="mono" id="rcBrtOut"></span></label>
-        <input type="range" id="rcBrt" min="0" max="9" step="1">
-        <label for="rcOff">Apagar a tela depois de</label>
-        <select id="rcOff"></select>
-        <label for="rcDir">Orientação</label>
-        <select id="rcDir">
-          <option value="0">Automática (gira com o aparelho)</option>
-          <option value="1">Virada para a direita</option>
-          <option value="2">Virada para a esquerda</option>
-        </select>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Brilho alto e tela acesa por mais tempo gastam mais bateria.</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Unidades na tela do aparelho</legend>
-        <label for="rcUnitDose">Dose</label>
-        <select id="rcUnitDose"><option value="1">Sievert (µSv, µSv/h)</option><option value="0">Röntgen (µR, µR/h)</option></select>
-        <label for="rcUnitCnt">Contagem</label>
-        <select id="rcUnitCnt"><option value="0">por segundo (cps)</option><option value="1">por minuto (cpm)</option></select>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">Só muda o que aparece no visor do RC102. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
-        </details>
-      </fieldset>
-
-      <fieldset data-dev="RC102" class="dev-card rc dc-edit">
-        <legend>Alarmes de contagem</legend>
-        <div class="rc-pair">
-          <label>Alarme 1 (cps)<input type="number" id="rcCR1" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
-          <label>Alarme 2 (cps)<input type="number" id="rcCR2" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
-        </div>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
-        </details>
-      </fieldset>
-      <fieldset data-dev="RC102" class="dev-card rc ro-card">
-        <legend>Só leitura</legend>
-        <dl class="info">
-          <dt>Calibração de energia</dt><dd class="mono" id="rcEnergy">—</dd>
-          <dt>Firmware</dt><dd class="mono" id="rcCfgFw">—</dd>
-        </dl>
-        <details class="how">
-          <summary>Como funciona</summary>
-          <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
-        </details>
-      </fieldset>
-      <fieldset data-dev="RC102" class="dev-card rc rc-reset-card">
-        <legend>Zerar a dose acumulada</legend>
-        <p class="small muted">Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.</p>
-        <button type="button" class="btn" id="rcResetDose" disabled>Zerar a dose</button>
-      </fieldset>
+      <div class="set-col">
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Alarmes de taxa de dose</legend>
+          <div class="rc-pair">
+            <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+            <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+          </div>
+          <p class="small muted" id="rcDRHint"></p>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">O aparelho apita quando a taxa de agora passa do valor. Os alertas do RC102 no app usam estes dois números como atenção e alarme.</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Alarmes de dose acumulada</legend>
+          <div class="rc-pair">
+            <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+            <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+          </div>
+          <div class="rc-pair">
+            <label class="rc-check"><input type="checkbox" id="rcDS1Off"> alarme 1 desligado</label>
+            <label class="rc-check"><input type="checkbox" id="rcDS2Off"> alarme 2 desligado</label>
+          </div>
+          <p class="small muted" id="rcDSHint"></p>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Avisa quando a dose somada desde o último zerar chega num total. Para comparar: o limite anual para o público é 1 mSv (1.000 µSv) além do fundo natural.</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Alarmes de contagem</legend>
+          <div class="rc-pair">
+            <label>Alarme 1 (cps)<input type="number" id="rcCR1" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
+            <label>Alarme 2 (cps)<input type="number" id="rcCR2" min="0.1" max="50000" step="0.1" inputmode="decimal"></label>
+          </div>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">O mesmo alarme de taxa, só que em fótons contados por segundo, sem converter para dose.</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc rc-reset-card">
+          <legend>Zerar a dose acumulada</legend>
+          <p class="small muted">Volta a dose do aparelho para zero, como no menu dele. Não tem volta. O histórico de dose do app guarda o total de antes e reconhece o zerar.</p>
+          <button type="button" class="btn" id="rcResetDose" disabled>Zerar a dose</button>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc ro-card">
+          <legend>Só leitura</legend>
+          <dl class="info">
+            <dt>Calibração de energia</dt><dd class="mono" id="rcEnergy">—</dd>
+            <dt>Firmware</dt><dd class="mono" id="rcCfgFw">—</dd>
+          </dl>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">A calibração de energia diz em que energia (keV) fica cada canal c do espectro. Vem da fábrica e o aparelho ajusta sozinho com a temperatura, então o app não grava.</p>
+          </details>
+        </fieldset>
       </div>
+      <div class="set-col">
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Som e vibração</legend>
+          <label class="toggle"><span>Som</span><input type="checkbox" id="rcSoundOn"></label>
+          <label class="toggle"><span>Vibração</span><input type="checkbox" id="rcVibroOn"></label>
+          <div class="table-box">
+            <table class="rc-ctrl-tbl">
+              <thead><tr><th scope="col">Quando</th><th scope="col">Som</th><th scope="col">Vibração</th></tr></thead>
+              <tbody id="rcCtrlRows"></tbody>
+            </table>
+          </div>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Cliques: um estalo por fóton detectado, como num contador Geiger (só som).</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Tela do aparelho</legend>
+          <label for="rcBrt">Brilho: <span class="mono" id="rcBrtOut"></span></label>
+          <input type="range" id="rcBrt" min="0" max="9" step="1">
+          <label for="rcOff">Apagar a tela depois de</label>
+          <select id="rcOff"></select>
+          <label for="rcDir">Orientação</label>
+          <select id="rcDir">
+            <option value="0">Automática (gira com o aparelho)</option>
+            <option value="1">Virada para a direita</option>
+            <option value="2">Virada para a esquerda</option>
+          </select>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Brilho alto e tela acesa por mais tempo gastam mais bateria.</p>
+          </details>
+        </fieldset>
+        <fieldset data-dev="RC102" class="dev-card rc dc-edit">
+          <legend>Unidades na tela do aparelho</legend>
+          <label for="rcUnitDose">Dose</label>
+          <select id="rcUnitDose"><option value="1">Sievert (µSv, µSv/h)</option><option value="0">Röntgen (µR, µR/h)</option></select>
+          <label for="rcUnitCnt">Contagem</label>
+          <select id="rcUnitCnt"><option value="0">por segundo (cps)</option><option value="1">por minuto (cpm)</option></select>
+          <details class="how">
+            <summary>Como funciona</summary>
+            <p class="small muted">Só muda o que aparece no visor do RC102. O app continua mostrando µSv/h. O Sievert mede o efeito no corpo; o Röntgen é uma unidade antiga, de exposição no ar (o aparelho usa 1 Sv = 100 R).</p>
+          </details>
+        </fieldset>
+      </div>
+    </div>
 
 
       <p class="small muted">Nada vai para o aparelho sem você clicar em "Gravar no RC102". Antes de gravar, o app salva uma cópia do que estava e depois lê de volta para conferir.</p>
@@ -1987,133 +1996,134 @@
       <p class="small" id="dangerNote" hidden></p>
       <p class="small muted">Os três valem para o GMC-800 e para o RC102. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
     </fieldset>
-
-    <fieldset>
-      <legend>Som</legend>
-      <label for="selSound">Som do alarme</label>
-      <select id="selSound">
-        <option value="sirene">Sirene contínua</option>
-        <option value="bipes">Bipes rápidos</option>
-        <option value="mudo">Sem som (só visual)</option>
-      </select>
-      <label class="toggle">
-        <span>Trazer a janela para a frente quando o alarme tocar</span>
-        <input type="checkbox" id="chkRaise">
-      </label>
-      <label for="lvSnooze">"Silenciar" cala o som por (minutos)</label>
-      <input type="number" id="lvSnooze" min="1" max="60" step="1" inputmode="numeric">
-      <p class="small muted">Depois do tempo, se continuar alto, volta a tocar.</p>
-      <div class="row-btns">
-        <button type="button" class="btn" id="btnTestAlarm">Testar alarme (5 s)</button>
-        <button type="button" class="btn" id="btnTestDanger">Testar alarme de perigo (5 s)</button>
-      </div>
-    </fieldset>
-
-    <fieldset id="devAlarms">
-      <legend>Alarmes que tocam nos aparelhos</legend>
-      <p class="small muted">Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:</p>
-      <dl class="info">
-        <dt>GMC-800</dt><dd class="mono" id="devAlGmc">—</dd>
-        <dt>RC102 1 e 2</dt><dd class="mono" id="devAlRc">—</dd>
-      </dl>
-      <div class="row-btns">
-        <button type="button" class="link small-link" data-setgo="gmc/dev">Mudar no GMC-800</button>
-        <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RC102</button>
-      </div>
-    </fieldset>
-
-    <fieldset class="set-wide">
-      <legend>Fora de casa</legend>
-      <label for="numAwayAsk">Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)</label>
-      <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
-    </fieldset>
+    <div class="set-col">
+      <fieldset>
+        <legend>Som</legend>
+        <label for="selSound">Som do alarme</label>
+        <select id="selSound">
+          <option value="sirene">Sirene contínua</option>
+          <option value="bipes">Bipes rápidos</option>
+          <option value="mudo">Sem som (só visual)</option>
+        </select>
+        <label class="toggle">
+          <span>Trazer a janela para a frente quando o alarme tocar</span>
+          <input type="checkbox" id="chkRaise">
+        </label>
+        <label for="lvSnooze">"Silenciar" cala o som por (minutos)</label>
+        <input type="number" id="lvSnooze" min="1" max="60" step="1" inputmode="numeric">
+        <p class="small muted">Depois do tempo, se continuar alto, volta a tocar.</p>
+        <div class="row-btns">
+          <button type="button" class="btn" id="btnTestAlarm">Testar alarme (5 s)</button>
+          <button type="button" class="btn" id="btnTestDanger">Testar alarme de perigo (5 s)</button>
+        </div>
+      </fieldset>
     </div>
+    <div class="set-col">
+      <fieldset id="devAlarms">
+        <legend>Alarmes que tocam nos aparelhos</legend>
+        <p class="small muted">Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:</p>
+        <dl class="info">
+          <dt>GMC-800</dt><dd class="mono" id="devAlGmc">—</dd>
+          <dt>RC102 1 e 2</dt><dd class="mono" id="devAlRc">—</dd>
+        </dl>
+        <div class="row-btns">
+          <button type="button" class="link small-link" data-setgo="gmc/dev">Mudar no GMC-800</button>
+          <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RC102</button>
+        </div>
+      </fieldset>
+      <fieldset>
+        <legend>Fora de casa</legend>
+        <label for="numAwayAsk">Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)</label>
+        <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
+      </fieldset>
+    </div>
+  </div>
   </section>
   <section class="set-sec" data-sec="app" hidden>
     <h2 class="set-sec-title">Janela e tela</h2>
     <div class="set-cards">
-    <fieldset>
-      <legend>Janela</legend>
-      <label class="toggle">
-        <span>Ao fechar, continuar rodando na bandeja (perto do relógio)</span>
-        <input type="checkbox" id="chkTray">
-      </label>
-      <label class="toggle">
-        <span>Iniciar com o Windows (abre na bandeja)</span>
-        <input type="checkbox" id="chkAutostart">
-      </label>
-      <label class="toggle">
-        <span>Mostrar a leitura no ícone da bandeja</span>
-        <input type="checkbox" id="chkTrayNum">
-      </label>
-      <label for="selTrayDev">Aparelho no ícone</label>
-      <select id="selTrayDev">
-        <option value="">Automático (o mais grave)</option>
-        <option value="gmc">GQ GMC-800</option>
-        <option value="radiacode">Radiacode 102</option>
-      </select>
-      <p class="small muted">O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.</p>
-      <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
-        <p class="small muted">O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>Pulso da contagem</legend>
-      <label class="toggle">
-        <span>Piscar o mostrador a cada contagem</span>
-        <input type="checkbox" id="chkPulse" checked>
-      </label>
-      <p class="small muted">O anel do meio pisca de leve a cada contagem do aparelho. Desliga sozinho se o Windows estiver sem efeitos de animação.</p>
-      <label class="toggle">
-        <span>Mostrar a fita dos últimos 10 segundos</span>
-        <input type="checkbox" id="chkPulseStrip">
-      </label>
-      <p class="small muted">Um risco por contagem, embaixo do cartão de cada aparelho no Agora e na tela do aparelho. Só aparece com o pulso ligado: desligando o pulso, a fita some e esta opção fica apagada.</p>
-      <label for="selPulseLogo">O logo pisca com</label>
-      <select id="selPulseLogo">
-        <option value="">O mesmo aparelho do ícone da bandeja</option>
-        <option value="gmc">GQ GMC-800</option>
-        <option value="radiacode">Radiacode 102</option>
-        <option value="nenhum">Nenhum (logo parado)</option>
-      </select>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Uma piscada é sempre uma contagem. Com o fundo de casa, o GMC-800 dá uma piscada a cada 3 segundos, mais ou menos; numa subida, as piscadas aceleram e dá para perceber antes de ler o número. As piscadas não vêm em ritmo certo: é o decaimento radioativo sendo aleatório.</p>
-        <p class="small muted">No GMC-800 cada piscada é uma contagem de verdade; só o instante dentro do segundo é sorteado.</p>
-        <p class="small muted">O RC102 manda a taxa, não cada contagem: o ritmo é o real, as piscadas são sorteadas a partir dele.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>Tamanho e espaço</legend>
-      <span class="small muted" id="uiScaleLbl">Tamanho de tudo (texto, números e gráficos)</span>
-      <div class="seg ui-seg" role="group" aria-labelledby="uiScaleLbl" id="segUiScale"><button type="button" data-v="0.9">90%</button><button type="button" data-v="1">100%</button><button type="button" data-v="1.08">108%</button><button type="button" data-v="1.15">115%</button><button type="button" data-v="1.3">130%</button><button type="button" data-v="1.5">150%</button></div>
-      <input type="hidden" id="valUiScale">
-      <p class="small muted">Atalhos: <kbd>Ctrl</kbd> <kbd>+</kbd>, <kbd>Ctrl</kbd> <kbd>−</kbd> e <kbd>Ctrl</kbd> <kbd>0</kbd> para voltar a 100%.</p>
-      <span class="small muted" id="uiDensLbl">Espaço entre as coisas</span>
-      <div class="seg ui-seg" role="group" aria-labelledby="uiDensLbl" id="segUiDensity"><button type="button" data-v="confortavel">confortável</button><button type="button" data-v="">normal</button><button type="button" data-v="compacto">compacto</button></div>
-      <input type="hidden" id="valUiDensity">
-      <p class="small muted">Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; "Salvar" guarda neste PC.</p>
-    </fieldset>
-
-    <fieldset>
-      <legend>Idioma</legend>
-      <label for="selLang">Idioma do app</label>
-      <select id="selLang" data-no-tr>
-        <option value="auto">Automático (idioma do sistema) · Automatic</option>
-        <option value="pt">Português</option>
-        <option value="en">English</option>
-      </select>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.</p>
-      </details>
-    </fieldset>
-
+    <div class="set-col">
+      <fieldset>
+        <legend>Janela</legend>
+        <label class="toggle">
+          <span>Ao fechar, continuar rodando na bandeja (perto do relógio)</span>
+          <input type="checkbox" id="chkTray">
+        </label>
+        <label class="toggle">
+          <span>Iniciar com o Windows (abre na bandeja)</span>
+          <input type="checkbox" id="chkAutostart">
+        </label>
+        <label class="toggle">
+          <span>Mostrar a leitura no ícone da bandeja</span>
+          <input type="checkbox" id="chkTrayNum">
+        </label>
+        <label for="selTrayDev">Aparelho no ícone</label>
+        <select id="selTrayDev">
+          <option value="">Automático (o mais grave)</option>
+          <option value="gmc">GQ GMC-800</option>
+          <option value="radiacode">Radiacode 102</option>
+        </select>
+        <p class="small muted">O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.</p>
+        <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
+          <p class="small muted">O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.</p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend>Idioma</legend>
+        <label for="selLang">Idioma do app</label>
+        <select id="selLang" data-no-tr>
+          <option value="auto">Automático (idioma do sistema) · Automatic</option>
+          <option value="pt">Português</option>
+          <option value="en">English</option>
+        </select>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Muda na hora (a janela recarrega). Vale para a tela, os relatórios em PDF, o menu da bandeja e o registro técnico. O arquivo log.txt continua em português.</p>
+        </details>
+      </fieldset>
+    </div>
+    <div class="set-col">
+      <fieldset>
+        <legend>Pulso da contagem</legend>
+        <label class="toggle">
+          <span>Piscar o mostrador a cada contagem</span>
+          <input type="checkbox" id="chkPulse" checked>
+        </label>
+        <p class="small muted">O anel do meio pisca de leve a cada contagem do aparelho. Desliga sozinho se o Windows estiver sem efeitos de animação.</p>
+        <label class="toggle">
+          <span>Mostrar a fita dos últimos 10 segundos</span>
+          <input type="checkbox" id="chkPulseStrip">
+        </label>
+        <p class="small muted">Um risco por contagem, embaixo do cartão de cada aparelho no Agora e na tela do aparelho. Só aparece com o pulso ligado: desligando o pulso, a fita some e esta opção fica apagada.</p>
+        <label for="selPulseLogo">O logo pisca com</label>
+        <select id="selPulseLogo">
+          <option value="">O mesmo aparelho do ícone da bandeja</option>
+          <option value="gmc">GQ GMC-800</option>
+          <option value="radiacode">Radiacode 102</option>
+          <option value="nenhum">Nenhum (logo parado)</option>
+        </select>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Uma piscada é sempre uma contagem. Com o fundo de casa, o GMC-800 dá uma piscada a cada 3 segundos, mais ou menos; numa subida, as piscadas aceleram e dá para perceber antes de ler o número. As piscadas não vêm em ritmo certo: é o decaimento radioativo sendo aleatório.</p>
+          <p class="small muted">No GMC-800 cada piscada é uma contagem de verdade; só o instante dentro do segundo é sorteado.</p>
+          <p class="small muted">O RC102 manda a taxa, não cada contagem: o ritmo é o real, as piscadas são sorteadas a partir dele.</p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend>Tamanho e espaço</legend>
+        <span class="small muted" id="uiScaleLbl">Tamanho de tudo (texto, números e gráficos)</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uiScaleLbl" id="segUiScale"><button type="button" data-v="0.9">90%</button><button type="button" data-v="1">100%</button><button type="button" data-v="1.08">108%</button><button type="button" data-v="1.15">115%</button><button type="button" data-v="1.3">130%</button><button type="button" data-v="1.5">150%</button></div>
+        <input type="hidden" id="valUiScale">
+        <p class="small muted">Atalhos: <kbd>Ctrl</kbd> <kbd>+</kbd>, <kbd>Ctrl</kbd> <kbd>−</kbd> e <kbd>Ctrl</kbd> <kbd>0</kbd> para voltar a 100%.</p>
+        <span class="small muted" id="uiDensLbl">Espaço entre as coisas</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uiDensLbl" id="segUiDensity"><button type="button" data-v="confortavel">confortável</button><button type="button" data-v="">normal</button><button type="button" data-v="compacto">compacto</button></div>
+        <input type="hidden" id="valUiDensity">
+        <p class="small muted">Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; "Salvar" guarda neste PC.</p>
+      </fieldset>
+    </div>
     <fieldset class="set-wide">
       <legend>Chuva no gráfico</legend>
       <label class="toggle">
@@ -2137,41 +2147,48 @@
         <p class="small muted">Marca a chuva da sua cidade no gráfico de CPM. Com o app aberto, lê o radar meteorológico (RainViewer) a cada 10 min. Para os horários sem radar (app fechado, histórico baixado do contador), usa o modelo do tempo do Open-Meteo, menos preciso. A chuva traz para o chão produtos do radônio do ar e costuma dar picos leves que somem em algumas horas.</p>
       </details>
     </fieldset>
-    </div>
+  </div>
   </section>
   <section class="set-sec" data-sec="data" hidden>
     <h2 class="set-sec-title">Dados e backup</h2>
     <div class="set-cards">
-    <fieldset>
-      <legend>Backup</legend>
-      <div class="row">
-        <button type="button" class="btn" id="btnBackup">Fazer backup (.zip)</button>
-        <button type="button" class="btn" id="btnImportBackup">Importar backup…</button>
-      </div>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Importar junta só o que falta: o que já existe aqui não muda.</p>
-      </details>
-    </fieldset>
-
-    <fieldset>
-      <legend>Relatórios</legend>
-      <p class="small mono path" id="reportDir">—</p>
-      <div class="row">
-        <button type="button" class="btn" id="btnReportDir">Escolher pasta…</button>
-        <button type="button" class="btn" id="btnOpenReportDir">Abrir pasta</button>
-        <button type="button" class="btn" id="btnResetReportDir" hidden>Voltar para a padrão</button>
-      </div>
-      <label class="toggle">
-        <span>Gerar o relatório da medição de objeto sozinho, no fim da medição</span>
-        <input type="checkbox" id="chkMeasReport">
-      </label>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
-      </details>
-    </fieldset>
-
+    <div class="set-col">
+      <fieldset>
+        <legend>Backup</legend>
+        <div class="row">
+          <button type="button" class="btn" id="btnBackup">Fazer backup (.zip)</button>
+          <button type="button" class="btn" id="btnImportBackup">Importar backup…</button>
+        </div>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Importar junta só o que falta: o que já existe aqui não muda.</p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend>Pasta dos dados</legend>
+        <p class="small muted mono path" id="dataDir">—</p>
+        <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
+      </fieldset>
+    </div>
+    <div class="set-col">
+      <fieldset>
+        <legend>Relatórios</legend>
+        <p class="small mono path" id="reportDir">—</p>
+        <div class="row">
+          <button type="button" class="btn" id="btnReportDir">Escolher pasta…</button>
+          <button type="button" class="btn" id="btnOpenReportDir">Abrir pasta</button>
+          <button type="button" class="btn" id="btnResetReportDir" hidden>Voltar para a padrão</button>
+        </div>
+        <label class="toggle">
+          <span>Gerar o relatório da medição de objeto sozinho, no fim da medição</span>
+          <input type="checkbox" id="chkMeasReport">
+        </label>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.</p>
+        </details>
+      </fieldset>
+    </div>
     <fieldset class="set-wide">
       <legend>Sincronização</legend>
       <label class="toggle">
@@ -2205,18 +2222,10 @@
         <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
       </details>
     </fieldset>
-
-    <fieldset>
-      <legend>Dados</legend>
-      <p class="small muted mono path" id="dataDir">—</p>
-      <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
-    </fieldset>
-
     <fieldset id="setMature" class="set-wide">
       <legend>Histórico disponível</legend>
       <div class="sum-notes" id="sumMature"><p class="small muted">Carregando…</p></div>
     </fieldset>
-
     <fieldset id="setCfgHist" class="set-wide">
       <legend>Histórico de configurações</legend>
       <div class="cfg-hist-wrap"><table class="cfg-hist"><thead><tr><th>quando</th><th>o quê</th><th>de</th><th>para</th><th>origem</th></tr></thead><tbody id="cfgHistBody"></tbody></table></div>
@@ -2226,40 +2235,43 @@
         <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
       </details>
     </fieldset>
-    </div>
+  </div>
   </section>
   <section class="set-sec" data-sec="about" hidden>
     <h2 class="set-sec-title">Atualizações e sobre</h2>
     <div class="set-cards">
-    <fieldset>
-      <legend>Atualizações</legend>
-      <label class="toggle">
-        <span>Procurar versão nova ao abrir e uma vez por dia</span>
-        <input type="checkbox" id="chkUpdCheck">
-      </label>
-      <div class="upd-row"><button type="button" class="btn small" id="btnUpdCheck">Procurar agora</button> <span class="small muted" id="updStatus"></span></div>
-      <label class="toggle">
-        <span>Apagar as versões antigas depois que a nova abrir</span>
-        <input type="checkbox" id="chkCleanOld">
-      </label>
-      <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
-      </details>
-    </fieldset>
-
-    <fieldset id="sec-sobre">
-      <legend>Sobre</legend>
-      <dl class="info">
-        <dt>Versão</dt><dd class="mono" id="aboutVer">—</dd>
-        <dt>Leitura do GMC-800</dt><dd class="mono">a cada 1 s</dd>
-        <dt>Protocolo</dt><dd class="mono">GQ-RFC1201</dd>
-        <dt>Código</dt><dd><a class="mono ext-link" href="https://github.com/matheusAFreitas/radlog" data-ext data-no-tr>github.com/matheusAFreitas/radlog</a></dd>
-        <dt>Feito por</dt><dd data-no-tr>Matheus Alves de Freitas</dd>
-      </dl>
-    </fieldset>
+    <div class="set-col">
+      <fieldset>
+        <legend>Atualizações</legend>
+        <label class="toggle">
+          <span>Procurar versão nova ao abrir e uma vez por dia</span>
+          <input type="checkbox" id="chkUpdCheck">
+        </label>
+        <div class="upd-row"><button type="button" class="btn small" id="btnUpdCheck">Procurar agora</button> <span class="small muted" id="updStatus"></span></div>
+        <label class="toggle">
+          <span>Apagar as versões antigas depois que a nova abrir</span>
+          <input type="checkbox" id="chkCleanOld">
+        </label>
+        <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
+        </details>
+      </fieldset>
     </div>
+    <div class="set-col">
+      <fieldset id="sec-sobre">
+        <legend>Sobre</legend>
+        <dl class="info">
+          <dt>Versão</dt><dd class="mono" id="aboutVer">—</dd>
+          <dt>Leitura do GMC-800</dt><dd class="mono">a cada 1 s</dd>
+          <dt>Protocolo</dt><dd class="mono">GQ-RFC1201</dd>
+          <dt>Código</dt><dd><a class="mono ext-link" href="https://github.com/matheusAFreitas/radlog" data-ext data-no-tr>github.com/matheusAFreitas/radlog</a></dd>
+          <dt>Feito por</dt><dd data-no-tr>Matheus Alves de Freitas</dd>
+        </dl>
+      </fieldset>
+    </div>
+  </div>
   </section>
     </div>
     </div>
