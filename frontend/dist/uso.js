@@ -172,6 +172,9 @@ function usoKeyName(k) {
 
 // ---------- números ----------
 
+// dd/mm/aaaa nos dois idiomas, como o resto do app
+function usoDate(ms) { const d = new Date(ms); return ddmm(ms) + "/" + d.getFullYear(); }
+
 function usoDur(s) {
   if (!s) return "0";
   if (s < 60) return "<1 min";
@@ -290,7 +293,7 @@ function renderUso() {
   for (const n of never) { const s = document.createElement("span"); s.textContent = n; nv.append(s); }
   if (!never.length) { const s = document.createElement("span"); s.textContent = tr("tudo foi usado"); nv.append(s); }
 
-  const since = info.since ? new Date(info.since).toLocaleDateString(LOCALE) : "—";
+  const since = info.since ? usoDate(info.since) : "—";
   $("usoFoot").textContent = info.on
     ? tr(`Contado só neste computador · desde ${since}`)
     : tr("Contagem desligada · o que já foi contado fica guardado até zerar");
@@ -301,7 +304,7 @@ function usoSummaryText() {
   const info = USO.info;
   if (!info) return "";
   const per = USO.days ? `${USO.days} dias` : "tudo";
-  const since = info.since ? new Date(info.since).toLocaleDateString(LOCALE) : "—";
+  const since = info.since ? usoDate(info.since) : "—";
   const L = [tr(`Uso do RadLog (${tr(per)}, contando desde ${since})`)];
   L.push(tr("Páginas:"));
   for (const p of usoPages(info)) L.push("- " + p.name + ": " + usoDur(p.c.s) + ", " + usoTimes(p.c.n || 0));

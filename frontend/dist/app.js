@@ -313,7 +313,7 @@ const LV_SAY = {
 function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  lvLabel($(pfx + "TileState"), lvl, word, pfx === "a" ? 14 : 18);
+  lvLabel($(pfx + "TileState"), lvl, word, 18);
   const sayEl = $(pfx + "TileSay");
   if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
 }
@@ -408,15 +408,15 @@ function renderRTile(st, o) {
   tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "", rcc ? { t: st.lastT || 0 } : null);
 }
 
-// alertas: o ativo mais alto (borda na cor do nível) ou o último que passou
-function renderATile() {
+// alertas ativos: a marca no menu (#navAlerts) e no topo compacto (#miniAlert);
+// o quadro "Alertas" do topo saiu na 2.73 (a faixa de cima já avisa)
+function renderAlertMarks() {
   const list = state.activeAlerts || [];
   const rank = { atencao: 1, alarme: 2, perigo: 3 };
   const dev = (e) => (isRcEv(e) ? "RC102" : "GMC-800");
   const top = list.slice().sort((a, b) => (rank[lvlCls(b)] || 1) - (rank[lvlCls(a)] || 1) || a.time - b.time)[0];
   const srcs = new Set(list.map((e) => dev(e) + (e.demo ? " demo" : "")));
   const lv = top ? { alarme: "alarme", perigo: "perigo" }[lvlCls(top)] || "atencao" : "";
-  tileState("a", lv, srcs.size > 1 ? `${srcs.size} aparelhos` : "");
   const ma = $("miniAlert");
   ma.hidden = !top;
   ma.className = "mini-alert" + (lv ? " lv-" + lv : "");
@@ -430,16 +430,6 @@ function renderATile() {
   nav.textContent = String(srcs.size);
   if (lv) nav.insertAdjacentHTML("afterbegin", lvIcon(lv, 10, "Nível: " + LV_WORD[lv]));
   nav.className = "side-badge mono" + (lv ? " lv-" + lv : "");
-  if (top) {
-    $("aTileTitle").textContent = `${lvlName(top)} no ${dev(top)}` + (top.demo ? " (demo)" : "");
-    $("aTileText").textContent = `desde ${hhmm(top.time)} (${fmtDur(Date.now() - top.time)}) · pico ${evVal(top, top.peak)}`;
-    return;
-  }
-  $("aTileTitle").textContent = "Nenhum alerta ativo";
-  const e = state.lastAlert;
-  $("aTileText").textContent = e
-    ? `Último: ${whenLabel(e.time)} · ${lvlName(e)} no ${dev(e)}` + (e.end ? ` · ${fmtDur(e.end - e.time)}` : "") + (e.peak ? ` · pico ${evVal(e, e.peak)}` : "")
-    : "Nenhum alerta registrado ainda.";
 }
 
 // a faixa de atenção/alarme fica presa no topo: o menu começa embaixo dela
@@ -3854,6 +3844,30 @@ const startMonth = (t, add) => { const d = new Date(t); return new Date(d.getFul
 
 // ---------- memória e sincronização do contador (2.7) ----------
 
+// Configurações › GQ GMC-800 › Contador: duas linhas curtas (Memória e
+// Download) e a explicação embaixo (2.73, U1 da auditoria; spec
+// ux/topo-sem-alertas.html, item 6). Cada frase num span: juntas, a tradução
+// não achava o molde (U3).
+function renderMemInfo(cs, pct) {
+  const mem = $("iMem");
+  mem.textContent = !cs.estPct ? "—" : cs.fullIn > 0 ? `${pct}% · enche em ${fmtDuration(cs.fullIn)}` : `${pct}%`;
+  mem.classList.toggle("mem-att", cs.memLevel === "atencao");
+  mem.classList.toggle("mem-full", cs.memLevel === "cheia");
+  const when = cs.at ? `${ddmm(cs.at)} ${hhmm(cs.at)}` : "";
+  const dl = { "em-dia": `em dia · ${when}`, pendente: `falta ${fmtDur((cs.pendingMinutes || 0) * 60e3)}`, "sem-gravacao": "contador não grava", nunca: "nunca" }[cs.state] || "—";
+  $("iSync").textContent = cs.known && !cs.complete ? `${dl} · incompleto` : dl;
+  const note = [];
+  if (cs.state === "em-dia") note.push("Em dia: nenhum trecho sem leitura no app desde o último download.");
+  else if (cs.state === "sem-gravacao") note.push("O contador não está gravando na memória: minutos sem o app não podem ser recuperados.");
+  else if (cs.text) note.push(cs.text);
+  if (cs.known && !cs.complete && cs.state !== "nunca" && !note.some((t) => t.includes("interrompido"))) note.push("O último download foi interrompido antes do fim da memória.");
+  if (cs.estPct) note.push(`A porcentagem é estimada a partir do download, no modo de gravação "${cs.saveMode}".`);
+  const p = $("iSyncNote");
+  p.replaceChildren();
+  note.forEach((t, i) => { if (i) p.append(" "); p.append(Object.assign(document.createElement("span"), { textContent: t })); });
+  p.hidden = !note.length;
+}
+
 async function refreshCounterSync(cs) {
   if (!cs) {
     if (!api.GetCounterSync) return;
@@ -3864,11 +3878,7 @@ async function refreshCounterSync(cs) {
   const memTxt = !cs.estPct ? "" : cs.fullIn > 0
     ? `A memória está cerca de ${pct}% ocupada (estimado desde o download) e enche em cerca de ${fmtDuration(cs.fullIn)} no modo "${cs.saveMode}".`
     : `A memória está cerca de ${pct}% ocupada (estimado desde o download).`;
-  // duas frases em dois spans: juntas num texto só, a tradução não achava o
-  // molde e saía misturada (auditoria de 12/11, U3)
-  const iSync = $("iSync");
-  iSync.replaceChildren(Object.assign(document.createElement("span"), { textContent: cs.text }));
-  if (memTxt) iSync.append(" ", Object.assign(document.createElement("span"), { textContent: memTxt }));
+  renderMemInfo(cs, pct);
   const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
   const show = cs.state === "pendente" || warnMem;
   const card = $("syncCard");

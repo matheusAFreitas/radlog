@@ -3643,7 +3643,10 @@ const I18N_EN = {
 "0 · nunca": "0 · never",
 "nada": "nothing",
 "Zerar": "Reset",
-"nunca": "never"
+"nunca": "never",
+"Em dia: nenhum trecho sem leitura no app desde o último download.": "Up to date: no stretch without readings in the app since the last download.",
+"contador não grava": "counter isn't saving",
+"Download": "Download"
 },
 "patterns": [
 [
@@ -5242,6 +5245,15 @@ const I18N_EN = {
 [
 "Vale olhar: ",
 ". Não é alarme: é sobre o aparelho, não sobre a radiação."
+]
+],
+[
+"A porcentagem é estimada a partir do download, no modo de gravação \"",
+"^A porcentagem é estimada a partir do download, no modo de gravação \"((?:(?! · ).)+?)\"\\.$",
+"The percentage is estimated from the download, in the \"${1}\" save mode.",
+[
+"A porcentagem é estimada a partir do download, no modo de gravação \"",
+"\"."
 ]
 ],
 [
@@ -13795,6 +13807,22 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% · enche em ((?:(?! · ).)+?)$",
+"${1}% · full in ${2}",
+[
+"% · enche em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · incompleto$",
+"${1} · incomplete",
+[
+" · incompleto"
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -15121,6 +15149,14 @@ const I18N_EN = {
 ]
 ],
 [
+"em dia · ",
+"^em dia · ((?:(?! · ).)+?)$",
+"up to date · ${1}",
+[
+"em dia · "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -15769,6 +15805,14 @@ const I18N_EN = {
 "Today, ${1}",
 [
 "Hoje, "
+]
+],
+[
+"falta ",
+"^falta ((?:(?! · ).)+?)$",
+"missing ${1}",
+[
+"falta "
 ]
 ],
 [

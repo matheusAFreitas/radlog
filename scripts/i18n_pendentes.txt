@@ -495,7 +495,6 @@ vêm
 Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico.
 Último download em {0}. Depois dele, o app ficou {1} sem leitura (desde {2}); a memória do contador pode ter esses minutos: baixe o histórico.
 Último download em {0}. O contador não está gravando na memória: minutos sem o app não podem ser recuperados.
-Último: {0} · {1} no {2}
 Últimos 7 dias · em casa · {0}
 Últimos 7 dias · {0}
 às

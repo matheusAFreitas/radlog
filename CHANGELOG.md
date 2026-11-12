@@ -1,5 +1,39 @@
 # Versões
 
+## 2.73.0
+Topo sem o quadro de alertas e memória do GMC-800 em duas linhas (U1 e U2 da
+auditoria; spec ux/topo-sem-alertas.html).
+
+- O quadro "Alertas" sai do topo de todas as telas: quando há alerta, a faixa
+  de cima já avisa, e o menu e o topo compacto continuam com a marca. O
+  último alerta e o histórico ficam na tela Alertas. Os quadros dos aparelhos
+  dividem a largura; quando aparece um só (um aparelho conectado, ou as
+  páginas GQ GMC-800 e Radiacode 102), ele ocupa a largura toda.
+- Configurações › GQ GMC-800 › Conexão: o campo Memória vira duas linhas
+  curtas, "Memória" (quanto está ocupado e quando enche) e "Download" (em dia,
+  quanto falta, contador não grava ou nunca), com a explicação embaixo.
+- Uso do app: a data do "desde" sai como dd/mm/aaaa também em inglês, e no
+  modo demonstração "Zerar contagem" zera o exemplo.
+- Prints do README refeitos sem o quadro de alertas.
+
+**English**
+
+Top row without the alerts box and GMC-800 memory in two lines (audit items
+U1 and U2; spec ux/topo-sem-alertas.html).
+
+- The "Alerts" box leaves the top of every screen: when there is an alert,
+  the bar at the top already says so, and the menu and the compact top still
+  show the mark. The last alert and the history are on the Alerts screen. The
+  device boxes share the width; when only one shows (one device connected,
+  or the GQ GMC-800 and Radiacode 102 pages), it takes the full width.
+- Settings › GQ GMC-800 › Connection: the Memory field becomes two short
+  lines, "Memory" (how full it is and when it fills up) and "Download" (up to
+  date, how much is missing, counter isn't saving, or never), with the
+  explanation below.
+- App usage: the "since" date shows as dd/mm/yyyy in English too, and in
+  demo mode "Reset count" resets the example.
+- README screenshots redone without the alerts box.
+
 ## 2.72.0
 Novo "Uso do app" (spec ux/uso-do-app.html).
 

@@ -1266,15 +1266,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 
 /* painel dos aparelhos */
 .instruments { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: var(--space-4); }
-/* duas colunas (janela média): o quadro dos alertas fica numa linha só, embaixo */
-@media (min-width: 901px) and (max-width: 1153px), (min-width: 622px) and (max-width: 900px) {
-  .instruments { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .inst.inst-alerts { grid-column: 1 / -1; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: baseline; gap: var(--space-1) var(--space-4); }
-  .inst-alerts .inst-head { grid-column: 1 / -1; }
-  .inst-alerts > .inst-fill { display: none; }
-  .instruments:has(#rTile[hidden]) .inst.inst-alerts { grid-column: auto; display: flex; }
-  .instruments:has(#rTile[hidden]) .inst-alerts > .inst-fill { display: block; }
-}
+/* só os quadros dos aparelhos visíveis (2.73, ux/topo-sem-alertas.html):
+   dois dividem a largura, um sozinho ocupa a largura toda */
+@media (min-width: 622px) { .instruments { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } }
 @media (max-width: 621px) { .instruments { grid-template-columns: minmax(0, 1fr); } }
 .inst { --sc: var(--accent); min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); transition: border-color .4s, background-color .4s; }
 .inst-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; min-height: 26px; font-size: var(--fs-label); }
@@ -1317,18 +1311,15 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst-sub { color: var(--dim); }
 .inst .inst-warn { color: var(--att); }
 .inst .inst-warn.full { color: var(--warn); }
-.inst-al-title { font-size: var(--fs-title); font-weight: 500; line-height: 1.3; }
-.inst-al-text { margin: 0; font-size: var(--fs-label); color: var(--muted); }
-.inst-al-link { align-self: flex-start; }
 
 /* só a faixa da leitura acende; borda e estado na cor do nível */
 .inst.lv-seguro .inst-state { color: var(--accent); }
 .inst.lv-atencao, .inst.lv-nocount { --sc: var(--att); border-color: var(--att); background: linear-gradient(180deg, color-mix(in srgb, var(--att) 6%, transparent), transparent 70%), var(--surface); }
 .inst.lv-alarme { --sc: var(--alarm); border-color: var(--alarm); background: linear-gradient(180deg, color-mix(in srgb, var(--alarm) 12%, transparent), transparent 70%), var(--surface); }
 .inst.lv-perigo { --sc: var(--warn); border-color: var(--warn); background: linear-gradient(180deg, color-mix(in srgb, var(--warn) 12%, transparent), transparent 70%), var(--surface); }
-.inst.lv-atencao .inst-state, .inst.lv-nocount .inst-state, .inst.lv-atencao .inst-al-title { color: var(--att); }
-.inst.lv-alarme .inst-state, .inst.lv-alarme .inst-al-title { color: var(--alarm); }
-.inst.lv-perigo .inst-state, .inst.lv-perigo .inst-al-title { color: var(--warn); }
+.inst.lv-atencao .inst-state, .inst.lv-nocount .inst-state { color: var(--att); }
+.inst.lv-alarme .inst-state { color: var(--alarm); }
+.inst.lv-perigo .inst-state { color: var(--warn); }
 .inst-rc.lv-atencao, .inst-rc.lv-alarme, .inst-rc.lv-perigo { --sc: var(--rc); }
 
 /* páginas: gráfico maior, já que agora ocupa a largura toda */
@@ -1677,15 +1668,9 @@ table.cc-cmp td:first-child { color: var(--muted); }
 
 /* ---------- tela do aparelho (2.31.0) ----------
    O valor aparece uma vez só: o quadro do próprio aparelho sai da fileira de
-   cima e o do outro fica igual ao do Agora, ao lado dos alertas (2.38.1). O mostrador grande faz o
+   cima e o do outro fica sozinho, na largura toda (2.73). O mostrador grande faz o
    papel da régua (faixas sempre à vista, acesas até a leitura). */
 .instruments[data-page="gmc"] #gTile, .instruments[data-page="radiacode"] #rTile { display: none; }
-@media (min-width: 622px) {
-  .instruments[data-page="gmc"], .instruments[data-page="radiacode"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .instruments[data-page] .inst.inst-alerts { grid-column: auto; display: flex; }
-  .instruments[data-page] .inst-alerts > .inst-fill { display: block; }
-  .instruments[data-page="gmc"]:has(#rTile[hidden]) .inst.inst-alerts { grid-column: 1 / -1; }
-}
 
 .hero, .rc-main { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-6); align-items: center; }
 .hero > *, .rc-main > * { grid-column: 1 / -1; }
@@ -2785,3 +2770,8 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
 .uso-chips { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-3); }
 #usoFoot { margin-top: var(--space-2); }
 .uso-chips span { border: 1px dashed var(--border); border-radius: var(--radius-pill); padding: 2px var(--space-3); font-size: var(--fs-label); color: var(--muted); }
+
+/* Configurações › GQ GMC-800 › Contador: Memória e Download (2.73, U1) */
+#iMem.mem-att { color: var(--att); }
+#iMem.mem-full { color: var(--warn); }
+#iSyncNote { margin: var(--space-3) 0 0; text-align: left; }

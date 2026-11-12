@@ -43,7 +43,7 @@ function makeDemoApi() {
     { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   // versões que o modo demonstração mostra em "Atualizações e sobre"; ao refazer
   // os prints do README, acerte para a versão atual e a seguinte (U4)
-  let demoUpd = { current: "2.70.0", latest: "2.71.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
+  let demoUpd = { current: "2.73.0", latest: "2.74.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
     notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
@@ -58,6 +58,7 @@ function makeDemoApi() {
   const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
   let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\RadLog" };
   let demoUsageOn = true;
+  let demoUsageReset = 0; // "Zerar contagem" no demo: some o exemplo
   let settings = { usageOn: true, levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
   const demoCfg = {
     values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, theme: 4 },
@@ -853,6 +854,7 @@ const demoRc = () => {
     SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
     // uso do app (uso.js): números de exemplo, como na maquete da spec
     GetUsage: async (days) => {
+      if (demoUsageReset) return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} };
       const f = days === 7 ? 0.25 : days === 30 ? 1 : 1.6;
       // chaves sem aspas: o i18n_extract não confunde "chuva" ou "hora" com texto da tela
       const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [180, 6 * 3600], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], alara: [5, 360], chuva: [2, 60] };
@@ -866,7 +868,7 @@ const demoRc = () => {
       return { on: demoUsageOn, since: Date.now() - 34 * 864e5, days: days || 34, totals };
     },
     SetUsageOn: async (on) => { demoUsageOn = on; settings.usageOn = on; return { on, since: 0, days: 0, totals: {} }; },
-    ResetUsage: async () => ({ on: demoUsageOn, since: Date.now(), days: 0, totals: {} }),
+    ResetUsage: async () => { demoUsageReset = Date.now(); return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} }; },
     RecordUsage: async () => {},
     ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),
     CancelPairCode: async () => (demoSync = { ...demoSync, code: "" }),
