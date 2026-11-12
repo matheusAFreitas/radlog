@@ -6,6 +6,8 @@
   clara da logo no fundo branco.
 - PDF: o período no subtítulo usa "–" entre as datas, que serve nas duas
   línguas (no PDF em inglês aparecia "a").
+- Saiu o docs/ROADMAP.md, parado desde a 1.31: o planejamento fica no
+  quadro do projeto.
 
 ## 2.68.2
 - README refeito para o público: em inglês (README.md) e em português
