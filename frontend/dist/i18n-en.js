@@ -3606,7 +3606,10 @@ const I18N_EN = {
 "O µSv/h dos dois aparelhos é uma estimativa.": "The µSv/h from both devices is an estimate.",
 "Eles medem a radiação no ambiente e são calibrados para a energia do césio-137; o GMC-800 não distingue energia, então pode ler um pouco a mais ou a menos conforme a fonte.": "They measure radiation in the surroundings and are calibrated for the energy of caesium-137; the GMC-800 can't tell energies apart, so it may read a little high or low depending on the source.",
 "Os limites com que o app compara valem para a dose no corpo.": "The limits the app compares against apply to the dose in the body.",
-"O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.": "The number is good for comparing days and places, but it isn't an official dose: that only comes from a work dosimeter read by a laboratory."
+"O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.": "The number is good for comparing days and places, but it isn't an official dose: that only comes from a work dosimeter read by a laboratory.",
+"saídas de casa": "trips away from home",
+"anotações": "notes",
+"medições": "measurements"
 },
 "patterns": [
 [
@@ -5522,6 +5525,15 @@ const I18N_EN = {
 [
 "Ainda são ",
 " meses. O calendário fica mais útil depois de um ano."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): não consegui ler o ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\); comecei vazio e guardei o arquivo em ((?:(?! · ).)+?)$",
+"${1}: couldn't read ${2} (${3}); started empty and kept the file at ${4}",
+[
+": não consegui ler o ",
+"); comecei vazio e guardei o arquivo em "
 ]
 ],
 [

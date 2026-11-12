@@ -278,6 +278,12 @@ func writeFile(path string, pts []Point) error {
 		f.Close()
 		return err
 	}
+	// os dados no disco antes do rename: sem isso, numa queda de energia o
+	// rename pode chegar primeiro e o mês ficar vazio (QA, 12/11)
+	if err := f.Sync(); err != nil {
+		f.Close()
+		return err
+	}
 	if err := f.Close(); err != nil {
 		return err
 	}
