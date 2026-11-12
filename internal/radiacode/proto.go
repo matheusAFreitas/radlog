@@ -469,7 +469,7 @@ func decodeDataBuf(b []byte, base time.Time) []Record {
 			var rt RealTime
 			var cr, dr float32
 			var ce, de uint16
-			cr, err = r.f32()
+			cr, _ = r.f32()
 			dr, _ = r.f32()
 			ce, _ = r.u16()
 			de, _ = r.u16()

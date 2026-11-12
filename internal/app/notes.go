@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -28,12 +27,8 @@ const noteMaxLen = 200
 func (a *App) notesPath() string { return filepath.Join(a.dataDir, "anotacoes.json") }
 
 func (a *App) loadNotes() {
-	b, err := os.ReadFile(a.notesPath())
-	if err != nil {
-		return
-	}
 	var list []Note
-	if json.Unmarshal(b, &list) == nil {
+	if a.readStateJSON(a.notesPath(), "anotações", &list) {
 		sort.Slice(list, func(i, j int) bool { return list[i].Time < list[j].Time })
 		a.notes = list
 	}
@@ -44,11 +39,7 @@ func (a *App) saveNotesLocked() error {
 		return nil
 	}
 	b, _ := json.MarshalIndent(a.notes, "", "  ")
-	tmp := a.notesPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.notesPath())
+	return writeFileAtomic(a.notesPath(), b, 0o644)
 }
 
 // GetNotes devolve as notas em [from, to) (ms); 0 e 0 = todas.

@@ -761,7 +761,7 @@ function renderMeasureResult(st) {
       ["média · máximo", `${usvVal(o.avgUSv)} · ${usvVal(o.maxUSv)}`],
       ["extra por estar perto", o.bgUSv ? `${o.excess > 0 ? "+" : "−"}${fmt(Math.abs(o.excess), 4)} µSv` : "—"],
     ]);
-    // o extra em coisas conhecidas: "≈ 20 min do fundo da sua casa · ≈ meia banana"
+    // o extra em coisas conhecidas: "≈ 3 h do fundo da sua casa · ≈ meia hora de voo"
     const kn = o.bgUSv && o.excess > 0 ? doseKnownEl(o.excess, o.bgUSv, "m-known") : null;
     if (kn) { kn.prepend(Object.assign(document.createElement("b"), { textContent: "dose extra" })); c.appendChild(kn); }
     p(c, o.bgUSv ? (o.excess > 0 ? `Acima do nível de fundo (${usvVal(o.bgUSv)}): é o que o objeto somou na sua dose nesse tempo.` : `Igual ao nível de fundo (${usvVal(o.bgUSv)}): o objeto não somou nada que dê para ver na sua dose.`) : "Sem o fundo da casa desse aparelho, só a dose total.", "muted");

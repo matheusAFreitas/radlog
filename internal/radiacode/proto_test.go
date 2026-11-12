@@ -83,7 +83,7 @@ func TestOpenAndRead(t *testing.T) {
 	sp = append(sp, le(uint32(60), float32(-6), float32(2.45), float32(0.0004))...)
 	sp = append(sp, le(uint16(1<<4|1), uint8(10))...)
 	sp = append(sp, le(uint16(1<<4|2), int8(2))...)
-	sp = append(sp, le(uint16(2<<4|0))...)
+	sp = append(sp, le(uint16(2<<4))...)
 	sp = append(sp, le(uint16(1<<4|3), int16(-5))...)
 	f := &fakeRC{dataBuf: db, spec: sp}
 	d, err := Open(f)

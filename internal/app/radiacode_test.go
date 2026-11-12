@@ -166,6 +166,7 @@ func TestRcRawAndBackup(t *testing.T) {
 		t.Fatalf("brutos: %v", raws)
 	}
 	f, _ := os.Open(raws[0])
+	defer f.Close() // no Windows o TempDir não sai com o arquivo aberto
 	zr, err := gzip.NewReader(f)
 	if err != nil {
 		t.Fatal(err)

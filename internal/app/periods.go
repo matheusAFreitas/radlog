@@ -3,7 +3,6 @@ package app
 import (
 	"encoding/json"
 	"errors"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -40,12 +39,8 @@ type Period struct {
 func (a *App) periodsPath() string { return filepath.Join(a.dataDir, "fora-de-casa.json") }
 
 func (a *App) loadPeriods() {
-	b, err := os.ReadFile(a.periodsPath())
-	if err != nil {
-		return
-	}
 	var list []Period
-	if json.Unmarshal(b, &list) == nil {
+	if a.readStateJSON(a.periodsPath(), "saídas de casa", &list) {
 		sort.Slice(list, func(i, j int) bool { return list[i].From < list[j].From })
 		a.periods = list
 	}
@@ -56,11 +51,7 @@ func (a *App) savePeriodsLocked() error {
 		return nil
 	}
 	b, _ := json.MarshalIndent(a.periods, "", "  ")
-	tmp := a.periodsPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.periodsPath())
+	return writeFileAtomic(a.periodsPath(), b, 0o644)
 }
 
 // GetPeriods devolve os períodos marcados, do mais antigo ao mais novo.

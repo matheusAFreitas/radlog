@@ -595,12 +595,8 @@ type SavedMeasure struct {
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }
 
 func (a *App) loadMeasurements() {
-	b, err := os.ReadFile(a.measurementsPath())
-	if err != nil {
-		return
-	}
 	var list []SavedMeasure
-	if json.Unmarshal(b, &list) == nil {
+	if a.readStateJSON(a.measurementsPath(), "medições", &list) {
 		a.measurements = list
 	}
 }
@@ -610,11 +606,7 @@ func (a *App) saveMeasurementsLocked() error {
 		return nil
 	}
 	b, _ := json.MarshalIndent(a.measurements, "", "  ")
-	tmp := a.measurementsPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.measurementsPath())
+	return writeFileAtomic(a.measurementsPath(), b, 0o644)
 }
 
 func (a *App) addMeasurement(m SavedMeasure) (int64, error) {

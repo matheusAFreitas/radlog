@@ -126,9 +126,9 @@
   // [natural?, nome por extenso, de onde vem, meia-vida, onde aparece]
   const ORIGIN = {
     "K-40": [1, "Potássio-40", "Uma parte pequena (0,012%) de todo potássio é radioativa desde a formação da Terra. Está no solo, no cimento, nos alimentos e no seu próprio corpo.", "1,25 bilhão de anos", "em tudo que tem potássio: banana, feijão, adubo, granito"],
-    "Pb-212": [1, "Chumbo-212", "\"Neto\" do tório-232, que existe nas rochas e no solo. Também chega pelo ar, depois do gás torônio (radônio-220).", "10,6 horas", "solo, materiais de construção, eletrodos de solda com tório, camisas de lampião antigas"],
+    "Pb-212": [1, "Chumbo-212", "Descendente do tório-232, que existe nas rochas e no solo. Também chega pelo ar, depois do gás torônio (radônio-220).", "10,6 horas", "solo, materiais de construção, eletrodos de solda com tório, camisas de lampião antigas"],
     "Tl-208": [1, "Tálio-208", "Também da série do tório, perto do fim. O gama de 2.615 keV é o de maior energia que costuma aparecer na natureza.", "3 minutos", "os mesmos lugares do Pb-212"],
-    "Ac-228": [1, "Actínio-228", "Série do tório, logo depois do rádio-228.", "6,1 horas", "os mesmos lugares do Pb-212"],
+    "Ac-228": [1, "Actínio-228", "Série do tório, logo depois do rádio-228.", "6,15 horas", "os mesmos lugares do Pb-212"],
     "Bi-212": [1, "Bismuto-212", "Série do tório, filho do Pb-212.", "61 minutos", "os mesmos lugares do Pb-212"],
     "Pb-214": [1, "Chumbo-214", "Filho do radônio-222, gás que sai do solo e dos materiais de construção (série do urânio). Gruda na poeira do ar.", "27 minutos", "ar de casa fechada, porão; sobe com chuva"],
     "Bi-214": [1, "Bismuto-214", "Vem logo depois do Pb-214, também filho do radônio. Some em poucas horas quando o radônio vai embora.", "20 minutos", "ar de casa fechada; sobe na chuva (a chuva traz o que estava no ar)"],

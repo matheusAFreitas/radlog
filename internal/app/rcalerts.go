@@ -192,8 +192,8 @@ func (a *App) saveRcAlertSeconds(evs []Event) {
 		for _, e := range evs {
 			from := time.UnixMilli(e.Time).Add(-alertPre)
 			to := time.UnixMilli(e.End).Add(alertPre)
-			if to.Sub(from) > alertMaxSecs {
-				from = to.Add(-alertMaxSecs)
+			if to.Sub(from) > alertMaxSpan {
+				from = to.Add(-alertMaxSpan)
 			}
 			pts := a.rcAlertPoints(from, to)
 			if len(pts) == 0 {
