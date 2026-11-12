@@ -5716,3 +5716,32 @@ function wireUiScale() {
     if (t) t.classList.add("ui-size");
   });
 }
+
+// ---------- Configurações em duas colunas (2.68.4) ----------
+// O último cartão visível de cada coluna estica até o fim, para as duas
+// colunas terminarem juntas. É marcado aqui (e não com :last-child) porque
+// cartões aparecem e somem (aparelho desconectado, seção escondida).
+(function setColsLast() {
+  const root = document.getElementById("settings");
+  if (!root) return;
+  let pending = false;
+  const mark = () => {
+    pending = false;
+    for (const col of root.querySelectorAll(".set-col")) {
+      let last = null;
+      for (const f of col.children) {
+        if (f.tagName === "FIELDSET" && !f.hidden && getComputedStyle(f).display !== "none") last = f;
+      }
+      for (const f of col.children) {
+        const want = f === last;
+        if (f.classList.contains("is-last") !== want) f.classList.toggle("is-last", want);
+      }
+    }
+  };
+  const later = () => { if (!pending) { pending = true; requestAnimationFrame(mark); } };
+  new MutationObserver((recs) => {
+    if (recs.every((r) => r.attributeName === "class" && r.target.classList && r.target.parentElement && r.target.parentElement.classList.contains("set-col") && r.oldValue != null && r.oldValue.replace(/\s*is-last\s*/g, " ").trim() === r.target.className.replace(/\s*is-last\s*/g, " ").trim())) return;
+    later();
+  }).observe(root, { attributes: true, attributeOldValue: true, attributeFilter: ["hidden", "class", "style"], subtree: true, childList: true });
+  later();
+})();

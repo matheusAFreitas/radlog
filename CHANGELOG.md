@@ -1,5 +1,12 @@
 # Versões
 
+## 2.68.4
+- Configurações sem buracos: em cada aba os cartões ficam em duas colunas
+  que empilham sozinhas, e o último cartão de cada coluna estica até o fim,
+  então as duas terminam juntas. Os cartões foram rearrumados por seção
+  (spec ux/config-colunas.html). Abaixo de 1100 px vira uma coluna só.
+- O cartão "Dados" virou "Pasta dos dados".
+
 ## 2.68.3
 - README: a logo do título não troca mais pela preferência do sistema, e sim
   pelo tema do GitHub. No tema claro com o Windows escuro, aparecia a versão

@@ -1781,11 +1781,14 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .set-tabs button:hover { color: var(--text); }
 #settings .set-tabs button[aria-selected="true"] { background: none; color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
 .set-tabs button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
-.set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
+.set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: stretch; }
+/* duas colunas que empilham sozinhas (2.68.4): o último cartão visível de cada uma estica */
+.set-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+.set-col > fieldset.is-last { flex: 1 1 auto; }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
-#settings .set-cards > fieldset, #settings .dc-grid > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
-#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend { float: left; width: 100%; padding: 0 0 var(--space-1); font-size: var(--fs-heading); font-weight: 600; }
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
+#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { float: left; width: 100%; padding: 0 0 var(--space-1); font-size: var(--fs-heading); font-weight: 600; }
 #settings fieldset.dev-card > legend { padding-right: 96px; }
 #settings fieldset.dev-card::after { content: attr(data-dev); position: absolute; top: calc(var(--space-4) + 2px); right: var(--space-4); padding: 1px 8px; border: 1px solid var(--accent-line); border-radius: var(--radius-pill); color: var(--accent); font-family: var(--mono); font-size: var(--fs-micro); line-height: 1.6; }
 #settings fieldset.dev-card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)); }
@@ -1827,7 +1830,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #lvCard .link { vertical-align: baseline; }
 #devAlarms dd { text-align: right; }
 #settings .ext-link { color: var(--accent); text-underline-offset: 3px; overflow-wrap: anywhere; }
-@media (max-width: 1100px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .lv-ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lv-step:nth-child(2) { border-right: 0; } .lv-step:nth-child(-n+2) { border-bottom: 1px solid var(--border); } }
+@media (max-width: 1100px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } .lv-ladder { grid-template-columns: repeat(2, minmax(0, 1fr)); } .lv-step:nth-child(2) { border-right: 0; } .lv-step:nth-child(-n+2) { border-bottom: 1px solid var(--border); } }
 @media (max-width: 760px) { .set-nav-st { display: none; } #settings .set-nav button { justify-content: center; } }
 @media (max-width: 480px) { .lv-ladder { grid-template-columns: minmax(0, 1fr); } .lv-step { border-right: 0; border-bottom: 1px solid var(--border); } .lv-step:last-child { border-bottom: 0; } }
 @media (prefers-reduced-motion: reduce) { .set-flash { animation: none; } .lv-bar i { transition: none; } }

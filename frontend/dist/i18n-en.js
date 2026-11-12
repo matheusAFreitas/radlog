@@ -3377,7 +3377,8 @@ const I18N_EN = {
 "Pico ao vivo (60 s)": "Live peak (60 s)",
 "µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA)": "µSv/h OVER THE PERIOD: GMC-800 (HOME)",
 "SAÍDAS DE CASA": "TRIPS AWAY FROM HOME",
-"Levou": "Taken"
+"Levou": "Taken",
+"Pasta dos dados": "Data folder"
 },
 "patterns": [
 [
