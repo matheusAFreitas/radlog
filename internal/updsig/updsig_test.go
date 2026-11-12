@@ -33,8 +33,13 @@ func TestVerifyWith(t *testing.T) {
 }
 
 func TestPubKeyValid(t *testing.T) {
-	b, err := base64.StdEncoding.DecodeString(PubKey)
-	if err != nil || len(b) != ed25519.PublicKeySize {
-		t.Fatalf("PubKey não é uma chave Ed25519 em base64 (%d bytes, %v)", len(b), err)
+	for _, k := range Keys() {
+		b, err := base64.StdEncoding.DecodeString(k)
+		if err != nil || len(b) != ed25519.PublicKeySize {
+			t.Fatalf("%q não é uma chave Ed25519 em base64 (%d bytes, %v)", k, len(b), err)
+		}
+	}
+	if ReserveKey == PubKey {
+		t.Fatal("a reserva não pode ser a mesma chave")
 	}
 }

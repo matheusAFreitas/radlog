@@ -165,12 +165,11 @@ function renderFitaDay(box, strip, day0, opt = {}) {
   const home = day.map((s) => (s && s.home) || null), pers = day.map((s) => (s && s.pers) || null);
   const away = day.map((s) => !!(s && s.away)), rain = day.map((s) => !!(s && s.rain));
   if (opt.say) ftSay(opt.say, day, marks, opt.label || "Hoje", nowIdx);
-  const esc = (t) => String(t).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const mk = marks.map((m) => {
     const i = Math.floor((m.t - day0) / 6e5);
     if (i < 0 || i >= FT_N) return "";
     const ico = m.kind === "nota" ? FT_PEN : LV_PATH[m.level] ? ftShape(m.level, 13) : ftShape("atencao", 13);
-    return `<span class="ft-mk ft-mark" style="left:${((i + 0.5) / FT_N) * 100}%" data-t="${m.t}" data-tip="${esc(ftMarkTip(m))}">${ico}</span>`;
+    return `<span class="ft-mk ft-mark" style="left:${((i + 0.5) / FT_N) * 100}%" data-t="${m.t}" data-tip="${escHtml(ftMarkTip(m))}">${ico}</span>`;
   }).join("");
   let h = "";
   if (mk) h += `<div class="ft-lane"><span class="ft-lb">marcas</span><div class="ft-marks">${mk}</div></div>`;

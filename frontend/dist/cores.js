@@ -36,9 +36,8 @@ const LV_PATH = {
 function lvIcon(level, size = 12, label = "") {
   const p = LV_PATH[level];
   if (!p) return "";
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   return `<svg class="lv-ico ${level}" width="${size}" height="${size}" viewBox="0 0 16 16" fill="currentColor"` +
-    (label ? ` role="img" aria-label="${esc(label)}"` : ' aria-hidden="true"') + `>${p}</svg>`;
+    (label ? ` role="img" aria-label="${escHtml(label)}"` : ' aria-hidden="true"') + `>${p}</svg>`;
 }
 
 // Põe a forma antes do texto num elemento (substitui o conteúdo).

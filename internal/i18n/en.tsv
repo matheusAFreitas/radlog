@@ -4696,3 +4696,7 @@ saídas de casa	trips away from home
 {0}: não consegui ler o {1} ({2}); comecei vazio e guardei o arquivo em {3}	{0}: couldn't read {1} ({2}); started empty and kept the file at {3}
 anotações	notes
 medições	measurements
+Licenças de terceiros	Third-party licenses
+O RadLog usa bibliotecas e fontes de outras pessoas. As licenças delas pedem que o aviso venha junto do programa; está aqui, em inglês, como os autores escreveram.	RadLog uses libraries and fonts made by other people. Their licenses ask for the notice to ship with the program; here it is, as the authors wrote it.
+Não consegui abrir o arquivo das licenças.	Couldn't open the licenses file.
+Licença	License
