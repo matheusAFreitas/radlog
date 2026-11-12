@@ -217,6 +217,7 @@ function qkRun(i) {
 }
 
 function qkOpen(q) {
+  usoAdd("c:busca/ctrlk", 1);
   qkFab(false);
   qkSheetClose();
   const d = $("qkDlg");

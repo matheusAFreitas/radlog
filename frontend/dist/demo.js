@@ -57,7 +57,8 @@ function makeDemoApi() {
   }
   const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
   let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\RadLog" };
-  let settings = { levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
+  let demoUsageOn = true;
+  let settings = { usageOn: true, levels: {}, port: "COM5", autoConnect: true, alarmEnabled: true, alarmCPM: 100, alarmSound: "sirene", alarmRaise: true };
   const demoCfg = {
     values: { saveMode: 2, powerSaving: 1, backlight: 10, led: 1, fastEstimate: 3, alarmVolume: 15, clickSound: 0, voiceVolume: 0, vibration: 1, alarmCPM: 100, theme: 4 },
     calibration: { source: "contador", points: [[986, 10], [8546, 100], [16408, 200], [37970, 500], [76010, 1000], [139671, 2000]].map(([cpm, usv]) => ({ cpm, usv })) },
@@ -850,6 +851,23 @@ const demoRc = () => {
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
     SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
+    // uso do app (uso.js): números de exemplo, como na maquete da spec
+    GetUsage: async (days) => {
+      const f = days === 7 ? 0.25 : days === 30 ? 1 : 1.6;
+      // chaves sem aspas: o i18n_extract não confunde "chuva" ou "hora" com texto da tela
+      const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [180, 6 * 3600], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], alara: [5, 360], chuva: [2, 60] };
+      const tabs = { radiacode: { agora: [212, 5 * 3600], espectro: [88, 3 * 3600], atividade: [9, 720], busca: [4, 480] },
+        graficos: { tempo: [150, 5 * 3600], hora: [20, 2400], padroes: [8, 600], tendencia: [2, 120] }, gmc: { agora: [28, 3000], tubo: [2, 300] } };
+      const base = { "s:radiacode/rcSpecView=tempo": [61, 0], "s:radiacode/rcSpecMode=acc": [34, 0], "c:busca/ctrlk": [6, 0] };
+      for (const [k, v] of Object.entries(pg)) base["p:" + k] = v;
+      for (const [k, m] of Object.entries(tabs)) for (const [t, v] of Object.entries(m)) base["a:" + k + "/" + t] = v;
+      const totals = {};
+      for (const [k, [n, sec]] of Object.entries(base)) totals[k] = { n: Math.max(1, Math.round(n * f)), s: Math.round(sec * f) };
+      return { on: demoUsageOn, since: Date.now() - 34 * 864e5, days: days || 34, totals };
+    },
+    SetUsageOn: async (on) => { demoUsageOn = on; settings.usageOn = on; return { on, since: 0, days: 0, totals: {} }; },
+    ResetUsage: async () => ({ on: demoUsageOn, since: Date.now(), days: 0, totals: {} }),
+    RecordUsage: async () => {},
     ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),
     CancelPairCode: async () => (demoSync = { ...demoSync, code: "" }),
     DiscoverPeers: async () => { await new Promise((r) => setTimeout(r, 800)); return [{ id: "b", name: "notebook", addr: "192.168.0.20:47862", paired: false }]; },

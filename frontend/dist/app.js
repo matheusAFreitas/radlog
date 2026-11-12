@@ -790,6 +790,7 @@ async function showView(v, skipRender) {
   const changed = state.view !== v;
   state.view = v;
   qkTrack(v);
+  if (changed) usoView(v);
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
   document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
     if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
@@ -836,6 +837,7 @@ function setSub(pg, sub, focus) {
   });
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
   if (pg === "graficos") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
+  if (changed) usoSub(pg, sub);
   if (changed && state.view === pg) refreshSub(pg);
   // fora da aba Agora a fileira de cima volta a mostrar os dois aparelhos (2.65)
   if (DEV_PAGES[pg]) renderDevMini();
@@ -2341,6 +2343,7 @@ async function openSettings(focusId) {
   rcCfgRead = false;
   refreshReportDir();
   refreshAutostart();
+  refreshUso();
   const s = state.settings;
   $("chkAuto").checked = !!s.autoConnect;
   $("numAlarm").value = usv3(alarmUSv());
@@ -4282,6 +4285,7 @@ async function init() {
     state.demo = await api.GetDemo();
   } catch (e) { /* segue com o padrão */ }
   renderDemo();
+  usoInit();
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
   renderStatus();
