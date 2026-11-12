@@ -3505,7 +3505,8 @@ const I18N_EN = {
 "igual a casa": "same as at home",
 "Contagens por minuto só no pico, acima do contínuo de cada espectro. \"Mais\" ou \"menos\" só quando a diferença passa de 3σ.": "Counts per minute in the peak only, above each spectrum's continuum. \"More\" or \"less\" only when the difference goes beyond 3σ.",
 "mais que em casa": "more than at home",
-"menos que em casa": "less than at home"
+"menos que em casa": "less than at home",
+"Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar: os dois devem somar nesse pico.": "It emits near here and another of its peaks showed up, so it can't be ruled out: the two probably add up in this peak."
 },
 "patterns": [
 [
@@ -13033,6 +13034,14 @@ const I18N_EN = {
 "in the period (${1})",
 [
 "no período ("
+]
+],
+[
+"Sim, junto com ",
+"^Sim, junto com ((?:(?! · ).)+?)$",
+"Yes, together with ${1}",
+[
+"Sim, junto com "
 ]
 ],
 [
