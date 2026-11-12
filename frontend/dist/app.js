@@ -2999,6 +2999,7 @@ function wire() {
   wireMeasure();
   setupMeasureHover();
   wirePeriods();
+  wireTrip();
   wireWhere();
   wireBusca();
 }
@@ -3024,7 +3025,7 @@ function listen() {
   on("notes", () => { refreshChart(); if (state.view === "resumo") refreshSummary(); });
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
   on("measurements", (list) => { state.measurements = list || []; renderMeasureHistory(); drawMeasureChart(); refreshChart(); });
-  on("periods", (list) => { state.periods = normPeriods(list); renderPeriods(); refreshAll(); });
+  on("periods", (list) => { const prev = state.periods; state.periods = normPeriods(list); tripCheckClosed(prev, state.periods); renderPeriods(); refreshAll(); });
   on("rcaway", onRcAway);
   on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
@@ -5326,6 +5327,41 @@ const demoRc = () => {
     },
     DeletePeriod: async (id) => { periods = periods.filter((q) => q.id !== id); setTimeout(() => { emit("periods", periods.slice()); emit("whereabouts", mockWhere()); }, 0); },
     GetWhereabouts: async () => mockWhere(),
+    // resumo da saída (2.67): números do resumo fingido + espectro de exemplo com mais K-40
+    GetTripSummary: async (id) => {
+      const p = periods.find((q) => q.id === id);
+      if (!p) throw new Error("período não encontrado");
+      const to = p.to || Date.now();
+      const sum = await api.GetSummary(p.from, to);
+      const rc = sum.rc ? { ...sum.rc, curve: [] } : null;
+      const step = 6e4;
+      if (rc) {
+        let seed = 7;
+        const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+        for (let t = p.from; t < to; t += step) {
+          const bump = Math.exp(-Math.pow((t - p.from - (to - p.from) * 0.42) / 9e5, 2)) * 0.09;
+          rc.curve.push({ t, usv: 0.158 + bump + (rnd() - 0.5) * 0.025 });
+        }
+        rc.max = Math.max(...rc.curve.map((q) => q.usv)); rc.maxAt = rc.curve.find((q) => q.usv === rc.max).t;
+        rc.avg = rc.curve.reduce((a, q) => a + q.usv, 0) / rc.curve.length; rc.dose = (rc.avg * (to - p.from)) / 36e5; rc.devOK = false; rc.coverageAll = 1;
+      }
+      const n = 1024, a = [0, 2.93, 0.0001], obj = [], bg = [];
+      const en = (i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) ** 2;
+      const pk = (e, c, w) => Math.exp(-Math.pow((e - c) / w, 2));
+      for (let i = 0; i < n; i++) {
+        const e = en(i), cont = 9000 / (1 + e / 60) + 30;
+        const lines = (k) => 600 * pk(e, 609, 28) + k * 900 * pk(e, 1461, 40) + 260 * pk(e, 2614, 55) + 300 * pk(e, 352, 22);
+        obj.push(Math.round((cont + lines(1.6)) * 16200 / 3600));
+        bg.push(Math.round((cont + lines(1)) * 86400 / 3600));
+      }
+      const peaks = [{ group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3 }, { group: "Potássio-40", nuclide: "K-40", kev: 1460.8 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5 }];
+      return {
+        period: p, from: p.from, to, open: !p.to, defaultName: p.name === whKind(whOf(p)), rc, stepMs: step, homeUSv: 0.157, homeSrc: "gmc",
+        spec: { a, obj, objSec: (to - p.from) / 1000, bg, bgSec: 86400, peaks }, specRows: 1,
+        lines: [{ nuclide: "K-40", group: "Potássio-40", kev: 1460.8, pct: 60, more: true, hasHome: true }, { nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", kev: 609.3, pct: 2, more: false, hasHome: true }, { nuclide: "Tl-208", group: "Tório-232 (série)", kev: 2614.5, pct: -3, more: false, hasHome: true }],
+        hasBat: true, bat0: 92, bat1: 71, hasTemp: true, tempMin: 24, tempMax: 31, tempMaxAt: p.from + (to - p.from) * 0.47, events: [],
+      };
+    },
     SetWhereAt: async (g, r, name, from) => {
       const w = await api.SetWhere(g, r, name);
       const o = periods.find((q) => q.to === 0);

@@ -4303,3 +4303,53 @@ máx {0}	max {0}
 quase sem leitura nesse trecho	barely any readings in this stretch
 Não estava comigo	Wasn't with me
 Marca o {0} como fora do cálculo neste trecho	Marks the {0} as left out of the calculation in this stretch
+Saída fechada: {0} → {1}	Trip closed: {0} → {1}
+Ver o resumo da saída	See the trip summary
+Depois	Later
+Dose {0} µSv · pico {1} µSv/h às {2}	Dose {0} µSv · peak {1} µSv/h at {2}
+Abrir resumo da saída	Open trip summary
+Resumo da saída	Trip summary
+{0} → {1} · {2} com o RC102	{0} → {1} · {2} with the RC102
+sem leitura do RC102	no RC102 reading
+Saída de {0}	Trip on {0}
+Calculando…	Calculating…
+✎ editar título	✎ edit title
+Onde você foi: o nome da saída em Fora de casa	Where you went: the trip name in Away from home
+Onde você foi	Where you went
+Título da saída	Trip title
+{0} dos minutos	{0} of the minutes
+Relatório da saída (PDF)	Trip report (PDF)
+Ver nos gráficos	See on the charts
+Sem leitura do RC102 nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.	No RC102 reading for this trip. If it hasn't reconnected to the PC yet, its history arrives when it does.
+Dose na saída	Dose on the trip
+{0}× casa ({1})	{0}× home ({1})
+sempre no nível seguro	always at the safe level
+A saída, minuto a minuto	The trip, minute by minute
+RC102 em µSv/h · tracejado: fundo de casa	RC102 in µSv/h · dashed: home background
+RC102 em µSv/h	RC102 in µSv/h
+sem pontos no intervalo	no points in the interval
+Espectro da saída	Trip spectrum
+somado de {0} · por segundo, para comparar	summed over {0} · per second, to compare
+Sem espectro desta saída	No spectrum for this trip
+na saída	on the trip
+em casa (mesmo tempo)	at home (same time)
+O que apareceu mais que em casa	What showed up more than at home
+Linhas que apareceram	Lines that showed up
+Não é perigo: só mostra de onde veio a diferença.	It's not a danger: it only shows where the difference came from.
+K-40 mais alto é comum perto de granito, tijolo, cimento e solo.	Higher K-40 is common near granite, brick, concrete and soil.
+Bi-214 e Pb-214 vêm do radônio: sobem em lugar fechado, subsolo e metrô.	Bi-214 and Pb-214 come from radon: they rise in closed places, basements and the subway.
+Tl-208, Ac-228 e Pb-212 vêm do tório: comum em granito, areia e tijolo.	Tl-208, Ac-228 and Pb-212 come from thorium: common in granite, sand and brick.
+Nenhuma linha gama conhecida se destacou na saída.	No known gamma line stood out on the trip.
+Como o RC102 estava	How the RC102 was doing
+sem registro	no record
+gastou {0}% em {1}	used {0}% in {1}
+carregou no caminho	charged along the way
+Temperatura	Temperature
+máx. às {0}	max at {0}
+Avisos do aparelho	Device warnings
+alarmes 1 e 2, temperatura, fora de escala	alarms 1 and 2, temperature, off scale
+{0} aviso, o primeiro às {1}	{0} warning, the first at {1}
+{0} avisos, o primeiro às {1}	{0} warnings, the first at {1}
+Bateria e temperatura vêm do histórico do próprio RC102, que chega quando ele conecta no PC.	Battery and temperature come from the RC102's own history, which arrives when it connects to the PC.
+Dose, gráfico, espectro e como o RC102 estava	Dose, chart, spectrum and how the RC102 was doing
+na saída ({0})	on the trip ({0})

@@ -2555,7 +2555,7 @@ const I18N_EN = {
 "Restaurar uma cópia no GMC-800?": "Restore a copy to the GMC-800?",
 "Escolha uma cópia salva para gravar de volta no contador. A configuração atual também é salva antes.": "Choose a saved copy to write back to the counter. The current configuration is also saved first.",
 "Escolher a cópia": "Choose the copy",
-"Depois": "After",
+"Depois": "Later",
 "Gravar": "Write",
 "Continuar?": "Continue?",
 "Novo": "New",
@@ -3271,7 +3271,50 @@ const I18N_EN = {
 "Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".": "Ok, the stretch stays open. When you get back, use \"I'm back\".",
 "A volta precisa ser depois da saída e não pode estar no futuro.": "The return has to be after you left and can't be in the future.",
 "quase sem leitura nesse trecho": "barely any readings in this stretch",
-"Não estava comigo": "Wasn't with me"
+"Não estava comigo": "Wasn't with me",
+"Ver o resumo da saída": "See the trip summary",
+"Abrir resumo da saída": "Open trip summary",
+"Resumo da saída": "Trip summary",
+"sem leitura do RC102": "no RC102 reading",
+"sem leitura do RadiaCode": "no RC102 reading",
+"Calculando…": "Calculating…",
+"✎ editar título": "✎ edit title",
+"Onde você foi: o nome da saída em Fora de casa": "Where you went: the trip name in Away from home",
+"Onde você foi": "Where you went",
+"Título da saída": "Trip title",
+"Relatório da saída (PDF)": "Trip report (PDF)",
+"Sem leitura do RC102 nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.": "No RC102 reading for this trip. If it hasn't reconnected to the PC yet, its history arrives when it does.",
+"Sem leitura do RadiaCode nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.": "No RC102 reading for this trip. If it hasn't reconnected to the PC yet, its history arrives when it does.",
+"Dose na saída": "Dose on the trip",
+"sempre no nível seguro": "always at the safe level",
+"A saída, minuto a minuto": "The trip, minute by minute",
+"RC102 em µSv/h · tracejado: fundo de casa": "RC102 in µSv/h · dashed: home background",
+"RadiaCode em µSv/h · tracejado: fundo de casa": "RC102 in µSv/h · dashed: home background",
+"RC102 em µSv/h": "RC102 in µSv/h",
+"RadiaCode em µSv/h": "RC102 in µSv/h",
+"sem pontos no intervalo": "no points in the interval",
+"Espectro da saída": "Trip spectrum",
+"Sem espectro desta saída": "No spectrum for this trip",
+"na saída": "on the trip",
+"em casa (mesmo tempo)": "at home (same time)",
+"O que apareceu mais que em casa": "What showed up more than at home",
+"Linhas que apareceram": "Lines that showed up",
+"Não é perigo: só mostra de onde veio a diferença.": "It's not a danger: it only shows where the difference came from.",
+"K-40 mais alto é comum perto de granito, tijolo, cimento e solo.": "Higher K-40 is common near granite, brick, concrete and soil.",
+"Bi-214 e Pb-214 vêm do radônio: sobem em lugar fechado, subsolo e metrô.": "Bi-214 and Pb-214 come from radon: they rise in closed places, basements and the subway.",
+"Tl-208, Ac-228 e Pb-212 vêm do tório: comum em granito, areia e tijolo.": "Tl-208, Ac-228 and Pb-212 come from thorium: common in granite, sand and brick.",
+"Nenhuma linha gama conhecida se destacou na saída.": "No known gamma line stood out on the trip.",
+"Como o RC102 estava": "How the RC102 was doing",
+"Como o RadiaCode estava": "How the RC102 was doing",
+"sem registro": "no record",
+"carregou no caminho": "charged along the way",
+"Temperatura": "Temperature",
+"Avisos do aparelho": "Device warnings",
+"alarmes 1 e 2, temperatura, fora de escala": "alarms 1 and 2, temperature, off scale",
+"Bateria e temperatura vêm do histórico do próprio RC102, que chega quando ele conecta no PC.": "Battery and temperature come from the RC102's own history, which arrives when it connects to the PC.",
+"Bateria e temperatura vêm do histórico do próprio RadiaCode, que chega quando ele conecta no PC.": "Battery and temperature come from the RC102's own history, which arrives when it connects to the PC.",
+"Dose, gráfico, espectro e como o RC102 estava": "Dose, chart, spectrum and how the RC102 was doing",
+"Dose, gráfico, espectro e como o RadiaCode estava": "Dose, chart, spectrum and how the RC102 was doing"
 },
 "patterns": [
 [
@@ -7365,6 +7408,15 @@ const I18N_EN = {
 ]
 ],
 [
+"somado de ",
+"^somado de ((?:(?! · ).)+?) · por segundo, para comparar$",
+"summed over ${1} · per second, to compare",
+[
+"somado de ",
+" · por segundo, para comparar"
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -9168,6 +9220,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Dose ",
+"^Dose ((?:(?! · ).)+?) µSv · pico ((?:(?! · ).)+?) µSv/h às ((?:(?! · ).)+?)$",
+"Dose ${1} µSv · peak ${2} µSv/h at ${3}",
+[
+"Dose ",
+" µSv · pico ",
+" µSv/h às "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -10045,6 +10107,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) avisos, o primeiro às ((?:(?! · ).)+?)$",
+"${1} warnings, the first at ${2}",
+[
+" avisos, o primeiro às "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -10319,6 +10389,22 @@ const I18N_EN = {
 [
 "Sem o ",
 " para comparar."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) → ((?:(?! · ).)+?) · ((?:(?! · ).)+?) com o RadiaCode$",
+"${1} → ${2} · ${3} with the RC102",
+[
+" com o RadiaCode"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) aviso, o primeiro às ((?:(?! · ).)+?)$",
+"${1} warning, the first at ${2}",
+[
+" aviso, o primeiro às "
 ]
 ],
 [
@@ -11473,6 +11559,22 @@ const I18N_EN = {
 "Checking with ${1}…",
 [
 "Conferindo com o "
+]
+],
+[
+"Saída fechada: ",
+"^Saída fechada: ((?:(?! · ).)+?) → ((?:(?! · ).)+?)$",
+"Trip closed: ${1} → ${2}",
+[
+"Saída fechada: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) → ((?:(?! · ).)+?) · ((?:(?! · ).)+?) com o RC102$",
+"${1} → ${2} · ${3} with the RC102",
+[
+" com o RC102"
 ]
 ],
 [
@@ -12867,6 +12969,14 @@ const I18N_EN = {
 ]
 ],
 [
+"na saída (",
+"^na saída \\(((?:(?! · ).)+?)\\)$",
+"on the trip (${1})",
+[
+"na saída ("
+]
+],
+[
 "calibração: ",
 "^calibração: ((?:(?! · ).)+?)$",
 "calibration: ${1}",
@@ -13215,6 +13325,23 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) dos minutos$",
+"${1} of the minutes",
+[
+" dos minutos"
+]
+],
+[
+"gastou ",
+"^gastou ((?:(?! · ).)+?)% em ((?:(?! · ).)+?)$",
+"used ${1}% in ${2}",
+[
+"gastou ",
+"% em "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -13458,6 +13585,14 @@ const I18N_EN = {
 "${1} (went off)",
 [
 " (apitou)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)× casa \\(((?:(?! · ).)+?)\\)$",
+"${1}× home (${2})",
+[
+"× casa ("
 ]
 ],
 [
@@ -14084,6 +14219,22 @@ const I18N_EN = {
 [
 "fora ",
 " µSv"
+]
+],
+[
+"Saída de ",
+"^Saída de ((?:(?! · ).)+?)$",
+"Trip on ${1}",
+[
+"Saída de "
+]
+],
+[
+"máx. às ",
+"^máx\\. às ((?:(?! · ).)+?)$",
+"max at ${1}",
+[
+"máx. às "
 ]
 ],
 [

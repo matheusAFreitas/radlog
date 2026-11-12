@@ -623,6 +623,7 @@
         </div>
         <span class="chip" id="sumSayChip" hidden></span>
       </div>
+      <div class="sum-trips" id="sumTrips" hidden></div>
       <div class="sum-top" id="sumTop">
         <div class="sum-big" id="sumBig"></div>
       </div>
@@ -2301,6 +2302,21 @@
 </div>
 <div class="qk-sheet" id="qkSheet" role="dialog" aria-label="Saí de casa" hidden></div>
 
+<dialog id="tripDlg" class="wide trip-dlg" aria-labelledby="tripTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <div class="trip-head">
+        <span class="trip-kicker">Fora de casa</span>
+        <h2 id="tripTitle">Resumo da saída</h2>
+        <span class="mono small muted" id="tripWhen"></span>
+      </div>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <div id="tripBody"></div>
+  </form>
+</dialog>
 <dialog id="reguaDlg" class="wide" aria-labelledby="reguaTitle">
   <form method="dialog" class="dlg">
     <div class="dlg-head">
@@ -2478,6 +2494,7 @@
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>
 <script src="onde.js"></script>
+<script src="saida.js"></script>
 <script src="intercal.js"></script>
 <script src="calcontador.js"></script>
 <script src="aparelho.js"></script>
