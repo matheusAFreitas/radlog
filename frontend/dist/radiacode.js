@@ -526,10 +526,10 @@
     const o = isoList(curPeaks()).find((x) => x.nuclide === nuc);
     if (!o) return;
     const e = o.lines[0].kev, w = 2.5 * fwhm(e);
-    pk.sel = nuc; pk.range = null; pk.win = [Math.max(15, e - w), e + w];
+    pk.sel = nuc; pk.chainFull = false; pk.range = null; pk.win = [Math.max(15, e - w), e + w];
     spDraw();
   }
-  function zoomClose() { pk.sel = null; pk.fromOpen = false; pk.range = null; pk.win = null; $("rcZoom").hidden = true; spDraw(); }
+  function zoomClose() { pk.sel = null; pk.fromOpen = false; pk.chainFull = false; pk.range = null; pk.win = null; $("rcZoom").hidden = true; spDraw(); }
   // canal fracionário → energia
   const enAt = (x) => { const i = Math.max(0, Math.min(EN.length - 2, Math.floor(x))), f = x - i; return EN[i] + (EN[i + 1] - EN[i]) * f; };
   // ajusta base linear + gaussiana nos canais do trecho
@@ -648,6 +648,76 @@
   }
 
 
+  // para que o isótopo é usado (spec item 2d): [área, uso]; medicina em azul
+  const USES = {
+    "Tc-99m": [["medicina", "exame"]],
+    "I-131": [["medicina", "tratamento"]],
+    "Co-60": [["medicina", "radioterapia"], ["indústria", "esterilização, inspeção de solda"]],
+    "Cs-137": [["medicina", "radioterapia, irradiar sangue"], ["indústria", "medidores"], ["", "calibração de aparelhos"]],
+    "Am-241": [["casa", "detector de fumaça"], ["indústria", "medidores"]],
+    "U-235": [["energia", "combustível de reator"]],
+    "Ra-226": [["antigo", "ponteiros de relógio, radioterapia antiga"]],
+  };
+  const usesHtml = (nuc) => (USES[nuc] ? `<dt>${tr("Uso")}</dt><dd class="rc-uses">${USES[nuc].map(([a, u]) => `<span>${a ? `<span class="rc-use${a === "medicina" ? " med" : ""}">${esc(tr(a))}</span> ` : ""}${esc(tr(u))}</span>`).join("")}</dd>` : "");
+  // séries e cadeias de decaimento (conferidas na tabela da SUNY Potsdam / ENSDF)
+  const TH=[["Th-232","Tório-232","α","14 bilhões de anos"],["Ra-228","Rádio-228","β","5,75 anos"],["Ac-228","Actínio-228","β","6,15 horas"],["Th-228","Tório-228","α","1,9 ano"],["Ra-224","Rádio-224","α","3,6 dias"],["Rn-220","Radônio-220 (torônio)","α","56 segundos"],["Po-216","Polônio-216","α","0,15 segundo"],["Pb-212","Chumbo-212","β","10,6 horas"],["Bi-212","Bismuto-212","fork","61 minutos",[["Po-212","Polônio-212","β 64%","0,3 microssegundo","α"],["Tl-208","Tálio-208","α 36%","3 minutos","β"]]],["Pb-208","Chumbo-208","","estável"]];
+  const U8=[["U-238","Urânio-238","α","4,5 bilhões de anos"],["Th-234","Tório-234","β","24 dias"],["Pa-234m","Protactínio-234m","β","1,2 minuto"],["U-234","Urânio-234","α","245 mil anos"],["Th-230","Tório-230","α","75 mil anos"],["Ra-226","Rádio-226","α","1.600 anos"],["Rn-222","Radônio-222","α","3,8 dias"],["Po-218","Polônio-218","α","3,1 minutos"],["Pb-214","Chumbo-214","β","27 minutos"],["Bi-214","Bismuto-214","β","20 minutos"],["Po-214","Polônio-214","α","0,16 milissegundo"],["Pb-210","Chumbo-210","β","22 anos"],["Bi-210","Bismuto-210","β","5 dias"],["Po-210","Polônio-210","α","138 dias"],["Pb-206","Chumbo-206","","estável"]];
+  const U5=[["U-235","Urânio-235","α","704 milhões de anos"],["Th-231","Tório-231","β","25,5 horas"],["Pa-231","Protactínio-231","α","32.800 anos"],["Ac-227","Actínio-227","β","21,8 anos"],["Th-227","Tório-227","α","18,7 dias"],["Ra-223","Rádio-223","α","11,4 dias"],["Rn-219","Radônio-219","α","4 segundos"],["Po-215","Polônio-215","α","1,8 milissegundo"],["Pb-211","Chumbo-211","β","36 minutos"],["Bi-211","Bismuto-211","α","2,1 minutos"],["Tl-207","Tálio-207","β","4,8 minutos"],["Pb-207","Chumbo-207","","estável"]];
+  const CHAINS={
+   "Ac-228":{s:"Série do tório",c:TH,nat:1},
+   "Pb-212":{s:"Série do tório",c:TH,nat:1},
+   "Bi-212":{s:"Série do tório",c:TH,nat:1},
+   "Tl-208":{s:"Série do tório",c:TH,nat:1},
+   "Th-234":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "Pa-234m":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "Ra-226":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "Pb-214":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "Bi-214":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "Pb-210":{s:"Série do urânio (urânio-238)",c:U8,nat:1},
+   "U-235":{s:"Série do actínio (urânio-235)",c:U5,nat:1},
+   "K-40":{s:"Decaimento do potássio-40",nat:1,c:[["K-40","Potássio-40","fork","1,25 bilhão de anos",[["Ca-40","Cálcio-40 (estável)","β 89%",""],["Ar-40","Argônio-40 (estável)","captura de elétron 11% · solta o γ",""]]]]},
+   "Cs-137":{s:"Decaimento do césio-137",c:[["Cs-137","Césio-137","β","30 anos"],["Ba-137m","Bário-137m","γ","2,55 minutos"],["Ba-137","Bário-137","","estável"]]},
+   "Co-60":{s:"Decaimento do cobalto-60",c:[["Co-60","Cobalto-60","β","5,3 anos"],["Ni-60","Níquel-60","","estável (solta os dois γ ao assentar)"]]},
+   "Am-241":{s:"Decaimento do amerício-241",c:[["Am-241","Amerício-241","α","432 anos"],["Np-237","Netúnio-237","α","2,1 milhões de anos · segue a série do netúnio"]]},
+   "Tc-99m":{s:"Decaimento do tecnécio-99m",c:[["Tc-99m","Tecnécio-99m","γ","6 horas"],["Tc-99","Tecnécio-99","β","211 mil anos"],["Ru-99","Rutênio-99","","estável"]]},
+   "I-131":{s:"Decaimento do iodo-131",c:[["I-131","Iodo-131","β","8 dias"],["Xe-131","Xenônio-131","","estável"]]},
+  };
+  // linha do decaimento dentro do "De onde vem" (2.70, spec ux/isotopos.html item 2c):
+  // [sigla, nome, decai por, meia-vida, ramo?]. Com mais de 7 passos aparece
+  // resumida (o pai, 2 antes e 2 depois do aberto, o estável).
+  const CH_SEEN = new Set([...Object.keys(EMIT), "Ba-137m"]);
+  function chainHtml(nuc) {
+    const d = CHAINS[nuc];
+    if (!d) return "";
+    const c = d.c, full = !!pk.chainFull;
+    const g = (n) => (CH_SEEN.has(n[0]) && !/^estável/.test(n[3]) ? `<span class="rc-em made" title="${esc(tr(EMIT_TIP.γ))}">γ</span>` : "");
+    const row = (n) => `<li class="${n[0] === nuc ? "cur" : ""}${/^estável/.test(n[3]) ? " end" : ""}"><span class="dot"></span><span class="nm"><b data-no-tr>${esc(n[0])}</b>${g(n)} <span>${esc(tr(n[1]))}</span></span><span class="hl">${esc(n[3] === "estável" && LANG === "en" ? "stable" : tr(n[3]))}</span></li>`; // "estável" já é "steady" (tendência)
+    const step = (m) => (m ? `<li class="step"><span class="ar" data-no-tr>↓ ${esc(m)}</span></li>` : "");
+    let idx = c.findIndex((x) => x[0] === nuc);
+    if (idx < 0) idx = c.findIndex((x) => x[2] === "fork");
+    let show = c.map((_, i) => i);
+    if (c.length > 7 && !full) {
+      const keep = new Set([0, c.length - 1]);
+      for (let i = idx - 2; i <= idx + 2; i++) if (i >= 0 && i < c.length) keep.add(i);
+      show = [...keep].sort((a, b) => a - b);
+    }
+    let h = "", prev = -1;
+    for (const i of show) {
+      if (prev >= 0 && i > prev + 1) h += `<li class="gap"><span></span><button type="button" class="link" data-chain="full">${tr(`… ${i - prev - 1} passos · ver a série inteira`)}</button></li>`;
+      else if (prev >= 0) h += step(c[prev][2] === "fork" ? "" : c[prev][2]);
+      const n = c[i];
+      h += row(n);
+      if (n[2] === "fork") {
+        h += `<li class="fork"><span></span><div class="two">${n[4].map((b) => `<div class="${b[0] === nuc ? "cur" : ""}"><span class="pct" data-no-tr>↓ ${esc(tr(b[2]))}</span><b data-no-tr>${esc(b[0])}</b>${CH_SEEN.has(b[0]) && b[3] ? g(b) : ""}<br><span class="dim">${esc(tr(b[1]))}</span>${b[3] ? `<span class="pct">${esc(tr(b[3]))}${b[4] ? " · " + tr(`depois ${b[4]} → Pb-208`) : ""}</span>` : ""}</div>`).join("")}</div></li>`;
+      }
+      prev = i;
+    }
+    if (full && c.length > 7) h += `<li class="gap"><span></span><button type="button" class="link" data-chain="less">${tr("mostrar menos")}</button></li>`;
+    const steps = c.length + (c.some((x) => x[2] === "fork") ? 1 : 0);
+    const ttl = tr(d.s) + (c.length > 2 ? " · " + tr(`${steps} passos até o estável`) : "");
+    return `<div class="rc-chain-box"><div class="rc-chain-ttl">${esc(ttl)}</div><ul class="rc-chain">${h}</ul></div>`;
+  }
+
   // ---------- detalhe "Por que X" (2.69) ----------
   // Mostra a mesma conta da detecção: a base que o Go usou (o contínuo do SNIP
   // no acumulado, o fundo da casa mais a base dos lados ao vivo), o que sobra
@@ -706,7 +776,7 @@
       h += `<details class="rc-why-from"${pk.fromOpen ? " open" : ""}><summary>${tr("De onde vem")} <span class="rc-why-tag ${nat ? "nat" : "art"}">${tr(nat ? "natural" : "artificial")}</span></summary>` +
         `<p><b><span data-no-tr>${nuc}</span> (${esc(tr(name))})</b> ${esc(tr(txt))}</p><dl>` +
         `<dt>${tr("Origem")}</dt><dd>${tr(nat ? "natural" : "artificial")}${fam ? " · " + tr(FAM_NAME[fam]) : ""}</dd>` +
-        `<dt>${tr("Meia-vida")}</dt><dd>${esc(tr(half))}</dd><dt>${tr("Onde aparece")}</dt><dd>${esc(tr(where))}</dd></dl></details>`;
+        `<dt>${tr("Meia-vida")}</dt><dd>${esc(tr(half))}</dd>${usesHtml(o.nuclide)}<dt>${tr("Onde aparece")}</dt><dd>${esc(tr(where))}</dd></dl>${chainHtml(o.nuclide)}</details>`;
     }
     // outros da série: as linhas procuradas da mesma família, achadas ou não
     if (FAM[o.nuclide]) {
@@ -732,7 +802,7 @@
     $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
     $("rcZoomWarn").hidden = true;
     // o detalhe só é refeito quando muda alguma coisa (o "De onde vem" aberto fica aberto)
-    const why = $("rcWhy"), key = [o.nuclide, sureOf(o)[1], o.lines.map((l) => l.kev).join(","), Math.round(o.sigma), acc, curPeaks().map((q) => q.nuclide + q.kev).join(",")].join("|");
+    const why = $("rcWhy"), key = [!!pk.chainFull, o.nuclide, sureOf(o)[1], o.lines.map((l) => l.kev).join(","), Math.round(o.sigma), acc, curPeaks().map((q) => q.nuclide + q.kev).join(",")].join("|");
     why.hidden = false;
     if (why.dataset.k !== key) { why.dataset.k = key; why.innerHTML = whyHtml(o, curPeaks()); }
     const st = $("rcZoomStats"), row = (k, v) => `<dt>${k}</dt><dd class="mono" data-no-tr>${v}</dd>`;
@@ -1693,6 +1763,8 @@
     $("rcIsos").addEventListener("click", (e) => { const b = e.target.closest("button[data-nuc]"); if (b) isoPick(b.dataset.nuc); });
     $("rcZoomClose").addEventListener("click", zoomClose);
     // o "De onde vem" lembra se ficou aberto enquanto o detalhe se refaz
+    // "ver a série inteira" / "mostrar menos" na linha do decaimento
+    $("rcWhy").addEventListener("click", (e) => { const b = e.target.closest("button[data-chain]"); if (!b) return; pk.chainFull = b.dataset.chain === "full"; spDraw(); });
     $("rcWhy").addEventListener("toggle", (e) => { if (e.target.classList.contains("rc-why-from")) pk.fromOpen = e.target.open; }, true);
     const lpSeg = $("rcLoupe");
     const lpMark = () => lpSeg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.n === lp.n)));
