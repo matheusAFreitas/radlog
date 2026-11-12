@@ -15,7 +15,6 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
-	"runtime"
 	"sort"
 	"strings"
 )
@@ -61,7 +60,11 @@ func main() {
 	w.WriteString("RadLog: avisos de licença das bibliotecas de terceiros\n")
 	w.WriteString("Third-party license notices\n")
 	w.WriteString("(gerado por scripts/licenses; não edite à mão)\n\n")
-	section(&w, "Go (biblioteca padrão e compilador)", filepath.Join(runtime.GOROOT(), "LICENSE"))
+	root, err := exec.Command("go", "env", "GOROOT").Output()
+	if err != nil {
+		fail("go env GOROOT: %v", err)
+	}
+	section(&w, "Go (biblioteca padrão e compilador)", filepath.Join(strings.TrimSpace(string(root)), "LICENSE"))
 	for _, k := range names {
 		lic := findLicense(mods[k])
 		if lic == "" {

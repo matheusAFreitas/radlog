@@ -1,5 +1,55 @@
 # Versões
 
+## 2.71.0
+Bloco 4 da auditoria de 12/11: limpeza e documentação.
+
+- A gravação bruta do RC102 (pasta `radiacode/bruto`) sai. Ela servia para
+  descobrir o protocolo do aparelho, que hoje já é conhecido, e crescia
+  para sempre. O app não grava mais nada ali, não leva a pasta no backup nem
+  na sincronização, e o interruptor "Dados brutos" sai das Configurações do
+  RC102. Os arquivos antigos ficam onde estão; se quiser o espaço de volta,
+  pode apagar a pasta à mão.
+- Configurações › Atualizações e sobre: novo "Licenças de terceiros", com os
+  avisos das bibliotecas e fontes que vão dentro do app (o arquivo é gerado
+  no build e o CI confere se está em dia).
+- O app passa a aceitar uma segunda chave de assinatura, de reserva, para o
+  caso de a principal se perder (a chave entra numa próxima versão).
+- Novo `SECURITY.md` (como avisar de uma falha, a chave pública e o plano se
+  a chave se perder). O `CONTRIBUTING.md` ganha as conferências de antes do
+  PR e as regras de versão; o README lista as pastas que faltavam e avisa
+  para não compartilhar o `sincronizacao.json`. As versões 1.x do CHANGELOG
+  vão para o `CHANGELOG-1.x.md`.
+- Arrumação interna: o modo demonstração sai do `app.js` para o `demo.js`,
+  sem nomes de computador reais; uma função de escape de HTML só no lugar de
+  cinco cópias; saem da raiz o `flow.png` e os `.syso` (gerados no build); o
+  `build.bat` não roda mais `go mod tidy` e gera o ícone e a versão do
+  `.exe`.
+
+**English**
+
+Block 4 of the 12 Nov audit: cleanup and documentation.
+
+- RC102 raw recording (the `radiacode/bruto` folder) is gone. It was there
+  to work out the device protocol, which is now known, and it grew forever.
+  The app no longer writes anything there, doesn't put the folder in backups
+  or sync, and the "Raw data" switch leaves the RC102 settings. Old files
+  stay where they are; delete the folder by hand to get the space back.
+- Settings › Updates and about: new "Third-party licenses", with the notices
+  of the libraries and fonts inside the app (the file is generated at build
+  time and CI checks that it is up to date).
+- The app now accepts a second, reserve signing key, in case the main one is
+  lost (the key itself comes in a later version).
+- New `SECURITY.md` (how to report a problem, the public key and the plan if
+  the key is lost). `CONTRIBUTING.md` gets the pre-PR checks and the version
+  rules; the README lists the missing folders and warns not to share
+  `sincronizacao.json`. The 1.x versions of the CHANGELOG move to
+  `CHANGELOG-1.x.md`.
+- Internal cleanup: demo mode moves out of `app.js` into `demo.js`, without
+  real computer names; a single HTML escape function instead of five copies;
+  `flow.png` and the `.syso` files (generated at build) leave the root;
+  `build.bat` no longer runs `go mod tidy` and generates the `.exe` icon and
+  version.
+
 ## 2.70.2
 Blocos 2 e 3 da auditoria de 12/11: ferramentas e textos.
 
