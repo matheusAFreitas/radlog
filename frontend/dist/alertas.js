@@ -171,7 +171,7 @@ function alertLi(e, other) {
 function renderActive() {
   const ul = $("activeAlerts");
   const list = state.activeAlerts || [];
-  renderATile();
+  renderAlertMarks();
   ul.textContent = "";
   if (!list.length) {
     ul.innerHTML = `<li class="none">${lvIcon("seguro", 12)}<b>Nenhum alerta agora</b></li>`;
@@ -472,8 +472,7 @@ async function refreshAlerts() {
   const [all, active] = await Promise.all([api.GetEvents("alerta"), api.GetActiveAlerts()]);
   state.activeAlerts = active || [];
   renderActive();
-  state.lastAlert = groupEpisodes(all || []).find((e) => !e.active) || null;
-  renderATile();
+  renderAlertMarks();
   if (state.view === "alertas") renderAlertHistory(all || []);
 }
 
