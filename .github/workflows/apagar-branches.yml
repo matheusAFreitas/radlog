@@ -1,0 +1,53 @@
+name: apagar-branches
+
+# Apaga branches do GitHub pela lista informada. Existe porque o ambiente das
+# threads do Claude consegue criar branch mas não consegue apagar (o push de
+# remoção é recusado). Roda à mão: Actions → apagar-branches → Run workflow,
+# com os nomes separados por espaço. Com "apagar" desmarcado só lista.
+# Nunca apaga o main nem branch com PR aberto. Tags e releases não são tocadas.
+on:
+  workflow_dispatch:
+    inputs:
+      branches:
+        description: "Branches a apagar, separadas por espaço"
+        type: string
+        required: true
+      apagar:
+        description: "Apagar de verdade (desmarcado = só listar)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  pull-requests: read
+
+jobs:
+  apagar:
+    runs-on: ubuntu-24.04
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      LISTA: ${{ inputs.branches }}
+      APAGAR: ${{ inputs.apagar }}
+    steps:
+      - name: Apagar
+        run: |
+          set -euo pipefail
+          OWNER="${GH_REPO%%/*}"
+          for b in $LISTA; do
+            case "$b" in
+              main|master) echo "fica (protegida): $b"; continue;;
+            esac
+            if ! gh api "repos/$GH_REPO/branches/$b" --silent 2>/dev/null; then
+              echo "não existe: $b"; continue
+            fi
+            abertos=$(gh api "repos/$GH_REPO/pulls?state=open&head=$OWNER:$b" --jq 'length')
+            if [ "$abertos" != "0" ]; then
+              echo "fica (PR aberto): $b"; continue
+            fi
+            if [ "$APAGAR" != "true" ]; then
+              echo "sairia: $b"; continue
+            fi
+            gh api -X DELETE "repos/$GH_REPO/git/refs/heads/$b"
+            echo "apagada: $b"
+          done
