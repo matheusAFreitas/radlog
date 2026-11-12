@@ -17,6 +17,9 @@ func TestReportNewPages(t *testing.T) {
 	// 2 dias: GMC em casa e o RC102 com você; das 13 às 17 h de ontem, fora
 	leave := time.Date(now.Year(), now.Month(), now.Day(), 13, 0, 0, 0, now.Location()).AddDate(0, 0, -1)
 	back := leave.Add(4 * time.Hour)
+	// e uma saída só com o GMC-800 (sem o RC102), das 8 às 10 h de ontem
+	gLeave := leave.Add(-5 * time.Hour)
+	gBack := gLeave.Add(2 * time.Hour)
 	var pts []store.Point
 	for m := start; m.Before(now); m = m.Add(time.Minute) {
 		v := 0.12 + 0.01*math.Sin(float64(m.Unix())/3000)
@@ -24,7 +27,11 @@ func TestReportNewPages(t *testing.T) {
 			v = 0.17
 		}
 		a.rcAddMinute(m.Add(time.Second), 3, v)
-		pts = append(pts, store.Point{T: m, CPM: 20 + float64(m.Minute()%5), Src: "live"})
+		cpm := 20 + float64(m.Minute()%5)
+		if !m.Before(gLeave) && m.Before(gBack) {
+			cpm = 60
+		}
+		pts = append(pts, store.Point{T: m, CPM: cpm, Src: "live"})
 	}
 	a.rcFlushMinute()
 	a.store.Import(pts)
@@ -55,6 +62,9 @@ func TestReportNewPages(t *testing.T) {
 	if _, err := a.SavePeriod(Period{From: leave.UnixMilli(), To: back.UnixMilli(), Name: "Centro", GMC: WhereHome, RC: WhereMe, NotHome: true}); err != nil {
 		t.Fatal(err)
 	}
+	if _, err := a.SavePeriod(Period{From: gLeave.UnixMilli(), To: gBack.UnixMilli(), Name: "Feira", GMC: WhereMe, RC: WhereOff, NotHome: true}); err != nil {
+		t.Fatal(err)
+	}
 	a.mu.Lock()
 	a.settings.ReportNotes = true
 	a.notes = append(a.notes, Note{ID: 1, Time: leave.Add(-time.Hour).UnixMilli(), Text: "abri a janela"})
@@ -64,8 +74,24 @@ func TestReportNewPages(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(r.Trips) != 1 || r.Trips[0].Title != "Centro" || r.Trips[0].Spec == nil || !r.Trips[0].HasDose {
+	var rcTrip, gTrip *reportTrip
+	for i := range r.Trips {
+		if r.Trips[i].GMC {
+			gTrip = &r.Trips[i]
+		} else {
+			rcTrip = &r.Trips[i]
+		}
+	}
+	if len(r.Trips) != 2 || rcTrip == nil || rcTrip.Title != "Centro" || rcTrip.Spec == nil || !rcTrip.HasDose {
 		t.Fatalf("saídas: %+v", r.Trips)
+	}
+	if gTrip == nil || gTrip.Title != "Feira" || gTrip.AvgU <= 0 || gTrip.Peak < gTrip.AvgU*0.999 {
+		t.Fatalf("saída com o GMC-800: %+v", gTrip)
+	}
+	for _, d := range r.Days2 {
+		if d.HasHome && d.HomeU > gTrip.AvgU*0.5 {
+			t.Fatalf("o fundo de casa entrou com a saída do GMC-800: %+v (saída %v)", d, gTrip.AvgU)
+		}
 	}
 	if len(r.Days2) < 2 || !r.Days2[1].HasDose || !r.Days2[1].HasHome {
 		t.Fatalf("por dia: %+v", r.Days2)

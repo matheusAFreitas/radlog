@@ -638,7 +638,7 @@ func (p *reportPDF) annexStats() {
 	p.section("A1 · ESTATÍSTICA DA CONTAGEM POR MINUTO (CPM, O QUE O CONTADOR MEDE)")
 	p.need(165)
 	top := p.y
-	livePeak := "— (nenhum alerta ao vivo)"
+	livePeak := "nenhum"
 	if r.AlertPeakMax > 0 {
 		livePeak = fmtBR(r.AlertPeakMax, 0) + " CPM às " + r.alertPeakAt.Format("02/01 15:04")
 	}
@@ -651,7 +651,7 @@ func (p *reportPDF) annexStats() {
 		{"P5 · P25 · P50", fmtBR(st.P5, 1) + " · " + fmtBR(st.P25, 1) + " · " + fmtBR(st.Median, 1), "M"},
 		{"P75 · P95", fmtBR(st.P75, 1) + " · " + fmtBR(st.P95, 1), "M"},
 		{"Mínimo · máximo (minutos gravados)", fmtBR(st.Min, 0) + " · " + fmtBR(st.Max, 0) + " CPM", "M"},
-		{"Pico ao vivo (alertas, janela de 60 s)", livePeak, "M"},
+		{"Pico ao vivo (60 s)", livePeak, "M"},
 	}
 	colW := (pdf.W - 2*pm) * 0.46
 	for _, kv := range rows {

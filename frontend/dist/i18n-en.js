@@ -3373,7 +3373,11 @@ const I18N_EN = {
 "A6 · HISTÓRICO DISPONÍVEL (MATURIDADE)": "A6 · HISTORY AVAILABLE (MATURITY)",
 "A7 · CONFIGURAÇÕES VIGENTES NO PERÍODO": "A7 · SETTINGS IN EFFECT IN THE PERIOD",
 "A7 · CONFIGURAÇÕES E MÉTODO": "A7 · SETTINGS AND METHOD",
-"A8 · LIMITAÇÕES": "A8 · LIMITATIONS"
+"A8 · LIMITAÇÕES": "A8 · LIMITATIONS",
+"Pico ao vivo (60 s)": "Live peak (60 s)",
+"µSv/h AO LONGO DO PERÍODO: GMC-800 (CASA)": "µSv/h OVER THE PERIOD: GMC-800 (HOME)",
+"SAÍDAS DE CASA": "TRIPS AWAY FROM HOME",
+"Levou": "Taken"
 },
 "patterns": [
 [
@@ -8609,6 +8613,15 @@ const I18N_EN = {
 "Did you move the GMC-800 on ${1}?",
 [
 "Mudou o GMC-800 de lugar em "
+]
+],
+[
+"Saídas de casa: ",
+"^Saídas de casa: ((?:(?! · ).)+?) \\(página 2\\)\\.$",
+"Trips away from home: ${1} (page 2).",
+[
+"Saídas de casa: ",
+" (página 2)."
 ]
 ],
 [
