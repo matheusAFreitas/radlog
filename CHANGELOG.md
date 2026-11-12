@@ -1,5 +1,64 @@
 # Versões
 
+## 2.70.1
+Primeiro bloco da auditoria de 12/11: dados e segurança. Nada muda na tela.
+
+- Leituras: uma linha estragada no meio do arquivo do mês (por exemplo, de
+  uma gravação cortada por queda de energia) não esconde mais as linhas
+  seguintes. Antes o resto do mês sumia da tela e, na importação seguinte
+  (histórico do contador, backup ou sincronização), era apagado do arquivo.
+  Agora cada linha é lida sozinha, e as que não dá para ler vão para um
+  arquivo ao lado (`AAAA-MM.csv.ilegivel`) antes de o mês ser regravado.
+- Configurações: o `config.json` é gravado num arquivo temporário e só
+  depois troca de nome, então uma queda de energia não deixa mais o arquivo
+  pela metade. Se mesmo assim ele não puder ser lido, o app volta ao padrão,
+  guarda o arquivo ruim como `config.json.ilegivel` e avisa em Eventos, em
+  vez de zerar tudo em silêncio. A chuva por dia ganhou a mesma gravação.
+- Atualização: o app só troca de versão sozinho se o nome do arquivo da
+  release trouxer a versão anunciada. A assinatura já garantia quem
+  publicou; isto impede que um arquivo antigo assinado seja oferecido como
+  versão nova.
+- Erro interno: o relatório automático da medição, a primeira sincronização
+  depois de parear e o ícone da bandeja passam a rodar protegidos, como as
+  outras tarefas de fundo. Um erro neles vira uma linha em Eventos em vez de
+  fechar o app.
+- Release: o `appimagetool` e o runtime do AppImage passam a ser baixados em
+  versão fixa, com o SHA-256 conferido antes de rodar (antes vinha do canal
+  "continuous", sem conferência, no mesmo job que assina).
+- O `.exe` volta a trazer a versão certa no campo fixo do arquivo (estava
+  parado em 2.28.0.0). O CI agora confere que `version.go`, `winres.json` e
+  o topo deste arquivo dizem a mesma versão.
+
+**English**
+
+First block of the 12 Nov audit: data and security. Nothing changes on
+screen.
+
+- Readings: a damaged line in the middle of a month file (for example from
+  a write cut short by a power loss) no longer hides the lines after it.
+  Before, the rest of the month vanished from the screen and was deleted
+  from the file on the next import (counter history, backup or sync). Each
+  line is now read on its own, and unreadable ones are saved to a file next
+  to it (`YYYY-MM.csv.ilegivel`) before the month is rewritten.
+- Settings: `config.json` is written to a temporary file and then renamed,
+  so a power loss can no longer leave it half written. If it still can't be
+  read, the app goes back to the defaults, keeps the bad file as
+  `config.json.ilegivel` and says so in Events instead of resetting
+  silently. The rain-per-day file is written the same way.
+- Update: the app only switches versions by itself when the release file
+  name carries the announced version. The signature already proved who
+  published; this stops an old signed file from being offered as a new
+  version.
+- Internal errors: the automatic measurement report, the first sync after
+  pairing and the tray icon now run protected like the other background
+  tasks. An error there becomes a line in Events instead of closing the
+  app.
+- Release: `appimagetool` and the AppImage runtime are now downloaded at a
+  fixed version, with the SHA-256 checked before running.
+- The `.exe` carries the right version in its fixed version field again (it
+  was stuck at 2.28.0.0). CI now checks that `version.go`, `winres.json`
+  and the top of this file agree.
+
 ## 2.70.0
 - "De onde vem" (detalhe do isótopo na aba Espectro) ganha:
   - a linha do decaimento: a série ou cadeia do isótopo, do pai até o

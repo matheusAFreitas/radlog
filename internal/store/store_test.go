@@ -136,3 +136,58 @@ func TestTraceColumns(t *testing.T) {
 		t.Fatalf("export:\n%s", buf.String())
 	}
 }
+
+// Uma linha estragada no meio do mês (aspa solta de uma gravação cortada)
+// não pode esconder as linhas seguintes (2.70.1).
+func TestParseCSVBadLineInTheMiddle(t *testing.T) {
+	in := header + "\n" +
+		"2026-11-01T00:00:00-03:00,20,ao vivo\n" +
+		"2026-11-01T00:01:00-03:00,2\"1,ao vivo\n" +
+		"\x00\x00\x00\x00\n" +
+		"lixo sem sentido\n" +
+		"2026-11-01T00:02:00-03:00,22,ao vivo,22,22,,desligado,sat\n" +
+		"2026-11-01T00:03:00-03:00,23,ao vivo"
+	pts, bad := parseCSV(strings.NewReader(in))
+	if len(pts) != 3 {
+		t.Fatalf("pontos = %d, quero 3", len(pts))
+	}
+	if pts[1].CPM != 22 || pts[1].Obs != "sat" || pts[2].CPM != 23 {
+		t.Fatalf("pontos errados: %+v", pts)
+	}
+	if len(bad) != 2 {
+		t.Fatalf("linhas ilegíveis = %d (%q), quero 2", len(bad), bad)
+	}
+}
+
+// Importar num mês com linha estragada não apaga as linhas boas que vêm
+// depois dela, e guarda a estragada num arquivo ao lado.
+func TestImportKeepsLinesAfterBadOne(t *testing.T) {
+	dir := t.TempDir()
+	s, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	day := time.Date(2020, 3, 10, 0, 0, 0, 0, time.Local)
+	path := s.monthFile(day)
+	var sb strings.Builder
+	sb.WriteString(header + "\n")
+	sb.WriteString(formatLine(Point{T: day, CPM: 20, Src: SrcLive}) + "\n")
+	sb.WriteString("2020-03-10T00:01:00-03:00,2\"1,ao vivo\n")
+	sb.WriteString(formatLine(Point{T: day.Add(2 * time.Minute), CPM: 22, Src: SrcLive}) + "\n")
+	sb.WriteString(formatLine(Point{T: day.Add(3 * time.Minute), CPM: 23, Src: SrcLive}) + "\n")
+	if err := os.WriteFile(path, []byte(sb.String()), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	added, err := s.ImportNew([]Point{{T: day.Add(10 * time.Minute), CPM: 30, Src: SrcDevice}})
+	if err != nil || len(added) != 1 {
+		t.Fatalf("ImportNew: %v, %d", err, len(added))
+	}
+	pts, err := readFile(path)
+	if err != nil || len(pts) != 4 {
+		t.Fatalf("depois de importar: %d pontos (%v), quero 4", len(pts), err)
+	}
+	b, err := os.ReadFile(path + ".ilegivel")
+	if err != nil || !strings.Contains(string(b), `2"1`) {
+		t.Fatalf("a linha estragada não foi guardada: %v %q", err, b)
+	}
+}

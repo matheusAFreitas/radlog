@@ -475,7 +475,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			auto := !a.settings.NoMeasureReport
 			a.mu.Unlock()
 			if auto {
-				go a.autoMeasureReport(id)
+				a.goSafe("autoMeasureReport", func() { a.autoMeasureReport(id) })
 			}
 		}
 	}

@@ -84,7 +84,7 @@ func (a *App) saveRainDaysLocked() {
 		return
 	}
 	if b, err := json.Marshal(a.rainDays); err == nil {
-		_ = os.WriteFile(a.rainDaysPath(), b, 0o644)
+		_ = writeFileAtomic(a.rainDaysPath(), b, 0o644)
 	}
 }
 

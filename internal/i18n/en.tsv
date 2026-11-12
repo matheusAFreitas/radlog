@@ -4680,3 +4680,6 @@ energia	energy
 combustível de reator	reactor fuel
 antigo	old
 ponteiros de relógio, radioterapia antiga	watch hands, early radiotherapy
+Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração	Couldn't read the settings (damaged file): they went back to the defaults. Check the alarms and the calibration
+o arquivo da release ({0}) não é o da versão {1}; baixe pela página e confira	the release file ({0}) isn't the one for version {1}; download it from the page and check it
+o arquivo da release ({0}) não é o da versão {1}; não vou instalar	the release file ({0}) isn't the one for version {1}; I won't install it
