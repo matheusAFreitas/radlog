@@ -390,6 +390,8 @@ function renderRTile(st, o) {
   $("rTile").classList.toggle("conn-wait", rcc === "wait");
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
   dialVal("r", v ? v[u] : "—");
+  // mrem/h pequeno embaixo do mostrador, igual ao do GMC-800 (ACE 11/11)
+  $("rTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
   $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
@@ -3577,7 +3579,8 @@ function renderRcMain(st) {
   $("rcMainUnit").textContent = { usv: "µSv/h", mrh: "mrem/h", cps: "CPS", cpm: "CPM" }[u];
   const v = usv == null ? null : { usv, mrh: usv / 10, cps, cpm: cps * 60 }[u];
   $("rcMainVal").textContent = v == null ? "—" : u === "usv" ? fmt(v, usvDigits(v)) : u === "mrh" ? fmt(v, usvDigits(v * 10) + 1) : u === "cps" ? fmt(v, 2) : fmt(v, 0);
-  $("rcMainAlt").textContent = live ? `${fmt(cps * 60, 0)} CPM · ${fmt(cps, 1)} cps · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
+  const mrem = u === "usv" && usv != null ? `${fmt(usv / 10, usvDigits(usv) + 1)} mrem/h · ` : "";
+  $("rcMainAlt").textContent = live ? `${mrem}${fmt(cps * 60, 0)} CPM · ${fmt(cps, 1)} cps · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
   if (st.todayDevOK) {
     $("rcDoseToday").textContent = fmt(st.todayDev, 2);

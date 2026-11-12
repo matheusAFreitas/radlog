@@ -1,5 +1,10 @@
 # Versões
 
+## 2.68.5
+- O mrem/h agora aparece também no RC102: pequeno embaixo do mostrador no
+  Agora (e no topo das outras telas) e na leitura da aba do Radiacode 102,
+  igual ao GMC-800. Só quando a unidade é µSv/h.
+
 ## 2.68.4
 - Configurações sem buracos: em cada aba os cartões ficam em duas colunas
   que empilham sozinhas, e o último cartão de cada coluna estica até o fim,
