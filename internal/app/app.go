@@ -342,19 +342,21 @@ type App struct {
 
 	mu       sync.Mutex
 	settings Settings
-	dev      *gmc.Device
-	info     DeviceInfo
-	cal      gmc.Calibration
-	calHist  calHistData // versões da calibração (2.2)
-	rcDevT   rcDevToday  // dose de hoje do RC102 pelo aparelho
-	firsts   firstCache  // primeiro dado de cada aparelho
-	state    string
-	message  string
-	stopPoll chan struct{}
-	events   []Event
-	evSeq    int64    // último ID de evento
-	alerts   alertIDs // alertas reais abertos agora
-	rcAlert  rcAlertState
+	// o config.json existia mas não deu para ler (startup avisa em Eventos)
+	settingsBroken bool
+	dev            *gmc.Device
+	info           DeviceInfo
+	cal            gmc.Calibration
+	calHist        calHistData // versões da calibração (2.2)
+	rcDevT         rcDevToday  // dose de hoje do RC102 pelo aparelho
+	firsts         firstCache  // primeiro dado de cada aparelho
+	state          string
+	message        string
+	stopPoll       chan struct{}
+	events         []Event
+	evSeq          int64    // último ID de evento
+	alerts         alertIDs // alertas reais abertos agora
+	rcAlert        rcAlertState
 
 	connMu sync.Mutex // uma conexão por vez
 
@@ -471,6 +473,9 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.logAutostart()
 	a.events = a.loadEvents()
+	if a.settingsBroken {
+		a.logEvent("Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração")
+	}
 	a.logMigration(migNow, migDocsMoved, migDocsErr)
 
 	st, err := store.Open(a.dataDir)
@@ -525,7 +530,16 @@ func (a *App) loadSettings() Settings {
 	s := defaultSettings()
 	b, err := os.ReadFile(a.settingsPath())
 	if err == nil {
-		_ = json.Unmarshal(b, &s)
+		if jerr := json.Unmarshal(b, &s); jerr != nil {
+			// arquivo cortado ou estragado: não dá para confiar em campos
+			// lidos pela metade. Volta ao padrão, guarda uma cópia do
+			// arquivo ruim e avisa (startup), em vez de zerar em silêncio.
+			s = defaultSettings()
+			bad := a.settingsPath() + ".ilegivel"
+			_ = os.WriteFile(bad, b, 0o644)
+			a.logf("configurações: não consegui ler o config.json (%v); voltei ao padrão e guardei o arquivo em %s", jerr, bad)
+			a.settingsBroken = true
+		}
 	}
 	if s.AlarmCPM <= 0 {
 		s.AlarmCPM = levels.WarningCPM
@@ -540,8 +554,13 @@ func (a *App) loadSettings() Settings {
 }
 
 func (a *App) saveSettingsLocked() {
-	b, _ := json.MarshalIndent(a.settings, "", "  ")
-	_ = os.WriteFile(a.settingsPath(), b, 0o644)
+	b, err := json.MarshalIndent(a.settings, "", "  ")
+	if err != nil {
+		return
+	}
+	if err := writeFileAtomic(a.settingsPath(), b, 0o644); err != nil {
+		a.logf("configurações: não consegui gravar o config.json: %v", err)
+	}
 }
 
 func (a *App) eventsPath() string { return filepath.Join(a.dataDir, "eventos.csv") }

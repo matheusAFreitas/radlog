@@ -31,7 +31,7 @@ const trayAvailable = true
 // startTray cria o ícone. O systray do Windows precisa da sua própria fila
 // de mensagens, numa thread fixa.
 func (a *App) startTray() {
-	go func() {
+	a.goSafe("tray", func() {
 		runtime.LockOSThread()
 		systray.Run(func() {
 			systray.SetIcon(trayIcon)
@@ -43,7 +43,7 @@ func (a *App) startTray() {
 			a.tray.items = []trayItem{{open, "Abrir o RadLog", "Mostra a janela"}, {quit, "Sair", "Fecha o app (para de monitorar)"}}
 			a.trayMu.Unlock()
 			a.trayReady.Store(true)
-			go a.trayRefresh()
+			a.goSafe("trayRefresh", a.trayRefresh)
 			for {
 				select {
 				case <-open.ClickedCh:
@@ -54,7 +54,7 @@ func (a *App) startTray() {
 				}
 			}
 		}, nil)
-	}()
+	})
 }
 
 func (a *App) stopTray() {

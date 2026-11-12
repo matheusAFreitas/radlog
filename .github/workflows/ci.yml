@@ -19,6 +19,12 @@ jobs:
       - uses: actions/setup-go@40f1582b2485089dde7abd97c1529aa768e1baff # v5.6.0
         with:
           go-version: "1.27"
+      - name: Versão igual em version.go, winres.json e CHANGELOG
+        run: sh scripts/check-version.sh
+      - name: Ferramentas do AppImage (versão fixa, SHA-256 conferido)
+        # as mesmas que o job de release usa: se a soma não bater, falha aqui
+        # no PR, não na hora de publicar
+        run: sh build/linux/build-appimage.sh --so-ferramentas
       - name: Dependências do Linux (GTK/WebKit)
         # no pior caso (4 tentativas travadas) falha em ~25 min, não em horas
         timeout-minutes: 25

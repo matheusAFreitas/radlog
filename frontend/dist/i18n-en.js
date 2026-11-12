@@ -3598,7 +3598,8 @@ const I18N_EN = {
 "energia": "energy",
 "combustível de reator": "reactor fuel",
 "antigo": "old",
-"ponteiros de relógio, radioterapia antiga": "watch hands, early radiotherapy"
+"ponteiros de relógio, radioterapia antiga": "watch hands, early radiotherapy",
+"Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração": "Couldn't read the settings (damaged file): they went back to the defaults. Check the alarms and the calibration"
 },
 "patterns": [
 [
@@ -5123,6 +5124,16 @@ const I18N_EN = {
 ]
 ],
 [
+"o arquivo da release (",
+"^o arquivo da release \\(((?:(?! · ).)+?)\\) não é o da versão ((?:(?! · ).)+?); baixe pela página e confira$",
+"the release file (${1}) isn't the one for version ${2}; download it from the page and check it",
+[
+"o arquivo da release (",
+") não é o da versão ",
+"; baixe pela página e confira"
+]
+],
+[
 "mais alto por volta das ",
 "^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) CPM\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) CPM\\)$",
 "highest around ${1}h (${2} CPM) · lowest around ${3}h (${4} CPM)",
@@ -5682,6 +5693,16 @@ const I18N_EN = {
 [
 "Pista: quando a pressão cai, o fundo sobe cerca de ",
 " h depois."
+]
+],
+[
+"o arquivo da release (",
+"^o arquivo da release \\(((?:(?! · ).)+?)\\) não é o da versão ((?:(?! · ).)+?); não vou instalar$",
+"the release file (${1}) isn't the one for version ${2}; I won't install it",
+[
+"o arquivo da release (",
+") não é o da versão ",
+"; não vou instalar"
 ]
 ],
 [

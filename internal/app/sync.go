@@ -909,7 +909,7 @@ func (a *App) PairWith(addr, code string) (SyncInfo, error) {
 	a.logEvent(fmt.Sprintf("Pareado com %s", sr.Name))
 	a.emitSync()
 	if a.ctx != nil { // já sincroniza (nos testes não há tela)
-		go func() { _, _ = a.SyncNow(sr.ID) }()
+		a.goSafe("SyncNow", func() { _, _ = a.SyncNow(sr.ID) })
 	}
 	return a.GetSync(), nil
 }

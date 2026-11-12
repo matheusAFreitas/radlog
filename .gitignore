@@ -9,6 +9,7 @@
 *.zip
 build/linux/*.AppDir/
 build/linux/appimagetool
+build/linux/appimage-runtime
 
 # go.mod alternativo usado só no ambiente offline de quem desenvolve
 local.mod
