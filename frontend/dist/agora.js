@@ -175,7 +175,7 @@ function renderAgDose() {
       n.classList.remove("up");
     }
     cell.append(n);
-    // em coisas conhecidas: tempo de fundo da casa e banana, voo, raio-X
+    // em coisas conhecidas: tempo de fundo da casa e voo, raio-X
     if (p.measuredMinutes || p.total) {
       const kn = doseKnownEl(p.total, d.backgroundRate || null, "ag-known");
       if (kn) cell.append(kn);
