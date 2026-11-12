@@ -1,8 +1,6 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
-    <img src="docs/logo-light.svg" alt="RadLog" width="300">
-  </picture>
+  <img src="docs/logo-light.svg#gh-light-mode-only" alt="RadLog" width="300">
+  <img src="docs/logo-dark.svg#gh-dark-mode-only" alt="RadLog" width="300">
 </p>
 
 <p align="center"><b>English</b> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
