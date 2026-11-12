@@ -137,3 +137,50 @@ jobs:
             out/*.tar.gz
             out/SHA256SUMS.txt
             out/SHA256SUMS.txt.sig
+
+  # cria a linha da versão no banco "Versões" do Notion. Precisa do segredo
+  # NOTION_TOKEN (integração interna do Notion com acesso ao banco); sem ele o
+  # passo só avisa e sai. Falha aqui não desfaz a release, que já saiu.
+  notion:
+    needs: [check, build]
+    runs-on: ubuntu-24.04
+    continue-on-error: true
+    steps:
+      - name: Linha no banco de Versões
+        env:
+          NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+          NOTION_DB: ${{ vars.NOTION_VERSOES_DB || 'a1d7164289e14b10a71ad9e193dbddf8' }}
+          VER: ${{ needs.check.outputs.ver }}
+          MSG: ${{ github.event.head_commit.message }}
+          REPO: ${{ github.repository }}
+        run: |
+          if [ -z "$NOTION_TOKEN" ]; then echo "sem NOTION_TOKEN: nada a fazer"; exit 0; fi
+          H='Notion-Version: 2022-06-28'
+          # já existe? (rodar a release de novo não duplica a linha)
+          n=$(jq -n --arg v "$VER" '{filter:{property:"Versão",title:{equals:$v}}}' \
+            | curl -sfS -X POST "https://api.notion.com/v1/databases/$NOTION_DB/query" \
+                -H "Authorization: Bearer $NOTION_TOKEN" -H "$H" -H 'Content-Type: application/json' -d @- \
+            | jq '.results | length')
+          if [ "$n" != "0" ]; then echo "a $VER já está no Notion"; exit 0; fi
+          # título do commit: "Resumo (X.Y.Z) (#N)"
+          T=$(printf '%s\n' "$MSG" | head -n1)
+          PR=$(printf '%s' "$T" | sed -n 's/.*(#\([0-9]\+\))$/\1/p')
+          RES=$(printf '%s' "$T" | sed -e 's/ *(#[0-9]\+)$//' -e "s/ *($VER)$//")
+          IFS=. read -r MA MI PA <<< "$VER"
+          if [ "$MA" = 2 ]; then FX="2.$((MI / 10))x"; else FX="$MA.x"; fi
+          if [ "$PA" != 0 ]; then TP=Patch; elif [ "$MI" = 0 ]; then TP=Major; else TP=Minor; fi
+          URL=""; [ -n "$PR" ] && URL="https://github.com/$REPO/pull/$PR"
+          jq -n --arg db "$NOTION_DB" --arg v "$VER" --arg r "$RES" --arg fx "$FX" --arg tp "$TP" \
+                --arg url "$URL" --arg d "$(date -u +%Y-%m-%dT%H:%M:%SZ)" '{
+              parent: {database_id: $db},
+              properties: ({
+                "Versão": {title: [{text: {content: $v}}]},
+                "Resumo": {rich_text: [{text: {content: $r}}]},
+                "Faixa": {select: {name: $fx}},
+                "Tipo": {select: {name: $tp}},
+                "Data": {date: {start: $d}}
+              } + (if $url == "" then {} else {"PR": {url: $url}} end))
+            }' \
+            | curl -sfS -X POST https://api.notion.com/v1/pages \
+                -H "Authorization: Bearer $NOTION_TOKEN" -H "$H" -H 'Content-Type: application/json' -d @- \
+            | jq -r '"criada: " + .url'
