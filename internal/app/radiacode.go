@@ -71,7 +71,6 @@ type RcState struct {
 	LastT      int64   `json:"lastT"`   // ms do último minuto gravado
 	LastUSv    float64 `json:"lastUSv"` // µSv/h desse minuto
 	LastCPS    float64 `json:"lastCPS"`
-	Raw        bool    `json:"raw"` // guardando os dados brutos
 	// para o quadro igual ao do GMC
 	Stats *RcStats `json:"stats"`
 	// faixas do app em µSv/h (as do GMC convertidas pela calibração dele)
@@ -122,7 +121,6 @@ type rcState struct {
 	fileM        sync.Mutex
 	ring         []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today        rcToday
-	raw          rcRawLog
 	spec         rcSpecLog // espectro de minuto em minuto (espectrograma)
 	specSum      rcSpecCache
 	act          actState  // medição de atividade (Bq)
@@ -176,7 +174,7 @@ func (a *App) GetRadiacode() RcState {
 	lim := a.rcLimits()
 	a.mu.Lock()
 	alertLvl := a.rcAlertLevelLocked()
-	off, ble, noRaw := a.settings.RcOff, a.settings.RcBLE, a.settings.RcNoRaw
+	off, ble := a.settings.RcOff, a.settings.RcBLE
 	cal := a.convCalLocked()
 	eff := a.effLocked()
 	lv := eff.Levels.Norm()
@@ -198,7 +196,6 @@ func (a *App) GetRadiacode() RcState {
 	}
 	st.Off, st.BLE, st.BLEOK = off, ble, radiacode.BLESupported
 	st.Stats = stats
-	st.Raw = !noRaw
 	st.AttnUSv, st.AlarmUSv, st.DangerUSv = cal.USv(lv.AttnEnter()), cal.USv(float64(alarmCPM)), cal.USv(lv.DangerEnter())
 	st.AlertLevel, st.Limits = alertLvl, lim
 	a.rcDoseFillLocked(&st, st.State == "conectado")
@@ -482,7 +479,6 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		askAway()
 		a.rcAlertsOff()
 		a.rcFlushMinute()
-		a.rcRawClose()
 		a.rcSpecClose()
 		a.rc.mu.Lock()
 		a.rc.dev = nil
@@ -496,7 +492,6 @@ func (a *App) rcRun(dev *radiacode.Device) {
 	via := map[string]string{"usb": "USB", "bluetooth": "Bluetooth"}[dev.Kind()]
 	a.logEvent(fmt.Sprintf("RC102 conectado (%s) · %s %s · firmware %s", via, dev.Model, dev.Serial, dev.Firmware))
 	a.emitRc()
-	a.rcRawSnapshot(dev)
 	a.rcTextLog(dev)
 	fails := 0
 	tick := time.NewTicker(rcPollEvery)
@@ -508,7 +503,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		if off {
 			break
 		}
-		raw, recs, err := dev.DataBufRaw()
+		_, recs, err := dev.DataBufRaw()
 		if err != nil {
 			fails++
 			if fails < 3 {
@@ -520,13 +515,11 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			break
 		}
 		fails = 0
-		a.rcRawRecords(raw, dev.Base())
 		a.rcRecords(recs)
 		if !asked && time.Since(since) >= rcAwayWait {
 			a.rcMemFlush()
 			askAway()
 		}
-		a.rcRawSpectrum(dev)
 		a.rcSpecTick(dev)
 		a.rcActTick(dev)
 		for _, r := range recs {

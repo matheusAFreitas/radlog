@@ -2,8 +2,6 @@ package app
 
 import (
 	"bytes"
-	"compress/gzip"
-	"io"
 	"math"
 	"os"
 	"path/filepath"
@@ -138,12 +136,12 @@ func TestRcRawAndBackup(t *testing.T) {
 	a.rcAddMinute(now.Add(-3*time.Minute+time.Second), 3, 0.1)
 	a.rcAddMinute(now.Add(-2*time.Minute+time.Second), 3, 0.1)
 	a.rcFlushMinute()
-	// um registro de tempo real cru
-	rec := []byte{0, 0, 0, 100, 0, 0, 0, 0, 0, 0x90, 0x40, 0xac, 0xc5, 0x27, 0x37, 150, 0, 200, 0, 0, 0, 0}
-	a.rcRawRecords(rec, time.Now())
-	a.rcRawClose()
+	// dados brutos de uma versão antiga: ficam no disco, mas não vão mais no
+	// backup (a gravação saiu na 2.70.3)
+	os.MkdirAll(a.rcRawPath(""), 0o755)
+	os.WriteFile(a.rcRawPath("2026-01-01-120000.jsonl.gz"), []byte("x"), 0o644)
 	files := a.rcBackupFiles()
-	if len(files) != 2 || !strings.HasPrefix(files[1], "radiacode/bruto/") {
+	if len(files) != 1 || strings.Contains(files[0], "bruto") {
 		t.Fatalf("arquivos: %v", files)
 	}
 	var buf bytes.Buffer
@@ -161,19 +159,8 @@ func TestRcRawAndBackup(t *testing.T) {
 	if res.RcMinutes != 2 || len(b.rcRange(now.Add(-time.Hour), now)) != 2 {
 		t.Fatalf("minutos: %+v", res)
 	}
-	raws, _ := filepath.Glob(filepath.Join(b.rcDir(), "bruto", "*.jsonl.gz"))
-	if len(raws) != 1 {
+	if raws, _ := filepath.Glob(filepath.Join(b.rcDir(), "bruto", "*")); len(raws) != 0 {
 		t.Fatalf("brutos: %v", raws)
-	}
-	f, _ := os.Open(raws[0])
-	defer f.Close() // no Windows o TempDir não sai com o arquivo aberto
-	zr, err := gzip.NewReader(f)
-	if err != nil {
-		t.Fatal(err)
-	}
-	line, _ := io.ReadAll(zr)
-	if !strings.Contains(string(line), `"tipo":"RealTimeData"`) {
-		t.Fatalf("linha: %s", line)
 	}
 	// de novo: nada repete
 	if res, _ := b.mergeZip(zp, true); res.RcMinutes != 0 {

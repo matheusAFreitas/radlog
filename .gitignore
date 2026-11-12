@@ -21,3 +21,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.swp
+
+# gerados pelo go-winres no build (scripts/build.bat e release.yml)
+rsrc_windows_*.syso

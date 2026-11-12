@@ -473,12 +473,11 @@ async function renderSumOverlay(per) {
     svg.insertBefore(g, svg.firstChild);
   }
   // marcas em cima (alertas com a forma do nível, anotações com o lápis)
-  const esc = (t) => String(t).replace(/[&<>"]/g, (ch) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[ch]);
   const marks = (s.marks || []).filter((m) => m.t >= t0 && m.t < t1);
   $("sumMarks").innerHTML = marks.map((m) => {
     const ico = m.kind === "nota" ? FT_PEN : LV_PATH[m.level] ? ftShape(m.level, 12) : ftShape("atencao", 12);
     const tip = (multi ? `${ddmm(m.t)} ` : "") + ftMarkTip(m);
-    return `<span class="sum-mk" style="left:${pct(m.t)}%" title="${esc(tip)}">${ico}</span>`;
+    return `<span class="sum-mk" style="left:${pct(m.t)}%" title="${escHtml(tip)}">${ico}</span>`;
   }).join("");
   $("sumPlot").classList.toggle("has-band", runs.length > 0);
   $("sumPlot").classList.toggle("has-marks", marks.length > 0);

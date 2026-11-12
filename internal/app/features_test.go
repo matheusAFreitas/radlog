@@ -24,7 +24,7 @@ func newTestApp(t *testing.T) *App {
 	a.dataDir, a.store, a.cal = dir, st, gmc.DefaultCalibration()
 	a.settings = defaultSettings()
 	// arquivos .gz abertos do RC102: no Windows o TempDir não sai com eles
-	t.Cleanup(func() { a.rcRawClose(); a.rcSpecClose() })
+	t.Cleanup(a.rcSpecClose)
 	return a
 }
 

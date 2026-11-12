@@ -149,21 +149,10 @@ func (a *App) rcInventory() rcInv {
 		active[filepath.Base(a.rc.spec.f.Name())] = true
 	}
 	a.rc.spec.mu.Unlock()
-	a.rc.raw.mu.Lock()
-	if a.rc.raw.f != nil {
-		active[filepath.Base(a.rc.raw.f.Name())] = true
-	}
-	a.rc.raw.mu.Unlock()
 	specs, _ := a.rcSpecFiles()
 	for _, n := range specs {
 		if !active[n] {
 			inv.Files = append(inv.Files, rcSpecDir+"/"+n)
-		}
-	}
-	raws, _ := filepath.Glob(filepath.Join(a.rcDir(), rcRawDir, "*"))
-	for _, r := range raws {
-		if n := filepath.Base(r); !active[n] {
-			inv.Files = append(inv.Files, rcRawDir+"/"+n)
 		}
 	}
 	sort.Strings(inv.Files)

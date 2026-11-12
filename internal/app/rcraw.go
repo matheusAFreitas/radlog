@@ -3,8 +3,6 @@ package app
 import (
 	"bufio"
 	"bytes"
-	"compress/gzip"
-	"encoding/hex"
 	"encoding/json"
 	"fmt"
 	"os"
@@ -17,167 +15,18 @@ import (
 	"radlog/internal/radiacode"
 )
 
-// ---------- dados brutos do Radiacode ----------
+// ---------- dados brutos do Radiacode (até a 2.70) ----------
 //
-// Para descobrir o que mais o aparelho oferece, o app guarda tudo o que ele
-// manda, como veio:
-//   - radiacode/bruto/AAAA-MM-DD-HHMMSS.jsonl.gz: cada registro do DATA_BUF
-//     (em hex, com os campos que já se sabe ler), e o espectro a cada hora.
-//     Um arquivo por conexão (até a 1.39 era um por dia, com cada conexão
-//     emendada no fim: se o app fosse fechado à força, o pedaço sem o fim do
-//     gzip estragava a leitura de tudo o que vinha depois);
-//   - radiacode/bruto/conexao-AAAAMMDD-HHMMSS.json: a cada conexão, todos os
-//     registradores e "strings virtuais" que dá para ler (inclusive as de
-//     formato desconhecido, como a cópia da memória).
-// Entra no backup. Desliga em Configurações → Radiacode.
+// Até a 2.70.2 o app guardava tudo o que o aparelho mandava, como veio, em
+// radiacode/bruto (AAAA-MM-DD-HHMMSS.jsonl.gz e conexao-*.json), para
+// descobrir o protocolo. O protocolo já é conhecido e a gravação saiu na
+// auditoria de 12/11 (P2). Os arquivos antigos ficam onde estão e ainda são
+// lidos pelas reposições que rodam uma vez (rclog, rcdoselog, rcmemory) e
+// aceitos de backups e PCs antigos; nada novo é gravado ali.
 
 const rcRawDir = "bruto"
 
-type rcRawLog struct {
-	mu        sync.Mutex
-	day       string
-	f         *os.File
-	gz        *gzip.Writer
-	enc       *json.Encoder
-	lastFlush time.Time
-	lastSpec  time.Time
-}
-
-func (a *App) rcRawOn() bool {
-	a.mu.Lock()
-	defer a.mu.Unlock()
-	return !a.settings.RcNoRaw && a.dataDir != ""
-}
-
 func (a *App) rcRawPath(name string) string { return filepath.Join(a.rcDir(), rcRawDir, name) }
-
-// rcRawWrite grava uma linha no arquivo do dia.
-func (a *App) rcRawWrite(v map[string]any) {
-	l := &a.rc.raw
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	now := time.Now()
-	day := now.Format("2006-01-02")
-	if l.day != day || l.gz == nil {
-		l.closeLocked()
-		os.MkdirAll(a.rcRawPath(""), 0o755)
-		f, err := os.OpenFile(a.rcRawPath(day+"-"+now.Format("150405")+".jsonl.gz"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
-		if err != nil {
-			return
-		}
-		l.f, l.gz, l.day = f, gzip.NewWriter(f), day
-		l.enc = json.NewEncoder(l.gz)
-		l.lastFlush = now
-	}
-	v["pc"] = now.UnixMilli()
-	l.enc.Encode(v)
-	if now.Sub(l.lastFlush) > time.Minute {
-		l.gz.Flush()
-		l.lastFlush = now
-	}
-}
-
-func (l *rcRawLog) closeLocked() {
-	if l.gz != nil {
-		l.gz.Close()
-	}
-	if l.f != nil {
-		l.f.Close()
-	}
-	l.f, l.gz, l.enc = nil, nil, nil
-}
-
-func (a *App) rcRawClose() {
-	a.rc.raw.mu.Lock()
-	a.rc.raw.closeLocked()
-	a.rc.raw.mu.Unlock()
-}
-
-// rcRawRecords guarda cada registro de uma resposta do DATA_BUF.
-func (a *App) rcRawRecords(b []byte, base time.Time) {
-	if len(b) == 0 || !a.rcRawOn() {
-		return
-	}
-	for _, r := range radiacode.SplitDataBuf(b, base) {
-		v := map[string]any{"t": r.T.UnixMilli(), "seq": r.Seq, "eid": r.EID, "gid": r.GID, "tipo": r.Name, "hex": hex.EncodeToString(r.Data)}
-		if len(r.Fields) > 0 {
-			v["v"] = r.Fields
-		}
-		a.rcRawWrite(v)
-	}
-}
-
-// rcRawSpectrum guarda os espectros (atual e acumulado) de hora em hora.
-func (a *App) rcRawSpectrum(dev *radiacode.Device) {
-	l := &a.rc.raw
-	l.mu.Lock()
-	due := time.Since(l.lastSpec) >= time.Hour
-	if due {
-		l.lastSpec = time.Now()
-	}
-	l.mu.Unlock()
-	if !due || !a.rcRawOn() {
-		return
-	}
-	for _, acc := range []bool{false, true} {
-		var s radiacode.Spectrum
-		var err error
-		if acc {
-			s, err = dev.SpectrumAccum()
-		} else {
-			s, err = dev.Spectrum()
-		}
-		v := map[string]any{"tipo": map[bool]string{false: "Espectro", true: "EspectroAcumulado"}[acc]}
-		if err != nil {
-			v["erro"] = err.Error()
-		} else {
-			v["s"], v["a"], v["contagens"] = s.Duration.Seconds(), []float64{s.A0, s.A1, s.A2}, s.Counts
-		}
-		a.rcRawWrite(v)
-	}
-}
-
-// rcRawSnapshot lê tudo o que dá ao conectar e guarda num .json.
-func (a *App) rcRawSnapshot(dev *radiacode.Device) {
-	if !a.rcRawOn() {
-		return
-	}
-	now := time.Now()
-	snap := map[string]any{
-		"quando": now.Format(time.RFC3339), "app": AppVersion, "via": dev.Kind(),
-		"modelo": dev.Model, "serie": dev.Serial, "firmware": dev.Firmware,
-	}
-	if cfg, err := dev.Configuration(); err == nil {
-		snap["configuracao"] = cfg
-	}
-	sfr := map[string]any{}
-	for _, r := range radiacode.KnownSFR {
-		k := fmt.Sprintf("%#x %s", r.ID, r.Name)
-		if v, err := dev.ReadSFR(r.ID); err == nil {
-			sfr[k] = v
-		} else {
-			sfr[k] = "erro: " + err.Error()
-		}
-	}
-	snap["registradores"] = sfr
-	vs := map[string]any{}
-	for _, s := range radiacode.KnownVS {
-		k := fmt.Sprintf("%#x %s", s.ID, s.Name)
-		if b, err := dev.ReadVS(s.ID); err == nil {
-			vs[k] = map[string]any{"bytes": len(b), "hex": hex.EncodeToString(b)}
-		} else {
-			e := map[string]any{"erro": err.Error()}
-			if raw, err2 := dev.ReadVSRaw(s.ID); err2 == nil {
-				e["resposta"] = hex.EncodeToString(raw)
-			}
-			vs[k] = e
-		}
-	}
-	snap["strings"] = vs
-	b, _ := json.MarshalIndent(snap, "", "  ")
-	os.MkdirAll(a.rcRawPath(""), 0o755)
-	os.WriteFile(a.rcRawPath("conexao-"+now.Format("20060102-150405")+".json"), b, 0o644)
-}
 
 // rcBackupFiles são os arquivos do Radiacode que vão no backup.
 func (a *App) rcBackupFiles() []string {
@@ -185,13 +34,6 @@ func (a *App) rcBackupFiles() []string {
 	mins, _ := filepath.Glob(filepath.Join(a.rcDir(), "*.csv"))
 	for _, m := range mins {
 		out = append(out, rcDirName+"/"+filepath.Base(m))
-	}
-	if a.rcRawOn() {
-		a.rc.raw.mu.Lock()
-		if a.rc.raw.gz != nil { // o arquivo do dia inteiro, até agora
-			a.rc.raw.gz.Flush()
-		}
-		a.rc.raw.mu.Unlock()
 	}
 	if _, err := os.Stat(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
 		out = append(out, rcDirName+"/"+rcDoseFile)
@@ -205,11 +47,6 @@ func (a *App) rcBackupFiles() []string {
 	specs, _ := a.rcSpecFiles()
 	for _, n := range specs {
 		out = append(out, rcDirName+"/"+rcSpecDir+"/"+n)
-	}
-	raws, _ := filepath.Glob(filepath.Join(a.rcDir(), rcRawDir, "*"))
-	sort.Strings(raws)
-	for _, r := range raws {
-		out = append(out, rcDirName+"/"+rcRawDir+"/"+filepath.Base(r))
 	}
 	return out
 }
@@ -341,19 +178,6 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	a.rc.stats = nil
 	a.rc.statsM.Unlock()
 	return added
-}
-
-// SetRcRaw liga/desliga a gravação dos dados brutos do Radiacode.
-func (a *App) SetRcRaw(on bool) RcState {
-	a.mu.Lock()
-	a.settings.RcNoRaw = !on
-	a.saveSettingsLocked()
-	a.mu.Unlock()
-	if !on {
-		a.rcRawClose()
-	}
-	a.emitRc()
-	return a.GetRadiacode()
 }
 
 // rcTextLog passa as mensagens internas do aparelho para o log.txt.

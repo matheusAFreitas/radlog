@@ -122,7 +122,7 @@
     γ: "Gama: onda de luz (fóton) muito energética, com energia fixa para cada isótopo. É o que faz os picos.",
     x: "Raio X: fóton mais fraco, que sai da nuvem de elétrons do átomo. Faz picos abaixo de 100 keV.",
   };
-  const emitHtml = (nuc) => (EMIT[nuc] ? `<span class="rc-ems">${[...EMIT[nuc]].map((s) => `<span class="rc-em${s === "γ" ? " made" : ""}" title="${esc(tr(EMIT_TIP[s]))}" data-no-tr>${s === "x" ? "rX" : s}</span>`).join("")}</span>` : "");
+  const emitHtml = (nuc) => (EMIT[nuc] ? `<span class="rc-ems">${[...EMIT[nuc]].map((s) => `<span class="rc-em${s === "γ" ? " made" : ""}" title="${escHtml(tr(EMIT_TIP[s]))}" data-no-tr>${s === "x" ? "rX" : s}</span>`).join("")}</span>` : "");
   // [natural?, nome por extenso, de onde vem, meia-vida, onde aparece]
   const ORIGIN = {
     "K-40": [1, "Potássio-40", "Uma parte pequena (0,012%) de todo potássio é radioativa desde a formação da Terra. Está no solo, no cimento, nos alimentos e no seu próprio corpo.", "1,25 bilhão de anos", "em tudo que tem potássio: banana, feijão, adubo, granito"],
@@ -246,7 +246,6 @@
     el.style.left = Math.min(Math.max(4, x + 12), p.width - r.width - 4) + "px";
     el.style.top = Math.max(4, y - r.height - 10) + "px";
   }
-  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" })[c]);
   const fmtT = (s) => { s = Math.round(s); const h = Math.floor(s / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(ss).padStart(2, "0"); };
 
   // =====================================================================
@@ -433,7 +432,7 @@
         const bgTot = bgT.reduce((a, b) => a + b, 0), net = tot - bgTot, nerr = Math.sqrt(tot + bgTot * tNow / Math.max(1, rl.acc.seconds));
         txt += ` · dureza ${nf(hr(counts) / Math.max(1e-9, hr(bgT)), 2)}`;
         const groups = [...new Set(rl.peaks.map((p) => p.group))];
-        if (groups.length) txt += ` · parece: <b>${groups.map((g) => esc(GROUP_SHORT[g] || g)).join(", ")}</b>`;
+        if (groups.length) txt += ` · parece: <b>${groups.map((g) => escHtml(GROUP_SHORT[g] || g)).join(", ")}</b>`;
         else if (net > 3 * nerr) txt += ` · acima do fundo (${nf(net / tNow, 2)} cps a mais), sem linha conhecida ainda`;
         else txt += tNow < 60 ? " · juntando contagens…" : " · igual ao fundo";
       }
@@ -465,8 +464,8 @@
     const rc = rl.on ? realCounts() : null, cnt = rc ? rc.c : sp.counts;
     const near = libNear(e);
     // o que não é isótopo (raio X, aniquilação) diz de onde vem (2.69)
-    const notIso = (n) => { const m = NOT_ISO.find(([re]) => re.test(n)); return m ? `<br><span class="muted">${esc(tr(m[1]))}</span>` : ""; };
-    const lib = near.length ? near.map(([le, n, d]) => `<b>${esc(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${esc(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
+    const notIso = (n) => { const m = NOT_ISO.find(([re]) => re.test(n)); return m ? `<br><span class="muted">${escHtml(tr(m[1]))}</span>` : ""; };
+    const lib = near.length ? near.map(([le, n, d]) => `<b>${escHtml(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${escHtml(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
     tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(cnt[ch] || 0)} contagens</span><br>${lib}`, x, ev.clientY - r.top);
     spDraw();
   }
@@ -513,7 +512,7 @@
       b.dataset.nuc = o.nuclide;
       b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
       const [pt, cls] = sureOf(o);
-      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${esc(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
         `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>${emitHtml(o.nuclide)}`;
       // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
       // gama; o título diz de qual família ele vem
@@ -658,7 +657,7 @@
     "U-235": [["energia", "combustível de reator"]],
     "Ra-226": [["antigo", "ponteiros de relógio, radioterapia antiga"]],
   };
-  const usesHtml = (nuc) => (USES[nuc] ? `<dt>${tr("Uso")}</dt><dd class="rc-uses">${USES[nuc].map(([a, u]) => `<span>${a ? `<span class="rc-use${a === "medicina" ? " med" : ""}">${esc(tr(a))}</span> ` : ""}${esc(tr(u))}</span>`).join("")}</dd>` : "");
+  const usesHtml = (nuc) => (USES[nuc] ? `<dt>${tr("Uso")}</dt><dd class="rc-uses">${USES[nuc].map(([a, u]) => `<span>${a ? `<span class="rc-use${a === "medicina" ? " med" : ""}">${escHtml(tr(a))}</span> ` : ""}${escHtml(tr(u))}</span>`).join("")}</dd>` : "");
   // séries e cadeias de decaimento (conferidas na tabela da SUNY Potsdam / ENSDF)
   const TH=[["Th-232","Tório-232","α","14 bilhões de anos"],["Ra-228","Rádio-228","β","5,75 anos"],["Ac-228","Actínio-228","β","6,15 horas"],["Th-228","Tório-228","α","1,9 ano"],["Ra-224","Rádio-224","α","3,6 dias"],["Rn-220","Radônio-220 (torônio)","α","56 segundos"],["Po-216","Polônio-216","α","0,15 segundo"],["Pb-212","Chumbo-212","β","10,6 horas"],["Bi-212","Bismuto-212","fork","61 minutos",[["Po-212","Polônio-212","β 64%","0,3 microssegundo","α"],["Tl-208","Tálio-208","α 36%","3 minutos","β"]]],["Pb-208","Chumbo-208","","estável"]];
   const U8=[["U-238","Urânio-238","α","4,5 bilhões de anos"],["Th-234","Tório-234","β","24 dias"],["Pa-234m","Protactínio-234m","β","1,2 minuto"],["U-234","Urânio-234","α","245 mil anos"],["Th-230","Tório-230","α","75 mil anos"],["Ra-226","Rádio-226","α","1.600 anos"],["Rn-222","Radônio-222","α","3,8 dias"],["Po-218","Polônio-218","α","3,1 minutos"],["Pb-214","Chumbo-214","β","27 minutos"],["Bi-214","Bismuto-214","β","20 minutos"],["Po-214","Polônio-214","α","0,16 milissegundo"],["Pb-210","Chumbo-210","β","22 anos"],["Bi-210","Bismuto-210","β","5 dias"],["Po-210","Polônio-210","α","138 dias"],["Pb-206","Chumbo-206","","estável"]];
@@ -690,9 +689,9 @@
     const d = CHAINS[nuc];
     if (!d) return "";
     const c = d.c, full = !!pk.chainFull;
-    const g = (n) => (CH_SEEN.has(n[0]) && !/^estável/.test(n[3]) ? `<span class="rc-em made" title="${esc(tr(EMIT_TIP.γ))}">γ</span>` : "");
-    const row = (n) => `<li class="${n[0] === nuc ? "cur" : ""}${/^estável/.test(n[3]) ? " end" : ""}"><span class="dot"></span><span class="nm"><b data-no-tr>${esc(n[0])}</b>${g(n)} <span>${esc(tr(n[1]))}</span></span><span class="hl">${esc(n[3] === "estável" && LANG === "en" ? "stable" : tr(n[3]))}</span></li>`; // "estável" já é "steady" (tendência)
-    const step = (m) => (m ? `<li class="step"><span class="ar" data-no-tr>↓ ${esc(m)}</span></li>` : "");
+    const g = (n) => (CH_SEEN.has(n[0]) && !/^estável/.test(n[3]) ? `<span class="rc-em made" title="${escHtml(tr(EMIT_TIP.γ))}">γ</span>` : "");
+    const row = (n) => `<li class="${n[0] === nuc ? "cur" : ""}${/^estável/.test(n[3]) ? " end" : ""}"><span class="dot"></span><span class="nm"><b data-no-tr>${escHtml(n[0])}</b>${g(n)} <span>${escHtml(tr(n[1]))}</span></span><span class="hl">${escHtml(n[3] === "estável" && LANG === "en" ? "stable" : tr(n[3]))}</span></li>`; // "estável" já é "steady" (tendência)
+    const step = (m) => (m ? `<li class="step"><span class="ar" data-no-tr>↓ ${escHtml(m)}</span></li>` : "");
     let idx = c.findIndex((x) => x[0] === nuc);
     if (idx < 0) idx = c.findIndex((x) => x[2] === "fork");
     let show = c.map((_, i) => i);
@@ -708,14 +707,14 @@
       const n = c[i];
       h += row(n);
       if (n[2] === "fork") {
-        h += `<li class="fork"><span></span><div class="two">${n[4].map((b) => `<div class="${b[0] === nuc ? "cur" : ""}"><span class="pct" data-no-tr>↓ ${esc(tr(b[2]))}</span><b data-no-tr>${esc(b[0])}</b>${CH_SEEN.has(b[0]) && b[3] ? g(b) : ""}<br><span class="dim">${esc(tr(b[1]))}</span>${b[3] ? `<span class="pct">${esc(tr(b[3]))}${b[4] ? " · " + tr(`depois ${b[4]} → Pb-208`) : ""}</span>` : ""}</div>`).join("")}</div></li>`;
+        h += `<li class="fork"><span></span><div class="two">${n[4].map((b) => `<div class="${b[0] === nuc ? "cur" : ""}"><span class="pct" data-no-tr>↓ ${escHtml(tr(b[2]))}</span><b data-no-tr>${escHtml(b[0])}</b>${CH_SEEN.has(b[0]) && b[3] ? g(b) : ""}<br><span class="dim">${escHtml(tr(b[1]))}</span>${b[3] ? `<span class="pct">${escHtml(tr(b[3]))}${b[4] ? " · " + tr(`depois ${b[4]} → Pb-208`) : ""}</span>` : ""}</div>`).join("")}</div></li>`;
       }
       prev = i;
     }
     if (full && c.length > 7) h += `<li class="gap"><span></span><button type="button" class="link" data-chain="less">${tr("mostrar menos")}</button></li>`;
     const steps = c.length + (c.some((x) => x[2] === "fork") ? 1 : 0);
     const ttl = tr(d.s) + (c.length > 2 ? " · " + tr(`${steps} passos até o estável`) : "");
-    return `<div class="rc-chain-box"><div class="rc-chain-ttl">${esc(ttl)}</div><ul class="rc-chain">${h}</ul></div>`;
+    return `<div class="rc-chain-box"><div class="rc-chain-ttl">${escHtml(ttl)}</div><ul class="rc-chain">${h}</ul></div>`;
   }
 
   // ---------- detalhe "Por que X" (2.69) ----------
@@ -733,7 +732,7 @@
   // ok: ✓ verde; false: ! amarelo; "note": • neutro (ressalva, nem a favor nem contra)
   const chk = (ok, head, body) => `<li class="${ok === "note" ? "note" : ok ? "ok" : "warn"}"><span class="rc-why-mk" aria-hidden="true">${ok === "note" ? "•" : ok ? "✓" : "!"}</span><div><b>${head}</b><span>${body}</span></div></li>`;
   function whyHtml(o, peaks) {
-    const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = esc(o.nuclide);
+    const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = escHtml(o.nuclide);
     const fw = goFW(p.kev), tol = 0.2 * fw;
     const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
     const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
@@ -762,27 +761,27 @@
     if (!id.neigh.length) h += chk(true, tr("Nenhum outro isótopo emite perto"), tr(`Nenhuma linha da biblioteca cai a menos de uma largura de pico (${nf(fwhm(p.kev), 0)} keV) daqui.`));
     for (const x of id.neigh) {
       const desc = x.d ? `, ${tr(x.d)}` : "";
-      if (x.out) h += chk(true, tr(`Descartado: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`, tr(`Ele também emite perto daqui, mas os outros picos dele (${x.others.map((e) => nf(e, 0)).join(", ")} keV) não apareceram.`));
-      else h += chk(id.ok ? "note" : false, tr(`Pode ser também: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${esc(desc)})</span>`,
+      if (x.out) h += chk(true, tr(`Descartado: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${escHtml(desc)})</span>`, tr(`Ele também emite perto daqui, mas os outros picos dele (${x.others.map((e) => nf(e, 0)).join(", ")} keV) não apareceram.`));
+      else h += chk(id.ok ? "note" : false, tr(`Pode ser também: ${x.n}`) + ` <span class="muted">(${nf(x.le, 1)} keV${escHtml(desc)})</span>`,
         (x.why === "found" ? tr("Ele emite perto daqui e outro pico dele apareceu, então não dá para descartar: os dois devem somar nesse pico.") : x.why === "alone" ? tr("Ele emite nessa mesma energia e não tem outro pico forte para conferir.") : tr("Essa energia também aparece sem ser de isótopo.")) + (id.ok && (id.own || id.fam.length) ? " " + tr("Mesmo assim, outro pico da mesma família apareceu (veja abaixo).") : ""));
     }
     if (id.own) h += chk(true, tr(`Outro pico do ${o.nuclide} apareceu`), tr(`${o.lines.slice(1).map((l) => nf(l.kev, 0)).join(", ")} keV: o mesmo isótopo em outra energia.`));
-    if (id.fam.length) h += chk(true, tr("Outro pico da mesma família apareceu"), `${[...new Set(id.fam.map((q) => `${q.nuclide} ${nf(q.kev, 0)} keV`))].map(esc).join(", ")}: ${tr(`confirma a ${FAM_NAME[FAM[o.nuclide]]}.`)}`);
+    if (id.fam.length) h += chk(true, tr("Outro pico da mesma família apareceu"), `${[...new Set(id.fam.map((q) => `${q.nuclide} ${nf(q.kev, 0)} keV`))].map(escHtml).join(", ")}: ${tr(`confirma a ${FAM_NAME[FAM[o.nuclide]]}.`)}`);
     h += "</ul>";
     // de onde vem (fechado por padrão)
     const og = ORIGIN[o.nuclide];
     if (og) {
       const [nat, name, txt, half, where] = og, fam = FAM[o.nuclide];
       h += `<details class="rc-why-from"${pk.fromOpen ? " open" : ""}><summary>${tr("De onde vem")} <span class="rc-why-tag ${nat ? "nat" : "art"}">${tr(nat ? "natural" : "artificial")}</span></summary>` +
-        `<p><b><span data-no-tr>${nuc}</span> (${esc(tr(name))})</b> ${esc(tr(txt))}</p><dl>` +
+        `<p><b><span data-no-tr>${nuc}</span> (${escHtml(tr(name))})</b> ${escHtml(tr(txt))}</p><dl>` +
         `<dt>${tr("Origem")}</dt><dd>${tr(nat ? "natural" : "artificial")}${fam ? " · " + tr(FAM_NAME[fam]) : ""}</dd>` +
-        `<dt>${tr("Meia-vida")}</dt><dd>${esc(tr(half))}</dd>${usesHtml(o.nuclide)}<dt>${tr("Onde aparece")}</dt><dd>${esc(tr(where))}</dd></dl>${chainHtml(o.nuclide)}</details>`;
+        `<dt>${tr("Meia-vida")}</dt><dd>${escHtml(tr(half))}</dd>${usesHtml(o.nuclide)}<dt>${tr("Onde aparece")}</dt><dd>${escHtml(tr(where))}</dd></dl>${chainHtml(o.nuclide)}</details>`;
     }
     // outros da série: as linhas procuradas da mesma família, achadas ou não
     if (FAM[o.nuclide]) {
       const mine = new Set(o.lines.map((l) => l.kev));
       const rows = SEARCHED.filter(([n, e]) => FAM[n] === FAM[o.nuclide] && !(n === o.nuclide && mine.has(e)) && (!acc || e >= 100))
-        .map(([n, e]) => { const f = peaks.find((q) => q.nuclide === n && Math.abs(q.kev - e) < 1); return `<li><span data-no-tr>${esc(n)} · ${nf(e, 0)} keV</span><span class="${f ? "seen" : "muted"}">${f ? tr(`apareceu · ${nf(f.sigma, 0)} σ`) : tr("não apareceu")}</span></li>`; });
+        .map(([n, e]) => { const f = peaks.find((q) => q.nuclide === n && Math.abs(q.kev - e) < 1); return `<li><span data-no-tr>${escHtml(n)} · ${nf(e, 0)} keV</span><span class="${f ? "seen" : "muted"}">${f ? tr(`apareceu · ${nf(f.sigma, 0)} σ`) : tr("não apareceu")}</span></li>`; });
       if (rows.length) h += `<h6>${tr(`Outros da ${FAM_NAME[FAM[o.nuclide]]} no espectro`)}</h6><ul class="rc-why-fam">${rows.join("")}</ul>`;
     }
     return h;
@@ -798,7 +797,7 @@
     box.hidden = false; zoomMode(true);
     const lib = LIBN.find((l) => l[1] === o.nuclide);
     $("rcZoomTitle").textContent = o.nuclide;
-    $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${esc(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
+    $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${escHtml(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
     $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
     $("rcZoomWarn").hidden = true;
     // o detalhe só é refeito quando muda alguma coisa (o "De onde vem" aberto fica aberto)
@@ -966,7 +965,7 @@
       const cell = (yy, xx) => (yy < tl.shown ? { rate: ((tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0)) / 2, n: (tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0) } : null);
       lh = loupeHtml(cell, TL_N, W, t, x, Math.log1p(tl.max)) + `<span class="mono">${nf(EN[2 * x], 0)}–${nf(EN[Math.min(NCH - 1, 2 * x + 2)], 0)} keV · ${tr("pixel do meio")}</span><br>`;
     }
-    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
+    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
   }
 
@@ -1033,7 +1032,7 @@
       labels = [0, 1, 2, 3, 4].map((k) => { const t = d.from + ((d.to - d.from) * k) / 4; return long ? ddmm(t) : hhmm(t); });
     }
     const key = labels.join("|");
-    if (tm.dataset.k !== key) { tm.dataset.k = key; tm.innerHTML = labels.map((l) => `<span>${esc(l)}</span>`).join(""); }
+    if (tm.dataset.k !== key) { tm.dataset.k = key; tm.innerHTML = labels.map((l) => `<span>${escHtml(l)}</span>`).join(""); }
     let info = "";
     if (sg.on && d) {
       const has = d.rows.some((r) => r);
@@ -1094,7 +1093,7 @@
       html += `<br><span class="mono">${nf(d.cps[k], 2)} cps · ${nf(e, 0)} keV · ${nf(row[b], 2)} por min</span>`;
       if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
       else if (d.secs[k] < d.rowSec * 0.9) html += `<br>${nf((d.secs[k] / d.rowSec) * 100, 0)}% do tempo com dados`;
-      if (near.length) html += `<br><b>${esc(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
+      if (near.length) html += `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
     }
     tip($("rcSgTip"), html, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
@@ -1154,7 +1153,7 @@
     if (t < 0 || t >= tl.shown) { tl.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); return; }
     tl.hover = t;
     const ev2 = tlLabel(t), lab = tl.label[t];
-    tip($("rcHardTip"), `<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · dureza ${nf(tl.hard[t], 2)}</span>${ev2 ? `<br>${ev2}` : ""}${lab ? `<br>parece: <b>${esc(lab)}</b>` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
+    tip($("rcHardTip"), `<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · dureza ${nf(tl.hard[t], 2)}</span>${ev2 ? `<br>${ev2}` : ""}${lab ? `<br>parece: <b>${escHtml(lab)}</b>` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     hdDraw(); sgDraw();
   }
 
@@ -1236,7 +1235,7 @@
     if (d.wet[k]) html += `<br>chovendo (${nf(d.rain[k], 1)} mm/h)`;
     if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
     const gs = sg.guess[k];
-    if (gs) html += `<br>parece: <b>${esc(gs)}</b>`;
+    if (gs) html += `<br>parece: <b>${escHtml(gs)}</b>`;
     return html;
   }
   function hdHoverReal(ev) {
@@ -1307,11 +1306,11 @@
       const pw = it.power === "carregando" ? "carregando na fonte externa" : it.power === "externa" ? "na fonte externa" : "";
       const bat = it.hasBat ? `Bateria: ${nf(it.battery, 0)}%` : "";
       const l1 = it.hasTemp ? `<span>t = ${nf(it.temp, 1)} °C</span>` : "";
-      const l2 = bat || pw ? `<span>${esc([bat, pw].filter(Boolean).join(" · "))}</span>` : "";
+      const l2 = bat || pw ? `<span>${escHtml([bat, pw].filter(Boolean).join(" · "))}</span>` : "";
       const dose = it.hasDose ? `<span>Σ = ${nf(it.dose, 2)} µSv</span>${it.doseSec ? `<span class="mute">durante ${fmtDur(it.doseSec)}</span>` : ""}` : "";
       data = `<td class="v mono">${l1}${l2}</td><td class="v mono">${dose}</td>`;
     } else {
-      data = `<td class="ev" colspan="2">${esc(it.event || "")}</td>`;
+      data = `<td class="ev" colspan="2">${escHtml(it.event || "")}</td>`;
     }
     return `<tr><td class="ic">${LOG_IC[it.kind] || ""}</td>${when}${data}</tr>`;
   }
@@ -1556,7 +1555,7 @@
   }
   function actCalHtml(v) {
     const c = v.cal || {}, parts = [];
-    parts.push(`<b>Calibração</b> · <span>posição: ${esc(c.geometry || "")}</span>`);
+    parts.push(`<b>Calibração</b> · <span>posição: ${escHtml(c.geometry || "")}</span>`);
     if (c.kcl) parts.push(`KCl em ${fmtDate(c.kcl.t)}: eficiência de <span class="mono">${fmtPct(c.kcl.eff)}</span> em 1.460 keV (±${nf(c.kcl.effErr * 100, 1)}%)<button type="button" class="link" data-forget="kcl">esquecer</button>`);
     else parts.push(v.cal && v.cal.th ? "sem KCl: a escala vem do tório (aproximada)" : "<span class=\"warn-text\">sem calibração: os Bq são só um chute (±100%). Comece pelo KCl.</span>");
     if (c.th) parts.push(`forma da curva pelo tório em ${fmtDate(c.th.t)}: inclinação <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span><button type="button" class="link" data-forget="torio">esquecer</button>`);
@@ -1572,7 +1571,7 @@
     if (!list || !list.length) return "";
     let h = `<table class="rc-act-tab"><thead><tr><th>radionuclídeo</th><th>atividade</th><th>por kg</th>${live ? "<th>para ±10%</th>" : ""}</tr></thead><tbody>`;
     for (const n of list) {
-      const lines = (n.lines || []).map((l) => `${nf(l.kev, 1)} keV (${esc(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`).join(" · ");
+      const lines = (n.lines || []).map((l) => `${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`).join(" · ");
       let a, k;
       if (n.detected) {
         a = `${fmtBq(n.bq)}± ${fmtBq(n.err)}Bq`; k = massG > 0 ? `${fmtBq(n.bqKg)}± ${fmtBq(n.errKg)}Bq/kg` : "";
@@ -1582,7 +1581,7 @@
       let extra = "";
       if (n.id === "K-40" && n.detected && massG > 0) extra = `<span class="sub">≈ ${nf(n.bqKg / 31.7, 1)} g de potássio por kg</span>`;
       const need = n.detected ? (n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? "já chegou" : "~" + fmtSec(n.needSec) + " no total") : "—") : "ainda não aparece";
-      h += `<tr><td>${esc(n.name)}${n.note ? `<span class="sub">${esc(n.note)}</span>` : ""}</td><td class="n">${a}</td><td class="n">${k}${extra}</td>${live ? `<td>${need}</td>` : ""}</tr>`;
+      h += `<tr><td>${escHtml(n.name)}${n.note ? `<span class="sub">${escHtml(n.note)}</span>` : ""}</td><td class="n">${a}</td><td class="n">${k}${extra}</td>${live ? `<td>${need}</td>` : ""}</tr>`;
       if (!live && lines) h += `<tr class="lines"><td colspan="3"><span class="sub mono">${lines}</span></td></tr>`;
     }
     return `<div class="rc-act-wrap">${h}</tbody></table></div>`;
@@ -1597,7 +1596,7 @@
     }
     if (r.kind === "amostra" || r.kind === "torio") h += actNucRows(r.nuclides, r.massG, false);
     const calTxt = { kcl: "calibração pelo KCl", torio: "calibração pelo tório (aproximada)", chute: "sem calibração: chute" }[r.calSrc] || "";
-    h += `<p class="small muted">${esc(r.name)} · ${nf(r.massG, 1)} g · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt}${r.geometry ? " · " + esc(r.geometry) : ""}</p>`;
+    h += `<p class="small muted">${escHtml(r.name)} · ${nf(r.massG, 1)} g · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt}${r.geometry ? " · " + escHtml(r.geometry) : ""}</p>`;
     return h;
   }
   function actSummary(r) {
@@ -1635,15 +1634,15 @@
     if (ch) actDraw(ch, v);
     // histórico
     const hist = v.history || [];
-    setHTML($("rcActHist"), hist.length ? `<p class="small muted">Medidas anteriores</p>` + hist.map((r) => `<details><summary><span class="mono">${fmtDate(r.t)} ${fmtTime(r.t)}</span>${esc(r.name)} · ${esc(actSummary(r))}</summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") : "");
+    setHTML($("rcActHist"), hist.length ? `<p class="small muted">Medidas anteriores</p>` + hist.map((r) => `<details><summary><span class="mono">${fmtDate(r.t)} ${fmtTime(r.t)}</span>${escHtml(r.name)} · ${escHtml(actSummary(r))}</summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") : "");
   }
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
     const step = {
       fundo: `<b>1. Fundo:</b> tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.`,
-      trocar: `<b>2. Amostra:</b> coloque ${esc(o.name || "a amostra")} na posição (${esc(o.geometry || "a mesma da calibração")}) e clique em Começar.`,
-      amostra: `<b>${o.newBg ? "3" : "1"}. Medindo:</b> ${esc(o.name || "")} (${nf(o.massG, 1)} g)`,
-      pronto: `<b>Pronto:</b> ${esc(o.name || "")}`,
+      trocar: `<b>2. Amostra:</b> coloque ${escHtml(o.name || "a amostra")} na posição (${escHtml(o.geometry || "a mesma da calibração")}) e clique em Começar.`,
+      amostra: `<b>${o.newBg ? "3" : "1"}. Medindo:</b> ${escHtml(o.name || "")} (${nf(o.massG, 1)} g)`,
+      pronto: `<b>Pronto:</b> ${escHtml(o.name || "")}`,
     }[ph] || "";
     $("rcActStep").innerHTML = step;
     $("rcActBar").style.width = (tg > 0 && (ph === "fundo" || ph === "amostra") ? Math.min(100, (t / tg) * 100) : ph === "pronto" ? 100 : 0) + "%";
