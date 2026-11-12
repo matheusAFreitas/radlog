@@ -16,10 +16,22 @@ dose, alerts, spectra, weather × radiation, object measurements and PDF
 reports. All data stays on your computer.
 
 Current version: see [Releases](../../releases) and the
-[changelog](CHANGELOG.md) (in Portuguese). An Android app (3.0) is in the
+[changelog](CHANGELOG.md) (in Portuguese, and also in English from 2.70.1 on). An Android app (3.0) is in the
 works.
 
 ![The Now screen, with the GQ GMC-800 and the Radiacode 102 side by side](docs/prints/en-agora.png)
+
+## Purpose
+
+RadLog is a study project. It was built to learn radiation protection and how
+these two devices work, and it is shared in case it helps someone learning
+the same things.
+
+It is not a professional tool. Its readings and doses are estimates from
+consumer devices, it has not been certified or validated by anyone, and it
+does not replace a calibrated instrument, an official dosimeter or a
+radiation protection professional. In a real emergency, follow the local
+authorities.
 
 ## Download and update
 

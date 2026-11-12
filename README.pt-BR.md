@@ -23,6 +23,18 @@ Um app de Android (3.0) está a caminho.
 
 ![Tela Agora, com o GQ GMC-800 e o Radiacode 102 lado a lado](docs/prints/pt-agora.png)
 
+## Propósito do app
+
+O RadLog é um projeto de estudo. Foi feito para aprender radioproteção e como
+esses dois aparelhos funcionam, e está aberto para quem estiver aprendendo as
+mesmas coisas.
+
+Não é um app profissional. As leituras e as doses são estimativas de
+aparelhos de uso pessoal, o app não foi certificado nem validado por ninguém
+e não substitui um instrumento calibrado, um dosímetro oficial nem um
+profissional de radioproteção. Numa emergência de verdade, siga as
+autoridades locais.
+
 ## Baixar e atualizar
 
 Os arquivos prontos ficam em **[Releases](../../releases)**:
