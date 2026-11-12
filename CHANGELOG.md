@@ -1,5 +1,12 @@
 # Versões
 
+## 2.66.0
+- Fora de casa: com um "Saí de casa" aberto e o RC102 junto, quando o RC102
+  volta a conectar no PC depois do tempo mínimo sem conexão (15 min por
+  padrão), o Agora pergunta "Voltou para casa?". "Voltei" fecha o trecho na
+  hora em que ele reconectou (dá para ajustar o horário); "Ainda estou fora"
+  deixa o trecho aberto. Dá para desfazer.
+
 ## 2.65.2
 - Tendência do fundo: o gráfico "Fundo ao longo do tempo" e o texto da
   tendência agora estão em µSv/h, pela calibração de agora, como o resto do

@@ -41,6 +41,10 @@ type RcAwayAsk struct {
 	ID   int64 `json:"id"`
 	From int64 `json:"from"` // ms: fim do último minuto gravado antes de sumir
 	To   int64 `json:"to"`   // ms: quando voltou a conectar
+	// "volta" (2.66.0): havia um "Saí de casa" aberto com o RC102 junto; a
+	// pergunta é "voltou para casa?" e Period é o trecho aberto
+	Kind   string `json:"kind,omitempty"`
+	Period int64  `json:"period,omitempty"`
 }
 
 // RcAwayView é a pergunta com o resumo do trecho para a tela.
@@ -56,6 +60,9 @@ type RcAwayView struct {
 	Ratio       float64 `json:"ratio"`
 	NormalRatio float64 `json:"normalRatio"`
 	Hint        string  `json:"hint"` // "fora", "casa" ou "" (sem dica)
+	// na pergunta "volta": começo e nome do trecho aberto
+	Since int64  `json:"since,omitempty"`
+	Name  string `json:"name,omitempty"`
 }
 
 func (a *App) rcAwayPath() string { return filepath.Join(a.dataDir, rcAwayFile) }
@@ -122,6 +129,18 @@ func (a *App) rcAwayDetect(from, to time.Time) {
 	}
 	ask := RcAwayAsk{ID: from.UnixMilli(), From: from.UnixMilli(), To: to.UnixMilli()}
 	a.mu.Lock()
+	// com um "Saí de casa" aberto e o RC102 junto, reconectar ao PC quer dizer
+	// que provavelmente você voltou: pergunta isso (ACE, 12/11)
+	if op, ok := a.openTripLocked(to); ok {
+		ask.Kind, ask.Period = rcAskBack, op.ID
+		added := a.addRcBackLocked(ask, time.Now())
+		a.mu.Unlock()
+		if added {
+			a.logf("RC102: voltou a conectar às %s com \"%s\" aberto; o app pergunta na tela Agora se você voltou para casa", to.Format("02/01 15:04"), op.Name)
+			a.emitRcAway()
+		}
+		return
+	}
 	added := a.addRcAwayLocked(ask, time.Now())
 	a.mu.Unlock()
 	if added {
@@ -151,6 +170,35 @@ func (a *App) addRcAwayLocked(ask RcAwayAsk, now time.Time) bool {
 	return true
 }
 
+const rcAskBack = "volta"
+
+// openTripLocked é o trecho aberto (sem fim) com o RC102 junto, começado
+// antes de t. (a.mu travado)
+func (a *App) openTripLocked(t time.Time) (Period, bool) {
+	for _, p := range a.periods {
+		if p.To == 0 && p.RC == WhereMe && p.From < t.UnixMilli() {
+			return p, true
+		}
+	}
+	return Period{}, false
+}
+
+// addRcBackLocked guarda a pergunta "voltou para casa?" (uma por trecho
+// aberto; a mais nova fica). (a.mu travado)
+func (a *App) addRcBackLocked(ask RcAwayAsk, now time.Time) bool {
+	list := a.loadRcAwayLocked()
+	kept := list[:0:0]
+	for _, q := range list {
+		if q.Kind == rcAskBack && q.Period == ask.Period {
+			continue
+		}
+		kept = append(kept, q)
+	}
+	a.rcAsks = pruneRcAway(append(kept, ask), now)
+	a.saveRcAwayLocked()
+	return true
+}
+
 // pruneRcAway tira as perguntas velhas e deixa só as últimas, em ordem.
 func pruneRcAway(list []RcAwayAsk, now time.Time) []RcAwayAsk {
 	out := list[:0:0]
@@ -172,6 +220,13 @@ func (a *App) pendingRcAwayLocked(now time.Time) []RcAwayAsk {
 	list := pruneRcAway(a.loadRcAwayLocked(), now)
 	out := list[:0:0]
 	for _, q := range list {
+		if q.Kind == rcAskBack {
+			// some quando o trecho foi fechado por outro caminho ("Voltei")
+			if a.periodOpenLocked(q.Period) {
+				out = append(out, q)
+			}
+			continue
+		}
 		covered := false
 		for _, p := range a.periods {
 			covered = covered || (q.From < periodEnd(p) && p.From < q.To)
@@ -241,7 +296,26 @@ func (a *App) rcAwayView(q RcAwayAsk) RcAwayView {
 	}
 	v.NormalRatio, _ = countRatio(kept)
 	v.Hint = rcAwayHint(v.Ratio, v.NormalRatio)
+	if q.Kind == rcAskBack {
+		a.mu.Lock()
+		for _, p := range a.periods {
+			if p.ID == q.Period {
+				v.Since, v.Name = p.From, p.Name
+			}
+		}
+		a.mu.Unlock()
+	}
 	return v
+}
+
+// periodOpenLocked: o trecho id existe e está aberto. (a.mu travado)
+func (a *App) periodOpenLocked(id int64) bool {
+	for _, p := range a.periods {
+		if p.ID == id {
+			return p.To == 0
+		}
+	}
+	return false
 }
 
 // countRatio é a razão de contagens Radiacode/GMC de uns minutos (0 = poucos).
@@ -293,6 +367,26 @@ func (a *App) AnswerRcAway(id int64, answer string, from, to int64, name string)
 	}
 	var p Period
 	switch answer {
+	case "voltei":
+		// fecha o trecho aberto na volta (to; 0 = quando reconectou)
+		q := list[idx]
+		if q.Kind != rcAskBack {
+			return p, errors.New("resposta inválida")
+		}
+		if to == 0 {
+			to = q.To
+		}
+		if _, err := a.SetWhereAt(WhereHome, WhereMe, "", to); err != nil {
+			return p, err
+		}
+		a.mu.Lock()
+		for _, x := range a.periods {
+			if x.ID == q.Period {
+				p = x
+			}
+		}
+		a.mu.Unlock()
+	case "aindafora":
 	case "fora":
 		if from == 0 || to == 0 {
 			from, to = list[idx].From, list[idx].To
@@ -323,6 +417,19 @@ func (a *App) AnswerRcAway(id int64, answer string, from, to int64, name string)
 // UndoRcAway desfaz uma resposta: apaga o trecho criado (se houve) e devolve
 // a pergunta.
 func (a *App) UndoRcAway(ask RcAwayAsk, periodID int64) error {
+	if ask.Kind == rcAskBack {
+		// "Voltei" desfeito: o trecho volta a ficar aberto
+		if periodID != 0 {
+			if err := a.reopenPeriod(periodID); err != nil {
+				return err
+			}
+		}
+		a.mu.Lock()
+		a.addRcBackLocked(ask, time.Now())
+		a.mu.Unlock()
+		a.emitRcAway()
+		return nil
+	}
 	if periodID != 0 {
 		if err := a.DeletePeriod(periodID); err != nil {
 			return err
@@ -333,6 +440,33 @@ func (a *App) UndoRcAway(ask RcAwayAsk, periodID int64) error {
 	a.mu.Unlock()
 	a.emitRcAway()
 	return nil
+}
+
+// reopenPeriod tira o fim do trecho id (só se nenhum outro começou depois).
+func (a *App) reopenPeriod(id int64) error {
+	a.mu.Lock()
+	idx := -1
+	for i, p := range a.periods {
+		if p.ID == id {
+			idx = i
+		}
+	}
+	if idx < 0 {
+		a.mu.Unlock()
+		return errors.New("esse trecho não existe mais")
+	}
+	for _, p := range a.periods {
+		if p.From > a.periods[idx].From {
+			a.mu.Unlock()
+			return errors.New("já tem outro trecho marcado depois desse")
+		}
+	}
+	a.periods[idx].To = 0
+	a.bgAt = time.Time{}
+	err := a.savePeriodsLocked()
+	a.mu.Unlock()
+	a.emitPeriods()
+	return err
 }
 
 func (a *App) emitRcAway() { a.emit("rcaway", a.GetRcAwayAsks()) }

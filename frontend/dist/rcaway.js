@@ -52,7 +52,7 @@ async function rcaAnswer(q, ans, from, to, name) {
     const p = await api.AnswerRcAway(q.id, ans, from || 0, to || 0, name || "");
     rcaEditing = 0;
     clearTimeout(rcaDoneTimer);
-    rcaDone = { ask: { id: q.id, from: q.from, to: q.to }, ans, period: p };
+    rcaDone = { ask: { id: q.id, from: q.from, to: q.to, kind: q.kind || "", period: q.period || 0 }, ans, period: p };
     rcaDoneTimer = setTimeout(() => { rcaDone = null; renderRcAway(); }, 10000);
     await refreshRcAway();
   } catch (e) { toast(errMsg(e), true); }
@@ -77,7 +77,9 @@ function renderRcAway() {
     box.className = "card rca rca-done";
     const t = document.createElement("span");
     const p = rcaDone.period;
-    if (rcaDone.ans === "fora" && p && p.id) {
+    if (rcaDone.ans === "voltei" && p && p.id) t.textContent = `Ok, marquei a volta às ${hhmm(p.to)}. O trecho "${p.name}" foi de ${zoomRangeText(p.from, p.to)}.`;
+    else if (rcaDone.ans === "aindafora") t.textContent = "Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".";
+    else if (rcaDone.ans === "fora" && p && p.id) {
       const c = document.createElement("span");
       c.className = "chip off"; c.textContent = "fora de casa";
       t.append(c, ` Marcado: ${p.name} · RC102 com você, GMC-800 em casa · ${hhmm(p.from)}–${hhmm(p.to)}`);
@@ -92,6 +94,7 @@ function renderRcAway() {
   box.hidden = false;
   box.className = "card rca";
   const q = list[list.length - 1]; // a mais recente primeiro
+  if (q.kind === "volta") { renderRcBack(box, q, list); return; }
   const head = document.createElement("div");
   head.className = "rca-head";
   head.innerHTML = '<span class="dot rc" aria-hidden="true"></span>';
@@ -156,6 +159,89 @@ function renderRcAway() {
     ask.appendChild(more);
   }
   box.appendChild(ask);
+}
+
+// "Voltou para casa?" (2.66.0): havia um "Saí de casa" aberto com o RC102
+// junto e ele voltou a conectar no PC (ACE, 12/11)
+function renderRcBack(box, q, list) {
+  const head = document.createElement("div");
+  head.className = "rca-head";
+  head.innerHTML = '<span class="dot rc" aria-hidden="true"></span>';
+  const h = document.createElement("h2");
+  h.textContent = "Voltou para casa?";
+  const tag = document.createElement("span");
+  tag.className = "chip off"; tag.textContent = "a responder";
+  head.append(h, tag);
+  const sub = document.createElement("div");
+  sub.className = "small muted";
+  sub.textContent = `"${q.name || "Saí de casa"}" está aberto desde ${whenLabel(q.since || q.from)}. O RC102 voltou a conectar no PC às ${hhmm(q.to)}, depois de ${hm(rcaMin(q))} sem conexão.`;
+  box.append(head, sub);
+  if (q.memMinutes) {
+    const g = document.createElement("div");
+    g.className = "rca-tiles";
+    g.append(
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
+      rcaTile("dose sem conexão", fmt(q.doseUSv, 2), "µSv"),
+      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
+    box.appendChild(g);
+  }
+  if (rcaEditing === q.id) { box.appendChild(rcaBackForm(q)); return; }
+  const ask = document.createElement("div");
+  ask.className = "rca-ask";
+  const row = document.createElement("div");
+  row.className = "row-btns";
+  const btn = (label, cls, fn) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn" + (cls ? " " + cls : ""); b.textContent = label;
+    b.addEventListener("click", fn);
+    row.appendChild(b);
+  };
+  btn(`Voltei às ${hhmm(q.to)}`, "accent", () => rcaAnswer(q, "voltei"));
+  btn("Ainda estou fora", "", () => rcaAnswer(q, "aindafora"));
+  const adj = document.createElement("button");
+  adj.type = "button"; adj.className = "link"; adj.textContent = "Ajustar horário";
+  adj.addEventListener("click", () => { rcaEditing = q.id; renderRcAway(); });
+  row.appendChild(adj);
+  const note = document.createElement("span");
+  note.className = "small muted";
+  note.textContent = "\"Voltei\" fecha o trecho fora de casa nesse horário e tudo volta ao normal.";
+  ask.append(row, note);
+  if (list.length > 1) {
+    const more = document.createElement("span");
+    more.className = "small muted";
+    more.textContent = list.length === 2 ? "Mais 1 trecho a responder em Fora de casa." : `Mais ${list.length - 1} trechos a responder em Fora de casa.`;
+    ask.appendChild(more);
+  }
+  box.appendChild(ask);
+}
+
+function rcaBackForm(q) {
+  const f = document.createElement("div");
+  f.className = "rca-form";
+  const g = document.createElement("div");
+  g.className = "row-btns rca-fields";
+  const l = document.createElement("label");
+  l.className = "small muted";
+  const to = document.createElement("input");
+  to.type = "datetime-local"; to.value = toLocalInput(q.to);
+  l.append("Voltei em", to);
+  const err = document.createElement("div");
+  err.className = "wh-err"; err.setAttribute("role", "alert"); err.hidden = true;
+  const save = document.createElement("button");
+  save.type = "button"; save.className = "btn accent"; save.textContent = "Salvar";
+  save.addEventListener("click", () => {
+    const b = fromLocalInput(to.value);
+    if (!(b > (q.since || 0)) || b > Date.now()) { err.textContent = "A volta precisa ser depois da saída e não pode estar no futuro."; err.hidden = false; return; }
+    rcaAnswer(q, "voltei", 0, b);
+  });
+  const back = document.createElement("button");
+  back.type = "button"; back.className = "btn"; back.textContent = "Cancelar";
+  back.addEventListener("click", () => { rcaEditing = 0; renderRcAway(); });
+  g.append(l, save, back);
+  f.append(g, err);
+  setTimeout(() => to.focus(), 0);
+  return f;
 }
 
 // ajustar o horário: parte do tempo sem conexão pode ter sido em casa
@@ -229,7 +315,8 @@ function rcAwayRows(ul) {
     when.textContent = zoomRangeText(q.from, q.to);
     const what = document.createElement("div");
     what.className = "small muted";
-    what.textContent = "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
+    what.textContent = q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
+      : "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
     t.append(c, when, what);
     const acts = document.createElement("div");
     acts.className = "acts";

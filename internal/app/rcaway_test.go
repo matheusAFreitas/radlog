@@ -159,3 +159,63 @@ func TestRcAwayHint(t *testing.T) {
 		t.Error("20 min com mínimo de 15 deveria perguntar")
 	}
 }
+
+// "Saí de casa" aberto e o RC102 reconecta: pergunta se você voltou (2.66.0)
+func TestRcAwayBackHome(t *testing.T) {
+	a := newTestApp(t)
+	t0 := time.Now().Add(-6 * time.Hour).Truncate(time.Minute)
+	rcWriteTest(t, a, t0, 60, 0.10, "")
+	gapFrom := t0.Add(time.Hour)
+	back := gapFrom.Add(2 * time.Hour)
+	if _, err := a.setWhereOut(gapFrom.Add(5*time.Minute), WhereHome, WhereMe, "", true); err != nil {
+		t.Fatal(err)
+	}
+	a.rcAwayDetect(gapFrom, back)
+	a.rcAwayDetect(gapFrom, back) // não duplica
+	l := a.GetRcAwayAsks()
+	if len(l) != 1 || l[0].Kind != rcAskBack || l[0].Period == 0 || l[0].Since != gapFrom.Add(5*time.Minute).UnixMilli() {
+		t.Fatalf("pergunta de volta: %+v", l)
+	}
+	if _, err := a.AnswerRcAway(l[0].ID, "fora", 0, 0, ""); err == nil {
+		t.Fatal("aceitou \"fora\" na pergunta de volta")
+	}
+	// "Voltei": fecha o trecho na reconexão
+	p, err := a.AnswerRcAway(l[0].ID, "voltei", 0, 0, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if p.ID != l[0].Period || p.To != back.UnixMilli() {
+		t.Fatalf("trecho fechado: %+v", p)
+	}
+	if w := a.GetWhereabouts(); !w.Normal {
+		t.Fatalf("depois de voltar: %+v", w)
+	}
+	if len(a.GetRcAwayAsks()) != 0 {
+		t.Fatal("a pergunta ficou")
+	}
+	// desfazer: o trecho volta a ficar aberto e a pergunta volta
+	if err := a.UndoRcAway(l[0].RcAwayAsk, p.ID); err != nil {
+		t.Fatal(err)
+	}
+	if w := a.GetWhereabouts(); w.Normal || len(a.GetRcAwayAsks()) != 1 {
+		t.Fatalf("desfazer: %+v %+v", w, a.GetRcAwayAsks())
+	}
+	// "Ainda estou fora": só tira a pergunta
+	if _, err := a.AnswerRcAway(l[0].ID, "aindafora", 0, 0, ""); err != nil {
+		t.Fatal(err)
+	}
+	if w := a.GetWhereabouts(); w.Normal || len(a.GetRcAwayAsks()) != 0 {
+		t.Fatalf("ainda fora: %+v", w)
+	}
+	// fechado pelo botão "Voltei": a pergunta de volta some sozinha
+	a.rcAwayDetect(gapFrom, back.Add(time.Minute))
+	if len(a.GetRcAwayAsks()) != 1 {
+		t.Fatal("não perguntou de novo")
+	}
+	if _, err := a.SetWhere(WhereHome, WhereMe, ""); err != nil {
+		t.Fatal(err)
+	}
+	if l := a.GetRcAwayAsks(); len(l) != 0 {
+		t.Fatalf("pergunta depois do Voltei: %+v", l)
+	}
+}

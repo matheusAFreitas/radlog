@@ -3263,7 +3263,13 @@ const I18N_EN = {
 "Média de cada dia do GQ GMC-800 em casa.": "Average of each day from the GQ GMC-800 at home.",
 "Ver mais": "Show more",
 "Conferindo o tubo…": "Checking the tube…",
-"1 alerta + 1 confirmado": "1 alert + 1 confirmed"
+"1 alerta + 1 confirmado": "1 alert + 1 confirmed",
+"Voltou para casa?": "Are you back home?",
+"dose sem conexão": "dose while disconnected",
+"Ainda estou fora": "Still away",
+"\"Voltei\" fecha o trecho fora de casa nesse horário e tudo volta ao normal.": "\"I'm back\" closes the away stretch at that time and everything goes back to normal.",
+"Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".": "Ok, the stretch stays open. When you get back, use \"I'm back\".",
+"A volta precisa ser depois da saída e não pode estar no futuro.": "The return has to be after you left and can't be in the future."
 },
 "patterns": [
 [
@@ -4249,6 +4255,17 @@ const I18N_EN = {
 ]
 ],
 [
+"\"",
+"^\"((?:(?! · ).)+?)\" está aberto desde ((?:(?! · ).)+?)\\. O RadiaCode voltou a conectar no PC às ((?:(?! · ).)+?), depois de ((?:(?! · ).)+?) sem conexão\\.$",
+"\"${1}\" has been open since ${2}. The RC102 reconnected to the PC at ${3}, after ${4} without a connection.",
+[
+"\" está aberto desde ",
+". O RadiaCode voltou a conectar no PC às ",
+", depois de ",
+" sem conexão."
+]
+],
+[
 "leitura ao vivo: iniciada em ",
 "^leitura ao vivo: iniciada em ((?:(?! · ).)+?) \\(GETCPM \\+ GETCPS a cada 1 s, prazo de ((?:(?! · ).)+?) s por comando, ((?:(?! · ).)+?)\\)$",
 "live reading: started on ${1} (GETCPM + GETCPS every 1 s, ${2} s timeout per command, ${3})",
@@ -4381,6 +4398,17 @@ const I18N_EN = {
 [
 "O RC102 em casa ficou igual (",
 "). Isso aponta para o aparelho, não para o ambiente."
+]
+],
+[
+"\"",
+"^\"((?:(?! · ).)+?)\" está aberto desde ((?:(?! · ).)+?)\\. O RC102 voltou a conectar no PC às ((?:(?! · ).)+?), depois de ((?:(?! · ).)+?) sem conexão\\.$",
+"\"${1}\" has been open since ${2}. The RC102 reconnected to the PC at ${3}, after ${4} without a connection.",
+[
+"\" está aberto desde ",
+". O RC102 voltou a conectar no PC às ",
+", depois de ",
+" sem conexão."
 ]
 ],
 [
@@ -5995,6 +6023,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode voltou a conectar às ",
+"^RadiaCode voltou a conectar às ((?:(?! · ).)+?): voltou para casa\\?$",
+"RC102 reconnected at ${1}: are you back home?",
+[
+"RadiaCode voltou a conectar às ",
+": voltou para casa?"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) permitidos no período \\(((?:(?! · ).)+?)%\\)\\.$",
 "Above background: ${1} of ${2} allowed in the period (${3}%).",
@@ -6325,6 +6362,25 @@ const I18N_EN = {
 "No object measurement or note since ${1}.",
 [
 "Nenhuma medição de objeto nem anotação desde "
+]
+],
+[
+"Ok, marquei a volta às ",
+"^Ok, marquei a volta às ((?:(?! · ).)+?)\\. O trecho \"((?:(?! · ).)+?)\" foi de ((?:(?! · ).)+?)\\.$",
+"Ok, I marked the return at ${1}. The stretch \"${2}\" went from ${3}.",
+[
+"Ok, marquei a volta às ",
+". O trecho \"",
+"\" foi de "
+]
+],
+[
+"RC102 voltou a conectar às ",
+"^RC102 voltou a conectar às ((?:(?! · ).)+?): voltou para casa\\?$",
+"RC102 reconnected at ${1}: are you back home?",
+[
+"RC102 voltou a conectar às ",
+": voltou para casa?"
 ]
 ],
 [
@@ -13708,6 +13764,14 @@ const I18N_EN = {
 "${1} (same)",
 [
 " (igual)"
+]
+],
+[
+"Voltei às ",
+"^Voltei às ((?:(?! · ).)+?)$",
+"I'm back at ${1}",
+[
+"Voltei às "
 ]
 ],
 [
