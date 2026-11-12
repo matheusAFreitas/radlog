@@ -27,6 +27,12 @@ Release public key (base64):
 47Gd5qTSvqncJzSIKx3nXlBMOhHwdJkp/Wes9hC7EQk=
 ```
 
+Reserve public key (base64, accepted from 2.72.0 on; see below):
+
+```
+WikNSgdGuqYSX8kLHJQ+lHqxeACcwDFeCDiQj1e/ujQ=
+```
+
 To check a download by hand: `go run ./scripts/sign verify SHA256SUMS.txt`
 next to `SHA256SUMS.txt.sig`, then `sha256sum -c SHA256SUMS.txt`.
 
@@ -62,8 +68,8 @@ prazo fixo. Só a versão mais recente recebe correção.
 Cada release traz o `SHA256SUMS.txt` (o SHA-256 de cada arquivo) e o
 `SHA256SUMS.txt.sig`, a assinatura Ed25519 dele. O app (2.16 em diante) só
 instala uma versão nova se a assinatura bater com uma das chaves públicas
-dele, a soma bater e o nome do arquivo trouxer a versão anunciada. A chave
-pública está acima.
+dele, a soma bater e o nome do arquivo trouxer a versão anunciada. As duas
+chaves públicas (principal e reserva, esta desde a 2.72.0) estão acima.
 
 ## Se a chave de assinatura se perder
 

@@ -2226,6 +2226,43 @@
         <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
       </details>
     </fieldset>
+    <fieldset class="set-wide" id="usoBox">
+      <legend>Uso do app</legend>
+      <label class="toggle">
+        <span>Contar o que eu abro no app (só neste computador)</span>
+        <input type="checkbox" id="chkUsage">
+      </label>
+      <div id="usoBody" hidden>
+        <div class="uso-ctl">
+          <div class="seg" role="group" aria-label="Período do uso" id="usoDaysSeg"><button type="button" data-d="7" aria-pressed="false">7 dias</button><button type="button" data-d="30" aria-pressed="true">30 dias</button><button type="button" data-d="0" aria-pressed="false">Tudo</button></div>
+          <div class="seg" role="group" aria-label="Medida do uso" id="usoMetSeg"><button type="button" data-m="s" aria-pressed="true">Tempo olhando</button><button type="button" data-m="n" aria-pressed="false">Vezes aberta</button></div>
+        </div>
+        <div class="uso-grid">
+          <div>
+            <ul class="uso-list" id="usoPages"></ul>
+            <div class="uso-legend small muted"><span>pouco</span><i class="uso-h0"></i><i class="uso-h1"></i><i class="uso-h2"></i><i class="uso-h3"></i><i class="uso-h4"></i><span>muito</span></div>
+          </div>
+          <div>
+            <h4 class="sync-h" id="usoTabsH"></h4>
+            <ul class="uso-list" id="usoTabs"></ul>
+            <h4 class="sync-h">Botões e "Como funciona" mais usados nesta página</h4>
+            <ul class="uso-list" id="usoClicks"></ul>
+          </div>
+        </div>
+        <h4 class="sync-h">Nunca usado em 30 dias</h4>
+        <div class="uso-chips" id="usoNever"></div>
+        <div class="row">
+          <button type="button" class="btn small" id="btnUsoCopy">Copiar resumo</button>
+          <button type="button" class="btn small" id="btnUsoReset">Zerar contagem</button>
+        </div>
+        <p class="small muted" id="usoFoot"></p>
+      </div>
+      <details class="how">
+        <summary>Como funciona</summary>
+        <p class="small muted">Conta cada vez que uma página ou aba abre, os cliques nos botões, nos "Como funciona" e nos seletores, e o tempo olhando: só com a janela em primeiro plano e você mexendo no mouse ou no teclado (parado mais de 2 minutos, para de contar).</p>
+        <p class="small muted">Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.</p>
+      </details>
+    </fieldset>
     <fieldset id="setMature" class="set-wide">
       <legend>Histórico disponível</legend>
       <div class="sum-notes" id="sumMature"><p class="small muted">Carregando…</p></div>
@@ -2546,6 +2583,7 @@
 <script src="alara.js"></script>
 <script src="clima.js"></script>
 <script src="busca.js"></script>
+<script src="uso.js"></script>
 <script src="demo.js"></script>
 <script src="app.js"></script>
 <div class="tb-tip mono small" id="tubeTip" hidden></div>

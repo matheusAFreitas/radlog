@@ -1,5 +1,39 @@
 # Versões
 
+## 2.72.0
+Novo "Uso do app" (spec ux/uso-do-app.html).
+
+- Configurações › Dados e backup › Uso do app: com a chave ligada, o app
+  conta, só neste computador, quantas vezes cada página, aba, botão,
+  "Como funciona" e seletor foi aberto, e o tempo olhando cada página (só
+  com a janela em primeiro plano e mexendo no mouse ou teclado; parado mais
+  de 2 minutos, não conta). A tela mostra as páginas com cores de pouco a
+  muito, as abas e os botões mais usados da página escolhida, o que nunca
+  foi usado em 30 dias, e tem "Copiar resumo" e "Zerar contagem".
+- Vem desligado. Guarda só totais por dia, sem horário, no `uso.json` da
+  pasta de dados, que fica fora do backup, da sincronização e do PDF.
+- Atualização: entra a chave de assinatura de reserva (a pública está no
+  `SECURITY.md`). Se a chave principal se perder, as versões novas ainda
+  podem ser assinadas e instaladas pelo app.
+
+**English**
+
+New "App usage" (spec ux/uso-do-app.html).
+
+- Settings › Data and backup › App usage: with the switch on, the app
+  counts, only on this computer, how many times each page, tab, button,
+  "How it works" and selector was opened, and the time spent looking at
+  each page (only with the window in front and the mouse or keyboard in
+  use; idle for more than 2 minutes doesn't count). The screen shows the
+  pages colored from a little to a lot, the most used tabs and buttons of
+  the chosen page, what was never used in 30 days, and has "Copy summary"
+  and "Reset count".
+- It starts off. It keeps only daily totals, with no times, in `uso.json`
+  in the data folder, which stays out of the backup, the sync and the PDF.
+- Updates: the reserve signing key is in (its public half is in
+  `SECURITY.md`). If the main key is ever lost, new versions can still be
+  signed and installed by the app.
+
 ## 2.71.0
 Bloco 4 da auditoria de 12/11: limpeza e documentação.
 

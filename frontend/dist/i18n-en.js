@@ -3613,7 +3613,37 @@ const I18N_EN = {
 "Licenças de terceiros": "Third-party licenses",
 "O RadLog usa bibliotecas e fontes de outras pessoas. As licenças delas pedem que o aviso venha junto do programa; está aqui, em inglês, como os autores escreveram.": "RadLog uses libraries and fonts made by other people. Their licenses ask for the notice to ship with the program; here it is, as the authors wrote it.",
 "Não consegui abrir o arquivo das licenças.": "Couldn't open the licenses file.",
-"Licença": "License"
+"Licença": "License",
+"Apaga tudo o que foi contado até agora neste computador. Se a contagem estiver ligada, ela recomeça do zero.": "Deletes everything counted so far on this computer. If counting is on, it starts again from zero.",
+"Botões e \"Como funciona\" mais usados nesta página": "Most used buttons and \"How it works\" on this page",
+"Botões mais usados:": "Most used buttons:",
+"Conta cada vez que uma página ou aba abre, os cliques nos botões, nos \"Como funciona\" e nos seletores, e o tempo olhando: só com a janela em primeiro plano e você mexendo no mouse ou no teclado (parado mais de 2 minutos, para de contar).": "Counts each time a page or tab opens, clicks on buttons, on \"How it works\" and on selectors, and the time spent looking: only with the window in front and you using the mouse or keyboard (idle for more than 2 minutes, it stops counting).",
+"Contagem desligada · o que já foi contado fica guardado até zerar": "Counting off · what was already counted is kept until you reset it",
+"Contar o que eu abro no app (só neste computador)": "Count what I open in the app (only on this computer)",
+"Medida do uso": "Usage measure",
+"Nunca usado em 30 dias": "Never used in 30 days",
+"Nunca usado em 30 dias:": "Never used in 30 days:",
+"Não consegui copiar": "Couldn't copy",
+"Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; \"Zerar contagem\" apaga.": "It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the sync and the PDF. Turning it off stops counting and keeps what was counted; \"Reset count\" deletes it.",
+"Período do uso": "Usage period",
+"Páginas:": "Pages:",
+"Uso do app": "App usage",
+"Zerar a contagem de uso?": "Reset the usage count?",
+"uso do app": "app usage",
+"1 clique": "1 click",
+"1 abertura": "opened once",
+"Tempo olhando": "Time looking",
+"Vezes aberta": "Times opened",
+"Copiar resumo": "Copy summary",
+"Zerar contagem": "Reset count",
+"Nada contado ainda": "Nothing counted yet",
+"tudo foi usado": "everything was used",
+"Resumo copiado": "Summary copied",
+"Busca (Ctrl+K)": "Search (Ctrl+K)",
+"0 · nunca": "0 · never",
+"nada": "nothing",
+"Zerar": "Reset",
+"nunca": "never"
 },
 "patterns": [
 [
@@ -8257,6 +8287,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Contado só neste computador · desde ",
+"^Contado só neste computador · desde ((?:(?! · ).)+?)$",
+"Counted only on this computer · since ${1}",
+[
+"Contado só neste computador · desde "
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -8427,6 +8465,15 @@ const I18N_EN = {
 "${1} no counts · check the device",
 [
 " sem contagens · confira o aparelho"
+]
+],
+[
+"Uso do RadLog (",
+"^Uso do RadLog \\(((?:(?! · ).)+?), contando desde ((?:(?! · ).)+?)\\)$",
+"RadLog usage (${1}, counting since ${2})",
+[
+"Uso do RadLog (",
+", contando desde "
 ]
 ],
 [
@@ -12846,6 +12893,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Como funciona · ",
+"^Como funciona · ((?:(?! · ).)+?)$",
+"How it works · ${1}",
+[
+"Como funciona · "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -14120,6 +14175,14 @@ const I18N_EN = {
 ]
 ],
 [
+"uso do app: ",
+"^uso do app: ((?:(?! · ).)+?)$",
+"app usage: ${1}",
+[
+"uso do app: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
@@ -14725,6 +14788,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) aberturas$",
+"opened ${1} times",
+[
+" aberturas"
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -15274,6 +15345,22 @@ const I18N_EN = {
 "Why ${1}",
 [
 "Por que "
+]
+],
+[
+"Abas de ",
+"^Abas de ((?:(?! · ).)+?)$",
+"${1} tabs",
+[
+"Abas de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) cliques$",
+"${1} clicks",
+[
+" cliques"
 ]
 ],
 [

@@ -93,6 +93,9 @@ type Settings struct {
 	ReportMode  string `json:"reportMode"`
 	ReportNotes bool   `json:"reportNotes"`
 	ReportNoCfg bool   `json:"reportNoCfg"`
+	// uso do app (usage.go, 2.72): contar páginas, abas e botões abertos;
+	// desligado por padrão, só muda por SetUsageOn
+	UsageOn bool `json:"usageOn"`
 }
 
 func defaultSettings() Settings {
@@ -380,6 +383,9 @@ type App struct {
 	trayGmc  trayDev   // última leitura do GMC-800 para o ícone
 	trayDemo bool
 	notes    []Note // anotações no gráfico (notes.go)
+	// uso do app (usage.go): carregado na primeira vez que precisa
+	usage       usageData
+	usageLoaded bool
 
 	alarmOn  bool
 	attnOn   bool
@@ -655,6 +661,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	s.BgMoved = a.settings.BgMoved                        // só por MarkBgMoved/ClearBgMoved
 	s.SkipVersion = a.settings.SkipVersion                // muda só por SkipUpdate
 	s.RcOff, s.RcBLE = a.settings.RcOff, a.settings.RcBLE // só por SetRadiacode
+	s.UsageOn = a.settings.UsageOn                        // só por SetUsageOn
 	old := a.settings
 	autostartChanged := old.StartWithWindows != s.StartWithWindows
 	if old.RainLat != s.RainLat || old.RainLon != s.RainLon || old.RainEnabled != s.RainEnabled {

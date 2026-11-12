@@ -19,9 +19,8 @@ const PubKey = "47Gd5qTSvqncJzSIKx3nXlBMOhHwdJkp/Wes9hC7EQk="
 
 // ReserveKey é a chave pública de reserva (base64), para o caso de a
 // privada principal se perder: a privada dela fica guardada fora do GitHub
-// e só passa a assinar se a principal sumir (SECURITY.md). Vazia enquanto
-// não for gerada; sem ela, perder a principal trava a atualização de todos.
-const ReserveKey = ""
+// e só passa a assinar se a principal sumir (SECURITY.md). Entrou na 2.72.0.
+const ReserveKey = "WikNSgdGuqYSX8kLHJQ+lHqxeACcwDFeCDiQj1e/ujQ="
 
 // Keys são as chaves públicas aceitas: a principal e a de reserva.
 func Keys() []string {
