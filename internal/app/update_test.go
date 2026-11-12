@@ -120,8 +120,12 @@ func TestUpdateFlow(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("não abriu a versão nova")
 	}
+	want := name
+	if runtime.GOOS == "windows" {
+		want = fixedExe // no Windows a versão nova vira sempre RadLog.exe
+	}
 	b, err := os.ReadFile(path)
-	if err != nil || string(b) != string(payload) || filepath.Base(path) != name {
+	if err != nil || string(b) != string(payload) || filepath.Base(path) != want {
 		t.Fatalf("arquivo: %s %v", path, err)
 	}
 	if _, err := os.Stat(path + ".part"); err == nil {
