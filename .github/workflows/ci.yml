@@ -53,6 +53,8 @@ jobs:
         run: |
           go install golang.org/x/vuln/cmd/govulncheck@v1.9.0
           govulncheck -tags webkit2_41 ./...
+      - name: Avisos de licença das bibliotecas em dia (frontend/dist/licencas.txt)
+        run: go run ./scripts/licenses -check
       - name: Toda frase nova com tradução (en.tsv)
         run: python3 scripts/i18n_check.py
       - name: Telas (11 páginas, 2 larguras, 2 idiomas, sem erro de script)

@@ -17,13 +17,30 @@ import (
 // PubKey é a chave pública Ed25519 (base64) das releases.
 const PubKey = "47Gd5qTSvqncJzSIKx3nXlBMOhHwdJkp/Wes9hC7EQk="
 
-// Verify confere a assinatura (base64, como no .sig) de data com PubKey.
-func Verify(data, sigB64 []byte) bool {
-	pub, err := base64.StdEncoding.DecodeString(PubKey)
-	if err != nil || len(pub) != ed25519.PublicKeySize {
-		return false
+// ReserveKey é a chave pública de reserva (base64), para o caso de a
+// privada principal se perder: a privada dela fica guardada fora do GitHub
+// e só passa a assinar se a principal sumir (SECURITY.md). Vazia enquanto
+// não for gerada; sem ela, perder a principal trava a atualização de todos.
+const ReserveKey = ""
+
+// Keys são as chaves públicas aceitas: a principal e a de reserva.
+func Keys() []string {
+	if ReserveKey == "" {
+		return []string{PubKey}
 	}
-	return VerifyWith(ed25519.PublicKey(pub), data, sigB64)
+	return []string{PubKey, ReserveKey}
+}
+
+// Verify confere a assinatura (base64, como no .sig) de data com qualquer
+// das chaves aceitas.
+func Verify(data, sigB64 []byte) bool {
+	for _, k := range Keys() {
+		pub, err := base64.StdEncoding.DecodeString(k)
+		if err == nil && len(pub) == ed25519.PublicKeySize && VerifyWith(ed25519.PublicKey(pub), data, sigB64) {
+			return true
+		}
+	}
+	return false
 }
 
 // VerifyWith é o Verify com outra chave (testes e scripts/sign).

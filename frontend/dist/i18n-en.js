@@ -3609,7 +3609,11 @@ const I18N_EN = {
 "O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.": "The number is good for comparing days and places, but it isn't an official dose: that only comes from a work dosimeter read by a laboratory.",
 "saídas de casa": "trips away from home",
 "anotações": "notes",
-"medições": "measurements"
+"medições": "measurements",
+"Licenças de terceiros": "Third-party licenses",
+"O RadLog usa bibliotecas e fontes de outras pessoas. As licenças delas pedem que o aviso venha junto do programa; está aqui, em inglês, como os autores escreveram.": "RadLog uses libraries and fonts made by other people. Their licenses ask for the notice to ship with the program; here it is, as the authors wrote it.",
+"Não consegui abrir o arquivo das licenças.": "Couldn't open the licenses file.",
+"Licença": "License"
 },
 "patterns": [
 [

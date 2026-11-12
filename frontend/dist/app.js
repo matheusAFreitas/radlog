@@ -4310,6 +4310,18 @@ async function init() {
 init();
 
 
+// ---------- licenças de terceiros (auditoria de 12/11, D2) ----------
+// o texto é gerado por scripts/licenses e só é lido quando abre
+{
+  const d = $("licDetails");
+  if (d) d.addEventListener("toggle", async () => {
+    const pre = $("licText");
+    if (!d.open || pre.textContent) return;
+    try { pre.textContent = await (await fetch("licencas.txt")).text(); }
+    catch (e) { pre.textContent = tr("Não consegui abrir o arquivo das licenças."); }
+  });
+}
+
 // ---------- tamanho e espaço da janela (2.49) ----------
 // --ui-scale multiplica os tokens de fonte e --ui-density os de espaço
 // (style.css). A prévia é ao vivo; "Salvar" guarda. Ctrl +/−/0 muda e já

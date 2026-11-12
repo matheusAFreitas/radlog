@@ -154,8 +154,16 @@ dados" abre a pasta. O que tem lá:
   configuração do contador;
 - `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
   alertas, medições, saídas de casa e anotações;
+- `radiacode/`: os minutos, a dose, os espectros por minuto e as medições
+  de atividade do Radiacode 102;
+- `alertas-detalhe/`: as leituras segundo a segundo em volta de cada
+  alerta;
+- `medicoes-anexos/`: fotos e arquivos anexados às medições;
 - `chuva*.json`: chuva e pressão (se o Clima estiver ligado);
-- `config.json`: configurações; `log.txt` e `diagnostico.txt`: log técnico.
+- `config.json`: configurações; `log.txt` e `diagnostico.txt`: log técnico;
+- `sincronizacao.json`: as chaves dos PCs pareados. Não compartilhe este
+  arquivo: é ele que deixa outro PC sincronizar com o seu. Nunca entra no
+  backup.
 
 O **backup** (.zip) junta só o que falta ao importar e serve para levar os
 dados de um PC para outro, Windows ou Linux. Localização e cidade nunca vão
@@ -229,7 +237,11 @@ foram conferidos com o projeto [PyGMC](https://pypi.org/project/pygmc).
 ## Licença
 
 Código sob a licença MIT (veja [LICENSE](LICENSE)). Fontes IBM Plex sob a SIL
-Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`).
+Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`). Os avisos de
+licença das bibliotecas que vão dentro do app estão em
+[frontend/dist/licencas.txt](frontend/dist/licencas.txt) e em Configurações ›
+Atualizações e sobre. Para avisar de um problema de segurança, veja o
+[SECURITY.md](SECURITY.md).
 
 Não é um produto da GQ Electronics nem da Radiacode. "GMC" e "GQ" são marcas
 da GQ Electronics; "Radiacode" é marca da Radiacode. O app só fala com os

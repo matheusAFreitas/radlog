@@ -2760,3 +2760,6 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
 .rc-uses { display: flex; flex-direction: column; gap: 3px; }
 .rc-use { font-size: 11px; padding: 0 6px; border-radius: var(--radius-pill); border: 1px solid var(--border-hover); color: var(--muted); }
 .rc-use.med { color: var(--info); border-color: color-mix(in srgb, var(--info) 55%, transparent); }
+
+/* licenças de terceiros (Configurações › Sobre) */
+.lic-text { max-height: 320px; overflow: auto; white-space: pre-wrap; font-size: var(--fs-caption); color: var(--muted); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-xs); padding: var(--space-2); margin: var(--space-2) 0 0; }

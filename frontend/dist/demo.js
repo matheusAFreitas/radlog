@@ -39,8 +39,8 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 function makeDemoApi() {
-  let demoSync = { id: "a", name: "ACENULL", listen: false, listening: false, auto: true, peers: [
-    { id: "b", name: "parrot", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
+  let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
+    { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   // versões que o modo demonstração mostra em "Atualizações e sobre"; ao refazer
   // os prints do README, acerte para a versão atual e a seguinte (U4)
   let demoUpd = { current: "2.70.0", latest: "2.71.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
@@ -852,7 +852,7 @@ const demoRc = () => {
     SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
     ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),
     CancelPairCode: async () => (demoSync = { ...demoSync, code: "" }),
-    DiscoverPeers: async () => { await new Promise((r) => setTimeout(r, 800)); return [{ id: "b", name: "parrot", addr: "192.168.0.20:47862", paired: false }]; },
+    DiscoverPeers: async () => { await new Promise((r) => setTimeout(r, 800)); return [{ id: "b", name: "notebook", addr: "192.168.0.20:47862", paired: false }]; },
     PairWith: async () => { throw new Error("no modo navegador não dá para parear; abra pelo app"); },
     SyncNow: async () => ({}),
     SetPeerAddrs: async () => demoSync,

@@ -152,8 +152,14 @@ button opens it. File names are in Portuguese:
   configuration;
 - `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
   alerts, measurements, trips and notes;
+- `radiacode/`: the Radiacode 102 minutes, dose, spectra per minute and
+  activity measurements;
+- `alertas-detalhe/`: the second-by-second readings around each alert;
+- `medicoes-anexos/`: photos and files attached to measurements;
 - `chuva*.json`: rain and pressure (when Weather is on);
-- `config.json`: settings; `log.txt` and `diagnostico.txt`: technical log.
+- `config.json`: settings; `log.txt` and `diagnostico.txt`: technical log;
+- `sincronizacao.json`: the keys of the paired PCs. Don't share this file:
+  it is what lets another PC sync with yours. It never goes into a backup.
 
 A **backup** (.zip) only adds what is missing when imported, so it also moves
 data from one PC to another, Windows or Linux. Location and city never go
@@ -227,7 +233,10 @@ were checked against the [PyGMC](https://pypi.org/project/pygmc) project.
 ## License
 
 Code under the MIT license (see [LICENSE](LICENSE)). IBM Plex fonts under the
-SIL Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`).
+SIL Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`). The notices of
+the third-party libraries inside the app are in
+[frontend/dist/licencas.txt](frontend/dist/licencas.txt) and under Settings ›
+Updates and about. To report a security problem, see [SECURITY.md](SECURITY.md).
 
 Not a product of GQ Electronics or Radiacode. "GMC" and "GQ" are trademarks of
 GQ Electronics; "Radiacode" is a trademark of Radiacode. The app only talks to
