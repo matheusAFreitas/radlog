@@ -222,7 +222,7 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 
 	r := reportData{
 		Title:     "Relatório de radiação",
-		Period:    fmt.Sprintf("%s · %s a %s", label, from.Format("02/01/2006 15:04"), to.Format("02/01/2006 15:04")),
+		Period:    fmt.Sprintf("%s · %s – %s", label, from.Format("02/01/2006 15:04"), to.Format("02/01/2006 15:04")),
 		Generated: time.Now().Format("02/01/2006 15:04"),
 		Version:   AppVersion,
 		S:         s,

@@ -1,5 +1,14 @@
 # Versões
 
+## 2.68.3
+- README: a logo do título não troca mais pela preferência do sistema, e sim
+  pelo tema do GitHub. No tema claro com o Windows escuro, aparecia a versão
+  clara da logo no fundo branco.
+- PDF: o período no subtítulo usa "–" entre as datas, que serve nas duas
+  línguas (no PDF em inglês aparecia "a").
+- Saiu o docs/ROADMAP.md, parado desde a 1.31: o planejamento fica no
+  quadro do projeto.
+
 ## 2.68.2
 - README refeito para o público: em inglês (README.md) e em português
   (README.pt-BR.md), com a logo no título, o que entrou da 2.57 à 2.68, a
