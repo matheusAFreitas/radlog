@@ -1,5 +1,10 @@
 # Versões
 
+## 2.68.2
+- README refeito para o público: em inglês (README.md) e em português
+  (README.pt-BR.md), com a logo no título, o que entrou da 2.57 à 2.68, a
+  dose, o PDF novo e prints do modo demonstração nas duas línguas.
+
 ## 2.68.1
 - PDF: saída de casa levando só o GMC-800 (sem o RC102) agora aparece em
   "Saídas de casa", com a média e o pico do GMC-800, e na faixa lilás do

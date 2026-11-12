@@ -1,107 +1,172 @@
-# RadLog
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/logo-dark.svg">
+    <img src="docs/logo-light.svg" alt="RadLog" width="300">
+  </picture>
+</p>
 
-Registro de radiação ionizante para dois aparelhos: o contador Geiger
-**GQ GMC-800** (monitor de área, parado em casa) e o **Radiacode 102**
-(dosímetro pessoal com espectrômetro, anda com você). Feito em Go + Wails,
-para Windows e Linux, em português (com tradução para inglês).
+<p align="center"><b>English</b> · <a href="README.pt-BR.md">Português (Brasil)</a></p>
 
-O app lê os aparelhos pela USB (o Radiacode 102 também pelo Bluetooth),
-guarda uma leitura por minuto e mostra tudo em µSv/h: leitura ao vivo,
-gráficos, dose, alertas, espectro, clima × radiação, medição de objetos e
-relatórios em PDF. Os dados ficam só no seu computador.
+RadLog is a desktop app that logs ionizing radiation from two devices: the
+**GQ GMC-800** Geiger counter and the **Radiacode 102** dosimeter and gamma
+spectrometer. It runs on Windows and Linux, works with one device or both,
+and is available in English and Brazilian Portuguese.
 
-Versão atual: veja as [Releases](../../releases) e o [CHANGELOG](CHANGELOG.md).
+It reads the devices over USB (the Radiacode 102 also over Bluetooth), keeps
+one reading per minute and shows everything in µSv/h: live readings, charts,
+dose, alerts, spectra, weather × radiation, object measurements and PDF
+reports. All data stays on your computer.
 
-> Até a 1.x se chamava **GMC Monitor**. A 2.0 leva os dados sozinha para a
-> pasta nova na primeira vez que abre.
+Current version: see [Releases](../../releases) and the
+[changelog](CHANGELOG.md) (in Portuguese). An Android app (3.0) is in the
+works.
 
-## Baixar e atualizar
+![The Now screen, with the GQ GMC-800 and the Radiacode 102 side by side](docs/prints/en-agora.png)
 
-Os arquivos prontos ficam em **[Releases](../../releases)**:
+## Download and update
 
-- **Windows**: `RadLog-vX.Y.Z.exe`. Não precisa instalar; o WebView2 já vem
-  no Windows 10/11.
-- **Linux**: `RadLog-vX.Y.Z-x86_64.AppImage`, ou o
-  `radlog-vX.Y.Z-linux-x86_64.tar.gz` com o binário e o `install.sh`. Precisa
-  da WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0`).
+Ready-to-run files are on the **[Releases](../../releases)** page:
 
-O app procura versão nova ao abrir e uma vez por dia. Antes de instalar, ele
-confere o SHA-256 do arquivo baixado e a **assinatura Ed25519** da lista de
-somas (`SHA256SUMS.txt.sig`): sem assinatura válida, a versão é recusada.
-Também dá para trocar à mão: abra a versão nova com a antiga aberta, e a
-antiga fecha e passa o lugar.
+- **Windows**: `RadLog-vX.Y.Z.exe`. No installation needed; WebView2 already
+  ships with Windows 10/11.
+- **Linux**: `RadLog-vX.Y.Z-x86_64.AppImage`, or
+  `radlog-vX.Y.Z-linux-x86_64.tar.gz` with the binary and `install.sh`.
+  Requires WebKitGTK 4.1 (`sudo apt install libwebkit2gtk-4.1-0`).
 
-## As telas
+The app checks for a new version when it opens and once a day. Before
+installing, it verifies the SHA-256 of the download and the **Ed25519
+signature** of the checksum list (`SHA256SUMS.txt.sig`); a version without a
+valid signature is refused. You can also update by hand: open the new version
+while the old one is running, and the old one closes and hands over.
 
-- **Agora**: os dois aparelhos lado a lado, cada um com mostrador, nível
-  (seguro, atenção, alarme, perigo, sempre com cor **e** símbolo), frase
-  dizendo se está dentro do normal, gráfico da última hora e a fita do dia.
-  O anel do mostrador pode piscar a cada contagem (pulso da contagem).
-- **Gráficos**: ao longo do tempo (com zoom arrastando), por hora do dia,
-  padrões, tendência e o **calendário do ano** (fundo de casa ou sua dose,
-  dia a dia).
-- **Resumo**: hoje, ontem, a semana ou qualquer dia, comparação de
-  períodos e **relatório em PDF**.
-- **ALARA**: de onde vem a sua dose e testes de tempo, distância e
-  blindagem.
-- **Alertas**: ativos e histórico, com o gráfico de cada um e o painel
-  **"Por que subiu?"**, que confere as causas comuns (acaso, o outro
-  aparelho, chuva, radônio, pressão, objeto, saída de casa) com os seus
-  dados.
-- **Medir objeto**: fundo e objeto pelo mesmo tempo, diferença com margem
-  de erro, veredito e a dose comparada com coisas conhecidas.
-- **Fora de casa**: períodos em que o Radiacode 102 saiu com você; entram
-  na dose, mas não no fundo da casa.
-- **Clima**: chuva (radar RainViewer e modelo Open-Meteo) e pressão
-  × radônio. Opcional; a cidade fica só nos ajustes deste PC.
-- **GQ GMC-800**: leitura, histórico da memória do contador, relógio,
-  ajustes do aparelho e calibração (inclusive gravar no próprio contador o
-  fator da intercalibração com o Radiacode 102).
-- **Radiacode 102**: leitura, espectro acumulado com isótopos e zoom no
-  pico, espectro ao longo do tempo, busca, atividade (Bq), log, ajustes e
-  alarmes do aparelho, e o histórico que ele gravou longe do PC.
-- **Configurações**: alarmes e níveis do app, janela e tela (tamanho,
-  densidade, número no ícone da bandeja, pulso), dados, backup e
-  sincronização entre PCs.
+## How it works
 
-Busca rápida com **Ctrl+K**. O logo é um botão para anotar, marcar saída de
-casa e medir um objeto.
+Each device has a role. By default the GMC-800 is the **home monitor**: it
+stays in one place and measures the background where you live. The Radiacode
+102 is your **personal dosimeter**: it goes with you, and its readings make
+up your dose. Any stretch of time can be marked differently: you took the
+Geiger with you, you left the Radiacode at home, or a device was out of the
+calculation. Those stretches still count toward your dose but stay out of
+the home background.
 
-## Alarmes
+## Screens
 
-- Faixas do app em µSv/h (atenção, alarme e perigo), por aparelho. O nível
-  **perigo** não pode ser desligado, só silenciado por um tempo.
-- O Radiacode 102 também pode usar os alarmes do próprio aparelho.
-- Aviso de Geiger saturado e de leitura fora da escala.
-- Alertas retroativos: o que passou do limite com o app fechado vira alerta
-  com a hora certa quando o histórico é baixado.
-- Ícone na bandeja com a leitura na cor do nível; alarme e perigo trazem a
-  janela para a frente.
+- **Now**: both devices side by side, each with a dial, a level (safe,
+  attention, alarm, danger, always shown by color **and** shape), a sentence
+  saying whether the reading is normal, the last hour and the day strip.
+  The µSv/h value also shows in mrem/h. The dial ring can blink with every
+  count.
+- **Charts**: over time (drag to zoom), by hour of day, patterns, **trend**
+  (daily background in µSv/h and slow background rise) and the **year
+  calendar** (home background or your dose, day by day).
+- **Summary**: Day, Week or Month with arrows to move through time, one
+  sentence with what matters, your dose compared with a chest X-ray, time at
+  home and away, a chart with the day strip and the trips in the period.
+  It can also compare two days and create the **PDF report**.
+- **ALARA**: where your dose comes from, and time, distance and shielding
+  tests.
+- **Alerts**: one list for both devices, with the details alongside (chart,
+  duration, peak). Each alert says whether the other device **confirmed**
+  the rise (cross-check), and the **"Why did it rise?"** panel checks the
+  usual causes (chance, the other device, rain, radon, pressure, an object,
+  a trip) against your data.
+- **Measure object**: background and object over the same time, the
+  difference with its margin of error, a verdict and the dose compared with
+  familiar things.
+- **Away from home**: the stretches when a device left its usual place.
+  Each trip shows the device you took, and the app asks "Are you back home?" when
+  the readings match home again. The **trip summary** has the times, dose,
+  peak, chart, the trip spectrum against the home spectrum and what the
+  device logged (battery, temperature, warnings).
+- **Weather**: rain (RainViewer radar and the Open-Meteo model) and
+  pressure × radon. Optional; the city is stored only in this PC's settings.
+- **GQ GMC-800**: **Now** (reading, the counter's memory history, clock,
+  device settings and calibration, including writing the
+  cross-calibration factor with the Radiacode 102 into the counter itself)
+  and **Tube health** (whether the Geiger tube is counting as it should).
+- **Radiacode 102**: reading, **Device screen** (the spectrum the device
+  shows, which Start over clears) and **Device's accumulated** (the
+  long-term spectrum, read only), both with isotopes and peak zoom;
+  **Spectrogram** (spectrum over time), search, activity (Bq), log, device
+  settings and alarms, and the history it recorded away from the PC. Each
+  card explains itself under "How it works".
+- **Settings**: app alarms and levels, window and display (size, density,
+  number on the tray icon, count blink), data, backup and sync between PCs.
 
-## Onde ficam os dados
+| Summary | Alerts |
+|---|---|
+| ![Summary of the day](docs/prints/en-resumo.png) | ![Alerts with the details alongside](docs/prints/en-alertas.png) |
+| **Radiacode 102** | **Away from home** |
+| ![Radiacode 102 tab](docs/prints/en-radiacode.png) | ![Trips away from home](docs/prints/en-fora.png) |
 
-Windows: `%AppData%\RadLog\`. Linux: `~/.config/RadLog/`. O botão "pasta de
-dados" abre a pasta. O que tem lá:
+Screenshots are from demo mode, with made-up data.
 
-- `leituras/AAAA-MM.csv`: uma linha por minuto de cada aparelho, abre no
-  Excel;
-- `historico/` e `configuracao/`: cópias brutas da memória e da
-  configuração do contador;
+Quick search with **Ctrl+K**. The logo button lets you add a note, mark that
+you left home and measure an object.
+
+## Dose
+
+Your dose comes from the device you carry, normally the Radiacode 102. The
+main value is the **device's own dose counter**; next to it the app shows its
+own sum of the minute-by-minute readings, as a cross-check. The home monitor
+measures the place, not you.
+
+## PDF report
+
+The **Report (PDF)** button opens a dialog to choose **Full** or **Summary
+only**, and whether to include notes and settings (the app remembers your
+choice):
+
+1. **Summary**: one sentence, four numbers, a chart of both devices with the
+   trips marked, and the day strip. Your dose is compared with what you would
+   have received staying home: normal, above normal or high.
+2. **By day**: home background, your dose, peak and alerts for each day;
+   the alert list (confirmed or not by the other device), trips,
+   measurements, rain and notes.
+3. **Spectrum**: the Radiacode 102 spectrum for the period and for each
+   trip, against the home spectrum, with the isotopes found.
+4. **Technical appendix** (A1 to A8): statistics, days, background,
+   episodes, time above the limits, gaps, settings and limitations.
+
+The PDF never includes GPS or place names.
+
+<p align="center"><img src="docs/prints/en-pdf.png" alt="Page 1 of the PDF report" width="420"></p>
+
+## Alarms
+
+- App levels in µSv/h (attention, alarm and danger), per device. **Danger**
+  can't be turned off, only silenced for a while.
+- The Radiacode 102 can also use the device's own alarms.
+- Warnings for a saturated Geiger tube, an off-scale reading and a **slow
+  background rise** (when the home background creeps up over weeks).
+- Retroactive alerts: anything that crossed a limit while the app was closed
+  becomes an alert with the right time once the history is downloaded.
+- Tray icon with the reading in the level color; alarm and danger bring the
+  window to the front.
+
+## Where the data lives
+
+Windows: `%AppData%\RadLog\`. Linux: `~/.config/RadLog/`. The "data folder"
+button opens it. File names are in Portuguese:
+
+- `leituras/YYYY-MM.csv`: one line per minute per device (opens in Excel);
+- `historico/` and `configuracao/`: raw copies of the counter's memory and
+  configuration;
 - `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
-  alertas, medições, saídas de casa e anotações;
-- `chuva*.json`: chuva e pressão (se o Clima estiver ligado);
-- `config.json`: configurações; `log.txt` e `diagnostico.txt`: log técnico.
+  alerts, measurements, trips and notes;
+- `chuva*.json`: rain and pressure (when Weather is on);
+- `config.json`: settings; `log.txt` and `diagnostico.txt`: technical log.
 
-O **backup** (.zip) junta só o que falta ao importar e serve para levar os
-dados de um PC para outro, Windows ou Linux. Localização e cidade nunca vão
-para PDF, relatório ou backup.
+A **backup** (.zip) only adds what is missing when imported, so it also moves
+data from one PC to another, Windows or Linux. Location and city never go
+into a PDF, report or backup.
 
-## Compilar
+## Building
 
-Precisa do [Go](https://go.dev/dl/) 1.22 ou mais novo. Não precisa do Wails
-CLI nem de Node: a interface é HTML, CSS e JS puros em `frontend/dist/`.
+Requires [Go](https://go.dev/dl/) 1.22 or newer. No Wails CLI or Node needed:
+the interface is plain HTML, CSS and JS in `frontend/dist/`.
 
-Windows (precisa do WebView2, que já vem no Windows 10/11):
+Windows (needs WebView2, which ships with Windows 10/11):
 
 ```
 scripts\build.bat
@@ -114,57 +179,58 @@ sudo apt install golang libgtk-3-dev libwebkit2gtk-4.1-dev   # Debian/Ubuntu
 ./scripts/build-linux.sh
 ```
 
-Para ler os aparelhos sem root no Linux, o usuário precisa estar no grupo
-`dialout` (`sudo usermod -aG dialout $USER` e entrar de novo).
+To read the devices without root on Linux, your user must be in the
+`dialout` group (`sudo usermod -aG dialout $USER`, then log in again).
 
-A interface também abre direto no navegador (`frontend/dist/index.html`) em
-**modo demonstração**, com dados falsos dos dois aparelhos.
+The interface also opens straight in a browser (`frontend/dist/index.html`)
+in **demo mode**, with fake data from both devices.
 
 ### Releases
 
-O GitHub Actions (`.github/workflows/release.yml`) compila o `.exe`, o
-AppImage e o `.tar.gz` quando a versão de `internal/app/version.go` muda no
-`main`, assina o `SHA256SUMS.txt` e publica com o trecho da versão no
-CHANGELOG.
+GitHub Actions (`.github/workflows/release.yml`) builds the `.exe`, the
+AppImage and the `.tar.gz` when the version in `internal/app/version.go`
+changes on `main`, signs `SHA256SUMS.txt` and publishes the release with
+that version's changelog entry. When the `NOTION_TOKEN` secret exists, one
+more step records the version on the project board in Notion.
 
-## Testes
+## Tests
 
 ```
 go test ./internal/...
 ```
 
-Os testes do GMC-800 usam respostas gravadas de um aparelho real.
+The GMC-800 tests use responses recorded from a real device.
 
-## Estrutura
+## Layout
 
 ```
-main.go                 embute a interface e chama o app
-internal/app/           o app (os métodos exportados de App são o que a interface chama)
-internal/gmc/           protocolo do GQ GMC-800 (serial, calibração, histórico)
-internal/radiacode/     protocolo do Radiacode 102 (USB e Bluetooth)
-internal/core/          contas puras: alertas, dose, intercalibração, níveis, estatística
-internal/store/         leituras em CSV mensal
-internal/pdf/           gerador de PDF mínimo, sem dependências
-internal/i18n/          tradução (en.tsv)
-internal/updsig/        chave pública que confere as atualizações
-frontend/dist/          interface (um arquivo .js por tela)
-build/                  ícone, manifesto do .exe e arquivos do Linux
-scripts/                build e ferramentas de tradução
+main.go                 embeds the interface and starts the app
+internal/app/           the app (App's exported methods are what the interface calls)
+internal/gmc/           GQ GMC-800 protocol (serial, calibration, history)
+internal/radiacode/     Radiacode 102 protocol (USB and Bluetooth)
+internal/core/          pure math: alerts, dose, cross-calibration, levels, statistics
+internal/store/         readings in monthly CSV files
+internal/pdf/           minimal PDF writer, no dependencies
+internal/i18n/          translation (en.tsv)
+internal/updsig/        public key that verifies updates
+frontend/dist/          interface (one .js file per screen)
+build/                  icon, .exe manifest and Linux files
+scripts/                build and translation tools
 ```
 
-## Observações sobre o GMC-800
+## Notes on the GMC-800
 
-O GMC-800 diz seguir o GQ-RFC1201, mas na prática difere: CPM e CPS vêm em
-4 bytes, a configuração tem 512 bytes com layout próprio e o `SPIR` às vezes
-manda um byte a mais. A configuração é gravada com `ECFG`,
-`WCFG[endereço alto][endereço baixo][valor]` e `CFGUPDATE`. Os detalhes
-foram conferidos com o projeto [PyGMC](https://pypi.org/project/pygmc).
+The GMC-800 claims to follow GQ-RFC1201, but in practice it differs: CPM and
+CPS come in 4 bytes, the configuration is 512 bytes with its own layout, and
+`SPIR` sometimes sends one extra byte. The configuration is written with
+`ECFG`, `WCFG[high address][low address][value]` and `CFGUPDATE`. The details
+were checked against the [PyGMC](https://pypi.org/project/pygmc) project.
 
-## Licença
+## License
 
-Código sob a licença MIT (veja [LICENSE](LICENSE)). Fontes IBM Plex sob a SIL
-Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`).
+Code under the MIT license (see [LICENSE](LICENSE)). IBM Plex fonts under the
+SIL Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`).
 
-Não é um produto da GQ Electronics nem da Radiacode. "GMC" e "GQ" são marcas
-da GQ Electronics; "Radiacode" é marca da Radiacode. O app só fala com os
-aparelhos pelos protocolos deles.
+Not a product of GQ Electronics or Radiacode. "GMC" and "GQ" are trademarks of
+GQ Electronics; "Radiacode" is a trademark of Radiacode. The app only talks to
+the devices through their protocols.
