@@ -4,6 +4,8 @@
 /RadLog*.exe
 /radlog
 *.exe
+# binário do go test -c
+*.test
 *.AppImage
 *.tar.gz
 *.zip
