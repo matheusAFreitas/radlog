@@ -1,5 +1,18 @@
 # Versões
 
+## 2.73.2
+- A tela passa a ter uma política de conteúdo (CSP, item S5 da auditoria):
+  ela só carrega os arquivos do próprio app. É uma segunda barreira caso
+  algum texto vindo de fora (como o nome de um aparelho Bluetooth) escape
+  da proteção que já existe. Testado no Windows antes de sair.
+
+**English**
+
+- The screen now has a content security policy (CSP, audit item S5): it
+  only loads the app's own files. It is a second barrier in case some outside
+  text (such as a Bluetooth device name) slips past the existing protection.
+  Tested on Windows before release.
+
 ## 2.73.1
 Itens soltos da auditoria de 12/11 (B4, B7, S6, U5).
 
