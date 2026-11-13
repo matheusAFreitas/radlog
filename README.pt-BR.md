@@ -84,6 +84,8 @@ trechos continuam contando na dose, mas não entram no fundo da casa.
 - **Medir objeto**: fundo e objeto pelo mesmo tempo, a diferença com margem
   de erro, um veredito e a dose comparada com coisas conhecidas.
 - **Fora de casa**: os trechos em que um aparelho saiu do lugar de sempre.
+  Dá para programar uma saída antes; quando o aparelho volta, o app acha o
+  horário pelo que ele mediu e pergunta antes de marcar.
   Cada saída mostra o aparelho que foi junto, e o app pergunta "Voltou para
   casa?" quando as leituras voltam a bater com as de casa. O **Resumo da
   saída** traz horário, dose, pico, gráfico, o espectro da saída comparado

@@ -1,5 +1,41 @@
 # Versões
 
+## 2.75.0
+- Saída programada: em Fora de casa, "Programar saída" marca
+  para onde vai, por volta de que horas e quais aparelhos vão. Também no
+  Ctrl+K e no "Saí de casa" ("É depois? Programar a saída"). Pode desligar o
+  PC.
+- Quando o aparelho que foi conecta de novo, o app pergunta "Você saiu
+  mesmo?" no lugar do "onde estava o RC102?". A saída vem da desconexão do
+  aparelho (PC ligado, até 1 h do programado), senão da conta RC102 ÷
+  GMC-800, senão do horário programado (marcado como "horário estimado"). A
+  volta é a hora em que ele conectou, com uma dica se a conta mostra que você
+  chegou mais de 1 h antes.
+- Se a conta ficou com o jeito de casa o tempo todo, a pergunta vira "A saída
+  programada não aconteceu?". Uma queda curta do Bluetooth não conta como
+  saída. Um trecho marcado à mão no mesmo horário ganha.
+- Na lista de Fora de casa, a saída marcada ganha "programada" e, quando for
+  o caso, "horário estimado". As programadas vão no backup.
+- Textos do QA na pergunta das configurações do backup.
+
+**English**
+
+- Planned trip: in Away from home, "Plan a trip" sets where
+  you're going, around what time and which devices go. Also in Ctrl+K and in
+  "I left home" ("Later? Plan the trip"). You can turn the PC off.
+- When the device that went connects again, the app asks "Did you really
+  leave?" instead of "where was the RC102?". The departure comes from the
+  device disconnecting (PC on, up to 1 h from the plan), else from the RC102 ÷
+  GMC-800 count, else from the planned time (marked "estimated time"). The
+  return is when it connected, with a hint if the count shows you got back
+  more than 1 h earlier.
+- If the count looked like home the whole time, the question becomes "Didn't
+  the planned trip happen?". A short Bluetooth drop doesn't count as leaving.
+  A stretch marked by hand at the same time wins.
+- In the Away from home list, the marked trip gets "planned" and, when it
+  applies, "estimated time". Planned trips go into the backup.
+- QA wording fixes in the backup settings question.
+
 ## 2.74.0
 Item B5 da auditoria de 12/11.
 

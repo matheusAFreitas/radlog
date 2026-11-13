@@ -483,10 +483,14 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		a.rc.mu.Lock()
 		a.rc.dev = nil
 		a.rcDoseSaveLiveLocked(time.Now())
-		if a.rc.st.State == "conectado" {
+		wasOn := a.rc.st.State == "conectado"
+		if wasOn {
 			a.rc.st.State = "procurando"
 		}
 		a.rc.mu.Unlock()
+		if wasOn {
+			a.plannedDisconnected(devRC, time.Now())
+		}
 		a.emitRc()
 	}()
 	via := map[string]string{"usb": "USB", "bluetooth": "Bluetooth"}[dev.Kind()]

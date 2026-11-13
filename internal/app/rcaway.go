@@ -45,6 +45,20 @@ type RcAwayAsk struct {
 	// pergunta é "voltou para casa?" e Period é o trecho aberto
 	Kind   string `json:"kind,omitempty"`
 	Period int64  `json:"period,omitempty"`
+	// "programada" (2.75, planned.go): a saída programada Planned, com o
+	// horário achado (Source: "desconexao", "razao" ou "plano"), quem foi,
+	// o horário programado e a dica da volta pela razão
+	Planned   int64  `json:"planned,omitempty"`
+	Name      string `json:"name,omitempty"`
+	GmcGoes   bool   `json:"gmcGoes,omitempty"`
+	RcGoes    bool   `json:"rcGoes,omitempty"`
+	PlanAt    int64  `json:"planAt,omitempty"`
+	Source    string `json:"source,omitempty"`
+	Estimated bool   `json:"estimated,omitempty"`
+	Missed    bool   `json:"missed,omitempty"` // a razão ficou com o jeito de casa
+	BackHint  int64  `json:"backHint,omitempty"`
+	Dev       string `json:"dev,omitempty"`     // o aparelho que voltou a conectar
+	LeftDev   string `json:"leftDev,omitempty"` // o que desconectou na janela
 }
 
 // RcAwayView é a pergunta com o resumo do trecho para a tela.
@@ -61,8 +75,7 @@ type RcAwayView struct {
 	NormalRatio float64 `json:"normalRatio"`
 	Hint        string  `json:"hint"` // "fora", "casa" ou "" (sem dica)
 	// na pergunta "volta": começo e nome do trecho aberto
-	Since int64  `json:"since,omitempty"`
-	Name  string `json:"name,omitempty"`
+	Since int64 `json:"since,omitempty"`
 }
 
 func (a *App) rcAwayPath() string { return filepath.Join(a.dataDir, rcAwayFile) }
@@ -119,6 +132,10 @@ func rcAwayGap(from, to time.Time, minLen time.Duration) bool {
 // gravado antes dela, to = começo dela).
 func (a *App) rcAwayDetect(from, to time.Time) {
 	if a.isDemo() {
+		return
+	}
+	// voltou de uma saída programada: a pergunta é a dela (planned.go)
+	if a.plannedOnConnect(devRC, to) {
 		return
 	}
 	a.mu.Lock()

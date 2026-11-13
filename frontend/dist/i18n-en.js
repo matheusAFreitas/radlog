@@ -3647,12 +3647,76 @@ const I18N_EN = {
 "Em dia: nenhum trecho sem leitura no app desde o último download.": "Up to date: no stretch without readings in the app since the last download.",
 "contador não grava": "counter isn't saving",
 "Download": "Download",
-"Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.": "From the backup: alarm, levels, sound, tray, pulse, language and updates. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.",
+"Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.": "From the backup: alarm, levels, sound, tray, pulse, language, updates, auto-connect and measurement. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.",
 "Usar as configurações do backup?": "Use the settings from the backup?",
-"Usar as do backup": "Use the backup's",
+"Usar as do backup": "Use backup settings",
 "Configurações do backup aplicadas": "Settings from the backup applied",
 "backup": "backup",
-"O backup também leva as configurações, sem o lugar da chuva e sem o que é só deste PC. Ao importar, o app pergunta se você quer usar as do backup.": "The backup also carries the settings, without the rain location and without what belongs only to this PC. When importing, the app asks whether you want to use the backup's."
+"O backup também leva as configurações, sem o lugar da chuva e sem o que é só deste PC. Ao importar, o app pergunta se você quer usar as do backup.": "The backup also carries the settings, without the rain location and without what belongs only to this PC. When importing, the app asks whether you want to use the backup's.",
+"A saída ficou no horário programado: nada nos aparelhos deu certeza.": "The departure stayed at the planned time: nothing in the devices was certain.",
+"Ajustar horário ou aparelhos": "Adjust times or devices",
+"Cancelar a saída": "Cancel the trip",
+"Cancelar a saída programada?": "Cancel the planned trip?",
+"Editar saída programada": "Edit planned trip",
+"Escolha pelo menos um aparelho que foi com você.": "Choose at least one device that went with you.",
+"Escolha pelo menos um aparelho que vai com você.": "Choose at least one device that goes with you.",
+"Escritório": "Office",
+"Esse horário já passou. Para uma saída que já aconteceu, use \"Adicionar trecho passado\".": "That time has passed. For a trip that already happened, use \"Add past stretch\".",
+"GMC-800 fora, RC102 em casa": "GMC-800 out, RC102 at home",
+"GMC-800 fora, RadiaCode em casa": "GMC-800 out, RC102 at home",
+"Não estou saindo": "I'm not leaving",
+"Não fui, pode apagar": "I didn't go, delete it",
+"Não precisa dizer a volta: ela é a hora em que o aparelho que foi conectar de novo no PC. O horário da saída não precisa ser exato: o app acerta pelo que os aparelhos mediram. Pode desligar o PC.": "No need to set the return: it is when the device that went connects to the PC again. The departure time doesn't need to be exact: the app corrects it from what the devices measured. You can turn the PC off.",
+"Não saí": "I didn't leave",
+"Para onde (vira o título da saída)": "Where to (becomes the trip's title)",
+"Programar saída": "Plan a trip",
+"Quais aparelhos vão comigo": "Which devices go with me",
+"RC102 fora, GMC-800 em casa": "RC102 out, GMC-800 at home",
+"RadiaCode fora, GMC-800 em casa": "RC102 out, GMC-800 at home",
+"Saio por volta de": "Leaving around",
+"Saí, marcar": "I left, mark it",
+"Saída programada": "Planned trip",
+"amanhã": "tomorrow",
+"conta a dose da saída": "counts the trip's dose",
+"escolha pelo menos um aparelho que foi com você": "choose at least one device that went with you",
+"escolha pelo menos um aparelho que vai com você": "choose at least one device that goes with you",
+"essa saída programada não existe mais": "that planned trip no longer exists",
+"esse horário já passou; para uma saída que já aconteceu, use \"Adicionar trecho passado\"": "that time has passed; for a trip that already happened, use \"Add past stretch\"",
+"ex.: Escritório": "e.g.: Office",
+"fica em casa medindo o fundo": "stays home measuring the background",
+"foi o GMC-800, o RC102 ficou em casa": "the GMC-800 went, the RC102 stayed home",
+"foi o GMC-800, o RadiaCode ficou em casa": "the GMC-800 went, the RC102 stayed home",
+"foi o RC102, o GMC-800 ficou em casa": "the RC102 went, the GMC-800 stayed home",
+"foi o RadiaCode, o GMC-800 ficou em casa": "the RC102 went, the GMC-800 stayed home",
+"horário estimado": "estimated time",
+"marca antes; o app acha o horário depois": "mark it ahead; the app finds the time later",
+"outro dia…": "another day…",
+"saio por volta de": "leaving around",
+"saída marcada": "trip marked",
+"saídas programadas": "planned trips",
+"vão o RC102 e o GMC-800": "the RC102 and the GMC-800 go",
+"vão o RadiaCode e o GMC-800": "the RC102 and the GMC-800 go",
+"É depois? Programar a saída": "Later? Plan the trip",
+"programada": "planned",
+"foram o RC102 e o GMC-800": "the RC102 and the GMC-800 went",
+"foram o RadiaCode e o GMC-800": "the RC102 and the GMC-800 went",
+"vai o RC102, o GMC-800 fica": "the RC102 goes, the GMC-800 stays",
+"vai o RadiaCode, o GMC-800 fica": "the RC102 goes, the GMC-800 stays",
+"vai o GMC-800, o RC102 fica": "the GMC-800 goes, the RC102 stays",
+"vai o GMC-800, o RadiaCode fica": "the GMC-800 goes, the RC102 stays",
+"Programadas": "Planned",
+"cancelar": "cancel",
+"editar": "edit",
+"Ok, nada foi marcado.": "Ok, nothing was marked.",
+"RC102 foi comigo": "RC102 went with me",
+"RadiaCode foi comigo": "RC102 went with me",
+"GMC-800 foi comigo": "GMC-800 went with me",
+"RC102 vai": "RC102 goes",
+"RadiaCode vai": "RC102 goes",
+"GMC-800 vai": "GMC-800 goes",
+"Programar": "Plan",
+"RC102 e GMC-800 fora": "RC102 and GMC-800 out",
+"RadiaCode e GMC-800 fora": "RC102 and GMC-800 out"
 },
 "patterns": [
 [
@@ -4147,6 +4211,14 @@ const I18N_EN = {
 ]
 ],
 [
+"O ",
+"^O ((?:(?! · ).)+?) ficou com o mesmo jeito de casa o tempo todo \\(a conta RadiaCode ÷ GMC\\-800 não mudou\\)\\. Nada foi marcado ainda\\.$",
+"The ${1} looked like home the whole time (the RC102 ÷ GMC-800 count didn't change). Nothing was marked yet.",
+[
+" ficou com o mesmo jeito de casa o tempo todo (a conta RadiaCode ÷ GMC-800 não mudou). Nada foi marcado ainda."
+]
+],
+[
 "Marcada como não comparável: ",
 "^Marcada como não comparável: ((?:(?! · ).)+?)\\. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto\\.$",
 "Marked as not comparable: ${1}. It stays saved, but should not be compared with the other measurements of this object.",
@@ -4202,6 +4274,14 @@ const I18N_EN = {
 [
 "Junho a agosto ficaram ",
 "% acima de novembro a março. Com a casa mais fechada no frio, o radônio se acumula mais."
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) ficou com o mesmo jeito de casa o tempo todo \\(a conta RC102 ÷ GMC\\-800 não mudou\\)\\. Nada foi marcado ainda\\.$",
+"The ${1} looked like home the whole time (the RC102 ÷ GMC-800 count didn't change). Nothing was marked yet.",
+[
+" ficou com o mesmo jeito de casa o tempo todo (a conta RC102 ÷ GMC-800 não mudou). Nada foi marcado ainda."
 ]
 ],
 [
@@ -4486,6 +4566,17 @@ const I18N_EN = {
 [
 "Últimas 2 semanas ",
 " em relação à referência. Isso é o vai e vem normal do radônio e do tempo."
+]
+],
+[
+"Saída programada \"",
+"^Saída programada \"((?:(?! · ).)+?)\": o ((?:(?! · ).)+?) voltou a conectar às ((?:(?! · ).)+?); o app pergunta na tela Agora se você saiu mesmo$",
+"Planned trip \"${1}\": the ${2} connected again at ${3}; the app asks on the Now screen whether you really left",
+[
+"Saída programada \"",
+"\": o ",
+" voltou a conectar às ",
+"; o app pergunta na tela Agora se você saiu mesmo"
 ]
 ],
 [
@@ -4970,6 +5061,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Saída programada \"",
+"^Saída programada \"((?:(?! · ).)+?)\": já havia um trecho marcado à mão nesse horário; ficou o seu$",
+"Planned trip \"${1}\": there was already a stretch marked by hand at that time; yours was kept",
+[
+"Saída programada \"",
+"\": já havia um trecho marcado à mão nesse horário; ficou o seu"
+]
+],
+[
 "Baixado e conferido. Troca sozinho quando o CPM voltar ao normal (agora: ",
 "^Baixado e conferido\\. Troca sozinho quando o CPM voltar ao normal \\(agora: ((?:(?! · ).)+?)\\)\\.$",
 "Downloaded and checked. Switches on its own when the CPM is back to normal (now: ${1}).",
@@ -5119,6 +5219,25 @@ const I18N_EN = {
 ]
 ],
 [
+"A conta RadiaCode ÷ GMC-800 voltou ao normal bem antes de o ",
+"^A conta RadiaCode ÷ GMC\\-800 voltou ao normal bem antes de o ((?:(?! · ).)+?) conectar às ((?:(?! · ).)+?)\\.$",
+"The RC102 ÷ GMC-800 count went back to normal well before the ${1} connected at ${2}.",
+[
+"A conta RadiaCode ÷ GMC-800 voltou ao normal bem antes de o ",
+" conectar às "
+]
+],
+[
+"Começou: o ",
+"^Começou: o ((?:(?! · ).)+?) desconectou às ((?:(?! · ).)+?)\\. A volta fica aberta até ele conectar de novo\\.$",
+"Started: the ${1} disconnected at ${2}. The return stays open until it connects again.",
+[
+"Começou: o ",
+" desconectou às ",
+". A volta fica aberta até ele conectar de novo."
+]
+],
+[
 "Conectando a ",
 "^Conectando a ((?:(?! · ).)+?)… leva alguns segundos\\. Deixe o app do celular desconectado\\.$",
 "Connecting to ${1}… it takes a few seconds. Keep the phone app disconnected.",
@@ -5233,6 +5352,25 @@ const I18N_EN = {
 [
 "A subida é de ",
 " σ, o tipo de variação que acontece várias vezes por dia."
+]
+],
+[
+"A conta RC102 ÷ GMC-800 voltou ao normal bem antes de o ",
+"^A conta RC102 ÷ GMC\\-800 voltou ao normal bem antes de o ((?:(?! · ).)+?) conectar às ((?:(?! · ).)+?)\\.$",
+"The RC102 ÷ GMC-800 count went back to normal well before the ${1} connected at ${2}.",
+[
+"A conta RC102 ÷ GMC-800 voltou ao normal bem antes de o ",
+" conectar às "
+]
+],
+[
+"Saída programada \"",
+"^Saída programada \"((?:(?! · ).)+?)\" de ((?:(?! · ).)+?) apagada: passou uma semana sem o aparelho voltar$",
+"Planned trip \"${1}\" on ${2} deleted: a week went by without the device coming back",
+[
+"Saída programada \"",
+"\" de ",
+" apagada: passou uma semana sem o aparelho voltar"
 ]
 ],
 [
@@ -5791,6 +5929,15 @@ const I18N_EN = {
 "Higher ${1} is common near granite, brick, cement and soil.",
 [
 " mais alto é comum perto de granito, tijolo, cimento e solo."
+]
+],
+[
+"Saída ~",
+"^Saída \\~((?:(?! · ).)+?) \\(horário estimado: nada nos aparelhos deu certeza\\)$",
+"Left ~${1} (estimated time: nothing in the devices was certain)",
+[
+"Saída ~",
+" (horário estimado: nada nos aparelhos deu certeza)"
 ]
 ],
 [
@@ -6578,6 +6725,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Saída ",
+"^Saída ((?:(?! · ).)+?) \\(achada pela conta RadiaCode ÷ GMC\\-800; ((?:(?! · ).)+?)\\)$",
+"Left ${1} (found by the RC102 ÷ GMC-800 count; ${2})",
+[
+"Saída ",
+" (achada pela conta RadiaCode ÷ GMC-800; "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) permitidos no período \\(((?:(?! · ).)+?)%\\)\\.$",
 "Above background: ${1} of ${2} allowed in the period (${3}%).",
@@ -6766,6 +6922,16 @@ const I18N_EN = {
 "${1} come from thorium: common in granite, sand and brick.",
 [
 " vêm do tório: comum em granito, areia e tijolo."
+]
+],
+[
+"Começou a saída programada \"",
+"^Começou a saída programada \"((?:(?! · ).)+?)\": o ((?:(?! · ).)+?) desconectou às ((?:(?! · ).)+?)$",
+"Planned trip \"${1}\" started: the ${2} disconnected at ${3}",
+[
+"Começou a saída programada \"",
+"\": o ",
+" desconectou às "
 ]
 ],
 [
@@ -6979,6 +7145,15 @@ const I18N_EN = {
 [
 "Saídas de casa com o RadiaCode: ",
 " (página 2)."
+]
+],
+[
+"Saída ",
+"^Saída ((?:(?! · ).)+?) \\(achada pela conta RC102 ÷ GMC\\-800; ((?:(?! · ).)+?)\\)$",
+"Left ${1} (found by the RC102 ÷ GMC-800 count; ${2})",
+[
+"Saída ",
+" (achada pela conta RC102 ÷ GMC-800; "
 ]
 ],
 [
@@ -8004,6 +8179,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Parece que você chegou por volta das ",
+"^Parece que você chegou por volta das ((?:(?! · ).)+?)\\.$",
+"Looks like you got back around ${1}.",
+[
+"Parece que você chegou por volta das "
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -8073,6 +8256,33 @@ const I18N_EN = {
 [
 "O fundo está ",
 "% abaixo do normal desde "
+]
+],
+[
+"A saída programada de ",
+"^A saída programada de ((?:(?! · ).)+?) não aconteceu\\?$",
+"Didn't the planned trip on ${1} happen?",
+[
+"A saída programada de ",
+" não aconteceu?"
+]
+],
+[
+"Saída programada \"",
+"^Saída programada \"((?:(?! · ).)+?)\": você saiu mesmo\\?$",
+"Planned trip \"${1}\": did you really leave?",
+[
+"Saída programada \"",
+"\": você saiu mesmo?"
+]
+],
+[
+"Saída programada: ",
+"^Saída programada: ((?:(?! · ).)+?), por volta de ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"Planned trip: ${1}, around ${2} (${3})",
+[
+"Saída programada: ",
+", por volta de "
 ]
 ],
 [
@@ -8606,6 +8816,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Saída programada: ",
+"^Saída programada: ((?:(?! · ).)+?), ((?:(?! · ).)+?) por volta de ((?:(?! · ).)+?)$",
+"Planned trip: ${1}, ${2} around ${3}",
+[
+"Saída programada: ",
+" por volta de "
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -8750,6 +8969,26 @@ const I18N_EN = {
 "Só o GMC-800 subiu: ",
 " em ",
 " semanas"
+]
+],
+[
+"Saída ",
+"^Saída ((?:(?! · ).)+?) \\(o ((?:(?! · ).)+?) desconectou do PC; ((?:(?! · ).)+?)\\)$",
+"Left ${1} (the ${2} disconnected from the PC; ${3})",
+[
+"Saída ",
+" (o ",
+" desconectou do PC; "
+]
+],
+[
+"volta ",
+"^volta ((?:(?! · ).)+?) \\(o ((?:(?! · ).)+?) conectou, pela dica\\)$",
+"back ${1} (the ${2} connected, from the hint)",
+[
+"volta ",
+" (o ",
+" conectou, pela dica)"
 ]
 ],
 [
@@ -9273,6 +9512,15 @@ const I18N_EN = {
 [
 "A energia bate com o ",
 " keV)"
+]
+],
+[
+"Fui sim, marcar ",
+"^Fui sim, marcar ((?:(?! · ).)+?) até a conexão$",
+"I did go, mark ${1} until the connection",
+[
+"Fui sim, marcar ",
+" até a conexão"
 ]
 ],
 [
@@ -11115,6 +11363,16 @@ const I18N_EN = {
 ]
 ],
 [
+"volta ",
+"^volta ((?:(?! · ).)+?) \\(o ((?:(?! · ).)+?) conectou\\)$",
+"back ${1} (the ${2} connected)",
+[
+"volta ",
+" (o ",
+" conectou)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -11685,6 +11943,22 @@ const I18N_EN = {
 ]
 ],
 [
+"Você saiu mesmo? ",
+"^Você saiu mesmo\\? ((?:(?! · ).)+?), ((?:(?! · ).)+?)$",
+"Did you really leave? ${1}, ${2}",
+[
+"Você saiu mesmo? "
+]
+],
+[
+"saídas programadas: ",
+"^saídas programadas: ((?:(?! · ).)+?)$",
+"planned trips: ${1}",
+[
+"saídas programadas: "
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -12009,6 +12283,15 @@ const I18N_EN = {
 [
 "Tem um pico em ",
 " keV"
+]
+],
+[
+"Usar ",
+"^Usar ((?:(?! · ).)+?) \\(a conexão\\)$",
+"Use ${1} (the connection)",
+[
+"Usar ",
+" (a conexão)"
 ]
 ],
 [
@@ -12349,6 +12632,14 @@ const I18N_EN = {
 "less than at home ${1}",
 [
 "menos que em casa "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?), ((?:(?! · ).)+?) por volta de ((?:(?! · ).)+?)\\.$",
+"${1}, ${2} around ${3}.",
+[
+" por volta de "
 ]
 ],
 [
@@ -13845,6 +14136,14 @@ const I18N_EN = {
 "${1} · incomplete",
 [
 " · incompleto"
+]
+],
+[
+"programado ~",
+"^programado \\~((?:(?! · ).)+?)$",
+"planned ~${1}",
+[
+"programado ~"
 ]
 ],
 [
@@ -15841,6 +16140,14 @@ const I18N_EN = {
 ]
 ],
 [
+"sai ~",
+"^sai \\~((?:(?! · ).)+?)$",
+"leaves ~${1}",
+[
+"sai ~"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) dias$",
 "${1} days",
@@ -15894,6 +16201,14 @@ const I18N_EN = {
 "Sound: ${1}",
 [
 "Som: "
+]
+],
+[
+"Usar ",
+"^Usar ((?:(?! · ).)+?)$",
+"Use ${1}",
+[
+"Usar "
 ]
 ],
 [

@@ -1158,8 +1158,13 @@
           <h2 id="periodsTitle">Fora de casa</h2>
           <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RC102 com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
         </div>
-        <button type="button" class="btn small" id="btnPeriodAdd">Adicionar trecho passado</button>
+        <div class="row-btns pl-head-btns">
+          <button type="button" class="btn small" id="btnPlanAdd">Programar saída</button>
+          <button type="button" class="btn small" id="btnPeriodAdd">Adicionar trecho passado</button>
+        </div>
       </div>
+      <div id="plannedForm"></div>
+      <div class="card pl-box" id="plannedBox" hidden></div>
       <div class="card">
         <div class="wh-head"><h3>Últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></div>
         <div class="wh-tl" id="whTimeline"></div>
@@ -2573,6 +2578,7 @@
 <script src="medir.js"></script>
 <script src="fora.js"></script>
 <script src="rcaway.js"></script>
+<script src="programada.js"></script>
 <script src="onde.js"></script>
 <script src="saida.js"></script>
 <script src="intercal.js"></script>

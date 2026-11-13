@@ -795,7 +795,7 @@ async function showView(v, skipRender) {
   renderDevMini();
   if (skipRender) return;
   if (v === "alertas") renderAlertHistory(await api.GetEvents("alerta"));
-  if (v === "fora") renderPeriods();
+  if (v === "fora") { renderPeriods(); refreshPlanned(); }
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
   if (v === "alara") refreshAlara();
@@ -2310,7 +2310,7 @@ async function askBackupSettings(r) {
   const n = r.settings, from = r.from || "outro PC";
   const text = [
     n === 1 ? `O backup de ${from} tem 1 ajuste diferente do daqui.` : `O backup de ${from} tem ${n} ajustes diferentes dos daqui.`,
-    "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",
+    "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",
   ];
   if (!(await askConfirm({ title: "Usar as configurações do backup?", text, ok: "Usar as do backup" }))) return;
   try {
@@ -3016,6 +3016,7 @@ function wire() {
   wireMeasure();
   setupMeasureHover();
   wirePeriods();
+  wirePlanned();
   wireTrip();
   wireReportDlg();
   wireWhere();
@@ -4329,6 +4330,7 @@ async function init() {
   await refreshRainStatus();
   await refreshPeriods();
   await refreshRcAway();
+  refreshPlanned();
   await refreshWhere();
   await refreshMeasurements();
   await refreshAll();

@@ -4747,9 +4747,87 @@ falta {0}	missing {0}
 Download	Download
 O backup de {0} tem 1 ajuste diferente do daqui.	The backup from {0} has 1 setting different from this one.
 O backup de {0} tem {1} ajustes diferentes dos daqui.	The backup from {0} has {1} settings different from the ones here.
-Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.	From the backup: alarm, levels, sound, tray, pulse, language and updates. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.
+Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.	From the backup: alarm, levels, sound, tray, pulse, language, updates, auto-connect and measurement. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.
 Usar as configurações do backup?	Use the settings from the backup?
-Usar as do backup	Use the backup's
+Usar as do backup	Use backup settings
 Configurações do backup aplicadas	Settings from the backup applied
 backup	backup
 O backup também leva as configurações, sem o lugar da chuva e sem o que é só deste PC. Ao importar, o app pergunta se você quer usar as do backup.	The backup also carries the settings, without the rain location and without what belongs only to this PC. When importing, the app asks whether you want to use the backup's.
+A conta RC102 ÷ GMC-800 voltou ao normal bem antes de o {0} conectar às {1}.	The RC102 ÷ GMC-800 count went back to normal well before the {0} connected at {1}.
+A saída ficou no horário programado: nada nos aparelhos deu certeza.	The departure stayed at the planned time: nothing in the devices was certain.
+A saída programada de {0} não aconteceu?	Didn't the planned trip on {0} happen?
+Ajustar horário ou aparelhos	Adjust times or devices
+Cancelar a saída	Cancel the trip
+Cancelar a saída programada?	Cancel the planned trip?
+Começou a saída programada "{0}": o {1} desconectou às {2}	Planned trip "{0}" started: the {1} disconnected at {2}
+Começou: o {0} desconectou às {1}. A volta fica aberta até ele conectar de novo.	Started: the {0} disconnected at {1}. The return stays open until it connects again.
+Editar saída programada	Edit planned trip
+Escolha pelo menos um aparelho que foi com você.	Choose at least one device that went with you.
+Escolha pelo menos um aparelho que vai com você.	Choose at least one device that goes with you.
+Escritório	Office
+Esse horário já passou. Para uma saída que já aconteceu, use "Adicionar trecho passado".	That time has passed. For a trip that already happened, use "Add past stretch".
+Fui sim, marcar {0} até a conexão	I did go, mark {0} until the connection
+GMC-800 fora, RC102 em casa	GMC-800 out, RC102 at home
+Não estou saindo	I'm not leaving
+Não fui, pode apagar	I didn't go, delete it
+Não precisa dizer a volta: ela é a hora em que o aparelho que foi conectar de novo no PC. O horário da saída não precisa ser exato: o app acerta pelo que os aparelhos mediram. Pode desligar o PC.	No need to set the return: it is when the device that went connects to the PC again. The departure time doesn't need to be exact: the app corrects it from what the devices measured. You can turn the PC off.
+Não saí	I didn't leave
+O {0} ficou com o mesmo jeito de casa o tempo todo (a conta RC102 ÷ GMC-800 não mudou). Nada foi marcado ainda.	The {0} looked like home the whole time (the RC102 ÷ GMC-800 count didn't change). Nothing was marked yet.
+Para onde (vira o título da saída)	Where to (becomes the trip's title)
+Parece que você chegou por volta das {0}.	Looks like you got back around {0}.
+Programar saída	Plan a trip
+Quais aparelhos vão comigo	Which devices go with me
+RC102 fora, GMC-800 em casa	RC102 out, GMC-800 at home
+Saio por volta de	Leaving around
+Saí, marcar	I left, mark it
+Saída programada	Planned trip
+Saída programada "{0}" de {1} apagada: passou uma semana sem o aparelho voltar	Planned trip "{0}" on {1} deleted: a week went by without the device coming back
+Saída programada "{0}": já havia um trecho marcado à mão nesse horário; ficou o seu	Planned trip "{0}": there was already a stretch marked by hand at that time; yours was kept
+Saída programada "{0}": o {1} voltou a conectar às {2}; o app pergunta na tela Agora se você saiu mesmo	Planned trip "{0}": the {1} connected again at {2}; the app asks on the Now screen whether you really left
+Saída programada "{0}": você saiu mesmo?	Planned trip "{0}": did you really leave?
+Saída programada: {0}, por volta de {1} ({2})	Planned trip: {0}, around {1} ({2})
+Saída programada: {0}, {1} por volta de {2}	Planned trip: {0}, {1} around {2}
+Saída {0} (achada pela conta RC102 ÷ GMC-800; {1})	Left {0} (found by the RC102 ÷ GMC-800 count; {1})
+Saída {0} (o {1} desconectou do PC; {2})	Left {0} (the {1} disconnected from the PC; {2})
+Saída ~{0} (horário estimado: nada nos aparelhos deu certeza)	Left ~{0} (estimated time: nothing in the devices was certain)
+Usar {0} (a conexão)	Use {0} (the connection)
+Você saiu mesmo? {0}, {1}	Did you really leave? {0}, {1}
+amanhã	tomorrow
+conta a dose da saída	counts the trip's dose
+escolha pelo menos um aparelho que foi com você	choose at least one device that went with you
+escolha pelo menos um aparelho que vai com você	choose at least one device that goes with you
+essa saída programada não existe mais	that planned trip no longer exists
+esse horário já passou; para uma saída que já aconteceu, use "Adicionar trecho passado"	that time has passed; for a trip that already happened, use "Add past stretch"
+ex.: Escritório	e.g.: Office
+fica em casa medindo o fundo	stays home measuring the background
+foi o GMC-800, o RC102 ficou em casa	the GMC-800 went, the RC102 stayed home
+foi o RC102, o GMC-800 ficou em casa	the RC102 went, the GMC-800 stayed home
+horário estimado	estimated time
+marca antes; o app acha o horário depois	mark it ahead; the app finds the time later
+outro dia…	another day…
+saio por volta de	leaving around
+saída marcada	trip marked
+saídas programadas	planned trips
+saídas programadas: {0}	planned trips: {0}
+vão o RC102 e o GMC-800	the RC102 and the GMC-800 go
+{0}, {1} por volta de {2}.	{0}, {1} around {2}.
+É depois? Programar a saída	Later? Plan the trip
+programada	planned
+foram o RC102 e o GMC-800	the RC102 and the GMC-800 went
+vai o RC102, o GMC-800 fica	the RC102 goes, the GMC-800 stays
+vai o GMC-800, o RC102 fica	the GMC-800 goes, the RC102 stays
+Programadas	Planned
+cancelar	cancel
+editar	edit
+programado ~{0}	planned ~{0}
+sai ~{0}	leaves ~{0}
+volta {0} (o {1} conectou)	back {0} (the {1} connected)
+volta {0} (o {1} conectou, pela dica)	back {0} (the {1} connected, from the hint)
+Ok, nada foi marcado.	Ok, nothing was marked.
+RC102 foi comigo	RC102 went with me
+GMC-800 foi comigo	GMC-800 went with me
+RC102 vai	RC102 goes
+GMC-800 vai	GMC-800 goes
+Programar	Plan
+RC102 e GMC-800 fora	RC102 and GMC-800 out
+Usar {0}	Use {0}

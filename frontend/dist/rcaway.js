@@ -4,6 +4,8 @@
 // contagens com o GMC. As perguntas sem resposta também aparecem em Fora de
 // casa como "a responder".
 //
+// A pergunta da saída programada (2.75) é desenhada pelo programada.js.
+//
 // Usa os globais do app.js e do fora.js (state, api, $, fmt, hhmm, hm,
 // toLocalInput, fromLocalInput, zoomRangeText, toast, errMsg). Carregado
 // antes do app.js.
@@ -77,6 +79,14 @@ function renderRcAway() {
     box.className = "card rca rca-done";
     const t = document.createElement("span");
     const p = rcaDone.period;
+    if (rcaDone.ans === "programada" || rcaDone.ans === "naosai") {
+      plDoneText(box, rcaDone);
+      const u = document.createElement("button");
+      u.type = "button"; u.className = "link"; u.textContent = "Desfazer";
+      u.addEventListener("click", rcaUndo);
+      box.appendChild(u);
+      return;
+    }
     if (rcaDone.ans === "voltei" && p && p.id) t.textContent = `Ok, marquei a volta às ${hhmm(p.to)}. O trecho "${p.name}" foi de ${zoomRangeText(p.from, p.to)}.`;
     else if (rcaDone.ans === "aindafora") t.textContent = "Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".";
     else if (rcaDone.ans === "fora" && p && p.id) {
@@ -95,6 +105,7 @@ function renderRcAway() {
   box.className = "card rca";
   const q = list[list.length - 1]; // a mais recente primeiro
   if (q.kind === "volta") { renderRcBack(box, q, list); return; }
+  if (q.kind === "programada") { renderPlannedAsk(box, q, list); return; }
   const head = document.createElement("div");
   head.className = "rca-head";
   head.innerHTML = '<span class="dot rc" aria-hidden="true"></span>';
@@ -316,6 +327,7 @@ function rcAwayRows(ul) {
     const what = document.createElement("div");
     what.className = "small muted";
     what.textContent = q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
+      : q.kind === "programada" ? `Saída programada "${q.name}": você saiu mesmo?`
       : "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
     t.append(c, when, what);
     const acts = document.createElement("div");

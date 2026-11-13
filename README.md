@@ -84,6 +84,8 @@ the home background.
   difference with its margin of error, a verdict and the dose compared with
   familiar things.
 - **Away from home**: the stretches when a device left its usual place.
+  You can plan a trip ahead; when the device comes back, the app finds the
+  time from what it measured and asks before marking it.
   Each trip shows the device you took, and the app asks "Are you back home?" when
   the readings match home again. The **trip summary** has the times, dose,
   peak, chart, the trip spectrum against the home spectrum and what the
