@@ -53,6 +53,11 @@ const (
 	syncBase     = "/radlog/v1/"
 	syncSkew     = 5 * time.Minute
 	syncQuery    = "RADLOG?v1"
+	// tamanho máximo de uma mensagem e prazo para o servidor ler o pedido
+	// inteiro (B4 da auditoria; eram 512 MB e sem prazo). Um ano de minutos
+	// dos dois aparelhos fica bem abaixo disto.
+	syncMaxMsg      = 128 << 20
+	syncReadTimeout = 5 * time.Minute
 )
 
 type syncPeer struct {
@@ -287,7 +292,7 @@ func (a *App) syncStartServer(addr string) {
 	}
 	s.ln, s.listenErr = ln, ""
 	s.port = ln.Addr().(*net.TCPAddr).Port
-	s.srv = &http.Server{Handler: a.syncHandler(), ReadHeaderTimeout: 10 * time.Second, MaxHeaderBytes: 16 << 10}
+	s.srv = &http.Server{Handler: a.syncHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: syncReadTimeout, MaxHeaderBytes: 16 << 10}
 	go func() { _ = s.srv.Serve(ln) }()
 	// descoberta: responde quem pergunta "RADLOG?v1" na mesma porta (UDP)
 	if host, _, _ := net.SplitHostPort(addr); host == "" || host == "0.0.0.0" {
@@ -325,9 +330,22 @@ func (a *App) syncAnswerDiscovery(uc *net.UDPConn, id string, port int) {
 		if string(buf[:n]) != syncQuery {
 			continue
 		}
+		// só responde enquanto o código de pareamento está na tela: fora disso,
+		// numa rede pública, ninguém fica sabendo o nome deste PC (S6)
+		if !a.syncCodeShown() {
+			continue
+		}
 		b, _ := json.Marshal(map[string]any{"app": "radlog", "id": id, "name": hostName(), "port": port})
 		_, _ = uc.WriteToUDP(b, from)
 	}
+}
+
+// syncCodeShown diz se há um código de pareamento valendo agora.
+func (a *App) syncCodeShown() bool {
+	s := &a.sync
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.code != "" && time.Now().Before(s.codeUntil)
 }
 
 // ShowPairCode cria um código de 6 dígitos (vale 5 min, um pareamento).
@@ -508,7 +526,7 @@ func (a *App) secure(fn func(peer string, body []byte) ([]byte, error)) http.Han
 			http.Error(w, "PC não pareado", http.StatusForbidden)
 			return
 		}
-		box, err := io.ReadAll(io.LimitReader(r.Body, 512<<20))
+		box, err := io.ReadAll(io.LimitReader(r.Body, syncMaxMsg))
 		if err != nil {
 			return
 		}
@@ -818,7 +836,7 @@ func (a *App) syncCall(addr string, p syncPeer, op string, body []byte, timeout 
 		return nil, err
 	}
 	defer resp.Body.Close()
-	data, err := io.ReadAll(io.LimitReader(resp.Body, 512<<20))
+	data, err := io.ReadAll(io.LimitReader(resp.Body, syncMaxMsg))
 	if err != nil {
 		return nil, err
 	}

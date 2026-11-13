@@ -1,5 +1,34 @@
 # Versões
 
+## 2.73.1
+Itens soltos da auditoria de 12/11 (B4, B7, S6, U5).
+
+- Sincronização entre PCs: cada mensagem tem no máximo 128 MB (eram 512) e
+  o PC que recebe tem 5 minutos para ler o pedido inteiro. A procura na rede
+  ("Procurar na rede") só acha este PC enquanto o código de pareamento está
+  na tela: fora disso, ninguém na rede fica sabendo o nome dele.
+- Radar da chuva: a imagem tem limite de tamanho (8 MB e 4096 px de lado)
+  antes de ser lida.
+- Alertas: as legendas do gráfico da confirmação cruzada e do gráfico do
+  fundo saem com 11 px no mínimo (estavam com 10,5).
+- Topo: em janelas com menos de 680 px, os quadros dos dois aparelhos ficam
+  um embaixo do outro (lado a lado ficavam estreitos demais).
+
+**English**
+
+Loose items from the 12 Nov audit (B4, B7, S6, U5).
+
+- Sync between PCs: each message is at most 128 MB (it was 512) and the
+  receiving PC has 5 minutes to read the whole request. "Search the network"
+  only finds this PC while the pairing code is on screen: otherwise, nobody
+  on the network learns its name.
+- Rain radar: the image has a size limit (8 MB and 4096 px per side) before
+  it is read.
+- Alerts: the labels of the cross-check chart and the background chart are
+  at least 11 px (they were 10.5).
+- Top row: in windows narrower than 680 px, the two device boxes stack (side
+  by side they were too narrow).
+
 ## 2.73.0
 Topo sem o quadro de alertas e memória do GMC-800 em duas linhas (U1 e U2 da
 auditoria; spec ux/topo-sem-alertas.html).

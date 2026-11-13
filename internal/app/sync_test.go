@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"net"
 	"strings"
 	"testing"
 	"time"
@@ -108,5 +109,37 @@ func TestDigestDays(t *testing.T) {
 	d := digestDays(pts)
 	if len(d) != 2 || !strings.HasPrefix(d["2026-11-05"], "2:") || !strings.HasPrefix(d["2026-11-06"], "1:") {
 		t.Fatalf("%v", d)
+	}
+}
+
+// S6: a descoberta só responde com o código de pareamento na tela
+func TestSyncDiscoveryOnlyWithCode(t *testing.T) {
+	a := newTestApp(t)
+	srv, err := net.ListenUDP("udp4", &net.UDPAddr{IP: net.IPv4(127, 0, 0, 1)})
+	if err != nil {
+		t.Skip(err)
+	}
+	defer srv.Close()
+	go a.syncAnswerDiscovery(srv, "id-teste", 47862)
+	ask := func() bool {
+		c, err := net.DialUDP("udp4", nil, srv.LocalAddr().(*net.UDPAddr))
+		if err != nil {
+			t.Fatal(err)
+		}
+		defer c.Close()
+		_, _ = c.Write([]byte(syncQuery))
+		_ = c.SetReadDeadline(time.Now().Add(400 * time.Millisecond))
+		buf := make([]byte, 512)
+		n, err := c.Read(buf)
+		return err == nil && strings.Contains(string(buf[:n]), "id-teste")
+	}
+	if ask() {
+		t.Fatal("respondeu sem código na tela")
+	}
+	a.sync.mu.Lock()
+	a.sync.code, a.sync.codeUntil = "123456", time.Now().Add(time.Minute)
+	a.sync.mu.Unlock()
+	if !ask() {
+		t.Fatal("não respondeu com o código na tela")
 	}
 }

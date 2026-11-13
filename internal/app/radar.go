@@ -1,11 +1,13 @@
 package app
 
 import (
+	"bytes"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"image"
 	"image/png"
+	"io"
 	"math"
 	"net/http"
 	"os"
@@ -155,8 +157,29 @@ func radarImage(url string) (image.Image, error) {
 		return nil, err
 	}
 	defer resp.Body.Close()
-	return png.Decode(resp.Body)
+	// a imagem vem de um endereço que o serviço manda: lê no máximo 8 MB e
+	// confere o tamanho antes de decodificar (B7 da auditoria)
+	b, err := io.ReadAll(io.LimitReader(resp.Body, radarMaxBytes+1))
+	if err != nil {
+		return nil, fmt.Errorf("radar: %w", err)
+	}
+	if len(b) > radarMaxBytes {
+		return nil, errors.New("radar: imagem grande demais")
+	}
+	cfg, err := png.DecodeConfig(bytes.NewReader(b))
+	if err != nil {
+		return nil, fmt.Errorf("radar: %w", err)
+	}
+	if cfg.Width > radarMaxSide || cfg.Height > radarMaxSide {
+		return nil, errors.New("radar: imagem grande demais")
+	}
+	return png.Decode(bytes.NewReader(b))
 }
+
+const (
+	radarMaxBytes = 8 << 20
+	radarMaxSide  = 4096 // os ladrilhos do radar têm 256 px
+)
 
 // pixelMax lê o maior dBZ num quadradinho em volta do ponto.
 func pixelMax(img image.Image, px, py, rad int) float64 {
