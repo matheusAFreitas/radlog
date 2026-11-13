@@ -253,10 +253,19 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 	}
 	// tira das linhas da saída o pedaço de casa que veio junto, pelo espectro
 	// de casa (o relatório dizia 14 h de espectro numa saída de 10 h)
+	// objF/objVar: a saída sem piso e a variância de cada canal (contagem
+	// original + fator²·casa), para a conta das linhas; obj (com piso em 0)
+	// fica só para o desenho e a busca de picos (QA, 13/11)
+	objF, objVar := make([]float64, nch), make([]float64, nch)
+	for i, v := range obj {
+		objF[i], objVar[i] = float64(v), float64(v)
+	}
 	if extraSec >= tripExtraMin && bgSec > 0 && extraSec < objSec {
+		f := extraSec / bgSec
 		for i := range obj {
-			v := float64(obj[i]) - float64(bg[i])*extraSec/bgSec
-			obj[i] = uint32(math.Max(0, math.Round(v)))
+			objF[i] -= float64(bg[i]) * f
+			objVar[i] += float64(bg[i]) * f * f
+			obj[i] = uint32(math.Max(0, math.Round(objF[i])))
 		}
 		objSec -= extraSec
 	}
@@ -281,8 +290,8 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 			}
 			seen[pk.KeV] = true
 			l := TripLine{Nuclide: pk.Nuclide, Group: pk.Group, KeV: pk.KeV, HasHome: true}
-			o, oe := tripPeakRate(sp, obj, objC, objSec, pk.KeV)
-			h, he := tripPeakRate(sp, bg, bgC, bgSec, pk.KeV)
+			o, oe := tripPeakRate(sp, objF, objVar, objC, objSec, pk.KeV)
+			h, he := tripPeakRate(sp, u32f(bg), nil, bgC, bgSec, pk.KeV)
 			l.Out, l.Home = math.Max(o, 0), math.Max(h, 0)
 			if l.Home > 0 {
 				l.Pct = (l.Out/l.Home - 1) * 100
@@ -315,7 +324,8 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 
 // tripPeakRate são as contagens por minuto do pico acima do contínuo (cont,
 // do SNIP), e a incerteza, numa janela de ±0,6 FWHM em volta da linha.
-func tripPeakRate(s *MeasureSpectrum, y []uint32, cont []float64, sec, kev float64) (rate, err float64) {
+// variance nil = contagem pura (variância = y).
+func tripPeakRate(s *MeasureSpectrum, y, variance, cont []float64, sec, kev float64) (rate, err float64) {
 	if sec <= 0 || len(cont) != len(y) {
 		return 0, 0
 	}
@@ -323,8 +333,12 @@ func tripPeakRate(s *MeasureSpectrum, y []uint32, cont []float64, sec, kev float
 	var net, vr float64
 	for i := range y {
 		if e := s.energy(i); e >= kev-h && e < kev+h {
-			net += float64(y[i]) - cont[i]
-			vr += float64(y[i])
+			net += y[i] - cont[i]
+			if variance != nil {
+				vr += variance[i]
+			} else {
+				vr += math.Max(y[i], 0)
+			}
 		}
 	}
 	return net / sec * 60, math.Sqrt(vr) / sec * 60
@@ -364,4 +378,12 @@ func (a *App) tripDevice(out *TripSummary) {
 			}
 		}
 	}
+}
+
+func u32f(v []uint32) []float64 {
+	out := make([]float64, len(v))
+	for i, x := range v {
+		out[i] = float64(x)
+	}
+	return out
 }

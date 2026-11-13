@@ -1,5 +1,18 @@
 # Versões
 
+## 2.78.3
+- Na comparação de linhas do espectro de uma saída com casa, a incerteza
+  agora conta o pedaço de casa que foi tirado da leitura da volta. Antes ela
+  saía menor do que é, e podiam aparecer linhas "mais que em casa" ou "menos
+  que em casa" que não eram de verdade.
+
+**English**
+
+- When comparing a trip's spectrum lines with home, the uncertainty now
+  includes the home part removed from the return reading. Before it came out
+  smaller than it is, and lines could show as "more than at home" or "less
+  than at home" when they weren't.
+
 ## 2.78.2
 - O espectro de uma saída não mistura mais horas de casa. Quando o RC102
   para de mandar espectro um tempo antes de sair, a primeira leitura da
