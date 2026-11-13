@@ -37,9 +37,11 @@ const tr = (() => {
   // decimal com certeza: 1–2 ou 4+ casas, ou "0,xxx".
   const fixNums = (s) => s.replace(/(?<![\d.,])(\d+),(\d+)(?![\d,])/g, (x, i, d) =>
     d.length === 3 && i !== "0" && i.length <= 3 ? x : i + "." + d);
+  // nome escrito pela pessoa (asIs em util.js): fica como está
+  const named = (c) => c.charCodeAt(0) === 0x2068 && c.charCodeAt(c.length - 1) === 0x2069 && c.indexOf("\u2069") === c.length - 1;
   const part = (s) => {
     const core = s && s.trim();
-    if (!core) return s;
+    if (!core || named(core)) return s;
     const a = s.slice(0, s.indexOf(core)), z = s.slice(s.indexOf(core) + core.length);
     const t = one(core, true);
     return a + (t !== core ? t : fixNums(core)) + z;
@@ -110,6 +112,7 @@ const tr = (() => {
     const c = cache.get(s);
     if (c !== undefined) return c;
     const core = s.trim().replace(/\s+/g, " ");
+    if (named(core)) return s;
     let out = one(core, false, false);
     if (out == null) out = wide(core);
     if (out == null) out = sentences(core);

@@ -95,7 +95,7 @@ func (a *App) GetPlannedTrips() []PlannedTrip {
 	out := append([]PlannedTrip{}, kept...)
 	a.mu.Unlock()
 	for _, p := range gone {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", p.Name, time.UnixMilli(p.From).Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", asIs(p.Name), time.UnixMilli(p.From).Format("02/01 15:04")))
 	}
 	return out
 }
@@ -316,9 +316,9 @@ func (a *App) plannedOnConnect(dev string, conn time.Time) bool {
 	}
 	a.mu.Unlock()
 	if manual {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", trip.Name))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", asIs(trip.Name)))
 	} else {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", trip.Name, devLabel(dev), conn.Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", asIs(trip.Name), devLabel(dev), conn.Format("02/01 15:04")))
 		a.emitRcAway()
 	}
 	a.emitPlanned()
@@ -583,4 +583,10 @@ func (a *App) plannedRefine() {
 	if changed {
 		a.emitRcAway()
 	}
+}
+
+// asIs marca o nome que a pessoa deu (U+2068…U+2069, invisíveis) para a
+// tradução da tela não mexer nele: "Escritório" não vira "Office".
+func asIs(s string) string {
+	return "\u2068" + strings.NewReplacer("\u2068", "", "\u2069", "").Replace(s) + "\u2069"
 }

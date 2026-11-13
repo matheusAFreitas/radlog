@@ -1,7 +1,7 @@
 # Versões
 
 ## 2.75.1
-Item P1 da auditoria de 12/11.
+Item P1 da auditoria de 12/11 e acertos da Saída programada.
 
 - Gráficos, relatórios e tendências de períodos longos ficaram cerca de 2 a
   3 vezes mais rápidos e usam bem menos memória. Num ano de minutos, a
@@ -9,6 +9,12 @@ Item P1 da auditoria de 12/11.
 - Enquanto uma consulta longa lê os meses antigos, a gravação do minuto não
   fica mais esperando: os dias recentes vêm da memória e os antigos são lidos
   sem segurar a trava.
+- Saída programada em inglês: o nome que você deu à saída não é mais
+  traduzido (ficava "Office" em parte das telas).
+- Fora de casa em tela estreita: os botões de cada trecho descem para baixo
+  do texto e o eixo dos últimos 7 dias mostra dia sim, dia não, sem os
+  rótulos se encostarem.
+- "Saí de casa" mostra a hora em 24 h também em inglês.
 
 **English**
 
@@ -18,6 +24,12 @@ Item P1 da auditoria de 12/11.
 - While a long query reads old months, saving the current minute no longer
   waits: recent days come from memory and old ones are read without holding
   the lock.
+- Planned trip in English: the name you gave the trip is no longer
+  translated (part of the screens showed "Office").
+- Away from home on a narrow window: each stretch's buttons move below the
+  text and the last-7-days axis shows every other day, so labels no longer
+  touch.
+- "I left home" shows the time in 24 h in English too.
 
 ## 2.75.0
 - Saída programada: em Fora de casa, "Programar saída" marca

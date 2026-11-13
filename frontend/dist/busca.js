@@ -31,7 +31,7 @@ const QK_ALIAS = {
 
 const qkNorm = (s) => String(s || "").normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
 const qkTr = (s) => (typeof tr === "function" ? tr(s) : s);
-const qkHM = () => new Date().toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+const qkHM = () => hhmm(Date.now()); // 24 h nos dois idiomas, como no resto do app
 
 // fora de casa agora? (o "Voltei" aparece no lugar do "Saí de casa")
 function qkAway() {
