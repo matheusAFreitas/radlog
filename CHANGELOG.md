@@ -1,5 +1,25 @@
 # Versões
 
+## 2.74.0
+Item B5 da auditoria de 12/11.
+
+- O backup passa a levar as configurações: alarme, níveis, som, bandeja,
+  pulso, idioma e atualização. Não leva o lugar da chuva nem o que é só do
+  PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows).
+- Ao importar um backup com configurações diferentes das daqui, o app
+  pergunta se você quer usar as do backup. Se disser que não, nada muda. A
+  troca fica no histórico de configurações, com origem "backup".
+
+**English**
+
+- Backups now carry the settings: alarm, levels, sound, tray, pulse,
+  language and updates. They don't carry the rain location or what belongs
+  only to the PC (port, Bluetooth, folders, screen size, starting with
+  Windows).
+- When importing a backup whose settings differ from the ones here, the app
+  asks whether you want to use the backup's. If you say no, nothing changes.
+  The change shows in the settings history, with source "backup".
+
 ## 2.73.2
 - A tela passa a ter uma política de conteúdo (CSP, item S5 da auditoria):
   ela só carrega os arquivos do próprio app. É uma segunda barreira caso

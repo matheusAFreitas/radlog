@@ -958,7 +958,8 @@ const demoRc = () => {
     },
     DeleteNote: async (id) => { notes = notes.filter((n) => n.id !== id); setTimeout(() => emit("notes", notes.slice()), 0); },
     ExportBackup: async () => "C:\\Users\\voce\\Documents\\gmc-backup-PC-2026-10-29.zip",
-    ImportBackup: async () => ({ from: "LINUX-PC", created: "", minutes: 340, events: 3, periods: 1, measurements: 0, alertFiles: 1 }),
+    ImportBackup: async () => ({ from: "LINUX-PC", created: "", minutes: 340, events: 3, periods: 1, measurements: 0, alertFiles: 1, settings: 3 }),
+    ApplyBackupSettings: async () => { settings = Object.assign({}, settings, { alarmSound: "bipes" }); return settings; },
     GetSummary: async (from, to) => {
       to = Math.min(to, Date.now() + 6e4);
       const span = to - from, step = span <= 26 * 36e5 ? 9e5 : span <= 8 * 864e5 ? 36e5 : 216e5;

@@ -2298,8 +2298,29 @@ function wireBackup() {
     try { const f = await api.ExportBackup(); if (f) toast("Backup salvo: " + f.split(/[\\/]/).pop()); } catch (e) { toast(errMsg(e), true); }
   });
   $("btnImportBackup").addEventListener("click", async () => {
-    try { const r = await api.ImportBackup(); if (r && (r.from || r.created)) toast(`Backup de ${r.from || "outro PC"}: ${mergeTextJS(r)}`); } catch (e) { toast(errMsg(e), true); }
+    let r;
+    try { r = await api.ImportBackup(); if (r && (r.from || r.created)) toast(`Backup de ${r.from || "outro PC"}: ${mergeTextJS(r)}`); } catch (e) { toast(errMsg(e), true); return; }
+    if (r && r.settings > 0 && api.ApplyBackupSettings) askBackupSettings(r);
   });
+}
+
+// configurações do backup (2.74): o backup traz as que valem em qualquer
+// PC; só mudam aqui se a pessoa escolher
+async function askBackupSettings(r) {
+  const n = r.settings, from = r.from || "outro PC";
+  const text = [
+    n === 1 ? `O backup de ${from} tem 1 ajuste diferente do daqui.` : `O backup de ${from} tem ${n} ajustes diferentes dos daqui.`,
+    "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",
+  ];
+  if (!(await askConfirm({ title: "Usar as configurações do backup?", text, ok: "Usar as do backup" }))) return;
+  try {
+    state.settings = await api.ApplyBackupSettings();
+    toast("Configurações do backup aplicadas");
+    syncLang(state.settings.lang);
+    $("chkAlarm").checked = !!state.settings.alarmEnabled;
+    renderAlarmLabel();
+    if (state.view === "config") openSettings("btnImportBackup");
+  } catch (e) { toast(errMsg(e), true); }
 }
 
 async function refreshAutostart() {

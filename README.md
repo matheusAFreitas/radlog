@@ -174,8 +174,10 @@ button opens it. File names are in Portuguese:
   it is what lets another PC sync with yours. It never goes into a backup.
 
 A **backup** (.zip) only adds what is missing when imported, so it also moves
-data from one PC to another, Windows or Linux. Location and city never go
-into a PDF, report or backup.
+data from one PC to another, Windows or Linux. It also carries the settings
+that make sense on any PC (alarm, levels, sound, tray, language); on import
+the app asks before using them. Location and city never go into a PDF,
+report or backup.
 
 ## Building
 

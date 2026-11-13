@@ -386,6 +386,9 @@ type App struct {
 	// uso do app (usage.go): carregado na primeira vez que precisa
 	usage       usageData
 	usageLoaded bool
+	// configurações do último backup importado, esperando a pessoa
+	// escolher se quer usar (backupcfg.go)
+	bkSettings *Settings
 
 	alarmOn  bool
 	attnOn   bool
@@ -640,7 +643,10 @@ func (a *App) GetSettings() Settings {
 }
 
 // SaveSettings grava as preferências.
-func (a *App) SaveSettings(s Settings) Settings {
+func (a *App) SaveSettings(s Settings) Settings { return a.saveSettingsFrom(s, "você") }
+
+// saveSettingsFrom grava e anota no histórico de configurações quem mudou.
+func (a *App) saveSettingsFrom(s Settings, source string) Settings {
 	if s.AlarmCPM <= 0 {
 		s.AlarmCPM = levels.WarningCPM
 	}
@@ -673,7 +679,7 @@ func (a *App) SaveSettings(s Settings) Settings {
 	s = a.effLocked()
 	a.saveSettingsLocked()
 	a.mu.Unlock()
-	a.cfgRecord("você")
+	a.cfgRecord(source)
 	if autostartChanged {
 		a.syncAutostart(s.StartWithWindows)
 		if s.StartWithWindows && startupDisabled() {

@@ -178,8 +178,10 @@ dados" abre a pasta. O que tem lá:
   backup.
 
 O **backup** (.zip) junta só o que falta ao importar e serve para levar os
-dados de um PC para outro, Windows ou Linux. Localização e cidade nunca vão
-para PDF, relatório ou backup.
+dados de um PC para outro, Windows ou Linux. Ele também leva as
+configurações que valem em qualquer PC (alarme, níveis, som, bandeja,
+idioma); ao importar, o app pergunta antes de usar. Localização e cidade
+nunca vão para PDF, relatório ou backup.
 
 ## Compilar
 
