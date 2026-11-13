@@ -4874,3 +4874,5 @@ formato de imagem não reconhecido	unrecognized image format
 {0} agora é outro aparelho: esperando o contador voltar	{0} is now another device: waiting for the counter to come back
 reconexão: {0} agora é outro aparelho; esperando o contador	reconnect: {0} is now another device; waiting for the counter
 reconexão: o contador mudou de {0} para {1}	reconnect: the counter moved from {0} to {1}
+fechando: {0} minuto(s) sem gravar em {1} ficaram guardados para a próxima abertura	closing: {0} unsaved minute(s) in {1} were kept for the next start
+{0}; e não deu para guardar em {1}: {2}	{0}; and couldn't keep them in {1}: {2}

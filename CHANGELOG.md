@@ -16,6 +16,10 @@ Bloco 3 da auditoria de 13/11: relógio, porta do contador, versões e fotos.
   modelo da câmera, data) ao anexar; a rotação fica. As anexadas antes saem
   limpas no backup e na sincronização. JPEG, PNG, WebP e HEIC; uma foto que
   não dá para limpar não é anexada.
+- Anexo com nome comprido anexado duas vezes não some mais da lista (QA).
+- Minutos esperando o arquivo do mês liberar são tentados de novo a cada
+  minuto, mesmo com o contador desconectado, e se o app fechar antes ficam
+  guardados e entram no mês na próxima abertura (QA).
 
 **English**
 
@@ -32,6 +36,11 @@ Bloco 3 da auditoria de 13/11: relógio, porta do contador, versões e fotos.
   camera model, date) when attached; rotation is kept. Photos attached
   before go out clean in backups and sync. JPEG, PNG, WebP and HEIC; a photo
   that can't be cleaned isn't attached.
+- An attachment with a long name attached twice no longer disappears from
+  the list (QA).
+- Minutes waiting for the month's file to be free are retried every minute,
+  even with the counter disconnected, and if the app closes first they are
+  kept and go into the month on the next start (QA).
 
 ## 2.76.2
 Bloco 2 da auditoria de 13/11: arquivos que podiam ficar vazios ou sumir.

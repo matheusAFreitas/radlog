@@ -2,12 +2,15 @@ package app
 
 import (
 	"bytes"
+	"fmt"
 	"image"
 	"image/jpeg"
 	"image/png"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
+	"unicode/utf8"
 )
 
 // S2: a foto anexada vai sem os metadados; um "jpg" que não é foto não entra.
@@ -52,4 +55,24 @@ func testPhoto(kind string) []byte {
 		_ = jpeg.Encode(&b, m, nil)
 	}
 	return b.Bytes()
+}
+
+// QA 13/11: nome de 80 caracteres anexado duas vezes não pode sumir.
+func TestNumberedNameStaysSafe(t *testing.T) {
+	for _, name := range []string{
+		strings.Repeat("a", 76) + ".png",
+		strings.Repeat("é", 38) + "abc.jpg", // 76 bytes + .jpg, letra de 2 bytes no corte
+		"curto.txt",
+	} {
+		n := safeFileName(name)
+		for k := 2; k < 12; k++ {
+			f := numberedName(n, k)
+			if safeFileName(f) != f || !strings.HasSuffix(f, fmt.Sprintf("-%d%s", k, filepath.Ext(n))) {
+				t.Fatalf("%q → %q", n, f)
+			}
+		}
+	}
+	if !utf8.ValidString(safeFileName(strings.Repeat("ã", 60) + ".png")) {
+		t.Fatal("cortou uma letra no meio")
+	}
 }

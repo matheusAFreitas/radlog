@@ -12,6 +12,7 @@ import (
 	"strings"
 	"time"
 	"unicode"
+	"unicode/utf8"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
 
@@ -50,14 +51,37 @@ func safeFileName(n string) string {
 	if n == "" {
 		n = "anexo"
 	}
-	if len(n) > 80 {
+	if len(n) > attachNameMax {
 		ext := filepath.Ext(n)
 		if len(ext) > 10 {
 			ext = ""
 		}
-		n = n[:80-len(ext)] + ext
+		n = cutUTF8(n, attachNameMax-len(ext)) + ext
 	}
 	return n
+}
+
+// attachNameMax é o tamanho máximo (em bytes) do nome de um anexo.
+const attachNameMax = 80
+
+// cutUTF8 corta s em até n bytes sem partir uma letra acentuada no meio.
+func cutUTF8(s string, n int) string {
+	if len(s) <= n {
+		return s
+	}
+	for n > 0 && !utf8.RuneStart(s[n]) {
+		n--
+	}
+	return s[:n]
+}
+
+// numberedName é name com "-k" antes da extensão, cortando o nome para
+// caber em attachNameMax: o resultado passa no safeFileName sem mudar
+// (QA 13/11: nome de 80 caracteres anexado duas vezes sumia da lista).
+func numberedName(name string, k int) string {
+	ext := filepath.Ext(name)
+	suf := fmt.Sprintf("-%d%s", k, ext)
+	return cutUTF8(strings.TrimSuffix(name, ext), attachNameMax-len(suf)) + suf
 }
 
 // attachFiles copia os arquivos para a medição id e devolve os anexos dela.
@@ -99,7 +123,7 @@ func (a *App) attachFiles(id int64, paths []string) ([]MeasureAttachment, error)
 		file := name
 		ext := filepath.Ext(name)
 		for k := 2; used[strings.ToLower(file)]; k++ {
-			file = fmt.Sprintf("%s-%d%s", strings.TrimSuffix(name, ext), k, ext)
+			file = numberedName(name, k)
 		}
 		size, err := copyAttachment(src, filepath.Join(dir, file), ext)
 		if err != nil {

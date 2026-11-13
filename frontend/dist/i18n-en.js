@@ -5192,6 +5192,16 @@ const I18N_EN = {
 ]
 ],
 [
+"fechando: ",
+"^fechando: ((?:(?! · ).)+?) minuto\\(s\\) sem gravar em ((?:(?! · ).)+?) ficaram guardados para a próxima abertura$",
+"closing: ${1} unsaved minute(s) in ${2} were kept for the next start",
+[
+"fechando: ",
+" minuto(s) sem gravar em ",
+" ficaram guardados para a próxima abertura"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) CPM \\(≈ ((?:(?! · ).)+?) µSv/h\\), mediana das leituras por minuto dos últimos 30 dias em casa$",
 "${1} CPM (≈ ${2} µSv/h), median of the per-minute readings of the last 30 days at home",
@@ -9724,6 +9734,14 @@ const I18N_EN = {
 [
 "Fui sim, marcar ",
 " até a conexão"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?); e não deu para guardar em ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"${1}; and couldn't keep them in ${2}: ${3}",
+[
+"; e não deu para guardar em "
 ]
 ],
 [

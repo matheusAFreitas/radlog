@@ -510,6 +510,7 @@ func (a *App) startup(ctx context.Context) {
 	a.goSafe("cleanOldVersionsLater", a.cleanOldVersionsLater)
 	a.goLoop("alertSecondsLoop", a.alertSecondsLoop)
 	a.goLoop("memoryWatch", a.memoryWatch)
+	a.goLoop("pendingRetry", a.pendingRetry)
 	a.goLoop("syncLoop", a.syncLoop)
 	a.goLoop("rcLoop", a.rcLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
@@ -541,10 +542,11 @@ func (a *App) shutdown(ctx context.Context) {
 	a.StopDemo()
 	a.disconnect("")
 	if a.store != nil {
-		if err := a.store.Flush(); err != nil {
-			if n, f := a.store.Pending(); n > 0 {
-				a.logf("fechando com %d minuto(s) sem gravar em %s: %v", n, f, err)
-			}
+		n, f := a.store.Pending()
+		if err := a.store.FlushOrKeep(); err != nil {
+			a.logf("fechando com %d minuto(s) sem gravar em %s: %v", n, f, err)
+		} else if n > 0 {
+			a.logf("fechando: %d minuto(s) sem gravar em %s ficaram guardados para a próxima abertura", n, f)
 		}
 	}
 }
@@ -816,6 +818,22 @@ func (a *App) noteSaveResult(err error) {
 	}
 	if was != n {
 		a.emit("status", st)
+	}
+}
+
+// pendingRetry tenta gravar a cada minuto os minutos que esperam, mesmo sem
+// leitura nova (contador desconectado depois de fechar o Excel), para o
+// aviso não ficar na tela até reconectar (QA 13/11).
+func (a *App) pendingRetry() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+	for range t.C {
+		if a.closing.Load() {
+			return
+		}
+		if n, _ := a.store.Pending(); n > 0 {
+			a.noteSaveResult(a.store.Flush())
+		}
 	}
 }
 
