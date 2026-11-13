@@ -1,5 +1,18 @@
 # Versões
 
+## 2.76.0
+- Configurações › Dados e backup ganhou o cartão "Nuvem (Google Drive)",
+  acima da Sincronização. Por enquanto é só a tela, marcada como WIP e
+  desligada: nada nele é clicável. O login com o Google e o envio cifrado
+  para o Drive entram numa próxima versão.
+
+**English**
+
+- Settings › Data and backup has a new "Cloud (Google Drive)" card, above
+  Sync. For now it's only the screen, marked WIP and turned off: nothing in it
+  can be clicked. Google sign-in and the encrypted upload to Drive come in a
+  later version.
+
 ## 2.75.3
 - Barra lateral com texto grande (Configurações › Janela, acima de 100%):
   ela cresce junto com o texto, e a pílula "vX disponível" e a versão ao

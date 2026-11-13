@@ -2822,3 +2822,13 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
   .pl-row { grid-template-columns: auto minmax(0, 1fr); }
   .pl-acts { grid-column: 1 / -1; justify-content: flex-start; }
 }
+
+/* ---------- nuvem no Google Drive: só a tela, inoperante (2.76.0) ---------- */
+.chip.cloud-exp, .chip.cloud-wip { font-family: var(--mono); font-size: var(--fs-micro); padding: 0 var(--space-2); vertical-align: 1px; }
+.chip.cloud-exp { color: var(--away); border-color: color-mix(in srgb, var(--away) 55%, transparent); }
+.chip.cloud-wip { color: var(--att); border-color: color-mix(in srgb, var(--att) 55%, transparent); gap: var(--space-1); }
+.cloud-wip .dot, .cloud-wip-note .dot { width: 7px; height: 7px; background: var(--att); border-color: var(--att); }
+.cloud-wip-note { display: flex; align-items: baseline; gap: var(--space-2); margin: 0 0 var(--space-3); color: var(--att); }
+.cloud-off { display: flex; flex-direction: column; gap: var(--space-3); opacity: .5; user-select: none; pointer-events: none; }
+.cloud-off > p, .cloud-off > .row { margin: 0; }
+.cloud-pts { margin: 0; padding-left: var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); }
