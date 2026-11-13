@@ -1,5 +1,34 @@
 # Versões
 
+## 2.79.0
+- Nuvem no Google Drive (experimental, desligada até você ligar):
+  Configurações › Dados e backup › Nuvem. Entra com o Google, guarda um
+  código de recuperação e sobe uma cópia cifrada dos dados (um arquivo por
+  mês) numa pasta do RadLog no seu próprio Drive. Outro PC entra com a mesma
+  conta e o código, baixa o histórico e junta só o que falta, como no
+  "Importar backup". Sincroniza sozinha a cada 15 minutos.
+- O app só enxerga a pasta que ele mesmo criou no Drive. O Google guarda os
+  arquivos mas não consegue ler. Lugar, coordenadas e metadados de foto
+  nunca sobem, e o e-mail da conta aparece só na tela.
+- Aviso no menu lateral e em Configurações quando a nuvem precisa de você
+  (entrar de novo, relógio do PC errado ou mais de 1 dia sem sincronizar).
+- Política de privacidade nova no repositório (PRIVACY.md).
+
+**English**
+
+- Google Drive cloud (experimental, off until you turn it on): Settings ›
+  Data and backup › Cloud. Sign in with Google, save a recovery code and the
+  app uploads an encrypted copy of your data (one file per month) to a
+  RadLog folder in your own Drive. Another PC signs in with the same account
+  and the code, downloads the history and merges only what is missing, like
+  "Import backup". It syncs on its own every 15 minutes.
+- The app only sees the folder it created in Drive. Google stores the files
+  but can't read them. Location, coordinates and photo metadata are never
+  uploaded, and the account email only shows on screen.
+- Notice in the side menu and in Settings when the cloud needs you (sign in
+  again, wrong PC clock or more than 1 day without syncing).
+- New privacy policy in the repository (PRIVACY.md).
+
 ## 2.78.3
 - Na comparação de linhas do espectro de uma saída com casa, a incerteza
   agora conta o pedaço de casa que foi tirado da leitura da volta. Antes ela

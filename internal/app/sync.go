@@ -607,6 +607,11 @@ type pullReq struct {
 	RcFiles []string `json:"rcFiles,omitempty"`
 	Anexos  []string `json:"anexos,omitempty"`
 	Rc      bool     `json:"rc,omitempty"` // quem pede entende o pacote novo
+	// nuvem (cloud.go): sem o nome do PC e com o manifesto fixo, para o pacote
+	// sair igual quando os dados não mudaram
+	cloud bool
+	// sem os pequenos de sempre (na nuvem eles vão no pacote "comum")
+	noSmall bool
 }
 
 func (a *App) handlePull(peer string, body []byte) ([]byte, error) {
@@ -658,6 +663,11 @@ func (a *App) dayDigests() (map[string]string, error) {
 		return nil, err
 	}
 	s := &a.sync
+	s.mu.Lock()
+	if s.inv == nil { // a nuvem pode pedir antes do syncLoad
+		s.inv = map[string]invMonth{}
+	}
+	s.mu.Unlock()
 	out := map[string]string{}
 	for _, fi := range files {
 		s.mu.Lock()
@@ -719,7 +729,11 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 	days, alerts := req.Days, req.Alerts
 	var buf bytes.Buffer
 	zw := zip.NewWriter(&buf)
-	man, _ := json.Marshal(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)})
+	bm := backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)}
+	if req.cloud {
+		bm = backupManifest{App: backupAppID, Version: "nuvem"}
+	}
+	man, _ := json.Marshal(bm)
 	if f, err := zw.Create("backup.json"); err == nil {
 		_, _ = f.Write(man)
 	}
@@ -742,22 +756,24 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 			}
 		}
 	}
-	// só alertas encerrados (os de agora ainda mudam)
-	a.mu.Lock()
-	var rows [][]string
-	for _, e := range a.events {
-		if e.Kind == kindAlert && !e.Demo && (e.End != 0 || e.Retro) {
-			rows = append(rows, eventRow(e))
+	if !req.noSmall {
+		// só alertas encerrados (os de agora ainda mudam)
+		a.mu.Lock()
+		var rows [][]string
+		for _, e := range a.events {
+			if e.Kind == kindAlert && !e.Demo && (e.End != 0 || e.Retro) {
+				rows = append(rows, eventRow(e))
+			}
 		}
-	}
-	a.mu.Unlock()
-	if f, err := zw.Create("eventos.csv"); err == nil {
-		_ = csv.NewWriter(f).WriteAll(rows)
-	}
-	for _, name := range []string{"fora-de-casa.json", "medicoes.json", "anotacoes.json"} {
-		if b, err := os.ReadFile(filepath.Join(a.dataDir, name)); err == nil {
-			if f, err := zw.Create(name); err == nil {
-				_, _ = f.Write(b)
+		a.mu.Unlock()
+		if f, err := zw.Create("eventos.csv"); err == nil {
+			_ = csv.NewWriter(f).WriteAll(rows)
+		}
+		for _, name := range []string{"fora-de-casa.json", "medicoes.json", "anotacoes.json"} {
+			if b, err := os.ReadFile(filepath.Join(a.dataDir, name)); err == nil {
+				if f, err := zw.Create(name); err == nil {
+					_, _ = f.Write(b)
+				}
 			}
 		}
 	}
@@ -773,7 +789,7 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 		}
 	}
 	if req.Rc {
-		if err := a.rcAddToDelta(zw, req.RcDays, req.RcFiles); err != nil {
+		if err := a.rcAddToDelta(zw, req.RcDays, req.RcFiles, !req.noSmall); err != nil {
 			return nil, err
 		}
 		if err := a.attachAddToDelta(zw, req.Anexos); err != nil {

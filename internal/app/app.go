@@ -411,8 +411,9 @@ type App struct {
 	noCount  noCountState
 	interf   interferenceDetector
 	upd      updater
-	sync     syncState // sincronização entre PCs (sync.go)
-	rc       rcState   // RC102 (radiacode.go)
+	sync     syncState  // sincronização entre PCs (sync.go)
+	cloud    cloudState // nuvem no Google Drive (cloud.go)
+	rc       rcState    // RC102 (radiacode.go)
 
 	live *ring    // última hora de leituras reais por segundo
 	demo demoData // modo demo
@@ -514,6 +515,7 @@ func (a *App) startup(ctx context.Context) {
 	a.goLoop("memoryWatch", a.memoryWatch)
 	a.goLoop("pendingRetry", a.pendingRetry)
 	a.goLoop("syncLoop", a.syncLoop)
+	a.goLoop("cloudLoop", a.cloudLoop)
 	a.goLoop("rcLoop", a.rcLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
 

@@ -182,7 +182,7 @@ func rcWant(theirs, mine rcInv) (days, files []string) {
 
 // rcAddToDelta põe no pacote as linhas dos dias pedidos, os arquivos pedidos
 // e os pequenos de sempre.
-func (a *App) rcAddToDelta(zw *zip.Writer, days, files []string) error {
+func (a *App) rcAddToDelta(zw *zip.Writer, days, files []string, small bool) error {
 	byFile := map[string]map[string]bool{}
 	for _, k := range days {
 		f, d, ok := strings.Cut(k, "|")
@@ -240,10 +240,13 @@ func (a *App) rcAddToDelta(zw *zip.Writer, days, files []string) error {
 			return err
 		}
 	}
+	if !small {
+		return nil
+	}
 	// pequenos, sempre: atividade, dose do aparelho, históricos
-	small := a.actBackupFiles()
-	small = append(small, rcDirName+"/"+rcDoseFile, cfgHistFile, calHistFile)
-	for _, rel := range small {
+	smalls := a.actBackupFiles()
+	smalls = append(smalls, rcDirName+"/"+rcDoseFile, cfgHistFile, calHistFile)
+	for _, rel := range smalls {
 		if err := add(rel); err != nil {
 			return err
 		}
