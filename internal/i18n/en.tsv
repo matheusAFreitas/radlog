@@ -4830,3 +4830,14 @@ GMC-800 vai	GMC-800 goes
 Programar	Plan
 RC102 e GMC-800 fora	RC102 and GMC-800 out
 Usar {0}	Use {0}
+Nuvem (Google Drive)	Cloud (Google Drive)
+experimental	experimental
+WIP	WIP
+Em construção: esta parte ainda não funciona	Under construction: this part doesn't work yet
+Em construção: esta parte ainda não funciona. O login com o Google e o envio entram numa próxima versão.	Under construction: this part doesn't work yet. Google sign-in and uploading come in a later version.
+Guarda uma cópia cifrada dos seus dados numa pasta do RadLog no seu próprio Google Drive, para outro PC (e, depois, o celular) ter o mesmo histórico.	Keeps an encrypted copy of your data in a RadLog folder in your own Google Drive, so another PC (and, later, the phone) has the same history.
+O Google guarda os arquivos mas não consegue ler: a chave fica nos seus aparelhos e num código que só você tem.	Google stores the files but can't read them: the key stays on your devices and in a code only you have.
+O app só enxerga a pasta que ele mesmo criou, não o resto do Drive.	The app only sees the folder it created, not the rest of your Drive.
+Lugar, coordenadas e metadados de foto nunca sobem.	Location, coordinates and photo metadata are never uploaded.
+Sem internet, nada muda: o app grava aqui e sobe depois.	Without internet nothing changes: the app records here and uploads later.
+Entrar com Google	Sign in with Google
