@@ -278,7 +278,8 @@ Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`). Os avisos de
 licença das bibliotecas que vão dentro do app estão em
 [frontend/dist/licencas.txt](frontend/dist/licencas.txt) e em Configurações ›
 Atualizações e sobre. Para avisar de um problema de segurança, veja o
-[SECURITY.md](SECURITY.md).
+[SECURITY.md](SECURITY.md). Política de privacidade:
+[PRIVACY.pt-BR.md](PRIVACY.pt-BR.md).
 
 Não é um produto da GQ Electronics nem da Radiacode. "GMC" e "GQ" são marcas
 da GQ Electronics; "Radiacode" é marca da Radiacode. O app só fala com os
