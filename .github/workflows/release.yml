@@ -71,17 +71,26 @@ jobs:
       - name: Testes
         run: go test -tags webkit2_41 ./...
       - name: Windows (.exe)
+        # a chave do app no Google (nuvem) entra só no build, pelos segredos
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
+          G="-X radlog/internal/app.googleClientID=$GOOGLE_CLIENT_ID -X radlog/internal/app.googleClientSecret=$GOOGLE_CLIENT_SECRET"
           go install github.com/tc-hib/go-winres@v0.3.3
           go-winres make --in build/windows/winres.json
           CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -tags desktop,production \
-            -ldflags "-w -s -H windowsgui" -o "out/RadLog-v${{ steps.v.outputs.ver }}.exe" .
+            -ldflags "-w -s -H windowsgui $G" -o "out/RadLog-v${{ steps.v.outputs.ver }}.exe" .
       - name: Linux (AppImage e .tar.gz)
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
+          G="-X radlog/internal/app.googleClientID=$GOOGLE_CLIENT_ID -X radlog/internal/app.googleClientSecret=$GOOGLE_CLIENT_SECRET"
           V=${{ steps.v.outputs.ver }}
           P="out/radlog-v$V-linux-x86_64"
           mkdir -p "$P"
-          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s" -o "$P/radlog" .
+          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s $G" -o "$P/radlog" .
           cp build/linux/* "$P/"
           echo "$V" > "$P/VERSION"
           (cd "$P" && sh build-appimage.sh)

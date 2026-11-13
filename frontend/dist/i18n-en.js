@@ -4017,7 +4017,118 @@ const I18N_EN = {
 "Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico.": "Last download on 05/11 20:10. After it, the app went 6 h 52 min without readings (since 06/11 21:00); the counter's memory may have those minutes: download the history.",
 "— valor atual; sem registro do valor vigente no início do período": "— current value; no record of the value in force at the start of the period",
 "% do tempo medido": "% of the measured time",
-"Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.": "The time has passed. When the device that went connects again, the app reads its memory and asks on the Now screen about 2 min later."
+"Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.": "The time has passed. When the device that went connects again, the app reads its memory and asks on the Now screen about 2 min later.",
+"A cópia que está no Drive fica ilegível para sempre (sem o código, ninguém abre). Os dados deste PC continuam aqui e sobem de novo com um código novo. Os outros aparelhos vão pedir o código novo.": "The copy in Drive becomes unreadable forever (without the code, nobody can open it). This PC's data stays here and goes up again with a new code. The other devices will ask for the new code.",
+"A primeira vez sobe todo o histórico, um arquivo por mês; pode levar alguns minutos. O app continua gravando normalmente.": "The first time uploads the whole history, one file per month; it can take a few minutes. The app keeps recording normally.",
+"A sincronização pela rede (abaixo) continua funcionando como antes.": "Sync over the network (below) keeps working as before.",
+"Abrir a nuvem": "Open the cloud",
+"Abrir o navegador de novo": "Open the browser again",
+"C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt": "C:\\Users\\you\\Documents\\radlog-recovery-code.txt",
+"Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por mês, cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\".": "Each device uploads its own data to the RadLog folder in your Drive, one file per month, encrypted with the recovery code key. The other devices download and merge only what is missing, like \"Import backup\".",
+"Com este código você liga outro aparelho na nuvem do RadLog ou recupera": "With this code you add another device to the RadLog cloud or recover",
+"Começar uma nuvem nova": "Start a new cloud",
+"Começar uma nuvem nova?": "Start a new cloud?",
+"Confira dois pedaços do código": "Check two pieces of the code",
+"Confira se ninguém está olhando a tela. Com o código, dá para abrir a cópia da nuvem.": "Make sure nobody is looking at the screen. With the code, the cloud copy can be opened.",
+"Código copiado": "Code copied",
+"Código de recuperação": "Recovery code",
+"Código salvo em": "Code saved to",
+"Depois desta tela ele só aparece de novo em \"Ver código de recuperação\", neste PC.": "After this screen it only shows again in \"Show recovery code\", on this PC.",
+"Desconectar do Google": "Disconnect from Google",
+"Desconectar do Google?": "Disconnect from Google?",
+"Escolha a conta e aceite. Quando o Google mostrar \"pode fechar esta aba\", volte para cá. Se o navegador não abriu, use o botão abaixo.": "Choose the account and accept. When Google says \"you can close this tab\", come back here. If the browser did not open, use the button below.",
+"Espaço usado no Drive": "Space used in Drive",
+"Essa conta já tem uma nuvem do RadLog": "This account already has a RadLog cloud",
+"Esse código não abre os arquivos desta nuvem. Confira letra por letra (o código não tem O, I nem L; parecidos com 0 e 1).": "This code does not open this cloud's files. Check it letter by letter (the code has no O, I or L; they look like 0 and 1).",
+"Esta cópia do app foi compilada sem a chave do Google. A nuvem funciona na versão baixada do GitHub.": "This copy of the app was built without the Google key. The cloud works in the version downloaded from GitHub.",
+"Este PC para de sincronizar com a nuvem. Os dados daqui não mudam, e a cópia da nuvem continua no seu Drive.": "This PC stops syncing with the cloud. The data here does not change, and the cloud copy stays in your Drive.",
+"Este aparelho agora faz parte da nuvem. Ele vai baixar o histórico dos outros aparelhos (pode levar alguns minutos) e subir o dele.": "This device is now part of the cloud. It will download the other devices' history (it can take a few minutes) and upload its own.",
+"Este é um aparelho novo": "This is a new device",
+"Guarde este código": "Save this code",
+"Guarde onde só você acessa, como o gerenciador de senhas ou junto do backup.": "Keep it where only you can reach it, like your password manager or with your backup.",
+"Guardei o código num lugar seguro, fora deste PC.": "I saved the code in a safe place, outside this PC.",
+"Isso acontece quando o acesso é revogado na conta Google ou fica muito tempo sem uso. Nada foi perdido: os dados estão aqui e a cópia da nuvem continua lá.": "This happens when access is revoked in the Google account or goes unused for a long time. Nothing was lost: the data is here and the cloud copy is still there.",
+"Login não reconhecido": "Sign-in not recognized",
+"Mostrar o código de recuperação?": "Show the recovery code?",
+"Na fila": "Queued",
+"Nome deste aparelho na nuvem": "This device's name in the cloud",
+"Não confere. Veja o código que você guardou, ou volte e veja de novo.": "It does not match. Check the code you saved, or go back and look again.",
+"Não deu certo da última vez:": "It did not work last time:",
+"Não deu para copiar; selecione e copie à mão.": "Could not copy; select it and copy by hand.",
+"O Google pediu para entrar de novo.": "Google asked you to sign in again.",
+"O e-mail da conta aparece só aqui: ele não vai para o registro, o backup, os PDFs nem a nuvem.": "The account email only shows here: it does not go to the log, the backup, the PDFs or the cloud.",
+"Os dois estão usando a mesma faixa da nuvem (isso acontece quando a pasta do RadLog é copiada de um PC para outro). A nuvem está pausada aqui até você escolher.": "Both are using the same slot in the cloud (this happens when the RadLog folder is copied from one PC to another). The cloud is paused here until you choose.",
+"Para ligar de novo, entre com o Google e digite o código de recuperação.": "To turn it on again, sign in with Google and type the recovery code.",
+"Para ter certeza de que o que você guardou está certo. Sem olhar nesta tela (ela não mostra mais o código).": "To be sure what you saved is right. Without looking at this screen (it no longer shows the code).",
+"Pegue o código num aparelho que já está ligado na nuvem: Configurações › Dados e backup › Nuvem › Ver código de recuperação. Se nenhum aparelho tem mais, dá para começar uma nuvem nova; a antiga fica ilegível, e os dados de cada aparelho sobem de novo.": "Get the code on a device already connected to the cloud: Settings › Data and backup › Cloud › Show recovery code. If no device has it anymore, you can start a new cloud; the old one becomes unreadable, and each device's data goes up again.",
+"Perdi o código": "I lost the code",
+"RadLog: código de recuperação da nuvem": "RadLog: cloud recovery code",
+"Salvar código de recuperação": "Save recovery code",
+"Salvar em arquivo": "Save to file",
+"Sem internet agora. Tudo continua gravado aqui; o que está na fila sobe quando a conexão voltar.": "No internet right now. Everything is still recorded here; what is queued goes up when the connection is back.",
+"Termine o login no navegador que abriu.": "Finish signing in in the browser that opened.",
+"Ver código de recuperação": "Show recovery code",
+"Você guardou o código?": "Did you save the code?",
+"Voltar e ver de novo": "Go back and look again",
+"a cópia da nuvem se perder os aparelhos. Guarde onde só você acessa.": "the cloud copy if you lose your devices. Keep it where only you can reach it.",
+"a nuvem foi apagada ou recomeçada em outro aparelho: desconecte e entre de novo com o código novo": "the cloud was deleted or restarted on another device: disconnect and sign in again with the new code",
+"a nuvem não está ligada neste PC": "the cloud is not on for this PC",
+"ainda não": "not yet",
+"ainda não enviou": "has not uploaded yet",
+"arquivo não está mais no Drive": "file is no longer in Drive",
+"código de recuperação (24 letras e números; pode colar)": "recovery code (24 letters and numbers; you can paste)",
+"digite um nome": "type a name",
+"em dia": "up to date",
+"em relação ao Google. A sincronização continua, mas as horas das anotações editadas podem ficar trocadas entre os aparelhos. Acerte a hora do Windows (Configurações › Hora e idioma › Sincronizar agora).": "compared to Google. Sync keeps working, but the times of edited notes may get mixed up between devices. Fix the Windows time (Settings › Time & language › Sync now).",
+"entrar de novo": "sign in again",
+"entre com o Google de novo": "sign in with Google again",
+"essa conta ainda não tem uma nuvem do RadLog": "this account does not have a RadLog cloud yet",
+"essa conta já tem uma nuvem do RadLog": "this account already has a RadLog cloud",
+"esta cópia do app não tem a chave do Google": "this copy of the app does not have the Google key",
+"há pouco": "just now",
+"nome deste aparelho na nuvem": "this device's name in the cloud",
+"nuvem de uma versão mais nova do RadLog": "cloud from a newer version of RadLog",
+"nuvem ligada": "cloud on",
+"nuvem · sem internet": "cloud · no internet",
+"nuvem: a nuvem antiga foi apagada do Drive para começar uma nova": "cloud: the old cloud was deleted from Drive to start a new one",
+"nuvem: entrar de novo": "cloud: sign in again",
+"nuvem: entrou de novo no Google": "cloud: signed in to Google again",
+"nuvem: o Google pediu para entrar de novo": "cloud: Google asked to sign in again",
+"nuvem: relógio errado": "cloud: wrong clock",
+"nuvem: sem sincronizar há mais de 1 dia": "cloud: not synced for over 1 day",
+"não abre com este código": "does not open with this code",
+"o Drive não devolveu o endereço do envio": "Drive did not return the upload address",
+"o Google pediu para entrar de novo": "Google asked to sign in again",
+"o código tem 24 letras e números (sem O, I nem L)": "the code has 24 letters and numbers (no O, I or L)",
+"openid email https://www.googleapis.com/auth/drive.file": "openid email https://www.googleapis.com/auth/drive.file",
+"para confirmar, digite NOVA": "to confirm, type NOVA",
+"sem internet": "no internet",
+"voce@gmail.com": "you@gmail.com",
+"É a chave da sua nuvem. Com ele você liga outro PC ou o celular, ou recupera tudo se este PC quebrar. Ninguém mais tem esse código: nem o Google, nem o RadLog. Se perder o código e todos os aparelhos, a cópia da nuvem fica ilegível (os dados deste PC continuam intactos).": "It is the key to your cloud. With it you add another PC or the phone, or recover everything if this PC breaks. Nobody else has this code: not Google, not RadLog. If you lose the code and all devices, the cloud copy becomes unreadable (this PC's data stays intact).",
+"É a chave da sua nuvem. Com ele você liga outro PC ou o celular.": "It is the key to your cloud. With it you add another PC or the phone.",
+"É como os outros aparelhos veem este PC na lista. Vai cifrado junto com os dados.": "It is how the other devices see this PC in the list. It is encrypted along with the data.",
+"Última sincronização": "Last sync",
+"adiantado": "ahead",
+"atrasado": "behind",
+"Conta": "Account",
+"renomear": "rename",
+"Tentar agora": "Try now",
+"Este PC": "This PC",
+"Aparelhos nesta nuvem": "Devices in this cloud",
+"Sincronizar sozinho a cada 15 min": "Sync on its own every 15 min",
+"Nuvem aberta": "Cloud opened",
+"Conferir": "Check",
+"Ligar a nuvem": "Turn the cloud on",
+"Guardei, continuar": "Saved it, continue",
+"Mostrar": "Show",
+"Copiar": "Copy",
+"nome": "name",
+"pausada": "paused",
+"enviando": "uploading",
+"nuvem enviando…": "cloud uploading…",
+"nuvem: confirme o aparelho": "cloud: confirm the device",
+"Pronto, login feito": "Done, you are signed in",
+"Login cancelado": "Sign-in canceled"
 },
 "patterns": [
 [
@@ -4066,6 +4177,15 @@ const I18N_EN = {
 "%), com ",
 " dias antes e ",
 " depois. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo."
+]
+],
+[
+"Ela foi criada em outro aparelho (último envio ",
+"^Ela foi criada em outro aparelho \\(último envio ((?:(?! · ).)+?); os nomes dos aparelhos só aparecem depois do código, porque também vão cifrados\\)\\. Para abrir os arquivos, digite o código de recuperação que você guardou\\.$",
+"It was created on another device (last upload ${1}; device names only show after the code, because they are encrypted too). To open the files, type the recovery code you saved.",
+[
+"Ela foi criada em outro aparelho (último envio ",
+"; os nomes dos aparelhos só aparecem depois do código, porque também vão cifrados). Para abrir os arquivos, digite o código de recuperação que você guardou."
 ]
 ],
 [
@@ -8358,6 +8478,14 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: não consegui abrir a chave guardada (",
+"^nuvem: não consegui abrir a chave guardada \\(((?:(?! · ).)+?)\\)$",
+"cloud: could not open the saved key (${1})",
+[
+"nuvem: não consegui abrir a chave guardada ("
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) chuva\\(s\\) sem dados suficientes do RadiaCode$",
 "${1} rain(s) without enough RC102 data",
@@ -8795,6 +8923,14 @@ const I18N_EN = {
 "acumulado do aparelho · ",
 " contagens · ",
 " cps"
+]
+],
+[
+"nuvem: login com o Google não deu certo (",
+"^nuvem: login com o Google não deu certo \\(((?:(?! · ).)+?)\\)$",
+"cloud: Google sign-in did not work (${1})",
+[
+"nuvem: login com o Google não deu certo ("
 ]
 ],
 [
@@ -9376,6 +9512,22 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: não consegui gravar o estado (",
+"^nuvem: não consegui gravar o estado \\(((?:(?! · ).)+?)\\)$",
+"cloud: could not save the state (${1})",
+[
+"nuvem: não consegui gravar o estado ("
+]
+],
+[
+"não consegui juntar um pacote da nuvem: ",
+"^não consegui juntar um pacote da nuvem: ((?:(?! · ).)+?)$",
+"could not merge a cloud package: ${1}",
+[
+"não consegui juntar um pacote da nuvem: "
+]
+],
+[
 "Memória: ",
 "^Memória: ((?:(?! · ).)+?) KB de ((?:(?! · ).)+?) MB usados \\(((?:(?! · ).)+?)%, em ((?:(?! · ).)+?)\\)\\.$",
 "Memory: ${1} KB of ${2} MB used (${3}%, on ${4}).",
@@ -9553,6 +9705,14 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: não consegui gravar a chave (",
+"^nuvem: não consegui gravar a chave \\(((?:(?! · ).)+?)\\)$",
+"cloud: could not save the key (${1})",
+[
+"nuvem: não consegui gravar a chave ("
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -9675,6 +9835,15 @@ const I18N_EN = {
 [
 "sincronização com ",
 ": voltou a responder"
+]
+],
+[
+"Parece que este PC é uma cópia de \"",
+"^Parece que este PC é uma cópia de \"((?:(?! · ).)+?)\"\\.$",
+"This PC looks like a copy of \"${1}\".",
+[
+"Parece que este PC é uma cópia de \"",
+"\"."
 ]
 ],
 [
@@ -10165,6 +10334,15 @@ const I18N_EN = {
 "${1}: ${2} ${3}, ${4} ${5} with a stretch above safe.",
 [
 " com trecho acima do seguro."
+]
+],
+[
+"Este é o ",
+"^Este é o ((?:(?! · ).)+?) \\(o outro foi desligado\\)$",
+"This is ${1} (the other one was turned off)",
+[
+"Este é o ",
+" (o outro foi desligado)"
 ]
 ],
 [
@@ -11106,6 +11284,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Nome deste aparelho na nuvem: ",
+"^Nome deste aparelho na nuvem: ((?:(?! · ).)+?)$",
+"This device's name in the cloud: ${1}",
+[
+"Nome deste aparelho na nuvem: "
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -11385,6 +11571,15 @@ const I18N_EN = {
 [
 "· incerteza ",
 "% (para em 10%)"
+]
+],
+[
+"O relógio deste PC está ",
+"^O relógio deste PC está ((?:(?! · ).)+?) min ((?:(?! · ).)+?)$",
+"This PC's clock is ${1} min ${2}",
+[
+"O relógio deste PC está ",
+" min "
 ]
 ],
 [
@@ -15265,6 +15460,15 @@ const I18N_EN = {
 ]
 ],
 [
+"enviando ",
+"^enviando ((?:(?! · ).)+?) · ((?:(?! · ).)+?) de ((?:(?! · ).)+?)$",
+"uploading ${1} · ${2} of ${3}",
+[
+"enviando ",
+" de "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -15682,6 +15886,14 @@ const I18N_EN = {
 "last reading ${1}",
 [
 "última leitura "
+]
+],
+[
+"nuvem em dia · ",
+"^nuvem em dia · ((?:(?! · ).)+?)$",
+"cloud up to date · ${1}",
+[
+"nuvem em dia · "
 ]
 ],
 [
@@ -18023,6 +18235,15 @@ const I18N_EN = {
 ]
 ],
 [
+"há ",
+"^há ((?:(?! · ).)+?) dias$",
+"${1} days ago",
+[
+"há ",
+" dias"
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -18303,6 +18524,14 @@ const I18N_EN = {
 ]
 ],
 [
+"enviou ",
+"^enviou ((?:(?! · ).)+?)$",
+"uploaded ${1}",
+[
+"enviou "
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -18503,6 +18732,14 @@ const I18N_EN = {
 ]
 ],
 [
+"grupo ",
+"^grupo ((?:(?! · ).)+?)$",
+"group ${1}",
+[
+"grupo "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) dias$",
 "${1} days",
@@ -18580,6 +18817,14 @@ const I18N_EN = {
 "· at ${1}",
 [
 "· às "
+]
+],
+[
+"há ",
+"^há ((?:(?! · ).)+?) h$",
+"${1} h ago",
+[
+"há "
 ]
 ],
 [

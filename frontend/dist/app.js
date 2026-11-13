@@ -1980,6 +1980,8 @@ function renderSetNavStatus() {
   put("rc", rt || "", ($("rcSetDot").className.match(/\b(on|err|wait)\b/) || [])[1] || "off");
   const set = state.settings || {};
   put("alarm", !set.alarmEnabled ? "alarme desligado" : `toca a partir de ${usvTxt(alarmUSv())}`, "");
+  const cb = typeof cloudBadge === "function" ? cloudBadge() : null;
+  put("data", cb ? cb.text : "", cb ? (cb.att ? "wait" : "on") : "");
   put("about", $("appVersion") && $("appVersion").textContent ? `versão ${$("appVersion").textContent.replace(/^v/, "")}` : "", "");
 }
 
@@ -3033,6 +3035,7 @@ function wire() {
   wireHeat();
   wireUpdate();
   wireSync();
+  wireCloud();
   wireRc();
   wireMeasureSaved();
   wireRain();

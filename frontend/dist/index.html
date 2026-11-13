@@ -98,6 +98,7 @@
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     <span>Configurações</span>
     </button>
+  <button type="button" class="side-cloud" id="sideCloud" title="Nuvem (Google Drive)" hidden><span class="dot on" aria-hidden="true"></span><span></span></button>
   <div class="side-foot"><button type="button" class="pill upd-pill" id="updPill" title="Versão nova do app" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
       <span id="updPillText">versão nova</span>
@@ -2200,18 +2201,8 @@
       </fieldset>
     </div>
     <fieldset class="set-wide cloud-box" id="cloudBox">
-      <legend>Nuvem (Google Drive) <span class="chip cloud-exp">experimental</span> <span class="chip cloud-wip" title="Em construção: esta parte ainda não funciona"><span class="dot wait" aria-hidden="true"></span>WIP</span></legend>
-      <p class="small cloud-wip-note"><span class="dot wait" aria-hidden="true"></span>Em construção: esta parte ainda não funciona. O login com o Google e o envio entram numa próxima versão.</p>
-      <div class="cloud-off" inert aria-disabled="true">
-        <p class="small muted">Guarda uma cópia cifrada dos seus dados numa pasta do RadLog no seu próprio Google Drive, para outro PC (e, depois, o celular) ter o mesmo histórico.</p>
-        <ul class="cloud-pts small">
-          <li>O Google guarda os arquivos mas não consegue ler: a chave fica nos seus aparelhos e num código que só você tem.</li>
-          <li>O app só enxerga a pasta que ele mesmo criou, não o resto do Drive.</li>
-          <li>Lugar, coordenadas e metadados de foto nunca sobem.</li>
-          <li>Sem internet, nada muda: o app grava aqui e sobe depois.</li>
-        </ul>
-        <div class="row"><button type="button" class="btn accent" disabled tabindex="-1">Entrar com Google</button></div>
-      </div>
+      <legend>Nuvem (Google Drive) <span class="chip cloud-exp">experimental</span> <span class="chip cloud-st" id="cloudTag" hidden></span></legend>
+      <div class="cloud-body" id="cloudBody"></div>
     </fieldset>
     <fieldset class="set-wide">
       <legend>Sincronização</legend>
@@ -2363,6 +2354,9 @@
 
 
 
+<dialog id="cloudDlg" class="cloud-dlg" aria-label="Nuvem (Google Drive)">
+  <div class="dlg" id="cloudDlgBody"></div>
+</dialog>
 <dialog id="qkDlg" class="qk-dlg" aria-label="Buscar">
   <div class="qk-in">
     <svg width="17" height="17" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.5 3.5" stroke-linecap="round"/></svg>
@@ -2605,6 +2599,7 @@
 <script src="clima.js"></script>
 <script src="busca.js"></script>
 <script src="uso.js"></script>
+<script src="nuvem.js"></script>
 <script src="demo-loader.js"></script>
 <script src="app.js"></script>
 <div class="tb-tip mono small" id="tubeTip" hidden></div>

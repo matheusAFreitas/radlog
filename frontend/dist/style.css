@@ -1348,6 +1348,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .side-tools .side-link, .side > .side-link { width: 36px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
   .side-tools .side-link span, .side > .side-link span { display: none; }
   .side-foot .pill { margin: 0; }
+  .side-cloud { width: auto; margin: 0; padding: 0 var(--space-2); border-top: 0; }
+  .side-cloud span:last-child { display: none; }
   .main { padding: var(--space-3) var(--space-4) var(--space-3); }
 }
 @media (max-width: 420px) { .dial { width: 104px; height: 104px; } }
@@ -2823,12 +2825,56 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
   .pl-acts { grid-column: 1 / -1; justify-content: flex-start; }
 }
 
-/* ---------- nuvem no Google Drive: só a tela, inoperante (2.76.0) ---------- */
-.chip.cloud-exp, .chip.cloud-wip { font-family: var(--mono); font-size: var(--fs-micro); padding: 0 var(--space-2); vertical-align: 1px; }
+/* ---------- nuvem no Google Drive (2.79.0; nuvem.js) ---------- */
+.chip.cloud-exp, .chip.cloud-st { font-family: var(--mono); font-size: var(--fs-micro); padding: 0 var(--space-2); vertical-align: 1px; }
 .chip.cloud-exp { color: var(--away); border-color: color-mix(in srgb, var(--away) 55%, transparent); }
-.chip.cloud-wip { color: var(--att); border-color: color-mix(in srgb, var(--att) 55%, transparent); gap: var(--space-1); }
-.cloud-wip .dot, .cloud-wip-note .dot { width: 7px; height: 7px; background: var(--att); border-color: var(--att); }
-.cloud-wip-note { display: flex; align-items: baseline; gap: var(--space-2); margin: 0 0 var(--space-3); color: var(--att); }
-.cloud-off { display: flex; flex-direction: column; gap: var(--space-3); opacity: .5; user-select: none; pointer-events: none; }
-.cloud-off > p, .cloud-off > .row { margin: 0; }
+.chip.cloud-st.ok { color: var(--accent); border-color: var(--accent-line); }
+.chip.cloud-st.att { color: var(--att); border-color: color-mix(in srgb, var(--att) 55%, transparent); }
+.cloud-body { display: flex; flex-direction: column; gap: var(--space-3); }
+.cloud-body > p, .cloud-body > .row { margin: 0; }
 .cloud-pts { margin: 0; padding-left: var(--space-5); display: flex; flex-direction: column; gap: var(--space-1); }
+.cloud-kv { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: var(--space-1) var(--space-5); margin: 0; font-size: var(--fs-body); }
+.cloud-kv dt { color: var(--muted); }
+.cloud-kv dd { margin: 0; text-align: right; font-size: var(--fs-label); overflow-wrap: anywhere; }
+.cloud-devs { border-top: 1px solid var(--border); }
+.cloud-devs:empty { display: none; }
+.cloud-devs > .small { padding-top: var(--space-2); }
+.cloud-dev { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--chart-grid); font-size: var(--fs-body); }
+.cloud-dev .link { background: none; border: 0; padding: 0; color: var(--accent); cursor: pointer; text-decoration: underline; }
+.cloud-note { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); font-size: var(--fs-label); }
+.cloud-note.att { background: color-mix(in srgb, var(--att) 8%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--att) 40%, transparent); }
+.cloud-note.info { background: color-mix(in srgb, var(--info) 7%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--info) 35%, transparent); }
+.cloud-bar { height: 6px; border-radius: 3px; background: var(--surface-2); overflow: hidden; }
+.cloud-bar i { display: block; height: 100%; background: var(--accent); transition: width .3s; }
+.cloud-spin { width: 28px; height: 28px; border-radius: 50%; border: 3px solid var(--surface-2); border-top-color: var(--accent); animation: cloud-spin 1s linear infinite; }
+@keyframes cloud-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .cloud-spin { animation-duration: 3s; } }
+dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
+.cloud-dlg h3 { margin: 0; font-size: var(--fs-heading); }
+.cloud-dlg p { margin: 0; }
+.cloud-steps { display: flex; gap: var(--space-2); }
+.cloud-steps i { height: 4px; flex: 1; border-radius: 2px; background: var(--surface-2); }
+.cloud-steps i.f { background: var(--accent); }
+.cloud-code { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-2); }
+.cloud-code span { font-size: 20px; font-weight: 500; letter-spacing: .08em; text-align: center; padding: var(--space-2) 0; border-radius: var(--radius-md); background: var(--bg); box-shadow: inset 0 0 0 1px var(--border); user-select: all; }
+.cloud-code small { display: block; font-size: var(--fs-micro); color: var(--dim); letter-spacing: 0; user-select: none; }
+.cloud-check { display: flex; gap: var(--space-3); align-items: flex-start; font-size: var(--fs-body); cursor: pointer; }
+.cloud-check input { margin-top: 3px; }
+.cloud-inputs { display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--space-3); }
+.cloud-inp { display: flex; flex-direction: column; gap: 2px; font-size: var(--fs-caption); color: var(--muted); }
+.cloud-inp input { padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); background: var(--bg); border: 1px solid var(--border); color: var(--text); font-size: var(--fs-body); }
+.cloud-inp input.mono, .cloud-inp.big input { font-family: var(--mono); letter-spacing: .08em; text-transform: uppercase; }
+.cloud-inp.big input { font-size: 16px; }
+.cloud-inp.bad input { border-color: var(--warn); }
+.cloud-err { color: var(--warn); font-size: var(--fs-label); }
+.cloud-foot { justify-content: flex-end; }
+.cloud-lost summary { cursor: pointer; }
+.cloud-lost > p, .cloud-lost > .btn { margin-top: var(--space-2); }
+.side-cloud { display: flex; align-items: center; gap: var(--space-2); width: 100%; margin-top: var(--space-2); padding: var(--space-2) var(--space-3) 0; border: 0; border-top: 1px solid var(--border); background: transparent; color: var(--muted); font-size: var(--fs-caption); text-align: left; cursor: pointer; }
+.side-cloud.att { color: var(--att); }
+.side-cloud:hover { color: var(--text); }
+.side-cloud[hidden] { display: none; }
+@media (max-width: 640px) {
+  .cloud-code { grid-template-columns: repeat(2, 1fr); }
+  .cloud-inputs { grid-template-columns: minmax(0, 1fr); }
+}

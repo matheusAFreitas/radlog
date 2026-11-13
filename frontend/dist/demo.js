@@ -39,9 +39,13 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.78.3";
+const DEMO_VERSION = "2.79.0";
 
 function makeDemoApi() {
+  let demoCloud = { state: "off", ready: true, auto: true };
+  let demoCloudCode = "";
+  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
+    devices: [{ name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
   let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
@@ -570,6 +574,32 @@ const demoRc = () => {
     GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\RadLog\\Versões",
     OpenVersionsDir: async () => {},
     GetSync: async () => demoSync,
+    // nuvem (nuvem.js): login de mentira; gmc.cloudDemo = "outro" finge uma conta que já tem nuvem
+    GetCloud: async () => demoCloud,
+    CloudLogin: async () => (demoCloud = { ...demoCloud, state: "wait" }),
+    CloudLoginWait: async () => {
+      await new Promise((r) => setTimeout(r, 1500));
+      if (demoCloud.state !== "wait") return null;
+      let other = false;
+      try { other = localStorage.getItem("gmc.cloudDemo") === "outro"; } catch (e) { /* sem localStorage */ }
+      const was = demoCloud.was;
+      demoCloud = { ...demoCloud, state: was || "off", email: "voce@gmail.com" };
+      if (was) return { info: (demoCloud = { ...demoCloud, state: "ok", was: "" }), next: "" };
+      return { info: demoCloud, next: other ? "existing" : "new", lastUp: Date.now() - 864e5 };
+    },
+    CloudCancel: async () => (demoCloud = { ...demoCloud, state: demoCloud.was || "off" }),
+    NewCloudCode: async () => { const A = "0123456789ABCDEFGHJKMNPQRSTVWXYZ"; let c = ""; for (let i = 0; i < 24; i++) c += (i && i % 4 === 0 ? "-" : "") + A[Math.floor(Math.random() * 32)]; demoCloudCode = c; return c; },
+    CheckCloudCode: async (v) => { const c = String(v).toUpperCase().replace(/O/g, "0").replace(/[IL]/g, "1").replace(/[\s-]/g, ""); if (!/^[0-9A-HJKMNP-TV-Z]{24}$/.test(c)) throw new Error("o código tem 24 letras e números (sem O, I nem L)"); return c.match(/.{4}/g).join("-"); },
+    CloudCode: async () => demoCloudCode,
+    SaveCloudCode: async () => "C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt",
+    CloudFinishSetup: async (code) => { demoCloudCode = code; return (demoCloud = demoCloudOn([])); },
+    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ name: "Notebook", lastUp: Date.now() - 6e6 }])); },
+    CloudReset: async () => demoCloud,
+    CloudSyncNow: async () => (demoCloud = { ...demoCloud, state: "ok", lastSync: Date.now(), queue: [] }),
+    CloudPause: async () => (demoCloud = { ...demoCloud, state: "ok" }),
+    SetCloudAuto: async (on) => (demoCloud = { ...demoCloud, auto: on }),
+    SetCloudName: async (name) => (demoCloud = { ...demoCloud, devices: demoCloud.devices.map((d) => (d.me ? { ...d, name } : d)) }),
+    CloudDisconnect: async () => (demoCloud = { state: "off", ready: true, auto: true }),
     GetRadiacode: async () => demoRc(),
     SetRadiacode: async (on, ble) => {
       const nb = (ble || "").toUpperCase(), changed = nb && nb !== demoRcCfg.ble;
