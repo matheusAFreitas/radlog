@@ -4859,3 +4859,20 @@ perguntas do RC102	RC102 questions
 sincronização	sync
 versões da calibração	calibration versions
 intercalibração	cross-calibration
+A versão antiga não abriu	The older version didn't open
+Você abriu a versão {0} com a {1} aberta. Continuei na {2}: a antiga gravaria as configurações sem os ajustes novos.	You opened version {0} while {1} was running. I stayed on {2}: the older one would save the settings without the new options.
+Para usar a versão antiga, feche o app (pelo ícone da bandeja) e abra ela de novo.	To use the older version, close the app (from the tray icon) and open it again.
+Entendi	Got it
+A versão {0} tentou abrir com a {1} aberta: continuei nesta	Version {0} tried to open while {1} was running: stayed on this one
+versão mais antiga ({0}) pediu para abrir com esta ({1}) aberta: recusei	older version ({0}) asked to open while this one ({1}) was running: refused
+Relógio do GMC-800 estava {0} s adiantado: acertei pelo do PC	GMC-800 clock was {0} s fast: set it from the PC
+Relógio do GMC-800 estava {0} s atrasado: acertei pelo do PC	GMC-800 clock was {0} s slow: set it from the PC
+conexão: não consegui acertar o relógio do contador: {0}	connection: couldn't set the counter clock: {0}
+não consegui tirar a localização e os dados da câmera de dentro desta foto, então ela não foi anexada	couldn't remove the location and camera data from inside this photo, so it wasn't attached
+anexo {0} ficou de fora (não consegui tirar a localização de dentro da foto)	attachment {0} was left out (couldn't remove the location from inside the photo)
+formato de imagem não reconhecido	unrecognized image format
+{0} agora é outro aparelho: esperando o contador voltar	{0} is now another device: waiting for the counter to come back
+reconexão: {0} agora é outro aparelho; esperando o contador	reconnect: {0} is now another device; waiting for the counter
+reconexão: o contador mudou de {0} para {1}	reconnect: the counter moved from {0} to {1}
+fechando: {0} minuto(s) sem gravar em {1} ficaram guardados para a próxima abertura	closing: {0} unsaved minute(s) in {1} were kept for the next start
+{0}; e não deu para guardar em {1}: {2}	{0}; and couldn't keep them in {1}: {2}

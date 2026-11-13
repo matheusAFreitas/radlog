@@ -28,7 +28,10 @@ import (
 
 // Settings são as preferências salvas em config.json.
 type Settings struct {
-	Port         string `json:"port"`
+	Port string `json:"port"`
+	// PortUSB é o USBID do contador na última conexão (B5): a reconexão
+	// procura por ele, não pelo número da porta. Só deste PC.
+	PortUSB      string `json:"portUsb,omitempty"`
 	AutoConnect  bool   `json:"autoConnect"`
 	AlarmEnabled bool   `json:"alarmEnabled"`
 	AlarmCPM     int    `json:"alarmCPM"` // derivado de AlarmUSv (thresholds.go)
@@ -507,6 +510,7 @@ func (a *App) startup(ctx context.Context) {
 	a.goSafe("cleanOldVersionsLater", a.cleanOldVersionsLater)
 	a.goLoop("alertSecondsLoop", a.alertSecondsLoop)
 	a.goLoop("memoryWatch", a.memoryWatch)
+	a.goLoop("pendingRetry", a.pendingRetry)
 	a.goLoop("syncLoop", a.syncLoop)
 	a.goLoop("rcLoop", a.rcLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
@@ -538,10 +542,11 @@ func (a *App) shutdown(ctx context.Context) {
 	a.StopDemo()
 	a.disconnect("")
 	if a.store != nil {
-		if err := a.store.Flush(); err != nil {
-			if n, f := a.store.Pending(); n > 0 {
-				a.logf("fechando com %d minuto(s) sem gravar em %s: %v", n, f, err)
-			}
+		n, f := a.store.Pending()
+		if err := a.store.FlushOrKeep(); err != nil {
+			a.logf("fechando com %d minuto(s) sem gravar em %s: %v", n, f, err)
+		} else if n > 0 {
+			a.logf("fechando: %d minuto(s) sem gravar em %s ficaram guardados para a próxima abertura", n, f)
 		}
 	}
 }
@@ -816,6 +821,22 @@ func (a *App) noteSaveResult(err error) {
 	}
 }
 
+// pendingRetry tenta gravar a cada minuto os minutos que esperam, mesmo sem
+// leitura nova (contador desconectado depois de fechar o Excel), para o
+// aviso não ficar na tela até reconectar (QA 13/11).
+func (a *App) pendingRetry() {
+	t := time.NewTicker(time.Minute)
+	defer t.Stop()
+	for range t.C {
+		if a.closing.Load() {
+			return
+		}
+		if n, _ := a.store.Pending(); n > 0 {
+			a.noteSaveResult(a.store.Flush())
+		}
+	}
+}
+
 func (a *App) setState(state, msg string) {
 	a.mu.Lock()
 	a.state, a.message = state, msg
@@ -860,10 +881,10 @@ func (a *App) DetectPort() (string, error) {
 	if connected {
 		return current, nil
 	}
-	for _, p := range ports {
-		if !p.IsUSB {
-			continue
-		}
+	a.mu.Lock()
+	known := a.settings.PortUSB
+	a.mu.Unlock()
+	for _, p := range detectOrder(ports, known) {
 		d, err := gmc.Open(p.Name)
 		if err != nil {
 			continue
@@ -875,6 +896,55 @@ func (a *App) DetectPort() (string, error) {
 		}
 	}
 	return "", errors.New("nenhum contador GMC encontrado nas portas USB")
+}
+
+// detectOrder escolhe as portas que o Detectar testa (B5): a do contador da
+// última conexão e as que têm o chip USB dos contadores GQ. Só se não houver
+// nenhuma assim testa as outras portas USB (o botão foi apertado de
+// propósito); a reconexão automática nunca faz isso.
+func detectOrder(ports []gmc.PortInfo, known string) []gmc.PortInfo {
+	var first, likely, rest []gmc.PortInfo
+	for _, p := range ports {
+		switch {
+		case !p.IsUSB:
+		case known != "" && p.USBID == known:
+			first = append(first, p)
+		case p.LikelyGMC():
+			likely = append(likely, p)
+		default:
+			rest = append(rest, p)
+		}
+	}
+	if out := append(first, likely...); len(out) > 0 {
+		return out
+	}
+	return rest
+}
+
+// resolvePort acha a porta do contador para a reconexão (B5). Se o número
+// da porta mudou, segue o contador; se outro aparelho está naquele número,
+// não abre (ok = false). Sem USBID guardado (versão antiga) fica a porta
+// salva.
+func resolvePort(ports []gmc.PortInfo, name, usb string) (string, bool) {
+	if usb == "" {
+		return name, true
+	}
+	for _, p := range ports {
+		if p.USBID == usb && p.Name == name {
+			return name, true
+		}
+	}
+	for _, p := range ports {
+		if p.USBID == usb {
+			return p.Name, true
+		}
+	}
+	for _, p := range ports {
+		if p.Name == name && p.USBID != "" {
+			return "", false // outro aparelho USB pegou o número
+		}
+	}
+	return name, true // não está conectado: o connect diz "não encontrada"
 }
 
 // Connect conecta ao contador na porta indicada.
@@ -947,6 +1017,29 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	if dt, err := withTimeout(6*time.Second, d.DateTime); err == nil {
 		info.ClockDrift = math.Round(time.Until(dt).Seconds())
 	}
+	// U3: relógio fora por mais de clockFixLimit é acertado ao conectar, para
+	// o histórico baixado entrar na hora certa (origem do B1)
+	clockFixed := 0.0
+	if math.Abs(info.ClockDrift) > clockFixLimit {
+		if _, err := withTimeout(6*time.Second, func() (bool, error) { return true, d.SetDateTime(time.Now()) }); err == nil {
+			clockFixed = info.ClockDrift
+			info.ClockDrift = 0
+			if dt, err := withTimeout(6*time.Second, d.DateTime); err == nil {
+				info.ClockDrift = math.Round(time.Until(dt).Seconds())
+			}
+		} else {
+			a.logf("conexão: não consegui acertar o relógio do contador: %v", err)
+		}
+	}
+
+	usbID := ""
+	if ports, err := gmc.ListPorts(); err == nil {
+		for _, p := range ports {
+			if p.Name == port {
+				usbID = p.USBID
+			}
+		}
+	}
 
 	stop := make(chan struct{})
 	a.mu.Lock()
@@ -956,6 +1049,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	}
 	a.cfgBackedUp = false
 	a.settings.Port = port
+	a.settings.PortUSB = usbID
 	a.saveSettingsLocked()
 	a.mu.Unlock()
 	a.saveLastCal(cal)
@@ -965,6 +1059,11 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	a.goSafe("plannedOnConnect", func() { a.plannedOnConnect("gmc", time.Now()) }) // voltou de uma saída programada?
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
 	a.logEvent(fmt.Sprintf("Contador conectado (%s em %s)", ver, port))
+	if clockFixed > 0 {
+		a.logEvent(fmt.Sprintf("Relógio do GMC-800 estava %.0f s adiantado: acertei pelo do PC", clockFixed))
+	} else if clockFixed < 0 {
+		a.logEvent(fmt.Sprintf("Relógio do GMC-800 estava %.0f s atrasado: acertei pelo do PC", -clockFixed))
+	}
 	go a.poll(d, stop, port)
 	return info, nil
 }
@@ -1029,7 +1128,7 @@ func (a *App) autoReconnect(wait time.Duration) {
 	}
 	stop := make(chan struct{})
 	a.retryStop = stop
-	port := a.settings.Port
+	port, usb := a.settings.Port, a.settings.PortUSB
 	a.mu.Unlock()
 
 	// logo depois de fechar, o Windows ainda segura a porta por um instante
@@ -1044,6 +1143,23 @@ func (a *App) autoReconnect(wait time.Duration) {
 		case <-stop:
 			return
 		default:
+		}
+		if ports, err := gmc.ListPorts(); err == nil {
+			p, ok := resolvePort(ports, port, usb)
+			if !ok {
+				a.logf("reconexão: %s agora é outro aparelho; esperando o contador", port)
+				a.setState("desconectado", fmt.Sprintf("%s agora é outro aparelho: esperando o contador voltar", port))
+				select {
+				case <-stop:
+					return
+				case <-time.After(10 * time.Second):
+				}
+				continue
+			}
+			if p != port {
+				a.logf("reconexão: o contador mudou de %s para %s", port, p)
+				port = p
+			}
 		}
 		if _, err := a.connect(port); err == nil {
 			a.mu.Lock()
@@ -1348,6 +1464,10 @@ func (a *App) storeMinute(t time.Time, cpm, raw float64, lv Levels) {
 }
 
 // ---------- relógio ----------
+
+// clockFixLimit é a diferença (em segundos) a partir da qual o relógio do
+// GMC-800 é acertado sozinho ao conectar (ACE, 13/11).
+const clockFixLimit = 3
 
 // SyncClock acerta o relógio do contador com o do computador.
 func (a *App) SyncClock() (float64, error) {

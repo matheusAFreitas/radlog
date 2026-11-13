@@ -102,7 +102,7 @@ func TestSyncAttachmentsAndCalibration(t *testing.T) {
 	addTestMeasure(win, 1, "Eletrodo", "encostado", t0)
 	addTestMeasure(lin, 7, "Outra", "", t0.Add(-24*time.Hour))
 	src := filepath.Join(t.TempDir(), "foto.jpg")
-	os.WriteFile(src, []byte("jpg"), 0o644)
+	os.WriteFile(src, testPhoto("jpg"), 0o644)
 	if _, err := win.attachFiles(1, []string{src}); err != nil {
 		t.Fatal(err)
 	}

@@ -136,3 +136,38 @@ func errorsIs(err, target error) bool {
 	}
 	return false
 }
+
+// QA 13/11: fechar com o mês travado guarda os minutos para a próxima
+// abertura.
+func TestFlushOrKeep(t *testing.T) {
+	dir := t.TempDir()
+	s, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	now := time.Now().Truncate(time.Minute)
+	month := s.monthFile(now)
+	_ = os.Remove(month)
+	_ = os.Mkdir(month, 0o755) // trava o mês
+	if err := s.Add(Point{T: now, CPM: 20, Src: SrcLive}); !errorsIs(err, ErrNotSaved) {
+		t.Fatalf("Add: %v", err)
+	}
+	if err := s.FlushOrKeep(); err != nil {
+		t.Fatal(err)
+	}
+	_ = os.Remove(month) // "fechou o Excel"
+	s2, err := Open(dir)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if n, _ := s2.Pending(); n != 0 {
+		t.Fatalf("ainda pendente: %d", n)
+	}
+	pts, _ := readFile(month)
+	if len(pts) != 1 || pts[0].CPM != 20 {
+		t.Fatalf("mês: %+v", pts)
+	}
+	if _, err := os.Stat(filepath.Join(dir, pendingFile)); !os.IsNotExist(err) {
+		t.Fatal("o arquivo de pendentes ficou")
+	}
+}

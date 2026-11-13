@@ -25,7 +25,7 @@ func TestMeasureAttachments(t *testing.T) {
 	a := newTestApp(t)
 	addTestMeasure(a, 1, "Eletrodo", "encostado", time.Now().Add(-time.Hour))
 	src := filepath.Join(t.TempDir(), "foto do eletrodo.png")
-	os.WriteFile(src, []byte("\\x89PNG fake"), 0o644)
+	os.WriteFile(src, testPhoto("png"), 0o644)
 	bad := filepath.Join(t.TempDir(), "x/../../etc")
 	list, err := a.attachFiles(1, []string{src, src, bad})
 	if err == nil || !strings.Contains(err.Error(), "não encontrado") {

@@ -13,6 +13,7 @@
 //     diffHead: ["Ponto", "Hoje", "Novo"], // títulos das colunas
 //     note: "aviso em destaque",
 //     ok: "Gravar", danger: true,        // danger = ação sem volta
+//     noCancel: true,                    // só avisa: um botão só
 //   })
 //
 // O foco começa no Cancelar; Esc e o X cancelam. O texto entra em
@@ -88,10 +89,12 @@ function askConfirm(o) {
   yes.textContent = o.ok || "Continuar";
   yes.classList.toggle("accent", !o.danger);
   yes.classList.toggle("danger", !!o.danger);
+  const no = cfmDlg.querySelector("#cfmNo");
+  no.hidden = !!o.noCancel;
   cfmDlg.returnValue = "";
   return new Promise((res) => {
     cfmDone = res;
     if (!cfmDlg.open) cfmDlg.showModal();
-    cfmDlg.querySelector("#cfmNo").focus();
+    (o.noCancel ? yes : no).focus();
   });
 }

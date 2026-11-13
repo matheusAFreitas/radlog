@@ -18,6 +18,19 @@ type PortInfo struct {
 	Name        string `json:"name"`
 	Description string `json:"description"`
 	IsUSB       bool   `json:"isUSB"`
+	// USBID identifica o aparelho atrás da porta: "VID:PID" e, se o chip
+	// tiver, ":número de série". O número da porta COM pode mudar; isto não.
+	USBID string `json:"usbId,omitempty"`
+}
+
+// gmcVIDs são os fabricantes de chip USB-serial usados pelos contadores GQ
+// (WCH: CH340, CH341, CH9102).
+var gmcVIDs = map[string]bool{"1A86": true}
+
+// LikelyGMC diz se a porta tem um chip USB-serial dos usados pelo GMC.
+func (p PortInfo) LikelyGMC() bool {
+	vid, _, _ := strings.Cut(p.USBID, ":")
+	return gmcVIDs[vid]
 }
 
 // ListPorts lista as portas seriais disponíveis.
@@ -30,7 +43,14 @@ func ListPorts() ([]PortInfo, error) {
 			if p.IsUSB && desc == "" {
 				desc = fmt.Sprintf("USB %s:%s", p.VID, p.PID)
 			}
-			out = append(out, PortInfo{Name: p.Name, Description: strings.TrimSpace(desc), IsUSB: p.IsUSB})
+			pi := PortInfo{Name: p.Name, Description: strings.TrimSpace(desc), IsUSB: p.IsUSB}
+			if p.IsUSB {
+				pi.USBID = strings.ToUpper(p.VID + ":" + p.PID)
+				if sn := strings.TrimSpace(p.SerialNumber); sn != "" {
+					pi.USBID += ":" + sn
+				}
+			}
+			out = append(out, pi)
 		}
 	} else {
 		names, err2 := serial.GetPortsList()

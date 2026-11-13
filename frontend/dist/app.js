@@ -3061,6 +3061,13 @@ function listen() {
   on("measurements", (list) => { state.measurements = list || []; renderMeasureHistory(); drawMeasureChart(); refreshChart(); });
   on("periods", (list) => { const prev = state.periods; state.periods = normPeriods(list); tripCheckClosed(prev, state.periods); renderPeriods(); refreshAll(); });
   on("rcaway", onRcAway);
+  // B6: uma versão mais antiga tentou abrir com esta aberta
+  on("older-instance", (v) => askConfirm({
+    title: "A versão antiga não abriu",
+    text: [`Você abriu a versão ${v.older} com a ${v.current} aberta. Continuei na ${v.current}: a antiga gravaria as configurações sem os ajustes novos.`,
+      "Para usar a versão antiga, feche o app (pelo ícone da bandeja) e abra ela de novo."],
+    ok: "Entendi", noCancel: true,
+  }));
   on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
     const was = state.status.state;

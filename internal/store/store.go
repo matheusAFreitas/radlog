@@ -101,6 +101,9 @@ func Open(dir string) (*Store, error) {
 		return nil, err
 	}
 	s.cache = pts
+	s.mu.Lock()
+	s.loadPendingLocked()
+	s.mu.Unlock()
 	return s, nil
 }
 
@@ -189,11 +192,46 @@ func (s *Store) flushLocked() error {
 	return nil
 }
 
-// Flush tenta gravar os minutos que ficaram esperando (ao fechar o app).
+// pendingFile guarda os minutos que não deu para gravar no mês quando o
+// app fechou (o CSV ainda aberto no Excel). Na próxima abertura eles voltam
+// e vão para o mês (QA 13/11).
+const pendingFile = "leituras-pendentes.csv"
+
+// Flush tenta gravar os minutos que ficaram esperando (ao fechar o app e a
+// cada minuto). Se não der, ao fechar (keep) eles vão para pendingFile.
 func (s *Store) Flush() error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return s.flushLocked()
+}
+
+// FlushOrKeep é o Flush do fechamento: o que não gravar no mês fica em
+// pendingFile, para a próxima abertura.
+func (s *Store) FlushOrKeep() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	err := s.flushLocked()
+	if err == nil || len(s.pending) == 0 {
+		return err
+	}
+	if kerr := writeFile(filepath.Join(s.dir, pendingFile), s.pending); kerr != nil {
+		return fmt.Errorf("%v; e não deu para guardar em %s: %v", err, pendingFile, kerr)
+	}
+	return nil
+}
+
+// loadPendingLocked traz de volta os minutos guardados no último fechamento.
+func (s *Store) loadPendingLocked() {
+	path := filepath.Join(s.dir, pendingFile)
+	pts, err := readFile(path)
+	if err != nil || len(pts) == 0 {
+		return
+	}
+	s.pending = append(s.pending, pts...)
+	s.cache = withPending(s.cache, pts)
+	if s.flushLocked() == nil {
+		os.Remove(path)
+	}
 }
 
 // Pending diz quantos minutos estão na memória esperando para gravar e o

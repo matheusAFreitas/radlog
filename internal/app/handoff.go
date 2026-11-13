@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -58,7 +59,16 @@ func sameExe(a, b string) bool {
 	return strings.EqualFold(filepath.Clean(a), filepath.Clean(b))
 }
 
-// shouldHandoff diz se o pedido veio de outra versão ou de outro .exe.
+// olderInstance diz se o pedido veio de uma versão mais antiga que esta.
+// Ela não assume: gravaria as configurações sem os campos novos
+// (auditoria 2.76.0, B6). Para usar a antiga, feche o app e abra ela.
+func olderInstance(args []string) (string, bool) {
+	v, _, _ := splitInstance(args)
+	return v, v != "" && newerVersion(AppVersion, v)
+}
+
+// shouldHandoff diz se o pedido veio de outra versão (igual ou mais nova)
+// ou de outro .exe.
 func shouldHandoff(args []string) (exe string, rest []string, ok bool) {
 	v, exe, rest := splitInstance(args)
 	if exe == "" {
@@ -66,6 +76,9 @@ func shouldHandoff(args []string) (exe string, rest []string, ok bool) {
 	}
 	if v == AppVersion && sameExe(exe, selfExe()) {
 		return "", nil, false // a mesma cópia aberta de novo
+	}
+	if _, older := olderInstance(args); older {
+		return "", nil, false
 	}
 	if _, err := os.Stat(exe); err != nil {
 		return "", nil, false
@@ -88,6 +101,13 @@ func (a *App) secondInstance(args []string) {
 		// esta cópia está fechando (ou travou fechando): sai logo, para a
 		// próxima tentativa de abrir funcionar
 		os.Exit(0)
+	}
+	if v, older := olderInstance(args); older {
+		a.logf("versão mais antiga (%s) pediu para abrir com esta (%s) aberta: recusei", v, AppVersion)
+		a.logEvent(fmt.Sprintf("A versão %s tentou abrir com a %s aberta: continuei nesta", v, AppVersion))
+		a.showFromTray()
+		a.emit("older-instance", map[string]string{"older": v, "current": AppVersion})
+		return
 	}
 	if exe, rest, ok := shouldHandoff(args); ok {
 		v, _, _ := splitInstance(args)

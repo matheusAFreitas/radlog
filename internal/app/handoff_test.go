@@ -24,6 +24,16 @@ func TestHandoff(t *testing.T) {
 	if !ok || exe != other || len(rest) != 1 || rest[0] != "--bandeja" {
 		t.Fatalf("troca: ok=%v exe=%q rest=%v", ok, exe, rest)
 	}
+	// versão mais antiga: não troca (B6), mesmo com o .exe existindo
+	if _, _, ok := shouldHandoff([]string{instArg + "0.1.0|" + other}); ok {
+		t.Fatal("trocou para uma versão mais antiga")
+	}
+	if v, older := olderInstance([]string{instArg + "0.1.0|" + other}); !older || v != "0.1.0" {
+		t.Fatalf("mais antiga: %q %v", v, older)
+	}
+	if _, older := olderInstance([]string{instArg + AppVersion + "|" + other}); older {
+		t.Fatal("a mesma versão não é mais antiga")
+	}
 	// .exe que não existe: não troca
 	if _, _, ok := shouldHandoff([]string{instArg + "9.9.9|" + other + ".sumiu"}); ok {
 		t.Fatal("trocou para um .exe que não existe")

@@ -55,7 +55,7 @@ function makeDemoApi() {
     if (i > 3 * 24 * 60 && i < 4 * 24 * 60) continue; // um buraco de um dia
     pts.push({ t: Math.floor(now / 60000) * 60000 - i * 60000, cpm: Math.round(20 + (rnd() - 0.5) * 14) });
   }
-  const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 4, usvPerCPM: 0.0101, calibration: { source: "contador" } };
+  const dev = { port: "COM5", version: "GMC-800Re1.23", serial: "5A 10 33 38 31 30 03 00 48 36 37 31", clockDrift: 1, usvPerCPM: 0.0101, calibration: { source: "contador" } };
   let status = { state: "conectado", message: "", device: dev, downloading: false, dataDir: "C:\\Users\\voce\\AppData\\Roaming\\RadLog" };
   let demoUsageOn = true;
   let demoUsageReset = 0; // "Zerar contagem" no demo: some o exemplo

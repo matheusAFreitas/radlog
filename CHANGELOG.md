@@ -1,5 +1,47 @@
 # Versões
 
+## 2.77.0
+Bloco 3 da auditoria de 13/11: relógio, porta do contador, versões e fotos.
+
+- O relógio do GMC-800 é acertado sozinho ao conectar quando está mais de
+  3 s fora do relógio do PC, com uma linha em Eventos. Era a origem do
+  histórico com hora errada.
+- A reconexão automática procura o GMC-800 pelo USB, não só pelo número da
+  porta: se ele mudar de COM, o app acha; se outro aparelho pegar aquele
+  número, o app não manda comandos para ele. O botão Detectar testa primeiro
+  as portas com o chip USB do contador.
+- Abrir uma versão mais antiga com a nova aberta não troca mais: a nova
+  continua e avisa. Para usar a antiga, feche o app e abra ela.
+- Fotos anexadas às medições perdem os metadados (localização do celular,
+  modelo da câmera, data) ao anexar; a rotação fica. As anexadas antes saem
+  limpas no backup e na sincronização. JPEG, PNG, WebP e HEIC; uma foto que
+  não dá para limpar não é anexada.
+- Anexo com nome comprido anexado duas vezes não some mais da lista (QA).
+- Minutos esperando o arquivo do mês liberar são tentados de novo a cada
+  minuto, mesmo com o contador desconectado, e se o app fechar antes ficam
+  guardados e entram no mês na próxima abertura (QA).
+
+**English**
+
+- The GMC-800 clock is set automatically on connect when it is more than
+  3 s off the PC clock, with a line in Events. It was the source of history
+  with the wrong time.
+- Automatic reconnect looks for the GMC-800 by USB, not only by port number:
+  if it moves to another COM, the app finds it; if another device takes that
+  number, the app doesn't send it commands. The Detect button tries the
+  ports with the counter's USB chip first.
+- Opening an older version while the new one runs no longer switches: the
+  new one stays and warns. To use the older one, close the app and open it.
+- Photos attached to measurements lose their metadata (phone location,
+  camera model, date) when attached; rotation is kept. Photos attached
+  before go out clean in backups and sync. JPEG, PNG, WebP and HEIC; a photo
+  that can't be cleaned isn't attached.
+- An attachment with a long name attached twice no longer disappears from
+  the list (QA).
+- Minutes waiting for the month's file to be free are retried every minute,
+  even with the counter disconnected, and if the app closes first they are
+  kept and go into the month on the next start (QA).
+
 ## 2.76.2
 Bloco 2 da auditoria de 13/11: arquivos que podiam ficar vazios ou sumir.
 
