@@ -46,8 +46,8 @@ func TestBackupMerge(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if res.Minutes != 60 || res.Events != 1 || res.Periods != 1 || res.Measurements != 1 || res.AlertFiles != 1 || res.From == "" {
-		t.Fatalf("mesclagem: %+v", res)
+	if res.Minutes != 60 || res.Events != 1 || res.Periods != 1 || res.Measurements != 1 || res.AlertFiles != 1 || res.From != "" || res.Created == "" {
+		t.Fatalf("mesclagem (sem o nome do PC desde a 2.78.0): %+v", res)
 	}
 	pts, _ := b.store.Range(base, base.Add(4*time.Hour))
 	if len(pts) != 180 {

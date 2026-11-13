@@ -35,6 +35,7 @@ func TestBackupAttachmentNames(t *testing.T) {
 	// mesmo que já esteja gravado em medicoes.json (versão antiga), o
 	// "remover" com esse nome não alcança o config.json
 	cfg := b.settingsPath()
+	b.flushWrites()
 	_ = os.WriteFile(cfg, []byte("{}"), 0o644)
 	b.mu.Lock()
 	b.measurements[0].Attachments = append(b.measurements[0].Attachments, MeasureAttachment{File: "../../config.json"})

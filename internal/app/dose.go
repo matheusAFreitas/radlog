@@ -120,6 +120,9 @@ func (a *App) GetDoseSrc(period, limit, src string) (DoseChart, error) {
 		span, step = 24*time.Hour, 5*time.Minute
 	}
 	to := time.Now().Truncate(time.Minute).Add(time.Minute)
+	if step == 24*time.Hour { // 1 ano: cada barra é um dia, de meia-noite a meia-noite
+		to = truncLocal(time.Now(), step).Add(step)
+	}
 	return a.buildDose(to.Add(-span), to, step, limit, src)
 }
 
@@ -156,7 +159,7 @@ func (a *App) GetDoseRangeSrc(fromMs, toMs int64, limit, src string) (DoseChart,
 			break
 		}
 	}
-	from = from.Truncate(step)
+	from = truncLocal(from, step)
 	to = ceilTo(to, step)
 	return a.buildDose(from, to, step, limit, src)
 }
@@ -227,11 +230,11 @@ func (a *App) doseSeriesRaw(src string, from, to time.Time) ([]doseMin, float64,
 	}
 	// Fundo: mediana do CPM real dos últimos 30 dias (resiste a picos; o
 	// demo não mexe nele). Se tiver pouco dado, usa o próprio período.
-	bgPts, _ := a.store.Range(now.Add(-30*24*time.Hour), to)
+	bgPts, _ := a.storeRange(now.Add(-30*24*time.Hour), to)
 	bgPts = a.homeOnly(bgPts) // o fundo é o de casa
 	srcTxt := "mediana dos últimos 30 dias"
 	if len(bgPts) < 60 {
-		bgPts, _ = a.store.Range(from, to)
+		bgPts, _ = a.storeRange(from, to)
 		bgPts = a.homeOnly(bgPts)
 		srcTxt = "mediana do período"
 	}

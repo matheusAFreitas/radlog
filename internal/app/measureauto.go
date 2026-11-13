@@ -76,7 +76,7 @@ func (a *App) GetHomeBackgroundDev(dev string) HomeBg {
 	if devName(dev) == "radiacode" {
 		return a.rcHomeBackground()
 	}
-	hb := a.GetHomeBackground()
+	hb := a.homeBackgroundGMC()
 	hb.Device = "gmc"
 	if hb.OK {
 		a.mu.Lock()
@@ -86,8 +86,9 @@ func (a *App) GetHomeBackgroundDev(dev string) HomeBg {
 	return hb
 }
 
-// GetHomeBackground devolve o fundo da casa da última hora (GMC).
-func (a *App) GetHomeBackground() HomeBg {
+// homeBackgroundGMC devolve o fundo da casa da última hora (GMC). A tela
+// usa o GetHomeBackgroundDev.
+func (a *App) homeBackgroundGMC() HomeBg {
 	now := time.Now()
 	a.mu.Lock()
 	demo := a.demo.Active

@@ -11,7 +11,7 @@ import (
 
 func TestHomeBackground(t *testing.T) {
 	a := newTestApp(t)
-	if hb := a.GetHomeBackground(); hb.OK {
+	if hb := a.homeBackgroundGMC(); hb.OK {
 		t.Fatalf("sem dados não deveria dar: %+v", hb)
 	}
 	now := time.Now().Truncate(time.Minute)
@@ -26,7 +26,7 @@ func TestHomeBackground(t *testing.T) {
 	if _, err := a.store.Import(pts); err != nil {
 		t.Fatal(err)
 	}
-	hb := a.GetHomeBackground()
+	hb := a.homeBackgroundGMC()
 	if !hb.OK || hb.Minutes != 58 || math.Abs(hb.CPM-25) > 0.1 {
 		t.Fatalf("fundo da casa: %+v", hb)
 	}

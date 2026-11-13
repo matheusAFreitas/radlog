@@ -74,9 +74,7 @@ func (a *App) usageSaveLocked() {
 		}
 	}
 	b, _ := json.Marshal(a.usage)
-	if err := writeFileAtomic(a.usagePath(), b, 0o644); err != nil {
-		a.logf("uso do app: %v", err)
-	}
+	a.writeLater(a.usagePath(), b, 0o644, "uso do app")
 }
 
 // chave aceita: prefixo conhecido, curta, sem quebra de linha

@@ -10,9 +10,11 @@ import (
 	"io"
 	"math"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -214,13 +216,21 @@ func (a *App) fetchRadar(lat, lon float64) error {
 			} `json:"past"`
 		} `json:"radar"`
 	}
-	err = json.NewDecoder(resp.Body).Decode(&idx)
+	err = json.NewDecoder(io.LimitReader(resp.Body, jsonMaxBytes)).Decode(&idx)
 	resp.Body.Close()
 	if err != nil {
 		return err
 	}
 	if idx.Host == "" || len(idx.Radar.Past) == 0 {
 		return errors.New("radar sem imagens agora")
+	}
+	if !radarHostOK(idx.Host) {
+		return errors.New("radar: endereço das imagens fora do RainViewer")
+	}
+	for _, f := range idx.Radar.Past {
+		if !radarPathOK(f.Path) {
+			return errors.New("radar: endereço das imagens fora do RainViewer")
+		}
 	}
 
 	a.mu.Lock()
@@ -353,4 +363,21 @@ func (a *App) GetRainRadar(fromMs, toMs int64) []RadarPoint {
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].Time < out[j].Time })
 	return out
+}
+
+// radarHostOK aceita só https em rainviewer.com (S5): o endereço vem na
+// resposta do serviço e o pedido leva o quadrado do mapa onde você está.
+func radarHostOK(host string) bool {
+	u, err := url.Parse(host)
+	if err != nil || u.Scheme != "https" || u.User != nil || u.Port() != "" || (u.Path != "" && u.Path != "/") || u.RawQuery != "" {
+		return false
+	}
+	h := strings.ToLower(u.Hostname())
+	return h == "rainviewer.com" || strings.HasSuffix(h, ".rainviewer.com")
+}
+
+// radarPathOK: o caminho é só um caminho ("/v2/radar/…"), sem trocar de
+// servidor.
+func radarPathOK(p string) bool {
+	return strings.HasPrefix(p, "/") && !strings.HasPrefix(p, "//") && !strings.ContainsAny(p, "@?#\\ ")
 }

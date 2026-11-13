@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io"
 	"net/http"
 	"net/url"
 	"os"
@@ -163,8 +164,11 @@ func getJSON(u string, v any) error {
 	if resp.StatusCode != http.StatusOK {
 		return fmt.Errorf("serviço de clima respondeu %d", resp.StatusCode)
 	}
-	return json.NewDecoder(resp.Body).Decode(v)
+	// resposta de no máximo 4 MB (S5): a do clima tem algumas dezenas de KB
+	return json.NewDecoder(io.LimitReader(resp.Body, jsonMaxBytes)).Decode(v)
 }
+
+const jsonMaxBytes = 4 << 20
 
 func (a *App) rainPath() string { return filepath.Join(a.dataDir, "chuva.json") }
 

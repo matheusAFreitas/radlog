@@ -38,12 +38,17 @@ function demoPeakDetail(sp, peaks) {
     return { ...p, center: cw > 0 ? ce / cw : 0, cont: Math.max(b, 1), half: h, side: 0 };
   });
 }
+// a versão do app (igual à do internal/app/version.go: o CI confere)
+const DEMO_VERSION = "2.78.0";
+
 function makeDemoApi() {
   let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
-  // versões que o modo demonstração mostra em "Atualizações e sobre"; ao refazer
-  // os prints do README, acerte para a versão atual e a seguinte (U4)
-  let demoUpd = { current: "2.73.0", latest: "2.74.0", available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
+  // versões que o modo demonstração mostra em "Atualizações e sobre": a
+  // atual (DEMO_VERSION, conferida pelo scripts/check-version.sh) e a
+  // seguinte (auditoria 2.76.0, U1)
+  const [vMaj, vMin] = DEMO_VERSION.split(".").map(Number);
+  let demoUpd = { current: DEMO_VERSION, latest: `${vMaj}.${vMin + 1}.0`, available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
     notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
@@ -922,7 +927,6 @@ const demoRc = () => {
       else { if (!meas.bg) throw new Error("meça o fundo primeiro"); Object.assign(meas, { phase, elapsed: 0, counts: 0, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), derived: null, spectrum: null, stopReq: false, name: name || meas.name }); if (meas.auto) meas.seconds = meas.maxSec; }
       emit("measure", { ...meas }); return { ...meas };
     },
-    GetHomeBackground: async () => demoHomeBg(),
     GetHomeBackgroundDev: async (dev) => {
       if (dev !== "radiacode") return { ...demoHomeBg(), usv: 20.4 * 0.0101, device: "gmc" };
       if (!demoRcFake()) return { ok: false, minutes: 0, why: "só 0 min do RC102 em casa na última hora (precisa de 30)", device: "radiacode" };

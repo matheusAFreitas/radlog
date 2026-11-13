@@ -17,14 +17,23 @@ type Levels = levels.Levels
 // DefaultLevels são os valores de fábrica do app.
 func DefaultLevels() Levels { return levels.Default() }
 
-// GetDefaultLevels devolve os padrões (para o botão "Restaurar padrões").
-func (a *App) GetDefaultLevels() Levels { return DefaultLevels() }
-
 // ceilTo arredonda t para cima no múltiplo de step (se já for múltiplo, fica).
 func ceilTo(t time.Time, step time.Duration) time.Time {
-	f := t.Truncate(step)
+	f := truncLocal(t, step)
 	if f.Equal(t) {
 		return t
 	}
 	return f.Add(step)
+}
+
+// truncLocal é o t.Truncate(step) pelo relógio local: o Truncate do Go corta
+// pelo UTC, então no Brasil cada "dia" dos gráficos de 1 ano ia das 21:00
+// às 21:00 (auditoria 2.76.0, B10). Passos menores que 1 h não mudam.
+func truncLocal(t time.Time, step time.Duration) time.Time {
+	if step < time.Hour {
+		return t.Truncate(step)
+	}
+	_, off := t.Zone()
+	shift := time.Duration(off) * time.Second
+	return t.Add(shift).Truncate(step).Add(-shift)
 }

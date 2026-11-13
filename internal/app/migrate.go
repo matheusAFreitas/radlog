@@ -10,6 +10,8 @@ import (
 	"path/filepath"
 	"strings"
 	"time"
+
+	"radlog/internal/store"
 )
 
 // ---------- migração GMC Monitor → RadLog (2.0) ----------
@@ -280,7 +282,11 @@ func zipFolder(dir, zipPath string) error {
 		os.Remove(tmp)
 		return err
 	}
-	return os.Rename(tmp, zipPath)
+	if err := store.RenameRetry(tmp, zipPath); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
 
 // ---------- Documentos ----------

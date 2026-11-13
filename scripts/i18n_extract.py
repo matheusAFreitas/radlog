@@ -17,9 +17,23 @@ exact, pats = set(), set()
 def norm(s):
     return " ".join(s.split())
 
+# o que não é texto de tela: caminho de import, nome de arquivo, classe CSS,
+# cabeçalho de CSV, seletor, pedaço de código e o alfabeto de acentos
+NOISE = re.compile(r"""^(?:
+    [\w.-]+\.[a-z]+/[\w./-]+          # github.com/...
+  | (?:os|io|net|path)/[a-z]+             # os/exec
+  | [\w-]+\.(?:json|jsonl|csv|zip|pdf|txt)
+  | [a-z]+(?:-[a-z0-9]+)+(?:\s[a-z-]+)*  # classe CSS: dl-perigo, as-info small
+  | [a-z_]+(?:,[a-z_]*)+                # hora,cps,usvh
+  | ,,.*                                # linha de CSV vazia
+  | \[[\w-]+\]                         # [data-no-tr]
+  | .*(?:\$\{|\btr\(|""\}).*              # pedaço de expressão JS
+  | [À-ÿ]{20,}
+)$""", re.X)
+
 def add_exact(s):
     s = norm(s)
-    if s and WORD.search(s) and PT.search(s) and "<" not in s and not s.startswith(("http", "#", ".", "--")):
+    if s and WORD.search(s) and PT.search(s) and "<" not in s and not s.startswith(("http", "#", ".", "--")) and not NOISE.match(s):
         exact.add(s)
 
 # ---- HTML
@@ -80,11 +94,11 @@ for f in glob.glob(os.path.join(ROOT, "internal/*/*.go")):
     src = re.sub(r"^\s*//.*$", "", src, flags=re.M)
     for m in re.finditer(r'"((?:[^"\\\n]|\\.)*)"', src):
         s = m.group(1).replace('\\"', '"').replace("\\n", " ")
-        if re.search(r"%[-+ #0-9.]*[vdsfqxgw]", s):
+        if re.search(r"%(?:[-+#0-9.]*[vdsfqxgw]| x)", s):
             n = [0]
             def rep(_):
                 n[0] += 1; return "{%d}" % (n[0] - 1)
-            out = norm(re.sub(r"%[-+ #0-9.]*[vdsfqxgw]", rep, s.replace("%%", "%")))
+            out = norm(re.sub(r"%(?:[-+#0-9.]*[vdsfqxgw]| x)", rep, s.replace("%%", "\0")).replace("\0", "%"))
             lit = re.sub(r"\{\d+\}", "", out)
             if WORD.search(lit) and PT.search(lit): pats.add(out)
         else:

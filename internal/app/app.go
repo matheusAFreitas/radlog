@@ -383,6 +383,8 @@ type App struct {
 	// pausa a reconexão automática quando o usuário desconecta na mão
 	manualOff bool
 	retryStop chan struct{}
+	later     laterWrites // gravações fora da trava (P2)
+	memo      readMemo    // leitura uma vez só por consulta (P1)
 	closing   atomic.Bool // janela fechando (watchdog.go)
 	// bandeja (tray.go)
 	inTray    atomic.Bool
@@ -549,6 +551,7 @@ func (a *App) shutdown(ctx context.Context) {
 			a.logf("fechando: %d minuto(s) sem gravar em %s ficaram guardados para a próxima abertura", n, f)
 		}
 	}
+	a.flushWrites() // config.json e uso.json pendentes (P2)
 }
 
 // ---------- configurações e eventos em disco ----------
@@ -587,9 +590,7 @@ func (a *App) saveSettingsLocked() {
 	if err != nil {
 		return
 	}
-	if err := writeFileAtomic(a.settingsPath(), b, 0o644); err != nil {
-		a.logf("configurações: não consegui gravar o config.json: %v", err)
-	}
+	a.writeLater(a.settingsPath(), b, 0o644, "configurações")
 }
 
 // openStore abre a pasta de leituras. Se ela não abrir, as leituras desta
@@ -600,6 +601,7 @@ func (a *App) saveSettingsLocked() {
 func (a *App) openStore() *store.Store {
 	st, err := store.Open(a.dataDir)
 	if err == nil {
+		a.recoverTempReadings(st, filepath.Join(os.TempDir(), appDirName))
 		return st
 	}
 	a.logEvent("Erro ao abrir os dados: " + err.Error())
@@ -610,6 +612,39 @@ func (a *App) openStore() *store.Store {
 	}
 	a.dataWarn = "-"
 	return store.Unopened(a.dataDir)
+}
+
+// recoverTempReadings traz para a pasta de leituras os minutos que uma
+// sessão anterior gravou na pasta temporária (a pasta de leituras não tinha
+// aberto), antes que o Windows limpe o temporário (QA 13/11).
+func (a *App) recoverTempReadings(st *store.Store, tmp string) {
+	if filepath.Clean(tmp) == filepath.Clean(a.dataDir) {
+		return
+	}
+	files, _ := filepath.Glob(filepath.Join(tmp, "leituras", "*.csv"))
+	if len(files) == 0 {
+		return
+	}
+	var pts []store.Point
+	for _, f := range files {
+		p, err := store.ReadFileTolerant(f)
+		if err != nil {
+			a.logf("pasta temporária: não li %s: %v", f, err)
+			return // deixa tudo lá para a próxima tentativa
+		}
+		pts = append(pts, p...)
+	}
+	added, err := st.ImportNew(pts)
+	if err != nil {
+		a.logf("pasta temporária: não consegui juntar as leituras: %v", err)
+		return
+	}
+	for _, f := range files {
+		os.Remove(f)
+	}
+	if len(added) > 0 {
+		a.logEvent(fmt.Sprintf("%d minuto(s) gravados na pasta temporária numa sessão anterior voltaram para a pasta de leituras", len(added)))
+	}
 }
 
 func (a *App) eventsPath() string { return filepath.Join(a.dataDir, "eventos.csv") }
@@ -1495,6 +1530,26 @@ func (a *App) SyncClock() (float64, error) {
 
 // ---------- histórico ----------
 
+// historyKeep é quantas cópias da memória do contador ficam guardadas: cada
+// uma tem até 2 MB e o que importa delas já foi para as leituras (ACE 13/11,
+// auditoria 2.76.0, D2).
+const historyKeep = 5
+
+// pruneHistoryCopies apaga as cópias mais antigas da memória do contador,
+// deixando as keep mais novas. O nome tem a data, então a ordem do nome é a
+// ordem de data.
+func pruneHistoryCopies(dir string, keep int) int {
+	files, _ := filepath.Glob(filepath.Join(dir, "historico-*.bin"))
+	sort.Strings(files)
+	n := 0
+	for i := 0; i < len(files)-keep; i++ {
+		if os.Remove(files[i]) == nil {
+			n++
+		}
+	}
+	return n
+}
+
 // DownloadHistory lê a memória do contador, salva uma cópia bruta (.bin) e
 // junta as leituras aos dados do app.
 func (a *App) DownloadHistory() (ImportResult, error) {
@@ -1539,7 +1594,9 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 		dir := filepath.Join(a.dataDir, "historico")
 		_ = os.MkdirAll(dir, 0o755)
 		res.File = filepath.Join(dir, "historico-"+time.Now().Format("2006-01-02_150405")+".bin")
-		_ = writeFileAtomic(res.File, raw, 0o644)
+		if writeFileAtomic(res.File, raw, 0o644) == nil {
+			pruneHistoryCopies(dir, historyKeep)
+		}
 	}
 
 	if err == nil {
@@ -1672,7 +1729,7 @@ func (a *App) GetChart(period string) (Chart, error) {
 	default:
 		span, step = time.Hour, time.Minute
 	}
-	to := now.Truncate(step).Add(step)
+	to := truncLocal(now, step).Add(step)
 	from := to.Add(-span)
 	return a.buildChart(from, to, step)
 }
@@ -1717,7 +1774,7 @@ func (a *App) GetChartRange(fromMs, toMs int64) (Chart, error) {
 			step *= 2
 		}
 	}
-	from = from.Truncate(step)
+	from = truncLocal(from, step)
 	to = ceilTo(to, step)
 	c, err := a.buildChart(from, to, step)
 	c.FineAlertsOnly = step < time.Minute && from.Before(now.Add(-liveWindow))
@@ -1959,12 +2016,18 @@ func (a *App) ExportCSV() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	defer f.Close()
 	a.mu.Lock()
 	tl := a.calTLLocked()
 	a.mu.Unlock()
 	conv := func(p store.Point) (float64, string) { return tl.USv(p), tl.Tag(p) }
-	if err := a.store.ExportCSV(f, from, time.Now().Add(time.Minute), conv); err != nil {
+	err = a.store.ExportCSV(f, from, time.Now().Add(time.Minute), conv)
+	if err == nil {
+		err = f.Sync() // disco cheio ou pendrive tirado aparecem aqui (QA 13/11)
+	}
+	if cerr := f.Close(); err == nil {
+		err = cerr
+	}
+	if err != nil {
 		return "", err
 	}
 	return path, nil

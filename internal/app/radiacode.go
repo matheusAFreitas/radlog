@@ -751,8 +751,8 @@ type RcPoint struct {
 	N    int
 }
 
-// rcRange lê os minutos gravados entre from e to.
-func (a *App) rcRange(from, to time.Time) []RcPoint {
+// rcRangeDisk lê os minutos gravados entre from e to (readmemo.go).
+func (a *App) rcRangeDisk(from, to time.Time) []RcPoint {
 	a.rc.fileM.Lock()
 	defer a.rc.fileM.Unlock()
 	var out []RcPoint

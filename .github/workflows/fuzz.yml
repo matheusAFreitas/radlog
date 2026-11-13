@@ -1,0 +1,26 @@
+name: fuzz
+
+# T3 (auditoria 2.76.0): os testes de fuzz do RC102 com tempo de busca, uma
+# vez por semana. No CI normal eles só rodam os exemplos fixos.
+on:
+  schedule:
+    - cron: "17 6 * * 1" # segunda, 06:17 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  fuzz:
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [FuzzDecodeDataBuf, FuzzSplitDataBuf, FuzzDecodeSpectrum, FuzzAssembler, FuzzDevice]
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.27"
+      - name: 30 s de fuzz (o caso que falhar aparece no log)
+        run: go test ./internal/radiacode -run '^$' -fuzz '^${{ matrix.target }}$' -fuzztime 30s

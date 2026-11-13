@@ -25,6 +25,7 @@ func newTestApp(t *testing.T) *App {
 	a.settings = defaultSettings()
 	// arquivos .gz abertos do RC102: no Windows o TempDir não sai com eles
 	t.Cleanup(a.rcSpecClose)
+	t.Cleanup(a.flushWrites) // config.json e uso.json vão para o disco depois (P2)
 	return a
 }
 

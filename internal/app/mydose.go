@@ -78,6 +78,12 @@ func (a *App) myDose(now time.Time, limit string) (MyDose, error) {
 		lim = doseLimits["publico"]
 	}
 	out := MyDose{Now: now.UnixMilli(), LimitName: lim.Name, LimitMSvYear: lim.MSvYear}
+	// o ano e o fundo (30 dias) de cada aparelho lidos uma vez só (P1)
+	memoFrom := coredose.Calendar(now)[3].From
+	if b := time.Now().Add(-31 * 24 * time.Hour); b.Before(memoFrom) {
+		memoFrom = b
+	}
+	defer a.beginReadMemo(memoFrom, now.Add(time.Minute))()
 	a.mu.Lock()
 	roles := a.whereaboutsLocked(now.Add(-time.Minute))
 	a.mu.Unlock()

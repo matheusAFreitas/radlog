@@ -4876,3 +4876,445 @@ reconexão: {0} agora é outro aparelho; esperando o contador	reconnect: {0} is 
 reconexão: o contador mudou de {0} para {1}	reconnect: the counter moved from {0} to {1}
 fechando: {0} minuto(s) sem gravar em {1} ficaram guardados para a próxima abertura	closing: {0} unsaved minute(s) in {1} were kept for the next start
 {0}; e não deu para guardar em {1}: {2}	{0}; and couldn't keep them in {1}: {2}
+espectro: mais canais do que o aparelho tem	spectrum: more channels than the device has
+radar: endereço das imagens fora do RainViewer	radar: image address outside RainViewer
+rainviewer.com	rainviewer.com
+{0} minuto(s) gravados na pasta temporária numa sessão anterior voltaram para a pasta de leituras	{0} minute(s) saved in the temporary folder in an earlier session went back to the readings folder
+pasta temporária: não li {0}: {1}	temporary folder: couldn't read {0}: {1}
+pasta temporária: não consegui juntar as leituras: {0}	temporary folder: couldn't merge the readings: {0}
+{0}: não consegui gravar o {1}: {2}	{0}: couldn't save {1}: {2}
+configurações	settings
+Próximo	Next
+Escolher o dia	Pick the day
+% abaixo do normal	% below normal
+% acima do normal	% above normal
+(aproximada: objeto espalhado ou só uma distância medida)	(approximate: spread-out object or only one distance measured)
+(curva do contador)	(counter's curve)
+(igual ao seu normal)	(same as your normal)
+(informado à mão)	(entered by hand)
+(já pareado)	(already paired)
+(menos que +{0})	(less than +{0})
+(sem resposta)	(no response)
+({0}{1}% do seu normal)	({0}{1}% of your normal)
+({0}× o fundo)	({0}× background)
+); baixe pela página e confira	); download it from the page and check
+); mande o arquivo para análise	); send the file for analysis
+, ou configure o endereço Bluetooth.	, or set the Bluetooth address.
+, ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).	, or keep it nearby with Bluetooth on (and the phone app disconnected).
+, recalculando o histórico de antes dela	, recalculating the history before it
+- **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor.	- **In-app update**: tells you when a new version is out. - Something else, better.
+0,00550 µSv/h por CPM no fundo (informado à mão)	0.00550 µSv/h per CPM at background (entered by hand)
+0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)	0.01014 µSv/h per CPM at background (counter; 986 CPM = 10.00 µSv/h, …)
+0,01014 µSv/h por CPM no fundo (curva do contador)	0.01014 µSv/h per CPM at background (counter's curve)
+1. Configuração (GETCFG) lida duas vezes	1. Configuration (GETCFG) read twice
+1ª leitura	1st reading
+24 h até {0} {1} ·	24 h up to {0} {1} ·
+2ª leitura	2nd reading
+3. Comandos candidatos (não documentados)	3. Candidate commands (undocumented)
+: "mediana de 120 a 30 dias atrás"} · {0} dias	: "median from 120 to 30 days ago"} · {0} days
+: maior que 25 MB	: larger than 25 MB
+: não encontrado	: not found
+A diferença ({0} ± {1}) ficou menor que duas vezes a incerteza. Meça mais tempo em cada fase, ou o material corta pouco essa radiação.	The difference ({0} ± {1}) is less than twice the uncertainty. Measure longer in each phase, or the material blocks little of this radiation.
+A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is 6% above day (+1.2 ± 0.3 CPM, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
+A noite (18h–6h) fica {0}% acima do dia (+{1} ± {2} {3}, {4} dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is {0}% above day (+{1} ± {2} {3}, {4} days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
+A pressão mudou 1,2 hPa nas 12 horas antes.	Pressure changed 1.2 hPa in the 12 hours before.
+A subida é de 14 σ. O acaso não chega nisso.	The rise is 14 σ. Chance doesn't get that far.
+ALARME no {0} · {1} µSv/h	ALARM on the {0} · {1} µSv/h
+ATENÇÃO no {0} · {1} µSv/h	ATTENTION on the {0} · {1} µSv/h
+Abaixo do normal (seu normal: {0}) — sem problema	Below normal (your normal: {0}) — no problem
+Abrir a tela do GMC-800	Open the GMC-800 screen
+Acima do normal (seu normal: {0}) — dificilmente é só variação	Above normal (your normal: {0}) — unlikely to be just variation
+Agora, no GMC-800	Now, on the GMC-800
+Agora, no RC102	Now, on the RC102
+Alarme no RC102: 1,24 µSv/h (alarme 2 do aparelho: 1,20)	Alarm on the RC102: 1.24 µSv/h (device alarm 2: 1.20)
+Alarme no RC102: 1,25 µSv/h (alarme 2 do aparelho: 1,20)	Alarm on the RC102: 1.25 µSv/h (device alarm 2: 1.20)
+Anotação ·	Note ·
+Aprendendo o normal dos dois em casa: 21 h juntos até agora; a vigia começa em	Learning the normal of both at home: 21 h together so far; watching starts in
+Assim não dá para medir o corte. Aproxime a fonte do aparelho ou meça mais tempo em cada fase.	This way the blocking can't be measured. Bring the source closer to the device or measure longer in each phase.
+Atenção no RC102: 0,412 µSv/h (alarme 1 do aparelho: 0,400)	Attention on the RC102: 0.412 µSv/h (device alarm 1: 0.400)
+Atenção no {0}	Attention on the {0}
+Automático (idioma do sistema) · Automatic	Automatic (system language) · Automático
+Buscando agora…	Fetching now…
+C:\Users\voce\Documents\RadLog\Versões	C:\Users\you\Documents\RadLog\Versions
+C:\\Users\\voce\\Documents\\RadLog\\Relatórios\\gmc-medicao-{0}.pdf	C:\\Users\\you\\Documents\\RadLog\\Reports\\gmc-measurement-{0}.pdf
+COM VOCÊ:	WITH YOU:
+CONFIGURATION	CONFIGURATION
+Cada minuto foi comparado com o limite vigente naquele momento (histórico de configurações). *: há minutos sem registro do limite da época, comparados com o valor atual.	Each minute was compared with the limit in force at that moment (settings history). *: some minutes have no record of the limit at the time and were compared with the current value.
+Cada vez que a distância dobrou, a taxa acima do fundo caiu para cerca de ¼. A fonte se comporta como pequena: afastar um palmo já corta muito.	Each time the distance doubled, the rate above background fell to about ¼. The source behaves as a small one: moving a hand's width away already cuts a lot.
+Casa em {0}	Home in {0}
+Centro e metrô	Downtown and subway
+Choveu 12,4 mm nas 4 horas antes, a partir de {0}. Esta é a hora em que o radônio costuma subir na sua casa. Os dois aparelhos subiram juntos, então é radiação de verdade.	It rained 12.4 mm in the 4 hours before, starting at {0}. This is the time when radon usually rises in your home. Both devices rose together, so it is real radiation.
+Choveu 12,4 mm nas 4 horas antes, a partir de {0}. Na sua casa, a chuva costuma subir o fundo uns 9%.	It rained 12.4 mm in the 4 hours before, starting at {0}. In your home, rain usually raises the background by about 9%.
+Com o RC102, guarda também o espectro do fundo.	With the RC102, it also keeps the background spectrum.
+Com o material no meio	With the material in between
+Com você em {0}	With you in {0}
+Conclusão:	Conclusion:
+Conferindo com o {0}: ele é menos sensível e precisa de mais uns 40 s.	Checking with the {0}: it is less sensitive and needs about 40 s more.
+Conferindo com o {0}: precisa de mais uns 40 s.	Checking with the {0}: it needs about 40 s more.
+Configurações ›	Settings ›
+Configurações › Alarme	Settings › Alarm
+Confira se o GMC-800 foi mexido ou ficou perto de alguma coisa nova, e o cabo. Ruído no tubo também faz a contagem pular.	Check whether the GMC-800 was moved or is near something new, and check the cable. Noise in the tube also makes the count jump.
+Confirmado pelo {0}: ele também subiu +{1}% sobre o fundo dele.	Confirmed by the {0}: it also rose +{1}% over its own background.
+Contador voltou à calibração	Counter back to its calibration
+Dados levados de "GMC Monitor" para "RadLog": {0} arquivos, conferidos; backup da pasta antiga em migracao/	Data moved from "GMC Monitor" to "RadLog": {0} files, checked; backup of the old folder in migracao/
+De {0} cm para {1} cm a radiação caiu	From {0} cm to {1} cm the radiation fell
+De {0} para {1} a radiação caiu mais que o inverso do quadrado ({2}× contra {3}×): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.	From {0} to {1} the radiation fell more than the inverse square ({2}× against {3}×): check the distances; the detector sits a few millimetres inside the case.
+De {0} para {1} a radiação caiu menos que o inverso do quadrado ({2}× contra {3}×): o objeto deve ser espalhado, então a distância segura é só aproximada.	From {0} to {1} the radiation fell less than the inverse square ({2}× against {3}×): the object is probably spread out, so the safe distance is only approximate.
+De {0} para {1} a radiação caiu {2}× (o inverso do quadrado dá {3}×): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis.	From {0} to {1} the radiation fell {2}× (the inverse square gives {3}×): the object behaves like a small source, so the safe distance and the Bq are more reliable.
+Diagnóstico da dose do GMC:	GMC dose diagnosis:
+ERRO interno em {0}: {1} vezes na última hora, não vou reiniciar	Internal ERROR in {0}: {1} times in the last hour, not restarting
+ERRO interno em {0}: {1} {2}	Internal ERROR in {0}: {1} {2}
+Ele assume enquanto o {0} não mede.	It takes over while the {0} isn't measuring.
+Então pode ser só coincidência. Com mais dias a resposta fica mais clara.	So it may be just coincidence. With more days the answer gets clearer.
+Escritório	Office
+Espectrograma · com você	Spectrogram · with you
+Fundo da casa: {0} ({1} min até {2}).	Home background: {0} ({1} min up to {2}).
+Fundo de casa em porcentagem da referência, 120 dias	Home background as a percentage of the reference, 120 days
+Fundo pronto. Agora o objeto na frente do aparelho{0}	Background ready. Now the object in front of the device{0}
+GMC-800 agora: {0} (calibração {1} µSv/h por CPM)	GMC-800 now: {0} (calibration {1} µSv/h per CPM)
+GQ GMC-800 em casa · conferido {0}	GQ GMC-800 at home · checked {0}
+Hoje: {0} · calculada pelo app (o GMC não informa a dose que soma)	Today: {0} · calculated by the app (the GMC doesn't report the dose it adds up)
+Importar o log do app do RC102	Import the RC102 app log
+KCl: {0}Bq de K-40 esperados · eficiência medida em 1.460 keV:	KCl: {0}Bq of K-40 expected · efficiency measured at 1,460 keV:
+Ligue o RC102 no USB do PC	Plug the RC102 into the PC's USB
+Linhas que apareceram:	Lines that showed up:
+Log do RC102 (*.csv)	RC102 log (*.csv)
+Log do RC102 importado ({0}): {1} registros novos de {2}	RC102 log imported ({0}): {1} new records out of {2}
+Longe, a taxa ficou acima da curva. A fonte deve ser grande ou espalhada (piso, bancada, várias peças). Perto de uma fonte assim, afastar ajuda menos. Bem longe dela, a regra do quadrado volta a valer.	Far away, the rate stayed above the curve. The source is probably large or spread out (floor, countertop, several pieces). Near a source like that, moving away helps less. Far from it, the square rule applies again.
+Mais que em casa (acima de 3σ):	More than at home (above 3σ):
+Marcada como não comparável{0}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.	Marked as not comparable{0}. It stays saved, but should not be compared with the other measurements of this object.
+Matheus Alves de Freitas	Matheus Alves de Freitas
+Medir objeto · Banana com casca	Measure object · Banana with peel
+Medição de {0}{1}: {2}{3} ± {4} µSv/h sobre o fundo ({5}σ) — {6}	Measurement of {0}{1}: {2}{3} ± {4} µSv/h over background ({5}σ) — {6}
+Memória do GMC praticamente cheia: cerca de {0}% ocupada (estimado). Dados novos podem não ser gravados ou podem sobrescrever os antigos.	GMC memory almost full: about {0}% used (estimated). New data may not be saved or may overwrite the old.
+Memória do contador	Counter memory
+Menos que em casa:	Less than at home:
+Meça no lugar de sempre do contador.	Measure at the counter's usual spot.
+Mudança brusca por volta de {0}: o fundo passou de {1} para {2} {3} ({4}%), com {5} dias antes e {6} depois.	Sudden change around {0}: the background went from {1} to {2} {3} ({4}%), with {5} days before and {6} after.
+Média: {0} → {1} µSv/h · máximo: {2} → {3} µSv/h	Average: {0} → {1} µSv/h · maximum: {2} → {3} µSv/h
+Na sua casa	In your home
+Nada foi gravado no contador: só comandos de leitura.	Nothing was written to the counter: only read commands.
+Não conectou:	Didn't connect:
+Não consegui importar:	Couldn't import:
+Não consegui terminar a mudança da pasta de dados para RadLog:	Couldn't finish moving the data folder to RadLog:
+Não deu para aceitar conexões:	Couldn't accept connections:
+Não deu para recomeçar:	Couldn't restart:
+Não há RC102 em casa nas duas épocas para comparar.	There is no RC102 at home in both periods to compare.
+Não há registro de configurações para este período: o histórico de configurações começa em	There is no settings record for this period: the settings history starts on
+Nível:	Level:
+Nível: {0}	Level: {0}
+O GMC-800 estava lendo {0}% {1} do RC102	The GMC-800 was reading {0}% {1} the RC102
+O RC102 em casa não mudou, então foi algo perto do GMC-800.	The RC102 at home didn't change, so it was something near the GMC-800.
+O RC102 em casa subiu junto.	The RC102 at home rose too.
+O RC102 também subiu, 16% no mesmo trecho.	The RC102 also rose, 16% over the same stretch.
+O app usa {0} µSv/h por CPM ({1}).{2} O contador usa {3}. {4} Gravando os pontos abaixo, os dois passam a mostrar o mesmo µSv/h.	The app uses {0} µSv/h per CPM ({1}).{2} The counter uses {3}. {4} Writing the points below makes both show the same µSv/h.
+O episódio terminou porque parou de chegar leitura ({0}) às {1}, não porque a contagem voltou ao normal. Se baixar o histórico do contador, os minutos depois disso aparecem no gráfico.	The episode ended because readings stopped arriving ({0}) at {1}, not because the count went back to normal. If you download the counter's history, the minutes after that show up in the chart.
+O fundo da casa (GMC-800) ficou em	The home background (GMC-800) was
+O fundo subiu 18% desde {0}	The background rose 18% since {0}
+O fundo {0} cerca de {1}% em {2} dias ({3} ± {4} {5} por dia, {6} dias completos).	The background {0} about {1}% in {2} days ({3} ± {4} {5} per day, {6} full days).
+O período começa {0} antes do primeiro dado do GMC ({1} {2}); esse trecho não conta como lacuna.	The period starts {0} before the first GMC data ({1} {2}); that stretch doesn't count as a gap.
+O {0} está com você, mas não manda leitura.	The {0} is with you, but isn't sending readings.
+O {0} está em casa, mas não manda leitura. Esses minutos ficam em branco.	The {0} is at home, but isn't sending readings. Those minutes stay blank.
+O {0} não viu: +2% sobre o fundo dele. Pode ser algo perto só do {1}, interferência ou o aparelho.	The {0} didn't see it: +2% over its own background. It may be something near the {1} only, interference or the device.
+Objeto na frente do aparelho{0}	Object in front of the device{0}
+PERIGO no {0} · {1} µSv/h	DANGER on the {0} · {1} µSv/h
+Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar {0} µSv/h (80% entre {1}).	From the minutes at home over the last 7 days, the RC102 usually reads {0} µSv/h (80% between {1}).
+Pico: maior leitura ao vivo do alerta (janela de 60 s, consultada a cada segundo). Mín/méd/máx: minutos gravados no episódio. (c): episódio encontrado no histórico do contador. (d): episódio com interrupção de leitura (desconexão ou app fechado).	Peak: highest live reading of the alert (60 s window, checked every second). Min/avg/max: minutes recorded in the episode. (c): episode found in the counter's history. (d): episode with a reading interruption (disconnection or app closed).
+Pode ter sido a posição entre uma medida e outra. Vale repetir com o aparelho sempre na mesma linha, medindo do centro do cristal.	It may have been the position between one measurement and another. It's worth repeating with the device always on the same line, measuring from the centre of the crystal.
+Português	Português
+Poucos dias completos para falar de tendência: {0} de 7 (um dia conta com pelo menos 12 h medidas em casa).	Too few full days to talk about a trend: {0} of 7 (a day counts with at least 12 h measured at home).
+Precisa de pelo menos 3 dias com a pressão e o fundo em casa juntos. Até agora são {0} horas.	Needs at least 3 days with pressure and home background together. So far there are {0} hours.
+Primeiro dado do GMC-800:	First GMC-800 data:
+Público	Public
+RC102 (mensagem do aparelho, {0}): {1}	RC102 (device message, {0}): {1}
+RC102 (média de cada	RC102 (average of each
+RC102 (você)	RC102 (you)
+RC102 desconectado:	RC102 disconnected:
+RC102 durante a saída	RC102 during the trip
+RC102: a conexão pelo Bluetooth caiu em {0}; próxima tentativa em {1}	RC102: the Bluetooth connection dropped at {0}; next attempt at {1}
+RC102: voltou a conectar às {0} com "{1}" aberto; o app pergunta na tela Agora se você voltou para casa	RC102: reconnected at {0} with "{1}" open; the app asks on the Now screen whether you are back home
+RC102: {0} registros da memória do aparelho repostos dos dados brutos ({1} minutos preenchidos, {2} linhas do log na hora errada retiradas)	RC102: {0} device memory records restored from the raw data ({1} minutes filled, {2} log lines at the wrong time removed)
+RC102: {0} registros do log recuperados dos dados brutos	RC102: {0} log records recovered from the raw data
+RC102: {0} totais de dose recuperados dos dados brutos	RC102: {0} dose totals recovered from the raw data
+RadLog {0} — diagnóstico da dose do GMC Contador: {1} Leituras: {2} e {3}	RadLog {0} — GMC dose diagnosis Counter: {1} Readings: {2} and {3}
+Regra dos episódios: um alerta abre quando a leitura ao vivo atinge o limite do nível e fecha quando ela cai abaixo de 90% dele (histerese). Alertas que se encostam (o seguinte começa até 1 min após o fim do anterior) formam um episódio, com o nível mais alto, o início do primeiro e o fim do último. Se o contador desconecta com um alerta aberto e reconecta em até 15 min com a leitura ainda acima do limite, o episódio continua e o trecho sem leitura não entra na estatística; fechar o app encerra o episódio. Episódios encontrados no histórico do contador (c) usam as leituras por minuto e terminam após 70 min sem dado.	Episode rule: an alert opens when the live reading reaches the level's limit and closes when it drops below 90% of it (hysteresis). Alerts that touch (the next one starts up to 1 min after the previous one ends) form one episode, with the highest level, the start of the first and the end of the last. If the counter disconnects with an alert open and reconnects within 15 min with the reading still above the limit, the episode continues and the stretch without readings is left out of the statistics; closing the app ends the episode. Episodes found in the counter's history (c) use the per-minute readings and end after 70 min without data.
+Relação:	Relationship:
+Saída de	Trip on
+Saída de ter 10/11	Trip on Tue 10/11
+Saúde do tubo: sem dado	Tube health: no data
+Saúde do tubo: {0} · {1}	Tube health: {0} · {1}
+Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo	If the object emits anything, it is below what can be seen in this time
+Sem dado do GMC-800	No GMC-800 data
+Sem leitura de {0} a {1} ({2}). Ao voltar, a leitura ainda estava alta: o alerta seguiu no mesmo episódio. O tempo sem leitura não entra no mínimo nem na média.	No reading from {0} to {1} ({2}). When it came back, the reading was still high: the alert continued in the same episode. The time without readings is left out of the minimum and the average.
+Sem nada no meio	With nothing in between
+Sem tendência: a média dos dias variou dentro do esperado (+0,03 ± 0,05 CPM por dia, +1,2% no período, {0} dias completos).	No trend: the daily average varied within the expected range (+0.03 ± 0.05 CPM per day, +1.2% over the period, {0} full days).
+Sem tendência: a média dos dias variou dentro do esperado ({0} ± {1} {2} por dia, {3}% no período, {4} dias completos).	No trend: the daily average varied within the expected range ({0} ± {1} {2} per day, {3}% over the period, {4} full days).
+Sua dose no período foi {0} µSv, {1} do que você teria recebido ficando em casa ({2} µSv).	Your dose in the period was {0} µSv, {1} than you would have received staying home ({2} µSv).
+Subiu de uma vez ({0}) e ficou. {1} Mudou o aparelho de lugar ou chegou algo novo perto dele?	It rose all at once ({0}) and stayed. {1} Did you move the device or did something new arrive near it?
+Só vale se o RC102 passou a última hora parado no lugar onde vai medir.	Only valid if the RC102 spent the last hour still at the spot where it will measure.
+TAMBÉM PERTO DO OBJETO:	ALSO NEAR THE OBJECT:
+Um pouco acima do normal (seu normal: {0}) — pode ser só variação	A little above normal (your normal: {0}) — may be just variation
+Valores tirados do histórico de configurações do app. Cada minuto e cada alerta foram avaliados com o valor vigente no momento; a calibração segue as versões descritas em "Calibração no período".	Values taken from the app's settings history. Each minute and each alert was evaluated with the value in force at the time; the calibration follows the versions described in "Calibration in the period".
+a assinatura do	the signature of
+a partir de	from
+a partir de 100 CPM	from 100 CPM
+a partir de 120 CPM	from 120 CPM
+a partir de agora (	from now on (
+a release não tem a assinatura (	the release has no signature (
+abaixo de {0}Bq	below {0}Bq
+abaixo de {0}Bq/kg	below {0}Bq/kg
+acima do fundo	above background
+acumulado do aparelho · {0} · {1} contagens · {2} cps	device total · {0} · {1} counts · {2} cps
+aguardando	waiting
+alarme 1 de taxa de dose	dose rate alarm 1
+alarme 2 de taxa de dose	dose rate alarm 2
+alarme de bateria vazia	empty battery alarm
+alarme sirene volume barulho	alarm siren volume noise sound
+alterado em {0} de {1} para {2}{3}	changed on {0} from {1} to {2}{3}
+anotação:	note:
+aqui o fundo sobe junto com a pressão, ao contrário do comum.	here the background rises with the pressure, unlike the usual.
+atualização: não deu para pôr como {0} ({1}); abrindo {2}	update: couldn't place it as {0} ({1}); opening {2}
+até HH:MM	until HH:MM
+até agora	so far
+buscando chuva{0}…	fetching rain{0}…
+chuva ligada{0} · aguardando a primeira busca	rain on{0} · waiting for the first fetch
+chuva{0} ·	rain{0} ·
+cm o extra do objeto cai para 10% do fundo	cm the object's extra drops to 10% of background
+com o RC102, coleta de	with the RC102, collecting
+com você ·	with you ·
+começou a carregar	started charging
+conferência falhou em {0}	check failed on {0}
+configuração alterada	setting changed
+contagem fora da escala	count off the scale
+cópia da memória	memory copy
+cópia feita, mas o backup da pasta antiga falhou ({0}); ela não foi apagada	copy made, but backing up the old folder failed ({0}); it was not deleted
+de fábrica	factory
+desde o primeiro dado ({0}) · {1}% do período inteiro	since the first data ({0}) · {1}% of the whole period
+desde {0} {1} · {2} até agora	since {0} {1} · {2} so far
+desligou por bateria fraca	turned off for low battery
+detalhe de alerta	alert detail
+detalhes de alerta	alert details
+dias com leitura	days with readings
+do GMC-800 · o RC102 confirmou	from the GMC-800 · the RC102 confirmed
+do RC102 · o GMC-800 confirmou	from the RC102 · the GMC-800 confirmed
+do fundo da sua casa	of your home background
+do período medido	of the measured period
+eficiência até agora: {0} ± {1}%{2}	efficiency so far: {0} ± {1}%{2}
+eletrodo de tório	thoriated electrode
+eletrodo de tório (	thoriated electrode (
+em 90 dias ({0}{1}%).	in 90 days ({0}{1}%).
+em formação	forming
+em {0} · {1}	in {0} · {1}
+erro em {0}: {1}	error in {0}: {1}
+espectro: formato de valor {0} desconhecido	spectrum: unknown value format {0}
+esse trecho não existe mais	that stretch no longer exists
+evento do usuário	user event
+evento/alerta	event/alert
+ficando em casa:	staying home:
+fora da escala	off the scale
+fora de casa:	away from home:
+fora do esperado (≈ 1)	outside the expected (≈ 1)
+fundo da casa indisponível:	home background unavailable:
+fundo da casa: {0} cps · dureza 1,00 = {1}% acima de 1.500 keV	home background: {0} cps · hardness 1.00 = {1}% above 1,500 keV
+fundo {0} µSv/h ({1}) · ≈ {2} mSv/ano nesse ritmo · {3}%	background {0} µSv/h ({1}) · ≈ {2} mSv/year at this rate · {3}%
+h do fundo da sua casa	h of your home background
+hoje ·	today ·
+hoje às {0}	today at {0}
+hora de voo	hour of flight
+horas de voo	hours of flight
+identificado com confiança	identified with confidence
+igual ao fundo: se o objeto emite algo, é menos que +{0}	same as background: if the object emits anything, it is less than +{0}
+início	start
+isótopo com constante de dose conhecida (	isotope with a known dose constant (
+já tem outro trecho marcado depois desse	there is already another stretch marked after this one
+leitura {0}: veio {1} bytes, esperava {2}	reading {0}: got {1} bytes, expected {2}
+mSv/ano no ritmo do período	mSv/year at the period's rate
+mais alto por volta das {0}h ({1}{2}) · mais baixo por volta das {3}h ({4}{5})	highest around {0}:00 ({1}{2}) · lowest around {3}:00 ({4}{5})
+mais que em casa{0}	more than at home{0}
+marcada como não comparável com outras medições do mesmo objeto:	marked as not comparable with other measurements of the same object:
+mediana · média {0} · {1} min	median · average {0} · {1} min
+medição de objeto	object measurement
+menos que em casa{0}	less than at home{0}
+mensagem de texto	text message
+migração GMC Monitor → RadLog adiada: {0} (usando a pasta antiga {1})	GMC Monitor → RadLog migration postponed: {0} (using the old folder {1})
+migração GMC Monitor → RadLog: {0} (usando {1})	GMC Monitor → RadLog migration: {0} (using {1})
+migração GMC Monitor → RadLog: {0} arquivos copiados ({1} KB), {2} já existiam; backup {3}; pasta antiga apagada: {4} {5}	GMC Monitor → RadLog migration: {0} files copied ({1} KB), {2} already existed; backup {3}; old folder deleted: {4} {5}
+min do fundo da sua casa	min of your home background
+minuto de leitura	minute of readings
+minutos de leitura	minutes of readings
+mudei lugar mover aparelho gmc fundo referencia	moved place move device gmc background reference
+mudei o aparelho de lugar	I moved the device
+mudou no período ·	changed in the period ·
+mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)	changed in the period · until 05/11/2026 16:27: 0.01014 µSv/h per CPM at background (version 1, counter's curve) · since 05/11/2026 16:27: 0.00550 µSv/h per CPM at background (version 2, entered by hand)
+máx	max
+média {0} µSv/h{1}	average {0} µSv/h{1}
+média {0} · mediana {1} µSv/h · n = {2} min	average {0} · median {1} µSv/h · n = {2} min
+média · máximo	average · maximum
+mês	month
+mín {0} · média {1} ({2} {3})	min {0} · average {1} ({2} {3})
+nenhum byte mudou: a dose acumulada não fica na configuração	no byte changed: the accumulated dose isn't in the configuration
+nenhum registro reconhecido no arquivo	no recognised record in the file
+ninguém	nobody
+no RC102	on the RC102
+no USB e no Bluetooth…	on USB and Bluetooth…
+no USB…	on USB…
+no detector	in the detector
+no período (radar/modelo meteorológico).	in the period (radar/weather model).
+no ritmo:	at the rate:
+no total	in total
+no tubo	in the tube
+não confere; não vou instalar esta versão	doesn't match; not installing this version
+não consegui apagar a pasta antiga:	couldn't delete the old folder:
+não consegui ler a configuração	couldn't read the configuration
+não consegui ler o arquivo: {0}	couldn't read the file: {0}
+não consegui ler os serviços (status {0})	couldn't read the services (status {0})
+não parece o log do app do RC102 (falta a coluna "Real time" ou "Time")	doesn't look like the RC102 app log (the "Real time" or "Time" column is missing)
+não tem)	none)
+o RC102 estava fora de casa?	was the RC102 away from home?
+o aparelho recusou recomeçar o espectro	the device refused to restart the spectrum
+o arquivo não tem registros	the file has no records
+o valor real é maior	the real value is higher
+o zip ficou com {0} de {1} arquivos	the zip ended up with {0} of {1} files
+ontem às {0}	yesterday at {0}
+outra configuração (	another setting (
+outra cópia do app ainda aberta	another copy of the app still open
+parou de carregar	stopped charging
+pasta antiga apagada em	old folder deleted on
+pedaço sem cabeçalho ({0} bytes)	chunk without a header ({0} bytes)
+pelo menos	at least
+período fora de casa	period away from home
+períodos fora de casa	periods away from home
+pico {0} às {1}	peak {0} at {1}
+pico {0}{1} às {2}	peak {0}{1} at {2}
+pote de 500 mL encostado	500 mL jar touching
+página N de M	page N of M
+quando a pressão cai, o fundo sobe cerca de {0} h depois.	when the pressure drops, the background rises about {0} h later.
+quando a pressão cai, o fundo sobe quase ao mesmo tempo.	when the pressure drops, the background rises almost at the same time.
+r = {0} em 7 dias. O sinal negativo quer dizer que um sobe quando o outro desce. Com menos de 28 dias isso ainda é uma pista.	r = {0} over 7 days. The negative sign means one rises when the other falls. With fewer than 28 days this is still only a hint.
+raio-X de tórax	chest X-ray
+raios-X de tórax	chest X-rays
+rajadas suspeitas em 30 dias{0}	suspicious bursts in 30 days{0}
+registrado em {0} como {1}{2}	recorded on {0} as {1}{2}
+registro do RC102	RC102 record
+registros do RC102	RC102 records
+relatórios levados para Documentos/RadLog/Relatórios ({0})	reports moved to Documents/RadLog/Relatórios ({0})
+relatórios: não consegui levar tudo para Documentos/RadLog: {0}	reports: couldn't move everything to Documents/RadLog: {0}
+resposta maior que o anunciado ({0} > {1})	response larger than announced ({0} > {1})
+saturado · o valor real é maior	saturated · the real value is higher
+saudável (≈ 1)	healthy (≈ 1)
+sem contagens · confira o aparelho	no counts · check the device
+sem pontos	no points
+sem registro (histórico desde	no record (history since
+silenciar alarme som parar	silence alarm sound stop mute
+sincronização com {0}: voltou a responder	sync with {0}: responding again
+série	series
+só 0 min do RC102 em casa na última hora (precisa de 30)	only 0 min of RC102 at home in the last hour (needs 30)
+tamanho de resposta absurdo: {0}	absurd response size: {0}
+taxa de dose fora da escala	dose rate off the scale
+testar alarme som sirene	test alarm sound siren
+tomografia de tórax	chest CT scan
+tomografias de tórax	chest CT scans
+trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas	brought: 12 minutes · took: 1,440 minutes, 2 alerts
+um espectro por minuto · gravando desde {0} {1}	one spectrum per minute · recording since {0} {1}
+você em {0}	you in {0}
+voltar casa chegar fora	back home arrive away return
+voltou ao fundo	back to background
+{0} (recebi {1} de {2} bytes)	{0} (got {1} of {2} bytes)
+{0} Contador e app usam o mesmo fator: {1} µSv/h por CPM. Os dois mostram o mesmo µSv/h.	{0} Counter and app use the same factor: {1} µSv/h per CPM. Both show the same µSv/h.
+{0} Em uso a partir da aplicação.	{0} In use from when it was applied.
+{0} Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.	{0} When it fills up, new data may not be saved or may overwrite the old. Download the history to keep everything in the app; then, if you want to free space, erase the memory from the counter's menu.
+{0} alarme{1}	{0} alarm{1}
+{0} ao vivo ({1})	{0} live ({1})
+{0} chuva(s) sem dados suficientes {1}	{0} rain event(s) without enough data {1}
+{0} cps · {1} keV · {2} por min	{0} cps · {1} keV · {2} per min
+{0} de {1} minutos com os dois{2}	{0} of {1} minutes with both{2}
+{0} desde que foi zerada	{0} since it was reset
+{0} em 30 dias ({1}). Normal.	{0} in 30 days ({1}). Normal.
+{0} fora do cálculo{1}	{0} left out of the calculation{1}
+{0} mais que o inverso do quadrado ({1} contra {2}): confira as distâncias; o detector fica alguns milímetros para dentro da caixa.	{0} more than the inverse square ({1} against {2}): check the distances; the detector sits a few millimetres inside the case.
+{0} menos que o inverso do quadrado ({1} contra {2}): o objeto deve ser espalhado, então a distância segura é só aproximada.	{0} less than the inverse square ({1} against {2}): the object is probably spread out, so the safe distance is only approximate.
+{0} min em casa · {1} {2} com dado	{0} min at home · {1} {2} with data
+{0} na semana	{0} in the week
+{0} no RC102: pico de {1}{2}	{0} on the RC102: peak of {1}{2}
+{0} no mesmo período: {1} em {2} medidos	{0} in the same period: {1} in {2} measured
+{0} no {1} · {2} · pico {3}	{0} on the {1} · {2} · peak {3}
+{0} variância/média · {1}	{0} variance/mean · {1}
+{0} {1} (2ª leitura)	{0} {1} (2nd reading)
+{0} {1} (o inverso do quadrado dá {2}): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis.	{0} {1} (the inverse square gives {2}): the object behaves like a small source, so the safe distance and the Bq are more reliable.
+{0} {1} Vale refazer a intercalibração.	{0} {1} It's worth redoing the intercalibration.
+{0} {1}, o primeiro às {2}	{0} {1}, the first at {2}
+{0} ± {1} sobre o fundo · {2}σ · {3}× o fundo	{0} ± {1} over background · {2}σ · {3}× background
+{0} µSv em {1} · média {2} · máx {3}	{0} µSv in {1} · average {2} · max {3}
+{0} µSv/h por CPM no fundo	{0} µSv/h per CPM at background
+{0} µSv/h por CPM no fundo (versão {1}, {2}	{0} µSv/h per CPM at background (version {1}, {2}
+{0} µSv/h por CPM · {1}	{0} µSv/h per CPM · {1}
+{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} CPM · n = {5} min	{0} · dispersion {1} · real σ {2} ÷ chance {3} · median {4} CPM · n = {5} min
+{0} · no objeto	{0} · on the object
+{0} · {1} (minuto)	{0} · {1} (minute)
+{0} · {1} g · amostra {2} · fundo {3} · {4}{5}	{0} · {1} g · sample {2} · background {3} · {4}{5}
+{0} · {1} keV · {2} de {3} {4}	{0} · {1} keV · {2} of {3} {4}
+{0}% dos minutos	{0}% of the minutes
+{0}% medido · {1} de {2} min	{0}% measured · {1} of {2} min
+{0}% · {1} de {2} min desde o primeiro dado ({3}) · {4}% do período inteiro ({5} min)	{0}% · {1} of {2} min since the first data ({3}) · {4}% of the whole period ({5} min)
+{0}, desconectado	{0}, disconnected
+{0}: pico de {1}{2}	{0}: peak of {1}{2}
+{0}: reiniciando em {1} (erro interno nº {2} na última hora)	{0}: restarting in {1} (internal error no. {2} in the last hour)
+{0}: {1} de no máximo {2}	{0}: {1} of at most {2}
+{0}: {1} {2}, nenhum trecho de 10 min acima do seguro.	{0}: {1} {2}, no 10 min stretch above safe.
+{0}: {1} {2}, {3} {4} com trecho acima do seguro.	{0}: {1} {2}, {3} {4} with a stretch above safe.
+{0}alarme	{0}alarm
+{0}anotação	{0}note
+{0}atenção	{0}attention
+{0}chuva	{0}rain
+{0}fora de casa	{0}away from home
+{0}h · mediana {1} · quartis {2}–{3} · média {4} {5} · {6} min em {7} {8}	{0}:00 · median {1} · quartiles {2}–{3} · average {4} {5} · {6} min in {7} {8}
+{0}h · sem dados	{0}:00 · no data
+{0}perigo	{0}danger
+{0}sem dado	{0}no data
+{n} mais alto é comum perto de granito, tijolo, cimento e solo.	Higher {n} is common near granite, brick, cement and soil.
+{n} {v} do radônio: sobe em lugar fechado, subsolo e metrô.	{n} {v} from radon: rises in closed places, basements and the subway.
+{n} {v} do tório: comum em granito, areia e tijolo.	{n} {v} from thorium: common in granite, sand and brick.
+µSv/dia	µSv/day
+µSv/h médio (RC102) · cinza = sem dados	average µSv/h (RC102) · grey = no data
+µSv/h no RC102	µSv/h on the RC102
+µSv/h por CPM (para gama do Cs-137)	µSv/h per CPM (for Cs-137 gamma)
+· Bluetooth: chega com até 1–2 s de atraso	· Bluetooth: arrives up to 1–2 s late
+· acima do fundo ({0} cps a mais), sem linha conhecida ainda	· above background ({0} cps more), no known line yet
+· chuva {0} (radar)	· rain {0} (radar)
+· chuva {0} mm (modelo)	· rain {0} mm (model)
+· chuva, fora da conta	· rain, left out of the count
+· de {0} {1} a {2} {3}	· from {0} {1} to {2} {3}
+· do RC102:	· from the RC102:
+· esperando o sinal subir acima do fundo	· waiting for the signal to rise above background
+· fundo da casa	· home background
+· fundo da casa (	· home background (
+· fundo de	· background of
+· histórico recalculado	· history recalculated
+· histórico recalculado com a versão {0}	· history recalculated with version {0}
+· igual ao fundo	· same as background
+· incerteza {0}% (para em 10%)	· uncertainty {0}% (stops at 10%)
+· janela em formação ({0} de {1} dias)	· window forming ({0} of {1} days)
+· mais alto por volta das {0}h, mais baixo por volta das {1}h	· highest around {0}:00, lowest around {1}:00
+· média ({0}) {1} ± {2} µSv/h	· average ({0}) {1} ± {2} µSv/h
+· nada neste período	· nothing in this period
+· no objeto	· on the object
+· os dois aparelhos	· both devices
+· sumiu no fundo	· faded into background
+· tracejado: fundo de casa	· dashed: home background
+· {0} no objeto, {1} com você	· {0} on the object, {1} with you
+· {0} sem leitura	· {0} without readings
+· {0}% do período inteiro	· {0}% of the whole period
+· ~{0} para decidir	· ~{0} to decide
+· às {0}	· at {0}
+Às 3h o seu fundo costuma ficar 7,5% acima da média do dia.	At 3:00 your background is usually 7.5% above the daily average.
+É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo.	It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.
+Últimas 24 horas	Last 24 hours
+Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico.	Last download on 05/11 20:10. After it, the app went 6 h 52 min without readings (since 06/11 21:00); the counter's memory may have those minutes: download the history.
+Último download em {0}. Depois dele, o app ficou {1} sem leitura (desde {2}); a memória do contador pode ter esses minutos: baixe o histórico.	Last download on {0}. After it, the app went {1} without readings (since {2}); the counter's memory may have those minutes: download the history.
+Último download em {0}. O contador não está gravando na memória: minutos sem o app não podem ser recuperados.	Last download on {0}. The counter isn't recording to memory: minutes without the app can't be recovered.
+Últimos 7 dias · em casa · {0}	Last 7 days · at home · {0}
+Últimos 7 dias · {0}	Last 7 days · {0}
+última leitura {0}	last reading {0}
+— valor atual; sem registro do valor vigente no início do período	— current value; no record of the value in force at the start of the period
+≈ {0} {1} do fundo da sua casa	≈ {0} {1} of your home background
+% do tempo medido	% of the measured time

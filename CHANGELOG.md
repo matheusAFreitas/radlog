@@ -1,5 +1,90 @@
 # Versões
 
+## 2.78.0
+O resto da auditoria de 13/11, numa versão só: segurança, gráficos, dados,
+velocidade, testes e textos.
+
+- O espectro do RC102 para em 4.096 canais. Uma resposta malformada (ou de
+  um aparelho falso por perto) virava milhões de canais e gigabytes de
+  memória.
+- O radar só busca imagens no RainViewer, por https, e as respostas do
+  serviço de clima e do radar são lidas até 4 MB.
+- O erro da busca de cidade entra na tela como texto.
+- O SECURITY.md tem o passo a passo certo para a chave de assinatura perdida
+  e o caso de uma chave vazar, com um teste que ensaia a troca.
+- O botão Reconectar do RC102 espera a leitura em andamento antes de fechar
+  o USB.
+- Nos gráficos de 1 ano (taxa e dose) cada dia vai de meia-noite a
+  meia-noite. Antes ia das 21:00 às 21:00.
+- Só as 5 cópias mais novas da memória do GMC-800 ficam guardadas.
+- O backup não leva mais o nome do computador, nem dentro do arquivo nem no
+  nome sugerido.
+- A Minha dose abre bem mais rápido: o ano de leituras é lido uma vez por
+  conta, não uma vez por gráfico (de 3,5 s para 1,3 s num ano cheio).
+- Configurações e contagem de uso gravam no disco em segundo plano, juntando
+  várias mudanças seguidas numa gravação só. Ao fechar, o que falta é
+  gravado.
+- O app não carrega mais o código do modo demonstração quando roda de
+  verdade.
+- Minutos que ficaram na pasta temporária quando a gravação falhou voltam
+  para o histórico ao abrir o app.
+- O CSV exportado confere se foi gravado inteiro antes de dizer que deu
+  certo, e a mudança de pasta da 2.0 tenta de novo quando o Windows segura
+  um arquivo.
+- Atenção: depois de abrir esta versão (ou a 2.76.2 em diante), uma versão
+  anterior à 2.76.2 não mostra mais os alertas, que agora ficam em
+  alertas.csv. Voltar para uma versão antiga não é recomendado.
+- A tradução para o inglês cobre quase todos os textos que faltavam
+  (gráficos, Medir objeto, relatórios, mensagens do RC102, modo
+  demonstração). A busca rápida também acha as ações por palavras em inglês.
+- A data no Resumo tem nome para leitor de tela, e o texto do alerta e do
+  passo do RC102 não aparece vazio antes de carregar.
+- O modo demonstração mostra a versão atual e uma "versão nova" depois dela.
+- O README tem a seção "O que vai para a internet": checagem de versão,
+  clima e radar, e nada mais. A sincronização fica na rede de casa.
+- Testes: busca aleatória (fuzz) toda semana, teste das sub-abas e janelas
+  nos dois idiomas, e checagem de que toda função chamada pela tela existe.
+
+**English**
+
+- The RC102 spectrum stops at 4,096 channels. A malformed reply (or one from
+  a fake device nearby) turned into millions of channels and gigabytes of
+  memory.
+- The radar only fetches images from RainViewer over https, and replies from
+  the weather and radar services are read up to 4 MB.
+- The city search error goes on screen as text.
+- SECURITY.md has the right steps for a lost signing key and the case of a
+  leaked key, with a test that rehearses the switch.
+- The RC102 Reconnect button waits for the current read before closing USB.
+- On the 1-year charts (rate and dose) each day runs midnight to midnight.
+  Before it ran from 21:00 to 21:00.
+- Only the 5 newest copies of the GMC-800 memory are kept.
+- Backups no longer carry the computer's name, neither inside the file nor
+  in the suggested file name.
+- My dose opens much faster: the year of readings is read once per
+  calculation, not once per chart (from 3.5 s to 1.3 s on a full year).
+- Settings and usage counts are written to disk in the background, folding
+  several changes in a row into one write. On exit, whatever is left is
+  written.
+- The app no longer loads the demo mode code when running for real.
+- Minutes left in the temp folder when saving failed come back into the
+  history when the app opens.
+- The exported CSV checks it was written in full before reporting success,
+  and the 2.0 folder move retries when Windows holds a file.
+- Note: after opening this version (or 2.76.2 onwards), versions before
+  2.76.2 no longer show alerts, which now live in alertas.csv. Going back to
+  an old version is not recommended.
+- The English translation covers almost all the texts that were missing
+  (charts, Measure object, reports, RC102 messages, demo mode). Quick search
+  also finds actions by English words.
+- The date on Summary has a name for screen readers, and the alert and RC102
+  step texts no longer show up empty before loading.
+- Demo mode shows the current version and a "new version" after it.
+- The README has a "What goes to the internet" section: version check,
+  weather and radar, nothing else. Sync stays on the home network.
+- Tests: weekly fuzzing, a test of sub-tabs and dialogs in both languages,
+  and a check that every function the screen calls exists.
+
 ## 2.77.0
 Bloco 3 da auditoria de 13/11: relógio, porta do contador, versões e fotos.
 

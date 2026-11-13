@@ -27,6 +27,7 @@ func TestUsage(t *testing.T) {
 		t.Fatalf("tudo: %+v", all)
 	}
 	// abre de novo: continua; a opção fica mesmo com SaveSettings sem ela
+	a.flushWrites()
 	b := newTestApp(t)
 	b.dataDir = a.dataDir
 	b.settings.UsageOn = true
@@ -46,6 +47,7 @@ func TestUsage(t *testing.T) {
 		t.Fatal("não desligou")
 	}
 	// fica fora do backup
+	a.flushWrites()
 	if _, err := os.Stat(a.usagePath()); err != nil {
 		t.Fatal(err)
 	}

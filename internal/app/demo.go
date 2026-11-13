@@ -351,7 +351,7 @@ func (a *App) demoLoop(stop chan struct{}) {
 // points devolve as leituras por minuto em [from, to). Com o demo ligado, os
 // minutos simulados aparecem por cima dos reais (só na tela).
 func (a *App) points(from, to time.Time) ([]store.Point, error) {
-	pts, err := a.store.Range(from, to)
+	pts, err := a.storeRange(from, to)
 	if err != nil {
 		return nil, err
 	}
