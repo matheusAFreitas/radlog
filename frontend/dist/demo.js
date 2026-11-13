@@ -113,7 +113,13 @@ function makeDemoApi() {
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
   // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
   if (localGet("rcBack", "") === "1") rcAsksAll.splice(0, 1, { id: rcY, from: rcY, to: rcY + 130 * 6e4, kind: "volta", period: 99, since: rcY + 4 * 6e4, name: "Saí de casa", memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" });
+  // saída programada (2.75): localStorage gmc.rcPlan=1 mostra a pergunta, rcPlan=2 a "não aconteceu?"
+  const plY = new Date(now - 3 * 864e5).setHours(5, 30, 0, 0);
+  const plMode = localGet("rcPlan", "");
+  if (plMode) rcAsksAll.splice(0, 1, { id: plY, from: plMode === "2" ? plY : plY + 11 * 6e4, to: plY + 13 * 36e5 + 2 * 6e4, kind: "programada", planned: plY, name: "Escritório", rcGoes: true, gmcGoes: false, planAt: plY, source: plMode === "2" ? "plano" : "razao", estimated: plMode === "2", missed: plMode === "2", backHint: plMode === "2" ? 0 : plY + 11 * 36e5 + 53 * 6e4, dev: "radiacode", memMinutes: 780, avgUSv: 0.13, maxUSv: 0.2, maxAt: plY + 3 * 36e5, doseUSv: 1.7, gmcUSv: 0.098, ratio: 39, normalRatio: 28, hint: "fora" });
   let rcAsks = rcAsksAll.slice();
+  const plTomorrow = new Date(now + 864e5).setHours(5, 30, 0, 0);
+  let planned = [{ id: plTomorrow, nome: "Escritório", de: plTomorrow, rc: true, gmc: false }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
   let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
@@ -1084,6 +1090,25 @@ const demoRc = () => {
       let p = { id: 0 };
       if (ans === "voltei") p = { id: q.period, from: q.since, to: to || q.to, name: q.name };
       if (ans === "fora") p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name, gmc: "casa", radiacode: "comigo", notHome: true });
+      rcAsks = rcAsks.filter((x) => x.id !== id);
+      setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
+      return p;
+    },
+    GetPlannedTrips: async () => planned.map((p) => ({ ...p })),
+    SavePlannedTrip: async (p) => {
+      if (!p.gmc && !p.rc) throw new Error("escolha pelo menos um aparelho que vai com você");
+      const q = { ...p, nome: (p.nome || "").trim() || "Saída programada", id: p.id || Date.now() };
+      planned = planned.filter((x) => x.id !== q.id).concat(q).sort((a, b) => a.de - b.de);
+      setTimeout(() => emit("planned", planned.slice()), 0);
+      return q;
+    },
+    DeletePlannedTrip: async (id) => { planned = planned.filter((x) => x.id !== id); setTimeout(() => emit("planned", planned.slice()), 0); },
+    NotLeaving: async (id) => { planned = planned.map((x) => (x.id === id ? { ...x, saiu: 0 } : x)); },
+    AnswerPlanned: async (id, ans, from, to, name, gmc, rc) => {
+      const q = rcAsks.find((x) => x.id === id);
+      if (!q) throw new Error("essa pergunta já foi respondida");
+      let p = { id: 0 };
+      if (ans === "sai") p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name: name || q.name, gmc: gmc ? "comigo" : "casa", radiacode: rc ? "comigo" : "casa", notHome: true, planned: q.planned, estimated: q.estimated && from === q.from });
       rcAsks = rcAsks.filter((x) => x.id !== id);
       setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
       return p;

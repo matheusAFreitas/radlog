@@ -428,6 +428,9 @@ type App struct {
 	cfgMu        sync.Mutex       // histórico de configurações
 	devSaveMode  string           // modo de gravação da memória do GMC (lido ao conectar)
 	alertWatch   map[int64]bool   // alertas do GMC com segundos sendo gravados
+	// saídas programadas (planned.go)
+	planned       []PlannedTrip
+	plannedLoaded bool
 	// Radiacode: espectro no começo da fase atual e o do fundo já medido
 	measSpec0  *radiacode.Spectrum
 	measSpecBg *MeasureSpectrum
@@ -856,6 +859,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	a.cfgRecord("contador")
 
 	a.setState("conectado", "")
+	go a.plannedOnConnect("gmc", time.Now()) // voltou de uma saída programada?
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
 	a.logEvent(fmt.Sprintf("Contador conectado (%s em %s)", ver, port))
 	go a.poll(d, stop, port)
@@ -896,6 +900,7 @@ func (a *App) disconnect(errMsg string) bool {
 	if d == nil {
 		return false
 	}
+	a.plannedDisconnected("gmc", time.Now())
 	if stop != nil {
 		close(stop)
 	}
@@ -1337,6 +1342,9 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	}
 	a.logEvent(msg)
 	a.emit("stored", time.Now().UnixMilli())
+	if res.Added > 0 {
+		a.plannedRefine() // a saída programada pode achar o horário agora
+	}
 	if ierr != nil {
 		return res, ierr
 	}

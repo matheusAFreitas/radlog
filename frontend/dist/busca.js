@@ -56,6 +56,7 @@ function qkActions() {
     qkAway()
       ? { g: "Ações", ic: QK_IC.back, t: "Voltei", s: "encerra o período fora de casa", kw: "voltar casa chegar fora", run: qkBack, c: "away" }
       : { g: "Ações", ic: QK_IC.out, t: "Saí de casa", s: "pergunta quem vai junto", kw: "sair fora rua viagem", run: qkAskAway, c: "away" },
+    { g: "Ações", ic: QK_IC.out, t: "Programar saída", s: "marca antes; o app acha o horário depois", kw: "programar saida agendar amanha escritorio viagem depois", run: () => { qkSheetClose(); openPlanForm(null); }, c: "away" },
     { g: "Ações", ic: QK_IC.obj, t: "Medir um objeto", s: "abre o Medir objeto no passo 1", kw: "medir objeto amostra", run: qkMeasure, c: "obj" },
     { g: "Ações", ic: QK_IC.pdf, t: "Relatório em PDF do Resumo", s: "do período escolhido no Resumo", kw: "relatorio pdf imprimir", run: qkReport },
     { g: "Ações", ic: QK_IC.bell, t: "Testar alarme (5 s)", s: "Configurações › Alarme", kw: "testar alarme som sirene", run: () => $("btnTestAlarm").click() },
@@ -297,6 +298,9 @@ function qkAskAway() {
     s.appendChild(l);
   }
   s.appendChild(Object.assign(document.createElement("span"), { className: "small muted", textContent: "Já vem marcado como da última vez." }));
+  const later = Object.assign(document.createElement("button"), { type: "button", className: "link small", textContent: "É depois? Programar a saída" });
+  later.addEventListener("click", () => { qkSheetClose(); openPlanForm(null); });
+  s.appendChild(later);
   const acts = document.createElement("div");
   acts.className = "qk-acts";
   const no = Object.assign(document.createElement("button"), { type: "button", className: "btn", textContent: "Cancelar" });

@@ -34,6 +34,10 @@ type Period struct {
 	// os dois em casa e você também saiu (esqueceu de levar): a dose pessoal
 	// fica em branco em vez de usar a leitura de casa
 	NotHome bool `json:"notHome,omitempty"`
+	// veio de uma saída programada (2.75, planned.go): o id dela e se o
+	// horário da saída é o programado (nada nos aparelhos deu certeza)
+	Planned   int64 `json:"planned,omitempty"`
+	Estimated bool  `json:"estimated,omitempty"`
 }
 
 func (a *App) periodsPath() string { return filepath.Join(a.dataDir, "fora-de-casa.json") }
@@ -118,6 +122,10 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 		found := false
 		for i := range a.periods {
 			if a.periods[i].ID == p.ID {
+				// a tela pode não mandar de volta a marca da programada
+				if old := a.periods[i]; p.Planned == 0 {
+					p.Planned, p.Estimated = old.Planned, old.Estimated && old.From == p.From
+				}
 				a.periods[i] = p
 				found = true
 			}

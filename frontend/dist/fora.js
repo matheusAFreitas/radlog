@@ -338,6 +338,8 @@ function renderPeriods() {
       who.appendChild(c);
     }
     if (p.notHome) { const c = document.createElement("span"); c.className = "chip"; c.textContent = "eu não estava em casa"; who.appendChild(c); }
+    if (p.planned) { const c = document.createElement("span"); c.className = "chip"; c.textContent = "programada"; who.appendChild(c); }
+    if (p.estimated) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "horário estimado"; c.title = "A saída ficou no horário programado: nada nos aparelhos deu certeza."; who.appendChild(c); }
     t.append(kind, when, who);
     const acts = document.createElement("div");
     acts.className = "acts";

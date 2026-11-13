@@ -2776,3 +2776,34 @@ dialog.trip-dlg { width: min(1040px, calc(100vw - 32px)); }
 #iMem.mem-att { color: var(--att); }
 #iMem.mem-full { color: var(--warn); }
 #iSyncNote { margin: var(--space-3) 0 0; text-align: left; }
+
+/* saída programada (2.75, programada.js) */
+.pl-form input[type="time"], .pl-form input[type="date"] { min-height: 44px; padding: 0 var(--space-3); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font: inherit; color-scheme: dark; }
+.pl-form > .wh-field { flex: none; }
+.view-periods .dlg-head { flex-wrap: wrap; gap: var(--space-3); }
+.pl-head-btns .btn { white-space: nowrap; }
+.pl-box { display: flex; flex-direction: column; gap: var(--space-2); }
+.pl-box h3 { margin: 0; }
+.pl-list { list-style: none; margin: 0; padding: 0; }
+.pl-row { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: var(--space-3); align-items: center; padding: var(--space-3) 0; border-top: 1px solid var(--border); }
+.pl-day { display: flex; flex-direction: column; align-items: center; min-width: 44px; padding: 2px var(--space-2); border: 1px solid color-mix(in srgb, var(--away) 50%, var(--border)); border-radius: var(--radius-md); line-height: 1.15; }
+.pl-day span { font-size: var(--fs-micro); color: var(--away); }
+.pl-day b { font-size: 1.15em; }
+.pl-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pl-started { color: var(--swap); }
+.pl-acts { display: flex; gap: var(--space-3); flex-wrap: wrap; justify-content: flex-end; }
+.pl-g { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+.pl-when { display: flex; gap: var(--space-2); flex-wrap: wrap; align-items: center; }
+.pl-when input { width: auto; }
+.pl-devs { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+.pl-dev { display: flex; gap: var(--space-2); align-items: flex-start; padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); cursor: pointer; }
+.pl-dev > span { display: flex; flex-direction: column; gap: 2px; }
+.pl-dev input { accent-color: var(--away); width: 16px; height: 16px; margin-top: 2px; }
+.pl-dev.on { border-color: var(--away); }
+.pl-dev.on b { color: var(--swap); }
+.dot.pl-miss { background: var(--att); border: 0; }
+@media (max-width: 640px) {
+  .pl-devs { grid-template-columns: minmax(0, 1fr); }
+  .pl-row { grid-template-columns: auto minmax(0, 1fr); }
+  .pl-acts { grid-column: 1 / -1; justify-content: flex-start; }
+}
