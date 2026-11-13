@@ -97,6 +97,12 @@ func (a *App) writeBackup(w io.Writer) error {
 		if rel == "chuva.json" || rel == "chuva-radar.json" {
 			b = hidePlace(b) // o lugar não sai do PC
 		}
+		if strings.HasPrefix(rel, attachDirName+"/") {
+			var ok bool
+			if b, ok = a.attachForExport(rel, b); !ok {
+				return nil
+			}
+		}
 		f, err := zw.Create(rel)
 		if err != nil {
 			return err

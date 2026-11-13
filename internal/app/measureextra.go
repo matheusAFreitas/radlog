@@ -14,6 +14,8 @@ import (
 	"unicode"
 
 	wruntime "github.com/wailsapp/wails/v2/pkg/runtime"
+
+	"radlog/internal/photometa"
 )
 
 // ---------- medições de objeto: anexos, comparabilidade e contexto (2.7) ----------
@@ -99,7 +101,8 @@ func (a *App) attachFiles(id int64, paths []string) ([]MeasureAttachment, error)
 		for k := 2; used[strings.ToLower(file)]; k++ {
 			file = fmt.Sprintf("%s-%d%s", strings.TrimSuffix(name, ext), k, ext)
 		}
-		if _, err := copyFile(src, filepath.Join(dir, file)); err != nil {
+		size, err := copyAttachment(src, filepath.Join(dir, file), ext)
+		if err != nil {
 			errs = append(errs, filepath.Base(src)+": "+err.Error())
 			continue
 		}
@@ -108,7 +111,7 @@ func (a *App) attachFiles(id int64, paths []string) ([]MeasureAttachment, error)
 		if typ == "" {
 			typ = "application/octet-stream"
 		}
-		added = append(added, MeasureAttachment{File: file, Name: filepath.Base(src), Size: st.Size(), Type: typ, Added: time.Now().UnixMilli()})
+		added = append(added, MeasureAttachment{File: file, Name: filepath.Base(src), Size: size, Type: typ, Added: time.Now().UnixMilli()})
 	}
 	a.mu.Lock()
 	var out []MeasureAttachment
@@ -381,4 +384,43 @@ func (a *App) GetMeasurementContext(id int64) (MeasureContext, error) {
 	}
 	sort.Slice(ctx.Related, func(i, j int) bool { return ctx.Related[i].Time > ctx.Related[j].Time })
 	return ctx, nil
+}
+
+// errPhotoMeta: a foto não foi anexada porque não deu para tirar a
+// localização de dentro dela.
+var errPhotoMeta = errors.New("não consegui tirar a localização e os dados da câmera de dentro desta foto, então ela não foi anexada")
+
+// copyAttachment copia o anexo para a pasta do app. Fotos vão sem os
+// metadados (localização do celular, modelo, data): eles não podem ir para
+// o backup nem para a nuvem (auditoria 2.76.0, S2). Devolve o tamanho
+// gravado.
+func copyAttachment(src, dst, ext string) (int64, error) {
+	if !photometa.Handles(ext) {
+		return copyFile(src, dst)
+	}
+	b, err := os.ReadFile(src)
+	if err != nil {
+		return 0, err
+	}
+	clean, err := photometa.Strip(b, ext)
+	if err != nil {
+		return 0, errPhotoMeta
+	}
+	return int64(len(clean)), writeFileAtomic(dst, clean, 0o644)
+}
+
+// attachForExport tira os metadados de uma foto anexada antes de ela sair
+// do PC (backup e sincronização): as anexadas antes da 2.77.0 ainda têm a
+// localização. Devolve false se a foto deve ficar de fora.
+func (a *App) attachForExport(rel string, b []byte) ([]byte, bool) {
+	ext := filepath.Ext(rel)
+	if !photometa.Handles(ext) {
+		return b, true
+	}
+	clean, err := photometa.Strip(b, ext)
+	if err != nil {
+		a.logf("anexo %s ficou de fora (não consegui tirar a localização de dentro da foto)", rel)
+		return nil, false
+	}
+	return clean, true
 }

@@ -3736,7 +3736,12 @@ const I18N_EN = {
 "perguntas do RadiaCode": "RC102 questions",
 "sincronização": "sync",
 "versões da calibração": "calibration versions",
-"intercalibração": "cross-calibration"
+"intercalibração": "cross-calibration",
+"A versão antiga não abriu": "The older version didn't open",
+"Para usar a versão antiga, feche o app (pelo ícone da bandeja) e abra ela de novo.": "To use the older version, close the app (from the tray icon) and open it again.",
+"Entendi": "Got it",
+"não consegui tirar a localização e os dados da câmera de dentro desta foto, então ela não foi anexada": "couldn't remove the location and camera data from inside this photo, so it wasn't attached",
+"formato de imagem não reconhecido": "unrecognized image format"
 },
 "patterns": [
 [
@@ -4396,6 +4401,17 @@ const I18N_EN = {
 " CPM por dia, ",
 "% no período, ",
 " dias completos)."
+]
+],
+[
+"Você abriu a versão ",
+"^Você abriu a versão ((?:(?! · ).)+?) com a ((?:(?! · ).)+?) aberta\\. Continuei na ((?:(?! · ).)+?): a antiga gravaria as configurações sem os ajustes novos\\.$",
+"You opened version ${1} while ${2} was running. I stayed on ${3}: the older one would save the settings without the new options.",
+[
+"Você abriu a versão ",
+" com a ",
+" aberta. Continuei na ",
+": a antiga gravaria as configurações sem os ajustes novos."
 ]
 ],
 [
@@ -5328,6 +5344,15 @@ const I18N_EN = {
 ]
 ],
 [
+"anexo ",
+"^anexo ((?:(?! · ).)+?) ficou de fora \\(não consegui tirar a localização de dentro da foto\\)$",
+"attachment ${1} was left out (couldn't remove the location from inside the photo)",
+[
+"anexo ",
+" ficou de fora (não consegui tirar a localização de dentro da foto)"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com CPM bruto e corrigido gravados \\(correção de tempo morto ligada em ((?:(?! · ).)+?)\\)$",
 "${1} with raw and corrected CPM recorded (dead-time correction on in ${2})",
@@ -5495,6 +5520,16 @@ const I18N_EN = {
 "Atenção (histórico do contador): pico de ",
 " µSv/h às ",
 " (a partir de "
+]
+],
+[
+"versão mais antiga (",
+"^versão mais antiga \\(((?:(?! · ).)+?)\\) pediu para abrir com esta \\(((?:(?! · ).)+?)\\) aberta: recusei$",
+"older version (${1}) asked to open while this one (${2}) was running: refused",
+[
+"versão mais antiga (",
+") pediu para abrir com esta (",
+") aberta: recusei"
 ]
 ],
 [
@@ -6154,6 +6189,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Relógio do GMC-800 estava ",
+"^Relógio do GMC\\-800 estava ((?:(?! · ).)+?) s adiantado: acertei pelo do PC$",
+"GMC-800 clock was ${1} s fast: set it from the PC",
+[
+"Relógio do GMC-800 estava ",
+" s adiantado: acertei pelo do PC"
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -6194,6 +6238,15 @@ const I18N_EN = {
 "${1} come from radon: they rise in closed places, basements and the subway.",
 [
 " vêm do radônio: sobem em lugar fechado, subsolo e metrô."
+]
+],
+[
+"Relógio do GMC-800 estava ",
+"^Relógio do GMC\\-800 estava ((?:(?! · ).)+?) s atrasado: acertei pelo do PC$",
+"GMC-800 clock was ${1} s slow: set it from the PC",
+[
+"Relógio do GMC-800 estava ",
+" s atrasado: acertei pelo do PC"
 ]
 ],
 [
@@ -6394,6 +6447,15 @@ const I18N_EN = {
 "Confirmado pelo ",
 ": ele também subiu ",
 " sobre o fundo dele."
+]
+],
+[
+"reconexão: ",
+"^reconexão: ((?:(?! · ).)+?) agora é outro aparelho; esperando o contador$",
+"reconnect: ${1} is now another device; waiting for the counter",
+[
+"reconexão: ",
+" agora é outro aparelho; esperando o contador"
 ]
 ],
 [
@@ -6631,6 +6693,24 @@ const I18N_EN = {
 ]
 ],
 [
+"A versão ",
+"^A versão ((?:(?! · ).)+?) tentou abrir com a ((?:(?! · ).)+?) aberta: continuei nesta$",
+"Version ${1} tried to open while ${2} was running: stayed on this one",
+[
+"A versão ",
+" tentou abrir com a ",
+" aberta: continuei nesta"
+]
+],
+[
+"conexão: não consegui acertar o relógio do contador: ",
+"^conexão: não consegui acertar o relógio do contador: ((?:(?! · ).)+?)$",
+"connection: couldn't set the counter clock: ${1}",
+[
+"conexão: não consegui acertar o relógio do contador: "
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -6713,6 +6793,14 @@ const I18N_EN = {
 [
 "Só o ",
 " subiu: é o que estava perto dele, não a casa."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) agora é outro aparelho: esperando o contador voltar$",
+"${1} is now another device: waiting for the counter to come back",
+[
+" agora é outro aparelho: esperando o contador voltar"
 ]
 ],
 [
@@ -8477,6 +8565,15 @@ const I18N_EN = {
 [
 "Sem como conferir: o ",
 " ficou em casa."
+]
+],
+[
+"reconexão: o contador mudou de ",
+"^reconexão: o contador mudou de ((?:(?! · ).)+?) para ((?:(?! · ).)+?)$",
+"reconnect: the counter moved from ${1} to ${2}",
+[
+"reconexão: o contador mudou de ",
+" para "
 ]
 ],
 [

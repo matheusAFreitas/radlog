@@ -307,6 +307,10 @@ func (a *App) attachAddToDelta(zw *zip.Writer, keys []string) error {
 		if err != nil {
 			continue
 		}
+		var ok bool
+		if b, ok = a.attachForExport(rel, b); !ok {
+			continue
+		}
 		w, err := zw.Create(rel)
 		if err != nil {
 			return err
