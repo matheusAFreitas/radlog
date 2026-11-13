@@ -106,6 +106,34 @@ func TestTripSummary(t *testing.T) {
 // espectro antes de sair): o pedaço de casa sai pelo espectro de casa, e o
 // tempo do espectro é o da saída (relatório do ACE, 13/11: 14 h numa saída de 10 h)
 func TestTripSpectrumLongReturnRow(t *testing.T) {
+	s := longReturnTrip(t, 6)
+	if s.Spec == nil || math.Abs(s.Spec.ObjSec-240*60) > 60 {
+		t.Fatalf("tempo do espectro: %+v", s.Spec)
+	}
+	for _, l := range s.Lines {
+		if l.Nuclide == "K-40" {
+			if l.Pct < 70 || l.Pct > 130 {
+				t.Fatalf("K-40 fora deveria ser ~2× casa: %+v", l)
+			}
+			return
+		}
+	}
+	t.Fatalf("sem K-40: %+v", s.Lines)
+}
+
+// fora igual a casa, com volta longa: nenhuma linha "mais" nem "menos" que
+// casa (o erro da subtração entra na conta; QA da 2.78.2)
+func TestTripSpectrumLongReturnSame(t *testing.T) {
+	s := longReturnTrip(t, 3)
+	for _, l := range s.Lines {
+		if l.More || l.Less {
+			t.Fatalf("linha diferente de casa com fora = casa: %+v", l)
+		}
+	}
+}
+
+func longReturnTrip(t *testing.T, awayK40 float64) TripSummary {
+	t.Helper()
 	a := newTestApp(t)
 	t0 := time.Now().Add(-12 * time.Hour).Truncate(time.Minute)
 	cont := func(i int) float64 { return 40 / (1 + float64(i)/40) }
@@ -133,7 +161,7 @@ func TestTripSpectrumLongReturnRow(t *testing.T) {
 	add(120, 3)
 	leave := t0.Add(300 * time.Minute)
 	back := leave.Add(4 * time.Hour)
-	add(240, 6)
+	add(240, awayK40)
 	a.rcSpecAdd("RC-1", back, fakeSpec(sec, c))
 	p, err := a.SavePeriod(Period{From: leave.UnixMilli(), To: back.UnixMilli(), GMC: WhereHome, RC: WhereMe, NotHome: true})
 	if err != nil {
@@ -143,18 +171,7 @@ func TestTripSpectrumLongReturnRow(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if s.Spec == nil || math.Abs(s.Spec.ObjSec-240*60) > 60 {
-		t.Fatalf("tempo do espectro: %+v", s.Spec)
-	}
-	for _, l := range s.Lines {
-		if l.Nuclide == "K-40" {
-			if l.Pct < 70 || l.Pct > 130 {
-				t.Fatalf("K-40 fora deveria ser ~2× casa: %+v", l)
-			}
-			return
-		}
-	}
-	t.Fatalf("sem K-40: %+v", s.Lines)
+	return s
 }
 
 func TestDoseVsHomeTxt(t *testing.T) {
