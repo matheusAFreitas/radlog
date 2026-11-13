@@ -1,5 +1,18 @@
 # Versões
 
+## 2.75.3
+- Barra lateral com texto grande (Configurações › Janela, acima de 100%):
+  ela cresce junto com o texto, e a pílula "vX disponível" e a versão ao
+  lado do logo não cortam mais. Os avisos longos da atualização ("baixando…",
+  "troca quando o CPM normalizar") quebram em duas linhas dentro da barra.
+
+**English**
+
+- Sidebar with large text (Settings › Window, above 100%): it grows with the
+  text, and the "vX available" pill and the version next to the logo are no
+  longer cut off. Long update notices ("downloading…", "switches when the
+  CPM settles") wrap inside the bar.
+
 ## 2.75.2
 - O arquivo de leituras volta a recusar datas que não existem (31/04, 29/02
   fora de ano bissexto): a leitura rápida da 2.75.1 as aceitava e jogava o
