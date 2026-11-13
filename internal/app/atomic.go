@@ -68,6 +68,7 @@ type laterWrites struct {
 	order   []string          // arquivos na ordem do primeiro pedido
 	data    map[string][]byte // a versão mais nova de cada um
 	perm    map[string]os.FileMode
+	what    map[string]string // o que é cada arquivo, para o log
 	running bool
 	idle    *sync.Cond
 }
@@ -76,39 +77,51 @@ func (a *App) writeLater(path string, data []byte, perm os.FileMode, what string
 	w := &a.later
 	w.mu.Lock()
 	if w.data == nil {
-		w.data, w.perm = map[string][]byte{}, map[string]os.FileMode{}
+		w.data, w.perm, w.what = map[string][]byte{}, map[string]os.FileMode{}, map[string]string{}
 		w.idle = sync.NewCond(&w.mu)
 	}
 	if _, ok := w.data[path]; !ok {
 		w.order = append(w.order, path)
 	}
-	w.data[path], w.perm[path] = data, perm
+	w.data[path], w.perm[path], w.what[path] = data, perm, what
 	start := !w.running
 	w.running = true
 	w.mu.Unlock()
 	if start {
-		a.goSafe("writeLater", func() { a.drainWrites(what) })
+		a.goSafe("writeLater", a.drainWrites)
 	}
 }
 
-func (a *App) drainWrites(what string) {
+// drainWrites grava a fila até ela esvaziar. running só volta a false no
+// mesmo trecho travado em que a fila foi vista vazia: assim um writeLater
+// que chega no fim ou acha a tarefa rodando (e ela pega o arquivo) ou
+// começa outra.
+func (a *App) drainWrites() {
 	w := &a.later
-	defer func() { // também se der panic: não deixa o flushWrites esperando
-		w.mu.Lock()
-		w.running = false
-		w.idle.Broadcast()
-		w.mu.Unlock()
+	done := false
+	defer func() { // se der panic: não deixa o flushWrites esperando
+		if !done {
+			w.mu.Lock()
+			w.running = false
+			w.idle.Broadcast()
+			w.mu.Unlock()
+		}
 	}()
 	for {
 		w.mu.Lock()
 		if len(w.order) == 0 {
+			w.running = false
+			w.idle.Broadcast()
 			w.mu.Unlock()
+			done = true
 			return
 		}
 		path := w.order[0]
 		w.order = w.order[1:]
-		data, perm := w.data[path], w.perm[path]
+		data, perm, what := w.data[path], w.perm[path], w.what[path]
 		delete(w.data, path)
+		delete(w.perm, path)
+		delete(w.what, path)
 		w.mu.Unlock()
 		if err := writeFileAtomic(path, data, perm); err != nil {
 			a.logf("%s: não consegui gravar o %s: %v", what, filepath.Base(path), err)
@@ -116,12 +129,20 @@ func (a *App) drainWrites(what string) {
 	}
 }
 
-// flushWrites espera as gravações pendentes do writeLater.
+// flushWrites espera as gravações pendentes do writeLater. Se sobrou algo na
+// fila sem tarefa rodando (uma tarefa que morreu em panic), grava aqui mesmo.
 func (a *App) flushWrites() {
 	w := &a.later
 	w.mu.Lock()
 	for w.running {
 		w.idle.Wait()
 	}
+	left := len(w.order) > 0
+	if left {
+		w.running = true
+	}
 	w.mu.Unlock()
+	if left {
+		a.drainWrites()
+	}
 }
