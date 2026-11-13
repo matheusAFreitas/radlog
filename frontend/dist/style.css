@@ -59,6 +59,9 @@
   --fs-reading-m: calc(40px * var(--ui-scale, 1));
   --fs-reading-l: calc(56px * var(--ui-scale, 1));
   --fs-reading-xl: calc(88px * var(--ui-scale, 1));
+  /* largura da barra lateral: cresce com o tamanho do texto (a 130% a
+     pílula "vX disponível" e a versão cortavam); nunca abaixo de 212px */
+  --side-w: calc(212px * max(1, var(--ui-scale, 1)));
   /* raios */
   --radius-xs: 4px; --radius-sm: 8px; --radius-md: 10px; --radius-lg: 14px; --radius-pill: 999px;
   /* espaço */
@@ -1231,7 +1234,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .shell { display: flex; align-items: stretch; min-height: 100vh; }
 
 /* menu da esquerda */
-.side { flex: 0 0 212px; position: sticky; top: var(--barsH, 0px); align-self: flex-start; height: calc(100vh - var(--barsH, 0px)); overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3) var(--space-3); border-right: 1px solid var(--border); background: rgba(0, 0, 0, .14); scrollbar-width: thin; }
+.side { flex: 0 0 var(--side-w); position: sticky; top: var(--barsH, 0px); align-self: flex-start; height: calc(100vh - var(--barsH, 0px)); overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3) var(--space-3); border-right: 1px solid var(--border); background: rgba(0, 0, 0, .14); scrollbar-width: thin; }
 .side .brand { padding: 2px var(--space-3) var(--space-3); font-size: var(--fs-heading); gap: var(--space-2); }
 .side .brand svg { width: 22px; height: 22px; }
 .side-nav { display: flex; flex-direction: column; gap: 1px; }
@@ -1259,6 +1262,11 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side-link#btnHistory.pending::after { margin-left: auto; }
 .side-foot { display: flex; }
 .side-foot .pill { margin: var(--space-2) var(--space-1) 0; }
+/* "v2.75.2: troca quando o CPM normalizar" não cabe numa linha: quebra
+   dentro da barra em vez de passar da borda */
+.side-foot .upd-pill { min-width: 0; max-width: 100%; white-space: normal; text-align: left; line-height: 1.3; border-radius: var(--radius-md); }
+.side-foot .upd-pill svg { flex: none; }
+.side-foot .upd-pill span:last-child { white-space: normal; overflow: visible; }
 
 /* conteúdo */
 .main { flex: 1 1 0; min-width: 0; max-width: 1720px; display: flex; flex-direction: column; gap: var(--space-4); padding: var(--space-4) var(--space-6) var(--space-3); }
@@ -1368,7 +1376,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 @media (max-width: 900px) { .side-head { padding: 0 var(--space-2) 0 var(--space-1); } }
 
 /* 2.10: faixa compacta dos aparelhos ao rolar */
-.mini { position: fixed; z-index: 15; top: var(--barsH, 0px); left: 212px; right: 0; display: flex; align-items: center; gap: var(--space-6); min-height: 44px; padding: var(--space-1) var(--space-6); background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); transform: translateY(-100%); opacity: 0; transition: transform .18s ease, opacity .18s ease, border-color .4s; }
+.mini { position: fixed; z-index: 15; top: var(--barsH, 0px); left: var(--side-w); right: 0; display: flex; align-items: center; gap: var(--space-6); min-height: 44px; padding: var(--space-1) var(--space-6); background: color-mix(in srgb, var(--bg) 94%, transparent); backdrop-filter: blur(6px); border-bottom: 1px solid var(--border); transform: translateY(-100%); opacity: 0; transition: transform .18s ease, opacity .18s ease, border-color .4s; }
 .mini.in { transform: none; opacity: 1; }
 .mini-dev { display: flex; align-items: baseline; gap: var(--space-2); min-width: 0; min-height: 36px; padding: 0 var(--space-2); margin: 0 -6px; border: 0; border-radius: var(--radius-sm); background: transparent; color: inherit; text-align: left; }
 .mini-dev:hover { background: var(--surface-2); }
@@ -1412,7 +1420,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #settings .set-nav button[aria-current="true"] { background: var(--surface-2); font-weight: 500; box-shadow: inset 3px 0 0 var(--accent); }
 #settings .set-content { overflow: visible; padding: 0 0 var(--space-6); min-width: 0; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: var(--space-5) var(--space-6) var(--space-6); }
 #settings .set-note { max-width: 860px; }
-.set-bar { position: fixed; z-index: 14; left: 212px; right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
+.set-bar { position: fixed; z-index: 14; left: var(--side-w); right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
 .set-bar > i { width: 8px; height: 8px; border-radius: 50%; background: var(--att); flex: none; }
 .set-bar .btn { min-height: 38px; }
 html.set-dirty { scroll-padding-bottom: 84px; scroll-padding-top: calc(var(--barsH, 0px) + 56px); }
