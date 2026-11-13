@@ -2,7 +2,6 @@ package app
 
 import (
 	"archive/zip"
-	"bufio"
 	"bytes"
 	"fmt"
 	"hash/fnv"
@@ -91,7 +90,7 @@ func (a *App) readRcLines(name string) []string {
 		return nil
 	}
 	var out []string
-	sc := bufio.NewScanner(bytes.NewReader(b))
+	sc := rcScanner(bytes.NewReader(b))
 	sc.Buffer(make([]byte, 1<<16), 1<<20)
 	for sc.Scan() {
 		out = append(out, sc.Text())

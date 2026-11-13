@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+
+	"radlog/internal/store"
 )
 
 // writeFileAtomic grava data em path sem nunca deixar o arquivo pela metade:
@@ -26,7 +28,7 @@ func writeFileAtomic(path string, data []byte, perm os.FileMode) error {
 		err = os.Chmod(tmp, perm)
 	}
 	if err == nil {
-		err = os.Rename(tmp, path)
+		err = store.RenameRetry(tmp, path)
 	}
 	if err != nil {
 		os.Remove(tmp)

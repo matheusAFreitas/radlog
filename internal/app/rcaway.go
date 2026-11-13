@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"encoding/json"
 	"errors"
 	"math"
@@ -88,12 +87,9 @@ func (a *App) loadRcAwayLocked() []RcAwayAsk {
 		return a.rcAsks
 	}
 	a.rcAsksLoaded = true
-	b, err := os.ReadFile(a.rcAwayPath())
-	if err == nil {
-		var list []RcAwayAsk
-		if json.Unmarshal(b, &list) == nil {
-			a.rcAsks = list
-		}
+	var list []RcAwayAsk
+	if a.readStateJSON(a.rcAwayPath(), "perguntas do RC102", &list) {
+		a.rcAsks = list
 	}
 	return a.rcAsks
 }
@@ -103,10 +99,7 @@ func (a *App) saveRcAwayLocked() {
 		return
 	}
 	b, _ := json.MarshalIndent(a.rcAsks, "", "  ")
-	tmp := a.rcAwayPath() + ".tmp"
-	if os.WriteFile(tmp, b, 0o644) == nil {
-		_ = os.Rename(tmp, a.rcAwayPath())
-	}
+	_ = writeFileAtomic(a.rcAwayPath(), b, 0o644)
 }
 
 // rcLastMinuteBefore é o fim do último minuto do Radiacode gravado antes de t
@@ -499,7 +492,7 @@ func (a *App) rcLiveMinutes(from, to time.Time) int {
 		if err != nil {
 			continue
 		}
-		sc := bufio.NewScanner(f)
+		sc := rcScanner(f)
 		for sc.Scan() {
 			p := strings.Split(sc.Text(), ",")
 			if len(p) < 4 || (len(p) >= 5 && p[4] == rcMemSrc) {

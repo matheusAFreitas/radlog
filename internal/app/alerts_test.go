@@ -66,14 +66,18 @@ func TestAlertsSeparatedFromEvents(t *testing.T) {
 	}
 	a.StopDemo()
 
-	// um alerta real vai para o arquivo com o tipo
+	// um alerta real vai para o arquivo com o tipo (desde a 2.76.2, o
+	// alertas.csv, que não tem limite)
 	a.logAlert("Atenção: 55 CPM (acima de 50)")
-	b, _ := os.ReadFile(filepath.Join(dir, "eventos.csv"))
+	b, _ := os.ReadFile(filepath.Join(dir, "alertas.csv"))
 	if !strings.HasSuffix(strings.TrimSpace(string(b)), "Atenção: 55 CPM (acima de 50),alerta,atencao") {
 		t.Fatalf("arquivo: %s", b)
 	}
 	if strings.Contains(string(b), "[demo]") {
 		t.Fatal("demo foi para o arquivo")
+	}
+	if ev, _ := os.ReadFile(filepath.Join(dir, "eventos.csv")); strings.Contains(string(ev), "Alarme") || !strings.Contains(string(ev), "Contador conectado") {
+		t.Fatalf("eventos.csv depois de separar: %s", ev)
 	}
 	again := a.loadEvents()
 	if again[len(again)-1].Kind != kindAlert {

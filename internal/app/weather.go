@@ -294,7 +294,7 @@ func (a *App) fetchRainNow(lat, lon float64) error {
 	a.rain.Fetched = time.Now()
 	if a.dataDir != "" {
 		if b, err := json.Marshal(a.rain); err == nil {
-			_ = os.WriteFile(a.rainPath(), b, 0o644)
+			_ = writeFileAtomic(a.rainPath(), b, 0o644)
 		}
 	}
 	return nil

@@ -199,9 +199,6 @@ func (a *App) cfgMerge(data []byte) int {
 		b, _ := json.Marshal(c)
 		buf.Write(append(b, '\n'))
 	}
-	tmp := a.cfgHistPath() + ".tmp"
-	if os.WriteFile(tmp, buf.Bytes(), 0o644) == nil {
-		os.Rename(tmp, a.cfgHistPath())
-	}
+	_ = writeFileAtomic(a.cfgHistPath(), buf.Bytes(), 0o644)
 	return added
 }

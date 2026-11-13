@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"fmt"
@@ -72,7 +71,7 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 			return 0
 		}
 		os.MkdirAll(a.rcSpecPath(""), 0o755)
-		os.WriteFile(dst, data, 0o644)
+		writeFileAtomic(dst, data, 0o644)
 		return 0
 	}
 	if strings.HasPrefix(rel, rcDirName+"/"+rcRawDir+"/") {
@@ -81,7 +80,7 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 			return 0
 		}
 		os.MkdirAll(a.rcRawPath(""), 0o755)
-		os.WriteFile(dst, data, 0o644)
+		writeFileAtomic(dst, data, 0o644)
 		return 0
 	}
 	if rel == rcDirName+"/"+rcDoseFile {
@@ -97,7 +96,7 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 		}
 		if in.At > have.At {
 			_ = os.MkdirAll(a.rcDir(), 0o755)
-			_ = os.WriteFile(filepath.Join(a.rcDir(), rcDoseFile), data, 0o644)
+			_ = writeFileAtomic(filepath.Join(a.rcDir(), rcDoseFile), data, 0o644)
 			if in.At > a.rc.dose.saved.At {
 				a.rc.dose.saved, a.rc.dose.loaded = in, true
 			}
@@ -109,7 +108,7 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	}
 	if strings.HasPrefix(name, "log-") { // log do aparelho: junta linha a linha
 		var lines []string
-		sc := bufio.NewScanner(bytes.NewReader(data))
+		sc := rcScanner(bytes.NewReader(data))
 		for sc.Scan() {
 			lines = append(lines, sc.Text())
 		}
@@ -122,16 +121,20 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	defer a.rc.fileM.Unlock()
 	dst := filepath.Join(a.rcDir(), name)
 	have := map[string]string{}
+	var bad rcBad
 	if b, err := os.ReadFile(dst); err == nil {
-		sc := bufio.NewScanner(bytes.NewReader(b))
+		sc := rcScanner(bytes.NewReader(b))
 		for sc.Scan() {
-			if k, _, ok := strings.Cut(sc.Text(), ","); ok && k != "hora" {
+			k, _, _ := strings.Cut(sc.Text(), ",")
+			if _, err := time.Parse(time.RFC3339, k); err == nil {
 				have[k] = sc.Text()
+			} else {
+				bad.add(sc.Text())
 			}
 		}
 	}
 	added := 0
-	sc := bufio.NewScanner(bytes.NewReader(data))
+	sc := rcScanner(bytes.NewReader(data))
 	for sc.Scan() {
 		k, _, ok := strings.Cut(sc.Text(), ",")
 		if !ok || k == "hora" {
@@ -167,9 +170,8 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 		out.WriteString(have[k] + "\n")
 	}
 	os.MkdirAll(a.rcDir(), 0o755)
-	tmp := dst + ".tmp"
-	if os.WriteFile(tmp, out.Bytes(), 0o644) == nil {
-		os.Rename(tmp, dst)
+	if writeFileAtomic(dst, out.Bytes(), 0o644) == nil {
+		bad.save(a, dst)
 	}
 	a.rc.mu.Lock()
 	a.rc.today.loaded = false // recalcula a dose de hoje

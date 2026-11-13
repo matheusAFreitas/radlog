@@ -4850,3 +4850,12 @@ fechando com {0} minuto(s) sem gravar em {1}: {2}	closing with {0} minute(s) not
 gravação: {0}	saving: {0}
 leitura impossível descartada às {0}: cpm={1} bruto={2}	impossible reading dropped at {0}: cpm={1} raw={2}
 leitura não gravada no disco	reading not saved to disk
+Não consegui abrir a pasta de leituras ({0}) nem uma pasta temporária: as leituras desta sessão ficam só na memória. Feche o app e confira se a pasta existe e se dá para gravar nela.	Couldn't open the readings folder ({0}) or a temporary folder: this session's readings stay in memory only. Close the app and check that the folder exists and can be written to.
+Não consegui abrir a pasta de leituras ({0}): as leituras desta sessão estão indo para {1}. Feche o app e confira se a pasta existe e se dá para gravar nela.	Couldn't open the readings folder ({0}): this session's readings are going to {1}. Close the app and check that the folder exists and can be written to.
+{0}: {1} linha(s) ilegível(is) guardada(s) em {2}	{0}: {1} unreadable line(s) saved in {2}
+calibração do contador	counter calibration
+dose do RC102	RC102 dose
+perguntas do RC102	RC102 questions
+sincronização	sync
+versões da calibração	calibration versions
+intercalibração	cross-calibration

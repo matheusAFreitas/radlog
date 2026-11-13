@@ -164,9 +164,7 @@ func (a *App) syncLoad() {
 	s.pending = map[string]*pairPending{}
 	s.nonces = map[string]time.Time{}
 	s.inv = map[string]invMonth{}
-	if b, err := os.ReadFile(a.syncPath()); err == nil {
-		_ = json.Unmarshal(b, &s.file)
-	}
+	a.readStateJSON(a.syncPath(), "sincronização", &s.file)
 	if s.file.ID == "" {
 		s.file.ID = randHex(8)
 		_ = a.syncSaveLocked()
@@ -178,11 +176,7 @@ func (a *App) syncSaveLocked() error {
 		return nil
 	}
 	b, _ := json.MarshalIndent(a.sync.file, "", "  ")
-	tmp := a.syncPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o600); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.syncPath())
+	return writeFileAtomic(a.syncPath(), b, 0o600)
 }
 
 func randHex(n int) string {

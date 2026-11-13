@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/binary"
 	"encoding/hex"
@@ -272,14 +271,16 @@ func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 		var lines []line
 		have := map[int64]*rcMemMinute{} // o que já está gravado em cada minuto
 		idx := map[int64][]int{}
+		var bad rcBad
 		if b, err := os.ReadFile(path); err == nil {
-			sc := bufio.NewScanner(bytes.NewReader(b))
+			sc := rcScanner(bytes.NewReader(b))
 			for sc.Scan() {
 				l := sc.Text()
 				f := strings.Split(l, ",")
 				t, err := time.Parse(time.RFC3339, f[0])
 				if err != nil {
-					continue // cabeçalho
+					bad.add(l) // cabeçalho fica de fora sozinho
+					continue
 				}
 				m := t.Truncate(time.Minute)
 				k := m.Unix()
@@ -340,9 +341,9 @@ func (a *App) rcMinuteMerge(mins []rcMemMinute, until time.Time) int {
 				buf.WriteString(l.s + "\n")
 			}
 		}
-		tmp := path + ".tmp"
-		if os.WriteFile(tmp, buf.Bytes(), 0o644) == nil && os.Rename(tmp, path) == nil {
+		if writeFileAtomic(path, buf.Bytes(), 0o644) == nil {
 			added += n
+			bad.save(a, path)
 		}
 	}
 	return added
@@ -454,7 +455,7 @@ func (a *App) rcMemRawBackfill() {
 	}
 	nd := a.rcLogDropNear(drop, 5*time.Second)
 	_ = os.MkdirAll(a.rcDir(), 0o755)
-	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
+	_ = writeFileAtomic(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 	if total > 0 {
 		a.logf("RC102: %d registros da memória do aparelho repostos dos dados brutos (%d minutos preenchidos, %d linhas do log na hora errada retiradas)", total, mins, nd)
 	}
@@ -488,11 +489,13 @@ func (a *App) rcLogDropNear(items []RcLogItem, tol time.Duration) int {
 		var out bytes.Buffer
 		out.WriteString(rcLogHeader + "\n")
 		removed := 0
-		sc := bufio.NewScanner(bytes.NewReader(b))
+		var bad rcBad
+		sc := rcScanner(bytes.NewReader(b))
 		for sc.Scan() {
 			l := sc.Text()
 			it, ok := parseRcLogLine(l)
 			if !ok {
+				bad.add(l)
 				continue
 			}
 			if it.Src != rcMemSrc {
@@ -513,9 +516,9 @@ func (a *App) rcLogDropNear(items []RcLogItem, tol time.Duration) int {
 		if removed == 0 {
 			continue
 		}
-		tmp := path + ".tmp"
-		if os.WriteFile(tmp, out.Bytes(), 0o644) == nil && os.Rename(tmp, path) == nil {
+		if writeFileAtomic(path, out.Bytes(), 0o644) == nil {
 			n += removed
+			bad.save(a, path)
 		}
 	}
 	return n

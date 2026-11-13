@@ -49,7 +49,7 @@ func (a *App) rcCfgBackup(s radiacode.Settings, dev *radiacode.Device, tag strin
 		"modelo": dev.Model, "firmware": dev.Firmware, "ajustes": s,
 	}, "", "  ")
 	path := a.rcCfgPath("ajustes-" + time.Now().Format("2006-01-02_150405.000") + "-" + tag + ".json")
-	return path, os.WriteFile(path, b, 0o644)
+	return path, writeFileAtomic(path, b, 0o644)
 }
 
 // rcCfgLastBefore é a cópia "antes" mais nova.

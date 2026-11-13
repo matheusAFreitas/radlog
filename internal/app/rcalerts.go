@@ -201,7 +201,7 @@ func (a *App) saveRcAlertSeconds(evs []Event) {
 			}
 			if b, err := json.Marshal(pts); err == nil {
 				_ = os.MkdirAll(a.alertDir(), 0o755)
-				_ = os.WriteFile(filepath.Join(a.alertDir(), rcAlertKey(e)), b, 0o644)
+				_ = writeFileAtomic(filepath.Join(a.alertDir(), rcAlertKey(e)), b, 0o644)
 			}
 		}
 	}

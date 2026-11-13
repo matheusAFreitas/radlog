@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"encoding/csv"
 	"fmt"
 	"os"
@@ -108,13 +109,18 @@ func (a *App) addEvent(ev Event, persist bool) int64 {
 		sort.SliceStable(a.events, func(i, j int) bool { return a.events[i].Time < a.events[j].Time })
 		sorted = false
 	}
-	if len(a.events) > maxEvents {
-		a.events = a.events[len(a.events)-maxEvents:]
-	}
+	a.events = trimEvents(a.events)
 	a.mu.Unlock()
 	if persist && a.dataDir != "" {
+		path := a.eventsPath()
+		if ev.Kind == kindAlert {
+			path = a.alertsPath()
+		}
+		if _, err := os.Stat(a.alertsPath()); err != nil {
+			sorted = false // ainda não separou os alertas: regrava os dois
+		}
 		if sorted {
-			if f, err := os.OpenFile(a.eventsPath(), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644); err == nil {
+			if f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644); err == nil {
 				w := csv.NewWriter(f)
 				_ = w.Write(eventRow(ev))
 				w.Flush()
@@ -128,28 +134,33 @@ func (a *App) addEvent(ev Event, persist bool) int64 {
 	return ev.ID
 }
 
-// saveEvents regrava o eventos.csv inteiro (sem os do demo).
+// saveEvents regrava alertas.csv e eventos.csv inteiros (sem os do demo).
+// O alertas.csv vai primeiro: se o app fechar no meio, o alerta fica nos
+// dois e a leitura junta sem repetir.
 func (a *App) saveEvents() {
 	if a.dataDir == "" {
 		return
 	}
+	var alerts, rest bytes.Buffer
+	wa, wr := csv.NewWriter(&alerts), csv.NewWriter(&rest)
 	a.mu.Lock()
-	rows := make([][]string, 0, len(a.events))
 	for _, e := range a.events {
-		if !e.Demo {
-			rows = append(rows, eventRow(e))
+		switch {
+		case e.Demo:
+		case e.Kind == kindAlert:
+			_ = wa.Write(eventRow(e))
+		default:
+			_ = wr.Write(eventRow(e))
 		}
 	}
 	a.mu.Unlock()
-	tmp := a.eventsPath() + ".tmp"
-	f, err := os.Create(tmp)
-	if err != nil {
+	wa.Flush()
+	wr.Flush()
+	if wa.Error() != nil || wr.Error() != nil {
 		return
 	}
-	w := csv.NewWriter(f)
-	_ = w.WriteAll(rows)
-	if f.Close() == nil && w.Error() == nil {
-		_ = os.Rename(tmp, a.eventsPath())
+	if writeFileAtomic(a.alertsPath(), alerts.Bytes(), 0o644) == nil {
+		_ = writeFileAtomic(a.eventsPath(), rest.Bytes(), 0o644)
 	}
 }
 
@@ -472,9 +483,7 @@ func (a *App) retroAlerts(pts []store.Point) int {
 	if n > 0 {
 		a.mu.Lock()
 		sort.SliceStable(a.events, func(i, j int) bool { return a.events[i].Time < a.events[j].Time })
-		if len(a.events) > maxEvents {
-			a.events = a.events[len(a.events)-maxEvents:]
-		}
+		a.events = trimEvents(a.events)
 		a.mu.Unlock()
 		a.saveEvents()
 		a.emit("event", Event{Kind: kindAlert})
@@ -508,7 +517,7 @@ func (a *App) scanRetroOnce() {
 			a.logEvent(fmt.Sprintf("Histórico já baixado conferido: %d %s", n, plural(n, "alerta encontrado", "alertas encontrados")))
 		}
 	}
-	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
+	_ = writeFileAtomic(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 }
 
 func plural(n int, one, many string) string {

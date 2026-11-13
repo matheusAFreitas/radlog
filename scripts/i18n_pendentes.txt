@@ -284,7 +284,6 @@ identificado com confiança
 igual ao fundo: se o objeto emite algo, é menos que +{0}
 informe a {0}e KCl (100 para KCl puro)
 informe a {0}e ThO₂ do eletrodo (2 no WT20)
-intercalibração
 início
 isótopo com constante de dose conhecida (
 já na distância medida o extra do objeto fica abaixo de 10{0}o fundo

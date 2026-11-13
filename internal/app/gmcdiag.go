@@ -6,7 +6,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"strings"
 	"time"
@@ -85,7 +84,7 @@ func (a *App) DiagnoseGMCDose() (GMCDiag, error) {
 	head := fmt.Sprintf("RadLog %s — diagnóstico da dose do GMC\nContador: %s\nLeituras: %s e %s\n\n",
 		AppVersion, info.Version, r1.at.Format("02/01/2006 15:04:05"), r2.at.Format("15:04:05"))
 	out.Path = filepath.Join(a.dataDir, "diagnostico-dose-gmc-"+time.Now().Format("2006-01-02_150405")+".txt")
-	if err := os.WriteFile(out.Path, []byte(head+txt), 0o644); err != nil {
+	if err := writeFileAtomic(out.Path, []byte(head+txt), 0o644); err != nil {
 		return out, err
 	}
 	a.logEvent("Diagnóstico da dose do GMC: " + out.Verdict)

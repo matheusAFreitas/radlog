@@ -62,8 +62,8 @@ func TestRcAlerts(t *testing.T) {
 	if att.End != t0.Add(60*time.Second).UnixMilli() {
 		t.Fatalf("fim da atenção: %v", time.UnixMilli(att.End).Sub(t0))
 	}
-	// o CSV guarda o aparelho
-	f, _ := os.Open(a.eventsPath())
+	// o CSV guarda o aparelho (alertas.csv desde a 2.76.2)
+	f, _ := os.Open(a.alertsPath())
 	rows, _ := csv.NewReader(f).ReadAll()
 	f.Close()
 	found := false

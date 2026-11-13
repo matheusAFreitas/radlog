@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"bytes"
 	"encoding/json"
 	"errors"
@@ -171,10 +170,7 @@ func (a *App) actWriteJSON(name string, v any) {
 		return
 	}
 	os.MkdirAll(a.actPath(""), 0o755)
-	tmp := a.actPath(name + ".tmp")
-	if os.WriteFile(tmp, b, 0o644) == nil {
-		os.Rename(tmp, a.actPath(name))
-	}
+	_ = writeFileAtomic(a.actPath(name), b, 0o644)
 }
 
 func (a *App) actCal() ActCal {
@@ -420,7 +416,7 @@ func (a *App) actHistory() []ActResult {
 	if err != nil {
 		return out
 	}
-	sc := bufio.NewScanner(bytes.NewReader(b))
+	sc := rcScanner(bytes.NewReader(b))
 	sc.Buffer(make([]byte, 1<<20), 1<<22)
 	for sc.Scan() {
 		var r ActResult
@@ -683,7 +679,7 @@ func (a *App) actMerge(name string, data []byte) {
 		have := map[string]bool{}
 		var lines []string
 		for _, src := range [][]byte{cur, data} {
-			sc := bufio.NewScanner(bytes.NewReader(src))
+			sc := rcScanner(bytes.NewReader(src))
 			sc.Buffer(make([]byte, 1<<20), 1<<22)
 			for sc.Scan() {
 				l := strings.TrimSpace(sc.Text())

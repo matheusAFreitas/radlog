@@ -105,7 +105,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", rainDaysFile, cfgHistFile, calHistFile, intercalFile, plannedFile}
+	files := []string{"alertas.csv", "eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", rainDaysFile, cfgHistFile, calHistFile, intercalFile, plannedFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -143,11 +143,20 @@ func (a *App) writeBackupFile(dst string) error {
 		os.Remove(tmp)
 		return err
 	}
+	if err := f.Sync(); err != nil {
+		f.Close()
+		os.Remove(tmp)
+		return err
+	}
 	if err := f.Close(); err != nil {
 		os.Remove(tmp)
 		return err
 	}
-	return os.Rename(tmp, dst)
+	if err := store.RenameRetry(tmp, dst); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
 
 // ExportBackup pergunta onde salvar e grava o backup. Devolve o caminho
@@ -288,7 +297,11 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	}
 
 	// eventos e alertas
-	if f, ok := files["eventos.csv"]; ok {
+	for _, name := range []string{"alertas.csv", "eventos.csv"} {
+		f, ok := files[name]
+		if !ok {
+			continue
+		}
 		if b, err := readZipFile(f); err == nil {
 			r := csv.NewReader(bytes.NewReader(b))
 			r.FieldsPerRecord = -1
@@ -322,9 +335,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			}
 			if res.Events > 0 {
 				sort.SliceStable(a.events, func(i, j int) bool { return a.events[i].Time < a.events[j].Time })
-				if len(a.events) > maxEvents {
-					a.events = a.events[len(a.events)-maxEvents:]
-				}
+				a.events = trimEvents(a.events)
 			}
 			a.mu.Unlock()
 			if res.Events > 0 {
@@ -464,7 +475,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 		if b, err := readZipFile(f); err == nil {
 			_ = os.MkdirAll(filepath.Dir(dst), 0o755)
-			_ = os.WriteFile(dst, b, 0o644)
+			_ = writeFileAtomic(dst, b, 0o644)
 		}
 	}
 
@@ -482,7 +493,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			continue
 		}
 		_ = os.MkdirAll(a.alertDir(), 0o755)
-		if os.WriteFile(dst, b, 0o644) == nil {
+		if writeFileAtomic(dst, b, 0o644) == nil {
 			res.AlertFiles++
 		}
 	}
