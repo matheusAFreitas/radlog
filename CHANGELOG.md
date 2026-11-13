@@ -1,5 +1,17 @@
 # Versões
 
+## 2.78.1
+- Uma mudança de configuração feita bem no instante em que a gravação
+  anterior terminava podia ficar parada na fila e se perder ao fechar o
+  app. Agora ela sempre vai para o disco.
+- O registro de erro de gravação diz o arquivo certo (configurações ou uso).
+
+**English**
+
+- A settings change made right as the previous write was finishing could
+  sit in the queue and be lost on exit. It now always reaches the disk.
+- The write error log names the right file (settings or usage).
+
 ## 2.78.0
 O resto da auditoria de 13/11, numa versão só: segurança, gráficos, dados,
 velocidade, testes e textos.

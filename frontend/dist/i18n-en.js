@@ -3761,7 +3761,6 @@ const I18N_EN = {
 ", ou configure o endereço Bluetooth.": ", or set the Bluetooth address.",
 ", ou deixe-o perto com o Bluetooth ligado (e o app do celular desconectado).": ", or keep it nearby with Bluetooth on (and the phone app disconnected).",
 ", recalculando o histórico de antes dela": ", recalculating the history before it",
-"- **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor.": "- **In-app update**: tells you when a new version is out. - Something else, better.",
 "0,00550 µSv/h por CPM no fundo (informado à mão)": "0.00550 µSv/h per CPM at background (entered by hand)",
 "0,01014 µSv/h por CPM no fundo (contador; 986 CPM = 10,00 µSv/h, …)": "0.01014 µSv/h per CPM at background (counter; 986 CPM = 10.00 µSv/h, …)",
 "0,01014 µSv/h por CPM no fundo (curva do contador)": "0.01014 µSv/h per CPM at background (counter's curve)",

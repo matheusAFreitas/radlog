@@ -25,6 +25,7 @@ func testApp(t *testing.T) (*App, string) {
 	a.dataDir, a.store, a.cal = dir, st, gmc.DefaultCalibration()
 	a.settings = defaultSettings()
 	a.settings.NoMeasureReport = true // o PDF automático é testado à parte (não escreve depois do teste)
+	t.Cleanup(a.flushWrites)          // config.json e uso.json vão para o disco depois (P2)
 	return a, dir
 }
 

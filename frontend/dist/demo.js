@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.78.0";
+const DEMO_VERSION = "2.78.1";
 
 function makeDemoApi() {
   let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
