@@ -271,7 +271,8 @@ Code under the MIT license (see [LICENSE](LICENSE)). IBM Plex fonts under the
 SIL Open Font License (`frontend/dist/fonts/OFL-IBM-Plex.txt`). The notices of
 the third-party libraries inside the app are in
 [frontend/dist/licencas.txt](frontend/dist/licencas.txt) and under Settings ›
-Updates and about. To report a security problem, see [SECURITY.md](SECURITY.md).
+Updates and about. To report a security problem, see [SECURITY.md](SECURITY.md). Privacy policy:
+[PRIVACY.md](PRIVACY.md).
 
 Not a product of GQ Electronics or Radiacode. "GMC" and "GQ" are trademarks of
 GQ Electronics; "Radiacode" is a trademark of Radiacode. The app only talks to
