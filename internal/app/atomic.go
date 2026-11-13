@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"os"
 	"path/filepath"
+	"sync"
 
 	"radlog/internal/store"
 )
@@ -52,4 +53,75 @@ func (a *App) readStateJSON(path, what string, v any) bool {
 		return false
 	}
 	return true
+}
+
+// ---------- gravação fora da trava (auditoria 2.76.0, P2) ----------
+//
+// Algumas gravações (config.json, uso.json) acontecem com a.mu presa, a
+// mesma trava que a leitura por segundo usa: num disco lento a leitura ao
+// vivo esperava o disco. writeLater guarda os bytes (montados com a trava)
+// e uma tarefa só grava depois, na ordem, sempre a versão mais nova de cada
+// arquivo. flushWrites espera tudo ir para o disco (fechamento e testes).
+
+type laterWrites struct {
+	mu      sync.Mutex
+	order   []string          // arquivos na ordem do primeiro pedido
+	data    map[string][]byte // a versão mais nova de cada um
+	perm    map[string]os.FileMode
+	running bool
+	idle    *sync.Cond
+}
+
+func (a *App) writeLater(path string, data []byte, perm os.FileMode, what string) {
+	w := &a.later
+	w.mu.Lock()
+	if w.data == nil {
+		w.data, w.perm = map[string][]byte{}, map[string]os.FileMode{}
+		w.idle = sync.NewCond(&w.mu)
+	}
+	if _, ok := w.data[path]; !ok {
+		w.order = append(w.order, path)
+	}
+	w.data[path], w.perm[path] = data, perm
+	start := !w.running
+	w.running = true
+	w.mu.Unlock()
+	if start {
+		a.goSafe("writeLater", func() { a.drainWrites(what) })
+	}
+}
+
+func (a *App) drainWrites(what string) {
+	w := &a.later
+	defer func() { // também se der panic: não deixa o flushWrites esperando
+		w.mu.Lock()
+		w.running = false
+		w.idle.Broadcast()
+		w.mu.Unlock()
+	}()
+	for {
+		w.mu.Lock()
+		if len(w.order) == 0 {
+			w.mu.Unlock()
+			return
+		}
+		path := w.order[0]
+		w.order = w.order[1:]
+		data, perm := w.data[path], w.perm[path]
+		delete(w.data, path)
+		w.mu.Unlock()
+		if err := writeFileAtomic(path, data, perm); err != nil {
+			a.logf("%s: não consegui gravar o %s: %v", what, filepath.Base(path), err)
+		}
+	}
+}
+
+// flushWrites espera as gravações pendentes do writeLater.
+func (a *App) flushWrites() {
+	w := &a.later
+	w.mu.Lock()
+	for w.running {
+		w.idle.Wait()
+	}
+	w.mu.Unlock()
 }

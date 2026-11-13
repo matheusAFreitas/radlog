@@ -136,7 +136,7 @@ function qkResults(q) {
   const hits = [];
   for (const it of all) {
     // acha pelo português e pela tradução; quem tem a busca no título vem antes
-    const hay = qkNorm([it.t, it.s, it.kw, qkTr(it.t), it.s ? qkTr(it.s) : ""].join(" "));
+    const hay = qkNorm([it.t, it.s, it.kw, qkTr(it.t), it.s ? qkTr(it.s) : "", it.kw ? qkTr(it.kw) : ""].join(" "));
     if (!words.every((w) => hay.includes(w))) continue;
     const title = " " + qkNorm(it.t + " " + qkTr(it.t));
     it.score = words.every((w) => title.includes(" " + w)) ? 0 : words.every((w) => title.includes(w)) ? 1 : 2;

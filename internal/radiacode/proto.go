@@ -150,8 +150,30 @@ func Open(tr Transport) (*Device, error) {
 // Kind diz por onde está conectado.
 func (d *Device) Kind() string { return d.tr.Kind() }
 
-// Close solta o aparelho.
-func (d *Device) Close() error { return d.tr.Close() }
+// closeWait é quanto o Close espera o comando em andamento terminar.
+const closeWait = 3 * time.Second
+
+// Close solta o aparelho. Espera o comando em andamento voltar antes de
+// fechar o USB: fechar no meio de uma leitura podia derrubar o app no
+// Windows (auditoria 2.76.0, B9). Se a leitura estiver presa no driver,
+// fecha depois de closeWait, porque fechar é o que destrava.
+func (d *Device) Close() error {
+	got := make(chan struct{})
+	go func() {
+		d.mu.Lock()
+		close(got)
+	}()
+	select {
+	case <-got:
+		defer d.mu.Unlock()
+	case <-time.After(closeWait):
+		go func() {
+			<-got
+			d.mu.Unlock()
+		}()
+	}
+	return d.tr.Close()
+}
 
 func u32(v uint32) []byte { b := make([]byte, 4); binary.LittleEndian.PutUint32(b, v); return b }
 
@@ -642,6 +664,9 @@ func decodeSpectrum(b []byte, format int) (Spectrum, error) {
 	switch format {
 	case 0:
 		for r.left() >= 4 {
+			if len(s.Counts) >= MaxChannels {
+				return s, errTooManyChannels
+			}
 			v, _ := r.u32()
 			s.Counts = append(s.Counts, v)
 		}
@@ -650,6 +675,9 @@ func decodeSpectrum(b []byte, format int) (Spectrum, error) {
 		for r.left() >= 2 {
 			h, _ := r.u16()
 			cnt, vlen := int(h>>4)&0x0fff, h&0x0f
+			if len(s.Counts)+cnt > MaxChannels {
+				return s, errTooManyChannels
+			}
 			for i := 0; i < cnt; i++ {
 				var v int64
 				switch vlen {
@@ -690,6 +718,14 @@ func decodeSpectrum(b []byte, format int) (Spectrum, error) {
 	}
 	return s, nil
 }
+
+// MaxChannels é o máximo de canais de um espectro. O RC102 tem 1.024; o
+// limite folgado só impede que uma resposta malformada (ou de um aparelho
+// falso por perto) vire milhões de canais e gigabytes de memória
+// (auditoria 2.76.0, S4).
+const MaxChannels = 4096
+
+var errTooManyChannels = errors.New("espectro: mais canais do que o aparelho tem")
 
 // ---------- leitura de bytes ----------
 

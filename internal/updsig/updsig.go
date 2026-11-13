@@ -33,7 +33,13 @@ func Keys() []string {
 // Verify confere a assinatura (base64, como no .sig) de data com qualquer
 // das chaves aceitas.
 func Verify(data, sigB64 []byte) bool {
-	for _, k := range Keys() {
+	return VerifyKeys(Keys(), data, sigB64)
+}
+
+// VerifyKeys é o Verify com outra lista de chaves (o ensaio da troca de
+// chave em updsig_test.go).
+func VerifyKeys(keys []string, data, sigB64 []byte) bool {
+	for _, k := range keys {
 		pub, err := base64.StdEncoding.DecodeString(k)
 		if err == nil && len(pub) == ed25519.PublicKeySize && VerifyWith(ed25519.PublicKey(pub), data, sigB64) {
 			return true

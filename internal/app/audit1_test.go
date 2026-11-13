@@ -90,6 +90,7 @@ func TestLoadSettingsBrokenFile(t *testing.T) {
 	a.mu.Lock()
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	a.flushWrites()
 	if got := a.loadSettings(); got.AlarmUSv != 3.21 || a.settingsBroken {
 		t.Fatalf("leitura normal: %v %v", got.AlarmUSv, a.settingsBroken)
 	}

@@ -58,7 +58,7 @@ const (
 type backupManifest struct {
 	App     string `json:"app"`
 	Version string `json:"version"`
-	Host    string `json:"host"`
+	Host    string `json:"host,omitempty"` // até a 2.77.0; não vai mais (D4)
 	Created string `json:"created"`
 }
 
@@ -77,7 +77,7 @@ var badFileChars = regexp.MustCompile(`[^A-Za-z0-9_.-]+`)
 // writeBackup escreve o .zip em w.
 func (a *App) writeBackup(w io.Writer) error {
 	zw := zip.NewWriter(w)
-	man, _ := json.MarshalIndent(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)}, "", "  ")
+	man, _ := json.MarshalIndent(backupManifest{App: backupAppID, Version: AppVersion, Created: time.Now().Format(time.RFC3339)}, "", "  ")
 	if f, err := zw.Create("backup.json"); err == nil {
 		_, _ = f.Write(man)
 	}
@@ -171,7 +171,8 @@ func (a *App) ExportBackup() (string, error) {
 	if a.ctx == nil {
 		return "", errors.New("sem janela")
 	}
-	name := fmt.Sprintf("radlog-backup-%s-%s.zip", badFileChars.ReplaceAllString(hostName(), "_"), time.Now().Format("2006-01-02"))
+	// sem o nome do PC (D4): ele ia dentro do arquivo e no nome sugerido
+	name := fmt.Sprintf("radlog-backup-%s.zip", time.Now().Format("2006-01-02"))
 	dst, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
 		Title: "Salvar backup", DefaultFilename: name,
 		Filters: []wruntime.FileFilter{{DisplayName: "Backup do RadLog (*.zip)", Pattern: "*.zip"}},

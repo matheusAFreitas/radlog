@@ -164,8 +164,9 @@ button opens it. File names are in Portuguese:
 - `leituras/YYYY-MM.csv`: one line per minute per device (opens in Excel);
 - `historico/` and `configuracao/`: raw copies of the counter's memory and
   configuration;
-- `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
-  alerts, measurements, trips and notes;
+- `alertas.csv`, `eventos.csv`, `medicoes.json`, `fora-de-casa.json`,
+  `anotacoes.json`: alerts (kept forever), events (the last 5,000),
+  measurements, trips and notes;
 - `radiacode/`: the Radiacode 102 minutes, dose, spectra per minute and
   activity measurements;
 - `alertas-detalhe/`: the second-by-second readings around each alert;
@@ -179,7 +180,25 @@ A **backup** (.zip) only adds what is missing when imported, so it also moves
 data from one PC to another, Windows or Linux. It also carries the settings
 that make sense on any PC (alarm, levels, sound, tray, language); on import
 the app asks before using them. Location and city never go into a PDF,
-report or backup.
+report or backup, and attached photos lose their location and camera data
+when attached.
+
+## What goes to the internet
+
+RadLog works without internet. Only three things go out, and each can be
+turned off in Settings:
+
+- **Update check** (GitHub): on start and once a day it asks GitHub for the
+  latest release; the request carries the app version. Turn off "Check for a
+  new version when opening and once a day" in Settings › Updates and about.
+- **Weather** (Open-Meteo): the city search sends what you type, and the
+  rain and pressure requests send the city's approximate position. Off by
+  default; it only runs with Weather on.
+- **Rain radar** (RainViewer): the map tile around the city (about 300 km
+  across, so it doesn't pin down where you are). Also only with Weather on.
+
+Syncing between your PCs stays on the local network (or your VPN) and only
+talks to PCs you paired.
 
 ## Building
 

@@ -1349,7 +1349,7 @@ function wireRain() {
     const ul = $("placeList");
     ul.innerHTML = '<li class="muted small">buscando…</li>';
     let list = [];
-    try { list = await api.SearchPlace($("txtPlace").value); } catch (e) { ul.innerHTML = `<li class="muted small">${errMsg(e)}</li>`; return; }
+    try { list = await api.SearchPlace($("txtPlace").value); } catch (e) { const li = document.createElement("li"); li.className = "muted small"; li.textContent = errMsg(e); ul.replaceChildren(li); return; }
     ul.textContent = "";
     if (!list.length) { ul.innerHTML = '<li class="muted small">Nenhuma cidade encontrada.</li>'; return; }
     for (const p of list) {
@@ -2314,15 +2314,23 @@ function wireBackup() {
   });
   $("btnImportBackup").addEventListener("click", async () => {
     let r;
-    try { r = await api.ImportBackup(); if (r && (r.from || r.created)) toast(`Backup de ${r.from || "outro PC"}: ${mergeTextJS(r)}`); } catch (e) { toast(errMsg(e), true); return; }
+    try { r = await api.ImportBackup(); if (r && (r.from || r.created)) toast(`Backup de ${backupFrom(r)}: ${mergeTextJS(r)}`); } catch (e) { toast(errMsg(e), true); return; }
     if (r && r.settings > 0 && api.ApplyBackupSettings) askBackupSettings(r);
   });
+}
+
+// de onde veio o backup: desde a 2.78.0 ele não leva o nome do PC (D4),
+// então vale a data em que foi feito
+function backupFrom(r) {
+  if (r.from) return asIs(r.from);
+  const d = r.created ? new Date(r.created) : null;
+  return d && !isNaN(d) ? d.toLocaleDateString(LOCALE) : "outro PC";
 }
 
 // configurações do backup (2.74): o backup traz as que valem em qualquer
 // PC; só mudam aqui se a pessoa escolher
 async function askBackupSettings(r) {
-  const n = r.settings, from = r.from || "outro PC";
+  const n = r.settings, from = backupFrom(r);
   const text = [
     n === 1 ? `O backup de ${from} tem 1 ajuste diferente do daqui.` : `O backup de ${from} tem ${n} ajustes diferentes dos daqui.`,
     "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",

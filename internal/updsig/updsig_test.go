@@ -75,3 +75,40 @@ func TestVerifyWithBadKey(t *testing.T) {
 		}
 	}
 }
+
+// S7: ensaio da troca de chave do SECURITY.md com chaves de teste.
+func TestKeyRotation(t *testing.T) {
+	gen := func() (ed25519.PrivateKey, string) {
+		pub, priv, _ := ed25519.GenerateKey(nil)
+		return priv, base64.StdEncoding.EncodeToString(pub)
+	}
+	sign := func(priv ed25519.PrivateKey, data []byte) []byte {
+		return []byte(base64.StdEncoding.EncodeToString(ed25519.Sign(priv, data)))
+	}
+	data := []byte("SHA256SUMS.txt")
+	_, mainPub := gen() // a principal se perdeu
+	resPriv, resPub := gen()
+	installed := []string{mainPub, resPub} // o app que já está nos PCs
+
+	// passos 1 e 2: a reserva vira PubKey, entra uma reserva nova
+	newResPriv, newResPub := gen()
+	next := []string{resPub, newResPub}
+
+	// passo 3: a release assinada com a reserva instala nos PCs
+	sig := sign(resPriv, data)
+	if !VerifyKeys(installed, data, sig) || !VerifyKeys(next, data, sig) {
+		t.Fatal("a release assinada com a reserva não instala")
+	}
+	// e a versão nova aceita a reserva nova, não a principal perdida
+	if !VerifyKeys(next, data, sign(newResPriv, data)) {
+		t.Fatal("a reserva nova não vale")
+	}
+	if VerifyKeys(next, data, sign(newResPriv, []byte("outro"))) {
+		t.Fatal("assinatura de outro arquivo valeu")
+	}
+	for _, k := range next {
+		if k == mainPub {
+			t.Fatal("a chave perdida continua aceita")
+		}
+	}
+}

@@ -636,7 +636,7 @@ func (a *App) satMinutes(from, to time.Time, use func(time.Time) bool) int {
 	if a.store == nil {
 		return 0
 	}
-	pts, err := a.store.Range(from, to)
+	pts, err := a.storeRange(from, to)
 	if err != nil {
 		return 0
 	}

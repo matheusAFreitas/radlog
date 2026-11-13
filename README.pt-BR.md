@@ -166,8 +166,9 @@ dados" abre a pasta. O que tem lá:
   Excel;
 - `historico/` e `configuracao/`: cópias brutas da memória e da
   configuração do contador;
-- `eventos.csv`, `medicoes.json`, `fora-de-casa.json`, `anotacoes.json`:
-  alertas, medições, saídas de casa e anotações;
+- `alertas.csv`, `eventos.csv`, `medicoes.json`, `fora-de-casa.json`,
+  `anotacoes.json`: alertas (ficam todos), eventos (os 5.000 últimos),
+  medições, saídas de casa e anotações;
 - `radiacode/`: os minutos, a dose, os espectros por minuto e as medições
   de atividade do Radiacode 102;
 - `alertas-detalhe/`: as leituras segundo a segundo em volta de cada
@@ -183,7 +184,27 @@ O **backup** (.zip) junta só o que falta ao importar e serve para levar os
 dados de um PC para outro, Windows ou Linux. Ele também leva as
 configurações que valem em qualquer PC (alarme, níveis, som, bandeja,
 idioma); ao importar, o app pergunta antes de usar. Localização e cidade
-nunca vão para PDF, relatório ou backup.
+nunca vão para PDF, relatório ou backup, e as fotos anexadas perdem a
+localização e os dados da câmera ao anexar.
+
+## O que vai para a internet
+
+O RadLog funciona sem internet. Só três coisas saem, e cada uma pode ser
+desligada nas Configurações:
+
+- **Busca de atualização** (GitHub): ao abrir e uma vez por dia o app
+  pergunta ao GitHub qual é a versão mais nova; o pedido leva a versão do
+  app. Desligue "Procurar versão nova ao abrir e uma vez por dia" em
+  Configurações › Atualizações e sobre.
+- **Clima** (Open-Meteo): a busca de cidade manda o que você digita, e a
+  chuva e a pressão mandam a posição aproximada da cidade. Vem desligado e
+  só funciona com o Clima ligado.
+- **Radar de chuva** (RainViewer): o quadrado do mapa em volta da cidade
+  (uns 300 km de lado, então não diz onde você está). Também só com o
+  Clima ligado.
+
+A sincronização entre os seus PCs fica na rede local (ou na sua VPN) e só
+conversa com os PCs que você pareou.
 
 ## Compilar
 

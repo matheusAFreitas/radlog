@@ -46,9 +46,32 @@ private half is kept offline and outside GitHub and is only used if the main
 key is gone. Steps then:
 
 1. Put the reserve private key in the `RADLOG_SIGN_KEY` secret.
-2. Generate a new reserve pair (`go run ./scripts/sign gen`), keep its
-   private half offline, and put the new public half in `ReserveKey`.
-3. Publish a release; from then on the old reserve key is the main one.
+2. In `internal/updsig/updsig.go`, move the reserve public key into
+   `PubKey` (it is the main key now). Generate a new reserve pair
+   (`go run ./scripts/sign gen`), keep its private half offline, and put the
+   new public half in `ReserveKey`. Update the two keys at the top of this
+   file.
+3. Publish a release. Installed apps accept it because it is signed with
+   their reserve key; the new version trusts the new pair.
+
+`TestKeyRotation` in `internal/updsig/updsig_test.go` rehearses these steps
+with throwaway keys.
+
+## If a signing key leaks
+
+If someone else may have a private key (secret exposed in a log, PC
+compromised), act fast, because installed apps keep accepting that key
+until they update:
+
+- **Main key leaked:** do the three steps above right away. Also revoke
+  the GitHub tokens and sessions that could publish a release, and check
+  the latest releases for files you didn't publish.
+- **Reserve key leaked:** keep `PubKey`, generate a new reserve pair, put
+  its public half in `ReserveKey` and publish a release.
+- **Both leaked:** no update can be trusted through the app. Say so in the
+  README and in a release, and ask people to download the next version by
+  hand and check it as shown above, against keys published somewhere other
+  than GitHub.
 
 ---
 
@@ -78,5 +101,32 @@ cópia fora da internet guardada por quem mantém o app. Se as duas se
 perdessem, nenhum app instalado aceitaria mais atualização. Por isso o app
 aceita uma segunda chave pública, de reserva (`ReserveKey`), cuja privada
 fica guardada fora do GitHub e só é usada se a principal sumir. Os passos,
-nesse caso, são os três da seção em inglês: pôr a privada de reserva no
-segredo, gerar uma reserva nova e publicar uma versão.
+nesse caso:
+
+1. Pôr a privada de reserva no segredo `RADLOG_SIGN_KEY`.
+2. Em `internal/updsig/updsig.go`, passar a pública de reserva para
+   `PubKey` (ela vira a principal). Gerar um par de reserva novo
+   (`go run ./scripts/sign gen`), guardar a privada fora da internet e pôr a
+   pública nova em `ReserveKey`. Atualizar as duas chaves no começo deste
+   arquivo.
+3. Publicar uma versão. Os apps instalados aceitam porque ela vem assinada
+   com a reserva deles; a versão nova já confia no par novo.
+
+O `TestKeyRotation` em `internal/updsig/updsig_test.go` ensaia esses passos
+com chaves de teste.
+
+## Se uma chave vazar
+
+Se outra pessoa pode ter uma chave privada (segredo num log, PC invadido),
+é preciso agir rápido, porque os apps instalados aceitam essa chave até
+atualizarem:
+
+- **Vazou a principal:** os três passos acima, na hora. E revogar os tokens
+  e sessões do GitHub que podem publicar release, e conferir se as últimas
+  releases têm arquivo que você não publicou.
+- **Vazou a de reserva:** manter a `PubKey`, gerar um par de reserva novo,
+  pôr a pública em `ReserveKey` e publicar uma versão.
+- **Vazaram as duas:** nenhuma atualização pelo app é confiável. Avisar no
+  README e numa release, e pedir para baixar a próxima versão à mão e
+  conferir como descrito acima, com as chaves publicadas em outro lugar além
+  do GitHub.

@@ -117,7 +117,7 @@
     <span class="mini-val mono" id="miniRVal">—</span><span class="mini-unit" id="miniRUnit">µSv/h</span>
     <span class="mini-sec mono" id="miniRSec"></span><span class="mini-state" id="miniRState"></span>
   </button>
-  <button type="button" class="mini-alert" id="miniAlert" data-view="alertas" hidden><i aria-hidden="true"></i><span id="miniAlertText"></span></button>
+  <button type="button" class="mini-alert" id="miniAlert" data-view="alertas" hidden><i aria-hidden="true"></i><span id="miniAlertText">Alertas</span></button>
   <span class="inst-fill"></span>
   <button type="button" class="mini-top" id="miniTop"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg><span>voltar ao topo</span></button>
 </div>
@@ -604,7 +604,7 @@
           <button type="button" class="btn small icon" id="sumPrev" title="Período anterior" aria-label="Período anterior">‹</button>
           <span class="sum-when">
             <button type="button" class="btn small" id="sumWhen" title="Escolher a data">Hoje</button>
-            <input type="date" id="sumDay" tabindex="-1" aria-hidden="true">
+            <input type="date" id="sumDay" tabindex="-1" aria-hidden="true" aria-label="Escolher o dia">
           </span>
           <button type="button" class="btn small icon" id="sumNext" title="Próximo período" aria-label="Próximo período">›</button>
         </div>
@@ -1504,7 +1504,7 @@
           <p class="rc-act-step" id="rcActStep"></p>
           <div class="rc-act-prog"><i id="rcActBar"></i></div>
           <p class="mono small muted" id="rcActTime"></p>
-          <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActNext"></button><button type="button" class="btn" id="rcActCancel">Cancelar</button></div>
+          <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActNext">Próximo</button><button type="button" class="btn" id="rcActCancel">Cancelar</button></div>
           <div id="rcActLive"></div>
         </div>
         <div class="rc-plot" id="rcActPlot" hidden><canvas id="rcActSpec" class="rc-canvas"></canvas></div>
@@ -2605,7 +2605,7 @@
 <script src="clima.js"></script>
 <script src="busca.js"></script>
 <script src="uso.js"></script>
-<script src="demo.js"></script>
+<script src="demo-loader.js"></script>
 <script src="app.js"></script>
 <div class="tb-tip mono small" id="tubeTip" hidden></div>
 </body>

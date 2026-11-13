@@ -41,6 +41,10 @@ O CI confere tudo isto; vale rodar antes para não esperar a volta:
 
 1. **Formato e testes:** `gofmt -l internal` sem saída, `go vet ./internal/...`
    e `go test ./internal/...` (o CI também roda com `-race` e no Windows).
+   Use Go 1.27 (o mesmo do `go.mod` e do CI). Sem internet, dá para rodar
+   com um `local.mod` próprio (`GOFLAGS=-modfile=local.mod GOPROXY=off`);
+   ele fica fora do repositório (`.gitignore`) e não é necessário para
+   quem tem internet.
 2. **staticcheck:** `staticcheck -tags webkit2_41 ./...` e, para o código do
    Windows, `GOOS=windows staticcheck -tags desktop,production ./...`.
 3. **Tradução:** toda frase nova da tela entra em `internal/i18n/en.tsv`

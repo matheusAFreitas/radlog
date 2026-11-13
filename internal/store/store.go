@@ -862,3 +862,7 @@ func (s *Store) ReadMonthFile(name string) ([]Point, error) {
 func Unopened(dir string) *Store {
 	return &Store{dir: dir, cacheMin: startOfDay(time.Now()).AddDate(0, 0, -keepDays)}
 }
+
+// ReadFileTolerant lê um arquivo de leituras de outra pasta (a temporária
+// de uma sessão anterior); linhas estragadas ficam de fora.
+func ReadFileTolerant(path string) ([]Point, error) { return readFile(path) }
