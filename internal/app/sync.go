@@ -293,12 +293,14 @@ func (a *App) syncStartServer(addr string) {
 	s.ln, s.listenErr = ln, ""
 	s.port = ln.Addr().(*net.TCPAddr).Port
 	s.srv = &http.Server{Handler: a.syncHandler(), ReadHeaderTimeout: 10 * time.Second, ReadTimeout: syncReadTimeout, MaxHeaderBytes: 16 << 10}
-	go func() { _ = s.srv.Serve(ln) }()
+	srv := s.srv
+	a.goSafe("sync serve", func() { _ = srv.Serve(ln) })
 	// descoberta: responde quem pergunta "RADLOG?v1" na mesma porta (UDP)
 	if host, _, _ := net.SplitHostPort(addr); host == "" || host == "0.0.0.0" {
 		if uc, err := net.ListenUDP("udp4", &net.UDPAddr{Port: s.port}); err == nil {
 			s.udp = uc
-			go a.syncAnswerDiscovery(uc, s.file.ID, s.port)
+			id, port := s.file.ID, s.port
+			a.goSafe("syncAnswerDiscovery", func() { a.syncAnswerDiscovery(uc, id, port) })
 		}
 	}
 	a.logf("sincronização: aceitando conexões na porta %d (%s)", s.port, strings.Join(localAddrs(s.port), ", "))

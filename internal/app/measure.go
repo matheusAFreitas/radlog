@@ -200,7 +200,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		return a.measure, fmt.Errorf("fase desconhecida %q", phase)
 	}
 	st := a.measureSnapLocked()
-	go a.emit("measure", st)
+	a.goSafe("emit measure", func() { a.emit("measure", st) })
 	return st, nil
 }
 
@@ -597,6 +597,9 @@ func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medic
 func (a *App) loadMeasurements() {
 	var list []SavedMeasure
 	if a.readStateJSON(a.measurementsPath(), "medições", &list) {
+		for i := range list {
+			list[i].Attachments = cleanAttachments(list[i].Attachments)
+		}
 		a.measurements = list
 	}
 }

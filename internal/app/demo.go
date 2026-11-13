@@ -128,7 +128,7 @@ func (a *App) StartDemo(cpm float64, realistic bool) DemoState {
 	a.logDemoEvent(fmt.Sprintf("Modo demo ligado (%.0f CPM)", cpm), kindEvent)
 	a.emit("measure", MeasureState{})
 	a.emit("demo", st)
-	go a.demoLoop(stop)
+	a.goSafe("demoLoop", func() { a.demoLoop(stop) })
 	return st
 }
 

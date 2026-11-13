@@ -290,7 +290,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	a.measSpec0, a.measSpecBg = spec0, specBg
 	st := a.measureSnapLocked()
 	a.mu.Unlock()
-	go a.emit("measure", st)
+	a.goSafe("emit measure", func() { a.emit("measure", st) })
 	return st, nil
 }
 

@@ -153,6 +153,10 @@ type Status struct {
 	// fator do fundo (µSv/h por CPM) em uso agora, mesmo desconectado
 	USvPerCPM float64 `json:"usvPerCPM"`
 	CalSource string  `json:"calSource"`
+	// minutos na memória esperando para gravar (arquivo do mês preso por
+	// outro programa, B2) e o arquivo
+	SavePending int    `json:"savePending,omitempty"`
+	SaveFile    string `json:"saveFile,omitempty"`
 }
 
 // Event é uma linha do registro de eventos.
@@ -362,6 +366,8 @@ type App struct {
 	connMu sync.Mutex // uma conexão por vez
 
 	downloading    atomic.Bool
+	savePending    int         // minutos esperando para gravar (B2); com a.mu
+	saveFile       string      // arquivo deles
 	cfgBusy        atomic.Bool // gravando/lendo a configuração do contador
 	rcCfgBusy      atomic.Bool // gravando os ajustes do RC102
 	cfgBackedUp    bool        // já salvou a cópia da config nesta conexão
@@ -530,6 +536,13 @@ func (a *App) shutdown(ctx context.Context) {
 	a.mu.Unlock()
 	a.StopDemo()
 	a.disconnect("")
+	if a.store != nil {
+		if err := a.store.Flush(); err != nil {
+			if n, f := a.store.Pending(); n > 0 {
+				a.logf("fechando com %d minuto(s) sem gravar em %s: %v", n, f, err)
+			}
+		}
+	}
 }
 
 // ---------- configurações e eventos em disco ----------
@@ -710,6 +723,31 @@ func (a *App) statusLocked() Status {
 		State: a.state, Message: a.message, Device: a.info,
 		Downloading: a.downloading.Load(), DataDir: a.dataDir,
 		USvPerCPM: a.convCalLocked().USv(100) / 100, CalSource: a.calSourceLocked(),
+		SavePending: a.savePending, SaveFile: a.saveFile,
+	}
+}
+
+// noteSaveResult acompanha os minutos que não gravaram: um evento quando
+// começa e outro quando volta, e o aviso na tela pelo status (B2).
+func (a *App) noteSaveResult(err error) {
+	if a.store == nil {
+		return
+	}
+	n, file := a.store.Pending()
+	a.mu.Lock()
+	was := a.savePending
+	a.savePending, a.saveFile = n, file
+	st := a.statusLocked()
+	a.mu.Unlock()
+	switch {
+	case was == 0 && n > 0:
+		a.logf("gravação: %v", err)
+		a.logEvent(fmt.Sprintf("Não deu para gravar em %s (aberto em outro programa?). As leituras ficam na memória e são gravadas quando o arquivo liberar.", file))
+	case was > 0 && n == 0:
+		a.logEvent(fmt.Sprintf("Arquivo liberado: %d minuto(s) que estavam esperando foram gravados.", was))
+	}
+	if was != n {
+		a.emit("status", st)
 	}
 }
 
@@ -859,7 +897,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 	a.cfgRecord("contador")
 
 	a.setState("conectado", "")
-	go a.plannedOnConnect("gmc", time.Now()) // voltou de uma saída programada?
+	a.goSafe("plannedOnConnect", func() { a.plannedOnConnect("gmc", time.Now()) }) // voltou de uma saída programada?
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
 	a.logEvent(fmt.Sprintf("Contador conectado (%s em %s)", ver, port))
 	go a.poll(d, stop, port)
@@ -1006,7 +1044,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		if r := recover(); r != nil {
 			a.recovered("poll", r)
 			why = fmt.Sprintf("erro interno: %v", r)
-			go a.lostConnection(fmt.Errorf("erro interno na leitura ao vivo"))
+			a.goSafe("lostConnection", func() { a.lostConnection(fmt.Errorf("erro interno na leitura ao vivo")) })
 		}
 	}()
 
@@ -1043,7 +1081,8 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			a.dumpDiag("leitura ao vivo sem resposta em 6 s (" + cmd + ")")
 			a.logEvent("O contador parou de responder (a porta travou); reconectando")
 			why = fmt.Sprintf("%s sem resposta em %.0f s: porta travada no driver", cmd, pollTimeout.Seconds())
-			go a.lostConnection(err)
+			e := err
+			a.goSafe("lostConnection", func() { a.lostConnection(e) })
 			return
 		}
 		if err != nil {
@@ -1062,7 +1101,8 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 				} else {
 					why = fmt.Sprintf("3 erros seguidos em %s (%v), com a porta ainda na lista", cmd, err)
 				}
-				go a.lostConnection(err)
+				e := err
+				a.goSafe("lostConnection", func() { a.lostConnection(e) })
 				return
 			}
 			continue
@@ -1228,7 +1268,13 @@ func (a *App) storeMinute(t time.Time, cpm, raw float64, lv Levels) {
 		p.TauUs = lv.DeadTimeUs
 	}
 	p.Obs = a.takeMinuteObs(t)
-	if err := a.store.Add(p); err != nil {
+	if !store.SaneCPM(cpm) || !store.SaneCPM(raw) {
+		a.logf("leitura impossível descartada às %s: cpm=%v bruto=%v", t.Format("15:04"), cpm, raw)
+		return
+	}
+	err := a.store.Add(p)
+	a.noteSaveResult(err)
+	if err != nil && !errors.Is(err, store.ErrNotSaved) {
 		a.logEvent("Erro ao gravar leitura: " + err.Error())
 		return
 	}
@@ -1320,6 +1366,12 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	lvDT := a.settings.Levels.Norm()
 	a.mu.Unlock()
 	pts := recordsToPoints(h.Records, lvDT)
+	// relógio do contador errado: o que cairia no futuro ou antes de 2020 fica
+	// fora (no futuro, travava a gravação ao vivo; B1)
+	pts, future, old := store.SaneTimes(pts, time.Now())
+	if future > 0 || old > 0 {
+		a.logEvent(fmt.Sprintf("Histórico do contador: %d registro(s) com hora impossível ficaram de fora (%d no futuro, %d antes de %d). Confira o relógio do GMC-800.", future+old, future, old, store.FirstYear))
+	}
 	added, ierr := a.store.ImportNew(pts)
 	res.Added = len(added)
 	res.Alerts = a.retroAlerts(added)
