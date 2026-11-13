@@ -25,8 +25,9 @@ import (
 // ---------- backup ----------
 //
 // Um backup é um .zip com as leituras (CSV por mês), eventos e alertas,
-// fora de casa, medições, segundos dos alertas e o cache de chuva. Importar
-// MESCLA: só entra o que falta (o que já existe aqui não muda).
+// fora de casa, medições, segundos dos alertas, o cache de chuva e as
+// configurações sem o lugar. Importar MESCLA: só entra o que falta (o que já
+// existe aqui não muda); as configurações só mudam se a pessoa escolher.
 
 // MergeResult diz o que entrou ao importar um backup.
 type MergeResult struct {
@@ -39,6 +40,9 @@ type MergeResult struct {
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
 	RcMinutes    int    `json:"rcMinutes"` // minutos do RC102
+	// ajustes das configurações do backup diferentes dos daqui (2.74); a
+	// tela pergunta se quer usar (ApplyBackupSettings)
+	Settings int `json:"settings"`
 }
 
 func (m MergeResult) total() int {
@@ -76,6 +80,10 @@ func (a *App) writeBackup(w io.Writer) error {
 	man, _ := json.MarshalIndent(backupManifest{App: backupAppID, Version: AppVersion, Host: hostName(), Created: time.Now().Format(time.RFC3339)}, "", "  ")
 	if f, err := zw.Create("backup.json"); err == nil {
 		_, _ = f.Write(man)
+	}
+	// as configurações, sem o lugar e sem o que é só deste PC (backupcfg.go)
+	if f, err := zw.Create(backupSettingsFile); err == nil {
+		_, _ = f.Write(a.backupSettingsJSON())
 	}
 	add := func(rel string) error {
 		src := filepath.Join(a.dataDir, filepath.FromSlash(rel))
@@ -389,6 +397,16 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 				res.Notes = a.mergeNotes(list)
 			}
 		}
+	}
+
+	// configurações: só ficam guardadas para a pessoa escolher (o pacote da
+	// sincronização não traz)
+	if backup {
+		var b []byte
+		if f, ok := files[backupSettingsFile]; ok {
+			b, _ = readZipFile(f)
+		}
+		res.Settings = a.stashBackupSettings(b) // sem o arquivo: esquece o anterior
 	}
 
 	// histórico de configurações

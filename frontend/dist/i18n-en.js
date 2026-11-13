@@ -3646,7 +3646,13 @@ const I18N_EN = {
 "nunca": "never",
 "Em dia: nenhum trecho sem leitura no app desde o último download.": "Up to date: no stretch without readings in the app since the last download.",
 "contador não grava": "counter isn't saving",
-"Download": "Download"
+"Download": "Download",
+"Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.": "From the backup: alarm, levels, sound, tray, pulse, language and updates. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.",
+"Usar as configurações do backup?": "Use the settings from the backup?",
+"Usar as do backup": "Use the backup's",
+"Configurações do backup aplicadas": "Settings from the backup applied",
+"backup": "backup",
+"O backup também leva as configurações, sem o lugar da chuva e sem o que é só deste PC. Ao importar, o app pergunta se você quer usar as do backup.": "The backup also carries the settings, without the rain location and without what belongs only to this PC. When importing, the app asks whether you want to use the backup's."
 },
 "patterns": [
 [
@@ -6866,6 +6872,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O backup de ",
+"^O backup de ((?:(?! · ).)+?) tem ((?:(?! · ).)+?) ajustes diferentes dos daqui\\.$",
+"The backup from ${1} has ${2} settings different from the ones here.",
+[
+"O backup de ",
+" tem ",
+" ajustes diferentes dos daqui."
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -7008,6 +7024,15 @@ const I18N_EN = {
 [
 "Fora de casa desde ",
 " · nenhum aparelho com você"
+]
+],
+[
+"O backup de ",
+"^O backup de ((?:(?! · ).)+?) tem 1 ajuste diferente do daqui\\.$",
+"The backup from ${1} has 1 setting different from this one.",
+[
+"O backup de ",
+" tem 1 ajuste diferente do daqui."
 ]
 ],
 [

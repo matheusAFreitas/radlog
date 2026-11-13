@@ -4745,3 +4745,11 @@ em dia · {0}	up to date · {0}
 falta {0}	missing {0}
 {0} · incompleto	{0} · incomplete
 Download	Download
+O backup de {0} tem 1 ajuste diferente do daqui.	The backup from {0} has 1 setting different from this one.
+O backup de {0} tem {1} ajustes diferentes dos daqui.	The backup from {0} has {1} settings different from the ones here.
+Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma e atualização. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.	From the backup: alarm, levels, sound, tray, pulse, language and updates. The rain location and what belongs only to this PC (port, Bluetooth, folders, screen size, starting with Windows) stay as they are.
+Usar as configurações do backup?	Use the settings from the backup?
+Usar as do backup	Use the backup's
+Configurações do backup aplicadas	Settings from the backup applied
+backup	backup
+O backup também leva as configurações, sem o lugar da chuva e sem o que é só deste PC. Ao importar, o app pergunta se você quer usar as do backup.	The backup also carries the settings, without the rain location and without what belongs only to this PC. When importing, the app asks whether you want to use the backup's.
