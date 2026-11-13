@@ -37,7 +37,7 @@ func (a *App) saveMemoryInfo(raw []byte) {
 	a.mu.Unlock()
 	m := MemoryInfo{Known: true, UsedBytes: usedFlash(raw), TotalBytes: gmc.FlashSize, At: time.Now().UnixMilli(), Serial: serial}
 	b, _ := json.MarshalIndent(m, "", "  ")
-	_ = os.WriteFile(a.memoryPath(), b, 0o644)
+	_ = writeFileAtomic(a.memoryPath(), b, 0o644)
 }
 
 // GetMemoryInfo devolve o uso da memória do contador conectado (se o

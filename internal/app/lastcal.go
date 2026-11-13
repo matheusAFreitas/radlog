@@ -30,10 +30,7 @@ func (a *App) saveLastCal(c gmc.Calibration) {
 	if err != nil {
 		return
 	}
-	tmp := a.lastCalPath() + ".tmp"
-	if os.WriteFile(tmp, b, 0o644) == nil {
-		_ = os.Rename(tmp, a.lastCalPath())
-	}
+	_ = writeFileAtomic(a.lastCalPath(), b, 0o644)
 	a.calHistDevice(c)
 }
 

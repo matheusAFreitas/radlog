@@ -78,7 +78,7 @@ func (a *App) writeCounterSync(d counterSyncData) {
 		return
 	}
 	b, _ := json.MarshalIndent(d, "", "  ")
-	_ = os.WriteFile(a.counterSyncPath(), b, 0o644)
+	_ = writeFileAtomic(a.counterSyncPath(), b, 0o644)
 }
 
 // recordCounterSync guarda o resultado de um download da memória.

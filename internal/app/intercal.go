@@ -60,9 +60,7 @@ func (a *App) loadIntercal() intercalData {
 	if a.dataDir == "" {
 		return d
 	}
-	if b, err := os.ReadFile(a.intercalPath()); err == nil {
-		_ = json.Unmarshal(b, &d)
-	}
+	a.readStateJSON(a.intercalPath(), "intercalibração", &d)
 	return d
 }
 
@@ -74,11 +72,7 @@ func (a *App) saveIntercal(d intercalData) error {
 	if err != nil {
 		return err
 	}
-	tmp := a.intercalPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.intercalPath())
+	return writeFileAtomic(a.intercalPath(), b, 0o644)
 }
 
 // gmcCounts são as contagens do minuto (sem a correção de tempo morto) e se

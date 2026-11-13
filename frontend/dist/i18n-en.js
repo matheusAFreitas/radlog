@@ -3728,7 +3728,15 @@ const I18N_EN = {
 "Sem internet, nada muda: o app grava aqui e sobe depois.": "Without internet nothing changes: the app records here and uploads later.",
 "Entrar com Google": "Sign in with Google",
 "ainda há minutos esperando": "there are still minutes waiting",
-"leitura não gravada no disco": "reading not saved to disk"
+"leitura não gravada no disco": "reading not saved to disk",
+"calibração do contador": "counter calibration",
+"dose do RC102": "RC102 dose",
+"dose do RadiaCode": "RC102 dose",
+"perguntas do RC102": "RC102 questions",
+"perguntas do RadiaCode": "RC102 questions",
+"sincronização": "sync",
+"versões da calibração": "calibration versions",
+"intercalibração": "cross-calibration"
 },
 "patterns": [
 [
@@ -3837,6 +3845,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Não consegui abrir a pasta de leituras (",
+"^Não consegui abrir a pasta de leituras \\(((?:(?! · ).)+?)\\) nem uma pasta temporária: as leituras desta sessão ficam só na memória\\. Feche o app e confira se a pasta existe e se dá para gravar nela\\.$",
+"Couldn't open the readings folder (${1}) or a temporary folder: this session's readings stay in memory only. Close the app and check that the folder exists and can be written to.",
+[
+"Não consegui abrir a pasta de leituras (",
+") nem uma pasta temporária: as leituras desta sessão ficam só na memória. Feche o app e confira se a pasta existe e se dá para gravar nela."
+]
+],
+[
 "Os dois estão se afastando: ",
 "^Os dois estão se afastando: ((?:(?! · ).)+?)% do normal há duas semanas\\. Pode ser o tubo do GMC, um dos aparelhos mudado de lugar ou o RC102 guardado em outro canto\\. Vale intercalibrar de novo\\.$",
 "The devices are drifting apart: ${1}% from normal for two weeks. It may be the GMC tube, one of the devices moved, or the RC102 kept somewhere else. Worth cross-calibrating again.",
@@ -3922,6 +3939,16 @@ const I18N_EN = {
 [
 "Subiu de uma vez (",
 ") e ficou. O RadiaCode em casa não mudou, então foi algo perto do GMC-800. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
+]
+],
+[
+"Não consegui abrir a pasta de leituras (",
+"^Não consegui abrir a pasta de leituras \\(((?:(?! · ).)+?)\\): as leituras desta sessão estão indo para ((?:(?! · ).)+?)\\. Feche o app e confira se a pasta existe e se dá para gravar nela\\.$",
+"Couldn't open the readings folder (${1}): this session's readings are going to ${2}. Close the app and check that the folder exists and can be written to.",
+[
+"Não consegui abrir a pasta de leituras (",
+"): as leituras desta sessão estão indo para ",
+". Feche o app e confira se a pasta existe e se dá para gravar nela."
 ]
 ],
 [
@@ -7270,6 +7297,14 @@ const I18N_EN = {
 "leitura impossível descartada às ",
 ": cpm=",
 " bruto="
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) linha\\(s\\) ilegível\\(is\\) guardada\\(s\\) em ((?:(?! · ).)+?)$",
+"${1}: ${2} unreadable line(s) saved in ${3}",
+[
+" linha(s) ilegível(is) guardada(s) em "
 ]
 ],
 [

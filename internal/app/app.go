@@ -157,6 +157,8 @@ type Status struct {
 	// outro programa, B2) e o arquivo
 	SavePending int    `json:"savePending,omitempty"`
 	SaveFile    string `json:"saveFile,omitempty"`
+	// DataWarn: a pasta de leituras não abriu nesta sessão (D3)
+	DataWarn string `json:"dataWarn,omitempty"`
 }
 
 // Event é uma linha do registro de eventos.
@@ -368,6 +370,7 @@ type App struct {
 	downloading    atomic.Bool
 	savePending    int         // minutos esperando para gravar (B2); com a.mu
 	saveFile       string      // arquivo deles
+	dataWarn       string      // pasta de leituras que não abriu (D3); só muda no startup
 	cfgBusy        atomic.Bool // gravando/lendo a configuração do contador
 	rcCfgBusy      atomic.Bool // gravando os ajustes do RC102
 	cfgBackedUp    bool        // já salvou a cópia da config nesta conexão
@@ -489,17 +492,15 @@ func (a *App) startup(ctx context.Context) {
 	}
 	a.logAutostart()
 	a.events = a.loadEvents()
+	if _, err := os.Stat(a.alertsPath()); err != nil && len(a.events) > 0 {
+		a.saveEvents() // primeira vez na 2.76.2: separa os alertas do eventos.csv
+	}
 	if a.settingsBroken {
 		a.logEvent("Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração")
 	}
 	a.logMigration(migNow, migDocsMoved, migDocsErr)
 
-	st, err := store.Open(a.dataDir)
-	if err != nil {
-		a.logEvent("Erro ao abrir os dados: " + err.Error())
-		st, _ = store.Open(filepath.Join(os.TempDir(), appDirName))
-	}
-	a.store = st
+	a.store = a.openStore()
 	// tarefas de fundo protegidas contra panic (panics.go)
 	a.goSafe("scanRetroOnce", a.scanRetroOnce)
 	a.goLoop("updateLoop", a.updateLoop)
@@ -559,7 +560,7 @@ func (a *App) loadSettings() Settings {
 			// arquivo ruim e avisa (startup), em vez de zerar em silêncio.
 			s = defaultSettings()
 			bad := a.settingsPath() + ".ilegivel"
-			_ = os.WriteFile(bad, b, 0o644)
+			_ = writeFileAtomic(bad, b, 0o644)
 			a.logf("configurações: não consegui ler o config.json (%v); voltei ao padrão e guardei o arquivo em %s", jerr, bad)
 			a.settingsBroken = true
 		}
@@ -586,10 +587,82 @@ func (a *App) saveSettingsLocked() {
 	}
 }
 
+// openStore abre a pasta de leituras. Se ela não abrir, as leituras desta
+// sessão vão para a pasta temporária; se nem essa abrir, ficam só na
+// memória (e o aviso de gravação aparece). Nos dois casos fica um aviso
+// fixo na tela até fechar o app, em vez de uma linha só em Eventos
+// (auditoria 2.76.0, D3).
+func (a *App) openStore() *store.Store {
+	st, err := store.Open(a.dataDir)
+	if err == nil {
+		return st
+	}
+	a.logEvent("Erro ao abrir os dados: " + err.Error())
+	tmp := filepath.Join(os.TempDir(), appDirName)
+	if st, terr := store.Open(tmp); terr == nil {
+		a.dataWarn = tmp
+		return st
+	}
+	a.dataWarn = "-"
+	return store.Unopened(a.dataDir)
+}
+
 func (a *App) eventsPath() string { return filepath.Join(a.dataDir, "eventos.csv") }
 
+// alertsPath guarda só os alertas, sem limite: eles não somem quando os
+// eventos comuns passam de maxEvents (auditoria 2.76.0, B7).
+func (a *App) alertsPath() string { return filepath.Join(a.dataDir, "alertas.csv") }
+
+// loadEvents lê alertas.csv e eventos.csv. Até a 2.76.1 os alertas ficavam
+// no eventos.csv: se o alertas.csv ainda não existe, eles vêm de lá e a
+// próxima gravação separa os dois.
 func (a *App) loadEvents() []Event {
-	f, err := os.Open(a.eventsPath())
+	alerts := readEventsFile(a.alertsPath())
+	have := make(map[string]bool, len(alerts))
+	for _, e := range alerts {
+		have[eventKey(e)] = true
+	}
+	out := alerts
+	for _, e := range readEventsFile(a.eventsPath()) {
+		if !have[eventKey(e)] {
+			out = append(out, e)
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].Time < out[j].Time })
+	out = trimEvents(out)
+	for i := range out {
+		a.evSeq++
+		out[i].ID = a.evSeq
+	}
+	return out
+}
+
+// trimEvents corta os eventos comuns mais antigos quando passam de
+// maxEvents. Alertas ficam todos. list já está em ordem de data.
+func trimEvents(list []Event) []Event {
+	n := 0
+	for _, e := range list {
+		if e.Kind != kindAlert {
+			n++
+		}
+	}
+	drop := n - maxEvents
+	if drop <= 0 {
+		return list
+	}
+	out := list[:0]
+	for _, e := range list {
+		if e.Kind != kindAlert && drop > 0 {
+			drop--
+			continue
+		}
+		out = append(out, e)
+	}
+	return out
+}
+
+func readEventsFile(path string) []Event {
+	f, err := os.Open(path)
 	if err != nil {
 		return nil
 	}
@@ -611,14 +684,6 @@ func (a *App) loadEvents() []Event {
 		if ev, ok := parseEventRow(rec); ok {
 			out = append(out, ev)
 		}
-	}
-	sort.SliceStable(out, func(i, j int) bool { return out[i].Time < out[j].Time })
-	if len(out) > maxEvents {
-		out = out[len(out)-maxEvents:]
-	}
-	for i := range out {
-		a.evSeq++
-		out[i].ID = a.evSeq
 	}
 	return out
 }
@@ -723,7 +788,7 @@ func (a *App) statusLocked() Status {
 		State: a.state, Message: a.message, Device: a.info,
 		Downloading: a.downloading.Load(), DataDir: a.dataDir,
 		USvPerCPM: a.convCalLocked().USv(100) / 100, CalSource: a.calSourceLocked(),
-		SavePending: a.savePending, SaveFile: a.saveFile,
+		SavePending: a.savePending, SaveFile: a.saveFile, DataWarn: a.dataWarn,
 	}
 }
 
@@ -1354,7 +1419,7 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 		dir := filepath.Join(a.dataDir, "historico")
 		_ = os.MkdirAll(dir, 0o755)
 		res.File = filepath.Join(dir, "historico-"+time.Now().Format("2006-01-02_150405")+".bin")
-		_ = os.WriteFile(res.File, raw, 0o644)
+		_ = writeFileAtomic(res.File, raw, 0o644)
 	}
 
 	if err == nil {

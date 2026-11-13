@@ -125,10 +125,7 @@ func migrateDataDir(oldDir, newDir string, running func() bool) migResult {
 
 func writeMigInfo(dir string, m *MigrationInfo) {
 	b, _ := json.MarshalIndent(m, "", "  ")
-	tmp := filepath.Join(dir, migMarkName+".tmp")
-	if os.WriteFile(tmp, b, 0o644) == nil {
-		os.Rename(tmp, filepath.Join(dir, migMarkName))
-	}
+	_ = writeFileAtomic(filepath.Join(dir, migMarkName), b, 0o644)
 }
 
 // copyAndVerify copia oldDir para newDir (sem sobrescrever) e confere.

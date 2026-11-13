@@ -539,6 +539,14 @@ function renderStatus() {
     sw.hidden = !s.savePending;
     if (s.savePending) sw.textContent = `Não estou conseguindo gravar em ${s.saveFile}: se ele estiver aberto no Excel ou em outro programa, feche. ${s.savePending} minuto(s) esperando na memória; nada se perde com o app aberto.`;
   }
+  // D3: a pasta de leituras não abriu nesta sessão
+  const dw = $("dataWarn");
+  if (dw) {
+    dw.hidden = !s.dataWarn;
+    if (s.dataWarn) dw.textContent = s.dataWarn === "-"
+      ? `Não consegui abrir a pasta de leituras (${s.dataDir}) nem uma pasta temporária: as leituras desta sessão ficam só na memória. Feche o app e confira se a pasta existe e se dá para gravar nela.`
+      : `Não consegui abrir a pasta de leituras (${s.dataDir}): as leituras desta sessão estão indo para ${s.dataWarn}. Feche o app e confira se a pasta existe e se dá para gravar nela.`;
+  }
   $("dataDir").textContent = s.dataDir || "—";
   $("connMsg").textContent = s.state === "erro" ? s.message : s.state === "conectado" ? "conectado em " + d.port : "";
   $("btnConnect").textContent = connected ? "Desconectar" : "Conectar";

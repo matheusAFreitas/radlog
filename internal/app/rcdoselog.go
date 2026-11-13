@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"bytes"
 	"compress/flate"
 	"encoding/hex"
@@ -218,7 +217,7 @@ func (a *App) rcDoseBackfill() {
 		sort.Slice(pts, func(i, j int) bool { return pts[i].T.Before(pts[j].T) })
 		a.rcDoseMerge(pts)
 	}
-	_ = os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
+	_ = writeFileAtomic(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 	if len(pts) > 0 {
 		a.logf("RC102: %d totais de dose recuperados dos dados brutos", len(pts))
 	}
@@ -236,10 +235,14 @@ func (a *App) rcDoseMerge(pts []rcDosePt) {
 	for name, add := range byMonth {
 		path := filepath.Join(a.rcDir(), name)
 		have := map[string]string{}
+		var bad rcBad
 		if b, err := os.ReadFile(path); err == nil {
 			for _, ln := range strings.Split(string(b), "\n") {
-				if k, _, ok := strings.Cut(ln, ","); ok && k != "hora" {
+				k, _, _ := strings.Cut(ln, ",")
+				if _, err := time.Parse(time.RFC3339, k); err == nil {
 					have[k] = ln
+				} else {
+					bad.add(ln)
 				}
 			}
 		}
@@ -263,9 +266,8 @@ func (a *App) rcDoseMerge(pts []rcDosePt) {
 		for _, k := range keys {
 			buf.WriteString(have[k] + "\n")
 		}
-		tmp := path + ".tmp"
-		if os.WriteFile(tmp, buf.Bytes(), 0o644) == nil {
-			_ = os.Rename(tmp, path)
+		if writeFileAtomic(path, buf.Bytes(), 0o644) == nil {
+			bad.save(a, path)
 		}
 	}
 }
@@ -287,7 +289,7 @@ func gzipLinesTolerant(b []byte) [][]byte {
 		}
 		data, _ := io.ReadAll(flate.NewReader(bytes.NewReader(b[start+10:])))
 		if k := bytes.LastIndexByte(data, '\n'); k >= 0 {
-			sc := bufio.NewScanner(bytes.NewReader(data[:k+1]))
+			sc := rcScanner(bytes.NewReader(data[:k+1]))
 			sc.Buffer(make([]byte, 1<<20), 1<<24)
 			for sc.Scan() {
 				lines = append(lines, append([]byte(nil), sc.Bytes()...))

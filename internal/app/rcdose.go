@@ -71,9 +71,7 @@ func (a *App) rcDoseResumeLocked(now time.Time) {
 	d.has, d.lastRT = false, time.Time{}
 	if !d.loaded && a.dataDir != "" {
 		d.loaded = true
-		if b, err := os.ReadFile(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
-			_ = json.Unmarshal(b, &d.saved)
-		}
+		a.readStateJSON(filepath.Join(a.rcDir(), rcDoseFile), "dose do RC102", &d.saved)
 	}
 	at := time.UnixMilli(d.saved.At)
 	if d.saved.At > 0 && !at.After(now) && now.Sub(at) <= rcDoseKeepGap {
@@ -90,10 +88,7 @@ func (a *App) rcDoseWriteLocked() {
 	if b, err := json.Marshal(d.saved); err == nil {
 		dir := a.rcDir()
 		_ = os.MkdirAll(dir, 0o755)
-		tmp := filepath.Join(dir, rcDoseFile+".tmp")
-		if os.WriteFile(tmp, b, 0o644) == nil {
-			_ = os.Rename(tmp, filepath.Join(dir, rcDoseFile))
-		}
+		_ = writeFileAtomic(filepath.Join(dir, rcDoseFile), b, 0o644)
 	}
 }
 
@@ -118,9 +113,7 @@ func (a *App) rcDoseFillLocked(st *RcState, connected bool) {
 	d := &a.rc.dose
 	if !d.loaded && a.dataDir != "" {
 		d.loaded = true
-		if b, err := os.ReadFile(filepath.Join(a.rcDir(), rcDoseFile)); err == nil {
-			_ = json.Unmarshal(b, &d.saved)
-		}
+		a.readStateJSON(filepath.Join(a.rcDir(), rcDoseFile), "dose do RC102", &d.saved)
 	}
 	switch {
 	case connected && d.has:

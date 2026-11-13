@@ -83,7 +83,15 @@ func TestGoSafeRecovers(t *testing.T) {
 		n := len(a.events)
 		a.mu.Unlock()
 		if n > 0 {
-			return
+			// o evento vai para a tela antes do arquivo: espera a gravação
+			// terminar, senão a pasta do teste some no meio dela
+			for time.Now().Before(deadline) {
+				if _, err := os.Stat(a.eventsPath()); err == nil {
+					return
+				}
+				time.Sleep(10 * time.Millisecond)
+			}
+			t.Fatal("o evento não foi gravado")
 		}
 		time.Sleep(10 * time.Millisecond)
 	}

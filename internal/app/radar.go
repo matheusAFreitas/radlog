@@ -75,7 +75,7 @@ func (a *App) saveRadarLocked() {
 		return
 	}
 	if b, err := json.Marshal(a.radar); err == nil {
-		_ = os.WriteFile(a.radarPath(), b, 0o644)
+		_ = writeFileAtomic(a.radarPath(), b, 0o644)
 	}
 }
 

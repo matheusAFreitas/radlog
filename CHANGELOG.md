@@ -1,5 +1,51 @@
 # Versões
 
+## 2.76.2
+Bloco 2 da auditoria de 13/11: arquivos que podiam ficar vazios ou sumir.
+
+- Todo arquivo que o app grava agora passa pela gravação segura: escreve num
+  temporário, força o disco e só então troca. Antes 22 lugares gravavam sem
+  forçar o disco ou direto por cima, e numa queda de energia o arquivo podia
+  ficar vazio (versões da calibração, pareamentos, intercalibração, minutos e
+  dose do RC102, entre outros). Um teste impede que volte.
+- Versões da calibração, intercalibração, calibração do contador,
+  sincronização, perguntas do RC102 e dose do RC102 estragados não começam
+  mais vazios em silêncio: ficam guardados em .ilegivel, com aviso no log.
+- No Windows, trocar um arquivo que outra parte do app está lendo (baixar o
+  histórico com um gráfico de 1 ano aberto) tenta de novo por até 1 s em vez
+  de falhar com "acesso negado" e deixar um .tmp.
+- Alertas não somem mais: ficam num arquivo próprio (alertas.csv), sem
+  limite. Só os eventos comuns continuam com o limite de 5.000. Na primeira
+  abertura o app separa os alertas que estavam no eventos.csv.
+- Os arquivos do RC102 guardam em .ilegivel as linhas que não dá para ler,
+  em vez de descartá-las ao regravar, e uma linha enorme não esconde mais o
+  resto do mês.
+- Se a pasta de leituras não abrir, a tela Agora mostra um aviso fixo
+  enquanto durar. Se nem a pasta temporária abrir, o app segue com as
+  leituras na memória em vez de quebrar.
+
+**English**
+
+- Every file the app writes now goes through safe saving: it writes a
+  temporary file, flushes it to disk and only then swaps it in. Before, 22
+  places saved without flushing or straight over the old file, and a power
+  cut could leave it empty (calibration versions, pairings, cross-calibration,
+  RC102 minutes and dose, among others). A test keeps it from coming back.
+- Damaged calibration versions, cross-calibration, counter calibration, sync,
+  RC102 questions and RC102 dose no longer start empty silently: they are
+  kept as .ilegivel, with a note in the log.
+- On Windows, replacing a file another part of the app is reading
+  (downloading history with a 1-year chart open) retries for up to 1 s
+  instead of failing with "access denied" and leaving a .tmp behind.
+- Alerts no longer disappear: they live in their own file (alertas.csv),
+  with no limit. Only ordinary events keep the 5,000 limit. On first start
+  the app moves the alerts out of eventos.csv.
+- RC102 files keep unreadable lines in .ilegivel instead of dropping them
+  when rewriting, and a huge line no longer hides the rest of the month.
+- If the readings folder doesn't open, the Now screen shows a fixed notice
+  for as long as it lasts. If not even the temporary folder opens, the app
+  keeps the readings in memory instead of crashing.
+
 ## 2.76.1
 Bloco 1 da auditoria de 13/11: o que fazia perder leitura ou arquivo.
 

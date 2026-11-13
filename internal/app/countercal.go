@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"time"
 
@@ -50,9 +49,7 @@ func (a *App) loadCounterCal() counterCalData {
 	if a.dataDir == "" {
 		return d
 	}
-	if b, err := os.ReadFile(a.counterCalPath()); err == nil {
-		_ = json.Unmarshal(b, &d)
-	}
+	a.readStateJSON(a.counterCalPath(), "calibração do contador", &d)
 	return d
 }
 
@@ -64,11 +61,7 @@ func (a *App) saveCounterCal(d counterCalData) error {
 	if err != nil {
 		return err
 	}
-	tmp := a.counterCalPath() + ".tmp"
-	if err := os.WriteFile(tmp, b, 0o644); err != nil {
-		return err
-	}
-	return os.Rename(tmp, a.counterCalPath())
+	return writeFileAtomic(a.counterCalPath(), b, 0o644)
 }
 
 func isFactoryCal(pts []gmc.CalPoint) bool {

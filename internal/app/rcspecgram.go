@@ -98,10 +98,7 @@ func (a *App) rcSpecAdd(serial string, now time.Time, s radiacode.Spectrum) {
 	l.last = cur
 	os.MkdirAll(a.rcSpecPath(""), 0o755)
 	if b, err := json.Marshal(cur); err == nil {
-		tmp := a.rcSpecPath(rcSpecLast + ".tmp")
-		if os.WriteFile(tmp, b, 0o644) == nil {
-			os.Rename(tmp, a.rcSpecPath(rcSpecLast))
-		}
+		_ = writeFileAtomic(a.rcSpecPath(rcSpecLast), b, 0o644)
 	}
 	if prev == nil || prev.Serial != serial {
 		return // primeira leitura: só serve de referência

@@ -1,7 +1,6 @@
 package app
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"math"
@@ -762,7 +761,7 @@ func (a *App) rcRange(from, to time.Time) []RcPoint {
 		if err != nil {
 			continue
 		}
-		sc := bufio.NewScanner(f)
+		sc := rcScanner(f)
 		for sc.Scan() {
 			p := strings.Split(sc.Text(), ",")
 			if len(p) < 4 {

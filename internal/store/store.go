@@ -357,18 +357,25 @@ func writeFile(path string, pts []Point) error {
 	}
 	if err := w.Flush(); err != nil {
 		f.Close()
+		os.Remove(tmp)
 		return err
 	}
 	// os dados no disco antes do rename: sem isso, numa queda de energia o
 	// rename pode chegar primeiro e o mês ficar vazio (QA, 12/11)
 	if err := f.Sync(); err != nil {
 		f.Close()
+		os.Remove(tmp)
 		return err
 	}
 	if err := f.Close(); err != nil {
+		os.Remove(tmp)
 		return err
 	}
-	return os.Rename(tmp, path)
+	if err := RenameRetry(tmp, path); err != nil {
+		os.Remove(tmp)
+		return err
+	}
+	return nil
 }
 
 func readFile(path string) ([]Point, error) {
@@ -809,4 +816,11 @@ func (s *Store) ReadMonthFile(name string) ([]Point, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	return readFile(filepath.Join(s.dir, "leituras", filepath.Base(name)))
+}
+
+// Unopened é um Store para quando nem a pasta de dados nem a temporária
+// abriram: as consultas voltam vazias e cada minuto fica esperando na
+// memória (ErrNotSaved), em vez de o app quebrar (auditoria 2.76.0, D3).
+func Unopened(dir string) *Store {
+	return &Store{dir: dir, cacheMin: startOfDay(time.Now()).AddDate(0, 0, -keepDays)}
 }

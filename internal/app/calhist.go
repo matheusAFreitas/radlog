@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"math"
-	"os"
 	"path/filepath"
 	"sort"
 	"strings"
@@ -201,19 +200,14 @@ func (a *App) saveCalHistLocked() {
 	if err != nil {
 		return
 	}
-	tmp := a.calHistPath() + ".tmp"
-	if os.WriteFile(tmp, b, 0o644) == nil {
-		_ = os.Rename(tmp, a.calHistPath())
-	}
+	_ = writeFileAtomic(a.calHistPath(), b, 0o644)
 }
 
 // loadCalHist lê as versões; na primeira vez, a calibração atual (a última
 // lida do contador) vale desde o começo — é a que o app já usava.
 func (a *App) loadCalHist() {
 	var h calHistData
-	if b, err := os.ReadFile(a.calHistPath()); err == nil {
-		_ = json.Unmarshal(b, &h)
-	}
+	a.readStateJSON(a.calHistPath(), "versões da calibração", &h)
 	a.mu.Lock()
 	defer a.mu.Unlock()
 	if len(h.Versions) == 0 {

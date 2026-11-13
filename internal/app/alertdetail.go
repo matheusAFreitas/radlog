@@ -331,9 +331,7 @@ func (a *App) writeAlertSeconds(e Event, from, to time.Time) {
 	}
 	_ = os.MkdirAll(a.alertDir(), 0o755)
 	path := filepath.Join(a.alertDir(), alertKey(e))
-	if os.WriteFile(path+".tmp", b, 0o644) == nil {
-		os.Rename(path+".tmp", path)
-	}
+	_ = writeFileAtomic(path, b, 0o644)
 }
 
 // GetAlertDetail monta o gráfico do alerta de id dado.

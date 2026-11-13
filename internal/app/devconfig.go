@@ -32,7 +32,7 @@ func (a *App) saveConfigBackup(cfg []byte, tag string) (string, error) {
 		name += "-" + strings.ReplaceAll(serial, " ", "")
 	}
 	path := filepath.Join(dir, name+".bin")
-	return path, os.WriteFile(path, cfg, 0o644)
+	return path, writeFileAtomic(path, cfg, 0o644)
 }
 
 // exclusive pausa a leitura ao vivo e roda fn com o contador só para si.

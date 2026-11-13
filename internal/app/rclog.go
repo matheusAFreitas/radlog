@@ -192,10 +192,14 @@ func (a *App) rcLogMergeLocked(name string, lines []string) int {
 		it.Src = ""
 		return it.csvLine()
 	}
+	var bad rcBad
 	if b, err := os.ReadFile(dst); err == nil {
-		sc := bufio.NewScanner(bytes.NewReader(b))
+		sc := rcScanner(bytes.NewReader(b))
 		for sc.Scan() {
-			if it, ok := parseRcLogLine(sc.Text()); ok && !have[key(it)] {
+			it, ok := parseRcLogLine(sc.Text())
+			if !ok {
+				bad.add(sc.Text())
+			} else if !have[key(it)] {
 				have[key(it)] = true
 				all = append(all, it)
 			}
@@ -221,9 +225,8 @@ func (a *App) rcLogMergeLocked(name string, lines []string) int {
 		out.WriteString(it.csvLine() + "\n")
 	}
 	os.MkdirAll(a.rcDir(), 0o755)
-	tmp := dst + ".tmp"
-	if os.WriteFile(tmp, out.Bytes(), 0o644) == nil {
-		os.Rename(tmp, dst)
+	if writeFileAtomic(dst, out.Bytes(), 0o644) == nil {
+		bad.save(a, dst)
 	}
 	return added
 }
@@ -335,7 +338,7 @@ func (a *App) rcLogBackfill() {
 		a.logf("RC102: %d registros do log recuperados dos dados brutos", n)
 	}
 	os.MkdirAll(a.rcDir(), 0o755)
-	os.WriteFile(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
+	writeFileAtomic(mark, []byte(time.Now().Format(time.RFC3339)+"\n"), 0o644)
 }
 
 // ---------- leitura ----------
@@ -374,7 +377,7 @@ func (a *App) GetRcLog(fromMs, toMs int64, kinds []string, limit int, beforeMs i
 		if err != nil {
 			continue
 		}
-		sc := bufio.NewScanner(bytes.NewReader(b))
+		sc := rcScanner(bytes.NewReader(b))
 		for sc.Scan() {
 			it, ok := parseRcLogLine(sc.Text())
 			if !ok {
