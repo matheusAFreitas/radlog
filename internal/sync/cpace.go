@@ -1,4 +1,4 @@
-package app
+package sync
 
 import (
 	"crypto/aes"
@@ -78,13 +78,14 @@ func pairGenerator(code string) (*ecdh.PublicKey, error) {
 	return ecdh.X25519().NewPublicKey(elligator2(h[:]))
 }
 
-// cpaceSide é um lado do pareamento: o segredo y e o Y = y·G mandado.
-type cpaceSide struct {
+// CPace é um lado do pareamento: o segredo y e o Y = y·G mandado.
+type CPace struct {
 	priv *ecdh.PrivateKey
 	Y    []byte
 }
 
-func newCPace(code string) (*cpaceSide, error) {
+// NewCPace começa um lado do pareamento com o código de 6 dígitos.
+func NewCPace(code string) (*CPace, error) {
 	g, err := pairGenerator(code)
 	if err != nil {
 		return nil, err
@@ -97,12 +98,12 @@ func newCPace(code string) (*cpaceSide, error) {
 	if err != nil {
 		return nil, err
 	}
-	return &cpaceSide{priv: priv, Y: y}, nil
+	return &CPace{priv: priv, Y: y}, nil
 }
 
-// finish calcula a chave de confirmação a partir do Y do outro lado.
+// Finish calcula a chave de confirmação a partir do Y do outro lado.
 // transcript: tudo o que foi trocado (sid, ids, Ys), nos dois lados igual.
-func (c *cpaceSide) finish(otherY, transcript []byte) ([]byte, error) {
+func (c *CPace) Finish(otherY, transcript []byte) ([]byte, error) {
 	pub, err := ecdh.X25519().NewPublicKey(otherY)
 	if err != nil {
 		return nil, err
@@ -114,14 +115,15 @@ func (c *cpaceSide) finish(otherY, transcript []byte) ([]byte, error) {
 	return hkdf.Key(sha256.New, k, transcript, "radlog-pair-confirm", 32)
 }
 
-func pairMAC(kc []byte, who string) []byte {
+// PairMAC confirma que o outro lado chegou à mesma chave (who: "client"/"server").
+func PairMAC(kc []byte, who string) []byte {
 	m := hmac.New(sha256.New, kc)
 	m.Write([]byte("radlog-pair-mac|" + who))
 	return m.Sum(nil)
 }
 
-// pairKey é a chave que fica guardada depois do pareamento.
-func pairKey(kc []byte) ([]byte, error) {
+// PairKey é a chave que fica guardada depois do pareamento.
+func PairKey(kc []byte) ([]byte, error) {
 	return hkdf.Key(sha256.New, kc, nil, "radlog-sync-key-v1", 32)
 }
 
@@ -132,7 +134,8 @@ func pairKey(kc []byte) ([]byte, error) {
 // caminho, a quem mandou e à hora, então não dá para reaproveitar uma resposta
 // em outro pedido.
 
-func seal(key, plain, aad []byte) ([]byte, error) {
+// Seal cifra e autentica plain com AES-256-GCM; aad amarra a mensagem.
+func Seal(key, plain, aad []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err
@@ -148,7 +151,8 @@ func seal(key, plain, aad []byte) ([]byte, error) {
 	return g.Seal(nonce, nonce, plain, aad), nil
 }
 
-func unseal(key, box, aad []byte) ([]byte, error) {
+// Unseal abre o que Seal fechou com a mesma chave e o mesmo aad.
+func Unseal(key, box, aad []byte) ([]byte, error) {
 	block, err := aes.NewCipher(key)
 	if err != nil {
 		return nil, err

@@ -1,4 +1,4 @@
-package app
+package sync
 
 import (
 	"bytes"
@@ -28,26 +28,26 @@ func TestElligatorOnCurve(t *testing.T) {
 
 func TestCPace(t *testing.T) {
 	tr := []byte("sid|a|b")
-	a, _ := newCPace("123456")
-	b, _ := newCPace("123456")
-	ka, err1 := a.finish(b.Y, tr)
-	kb, err2 := b.finish(a.Y, tr)
+	a, _ := NewCPace("123456")
+	b, _ := NewCPace("123456")
+	ka, err1 := a.Finish(b.Y, tr)
+	kb, err2 := b.Finish(a.Y, tr)
 	if err1 != nil || err2 != nil || !bytes.Equal(ka, kb) {
 		t.Fatal("mesmo código deveria dar a mesma chave")
 	}
-	c, _ := newCPace("654321")
-	kc, _ := c.finish(a.Y, tr)
-	ka2, _ := a.finish(c.Y, tr)
+	c, _ := NewCPace("654321")
+	kc, _ := c.Finish(a.Y, tr)
+	ka2, _ := a.Finish(c.Y, tr)
 	if bytes.Equal(kc, ka2) {
 		t.Fatal("código errado deu a mesma chave")
 	}
 	// envelope
-	key, _ := pairKey(ka)
-	box, _ := seal(key, []byte("oi"), []byte("aad"))
-	if p, err := unseal(key, box, []byte("aad")); err != nil || string(p) != "oi" {
+	key, _ := PairKey(ka)
+	box, _ := Seal(key, []byte("oi"), []byte("aad"))
+	if p, err := Unseal(key, box, []byte("aad")); err != nil || string(p) != "oi" {
 		t.Fatal("abrir")
 	}
-	if _, err := unseal(key, box, []byte("outro")); err == nil {
+	if _, err := Unseal(key, box, []byte("outro")); err == nil {
 		t.Fatal("AAD diferente deveria falhar")
 	}
 }
