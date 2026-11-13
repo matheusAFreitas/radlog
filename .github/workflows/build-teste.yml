@@ -1,0 +1,56 @@
+name: build-teste
+
+# Versão de teste (S5, CSP): gera o .exe e o AppImage desta branch e publica
+# como pré-release "teste-csp". O atualizador do app ignora pré-releases e
+# usa só /releases/latest, então ninguém recebe isto sozinho. Este arquivo
+# só existe nesta branch e não vai para o main.
+on:
+  push:
+    branches: [chore/csp-teste]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.27"
+      - name: Dependências do Linux (GTK/WebKit)
+        timeout-minutes: 25
+        uses: ./.github/actions/linux-deps
+      - name: Windows (.exe)
+        run: |
+          go install github.com/tc-hib/go-winres@v0.3.3
+          go-winres make --in build/windows/winres.json
+          CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -trimpath -tags desktop,production \
+            -ldflags "-w -s -H windowsgui" -o out/RadLog-teste-csp.exe .
+      - name: Linux (AppImage)
+        run: |
+          V=$(sed -n 's/^const AppVersion = "\(.*\)"/\1/p' internal/app/version.go)
+          P="out/radlog-teste"
+          mkdir -p "$P"
+          CGO_ENABLED=1 go build -trimpath -tags desktop,production,webkit2_41 -ldflags "-w -s" -o "$P/radlog" .
+          cp build/linux/* "$P/"
+          echo "$V" > "$P/VERSION"
+          (cd "$P" && sh build-appimage.sh)
+          mv "$P/RadLog-v$V-x86_64.AppImage" out/RadLog-teste-csp-x86_64.AppImage
+          rm -rf "$P"
+          (cd out && sha256sum * > SHA256SUMS-teste.txt && cat SHA256SUMS-teste.txt)
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        with:
+          name: Teste da CSP (não é uma versão)
+          tag_name: teste-csp
+          target_commitish: ${{ github.sha }}
+          prerelease: true
+          make_latest: false
+          body: |
+            Versão de teste da proteção de conteúdo da tela (S5 da auditoria). Não é uma release: o app não oferece isto como atualização.
+            Feche o RadLog normal antes de abrir esta. Se alguma coisa for bloqueada, aparece um aviso vermelho "CSP bloqueou: …" no canto da tela.
+          files: |
+            out/RadLog-teste-csp.exe
+            out/RadLog-teste-csp-x86_64.AppImage
+            out/SHA256SUMS-teste.txt
