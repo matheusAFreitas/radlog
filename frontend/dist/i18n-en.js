@@ -3726,7 +3726,9 @@ const I18N_EN = {
 "O app só enxerga a pasta que ele mesmo criou, não o resto do Drive.": "The app only sees the folder it created, not the rest of your Drive.",
 "Lugar, coordenadas e metadados de foto nunca sobem.": "Location, coordinates and photo metadata are never uploaded.",
 "Sem internet, nada muda: o app grava aqui e sobe depois.": "Without internet nothing changes: the app records here and uploads later.",
-"Entrar com Google": "Sign in with Google"
+"Entrar com Google": "Sign in with Google",
+"ainda há minutos esperando": "there are still minutes waiting",
+"leitura não gravada no disco": "reading not saved to disk"
 },
 "patterns": [
 [
@@ -3904,6 +3906,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Não estou conseguindo gravar em ",
+"^Não estou conseguindo gravar em ((?:(?! · ).)+?): se ele estiver aberto no Excel ou em outro programa, feche\\. ((?:(?! · ).)+?) minuto\\(s\\) esperando na memória; nada se perde com o app aberto\\.$",
+"Can't save to ${1}: if it's open in Excel or another program, close it. ${2} minute(s) waiting in memory; nothing is lost while the app is open.",
+[
+"Não estou conseguindo gravar em ",
+": se ele estiver aberto no Excel ou em outro programa, feche. ",
+" minuto(s) esperando na memória; nada se perde com o app aberto."
+]
+],
+[
 "Subiu de uma vez (",
 "^Subiu de uma vez \\(((?:(?! · ).)+?)\\) e ficou\\. O RadiaCode em casa não mudou, então foi algo perto do GMC\\-800\\. Mudou o aparelho de lugar ou chegou algo novo perto dele\\?$",
 "It rose at once (${1}) and stayed. The RC102 at home did not change, so it was something near the GMC-800. Did you move the device or put something new near it?",
@@ -4052,6 +4064,18 @@ const I18N_EN = {
 ]
 ],
 [
+"Histórico do contador: ",
+"^Histórico do contador: ((?:(?! · ).)+?) registro\\(s\\) com hora impossível ficaram de fora \\(((?:(?! · ).)+?) no futuro, ((?:(?! · ).)+?) antes de ((?:(?! · ).)+?)\\)\\. Confira o relógio do GMC\\-800\\.$",
+"Counter history: ${1} record(s) with an impossible time were left out (${2} in the future, ${3} before ${4}). Check the GMC-800 clock.",
+[
+"Histórico do contador: ",
+" registro(s) com hora impossível ficaram de fora (",
+" no futuro, ",
+" antes de ",
+"). Confira o relógio do GMC-800."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): o objeto deu abaixo do fundo, então o fundo provavelmente mudou \\(outro lugar, chuva\\)\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): the object came out below background, so the background probably changed (another spot, rain).",
@@ -4107,6 +4131,15 @@ const I18N_EN = {
 [
 "A partir de ",
 " CPM toca o alarme de perigo do app (vermelho), com prioridade sobre o seu. Ajuste em Avisos → Alarme de perigo."
+]
+],
+[
+"Não deu para gravar em ",
+"^Não deu para gravar em ((?:(?! · ).)+?) \\(aberto em outro programa\\?\\)\\. As leituras ficam na memória e são gravadas quando o arquivo liberar\\.$",
+"Couldn't save to ${1} (open in another program?). Readings stay in memory and are saved when the file is free.",
+[
+"Não deu para gravar em ",
+" (aberto em outro programa?). As leituras ficam na memória e são gravadas quando o arquivo liberar."
 ]
 ],
 [
@@ -5494,6 +5527,15 @@ const I18N_EN = {
 [
 "Nos dias com saída de casa a dose ficou ",
 "% acima dos dias só em casa."
+]
+],
+[
+"Arquivo liberado: ",
+"^Arquivo liberado: ((?:(?! · ).)+?) minuto\\(s\\) que estavam esperando foram gravados\\.$",
+"File free again: ${1} minute(s) that were waiting were saved.",
+[
+"Arquivo liberado: ",
+" minuto(s) que estavam esperando foram gravados."
 ]
 ],
 [
@@ -7221,6 +7263,16 @@ const I18N_EN = {
 ]
 ],
 [
+"leitura impossível descartada às ",
+"^leitura impossível descartada às ((?:(?! · ).)+?): cpm=((?:(?! · ).)+?) bruto=((?:(?! · ).)+?)$",
+"impossible reading dropped at ${1}: cpm=${2} raw=${3}",
+[
+"leitura impossível descartada às ",
+": cpm=",
+" bruto="
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -7732,6 +7784,15 @@ const I18N_EN = {
 [
 "Marca o ",
 " como fora do cálculo neste trecho"
+]
+],
+[
+"fechando com ",
+"^fechando com ((?:(?! · ).)+?) minuto\\(s\\) sem gravar em ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"closing with ${1} minute(s) not saved to ${2}: ${3}",
+[
+"fechando com ",
+" minuto(s) sem gravar em "
 ]
 ],
 [
@@ -15155,6 +15216,14 @@ const I18N_EN = {
 "opened ${1} times",
 [
 " aberturas"
+]
+],
+[
+"gravação: ",
+"^gravação: ((?:(?! · ).)+?)$",
+"saving: ${1}",
+[
+"gravação: "
 ]
 ],
 [

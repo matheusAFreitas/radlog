@@ -560,6 +560,11 @@ func (a *App) rcRecords(recs []radiacode.Record) {
 	for _, r := range recs {
 		switch v := r.(type) {
 		case radiacode.RealTime:
+			// valor impossível (NaN, infinito, negativo) não entra: quebrava o
+			// envio do estado para a tela e as médias (B4)
+			if !store.SaneUSvh(v.DoseRate) || !store.SaneUSvh(v.CPS) {
+				continue
+			}
 			// a hora do registro vem do relógio do aparelho; para gravar, usa a do PC
 			now := time.Now()
 			a.rc.mu.Lock()
@@ -770,6 +775,9 @@ func (a *App) rcRange(from, to time.Time) []RcPoint {
 			cps, _ := strconv.ParseFloat(p[1], 64)
 			usv, _ := strconv.ParseFloat(p[2], 64)
 			n, _ := strconv.Atoi(p[3])
+			if !store.SaneUSvh(cps) || !store.SaneUSvh(usv) {
+				continue
+			}
 			out = append(out, RcPoint{T: t.Local(), CPS: cps, USvh: usv, N: n})
 		}
 		f.Close()

@@ -154,8 +154,30 @@ func (a *App) measurementAttachments(id int64) []MeasureAttachment {
 	return nil
 }
 
+// cleanAttachments tira da lista os anexos com nome que sairia da pasta
+// (ex.: "../../config.json" vindo de um backup de outra pessoa, S1).
+func cleanAttachments(list []MeasureAttachment) []MeasureAttachment {
+	out := list[:0:0]
+	for _, at := range list {
+		if at.File != "" && safeFileName(at.File) == at.File {
+			out = append(out, at)
+		}
+	}
+	return out
+}
+
+// attachOpenExt são os tipos que "Abrir" entrega ao programa do sistema;
+// o resto (um .exe vindo de backup, por exemplo) só abre a pasta.
+var attachOpenExt = map[string]bool{
+	".jpg": true, ".jpeg": true, ".png": true, ".gif": true, ".webp": true, ".heic": true, ".bmp": true,
+	".pdf": true, ".txt": true, ".csv": true, ".md": true,
+}
+
 // attachPath acha o arquivo do anexo (só os que estão na lista da medição).
 func (a *App) attachPath(id int64, file string) (string, MeasureAttachment, error) {
+	if file == "" || safeFileName(file) != file {
+		return "", MeasureAttachment{}, errors.New("anexo não encontrado")
+	}
 	for _, at := range a.measurementAttachments(id) {
 		if at.File == file {
 			return filepath.Join(a.attachDir(id), at.File), at, nil
@@ -211,6 +233,9 @@ func (a *App) OpenMeasurementAttachment(id int64, file string) error {
 	p, _, err := a.attachPath(id, file)
 	if err != nil {
 		return err
+	}
+	if !attachOpenExt[strings.ToLower(filepath.Ext(p))] {
+		return openFolder(filepath.Dir(p))
 	}
 	return openFolder(p)
 }

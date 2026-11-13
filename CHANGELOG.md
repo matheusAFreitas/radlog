@@ -1,5 +1,45 @@
 # Versões
 
+## 2.76.1
+Bloco 1 da auditoria de 13/11: o que fazia perder leitura ou arquivo.
+
+- Histórico do GMC-800 com o relógio adiantado não trava mais a gravação ao
+  vivo. Antes, os minutos que caíam no futuro faziam o app descartar cada
+  minuto novo, sem aviso, até a hora real passar deles. Agora o que vem do
+  histórico com hora no futuro ou antes de 2020 fica de fora, com um aviso em
+  Eventos para conferir o relógio.
+- Com o arquivo do mês aberto no Excel (ou em outro programa que trava o
+  arquivo), os minutos não se perdem mais: ficam na memória e nos gráficos e
+  são gravados assim que o arquivo liberar. A tela Agora mostra um aviso
+  enquanto isso.
+- Leituras impossíveis (NaN, infinito, negativas) são recusadas na leitura
+  dos arquivos e na entrada ao vivo do RC102. Antes uma delas parava a tela.
+- Um backup de outra pessoa não consegue mais apontar anexos para fora da
+  pasta do app: nomes assim são descartados ao importar e ao abrir o app.
+  "Abrir" um anexo entrega ao sistema só foto, PDF e texto; o resto abre a
+  pasta.
+- Mais seis tarefas internas ganharam a proteção contra erro interno, e um
+  teste impede que entre outra sem ela.
+
+**English**
+
+- GMC-800 history with the clock running ahead no longer stops live
+  recording. Before, minutes that landed in the future made the app drop
+  every new minute, silently, until real time caught up. Now history with a
+  time in the future or before 2020 is left out, with a note in Events to
+  check the clock.
+- With the month's file open in Excel (or another program that locks it),
+  minutes are no longer lost: they stay in memory and on the charts and are
+  saved as soon as the file is free. The Now screen shows a notice meanwhile.
+- Impossible readings (NaN, infinity, negative) are rejected when reading
+  files and in the RC102 live input. Before, one of them froze the screen.
+- Someone else's backup can no longer point attachments outside the app
+  folder: such names are dropped on import and when the app opens. "Open" on
+  an attachment hands only photos, PDF and text to the system; anything else
+  opens the folder.
+- Six more internal tasks got the crash protection, and a test keeps new ones
+  from coming in without it.
+
 ## 2.76.0
 - Configurações › Dados e backup ganhou o cartão "Nuvem (Google Drive)",
   acima da Sincronização. Por enquanto é só a tela, marcada como WIP e

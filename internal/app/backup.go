@@ -368,6 +368,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 				}
 				changed := false
 				for _, m := range list {
+					m.Attachments = cleanAttachments(m.Attachments)
 					if i, ok := have[m.Time/1000]; ok {
 						// a mesma medição: junta os anexos que faltam
 						local := &a.measurements[i]

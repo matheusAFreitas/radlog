@@ -532,6 +532,13 @@ function renderStatus() {
     $("iCal").textContent = "—";
   }
   $("progress").hidden = !s.downloading;
+  // B2: o arquivo do mês preso por outro programa (Excel): os minutos
+  // esperam na memória
+  const sw = $("saveWarn");
+  if (sw) {
+    sw.hidden = !s.savePending;
+    if (s.savePending) sw.textContent = `Não estou conseguindo gravar em ${s.saveFile}: se ele estiver aberto no Excel ou em outro programa, feche. ${s.savePending} minuto(s) esperando na memória; nada se perde com o app aberto.`;
+  }
   $("dataDir").textContent = s.dataDir || "—";
   $("connMsg").textContent = s.state === "erro" ? s.message : s.state === "conectado" ? "conectado em " + d.port : "";
   $("btnConnect").textContent = connected ? "Desconectar" : "Conectar";

@@ -78,7 +78,14 @@ type Store struct {
 	// cache ordenado por tempo com os dias recentes
 	cache    []Point
 	cacheMin time.Time
+	// minutos ao vivo que não gravaram (arquivo do mês aberto no Excel, por
+	// exemplo): ficam no cache e são gravados no próximo Add ou no Flush (B2)
+	pending []Point
 }
+
+// ErrNotSaved diz que o minuto não foi para o disco agora: ficou na memória
+// e o app tenta de novo no minuto seguinte.
+var ErrNotSaved = errors.New("leitura não gravada no disco")
 
 const keepDays = 8
 
@@ -111,20 +118,93 @@ func (s *Store) monthFile(t time.Time) string {
 
 const header = "data_hora,cpm,origem,cpm_bruto,cpm_corrigido,tau_us,tm,obs"
 
-// Add grava a leitura de um minuto feita ao vivo.
+// Add grava a leitura de um minuto feita ao vivo. Se o arquivo não deixar
+// gravar, o minuto fica na memória (e nos gráficos) e o erro é ErrNotSaved;
+// o próximo Add tenta gravar os que ficaram, na ordem.
 func (s *Store) Add(p Point) error {
 	p.T = p.T.Truncate(time.Minute)
 	s.mu.Lock()
 	defer s.mu.Unlock()
-	if n := len(s.cache); n > 0 && !s.cache[n-1].T.Before(p.T) {
-		return nil // já existe esse minuto (ou o relógio voltou)
+	// já gravado: compara com o último minuto ao vivo, não com o histórico do
+	// contador (um relógio adiantado deixava minutos no futuro e a gravação
+	// ao vivo descartava tudo até a hora passar deles, B1)
+	if last, ok := s.lastLiveLocked(); ok && !last.Before(p.T) {
+		return nil
 	}
-	if err := s.appendLine(p); err != nil {
-		return err
+	i := sort.Search(len(s.cache), func(i int) bool { return !s.cache[i].T.Before(p.T) })
+	if i < len(s.cache) && s.cache[i].T.Equal(p.T) {
+		return nil // o histórico já trouxe esse minuto
 	}
-	s.cache = append(s.cache, p)
+	var err error
+	if s.flushLocked() == nil {
+		err = s.appendLine(p)
+	} else {
+		err = errors.New("ainda há minutos esperando")
+	}
+	if err != nil {
+		s.pending = append(s.pending, p)
+		err = fmt.Errorf("%w: %v", ErrNotSaved, err)
+	}
+	s.cache = append(s.cache, Point{})
+	copy(s.cache[i+1:], s.cache[i:])
+	s.cache[i] = p
 	s.trim()
+	return err
+}
+
+// withPending põe no cache relido do disco os minutos que ainda não gravaram.
+func withPending(cache, pending []Point) []Point {
+	for _, p := range pending {
+		i := sort.Search(len(cache), func(i int) bool { return !cache[i].T.Before(p.T) })
+		if i < len(cache) && cache[i].T.Equal(p.T) {
+			continue
+		}
+		cache = append(cache, Point{})
+		copy(cache[i+1:], cache[i:])
+		cache[i] = p
+	}
+	return cache
+}
+
+// lastLiveLocked é a hora do último minuto ao vivo no cache.
+func (s *Store) lastLiveLocked() (time.Time, bool) {
+	for i := len(s.cache) - 1; i >= 0; i-- {
+		if s.cache[i].Src == SrcLive {
+			return s.cache[i].T, true
+		}
+	}
+	return time.Time{}, false
+}
+
+// flushLocked grava os minutos que ficaram esperando, na ordem; para no
+// primeiro que falhar.
+func (s *Store) flushLocked() error {
+	for len(s.pending) > 0 {
+		if err := s.appendLine(s.pending[0]); err != nil {
+			return err
+		}
+		s.pending = s.pending[1:]
+	}
+	s.pending = nil
 	return nil
+}
+
+// Flush tenta gravar os minutos que ficaram esperando (ao fechar o app).
+func (s *Store) Flush() error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	return s.flushLocked()
+}
+
+// Pending diz quantos minutos estão na memória esperando para gravar e o
+// arquivo do primeiro.
+func (s *Store) Pending() (int, string) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if len(s.pending) == 0 {
+		return 0, ""
+	}
+	return len(s.pending), filepath.Base(s.monthFile(s.pending[0].T))
 }
 
 func (s *Store) appendLine(p Point) error {
@@ -194,6 +274,7 @@ func (s *Store) Import(pts []Point) (int, error) {
 
 // ImportNew é o Import que devolve os pontos que entraram de fato.
 func (s *Store) ImportNew(pts []Point) ([]Point, error) {
+	pts, _, _ = SaneTimes(pts, time.Now())
 	if len(pts) == 0 {
 		return nil, nil
 	}
@@ -243,7 +324,7 @@ func (s *Store) ImportNew(pts []Point) ([]Point, error) {
 	if err != nil {
 		return added, err
 	}
-	s.cache = pts2
+	s.cache = withPending(pts2, s.pending)
 	return added, nil
 }
 
@@ -420,8 +501,8 @@ func parseLine(line string) (p Point, ok, skip bool) {
 	}
 	t, ok1 := parseTime(rec[0])
 	v, err2 := strconv.ParseFloat(rec[1], 64)
-	if !ok1 || err2 != nil {
-		return p, false, false
+	if !ok1 || err2 != nil || !SaneCPM(v) {
+		return p, false, false // NaN, infinito ou negativo vai para o .ilegivel
 	}
 	src := SrcLive
 	if n > 2 {
@@ -431,7 +512,7 @@ func parseLine(line string) (p Point, ok, skip bool) {
 	if n >= 7 && rec[3] != "" {
 		raw, e1 := strconv.ParseFloat(rec[3], 64)
 		corr, e2 := strconv.ParseFloat(rec[4], 64)
-		if e1 == nil && e2 == nil {
+		if e1 == nil && e2 == nil && SaneCPM(raw) && SaneCPM(corr) {
 			p.Has, p.Raw, p.Corr = true, raw, corr
 			p.DTOn = rec[6] == "ligado"
 			if rec[5] != "" {

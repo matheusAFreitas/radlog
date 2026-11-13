@@ -4841,3 +4841,12 @@ O app só enxerga a pasta que ele mesmo criou, não o resto do Drive.	The app on
 Lugar, coordenadas e metadados de foto nunca sobem.	Location, coordinates and photo metadata are never uploaded.
 Sem internet, nada muda: o app grava aqui e sobe depois.	Without internet nothing changes: the app records here and uploads later.
 Entrar com Google	Sign in with Google
+Não estou conseguindo gravar em {0}: se ele estiver aberto no Excel ou em outro programa, feche. {1} minuto(s) esperando na memória; nada se perde com o app aberto.	Can't save to {0}: if it's open in Excel or another program, close it. {1} minute(s) waiting in memory; nothing is lost while the app is open.
+Não deu para gravar em {0} (aberto em outro programa?). As leituras ficam na memória e são gravadas quando o arquivo liberar.	Couldn't save to {0} (open in another program?). Readings stay in memory and are saved when the file is free.
+Arquivo liberado: {0} minuto(s) que estavam esperando foram gravados.	File free again: {0} minute(s) that were waiting were saved.
+Histórico do contador: {0} registro(s) com hora impossível ficaram de fora ({1} no futuro, {2} antes de {3}). Confira o relógio do GMC-800.	Counter history: {0} record(s) with an impossible time were left out ({1} in the future, {2} before {3}). Check the GMC-800 clock.
+ainda há minutos esperando	there are still minutes waiting
+fechando com {0} minuto(s) sem gravar em {1}: {2}	closing with {0} minute(s) not saved to {1}: {2}
+gravação: {0}	saving: {0}
+leitura impossível descartada às {0}: cpm={1} bruto={2}	impossible reading dropped at {0}: cpm={1} raw={2}
+leitura não gravada no disco	reading not saved to disk
