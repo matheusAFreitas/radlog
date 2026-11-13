@@ -230,8 +230,10 @@ func TestCloudResetAndCancel(t *testing.T) {
 	if _, err := c.CloudLogin(); err != nil {
 		t.Fatal(err)
 	}
-	go func() { time.Sleep(50 * time.Millisecond); c.CloudCancel() }()
+	canceled := make(chan struct{})
+	go func() { time.Sleep(50 * time.Millisecond); c.CloudCancel(); close(canceled) }()
 	d, err := c.CloudLoginWait()
+	<-canceled // o CloudCancel termina antes do teste trocar as variáveis de volta
 	if err != nil || d.Info.State != "off" {
 		t.Fatalf("cancelar: %+v %v", d, err)
 	}
