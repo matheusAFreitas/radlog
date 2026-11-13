@@ -103,7 +103,7 @@ function renderPlanned() {
     if (p.saiu) link("Não estou saindo", () => call(api.NotLeaving, p.id).then(refreshPlanned));
     link("editar", () => openPlanForm(p));
     link("cancelar", async () => {
-      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${p.nome}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", danger: true }))) return;
+      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${asIs(p.nome)}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", danger: true }))) return;
       try { await api.DeletePlannedTrip(p.id); } catch (e) { toast(errMsg(e), true); }
       refreshPlanned();
     });
@@ -215,7 +215,7 @@ function planForm(p) {
     try {
       const r = await api.SavePlannedTrip({ id: p.id || 0, nome: name.value, de: at, gmc: goes.gmc, rc: goes.rc });
       plEditing = null;
-      toast(`Saída programada: ${r.nome}, ${plDate(r.de)} por volta de ${hhmm(r.de)}`);
+      toast(`Saída programada: ${asIs(r.nome)}, ${plDate(r.de)} por volta de ${hhmm(r.de)}`);
       refreshPlanned();
     } catch (e) { err.textContent = errMsg(e); err.hidden = false; }
   });
@@ -252,7 +252,7 @@ function plDoneText(box, d) {
   if (d.ans === "programada" && p && p.id) {
     const c = document.createElement("span");
     c.className = "chip off"; c.textContent = "saída marcada";
-    t.append(c, ` ${p.name} · ${plDate(p.from)} · ${hhmm(p.from)}–${hhmm(p.to)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")}`);
+    t.append(c, ` ${asIs(p.name)} · ${plDate(p.from)} · ${hhmm(p.from)}–${hhmm(p.to)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")}`);
     box.appendChild(t);
     if (typeof openTrip === "function" && isTripP(p)) {
       const v = document.createElement("button");
@@ -271,7 +271,7 @@ function renderPlannedAsk(box, q, list) {
   head.className = "rca-head";
   head.innerHTML = q.missed ? '<span class="dot pl-miss" aria-hidden="true"></span>' : '<span class="dot rc" aria-hidden="true"></span>';
   const h = document.createElement("h2");
-  h.textContent = q.missed ? `A saída programada de ${plDate(q.planAt)} não aconteceu?` : `Você saiu mesmo? ${q.name}, ${plDate(q.planAt)}`;
+  h.textContent = q.missed ? `A saída programada de ${plDate(q.planAt)} não aconteceu?` : `Você saiu mesmo? ${asIs(q.name)}, ${plDate(q.planAt)}`;
   const tag = document.createElement("span");
   tag.className = "chip off"; tag.textContent = "a responder";
   head.append(h, tag);

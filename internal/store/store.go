@@ -305,7 +305,11 @@ func readFileBad(path string) ([]Point, []string, error) {
 		return nil, nil, err
 	}
 	defer f.Close()
-	pts, bad := parseCSV(f)
+	hint := 0
+	if st, err := f.Stat(); err == nil {
+		hint = int(st.Size() / 60) // ~60 bytes por linha
+	}
+	pts, bad := parseCSVHint(f, hint)
 	return pts, bad, nil
 }
 
@@ -327,7 +331,11 @@ const maxLine = 64 << 10
 // queda de energia): o resto do mês sumia da tela e, na importação seguinte,
 // o arquivo era regravado sem ele. Agora cada linha é lida sozinha e uma
 // linha ruim só perde a si mesma.
-func parseCSV(rd io.Reader) (out []Point, bad []string) {
+func parseCSV(rd io.Reader) (out []Point, bad []string) { return parseCSVHint(rd, 0) }
+
+// parseCSVHint é o parseCSV com uma estimativa de quantas linhas vêm.
+func parseCSVHint(rd io.Reader, hint int) (out []Point, bad []string) {
+	out = make([]Point, 0, hint)
 	br := bufio.NewReaderSize(rd, 64<<10)
 	for {
 		line, err := readLine(br)
@@ -345,15 +353,25 @@ func parseCSV(rd io.Reader) (out []Point, bad []string) {
 }
 
 // readLine lê uma linha de qualquer tamanho, guardando no máximo maxLine.
+// O caso comum (linha que cabe no buffer) sai com uma alocação só.
 func readLine(br *bufio.Reader) (string, error) {
+	b, err := br.ReadSlice('\n')
+	if err != bufio.ErrBufferFull {
+		return strings.TrimRight(string(b), "\r\n"), err
+	}
 	var sb strings.Builder
+	sb.Write(b)
 	for {
-		chunk, more, err := br.ReadLine()
+		b, err = br.ReadSlice('\n')
 		if sb.Len() < maxLine {
-			sb.Write(chunk)
+			sb.Write(b)
 		}
-		if err != nil || !more {
-			return sb.String(), err
+		if err != bufio.ErrBufferFull {
+			line := sb.String()
+			if len(line) > maxLine {
+				line = line[:maxLine]
+			}
+			return strings.TrimRight(line, "\r\n"), err
 		}
 	}
 }
@@ -373,36 +391,131 @@ func splitLine(line string) ([]string, bool) {
 
 // parseLine lê uma linha. skip = cabeçalho (não é ponto nem linha ruim).
 func parseLine(line string) (p Point, ok, skip bool) {
-	rec, good := splitLine(line)
-	if !good || len(rec) < 2 {
+	var rec [8]string
+	n := 0
+	if strings.Contains(line, `"`) {
+		r, good := splitLine(line)
+		if !good {
+			return p, false, false
+		}
+		n = copy(rec[:], r)
+	} else {
+		// sem aspas: separa à mão, sem alocar (é o caminho de quase todas)
+		rest := line
+		for n < len(rec) {
+			f, tail, more := strings.Cut(rest, ",")
+			rec[n] = f
+			n++
+			if !more {
+				break
+			}
+			rest = tail
+		}
+	}
+	if n < 2 {
 		return p, false, false
 	}
 	if strings.HasPrefix(rec[0], "data") {
 		return p, false, true
 	}
-	t, err1 := time.Parse(time.RFC3339, rec[0])
+	t, ok1 := parseTime(rec[0])
 	v, err2 := strconv.ParseFloat(rec[1], 64)
-	if err1 != nil || err2 != nil {
+	if !ok1 || err2 != nil {
 		return p, false, false
 	}
 	src := SrcLive
-	if len(rec) > 2 {
-		src = rec[2]
+	if n > 2 {
+		src = intern(rec[2])
 	}
-	p = Point{T: t.Local(), CPM: v, Src: src}
-	if len(rec) >= 7 && rec[3] != "" {
+	p = Point{T: t, CPM: v, Src: src}
+	if n >= 7 && rec[3] != "" {
 		raw, e1 := strconv.ParseFloat(rec[3], 64)
 		corr, e2 := strconv.ParseFloat(rec[4], 64)
 		if e1 == nil && e2 == nil {
 			p.Has, p.Raw, p.Corr = true, raw, corr
 			p.DTOn = rec[6] == "ligado"
-			p.TauUs, _ = strconv.ParseFloat(rec[5], 64)
-			if len(rec) > 7 {
-				p.Obs = rec[7]
+			if rec[5] != "" {
+				p.TauUs, _ = strconv.ParseFloat(rec[5], 64)
+			}
+			if n > 7 {
+				p.Obs = intern(rec[7])
 			}
 		}
 	}
 	return p, true, false
+}
+
+// intern devolve uma cópia compartilhada das origens e marcas mais comuns,
+// para cada ponto não segurar a linha inteira na memória.
+func intern(s string) string {
+	switch s {
+	case "":
+		return ""
+	case SrcLive:
+		return SrcLive
+	}
+	internMu.Lock()
+	defer internMu.Unlock()
+	if v, ok := internMap[s]; ok {
+		return v
+	}
+	v := strings.Clone(s)
+	if len(internMap) < 256 {
+		internMap[v] = v
+	}
+	return v
+}
+
+var (
+	internMu  sync.Mutex
+	internMap = map[string]string{}
+)
+
+// parseTime lê o horário das linhas (RFC 3339, com ou sem fuso) já no fuso
+// do PC. O formato que o app grava é lido à mão, bem mais rápido que o
+// time.Parse; qualquer outro passa por ele.
+func parseTime(v string) (time.Time, bool) {
+	if len(v) == 25 || (len(v) == 20 && v[19] == 'Z') {
+		num := func(i, n int) (int, bool) {
+			x := 0
+			for _, c := range []byte(v[i : i+n]) {
+				if c < '0' || c > '9' {
+					return 0, false
+				}
+				x = x*10 + int(c-'0')
+			}
+			return x, true
+		}
+		y, a := num(0, 4)
+		mo, b := num(5, 2)
+		d, c := num(8, 2)
+		h, e := num(11, 2)
+		mi, f := num(14, 2)
+		se, g := num(17, 2)
+		if a && b && c && e && f && g && v[4] == '-' && v[7] == '-' && v[10] == 'T' && v[13] == ':' && v[16] == ':' &&
+			mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && h < 24 && mi < 60 && se < 60 {
+			off := 0
+			if len(v) == 25 {
+				oh, ok1 := num(20, 2)
+				om, ok2 := num(23, 2)
+				if !ok1 || !ok2 || v[22] != ':' || (v[19] != '+' && v[19] != '-') {
+					goto slow
+				}
+				off = (oh*60 + om) * 60
+				if v[19] == '-' {
+					off = -off
+				}
+			}
+			t := time.Date(y, time.Month(mo), d, h, mi, se, 0, time.UTC).Add(-time.Duration(off) * time.Second)
+			return t.Local(), true
+		}
+	}
+slow:
+	t, err := time.Parse(time.RFC3339, v)
+	if err != nil {
+		return time.Time{}, false
+	}
+	return t.Local(), true
 }
 
 // keepBad guarda as linhas ilegíveis de um mês em <mês>.csv.ilegivel antes
@@ -429,21 +542,39 @@ func keepBad(path string, bad []string) error {
 
 // load lê dos arquivos os pontos em [from, to).
 func (s *Store) load(from, to time.Time) ([]Point, error) {
-	var out []Point
+	var months [][]Point
+	total := 0
 	m := time.Date(from.Year(), from.Month(), 1, 0, 0, 0, 0, from.Location())
 	for !m.After(to) {
 		pts, err := readFile(s.monthFile(m))
 		if err != nil {
 			return nil, err
 		}
-		for _, p := range pts {
-			if !p.T.Before(from) && p.T.Before(to) {
-				out = append(out, p)
+		// só o pedaço do mês dentro de [from, to), sem copiar
+		if sortedPts(pts) {
+			i := sort.Search(len(pts), func(k int) bool { return !pts[k].T.Before(from) })
+			j := sort.Search(len(pts), func(k int) bool { return !pts[k].T.Before(to) })
+			pts = pts[i:j]
+		} else {
+			keep := pts[:0]
+			for _, p := range pts {
+				if !p.T.Before(from) && p.T.Before(to) {
+					keep = append(keep, p)
+				}
 			}
+			pts = keep
 		}
+		months = append(months, pts)
+		total += len(pts)
 		m = m.AddDate(0, 1, 0)
 	}
-	sort.Slice(out, func(i, j int) bool { return out[i].T.Before(out[j].T) })
+	out := make([]Point, 0, total)
+	for _, pts := range months {
+		out = append(out, pts...)
+	}
+	if !sortedPts(out) {
+		sort.SliceStable(out, func(i, j int) bool { return out[i].T.Before(out[j].T) })
+	}
 	// remove minutos repetidos (fica o primeiro)
 	dedup := out[:0]
 	for i, p := range out {
@@ -455,16 +586,52 @@ func (s *Store) load(from, to time.Time) ([]Point, error) {
 	return dedup, nil
 }
 
-// Range devolve os pontos em [from, to).
-func (s *Store) Range(from, to time.Time) ([]Point, error) {
-	s.mu.Lock()
-	defer s.mu.Unlock()
-	if !from.Before(s.cacheMin) {
-		i := sort.Search(len(s.cache), func(i int) bool { return !s.cache[i].T.Before(from) })
-		j := sort.Search(len(s.cache), func(i int) bool { return !s.cache[i].T.Before(to) })
-		return append([]Point(nil), s.cache[i:j]...), nil
+func sortedPts(p []Point) bool {
+	for i := 1; i < len(p); i++ {
+		if p[i].T.Before(p[i-1].T) {
+			return false
+		}
 	}
-	return s.load(from, to)
+	return true
+}
+
+// Range devolve os pontos em [from, to). Os dias recentes vêm da memória;
+// os de antes, dos arquivos, lidos sem segurar a trava (a gravação do minuto
+// não espera uma consulta longa).
+func (s *Store) Range(from, to time.Time) ([]Point, error) {
+	var old []Point
+	for {
+		s.mu.Lock()
+		cm := s.cacheMin
+		if !from.Before(cm) {
+			i := sort.Search(len(s.cache), func(i int) bool { return !s.cache[i].T.Before(from) })
+			j := sort.Search(len(s.cache), func(i int) bool { return !s.cache[i].T.Before(to) })
+			out := make([]Point, 0, len(old)+j-i)
+			out = append(append(out, old...), s.cache[i:j]...)
+			s.mu.Unlock()
+			return out, nil
+		}
+		s.mu.Unlock()
+		// os meses de antes: lidos fora da trava (os arquivos só são trocados
+		// inteiros, por rename)
+		end := to
+		if cm.Before(end) {
+			end = cm
+		}
+		pts, err := s.load(from, end)
+		if err != nil {
+			return nil, err
+		}
+		if old == nil {
+			old = pts
+		} else {
+			old = append(old, pts...)
+		}
+		if !to.After(end) {
+			return old, nil
+		}
+		from = end // o resto vem da memória (se a virada do dia mexeu nela, lê o que faltou)
+	}
 }
 
 // ExportCSV escreve todos os pontos em [from, to) num único CSV. usv devolve

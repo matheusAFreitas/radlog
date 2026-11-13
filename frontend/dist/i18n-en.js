@@ -3660,7 +3660,6 @@ const I18N_EN = {
 "Editar saída programada": "Edit planned trip",
 "Escolha pelo menos um aparelho que foi com você.": "Choose at least one device that went with you.",
 "Escolha pelo menos um aparelho que vai com você.": "Choose at least one device that goes with you.",
-"Escritório": "Office",
 "Esse horário já passou. Para uma saída que já aconteceu, use \"Adicionar trecho passado\".": "That time has passed. For a trip that already happened, use \"Add past stretch\".",
 "GMC-800 fora, RC102 em casa": "GMC-800 out, RC102 at home",
 "GMC-800 fora, RadiaCode em casa": "GMC-800 out, RC102 at home",

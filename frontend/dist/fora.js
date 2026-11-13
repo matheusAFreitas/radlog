@@ -163,6 +163,7 @@ function renderTimeline() {
   const axis = lane("axis", "");
   for (let d = 0; d < 7; d++) {
     const s = document.createElement("span");
+    if (d % 2) s.className = "alt"; // some em tela estreita: os rótulos se encostavam
     const mid = t0 + d * 864e5 + 432e5;
     s.style.left = pct(mid) + "%";
     s.textContent = dayMonth(mid);

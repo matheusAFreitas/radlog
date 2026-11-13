@@ -1590,6 +1590,13 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .wh-trow .acts { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: flex-end; }
 .wh-trow.open { background: linear-gradient(90deg, color-mix(in srgb, var(--away) 6%, transparent), transparent 70%); }
 .wh-trow > .p-stats { grid-column: 1 / -1; }
+/* tela estreita: os botões descem para baixo do texto e o eixo mostra dia sim, dia não */
+@media (max-width: 640px) {
+  .wh-trow { grid-template-columns: minmax(0, 1fr); }
+  .wh-trow .acts { justify-content: flex-start; }
+  .wh-lane { grid-template-columns: 72px minmax(0, 1fr); gap: var(--space-2); }
+  .wh-lane.axis .bar span.alt { display: none; }
+}
 .wh-kind { font-size: var(--fs-label); color: var(--swap); }
 .wh-edit { grid-column: 1 / -1; display: flex; flex-direction: column; gap: var(--space-3); background: var(--bg); border: 1px solid var(--border-hover); border-radius: var(--radius-md); padding: var(--space-3); }
 .wh-edit .g3 { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-3); }

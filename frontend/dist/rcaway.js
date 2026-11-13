@@ -327,7 +327,7 @@ function rcAwayRows(ul) {
     const what = document.createElement("div");
     what.className = "small muted";
     what.textContent = q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
-      : q.kind === "programada" ? `Saída programada "${q.name}": você saiu mesmo?`
+      : q.kind === "programada" ? `Saída programada "${asIs(q.name)}": você saiu mesmo?`
       : "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
     t.append(c, when, what);
     const acts = document.createElement("div");

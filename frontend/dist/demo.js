@@ -115,11 +115,13 @@ function makeDemoApi() {
   if (localGet("rcBack", "") === "1") rcAsksAll.splice(0, 1, { id: rcY, from: rcY, to: rcY + 130 * 6e4, kind: "volta", period: 99, since: rcY + 4 * 6e4, name: "Saí de casa", memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" });
   // saída programada (2.75): localStorage gmc.rcPlan=1 mostra a pergunta, rcPlan=2 a "não aconteceu?"
   const plY = new Date(now - 3 * 864e5).setHours(5, 30, 0, 0);
+  // o nome é o que a pessoa escreveu (não passa pela tradução): no demo em inglês já vem em inglês
+  const plDemoName = LANG === "en" ? "Office" : "Escritório";
   const plMode = localGet("rcPlan", "");
-  if (plMode) rcAsksAll.splice(0, 1, { id: plY, from: plMode === "2" ? plY : plY + 11 * 6e4, to: plY + 13 * 36e5 + 2 * 6e4, kind: "programada", planned: plY, name: "Escritório", rcGoes: true, gmcGoes: false, planAt: plY, source: plMode === "2" ? "plano" : "razao", estimated: plMode === "2", missed: plMode === "2", backHint: plMode === "2" ? 0 : plY + 11 * 36e5 + 53 * 6e4, dev: "radiacode", memMinutes: 780, avgUSv: 0.13, maxUSv: 0.2, maxAt: plY + 3 * 36e5, doseUSv: 1.7, gmcUSv: 0.098, ratio: 39, normalRatio: 28, hint: "fora" });
+  if (plMode) rcAsksAll.splice(0, 1, { id: plY, from: plMode === "2" ? plY : plY + 11 * 6e4, to: plY + 13 * 36e5 + 2 * 6e4, kind: "programada", planned: plY, name: plDemoName, rcGoes: true, gmcGoes: false, planAt: plY, source: plMode === "2" ? "plano" : "razao", estimated: plMode === "2", missed: plMode === "2", backHint: plMode === "2" ? 0 : plY + 11 * 36e5 + 53 * 6e4, dev: "radiacode", memMinutes: 780, avgUSv: 0.13, maxUSv: 0.2, maxAt: plY + 3 * 36e5, doseUSv: 1.7, gmcUSv: 0.098, ratio: 39, normalRatio: 28, hint: "fora" });
   let rcAsks = rcAsksAll.slice();
   const plTomorrow = new Date(now + 864e5).setHours(5, 30, 0, 0);
-  let planned = [{ id: plTomorrow, nome: "Escritório", de: plTomorrow, rc: true, gmc: false }];
+  let planned = [{ id: plTomorrow, nome: plDemoName, de: plTomorrow, rc: true, gmc: false }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
   let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
