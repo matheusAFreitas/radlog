@@ -494,11 +494,16 @@ func parseTime(v string) (time.Time, bool) {
 		se, g := num(17, 2)
 		if a && b && c && e && f && g && v[4] == '-' && v[7] == '-' && v[10] == 'T' && v[13] == ':' && v[16] == ':' &&
 			mo >= 1 && mo <= 12 && d >= 1 && d <= 31 && h < 24 && mi < 60 && se < 60 {
+			// 31/04 ou 29/02 fora de bissexto: o time.Date normalizaria para o
+			// mês seguinte; o time.Parse recusa (a linha vai para o .ilegivel)
+			if d > 28 && time.Date(y, time.Month(mo), d, 0, 0, 0, 0, time.UTC).Day() != d {
+				goto slow
+			}
 			off := 0
 			if len(v) == 25 {
 				oh, ok1 := num(20, 2)
 				om, ok2 := num(23, 2)
-				if !ok1 || !ok2 || v[22] != ':' || (v[19] != '+' && v[19] != '-') {
+				if !ok1 || !ok2 || oh > 23 || om > 59 || v[22] != ':' || (v[19] != '+' && v[19] != '-') {
 					goto slow
 				}
 				off = (oh*60 + om) * 60

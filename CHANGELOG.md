@@ -1,5 +1,18 @@
 # Versões
 
+## 2.75.2
+- O arquivo de leituras volta a recusar datas que não existem (31/04, 29/02
+  fora de ano bissexto): a leitura rápida da 2.75.1 as aceitava e jogava o
+  minuto para o mês seguinte. A linha vai de novo para o .ilegivel.
+- Tirado do repositório um binário de teste que entrou por engano.
+
+**English**
+
+- The readings file again rejects dates that don't exist (April 31,
+  February 29 outside a leap year): the fast reader in 2.75.1 accepted them
+  and moved the minute to the next month. The line goes to .ilegivel again.
+- Removed a test binary that was committed by mistake.
+
 ## 2.75.1
 Item P1 da auditoria de 12/11 e acertos da Saída programada.
 
