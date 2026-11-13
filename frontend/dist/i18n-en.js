@@ -4016,7 +4016,8 @@ const I18N_EN = {
 "Últimas 24 horas": "Last 24 hours",
 "Último download em 05/11 20:10. Depois dele, o app ficou 6 h 52 min sem leitura (desde 06/11 21:00); a memória do contador pode ter esses minutos: baixe o histórico.": "Last download on 05/11 20:10. After it, the app went 6 h 52 min without readings (since 06/11 21:00); the counter's memory may have those minutes: download the history.",
 "— valor atual; sem registro do valor vigente no início do período": "— current value; no record of the value in force at the start of the period",
-"% do tempo medido": "% of the measured time"
+"% do tempo medido": "% of the measured time",
+"Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.": "The time has passed. When the device that went connects again, the app reads its memory and asks on the Now screen about 2 min later."
 },
 "patterns": [
 [
@@ -4589,6 +4590,16 @@ const I18N_EN = {
 [
 "Não deu para gravar em ",
 " (aberto em outro programa?). As leituras ficam na memória e são gravadas quando o arquivo liberar."
+]
+],
+[
+"Começou: o ",
+"^Começou: o ((?:(?! · ).)+?) desconectou às ((?:(?! · ).)+?)\\. Quando ele conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois\\.$",
+"Started: the ${1} disconnected at ${2}. When it connects again, the app reads its memory and asks on the Now screen about 2 min later.",
+[
+"Começou: o ",
+" desconectou às ",
+". Quando ele conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois."
 ]
 ],
 [
@@ -5340,6 +5351,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Sua dose no período foi ",
+"^Sua dose no período foi ((?:(?! · ).)+?) µSv, ((?:(?! · ).)+?)% abaixo do que você teria recebido ficando em casa \\(((?:(?! · ).)+?) µSv\\)\\.$",
+"Your dose in the period was ${1} µSv, ${2}% below what you would have received staying home (${3} µSv).",
+[
+"Sua dose no período foi ",
+" µSv, ",
+"% abaixo do que você teria recebido ficando em casa (",
+" µSv)."
+]
+],
+[
 "O ",
 "^O ((?:(?! · ).)+?) não viu: ((?:(?! · ).)+?) sobre o fundo dele\\. Pode ser algo perto só do ((?:(?! · ).)+?), interferência ou o aparelho\\.$",
 "${1} saw nothing: ${2} above its background. It may be something close only to ${3}, interference or the device.",
@@ -5702,7 +5724,7 @@ const I18N_EN = {
 [
 "Sua dose no período foi ",
 "^Sua dose no período foi ((?:(?! · ).)+?) µSv, ((?:(?! · ).)+?) do que você teria recebido ficando em casa \\(((?:(?! · ).)+?) µSv\\)\\.$",
-"Your dose in the period was ${1} µSv, ${2} than you would have received staying home (${3} µSv).",
+"Your dose in the period was ${1} µSv, ${2} compared with staying home (${3} µSv).",
 [
 "Sua dose no período foi ",
 " µSv, ",

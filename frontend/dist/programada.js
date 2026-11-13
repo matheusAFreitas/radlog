@@ -89,7 +89,13 @@ function renderPlanned() {
     if (p.saiu) {
       const c = document.createElement("span");
       c.className = "small pl-started";
-      c.textContent = `Começou: o ${plDev(p.saiuAparelho)} desconectou às ${hhmm(p.saiu)}. A volta fica aberta até ele conectar de novo.`;
+      c.textContent = `Começou: o ${plDev(p.saiuAparelho)} desconectou às ${hhmm(p.saiu)}. Quando ele conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.`;
+      t.appendChild(c);
+    } else if (Date.now() > p.de + 3600e3) {
+      // já passou da janela: a pergunta só vem quando o aparelho reconecta (ACE, 13/11)
+      const c = document.createElement("span");
+      c.className = "small pl-started";
+      c.textContent = "Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.";
       t.appendChild(c);
     }
     const acts = document.createElement("div");

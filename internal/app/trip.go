@@ -166,6 +166,10 @@ func (a *App) rcSpecEach(fromMs, toMs int64, fn func(r rcSpecRow)) {
 // tripMinHome: com menos que isso de casa nas 24 h antes, procura em 7 dias.
 const tripMinHome = 3600.0
 
+// tripExtraMin: a partir disso de casa dentro das linhas da saída (s), tira
+// esse pedaço pelo espectro de casa; menos que isso é só o atraso da volta.
+const tripExtraMin = 15 * 60.0
+
 // tripSpectrum soma as linhas do espectrograma que caem na saída (com o
 // RC102 longe do PC, a primeira linha depois que ele volta cobre a saída
 // inteira) e compara com o espectro de casa antes da saída.
@@ -189,6 +193,7 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 		objSec, bgIns float64
 		bg24, bg7     []uint32
 		bg24s, bg7sec float64
+		extraSec      float64 // tempo de casa dentro das linhas que contaram na saída
 	)
 	addTo := func(dst []uint32, c []uint32) {
 		for i, v := range c {
@@ -210,6 +215,11 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 		if inTrip(r) {
 			addTo(obj, r.C)
 			objSec += r.S
+			// a linha da volta pode começar bem antes da saída (o último
+			// espectro gravado antes de o RC102 sair do alcance)
+			r0, r1 := float64(r.T)-r.S*1000, float64(r.T)
+			ov := math.Min(r1, float64(out.To)) - math.Max(r0, float64(out.From))
+			extraSec += math.Max(0, r.S-ov/1000)
 			ref = r.A
 			out.SpecRows++
 			if inside && !away(time.UnixMilli(r.T-int64(r.S*500))) {
@@ -240,6 +250,15 @@ func (a *App) spectrumVsHome(out *TripSummary, inside bool) {
 		bg, bgSec = bgIn, bgIns
 	} else if bgSec < tripMinHome {
 		bg, bgSec = bg7, bg7sec
+	}
+	// tira das linhas da saída o pedaço de casa que veio junto, pelo espectro
+	// de casa (o relatório dizia 14 h de espectro numa saída de 10 h)
+	if extraSec >= tripExtraMin && bgSec > 0 && extraSec < objSec {
+		for i := range obj {
+			v := float64(obj[i]) - float64(bg[i])*extraSec/bgSec
+			obj[i] = uint32(math.Max(0, math.Round(v)))
+		}
+		objSec -= extraSec
 	}
 	sp := &MeasureSpectrum{A: ref, Obj: obj, ObjSec: objSec}
 	// as linhas da saída: o SNIP no espectro dela sozinho, como no Acumulado

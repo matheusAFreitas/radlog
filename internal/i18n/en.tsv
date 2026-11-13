@@ -5048,7 +5048,7 @@ Sem leitura de {0} a {1} ({2}). Ao voltar, a leitura ainda estava alta: o alerta
 Sem nada no meio	With nothing in between
 Sem tendência: a média dos dias variou dentro do esperado (+0,03 ± 0,05 CPM por dia, +1,2% no período, {0} dias completos).	No trend: the daily average varied within the expected range (+0.03 ± 0.05 CPM per day, +1.2% over the period, {0} full days).
 Sem tendência: a média dos dias variou dentro do esperado ({0} ± {1} {2} por dia, {3}% no período, {4} dias completos).	No trend: the daily average varied within the expected range ({0} ± {1} {2} per day, {3}% over the period, {4} full days).
-Sua dose no período foi {0} µSv, {1} do que você teria recebido ficando em casa ({2} µSv).	Your dose in the period was {0} µSv, {1} than you would have received staying home ({2} µSv).
+Sua dose no período foi {0} µSv, {1} do que você teria recebido ficando em casa ({2} µSv).	Your dose in the period was {0} µSv, {1} compared with staying home ({2} µSv).
 Subiu de uma vez ({0}) e ficou. {1} Mudou o aparelho de lugar ou chegou algo novo perto dele?	It rose all at once ({0}) and stayed. {1} Did you move the device or did something new arrive near it?
 Só vale se o RC102 passou a última hora parado no lugar onde vai medir.	Only valid if the RC102 spent the last hour still at the spot where it will measure.
 TAMBÉM PERTO DO OBJETO:	ALSO NEAR THE OBJECT:
@@ -5317,3 +5317,6 @@ voltou ao fundo	back to background
 — valor atual; sem registro do valor vigente no início do período	— current value; no record of the value in force at the start of the period
 ≈ {0} {1} do fundo da sua casa	≈ {0} {1} of your home background
 % do tempo medido	% of the measured time
+Sua dose no período foi {0} µSv, {1}% abaixo do que você teria recebido ficando em casa ({2} µSv).	Your dose in the period was {0} µSv, {1}% below what you would have received staying home ({2} µSv).
+Começou: o {0} desconectou às {1}. Quando ele conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.	Started: the {0} disconnected at {1}. When it connects again, the app reads its memory and asks on the Now screen about 2 min later.
+Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.	The time has passed. When the device that went connects again, the app reads its memory and asks on the Now screen about 2 min later.
