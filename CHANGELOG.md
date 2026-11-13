@@ -1,5 +1,24 @@
 # Versões
 
+## 2.75.1
+Item P1 da auditoria de 12/11.
+
+- Gráficos, relatórios e tendências de períodos longos ficaram cerca de 2 a
+  3 vezes mais rápidos e usam bem menos memória. Num ano de minutos, a
+  leitura caiu de ~0,7 s e ~740 MB alocados para ~0,25 s e ~200 MB.
+- Enquanto uma consulta longa lê os meses antigos, a gravação do minuto não
+  fica mais esperando: os dias recentes vêm da memória e os antigos são lidos
+  sem segurar a trava.
+
+**English**
+
+- Charts, reports and trends over long periods got about 2 to 3 times faster
+  and use much less memory. For a year of minutes, reading went from ~0.7 s
+  and ~740 MB allocated to ~0.25 s and ~200 MB.
+- While a long query reads old months, saving the current minute no longer
+  waits: recent days come from memory and old ones are read without holding
+  the lock.
+
 ## 2.75.0
 - Saída programada: em Fora de casa, "Programar saída" marca
   para onde vai, por volta de que horas e quais aparelhos vão. Também no
