@@ -254,7 +254,7 @@ func (p *reportPDF) pageSummary() {
 	var lines []string
 	if v := r.Verdict; v.OK {
 		lines = append(lines, fmt.Sprintf("Sua dose no período foi %s µSv, %s do que você teria recebido ficando em casa (%s µSv).",
-			fmtBR(v.Dose, 2), map[string]string{"normal": "perto", "acima": "acima", "alto": "bem acima"}[v.Level], fmtBR(v.Expected, 2)))
+			fmtBR(v.Dose, 2), doseVsHomeTxt(v), fmtBR(v.Expected, 2)))
 	}
 	if s.BgOK {
 		lines = append(lines, "O fundo da casa (GMC-800) ficou em "+fmtU(r.homeMean())+" µSv/h: "+strings.ToLower(pctNormal("", s.VsBgPct)[1:])+".")
@@ -604,4 +604,21 @@ func (p *reportPDF) annex() {
 	}
 	p.annexConfig()
 	p.annexLimits()
+}
+
+// doseVsHomeTxt compara a dose com a de ficar em casa. "normal" vai até
+// 1,25× e não tem piso: 32% abaixo não é "perto" (relatório do ACE, 13/11).
+func doseVsHomeTxt(v reportDoseVerdict) string {
+	switch v.Level {
+	case "acima":
+		return "acima"
+	case "alto":
+		return "bem acima"
+	}
+	if v.Expected > 0 {
+		if pct := (v.Dose/v.Expected - 1) * 100; pct <= -10 {
+			return fmtBR(-pct, 0) + "% abaixo"
+		}
+	}
+	return "perto"
 }

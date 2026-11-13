@@ -1,5 +1,28 @@
 # Versões
 
+## 2.78.2
+- O espectro de uma saída não mistura mais horas de casa. Quando o RC102
+  para de mandar espectro um tempo antes de sair, a primeira leitura da
+  volta cobre também esse tempo em casa; agora esse pedaço sai pelo espectro
+  de casa, e o tempo mostrado é o da saída (antes aparecia 14 h numa saída
+  de 10 h).
+- O resumo do relatório diz quanto a dose ficou abaixo da de casa ("32%
+  abaixo") em vez de "perto" quando a diferença passa de 10%.
+- Uma saída programada que já passou do horário avisa que a pergunta vem na
+  tela Agora uns 2 minutos depois que o aparelho conectar de novo.
+
+**English**
+
+- A trip's spectrum no longer mixes in hours at home. When the RC102 stops
+  sending spectra a while before leaving, the first reading after the return
+  also covers that time at home; that part is now removed using the home
+  spectrum, and the time shown is the trip's (before it showed 14 h for a
+  10 h trip).
+- The report summary says how far the dose was below staying home ("32%
+  below") instead of "close" when the difference is over 10%.
+- A scheduled trip past its time says the question comes on the Now screen
+  about 2 minutes after the device connects again.
+
 ## 2.78.1
 - Uma mudança de configuração feita bem no instante em que a gravação
   anterior terminava podia ficar parada na fila e se perder ao fechar o
