@@ -5530,3 +5530,5 @@ essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nu
 outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele	another device just created the cloud in this account. Sign in again and use its recovery code
 arquivo grande demais para baixar	file too large to download
 nuvem: um arquivo da nuvem é grande demais ({0} MB) e foi pulado	cloud: a cloud file is too large ({0} MB) and was skipped
+sem área de transferência privada	no private clipboard
+área de transferência ocupada	clipboard busy
