@@ -1,8 +1,7 @@
 package app
 
 import (
-	"math"
-	"math/rand"
+	"errors"
 	"os"
 	"path/filepath"
 	"strings"
@@ -25,99 +24,97 @@ func TestRingWrapsAround(t *testing.T) {
 	}
 }
 
-func TestPoissonMean(t *testing.T) {
-	rng := rand.New(rand.NewSource(1))
-	for _, lambda := range []float64{0.3, 5, 200} {
-		sum := 0
-		for i := 0; i < 20000; i++ {
-			sum += poisson(rng, lambda)
-		}
-		if m := float64(sum) / 20000; math.Abs(m-lambda) > 0.05*lambda+0.02 {
-			t.Fatalf("lambda %v: média %v", lambda, m)
-		}
-	}
-}
-
+// 2.82: a demonstração só guarda o estado na memória, recusa o que tiraria
+// dado do app e não mexe em nenhum arquivo; a leitura real continua.
 func TestDemoDoesNotTouchFiles(t *testing.T) {
 	dir := t.TempDir()
 	st, _ := store.Open(dir)
 	a := NewApp()
 	a.dataDir, a.store, a.cal = dir, st, gmc.DefaultCalibration()
-	a.settings = defaultSettings() // alarme em 100 CPM
-
-	// um minuto real gravado há 10 min
+	a.settings = defaultSettings()
+	t.Cleanup(a.flushWrites)
 	realT := time.Now().Truncate(time.Minute).Add(-10 * time.Minute)
 	if err := st.Add(store.Point{T: realT, CPM: 20, Src: store.SrcLive}); err != nil {
 		t.Fatal(err)
 	}
-	before := snapshotDir(t, dir)
 
-	a.StartDemo(500, false)
-	time.Sleep(2500 * time.Millisecond)
-
-	c, err := a.GetChart("15m")
-	if err != nil {
-		t.Fatal(err)
+	d := a.SetDemo(DemoState{Scenario: "nada disso", Speed: 3, USv: -2})
+	if !d.Active || d.Scenario != "casa" || d.Speed != 1 || d.USv != 0 || d.Sound || d.Since == 0 {
+		t.Fatalf("estado: %+v", d)
 	}
-	var last *float64
-	for _, v := range c.Values {
-		if v != nil {
-			last = v
+	since := d.Since
+	d = a.SetDemo(DemoState{Scenario: "fonte", Speed: 10, Sound: true})
+	if d.Scenario != "fonte" || d.Speed != 10 || !d.Sound || d.Since != since {
+		t.Fatalf("troca de cenário: %+v", d)
+	}
+	a.DemoTray(6.5, "perigo", 13, "perigo", "conectado")
+	if r, show := a.trayRc(); !show || r.State != "ok" || r.USv != 13 || r.Level != "perigo" {
+		t.Fatalf("bandeja do RC102: %+v", r)
+	}
+
+	for name, err := range map[string]error{
+		"csv":    second(a.ExportCSV()),
+		"pdf":    second(a.ExportReport(realT.UnixMilli(), time.Now().UnixMilli(), "")),
+		"medida": second(a.ExportMeasureReport(1)),
+		"backup": second(a.ExportBackup()),
+		"nuvem":  second(a.CloudSyncNow()),
+		"login":  second(a.CloudLogin()),
+		"sync":   second(a.SyncNow("x")),
+	} {
+		if !errors.Is(err, errDemo) {
+			t.Fatalf("%s na demonstração: %v", name, err)
 		}
 	}
-	if last == nil || *last != 500 || len(c.Values) != 180 {
-		t.Fatalf("gráfico de 15 min: último %v, %d pontos", last, len(c.Values))
+	if _, err := a.ImportBackup(); !errors.Is(err, errDemo) {
+		t.Fatalf("importar na demonstração: %v", err)
 	}
 
-	// simula um minuto demo fechado sobre o minuto real
-	a.mu.Lock()
-	a.demo.minutes[realT.Unix()] = 500
-	a.mu.Unlock()
-	pts, _ := a.points(realT, realT.Add(time.Minute))
-	if len(pts) != 1 || pts[0].CPM != 500 || pts[0].Src != "demo" {
-		t.Fatalf("sobreposição: %+v", pts)
+	// a leitura real continua indo para o disco por baixo
+	sim := newGMCSim(a)
+	sim.feed(150, 1)
+	if l := a.GetActiveAlerts(); len(l) == 0 {
+		t.Fatal("o alerta real não abriu")
 	}
-	d, _ := a.GetDose("3h", "publico")
-	// 1 minuto demo (2 se o relógio virou o minuto durante o teste)
-	if (d.MeasuredMinutes != 1 && d.MeasuredMinutes != 2) || math.Abs(d.Total-float64(d.MeasuredMinutes)*a.cal.USv(500)/60) > 1e-9 {
-		t.Fatalf("dose no demo: %+v (%d min) — %+v", d.Total, d.MeasuredMinutes, a.demo.minutes)
-	}
-	if d.BackgroundRate > a.cal.USv(25) { // fundo continua vindo dos dados reais (20 CPM)
-		t.Fatalf("fundo contaminado pelo demo: %v", d.BackgroundRate)
-	}
-
-	evs := a.GetEvents("")
-	joined := ""
-	for _, e := range evs {
-		joined += e.Text + " | "
-	}
-	if !strings.Contains(joined, "[demo] Alarme: "+uT(a, 500)) {
-		t.Fatalf("eventos: %s", joined)
-	}
-
-	a.StopDemo()
-	pts, _ = a.points(realT, realT.Add(time.Minute))
-	if len(pts) != 1 || pts[0].CPM != 20 {
-		t.Fatalf("depois do demo: %+v", pts)
-	}
-	for _, e := range a.GetEvents("") {
-		if strings.HasPrefix(e.Text, demoPrefix) {
-			t.Fatalf("evento demo ficou: %s", e.Text)
-		}
-	}
-	if after := snapshotDir(t, dir); after != before {
-		t.Fatalf("o demo mexeu nos arquivos:\nantes:\n%s\ndepois:\n%s", before, after)
-	}
+	// e o alarme de verdade tirou da demonstração
 	if a.GetDemo().Active {
-		t.Fatal("demo continuou ativo")
+		t.Fatal("alarme de verdade não tirou da demonstração")
+	}
+	if r, _ := a.trayRc(); r.USv == 13 {
+		t.Fatal("a bandeja continuou com o RC102 da demonstração")
+	}
+	ev := a.GetEvents(kindEvent)
+	if len(ev) == 0 || !strings.Contains(ev[0].Text, "Demonstração desligada") {
+		t.Fatalf("eventos: %+v", ev)
+	}
+
+	// liga e desliga de novo sem leitura nenhuma: nada muda nos arquivos
+	b := NewApp()
+	dir2 := t.TempDir()
+	st2, _ := store.Open(dir2)
+	b.dataDir, b.store, b.cal = dir2, st2, gmc.DefaultCalibration()
+	b.settings = defaultSettings()
+	t.Cleanup(b.flushWrites)
+	before2 := snapshotDir(t, dir2)
+	b.SetDemo(DemoState{Scenario: "perigo"})
+	b.DemoTray(6.5, "perigo", 0, "", "")
+	b.StopDemo()
+	b.flushWrites()
+	if after := snapshotDir(t, dir2); after != before2 {
+		t.Fatalf("a demonstração mexeu nos arquivos:\nantes:\n%s\ndepois:\n%s", before2, after)
+	}
+	if b.GetDemo().Active {
+		t.Fatal("demonstração continuou ligada")
 	}
 }
 
-// snapshotDir lista nome, tamanho e conteúdo de todos os arquivos.
+func second[T any](_ T, err error) error { return err }
+
+// snapshotDir lista nome, tamanho e conteúdo de todos os arquivos (menos o
+// log.txt, o registro de diagnóstico, que anota quando a demonstração liga).
 func snapshotDir(t *testing.T, dir string) string {
 	var b strings.Builder
 	filepath.Walk(dir, func(p string, info os.FileInfo, err error) error {
-		if err == nil && !info.IsDir() {
+		if err == nil && !info.IsDir() && info.Name() != "log.txt" {
 			data, _ := os.ReadFile(p)
 			b.WriteString(p + "\n" + string(data) + "\n")
 		}

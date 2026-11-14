@@ -55,12 +55,12 @@ func TestShieldCut(t *testing.T) {
 
 func TestMeasureRelErrStop(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active, a.demo.CPM = true, 25
+	fakeGMC(t, a, 25)
 	if _, err := a.StartMeasure(MeasureOpts{Name: "teste", DistCM: 5, Seconds: 300, HomeBg: true, Test: "distancia", RelErr: 0.1}); err != nil {
 		t.Fatal(err)
 	}
 	for i := 0; i < 300 && a.GetMeasure().Phase == "objeto"; i++ {
-		a.feedMeasure(0, 60, true) // bem acima do fundo
+		a.feedMeasure(0, 60) // bem acima do fundo
 	}
 	st := a.GetMeasure()
 	if st.Phase != "pronto" || st.Result.Stop != "precisao" || st.Obj.Seconds >= 300 || st.Test != "distancia" {

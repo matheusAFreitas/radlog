@@ -102,20 +102,22 @@ func (a *App) trayGmcConn(state string) {
 
 // trayRc lê o RC102 para o ícone e a dica.
 func (a *App) trayRc() (d trayDev, show bool) {
+	a.trayMu.Lock()
+	demo := a.trayRcDemo
+	a.trayMu.Unlock()
+	if demo != nil { // demonstração: o RC102 dela
+		return *demo, true
+	}
 	a.rc.mu.Lock()
 	st := a.rc.st
 	a.rc.mu.Unlock()
-	a.demoRcOverlay(&st)
 	now := time.Now()
 	a.mu.Lock()
-	rcOff := a.settings.RcOff && !st.Demo
+	rcOff := a.settings.RcOff
 	lvl := a.rcAlertLevelLocked()
 	satAt := a.effLocked().Levels.RcSatUSv
 	away := a.whereaboutsLocked(now).NotHome
 	a.mu.Unlock()
-	if st.Demo {
-		lvl = st.AlertLevel
-	}
 	d = trayDev{Name: "RC102", Key: "rc", State: "off", SatAbove: satAt, Away: away}
 	switch st.State {
 	case "conectado":

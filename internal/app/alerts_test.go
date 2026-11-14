@@ -5,7 +5,6 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
 
 	"radlog/internal/core/levels"
 	"radlog/internal/gmc"
@@ -53,18 +52,14 @@ func TestAlertsSeparatedFromEvents(t *testing.T) {
 		t.Fatalf("alertas antigos: %+v", al)
 	}
 
-	a.StartDemo(60, false)
-	time.Sleep(1500 * time.Millisecond)
-	a.StartDemo(150, false)
-	time.Sleep(1500 * time.Millisecond)
+	sim := newGMCSim(a)
+	sim.feed(60, 2)
+	sim.feed(150, 2)
 	al := a.GetEvents(kindAlert)
-	if len(al) < 3 || al[0].Text != "[demo] Alarme: "+uT(a, 150)+" (limite "+uN(a, 100)+")" || al[1].Text != "[demo] Atenção: "+uT(a, 60)+" (a partir de "+uN(a, 50)+")" {
-		t.Fatalf("alertas do demo: %+v", al)
+	if len(al) < 3 || al[0].Text != "Alarme: "+uT(a, 150)+" (limite "+uN(a, 100)+")" || al[1].Text != "Atenção: "+uT(a, 60)+" (a partir de "+uN(a, 50)+")" {
+		t.Fatalf("alertas: %+v", al)
 	}
-	if ev := a.GetEvents(kindEvent); ev[0].Text != "[demo] Modo demo ligado (60 CPM)" {
-		t.Fatalf("eventos do demo: %+v", ev)
-	}
-	a.StopDemo()
+	sim.feed(20, 2)
 
 	// um alerta real vai para o arquivo com o tipo (desde a 2.76.2, o
 	// alertas.csv, que não tem limite)

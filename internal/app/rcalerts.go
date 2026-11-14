@@ -127,6 +127,9 @@ func (a *App) rcAlertStep(now time.Time, usv float64) {
 		AlarmStarted: alarmStarted, AlarmEnded: alarmEnded, AlarmOn: alarmOn,
 		DangerStarted: dangStarted, DangerEnded: dangEnded,
 	})
+	if dangStarted || alarmStarted {
+		a.realAlarmStopsDemo() // alarme de verdade tira da demonstração
+	}
 	val := usvTxt(usv) + " µSv/h no RC102"
 	switch {
 	case dangStarted:

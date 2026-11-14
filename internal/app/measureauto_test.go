@@ -39,7 +39,7 @@ func TestHomeBackground(t *testing.T) {
 // com "achou"; um igual ao fundo para com "nada" antes do limite.
 func TestMeasureAuto(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active, a.demo.CPM = true, 25
+	fakeGMC(t, a, 25)
 	st, err := a.StartMeasure(MeasureOpts{Name: "pedra", Distance: "encostado", Auto: true, HomeBg: true, MaxSec: 1800, Pct: 20})
 	if err != nil {
 		t.Fatal(err)
@@ -49,7 +49,7 @@ func TestMeasureAuto(t *testing.T) {
 	}
 	// 4 contagens/s = 240 CPM
 	for i := 0; i < 120 && a.GetMeasure().Phase == "objeto"; i++ {
-		a.feedMeasure(0, 4, true)
+		a.feedMeasure(0, 4)
 	}
 	st = a.GetMeasure()
 	if st.Phase != "pronto" || st.Result.Stop != "achou" || st.Obj.Seconds != autoMinSec || st.Result.Level != "sim" {
@@ -66,7 +66,7 @@ func TestMeasureAuto(t *testing.T) {
 		if i%12 < 5 {
 			c = 1
 		}
-		a.feedMeasure(0, c, true)
+		a.feedMeasure(0, c)
 		if s := a.GetMeasure(); s.Phase == "objeto" && s.Eta > 0 && s.Live != nil {
 			sawEta = true
 		}
@@ -87,7 +87,7 @@ func TestMeasureAuto(t *testing.T) {
 
 func TestMeasureAutoLimit(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active, a.demo.CPM = true, 25
+	fakeGMC(t, a, 25)
 	if _, err := a.StartMeasure(MeasureOpts{Auto: true, HomeBg: true, MaxSec: 60, Pct: 20}); err != nil {
 		t.Fatal(err)
 	}
@@ -97,7 +97,7 @@ func TestMeasureAutoLimit(t *testing.T) {
 		if i%60 < 29 {
 			c = 1
 		}
-		a.feedMeasure(0, c, true)
+		a.feedMeasure(0, c)
 	}
 	st := a.GetMeasure()
 	if st.Phase != "pronto" || st.Result.Stop != "limite" || st.Result.Limit <= 0 {

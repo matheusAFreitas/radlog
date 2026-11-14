@@ -99,21 +99,20 @@ func TestHeatmap(t *testing.T) {
 
 func TestMeasureObject(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active = true // permite medir sem contador; alimenta como demo
+	fakeGMC(t, a, 25) // permite medir sem contador
 	if _, err := a.StartMeasurePhase("objeto", 60, ""); err == nil {
 		t.Fatal("objeto antes do fundo deveria falhar")
 	}
 	if _, err := a.StartMeasurePhase("fundo", 60, "vidro verde"); err != nil {
 		t.Fatal(err)
 	}
-	// fundo: 27 contagens em 60 s; contagens reais (não demo) são ignoradas
+	// fundo: 27 contagens em 60 s
 	for i := 0; i < 60; i++ {
 		c := uint32(0)
 		if i < 27 {
 			c = 1
 		}
-		a.feedMeasure(0, c, true)
-		a.feedMeasure(0, 5, false)
+		a.feedMeasure(0, c)
 	}
 	if st := a.GetMeasure(); st.Phase != "fundo-pronto" || st.Bg == nil || st.Bg.Counts != 27 || st.Bg.CPM != 27 {
 		t.Fatalf("fundo: %+v", st)
@@ -126,7 +125,7 @@ func TestMeasureObject(t *testing.T) {
 		if i < 30 {
 			c = 2 // 90 contagens no minuto
 		}
-		a.feedMeasure(0, c, true)
+		a.feedMeasure(0, c)
 	}
 	st := a.GetMeasure()
 	r := st.Result
@@ -138,7 +137,7 @@ func TestMeasureObject(t *testing.T) {
 	}
 	found := false
 	for _, e := range a.GetEvents(kindEvent) {
-		if strings.Contains(e.Text, "[demo] Medição de vidro verde: +0,639 ± 0,110 µSv/h") {
+		if strings.Contains(e.Text, "Medição de vidro verde: +0,639 ± 0,110 µSv/h") {
 			found = true
 		}
 	}

@@ -392,11 +392,12 @@ type App struct {
 	trayReady atomic.Bool
 	trayMu    sync.Mutex
 	//lint:ignore U1000 usado só no Windows (tray_windows.go)
-	tray     trayState // menu, dica e ícone da bandeja
-	lang     string    // idioma da interface já resolvido ("pt" ou "en"); a tela informa
-	trayGmc  trayDev   // última leitura do GMC-800 para o ícone
-	trayDemo bool
-	notes    []Note // anotações no gráfico (notes.go)
+	tray       trayState // menu, dica e ícone da bandeja
+	lang       string    // idioma da interface já resolvido ("pt" ou "en"); a tela informa
+	trayGmc    trayDev   // última leitura do GMC-800 para o ícone
+	trayDemo   bool
+	trayRcDemo *trayDev // RC102 da demonstração (nil fora dela)
+	notes      []Note   // anotações no gráfico (notes.go)
 	// editar e apagar entre aparelhos (records.go): resumo de cada item na
 	// última gravação, mescla em andamento e marcas de apagado
 	recHash  map[string]map[string]string
@@ -420,8 +421,8 @@ type App struct {
 	cloud    cloudState // nuvem no Google Drive (cloud.go)
 	rc       rcState    // RC102 (radiacode.go)
 
-	live *ring    // última hora de leituras reais por segundo
-	demo demoData // modo demo
+	live *ring     // última hora de leituras reais por segundo
+	demo DemoState // modo demonstração (só na memória)
 
 	bgCPM float64 // fundo em cache (stats.go)
 	bgOK  bool
@@ -1332,144 +1333,144 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			a.logf("leitura ao vivo: voltou a responder depois de %d erro(s)", fails)
 		}
 		fails = 0
-		now := time.Now()
-
-		// tempo morto: o CPM e o CPS corrigidos valem para tudo (gravação,
-		// alertas, tela); a saturação olha o que o contador mandou (o fim da
-		// escala é dele)
-		rawCPM, rawCPS := cpm, cps
-		a.mu.Lock()
-		lvDT := a.settings.Levels.Norm()
-		a.mu.Unlock()
-		cpm = uint32(math.Round(lvDT.DtCPM(float64(rawCPM))))
-		cps = uint32(math.Round(lvDT.DtCPS(float64(rawCPS))))
-
-		// virou o minuto: grava o anterior (média dos CPS, ver gmcMinute)
-		if p, ok := minute.add(now, cpm, rawCPM, cps, rawCPS, lvDT); ok {
-			a.storeMinute(p.T, p.CPM, p.Raw, p.Lv)
-		}
-
-		a.mu.Lock()
-		cal := a.convCalLocked()
-		rawCal := a.cal      // o que o contador mandou (sem correção): curva dele
-		set := a.effLocked() // limites em CPM pela calibração de agora
-		attnU, alarmU, dangerU := thrUSvLocked(a, set)
-		// medindo um objeto com o GMC: os alertas dele ficam calados (2.81)
-		acpm := cpm
-		quiet := a.measureQuietLocked("gmc", now)
-		if quiet {
-			acpm = 0
-		}
-		alarm := set.AlarmEnabled && int(acpm) >= set.AlarmCPM
-		was := a.alarmOn
-		started := alarm && !a.alarmOn
-		if alarm {
-			a.alarmOn = true
-		} else if float64(acpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
-			a.alarmOn = false
-		}
-		ended := was && !a.alarmOn
-		alarmOn := a.alarmOn && set.AlarmEnabled
-		attnWas := a.attnOn
-		lv := set.Levels.Norm()
-		attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(acpm), lv)
-		attnOn := a.attnOn
-		satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
-		dCPM := float64(acpm)
-		if satOn && !quiet {
-			dCPM = math.Max(dCPM, lv.DangerEnter()) // saturado: o perigo continua valendo
-		}
-		dangerStarted, dangerEnded := levels.DangerStep(&a.dangerOn, dCPM, lv)
-		dangerOn := a.dangerOn
-		if dangerStarted {
-			a.sat.rise = a.sat.riseFrom(now, cal.USv(lv.AttnEnter()))
-		}
-		if !dangerOn {
-			a.sat.rise = nil
-		}
-		satReason, rise := a.sat.reason, a.sat.rise
-		if satOn {
-			a.markMinuteLocked(now, store.ObsSaturation)
-		}
-		zeroSince := a.noCount.since
-		zeroStarted, zeroEnded := a.noCount.step(now, cpm, satOn)
-		noCount, noCountSince := a.noCount.on, a.noCount.since
-		a.mu.Unlock()
-		if satStarted {
-			a.logEvent(satText(satReason, lv))
-		}
-		if !satOn {
-			a.checkInterference(now, float64(rawCPS))
-		}
-		if zeroStarted {
-			a.logEvent("Sem contagens: 0 CPM há 2 min. O tubo pode estar com defeito; confira o contador")
-		}
-		if zeroEnded {
-			a.logEvent(noCountText(zeroSince, now))
-		}
-		a.stepAlerts(&a.alerts, alertStep{
-			Now: now, CPM: float64(acpm), AlarmCPM: set.AlarmCPM, Lv: lv,
-			USv: cal.USv(float64(cpm)), AttnUSv: attnU, AlarmUSv: alarmU, DngrUSv: dangerU,
-			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
-			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
-			DangerStarted: dangerStarted, DangerEnded: dangerEnded,
-		})
-		if dangerStarted {
-			a.dangerStarted(float64(cpm), false)
-		} else if started {
-			a.alarmStarted(float64(cpm), false)
-		}
-		if dangerEnded && alarmOn {
-			// saiu do perigo mas continua no alarme do usuário: só o título
-			a.flagWindow("ALARME", float64(cpm), false, false)
-		}
-		if ended || dangerEnded {
-			a.alarmEnded()
-		}
-
-		usv := cal.USv(float64(cpm))
-		r := Reading{
-			Time: now.UnixMilli(), CPM: cpm, CPS: cps,
-			USv: usv, MRh: usv / 10, Level: levels.LevelWith(float64(cpm), float64(set.AlarmCPM), lv), Alarm: alarmOn,
-			Attention: attnOn, Danger: dangerOn,
-			Saturated: satOn, SatReason: satReason, Rise: rise,
-			NoCount: noCount,
-		}
-		if cpm != rawCPM {
-			r.RawCPM = rawCPM
-			r.DTPct = (float64(cpm)/math.Max(1, float64(rawCPM)) - 1) * 100
-		}
-		if noCount {
-			r.NoCountSince = noCountSince.UnixMilli()
-		}
-		a.fillSigma(&r)
-		trayLvl := ""
-		switch {
-		case dangerOn:
-			trayLvl = "perigo"
-		case alarmOn:
-			trayLvl = "alarme"
-		case attnOn:
-			trayLvl = "atencao"
-		}
-		if !a.isDemo() {
-			a.trayTick(usv, trayLvl, noCount, satOn, false) // no demo, o ícone mostra o demo
-		}
-		a.mu.Lock()
-		a.live.add(now, float64(cpm))
-		demo := a.demo.Active
-		a.mu.Unlock()
-		if !demo {
-			a.feedMeasure(float64(cpm), cps, false)
-		}
-		if demo {
-			// no demo a tela mostra o valor simulado; o real vai à parte
-			// (e o alarme real continua valendo)
-			a.emit("realReading", r)
-		} else {
-			a.emit("reading", r)
-		}
+		a.gmcReading(time.Now(), cpm, cps, &minute)
 	}
+}
+
+// gmcReading trata uma leitura (CPM e CPS do segundo) do GMC-800: grava o
+// minuto, passa pelos alertas e manda para a tela. Fica fora do laço para os
+// testes darem leituras sem o aparelho.
+func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
+	// tempo morto: o CPM e o CPS corrigidos valem para tudo (gravação,
+	// alertas, tela); a saturação olha o que o contador mandou (o fim da
+	// escala é dele)
+	rawCPM, rawCPS := cpm, cps
+	a.mu.Lock()
+	lvDT := a.settings.Levels.Norm()
+	a.mu.Unlock()
+	cpm = uint32(math.Round(lvDT.DtCPM(float64(rawCPM))))
+	cps = uint32(math.Round(lvDT.DtCPS(float64(rawCPS))))
+
+	// virou o minuto: grava o anterior (média dos CPS, ver gmcMinute)
+	if p, ok := minute.add(now, cpm, rawCPM, cps, rawCPS, lvDT); ok {
+		a.storeMinute(p.T, p.CPM, p.Raw, p.Lv)
+	}
+
+	a.mu.Lock()
+	cal := a.convCalLocked()
+	rawCal := a.cal      // o que o contador mandou (sem correção): curva dele
+	set := a.effLocked() // limites em CPM pela calibração de agora
+	attnU, alarmU, dangerU := thrUSvLocked(a, set)
+	// medindo um objeto com o GMC: os alertas dele ficam calados (2.81)
+	acpm := cpm
+	quiet := a.measureQuietLocked("gmc", now)
+	if quiet {
+		acpm = 0
+	}
+	alarm := set.AlarmEnabled && int(acpm) >= set.AlarmCPM
+	was := a.alarmOn
+	started := alarm && !a.alarmOn
+	if alarm {
+		a.alarmOn = true
+	} else if float64(acpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
+		a.alarmOn = false
+	}
+	ended := was && !a.alarmOn
+	alarmOn := a.alarmOn && set.AlarmEnabled
+	attnWas := a.attnOn
+	lv := set.Levels.Norm()
+	attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(acpm), lv)
+	attnOn := a.attnOn
+	satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
+	dCPM := float64(acpm)
+	if satOn && !quiet {
+		dCPM = math.Max(dCPM, lv.DangerEnter()) // saturado: o perigo continua valendo
+	}
+	dangerStarted, dangerEnded := levels.DangerStep(&a.dangerOn, dCPM, lv)
+	dangerOn := a.dangerOn
+	if dangerStarted {
+		a.sat.rise = a.sat.riseFrom(now, cal.USv(lv.AttnEnter()))
+	}
+	if !dangerOn {
+		a.sat.rise = nil
+	}
+	satReason, rise := a.sat.reason, a.sat.rise
+	if satOn {
+		a.markMinuteLocked(now, store.ObsSaturation)
+	}
+	zeroSince := a.noCount.since
+	zeroStarted, zeroEnded := a.noCount.step(now, cpm, satOn)
+	noCount, noCountSince := a.noCount.on, a.noCount.since
+	a.mu.Unlock()
+	if satStarted {
+		a.logEvent(satText(satReason, lv))
+	}
+	if !satOn {
+		a.checkInterference(now, float64(rawCPS))
+	}
+	if zeroStarted {
+		a.logEvent("Sem contagens: 0 CPM há 2 min. O tubo pode estar com defeito; confira o contador")
+	}
+	if zeroEnded {
+		a.logEvent(noCountText(zeroSince, now))
+	}
+	a.stepAlerts(&a.alerts, alertStep{
+		Now: now, CPM: float64(acpm), AlarmCPM: set.AlarmCPM, Lv: lv,
+		USv: cal.USv(float64(cpm)), AttnUSv: attnU, AlarmUSv: alarmU, DngrUSv: dangerU,
+		AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
+		AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,
+		DangerStarted: dangerStarted, DangerEnded: dangerEnded,
+	})
+	if dangerStarted || started {
+		a.realAlarmStopsDemo() // alarme de verdade tira da demonstração
+	}
+	if dangerStarted {
+		a.dangerStarted(float64(cpm), false)
+	} else if started {
+		a.alarmStarted(float64(cpm), false)
+	}
+	if dangerEnded && alarmOn {
+		// saiu do perigo mas continua no alarme do usuário: só o título
+		a.flagWindow("ALARME", float64(cpm), false, false)
+	}
+	if ended || dangerEnded {
+		a.alarmEnded()
+	}
+
+	usv := cal.USv(float64(cpm))
+	r := Reading{
+		Time: now.UnixMilli(), CPM: cpm, CPS: cps,
+		USv: usv, MRh: usv / 10, Level: levels.LevelWith(float64(cpm), float64(set.AlarmCPM), lv), Alarm: alarmOn,
+		Attention: attnOn, Danger: dangerOn,
+		Saturated: satOn, SatReason: satReason, Rise: rise,
+		NoCount: noCount,
+	}
+	if cpm != rawCPM {
+		r.RawCPM = rawCPM
+		r.DTPct = (float64(cpm)/math.Max(1, float64(rawCPM)) - 1) * 100
+	}
+	if noCount {
+		r.NoCountSince = noCountSince.UnixMilli()
+	}
+	a.fillSigma(&r)
+	trayLvl := ""
+	switch {
+	case dangerOn:
+		trayLvl = "perigo"
+	case alarmOn:
+		trayLvl = "alarme"
+	case attnOn:
+		trayLvl = "atencao"
+	}
+	if !a.isDemo() {
+		a.trayTick(usv, trayLvl, noCount, satOn, false) // na demonstração, o ícone mostra a demonstração
+	}
+	a.mu.Lock()
+	a.live.add(now, float64(cpm))
+	a.mu.Unlock()
+	a.feedMeasure(float64(cpm), cps)
+	// na demonstração a tela troca este evento para a "leitura real"
+	a.emit("reading", r)
 }
 
 func (a *App) lostConnection(err error) {
@@ -2004,6 +2005,9 @@ func (a *App) GetDaily(days int) ([]DayStat, error) {
 
 // ExportCSV pergunta onde salvar e exporta todas as leituras guardadas.
 func (a *App) ExportCSV() (string, error) {
+	if a.isDemo() {
+		return "", errDemo
+	}
 	path, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
 		Title:           "Exportar leituras",
 		DefaultFilename: "radlog-gmc-leituras-" + time.Now().Format("2006-01-02") + ".csv",

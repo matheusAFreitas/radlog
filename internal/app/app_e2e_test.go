@@ -96,8 +96,8 @@ func TestEndToEnd(t *testing.T) {
 		t.Fatalf("cópias: %v", backups)
 	}
 
-	// Liga o demo: a tela vê 999 CPM, mas o que vai para o disco é o real (120).
-	a.StartDemo(999, false)
+	// Liga a demonstração: o que vai para o disco continua sendo o real (120).
+	a.SetDemo(DemoState{Scenario: "perigo"})
 	// Espera passar uma virada de minuto completa com leitura ao vivo.
 	deadline := time.Now().Add(130 * time.Second)
 	for time.Now().Before(deadline) {
@@ -116,7 +116,7 @@ func TestEndToEnd(t *testing.T) {
 	real, _ := a.store.Range(time.Now().Add(-5*time.Minute), time.Now().Add(time.Minute))
 	for _, p := range real {
 		if p.Src == store.SrcLive && p.CPM != 120 {
-			t.Fatalf("o demo vazou para o disco: %+v", p)
+			t.Fatalf("a leitura real mudou na demonstração: %+v", p)
 		}
 	}
 	a.StopDemo()

@@ -786,6 +786,9 @@ var errReportBusy = errors.New("já estou gerando um relatório; espere ele abri
 // gera o relatório: mode "completo" ou "resumo", as anotações e o anexo das
 // configurações vigentes.
 func (a *App) ExportReportWith(fromMs, toMs int64, label, mode string, notes, cfg bool) (string, error) {
+	if a.isDemo() {
+		return "", errDemo
+	}
 	if mode != "resumo" {
 		mode = "completo"
 	}
@@ -804,6 +807,9 @@ func (a *App) reportOptsSaved() reportOpts {
 }
 
 func (a *App) ExportReport(fromMs, toMs int64, label string) (string, error) {
+	if a.isDemo() {
+		return "", errDemo
+	}
 	if !a.reportBusy.TryLock() {
 		return "", errReportBusy
 	}

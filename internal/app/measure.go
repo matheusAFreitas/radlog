@@ -59,7 +59,6 @@ type MeasureState struct {
 	Elapsed int            `json:"elapsed"`
 	Counts  int            `json:"counts"`
 	Name    string         `json:"name"`
-	Demo    bool           `json:"demo"`
 	Bg      *MeasurePhase  `json:"bg"`
 	Obj     *MeasurePhase  `json:"obj"`
 	Result  *MeasureResult `json:"result"`
@@ -150,8 +149,8 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	}
 	a.mu.Lock()
 	defer a.mu.Unlock()
-	if dev == "gmc" && a.dev == nil && !a.demo.Active {
-		return a.measure, errors.New("conecte o contador (ou ligue o modo demo) para medir")
+	if dev == "gmc" && a.dev == nil {
+		return a.measure, errors.New("conecte o contador para medir")
 	}
 	a.measSpec0 = spec0
 	switch phase {
@@ -160,7 +159,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 			seconds = 60
 		}
 		prev := a.measure
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), Demo: a.demo.Active && dev == "gmc", PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode}
 		if o := prev.Other; o != nil {
 			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
 		}
@@ -221,7 +220,7 @@ const (
 // measureQuietLocked diz se os alertas do aparelho dev ficam calados agora.
 func (a *App) measureQuietLocked(dev string, now time.Time) bool {
 	m := &a.measure
-	if m.Demo || m.Phase == "" {
+	if m.Phase == "" {
 		return false
 	}
 	onObj := devName(m.Device) == dev || (m.Other != nil && m.Other.Role == "objeto" && m.Other.Device == dev)
@@ -348,9 +347,9 @@ func measT0(m *MeasureState) int64 {
 	return m.PhaseStart
 }
 
-// feedMeasure recebe a leitura de um segundo do GMC (real ou do demo).
-func (a *App) feedMeasure(cpm float64, cps uint32, demo bool) {
-	a.feedMeasureDev(measFeed{dev: "gmc", cpm: cpm, counts: int(cps), demo: demo})
+// feedMeasure recebe a leitura de um segundo do GMC.
+func (a *App) feedMeasure(cpm float64, cps uint32) {
+	a.feedMeasureDev(measFeed{dev: "gmc", cpm: cpm, counts: int(cps)})
 }
 
 // measFeed é um segundo de leitura de um aparelho.
@@ -359,7 +358,6 @@ type measFeed struct {
 	cpm    float64 // leitura ao vivo (para o gráfico)
 	counts int     // contagens desse segundo
 	usv    float64 // RC102: µSv/h do aparelho nesse segundo
-	demo   bool
 }
 
 // measPhaseLocked é o resultado da fase atual até agora. No GMC o µSv/h vem
@@ -379,7 +377,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		a.mu.Unlock()
 		return
 	}
-	if (m.Phase != "fundo" && m.Phase != "objeto") || m.Demo != f.demo || devName(m.Device) != f.dev {
+	if (m.Phase != "fundo" && m.Phase != "objeto") || devName(m.Device) != f.dev {
 		a.mu.Unlock()
 		return
 	}
@@ -445,7 +443,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			}
 			logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ) — %s",
 				name, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
-			if !f.demo { // o demo não fica salvo
+			{
 				when := m.Bg.Start
 				if m.Bg.Source == "casa" {
 					when = ph.Start
@@ -519,11 +517,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 	st := a.measureSnapLocked()
 	a.mu.Unlock()
 	if logText != "" {
-		if f.demo {
-			a.logDemoEvent(logText, kindEvent)
-		} else {
-			a.logEvent(logText)
-		}
+		a.logEvent(logText)
 	}
 	a.emit("measure", st)
 }

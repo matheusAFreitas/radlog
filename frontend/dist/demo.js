@@ -39,9 +39,12 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.81.0";
+const DEMO_VERSION = "2.82.0";
 
-function makeDemoApi() {
+function makeDemoApi(opts) {
+  // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
+  // evento "demo"; a leitura real chega pelo Go
+  const inApp = !!(opts && opts.inApp);
   let demoCloud = { state: "off", ready: true, auto: true };
   let demoCloudCode = "";
   const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
@@ -134,7 +137,109 @@ function makeDemoApi() {
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
   let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
-  let demoSt = { active: false, cpm: 20, realistic: false };
+  // ---------- demonstração (2.82): cenários tocados no tempo ----------
+  // Os dois aparelhos andam juntos, cada um com os próprios limites. Vale no
+  // navegador e dentro do app (lá o app.js troca a ponte com o Go por esta).
+  let demoSt = { active: false, scenario: "casa", usv: 0, speed: 1, sound: false, since: 0 };
+  const DEMO_K = 0.0101; // µSv/h por CPM do GMC-800 do mundo simulado
+  const gLim = () => { const lv = settings.levels || {}; return { attn: (lv.attentionCPM || 50) * DEMO_K, alarm: (settings.alarmCPM || 100) * DEMO_K, danger: (lv.dangerCPM || 1000) * DEMO_K }; };
+  const rLim = () => ({ attn: 0.4, alarm: 1.2, danger: 10.1 });
+  // um valor dentro do nível pedido, para cada aparelho com os limites dele
+  const inLv = (l, lv) => lv === "danger" ? l.danger * 1.3 : Math.min(l[lv] * 1.3, (lv === "attn" ? l.alarm : l.danger) * 0.9);
+  const bump = (p, w) => Math.exp(-(((p - 0.5) / w) ** 2));
+  // cada cenário é uma função da fase p (0 a 1) de um ciclo de 2 min
+  const DEMO_SC = {
+    casa: () => ({ g: 0.12, r: 0.12 }),
+    atencao: () => ({ g: inLv(gLim(), "attn"), r: inLv(rLim(), "attn") }),
+    alarme: () => ({ g: inLv(gLim(), "alarm"), r: inLv(rLim(), "alarm") }),
+    perigo: () => ({ g: inLv(gLim(), "danger"), r: inLv(rLim(), "danger") }),
+    fonte: (p) => ({ g: 0.12 + (gLim().alarm * 1.8 - 0.12) * bump(p, 0.16), r: 0.12 + (rLim().alarm * 1.8 - 0.12) * bump(p, 0.15) }),
+    picorc: (p) => ({ g: 0.12, r: p > 0.4 && p < 0.6 ? rLim().alarm * 0.75 : 0.13 }),
+    saturado: (p) => (p < 0.4 ? { g: 0.12 * Math.pow(2500 / 0.12, p / 0.4), r: 48, sat: p >= 0.37 ? "limite" : "" }
+      : p < 0.9 ? { g: 0.05, r: 48, sat: "queda" } : { g: 0.12, r: 48 }),
+    saida: (p) => ({ g: 0.12, r: p < 0.3 ? 0.12 : 0.07 + 0.02 * Math.sin(p * 40), away: p >= 0.3 }),
+    cs137: () => ({ g: 0.3, r: 0.34, cs: true }),
+    desconecta: () => ({ g: 0.12, r: NaN }),
+    valor: () => ({ g: demoSt.usv, r: demoSt.usv }),
+  };
+  let demoClock = 0; // segundos do cenário (10× anda 10 por segundo)
+  let demoNowV = { g: 0.12, r: 0.12 };
+  const demoSecs = [], demoRcSecs = []; // última hora, por segundo
+  const demoRcMin = new Map(); // minuto -> µSv/h do RC102 simulado
+  const demoScNow = () => {
+    const f = DEMO_SC[demoSt.scenario] || DEMO_SC.casa, v = { ...f((demoClock % 120) / 120) };
+    const j = () => 1 + (Math.random() - 0.5) * 0.08;
+    if (!v.sat) v.g *= j();
+    if (isFinite(v.r)) v.r *= j();
+    return v;
+  };
+  // alertas simulados de um aparelho (somem ao sair)
+  const demoAlertStep = (dev, u, l, danger, cpm) => {
+    const want = [];
+    if (u >= l.attn && settings.attentionEnabled !== false) want.push("atencao");
+    if (u >= l.alarm && (dev === "radiacode" || settings.alarmEnabled)) want.push("alarme");
+    if (danger || u >= l.danger) want.push("perigo");
+    let changed = false;
+    const now = Date.now(), mine = (e) => e.demo && (e.device || "") === (dev === "radiacode" ? "radiacode" : "");
+    for (const e of demoAlerts) if (e.active && mine(e)) {
+      if (!want.includes(e.level)) { e.active = false; e.end = now; changed = true; }
+      else if ((dev === "radiacode" ? u : cpm) > e.peak) { e.peak = dev === "radiacode" ? u : cpm; e.peakAt = now; }
+    }
+    const lim = { perigo: l.danger, alarme: l.alarm, atencao: l.attn };
+    for (const lv of want) if (!demoAlerts.some((e) => e.active && mine(e) && e.level === lv)) {
+      const v = dev === "radiacode" ? u : cpm;
+      const a = usvTxt(u), b = fmt(lim[lv], usvDigits(lim[lv]));
+      const text = dev === "radiacode"
+        ? { perigo: `[demo] Perigo no RC102: ${a} (limite ${b})`, alarme: `[demo] Alarme no RC102: ${a} (limite ${b})`, atencao: `[demo] Atenção no RC102: ${a} (limite ${b})` }[lv]
+        : { perigo: `[demo] Perigo: ${a} (a partir de ${b})`, alarme: `[demo] Alarme: ${a} (limite ${b})`, atencao: `[demo] Atenção: ${a} (a partir de ${b})` }[lv];
+      demoAlerts.push({ id: ++demoAlertSeq, time: now, kind: "alerta", level: lv, cpm: v, peak: v, peakAt: now, active: true, demo: true, text, ...(dev === "radiacode" ? { device: "radiacode" } : {}) });
+      changed = true;
+    }
+    return changed;
+  };
+  // "Saída de casa": prévia do cartão de pergunta, só na memória
+  const demoAwayAsk = (on) => {
+    const has = rcAsks.some((q) => q.demoAsk);
+    if (on && !has) {
+      const now = Date.now(), from = Math.floor(now / 6e4) * 6e4 - 25 * 6e4;
+      rcAsks = rcAsks.concat({ id: from, from, to: now, memMinutes: 25, avgUSv: 0.078, maxUSv: 0.11, maxAt: from + 9 * 6e4, doseUSv: 0.03, gmcUSv: 0.12, ratio: 18, normalRatio: 28, hint: "fora", demoAsk: true });
+      emit("rcaway", rcAsks.slice());
+    } else if (!on && has) {
+      rcAsks = rcAsks.filter((q) => !q.demoAsk);
+      emit("rcaway", rcAsks.slice());
+    }
+  };
+  function demoTick() {
+    demoClock += demoSt.speed === 10 ? 10 : 1;
+    const v = (demoNowV = demoScNow()), now = Date.now(), l = gLim(), rl = rLim();
+    const c = v.g / DEMO_K, danger = !!v.sat || v.g >= l.danger;
+    let changed = demoAlertStep("gmc", v.g, l, danger, c);
+    const rcOn = isFinite(v.r);
+    if (rcOn) changed = demoAlertStep("radiacode", v.r, rl, v.r >= rl.danger) || changed;
+    else for (const e of demoAlerts) if (e.active && e.device === "radiacode") { e.active = false; e.end = now; changed = true; }
+    if (changed) emit("event", { kind: "alerta" });
+    // o minuto e os segundos entram no histórico simulado (gráficos, dose)
+    const m = Math.floor(now / 6e4) * 6e4, last = pts[pts.length - 1];
+    if (last && last.t === m && last.demoN) { last.cpm = Math.round((last.cpm * last.demoN + c) / (last.demoN + 1)); last.demoN++; }
+    else pts.push({ t: m, cpm: Math.round(c), demoN: 1 });
+    demoSecs.push({ t: now, cpm: c });
+    if (rcOn) {
+      demoRcSecs.push({ t: now, usv: v.r });
+      const a = demoRcMin.get(m) || [0, 0]; demoRcMin.set(m, [a[0] + v.r, a[1] + 1]);
+    }
+    while (demoSecs.length && demoSecs[0].t < now - 36e5) demoSecs.shift();
+    while (demoRcSecs.length && demoRcSecs[0].t < now - 36e5) demoRcSecs.shift();
+    const lvl = danger ? "perigo" : v.g >= l.alarm ? "alarme" : v.g >= l.attn ? "atencao" : "seguro";
+    emit("reading", { time: now, cpm: Math.round(c), cps: pulsePoisson(c / 60), usv: v.g, mrh: v.g / 10, level: lvl, alarm: settings.alarmEnabled && v.g >= l.alarm, danger,
+      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12) });
+    feed(Math.max(0, pulsePoisson(c / 60)));
+    emit("radiacode", demoRc());
+    demoAwayAsk(!!v.away);
+    // no navegador não tem leitura real: finge uma
+    if (!inApp) emit("realReading", { time: now, cpm: 12, cps: 0, usv: 0.12, mrh: 0.012, level: "seguro", alarm: false });
+  }
+  // "Pico só no RC102": o GMC-800 não confirma
+  const demoCxSc = () => (!demoSt.active ? "" : demoSt.scenario === "picorc" ? "nao" : demoSt.scenario === "desconecta" ? "desc" : "conf");
   const withPeaks = (c) => {
     c.peaks = events.concat(demoAlerts).filter((e) => e.kind === "alerta" && e.peak && (e.peakAt || e.time) >= c.from && (e.peakAt || e.time) < c.to)
       .map((e) => ({ t: e.peakAt || e.time, cpm: e.peak, level: e.level, retro: !!e.retro }));
@@ -144,22 +249,7 @@ function makeDemoApi() {
   const chartRangePreview = (from, to) => api._chartRange(from, to);
   setInterval(() => {
     if (demoSt.active) {
-      const c = demoSt.cpm;
-      const dl = (settings.levels || {}).dangerCPM || 1000, al = (settings.levels || {}).attentionCPM || 50;
-      const want = c >= settings.alarmCPM ? ["alarme"] : c >= al ? ["atencao"] : [];
-      if (c >= settings.alarmCPM && c >= al) want.push("atencao");
-      if (c >= dl) want.unshift("perigo");
-      let changed = false;
-      for (const e of demoAlerts) if (e.active && !want.includes(e.level)) { e.active = false; e.end = Date.now(); changed = true; }
-      for (const lv of want) if (!demoAlerts.some((e) => e.active && e.level === lv)) {
-        demoAlerts.push({ id: ++demoAlertSeq, time: Date.now(), kind: "alerta", level: lv, cpm: c, peak: c, peakAt: Date.now(), active: true, demo: true,
-          text: lv === "perigo" ? `[demo] Perigo: ${c} CPM (a partir de ${dl})` : lv === "alarme" ? `[demo] Alarme: ${c} CPM (limite ${settings.alarmCPM})` : `[demo] Atenção: ${c} CPM (a partir de ${al})` });
-        changed = true;
-      }
-      if (changed) { emit("event", { kind: "alerta" }); }
-      emit("reading", { time: Date.now(), cpm: c, cps: pulsePoisson(c / 60), usv: c * 0.0101, mrh: c * 0.00101, level: c >= dl ? "perigo" : c >= 100 ? "alarme" : c >= 50 ? "atencao" : "seguro", alarm: settings.alarmEnabled && c >= settings.alarmCPM, danger: c >= dl, saturated: c * 0.0101 >= 2000, satReason: "limite", rise: c >= dl ? { fromUSv: 0.13, seconds: 3 } : null, demo: true, attention: c >= al, bgCPM: 20, sigma: (c - 20) / Math.sqrt(20) });
-      feed(Math.max(0, Math.round(c / 60 + (Math.random() - 0.5) * 2)));
-      emit("realReading", { time: Date.now(), cpm: 21, cps: 0, usv: 0.137, mrh: 0.0137, level: "seguro", alarm: false });
+      demoTick();
       return;
     }
     if (status.state !== "conectado") return;
@@ -384,7 +474,8 @@ function makeDemoApi() {
   // localStorage rcFake=1: finge um Radiacode conectado (para ver a tela no demo)
   const usvEv = (e) => (e.kind !== "alerta" || e.device === "radiacode" ? e
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
-  const demoRcFake = () => { try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
+  // na demonstração o RC102 existe (menos no cenário "Aparelho desconecta")
+  const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
     run: null,
@@ -459,10 +550,11 @@ function makeDemoApi() {
   const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
 const demoRc = () => {
     const st = demoRcReal();
-    if (!(demoSt && demoSt.active && demoSt.rc)) return st;
-    const u = demoSt.rcUSv || 0, l = st.limits || { attn: 0.4, alarm: 1.2, danger: 10.1 };
-    return Object.assign({ limits: l, stats: { bgUSv: 0.097 } }, st, { state: "conectado", via: st.state === "conectado" ? st.via : "demo", demo: true, time: Date.now(), usvh: u * (0.97 + Math.random() * 0.06), cps: u * 85, usvhErr: 8,
-      alertLevel: u >= l.danger ? "perigo" : u >= l.alarm ? "alarme" : u >= l.attn ? "atencao" : "", limits: l });
+    if (!demoSt.active) return st;
+    if (demoSt.scenario === "desconecta") return { state: "procurando", ble: "", bleOK: true, off: false, demo: true };
+    const u = demoNowV.r || 0, l = rLim();
+    return Object.assign({ stats: { bgUSv: 0.12 } }, st, { state: "conectado", via: "demo", demo: true, time: Date.now(), usvh: u, cps: u * 85, usvhErr: 8, offscale: false,
+      alertLevel: u >= l.danger ? "perigo" : u >= l.alarm ? "alarme" : u >= l.attn ? "atencao" : "", limits: { ...l, device: true } });
   };
   const demoRcReal = () => demoRcFake() && !demoRcCfg.off
     ? { alertLevel: localStorage.getItem("rcAlert") || "", limits: { attn: 0.4, alarm: 1.2, danger: 10.1, device: true }, today: 0.84, lastT: Date.now() - 60e3, lastUSv: 0.098, lastCPS: 3.2, attnUSv: 0.505, alarmUSv: 1.01, dangerUSv: 10.1,
@@ -480,7 +572,8 @@ const demoRc = () => {
     GetAutostartStatus: async () => ({ available: true, on: !!settings.startWithWindows, path: "C:\\Users\\voce\\Downloads\\RadLog-v2.0.0.exe", exists: false, current: false, disabled: false, started: false }),
     FixAutostart: async () => ({}),
     SaveSettings: async (s) => { settings = s; setTimeout(() => emit("rain-status", rainStatus()), 0); return s; },
-    GetStatus: async () => status,
+    // na demonstração o GMC-800 aparece "simulado" no lugar da porta
+    GetStatus: async () => (demoSt.active ? { ...status, state: "conectado", device: { ...dev, port: "simulado" } } : status),
     GetLogs: async (q) => {
       const now = Date.now(), from = q.from || now - 3 * 86400e3, to = q.to || now;
       const msgs = [["INFO", "conexão", "conexão: ok, GMC-800Re1.23 em COM5, série 5A 10 33 38 31 30 03 00 48 36 37 31"], ["INFO", "leitura ao vivo", "leitura ao vivo: começou"],
@@ -564,10 +657,30 @@ const demoRc = () => {
     OpenConfigBackups: async () => {},
     RestoreDeviceConfig: async () => "",
     SnapshotDeviceConfig: async () => {},
-    GetDemo: async () => demoSt,
-    StartDemo: async (cpm, realistic) => (demoSt = Object.assign({}, demoSt, { active: true, cpm, realistic })),
-    SetDemoRc: async (on, usv) => { if (!demoSt.active) return demoSt; demoSt = Object.assign({}, demoSt, { rc: on, rcUSv: usv }); emit("radiacode", demoRc()); return demoSt; },
-    StopDemo: async () => { demoAlerts = []; demoSt = { active: false, cpm: 20, realistic: false }; emit("event", { kind: "alerta" }); emit("demo", demoSt); return demoSt; },
+    GetDemo: async () => ({ ...demoSt }),
+    SetDemo: async (st) => {
+      const was = demoSt;
+      const sc = DEMO_SC[st.scenario] ? st.scenario : "casa";
+      demoSt = { active: true, scenario: sc, usv: Math.min(10000, Math.max(0, +st.usv || 0)), speed: st.speed === 10 ? 10 : 1, sound: !!st.sound, since: st.since || was.since || Date.now() };
+      if (!was.active || was.scenario !== sc) demoClock = 0;
+      demoNowV = demoScNow();
+      if (!inApp) emit("demo", { ...demoSt });
+      if (!was.active) api.GetStatus().then((s) => emit("status", s));
+      return { ...demoSt };
+    },
+    StopDemo: async () => {
+      demoAlerts = []; demoAwayAsk(false);
+      for (let i = pts.length - 1; i >= 0; i--) if (pts[i].demoN) pts.splice(i, 1);
+      demoSecs.length = 0; demoRcSecs.length = 0; demoRcMin.clear();
+      demoSt = { active: false, scenario: "casa", usv: 0, speed: 1, sound: false, since: 0 };
+      emit("event", { kind: "alerta" }); emit("radiacode", demoRc());
+      if (!inApp) emit("demo", { ...demoSt });
+      emit("status", status);
+      return { ...demoSt };
+    },
+    DemoTray: async () => {},
+    // dentro do app: as preferências da tela (idioma, escala, som) vêm do Go
+    _seedSettings: (s) => { if (s) settings = Object.assign({}, s, { levels: {}, alarmCPM: 100, port: "COM5" }); },
     GetVersion: async () => "navegador",
     ExportMeasureReport: async (id) => { await new Promise((r) => setTimeout(r, 300)); return `C:\\Users\\voce\\Documents\\RadLog\\Relatórios\\gmc-medicao-${id}.pdf`; },
     OpenReportFile: async () => {},
@@ -635,7 +748,8 @@ const demoRc = () => {
         const e = En(i); if (e < 20) return 0;
         const pk = (pe, r) => { const sg = 65 * Math.sqrt(pe / 661.7) / 2.355; return r * 2.35 / (sg * 2.5066) * Math.exp(-(((e - pe) / sg) ** 2) / 2); };
         let v = 0.035 * Math.exp(-e / 350) + pk(1460.8, 0.08) + pk(609.3, 0.06) + pk(351.9, 0.06) + pk(295.2, 0.03) + pk(238.6, 0.04) + pk(2614.5, 0.01) + pk(1764.5, 0.01);
-        if (th) v += 0.09 * Math.exp(-e / 300) + pk(238.6, 3) + pk(583.2, 1) + pk(911.2, 0.5) + pk(2614.5, 0.4) + pk(75, 1.5);
+        if (th && demoSt.active && demoSt.scenario === "cs137") v += 0.06 * Math.exp(-e / 250) + pk(661.7, 2.6) + pk(32, 0.6);
+        else if (th) v += 0.09 * Math.exp(-e / 300) + pk(238.6, 3) + pk(583.2, 1) + pk(911.2, 0.5) + pk(2614.5, 0.4) + pk(75, 1.5);
         return v;
       };
       const pois = (l) => { if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * (Math.random() + Math.random() + Math.random() - 1.5) * 2)); let k = 0, p = 1; const L = Math.exp(-l); do { k++; p *= Math.random(); } while (p > L); return k - 1; };
@@ -696,6 +810,7 @@ const demoRc = () => {
     },
     GetRcWindowPeaks: async (from, to) => {
       const ago = (Date.now() - (from + to) / 2) / 3600e3;
+      if (demoSt.active && demoSt.scenario === "cs137" && ago < 0.25) return [{ group: "Césio-137", nuclide: "Cs-137", kev: 661.7, net: 300, sigma: 12 }];
       if (ago < 0.75 && ago > 0.35) return [{ group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 400, sigma: 14 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 120, sigma: 6 }];
       if (ago < 6 && ago > 3) return [{ group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 200, sigma: 7 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 150, sigma: 5 }];
       return [];
@@ -795,8 +910,8 @@ const demoRc = () => {
       }
       return { year: y, first, today, days };
     },
-    GetCrossCheck: async (dev, from, to, series) => cxDemo(dev, from, to, series),
-    GetCrossChecks: async (reqs) => reqs.map((r) => cxDemo(r.dev, r.from, r.to, false)),
+    GetCrossCheck: async (dev, from, to, series) => cxDemo(dev, from, to, series, demoCxSc()),
+    GetCrossChecks: async (reqs) => reqs.map((r) => cxDemo(r.dev, r.from, r.to, false, demoCxSc())),
     GetBgSlow: async () => bsDemo(localGet("fundoDemo", "amb"), +localGet("fundoMoved", 0)),
     MarkBgMoved: async (d) => { const t = new Date(d || Date.now()); t.setHours(0, 0, 0, 0); localSet("fundoMoved", t.getTime()); return bsDemo(localGet("fundoDemo", "amb"), t.getTime()); },
     ClearBgMoved: async () => { localSet("fundoMoved", 0); return bsDemo(localGet("fundoDemo", "amb"), 0); },
@@ -895,7 +1010,8 @@ const demoRc = () => {
       { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 44000, sigma: 125 }, { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: 21000, sigma: 60 },
       { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 30000, sigma: 80 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 1764.5, net: 2000, sigma: 9 },
       { group: "Potássio-40", nuclide: "K-40", kev: 1460.8, net: 9000, sigma: 40 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 900, sigma: 7 },
-      { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 6 }] : sp.objSec > 20 ? [
+      { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 6 }] : sp.objSec > 20 && demoSt.active && demoSt.scenario === "cs137" ? [
+      { group: "Césio-137", nuclide: "Cs-137", kev: 661.7, net: 640, sigma: 21 }] : sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
     SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
@@ -1464,6 +1580,20 @@ const demoRc = () => {
         c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
         c.rcAvgCPM = c.rcAvg == null ? null : c.rcAvg * 4950;
       }
+      if (demoSt.active && c.times) { // o RC102 do cenário por cima
+        c.rc = c.rc || c.times.map(() => null);
+        const st = c.stepMs || 6e4;
+        c.times.forEach((t0, i) => {
+          let s = 0, k = 0;
+          if (st < 6e4) for (const q of demoRcSecs) { if (q.t >= t0 && q.t < t0 + st) { s += q.usv; k++; } }
+          else for (const [m, a] of demoRcMin) if (m >= t0 && m < t0 + st) { s += a[0]; k += a[1]; }
+          if (k) c.rc[i] = s / k;
+        });
+        const ok = c.rc.filter((v) => v != null);
+        c.rcAvg = ok.length ? ok.reduce((a, b) => a + b, 0) / ok.length : null;
+        c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
+        c.rcAvgCPM = c.rcAvg == null ? null : c.rcAvg * 4950;
+      }
       return Object.assign(c, { avgUSv: u(c.avg), minUSv: u(c.min), maxUSv: u(c.max) });
     },
     _unused: async (period) => {
@@ -1478,6 +1608,12 @@ const demoRc = () => {
           if (i >= 0 && i < n) { sums[i] += p.cpm; cnt[i]++; }
         }
       });
+      // demonstração: os segundos do cenário valem por cima dos minutos
+      if (step < 6e4 && demoSecs.length) {
+        const ss = new Array(n).fill(0), sc = new Array(n).fill(0);
+        for (const q of demoSecs) { const i = Math.floor((q.t - from) / step); if (i >= 0 && i < n) { ss[i] += q.cpm; sc[i]++; } }
+        for (let i = 0; i < n; i++) if (sc[i]) { sums[i] = ss[i]; cnt[i] = sc[i]; }
+      }
       return {
         from, to, stepMs: step,
         times: sums.map((_, i) => from + i * step),
