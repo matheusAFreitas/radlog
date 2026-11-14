@@ -23,6 +23,18 @@ func Handles(ext string) bool {
 	return false
 }
 
+// Risky diz se a extensão é de um tipo que pode levar a localização dentro
+// (foto RAW ou TIFF, vídeo) e que o app não sabe limpar: esse anexo fica só
+// no PC, fora do backup e da nuvem (auditoria 2.79.0, S1).
+func Risky(ext string) bool {
+	switch strings.ToLower(strings.TrimPrefix(ext, ".")) {
+	case "tif", "tiff", "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "orf", "rw2", "raf", "pef", "srw", "x3f", "3fr", "rwl", "iiq",
+		"mp4", "m4v", "mov", "qt", "3gp", "3g2", "avi", "mkv", "webm", "mts", "m2ts":
+		return true
+	}
+	return false
+}
+
 // Strip devolve a imagem sem os metadados. Para extensões que não são de
 // foto devolve b como veio.
 func Strip(b []byte, ext string) ([]byte, error) {

@@ -159,3 +159,57 @@ func TestCloudTooBigSkipped(t *testing.T) {
 		t.Fatalf("baixou o que devia pular: %d", len(pts))
 	}
 }
+
+// QA da 2.80.4: os dois aparelhos acham a mesma pasta vazia e criam a meta
+// nela: vale a meta mais antiga, e quem perdeu tira a sua.
+func TestCloudCreateRaceSameFolder(t *testing.T) {
+	srv := fakeCloud(t)
+	d := cloudDriveFn(func(context.Context) (string, error) { return "x", nil })
+	if _, err := d.CreateFolder(context.Background(), cloudFolderName); err != nil {
+		t.Fatal(err)
+	}
+	a, _ := testApp(t)
+	b, _ := testApp(t)
+	if done := cloudLogin(t, a); done.Next != "new" {
+		t.Fatalf("a: %+v", done)
+	}
+	cloudLogin(t, b)
+	ca, _ := a.NewCloudCode()
+	if _, err := a.CloudFinishSetup(ca); err != nil {
+		t.Fatal(err)
+	}
+	cb, _ := b.NewCloudCode()
+	if _, err := b.CloudFinishSetup(cb); !errors.Is(err, errCloudRace) {
+		t.Fatalf("b ficou com outra meta: %v", err)
+	}
+	if n := len(srv.Named(rs.MetaFile)); n != 1 {
+		t.Fatalf("metas: %d", n)
+	}
+	a.cloudSync()
+	if st := a.GetCloud(); st.State != "ok" {
+		t.Fatalf("a: %+v", st)
+	}
+}
+
+// QA da 2.80.4: o outro aparelho criou a pasta e ainda não subiu a meta
+// quando este confere: a pasta mais antiga e recente vence assim mesmo.
+func TestCloudCreateRaceNoMetaYet(t *testing.T) {
+	srv := fakeCloud(t)
+	b, _ := testApp(t)
+	cloudLogin(t, b)
+	d := cloudDriveFn(func(context.Context) (string, error) { return "x", nil })
+	if _, err := d.CreateFolder(context.Background(), cloudFolderName); err != nil { // a, no meio
+		t.Fatal(err)
+	}
+	cb, _ := b.NewCloudCode()
+	if _, err := b.CloudFinishSetup(cb); !errors.Is(err, errCloudRace) {
+		t.Fatalf("b criou outra nuvem: %v", err)
+	}
+	if n := len(srv.Named(rs.MetaFile)); n != 0 {
+		t.Fatalf("metas: %d", n)
+	}
+	fs, _ := d.FindFolders(context.Background(), cloudFolderName)
+	if len(fs) != 1 {
+		t.Fatalf("pastas: %d", len(fs))
+	}
+}

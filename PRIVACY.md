@@ -1,6 +1,6 @@
 # RadLog privacy policy
 
-*Last updated: 2026-11-13* · [Português](PRIVACY.pt-BR.md)
+*Last updated: 2026-11-14* · [Português](PRIVACY.pt-BR.md)
 
 RadLog is a free, open-source desktop app that records readings from personal radiation meters (GQ GMC-800 and Radiacode 102). This page explains what happens to your data.
 
@@ -17,11 +17,16 @@ The cloud backup is off by default. When you turn it on and sign in with Google:
 - **Scopes requested:** `openid`, `email` and `https://www.googleapis.com/auth/drive.file`.
   - `drive.file` only lets RadLog see and change the files and the folder that RadLog itself created in your Drive. It cannot see, read or change any other file in your Drive.
   - `email` is used only to show which Google account is connected, on the app's settings screen. It is not written to logs, backups, PDF reports or the cloud.
-- **What is uploaded:** your readings, alerts, notes, measurements and their attachments, encrypted on your computer with AES-256-GCM before upload. The key comes from a recovery code that only you have. File names in Drive are random-looking, so they do not reveal dates or devices.
-- **What is never uploaded:** your location, coordinates or photo metadata (photo location is stripped before upload).
+- **What is uploaded:** everything is encrypted on your computer with AES-256-GCM before upload. The key comes from a recovery code that only you have. File names in Drive are random-looking, so they do not reveal dates or devices. Uploaded:
+  - readings (GMC-800 minutes and Radiacode 102 rows) and spectra;
+  - alerts, notes and measurements, with their attachments;
+  - times away from home, with the name you gave each one (if that name is a place, it is uploaded, encrypted);
+  - the settings and calibration histories of the meters;
+  - this device's name in the cloud, which is the PC name by default (you can change it in the app).
+- **What is never uploaded:** the place and coordinates from the settings, and photo metadata (location is stripped from jpg, png, webp, heic and avif photos before upload). Attachments of types that can carry a location and that the app cannot clean (videos, TIFF and RAW photos) stay only on your computer: they do not go to the cloud, the backup or the local network sync.
 - **Where it goes:** directly from your computer to Google Drive. It does not pass through any server of ours.
-- **Tokens:** the Google sign-in token and your recovery code are stored only on your computer (protected by Windows DPAPI on Windows).
-- **Turning it off:** "Disconnect from Google" in the app removes the token and code from your computer. You can also revoke access at https://myaccount.google.com/permissions and delete the RadLog folder from your Drive at any time.
+- **Tokens:** the Google sign-in token and your recovery code are stored only on your computer. On Windows they are protected by DPAPI; on Linux they are in a file only your user can read. On Windows, the code copied in the app stays out of the clipboard history and is cleared from the clipboard after 1 minute.
+- **Turning it off:** "Disconnect from Google" in the app removes the token and code from your computer. If it is the only device in the cloud, RadLog is also removed from your Google account's app list. You can also revoke access at https://myaccount.google.com/permissions and delete the RadLog folder from your Drive at any time.
 
 RadLog's use and transfer of information received from Google APIs adheres to the [Google API Services User Data Policy](https://developers.google.com/terms/api-services-user-data-policy), including the Limited Use requirements. Data from Google APIs is used only to provide the backup feature to you. It is not sold, not shared with third parties, not used for advertising and not used to train AI models.
 

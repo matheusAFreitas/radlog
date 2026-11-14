@@ -16,6 +16,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/photometa"
 	rs "radlog/internal/sync"
 )
 
@@ -148,8 +149,8 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 	a.mu.Lock()
 	for _, m := range a.measurements {
 		for _, at := range m.Attachments {
-			if m.UID == "" {
-				continue
+			if m.UID == "" || photometa.Risky(filepath.Ext(at.File)) {
+				continue // tipo que pode levar a localização fica no PC (S1)
 			}
 			out = append(out, cloudPack{key: "anexo|" + m.UID + "/" + at.File, kind: rs.KindAttachment,
 				month: time.UnixMilli(m.Time).UTC().Format("2006-01"), digest: "1",

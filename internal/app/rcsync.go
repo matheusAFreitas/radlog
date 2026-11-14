@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"radlog/internal/photometa"
 )
 
 // ---------- sincronização entre PCs: Radiacode, históricos e anexos (2.7.1) ----------
@@ -266,6 +268,9 @@ func (a *App) attachInventory() []string {
 	out := []string{}
 	for _, m := range a.measurements {
 		for _, at := range m.Attachments {
+			if photometa.Risky(filepath.Ext(at.File)) {
+				continue // fica só neste PC (S1)
+			}
 			out = append(out, fmt.Sprintf("%d/%s", m.Time/1000, at.File))
 		}
 	}

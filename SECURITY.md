@@ -57,6 +57,17 @@ key is gone. Steps then:
 `TestKeyRotation` in `internal/updsig/updsig_test.go` rehearses these steps
 with throwaway keys.
 
+## Cloud backup (Google Drive)
+
+The optional cloud backup encrypts everything on the computer (AES-256-GCM,
+key derived with HKDF-SHA256 from a 24-character recovery code that only the
+user has) before it goes to the user's own Drive, with the `drive.file`
+scope. The file format and test vectors are in
+[docs/nuvem-formato.md](docs/nuvem-formato.md); what goes up and what never
+does is in [PRIVACY.md](PRIVACY.md). Problems in the encryption, the sign-in
+or the merge of files from other devices are security problems: report them
+as above.
+
 ## If a signing key leaks
 
 If someone else may have a private key (secret exposed in a log, PC
@@ -114,6 +125,17 @@ nesse caso:
 
 O `TestKeyRotation` em `internal/updsig/updsig_test.go` ensaia esses passos
 com chaves de teste.
+
+## Backup na nuvem (Google Drive)
+
+O backup na nuvem, opcional, cifra tudo no computador (AES-256-GCM, chave
+tirada com HKDF-SHA256 de um código de recuperação de 24 caracteres que só a
+pessoa tem) antes de mandar para o Drive dela, com a permissão `drive.file`.
+O formato dos arquivos e os vetores de teste estão em
+[docs/nuvem-formato.md](docs/nuvem-formato.md); o que sobe e o que nunca
+sobe está em [PRIVACY.pt-BR.md](PRIVACY.pt-BR.md). Falha na cifra, no login
+ou na junção dos arquivos de outros aparelhos é problema de segurança:
+avise como descrito acima.
 
 ## Se uma chave vazar
 

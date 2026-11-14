@@ -1,5 +1,27 @@
 # Versões
 
+## 2.80.6
+- Anexos de tipos que podem levar a localização dentro e que o app não sabe
+  limpar (vídeos, fotos TIFF e RAW) ficam só neste PC: não vão para o
+  backup, a nuvem nem a sincronização pela rede. O app avisa ao anexar.
+- Nuvem: dois aparelhos criando a nuvem no mesmo minuto agora terminam
+  sempre com uma nuvem só, mesmo quando os dois acham a mesma pasta vazia.
+- Política de privacidade: a lista do que sobe para a nuvem ficou completa
+  (saídas de casa com os nomes delas, espectros, históricos de configuração
+  e calibração, nome do aparelho). A página de segurança fala da nuvem.
+
+**English**
+
+- Attachments of types that can carry a location inside and that the app
+  cannot clean (videos, TIFF and RAW photos) stay only on this PC: they do
+  not go to the backup, the cloud or the local network sync. The app says
+  so when attaching.
+- Cloud: two devices creating the cloud in the same minute now always end
+  up with a single cloud, even when both find the same empty folder.
+- Privacy policy: the list of what goes up to the cloud is now complete
+  (times away from home with their names, spectra, settings and
+  calibration histories, device name). The security page covers the cloud.
+
 ## 2.80.5
 - Nuvem: arquivo grande (mais de 8 MB, como uma foto anexada) sobe em
   pedaços. Se a conexão cair no meio, o envio continua do último pedaço
