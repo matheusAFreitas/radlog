@@ -542,8 +542,6 @@ body.danger .hero.alarm { border-color: var(--warn); }
 .heat .c.away { background: color-mix(in srgb, var(--away) 50%, transparent); }
 input[type="datetime-local"] { min-height: 44px; padding: 0 var(--space-3); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font: inherit; color-scheme: dark; }
 
-.new-ranges li { flex-wrap: wrap; }
-.new-ranges li.answered { opacity: .7; }
 .nr-form { display: flex; gap: var(--space-2); flex-basis: 100%; min-width: 0; max-width: 100%; }
 .nr-form .btn { flex: none; }
 .nr-form[hidden] { display: none; }
@@ -685,7 +683,6 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .sum-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
 .sum-table td { font-family: var(--mono); }
 .sum-table .sw { display: inline-block; width: 10px; height: 10px; border-radius: var(--radius-xs); vertical-align: middle; }
-.nr-sum { display: block; margin-top: 2px; }
 
 /* anotações */
 .note-marks { position: absolute; inset: 0 0 auto 0; height: 0; pointer-events: none; }
@@ -1971,9 +1968,6 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .rca-done { flex-direction: row; align-items: center; gap: var(--space-3); padding: var(--space-4) var(--space-5); }
 .rca-done > span { flex: 1; display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
 .chip.rca-pending { border-style: dashed; }
-.nr-form:has(.nr-who) { flex-wrap: wrap; }
-.nr-who { flex-basis: 100%; display: flex; align-items: center; gap: var(--space-4); flex-wrap: wrap; }
-.nr-who > span { display: inline-flex; align-items: center; gap: var(--space-2); }
 
 /* "Como funciona" (2.38.2): o texto que só explica fica fechado no pé do cartão */
 :is(#settings, .rc-card, #pageAlara) details.how { margin-top: var(--space-1); color: var(--muted); font-size: var(--fs-label); }
@@ -2920,3 +2914,7 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
   .cloud-code { grid-template-columns: repeat(2, 1fr); }
   .cloud-inputs { grid-template-columns: minmax(0, 1fr); }
 }
+/* aviso com título e botão (2.83.0) */
+.toast.rich { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
+.toast.rich.ok { border-color: var(--accent-line); }
+.toast.rich .btn { margin-top: var(--space-1); }

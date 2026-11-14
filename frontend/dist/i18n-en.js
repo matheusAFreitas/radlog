@@ -4284,7 +4284,36 @@ const I18N_EN = {
 "Fonte chegando perto": "Source coming closer",
 "Aparelho desconecta": "Device disconnects",
 "Valor escolhido": "Chosen value",
-"Não deu para ligar a demonstração neste computador.": "Couldn't turn on the demo on this computer."
+"Não deu para ligar a demonstração neste computador.": "Couldn't turn on the demo on this computer.",
+"\"Saí de casa\": as medições do aparelho que foi com você saem do fundo da casa e continuam na sua dose.": "\"I left home\": readings from the device that went with you leave the home background and still count in your dose.",
+"Baixar a memória sozinho ao conectar": "Download the memory automatically on connect",
+"Estava em casa": "I was home",
+"GMC-800 e RC102 sem conexão: você estava fora de casa?": "GMC-800 and RC102 offline: were you away from home?",
+"GMC-800 e RadiaCode sem conexão: você estava fora de casa?": "GMC-800 and RC102 offline: were you away from home?",
+"GMC-800 sem conexão: você estava fora de casa?": "GMC-800 offline: were you away from home?",
+"Histórico": "History",
+"Histórico do GMC-800 baixado": "GMC-800 history downloaded",
+"Não deu para baixar a memória do GMC-800": "Couldn't download the GMC-800 memory",
+"Para onde (opcional)": "Where to (optional)",
+"Parece que algum aparelho saiu de casa.": "Looks like a device left home.",
+"Parece que os dois ficaram em casa.": "Looks like both stayed home.",
+"Perguntar se foi fora de casa a partir de um trecho sem leitura de pelo menos (min)": "Ask if you were away from home for a stretch without readings of at least (min)",
+"Saí de casa…": "I left home…",
+"Toda vez que ele conecta de novo. O botão \"Baixar histórico\" continua.": "Every time it connects again. The \"Download history\" button stays.",
+"Você estava fora de casa?": "Were you away from home?",
+"a volta precisa ser depois da saída": "the return must be after leaving",
+"histórico automático: nada novo na memória do GMC-800": "automatic history: nothing new in the GMC-800 memory",
+"histórico do GMC-800 sozinho": "automatic GMC-800 history",
+"média do GMC-800": "GMC-800 average",
+"o GMC-800 e o RC102 ficaram sem conexão": "the GMC-800 and the RC102 were offline",
+"o GMC-800 e o RadiaCode ficaram sem conexão": "the GMC-800 and the RC102 were offline",
+"o GMC-800 ficou sem conexão com o app": "the GMC-800 was not connected to the app",
+"o GMC-800 ficou sem conexão, o RC102 estava no PC": "the GMC-800 was offline, the RC102 was on the PC",
+"o GMC-800 ficou sem conexão, o RadiaCode estava no PC": "the GMC-800 was offline, the RC102 was on the PC",
+"a pergunta \"fora de casa?\" está no Agora": "the \"away from home?\" question is on Now",
+". A pergunta \"fora de casa?\" está no Agora.": ". The \"away from home?\" question is on Now.",
+"Responder depois": "Answer later",
+"Parece que o GMC-800 ficou em casa.": "Looks like the GMC-800 stayed home."
 },
 "patterns": [
 [
@@ -5393,6 +5422,16 @@ const I18N_EN = {
 [
 "Lendo o ",
 " (média dos últimos 5 s). Vale também para achar o lado mais forte de um objeto grande."
+]
+],
+[
+"histórico: o GMC-800 trouxe ",
+"^histórico: o GMC\\-800 trouxe ((?:(?! · ).)+?) sem conexão \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\); o app pergunta na tela Agora se foi fora de casa$",
+"history: the GMC-800 brought ${1} offline (${2} to ${3}); the app asks on the Now screen if you were away from home",
+[
+"histórico: o GMC-800 trouxe ",
+" sem conexão (",
+"); o app pergunta na tela Agora se foi fora de casa"
 ]
 ],
 [
@@ -6948,6 +6987,16 @@ const I18N_EN = {
 ]
 ],
 [
+"A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
+"^A conta RadiaCode ÷ GMC\\-800 ficou perto da normal \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\)\\.$",
+"The RC102 ÷ GMC-800 ratio stayed close to normal (${1} vs ${2}).",
+[
+"A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
+" contra ",
+")."
+]
+],
+[
 "Precisão do líquido: ±",
 "^Precisão do líquido: ±((?:(?! · ).)+?)%\\. Para ±10%: ((?:(?! · ).)+?) em cada fase; para ±5%: ((?:(?! · ).)+?)\\.$",
 "Precision of the net value: ±${1}%. For ±10%: ${2} in each phase; for ±5%: ${3}.",
@@ -7249,6 +7298,16 @@ const I18N_EN = {
 "RadLog ",
 " — diagnóstico da dose do GMC Contador: ",
 " Leituras: "
+]
+],
+[
+"A conta RC102 ÷ GMC-800 ficou perto da normal (",
+"^A conta RC102 ÷ GMC\\-800 ficou perto da normal \\(((?:(?! · ).)+?) contra ((?:(?! · ).)+?)\\)\\.$",
+"The RC102 ÷ GMC-800 ratio stayed close to normal (${1} vs ${2}).",
+[
+"A conta RC102 ÷ GMC-800 ficou perto da normal (",
+" contra ",
+")."
 ]
 ],
 [
@@ -7918,6 +7977,16 @@ const I18N_EN = {
 ]
 ],
 [
+"A conta RadiaCode ÷ GMC-800 mudou: ",
+"^A conta RadiaCode ÷ GMC\\-800 mudou: ((?:(?! · ).)+?) contra ((?:(?! · ).)+?) em casa\\.$",
+"The RC102 ÷ GMC-800 ratio changed: ${1} vs ${2} at home.",
+[
+"A conta RadiaCode ÷ GMC-800 mudou: ",
+" contra ",
+" em casa."
+]
+],
+[
 "3 erros seguidos em ",
 "^3 erros seguidos em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\), com a porta ainda na lista$",
 "3 errors in a row on ${1} (${2}), with the port still in the list",
@@ -8415,6 +8484,16 @@ const I18N_EN = {
 [
 "Os alarmes do ",
 " ficam em silêncio até o resultado."
+]
+],
+[
+"A conta RC102 ÷ GMC-800 mudou: ",
+"^A conta RC102 ÷ GMC\\-800 mudou: ((?:(?! · ).)+?) contra ((?:(?! · ).)+?) em casa\\.$",
+"The RC102 ÷ GMC-800 ratio changed: ${1} vs ${2} at home.",
+[
+"A conta RC102 ÷ GMC-800 mudou: ",
+" contra ",
+" em casa."
 ]
 ],
 [
@@ -9351,6 +9430,15 @@ const I18N_EN = {
 [
 "[demo] Atenção no RadiaCode: ",
 " (limite "
+]
+],
+[
+"Leitura cancelada: ",
+"^Leitura cancelada: ((?:(?! · ).)+?) minutos novos guardados$",
+"Download canceled: ${1} new minutes kept",
+[
+"Leitura cancelada: ",
+" minutos novos guardados"
 ]
 ],
 [
@@ -16657,6 +16745,14 @@ const I18N_EN = {
 "· ${1} without readings",
 [
 " sem leitura"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) novos, de ((?:(?! · ).)+?) a ((?:(?! · ).)+?)$",
+"${1} new, from ${2} to ${3}",
+[
+" novos, de "
 ]
 ],
 [

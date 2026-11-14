@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.82.0";
+const DEMO_VERSION = "2.83.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -131,6 +131,12 @@ function makeDemoApi(opts) {
   const plDemoName = LANG === "en" ? "Office" : "Escritório";
   const plMode = localGet("rcPlan", "");
   if (plMode) rcAsksAll.splice(0, 1, { id: plY, from: plMode === "2" ? plY : plY + 11 * 6e4, to: plY + 13 * 36e5 + 2 * 6e4, kind: "programada", planned: plY, name: plDemoName, rcGoes: true, gmcGoes: false, planAt: plY, source: plMode === "2" ? "plano" : "razao", estimated: plMode === "2", missed: plMode === "2", backHint: plMode === "2" ? 0 : plY + 11 * 36e5 + 53 * 6e4, dev: "radiacode", memMinutes: 780, avgUSv: 0.13, maxUSv: 0.2, maxAt: plY + 3 * 36e5, doseUSv: 1.7, gmcUSv: 0.098, ratio: 39, normalRatio: 28, hint: "fora" });
+  // "Você estava fora de casa?" do histórico do GMC-800 (2.83.0): uma noite
+  // com o PC desligado; aparece ao baixar o histórico (ou com localStorage awAsk=1)
+  const awT = Math.floor((now - 2 * 36e5) / 6e4) * 6e4, awF = awT - 461 * 6e4;
+  const awAsk = { id: awF, from: awF, to: awT, kind: "ambos", gmcMinutes: 461, gmcUSv: 0.101, gmcMaxUSv: 0.142, gmcMaxAt: awF + 229 * 6e4, gmcDoseUSv: 0.77, alerts: 0,
+    memMinutes: 455, avgUSv: 0.128, maxUSv: 0.17, doseUSv: 0.98, ratio: 28.6, normalRatio: 28, hint: "casa" };
+  if (localGet("awAsk", "") === "1") rcAsksAll.push(awAsk);
   let rcAsks = rcAsksAll.slice();
   const plTomorrow = new Date(now + 864e5).setHours(5, 30, 0, 0);
   let planned = [{ id: plTomorrow, nome: plDemoName, de: plTomorrow, rc: true, gmc: false }];
@@ -645,11 +651,9 @@ const demoRc = () => {
     Disconnect: async () => { status = { ...status, state: "desconectado" }; emit("status", status); },
     SyncClock: async () => { dev.clockDrift = 0; emit("status", status); return 0; },
     DownloadHistory: async () => {
-      const d = new Date(); d.setHours(0, 0, 0, 0);
-      return { records: 900, added: 720, newRanges: [
-        { from: d.getTime() + 1 * 36e5, to: d.getTime() + 7.5 * 36e5, minutes: 390, avgCPM: 19.6, rcSuggest: "casa" },
-        { from: d.getTime() - 864e5 + 13 * 36e5, to: d.getTime() - 864e5 + 17.25 * 36e5, minutes: 255, avgCPM: 31.4, rcSuggest: "comigo" },
-      ] };
+      const add = !rcAsks.some((x) => x.id === awAsk.id);
+      if (add) { rcAsks = rcAsks.concat(awAsk).sort((x, y) => x.from - y.from); if (!rcAsksAll.includes(awAsk)) rcAsksAll.push(awAsk); setTimeout(() => emit("rcaway", rcAsks.slice()), 0); }
+      return { records: 900, added: add ? 461 : 0, asks: add ? 1 : 0, complete: true, newFrom: awF, newTo: awT, newRanges: [] };
     },
     CancelDownload: async () => {},
     ExportCSV: async () => "",
@@ -1247,6 +1251,18 @@ const demoRc = () => {
       let p = { id: 0 };
       if (ans === "voltei") p = { id: q.period, from: q.since, to: to || q.to, name: q.name };
       if (ans === "fora") p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name, gmc: "casa", radiacode: "comigo", notHome: true });
+      rcAsks = rcAsks.filter((x) => x.id !== id);
+      setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
+      return p;
+    },
+    AnswerAway: async (id, ans, from, to, name, gmc, rc) => {
+      const q = rcAsks.find((x) => x.id === id);
+      if (!q) throw new Error("essa pergunta já foi respondida");
+      let p = { id: 0 };
+      if (ans === "sai") {
+        if (!gmc && !rc) throw new Error("escolha pelo menos um aparelho que foi com você");
+        p = await api.SavePeriod({ id: 0, from: from || q.from, to: to || q.to, name, gmc: gmc ? "comigo" : "casa", radiacode: rc ? "comigo" : "casa", notHome: true });
+      }
       rcAsks = rcAsks.filter((x) => x.id !== id);
       setTimeout(() => emit("rcaway", rcAsks.slice()), 0);
       return p;

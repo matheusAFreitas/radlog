@@ -88,6 +88,8 @@ type Settings struct {
 	RcBLE string `json:"rcBLE"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
+	// baixar a memória do GMC-800 sozinho ao conectar (ligado se false; 2.83.0)
+	NoAutoHistory bool `json:"noAutoHistory"`
 	// pasta dos relatórios em PDF; vazio = Documentos/RadLog/Relatórios
 	// (report.go; só muda por ChooseReportDir)
 	ReportDir string `json:"reportDir"`
@@ -335,6 +337,15 @@ type ImportResult struct {
 	// fora de casa
 	NewRanges []NewRange `json:"newRanges"`
 	File      string     `json:"file"`
+	// 2.83.0: primeiro e último minuto novo (ms), se leu até o fim, se foi
+	// cancelada, o erro que interrompeu a leitura e quantas perguntas "fora
+	// de casa?" foram criadas
+	NewFrom  int64  `json:"newFrom"`
+	NewTo    int64  `json:"newTo"`
+	Complete bool   `json:"complete"`
+	Canceled bool   `json:"canceled"`
+	Partial  string `json:"partial"`
+	Asks     int    `json:"asks"`
 }
 
 // App é o que a interface enxerga (os métodos exportados viram funções
@@ -379,6 +390,10 @@ type App struct {
 	cfgBackedUp    bool        // já salvou a cópia da config nesta conexão
 	cfgSnapshot    []byte      // "foto" da config para comparar
 	cancelDownload chan struct{}
+	autoHistAt     time.Time                    // fim do último download automático (autohist.go); com a.mu
+	histAskFrom    int64                        // sem pasta de dados: o mesmo que perguntarDesde (autohist.go)
+	histDownload   func() (ImportResult, error) // testes: no lugar do downloadHistory
+	emitHook       func(name string, data any)  // testes: os eventos para a tela
 
 	// pausa a reconexão automática quando o usuário desconecta na mão
 	manualOff bool
@@ -756,6 +771,9 @@ func (a *App) logEntry(text, kind string, persist bool) {
 }
 
 func (a *App) emit(name string, data any) {
+	if a.emitHook != nil {
+		a.emitHook(name, data)
+	}
 	if a.ctx != nil {
 		wruntime.EventsEmit(a.ctx, name, data)
 	}
@@ -1100,6 +1118,7 @@ func (a *App) connect(port string) (DeviceInfo, error) {
 
 	a.setState("conectado", "")
 	a.goSafe("plannedOnConnect", func() { a.plannedOnConnect("gmc", time.Now()) }) // voltou de uma saída programada?
+	a.autoHistoryOnConnect(d)
 	a.logf("conexão: ok, %s em %s, série %s", ver, port, info.Serial)
 	a.logEvent(fmt.Sprintf("Contador conectado (%s em %s)", ver, port))
 	if clockFixed > 0 {
@@ -1560,7 +1579,9 @@ func pruneHistoryCopies(dir string, keep int) int {
 
 // DownloadHistory lê a memória do contador, salva uma cópia bruta (.bin) e
 // junta as leituras aos dados do app.
-func (a *App) DownloadHistory() (ImportResult, error) {
+func (a *App) DownloadHistory() (ImportResult, error) { return a.downloadHistory() }
+
+func (a *App) downloadHistory() (ImportResult, error) {
 	a.mu.Lock()
 	d := a.dev
 	a.mu.Unlock()
@@ -1568,10 +1589,10 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 		return ImportResult{}, errors.New("contador desconectado")
 	}
 	if a.cfgBusy.Load() {
-		return ImportResult{}, errors.New("espere terminar a gravação da configuração")
+		return ImportResult{}, errCfgBusy
 	}
 	if !a.downloading.CompareAndSwap(false, true) {
-		return ImportResult{}, errors.New("já estou baixando o histórico")
+		return ImportResult{}, errDownloading
 	}
 	a.logf("histórico: começou a baixar")
 	defer a.logf("histórico: terminou")
@@ -1593,11 +1614,23 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	raw, err := d.ReadHistory(cancel, func(n int) {
 		a.emit("history-progress", map[string]int{"bytes": n, "max": gmc.FlashSize})
 	})
+	canceled := false
+	select {
+	case <-cancel:
+		canceled = err != nil
+	default:
+	}
 	if err != nil && len(raw) == 0 {
+		if canceled {
+			return ImportResult{Canceled: true}, errHistCanceled
+		}
 		return ImportResult{}, err
 	}
 
-	res := ImportResult{Bytes: len(raw)}
+	res := ImportResult{Bytes: len(raw), Complete: err == nil, Canceled: canceled}
+	if err != nil && !res.Canceled {
+		res.Partial = err.Error()
+	}
 	if len(raw) > 0 {
 		dir := filepath.Join(a.dataDir, "historico")
 		_ = os.MkdirAll(dir, 0o755)
@@ -1626,10 +1659,19 @@ func (a *App) DownloadHistory() (ImportResult, error) {
 	res.Added = len(added)
 	res.Alerts = a.retroAlerts(added)
 	res.NewRanges = a.newRanges(added)
+	for _, p := range added {
+		if t := p.T.UnixMilli(); res.NewFrom == 0 || t < res.NewFrom {
+			res.NewFrom = t
+		}
+		if t := p.T.Add(time.Minute).UnixMilli(); t > res.NewTo {
+			res.NewTo = t
+		}
+	}
 	if len(raw) > 0 {
 		a.recordCounterSync(h, res, err == nil)
 		defer func() { a.emit("countersync", a.GetCounterSync()) }()
 	}
+	res.Asks = a.gmcAwayAsks(added, err == nil)
 
 	msg := fmt.Sprintf("Histórico baixado: %d registros, %d minutos novos", res.Records, res.Added)
 	switch res.Alerts {

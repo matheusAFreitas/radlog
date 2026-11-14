@@ -1585,6 +1585,15 @@
           <input type="checkbox" id="chkAuto">
         </label>
       </fieldset>
+      <fieldset>
+        <legend>Histórico</legend>
+        <label class="toggle">
+          <span>Baixar a memória sozinho ao conectar<br><span class="small muted">Toda vez que ele conecta de novo. O botão "Baixar histórico" continua.</span></span>
+          <input type="checkbox" id="chkAutoHist">
+        </label>
+        <label for="numAwayAsk">Perguntar se foi fora de casa a partir de um trecho sem leitura de pelo menos (min)</label>
+        <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
+      </fieldset>
     </div>
   </div>
     </div>
@@ -2036,11 +2045,6 @@
           <button type="button" class="link small-link" data-setgo="gmc/dev">Mudar no GMC-800</button>
           <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RC102</button>
         </div>
-      </fieldset>
-      <fieldset>
-        <legend>Fora de casa</legend>
-        <label for="numAwayAsk">Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)</label>
-        <input type="number" id="numAwayAsk" min="5" max="240" step="5" inputmode="numeric">
       </fieldset>
     </div>
   </div>
@@ -2515,21 +2519,6 @@
   </form>
 </dialog>
 
-<dialog id="newDataDlg" aria-labelledby="newDataTitle">
-  <form method="dialog" class="dlg">
-    <div class="dlg-head">
-      <h2 id="newDataTitle">Dados novos do contador</h2>
-      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
-      </button>
-    </div>
-    <p class="small muted">O histórico trouxe trechos que o app não tinha visto. Algum foi fora de casa? Se você só estava dormindo ou com o PC desligado, é "Em casa".</p>
-    <ul class="periods new-ranges" id="newRangeList"></ul>
-    <div class="dlg-foot">
-      <button type="submit" class="btn accent" value="close">Pronto</button>
-    </div>
-  </form>
-</dialog>
 
 
 

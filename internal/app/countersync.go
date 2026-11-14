@@ -33,6 +33,9 @@ type counterSyncData struct {
 	MemLast  int64  `json:"memoriaAte"`
 	SaveMode string `json:"modoGravacao"` // último modo conhecido
 	Warned   string `json:"avisado"`      // nível de memória já avisado desde o último download
+	// começo do trecho que um download interrompido trouxe pela metade: a
+	// pergunta "fora de casa?" dele espera o próximo download completo (2.83.0)
+	AskFrom int64 `json:"perguntarDesde,omitempty"`
 }
 
 // CounterSync é o estado para a tela.
@@ -96,8 +99,11 @@ func (a *App) recordCounterSync(h gmc.History, res ImportResult, complete bool) 
 			d.MemLast = t
 		}
 	}
-	if old, ok := a.readCounterSync(); ok && d.SaveMode == "" {
-		d.SaveMode = old.SaveMode
+	if old, ok := a.readCounterSync(); ok {
+		if d.SaveMode == "" {
+			d.SaveMode = old.SaveMode
+		}
+		d.AskFrom = old.AskFrom
 	}
 	a.writeCounterSync(d)
 }

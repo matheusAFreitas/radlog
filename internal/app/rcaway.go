@@ -58,6 +58,9 @@ type RcAwayAsk struct {
 	BackHint  int64  `json:"backHint,omitempty"`
 	Dev       string `json:"dev,omitempty"`     // o aparelho que voltou a conectar
 	LeftDev   string `json:"leftDev,omitempty"` // o que desconectou na janela
+	// "gmc"/"ambos" (2.83.0, autohist.go): o trecho veio do histórico do
+	// GMC-800; RcHome: o RC102 estava conectado ao PC em boa parte dele
+	RcHome bool `json:"rcHome,omitempty"`
 }
 
 // RcAwayView é a pergunta com o resumo do trecho para a tela.
@@ -75,6 +78,13 @@ type RcAwayView struct {
 	Hint        string  `json:"hint"` // "fora", "casa" ou "" (sem dica)
 	// na pergunta "volta": começo e nome do trecho aberto
 	Since int64 `json:"since,omitempty"`
+	// nas perguntas do GMC-800 (2.83.0): minutos dele no trecho, máximo,
+	// dose e alertas
+	GmcMinutes int     `json:"gmcMinutes,omitempty"`
+	GmcMaxUSv  float64 `json:"gmcMaxUSv,omitempty"`
+	GmcMaxAt   int64   `json:"gmcMaxAt,omitempty"`
+	GmcDoseUSv float64 `json:"gmcDoseUSv,omitempty"`
+	Alerts     int     `json:"alerts,omitempty"`
 }
 
 func (a *App) rcAwayPath() string { return filepath.Join(a.dataDir, rcAwayFile) }
@@ -169,8 +179,15 @@ func (a *App) addRcAwayLocked(ask RcAwayAsk, now time.Time) bool {
 			return false
 		}
 	}
-	for _, q := range list {
+	for i, q := range list {
 		if ask.From < q.To && q.From < ask.To {
+			if ask.Kind == "" && q.Kind == askGmc {
+				// o GMC-800 já perguntou pelo mesmo trecho: uma pergunta só (2.83.0)
+				list[i] = joinAsks(q, ask)
+				a.rcAsks = pruneRcAway(list, now)
+				a.saveRcAwayLocked()
+				return true
+			}
 			return false
 		}
 	}
@@ -306,6 +323,9 @@ func (a *App) rcAwayView(q RcAwayAsk) RcAwayView {
 	}
 	v.NormalRatio, _ = countRatio(kept)
 	v.Hint = rcAwayHint(v.Ratio, v.NormalRatio)
+	if q.Kind == askGmc || q.Kind == askBoth {
+		a.gmcAwayView(&v)
+	}
 	if q.Kind == rcAskBack {
 		a.mu.Lock()
 		for _, p := range a.periods {

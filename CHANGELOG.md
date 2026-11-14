@@ -1,5 +1,52 @@
 # Versões
 
+## 2.83.0
+- O app baixa a memória do GMC-800 sozinho toda vez que ele conecta (ou
+  quando o app abre com ele conectado), depois de 10 s de conexão estável.
+  Espera a gravação da configuração ou outro download terminar, deixa pelo
+  menos 2 min entre dois automáticos e, se você cancelar, só tenta de novo
+  na próxima conexão. No fim aparece um aviso com o tempo novo e os
+  alertas; se der erro, o aviso tem "Tentar de novo" e o que chegou fica
+  guardado. Dá para desligar em Configurações › GQ GMC-800 › Conexão.
+- A pergunta "Você estava fora de casa?" dos trechos novos do histórico
+  virou um cartão no Agora, em µSv/h, que fica até ser respondido (no
+  lugar da janela em CPM). Se o RC102 também ficou sem conexão no mesmo
+  trecho, é uma pergunta só para os dois. A conta RC102 ÷ GMC-800 destaca
+  "Estava em casa" quando parece que nada saiu, mas a pergunta aparece
+  sempre. "Saí de casa…" abre o mesmo formulário da saída programada
+  (horário, nome e quais aparelhos foram), e "Responder depois" deixa o
+  trecho só em Fora de casa.
+- Uma saída programada no mesmo horário continua ganhando, trecho menor
+  que o mínimo entra sem pergunta e, com a leitura interrompida, o último
+  trecho só é perguntado quando o download seguinte terminar.
+- O "Perguntar se foi fora de casa a partir de" saiu de Alertas e foi para
+  Configurações › GQ GMC-800 › Conexão, junto da opção nova.
+
+**English**
+
+- The app downloads the GMC-800 memory by itself every time it connects
+  (or when the app opens with it connected), after 10 s of stable
+  connection. It waits for a config write or another download to finish,
+  keeps at least 2 min between two automatic downloads and, if you cancel,
+  only tries again on the next connection. At the end a notice shows the
+  new time and the alerts; on an error the notice has "Try again" and what
+  arrived is kept. It can be turned off in Settings › GQ GMC-800 ›
+  Connection.
+- The "Were you away from home?" question for new history stretches is now
+  a card on Now, in µSv/h, that stays until answered (instead of the
+  window in CPM). If the RC102 was also offline in the same stretch, it is
+  a single question for both. The RC102 ÷ GMC-800 ratio highlights "I was
+  home" when nothing seems to have left, but the question always shows.
+  "I left home…" opens the same form as a planned trip (times, name and
+  which devices went), and "Answer later" keeps the stretch only in Away
+  from home.
+- A planned trip at the same time still wins, a stretch shorter than the
+  minimum is merged without a question and, when a download is
+  interrupted, the last stretch is only asked about after the next
+  download finishes.
+- "Ask if you were away from home from" moved from Alerts to Settings ›
+  GQ GMC-800 › Connection, next to the new option.
+
 ## 2.82.0
 - Demonstração nova: um controle só move os dois aparelhos juntos, cada um
   com os próprios limites e sempre em µSv/h. Dez cenários prontos: fundo

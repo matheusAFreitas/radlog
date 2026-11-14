@@ -4,13 +4,17 @@
 // contagens com o GMC. As perguntas sem resposta também aparecem em Fora de
 // casa como "a responder".
 //
-// A pergunta da saída programada (2.75) é desenhada pelo programada.js.
+// A pergunta da saída programada (2.75) é desenhada pelo programada.js. A dos
+// trechos novos do histórico do GMC-800 (2.83.0, "gmc" e "ambos") fica no
+// fim deste arquivo.
 //
 // Usa os globais do app.js e do fora.js (state, api, $, fmt, hhmm, hm,
 // toLocalInput, fromLocalInput, zoomRangeText, toast, errMsg). Carregado
 // antes do app.js.
 
 let rcaEditing = 0, rcaDone = null, rcaDoneTimer = 0;
+const awLater = new Set(); // "Responder depois" (2.83.0): fica só em Fora de casa até reabrir o app
+let awFocus = "from";
 
 async function refreshRcAway() {
   if (!api.GetRcAwayAsks) return;
@@ -79,6 +83,14 @@ function renderRcAway() {
     box.className = "card rca rca-done";
     const t = document.createElement("span");
     const p = rcaDone.period;
+    if (rcaDone.ans === "awsai" || rcaDone.ans === "awcasa") {
+      awDoneText(box, rcaDone);
+      const u = document.createElement("button");
+      u.type = "button"; u.className = "link"; u.textContent = "Desfazer";
+      u.addEventListener("click", rcaUndo);
+      box.appendChild(u);
+      return;
+    }
     if (rcaDone.ans === "programada" || rcaDone.ans === "naosai") {
       plDoneText(box, rcaDone);
       const u = document.createElement("button");
@@ -100,10 +112,12 @@ function renderRcAway() {
     box.append(t, u);
     return;
   }
-  if (!list.length) { box.hidden = true; box.className = "card rca"; return; }
+  const vis = list.filter((x) => !awLater.has(x.id)); // "Responder depois" some do Agora
+  if (!vis.length) { box.hidden = true; box.className = "card rca"; return; }
   box.hidden = false;
   box.className = "card rca";
-  const q = list[list.length - 1]; // a mais recente primeiro
+  const q = vis[vis.length - 1]; // a mais recente primeiro
+  if (q.kind === "gmc" || q.kind === "ambos") { renderAwayAsk(box, q, list); return; }
   if (q.kind === "volta") { renderRcBack(box, q, list); return; }
   if (q.kind === "programada") { renderPlannedAsk(box, q, list); return; }
   const head = document.createElement("div");
@@ -326,7 +340,9 @@ function rcAwayRows(ul) {
     when.textContent = zoomRangeText(q.from, q.to);
     const what = document.createElement("div");
     what.className = "small muted";
-    what.textContent = q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
+    what.textContent = q.kind === "gmc" ? "GMC-800 sem conexão: você estava fora de casa?"
+      : q.kind === "ambos" ? "GMC-800 e RC102 sem conexão: você estava fora de casa?"
+      : q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
       : q.kind === "programada" ? `Saída programada "${asIs(q.name)}": você saiu mesmo?`
       : "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
     t.append(c, when, what);
@@ -337,6 +353,7 @@ function rcAwayRows(ul) {
     go.addEventListener("click", () => {
       // a escolhida vai para o fim: é a que o cartão do Agora mostra
       state.rcAway = (state.rcAway || []).filter((x) => x.id !== q.id).concat(q);
+      awLater.delete(q.id);
       showView("agora");
       renderRcAway();
     });
@@ -344,4 +361,157 @@ function rcAwayRows(ul) {
     li.append(t, acts);
     ul.appendChild(li);
   }
+}
+
+// ---------- "Você estava fora de casa?" (2.83.0) ----------
+//
+// Spec ux/historico-automatico. O histórico do GMC-800 (baixado sozinho ao
+// conectar ou pelo botão) trouxe um trecho que o app não tinha visto: "gmc"
+// quando só ele ficou sem conexão, "ambos" quando o RC102 também. A pergunta
+// aparece sempre; a dica pela conta RC102 ÷ GMC-800 só destaca um botão.
+
+function awSub(q) {
+  const why = q.kind === "ambos" ? "o GMC-800 e o RC102 ficaram sem conexão"
+    : q.rcHome ? "o GMC-800 ficou sem conexão, o RC102 estava no PC"
+    : "o GMC-800 ficou sem conexão com o app";
+  return `${zoomRangeText(q.from, q.to)} · ${why}`;
+}
+
+function awHintText(q) {
+  if (q.hint === "casa") return [q.kind === "ambos" ? "Parece que os dois ficaram em casa." : "Parece que o GMC-800 ficou em casa.", `A conta RC102 ÷ GMC-800 ficou perto da normal (${fmt(q.ratio, 0)} contra ${fmt(q.normalRatio, 0)}).`];
+  if (q.hint === "fora") return ["Parece que algum aparelho saiu de casa.", `A conta RC102 ÷ GMC-800 mudou: ${fmt(q.ratio, 0)} contra ${fmt(q.normalRatio, 0)} em casa.`];
+  return null;
+}
+
+async function awAnswer(q, ans, from, to, name, gmc, rc) {
+  try {
+    const p = await api.AnswerAway(q.id, ans, from || 0, to || 0, name || "", !!gmc, !!rc);
+    rcaEditing = 0;
+    clearTimeout(rcaDoneTimer);
+    rcaDone = { ask: { id: q.id, from: q.from, to: q.to, kind: q.kind, rcHome: !!q.rcHome }, ans: ans === "sai" ? "awsai" : "awcasa", period: p };
+    rcaDoneTimer = setTimeout(() => { rcaDone = null; renderRcAway(); }, 10000);
+    await refreshRcAway();
+  } catch (e) { toast(errMsg(e), true); }
+}
+
+function awDoneText(box, d) {
+  const t = document.createElement("span");
+  const p = d.period;
+  if (d.ans === "awsai" && p && p.id) {
+    const c = document.createElement("span");
+    c.className = "chip off"; c.textContent = "fora de casa";
+    t.append(c, ` Marcado: ${asIs(p.name)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")} · ${hhmm(p.from)}–${hhmm(p.to)}`);
+  } else t.textContent = "Ok, ficou como em casa.";
+  box.appendChild(t);
+}
+
+function renderAwayAsk(box, q, list) {
+  const head = document.createElement("div");
+  head.className = "rca-head";
+  head.innerHTML = '<span class="dot gmc" aria-hidden="true"></span>';
+  const h = document.createElement("h2");
+  h.textContent = "Você estava fora de casa?";
+  const tag = document.createElement("span");
+  tag.className = "chip off"; tag.textContent = "a responder";
+  head.append(h, tag);
+  const sub = document.createElement("div");
+  sub.className = "mono small muted";
+  sub.textContent = awSub(q);
+  box.append(head, sub);
+  if (q.gmcMinutes) {
+    const g = document.createElement("div");
+    g.className = "rca-tiles";
+    g.append(
+      rcaTile("média do GMC-800", rcaUSv(q.gmcUSv), "µSv/h", "gmc"),
+      rcaTile("máximo", rcaUSv(q.gmcMaxUSv), q.gmcMaxAt ? `às ${hhmm(q.gmcMaxAt)}` : ""),
+      rcaTile("dose no trecho", fmt(q.gmcDoseUSv, 2), "µSv"),
+      q.kind === "ambos" && q.memMinutes ? rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h") : rcaTile("alertas", String(q.alerts || 0), ""));
+    box.appendChild(g);
+  }
+  const ht = awHintText(q);
+  if (ht) {
+    const hint = document.createElement("div");
+    hint.className = "rca-hint small";
+    const b = document.createElement("strong");
+    b.textContent = ht[0];
+    const hs = document.createElement("span");
+    hs.className = "muted"; hs.textContent = " " + ht[1];
+    hint.append(b, hs);
+    box.appendChild(hint);
+  }
+  if (rcaEditing === q.id) { box.appendChild(awForm(q)); return; }
+  const ask = document.createElement("div");
+  ask.className = "rca-ask";
+  const row = document.createElement("div");
+  row.className = "row-btns";
+  const btn = (label, cls, fn) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = cls; b.textContent = label;
+    b.addEventListener("click", fn);
+    row.appendChild(b);
+  };
+  btn("Estava em casa", "btn" + (q.hint === "casa" ? " sug" : ""), () => awAnswer(q, "casa"));
+  btn("Saí de casa…", "btn rca-out" + (q.hint === "fora" ? " sug" : ""), () => { rcaEditing = q.id; awFocus = "name"; renderRcAway(); });
+  btn("Ajustar horário", "link", () => { rcaEditing = q.id; awFocus = "from"; renderRcAway(); });
+  btn("Responder depois", "link", () => { awLater.add(q.id); renderRcAway(); });
+  const note = document.createElement("span");
+  note.className = "small muted";
+  note.textContent = "\"Saí de casa\": as medições do aparelho que foi com você saem do fundo da casa e continuam na sua dose.";
+  ask.append(row, note);
+  if (list.length > 1) {
+    const more = document.createElement("span");
+    more.className = "small muted";
+    more.textContent = list.length === 2 ? "Mais 1 trecho a responder em Fora de casa." : `Mais ${list.length - 1} trechos a responder em Fora de casa.`;
+    ask.appendChild(more);
+  }
+  box.appendChild(ask);
+}
+
+// o mesmo formulário da saída programada: horário, nome e quem foi
+function awForm(q) {
+  const f = document.createElement("div");
+  f.className = "rca-form";
+  const g = document.createElement("div");
+  g.className = "row-btns rca-fields";
+  const field = (label, input) => {
+    const l = document.createElement("label");
+    l.className = "small muted";
+    l.append(label, input);
+    return l;
+  };
+  const from = Object.assign(document.createElement("input"), { type: "datetime-local", value: toLocalInput(q.from) });
+  const to = Object.assign(document.createElement("input"), { type: "datetime-local", value: toLocalInput(q.to) });
+  const name = Object.assign(document.createElement("input"), { type: "text", maxLength: 60, placeholder: "Fora de casa" });
+  g.append(field("Saí em", from), field("Voltei em", to), field("Para onde (opcional)", name));
+  const devs = document.createElement("div");
+  devs.className = "row-btns";
+  const pick = {};
+  for (const [k, label, on] of [["rc", "RC102 foi comigo", q.kind === "ambos"], ["gmc", "GMC-800 foi comigo", true]]) {
+    const l = document.createElement("label");
+    l.className = "qk-go-row small";
+    const c = Object.assign(document.createElement("input"), { type: "checkbox", checked: !!on });
+    pick[k] = c;
+    l.append(c, Object.assign(document.createElement("span"), { textContent: label }));
+    devs.appendChild(l);
+  }
+  const err = document.createElement("div");
+  err.className = "wh-err"; err.setAttribute("role", "alert"); err.hidden = true;
+  const btns = document.createElement("div");
+  btns.className = "row-btns";
+  const save = Object.assign(document.createElement("button"), { type: "button", className: "btn accent", textContent: "Salvar" });
+  const back = Object.assign(document.createElement("button"), { type: "button", className: "btn", textContent: "Voltar" });
+  save.addEventListener("click", () => {
+    const a = fromLocalInput(from.value), b = fromLocalInput(to.value);
+    if (!(a < b)) { err.textContent = "A volta precisa ser depois da saída."; err.hidden = false; return; }
+    if (!pick.rc.checked && !pick.gmc.checked) { err.textContent = "Escolha pelo menos um aparelho que foi com você."; err.hidden = false; return; }
+    awAnswer(q, "sai", a, b, name.value, pick.gmc.checked, pick.rc.checked);
+  });
+  back.addEventListener("click", () => { rcaEditing = 0; renderRcAway(); });
+  btns.append(save, back);
+  const note = document.createElement("span");
+  note.className = "small muted";
+  note.textContent = "O tempo sem conexão fora desse horário fica como em casa (o normal).";
+  f.append(g, devs, err, btns, note);
+  setTimeout(() => (awFocus === "name" ? name : from).focus(), 0);
+  return f;
 }
