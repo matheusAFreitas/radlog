@@ -32,8 +32,9 @@ type Server struct {
 	*httptest.Server
 	mu      sync.Mutex
 	Files   map[string]*File
-	Trashed map[string]*File // na lixeira (com o que estava dentro)
-	ups     map[string]*File // envios retomáveis abertos
+	Trashed map[string]*File  // na lixeira (com o que estava dentro)
+	ups     map[string]*File  // envios retomáveis abertos
+	parts   map[string][]byte // o que já chegou de cada envio em pedaços
 	n       int
 	Revoked bool          // o token responde invalid_grant
 	Offline bool          // tudo responde 503
@@ -42,12 +43,16 @@ type Server struct {
 	OnPut   func()        // chamado depois de cada envio terminado (resposta já enviada)
 	Calls   []string
 	Revokes []string // tokens revogados em /revoke
-	Email   string   // e-mail do login (vazio = voce@example.com)
+	// DropChunks > 0: os próximos pedaços chegam pela metade e a conexão
+	// cai (o envio tem de continuar de onde parou)
+	DropChunks int
+	Chunks     int    // pedaços recebidos
+	Email      string // e-mail do login (vazio = voce@example.com)
 }
 
 // New sobe o servidor.
 func New() *Server {
-	s := &Server{Files: map[string]*File{}, Trashed: map[string]*File{}, ups: map[string]*File{}}
+	s := &Server{Files: map[string]*File{}, Trashed: map[string]*File{}, ups: map[string]*File{}, parts: map[string][]byte{}}
 	s.Server = httptest.NewServer(http.HandlerFunc(s.serve))
 	return s
 }
@@ -248,6 +253,50 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		s.openUp(w, f)
+	case r.Method == "PUT" && strings.HasPrefix(p, "/up/") && r.Header.Get("Content-Range") != "":
+		f := s.ups[p]
+		if f == nil {
+			w.WriteHeader(404)
+			return
+		}
+		var a, b, total int
+		cr := r.Header.Get("Content-Range")
+		if _, err := fmt.Sscanf(cr, "bytes %d-%d/%d", &a, &b, &total); err == nil {
+			s.Chunks++
+			if a != len(s.parts[p]) {
+				w.WriteHeader(400)
+				return
+			}
+			if s.DropChunks > 0 {
+				// guarda metade (arredondada para baixo) e derruba
+				s.DropChunks--
+				s.parts[p] = append(s.parts[p], body[:len(body)/2]...)
+				if hj, ok := w.(http.Hijacker); ok {
+					if c, _, err := hj.Hijack(); err == nil {
+						_ = c.Close()
+						return
+					}
+				}
+				w.WriteHeader(503)
+				return
+			}
+			s.parts[p] = append(s.parts[p], body...)
+		} else if _, err := fmt.Sscanf(cr, "bytes */%d", &total); err != nil {
+			w.WriteHeader(400)
+			return
+		}
+		if len(s.parts[p]) < total {
+			if n := len(s.parts[p]); n > 0 {
+				w.Header().Set("Range", fmt.Sprintf("bytes=0-%d", n-1))
+			}
+			w.WriteHeader(308)
+			return
+		}
+		delete(s.ups, p)
+		f.Data, f.Modified = s.parts[p], now
+		delete(s.parts, p)
+		s.Files[f.ID] = f
+		s.js(w, meta(f))
 	case r.Method == "PUT" && strings.HasPrefix(p, "/up/"):
 		f := s.ups[p]
 		if f == nil {

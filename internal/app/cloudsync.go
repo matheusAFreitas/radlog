@@ -585,6 +585,12 @@ func (a *App) cloudDownload(ctx context.Context, d *rs.Drive, files []rs.File, p
 		if errors.Is(err, rs.ErrNotFound) {
 			continue
 		}
+		if errors.Is(err, rs.ErrTooBig) {
+			// nenhum pacote do app chega perto do limite (N14): pula de vez
+			a.logf("nuvem: um arquivo da nuvem é grande demais (%d MB) e foi pulado", f.Size>>20)
+			a.cloudSeen(gen, f.Name, f.MD5)
+			continue
+		}
 		if err != nil {
 			return got, bad, echo, err
 		}

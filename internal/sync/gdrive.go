@@ -102,6 +102,15 @@ func (d *Drive) do(ctx context.Context, method, u, ctype string, body []byte, ou
 		_, _ = io.Copy(io.Discard, resp.Body)
 	case *[]byte:
 		*o, err = io.ReadAll(resp.Body)
+	case *limited:
+		if resp.ContentLength > o.max {
+			return resp.Header, ErrTooBig
+		}
+		*o.b, err = io.ReadAll(io.LimitReader(resp.Body, o.max+1))
+		if err == nil && int64(len(*o.b)) > o.max {
+			*o.b = nil
+			return resp.Header, ErrTooBig
+		}
 	default:
 		err = json.NewDecoder(resp.Body).Decode(out)
 	}
@@ -207,11 +216,25 @@ func (d *Drive) List(ctx context.Context, folder string) ([]File, error) {
 	}
 }
 
-// Get baixa o conteúdo de um arquivo.
+// MaxDownload é o maior arquivo que Get aceita: o maior pacote do app (um
+// anexo de 25 MB ou um mês de espectros) cabe com folga (auditoria 2.79.0,
+// N14).
+var MaxDownload int64 = 256 << 20
+
+// ErrTooBig é um arquivo maior que MaxDownload.
+var ErrTooBig = errors.New("arquivo grande demais para baixar")
+
+// Get baixa o conteúdo de um arquivo, até MaxDownload.
 func (d *Drive) Get(ctx context.Context, id string) ([]byte, error) {
 	var b []byte
-	_, err := d.do(ctx, "GET", d.Base+"/files/"+url.PathEscape(id)+"?alt=media", "", nil, &b)
+	_, err := d.do(ctx, "GET", d.Base+"/files/"+url.PathEscape(id)+"?alt=media", "", nil, &limited{max: MaxDownload, b: &b})
 	return b, err
+}
+
+// limited é o destino de do() que para de ler depois de max bytes.
+type limited struct {
+	max int64
+	b   *[]byte
 }
 
 // Put sobe data: cria o arquivo na pasta (id vazio) ou troca o conteúdo do
@@ -232,9 +255,109 @@ func (d *Drive) Put(ctx context.Context, folder, id, name string, data []byte) (
 	if loc == "" {
 		return File{}, errors.New("o Drive não devolveu o endereço do envio")
 	}
-	var f File
-	_, err = d.do(ctx, "PUT", loc, "application/octet-stream", data, &f)
-	return f, err
+	if len(data) <= ChunkSize {
+		var f File
+		_, err = d.do(ctx, "PUT", loc, "application/octet-stream", data, &f)
+		return f, err
+	}
+	return d.putChunks(ctx, loc, data)
+}
+
+// ChunkSize é o tamanho de cada pedaço do envio (múltiplo de 256 KiB, como o
+// Drive pede). Arquivo maior sobe em pedaços: se a conexão cair, o envio
+// continua do último pedaço que chegou, em vez de recomeçar (N14).
+var ChunkSize = 8 << 20
+
+// chunkTries é quantas vezes seguidas um pedaço pode falhar.
+const chunkTries = 5
+
+// putChunks sobe data em pedaços no envio aberto em loc.
+func (d *Drive) putChunks(ctx context.Context, loc string, data []byte) (File, error) {
+	total := len(data)
+	off, fails := 0, 0
+	for {
+		end := off + ChunkSize
+		if end > total {
+			end = total
+		}
+		f, next, err := d.putRange(ctx, loc, data[off:end], fmt.Sprintf("bytes %d-%d/%d", off, end-1, total))
+		if err == nil && next < 0 {
+			return f, nil
+		}
+		if err != nil {
+			var he *HTTPError
+			if ctx.Err() != nil || (errors.As(err, &he) && he.Code/100 == 4) || errors.Is(err, ErrNotFound) {
+				return File{}, err
+			}
+			if fails++; fails >= chunkTries {
+				return File{}, err
+			}
+			// pergunta ao Drive até onde chegou e continua dali
+			select {
+			case <-ctx.Done():
+				return File{}, ctx.Err()
+			case <-time.After(time.Duration(fails) * time.Second):
+			}
+			f, next, err = d.putRange(ctx, loc, nil, fmt.Sprintf("bytes */%d", total))
+			if err != nil {
+				continue
+			}
+			if next < 0 {
+				return f, nil
+			}
+		} else {
+			fails = 0
+		}
+		off = next
+	}
+}
+
+// putRange manda um pedaço. next é o primeiro byte que falta (-1 = terminou,
+// e f é o arquivo).
+func (d *Drive) putRange(ctx context.Context, loc string, body []byte, crange string) (f File, next int, err error) {
+	tok, err := d.Token(ctx)
+	if err != nil {
+		return File{}, 0, err
+	}
+	req, err := http.NewRequestWithContext(ctx, "PUT", loc, bytes.NewReader(body))
+	if err != nil {
+		return File{}, 0, err
+	}
+	req.Header.Set("Authorization", "Bearer "+tok)
+	req.Header.Set("Content-Range", crange)
+	req.ContentLength = int64(len(body))
+	resp, err := d.HTTP.Do(req)
+	if err != nil {
+		return File{}, 0, err
+	}
+	defer resp.Body.Close()
+	switch {
+	case resp.StatusCode == 308:
+		_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+		// "bytes=0-N": chegou até N; sem Range, nada chegou
+		next = 0
+		if r := resp.Header.Get("Range"); r != "" {
+			var a, b int
+			if _, err := fmt.Sscanf(r, "bytes=%d-%d", &a, &b); err == nil {
+				next = b + 1
+			}
+		}
+		return File{}, next, nil
+	case resp.StatusCode == 404:
+		return File{}, 0, ErrNotFound
+	case resp.StatusCode/100 == 2:
+		err = json.NewDecoder(resp.Body).Decode(&f)
+		return f, -1, err
+	default:
+		b, _ := io.ReadAll(io.LimitReader(resp.Body, 4096))
+		var e struct {
+			Error struct {
+				Message string `json:"message"`
+			} `json:"error"`
+		}
+		_ = json.Unmarshal(b, &e)
+		return File{}, 0, &HTTPError{Code: resp.StatusCode, Msg: e.Error.Message}
+	}
 }
 
 // Trash põe o arquivo ou a pasta (com o que tem dentro) na lixeira do Drive:
