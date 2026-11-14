@@ -396,7 +396,7 @@ func (a *App) mergePeriods(list []Period) int {
 		if p.UID == "" {
 			p.UID = legacyPeriodUID(p)
 		}
-		if a.tombed(recPeriod, p.UID) {
+		if a.tombBlocks(recPeriod, p.UID, p.Edited) {
 			continue
 		}
 		// o mesmo trecho: a edição mais nova vale (N4)

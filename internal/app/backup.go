@@ -367,6 +367,14 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if b, err := readZipFile(f); err == nil {
 			var list []Period
 			if json.Unmarshal(b, &list) == nil {
+				if backup {
+					for i := range list {
+						if list[i].UID == "" {
+							list[i].UID = legacyPeriodUID(list[i])
+						}
+						list[i].Edited = a.backupRevive(recPeriod, list[i].UID, list[i].Edited)
+					}
+				}
 				res.Periods = a.mergePeriods(list)
 			}
 		}
@@ -388,6 +396,14 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if b, err := readZipFile(f); err == nil {
 			var list []SavedMeasure
 			if json.Unmarshal(b, &list) == nil {
+				if backup {
+					for i := range list {
+						if list[i].UID == "" {
+							list[i].UID = legacyMeasureUID(list[i])
+						}
+						list[i].Edited = a.backupRevive(recMeasure, list[i].UID, list[i].Edited)
+					}
+				}
 				a.mu.Lock()
 				a.tombsLoadLocked()
 				var max int64
@@ -406,7 +422,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 					if m.UID == "" {
 						m.UID = legacyMeasureUID(m)
 					}
-					if a.tombed(recMeasure, m.UID) {
+					if a.tombBlocks(recMeasure, m.UID, m.Edited) {
 						continue
 					}
 					i, same := byUID[m.UID]
@@ -466,6 +482,14 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		if b, err := readZipFile(f); err == nil {
 			var list []Note
 			if json.Unmarshal(b, &list) == nil {
+				if backup {
+					for i := range list {
+						if list[i].UID == "" {
+							list[i].UID = legacyNoteUID(list[i])
+						}
+						list[i].Edited = a.backupRevive(recNote, list[i].UID, list[i].Edited)
+					}
+				}
 				res.Notes = a.mergeNotes(list)
 			}
 		}

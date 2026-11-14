@@ -212,6 +212,35 @@ func (a *App) tombed(k, uid string) bool {
 	return ok
 }
 
+// tombBlocks diz se a marca de apagado barra um item que chegou. Um item
+// editado depois de apagado (voltou de um backup, por exemplo) vence: a marca
+// sai e ele entra.
+func (a *App) tombBlocks(k, uid string, edited int64) bool {
+	t, ok := a.tombs[k+"|"+uid]
+	if !ok {
+		return false
+	}
+	if edited > t {
+		delete(a.tombs, k+"|"+uid)
+		a.saveTombsLocked()
+		return false
+	}
+	return true
+}
+
+// backupRevive: no "Importar backup", um item do backup que foi apagado aqui
+// volta (a pessoa importou para recuperar) e ganha a hora de agora, para
+// voltar também nos outros aparelhos. Devolve a hora de edição a usar.
+func (a *App) backupRevive(k, uid string, edited int64) int64 {
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	a.tombsLoadLocked()
+	if t, ok := a.tombs[k+"|"+uid]; ok && edited <= t {
+		return time.Now().UnixMilli()
+	}
+	return edited
+}
+
 // applyTombs junta as marcas de apagado de outro aparelho e apaga aqui os
 // itens marcados. Devolve quantos itens saíram.
 func (a *App) applyTombs(list []tomb) int {
@@ -219,8 +248,22 @@ func (a *App) applyTombs(list []tomb) int {
 	a.tombsLoadLocked()
 	added := false
 	gone := map[string]bool{}
+	// item editado aqui depois de apagado lá (voltou de um backup) fica
+	edited := map[string]int64{}
+	for _, x := range a.notes {
+		edited[recNote+"|"+x.UID] = x.Edited
+	}
+	for _, x := range a.measurements {
+		edited[recMeasure+"|"+x.UID] = x.Edited
+	}
+	for _, x := range a.periods {
+		edited[recPeriod+"|"+x.UID] = x.Edited
+	}
 	for _, t := range list {
 		if (t.K != recNote && t.K != recMeasure && t.K != recPeriod) || t.ID == "" || a.tombed(t.K, t.ID) {
+			continue
+		}
+		if edited[t.K+"|"+t.ID] > t.T {
 			continue
 		}
 		a.tombs[t.K+"|"+t.ID] = t.T

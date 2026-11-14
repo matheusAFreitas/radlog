@@ -154,7 +154,7 @@ func (a *App) mergeNotes(list []Note) int {
 		if n.UID == "" {
 			n.UID = legacyNoteUID(n)
 		}
-		if a.tombed(recNote, n.UID) {
+		if a.tombBlocks(recNote, n.UID, n.Edited) {
 			continue
 		}
 		if i, ok := byUID[n.UID]; ok {
