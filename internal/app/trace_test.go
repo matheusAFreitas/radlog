@@ -68,13 +68,13 @@ func TestConfigHistory(t *testing.T) {
 	a.mu.Unlock()
 	a.cfgRecord("app")
 	h := a.GetConfigHistory()
-	if len(h) != 8 || h[0].Source != "início do registro" || h[0].From != "" {
+	if len(h) != 9 || h[0].Source != "início do registro" || h[0].From != "" {
 		t.Fatalf("inicial: %+v", h)
 	}
 	time.Sleep(3 * time.Millisecond)
 	// abrir de novo sem mudar nada: nada novo
 	a.cfgRecord("app")
-	if len(a.GetConfigHistory()) != 8 {
+	if len(a.GetConfigHistory()) != 9 {
 		t.Fatalf("repetiu o estado inicial")
 	}
 	// mudar o tempo morto e o alarme pelas Configurações
@@ -83,7 +83,7 @@ func TestConfigHistory(t *testing.T) {
 	s.AlarmUSv = 1.2
 	a.SaveSettings(s)
 	h = a.GetConfigHistory()
-	if len(h) != 10 {
+	if len(h) != 11 {
 		t.Fatalf("mudanças: %+v", h[:3])
 	}
 	got := map[string]ConfigChange{}
@@ -103,7 +103,7 @@ func TestConfigHistory(t *testing.T) {
 	a.mu.Unlock()
 	a.cfgRecord("contador")
 	h = a.GetConfigHistory()
-	if len(h) != 13 || !strings.Contains(h[0].To+h[1].To, "0,0055") {
+	if len(h) != 14 || !strings.Contains(h[0].To+h[1].To, "0,0055") {
 		t.Fatalf("calibração: %+v", h[:2])
 	}
 	// backup leva o histórico; outro PC junta sem repetir
@@ -121,7 +121,7 @@ func TestConfigHistory(t *testing.T) {
 			t.Fatal(err)
 		}
 	}
-	if n := len(b.GetConfigHistory()); n != 21 {
+	if n := len(b.GetConfigHistory()); n != 23 {
 		t.Fatalf("no outro PC: %d", n)
 	}
 	// em ordem de tempo no arquivo
@@ -196,5 +196,30 @@ func TestAlertSecondsWindow(t *testing.T) {
 	a.alertSecondsTick(time.Now())
 	if m := len(a.readAlertSeconds(e)); m != n {
 		t.Fatalf("duplicou: %d → %d", n, m)
+	}
+}
+
+// QA da 2.80.9: quem já tinha histórico vê a data em que o minuto do GMC-800
+// passou a ser a média dos segundos; instalação nova só começa o registro.
+func TestConfigHistoryGMCMinute(t *testing.T) {
+	a := newTestApp(t)
+	b, _ := json.Marshal(ConfigChange{T: 1, Field: "Tempo morto", To: "desligado", Source: "início do registro"})
+	os.WriteFile(a.cfgHistPath(), append(b, '\n'), 0o644)
+	a.cfgRecord("app")
+	var got *ConfigChange
+	for _, c := range a.GetConfigHistory() {
+		if c.Field == cfgGMCMinute {
+			got = &c
+		}
+	}
+	if got == nil || got.From != cfgGMCMinuteOld || got.To != cfgGMCMinuteNow || got.Source != "atualização do app" {
+		t.Fatalf("troca do minuto: %+v", got)
+	}
+	n := newTestApp(t)
+	n.cfgRecord("app")
+	for _, c := range n.GetConfigHistory() {
+		if c.Field == cfgGMCMinute && (c.From != "" || c.Source != "início do registro") {
+			t.Fatalf("instalação nova: %+v", c)
+		}
 	}
 }
