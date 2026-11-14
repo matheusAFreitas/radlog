@@ -90,8 +90,8 @@ func TestCloudBadPackDoesNotBlock(t *testing.T) {
 	cloudPair(t, a, b)
 	b.cloudSync()
 	// um pacote estragado de "outro aparelho" (abre, mas não é zip)
-	name := b.cloud.keys.FileName("p|estragado|2026-09")
-	sealed, _ := b.cloud.keys.Seal(name, append([]byte{cloudKindPack}, []byte("isto não é zip")...))
+	name := b.cloud.keys.Name("estragado", "dia|2026-09-01")
+	sealed, _ := b.cloud.keys.Seal(name, rs.Wrap(rs.KindDay, []byte("isto não é zip")))
 	d := b.cloudDriveWith(b.cloudToken)
 	if _, err := d.Put(t.Context(), b.cloud.f.Folder, "", name, sealed); err != nil {
 		t.Fatal(err)

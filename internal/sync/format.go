@@ -79,9 +79,10 @@ type Device struct {
 	Seq    int64  `json:"seq"` // sobe a cada gravação do Writer
 }
 
-// AttachmentHeader identifica um anexo pela medição (início em s) e o nome.
+// AttachmentHeader identifica um anexo pela medição e o nome do arquivo.
 type AttachmentHeader struct {
-	Start int64  `json:"start"`
+	UID   string `json:"uid,omitempty"` // UID da medição
+	Start int64  `json:"start"`         // início da medição (s)
 	File  string `json:"file"`
 }
 

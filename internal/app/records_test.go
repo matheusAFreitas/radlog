@@ -58,15 +58,6 @@ func TestRecordsNoteEditDelete(t *testing.T) {
 	}
 }
 
-func mustDelta(t *testing.T, a *App) []byte {
-	t.Helper()
-	z, err := a.buildDelta(pullReq{Rc: true, cloud: true})
-	if err != nil {
-		t.Fatal(err)
-	}
-	return z
-}
-
 // N4: medição renomeada e depois apagada (com a pasta dos anexos).
 func TestRecordsMeasureEditDelete(t *testing.T) {
 	a, _ := testApp(t)
