@@ -58,6 +58,9 @@ function qkActions() {
       : { g: "Ações", ic: QK_IC.out, t: "Saí de casa", s: "pergunta quem vai junto", kw: "sair fora rua viagem", run: qkAskAway, c: "away" },
     { g: "Ações", ic: QK_IC.out, t: "Programar saída", s: "marca antes; o app acha o horário depois", kw: "programar saida agendar amanha escritorio viagem depois", run: () => { qkSheetClose(); openPlanForm(null); }, c: "away" },
     { g: "Ações", ic: QK_IC.obj, t: "Medir um objeto", s: "abre o Medir objeto no passo 1", kw: "medir objeto amostra", run: qkMeasure, c: "obj" },
+    state.demo && state.demo.active
+      ? { g: "Ações", ic: QK_IC.page, t: "Sair da demonstração", s: "volta para os dados reais", kw: "demonstracao demo simulado sair", run: () => { qkSheetClose(); demoStop(); } }
+      : { g: "Ações", ic: QK_IC.page, t: "Ligar a demonstração", s: "dados simulados no app todo; nada é gravado", kw: "demonstracao demo simulado cenario testar", run: () => { qkSheetClose(); demoStart(); } },
     { g: "Ações", ic: QK_IC.pdf, t: "Relatório em PDF do Resumo", s: "do período escolhido no Resumo", kw: "relatorio pdf imprimir", run: qkReport },
     { g: "Ações", ic: QK_IC.bell, t: "Testar alarme (5 s)", s: "Configurações › Alarme", kw: "testar alarme som sirene", run: () => $("btnTestAlarm").click() },
   ];

@@ -54,6 +54,29 @@ func TestCloudScreenE2E(t *testing.T) {
 	}()
 	t.Cleanup(func() { close(stop); wg.Wait() })
 
+	url := e2eServe(t, a, nil)
+	cmd := exec.Command("node", "../../scripts/nuvem_e2e.js", url)
+	cmd.Env = os.Environ()
+	out, err := cmd.CombinedOutput()
+	t.Logf("%s", out)
+	if err != nil {
+		t.Fatalf("roteiro do navegador: %v", err)
+	}
+	// o que a tela fez chegou mesmo no Drive e no estado do app
+	if n := len(srv.Named(rs.MetaFile)); n != 1 {
+		t.Fatalf("metas no Drive: %d", n)
+	}
+	if st := a.GetCloud(); st.State != "off" {
+		t.Fatalf("depois de desconectar: %+v", st)
+	}
+	if _, err := os.Stat(a.cloudKeyPath()); err == nil {
+		t.Fatal("a chave ficou no disco")
+	}
+}
+
+// e2eServe serve a tela com o App de verdade por trás (a ponte /__go/) e
+// devolve o endereço. extra trata caminhos a mais (nil: nenhum).
+func e2eServe(t *testing.T, a *App, extra func(w http.ResponseWriter, r *http.Request) bool) string {
 	dist, _ := filepath.Abs("../../frontend/dist")
 	mux := http.NewServeMux()
 	var mu sync.Mutex
@@ -72,6 +95,9 @@ func TestCloudScreenE2E(t *testing.T) {
 		_ = json.NewEncoder(w).Encode(out)
 	})
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		if extra != nil && extra(w, r) {
+			return
+		}
 		if r.URL.Path == "/" || r.URL.Path == "/index.html" {
 			b, err := os.ReadFile(filepath.Join(dist, "index.html"))
 			if err != nil {
@@ -98,29 +124,13 @@ func TestCloudScreenE2E(t *testing.T) {
 	go func() { _ = hs.Serve(ln) }()
 	t.Cleanup(func() { _ = hs.Close() })
 
-	cmd := exec.Command("node", "../../scripts/nuvem_e2e.js", "http://"+ln.Addr().String()+"/")
-	cmd.Env = os.Environ()
-	out, err := cmd.CombinedOutput()
-	t.Logf("%s", out)
-	if err != nil {
-		t.Fatalf("roteiro do navegador: %v", err)
-	}
-	// o que a tela fez chegou mesmo no Drive e no estado do app
-	if n := len(srv.Named(rs.MetaFile)); n != 1 {
-		t.Fatalf("metas no Drive: %d", n)
-	}
-	if st := a.GetCloud(); st.State != "off" {
-		t.Fatalf("depois de desconectar: %+v", st)
-	}
-	if _, err := os.Stat(a.cloudKeyPath()); err == nil {
-		t.Fatal("a chave ficou no disco")
-	}
+	return "http://" + ln.Addr().String() + "/"
 }
 
 // ponte no lugar da Wails: window.go.app.App.X(...) vira POST /__go/X
 const e2eShim = `window.go = { app: { App: new Proxy({}, { get: (_, name) => typeof name !== "string" || name === "then" ? undefined : (...args) =>
   fetch("/__go/" + name, { method: "POST", body: JSON.stringify(args) }).then((r) => r.json()).then((x) => { if (x.e) throw new Error(x.e); return x.r; }) }) } };
-window.runtime = new Proxy({}, { get: () => () => {} });
+window.runtime = new Proxy({ WindowReloadApp: () => location.reload() }, { get: (o, k) => o[k] || (() => {}) });
 `
 
 // e2eCall chama o método exportado do App com os argumentos em JSON.

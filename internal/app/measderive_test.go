@@ -113,7 +113,7 @@ func TestDistCMFrom(t *testing.T) {
 
 func TestMeasureStopAndAgain(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active, a.demo.CPM = true, 25
+	fakeGMC(t, a, 25)
 	if _, err := a.StartMeasure(MeasureOpts{Name: "pedra", Distance: "5 cm", DistCM: -1, Size: "pequeno", Auto: false, Seconds: 600, HomeBg: true}); err != nil {
 		t.Fatal(err)
 	}
@@ -121,12 +121,12 @@ func TestMeasureStopAndAgain(t *testing.T) {
 		t.Fatalf("opções: %+v", st)
 	}
 	for i := 0; i < 3; i++ {
-		a.feedMeasure(0, 8, true)
+		a.feedMeasure(0, 8)
 	}
 	a.StopMeasure()
 	// espera o mínimo de segundos antes de parar
 	for i := 0; i < 10 && a.GetMeasure().Phase == "objeto"; i++ {
-		a.feedMeasure(0, 8, true)
+		a.feedMeasure(0, 8)
 	}
 	st := a.GetMeasure()
 	if st.Phase != "pronto" || st.Result.Stop != "manual" || st.Obj.Seconds != measStopMinSec || st.Derived == nil || !st.Derived.Safe.OK {
@@ -142,7 +142,7 @@ func TestMeasureStopAndAgain(t *testing.T) {
 		if i%2 == 0 {
 			c = 3
 		}
-		a.feedMeasure(0, c, true)
+		a.feedMeasure(0, c)
 	}
 	st = a.GetMeasure()
 	if st.Phase != "pronto" || st.Derived == nil || st.Derived.InvSq == nil {

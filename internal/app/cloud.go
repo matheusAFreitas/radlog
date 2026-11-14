@@ -472,6 +472,9 @@ func (a *App) cloudKick() {
 
 // CloudLogin abre o navegador no login do Google (ou de novo, se já abriu).
 func (a *App) CloudLogin() (CloudInfo, error) {
+	if a.isDemo() {
+		return a.GetCloud(), errDemo
+	}
 	c := &a.cloud
 	c.mu.Lock()
 	a.cloudLoadLocked()
@@ -932,6 +935,9 @@ func (a *App) SaveCloudCode(code string) (string, error) {
 
 // CloudSyncNow sincroniza já.
 func (a *App) CloudSyncNow() (CloudInfo, error) {
+	if a.isDemo() {
+		return a.GetCloud(), errDemo
+	}
 	a.cloud.mu.Lock()
 	a.cloudLoadLocked()
 	on := a.cloud.f.On

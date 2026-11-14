@@ -197,8 +197,9 @@ document.addEventListener("DOMContentLoaded", crossInit);
 
 // ---------- demonstração (navegador sem o app) ----------
 // cenário pelo localStorage "cruzDemo": conf (padrão), nao, espera, longe, desc
-function cxDemo(dev, from, to, series) {
-  const sc = localGet("cruzDemo", "conf");
+// sc0: o cenário da demonstração, quando ela está ligada (2.82)
+function cxDemo(dev, from, to, series, sc0) {
+  const sc = sc0 || localGet("cruzDemo", "conf");
   dev = dev === "radiacode" ? "radiacode" : "gmc";
   const now = Date.now(), at = from || now - 4 * 60e3;
   const me = cxName(dev), ot = cxName(cxOther(dev));

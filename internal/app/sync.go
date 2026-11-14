@@ -876,6 +876,9 @@ func normAddr(addr string) string {
 
 // PairWith pareia com o PC em addr usando o código que ele mostra.
 func (a *App) PairWith(addr, code string) (SyncInfo, error) {
+	if a.isDemo() {
+		return a.GetSync(), errDemo
+	}
 	a.syncLoad()
 	addr = normAddr(addr)
 	code = strings.TrimSpace(strings.ReplaceAll(code, " ", ""))
@@ -1006,6 +1009,9 @@ type SyncResult struct {
 
 // SyncNow sincroniza com um PC pareado (os dois lados ficam com tudo).
 func (a *App) SyncNow(id string) (SyncResult, error) {
+	if a.isDemo() {
+		return SyncResult{}, errDemo
+	}
 	a.syncLoad()
 	s := &a.sync
 	s.runMu.Lock()

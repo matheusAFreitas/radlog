@@ -175,7 +175,6 @@ type alertStep struct {
 	CPM           float64
 	AlarmCPM      int
 	Lv            Levels
-	Demo          bool
 	AttnStarted   bool
 	AttnEnded     bool
 	AttnOn        bool
@@ -214,14 +213,11 @@ func (a *App) openAlert(level string, s alertStep) int64 {
 	}
 	ms := s.Now.UnixMilli()
 	ev := Event{Time: ms, Kind: kindAlert, Level: level, CPM: s.CPM, Peak: s.CPM, PeakAt: ms, Text: text, Device: s.Device}
-	if s.Demo {
-		ev.Text = demoPrefix + text
-	}
-	return a.addEvent(ev, !s.Demo)
+	return a.addEvent(ev, true)
 }
 
 // stepAlerts abre, atualiza o pico e fecha os alertas de uma fonte.
-// ids aponta para a.alerts ou a.demo.alerts (protegidos por a.mu).
+// ids aponta para a.alerts ou a.rcAlert.ids (protegidos por a.mu).
 func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 	changed := false
 	// Pulou vários níveis no mesmo segundo: abre só o mais alto (ele já anota
@@ -275,7 +271,7 @@ func (a *App) stepAlerts(ids *alertIDs, s alertStep) {
 	a.mu.Unlock()
 
 	if len(closeIDs) > 0 {
-		a.finishAlerts(closeIDs, s.Now, s.Demo)
+		a.finishAlerts(closeIDs, s.Now, false)
 		changed = true
 	}
 	if reopenAlarm {
@@ -304,8 +300,8 @@ const (
 	endAppClosed      = "app fechado"
 )
 
-// closeAlerts fecha tudo que estiver aberto (contador desconectado, demo
-// desligado). reason vai no alerta: ele não terminou porque a leitura
+// closeAlerts fecha tudo que estiver aberto (aparelho desconectado, app
+// fechando). reason vai no alerta: ele não terminou porque a leitura
 // voltou, e sim porque parou de chegar leitura.
 func (a *App) closeAlerts(ids *alertIDs, now time.Time, demo bool, reason string) {
 	a.mu.Lock()
@@ -384,7 +380,7 @@ func (a *App) isActiveLocked(id int64) bool {
 	if r := a.rcAlert.ids; id == r.attn || id == r.alarm || id == r.danger {
 		return true
 	}
-	return a.demo.Active && (id == a.demo.alerts.attn || id == a.demo.alerts.alarm || id == a.demo.alerts.danger)
+	return false
 }
 
 // GetActiveAlerts devolve os alertas acontecendo agora (o mais grave primeiro).
@@ -394,12 +390,6 @@ func (a *App) GetActiveAlerts() []Event {
 	out := []Event{}
 	r := a.rcAlert.ids
 	ids := []int64{a.alerts.danger, a.alerts.alarm, a.alerts.attn, r.danger, r.alarm, r.attn}
-	if a.demo.Active {
-		ids = append([]int64{a.demo.alerts.danger, a.demo.alerts.alarm, a.demo.alerts.attn}, ids...)
-		if d := a.demo.rc; d != nil {
-			ids = append(ids, d.alert.ids.danger, d.alert.ids.alarm, d.alert.ids.attn)
-		}
-	}
 	for _, id := range ids {
 		if e := a.eventLocked(id); e != nil {
 			c := *e

@@ -9,7 +9,7 @@ import (
 // (a pessoa procura o ponto) e só depois começa o objeto.
 func TestMeasureWaitObj(t *testing.T) {
 	a := newTestApp(t)
-	a.demo.Active, a.demo.CPM = true, 25
+	fakeGMC(t, a, 25)
 	st, err := a.StartMeasure(MeasureOpts{Name: "pedra", Auto: true, HomeBg: true, WaitObj: true, MaxSec: 600, Pct: 20})
 	if err != nil {
 		t.Fatal(err)
@@ -17,7 +17,7 @@ func TestMeasureWaitObj(t *testing.T) {
 	if st.Phase != "fundo-pronto" || st.Bg == nil || st.Bg.Source != "casa" {
 		t.Fatalf("início: %+v", st)
 	}
-	a.feedMeasure(0, 4, true) // procurando: não conta
+	a.feedMeasure(0, 4) // procurando: não conta
 	if st := a.GetMeasure(); st.Elapsed != 0 || st.Counts != 0 {
 		t.Fatalf("contou antes do objeto: %+v", st)
 	}
@@ -52,9 +52,9 @@ func TestMeasureQuiet(t *testing.T) {
 	if !q("gmc") || q(devRC) {
 		t.Fatal("o que fica com a pessoa continua com alarme")
 	}
-	set(MeasureState{Phase: "objeto", Device: "gmc", Demo: true})
+	set(MeasureState{Phase: "", Device: "gmc"})
 	if q("gmc") {
-		t.Fatal("medição no demo não cala o contador real")
+		t.Fatal("sem medição não cala")
 	}
 	set(MeasureState{Phase: "fundo-pronto", Device: "gmc", readyAt: now.Add(-10 * time.Minute)})
 	if !q("gmc") {

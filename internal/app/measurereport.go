@@ -117,6 +117,9 @@ func fmtDurSec(s float64) string {
 
 // ExportMeasureReport salva o PDF de uma medição salva e abre.
 func (a *App) ExportMeasureReport(id int64) (string, error) {
+	if a.isDemo() {
+		return "", errDemo
+	}
 	path, err := a.saveMeasureReport(id)
 	if err == nil {
 		_ = openFolder(path)

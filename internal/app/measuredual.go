@@ -82,7 +82,7 @@ func (a *App) sidePhaseLocked(s *MeasureSide) MeasurePhase {
 // Devolve false se a leitura não é dele.
 func (a *App) feedSideLocked(m *MeasureState, f measFeed) bool {
 	s := m.Other
-	if s == nil || f.dev != s.Device || f.demo {
+	if s == nil || f.dev != s.Device {
 		return false
 	}
 	if m.Phase != "fundo" && m.Phase != "objeto" {
@@ -223,11 +223,8 @@ func (a *App) newSide(primary, mode string, homeBg bool) (*MeasureSide, error) {
 		return nil, fmt.Errorf("conecte o RC102 para medir com os dois")
 	}
 	a.mu.Lock()
-	gmcOK, demo := a.dev != nil, a.demo.Active
+	gmcOK := a.dev != nil
 	a.mu.Unlock()
-	if demo {
-		return nil, fmt.Errorf("desligue o modo demo para medir com os dois aparelhos")
-	}
 	if s.Device == "gmc" && !gmcOK {
 		return nil, fmt.Errorf("conecte o GMC-800 para medir com os dois")
 	}

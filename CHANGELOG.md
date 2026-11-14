@@ -1,5 +1,53 @@
 # Versões
 
+## 2.82.0
+- Demonstração nova: um controle só move os dois aparelhos juntos, cada um
+  com os próprios limites e sempre em µSv/h. Dez cenários prontos: fundo
+  de casa, atenção, alarme, perigo, fonte chegando perto, pico só no
+  RC102, GMC-800 saturado, saída de casa, espectro com Cs-137 e aparelho
+  desconecta. O "Valor agora" dá o mesmo µSv/h aos dois, a velocidade 10×
+  passa os cenários que andam no tempo em segundos, e o som do alarme fica
+  mudo, com a opção de tocar.
+- Com a demonstração ligada, o app todo mostra um mundo simulado: gráficos,
+  resumo, ALARA, calendário, dose, alertas (marcados "demo"), saídas e
+  perguntas "fora de casa?", medições, espectro, espectrograma e
+  confirmação cruzada. É o mesmo mundo do modo navegador (prints e testes),
+  então os dois não ficam mais fora de sincronia. Ao sair, tudo volta para
+  os dados reais como estavam.
+- Uma faixa azul listrada "DEMONSTRAÇÃO" fica no topo de todas as telas,
+  com "Abrir controles" e "Sair". No menu, o item vira "Demonstração
+  ligada" em azul, e o Ctrl+K liga e desliga. Azul, e não amarelo, porque
+  amarelo é o nível "atenção".
+- Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam
+  desligados durante a demonstração ("saia da demonstração para usar"),
+  para nunca sair um arquivo com dado de mentira. Nada vai para os arquivos
+  do app; os aparelhos de verdade continuam sendo lidos e gravados por
+  baixo, e um alarme de verdade tira da demonstração na hora.
+
+**English**
+
+- New demo: one control moves both devices together, each with its own
+  limits and always in µSv/h. Ten ready scenarios: home background,
+  attention, alarm, danger, source coming closer, spike on the RC102 only,
+  GMC-800 saturated, leaving home, spectrum with Cs-137 and device
+  disconnects. "Value now" gives both the same µSv/h, the 10× speed plays
+  the time-based scenarios in seconds, and the alarm sound is muted, with
+  an option to play it.
+- With the demo on, the whole app shows a simulated world: charts,
+  summary, ALARA, calendar, dose, alerts (marked "demo"), trips and "away
+  from home?" questions, measurements, spectrum, spectrogram and cross
+  check. It is the same world as the browser mode (screenshots and tests),
+  so the two no longer drift apart. When you leave, everything goes back to
+  the real data as it was.
+- A striped blue "DEMO" band stays at the top of every screen, with "Open
+  controls" and "Leave". In the menu the item turns into "Demo on" in blue,
+  and Ctrl+K turns it on and off. Blue, not yellow, because yellow is the
+  "attention" level.
+- CSV export, PDF report, backup, cloud and sync are off during the demo
+  ("leave the demo to use this"), so a file with made-up data never leaves
+  the app. Nothing goes to the app's files; the real devices keep being read
+  and recorded underneath, and a real alarm ends the demo right away.
+
 ## 2.81.0
 - Medir objeto: o fundo vem antes de procurar o ponto. A ordem agora é
   Preparar, Fundo, Procurar, Objeto e Resultado: primeiro o fundo sem o

@@ -93,31 +93,6 @@ func (a *App) GetHomeBackgroundDev(dev string) HomeBg {
 // usa o GetHomeBackgroundDev.
 func (a *App) homeBackgroundGMC() HomeBg {
 	now := time.Now()
-	a.mu.Lock()
-	demo := a.demo.Active
-	var demoMins []float64
-	var demoCPM float64
-	if demo {
-		demoCPM = a.demo.CPM
-		for k, v := range a.demo.minutes {
-			if t := time.Unix(k, 0); t.After(now.Add(-homeBgWindow)) {
-				demoMins = append(demoMins, v)
-			}
-		}
-	}
-	a.mu.Unlock()
-	if demo {
-		// demo: os minutos simulados, ou o valor do demo se acabou de ligar
-		if len(demoMins) < 10 {
-			demoMins = make([]float64, 60)
-			for i := range demoMins {
-				demoMins[i] = demoCPM
-			}
-		}
-		hb := homeBgFrom(demoMins, now.Add(-time.Duration(len(demoMins))*time.Minute), now)
-		hb.Demo = true
-		return hb
-	}
 	if a.store == nil {
 		return HomeBg{Why: "sem dados gravados"}
 	}
@@ -255,10 +230,10 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		}
 	}
 	a.mu.Lock()
-	if dev == "gmc" && a.dev == nil && !a.demo.Active {
+	if dev == "gmc" && a.dev == nil {
 		st := a.measureSnapLocked()
 		a.mu.Unlock()
-		return st, errors.New("conecte o contador (ou ligue o modo demo) para medir")
+		return st, errors.New("conecte o contador para medir")
 	}
 	now := time.Now().UnixMilli()
 	if o.DistCM < 0 {
@@ -267,12 +242,9 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	if o.Size != "pequeno" && o.Size != "espalhado" {
 		o.Size = ""
 	}
-	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance), Demo: a.demo.Active && dev == "gmc",
+	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance),
 		DistCM: o.DistCM, Size: o.Size, Test: alaraTest(o.Test), Material: strings.TrimSpace(o.Material), RelErr: math.Min(math.Max(o.RelErr, 0), 0.5),
 		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
-	if side != nil {
-		m.Demo = false
-	}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
 			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}

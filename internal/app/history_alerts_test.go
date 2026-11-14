@@ -124,33 +124,36 @@ func TestActiveAlerts(t *testing.T) {
 	a, _ := testApp(t)
 	active := func() []Event { return a.GetActiveAlerts() }
 
-	a.StartDemo(60, false)
-	waitFor(t, "atenção ativa", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
-	a.StartDemo(150, false)
-	waitFor(t, "alarme e atenção ativos", func() bool { l := active(); return len(l) == 2 && l[0].Level == "alarme" })
+	sim := newGMCSim(a)
+	must := func(what string, ok func() bool) {
+		t.Helper()
+		if !ok() {
+			t.Fatalf("%s: %+v", what, active())
+		}
+	}
+	sim.feed(60, 1)
+	must("atenção ativa", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
+	sim.feed(150, 1)
+	must("alarme e atenção ativos", func() bool { l := active(); return len(l) == 2 && l[0].Level == "alarme" })
 	if l := active(); l[0].Peak != 150 || l[1].Peak != 150 || !l[0].Active {
 		t.Fatalf("pico: %+v", l)
 	}
-	a.StartDemo(70, false)
-	waitFor(t, "só atenção", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
-	a.StartDemo(20, false)
-	waitFor(t, "nada ativo", func() bool { return len(active()) == 0 })
+	sim.feed(70, 1)
+	must("só atenção", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
+	sim.feed(20, 1)
+	must("nada ativo", func() bool { return len(active()) == 0 })
 	for _, e := range a.GetEvents(kindAlert) {
-		if e.End == 0 || e.Active || !e.Demo {
+		if e.End == 0 || e.Active {
 			t.Fatalf("não fechou: %+v", e)
 		}
 	}
 
 	// pula direto para o alarme e desce para a faixa de atenção: a atenção é
 	// anotada quando o alarme acaba
-	a.StartDemo(150, false)
-	waitFor(t, "alarme direto", func() bool { l := active(); return len(l) == 1 && l[0].Level == "alarme" })
-	a.StartDemo(70, false)
-	waitFor(t, "atenção depois do alarme", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" && l[0].CPM == 70 })
-	a.StopDemo()
-	if len(active()) != 0 || len(a.GetEvents(kindAlert)) != 0 {
-		t.Fatal("o demo deixou alertas")
-	}
+	sim.feed(150, 1)
+	must("alarme direto", func() bool { l := active(); return len(l) == 1 && l[0].Level == "alarme" })
+	sim.feed(70, 1)
+	must("atenção depois do alarme", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" && l[0].CPM == 70 })
 }
 
 func TestHeatmapAlerts(t *testing.T) {
@@ -192,23 +195,23 @@ func TestDangerLevel(t *testing.T) {
 	a.settings.AlarmEnabled = false // o perigo vale mesmo com o alarme desligado
 	active := func() []Event { return a.GetActiveAlerts() }
 
-	a.StartDemo(1200, false)
-	waitFor(t, "perigo ativo", func() bool { l := active(); return len(l) >= 1 && l[0].Level == "perigo" })
-	if l := active(); len(l) != 1 { // pulou do fundo para o perigo: só o perigo abre
+	sim := newGMCSim(a)
+	sim.feed(1200, 1)
+	if l := active(); len(l) != 1 || l[0].Level != "perigo" { // pulou do fundo para o perigo: só o perigo abre
 		t.Fatalf("ativos: %+v", l)
 	}
-	if l := active(); l[0].Text != "[demo] Perigo: "+uT(a, 1200)+" (a partir de "+uN(a, 1000)+")" {
+	if l := active(); l[0].Text != "Perigo: "+uT(a, 1200)+" (a partir de "+uN(a, 1000)+")" {
 		t.Fatalf("texto: %q", l[0].Text)
 	}
 	// 950 ainda é perigo (só sai abaixo de 900)
-	a.StartDemo(950, false)
-	time.Sleep(1500 * time.Millisecond)
+	sim.feed(950, 2)
 	if l := active(); len(l) == 0 || l[0].Level != "perigo" || l[0].Peak != 1200 {
 		t.Fatalf("saiu cedo do perigo: %+v", l)
 	}
-	a.StartDemo(800, false)
-	waitFor(t, "fim do perigo", func() bool { l := active(); return len(l) == 1 && l[0].Level == "atencao" })
-	a.StopDemo()
+	sim.feed(800, 1)
+	if l := active(); len(l) != 1 || l[0].Level != "atencao" {
+		t.Fatalf("fim do perigo: %+v", l)
+	}
 
 	if levels.Level(999, DefaultLevels()) != "alarme" || levels.Level(1000, DefaultLevels()) != "perigo" {
 		t.Fatal("level")
@@ -280,16 +283,18 @@ func TestSaturation(t *testing.T) {
 
 func TestSaturationKeepsDanger(t *testing.T) {
 	a, _ := testApp(t)
-	a.StartDemo(999999, false) // ~6.500 µSv/h com a calibração de fábrica
-	waitFor(t, "saturado", func() bool {
-		a.mu.Lock()
-		defer a.mu.Unlock()
-		return a.demo.sat.on && a.demo.dangerOn && a.demo.sat.rise != nil
-	})
-	a.StartDemo(20, false) // a taxa despenca: pode ser o tubo travado
-	time.Sleep(2500 * time.Millisecond)
+	sim := newGMCSim(a)
+	sim.feed(20, 30)
+	sim.feed(999999, 3) // ~6.500 µSv/h com a calibração de fábrica
 	a.mu.Lock()
-	on, reason, danger := a.demo.sat.on, a.demo.sat.reason, a.demo.dangerOn
+	ok := a.sat.on && a.dangerOn && a.sat.rise != nil
+	a.mu.Unlock()
+	if !ok {
+		t.Fatal("não saturou")
+	}
+	sim.feed(20, 2) // a taxa despenca: pode ser o tubo travado
+	a.mu.Lock()
+	on, reason, danger := a.sat.on, a.sat.reason, a.dangerOn
 	a.mu.Unlock()
 	if !on || reason != "queda" || !danger {
 		t.Fatalf("depois da queda: sat %v %q perigo %v", on, reason, danger)
@@ -303,7 +308,6 @@ func TestSaturationKeepsDanger(t *testing.T) {
 	if !found {
 		t.Fatal("não anotou a saturação")
 	}
-	a.StopDemo()
 }
 
 func TestCustomLevels(t *testing.T) {
@@ -313,17 +317,15 @@ func TestCustomLevels(t *testing.T) {
 	if a.settings.Levels.SnoozeMin != 5 || a.settings.Levels.SatMaxUSv != 2000 {
 		t.Fatalf("padrões: %+v", a.settings.Levels)
 	}
-	a.StartDemo(70, false) // abaixo da atenção ajustada
-	time.Sleep(1500 * time.Millisecond)
+	sim := newGMCSim(a)
+	sim.feed(70, 2) // abaixo da atenção ajustada
 	if l := a.GetActiveAlerts(); len(l) != 0 {
 		t.Fatalf("70 não deveria avisar com atenção em 80: %+v", l)
 	}
-	a.StartDemo(350, false)
-	waitFor(t, "perigo em 300", func() bool { l := a.GetActiveAlerts(); return len(l) > 0 && l[0].Level == "perigo" })
-	if l := a.GetActiveAlerts(); l[0].Text != "[demo] Perigo: "+uT(a, 350)+" (a partir de "+uN(a, 300)+")" {
-		t.Fatalf("texto: %q", l[0].Text)
+	sim.feed(350, 1)
+	if l := a.GetActiveAlerts(); len(l) == 0 || l[0].Level != "perigo" || l[0].Text != "Perigo: "+uT(a, 350)+" (a partir de "+uN(a, 300)+")" {
+		t.Fatalf("perigo em 300: %+v", l)
 	}
-	a.StopDemo()
 
 	// valores absurdos e zeros voltam para limites razoáveis
 	n := Levels{AttentionCPM: -3, DangerCPM: 1, SnoozeMin: 999, SatHoldSec: 1}.Norm()
@@ -465,16 +467,15 @@ func TestNewRanges(t *testing.T) {
 func TestSavedMeasurements(t *testing.T) {
 	a, dir := testApp(t)
 	a.dev = nil
-	a.demo.Active = false
 	// simula um contador conectado só para poder medir (sem serial de verdade)
 	a.measure = MeasureState{Phase: "fundo", Seconds: 3, Name: "banana", PhaseStart: time.Now().Add(-5 * time.Second).UnixMilli()}
 	for i := 0; i < 3; i++ {
-		a.feedMeasure(0, 1, false)
+		a.feedMeasure(0, 1)
 	}
 	a.measure.Phase, a.measure.Elapsed, a.measure.Counts = "objeto", 0, 0
 	a.measure.PhaseStart = time.Now().UnixMilli()
 	for i := 0; i < 3; i++ {
-		a.feedMeasure(0, 1, false)
+		a.feedMeasure(0, 1)
 	}
 	st := a.GetMeasure()
 	list := a.GetMeasurements()
@@ -502,13 +503,6 @@ func TestSavedMeasurements(t *testing.T) {
 	if len(a.GetMeasurements()) != 0 {
 		t.Fatal("não apagou")
 	}
-	// medição no demo não é salva
-	a.demo.Active = true
-	a.measure = MeasureState{Phase: "objeto", Seconds: 1, Demo: true, Bg: &MeasurePhase{Counts: 1, Seconds: 1, CPM: 60, ErrCPM: 60}}
-	a.feedMeasure(0, 1, true)
-	if len(a.GetMeasurements()) != 0 {
-		t.Fatal("salvou medição do demo")
-	}
 }
 
 func TestRadiacodeMeasure(t *testing.T) {
@@ -517,7 +511,7 @@ func TestRadiacodeMeasure(t *testing.T) {
 	bg := &MeasurePhase{Counts: 600, Seconds: 60, CPM: 600, ErrCPM: 24.5, USv: 0.10, Source: "casa"}
 	a.measure = MeasureState{Phase: "objeto", Seconds: 3, Device: "radiacode", Bg: bg, PhaseStart: time.Now().UnixMilli()}
 	// o GMC não entra numa medição do Radiacode
-	a.feedMeasure(30, 5, false)
+	a.feedMeasure(30, 5)
 	if a.GetMeasure().Elapsed != 0 {
 		t.Fatal("GMC entrou na medição do RC102")
 	}
@@ -563,7 +557,7 @@ func TestDualMeasure(t *testing.T) {
 		if i%3 == 0 {
 			cps = 2 // ~80 CPM
 		}
-		a.feedMeasure(80, cps, false)
+		a.feedMeasure(80, cps)
 	}
 	st := a.GetMeasure()
 	if st.Phase != "pronto" || st.Other == nil || st.Other.Result == nil || st.Other.Obj == nil {
@@ -582,7 +576,7 @@ func TestDualMeasure(t *testing.T) {
 		Other: &MeasureSide{Device: "radiacode", Role: "voce", BgUSv: 0.10}}
 	for i := 0; i < 30; i++ {
 		a.rcMeasureSamples(radiacode.RawSamples{Period: 500 * time.Millisecond, CPS: []float64{24, 24}, DoseRate: []float64{0.46, 0.46}})
-		a.feedMeasure(30, 1, false)
+		a.feedMeasure(30, 1)
 	}
 	st = a.GetMeasure()
 	o := st.Other

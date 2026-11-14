@@ -65,7 +65,7 @@ func (a *App) alarmEnded() {
 		return
 	}
 	a.mu.Lock()
-	any := a.alarmOn || a.dangerOn || a.rcAlert.alarmOn || a.rcAlert.dangOn || (a.demo.Active && (a.demo.alarmOn || a.demo.dangerOn))
+	any := a.alarmOn || a.dangerOn || a.rcAlert.alarmOn || a.rcAlert.dangOn
 	a.mu.Unlock()
 	if !any {
 		wruntime.WindowSetTitle(a.ctx, appTitle)

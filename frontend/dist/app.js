@@ -6,11 +6,49 @@
 // desde a 1.13.4; antes era "main")
 const goApp = window.go && ((window.go.app && window.go.app.App) || (window.go.main && window.go.main.App));
 const hasGo = !!goApp;
-const api = hasGo ? goApp : makeDemoApi();
+// 2.82: demonstração dentro do app. A tela recarrega ao ligar e ao sair; com
+// ela ligada, a ponte passa a ser o mundo simulado do demo.js (o mesmo do
+// modo navegador). Do Go ficam só o estado dela, a bandeja e a leitura real;
+// o que tiraria dado de mentira do app (CSV, PDF, backup, nuvem) é recusado.
+const DEMO_FLAG = "radlogDemo";
+const inDemo = hasGo && typeof makeDemoApi === "function" && (() => { try { return sessionStorage.getItem(DEMO_FLAG) === "1"; } catch (e) { return false; } })();
+const demoApi = !hasGo || inDemo ? makeDemoApi({ inApp: inDemo }) : null;
+const DEMO_GO = new Set(["GetDemo", "StopDemo", "DemoTray"]);
+const DEMO_BLOCK = new Set(["ExportCSV", "ExportReport", "ExportReportWith", "ExportMeasureReport", "ExportBackup", "ImportBackup", "ApplyBackupSettings",
+  "CloudLogin", "CloudLoginWait", "CloudFinishSetup", "CloudOpen", "CloudSyncNow", "CloudRestart", "CloudRejoin", "CloudReset", "CloudDisconnect", "CloudRemoveDevice", "CloudDupAnswer", "CloudVaultRetry", "SetCloudAuto", "SetCloudName", "SaveCloudCode",
+  "SyncNow", "PairWith", "ShowPairCode", "SetSyncListen", "SetSyncAuto", "DiscoverPeers", "SetPeerAddrs", "ForgetPeer", "ImportRcLog"]);
+const demoRefuse = async () => { throw new Error("saia da demonstração para usar"); };
+const demoBridge = inDemo ? new Proxy({}, {
+  get: (_, k) => {
+    if (k === "SetDemo") return async (st) => { const d = await goApp.SetDemo(st); await demoApi.SetDemo(d); return d; };
+    if (k === "GetSettings") return async () => { demoApi._seedSettings(await goApp.GetSettings()); return demoApi.GetSettings(); };
+    if (DEMO_GO.has(k)) return goApp[k];
+    if (DEMO_BLOCK.has(k)) return demoRefuse;
+    if (k in demoApi) return demoApi[k];
+    return goApp[k] ? demoRefuse : undefined;
+  },
+}) : null;
+const api = !hasGo ? demoApi : inDemo ? demoBridge : goApp;
 const on = (name, fn) => {
-  if (hasGo && window.runtime) window.runtime.EventsOn(name, fn);
-  else demoBus[name] = (demoBus[name] || []).concat(fn);
+  if (!hasGo || inDemo) demoBus[name] = (demoBus[name] || []).concat(fn);
+  if (!hasGo || !window.runtime) return;
+  if (!inDemo) window.runtime.EventsOn(name, fn);
+  // na demonstração, do Go só vêm o estado dela e a leitura real
+  else if (name === "demo") window.runtime.EventsOn("demo", fn);
+  else if (name === "realReading") window.runtime.EventsOn("reading", fn);
 };
+// liga ou desliga a demonstração recarregando a tela (dentro do app)
+function demoReload(on) {
+  let ok = false;
+  try {
+    if (on) sessionStorage.setItem(DEMO_FLAG, "1"); else sessionStorage.removeItem(DEMO_FLAG);
+    ok = (sessionStorage.getItem(DEMO_FLAG) === "1") === on;
+  } catch (e) { /* sem armazenamento */ }
+  // sem como lembrar depois de recarregar: desliga no Go, para não ficar recarregando
+  if (!ok && on) { goApp.StopDemo().catch(() => {}); setTimeout(() => toast("Não deu para ligar a demonstração neste computador.", true), 0); return; }
+  if (window.runtime && window.runtime.WindowReloadApp) window.runtime.WindowReloadApp();
+  else location.reload();
+}
 
 // ---------- formatação ----------
 
@@ -61,7 +99,7 @@ const state = {
   settings: {},
   last: null,
   alarm: false,
-  demo: { active: false, cpm: 20, realistic: false },
+  demo: { active: false, scenario: "casa", usv: 0, speed: 1, sound: false },
   realAlarm: false,
   chart: null,
 };
@@ -891,127 +929,137 @@ document.addEventListener("click", (e) => {
 state.doseSrc = localGet("doseSrc", "radiacode");
 state.doseShow = (() => { try { return Object.assign({ gmc: true, rc: true }, JSON.parse(localGet("doseShow", "{}"))); } catch (e) { return { gmc: true, rc: true }; } })();
 
-// ---------- modo demo ----------
+// ---------- demonstração (2.82) ----------
+//
+// Spec ux/demonstracao.html. A faixa azul fica no topo de todas as telas; os
+// controles abrem embaixo dela. Os cenários tocam no demo.js (o mesmo mundo
+// do modo navegador). Dentro do app, ligar e sair recarregam a tela.
 
-const sliderToCPM = (v) => Math.min(999999, Math.max(0, Math.round(Math.pow(10, (v / 100) * 6) - 1)));
-const cpmToSlider = (c) => Math.round((Math.log10(Math.max(0, c) + 1) / 6) * 100);
+const DEMO_SCEN = [
+  ["casa", "Fundo de casa", "Os dois em fundo normal."],
+  ["atencao", "Atenção", "Cada aparelho logo acima do próprio limite de atenção."],
+  ["alarme", "Alarme", "Os dois em alarme; o alarme dispara (som conforme a escolha)."],
+  ["perigo", "Perigo", "Os dois em perigo."],
+  ["fonte", "Fonte chegando perto", "Sobe até o alarme e volta em 2 min (12 s no 10×)."],
+  ["picorc", "Pico só no RC102", "Só o RC102 sobe: aparece \"não confirmado\" e o \"Por que subiu?\"."],
+  ["saturado", "GMC-800 saturado", "Valor extremo e queda de repente no GMC-800: aviso de saturação."],
+  ["saida", "Saída de casa", "O RC102 \"sai\" e a conta RC102 ÷ GMC-800 muda; prévia do cartão de pergunta, sem salvar."],
+  ["cs137", "Espectro com Cs-137", "O espectro do RC102 ganha o pico de 662 keV e a lista de isótopos mostra Cs-137."],
+  ["desconecta", "Aparelho desconecta", "O RC102 \"desconecta\" para ver as telas sem conexão."],
+];
+// "Valor agora": 0,01 a 10.000 µSv/h na escala logarítmica
+const sliderToUSv = (v) => { const u = Math.pow(10, (v / 100) * 6 - 2); return u < 1 ? Math.round(u * 1000) / 1000 : u < 10 ? Math.round(u * 100) / 100 : Math.round(u * 10) / 10; };
+const usvToSlider = (u) => Math.round(((Math.log10(Math.max(0.01, u)) + 2) / 6) * 100);
 let demoTimer = null;
+const demoName = (sc) => (DEMO_SCEN.find((x) => x[0] === sc) || [sc, "Valor escolhido"])[1];
 
 function renderDemo() {
-  const d = state.demo;
-  $("demoCard").hidden = !d.active;
-  $("btnDemo").setAttribute("aria-pressed", String(!!d.active));
-  $("btnDemoText").textContent = d.active ? "Demo ligado" : "Modo demo";
-  if (d.active) {
-    if (document.activeElement !== $("demoCPM")) $("demoCPM").value = Math.round(d.cpm);
-    if (document.activeElement !== $("demoSlider")) $("demoSlider").value = cpmToSlider(d.cpm);
-    $("demoReal").checked = !!d.realistic;
-    $("demoRcOn").checked = !!d.rc;
-    $("demoRcCtl").hidden = !d.rc;
-    if (d.rc) {
-      if (document.activeElement !== $("demoRcUSv")) $("demoRcUSv").value = +(d.rcUSv || 0).toFixed(d.rcUSv < 1 ? 3 : 2);
-      if (document.activeElement !== $("demoRcSlider")) $("demoRcSlider").value = usvToSlider(d.rcUSv || 0);
+  const d = state.demo || {};
+  const on = !!d.active;
+  document.body.classList.toggle("demo-on", on);
+  $("demoStripe").hidden = !on;
+  $("btnDemo").setAttribute("aria-pressed", String(on));
+  $("btnDemo").classList.toggle("demo-on", on);
+  $("btnDemoText").textContent = on ? "Demonstração ligada" : "Demonstração";
+  if (!on) { $("demoPanel").hidden = true; renderStatus(); return; }
+  $("demoStripeTxt").textContent = `${demoName(d.scenario)} · nada é gravado`;
+  const open = !$("demoPanel").hidden;
+  $("demoOpen").textContent = open ? "Fechar controles" : "Abrir controles";
+  $("demoOpen").setAttribute("aria-expanded", String(open));
+  const box = $("demoScen");
+  if (!box.childElementCount) {
+    for (const [k, name] of DEMO_SCEN) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.sc = k;
+      b.textContent = name;
+      box.appendChild(b);
     }
-    renderDemoRcPresets();
   }
+  box.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.sc === d.scenario)));
+  const sc = DEMO_SCEN.find((x) => x[0] === d.scenario);
+  $("demoScenDesc").textContent = sc ? sc[2] : "Os dois aparelhos recebem o mesmo µSv/h e cada um mostra o próprio nível.";
+  $("demoSpeed").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === (d.speed || 1))));
+  $("demoSound").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "1") === !!d.sound)));
   renderStatus();
 }
 
-// Radiacode simulado: µSv/h de 0,01 a 10.000 na escala logarítmica
-const sliderToUSv = (v) => Math.round(Math.pow(10, (v / 100) * 6 - 2) * 1000) / 1000;
-const usvToSlider = (u) => Math.round(((Math.log10(Math.max(0.01, u)) + 2) / 6) * 100);
-function renderDemoRcPresets() {
-  const box = $("demoRcPresets");
-  const st = (state.rc && state.rc.st) || {};
-  const l = st.limits || {};
-  const bg = (st.stats && st.stats.bgUSv) || 0.12;
-  const list = [[bg, "fundo"]];
-  if (l.attn) list.push([l.attn * 1.15, "atenção"]);
-  if (l.alarm) list.push([l.alarm * 1.15, "alarme"]);
-  if (l.danger) list.push([l.danger * 1.15, "perigo"]);
-  const key = list.map((x) => x[0].toFixed(3)).join("|");
-  if (box.dataset.key === key) return;
-  box.dataset.key = key;
-  box.textContent = "";
-  for (const [v, name] of list) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "btn small";
-    const r = v < 1 ? Math.round(v * 1000) / 1000 : v < 10 ? Math.round(v * 100) / 100 : Math.round(v * 10) / 10;
-    b.dataset.demoRc = r;
-    b.textContent = `${fmt(r, usvDigits(r))} · ${name}`;
-    box.appendChild(b);
-  }
-}
-let demoRcTimer = null;
-function sendDemoRc(on, usv) {
-  clearTimeout(demoRcTimer);
-  demoRcTimer = setTimeout(() => {
-    if (!api.SetDemoRc) return;
-    call(api.SetDemoRc, on, usv).then((st) => { state.demo = st; renderDemo(); });
-  }, 200);
+// o valor do GMC-800 agora vai para o "Valor agora" (menos quando a pessoa mexe nele)
+function demoSliderFollow(usv) {
+  if (!state.demo.active || document.activeElement === $("demoSlider") || $("demoPanel").hidden) return;
+  $("demoSlider").value = usvToSlider(usv);
+  $("demoSliderVal").textContent = usvTxt(usv);
 }
 
-function sendDemo(cpm) {
+function sendDemo(patch) {
+  const st = Object.assign({}, state.demo, patch);
   clearTimeout(demoTimer);
   demoTimer = setTimeout(() => {
-    call(api.StartDemo, cpm, $("demoReal").checked).then((st) => { state.demo = st; renderDemo(); });
-  }, 200);
+    call(api.SetDemo, st).then((d) => { if (d) { state.demo = d; renderDemo(); } });
+  }, patch.scenario === "valor" ? 150 : 0);
+  state.demo = Object.assign(st, { active: true });
+  renderDemo();
+}
+
+// ligar: dentro do app o Go guarda o estado e a tela recarrega com o mundo simulado
+async function demoStart() {
+  const st = { scenario: "casa", usv: 0, speed: 1, sound: false };
+  if (hasGo && !inDemo) {
+    try { await goApp.SetDemo(st); } catch (e) { toast("Não deu para ligar a demonstração: " + String(e && e.message ? e.message : e), true); return; }
+    demoReload(true);
+    return;
+  }
+  state.demo = await call(api.SetDemo, st);
+  localSet("demoPanel", "1");
+  $("demoPanel").hidden = false;
+  state.last = null;
+  renderDemo();
+  refreshAll();
+}
+
+async function demoStop() {
+  if (inDemo) {
+    try { await goApp.StopDemo(); } catch (e) { /* recarrega do mesmo jeito */ }
+    demoReload(false);
+    return;
+  }
+  state.demo = await call(api.StopDemo);
+  state.last = null;
+  renderDemo();
+  refreshAll();
+}
+
+// bandeja: o Go mostra o que a demonstração mostra (uma vez a cada 2 s)
+let demoTrayAt = 0;
+function demoTray(r) {
+  if (!inDemo || !r || !r.demo || Date.now() - demoTrayAt < 2000) return;
+  demoTrayAt = Date.now();
+  const rc = (state.rc && state.rc.st) || {};
+  const lvl = (x) => (x === "seguro" ? "" : x || "");
+  api.DemoTray(r.usv || 0, r.danger ? "perigo" : lvl(r.level), rc.usvh || 0, rc.alertLevel || "", rc.state || "").catch(() => {});
 }
 
 function wireDemo() {
-  $("btnDemo").addEventListener("click", async () => {
-    if (state.demo.active) {
-      state.demo = await call(api.StopDemo);
-    } else {
-      const start = state.last && !state.last.demo ? state.last.cpm : 20;
-      state.demo = await call(api.StartDemo, start, false);
-    }
-    state.last = null;
+  $("btnDemo").addEventListener("click", () => (state.demo.active ? ($("demoPanel").hidden = !$("demoPanel").hidden, renderDemo()) : demoStart()));
+  $("demoExit").addEventListener("click", demoStop);
+  $("demoPanelExit").addEventListener("click", demoStop);
+  $("demoOpen").addEventListener("click", () => {
+    $("demoPanel").hidden = !$("demoPanel").hidden;
+    localSet("demoPanel", $("demoPanel").hidden ? "0" : "1");
     renderDemo();
-    refreshAll();
   });
-  $("btnDemoStop").addEventListener("click", () => $("btnDemo").click());
-  $("demoRcOn").addEventListener("change", () => {
-    const st = (state.rc && state.rc.st) || {};
-    const v = parseFloat($("demoRcUSv").value) || state.demo.rcUSv || (st.stats && st.stats.bgUSv) || 0.12;
-    sendDemoRc($("demoRcOn").checked, v);
-  });
-  $("demoRcUSv").addEventListener("input", () => {
-    const v = Math.min(10000, Math.max(0, parseFloat(String($("demoRcUSv").value).replace(",", ".")) || 0));
-    $("demoRcSlider").value = usvToSlider(v);
-    sendDemoRc(true, v);
-  });
-  $("demoRcSlider").addEventListener("input", () => {
-    const v = sliderToUSv(parseInt($("demoRcSlider").value, 10));
-    $("demoRcUSv").value = v;
-    sendDemoRc(true, v);
-  });
-  $("demoRcPresets").addEventListener("click", (e) => {
-    const b = e.target.closest("[data-demo-rc]");
-    if (!b) return;
-    const v = parseFloat(b.dataset.demoRc);
-    $("demoRcUSv").value = v;
-    $("demoRcSlider").value = usvToSlider(v);
-    sendDemoRc(true, v);
-  });
-  $("demoCPM").addEventListener("input", () => {
-    const v = Math.min(999999, Math.max(0, parseInt($("demoCPM").value, 10) || 0));
-    $("demoSlider").value = cpmToSlider(v);
-    sendDemo(v);
+  $("demoScen").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-sc]");
+    if (b) sendDemo({ scenario: b.dataset.sc });
   });
   $("demoSlider").addEventListener("input", () => {
-    const v = sliderToCPM(parseInt($("demoSlider").value, 10));
-    $("demoCPM").value = v;
-    sendDemo(v);
+    const v = sliderToUSv(parseInt($("demoSlider").value, 10));
+    $("demoSliderVal").textContent = usvTxt(v);
+    sendDemo({ scenario: "valor", usv: v });
   });
-  document.querySelectorAll("[data-demo]").forEach((b) => b.addEventListener("click", () => {
-    const v = parseInt(b.dataset.demo, 10);
-    $("demoCPM").value = v;
-    $("demoSlider").value = cpmToSlider(v);
-    sendDemo(v);
-  }));
-  $("demoReal").addEventListener("change", () => sendDemo(parseInt($("demoCPM").value, 10) || 0));
+  $("demoSpeed").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) sendDemo({ speed: +b.dataset.v }); });
+  $("demoSound").addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) sendDemo({ sound: b.dataset.v === "1" }); });
+  if (localGet("demoPanel", "1") === "1") $("demoPanel").hidden = false;
 }
 
 // ---------- padrão por hora do dia (mapa de calor) ----------
@@ -1640,6 +1688,8 @@ function updateAlarm() {
   let want = null;
   if (sev === "perigo") want = snoozed ? null : "perigo";
   else if (sev === "alarme") want = alarmCtl.muted ? null : (kind === "test" ? $("selSound").value : (state.settings.alarmSound || "sirene")) + (fast ? "+" : "");
+  // demonstração: mudo, a não ser que a pessoa escolha "tocar"
+  if ((kind === "demo" || (kind === "rc" && !!(state.rc.st || {}).demo)) && !(state.demo && state.demo.sound)) want = null;
   if (want !== alarmCtl.sound) {
     if (want) startSound(want.replace("+", ""), want.endsWith("+"));
     else stopSound();
@@ -3059,6 +3109,7 @@ function listen() {
     if (r.demo) { alarmCtl.demo = !!r.alarm; alarmCtl.demoDanger = !!r.danger; }
     else { alarmCtl.real = !!r.alarm; alarmCtl.realDanger = !!r.danger; state.lastReal = r; }
     renderReading();
+    if (r.demo) { demoTray(r); demoSliderFollow(r.usv); }
     pulseGmc(r);
     measureLogReading(r);
     updateAlarm();
@@ -3090,15 +3141,18 @@ function listen() {
   });
   on("event", (e) => { refreshEvents(); if (e && e.kind === "alerta") refreshHeat(); });
   on("demo", (d) => {
+    // dentro do app, ligar ou sair (ou um alarme de verdade) recarrega a tela
+    if (hasGo && !!d.active !== inDemo) { demoReload(!!d.active); return; }
     const changed = d.active !== state.demo.active;
     state.demo = d;
     if (changed) { state.last = null; state.alarm = false; alarmCtl.demo = false; alarmCtl.demoDanger = false; attnCtl.demo = false; refreshAll(); updateAlarm(); updateAttention(); }
     renderDemo();
   });
   on("realReading", (r) => {
-    // leitura real enquanto o demo está ligado (o alarme real continua valendo)
+    // leitura real enquanto a demonstração está ligada (um alarme de verdade
+    // tira dela, no Go)
     const line = $("demoRealLine");
-    line.textContent = `Leitura real: ${usvTxt(r.usv)}` + (r.danger ? " · PERIGO REAL" : r.alarm ? " · ALARME REAL" : "");
+    line.textContent = `Leitura real do GMC-800: ${usvTxt(r.usv)}` + (r.danger ? " · PERIGO REAL" : r.alarm ? " · ALARME REAL" : "");
     line.classList.toggle("alarm", !!(r.alarm || r.danger));
     state.lastReal = r;
     state.realAlarm = !!(r.alarm || r.danger);
@@ -4348,6 +4402,8 @@ async function init() {
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();
+    if (hasGo && !!state.demo.active !== inDemo) { demoReload(!!state.demo.active); return; }
+    if (inDemo) await demoApi.SetDemo(state.demo); // o mundo simulado no cenário que o Go guardou
   } catch (e) { /* segue com o padrão */ }
   renderDemo();
   usoInit();

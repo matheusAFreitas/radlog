@@ -4236,7 +4236,55 @@ const I18N_EN = {
 "Usar o fundo da casa": "Use the home background",
 "fundo daqui, sem o objeto": "background here, without the object",
 "medição (o número está na lista)": "measurement (the number is in the list)",
-"· guarda o espectro do fundo": "· keeps the background spectrum"
+"· guarda o espectro do fundo": "· keeps the background spectrum",
+"Abrir controles": "Open controls",
+"Cada aparelho logo acima do próprio limite de atenção.": "Each device just above its own attention limit.",
+"Cenários": "Scenarios",
+"Controles da demonstração": "Demo controls",
+"DEMONSTRAÇÃO": "DEMO",
+"Demonstração": "Demo",
+"Demonstração desligada: alarme de verdade": "Demo turned off: real alarm",
+"Demonstração ligada": "Demo on",
+"Escolha um cenário. Os dois aparelhos andam juntos, cada um com os próprios limites. O app todo mostra dados simulados até você sair. Nada vai para os arquivos, e os aparelhos de verdade continuam gravando por baixo.": "Pick a scenario. Both devices move together, each with its own limits. The whole app shows simulated data until you leave. Nothing goes to the files, and the real devices keep recording underneath.",
+"Espectro com Cs-137": "Spectrum with Cs-137",
+"Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.": "CSV export, PDF report, backup, cloud and sync stay off until you leave. A real alarm ends the demo right away.",
+"Fechar controles": "Close controls",
+"Fundo de casa · nada é gravado": "Home background · nothing is recorded",
+"Leitura real do GMC-800: —": "Real GMC-800 reading: —",
+"Ligar a demonstração": "Turn on the demo",
+"Não deu para ligar a demonstração:": "Couldn't turn on the demo:",
+"O RC102 \"desconecta\" para ver as telas sem conexão.": "The RC102 \"disconnects\" so you can see the screens without a connection.",
+"O RadiaCode \"desconecta\" para ver as telas sem conexão.": "The RC102 \"disconnects\" so you can see the screens without a connection.",
+"O RC102 \"sai\" e a conta RC102 ÷ GMC-800 muda; prévia do cartão de pergunta, sem salvar.": "The RC102 \"leaves\" and the RC102 ÷ GMC-800 ratio changes; preview of the question card, nothing saved.",
+"O RadiaCode \"sai\" e a conta RadiaCode ÷ GMC-800 muda; prévia do cartão de pergunta, sem salvar.": "The RC102 \"leaves\" and the RC102 ÷ GMC-800 ratio changes; preview of the question card, nothing saved.",
+"O espectro do RC102 ganha o pico de 662 keV e a lista de isótopos mostra Cs-137.": "The RC102 spectrum gets the 662 keV peak and the isotope list shows Cs-137.",
+"O espectro do RadiaCode ganha o pico de 662 keV e a lista de isótopos mostra Cs-137.": "The RC102 spectrum gets the 662 keV peak and the isotope list shows Cs-137.",
+"Os dois aparelhos recebem o mesmo µSv/h e cada um mostra o próprio nível.": "Both devices get the same µSv/h and each shows its own level.",
+"Os dois em alarme; o alarme dispara (som conforme a escolha).": "Both in alarm; the alarm goes off (sound as chosen).",
+"Os dois em fundo normal.": "Both at normal background.",
+"Os dois em perigo.": "Both in danger.",
+"Pico só no RC102": "Spike on the RC102 only",
+"Pico só no RadiaCode": "Spike on the RC102 only",
+"Sair da demonstração": "Leave the demo",
+"Sobe até o alarme e volta em 2 min (12 s no 10×).": "Rises to alarm and comes back in 2 min (12 s at 10×).",
+"Só o RC102 sobe: aparece \"não confirmado\" e o \"Por que subiu?\".": "Only the RC102 rises: \"not confirmed\" and \"Why did it rise?\" show up.",
+"Só o RadiaCode sobe: aparece \"não confirmado\" e o \"Por que subiu?\".": "Only the RC102 rises: \"not confirmed\" and \"Why did it rise?\" show up.",
+"Valor agora, em escala logarítmica": "Value now, on a log scale",
+"Valor extremo e queda de repente no GMC-800: aviso de saturação.": "Extreme value then a sudden drop on the GMC-800: saturation warning.",
+"conecte o contador para medir": "connect the counter to measure",
+"dados simulados no app todo; nada é gravado": "simulated data in the whole app; nothing is recorded",
+"demonstração desligada": "demo turned off",
+"demonstração ligada": "demo turned on",
+"saia da demonstração para usar": "leave the demo to use this",
+"volta para os dados reais": "back to the real data",
+"Sair": "Leave",
+"Valor agora": "Value now",
+"mudo": "muted",
+"tocar": "play",
+"Fonte chegando perto": "Source coming closer",
+"Aparelho desconecta": "Device disconnects",
+"Valor escolhido": "Chosen value",
+"Não deu para ligar a demonstração neste computador.": "Couldn't turn on the demo on this computer."
 },
 "patterns": [
 [
@@ -9297,6 +9345,15 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] Atenção no RadiaCode: ",
+"^\\[demo\\] Atenção no RadiaCode: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Attention on the RC102: ${1} (limit ${2})",
+[
+"[demo] Atenção no RadiaCode: ",
+" (limite "
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -9414,6 +9471,24 @@ const I18N_EN = {
 "cloud: could not save the device (${1})",
 [
 "nuvem: não consegui gravar o aparelho ("
+]
+],
+[
+"[demo] Alarme no RadiaCode: ",
+"^\\[demo\\] Alarme no RadiaCode: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Alarm on the RC102: ${1} (limit ${2})",
+[
+"[demo] Alarme no RadiaCode: ",
+" (limite "
+]
+],
+[
+"[demo] Perigo no RadiaCode: ",
+"^\\[demo\\] Perigo no RadiaCode: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Danger on the RC102: ${1} (limit ${2})",
+[
+"[demo] Perigo no RadiaCode: ",
+" (limite "
 ]
 ],
 [
@@ -9953,6 +10028,15 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] Atenção no RC102: ",
+"^\\[demo\\] Atenção no RC102: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Attention on the RC102: ${1} (limit ${2})",
+[
+"[demo] Atenção no RC102: ",
+" (limite "
+]
+],
+[
 "[demo] Perigo: ",
 "^\\[demo\\] Perigo: ((?:(?! · ).)+?) CPM \\(a partir de ((?:(?! · ).)+?)\\)$",
 "[demo] Danger: ${1} CPM (from ${2})",
@@ -10084,6 +10168,24 @@ const I18N_EN = {
 [
 "Parece que este PC é uma cópia de \"",
 "\"."
+]
+],
+[
+"[demo] Alarme no RC102: ",
+"^\\[demo\\] Alarme no RC102: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Alarm on the RC102: ${1} (limit ${2})",
+[
+"[demo] Alarme no RC102: ",
+" (limite "
+]
+],
+[
+"[demo] Perigo no RC102: ",
+"^\\[demo\\] Perigo no RC102: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Danger on the RC102: ${1} (limit ${2})",
+[
+"[demo] Perigo no RC102: ",
+" (limite "
 ]
 ],
 [
@@ -10594,6 +10696,15 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] Atenção: ",
+"^\\[demo\\] Atenção: ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
+"[demo] Attention: ${1} (from ${2})",
+[
+"[demo] Atenção: ",
+" (a partir de "
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -10738,6 +10849,15 @@ const I18N_EN = {
 "· janela em formação (",
 " de ",
 " dias)"
+]
+],
+[
+"[demo] Perigo: ",
+"^\\[demo\\] Perigo: ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
+"[demo] Danger: ${1} (from ${2})",
+[
+"[demo] Perigo: ",
+" (a partir de "
 ]
 ],
 [
@@ -11849,6 +11969,15 @@ const I18N_EN = {
 ]
 ],
 [
+"[demo] Alarme: ",
+"^\\[demo\\] Alarme: ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
+"[demo] Alarm: ${1} (limit ${2})",
+[
+"[demo] Alarme: ",
+" (limite "
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -12512,6 +12641,14 @@ const I18N_EN = {
 "efficiency so far: ${1} ± ${2}%${3}",
 [
 "eficiência até agora: "
+]
+],
+[
+"Leitura real do GMC-800: ",
+"^Leitura real do GMC\\-800: ((?:(?! · ).)+?)$",
+"Real GMC-800 reading: ${1}",
+[
+"Leitura real do GMC-800: "
 ]
 ],
 [
@@ -15474,6 +15611,14 @@ const I18N_EN = {
 "Last 7 days · ${1}",
 [
 "Últimos 7 dias · "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · nada é gravado$",
+"${1} · nothing is recorded",
+[
+" · nada é gravado"
 ]
 ],
 [

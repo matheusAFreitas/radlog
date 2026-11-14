@@ -169,6 +169,9 @@ func (a *App) writeBackupFile(dst string) error {
 // ExportBackup pergunta onde salvar e grava o backup. Devolve o caminho
 // (vazio se cancelou).
 func (a *App) ExportBackup() (string, error) {
+	if a.isDemo() {
+		return "", errDemo
+	}
 	if a.ctx == nil {
 		return "", errors.New("sem janela")
 	}
@@ -195,6 +198,9 @@ func (a *App) ExportBackup() (string, error) {
 
 // ImportBackup pergunta qual .zip e mescla.
 func (a *App) ImportBackup() (MergeResult, error) {
+	if a.isDemo() {
+		return MergeResult{}, errDemo
+	}
 	if a.ctx == nil {
 		return MergeResult{}, errors.New("sem janela")
 	}

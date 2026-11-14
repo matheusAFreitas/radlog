@@ -83,7 +83,7 @@
     </button>
     <button type="button" class="side-link" id="btnDemo" aria-pressed="false">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>
-      <span id="btnDemoText">Modo demo</span>
+      <span id="btnDemoText">Demonstração</span>
     </button>
     <button type="button" class="side-link" id="btnEvents">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
@@ -131,42 +131,36 @@
   <div class="bar"><div class="bar-fill" id="progressFill"></div></div>
 </div>
 
-<section class="card demo-card" id="demoCard" hidden>
-    <div class="demo-head">
-      <div>
-        <h2>Modo demo</h2>
-        <p class="small muted">Valores simulados só no app, para testar alarme e gráficos. O contador continua sendo lido e as leituras reais continuam sendo gravadas; nada do demo vai para os arquivos. Ao sair, tudo que foi simulado some.</p>
-      </div>
-      <button type="button" class="btn" id="btnDemoStop">Sair do demo</button>
+<div class="demo-stripe" id="demoStripe" role="status" hidden>
+  <b>DEMONSTRAÇÃO</b><span id="demoStripeTxt">Fundo de casa · nada é gravado</span>
+  <span class="inst-fill"></span>
+  <button type="button" class="link-btn" id="demoOpen" aria-expanded="false" aria-controls="demoPanel">Abrir controles</button>
+  <button type="button" class="link-btn" id="demoExit">Sair</button>
+</div>
+<section class="card demo-panel" id="demoPanel" aria-label="Controles da demonstração" hidden>
+  <div class="demo-head">
+    <div>
+      <h2>Demonstração</h2>
+      <p class="small muted">Escolha um cenário. Os dois aparelhos andam juntos, cada um com os próprios limites. O app todo mostra dados simulados até você sair. Nada vai para os arquivos, e os aparelhos de verdade continuam gravando por baixo.</p>
     </div>
-    <div class="demo-controls">
-      <label for="demoCPM">Valor simulado (CPM)</label>
-      <div class="row">
-        <input type="number" id="demoCPM" min="0" max="999999" step="1" inputmode="numeric">
-        <input type="range" id="demoSlider" min="0" max="100" step="1" aria-label="Valor simulado em escala logarítmica">
-      </div>
-      <div class="row presets">
-        <button type="button" class="btn small" data-demo="20">20 · fundo</button>
-        <button type="button" class="btn small" data-demo="70">70 · atenção</button>
-        <button type="button" class="btn small" data-demo="150">150 · alarme</button>
-        <button type="button" class="btn small" data-demo="1000">1.000</button>
-        <button type="button" class="btn small" data-demo="10000">10.000</button>
-      </div>
-      <label class="toggle"><span>Variar como um contador de verdade (o CPM leva até 1 min para chegar no valor)</span><input type="checkbox" id="demoReal"></label>
-      <p class="small mono" id="demoRealLine">Leitura real: —</p>
-    </div>
-    <div class="demo-controls demo-rc">
-      <label class="toggle"><span><strong>Simular o RC102</strong> · quadro, alertas e gráficos com os limites dele; o aparelho de verdade, se conectado, continua gravando</span><input type="checkbox" id="demoRcOn"></label>
-      <div class="demo-rc-ctl" id="demoRcCtl" hidden>
-        <label for="demoRcUSv">Valor simulado do RC102 (µSv/h)</label>
-        <div class="row">
-          <input type="number" id="demoRcUSv" min="0" max="10000" step="0.01" inputmode="decimal">
-          <input type="range" id="demoRcSlider" min="0" max="100" step="1" aria-label="Valor simulado do RC102 em escala logarítmica">
-        </div>
-        <div class="row presets" id="demoRcPresets"></div>
-      </div>
-    </div>
-  </section>
+    <button type="button" class="btn" id="demoPanelExit">Sair da demonstração</button>
+  </div>
+  <div class="demo-scen" id="demoScen" role="group" aria-label="Cenários"></div>
+  <p class="small muted demo-desc" id="demoScenDesc"></p>
+  <div class="demo-ctl">
+    <label for="demoSlider">Valor agora</label>
+    <input type="range" id="demoSlider" min="0" max="100" step="1" value="35" aria-label="Valor agora, em escala logarítmica">
+    <span class="mono" id="demoSliderVal">—</span>
+  </div>
+  <div class="demo-opts">
+    <span class="small muted">Velocidade</span>
+    <div class="seg" id="demoSpeed" role="group" aria-label="Velocidade"><button type="button" data-v="1">1×</button><button type="button" data-v="10">10×</button></div>
+    <span class="small muted">Som do alarme</span>
+    <div class="seg" id="demoSound" role="group" aria-label="Som do alarme"><button type="button" data-v="0">mudo</button><button type="button" data-v="1">tocar</button></div>
+  </div>
+  <p class="small mono" id="demoRealLine">Leitura real do GMC-800: —</p>
+  <p class="small muted">Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.</p>
+</section>
 
 <div class="notice save-warn" id="dataWarn" role="alert" hidden></div>
 <div class="notice save-warn" id="saveWarn" role="alert" hidden></div>
