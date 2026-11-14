@@ -365,7 +365,10 @@ function drawAlertDetail(d) {
   if (e.startedAs) sub.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
   if (e.peak && !rc && bgNow()) sub.push(`pico ${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)}`);
   const ep = d.episode;
-  if (ep && ep.n) sub.push(`mín ${val(ep.min)} · média ${val(ep.mean)} (${fmt(ep.n, 0)} ${ep.src === "segundos" ? "segundos" : "minutos"})`);
+  if (ep && ep.n) {
+    const unit = ep.src === "segundos" ? (ep.n === 1 ? "segundo" : "segundos") : ep.n === 1 ? "minuto" : "minutos";
+    sub.push(`mín ${val(ep.min)} · média ${val(ep.mean)} (${fmt(ep.n, 0)} ${unit})`);
+  }
   $("adSub").textContent = sub.join(" · ");
   $("adSub").hidden = !sub.length;
 

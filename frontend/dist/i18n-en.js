@@ -4210,7 +4210,9 @@ const I18N_EN = {
 "nuvem: a chave guardada não está no cofre do sistema": "cloud: the saved key is not in the system keyring",
 "nuvem: abrindo o cofre…": "cloud: opening the keyring…",
 "nuvem: cofre bloqueado": "cloud: keyring locked",
-"cofre": "keyring"
+"cofre": "keyring",
+"minuto": "minute",
+"segundo": "second"
 },
 "patterns": [
 [

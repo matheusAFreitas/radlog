@@ -10,6 +10,7 @@ import (
 	"regexp"
 	"sort"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -173,12 +174,19 @@ func (a *App) readAlertSeconds(e Event) []AlertPoint {
 	return nil
 }
 
-var limitRe = regexp.MustCompile(`(?:a partir de|acima de|limite) (\d+)`)
+var limitRe = regexp.MustCompile(`(?:a partir de|acima de|limite) (\d+(?:,\d+)?)`)
 
-func alertLimit(e Event, lv Levels, alarm int) float64 {
+// alertLimit é o limite do alerta em CPM. Desde a 2.29 o texto do GMC traz
+// o limite em µSv/h ("Perigo: 16,0 µSv/h (a partir de 10,1)"): esse passa
+// para CPM pela calibração da hora do alerta (antes o "10" virava 10 CPM, e
+// o cartão mostrava 0,056 µSv/h).
+func alertLimit(e Event, lv Levels, alarm int, tl calTL) float64 {
 	if m := limitRe.FindStringSubmatch(e.Text); m != nil {
-		v, _ := strconv.Atoi(m[1])
-		return float64(v)
+		v, _ := strconv.ParseFloat(strings.Replace(m[1], ",", ".", 1), 64)
+		if strings.Contains(e.Text, "µSv/h") {
+			return float64(cpmForUSv(tl.calAt(e.Time, tl.dtNow), v))
+		}
+		return v
 	}
 	switch e.Level {
 	case "perigo":
@@ -363,7 +371,7 @@ func (a *App) GetAlertDetail(id int64) (AlertDetail, error) {
 	}
 	d := AlertDetail{
 		Event: e, End: end.UnixMilli(),
-		Limit: alertLimit(e, lv, alarm), Attention: float64(lv.AttentionCPM),
+		Limit: alertLimit(e, lv, alarm, tl), Attention: float64(lv.AttentionCPM),
 		Alarm: float64(alarm), Danger: float64(lv.DangerCPM),
 	}
 

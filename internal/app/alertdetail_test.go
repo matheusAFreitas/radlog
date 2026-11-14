@@ -213,3 +213,22 @@ func TestOldZoomUsesAlertSeconds(t *testing.T) {
 		t.Fatalf("sem alerta, passo %d", c2.StepMs)
 	}
 }
+
+// Dados reais de 14/11: o texto do Perigo traz o limite em µSv/h ("a partir
+// de 10,1"). O cartão mostrava 0,056 µSv/h (o 10 lido como CPM e convertido
+// de novo).
+func TestAlertLimitInUSv(t *testing.T) {
+	a, _ := testApp(t)
+	a.mu.Lock()
+	tl := a.calTLLocked()
+	a.mu.Unlock()
+	e := Event{Time: time.Now().UnixMilli(), Level: "perigo", Text: "Perigo: 16,0 µSv/h (a partir de 10,1)"}
+	cpm := alertLimit(e, Levels{}, 0, tl)
+	if u := tl.USvAt(time.UnixMilli(e.Time), cpm); math.Abs(u-10.1) > 0.02 {
+		t.Fatalf("limite %v CPM = %v µSv/h, esperado 10,1", cpm, u)
+	}
+	// texto antigo, em CPM
+	if v := alertLimit(Event{Text: "Alarme: 110 CPM (limite 100)"}, Levels{}, 0, tl); v != 100 {
+		t.Fatalf("limite em CPM: %v", v)
+	}
+}
