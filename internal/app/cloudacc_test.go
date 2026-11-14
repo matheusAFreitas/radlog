@@ -3,6 +3,7 @@ package app
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 
@@ -211,5 +212,23 @@ func TestCloudCreateRaceNoMetaYet(t *testing.T) {
 	fs, _ := d.FindFolders(context.Background(), cloudFolderName)
 	if len(fs) != 1 {
 		t.Fatalf("pastas: %d", len(fs))
+	}
+}
+
+// QA da 2.80.5: pacote acima do limite de download não sobe e o erro aparece
+// no PC que envia (em vez de sumir em silêncio no outro).
+func TestCloudPackTooBigToSend(t *testing.T) {
+	fakeCloud(t)
+	a, _ := testApp(t)
+	cloudPair(t, a, nil)
+	if _, err := a.store.Import(series(time.Date(2026, 9, 21, 10, 0, 0, 0, time.UTC), 20, 21, 22)); err != nil {
+		t.Fatal(err)
+	}
+	old := rs.MaxDownload
+	rs.MaxDownload = 100
+	t.Cleanup(func() { rs.MaxDownload = old })
+	a.cloudSync()
+	if st := a.GetCloud(); !strings.Contains(st.Err, "acima do limite") {
+		t.Fatalf("sem aviso: %+v", st)
 	}
 }

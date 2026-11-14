@@ -4194,7 +4194,13 @@ const I18N_EN = {
 "arquivo grande demais para baixar": "file too large to download",
 "anexado, mas fica só neste PC: esse tipo de arquivo pode ter a localização dentro e o app não sabe tirar, então ele não vai para o backup nem para a nuvem": "attached, but it stays on this PC only: this file type can carry a location inside and the app cannot remove it, so it does not go to the backup or the cloud",
 "sem área de transferência privada": "no private clipboard",
-"área de transferência ocupada": "clipboard busy"
+"área de transferência ocupada": "clipboard busy",
+"RadLog: chave da nuvem": "RadLog: cloud key",
+"chave da nuvem estragada": "cloud key damaged",
+"cofre do sistema indisponível": "system keyring unavailable",
+"cofre do sistema: chave com tamanho errado": "system keyring: key has the wrong size",
+"cofre do sistema: pedido recusado": "system keyring: request declined",
+"cofre do sistema: sem resposta": "system keyring: no answer"
 },
 "patterns": [
 [
@@ -7029,6 +7035,17 @@ const I18N_EN = {
 [
 "nuvem: um arquivo da nuvem é grande demais (",
 " MB) e foi pulado"
+]
+],
+[
+"o pacote ",
+"^o pacote ((?:(?! · ).)+?) tem ((?:(?! · ).)+?) MB, acima do limite de ((?:(?! · ).)+?) MB da nuvem, e não subiu$",
+"the package ${1} is ${2} MB, above the cloud limit of ${3} MB, and was not uploaded",
+[
+"o pacote ",
+" tem ",
+" MB, acima do limite de ",
+" MB da nuvem, e não subiu"
 ]
 ],
 [
@@ -14993,6 +15010,14 @@ const I18N_EN = {
 "Last upload on ${1}.",
 [
 "Último envio em "
+]
+],
+[
+"cofre do sistema: ",
+"^cofre do sistema: ((?:(?! · ).)+?)$",
+"system keyring: ${1}",
+[
+"cofre do sistema: "
 ]
 ],
 [

@@ -80,3 +80,25 @@ func TestDriveGetLimit(t *testing.T) {
 		t.Fatalf("no limite: %d %v", len(b), err)
 	}
 }
+
+// QA da 2.80.5: 429 (limite de pedidos) espera e tenta de novo, em vez de
+// desistir como os outros 4xx.
+func TestDrivePutChunksThrottle(t *testing.T) {
+	old := rs.ChunkSize
+	rs.ChunkSize = 256 << 10
+	t.Cleanup(func() { rs.ChunkSize = old })
+	srv, d := testDrive(t)
+	ctx := context.Background()
+	folder, _ := d.CreateFolder(ctx, "RadLog")
+	data := bytes.Repeat([]byte("x"), 600000)
+	srv.Lock()
+	srv.Throttle = 1
+	srv.Unlock()
+	f, err := d.Put(ctx, folder, "", "grande", data)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if got, _ := d.Get(ctx, f.ID); !bytes.Equal(got, data) {
+		t.Fatal("conteúdo")
+	}
+}
