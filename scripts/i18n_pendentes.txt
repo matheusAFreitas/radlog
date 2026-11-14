@@ -10,3 +10,4 @@ vem do
 vêm
 às
 - **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor.
+dia|

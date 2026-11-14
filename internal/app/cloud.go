@@ -3,17 +3,13 @@ package app
 import (
 	"bytes"
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"encoding/json"
 	"errors"
 	"fmt"
 	"net"
 	"os"
 	"path/filepath"
-	"regexp"
 	"sort"
-	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -27,16 +23,12 @@ import (
 // ---------- nuvem no Google Drive (fase 2; spec ux/nuvem.html) ----------
 //
 // Cada aparelho sobe os próprios dados para a pasta "RadLog" do Drive da
-// pessoa, cifrados com a chave do código de recuperação (internal/sync):
-//   - um pacote por mês: minutos do GMC-800 e do RC102, segundos de alerta e
-//     anexos das medições daquele mês;
-//   - um pacote por arquivo de espectro (fechado, sobe uma vez);
-//   - um pacote "comum" com os pequenos (alertas encerrados, saídas,
-//     medições, anotações, atividade, históricos);
-//   - um arquivo do aparelho com o nome que ele dá a si mesmo.
-// Os pacotes são os mesmos da sincronização pela rede (buildDelta) e quem
-// baixa junta com a mesma mescla do "Importar backup". Um resumo por pacote
-// diz o que mudou desde o último envio.
+// pessoa, cifrados com a chave do código de recuperação (internal/sync), no
+// formato 2 (docs/nuvem-formato.md; envio e recebimento em cloudsync.go): um
+// arquivo do aparelho, um "comum" com os pequenos, um por dia de minutos, um
+// por mês de espectros e um por anexo. Os pacotes são os mesmos da
+// sincronização pela rede (buildDelta) e quem baixa junta com a mesma mescla
+// do "Importar backup".
 //
 // O e-mail da conta fica só na tela e no nuvem.json deste PC: nunca vai para
 // o registro, o backup, os PDFs nem a nuvem. O código e o acesso do Google
@@ -74,6 +66,7 @@ var errCloudGone = errors.New("a nuvem foi apagada ou recomeçada em outro apare
 
 // CloudDevice é um aparelho da nuvem (o nome vai cifrado junto dos dados).
 type CloudDevice struct {
+	ID     string `json:"id"`
 	Name   string `json:"name"`
 	LastUp int64  `json:"lastUp"` // ms; 0 = ainda não subiu nada
 	Me     bool   `json:"me"`
@@ -81,7 +74,7 @@ type CloudDevice struct {
 
 // CloudInfo é o estado do cartão "Nuvem (Google Drive)".
 type CloudInfo struct {
-	// off, wait, ok, send, offline, login, clock
+	// off, wait, ok, send, offline, login, clock, err, dup, old
 	State    string        `json:"state"`
 	Ready    bool          `json:"ready"` // esta cópia tem a chave do Google
 	Email    string        `json:"email,omitempty"`
@@ -96,12 +89,17 @@ type CloudInfo struct {
 	SendI    int           `json:"sendI,omitempty"`
 	SendN    int           `json:"sendN,omitempty"`
 	Err      string        `json:"err,omitempty"` // último erro do Google
+	// removido por outro aparelho (ms); recomeço em andamento e quando
+	// terminou (ms; a pasta antiga sai da lixeira 30 dias depois)
+	Removed   int64 `json:"removed,omitempty"`
+	Restart   bool  `json:"restart,omitempty"`
+	Restarted int64 `json:"restarted,omitempty"`
 }
 
 // CloudLoginDone é o fim do login: next diz qual diálogo abre.
 type CloudLoginDone struct {
 	Info   CloudInfo `json:"info"`
-	Next   string    `json:"next"`   // "new", "existing" ou "" (só entrou de novo)
+	Next   string    `json:"next"`   // "new", "existing", "old" (formato antigo) ou "" (só entrou de novo)
 	LastUp int64     `json:"lastUp"` // ms do último envio na nuvem existente
 }
 
@@ -126,8 +124,23 @@ type cloudFile struct {
 	Queue     []string            `json:"queue,omitempty"`
 	Up        map[string]string   `json:"up,omitempty"`   // pacote → resumo do que subiu
 	Seen      map[string]string   `json:"seen,omitempty"` // arquivo de outro aparelho → md5 já juntado
-	Devs      map[string]cloudDev `json:"devs,omitempty"` // arquivo de aparelho → nome e último envio
+	Devs      map[string]cloudDev `json:"devs,omitempty"` // ID de outro aparelho → nome e último envio
 	Rev       int                 `json:"rev,omitempty"`  // cloudRev desta cópia do app
+	// o arquivo deste aparelho como foi escrito por último daqui (N6) e
+	// quantas vezes foi escrito
+	DevMD5 string `json:"devMd5,omitempty"`
+	Seq    int64  `json:"seq,omitempty"`
+	// outro PC escreveu no arquivo deste aparelho (pasta copiada): pausada até
+	// a pessoa escolher (CloudDupAnswer)
+	Dup   bool   `json:"dup,omitempty"`
+	DupOf string `json:"dupOf,omitempty"`
+	// a nuvem é do formato antigo (2.79.x): pausada até começar uma nova
+	Old bool `json:"old,omitempty"`
+	// outro aparelho tirou este da nuvem (ms): pausada até entrar de novo
+	Removed int64 `json:"removed,omitempty"`
+	// nuvem recomeçada (CloudRestart, ms) e ainda subindo tudo de novo
+	Restart   int64 `json:"restart,omitempty"`
+	Restarted int64 `json:"restarted,omitempty"`
 }
 
 // cloudRev sobe quando a mescla passa a aproveitar algo que antes ficava de
@@ -136,10 +149,21 @@ type cloudFile struct {
 //	1: 2.79.1, anexos das medições (N1)
 const cloudRev = 1
 
-// cloudSecret é o nuvem-chave.bin.
+// cloudSecret é o nuvem-chave.bin. Writer muda a cada instalação: ligar a
+// nuvem de novo, chave ilegível (pasta copiada para outro PC) ou outro nome
+// de PC (Host).
 type cloudSecret struct {
 	Code    string `json:"code"`
 	Refresh string `json:"refresh"`
+	Writer  string `json:"writer,omitempty"`
+	Host    string `json:"host,omitempty"`
+}
+
+// cloudDevFile é o nuvem-aparelho.json: o ID deste aparelho na nuvem, que
+// fica mesmo depois de desconectar (o mesmo PC volta como o mesmo aparelho,
+// N5).
+type cloudDevFile struct {
+	ID string `json:"id"`
 }
 
 type cloudPending struct {
@@ -175,6 +199,25 @@ type cloudState struct {
 
 func (a *App) cloudPath() string    { return filepath.Join(a.dataDir, "nuvem.json") }
 func (a *App) cloudKeyPath() string { return filepath.Join(a.dataDir, "nuvem-chave.bin") }
+func (a *App) cloudDevPath() string { return filepath.Join(a.dataDir, "nuvem-aparelho.json") }
+
+// cloudDevID devolve o ID guardado deste aparelho ou sorteia (e guarda) um.
+func (a *App) cloudDevID(fresh bool) string {
+	var f cloudDevFile
+	if !fresh {
+		a.readStateJSON(a.cloudDevPath(), "aparelho da nuvem", &f)
+	}
+	if len(f.ID) < 8 || fresh {
+		f.ID = randHex(8)
+		if a.dataDir != "" {
+			b, _ := json.Marshal(f)
+			if err := writeFileAtomic(a.cloudDevPath(), b, 0o600); err != nil {
+				a.logf("nuvem: não consegui gravar o aparelho (%v)", err)
+			}
+		}
+	}
+	return f.ID
+}
 
 // cloudLoadLocked lê os dois arquivos na primeira vez.
 func (a *App) cloudLoadLocked() {
@@ -197,6 +240,10 @@ func (a *App) cloudLoadLocked() {
 	if c.f.On {
 		if k, err := rs.DeriveKeys(c.sec.Code, c.f.Salt); err == nil && c.sec.Code != "" {
 			c.keys = k
+			if h := hostName(); c.sec.Writer == "" || c.sec.Host != h {
+				c.sec.Writer, c.sec.Host = randHex(8), h // outro PC com a mesma chave
+				a.cloudSaveSecretLocked()
+			}
 		} else {
 			// chave ilegível (pasta copiada de outro PC, Windows reinstalado):
 			// entrar de novo e digitar o código (N3)
@@ -248,6 +295,14 @@ func (a *App) cloudInfoLocked() CloudInfo {
 		return info
 	case f.NeedLogin:
 		info.State = "login"
+	case f.Old:
+		info.State = "old"
+	case f.Removed != 0:
+		info.State = "removed"
+		info.Removed = f.Removed
+	case f.Dup:
+		info.State = "dup"
+		info.DupOf = f.DupOf
 	case c.run != nil && c.sendN > 0:
 		info.State = "send"
 		info.SendNow, info.SendI, info.SendN = c.sendNow, c.sendI, c.sendN
@@ -261,12 +316,15 @@ func (a *App) cloudInfoLocked() CloudInfo {
 		info.State = "ok"
 	}
 	info.SkewSec = c.skew
+	info.Restart, info.Restarted = f.Restart != 0, f.Restarted
 	info.Email = f.Email
 	if f.On {
-		info.Devices = append(info.Devices, CloudDevice{Name: f.Name, LastUp: f.LastUp, Me: true})
+		info.Devices = append(info.Devices, CloudDevice{ID: f.DevID, Name: f.Name, LastUp: f.LastUp, Me: true})
 		var others []CloudDevice
-		for _, d := range f.Devs {
-			others = append(others, CloudDevice{Name: d.Name, LastUp: d.LastUp})
+		for id, d := range f.Devs {
+			if id != f.DevID {
+				others = append(others, CloudDevice{ID: id, Name: d.Name, LastUp: d.LastUp})
+			}
 		}
 		sort.Slice(others, func(i, j int) bool { return others[i].Name < others[j].Name })
 		info.Devices = append(info.Devices, others...)
@@ -387,6 +445,9 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 				if json.Unmarshal(b, &m) == nil {
 					p.meta = &m
 					done.Next = "existing"
+					if m.V < rs.MetaVersion {
+						done.Next = "old" // só dá para começar uma nova (CloudReset)
+					}
 				}
 			}
 			if ms := f.Modified.UnixMilli(); ms > done.LastUp {
@@ -481,11 +542,15 @@ func (a *App) cloudTurnOn(p *cloudPending, folder, code string, salt []byte, key
 	c := &a.cloud
 	c.mu.Lock()
 	old := c.f
-	c.f = cloudFile{On: true, DevID: randHex(8), Name: name, Folder: folder, Salt: salt, Email: p.tok.Email,
+	// o mesmo PC volta como o mesmo aparelho (N5)
+	c.f = cloudFile{On: true, DevID: a.cloudDevID(false), Name: name, Folder: folder, Salt: salt, Email: p.tok.Email,
 		Up: map[string]string{}, Seen: map[string]string{}, Devs: map[string]cloudDev{}, Rev: cloudRev}
-	if old.On && old.Folder == folder && old.DevID != "" && bytes.Equal(old.Salt, salt) {
-		// a mesma nuvem (a chave daqui ficou ilegível): continua o mesmo aparelho
-		c.f.DevID, c.f.Name, c.f.NoAuto, c.f.LastUp, c.f.LastSync = old.DevID, old.Name, old.NoAuto, old.LastUp, old.LastSync
+	if old.On && old.Folder == folder && bytes.Equal(old.Salt, salt) {
+		// a mesma nuvem (a chave daqui ficou ilegível): continua de onde estava
+		c.f.Name, c.f.NoAuto, c.f.LastUp, c.f.LastSync, c.f.DevMD5, c.f.Seq = old.Name, old.NoAuto, old.LastUp, old.LastSync, old.DevMD5, old.Seq
+		if old.DevID != "" {
+			c.f.DevID = old.DevID
+		}
 		if old.Up != nil {
 			c.f.Up = old.Up
 		}
@@ -494,7 +559,7 @@ func (a *App) cloudTurnOn(p *cloudPending, folder, code string, salt []byte, key
 		}
 	}
 	c.gen++
-	c.sec = cloudSecret{Code: code, Refresh: p.tok.Refresh}
+	c.sec = cloudSecret{Code: code, Refresh: p.tok.Refresh, Writer: randHex(8), Host: hostName()}
 	c.keys, c.access, c.expiry = keys, p.tok.Access, p.tok.Expiry
 	c.pend, c.err, c.offline, c.skew = nil, "", false, 0
 	a.cloudSaveLocked()
@@ -505,8 +570,9 @@ func (a *App) cloudTurnOn(p *cloudPending, folder, code string, salt []byte, key
 	a.emitCloud()
 }
 
-// CloudReset apaga a nuvem que está no Drive (o código foi perdido) para
-// começar uma nova; os dados deste PC não mudam.
+// CloudReset põe a nuvem que está no Drive na lixeira (o código foi perdido
+// ou ela é do formato antigo) para começar uma nova; os dados deste PC não
+// mudam.
 func (a *App) CloudReset() (CloudInfo, error) {
 	p, err := a.cloudPending()
 	if err != nil {
@@ -516,10 +582,10 @@ func (a *App) CloudReset() (CloudInfo, error) {
 		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 		defer cancel()
 		d := a.cloudDriveWith(func(context.Context) (string, error) { return p.tok.Access, nil })
-		if err := d.Delete(ctx, p.folder); err != nil {
+		if err := d.Trash(ctx, p.folder); err != nil {
 			return a.GetCloud(), err
 		}
-		a.logf("nuvem: a nuvem antiga foi apagada do Drive para começar uma nova")
+		a.logf("nuvem: a nuvem antiga foi para a lixeira do Drive para começar uma nova")
 	}
 	a.cloud.mu.Lock()
 	p.folder, p.meta = "", nil
@@ -681,6 +747,153 @@ func (a *App) CloudDisconnect() CloudInfo {
 	return a.GetCloud()
 }
 
+// CloudDupAnswer responde a pergunta do PC copiado (N6): newDevice = este é
+// outro aparelho (ganha ID novo e sobe tudo como aparelho novo); false = este
+// é o mesmo aparelho e o outro foi desligado (assume o arquivo dele).
+func (a *App) CloudDupAnswer(newDevice bool) (CloudInfo, error) {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	if !c.f.On || !c.f.Dup {
+		c.mu.Unlock()
+		return a.GetCloud(), nil
+	}
+	if newDevice {
+		c.f.DevID = a.cloudDevID(true)
+		c.f.Up = map[string]string{}
+		c.f.LastUp, c.f.Seq = 0, 0
+		a.logf("nuvem: este PC passou a ser um aparelho novo na nuvem")
+	} else {
+		a.logf("nuvem: este PC assumiu o aparelho que estava copiado")
+	}
+	c.f.Dup, c.f.DupOf, c.f.DevMD5 = false, "", ""
+	c.gen++
+	a.cloudSaveLocked()
+	c.mu.Unlock()
+	a.cloudKick()
+	a.emitCloud()
+	return a.GetCloud(), nil
+}
+
+// CloudRemoveDevice tira um aparelho da nuvem: os arquivos dele vão para a
+// lixeira do Drive. Os dados que já chegaram aqui ficam, e este PC sobe de
+// novo o que tinha recebido dele, para a cópia da nuvem continuar completa.
+func (a *App) CloudRemoveDevice(id string) (CloudInfo, error) {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	on, keys, folder, me := c.f.On && c.keys != nil, c.keys, c.f.Folder, c.f.DevID
+	c.mu.Unlock()
+	if !on {
+		return a.GetCloud(), errors.New("a nuvem não está ligada neste PC")
+	}
+	if id == "" || id == me {
+		return a.GetCloud(), errors.New("este aparelho não pode se remover; use Desconectar")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	d := a.cloudDriveWith(a.cloudToken)
+	files, err := d.List(ctx, folder)
+	if err != nil {
+		return a.GetCloud(), err
+	}
+	prefix, n := keys.Prefix(id), 0
+	for _, f := range files {
+		if strings.HasPrefix(f.Name, prefix) {
+			if err := d.Trash(ctx, f.ID); err != nil {
+				return a.GetCloud(), err
+			}
+			n++
+		}
+	}
+	c.mu.Lock()
+	delete(c.f.Devs, id)
+	for k, v := range c.f.Up {
+		if strings.HasPrefix(v, cloudEcho) {
+			delete(c.f.Up, k)
+		}
+	}
+	a.cloudSaveLocked()
+	c.mu.Unlock()
+	a.logf("nuvem: um aparelho foi removido (%d arquivo(s) na lixeira do Drive)", n)
+	a.cloudKick()
+	a.emitCloud()
+	return a.GetCloud(), nil
+}
+
+// CloudRejoin volta este PC para a nuvem depois de outro aparelho tirar ele
+// (pede o código de novo, como a tela promete): continua o mesmo aparelho e
+// sobe tudo outra vez.
+func (a *App) CloudRejoin(code string) (CloudInfo, error) {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	if !c.f.On || c.f.Removed == 0 {
+		c.mu.Unlock()
+		return a.GetCloud(), nil
+	}
+	got, err := rs.ParseRecoveryCode(code)
+	if err != nil || got != c.sec.Code {
+		c.mu.Unlock()
+		return a.GetCloud(), errors.New("esse código não é o desta nuvem")
+	}
+	c.f.Removed, c.f.DevMD5, c.f.Seq = 0, "", 0
+	c.f.Up = map[string]string{}
+	c.gen++
+	a.cloudSaveLocked()
+	c.mu.Unlock()
+	a.logf("nuvem: este PC entrou de novo na nuvem")
+	a.cloudKick()
+	a.emitCloud()
+	return a.GetCloud(), nil
+}
+
+// CloudRestart começa uma nuvem nova no formato atual com o mesmo código
+// (a do Drive é do formato antigo): cria a pasta nova e só depois põe a
+// antiga na lixeira (N11). Os dados deste PC não mudam e sobem de novo.
+func (a *App) CloudRestart() (CloudInfo, error) {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	on, code, oldFolder := c.f.On && c.keys != nil, c.sec.Code, c.f.Folder
+	c.mu.Unlock()
+	if !on {
+		return a.GetCloud(), errors.New("a nuvem não está ligada neste PC")
+	}
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
+	defer cancel()
+	d := a.cloudDriveWith(a.cloudToken)
+	folder, err := d.CreateFolder(ctx, cloudFolderName)
+	if err != nil {
+		return a.GetCloud(), err
+	}
+	meta, keys, err := rs.NewMeta(code)
+	if err == nil {
+		b, _ := json.Marshal(meta)
+		_, err = d.Put(ctx, folder, "", rs.MetaFile, b)
+	}
+	if err == nil && oldFolder != "" {
+		err = d.Trash(ctx, oldFolder)
+	}
+	if err != nil {
+		_ = d.Delete(ctx, folder) // desfaz: a pasta nova está vazia
+		return a.GetCloud(), err
+	}
+	c.mu.Lock()
+	c.f.Folder, c.f.Salt, c.f.Old = folder, meta.Salt, false
+	c.f.Up, c.f.Seen, c.f.Devs = map[string]string{}, map[string]string{}, map[string]cloudDev{}
+	c.f.DevMD5, c.f.Seq, c.f.Queue, c.f.Used = "", 0, nil, 0
+	c.f.Restart, c.f.Restarted = time.Now().UnixMilli(), 0
+	c.keys, c.err = keys, ""
+	c.gen++
+	a.cloudSaveLocked()
+	c.mu.Unlock()
+	a.logf("nuvem: nuvem nova começada; a antiga foi para a lixeira do Drive")
+	a.cloudKick()
+	a.emitCloud()
+	return a.GetCloud(), nil
+}
+
 // ---------- envio e recebimento ----------
 
 func (a *App) cloudDriveWith(tok func(context.Context) (string, error)) *rs.Drive {
@@ -753,7 +966,7 @@ func (a *App) cloudSync() {
 	c := &a.cloud
 	c.mu.Lock()
 	a.cloudLoadLocked()
-	if !c.f.On || c.f.NeedLogin || c.run != nil || c.keys == nil {
+	if !c.f.On || c.f.NeedLogin || c.f.Old || c.f.Dup || c.f.Removed != 0 || c.run != nil || c.keys == nil {
 		c.mu.Unlock()
 		return
 	}
@@ -775,7 +988,17 @@ func (a *App) cloudSync() {
 	switch {
 	case err == nil:
 		c.offline, c.err = false, ""
+		if c.f.Restart != 0 {
+			c.f.Restart, c.f.Restarted = 0, time.Now().UnixMilli()
+			a.cloudSaveLocked()
+		}
 	case errors.Is(err, context.Canceled):
+	case errors.Is(err, errCloudDup), errors.Is(err, errCloudRemoved):
+		c.offline, c.err = false, ""
+	case errors.Is(err, errCloudOld):
+		c.f.Old, c.offline, c.err = true, false, ""
+		a.cloudSaveLocked()
+		a.logf("nuvem: a nuvem no Drive é do formato antigo e precisa ser começada de novo")
 	case errors.Is(err, rs.ErrRevoked):
 		c.f.NeedLogin, c.access = true, ""
 		a.cloudSaveLocked()
@@ -805,393 +1028,4 @@ func cloudErrText(err error) string {
 		}
 	}
 	return err.Error()
-}
-
-type cloudPack struct {
-	key    string // "c", "m|2026-11", "s|espectros/…"
-	month  string // para a fila na tela
-	digest string
-	req    pullReq
-}
-
-var reMonth = regexp.MustCompile(`\d{4}-\d{2}`)
-
-// cloudPacks monta a lista de pacotes deste PC e o resumo de cada um.
-func (a *App) cloudPacks() ([]cloudPack, error) {
-	days, err := a.dayDigests()
-	if err != nil {
-		return nil, err
-	}
-	rc := a.rcInventory()
-	months := map[string]*cloudPack{}
-	parts := map[string][]string{}
-	month := func(m string) *cloudPack {
-		p := months[m]
-		if p == nil {
-			p = &cloudPack{key: "m|" + m, month: m, req: pullReq{Rc: true, cloud: true, noSmall: true}}
-			months[m] = p
-		}
-		return p
-	}
-	for d, h := range days {
-		if len(d) < 7 {
-			continue
-		}
-		p := month(d[:7])
-		p.req.Days = append(p.req.Days, d)
-		parts[p.key] = append(parts[p.key], "g"+d+h)
-	}
-	for k, h := range rc.Days {
-		_, d, ok := strings.Cut(k, "|")
-		if !ok || len(d) < 7 {
-			continue
-		}
-		p := month(d[:7])
-		p.req.RcDays = append(p.req.RcDays, k)
-		parts[p.key] = append(parts[p.key], "r"+k+h)
-	}
-	secMonth := func(s string) string {
-		n, err := strconv.ParseInt(s, 10, 64)
-		if err != nil {
-			return ""
-		}
-		return time.Unix(n, 0).UTC().Format("2006-01")
-	}
-	for _, n := range a.alertFiles() {
-		s, _, _ := strings.Cut(n, "-")
-		if m := secMonth(strings.TrimSuffix(s, ".json")); m != "" {
-			p := month(m)
-			p.req.Alerts = append(p.req.Alerts, n)
-			parts[p.key] = append(parts[p.key], "a"+n)
-		}
-	}
-	for _, k := range a.attachInventory() {
-		s, _, _ := strings.Cut(k, "/")
-		if m := secMonth(s); m != "" {
-			p := month(m)
-			p.req.Anexos = append(p.req.Anexos, k)
-			parts[p.key] = append(parts[p.key], "x"+k)
-		}
-	}
-	// o comum: o resumo é o próprio pacote (pequeno e igual se nada mudou)
-	common := cloudPack{key: "c", month: time.Now().UTC().Format("2006-01"), req: pullReq{Rc: true, cloud: true}}
-	z, err := a.buildDelta(common.req)
-	if err != nil {
-		return nil, err
-	}
-	sum := sha256.Sum256(z)
-	common.digest = hex.EncodeToString(sum[:16])
-	out := []cloudPack{common}
-	var keys []string
-	for m := range months {
-		keys = append(keys, m)
-	}
-	sort.Strings(keys)
-	for _, m := range keys {
-		p := months[m]
-		ps := parts[p.key]
-		sort.Strings(ps)
-		h := sha256.Sum256([]byte("v2\n" + strings.Join(ps, "\n"))) // v2: início das medições dos anexos (N1)
-		p.digest = hex.EncodeToString(h[:16])
-		out = append(out, *p)
-	}
-	for _, f := range rc.Files {
-		out = append(out, cloudPack{key: "s|" + f, month: reMonth.FindString(f), digest: "1", req: pullReq{Rc: true, cloud: true, noSmall: true, RcFiles: []string{f}}})
-	}
-	return out, nil
-}
-
-func cloudQueue(todo []cloudPack) []string {
-	seen := map[string]bool{}
-	var out []string
-	for _, p := range todo {
-		if p.month != "" && !seen[p.month] {
-			seen[p.month] = true
-			out = append(out, p.month)
-		}
-	}
-	sort.Strings(out)
-	return out
-}
-
-// tipos do que vai cifrado
-const (
-	cloudKindDev    = 'd'
-	cloudKindCommon = 'c'
-	cloudKindPack   = 'p'
-)
-
-// cloudHold trava e confere que a nuvem ainda é a da sincronização; false =
-// destravada, parar (N8).
-func (a *App) cloudHold(gen int) bool {
-	a.cloud.mu.Lock()
-	if a.cloud.gen != gen || !a.cloud.f.On {
-		a.cloud.mu.Unlock()
-		return false
-	}
-	return true
-}
-
-func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
-	c := &a.cloud
-	if !a.cloudHold(gen) {
-		return context.Canceled
-	}
-	folder, keys, dev, code := c.f.Folder, c.keys, c.f.DevID, c.sec.Code
-	mine := map[string]bool{keys.FileName("d|" + dev): true, keys.FileName("c|" + dev): true}
-	for k := range c.f.Up {
-		mine[keys.FileName("p|"+dev+"|"+k)] = true
-	}
-	c.mu.Unlock()
-	d := a.cloudDriveWith(a.cloudToken)
-	files, err := d.List(ctx, folder)
-	if err != nil {
-		return err
-	}
-	byName := map[string]rs.File{}
-	for _, f := range files {
-		byName[f.Name] = f
-	}
-	// a nuvem ainda é a mesma (ninguém começou outra)
-	mf, ok := byName[rs.MetaFile]
-	if !ok {
-		return errCloudGone
-	}
-	if !a.cloudHold(gen) {
-		return context.Canceled
-	}
-	metaSeen := c.f.Seen[rs.MetaFile] == mf.MD5
-	c.mu.Unlock()
-	if !metaSeen {
-		b, err := d.Get(ctx, mf.ID)
-		if err != nil {
-			return err
-		}
-		var m rs.Meta
-		if json.Unmarshal(b, &m) != nil {
-			return errCloudGone
-		}
-		if _, err := m.Unlock(code); err != nil {
-			return errCloudGone
-		}
-		a.cloudSeen(gen, rs.MetaFile, mf.MD5)
-	}
-
-	// 1) baixa o que os outros aparelhos subiram de novo
-	got, bad, err := a.cloudDownload(ctx, d, files, mine, gen)
-	if err != nil {
-		return err
-	}
-
-	// 2) sobe o que mudou aqui
-	packs, err := a.cloudPacks()
-	if err != nil {
-		return err
-	}
-	if !a.cloudHold(gen) {
-		return context.Canceled
-	}
-	var todo []cloudPack
-	for _, p := range packs {
-		if c.f.Up[p.key] != p.digest {
-			todo = append(todo, p)
-		}
-	}
-	c.f.Queue = cloudQueue(todo)
-	c.sendN = len(todo)
-	c.mu.Unlock()
-	sent := 0
-	for i, p := range todo {
-		if err := ctx.Err(); err != nil {
-			return err
-		}
-		if !a.cloudHold(gen) {
-			return context.Canceled
-		}
-		c.sendI, c.sendNow = i+1, p.month
-		c.mu.Unlock()
-		a.emitCloud()
-		z, err := a.buildDelta(p.req)
-		if err != nil {
-			return err
-		}
-		kind, id := byte(cloudKindPack), "p|"+dev+"|"+p.key
-		if p.key == "c" {
-			kind, id = cloudKindCommon, "c|"+dev
-		}
-		f, err := a.cloudPut(ctx, d, folder, keys, byName, keys.FileName(id), kind, z)
-		if err != nil {
-			return err
-		}
-		byName[f.Name] = f
-		sent++
-		if !a.cloudHold(gen) {
-			return context.Canceled
-		}
-		c.f.Up[p.key] = p.digest
-		c.f.LastUp = time.Now().UnixMilli()
-		c.f.Queue = cloudQueue(todo[i+1:])
-		a.cloudSaveLocked()
-		c.mu.Unlock()
-	}
-	// o arquivo deste aparelho: nome e último envio
-	if !a.cloudHold(gen) {
-		return context.Canceled
-	}
-	me := cloudDev{Name: c.f.Name, LastUp: c.f.LastUp}
-	devDigest := me.Name + "|" + strconv.FormatInt(me.LastUp, 10)
-	devUp := c.f.Up["d"] == devDigest
-	c.mu.Unlock()
-	if !devUp {
-		b, _ := json.Marshal(me)
-		f, err := a.cloudPut(ctx, d, folder, keys, byName, keys.FileName("d|"+dev), cloudKindDev, b)
-		if err != nil {
-			return err
-		}
-		byName[f.Name] = f
-		if !a.cloudHold(gen) {
-			return context.Canceled
-		}
-		c.f.Up["d"] = devDigest
-		c.mu.Unlock()
-	}
-	var used int64
-	for _, f := range byName {
-		used += f.Size
-	}
-	if !a.cloudHold(gen) {
-		return context.Canceled
-	}
-	c.f.LastSync, c.f.Used, c.f.Queue = time.Now().UnixMilli(), used, nil
-	a.cloudSaveLocked()
-	c.mu.Unlock()
-	if sent > 0 || got > 0 {
-		a.logf("nuvem: subiu %d pacote(s), juntou %d", sent, got)
-	}
-	if bad > 0 {
-		// o resto sincronizou; os que não entraram são tentados de novo (N2)
-		return fmt.Errorf("%d pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo", bad)
-	}
-	return nil
-}
-
-func (a *App) cloudSeen(gen int, name, md5 string) {
-	if !a.cloudHold(gen) {
-		return
-	}
-	if a.cloud.f.Seen == nil {
-		a.cloud.f.Seen = map[string]string{}
-	}
-	a.cloud.f.Seen[name] = md5
-	a.cloudSaveLocked()
-	a.cloud.mu.Unlock()
-}
-
-// cloudPut cifra e sobe (troca o conteúdo se o arquivo já existe).
-func (a *App) cloudPut(ctx context.Context, d *rs.Drive, folder string, keys *rs.Keys, byName map[string]rs.File, name string, kind byte, data []byte) (rs.File, error) {
-	sealed, err := keys.Seal(name, append([]byte{kind}, data...))
-	if err != nil {
-		return rs.File{}, err
-	}
-	id := byName[name].ID
-	f, err := d.Put(ctx, folder, id, name, sealed)
-	if errors.Is(err, rs.ErrNotFound) && id != "" {
-		f, err = d.Put(ctx, folder, "", name, sealed)
-	}
-	if err == nil && f.Name == "" {
-		f.Name = name
-	}
-	return f, err
-}
-
-// cloudDownload baixa e junta os arquivos novos dos outros aparelhos: o
-// comum primeiro (as medições, para os anexos acharem a delas), depois os
-// meses e espectros. Um pacote que não junta fica de fora desta vez e não
-// para o resto (N2). Devolve quantos pacotes juntou e quantos não entraram.
-func (a *App) cloudDownload(ctx context.Context, d *rs.Drive, files []rs.File, mine map[string]bool, gen int) (got, bad int, err error) {
-	c := &a.cloud
-	if !a.cloudHold(gen) {
-		return 0, 0, context.Canceled
-	}
-	keys := c.keys
-	seen := map[string]string{}
-	for k, v := range c.f.Seen {
-		seen[k] = v
-	}
-	c.mu.Unlock()
-	dir := filepath.Join(a.dataDir, "tmp")
-	_ = os.MkdirAll(dir, 0o755)
-	type later struct{ name, md5, path string }
-	var packs []later
-	defer func() {
-		for _, p := range packs {
-			_ = os.Remove(p.path)
-		}
-	}()
-	for _, f := range files {
-		if f.Name == rs.MetaFile || mine[f.Name] || (f.MD5 != "" && seen[f.Name] == f.MD5) {
-			continue
-		}
-		if err := ctx.Err(); err != nil {
-			return got, bad, err
-		}
-		b, err := d.Get(ctx, f.ID)
-		if errors.Is(err, rs.ErrNotFound) {
-			continue
-		}
-		if err != nil {
-			return got, bad, err
-		}
-		plain, err := keys.Open(f.Name, b)
-		if err != nil || len(plain) == 0 {
-			a.cloudSeen(gen, f.Name, f.MD5) // não é da nuvem (ou estragou): não tenta de novo
-			continue
-		}
-		switch plain[0] {
-		case cloudKindDev:
-			var dv cloudDev
-			if json.Unmarshal(plain[1:], &dv) == nil && a.cloudHold(gen) {
-				if c.f.Devs == nil {
-					c.f.Devs = map[string]cloudDev{}
-				}
-				c.f.Devs[f.Name] = dv
-				c.mu.Unlock()
-			}
-			a.cloudSeen(gen, f.Name, f.MD5)
-		case cloudKindCommon:
-			if _, err := a.mergeDelta(plain[1:], "nuvem"); err != nil {
-				a.logf("nuvem: um pacote de outro aparelho não entrou (%v)", err)
-				bad++
-				continue
-			}
-			got++
-			a.cloudSeen(gen, f.Name, f.MD5)
-		case cloudKindPack:
-			tf, err := os.CreateTemp(dir, "nuvem-*.zip")
-			if err != nil {
-				return got, bad, err
-			}
-			_, werr := tf.Write(plain[1:])
-			tf.Close()
-			packs = append(packs, later{f.Name, f.MD5, tf.Name()})
-			if werr != nil {
-				return got, bad, werr
-			}
-		default:
-			a.cloudSeen(gen, f.Name, f.MD5)
-		}
-	}
-	for _, p := range packs {
-		if err := ctx.Err(); err != nil {
-			return got, bad, err
-		}
-		if _, err := a.mergeZip(p.path, false); err != nil {
-			a.logf("nuvem: um pacote de outro aparelho não entrou (%v)", err)
-			bad++
-			continue
-		}
-		got++
-		a.cloudSeen(gen, p.name, p.md5)
-	}
-	return got, bad, nil
 }

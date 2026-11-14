@@ -20,6 +20,9 @@ type Note struct {
 	End     int64  `json:"end"`  // ms; 0 = um momento só
 	Text    string `json:"text"`
 	Created int64  `json:"created"`
+	// igual em todos os aparelhos e hora da última edição (records.go, N4)
+	UID    string `json:"uid,omitempty"`
+	Edited int64  `json:"edited,omitempty"`
 }
 
 const noteMaxLen = 200
@@ -32,12 +35,14 @@ func (a *App) loadNotes() {
 		sort.Slice(list, func(i, j int) bool { return list[i].Time < list[j].Time })
 		a.notes = list
 	}
+	a.notesTrackLocked(true)
 }
 
 func (a *App) saveNotesLocked() error {
 	if a.dataDir == "" {
 		return nil
 	}
+	a.notesTrackLocked(false)
 	b, _ := json.MarshalIndent(a.notes, "", "  ")
 	return writeFileAtomic(a.notesPath(), b, 0o644)
 }
@@ -91,7 +96,7 @@ func (a *App) SaveNote(n Note) (Note, error) {
 		found := false
 		for i := range a.notes {
 			if a.notes[i].ID == n.ID {
-				n.Created = a.notes[i].Created
+				n.Created, n.UID, n.Edited = a.notes[i].Created, a.notes[i].UID, a.notes[i].Edited
 				a.notes[i] = n
 				found = true
 			}
@@ -124,30 +129,57 @@ func (a *App) DeleteNote(id int64) error {
 	return err
 }
 
-// mergeNotes junta notas de um backup (mesma hora e texto = a mesma).
+// mergeNotes junta notas de um backup ou de outro aparelho: pelo UID, a
+// edição mais nova vale e a apagada não volta; sem UID (backup antigo), mesma
+// hora e texto = a mesma.
 func (a *App) mergeNotes(list []Note) int {
 	a.mu.Lock()
 	defer a.mu.Unlock()
+	a.tombsLoadLocked()
 	have := map[string]bool{}
+	byUID := map[string]int{}
 	var max int64
-	for _, n := range a.notes {
+	for i, n := range a.notes {
 		have[noteKey(n)] = true
+		if n.UID != "" {
+			byUID[n.UID] = i
+		}
 		max = maxInt64(max, n.ID)
 	}
 	added := 0
 	for _, n := range list {
-		if strings.TrimSpace(n.Text) == "" || have[noteKey(n)] {
+		if strings.TrimSpace(n.Text) == "" {
+			continue
+		}
+		if n.UID == "" {
+			n.UID = legacyNoteUID(n)
+		}
+		if a.tombed(recNote, n.UID) {
+			continue
+		}
+		if i, ok := byUID[n.UID]; ok {
+			if n.Edited > a.notes[i].Edited {
+				n.ID = a.notes[i].ID
+				a.notes[i] = n
+				added++
+			}
+			continue
+		}
+		if have[noteKey(n)] {
 			continue
 		}
 		have[noteKey(n)] = true
 		max++
 		n.ID = max
 		a.notes = append(a.notes, n)
+		byUID[n.UID] = len(a.notes) - 1
 		added++
 	}
 	if added > 0 {
 		sort.Slice(a.notes, func(i, j int) bool { return a.notes[i].Time < a.notes[j].Time })
+		a.recMerge = true
 		_ = a.saveNotesLocked()
+		a.recMerge = false
 	}
 	return added
 }

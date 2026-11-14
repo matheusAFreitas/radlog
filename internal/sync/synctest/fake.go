@@ -29,6 +29,7 @@ type Server struct {
 	*httptest.Server
 	mu      sync.Mutex
 	Files   map[string]*File
+	Trashed map[string]*File // na lixeira (com o que estava dentro)
 	ups     map[string]*File // envios retomáveis abertos
 	n       int
 	Revoked bool          // o token responde invalid_grant
@@ -41,7 +42,7 @@ type Server struct {
 
 // New sobe o servidor.
 func New() *Server {
-	s := &Server{Files: map[string]*File{}, ups: map[string]*File{}}
+	s := &Server{Files: map[string]*File{}, Trashed: map[string]*File{}, ups: map[string]*File{}}
 	s.Server = httptest.NewServer(http.HandlerFunc(s.serve))
 	return s
 }
@@ -147,6 +148,24 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		_, _ = w.Write(f.Data)
+	case r.Method == "PATCH" && strings.HasPrefix(p, "/drive/v3/files/"):
+		id := strings.TrimPrefix(p, "/drive/v3/files/")
+		f := s.Files[id]
+		if f == nil {
+			w.WriteHeader(404)
+			return
+		}
+		var m struct{ Trashed bool }
+		_ = json.Unmarshal(body, &m)
+		if m.Trashed {
+			for k, x := range s.Files {
+				if k == id || x.Parent == id {
+					s.Trashed[k] = x
+					delete(s.Files, k)
+				}
+			}
+		}
+		s.js(w, meta(f))
 	case r.Method == "DELETE" && strings.HasPrefix(p, "/drive/v3/files/"):
 		id := strings.TrimPrefix(p, "/drive/v3/files/")
 		if s.Files[id] == nil {

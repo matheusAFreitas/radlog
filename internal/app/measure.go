@@ -590,6 +590,9 @@ type SavedMeasure struct {
 	// 2.43: teste do ALARA (distancia, blindagem) e o material da blindagem
 	Test     string `json:"test,omitempty"`
 	Material string `json:"material,omitempty"`
+	// igual em todos os aparelhos e hora da última edição (records.go, N4)
+	UID    string `json:"uid,omitempty"`
+	Edited int64  `json:"edited,omitempty"`
 }
 
 func (a *App) measurementsPath() string { return filepath.Join(a.dataDir, "medicoes.json") }
@@ -602,12 +605,14 @@ func (a *App) loadMeasurements() {
 		}
 		a.measurements = list
 	}
+	a.measurementsTrackLocked(true)
 }
 
 func (a *App) saveMeasurementsLocked() error {
 	if a.dataDir == "" {
 		return nil
 	}
+	a.measurementsTrackLocked(false)
 	b, _ := json.MarshalIndent(a.measurements, "", "  ")
 	return writeFileAtomic(a.measurementsPath(), b, 0o644)
 }

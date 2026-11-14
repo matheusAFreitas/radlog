@@ -200,6 +200,16 @@ func (d *Drive) Put(ctx context.Context, folder, id, name string, data []byte) (
 	return f, err
 }
 
+// Trash põe o arquivo ou a pasta (com o que tem dentro) na lixeira do Drive:
+// a pessoa ainda recupera por 30 dias (auditoria 2.79.0, N11).
+func (d *Drive) Trash(ctx context.Context, id string) error {
+	_, err := d.do(ctx, "PATCH", d.Base+"/files/"+url.PathEscape(id)+"?fields=id", "application/json", []byte(`{"trashed":true}`), nil)
+	if err == ErrNotFound {
+		return nil
+	}
+	return err
+}
+
 // Delete apaga um arquivo (ou a pasta).
 func (d *Drive) Delete(ctx context.Context, id string) error {
 	_, err := d.do(ctx, "DELETE", d.Base+"/files/"+url.PathEscape(id), "", nil, nil)

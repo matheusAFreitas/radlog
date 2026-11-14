@@ -39,14 +39,15 @@ type MergeResult struct {
 	Measurements int    `json:"measurements"`
 	AlertFiles   int    `json:"alertFiles"`
 	Notes        int    `json:"notes"`
-	RcMinutes    int    `json:"rcMinutes"` // minutos do RC102
+	RcMinutes    int    `json:"rcMinutes"`         // minutos do RC102
+	Deleted      int    `json:"deleted,omitempty"` // apagados em outro aparelho (N4)
 	// ajustes das configurações do backup diferentes dos daqui (2.74); a
 	// tela pergunta se quer usar (ApplyBackupSettings)
 	Settings int `json:"settings"`
 }
 
 func (m MergeResult) total() int {
-	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes
+	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes + m.Deleted
 }
 
 // backupAppID marca os backups; os da 1.x (GMC Monitor) continuam valendo.
@@ -111,7 +112,7 @@ func (a *App) writeBackup(w io.Writer) error {
 		return err
 	}
 	a.mu.Lock()
-	files := []string{"alertas.csv", "eventos.csv", "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", rainDaysFile, cfgHistFile, calHistFile, intercalFile, plannedFile}
+	files := []string{"alertas.csv", "eventos.csv", tombsFile, "fora-de-casa.json", "medicoes.json", "anotacoes.json", "chuva.json", "chuva-radar.json", rainDaysFile, cfgHistFile, calHistFile, intercalFile, plannedFile}
 	a.mu.Unlock()
 	months, _ := filepath.Glob(filepath.Join(a.dataDir, "leituras", "*.csv"))
 	for _, m := range months {
@@ -351,6 +352,16 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 	}
 
+	// apagados em outro aparelho (N4): antes dos itens, para não voltarem
+	if f, ok := files[tombsFile]; ok {
+		if b, err := readZipFile(f); err == nil {
+			var list []tomb
+			if json.Unmarshal(b, &list) == nil {
+				res.Deleted = a.applyTombs(list)
+			}
+		}
+	}
+
 	// fora de casa
 	if f, ok := files["fora-de-casa.json"]; ok {
 		if b, err := readZipFile(f); err == nil {
@@ -378,17 +389,45 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 			var list []SavedMeasure
 			if json.Unmarshal(b, &list) == nil {
 				a.mu.Lock()
+				a.tombsLoadLocked()
 				var max int64
 				have := map[int64]int{} // segundo do início → índice
+				byUID := map[string]int{}
 				for i, m := range a.measurements {
 					have[m.Time/1000] = i
+					if m.UID != "" {
+						byUID[m.UID] = i
+					}
 					max = maxInt64(max, m.ID)
 				}
 				changed := false
 				for _, m := range list {
 					m.Attachments = cleanAttachments(m.Attachments)
-					if i, ok := have[m.Time/1000]; ok {
-						// a mesma medição: junta os anexos que faltam
+					if m.UID == "" {
+						m.UID = legacyMeasureUID(m)
+					}
+					if a.tombed(recMeasure, m.UID) {
+						continue
+					}
+					i, same := byUID[m.UID]
+					if same {
+						local := &a.measurements[i]
+						attachIDs[m.ID] = local.ID
+						if m.Edited > local.Edited {
+							// editada lá depois daqui (N4): vale a de lá
+							m.ID = local.ID
+							*local = m
+							changed = true
+							continue
+						}
+						if m.Edited != 0 || local.Edited != 0 {
+							continue
+						}
+					} else {
+						i, same = have[m.Time/1000]
+					}
+					if same {
+						// a mesma medição de antes da 2.80: junta os anexos que faltam
 						local := &a.measurements[i]
 						attachIDs[m.ID] = local.ID
 						for _, at := range m.Attachments {
@@ -407,11 +446,15 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 					attachIDs[m.ID] = max
 					m.ID = max
 					a.measurements = append(a.measurements, m)
+					byUID[m.UID] = len(a.measurements) - 1
 					res.Measurements++
 				}
 				if res.Measurements > 0 || changed {
 					sort.Slice(a.measurements, func(i, j int) bool { return a.measurements[i].Time < a.measurements[j].Time })
+					a.bgAt = time.Time{}
+					a.recMerge = true
 					_ = a.saveMeasurementsLocked()
+					a.recMerge = false
 				}
 				a.mu.Unlock()
 			}

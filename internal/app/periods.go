@@ -38,6 +38,9 @@ type Period struct {
 	// horário da saída é o programado (nada nos aparelhos deu certeza)
 	Planned   int64 `json:"planned,omitempty"`
 	Estimated bool  `json:"estimated,omitempty"`
+	// igual em todos os aparelhos e hora da última edição (records.go, N4)
+	UID    string `json:"uid,omitempty"`
+	Edited int64  `json:"edited,omitempty"`
 }
 
 func (a *App) periodsPath() string { return filepath.Join(a.dataDir, "fora-de-casa.json") }
@@ -48,12 +51,14 @@ func (a *App) loadPeriods() {
 		sort.Slice(list, func(i, j int) bool { return list[i].From < list[j].From })
 		a.periods = list
 	}
+	a.periodsTrackLocked(true)
 }
 
 func (a *App) savePeriodsLocked() error {
 	if a.dataDir == "" {
 		return nil
 	}
+	a.periodsTrackLocked(false)
 	b, _ := json.MarshalIndent(a.periods, "", "  ")
 	return writeFileAtomic(a.periodsPath(), b, 0o644)
 }
@@ -123,9 +128,11 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 		for i := range a.periods {
 			if a.periods[i].ID == p.ID {
 				// a tela pode não mandar de volta a marca da programada
-				if old := a.periods[i]; p.Planned == 0 {
+				old := a.periods[i]
+				if p.Planned == 0 {
 					p.Planned, p.Estimated = old.Planned, old.Estimated && old.From == p.From
 				}
+				p.UID, p.Edited = old.UID, old.Edited // a tela não manda (N4)
 				a.periods[i] = p
 				found = true
 			}

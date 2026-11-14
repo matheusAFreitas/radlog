@@ -380,10 +380,42 @@ func (a *App) mergePeriods(list []Period) int {
 		}
 		max = maxInt64(max, p.ID)
 	}
+	a.tombsLoadLocked()
+	byUID := map[string]int{}
+	for i, p := range a.periods {
+		if p.UID != "" {
+			byUID[p.UID] = i
+		}
+	}
 	list = append([]Period{}, list...)
 	sort.Slice(list, func(i, j int) bool { return list[i].From < list[j].From })
 	for _, p := range list {
-		if have[[2]int64{p.From, p.To}] || (p.To != 0 && p.To <= p.From) {
+		if p.To != 0 && p.To <= p.From {
+			continue
+		}
+		if p.UID == "" {
+			p.UID = legacyPeriodUID(p)
+		}
+		if a.tombed(recPeriod, p.UID) {
+			continue
+		}
+		// o mesmo trecho: a edição mais nova vale (N4)
+		if i, ok := byUID[p.UID]; ok {
+			cur := a.periods[i]
+			if p.Edited > cur.Edited || (p.Edited == 0 && cur.To == 0 && p.To != 0 && p.From == cur.From) {
+				others := append(append([]Period{}, a.periods[:i]...), a.periods[i+1:]...)
+				if p.To != cur.To || p.From != cur.From {
+					if crossesPeriod(others, p) {
+						continue
+					}
+				}
+				p.ID = cur.ID
+				a.periods[i] = p
+				n++
+			}
+			continue
+		}
+		if have[[2]int64{p.From, p.To}] {
 			continue
 		}
 		if i, ok := open[p.From]; ok && p.To != 0 {
@@ -400,12 +432,15 @@ func (a *App) mergePeriods(list []Period) int {
 		max++
 		p.ID = max
 		a.periods = append(a.periods, p)
+		byUID[p.UID] = len(a.periods) - 1
 		have[[2]int64{p.From, p.To}] = true
 		n++
 	}
 	if n > 0 {
 		sort.Slice(a.periods, func(i, j int) bool { return a.periods[i].From < a.periods[j].From })
+		a.recMerge = true
 		_ = a.savePeriodsLocked()
+		a.recMerge = false
 		a.bgAt = time.Time{}
 	}
 	return n

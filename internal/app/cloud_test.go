@@ -251,7 +251,7 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 	for _, p := range ps {
 		keys = append(keys, p.key)
 	}
-	if strings.Join(keys, ",") != "c,m|2026-09,m|2026-10" {
+	if strings.Join(keys, ",") != "comum,dia|2026-09-20,dia|2026-10-20" {
 		t.Fatalf("pacotes: %v", keys)
 	}
 	z1, _ := a.buildDelta(ps[0].req)

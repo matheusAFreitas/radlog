@@ -769,6 +769,11 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 		if f, err := zw.Create("eventos.csv"); err == nil {
 			_ = csv.NewWriter(f).WriteAll(rows)
 		}
+		if b := a.tombsJSON(); b != nil {
+			if f, err := zw.Create(tombsFile); err == nil {
+				_, _ = f.Write(b)
+			}
+		}
 		for _, name := range []string{"fora-de-casa.json", "medicoes.json", "anotacoes.json"} {
 			if b, err := os.ReadFile(filepath.Join(a.dataDir, name)); err == nil {
 				if f, err := zw.Create(name); err == nil {

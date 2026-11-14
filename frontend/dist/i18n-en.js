@@ -4132,7 +4132,58 @@ const I18N_EN = {
 "com erro": "error",
 "nuvem: deu erro": "cloud: error",
 "o Google Drive está cheio: libere espaço na conta Google para a nuvem voltar a subir": "Google Drive is full: free up space in the Google account so the cloud can upload again",
-"o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha": "Google asked to wait a little; the cloud tries again on its own"
+"o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha": "Google asked to wait a little; the cloud tries again on its own",
+"remover": "remove",
+"Ele ainda não enviou nada.": "It has not uploaded anything yet.",
+"Os arquivos que ele mandou vão para a lixeira do seu Drive e ficam lá 30 dias.": "The files it sent go to your Drive trash and stay there for 30 days.",
+"O que já chegou neste PC continua aqui, e este PC sobe de novo o que tinha recebido dele. Os outros aparelhos não perdem nada.": "What already reached this PC stays here, and this PC uploads again what it had received from it. The other devices lose nothing.",
+"Se ele ainda estiver ligado, para de sincronizar e mostra que foi removido. Dá para entrar de novo com o código.": "If it is still on, it stops syncing and shows that it was removed. It can join again with the code.",
+"Perdeu ou roubaram o aparelho? Remover não basta, porque ele ainda sabe o código de recuperação. Nesse caso, depois de remover, use \"Começar uma nuvem nova\" para trocar o código.": "Device lost or stolen? Removing it is not enough, because it still knows the recovery code. In that case, after removing it, use \"Start a new cloud\" to change the code.",
+"removido": "removed",
+"nuvem: removido": "cloud: removed",
+"Entrar de novo": "Join again",
+"Deixar desligada": "Leave it off",
+"\"Entrar de novo\" pede o código de recuperação e sobe tudo deste PC outra vez.": "\"Join again\" asks for the recovery code and uploads everything from this PC again.",
+"Entrar de novo na nuvem": "Join the cloud again",
+"Digite o código de recuperação. Este PC volta como o mesmo aparelho e sobe tudo outra vez.": "Type the recovery code. This PC comes back as the same device and uploads everything again.",
+"recomeçar": "restart",
+"nuvem: recomeçar": "cloud: restart",
+"A nuvem precisa recomeçar uma vez.": "The cloud needs to start over once.",
+"Esta versão mudou o jeito de guardar os arquivos no Drive, e a nuvem de antes não serve mais. Nada some deste PC.": "This version changed how files are stored in Drive, and the old cloud does not work anymore. Nothing is lost on this PC.",
+"O código de recuperação continua o mesmo.": "The recovery code stays the same.",
+"O app cria a pasta nova e só depois manda a antiga para a lixeira do Drive, onde ela fica 30 dias.": "The app creates the new folder and only then sends the old one to Drive trash, where it stays for 30 days.",
+"Este PC sobe tudo de novo.": "This PC uploads everything again.",
+"Os outros aparelhos só precisam atualizar o RadLog.": "The other devices only need to update RadLog.",
+"Recomeçar a nuvem": "Restart the cloud",
+"A nuvem fica pausada até você recomeçar ou desconectar.": "The cloud stays paused until you restart or disconnect.",
+"\"Agora não\" deixa a nuvem pausada. O aviso continua aqui até você recomeçar ou desconectar.": "\"Not now\" leaves the cloud paused. The notice stays here until you restart or disconnect.",
+"Achamos uma nuvem de uma versão antiga": "We found a cloud from an older version",
+"Esta conta tem uma pasta do RadLog no formato de antes, que esta versão não lê.": "This account has a RadLog folder in the old format, which this version cannot read.",
+"A pasta antiga vai para a lixeira do Drive e fica lá 30 dias.": "The old folder goes to Drive trash and stays there for 30 days.",
+"Começa uma nuvem nova, com código de recuperação novo (o próximo passo é o de sempre: ver, confirmar e conferir o código).": "A new cloud starts, with a new recovery code (the next step is the usual one: see, confirm and check the code).",
+"Os dados deste PC sobem de novo.": "This PC's data is uploaded again.",
+"Cancelar sai do login sem mexer no Drive.": "Cancel leaves the sign-in without touching Drive.",
+"Aparelho novo: este PC ganha uma linha própria na lista e sobe os dados dele.": "New device: this PC gets its own row in the list and uploads its data.",
+"Nuvem nova criada; a antiga já está na lixeira do Drive. Pode fechar o app: o envio continua de onde parou.": "New cloud created; the old one is already in Drive trash. You can close the app: the upload continues where it stopped.",
+"A primeira vez sobe todo o histórico, um arquivo por dia; pode levar alguns minutos. O app continua gravando normalmente.": "The first time uploads the whole history, one file per day; it can take a few minutes. The app keeps recording normally.",
+"Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por dia (e cada anexo uma vez só), cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\". O que você apaga ou edita num aparelho vale nos outros.": "Each device uploads its own data to the RadLog folder in your Drive, one file per day (and each attachment only once), encrypted with the recovery code key. The other devices download and merge only what is missing, as in \"Import backup\". What you delete or edit on one device applies on the others.",
+"esse código não é o desta nuvem": "that code is not this cloud's code",
+"este aparelho não pode se remover; use Desconectar": "this device cannot remove itself; use Disconnect",
+"nuvem do formato antigo": "cloud in the old format",
+"aparelho da nuvem": "cloud device",
+"arquivo da nuvem em formato desconhecido": "cloud file in an unknown format",
+"arquivo de uma versão mais nova do RadLog": "file from a newer RadLog version",
+"este PC foi removido da nuvem": "this PC was removed from the cloud",
+"este PC parece cópia de outro aparelho da nuvem": "this PC looks like a copy of another cloud device",
+"nuvem: a nuvem antiga foi para a lixeira do Drive para começar uma nova": "cloud: the old cloud went to Drive trash to start a new one",
+"nuvem: a nuvem no Drive é do formato antigo e precisa ser começada de novo": "cloud: the cloud in Drive is in the old format and needs to start over",
+"nuvem: este PC assumiu o aparelho que estava copiado": "cloud: this PC took over the copied device",
+"nuvem: este PC entrou de novo na nuvem": "cloud: this PC joined the cloud again",
+"nuvem: este PC passou a ser um aparelho novo na nuvem": "cloud: this PC became a new device in the cloud",
+"nuvem: nuvem nova começada; a antiga foi para a lixeira do Drive": "cloud: new cloud started; the old one went to Drive trash",
+"nuvem: outro PC está usando a faixa deste aparelho; a nuvem pausou até você escolher": "cloud: another PC is using this device's slot; the cloud paused until you choose",
+"nuvem: outro aparelho tirou este PC da nuvem; os dados daqui continuam": "cloud: another device removed this PC from the cloud; the data here stays",
+"não consegui tirar os metadados da foto": "could not remove the photo metadata"
 },
 "patterns": [
 [
@@ -4792,6 +4843,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Nuvem recomeçada. Tudo deste PC subiu no formato novo, com o mesmo código. A pasta antiga fica na lixeira do Drive até ",
+"^Nuvem recomeçada\\. Tudo deste PC subiu no formato novo, com o mesmo código\\. A pasta antiga fica na lixeira do Drive até ((?:(?! · ).)+?)\\.$",
+"Cloud restarted. Everything from this PC was uploaded in the new format, with the same code. The old folder stays in Drive trash until ${1}.",
+[
+"Nuvem recomeçada. Tudo deste PC subiu no formato novo, com o mesmo código. A pasta antiga fica na lixeira do Drive até "
+]
+],
+[
 "O RC102 em casa subiu junto (",
 "^O RC102 em casa subiu junto \\(((?:(?! · ).)+?)\\), então é o ambiente, não o aparelho\\. Ainda é fundo baixo, mas vale descobrir o motivo\\.$",
 "The RC102 at home rose too (${1}), so it is the environment, not the device. It is still a low background, but worth finding out why.",
@@ -5197,6 +5256,15 @@ const I18N_EN = {
 "${1} package(s) from another device did not go into this PC; the rest synced and they will be tried again",
 [
 " pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo"
+]
+],
+[
+"O mesmo: este PC continua a linha do ",
+"^O mesmo: este PC continua a linha do ((?:(?! · ).)+?)\\. Se o outro ligar de novo, ele é que vai cair nesta pergunta\\.$",
+"The same one: this PC takes over ${1}'s row. If the other one turns on again, it will get this question.",
+[
+"O mesmo: este PC continua a linha do ",
+". Se o outro ligar de novo, ele é que vai cair nesta pergunta."
 ]
 ],
 [
@@ -5720,6 +5788,15 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: ",
+"^nuvem: ((?:(?! · ).)+?) arquivo\\(s\\) de uma versão mais nova do RadLog ficaram para depois de atualizar$",
+"cloud: ${1} file(s) from a newer RadLog version wait until you update",
+[
+"nuvem: ",
+" arquivo(s) de uma versão mais nova do RadLog ficaram para depois de atualizar"
+]
+],
+[
 "Seu limite (",
 "^Seu limite \\(((?:(?! · ).)+?)\\) está acima do perigo do app \\(((?:(?! · ).)+?) CPM\\): quem toca é o alarme de perigo\\.$",
 "Your limit (${1}) is above the app's danger level (${2} CPM): the danger alarm is the one that sounds.",
@@ -5952,6 +6029,15 @@ const I18N_EN = {
 [
 "o Google recusou o acesso ao Drive (",
 "); se continuar, desconecte e entre de novo"
+]
+],
+[
+"Outro aparelho tirou este PC da nuvem em ",
+"^Outro aparelho tirou este PC da nuvem em ((?:(?! · ).)+?)\\. Os dados daqui continuam todos aqui\\.$",
+"Another device removed this PC from the cloud on ${1}. All data here stays here.",
+[
+"Outro aparelho tirou este PC da nuvem em ",
+". Os dados daqui continuam todos aqui."
 ]
 ],
 [
@@ -6464,6 +6550,15 @@ const I18N_EN = {
 [
 "Arquivo liberado: ",
 " minuto(s) que estavam esperando foram gravados."
+]
+],
+[
+"nuvem: um aparelho foi removido (",
+"^nuvem: um aparelho foi removido \\(((?:(?! · ).)+?) arquivo\\(s\\) na lixeira do Drive\\)$",
+"cloud: a device was removed (${1} file(s) in Drive trash)",
+[
+"nuvem: um aparelho foi removido (",
+" arquivo(s) na lixeira do Drive)"
 ]
 ],
 [
@@ -9223,6 +9318,14 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: não consegui gravar o aparelho (",
+"^nuvem: não consegui gravar o aparelho \\(((?:(?! · ).)+?)\\)$",
+"cloud: could not save the device (${1})",
+[
+"nuvem: não consegui gravar o aparelho ("
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\)$",
 "The difference is ${1} times the uncertainty (${2}σ)",
@@ -10165,6 +10268,14 @@ const I18N_EN = {
 "Média: ",
 " µSv/h · máximo: ",
 " µSv/h"
+]
+],
+[
+"não consegui gravar os apagados (",
+"^não consegui gravar os apagados \\(((?:(?! · ).)+?)\\)$",
+"could not save the deleted items (${1})",
+[
+"não consegui gravar os apagados ("
 ]
 ],
 [
@@ -11330,6 +11441,14 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: um anexo não subiu (",
+"^nuvem: um anexo não subiu \\(((?:(?! · ).)+?)\\)$",
+"cloud: an attachment was not uploaded (${1})",
+[
+"nuvem: um anexo não subiu ("
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12048,6 +12167,15 @@ const I18N_EN = {
 "Last 7 days · at home · ${1}",
 [
 "Últimos 7 dias · em casa · "
+]
+],
+[
+"subindo tudo de novo · ",
+"^subindo tudo de novo · ((?:(?! · ).)+?) de ((?:(?! · ).)+?)$",
+"uploading everything again · ${1} of ${2}",
+[
+"subindo tudo de novo · ",
+" de "
 ]
 ],
 [
@@ -13743,6 +13871,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Remover \"",
+"^Remover \"((?:(?! · ).)+?)\" da nuvem\\?$",
+"Remove \"${1}\" from the cloud?",
+[
+"Remover \"",
+"\" da nuvem?"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -14828,6 +14965,14 @@ const I18N_EN = {
 [
 "· chuva ",
 " (radar)"
+]
+],
+[
+"Último envio em ",
+"^Último envio em ((?:(?! · ).)+?)\\.$",
+"Last upload on ${1}.",
+[
+"Último envio em "
 ]
 ],
 [
@@ -15932,6 +16077,15 @@ const I18N_EN = {
 "cloud up to date · ${1}",
 [
 "nuvem em dia · "
+]
+],
+[
+"parado há ",
+"^parado há ((?:(?! · ).)+?) dias$",
+"idle for ${1} days",
+[
+"parado há ",
+" dias"
 ]
 ],
 [
