@@ -1,5 +1,23 @@
 # Versões
 
+## 2.80.9
+- GQ GMC-800: o valor gravado de cada minuto agora é a média das contagens
+  de cada segundo. Antes era só a última leitura do minuto, e o GMC-800 manda
+  uma estimativa que sobe e desce em poucos segundos: um pico curto (o
+  contador encostado numa pedra por 20 s) sumia do gráfico e da dose. Num
+  minuto de 14/11 o valor gravado foi 101 CPM, quando a média segundo a
+  segundo foi 793. Os minutos já gravados não mudam.
+
+**English**
+
+- GQ GMC-800: each minute is now saved as the average of the counts of each
+  second. Before, it was only the last reading of the minute, and the
+  GMC-800 sends an estimate that rises and falls within a few seconds: a
+  short peak (the counter held against a rock for 20 s) vanished from the
+  chart and from the dose. In one minute on 14/11 the saved value was
+  101 CPM while the second-by-second average was 793. Minutes already saved
+  do not change.
+
 ## 2.80.8
 - Nuvem no Linux: quando o cofre do sistema pede a senha, a tela da nuvem e
   o resto do app não ficam parados esperando. Se o pedido for fechado ou
