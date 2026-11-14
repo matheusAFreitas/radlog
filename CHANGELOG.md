@@ -1,5 +1,32 @@
 # Versões
 
+## 2.80.3
+- Nuvem: "Começar uma nuvem nova" só manda a nuvem antiga para a lixeira do
+  Drive depois de a nova estar criada. Quem desiste no meio continua com a
+  antiga.
+- Nuvem: o código de recuperação copiado sai da área de transferência
+  depois de 1 minuto.
+- Nuvem: com o relógio errado ou sem internet, o cartão também mostra "Ver
+  código de recuperação" e "Desconectar do Google". "Pausar" avisa que o
+  envio continua na próxima sincronização.
+- Nuvem em inglês: "(há 1 h)", a palavra para confirmar a nuvem nova (agora
+  "NEW") e a página do fim do login.
+- A versão não é publicada se faltar a chave do app no Google.
+
+**English**
+
+- Cloud: "Start a new cloud" only sends the old cloud to the Drive trash
+  after the new one is created. If you give up halfway, you keep the old
+  one.
+- Cloud: the copied recovery code is cleared from the clipboard after 1
+  minute.
+- Cloud: with a wrong clock or no internet, the card also shows "Show
+  recovery code" and "Disconnect from Google". "Pause" says the upload
+  continues at the next sync.
+- Cloud in English: "(1 h ago)", the word to confirm a new cloud (now
+  "NEW") and the page at the end of the login.
+- A release is not published if the app's Google key is missing.
+
 ## 2.80.2
 - Nuvem: quem já tinha a nuvem ligada na 2.79 agora vê o aviso "Recomeçar
   a nuvem". Na 2.80.0 e na 2.80.1 o app não relia o arquivo da nuvem e

@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -209,15 +210,20 @@ func TestCloudResetAndCancel(t *testing.T) {
 	}
 	b, _ := testApp(t)
 	cloudLogin(t, b)
+	before := srv.Count()
 	if _, err := b.CloudReset(); err != nil {
 		t.Fatal(err)
 	}
-	if srv.Count() != 0 {
-		t.Fatalf("a nuvem antiga ficou: %d", srv.Count())
+	// N11: a antiga só vai para a lixeira quando a nova existir
+	if srv.Count() != before || len(srv.Trashed) != 0 {
+		t.Fatalf("a nuvem antiga saiu antes da nova: %d de %d, %d na lixeira", srv.Count(), before, len(srv.Trashed))
 	}
 	code2, _ := b.NewCloudCode()
 	if _, err := b.CloudFinishSetup(code2); err != nil {
 		t.Fatal(err)
+	}
+	if len(srv.Trashed) == 0 {
+		t.Fatal("a antiga não foi para a lixeira")
 	}
 	// A percebe que a nuvem mudou
 	a.cloudSync()
@@ -266,5 +272,55 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 	ps2, _ := a.cloudPacks()
 	if ps2[1].digest != ps[1].digest {
 		t.Fatal("resumo do mês mudou sem mudança")
+	}
+}
+
+// N11: quem começa uma nuvem nova e desiste continua com a antiga.
+func TestCloudResetThenCancelKeepsOld(t *testing.T) {
+	srv := fakeCloud(t)
+	a, _ := testApp(t)
+	cloudPair(t, a, nil)
+	b, _ := testApp(t)
+	cloudLogin(t, b)
+	if _, err := b.CloudReset(); err != nil {
+		t.Fatal(err)
+	}
+	b.CloudCancel()
+	if len(srv.Trashed) != 0 {
+		t.Fatal("a nuvem antiga foi para a lixeira sem a nova existir")
+	}
+	c, _ := testApp(t)
+	if done := cloudLogin(t, c); done.Next != "existing" {
+		t.Fatalf("a nuvem antiga sumiu: %+v", done)
+	}
+}
+
+// U2: o código sai da área de transferência depois do prazo, se ainda estiver
+// lá; o que a pessoa copiou depois fica.
+func TestCopyCloudCodeClears(t *testing.T) {
+	var mu sync.Mutex
+	clip := ""
+	oldSet, oldGet, oldTTL := cloudClipSet, cloudClipGet, cloudClipTTL
+	t.Cleanup(func() { cloudClipSet, cloudClipGet, cloudClipTTL = oldSet, oldGet, oldTTL })
+	cloudClipSet = func(_ *App, s string) error { mu.Lock(); clip = s; mu.Unlock(); return nil }
+	cloudClipGet = func(*App) (string, error) { mu.Lock(); defer mu.Unlock(); return clip, nil }
+	cloudClipTTL = 20 * time.Millisecond
+	read := func() string { mu.Lock(); defer mu.Unlock(); return clip }
+	a, _ := testApp(t)
+	if err := a.CopyCloudCode("K7QF-3XWM"); err != nil {
+		t.Fatal(err)
+	}
+	if read() != "K7QF-3XWM" {
+		t.Fatal("não copiou")
+	}
+	time.Sleep(80 * time.Millisecond)
+	if read() != "" {
+		t.Fatalf("o código ficou: %q", read())
+	}
+	_ = a.CopyCloudCode("K7QF-3XWM")
+	_ = cloudClipSet(a, "outra coisa")
+	time.Sleep(80 * time.Millisecond)
+	if read() != "outra coisa" {
+		t.Fatalf("apagou o que a pessoa copiou depois: %q", read())
 	}
 }

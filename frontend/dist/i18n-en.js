@@ -4018,7 +4018,7 @@ const I18N_EN = {
 "— valor atual; sem registro do valor vigente no início do período": "— current value; no record of the value in force at the start of the period",
 "% do tempo medido": "% of the measured time",
 "Já passou do horário. Quando o aparelho que foi conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois.": "The time has passed. When the device that went connects again, the app reads its memory and asks on the Now screen about 2 min later.",
-"A cópia que está no Drive fica ilegível para sempre (sem o código, ninguém abre). Os dados deste PC continuam aqui e sobem de novo com um código novo. Os outros aparelhos vão pedir o código novo.": "The copy in Drive becomes unreadable forever (without the code, nobody can open it). This PC's data stays here and goes up again with a new code. The other devices will ask for the new code.",
+"A cópia que está no Drive vai para a lixeira do Drive (fica lá 30 dias) assim que a nuvem nova estiver criada. Os dados deste PC continuam aqui e sobem de novo com um código novo. Os outros aparelhos vão pedir o código novo.": "The copy in Drive goes to the Drive trash (it stays there 30 days) as soon as the new cloud is created. This PC's data stays here and goes up again with a new code. The other devices will ask for the new code.",
 "A primeira vez sobe todo o histórico, um arquivo por mês; pode levar alguns minutos. O app continua gravando normalmente.": "The first time uploads the whole history, one file per month; it can take a few minutes. The app keeps recording normally.",
 "A sincronização pela rede (abaixo) continua funcionando como antes.": "Sync over the network (below) keeps working as before.",
 "Abrir a nuvem": "Open the cloud",
@@ -4031,6 +4031,9 @@ const I18N_EN = {
 "Confira dois pedaços do código": "Check two pieces of the code",
 "Confira se ninguém está olhando a tela. Com o código, dá para abrir a cópia da nuvem.": "Make sure nobody is looking at the screen. With the code, the cloud copy can be opened.",
 "Código copiado": "Code copied",
+"Código copiado. Por segurança, ele sai da área de transferência em 1 min.": "Code copied. For safety, it is cleared from the clipboard in 1 min.",
+"Envio pausado. Ele continua na próxima sincronização, em até 15 min.": "Upload paused. It continues at the next sync, within 15 min.",
+"há pouco": "just now",
 "Código de recuperação": "Recovery code",
 "Código salvo em": "Code saved to",
 "Depois desta tela ele só aparece de novo em \"Ver código de recuperação\", neste PC.": "After this screen it only shows again in \"Show recovery code\", on this PC.",
@@ -4060,7 +4063,7 @@ const I18N_EN = {
 "Os dois estão usando a mesma faixa da nuvem (isso acontece quando a pasta do RadLog é copiada de um PC para outro). A nuvem está pausada aqui até você escolher.": "Both are using the same slot in the cloud (this happens when the RadLog folder is copied from one PC to another). The cloud is paused here until you choose.",
 "Para ligar de novo, entre com o Google e digite o código de recuperação.": "To turn it on again, sign in with Google and type the recovery code.",
 "Para ter certeza de que o que você guardou está certo. Sem olhar nesta tela (ela não mostra mais o código).": "To be sure what you saved is right. Without looking at this screen (it no longer shows the code).",
-"Pegue o código num aparelho que já está ligado na nuvem: Configurações › Dados e backup › Nuvem › Ver código de recuperação. Se nenhum aparelho tem mais, dá para começar uma nuvem nova; a antiga fica ilegível, e os dados de cada aparelho sobem de novo.": "Get the code on a device already connected to the cloud: Settings › Data and backup › Cloud › Show recovery code. If no device has it anymore, you can start a new cloud; the old one becomes unreadable, and each device's data goes up again.",
+"Pegue o código num aparelho que já está ligado na nuvem: Configurações › Dados e backup › Nuvem › Ver código de recuperação. Se nenhum aparelho tem mais, dá para começar uma nuvem nova; a antiga vai para a lixeira do Drive, e os dados de cada aparelho sobem de novo.": "Get the code on a device already connected to the cloud: Settings › Data and backup › Cloud › Show recovery code. If no device has it anymore, you can start a new cloud; the old one goes to the Drive trash, and each device's data goes up again.",
 "Perdi o código": "I lost the code",
 "RadLog: código de recuperação da nuvem": "RadLog: cloud recovery code",
 "Salvar código de recuperação": "Save recovery code",
@@ -4085,7 +4088,6 @@ const I18N_EN = {
 "essa conta ainda não tem uma nuvem do RadLog": "this account does not have a RadLog cloud yet",
 "essa conta já tem uma nuvem do RadLog": "this account already has a RadLog cloud",
 "esta cópia do app não tem a chave do Google": "this copy of the app does not have the Google key",
-"há pouco": "just now",
 "nome deste aparelho na nuvem": "this device's name in the cloud",
 "nuvem de uma versão mais nova do RadLog": "cloud from a newer version of RadLog",
 "nuvem ligada": "cloud on",
@@ -4101,7 +4103,7 @@ const I18N_EN = {
 "o Google pediu para entrar de novo": "Google asked to sign in again",
 "o código tem 24 letras e números (sem O, I nem L)": "the code has 24 letters and numbers (no O, I or L)",
 "openid email https://www.googleapis.com/auth/drive.file": "openid email https://www.googleapis.com/auth/drive.file",
-"para confirmar, digite NOVA": "to confirm, type NOVA",
+"para confirmar, digite NOVA": "to confirm, type NEW",
 "sem internet": "no internet",
 "voce@gmail.com": "you@gmail.com",
 "É a chave da sua nuvem. Com ele você liga outro PC ou o celular, ou recupera tudo se este PC quebrar. Ninguém mais tem esse código: nem o Google, nem o RadLog. Se perder o código e todos os aparelhos, a cópia da nuvem fica ilegível (os dados deste PC continuam intactos).": "It is the key to your cloud. With it you add another PC or the phone, or recover everything if this PC breaks. Nobody else has this code: not Google, not RadLog. If you lose the code and all devices, the cloud copy becomes unreadable (this PC's data stays intact).",
@@ -4183,7 +4185,9 @@ const I18N_EN = {
 "nuvem: nuvem nova começada; a antiga foi para a lixeira do Drive": "cloud: new cloud started; the old one went to Drive trash",
 "nuvem: outro PC está usando a faixa deste aparelho; a nuvem pausou até você escolher": "cloud: another PC is using this device's slot; the cloud paused until you choose",
 "nuvem: outro aparelho tirou este PC da nuvem; os dados daqui continuam": "cloud: another device removed this PC from the cloud; the data here stays",
-"não consegui tirar os metadados da foto": "could not remove the photo metadata"
+"não consegui tirar os metadados da foto": "could not remove the photo metadata",
+"nuvem: a nuvem antiga foi para a lixeira do Drive": "cloud: the old cloud went to the Drive trash",
+"área de transferência indisponível": "clipboard unavailable"
 },
 "patterns": [
 [
@@ -18436,6 +18440,15 @@ const I18N_EN = {
 ]
 ],
 [
+"há ",
+"^há ((?:(?! · ).)+?) dias$",
+"${1} days ago",
+[
+"há ",
+" dias"
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -19009,6 +19022,14 @@ const I18N_EN = {
 "· at ${1}",
 [
 "· às "
+]
+],
+[
+"há ",
+"^há ((?:(?! · ).)+?) h$",
+"${1} h ago",
+[
+"há "
 ]
 ],
 [

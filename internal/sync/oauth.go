@@ -110,7 +110,7 @@ func (o *OAuth) Start() (*Login, error) {
 
 const loginPage = `<!doctype html><meta charset="utf-8"><title>RadLog</title>
 <body style="background:#0E1316;color:#E6EDF2;font:16px system-ui,sans-serif;display:grid;place-items:center;height:90vh;text-align:center">
-<div><h2>%s</h2><p>Pode fechar esta aba e voltar para o RadLog.</p><p style="color:#8B98A5">You can close this tab and go back to RadLog.</p></div>`
+<div><h2>%s</h2><p style="color:#8B98A5;margin-top:-8px">%s</p><p>Pode fechar esta aba e voltar para o RadLog.</p><p style="color:#8B98A5">You can close this tab and go back to RadLog.</p></div>`
 
 func (l *Login) serve(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
@@ -121,19 +121,19 @@ func (l *Login) serve(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 	if q.Get("state") != l.state {
 		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, loginPage, "Login não reconhecido")
+		fmt.Fprintf(w, loginPage, "Login não reconhecido", "Login not recognized")
 		return
 	}
 	res := loginResult{code: q.Get("code")}
-	title := "Pronto, login feito"
+	title, en := "Pronto, login feito", "Done, you are signed in"
 	if e := q.Get("error"); e != "" {
 		res = loginResult{err: ErrCanceled}
 		if e != "access_denied" {
 			res.err = fmt.Errorf("o Google recusou o login (%s)", e)
 		}
-		title = "Login cancelado"
+		title, en = "Login cancelado", "Login canceled"
 	}
-	fmt.Fprintf(w, loginPage, title)
+	fmt.Fprintf(w, loginPage, title, en)
 	select {
 	case l.got <- res:
 	default:

@@ -264,6 +264,10 @@ func TestCloudLoginOld(t *testing.T) {
 	if _, err := b.CloudReset(); err != nil {
 		t.Fatal(err)
 	}
+	code, _ := b.NewCloudCode()
+	if _, err := b.CloudFinishSetup(code); err != nil {
+		t.Fatal(err)
+	}
 	if len(srv.Trashed) == 0 {
 		t.Fatal("a antiga não foi para a lixeira")
 	}
