@@ -48,6 +48,7 @@ function cloudBadge(c) {
   const stale = c.lastSync && Date.now() - c.lastSync > 864e5;
   switch (c.state) {
     case "login": return { text: "nuvem: entrar de novo", att: true };
+    case "vault": return c.vaultWait ? { text: "nuvem: abrindo o cofre…" } : { text: "nuvem: cofre bloqueado", att: true };
     case "clock": return { text: "nuvem: relógio errado", att: true };
     case "dup": return { text: "nuvem: confirme o aparelho", att: true };
     case "old": return { text: "nuvem: recomeçar", att: true };
@@ -133,7 +134,7 @@ function cloudDevices(c) {
   return box;
 }
 
-const CLOUD_TAG = { err: ["com erro", "att"], ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"], old: ["recomeçar", "att"], removed: ["removido", "att"] };
+const CLOUD_TAG = { err: ["com erro", "att"], ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"], old: ["recomeçar", "att"], removed: ["removido", "att"], vault: ["cofre", "att"] };
 
 function renderCloud() {
   renderCloudBadges();
@@ -184,6 +185,18 @@ function renderCloud() {
       body.append(cloudNote("info", "", "Sem internet agora. Tudo continua gravado aqui; o que está na fila sobe quando a conexão voltar."), cloudDevices(c));
       row.append(cloudBtn("Tentar agora", "", () => cloudCall("CloudSyncNow")), cloudBtn("Ver código de recuperação", "", cloudShowCode), cloudBtn("Desconectar do Google", "", cloudDisconnect));
       body.append(row);
+      break;
+    case "vault":
+      // Linux: a chave da nuvem fica no cofre do sistema (GNOME Keyring, KWallet)
+      if (c.vaultWait) {
+        body.append(cloudEl("div", "cloud-spin"), cloudEl("p", "", ""));
+        body.lastChild.append(cloudEl("b", "", "Esperando o cofre do sistema."));
+        body.append(cloudEl("p", "small muted", "Se apareceu um pedido de senha do chaveiro, digite a senha da sua sessão para a nuvem continuar."));
+      } else {
+        body.append(cloudNote("att", "O cofre do sistema está bloqueado.", "A chave da nuvem deste PC fica no chaveiro do sistema, e ele não abriu (o pedido de senha foi fechado ou passou do tempo). Nada foi perdido; a nuvem fica pausada até o cofre abrir."));
+        row.append(cloudBtn("Tentar de novo", "accent", () => cloudCall("CloudVaultRetry")), cloudBtn("Desconectar do Google", "", cloudDisconnect));
+        body.append(row);
+      }
       break;
     case "login":
       body.append(cloudNote("att", "O Google pediu para entrar de novo.", "Isso acontece quando o acesso é revogado na conta Google ou fica muito tempo sem uso. Nada foi perdido: os dados estão aqui e a cópia da nuvem continua lá."));

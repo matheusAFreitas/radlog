@@ -1,5 +1,20 @@
 # Versões
 
+## 2.80.8
+- Nuvem no Linux: quando o cofre do sistema pede a senha, a tela da nuvem e
+  o resto do app não ficam parados esperando. Se o pedido for fechado ou
+  passar do tempo, o cartão mostra "cofre bloqueado" com "Tentar de novo",
+  em vez de pedir o código de recuperação. O código só é pedido quando a
+  chave não está mais no cofre.
+
+**English**
+
+- Cloud on Linux: when the system keyring asks for the password, the cloud
+  screen and the rest of the app no longer freeze while waiting. If the
+  prompt is closed or times out, the card shows "keyring locked" with "Try
+  again" instead of asking for the recovery code. The code is only asked for
+  when the key is no longer in the keyring.
+
 ## 2.80.7
 - Nuvem no Linux: o acesso do Google e o código de recuperação são cifrados
   com uma chave guardada no cofre do sistema (GNOME Keyring ou KWallet),

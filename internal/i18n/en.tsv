@@ -5541,3 +5541,14 @@ cofre do sistema: pedido recusado	system keyring: request declined
 cofre do sistema: sem resposta	system keyring: no answer
 cofre do sistema: {0}	system keyring: {0}
 o pacote {0} tem {1} MB, acima do limite de {2} MB da nuvem, e não subiu	the package {0} is {1} MB, above the cloud limit of {2} MB, and was not uploaded
+A chave da nuvem deste PC fica no chaveiro do sistema, e ele não abriu (o pedido de senha foi fechado ou passou do tempo). Nada foi perdido; a nuvem fica pausada até o cofre abrir.	This PC's cloud key is kept in the system keyring, and it did not open (the password prompt was closed or timed out). Nothing was lost; the cloud stays paused until the keyring opens.
+Esperando o cofre do sistema.	Waiting for the system keyring.
+O cofre do sistema está bloqueado.	The system keyring is locked.
+Se apareceu um pedido de senha do chaveiro, digite a senha da sua sessão para a nuvem continuar.	If a keyring password prompt appeared, type your session password so the cloud can continue.
+a chave não está no cofre do sistema	the key is not in the system keyring
+esperando o cofre do sistema	waiting for the system keyring
+nuvem: a chave guardada não está no cofre do sistema	cloud: the saved key is not in the system keyring
+nuvem: o cofre do sistema não abriu ({0})	cloud: the system keyring did not open ({0})
+nuvem: abrindo o cofre…	cloud: opening the keyring…
+nuvem: cofre bloqueado	cloud: keyring locked
+cofre	keyring

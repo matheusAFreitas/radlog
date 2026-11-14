@@ -4200,7 +4200,17 @@ const I18N_EN = {
 "cofre do sistema indisponível": "system keyring unavailable",
 "cofre do sistema: chave com tamanho errado": "system keyring: key has the wrong size",
 "cofre do sistema: pedido recusado": "system keyring: request declined",
-"cofre do sistema: sem resposta": "system keyring: no answer"
+"cofre do sistema: sem resposta": "system keyring: no answer",
+"A chave da nuvem deste PC fica no chaveiro do sistema, e ele não abriu (o pedido de senha foi fechado ou passou do tempo). Nada foi perdido; a nuvem fica pausada até o cofre abrir.": "This PC's cloud key is kept in the system keyring, and it did not open (the password prompt was closed or timed out). Nothing was lost; the cloud stays paused until the keyring opens.",
+"Esperando o cofre do sistema.": "Waiting for the system keyring.",
+"O cofre do sistema está bloqueado.": "The system keyring is locked.",
+"Se apareceu um pedido de senha do chaveiro, digite a senha da sua sessão para a nuvem continuar.": "If a keyring password prompt appeared, type your session password so the cloud can continue.",
+"a chave não está no cofre do sistema": "the key is not in the system keyring",
+"esperando o cofre do sistema": "waiting for the system keyring",
+"nuvem: a chave guardada não está no cofre do sistema": "cloud: the saved key is not in the system keyring",
+"nuvem: abrindo o cofre…": "cloud: opening the keyring…",
+"nuvem: cofre bloqueado": "cloud: keyring locked",
+"cofre": "keyring"
 },
 "patterns": [
 [
@@ -9703,6 +9713,14 @@ const I18N_EN = {
 "could not merge a cloud package: ${1}",
 [
 "não consegui juntar um pacote da nuvem: "
+]
+],
+[
+"nuvem: o cofre do sistema não abriu (",
+"^nuvem: o cofre do sistema não abriu \\(((?:(?! · ).)+?)\\)$",
+"cloud: the system keyring did not open (${1})",
+[
+"nuvem: o cofre do sistema não abriu ("
 ]
 ],
 [
