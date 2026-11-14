@@ -36,7 +36,7 @@ function cloudSize(b) {
 // "há 8 h", "há 2 dias"
 function cloudAgo(ms) {
   const h = (Date.now() - ms) / 36e5;
-  return h < 1 ? "há pouco" : h < 48 ? `há ${Math.round(h)} h` : `há ${Math.round(h / 24)} dias`;
+  return tr(h < 1 ? "há pouco" : h < 48 ? `há ${Math.round(h)} h` : `há ${Math.round(h / 24)} dias`);
 }
 
 // ---------- o que aparece fora das Configurações ----------
@@ -175,14 +175,14 @@ function renderCloud() {
       body.append(bar, cloudEl("p", "small muted", c.restart
         ? "Nuvem nova criada; a antiga já está na lixeira do Drive. Pode fechar o app: o envio continua de onde parou."
         : "A primeira vez sobe todo o histórico, um arquivo por dia; pode levar alguns minutos. O app continua gravando normalmente."));
-      row.append(cloudBtn("Pausar", "", () => cloudCall("CloudPause")));
+      row.append(cloudBtn("Pausar", "", async () => { await cloudCall("CloudPause"); toast("Envio pausado. Ele continua na próxima sincronização, em até 15 min."); }));
       body.append(row);
       break;
     }
     case "offline":
       body.append(cloudKV([...acct, ["Última sincronização", c.lastSync ? `${whenLabel(c.lastSync)} (${cloudAgo(c.lastSync)})` : "ainda não"], ["Na fila", cloudQueue(c.queue)]]));
       body.append(cloudNote("info", "", "Sem internet agora. Tudo continua gravado aqui; o que está na fila sobe quando a conexão voltar."), cloudDevices(c));
-      row.append(cloudBtn("Tentar agora", "", () => cloudCall("CloudSyncNow")));
+      row.append(cloudBtn("Tentar agora", "", () => cloudCall("CloudSyncNow")), cloudBtn("Ver código de recuperação", "", cloudShowCode), cloudBtn("Desconectar do Google", "", cloudDisconnect));
       body.append(row);
       break;
     case "login":
@@ -195,6 +195,8 @@ function renderCloud() {
       const min = Math.max(1, Math.round(Math.abs(c.skewSec || 0) / 60));
       body.append(cloudNote("att", `O relógio deste PC está ${min} min ${(c.skewSec || 0) >= 0 ? "adiantado" : "atrasado"}`, "em relação ao Google. A sincronização continua, mas as horas das anotações editadas podem ficar trocadas entre os aparelhos. Acerte a hora do Windows (Configurações › Hora e idioma › Sincronizar agora)."));
       body.append(cloudKV([["Última sincronização", cloudWhen(c.lastSync)]]), cloudDevices(c));
+      row.append(cloudBtn("Sincronizar agora", "", () => cloudCall("CloudSyncNow")), cloudBtn("Ver código de recuperação", "", cloudShowCode), cloudBtn("Desconectar do Google", "", cloudDisconnect));
+      body.append(row);
       break;
     }
     case "dup": {
@@ -427,7 +429,11 @@ function cloudInput(label, value) {
   return i;
 }
 async function cloudCopy(code) {
-  try { await navigator.clipboard.writeText(code); toast("Código copiado"); } catch { toast("Não deu para copiar; selecione e copie à mão.", true); }
+  try {
+    if (api.CopyCloudCode) await api.CopyCloudCode(code);
+    else await navigator.clipboard.writeText(code);
+    toast("Código copiado. Por segurança, ele sai da área de transferência em 1 min.");
+  } catch { toast("Não deu para copiar; selecione e copie à mão.", true); }
 }
 async function cloudSave(code) {
   try {
@@ -542,7 +548,7 @@ function cloudOtherDevice(info) {
     box.append(f);
     const lost = cloudEl("details", "cloud-lost");
     lost.append(cloudEl("summary", "small muted", "Perdi o código"));
-    lost.append(cloudEl("p", "small muted", "Pegue o código num aparelho que já está ligado na nuvem: Configurações › Dados e backup › Nuvem › Ver código de recuperação. Se nenhum aparelho tem mais, dá para começar uma nuvem nova; a antiga fica ilegível, e os dados de cada aparelho sobem de novo."));
+    lost.append(cloudEl("p", "small muted", "Pegue o código num aparelho que já está ligado na nuvem: Configurações › Dados e backup › Nuvem › Ver código de recuperação. Se nenhum aparelho tem mais, dá para começar uma nuvem nova; a antiga vai para a lixeira do Drive, e os dados de cada aparelho sobem de novo."));
     lost.append(cloudBtn("Começar uma nuvem nova", "danger", () => cloudNewCloud(close)));
     box.append(lost);
     setTimeout(() => inp.focus(), 30);
@@ -571,7 +577,8 @@ function cloudOpened(close) {
 function cloudNewCloud(close) {
   cloudDialog((box) => {
     box.append(cloudEl("h3", "", "Começar uma nuvem nova?"));
-    box.append(cloudEl("p", "small muted", "A cópia que está no Drive fica ilegível para sempre (sem o código, ninguém abre). Os dados deste PC continuam aqui e sobem de novo com um código novo. Os outros aparelhos vão pedir o código novo."));
+    box.append(cloudEl("p", "small muted", "A cópia que está no Drive vai para a lixeira do Drive (fica lá 30 dias) assim que a nuvem nova estiver criada. Os dados deste PC continuam aqui e sobem de novo com um código novo. Os outros aparelhos vão pedir o código novo."));
+    const word = LANG === "en" ? "NEW" : "NOVA";
     const inp = cloudInput("para confirmar, digite NOVA");
     box.append(inp.parentNode);
     const f = cloudEl("div", "row cloud-foot");
@@ -581,7 +588,7 @@ function cloudNewCloud(close) {
       cloudFirstDevice();
     });
     go.disabled = true;
-    inp.addEventListener("input", () => { go.disabled = inp.value.trim().toUpperCase() !== "NOVA"; });
+    inp.addEventListener("input", () => { go.disabled = inp.value.trim().toUpperCase() !== word; });
     f.append(cloudBtn("Voltar", "", () => cloudOtherDevice(cloud)), go);
     box.append(f);
     setTimeout(() => inp.focus(), 30);

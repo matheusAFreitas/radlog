@@ -172,6 +172,9 @@ type cloudPending struct {
 	tok    rs.Token
 	folder string
 	meta   *rs.Meta
+	// trash é a nuvem antiga que vai para a lixeira só depois de a nova
+	// estar criada (auditoria 2.79.0, N11)
+	trash string
 }
 
 type cloudState struct {
@@ -507,11 +510,19 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 		}
 	}
 	meta, keys, err := rs.NewMeta(code)
-	if err != nil {
-		return a.GetCloud(), err
+	if err == nil {
+		b, _ := json.Marshal(meta)
+		_, err = d.Put(ctx, folder, "", rs.MetaFile, b)
 	}
-	b, _ := json.Marshal(meta)
-	if _, err := d.Put(ctx, folder, "", rs.MetaFile, b); err != nil {
+	if err == nil && p.trash != "" {
+		if err = d.Trash(ctx, p.trash); err == nil {
+			a.logf("nuvem: a nuvem antiga foi para a lixeira do Drive")
+		}
+	}
+	if err != nil {
+		if folder != p.folder {
+			_ = d.Delete(ctx, folder) // desfaz: a pasta nova está vazia
+		}
 		return a.GetCloud(), err
 	}
 	a.cloudTurnOn(p, folder, code, meta.Salt, keys)
@@ -572,30 +583,56 @@ func (a *App) cloudTurnOn(p *cloudPending, folder, code string, salt []byte, key
 	a.emitCloud()
 }
 
-// CloudReset põe a nuvem que está no Drive na lixeira (o código foi perdido
-// ou ela é do formato antigo) para começar uma nova; os dados deste PC não
-// mudam.
+// CloudReset prepara uma nuvem nova (o código foi perdido ou a do Drive é do
+// formato antigo). A antiga só vai para a lixeira do Drive quando a nova
+// estiver criada (CloudFinishSetup): quem desiste no meio continua com ela
+// (auditoria 2.79.0, N11). Os dados deste PC não mudam.
 func (a *App) CloudReset() (CloudInfo, error) {
 	p, err := a.cloudPending()
 	if err != nil {
 		return a.GetCloud(), err
 	}
-	if p.folder != "" {
-		ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
-		defer cancel()
-		d := a.cloudDriveWith(func(context.Context) (string, error) { return p.tok.Access, nil })
-		if err := d.Trash(ctx, p.folder); err != nil {
-			return a.GetCloud(), err
-		}
-		a.logf("nuvem: a nuvem antiga foi para a lixeira do Drive para começar uma nova")
-	}
 	a.cloud.mu.Lock()
+	if p.folder != "" {
+		p.trash = p.folder
+	}
 	p.folder, p.meta = "", nil
 	a.cloud.mu.Unlock()
 	return a.GetCloud(), nil
 }
 
 // ---------- código e ajustes ----------
+
+// área de transferência (trocadas nos testes)
+var (
+	cloudClipSet = func(a *App, s string) error {
+		if a.ctx == nil {
+			return errors.New("área de transferência indisponível")
+		}
+		return wruntime.ClipboardSetText(a.ctx, s)
+	}
+	cloudClipGet = func(a *App) (string, error) {
+		if a.ctx == nil {
+			return "", errors.New("área de transferência indisponível")
+		}
+		return wruntime.ClipboardGetText(a.ctx)
+	}
+	cloudClipTTL = time.Minute
+)
+
+// CopyCloudCode põe o código na área de transferência e limpa depois de
+// 1 min, se ele ainda estiver lá (auditoria 2.79.0, U2).
+func (a *App) CopyCloudCode(code string) error {
+	if err := cloudClipSet(a, code); err != nil {
+		return err
+	}
+	time.AfterFunc(cloudClipTTL, func() {
+		if t, err := cloudClipGet(a); err == nil && strings.TrimSpace(t) == code {
+			_ = cloudClipSet(a, "")
+		}
+	})
+	return nil
+}
 
 // NewCloudCode sorteia um código de recuperação (com os traços).
 func (a *App) NewCloudCode() (string, error) {

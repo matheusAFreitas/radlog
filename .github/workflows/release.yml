@@ -70,6 +70,17 @@ jobs:
           go mod tidy -diff
       - name: Testes
         run: go test -tags webkit2_41 ./...
+      - name: Chave do app no Google (nuvem)
+        # sem os segredos a versão sairia com a nuvem desligada sem ninguém
+        # notar (auditoria 2.79.0, S2): falha antes de compilar
+        env:
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+        run: |
+          if [ -z "$GOOGLE_CLIENT_ID" ] || [ -z "$GOOGLE_CLIENT_SECRET" ]; then
+            echo "::error::faltam os segredos GOOGLE_CLIENT_ID e GOOGLE_CLIENT_SECRET"
+            exit 1
+          fi
       - name: Windows (.exe)
         # a chave do app no Google (nuvem) entra só no build, pelos segredos
         env:
