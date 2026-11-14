@@ -5,6 +5,7 @@ package app
 import (
 	"bufio"
 	"bytes"
+	"errors"
 	"fmt"
 	"os"
 	"os/exec"
@@ -24,6 +25,9 @@ type fakeVault struct {
 	n     int
 	items map[dbus.ObjectPath]*fakeItem
 	lock  bool // itens novos nascem trancados
+	// Unlock espera hold (o pedido de senha aberto) e recusa com refuse
+	hold   chan struct{}
+	refuse bool
 }
 
 type fakeItem struct {
@@ -71,7 +75,16 @@ func (s fakeSvc) SearchItems(attrs map[string]string) ([]dbus.ObjectPath, []dbus
 
 func (s fakeSvc) Unlock(objs []dbus.ObjectPath) ([]dbus.ObjectPath, dbus.ObjectPath, *dbus.Error) {
 	s.v.mu.Lock()
+	hold := s.v.hold
+	s.v.mu.Unlock()
+	if hold != nil {
+		<-hold
+	}
+	s.v.mu.Lock()
 	defer s.v.mu.Unlock()
+	if s.v.refuse {
+		return nil, "/", dbus.MakeFailedError(fmt.Errorf("pedido recusado"))
+	}
 	for _, p := range objs {
 		if it := s.v.items[p]; it != nil {
 			it.locked = false
@@ -159,9 +172,10 @@ func startVault(t *testing.T) *fakeVault {
 	if r, err := conn.RequestName(ssName, dbus.NameFlagDoNotQueue); err != nil || r != dbus.RequestNameReplyPrimaryOwner {
 		t.Fatal("nome do cofre", r, err)
 	}
-	old := keyringBus
+	old, oldP := keyringBus, keyringPossible
 	keyringBus = func() (*dbus.Conn, error) { return dbus.Connect(addr) }
-	t.Cleanup(func() { keyringBus = old })
+	keyringPossible = func() bool { return true }
+	t.Cleanup(func() { keyringBus, keyringPossible = old, oldP })
 	return v
 }
 
@@ -178,6 +192,14 @@ func TestKeyringProtect(t *testing.T) {
 	t.Cleanup(clearKeyCache)
 	dir := t.TempDir()
 	plain := []byte(`{"code":"K7QF3XWM9ABCDEFGHJKMNPQR","refresh":"rt-1"}`)
+	// sem a chave no cache: fica em claro e não abre cifrado (não fala com o
+	// cofre aqui, que pode estar com a trava da nuvem presa)
+	if got, _ := protect(dir, plain); !bytes.Equal(got, plain) {
+		t.Fatal("cifrou sem a chave no cache")
+	}
+	if err := warmProtect(dir, true); err != nil {
+		t.Fatal(err)
+	}
 	enc, err := protect(dir, plain)
 	if err != nil {
 		t.Fatal(err)
@@ -186,13 +208,19 @@ func TestKeyringProtect(t *testing.T) {
 		t.Fatalf("não cifrou: %q", enc)
 	}
 	clearKeyCache()
+	if _, err := unprotect(dir, enc); !errors.Is(err, errVaultWait) {
+		t.Fatalf("sem cache: %v", err)
+	}
+	if err := warmProtect(dir, false); err != nil {
+		t.Fatal(err)
+	}
 	got, err := unprotect(dir, enc)
 	if err != nil || !bytes.Equal(got, plain) {
 		t.Fatalf("abrir: %q %v", got, err)
 	}
 	// a chave reaproveita o item do cofre (não cria outro)
 	clearKeyCache()
-	if _, err := protect(dir, plain); err != nil {
+	if err := warmProtect(dir, true); err != nil {
 		t.Fatal(err)
 	}
 	v.mu.Lock()
@@ -208,6 +236,9 @@ func TestKeyringProtect(t *testing.T) {
 	}
 	v.mu.Unlock()
 	clearKeyCache()
+	if err := warmProtect(dir, false); err != nil {
+		t.Fatal(err)
+	}
 	if got, err := unprotect(dir, enc); err != nil || !bytes.Equal(got, plain) {
 		t.Fatalf("trancado: %v", err)
 	}
@@ -217,14 +248,13 @@ func TestKeyringProtect(t *testing.T) {
 	}
 	// outra pasta não usa a mesma chave
 	clearKeyCache()
-	if _, err := unprotect(t.TempDir(), enc); err == nil {
-		t.Fatal("abriu com a chave de outra pasta")
+	if err := warmProtect(t.TempDir(), false); !errors.Is(err, errVaultMissing) {
+		t.Fatalf("outra pasta: %v", err)
 	}
 	// desconectar tira a chave do cofre
 	forgetProtect(dir)
-	clearKeyCache()
-	if _, err := unprotect(dir, enc); err == nil {
-		t.Fatal("abriu depois de esquecer")
+	if err := warmProtect(dir, false); !errors.Is(err, errVaultMissing) {
+		t.Fatalf("depois de esquecer: %v", err)
 	}
 	v.mu.Lock()
 	n = len(v.items)
@@ -236,13 +266,123 @@ func TestKeyringProtect(t *testing.T) {
 
 // N10: sem cofre, o arquivo fica como antes (em claro, 0600).
 func TestKeyringMissing(t *testing.T) {
-	old := keyringBus
+	old, oldP := keyringBus, keyringPossible
 	keyringBus = func() (*dbus.Conn, error) { return nil, errNoKeyring }
-	t.Cleanup(func() { keyringBus = old })
+	keyringPossible = func() bool { return true }
+	t.Cleanup(func() { keyringBus, keyringPossible = old, oldP })
 	clearKeyCache()
 	b := []byte("x")
-	got, err := protect(t.TempDir(), b)
+	dir := t.TempDir()
+	if err := warmProtect(dir, true); !errors.Is(err, errVaultMissing) {
+		t.Fatal(err)
+	}
+	got, err := protect(dir, b)
 	if err != nil || !bytes.Equal(got, b) {
 		t.Fatalf("%q %v", got, err)
 	}
+}
+
+// reopenApp é o app aberto de novo na mesma pasta (a nuvem relê os arquivos).
+func reopenApp(a *App) *App {
+	b := NewApp()
+	b.dataDir, b.store, b.cal, b.settings = a.dataDir, a.store, a.cal, a.settings
+	return b
+}
+
+func waitCloud(t *testing.T, a *App, ok func(CloudInfo) bool) CloudInfo {
+	t.Helper()
+	var st CloudInfo
+	for end := time.Now().Add(5 * time.Second); time.Now().Before(end); time.Sleep(10 * time.Millisecond) {
+		if st = a.GetCloud(); ok(st) {
+			return st
+		}
+	}
+	t.Fatalf("estado da nuvem: %+v", st)
+	return st
+}
+
+// QA da 2.80.7: com o cofre esperando a senha, a tela da nuvem não trava;
+// recusar o pedido não pede o código de novo, e "Tentar de novo" abre.
+func TestCloudVaultLockedNoBlock(t *testing.T) {
+	v := startVault(t)
+	clearKeyCache()
+	t.Cleanup(clearKeyCache)
+	fakeCloud(t)
+	a, _ := testApp(t)
+	t.Cleanup(a.cloud.vaultWG.Wait)
+	cloudPair(t, a, nil)
+	// a chave passa para o cofre em segundo plano
+	for end := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		b, _ := os.ReadFile(a.cloudKeyPath())
+		if bytes.HasPrefix(b, []byte(keyMagic)) {
+			break
+		}
+		if time.Now().After(end) {
+			t.Fatal("a chave não foi para o cofre")
+		}
+	}
+	// abre o app de novo com o cofre trancado e o pedido de senha aberto
+	v.mu.Lock()
+	for _, it := range v.items {
+		it.locked = true
+	}
+	v.hold, v.refuse = make(chan struct{}), true
+	v.mu.Unlock()
+	clearKeyCache()
+	b := reopenApp(a)
+	t.Cleanup(b.cloud.vaultWG.Wait)
+	done := make(chan CloudInfo, 1)
+	go func() { done <- b.GetCloud() }()
+	var st CloudInfo
+	select {
+	case st = <-done:
+	case <-time.After(2 * time.Second):
+		t.Fatal("GetCloud travou esperando o cofre")
+	}
+	if st.State != "vault" || !st.VaultWait {
+		t.Fatalf("esperando o cofre: %+v", st)
+	}
+	close(v.hold) // a pessoa fecha o pedido
+	st = waitCloud(t, b, func(s CloudInfo) bool { return !s.VaultWait })
+	if st.State != "vault" {
+		t.Fatalf("recusado virou %q (não pode pedir o código)", st.State)
+	}
+	v.mu.Lock()
+	v.hold, v.refuse = nil, false
+	v.mu.Unlock()
+	b.CloudVaultRetry()
+	waitCloud(t, b, func(s CloudInfo) bool { return s.State == "ok" })
+	b.cloud.mu.Lock()
+	keys := b.cloud.keys != nil
+	b.cloud.mu.Unlock()
+	if !keys {
+		t.Fatal("abriu sem as chaves")
+	}
+}
+
+// Sem a chave no cofre (cofre apagado), aí sim pede para entrar de novo.
+func TestCloudVaultMissingNeedsLogin(t *testing.T) {
+	v := startVault(t)
+	clearKeyCache()
+	t.Cleanup(clearKeyCache)
+	fakeCloud(t)
+	a, _ := testApp(t)
+	t.Cleanup(a.cloud.vaultWG.Wait)
+	cloudPair(t, a, nil)
+	for end := time.Now().Add(5 * time.Second); ; time.Sleep(10 * time.Millisecond) {
+		b, _ := os.ReadFile(a.cloudKeyPath())
+		if bytes.HasPrefix(b, []byte(keyMagic)) {
+			break
+		}
+		if time.Now().After(end) {
+			t.Fatal("a chave não foi para o cofre")
+		}
+	}
+	v.mu.Lock()
+	v.items = map[dbus.ObjectPath]*fakeItem{}
+	v.mu.Unlock()
+	clearKeyCache()
+	b := reopenApp(a)
+	t.Cleanup(b.cloud.vaultWG.Wait)
+	waitCloud(t, b, func(s CloudInfo) bool { return s.State == "login" })
 }

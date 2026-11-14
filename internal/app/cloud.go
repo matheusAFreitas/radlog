@@ -74,7 +74,7 @@ type CloudDevice struct {
 
 // CloudInfo é o estado do cartão "Nuvem (Google Drive)".
 type CloudInfo struct {
-	// off, wait, ok, send, offline, login, clock, err, dup, old
+	// off, wait, ok, send, offline, login, clock, err, dup, old, vault
 	State    string        `json:"state"`
 	Ready    bool          `json:"ready"` // esta cópia tem a chave do Google
 	Email    string        `json:"email,omitempty"`
@@ -94,6 +94,9 @@ type CloudInfo struct {
 	Removed   int64 `json:"removed,omitempty"`
 	Restart   bool  `json:"restart,omitempty"`
 	Restarted int64 `json:"restarted,omitempty"`
+	// state "vault": o cofre do sistema (Linux) ainda não deu a chave;
+	// VaultWait = pedido aberto, esperando a senha
+	VaultWait bool `json:"vaultWait,omitempty"`
 }
 
 // CloudLoginDone é o fim do login: next diz qual diálogo abre.
@@ -202,6 +205,13 @@ type cloudState struct {
 	// gen muda ao ligar e ao desconectar: uma sincronização que termina
 	// depois disso não grava mais nada (auditoria 2.79.0, N8)
 	gen int
+	// cofre do sistema (Linux): "wait" abrindo, "locked" recusado ou sem
+	// resposta; vaultRaw é o arquivo da chave ainda cifrado; vaultBusy, um
+	// pedido em andamento (fora da trava)
+	vault     string
+	vaultRaw  []byte
+	vaultBusy bool
+	vaultWG   sync.WaitGroup // os testes esperam o pedido terminar
 }
 
 func (a *App) cloudPath() string    { return filepath.Join(a.dataDir, "nuvem.json") }
@@ -237,25 +247,20 @@ func (a *App) cloudLoadLocked() {
 	}
 	c.loaded = true
 	a.readStateJSON(a.cloudPath(), "nuvem", &c.f)
-	if b, err := os.ReadFile(a.cloudKeyPath()); err == nil {
+	b, err := os.ReadFile(a.cloudKeyPath())
+	if err == nil {
 		if p, err := unprotect(a.dataDir, b); err == nil {
 			_ = json.Unmarshal(p, &c.sec)
+		} else if errors.Is(err, errVaultWait) {
+			// a chave está no cofre: pede fora da trava (QA da 2.80.7)
+			c.vault, c.vaultRaw = "wait", b
+			a.cloudVaultOpenLocked()
 		} else {
 			a.logf("nuvem: não consegui abrir a chave guardada (%v)", err)
 		}
 	}
 	if c.f.On {
-		if k, err := rs.DeriveKeys(c.sec.Code, c.f.Salt); err == nil && c.sec.Code != "" {
-			c.keys = k
-			if h := hostName(); c.sec.Writer == "" || c.sec.Host != h {
-				c.sec.Writer, c.sec.Host = randHex(8), h // outro PC com a mesma chave
-				a.cloudSaveSecretLocked()
-			}
-		} else {
-			// chave ilegível (pasta copiada de outro PC, Windows reinstalado):
-			// entrar de novo e digitar o código (N3)
-			c.f.NeedLogin = true
-		}
+		a.cloudKeysLocked()
 		if c.f.Rev < cloudRev {
 			seen := map[string]string{}
 			if m, ok := c.f.Seen[rs.MetaFile]; ok {
@@ -264,7 +269,102 @@ func (a *App) cloudLoadLocked() {
 			c.f.Seen, c.f.Rev = seen, cloudRev
 			a.cloudSaveLocked()
 		}
+		// arquivo em claro de antes da 2.80.7 (ou de quando o cofre não
+		// abriu): passa para o cofre na próxima gravação
+		if err == nil && c.vault == "" && c.sec.Code != "" && !vaultCached(a.dataDir) {
+			a.cloudVaultOpenLocked()
+		}
 	}
+}
+
+// cloudKeysLocked monta as chaves a partir do código guardado.
+func (a *App) cloudKeysLocked() {
+	c := &a.cloud
+	if c.vault != "" {
+		return // esperando o cofre: nem chave nem "entrar de novo" ainda
+	}
+	if k, err := rs.DeriveKeys(c.sec.Code, c.f.Salt); err == nil && c.sec.Code != "" {
+		c.keys = k
+		if h := hostName(); c.sec.Writer == "" || c.sec.Host != h {
+			c.sec.Writer, c.sec.Host = randHex(8), h // outro PC com a mesma chave
+			a.cloudSaveSecretLocked()
+		}
+	} else {
+		// chave ilegível (pasta copiada de outro PC, Windows reinstalado):
+		// entrar de novo e digitar o código (N3)
+		c.f.NeedLogin = true
+	}
+}
+
+// cloudVaultOpenLocked pede a chave ao cofre do sistema sem segurar a
+// trava: o cofre pode mostrar o pedido de senha e esperar a pessoa. Com
+// c.vaultRaw abre a chave guardada; sem, cria a chave do cofre e grava o
+// arquivo de novo, agora cifrado.
+func (a *App) cloudVaultOpenLocked() {
+	c := &a.cloud
+	if c.vaultBusy || a.dataDir == "" {
+		return
+	}
+	c.vaultBusy = true
+	raw, dir := c.vaultRaw, a.dataDir
+	c.vaultWG.Add(1)
+	a.goSafe("nuvem: cofre", func() {
+		defer c.vaultWG.Done()
+		err := warmProtect(dir, raw == nil)
+		c.mu.Lock()
+		c.vaultBusy = false
+		kick := false
+		switch {
+		case c.vault == "" && raw != nil:
+			// desconectou ou entrou de novo enquanto esperava
+		case raw == nil:
+			if err == nil && c.f.On && c.vault == "" {
+				a.cloudSaveSecretLocked()
+			}
+		case err == nil:
+			c.vault, c.vaultRaw = "", nil
+			if p, err := unprotect(dir, raw); err == nil {
+				_ = json.Unmarshal(p, &c.sec)
+			} else {
+				a.logf("nuvem: não consegui abrir a chave guardada (%v)", err)
+			}
+			if c.f.On {
+				a.cloudKeysLocked()
+				kick = c.keys != nil
+			}
+		case errors.Is(err, errVaultMissing):
+			// a chave não está no cofre (outro PC, cofre apagado): só o
+			// código da nuvem resolve
+			a.logf("nuvem: a chave guardada não está no cofre do sistema")
+			c.vault, c.vaultRaw = "", nil
+			if c.f.On {
+				a.cloudKeysLocked()
+			}
+		default:
+			a.logf("nuvem: o cofre do sistema não abriu (%v)", err)
+			c.vault = "locked"
+		}
+		c.mu.Unlock()
+		a.emitCloud()
+		if kick {
+			a.cloudKick()
+		}
+	})
+}
+
+// CloudVaultRetry pede a chave ao cofre de novo (o pedido de senha foi
+// fechado ou passou do tempo).
+func (a *App) CloudVaultRetry() CloudInfo {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	if c.vault == "locked" {
+		c.vault = "wait"
+		a.cloudVaultOpenLocked()
+	}
+	c.mu.Unlock()
+	a.emitCloud()
+	return a.GetCloud()
 }
 
 func (a *App) cloudSaveLocked() {
@@ -280,6 +380,8 @@ func (a *App) cloudSaveLocked() {
 
 func (a *App) cloudSaveSecretLocked() {
 	c := &a.cloud
+	// o que se grava agora vale mais que a chave antiga ainda no cofre
+	c.vault, c.vaultRaw = "", nil
 	b, _ := json.Marshal(c.sec)
 	p, err := protect(a.dataDir, b)
 	if err == nil {
@@ -287,6 +389,9 @@ func (a *App) cloudSaveSecretLocked() {
 	}
 	if err != nil {
 		a.logf("nuvem: não consegui gravar a chave (%v)", err)
+	}
+	if !vaultCached(a.dataDir) {
+		a.cloudVaultOpenLocked() // gravou em claro: cifra quando o cofre der a chave
 	}
 }
 
@@ -300,6 +405,9 @@ func (a *App) cloudInfoLocked() CloudInfo {
 	case !f.On:
 		info = CloudInfo{State: "off", Ready: info.Ready, Auto: true}
 		return info
+	case c.vault != "":
+		info.State = "vault"
+		info.VaultWait = c.vault == "wait"
 	case f.NeedLogin:
 		info.State = "login"
 	case f.Old:
@@ -492,6 +600,13 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 
 // errCloudOtherAccount: no "entrar de novo", a conta Google é outra (N12).
 // O e-mail não entra na mensagem (ela pode ir para o registro).
+// cofre do sistema (Linux): a chave ainda não veio para o cache, ou não está
+// lá
+var (
+	errVaultWait    = errors.New("esperando o cofre do sistema")
+	errVaultMissing = errors.New("a chave não está no cofre do sistema")
+)
+
 var errCloudOtherAccount = errors.New("essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nuvem, ou desconecte para usar outra")
 
 // errCloudRace: dois aparelhos criaram a nuvem ao mesmo tempo (N17).
@@ -892,10 +1007,11 @@ func (a *App) CloudDisconnect() CloudInfo {
 	}
 	_ = os.Remove(a.cloudKeyPath())
 	_ = os.Remove(a.cloudPath())
-	forgetProtect(a.dataDir)
 	c.f, c.sec, c.keys, c.access, c.pend, c.err, c.offline, c.skew = cloudFile{}, cloudSecret{}, nil, "", nil, "", false, 0
+	c.vault, c.vaultRaw = "", nil
 	c.gen++
 	c.mu.Unlock()
+	forgetProtect(a.dataDir) // conversa com o cofre: fora da trava
 	if revoke != "" {
 		// em segundo plano: sem internet, o acesso só deixa de ser usado
 		o := cloudOAuth()

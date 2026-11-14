@@ -36,3 +36,8 @@ func dpapi(b []byte, enc bool) ([]byte, error) {
 	defer windows.LocalFree(windows.Handle(unsafe.Pointer(out.Data)))
 	return append([]byte(nil), unsafe.Slice(out.Data, out.Size)...), nil
 }
+
+// a chave não vem de um cofre que pede senha: nada a esperar
+func vaultCached(string) bool { return true }
+
+func warmProtect(string, bool) error { return nil }

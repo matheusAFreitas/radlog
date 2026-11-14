@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.80.7";
+const DEMO_VERSION = "2.80.8";
 
 function makeDemoApi() {
   let demoCloud = { state: "off", ready: true, auto: true };
@@ -604,6 +604,7 @@ const demoRc = () => {
     CloudRestart: async () => (demoCloud = { ...demoCloud, state: "ok", restarted: Date.now() }),
     CloudRejoin: async () => (demoCloud = { ...demoCloud, state: "ok", removed: 0 }),
     CloudDupAnswer: async () => (demoCloud = { ...demoCloud, state: "ok" }),
+    CloudVaultRetry: async () => (demoCloud = { ...demoCloud, state: "ok" }),
     GetRadiacode: async () => demoRc(),
     SetRadiacode: async (on, ble) => {
       const nb = (ble || "").toUpperCase(), changed = nb && nb !== demoRcCfg.ble;

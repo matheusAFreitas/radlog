@@ -43,18 +43,27 @@ var errNoKeyring = errors.New("cofre do sistema indisponível")
 var (
 	// keyringBus abre a conexão com a sessão (trocada nos testes)
 	keyringBus = func() (*dbus.Conn, error) {
-		// sem sessão de D-Bus não tenta abrir uma (dbus-launch)
+		if !keyringPossible() {
+			return nil, errNoKeyring
+		}
+		// sem DBUS_SESSION_BUS_ADDRESS, o barramento padrão da sessão
 		if os.Getenv("DBUS_SESSION_BUS_ADDRESS") == "" {
-			p := filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "bus")
-			if os.Getenv("XDG_RUNTIME_DIR") == "" {
-				return nil, errNoKeyring
-			}
-			if _, err := os.Stat(p); err != nil {
-				return nil, errNoKeyring
-			}
-			return dbus.Connect("unix:path=" + p)
+			return dbus.Connect("unix:path=" + filepath.Join(os.Getenv("XDG_RUNTIME_DIR"), "bus"))
 		}
 		return dbus.ConnectSessionBus()
+	}
+	// keyringPossible diz, sem conversar com ninguém, se há sessão de D-Bus
+	// (sem ela não tenta abrir uma com dbus-launch, nem pedir ao cofre)
+	keyringPossible = func() bool {
+		if os.Getenv("DBUS_SESSION_BUS_ADDRESS") != "" {
+			return true
+		}
+		rt := os.Getenv("XDG_RUNTIME_DIR")
+		if rt == "" {
+			return false
+		}
+		_, err := os.Stat(filepath.Join(rt, "bus"))
+		return err == nil
 	}
 	// keyringTimeout limita cada conversa com o cofre (o desbloqueio pode
 	// pedir a senha da sessão)
@@ -202,18 +211,51 @@ func ssPromptWait(ctx context.Context, conn *dbus.Conn, p dbus.ObjectPath) (dbus
 	}
 }
 
-// protect cifra com a chave do cofre. Sem cofre, devolve b como veio (o
-// arquivo é 0600, como antes da 2.80.7).
-func protect(dir string, b []byte) ([]byte, error) {
-	key, err := keyringKey(dir, true)
-	if err != nil {
-		return b, nil
+// A conversa com o cofre pode esperar a pessoa digitar a senha (até
+// keyringTimeout), então nunca acontece com a trava da nuvem presa (QA da
+// 2.80.7): warmProtect busca a chave fora da trava e guarda no cache;
+// protect e unprotect só usam o cache.
+
+// vaultCached diz se a chave desta pasta já está no cache (nada a pedir ao
+// cofre).
+// Sem sessão de D-Bus não há cofre a esperar.
+func vaultCached(dir string) bool {
+	_, ok := keyringCache.Load(dir)
+	return ok || !keyringPossible()
+}
+
+// warmProtect busca (ou, com create, cria) a chave desta pasta no cofre e
+// deixa no cache. Sem a chave no cofre (ou sem cofre) devolve
+// errVaultMissing.
+func warmProtect(dir string, create bool) error {
+	_, err := keyringKey(dir, create)
+	if errors.Is(err, errNoKeyring) {
+		return errVaultMissing
 	}
-	blk, err := aes.NewCipher(key)
+	return err
+}
+
+func keyGCM(dir string) (cipher.AEAD, bool, error) {
+	k, ok := keyringCache.Load(dir)
+	if !ok {
+		return nil, false, nil
+	}
+	blk, err := aes.NewCipher(k.([]byte))
 	if err != nil {
-		return nil, err
+		return nil, true, err
 	}
 	g, err := cipher.NewGCM(blk)
+	return g, true, err
+}
+
+// protect cifra com a chave do cofre. Sem a chave no cache (sem cofre, ou
+// ainda não aberto), devolve b como veio: o arquivo é 0600, como antes da
+// 2.80.7, e quem chama pede a chave ao cofre (warmProtect) e grava de novo.
+func protect(dir string, b []byte) ([]byte, error) {
+	g, ok, err := keyGCM(dir)
+	if !ok {
+		return b, nil
+	}
 	if err != nil {
 		return nil, err
 	}
@@ -226,20 +268,16 @@ func protect(dir string, b []byte) ([]byte, error) {
 }
 
 // unprotect desfaz o protect. Arquivo em claro (de antes, ou sem cofre) vem
-// como está; cifrado sem a chave no cofre dá erro (a nuvem pede o código).
+// como está; cifrado com a chave ainda fora do cache dá errVaultWait (quem
+// chama abre o cofre com warmProtect, fora da trava, e tenta de novo).
 func unprotect(dir string, b []byte) ([]byte, error) {
 	if !bytes.HasPrefix(b, []byte(keyMagic)) {
 		return b, nil
 	}
-	key, err := keyringKey(dir, false)
-	if err != nil {
-		return nil, err
+	g, ok, err := keyGCM(dir)
+	if !ok {
+		return nil, errVaultWait
 	}
-	blk, err := aes.NewCipher(key)
-	if err != nil {
-		return nil, err
-	}
-	g, err := cipher.NewGCM(blk)
 	if err != nil {
 		return nil, err
 	}
