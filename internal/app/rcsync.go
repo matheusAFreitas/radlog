@@ -3,11 +3,13 @@ package app
 import (
 	"archive/zip"
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"hash/fnv"
 	"os"
 	"path/filepath"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -297,14 +299,28 @@ func (a *App) attachAddToDelta(zw *zip.Writer, keys []string) error {
 	}
 	a.mu.Lock()
 	var rels []string
+	starts := map[string]int64{} // número da medição aqui → início (s)
 	for _, m := range a.measurements {
 		for _, at := range m.Attachments {
 			if want[fmt.Sprintf("%d/%s", m.Time/1000, at.File)] {
 				rels = append(rels, fmt.Sprintf("%s/%d/%s", attachDirName, m.ID, at.File))
+				starts[strconv.FormatInt(m.ID, 10)] = m.Time / 1000
 			}
 		}
 	}
 	a.mu.Unlock()
+	// o início de cada medição vai junto: o pacote da nuvem não leva o
+	// medicoes.json (auditoria 2.79.0, N1)
+	if len(starts) > 0 {
+		b, _ := json.Marshal(starts)
+		w, err := zw.Create(attachStartsFile)
+		if err != nil {
+			return err
+		}
+		if _, err := w.Write(b); err != nil {
+			return err
+		}
+	}
 	for _, rel := range rels {
 		b, err := os.ReadFile(filepath.Join(a.dataDir, filepath.FromSlash(rel)))
 		if err != nil {

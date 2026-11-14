@@ -1,5 +1,34 @@
 # Versões
 
+## 2.79.1
+- Nuvem: as fotos e outros anexos das medições agora chegam no outro
+  aparelho (antes chegava só a medição). Quem já tinha a nuvem ligada baixa
+  e junta de novo uma vez, sozinho.
+- Nuvem: um pacote de outro aparelho que não entra não trava mais a
+  sincronização; o resto segue e ele é tentado de novo.
+- Nuvem: se a chave guardada no PC ficar ilegível (pasta copiada, Windows
+  reinstalado), o app pede para entrar e digitar o código de recuperação, e
+  o PC continua o mesmo aparelho na lista.
+- Nuvem: erro que se repete (Drive cheio, por exemplo) aparece em amarelo na
+  hora, com uma explicação em português, em vez de "em dia".
+- Desconectar no instante em que um envio termina não trava mais a tela da
+  nuvem.
+
+**English**
+
+- Cloud: photos and other measurement attachments now reach the other
+  device (before only the measurement did). If the cloud was already on, it
+  downloads and merges again once, on its own.
+- Cloud: a package from another device that does not go in no longer stops
+  syncing; the rest goes on and it is tried again.
+- Cloud: if the key saved on the PC becomes unreadable (copied folder,
+  reinstalled Windows), the app asks you to sign in and type the recovery
+  code, and the PC stays the same device in the list.
+- Cloud: an error that keeps happening (a full Drive, for example) shows in
+  yellow right away, with an explanation, instead of "up to date".
+- Disconnecting right when an upload finishes no longer freezes the cloud
+  screen.
+
 ## 2.79.0
 - Nuvem no Google Drive (experimental, desligada até você ligar):
   Configurações › Dados e backup › Nuvem. Entra com o Google, guarda um

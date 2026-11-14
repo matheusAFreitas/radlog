@@ -33,8 +33,10 @@ type MeasureAttachment struct {
 
 const (
 	attachDirName = "medicoes-anexos"
-	attachMaxSize = 25 << 20 // 25 MB por arquivo
-	attachMaxView = 12 << 20 // miniatura/visualização no app
+	// início (s) de cada medição dos anexos de um pacote (rcsync.go)
+	attachStartsFile = "medicoes-anexos-inicio.json"
+	attachMaxSize    = 25 << 20 // 25 MB por arquivo
+	attachMaxView    = 12 << 20 // miniatura/visualização no app
 )
 
 func (a *App) attachDir(id int64) string {
