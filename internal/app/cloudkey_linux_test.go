@@ -18,6 +18,10 @@ import (
 	"github.com/godbus/dbus/v5"
 )
 
+// Os testes nunca falam com o cofre de verdade da máquina (no CI há sessão
+// de D-Bus): só o startVault liga o cofre, com o de mentira.
+func init() { keyringPossible = func() bool { return false } }
+
 // cofre de mentira (Secret Service) num D-Bus só do teste
 type fakeVault struct {
 	mu    sync.Mutex
