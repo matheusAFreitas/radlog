@@ -322,10 +322,12 @@
           <button type="button" class="btn small" id="btnZoomOut">Sair do zoom</button>
         </span>
       </div>
-      <div class="chart-body">
+      <div class="chart-body" id="chartBody">
         <div class="y-axis mono" id="yAxis"><span>60</span><span>40</span><span>20</span><span>0</span></div>
         <div class="plot-wrap">
+          <div class="meas-pins" id="measPins" hidden></div>
           <div class="plot" id="plot">
+            <div class="plot-lbls mono" id="plotLbls" hidden><span class="gmc">GMC-800 · CPM</span><span class="rc">RC102 · CPM</span></div>
             <svg id="chart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho."></svg>
             <div class="peak-dots" id="peakDots"></div>
             <div class="thr-marks" id="thrMarks" aria-hidden="true"></div>
@@ -339,8 +341,9 @@
         <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RC102"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RC102</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição (o número está na lista)</span><span class="gap-key" id="gapKey" hidden><i aria-hidden="true"></i>sem leitura</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RC102</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
+      <ol class="meas-list small muted" id="measList" hidden></ol>
     </section>
 
   <section class="card chart-card" id="doseCard" role="tabpanel" data-subpane="tempo">
@@ -867,11 +870,12 @@
       <div id="mNewPane">
       <ol class="m-steps" id="mSteps" aria-label="Etapas da medição">
         <li data-step="prep"><span class="m-step-n" aria-hidden="true">1</span>Preparar</li>
-        <li data-step="busca"><span class="m-step-n" aria-hidden="true">2</span>Procurar</li>
-        <li data-step="fundo"><span class="m-step-n" aria-hidden="true">3</span>Fundo</li>
+        <li data-step="fundo"><span class="m-step-n" aria-hidden="true">2</span>Fundo</li>
+        <li data-step="busca"><span class="m-step-n" aria-hidden="true">3</span>Procurar</li>
         <li data-step="objeto"><span class="m-step-n" aria-hidden="true">4</span>Objeto</li>
         <li data-step="result"><span class="m-step-n" aria-hidden="true">5</span>Resultado</li>
       </ol>
+      <p class="m-quiet small" id="mQuiet" hidden></p>
 
       <!-- 1. preparar -->
       <div class="m-pane" id="mPanePrep">
@@ -919,16 +923,8 @@
           <span class="small muted" id="mSizeHint">O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.</span>
         </div>
         <details class="m-adj" id="mAdj">
-          <summary>Ajustes da medição: fundo, tempo e quando conta como “tem algo”</summary>
+          <summary>Ajustes da medição: tempo e quando conta como “tem algo”</summary>
           <div class="m-adj-grid">
-            <div class="m-field">
-              <span class="m-label" id="mBgLabel">Fundo</span>
-              <div class="seg" role="group" aria-labelledby="mBgLabel" id="mBgSeg">
-                <button type="button" data-bg="medir" aria-pressed="false">medir agora</button>
-                <button type="button" data-bg="casa" aria-pressed="false">fundo da casa (última hora)</button>
-              </div>
-              <span class="small muted" id="mHomeBgLine"></span>
-            </div>
             <div class="m-field">
               <label for="mSecs">Tempo</label>
               <select id="mSecs">
@@ -955,41 +951,47 @@
         <p class="small m-warn" id="mOptHint" hidden></p>
         <div class="m-go">
           <button type="button" class="btn accent" id="btnMStart">Começar</button>
-          <span class="small muted">Primeiro você procura o ponto mais forte. Dá pra pular.</span>
+          <span class="small muted">Deixe o objeto longe por enquanto: primeiro vem o fundo.</span>
         </div>
       </div>
 
       <!-- 2. procurar -->
       <div class="m-pane" id="mPaneBusca" hidden>
-        <h3>Passe o aparelho devagar em volta do objeto</h3>
+        <h3>Agora traga o objeto e passe o aparelho devagar em volta</h3>
         <p class="small muted">A tela mostra só se está subindo ou descendo, rápido, sem média longa. Quando achar o ponto mais forte, pare ali.</p>
         <div class="m-busca">
           <div class="m-busca-main">
-            <div class="m-busca-val"><span class="mono" id="mBuscaVal">—</span><span class="muted">µSv/h</span></div>
+            <div class="m-busca-val"><span class="mono" id="mBuscaVal">—</span><span class="muted">µSv/h</span><span class="mono m-busca-x" id="mBuscaX"></span></div>
             <div class="m-busca-trend" id="mBuscaTrend" aria-live="polite">esperando a leitura</div>
             <div class="m-busca-bar" aria-hidden="true"><div class="m-busca-fill" id="mBuscaFill"></div><i class="m-busca-bg" id="mBuscaBgMk"></i><i class="m-busca-pk" id="mBuscaPkMk"></i></div>
             <div class="m-busca-scale mono small muted"><span id="mBuscaBgTxt">fundo</span><span id="mBuscaPkTxt">pico —</span></div>
           </div>
-          <svg class="m-busca-spark" id="mBuscaSpark" viewBox="0 0 240 80" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg>
+          <svg class="m-busca-spark" id="mBuscaSpark" viewBox="0 0 240 80" preserveAspectRatio="none" aria-hidden="true"><line class="bg" x1="0" x2="240" y1="78" y2="78" hidden/><polyline points=""/></svg>
         </div>
         <p class="small muted" id="mBuscaDev"></p>
         <div class="m-go">
           <button type="button" class="btn accent" id="btnMBuscaOk">Achei o ponto, medir aqui</button>
           <button type="button" class="btn" id="btnMBuscaSkip">Pular</button>
-          <button type="button" class="btn" id="btnMBuscaBack">Voltar</button>
+          <button type="button" class="btn" id="btnMBuscaBack">Recomeçar</button>
+          <span class="small muted">Depois de clicar, não mexa mais no objeto.</span>
         </div>
       </div>
 
       <!-- 3. fundo -->
       <div class="m-pane" id="mPaneFundo" hidden>
-        <h3 id="mFundoTitle">Afaste o objeto pelo menos 2 metros</h3>
-        <p class="small muted" id="mFundoText">O app mede o fundo do lugar para descontar depois.</p>
-        <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
-        <div class="m-bar-scale mono small muted"><span id="mBgElapsed">0 s</span><span id="mBgTotal"></span></div>
-        <div class="m-kv"><span id="mBgValK">fundo até agora</span><span class="mono" id="mBgVal">—</span></div>
-        <div class="m-kv" id="mBgOtherRow" hidden><span id="mBgOtherK"></span><span class="mono" id="mBgOtherV">—</span></div>
+        <h3 id="mFundoTitle">Deixe o objeto longe (pelo menos 2 metros)</h3>
+        <p class="small muted" id="mFundoText">O fundo é o que o aparelho mede sem o objeto. Ele é descontado no resultado.</p>
+        <div class="m-bg-pick" id="mBgPick" role="group" aria-label="Fundo">
+          <button type="button" class="m-dev" id="btnMBgHome"><strong>Usar o fundo da casa</strong><span id="mBgHomeHint">Pronto agora.</span><span class="mono" id="mHomeBgLine"></span></button>
+          <button type="button" class="m-dev" id="btnMBgNow"><strong>Medir o fundo agora</strong><span>Mais certo se você mudou de lugar.</span><span class="mono" id="mBgNowLine">fundo daqui, sem o objeto</span></button>
+        </div>
+        <div id="mBgRun">
+          <div class="bar"><div class="bar-fill" id="mBgFill"></div></div>
+          <div class="m-bar-scale mono small muted"><span id="mBgElapsed">0 s</span><span id="mBgTotal"></span></div>
+          <div class="m-kv"><span id="mBgValK">fundo até agora</span><span class="mono" id="mBgVal">—</span></div>
+          <div class="m-kv" id="mBgOtherRow" hidden><span id="mBgOtherK"></span><span class="mono" id="mBgOtherV">—</span></div>
+        </div>
         <div class="m-go">
-          <button type="button" class="btn accent" id="btnMObjGo" hidden>Medir o objeto</button>
           <button type="button" class="btn" id="btnMUseHome">Já tenho, usar o fundo da casa</button>
           <button type="button" class="btn" id="btnMBgCancel">Cancelar</button>
         </div>

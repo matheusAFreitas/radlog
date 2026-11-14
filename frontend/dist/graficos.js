@@ -63,7 +63,9 @@ async function refreshChart() {
   // picos dos alertas (leitura de segundo): entram na escala e viram ponto
   const kU = c.alarmCPM ? c.alarmUSv / c.alarmCPM : 0;
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
-  for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
+  // (só no µSv/h, onde viram ponto; no CPM o pico de 1 s nem aparece, então
+  // não estica a escala, 2.81)
+  if (usvMode) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
@@ -83,27 +85,39 @@ async function refreshChart() {
   let want = max;
   if (ringing && alarmV) want = Math.max(want, alarmV);
   if (dangerInScale) want = Math.max(want, dangerV);
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
+  // CPM com os dois aparelhos: dois andares, GMC-800 em cima e RC102
+  // embaixo, cada um com a sua escala (2.81; antes eram dois eixos no mesmo
+  // gráfico e a linha do GMC sumia no chão)
+  const stacked = !usvMode && rcMax > 0;
+  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : stacked ? niceTop(Math.max(30, want * 1.05)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
   c.top = top;
   const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
-  const ys = $("yAxis").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
-  // eixo da direita: CPM do Radiacode
-  const rcAxis = !usvMode && rcMax > 0;
-  const rcTop = rcAxis ? Math.max(300, Math.ceil((rcMax * 1.15) / 300) * 300) : top;
-  $("yAxisR").hidden = !rcAxis;
-  if (rcAxis) { const yr = $("yAxisR").children; for (let i = 0; i < 4; i++) yr[i].textContent = fmt(rcTop - (rcTop / 3) * i, 0); }
+  const rcTop = stacked ? niceTop(Math.max(300, rcMax * 1.05)) : top;
+  // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
+  const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
+  const yAx = $("yAxis");
+  yAx.classList.toggle("stacked", stacked);
+  if (stacked) {
+    const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
+    yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
+      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, 0)}</span>`).join("");
+  } else {
+    if (yAx.children.length !== 4) yAx.innerHTML = "<span></span><span></span><span></span><span></span>";
+    for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
+  }
+  $("yAxisR").hidden = true;
+  $("plotLbls").hidden = !stacked;
 
   const n = vals.length;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
-  const y = (v) => H - (v / top) * H;
+  const y = (v) => G1 - (v / top) * (G1 - PAD);
 
   let line = "", area = "", seg = [];
   const flush = () => {
     if (!seg.length) return;
     line += "M" + seg.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L");
     if (seg.length === 1) line += "l0.01 0";
-    area += `M${seg[0][0].toFixed(1)} ${H}L` + seg.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L") + `L${seg[seg.length - 1][0].toFixed(1)} ${H}Z`;
+    area += `M${seg[0][0].toFixed(1)} ${G1}L` + seg.map((p) => p[0].toFixed(1) + " " + p[1].toFixed(1)).join("L") + `L${seg[seg.length - 1][0].toFixed(1)} ${G1}Z`;
     seg = [];
   };
   vals.forEach((v, i) => { if (v == null) flush(); else seg.push([x(i), y(v)]); });
@@ -118,17 +132,32 @@ async function refreshChart() {
       }
       pts = [];
     };
-    const yr = (v) => H - (v / rcTop) * H;
+    const yr = (v) => H - (v / rcTop) * (H - R0 - PAD);
     rcVals.forEach((v, i) => { if (v == null) out(); else pts.push([x(i).toFixed(1), (usvMode ? y(v) : yr(v)).toFixed(1)]); });
     out();
   }
   $("rcKey").hidden = !rcVals;
-  $("rcKeyText").textContent = usvMode ? "RC102" : "RC102 (eixo da direita)";
+  $("rcKeyText").textContent = "RC102";
 
-  const grid = [0, 1, 2, 3].map((i) => {
-    const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
-    return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
-  }).join("");
+  const gl = (gy) => `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  const grid = stacked
+    ? [0.5, G1 / 2, G1 - 0.5, R0 + 0.5, (R0 + H) / 2, H - 0.5].map(gl).join("")
+    : [0, 1, 2, 3].map((i) => gl(i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i)).join("");
+  // buraco curto (até 30 min) no meio da série: hachurado "sem leitura"
+  const gapRects = (arr, y0, y1) => {
+    let out = "", st = -1;
+    (arr || []).forEach((v, i) => {
+      if (v == null && st < 0) st = i;
+      else if (v != null && st >= 0) {
+        if (st > 0 && (i - st) * (c.stepMs || 60000) <= 30 * 60e3) out += `<rect x="${x(st - 1).toFixed(1)}" y="${y0}" width="${Math.max(1, x(i) - x(st - 1)).toFixed(1)}" height="${y1 - y0}" fill="url(#gapHatch)"/>`;
+        st = -1;
+      }
+    });
+    return out;
+  };
+  const gaps = stacked ? gapRects(vals, 0, G1) + gapRects(rcVals, R0, H) : "";
+  $("gapKey").hidden = !gaps;
+  const hatch = gaps ? `<defs><pattern id="gapHatch" width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)"><rect width="3" height="6" fill="${COR.grid}"/></pattern></defs>` : "";
   const hline = (v, color, width) => `<line x1="0" y1="${y(v).toFixed(1)}" x2="${W}" y2="${y(v).toFixed(1)}" stroke="${color}" stroke-width="${width}" stroke-dasharray="8 5" vector-effect="non-scaling-stroke"/>`;
   let thr = usvMode && top >= thrV ? hline(thrV, COR.att, 1) : "";
   const showAlarm = ringing && alarmV && alarmV <= top;
@@ -162,7 +191,7 @@ async function refreshChart() {
   $("rainKey").lastChild.textContent = radarWet.length ? (rainy.length ? "chuva (radar · modelo)" : "chuva (radar)") : "chuva (modelo)";
   const away = awayBands(c.from, tEnd, xt);
   $("awayKey").hidden = !away;
-  const meas = measureBands(c.from, tEnd, xt);
+  const meas = measureMarks(c.from, tEnd, xt);
   $("measKey").hidden = !meas;
   // anotações: linha tracejada roxa e uma marca clicável no topo
   const noteX = (t) => xt(t);
@@ -194,7 +223,12 @@ async function refreshChart() {
   }).join("");
   // com o Radiacode (aparelho principal), ele é a curva cheia e o GMC (casa)
   // vira uma linha de referência
-  $("chart").innerHTML = grid + away + meas + rainBars + thr + noteLines + (rcLine
+  $("chart").innerHTML = hatch + grid + away + gaps + meas + rainBars + thr + noteLines + (stacked
+    ? `<path d="${area}" fill="${COR.accent}" fill-opacity="0.10"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.10"/>` +
+      `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
+    : rcLine
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
       `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
@@ -224,7 +258,7 @@ async function refreshChart() {
     ? "sem dados no período"
     : usvMode
       ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(c.max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} CPM` : "");
+      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {

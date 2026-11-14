@@ -52,6 +52,9 @@ type MeasureOpts struct {
 	Test     string  `json:"test"`
 	Material string  `json:"material"`
 	RelErr   float64 `json:"relErr"`
+	// 2.81: com o fundo da casa, para em "fundo-pronto" (a pessoa ainda vai
+	// procurar o ponto) em vez de já começar pelo objeto
+	WaitObj bool `json:"waitObj"`
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -278,6 +281,9 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		m.Seconds = o.Seconds
 		if o.Auto {
 			m.Seconds = o.MaxSec
+		}
+		if o.WaitObj {
+			m.Phase, m.readyAt = "fundo-pronto", time.Now()
 		}
 	} else {
 		m.Phase = "fundo"

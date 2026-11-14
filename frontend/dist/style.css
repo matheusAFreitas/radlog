@@ -540,7 +540,30 @@ input[type="datetime-local"] { min-height: 44px; padding: 0 var(--space-3); back
 
 /* medições salvas */
 .meas-key { display: inline-flex; align-items: center; gap: var(--space-2); margin-left: var(--space-3); color: var(--obj); }
-.meas-key i { width: 14px; height: 10px; border-radius: var(--radius-xs); background: color-mix(in srgb, var(--obj) 50%, transparent); }
+.meas-key i { width: 2px; height: 12px; border-radius: 0; background: var(--obj); }
+.gap-key { display: inline-flex; align-items: center; gap: var(--space-2); }
+.gap-key i { width: 14px; height: 10px; border-radius: var(--radius-xs); background: repeating-linear-gradient(45deg, var(--chart-grid, #2A3136) 0 3px, transparent 3px 6px); }
+.gap-key[hidden] { display: none; }
+.meas-pins { position: relative; margin-bottom: calc(-1 * var(--space-2) + 2px); }
+.meas-pins[hidden] { display: none; }
+.meas-pin { position: absolute; width: 18px; height: 18px; margin-left: -9px; padding: 0; border-radius: 50%; border: 1px solid var(--obj); background: color-mix(in srgb, var(--obj) 12%, var(--bg)); color: var(--text); font: 500 11px/1 var(--font-mono); display: grid; place-items: center; cursor: pointer; }
+.meas-pin:hover, .meas-pin:focus-visible { background: color-mix(in srgb, var(--obj) 30%, var(--bg)); }
+.chart-body .y-axis { margin-top: var(--pins-h, 0px); }
+.meas-list { margin: 0; padding-left: 22px; columns: 2 260px; column-gap: var(--space-6, 24px); }
+.meas-list[hidden] { display: none; }
+.meas-list li { break-inside: avoid; }
+.meas-list .link { font-family: inherit; font-size: inherit; text-align: left; color: var(--muted); }
+.y-axis.stacked { position: relative; display: block; }
+.y-axis.stacked span { position: absolute; right: 0; transform: translateY(-50%); }
+.y-axis.stacked span:first-child, .y-axis.stacked span:nth-child(4) { transform: none; }
+.y-axis.stacked span:nth-child(3), .y-axis.stacked span:last-child { transform: translateY(-100%); }
+.y-axis.stacked .gmc { color: var(--accent); }
+.y-axis.stacked .rc { color: var(--rc); }
+.plot-lbls { position: absolute; inset: 0; pointer-events: none; font-size: var(--fs-micro); }
+.plot-lbls[hidden] { display: none; }
+.plot-lbls span { position: absolute; left: 8px; }
+.plot-lbls .gmc { top: 4px; color: var(--accent); }
+.plot-lbls .rc { top: calc(50% + 6px); color: var(--rc); }
 .m-saved { color: var(--accent); }
 .m-history summary { cursor: pointer; padding: var(--space-2) 0; }
 .m-history .periods { margin-top: var(--space-2); max-height: 320px; }
@@ -2040,6 +2063,17 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .m-busca-scale, .m-bar-scale { display: flex; justify-content: space-between; gap: var(--space-2); }
 .m-busca-spark { width: 100%; height: 80px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .m-busca-spark polyline { fill: none; stroke: var(--obj); stroke-width: 1.6; vector-effect: non-scaling-stroke; }
+.m-busca-spark line.bg { stroke: var(--dim); stroke-width: 1; stroke-dasharray: 4 4; vector-effect: non-scaling-stroke; }
+.m-busca-spark line[hidden] { display: none; }
+.m-busca-val .m-busca-x { margin-left: var(--space-3); font-size: var(--fs-heading); font-weight: 600; color: var(--obj); }
+.m-busca-trend.wait { font-weight: 500; color: var(--dim); }
+.m-bg-pick { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-3); }
+.m-bg-pick .m-dev[aria-checked="true"] { border-color: var(--accent); }
+.m-bg-pick .m-dev:disabled { opacity: .55; cursor: not-allowed; }
+.m-bg-pick[hidden], #mBgRun[hidden] { display: none; }
+.m-quiet { margin: 0; padding: var(--space-2) var(--space-3); border: 1px solid color-mix(in srgb, var(--att) 40%, transparent); border-radius: var(--radius-md); background: color-mix(in srgb, var(--att) 8%, transparent); color: var(--att); }
+.m-quiet[hidden] { display: none; }
+.m-quiet b { color: var(--text); font-weight: 600; }
 .m-kv { display: flex; justify-content: space-between; align-items: baseline; gap: var(--space-3); padding: var(--space-2) 0; border-bottom: 1px solid var(--border); font-size: var(--fs-label); color: var(--muted); }
 .m-kv .mono { color: var(--text); font-size: var(--fs-body); text-align: right; }
 .m-kv-head { border-bottom: 0; padding-bottom: 0; color: var(--text); font-weight: 600; }

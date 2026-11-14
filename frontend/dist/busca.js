@@ -260,7 +260,7 @@ function qkReport() {
 async function qkMeasure() {
   await showView("medir");
   setMeasureMode("nova");
-  if (!qkMeasuring()) { state.mBusca = false; if (state.measureSt) renderMeasure(state.measureSt); }
+  if (!qkMeasuring()) { state.mBgPick = false; if (state.measureSt) renderMeasure(state.measureSt); }
 }
 
 function qkNote() {

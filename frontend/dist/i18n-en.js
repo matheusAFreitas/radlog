@@ -4216,7 +4216,27 @@ const I18N_EN = {
 "Minuto do GMC-800": "GMC-800 minute",
 "atualização do app": "app update",
 "média das contagens de cada segundo (desde a 2.80.9)": "average of the counts of each second (since 2.80.9)",
-"última leitura do minuto (até a 2.80.8)": "last reading of the minute (up to 2.80.8)"
+"última leitura do minuto (até a 2.80.8)": "last reading of the minute (up to 2.80.8)",
+"(clique para abrir)": "(click to open)",
+"Agora traga o objeto e passe o aparelho devagar em volta": "Now bring the object and move the device slowly around it",
+"Ajustes da medição: tempo e quando conta como “tem algo”": "Measurement settings: time and when it counts as “something there”",
+"Deixe o objeto longe (pelo menos 2 metros)": "Keep the object away (at least 2 meters)",
+"Deixe o objeto longe por enquanto: primeiro vem o fundo.": "Keep the object away for now: the background comes first.",
+"Depois de clicar, não mexa mais no objeto.": "After clicking, don't move the object anymore.",
+"Lendo o fundo da casa…": "Reading the home background…",
+"Mais certo se você mudou de lugar.": "More accurate if you changed places.",
+"Medindo o fundo: deixe o objeto longe": "Measuring the background: keep the object away",
+"Medindo um objeto.": "Measuring an object.",
+"Medir o fundo agora": "Measure the background now",
+"No automático, o fundo é medido por 5 min.": "In automatic mode, the background is measured for 5 min.",
+"O fundo é o que o aparelho mede sem o objeto. Ele é descontado no resultado.": "The background is what the device reads without the object. It is subtracted in the result.",
+"Pronto agora. Só vale se o RC102 passou a última hora parado no lugar onde vai medir.": "Ready now. Only valid if the RC102 spent the last hour still where you'll measure.",
+"Pronto agora. Só vale se o RadiaCode passou a última hora parado no lugar onde vai medir.": "Ready now. Only valid if the RC102 spent the last hour still where you'll measure.",
+"Pronto agora. Vale no lugar de sempre do contador.": "Ready now. Valid at the counter's usual spot.",
+"Usar o fundo da casa": "Use the home background",
+"fundo daqui, sem o objeto": "background here, without the object",
+"medição (o número está na lista)": "measurement (the number is in the list)",
+"· guarda o espectro do fundo": "· keeps the background spectrum"
 },
 "patterns": [
 [
@@ -4770,6 +4790,15 @@ const I18N_EN = {
 [
 " (o inverso do quadrado dá ",
 "): o objeto se comporta como uma fonte pequena, e a distância segura e o Bq ficam mais confiáveis."
+]
+],
+[
+"Lendo o ",
+"^Lendo o ((?:(?! · ).)+?) \\(média dos últimos 5 s\\)\\. A linha tracejada é o fundo\\. Vale também para achar o lado mais forte de um objeto grande\\.$",
+"Reading the ${1} (average of the last 5 s). The dashed line is the background. Also works to find the strongest side of a large object.",
+[
+"Lendo o ",
+" (média dos últimos 5 s). A linha tracejada é o fundo. Vale também para achar o lado mais forte de um objeto grande."
 ]
 ],
 [
@@ -8332,6 +8361,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Os alarmes do ",
+"^Os alarmes do ((?:(?! · ).)+?) ficam em silêncio até o resultado\\.$",
+"The ${1} alarms stay silent until the result.",
+[
+"Os alarmes do ",
+" ficam em silêncio até o resultado."
+]
+],
+[
 "Acima do normal (",
 "^Acima do normal \\(((?:(?! · ).)+?)\\) — dificilmente é só variação$",
 "Above normal (${1}) — hardly just variation",
@@ -11801,6 +11839,16 @@ const I18N_EN = {
 ]
 ],
 [
+"· RadiaCode média ",
+"^· RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"· RC102 average ${1} · max ${2} CPM",
+[
+"· RadiaCode média ",
+" · máx ",
+" CPM"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -11985,6 +12033,14 @@ const I18N_EN = {
 [
 " g · amostra ",
 " · fundo "
+]
+],
+[
+"fundo daqui, sem o objeto · ",
+"^fundo daqui, sem o objeto · ((?:(?! · ).)+?)$",
+"background here, without the object · ${1}",
+[
+"fundo daqui, sem o objeto · "
 ]
 ],
 [
@@ -12747,6 +12803,16 @@ const I18N_EN = {
 [
 " min em casa · ",
 " com dado"
+]
+],
+[
+"· RC102 média ",
+"^· RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"· RC102 average ${1} · max ${2} CPM",
+[
+"· RC102 média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -15721,6 +15787,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Indisponível: ",
+"^Indisponível: ((?:(?! · ).)+?)\\.$",
+"Unavailable: ${1}.",
+[
+"Indisponível: "
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -17194,6 +17268,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) min até ((?:(?! · ).)+?)$",
+"${1} · ${2} min until ${3}",
+[
+" min até "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -18210,6 +18292,14 @@ const I18N_EN = {
 [
 "pico ",
 " às "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)× o fundo$",
+"${1}× the background",
+[
+"× o fundo"
 ]
 ],
 [

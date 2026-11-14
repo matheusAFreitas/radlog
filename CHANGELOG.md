@@ -1,5 +1,63 @@
 # Versões
 
+## 2.81.0
+- Medir objeto: o fundo vem antes de procurar o ponto. A ordem agora é
+  Preparar, Fundo, Procurar, Objeto e Resultado: primeiro o fundo sem o
+  objeto (ou o fundo da casa, escolhido na própria etapa, com o valor à
+  vista), depois você traz o objeto, acha o ponto mais forte e a medição
+  começa ali, sem mexer mais. Antes era preciso afastar o objeto depois de
+  achar o ponto e tentar achar o mesmo ponto de novo.
+- Procurar: mostra quantas vezes o valor está acima do fundo desta
+  medição, com o fundo marcado na linha; só diz "estável" depois de 3 s de
+  leitura e o pico aparece desde a primeira leitura.
+- Alarmes durante a medição: do começo até o resultado (e 1 minuto depois,
+  para tirar o objeto de perto), o aparelho que está no objeto não abre
+  alerta, não toca e não pisca a janela. O valor fica salvo na medição. O
+  aparelho que fica com você continua com alarme normal, e se a medição
+  ficar parada esperando o ponto por 30 min os alarmes voltam sozinhos.
+  Encostado numa pedra, o GQ GMC-800 conta também beta e mostrava "Perigo"
+  com valores 4 a 6 vezes maiores que o Radiacode 102.
+- Gráfico de CPM: com os dois aparelhos, vira dois andares (GMC-800 em
+  cima, RC102 embaixo), cada um com a sua escala, nome e cor, no mesmo
+  horário. A escala do GMC-800 não estica mais por causa de um pico de 1
+  segundo que nem aparece nesse gráfico, e o "máx" mostra o maior ponto do
+  gráfico. Buracos curtos na leitura aparecem hachurados ("sem leitura").
+- Gráficos de µSv/h e de CPM: as medições de objeto viram uma linha fina
+  com um número no topo (a mesma pedra medida em seguida vira um número
+  só), com a lista embaixo do gráfico. Clicar no número ou na lista abre a
+  medição salva. Antes cada medição pintava faixas de fundo e de objeto que
+  se sobrepunham.
+
+**English**
+
+- Measure object: the background now comes before searching for the spot.
+  The order is Prepare, Background, Search, Object and Result: first the
+  background without the object (or the home background, chosen in that
+  step with its value shown), then you bring the object, find the strongest
+  spot and the measurement starts right there, without moving it again.
+  Before, you had to move the object away after finding the spot and try to
+  find the same spot again.
+- Search: shows how many times the reading is above this measurement's
+  background, with the background marked on the line; it only says
+  "steady" after 3 s of reading, and the peak shows from the first reading.
+- Alarms during a measurement: from the start until the result (and 1
+  minute after, to move the object away), the device on the object opens no
+  alert, plays no sound and doesn't flash the window. The value is saved in
+  the measurement. The device that stays with you keeps its normal alarm,
+  and if the measurement waits 30 min for the spot, alarms come back on
+  their own. Touching a stone, the GQ GMC-800 also counts beta and showed
+  "Danger" with values 4 to 6 times higher than the Radiacode 102.
+- CPM chart: with both devices it becomes two stacked charts (GMC-800 on
+  top, RC102 below), each with its own scale, name and color, on the same
+  time axis. The GMC-800 scale no longer stretches because of a 1-second
+  peak that isn't even drawn on this chart, and "max" shows the highest
+  point on the chart. Short gaps in the readings are hatched ("no reading").
+- µSv/h and CPM charts: object measurements become a thin line with a
+  number at the top (the same stone measured in a row becomes one number),
+  with the list below the chart. Clicking the number or the list opens the
+  saved measurement. Before, each measurement painted background and
+  object bands that overlapped.
+
 ## 2.80.11
 - Histórico de configurações: anota a troca do jeito de calcular o minuto do
   GQ GMC-800 (média das contagens de cada segundo desde a 2.80.9), para
