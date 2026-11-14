@@ -29,6 +29,10 @@ type Keys struct {
 // ou arquivo mexido).
 var ErrOpen = errors.New("não abre com este código")
 
+// ErrOldCloud: a nuvem foi criada no formato antigo (2.79.x) e precisa ser
+// começada de novo (sem conversão; ACE, 14/11).
+var ErrOldCloud = errors.New("nuvem do formato antigo")
+
 // metaCheck é o texto que o teste do arquivo de metadados guarda.
 const metaCheck = "radlog-nuvem-v1"
 
@@ -131,12 +135,15 @@ func NewMeta(code string) (Meta, *Keys, error) {
 	if err != nil {
 		return Meta{}, nil, err
 	}
-	return Meta{V: 1, Salt: salt, Check: chk}, k, nil
+	return Meta{V: MetaVersion, Salt: salt, Check: chk}, k, nil
 }
 
 // Unlock confere o código com os metadados e devolve as chaves, ou ErrOpen.
 func (m Meta) Unlock(code string) (*Keys, error) {
-	if m.V != 1 {
+	switch {
+	case m.V < MetaVersion:
+		return nil, ErrOldCloud
+	case m.V > MetaVersion:
 		return nil, errors.New("nuvem de uma versão mais nova do RadLog")
 	}
 	k, err := DeriveKeys(code, m.Salt)

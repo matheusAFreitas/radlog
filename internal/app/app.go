@@ -397,6 +397,11 @@ type App struct {
 	trayGmc  trayDev   // última leitura do GMC-800 para o ícone
 	trayDemo bool
 	notes    []Note // anotações no gráfico (notes.go)
+	// editar e apagar entre aparelhos (records.go): resumo de cada item na
+	// última gravação, mescla em andamento e marcas de apagado
+	recHash  map[string]map[string]string
+	recMerge bool
+	tombs    map[string]int64
 	// uso do app (usage.go): carregado na primeira vez que precisa
 	usage       usageData
 	usageLoaded bool
