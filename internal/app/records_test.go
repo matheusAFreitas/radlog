@@ -1,6 +1,7 @@
 package app
 
 import (
+	"path/filepath"
 	"testing"
 	"time"
 )
@@ -145,5 +146,61 @@ func TestRecordsLegacyUID(t *testing.T) {
 	}
 	if r := recSync(t, a, b); r.Notes != 0 || len(b.notes) != 1 {
 		t.Fatalf("duplicou: %+v", b.notes)
+	}
+}
+
+// "Importar backup" desfaz um apagado sem querer: o item volta aqui e nos
+// outros aparelhos.
+func TestRecordsBackupRevives(t *testing.T) {
+	a, _ := testApp(t)
+	b, _ := testApp(t)
+	t0 := time.Now().Add(-5 * time.Hour)
+	addTestMeasure(a, 1, "Eletrodo", "", t0)
+	a.mu.Lock()
+	_ = a.saveMeasurementsLocked()
+	a.mu.Unlock()
+	if _, err := a.SaveNote(Note{Time: t0.UnixMilli(), Text: "janela"}); err != nil {
+		t.Fatal(err)
+	}
+	zip := filepath.Join(t.TempDir(), "antes.zip")
+	if err := a.writeBackupFile(zip); err != nil {
+		t.Fatal(err)
+	}
+	recSync(t, a, b)
+	time.Sleep(2 * time.Millisecond)
+	if err := a.DeleteMeasurement(1); err != nil {
+		t.Fatal(err)
+	}
+	if err := a.DeleteNote(a.GetNotes(0, 0)[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	recSync(t, a, b)
+	if len(b.GetMeasurements()) != 0 || len(b.GetNotes(0, 0)) != 0 {
+		t.Fatal("o apagado não chegou em b")
+	}
+	time.Sleep(2 * time.Millisecond)
+	r, err := a.mergeBackup(zip)
+	if err != nil || r.Measurements != 1 || r.Notes != 1 {
+		t.Fatalf("backup: %+v %v", r, err)
+	}
+	// b ainda manda a marca velha: não apaga de novo
+	recSync(t, b, a)
+	if len(a.GetMeasurements()) != 1 || len(a.GetNotes(0, 0)) != 1 {
+		t.Fatal("a marca de b apagou de novo")
+	}
+	recSync(t, a, b)
+	if len(b.GetMeasurements()) != 1 || len(b.GetNotes(0, 0)) != 1 {
+		t.Fatalf("não voltou em b: %+v %+v", b.GetMeasurements(), b.GetNotes(0, 0))
+	}
+	// e o backup pela nuvem/rede (não manual) não desfaz apagado
+	time.Sleep(2 * time.Millisecond)
+	if err := a.DeleteNote(a.GetNotes(0, 0)[0].ID); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := a.mergeZip(zip, false); err != nil {
+		t.Fatal(err)
+	}
+	if len(a.GetNotes(0, 0)) != 0 {
+		t.Fatal("a mescla automática trouxe de volta")
 	}
 }

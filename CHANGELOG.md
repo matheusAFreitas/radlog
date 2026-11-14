@@ -1,5 +1,16 @@
 # Versões
 
+## 2.80.1
+- Importar backup traz de volta uma anotação, medição ou saída de casa
+  apagada sem querer, e ela volta também nos outros aparelhos da nuvem.
+  Antes, a marca de apagado impedia que ela voltasse.
+
+**English**
+
+- Import backup brings back a note, measurement or time away from home
+  that was deleted by mistake, and it comes back on the other cloud
+  devices too. Before, the deletion mark kept it from coming back.
+
 ## 2.80.0
 - Nuvem no formato novo. Na primeira vez, o cartão da nuvem pede para
   "Recomeçar a nuvem": o código de recuperação continua o mesmo, o app cria

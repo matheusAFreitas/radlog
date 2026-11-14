@@ -36,6 +36,9 @@ O único arquivo em claro é o `radlog-nuvem.json`:
 3. Os bytes 0 a 31 são a chave `enc` (AES-256-GCM). Os bytes 32 a 63 são a
    chave `name` (HMAC-SHA256).
 
+O "v1" de `radlog nuvem v1` e de `radlog-nuvem-v1` é a versão da derivação
+das chaves, que não mudou. Ele não é a versão do formato dos arquivos.
+
 ## Nomes dos arquivos
 
 - `FileName(x)` = os 32 primeiros caracteres hexadecimais de
@@ -135,7 +138,10 @@ aparelhos) e `edited` (ms da última edição).
   - saída: `p-<from>`
 - Na mescla, a edição mais nova vale.
 - `apagados.json` é uma lista de `{"k": "n"|"m"|"p", "id": "<uid>", "t": <ms>}`.
-  Um item com marca de apagado é tirado e não volta.
+  Um item com marca de apagado é tirado e não volta, a não ser que chegue
+  editado depois da marca (`edited` maior que `t`). Isso acontece quando a
+  pessoa recupera o item pelo "Importar backup": ele ganha a hora de agora e
+  volta em todos os aparelhos.
 
 ## Vetores de teste
 
