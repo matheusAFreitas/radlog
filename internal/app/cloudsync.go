@@ -212,6 +212,8 @@ func (a *App) cloudHold(gen int) bool {
 var (
 	errCloudOld = errors.New("nuvem do formato antigo")
 	errCloudDup = errors.New("este PC parece cópia de outro aparelho da nuvem")
+	// outro aparelho tirou este da nuvem (CloudRemoveDevice)
+	errCloudRemoved = errors.New("este PC foi removido da nuvem")
 )
 
 func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
@@ -260,7 +262,22 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 
 	// 0) o arquivo deste aparelho foi escrito por outro PC? (pasta copiada, N6)
 	devName := keys.Name(dev, cloudKeyDevice)
-	if df, ok := byName[devName]; ok {
+	df, ok := byName[devName]
+	if !ok {
+		// o arquivo deste aparelho já foi escrito daqui e sumiu: outro
+		// aparelho tirou este da nuvem
+		if !a.cloudHold(gen) {
+			return context.Canceled
+		}
+		if c.f.DevMD5 != "" {
+			c.f.Removed = time.Now().UnixMilli()
+			a.cloudSaveLocked()
+			c.mu.Unlock()
+			a.logf("nuvem: outro aparelho tirou este PC da nuvem; os dados daqui continuam")
+			return errCloudRemoved
+		}
+		c.mu.Unlock()
+	} else {
 		if !a.cloudHold(gen) {
 			return context.Canceled
 		}

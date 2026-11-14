@@ -154,6 +154,29 @@ func TestCloudRemoveDevice(t *testing.T) {
 	if st := a.GetCloud(); len(st.Devices) != 1 {
 		t.Fatalf("depois de remover: %+v", st.Devices)
 	}
+	// b ainda ligado: fica "removido" até entrar de novo com o código
+	b.cloudSync()
+	if st := b.GetCloud(); st.State != "removed" || st.Removed == 0 {
+		t.Fatalf("b removido: %+v", st)
+	}
+	if _, err := b.CloudRejoin("0000-0000-0000-0000-0000-0000"); err == nil {
+		t.Fatal("entrou com código errado")
+	}
+	code := b.cloud.sec.Code
+	if _, err := b.CloudRejoin(code); err != nil {
+		t.Fatal(err)
+	}
+	b.cloudSync()
+	if st := b.GetCloud(); st.State != "ok" {
+		t.Fatalf("b de volta: %+v", st)
+	}
+	a.cloudSync()
+	if st := a.GetCloud(); len(st.Devices) != 2 {
+		t.Fatalf("b voltou na lista: %+v", st.Devices)
+	}
+	if _, err := a.CloudRemoveDevice(id); err != nil {
+		t.Fatal(err)
+	}
 	// o que veio de b continua na nuvem pela faixa de a
 	c, _ := testApp(t)
 	cloudLogin(t, c)
@@ -194,8 +217,11 @@ func TestCloudOldFormatRestart(t *testing.T) {
 	if srv.Trashed[old] == nil || a.cloud.f.Folder == old {
 		t.Fatal("a pasta antiga não foi para a lixeira")
 	}
+	if st := a.GetCloud(); !st.Restart {
+		t.Fatalf("recomeço: %+v", st)
+	}
 	a.cloudSync()
-	if st := a.GetCloud(); st.State != "ok" {
+	if st := a.GetCloud(); st.State != "ok" || st.Restart || st.Restarted == 0 {
 		t.Fatalf("depois: %+v", st)
 	}
 	if got, _ := a.CloudCode(); got != code {

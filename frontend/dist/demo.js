@@ -39,13 +39,13 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.79.1";
+const DEMO_VERSION = "2.80.0";
 
 function makeDemoApi() {
   let demoCloud = { state: "off", ready: true, auto: true };
   let demoCloudCode = "";
   const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
-    devices: [{ name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
+    devices: [{ id: "a0", name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
   let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
     { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
@@ -593,13 +593,17 @@ const demoRc = () => {
     CloudCode: async () => demoCloudCode,
     SaveCloudCode: async () => "C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt",
     CloudFinishSetup: async (code) => { demoCloudCode = code; return (demoCloud = demoCloudOn([])); },
-    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ name: "Notebook", lastUp: Date.now() - 6e6 }])); },
+    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: "PC antigo", lastUp: Date.now() - 42 * 864e5 }])); },
     CloudReset: async () => demoCloud,
     CloudSyncNow: async () => (demoCloud = { ...demoCloud, state: "ok", lastSync: Date.now(), queue: [] }),
     CloudPause: async () => (demoCloud = { ...demoCloud, state: "ok" }),
     SetCloudAuto: async (on) => (demoCloud = { ...demoCloud, auto: on }),
     SetCloudName: async (name) => (demoCloud = { ...demoCloud, devices: demoCloud.devices.map((d) => (d.me ? { ...d, name } : d)) }),
     CloudDisconnect: async () => (demoCloud = { state: "off", ready: true, auto: true }),
+    CloudRemoveDevice: async (id) => (demoCloud = { ...demoCloud, devices: demoCloud.devices.filter((d) => d.me || d.id !== id) }),
+    CloudRestart: async () => (demoCloud = { ...demoCloud, state: "ok", restarted: Date.now() }),
+    CloudRejoin: async () => (demoCloud = { ...demoCloud, state: "ok", removed: 0 }),
+    CloudDupAnswer: async () => (demoCloud = { ...demoCloud, state: "ok" }),
     GetRadiacode: async () => demoRc(),
     SetRadiacode: async (on, ble) => {
       const nb = (ble || "").toUpperCase(), changed = nb && nb !== demoRcCfg.ble;

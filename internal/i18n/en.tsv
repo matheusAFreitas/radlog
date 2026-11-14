@@ -5455,3 +5455,66 @@ o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha	Google asked
 o Google respondeu com erro {0}; a nuvem tenta de novo sozinha	Google answered with error {0}; the cloud tries again on its own
 {0} pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo	{0} package(s) from another device did not go into this PC; the rest synced and they will be tried again
 nuvem: um pacote de outro aparelho não entrou ({0})	cloud: a package from another device did not go in ({0})
+remover	remove
+parado há {0} dias	idle for {0} days
+Remover "{0}" da nuvem?	Remove "{0}" from the cloud?
+Último envio em {0}.	Last upload on {0}.
+Ele ainda não enviou nada.	It has not uploaded anything yet.
+Os arquivos que ele mandou vão para a lixeira do seu Drive e ficam lá 30 dias.	The files it sent go to your Drive trash and stay there for 30 days.
+O que já chegou neste PC continua aqui, e este PC sobe de novo o que tinha recebido dele. Os outros aparelhos não perdem nada.	What already reached this PC stays here, and this PC uploads again what it had received from it. The other devices lose nothing.
+Se ele ainda estiver ligado, para de sincronizar e mostra que foi removido. Dá para entrar de novo com o código.	If it is still on, it stops syncing and shows that it was removed. It can join again with the code.
+Perdeu ou roubaram o aparelho? Remover não basta, porque ele ainda sabe o código de recuperação. Nesse caso, depois de remover, use "Começar uma nuvem nova" para trocar o código.	Device lost or stolen? Removing it is not enough, because it still knows the recovery code. In that case, after removing it, use "Start a new cloud" to change the code.
+removido	removed
+nuvem: removido	cloud: removed
+Outro aparelho tirou este PC da nuvem em {0}. Os dados daqui continuam todos aqui.	Another device removed this PC from the cloud on {0}. All data here stays here.
+Entrar de novo	Join again
+Deixar desligada	Leave it off
+"Entrar de novo" pede o código de recuperação e sobe tudo deste PC outra vez.	"Join again" asks for the recovery code and uploads everything from this PC again.
+Entrar de novo na nuvem	Join the cloud again
+Digite o código de recuperação. Este PC volta como o mesmo aparelho e sobe tudo outra vez.	Type the recovery code. This PC comes back as the same device and uploads everything again.
+recomeçar	restart
+nuvem: recomeçar	cloud: restart
+A nuvem precisa recomeçar uma vez.	The cloud needs to start over once.
+Esta versão mudou o jeito de guardar os arquivos no Drive, e a nuvem de antes não serve mais. Nada some deste PC.	This version changed how files are stored in Drive, and the old cloud does not work anymore. Nothing is lost on this PC.
+O código de recuperação continua o mesmo.	The recovery code stays the same.
+O app cria a pasta nova e só depois manda a antiga para a lixeira do Drive, onde ela fica 30 dias.	The app creates the new folder and only then sends the old one to Drive trash, where it stays for 30 days.
+Este PC sobe tudo de novo.	This PC uploads everything again.
+Os outros aparelhos só precisam atualizar o RadLog.	The other devices only need to update RadLog.
+Recomeçar a nuvem	Restart the cloud
+A nuvem fica pausada até você recomeçar ou desconectar.	The cloud stays paused until you restart or disconnect.
+"Agora não" deixa a nuvem pausada. O aviso continua aqui até você recomeçar ou desconectar.	"Not now" leaves the cloud paused. The notice stays here until you restart or disconnect.
+Achamos uma nuvem de uma versão antiga	We found a cloud from an older version
+Esta conta tem uma pasta do RadLog no formato de antes, que esta versão não lê.	This account has a RadLog folder in the old format, which this version cannot read.
+A pasta antiga vai para a lixeira do Drive e fica lá 30 dias.	The old folder goes to Drive trash and stays there for 30 days.
+Começa uma nuvem nova, com código de recuperação novo (o próximo passo é o de sempre: ver, confirmar e conferir o código).	A new cloud starts, with a new recovery code (the next step is the usual one: see, confirm and check the code).
+Os dados deste PC sobem de novo.	This PC's data is uploaded again.
+Cancelar sai do login sem mexer no Drive.	Cancel leaves the sign-in without touching Drive.
+Aparelho novo: este PC ganha uma linha própria na lista e sobe os dados dele.	New device: this PC gets its own row in the list and uploads its data.
+O mesmo: este PC continua a linha do {0}. Se o outro ligar de novo, ele é que vai cair nesta pergunta.	The same one: this PC takes over {0}'s row. If the other one turns on again, it will get this question.
+subindo tudo de novo · {0} de {1}	uploading everything again · {0} of {1}
+Nuvem nova criada; a antiga já está na lixeira do Drive. Pode fechar o app: o envio continua de onde parou.	New cloud created; the old one is already in Drive trash. You can close the app: the upload continues where it stopped.
+A primeira vez sobe todo o histórico, um arquivo por dia; pode levar alguns minutos. O app continua gravando normalmente.	The first time uploads the whole history, one file per day; it can take a few minutes. The app keeps recording normally.
+Nuvem recomeçada. Tudo deste PC subiu no formato novo, com o mesmo código. A pasta antiga fica na lixeira do Drive até {0}.	Cloud restarted. Everything from this PC was uploaded in the new format, with the same code. The old folder stays in Drive trash until {0}.
+Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por dia (e cada anexo uma vez só), cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no "Importar backup". O que você apaga ou edita num aparelho vale nos outros.	Each device uploads its own data to the RadLog folder in your Drive, one file per day (and each attachment only once), encrypted with the recovery code key. The other devices download and merge only what is missing, as in "Import backup". What you delete or edit on one device applies on the others.
+esse código não é o desta nuvem	that code is not this cloud's code
+este aparelho não pode se remover; use Desconectar	this device cannot remove itself; use Disconnect
+nuvem do formato antigo	cloud in the old format
+aparelho da nuvem	cloud device
+arquivo da nuvem em formato desconhecido	cloud file in an unknown format
+arquivo de uma versão mais nova do RadLog	file from a newer RadLog version
+este PC foi removido da nuvem	this PC was removed from the cloud
+este PC parece cópia de outro aparelho da nuvem	this PC looks like a copy of another cloud device
+nuvem: a nuvem antiga foi para a lixeira do Drive para começar uma nova	cloud: the old cloud went to Drive trash to start a new one
+nuvem: a nuvem no Drive é do formato antigo e precisa ser começada de novo	cloud: the cloud in Drive is in the old format and needs to start over
+nuvem: este PC assumiu o aparelho que estava copiado	cloud: this PC took over the copied device
+nuvem: este PC entrou de novo na nuvem	cloud: this PC joined the cloud again
+nuvem: este PC passou a ser um aparelho novo na nuvem	cloud: this PC became a new device in the cloud
+nuvem: nuvem nova começada; a antiga foi para a lixeira do Drive	cloud: new cloud started; the old one went to Drive trash
+nuvem: não consegui gravar o aparelho ({0})	cloud: could not save the device ({0})
+nuvem: outro PC está usando a faixa deste aparelho; a nuvem pausou até você escolher	cloud: another PC is using this device's slot; the cloud paused until you choose
+nuvem: outro aparelho tirou este PC da nuvem; os dados daqui continuam	cloud: another device removed this PC from the cloud; the data here stays
+nuvem: um anexo não subiu ({0})	cloud: an attachment was not uploaded ({0})
+nuvem: um aparelho foi removido ({0} arquivo(s) na lixeira do Drive)	cloud: a device was removed ({0} file(s) in Drive trash)
+nuvem: {0} arquivo(s) de uma versão mais nova do RadLog ficaram para depois de atualizar	cloud: {0} file(s) from a newer RadLog version wait until you update
+não consegui gravar os apagados ({0})	could not save the deleted items ({0})
+não consegui tirar os metadados da foto	could not remove the photo metadata

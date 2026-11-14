@@ -89,6 +89,11 @@ type CloudInfo struct {
 	SendI    int           `json:"sendI,omitempty"`
 	SendN    int           `json:"sendN,omitempty"`
 	Err      string        `json:"err,omitempty"` // último erro do Google
+	// removido por outro aparelho (ms); recomeço em andamento e quando
+	// terminou (ms; a pasta antiga sai da lixeira 30 dias depois)
+	Removed   int64 `json:"removed,omitempty"`
+	Restart   bool  `json:"restart,omitempty"`
+	Restarted int64 `json:"restarted,omitempty"`
 }
 
 // CloudLoginDone é o fim do login: next diz qual diálogo abre.
@@ -131,6 +136,11 @@ type cloudFile struct {
 	DupOf string `json:"dupOf,omitempty"`
 	// a nuvem é do formato antigo (2.79.x): pausada até começar uma nova
 	Old bool `json:"old,omitempty"`
+	// outro aparelho tirou este da nuvem (ms): pausada até entrar de novo
+	Removed int64 `json:"removed,omitempty"`
+	// nuvem recomeçada (CloudRestart, ms) e ainda subindo tudo de novo
+	Restart   int64 `json:"restart,omitempty"`
+	Restarted int64 `json:"restarted,omitempty"`
 }
 
 // cloudRev sobe quando a mescla passa a aproveitar algo que antes ficava de
@@ -287,6 +297,9 @@ func (a *App) cloudInfoLocked() CloudInfo {
 		info.State = "login"
 	case f.Old:
 		info.State = "old"
+	case f.Removed != 0:
+		info.State = "removed"
+		info.Removed = f.Removed
 	case f.Dup:
 		info.State = "dup"
 		info.DupOf = f.DupOf
@@ -303,6 +316,7 @@ func (a *App) cloudInfoLocked() CloudInfo {
 		info.State = "ok"
 	}
 	info.SkewSec = c.skew
+	info.Restart, info.Restarted = f.Restart != 0, f.Restarted
 	info.Email = f.Email
 	if f.On {
 		info.Devices = append(info.Devices, CloudDevice{ID: f.DevID, Name: f.Name, LastUp: f.LastUp, Me: true})
@@ -807,6 +821,33 @@ func (a *App) CloudRemoveDevice(id string) (CloudInfo, error) {
 	return a.GetCloud(), nil
 }
 
+// CloudRejoin volta este PC para a nuvem depois de outro aparelho tirar ele
+// (pede o código de novo, como a tela promete): continua o mesmo aparelho e
+// sobe tudo outra vez.
+func (a *App) CloudRejoin(code string) (CloudInfo, error) {
+	c := &a.cloud
+	c.mu.Lock()
+	a.cloudLoadLocked()
+	if !c.f.On || c.f.Removed == 0 {
+		c.mu.Unlock()
+		return a.GetCloud(), nil
+	}
+	got, err := rs.ParseRecoveryCode(code)
+	if err != nil || got != c.sec.Code {
+		c.mu.Unlock()
+		return a.GetCloud(), errors.New("esse código não é o desta nuvem")
+	}
+	c.f.Removed, c.f.DevMD5, c.f.Seq = 0, "", 0
+	c.f.Up = map[string]string{}
+	c.gen++
+	a.cloudSaveLocked()
+	c.mu.Unlock()
+	a.logf("nuvem: este PC entrou de novo na nuvem")
+	a.cloudKick()
+	a.emitCloud()
+	return a.GetCloud(), nil
+}
+
 // CloudRestart começa uma nuvem nova no formato atual com o mesmo código
 // (a do Drive é do formato antigo): cria a pasta nova e só depois põe a
 // antiga na lixeira (N11). Os dados deste PC não mudam e sobem de novo.
@@ -842,6 +883,7 @@ func (a *App) CloudRestart() (CloudInfo, error) {
 	c.f.Folder, c.f.Salt, c.f.Old = folder, meta.Salt, false
 	c.f.Up, c.f.Seen, c.f.Devs = map[string]string{}, map[string]string{}, map[string]cloudDev{}
 	c.f.DevMD5, c.f.Seq, c.f.Queue, c.f.Used = "", 0, nil, 0
+	c.f.Restart, c.f.Restarted = time.Now().UnixMilli(), 0
 	c.keys, c.err = keys, ""
 	c.gen++
 	a.cloudSaveLocked()
@@ -924,7 +966,7 @@ func (a *App) cloudSync() {
 	c := &a.cloud
 	c.mu.Lock()
 	a.cloudLoadLocked()
-	if !c.f.On || c.f.NeedLogin || c.f.Old || c.f.Dup || c.run != nil || c.keys == nil {
+	if !c.f.On || c.f.NeedLogin || c.f.Old || c.f.Dup || c.f.Removed != 0 || c.run != nil || c.keys == nil {
 		c.mu.Unlock()
 		return
 	}
@@ -946,8 +988,12 @@ func (a *App) cloudSync() {
 	switch {
 	case err == nil:
 		c.offline, c.err = false, ""
+		if c.f.Restart != 0 {
+			c.f.Restart, c.f.Restarted = 0, time.Now().UnixMilli()
+			a.cloudSaveLocked()
+		}
 	case errors.Is(err, context.Canceled):
-	case errors.Is(err, errCloudDup):
+	case errors.Is(err, errCloudDup), errors.Is(err, errCloudRemoved):
 		c.offline, c.err = false, ""
 	case errors.Is(err, errCloudOld):
 		c.f.Old, c.offline, c.err = true, false, ""

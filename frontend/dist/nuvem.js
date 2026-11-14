@@ -1,4 +1,5 @@
-// Nuvem no Google Drive (2.79.0; spec ux/nuvem.html; Go em cloud.go).
+// Nuvem no Google Drive (2.79.0; spec ux/nuvem.html; Go em cloud.go). Remover
+// aparelho, recomeçar no formato novo e PC copiado: 2.80.0, ux/nuvem-remover.html.
 //
 // O cartão #cloudBox em Configurações › Dados e backup, os diálogos do código
 // de recuperação (primeiro aparelho e outro aparelho) e o indicador no menu
@@ -49,6 +50,8 @@ function cloudBadge(c) {
     case "login": return { text: "nuvem: entrar de novo", att: true };
     case "clock": return { text: "nuvem: relógio errado", att: true };
     case "dup": return { text: "nuvem: confirme o aparelho", att: true };
+    case "old": return { text: "nuvem: recomeçar", att: true };
+    case "removed": return { text: "nuvem: removido", att: true };
     case "err": return { text: "nuvem: deu erro", att: true };
     case "send": return { text: "nuvem enviando…" };
     case "offline": return stale ? { text: "nuvem: sem sincronizar há mais de 1 dia", att: true } : { text: "nuvem · sem internet" };
@@ -110,6 +113,14 @@ function cloudDevices(c) {
     if (!d.me) { nm.textContent = d.name; nm.dataset.noTr = ""; }
     const right = cloudEl("span", "mono small muted", d.lastUp ? `enviou ${whenLabel(d.lastUp)}` : "ainda não enviou");
     row.append(nm, right);
+    if (!d.me) {
+      const idle = d.lastUp ? Math.floor((Date.now() - d.lastUp) / 864e5) : 0;
+      if (idle > 30) nm.after(cloudEl("span", "chip cloud-st att", `parado há ${idle} dias`));
+      const rm = cloudEl("button", "link small", "remover");
+      rm.type = "button";
+      rm.addEventListener("click", () => cloudRemoveDevice(d));
+      right.append(" ", rm);
+    }
     if (d.me) {
       const ed = cloudEl("button", "link small", "renomear");
       ed.type = "button";
@@ -122,10 +133,11 @@ function cloudDevices(c) {
   return box;
 }
 
-const CLOUD_TAG = { err: ["com erro", "att"], ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"] };
+const CLOUD_TAG = { err: ["com erro", "att"], ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"], old: ["recomeçar", "att"], removed: ["removido", "att"] };
 
 function renderCloud() {
   renderCloudBadges();
+  cloudRestartedToast(cloud);
   const body = $("cloudBody");
   if (!body) return;
   const c = cloud || { state: "off" };
@@ -154,12 +166,15 @@ function renderCloud() {
       body.append(row);
       break;
     case "send": {
-      body.append(cloudKV([...acct, ["Agora", `enviando ${cloudMonth(c.sendNow)} · ${c.sendI} de ${c.sendN}`], ["Última sincronização", cloudWhen(c.lastSync)]]));
+      const now = c.restart ? `subindo tudo de novo · ${c.sendI} de ${c.sendN}` : `enviando ${cloudMonth(c.sendNow)} · ${c.sendI} de ${c.sendN}`;
+      body.append(cloudKV([...acct, ["Agora", now], ["Última sincronização", cloudWhen(c.lastSync)]]));
       const bar = cloudEl("div", "cloud-bar");
       const fill = cloudEl("i");
       fill.style.width = Math.round(100 * Math.max(0, (c.sendI - 0.5) / Math.max(1, c.sendN))) + "%";
       bar.append(fill);
-      body.append(bar, cloudEl("p", "small muted", "A primeira vez sobe todo o histórico, um arquivo por mês; pode levar alguns minutos. O app continua gravando normalmente."));
+      body.append(bar, cloudEl("p", "small muted", c.restart
+        ? "Nuvem nova criada; a antiga já está na lixeira do Drive. Pode fechar o app: o envio continua de onde parou."
+        : "A primeira vez sobe todo o histórico, um arquivo por dia; pode levar alguns minutos. O app continua gravando normalmente."));
       row.append(cloudBtn("Pausar", "", () => cloudCall("CloudPause")));
       body.append(row);
       break;
@@ -189,6 +204,27 @@ function renderCloud() {
       body.append(n);
       row.append(cloudBtn("Este é um aparelho novo", "accent", () => cloudCall("CloudDupAnswer", true)), cloudBtn(`Este é o ${asIs(other)} (o outro foi desligado)`, "", () => cloudCall("CloudDupAnswer", false)));
       body.append(row);
+      body.append(cloudEl("p", "small muted", "Aparelho novo: este PC ganha uma linha própria na lista e sobe os dados dele."));
+      body.append(cloudEl("p", "small muted", `O mesmo: este PC continua a linha do ${asIs(other)}. Se o outro ligar de novo, ele é que vai cair nesta pergunta.`));
+      break;
+    }
+    case "old": {
+      const n = cloudNote("att", "A nuvem precisa recomeçar uma vez.", "Esta versão mudou o jeito de guardar os arquivos no Drive, e a nuvem de antes não serve mais. Nada some deste PC.");
+      body.append(n);
+      const ul = cloudEl("ul", "cloud-pts small");
+      for (const t of ["O código de recuperação continua o mesmo.", "O app cria a pasta nova e só depois manda a antiga para a lixeira do Drive, onde ela fica 30 dias.", "Este PC sobe tudo de novo.", "Os outros aparelhos só precisam atualizar o RadLog."]) ul.append(cloudEl("li", "", t));
+      body.append(ul);
+      if (c.err) body.append(cloudNote("att", "Não deu certo da última vez:", c.err));
+      row.append(cloudBtn("Recomeçar a nuvem", "accent", cloudRestart), cloudBtn("Agora não", "", () => toast("A nuvem fica pausada até você recomeçar ou desconectar.")));
+      body.append(row);
+      body.append(cloudEl("p", "small muted", "\"Agora não\" deixa a nuvem pausada. O aviso continua aqui até você recomeçar ou desconectar."));
+      break;
+    }
+    case "removed": {
+      body.append(cloudNote("att", "", `Outro aparelho tirou este PC da nuvem em ${cloudDay(c.removed)}. Os dados daqui continuam todos aqui.`));
+      row.append(cloudBtn("Entrar de novo", "accent", cloudRejoin), cloudBtn("Deixar desligada", "", () => cloudCall("CloudDisconnect")));
+      body.append(row);
+      body.append(cloudEl("p", "small muted", "\"Entrar de novo\" pede o código de recuperação e sobe tudo deste PC outra vez."));
       break;
     }
     default: {
@@ -205,7 +241,7 @@ function renderCloud() {
   }
   const how = cloudEl("details", "how");
   how.append(cloudEl("summary", "", "Como funciona"));
-  for (const s of ["Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por mês, cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\".", "O e-mail da conta aparece só aqui: ele não vai para o registro, o backup, os PDFs nem a nuvem.", "A sincronização pela rede (abaixo) continua funcionando como antes."]) how.append(cloudEl("p", "small muted", s));
+  for (const s of ["Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por dia (e cada anexo uma vez só), cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\". O que você apaga ou edita num aparelho vale nos outros.", "O e-mail da conta aparece só aqui: ele não vai para o registro, o backup, os PDFs nem a nuvem.", "A sincronização pela rede (abaixo) continua funcionando como antes."]) how.append(cloudEl("p", "small muted", s));
   body.append(how);
 }
 
@@ -233,6 +269,7 @@ async function cloudCall(fn, ...args) {
       renderCloud();
       if (done.next === "new") cloudFirstDevice();
       else if (done.next === "existing") cloudOtherDevice(done);
+      else if (done.next === "old") cloudOldLogin();
     }
   } catch (e) {
     toast(String(e && e.message || e), true);
@@ -264,6 +301,90 @@ async function cloudRename(cur) {
     }));
     box.append(row);
     setTimeout(() => inp.select(), 30);
+  });
+}
+
+// "14/11"
+function cloudDay(ms) {
+  const d = new Date(ms || Date.now());
+  return String(d.getDate()).padStart(2, "0") + "/" + String(d.getMonth() + 1).padStart(2, "0");
+}
+
+async function cloudRemoveDevice(d) {
+  const ok = await askConfirm({
+    title: `Remover "${asIs(d.name)}" da nuvem?`,
+    text: [
+      d.lastUp ? `Último envio em ${cloudDay(d.lastUp)}.` : "Ele ainda não enviou nada.",
+      "Os arquivos que ele mandou vão para a lixeira do seu Drive e ficam lá 30 dias.",
+      "O que já chegou neste PC continua aqui, e este PC sobe de novo o que tinha recebido dele. Os outros aparelhos não perdem nada.",
+      "Se ele ainda estiver ligado, para de sincronizar e mostra que foi removido. Dá para entrar de novo com o código.",
+      "Perdeu ou roubaram o aparelho? Remover não basta, porque ele ainda sabe o código de recuperação. Nesse caso, depois de remover, use \"Começar uma nuvem nova\" para trocar o código.",
+    ],
+    ok: "Remover", danger: true,
+  });
+  if (ok) cloudCall("CloudRemoveDevice", d.id);
+}
+
+async function cloudRestart() {
+  await cloudCall("CloudRestart");
+}
+
+// o toast do fim do recomeço aparece uma vez
+function cloudRestartedToast(c) {
+  if (!c || !c.restarted || Date.now() - c.restarted > 6e5) return;
+  let seen = "";
+  try { seen = localStorage.getItem("gmc.cloudRestarted") || ""; } catch {}
+  if (seen === String(c.restarted)) return;
+  try { localStorage.setItem("gmc.cloudRestarted", String(c.restarted)); } catch {}
+  toast(`Nuvem recomeçada. Tudo deste PC subiu no formato novo, com o mesmo código. A pasta antiga fica na lixeira do Drive até ${cloudDay(c.restarted + 30 * 864e5)}.`);
+}
+
+// "Entrar de novo" depois de removido: confere o código guardado
+function cloudRejoin() {
+  cloudDialog((box, close) => {
+    box.append(cloudEl("h3", "", "Entrar de novo na nuvem"));
+    box.append(cloudEl("p", "small muted", "Digite o código de recuperação. Este PC volta como o mesmo aparelho e sobe tudo outra vez."));
+    const inp = cloudInput("código de recuperação (24 letras e números; pode colar)");
+    inp.classList.add("mono");
+    inp.placeholder = "____-____-____-____-____-____";
+    inp.parentNode.classList.add("big");
+    const err = cloudEl("p", "cloud-err", "");
+    err.hidden = true;
+    box.append(inp.parentNode, err);
+    const f = cloudEl("div", "row cloud-foot");
+    f.append(cloudBtn("Cancelar", "", close), cloudBtn("Entrar de novo", "accent", async () => {
+      err.hidden = true;
+      try {
+        const r = await api.CloudRejoin(inp.value);
+        cloud = r || cloud;
+      } catch (e) {
+        err.hidden = false;
+        err.textContent = String(e && e.message || e);
+        return;
+      }
+      close();
+      renderCloud();
+    }));
+    box.append(f);
+    setTimeout(() => inp.focus(), 30);
+  });
+}
+
+// login numa conta com nuvem do formato antigo
+function cloudOldLogin() {
+  cloudDialog((box, close) => {
+    box.append(cloudEl("h3", "", "Achamos uma nuvem de uma versão antiga"));
+    box.append(cloudEl("p", "small muted", "Esta conta tem uma pasta do RadLog no formato de antes, que esta versão não lê."));
+    const ul = cloudEl("ul", "cloud-pts small");
+    for (const t of ["A pasta antiga vai para a lixeira do Drive e fica lá 30 dias.", "Começa uma nuvem nova, com código de recuperação novo (o próximo passo é o de sempre: ver, confirmar e conferir o código).", "Os dados deste PC sobem de novo."]) ul.append(cloudEl("li", "", t));
+    box.append(ul);
+    const f = cloudEl("div", "row cloud-foot");
+    f.append(cloudBtn("Cancelar", "", () => { close(); cloudCall("CloudCancel"); }), cloudBtn("Continuar", "accent", async () => {
+      close();
+      try { await api.CloudReset(); } catch (e) { toast(String(e && e.message || e), true); return; }
+      cloudFirstDevice();
+    }));
+    box.append(f, cloudEl("p", "small muted", "Cancelar sai do login sem mexer no Drive."));
   });
 }
 

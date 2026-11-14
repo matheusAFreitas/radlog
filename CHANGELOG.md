@@ -1,5 +1,48 @@
 # Versões
 
+## 2.80.0
+- Nuvem no formato novo. Na primeira vez, o cartão da nuvem pede para
+  "Recomeçar a nuvem": o código de recuperação continua o mesmo, o app cria
+  a pasta nova e só depois manda a antiga para a lixeira do Drive (fica lá
+  30 dias). Os outros aparelhos só precisam atualizar o RadLog.
+- Nuvem: apagar ou editar uma anotação, medição ou saída de casa agora vale
+  nos outros aparelhos, e o que foi apagado não volta.
+- Nuvem: sobe só o dia que mudou, em vez do mês inteiro. Os espectros vão
+  por mês, e cada anexo sobe uma vez só (sem os metadados da foto).
+- Nuvem: o mesmo PC continua o mesmo aparelho depois de desconectar e
+  entrar de novo.
+- Nuvem: "remover" em cada aparelho da lista. Os arquivos dele vão para a
+  lixeira do Drive, e quem estiver parado há mais de 30 dias ganha a
+  etiqueta "parado há N dias". Um aparelho removido que ainda está ligado
+  avisa e pode entrar de novo com o código.
+- Nuvem: se a pasta do RadLog for copiada para outro PC, a nuvem pausa e
+  pergunta se é um aparelho novo ou o mesmo.
+- Nuvem: arquivo de uma versão mais nova do RadLog fica para depois de
+  atualizar, em vez de ser ignorado para sempre. O formato está descrito
+  em docs/nuvem-formato.md.
+
+**English**
+
+- Cloud in the new format. The first time, the cloud card asks you to
+  "Restart the cloud": the recovery code stays the same, the app creates
+  the new folder and only then sends the old one to Drive trash (it stays
+  there for 30 days). The other devices only need to update RadLog.
+- Cloud: deleting or editing a note, measurement or time away from home now
+  applies on the other devices, and what was deleted does not come back.
+- Cloud: only the day that changed is uploaded, instead of the whole month.
+  Spectra go by month, and each attachment is uploaded only once (without
+  photo metadata).
+- Cloud: the same PC stays the same device after disconnecting and signing
+  in again.
+- Cloud: "remove" on each device in the list. Its files go to Drive trash,
+  and a device idle for more than 30 days gets an "idle for N days" tag. A
+  removed device that is still on says so and can join again with the code.
+- Cloud: if the RadLog folder is copied to another PC, the cloud pauses and
+  asks whether it is a new device or the same one.
+- Cloud: a file from a newer RadLog version waits until you update, instead
+  of being skipped forever. The format is described in
+  docs/nuvem-formato.md.
+
 ## 2.79.1
 - Nuvem: as fotos e outros anexos das medições agora chegam no outro
   aparelho (antes chegava só a medição). Quem já tinha a nuvem ligada baixa
