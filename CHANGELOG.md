@@ -1,5 +1,16 @@
 # Versões
 
+## 2.80.2
+- Nuvem: quem já tinha a nuvem ligada na 2.79 agora vê o aviso "Recomeçar
+  a nuvem". Na 2.80.0 e na 2.80.1 o app não relia o arquivo da nuvem e
+  ficava "em dia" no formato antigo.
+
+**English**
+
+- Cloud: if the cloud was already on in 2.79, the "Restart the cloud"
+  notice now shows. In 2.80.0 and 2.80.1 the app did not read the cloud
+  file again and stayed "up to date" in the old format.
+
 ## 2.80.1
 - Importar backup traz de volta uma anotação, medição ou saída de casa
   apagada sem querer, e ela volta também nos outros aparelhos da nuvem.
