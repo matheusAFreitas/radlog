@@ -1232,10 +1232,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 	ticker := time.NewTicker(time.Second)
 	defer ticker.Stop()
 	fails := 0
-	var minute time.Time // minuto da última amostra
-	var lastCPM, lastRaw uint32
-	var lastLv Levels
-	var lastAt time.Time
+	var minute gmcMinute // o minuto que está sendo lido
 	lastTick := time.Now()
 	began := time.Now()
 	reads, errs := 0, 0
@@ -1347,13 +1344,10 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		cpm = uint32(math.Round(lvDT.DtCPM(float64(rawCPM))))
 		cps = uint32(math.Round(lvDT.DtCPS(float64(rawCPS))))
 
-		// Virou o minuto: grava o CPM medido no fim do minuto anterior
-		// (o CPM do contador já é a soma dos últimos 60 s).
-		m := now.Truncate(time.Minute)
-		if !minute.IsZero() && m.After(minute) && lastAt.Sub(minute) >= 50*time.Second {
-			a.storeMinute(minute, float64(lastCPM), float64(lastRaw), lastLv)
+		// virou o minuto: grava o anterior (média dos CPS, ver gmcMinute)
+		if p, ok := minute.add(now, cpm, rawCPM, cps, rawCPS, lvDT); ok {
+			a.storeMinute(p.T, p.CPM, p.Raw, p.Lv)
 		}
-		minute, lastCPM, lastRaw, lastAt, lastLv = m, cpm, rawCPM, now, lvDT
 
 		a.mu.Lock()
 		cal := a.convCalLocked()
