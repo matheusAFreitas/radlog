@@ -12,6 +12,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"regexp"
+	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -20,6 +22,7 @@ import (
 // File é um arquivo do Drive de mentira.
 type File struct {
 	ID, Name, Parent, Mime string
+	Props                  map[string]string // appProperties
 	Data                   []byte
 	Created, Modified      time.Time
 }
@@ -38,6 +41,8 @@ type Server struct {
 	Quota   bool          // envio responde 403 de cota cheia
 	OnPut   func()        // chamado depois de cada envio terminado (resposta já enviada)
 	Calls   []string
+	Revokes []string // tokens revogados em /revoke
+	Email   string   // e-mail do login (vazio = voce@example.com)
 }
 
 // New sobe o servidor.
@@ -46,6 +51,13 @@ func New() *Server {
 	s.Server = httptest.NewServer(http.HandlerFunc(s.serve))
 	return s
 }
+
+// Lock e Unlock deixam o teste mexer nos arquivos.
+func (s *Server) Lock()   { s.mu.Lock() }
+func (s *Server) Unlock() { s.mu.Unlock() }
+
+// RevokeURL é o endereço para revogar o acesso.
+func (s *Server) RevokeURL() string { return s.URL + "/revoke" }
 
 // Base, Upload e TokenURL são os endereços para o cliente.
 func (s *Server) Base() string     { return s.URL + "/drive/v3" }
@@ -81,6 +93,7 @@ func (s *Server) Count() int {
 var (
 	reName   = regexp.MustCompile(`name = '([^']*)'`)
 	reParent = regexp.MustCompile(`'([^']*)' in parents`)
+	reProp   = regexp.MustCompile(`appProperties has \{ key='([^']*)' and value='([^']*)' \}`)
 )
 
 func (s *Server) js(w http.ResponseWriter, v any) {
@@ -119,26 +132,49 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		// id_token só com o e-mail (o cliente não confere a assinatura)
-		pl := base64.RawURLEncoding.EncodeToString([]byte(`{"email":"voce@example.com"}`))
+		email := s.Email
+		if email == "" {
+			email = "voce@example.com"
+		}
+		pl := base64.RawURLEncoding.EncodeToString([]byte(`{"email":"` + email + `"}`))
 		s.js(w, map[string]any{"access_token": "at-" + fmt.Sprint(now.UnixNano()), "refresh_token": "rt-1", "expires_in": 3600, "id_token": "x." + pl + ".y"})
+	case p == "/revoke":
+		_ = r.ParseForm()
+		s.Revokes = append(s.Revokes, r.Form.Get("token"))
+		w.WriteHeader(200)
 	case r.Method == "GET" && p == "/drive/v3/files":
 		q := r.URL.Query().Get("q")
-		var out []map[string]any
+		var fs []*File
 		for _, f := range s.Files {
+			fs = append(fs, f)
+		}
+		// na ordem de criação (como o orderBy=createdTime do Drive)
+		sort.Slice(fs, func(i, j int) bool { return fileNum(fs[i].ID) < fileNum(fs[j].ID) })
+		var out []map[string]any
+		for _, f := range fs {
 			if m := reName.FindStringSubmatch(q); m != nil && (f.Name != m[1] || f.Mime == "") {
 				continue
 			}
 			if m := reParent.FindStringSubmatch(q); m != nil && f.Parent != m[1] {
 				continue
 			}
+			if m := reProp.FindStringSubmatch(q); m != nil && f.Props[m[1]] != m[2] {
+				continue
+			}
+			if strings.Contains(q, "mimeType = ") && f.Mime == "" {
+				continue
+			}
 			out = append(out, meta(f))
 		}
 		s.js(w, map[string]any{"files": out})
 	case r.Method == "POST" && p == "/drive/v3/files":
-		var m struct{ Name, MimeType string }
+		var m struct {
+			Name, MimeType string
+			AppProperties  map[string]string
+		}
 		_ = json.Unmarshal(body, &m)
 		s.n++
-		f := &File{ID: fmt.Sprintf("f%d", s.n), Name: m.Name, Mime: m.MimeType, Created: now, Modified: now}
+		f := &File{ID: fmt.Sprintf("f%d", s.n), Name: m.Name, Mime: m.MimeType, Props: m.AppProperties, Created: now, Modified: now}
 		s.Files[f.ID] = f
 		s.js(w, meta(f))
 	case r.Method == "GET" && strings.HasPrefix(p, "/drive/v3/files/"):
@@ -155,8 +191,19 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			w.WriteHeader(404)
 			return
 		}
-		var m struct{ Trashed bool }
+		var m struct {
+			Trashed       bool
+			AppProperties map[string]string
+		}
 		_ = json.Unmarshal(body, &m)
+		if m.AppProperties != nil {
+			if f.Props == nil {
+				f.Props = map[string]string{}
+			}
+			for k, v := range m.AppProperties {
+				f.Props[k] = v
+			}
+		}
 		if m.Trashed {
 			for k, x := range s.Files {
 				if k == id || x.Parent == id {
@@ -228,4 +275,9 @@ func (s *Server) openUp(w http.ResponseWriter, f *File) {
 	s.ups[loc] = f
 	w.Header().Set("Location", s.URL+loc)
 	w.WriteHeader(200)
+}
+
+func fileNum(id string) int {
+	n, _ := strconv.Atoi(strings.TrimPrefix(id, "f"))
+	return n
 }

@@ -4187,7 +4187,10 @@ const I18N_EN = {
 "nuvem: outro aparelho tirou este PC da nuvem; os dados daqui continuam": "cloud: another device removed this PC from the cloud; the data here stays",
 "não consegui tirar os metadados da foto": "could not remove the photo metadata",
 "nuvem: a nuvem antiga foi para a lixeira do Drive": "cloud: the old cloud went to the Drive trash",
-"área de transferência indisponível": "clipboard unavailable"
+"área de transferência indisponível": "clipboard unavailable",
+"Como este é o único aparelho da nuvem, o RadLog também sai da lista de apps da sua conta Google.": "Since this is the only device in the cloud, RadLog is also removed from your Google account's app list.",
+"essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nuvem, ou desconecte para usar outra": "that is a different Google account. Sign in with the same account shown on the cloud card, or disconnect to use another one",
+"outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele": "another device just created the cloud in this account. Sign in again and use its recovery code"
 },
 "patterns": [
 [

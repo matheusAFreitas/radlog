@@ -11,8 +11,13 @@ o app pede para começar uma nova, e a pasta antiga vai para a lixeira do Drive.
 
 ## Pasta e metadados
 
-A pasta fica na raiz do Drive, com o nome `RadLog`. O app só enxerga o que ele
-mesmo criou (escopo `drive.file`).
+A pasta fica na raiz do Drive, com o nome `RadLog` e a marca
+`appProperties: {"radlog": "nuvem"}` (desde a 2.80.4; as pastas de antes
+ganham a marca na primeira sincronização). Procure pela marca e, sem
+resultado, pelo nome. Com mais de uma pasta, vale a mais antiga que tem o
+`radlog-nuvem.json`. Depois de criar uma pasta, confira de novo: se outra
+pasta com nuvem nasceu antes, apague a sua e use a outra. O app só enxerga o
+que ele mesmo criou (escopo `drive.file`).
 
 O único arquivo em claro é o `radlog-nuvem.json`:
 
