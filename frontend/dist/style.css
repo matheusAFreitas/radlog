@@ -270,6 +270,8 @@ table.cal .bad { color: var(--warn); }
   background: repeating-linear-gradient(135deg, color-mix(in srgb, var(--info) 10%, transparent) 0 10px, color-mix(in srgb, var(--info) 4%, transparent) 10px 20px);
   border-bottom: 1px solid color-mix(in srgb, var(--info) 45%, transparent); }
 .demo-stripe b { color: var(--info); font-weight: 600; letter-spacing: .04em; }
+.demo-warn { color: var(--warn); font-weight: 600; }
+.demo-warn::before { content: "· "; color: var(--muted); font-weight: 400; }
 .link-btn { background: none; border: 0; padding: 0; min-height: 24px; color: var(--text); font: inherit; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
 .link-btn:hover { color: var(--info); }
 .demo-panel { border-color: color-mix(in srgb, var(--info) 35%, transparent); display: flex; flex-direction: column; gap: var(--space-3); }
