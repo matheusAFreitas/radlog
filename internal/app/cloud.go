@@ -540,13 +540,15 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 		}
 	}
 	meta, keys, err := rs.NewMeta(code)
+	var mf rs.File
 	if err == nil {
 		b, _ := json.Marshal(meta)
-		_, err = d.Put(ctx, folder, "", rs.MetaFile, b)
+		mf, err = d.Put(ctx, folder, "", rs.MetaFile, b)
 	}
-	if err == nil && folder != p.folder {
-		// dois aparelhos criando ao mesmo tempo (N17): vale a mais antiga
-		err = a.cloudRaceCheck(ctx, d, folder, p.trash)
+	if err == nil {
+		// dois aparelhos criando ao mesmo tempo (N17): vale a pasta e a meta
+		// mais antigas
+		err = a.cloudRaceCheck(ctx, d, folder, p.trash, mf.ID)
 	}
 	if err == nil && p.trash != "" {
 		if err = d.Trash(ctx, p.trash); err == nil {
@@ -556,6 +558,8 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 	if err != nil {
 		if folder != p.folder {
 			_ = d.Delete(ctx, folder) // desfaz: a pasta nova está vazia
+		} else if mf.ID != "" {
+			_ = d.Delete(ctx, mf.ID) // a pasta era de antes: tira só a meta daqui
 		}
 		return a.GetCloud(), err
 	}
@@ -563,19 +567,40 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 	return a.GetCloud(), nil
 }
 
-// cloudRaceCheck: depois de criar a pasta, confere se outra pasta com nuvem
-// nasceu antes dela (fora skip, a antiga que vai para a lixeira).
-func (a *App) cloudRaceCheck(ctx context.Context, d *rs.Drive, mine, skip string) error {
+// cloudRaceWait dá tempo para a busca do Drive mostrar o que o outro
+// aparelho acabou de criar.
+var cloudRaceWait = 2 * time.Second
+
+// cloudRaceRecent: uma pasta marcada sem meta, criada há menos que isso, é
+// de outro aparelho no meio da criação.
+const cloudRaceRecent = 10 * time.Minute
+
+// cloudRaceCheck: depois de criar a nuvem (pasta mine, meta myMeta), confere
+// se outro aparelho criou uma ao mesmo tempo (QA da 2.80.4):
+//   - outra pasta mais antiga com meta, ou criada há pouco (o outro ainda
+//     está subindo a meta), vence;
+//   - na mesma pasta (reaproveitada vazia), vale a meta mais antiga.
+//
+// skip é a nuvem antiga que vai para a lixeira.
+func (a *App) cloudRaceCheck(ctx context.Context, d *rs.Drive, mine, skip, myMeta string) error {
+	select {
+	case <-ctx.Done():
+		return ctx.Err()
+	case <-time.After(cloudRaceWait):
+	}
 	folders, err := d.FindFolders(ctx, cloudFolderName)
 	if err != nil {
 		return err
 	}
 	for _, fd := range folders {
 		if fd.ID == mine {
-			return nil
+			break
 		}
 		if fd.ID == skip {
 			continue
+		}
+		if !fd.Created.IsZero() && time.Since(fd.Created) < cloudRaceRecent {
+			return errCloudRace
 		}
 		files, err := d.List(ctx, fd.ID)
 		if err != nil {
@@ -586,6 +611,23 @@ func (a *App) cloudRaceCheck(ctx context.Context, d *rs.Drive, mine, skip string
 				return errCloudRace
 			}
 		}
+	}
+	files, err := d.List(ctx, mine)
+	if err != nil {
+		return err
+	}
+	var first *rs.File
+	for i := range files {
+		f := &files[i]
+		if f.Name != rs.MetaFile {
+			continue
+		}
+		if first == nil || f.Created.Before(first.Created) || (f.Created.Equal(first.Created) && f.ID < first.ID) {
+			first = f
+		}
+	}
+	if first != nil && first.ID != myMeta {
+		return errCloudRace
 	}
 	return nil
 }

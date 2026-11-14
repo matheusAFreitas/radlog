@@ -4192,6 +4192,7 @@ const I18N_EN = {
 "essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nuvem, ou desconecte para usar outra": "that is a different Google account. Sign in with the same account shown on the cloud card, or disconnect to use another one",
 "outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele": "another device just created the cloud in this account. Sign in again and use its recovery code",
 "arquivo grande demais para baixar": "file too large to download",
+"anexado, mas fica só neste PC: esse tipo de arquivo pode ter a localização dentro e o app não sabe tirar, então ele não vai para o backup nem para a nuvem": "attached, but it stays on this PC only: this file type can carry a location inside and the app cannot remove it, so it does not go to the backup or the cloud",
 "sem área de transferência privada": "no private clipboard",
 "área de transferência ocupada": "clipboard busy"
 },

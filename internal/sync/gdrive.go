@@ -52,7 +52,7 @@ type File struct {
 	Created  time.Time `json:"createdTime"`
 }
 
-const fileFields = "id,name,size,md5Checksum,modifiedTime"
+const fileFields = "id,name,size,md5Checksum,modifiedTime,createdTime"
 
 // ErrNotFound é o 404 do Drive.
 var ErrNotFound = errors.New("arquivo não está mais no Drive")

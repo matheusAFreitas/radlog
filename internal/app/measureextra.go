@@ -133,6 +133,9 @@ func (a *App) attachFiles(id int64, paths []string) ([]MeasureAttachment, error)
 			continue
 		}
 		used[strings.ToLower(file)] = true
+		if photometa.Risky(ext) {
+			errs = append(errs, filepath.Base(src)+": "+errAttachLocal.Error())
+		}
 		typ := mime.TypeByExtension(strings.ToLower(ext))
 		if typ == "" {
 			typ = "application/octet-stream"
@@ -416,6 +419,10 @@ func (a *App) GetMeasurementContext(id int64) (MeasureContext, error) {
 // localização de dentro dela.
 var errPhotoMeta = errors.New("não consegui tirar a localização e os dados da câmera de dentro desta foto, então ela não foi anexada")
 
+// errAttachLocal não é erro: avisa que o anexo foi guardado, mas fica só
+// neste PC (S1).
+var errAttachLocal = errors.New("anexado, mas fica só neste PC: esse tipo de arquivo pode ter a localização dentro e o app não sabe tirar, então ele não vai para o backup nem para a nuvem")
+
 // copyAttachment copia o anexo para a pasta do app. Fotos vão sem os
 // metadados (localização do celular, modelo, data): eles não podem ir para
 // o backup nem para a nuvem (auditoria 2.76.0, S2). Devolve o tamanho
@@ -440,6 +447,9 @@ func copyAttachment(src, dst, ext string) (int64, error) {
 // localização. Devolve false se a foto deve ficar de fora.
 func (a *App) attachForExport(rel string, b []byte) ([]byte, bool) {
 	ext := filepath.Ext(rel)
+	if photometa.Risky(ext) {
+		return nil, false // fica só no PC (S1)
+	}
 	if !photometa.Handles(ext) {
 		return b, true
 	}

@@ -27,6 +27,9 @@ func fakeCloud(t *testing.T) *synctest.Server {
 		o.TokenURL, o.RevokeURL = srv.TokenURL(), srv.RevokeURL()
 		return o
 	}
+	oldWait := cloudRaceWait
+	cloudRaceWait = 0
+	t.Cleanup(func() { cloudRaceWait = oldWait })
 	cloudDriveFn = func(tok func(context.Context) (string, error)) *rs.Drive {
 		d := rs.NewDrive(tok)
 		d.Base, d.Upload = srv.Base(), srv.Upload()
