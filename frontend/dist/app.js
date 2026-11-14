@@ -117,6 +117,25 @@ function toast(msg, err) {
   setTimeout(() => el.remove(), err ? 7000 : 4000);
 }
 
+// aviso com título, linha de baixo e um botão (2.83.0)
+function toastBox(title, sub, opt = {}) {
+  const el = document.createElement("div");
+  el.className = "toast rich" + (opt.err ? " err" : " ok");
+  el.setAttribute("role", "status");
+  const b = document.createElement("b");
+  b.textContent = title;
+  el.appendChild(b);
+  if (sub) { const s = document.createElement("div"); s.className = "small muted"; s.textContent = sub; el.appendChild(s); }
+  if (opt.action) {
+    const x = document.createElement("button");
+    x.type = "button"; x.className = "btn small"; x.textContent = opt.action[0];
+    x.addEventListener("click", () => { el.remove(); opt.action[1](); });
+    el.appendChild(x);
+  }
+  $("toasts").appendChild(el);
+  setTimeout(() => el.remove(), opt.action ? 15000 : 7000);
+}
+
 async function call(fn, ...args) {
   try { return await fn(...args); }
   catch (e) { toast(String(e && e.message ? e.message : e), true); throw e; }
@@ -2454,6 +2473,7 @@ async function openSettings(focusId) {
   if (api.GetVersionsDir) api.GetVersionsDir().then((d) => { $("updDir").textContent = d; }).catch(() => {});
   $("selLang").value = s.lang || "auto";
   $("chkMeasReport").checked = !s.noMeasureReport;
+  $("chkAutoHist").checked = !s.noAutoHistory;
   fillLevels(lv());
   renderAttnLabel();
   // (o botão da engrenagem chama com o evento do clique: só vale texto)
@@ -2471,11 +2491,11 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
-  chkMeasReport: "relatório da medição", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
+  chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
@@ -3039,6 +3059,7 @@ function wire() {
       keepOldVersions: !$("chkCleanOld").checked,
       lang: $("selLang").value,
       noMeasureReport: !$("chkMeasReport").checked,
+      noAutoHistory: !$("chkAutoHist").checked,
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
@@ -3068,8 +3089,9 @@ function wire() {
     $("progressText").textContent = "Lendo a memória do contador…";
     try {
       const r = await api.DownloadHistory();
-      toast(`Histórico: ${r.records} registros, ${r.added} minutos novos`);
-      if (r.newRanges && r.newRanges.length) askNewRanges(r.newRanges);
+      if (r.canceled) toast(`Leitura cancelada: ${r.added} minutos novos guardados`);
+      else if (r.partial) histFailToast(r.partial, true);
+      else toast(`Histórico: ${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""));
     } catch (e) {
       toast("Histórico: " + (e && e.message ? e.message : e), true);
     }
@@ -3097,6 +3119,24 @@ function wire() {
   wireReportDlg();
   wireWhere();
   wireBusca();
+}
+
+// ---------- histórico do GMC-800 baixado sozinho (2.83.0) ----------
+
+function histFailToast(err, kept) {
+  toastBox("Não deu para baixar a memória do GMC-800", errMsg(err) + (kept ? ". Os minutos que chegaram foram guardados." : ""),
+    { err: true, action: ["Tentar de novo", () => $("btnHistory").click()] });
+}
+
+function onAutoHistory(r) {
+  if (!r || r.canceled) return;
+  if (!r.ok) { histFailToast(r.err, r.partial); refreshAll(); return; }
+  if (!r.added) return; // nada novo: não avisa a cada conexão
+  const al = r.alerts === 0 ? "nenhum alerta" : r.alerts === 1 ? "1 alerta" : `${r.alerts} alertas`;
+  const parts = [`${hm(r.added)} novos, de ${hhmm(r.from)} a ${hhmm(r.to)}`, al];
+  if (r.asks) parts.push("a pergunta \"fora de casa?\" está no Agora");
+  toastBox("Histórico do GMC-800 baixado", parts.join(" · "));
+  refreshAll();
 }
 
 // ---------- eventos vindos do Go ----------
@@ -3165,6 +3205,7 @@ function listen() {
   on("countersync", (cs) => refreshCounterSync(cs));
   $("btnSyncDl").addEventListener("click", () => $("btnHistory").click());
   on("measure", (st) => renderMeasure(st));
+  on("history-auto", onAutoHistory);
   on("history-progress", (p) => {
     // A memória para de ser lida na primeira página vazia, então o total real
     // não é conhecido: mostra quanto já veio.

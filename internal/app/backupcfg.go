@@ -37,6 +37,7 @@ func portableCopy(dst *Settings, src Settings) {
 	dst.KeepOldVersions = src.KeepOldVersions
 	dst.Lang = src.Lang
 	dst.NoMeasureReport = src.NoMeasureReport
+	dst.NoAutoHistory = src.NoAutoHistory
 }
 
 // portableSettings é o que vai para o backup.
