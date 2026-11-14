@@ -61,6 +61,8 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund --prefix /tmp/pw playwright-core@1.63.0
           NODE_PATH=/tmp/pw/node_modules RADLOG_CHROME=chrome node scripts/telas_test.js
+      - name: Tela da nuvem de ponta a ponta (página + App + Drive de mentira)
+        run: RADLOG_E2E=1 NODE_PATH=/tmp/pw/node_modules RADLOG_CHROME=chrome go test -count=1 -tags webkit2_41 -run TestCloudScreenE2E ./internal/app/
 
   windows:
     # o Bluetooth, a bandeja e a troca de versão do Windows só rodam aqui
