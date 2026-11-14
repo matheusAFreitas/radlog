@@ -1,5 +1,24 @@
 # Versões
 
+## 2.80.7
+- Nuvem no Linux: o acesso do Google e o código de recuperação são cifrados
+  com uma chave guardada no cofre do sistema (GNOME Keyring ou KWallet),
+  como já era no Windows. Sem cofre, ficam como antes, num arquivo que só o
+  seu usuário lê. Desconectar tira a chave do cofre.
+- Nuvem: quando o Google pede para esperar (limite de pedidos), o envio
+  espera e continua, em vez de desistir. Um pacote acima do limite de
+  download não sobe e o erro aparece no cartão do PC que enviou.
+
+**English**
+
+- Cloud on Linux: the Google sign-in and the recovery code are encrypted
+  with a key kept in the system keyring (GNOME Keyring or KWallet), as on
+  Windows already. Without a keyring, they stay as before, in a file only
+  your user can read. Disconnecting removes the key from the keyring.
+- Cloud: when Google asks to wait (rate limit), the upload waits and
+  continues instead of giving up. A package above the download limit is not
+  uploaded, and the error shows on the card of the PC that sent it.
+
 ## 2.80.6
 - Anexos de tipos que podem levar a localização dentro e que o app não sabe
   limpar (vídeos, fotos TIFF e RAW) ficam só neste PC: não vão para o

@@ -238,7 +238,7 @@ func (a *App) cloudLoadLocked() {
 	c.loaded = true
 	a.readStateJSON(a.cloudPath(), "nuvem", &c.f)
 	if b, err := os.ReadFile(a.cloudKeyPath()); err == nil {
-		if p, err := unprotect(b); err == nil {
+		if p, err := unprotect(a.dataDir, b); err == nil {
 			_ = json.Unmarshal(p, &c.sec)
 		} else {
 			a.logf("nuvem: não consegui abrir a chave guardada (%v)", err)
@@ -281,7 +281,7 @@ func (a *App) cloudSaveLocked() {
 func (a *App) cloudSaveSecretLocked() {
 	c := &a.cloud
 	b, _ := json.Marshal(c.sec)
-	p, err := protect(b)
+	p, err := protect(a.dataDir, b)
 	if err == nil {
 		err = writeFileAtomic(a.cloudKeyPath(), p, 0o600)
 	}
@@ -892,6 +892,7 @@ func (a *App) CloudDisconnect() CloudInfo {
 	}
 	_ = os.Remove(a.cloudKeyPath())
 	_ = os.Remove(a.cloudPath())
+	forgetProtect(a.dataDir)
 	c.f, c.sec, c.keys, c.access, c.pend, c.err, c.offline, c.skew = cloudFile{}, cloudSecret{}, nil, "", nil, "", false, 0
 	c.gen++
 	c.mu.Unlock()

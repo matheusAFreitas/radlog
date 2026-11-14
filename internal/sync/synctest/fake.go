@@ -47,6 +47,7 @@ type Server struct {
 	// cai (o envio tem de continuar de onde parou)
 	DropChunks int
 	Chunks     int    // pedaços recebidos
+	Throttle   int    // os próximos pedaços respondem 429
 	Email      string // e-mail do login (vazio = voce@example.com)
 }
 
@@ -265,6 +266,13 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			s.Chunks++
 			if a != len(s.parts[p]) {
 				w.WriteHeader(400)
+				return
+			}
+			if s.Throttle > 0 {
+				// limite de pedidos: nada é guardado, tente de novo depois
+				s.Throttle--
+				w.WriteHeader(429)
+				s.js(w, map[string]any{"error": map[string]any{"code": 429, "message": "Rate Limit Exceeded"}})
 				return
 			}
 			if s.DropChunks > 0 {

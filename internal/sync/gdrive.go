@@ -286,7 +286,7 @@ func (d *Drive) putChunks(ctx context.Context, loc string, data []byte) (File, e
 		}
 		if err != nil {
 			var he *HTTPError
-			if ctx.Err() != nil || (errors.As(err, &he) && he.Code/100 == 4) || errors.Is(err, ErrNotFound) {
+			if ctx.Err() != nil || (errors.As(err, &he) && he.Code/100 == 4 && !rateLimited(he)) || errors.Is(err, ErrNotFound) {
 				return File{}, err
 			}
 			if fails++; fails >= chunkTries {
@@ -310,6 +310,12 @@ func (d *Drive) putChunks(ctx context.Context, loc string, data []byte) (File, e
 		}
 		off = next
 	}
+}
+
+// rateLimited: 429, ou 403 de limite de pedidos, que o Google manda tentar de
+// novo depois de esperar (QA da 2.80.5).
+func rateLimited(e *HTTPError) bool {
+	return e.Code == 429 || (e.Code == 403 && strings.Contains(strings.ToLower(e.Msg), "rate limit"))
 }
 
 // putRange manda um pedaço. next é o primeiro byte que falta (-1 = terminou,

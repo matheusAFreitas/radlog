@@ -194,6 +194,11 @@ func (a *App) cloudPackData(p cloudPack) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	// os outros aparelhos não baixam acima do limite: melhor avisar aqui do
+	// que o pacote sumir em silêncio lá (QA da 2.80.5)
+	if int64(len(z)) > rs.MaxDownload {
+		return nil, fmt.Errorf("o pacote %s tem %d MB, acima do limite de %d MB da nuvem, e não subiu", p.key, len(z)>>20, rs.MaxDownload>>20)
+	}
 	return rs.Wrap(p.kind, z), nil
 }
 

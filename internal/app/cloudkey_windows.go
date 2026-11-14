@@ -10,10 +10,13 @@ import (
 
 // protect cifra os segredos da nuvem com o DPAPI do Windows (só este usuário
 // neste PC abre).
-func protect(b []byte) ([]byte, error) { return dpapi(b, true) }
+func protect(_ string, b []byte) ([]byte, error) { return dpapi(b, true) }
 
 // unprotect desfaz o protect.
-func unprotect(b []byte) ([]byte, error) { return dpapi(b, false) }
+func unprotect(_ string, b []byte) ([]byte, error) { return dpapi(b, false) }
+
+// forgetProtect: no Windows não há nada guardado fora do arquivo.
+func forgetProtect(string) {}
 
 func dpapi(b []byte, enc bool) ([]byte, error) {
 	if len(b) == 0 {
