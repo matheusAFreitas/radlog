@@ -670,6 +670,10 @@ var (
 		if a.ctx == nil {
 			return errors.New("área de transferência indisponível")
 		}
+		// no Windows, fora do histórico (Win+V) e da nuvem da Microsoft
+		if s != "" && clipPrivateSet(s) == nil {
+			return nil
+		}
 		return wruntime.ClipboardSetText(a.ctx, s)
 	}
 	cloudClipGet = func(a *App) (string, error) {

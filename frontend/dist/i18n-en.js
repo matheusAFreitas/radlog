@@ -4190,7 +4190,10 @@ const I18N_EN = {
 "área de transferência indisponível": "clipboard unavailable",
 "Como este é o único aparelho da nuvem, o RadLog também sai da lista de apps da sua conta Google.": "Since this is the only device in the cloud, RadLog is also removed from your Google account's app list.",
 "essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nuvem, ou desconecte para usar outra": "that is a different Google account. Sign in with the same account shown on the cloud card, or disconnect to use another one",
-"outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele": "another device just created the cloud in this account. Sign in again and use its recovery code"
+"outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele": "another device just created the cloud in this account. Sign in again and use its recovery code",
+"arquivo grande demais para baixar": "file too large to download",
+"sem área de transferência privada": "no private clipboard",
+"área de transferência ocupada": "clipboard busy"
 },
 "patterns": [
 [
@@ -7016,6 +7019,15 @@ const I18N_EN = {
 [
 "RC102: a conexão pelo Bluetooth caiu em ",
 "; próxima tentativa em "
+]
+],
+[
+"nuvem: um arquivo da nuvem é grande demais (",
+"^nuvem: um arquivo da nuvem é grande demais \\(((?:(?! · ).)+?) MB\\) e foi pulado$",
+"cloud: a cloud file is too large (${1} MB) and was skipped",
+[
+"nuvem: um arquivo da nuvem é grande demais (",
+" MB) e foi pulado"
 ]
 ],
 [

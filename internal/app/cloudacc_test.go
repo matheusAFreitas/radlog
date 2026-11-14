@@ -136,3 +136,26 @@ func TestCloudCreateRace(t *testing.T) {
 		t.Fatal("ficaram duas nuvens")
 	}
 }
+
+// N14: um arquivo grande demais na nuvem é pulado sem travar o resto.
+func TestCloudTooBigSkipped(t *testing.T) {
+	fakeCloud(t)
+	a, _ := testApp(t)
+	b, _ := testApp(t)
+	if _, err := a.store.Import(series(time.Date(2026, 9, 21, 10, 0, 0, 0, time.UTC), 20)); err != nil {
+		t.Fatal(err)
+	}
+	cloudPair(t, a, b)
+	old := rs.MaxDownload
+	rs.MaxDownload = 400 // passa a meta e o aparelho, barra os pacotes
+	t.Cleanup(func() { rs.MaxDownload = old })
+	b.cloudSync()
+	if st := b.GetCloud(); st.State != "ok" || st.Err != "" {
+		t.Fatalf("travou: %+v", st)
+	}
+	rs.MaxDownload = old
+	b.cloudSync() // marcado como visto: não baixa de novo
+	if pts, _ := b.store.Range(time.Date(2026, 9, 21, 0, 0, 0, 0, time.UTC), time.Date(2026, 9, 22, 0, 0, 0, 0, time.UTC)); len(pts) != 0 {
+		t.Fatalf("baixou o que devia pular: %d", len(pts))
+	}
+}

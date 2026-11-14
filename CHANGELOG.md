@@ -1,5 +1,24 @@
 # Versões
 
+## 2.80.5
+- Nuvem: arquivo grande (mais de 8 MB, como uma foto anexada) sobe em
+  pedaços. Se a conexão cair no meio, o envio continua do último pedaço
+  que chegou, em vez de recomeçar do zero.
+- Nuvem: o download tem um limite de tamanho. Um arquivo da nuvem grande
+  demais é pulado, sem travar o resto.
+- Nuvem no Windows: o código de recuperação copiado não entra no histórico
+  da área de transferência (Win+V) nem sobe para a nuvem da Microsoft.
+
+**English**
+
+- Cloud: large files (over 8 MB, such as an attached photo) upload in
+  pieces. If the connection drops halfway, the upload continues from the
+  last piece that arrived, instead of starting over.
+- Cloud: downloads have a size limit. A cloud file that is too large is
+  skipped without blocking the rest.
+- Cloud on Windows: the copied recovery code does not go into the
+  clipboard history (Win+V) or up to Microsoft's cloud clipboard.
+
 ## 2.80.4
 - Nuvem: no "Entrar com Google" de novo, outra conta Google é recusada com
   um aviso, em vez de dar erro depois.
