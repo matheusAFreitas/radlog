@@ -81,3 +81,42 @@ func TestFindPeaksBi214NotCo60(t *testing.T) {
 		t.Fatalf("não achou o rádio: %+v", p)
 	}
 }
+
+// Dados reais de 14/11: numa pedra de urânio o pico de 583-609 keV saía
+// como "Tório-232". Sem 911 nem 2.614 keV, não é tório; com o 2.614, é.
+func TestFindPeaksThoriumNeedsConfirm(t *testing.T) {
+	const n = 1024
+	mk := func(withTh bool) *MeasureSpectrum {
+		s := &MeasureSpectrum{A: [3]float64{5.43, 2.351, 0.000381}, BgSec: 1000, ObjSec: 1000, Bg: make([]uint32, n), Obj: make([]uint32, n)}
+		for i := 0; i < n; i++ {
+			e := s.energy(i)
+			cont := 400 * math.Exp(-e/300)
+			s.Bg[i] = uint32(cont)
+			g := func(pe, c float64) float64 {
+				sg := specFWHM(pe) / 2.355
+				return c * 2.35 / (sg * math.Sqrt(2*math.Pi)) * math.Exp(-math.Pow((e-pe)/sg, 2)/2)
+			}
+			// o pico largo entre 583 e 609 puxado para o lado do Tl-208
+			v := cont + 2*cont + g(583.2, 4000) + g(351.9, 3000)
+			if withTh {
+				v += g(2614.5, 1500) + g(911.2, 1500)
+			}
+			s.Obj[i] = uint32(v)
+		}
+		return s
+	}
+	for _, x := range mk(false).findPeaks() {
+		if x.Group == "Tório-232 (série)" {
+			t.Fatalf("tório sem 911 nem 2.614: %+v", x)
+		}
+	}
+	th := false
+	for _, x := range mk(true).findPeaks() {
+		if x.Group == "Tório-232 (série)" {
+			th = true
+		}
+	}
+	if !th {
+		t.Fatal("com 2.614 keV, o tório tem que aparecer")
+	}
+}

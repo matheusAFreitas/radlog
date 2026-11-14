@@ -1,5 +1,26 @@
 # Versões
 
+## 2.80.10
+- Detalhe do alerta do GQ GMC-800: o "Limite" mostrava 0,056 µSv/h quando o
+  alerta dizia "a partir de 10,1": o app lia o 10,1 µSv/h do texto como se
+  fosse 10 CPM e convertia de novo. Agora mostra o limite certo. Também
+  saiu o "1 minutos".
+- Espectros: o app só fala em tório (Th-232) quando aparece o pico de
+  911 keV ou o de 2.614 keV. O pico de 583 keV fica junto do 609 keV do
+  urânio (e o de 238,6 junto do 242), e o RC102 não separa os dois: numa
+  pedra de urânio o app chegava a marcar "Tório-232" sem tório nenhum.
+
+**English**
+
+- GQ GMC-800 alert detail: "Limit" showed 0.056 µSv/h when the alert said
+  "from 10.1": the app read the 10.1 µSv/h in the text as if it were 10 CPM
+  and converted it again. It now shows the right limit. "1 minutes" is gone
+  too.
+- Spectra: the app only mentions thorium (Th-232) when the 911 keV or the
+  2,614 keV peak shows up. The 583 keV peak sits next to uranium's 609 keV
+  (and 238.6 next to 242), and the RC102 cannot tell them apart: on a
+  uranium rock the app could label "Thorium-232" with no thorium at all.
+
 ## 2.80.9
 - GQ GMC-800: o valor gravado de cada minuto agora é a média das contagens
   de cada segundo. Antes era só a última leitura do minuto, e o GMC-800 manda

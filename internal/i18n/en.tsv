@@ -5552,3 +5552,5 @@ nuvem: o cofre do sistema não abriu ({0})	cloud: the system keyring did not ope
 nuvem: abrindo o cofre…	cloud: opening the keyring…
 nuvem: cofre bloqueado	cloud: keyring locked
 cofre	keyring
+minuto	minute
+segundo	second

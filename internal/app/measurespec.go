@@ -168,6 +168,25 @@ func (s *MeasureSpectrum) findPeaks() []SpecPeak {
 		}
 	}
 	out = kept0
+	// tório só com uma linha que nenhuma outra série tem perto: 911 keV
+	// (Ac-228) ou 2.614 keV (Tl-208). O 583 (Tl-208) fica dentro do 609 do
+	// Bi-214 e o 238,6 (Pb-212) dentro do 242 do Pb-214: numa pedra de
+	// urânio eles "aparecem" sem tório nenhum (dados reais de 14/11)
+	thOK := false
+	for _, p := range out {
+		if p.Group == "Tório-232 (série)" && (p.KeV == 911.2 || p.KeV == 2614.5) {
+			thOK = true
+		}
+	}
+	if !thOK {
+		kept1 := out[:0]
+		for _, p := range out {
+			if p.Group != "Tório-232 (série)" {
+				kept1 = append(kept1, p)
+			}
+		}
+		out = kept1
+	}
 	// linhas mais perto que a largura do pico (ex.: 583 do Tl-208 e 609 do
 	// Bi-214) não dá para separar: fica só a mais forte
 	sort.SliceStable(out, func(i, j int) bool { return out[i].Sigma > out[j].Sigma })
