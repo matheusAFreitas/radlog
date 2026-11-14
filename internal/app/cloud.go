@@ -1,6 +1,7 @@
 package app
 
 import (
+	"bytes"
 	"context"
 	"crypto/sha256"
 	"encoding/hex"
@@ -126,7 +127,14 @@ type cloudFile struct {
 	Up        map[string]string   `json:"up,omitempty"`   // pacote → resumo do que subiu
 	Seen      map[string]string   `json:"seen,omitempty"` // arquivo de outro aparelho → md5 já juntado
 	Devs      map[string]cloudDev `json:"devs,omitempty"` // arquivo de aparelho → nome e último envio
+	Rev       int                 `json:"rev,omitempty"`  // cloudRev desta cópia do app
 }
+
+// cloudRev sobe quando a mescla passa a aproveitar algo que antes ficava de
+// fora: a nuvem baixa e junta de novo o que já tinha visto.
+//
+//	1: 2.79.1, anexos das medições (N1)
+const cloudRev = 1
 
 // cloudSecret é o nuvem-chave.bin.
 type cloudSecret struct {
@@ -160,6 +168,9 @@ type cloudState struct {
 	sendI     int
 	sendN     int
 	kick      chan struct{}
+	// gen muda ao ligar e ao desconectar: uma sincronização que termina
+	// depois disso não grava mais nada (auditoria 2.79.0, N8)
+	gen int
 }
 
 func (a *App) cloudPath() string    { return filepath.Join(a.dataDir, "nuvem.json") }
@@ -184,10 +195,20 @@ func (a *App) cloudLoadLocked() {
 		}
 	}
 	if c.f.On {
-		if c.sec.Code == "" {
-			c.f.NeedLogin = true
-		} else if k, err := rs.DeriveKeys(c.sec.Code, c.f.Salt); err == nil {
+		if k, err := rs.DeriveKeys(c.sec.Code, c.f.Salt); err == nil && c.sec.Code != "" {
 			c.keys = k
+		} else {
+			// chave ilegível (pasta copiada de outro PC, Windows reinstalado):
+			// entrar de novo e digitar o código (N3)
+			c.f.NeedLogin = true
+		}
+		if c.f.Rev < cloudRev {
+			seen := map[string]string{}
+			if m, ok := c.f.Seen[rs.MetaFile]; ok {
+				seen[rs.MetaFile] = m
+			}
+			c.f.Seen, c.f.Rev = seen, cloudRev
+			a.cloudSaveLocked()
 		}
 	}
 }
@@ -230,6 +251,8 @@ func (a *App) cloudInfoLocked() CloudInfo {
 	case c.run != nil && c.sendN > 0:
 		info.State = "send"
 		info.SendNow, info.SendI, info.SendN = c.sendNow, c.sendI, c.sendN
+	case c.err != "":
+		info.State = "err" // amarelo na hora (N9)
 	case c.offline:
 		info.State = "offline"
 	case c.skew > cloudSkewMax || c.skew < -cloudSkewMax:
@@ -319,7 +342,7 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 		c.login = nil
 		c.loginStop()
 	}
-	on := c.f.On
+	on := c.f.On && c.keys != nil
 	c.mu.Unlock()
 	defer a.emitCloud()
 	if errors.Is(err, rs.ErrCanceled) {
@@ -457,8 +480,20 @@ func (a *App) cloudTurnOn(p *cloudPending, folder, code string, salt []byte, key
 	}
 	c := &a.cloud
 	c.mu.Lock()
+	old := c.f
 	c.f = cloudFile{On: true, DevID: randHex(8), Name: name, Folder: folder, Salt: salt, Email: p.tok.Email,
-		Up: map[string]string{}, Seen: map[string]string{}, Devs: map[string]cloudDev{}}
+		Up: map[string]string{}, Seen: map[string]string{}, Devs: map[string]cloudDev{}, Rev: cloudRev}
+	if old.On && old.Folder == folder && old.DevID != "" && bytes.Equal(old.Salt, salt) {
+		// a mesma nuvem (a chave daqui ficou ilegível): continua o mesmo aparelho
+		c.f.DevID, c.f.Name, c.f.NoAuto, c.f.LastUp, c.f.LastSync = old.DevID, old.Name, old.NoAuto, old.LastUp, old.LastSync
+		if old.Up != nil {
+			c.f.Up = old.Up
+		}
+		if old.Devs != nil {
+			c.f.Devs = old.Devs
+		}
+	}
+	c.gen++
 	c.sec = cloudSecret{Code: code, Refresh: p.tok.Refresh}
 	c.keys, c.access, c.expiry = keys, p.tok.Access, p.tok.Expiry
 	c.pend, c.err, c.offline, c.skew = nil, "", false, 0
@@ -639,6 +674,7 @@ func (a *App) CloudDisconnect() CloudInfo {
 	_ = os.Remove(a.cloudKeyPath())
 	_ = os.Remove(a.cloudPath())
 	c.f, c.sec, c.keys, c.access, c.pend, c.err, c.offline, c.skew = cloudFile{}, cloudSecret{}, nil, "", nil, "", false, 0
+	c.gen++
 	c.mu.Unlock()
 	a.logf("nuvem desligada neste PC")
 	a.emitCloud()
@@ -723,11 +759,17 @@ func (a *App) cloudSync() {
 	}
 	ctx, cancel := context.WithCancel(context.Background())
 	c.run = cancel
+	gen := c.gen
 	c.mu.Unlock()
-	err := a.cloudSyncRun(ctx)
+	err := a.cloudSyncRun(ctx, gen)
 	cancel()
 	c.mu.Lock()
+	defer a.emitCloud()
+	defer c.mu.Unlock()
 	c.run, c.sendN, c.sendI, c.sendNow = nil, 0, 0, ""
+	if c.gen != gen || !c.f.On {
+		return // desconectou ou ligou outra nuvem no meio
+	}
 	var nerr net.Error
 	var herr *rs.HTTPError
 	switch {
@@ -741,11 +783,28 @@ func (a *App) cloudSync() {
 	case errors.As(err, &nerr), errors.As(err, &herr) && herr.Code >= 500:
 		c.offline = true // sem internet ou o Google fora do ar: tenta na próxima
 	default:
-		c.offline, c.err = false, err.Error()
+		c.offline, c.err = false, cloudErrText(err)
 		a.logf("nuvem: %v", err)
 	}
-	c.mu.Unlock()
-	a.emitCloud()
+}
+
+// cloudErrText é o erro em palavras para a tela (o Google responde em inglês).
+func cloudErrText(err error) string {
+	var herr *rs.HTTPError
+	if errors.As(err, &herr) {
+		msg := strings.ToLower(herr.Msg)
+		switch {
+		case strings.Contains(msg, "quota") || strings.Contains(msg, "storage"):
+			return "o Google Drive está cheio: libere espaço na conta Google para a nuvem voltar a subir"
+		case herr.Code == 401 || herr.Code == 403:
+			return fmt.Sprintf("o Google recusou o acesso ao Drive (%d); se continuar, desconecte e entre de novo", herr.Code)
+		case herr.Code == 429:
+			return "o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha"
+		default:
+			return fmt.Sprintf("o Google respondeu com erro %d; a nuvem tenta de novo sozinha", herr.Code)
+		}
+	}
+	return err.Error()
 }
 
 type cloudPack struct {
@@ -832,7 +891,7 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 		p := months[m]
 		ps := parts[p.key]
 		sort.Strings(ps)
-		h := sha256.Sum256([]byte(strings.Join(ps, "\n")))
+		h := sha256.Sum256([]byte("v2\n" + strings.Join(ps, "\n"))) // v2: início das medições dos anexos (N1)
 		p.digest = hex.EncodeToString(h[:16])
 		out = append(out, *p)
 	}
@@ -862,9 +921,22 @@ const (
 	cloudKindPack   = 'p'
 )
 
-func (a *App) cloudSyncRun(ctx context.Context) error {
+// cloudHold trava e confere que a nuvem ainda é a da sincronização; false =
+// destravada, parar (N8).
+func (a *App) cloudHold(gen int) bool {
+	a.cloud.mu.Lock()
+	if a.cloud.gen != gen || !a.cloud.f.On {
+		a.cloud.mu.Unlock()
+		return false
+	}
+	return true
+}
+
+func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 	c := &a.cloud
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return context.Canceled
+	}
 	folder, keys, dev, code := c.f.Folder, c.keys, c.f.DevID, c.sec.Code
 	mine := map[string]bool{keys.FileName("d|" + dev): true, keys.FileName("c|" + dev): true}
 	for k := range c.f.Up {
@@ -885,7 +957,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 	if !ok {
 		return errCloudGone
 	}
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return context.Canceled
+	}
 	metaSeen := c.f.Seen[rs.MetaFile] == mf.MD5
 	c.mu.Unlock()
 	if !metaSeen {
@@ -900,11 +974,11 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 		if _, err := m.Unlock(code); err != nil {
 			return errCloudGone
 		}
-		a.cloudSeen(rs.MetaFile, mf.MD5)
+		a.cloudSeen(gen, rs.MetaFile, mf.MD5)
 	}
 
 	// 1) baixa o que os outros aparelhos subiram de novo
-	got, err := a.cloudDownload(ctx, d, files, mine)
+	got, bad, err := a.cloudDownload(ctx, d, files, mine, gen)
 	if err != nil {
 		return err
 	}
@@ -914,7 +988,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return context.Canceled
+	}
 	var todo []cloudPack
 	for _, p := range packs {
 		if c.f.Up[p.key] != p.digest {
@@ -929,7 +1005,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 		if err := ctx.Err(); err != nil {
 			return err
 		}
-		c.mu.Lock()
+		if !a.cloudHold(gen) {
+			return context.Canceled
+		}
 		c.sendI, c.sendNow = i+1, p.month
 		c.mu.Unlock()
 		a.emitCloud()
@@ -947,7 +1025,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 		}
 		byName[f.Name] = f
 		sent++
-		c.mu.Lock()
+		if !a.cloudHold(gen) {
+			return context.Canceled
+		}
 		c.f.Up[p.key] = p.digest
 		c.f.LastUp = time.Now().UnixMilli()
 		c.f.Queue = cloudQueue(todo[i+1:])
@@ -955,7 +1035,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 		c.mu.Unlock()
 	}
 	// o arquivo deste aparelho: nome e último envio
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return context.Canceled
+	}
 	me := cloudDev{Name: c.f.Name, LastUp: c.f.LastUp}
 	devDigest := me.Name + "|" + strconv.FormatInt(me.LastUp, 10)
 	devUp := c.f.Up["d"] == devDigest
@@ -967,7 +1049,9 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 			return err
 		}
 		byName[f.Name] = f
-		c.mu.Lock()
+		if !a.cloudHold(gen) {
+			return context.Canceled
+		}
 		c.f.Up["d"] = devDigest
 		c.mu.Unlock()
 	}
@@ -975,18 +1059,26 @@ func (a *App) cloudSyncRun(ctx context.Context) error {
 	for _, f := range byName {
 		used += f.Size
 	}
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return context.Canceled
+	}
 	c.f.LastSync, c.f.Used, c.f.Queue = time.Now().UnixMilli(), used, nil
 	a.cloudSaveLocked()
 	c.mu.Unlock()
 	if sent > 0 || got > 0 {
 		a.logf("nuvem: subiu %d pacote(s), juntou %d", sent, got)
 	}
+	if bad > 0 {
+		// o resto sincronizou; os que não entraram são tentados de novo (N2)
+		return fmt.Errorf("%d pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo", bad)
+	}
 	return nil
 }
 
-func (a *App) cloudSeen(name, md5 string) {
-	a.cloud.mu.Lock()
+func (a *App) cloudSeen(gen int, name, md5 string) {
+	if !a.cloudHold(gen) {
+		return
+	}
 	if a.cloud.f.Seen == nil {
 		a.cloud.f.Seen = map[string]string{}
 	}
@@ -1014,10 +1106,13 @@ func (a *App) cloudPut(ctx context.Context, d *rs.Drive, folder string, keys *rs
 
 // cloudDownload baixa e junta os arquivos novos dos outros aparelhos: o
 // comum primeiro (as medições, para os anexos acharem a delas), depois os
-// meses e espectros. Devolve quantos pacotes juntou.
-func (a *App) cloudDownload(ctx context.Context, d *rs.Drive, files []rs.File, mine map[string]bool) (int, error) {
+// meses e espectros. Um pacote que não junta fica de fora desta vez e não
+// para o resto (N2). Devolve quantos pacotes juntou e quantos não entraram.
+func (a *App) cloudDownload(ctx context.Context, d *rs.Drive, files []rs.File, mine map[string]bool, gen int) (got, bad int, err error) {
 	c := &a.cloud
-	c.mu.Lock()
+	if !a.cloudHold(gen) {
+		return 0, 0, context.Canceled
+	}
 	keys := c.keys
 	seen := map[string]string{}
 	for k, v := range c.f.Seen {
@@ -1033,65 +1128,70 @@ func (a *App) cloudDownload(ctx context.Context, d *rs.Drive, files []rs.File, m
 			_ = os.Remove(p.path)
 		}
 	}()
-	got := 0
 	for _, f := range files {
 		if f.Name == rs.MetaFile || mine[f.Name] || (f.MD5 != "" && seen[f.Name] == f.MD5) {
 			continue
 		}
 		if err := ctx.Err(); err != nil {
-			return got, err
+			return got, bad, err
 		}
 		b, err := d.Get(ctx, f.ID)
 		if errors.Is(err, rs.ErrNotFound) {
 			continue
 		}
 		if err != nil {
-			return got, err
+			return got, bad, err
 		}
 		plain, err := keys.Open(f.Name, b)
 		if err != nil || len(plain) == 0 {
-			a.cloudSeen(f.Name, f.MD5) // não é da nuvem (ou estragou): não tenta de novo
+			a.cloudSeen(gen, f.Name, f.MD5) // não é da nuvem (ou estragou): não tenta de novo
 			continue
 		}
 		switch plain[0] {
 		case cloudKindDev:
 			var dv cloudDev
-			if json.Unmarshal(plain[1:], &dv) == nil {
-				c.mu.Lock()
+			if json.Unmarshal(plain[1:], &dv) == nil && a.cloudHold(gen) {
 				if c.f.Devs == nil {
 					c.f.Devs = map[string]cloudDev{}
 				}
 				c.f.Devs[f.Name] = dv
 				c.mu.Unlock()
 			}
-			a.cloudSeen(f.Name, f.MD5)
+			a.cloudSeen(gen, f.Name, f.MD5)
 		case cloudKindCommon:
 			if _, err := a.mergeDelta(plain[1:], "nuvem"); err != nil {
-				return got, fmt.Errorf("não consegui juntar um pacote da nuvem: %w", err)
+				a.logf("nuvem: um pacote de outro aparelho não entrou (%v)", err)
+				bad++
+				continue
 			}
 			got++
-			a.cloudSeen(f.Name, f.MD5)
+			a.cloudSeen(gen, f.Name, f.MD5)
 		case cloudKindPack:
 			tf, err := os.CreateTemp(dir, "nuvem-*.zip")
 			if err != nil {
-				return got, err
+				return got, bad, err
 			}
 			_, werr := tf.Write(plain[1:])
 			tf.Close()
 			packs = append(packs, later{f.Name, f.MD5, tf.Name()})
 			if werr != nil {
-				return got, werr
+				return got, bad, werr
 			}
 		default:
-			a.cloudSeen(f.Name, f.MD5)
+			a.cloudSeen(gen, f.Name, f.MD5)
 		}
 	}
 	for _, p := range packs {
+		if err := ctx.Err(); err != nil {
+			return got, bad, err
+		}
 		if _, err := a.mergeZip(p.path, false); err != nil {
-			return got, fmt.Errorf("não consegui juntar um pacote da nuvem: %w", err)
+			a.logf("nuvem: um pacote de outro aparelho não entrou (%v)", err)
+			bad++
+			continue
 		}
 		got++
-		a.cloudSeen(p.name, p.md5)
+		a.cloudSeen(gen, p.name, p.md5)
 	}
-	return got, nil
+	return got, bad, nil
 }

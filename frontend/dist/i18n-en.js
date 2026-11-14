@@ -4128,7 +4128,11 @@ const I18N_EN = {
 "nuvem enviando…": "cloud uploading…",
 "nuvem: confirme o aparelho": "cloud: confirm the device",
 "Pronto, login feito": "Done, you are signed in",
-"Login cancelado": "Sign-in canceled"
+"Login cancelado": "Sign-in canceled",
+"com erro": "error",
+"nuvem: deu erro": "cloud: error",
+"o Google Drive está cheio: libere espaço na conta Google para a nuvem voltar a subir": "Google Drive is full: free up space in the Google account so the cloud can upload again",
+"o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha": "Google asked to wait a little; the cloud tries again on its own"
 },
 "patterns": [
 [
@@ -5188,6 +5192,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) pacote\\(s\\) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo$",
+"${1} package(s) from another device did not go into this PC; the rest synced and they will be tried again",
+[
+" pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo"
+]
+],
+[
 "Choveu 12,4 mm nas 4 horas antes, a partir de ",
 "^Choveu 12,4 mm nas 4 horas antes, a partir de ((?:(?! · ).)+?)\\. Na sua casa, a chuva costuma subir o fundo uns 9%\\.$",
 "It rained 12.4 mm in the 4 hours before, starting at ${1}. In your home, rain usually raises the background by about 9%.",
@@ -5931,6 +5943,15 @@ const I18N_EN = {
 "A diferença vale ",
 " vezes a incerteza (",
 "σ): cabe na variação natural da contagem."
+]
+],
+[
+"o Google recusou o acesso ao Drive (",
+"^o Google recusou o acesso ao Drive \\(((?:(?! · ).)+?)\\); se continuar, desconecte e entre de novo$",
+"Google refused access to Drive (${1}); if it keeps happening, disconnect and sign in again",
+[
+"o Google recusou o acesso ao Drive (",
+"); se continuar, desconecte e entre de novo"
 ]
 ],
 [
@@ -7176,6 +7197,15 @@ const I18N_EN = {
 ]
 ],
 [
+"o Google respondeu com erro ",
+"^o Google respondeu com erro ((?:(?! · ).)+?); a nuvem tenta de novo sozinha$",
+"Google answered with error ${1}; the cloud tries again on its own",
+[
+"o Google respondeu com erro ",
+"; a nuvem tenta de novo sozinha"
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -8143,6 +8173,14 @@ const I18N_EN = {
 [
 "atualização: não deu para pôr como ",
 "); abrindo "
+]
+],
+[
+"nuvem: um pacote de outro aparelho não entrou (",
+"^nuvem: um pacote de outro aparelho não entrou \\(((?:(?! · ).)+?)\\)$",
+"cloud: a package from another device did not go in (${1})",
+[
+"nuvem: um pacote de outro aparelho não entrou ("
 ]
 ],
 [

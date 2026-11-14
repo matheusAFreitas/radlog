@@ -5447,3 +5447,11 @@ nuvem enviando…	cloud uploading…
 nuvem: confirme o aparelho	cloud: confirm the device
 Pronto, login feito	Done, you are signed in
 Login cancelado	Sign-in canceled
+com erro	error
+nuvem: deu erro	cloud: error
+o Google Drive está cheio: libere espaço na conta Google para a nuvem voltar a subir	Google Drive is full: free up space in the Google account so the cloud can upload again
+o Google recusou o acesso ao Drive ({0}); se continuar, desconecte e entre de novo	Google refused access to Drive ({0}); if it keeps happening, disconnect and sign in again
+o Google pediu para esperar um pouco; a nuvem tenta de novo sozinha	Google asked to wait a little; the cloud tries again on its own
+o Google respondeu com erro {0}; a nuvem tenta de novo sozinha	Google answered with error {0}; the cloud tries again on its own
+{0} pacote(s) de outro aparelho não entraram neste PC; o resto sincronizou e eles são tentados de novo	{0} package(s) from another device did not go into this PC; the rest synced and they will be tried again
+nuvem: um pacote de outro aparelho não entrou ({0})	cloud: a package from another device did not go in ({0})

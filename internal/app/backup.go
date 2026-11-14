@@ -462,7 +462,24 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 	}
 
-	// anexos das medições (copia o que falta)
+	// anexos das medições (copia o que falta). Sem o medicoes.json no mesmo
+	// pacote (nuvem), a medição daqui é achada pelo início (N1).
+	var starts map[string]int64
+	if f, ok := files[attachStartsFile]; ok {
+		if b, err := readZipFile(f); err == nil {
+			_ = json.Unmarshal(b, &starts)
+		}
+	}
+	localByStart := func(sec int64) (int64, bool) {
+		a.mu.Lock()
+		defer a.mu.Unlock()
+		for _, m := range a.measurements {
+			if m.Time/1000 == sec {
+				return m.ID, true
+			}
+		}
+		return 0, false
+	}
 	for n, f := range files {
 		parts := strings.Split(n, "/")
 		if len(parts) != 3 || parts[0] != attachDirName || parts[1] == "" || safeFileName(parts[2]) != parts[2] {
@@ -474,7 +491,13 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 		}
 		lid, ok := attachIDs[bid]
 		if !ok {
-			continue
+			sec, has := starts[parts[1]]
+			if !has {
+				continue
+			}
+			if lid, ok = localByStart(sec); !ok {
+				continue
+			}
 		}
 		dst := filepath.Join(a.attachDir(lid), parts[2])
 		if _, err := os.Stat(dst); err == nil {

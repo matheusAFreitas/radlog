@@ -49,6 +49,7 @@ function cloudBadge(c) {
     case "login": return { text: "nuvem: entrar de novo", att: true };
     case "clock": return { text: "nuvem: relógio errado", att: true };
     case "dup": return { text: "nuvem: confirme o aparelho", att: true };
+    case "err": return { text: "nuvem: deu erro", att: true };
     case "send": return { text: "nuvem enviando…" };
     case "offline": return stale ? { text: "nuvem: sem sincronizar há mais de 1 dia", att: true } : { text: "nuvem · sem internet" };
     default: return stale ? { text: "nuvem: sem sincronizar há mais de 1 dia", att: true } : { text: `nuvem em dia · ${hhmm(c.lastSync || Date.now())}` };
@@ -121,7 +122,7 @@ function cloudDevices(c) {
   return box;
 }
 
-const CLOUD_TAG = { ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"] };
+const CLOUD_TAG = { err: ["com erro", "att"], ok: ["em dia", "ok"], send: ["enviando", "ok"], offline: ["sem internet", ""], login: ["entrar de novo", "att"], clock: ["relógio", "att"], dup: ["pausada", "att"] };
 
 function renderCloud() {
   renderCloudBadges();
@@ -143,6 +144,7 @@ function renderCloud() {
       row.append(cloudBtn("Abrir o navegador de novo", "", () => cloudCall("CloudLogin")), cloudBtn("Cancelar", "", () => cloudCall("CloudCancel")));
       body.append(row);
       return;
+    case "err":
     case "ok":
       body.append(cloudKV([...acct, ["Última sincronização", cloudWhen(c.lastSync)], ["Na fila", cloudQueue(c.queue)], ["Espaço usado no Drive", cloudSize(c.used)]]));
       if (c.err) body.append(cloudNote("att", "Não deu certo da última vez:", c.err));

@@ -34,6 +34,8 @@ type Server struct {
 	Revoked bool          // o token responde invalid_grant
 	Offline bool          // tudo responde 503
 	Skew    time.Duration // somado à hora do cabeçalho Date
+	Quota   bool          // envio responde 403 de cota cheia
+	OnPut   func()        // chamado depois de cada envio terminado (resposta já enviada)
 	Calls   []string
 }
 
@@ -158,6 +160,9 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 		w.WriteHeader(204)
+	case s.Quota && strings.HasPrefix(p, "/upload/"):
+		w.WriteHeader(403)
+		s.js(w, map[string]any{"error": map[string]any{"code": 403, "message": "The user's Drive storage quota has been exceeded."}})
 	case r.Method == "POST" && p == "/upload/drive/v3/files":
 		var m struct {
 			Name    string
@@ -187,6 +192,12 @@ func (s *Server) serve(w http.ResponseWriter, r *http.Request) {
 		f.Data, f.Modified = body, now
 		s.Files[f.ID] = f
 		s.js(w, meta(f))
+		if s.OnPut != nil {
+			if fl, ok := w.(http.Flusher); ok {
+				fl.Flush()
+			}
+			s.OnPut()
+		}
 	default:
 		w.WriteHeader(400)
 	}
