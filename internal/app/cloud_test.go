@@ -24,7 +24,7 @@ func fakeCloud(t *testing.T) *synctest.Server {
 	googleClientID = "cid"
 	cloudOAuth = func() *rs.OAuth {
 		o := rs.Google("cid", "sec")
-		o.TokenURL = srv.TokenURL()
+		o.TokenURL, o.RevokeURL = srv.TokenURL(), srv.RevokeURL()
 		return o
 	}
 	cloudDriveFn = func(tok func(context.Context) (string, error)) *rs.Drive {

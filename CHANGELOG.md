@@ -1,5 +1,26 @@
 # Versões
 
+## 2.80.4
+- Nuvem: no "Entrar com Google" de novo, outra conta Google é recusada com
+  um aviso, em vez de dar erro depois.
+- Nuvem: desconectar o único aparelho da nuvem também tira o RadLog da
+  lista de apps da conta Google. Com outros aparelhos ligados, não tira,
+  para não desconectar os outros.
+- Nuvem: a pasta do RadLog no Drive ganha uma marca. Um aparelho novo acha
+  a nuvem mesmo que a pasta mude de nome, e dois aparelhos criando a nuvem
+  ao mesmo tempo não viram duas nuvens.
+
+**English**
+
+- Cloud: when signing in with Google again, a different Google account is
+  refused with a notice, instead of failing later.
+- Cloud: disconnecting the only device in the cloud also removes RadLog
+  from the Google account's app list. With other devices connected it does
+  not, so the others stay connected.
+- Cloud: the RadLog folder in Drive gets a mark. A new device finds the
+  cloud even if the folder is renamed, and two devices creating the cloud
+  at the same time no longer end up with two clouds.
+
 ## 2.80.3
 - Nuvem: "Começar uma nuvem nova" só manda a nuvem antiga para a lixeira do
   Drive depois de a nova estar criada. Quem desiste no meio continua com a

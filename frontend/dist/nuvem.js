@@ -281,7 +281,8 @@ async function cloudCall(fn, ...args) {
 async function cloudDisconnect() {
   const ok = await askConfirm({
     title: "Desconectar do Google?",
-    text: ["Este PC para de sincronizar com a nuvem. Os dados daqui não mudam, e a cópia da nuvem continua no seu Drive.", "Para ligar de novo, entre com o Google e digite o código de recuperação."],
+    text: ["Este PC para de sincronizar com a nuvem. Os dados daqui não mudam, e a cópia da nuvem continua no seu Drive.", "Para ligar de novo, entre com o Google e digite o código de recuperação."]
+      .concat((cloud && cloud.devices || []).some((d) => !d.me) ? [] : ["Como este é o único aparelho da nuvem, o RadLog também sai da lista de apps da sua conta Google."]),
     ok: "Desconectar", danger: true,
   });
   if (ok) cloudCall("CloudDisconnect");

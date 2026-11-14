@@ -9,6 +9,7 @@ import (
 	"io"
 	"net/http"
 	"net/url"
+	"sort"
 	"strings"
 	"time"
 )
@@ -48,6 +49,7 @@ type File struct {
 	Size     int64     `json:"size,string,omitempty"`
 	MD5      string    `json:"md5Checksum,omitempty"`
 	Modified time.Time `json:"modifiedTime"`
+	Created  time.Time `json:"createdTime"`
 }
 
 const fileFields = "id,name,size,md5Checksum,modifiedTime"
@@ -110,35 +112,70 @@ func qs(s string) string {
 	return "'" + strings.ReplaceAll(strings.ReplaceAll(s, `\`, `\\`), "'", `\'`) + "'"
 }
 
-// FindFolder acha a pasta do app na raiz pelo nome ("" se não existe).
-func (d *Drive) FindFolder(ctx context.Context, name string) (string, error) {
-	q := url.Values{
-		"q":        {fmt.Sprintf("name = %s and mimeType = %s and trashed = false", qs(name), qs(folderMime))},
-		"fields":   {"files(id,name,createdTime)"},
-		"orderBy":  {"createdTime"},
-		"pageSize": {"10"},
-		"spaces":   {"drive"},
+// Marca da pasta do app (appProperties): acha a pasta mesmo que a pessoa
+// mude o nome dela no Drive (auditoria 2.79.0, N17).
+const (
+	FolderPropKey = "radlog"
+	FolderPropVal = "nuvem"
+)
+
+// FindFolders acha as pastas do app, pela marca ou pelo nome (as de antes da
+// marca), da mais antiga para a mais nova.
+func (d *Drive) FindFolders(ctx context.Context, name string) ([]File, error) {
+	seen := map[string]bool{}
+	var out []File
+	for _, cond := range []string{
+		fmt.Sprintf("appProperties has { key=%s and value=%s }", qs(FolderPropKey), qs(FolderPropVal)),
+		fmt.Sprintf("name = %s", qs(name)),
+	} {
+		q := url.Values{
+			"q":        {fmt.Sprintf("%s and mimeType = %s and trashed = false", cond, qs(folderMime))},
+			"fields":   {"files(id,name,createdTime)"},
+			"orderBy":  {"createdTime"},
+			"pageSize": {"20"},
+			"spaces":   {"drive"},
+		}
+		var r struct {
+			Files []File `json:"files"`
+		}
+		if _, err := d.do(ctx, "GET", d.Base+"/files?"+q.Encode(), "", nil, &r); err != nil {
+			return nil, err
+		}
+		for _, f := range r.Files {
+			if !seen[f.ID] {
+				seen[f.ID] = true
+				out = append(out, f)
+			}
+		}
 	}
-	var r struct {
-		Files []File `json:"files"`
-	}
-	if _, err := d.do(ctx, "GET", d.Base+"/files?"+q.Encode(), "", nil, &r); err != nil {
-		return "", err
-	}
-	if len(r.Files) == 0 {
-		return "", nil
-	}
-	return r.Files[0].ID, nil
+	sort.SliceStable(out, func(i, j int) bool { return out[i].Created.Before(out[j].Created) })
+	return out, nil
 }
 
-// CreateFolder cria a pasta na raiz do Drive.
+// FindFolder acha a pasta do app mais antiga ("" se não existe).
+func (d *Drive) FindFolder(ctx context.Context, name string) (string, error) {
+	fs, err := d.FindFolders(ctx, name)
+	if err != nil || len(fs) == 0 {
+		return "", err
+	}
+	return fs[0].ID, nil
+}
+
+// CreateFolder cria a pasta na raiz do Drive, já com a marca.
 func (d *Drive) CreateFolder(ctx context.Context, name string) (string, error) {
-	b, _ := json.Marshal(map[string]any{"name": name, "mimeType": folderMime})
+	b, _ := json.Marshal(map[string]any{"name": name, "mimeType": folderMime, "appProperties": map[string]string{FolderPropKey: FolderPropVal}})
 	var f File
 	if _, err := d.do(ctx, "POST", d.Base+"/files?fields=id", "application/json", b, &f); err != nil {
 		return "", err
 	}
 	return f.ID, nil
+}
+
+// TagFolder põe a marca numa pasta criada antes dela existir.
+func (d *Drive) TagFolder(ctx context.Context, id string) error {
+	b, _ := json.Marshal(map[string]any{"appProperties": map[string]string{FolderPropKey: FolderPropVal}})
+	_, err := d.do(ctx, "PATCH", d.Base+"/files/"+url.PathEscape(id)+"?fields=id", "application/json", b, nil)
+	return err
 }
 
 // List lista os arquivos da pasta.

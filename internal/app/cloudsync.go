@@ -244,7 +244,17 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 	// MetaV: o nuvem.json da 2.79.x já tinha visto a meta antiga; sem ela
 	// conferida nesta versão, lê de novo para achar o formato antigo
 	metaSeen := c.f.Seen[rs.MetaFile] == mf.MD5 && c.f.MetaV == rs.MetaVersion
+	tagged := c.f.Tagged
 	c.mu.Unlock()
+	// a pasta de antes da marca ganha a marca uma vez: assim um aparelho novo
+	// acha a nuvem mesmo que a pasta mude de nome (N17)
+	if !tagged {
+		if err := d.TagFolder(ctx, folder); err == nil && a.cloudHold(gen) {
+			c.f.Tagged = true
+			a.cloudSaveLocked()
+			c.mu.Unlock()
+		}
+	}
 	if !metaSeen {
 		b, err := d.Get(ctx, mf.ID)
 		if err != nil {

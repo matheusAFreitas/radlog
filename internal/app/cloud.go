@@ -138,6 +138,8 @@ type cloudFile struct {
 	Old bool `json:"old,omitempty"`
 	// versão da meta conferida por último (rs.MetaVersion)
 	MetaV int `json:"metaV,omitempty"`
+	// a pasta já tem a marca do app (N17)
+	Tagged bool `json:"tagged,omitempty"`
 	// outro aparelho tirou este da nuvem (ms): pausada até entrar de novo
 	Removed int64 `json:"removed,omitempty"`
 	// nuvem recomeçada (CloudRestart, ms) e ainda subindo tudo de novo
@@ -417,6 +419,11 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 	}
 	if on {
 		c.mu.Lock()
+		// N12: outra conta Google não enxerga a pasta desta nuvem
+		if c.f.Email != "" && tok.Email != "" && !strings.EqualFold(c.f.Email, tok.Email) {
+			c.mu.Unlock()
+			return nil, errCloudOtherAccount
+		}
 		c.sec.Refresh = tok.Refresh
 		c.access, c.expiry = tok.Access, tok.Expiry
 		c.f.NeedLogin, c.f.Email, c.err = false, tok.Email, ""
@@ -432,14 +439,29 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 	d := a.cloudDriveWith(func(context.Context) (string, error) { return tok.Access, nil })
 	p := &cloudPending{tok: tok}
 	done := &CloudLoginDone{Next: "new"}
-	if p.folder, err = d.FindFolder(ctx, cloudFolderName); err != nil {
+	folders, err := d.FindFolders(ctx, cloudFolderName)
+	if err != nil {
 		return nil, err
 	}
-	if p.folder != "" {
-		files, err := d.List(ctx, p.folder)
+	// mais de uma pasta (N17): vale a mais antiga que tem nuvem
+	for _, fd := range folders {
+		files, err := d.List(ctx, fd.ID)
 		if err != nil {
 			return nil, err
 		}
+		if p.folder == "" {
+			p.folder = fd.ID
+		}
+		has := false
+		for _, f := range files {
+			if f.Name == rs.MetaFile {
+				has = true
+			}
+		}
+		if !has {
+			continue
+		}
+		p.folder = fd.ID
 		for _, f := range files {
 			if f.Name == rs.MetaFile {
 				b, err := d.Get(ctx, f.ID)
@@ -459,6 +481,7 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 				done.LastUp = ms
 			}
 		}
+		break
 	}
 	c.mu.Lock()
 	c.pend = p
@@ -466,6 +489,13 @@ func (a *App) CloudLoginWait() (*CloudLoginDone, error) {
 	done.Info = a.GetCloud()
 	return done, nil
 }
+
+// errCloudOtherAccount: no "entrar de novo", a conta Google é outra (N12).
+// O e-mail não entra na mensagem (ela pode ir para o registro).
+var errCloudOtherAccount = errors.New("essa é outra conta Google. Entre com a mesma conta que aparece no cartão da nuvem, ou desconecte para usar outra")
+
+// errCloudRace: dois aparelhos criaram a nuvem ao mesmo tempo (N17).
+var errCloudRace = errors.New("outro aparelho acabou de criar a nuvem nesta conta. Entre de novo e use o código de recuperação dele")
 
 // CloudCancel desiste do login ou da configuração.
 func (a *App) CloudCancel() CloudInfo {
@@ -514,6 +544,10 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 		b, _ := json.Marshal(meta)
 		_, err = d.Put(ctx, folder, "", rs.MetaFile, b)
 	}
+	if err == nil && folder != p.folder {
+		// dois aparelhos criando ao mesmo tempo (N17): vale a mais antiga
+		err = a.cloudRaceCheck(ctx, d, folder, p.trash)
+	}
 	if err == nil && p.trash != "" {
 		if err = d.Trash(ctx, p.trash); err == nil {
 			a.logf("nuvem: a nuvem antiga foi para a lixeira do Drive")
@@ -527,6 +561,33 @@ func (a *App) CloudFinishSetup(code string) (CloudInfo, error) {
 	}
 	a.cloudTurnOn(p, folder, code, meta.Salt, keys)
 	return a.GetCloud(), nil
+}
+
+// cloudRaceCheck: depois de criar a pasta, confere se outra pasta com nuvem
+// nasceu antes dela (fora skip, a antiga que vai para a lixeira).
+func (a *App) cloudRaceCheck(ctx context.Context, d *rs.Drive, mine, skip string) error {
+	folders, err := d.FindFolders(ctx, cloudFolderName)
+	if err != nil {
+		return err
+	}
+	for _, fd := range folders {
+		if fd.ID == mine {
+			return nil
+		}
+		if fd.ID == skip {
+			continue
+		}
+		files, err := d.List(ctx, fd.ID)
+		if err != nil {
+			return err
+		}
+		for _, f := range files {
+			if f.Name == rs.MetaFile {
+				return errCloudRace
+			}
+		}
+	}
+	return nil
 }
 
 // CloudOpen abre uma nuvem que já existe com o código (outro aparelho).
@@ -776,11 +837,27 @@ func (a *App) CloudDisconnect() CloudInfo {
 	if c.run != nil {
 		c.run()
 	}
+	a.cloudLoadLocked()
+	// N13: tira o RadLog da conta Google, mas só se não há outro aparelho na
+	// nuvem (revogar vale para todos os PCs na mesma conta)
+	revoke := ""
+	if len(c.f.Devs) == 0 {
+		revoke = c.sec.Refresh
+	}
 	_ = os.Remove(a.cloudKeyPath())
 	_ = os.Remove(a.cloudPath())
 	c.f, c.sec, c.keys, c.access, c.pend, c.err, c.offline, c.skew = cloudFile{}, cloudSecret{}, nil, "", nil, "", false, 0
 	c.gen++
 	c.mu.Unlock()
+	if revoke != "" {
+		// em segundo plano: sem internet, o acesso só deixa de ser usado
+		o := cloudOAuth()
+		a.goSafe("nuvem: revogar", func() {
+			ctx, cancel := context.WithTimeout(context.Background(), 30*time.Second)
+			defer cancel()
+			_ = o.Revoke(ctx, revoke)
+		})
+	}
 	a.logf("nuvem desligada neste PC")
 	a.emitCloud()
 	return a.GetCloud()

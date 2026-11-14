@@ -36,6 +36,7 @@ var ErrCanceled = errors.New("login cancelado")
 type OAuth struct {
 	ClientID, Secret  string
 	AuthURL, TokenURL string
+	RevokeURL         string
 	HTTP              *http.Client
 }
 
@@ -43,9 +44,10 @@ type OAuth struct {
 func Google(id, secret string) *OAuth {
 	return &OAuth{
 		ClientID: id, Secret: secret,
-		AuthURL:  "https://accounts.google.com/o/oauth2/v2/auth",
-		TokenURL: "https://oauth2.googleapis.com/token",
-		HTTP:     &http.Client{Timeout: time.Minute},
+		AuthURL:   "https://accounts.google.com/o/oauth2/v2/auth",
+		TokenURL:  "https://oauth2.googleapis.com/token",
+		RevokeURL: "https://oauth2.googleapis.com/revoke",
+		HTTP:      &http.Client{Timeout: time.Minute},
 	}
 }
 
@@ -214,6 +216,30 @@ func (o *OAuth) token(ctx context.Context, v url.Values) (Token, error) {
 		r.Expires = 3600
 	}
 	return Token{Access: r.Access, Refresh: r.Refresh, Expiry: time.Now().Add(time.Duration(r.Expires-60) * time.Second), Email: idEmail(r.IDToken)}, nil
+}
+
+// Revoke tira o acesso do app na conta Google (some da lista de apps da
+// conta). Vale para todos os aparelhos com o mesmo cliente nessa conta.
+func (o *OAuth) Revoke(ctx context.Context, token string) error {
+	if o.RevokeURL == "" || token == "" {
+		return nil
+	}
+	req, err := http.NewRequestWithContext(ctx, "POST", o.RevokeURL, strings.NewReader(url.Values{"token": {token}}.Encode()))
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Content-Type", "application/x-www-form-urlencoded")
+	resp, err := o.HTTP.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	_, _ = io.Copy(io.Discard, io.LimitReader(resp.Body, 4096))
+	// 400 = o token já não valia
+	if resp.StatusCode != 200 && resp.StatusCode != 400 {
+		return &HTTPError{Code: resp.StatusCode}
+	}
+	return nil
 }
 
 // idEmail lê o e-mail do id_token (veio direto do Google por HTTPS, então
