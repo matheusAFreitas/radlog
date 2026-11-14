@@ -4313,7 +4313,13 @@ const I18N_EN = {
 "a pergunta \"fora de casa?\" está no Agora": "the \"away from home?\" question is on Now",
 ". A pergunta \"fora de casa?\" está no Agora.": ". The \"away from home?\" question is on Now.",
 "Responder depois": "Answer later",
-"Parece que o GMC-800 ficou em casa.": "Looks like the GMC-800 stayed home."
+"Parece que o GMC-800 ficou em casa.": "Looks like the GMC-800 stayed home.",
+"Na demonstração isso não muda o aparelho de verdade.": "In the demo this doesn't change the real device.",
+"o GMC-800 de verdade está desconectado": "the real GMC-800 is disconnected",
+"o GMC-800 de verdade saturou": "the real GMC-800 saturated",
+"o GMC-800 de verdade está sem contagens": "the real GMC-800 has no counts",
+"a memória do GMC-800 de verdade passou de 95%": "the real GMC-800 memory is over 95%",
+"a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%"
 },
 "patterns": [
 [

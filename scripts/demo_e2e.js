@@ -32,6 +32,9 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   if (!(await p.evaluate(() => inDemo && typeof demoApi === "object"))) fail("ligou sem trocar a ponte");
   if ((await goCall("GetDemo")).scenario !== "casa") fail("o Go não guardou o cenário");
   if ((await (await p.request.get(url + "__snap")).text()) !== "ok") fail("snap");
+  // o GMC-800 de verdade não está conectado: a faixa avisa (2.83.1)
+  const warn = await p.locator("#demoStripeWarn").textContent();
+  if (!(await p.locator("#demoStripeWarn").isVisible()) || !warn.includes("desconectado")) fail("a faixa não avisou do GMC-800 desconectado: " + warn);
 
   // 2) cenários: o Go guarda, a tela mostra
   for (const sc of ["perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta", "casa"]) {
@@ -57,6 +60,10 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   await p.waitForTimeout(800);
   const toasts = await p.locator("#toasts").textContent();
   if (!toasts.includes("saia da demonstração para usar")) fail("exportar não foi recusado: " + toasts);
+  // ação no aparelho: finge e avisa
+  await p.evaluate(() => api.SyncClock());
+  await p.waitForTimeout(300);
+  if (!(await p.locator("#toasts").textContent()).includes("não muda o aparelho de verdade")) fail("acertar o relógio não avisou");
 
   // 5) nada mudou nos arquivos e sai
   const chk = await (await p.request.get(url + "__check")).text();

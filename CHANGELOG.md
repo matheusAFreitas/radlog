@@ -1,5 +1,22 @@
 # Versões
 
+## 2.83.1
+- Com a demonstração ligada, a faixa azul avisa o que acontece de verdade
+  e não é alarme: o GMC-800 desconectado, saturado ou sem contagens, e a
+  memória dele passando de 80% ou 95%.
+- Na demonstração, gravar a configuração do GMC-800, acertar o relógio,
+  ligar ou desligar o RC102 e zerar o espectro avisam que isso não muda o
+  aparelho de verdade.
+
+**English**
+
+- With the demo on, the blue stripe shows what is really happening that
+  isn't an alarm: the GMC-800 disconnected, saturated or without counts,
+  and its memory going over 80% or 95%.
+- In the demo, writing the GMC-800 settings, setting its clock, turning the
+  RC102 on or off and resetting the spectrum now say that this doesn't
+  change the real device.
+
 ## 2.83.0
 - O app baixa a memória do GMC-800 sozinho toda vez que ele conecta (ou
   quando o app abre com ele conectado), depois de 10 s de conexão estável.

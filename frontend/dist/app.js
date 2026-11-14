@@ -17,6 +17,8 @@ const DEMO_GO = new Set(["GetDemo", "StopDemo", "DemoTray"]);
 const DEMO_BLOCK = new Set(["ExportCSV", "ExportReport", "ExportReportWith", "ExportMeasureReport", "ExportBackup", "ImportBackup", "ApplyBackupSettings",
   "CloudLogin", "CloudLoginWait", "CloudFinishSetup", "CloudOpen", "CloudSyncNow", "CloudRestart", "CloudRejoin", "CloudReset", "CloudDisconnect", "CloudRemoveDevice", "CloudDupAnswer", "CloudVaultRetry", "SetCloudAuto", "SetCloudName", "SaveCloudCode",
   "SyncNow", "PairWith", "ShowPairCode", "SetSyncListen", "SetSyncAuto", "DiscoverPeers", "SetPeerAddrs", "ForgetPeer", "ImportRcLog"]);
+// ações no aparelho: a demonstração finge que fez, e avisa (2.83.1)
+const DEMO_DEVICE = new Set(["SetDeviceConfig", "RestoreDeviceConfig", "SyncClock", "ResetRcSpectrum", "SetRadiacode", "ReconnectRadiacode", "Connect", "Disconnect"]);
 const demoRefuse = async () => { throw new Error("saia da demonstração para usar"); };
 const demoBridge = inDemo ? new Proxy({}, {
   get: (_, k) => {
@@ -24,6 +26,7 @@ const demoBridge = inDemo ? new Proxy({}, {
     if (k === "GetSettings") return async () => { demoApi._seedSettings(await goApp.GetSettings()); return demoApi.GetSettings(); };
     if (DEMO_GO.has(k)) return goApp[k];
     if (DEMO_BLOCK.has(k)) return demoRefuse;
+    if (DEMO_DEVICE.has(k) && k in demoApi) return async (...a) => { const r = await demoApi[k](...a); toast("Na demonstração isso não muda o aparelho de verdade."); return r; };
     if (k in demoApi) return demoApi[k];
     return goApp[k] ? demoRefuse : undefined;
   },
@@ -36,6 +39,8 @@ const on = (name, fn) => {
   // na demonstração, do Go só vêm o estado dela e a leitura real
   else if (name === "demo") window.runtime.EventsOn("demo", fn);
   else if (name === "realReading") window.runtime.EventsOn("reading", fn);
+  else if (name === "realStatus") window.runtime.EventsOn("status", fn);
+  else if (name === "realCounterSync") window.runtime.EventsOn("countersync", fn);
 };
 // liga ou desliga a demonstração recarregando a tela (dentro do app)
 function demoReload(on) {
@@ -971,6 +976,23 @@ const sliderToUSv = (v) => { const u = Math.pow(10, (v / 100) * 6 - 2); return u
 const usvToSlider = (u) => Math.round(((Math.log10(Math.max(0.01, u)) + 2) / 6) * 100);
 let demoTimer = null;
 const demoName = (sc) => (DEMO_SCEN.find((x) => x[0] === sc) || [sc, "Valor escolhido"])[1];
+
+// o que acontece de verdade e não é alarme fica na faixa azul (2.83.1)
+const demoReal = { status: null, sat: false, noCount: false, mem: "" };
+function renderDemoWarn() {
+  const el = $("demoStripeWarn");
+  if (!el) return;
+  const w = [];
+  if (inDemo) {
+    if (demoReal.status && demoReal.status.state !== "conectado") w.push("o GMC-800 de verdade está desconectado");
+    else if (demoReal.sat) w.push("o GMC-800 de verdade saturou");
+    else if (demoReal.noCount) w.push("o GMC-800 de verdade está sem contagens");
+    if (demoReal.mem === "cheia") w.push("a memória do GMC-800 de verdade passou de 95%");
+    else if (demoReal.mem === "atencao") w.push("a memória do GMC-800 de verdade passou de 80%");
+  }
+  el.textContent = w.join(" · ");
+  el.hidden = !w.length;
+}
 
 function renderDemo() {
   const d = state.demo || {};
@@ -3188,9 +3210,17 @@ function listen() {
     if (changed) { state.last = null; state.alarm = false; alarmCtl.demo = false; alarmCtl.demoDanger = false; attnCtl.demo = false; refreshAll(); updateAlarm(); updateAttention(); }
     renderDemo();
   });
+  on("realStatus", (st) => { demoReal.status = st; renderDemoWarn(); });
+  on("realCounterSync", (cs) => { demoReal.mem = (cs && cs.memLevel) || ""; renderDemoWarn(); });
+  if (inDemo) {
+    goApp.GetStatus().then((st) => { demoReal.status = st; renderDemoWarn(); }).catch(() => {});
+    goApp.GetCounterSync().then((cs) => { demoReal.mem = (cs && cs.memLevel) || ""; renderDemoWarn(); }).catch(() => {});
+  }
   on("realReading", (r) => {
     // leitura real enquanto a demonstração está ligada (um alarme de verdade
     // tira dela, no Go)
+    demoReal.sat = !!r.saturated; demoReal.noCount = !!r.noCount;
+    renderDemoWarn();
     const line = $("demoRealLine");
     line.textContent = `Leitura real do GMC-800: ${usvTxt(r.usv)}` + (r.danger ? " · PERIGO REAL" : r.alarm ? " · ALARME REAL" : "");
     line.classList.toggle("alarm", !!(r.alarm || r.danger));
