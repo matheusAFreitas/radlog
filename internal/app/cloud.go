@@ -136,6 +136,8 @@ type cloudFile struct {
 	DupOf string `json:"dupOf,omitempty"`
 	// a nuvem é do formato antigo (2.79.x): pausada até começar uma nova
 	Old bool `json:"old,omitempty"`
+	// versão da meta conferida por último (rs.MetaVersion)
+	MetaV int `json:"metaV,omitempty"`
 	// outro aparelho tirou este da nuvem (ms): pausada até entrar de novo
 	Removed int64 `json:"removed,omitempty"`
 	// nuvem recomeçada (CloudRestart, ms) e ainda subindo tudo de novo
@@ -880,7 +882,7 @@ func (a *App) CloudRestart() (CloudInfo, error) {
 		return a.GetCloud(), err
 	}
 	c.mu.Lock()
-	c.f.Folder, c.f.Salt, c.f.Old = folder, meta.Salt, false
+	c.f.Folder, c.f.Salt, c.f.Old, c.f.MetaV = folder, meta.Salt, false, rs.MetaVersion
 	c.f.Up, c.f.Seen, c.f.Devs = map[string]string{}, map[string]string{}, map[string]cloudDev{}
 	c.f.DevMD5, c.f.Seq, c.f.Queue, c.f.Used = "", 0, nil, 0
 	c.f.Restart, c.f.Restarted = time.Now().UnixMilli(), 0

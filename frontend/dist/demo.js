@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.80.1";
+const DEMO_VERSION = "2.80.2";
 
 function makeDemoApi() {
   let demoCloud = { state: "off", ready: true, auto: true };

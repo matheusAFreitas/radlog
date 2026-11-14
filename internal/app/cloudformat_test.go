@@ -1,6 +1,8 @@
 package app
 
 import (
+	"crypto/md5"
+	"encoding/hex"
 	"encoding/json"
 	"os"
 	"path/filepath"
@@ -206,7 +208,12 @@ func TestCloudOldFormatRestart(t *testing.T) {
 		m.V = 1
 		f.Data, _ = json.Marshal(m)
 	}
-	a.cloud.f.Seen = map[string]string{}
+	// como o nuvem.json da 2.79.x: a meta antiga já vista, sem MetaV
+	for _, f := range srv.Named(rs.MetaFile) {
+		sum := md5.Sum(f.Data)
+		a.cloud.f.Seen[rs.MetaFile] = hex.EncodeToString(sum[:])
+	}
+	a.cloud.f.MetaV = 0
 	a.cloudSync()
 	if st := a.GetCloud(); st.State != "old" {
 		t.Fatalf("antiga: %+v", st)

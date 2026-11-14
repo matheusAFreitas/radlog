@@ -241,7 +241,9 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 	if !a.cloudHold(gen) {
 		return context.Canceled
 	}
-	metaSeen := c.f.Seen[rs.MetaFile] == mf.MD5
+	// MetaV: o nuvem.json da 2.79.x já tinha visto a meta antiga; sem ela
+	// conferida nesta versão, lê de novo para achar o formato antigo
+	metaSeen := c.f.Seen[rs.MetaFile] == mf.MD5 && c.f.MetaV == rs.MetaVersion
 	c.mu.Unlock()
 	if !metaSeen {
 		b, err := d.Get(ctx, mf.ID)
@@ -256,6 +258,10 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 			return errCloudOld
 		} else if err != nil {
 			return errCloudGone
+		}
+		if a.cloudHold(gen) {
+			c.f.MetaV = rs.MetaVersion
+			c.mu.Unlock()
 		}
 		a.cloudSeen(gen, rs.MetaFile, mf.MD5)
 	}
