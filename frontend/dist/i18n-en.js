@@ -4212,7 +4212,11 @@ const I18N_EN = {
 "nuvem: cofre bloqueado": "cloud: keyring locked",
 "cofre": "keyring",
 "minuto": "minute",
-"segundo": "second"
+"segundo": "second",
+"Minuto do GMC-800": "GMC-800 minute",
+"atualização do app": "app update",
+"média das contagens de cada segundo (desde a 2.80.9)": "average of the counts of each second (since 2.80.9)",
+"última leitura do minuto (até a 2.80.8)": "last reading of the minute (up to 2.80.8)"
 },
 "patterns": [
 [

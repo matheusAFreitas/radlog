@@ -1,5 +1,20 @@
 # Versões
 
+## 2.80.11
+- Histórico de configurações: anota a troca do jeito de calcular o minuto do
+  GQ GMC-800 (média das contagens de cada segundo desde a 2.80.9), para
+  marcar a data em comparações de fundo e de períodos. Nos seus dados, a
+  média antiga ficava uns 2% abaixo da contagem por minuto da memória do
+  contador; a nova deve ficar mais perto dela.
+
+**English**
+
+- Settings history: records the change in how the GQ GMC-800 minute is
+  computed (average of the counts of each second since 2.80.9), to mark the
+  date when comparing background and periods. In real data the old average
+  was about 2% below the per-minute count from the counter's memory; the new
+  one should be closer to it.
+
 ## 2.80.10
 - Detalhe do alerta do GQ GMC-800: o "Limite" mostrava 0,056 µSv/h quando o
   alerta dizia "a partir de 10,1": o app lia o 10,1 µSv/h do texto como se

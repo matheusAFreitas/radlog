@@ -55,12 +55,21 @@ func (a *App) cfgSnapshotLocked() map[string]string {
 		"Saturação do RC102": fmt.Sprintf("fim da escala %s µSv/h", fmtBR(lv.RcSatUSv, 0)),
 		"Calibração do GMC":  calDesc(a.cal),
 		"Calibração em uso":  a.calInUseDesc(),
+		cfgGMCMinute:         cfgGMCMinuteNow,
 	}
 	if a.devSaveMode != "" {
 		m["Gravação na memória do GMC"] = a.devSaveMode
 	}
 	return m
 }
+
+// Como o minuto do GMC-800 é calculado (2.80.9): entra no histórico para
+// marcar a data em que o valor gravado mudou de tipo (QA da 2.80.9).
+const (
+	cfgGMCMinute    = "Minuto do GMC-800"
+	cfgGMCMinuteNow = "média das contagens de cada segundo (desde a 2.80.9)"
+	cfgGMCMinuteOld = "última leitura do minuto (até a 2.80.8)"
+)
 
 // calDesc resume a curva: o 1º ponto (o que vale no fundo) e de onde veio.
 func calDesc(c gmc.Calibration) string {
@@ -126,7 +135,11 @@ func (a *App) cfgRecord(source string) {
 			continue
 		}
 		src := source
-		if !ok {
+		switch {
+		case !ok && k == cfgGMCMinute && len(last) > 0:
+			// quem já tinha histórico: a troca veio com a atualização
+			old, src = cfgGMCMinuteOld, "atualização do app"
+		case !ok:
 			src = "início do registro"
 		}
 		b, _ := json.Marshal(ConfigChange{T: t, Field: k, From: old, To: now[k], Source: src})
