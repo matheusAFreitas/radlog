@@ -98,6 +98,9 @@ func rcAlertText(level string, usv float64, l RcLimits) string {
 func (a *App) rcAlertStep(now time.Time, usv float64) {
 	l := a.rcLimits()
 	a.mu.Lock()
+	if a.measureQuietLocked(devRC, now) {
+		usv = 0 // medindo um objeto com o RC102: alertas calados (2.81)
+	}
 	set := a.settings
 	s := &a.rcAlert
 	step := func(on *bool, enabled bool, enter float64) (started, ended bool) {

@@ -101,6 +101,8 @@ type MeasureState struct {
 	usvSum float64
 	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
 	stopReq bool
+	// 2.81: quando o fundo ficou pronto (a pessoa está procurando o ponto)
+	readyAt time.Time
 }
 
 // MeasureSpectrum são os espectros do Radiacode de cada fase (contagens por
@@ -202,6 +204,39 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	st := a.measureSnapLocked()
 	a.goSafe("emit measure", func() { a.emit("measure", st) })
 	return st, nil
+}
+
+// ---------- alarmes em silêncio durante a medição (2.81) ----------
+//
+// Medindo uma pedra, o aparelho que está nela sobe de propósito (e o GMC,
+// encostado, conta beta e exagera o µSv/h). Do começo da medição até o
+// resultado, os alertas desse aparelho ficam calados: nada de som, de
+// janela piscando nem de linha em Alertas; o valor fica salvo na medição.
+// O aparelho que fica com a pessoa (modo "voce") continua normal.
+const (
+	measQuietIdle  = 30 * time.Minute // procurando o ponto há mais que isso: volta a valer
+	measQuietGrace = time.Minute      // depois do resultado, para tirar o objeto de perto
+)
+
+// measureQuietLocked diz se os alertas do aparelho dev ficam calados agora.
+func (a *App) measureQuietLocked(dev string, now time.Time) bool {
+	m := &a.measure
+	if m.Demo || m.Phase == "" {
+		return false
+	}
+	onObj := devName(m.Device) == dev || (m.Other != nil && m.Other.Role == "objeto" && m.Other.Device == dev)
+	if !onObj {
+		return false
+	}
+	switch m.Phase {
+	case "fundo", "objeto":
+		return true
+	case "fundo-pronto":
+		return now.Sub(m.readyAt) < measQuietIdle
+	case "pronto":
+		return m.Obj != nil && now.UnixMilli()-m.Obj.End < measQuietGrace.Milliseconds()
+	}
+	return false
 }
 
 // measStopMinSec: antes disso o "parar agora" espera (poucas contagens).
@@ -384,6 +419,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		if m.Phase == "fundo" {
 			m.Bg = &ph
 			m.Phase = "fundo-pronto"
+			m.readyAt = time.Now()
 		} else {
 			m.Obj = &ph
 			r := compareMeasure(*m.Bg, ph, a.convCalLocked().USv)

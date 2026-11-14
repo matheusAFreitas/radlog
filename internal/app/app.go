@@ -1354,23 +1354,29 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 		rawCal := a.cal      // o que o contador mandou (sem correção): curva dele
 		set := a.effLocked() // limites em CPM pela calibração de agora
 		attnU, alarmU, dangerU := thrUSvLocked(a, set)
-		alarm := set.AlarmEnabled && int(cpm) >= set.AlarmCPM
+		// medindo um objeto com o GMC: os alertas dele ficam calados (2.81)
+		acpm := cpm
+		quiet := a.measureQuietLocked("gmc", now)
+		if quiet {
+			acpm = 0
+		}
+		alarm := set.AlarmEnabled && int(acpm) >= set.AlarmCPM
 		was := a.alarmOn
 		started := alarm && !a.alarmOn
 		if alarm {
 			a.alarmOn = true
-		} else if float64(cpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
+		} else if float64(acpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
 			a.alarmOn = false
 		}
 		ended := was && !a.alarmOn
 		alarmOn := a.alarmOn && set.AlarmEnabled
 		attnWas := a.attnOn
 		lv := set.Levels.Norm()
-		attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(cpm), lv)
+		attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(acpm), lv)
 		attnOn := a.attnOn
 		satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
-		dCPM := float64(cpm)
-		if satOn {
+		dCPM := float64(acpm)
+		if satOn && !quiet {
 			dCPM = math.Max(dCPM, lv.DangerEnter()) // saturado: o perigo continua valendo
 		}
 		dangerStarted, dangerEnded := levels.DangerStep(&a.dangerOn, dCPM, lv)
@@ -1402,7 +1408,7 @@ func (a *App) poll(d *gmc.Device, stop chan struct{}, port string) {
 			a.logEvent(noCountText(zeroSince, now))
 		}
 		a.stepAlerts(&a.alerts, alertStep{
-			Now: now, CPM: float64(cpm), AlarmCPM: set.AlarmCPM, Lv: lv,
+			Now: now, CPM: float64(acpm), AlarmCPM: set.AlarmCPM, Lv: lv,
 			USv: cal.USv(float64(cpm)), AttnUSv: attnU, AlarmUSv: alarmU, DngrUSv: dangerU,
 			AttnStarted: attnStarted, AttnEnded: attnWas && !attnOn, AttnOn: attnOn,
 			AlarmStarted: started, AlarmEnded: ended, AlarmOn: alarmOn,

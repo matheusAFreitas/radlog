@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.80.11";
+const DEMO_VERSION = "2.81.0";
 
 function makeDemoApi() {
   let demoCloud = { state: "off", ready: true, auto: true };
@@ -986,7 +986,7 @@ const demoRc = () => {
         const h = await api.GetHomeBackgroundDev(device);
         if (!h.ok) throw new Error("fundo da casa indisponível: " + h.why);
         meas.bg = { counts: h.counts, seconds: h.minutes * 60, cpm: h.cpm, errCPM: h.errCPM, usv: h.usv, start: h.from, end: h.to, source: "casa" };
-        meas.phase = "objeto";
+        meas.phase = o.waitObj ? "fundo-pronto" : "objeto";
         meas.seconds = o.auto ? maxSec : o.seconds || 60;
       }
       emit("measure", { ...meas }); return { ...meas };
