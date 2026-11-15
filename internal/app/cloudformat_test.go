@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+	"sync"
 	"testing"
 	"time"
 
@@ -328,5 +329,43 @@ func TestCloudDaysEchoAttach(t *testing.T) {
 	a.cloudSync()
 	if srv.Count() != before {
 		t.Fatalf("o anexo tirado ficou na nuvem: %d", srv.Count())
+	}
+}
+
+// dois cliques em "Recomeçar" criavam duas nuvens com o mesmo código (o
+// celular entrava na mais antiga e não via este PC): só uma pode nascer.
+func TestCloudRestartTwice(t *testing.T) {
+	srv := fakeCloud(t)
+	a, _ := testApp(t)
+	cloudPair(t, a, nil)
+	for _, f := range srv.Named(rs.MetaFile) {
+		var m rs.Meta
+		_ = json.Unmarshal(f.Data, &m)
+		m.V = 1
+		f.Data, _ = json.Marshal(m)
+		sum := md5.Sum(f.Data)
+		a.cloud.f.Seen[rs.MetaFile] = hex.EncodeToString(sum[:])
+	}
+	a.cloud.f.MetaV = 0
+	a.cloudSync()
+	if st := a.GetCloud(); st.State != "old" {
+		t.Fatalf("antiga: %+v", st)
+	}
+	var wg sync.WaitGroup
+	for i := 0; i < 2; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			if _, err := a.CloudRestart(); err != nil {
+				t.Error(err)
+			}
+		}()
+	}
+	wg.Wait()
+	if _, err := a.CloudRestart(); err != nil { // terceiro clique, depois
+		t.Fatal(err)
+	}
+	if n := len(srv.Named(rs.MetaFile)); n != 1 {
+		t.Fatalf("metas fora da lixeira: %d (esperava 1)", n)
 	}
 }
