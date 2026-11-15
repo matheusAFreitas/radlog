@@ -1,5 +1,23 @@
 # Versões
 
+## 2.83.4
+- Linux: os títulos dos quadros (Configurações e outros) apareciam em cima
+  da borda. Agora ficam dentro do quadro, como no Windows.
+- Linux: a rolagem e a tela em geral estavam lentas porque o app abria
+  sem aceleração de vídeo (tudo desenhado pelo processador). Agora a
+  aceleração é usada quando a página pede. Se a janela ficar em branco em
+  alguma placa de vídeo, abrir com RADLOG_GPU=0 volta ao modo anterior.
+
+**English**
+
+- Linux: box titles (Settings and others) showed on top of the border. They
+  now sit inside the box, as on Windows.
+- Linux: scrolling and the screen in general were slow because the app ran
+  without graphics acceleration (everything drawn by the processor). Now
+  acceleration is used when the page asks for it. If the window turns blank
+  on some graphics card, starting it with RADLOG_GPU=0 goes back to the old
+  mode.
+
 ## 2.83.3
 - Os botões da nuvem ficam desligados enquanto a ação anda: um segundo
   clique não chega mais ao app antes da resposta do primeiro.
