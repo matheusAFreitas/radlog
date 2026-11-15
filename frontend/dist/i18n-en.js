@@ -4319,7 +4319,15 @@ const I18N_EN = {
 "o GMC-800 de verdade saturou": "the real GMC-800 saturated",
 "o GMC-800 de verdade está sem contagens": "the real GMC-800 has no counts",
 "a memória do GMC-800 de verdade passou de 95%": "the real GMC-800 memory is over 95%",
-"a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%"
+"a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%",
+"Abrir eventos": "Open events",
+"Configurações › Atualizações e sobre": "Settings › Updates and about",
+"Configurações › Dados e backup": "Settings › Data and backup",
+"Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.": "Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.",
+"Nuvem (Google Drive): abrir em Configurações": "Cloud (Google Drive): open in Settings",
+"O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.",
+"Exportar leituras": "Export readings",
+"Exportar leituras (CSV)": "Export readings (CSV)"
 },
 "patterns": [
 [

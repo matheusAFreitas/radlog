@@ -3102,6 +3102,8 @@ function wire() {
     await call(api.SyncClock);
     toast("Relógio do contador acertado");
   });
+  const sideNav = $("sideNav");
+  sideNav.addEventListener("scroll", () => sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2), { passive: true });
   $("btnExport").addEventListener("click", async () => {
     const path = await call(api.ExportCSV);
     if (path) toast("Leituras exportadas para " + path);

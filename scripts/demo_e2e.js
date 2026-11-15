@@ -56,7 +56,7 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   }
 
   // 4) exportar é recusado
-  await p.click("#btnExport");
+  await p.evaluate(() => document.getElementById("btnExport").click()); // fica nas Configurações › Dados e backup
   await p.waitForTimeout(800);
   const toasts = await p.locator("#toasts").textContent();
   if (!toasts.includes("saia da demonstração para usar")) fail("exportar não foi recusado: " + toasts);

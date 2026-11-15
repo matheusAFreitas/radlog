@@ -1,5 +1,27 @@
 # Versões
 
+## 2.83.6
+- Barra lateral: com a janela baixa, a barra inteira rolava e a logo
+  sumia. Agora só a lista de páginas rola; a logo, a nuvem e a busca ficam
+  presas em cima, e Baixar histórico, Demonstração e Configurações ficam
+  presas embaixo. Uma linha fina embaixo da busca mostra que a lista está
+  rolada.
+- A linha da nuvem subiu para logo abaixo da logo, com o ícone de nuvem.
+- "Eventos" e "Exportar CSV" saíram da barra: agora são os cartões "Eventos
+  e log" (Configurações › Atualizações e sobre) e "Exportar leituras"
+  (Configurações › Dados e backup). Os dois continuam no Ctrl+K.
+
+**English**
+
+- Sidebar: in a short window the whole sidebar scrolled and the logo went
+  away. Now only the page list scrolls; the logo, cloud and search stay
+  pinned at the top, and Download history, Demo and Settings stay pinned at
+  the bottom. A thin line under the search shows the list is scrolled.
+- The cloud line moved right below the logo, with a cloud icon.
+- "Events" and "Export CSV" left the sidebar: they are now the "Events and
+  log" card (Settings › Updates and about) and the "Export readings" card
+  (Settings › Data and backup). Both are still in Ctrl+K.
+
 ## 2.83.5
 - Linux: ao atualizar pelo app, o AppImage novo passa a se chamar sempre
   "radlog" na pasta das versões (o anterior vira radlog.old e é apagado

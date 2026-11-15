@@ -67,8 +67,8 @@ function renderCloudBadges() {
     side.hidden = !b;
     if (b) {
       side.classList.toggle("att", !!b.att);
-      side.firstChild.className = "dot " + (b.att ? "wait" : "on");
-      side.lastChild.textContent = b.text;
+      side.querySelector(".dot").className = "dot " + (b.att ? "wait" : "on");
+      side.querySelector(".side-cloud-t").textContent = b.text;
     }
   }
   if (typeof renderSetNavStatus === "function") renderSetNavStatus();
