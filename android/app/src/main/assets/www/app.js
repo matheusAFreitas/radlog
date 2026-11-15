@@ -367,7 +367,7 @@ function ajustes() {
   h += li(T("Esquecer o aparelho"), T("Volta para a primeira vez"), "›", "sForget");
   h += `</div><div class="gh">${esc(T("Alarmes"))}</div><div class="list">`;
   h += li(T("Som do alarme"), T("O perigo tem som próprio, como no PC"), SOUNDS()[s.alarmSound || "sirene"] || "", "sSound");
-  h += li(T("Limites"), T("Os mesmos do PC: atenção {0}, alarme {1} µSv/h", usv((rc.limits || {}).attn || 0), usv((rc.limits || {}).alarm || 0)), "", "");
+  h += li(T("Alarmes do RC102"), T("Atenção {0}, alarme {1} µSv/h (os mesmos do aparelho)", usv((rc.limits || {}).attn || 0), usv((rc.limits || {}).alarm || 0)), "›", "sRcAlarms");
   h += li(T("Testar o alarme"), T("Toca 5 s no volume de alarme"), "›", "sTest");
   const [ct, cs] = cloudLine();
   h += `</div><div class="gh">${esc(T("Nuvem"))}</div><div class="list">`;
@@ -382,6 +382,7 @@ function ajustes() {
   h += `</div><div class="gh">${esc(T("Sobre"))}</div><div class="list">`;
   const inf = state.info || {};
   h += li("RadLog " + (inf.app || ""), (inf.model || "") + (inf.android ? " · Android " + inf.android : ""), "", "");
+  h += li(T("Copiar o registro"), T("As últimas 300 linhas, para mandar quando algo der errado"), "›", "sLog");
   h += "</div>";
   return h;
 }
@@ -505,6 +506,48 @@ function soundSheet() {
   }));
 }
 
+// alarmes do próprio RC102 (os mesmos que o PC muda em Configurações do
+// Radiacode): taxa de dose 1 e 2 em µSv/h e dose acumulada 1 e 2 em µSv.
+// O app usa a taxa 1 e 2 como atenção e alarme.
+async function rcAlarmSheet() {
+  let cur;
+  try { cur = await call("GetRcSettings"); } catch (e) { toast(errText(e)); return; }
+  const num = (v) => (v > 0 && v < 9e6 ? fmt(v, v < 10 ? 2 : 0) : "");
+  const row = (id, label, v, unit) => `<label class="fld"><span>${esc(label)}</span><input id="${id}" inputmode="decimal" value="${esc(num(v))}"><i>${unit}</i></label>`;
+  sheet(`<h3>${esc(T("Alarmes do RC102"))}</h3><p>${esc(T("Ficam gravados no aparelho: valem também longe do celular e do PC. O app usa a taxa 1 como atenção e a taxa 2 como alarme. Dose vazia = desligada."))}</p>`
+    + row("aR1", T("Taxa 1 (atenção)"), cur.doseRate1, "µSv/h") + row("aR2", T("Taxa 2 (alarme)"), cur.doseRate2, "µSv/h")
+    + row("aD1", T("Dose acumulada 1"), cur.dose1, "µSv") + row("aD2", T("Dose acumulada 2"), cur.dose2, "µSv")
+    + `<span class="err" id="aErr"></span><button class="btn pri" id="aOk">${esc(T("Gravar no RC102"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
+  const val = (id) => {
+    const t = $(id).value.trim().replace(",", ".");
+    if (!t) return 0;
+    const v = Number(t);
+    return isFinite(v) && v > 0 ? v : NaN;
+  };
+  $("aOk").onclick = async () => {
+    const n = { doseRate1: val("aR1"), doseRate2: val("aR2"), dose1: val("aD1"), dose2: val("aD2") };
+    if (Object.values(n).some((v) => isNaN(v)) || !n.doseRate1 || !n.doseRate2) { $("aErr").textContent = T("Use só números maiores que zero (as duas taxas são obrigatórias)."); return; }
+    if (n.doseRate2 <= n.doseRate1) { $("aErr").textContent = T("A taxa 2 precisa ser maior que a taxa 1."); return; }
+    // dose vazia = desligada: o aparelho usa 10 Sv (o máximo) como desligado
+    const next = Object.assign({}, cur, { doseRate1: n.doseRate1, doseRate2: n.doseRate2, dose1: n.dose1 || 1e7, dose2: n.dose2 || 1e7 });
+    if (next.dose2 < next.dose1) { $("aErr").textContent = T("A dose 2 não pode ser menor que a dose 1."); return; }
+    $("aOk").disabled = true;
+    try { await call("SetRcSettings", next); closeSheet(); toast(T("Gravado no RC102.")); refreshRc(); }
+    catch (e) { $("aErr").textContent = errText(e); $("aOk").disabled = false; }
+  };
+}
+
+async function copyLog() {
+  try {
+    const r = await call("GetLogs", { from: 0, to: 0, levels: [], comp: "", text: "", limit: 300 });
+    const inf = state.info || {};
+    const head = `RadLog ${inf.app || ""} · ${inf.model || ""} · Android ${inf.android || ""}\n`;
+    const txt = head + (r.entries || []).slice().reverse().map((e) => `${new Date(e.t).toLocaleString("pt-BR")}  ${e.level}  ${e.msg}`).join("\n");
+    await navigator.clipboard.writeText(txt);
+    toast(T("Registro copiado. Cole na conversa."));
+  } catch (e) { toast(errText(e)); }
+}
+
 async function setLang(l) {
   try { state.settings = await call("SaveSettings", Object.assign({}, state.settings, { lang: l })); } catch (e) { toast(errText(e)); }
   lang = l; document.documentElement.lang = l === "en" ? "en" : "pt-BR";
@@ -538,6 +581,8 @@ function bind() {
   q("sOwner", () => (isOff(state.rc) ? nat("owner", "phone").then(() => setTimeout(refreshRc, 600)) : releaseSheet()));
   q("sForget", forgetSheet);
   q("sSound", soundSheet);
+  q("sRcAlarms", rcAlarmSheet);
+  q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
   q("sCloud", cloudToggle);
   q("sSync", syncNow);

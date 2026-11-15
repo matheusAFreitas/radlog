@@ -83,8 +83,11 @@ class Ble(private val ctx: Context) {
     private val callback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(g: BluetoothGatt, status: Int, state: Int) {
             if (state == BluetoothProfile.STATE_CONNECTED && status == BluetoothGatt.GATT_SUCCESS) {
-                g.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED)
-                if (!g.discoverServices()) fail(g, "não consegui ler os serviços do aparelho")
+                // conexão rápida e pacotes maiores: as respostas grandes do
+                // RC102 (espectro) chegavam devagar demais com os 20 bytes
+                // padrão e estouravam o tempo, e o app reconectava
+                g.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+                if (!g.requestMtu(247) && !g.discoverServices()) fail(g, "não consegui ler os serviços do aparelho")
                 return
             }
             if (state == BluetoothProfile.STATE_DISCONNECTED) {
@@ -99,6 +102,11 @@ class Ble(private val ctx: Context) {
                 writeDone.release()
                 if (wasReady) Mobile.bleLost()
             }
+        }
+
+        override fun onMtuChanged(g: BluetoothGatt, mtu: Int, status: Int) {
+            Log.i(TAG, "MTU $mtu (status $status)")
+            if (!g.discoverServices()) fail(g, "não consegui ler os serviços do aparelho")
         }
 
         override fun onServicesDiscovered(g: BluetoothGatt, status: Int) {
