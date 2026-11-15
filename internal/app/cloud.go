@@ -212,6 +212,10 @@ type cloudState struct {
 	vaultRaw  []byte
 	vaultBusy bool
 	vaultWG   sync.WaitGroup // os testes esperam o pedido terminar
+	// restarting: um recomeço (CloudRestart) em andamento. Dois cliques
+	// seguidos criavam duas nuvens com o mesmo código, e os aparelhos ficavam
+	// separados (o celular entra na mais antiga)
+	restarting bool
 }
 
 func (a *App) cloudPath() string    { return filepath.Join(a.dataDir, "nuvem.json") }
@@ -1140,11 +1144,24 @@ func (a *App) CloudRestart() (CloudInfo, error) {
 	c := &a.cloud
 	c.mu.Lock()
 	a.cloudLoadLocked()
-	on, code, oldFolder := c.f.On && c.keys != nil, c.sec.Code, c.f.Folder
+	on, code, oldFolder, old := c.f.On && c.keys != nil, c.sec.Code, c.f.Folder, c.f.Old
+	busy := c.restarting
+	if on && old && !busy {
+		c.restarting = true
+	}
 	c.mu.Unlock()
 	if !on {
 		return a.GetCloud(), errors.New("a nuvem não está ligada neste PC")
 	}
+	if busy || !old {
+		// já recomeçando, ou já recomeçou (segundo clique): nada a fazer
+		return a.GetCloud(), nil
+	}
+	defer func() {
+		c.mu.Lock()
+		c.restarting = false
+		c.mu.Unlock()
+	}()
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Minute)
 	defer cancel()
 	d := a.cloudDriveWith(a.cloudToken)
