@@ -50,6 +50,8 @@ confere o SHA-256 do arquivo baixado e a **assinatura Ed25519** da lista de
 somas (`SHA256SUMS.txt.sig`): sem assinatura válida, a versão é recusada.
 Também dá para trocar à mão: abra a versão nova com a antiga aberta, e a
 antiga fecha e passa o lugar.
+A versão que o app baixa fica sempre com o mesmo nome na pasta das versões
+(`RadLog.exe` no Windows, `radlog` no Linux), então atalhos continuam valendo.
 
 ## Como funciona
 
