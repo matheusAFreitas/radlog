@@ -74,3 +74,60 @@ jobs:
           go-version: "1.27"
       - name: Testes no Windows
         run: go test ./internal/...
+
+  android:
+    # o app de Android (3.0.0): o motor em Go vira uma .aar pelo gomobile e o
+    # Gradle monta o APK. Sem o keystore do RadLog nos segredos, sai com a
+    # chave de debug (só para teste).
+    runs-on: ubuntu-24.04
+    timeout-minutes: 40
+    env:
+      # gomobile preso pela versão do módulo (golang.org/x/mobile não tem etiquetas)
+      GOMOBILE: v0.0.0-20261011034528-197770444867
+    steps:
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
+      - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+        with:
+          go-version: "1.27"
+      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Motor compila para o Android
+        run: |
+          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go vet ./internal/... ./mobile
+          go test -race ./mobile
+      - name: gomobile (motor em .aar)
+        run: |
+          go install golang.org/x/mobile/cmd/gomobile@$GOMOBILE
+          go install golang.org/x/mobile/cmd/gobind@$GOMOBILE
+          # só no CI: o go.mod do repositório não leva o gomobile
+          go get golang.org/x/mobile/bind@$GOMOBILE
+          export ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME"
+          gomobile init
+          mkdir -p android/app/libs
+          gomobile bind -target=android/arm64 -androidapi 29 -javapkg=app.radlog.go \
+            -ldflags "-s -w" -o android/app/libs/radlog.aar ./mobile
+      - name: APK
+        working-directory: android
+        env:
+          # a chave de verdade só no main (nunca em PR)
+          KEYSTORE: ${{ github.event_name == 'push' && secrets.RADLOG_ANDROID_KEYSTORE || '' }}
+          KS_PASS: ${{ secrets.RADLOG_ANDROID_KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.RADLOG_ANDROID_KEY_ALIAS }}
+          KEY_PASS: ${{ secrets.RADLOG_ANDROID_KEY_PASSWORD }}
+        run: |
+          SIGN=""
+          if [ -n "$KEYSTORE" ]; then
+            echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/radlog.jks"
+            SIGN="-Pradlog.storeFile=$RUNNER_TEMP/radlog.jks -Pradlog.storePassword=$KS_PASS -Pradlog.keyAlias=$KEY_ALIAS -Pradlog.keyPassword=$KEY_PASS"
+          fi
+          ./gradlew --no-daemon assembleRelease \
+            -PradlogVersion=3.0.0-dev.${{ github.run_number }} -PradlogCode=${{ github.run_number }} $SIGN
+          rm -f "$RUNNER_TEMP/radlog.jks"
+          mv app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/RadLog-android-dev.${{ github.run_number }}.apk"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: RadLog-android
+          path: ${{ runner.temp }}/RadLog-android-*.apk
+          retention-days: 14

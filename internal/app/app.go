@@ -394,6 +394,7 @@ type App struct {
 	histAskFrom    int64                        // sem pasta de dados: o mesmo que perguntarDesde (autohist.go)
 	histDownload   func() (ImportResult, error) // testes: no lugar do downloadHistory
 	emitHook       func(name string, data any)  // testes: os eventos para a tela
+	mobile         bool                         // app de Android (mobile.go)
 
 	// pausa a reconexão automática quando o usuário desconecta na mão
 	manualOff bool

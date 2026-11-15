@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- o "O" do logo: anel e os três arcos, em verde -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp" android:height="108dp"
+    android:viewportWidth="108" android:viewportHeight="108">
+    <group android:translateX="30" android:translateY="30">
+        <path android:pathData="M24,14.6a9.4,9.4 0,1 1,0 18.8a9.4,9.4 0,1 1,0 -18.8z"
+            android:strokeColor="#6EE7A0" android:strokeWidth="4.6" android:fillColor="#00000000" />
+        <path android:pathData="M34.07,40.11A19,19 0,0 1,13.93 40.11M5.01,24.66A19,19 0,0 1,15.08 7.22M32.92,7.22A19,19 0,0 1,42.99 24.66"
+            android:strokeColor="#6EE7A0" android:strokeWidth="3" android:strokeLineCap="round" android:fillColor="#00000000" />
+    </group>
+</vector>

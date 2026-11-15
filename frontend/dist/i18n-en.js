@@ -4319,7 +4319,8 @@ const I18N_EN = {
 "o GMC-800 de verdade saturou": "the real GMC-800 saturated",
 "o GMC-800 de verdade está sem contagens": "the real GMC-800 has no counts",
 "a memória do GMC-800 de verdade passou de 95%": "the real GMC-800 memory is over 95%",
-"a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%"
+"a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%",
+"Bluetooth: o app ainda não ligou o rádio": "Bluetooth: the app hasn't turned on the radio yet"
 },
 "patterns": [
 [

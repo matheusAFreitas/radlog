@@ -63,7 +63,14 @@ type backupManifest struct {
 	Created string `json:"created"`
 }
 
+// mobileHost é o nome do aparelho no celular (o modelo, dado pelo Android):
+// lá o os.Hostname() devolve "localhost".
+var mobileHost string
+
 func hostName() string {
+	if mobileHost != "" {
+		return mobileHost
+	}
 	h, _ := os.Hostname()
 	if h == "" {
 		h = "pc"
