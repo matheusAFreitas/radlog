@@ -1,5 +1,20 @@
 # Versões
 
+## 2.83.2
+- Correção: clicar duas vezes seguidas em "Recomeçar a nuvem" criava duas
+  nuvens com o mesmo código. O PC ficava numa e os outros aparelhos
+  entravam na outra, e os dados deles não apareciam no PC. Agora o segundo
+  clique é ignorado enquanto o recomeço anda, e também depois que a nuvem
+  já recomeçou.
+
+**English**
+
+- Fix: clicking "Restart the cloud" twice in a row created two clouds with
+  the same code. The PC stayed in one and the other devices joined the
+  other, so their data didn't show up on the PC. Now the second click is
+  ignored while the restart runs, and also once the cloud has already
+  restarted.
+
 ## 2.83.1
 - Com a demonstração ligada, a faixa azul avisa o que acontece de verdade
   e não é alarme: o GMC-800 desconectado, saturado ou sem contagens, e a
