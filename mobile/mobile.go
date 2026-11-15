@@ -45,7 +45,6 @@ type Host interface {
 var (
 	mu  sync.Mutex
 	eng *app.App
-	h   Host
 )
 
 // Start cria e liga o motor. dir é a pasta privada do app; device é o nome
@@ -59,7 +58,6 @@ func Start(dir, device string, host Host) error {
 	if host == nil {
 		return errors.New("sem host")
 	}
-	h = host
 	radiacode.SetBLEHost(bleHost{host})
 	app.SetMobileOpenURL(host.OpenURL)
 	if device != "" {
