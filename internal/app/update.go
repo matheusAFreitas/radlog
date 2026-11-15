@@ -373,12 +373,10 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 		return
 	}
 	a.logf("atualização: %s baixado e conferido (SHA-256 %s…) em %s", asset.Name, want[:12], path)
-	if runtime.GOOS == "windows" {
-		if fixed, err := installFixed(path); err != nil {
-			a.logf("atualização: não deu para pôr como %s (%v); abrindo %s", fixedExe, err, filepath.Base(path))
-		} else {
-			path = fixed
-		}
+	if fixed, err := installFixed(path); err != nil {
+		a.logf("atualização: não deu para pôr como %s (%v); abrindo %s", fixedExe, err, filepath.Base(path))
+	} else {
+		path = fixed
 	}
 
 	// espera o CPM normal
@@ -409,7 +407,7 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 	a.quitApp()
 }
 
-// ---------- nome fixo no Windows ----------
+// ---------- nome fixo ----------
 //
 // O Windows guarda pelo caminho do .exe se o ícone fica fixo na barra ou
 // escondido na setinha, e também a regra do firewall da sincronização. Com
@@ -420,14 +418,22 @@ func (a *App) runUpdate(version string, asset, sums, sig ghAsset) {
 // o atual vira RadLog.old.exe (apagado depois, com as versões antigas) e o
 // novo assume o nome. Se algo falhar, abre o arquivo com o nome da versão,
 // como antes.
+//
+// No Linux (2.83.5) é igual com o AppImage: a versão baixada vira sempre
+// "radlog" na pasta das versões (o anterior vira radlog.old), para o atalho
+// do menu ou da área de trabalho não quebrar a cada atualização.
 
-const (
-	fixedExe = "RadLog.exe"
-	oldExe   = "RadLog.old.exe"
-)
+var fixedExe, oldExe = fixedNames(runtime.GOOS)
 
-// installFixed renomeia o .exe baixado para RadLog.exe na mesma pasta e
-// devolve o caminho novo.
+func fixedNames(goos string) (fixed, old string) {
+	if goos == "windows" {
+		return "RadLog.exe", "RadLog.old.exe"
+	}
+	return "radlog", "radlog.old"
+}
+
+// installFixed renomeia o arquivo baixado para o nome fixo (fixedExe) na
+// mesma pasta e devolve o caminho novo.
 func installFixed(path string) (string, error) {
 	dir := filepath.Dir(path)
 	fixed := filepath.Join(dir, fixedExe)

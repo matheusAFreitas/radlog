@@ -1,5 +1,18 @@
 # Versões
 
+## 2.83.5
+- Linux: ao atualizar pelo app, o AppImage novo passa a se chamar sempre
+  "radlog" na pasta das versões (o anterior vira radlog.old e é apagado
+  depois), como o RadLog.exe no Windows. Assim um atalho no menu ou na
+  área de trabalho continua valendo depois de cada atualização.
+
+**English**
+
+- Linux: when updating from the app, the new AppImage is now always named
+  "radlog" in the versions folder (the previous one becomes radlog.old and
+  is deleted later), like RadLog.exe on Windows. A shortcut in the menu or
+  on the desktop keeps working after every update.
+
 ## 2.83.4
 - Linux: os títulos dos quadros (Configurações e outros) apareciam em cima
   da borda. Agora ficam dentro do quadro, como no Windows.
