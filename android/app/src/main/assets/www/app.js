@@ -288,12 +288,48 @@ function bindChart() {
 }
 
 // ---------------- Alertas ----------------
+// junta os alertas do mesmo episódio numa linha, como o PC (frontend/dist/alertas.js,
+// groupEpisodes): mesmo aparelho, um começando até 1 min depois do outro acabar
+// (15 min se caiu a conexão); vale o nível mais alto e o maior pico
+const LVL_RANK = { atencao: 1, alarme: 2, perigo: 3 };
+const lvlOf = (e) => (e.level === "alarme" || e.level === "perigo" ? e.level : "atencao");
+function episodes(list) {
+  const asc = list.slice().sort((x, y) => x.time - y.time);
+  const now = Date.now();
+  const eps = [];
+  let cur = null;
+  for (const e of asc) {
+    const end = e.active ? now : (e.end || e.time);
+    const gap = cur && cur.endReason && cur.endReason !== "app fechado" ? 15 * 60e3 : 60e3;
+    if (cur && !!e.demo === cur.demo && !!e.retro === cur.retro && (e.device || "") === cur.device && e.time <= cur.until + gap) {
+      cur.ms.push(e);
+      if (end >= cur.until) cur.endReason = e.endReason || "";
+      cur.until = Math.max(cur.until, end);
+      continue;
+    }
+    cur = { ms: [e], until: end, demo: !!e.demo, retro: !!e.retro, device: e.device || "", endReason: e.endReason || "" };
+    eps.push(cur);
+  }
+  return eps.map((g) => {
+    const ms = g.ms;
+    if (ms.length === 1) return ms[0];
+    const top = ms.reduce((b, x) => (LVL_RANK[lvlOf(x)] > LVL_RANK[lvlOf(b)] ? x : b), ms[0]);
+    const pk = ms.reduce((b, x) => ((x.peak || 0) > (b.peak || 0) ? x : b), ms[0]);
+    const active = ms.some((x) => x.active);
+    const ended = ms.every((x) => x.end || x.active);
+    return Object.assign({}, top, {
+      time: ms[0].time, end: active || !ended ? 0 : Math.max(...ms.map((x) => x.end)), active,
+      peak: pk.peak, peakUSv: pk.peakUSv, endReason: g.endReason,
+    });
+  }).sort((x, y) => y.time - x.time);
+}
+
 function alertas() {
-  const evs = state.events.filter((e) => e.kind === "alerta");
+  const evs = episodes(state.events.filter((e) => e.kind === "alerta"));
   if (!evs.length) return `<h2>${esc(T("Alertas"))}</h2><div class="empty">${esc(T("Nenhum alerta ainda."))}</div>`;
   let h = `<h2>${esc(T("Alertas"))}</h2><div class="list">`;
   for (const e of evs.slice(0, 200)) {
-    const lv = e.level === "alarme" || e.level === "perigo" ? e.level : "atencao";
+    const lv = lvlOf(e);
     const dev = e.device === "radiacode" ? "RC102" : "GMC-800";
     const peak = e.device === "radiacode" ? e.peak : e.peakUSv;
     const dur = e.end ? Math.max(1, Math.round((e.end - e.time) / 60000)) : 0;
