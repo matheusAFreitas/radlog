@@ -26,11 +26,11 @@ button { font: inherit; color: inherit; cursor: pointer; background: none; borde
 .top { display: flex; align-items: center; gap: 8px; padding: 10px 16px; flex: none; }
 .top .lg { width: 24px; height: 24px; }
 .top b { font-size: 16px; letter-spacing: .01em; }
-.conn { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
+.conn { margin-left: auto; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 999px; padding: 2px 9px; }
 .conn i { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); display: inline-block; }
 .conn.off i { background: #5D666E; } .conn.wait i { background: var(--att); } .conn.err i { background: var(--warn); }
 
-main { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 16px; display: grid; grid-auto-rows: max-content; gap: 10px; align-content: start; }
+main { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 16px; display: grid; grid-template-columns: minmax(0, 1fr); grid-auto-rows: max-content; gap: 10px; align-content: start; }
 .nav { display: flex; justify-content: space-around; border-top: 1px solid var(--line); padding: 6px 0 calc(10px + env(safe-area-inset-bottom, 0px)); flex: none; background: #0d1114; }
 .nav button { display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--dim); min-width: 72px; min-height: 48px; }
 .nav button svg { width: 22px; height: 22px; }
@@ -41,15 +41,17 @@ main { flex: 1; min-height: 0; overflow-y: auto; padding: 0 14px 16px; display: 
 .card { border: 1px solid var(--line); border-radius: 14px; background: var(--surface); padding: 12px 14px; display: grid; gap: 6px; }
 .card .k { font-size: 12px; color: var(--dim); }
 .hero { display: grid; justify-items: center; gap: 2px; padding: 6px 0 4px; }
-.dial { position: relative; width: 176px; height: 176px; }
+.dial { --d: min(200px, 58vw, 48vh); position: relative; width: var(--d); height: var(--d); }
 .dial svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .dial .in { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; }
-.dial .v { font-family: var(--mono); font-size: 38px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
-.dial .u { font-family: var(--mono); font-size: 14px; color: var(--muted); margin-top: 4px; }
+.dial .v { font-family: var(--mono); font-size: 34px; font-weight: 600; line-height: 1; font-variant-numeric: tabular-nums; }
+.dial .u { font-family: var(--mono); font-size: calc(var(--d) * .07); color: var(--muted); margin-top: 4px; }
 .lvl { display: inline-flex; align-items: center; gap: 6px; font-size: 14px; font-weight: 600; margin-top: 6px; }
 .lvl svg { width: 14px; height: 14px; }
 .vs { font-size: 12.5px; color: var(--muted); text-align: center; }
-.two { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.two { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+.card { min-width: 0; }
+.two .card > * { overflow: hidden; text-overflow: ellipsis; }
 .two .card .v { font-family: var(--mono); font-size: 19px; font-weight: 600; }
 .two .card .d { font-size: 11.5px; color: var(--muted); }
 .ch svg { width: 100%; height: 96px; display: block; touch-action: none; }
@@ -129,3 +131,13 @@ input.code:focus { outline: none; border-color: var(--accent); }
 .codebox { font-family: var(--mono); font-size: 18px; letter-spacing: .06em; text-align: center; padding: 12px; border: 1px dashed var(--line-2); border-radius: 12px; user-select: text; }
 .err { color: var(--warn); font-size: 12.5px; }
 .toast { position: fixed; left: 16px; right: 16px; bottom: calc(76px + env(safe-area-inset-bottom, 0px)); z-index: 20; background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 12px; padding: 10px 14px; font-size: 13px; box-shadow: 0 8px 24px rgba(0,0,0,.45); }
+
+/* tela pequena (a tela externa do Flip): tudo um pouco menor */
+@media (max-width: 360px) {
+  main { padding: 0 10px 12px; gap: 8px; }
+  .two { gap: 8px; }
+  .card { padding: 10px; }
+  .two .card .v { font-size: 16px; }
+  .top { padding: 8px 10px; }
+  .nav button { min-width: 56px; }
+}

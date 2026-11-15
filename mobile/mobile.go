@@ -18,6 +18,7 @@ import (
 	"reflect"
 	"sync"
 	"time"
+	_ "time/tzdata" // reserva, se o sistema não tiver o fuso
 
 	"radlog/internal/app"
 	"radlog/internal/radiacode"
@@ -71,6 +72,22 @@ func Start(dir, device string, host Host) error {
 		host.Event(name, string(b))
 	})
 	eng.StartMobile()
+	return nil
+}
+
+// SetTimeZone acerta o fuso do Go (ex.: "America/Sao_Paulo"). No Android o
+// Go não lê o fuso do sistema e fica em UTC: o "hoje" da dose virava às 21h
+// e as horas gravadas saíam erradas. O Kotlin chama antes do Start e quando
+// o fuso muda.
+func SetTimeZone(id string) error {
+	if id == "" {
+		return errors.New("fuso vazio")
+	}
+	loc, err := time.LoadLocation(id)
+	if err != nil {
+		return err
+	}
+	time.Local = loc
 	return nil
 }
 

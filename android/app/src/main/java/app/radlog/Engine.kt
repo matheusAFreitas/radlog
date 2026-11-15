@@ -34,6 +34,7 @@ object Engine : Host {
 
     @Synchronized
     fun start(ctx: Context) {
+        syncTimeZone()
         if (Mobile.running()) return
         app = ctx.applicationContext
         ble = Ble(app)
@@ -41,6 +42,11 @@ object Engine : Host {
         dir.mkdirs()
         val name = (Build.MODEL ?: "Android").take(40)
         Mobile.start(dir.absolutePath, name, this)
+    }
+
+    /** O Go no Android fica em UTC: passa o fuso do celular. */
+    fun syncTimeZone() {
+        try { Mobile.setTimeZone(java.util.TimeZone.getDefault().id) } catch (_: Exception) { }
     }
 
     fun call(method: String, args: String): String = Mobile.call(method, args)

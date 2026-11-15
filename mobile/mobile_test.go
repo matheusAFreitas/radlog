@@ -6,6 +6,7 @@ import (
 	"reflect"
 	"strings"
 	"testing"
+	"time"
 )
 
 type fake struct{ n int }
@@ -96,4 +97,18 @@ func TestStartEngine(t *testing.T) {
 		t.Logf("ScanRadiacodeBLE no PC: %s", r.E)
 	}
 	Flush()
+}
+
+func TestSetTimeZone(t *testing.T) {
+	old := time.Local
+	defer func() { time.Local = old }()
+	if err := SetTimeZone("America/Sao_Paulo"); err != nil {
+		t.Fatal(err)
+	}
+	if time.Local.String() != "America/Sao_Paulo" {
+		t.Fatalf("fuso %s", time.Local)
+	}
+	if SetTimeZone("") == nil || SetTimeZone("Nada/Nenhum") == nil {
+		t.Fatal("fuso inválido passou")
+	}
 }

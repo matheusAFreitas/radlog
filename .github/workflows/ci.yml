@@ -98,6 +98,10 @@ jobs:
           CGO_ENABLED=0 GOOS=android GOARCH=arm64 go vet ./internal/... ./mobile
           go test -race ./mobile
       - name: gomobile (motor em .aar)
+        env:
+          # a mesma chave do Google do PC (login da nuvem); não chega a PR de fork
+          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
+          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
         run: |
           go install golang.org/x/mobile/cmd/gomobile@$GOMOBILE
           go install golang.org/x/mobile/cmd/gobind@$GOMOBILE
@@ -107,7 +111,8 @@ jobs:
           gomobile init
           mkdir -p android/app/libs
           gomobile bind -target=android/arm64 -androidapi 29 -javapkg=app.radlog.go \
-            -ldflags "-s -w" -o android/app/libs/radlog.aar ./mobile
+            -ldflags "-s -w -X radlog/internal/app.googleClientID=$GOOGLE_CLIENT_ID -X radlog/internal/app.googleClientSecret=$GOOGLE_CLIENT_SECRET" \
+            -o android/app/libs/radlog.aar ./mobile
       - name: APK
         working-directory: android
         env:

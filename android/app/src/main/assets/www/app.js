@@ -154,13 +154,17 @@ function render() {
 }
 
 // ---------------- Agora ----------------
+// o número cabe dentro do círculo (~104 de 200 úteis; a fonte mono tem 0,6 em
+// por letra); o tamanho sai em fração do medidor, que encolhe na tela pequena
+const dialSize = (v) => Math.max(18, Math.min(34, Math.floor(104 / (String(v).length * 0.6))));
+
 function dial(v, lv, sub) {
   const c = COL[lv] || COL.off;
   const lvl = lv === "off"
     ? `<span class="lvl" style="color:#8C969E">${esc(state.rc && state.rc.lastT ? T("última leitura às {0}", when(state.rc.lastT)) : T("sem leitura ainda"))}</span>`
     : `<span class="lvl" style="color:${c}"><svg viewBox="0 0 16 16" fill="${c}">${SH[lv]}</svg>${esc(LBL()[lv])}</span>`;
   return `<div class="hero"><div class="dial"><svg viewBox="0 0 48 48" aria-hidden="true"><path d="${ARCS}" fill="none" stroke="${c}" stroke-width="2.6" stroke-linecap="round"/><circle cx="24" cy="24" r="15.2" fill="none" stroke="#232A31" stroke-width=".8"/></svg>`
-    + `<div class="in"><span class="v" style="color:${lv === "off" ? "#8C969E" : "#E7ECEF"}">${v}</span><span class="u">µSv/h</span></div></div>${lvl}<span class="vs">${sub}</span></div>`;
+    + `<div class="in"><span class="v" style="color:${lv === "off" ? "#8C969E" : "#E7ECEF"};font-size:calc(var(--d) * ${(dialSize(v) / 200).toFixed(3)})">${v}</span><span class="u">µSv/h</span></div></div>${lvl}<span class="vs">${sub}</span></div>`;
 }
 
 // série do RC102 no gráfico (µSv/h), com o máximo e quando foi

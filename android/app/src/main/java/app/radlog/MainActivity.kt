@@ -64,6 +64,7 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        Engine.syncTimeZone()
         UiBridge.js("window.__rl&&__rl.event(\"resume\",{})")
     }
 
