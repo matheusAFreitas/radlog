@@ -1821,7 +1821,11 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
 #settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
-#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { float: left; width: 100%; padding: 0 0 var(--space-1); font-size: var(--fs-heading); font-weight: 600; }
+/* o título fica dentro do quadro: posicionado, a legenda não vai para a
+   borda em nenhum motor (no WebKitGTK do Linux, o float é ignorado dentro
+   do fieldset em flex e o título caía em cima da borda; ACE, 15/11) */
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { padding-top: calc(var(--space-4) + var(--fs-heading) * 1.45 + var(--space-1) + var(--space-2)); }
+#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { position: absolute; top: var(--space-4); left: var(--space-4); right: var(--space-4); width: auto; padding: 0; line-height: 1.45; font-size: var(--fs-heading); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #settings fieldset.dev-card > legend { padding-right: 96px; }
 #settings fieldset.dev-card::after { content: attr(data-dev); position: absolute; top: calc(var(--space-4) + 2px); right: var(--space-4); padding: 1px 8px; border: 1px solid var(--accent-line); border-radius: var(--radius-pill); color: var(--accent); font-family: var(--mono); font-size: var(--fs-micro); line-height: 1.6; }
 #settings fieldset.dev-card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)); }
