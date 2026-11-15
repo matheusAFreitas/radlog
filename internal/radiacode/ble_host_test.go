@@ -3,6 +3,8 @@ package radiacode
 import (
 	"encoding/binary"
 	"errors"
+	"fmt"
+	"strings"
 	"testing"
 	"time"
 )
@@ -85,3 +87,35 @@ func TestHostBLE(t *testing.T) {
 		t.Fatal("conexão que falha não deu erro")
 	}
 }
+
+// resposta que não vem: o registro diz se nada chegou ou se veio pela metade.
+func TestBLEHostTimeoutLog(t *testing.T) {
+	if testing.Short() {
+		t.Skip("espera 10 s")
+	}
+	var lines []string
+	BLELogf = func(f string, a ...any) { lines = append(lines, fmt.Sprintf(f, a...)) }
+	defer func() { BLELogf = nil }()
+	b := &bleAndroid{h: nopHost{}, as: newAssembler(), resp: make(chan []byte, 1)}
+	bleMu.Lock()
+	bleCur = b
+	bleMu.Unlock()
+	defer func() { bleMu.Lock(); bleCur = nil; bleMu.Unlock() }()
+	go func() {
+		time.Sleep(100 * time.Millisecond)
+		BLENotify([]byte{20, 0, 0, 0, 1, 2, 3}) // anuncia 20 bytes, chegam 3
+	}()
+	if _, err := b.Exchange([]byte{4, 0, 0, 0, 0x05, 0x00, 0, 0x80}); err == nil {
+		t.Fatal("devia estourar o tempo")
+	}
+	if len(lines) != 1 || !strings.Contains(lines[0], "pedido 0005") || !strings.Contains(lines[0], "3 de 20 bytes") {
+		t.Fatalf("registro: %q", lines)
+	}
+}
+
+type nopHost struct{}
+
+func (nopHost) Scan(time.Duration) ([]BLEDevice, error) { return nil, nil }
+func (nopHost) Connect(string) error                    { return nil }
+func (nopHost) Write([]byte) error                      { return nil }
+func (nopHost) Close()                                  {}

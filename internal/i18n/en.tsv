@@ -5674,3 +5674,7 @@ o GMC-800 de verdade está sem contagens	the real GMC-800 has no counts
 a memória do GMC-800 de verdade passou de 95%	the real GMC-800 memory is over 95%
 a memória do GMC-800 de verdade passou de 80%	the real GMC-800 memory is over 80%
 Bluetooth: o app ainda não ligou o rádio	Bluetooth: the app hasn't turned on the radio yet
+, resposta pela metade ({0} de {1} bytes)	, half a response ({0} of {1} bytes)
+RC102 (Bluetooth): sem resposta em 10 s ao pedido {0}: {1}	RC102 (Bluetooth): no answer in 10 s to request {0}: {1}
+chegaram {0} pedaço(s)	{0} chunk(s) arrived
+nada chegou	nothing arrived

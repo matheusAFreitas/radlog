@@ -3,6 +3,8 @@ package app
 import (
 	"os"
 	"time"
+
+	"radlog/internal/radiacode"
 )
 
 // O app de Android (3.0.0) roda este mesmo App, sem o Wails: o pacote
@@ -46,6 +48,7 @@ func (a *App) StartMobile() {
 	_ = os.MkdirAll(a.dataDir, 0o755)
 	a.logStart()
 	a.logf("modo celular (Android)")
+	radiacode.BLELogf = a.logf
 	a.settings = a.loadSettings()
 	a.loadLastCal()
 	a.loadCalHist()

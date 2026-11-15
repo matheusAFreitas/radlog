@@ -45,6 +45,12 @@ func host() BLEHost {
 	return bleHost
 }
 
+// BLELogf, se não for nil, recebe o diagnóstico de cada resposta que não
+// veio (o app liga no modo celular): quantos pedaços chegaram depois do
+// pedido e quanto da resposta montou. Assim uma queda no Bluetooth mostra no
+// registro se o RC102 calou ou se a resposta veio pela metade.
+var BLELogf func(format string, args ...any)
+
 type bleAndroid struct {
 	h    BLEHost
 	mu   sync.Mutex
@@ -52,6 +58,10 @@ type bleAndroid struct {
 	resp chan []byte
 	lost bool
 	done bool
+	// desde o último pedido: pedaços que chegaram e erros da montagem
+	got  int
+	bad  string
+	sent time.Time
 }
 
 // BLENotify entrega uma notificação que chegou no Android.
@@ -63,8 +73,10 @@ func BLENotify(p []byte) {
 		return
 	}
 	b.mu.Lock()
+	b.got++
 	out, done, err := b.as.add(append([]byte(nil), p...))
 	if err != nil {
+		b.bad = err.Error()
 		b.as = newAssembler()
 	}
 	b.mu.Unlock()
@@ -144,6 +156,7 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 		return nil, errors.New("Bluetooth: conexão perdida")
 	}
 	b.as = newAssembler()
+	b.got, b.bad, b.sent = 0, "", time.Now()
 	b.mu.Unlock()
 	select { // sobra de uma resposta antiga
 	case <-b.resp:
@@ -161,8 +174,34 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 		}
 		return out, nil
 	case <-time.After(10 * time.Second):
+		b.logTimeout(req)
 		return nil, errors.New("Bluetooth: o RC102 não respondeu")
 	}
+}
+
+func (b *bleAndroid) logTimeout(req []byte) {
+	f := BLELogf
+	if f == nil {
+		return
+	}
+	b.mu.Lock()
+	got, bad, part, want := b.got, b.bad, len(b.as.data), b.as.want
+	b.mu.Unlock()
+	cmd := ""
+	if len(req) >= 6 {
+		cmd = fmt.Sprintf("%02x%02x", req[5], req[4])
+	}
+	what := "nada chegou"
+	if got > 0 {
+		what = fmt.Sprintf("chegaram %d pedaço(s)", got)
+		if want >= 0 {
+			what += fmt.Sprintf(", resposta pela metade (%d de %d bytes)", part, want)
+		}
+	}
+	if bad != "" {
+		what += "; montagem: " + bad
+	}
+	f("RC102 (Bluetooth): sem resposta em 10 s ao pedido %s: %s", cmd, what)
 }
 
 func (b *bleAndroid) Close() error {
