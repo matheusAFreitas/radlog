@@ -17,11 +17,14 @@ object UiBridge : Engine.Listener {
 
     fun attach(w: WebView) {
         web = WeakReference(w)
+        Engine.removeListener(this)
         Engine.addListener(this)
     }
 
     fun detach(w: WebView) {
-        if (web?.get() === w) web = null
+        // outra tela pode já ter se ligado (a nova abre antes da velha fechar)
+        if (web?.get() !== w) return
+        web = null
         Engine.removeListener(this)
     }
 

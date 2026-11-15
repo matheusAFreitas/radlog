@@ -13,7 +13,9 @@ import android.os.Bundle
 import android.os.PowerManager
 import android.provider.Settings
 import android.view.WindowManager
+import android.view.ViewGroup
 import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
 import android.webkit.WebResourceRequest
 import android.webkit.WebResourceResponse
 import android.webkit.WebView
@@ -32,21 +34,32 @@ class MainActivity : Activity() {
     private val pool = Executors.newFixedThreadPool(3)
     private var permCb: String? = null
 
-    @SuppressLint("SetJavaScriptEnabled")
     override fun onCreate(saved: Bundle?) {
         super.onCreate(saved)
         try { Engine.start(this) } catch (_: Exception) { /* a tela mostra o erro */ }
         if (prefs().getBoolean("paired", false)) RadLogService.start(this)
+        newWeb()
+    }
+
+    /**
+     * Monta o WebView. O Android pode matar o processo que desenha a página
+     * (com o app em segundo plano, para liberar memória): sem tratar isso, a
+     * tela voltava toda preta até fechar o app. Agora um WebView novo sobe
+     * no lugar (onRenderProcessGone).
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun newWeb() {
         val loader = WebViewAssetLoader.Builder()
             .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
             .build()
-        web = WebView(this)
-        web.setBackgroundColor(0xFF0B0E10.toInt())
-        web.settings.javaScriptEnabled = true
-        web.settings.domStorageEnabled = true
-        web.settings.allowFileAccess = false
-        web.settings.allowContentAccess = false
-        web.webViewClient = object : WebViewClient() {
+        val w = WebView(this)
+        web = w
+        w.setBackgroundColor(0xFF0B0E10.toInt())
+        w.settings.javaScriptEnabled = true
+        w.settings.domStorageEnabled = true
+        w.settings.allowFileAccess = false
+        w.settings.allowContentAccess = false
+        w.webViewClient = object : WebViewClient() {
             override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? =
                 loader.shouldInterceptRequest(r.url)
 
@@ -55,17 +68,32 @@ class MainActivity : Activity() {
                 startActivity(Intent(Intent.ACTION_VIEW, r.url)) // link de fora: navegador
                 return true
             }
+
+            override fun onRenderProcessGone(v: WebView, d: RenderProcessGoneDetail): Boolean {
+                UiBridge.detach(v)
+                (v.parent as? ViewGroup)?.removeView(v)
+                v.destroy()
+                if (!isFinishing && !isDestroyed) newWeb()
+                return true // o app continua; só a página recomeça
+            }
         }
-        web.addJavascriptInterface(Native(), "RadLogNative")
-        setContentView(web)
-        UiBridge.attach(web)
-        web.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
+        w.addJavascriptInterface(Native(), "RadLogNative")
+        setContentView(w)
+        UiBridge.attach(w)
+        w.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
     }
 
     override fun onResume() {
         super.onResume()
         Engine.syncTimeZone()
         UiBridge.js("window.__rl&&__rl.event(\"resume\",{})")
+        // rede de segurança: se a página voltou vazia (sem o script de pé), recarrega
+        val w = web
+        w.postDelayed({
+            if (web === w && !isFinishing) w.evaluateJavascript("!!(window.__rl&&document.getElementById('main').childElementCount)") { r ->
+                if (r != "true" && web === w) w.reload()
+            }
+        }, 2500)
     }
 
     override fun onDestroy() {
