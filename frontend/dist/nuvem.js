@@ -85,7 +85,12 @@ function cloudEl(tag, cls, text) {
 function cloudBtn(text, cls, fn) {
   const b = cloudEl("button", "btn" + (cls ? " " + cls : ""), text);
   b.type = "button";
-  if (fn) b.addEventListener("click", fn);
+  // um clique por vez: o botão fica desligado até a ação responder (2.83.3)
+  if (fn) b.addEventListener("click", async (e) => {
+    if (b.disabled) return;
+    b.disabled = true;
+    try { await fn(e); } finally { b.disabled = false; }
+  });
   return b;
 }
 function cloudKV(rows) {

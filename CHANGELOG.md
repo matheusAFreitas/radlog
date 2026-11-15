@@ -1,5 +1,14 @@
 # Versões
 
+## 2.83.3
+- Os botões da nuvem ficam desligados enquanto a ação anda: um segundo
+  clique não chega mais ao app antes da resposta do primeiro.
+
+**English**
+
+- Cloud buttons stay disabled while the action runs: a second click no
+  longer reaches the app before the first one answers.
+
 ## 2.83.2
 - Correção: clicar duas vezes seguidas em "Recomeçar a nuvem" criava duas
   nuvens com o mesmo código. O PC ficava numa e os outros aparelhos
