@@ -11,7 +11,7 @@ val radlogVersion = (findProperty("radlogVersion") as String?) ?: "3.0.0-dev"
 val radlogCode = ((findProperty("radlogCode") as String?) ?: "1").toInt()
 
 // Assinatura: o keystore do RadLog vem dos segredos do GitHub (o CI escreve
-// o arquivo e passa os caminhos). Sem eles, o APK sai com a chave de debug.
+// o arquivo e passa os caminhos). Sem eles, o APK sai com a chave de teste.
 val sign = Properties().apply {
     listOf("storeFile", "storePassword", "keyAlias", "keyPassword").forEach { k ->
         (findProperty("radlog.$k") as String?)?.let { setProperty(k, it) }
@@ -39,12 +39,21 @@ android {
                 keyPassword = sign.getProperty("keyPassword")
             }
         }
+        // chave de TESTE fixa (pública, no repositório): os APKs de teste
+        // atualizam um por cima do outro. A chave de debug do Gradle mudava
+        // a cada build do CI e o Android recusava a atualização.
+        create("teste") {
+            storeFile = rootProject.file("chave-teste.jks")
+            storePassword = "radlog-teste"
+            keyAlias = "teste"
+            keyPassword = "radlog-teste"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            signingConfig = signingConfigs.findByName("radlog") ?: signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.findByName("radlog") ?: signingConfigs.getByName("teste")
         }
     }
 

@@ -78,7 +78,7 @@ jobs:
   android:
     # o app de Android (3.0.0): o motor em Go vira uma .aar pelo gomobile e o
     # Gradle monta o APK. Sem o keystore do RadLog nos segredos, sai com a
-    # chave de debug (só para teste).
+    # chave de teste fixa do repositório (android/chave-teste.jks).
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     env:
@@ -116,8 +116,10 @@ jobs:
       - name: APK
         working-directory: android
         env:
-          # a chave de verdade só no main (nunca em PR)
-          KEYSTORE: ${{ github.event_name == 'push' && secrets.RADLOG_ANDROID_KEYSTORE || '' }}
+          # a chave de verdade em todo build daqui (PR de fork não recebe
+          # segredos): assim o APK de teste e o publicado atualizam um por cima
+          # do outro. Sem ela, vale a chave de teste fixa (android/chave-teste.jks)
+          KEYSTORE: ${{ secrets.RADLOG_ANDROID_KEYSTORE }}
           KS_PASS: ${{ secrets.RADLOG_ANDROID_KEYSTORE_PASSWORD }}
           KEY_ALIAS: ${{ secrets.RADLOG_ANDROID_KEY_ALIAS }}
           KEY_PASS: ${{ secrets.RADLOG_ANDROID_KEY_PASSWORD }}
