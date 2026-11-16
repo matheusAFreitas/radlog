@@ -3624,7 +3624,7 @@ const I18N_EN = {
 "Nunca usado em 30 dias": "Never used in 30 days",
 "Nunca usado em 30 dias:": "Never used in 30 days:",
 "Não consegui copiar": "Couldn't copy",
-"Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; \"Zerar contagem\" apaga.": "It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the sync and the PDF. Turning it off stops counting and keeps what was counted; \"Reset count\" deletes it.",
+"Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da nuvem e do PDF. Desligar para de contar e guarda o que já contou; \"Zerar contagem\" apaga.": "It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the cloud and the PDF. Turning it off stops counting and keeps what was counted; \"Reset count\" deletes it.",
 "Período do uso": "Usage period",
 "Páginas:": "Pages:",
 "Uso do app": "App usage",
@@ -4349,7 +4349,52 @@ const I18N_EN = {
 "Onde estão": "Where they are",
 "mudar": "change",
 "continua somando a dose sozinho": "keeps adding up the dose on its own",
-"/dia": "/day"
+"/dia": "/day",
+"% acima da média das 2 h antes": "% above the average of the 2 h before",
+"A aba Distância mede isso com o seu objeto.": "The Distance tab measures it with your object.",
+"A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.": "With each rain while the counter is recording (app open or history downloaded), the app measures how much the reading rose afterwards and compares it with times without rain.",
+"A fatia que dá para baixar é a de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.": "The slice you can lower is the top one, the dose that came from something: an object you measured, a spike, a different place.",
+"É nessa parte que tempo, distância e blindagem fazem diferença; os testes ficam no Medir objeto.": "That is where time, distance and shielding make a difference; the tests are in Measure object.",
+"Como funciona: tempo, distância e blindagem": "How it works: time, distance and shielding",
+"De uma fonte pequena, o dobro da distância deixa ¼ da taxa.": "From a small source, twice the distance leaves ¼ of the rate.",
+"Distância.": "Distance.",
+"Blindagem.": "Shielding.",
+"Tempo.": "Time.",
+"Divisão da dose do período": "Split of the period's dose",
+"Dose = taxa × tempo: metade do tempo dá metade da dose.": "Dose = rate × time: half the time gives half the dose.",
+"Ficar perto por": "Stay close for",
+"GMC-800 sem conexão": "GMC-800 disconnected",
+"RC102 sem conexão": "RC102 disconnected",
+"RadiaCode sem conexão": "RC102 disconnected",
+"Os dois sem conexão": "Both disconnected",
+"RC102 voltou": "RC102 came back",
+"RadiaCode voltou": "RC102 came back",
+"Leitura média antes e depois da chuva, comparada com horários sem chuva": "Average reading before and after rain, compared with times without rain",
+"Mais ações deste trecho": "More actions for this period",
+"Marcar a chuva no gráfico": "Mark rain on the chart",
+"Mostra quando choveu na sua cidade e quanto a leitura sobe depois. A cidade fica só neste PC.": "Shows when it rained in your city and how much the reading rises afterwards. The city stays on this PC only.",
+"Ligar": "Turn on",
+"Medir objeto › Distância": "Measure object › Distance",
+"Medir objeto › Blindagem": "Measure object › Shielding",
+"Blindagem": "Shielding",
+"Teste de blindagem": "Shielding test",
+"Memória do GMC-800 cheia": "GMC-800 memory full",
+"O aparelho para de gravar ou grava por cima (conforme o ajuste dele). Baixe o histórico para guardar tudo no app.": "The device stops recording or overwrites (depending on its setting). Download the history to keep everything in the app.",
+"Quando encher, o aparelho para de gravar ou grava por cima (conforme o ajuste dele).": "When it fills up, the device stops recording or overwrites (depending on its setting).",
+"Metade do tempo dá metade da dose. De uma fonte pequena, o dobro da distância deixa ¼.": "Half the time gives half the dose. From a small source, twice the distance leaves ¼.",
+"Nenhum trecho acima do fundo no período: tudo foi fundo natural.": "No period above background: it was all natural background.",
+"O resultado de cada medição mostra quanto custa ficar perto.": "Each measurement's result shows how much staying close costs.",
+"Partes de Dados e backup": "Parts of Data and backup",
+"Pôr matéria no caminho segura uma parte da radiação.": "Putting matter in the way stops part of the radiation.",
+"A aba Blindagem compara antes e depois.": "The Shielding tab compares before and after.",
+"Sem leituras da memória do aparelho.": "No readings from the device memory.",
+"São três jeitos, e os três moram aqui:": "There are three ways, and all three live here:",
+"Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.": "All of this is about the dose above background. Natural background comes from the ground, the walls, the air and space, and you get it anywhere in the house.",
+"alara origem dose fundo acima": "alara origin dose background above",
+"alara distancia inverso quadrado afastar": "alara distance inverse square move away",
+"alara blindagem material chumbo antes depois": "alara shielding material lead before after",
+"Backup e arquivos": "Backup and files",
+"Nuvem": "Cloud"
 },
 "patterns": [
 [
@@ -10935,6 +10980,14 @@ const I18N_EN = {
 ]
 ],
 [
+"% acima da média das 2 h antes (",
+"^% acima da média das 2 h antes \\(((?:(?! · ).)+?)\\)$",
+"% above the average of the 2 h before (${1})",
+[
+"% acima da média das 2 h antes ("
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -11760,6 +11813,14 @@ const I18N_EN = {
 " no mesmo período: ",
 " em ",
 " medidos"
+]
+],
+[
+"A memória do aparelho trouxe ",
+"^A memória do aparelho trouxe ((?:(?! · ).)+?)\\.$",
+"The device memory brought back ${1}.",
+[
+"A memória do aparelho trouxe "
 ]
 ],
 [
@@ -13645,6 +13706,14 @@ const I18N_EN = {
 "≈ ${1} ${2} of your home background",
 [
 " do fundo da sua casa"
+]
+],
+[
+"Memória do GMC-800 em ",
+"^Memória do GMC\\-800 em ((?:(?! · ).)+?)%$",
+"GMC-800 memory at ${1}%",
+[
+"Memória do GMC-800 em "
 ]
 ],
 [
@@ -18208,6 +18277,14 @@ const I18N_EN = {
 "Attention on the ${1}",
 [
 "Atenção no "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no período$",
+"${1} in the period",
+[
+" no período"
 ]
 ],
 [

@@ -66,7 +66,6 @@
     <span class="side-group">Análise</span>
     <button type="button" data-view="graficos"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L19 7"/></svg><span>Gráficos</span></button>
     <button type="button" data-view="resumo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="14" height="18" rx="2"/><path d="M10 3v18"/><path d="M3.5 7.5H6M3.5 12H6M3.5 16.5H6"/><path d="M13 8.5h4M13 12.5h4"/></svg><span>Resumo</span></button>
-    <button type="button" data-view="alara"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2 2 4-4"/></svg><span>ALARA</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
     <button type="button" data-view="medir"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Medir objeto</span></button>
@@ -77,6 +76,13 @@
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
   </nav>
   <div class="side-tools">
+    <div class="qk-side" id="qkFab">
+      <button type="button" class="side-link" id="qkFabMain" aria-expanded="false" aria-haspopup="menu" aria-controls="qkFabMenu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Ações rápidas</span>
+      </button>
+      <div class="qk-fab-menu" id="qkFabMenu" role="menu" aria-label="Ações rápidas"></div>
+    </div>
     <button type="button" class="side-link" id="btnHistory">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
       Baixar histórico
@@ -654,23 +660,12 @@
       </details>
       </div>
     </section>
-</div>
-<div class="page" id="pageAlara" hidden>
-  <section class="card view" id="viewAlara">
-      <div class="view-body">
-      <div class="dlg-head">
-        <div>
-          <h2>ALARA</h2>
-          <p class="small muted"><span>ALARA quer dizer "tão baixo quanto razoavelmente possível".</span> <span>Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.</span> <span>São três jeitos: tempo, distância e blindagem.</span></p>
-        </div>
-      </div>
-
-      <div class="al-sec">
+  <section class="card al-sec sum-origin" id="sumOrigin">
         <div class="al-main">
-          <h3>De onde vem a sua dose</h3>
+          <h2>De onde vem a sua dose</h2>
           <span class="mono small muted" id="alOrSub">—</span>
           <div class="al-big mono" id="alOrTot">—</div>
-          <svg class="al-bar" id="alOrBar" viewBox="0 0 600 36" preserveAspectRatio="none" role="img" aria-label="Divisão da dose da semana"></svg>
+          <svg class="al-bar" id="alOrBar" viewBox="0 0 600 36" preserveAspectRatio="none" role="img" aria-label="Divisão da dose do período"></svg>
           <div class="al-legend small" id="alOrLeg"></div>
           <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alOrTbl"><thead><tr><th>Acima do fundo</th><th>quando</th><th class="n">dose</th></tr></thead><tbody></tbody></table></div>
         </div>
@@ -679,114 +674,11 @@
           <p><span>O fundo natural é quase tudo, e é normal.</span> <span>Ele vem do solo e das paredes, do radônio no ar, dos raios cósmicos e até do potássio do seu corpo.</span> <span>Não dá para zerar.</span></p>
           </details>
           <details class="how"><summary>Como funciona</summary>
-          <p><span>O ALARA trabalha na fatia de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.</span> <span>É nessa parte que tempo, distância e blindagem fazem diferença.</span></p>
+          <p><span>A fatia que dá para baixar é a de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.</span> <span>É nessa parte que tempo, distância e blindagem fazem diferença; os testes ficam no Medir objeto.</span></p>
           <p>Cada linha da tabela abre o momento no gráfico.</p>
           </details>
         </aside>
-      </div>
-
-      <div class="al-sec">
-        <div class="al-main">
-          <h3>Tempo: quanto custa ficar perto</h3>
-          <div class="al-row">
-            <label class="al-f">Taxa no lugar (µSv/h)<input type="number" id="alRate" min="0" step="0.01" inputmode="decimal"></label>
-            <label class="al-f">Minutos<input type="number" id="alMin" min="1" max="6000" step="1" value="30" inputmode="numeric"></label>
-            <span class="small muted" id="alRateFrom">—</span>
-          </div>
-          <div class="al-big mono" id="alTDose">—</div>
-          <div class="al-eq small" id="alTEq"></div>
-          <div class="al-alt small" id="alTAlt"></div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>Dose = taxa × tempo.</span> <span>A taxa (µSv/h) é a velocidade e a dose (µSv) é a distância percorrida.</span> <span>Metade do tempo dá metade da dose.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <p>A comparação com o fundo da sua casa ajuda a ter noção do tamanho.</p>
-          </details>
-        </aside>
-      </div>
-
-      <div class="al-sec" id="alSecDist">
-        <div class="al-main">
-          <h3>Teste de distância: o inverso do quadrado</h3>
-          <div class="al-row">
-            <div class="seg" role="group" aria-label="Aparelho do teste" id="alDevSeg">
-              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
-              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
-            </div>
-            <label class="al-f">Distâncias (cm)<input type="text" id="alDists" value="5, 10, 20, 40" autocomplete="off"></label>
-          </div>
-          <div class="al-steps" id="alDSteps"></div>
-          <p class="al-msg small" id="alDMsg"></p>
-          <div class="al-row">
-            <button type="button" class="btn accent" id="alDStart">Começar</button>
-            <button type="button" class="btn accent" id="alDNext" hidden>Medir</button>
-            <button type="button" class="btn" id="alDStop" hidden>Parar esta distância</button>
-            <button type="button" class="btn" id="alDCancel" hidden>Cancelar o teste</button>
-          </div>
-          <div class="al-verdict" id="alDVer" hidden></div>
-          <div id="alDBox" hidden>
-            <svg class="al-chart" id="alDChart" viewBox="0 0 640 280" role="img" aria-label="Taxa acima do fundo em cada distância e a curva do inverso do quadrado"></svg>
-            <div class="al-legend small"><span><i style="background:var(--rc)"></i>medido (acima do fundo), com a incerteza</span><span><i class="ln" style="background:var(--muted)"></i>o que o inverso do quadrado prevê</span><span><i class="ln" style="background:var(--dim)"></i>fundo de casa</span></div>
-            <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alDTbl"><thead><tr><th>distância</th><th class="n">medido (µSv/h)</th><th class="n">previsto</th><th class="n">tempo</th></tr></thead><tbody></tbody></table></div>
-          </div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>A radiação de uma fonte pequena se espalha como a luz de uma lâmpada.</span> <span>A 2× a distância, a mesma quantidade se espalha por uma área 4× maior.</span> <span>Por isso dobrar a distância deixa ¼ da taxa.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <p><span>Como o teste funciona: o app mede cada distância até a incerteza ficar abaixo de 10% (no máximo 5 min) e tira o fundo da sua casa.</span></p>
-          <ul>
-            <li>Meça do centro do cristal (a marca no corpo do aparelho), não da ponta.</li>
-            <li>Encostado demais a regra falha. Por isso o primeiro ponto é 5 cm e não 0.</li>
-            <li>Longe, a fonte some no fundo. O app avisa quando o sinal fica do tamanho do fundo.</li>
-            <li>Se a queda for mais lenta que a curva, a fonte é grande ou espalhada (um piso, uma bancada, várias peças).</li>
-          </ul>
-          </details>
-        </aside>
-      </div>
-
-      <div class="al-sec" id="alSecShield">
-        <div class="al-main">
-          <h3>Teste de blindagem: antes × depois</h3>
-          <div class="al-row">
-            <div class="seg" role="group" aria-label="Aparelho do teste" id="alBDevSeg">
-              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
-              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
-            </div>
-            <label class="al-f">Material<input type="text" id="alMat" autocomplete="off" placeholder="ex.: livro de 3 cm"></label>
-            <label class="al-f">Minutos em cada fase<input type="number" id="alBMin" min="0.5" max="30" step="0.5" value="2" inputmode="decimal"></label>
-          </div>
-          <div class="al-steps" id="alBSteps"></div>
-          <p class="al-msg small" id="alBMsg"></p>
-          <div class="al-row">
-            <button type="button" class="btn accent" id="alBStart">Começar</button>
-            <button type="button" class="btn accent" id="alBNext" hidden>Medir com o material</button>
-            <button type="button" class="btn" id="alBStop" hidden>Parar esta fase</button>
-            <button type="button" class="btn" id="alBCancel" hidden>Cancelar o teste</button>
-          </div>
-          <div class="al-verdict" id="alBVer" hidden></div>
-          <div id="alBBox" hidden>
-            <svg class="al-chart" id="alBChart" viewBox="0 0 640 114" role="img" aria-label="Taxa acima do fundo sem nada e com o material"></svg>
-          </div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>Blindar é pôr matéria no caminho.</span> <span>Cada camada segura uma parte da radiação.</span> <span>Materiais densos e grossos seguram mais, e a gama de energia alta passa mais fácil.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <ul>
-            <li>Mesma posição nas duas fases. Se o aparelho mexer, o teste mede a distância em vez do material.</li>
-            <li>A incerteza decide. Se a diferença for menor que duas vezes a incerteza, o app diz "não deu para ver" em vez de inventar um número. Medir mais tempo ajuda.</li>
-            <li>Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RC102, parte do que o GMC via era beta. O RC102 mede gama.</li>
-          </ul>
-          </details>
-        </aside>
-      </div>
-      </div>
-    </section>
+      </section>
 </div>
 <div class="page" id="pageAlertas" hidden>
   <section class="card view al-page" id="alertsCard">
@@ -855,7 +747,12 @@
     </section>
 </div>
 <div class="page" id="pageMedir" hidden>
-  <section class="card view view-measure" id="viewMeasure">
+  <nav class="subtabs" role="tablist" aria-label="Medir objeto" data-page="medir">
+    <button type="button" role="tab" data-sub="objeto" aria-selected="true">Objeto</button>
+    <button type="button" role="tab" data-sub="distancia" aria-selected="false" tabindex="-1">Distância</button>
+    <button type="button" role="tab" data-sub="blindagem" aria-selected="false" tabindex="-1">Blindagem</button>
+  </nav>
+  <section class="card view view-measure" id="viewMeasure" role="tabpanel" data-subpane="objeto">
       <div class="view-body">
       <div class="dlg-head m-head">
         <h2 id="measureTitle">Medir objeto</h2>
@@ -1091,6 +988,16 @@
       </div>
       </div>
 
+      <div class="m-alara-box"><details class="how m-alara" id="mAlara"><summary>Como funciona: tempo, distância e blindagem</summary>
+        <p><span>ALARA quer dizer "tão baixo quanto razoavelmente possível".</span> <span>Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.</span> <span>São três jeitos, e os três moram aqui:</span></p>
+        <ul>
+          <li><b>Tempo.</b> <span>Dose = taxa × tempo: metade do tempo dá metade da dose.</span> <span>O resultado de cada medição mostra quanto custa ficar perto.</span></li>
+          <li><b>Distância.</b> <span>De uma fonte pequena, o dobro da distância deixa ¼ da taxa.</span> <span>A aba Distância mede isso com o seu objeto.</span></li>
+          <li><b>Blindagem.</b> <span>Pôr matéria no caminho segura uma parte da radiação.</span> <span>A aba Blindagem compara antes e depois.</span></li>
+        </ul>
+        <p class="small muted">Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.</p>
+      </details></div>
+
       <div class="m-saved-grid" id="mSavedPane" hidden>
         <aside class="m-history" id="mHistory">
           <input type="search" id="mSearch" placeholder="Procurar pelo nome ou anotação" aria-label="Procurar medição" autocomplete="off">
@@ -1152,6 +1059,83 @@
 
         </div>
     </section>
+  <section class="card al-sec" id="alSecDist" role="tabpanel" data-subpane="distancia" hidden>
+        <div class="al-main">
+          <h2>Teste de distância: o inverso do quadrado</h2>
+          <div class="al-row">
+            <div class="seg" role="group" aria-label="Aparelho do teste" id="alDevSeg">
+              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
+              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
+            </div>
+            <label class="al-f">Distâncias (cm)<input type="text" id="alDists" value="5, 10, 20, 40" autocomplete="off"></label>
+          </div>
+          <div class="al-steps" id="alDSteps"></div>
+          <p class="al-msg small" id="alDMsg"></p>
+          <div class="al-row">
+            <button type="button" class="btn accent" id="alDStart">Começar</button>
+            <button type="button" class="btn accent" id="alDNext" hidden>Medir</button>
+            <button type="button" class="btn" id="alDStop" hidden>Parar esta distância</button>
+            <button type="button" class="btn" id="alDCancel" hidden>Cancelar o teste</button>
+          </div>
+          <div class="al-verdict" id="alDVer" hidden></div>
+          <div id="alDBox" hidden>
+            <svg class="al-chart" id="alDChart" viewBox="0 0 640 280" role="img" aria-label="Taxa acima do fundo em cada distância e a curva do inverso do quadrado"></svg>
+            <div class="al-legend small"><span><i style="background:var(--rc)"></i>medido (acima do fundo), com a incerteza</span><span><i class="ln" style="background:var(--muted)"></i>o que o inverso do quadrado prevê</span><span><i class="ln" style="background:var(--dim)"></i>fundo de casa</span></div>
+            <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alDTbl"><thead><tr><th>distância</th><th class="n">medido (µSv/h)</th><th class="n">previsto</th><th class="n">tempo</th></tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+        <aside class="al-why">
+          <details class="how al-how-why"><summary>Por que isso importa</summary>
+          <p><span>A radiação de uma fonte pequena se espalha como a luz de uma lâmpada.</span> <span>A 2× a distância, a mesma quantidade se espalha por uma área 4× maior.</span> <span>Por isso dobrar a distância deixa ¼ da taxa.</span></p>
+          </details>
+          <details class="how"><summary>Como funciona</summary>
+          <p><span>Como o teste funciona: o app mede cada distância até a incerteza ficar abaixo de 10% (no máximo 5 min) e tira o fundo da sua casa.</span></p>
+          <ul>
+            <li>Meça do centro do cristal (a marca no corpo do aparelho), não da ponta.</li>
+            <li>Encostado demais a regra falha. Por isso o primeiro ponto é 5 cm e não 0.</li>
+            <li>Longe, a fonte some no fundo. O app avisa quando o sinal fica do tamanho do fundo.</li>
+            <li>Se a queda for mais lenta que a curva, a fonte é grande ou espalhada (um piso, uma bancada, várias peças).</li>
+          </ul>
+          </details>
+        </aside>
+      </section>
+  <section class="card al-sec" id="alSecShield" role="tabpanel" data-subpane="blindagem" hidden>
+        <div class="al-main">
+          <h2>Teste de blindagem: antes × depois</h2>
+          <div class="al-row">
+            <div class="seg" role="group" aria-label="Aparelho do teste" id="alBDevSeg">
+              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
+              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
+            </div>
+            <label class="al-f">Material<input type="text" id="alMat" autocomplete="off" placeholder="ex.: livro de 3 cm"></label>
+            <label class="al-f">Minutos em cada fase<input type="number" id="alBMin" min="0.5" max="30" step="0.5" value="2" inputmode="decimal"></label>
+          </div>
+          <div class="al-steps" id="alBSteps"></div>
+          <p class="al-msg small" id="alBMsg"></p>
+          <div class="al-row">
+            <button type="button" class="btn accent" id="alBStart">Começar</button>
+            <button type="button" class="btn accent" id="alBNext" hidden>Medir com o material</button>
+            <button type="button" class="btn" id="alBStop" hidden>Parar esta fase</button>
+            <button type="button" class="btn" id="alBCancel" hidden>Cancelar o teste</button>
+          </div>
+          <div class="al-verdict" id="alBVer" hidden></div>
+          <div id="alBBox" hidden>
+            <svg class="al-chart" id="alBChart" viewBox="0 0 640 114" role="img" aria-label="Taxa acima do fundo sem nada e com o material"></svg>
+          </div>
+        </div>
+        <aside class="al-why">
+          <details class="how al-how-why"><summary>Por que isso importa</summary>
+          <p><span>Blindar é pôr matéria no caminho.</span> <span>Cada camada segura uma parte da radiação.</span> <span>Materiais densos e grossos seguram mais, e a gama de energia alta passa mais fácil.</span></p>
+          </details>
+          <details class="how"><summary>Como funciona</summary>
+          <ul>
+            <li>Mesma posição nas duas fases. Se o aparelho mexer, o teste mede a distância em vez do material.</li>
+            <li>A incerteza decide. Se a diferença for menor que duas vezes a incerteza, o app diz "não deu para ver" em vez de inventar um número. Medir mais tempo ajuda.</li>
+            <li>Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RC102, parte do que o GMC via era beta. O RC102 mede gama.</li>
+          </ul>
+          </details>
+        </aside>
+      </section>
 </div>
 <div class="page" id="pageFora" hidden>
   <section class="card view view-periods" id="viewPeriods">
@@ -1205,7 +1189,7 @@
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="riY"><span></span><span></span><span></span><span></span></div>
           <div class="plot m-plot" id="riPlot">
-            <svg id="riChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="CPM médio antes e depois da chuva, comparado com horários sem chuva"></svg>
+            <svg id="riChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Leitura média antes e depois da chuva, comparada com horários sem chuva"></svg>
             <div class="cursor" id="riCursor" hidden></div>
             <div class="tip mono" id="riTip" hidden></div>
           </div>
@@ -1214,7 +1198,7 @@
         <div class="legend small muted ad-legend">
           <span class="key"><i style="border-color:#3DA5FF"></i>depois da chuva</span>
           <span class="key"><i style="border-color:#A3ADB4"></i>sem chuva (variação normal)</span>
-          <span class="small muted" id="riUnit">CPM acima da média das 2 h antes</span>
+          <span class="small muted" id="riUnit">% acima da média das 2 h antes</span>
         </div>
       </div>
       <ul class="ri-list" id="riList"></ul>
@@ -2171,6 +2155,8 @@
   </section>
   <section class="set-sec" data-sec="data" hidden>
     <h2 class="set-sec-title">Dados e backup</h2>
+    <div class="set-tabs" role="tablist" aria-label="Partes de Dados e backup"></div>
+    <div class="set-tab" data-tab="arq" hidden>
     <div class="set-cards">
     <div class="set-col">
       <fieldset>
@@ -2215,43 +2201,18 @@
         </details>
       </fieldset>
     </div>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="nuvem" hidden>
+    <div class="set-cards">
     <fieldset class="set-wide cloud-box" id="cloudBox">
       <legend>Nuvem (Google Drive) <span class="chip cloud-exp">experimental</span> <span class="chip cloud-st" id="cloudTag" hidden></span></legend>
       <div class="cloud-body" id="cloudBody"></div>
     </fieldset>
-    <fieldset class="set-wide">
-      <legend>Sincronização</legend>
-      <label class="toggle">
-        <span>Aceitar conexões de outros PCs (este PC aparece na rede)</span>
-        <input type="checkbox" id="chkSyncListen">
-      </label>
-      <p class="small muted" id="syncListenInfo"></p>
-      <div class="upd-row" id="syncCodeRow" hidden>
-        <button type="button" class="btn small" id="btnSyncCode">Mostrar código para parear</button>
-        <span class="sync-code mono" id="syncCode" data-no-tr></span>
-        <span class="small muted" id="syncCodeLeft"></span>
-      </div>
-      <label class="toggle">
-        <span>Sincronizar sozinho a cada 10 min</span>
-        <input type="checkbox" id="chkSyncAuto">
-      </label>
-      <h4 class="sync-h">PCs pareados</h4>
-      <ul class="sync-list" id="syncPeers"></ul>
-      <h4 class="sync-h">Parear com outro PC</h4>
-      <p class="small muted">No outro PC, ligue "Aceitar conexões" e clique em "Mostrar código para parear". Aqui, escolha ele na lista (ou digite o endereço) e digite o código.</p>
-      <div class="upd-row"><button type="button" class="btn small" id="btnSyncFind">Procurar na rede</button> <span class="small muted" id="syncFindMsg"></span></div>
-      <ul class="sync-list" id="syncFound"></ul>
-      <div class="sync-pair">
-        <input type="text" id="syncAddr" placeholder="endereço (ex.: 192.168.0.20 ou o 100.x.y.z do Tailscale)" autocomplete="off" aria-label="Endereço do outro PC">
-        <input type="text" id="syncPairCode" inputmode="numeric" maxlength="7" placeholder="código" autocomplete="off" aria-label="Código de 6 dígitos">
-        <button type="button" class="btn small accent" id="btnSyncPair">Parear</button>
-      </div>
-      <p class="small" id="syncPairMsg"></p>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
-      </details>
-    </fieldset>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="uso" hidden>
+    <div class="set-cards">
     <fieldset class="set-wide" id="usoBox">
       <legend>Uso do app</legend>
       <label class="toggle">
@@ -2286,9 +2247,13 @@
       <details class="how">
         <summary>Como funciona</summary>
         <p class="small muted">Conta cada vez que uma página ou aba abre, os cliques nos botões, nos "Como funciona" e nos seletores, e o tempo olhando: só com a janela em primeiro plano e você mexendo no mouse ou no teclado (parado mais de 2 minutos, para de contar).</p>
-        <p class="small muted">Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.</p>
+        <p class="small muted">Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da nuvem e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.</p>
       </details>
     </fieldset>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="hist" hidden>
+    <div class="set-cards">
     <fieldset id="setMature" class="set-wide">
       <legend>Histórico disponível</legend>
       <div class="sum-notes" id="sumMature"><p class="small muted">Carregando…</p></div>
@@ -2302,7 +2267,8 @@
         <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
       </details>
     </fieldset>
-  </div>
+    </div>
+    </div>
   </section>
   <section class="set-sec" data-sec="about" hidden>
     <h2 class="set-sec-title">Atualizações e sobre</h2>
@@ -2387,12 +2353,6 @@
   <div class="qk-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> escolher</span><span><kbd>Enter</kbd> abrir</span><span><kbd>Esc</kbd> fechar</span></div>
 </dialog>
 
-<div class="qk-fab" id="qkFab">
-  <div class="qk-fab-menu" id="qkFabMenu"></div>
-  <button type="button" class="qk-fab-main" id="qkFabMain" aria-expanded="false" aria-label="Ações rápidas" title="Ações rápidas">
-    <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><circle cx="24" cy="24" r="5" fill="var(--accent)"/></svg>
-  </button>
-</div>
 <div class="qk-sheet" id="qkSheet" role="dialog" aria-label="Saí de casa" hidden></div>
 
 <dialog id="repDlg" aria-labelledby="repTitle">

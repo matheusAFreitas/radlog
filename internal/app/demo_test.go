@@ -59,7 +59,6 @@ func TestDemoDoesNotTouchFiles(t *testing.T) {
 		"backup": second(a.ExportBackup()),
 		"nuvem":  second(a.CloudSyncNow()),
 		"login":  second(a.CloudLogin()),
-		"sync":   second(a.SyncNow("x")),
 	} {
 		if !errors.Is(err, errDemo) {
 			t.Fatalf("%s na demonstração: %v", name, err)

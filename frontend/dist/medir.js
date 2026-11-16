@@ -699,6 +699,42 @@ function drawMeasSg() {
 
 // ---------- 5. resultado ----------
 
+// Tempo (era do ALARA, 2.85): dose = taxa × tempo, só a parte acima do fundo
+// (o fundo você pega em qualquer canto da casa)
+function mTempoCard(c, net) {
+  const row = document.createElement("div");
+  row.className = "m-tempo-row";
+  const lab = document.createElement("label");
+  const inp = document.createElement("input");
+  inp.type = "number"; inp.min = "1"; inp.max = "6000"; inp.step = "1"; inp.inputMode = "numeric";
+  inp.value = localGet("mTempoMin", "30");
+  lab.append("Ficar perto por ", inp, " min");
+  const out = document.createElement("div");
+  out.className = "m-tempo-out";
+  const big = document.createElement("b");
+  big.className = "mono";
+  const kn = document.createElement("span");
+  kn.className = "small muted";
+  out.append(big, kn);
+  row.append(lab, out);
+  const tip = document.createElement("p");
+  tip.className = "small muted";
+  tip.textContent = "Metade do tempo dá metade da dose. De uma fonte pequena, o dobro da distância deixa ¼.";
+  const draw = () => {
+    const m = Math.max(1, Math.min(6000, parseFloat(String(inp.value).replace(",", ".")) || 30));
+    localSet("mTempoMin", String(m));
+    const ex = (net * m) / 60;
+    big.textContent = `+${doseNum(ex, ex < 0.1 ? 3 : 2)} ${doseLbl()}`;
+    kn.textContent = "";
+    kn.append(" ", Object.assign(document.createElement("span"), { textContent: "acima do fundo" }));
+    // uma frase por nó: a tradução acha cada uma
+    for (const l of homeBgUSv() > 0 ? doseKnown(ex, homeBgUSv(), doseXray) : []) kn.append(" · ", Object.assign(document.createElement("span"), { textContent: l }));
+  };
+  inp.addEventListener("input", draw);
+  draw();
+  c.append(row, tip);
+}
+
 function measBannerTitle(st, r) {
   const nm = (st.name || "").trim();
   if (r.level === "sim") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} emite radiação acima do fundo` : "O objeto emite radiação acima do fundo";
@@ -772,6 +808,7 @@ function renderMeasureResult(st) {
       c2.appendChild(ul);
     }
   }
+  if (r.level === "sim" && r.netUSv > 0) mTempoCard(card("Tempo: quanto custa ficar perto"), r.netUSv);
   const o = st.other;
   if (o && o.role === "objeto") {
     const c = card("Os dois aparelhos, lado a lado");

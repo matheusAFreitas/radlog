@@ -135,6 +135,10 @@ function qkResults(q) {
   const all = [
     ...qkActions(),
     ...qkViews().map(([v, n]) => ({ g: "Telas", ic: QK_IC.page, t: n, kw: v, run: () => qkGo(v) })),
+    // o que era a tela ALARA (2.85): cada parte no lugar novo
+    { g: "Telas", ic: QK_IC.obj, t: "Teste de distância", s: "Medir objeto › Distância", kw: "alara distancia inverso quadrado afastar", run: () => { setSub("medir", "distancia"); qkGo("medir"); } },
+    { g: "Telas", ic: QK_IC.obj, t: "Teste de blindagem", s: "Medir objeto › Blindagem", kw: "alara blindagem material chumbo antes depois", run: () => { setSub("medir", "blindagem"); qkGo("medir"); } },
+    { g: "Telas", ic: QK_IC.page, t: "De onde vem a sua dose", s: "Resumo", kw: "alara origem dose fundo acima", run: async () => { await showView("resumo"); const c = $("sumOrigin"); if (c) c.scrollIntoView({ block: "start" }); } },
     ...qkSettings(),
     ...qkMeasurements(),
   ];
@@ -341,7 +345,7 @@ async function qkBack() {
   } catch (e) { toast(errMsg(e), true); }
 }
 
-// ---------- botão do logo ----------
+// ---------- ações rápidas (pé da barra lateral, 2.85) ----------
 
 function qkFab(open) {
   const f = $("qkFab");
@@ -360,12 +364,22 @@ function qkFab(open) {
     const ic = document.createElement("span");
     ic.className = "qk-fic" + (it.c ? " " + it.c : "");
     ic.innerHTML = it.ic;
-    b.appendChild(ic);
+    b.prepend(ic);
+    b.setAttribute("role", "menuitem");
     b.addEventListener("click", () => { qkFab(false); it.run(); });
     menu.appendChild(b);
   });
+  qkFabPlace();
   const first = menu.querySelector("button");
   if (first) first.focus();
+}
+
+// o menu fica preso à tela, em cima do botão da barra lateral (ou embaixo,
+// com a barra no topo em tela estreita)
+function qkFabPlace() {
+  const r = $("qkFabMain").getBoundingClientRect(), m = $("qkFabMenu").style;
+  if (r.top > innerHeight / 2) { m.left = r.left + "px"; m.right = "auto"; m.top = "auto"; m.bottom = (innerHeight - r.top + 8) + "px"; $("qkFabMenu").style.flexDirection = "column-reverse"; m.alignItems = "flex-start"; }
+  else { m.left = "auto"; m.right = Math.max(8, innerWidth - r.right) + "px"; m.top = (r.bottom + 8) + "px"; m.bottom = "auto"; $("qkFabMenu").style.flexDirection = "column"; m.alignItems = "flex-end"; }
 }
 
 // some durante uma medição em andamento (o "Parar" fica no canto) e com o

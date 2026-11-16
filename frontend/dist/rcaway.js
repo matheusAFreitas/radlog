@@ -388,12 +388,14 @@ function rcAwayRows(ul) {
     when.textContent = zoomRangeText(q.from, q.to);
     const what = document.createElement("div");
     what.className = "small muted";
-    what.textContent = q.kind === "gmc" ? "GMC-800 sem conexão: você estava fora de casa?"
-      : q.kind === "ambos" ? "GMC-800 e RC102 sem conexão: você estava fora de casa?"
+    what.textContent = q.kind === "gmc" || q.kind === "ambos" ? "Você estava fora de casa?"
       : q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
       : q.kind === "programada" ? `Saída programada "${asIs(q.name)}": você saiu mesmo?`
-      : "RC102 sem conexão, " + (q.memMinutes ? `a memória trouxe ${hm(q.memMinutes)}` : "sem leituras da memória");
-    t.append(c, when, what);
+      : q.memMinutes ? `A memória do aparelho trouxe ${hm(q.memMinutes)}.` : "Sem leituras da memória do aparelho.";
+    const tt = document.createElement("b");
+    tt.textContent = q.kind === "gmc" ? "GMC-800 sem conexão" : q.kind === "ambos" ? "Os dois sem conexão"
+      : q.kind === "volta" ? "RC102 voltou" : q.kind === "programada" ? "Saída programada" : "RC102 sem conexão";
+    t.append(tt, " ", c, when, what);
     const acts = document.createElement("div");
     acts.className = "acts";
     const go = document.createElement("button");
@@ -402,6 +404,7 @@ function rcAwayRows(ul) {
       // a escolhida vai para o fim: é a que o cartão do Agora mostra
       state.rcAway = (state.rcAway || []).filter((x) => x.id !== q.id).concat(q);
       awLater.delete(q.id);
+      rcaOpen.add(q.id);
       showView("agora");
       renderRcAway();
     });

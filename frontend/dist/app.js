@@ -19,7 +19,7 @@ const demoApi = !hasGo || inDemo ? makeDemoApi({ inApp: inDemo }) : null;
 const DEMO_GO = new Set(["GetDemo", "StopDemo", "DemoTray"]);
 const DEMO_BLOCK = new Set(["ExportCSV", "ExportReport", "ExportReportWith", "ExportMeasureReport", "ExportBackup", "ImportBackup", "ApplyBackupSettings",
   "CloudLogin", "CloudLoginWait", "CloudFinishSetup", "CloudOpen", "CloudSyncNow", "CloudRestart", "CloudRejoin", "CloudReset", "CloudDisconnect", "CloudRemoveDevice", "CloudDupAnswer", "CloudVaultRetry", "SetCloudAuto", "SetCloudName", "SaveCloudCode",
-  "SyncNow", "PairWith", "ShowPairCode", "SetSyncListen", "SetSyncAuto", "DiscoverPeers", "SetPeerAddrs", "ForgetPeer", "ImportRcLog"]);
+  "ImportRcLog"]);
 // ações no aparelho: a demonstração finge que fez, e avisa (2.83.1)
 const DEMO_DEVICE = new Set(["SetDeviceConfig", "RestoreDeviceConfig", "SyncClock", "ResetRcSpectrum", "SetRadiacode", "ReconnectRadiacode", "Connect", "Disconnect"]);
 const demoRefuse = async () => { throw new Error("saia da demonstração para usar"); };
@@ -866,10 +866,11 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
-const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alara: "pageAlara", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
+  if (v === "alara") { setSub("medir", "distancia"); v = "medir"; } // o ALARA saiu na 2.85: os testes ficam no Medir objeto
   if (!PAGES[v]) v = "graficos";
   if (v !== "alertas") state.alertRange = null; // o filtro de período vale só na ida pelo Resumo
   const changed = state.view !== v;
@@ -893,8 +894,7 @@ async function showView(v, skipRender) {
   if (v === "fora") { renderPeriods(); refreshPlanned(); }
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
-  if (v === "alara") refreshAlara();
-  if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
+  if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); refreshAlara(); }
   if (v === "radiacode") { if (api.GetRadiacode) renderRc(await api.GetRadiacode()); refreshRc24(); }
   if (v === "config") openSettings();
   if (v === "agora") refreshAgora();
@@ -902,7 +902,7 @@ async function showView(v, skipRender) {
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"] };
+const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"], medir: ["objeto", "distancia", "blindagem"] };
 state.sub = {};
 // 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
 if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
@@ -941,6 +941,7 @@ function refreshSub(pg) {
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
   if (pg === "radiacode" && s === "agora") refreshRc24();
   if (pg === "gmc" && s === "tubo" && typeof tbLoad === "function" && !TB.h) tbLoad();
+  if (pg === "medir") refreshAlara();
 }
 
 for (const pg of Object.keys(SUBS)) setSub(pg, state.sub[pg]);
@@ -1995,11 +1996,11 @@ const SET_LAYOUT = [
   { id: "rc", name: "Radiacode 102", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
   { group: "Avisos", id: "alarm", name: "Alarmes e avisos" },
   { group: "App", id: "app", name: "Janela e tela" },
-  { id: "data", name: "Dados e backup" },
+  { id: "data", name: "Dados e backup", tabs: [["arq", "Backup e arquivos"], ["nuvem", "Nuvem"], ["uso", "Uso do app"], ["hist", "Histórico"]] },
   { id: "about", name: "Atualizações e sobre" },
 ];
 state.setSec = "gmc";
-state.setTab = { gmc: "con", rc: "con" };
+state.setTab = { gmc: "con", rc: "con", data: "arq" };
 const setSecEl = (id) => document.querySelector(`#settings .set-sec[data-sec="${id}"]`);
 const setLay = (id) => SET_LAYOUT.find((x) => x.id === id);
 // o elemento está na seção e na aba abertas agora
@@ -2057,7 +2058,7 @@ function showSetSection(id, tab) {
   if (["devcfg", "dcCalCard", "dcTube"].some((k) => setShown($(k)))) openDevCfg();
   if (setShown($("rcCfg"))) openRcCfg();
   if (L.id === "alarm") { renderLadder(); renderDevAlarms(); openDevCfg().then(renderDevAlarms); }
-  if (L.id === "data") renderMaturity();
+  if (L.id === "data" && state.setTab.data === "hist") renderMaturity();
 }
 
 // abre a seção e a aba onde está um campo (ex.: "txtPlace" → Janela e tela)
@@ -3183,7 +3184,6 @@ function wire() {
   wireAlarm();
   wireHeat();
   wireUpdate();
-  wireSync();
   wireCloud();
   wireRc();
   wireMeasureSaved();
@@ -3338,7 +3338,29 @@ function renderRainOff() {
   $("riSub").textContent = "chuva desligada";
   $("riChartBox").hidden = true;
   $("riList").textContent = "";
-  $("riTiles").innerHTML = '<p class="small muted">Para medir o efeito da chuva no CPM, ligue "Mostrar chuva no gráfico" e escolha a cidade em Configurações → Janela e tela → Chuva no gráfico.</p>';
+  // desligado: uma linha do que a tela mostra e "Ligar" (2.85)
+  const box = $("riTiles");
+  box.textContent = "";
+  const d = document.createElement("div");
+  d.className = "ri-off";
+  const t = document.createElement("div");
+  const b = document.createElement("b");
+  b.textContent = "Marcar a chuva no gráfico";
+  const p = document.createElement("p");
+  p.className = "small muted";
+  p.textContent = "Mostra quando choveu na sua cidade e quanto a leitura sobe depois. A cidade fica só neste PC.";
+  t.append(b, p);
+  const on = document.createElement("button");
+  on.type = "button"; on.className = "btn accent"; on.textContent = "Ligar";
+  on.addEventListener("click", async () => {
+    if (!state.settings.rainPlace) { await openSettings("txtPlace"); $("txtPlace").focus(); return; }
+    await saveSettings({ rainEnabled: true });
+    renderRainSettings();
+    refreshChart();
+    refreshRainImpact(true);
+  });
+  d.append(t, on);
+  box.appendChild(d);
 }
 
 function renderRainNow(n) {
@@ -3368,16 +3390,20 @@ function renderRainNow(n) {
 function renderRainImpact(r) {
   state.ri = r;
   renderRainNow(r.now);
-  const rc = r.device === "radiacode", k = r.usvPerCPM || 0, base = r.avgBase || 1;
-  $("riUnit").textContent = rc ? "% acima da média das 2 h antes (RC102)" : "CPM acima da média das 2 h antes";
+  // 2.85: o GMC-800 também sai na taxa (pela calibração) e a curva em % da
+  // base, como o RC102; o CPM só fica sem calibração conhecida
+  const k = r.usvPerCPM || 0, rc = r.device === "radiacode" || k > 0, base = r.avgBase || 1;
+  const devTxt = r.device === "radiacode" ? "RC102" : "GMC-800";
+  $("riUnit").textContent = rc ? `% acima da média das 2 h antes (${devTxt})` : "CPM acima da média das 2 h antes";
   const tiles = $("riTiles"), list = $("riList");
   tiles.textContent = ""; list.textContent = "";
   $("riChartBox").hidden = !r.n;
   if (!r.n) {
     $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes ${rc ? "do RC102" : "do contador"}` : "nenhuma chuva medida ainda";
     tiles.innerHTML = rc
-      ? '<p class="small muted">A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
-      : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto o CPM subiu depois e compara com horários sem chuva.</p>';
+      ? (r.device === "radiacode" ? '<p class="small muted">A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
+        : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.</p>')
+      : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.</p>';
     return;
   }
   $("riSub").textContent = `${r.n} chuva${r.n > 1 ? "s" : ""} medida${r.n > 1 ? "s" : ""} nos últimos 60 dias` + (r.dryN ? ` · comparado com ${r.dryN} horários sem chuva` : "");
@@ -3416,7 +3442,7 @@ function renderRainImpact(r) {
 
 function drawRainCurve(r) {
   // Radiacode: a curva em % da base (a escala do CPM dele é outra)
-  const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+  const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
   const pts = (r.curve || []).map((p) => (pc ? { min: p.min, rain: p.rain == null ? null : p.rain * pc, dry: p.dry == null ? null : p.dry * pc } : p));
   let lo = 0, hi = 1;
   for (const p of pts) for (const v of [p.rain, p.dry]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
@@ -3552,138 +3578,6 @@ function wireUpdate() {
     } catch (e) { renderUpdate(); }
   });
   if (api.GetUpdateInfo) api.GetUpdateInfo().then(renderUpdate).catch(() => {});
-}
-
-// ---------- sincronização entre PCs ----------
-
-let syncTimer = null;
-
-function renderSync(info) {
-  if (!info) return;
-  state.sync = info;
-  $("chkSyncListen").checked = !!info.listen;
-  $("chkSyncAuto").checked = !!info.auto;
-  const li = $("syncListenInfo");
-  if (info.listen && info.listenErr) {
-    li.textContent = "Não deu para aceitar conexões: " + info.listenErr;
-    li.className = "small warn-text";
-  } else if (info.listening) {
-    li.textContent = `Este PC: ${info.name} · ${(info.addrs || []).join(", ") || "sem rede"}`;
-    li.className = "small muted";
-  } else {
-    li.textContent = "Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).";
-    li.className = "small muted";
-  }
-  $("syncCodeRow").hidden = !info.listening;
-  const codeOn = !!info.code;
-  $("syncCode").textContent = codeOn ? info.code.slice(0, 3) + " " + info.code.slice(3) : "";
-  $("btnSyncCode").textContent = codeOn ? "Cancelar código" : "Mostrar código para parear";
-  clearInterval(syncTimer);
-  const left = () => {
-    const s = Math.max(0, Math.round((info.codeUntil - Date.now()) / 1000));
-    $("syncCodeLeft").textContent = codeOn ? `vale por mais ${Math.floor(s / 60)}:${pad(s % 60)}` : "";
-    if (codeOn && s <= 0) { clearInterval(syncTimer); api.GetSync().then(renderSync).catch(() => {}); }
-  };
-  left();
-  if (codeOn) syncTimer = setInterval(left, 1000);
-  const ul = $("syncPeers");
-  ul.textContent = "";
-  if (!info.peers.length) ul.innerHTML = '<li class="small muted">Nenhum PC pareado ainda.</li>';
-  for (const p of info.peers) {
-    const item = document.createElement("li");
-    const g = document.createElement("span");
-    g.className = "grow";
-    const name = document.createElement("strong");
-    name.textContent = p.name;
-    const st = document.createElement("span");
-    st.className = "small " + (p.lastError ? "err" : "muted");
-    st.textContent = p.lastError ? `Última tentativa ${whenLabel(p.lastTry)}: ${p.lastError}`
-      : p.lastSync ? `Sincronizado ${whenLabel(p.lastSync)} · ${p.lastResult || ""}` : "Ainda não sincronizou.";
-    const ad = document.createElement("span");
-    ad.className = "small mono muted";
-    ad.dataset.noTr = "";
-    ad.textContent = [...(p.manualAddrs || []), ...(p.addrs || [])].join(", ");
-    g.append(name, st, ad);
-    const now = document.createElement("button");
-    now.type = "button"; now.className = "btn small"; now.textContent = info.running ? "Sincronizando…" : "Sincronizar agora";
-    now.disabled = !!info.running;
-    now.addEventListener("click", async () => {
-      try { await api.SyncNow(p.id); } catch (e) { toast(errMsg(e), true); }
-      renderSync(await api.GetSync());
-    });
-    const addrs = document.createElement("button");
-    addrs.type = "button"; addrs.className = "btn small"; addrs.textContent = "Endereços";
-    addrs.title = "Endereços extras deste PC, separados por vírgula (ex.: o IP do Tailscale)";
-    addrs.addEventListener("click", () => {
-      const f = item.querySelector(".nr-form");
-      if (f) { f.remove(); return; }
-      const form = document.createElement("div");
-      form.className = "nr-form sync-pair";
-      form.innerHTML = '<input type="text" aria-label="Endereços extras"><button type="button" class="btn small accent">Salvar</button>';
-      const inp = form.querySelector("input");
-      inp.value = (p.manualAddrs || []).join(", ");
-      inp.placeholder = "ex.: 100.101.102.103, notebook";
-      form.querySelector("button").addEventListener("click", async () => {
-        renderSync(await call(api.SetPeerAddrs, p.id, inp.value.split(/[,\s]+/).filter(Boolean)));
-      });
-      item.appendChild(form);
-      inp.focus();
-    });
-    const del = document.createElement("button");
-    del.type = "button"; del.className = "btn small danger-btn"; del.textContent = "Esquecer";
-    del.addEventListener("click", async () => {
-      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
-      renderSync(await call(api.ForgetPeer, p.id));
-    });
-    item.append(g, now, addrs, del);
-    ul.appendChild(item);
-  }
-}
-
-function wireSync() {
-  on("sync", renderSync);
-  $("chkSyncListen").addEventListener("change", async (e) => renderSync(await call(api.SetSyncListen, e.target.checked)));
-  $("chkSyncAuto").addEventListener("change", async (e) => renderSync(await call(api.SetSyncAuto, e.target.checked)));
-  $("btnSyncCode").addEventListener("click", async () => {
-    try { renderSync(state.sync && state.sync.code ? await api.CancelPairCode() : await api.ShowPairCode()); }
-    catch (e) { toast(errMsg(e), true); }
-  });
-  $("btnSyncFind").addEventListener("click", async () => {
-    const msg = $("syncFindMsg"), ul = $("syncFound");
-    msg.textContent = "Procurando…";
-    ul.textContent = "";
-    let list = [];
-    try { list = await api.DiscoverPeers(); } catch (e) { msg.textContent = errMsg(e); return; }
-    msg.textContent = list.length ? "" : "Ninguém respondeu. O outro PC está com \"Aceitar conexões\" ligado e na mesma rede?";
-    for (const f of list) {
-      const li = document.createElement("li");
-      const g = document.createElement("span");
-      g.className = "grow";
-      g.innerHTML = "<strong></strong><span class='small mono muted' data-no-tr></span>";
-      g.firstChild.textContent = f.name + (f.paired ? " (já pareado)" : "");
-      g.lastChild.textContent = f.addr;
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "btn small"; b.textContent = "Usar este";
-      b.addEventListener("click", () => { $("syncAddr").value = f.addr; $("syncPairCode").focus(); });
-      li.append(g, b);
-      ul.appendChild(li);
-    }
-  });
-  $("btnSyncPair").addEventListener("click", async () => {
-    const msg = $("syncPairMsg");
-    msg.className = "small";
-    msg.textContent = "Pareando…";
-    try {
-      renderSync(await api.PairWith($("syncAddr").value, $("syncPairCode").value));
-      msg.textContent = "Pareado. A primeira sincronização já começou.";
-      $("syncPairCode").value = "";
-      $("syncFound").textContent = "";
-    } catch (e) {
-      msg.className = "small warn-text";
-      msg.textContent = errMsg(e);
-    }
-  });
-  if (api.GetSync) api.GetSync().then(renderSync).catch(() => {});
 }
 
 // ---------- Radiacode (aparelho de verdade) ----------
@@ -4110,9 +4004,6 @@ async function refreshCounterSync(cs) {
   }
   state.counterSync = cs;
   const pct = fmt(cs.estPct, cs.estPct < 10 ? 1 : 0);
-  const memTxt = !cs.estPct ? "" : cs.fullIn > 0
-    ? `A memória está cerca de ${pct}% ocupada (estimado desde o download) e enche em cerca de ${fmtDuration(cs.fullIn)} no modo "${cs.saveMode}".`
-    : `A memória está cerca de ${pct}% ocupada (estimado desde o download).`;
   renderMemInfo(cs, pct);
   const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
   const show = cs.state === "pendente" || warnMem;
@@ -4128,9 +4019,10 @@ async function refreshCounterSync(cs) {
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;
   if (!show) return;
-  $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do contador praticamente cheia" : "Memória do contador perto de encher") : "Há minutos para buscar no contador";
+  // aviso curto (2.85): título, uma linha e o botão
+  $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do GMC-800 cheia" : `Memória do GMC-800 em ${pct}%`) : "Há minutos para buscar no contador";
   $("syncText").textContent = warnMem
-    ? `${memTxt} Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.` + (cs.state === "pendente" ? " " + cs.text : "")
+    ? (cs.memLevel === "cheia" ? "O aparelho para de gravar ou grava por cima (conforme o ajuste dele). Baixe o histórico para guardar tudo no app." : "Quando encher, o aparelho para de gravar ou grava por cima (conforme o ajuste dele).")
     : cs.text;
   $("btnSyncDl").disabled = $("btnHistory").disabled;
 }
@@ -4512,7 +4404,7 @@ function setupRainImpact() {
     const tip = $("riTip");
     tip.hidden = false;
     const when = p.min < 0 ? `${durMin(-p.min)} antes` : `${durMin(p.min)} depois`;
-    const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+    const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
     const v = (x) => (x == null ? "—" : pc ? sgn(x * pc, 1) + "%" : sgn(x, 1));
     tip.textContent = `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM");
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";

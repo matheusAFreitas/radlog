@@ -261,7 +261,7 @@ function renderCloud() {
   }
   const how = cloudEl("details", "how");
   how.append(cloudEl("summary", "", "Como funciona"));
-  for (const s of ["Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por dia (e cada anexo uma vez só), cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\". O que você apaga ou edita num aparelho vale nos outros.", "O e-mail da conta aparece só aqui: ele não vai para o registro, o backup, os PDFs nem a nuvem.", "A sincronização pela rede (abaixo) continua funcionando como antes."]) how.append(cloudEl("p", "small muted", s));
+  for (const s of ["Cada aparelho sobe os próprios dados para a pasta do RadLog no seu Drive, um arquivo por dia (e cada anexo uma vez só), cifrado com a chave do código de recuperação. Os outros aparelhos baixam e juntam só o que falta, como no \"Importar backup\". O que você apaga ou edita num aparelho vale nos outros.", "O e-mail da conta aparece só aqui: ele não vai para o registro, o backup, os PDFs nem a nuvem."]) how.append(cloudEl("p", "small muted", s));
   body.append(how);
 }
 

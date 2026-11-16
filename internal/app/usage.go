@@ -13,7 +13,7 @@ import (
 // Spec ux/uso-do-app.html. Conta, só neste computador, quantas vezes cada
 // página, aba e botão foi aberto e por quanto tempo a pessoa ficou olhando.
 // A tela manda os totais a cada minuto (RecordUsage); aqui ficam só totais
-// por dia, sem horário, em uso.json. Fica fora do backup, da sincronização e
+// por dia, sem horário, em uso.json. Fica fora do backup, da nuvem e
 // do PDF (as listas de arquivos de lá são fechadas). Desligado por padrão.
 //
 // Chaves (a tela monta): "p:pagina", "a:pagina/aba", "c:pagina/botao",

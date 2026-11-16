@@ -1,5 +1,58 @@
 # Versões
 
+## 2.85.0
+- Ações rápidas saíram do botão redondo do canto e foram para o pé da barra
+  lateral ("＋ Ações rápidas", junto de Baixar histórico e Configurações).
+  O menu abre para cima e some nas mesmas horas de antes (medição em
+  andamento, alarme tocando).
+- Fora de casa: cada saída mostra "Resumo da saída" e "Ver no gráfico";
+  Relatório (PDF), Editar e Apagar ficam no "⋯". Os itens "a responder"
+  ganharam título ("RC102 sem conexão", "GMC-800 sem conexão", "Os dois sem
+  conexão").
+- A tela ALARA saiu e as partes foram para onde fazem sentido: "De onde vem
+  a sua dose" virou um quadro do Resumo, no período escolhido lá (dia,
+  semana ou mês); os testes de distância e de blindagem viraram abas do
+  Medir objeto (Objeto · Distância · Blindagem); o resultado de cada
+  medição mostra quanto custa ficar perto ("ficar 30 min perto = X acima do
+  fundo"); e o "Como funciona" do Medir objeto explica os três jeitos.
+- Clima desligado: uma linha do que a tela mostra e o botão "Ligar". O
+  efeito da chuva no GMC-800 sai na unidade da tela, como no RC102.
+- Aviso de memória do GMC-800 curto: título, uma linha e o botão.
+- Configurações › Dados e backup em abas: Backup e arquivos · Nuvem · Uso
+  do app · Histórico.
+- A sincronização pela rede local entre PCs (pareamento por código) saiu do
+  app: a nuvem substitui. PCs que estavam pareados param de trocar dados por
+  ela; quem usa a nuvem não muda nada. O arquivo sincronizacao.json pode ser
+  apagado da pasta de dados.
+
+**English**
+
+- Quick actions left the round corner button and moved to the foot of the
+  sidebar ("＋ Quick actions", next to Download history and Settings). The
+  menu opens upwards and hides at the same times as before (measurement in
+  progress, alarm ringing).
+- Away from home: each trip shows "Trip summary" and "See on the chart";
+  Report (PDF), Edit and Delete are in the "⋯". The "to answer" items got a
+  title ("RC102 disconnected", "GMC-800 disconnected", "Both
+  disconnected").
+- The ALARA screen is gone and its parts moved where they make sense:
+  "Where your dose comes from" is now a Summary tile, for the period chosen
+  there (day, week or month); the distance and shielding tests became tabs
+  of Measure object (Object · Distance · Shielding); each measurement's
+  result shows how much staying close costs ("stay close 30 min = X above
+  background"); and Measure object's "How it works" explains the three
+  ways.
+- Weather off: one line about what the screen shows and a "Turn on"
+  button. The rain effect on the GMC-800 uses the screen unit, like the
+  RC102.
+- Short GMC-800 memory notice: title, one line and the button.
+- Settings › Data and backup in tabs: Backup and files · Cloud · App usage
+  · History.
+- Sync over the local network between PCs (pairing by code) was removed:
+  the cloud replaces it. PCs that were paired stop exchanging data through
+  it; nothing changes for those using the cloud. The sincronizacao.json
+  file can be deleted from the data folder.
+
 ## 2.84.0
 - Unidades da tela para o app todo, em Configurações › Janela e tela ›
   Unidades: taxa em µSv/h ou mrem/h e contagem em CPM ou CPS (dá para

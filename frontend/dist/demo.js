@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.84.0";
+const DEMO_VERSION = "2.85.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -49,8 +49,6 @@ function makeDemoApi(opts) {
   let demoCloudCode = "";
   const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
     devices: [{ id: "a0", name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
-  let demoSync = { id: "a", name: "pc-sala", listen: false, listening: false, auto: true, peers: [
-    { id: "b", name: "notebook", addrs: ["192.168.0.20:47862", "100.88.1.7:47862"], manualAddrs: [], lastSync: Date.now() - 4 * 6e4, lastTry: Date.now() - 4 * 6e4, lastResult: "trouxe: 12 minutos · levou: 1.440 minutos, 2 alertas" }] };
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
   // atual (DEMO_VERSION, conferida pelo scripts/check-version.sh) e a
   // seguinte (auditoria 2.76.0, U1)
@@ -691,7 +689,6 @@ const demoRc = () => {
     OpenReportFile: async () => {},
     GetVersionsDir: async () => "C:\\Users\\voce\\Documents\\RadLog\\Versões",
     OpenVersionsDir: async () => {},
-    GetSync: async () => demoSync,
     // nuvem (nuvem.js): login de mentira; gmc.cloudDemo = "outro" finge uma conta que já tem nuvem
     GetCloud: async () => demoCloud,
     CloudLogin: async () => (demoCloud = { ...demoCloud, state: "wait" }),
@@ -1019,14 +1016,12 @@ const demoRc = () => {
       { group: "Césio-137", nuclide: "Cs-137", kev: 661.7, net: 640, sigma: 21 }] : sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
       { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
-    SetSyncListen: async (on) => (demoSync = { ...demoSync, listen: on, listening: on, addrs: on ? ["192.168.0.10:47862", "100.101.102.103:47862"] : [] }),
-    SetSyncAuto: async (on) => (demoSync = { ...demoSync, auto: on }),
     // uso do app (uso.js): números de exemplo, como na maquete da spec
     GetUsage: async (days) => {
       if (demoUsageReset) return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} };
       const f = days === 7 ? 0.25 : days === 30 ? 1 : 1.6;
       // chaves sem aspas: o i18n_extract não confunde "chuva" ou "hora" com texto da tela
-      const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [180, 6 * 3600], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], alara: [5, 360], chuva: [2, 60] };
+      const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [180, 6 * 3600], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], chuva: [2, 60] };
       const tabs = { radiacode: { agora: [212, 5 * 3600], espectro: [88, 3 * 3600], atividade: [9, 720], busca: [4, 480] },
         graficos: { tempo: [150, 5 * 3600], hora: [20, 2400], padroes: [8, 600], tendencia: [2, 120] }, gmc: { agora: [28, 3000], tubo: [2, 300] } };
       const base = { "s:radiacode/rcSpecView=tempo": [61, 0], "s:radiacode/rcSpecMode=acc": [34, 0], "c:busca/ctrlk": [6, 0] };
@@ -1039,13 +1034,6 @@ const demoRc = () => {
     SetUsageOn: async (on) => { demoUsageOn = on; settings.usageOn = on; return { on, since: 0, days: 0, totals: {} }; },
     ResetUsage: async () => { demoUsageReset = Date.now(); return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} }; },
     RecordUsage: async () => {},
-    ShowPairCode: async () => (demoSync = { ...demoSync, code: "482913", codeUntil: Date.now() + 300e3 }),
-    CancelPairCode: async () => (demoSync = { ...demoSync, code: "" }),
-    DiscoverPeers: async () => { await new Promise((r) => setTimeout(r, 800)); return [{ id: "b", name: "notebook", addr: "192.168.0.20:47862", paired: false }]; },
-    PairWith: async () => { throw new Error("no modo navegador não dá para parear; abra pelo app"); },
-    SyncNow: async () => ({}),
-    SetPeerAddrs: async () => demoSync,
-    ForgetPeer: async () => demoSync,
     GetUpdateInfo: async () => demoUpd,
     CheckUpdate: async () => { demoUpd = { ...demoUpd, available: true, checkedAt: Date.now() }; emit("update", demoUpd); return demoUpd; },
     SkipUpdate: async (v) => { demoUpd = { ...demoUpd, skipped: !!v }; emit("update", demoUpd); },
@@ -1522,8 +1510,15 @@ const demoRc = () => {
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
     },
     // de onde vem a dose (2.43): pela fita, com o fundo fingido do RC102 a 0,092
-    GetDoseOrigin: async (days) => {
-      const to = Date.now(), from = to - (days || 7) * 864e5, s = await api.GetDayStrip(from, to);
+    GetDoseOrigin: async (days) => api.GetDoseOriginRange(Date.now() - (days || 7) * 864e5, Date.now()),
+    // 2.85: o período do Resumo (na demonstração, no máximo os últimos 31 dias dele)
+    GetDoseOriginRange: async (from0, to0) => {
+      const to = Math.min(to0, Date.now()), from = Math.max(from0, to - 31 * 864e5);
+      const s = { slots: [] };
+      for (let c = from; c < to; c += 7 * 864e5) {
+        const part = await api.GetDayStrip(c, Math.min(to, c + 7 * 864e5));
+        for (const x of part.slots) if (!s.slots.length || x.t > s.slots[s.slots.length - 1].t) s.slots.push(x);
+      }
       const o = { from, to, device: demoRcFake() ? "radiacode" : "gmc", total: 0, homeBg: 0, awayBg: 0, above: 0, minutes: 0, items: [], homeBgRate: demoRcFake() ? 0.092 : 0.206 };
       for (const x of s.slots) {
         if (!x.pers && !x.home) continue;
@@ -1533,9 +1528,10 @@ const demoRc = () => {
         o.above += d - base;
         if (x.away) o.awayBg += base; else o.homeBg += base;
       }
-      o.items = [{ from: to - 40 * 6e4, to: to - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
-        { from: to - 5 * 36e5, to: to - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }];
-      o.above += 0.033; o.total += 0.033;
+      const now = Date.now();
+      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
+        { from: now - 5 * 36e5, to: now - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }].filter((i) => i.from >= from && i.to <= to);
+      for (const i of o.items) { o.above += i.dose; o.total += i.dose; }
       return o;
     },
     // fita do dia (2.42): pedaços de 10 min, nível pela média; RC102 fingido a 0,6× o GMC

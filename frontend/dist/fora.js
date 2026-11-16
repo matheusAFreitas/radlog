@@ -293,6 +293,37 @@ function periodForm(p, onDone) {
   return box;
 }
 
+// menu "⋯": <details> com a lista embaixo; fecha ao escolher, com Esc ou ao
+// clicar fora
+function moreMenu(label, items) {
+  const d = document.createElement("details");
+  d.className = "more-menu";
+  const sm = document.createElement("summary");
+  sm.className = "btn small icon";
+  sm.setAttribute("aria-label", label);
+  sm.title = label;
+  sm.textContent = "⋯";
+  const box = document.createElement("div");
+  box.className = "more-list";
+  box.setAttribute("role", "menu");
+  for (const [t, cls, fn] of items) {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("role", "menuitem"); b.textContent = t;
+    if (cls) b.className = cls;
+    b.addEventListener("click", () => { d.open = false; fn(); });
+    box.appendChild(b);
+  }
+  d.append(sm, box);
+  return d;
+}
+document.addEventListener("click", (e) => {
+  document.querySelectorAll("details.more-menu[open]").forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  document.querySelectorAll("details.more-menu[open]").forEach((d) => { d.open = false; d.querySelector("summary").focus(); });
+});
+
 function renderPeriods() {
   renderTimeline();
   const add = $("periodAddForm");
@@ -354,10 +385,14 @@ function renderPeriods() {
     };
     if (p.open) btn("Voltar ao normal", "accent", () => call(api.SetWhere, "casa", "comigo", ""));
     if (isTripP(p)) btn("Resumo da saída", "away-btn", () => openTrip(p.id), "Dose, gráfico, espectro e como o RC102 estava");
-    btn("Ver", "", () => showRange(p.from, pTo(p)));
-    btn("Relatório (PDF)", "", (e) => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, e.currentTarget), "Relatório em PDF só desse trecho");
-    btn(p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); });
-    btn("Apagar…", "danger-btn", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); });
+    btn("Ver no gráfico", "", () => showRange(p.from, pTo(p)));
+    // o resto fica no "⋯" (2.85)
+    const more = moreMenu("Mais ações deste trecho", [
+      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, more.querySelector("summary"))],
+      [p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); }],
+      ["Apagar…", "danger", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); }],
+    ]);
+    acts.appendChild(more);
     li.append(t, acts);
     if (periodConfirm === p.id) {
       const c = document.createElement("div");
