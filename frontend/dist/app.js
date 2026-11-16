@@ -4207,7 +4207,7 @@ function drawBgTrend(tr) {
   $("bgLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.accent + '"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
     '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
     (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:' + COR.att + ';border-top-style:dashed"></i>tendência</span>' : "") +
-    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (µSv/h)";
+    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + '<span data-u="rate"> (µSv/h)</span>';
 
   // dispersão de cada dia
   const dsvg = $("bgDisp"), DH = 80;

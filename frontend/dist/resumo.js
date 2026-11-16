@@ -606,6 +606,6 @@ function drawSumChartUSv(r, rc) {
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
-  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
+  $("sumLegend").innerHTML = '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key" data-u="rate"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
     (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RC102)</span>' : "");
 }

@@ -421,9 +421,9 @@ function drawAlertDetail(d) {
   const xs = $("adX").children;
   xs[0].textContent = xl(t0); xs[1].textContent = xl(t0 + (t1 - t0) / 2); xs[2].textContent = xl(t1);
   $("adLegend").innerHTML =
-    (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
-      : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
-      : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
+    (rc ? (secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
+      : '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
+      : secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
       : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
