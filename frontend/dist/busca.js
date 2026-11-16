@@ -378,8 +378,8 @@ function qkFab(open) {
 // com a barra no topo em tela estreita)
 function qkFabPlace() {
   const r = $("qkFabMain").getBoundingClientRect(), m = $("qkFabMenu").style;
-  if (r.top > innerHeight / 2) { m.left = r.left + "px"; m.right = "auto"; m.top = "auto"; m.bottom = (innerHeight - r.top + 8) + "px"; $("qkFabMenu").style.flexDirection = "column-reverse"; m.alignItems = "flex-start"; }
-  else { m.left = "auto"; m.right = Math.max(8, innerWidth - r.right) + "px"; m.top = (r.bottom + 8) + "px"; m.bottom = "auto"; $("qkFabMenu").style.flexDirection = "column"; m.alignItems = "flex-end"; }
+  if (r.top > innerHeight / 2) { m.left = r.left + "px"; m.right = "auto"; m.top = "auto"; m.bottom = (innerHeight - r.top + 8) + "px"; $("qkFabMenu").style.flexDirection = "column-reverse"; m.alignItems = "stretch"; }
+  else { m.left = "auto"; m.right = Math.max(8, innerWidth - r.right) + "px"; m.top = (r.bottom + 8) + "px"; m.bottom = "auto"; $("qkFabMenu").style.flexDirection = "column"; m.alignItems = "stretch"; }
 }
 
 // some durante uma medição em andamento (o "Parar" fica no canto) e com o
