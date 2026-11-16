@@ -1,5 +1,15 @@
 # Versões
 
+## 2.87.1
+- Agora: "detalhes" abre e fecha nos dois quadros juntos (GMC-800 e RC102).
+  Abrir só um deixava o outro quadro esticado, com um espaço vazio.
+
+**English**
+
+- Now: "details" opens and closes on both cards together (GMC-800 and
+  RC102). Opening just one left the other card stretched with an empty
+  space.
+
 ## 2.87.0
 - Agora: o trifólio voltou para o quadro do GMC-800 e do RC102, à esquerda
   do número grande e do tamanho de antes. No meio dele fica a forma do

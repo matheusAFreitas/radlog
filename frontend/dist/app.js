@@ -391,12 +391,19 @@ function tileBig(pfx, u, v) {
   $(pfx + "TileKv").innerHTML = [["CPM", "cpm"], ["CPS", "cps"], [UNIT_TXT[o], o]]
     .map(([l, k]) => `<div><span>${l}</span><b>${v ? escHtml(v[k]) : "—"}</b></div>`).join("");
 }
-// o "detalhes" de cada quadro lembra se ficou aberto
-for (const pfx of ["g", "r"]) {
-  const d = document.getElementById(pfx + "TileDet");
-  if (!d) continue;
-  d.open = localGet("tileDet." + pfx, "") === "1";
-  d.addEventListener("toggle", () => { localSet("tileDet." + pfx, d.open ? "1" : ""); if (d.open && typeof pulseApply === "function") pulseApply(); });
+// o "detalhes" dos dois quadros abre e fecha junto (2.87.1: abrir só um
+// deixava o outro quadro esticado com um espaço vazio) e lembra se ficou aberto
+{
+  const dets = ["g", "r"].map((pfx) => document.getElementById(pfx + "TileDet")).filter(Boolean);
+  const open0 = localGet("tileDet.g", "") === "1" || localGet("tileDet.r", "") === "1";
+  for (const d of dets) {
+    d.open = open0;
+    d.addEventListener("toggle", () => {
+      for (const o of dets) if (o !== d && o.open !== d.open) o.open = d.open;
+      localSet("tileDet.g", d.open ? "1" : ""); localSet("tileDet.r", d.open ? "1" : "");
+      if (d.open && typeof pulseApply === "function") pulseApply();
+    });
+  }
 }
 
 
