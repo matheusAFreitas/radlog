@@ -30,8 +30,10 @@ func TestMobileAPI(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if got != string(want) {
-		gl, wl := strings.Split(got, "\n"), strings.Split(string(want), "\n")
+	// no Windows o git pode trazer o arquivo com \r\n
+	wantS := strings.ReplaceAll(string(want), "\r\n", "\n")
+	if got != wantS {
+		gl, wl := strings.Split(got, "\n"), strings.Split(wantS, "\n")
 		var diff []string
 		in := func(l []string, s string) bool {
 			for _, x := range l {
