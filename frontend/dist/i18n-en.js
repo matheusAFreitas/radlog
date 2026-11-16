@@ -4330,7 +4330,8 @@ const I18N_EN = {
 "Exportar leituras (CSV)": "Export readings (CSV)",
 "µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
 "Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour",
-"papel mudou": "role changed"
+"papel mudou": "role changed",
+"fora": "out"
 },
 "patterns": [
 [
@@ -5960,6 +5961,17 @@ const I18N_EN = {
 [
 "nuvem: ",
 " arquivo(s) de uma versão mais nova do RadLog ficaram para depois de atualizar"
+]
+],
+[
+"abertura: tela pronta em ",
+"^abertura: tela pronta em ((?:(?! · ).)+?) ms \\(scripts lidos em ((?:(?! · ).)+?) ms\\); ((?:(?! · ).)+?) ms desde que o programa começou$",
+"startup: screen ready in ${1} ms (scripts read in ${2} ms); ${3} ms since the program started",
+[
+"abertura: tela pronta em ",
+" ms (scripts lidos em ",
+" ms); ",
+" ms desde que o programa começou"
 ]
 ],
 [

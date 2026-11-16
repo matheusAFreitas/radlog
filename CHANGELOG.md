@@ -1,5 +1,30 @@
 # Versões
 
+## 2.83.10
+- Abertura mais leve: a tabela de tradução para o inglês (~700 KB) só
+  carrega com o app em inglês, e os gráficos da aba Gráficos (tempo, dose,
+  hora do dia, últimos dias) só são buscados e desenhados com a sub-aba
+  aberta, em vez de todos na abertura e a cada 5 minutos.
+- O log guarda o tempo de abertura da tela ("abertura: tela pronta em …"),
+  para comparar antes e depois.
+- Fita do dia: em tela estreita, a faixa do papel usa nomes curtos ("casa",
+  "você", "fora") e mostra o nome inteiro ao passar o mouse.
+- Teste novo que trava a lista de funções que o app do celular usa, para
+  uma mudança no PC não quebrar o celular sem aviso.
+
+**English**
+
+- Lighter startup: the English translation table (~700 KB) only loads with
+  the app in English, and the charts on the Charts tab (time, dose, hour of
+  day, recent days) are only fetched and drawn with their sub-tab open,
+  instead of all of them at startup and every 5 minutes.
+- The log records how long the screen took to open ("abertura: tela pronta
+  em …"), to compare before and after.
+- Day strip: on a narrow screen, the role band uses short names ("home",
+  "you", "out") and shows the full name on hover.
+- New test that locks the list of functions the phone app uses, so a change
+  on the PC can't break the phone without notice.
+
 ## 2.83.9
 - Fita do dia: as linhas "com você" e "casa" viraram uma linha por
   aparelho, "GQ GMC-800" em cima e "Radiacode 102" embaixo, com o papel de

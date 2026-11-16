@@ -2178,6 +2178,12 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .ft-dev small { display: block; font-size: var(--fs-caption); color: var(--dim); line-height: 1.2; }
 .ft-roles { position: relative; height: 16px; margin-top: 3px; }
 .ft-roles span { position: absolute; top: 0; height: 16px; display: flex; align-items: center; padding: 0 6px; font-size: var(--fs-micro, 11px); color: var(--dim); border-left: 1px solid var(--border-hover, var(--border)); white-space: nowrap; overflow: hidden; }
+.ft-roles span b { font-weight: inherit; overflow: hidden; text-overflow: ellipsis; }
+.ft-roles span .ft-rs { display: none; }
+@media (max-width: 640px) {
+  .ft-roles span .ft-rl { display: none; }
+  .ft-roles span .ft-rs { display: inline; }
+}
 .ft-roles span.comigo { color: var(--text); }
 .ft-roles span.fora { color: var(--muted); background: repeating-linear-gradient(135deg, rgba(139, 151, 163, .12) 0 4px, transparent 4px 8px); }
 .ft-strip { position: relative; height: 22px; border-radius: 4px; overflow: hidden; background: var(--ft-none); }
