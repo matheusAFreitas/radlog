@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.83.8";
+const DEMO_VERSION = "2.83.9";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -1549,11 +1549,13 @@ const demoRc = () => {
         const o = periods.find((q) => q.from < t + step && (q.to || Infinity) > t);
         if (o) s.away = true;
         const g = o ? o.gmc || "comigo" : "casa";
+        s.gmcRole = g; s.rcRole = o ? o.rc || "comigo" : "comigo";
         if (p.length) {
           const u = (p.reduce((x, q) => x + q.cpm, 0) / p.length) * 0.0101;
+          Object.assign(s, { gmc: lv(u, gb), gmcUSv: u });
           if (g === "casa") Object.assign(s, { home: lv(u, gb), homeUSv: u, homeDev: "gmc" });
           else Object.assign(s, { pers: lv(u, gb), persUSv: u, persDev: "gmc" });
-          if (demoRcFake() && g === "casa") { const r = u * 0.6 + Math.sin(i / 3) * 0.004; Object.assign(s, { pers: lv(r, rb), persUSv: r, persDev: "radiacode" }); }
+          if (demoRcFake()) { const r = u * 0.6 + Math.sin(i / 3) * 0.004; Object.assign(s, { rc: lv(r, rb), rcUSv: r }); if (g === "casa") Object.assign(s, { pers: lv(r, rb), persUSv: r, persDev: "radiacode" }); }
         }
         if (i % 144 >= 93 && i % 144 < 104 && t < Date.now() - 864e5) s.rain = 1.4;
         slots.push(s);

@@ -5683,3 +5683,11 @@ Exportar leituras (CSV)	Export readings (CSV)
 µSv/h médio · cinza = sem dados	Average µSv/h · gray = no data
 Mapa de calor do µSv/h médio por dia e hora	Heat map of average µSv/h by day and hour
 {0} · dispersão {1} (σ real ÷ σ do acaso, nas contagens) · mediana {2} · n = {3} min	{0} · dispersion {1} (real σ ÷ chance σ, in counts) · median {2} · n = {3} min
+{0}: sem dado{1}	{0}: no data{1}
+papel mudou	role changed
+{0}: {1} µSv/h (em casa)	{0}: {1} µSv/h (at home)
+{0}: sem dado (em casa)	{0}: no data (at home)
+{0}: {1} µSv/h (com você)	{0}: {1} µSv/h (with you)
+{0}: sem dado (com você)	{0}: no data (with you)
+{0}: {1} µSv/h (fora do cálculo)	{0}: {1} µSv/h (out of the calculation)
+{0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)

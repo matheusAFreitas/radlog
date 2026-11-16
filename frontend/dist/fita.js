@@ -66,14 +66,19 @@ function ftShapesOver(levels) {
 }
 
 const ftHm = (i) => { const m = i * 10; return pad(Math.floor(m / 60)) + ":" + pad(m % 60); };
-const ftUsv = (v, dev) => `${fmt(v, usvDigits(v))} µSv/h (${FT_DEV[dev] || dev})`;
+// papel de cada aparelho (roles.go)
+const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "fora do cálculo" };
 
-// texto do trecho, para a dica
-function ftSlotTip(s, i) {
+// texto do trecho, para a dica: os dois aparelhos e o papel de cada um (2.83.9)
+function ftSlotTip(s, i, showRc) {
   const parts = [`${ftHm(i)}–${ftHm(i + 1)}`];
   if (!s) { parts.push("sem dado"); return parts.join(" · "); }
-  parts.push(s.home ? `casa: ${ftUsv(s.homeUSv, s.homeDev)}` : "casa: sem dado");
-  parts.push(s.pers ? `com você: ${ftUsv(s.persUSv, s.persDev)}` : "com você: sem dado");
+  const dev = (name, lv, v, role) => {
+    const r = FT_ROLE[role] ? ` (${FT_ROLE[role]})` : "";
+    parts.push(lv ? `${name}: ${fmt(v, usvDigits(v))} µSv/h${r}` : `${name}: sem dado${r}`);
+  };
+  dev("GMC-800", s.gmc, s.gmcUSv, s.gmcRole);
+  if (showRc) dev("RC102", s.rc, s.rcUSv, s.rcRole);
   if (s.away) parts.push("fora de casa");
   if (s.rain) parts.push(`chuva ${fmt(s.rain, 1)} mm/h`);
   return parts.join(" · ");
@@ -156,13 +161,36 @@ function ftLegend(el) {
 
 const ftHours = (marks) => `<div class="ft-hours"><span></span><div>${marks.map((h) => `<span>${pad(h)}</span>`).join("")}</div></div>`;
 
-// um dia: marcas, com você, casa, fora de casa e chuva
+// linha de um aparelho: nome com a bolinha, papel embaixo (ou "papel mudou"
+// e a faixinha de papel sob a fita), marcas de nível em cima
+function ftDevLane(name, color, levels, roles, nowIdx, lane) {
+  const runs = [];
+  let i = 0;
+  while (i < FT_N) {
+    let j = i;
+    while (j < FT_N && roles[j] === roles[i]) j++;
+    if (roles[i]) runs.push([i, j, roles[i]]);
+    i = j;
+  }
+  const kinds = new Set(runs.map((r) => r[2]));
+  const changed = kinds.size > 1;
+  const sub = changed ? "papel mudou" : FT_ROLE[[...kinds][0]] || "";
+  const band = changed ? `<div class="ft-roles">${runs.map(([a, b, r]) =>
+    `<span class="${r}" style="left:${(a / FT_N) * 100}%;width:${((b - a) / FT_N) * 100}%">${FT_ROLE[r] || r}</span>`).join("")}</div>` : "";
+  return `<div class="ft-lane"><span class="ft-lb ft-dev"><b><i style="background:${color}"></i>${name}</b>${sub ? `<small>${sub}</small>` : ""}</span>` +
+    `<div><div class="ft-marks ft-over">${ftShapesOver(levels)}</div><div class="ft-strip" data-lane="${lane}">${ftStripSvg(levels, nowIdx)}</div>${band}</div></div>`;
+}
+
+// um dia: marcas, uma linha por aparelho (2.83.9), fora de casa e chuva
 function renderFitaDay(box, strip, day0, opt = {}) {
   const day = ftDay(strip, day0);
   const now = Date.now();
   const nowIdx = now < day0 + 864e5 ? Math.max(0, Math.ceil((now - day0) / 6e5)) : FT_N;
   const marks = (strip && strip.marks) || [];
-  const home = day.map((s) => (s && s.home) || null), pers = day.map((s) => (s && s.pers) || null);
+  const gmc = day.map((s) => (s && s.gmc) || null), rc = day.map((s) => (s && s.rc) || null);
+  const gmcRole = day.map((s) => (s && s.gmcRole) || null), rcRole = day.map((s) => (s && s.rcRole) || null);
+  // o RC102 só aparece se ele é usado (ou mediu neste dia)
+  const showRc = rc.some(Boolean) || (typeof hasRcData === "function" && hasRcData());
   const away = day.map((s) => !!(s && s.away)), rain = day.map((s) => !!(s && s.rain));
   if (opt.say) ftSay(opt.say, day, marks, opt.label || "Hoje", nowIdx);
   const mk = marks.map((m) => {
@@ -173,13 +201,13 @@ function renderFitaDay(box, strip, day0, opt = {}) {
   }).join("");
   let h = "";
   if (mk) h += `<div class="ft-lane"><span class="ft-lb">marcas</span><div class="ft-marks">${mk}</div></div>`;
-  h += `<div class="ft-lane"><span class="ft-lb">com você</span><div><div class="ft-marks ft-over">${ftShapesOver(pers)}</div><div class="ft-strip" data-lane="pers">${ftStripSvg(pers, nowIdx)}</div></div></div>`;
-  h += `<div class="ft-lane"><span class="ft-lb">casa</span><div><div class="ft-marks ft-over">${ftShapesOver(home)}</div><div class="ft-strip" data-lane="home">${ftStripSvg(home, nowIdx)}</div></div></div>`;
+  h += ftDevLane("GQ GMC-800", "var(--accent)", gmc, gmcRole, nowIdx, "gmc");
+  if (showRc) h += ftDevLane("Radiacode 102", "var(--rc)", rc, rcRole, nowIdx, "rc");
   if (away.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">fora de casa</span><div class="ft-strip thin">${ftBandSvg(away, "var(--away)")}</div></div>`;
   if (rain.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">chuva</span><div class="ft-strip thin">${ftBandSvg(rain, "var(--info)")}</div></div>`;
   h += ftHours([0, 4, 8, 12, 16, 20, 24]);
   box.innerHTML = h;
-  ftHover(box, [...box.querySelectorAll(".ft-strip")], (i) => ftSlotTip(day[i], i), (i) => (i < nowIdx ? day0 + i * 6e5 : null));
+  ftHover(box, [...box.querySelectorAll(".ft-strip")], (i) => ftSlotTip(day[i], i, showRc), (i) => (i < nowIdx ? day0 + i * 6e5 : null));
 }
 
 // vários dias empilhados (semana no Agora; dias do período no Resumo)
