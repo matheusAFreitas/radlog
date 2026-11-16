@@ -50,6 +50,9 @@ type ActOpts struct {
 	NewBg    bool     `json:"newBg"`
 	BgSec    int      `json:"bgSec"`  // 0 = até parar
 	SmpSec   int      `json:"smpSec"` // 0 = até parar
+	// pedra solta (forma diferente do pote): massa opcional, resultado em Bq da peça
+	Loose    bool   `json:"loose,omitempty"`
+	SampleID string `json:"sampleId,omitempty"` // de "Suas amostras"
 }
 
 // actSaved é um espectro somado guardado.
@@ -160,6 +163,10 @@ type ActResult struct {
 	Th       *ActCalTh    `json:"th,omitempty"`
 	ThLines  []ActLineRes `json:"thLines,omitempty"`
 	Prev     float64      `json:"prev,omitempty"` // eficiência anterior em 1.460 keV (para comparar)
+	Loose    bool         `json:"loose,omitempty"`
+	SampleID string       `json:"sampleId,omitempty"`
+	Nucs     []string     `json:"nucs,omitempty"`    // o que foi procurado
+	SmpSecO  int          `json:"smpSecO,omitempty"` // tempo escolhido (para medir de novo)
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -258,8 +265,13 @@ func actValidate(o *ActOpts) error {
 	default:
 		return errors.New("tipo de medição desconhecido")
 	}
-	if o.MassG <= 0 {
-		return errors.New("informe a massa em gramas")
+	if o.Kind != "amostra" || !o.Loose {
+		o.Loose = false
+		if o.MassG <= 0 {
+			return errors.New("informe a massa em gramas")
+		}
+	} else if o.MassG < 0 {
+		o.MassG = 0
 	}
 	return nil
 }
@@ -360,7 +372,8 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	o := r.Opts
 	cal := a.actCal()
 	smp, bg := r.Smp.spec(), r.Bg.spec()
-	res := ActResult{T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec}
+	res := ActResult{T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
+		Loose: o.Loose, SampleID: o.SampleID, Nucs: o.Nuclides, SmpSecO: o.SmpSec}
 	if cal.KCl != nil {
 		res.Prev = cal.KCl.Eff
 	}
@@ -497,27 +510,28 @@ type ActChart struct {
 
 // ActView é o que o cartão mostra.
 type ActView struct {
-	Phase     string       `json:"phase"` // "" | fundo | trocar | amostra | pronto
-	Opts      *ActOpts     `json:"opts"`
-	PhaseAt   int64        `json:"phaseAt"`
-	PhaseSec  float64      `json:"phaseSec"` // tempo somado na fase (s do aparelho)
-	Target    int          `json:"target"`
-	BgSec     float64      `json:"bgSec"`
-	BgT       int64        `json:"bgT"`
-	Live      []ActNucRes  `json:"live"`
-	LiveKCl   *ActCalKCl   `json:"liveKcl"`
-	LiveTh    *ActCalTh    `json:"liveTh"`
-	Expected  float64      `json:"expected"`
-	Result    *ActResult   `json:"result"`
-	Cal       ActCal       `json:"cal"`
-	CalSrc    string       `json:"calSrc"`
-	CalEff    []float64    `json:"calEff"` // ε em 250, 500, 1000, 1500, 2000, 2500 keV
-	CalErr    []float64    `json:"calErr"` // relativa
-	SavedBg   *ActBgInfo   `json:"savedBg"`
-	History   []ActResult  `json:"history"`
-	Chart     *ActChart    `json:"chart"`
-	Nuclides  []ActNuclide `json:"nuclides"`
-	Connected bool         `json:"connected"`
+	Phase     string          `json:"phase"` // "" | fundo | trocar | amostra | pronto
+	Opts      *ActOpts        `json:"opts"`
+	PhaseAt   int64           `json:"phaseAt"`
+	PhaseSec  float64         `json:"phaseSec"` // tempo somado na fase (s do aparelho)
+	Target    int             `json:"target"`
+	BgSec     float64         `json:"bgSec"`
+	BgT       int64           `json:"bgT"`
+	Live      []ActNucRes     `json:"live"`
+	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	LiveTh    *ActCalTh       `json:"liveTh"`
+	Expected  float64         `json:"expected"`
+	Result    *ActResult      `json:"result"`
+	Cal       ActCal          `json:"cal"`
+	CalSrc    string          `json:"calSrc"`
+	CalEff    []float64       `json:"calEff"` // ε em 250, 500, 1000, 1500, 2000, 2500 keV
+	CalErr    []float64       `json:"calErr"` // relativa
+	SavedBg   *ActBgInfo      `json:"savedBg"`
+	Samples   []ActSampleView `json:"samples"`
+	History   []ActResult     `json:"history"`
+	Chart     *ActChart       `json:"chart"`
+	Nuclides  []ActNuclide    `json:"nuclides"`
+	Connected bool            `json:"connected"`
 }
 
 // ActBgInfo resume o fundo salvo.
@@ -565,6 +579,7 @@ func (a *App) GetActivity() ActView {
 		v.SavedBg = &ActBgInfo{T: bg.T, Sec: bg.Sec}
 	}
 	v.History = a.actHistory()
+	v.Samples = a.actSampleViews()
 	st := &a.rc.act
 	st.mu.Lock()
 	a.actLoadLocked()
@@ -630,7 +645,7 @@ func (a *App) ForgetActivityCal(which string) {
 
 func (a *App) actBackupFiles() []string {
 	var out []string
-	for _, n := range []string{actCalFile, actBgFile, actResFile} {
+	for _, n := range []string{actCalFile, actBgFile, actResFile, actSamplesFile} {
 		if _, err := os.Stat(a.actPath(n)); err == nil {
 			out = append(out, rcDirName+"/"+actDir+"/"+n)
 		}

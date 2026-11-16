@@ -1522,27 +1522,44 @@
   // =====================================================================
   // 6. atividade (Bq): calibrar com KCl e tório, medir amostras
   // =====================================================================
-  // Valores típicos para comparar (fontes no comentário de cada um).
+  // Valores típicos para comparar: castanha (Acta Amazonica, 2012, e outro
+  // estudo com 24 e 26 Bq/kg), areia de Marataízes (ES), solo (UNSCEAR 2000).
+  // range: faixa típica em Bq/kg, para o "comparado ao típico" do resultado.
   const ACT_PRESETS = {
-    castanha: { name: "castanha-do-pará", mass: 500, nucs: ["Ra-226", "Ra-228", "K-40"],
-      hint: "Castanha moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226). Típico: Ra-226 ≈ 105 e Ra-228 ≈ 99 Bq/kg na média de 30 lotes (Acta Amazonica, 2012); outro estudo achou 24 e 26 Bq/kg. Para o RC102 é fraco: conte com 12 a 24 h e talvez só um limite (\"abaixo de\")." },
-    areia: { name: "areia monazítica", mass: 500, nucs: ["Th-232", "Ra-226", "K-40"],
-      hint: "Areia seca, pote cheio. Típico: Th-232 de ~1.000 a 2.300 Bq/kg em praias de Marataízes (ES); solo comum tem ~45 Bq/kg (UNSCEAR 2000). Sai em menos de 1 h." },
-    rocha: { name: "granito / porcelanato", mass: 500, nucs: ["K-40", "Ra-226", "Th-232"],
-      hint: "Pedaços que caibam no pote, ou a peça encostada do mesmo jeito. Para comparar, a média do solo no mundo: K-40 ≈ 420, Ra-226 ≈ 32 e Th-232 ≈ 45 Bq/kg (UNSCEAR 2000)." },
-    urania: { name: "vidro ou esmalte de urânio", mass: 100, nucs: ["U-238", "Ra-226"],
-      hint: "O urânio-238 sai pela linha de 1.001 keV (fraca): só funciona com peça forte. O rádio costuma ser baixo, porque o urânio foi purificado ao fazer o vidro." },
-    comida: { name: "alimento", mass: 500, nucs: ["Cs-137", "K-40"],
-      hint: "Na comida comum, o que aparece é o K-40 (o potássio). O Cs-137 de hoje em comida brasileira fica bem abaixo do que o RC102 enxerga: o resultado deve ser \"abaixo de\"." },
-    adubo: { name: "adubo de potássio", mass: 500, nucs: ["K-40"],
-      hint: "Pelo K-40 o app calcula quanto potássio tem (31,7 Bq por grama de potássio)." },
-    outro: { name: "", mass: 100, nucs: ["K-40", "Ra-226", "Th-232"], hint: "" },
+    castanha: { name: "castanha-do-pará", label: "Castanha-do-pará", sub: "Ra-226, Ra-228", mass: 500, nucs: ["Ra-226", "Ra-228", "K-40"], time: 43200,
+      typical: "Ra-226 ≈ 24 a 105 Bq/kg", note: "talvez só \"abaixo de\"", range: { "Ra-226": [24, 105], "Ra-228": [26, 99] },
+      prep: "Moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226)." },
+    areia: { name: "areia monazítica", label: "Areia monazítica", sub: "Th-232", mass: 500, nucs: ["Th-232", "Ra-226", "K-40"], time: 3600,
+      typical: "Th-232 ≈ 1.000 a 2.300 Bq/kg", note: "sai fácil", range: { "Th-232": [1000, 2300] },
+      prep: "Areia seca, pote cheio. Solo comum tem ~45 Bq/kg." },
+    rocha: { name: "granito / porcelanato", label: "Granito / porcelanato", sub: "K-40, Ra-226, Th-232", mass: 500, nucs: ["K-40", "Ra-226", "Th-232"], time: 3600,
+      typical: "solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg", note: "—",
+      prep: "Pedaços que caibam no pote, ou a peça encostada sempre do mesmo jeito." },
+    urania: { name: "vidro ou esmalte de urânio", label: "Vidro ou esmalte de urânio", sub: "U-238", mass: 100, nucs: ["U-238", "Ra-226"], time: 3600,
+      typical: "rádio costuma ser baixo", note: "só com peça forte",
+      prep: "O U-238 sai pela linha de 1.001 keV, que é fraca. O rádio costuma ser baixo porque o urânio foi purificado ao fazer o vidro." },
+    comida: { name: "alimento", label: "Alimento", sub: "K-40, Cs-137", mass: 500, nucs: ["Cs-137", "K-40"], time: 3600,
+      typical: "Cs-137 bem abaixo do que o RC102 vê", note: "Cs-137 \"abaixo de\"",
+      prep: "O que aparece é o K-40, do potássio da comida." },
+    adubo: { name: "adubo de potássio", label: "Adubo de potássio", sub: "K-40", mass: 500, nucs: ["K-40"], time: 3600,
+      typical: "31,7 Bq por grama de potássio", note: "dá o potássio em g/kg",
+      prep: "Pelo K-40 o app calcula quanto potássio tem." },
+    outro: { name: "", label: "Outra coisa", sub: "escolher", mass: 100, nucs: ["K-40", "Ra-226", "Th-232"], time: 3600,
+      typical: "—", note: "—", prep: "Dê um nome em Mais opções." },
   };
-  const act = { v: null, kind: "amostra", preset: "castanha", busy: false, at: 0, chartKey: "" };
+  const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
+  const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
+  const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
+  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
   const fmtSec = (s) => { if (!isFinite(s) || s <= 0) return "—"; if (s < 90) return nf(s, 0) + " s"; if (s < 5400) return nf(s / 60, 0) + " min"; return nf(s / 3600, s < 36000 ? 1 : 0) + " h"; };
+  // "4 h 33 min", "30 min", "12 h"
+  const fmtHM = (s) => { s = Math.max(0, Math.round(s / 60)); const h = Math.floor(s / 60), m = s % 60; return h ? `${h} h${m ? " " + m + " min" : ""}` : `${m} min`; };
+  const fmtAT = (s) => (s > 0 ? fmtHM(s) : "até eu parar");
+  const fmtDM = (t) => new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" });
   const setHTML = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
+  const actNum = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
   async function actLoad() {
     if (typeof api === "undefined" || !api.GetActivity || act.busy) return;
     act.busy = true;
@@ -1553,112 +1570,282 @@
     act.v = v;
     actRender();
   }
+  // o que está escolhido: um preset ("p:castanha") ou uma amostra guardada ("s:<id>")
+  function actChoice() {
+    const v = act.v || {}, [t, k] = act.pick.split(/:(.*)/s);
+    if (t === "s") {
+      const s = (v.samples || []).find((x) => x.id === k);
+      if (s) return { saved: s, name: s.name, label: s.name, nucs: s.nuclides || [], time: s.smpSec || 3600, mass: s.massG || 0, loose: !!s.loose, prep: s.prep || "", note: s.note || "" };
+    }
+    const p = ACT_PRESETS[k] || ACT_PRESETS.castanha;
+    return { preset: ACT_PRESETS[k] ? k : "castanha", ...p, loose: false };
+  }
+  // linha da calibração no topo
   function actCalHtml(v) {
-    const c = v.cal || {}, parts = [];
-    parts.push(`<b>Calibração</b> · <span>posição: ${escHtml(c.geometry || "")}</span>`);
-    if (c.kcl) parts.push(`KCl em ${fmtDate(c.kcl.t)}: eficiência de <span class="mono">${fmtPct(c.kcl.eff)}</span> em 1.460 keV (±${nf(c.kcl.effErr * 100, 1)}%)<button type="button" class="link" data-forget="kcl">esquecer</button>`);
-    else parts.push(v.cal && v.cal.th ? "sem KCl: a escala vem do tório (aproximada)" : "<span class=\"warn-text\">sem calibração: os Bq são só um chute (±100%). Comece pelo KCl.</span>");
-    if (c.th) parts.push(`forma da curva pelo tório em ${fmtDate(c.th.t)}: inclinação <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span><button type="button" class="link" data-forget="torio">esquecer</button>`);
-    else parts.push(`forma da curva: estimada (inclinação −1,3 ± 0,4); o tório melhora`);
-    // eficiência em cada energia: uma tabela pequena em vez da linha técnica
-    const es = [250, 500, 1000, 1500, 2000, 2500];
+    const c = v.cal || {}, geo = escHtml(c.geometry || "");
+    if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
+    const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
+    const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
+    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · ${shape}</small></div>` +
+      `<button type="button" class="link" data-eff aria-expanded="${act.effOpen}">detalhes</button><button type="button" class="btn${c.kcl ? "" : " accent"}" data-cal="kcl">${c.kcl ? "Calibrar de novo" : "Calibrar"}</button></div>`;
+  }
+  function actEffHtml(v) {
+    const c = v.cal || {}, es = [250, 500, 1000, 1500, 2000, 2500];
     const tab = `<table class="rc-act-eff"><thead><tr><th>${tr("energia (keV)")}</th>${es.map((e) => `<th class="mono">${nf(e, 0)}</th>`).join("")}</tr></thead><tbody>` +
       `<tr><th>${tr("eficiência")}</th>${es.map((_, i) => `<td class="mono">${fmtPct(v.calEff[i])}</td>`).join("")}</tr>` +
       `<tr><th>${tr("incerteza")}</th>${es.map((_, i) => `<td class="mono">±${nf(v.calErr[i] * 100, 0)}%</td>`).join("")}</tr></tbody></table>`;
-    return parts.join("<br>") + `<div class="rc-act-eff-wrap" data-no-tr>${tab}</div>`;
+    const parts = [];
+    if (c.kcl) parts.push(`${tr("KCl")} ${fmtDate(c.kcl.t)}: <span class="mono">${fmtPct(c.kcl.eff)}</span> ${tr("em 1.460 keV")} <button type="button" class="link" data-forget="kcl">${tr("esquecer")}</button>`);
+    if (c.th) parts.push(`${tr("tório")} ${fmtDate(c.th.t)}: ${tr("inclinação")} <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span> <button type="button" class="link" data-forget="torio">${tr("esquecer")}</button>`);
+    else parts.push(`${tr("forma da curva: estimada (inclinação −1,3 ± 0,4)")} <button type="button" class="link" data-cal="torio">${tr("medir o tório")}</button>`);
+    return tab + `<p class="small muted">${parts.join("<br>")}</p>`;
   }
-  function actNucRows(list, massG, live) {
+  // cartões: suas amostras, depois a lista
+  function actChipsHtml(v) {
+    const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
+    let h = `<p class="rc-act-grp">Suas amostras</p>`;
+    for (const s of v.samples || []) h += chip("s:" + s.id, `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
+    h += `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
+    h += `<p class="rc-act-grp">Outras</p>`;
+    for (const [k, p] of Object.entries(ACT_PRESETS)) h += chip("p:" + k, p.label, p.sub);
+    return h;
+  }
+  function actRefText(s, hist) {
+    const out = [];
+    if (s.refUSv > 0) out.push(`<span data-no-tr>${escHtml(s.refDist || tr("encostada"))}:</span> <span class="mono">${rateNum(s.refUSv, 2)}</span> <span data-unit-keep>${rateLbl()}</span> ${s.refDev === "radiacode" ? tr("no RC102") : tr("no GMC-800")} (<span class="mono">${fmtDM(s.refT)}</span>)`);
+    const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name)));
+    if (last) out.push(`${tr("última medida")} <span class="mono">${fmtDM(last.t)}</span>: ${escHtml(actSummary(last))}`);
+    return out.length ? out.join("<br>") : tr("ainda não medida");
+  }
+  const foldTxt = (s) => String(s || "").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "").trim();
+  function actSegHtml(list, cur, rec) {
+    const opts = [...list];
+    if (rec != null && !opts.includes(rec)) { opts.push(rec); opts.sort((a, b) => (a || 1e9) - (b || 1e9)); }
+    return opts.map((s) => `<button type="button" data-v="${s}" aria-pressed="${s === cur}">${fmtAT(s)}${s === rec ? `<span class="rc-rec">recomendado</span>` : ""}</button>`).join("");
+  }
+  // escolheu outro cartão: o formulário segue o cartão
+  function actPick(key) {
+    act.pick = key;
+    const c = actChoice();
+    $("rcActName").value = c.name || "";
+    $("rcActMass").value = c.loose ? (c.mass > 0 ? c.mass : "") : c.mass;
+    act.smpSec = c.time;
+    document.querySelectorAll("#rcActNucs input").forEach((x) => { x.checked = c.nucs.includes(x.value); });
+    $("rcActErr").dataset.msg = "";
+    actRender();
+  }
+  // cada pedaço de texto é uma frase inteira do en.tsv
+  function actTotal(bgNew, bgSec, smpSec, smpWord) {
+    const smp = smpSec > 0 ? `<b>${fmtHM(smpSec)}</b> <span>${smpWord}</span>` : `<span>${smpWord}</span> <span>${tr("até você parar")}</span>`;
+    return bgNew ? `<span>Total:</span> <b>${bgSec > 0 ? fmtHM(bgSec) : "—"}</b> <span>de fundo +</span> ${smp}` : `<span>Total:</span> ${smp} <span>(fundo salvo)</span>`;
+  }
+  function actRenderForm(v) {
+    const c = actChoice(), hist = v.history || [];
+    setHTML($("rcActChips"), actChipsHtml(v));
+    const exp = c.saved
+      ? `<div><span class="k">sua referência</span><b>${actRefText(c.saved, hist)}</b></div>`
+      : `<div><span class="k">valor típico</span><b>${escHtml(c.typical)}</b></div>`;
+    setHTML($("rcActExpect"), exp + `<div><span class="k">tempo recomendado</span><b>${fmtAT(c.time)}</b></div><div><span class="k">para o RC102</span><b>${escHtml(c.note || "—")}</b></div>` +
+      (c.saved ? `<div class="rc-act-full"><button type="button" class="link" data-forget-sample="${escHtml(c.saved.id)}">tirar de Suas amostras</button></div>` : ""));
+    setHTML($("rcActPrep"), c.prep ? `<span>Preparo:</span> <span>${escHtml(c.prep)}</span>` : "");
+    $("rcActMassLbl").textContent = c.loose ? tr("Massa (g), só para o Bq/g") : tr("Massa (g)");
+    $("rcActMass").placeholder = c.loose ? tr("opcional") : "";
+    setHTML($("rcActSmpT"), actSegHtml(ACT_SMP_T, act.smpSec, c.time));
+    const saved = v.savedBg, fresh = saved && Date.now() - saved.t < 30 * 864e5;
+    if (!fresh && act.bgMode === "salvo") act.bgMode = "novo";
+    const bs = $("rcActBgSaved");
+    bs.disabled = !fresh;
+    bs.textContent = fresh ? `usar o salvo (${fmtDM(saved.t)}, ${fmtSec(saved.sec)})` : tr("usar o salvo (não tem)");
+    document.querySelectorAll("#rcActBg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.bgMode)));
+    $("rcActBgTBox").hidden = act.bgMode !== "novo";
+    setHTML($("rcActBgT"), actSegHtml(ACT_BG_T, act.bgSec, null));
+    if (!$("rcActGeom").value) $("rcActGeom").value = (v.cal && v.cal.geometry) || "";
+    setHTML($("rcActTot"), actTotal(act.bgMode === "novo", act.bgSec, act.smpSec, tr("de amostra")));
+    $("rcActStart").disabled = !v.connected;
+    $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
+  }
+  function actRenderCal(v) {
+    const k = act.calKind, light = act.kclType !== "100";
+    document.querySelectorAll("#rcActCalSteps [data-k]").forEach((b) => { b.classList.toggle("cur", b.dataset.k === k); b.setAttribute("aria-pressed", String(b.dataset.k === k)); });
+    document.querySelectorAll("#rcActCalFlow [data-for]").forEach((el) => { el.hidden = el.dataset.for !== k; });
+    $("rcActPctBox").hidden = k !== "kcl" || !light;
+    document.querySelectorAll("#rcActKclType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.kclType)));
+    if (!$("rcActCalGeom").value) $("rcActCalGeom").value = (v.cal && v.cal.geometry) || "";
+    $("rcActCalHint").textContent = k === "kcl"
+      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.")
+      : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
+    act.calSmpSec = k === "kcl" ? (light ? 7200 : 3600) : 3600;
+    setHTML($("rcActCalTot"), actTotal(true, 3600, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo")));
+    $("rcActCalStart").textContent = k === "kcl" ? tr("Começar a calibração") : tr("Medir o tório");
+    $("rcActCalStart").disabled = !v.connected;
+    $("rcActCalErr").textContent = v.connected ? $("rcActCalErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
+  }
+  function actNucRows(list, r, live) {
     if (!list || !list.length) return "";
-    let h = `<table class="rc-act-tab"><thead><tr><th>radionuclídeo</th><th>atividade</th><th>por kg</th>${live ? "<th>para ±10%</th>" : ""}</tr></thead><tbody>`;
+    const massG = r.massG || 0, loose = !!r.loose, perKg = massG > 0 && !loose;
+    const pk = (r.sampleId || "").startsWith("p:") ? ACT_PRESETS[r.sampleId.slice(2)] : null, range = !live && pk && pk.range;
+    const col = perKg ? tr("por kg") : tr("na peça");
+    let h = `<table class="rc-act-tab"><thead><tr><th>${tr("Radionuclídeo")}</th><th>${live ? tr("até agora") : col}</th>${live ? `<th>${tr("falta para ±10%")}</th>` : range ? `<th>${tr("comparado ao típico")}</th>` : ""}</tr></thead><tbody>`;
     for (const n of list) {
-      const lines = (n.lines || []).map((l) => `${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`).join(" · ");
-      let a, k;
-      if (n.detected) {
-        a = `${fmtBq(n.bq)}± ${fmtBq(n.err)}Bq`; k = massG > 0 ? `${fmtBq(n.bqKg)}± ${fmtBq(n.errKg)}Bq/kg` : "";
-      } else {
-        a = `abaixo de ${fmtBq(n.mda)}Bq`; k = massG > 0 ? `abaixo de ${fmtBq(n.mdaKg)}Bq/kg` : "";
-      }
-      let extra = "";
-      if (n.id === "K-40" && n.detected && massG > 0) extra = `<span class="sub">≈ ${nf(n.bqKg / 31.7, 1)} g de potássio por kg</span>`;
-      const need = n.detected ? (n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? "já chegou" : "~" + fmtSec(n.needSec) + " no total") : "—") : "ainda não aparece";
-      h += `<tr><td>${escHtml(n.name)}${n.note ? `<span class="sub">${escHtml(n.note)}</span>` : ""}</td><td class="n">${a}</td><td class="n">${k}${extra}</td>${live ? `<td>${need}</td>` : ""}</tr>`;
-      if (!live && lines) h += `<tr class="lines"><td colspan="3"><span class="sub mono">${lines}</span></td></tr>`;
+      const val = (x) => (perKg ? x * 1000 / massG : x);
+      const unit = perKg ? "Bq/kg" : "Bq";
+      const grams = loose && massG > 0 && n.detected ? `<span class="sub"><span class="mono">${fmtBq(n.bq / massG)}</span>Bq/g</span>` : "";
+      const a = n.detected ? `<span class="mono">${fmtBq(val(n.bq))}± ${fmtBq(val(n.err))}</span>${unit}${grams}` : `<span class="lo">abaixo de <span class="mono">${fmtBq(val(n.mda))}</span>${unit}</span>`;
+      let sub = ACT_SUB[n.id] ? tr(ACT_SUB[n.id]) : "";
+      if (n.id === "K-40" && n.detected && perKg) sub = `≈ ${nf(n.bq * 1000 / massG / 31.7, 1)} ${tr("g de potássio por kg")}`;
+      let third = "";
+      if (live) third = `<td>${n.detected ? (n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? tr("já chegou") : "~" + fmtSec(n.needSec) + " no total") : "—") : tr("ainda não aparece")}</td>`;
+      else if (range) {
+        const rg = range[n.id];
+        if (!n.detected) third = `<td><span class="sub">${tr("O RC102 não chegou a ver. Mais tempo ajudaria.")}</span></td>`;
+        else if (!rg) third = `<td><span class="sub">${tr("sem valor típico na lista")}</span></td>`;
+        else {
+          const x = val(n.bq), e = val(n.err), lo = Math.log10(rg[0] / 3), hi = Math.log10(rg[1] * 3), pos = (y) => Math.max(0, Math.min(100, ((Math.log10(Math.max(y, 1e-6)) - lo) / (hi - lo)) * 100));
+          const word = x + e < rg[0] ? "abaixo do típico" : x - e > rg[1] ? "acima do típico" : "dentro do esperado";
+          third = `<td><div class="rc-act-bar2" aria-hidden="true"><i style="left:${pos(rg[0]).toFixed(1)}%;width:${(pos(rg[1]) - pos(rg[0])).toFixed(1)}%"></i><b style="left:${pos(x).toFixed(1)}%"></b></div><span class="sub">${word} (${nf(rg[0], 0)} a ${nf(rg[1], 0)} Bq/kg)</span></td>`;
+        }
+      } else if (!live && !n.detected) sub = (sub ? sub + ". " : "") + tr("O RC102 não chegou a ver. Mais tempo ajudaria.");
+      h += `<tr><td>${escHtml(n.id)}${sub ? `<span class="sub">${sub}</span>` : ""}</td><td class="nw">${a}</td>${third}</tr>`;
     }
     return `<div class="rc-act-wrap">${h}</tbody></table></div>`;
   }
+  const calTxt = (r) => ({ kcl: "calibração pelo KCl", torio: "calibração pelo tório (aproximada)", chute: "sem calibração: chute" }[r.calSrc] || "");
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
       h += r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
       h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
-      if (r.thLines && r.thLines.length) h += `<p class="small muted mono">${r.thLines.map((l) => `${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`).join(" · ")}</p>`;
     }
-    if (r.kind === "amostra" || r.kind === "torio") h += actNucRows(r.nuclides, r.massG, false);
-    const calTxt = { kcl: "calibração pelo KCl", torio: "calibração pelo tório (aproximada)", chute: "sem calibração: chute" }[r.calSrc] || "";
-    h += `<p class="small muted">${escHtml(r.name)} · ${nf(r.massG, 1)} g · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt}${r.geometry ? " · " + escHtml(r.geometry) : ""}</p>`;
+    if (r.kind === "amostra") {
+      if (r.loose) h += `<p class="small att-text">${tr("Forma diferente do pote da calibração: aproximado.")}</p>`;
+      h += actNucRows(r.nuclides, r, false);
+    }
+    // detalhes técnicos: linhas usadas, notas e a medida
+    const lines = [];
+    for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
+    for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
+    const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted">${escHtml(n.id)}: ${escHtml(n.note)}</p>`).join("");
+    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : tr("sem massa")} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
   function actSummary(r) {
     if (r.kind === "kcl") return r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
     if (r.kind === "torio") return r.th ? `inclinação ${nf(r.th.b, 2)}` : "sem linhas";
-    return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(n.bqKg) + "Bq/kg" : "< " + fmtBq(n.mdaKg) + "Bq/kg"}`).join(" · ");
+    const perKg = r.massG > 0 && !r.loose, u = perKg ? "Bq/kg" : "Bq";
+    return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(perKg ? n.bqKg : n.bq) + u : "< " + fmtBq(perKg ? n.mdaKg : n.mda) + u}`).join(" · ");
   }
   function actRender() {
     const v = act.v; if (!v) return;
     setHTML($("rcActCal"), actCalHtml(v));
+    const effBox = $("rcActEff");
+    effBox.hidden = !act.effOpen || (!v.cal.kcl && !v.cal.th);
+    if (!effBox.hidden) setHTML(effBox, actEffHtml(v));
     const running = !!v.phase;
-    $("rcActForm").hidden = running;
+    $("rcActForm").hidden = running || act.mode !== "medir";
+    $("rcActCalFlow").hidden = running || act.mode !== "calibrar";
     $("rcActRun").hidden = !running;
-    // formulário
-    document.querySelectorAll("#rcActKind button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.k === act.kind)));
-    document.querySelectorAll("#rcActForm [data-for]").forEach((el) => { el.hidden = !el.dataset.for.split(" ").includes(act.kind); });
-    $("rcActPctBox").hidden = act.kind !== "kcl" || $("rcActKclType").value === "100";
-    const bgSel = $("rcActBg"), saved = v.savedBg;
-    bgSel.options[1].disabled = !saved;
-    bgSel.options[1].textContent = saved ? `usar o fundo salvo (${fmtDate(saved.t)}, ${fmtSec(saved.sec)})` : "usar o fundo salvo (não tem)";
-    if (!saved && bgSel.value === "salvo") bgSel.value = "novo";
-    $("rcActBgTBox").hidden = bgSel.value !== "novo";
-    if (!$("rcActGeom").value) $("rcActGeom").value = (v.cal && v.cal.geometry) || "";
-    const pr = ACT_PRESETS[act.preset];
-    $("rcActHint").textContent = act.kind === "amostra" ? pr.hint : act.kind === "kcl"
-      ? "Pote cheio de sal, o RC102 encostado sempre do mesmo jeito (anote a posição). Com 500 g de KCl puro, 1 h já dá uma boa medida; com sal light, 2 h. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar."
-      : "O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.";
-    $("rcActStart").disabled = !v.connected;
-    $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : "Conecte o RC102 para medir.";
-    // em andamento
     if (running) actRenderRun(v);
+    else if (act.mode === "calibrar") actRenderCal(v);
+    else actRenderForm(v);
     // gráfico
     const ch = v.chart;
     $("rcActPlot").hidden = !ch; $("rcActLegend").hidden = !ch;
     if (ch) actDraw(ch, v);
     // histórico
     const hist = v.history || [];
-    setHTML($("rcActHist"), hist.length ? `<p class="small muted">Medidas anteriores</p>` + hist.map((r) => `<details><summary><span class="mono">${fmtDate(r.t)} ${fmtTime(r.t)}</span>${escHtml(r.name)} · ${escHtml(actSummary(r))}</summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") : "");
+    const what = (r) => (r.kind === "amostra" ? `<span>${escHtml(r.name)}</span>` : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
+    setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
+      hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
   }
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
-    const step = {
-      fundo: `<b>1. Fundo:</b> tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.`,
-      trocar: `<b>2. Amostra:</b> coloque ${escHtml(o.name || "a amostra")} na posição (${escHtml(o.geometry || "a mesma da calibração")}) e clique em Começar.`,
-      amostra: `<b>${o.newBg ? "3" : "1"}. Medindo:</b> ${escHtml(o.name || "")} (${nf(o.massG, 1)} g)`,
-      pronto: `<b>Pronto:</b> ${escHtml(o.name || "")}`,
+    const idx = { fundo: 0, trocar: 1, amostra: 2, pronto: 3 }[ph] ?? 0;
+    const steps = ["Fundo", "Colocar a amostra", "Medindo", "Resultado"];
+    setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
+    const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
+    setHTML($("rcActWhat"), `<b data-no-tr>${nm}</b> <span class="muted">${mass}${o.geometry ? " · " + escHtml(o.geometry) : ""}</span>`);
+    $("rcActWhat").hidden = ph === "pronto";
+    $("rcActDo").textContent = {
+      fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
+      trocar: tr("Coloque a amostra na posição da calibração e clique em Começar."),
+      amostra: "", pronto: "",
     }[ph] || "";
-    $("rcActStep").innerHTML = step;
     $("rcActBar").style.width = (tg > 0 && (ph === "fundo" || ph === "amostra") ? Math.min(100, (t / tg) * 100) : ph === "pronto" ? 100 : 0) + "%";
-    $("rcActTime").textContent = ph === "fundo" || ph === "amostra" ? `${fmtDur(t)}${tg > 0 ? " / " + fmtDur(tg) : ""}${v.bgSec && ph === "amostra" ? " · fundo de " + fmtSec(v.bgSec) : ""}` : "";
+    $("rcActBar").parentElement.hidden = ph === "trocar" || ph === "pronto";
+    $("rcActTime").textContent = ph === "fundo" || ph === "amostra" ? `${fmtHM(t)}${tg > 0 ? " / " + fmtHM(tg) : ""}${v.bgSec && ph === "amostra" ? " · fundo de " + fmtHM(v.bgSec) : ""}` : "";
     const nx = $("rcActNext");
-    nx.hidden = false;
-    nx.textContent = { fundo: "Encerrar o fundo agora", trocar: "Começar", amostra: "Encerrar agora", pronto: "Nova medida" }[ph] || "";
+    nx.textContent = tr({ fundo: "Encerrar o fundo agora", trocar: "Começar", amostra: "Encerrar agora", pronto: "Nova medida" }[ph] || "");
+    nx.classList.toggle("accent", ph !== "amostra" && ph !== "fundo");
     $("rcActCancel").hidden = ph === "pronto";
+    $("rcActAgain").hidden = ph !== "pronto" || o.kind !== "amostra";
+    const mine = (o.sampleId || "").startsWith("s:") && (v.samples || []).some((s) => "s:" + s.id === o.sampleId);
+    $("rcActKeep").hidden = ph !== "pronto" || o.kind !== "amostra" || mine;
+    $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
       if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
-      if (o.kind !== "kcl") live += actNucRows(v.live, o.massG, true);
+      if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;
-    } else if (ph === "pronto" && v.result) live = `<div class="rc-act-res">${actResHtml(v.result)}</div>`;
+    } else if (ph === "pronto" && v.result) {
+      const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
+      live = `<div class="rc-act-res"><h4>${escHtml(r.name)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
+    }
     setHTML($("rcActLive"), live);
+  }
+  async function actStartOpts(o, errEl) {
+    try { await api.StartActivity(o); errEl.dataset.msg = ""; act.mode = "medir"; } catch (e) { errEl.dataset.msg = String(e && e.message ? e.message : e); }
+    actLoad();
+  }
+  function actFormOpts() {
+    const c = actChoice();
+    return {
+      kind: "amostra", name: $("rcActName").value.trim() || c.name || "", massG: actNum("rcActMass"), geometry: $("rcActGeom").value,
+      newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: c.loose, sampleId: act.pick,
+      nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
+    };
+  }
+  function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
+  function actStartCal() {
+    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: $("rcActCalGeom").value, newBg: true, bgSec: 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
+    if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
+    else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
+    actStartOpts(o, $("rcActCalErr"));
+  }
+  async function actNext() {
+    const err = $("rcActRunErr");
+    if (act.v && act.v.phase === "pronto") { await api.CloseActivity(); }
+    else { try { await api.ActivityNext(); err.dataset.msg = ""; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); } }
+    actLoad();
+  }
+  // medir de novo: as mesmas escolhas, com o fundo que acabou de ser medido
+  async function actAgain() {
+    const v = act.v; if (!v || !v.opts) return;
+    const o = { ...v.opts, newBg: !(v.savedBg && Date.now() - v.savedBg.t < 864e5) };
+    await api.CloseActivity();
+    actStartOpts(o, $("rcActRunErr"));
+  }
+  // guarda como "minha": da medida terminada ou do que está escolhido
+  async function actKeep(o) {
+    if (!api.SaveActSample) return;
+    const c = actChoice();
+    const s = { id: "", name: (o.name || "").trim(), sub: c.saved ? c.saved.sub || "" : c.sub || "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: c.prep || "", note: c.note || "" };
+    const err = o === act.v?.opts ? $("rcActRunErr") : $("rcActErr");
+    if (!s.name) { err.dataset.msg = tr("Dê um nome em Mais opções."); $("rcActMore").open = true; $("rcActName").focus(); actRender(); return; }
+    try { const id = await api.SaveActSample(s); err.dataset.msg = ""; act.pick = "s:" + id; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }
+    await actLoad();
+    if (act.v && !act.v.phase) actPick(act.pick);
+  }
+  async function actForgetSample(id) {
+    const s = ((act.v && act.v.samples) || []).find((x) => x.id === id);
+    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? s.name : "", ok: tr("Tirar") });
+    if (!ok) return;
+    await api.DeleteActSample(id);
+    act.pick = "p:castanha";
+    await actLoad();
+    actPick(act.pick);
   }
   function actDraw(ch, v) {
     const cv = $("rcActSpec"), f = fit(cv, 170); if (!f) return;
@@ -1691,31 +1878,6 @@
       g.fillText(nf(e, 0), x + 3, T0 + 10 + (seen.size % 2) * 12);
     }
     g.setLineDash([]);
-  }
-  function actPreset(k) {
-    act.preset = k;
-    const p = ACT_PRESETS[k];
-    $("rcActName").value = p.name;
-    $("rcActMass").value = p.mass;
-    document.querySelectorAll("#rcActNucs input").forEach((c) => { c.checked = p.nucs.includes(c.value); });
-  }
-  async function actStart() {
-    const kind = act.kind, num = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
-    const o = {
-      kind, name: kind === "amostra" ? $("rcActName").value : "", massG: num("rcActMass"), geometry: $("rcActGeom").value,
-      newBg: $("rcActBg").value === "novo", bgSec: +$("rcActBgT").value, smpSec: +$("rcActSmpT").value, nuclides: [], pct: 0, ageY: 0,
-    };
-    if (kind === "kcl") o.pct = $("rcActKclType").value === "100" ? 100 : num("rcActPct");
-    if (kind === "torio") { o.pct = +$("rcActTh").value; o.ageY = num("rcActAge"); }
-    if (kind === "amostra") o.nuclides = [...document.querySelectorAll("#rcActNucs input:checked")].map((c) => c.value);
-    const err = $("rcActErr");
-    try { await api.StartActivity(o); err.dataset.msg = ""; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }
-    actLoad();
-  }
-  async function actNext() {
-    if (act.v && act.v.phase === "pronto") { await api.CloseActivity(); }
-    else { try { await api.ActivityNext(); } catch (e) { $("rcActErr").dataset.msg = String(e && e.message ? e.message : e); } }
-    actLoad();
   }
 
   // =====================================================================
@@ -1809,22 +1971,42 @@
     $("rcSrRefReset").addEventListener("click", () => { sr.myRef = 0; srDraw(); });
     $("rcSrMaxReset").addEventListener("click", () => { sr.max = 0; srDraw(); });
     // atividade
-    const psel = $("rcActPreset");
-    for (const [k, p] of Object.entries(ACT_PRESETS)) { const o = document.createElement("option"); o.value = k; o.textContent = p.name || "outra coisa"; psel.appendChild(o); }
-    $("rcActNucs").innerHTML = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"].map((id) => `<label><input type="checkbox" value="${id}"> ${id}</label>`).join("");
-    psel.addEventListener("change", () => { actPreset(psel.value); actRender(); });
-    actPreset("castanha");
-    $("rcActKind").addEventListener("click", (e) => {
+    $("rcActNucs").innerHTML = ACT_NUCS.map((id) => `<label><input type="checkbox" value="${id}"> ${id}</label>`).join("");
+    actPick(act.pick);
+    const segPick = (id, fn) => $(id).addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b || b.disabled) return; fn(b.dataset.v); actRender(); });
+    segPick("rcActSmpT", (x) => { act.smpSec = +x; });
+    segPick("rcActBgT", (x) => { act.bgSec = +x; });
+    segPick("rcActBg", (x) => { act.bgMode = x; });
+    segPick("rcActKclType", (x) => { act.kclType = x; $("rcActCalMass").value = 500; });
+    $("rcActChips").addEventListener("click", (e) => {
+      if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
+      const b = e.target.closest("button[data-pick]"); if (b) actPick(b.dataset.pick);
+    });
+    $("rcActExpect").addEventListener("click", (e) => { const b = e.target.closest("[data-forget-sample]"); if (b) actForgetSample(b.dataset.forgetSample); });
+    $("rcActCalSteps").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-k]"); if (!b) return;
-      act.kind = b.dataset.k;
-      $("rcActMass").value = act.kind === "torio" ? 40 : act.kind === "kcl" ? 500 : ACT_PRESETS[act.preset].mass;
+      act.calKind = b.dataset.k;
+      $("rcActCalMass").value = act.calKind === "torio" ? 40 : 500;
       actRender();
     });
-    for (const id of ["rcActKclType", "rcActBg"]) $(id).addEventListener("change", actRender);
+    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; $("rcActCalMass").value = k === "torio" ? 40 : 500; actRender(); };
+    $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
+    $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);
     $("rcActNext").addEventListener("click", actNext);
+    $("rcActAgain").addEventListener("click", actAgain);
+    $("rcActKeep").addEventListener("click", () => { if (act.v && act.v.opts) actKeep(act.v.opts); });
     $("rcActCancel").addEventListener("click", async () => { await api.CancelActivity(); actLoad(); });
-    $("rcActCal").addEventListener("click", async (e) => { const b = e.target.closest("[data-forget]"); if (!b) return; await api.ForgetActivityCal(b.dataset.forget); actLoad(); });
+    const calClick = async (e) => {
+      const c = e.target.closest("[data-cal]"); if (c) { openCal(c.dataset.cal); return; }
+      if (e.target.closest("[data-eff]")) { act.effOpen = !act.effOpen; actRender(); return; }
+      const b = e.target.closest("[data-forget]"); if (!b) return;
+      const ok = await askConfirm({ title: b.dataset.forget === "kcl" ? tr("Esquecer a calibração do KCl?") : tr("Esquecer a calibração do tório?"), text: tr("Para voltar, é preciso medir de novo."), ok: tr("Esquecer") });
+      if (!ok) return;
+      await api.ForgetActivityCal(b.dataset.forget); actLoad();
+    };
+    $("rcActCal").addEventListener("click", calClick);
+    $("rcActEff").addEventListener("click", calClick);
     new ResizeObserver(() => { if (visible) drawAll(); }).observe($("viewRadiacode"));
     // Espectro: espectro (acumulado) ou espectrograma (com a dureza)
     const sv = $("rcSpecView");

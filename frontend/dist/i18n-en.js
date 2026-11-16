@@ -4394,7 +4394,124 @@ const I18N_EN = {
 "alara distancia inverso quadrado afastar": "alara distance inverse square move away",
 "alara blindagem material chumbo antes depois": "alara shielding material lead before after",
 "Backup e arquivos": "Backup and files",
-"Nuvem": "Cloud"
+"Nuvem": "Cloud",
+"% de KCl no rótulo": "% KCl on the label",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RadiaCode encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"(fundo salvo)": "(saved background)",
+"1 · KCl": "1 · KCl",
+"2 · Tório": "2 · Thorium",
+"3 · Pronto": "3 · Done",
+"31,7 Bq por grama de potássio": "31.7 Bq per gram of potassium",
+"Adubo de potássio": "Potash fertilizer",
+"Areia monazítica": "Monazite sand",
+"Alimento": "Food",
+"Calibrar": "Calibrate",
+"Calibrar de novo": "Calibrate again",
+"Castanha-do-pará": "Brazil nuts",
+"Coloque a amostra na posição da calibração e clique em Começar.": "Put the sample in the calibration position and click Start.",
+"Começar a calibração": "Start calibration",
+"Cs-137 \"abaixo de\"": "Cs-137 \"below\"",
+"Cs-137 bem abaixo do que o RC102 vê": "Cs-137 well below what the RC102 can see",
+"Cs-137 bem abaixo do que o RadiaCode vê": "Cs-137 well below what the RC102 can see",
+"Depois, é só medir amostras na mesma posição.": "After that, just measure samples in the same position.",
+"Dê um nome em Mais opções.": "Give it a name in More options.",
+"Eletrodo de tungstênio toriado, se tiver.": "Thoriated tungsten electrode, if you have one.",
+"Escala aproximada: falta o KCl.": "Approximate scale: KCl still missing.",
+"Esquecer a calibração do KCl?": "Forget the KCl calibration?",
+"Esquecer a calibração do tório?": "Forget the thorium calibration?",
+"Euxenita pode ter urânio e tório. O app só conta tório com as linhas de 911 ou 2.614 keV.": "Euxenite can have uranium and thorium. The app only counts thorium with the 911 or 2,614 keV lines.",
+"Falta calibrar.": "Not calibrated yet.",
+"Forma diferente do pote da calibração: aproximado.": "Different shape from the calibration jar: approximate.",
+"Guardar como minha": "Save as mine",
+"＋ Guardar como minha": "＋ Save as mine",
+"KCl puro": "Pure KCl",
+"Linhas usadas e detalhes técnicos": "Lines used and technical details",
+"Mais opções": "More options",
+"Massa (g), só para o Bq/g": "Mass (g), only for Bq/g",
+"Medindo": "Measuring",
+"Colocar a amostra": "Place the sample",
+"Medir o tório": "Measure the thorium",
+"Moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226).": "Ground or chopped, full jar, tightly closed ~3 weeks before (for Ra-226).",
+"Nome (para o histórico)": "Name (for the history)",
+"O RC102 não chegou a ver. Mais tempo ajudaria.": "The RC102 didn't see it. More time would help.",
+"O RadiaCode não chegou a ver. Mais tempo ajudaria.": "The RC102 didn't see it. More time would help.",
+"O U-238 sai pela linha de 1.001 keV, que é fraca. O rádio costuma ser baixo porque o urânio foi purificado ao fazer o vidro.": "U-238 comes from the 1,001 keV line, which is weak. Radium is usually low because the uranium was purified to make the glass.",
+"O que aparece é o K-40, do potássio da comida.": "What shows up is K-40, from the potassium in the food.",
+"Outra coisa": "Something else",
+"Outras": "Others",
+"Para voltar, é preciso medir de novo.": "To get it back, you have to measure again.",
+"Pedaços que caibam no pote, ou a peça encostada sempre do mesmo jeito.": "Pieces that fit in the jar, or the piece touching it the same way every time.",
+"Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.": "Loose stone: the result is in Bq for the whole piece, no need to weigh it. The shape differs from the calibration jar, so it's approximate.",
+"Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RC102 quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
+"Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RadiaCode quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
+"Pelo K-40 o app calcula quanto potássio tem.": "From K-40 the app works out how much potassium there is.",
+"Preparo:": "Preparation:",
+"Radionuclídeo": "Radionuclide",
+"Sal light ou KCl puro, ~500 g, no pote.": "Lite salt or pure KCl, ~500 g, in the jar.",
+"Sem isso, os Bq são só um chute (±100%).": "Without it, the Bq are just a guess (±100%).",
+"Suas amostras": "Your samples",
+"Tirar": "Remove",
+"Tirar de Suas amostras?": "Remove from Your samples?",
+"Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.": "Move the sample away (about 3 m) and leave the RC102 in its usual place.",
+"Tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.": "Move the sample away (about 3 m) and leave the RC102 in its usual place.",
+"Total:": "Total:",
+"Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.": "Just once, with lite salt or pure KCl, in the position you'll measure in.",
+"Vidro ou esmalte de urânio": "Uranium glass or glaze",
+"abaixo de": "below",
+"abaixo do típico": "below typical",
+"acima do típico": "above typical",
+"ainda não medida": "not measured yet",
+"até você parar": "until you stop",
+"com o eletrodo": "with the electrode",
+"com o que está escolhido": "with what's selected",
+"comparado ao típico": "compared to typical",
+"césio, de usinas e testes nucleares": "cesium, from power plants and nuclear tests",
+"de amostra": "of sample",
+"de fundo +": "of background +",
+"dentro do esperado": "as expected",
+"dá o potássio em g/kg": "gives potassium in g/kg",
+"dê um nome para a amostra": "give the sample a name",
+"em 1.460 keV": "at 1,460 keV",
+"encostada": "touching",
+"falta para ±10%": "left for ±10%",
+"fica guardado": "it's kept",
+"forma da curva estimada (o tório melhora)": "curve shape estimated (thorium improves it)",
+"forma da curva: estimada (inclinação −1,3 ± 0,4)": "curve shape: estimated (slope −1.3 ± 0.4)",
+"forte: sai rápido": "strong: quick",
+"g de potássio por kg": "g of potassium per kg",
+"inclinação": "slope",
+"massa ou tempo inválido": "invalid mass or time",
+"medir o tório": "measure the thorium",
+"medir um novo": "measure a new one",
+"na peça": "in the piece",
+"no GMC-800": "on the GMC-800",
+"obrigatório · ~1 h": "required · ~1 h",
+"opcional · melhora a curva": "optional · improves the curve",
+"para o RC102": "for the RC102",
+"para o RadiaCode": "for the RC102",
+"recomendado": "recommended",
+"rádio costuma ser baixo": "radium is usually low",
+"rádio, da série do tório": "radium, thorium series",
+"rádio, da série do urânio": "radium, uranium series",
+"sai fácil": "easy",
+"sem massa": "no mass",
+"sem valor típico na lista": "no typical value on the list",
+"sua": "yours",
+"sua referência": "your reference",
+"só com peça forte": "only with a strong piece",
+"talvez só \"abaixo de\"": "maybe only \"below\"",
+"tirar de Suas amostras": "remove from Your samples",
+"tório só se aparecer 911 ou 2.614 keV": "thorium only if 911 or 2,614 keV shows up",
+"tório, a série inteira": "thorium, whole series",
+"urânio": "uranium",
+"urânio e tório?": "uranium and thorium?",
+"usar o salvo": "use the saved one",
+"usar o salvo (não tem)": "use the saved one (none)",
+"valor típico": "typical value",
+"voltar": "back",
+"última medida": "last measured",
+"tempo recomendado": "recommended time"
 },
 "patterns": [
 [
@@ -11614,6 +11731,15 @@ const I18N_EN = {
 ]
 ],
 [
+"dentro do esperado (",
+"^dentro do esperado \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"as expected (${1} to ${2} Bq/kg)",
+[
+"dentro do esperado (",
+" Bq/kg)"
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -12067,6 +12193,15 @@ const I18N_EN = {
 ]
 ],
 [
+"abaixo do típico (",
+"^abaixo do típico \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"below typical (${1} to ${2} Bq/kg)",
+[
+"abaixo do típico (",
+" Bq/kg)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12420,6 +12555,23 @@ const I18N_EN = {
 "· RadiaCode média ",
 " · máx ",
 " CPS"
+]
+],
+[
+"acima do típico (",
+"^acima do típico \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"above typical (${1} to ${2} Bq/kg)",
+[
+"acima do típico (",
+" Bq/kg)"
+]
+],
+[
+"forma da curva pelo tório em ",
+"^forma da curva pelo tório em ((?:(?! · ).)+?)$",
+"curve shape from thorium on ${1}",
+[
+"forma da curva pelo tório em "
 ]
 ],
 [
@@ -13146,6 +13298,15 @@ const I18N_EN = {
 "Average ${1} · gray = no data",
 [
 " médio · cinza = sem dados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · amostra ((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) · ((?:(?! · ).)+?)((?:(?! · ).)+?)$",
+"${1} · ${2} · sample ${3} · background ${4} · ${5}${6}",
+[
+" · amostra ",
+" · fundo "
 ]
 ],
 [
@@ -13975,6 +14136,14 @@ const I18N_EN = {
 "${1}: no data (with you)",
 [
 ": sem dado (com você)"
+]
+],
+[
+"Calibrado com KCl em ",
+"^Calibrado com KCl em ((?:(?! · ).)+?) ·$",
+"Calibrated with KCl on ${1} ·",
+[
+"Calibrado com KCl em "
 ]
 ],
 [
@@ -15402,6 +15571,14 @@ const I18N_EN = {
 "% medido · ",
 " de ",
 " min"
+]
+],
+[
+"usar o salvo (",
+"^usar o salvo \\(((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"use the saved one (${1}, ${2})",
+[
+"usar o salvo ("
 ]
 ],
 [
@@ -18009,6 +18186,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) · fundo de ((?:(?! · ).)+?)$",
+"${1} · background of ${2}",
+[
+" · fundo de "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -19049,6 +19234,14 @@ const I18N_EN = {
 "${1}× the background",
 [
 "× o fundo"
+]
+],
+[
+"fundo de ",
+"^fundo de ((?:(?! · ).)+?)$",
+"background of ${1}",
+[
+"fundo de "
 ]
 ],
 [
