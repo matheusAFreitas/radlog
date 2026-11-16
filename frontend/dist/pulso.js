@@ -101,11 +101,6 @@ function pulseTargets(dev) {
   const out = [];
   const tile = $(dev === "gmc" ? "gTileDial" : "rTileDial");
   if (tile) { const c = tile.querySelector(".dial-ring"); if (c) out.push(c); }
-  // 2.84.0: o sinal do nível ao lado da palavra pisca junto, para o pulso
-  // não sumir de vista com o "detalhes" fechado
-  const st = $(dev === "gmc" ? "gTileState" : "rTileState");
-  const ic = st && st.querySelector("svg");
-  if (ic) { ic.classList.add("pu-dot"); out.push(ic); }
   const hero = $(dev === "gmc" ? "gHeroDial" : "rHeroDial");
   if (hero) { const c = hero.querySelector(".dl-pulse"); if (c) out.push(c); }
   if (pulseLogoDev() === dev) document.querySelectorAll(".brand-o .brand-ring").forEach((c) => out.push(c));
@@ -116,8 +111,7 @@ function pulseFlash(dev, now) {
   const d = puDur(PU.rate[dev]);
   for (const el of pulseTargets(dev)) {
     if (!el.animate || el.getClientRects().length === 0) continue;
-    if (el.classList.contains("pu-dot")) el.animate([{ opacity: 1 }, { opacity: 0.25, offset: 0.15 }, { opacity: 1 }], { duration: d, easing: "ease-out" });
-    else el.animate([{ strokeOpacity: 0.35 }, { strokeOpacity: 1, offset: 0.15 }, { strokeOpacity: 0.35 }], { duration: d, easing: "ease-out" });
+    el.animate([{ strokeOpacity: 0.35 }, { strokeOpacity: 1, offset: 0.15 }, { strokeOpacity: 0.35 }], { duration: d, easing: "ease-out" });
   }
   PU.lastFlash[dev] = now;
 }

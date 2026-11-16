@@ -1,5 +1,24 @@
 # Versões
 
+## 2.87.0
+- Agora: o trifólio voltou para o quadro do GMC-800 e do RC102, à esquerda
+  do número grande e do tamanho de antes. No meio dele fica a forma do
+  nível (círculo, triângulo, losango, octógono) na cor do nível, e o anel
+  em volta pisca a cada contagem. A palavra do nível continua em cima do
+  gráfico, sem o pontinho que piscava ao lado dela.
+- "detalhes" fica só com CPM, CPS, a outra unidade de taxa e a fita dos
+  últimos 10 segundos.
+
+**English**
+
+- Now: the trefoil is back on the GMC-800 and RC102 cards, left of the big
+  number and at its old size. Inside it sits the level shape (circle,
+  triangle, diamond, octagon) in the level color, and the ring around it
+  blinks on every count. The level word stays above the chart, without the
+  blinking dot next to it.
+- "details" keeps only CPM, CPS, the other rate unit and the last 10
+  seconds strip.
+
 ## 2.86.1
 - Atividade (Bq) em inglês: o valor típico da castanha, da areia e do
   granito aparece traduzido; o preparo da pedra solta não sai mais com uma
