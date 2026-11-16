@@ -1,5 +1,65 @@
 # Versões
 
+## 2.84.0
+- Unidades da tela para o app todo, em Configurações › Janela e tela ›
+  Unidades: taxa em µSv/h ou mrem/h e contagem em CPM ou CPS (dá para
+  misturar, por exemplo µSv/h com CPS). A dose acompanha a taxa (µSv ou
+  mrem), inclusive nos alarmes e no relatório. O RC102 segue a mesma
+  escolha. Os botões de unidade da página do GQ GMC-800 saíram.
+- A calibração, o tubo e as partes técnicas continuam em CPM, que é o que
+  o tubo mede. Os gráficos dentro do PDF continuam em µSv/h; o texto do
+  relatório sai na unidade escolhida.
+- Alarme do GMC-800 nas configurações do aparelho: você digita na unidade
+  da tela e o app grava em CPM, pela calibração do app ("grava N CPM no
+  aparelho"). Se o aparelho estiver com o alarme em µSv/h ou mR/h no menu
+  dele, esse campo ainda não é lido; fica para uma próxima versão.
+- Quadro do Agora: o número grande na unidade escolhida e, embaixo, uma
+  linha com a contagem e a dose de hoje. O mostrador com o pulso foi para
+  "detalhes" (fechado por padrão, o app lembra), com CPM, CPS, a outra
+  unidade de taxa e a fita dos últimos 10 segundos. O ícone do nível pisca
+  a cada contagem.
+- Pergunta "a responder" do Agora numa linha só: frase, dica, os dois
+  botões mais prováveis e "Ver detalhes" para abrir o cartão inteiro.
+- "Onde está cada aparelho" virou uma linha ("GMC-800 em casa · RC102 com
+  você · mudar"); "mudar" abre os seletores. Os cartões "Casa pelo GMC-800"
+  e "Sua dose pelo RC102" saíram; só aparece aviso quando algo fica em
+  branco ou satura. RC102 longe do PC mostra "continua somando a dose
+  sozinho" embaixo dele.
+- "Sem dado" neutro: a barra fica cinza e o texto diz "RC102 desligado em
+  X% do dia".
+- Fonte mono só nos números; rótulos, botões e etiquetas na fonte normal.
+
+**English**
+
+- Screen units for the whole app, in Settings › Window and display ›
+  Units: rate in µSv/h or mrem/h and count in CPM or CPS (they can be
+  mixed, for example µSv/h with CPS). Dose follows the rate (µSv or mrem),
+  including alarms and the report. The RC102 follows the same choice. The
+  unit buttons on the GQ GMC-800 page are gone.
+- Calibration, the tube and the technical parts stay in CPM, which is what
+  the tube measures. Charts inside the PDF stay in µSv/h; the report text
+  uses the chosen unit.
+- GMC-800 alarm in the device settings: you type it in the screen unit and
+  the app writes it in CPM, using the app's calibration ("writes N CPM to
+  the device"). If the device has its alarm set to µSv/h or mR/h in its own
+  menu, that field isn't read yet; that's for a later version.
+- Now tile: the big number in the chosen unit and, below it, one line with
+  the count and today's dose. The dial with the pulse moved into "details"
+  (closed by default, the app remembers), with CPM, CPS, the other rate
+  unit and the last-10-seconds strip. The level icon blinks with each
+  count.
+- The "to answer" question on Now fits on one line: sentence, hint, the
+  two likeliest buttons and "See details" to open the full card.
+- "Where each device is" became one line ("GMC-800 at home · RC102 with
+  you · change"); "change" opens the selectors. The "Home by the GMC-800"
+  and "Your dose by the RC102" cards are gone; a notice only shows when
+  something goes blank or saturates. An RC102 away from the PC shows
+  "keeps adding up the dose on its own" under it.
+- Neutral "no data": the bar turns gray and the text says "RC102 off for
+  X% of the day".
+- Mono font only for numbers; labels, buttons and tags use the regular
+  font.
+
 ## 2.83.10
 - Abertura mais leve: a tabela de tradução para o inglês (~700 KB) só
   carrega com o app em inglês, e os gráficos da aba Gráficos (tempo, dose,

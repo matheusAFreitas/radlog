@@ -50,10 +50,27 @@ func (a *App) SetUILang(lang string) {
 func (a *App) T(s string) string { return i18n.T(a.uiLang(), s) }
 
 // inLang gera um PDF no idioma da interface (em português, sem tradução).
+// Com a taxa da tela em mrem/h, os textos com número em µSv viram mrem
+// (2.84.0, unidades.go); os gráficos do PDF continuam em µSv/h.
 func (a *App) inLang(render func() []byte) []byte {
 	lang := a.uiLang()
-	if lang == "pt" {
+	a.mu.Lock()
+	mrem := a.settings.RateUnit == rateMrem
+	a.mu.Unlock()
+	if lang == "pt" && !mrem {
 		return render()
 	}
-	return pdf.WithTranslator(func(s string) string { return i18n.T(lang, s) }, render)
+	sep := ","
+	if lang == "en" {
+		sep = "."
+	}
+	return pdf.WithTranslator(func(s string) string {
+		if lang != "pt" {
+			s = i18n.T(lang, s)
+		}
+		if mrem {
+			s = remText(s, sep)
+		}
+		return s
+	}, render)
 }

@@ -379,6 +379,23 @@ function tileState(pfx, lvl, word, say) {
   const sayEl = $(pfx + "TileSay");
   if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
 }
+// 2.84.0 (revisão da interface): o número grande do quadro, na unidade da
+// taxa, e os valores do "detalhes" (CPM, CPS e a outra unidade de taxa)
+function tileBig(pfx, u, v) {
+  $(pfx + "TileNum").textContent = v ? v[u] : "—";
+  $(pfx + "TileUnitT").textContent = UNIT_TXT[u];
+  const o = u === "mrh" ? "usv" : "mrh";
+  $(pfx + "TileKv").innerHTML = [["CPM", "cpm"], ["CPS", "cps"], [UNIT_TXT[o], o]]
+    .map(([l, k]) => `<div><span>${l}</span><b>${v ? escHtml(v[k]) : "—"}</b></div>`).join("");
+}
+// o "detalhes" de cada quadro lembra se ficou aberto
+for (const pfx of ["g", "r"]) {
+  const d = document.getElementById(pfx + "TileDet");
+  if (!d) continue;
+  d.open = localGet("tileDet." + pfx, "") === "1";
+  d.addEventListener("toggle", () => { localSet("tileDet." + pfx, d.open ? "1" : ""); if (d.open && typeof pulseApply === "function") pulseApply(); });
+}
+
 // número dentro do anel: encolhe quando não cabe
 function dialVal(pfx, txt) {
   const el = $(pfx + "TileVal");
@@ -413,8 +430,8 @@ function renderGTile() {
   $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
   dialVal("g", v ? v[u] : "—");
-  // mrem/h pequeno embaixo do mostrador (ACE 11/11); só quando o grande é µSv/h
-  $("gTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
+  tileBig("g", u, v);
+  $("gTileAlt").textContent = "";
   // os níveis do app (os mesmos que disparam os avisos), régua até 1,5× o alarme
   const k = calK(), [tA, tB] = gmcThrCPM(), top = tB * 1.5;
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
@@ -452,9 +469,9 @@ function renderRTile(st, o) {
   $("rTile").classList.toggle("conn-wait", rcc === "wait");
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
   dialVal("r", v ? v[u] : "—");
-  // mrem/h pequeno embaixo do mostrador, igual ao do GMC-800 (ACE 11/11)
-  $("rTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
-  $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
+  tileBig("r", u, v);
+  $("rTileAlt").textContent = "";
+  $("rTileNum").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));

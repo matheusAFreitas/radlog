@@ -165,7 +165,7 @@
         <span class="inst-fill"></span>
       </header>
       <div class="inst-read" data-view="gmc">
-        <div class="dial-col"><svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="gTileAlt"></span></div>
+        <div class="inst-big"><span class="inst-num mono" id="gTileNum">—</span><span class="inst-unit" id="gTileUnitT">µSv/h</span></div>
         <div class="inst-say"><span class="inst-state" id="gTileState">—</span><span class="inst-sub-say" id="gTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="gTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
@@ -174,6 +174,12 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       <span id="clockText">relógio certo</span>
     </button></footer>
+      <details class="inst-det" id="gTileDet"><summary>detalhes</summary>
+        <div class="inst-detbox">
+          <div class="dial-col"><svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="gTileAlt"></span></div>
+          <div class="inst-detr" id="gTileDetR"><div class="inst-kv mono" id="gTileKv"></div><p class="small muted inst-tape-cap">Os últimos 10 segundos · cada traço é uma contagem</p></div>
+        </div>
+      </details>
     </article>
     <article class="inst inst-rc" id="rTile" hidden>
       <header class="inst-head">
@@ -181,12 +187,18 @@
         <span class="inst-fill"></span>
       </header>
       <div class="inst-read" data-view="radiacode">
-        <div class="dial-col"><svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="rTileAlt"></span></div>
+        <div class="inst-big"><span class="inst-num mono" id="rTileNum">—</span><span class="inst-unit" id="rTileUnitT">µSv/h</span></div>
         <div class="inst-say"><span class="inst-state" id="rTileState">—</span><span class="inst-sub-say" id="rTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="rTileDemo" hidden>demo</span>
         <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
+      <details class="inst-det" id="rTileDet"><summary>detalhes</summary>
+        <div class="inst-detbox">
+          <div class="dial-col"><svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="rTileAlt"></span></div>
+          <div class="inst-detr" id="rTileDetR"><div class="inst-kv mono" id="rTileKv"></div><p class="small muted inst-tape-cap">Os últimos 10 segundos · cada traço é uma contagem</p></div>
+        </div>
+      </details>
     </article>
 </section>
 
@@ -204,10 +216,11 @@
 
   <section class="card wh-card" id="whCard">
     <div class="wh-head">
-      <h2>Onde está cada aparelho <span class="chip off" id="whChip" hidden></span></h2>
-      <span class="small muted">o normal: GMC-800 em casa, RC102 com você</span>
+      <h2>Onde estão <span class="chip off" id="whChip" hidden></span></h2>
+      <span class="wh-sum" id="whSum"></span>
+      <button type="button" class="link" id="whToggle" aria-expanded="false" aria-controls="whRows">mudar</button>
     </div>
-    <div class="wh-rows">
+    <div class="wh-rows" id="whRows" hidden>
       <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GQ GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
         <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
       <div class="wh-row"><div class="t"><b><span class="dot rc"></span>Radiacode 102</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>

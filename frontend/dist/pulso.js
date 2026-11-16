@@ -101,6 +101,11 @@ function pulseTargets(dev) {
   const out = [];
   const tile = $(dev === "gmc" ? "gTileDial" : "rTileDial");
   if (tile) { const c = tile.querySelector(".dial-ring"); if (c) out.push(c); }
+  // 2.84.0: o sinal do nível ao lado da palavra pisca junto, para o pulso
+  // não sumir de vista com o "detalhes" fechado
+  const st = $(dev === "gmc" ? "gTileState" : "rTileState");
+  const ic = st && st.querySelector("svg");
+  if (ic) { ic.classList.add("pu-dot"); out.push(ic); }
   const hero = $(dev === "gmc" ? "gHeroDial" : "rHeroDial");
   if (hero) { const c = hero.querySelector(".dl-pulse"); if (c) out.push(c); }
   if (pulseLogoDev() === dev) document.querySelectorAll(".brand-o .brand-ring").forEach((c) => out.push(c));
@@ -111,7 +116,8 @@ function pulseFlash(dev, now) {
   const d = puDur(PU.rate[dev]);
   for (const el of pulseTargets(dev)) {
     if (!el.animate || el.getClientRects().length === 0) continue;
-    el.animate([{ strokeOpacity: 0.35 }, { strokeOpacity: 1, offset: 0.15 }, { strokeOpacity: 0.35 }], { duration: d, easing: "ease-out" });
+    if (el.classList.contains("pu-dot")) el.animate([{ opacity: 1 }, { opacity: 0.25, offset: 0.15 }, { opacity: 1 }], { duration: d, easing: "ease-out" });
+    else el.animate([{ strokeOpacity: 0.35 }, { strokeOpacity: 1, offset: 0.15 }, { strokeOpacity: 0.35 }], { duration: d, easing: "ease-out" });
   }
   PU.lastFlash[dev] = now;
 }
@@ -153,14 +159,17 @@ function pulseLoop(now) {
     const a = PU.ticks[k];
     while (a.length && wall - a[0][0] > PU_TAPE_MS) a.shift();
   }
-  if (pulseTapeOn()) pulseTapes(wall);
+  pulseTapes(wall); // só desenha as fitas à vista
   if (pulseLive("gmc") || pulseLive("radiacode") || PU.queue.length) PU.raf = requestAnimationFrame(pulseLoop);
   else pulseApply();
 }
 
 // ---------- fita dos últimos 10 segundos ----------
 
-const PU_TAPE_HOSTS = [["gTile", "gmc"], ["rTile", "radiacode"], ["hero", "gmc"], ["rcMain", "radiacode"]];
+// 2.84.0: nos quadros do Agora a fita fica no "detalhes" e aparece sempre
+// que ele está aberto (com o pulso ligado); nas páginas, só com a opção
+const PU_TAPE_HOSTS = [["gTileDetR", "gmc"], ["rTileDetR", "radiacode"], ["hero", "gmc"], ["rcMain", "radiacode"]];
+const PU_TAPE_ALWAYS = new Set(["gTileDetR", "rTileDetR"]);
 
 function pulseTapeEl(host, dev) {
   const h = $(host);
@@ -181,7 +190,7 @@ function pulseTapeEl(host, dev) {
 
 function pulseTapes(wall) {
   for (const [host, dev] of PU_TAPE_HOSTS) {
-    const el = pulseTapeEl(host, dev);
+    const h = $(host), el = h && h.querySelector(":scope > .pu-tape"); // pulseApply cria as que aparecem
     if (!el || el.hidden || el.getClientRects().length === 0) continue;
     // o canvas tem exatamente pixels inteiros da tela (com escala de 125%
     // do Windows, 100% de largura dava meio pixel e o navegador esticava o
@@ -242,7 +251,7 @@ function pulseApply() {
     if (logo) el.style.setProperty("--pu-c", pulseColor(logo)); else el.style.removeProperty("--pu-c");
   });
   for (const [host, dev] of PU_TAPE_HOSTS) {
-    const show = tape && pulseLive(dev);
+    const show = (PU_TAPE_ALWAYS.has(host) ? on : tape) && pulseLive(dev);
     const el = show ? pulseTapeEl(host, dev) : $(host) && $(host).querySelector(":scope > .pu-tape");
     if (el) el.hidden = !show;
   }
