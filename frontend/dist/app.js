@@ -80,11 +80,9 @@ const calK = () => (state.status && (state.status.usvPerCPM || (state.status.dev
 
 // ---------- estado ----------
 
-// 2.8: os dois aparelhos abrem em µSv/h; quem ainda estava no padrão antigo
-// (CPM) passa para µSv/h uma vez, depois vale o que escolher
-if (!localGet("unit28", "")) { localSet("unit", "usv"); localSet("unit28", "1"); }
+// 2.84.0: a unidade do número grande é a taxa das Configurações (unidades.js)
 const state = {
-  unit: localGet("unit", "usv"),
+  unit: UNITS.rate,
   range: localGet("range", "1h"),
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
@@ -236,7 +234,6 @@ function renderReading() {
   const u = state.unit;
   const units = { cpm: "CPM", usv: "µSv/h", mrh: "mrem/h", cps: "CPS" };
   $("readUnit").textContent = units[u];
-  document.querySelectorAll("#unitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === u)));
 
   $("demoTag").hidden = !state.demo.active;
   if (!r || (!connected && !state.demo.active)) {
@@ -257,11 +254,11 @@ function renderReading() {
     cps: fmt(r.cps, 0),
   };
   $("readValue").textContent = vals[u];
+  // a contagem na unidade escolhida e a outra unidade de taxa (2.84.0)
+  const cnt = UNITS.count === "cpm" ? `${vals.cpm} CPM` : `${fmt(r.cpm / 60, 2)} CPS`;
   const alt = {
-    cpm: `≈ ${vals.usv} µSv/h · ${vals.cps} CPS`,
-    usv: `${vals.cpm} CPM · ${vals.mrh} mrem/h`,
-    mrh: `${vals.cpm} CPM · ${vals.usv} µSv/h`,
-    cps: `último segundo · ${vals.cpm} CPM`,
+    usv: `${cnt} · ${vals.mrh} mrem/h`,
+    mrh: `${cnt} · ${vals.usv} µSv/h`,
   };
   $("readAlt").textContent = alt[u] + (r.dtPct >= 0.1 ? ` · tempo morto +${fmt(r.dtPct, r.dtPct < 10 ? 1 : 0)}% (contador: ${fmt(r.rawCPM, 0)} CPM)` : "");
   renderSigma(r);
@@ -321,7 +318,7 @@ function tileVals(usv, cpm, cps) {
 // no lugar das outras unidades vai "última leitura às HH:MM" em cinza, e a
 // dose diz "até HH:MM", como no cartão do aparelho
 function tileFoot(el, u, v, dose, doseSub, lost) {
-  const keys = u === "cpm" ? ["usv", "cps"] : u === "cps" ? ["usv", "cpm"] : ["cpm", "cps"];
+  const keys = [UNITS.count]; // 2.84.0: a contagem na unidade escolhida
   el.textContent = "";
   const num = (t) => { const b = document.createElement("b"); b.className = "mono"; b.textContent = t; return b; };
   if (lost) {
@@ -337,7 +334,7 @@ function tileFoot(el, u, v, dose, doseSub, lost) {
     el.appendChild(sp);
   }
   const sp = document.createElement("span");
-  sp.append("hoje", " ", num(dose == null ? "—" : fmt(dose, 2)), " µSv");
+  sp.append("hoje", " ", num(doseNum(dose)), " " + doseLbl());
   if (doseSub) { const s2 = document.createElement("span"); s2.className = "inst-sub"; s2.textContent = doseSub; sp.append(" ", s2); }
   el.appendChild(sp);
 }
@@ -398,7 +395,7 @@ function miniDev(pfx, u, v, lvl, word, dotCls, stale) {
   $("mini" + pfx + "Dot").className = "dot" + dotCls;
   $("mini" + pfx + "Val").textContent = v ? v[u] : "—";
   $("mini" + pfx + "Unit").textContent = UNIT_TXT[u];
-  const k2 = u === "cpm" || u === "cps" ? "usv" : "cpm";
+  const k2 = UNITS.count; // a contagem na unidade escolhida (2.84.0)
   $("mini" + pfx + "Sec").textContent = v ? `${v[k2]} ${UNIT_TXT[k2]}` : "";
   lvLabel($("mini" + pfx + "State"), lvl, word, 12);
 }
@@ -626,20 +623,20 @@ async function refreshStats() {
   state.bgCPM = s.bgCPM || null;
   const cal = calK();
   // em µSv/h desde a 2.29 (a última hora e o último dia: calibração de agora)
-  const u = (v) => (v == null ? "—" : fmt(v * cal, usvDigits(v * cal)));
+  const u = (v) => (v == null ? "—" : rateNum(v * cal, usvDigits(v * cal)));
   $("tAvg").textContent = u(s.avg1h);
-  $("tAvgSub").textContent = s.avg1h == null ? "µSv/h" : `µSv/h · ${fmt(s.avg1h, 1)} CPM`;
+  $("tAvgSub").textContent = s.avg1h == null ? rateLbl() : `${rateLbl()} · ${countTxt(s.avg1h)}`;
   $("tMin").textContent = u(s.min24h);
   $("tMax").textContent = u(s.max24h);
-  $("tMaxSub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
+  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o Radiacode)
   $("hAvg1h").textContent = u(s.avg1h);
   $("hMin24").textContent = u(s.min24h);
   $("hMax24").textContent = u(s.max24h);
-  $("hMax24Sub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
+  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
   state.gDose = s.minutesToday ? s.doseToday : null;
   renderGTile();
-  $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
+  $("tDose").textContent = s.minutesToday ? doseNum(s.doseToday) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
   if (gmcConn()) renderGmcConn(); // desconectado: "até HH:MM"
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseKnown(s.doseToday, homeBgUSv()).join(" · ")} · calculada pelo app (o GMC não informa a dose que soma)` : "";
@@ -661,7 +658,7 @@ async function refreshDaily() {
   for (const d of days.slice(0, dailyN)) {
     const tr = document.createElement("tr");
     const label = isToday(d.day) ? "hoje" : isYesterday(d.day) ? "ontem" : ddmm(d.day);
-    for (const [txt, cls] of [[label, ""], [fmt(d.usv, 3), "num"], [fmt(d.cpm, 1), "num"]]) {
+    for (const [txt, cls] of [[label, ""], [rateNum(d.usv, 3), "num"], [UNITS.count === "cps" ? fmt(d.cpm / 60, 3) : fmt(d.cpm, 1), "num"]]) {
       const td = document.createElement("td");
       td.textContent = txt;
       if (cls) td.className = cls;
@@ -1136,8 +1133,8 @@ async function refreshHeat() {
   const rcMap = h.device === "radiacode";
   // tudo em µSv/h; no GMC-800 cada minuto pela calibração que valia nele
   // (2.83.8; os campos em CPM ficam só para o σ)
-  const hv = (v) => fmt(v, usvDigits(v));
-  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "µSv/h médio · cinza = sem dados";
+  const hv = (v) => rateNum(v, usvDigits(v)); // na unidade da tela (2.84.0)
+  $("heatUnit").textContent = rcMap ? `${rateLbl()} médio (RC102) · cinza = sem dados` : `${rateLbl()} médio · cinza = sem dados`;
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1183,7 +1180,7 @@ async function refreshHeat() {
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} µSv/h) · mais baixo por volta das ${h.lowHour}h (${hv(l)} µSv/h)`;
+    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
   }
 }
 
@@ -1211,14 +1208,14 @@ function showHeatTip(c) {
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
     if (rcMap && avg != null && h.days.length > 1) {
       const d = v - avg;
-      line(Math.abs(d) < avg * 0.005 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d), usvDigits(avg) + 1)} da média das ${hr}h (${fmt(avg, usvDigits(avg))})`, "ht-dim");
+      line(Math.abs(d) < avg * 0.005 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${rateNum(Math.abs(d), usvDigits(avg) + 1)} da média das ${hr}h (${rateNum(avg, usvDigits(avg))})`, "ht-dim");
     } else if (avg != null && h.days.length > 1) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
       // o σ sai das contagens (CPM); o texto, em µSv/h
       const du = u - uAvg;
-      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${fmt(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${uv(uAvg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
+      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${rateNum(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${rateNum(uAvg, usvDigits(uAvg))})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
     }
     if (n) line(n >= 60 ? "hora completa" : `${n} de 60 min medidos`, "ht-dim");
   }
@@ -1907,9 +1904,9 @@ function renderRise(rise, usvNow) {
 
 // aviso nas Configurações sobre o alarme de perigo
 function renderDangerNote() {
-  const v = parseFloat($("numAlarm").value) || 0;
+  const v = rateIn($("numAlarm").value) || 0;
   const el = $("dangerNote");
-  const d = parseFloat($("lvDanger").value) || dangerUSv();
+  const d = rateIn($("lvDanger").value) || dangerUSv();
   if (v >= d) {
     el.className = "danger-note warn";
     el.textContent = `Seu limite (${usvTxt(v)}) está acima do perigo do app (${usvTxt(d)}): quem toca é o alarme de perigo.`;
@@ -1924,10 +1921,11 @@ function renderDangerNote() {
 const LV_FIELDS = { lvAttn: "attentionUSv", lvDanger: "dangerUSv", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvRcSat: "rcSatUSv", lvDTUs: "deadTimeUs" };
 
 function fillLevels(l) {
-  for (const [id, k] of Object.entries(LV_FIELDS)) $(id).value = l[k] ?? LV_DEFAULT[k];
+  // limites em µSv/h aparecem na unidade da tela (2.84.0)
+  for (const [id, k] of Object.entries(LV_FIELDS)) { const v = l[k] ?? LV_DEFAULT[k]; $(id).value = k.endsWith("USv") ? rateOut(v) : v; }
   // limites em µSv/h: sem o valor salvo, o equivalente do CPM antigo
-  if (!(l.attentionUSv > 0)) $("lvAttn").value = usv3((l.attentionCPM || LV_DEFAULT.attentionCPM) * calK());
-  if (!(l.dangerUSv > 0)) $("lvDanger").value = usv3((l.dangerCPM || LV_DEFAULT.dangerCPM) * calK());
+  if (!(l.attentionUSv > 0)) $("lvAttn").value = rateOut(usv3((l.attentionCPM || LV_DEFAULT.attentionCPM) * calK()));
+  if (!(l.dangerUSv > 0)) $("lvDanger").value = rateOut(usv3((l.dangerCPM || LV_DEFAULT.dangerCPM) * calK()));
   $("lvDTOn").checked = !!l.deadTimeOn;
   renderLevelEq();
   renderDeadTime();
@@ -1950,7 +1948,7 @@ function renderDeadTime() {
 function readLevels() {
   const out = {};
   for (const [id, k] of Object.entries(LV_FIELDS)) {
-    const v = parseFloat($(id).value);
+    const v = k.endsWith("USv") ? rateIn($(id).value) : parseFloat($(id).value);
     out[k] = v > 0 ? (k.endsWith("USv") || k === "deadTimeUs" ? v : Math.round(v)) : LV_DEFAULT[k];
   }
   // em branco: o padrão do app, em µSv/h pela calibração atual
@@ -2087,9 +2085,9 @@ function renderSetNavStatus() {
 function renderLadder() {
   const bar = $("lvBar");
   if (!bar) return;
-  const a = parseFloat($("lvAttn").value) || attnUSv();
-  const al = parseFloat($("numAlarm").value) || alarmUSv();
-  const p = parseFloat($("lvDanger").value) || dangerUSv();
+  const a = rateIn($("lvAttn").value) || attnUSv();
+  const al = rateIn($("numAlarm").value) || alarmUSv();
+  const p = rateIn($("lvDanger").value) || dangerUSv();
   const lo = Math.min(a, al, p) / 10, hi = Math.max(a, al, p) * 1.5;
   const pos = (v) => Math.max(0, Math.min(100, (Math.log10(v / lo) / Math.log10(hi / lo)) * 100));
   const xs = [pos(Math.min(a, al)), pos(Math.max(a, al)), pos(p)];
@@ -2480,7 +2478,7 @@ async function openSettings(focusId) {
   refreshUso();
   const s = state.settings;
   $("chkAuto").checked = !!s.autoConnect;
-  $("numAlarm").value = usv3(alarmUSv());
+  $("numAlarm").value = rateOut(usv3(alarmUSv()));
   renderLevelEq();
   $("selSound").value = s.alarmSound || "sirene";
   $("chkRaise").checked = s.alarmRaise !== false;
@@ -2501,6 +2499,7 @@ async function openSettings(focusId) {
   $("chkCleanOld").checked = !s.keepOldVersions;
   if (api.GetVersionsDir) api.GetVersionsDir().then((d) => { $("updDir").textContent = d; }).catch(() => {});
   $("selLang").value = s.lang || "auto";
+  unitSegSet(s.rateUnit || "usv", s.countUnit || "cps");
   $("chkMeasReport").checked = !s.noMeasureReport;
   $("chkAutoHist").checked = !s.noAutoHistory;
   fillLevels(lv());
@@ -2520,10 +2519,10 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
-  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
@@ -2746,6 +2745,7 @@ async function saveSettings(extra) {
   const rainWas = state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon;
   state.settings = await call(api.SaveSettings, s);
   syncLang(state.settings.lang);
+  syncUnits(state.settings.rateUnit, state.settings.countUnit);
   if (rainWas !== state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon) refreshRainImpact(true);
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
@@ -2807,6 +2807,7 @@ function setDevCfgEnabled(on) {
   if (on && devCfg) {
     const locked = new Set(devCfg.locked || []);
     qsa("#devcfg [data-key]").forEach((el) => { el.disabled = locked.has(el.dataset.key); });
+    $("dcAlarmRate").disabled = locked.has("alarmCPM");
     qsa("#calRows input, #calSens, #calApply").forEach((el) => { el.disabled = !devCfg.calibrationEditable; });
   }
   renderSaveAdvice();
@@ -2871,6 +2872,7 @@ function fillDevCfg(c) {
     }
   });
   renderOutputs();
+  dcAlarmFill();
 
   const tb = $("calRows");
   tb.textContent = "";
@@ -2917,6 +2919,26 @@ async function openDevCfg() {
     $("dcIntro").textContent = "Não consegui ler a configuração: " + errMsg(e);
   }
 }
+
+// alarme do GMC-800 (2.84.0): o aparelho guarda em CPM; aqui ele é digitado
+// na unidade da tela e convertido pela calibração do app
+function dcAlarmFill() {
+  const cpm = parseInt($("dcAlarm").value, 10);
+  $("dcAlarmRate").value = cpm > 0 ? rateOut(cpm * calK()) : "";
+  $("dcAlarmRate").disabled = $("dcAlarm").disabled;
+  dcAlarmNote();
+}
+function dcAlarmNote() {
+  const cpm = parseInt($("dcAlarm").value, 10);
+  $("dcAlarmNote").textContent = cpm > 0 ? `grava ${fmt(cpm, 0)} CPM no aparelho, pela calibração do app (${fmt(calK(), 5)} µSv/h por CPM)` : "";
+}
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "dcAlarmRate") return;
+  const usv = rateIn(e.target.value);
+  if (usv > 0) $("dcAlarm").value = String(Math.max(1, Math.min(999999, Math.round(usv / calK()))));
+  dcAlarmNote();
+  renderOutputs();
+});
 
 function readDevCfgForm() {
   const values = Object.assign({}, devCfg.values);
@@ -3023,9 +3045,6 @@ function wireDevCfg() {
 // ---------- ligações da interface ----------
 
 function wire() {
-  document.querySelectorAll("#unitSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.unit = b.dataset.unit; localSet("unit", state.unit); renderReading();
-  }));
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.addEventListener("click", () => {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
@@ -3065,10 +3084,11 @@ function wire() {
   });
   $("chkTrayNum").addEventListener("change", () => { $("selTrayDev").disabled = !$("chkTrayNum").checked; });
   wireUiScale();
+  wireUnits();
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
     if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
-    const alarm = parseFloat($("numAlarm").value);
+    const alarm = rateIn($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
@@ -3080,6 +3100,8 @@ function wire() {
       trayPlain: !$("chkTrayNum").checked,
       uiScale: parseFloat($("valUiScale").value) || 1,
       uiDensity: $("valUiDensity").value,
+      rateUnit: $("valRateUnit").value || "usv",
+      countUnit: $("valCountUnit").value || "cps",
       trayDevice: $("selTrayDev").value,
       pulseOff: !$("chkPulse").checked,
       pulseStrip: $("chkPulseStrip").checked,
@@ -3730,7 +3752,7 @@ function renderRcSetState(st, prev) {
 // quadro do Radiacode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
 // desde a 2.51 o RC102 mostra só µSv/h em destaque (CPM e cps na linha de baixo)
-state.rcUnit = "usv";
+state.rcUnit = UNITS.rate; // 2.84.0: a taxa das Configurações
 
 // quadro do Radiacode, com as mesmas informações do GMC: valor, dose de
 // hoje, normal/σ, régua e medidas
@@ -3772,14 +3794,14 @@ function renderRcMain(st) {
   $("rcMainAlt").textContent = live ? `${mrem}${fmt(cps * 60, 0)} CPM · ${fmt(cps, 1)} cps · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
   if (st.todayDevOK) {
-    $("rcDoseToday").textContent = fmt(st.todayDev, 2);
+    $("rcDoseToday").textContent = doseNum(st.todayDev);
     rcParts($("rcDoseTodaySub"), ["desde 00:00", rcAwayToday(), sx.todayMinutes || st.today ? `app ${fmt(st.today, 2)}` : ""]);
     const chk = $("rcDoseTodaySub").lastElementChild;
     if (chk && (sx.todayMinutes || st.today)) chk.className = "dose-chk";
     $("rcDoseToday").title = `Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
     $("rcDoseTodaySub").title = "O número grande é o do RC102. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.";
   } else {
-    $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
+    $("rcDoseToday").textContent = sx.todayMinutes || st.today ? doseNum(st.today) : "—";
     rcParts($("rcDoseTodaySub"), [sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "desde 00:00", rcAwayToday()]);
     $("rcDoseToday").title = "Calculada pelo app: só os minutos que o PC gravou";
     $("rcDoseTodaySub").title = "";
@@ -3824,16 +3846,16 @@ function renderRcMain(st) {
   agoraNow();
   renderDevMini();
   // medidas
-  const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
+  const fu = (x) => (x == null ? "—" : rateNum(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
-  $("rcMax24At").textContent = sx.n24h ? `µSv/h às ${hhmm(sx.max24hAt)}` : "µSv/h";
+  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} às ${hhmm(sx.max24hAt)}` : rateLbl();
   // dose que o próprio aparelho soma desde que foi zerado
   if (st.doseLiveAt) {
-    const mSv = st.doseLive >= 1000, v = mSv ? st.doseLive / 1000 : st.doseLive;
+    const mSv = !RATE_MREM && st.doseLive >= 1000, v = RATE_MREM ? st.doseLive / 10 : mSv ? st.doseLive / 1000 : st.doseLive;
     $("rcDevDose").textContent = fmt(v, v < 10 ? (mSv ? 2 : 3) : 2);
-    $("rcDevDoseSub").textContent = `${mSv ? "mSv" : "µSv"} desde que foi zerada`;
+    $("rcDevDoseSub").textContent = `${RATE_MREM ? "mrem" : mSv ? "mSv" : "µSv"} desde que foi zerada`;
     $("rcDevDose").title = st.doseLiveSec ? `em ${rcDur(st.doseLiveSec)} contando` + (st.doseLiveOn ? "" : ` · às ${hhmm(st.doseLiveAt)}`) : "";
   } else { $("rcDevDose").textContent = "—"; $("rcDevDoseSub").textContent = "desde que foi zerada"; }
 }
@@ -3951,7 +3973,7 @@ function drawRcCompare(c) {
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-cmp-svg">`;
   for (let k = 0; k <= 4; k++) {
     const v = (top / 4) * k, yy = y(v);
-    svg += `<line x1="${PL}" x2="${W - 8}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 6}" y="${yy + 4}" text-anchor="end" class="ax">${fmt(v, 2)}</text>`;
+    svg += `<line x1="${PL}" x2="${W - 8}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 6}" y="${yy + 4}" text-anchor="end" class="ax">${axRate(v, 2)}</text>`;
   }
   svg += `<text x="${PL}" y="${H - 4}" class="ax">${hhmm(t0)}</text><text x="${W - 8}" y="${H - 4}" text-anchor="end" class="ax">${hhmm(t1)}</text>`;
   svg += `<path d="${path(g)}" class="gmc"/><path d="${path(r)}" class="rc"/></svg>`;
@@ -4115,13 +4137,15 @@ async function refreshPatterns() {
   drawPatterns(p);
 }
 
-function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : fmt(v, usvDigits(v)); }
+// 2.84.0: µSv/h na unidade da tela (rateNum); CPM do RC102 fica CPM
+function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : rateNum(v, usvDigits(v)); }
+const patUnit = (p) => (p.unit === "CPM" ? "CPM" : rateLbl());
 
 function drawPatterns(p) {
   const rc = p.device === "radiacode", color = rc ? COR.rc : COR.accent;
   const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
   $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
-    : `${fmt(p.minutes, 0)} min em casa (${p.unit})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
+    : `${fmt(p.minutes, 0)} min em casa (${patUnit(p)})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
       (p.peakHour >= 0 ? ` · mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h` : "");
   // hora do dia
   const svg = $("patChart"), PH = 160;
@@ -4159,7 +4183,7 @@ function drawPatterns(p) {
     d.className = "pat-dn-v";
     d.innerHTML = "<span class='small muted'></span><b></b><span class='small muted'></span>";
     d.children[0].textContent = lab;
-    d.children[1].textContent = st && st.n ? `${patVal(p, st.median)} ${p.unit}` : "—";
+    d.children[1].textContent = st && st.n ? `${patVal(p, st.median)} ${patUnit(p)}` : "—";
     d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean)} · ${fmt(st.n, 0)} min` : "sem dados";
     dn.appendChild(d);
   }
@@ -4204,7 +4228,7 @@ function wirePatterns() {
     $("patCursor").style.left = (h / 23) * 100 + "%";
     const tip = $("patTip");
     tip.hidden = false;
-    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${p.unit} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
+    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
     const left = (h / 23) * r.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px";
   });
@@ -4255,7 +4279,7 @@ function drawBgTrend(tr) {
   lo = Math.max(0, Math.floor((lo - pad) / q) * q); hi = Math.ceil((hi + pad) / q) * q;
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, 3);
+  for (let i = 0; i < 4; i++) ys[i].textContent = axRate(hi - ((hi - lo) / 3) * i, 3);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="${COR.muted}" fill-opacity="0.06"/>`;
   const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = u(val(p)); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
@@ -4479,6 +4503,19 @@ function setupRainImpact() {
   plot.addEventListener("mouseleave", () => { $("riCursor").hidden = true; $("riTip").hidden = true; });
 }
 
+// 2.84.0: a unidade escolhida na página do aparelho (localStorage "unit")
+// vira a configuração do app, uma vez
+async function migrateUnits() {
+  if (localGet("unit84", "")) return;
+  localSet("unit84", "1");
+  const old = localGet("unit", "");
+  const s = state.settings || {};
+  const rate = old === "mrh" ? "mrh" : s.rateUnit || "usv";
+  const count = old === "cpm" || old === "cps" ? old : s.countUnit || "cps";
+  if (rate === s.rateUnit && count === s.countUnit) return;
+  try { state.settings = await api.SaveSettings(Object.assign({}, s, { rateUnit: rate, countUnit: count })); } catch (e) { /* fica o que estava */ }
+}
+
 async function init() {
   wire();
   listen();
@@ -4486,6 +4523,10 @@ async function init() {
     state.settings = await api.GetSettings();
     applyUi(state.settings.uiScale, state.settings.uiDensity);
     if (hasGo) { syncLang(state.settings.lang); if (api.SetUILang) api.SetUILang(LANG).catch(() => {}); }
+    // modo navegador: a escolha fica só no navegador
+    if (!state.settings.rateUnit) Object.assign(state.settings, { rateUnit: UNITS.rate, countUnit: UNITS.count });
+    if (hasGo) await migrateUnits();
+    if (syncUnits(state.settings.rateUnit, state.settings.countUnit)) return;
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();
@@ -4553,6 +4594,18 @@ function uiSegSet(scale, dens) {
   $("valUiDensity").value = dens;
   document.querySelectorAll("#segUiScale button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === +scale)));
   document.querySelectorAll("#segUiDensity button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === dens)));
+}
+// unidades (2.84.0): os dois seletores escrevem nos campos escondidos
+function unitSegSet(rate, count) {
+  $("valRateUnit").value = rate;
+  $("valCountUnit").value = count;
+  document.querySelectorAll("#segRateUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === rate)));
+  document.querySelectorAll("#segCountUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === count)));
+}
+function wireUnits() {
+  const pick = (id, v) => { $(id).value = v; unitSegSet($("valRateUnit").value, $("valCountUnit").value); $(id).dispatchEvent(new Event("change", { bubbles: true })); };
+  document.querySelectorAll("#segRateUnit button").forEach((b) => b.addEventListener("click", () => pick("valRateUnit", b.dataset.v)));
+  document.querySelectorAll("#segCountUnit button").forEach((b) => b.addEventListener("click", () => pick("valCountUnit", b.dataset.v)));
 }
 function wireUiScale() {
   const pick = () => {

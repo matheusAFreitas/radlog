@@ -16,6 +16,7 @@ function agDev() {
 // µSv com casas que façam sentido; de 1000 µSv em diante vira mSv
 function agSv(usv) {
   if (usv == null || !isFinite(usv)) return ["—", ""];
+  if (RATE_MREM) return fmtDose(usv); // mrem (2.84.0)
   if (Math.abs(usv) >= 1000) return [fmt(usv / 1000, 2), "mSv"];
   return [fmt(usv, usv < 10 ? 2 : usv < 100 ? 1 : 0), "µSv"];
 }

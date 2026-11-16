@@ -60,8 +60,13 @@ async function refreshChart() {
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cunit === state.chartUnit)));
   // o gráfico em µSv/h é o principal (limites, alarmes e picos); o de CPM é
   // só de análise: as contagens de cada aparelho, sem nenhum alarme (2.29)
-  $("chartTitle").textContent = usvMode ? "µSv/h ao longo do tempo" : "CPM ao longo do tempo (análise)";
-  const vals = (usvMode ? c.usv : c.values) || [];
+  // 2.84.0: a taxa e a contagem nas unidades das Configurações (unidades.js).
+  // Os textos com número e "µSv/h" a tela troca sozinha; aqui só o eixo, que
+  // não tem unidade, e a contagem em CPS (CPM ÷ 60)
+  const cps = !usvMode && UNITS.count === "cps", ck = cps ? 1 / 60 : 1;
+  const cScale = (a) => (cps && a ? a.map((v) => (v == null ? null : v * ck)) : a);
+  $("chartTitle").textContent = usvMode ? `${rateLbl()} ao longo do tempo` : `${countLbl()} ao longo do tempo (análise)`;
+  const vals = (usvMode ? c.usv : cScale(c.values)) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
   for (const v of vals) if (v != null && v > max) max = v;
@@ -74,7 +79,7 @@ async function refreshChart() {
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
-  const rcVals = usvMode ? c.rc || null : c.rcCPM || null;
+  const rcVals = usvMode ? c.rc || null : cScale(c.rcCPM) || null;
   let rcMax = 0;
   if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
   if (usvMode) max = Math.max(max, rcMax);
@@ -94,10 +99,13 @@ async function refreshChart() {
   // embaixo, cada um com a sua escala (2.81; antes eram dois eixos no mesmo
   // gráfico e a linha do GMC sumia no chão)
   const stacked = !usvMode && rcMax > 0;
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : stacked ? niceTop(Math.max(30, want * 1.05)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
+  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : stacked ? niceTop(Math.max(30 * ck, want * 1.05)) : cps ? niceTop(Math.max(0.5, want * 1.15)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
   c.top = top;
-  const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
-  const rcTop = stacked ? niceTop(Math.max(300, rcMax * 1.05)) : top;
+  // casas do eixo pelo valor na unidade da tela
+  const yTop = usvMode ? top * rateK() : top;
+  const yd = usvMode ? (yTop < 0.03 ? 4 : yTop < 0.3 ? 3 : yTop < 10 ? 2 : 1) : cps ? (top < 1 ? 2 : top < 10 ? 1 : 0) : 0;
+  const yk = usvMode ? rateK() : 1;
+  const rcTop = stacked ? niceTop(Math.max(300 * ck, rcMax * 1.05)) : top;
   // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
   const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
   const yAx = $("yAxis");
@@ -105,10 +113,10 @@ async function refreshChart() {
   if (stacked) {
     const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
     yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
-      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, 0)}</span>`).join("");
+      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? (v && v < 10 ? 1 : 0) : 0)}</span>`).join("");
   } else {
     if (yAx.children.length !== 4) yAx.innerHTML = "<span></span><span></span><span></span><span></span>";
-    for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
+    for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt((top - (top / 3) * i) * yk, i === 3 ? 0 : yd);
   }
   $("yAxisR").hidden = true;
   $("plotLbls").hidden = !stacked;
@@ -173,7 +181,7 @@ async function refreshChart() {
   const mark = (v, lv) => `<span style="top:${((y(v) / H) * 100).toFixed(2)}%">${lvIcon(lv, 10)}</span>`;
   $("thrMarks").innerHTML = (usvMode && top >= thrV ? mark(thrV, "atencao") : "") +
     (showAlarm && !(dangerV && alarmV >= dangerV) ? mark(alarmV, "alarme") : "") + (showDanger ? mark(dangerV, "perigo") : "");
-  const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
+  const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, cps ? 2 : 0)} ${countLbl()}`);
   $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
   $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;
   $("legDanger").hidden = !ringing || !dangerV;
@@ -257,13 +265,15 @@ async function refreshChart() {
   $("chartStats").dataset.short = String(isShortRange());
   $("legendText").textContent = usvMode
     ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
-    : "análise: sem limites nem alarmes (eles ficam no µSv/h)";
+    : `análise: sem limites nem alarmes (eles ficam no ${rateLbl()})`;
   $("legDash").hidden = !usvMode;
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
       ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
+      : cps
+        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
+        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -292,9 +302,11 @@ function setupChartHover() {
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
     const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
-    const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : ` · RC102 ${fmt(rcv, 0)} CPM`;
+    const cps = !usvMode && UNITS.count === "cps";
+    const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
     tip.textContent = (v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
+      : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
       : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
@@ -434,7 +446,9 @@ function renderZoomBar(c) {
 
 // ---------- dose acumulada (dosímetro) ----------
 
+// 2.84.0: na unidade da tela (mrem quando a taxa é mrem/h)
 function fmtDose(v) {
+  if (RATE_MREM) { const m = v / 10; return [fmt(m, m < 1 ? 3 : m < 10 ? 2 : m < 100 ? 1 : 0), "mrem"]; }
   if (v >= 1000) return [fmt(v / 1000, v >= 10000 ? 1 : 2), "mSv"];
   return [fmt(v, v < 10 ? 2 : v < 100 ? 1 : 0), "µSv"];
 }
@@ -468,7 +482,7 @@ function renderDevBoxes(box, list) {
       el.title = "Mostrar ou esconder no gráfico";
     }
     const has = c && c.measuredMinutes > 0;
-    const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
+    const [tv, tu] = has ? fmtDose(c.total) : ["—", doseLbl()];
     const hours = has ? c.measuredMinutes / 60 : 0;
     const rate = has && hours ? c.total / hours : null;
     // quanto do limite já foi: só o que passou do fundo natural conta (o

@@ -277,12 +277,14 @@ function ycSay(days, ref, ok) {
 }
 
 function ycTable(days) {
-  const bm = ycByMonth(days), unit = YC.mode === "bg" ? "µSv/h" : "µSv/dia", dec = YC.mode === "bg" ? 3 : 2;
+  // 2.84.0: as células não têm unidade: vão na unidade da tela
+  const bm = ycByMonth(days), unit = YC.mode === "bg" ? rateLbl() : doseLbl() + "/dia", dec = YC.mode === "bg" ? 3 : 2;
+  const yn = (v) => fmt(v * rateK(), RATE_MREM ? dec + 1 : dec);
   let h = `<table class="yc-table"><thead><tr><th>Mês</th><th class="n">Mediana (${unit})</th><th class="n">Dia mais baixo</th><th class="n">Dia mais alto</th><th class="n">Dias com alarme</th><th class="n">Dias de chuva</th><th class="n">Dias com dado</th></tr></thead><tbody>`;
   bm.forEach((a, m) => {
     if (!a.length) { h += `<tr><td>${ycMonthName(m)}</td><td colspan="6" class="muted">sem dado</td></tr>`; return; }
     const v = a.map(ycKey);
-    h += `<tr><td>${ycMonthName(m)}</td><td class="n mono">${fmt(ycMed(v), dec)}</td><td class="n mono">${fmt(Math.min(...v), dec)}</td><td class="n mono">${fmt(Math.max(...v), dec)}</td>` +
+    h += `<tr><td>${ycMonthName(m)}</td><td class="n mono">${yn(ycMed(v))}</td><td class="n mono">${yn(Math.min(...v))}</td><td class="n mono">${yn(Math.max(...v))}</td>` +
       `<td class="n mono">${a.filter((d) => d.lvl).length}</td><td class="n mono">${a.filter((d) => d.rain).length}</td><td class="n mono">${a.length}</td></tr>`;
   });
   $("ycTbl").innerHTML = h + "</tbody></table>";

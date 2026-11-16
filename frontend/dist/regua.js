@@ -64,6 +64,12 @@ function reguaDoseRefs() {
 
 const reguaFmt = (v, unit) => {
   const per = unit === "µSv/h" ? "/h" : "";
+  // 2.84.0: em mrem (e rem de 1.000 mrem em diante) com a taxa em mrem/h
+  if (RATE_MREM) {
+    const m = v / 10;
+    if (m >= 1000) return `${fmt(m / 1000, m >= 10000 ? 0 : 1)} rem${per}`;
+    return `${fmt(m, m < 0.01 ? 4 : m < 0.1 ? 3 : m < 1 ? 2 : m < 10 ? 1 : 0)} mrem${per}`;
+  }
   if (v >= 1e6) return `${fmt(v / 1e6, v >= 1e7 ? 0 : 1)} Sv${per}`;
   if (v >= 1000) return `${fmt(v / 1000, v >= 10000 ? 0 : 1)} mSv${per}`;
   return `${fmt(v, v < 0.1 ? 3 : v < 1 ? 2 : v < 10 ? 1 : 0)} ${unit}`;

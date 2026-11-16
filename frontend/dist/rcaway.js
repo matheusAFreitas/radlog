@@ -29,7 +29,7 @@ function onRcAway(list) {
 }
 
 const rcaMin = (q) => Math.max(1, Math.round((q.to - q.from) / 60000));
-const rcaUSv = (v) => (v > 0 ? fmt(v, usvDigits(v)) : "—");
+const rcaUSv = (v) => (v > 0 ? rateNum(v, usvDigits(v)) : "—"); // na unidade da tela (2.84.0)
 
 function rcaTile(label, value, unit, cls) {
   const d = document.createElement("div");
@@ -137,10 +137,10 @@ function renderRcAway() {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()),
       rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
-      rcaTile("dose no trecho", fmt(q.doseUSv, 2), "µSv"),
-      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
+      rcaTile("dose no trecho", doseNum(q.doseUSv), doseLbl()),
+      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), rateLbl(), "gmc"));
     box.appendChild(g);
   }
   const [hb, ht] = rcaHintText(q);
@@ -205,10 +205,10 @@ function renderRcBack(box, q, list) {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()),
       rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
-      rcaTile("dose sem conexão", fmt(q.doseUSv, 2), "µSv"),
-      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
+      rcaTile("dose sem conexão", doseNum(q.doseUSv), doseLbl()),
+      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), rateLbl(), "gmc"));
     box.appendChild(g);
   }
   if (rcaEditing === q.id) { box.appendChild(rcaBackForm(q)); return; }
@@ -422,10 +422,10 @@ function renderAwayAsk(box, q, list) {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do GMC-800", rcaUSv(q.gmcUSv), "µSv/h", "gmc"),
+      rcaTile("média do GMC-800", rcaUSv(q.gmcUSv), rateLbl(), "gmc"),
       rcaTile("máximo", rcaUSv(q.gmcMaxUSv), q.gmcMaxAt ? `às ${hhmm(q.gmcMaxAt)}` : ""),
-      rcaTile("dose no trecho", fmt(q.gmcDoseUSv, 2), "µSv"),
-      q.kind === "ambos" && q.memMinutes ? rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h") : rcaTile("alertas", String(q.alerts || 0), ""));
+      rcaTile("dose no trecho", doseNum(q.gmcDoseUSv), doseLbl()),
+      q.kind === "ambos" && q.memMinutes ? rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()) : rcaTile("alertas", String(q.alerts || 0), ""));
     box.appendChild(g);
   }
   const ht = awHintText(q);

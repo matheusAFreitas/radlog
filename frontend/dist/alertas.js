@@ -354,13 +354,13 @@ function drawAlertDetail(d) {
   const dt = new Date(e.time);
   $("adWhen").textContent = `${dt.toLocaleDateString(LOCALE, { weekday: "long" })}, ${ddmm(e.time)} ${hhmm(e.time)}`;
   // os 3 números: pico, duração e limite
-  const num = (v) => (inUSv ? fmt(v, usvDigits(v)) : fmt(v, 0));
+  const num = (v) => (inUSv ? rateNum(v, usvDigits(v)) : fmt(v, 0));
   $("adPk").textContent = e.peak ? num(peakV) : "—";
-  $("adPkSub").textContent = e.peak ? `${inUSv ? "µSv/h" : "CPM"} às ${hhmmss(e.peakAt || e.time)}` : "";
+  $("adPkSub").textContent = e.peak ? `${inUSv ? rateLbl() : "CPM"} às ${hhmmss(e.peakAt || e.time)}` : "";
   $("adDur").textContent = fmtDur(d.end - e.time);
   $("adDurSub").textContent = e.active ? `desde ${hhmm(e.time)}` : `${hhmm(e.time)}–${hhmm(d.end)}`;
   $("adLim").textContent = d.limit ? num(d.limit) : "—";
-  $("adLim").nextElementSibling.textContent = inUSv ? "µSv/h" : "CPM";
+  $("adLim").nextElementSibling.textContent = inUSv ? rateLbl() : "CPM";
   const sub = [];
   if (e.startedAs) sub.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
   if (e.peak && !rc && bgNow()) sub.push(`pico ${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)}`);
@@ -381,7 +381,7 @@ function drawAlertDetail(d) {
   const x = (t) => Math.max(0, Math.min(W, ((t - t0) / (t1 - t0)) * W));
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   const ys = $("adY").children;
-  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = inUSv ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
+  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = inUSv ? axRate(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;

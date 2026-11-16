@@ -214,7 +214,7 @@ function tripChartSvg(s, rc) {
   const x = (t) => PL + ((t - t0) / (t1 - t0)) * (W - PL - PR);
   const y = (v) => PT + (H - PT - PB) * (1 - v / hi);
   let g = "";
-  for (let v = 0; v <= hi + st / 2; v += st) g += `<line x1="${PL}" x2="${W - PR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="grid"/><text x="${PL - 5}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" class="ax">${fmt(v, st < 0.01 ? 3 : 2)}</text>`;
+  for (let v = 0; v <= hi + st / 2; v += st) g += `<line x1="${PL}" x2="${W - PR}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="grid"/><text x="${PL - 5}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end" class="ax">${axRate(v, st < 0.01 ? 3 : 2)}</text>`;
   const hr = 36e5, span = t1 - t0, tick = span <= 3 * hr ? hr / 2 : span <= 12 * hr ? hr : span <= 48 * hr ? 6 * hr : 24 * hr;
   const first = Math.ceil(t0 / tick) * tick;
   for (let t = first; t <= t1; t += tick) if (x(t) - PL > 30 && W - PR - x(t) > 30) g += `<text x="${x(t).toFixed(1)}" y="${H - 6}" text-anchor="middle" class="ax">${hhmm(t)}</text>`;
