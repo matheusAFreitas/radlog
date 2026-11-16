@@ -1,5 +1,49 @@
 # Versões
 
+## 2.86.0
+- Atividade (Bq) do RC102 repaginada, na ordem em que as coisas acontecem.
+  No topo, uma linha diz se falta calibrar ou com o que está calibrado; a
+  tabela de eficiência foi para "detalhes".
+- Calibrar virou um passo guiado e separado: KCl (sal light ou KCl puro)
+  primeiro e o tório, opcional, depois. O tempo total aparece antes de
+  começar.
+- O que medir é escolhido por cartões, com o valor típico, o tempo
+  recomendado (já marcado) e o preparo de cada um. Nome, posição, fundo e
+  radionuclídeos foram para "Mais opções", e o tempo total fica ao lado do
+  Começar.
+- "Suas amostras": cartões guardados por você, começando com uraninita,
+  uranocircita e euxenita. A referência de cada uma vem da sua última
+  medição de objeto com o mesmo nome. Qualquer medida pode virar "minha".
+- Pedra solta: a massa é opcional e o resultado sai em Bq da peça (e em
+  Bq/g, se tiver a massa), com o aviso de que a forma é diferente da do
+  pote da calibração.
+- Durante a medida, os passos (fundo, colocar a amostra, medindo,
+  resultado). No resultado, a comparação com o valor típico quando a
+  amostra tem uma faixa conhecida, "Medir de novo" e as linhas usadas
+  recolhidas. O texto dos limites foi para o "Como funciona".
+
+**English**
+
+- The RC102 Activity (Bq) tab was redone, in the order things happen. At
+  the top, one line says whether calibration is missing or what it was
+  calibrated with; the efficiency table moved to "details".
+- Calibrating is now a separate guided step: KCl (lite salt or pure KCl)
+  first, then the optional thorium. The total time shows before starting.
+- What to measure is picked with cards, each with its typical value,
+  recommended time (already selected) and preparation. Name, position,
+  background and radionuclides moved to "More options", and the total time
+  sits next to Start.
+- "Your samples": cards you save, starting with uraninite, uranocircite
+  and euxenite. Each one's reference comes from your latest object
+  measurement with the same name. Any measurement can become "mine".
+- Loose stone: the mass is optional and the result is in Bq for the piece
+  (and Bq/g if the mass is given), with a note that the shape differs from
+  the calibration jar.
+- While measuring, the steps (background, place the sample, measuring,
+  result). The result compares with the typical value when the sample has
+  a known range, has "Measure again", and keeps the lines used collapsed.
+  The limits text moved to "How it works".
+
 ## 2.85.1
 - Unidades: rótulos que ainda diziam µSv/h com a tela em mrem/h agora
   seguem a unidade escolhida (a dica embaixo da régua do GMC-800 e do

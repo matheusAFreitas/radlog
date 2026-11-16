@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.85.1";
+const DEMO_VERSION = "2.86.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -486,6 +486,10 @@ function makeDemoApi(opts) {
     bg: null,
     cal: { geometry: "pote de 500 mL encostado", kcl: { t: Date.now() - 3 * 86400e3, eff: 0.00182, effErr: 0.031, massG: 500, pct: 100, sec: 3600 }, th: null },
     hist: [],
+    samples: [
+      { id: "uraninita", name: "Uraninita", sub: "urânio", nuclides: ["U-238", "Ra-226", "Th-232"], smpSec: 1800, massG: 0, loose: true, seed: true, prep: "Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.", note: "forte: sai rápido", refUSv: 1.2, refDev: "radiacode", refT: Date.now() - 2 * 864e5, refDist: "encostada" },
+      { id: "euxenita", name: "Euxenita", sub: "urânio e tório?", nuclides: ["U-238", "Ra-226", "Th-232"], smpSec: 3600, massG: 0, loose: true, seed: true, prep: "Euxenita pode ter urânio e tório. O app só conta tório com as linhas de 911 ou 2.614 keV.", note: "tório só se aparecer 911 ou 2.614 keV" },
+    ],
     nucs: [
       { id: "K-40", name: "Potássio-40", kevs: [1460.8] }, { id: "Cs-137", name: "Césio-137", kevs: [661.7] },
       { id: "Ra-226", name: "Rádio-226 (série do urânio)", note: "pelos filhos Pb-214 e Bi-214: a amostra precisa ficar fechada ~3 semanas antes, para o radônio não escapar", kevs: [351.9, 609.3, 1764.5] },
@@ -495,7 +499,7 @@ function makeDemoApi(opts) {
     sec() { return this.run ? Math.min(this.run.target || 1e9, ((Date.now() - this.run.at) / 1000) * 120) : 0; },
     start(o) {
       if (!demoRcFake()) throw new Error("RC102 não conectado");
-      if (!(o.massG > 0)) throw new Error("informe a massa em gramas");
+      if (!(o.massG > 0) && !(o.kind === "amostra" && o.loose)) throw new Error("informe a massa em gramas");
       o.name = o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : o.kind === "torio" ? "eletrodo de tório (" + o.pct + "% ThO₂)" : "amostra");
       this.run = { o, phase: o.newBg ? "fundo" : "amostra", at: Date.now(), target: o.newBg ? o.bgSec : o.smpSec, bgSec: o.newBg ? 0 : 7200 };
     },
@@ -520,7 +524,7 @@ function makeDemoApi(opts) {
       });
     },
     result(sec) {
-      const o = this.run.o, r = { t: Date.now(), kind: o.kind, name: o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : "eletrodo de tório"), massG: o.massG, geometry: o.geometry, sec, bgSec: this.run.bgSec, calSrc: "kcl", nuclides: [] };
+      const o = this.run.o, r = { t: Date.now(), kind: o.kind, name: o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : "eletrodo de tório"), massG: o.massG, geometry: o.geometry, sec, bgSec: this.run.bgSec, calSrc: "kcl", nuclides: [], loose: !!o.loose, sampleId: o.sampleId || "", nucs: o.nuclides, smpSecO: o.smpSec };
       if (o.kind === "kcl") { r.expected = (o.massG * o.pct) / 100 * 0.52445 * 31.7; r.kcl = { t: r.t, eff: 0.00179 + Math.random() * 0.00008, effErr: 0.03 * Math.sqrt(3600 / sec), massG: o.massG, pct: o.pct, sec }; r.prev = this.cal.kcl && this.cal.kcl.eff; }
       else if (o.kind === "torio") { r.th = { t: r.t, b: -1.24, bErr: 0.07, pivot: 583.2 }; r.thLines = [{ kev: 238.6, area: 41230, areaErr: 410 }, { kev: 583.2, area: 9120, areaErr: 260 }, { kev: 2614.5, area: 2210, areaErr: 120 }]; r.nuclides = this.nucRes(sec, o.massG, ["Th-232"]); }
       else r.nuclides = this.nucRes(sec, o.massG, o.nuclides);
@@ -530,7 +534,7 @@ function makeDemoApi(opts) {
       const cal = this.cal, effAt = (e) => (cal.kcl ? cal.kcl.eff : 0.001) * Math.pow(e / 1460.8, cal.th ? cal.th.b : -1.3);
       const E = [250, 500, 1000, 1500, 2000, 2500];
       const v = { phase: "", cal, calSrc: cal.kcl ? "kcl" : "chute", calEff: E.map(effAt), calErr: E.map((e) => Math.hypot(cal.kcl ? cal.kcl.effErr : 1, (cal.th ? 0.07 : 0.4) * Math.log(e / 1460.8))),
-        savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, history: this.hist, nuclides: this.nucs, connected: demoRcFake() };
+        savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, history: this.hist, samples: this.samples, nuclides: this.nucs, connected: demoRcFake() };
       if (this.run && (this.run.phase === "fundo" || this.run.phase === "amostra") && this.run.target > 0 && this.sec() >= this.run.target) this.next();
       const r = this.run; if (!r) return v;
       v.opts = r.o; v.phase = r.phase; v.phaseAt = r.at; v.bgSec = r.bgSec;
@@ -1003,6 +1007,8 @@ const demoRc = () => {
     ActivityNext: async () => demoAct.next(),
     CancelActivity: async () => { demoAct.run = null; },
     CloseActivity: async () => { demoAct.run = null; },
+    SaveActSample: async (x) => { const id = x.id || "s" + Date.now(); demoAct.samples = [{ ...x, id }, ...demoAct.samples.filter((y) => y.id !== id)]; return id; },
+    DeleteActSample: async (id) => { demoAct.samples = demoAct.samples.filter((y) => y.id !== id); },
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
     // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
     SpectrumContinuum: async (sp) => demoSnip(sp),
