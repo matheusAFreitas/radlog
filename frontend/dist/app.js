@@ -1129,9 +1129,9 @@ async function refreshHeat() {
     h = api.GetHeatmapDev ? await api.GetHeatmapDev(state.heatDays, dev) : await api.GetHeatmap(state.heatDays);
   }
   const rcMap = h.device === "radiacode";
-  // o GMC-800 vem em CPM e aparece em µSv/h pela calibração de agora (2.83.7)
-  const hk = heatK(h);
-  const hv = (v) => fmt(v * hk, usvDigits(v * hk));
+  // tudo em µSv/h; no GMC-800 cada minuto pela calibração que valia nele
+  // (2.83.8; os campos em CPM ficam só para o σ)
+  const hv = (v) => fmt(v, usvDigits(v));
   $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "µSv/h médio · cinza = sem dados";
   state.heat = h;
   hideHeatTip();
@@ -1146,14 +1146,14 @@ async function refreshHeat() {
   };
   cell("rl", "");
   for (let hr = 0; hr < 24; hr++) cell("hl", hr % 3 === 0 ? String(hr) : "");
-  const mn = h.min, mx = h.max;
+  const mn = h.minUSv, mx = h.maxUSv;
   const span = mx != null && mn != null && mx > mn ? mx - mn : 1;
   // mais recente em cima
   for (let i = h.days.length - 1; i >= 0; i--) {
     const day = h.days[i];
     cell("rl", isToday(day) ? "hoje" : ddmm(day));
     for (let hr = 0; hr < 24; hr++) {
-      const v = h.values[i][hr];
+      const v = h.usv[i][hr];
       const c = cell("c", "");
       c.dataset.i = i;
       c.dataset.h = hr;
@@ -1177,13 +1177,10 @@ async function refreshHeat() {
   if (h.peakHour < 0) $("heatSub").textContent = "sem dados ainda";
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
-    const p = h.hourAvg[h.peakHour], l = h.hourAvg[h.lowHour];
+    const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
     $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} µSv/h) · mais baixo por volta das ${h.lowHour}h (${hv(l)} µSv/h)`;
   }
 }
-
-// fator para µSv/h do padrão por hora: 1 no RC102 (já vem em µSv/h)
-function heatK(h) { return h && h.device === "radiacode" ? 1 : calK(); }
 
 // caixinha com o valor de cada quadrado
 function showHeatTip(c) {
@@ -1202,8 +1199,9 @@ function showHeatTip(c) {
   if (v == null) {
     if (!onlyAway) line("sem dados", "ht-none");
   } else {
-    const rcMap = h.device === "radiacode", hk = heatK(h), uv = (x) => fmt(x * hk, usvDigits(x * hk));
-    line(`${uv(v)} µSv/h`, "ht-val");
+    const rcMap = h.device === "radiacode", uv = (x) => fmt(x, usvDigits(x));
+    const u = h.usv[i][hr], uAvg = h.hourAvgUSv[hr];
+    line(`${uv(u)} µSv/h`, "ht-val");
     const avg = h.hourAvg[hr];
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
     if (rcMap && avg != null && h.days.length > 1) {
@@ -1213,14 +1211,16 @@ function showHeatTip(c) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
-      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * hk, usvDigits(avg * hk) + 1)} da média das ${hr}h (${uv(avg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
+      // o σ sai das contagens (CPM); o texto, em µSv/h
+      const du = u - uAvg;
+      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${fmt(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${uv(uAvg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
     }
     if (n) line(n >= 60 ? "hora completa" : `${n} de 60 min medidos`, "ht-dim");
   }
   const ac = h.awayCounts && h.awayCounts[i] ? h.awayCounts[i][hr] : 0;
   if (ac) {
-    const av = h.awayValues && h.awayValues[i] ? h.awayValues[i][hr] : null;
-    line(`fora de casa: ${ac} min${av != null ? ` · ${h.device === "radiacode" ? fmt(av, usvDigits(av)) + " µSv/h" : fmt(av * calK(), usvDigits(av * calK())) + " µSv/h"}` : ""} (fora do padrão)`, "ht-away");
+    const av = h.awayUSv && h.awayUSv[i] ? h.awayUSv[i][hr] : null;
+    line(`fora de casa: ${ac} min${av != null ? ` · ${usvVal(av)}` : ""} (fora do padrão)`, "ht-away");
   }
   // o mais perigoso primeiro (perigo, alarme, atenção); no mesmo nível, o maior pico
   const rank = { perigo: 0, alarme: 1 };
@@ -1228,7 +1228,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + (h.device === "radiacode" ? fmt(a.peak, usvDigits(a.peak)) + " µSv/h" : usvVal(a.peak * calK())) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -4318,7 +4318,7 @@ function wireBgTrend() {
     const tip = $("bgDTip");
     if (!d) { tip.hidden = true; return; }
     tip.hidden = false;
-    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} · σ real ${fmt(d.sd, 1)} ÷ acaso ${fmt(d.poissonSD, 1)} · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
+    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
     const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });

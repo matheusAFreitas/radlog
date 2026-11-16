@@ -110,17 +110,20 @@ func (a *App) GetPatterns(days int, dev string) (Patterns, error) {
 		if f := a.gmcFirst(); !f.IsZero() {
 			out.First = f.UnixMilli()
 		}
-		// em µSv/h pela calibração de agora (2.83.7): o GMC-800 aparece em
-		// µSv/h no app todo, CPM só nas tabelas técnicas
+		// em µSv/h (2.83.7), cada minuto pela calibração que valia nele
+		// (2.83.8): o GMC-800 aparece em µSv/h no app todo, CPM só nas
+		// tabelas técnicas
 		out.Unit = "µSv/h"
-		k := a.curK()
+		a.mu.Lock()
+		tl := a.calTLLocked()
+		a.mu.Unlock()
 		if a.store != nil {
 			pts, err := a.store.Range(from, to)
 			if err != nil {
 				return out, err
 			}
 			for _, p := range bgClean(a.homeOnly(pts)) {
-				vals = append(vals, patVal{p.T, p.CPM * k})
+				vals = append(vals, patVal{p.T, tl.USv(p)})
 			}
 		}
 	}

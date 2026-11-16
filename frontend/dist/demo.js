@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.83.7";
+const DEMO_VERSION = "2.83.8";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -552,7 +552,8 @@ function makeDemoApi(opts) {
     },
   };
   const demoFirst = () => Date.now() - 12 * 864e5;
-  const rcHeat = (h) => { const k = 0.0061, sc = (rows) => rows.map((r) => r.map((v) => (v == null ? null : v * k))); return Object.assign({}, h, { device: "radiacode", values: sc(h.values), usv: sc(h.values), awayValues: sc(h.awayValues || []), hourAvg: h.hourAvg.map((v) => (v == null ? null : v * k)), min: h.min == null ? null : h.min * k, max: h.max == null ? null : h.max * k, alerts: {} }); };
+  const rcHeat = (h) => { const k = 0.0061, sc = (rows) => rows.map((r) => r.map((v) => (v == null ? null : v * k))); return Object.assign({}, h, { device: "radiacode", values: sc(h.values), usv: sc(h.values), awayValues: sc(h.awayValues || []), hourAvg: h.hourAvg.map((v) => (v == null ? null : v * k)), min: h.min == null ? null : h.min * k, max: h.max == null ? null : h.max * k,
+    hourAvgUSv: h.hourAvg.map((v) => (v == null ? null : v * k)), minUSv: h.min == null ? null : h.min * k, maxUSv: h.max == null ? null : h.max * k, awayUSv: sc(h.awayValues || []), alerts: {} }); };
   const demoCal = { retro: 0, vers: [{ id: 1, desde: 0, fator: 0, origem: "início", pontos: [] }, { id: 2, desde: Date.now() - 2 * 86400e3, fator: 0, origem: "contador", pontos: [], nota: "a curva do contador mudou" }] };
 const demoRc = () => {
     const st = demoRcReal();
@@ -874,7 +875,7 @@ const demoRc = () => {
     GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="' + COR.accent + '"/></svg>'),
     OpenMeasurementAttachment: async () => {},
     GetPatterns: async (days, dev) => {
-      const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 0.00564;
+      const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : DEMO_K;
       const pts = range(from, now).map((q) => ({ t: q.t, v: q.cpm * k }));
       const st = (vs) => { if (!vs.length) return { n: 0, days: 0, median: 0, p25: 0, p75: 0, mean: 0 }; const x = vs.map((q) => q.v).sort((a, b) => a - b), q = (f) => x[Math.min(x.length - 1, Math.floor(f * x.length))];
         return { n: x.length, days: new Set(vs.map((v) => new Date(v.t).toDateString())).size, median: q(0.5), p25: q(0.25), p75: q(0.75), mean: x.reduce((a, b) => a + b, 0) / x.length }; };
@@ -1406,7 +1407,10 @@ const demoRc = () => {
           (alerts[`${i}-${dd.getHours()}`] = alerts[`${i}-${dd.getHours()}`] || []).push({ level: e.level || "atencao", time: e.time, peak: e.peak || e.cpm || 0, retro: !!e.retro });
         }
       }
-      return { days: dayList, values, usv, counts, alerts, hourAvg, min: mn, max: mx, peakHour: peak, lowHour: low, minutes: 0 };
+      const K = DEMO_K, sc = (v) => (v == null ? null : v * K);
+      for (const l of Object.values(alerts)) for (const a of l) a.peakUSv = a.peak * K;
+      return { days: dayList, values, usv, counts, alerts, hourAvg, min: mn, max: mx, peakHour: peak, lowHour: low, minutes: 0,
+        hourAvgUSv: hourAvg.map(sc), minUSv: sc(mn), maxUSv: sc(mx), awayUSv: [] };
     },
     GetMemoryInfo: async () => ({ known: true, usedBytes: 38912, totalBytes: 2097152, at: Date.now() - 3600e3, serial: "" }),
     DiffDeviceConfig: async () => [{ index: 124, before: 1, after: 0, field: "" }],

@@ -95,6 +95,11 @@ func TestHeatmap(t *testing.T) {
 	if *h.Min != 10 || *h.Max != 40 {
 		t.Fatalf("min %v max %v", *h.Min, *h.Max)
 	}
+	// o mesmo em µSv/h pela calibração de cada minuto (2.83.8)
+	near := func(p *float64, cpm float64) bool { return p != nil && math.Abs(*p-a.cal.USv(cpm)) < 1e-9 }
+	if !near(h.MinUSv, 10) || !near(h.MaxUSv, 40) || !near(h.HourAvgUSv[6], 40) || !near(h.HourAvgUSv[0], 20) || h.HourAvgUSv[23] == nil {
+		t.Fatalf("µSv/h: %v %v %v", h.MinUSv, h.MaxUSv, h.HourAvgUSv[6])
+	}
 }
 
 func TestMeasureObject(t *testing.T) {

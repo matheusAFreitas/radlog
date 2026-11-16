@@ -5247,7 +5247,6 @@ voltou ao fundo	back to background
 {0} µSv/h por CPM no fundo	{0} µSv/h per CPM at background
 {0} µSv/h por CPM no fundo (versão {1}, {2}	{0} µSv/h per CPM at background (version {1}, {2}
 {0} µSv/h por CPM · {1}	{0} µSv/h per CPM · {1}
-{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} · n = {5} min	{0} · dispersion {1} · real σ {2} ÷ chance {3} · median {4} · n = {5} min
 {0} · no objeto	{0} · on the object
 {0} · {1} (minuto)	{0} · {1} (minute)
 {0} · {1} g · amostra {2} · fundo {3} · {4}{5}	{0} · {1} g · sample {2} · background {3} · {4}{5}
@@ -5683,3 +5682,4 @@ Exportar leituras	Export readings
 Exportar leituras (CSV)	Export readings (CSV)
 µSv/h médio · cinza = sem dados	Average µSv/h · gray = no data
 Mapa de calor do µSv/h médio por dia e hora	Heat map of average µSv/h by day and hour
+{0} · dispersão {1} (σ real ÷ σ do acaso, nas contagens) · mediana {2} · n = {3} min	{0} · dispersion {1} (real σ ÷ chance σ, in counts) · median {2} · n = {3} min
