@@ -1274,6 +1274,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 /* 2.83.6: só a lista do meio rola; logo, nuvem e busca ficam presas em cima e as ferramentas embaixo */
 .side > .side-nav { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: var(--space-3); border-top: 1px solid transparent; scrollbar-width: thin; }
 .side > .side-nav.scrolled { border-top-color: var(--border); }
+.side > .side-nav.more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); }
 .side-group { font-size: var(--fs-caption); color: var(--dim); padding: var(--space-4) var(--space-3) var(--space-1); }
 .side-nav .side-group:first-child { padding-top: var(--space-1); }
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
@@ -1375,7 +1376,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .shell { flex-direction: column; }
   .side { position: static; align-self: stretch; min-width: 0; height: auto; flex: none; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3); border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
   .side .brand { padding: 0 var(--space-2) 0 var(--space-1); }
-  .side > .side-nav { order: 9; flex: 1 1 100%; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding-bottom: 0; border-top: 0; scrollbar-width: none; gap: 2px; }
+  .side > .side-nav { order: 9; flex: 1 1 100%; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding-bottom: 0; border-top: 0; scrollbar-width: none; gap: 2px; -webkit-mask-image: none; mask-image: none; }
   .side-nav button { flex: 0 0 auto; white-space: nowrap; }
   .side-nav button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--accent); }
   .side-group { display: none; }

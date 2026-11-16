@@ -1129,8 +1129,10 @@ async function refreshHeat() {
     h = api.GetHeatmapDev ? await api.GetHeatmapDev(state.heatDays, dev) : await api.GetHeatmap(state.heatDays);
   }
   const rcMap = h.device === "radiacode";
-  const hv = (v, d) => (rcMap ? fmt(v, usvDigits(v)) : fmt(v, d));
-  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "CPM médio · cinza = sem dados";
+  // o GMC-800 vem em CPM e aparece em µSv/h pela calibração de agora (2.83.7)
+  const hk = heatK(h);
+  const hv = (v) => fmt(v * hk, usvDigits(v * hk));
+  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "µSv/h médio · cinza = sem dados";
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1168,18 +1170,20 @@ async function refreshHeat() {
     }
   }
   markHeatPick();
-  $("heatMin").textContent = mn == null ? "—" : hv(mn, 0);
-  $("heatMax").textContent = mx == null ? "—" : hv(mx, 0);
+  $("heatMin").textContent = mn == null ? "—" : hv(mn);
+  $("heatMax").textContent = mx == null ? "—" : hv(mx);
   document.querySelector("#heatCard .heat-ramp").classList.toggle("rc", rcMap);
   const daysWith = h.values.filter((row) => row.some((v) => v != null)).length;
   if (h.peakHour < 0) $("heatSub").textContent = "sem dados ainda";
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvg[h.peakHour], l = h.hourAvg[h.lowHour];
-    const u = rcMap ? " µSv/h" : " CPM";
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p, 1)}${u}) · mais baixo por volta das ${h.lowHour}h (${hv(l, 1)}${u})`;
+    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} µSv/h) · mais baixo por volta das ${h.lowHour}h (${hv(l)} µSv/h)`;
   }
 }
+
+// fator para µSv/h do padrão por hora: 1 no RC102 (já vem em µSv/h)
+function heatK(h) { return h && h.device === "radiacode" ? 1 : calK(); }
 
 // caixinha com o valor de cada quadrado
 function showHeatTip(c) {
@@ -1198,10 +1202,8 @@ function showHeatTip(c) {
   if (v == null) {
     if (!onlyAway) line("sem dados", "ht-none");
   } else {
-    const rcMap = h.device === "radiacode";
-    line(rcMap ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 1)} CPM`, "ht-val");
-    const u = h.usv && h.usv[i] ? h.usv[i][hr] : null;
-    if (u != null && !rcMap) line(`≈ ${fmt(u, usvDigits(u))} µSv/h`);
+    const rcMap = h.device === "radiacode", hk = heatK(h), uv = (x) => fmt(x * hk, usvDigits(x * hk));
+    line(`${uv(v)} µSv/h`, "ht-val");
     const avg = h.hourAvg[hr];
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
     if (rcMap && avg != null && h.days.length > 1) {
@@ -1211,14 +1213,14 @@ function showHeatTip(c) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
-      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d), 1)} da média das ${hr}h (${fmt(avg, 1)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
+      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d) * hk, usvDigits(avg * hk) + 1)} da média das ${hr}h (${uv(avg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
     }
     if (n) line(n >= 60 ? "hora completa" : `${n} de 60 min medidos`, "ht-dim");
   }
   const ac = h.awayCounts && h.awayCounts[i] ? h.awayCounts[i][hr] : 0;
   if (ac) {
     const av = h.awayValues && h.awayValues[i] ? h.awayValues[i][hr] : null;
-    line(`fora de casa: ${ac} min${av != null ? ` · ${h.device === "radiacode" ? fmt(av, usvDigits(av)) + " µSv/h" : fmt(av, 1) + " CPM"}` : ""} (fora do padrão)`, "ht-away");
+    line(`fora de casa: ${ac} min${av != null ? ` · ${h.device === "radiacode" ? fmt(av, usvDigits(av)) + " µSv/h" : fmt(av * calK(), usvDigits(av * calK())) + " µSv/h"}` : ""} (fora do padrão)`, "ht-away");
   }
   // o mais perigoso primeiro (perigo, alarme, atenção); no mesmo nível, o maior pico
   const rank = { perigo: 0, alarme: 1 };
@@ -1226,7 +1228,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + (h.device === "radiacode" ? fmt(a.peak, usvDigits(a.peak)) + " µSv/h" : fmt(a.peak, 0) + " CPM") : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + (h.device === "radiacode" ? fmt(a.peak, usvDigits(a.peak)) + " µSv/h" : usvVal(a.peak * calK())) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -3103,7 +3105,14 @@ function wire() {
     toast("Relógio do contador acertado");
   });
   const sideNav = $("sideNav");
-  sideNav.addEventListener("scroll", () => sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2), { passive: true });
+  // linha no topo quando rolada; degradê no pé enquanto há páginas embaixo
+  const sideEdges = () => {
+    sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2);
+    sideNav.classList.toggle("more", sideNav.scrollHeight - sideNav.clientHeight - sideNav.scrollTop > 2);
+  };
+  sideNav.addEventListener("scroll", sideEdges, { passive: true });
+  window.addEventListener("resize", sideEdges);
+  sideEdges();
   $("btnExport").addEventListener("click", async () => {
     const path = await call(api.ExportCSV);
     if (path) toast("Leituras exportadas para " + path);
@@ -4309,7 +4318,7 @@ function wireBgTrend() {
     const tip = $("bgDTip");
     if (!d) { tip.hidden = true; return; }
     tip.hidden = false;
-    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} · σ real ${fmt(d.sd, 1)} ÷ acaso ${fmt(d.poissonSD, 1)} · mediana ${fmt(d.median, 1)} CPM · n = ${fmt(d.n, 0)} min`;
+    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} · σ real ${fmt(d.sd, 1)} ÷ acaso ${fmt(d.poissonSD, 1)} · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
     const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });

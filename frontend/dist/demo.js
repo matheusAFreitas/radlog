@@ -39,7 +39,7 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.83.6";
+const DEMO_VERSION = "2.83.7";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -874,7 +874,7 @@ const demoRc = () => {
     GetMeasurementAttachment: async () => "data:image/svg+xml;base64," + btoa('<svg xmlns="http://www.w3.org/2000/svg" width="120" height="90"><rect width="120" height="90" fill="#2a3136"/><circle cx="60" cy="45" r="22" fill="' + COR.accent + '"/></svg>'),
     OpenMeasurementAttachment: async () => {},
     GetPatterns: async (days, dev) => {
-      const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 1;
+      const now = Date.now(), from = now - days * 864e5, k = dev === "radiacode" ? 0.0061 : 0.00564;
       const pts = range(from, now).map((q) => ({ t: q.t, v: q.cpm * k }));
       const st = (vs) => { if (!vs.length) return { n: 0, days: 0, median: 0, p25: 0, p75: 0, mean: 0 }; const x = vs.map((q) => q.v).sort((a, b) => a - b), q = (f) => x[Math.min(x.length - 1, Math.floor(f * x.length))];
         return { n: x.length, days: new Set(vs.map((v) => new Date(v.t).toDateString())).size, median: q(0.5), p25: q(0.25), p75: q(0.75), mean: x.reduce((a, b) => a + b, 0) / x.length }; };
@@ -885,9 +885,9 @@ const demoRc = () => {
       const months = [...new Set(pts.map((q) => mStart(q.t)))].sort().map((m) => Object.assign({ month: m }, st(pts.filter((q) => mStart(q.t) === m))));
       let pk = -1, lw = -1;
       hours.forEach((h, i) => { if (h.n < 30) return; if (pk < 0 || h.median > hours[pk].median) pk = i; if (lw < 0 || h.median < hours[lw].median) lw = i; });
-      return { device: dev, unit: dev === "radiacode" ? "µSv/h" : "CPM", days, from, to: now, minutes: pts.length, first: demoFirst(), hours, weekdays, months,
+      return { device: dev, unit: "µSv/h", days, from, to: now, minutes: pts.length, first: demoFirst(), hours, weekdays, months,
         day: st(pts.filter((q) => isDay(q.t))), night: st(pts.filter((q) => !isDay(q.t))), dnDays: 6, dnDiff: 1.2 * k, dnErr: 0.3 * k, dnPct: 6,
-        dnText: "A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.", peakHour: pk, lowHour: lw };
+        dnText: "A noite (18h–6h) fica 6% acima do dia (+0,0068 ± 0,0017 µSv/h, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.", peakHour: pk, lowHour: lw };
     },
     GetHeatmapDev: async (days, dev) => { const h = await api.GetHeatmap(days); return dev === "radiacode" ? rcHeat(h) : h; },
     GetHeatmapMonthDev: async (y, m, dev) => { const h = await api.GetHeatmapMonth(y, m); return dev === "radiacode" ? rcHeat(h) : h; },

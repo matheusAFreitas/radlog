@@ -1,5 +1,30 @@
 # Versões
 
+## 2.83.7
+- Gráficos › Hora do dia: o padrão por hora do GMC-800 aparecia em CPM
+  (subtítulo, escala e caixinha de cada hora). Agora fica em µSv/h, pela
+  calibração atual, como no resto do app.
+- Gráficos › Padrões do fundo: o GMC-800 também passa para µSv/h (horas,
+  dia × noite, dias da semana e meses). Na Tendência do fundo, a mediana
+  da caixinha de cada dia também.
+- Barra lateral: um degradê no pé da lista mostra que há mais páginas
+  embaixo quando a janela é baixa.
+- Ctrl+K: "Exportar leituras" e "Eventos e log" aparecem uma vez só (em
+  Ações).
+
+**English**
+
+- Charts › Time of day: the GMC-800 hourly pattern showed CPM (subtitle,
+  scale and the box for each hour). It now shows µSv/h, with the current
+  calibration, like the rest of the app.
+- Charts › Background patterns: the GMC-800 also moves to µSv/h (hours, day
+  vs. night, weekdays and months). In Background trend, the median in each
+  day's box too.
+- Sidebar: a fade at the bottom of the list shows there are more pages
+  below when the window is short.
+- Ctrl+K: "Export readings" and "Events and log" show up only once (under
+  Actions).
+
 ## 2.83.6
 - Barra lateral: com a janela baixa, a barra inteira rolava e a logo
   sumia. Agora só a lista de páginas rola; a logo, a nuvem e a busca ficam
