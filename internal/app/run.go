@@ -9,6 +9,7 @@ import (
 	"github.com/wailsapp/wails/v2"
 	"github.com/wailsapp/wails/v2/pkg/options"
 	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
+	"github.com/wailsapp/wails/v2/pkg/options/linux"
 	"github.com/wailsapp/wails/v2/pkg/options/windows"
 )
 
@@ -60,6 +61,14 @@ func Run(assets fs.FS) error {
 				app.secondInstance(d.Args)
 			},
 		},
+		// Linux: sem estas opções a Wails desliga a aceleração de vídeo do
+		// WebKitGTK e a tela toda é desenhada pelo processador (rolagem
+		// lenta; ACE, 15/11). RADLOG_GPU=0 volta ao modo sem aceleração,
+		// para placas em que ela deixa a janela em branco.
+		Linux: &linux.Options{
+			WebviewGpuPolicy: linuxGpuPolicy(os.Getenv("RADLOG_GPU")),
+			ProgramName:      "radlog",
+		},
 		Windows: &windows.Options{
 			Theme: windows.Dark,
 			// uma pasta só para o WebView2; sem isso ele cria uma pasta
@@ -68,4 +77,16 @@ func Run(assets fs.FS) error {
 		},
 	})
 	return err
+}
+
+// linuxGpuPolicy: aceleração quando a página pede (o padrão do WebKitGTK);
+// "0" desliga, "1" deixa sempre ligada.
+func linuxGpuPolicy(env string) linux.WebviewGpuPolicy {
+	switch env {
+	case "0":
+		return linux.WebviewGpuPolicyNever
+	case "1":
+		return linux.WebviewGpuPolicyAlways
+	}
+	return linux.WebviewGpuPolicyOnDemand
 }

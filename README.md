@@ -48,6 +48,8 @@ installing, it verifies the SHA-256 of the download and the **Ed25519
 signature** of the checksum list (`SHA256SUMS.txt.sig`); a version without a
 valid signature is refused. You can also update by hand: open the new version
 while the old one is running, and the old one closes and hands over.
+Updates from the app always land with a fixed name in the versions folder
+(`RadLog.exe` on Windows, `radlog` on Linux), so shortcuts keep working.
 
 ## How it works
 

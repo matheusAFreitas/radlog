@@ -11,6 +11,7 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 	"time"
@@ -120,10 +121,7 @@ func TestUpdateFlow(t *testing.T) {
 	case <-time.After(10 * time.Second):
 		t.Fatal("não abriu a versão nova")
 	}
-	want := name
-	if runtime.GOOS == "windows" {
-		want = fixedExe // no Windows a versão nova vira sempre RadLog.exe
-	}
+	want := fixedExe // a versão nova vira sempre RadLog.exe (Windows) ou radlog (Linux)
 	b, err := os.ReadFile(path)
 	if err != nil || string(b) != string(payload) || filepath.Base(path) != want {
 		t.Fatalf("arquivo: %s %v", path, err)
@@ -175,7 +173,7 @@ func TestOldVersionsIn(t *testing.T) {
 	dir := t.TempDir()
 	for _, n := range []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.21.0.exe", "GMC-Monitor-v99.0.0.exe",
 		"GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "outro.exe", "GMC-Monitor-v1.0.0-notas.txt",
-		"RadLog-v1.9.0.exe", "RadLog-v99.0.0.exe", "RadLog.exe", "RadLog.old.exe"} {
+		"RadLog-v1.9.0.exe", "RadLog-v99.0.0.exe", fixedExe, oldExe} {
 		_ = os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
 	}
 	self := filepath.Join(dir, "GMC-Monitor-v1.21.0.exe")
@@ -183,19 +181,27 @@ func TestOldVersionsIn(t *testing.T) {
 	for _, p := range oldVersionsIn(dir, self) {
 		got = append(got, filepath.Base(p))
 	}
-	want := "GMC-Monitor-v1.0.0.exe,GMC-Monitor-v1.2.0-x86_64.AppImage,GMC-Monitor-v1.5.0.exe.part,RadLog-v1.9.0.exe,RadLog.old.exe"
-	if strings.Join(got, ",") != want {
+	sort.Strings(got)
+	want := []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "RadLog-v1.9.0.exe", oldExe}
+	sort.Strings(want)
+	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Fatalf("apagaria %v", got)
 	}
 	// aberta como RadLog.old.exe (a troca falhou ao abrir a nova): não se apaga
-	for _, p := range oldVersionsIn(dir, filepath.Join(dir, "RadLog.old.exe")) {
-		if filepath.Base(p) == "RadLog.old.exe" || filepath.Base(p) == "RadLog.exe" {
+	for _, p := range oldVersionsIn(dir, filepath.Join(dir, oldExe)) {
+		if filepath.Base(p) == oldExe || filepath.Base(p) == fixedExe {
 			t.Fatalf("apagaria %s", p)
 		}
 	}
 }
 
 func TestInstallFixed(t *testing.T) {
+	if f, o := fixedNames("windows"); f != "RadLog.exe" || o != "RadLog.old.exe" {
+		t.Fatalf("windows: %s %s", f, o)
+	}
+	if f, o := fixedNames("linux"); f != "radlog" || o != "radlog.old" {
+		t.Fatalf("linux: %s %s", f, o)
+	}
 	dir := t.TempDir()
 	read := func(n string) string {
 		b, err := os.ReadFile(filepath.Join(dir, n))
@@ -209,23 +215,23 @@ func TestInstallFixed(t *testing.T) {
 	// primeira vez: não há RadLog.exe ainda
 	put("RadLog-v2.40.1.exe", "v2.40.1")
 	got, err := installFixed(filepath.Join(dir, "RadLog-v2.40.1.exe"))
-	if err != nil || filepath.Base(got) != "RadLog.exe" || read("RadLog.exe") != "v2.40.1" || read("RadLog-v2.40.1.exe") != "-" {
-		t.Fatalf("1ª troca: %s %v %q", got, err, read("RadLog.exe"))
+	if err != nil || filepath.Base(got) != fixedExe || read(fixedExe) != "v2.40.1" || read("RadLog-v2.40.1.exe") != "-" {
+		t.Fatalf("1ª troca: %s %v %q", got, err, read(fixedExe))
 	}
 	// próxima: a atual vira .old, a sobra anterior some
-	put("RadLog.old.exe", "sobra")
+	put(oldExe, "sobra")
 	put("RadLog-v2.41.0.exe", "v2.41.0")
 	got, err = installFixed(filepath.Join(dir, "RadLog-v2.41.0.exe"))
-	if err != nil || filepath.Base(got) != "RadLog.exe" || read("RadLog.exe") != "v2.41.0" || read("RadLog.old.exe") != "v2.40.1" {
-		t.Fatalf("2ª troca: %s %v %q %q", got, err, read("RadLog.exe"), read("RadLog.old.exe"))
+	if err != nil || filepath.Base(got) != fixedExe || read(fixedExe) != "v2.41.0" || read(oldExe) != "v2.40.1" {
+		t.Fatalf("2ª troca: %s %v %q %q", got, err, read(fixedExe), read(oldExe))
 	}
 	// já com o nome fixo: não mexe
-	if got, err := installFixed(filepath.Join(dir, "RadLog.exe")); err != nil || filepath.Base(got) != "RadLog.exe" {
+	if got, err := installFixed(filepath.Join(dir, fixedExe)); err != nil || filepath.Base(got) != fixedExe {
 		t.Fatalf("mesmo nome: %s %v", got, err)
 	}
 	// arquivo sumiu: devolve o caminho original com erro e não perde o RadLog.exe
-	if got, err := installFixed(filepath.Join(dir, "RadLog-v9.9.9.exe")); err == nil || filepath.Base(got) != "RadLog-v9.9.9.exe" || read("RadLog.exe") != "v2.41.0" {
-		t.Fatalf("falha: %s %v %q", got, err, read("RadLog.exe"))
+	if got, err := installFixed(filepath.Join(dir, "RadLog-v9.9.9.exe")); err == nil || filepath.Base(got) != "RadLog-v9.9.9.exe" || read(fixedExe) != "v2.41.0" {
+		t.Fatalf("falha: %s %v %q", got, err, read(fixedExe))
 	}
 }
 

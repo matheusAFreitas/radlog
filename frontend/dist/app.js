@@ -1,5 +1,8 @@
 "use strict";
 
+// 2.83.10: quando os scripts terminaram de ler (o tempo de abertura vai para o log)
+const T_SCRIPTS = performance.now();
+
 // ---------- ponte com o Go (ou modo demonstração no navegador) ----------
 
 // a Wails expõe os métodos em window.go.<pacote Go>.App (o pacote é "app"
@@ -645,6 +648,7 @@ async function refreshStats() {
 // Fundo por dia (Gráficos › Tendência do fundo, 2.65): 14 dias e "Ver mais"
 let dailyN = 14;
 async function refreshDaily() {
+  if (!gfxShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
   // GetDaily conta dias do calendário (até 60): pede um a mais para saber se tem mais
   const days = await api.GetDaily(Math.min(60, dailyN + 1));
   const tb = $("days");
@@ -917,7 +921,7 @@ function refreshSub(pg) {
     else if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
     else if (s === "ano") refreshYearCal();
-    else refreshBgTrend();
+    else { refreshBgTrend(); refreshDaily(); }
   }
   // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
@@ -1108,6 +1112,7 @@ function wireDemo() {
 function heatMonthStart(hm) { return new Date(hm.y, hm.m - 1, 1).getTime(); }
 
 async function refreshHeat() {
+  if (!gfxShown("hora")) return; // só com a sub-aba aberta (2.83.10)
   const mm = state.heatMonthMode;
   document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
   $("heatMonthNav").hidden = !mm;
@@ -1129,8 +1134,10 @@ async function refreshHeat() {
     h = api.GetHeatmapDev ? await api.GetHeatmapDev(state.heatDays, dev) : await api.GetHeatmap(state.heatDays);
   }
   const rcMap = h.device === "radiacode";
-  const hv = (v, d) => (rcMap ? fmt(v, usvDigits(v)) : fmt(v, d));
-  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "CPM médio · cinza = sem dados";
+  // tudo em µSv/h; no GMC-800 cada minuto pela calibração que valia nele
+  // (2.83.8; os campos em CPM ficam só para o σ)
+  const hv = (v) => fmt(v, usvDigits(v));
+  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "µSv/h médio · cinza = sem dados";
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1144,14 +1151,14 @@ async function refreshHeat() {
   };
   cell("rl", "");
   for (let hr = 0; hr < 24; hr++) cell("hl", hr % 3 === 0 ? String(hr) : "");
-  const mn = h.min, mx = h.max;
+  const mn = h.minUSv, mx = h.maxUSv;
   const span = mx != null && mn != null && mx > mn ? mx - mn : 1;
   // mais recente em cima
   for (let i = h.days.length - 1; i >= 0; i--) {
     const day = h.days[i];
     cell("rl", isToday(day) ? "hoje" : ddmm(day));
     for (let hr = 0; hr < 24; hr++) {
-      const v = h.values[i][hr];
+      const v = h.usv[i][hr];
       const c = cell("c", "");
       c.dataset.i = i;
       c.dataset.h = hr;
@@ -1168,16 +1175,15 @@ async function refreshHeat() {
     }
   }
   markHeatPick();
-  $("heatMin").textContent = mn == null ? "—" : hv(mn, 0);
-  $("heatMax").textContent = mx == null ? "—" : hv(mx, 0);
+  $("heatMin").textContent = mn == null ? "—" : hv(mn);
+  $("heatMax").textContent = mx == null ? "—" : hv(mx);
   document.querySelector("#heatCard .heat-ramp").classList.toggle("rc", rcMap);
   const daysWith = h.values.filter((row) => row.some((v) => v != null)).length;
   if (h.peakHour < 0) $("heatSub").textContent = "sem dados ainda";
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
-    const p = h.hourAvg[h.peakHour], l = h.hourAvg[h.lowHour];
-    const u = rcMap ? " µSv/h" : " CPM";
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p, 1)}${u}) · mais baixo por volta das ${h.lowHour}h (${hv(l, 1)}${u})`;
+    const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
+    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} µSv/h) · mais baixo por volta das ${h.lowHour}h (${hv(l)} µSv/h)`;
   }
 }
 
@@ -1198,10 +1204,9 @@ function showHeatTip(c) {
   if (v == null) {
     if (!onlyAway) line("sem dados", "ht-none");
   } else {
-    const rcMap = h.device === "radiacode";
-    line(rcMap ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 1)} CPM`, "ht-val");
-    const u = h.usv && h.usv[i] ? h.usv[i][hr] : null;
-    if (u != null && !rcMap) line(`≈ ${fmt(u, usvDigits(u))} µSv/h`);
+    const rcMap = h.device === "radiacode", uv = (x) => fmt(x, usvDigits(x));
+    const u = h.usv[i][hr], uAvg = h.hourAvgUSv[hr];
+    line(`${uv(u)} µSv/h`, "ht-val");
     const avg = h.hourAvg[hr];
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
     if (rcMap && avg != null && h.days.length > 1) {
@@ -1211,14 +1216,16 @@ function showHeatTip(c) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
-      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d), 1)} da média das ${hr}h (${fmt(avg, 1)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
+      // o σ sai das contagens (CPM); o texto, em µSv/h
+      const du = u - uAvg;
+      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${fmt(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${uv(uAvg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
     }
     if (n) line(n >= 60 ? "hora completa" : `${n} de 60 min medidos`, "ht-dim");
   }
   const ac = h.awayCounts && h.awayCounts[i] ? h.awayCounts[i][hr] : 0;
   if (ac) {
-    const av = h.awayValues && h.awayValues[i] ? h.awayValues[i][hr] : null;
-    line(`fora de casa: ${ac} min${av != null ? ` · ${h.device === "radiacode" ? fmt(av, usvDigits(av)) + " µSv/h" : fmt(av, 1) + " CPM"}` : ""} (fora do padrão)`, "ht-away");
+    const av = h.awayUSv && h.awayUSv[i] ? h.awayUSv[i][hr] : null;
+    line(`fora de casa: ${ac} min${av != null ? ` · ${usvVal(av)}` : ""} (fora do padrão)`, "ht-away");
   }
   // o mais perigoso primeiro (perigo, alarme, atenção); no mesmo nível, o maior pico
   const rank = { perigo: 0, alarme: 1 };
@@ -1226,7 +1233,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peak ? " · pico " + (h.device === "radiacode" ? fmt(a.peak, usvDigits(a.peak)) + " µSv/h" : fmt(a.peak, 0) + " CPM") : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -3102,6 +3109,15 @@ function wire() {
     await call(api.SyncClock);
     toast("Relógio do contador acertado");
   });
+  const sideNav = $("sideNav");
+  // linha no topo quando rolada; degradê no pé enquanto há páginas embaixo
+  const sideEdges = () => {
+    sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2);
+    sideNav.classList.toggle("more", sideNav.scrollHeight - sideNav.clientHeight - sideNav.scrollTop > 2);
+  };
+  sideNav.addEventListener("scroll", sideEdges, { passive: true });
+  window.addEventListener("resize", sideEdges);
+  sideEdges();
   $("btnExport").addEventListener("click", async () => {
     const path = await call(api.ExportCSV);
     if (path) toast("Leituras exportadas para " + path);
@@ -4307,7 +4323,7 @@ function wireBgTrend() {
     const tip = $("bgDTip");
     if (!d) { tip.hidden = true; return; }
     tip.hidden = false;
-    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} · σ real ${fmt(d.sd, 1)} ÷ acaso ${fmt(d.poissonSD, 1)} · mediana ${fmt(d.median, 1)} CPM · n = ${fmt(d.n, 0)} min`;
+    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
     const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
@@ -4495,6 +4511,8 @@ async function init() {
   await refreshMeasurements();
   await refreshAll();
   refreshAgora(true);
+  // tempo de abertura no log (2.83.10): para comparar antes e depois de mexer no carregamento
+  if (hasGo && goApp.UIReady) requestAnimationFrame(() => goApp.UIReady(T_SCRIPTS, performance.now()).catch(() => {}));
   if (!hasGo) toast("Modo demonstração: abra pelo app para usar o contador de verdade.");
   // Garante que o gráfico de 7 dias e as datas "hoje/ontem" virem o dia.
   setInterval(refreshAll, 5 * 60 * 1000);

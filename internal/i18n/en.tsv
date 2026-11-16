@@ -4914,7 +4914,7 @@ Escolher o dia	Pick the day
 : maior que 25 MB	: larger than 25 MB
 : não encontrado	: not found
 A diferença ({0} ± {1}) ficou menor que duas vezes a incerteza. Meça mais tempo em cada fase, ou o material corta pouco essa radiação.	The difference ({0} ± {1}) is less than twice the uncertainty. Measure longer in each phase, or the material blocks little of this radiation.
-A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is 6% above day (+1.2 ± 0.3 CPM, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
+A noite (18h–6h) fica 6% acima do dia (+0,0068 ± 0,0017 µSv/h, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is 6% above day (+0.0068 ± 0.0017 µSv/h, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
 A noite (18h–6h) fica {0}% acima do dia (+{1} ± {2} {3}, {4} dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is {0}% above day (+{1} ± {2} {3}, {4} days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
 A pressão mudou 1,2 hPa nas 12 horas antes.	Pressure changed 1.2 hPa in the 12 hours before.
 A subida é de 14 σ. O acaso não chega nisso.	The rise is 14 σ. Chance doesn't get that far.
@@ -5247,7 +5247,6 @@ voltou ao fundo	back to background
 {0} µSv/h por CPM no fundo	{0} µSv/h per CPM at background
 {0} µSv/h por CPM no fundo (versão {1}, {2}	{0} µSv/h per CPM at background (version {1}, {2}
 {0} µSv/h por CPM · {1}	{0} µSv/h per CPM · {1}
-{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} CPM · n = {5} min	{0} · dispersion {1} · real σ {2} ÷ chance {3} · median {4} CPM · n = {5} min
 {0} · no objeto	{0} · on the object
 {0} · {1} (minuto)	{0} · {1} (minute)
 {0} · {1} g · amostra {2} · fundo {3} · {4}{5}	{0} · {1} g · sample {2} · background {3} · {4}{5}
@@ -5683,3 +5682,24 @@ RC102: não conectou ({0}); próxima tentativa pelo Bluetooth em {1}	RC102: did 
 RC102 (Bluetooth): não deu para ligar as notificações de novo: {0}	RC102 (Bluetooth): could not turn notifications back on: {0}
 RC102 (Bluetooth): notificações ligadas de novo	RC102 (Bluetooth): notifications turned back on
 RC102 (Bluetooth): a resposta voltou depois de ligar as notificações de novo	RC102 (Bluetooth): the answer came back after turning notifications back on
+Abrir eventos	Open events
+Configurações › Atualizações e sobre	Settings › Updates and about
+Configurações › Dados e backup	Settings › Data and backup
+Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.	Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.
+Nuvem (Google Drive): abrir em Configurações	Cloud (Google Drive): open in Settings
+O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.	What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.
+Exportar leituras	Export readings
+Exportar leituras (CSV)	Export readings (CSV)
+µSv/h médio · cinza = sem dados	Average µSv/h · gray = no data
+Mapa de calor do µSv/h médio por dia e hora	Heat map of average µSv/h by day and hour
+{0} · dispersão {1} (σ real ÷ σ do acaso, nas contagens) · mediana {2} · n = {3} min	{0} · dispersion {1} (real σ ÷ chance σ, in counts) · median {2} · n = {3} min
+{0}: sem dado{1}	{0}: no data{1}
+papel mudou	role changed
+{0}: {1} µSv/h (em casa)	{0}: {1} µSv/h (at home)
+{0}: sem dado (em casa)	{0}: no data (at home)
+{0}: {1} µSv/h (com você)	{0}: {1} µSv/h (with you)
+{0}: sem dado (com você)	{0}: no data (with you)
+{0}: {1} µSv/h (fora do cálculo)	{0}: {1} µSv/h (out of the calculation)
+{0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)
+fora	out
+abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started

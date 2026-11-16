@@ -67,8 +67,8 @@ function renderCloudBadges() {
     side.hidden = !b;
     if (b) {
       side.classList.toggle("att", !!b.att);
-      side.firstChild.className = "dot " + (b.att ? "wait" : "on");
-      side.lastChild.textContent = b.text;
+      side.querySelector(".dot").className = "dot " + (b.att ? "wait" : "on");
+      side.querySelector(".side-cloud-t").textContent = b.text;
     }
   }
   if (typeof renderSetNavStatus === "function") renderSetNavStatus();
@@ -85,7 +85,12 @@ function cloudEl(tag, cls, text) {
 function cloudBtn(text, cls, fn) {
   const b = cloudEl("button", "btn" + (cls ? " " + cls : ""), text);
   b.type = "button";
-  if (fn) b.addEventListener("click", fn);
+  // um clique por vez: o botão fica desligado até a ação responder (2.83.3)
+  if (fn) b.addEventListener("click", async (e) => {
+    if (b.disabled) return;
+    b.disabled = true;
+    try { await fn(e); } finally { b.disabled = false; }
+  });
   return b;
 }
 function cloudKV(rows) {

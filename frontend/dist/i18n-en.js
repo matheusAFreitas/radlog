@@ -3770,7 +3770,7 @@ const I18N_EN = {
 "3. Comandos candidatos (não documentados)": "3. Candidate commands (undocumented)",
 ": maior que 25 MB": ": larger than 25 MB",
 ": não encontrado": ": not found",
-"A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.": "Night (18:00–06:00) is 6% above day (+1.2 ± 0.3 CPM, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.",
+"A noite (18h–6h) fica 6% acima do dia (+0,0068 ± 0,0017 µSv/h, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.": "Night (18:00–06:00) is 6% above day (+0.0068 ± 0.0017 µSv/h, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.",
 "A pressão mudou 1,2 hPa nas 12 horas antes.": "Pressure changed 1.2 hPa in the 12 hours before.",
 "A subida é de 14 σ. O acaso não chega nisso.": "The rise is 14 σ. Chance doesn't get that far.",
 "Abrir a tela do GMC-800": "Open the GMC-800 screen",
@@ -4320,7 +4320,24 @@ const I18N_EN = {
 "o GMC-800 de verdade está sem contagens": "the real GMC-800 has no counts",
 "a memória do GMC-800 de verdade passou de 95%": "the real GMC-800 memory is over 95%",
 "a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%",
-"Bluetooth: o app ainda não ligou o rádio": "Bluetooth: the app hasn't turned on the radio yet"
+"Bluetooth: o app ainda não ligou o rádio": "Bluetooth: the app hasn't turned on the radio yet",
+"nada chegou": "nothing arrived",
+"RC102 (Bluetooth): notificações ligadas de novo": "RC102 (Bluetooth): notifications turned back on",
+"RadiaCode (Bluetooth): notificações ligadas de novo": "RC102 (Bluetooth): notifications turned back on",
+"RC102 (Bluetooth): a resposta voltou depois de ligar as notificações de novo": "RC102 (Bluetooth): the answer came back after turning notifications back on",
+"RadiaCode (Bluetooth): a resposta voltou depois de ligar as notificações de novo": "RC102 (Bluetooth): the answer came back after turning notifications back on",
+"Abrir eventos": "Open events",
+"Configurações › Atualizações e sobre": "Settings › Updates and about",
+"Configurações › Dados e backup": "Settings › Data and backup",
+"Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.": "Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.",
+"Nuvem (Google Drive): abrir em Configurações": "Cloud (Google Drive): open in Settings",
+"O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.",
+"Exportar leituras": "Export readings",
+"Exportar leituras (CSV)": "Export readings (CSV)",
+"µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
+"Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour",
+"papel mudou": "role changed",
+"fora": "out"
 },
 "patterns": [
 [
@@ -5953,6 +5970,17 @@ const I18N_EN = {
 ]
 ],
 [
+"abertura: tela pronta em ",
+"^abertura: tela pronta em ((?:(?! · ).)+?) ms \\(scripts lidos em ((?:(?! · ).)+?) ms\\); ((?:(?! · ).)+?) ms desde que o programa começou$",
+"startup: screen ready in ${1} ms (scripts read in ${2} ms); ${3} ms since the program started",
+[
+"abertura: tela pronta em ",
+" ms (scripts lidos em ",
+" ms); ",
+" ms desde que o programa começou"
+]
+],
+[
 "Seu limite (",
 "^Seu limite \\(((?:(?! · ).)+?)\\) está acima do perigo do app \\(((?:(?! · ).)+?) CPM\\): quem toca é o alarme de perigo\\.$",
 "Your limit (${1}) is above the app's danger level (${2} CPM): the danger alarm is the one that sounds.",
@@ -6448,6 +6476,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) \\(σ real ÷ σ do acaso, nas contagens\\) · mediana ((?:(?! · ).)+?) · n = ((?:(?! · ).)+?) min$",
+"${1} · dispersion ${2} (real σ ÷ chance σ, in counts) · median ${3} · n = ${4} min",
+[
+" · dispersão ",
+" (σ real ÷ σ do acaso, nas contagens) · mediana ",
+" · n = ",
+" min"
+]
+],
+[
 "limpeza: ",
 "^limpeza: ((?:(?! · ).)+?) pastas antigas do WebView apagadas em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) ficaram para depois\\)$",
 "cleanup: ${1} old WebView folders deleted in ${2} (${3} left for later)",
@@ -6718,6 +6757,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode (Bluetooth): não deu para ligar as notificações de novo: ",
+"^RadiaCode \\(Bluetooth\\): não deu para ligar as notificações de novo: ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): could not turn notifications back on: ${1}",
+[
+"RadiaCode (Bluetooth): não deu para ligar as notificações de novo: "
+]
+],
+[
 "Atenção (histórico do contador): pico de ",
 "^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Attention (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -6889,6 +6936,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode: não conectou (",
+"^RadiaCode: não conectou \\(((?:(?! · ).)+?)\\); próxima tentativa pelo Bluetooth em ((?:(?! · ).)+?)$",
+"RC102: did not connect (${1}); next Bluetooth try in ${2}",
+[
+"RadiaCode: não conectou (",
+"); próxima tentativa pelo Bluetooth em "
+]
+],
+[
 "não consegui salvar a cópia de segurança, então não gravei nada: ",
 "^não consegui salvar a cópia de segurança, então não gravei nada: ((?:(?! · ).)+?)$",
 "couldn't save the backup copy, so nothing was written: ${1}",
@@ -7001,6 +7057,14 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
+]
+],
+[
+"RC102 (Bluetooth): não deu para ligar as notificações de novo: ",
+"^RC102 \\(Bluetooth\\): não deu para ligar as notificações de novo: ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): could not turn notifications back on: ${1}",
+[
+"RC102 (Bluetooth): não deu para ligar as notificações de novo: "
 ]
 ],
 [
@@ -7260,6 +7324,15 @@ const I18N_EN = {
 "o arquivo da release (",
 ") não é o da versão ",
 "; não vou instalar"
+]
+],
+[
+"RC102: não conectou (",
+"^RC102: não conectou \\(((?:(?! · ).)+?)\\); próxima tentativa pelo Bluetooth em ((?:(?! · ).)+?)$",
+"RC102: did not connect (${1}); next Bluetooth try in ${2}",
+[
+"RC102: não conectou (",
+"); próxima tentativa pelo Bluetooth em "
 ]
 ],
 [
@@ -7558,16 +7631,11 @@ const I18N_EN = {
 ]
 ],
 [
-"",
-"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) · σ real ((?:(?! · ).)+?) ÷ acaso ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) CPM · n = ((?:(?! · ).)+?) min$",
-"${1} · dispersion ${2} · real σ ${3} ÷ chance ${4} · median ${5} CPM · n = ${6} min",
+"RadiaCode (Bluetooth): sem resposta em 10 s ao pedido ",
+"^RadiaCode \\(Bluetooth\\): sem resposta em 10 s ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in 10 s to request ${1}: ${2}",
 [
-" · dispersão ",
-" · σ real ",
-" ÷ acaso ",
-" · mediana ",
-" CPM · n = ",
-" min"
+"RadiaCode (Bluetooth): sem resposta em 10 s ao pedido "
 ]
 ],
 [
@@ -7991,6 +8059,14 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 mudou: ",
 " contra ",
 " em casa."
+]
+],
+[
+"RC102 (Bluetooth): sem resposta em 10 s ao pedido ",
+"^RC102 \\(Bluetooth\\): sem resposta em 10 s ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in 10 s to request ${1}: ${2}",
+[
+"RC102 (Bluetooth): sem resposta em 10 s ao pedido "
 ]
 ],
 [
@@ -10284,6 +10360,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode: conectou mas não abriu (",
+"^RadiaCode: conectou mas não abriu \\(((?:(?! · ).)+?)\\)$",
+"RC102: connected but did not open (${1})",
+[
+"RadiaCode: conectou mas não abriu ("
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -10386,6 +10470,16 @@ const I18N_EN = {
 "· history recalculated with version ${1}",
 [
 "· histórico recalculado com a versão "
+]
+],
+[
+", resposta pela metade (",
+"^, resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+", half a response (${1} of ${2} bytes)",
+[
+", resposta pela metade (",
+" de ",
+" bytes)"
 ]
 ],
 [
@@ -10953,6 +11047,14 @@ const I18N_EN = {
 [
 "[demo] Perigo: ",
 " (a partir de "
+]
+],
+[
+"RC102: conectou mas não abriu (",
+"^RC102: conectou mas não abriu \\(((?:(?! · ).)+?)\\)$",
+"RC102: connected but did not open (${1})",
+[
+"RC102: conectou mas não abriu ("
 ]
 ],
 [
@@ -11763,6 +11865,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): sem dado \\(fora do cálculo\\)$",
+"${1}: no data (out of the calculation)",
+[
+": sem dado (fora do cálculo)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12265,6 +12375,14 @@ const I18N_EN = {
 "background here, without the object · ${1}",
 [
 "fundo daqui, sem o objeto · "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(fora do cálculo\\)$",
+"${1}: ${2} µSv/h (out of the calculation)",
+[
+" µSv/h (fora do cálculo)"
 ]
 ],
 [
@@ -13551,6 +13669,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?): sem dado \\(com você\\)$",
+"${1}: no data (with you)",
+[
+": sem dado (com você)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -13918,6 +14044,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): sem dado \\(em casa\\)$",
+"${1}: no data (at home)",
+[
+": sem dado (em casa)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -14239,6 +14373,23 @@ const I18N_EN = {
 ]
 ],
 [
+"chegaram ",
+"^chegaram ((?:(?! · ).)+?) pedaço\\(s\\)$",
+"${1} chunk(s) arrived",
+[
+"chegaram ",
+" pedaço(s)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(com você\\)$",
+"${1}: ${2} µSv/h (with you)",
+[
+" µSv/h (com você)"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -14545,6 +14696,14 @@ const I18N_EN = {
 [
 "registrado em ",
 " como "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(em casa\\)$",
+"${1}: ${2} µSv/h (at home)",
+[
+" µSv/h (em casa)"
 ]
 ],
 [
@@ -18181,6 +18340,14 @@ const I18N_EN = {
 "· from ${1} ${2} to ${3} ${4}",
 [
 "· de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): sem dado((?:(?! · ).)+?)$",
+"${1}: no data${2}",
+[
+": sem dado"
 ]
 ],
 [

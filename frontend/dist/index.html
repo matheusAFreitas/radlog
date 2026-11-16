@@ -59,6 +59,7 @@
 
 <aside class="side" id="side">
   <div class="side-head"><div class="brand brand-word" role="img" aria-label="RadLog"><span aria-hidden="true">RadL</span><svg class="brand-o" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><circle cx="24" cy="24" r="9.4" stroke-width="4.6"/><path stroke-width="3" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/></svg><span aria-hidden="true">g</span></div><span class="side-ver mono" id="appVersion" title="Versão do RadLog"></span></div>
+  <button type="button" class="side-cloud" id="sideCloud" title="Nuvem (Google Drive): abrir em Configurações" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17.5 18z"/></svg><span class="dot on" aria-hidden="true"></span><span class="side-cloud-t"></span></button>
   <button type="button" class="side-quick" id="btnQuick" title="Buscar (Ctrl+K)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.5 3.5" stroke-linecap="round"/></svg><span class="sq-t">Buscar</span><span class="sq-k"><kbd>Ctrl</kbd><kbd>K</kbd></span></button>
   <nav class="side-nav" id="sideNav" aria-label="Páginas">
     <button type="button" data-view="agora" aria-current="page"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 16a8.5 8.5 0 0 1 17 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/><path d="M3.5 20h17"/></svg><span>Agora</span></button>
@@ -75,7 +76,6 @@
     <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
   </nav>
-  <span class="side-fill"></span>
   <div class="side-tools">
     <button type="button" class="side-link" id="btnHistory">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
@@ -85,20 +85,11 @@
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>
       <span id="btnDemoText">Demonstração</span>
     </button>
-    <button type="button" class="side-link" id="btnEvents">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
-      Eventos
-    </button>
-    <button type="button" class="side-link" id="btnExport">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"/><path d="M14 3v6h6"/><path d="M8 13h8M8 17h5"/></svg>
-      Exportar CSV
-    </button>
   </div>
   <button type="button" class="side-link" id="btnSettings" data-view="config">
       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
     <span>Configurações</span>
     </button>
-  <button type="button" class="side-cloud" id="sideCloud" title="Nuvem (Google Drive)" hidden><span class="dot on" aria-hidden="true"></span><span></span></button>
   <div class="side-foot"><button type="button" class="pill upd-pill" id="updPill" title="Versão nova do app" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5"/><path d="M5 12l7-7 7 7"/></svg>
       <span id="updPillText">versão nova</span>
@@ -424,13 +415,13 @@
         </div>
       </div>
       <div class="heat-wrap">
-        <div class="heat" id="heat" role="img" aria-label="Mapa de calor do CPM médio por dia e hora"></div>
+        <div class="heat" id="heat" role="img" aria-label="Mapa de calor do µSv/h médio por dia e hora"></div>
       </div>
       <div class="heat-legend small muted">
         <span id="heatMin">—</span>
         <span class="heat-ramp" aria-hidden="true"></span>
         <span id="heatMax">—</span>
-        <span id="heatUnit">CPM médio · cinza = sem dados</span>
+        <span id="heatUnit">µSv/h médio · cinza = sem dados</span>
         <span class="heat-key"><i class="hk-att" aria-hidden="true"></i>teve atenção</span>
         <span class="heat-key"><i class="hk-alarm" aria-hidden="true"></i>teve alarme</span>
         <span class="heat-key"><i class="hk-danger" aria-hidden="true"></i>teve perigo</span>
@@ -2180,6 +2171,11 @@
         <p class="small muted mono path" id="dataDir">—</p>
         <button type="button" class="btn" id="btnOpenData">Abrir pasta</button>
       </fieldset>
+      <fieldset>
+        <legend>Exportar leituras</legend>
+        <p class="small muted">Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.</p>
+        <button type="button" class="btn" id="btnExport">Exportar CSV</button>
+      </fieldset>
     </div>
     <div class="set-col">
       <fieldset>
@@ -2309,6 +2305,11 @@
           <summary>Como funciona</summary>
           <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
         </details>
+      </fieldset>
+      <fieldset>
+        <legend>Eventos e log</legend>
+        <p class="small muted">O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.</p>
+        <button type="button" class="btn" id="btnEvents">Abrir eventos</button>
       </fieldset>
     </div>
     <div class="set-col">
@@ -2552,7 +2553,7 @@
 
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
-<script src="i18n-en.js"></script>
+<script src="i18n-loader.js"></script>
 <script src="i18n.js"></script>
 <script src="util.js"></script>
 <script src="confirma.js"></script>

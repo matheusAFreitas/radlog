@@ -62,6 +62,8 @@ function qkActions() {
       ? { g: "Ações", ic: QK_IC.page, t: "Sair da demonstração", s: "volta para os dados reais", kw: "demonstracao demo simulado sair", run: () => { qkSheetClose(); demoStop(); } }
       : { g: "Ações", ic: QK_IC.page, t: "Ligar a demonstração", s: "dados simulados no app todo; nada é gravado", kw: "demonstracao demo simulado cenario testar", run: () => { qkSheetClose(); demoStart(); } },
     { g: "Ações", ic: QK_IC.pdf, t: "Relatório em PDF do Resumo", s: "do período escolhido no Resumo", kw: "relatorio pdf imprimir", run: qkReport },
+    { g: "Ações", ic: QK_IC.page, t: "Exportar leituras (CSV)", s: "Configurações › Dados e backup", kw: "exportar csv planilha leituras dados", run: () => $("btnExport").click() },
+    { g: "Ações", ic: QK_IC.page, t: "Eventos e log", s: "Configurações › Atualizações e sobre", kw: "eventos log erros registro", run: () => $("btnEvents").click() },
     { g: "Ações", ic: QK_IC.bell, t: "Testar alarme (5 s)", s: "Configurações › Alarme", kw: "testar alarme som sirene", run: () => $("btnTestAlarm").click() },
   ];
   if (qkAlarmOn()) a.splice(3, 0, { g: "Ações", ic: QK_IC.mute, t: "Silenciar o alarme", s: "a faixa continua até o nível baixar", kw: "silenciar alarme som parar", run: () => $("btnSilence").click() });
@@ -83,6 +85,7 @@ function qkSettings() {
   if (typeof setLay !== "function") return out;
   for (const f of document.querySelectorAll("#settings .set-sec fieldset")) {
     if (f.parentElement.closest("fieldset")) continue;
+    if (f.querySelector("#btnExport, #btnEvents")) continue; // já estão em Ações
     const leg = f.querySelector(":scope > legend");
     const sec = f.closest(".set-sec");
     if (!leg || !sec) continue;

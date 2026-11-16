@@ -29,7 +29,12 @@ function chartTimeFmt(c) {
 
 let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no meio)
 
+// 2.83.10 (auditoria 2.79.0 P4): os gráficos só são buscados e desenhados com
+// a sub-aba aberta; ao abrir, refreshSub (app.js) busca de novo
+const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
+
 async function refreshChart() {
+  if (!gfxShown("tempo")) return;
   const my = ++chartSeq;
   const c = state.zoom ? await api.GetChartRange(state.zoom.from, state.zoom.to) : await api.GetChart(state.range);
   if (my !== chartSeq) return;
@@ -552,7 +557,9 @@ function drawDoseChart() {
   ys[3].textContent = "0";
 }
 
-async function refreshDose() {
+// force: a régua usa a dose do período mesmo com a aba fechada
+async function refreshDose(force) {
+  if (!force && !gfxShown("tempo")) return;
   $("doseLimit").value = state.doseLimit;
   const my = ++doseSeq;
   const rcOn0 = hasRcData();

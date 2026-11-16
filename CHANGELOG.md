@@ -1,5 +1,149 @@
 # Versões
 
+## 2.83.10
+- Abertura mais leve: a tabela de tradução para o inglês (~700 KB) só
+  carrega com o app em inglês, e os gráficos da aba Gráficos (tempo, dose,
+  hora do dia, últimos dias) só são buscados e desenhados com a sub-aba
+  aberta, em vez de todos na abertura e a cada 5 minutos.
+- O log guarda o tempo de abertura da tela ("abertura: tela pronta em …"),
+  para comparar antes e depois.
+- Fita do dia: em tela estreita, a faixa do papel usa nomes curtos ("casa",
+  "você", "fora") e mostra o nome inteiro ao passar o mouse.
+- Teste novo que trava a lista de funções que o app do celular usa, para
+  uma mudança no PC não quebrar o celular sem aviso.
+
+**English**
+
+- Lighter startup: the English translation table (~700 KB) only loads with
+  the app in English, and the charts on the Charts tab (time, dose, hour of
+  day, recent days) are only fetched and drawn with their sub-tab open,
+  instead of all of them at startup and every 5 minutes.
+- The log records how long the screen took to open ("abertura: tela pronta
+  em …"), to compare before and after.
+- Day strip: on a narrow screen, the role band uses short names ("home",
+  "you", "out") and shows the full name on hover.
+- New test that locks the list of functions the phone app uses, so a change
+  on the PC can't break the phone without notice.
+
+## 2.83.9
+- Fita do dia: as linhas "com você" e "casa" viraram uma linha por
+  aparelho, "GQ GMC-800" em cima e "Radiacode 102" embaixo, com o papel de
+  cada um embaixo do nome. Se o papel mudou no dia, uma faixinha embaixo
+  da linha mostra quando (com "fora do cálculo" listrado). A dica do mouse
+  mostra os dois aparelhos e o papel de cada um.
+
+**English**
+
+- Day strip: the "with you" and "home" rows became one row per device,
+  "GQ GMC-800" on top and "Radiacode 102" below, with each one's role under
+  the name. If the role changed during the day, a thin band under the row
+  shows when (with "out of the calculation" striped). The tooltip shows
+  both devices and each one's role.
+
+## 2.83.8
+- Gráficos › Hora do dia e Padrões do fundo: na 2.83.7, o µSv/h do
+  GMC-800 usava a calibração de hoje para todos os dias. Agora cada minuto
+  usa a calibração que valia nele, como no resto do app. Vale também para
+  o "fora de casa" e o pico dos alertas na caixinha de cada hora.
+- Tendência do fundo: a caixinha de cada dia não mistura mais CPM com
+  µSv/h (a dispersão é uma razão, sem unidade).
+
+**English**
+
+- Charts › Time of day and Background patterns: in 2.83.7 the GMC-800
+  µSv/h used today's calibration for every day. Now each minute uses the
+  calibration in force at that time, like the rest of the app. This also
+  applies to "away from home" and the alert peak in each hour's box.
+- Background trend: each day's box no longer mixes CPM with µSv/h (the
+  dispersion is a ratio, with no unit).
+
+## 2.83.7
+- Gráficos › Hora do dia: o padrão por hora do GMC-800 aparecia em CPM
+  (subtítulo, escala e caixinha de cada hora). Agora fica em µSv/h, pela
+  calibração atual, como no resto do app.
+- Gráficos › Padrões do fundo: o GMC-800 também passa para µSv/h (horas,
+  dia × noite, dias da semana e meses). Na Tendência do fundo, a mediana
+  da caixinha de cada dia também.
+- Barra lateral: um degradê no pé da lista mostra que há mais páginas
+  embaixo quando a janela é baixa.
+- Ctrl+K: "Exportar leituras" e "Eventos e log" aparecem uma vez só (em
+  Ações).
+
+**English**
+
+- Charts › Time of day: the GMC-800 hourly pattern showed CPM (subtitle,
+  scale and the box for each hour). It now shows µSv/h, with the current
+  calibration, like the rest of the app.
+- Charts › Background patterns: the GMC-800 also moves to µSv/h (hours, day
+  vs. night, weekdays and months). In Background trend, the median in each
+  day's box too.
+- Sidebar: a fade at the bottom of the list shows there are more pages
+  below when the window is short.
+- Ctrl+K: "Export readings" and "Events and log" show up only once (under
+  Actions).
+
+## 2.83.6
+- Barra lateral: com a janela baixa, a barra inteira rolava e a logo
+  sumia. Agora só a lista de páginas rola; a logo, a nuvem e a busca ficam
+  presas em cima, e Baixar histórico, Demonstração e Configurações ficam
+  presas embaixo. Uma linha fina embaixo da busca mostra que a lista está
+  rolada.
+- A linha da nuvem subiu para logo abaixo da logo, com o ícone de nuvem.
+- "Eventos" e "Exportar CSV" saíram da barra: agora são os cartões "Eventos
+  e log" (Configurações › Atualizações e sobre) e "Exportar leituras"
+  (Configurações › Dados e backup). Os dois continuam no Ctrl+K.
+
+**English**
+
+- Sidebar: in a short window the whole sidebar scrolled and the logo went
+  away. Now only the page list scrolls; the logo, cloud and search stay
+  pinned at the top, and Download history, Demo and Settings stay pinned at
+  the bottom. A thin line under the search shows the list is scrolled.
+- The cloud line moved right below the logo, with a cloud icon.
+- "Events" and "Export CSV" left the sidebar: they are now the "Events and
+  log" card (Settings › Updates and about) and the "Export readings" card
+  (Settings › Data and backup). Both are still in Ctrl+K.
+
+## 2.83.5
+- Linux: ao atualizar pelo app, o AppImage novo passa a se chamar sempre
+  "radlog" na pasta das versões (o anterior vira radlog.old e é apagado
+  depois), como o RadLog.exe no Windows. Assim um atalho no menu ou na
+  área de trabalho continua valendo depois de cada atualização.
+
+**English**
+
+- Linux: when updating from the app, the new AppImage is now always named
+  "radlog" in the versions folder (the previous one becomes radlog.old and
+  is deleted later), like RadLog.exe on Windows. A shortcut in the menu or
+  on the desktop keeps working after every update.
+
+## 2.83.4
+- Linux: os títulos dos quadros (Configurações e outros) apareciam em cima
+  da borda. Agora ficam dentro do quadro, como no Windows.
+- Linux: a rolagem e a tela em geral estavam lentas porque o app abria
+  sem aceleração de vídeo (tudo desenhado pelo processador). Agora a
+  aceleração é usada quando a página pede. Se a janela ficar em branco em
+  alguma placa de vídeo, abrir com RADLOG_GPU=0 volta ao modo anterior.
+
+**English**
+
+- Linux: box titles (Settings and others) showed on top of the border. They
+  now sit inside the box, as on Windows.
+- Linux: scrolling and the screen in general were slow because the app ran
+  without graphics acceleration (everything drawn by the processor). Now
+  acceleration is used when the page asks for it. If the window turns blank
+  on some graphics card, starting it with RADLOG_GPU=0 goes back to the old
+  mode.
+
+## 2.83.3
+- Os botões da nuvem ficam desligados enquanto a ação anda: um segundo
+  clique não chega mais ao app antes da resposta do primeiro.
+
+**English**
+
+- Cloud buttons stay disabled while the action runs: a second click no
+  longer reaches the app before the first one answers.
+
 ## 2.83.2
 - Correção: clicar duas vezes seguidas em "Recomeçar a nuvem" criava duas
   nuvens com o mesmo código. O PC ficava numa e os outros aparelhos

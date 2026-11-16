@@ -1267,10 +1267,14 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .shell { display: flex; align-items: stretch; min-height: 100vh; }
 
 /* menu da esquerda */
-.side { flex: 0 0 var(--side-w); position: sticky; top: var(--barsH, 0px); align-self: flex-start; height: calc(100vh - var(--barsH, 0px)); overflow-y: auto; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3) var(--space-3); border-right: 1px solid var(--border); background: rgba(0, 0, 0, .14); scrollbar-width: thin; }
+.side { flex: 0 0 var(--side-w); position: sticky; top: var(--barsH, 0px); align-self: flex-start; height: calc(100vh - var(--barsH, 0px)); overflow: hidden; display: flex; flex-direction: column; gap: 2px; padding: var(--space-4) var(--space-3) var(--space-3); border-right: 1px solid var(--border); background: rgba(0, 0, 0, .14); scrollbar-width: thin; }
 .side .brand { padding: 2px var(--space-3) var(--space-3); font-size: var(--fs-heading); gap: var(--space-2); }
 .side .brand svg { width: 22px; height: 22px; }
-.side-nav { display: flex; flex-direction: column; gap: 1px; }
+.side > * { flex: none; }
+/* 2.83.6: só a lista do meio rola; logo, nuvem e busca ficam presas em cima e as ferramentas embaixo */
+.side > .side-nav { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: var(--space-3); border-top: 1px solid transparent; scrollbar-width: thin; }
+.side > .side-nav.scrolled { border-top-color: var(--border); }
+.side > .side-nav.more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); }
 .side-group { font-size: var(--fs-caption); color: var(--dim); padding: var(--space-4) var(--space-3) var(--space-1); }
 .side-nav .side-group:first-child { padding-top: var(--space-1); }
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
@@ -1285,7 +1289,6 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side-badge.lv-perigo { background: var(--warn); }
 .side-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--att); flex: none; }
 #navRcDot { background: var(--warn); }
-.side-fill { flex: 1 1 auto; min-height: 16px; }
 .side-tools { display: flex; flex-direction: column; gap: 1px; padding-top: var(--space-3); margin-bottom: 2px; border-top: 1px solid var(--border); }
 .side-link { display: flex; align-items: center; gap: var(--space-3); width: 100%; min-height: 34px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
 .side-link svg { flex: none; width: 16px; height: 16px; }
@@ -1373,10 +1376,10 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .shell { flex-direction: column; }
   .side { position: static; align-self: stretch; min-width: 0; height: auto; flex: none; flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-1); padding: var(--space-2) var(--space-3); border-right: 0; border-bottom: 1px solid var(--border); overflow: visible; }
   .side .brand { padding: 0 var(--space-2) 0 var(--space-1); }
-  .side-nav { order: 9; flex: 1 1 100%; flex-direction: row; overflow-x: auto; scrollbar-width: none; gap: 2px; }
+  .side > .side-nav { order: 9; flex: 1 1 100%; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding-bottom: 0; border-top: 0; scrollbar-width: none; gap: 2px; -webkit-mask-image: none; mask-image: none; }
   .side-nav button { flex: 0 0 auto; white-space: nowrap; }
   .side-nav button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--accent); }
-  .side-group, .side-fill { display: none; }
+  .side-group { display: none; }
   .side-tools { flex-direction: row; padding-top: 0; margin: 0 0 0 auto; border-top: 0; }
   .side-tools .side-link, .side > .side-link { width: 36px; padding: 0; justify-content: center; font-size: 0; gap: 0; }
   .side-tools .side-link span, .side > .side-link span { display: none; }
@@ -1821,7 +1824,11 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
 #settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
-#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { float: left; width: 100%; padding: 0 0 var(--space-1); font-size: var(--fs-heading); font-weight: 600; }
+/* o título fica dentro do quadro: posicionado, a legenda não vai para a
+   borda em nenhum motor (no WebKitGTK do Linux, o float é ignorado dentro
+   do fieldset em flex e o título caía em cima da borda; ACE, 15/11) */
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { padding-top: calc(var(--space-4) + var(--fs-heading) * 1.45 + var(--space-1) + var(--space-2)); }
+#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { position: absolute; top: var(--space-4); left: var(--space-4); right: var(--space-4); width: auto; padding: 0; line-height: 1.45; font-size: var(--fs-heading); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #settings fieldset.dev-card > legend { padding-right: 96px; }
 #settings fieldset.dev-card::after { content: attr(data-dev); position: absolute; top: calc(var(--space-4) + 2px); right: var(--space-4); padding: 1px 8px; border: 1px solid var(--accent-line); border-radius: var(--radius-pill); color: var(--accent); font-family: var(--mono); font-size: var(--fs-micro); line-height: 1.6; }
 #settings fieldset.dev-card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)); }
@@ -2164,8 +2171,21 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .ft-ctl { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; }
 .ft-say { margin: 0 0 var(--space-3); color: var(--text); }
 .fita { display: flex; flex-direction: column; gap: 6px; position: relative; cursor: pointer; }
-.ft-lane { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; align-items: center; }
+.ft-lane { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; align-items: center; }
 .ft-lb { font-size: var(--fs-caption); color: var(--muted); text-align: right; white-space: nowrap; }
+.ft-dev b { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; color: var(--text); }
+.ft-dev b i { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.ft-dev small { display: block; font-size: var(--fs-caption); color: var(--dim); line-height: 1.2; }
+.ft-roles { position: relative; height: 16px; margin-top: 3px; }
+.ft-roles span { position: absolute; top: 0; height: 16px; display: flex; align-items: center; padding: 0 6px; font-size: var(--fs-micro, 11px); color: var(--dim); border-left: 1px solid var(--border-hover, var(--border)); white-space: nowrap; overflow: hidden; }
+.ft-roles span b { font-weight: inherit; overflow: hidden; text-overflow: ellipsis; }
+.ft-roles span .ft-rs { display: none; }
+@media (max-width: 640px) {
+  .ft-roles span .ft-rl { display: none; }
+  .ft-roles span .ft-rs { display: inline; }
+}
+.ft-roles span.comigo { color: var(--text); }
+.ft-roles span.fora { color: var(--muted); background: repeating-linear-gradient(135deg, rgba(139, 151, 163, .12) 0 4px, transparent 4px 8px); }
 .ft-strip { position: relative; height: 22px; border-radius: 4px; overflow: hidden; background: var(--ft-none); }
 .ft-strip.thin { height: 10px; background: transparent; }
 .ft-strip svg { display: block; width: 100%; height: 100%; }
@@ -2173,7 +2193,7 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .ft-marks { position: relative; height: 20px; }
 .ft-marks.ft-over { height: 12px; }
 .ft-mk { position: absolute; top: 0; transform: translateX(-50%); line-height: 0; }
-.ft-hours { display: grid; grid-template-columns: 92px minmax(0, 1fr); gap: 10px; }
+.ft-hours { display: grid; grid-template-columns: 120px minmax(0, 1fr); gap: 10px; }
 .ft-hours div { display: flex; justify-content: space-between; font-family: var(--mono); font-size: var(--fs-caption); color: var(--dim); }
 .ft-tip { position: absolute; pointer-events: none; background: var(--surface-2); border: 1px solid var(--border-hover, var(--border)); border-radius: var(--radius-sm); box-shadow: var(--shadow-float); padding: 6px 10px; font-size: var(--fs-caption); white-space: nowrap; z-index: 5; }
 .ft-cursor { position: absolute; top: 0; bottom: 18px; width: 1px; background: var(--text); opacity: .5; pointer-events: none; }
@@ -2908,10 +2928,13 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .cloud-foot { justify-content: flex-end; }
 .cloud-lost summary { cursor: pointer; }
 .cloud-lost > p, .cloud-lost > .btn { margin-top: var(--space-2); }
-.side-cloud { display: flex; align-items: center; gap: var(--space-2); width: 100%; margin-top: var(--space-2); padding: var(--space-2) var(--space-3) 0; border: 0; border-top: 1px solid var(--border); background: transparent; color: var(--muted); font-size: var(--fs-caption); text-align: left; cursor: pointer; }
+.side-cloud { display: flex; align-items: center; gap: var(--space-2); width: 100%; margin: calc(-1 * var(--space-2)) 0 var(--space-3); padding: 0 var(--space-3); border: 0; background: transparent; color: var(--muted); font-size: var(--fs-caption); text-align: left; cursor: pointer; }
 .side-cloud.att { color: var(--att); }
 .side-cloud:hover { color: var(--text); }
 .side-cloud[hidden] { display: none; }
+.side-cloud svg { flex: none; }
+.side-cloud .side-cloud-t { min-width: 0; line-height: 1.3; }
+@media (max-width: 900px) { .side-cloud { width: auto; margin: 0; padding: 0 var(--space-2); } }
 @media (max-width: 640px) {
   .cloud-code { grid-template-columns: repeat(2, 1fr); }
   .cloud-inputs { grid-template-columns: minmax(0, 1fr); }
@@ -2920,3 +2943,4 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .toast.rich { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-1); }
 .toast.rich.ok { border-color: var(--accent-line); }
 .toast.rich .btn { margin-top: var(--space-1); }
+@media (max-width: 700px) { .ft-lane, .ft-hours { grid-template-columns: 84px minmax(0, 1fr); } }
