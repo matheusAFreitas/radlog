@@ -375,7 +375,10 @@ const LV_SAY = {
 function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  lvLabel($(pfx + "TileState"), lvl, word, 18);
+  // 2.87.0: a forma do nível fica no meio do trifólio; a palavra vai sozinha
+  $(pfx + "TileState").textContent = word;
+  const lv = $(pfx + "TileLv");
+  if (lv && lv._lv !== lvl) { lv._lv = lvl; lv.innerHTML = LV_PATH[lvl] || ""; }
   const sayEl = $(pfx + "TileSay");
   if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
 }
@@ -396,12 +399,6 @@ for (const pfx of ["g", "r"]) {
   d.addEventListener("toggle", () => { localSet("tileDet." + pfx, d.open ? "1" : ""); if (d.open && typeof pulseApply === "function") pulseApply(); });
 }
 
-// número dentro do anel: encolhe quando não cabe
-function dialVal(pfx, txt) {
-  const el = $(pfx + "TileVal");
-  el.textContent = txt;
-  el.setAttribute("font-size", txt.length > 6 ? "3.4" : txt.length > 4 ? "4.2" : "5.2");
-}
 
 // faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
 // grande já for CPM/CPS) e o estado na cor do nível
@@ -422,16 +419,13 @@ function renderGTile() {
   const connected = s.state === "conectado";
   const live = !!r && (connected || state.demo.active);
   const u = state.unit;
-  $("gTileUnit").textContent = UNIT_TXT[u];
   $("gTileDemo").hidden = !state.demo.active;
   $("gTile").classList.toggle("stale", !live);
   const gc = gmcConn();
   $("gTile").classList.toggle("conn-off", gc === "off");
   $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
-  dialVal("g", v ? v[u] : "—");
   tileBig("g", u, v);
-  $("gTileAlt").textContent = "";
   // os níveis do app (os mesmos que disparam os avisos), régua até 1,5× o alarme
   const k = calK(), [tA, tB] = gmcThrCPM(), top = tB * 1.5;
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
@@ -462,15 +456,12 @@ function renderRTile(st, o) {
     : st.state === "conectando" ? "Radiacode 102 · conectando…" : "Radiacode 102 · desconectado";
   $("rTileConn").title = on ? `Radiacode 102 conectado pelo ${via}` : st.err || "Radiacode 102";
   const u = state.rcUnit;
-  $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
   const rcc = rcConn(st);
   $("rTile").classList.toggle("conn-off", rcc === "off");
   $("rTile").classList.toggle("conn-wait", rcc === "wait");
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
-  dialVal("r", v ? v[u] : "—");
   tileBig("r", u, v);
-  $("rTileAlt").textContent = "";
   $("rTileNum").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;

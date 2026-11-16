@@ -1380,7 +1380,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .inst-fill { flex: 1 1 auto; }
 .inst-name { color: var(--muted); }
 .inst-state { font-weight: 600; white-space: nowrap; color: var(--dim); display: inline-flex; align-items: center; gap: var(--space-2); }
-.inst-read { display: flex; align-items: center; gap: var(--space-4); min-width: 0; cursor: pointer; }
+.inst-read { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); min-width: 0; cursor: pointer; }
 .inst-read .demo-tag { align-self: center; }
 .inst-spark { flex: 1 1 auto; min-width: 48px; height: 38px; margin-left: var(--space-3); overflow: visible; }
 .inst-spark polyline { fill: none; stroke: var(--sc); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
@@ -1392,11 +1392,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 /* mostrador no logo (ideia 1): o arco de fora enche pelas três faixas */
 .dial { width: 148px; height: 148px; flex: none; align-self: center; overflow: visible; }
 .dial-col { display: flex; flex-direction: column; align-items: center; flex: none; align-self: center; }
-.dial-alt { font-size: var(--fs-label); color: var(--dim); margin-top: -6px; min-height: 1em; }
-.dial-val { font-family: var(--mono); font-weight: 500; fill: var(--text); letter-spacing: -.02em; }
-.dial-unit { font-size: 2.8px; fill: var(--dim); }
-.inst.stale .dial-val { fill: var(--dim); }
-.inst-say { flex: 1 1 auto; min-width: 0; display: flex; flex-direction: column; gap: 2px; align-self: center; }
+.dial-lv { color: var(--lvc, var(--accent)); }
+.inst.stale .dial-lv, .inst.conn-off .dial-lv, .inst.conn-wait .dial-lv { display: none; }
+.inst-say { flex: 1 1 6.5em; min-width: 6.5em; display: flex; flex-direction: column; gap: 2px; align-self: center; }
 .inst-say .inst-state { font-size: var(--fs-number); white-space: normal; }
 .inst-sub-say { color: var(--muted); font-size: var(--fs-body); }
 .inst-say-row { display: flex; align-items: center; gap: var(--space-2); min-width: 0; margin-top: var(--space-2); }
@@ -1855,8 +1853,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 
 /* quadros da tela Agora sem conexão */
 .dial-dash { display: none; fill: none; stroke: var(--muted); stroke-width: 2.2; stroke-linecap: round; }
-.inst.conn-off .dial-ring, .inst.conn-off .dial-val, .inst.conn-off .dial-unit,
-.inst.conn-wait .dial-val, .inst.conn-wait .dial-unit { display: none; }
+.inst.conn-off .dial-ring { display: none; }
 .inst.conn-off .dial-dash { display: inline; }
 .inst.conn-wait .dial-ring { stroke: var(--att); stroke-dasharray: 3.6 3; }
 .inst.conn-wait .dial-track { stroke: var(--att); opacity: .5; animation: dl-pulse 1.4s ease-in-out infinite; }
@@ -3030,10 +3027,9 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .inst-kv b { font-weight: 500; font-size: var(--fs-title); color: var(--text); font-variant-numeric: tabular-nums; }
 .inst-tape-cap { margin: var(--space-3) 0 0; }
 .inst-detr .pu-tape { margin-top: var(--space-1); }
-.inst-det .dial { width: 96px; height: 96px; }
 @media (prefers-reduced-motion: reduce) { .inst-det > summary::before { transition: none; } }
 /* mono só em números (2.84.0): pílulas, segmentados, links e etiquetas em Plex Sans */
-.dial-unit, .dl-lv { font-family: var(--sans); }
+.dl-lv { font-family: var(--sans); }
 /* "sem dado" neutro (2.84.0): cinza, sem cara de erro */
 :root { --nodata: color-mix(in srgb, var(--muted) 35%, transparent); }
 .wh-src.nodata { color: var(--dim); }
