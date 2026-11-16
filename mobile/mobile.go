@@ -16,6 +16,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"slices"
 	"sync"
 	"time"
 	_ "time/tzdata" // reserva, se o sistema não tiver o fuso
@@ -165,12 +166,15 @@ func Call(method, args string) (out string) {
 			out = answer(nil, fmt.Errorf("erro interno em %s: %v", method, p))
 		}
 	}()
+	if !allowed(method) {
+		return answer(nil, fmt.Errorf("método desconhecido: %s", method))
+	}
 	return call(reflect.ValueOf(a), method, args)
 }
 
 func call(v reflect.Value, method, args string) string {
 	m := v.MethodByName(method)
-	if !m.IsValid() || !allowed(method) {
+	if !m.IsValid() || method == "StartMobile" {
 		return answer(nil, fmt.Errorf("método desconhecido: %s", method))
 	}
 	t := m.Type()
@@ -206,14 +210,11 @@ func call(v reflect.Value, method, args string) string {
 	return answer(r, err)
 }
 
-// allowed devolve false para o que a tela do celular não pode chamar: o
-// que é só do ciclo de vida do motor (o Kotlin cuida) ou só do desktop.
+// allowed: só o que está em app.MobileMethods (lista branca, A4 da
+// auditoria 2.79). Método novo na tela do celular entra lá e no golden do
+// TestMobileAPI.
 func allowed(method string) bool {
-	switch method {
-	case "StartMobile", "StopMobile", "MobileFlush", "IsMobile":
-		return false
-	}
-	return true
+	return slices.Contains(app.MobileMethods, method)
 }
 
 // bleHost adapta o Host ao Bluetooth do pacote radiacode.

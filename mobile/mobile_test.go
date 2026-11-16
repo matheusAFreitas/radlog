@@ -3,7 +3,10 @@ package mobile
 import (
 	"encoding/json"
 	"errors"
+	"os"
+	"path/filepath"
 	"reflect"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -85,7 +88,7 @@ func TestStartEngine(t *testing.T) {
 	if !Running() || Start("x", "", h) != nil {
 		t.Fatal("Running/Start de novo")
 	}
-	for _, m := range []string{"GetRadiacode", "GetActiveAlerts", "GetCloud", "GetSettings", "GetVersion"} {
+	for _, m := range []string{"GetRadiacode", "GetCloud", "GetSettings"} {
 		if r := got(t, Call(m, "[]")); r.E != "" || r.R == nil {
 			t.Fatalf("%s: %+v", m, r)
 		}
@@ -111,5 +114,35 @@ func TestSetTimeZone(t *testing.T) {
 	}
 	if SetTimeZone("") == nil || SetTimeZone("Nada/Nenhum") == nil {
 		t.Fatal("fuso inválido passou")
+	}
+}
+
+// A4 (auditoria 2.79): todo método que a tela do celular e o Kotlin chamam
+// está na lista branca, e nada fora dela passa.
+func TestMobileMethodsCoverUI(t *testing.T) {
+	re := regexp.MustCompile(`call\("([A-Za-z]+)"`)
+	files := []string{"../android/app/src/main/assets/www/app.js"}
+	kt, _ := filepath.Glob("../android/app/src/main/java/app/radlog/*.kt")
+	files = append(files, kt...)
+	seen := 0
+	for _, f := range files {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatal(err)
+		}
+		for _, m := range re.FindAllSubmatch(b, -1) {
+			seen++
+			if !allowed(string(m[1])) {
+				t.Errorf("%s chama %s, que não está em app.MobileMethods", filepath.Base(f), m[1])
+			}
+		}
+	}
+	if seen == 0 {
+		t.Fatal("nenhum call(\"X\") achado: o caminho do app.js mudou?")
+	}
+	for _, m := range []string{"StartMobile", "StopMobile", "MobileFlush", "IsMobile", "CloudReset", "SaveCSV"} {
+		if allowed(m) {
+			t.Errorf("%s não devia passar", m)
+		}
 	}
 }
