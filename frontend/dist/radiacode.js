@@ -1612,7 +1612,7 @@
   }
   function actRefText(s, hist) {
     const out = [];
-    if (s.refUSv > 0) out.push(`<span data-no-tr>${escHtml(s.refDist || tr("encostada"))}:</span> <span class="mono">${rateNum(s.refUSv, 2)}</span> <span data-unit-keep>${rateLbl()}</span> ${s.refDev === "radiacode" ? tr("no RC102") : tr("no GMC-800")} (<span class="mono">${fmtDM(s.refT)}</span>)`);
+    if (s.refUSv > 0) out.push(`<span>${escHtml(s.refDist || tr("encostada"))}</span>: <span class="mono">${rateNum(s.refUSv, 2)}</span> <span data-unit-keep>${rateLbl()}</span> ${s.refDev === "radiacode" ? tr("no RC102") : tr("no GMC-800")} (<span class="mono">${fmtDM(s.refT)}</span>)`);
     const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name)));
     if (last) out.push(`${tr("última medida")} <span class="mono">${fmtDM(last.t)}</span>: ${escHtml(actSummary(last))}`);
     return out.length ? out.join("<br>") : tr("ainda não medida");
@@ -1765,7 +1765,8 @@
     const steps = ["Fundo", "Colocar a amostra", "Medindo", "Resultado"];
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
-    setHTML($("rcActWhat"), `<b data-no-tr>${nm}</b> <span class="muted">${mass}${o.geometry ? " · " + escHtml(o.geometry) : ""}</span>`);
+    const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
+    setHTML($("rcActWhat"), `<b>${nm}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
       fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
@@ -1831,7 +1832,10 @@
   async function actKeep(o) {
     if (!api.SaveActSample) return;
     const c = actChoice();
-    const s = { id: "", name: (o.name || "").trim(), sub: c.saved ? c.saved.sub || "" : c.sub || "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: c.prep || "", note: c.note || "" };
+    // nome do preset: grava no idioma da tela (o cartão fica com o nome dele)
+    const pk = (o.sampleId || "").startsWith("p:") ? ACT_PRESETS[o.sampleId.slice(2)] : null;
+    const nm0 = (o.name || "").trim(), nm = pk && pk.name && nm0 === pk.name ? tr(pk.label) : nm0;
+    const s = { id: "", name: nm, sub: c.saved ? c.saved.sub || "" : c.sub || "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: c.prep || "", note: c.note || "" };
     const err = o === act.v?.opts ? $("rcActRunErr") : $("rcActErr");
     if (!s.name) { err.dataset.msg = tr("Dê um nome em Mais opções."); $("rcActMore").open = true; $("rcActName").focus(); actRender(); return; }
     try { const id = await api.SaveActSample(s); err.dataset.msg = ""; act.pick = "s:" + id; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }
