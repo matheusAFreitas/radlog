@@ -41,6 +41,9 @@ type Host interface {
 	BLEWrite(chunk []byte) error
 	// BLEClose desconecta.
 	BLEClose()
+	// BLEResubscribe liga de novo as notificações do RC102 (a resposta parou
+	// de chegar com a conexão de pé).
+	BLEResubscribe() error
 }
 
 var (
@@ -231,3 +234,4 @@ func (b bleHost) Scan(d time.Duration) ([]radiacode.BLEDevice, error) {
 func (b bleHost) Connect(addr string) error { return b.h.BLEConnect(addr) }
 func (b bleHost) Write(chunk []byte) error  { return b.h.BLEWrite(chunk) }
 func (b bleHost) Close()                    { b.h.BLEClose() }
+func (b bleHost) Resubscribe() error        { return b.h.BLEResubscribe() }
