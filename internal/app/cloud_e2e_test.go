@@ -104,7 +104,7 @@ func e2eServe(t *testing.T, a *App, extra func(w http.ResponseWriter, r *http.Re
 				http.Error(w, err.Error(), 500)
 				return
 			}
-			b = bytes.Replace(b, []byte(`<script src="i18n-en.js"></script>`), []byte(`<script src="__ponte.js"></script><script src="i18n-en.js"></script>`), 1)
+			b = bytes.Replace(b, []byte(`<script src="i18n-loader.js"></script>`), []byte(`<script src="__ponte.js"></script><script src="i18n-loader.js"></script>`), 1)
 			w.Header().Set("Content-Type", "text/html; charset=utf-8")
 			_, _ = w.Write(b)
 			return

@@ -68,6 +68,8 @@ function ftShapesOver(levels) {
 const ftHm = (i) => { const m = i * 10; return pad(Math.floor(m / 60)) + ":" + pad(m % 60); };
 // papel de cada aparelho (roles.go)
 const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "fora do cálculo" };
+// em tela estreita a faixa do papel usa o nome curto (2.83.10)
+const FT_ROLE_SHORT = { casa: "casa", comigo: "você", fora: "fora" };
 
 // texto do trecho, para a dica: os dois aparelhos e o papel de cada um (2.83.9)
 function ftSlotTip(s, i, showRc) {
@@ -176,7 +178,7 @@ function ftDevLane(name, color, levels, roles, nowIdx, lane) {
   const changed = kinds.size > 1;
   const sub = changed ? "papel mudou" : FT_ROLE[[...kinds][0]] || "";
   const band = changed ? `<div class="ft-roles">${runs.map(([a, b, r]) =>
-    `<span class="${r}" style="left:${(a / FT_N) * 100}%;width:${((b - a) / FT_N) * 100}%">${FT_ROLE[r] || r}</span>`).join("")}</div>` : "";
+    `<span class="${r}" style="left:${(a / FT_N) * 100}%;width:${((b - a) / FT_N) * 100}%" title="${FT_ROLE[r] || r}"><b class="ft-rl">${FT_ROLE[r] || r}</b><b class="ft-rs">${FT_ROLE_SHORT[r] || r}</b></span>`).join("")}</div>` : "";
   return `<div class="ft-lane"><span class="ft-lb ft-dev"><b><i style="background:${color}"></i>${name}</b>${sub ? `<small>${sub}</small>` : ""}</span>` +
     `<div><div class="ft-marks ft-over">${ftShapesOver(levels)}</div><div class="ft-strip" data-lane="${lane}">${ftStripSvg(levels, nowIdx)}</div>${band}</div></div>`;
 }

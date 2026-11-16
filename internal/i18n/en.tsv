@@ -5691,3 +5691,5 @@ papel mudou	role changed
 {0}: sem dado (com você)	{0}: no data (with you)
 {0}: {1} µSv/h (fora do cálculo)	{0}: {1} µSv/h (out of the calculation)
 {0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)
+fora	out
+abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started

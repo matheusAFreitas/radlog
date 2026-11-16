@@ -1,5 +1,8 @@
 "use strict";
 
+// 2.83.10: quando os scripts terminaram de ler (o tempo de abertura vai para o log)
+const T_SCRIPTS = performance.now();
+
 // ---------- ponte com o Go (ou modo demonstração no navegador) ----------
 
 // a Wails expõe os métodos em window.go.<pacote Go>.App (o pacote é "app"
@@ -645,6 +648,7 @@ async function refreshStats() {
 // Fundo por dia (Gráficos › Tendência do fundo, 2.65): 14 dias e "Ver mais"
 let dailyN = 14;
 async function refreshDaily() {
+  if (!gfxShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
   // GetDaily conta dias do calendário (até 60): pede um a mais para saber se tem mais
   const days = await api.GetDaily(Math.min(60, dailyN + 1));
   const tb = $("days");
@@ -917,7 +921,7 @@ function refreshSub(pg) {
     else if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
     else if (s === "ano") refreshYearCal();
-    else refreshBgTrend();
+    else { refreshBgTrend(); refreshDaily(); }
   }
   // os gráficos do Radiacode são canvas: redesenha com o tamanho de agora
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
@@ -1108,6 +1112,7 @@ function wireDemo() {
 function heatMonthStart(hm) { return new Date(hm.y, hm.m - 1, 1).getTime(); }
 
 async function refreshHeat() {
+  if (!gfxShown("hora")) return; // só com a sub-aba aberta (2.83.10)
   const mm = state.heatMonthMode;
   document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
   $("heatMonthNav").hidden = !mm;
@@ -4506,6 +4511,8 @@ async function init() {
   await refreshMeasurements();
   await refreshAll();
   refreshAgora(true);
+  // tempo de abertura no log (2.83.10): para comparar antes e depois de mexer no carregamento
+  if (hasGo && goApp.UIReady) requestAnimationFrame(() => goApp.UIReady(T_SCRIPTS, performance.now()).catch(() => {}));
   if (!hasGo) toast("Modo demonstração: abra pelo app para usar o contador de verdade.");
   // Garante que o gráfico de 7 dias e as datas "hoje/ontem" virem o dia.
   setInterval(refreshAll, 5 * 60 * 1000);

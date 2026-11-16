@@ -227,7 +227,13 @@ function showReguaTab(t) {
 
 document.addEventListener("click", (e) => {
   const b = e.target.closest("[data-regua]");
-  if (b) { e.preventDefault(); openRegua(b.dataset.regua); return; }
+  if (b) {
+    e.preventDefault();
+    // a dose do período vem da aba Gráficos, que pode não ter aberto ainda (2.83.10)
+    if (!state.dose && typeof refreshDose === "function") refreshDose(true).catch(() => {}).then(() => openRegua(b.dataset.regua));
+    else openRegua(b.dataset.regua);
+    return;
+  }
   const t = e.target.closest("#rgTabs button");
   if (t) showReguaTab(t.dataset.rg);
 });
