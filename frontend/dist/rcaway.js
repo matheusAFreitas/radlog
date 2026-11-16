@@ -29,7 +29,7 @@ function onRcAway(list) {
 }
 
 const rcaMin = (q) => Math.max(1, Math.round((q.to - q.from) / 60000));
-const rcaUSv = (v) => (v > 0 ? fmt(v, usvDigits(v)) : "—");
+const rcaUSv = (v) => (v > 0 ? rateNum(v, usvDigits(v)) : "—"); // na unidade da tela (2.84.0)
 
 function rcaTile(label, value, unit, cls) {
   const d = document.createElement("div");
@@ -71,6 +71,51 @@ async function rcaUndo() {
   clearTimeout(rcaDoneTimer);
   try { await api.UndoRcAway(d.ask, (d.period && d.period.id) || 0); } catch (e) { toast(errMsg(e), true); }
   await refreshRcAway();
+}
+
+// perguntas abertas com "Ver detalhes" (o resto fica numa linha)
+const rcaOpen = new Set();
+
+function rcaCompact(box, q, list) {
+  box.className = "card rca rca-1";
+  const rc = !q.kind || q.kind === "rc";
+  const dots = document.createElement("span");
+  dots.className = "rca1-dots";
+  dots.innerHTML = q.kind === "ambos" ? '<span class="dot gmc"></span><span class="dot rc"></span>' : `<span class="dot ${rc ? "rc" : "gmc"}"></span>`;
+  dots.setAttribute("aria-hidden", "true");
+  const t = document.createElement("div");
+  t.className = "rca1-t";
+  const hint = rc ? rcaHintText(q)[0] : (awHintText(q) || [""])[0];
+  t.append(rc ? `O RC102 ficou ${hm(rcaMin(q))} sem conexão.` : "Você estava fora de casa?");
+  if (hint) { const s = document.createElement("span"); s.className = "rca1-hint"; s.textContent = " " + hint; t.appendChild(s); }
+  const sm = document.createElement("small");
+  const parts = [rc ? zoomRangeText(q.from, q.to) : awSub(q)];
+  if (rc && q.memMinutes && q.avgUSv > 0) parts.push(`média ${rateTxt(q.avgUSv)}`);
+  if (!rc && q.gmcMinutes && q.gmcUSv > 0) parts.push(`média ${rateTxt(q.gmcUSv)}`);
+  if (rc && q.gmcUSv > 0) parts.push(`GMC-800 em casa ${rateTxt(q.gmcUSv)}`);
+  if (list.length > 1) parts.push(list.length === 2 ? "mais 1 a responder" : `mais ${list.length - 1} a responder`);
+  sm.textContent = parts.join(" · ");
+  t.appendChild(sm);
+  const row = document.createElement("div");
+  row.className = "rca1-btns";
+  const btn = (label, cls, fn) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "btn" + (cls ? " " + cls : ""); b.textContent = label;
+    b.addEventListener("click", fn);
+    row.appendChild(b);
+  };
+  if (rc) {
+    btn("Comigo, fora de casa", q.hint === "fora" ? "rca-out sug" : "rca-out", () => rcaAnswer(q, "fora"));
+    btn("Em casa", q.hint === "casa" ? "sug" : "", () => rcaAnswer(q, "casa"));
+  } else {
+    btn("Estava em casa", q.hint === "casa" ? "sug" : "", () => awAnswer(q, "casa"));
+    btn("Saí de casa…", "rca-out" + (q.hint === "fora" ? " sug" : ""), () => { rcaEditing = q.id; awFocus = "name"; renderRcAway(); });
+  }
+  const more = document.createElement("button");
+  more.type = "button"; more.className = "link"; more.textContent = "Ver detalhes";
+  more.addEventListener("click", () => { rcaOpen.add(q.id); renderRcAway(); });
+  row.appendChild(more);
+  box.append(dots, t, row);
 }
 
 function renderRcAway() {
@@ -117,6 +162,9 @@ function renderRcAway() {
   box.hidden = false;
   box.className = "card rca";
   const q = vis[vis.length - 1]; // a mais recente primeiro
+  // 2.84.0 (revisão da interface): fechada, a pergunta é uma linha só
+  const kindRc = !q.kind || q.kind === "rc";
+  if ((kindRc || q.kind === "gmc" || q.kind === "ambos") && !rcaOpen.has(q.id) && rcaEditing !== q.id) { rcaCompact(box, q, list); return; }
   if (q.kind === "gmc" || q.kind === "ambos") { renderAwayAsk(box, q, list); return; }
   if (q.kind === "volta") { renderRcBack(box, q, list); return; }
   if (q.kind === "programada") { renderPlannedAsk(box, q, list); return; }
@@ -137,10 +185,10 @@ function renderRcAway() {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()),
       rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
-      rcaTile("dose no trecho", fmt(q.doseUSv, 2), "µSv"),
-      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
+      rcaTile("dose no trecho", doseNum(q.doseUSv), doseLbl()),
+      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), rateLbl(), "gmc"));
     box.appendChild(g);
   }
   const [hb, ht] = rcaHintText(q);
@@ -205,10 +253,10 @@ function renderRcBack(box, q, list) {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h"),
+      rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()),
       rcaTile("máximo", rcaUSv(q.maxUSv), q.maxAt ? `às ${hhmm(q.maxAt)}` : ""),
-      rcaTile("dose sem conexão", fmt(q.doseUSv, 2), "µSv"),
-      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), "µSv/h", "gmc"));
+      rcaTile("dose sem conexão", doseNum(q.doseUSv), doseLbl()),
+      rcaTile("GMC-800 em casa, mesmo horário", rcaUSv(q.gmcUSv), rateLbl(), "gmc"));
     box.appendChild(g);
   }
   if (rcaEditing === q.id) { box.appendChild(rcaBackForm(q)); return; }
@@ -422,10 +470,10 @@ function renderAwayAsk(box, q, list) {
     const g = document.createElement("div");
     g.className = "rca-tiles";
     g.append(
-      rcaTile("média do GMC-800", rcaUSv(q.gmcUSv), "µSv/h", "gmc"),
+      rcaTile("média do GMC-800", rcaUSv(q.gmcUSv), rateLbl(), "gmc"),
       rcaTile("máximo", rcaUSv(q.gmcMaxUSv), q.gmcMaxAt ? `às ${hhmm(q.gmcMaxAt)}` : ""),
-      rcaTile("dose no trecho", fmt(q.gmcDoseUSv, 2), "µSv"),
-      q.kind === "ambos" && q.memMinutes ? rcaTile("média do RC102", rcaUSv(q.avgUSv), "µSv/h") : rcaTile("alertas", String(q.alerts || 0), ""));
+      rcaTile("dose no trecho", doseNum(q.gmcDoseUSv), doseLbl()),
+      q.kind === "ambos" && q.memMinutes ? rcaTile("média do RC102", rcaUSv(q.avgUSv), rateLbl()) : rcaTile("alertas", String(q.alerts || 0), ""));
     box.appendChild(g);
   }
   const ht = awHintText(q);

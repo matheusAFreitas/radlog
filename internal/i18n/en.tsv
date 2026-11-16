@@ -5693,3 +5693,46 @@ papel mudou	role changed
 {0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)
 fora	out
 abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started
+GMC-800 desligado em {0} do dia	GMC-800 off for {0} of the day
+RC102 desligado em {0} do dia	RC102 off for {0} of the day
+GMC-800 desligado em {0} da semana	GMC-800 off for {0} of the week
+RC102 desligado em {0} da semana	RC102 off for {0} of the week
+GMC-800 desligado em {0} do mês	GMC-800 off for {0} of the month
+RC102 desligado em {0} do mês	RC102 off for {0} of the month
+GMC-800 desligado em {0} do ano	GMC-800 off for {0} of the year
+RC102 desligado em {0} do ano	RC102 off for {0} of the year
+Os últimos 10 segundos · cada traço é uma contagem	The last 10 seconds · each mark is one count
+GMC-800 desligado em {0} do período	GMC-800 off for {0} of the period
+RC102 desligado em {0} do período	RC102 off for {0} of the period
+{0} desligado em {1} {2}	{0} off for {1} {2}
+do dia	of the day
+da semana	of the week
+do mês	of the month
+do ano	of the year
+do período	of the period
+Unidades	Units
+Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RC102 segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. "Salvar" recarrega a tela na unidade nova.	Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. "Save" reloads the screen in the new unit.
+unidade da taxa	rate unit
+unidade da contagem	count unit
+Limite (µSv/h)	Limit (µSv/h)
+grava {0} CPM no aparelho, pela calibração do app ({1} µSv/h por CPM)	writes {0} CPM to the device, using the app's calibration ({1} µSv/h per CPM)
+O RC102 ficou {0} sem conexão.	The RC102 was disconnected for {0}.
+GMC-800 em casa {0}	GMC-800 at home {0}
+mais 1 a responder	1 more to answer
+mais {0} a responder	{0} more to answer
+Ver detalhes	See details
+Onde estão	Where they are
+mudar	change
+continua somando a dose sozinho	keeps adding up the dose on its own
+{0}/dia	{0}/day
+{0} ao longo do tempo	{0} over time
+{0} ao longo do tempo (análise)	{0} over time (analysis)
+análise: sem limites nem alarmes (eles ficam no {0})	analysis: no limits or alarms (they stay in {0})
+GMC-800 média {0} · mín {1} · máx {2} CPS	GMC-800 average {0} · min {1} · max {2} CPS
+· RC102 média {0} · máx {1} CPS	· RC102 average {0} · max {1} CPS
+mais alto por volta das {0}h ({1} {2}) · mais baixo por volta das {3}h ({4} {5})	highest around {0}h ({1} {2}) · lowest around {3}h ({4} {5})
+{0} médio (RC102) · cinza = sem dados	Average {0} (RC102) · gray = no data
+{0} médio · cinza = sem dados	Average {0} · gray = no data
+/dia	/day
+GMC-800 média {0} · mín {1} · máx {2} CPS · RC102 média {3} · máx {4} CPS	GMC-800 average {0} · min {1} · max {2} CPS · RC102 average {3} · max {4} CPS
+GMC-800 média {0} · mín {1} · máx {2} CPM · RC102 média {3} · máx {4} CPM	GMC-800 average {0} · min {1} · max {2} CPM · RC102 average {3} · max {4} CPM

@@ -4331,7 +4331,25 @@ const I18N_EN = {
 "µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
 "Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour",
 "papel mudou": "role changed",
-"fora": "out"
+"fora": "out",
+"Os últimos 10 segundos · cada traço é uma contagem": "The last 10 seconds · each mark is one count",
+"do dia": "of the day",
+"da semana": "of the week",
+"do mês": "of the month",
+"do ano": "of the year",
+"do período": "of the period",
+"Unidades": "Units",
+"Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RC102 segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. \"Salvar\" recarrega a tela na unidade nova.": "Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. \"Save\" reloads the screen in the new unit.",
+"Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RadiaCode segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. \"Salvar\" recarrega a tela na unidade nova.": "Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. \"Save\" reloads the screen in the new unit.",
+"unidade da taxa": "rate unit",
+"unidade da contagem": "count unit",
+"Limite (µSv/h)": "Limit (µSv/h)",
+"mais 1 a responder": "1 more to answer",
+"Ver detalhes": "See details",
+"Onde estão": "Where they are",
+"mudar": "change",
+"continua somando a dose sozinho": "keeps adding up the dose on its own",
+"/dia": "/day"
 },
 "patterns": [
 [
@@ -6922,6 +6940,17 @@ const I18N_EN = {
 ]
 ],
 [
+"mais alto por volta das ",
+"^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
+"highest around ${1}h (${2} ${3}) · lowest around ${4}h (${5} ${6})",
+[
+"mais alto por volta das ",
+"h (",
+") · mais baixo por volta das ",
+"h ("
+]
+],
+[
 "não consegui salvar a cópia de segurança, então não gravei nada: ",
 "^não consegui salvar a cópia de segurança, então não gravei nada: ((?:(?! · ).)+?)$",
 "couldn't save the backup copy, so nothing was written: ${1}",
@@ -7034,6 +7063,16 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
+]
+],
+[
+"grava ",
+"^grava ((?:(?! · ).)+?) CPM no aparelho, pela calibração do app \\(((?:(?! · ).)+?) µSv/h por CPM\\)$",
+"writes ${1} CPM to the device, using the app's calibration (${2} µSv/h per CPM)",
+[
+"grava ",
+" CPM no aparelho, pela calibração do app (",
+" µSv/h por CPM)"
 ]
 ],
 [
@@ -7228,6 +7267,32 @@ const I18N_EN = {
 " tem ",
 " MB, acima do limite de ",
 " MB da nuvem, e não subiu"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS · RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS · RC102 average ${4} · max ${5} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS · RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM · RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPM · RC102 average ${4} · max ${5} CPM",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPM · RadiaCode média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -7527,6 +7592,32 @@ const I18N_EN = {
 [
 "o Google respondeu com erro ",
 "; a nuvem tenta de novo sozinha"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS · RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS · RC102 average ${4} · max ${5} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS · RC102 média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM · RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPM · RC102 average ${4} · max ${5} CPM",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPM · RC102 média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -8365,6 +8456,14 @@ const I18N_EN = {
 [
 "RC102: ",
 " totais de dose recuperados dos dados brutos"
+]
+],
+[
+"análise: sem limites nem alarmes (eles ficam no ",
+"^análise: sem limites nem alarmes \\(eles ficam no ((?:(?! · ).)+?)\\)$",
+"analysis: no limits or alarms (they stay in ${1})",
+[
+"análise: sem limites nem alarmes (eles ficam no "
 ]
 ],
 [
@@ -9958,6 +10057,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) médio \\(RadiaCode\\) · cinza = sem dados$",
+"Average ${1} (RC102) · gray = no data",
+[
+" médio (RadiaCode) · cinza = sem dados"
+]
+],
+[
 "Memória: ",
 "^Memória: ((?:(?! · ).)+?) KB de ((?:(?! · ).)+?) MB usados \\(((?:(?! · ).)+?)%, em ((?:(?! · ).)+?)\\)\\.$",
 "Memory: ${1} KB of ${2} MB used (${3}%, on ${4}).",
@@ -10595,6 +10702,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) médio \\(RC102\\) · cinza = sem dados$",
+"Average ${1} (RC102) · gray = no data",
+[
+" médio (RC102) · cinza = sem dados"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -10976,6 +11091,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do período$",
+"RC102 off for ${1} of the period",
+[
+"RadiaCode desligado em ",
+" do período"
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -11159,6 +11283,35 @@ const I18N_EN = {
 " sobre o fundo · ",
 "σ · ",
 "× o fundo"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) da semana$",
+"RC102 off for ${1} of the week",
+[
+"RadiaCode desligado em ",
+" da semana"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do período$",
+"GMC-800 off for ${1} of the period",
+[
+"GMC-800 desligado em ",
+" do período"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS"
 ]
 ],
 [
@@ -11387,6 +11540,24 @@ const I18N_EN = {
 "leitura ",
 ": veio ",
 " bytes, esperava "
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) da semana$",
+"GMC-800 off for ${1} of the week",
+[
+"GMC-800 desligado em ",
+" da semana"
+]
+],
+[
+"O RadiaCode ficou ",
+"^O RadiaCode ficou ((?:(?! · ).)+?) sem conexão\\.$",
+"The RC102 was disconnected for ${1}.",
+[
+"O RadiaCode ficou ",
+" sem conexão."
 ]
 ],
 [
@@ -11791,6 +11962,50 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do dia$",
+"RC102 off for ${1} of the day",
+[
+"RadiaCode desligado em ",
+" do dia"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do mês$",
+"RC102 off for ${1} of the month",
+[
+"RadiaCode desligado em ",
+" do mês"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do ano$",
+"RC102 off for ${1} of the year",
+[
+"RadiaCode desligado em ",
+" do ano"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do período$",
+"RC102 off for ${1} of the period",
+[
+"RC102 desligado em ",
+" do período"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) ao longo do tempo \\(análise\\)$",
+"${1} over time (analysis)",
+[
+" ao longo do tempo (análise)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12101,6 +12316,52 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do dia$",
+"GMC-800 off for ${1} of the day",
+[
+"GMC-800 desligado em ",
+" do dia"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) da semana$",
+"RC102 off for ${1} of the week",
+[
+"RC102 desligado em ",
+" da semana"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do mês$",
+"GMC-800 off for ${1} of the month",
+[
+"GMC-800 desligado em ",
+" do mês"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do ano$",
+"GMC-800 off for ${1} of the year",
+[
+"GMC-800 desligado em ",
+" do ano"
+]
+],
+[
+"· RadiaCode média ",
+"^· RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"· RC102 average ${1} · max ${2} CPS",
+[
+"· RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -12301,6 +12562,15 @@ const I18N_EN = {
 "${1}: ${2} µSv/h (out of the calculation)",
 [
 " µSv/h (fora do cálculo)"
+]
+],
+[
+"O RC102 ficou ",
+"^O RC102 ficou ((?:(?! · ).)+?) sem conexão\\.$",
+"The RC102 was disconnected for ${1}.",
+[
+"O RC102 ficou ",
+" sem conexão."
 ]
 ],
 [
@@ -12783,6 +13053,41 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do dia$",
+"RC102 off for ${1} of the day",
+[
+"RC102 desligado em ",
+" do dia"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do mês$",
+"RC102 off for ${1} of the month",
+[
+"RC102 desligado em ",
+" do mês"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do ano$",
+"RC102 off for ${1} of the year",
+[
+"RC102 desligado em ",
+" do ano"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) médio · cinza = sem dados$",
+"Average ${1} · gray = no data",
+[
+" médio · cinza = sem dados"
+]
+],
+[
 "backup: erro ao salvar ",
 "^backup: erro ao salvar ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
 "backup: error saving ${1}: ${2}",
@@ -13081,6 +13386,16 @@ const I18N_EN = {
 "· RC102 média ",
 " · máx ",
 " CPM"
+]
+],
+[
+"· RC102 média ",
+"^· RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"· RC102 average ${1} · max ${2} CPS",
+[
+"· RC102 média ",
+" · máx ",
+" CPS"
 ]
 ],
 [
@@ -15411,6 +15726,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ao longo do tempo$",
+"${1} over time",
+[
+" ao longo do tempo"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -15782,6 +16105,23 @@ const I18N_EN = {
 "${1} · nothing is recorded",
 [
 " · nada é gravado"
+]
+],
+[
+"GMC-800 em casa ",
+"^GMC\\-800 em casa ((?:(?! · ).)+?)$",
+"GMC-800 at home ${1}",
+[
+"GMC-800 em casa "
+]
+],
+[
+"mais ",
+"^mais ((?:(?! · ).)+?) a responder$",
+"${1} more to answer",
+[
+"mais ",
+" a responder"
 ]
 ],
 [
@@ -16537,6 +16877,14 @@ const I18N_EN = {
 [
 "parado há ",
 " dias"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) desligado em ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"${1} off for ${2} ${3}",
+[
+" desligado em "
 ]
 ],
 [
@@ -19701,6 +20049,14 @@ const I18N_EN = {
 "max ${1}",
 [
 "máx "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)/dia$",
+"${1}/day",
+[
+"/dia"
 ]
 ],
 [

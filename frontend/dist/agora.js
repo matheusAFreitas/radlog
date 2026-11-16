@@ -14,8 +14,10 @@ function agDev() {
 }
 
 // µSv com casas que façam sentido; de 1000 µSv em diante vira mSv
+const AG_OF = { dia: "do dia", semana: "da semana", mes: "do mês", ano: "do ano" };
 function agSv(usv) {
   if (usv == null || !isFinite(usv)) return ["—", ""];
+  if (RATE_MREM) return fmtDose(usv); // mrem (2.84.0)
   if (Math.abs(usv) >= 1000) return [fmt(usv / 1000, 2), "mSv"];
   return [fmt(usv, usv < 10 ? 2 : usv < 100 ? 1 : 0), "µSv"];
 }
@@ -131,7 +133,7 @@ function renderAgDose() {
     tag.className = "wh-src";
     if (swap && swap < meas) { tag.classList.add("mixed"); tag.innerHTML = '<span class="dot" style="background:var(--swap)"></span>'; tag.append("misto"); }
     else if (!meas && gap) { tag.classList.add("mixed"); tag.textContent = "sem medição"; cell.classList.add("blankv"); }
-    else if (!meas && nod) { tag.classList.add("mixed"); tag.textContent = "sem dado"; cell.classList.add("blankv"); }
+    else if (!meas && nod) { tag.classList.add("nodata"); tag.textContent = "sem dado"; cell.classList.add("blankv"); }
     else { const who = swap ? other : main; tag.innerHTML = `<span class="dot ${who === "gmc" ? "gmc" : "rc"}"></span>`; tag.append(devName[who]); }
     k.appendChild(tag);
     const v = document.createElement("span");
@@ -159,7 +161,7 @@ function renderAgDose() {
       bar.className = "wh-mix";
       bar.setAttribute("aria-hidden", "true");
       const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--accent)");
-      for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nosig)"]]) {
+      for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nodata)"]]) {
         const i = document.createElement("i");
         i.style.width = `${(w / tot) * 100}%`;
         i.style.background = bg;
@@ -170,7 +172,8 @@ function renderAgDose() {
       const pc = (x) => { const v = (x / tot) * 100; return v < 1 ? "<1%" : `${Math.round(v)}%`; };
       if (swap) parts.push(`${pc(swap)} pelo ${devName[other]}`);
       if (gap) parts.push(`${pc(gap)} sem medição`);
-      if (nod) parts.push(`${pc(nod)} sem dado`);
+      // 2.84.0: sem dado quase sempre é o aparelho desligado; texto neutro
+      if (nod) parts.push(`${devName[main]} desligado em ${pc(nod)} ${AG_OF[p.key] || "do período"}`);
       n.textContent = parts.join(" · ");
       n.classList.remove("up");
     }

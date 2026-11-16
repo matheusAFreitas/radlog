@@ -179,7 +179,7 @@ function drawMeasureSrc(src) {
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   // o gráfico fica em CPM por dentro; os números saem em µSv/h
   const ys = $("mY").children;
-  for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : fmt(v, usvDigits(top * k)); }
+  for (let i = 0; i < 4; i++) { const v = (top - (top / 3) * i) * k; ys[i].textContent = i === 3 ? "0" : axRate(v, usvDigits(top * k)); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
@@ -459,7 +459,7 @@ function buscaFeed(dev, usv) {
 function renderMeasureBusca() {
   const dev = mBusca.dev || buscaDev(), on = dev === "radiacode" ? rcOnline() : gmcOnline();
   const last = mBusca.vals[mBusca.vals.length - 1];
-  $("mBuscaVal").textContent = last ? numU(last.v) : "—";
+  $("mBuscaVal").textContent = last ? rateNum(last.v, last.v === 0 ? 0 : usvDigits(Math.abs(last.v))) : "—";
   const old = mBusca.vals.find((x) => last && last.t - x.t <= 3000);
   // só diz "estável" depois de 3 s de leitura (antes não dá para saber)
   const enough = last && mBusca.vals.length && last.t - mBusca.vals[0].t >= 3000;
