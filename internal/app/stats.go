@@ -73,27 +73,34 @@ type Heatmap struct {
 	AwayCounts [][]int      `json:"awayCounts"`
 	AwayValues [][]*float64 `json:"awayValues"`
 	// alertas que pegaram cada hora; chave "dia-hora" (índices de Days e 0–23)
-	Alerts   map[string][]HeatAlert `json:"alerts"`
-	HourAvg  []*float64             `json:"hourAvg"` // média de cada hora em todos os dias
-	Min      *float64               `json:"min"`
-	Max      *float64               `json:"max"`
-	PeakHour int                    `json:"peakHour"` // -1 se não houver dados
-	LowHour  int                    `json:"lowHour"`
-	Minutes  int                    `json:"minutes"`
+	Alerts  map[string][]HeatAlert `json:"alerts"`
+	HourAvg []*float64             `json:"hourAvg"` // média de cada hora em todos os dias
+	Min     *float64               `json:"min"`
+	Max     *float64               `json:"max"`
+	// o mesmo em µSv/h, cada minuto pela calibração que valia nele (2.83.8):
+	// a tela mostra só µSv/h; os de CPM ficam para o σ
+	HourAvgUSv []*float64   `json:"hourAvgUSv"`
+	MinUSv     *float64     `json:"minUSv"`
+	MaxUSv     *float64     `json:"maxUSv"`
+	AwayUSv    [][]*float64 `json:"awayUSv"`
+	PeakHour   int          `json:"peakHour"` // -1 se não houver dados
+	LowHour    int          `json:"lowHour"`
+	Minutes    int          `json:"minutes"`
 	// "" = GMC (CPM); "radiacode" = valores em µSv/h (2.5)
 	Device string `json:"device,omitempty"`
 }
 
 // HeatAlert é um alerta que aconteceu (ao menos em parte) numa hora do mapa.
 type HeatAlert struct {
-	Level string  `json:"level"` // "atencao" ou "alarme"
-	Time  int64   `json:"time"`
-	Peak  float64 `json:"peak"`
-	Retro bool    `json:"retro"`
+	Level   string  `json:"level"` // "atencao" ou "alarme"
+	Time    int64   `json:"time"`
+	Peak    float64 `json:"peak"`
+	PeakUSv float64 `json:"peakUSv"` // pela calibração do momento do alerta
+	Retro   bool    `json:"retro"`
 }
 
 // heatAlerts marca as horas em que houve alerta do GMC.
-func (a *App) heatAlerts(first time.Time, days int, dev string) map[string][]HeatAlert {
+func (a *App) heatAlerts(first time.Time, days int, dev string, tl calTL) map[string][]HeatAlert {
 	out := map[string][]HeatAlert{}
 	end := first.AddDate(0, 0, days)
 	now := time.Now()
@@ -126,7 +133,13 @@ func (a *App) heatAlerts(first time.Time, days int, dev string) map[string][]Hea
 		if peak == 0 {
 			peak = e.CPM
 		}
-		ha := HeatAlert{Level: e.Level, Time: e.Time, Peak: peak, Retro: e.Retro}
+		ha := HeatAlert{Level: e.Level, Time: e.Time, Peak: peak, PeakUSv: e.PeakUSv, Retro: e.Retro}
+		switch {
+		case dev == devRC:
+			ha.PeakUSv = peak
+		case ha.PeakUSv == 0 && peak > 0:
+			ha.PeakUSv = tl.USvAt(start, peak)
+		}
 		if ha.Level == "" {
 			ha.Level = "atencao"
 		}
@@ -191,8 +204,8 @@ func (a *App) GetHeatmapMonthDev(year, month int, dev string) (Heatmap, error) {
 	days := int(math.Round(end.Sub(first).Hours() / 24))
 	if days < 1 {
 		return Heatmap{Days: []int64{}, Values: [][]*float64{}, USv: [][]*float64{}, Counts: [][]int{},
-			AwayCounts: [][]int{}, AwayValues: [][]*float64{}, Alerts: map[string][]HeatAlert{},
-			HourAvg: make([]*float64, 24), PeakHour: -1, LowHour: -1, Device: dev}, nil
+			AwayCounts: [][]int{}, AwayValues: [][]*float64{}, AwayUSv: [][]*float64{}, Alerts: map[string][]HeatAlert{},
+			HourAvg: make([]*float64, 24), HourAvgUSv: make([]*float64, 24), PeakHour: -1, LowHour: -1, Device: dev}, nil
 	}
 	return a.heatmapFromDev(first, days, dev)
 }
@@ -228,10 +241,11 @@ func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, er
 	usum := make([][24]float64, days)
 	cnt := make([][24]int, days)
 	asum := make([][24]float64, days)
+	ausum := make([][24]float64, days)
 	acnt := make([][24]int, days)
 	away := a.awayChecker()
 	measuring := a.measuringChecker()
-	var hsum [24]float64
+	var hsum, husum [24]float64
 	var hcnt [24]int
 	h := Heatmap{PeakHour: -1, LowHour: -1, Minutes: len(pts)}
 	for _, p := range pts {
@@ -245,19 +259,21 @@ func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, er
 		if measuring(p.T) {
 			continue // objeto encostado no contador: não é o padrão da casa
 		}
+		u := p.CPM
+		if dev != devRC {
+			u = tl.USv(p) // pela calibração que valia nesse minuto
+		}
 		if away(p.T) {
 			asum[i][hr] += p.CPM
+			ausum[i][hr] += u
 			acnt[i][hr]++
 			continue
 		}
 		sum[i][hr] += p.CPM
-		if dev == devRC {
-			usum[i][hr] += p.CPM
-		} else {
-			usum[i][hr] += tl.USv(p) // pela calibração que valia nesse minuto
-		}
+		usum[i][hr] += u
 		cnt[i][hr]++
 		hsum[hr] += p.CPM
+		husum[hr] += u
 		hcnt[hr]++
 	}
 	for i := 0; i < days; i++ {
@@ -267,12 +283,15 @@ func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, er
 		crow := make([]int, 24)
 		arow := make([]int, 24)
 		avrow := make([]*float64, 24)
+		aurow := make([]*float64, 24)
 		for hr := 0; hr < 24; hr++ {
 			crow[hr] = cnt[i][hr]
 			arow[hr] = acnt[i][hr]
 			if acnt[i][hr] > 0 {
 				av := asum[i][hr] / float64(acnt[i][hr])
 				avrow[hr] = &av
+				au := ausum[i][hr] / float64(acnt[i][hr])
+				aurow[hr] = &au
 			}
 			if cnt[i][hr] == 0 {
 				continue
@@ -289,26 +308,39 @@ func (a *App) heatmapFromDev(first time.Time, days int, dev string) (Heatmap, er
 				mx := v
 				h.Max = &mx
 			}
+			if h.MinUSv == nil || u < *h.MinUSv {
+				mn := u
+				h.MinUSv = &mn
+			}
+			if h.MaxUSv == nil || u > *h.MaxUSv {
+				mx := u
+				h.MaxUSv = &mx
+			}
 		}
 		h.Values = append(h.Values, row)
 		h.USv = append(h.USv, urow)
 		h.Counts = append(h.Counts, crow)
 		h.AwayCounts = append(h.AwayCounts, arow)
 		h.AwayValues = append(h.AwayValues, avrow)
+		h.AwayUSv = append(h.AwayUSv, aurow)
 	}
-	h.Alerts = a.heatAlerts(first, days, dev)
+	h.Alerts = a.heatAlerts(first, days, dev, tl)
 	h.Device = dev
 	h.HourAvg = make([]*float64, 24)
+	h.HourAvgUSv = make([]*float64, 24)
 	for hr := 0; hr < 24; hr++ {
 		if hcnt[hr] == 0 {
 			continue
 		}
 		v := hsum[hr] / float64(hcnt[hr])
 		h.HourAvg[hr] = &v
-		if h.PeakHour < 0 || v > *h.HourAvg[h.PeakHour] {
+		hu := husum[hr] / float64(hcnt[hr])
+		h.HourAvgUSv[hr] = &hu
+		// mais alto e mais baixo pelo µSv/h, que é o que a tela mostra
+		if h.PeakHour < 0 || hu > *h.HourAvgUSv[h.PeakHour] {
 			h.PeakHour = hr
 		}
-		if h.LowHour < 0 || v < *h.HourAvg[h.LowHour] {
+		if h.LowHour < 0 || hu < *h.HourAvgUSv[h.LowHour] {
 			h.LowHour = hr
 		}
 	}

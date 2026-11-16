@@ -1,5 +1,22 @@
 # Versões
 
+## 2.83.8
+- Gráficos › Hora do dia e Padrões do fundo: na 2.83.7, o µSv/h do
+  GMC-800 usava a calibração de hoje para todos os dias. Agora cada minuto
+  usa a calibração que valia nele, como no resto do app. Vale também para
+  o "fora de casa" e o pico dos alertas na caixinha de cada hora.
+- Tendência do fundo: a caixinha de cada dia não mistura mais CPM com
+  µSv/h (a dispersão é uma razão, sem unidade).
+
+**English**
+
+- Charts › Time of day and Background patterns: in 2.83.7 the GMC-800
+  µSv/h used today's calibration for every day. Now each minute uses the
+  calibration in force at that time, like the rest of the app. This also
+  applies to "away from home" and the alert peak in each hour's box.
+- Background trend: each day's box no longer mixes CPM with µSv/h (the
+  dispersion is a ratio, with no unit).
+
 ## 2.83.7
 - Gráficos › Hora do dia: o padrão por hora do GMC-800 aparecia em CPM
   (subtítulo, escala e caixinha de cada hora). Agora fica em µSv/h, pela

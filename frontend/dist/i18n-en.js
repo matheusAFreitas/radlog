@@ -6457,6 +6457,17 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) \\(σ real ÷ σ do acaso, nas contagens\\) · mediana ((?:(?! · ).)+?) · n = ((?:(?! · ).)+?) min$",
+"${1} · dispersion ${2} (real σ ÷ chance σ, in counts) · median ${3} · n = ${4} min",
+[
+" · dispersão ",
+" (σ real ÷ σ do acaso, nas contagens) · mediana ",
+" · n = ",
+" min"
+]
+],
+[
 "limpeza: ",
 "^limpeza: ((?:(?! · ).)+?) pastas antigas do WebView apagadas em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) ficaram para depois\\)$",
 "cleanup: ${1} old WebView folders deleted in ${2} (${3} left for later)",
@@ -7977,19 +7988,6 @@ const I18N_EN = {
 "same as background: if the object emits anything, it is less than +${1}",
 [
 "igual ao fundo: se o objeto emite algo, é menos que +"
-]
-],
-[
-"",
-"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) · σ real ((?:(?! · ).)+?) ÷ acaso ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) · n = ((?:(?! · ).)+?) min$",
-"${1} · dispersion ${2} · real σ ${3} ÷ chance ${4} · median ${5} · n = ${6} min",
-[
-" · dispersão ",
-" · σ real ",
-" ÷ acaso ",
-" · mediana ",
-" · n = ",
-" min"
 ]
 ],
 [
