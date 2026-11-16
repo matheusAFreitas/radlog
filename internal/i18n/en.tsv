@@ -5678,3 +5678,5 @@ Bluetooth: o app ainda não ligou o rádio	Bluetooth: the app hasn't turned on t
 RC102 (Bluetooth): sem resposta em 10 s ao pedido {0}: {1}	RC102 (Bluetooth): no answer in 10 s to request {0}: {1}
 chegaram {0} pedaço(s)	{0} chunk(s) arrived
 nada chegou	nothing arrived
+RC102: conectou mas não abriu ({0})	RC102: connected but did not open ({0})
+RC102: não conectou ({0}); próxima tentativa pelo Bluetooth em {1}	RC102: did not connect ({0}); next Bluetooth try in {1}
