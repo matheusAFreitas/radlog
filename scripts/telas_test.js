@@ -10,7 +10,7 @@ let pw;
 try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
 const path = require("path");
 
-const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "alertas", "fora", "medir", "alara", "chuva", "config"];
+const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "alertas", "fora", "medir", "chuva", "config"];
 const SIZES = [{ width: 1280, height: 900 }, { width: 412, height: 915 }];
 const page0 = "file://" + path.resolve(__dirname, "../frontend/dist/index.html");
 

@@ -81,9 +81,6 @@ type Settings struct {
 	NoUpdateCheck   bool   `json:"noUpdateCheck"`
 	SkipVersion     string `json:"skipVersion"`     // "Pular esta versão"
 	KeepOldVersions bool   `json:"keepOldVersions"` // não apagar as versões antigas depois de atualizar
-	// sincronização entre PCs: aceitar conexões (porta 47862) e não sincronizar sozinho
-	SyncListen bool `json:"syncListen"`
-	NoSyncAuto bool `json:"noSyncAuto"`
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
 	// Radiacode (radiacode.go): não procurar o aparelho; endereço Bluetooth
@@ -436,7 +433,7 @@ type App struct {
 	noCount  noCountState
 	interf   interferenceDetector
 	upd      updater
-	sync     syncState  // sincronização entre PCs (sync.go)
+	inv      invCache   // resumo dos dias gravados, para a nuvem (delta.go)
 	cloud    cloudState // nuvem no Google Drive (cloud.go)
 	rc       rcState    // RC102 (radiacode.go)
 
@@ -539,7 +536,6 @@ func (a *App) startup(ctx context.Context) {
 	a.goLoop("alertSecondsLoop", a.alertSecondsLoop)
 	a.goLoop("memoryWatch", a.memoryWatch)
 	a.goLoop("pendingRetry", a.pendingRetry)
-	a.goLoop("syncLoop", a.syncLoop)
 	a.goLoop("cloudLoop", a.cloudLoop)
 	a.goLoop("rcLoop", a.rcLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })

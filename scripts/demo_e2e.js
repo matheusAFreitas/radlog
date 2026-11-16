@@ -50,7 +50,7 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   if (!d.sound || d.speed !== 10) fail("som e velocidade: " + JSON.stringify(d));
 
   // 3) páginas com o mundo simulado
-  for (const v of ["graficos", "resumo", "alara", "alertas", "medir", "fora", "gmc", "radiacode", "agora"]) {
+  for (const v of ["graficos", "resumo", "alertas", "medir", "fora", "gmc", "radiacode", "agora"]) {
     await p.click(`#sideNav [data-view="${v}"]`);
     await p.waitForTimeout(700);
   }

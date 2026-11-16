@@ -199,11 +199,46 @@ func (a *App) GetDoseOrigin(days int) (DoseOrigin, error) {
 		days = 7
 	}
 	now := time.Now()
-	from := now.Add(-time.Duration(days) * 24 * time.Hour)
-	out := DoseOrigin{From: from.UnixMilli(), To: now.UnixMilli(), Items: []DoseOriginItem{}}
-	ds, err := a.GetDayStrip(from.UnixMilli(), now.UnixMilli())
-	if err != nil {
-		return out, err
+	return a.GetDoseOriginRange(now.Add(-time.Duration(days)*24*time.Hour).UnixMilli(), now.UnixMilli())
+}
+
+// originMaxSpan: o quadro do Resumo vai até um ano; a fita é lida em
+// pedaços de 7 dias (ela mesma para em 8).
+const originMaxSpan = 366 * 24 * time.Hour
+
+// GetDoseOriginRange faz o mesmo para um período qualquer (o do Resumo, 2.85).
+func (a *App) GetDoseOriginRange(fromMs, toMs int64) (DoseOrigin, error) {
+	to := time.UnixMilli(toMs)
+	if now := time.Now(); to.After(now) {
+		to = now
+	}
+	from := time.UnixMilli(fromMs)
+	if to.Sub(from) > originMaxSpan {
+		from = to.Add(-originMaxSpan)
+	}
+	out := DoseOrigin{From: from.UnixMilli(), To: to.UnixMilli(), Items: []DoseOriginItem{}}
+	if !to.After(from) {
+		return out, nil
+	}
+	var slots []StripSlot
+	var stepMs int64
+	for c := from; c.Before(to); c = c.Add(7 * 24 * time.Hour) {
+		e := c.Add(7 * 24 * time.Hour)
+		if e.After(to) {
+			e = to
+		}
+		ds, err := a.GetDayStrip(c.UnixMilli(), e.UnixMilli())
+		if err != nil {
+			return out, err
+		}
+		stepMs = ds.StepMs
+		for _, s := range ds.Slots {
+			// o começo de cada pedaço é arredondado para baixo: sem repetir
+			if n := len(slots); n > 0 && s.T <= slots[n-1].T {
+				continue
+			}
+			slots = append(slots, s)
+		}
 	}
 	devMin := map[string]int{}
 	type run struct {
@@ -212,7 +247,7 @@ func (a *App) GetDoseOrigin(days int) (DoseOrigin, error) {
 	}
 	var runs []run
 	var cur *run
-	for _, s := range ds.Slots {
+	for _, s := range slots {
 		if s.persN == 0 {
 			cur = nil
 			continue
@@ -228,9 +263,9 @@ func (a *App) GetDoseOrigin(days int) (DoseOrigin, error) {
 			ex := dose - base
 			out.Above += ex
 			if cur != nil && cur.to == s.T {
-				cur.to, cur.dose = s.T+ds.StepMs, cur.dose+ex
+				cur.to, cur.dose = s.T+stepMs, cur.dose+ex
 			} else {
-				runs = append(runs, run{s.T, s.T + ds.StepMs, ex})
+				runs = append(runs, run{s.T, s.T + stepMs, ex})
 				cur = &runs[len(runs)-1]
 			}
 		} else {

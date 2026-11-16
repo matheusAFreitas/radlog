@@ -183,6 +183,9 @@ async function refreshSummary() {
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }
   if (my !== sumSeq) return;
   state.sumRes = { periods, res };
+  // de onde vem a dose (era do ALARA, 2.85): só no resumo de um período
+  if (res0) refreshAlOrigin(periods[0][0], periods[0][1], periods[0][3]);
+  else $("sumOrigin").hidden = true;
   if (res0) renderSummary(res[0], periods[0]);
   else { $("sumPlot").closest(".sum-chart").hidden = false; renderCompare(res, periods); sumOverlayClear(); }
   renderSumGaps(res0 ? res[0] : null);
