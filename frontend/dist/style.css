@@ -2339,9 +2339,12 @@ dialog.qk-dlg:not([open]) { display: none; }
    à tela (a barra corta o que passa dela) */
 .qk-side[hidden] { display: none; }
 .qk-side.open > .side-link { background: var(--surface-2); color: var(--text); }
-.qk-fab-menu { position: fixed; z-index: 30; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; pointer-events: none; visibility: hidden; }
+.qk-fab-menu { position: fixed; z-index: 30; display: flex; flex-direction: column; align-items: stretch; gap: 6px; pointer-events: none; visibility: hidden;
+  /* 2.87.2: um painel opaco atrás das bolhas, para os itens da barra não aparecerem entre elas */
+  padding: 8px; background: var(--surface); border: 1px solid var(--border-hover); border-radius: var(--radius-lg); box-shadow: var(--shadow-float); opacity: 0; transition: opacity .18s; }
+.qk-side.open .qk-fab-menu { opacity: 1; }
 .qk-side.open .qk-fab-menu { visibility: visible; }
-.qk-fab-menu button { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px 0 8px; border-radius: var(--radius-pill); border: 1px solid var(--border-hover); background: var(--surface-2); color: var(--text); font: inherit; font-size: 14px; white-space: nowrap; box-shadow: var(--shadow-float); cursor: pointer; opacity: 0; transform: translateY(8px); transition: opacity .18s, transform .18s; pointer-events: none; }
+.qk-fab-menu button { display: inline-flex; align-items: center; gap: 10px; min-height: 40px; padding: 0 14px 0 8px; border-radius: var(--radius-md); border: 0; background: transparent; color: var(--text); font: inherit; font-size: 14px; white-space: nowrap; cursor: pointer; opacity: 0; transform: translateY(8px); transition: opacity .18s, transform .18s; pointer-events: none; }
 .qk-side.open .qk-fab-menu button { opacity: 1; transform: none; pointer-events: auto; }
 .qk-side.open .qk-fab-menu button:nth-child(2) { transition-delay: .03s; }
 .qk-side.open .qk-fab-menu button:nth-child(1) { transition-delay: .06s; }
@@ -2356,7 +2359,7 @@ dialog.qk-dlg:not([open]) { display: none; }
 .qk-acts { display: flex; justify-content: flex-end; gap: 8px; }
 .qk-away-ok { background: var(--away); border-color: var(--away); color: var(--bg); }
 .qk-away-ok:hover:not(:disabled) { background: color-mix(in srgb, var(--away) 85%, white); border-color: var(--away); }
-@media (prefers-reduced-motion: reduce) { .qk-fab-menu button { transition: none; } }
+@media (prefers-reduced-motion: reduce) { .qk-fab-menu, .qk-fab-menu button { transition: none; } }
 @media (max-width: 900px) { .qk-sheet { left: auto; right: 12px; top: 64px; bottom: auto; } }
 @media (max-width: 900px) { .side-quick .sq-t, .side-quick .sq-k { display: none; } .side-quick { margin: 0; padding: 0 var(--space-2); } }
 /* tamanho e espaço (2.49) */

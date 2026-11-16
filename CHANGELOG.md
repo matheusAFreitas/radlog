@@ -1,5 +1,16 @@
 # Versões
 
+## 2.87.2
+- Ações rápidas: o menu abre num painel com fundo, em vez de bolhas soltas.
+  Os itens da barra lateral não aparecem mais entre elas, e o texto fica
+  fácil de ler.
+
+**English**
+
+- Quick actions: the menu opens in a panel with a background instead of
+  loose bubbles. The sidebar items no longer show between them, and the
+  text is easy to read.
+
 ## 2.87.1
 - Agora: "detalhes" abre e fecha nos dois quadros juntos (GMC-800 e RC102).
   Abrir só um deixava o outro quadro esticado, com um espaço vazio.
