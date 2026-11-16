@@ -85,6 +85,7 @@ function qkSettings() {
   if (typeof setLay !== "function") return out;
   for (const f of document.querySelectorAll("#settings .set-sec fieldset")) {
     if (f.parentElement.closest("fieldset")) continue;
+    if (f.querySelector("#btnExport, #btnEvents")) continue; // já estão em Ações
     const leg = f.querySelector(":scope > legend");
     const sec = f.closest(".set-sec");
     if (!leg || !sec) continue;

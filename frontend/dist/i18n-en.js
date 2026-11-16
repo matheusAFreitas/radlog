@@ -3770,7 +3770,7 @@ const I18N_EN = {
 "3. Comandos candidatos (não documentados)": "3. Candidate commands (undocumented)",
 ": maior que 25 MB": ": larger than 25 MB",
 ": não encontrado": ": not found",
-"A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.": "Night (18:00–06:00) is 6% above day (+1.2 ± 0.3 CPM, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.",
+"A noite (18h–6h) fica 6% acima do dia (+0,0068 ± 0,0017 µSv/h, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.": "Night (18:00–06:00) is 6% above day (+0.0068 ± 0.0017 µSv/h, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.",
 "A pressão mudou 1,2 hPa nas 12 horas antes.": "Pressure changed 1.2 hPa in the 12 hours before.",
 "A subida é de 14 σ. O acaso não chega nisso.": "The rise is 14 σ. Chance doesn't get that far.",
 "Abrir a tela do GMC-800": "Open the GMC-800 screen",
@@ -4327,7 +4327,9 @@ const I18N_EN = {
 "Nuvem (Google Drive): abrir em Configurações": "Cloud (Google Drive): open in Settings",
 "O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.",
 "Exportar leituras": "Export readings",
-"Exportar leituras (CSV)": "Export readings (CSV)"
+"Exportar leituras (CSV)": "Export readings (CSV)",
+"µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
+"Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour"
 },
 "patterns": [
 [
@@ -7565,19 +7567,6 @@ const I18N_EN = {
 ]
 ],
 [
-"",
-"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) · σ real ((?:(?! · ).)+?) ÷ acaso ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) CPM · n = ((?:(?! · ).)+?) min$",
-"${1} · dispersion ${2} · real σ ${3} ÷ chance ${4} · median ${5} CPM · n = ${6} min",
-[
-" · dispersão ",
-" · σ real ",
-" ÷ acaso ",
-" · mediana ",
-" CPM · n = ",
-" min"
-]
-],
-[
 "ponto ",
 "^ponto ((?:(?! · ).)+?) dá ((?:(?! · ).)+?) CPM por µSv/h, fora da faixa plausível \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
 "point ${1} gives ${2} CPM per µSv/h, outside the plausible range (${3} to ${4})",
@@ -7988,6 +7977,19 @@ const I18N_EN = {
 "same as background: if the object emits anything, it is less than +${1}",
 [
 "igual ao fundo: se o objeto emite algo, é menos que +"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · dispersão ((?:(?! · ).)+?) · σ real ((?:(?! · ).)+?) ÷ acaso ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) · n = ((?:(?! · ).)+?) min$",
+"${1} · dispersion ${2} · real σ ${3} ÷ chance ${4} · median ${5} · n = ${6} min",
+[
+" · dispersão ",
+" · σ real ",
+" ÷ acaso ",
+" · mediana ",
+" · n = ",
+" min"
 ]
 ],
 [

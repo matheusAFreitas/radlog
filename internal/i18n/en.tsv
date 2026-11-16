@@ -4914,7 +4914,7 @@ Escolher o dia	Pick the day
 : maior que 25 MB	: larger than 25 MB
 : não encontrado	: not found
 A diferença ({0} ± {1}) ficou menor que duas vezes a incerteza. Meça mais tempo em cada fase, ou o material corta pouco essa radiação.	The difference ({0} ± {1}) is less than twice the uncertainty. Measure longer in each phase, or the material blocks little of this radiation.
-A noite (18h–6h) fica 6% acima do dia (+1,2 ± 0,3 CPM, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is 6% above day (+1.2 ± 0.3 CPM, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
+A noite (18h–6h) fica 6% acima do dia (+0,0068 ± 0,0017 µSv/h, 6 dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is 6% above day (+0.0068 ± 0.0017 µSv/h, 6 days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
 A noite (18h–6h) fica {0}% acima do dia (+{1} ± {2} {3}, {4} dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.	Night (18:00–06:00) is {0}% above day (+{1} ± {2} {3}, {4} days with both halves). This is the usual radon pattern: it builds up with the house closed and the air still at night.
 A pressão mudou 1,2 hPa nas 12 horas antes.	Pressure changed 1.2 hPa in the 12 hours before.
 A subida é de 14 σ. O acaso não chega nisso.	The rise is 14 σ. Chance doesn't get that far.
@@ -5247,7 +5247,7 @@ voltou ao fundo	back to background
 {0} µSv/h por CPM no fundo	{0} µSv/h per CPM at background
 {0} µSv/h por CPM no fundo (versão {1}, {2}	{0} µSv/h per CPM at background (version {1}, {2}
 {0} µSv/h por CPM · {1}	{0} µSv/h per CPM · {1}
-{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} CPM · n = {5} min	{0} · dispersion {1} · real σ {2} ÷ chance {3} · median {4} CPM · n = {5} min
+{0} · dispersão {1} · σ real {2} ÷ acaso {3} · mediana {4} · n = {5} min	{0} · dispersion {1} · real σ {2} ÷ chance {3} · median {4} · n = {5} min
 {0} · no objeto	{0} · on the object
 {0} · {1} (minuto)	{0} · {1} (minute)
 {0} · {1} g · amostra {2} · fundo {3} · {4}{5}	{0} · {1} g · sample {2} · background {3} · {4}{5}
@@ -5681,3 +5681,5 @@ Nuvem (Google Drive): abrir em Configurações	Cloud (Google Drive): open in Set
 O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.	What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.
 Exportar leituras	Export readings
 Exportar leituras (CSV)	Export readings (CSV)
+µSv/h médio · cinza = sem dados	Average µSv/h · gray = no data
+Mapa de calor do µSv/h médio por dia e hora	Heat map of average µSv/h by day and hour

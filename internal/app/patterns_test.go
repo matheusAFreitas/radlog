@@ -168,3 +168,24 @@ func TestDisconnectMarksAlerts(t *testing.T) {
 		t.Fatalf("episódio: %+v", ep)
 	}
 }
+
+// o GMC-800 também sai em µSv/h, pela calibração de agora (2.83.7)
+func TestPatternsGmcUSv(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now().Truncate(time.Minute)
+	var pts []store.Point
+	for m := now.Add(-5 * 24 * time.Hour); m.Before(now); m = m.Add(time.Minute) {
+		pts = append(pts, store.Point{T: m, CPM: 30, Src: store.SrcDevice})
+	}
+	if _, err := a.store.ImportNew(pts); err != nil {
+		t.Fatal(err)
+	}
+	p, err := a.GetPatterns(30, "")
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := 30 * a.curK()
+	if p.Unit != "µSv/h" || p.Minutes == 0 || math.Abs(p.Hours[5].Median-want) > 1e-9 || !strings.Contains(p.DNText, "µSv/h") {
+		t.Fatalf("padrões GMC: %s %d %v (quero %v) %q", p.Unit, p.Minutes, p.Hours[5].Median, want, p.DNText)
+	}
+}
