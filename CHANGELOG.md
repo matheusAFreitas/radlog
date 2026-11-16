@@ -1,5 +1,20 @@
 # Versões
 
+## 2.83.9
+- Fita do dia: as linhas "com você" e "casa" viraram uma linha por
+  aparelho, "GQ GMC-800" em cima e "Radiacode 102" embaixo, com o papel de
+  cada um embaixo do nome. Se o papel mudou no dia, uma faixinha embaixo
+  da linha mostra quando (com "fora do cálculo" listrado). A dica do mouse
+  mostra os dois aparelhos e o papel de cada um.
+
+**English**
+
+- Day strip: the "with you" and "home" rows became one row per device,
+  "GQ GMC-800" on top and "Radiacode 102" below, with each one's role under
+  the name. If the role changed during the day, a thin band under the row
+  shows when (with "out of the calculation" striped). The tooltip shows
+  both devices and each one's role.
+
 ## 2.83.8
 - Gráficos › Hora do dia e Padrões do fundo: na 2.83.7, o µSv/h do
   GMC-800 usava a calibração de hoje para todos os dias. Agora cada minuto

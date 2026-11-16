@@ -56,4 +56,17 @@ func TestDayStrip(t *testing.T) {
 	if s := ds.Slots[2]; s.Away || s.Home != "seguro" {
 		t.Errorf("de volta: %+v", s)
 	}
+	// por aparelho (2.83.9): o GMC na linha dele, com o papel de cada pedaço
+	if s := ds.Slots[0]; s.Gmc != "seguro" || s.GmcUSv <= 0 || s.GmcRole != WhereMe || s.RcRole != WhereMe || s.Rc != "" {
+		t.Errorf("aparelho fora: %+v", s)
+	}
+	if s := ds.Slots[2]; s.Gmc != "seguro" || s.GmcRole != WhereHome || s.RcRole != WhereMe {
+		t.Errorf("aparelho de volta: %+v", s)
+	}
+	if s := ds.Slots[4]; s.Gmc == "seguro" || s.Gmc == "" || s.Gmc != s.Home {
+		t.Errorf("aparelho alto: %+v", s)
+	}
+	if s := ds.Slots[5]; s.Gmc != "" || s.GmcRole != WhereHome {
+		t.Errorf("aparelho sem dado: %+v", s)
+	}
 }

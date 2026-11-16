@@ -24,6 +24,14 @@ type StripSlot struct {
 	Pers    string  `json:"pers,omitempty"`
 	PersUSv float64 `json:"persUSv,omitempty"`
 	PersDev string  `json:"persDev,omitempty"`
+	// por aparelho (2.83.9): nível e média de cada um e o papel dele no
+	// pedaço (casa, comigo ou fora do cálculo), para a fita por aparelho
+	Gmc     string  `json:"gmc,omitempty"`
+	GmcUSv  float64 `json:"gmcUSv,omitempty"`
+	GmcRole string  `json:"gmcRole"`
+	Rc      string  `json:"rc,omitempty"`
+	RcUSv   float64 `json:"rcUSv,omitempty"`
+	RcRole  string  `json:"rcRole"`
 	Away    bool    `json:"away,omitempty"`
 	Rain    float64 `json:"rain,omitempty"` // mm/h, só quando chove
 	// para a dose por origem (alara.go): minutos medidos e fundo do aparelho
@@ -122,6 +130,12 @@ func (a *App) GetDayStrip(fromMs, toMs int64) (DayStrip, error) {
 			if i < 0 || i >= n {
 				continue
 			}
+			k := key{i, "d" + dev} // o aparelho, em qualquer papel
+			if sums[k] == nil {
+				sums[k] = &acc{}
+			}
+			sums[k].sum += v
+			sums[k].n++
 			pers, persFill, home, homeFill := roles(time.UnixMilli(t))
 			for _, r := range [][3]string{{"h", home, homeFill}, {"p", pers, persFill}} {
 				// o principal vale; o que preenche só entra se o principal não mediu
@@ -137,8 +151,18 @@ func (a *App) GetDayStrip(fromMs, toMs int64) (DayStrip, error) {
 			}
 		}
 	}
+	where := a.whereChecker()
 	for i := range out.Slots {
 		s := &out.Slots[i]
+		s.GmcRole, s.RcRole = where(time.UnixMilli(s.T))
+		if c := sums[key{i, "dgmc"}]; c != nil {
+			s.GmcUSv = c.sum / float64(c.n)
+			s.Gmc = bands["gmc"].level(s.GmcUSv)
+		}
+		if c := sums[key{i, "d" + devRC}]; c != nil {
+			s.RcUSv = c.sum / float64(c.n)
+			s.Rc = bands[devRC].level(s.RcUSv)
+		}
 		for _, role := range []string{"h", "p"} {
 			best, bn, bdev := 0.0, 0, ""
 			for _, dev := range []string{"gmc", devRC} {

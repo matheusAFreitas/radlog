@@ -4329,7 +4329,8 @@ const I18N_EN = {
 "Exportar leituras": "Export readings",
 "Exportar leituras (CSV)": "Export readings (CSV)",
 "µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
-"Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour"
+"Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour",
+"papel mudou": "role changed"
 },
 "patterns": [
 [
@@ -11770,6 +11771,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): sem dado \\(fora do cálculo\\)$",
+"${1}: no data (out of the calculation)",
+[
+": sem dado (fora do cálculo)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12272,6 +12281,14 @@ const I18N_EN = {
 "background here, without the object · ${1}",
 [
 "fundo daqui, sem o objeto · "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(fora do cálculo\\)$",
+"${1}: ${2} µSv/h (out of the calculation)",
+[
+" µSv/h (fora do cálculo)"
 ]
 ],
 [
@@ -13558,6 +13575,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?): sem dado \\(com você\\)$",
+"${1}: no data (with you)",
+[
+": sem dado (com você)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -13925,6 +13950,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): sem dado \\(em casa\\)$",
+"${1}: no data (at home)",
+[
+": sem dado (em casa)"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -14246,6 +14279,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(com você\\)$",
+"${1}: ${2} µSv/h (with you)",
+[
+" µSv/h (com você)"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -14552,6 +14593,14 @@ const I18N_EN = {
 [
 "registrado em ",
 " como "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) µSv/h \\(em casa\\)$",
+"${1}: ${2} µSv/h (at home)",
+[
+" µSv/h (em casa)"
 ]
 ],
 [
@@ -18188,6 +18237,14 @@ const I18N_EN = {
 "· from ${1} ${2} to ${3} ${4}",
 [
 "· de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): sem dado((?:(?! · ).)+?)$",
+"${1}: no data${2}",
+[
+": sem dado"
 ]
 ],
 [
