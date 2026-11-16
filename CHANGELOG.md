@@ -1,5 +1,24 @@
 # Versões
 
+## 2.85.1
+- Unidades: rótulos que ainda diziam µSv/h com a tela em mrem/h agora
+  seguem a unidade escolhida (a dica embaixo da régua do GMC-800 e do
+  RC102, as legendas do Resumo, do detalhe do alerta e da tendência do
+  fundo, a frase dos alarmes dos aparelhos e a da bandeja). A tabela, o
+  eixo e o resultado dos testes de distância e de blindagem também.
+- Na página do GMC-800 em mrem/h, a linha embaixo do número volta a mostrar
+  o µSv/h (estava sendo convertida para mrem/h de novo).
+
+**English**
+
+- Units: labels that still said µSv/h with the screen in mrem/h now follow
+  the chosen unit (the hint under the GMC-800 and RC102 scale, the legends
+  of the Summary, the alert detail and the background trend, the device
+  alarms sentence and the tray one). So do the table, axis and result of
+  the distance and shielding tests.
+- On the GMC-800 page in mrem/h, the line under the number shows µSv/h
+  again (it was being converted to mrem/h twice).
+
 ## 2.85.0
 - Ações rápidas saíram do botão redondo do canto e foram para o pé da barra
   lateral ("＋ Ações rápidas", junto de Baixar histórico e Configurações).

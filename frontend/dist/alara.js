@@ -215,7 +215,7 @@ function renderAlDistChart(st) {
   let h = "";
   for (let i = 0; i <= 4; i++) {
     const v = (ymax * i) / 4, y = Y(v);
-    h += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--chart-grid)"/><text x="${L - 8}" y="${(y + 4).toFixed(1)}" class="al-ax" text-anchor="end">${alNum(v, v < 1 ? 2 : 1)}</text>`;
+    h += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--chart-grid)"/><text x="${L - 8}" y="${(y + 4).toFixed(1)}" class="al-ax" text-anchor="end">${axRate(v, v < 1 ? 2 : 1)}</text>`;
   }
   const step = xmax > 100 ? 50 : xmax > 50 ? 20 : 10;
   for (let r = 0; r <= xmax; r += step) h += `<text x="${X(r).toFixed(1)}" y="${H - B + 18}" class="al-ax" text-anchor="middle">${r} cm</text>`;
@@ -233,8 +233,8 @@ function renderAlDistChart(st) {
   for (const p of pts) {
     const tr = tb.insertRow();
     tr.insertCell().textContent = `${fmt(p.cm, 0)} cm`;
-    const a = tr.insertCell(); a.className = "n"; a.textContent = `${alNum(p.netUSv, 3)} ± ${alNum(p.errUSv, 3)}` + (p.lost ? " · sumiu no fundo" : "");
-    const b = tr.insertCell(); b.className = "n"; b.textContent = p.predict != null ? alNum(p.predict, 3) : "—";
+    const a = tr.insertCell(); a.className = "n"; a.textContent = `${rateNum(p.netUSv, 3)} ± ${rateNum(p.errUSv, 3)}` + (p.lost ? " · sumiu no fundo" : "");
+    const b = tr.insertCell(); b.className = "n"; b.textContent = p.predict != null ? rateNum(p.predict, 3) : "—";
     const c = tr.insertCell(); c.className = "n"; c.textContent = fmtMin(p.seconds || 0);
   }
 }
@@ -259,7 +259,7 @@ function renderAlShieldChart(s, st) {
     h += `<text x="${L - 10}" y="${y + rh / 2 + 4}" class="al-lb" text-anchor="end">${alEsc(t)}</text>`;
     h += `<rect x="${L}" y="${y}" width="${Math.max(2, X(v) - L).toFixed(1)}" height="${rh}" rx="4" fill="${c}" fill-opacity=".75"/>`;
     h += `<line x1="${X(v - e).toFixed(1)}" x2="${X(v + e).toFixed(1)}" y1="${y + rh / 2}" y2="${y + rh / 2}" stroke="var(--text)" stroke-width="2"/>`;
-    h += `<text x="${(X(v + e) + 8).toFixed(1)}" y="${y + rh / 2 + 4}" class="al-ax">${alNum(v, 3)}</text>`;
+    h += `<text x="${(X(v + e) + 8).toFixed(1)}" y="${y + rh / 2 + 4}" class="al-ax">${rateNum(v, 3)} ${rateLbl()}</text>`;
   });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.innerHTML = h;
