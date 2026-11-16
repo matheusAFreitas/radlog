@@ -4442,7 +4442,7 @@ const I18N_EN = {
 "Outras": "Others",
 "Para voltar, é preciso medir de novo.": "To get it back, you have to measure again.",
 "Pedaços que caibam no pote, ou a peça encostada sempre do mesmo jeito.": "Pieces that fit in the jar, or the piece touching it the same way every time.",
-"Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.": "Loose stone: the result is in Bq for the whole piece, no need to weigh it. The shape differs from the calibration jar, so it's approximate.",
+"Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.": "Loose stone: the result is in Bq for the whole piece, so weighing it is optional. The shape differs from the calibration jar, so it's approximate.",
 "Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RC102 quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
 "Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RadiaCode quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
 "Pelo K-40 o app calcula quanto potássio tem.": "From K-40 the app works out how much potassium there is.",
@@ -4511,7 +4511,11 @@ const I18N_EN = {
 "valor típico": "typical value",
 "voltar": "back",
 "última medida": "last measured",
-"tempo recomendado": "recommended time"
+"tempo recomendado": "recommended time",
+"Ra-226 ≈ 24 a 105 Bq/kg": "Ra-226 ≈ 24 to 105 Bq/kg",
+"Th-232 ≈ 1.000 a 2.300 Bq/kg": "Th-232 ≈ 1,000 to 2,300 Bq/kg",
+"solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg": "soil: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg",
+"pedra solta": "loose stone"
 },
 "patterns": [
 [

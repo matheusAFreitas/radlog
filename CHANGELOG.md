@@ -1,5 +1,25 @@
 # Versões
 
+## 2.86.1
+- Atividade (Bq) em inglês: o valor típico da castanha, da areia e do
+  granito aparece traduzido; o preparo da pedra solta não sai mais com uma
+  frase trocada; o nome e a posição na linha da medida também são
+  traduzidos.
+- Na medida de uma pedra solta, a linha de cima diz "pedra solta" em vez da
+  posição do pote.
+- "Guardar como minha" a partir de um cartão da lista grava o nome no
+  idioma da tela.
+
+**English**
+
+- Activity (Bq) in English: the typical value for Brazil nuts, sand and
+  granite is translated; the loose-stone preparation no longer comes out
+  with a garbled sentence; the name and position in the measurement line
+  are translated too.
+- When measuring a loose stone, the top line says "loose stone" instead of
+  the jar position.
+- "Save as mine" from a list card saves the name in the screen's language.
+
 ## 2.86.0
 - Atividade (Bq) do RC102 repaginada, na ordem em que as coisas acontecem.
   No topo, uma linha diz se falta calibrar ou com o que está calibrado; a
