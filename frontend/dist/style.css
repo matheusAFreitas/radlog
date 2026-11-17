@@ -3309,3 +3309,6 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 #instruments.inst-float { position: fixed; top: var(--barsH, 0px); left: var(--side-w); right: 0; z-index: 15; margin: 0; padding: var(--space-2) var(--space-6); background: var(--bg); border-bottom: 1px solid var(--border); }
 #instruments.inst-float .inst-open { display: none; }
 @media (max-width: 900px) { #instruments.inst-float { left: 0; padding: var(--space-2) var(--space-4); } }
+.dd-box.dd-tog { cursor: pointer; transition: opacity .2s, border-color .2s; }
+.dd-box.dd-tog:hover { border-color: var(--border-hover); }
+.dd-box.dd-tog[aria-pressed="true"] { border-color: color-mix(in srgb, var(--c) 45%, var(--border)); }

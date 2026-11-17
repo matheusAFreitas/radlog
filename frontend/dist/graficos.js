@@ -513,13 +513,14 @@ function renderDevBoxes(box, list) {
     el.querySelector(".dd-more p").textContent = lim
       ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
       : "";
+    // 2.98.0 (ACE): o quadro inteiro liga e desliga a linha no gráfico,
+    // como antes da 2.92 (no lugar da caixa "mostrar no gráfico")
     if (list.length > 1) {
-      const l = document.createElement("label");
-      l.className = "dd-state";
-      l.innerHTML = '<input type="checkbox"> <span>mostrar no gráfico</span>';
-      l.firstChild.checked = !!state.doseShow[d.key];
-      l.firstChild.dataset.key = d.key;
-      el.appendChild(l);
+      el.classList.add("dd-tog");
+      el.setAttribute("role", "button");
+      el.tabIndex = 0;
+      el.setAttribute("aria-pressed", String(!!state.doseShow[d.key]));
+      el.title = "Clique para mostrar ou esconder no gráfico";
     }
     box.appendChild(el);
   }
@@ -536,15 +537,22 @@ function toggleDoseDev(k) {
   if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
   localSet("doseShow", JSON.stringify(s));
   document.querySelectorAll(".dd-box").forEach((b) => {
-    const on = !!s[b.dataset.key], cb = b.querySelector(".dd-state input");
-    if (!cb) return;
+    if (!b.classList.contains("dd-tog")) return;
+    const on = !!s[b.dataset.key];
     b.classList.toggle("off", !on);
-    cb.checked = on;
+    b.setAttribute("aria-pressed", String(on));
   });
   drawDoseChart();
   if (state.heatPick && state.ht) drawHeatTrecho();
 }
-document.addEventListener("change", (e) => { const b = e.target.closest(".dd-state input"); if (b) toggleDoseDev(b.dataset.key); });
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".dd-box.dd-tog");
+  if (b && !e.target.closest("details, a, button")) toggleDoseDev(b.dataset.key);
+});
+document.addEventListener("keydown", (e) => {
+  const b = e.target.classList && e.target.classList.contains("dd-tog") ? e.target : null;
+  if (b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleDoseDev(b.dataset.key); }
+});
 
 function drawDoseChart() {
   const c = state.dose, c2raw = state.dose2;

@@ -7,6 +7,9 @@
   ("voltar ao topo") saiu.
 - Com os dois quadros abertos na faixa, eles ficam lado a lado, sem empilhar.
   Com um só aberto, a faixa rola junto para não cobrir a tela.
+- Dose acumulada: clicar no quadro do aparelho volta a mostrar ou esconder a
+  linha dele no gráfico (no lugar da caixa "mostrar no gráfico"). Escondido,
+  o quadro fica apagado.
 
 **English**
 
@@ -17,6 +20,9 @@
 - With both cards open on the strip, they sit side by side instead of
   stacking. With only one open, the strip scrolls along so it doesn't cover
   the screen.
+- Accumulated dose: clicking a device's card shows or hides its line on the
+  chart again (instead of the "show on chart" box). Hidden, the card is
+  dimmed.
 
 ## 2.97.1
 - Faixa dos aparelhos (fora do Agora): abrir um quadro não deixa mais um
