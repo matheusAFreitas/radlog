@@ -16,8 +16,8 @@ import (
 // chegou desde a última vez" várias vezes por segundo.
 
 const (
-	rcSearchKeep  = 3 * time.Minute
-	rcSearchRefTT = 5 * time.Minute // refaz a referência no máximo a cada 5 min
+	rcSearchKeep  = 5*time.Minute + 30*time.Second // janela de até 5 min (2.100.0)
+	rcSearchRefTT = 5 * time.Minute                // refaz a referência no máximo a cada 5 min
 )
 
 type rcSearchPt struct {

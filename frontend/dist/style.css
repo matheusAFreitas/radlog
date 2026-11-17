@@ -3344,3 +3344,19 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .m-time .m-pct { margin-top: var(--space-2); }
 .m-time .m-pct[hidden] { display: none; }
 .m-time .m-pct .seg { width: fit-content; max-width: 100%; }
+
+/* 2.100.0: Modo busca com espectrograma ao vivo. A linha da taxa ocupa a
+   largura toda e o espectrograma fica embaixo, no mesmo eixo de tempo
+   ("agora" à direita), energia de 0 a 1500 keV na vertical */
+.rc-sr-plot { margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.rc-sr-plot #rcTrend { margin-left: 48px; width: calc(100% - 48px); }
+.rc-sr-sg { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 6px; }
+.rc-sr-ax { display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: var(--fs-micro); color: var(--dim); }
+#rcSrSg { width: 100%; height: 200px; display: block; border-radius: var(--radius-sm); background: #0A0D0F; image-rendering: pixelated; }
+.rc-sr-x { display: flex; justify-content: space-between; margin-left: 48px; }
+.rc-sr-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-left: 48px; }
+.rc-sr-like:empty { display: none; }
+.rc-sr-like b { color: var(--text); font-weight: 600; }
+.rc-sr-opts { align-items: center; }
+.rc-sr-ax span { white-space: nowrap; }
+@media (max-width: 600px) { #rcSrSg { height: 160px; } }

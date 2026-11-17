@@ -119,6 +119,7 @@ type rcState struct {
 	ring         []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today        rcToday
 	spec         rcSpecLog // espectro de minuto em minuto (espectrograma)
+	sgFast       rcSgFast  // espectro de 2 em 2 s com a aba Busca aberta (só na memória)
 	specSum      rcSpecCache
 	act          actState  // medição de atividade (Bq)
 	macc         rcMeasAcc // só a goroutine do rcRun mexe
@@ -519,6 +520,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			askAway()
 		}
 		a.rcSpecTick(dev)
+		a.rcSgFastTick(dev, dev.Kind() == "bluetooth")
 		a.rcActTick(dev)
 		for _, r := range recs {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 17 { // mensagem de texto nova
