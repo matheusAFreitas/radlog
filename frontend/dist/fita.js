@@ -112,7 +112,8 @@ function ftSay(el, day, marks, label, nowIdx) {
   const add = (t) => { const s = document.createElement("span"); s.textContent = t; el.appendChild(s); el.append(" "); };
   if (!has) add(`${label}: sem leitura ainda.`);
   else if (!alerts && !above) add(`${label}: dia tranquilo, tudo no nível seguro.`);
-  else if (alerts) add(`${label}: ${alerts} ${alerts === 1 ? "alerta" : "alertas"}.`);
+  else if (alerts === 1) add(`${label}: 1 alerta.`);
+  else if (alerts) add(`${label}: ${alerts} alertas.`);
   else add(`${label}: ${above * 10} min acima do seguro, sem alerta.`);
   const away = ftRuns(day.map((s) => !!(s && s.away)));
   if (away.length) {
@@ -272,8 +273,12 @@ function renderFitaWeek(box, strips, days, opt = {}) {
     opt.say.textContent = "";
     const s = document.createElement("span");
     s.textContent = !alerts && !above ? `${opt.label || "Semana"}: tudo no nível seguro.`
-      : !above ? `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "alerta curto" : "alertas curtos"}, nenhum trecho de 10 min acima do seguro.`
-      : `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "alerta" : "alertas"}, ${above} ${above === 1 ? "dia" : "dias"} com trecho acima do seguro.`;
+      : !above && alerts === 1 ? `${opt.label || "Semana"}: 1 alerta curto, nenhum trecho de 10 min acima do seguro.`
+      : !above ? `${opt.label || "Semana"}: ${alerts} alertas curtos, nenhum trecho de 10 min acima do seguro.`
+      : alerts === 1 && above === 1 ? `${opt.label || "Semana"}: 1 alerta, 1 dia com trecho acima do seguro.`
+      : alerts === 1 ? `${opt.label || "Semana"}: 1 alerta, ${above} dias com trecho acima do seguro.`
+      : above === 1 ? `${opt.label || "Semana"}: ${alerts} alertas, 1 dia com trecho acima do seguro.`
+      : `${opt.label || "Semana"}: ${alerts} alertas, ${above} dias com trecho acima do seguro.`;
     opt.say.appendChild(s);
   }
   const used = new Set();

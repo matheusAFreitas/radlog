@@ -516,11 +516,14 @@ function renderDevBoxes(box, list) {
     // 2.98.0 (ACE): o quadro inteiro liga e desliga a linha no gráfico,
     // como antes da 2.92 (no lugar da caixa "mostrar no gráfico")
     if (list.length > 1) {
+      // o botão (teclado, leitor de tela) é só o nome: o quadro tem "a conta"
+      // dentro, e controle dentro de botão confunde o leitor (2.99.0)
       el.classList.add("dd-tog");
-      el.setAttribute("role", "button");
-      el.tabIndex = 0;
-      el.setAttribute("aria-pressed", String(!!state.doseShow[d.key]));
       el.title = "Clique para mostrar ou esconder no gráfico";
+      const nm = el.querySelector(".dd-name");
+      nm.setAttribute("role", "button");
+      nm.tabIndex = 0;
+      nm.setAttribute("aria-pressed", String(!!state.doseShow[d.key]));
     }
     box.appendChild(el);
   }
@@ -533,14 +536,14 @@ const devName = (k) => (k === "rc" ? "RC102" : "GMC-800");
 const devColor = (k) => (k === "rc" ? COR.rc : COR.gmc);
 function toggleDoseDev(k) {
   const s = state.doseShow;
+  if (s[k] && !s[k === "rc" ? "gmc" : "rc"]) return; // o único aceso fica aceso (nunca os dois apagados)
   s[k] = !s[k];
-  if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
   localSet("doseShow", JSON.stringify(s));
   document.querySelectorAll(".dd-box").forEach((b) => {
     if (!b.classList.contains("dd-tog")) return;
     const on = !!s[b.dataset.key];
     b.classList.toggle("off", !on);
-    b.setAttribute("aria-pressed", String(on));
+    b.querySelector(".dd-name").setAttribute("aria-pressed", String(on));
   });
   drawDoseChart();
   if (state.heatPick && state.ht) drawHeatTrecho();
@@ -550,7 +553,7 @@ document.addEventListener("click", (e) => {
   if (b && !e.target.closest("details, a, button")) toggleDoseDev(b.dataset.key);
 });
 document.addEventListener("keydown", (e) => {
-  const b = e.target.classList && e.target.classList.contains("dd-tog") ? e.target : null;
+  const b = e.target.classList && e.target.classList.contains("dd-name") ? e.target.closest(".dd-box.dd-tog") : null;
   if (b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleDoseDev(b.dataset.key); }
 });
 
