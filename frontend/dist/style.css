@@ -3338,3 +3338,9 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
   .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) .inst-head { min-width: 0; flex: 0 1 auto; overflow: hidden; }
   .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) .inst-conn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 }
+
+/* 2.99.1: o "conta como tem algo" mora no bloco do tempo e só aparece no
+   automático (no fixo não vale); a caixa de Ajustes saiu */
+.m-time .m-pct { margin-top: var(--space-2); }
+.m-time .m-pct[hidden] { display: none; }
+.m-time .m-pct .seg { width: fit-content; max-width: 100%; }
