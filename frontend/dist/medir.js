@@ -438,7 +438,7 @@ function renderMeasurePrep() {
   document.querySelectorAll("#mDistSeg button").forEach((b) => b.setAttribute("aria-pressed", String(cm !== "" && +b.dataset.dist === +cm)));
   document.querySelectorAll("#mSizeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.size === o.size)));
   document.querySelectorAll("#mPctSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.pct === o.pct)));
-  $("mPctBox").hidden = !o.auto;
+  $("mPctBox").hidden = !o.maxSec; // só vale no automático (o.auto não existia: a caixa sumia sempre)
   refreshHomeBg(false);
   const rc = o.device === "radiacode";
   const warn = [

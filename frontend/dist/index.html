@@ -854,36 +854,28 @@
             </div>
           </div>
           <span class="small muted" id="mTimeHint"></span>
-        </div>
-        <details class="m-adj" id="mAdj">
-          <summary>Ajustes da medição: quando conta como “tem algo”</summary>
-          <div class="m-adj-grid">
-            <div class="m-field" hidden>
-              <label for="mSecs">Tempo</label>
-              <select id="mSecs">
-                <option value="auto600">automático, até 10 min</option>
-                <option value="auto1800" selected>automático, até 30 min</option>
-                <option value="auto3600">automático, até 1 h</option>
-                <option value="30">fixo: 30 s</option>
-                <option value="60">fixo: 1 min</option>
-                <option value="120">fixo: 2 min</option>
-                <option value="300">fixo: 5 min</option>
-                <option value="600">fixo: 10 min</option>
-                <option value="1800">fixo: 30 min</option>
-                <option value="3600">fixo: 1 h</option>
-              </select>
+          <div class="m-field m-pct" id="mPctBox">
+            <span class="m-label" id="mPctLabel">Conta como “tem algo”</span>
+            <div class="seg" role="group" aria-labelledby="mPctLabel" id="mPctSeg">
+              <button type="button" data-pct="10" aria-pressed="false">+10%</button>
+              <button type="button" data-pct="20" aria-pressed="false">+20%</button>
+              <button type="button" data-pct="50" aria-pressed="false">+50%</button>
             </div>
-            <div class="m-field" id="mPctBox">
-              <span class="m-label" id="mPctLabel">Conta como “tem algo”</span>
-              <div class="seg" role="group" aria-labelledby="mPctLabel" id="mPctSeg">
-                <button type="button" data-pct="10" aria-pressed="false">+10%</button>
-                <button type="button" data-pct="20" aria-pressed="false">+20%</button>
-                <button type="button" data-pct="50" aria-pressed="false">+50%</button>
-              </div>
-              <span class="small muted">do fundo; menor acha coisas mais fracas, mas demora mais</span>
-            </div>
+            <span class="small muted">do fundo; menor acha coisas mais fracas, mas demora mais</span>
           </div>
-        </details>
+        </div>
+        <select id="mSecs" hidden aria-hidden="true" tabindex="-1">
+          <option value="auto600">automático, até 10 min</option>
+          <option value="auto1800" selected>automático, até 30 min</option>
+          <option value="auto3600">automático, até 1 h</option>
+          <option value="30">fixo: 30 s</option>
+          <option value="60">fixo: 1 min</option>
+          <option value="120">fixo: 2 min</option>
+          <option value="300">fixo: 5 min</option>
+          <option value="600">fixo: 10 min</option>
+          <option value="1800">fixo: 30 min</option>
+          <option value="3600">fixo: 1 h</option>
+        </select>
         <p class="small m-warn" id="mOptHint" hidden></p>
         <div class="m-go">
           <button type="button" class="btn accent" id="btnMStart">Começar</button>

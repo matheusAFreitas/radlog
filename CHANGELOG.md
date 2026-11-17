@@ -1,5 +1,19 @@
 # Versões
 
+## 2.99.1
+- Medir objeto: a caixa "Ajustes da medição" saiu (no tempo fixo ela abria
+  vazia, e no automático também, porque a opção de dentro nunca aparecia). O
+  "Conta como tem algo" (+10%, +20%, +50% do fundo) agora fica logo abaixo
+  do tempo e aparece no automático, que é onde ele vale.
+
+**English**
+
+- Measure object: the "Measurement settings" box is gone (with a fixed time
+  it opened empty, and in automatic too, because the option inside never
+  showed). "Counts as something there" (+10%, +20%, +50% of background) now
+  sits right below the time and shows in automatic, which is where it
+  applies.
+
 ## 2.99.0
 - Medir objeto: antes de começar, a escolha fica à vista em "Quanto tempo
   medir": Automático (para quando tiver certeza, até 10 min, 30 min ou 1 h)
