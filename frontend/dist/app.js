@@ -3693,7 +3693,14 @@ function renderUpdate(u) {
   // diálogo
   $("updTitle").textContent = u.latest ? `Versão ${u.latest}` : "Versão nova";
   $("updSub").textContent = `Você está na ${u.current || "?"}.` + (u.canAuto ? "" : u.manual ? ` Atualizar por aqui não dá: ${u.manual}.` : "");
-  $("updNotes").textContent = (u.notes || "Sem notas.").replace(/\*\*/g, "");
+  // 2.101.2: as notas vêm nos dois idiomas (o inglês depois de "**English**"):
+  // mostra só o do idioma da tela
+  let notes = u.notes || "";
+  const enAt = notes.search(/^\*\*English\*\*\s*$/m);
+  if (enAt >= 0) notes = LANG === "en" ? notes.slice(enAt).replace(/^\*\*English\*\*\s*/, "") : notes.slice(0, enAt);
+  const updNotes = $("updNotes");
+  updNotes.textContent = (notes.trim() || "Sem notas.").replace(/\*\*/g, "");
+  if (enAt >= 0 && LANG === "en") updNotes.setAttribute("data-no-tr", ""); else updNotes.removeAttribute("data-no-tr");
   const st = $("updState");
   const msg = {
     baixando: `Baixando e conferindo… ${fmt((u.progress || 0) * 100, 0)}%`,

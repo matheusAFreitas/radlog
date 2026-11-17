@@ -31,6 +31,8 @@ const tr = (() => {
     else (byLead.get(k) || byLead.set(k, []).get(k)).push(p);
   }
   const cache = new Map();
+  // 2.101.2: sobra de português num resultado (acento ou palavra comum)
+  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|dia|dias|casa|fundo|aparelho|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui)\b/i;
   const hasWord = /[A-Za-zÀ-ú]{2}/;
   // números do Go vêm com vírgula decimal ("52,3"); os do app já saem no
   // formato do idioma ("1,239" = mil duzentos…). Só troca a vírgula quando é
@@ -88,16 +90,31 @@ const tr = (() => {
     const e = exact.get(s);
     if (e != null) return e;
     const k = s.slice(0, 3).toLowerCase();
-    const lists = generic ? [byLead.get(k) || [], anyLead] : [byLead.get(k) || []];
-    for (const list of lists) {
+    // 2.101.2: entre os moldes que batem, vale o de mais texto fixo (antes
+    // valia o primeiro: "Hoje: {0}" ganhava de "{0}: dia tranquilo, tudo no
+    // nível seguro." e o resto saía meio traduzido). Sem generic, os que
+    // começam variáveis só entram com 40%+ de texto fixo.
+    // Um molde cujo resultado ainda tem português (a parte variável não
+    // traduziu) só vale se nenhum outro der certo, e aí a frase ainda pode
+    // ser quebrada em frases ou pedaços antes.
+    let best = null, bestOut = null, half = null;
+    const tryList = (list, wideOnly) => {
       for (const p of list) {
+        if (best && p.fixed <= best.fixed) continue;
+        if (wideOnly && p.fixed * 10 < s.length * 4) continue;
         // os pedaços fixos precisam estar no texto (barato) antes da expressão
         if (!p.pieces.every((x) => s.includes(x))) continue;
-        if (list === anyLead && s.length > 300) continue;
         const m = p.re.exec(s);
-        if (m) return p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+        if (!m) continue;
+        const out = p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+        if (PT_LEFT.test(out)) { if (half == null) half = out; continue; }
+        best = p; bestOut = out;
       }
-    }
+    };
+    tryList(byLead.get(k) || [], false);
+    if (s.length <= 300) tryList(anyLead, !generic);
+    if (best) return bestOut;
+    if (half != null && generic) return half;
     // "Frase com maiúscula." ↔ "frase com maiúscula" do dicionário
     const low = s.charAt(0).toLowerCase() + s.slice(1);
     const bare = low.replace(/\.$/, "");
@@ -120,6 +137,7 @@ const tr = (() => {
     let out = one(core, false, false);
     if (out == null) out = wide(core);
     if (out == null) out = sentences(core);
+    let segFallback = null;
     if (out == null && core.includes(" · ")) {
       // pedaços juntados com " · ": traduz cada um (com e sem o "· ")
       const segs = core.split(/ (?=· )/);
@@ -128,10 +146,15 @@ const tr = (() => {
         const r = dot ? g.slice(2) : g;
         // primeiro os moldes que começam com texto fixo; os genéricos por último
         const t = (dot && one(g, false, false)) || one(r, false, false) || wide(r) || sentences(r) || one(r, false, true);
-        if (t == null) return g;
+        if (t == null) return fixNums(g);
         return dot && !t.startsWith("· ") ? "· " + t : t;
       });
-      if (ts.some((g, i) => g !== segs[i])) out = ts.join(" ");
+      if (ts.some((g, i) => g !== segs[i])) {
+        // 2.101.2: com português sobrando, um molde da frase inteira ainda
+        // pode ganhar (o resultado em pedaços fica de reserva)
+        const j = ts.join(" ");
+        if (PT_LEFT.test(j)) segFallback = j; else out = j;
+      }
     }
     if (out == null && core.length > 2 && core.startsWith("(") && core.endsWith(")")) {
       // 2.101.1: "(actínio · série do tório)": traduz o que está dentro
@@ -145,6 +168,7 @@ const tr = (() => {
       if (m) { const lp = one(m[1], false, false); if (lp != null) { const r = tr(m[2]); out = lp + ": " + (r === m[2] ? fixNums(r) : r); } }
     }
     if (out == null) out = one(core, false, true);
+    if (out == null && segFallback != null) out = segFallback;
     if (out == null) {
       // "nome (12)": contador no fim
       const m = /^(.+) \((\d+)\)$/.exec(core);
