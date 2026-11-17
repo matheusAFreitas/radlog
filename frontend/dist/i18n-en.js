@@ -4539,7 +4539,17 @@ const I18N_EN = {
 "igual ao fundo da sua casa": "same as your home background",
 "por período": "by period",
 "sem dado hoje": "no data today",
-"ano": "year"
+"ano": "year",
+"Abrir em Fundo de casa": "Open in Home background",
+"Abrir o Fundo de casa": "Open Home background",
+"Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.": "Each bar is the difference from the average, in %: to the right is above, to the left is below. The value shows on hover.",
+"Dia da semana, dia × noite e mês": "Day of week, day × night and month",
+"Fundo por dia, em tabela": "Background by day, as a table",
+"Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.": "Median of the minutes at home (no object measurement and no saturated or interfered minutes). The day × night comparison uses the days with both halves measured (6 h or more each) and compares each day with its own night, so one day's weather doesn't weigh in.",
+"Outra conta: a reta dos últimos dias": "Another calculation: the line over the last days",
+"ainda é 1 mês de dado; fica mais útil depois de um ano": "only 1 month of data so far; more useful after a year",
+"sem diferença de verdade (tudo abaixo de 1%)": "no real difference (all below 1%)",
+"Últimas semanas": "Last weeks"
 },
 "patterns": [
 [
@@ -8035,6 +8045,15 @@ const I18N_EN = {
 ]
 ],
 [
+"ainda são ",
+"^ainda são ((?:(?! · ).)+?) meses de dado; fica mais útil depois de um ano$",
+"only ${1} months of data so far; more useful after a year",
+[
+"ainda são ",
+" meses de dado; fica mais útil depois de um ano"
+]
+],
+[
 "esta versão (",
 "^esta versão \\(((?:(?! · ).)+?)\\) é mais nova que a última publicada \\(((?:(?! · ).)+?)\\)((?:(?! · ).)+?)$",
 "this version (${1}) is newer than the latest published (${2})${3}",
@@ -8703,6 +8722,15 @@ const I18N_EN = {
 ]
 ],
 [
+"junho a agosto ficaram ",
+"^junho a agosto ficaram ((?:(?! · ).)+?)% abaixo de novembro a março$",
+"June to August were ${1}% below November to March",
+[
+"junho a agosto ficaram ",
+"% abaixo de novembro a março"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) permitidos no período \\(((?:(?! · ).)+?)%\\)\\.$",
 "Above background: ${1} of ${2} allowed in the period (${3}%).",
@@ -8856,6 +8884,15 @@ const I18N_EN = {
 "A conta RC102 ÷ GMC-800 mudou: ",
 " contra ",
 " em casa."
+]
+],
+[
+"junho a agosto ficaram ",
+"^junho a agosto ficaram ((?:(?! · ).)+?)% acima de novembro a março$",
+"June to August were ${1}% above November to March",
+[
+"junho a agosto ficaram ",
+"% acima de novembro a março"
 ]
 ],
 [
@@ -10647,6 +10684,15 @@ const I18N_EN = {
 ]
 ],
 [
+"o dia mais baixo é ",
+"^o dia mais baixo é ((?:(?! · ).)+?), ((?:(?! · ).)+?)% abaixo da média$",
+"the lowest day is ${1}, ${2}% below the average",
+[
+"o dia mais baixo é ",
+"% abaixo da média"
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -10943,6 +10989,15 @@ const I18N_EN = {
 "Average ${1} (RC102) · gray = no data",
 [
 " médio (RC102) · cinza = sem dados"
+]
+],
+[
+"o dia mais alto é ",
+"^o dia mais alto é ((?:(?! · ).)+?), ((?:(?! · ).)+?)% acima da média$",
+"the highest day is ${1}, ${2}% above the average",
+[
+"o dia mais alto é ",
+"% acima da média"
 ]
 ],
 [
@@ -11556,6 +11611,15 @@ const I18N_EN = {
 " · mín ",
 " · máx ",
 " CPS"
+]
+],
+[
+"estável, ",
+"^estável, ((?:(?! · ).)+?) em relação à referência$",
+"steady, ${1} against the reference",
+[
+"estável, ",
+" em relação à referência"
 ]
 ],
 [
@@ -13126,6 +13190,15 @@ const I18N_EN = {
 [
 "subindo tudo de novo · ",
 " de "
+]
+],
+[
+"ainda medindo: faltam ",
+"^ainda medindo: faltam ((?:(?! · ).)+?) dias$",
+"still measuring: ${1} days to go",
+[
+"ainda medindo: faltam ",
+" dias"
 ]
 ],
 [
@@ -15312,6 +15385,14 @@ const I18N_EN = {
 ]
 ],
 [
+"mudou de patamar em ",
+"^mudou de patamar em ((?:(?! · ).)+?)$",
+"stepped to a new level on ${1}",
+[
+"mudou de patamar em "
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -16129,6 +16210,16 @@ const I18N_EN = {
 "${1} over time",
 [
 " ao longo do tempo"
+]
+],
+[
+"subiu ",
+"^subiu ((?:(?! · ).)+?) em ((?:(?! · ).)+?) semanas$",
+"rose ${1} in ${2} weeks",
+[
+"subiu ",
+" em ",
+" semanas"
 ]
 ],
 [

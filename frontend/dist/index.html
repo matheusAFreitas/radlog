@@ -64,6 +64,7 @@
     <button type="button" data-view="agora" aria-current="page"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 16a8.5 8.5 0 0 1 17 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/><path d="M3.5 20h17"/></svg><span>Agora</span></button>
     <span class="side-group">Análise</span>
     <button type="button" data-view="graficos"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L19 7"/></svg><span>Gráficos</span></button>
+    <button type="button" data-view="fundo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 16.5c1-1.6 2-2.4 3-2.4s2 .8 3 2.4"/></svg><span>Fundo de casa</span></button>
     <button type="button" data-view="resumo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="14" height="18" rx="2"/><path d="M10 3v18"/><path d="M3.5 7.5H6M3.5 12H6M3.5 16.5H6"/><path d="M13 8.5h4M13 12.5h4"/></svg><span>Resumo</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
@@ -287,15 +288,8 @@
 </div>
 
 <div class="page" id="pageGraficos" hidden>
-  <nav class="subtabs" role="tablist" aria-label="Gráficos" data-page="graficos">
-    <button type="button" role="tab" data-sub="tempo" aria-selected="true">Dose</button>
-    <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1">Hora do dia</button>
-    <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1">Padrões do fundo</button>
-    <button type="button" role="tab" data-sub="tendencia" aria-selected="false" tabindex="-1">Tendência do fundo</button>
-    <button type="button" role="tab" data-sub="ano" aria-selected="false" tabindex="-1">Ano</button>
-  </nav>
   <div class="graf-period" data-subpane="tempo">
-    <span class="small muted">Período dos gráficos de CPM e de dose</span>
+    <span class="small muted">Período</span>
     <div class="seg" role="group" aria-label="Período" id="rangeSeg">
       <button type="button" data-range="15m" aria-pressed="false">15 min</button>
       <button type="button" data-range="30m" aria-pressed="false">30 min</button>
@@ -413,6 +407,18 @@
         <p class="small muted note" id="doseNote"></p>
       </details>
     </section>
+</div>
+<div class="page" id="pageFundo" hidden>
+  <section class="card fc-sum" id="fcSum">
+    <h2>Fundo de casa</h2>
+    <p class="fc-say" id="fcSay">Carregando…</p>
+    <div class="subtabs fc-rows" role="tablist" aria-label="Fundo de casa" data-page="fundo">
+      <button type="button" role="tab" data-sub="tendencia" aria-selected="true"><b>Últimas semanas</b><span class="fc-a" id="fcA_tendencia">—</span></button>
+      <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1"><b>Hora do dia</b><span class="fc-a" id="fcA_hora">—</span></button>
+      <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1"><b>Dia da semana</b><span class="fc-a" id="fcA_padroes">—</span></button>
+      <button type="button" role="tab" data-sub="ano" aria-selected="false" tabindex="-1"><b>Ano</b><span class="fc-a" id="fcA_ano">—</span></button>
+    </div>
+  </section>
   <section class="card view-graficos" id="heatCard" role="tabpanel" data-subpane="hora" hidden>
       <div class="chart-head">
         <div>
@@ -470,7 +476,7 @@
   <section class="card view-graficos" id="patCard" role="tabpanel" data-subpane="padroes" hidden>
       <div class="chart-head">
         <div>
-          <h2>Padrões do fundo</h2>
+          <h2>Dia da semana, dia × noite e mês</h2>
           <span class="mono muted small" id="patSub">sem dados ainda</span>
         </div>
         <div class="heat-ctrl">
@@ -485,7 +491,7 @@
           </div>
         </div>
       </div>
-      <div class="pat-hours">
+      <div class="pat-hours" hidden>
         <h3 class="sub-head">Hora do dia</h3>
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="patY"><span></span><span></span><span></span><span></span></div>
@@ -505,13 +511,16 @@
         <div><h3 class="sub-head">Dia da semana</h3><div class="pat-bars" id="patWd"></div></div>
         <div><h3 class="sub-head">Mês</h3><div class="pat-bars" id="patMonths"></div></div>
       </div>
-      <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
+      <p class="small muted">Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.</p>
+      <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
     </section>
   <section class="card view-graficos tube-card" id="slowCard" data-subpane="tendencia" aria-label="Fundo nas últimas semanas" hidden></section>
-  <section class="card view-graficos" id="bgCard" role="tabpanel" data-subpane="tendencia" hidden>
+  <section class="card view-graficos fc-ev" id="bgCard" role="tabpanel" data-subpane="tendencia" hidden>
+    <details id="bgDet">
+      <summary><span class="fc-ev-k">Outra conta: a reta dos últimos dias</span> <span class="small muted" id="bgFitShort"></span></summary>
       <div class="chart-head">
         <div>
-          <h2>Fundo ao longo do tempo</h2>
+          <h2 class="sr-only">Fundo ao longo do tempo</h2>
           <span class="mono muted small" id="bgSub">sem dados ainda</span>
         </div>
         <div class="seg" role="group" aria-label="Janela do fundo" id="bgSeg">
@@ -541,9 +550,11 @@
         </div>
       </div>
       <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
+    </details>
     </section>
-  <section class="card view-graficos days-card" id="daysCard" data-subpane="tendencia" hidden>
-      <h2>Fundo por dia</h2>
+  <section class="card view-graficos days-card fc-ev" id="daysCard" data-subpane="tendencia" hidden>
+    <details id="daysDet">
+      <summary><span class="fc-ev-k">Fundo por dia, em tabela</span></summary>
       <p class="small muted">Média de cada dia do GQ GMC-800 em casa.</p>
       <div class="table-box">
         <table>
@@ -552,6 +563,7 @@
         </table>
       </div>
       <button type="button" class="link small-link" id="btnDaysMore" hidden>Ver mais</button>
+    </details>
     </section>
   <section class="card view-graficos yc-card" id="ycCard" role="tabpanel" data-subpane="ano" hidden>
       <div class="chart-head">

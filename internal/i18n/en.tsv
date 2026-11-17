@@ -5948,3 +5948,22 @@ sem dado hoje	no data today
 {0}% acima do fundo da sua casa	{0}% above your home background
 {0}sem leitura	{0}no reading
 ano	year
+Abrir em Fundo de casa	Open in Home background
+Abrir o Fundo de casa	Open Home background
+Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.	Each bar is the difference from the average, in %: to the right is above, to the left is below. The value shows on hover.
+Dia da semana, dia × noite e mês	Day of week, day × night and month
+Fundo por dia, em tabela	Background by day, as a table
+Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.	Median of the minutes at home (no object measurement and no saturated or interfered minutes). The day × night comparison uses the days with both halves measured (6 h or more each) and compares each day with its own night, so one day's weather doesn't weigh in.
+Outra conta: a reta dos últimos dias	Another calculation: the line over the last days
+ainda medindo: faltam {0} dias	still measuring: {0} days to go
+ainda são {0} meses de dado; fica mais útil depois de um ano	only {0} months of data so far; more useful after a year
+ainda é 1 mês de dado; fica mais útil depois de um ano	only 1 month of data so far; more useful after a year
+estável, {0} em relação à referência	steady, {0} against the reference
+junho a agosto ficaram {0}% abaixo de novembro a março	June to August were {0}% below November to March
+junho a agosto ficaram {0}% acima de novembro a março	June to August were {0}% above November to March
+mudou de patamar em {0}	stepped to a new level on {0}
+o dia mais alto é {0}, {1}% acima da média	the highest day is {0}, {1}% above the average
+o dia mais baixo é {0}, {1}% abaixo da média	the lowest day is {0}, {1}% below the average
+sem diferença de verdade (tudo abaixo de 1%)	no real difference (all below 1%)
+subiu {0} em {1} semanas	rose {0} in {1} weeks
+Últimas semanas	Last weeks

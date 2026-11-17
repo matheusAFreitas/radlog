@@ -86,7 +86,7 @@ function ycGo(y) {
 }
 
 async function refreshYearCal() {
-  if (!api.GetYearCal || state.view !== "graficos" || state.sub.graficos !== "ano") return;
+  if (!api.GetYearCal || !fundoShown("ano")) return;
   const y = YC.year || new Date().getFullYear();
   if (YC.data && YC.data.year === y && Date.now() - YC.at < 60e3) { ycRender(); return; }
   const my = ++YC.seq;

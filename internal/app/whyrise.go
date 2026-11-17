@@ -276,7 +276,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 
 	var C []WhyCause
 	// acaso
-	acaso := WhyCause{Key: "acaso", Title: "Acaso", More: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.", Link: "padroes", LinkT: "Abrir Padrões do fundo"}
+	acaso := WhyCause{Key: "acaso", Title: "Acaso", More: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.", Link: "padroes", LinkT: "Abrir o Fundo de casa"}
 	if out.Acaso {
 		acaso.State = "yes"
 		acaso.Ev = fmt.Sprintf("A subida é de %s σ. Variações assim aparecem várias vezes por dia.", whyNum(math.Max(z, 0), 1))
@@ -381,7 +381,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 		}
 	}
 	// radônio da noite (hora do dia)
-	rad := WhyCause{Key: "radonio", Title: "Radônio da noite", More: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", Link: "padroes", LinkT: "Abrir Padrões do fundo"}
+	rad := WhyCause{Key: "radonio", Title: "Radônio da noite", More: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", Link: "padroes", LinkT: "Abrir o Fundo de casa"}
 	h := t.Add(-time.Minute).Hour()
 	if me.hourN[h] < 300 || me.norm <= 0 {
 		rad.State, rad.Ev = "na", "Sem dado: ainda são poucos dias para saber o padrão de cada hora."

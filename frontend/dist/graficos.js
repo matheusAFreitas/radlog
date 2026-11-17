@@ -32,6 +32,7 @@ let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no m
 // 2.83.10 (auditoria 2.79.0 P4): os gráficos só são buscados e desenhados com
 // a sub-aba aberta; ao abrir, refreshSub (app.js) busca de novo
 const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
+const fundoShown = (sub) => state.view === "fundo" && state.sub.fundo === sub;
 
 async function refreshChart() {
   if (!gfxShown("tempo")) return;

@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.90.0";
+const DEMO_VERSION = "2.91.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -958,7 +958,7 @@ const demoRc = () => {
         gNorm: 0.110, rNorm: 0.098, bins, rain: [[from + 38 * 6e5, from + 47 * 6e5]], marks: [],
         causes: [
           { key: "chuva", state: "yes", title: "Chuva", ev: `Choveu 12,4 mm nas 4 horas antes, a partir de ${hh(from + 38 * 6e5)}. Na sua casa, a chuva costuma subir o fundo uns 9%.`, more: "A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.", link: "chuva", linkText: "Abrir a tela Clima" },
-          { key: "radonio", state: "yes", title: "Radônio da noite", ev: "Às 3h o seu fundo costuma ficar 7,5% acima da média do dia.", more: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", link: "padroes", linkText: "Abrir Padrões do fundo" },
+          { key: "radonio", state: "yes", title: "Radônio da noite", ev: "Às 3h o seu fundo costuma ficar 7,5% acima da média do dia.", more: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", link: "padroes", linkText: "Abrir o Fundo de casa" },
           { key: "ambos", state: "yes", title: "Os dois aparelhos viram", ev: "O RC102 também subiu, 16% no mesmo trecho.", more: "Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só." },
           { key: "acaso", state: "no", title: "Acaso", ev: "A subida é de 14 σ. O acaso não chega nisso.", more: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora." },
           { key: "pressao", state: "no", title: "Pressão caindo", ev: "A pressão mudou 1,2 hPa nas 12 horas antes.", more: "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.", link: "chuva", linkText: "Abrir a tela Clima" },
@@ -1031,9 +1031,9 @@ const demoRc = () => {
       if (demoUsageReset) return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} };
       const f = days === 7 ? 0.25 : days === 30 ? 1 : 1.6;
       // chaves sem aspas: o i18n_extract não confunde "chuva" ou "hora" com texto da tela
-      const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [180, 6 * 3600], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], chuva: [2, 60] };
+      const pg = { agora: [420, 41 * 3600], radiacode: [260, 9 * 3600], graficos: [150, 5 * 3600], fundo: [30, 3000], resumo: [60, 2 * 3600], alertas: [40, 3600], gmc: [30, 3300], config: [25, 2400], fora: [12, 1080], chuva: [2, 60] };
       const tabs = { radiacode: { agora: [212, 5 * 3600], espectro: [88, 3 * 3600], atividade: [9, 720], busca: [4, 480] },
-        graficos: { tempo: [150, 5 * 3600], hora: [20, 2400], padroes: [8, 600], tendencia: [2, 120] }, gmc: { agora: [28, 3000], tubo: [2, 300] } };
+        fundo: { hora: [20, 2400], padroes: [8, 600], tendencia: [2, 120] }, gmc: { agora: [28, 3000], tubo: [2, 300] } };
       const base = { "s:radiacode/rcSpecView=tempo": [61, 0], "s:radiacode/rcSpecMode=acc": [34, 0], "c:busca/ctrlk": [6, 0] };
       for (const [k, v] of Object.entries(pg)) base["p:" + k] = v;
       for (const [k, m] of Object.entries(tabs)) for (const [t, v] of Object.entries(m)) base["a:" + k + "/" + t] = v;

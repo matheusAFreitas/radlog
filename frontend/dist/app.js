@@ -659,7 +659,7 @@ async function refreshStats() {
 // Fundo por dia (Gráficos › Tendência do fundo, 2.65): 14 dias e "Ver mais"
 let dailyN = 14;
 async function refreshDaily() {
-  if (!gfxShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
+  if (!fundoShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
   // GetDaily conta dias do calendário (até 60): pede um a mais para saber se tem mais
   const days = await api.GetDaily(Math.min(60, dailyN + 1));
   const tb = $("days");
@@ -863,10 +863,11 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
-const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
+  if (v === "padroes" || v === "tendencia") { setSub("fundo", v); v = "fundo"; } // 2.91: o fundo de casa virou página
   if (v === "alara") { setSub("medir", "distancia"); v = "medir"; } // o ALARA saiu na 2.85: os testes ficam no Medir objeto
   if (!PAGES[v]) v = "graficos";
   if (v !== "alertas") state.alertRange = null; // o filtro de período vale só na ida pelo Resumo
@@ -884,6 +885,7 @@ async function showView(v, skipRender) {
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
   if (v === "graficos") refreshSub("graficos");
+  if (v === "fundo") { refreshSub("fundo"); fcLoad(); }
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   renderDevMini();
   if (skipRender) return;
@@ -899,8 +901,10 @@ async function showView(v, skipRender) {
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"], medir: ["objeto", "distancia", "blindagem"] };
+const SUBS = { graficos: ["tempo"], fundo: ["tendencia", "hora", "padroes", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"], medir: ["objeto", "distancia", "blindagem"] };
 state.sub = {};
+// 2.91: Hora do dia, Padrões, Tendência e Ano saíram de Gráficos para a página Fundo de casa
+{ const old = localGet("sub.graficos", ""); if (["hora", "padroes", "tendencia", "ano"].includes(old)) { localSet("sub." + "fundo", old); localSet("sub.graficos", "tempo"); } }
 // 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
 if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
 for (const pg of Object.keys(SUBS)) { const v = localGet("sub." + pg, ""); state.sub[pg] = SUBS[pg].includes(v) ? v : SUBS[pg][0]; }
@@ -918,7 +922,7 @@ function setSub(pg, sub, focus) {
     if (on && focus) b.focus();
   });
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
-  if (pg === "graficos") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
+  if (pg === "fundo") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
   if (changed) usoSub(pg, sub);
   if (changed && state.view === pg) refreshSub(pg);
   // fora da aba Agora a fileira de cima volta a mostrar os dois aparelhos (2.65)
@@ -927,9 +931,9 @@ function setSub(pg, sub, focus) {
 
 function refreshSub(pg) {
   const s = state.sub[pg];
-  if (pg === "graficos") {
-    if (s === "tempo") { refreshChart(); refreshDose(); }
-    else if (s === "hora") refreshHeat();
+  if (pg === "graficos") { refreshChart(); refreshDose(); }
+  if (pg === "fundo") {
+    if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
     else if (s === "ano") refreshYearCal();
     else { refreshBgTrend(); refreshDaily(); }
@@ -1124,7 +1128,7 @@ function wireDemo() {
 function heatMonthStart(hm) { return new Date(hm.y, hm.m - 1, 1).getTime(); }
 
 async function refreshHeat() {
-  if (!gfxShown("hora")) return; // só com a sub-aba aberta (2.83.10)
+  if (!fundoShown("hora")) return; // só com a sub-aba aberta (2.83.10)
   const mm = state.heatMonthMode;
   document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
   $("heatMonthNav").hidden = !mm;
@@ -4030,7 +4034,7 @@ async function refreshCounterSync(cs) {
 
 let patSeq = 0;
 async function refreshPatterns() {
-  if (!api.GetPatterns || state.view !== "graficos" || state.sub.graficos !== "padroes") return;
+  if (!api.GetPatterns || !fundoShown("padroes")) return;
   const rcOn = hasRcData();
   $("patDevSeg").hidden = !rcOn;
   if (!rcOn) state.patDev = "";
@@ -4046,7 +4050,8 @@ async function refreshPatterns() {
 }
 
 // 2.84.0: µSv/h na unidade da tela (rateNum); CPM do RC102 fica CPM
-function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : rateNum(v, usvDigits(v)); }
+// extra: casas a mais, para os cartões dia × noite baterem com a frase (2.91)
+function patVal(p, v, extra) { return p.unit === "CPM" ? fmt(v, 1 + (extra || 0)) : rateNum(v, usvDigits(v) + (extra || 0)); }
 const patUnit = (p) => (p.unit === "CPM" ? "CPM" : rateLbl());
 
 function drawPatterns(p) {
@@ -4091,27 +4096,32 @@ function drawPatterns(p) {
     d.className = "pat-dn-v";
     d.innerHTML = "<span class='small muted'></span><b></b><span class='small muted'></span>";
     d.children[0].textContent = lab;
-    d.children[1].textContent = st && st.n ? `${patVal(p, st.median)} ${patUnit(p)}` : "—";
-    d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean)} · ${fmt(st.n, 0)} min` : "sem dados";
+    d.children[1].textContent = st && st.n ? `${patVal(p, st.median, 1)} ${patUnit(p)}` : "—";
+    d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean, 1)} · ${fmt(st.n, 0)} min` : "sem dados";
     dn.appendChild(d);
   }
   $("patDNText").textContent = p.minutes ? p.dnText : "";
-  // barras
+  // barras: diferença de cada linha para a média, em % (2.91, G4); a barra
+  // sai do meio, para a direita acima da média e para a esquerda abaixo
   const bars = (box, rows) => {
     box.textContent = "";
     box.classList.toggle("rc", rc);
-    const vals = rows.filter((r) => r.st && r.st.n >= 60).map((r) => r.st.median);
-    if (!vals.length) { box.innerHTML = '<span class="small muted">sem dados</span>'; return; }
-    const mn = Math.min(...vals), mx = Math.max(...vals), base = Math.max(0, mn - (mx - mn) * 0.6 - mx * 0.02);
-    for (const r of rows) {
+    const diffs = fcDiffs(rows);
+    if (!diffs) { box.innerHTML = '<span class="small muted">sem dados</span>'; return; }
+    const top = Math.max(2, ...diffs.filter((d) => d != null).map(Math.abs));
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i], d = diffs[i];
       const l = document.createElement("span"); l.className = "lab"; l.textContent = r.label;
-      const wrap = document.createElement("span"); wrap.className = "track";
+      const wrap = document.createElement("span"); wrap.className = "track pat-div";
       const v = document.createElement("span"); v.className = "v";
-      if (r.st && r.st.n >= 60) {
+      if (d != null) {
         const b = document.createElement("span"); b.className = "bar";
-        b.style.width = `${Math.max(2, ((r.st.median - base) / (mx - base)) * 100).toFixed(1)}%`;
+        const w = Math.max(1, (Math.abs(d) / top) * 50);
+        b.style.width = `${w.toFixed(1)}%`;
+        b.style.left = d >= 0 ? "50%" : `${(50 - w).toFixed(1)}%`;
         wrap.appendChild(b);
-        v.textContent = `${patVal(p, r.st.median)} · ${r.st.days} ${r.st.days === 1 ? "dia" : "dias"}`;
+        wrap.title = `${patVal(p, r.st.median, 1)} ${patUnit(p)}`;
+        v.textContent = `${d >= 0 ? "+" : "−"}${fmt(Math.abs(d), 1)}% · ${r.st.days} ${r.st.days === 1 ? "dia" : "dias"}`;
       } else v.textContent = "—";
       box.append(l, wrap, v);
     }
@@ -4148,7 +4158,7 @@ function wirePatterns() {
 const BG_STATE = { estavel: "Estável", subindo: "Tendência de alta", descendo: "Tendência de queda", degrau: "Mudança brusca", insuficiente: "Ainda sem tendência" };
 let bgSeq = 0;
 async function refreshBgTrend() {
-  if (!api.GetBgTrend || state.view !== "graficos" || state.sub.graficos !== "tendencia") return;
+  if (!api.GetBgTrend || !fundoShown("tendencia")) return;
   const days = state.bgDays || 30;
   document.querySelectorAll("#bgSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.bgdays === days)));
   const my = ++bgSeq;
@@ -4173,6 +4183,7 @@ function drawBgTrend(tr) {
   fit.innerHTML = "<strong></strong><span></span>";
   fit.children[0].textContent = BG_STATE[f.state] || "";
   fit.children[1].textContent = f.text || "";
+  $("bgFitShort").textContent = tr.minutes ? BG_STATE[f.state] || "" : "";
 
   // gráfico: média e mediana móveis, a média aparada de cada dia (pontos) e
   // a reta ou o degrau quando há aviso
