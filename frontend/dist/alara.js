@@ -76,6 +76,8 @@ async function refreshAlOrigin(from, to, label) {
     tr.addEventListener("click", () => openGapOnChart(it));
   }
   AL.bg = o.homeBgRate || homeBgUSv();
+  state.sumOrigin = o;
+  sumDoseSync();
 }
 
 // ---------- testes (distância e blindagem) ----------

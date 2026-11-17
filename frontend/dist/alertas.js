@@ -149,7 +149,7 @@ function alertLi(e, other) {
   if (e.retro) {
     const tag = document.createElement("span");
     tag.className = "tag-retro";
-    tag.textContent = "do contador";
+    tag.textContent = "achado depois"; // 2.92 (G6)
     tag.title = "Achado no histórico baixado do contador";
     sub.appendChild(tag);
   }
@@ -363,7 +363,11 @@ function drawAlertDetail(d) {
   $("adLim").nextElementSibling.textContent = inUSv ? rateLbl() : "CPM";
   const sub = [];
   if (e.startedAs) sub.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
-  if (e.peak && !rc && bgNow()) sub.push(`pico ${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)}`);
+  // 2.92 (G6): em palavras; o σ fica no detalhe do alerta
+  if (e.peak && !rc && bgNow()) {
+    const z = sigmaOf(e.peak, bgNow()), bgT = inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0);
+    sub.push(z >= 4 ? `pico bem acima do fundo de ${bgT}` : z >= 2 ? `pico acima do fundo de ${bgT}` : `pico dentro do vai e vem do fundo de ${bgT}`);
+  }
   const ep = d.episode;
   if (ep && ep.n) {
     const unit = ep.src === "segundos" ? (ep.n === 1 ? "segundo" : "segundos") : ep.n === 1 ? "minuto" : "minutos";
@@ -377,7 +381,7 @@ function drawAlertDetail(d) {
   let top = Math.max(d.limit || 0, peakV || 0);
   for (const p of secs) top = Math.max(top, p.cpm);
   for (const p of mins) top = Math.max(top, p.cpm);
-  top = niceTop(top * 1.12);
+  top = niceN(top * 1.12, 3);
   const x = (t) => Math.max(0, Math.min(W, ((t - t0) / (t1 - t0)) * W));
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   const ys = $("adY").children;

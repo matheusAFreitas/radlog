@@ -272,7 +272,8 @@ function renderSumSay(r, rc) {
     else if (gAbove || rAbove) { lv = "atencao"; title = "Fundo acima do normal no período."; }
     else if (n.attention) { lv = "atencao"; title = "Período normal, com alertas de atenção."; }
     else title = "Período normal.";
-    if (r.minutes && r.bgOK) parts.push(sumPct(r.vsBgPct, "Casa"));
+    // 2.92 (G5): com alerta no período, a frase da casa diz que é fora deles
+    if (r.minutes && r.bgOK) parts.push(n.danger || n.alarm || n.attention ? sumPct(r.vsBgPct, "Fora dos alertas, a casa ficou") : sumPct(r.vsBgPct, "Casa"));
     if (rc && rc.bgUSv) parts.push(sumPct(rc.vsBgPct, "RC102"));
     const cov = rc ? rc.coverage : r.coverage;
     parts.push(`${fmt(cov * 100, 0)}% do tempo medido`);
@@ -338,6 +339,7 @@ function renderSumBig(r, rc) {
   const kn = doseKnownEl(rc ? (rc.devOK ? rc.devDose : rc.dose) : r.dose, rc && rc.bgUSv > 0 ? rc.bgUSv : null, "sum-known", doseXray);
   if (kn) k.appendChild(kn);
   sumAwayBar(k, rc);
+  k.dataset.k = "dose";
   if (r.minutes) {
     sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
@@ -345,8 +347,52 @@ function renderSumBig(r, rc) {
     const p = rc.bgUSv ? ((home - rc.bgUSv) / rc.bgUSv) * 100 : 0;
     sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RC102 em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
   }
-  if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RC102 · ${atText(r, rc.maxAt)}`, "rc");
-  else sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+  const pk = rc ? sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RC102 · ${atText(r, rc.maxAt)}`, "rc")
+    : sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+  pk.dataset.k = "peak";
+  pk.dataset.v = String(rc ? rc.max : r.maxUSv || 0);
+  sumDoseSync();
+  sumPeakSync(r);
+}
+
+// 2.92 (G5): um total de dose por período, o mesmo do "De onde vem a sua
+// dose", com a conta à vista (fundo + acima do fundo)
+function sumDoseSync() {
+  const o = state.sumOrigin, k = document.querySelector('#sumBig [data-k="dose"]'), sr = state.sumRes;
+  if (!o || !k || !o.minutes || !sr || state.sum.mode !== "resumo" || Math.abs(o.from - sr.periods[0][0]) > 60e3) return;
+  const d = (v) => fmt(v, v < 10 ? 2 : 1);
+  k.children[0].textContent = "Sua dose";
+  k.children[1].textContent = sumUSv(o.total);
+  k.children[2].textContent = `fundo ${d(o.homeBg + o.awayBg)} + acima do fundo ${d(o.above)} µSv`;
+  k.classList.toggle("rc", o.device === "radiacode");
+  // casa × fora já aparece no quadro de baixo
+  k.querySelectorAll(".sum-away, .sum-known").forEach((e) => e.remove());
+  const kn = doseKnownEl(o.total, o.homeBgRate > 0 ? o.homeBgRate : null, "sum-known", doseXray);
+  if (kn) k.appendChild(kn);
+}
+
+// 2.92 (G5): o pico inclui os alertas do período (o pico do alerta é o da
+// leitura instantânea; o da tabela é o maior minuto)
+let sumPkSeq = 0;
+async function sumPeakSync(r) {
+  const pk = document.querySelector('#sumBig [data-k="peak"]');
+  if (!pk || !api.GetEvents) return;
+  const my = ++sumPkSeq;
+  let ev;
+  try { ev = await api.GetEvents("alerta"); } catch (e) { return; }
+  if (my !== sumPkSeq || !pk.isConnected) return;
+  let best = null, bv = +pk.dataset.v || 0;
+  for (const e of ev || []) {
+    const t = e.peakAt || e.time, v = e.device === "radiacode" ? e.peak : e.peakUSv;
+    if (!(v > bv) || t < r.from || t >= r.to) continue;
+    best = e; bv = v;
+  }
+  if (!best) return;
+  const t = best.peakAt || best.time, dev = best.device === "radiacode" ? "RC102" : "GMC-800";
+  const during = best.level === "perigo" ? `${dev} · ${atText(r, t)} · durante o perigo` : best.level === "alarme" ? `${dev} · ${atText(r, t)} · durante o alarme` : `${dev} · ${atText(r, t)} · durante a atenção`;
+  pk.children[1].textContent = usvVal(bv);
+  pk.children[2].textContent = during;
+  pk.classList.toggle("rc", best.device === "radiacode");
 }
 
 // "Mais números" (2.64): só o que não está em cima. Média, Máximo e Dose
@@ -560,7 +606,7 @@ function drawSumChart(series) {
   const pu = (p) => (p.usv != null ? p.usv : p.cpm != null ? p.cpm * k : null);
   let top = 0.05;
   for (const s of series) for (const p of s.r.curve) if (pu(p) != null) top = Math.max(top, pu(p));
-  top = niceTop(top * 1.15);
+  top = niceN(top * 1.15, 3);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
@@ -590,7 +636,7 @@ function drawSumChartUSv(r, rc) {
   let top = 0.05;
   for (const p of rc.curve) if (p.usv != null) top = Math.max(top, p.usv);
   for (const p of r.curve) if (p.cpm != null) top = Math.max(top, p.usv != null ? p.usv : p.cpm * k);
-  top = niceTop(top * 1.15);
+  top = niceN(top * 1.15, 3);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;

@@ -18,6 +18,19 @@ function niceTop(v) {
   for (const m of [1, 2, 2.5, 5, 10]) if (m * mag >= v) return m * mag;
   return 10 * mag;
 }
+// 2.92 (G1): topo para n intervalos de passo redondo (1, 2, 2,5 ou 5 × 10^k),
+// para as marcas do eixo saírem 1,5 / 1,0 / 0,5 em vez de 1,00 / 0,67 / 0,33
+const niceN = (v, n) => n * niceTop(v / n);
+// faixa [lo, hi] com n intervalos de passo redondo que cobre de a até b
+function niceRange(a, b, n) {
+  let step = niceTop((b - a) / n || Math.abs(b) / n || 1);
+  for (let k = 0; k < 6; k++) {
+    const lo = Math.floor(a / step + 1e-9) * step;
+    if (lo + n * step >= b - 1e-12) return [Math.max(0, lo), Math.max(0, lo) + n * step];
+    step = niceTop(step * 1.01);
+  }
+  return [a, b];
+}
 
 // formato de hora conforme o passo e o tamanho do período
 function chartTimeFmt(c) {
@@ -100,17 +113,18 @@ async function refreshChart() {
   // embaixo, cada um com a sua escala (2.81; antes eram dois eixos no mesmo
   // gráfico e a linha do GMC sumia no chão)
   const stacked = !usvMode && rcMax > 0;
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : stacked ? niceTop(Math.max(30 * ck, want * 1.05)) : cps ? niceTop(Math.max(0.5, want * 1.15)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
+  const top = usvMode ? niceN(Math.max(thrV * 1.2, want * 1.15), 3) : stacked ? niceN(Math.max(30 * ck, want * 1.05), 2) : cps ? niceN(Math.max(0.5, want * 1.15), 3) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
   c.top = top;
   // casas do eixo pelo valor na unidade da tela
   const yTop = usvMode ? top * rateK() : top;
   const yd = usvMode ? (yTop < 0.03 ? 4 : yTop < 0.3 ? 3 : yTop < 10 ? 2 : 1) : cps ? (top < 1 ? 2 : top < 10 ? 1 : 0) : 0;
   const yk = usvMode ? rateK() : 1;
-  const rcTop = stacked ? niceTop(Math.max(300 * ck, rcMax * 1.05)) : top;
+  const rcTop = stacked ? niceN(Math.max(300 * ck, rcMax * 1.05), 2) : top;
   // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
   const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
   const yAx = $("yAxis");
   yAx.classList.toggle("stacked", stacked);
+  yAx.dataset.unit = usvMode ? rateLbl() : cps ? "CPS" : "CPM";
   if (stacked) {
     const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
     yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
@@ -472,16 +486,10 @@ function fetchDose(src, range) {
 function renderDevBoxes(box, list) {
   box.textContent = "";
   for (const d of list) {
-    const c = d.c, el = document.createElement(list.length > 1 ? "button" : "div");
+    const c = d.c, el = document.createElement("div");
     el.className = "dd-box " + d.key;
     el.dataset.key = d.key;
-    if (list.length > 1) {
-      el.type = "button";
-      const on = !!state.doseShow[d.key];
-      el.classList.toggle("off", !on);
-      el.setAttribute("aria-pressed", String(on));
-      el.title = "Mostrar ou esconder no gráfico";
-    }
+    if (list.length > 1) el.classList.toggle("off", !state.doseShow[d.key]);
     const has = c && c.measuredMinutes > 0;
     const [tv, tu] = has ? fmtDose(c.total) : ["—", doseLbl()];
     const hours = has ? c.measuredMinutes / 60 : 0;
@@ -491,21 +499,27 @@ function renderDevBoxes(box, list) {
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
     const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
-    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
+    // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
+    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
     el.querySelector(".dd-val > span").textContent = tu;
     el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
-    el.querySelector(".dd-pct").textContent = has && c.allowance > 0
+    const lim = has && c.allowance > 0;
+    el.querySelector(".dd-pct").textContent = !lim ? "" : pct > 100 ? "passou do teto" : "dentro do teto";
+    el.querySelector(".dd-more").hidden = !lim;
+    el.querySelector(".dd-more p").textContent = lim
       ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
       : "";
     if (list.length > 1) {
-      const s = document.createElement("span");
-      s.className = "dd-state";
-      s.textContent = state.doseShow[d.key] ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
-      el.appendChild(s);
+      const l = document.createElement("label");
+      l.className = "dd-state";
+      l.innerHTML = '<input type="checkbox"> <span>mostrar no gráfico</span>';
+      l.firstChild.checked = !!state.doseShow[d.key];
+      l.firstChild.dataset.key = d.key;
+      el.appendChild(l);
     }
     box.appendChild(el);
   }
@@ -521,17 +535,16 @@ function toggleDoseDev(k) {
   s[k] = !s[k];
   if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
   localSet("doseShow", JSON.stringify(s));
-  document.querySelectorAll("button.dd-box").forEach((b) => {
-    const on = !!s[b.dataset.key];
+  document.querySelectorAll(".dd-box").forEach((b) => {
+    const on = !!s[b.dataset.key], cb = b.querySelector(".dd-state input");
+    if (!cb) return;
     b.classList.toggle("off", !on);
-    b.setAttribute("aria-pressed", String(on));
-    const st = b.querySelector(".dd-state");
-    if (st) st.textContent = on ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
+    cb.checked = on;
   });
   drawDoseChart();
   if (state.heatPick && state.ht) drawHeatTrecho();
 }
-document.addEventListener("click", (e) => { const b = e.target.closest(".dd-box"); if (b) toggleDoseDev(b.dataset.key); });
+document.addEventListener("change", (e) => { const b = e.target.closest(".dd-state input"); if (b) toggleDoseDev(b.dataset.key); });
 
 function drawDoseChart() {
   const c = state.dose, c2raw = state.dose2;
@@ -549,8 +562,7 @@ function drawDoseChart() {
   $("doseKeyCeil2Txt").textContent = show1 && show2 ? `teto do ${devName(k2)}` : "";
   $("doseKeyRc").hidden = !((k1 === "rc" && show1) || (k2 === "rc" && show2));
   document.querySelector("#doseCard .dose-legend .sw-gmc").parentElement.hidden = !((k1 === "gmc" && show1) || (k2 === "gmc" && show2));
-  const mag = Math.pow(10, Math.floor(Math.log10(top0)));
-  const top = Math.ceil(top0 / mag * 2) / 2 * mag;
+  const top = niceN(top0, 3);
   const y = (v) => H - (v / top) * H;
   const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + ((arr.length <= 1 ? 0 : (i / (arr.length - 1)) * W)).toFixed(1) + " " + y(v).toFixed(1)).join("");
   const grid = [0, 1, 2, 3].map((i) => {
@@ -570,6 +582,7 @@ function drawDoseChart() {
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
   ys[3].textContent = "0";
+  $("doseY").dataset.unit = fmtDose(top)[1];
 }
 
 // force: a régua usa a dose do período mesmo com a aba fechada

@@ -3135,3 +3135,13 @@ body.alarming #agSay, body.alarming #rcAwayBox, body.alarming #whSuggest { displ
 .pat-bars .track.pat-div { position: relative; height: 10px; }
 .pat-bars .track.pat-div::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--border); }
 .pat-bars .pat-div .bar { position: absolute; top: 0; min-width: 1px; }
+/* G1 (2.92): a unidade escrita embaixo do eixo */
+.y-axis[data-unit] { position: relative; }
+.y-axis[data-unit]::after { content: attr(data-unit); position: absolute; right: 0; bottom: -18px; font-size: var(--fs-micro); color: var(--dim); white-space: nowrap; }
+/* G2 (2.92): caixa visível para mostrar a linha; a conta do teto recolhida */
+.dd-box.off { opacity: .55; border-style: dashed; }
+.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--c); height: 5px; }
+label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1); font-size: var(--fs-caption); color: var(--muted); cursor: pointer; }
+.dd-more summary { cursor: pointer; color: var(--dim); font-size: var(--fs-caption); }
+.dd-more p { margin: var(--space-1) 0 0; color: var(--dim); font-size: var(--fs-caption); }
+.rain-status[hidden] { display: none; }

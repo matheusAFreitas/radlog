@@ -1249,7 +1249,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (achado depois)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -1344,7 +1344,7 @@ function drawHeatTrecho() {
   const g = ch && showG ? ch.usv || [] : [], r = ch && showR ? ch.rc || [] : [];
   const vals = g.concat(r).filter((v) => v != null && isFinite(v));
   const attn = ch && ch.attentionUSv;
-  const rtop = niceTop(Math.max(...vals, 0.05) * 1.15);
+  const rtop = niceN(Math.max(...vals, 0.05) * 1.15, 2);
   const ry = (v) => RH - (v / rtop) * RH;
   const line = (arr, n, yf, color, dash) => {
     let d = "", pen = false;
@@ -1363,7 +1363,7 @@ function drawHeatTrecho() {
   // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
   const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
-  const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
+  const dtop = niceN(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1, 2);
   const dy = (v) => DH - (v / dtop) * DH;
   $("htDose").innerHTML = grid(DH) +
     (R ? line(R.ceiling, R.ceiling.length, dy, COR.warn) : "") +
@@ -1554,6 +1554,7 @@ function renderRainStatus() {
     title = "";
   }
   btn.className = "rain-status " + cls;
+  btn.hidden = !st.enabled; // 2.92 (G2): a legenda só mostra o que está desenhado
   $("rainStatusText").textContent = text;
   btn.title = title;
   const set = $("rainStatusSet");
@@ -1793,7 +1794,7 @@ function updateAlarm() {
     $("alarmTitle").textContent = `${BAND_NAME[sev]} no ${dev}`;
     $("alarmDetail").textContent = perigo
       ? `perigo a partir de ${kind === "rc" ? usvTxt(rcl.danger || 0) : usvTxt(dangerUSv())}`
-      : kind === "rc" ? (rcl.device ? `alarme 2 do aparelho: ${usvTxt(rcl.alarm || 0)}` : `limite ${usvTxt(rcl.alarm || 0)}`)
+      : kind === "rc" ? (rcl.device ? `alarme 2 (alarme) do aparelho: ${usvTxt(rcl.alarm || 0)}` : `limite ${usvTxt(rcl.alarm || 0)}`)
       : `seu limite: ${usvTxt(alarmUSv())}`;
   }
   // o outro aparelho: no mesmo nível, os dois números lado a lado; abaixo,
@@ -1995,7 +1996,7 @@ function renderLevelEq() {
 const SET_LAYOUT = [
   { group: "Aparelhos", id: "gmc", name: "GQ GMC-800", tabs: [["con", "Conexão"], ["dev", "No aparelho"], ["cal", "Calibração"], ["tubo", "Tubo"], ["test", "Testes"]] },
   { id: "rc", name: "Radiacode 102", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
-  { group: "Avisos", id: "alarm", name: "Alarmes e avisos" },
+  { group: "Alarmes", id: "alarm", name: "Níveis e alarmes" },
   { group: "App", id: "app", name: "Janela e tela" },
   { id: "data", name: "Dados e backup", tabs: [["arq", "Backup e arquivos"], ["nuvem", "Nuvem"], ["uso", "Uso do app"], ["hist", "Histórico"]] },
   { id: "about", name: "Atualizações e sobre" },
@@ -2318,7 +2319,7 @@ function updateAttention() {
     const rs = state.rc.st || {}, l = rs.limits || {};
     dev = "RC102";
     usv = rs.usvh || 0;
-    lim = l.device ? `alarme 1 do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
+    lim = l.device ? `alarme 1 (atenção) do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
     fake = !!rs.demo;
   } else {
     const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
@@ -4194,8 +4195,9 @@ function drawBgTrend(tr) {
   for (const d of daily) if (d.full) { lo = Math.min(lo, u(d.trimmed)); hi = Math.max(hi, u(d.trimmed)); }
   const ys = $("bgY").children;
   if (!isFinite(lo)) { svg.innerHTML = ""; for (const e of ys) e.textContent = ""; $("bgLegend").textContent = ""; $("bgDisp").innerHTML = ""; for (const e of $("bgX").children) e.textContent = ""; return; }
-  const pad = Math.max(k, (hi - lo) * 0.15), q = 0.005;
-  lo = Math.max(0, Math.floor((lo - pad) / q) * q); hi = Math.ceil((hi + pad) / q) * q;
+  const pad = Math.max(k, (hi - lo) * 0.15);
+  [lo, hi] = niceRange(Math.max(0, lo - pad), hi + pad, 3);
+  $("bgY").dataset.unit = rateLbl();
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
   for (let i = 0; i < 4; i++) ys[i].textContent = axRate(hi - ((hi - lo) / 3) * i, 3);

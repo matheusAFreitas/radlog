@@ -1,5 +1,40 @@
 # Versões
 
+## 2.92.0
+- Gráficos: as marcas do eixo saem em passos redondos (1,5 / 1,0 / 0,5) e
+  a unidade fica escrita embaixo do eixo.
+- Gráficos › Dose (em teste, fácil de voltar): o quadro de cada aparelho diz
+  só "dentro do teto"; a conta fica em "a conta". Mostrar ou esconder a
+  linha virou uma caixa "mostrar no gráfico". A legenda tira "chuva:
+  desligada" e encurta "medição".
+- Resumo: "Sua dose" usa o mesmo total do "De onde vem a sua dose", com a
+  conta à vista (fundo + acima do fundo). O pico inclui os alertas do
+  período e diz quando foi durante um. Com alerta no período, a frase da
+  casa diz "Fora dos alertas, a casa ficou…".
+- Palavras: "aviso" sai. Alertas marcados "do contador" agora dizem "achado
+  depois"; o filtro ganhou o rótulo "Mostrar"; nos limites do RC102 aparece
+  "alarme 1 (atenção)" e "alarme 2 (alarme)"; a linha do pico diz "bem acima
+  do fundo" em vez do σ. Configurações › "Alarmes e avisos" virou "Níveis e
+  alarmes".
+
+**English**
+
+- Charts: axis ticks now use round steps (1.5 / 1.0 / 0.5) and the unit is
+  written under the axis.
+- Charts › Dose (on trial, easy to undo): each device box only says "within
+  the ceiling"; the math is under "the math". Showing or hiding the line is
+  now a "show on chart" checkbox. The legend drops "rain: off" and shortens
+  "measurement".
+- Summary: "Your dose" uses the same total as "Where your dose comes from",
+  with the math in view (background + above background). The peak includes
+  the period's alerts and says when it happened during one. With an alert
+  in the period, the home sentence says "Outside the alerts, home was…".
+- Words: "warning" is gone. Alerts tagged "from the counter" now say "found
+  later"; the filter got a "Show" label; RC102 limits show "alarm 1
+  (attention)" and "alarm 2 (alarm)"; the peak line says "well above
+  background" instead of σ. Settings › "Alarms and warnings" became "Levels
+  and alarms".
+
 ## 2.91.0
 - Página nova "Fundo de casa" na barra lateral. No topo, uma frase diz como
   está o fundo da casa, e quatro quadros dão a resposta de cada recorte:
