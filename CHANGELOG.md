@@ -1,5 +1,15 @@
 # Versões
 
+## 2.101.1
+- Faixa dos aparelhos presa no topo (fora do Agora): atrás da bolha do
+  aparelho aparecia um retângulo de outra cor, de cantos retos. A faixa agora
+  usa o mesmo fundo da página (pedido do ACE).
+
+**English**
+- Device strip pinned to the top (outside Now): a rectangle of a different
+  color, with square corners, showed behind the device bubble. The strip now
+  uses the same background as the page (ACE's request).
+
 ## 2.101.0
 - Gráficos, dose por período (pedido do ACE): um trecho só para a página.
   Arrastar no gráfico de cima ou no da dose marca o mesmo trecho nos dois, e

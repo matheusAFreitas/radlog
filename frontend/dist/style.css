@@ -983,7 +983,10 @@ table.rc-ctrl-tbl thead th { color: var(--muted); font-weight: 500; }
 .rc-reset p { margin: var(--space-1) 0 0; }
 
 /* ===== repaginação 1.10 ===== */
-body { background: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%), var(--bg); }
+/* 2.101.1: o fundo fica preso na janela (fixed) para a faixa presa dos aparelhos
+   usar o mesmo fundo e não aparecer como um retângulo de outra cor */
+:root { --page-bg: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%) fixed, var(--bg); }
+body { background: var(--page-bg); }
 
 /* cartões: borda mais leve, um pouco mais de respiro */
 .card { border-radius: var(--radius-lg); border-color: var(--border); box-shadow: 0 1px 0 rgba(255,255,255,.02) inset; }
@@ -3298,8 +3301,8 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 /* 2.98.0 (ACE): a faixa dos aparelhos (fora do Agora) fica presa no topo ao
    rolar, no lugar da barra compacta antiga. Com um quadro aberto ela rola
    junto, para não cobrir a tela. Com os dois abertos, ficam lado a lado. */
-.instruments[data-strip]:not(:has(.inst.open)) { position: sticky; top: var(--barsH, 0px); z-index: 14; margin-top: calc(-1 * var(--space-2)); padding: var(--space-2) 0; background: var(--bg); }
-#instruments.inst-float { position: fixed; top: var(--barsH, 0px); left: var(--side-w); right: 0; z-index: 15; margin: 0; padding: var(--space-2) var(--space-6); background: var(--bg); border-bottom: 1px solid var(--border); }
+.instruments[data-strip]:not(:has(.inst.open)) { position: sticky; top: var(--barsH, 0px); z-index: 14; margin-top: calc(-1 * var(--space-2)); padding: var(--space-2) 0; background: var(--page-bg); }
+#instruments.inst-float { position: fixed; top: var(--barsH, 0px); left: var(--side-w); right: 0; z-index: 15; margin: 0; padding: var(--space-2) var(--space-6); background: var(--page-bg); border-bottom: 1px solid var(--border); }
 #instruments.inst-float .inst-open { display: none; }
 @media (max-width: 900px) { #instruments.inst-float { left: 0; padding: var(--space-2) var(--space-4); } }
 .dd-box.dd-tog { cursor: pointer; transition: opacity .2s, border-color .2s; }
