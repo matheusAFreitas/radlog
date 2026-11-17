@@ -1,16 +1,14 @@
 // Tela do aparelho (ajuste da 2.26.0, opção B aprovada pelo ACE em 10/11).
 //
 // Na página do GMC-800 e na do Radiacode o valor aparece uma vez só: o
-// cartão grande do aparelho tem o mostrador fazendo o papel da régua (as três
-// faixas sempre à vista, apagadas, e acesas até a leitura, com um ponto na
-// leitura e os limites escritos nos vãos do anel). O quadro do próprio
-// aparelho sai da fileira de cima; o outro aparelho fica compacto ao lado dos
-// alertas e abre a tela dele no clique. A tela Agora não muda.
+// cartão grande do aparelho tem o número, o nível e a régua dos limites
+// (2.88.0: a régua tomou o lugar do mostrador redondo, que ficou só no
+// Agora). O quadro do próprio aparelho sai da fileira de cima; o outro
+// aparelho fica na faixa compacta.
 //
-// O mesmo desenho serve para o mostrador grande e o pequeno: cada arco do
-// logo é uma faixa. Verde e amarelo são lineares entre os limites; o laranja
-// vai do limite de alarme até o de perigo em escala log, senão o ponto quase
-// não anda. No perigo o anel inteiro fica vermelho.
+// A escala é a mesma do mostrador: um terço para cada faixa. Verde e amarelo
+// são lineares entre os limites; o laranja vai do limite de alarme até o de
+// perigo em escala log, senão o ponto quase não anda.
 
 const DEV_PAGES = { gmc: "g", radiacode: "r" };
 
@@ -22,69 +20,6 @@ function devDialPos(v, t) {
   if (v < t[0]) return Math.max(0, v / t[0] / 3);
   if (v < t[1]) return (1 + (v - t[0]) / (t[1] - t[0])) / 3;
   return (2 + Math.log(v / t[1]) / Math.log(t[2] / t[1])) / 3;
-}
-
-function devSeg(i, f) {
-  const p = DIAL_SEG[i];
-  const a0 = Math.atan2(24 - p[1], p[0] - 24);
-  let a1 = Math.atan2(24 - p[3], p[2] - 24);
-  if (a1 > a0) a1 -= 2 * Math.PI;
-  const ae = a0 + (a1 - a0) * f;
-  const P = (a) => `${(24 + 19 * Math.cos(a)).toFixed(2)} ${(24 - 19 * Math.sin(a)).toFixed(2)}`;
-  return `M${P(a0)}A19 19 0 0 1 ${P(ae)}`;
-}
-function devAng(i, f) {
-  const p = DIAL_SEG[i];
-  const a0 = Math.atan2(24 - p[1], p[0] - 24);
-  let a1 = Math.atan2(24 - p[3], p[2] - 24);
-  if (a1 > a0) a1 -= 2 * Math.PI;
-  return a0 + (a1 - a0) * f;
-}
-
-// o desenho do mostrador. lv: nível (cor do centro); pos: devDialPos (null =
-// sem leitura); labels: [[valor, nome] × 3] nos vãos; center: mostrador
-// grande (forma maior). No centro fica só a forma do nível, no centro exato
-// do anel; o nome do nível vai embaixo do anel, fora do desenho.
-// conn: "off" (desconectado: arcos cinza, sem parte acesa nem ponto, traço no
-// meio) ou "wait" (conectando: arcos âmbar pulsando, anel tracejado no meio)
-const DL_CONN_ICON = {
-  off: (sw) => `<path d="M3.5 8h9" fill="none" stroke="currentColor" stroke-width="${sw * 1.4}" stroke-linecap="round"/>`,
-  wait: (sw) => `<circle cx="8" cy="8" r="5.6" fill="none" stroke="currentColor" stroke-width="${sw}" stroke-linecap="round" stroke-dasharray="2.6 2.2"/>`,
-};
-function devDialSvg(pos, lv, o = {}) {
-  const w = o.w || 3.4, conn = DL_CONN_ICON[o.conn] ? o.conn : "";
-  const per = !conn && pos != null && pos >= 1;
-  const tf = o.center ? "translate(15.2 15.2) scale(1.1)" : "translate(17.6 17.6) scale(.8)";
-  let s = "";
-  if (conn) {
-    let arcs = "";
-    for (let i = 0; i < 3; i++) arcs += `<path class="dl-base dl-${conn}" d="${devSeg(i, 1)}" stroke-width="${w}"/>`;
-    s += conn === "wait" ? `<g class="dl-sweep">${arcs}</g>` : arcs;
-  } else {
-    for (let i = 0; i < 3; i++) {
-      const cls = per ? "dl-perigo" : "dl-b" + i;
-      s += `<path class="dl-base ${cls}${per ? " on" : ""}" d="${devSeg(i, 1)}" stroke-width="${w}"/>`;
-      const f = pos == null ? 0 : Math.max(0, Math.min(1, pos * 3 - i));
-      if (!per && f > 0.002) s += `<path class="dl-lit ${cls}" d="${devSeg(i, f)}" stroke-width="${w}"/>`;
-    }
-    if (pos != null && !per) {
-      const b = Math.min(2, Math.floor(pos * 3)), f = Math.max(0, Math.min(1, pos * 3 - b)), a = devAng(b, f);
-      s += `<circle class="dl-pt" cx="${(24 + 19 * Math.cos(a)).toFixed(2)}" cy="${(24 - 19 * Math.sin(a)).toFixed(2)}" r="${(w * 0.62).toFixed(2)}" stroke-width="${(w * 0.28).toFixed(2)}"/>`;
-    }
-  }
-  if (o.labels) {
-    [-150, 90, -30].forEach((g, i) => {
-      const a = g * Math.PI / 180, x = 24 + 25.4 * Math.cos(a), y = 24 - 25.4 * Math.sin(a);
-      const anchor = i === 0 ? "end" : i === 2 ? "start" : "middle";
-      const [v, name] = o.labels[i] || ["", ""];
-      s += `<text class="dl-lv${conn ? " dim" : ""}" x="${x.toFixed(2)}" y="${(y + (i === 1 ? -0.3 : 1.2)).toFixed(2)}" text-anchor="${anchor}">${escHtml(v)}</text>`;
-      if (!conn) s += `<text class="dl-ln" x="${x.toFixed(2)}" y="${(y + (i === 1 ? 3.2 : 4.8)).toFixed(2)}" text-anchor="${anchor}">${escHtml(name)}</text>`;
-    });
-  }
-  if (!conn && o.center) s += `<circle class="dl-pulse" cx="24" cy="24" r="12.6"/>`;
-  if (conn) s += `<g class="dl-c dl-c-${conn}" transform="${o.center ? "translate(15.2 15.2) scale(1.1)" : "translate(18.4 18.4) scale(.7)"}">${DL_CONN_ICON[conn](o.center ? 1.5 : 1.9)}</g>`;
-  else if (LV_PATH[lv]) s += `<g class="dl-c lv-ico ${lv}" fill="currentColor" transform="${tf}">${LV_PATH[lv]}</g>`;
-  return s;
 }
 
 // estado de conexão de cada aparelho para a tela: "" (conectado ou demo),
@@ -105,12 +40,39 @@ function agoTxt(t) {
 }
 function atTxt(t) { return isToday(t) ? hhmm(t) : whenLabel(t); }
 
-// nome do nível embaixo do mostrador grande, na cor do nível (ou o estado da
+// nome do nível ao lado do número grande, na cor do nível (ou o estado da
 // conexão)
 function devDialState(el, conn, lv, word) {
   if (!el) return;
-  el.className = "hero-dial-state " + (conn ? "conn-" + conn : lv || "");
+  el.className = "hero-lv " + (conn ? "conn-" + conn : lv || "");
   el.textContent = conn === "off" ? "Desconectado" : conn === "wait" ? "Conectando…" : word || "—";
+}
+
+// 2.88.0 (avaliação A2/E2): na página do aparelho a régua dos níveis fica
+// embaixo do número, no lugar do mostrador redondo. Mesma escala do
+// mostrador (devDialPos): um terço para cada faixa até o perigo, que fica com
+// um pedaço curto no fim. labels: [[valor, nome] × 3]; next: frase de quanto
+// falta para o próximo limite.
+const RG_W = 93; // % da barra até o limite de perigo
+function devReguaHtml(pos, lv, labels, o = {}) {
+  const conn = o.conn || "";
+  const lit = conn || pos == null ? -1 : pos >= 1 ? 3 : Math.min(2, Math.floor(pos * 3));
+  const segs = ["seguro", "atencao", "alarme", "perigo"].map((c, i) =>
+    `<i class="dr-s dr-${c}${i === lit ? " on" : ""}" style="flex:${i < 3 ? RG_W / 3 : 100 - RG_W}"></i>`).join("");
+  const x = conn || pos == null ? null : pos >= 1 ? RG_W + (100 - RG_W) / 2 : pos * RG_W;
+  const pt = x == null ? "" : `<b class="dr-pt" style="left:${x.toFixed(2)}%"></b>`;
+  const lab = (labels || []).map(([v, name], i) =>
+    `<span class="dr-l dr-l${i}" style="left:${((i + 1) * RG_W / 3).toFixed(2)}%">${escHtml(name)} <b class="mono">${escHtml(v)}</b></span>`).join("");
+  return `<div class="dr-bar${conn ? " off" : ""}">${segs}${pt}</div><div class="dr-labs">${lab}</div>` +
+    (o.next && !conn ? `<p class="dr-next">${escHtml(o.next)}</p>` : "");
+}
+// "falta 0,28 µSv/h para a atenção": t e v na mesma unidade (linear)
+function devNext(v, t, f) {
+  if (v == null || !isFinite(v) || !(t[0] > 0)) return "";
+  if (v < t[0]) return `falta ${f(t[0] - v)} para a atenção`;
+  if (v < t[1]) return `falta ${f(t[1] - v)} para o alarme`;
+  if (v < t[2]) return `falta ${f(t[2] - v)} para o perigo`;
+  return "";
 }
 
 // aviso no topo do cartão quando o aparelho não está conectado: a frase do
@@ -160,13 +122,13 @@ function gmcThrCPM() {
 }
 // mostrador grande do GMC-800, com os níveis do app
 function renderGmcDial(r, lvl, word) {
-  const el = $("gHeroDial");
+  const el = $("gHeroRegua");
   if (!el) return;
   const u = state.unit, t = gmcThrCPM(), conn = gmcConn();
   const labels = t.map((c, i) => [fmtLim(gmcInUnit(c, u), u), ["atenção", "alarme", "perigo"][i]]);
   const pos = r ? (lvl === "perigo" ? 1.01 : devDialPos(r.cpm, t)) : null;
-  el.innerHTML = devDialSvg(pos, lvl, { w: 3.4, labels, center: true, conn });
-  el.setAttribute("aria-label", conn ? (conn === "wait" ? "Conectando…" : "Desconectado") : word ? `Nível: ${word}` : "Mostrador");
+  const next = r ? devNext(r.cpm, t, (d) => `${fmtLim(gmcInUnit(d, u), u)} ${UNIT_TXT[u]}`) : "";
+  el.innerHTML = devReguaHtml(pos, lvl, labels, { conn, next });
   devDialState($("gHeroState"), conn, lvl, word);
   renderGmcConn();
 }
@@ -208,16 +170,18 @@ function rcInUnit(usv, u, perUSv) {
   return u === "mrh" ? usv / 10 : u === "cps" ? (perUSv ? usv * perUSv : null) : u === "cpm" ? (perUSv ? usv * perUSv * 60 : null) : usv;
 }
 function renderRcDial(st, o) {
-  const el = $("rHeroDial");
+  const el = $("rHeroRegua");
   if (!el) return;
   const t = rcDialLimits(st, o.attn, o.alarm, o.own), conn = rcConn(st);
   const u = state.rcUnit, perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
-  const names = o.own ? ["alarme 1", "alarme 2", "perigo"] : ["atenção", "alarme", "perigo"];
-  const labels = t.map((x, i) => { const v = rcInUnit(x, u, perUSv); return [v == null ? fmtLim(x, "usv") : fmtLim(v, u), names[i]]; });
-  const word = o.lvl ? (o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : LV_WORD)[o.lvl] : "";
+  // 2.88.0 (R2): os mesmos nomes do GMC-800; os alarmes 1 e 2 do aparelho
+  // fazem o papel de atenção e alarme (a legenda embaixo diz de onde vêm)
+  const inU = (x) => { const v = rcInUnit(x, u, perUSv); return v == null ? `${fmtLim(x, "usv")} µSv/h` : `${fmtLim(v, u)} ${UNIT_TXT[u]}`; };
+  const labels = t.map((x, i) => { const v = rcInUnit(x, u, perUSv); return [v == null ? fmtLim(x, "usv") : fmtLim(v, u), ["atenção", "alarme", "perigo"][i]]; });
+  const word = o.lvl ? LV_WORD[o.lvl] : "";
   const pos = o.usv == null ? null : o.lvl === "perigo" ? 1.01 : devDialPos(o.usv, t);
-  el.innerHTML = devDialSvg(pos, o.lvl, { w: 3.4, labels, center: true, conn });
-  el.setAttribute("aria-label", conn ? (conn === "wait" ? "Conectando…" : "Desconectado") : word ? `Nível: ${word}` : "Mostrador");
+  const next = o.usv == null ? "" : devNext(o.usv, t, inU);
+  el.innerHTML = devReguaHtml(pos, o.lvl, labels, { conn, next });
   devDialState($("rHeroState"), conn, o.lvl, word);
   renderRcConn(st);
 }
@@ -247,6 +211,26 @@ function renderRcConn(st) {
   $("rcMainVia").textContent = conn === "wait" ? "· conectando…" : since ? `· desconectado há ${agoTxt(since)}` : "· desconectado";
   $("rcMainVia").className = "rc-main-via mono conn-" + conn;
 }
+
+// abre e fecha um quadro da faixa compacta
+function instOpen(tile, on) {
+  tile.classList.toggle("open", on);
+  const b = tile.querySelector(".inst-open");
+  if (b) { b.setAttribute("aria-expanded", String(on)); b.setAttribute("aria-label", on ? "fechar o quadro" : "abrir o quadro"); }
+}
+// na faixa, um clique no quadro fechado abre ele ali mesmo (não leva para a
+// página do aparelho); os botões de dentro continuam com a ação deles
+document.addEventListener("click", (e) => {
+  const inst = $("instruments");
+  if (!inst || !("strip" in inst.dataset)) return;
+  const tile = e.target.closest(".inst");
+  if (!tile || !inst.contains(tile)) return;
+  const ob = e.target.closest(".inst-open");
+  if (ob) { e.stopPropagation(); instOpen(tile, !tile.classList.contains("open")); return; }
+  if (tile.classList.contains("open") || e.target.closest("button, a, summary, input")) return;
+  e.stopPropagation();
+  instOpen(tile, true);
+}, true);
 
 // botões do aviso de conexão
 document.addEventListener("click", async (e) => {
@@ -280,6 +264,14 @@ function renderDevMini() {
   const own = DEV_PAGES[page] && (!state.sub || state.sub[page] === "agora");
   if (own) inst.dataset.page = page; else delete inst.dataset.page;
   inst.dataset.devpage = DEV_PAGES[page] ? page : "";
+  // 2.88.0 (avaliação E1): fora do Agora os quadros viram a faixa compacta;
+  // trocar de página fecha o que estava aberto
+  const strip = page !== "agora";
+  if (strip !== ("strip" in inst.dataset) || inst._page !== page) {
+    inst._page = page;
+    if (strip) inst.dataset.strip = ""; else delete inst.dataset.strip;
+    inst.querySelectorAll(".inst.open").forEach((t) => instOpen(t, false));
+  }
   // o aviso do relógio do GMC mora no quadro dele; na página do GMC o quadro
   // some, então o aviso vai para o cartão grande
   const clk = $("clockChip"), home = own && page === "gmc" ? $("heroClock") : $("gTileSync").parentNode;

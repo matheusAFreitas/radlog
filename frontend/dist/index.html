@@ -162,6 +162,7 @@
 <div class="notice save-warn" id="dataWarn" role="alert" hidden></div>
 <div class="notice save-warn" id="saveWarn" role="alert" hidden></div>
 <section class="instruments" id="instruments" aria-label="Aparelhos agora">
+  <div class="inst-pair">
     <article class="inst" id="gTile">
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="statusPill" title="Conexão">
@@ -169,6 +170,7 @@
       <span id="statusText">desconectado</span>
     </button>
         <span class="inst-fill"></span>
+        <button type="button" class="inst-open" data-tile="g" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="gmc">
         <div class="dial-col"><svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><g class="dial-lv" id="gTileLv" transform="translate(18.5 18.5) scale(.6875)" fill="currentColor"></g></svg></div>
@@ -181,16 +183,12 @@
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
       <span id="clockText">relógio certo</span>
     </button></footer>
-      <details class="inst-det" id="gTileDet"><summary>detalhes</summary>
-        <div class="inst-detbox">
-          <div class="inst-detr" id="gTileDetR"><div class="inst-kv mono" id="gTileKv"></div><p class="small muted inst-tape-cap">Os últimos 10 segundos · cada traço é uma contagem</p></div>
-        </div>
-      </details>
     </article>
     <article class="inst inst-rc" id="rTile" hidden>
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">Radiacode 102</span></button>
         <span class="inst-fill"></span>
+        <button type="button" class="inst-open" data-tile="r" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="radiacode">
         <div class="dial-col"><svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><g class="dial-lv" id="rTileLv" transform="translate(18.5 18.5) scale(.6875)" fill="currentColor"></g></svg></div>
@@ -200,12 +198,17 @@
         <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
-      <details class="inst-det" id="rTileDet"><summary>detalhes</summary>
-        <div class="inst-detbox">
-          <div class="inst-detr" id="rTileDetR"><div class="inst-kv mono" id="rTileKv"></div><p class="small muted inst-tape-cap">Os últimos 10 segundos · cada traço é uma contagem</p></div>
-        </div>
-      </details>
     </article>
+  </div>
+  <!-- 2.88.0 (R2): um "detalhes" só, embaixo dos dois quadros -->
+  <details class="inst-det inst-det-all" id="instDet"><summary>detalhes</summary>
+    <div class="inst-dt">
+      <span></span><span class="inst-dt-h c-g">GMC-800</span><span class="inst-dt-h c-r">RC102</span>
+      <span class="inst-dt-l">Contagem</span><span class="mono c-g" id="gDetCnt">—</span><span class="mono c-r" id="rDetCnt">—</span>
+      <span class="inst-dt-l" id="instDetAltL">Em mrem/h</span><span class="mono c-g" id="gDetAlt">—</span><span class="mono c-r" id="rDetAlt">—</span>
+      <span class="inst-dt-l">Últimos 10 s</span><div class="c-g inst-dt-tape" id="gTileDetR"></div><div class="c-r inst-dt-tape" id="rTileDetR"></div>
+    </div>
+  </details>
 </section>
 
 <main class="pages" id="pages">
@@ -1250,6 +1253,7 @@
               <div class="value-row">
                 <span class="value" id="readValue">—</span>
                 <span class="unit" id="readUnit">CPM</span>
+                <span class="hero-lv" id="gHeroState">—</span>
               </div>
             </div>
             <div class="hero-spark" aria-hidden="true"><svg id="gHeroSpark" viewBox="0 0 160 40" preserveAspectRatio="none"><polyline points=""/></svg><span class="tile-sub">última hora</span></div>
@@ -1259,18 +1263,14 @@
               <span class="tile-sub" id="tDoseSub">acumulados</span>
             </div>
           </div>
+          <div class="dev-regua" id="gHeroRegua"></div>
+          <p class="dr-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint" data-u="rate">faixas do app em µSv/h</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></p>
           <div class="dev-lost" id="gLost" hidden></div>
           <p class="read-last mono" id="gLast"></p>
           <span class="alt" id="readAlt" data-unit-keep>sem contador conectado</span>
           <span class="sigma" id="readSigma" hidden></span>
-          <span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span>
+          <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span></details>
         </div>
-      </div>
-
-      <div class="hero-dial">
-        <svg class="dev-dial" id="gHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
-        <div class="hero-dial-state" id="gHeroState">—</div>
-        <div class="hero-dial-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint" data-u="rate">faixas do app em µSv/h</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
 
       <div class="rc-mini">
@@ -1311,7 +1311,7 @@
         <div class="read-head">
           <div class="read-main">
             <span class="eyebrow rc-eyebrow" id="rcEyebrow">Radiacode 102 <span class="rc-main-via mono" id="rcMainVia"></span><span class="rc-chips" id="rcChips"></span></span>
-            <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
+            <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span><span class="hero-lv" id="rHeroState">—</span></div>
           </div>
           <div class="hero-dose">
             <span class="tile-label">Minha dose hoje</span>
@@ -1319,20 +1319,17 @@
             <span class="tile-sub" id="rcDoseTodaySub"></span>
           </div>
         </div>
+        <div class="dev-regua" id="rHeroRegua"></div>
+        <p class="dr-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint" data-u="rate">alarmes do RC102</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></p>
         <div class="dev-lost" id="rLost" hidden></div>
         <p class="read-last mono" id="rLast"></p>
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
-        <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
+        <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span></details>
         <div class="rc-acts"><button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button><button type="button" class="btn small" id="btnRcConn">Conexão</button></div>
         </div>
       </div>
 
-      <div class="hero-dial">
-        <svg class="dev-dial" id="rHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
-        <div class="hero-dial-state" id="rHeroState">—</div>
-        <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint" data-u="rate">alarmes do RC102</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
-      </div>
       <div class="rc-mini">
         <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Mín 24 h</span><span class="mono" id="rcMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>

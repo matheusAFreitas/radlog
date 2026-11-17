@@ -330,6 +330,7 @@ function tileFoot(el, u, v, dose, doseSub, lost) {
   }
   for (const k of lost ? [] : keys) {
     const sp = document.createElement("span");
+    sp.className = "inst-cnt";
     sp.append(num(v ? v[k] : "—"), " " + UNIT_TXT[k]);
     el.appendChild(sp);
   }
@@ -388,22 +389,20 @@ function tileBig(pfx, u, v) {
   $(pfx + "TileNum").textContent = v ? v[u] : "—";
   $(pfx + "TileUnitT").textContent = UNIT_TXT[u];
   const o = u === "mrh" ? "usv" : "mrh";
-  $(pfx + "TileKv").innerHTML = [["CPM", "cpm"], ["CPS", "cps"], [UNIT_TXT[o], o]]
-    .map(([l, k]) => `<div><span>${l}</span><b>${v ? escHtml(v[k]) : "—"}</b></div>`).join("");
+  // 2.88.0 (R2): os valores vão para o "detalhes" único embaixo dos quadros
+  $(pfx + "DetCnt").textContent = v ? `${v.cpm} CPM · ${v.cps} CPS` : "—";
+  $(pfx + "DetAlt").textContent = v ? v[o] : "—";
+  $("instDetAltL").textContent = o === "mrh" ? "Em mrem/h" : "Em µSv/h";
 }
-// o "detalhes" dos dois quadros abre e fecha junto (2.87.1: abrir só um
-// deixava o outro quadro esticado com um espaço vazio) e lembra se ficou aberto
+// um "detalhes" só para os dois quadros (2.88.0, avaliação R2: antes cada
+// quadro tinha o seu e abrir um deixava buraco no outro); lembra se ficou aberto
 {
-  const dets = ["g", "r"].map((pfx) => document.getElementById(pfx + "TileDet")).filter(Boolean);
-  const open0 = localGet("tileDet.g", "") === "1" || localGet("tileDet.r", "") === "1";
-  for (const d of dets) {
-    d.open = open0;
-    d.addEventListener("toggle", () => {
-      for (const o of dets) if (o !== d && o.open !== d.open) o.open = d.open;
-      localSet("tileDet.g", d.open ? "1" : ""); localSet("tileDet.r", d.open ? "1" : "");
-      if (d.open && typeof pulseApply === "function") pulseApply();
-    });
-  }
+  const d = $("instDet");
+  d.open = localGet("tileDet.g", "") === "1" || localGet("tileDet.r", "") === "1";
+  d.addEventListener("toggle", () => {
+    localSet("tileDet.g", d.open ? "1" : ""); localSet("tileDet.r", "");
+    if (d.open && typeof pulseApply === "function") pulseApply();
+  });
 }
 
 
@@ -473,7 +472,7 @@ function renderRTile(st, o) {
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
-  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : LV_WORD;
+  const names = LV_WORD; // 2.88.0 (R2): os mesmos nomes nos dois aparelhos
   const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
@@ -3744,9 +3743,9 @@ function renderRcMain(st) {
   const al = st.alarms || {};
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
-  $("rcLevelHint").textContent = own ? "alarmes do RC102" : "faixas do app em µSv/h";
+  $("rcLevelHint").textContent = own ? "atenção e alarme: os alarmes 1 e 2 do RC102" : "faixas do app em µSv/h";
   const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
-  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
+  lvLabel($("rcLevelName"), lvl, LV_WORD[lvl] || "—", 16);
   $("rcLevelName").className = "sr-only level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   renderRcDial(st, { usv, cps, lvl, own, attn, alarm });

@@ -101,8 +101,6 @@ function pulseTargets(dev) {
   const out = [];
   const tile = $(dev === "gmc" ? "gTileDial" : "rTileDial");
   if (tile) { const c = tile.querySelector(".dial-ring"); if (c) out.push(c); }
-  const hero = $(dev === "gmc" ? "gHeroDial" : "rHeroDial");
-  if (hero) { const c = hero.querySelector(".dl-pulse"); if (c) out.push(c); }
   if (pulseLogoDev() === dev) document.querySelectorAll(".brand-o .brand-ring").forEach((c) => out.push(c));
   return out;
 }

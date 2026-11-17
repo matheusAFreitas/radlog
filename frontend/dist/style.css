@@ -1175,7 +1175,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-main-via { margin-left: var(--space-2); letter-spacing: 0; text-transform: none; color: var(--muted); }
 .rc-main-via.on { color: var(--rc); }
 .rc-main .value-row { flex-wrap: nowrap; white-space: nowrap; }
-.rc-main .value { font-size: var(--fs-reading-l); font-weight: 600; letter-spacing: -.03em; }
+.rc-main .value, .hero .value { font-size: var(--fs-reading-l); font-weight: 600; letter-spacing: -.03em; } /* 2.88.0 (R2): o mesmo tamanho nos dois */
 .gmc-via.on { color: var(--accent); }
 .rc-main.stale .rc-main-val { color: var(--dim, var(--muted)); }
 .rc-mini { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); border-top: 1px solid var(--border); padding-top: var(--space-3); margin-top: auto; }
@@ -1364,12 +1364,13 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .pages, .page { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 
 /* painel dos aparelhos */
-.instruments { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: var(--space-4); }
+.instruments { display: flex; flex-direction: column; gap: var(--space-3); }
+.inst-pair { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: var(--space-4); }
 /* só os quadros dos aparelhos visíveis (2.73, ux/topo-sem-alertas.html):
    dois dividem a largura, um sozinho ocupa a largura toda */
-@media (min-width: 680px) { .instruments { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } }
+@media (min-width: 680px) { .inst-pair { grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: minmax(0, 1fr); } }
 /* abaixo de 680 px, dois quadros lado a lado ficam estreitos demais: empilha */
-@media (max-width: 679px) { .instruments { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 679px) { .inst-pair { grid-template-columns: minmax(0, 1fr); } }
 .inst { --sc: var(--accent); min-width: 0; display: flex; flex-direction: column; gap: var(--space-2); padding: var(--space-3) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); transition: border-color .4s, background-color .4s; }
 .inst-head { display: flex; align-items: center; gap: var(--space-2); min-width: 0; min-height: 26px; font-size: var(--fs-label); }
 .inst .inst-conn { min-height: 26px; padding: 0; border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--muted); min-width: 0; max-width: 100%; }
@@ -1773,58 +1774,79 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .cc-saved dt { color: var(--muted); font-size: var(--fs-label); }
 .cc-saved dd { margin: 0; font-size: var(--fs-label); min-width: 0; }
 
-/* ---------- tela do aparelho (2.31.0) ----------
+/* ---------- tela do aparelho (2.31.0; régua na 2.88.0) ----------
    O valor aparece uma vez só: o quadro do próprio aparelho sai da fileira de
-   cima e o do outro fica sozinho, na largura toda (2.73). O mostrador grande faz o
-   papel da régua (faixas sempre à vista, acesas até a leitura). */
+   cima na aba Agora do aparelho. O cartão grande tem número, nível e a régua
+   dos limites embaixo. */
 .instruments[data-page="gmc"] #gTile, .instruments[data-page="radiacode"] #rTile { display: none; }
 
-.hero, .rc-main { display: grid; grid-template-columns: auto minmax(0, 1fr); column-gap: var(--space-6); align-items: center; }
-.hero > *, .rc-main > * { grid-column: 1 / -1; }
-.hero > .hero-dial, .rc-main > .hero-dial { grid-column: 1; grid-row: 1; }
-.hero > .hero-top, .rc-main > .hero-top { grid-column: 2; grid-row: 1; }
-.hero-dial { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); }
-.dev-dial { width: 240px; max-width: 100%; height: auto; display: block; overflow: visible; }
-.hero-dial-cap { font-size: var(--fs-caption); color: var(--muted); text-align: center; }
-@media (max-width: 760px) {
-  .hero, .rc-main { grid-template-columns: minmax(0, 1fr); }
-  .hero > .hero-dial, .rc-main > .hero-dial, .hero > .hero-top, .rc-main > .hero-top { grid-column: 1; grid-row: auto; }
-  .hero > .hero-dial, .rc-main > .hero-dial { order: -1; margin-bottom: var(--space-2); }
-  .dev-dial { width: 220px; }
-}
+.hero, .rc-main { display: flex; flex-direction: column; gap: var(--space-3); }
+.hero-lv { font-size: var(--fs-heading); font-weight: 600; color: var(--muted); align-self: center; margin-left: var(--space-2); white-space: nowrap; }
+.hero-lv.seguro { color: var(--accent); }
+.hero-lv.atencao, .hero-lv.nocount, .hero-lv.conn-wait { color: var(--att); }
+.hero-lv.alarme { color: var(--alarm); }
+.hero-lv.perigo { color: var(--warn); }
 
-/* o desenho do mostrador: base da faixa a 32%, parte acesa cheia, ponto na leitura */
-.dl-base, .dl-lit { fill: none; stroke-linecap: round; }
-.dl-base { opacity: .32; }
-.dl-base.on { opacity: 1; }
-.dl-b0 { stroke: var(--accent); }
-.dl-b1 { stroke: var(--att); }
-.dl-b2 { stroke: var(--alarm); }
-.dl-perigo { stroke: var(--warn); }
-.dl-lit { transition: d .4s; }
-.dl-pt { fill: var(--text); stroke: var(--surface); }
-.dl-lv { font-family: var(--mono); font-size: 3.4px; fill: var(--text); }
-.dl-ln { font-size: 2.8px; fill: var(--muted); }
+/* régua: as quatro faixas apagadas, a da leitura acesa, um traço na leitura e
+   os limites escritos embaixo de cada divisa */
+.dev-regua { margin-top: var(--space-2); max-width: 760px; }
+.dr-bar { position: relative; display: flex; gap: 2px; height: 8px; }
+.dr-s { display: block; height: 100%; opacity: .38; }
+.dr-s:first-child { border-radius: 4px 0 0 4px; }
+.dr-s:nth-child(4) { border-radius: 0 4px 4px 0; }
+.dr-s.on { opacity: 1; }
+.dr-seguro { background: var(--accent); }
+.dr-atencao { background: var(--att); }
+.dr-alarme { background: var(--alarm); }
+.dr-perigo { background: var(--warn); }
+.dr-bar.off .dr-s { background: var(--chart-grid); opacity: 1; }
+.dr-pt { position: absolute; top: -5px; width: 4px; height: 18px; margin-left: -2px; border-radius: 2px; background: var(--text); box-shadow: 0 0 0 2px var(--surface); transition: left .4s; }
+.dr-labs { position: relative; height: 1.5em; margin-top: var(--space-1); font-size: var(--fs-caption); color: var(--muted); }
+.dr-l { position: absolute; top: 0; transform: translateX(-100%); padding-right: 4px; white-space: nowrap; }
+.dr-l b { font-weight: 500; color: var(--text); }
+.dr-l2 { transform: translateX(-100%); }
+.dr-next { margin: var(--space-1) 0 0; font-size: var(--fs-label); color: var(--muted); }
+.dr-cap { margin: 0; font-size: var(--fs-caption); color: var(--dim); }
+@media (prefers-reduced-motion: reduce) { .dr-pt { transition: none; } }
+.hero-det > summary { margin-top: var(--space-1); }
+.hero-det:has(> .sigma-line[hidden]) { display: none; }
+.hero-det .sigma-line { display: block; margin-top: var(--space-2); }
+
+/* aviso do relógio do contador no cartão grande */
 .hero-clock { display: block; }
 .hero-clock .clock-chip { min-height: 24px; margin-top: var(--space-1); padding: 0; gap: var(--space-1); border: 0; background: transparent; font-family: var(--sans); font-size: var(--fs-label); color: var(--att); letter-spacing: 0; text-transform: none; }
 .hero-clock .clock-chip:not(.off) { display: none; }
-
-/* ---------- estados de conexão no mostrador e nos cartões (2.33.0) ----------
-   Conectado: forma do nível no meio. Conectando: anel tracejado âmbar, arcos
-   âmbar pulsando. Desconectado: traço cinza, arcos cinza sem parte acesa. */
-.dl-off { stroke: var(--chart-grid); opacity: 1; }
-.dl-wait { stroke: var(--att); opacity: .5; }
-.dl-c-off { color: var(--muted); }
-.dl-c-wait { color: var(--att); }
-.dl-lv.dim { fill: var(--dim); }
 @keyframes dl-pulse { 50% { opacity: .35; } }
-.dl-sweep { animation: dl-pulse 1.4s ease-in-out infinite; }
-@media (prefers-reduced-motion: reduce) { .dl-sweep, .inst.conn-wait .dial-track { animation: none; } }
-.hero-dial-state { font-size: var(--fs-heading); font-weight: 600; color: var(--muted); line-height: 1.2; margin-top: calc(-1 * var(--space-2)); }
-.hero-dial-state.seguro { color: var(--accent); }
-.hero-dial-state.atencao, .hero-dial-state.nocount, .hero-dial-state.conn-wait { color: var(--att); }
-.hero-dial-state.alarme { color: var(--alarm); }
-.hero-dial-state.perigo { color: var(--warn); }
+@media (prefers-reduced-motion: reduce) { .inst.conn-wait .dial-track { animation: none; } }
+
+/* ---------- faixa compacta dos aparelhos (2.88.0, avaliação E1) ----------
+   Fora do Agora cada quadro vira uma linha: nome, número, nível e a dose de
+   hoje. Um clique abre o quadro inteiro ali mesmo. */
+.inst-open { display: none; align-items: center; gap: var(--space-1); min-height: 26px; padding: 0 var(--space-1); border: 0; background: transparent; color: var(--muted); font: inherit; font-size: var(--fs-label); cursor: pointer; border-radius: var(--radius-sm, 6px); }
+.inst-open:hover { color: var(--text); }
+.inst-open-t { display: none; }
+.instruments[data-strip] .inst-open { display: inline-flex; }
+.instruments[data-strip] .inst.open .inst-open-t { display: inline; }
+.instruments[data-strip] .inst.open .inst-open svg { transform: rotate(180deg); }
+.instruments[data-strip] .inst:not(.open) { flex-direction: row; flex-wrap: wrap; align-items: center; gap: var(--space-1) var(--space-4); padding: var(--space-2) var(--space-4); min-height: 44px; cursor: pointer; }
+.instruments[data-strip] .inst:not(.open) .inst-head { order: 0; flex: none; min-height: 0; }
+.instruments[data-strip] .inst:not(.open) .inst-head .inst-fill { display: none; }
+.instruments[data-strip] .inst:not(.open) .inst-open { order: 9; margin-left: auto; }
+.instruments[data-strip] .inst:not(.open) .inst-read { order: 1; flex: none; flex-wrap: nowrap; gap: var(--space-3); cursor: pointer; }
+.instruments[data-strip] .inst:not(.open) .dial-col,
+.instruments[data-strip] .inst:not(.open) .inst-sub-say,
+.instruments[data-strip] .inst:not(.open) .inst-say-row { display: none; }
+.instruments[data-strip] .inst:not(.open) .inst-say { flex: none; min-width: 0; }
+.instruments[data-strip] .inst:not(.open) .inst-say .inst-state { font-size: var(--fs-body); }
+.instruments[data-strip] .inst:not(.open) .inst-num { font-size: var(--fs-title); }
+.instruments[data-strip] .inst:not(.open) .inst-foot { order: 2; flex: 1 1 auto; flex-wrap: nowrap; min-width: 0; }
+.instruments[data-strip] .inst:not(.open) .inst-cnt { display: none; }
+.instruments[data-strip] .inst:not(.open) .inst-foot .inst-fill { display: none; }
+.instruments[data-strip] .inst:not(.open) .inst-foot span { white-space: nowrap; }
+.instruments[data-strip] .inst-det-all { display: none; }
+.instruments[data-strip] .inst-pair { align-items: start; }
+/* na página do aparelho, fora da aba Agora, o próprio aparelho vem primeiro */
+.instruments[data-devpage="gmc"] #gTile, .instruments[data-devpage="radiacode"] #rTile { order: -1; }
 
 /* cartão grande sem conexão: aviso, a última leitura no lugar do número */
 .read-last { display: none; margin: 0; color: var(--muted); font-size: var(--fs-body); }
@@ -2526,9 +2548,6 @@ dialog.qk-dlg:not([open]) { display: none; }
 /* ---------- pulso da contagem (2.54) ---------- */
 html.pulse-g #gTileDial .dial-ring, html.pulse-r #rTileDial .dial-ring { stroke-opacity: .35; }
 .dl-pulse { display: none; fill: none; stroke-width: 1.4; }
-html.pulse-g #gHeroDial .dl-pulse, html.pulse-r #rHeroDial .dl-pulse { display: inline; stroke-opacity: .35; }
-#gHeroDial .dl-pulse { stroke: var(--pu-g, var(--accent)); }
-#rHeroDial .dl-pulse { stroke: var(--pu-r, var(--accent)); }
 .brand-o.pulsing .brand-ring { stroke: var(--pu-c); stroke-opacity: .35; }
 .pu-tape { margin-top: var(--space-3); display: grid; gap: var(--space-1); }
 .pu-tape .pu-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0 var(--space-2); color: var(--text-soft); }
@@ -3022,14 +3041,17 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .inst-det > summary::before { content: "▸"; display: inline-block; margin-right: 6px; transition: transform .15s; }
 .inst-det[open] > summary::before { transform: rotate(90deg); }
 .inst-det > summary:hover { color: var(--text); }
-.inst-detbox { display: flex; align-items: flex-start; gap: var(--space-4); margin-top: var(--space-3); padding-top: var(--space-3); border-top: 1px solid var(--border); }
-.inst-detr { flex: 1 1 auto; min-width: 0; }
-.inst-kv { display: flex; flex-wrap: wrap; gap: var(--space-2) var(--space-5, 24px); }
-.inst-kv div { display: flex; flex-direction: column; }
-.inst-kv span { font-family: var(--sans); font-size: var(--fs-caption); color: var(--dim); }
-.inst-kv b { font-weight: 500; font-size: var(--fs-title); color: var(--text); font-variant-numeric: tabular-nums; }
-.inst-tape-cap { margin: var(--space-3) 0 0; }
-.inst-detr .pu-tape { margin-top: var(--space-1); }
+/* 2.88.0 (R2): um "detalhes" só, embaixo dos dois quadros, em tabela */
+.inst-det-all { padding: 0 var(--space-4); }
+.inst-dt { display: grid; grid-template-columns: max-content minmax(0, 1fr) minmax(0, 1fr); gap: 0 var(--space-5, 24px); margin-top: var(--space-2); padding: var(--space-2) var(--space-4); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); font-size: var(--fs-label); }
+.inst-dt > * { padding: var(--space-2) 0; border-top: 1px solid var(--border); min-width: 0; align-self: center; }
+.inst-dt > :nth-child(-n+3) { border-top: 0; }
+.inst-dt-h { color: var(--muted); font-size: var(--fs-caption); }
+.inst-dt-l { color: var(--muted); }
+.inst-dt .mono { color: var(--text); font-variant-numeric: tabular-nums; }
+.inst-dt-tape .pu-tape { margin-top: 0; }
+.instruments:has(#rTile[hidden]) .inst-dt { grid-template-columns: max-content minmax(0, 1fr); }
+.instruments:has(#rTile[hidden]) .inst-dt .c-r { display: none; }
 @media (prefers-reduced-motion: reduce) { .inst-det > summary::before { transition: none; } }
 /* mono só em números (2.84.0): pílulas, segmentados, links e etiquetas em Plex Sans */
 .dl-lv { font-family: var(--sans); }

@@ -1,5 +1,34 @@
 # Versões
 
+## 2.88.0
+- Fora do Agora, os quadros dos aparelhos viram uma faixa de uma linha com
+  nome, número, nível e a dose de hoje. Um clique abre o quadro inteiro ali
+  mesmo; "fechar" volta para a faixa. Gráficos, Espectro e as outras telas
+  ganham quase 200 px de altura.
+- Página de cada aparelho: na aba Agora o cartão grande é o do próprio
+  aparelho; nas outras abas ele vem primeiro na faixa. O mostrador redondo
+  do cartão deu lugar a uma régua com atenção, alarme e perigo marcados e
+  quanto falta para o próximo limite. O trifólio continua no Agora.
+- Os dois aparelhos usam os mesmos nomes de nível (atenção e alarme também
+  no RC102, que usa os alarmes 1 e 2 dele) e o número no mesmo tamanho.
+- "detalhes" do Agora virou uma tabela só, embaixo dos dois quadros, sem
+  deixar buraco. A linha do σ do cartão grande foi para "detalhes".
+
+**English**
+
+- Outside Now, the device cards become a one-line strip with name, number,
+  level and today's dose. One click opens the full card right there;
+  "close" goes back to the strip. Charts, Spectrum and the other screens
+  gain almost 200 px of height.
+- Each device page: on the Now tab the big card is the device's own; on
+  the other tabs it comes first in the strip. The round dial on the card
+  gave way to a ruler with attention, alarm and danger marked and how far
+  it is to the next limit. The trefoil stays on Now.
+- Both devices use the same level names (attention and alarm on the RC102
+  too, which uses its alarms 1 and 2) and the number in the same size.
+- "details" on Now became a single table under both cards, with no empty
+  space. The σ line on the big card moved to "details".
+
 ## 2.87.2
 - Ações rápidas: o menu abre num painel com fundo, em vez de bolhas soltas.
   Os itens da barra lateral não aparecem mais entre elas, e o texto fica
