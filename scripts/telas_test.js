@@ -35,8 +35,11 @@ let subs = 0, dlgs = 0;
       for (const v of VIEWS) {
         where = v;
         const nav = p.locator(`[data-view="${v}"]:visible`).first();
-        if (!(await nav.count())) { fails.push(`${lang} ${vp.width}px: sem botão para a página ${v}`); continue; }
-        await nav.click();
+        // 2.89.0: o Clima só fica na barra com o clima ligado; desligado,
+        // a página continua existindo e é aberta direto
+        if (!(await nav.count()) && v === "chuva") await p.evaluate(() => showView("chuva"));
+        else if (!(await nav.count())) { fails.push(`${lang} ${vp.width}px: sem botão para a página ${v}`); continue; }
+        else await nav.click();
         await p.waitForTimeout(700);
         await checkOver(p, `${lang} ${vp.width}px ${v}`, fails);
         // sub-abas da página (Gráficos, RC102, GMC-800…)

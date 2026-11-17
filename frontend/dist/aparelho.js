@@ -256,6 +256,9 @@ document.addEventListener("click", async (e) => {
 function renderDevMini() {
   if (typeof whConnSync === "function") whConnSync();
   const page = state.view;
+  // 2.89.0 (E6): o Clima só aparece na barra com o clima ligado
+  const nc = $("navChuva");
+  if (nc) nc.hidden = !(state.settings && state.settings.rainEnabled) && page !== "chuva";
   const inst = $("instruments");
   if (!inst) return;
   // na tela de um aparelho, na aba Agora, a fileira de cima é a mesma do

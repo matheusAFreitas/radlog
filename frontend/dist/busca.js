@@ -20,6 +20,7 @@ const QK_IC = {
   bell: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round" aria-hidden="true"><path d="M4 11V7a4 4 0 0 1 8 0v4l1 1.5H3z"/><path d="M6.5 14h3"/></svg>',
   mute: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6.2h2.2L8 4v8L5.2 9.8H3Z"/><path d="M10.5 6l3 4M13.5 6l-3 4"/></svg>',
   moved: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h9M8 5l3 3-3 3"/><path d="M13.5 3v10"/></svg>',
+  dl: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v8M5 7l3 3 3-3M3 13.5h10"/></svg>',
   clock: '<svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" aria-hidden="true"><circle cx="8" cy="8" r="6"/><path d="M8 4.5V8l2.5 1.5"/></svg>',
 };
 
@@ -65,6 +66,10 @@ function qkActions() {
     { g: "Ações", ic: QK_IC.page, t: "Exportar leituras (CSV)", s: "Configurações › Dados e backup", kw: "exportar csv planilha leituras dados", run: () => $("btnExport").click() },
     { g: "Ações", ic: QK_IC.page, t: "Eventos e log", s: "Configurações › Atualizações e sobre", kw: "eventos log erros registro", run: () => $("btnEvents").click() },
     { g: "Ações", ic: QK_IC.bell, t: "Testar alarme (5 s)", s: "Configurações › Alarme", kw: "testar alarme som sirene", run: () => $("btnTestAlarm").click() },
+    objTestActive()
+      ? { g: "Ações", ic: QK_IC.obj, t: "Parar o teste do objeto", s: "atenção e alarme voltam a valer", kw: "testar objeto parar", run: objTestStopAll, c: "obj" }
+      : { g: "Ações", ic: QK_IC.obj, t: "Estou testando um objeto", s: "cala os alertas por 10 min", kw: "testar objeto calar silenciar pedra", run: qkAskTest, c: "obj" },
+    { g: "Ações", ic: QK_IC.dl, t: "Baixar histórico", s: "a memória do GMC-800", kw: "baixar historico memoria gmc", run: () => $("btnHistory").click(), off: () => $("btnHistory").disabled },
   ];
   if (qkAlarmOn()) a.splice(3, 0, { g: "Ações", ic: QK_IC.mute, t: "Silenciar o alarme", s: "a faixa continua até o nível baixar", kw: "silenciar alarme som parar", run: () => $("btnSilence").click() });
   return a;
@@ -290,6 +295,7 @@ function qkSheetClose() {
 function qkAskAway() {
   qkFab(false);
   const s = $("qkSheet"), go = qkGoFor();
+  s.setAttribute("aria-label", "Saí de casa");
   s.textContent = "";
   const b = document.createElement("b");
   b.textContent = `Saí de casa às ${qkHM()}`;
@@ -335,6 +341,85 @@ function qkAskAway() {
   ok.focus();
 }
 
+// ---------- "Estou testando um objeto" (2.89.0, avaliação A5) ----------
+// Cala atenção e alarme de um aparelho por 10 min; o perigo continua.
+function objTestActive() {
+  const now = Date.now();
+  return Object.values(state.objTest || {}).some((t) => t > now);
+}
+function qkAskTest() {
+  qkFab(false);
+  const s = $("qkSheet");
+  s.setAttribute("aria-label", "Estou testando um objeto");
+  s.textContent = "";
+  s.appendChild(Object.assign(document.createElement("b"), { textContent: "Estou testando um objeto" }));
+  s.appendChild(Object.assign(document.createElement("span"), { className: "small muted", textContent: "Cala atenção e alarme do aparelho escolhido por 10 min. O perigo continua tocando." }));
+  let dev = localGet("objTestDev", "radiacode");
+  const seg = document.createElement("div");
+  seg.className = "seg";
+  seg.setAttribute("role", "group");
+  seg.setAttribute("aria-label", "Aparelho");
+  for (const [k, name] of [["radiacode", "RC102"], ["gmc", "GMC-800"]]) {
+    const b = Object.assign(document.createElement("button"), { type: "button", textContent: name });
+    b.dataset.v = k;
+    b.setAttribute("aria-pressed", String(k === dev));
+    b.addEventListener("click", () => { dev = k; seg.querySelectorAll("button").forEach((x) => x.setAttribute("aria-pressed", String(x === b))); });
+    seg.appendChild(b);
+  }
+  s.appendChild(seg);
+  const acts = document.createElement("div");
+  acts.className = "qk-acts";
+  const no = Object.assign(document.createElement("button"), { type: "button", className: "btn", textContent: "Cancelar" });
+  const ok = Object.assign(document.createElement("button"), { type: "button", className: "btn qk-away-ok", textContent: "Começar" });
+  no.addEventListener("click", qkSheetClose);
+  ok.addEventListener("click", async () => {
+    qkSheetClose();
+    localSet("objTestDev", dev);
+    try {
+      const until = await api.TestObject(dev);
+      state.objTest = Object.assign({}, state.objTest, { [dev]: until });
+      objTestRender();
+    } catch (e) { toast(errMsg(e), true); }
+  });
+  acts.append(no, ok);
+  s.appendChild(acts);
+  s.hidden = false;
+  ok.focus();
+}
+async function objTestStop(dev) {
+  if (state.objTest) delete state.objTest[dev];
+  try { await api.StopTestObject(dev); } catch (e) { /* já passou */ }
+  objTestRender();
+}
+function objTestStopAll() { Object.keys(state.objTest || {}).forEach(objTestStop); }
+// aviso embaixo dos quadros enquanto vale, com o botão de parar
+function objTestRender() {
+  const box = $("objTestNote");
+  if (!box) return;
+  const now = Date.now();
+  state.objTest = state.objTest || {};
+  for (const [d, t] of Object.entries(state.objTest)) if (!(t > now)) delete state.objTest[d];
+  const list = Object.entries(state.objTest);
+  box.hidden = !list.length;
+  box.textContent = "";
+  for (const [d, t] of list) {
+    const row = document.createElement("div");
+    row.className = "obj-test-row";
+    const txt = document.createElement("span");
+    txt.textContent = d === "gmc" ? `Testando um objeto no GMC-800: atenção e alarme calados até ${hhmm(t)}. O perigo continua.`
+      : `Testando um objeto no RC102: atenção e alarme calados até ${hhmm(t)}. O perigo continua.`;
+    const b = Object.assign(document.createElement("button"), { type: "button", className: "btn small", textContent: "Parar" });
+    b.addEventListener("click", () => objTestStop(d));
+    row.append(txt, b);
+    box.appendChild(row);
+  }
+}
+async function objTestSync() {
+  if (!api.ObjectTests) return;
+  try { state.objTest = (await api.ObjectTests()) || {}; } catch (e) { return; }
+  objTestRender();
+}
+
 async function qkBack() {
   qkSheetClose();
   try {
@@ -356,7 +441,7 @@ function qkFab(open) {
   qkSheetClose();
   const menu = $("qkFabMenu");
   menu.textContent = "";
-  qkActions().slice(0, 4).forEach((it) => {
+  qkFabItems().forEach((it) => {
     const b = document.createElement("button");
     b.type = "button";
     b.append(it.t);
@@ -374,6 +459,15 @@ function qkFab(open) {
   if (first) first.focus();
 }
 
+// 2.89.0 (avaliação E7/E8): a busca saiu da barra e as Ações ficaram com o
+// que se faz no dia a dia, na ordem de uso. Ctrl+K abre este menu.
+const QK_FAB = ["Anotar agora", "Medir um objeto", "Estou testando um objeto", "Parar o teste do objeto", "Silenciar o alarme",
+  "Saí de casa", "Voltei", "Programar saída", "Relatório em PDF do Resumo", "Baixar histórico", "Mudei o aparelho de lugar"];
+function qkFabItems() {
+  const all = qkActions().filter((it) => !(it.off && it.off()));
+  return QK_FAB.map((t) => all.find((it) => it.t === t)).filter(Boolean);
+}
+
 // o menu fica preso à tela, em cima do botão da barra lateral (ou embaixo,
 // com a barra no topo em tela estreita)
 function qkFabPlace() {
@@ -382,12 +476,12 @@ function qkFabPlace() {
   else { m.left = "auto"; m.right = Math.max(8, innerWidth - r.right) + "px"; m.top = (r.bottom + 8) + "px"; m.bottom = "auto"; $("qkFabMenu").style.flexDirection = "column"; m.alignItems = "stretch"; }
 }
 
-// some durante uma medição em andamento (o "Parar" fica no canto) e com o
-// alarme tocando (a faixa tem prioridade)
+// some durante uma medição em andamento (o "Parar" fica no canto). Com o
+// alarme tocando fica (2.89.0): "Estou testando um objeto" serve justamente aí
 function qkFabSync() {
   const f = $("qkFab");
   if (!f) return;
-  const hide = qkMeasuring() || qkAlarmOn();
+  const hide = qkMeasuring();
   if (hide && f.classList.contains("open")) qkFab(false);
   f.hidden = hide;
 }
@@ -413,12 +507,12 @@ function wireBusca() {
   });
   $("qkDlg").addEventListener("mousedown", (e) => { if (e.target === $("qkDlg")) qkClose(); });
   $("qkDlg").addEventListener("close", () => { if (QK.last && QK.last.focus) QK.last.focus(); });
-  $("btnQuick").addEventListener("click", () => qkOpen(""));
   $("qkFabMain").addEventListener("click", () => qkFab(!$("qkFab").classList.contains("open")));
   document.addEventListener("keydown", (e) => {
     if ((e.ctrlKey || e.metaKey) && !e.altKey && e.key.toLowerCase() === "k") {
       e.preventDefault();
-      if ($("qkDlg").open) qkClose(); else qkOpen("");
+      if ($("qkDlg").open) qkClose();
+      if (!$("qkFab").hidden) qkFab(!$("qkFab").classList.contains("open"));
       return;
     }
     if (e.key === "Escape") {
@@ -441,4 +535,6 @@ function wireBusca() {
   });
   setInterval(qkFabSync, 1000);
   qkFabSync();
+  objTestSync();
+  setInterval(objTestRender, 15000);
 }

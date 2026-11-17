@@ -1017,7 +1017,7 @@ function renderDemo() {
   $("demoStripe").hidden = !on;
   $("btnDemo").setAttribute("aria-pressed", String(on));
   $("btnDemo").classList.toggle("demo-on", on);
-  $("btnDemoText").textContent = on ? "Demonstração ligada" : "Demonstração";
+  $("btnDemoText").textContent = on ? "Sair da demonstração" : "Ligar a demonstração";
   if (!on) { $("demoPanel").hidden = true; renderStatus(); return; }
   $("demoStripeTxt").textContent = `${demoName(d.scenario)} · nada é gravado`;
   const open = !$("demoPanel").hidden;
@@ -1097,7 +1097,7 @@ function demoTray(r) {
 }
 
 function wireDemo() {
-  $("btnDemo").addEventListener("click", () => (state.demo.active ? ($("demoPanel").hidden = !$("demoPanel").hidden, renderDemo()) : demoStart()));
+  $("btnDemo").addEventListener("click", () => (state.demo.active ? demoStop() : demoStart()));
   $("demoExit").addEventListener("click", demoStop);
   $("demoPanelExit").addEventListener("click", demoStop);
   $("demoOpen").addEventListener("click", () => {
@@ -4012,6 +4012,8 @@ async function refreshCounterSync(cs) {
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
   gs.title = cs.text;
+  // 2.89.0 (E5): o ponto da barra diz o que é ao passar o mouse
+  $("navGmcDot").closest("button").title = show ? gs.textContent : "";
   card.classList.toggle("cheia", cs.memLevel === "cheia");
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;

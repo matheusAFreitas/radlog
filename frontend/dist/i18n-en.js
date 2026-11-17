@@ -4522,7 +4522,16 @@ const I18N_EN = {
 "Em µSv/h": "In µSv/h",
 "Últimos 10 s": "Last 10 s",
 "atenção e alarme: os alarmes 1 e 2 do RC102": "attention and alarm: the RC102's alarms 1 and 2",
-"atenção e alarme: os alarmes 1 e 2 do RadiaCode": "attention and alarm: the RC102's alarms 1 and 2"
+"atenção e alarme: os alarmes 1 e 2 do RadiaCode": "attention and alarm: the RC102's alarms 1 and 2",
+"Cala atenção e alarme do aparelho escolhido por 10 min. O perigo continua tocando.": "Silences attention and alarm on the chosen device for 10 min. Danger still sounds.",
+"Dados simulados no app todo, para conhecer as telas e os alarmes. Nada é gravado.": "Simulated data across the app, to get to know the screens and alarms. Nothing is saved.",
+"Estou testando um objeto": "I'm testing an object",
+"Parar o teste do objeto": "Stop the object test",
+"a memória do GMC-800": "the GMC-800's memory",
+"atenção e alarme voltam a valer": "attention and alarm work again",
+"baixar historico memoria gmc": "download history memory gmc",
+"cala os alertas por 10 min": "silences alerts for 10 min",
+"Parar": "Stop"
 },
 "patterns": [
 [
@@ -6320,6 +6329,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Testando um objeto no RadiaCode: atenção e alarme calados até ",
+"^Testando um objeto no RadiaCode: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the RC102: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no RadiaCode: atenção e alarme calados até ",
+". O perigo continua."
+]
+],
+[
 "não vou gravar: a configuração do contador tem valores que o app não reconhece (",
 "^não vou gravar: a configuração do contador tem valores que o app não reconhece \\(((?:(?! · ).)+?)\\)$",
 "won't write: the counter configuration has values the app doesn't recognize (${1})",
@@ -6343,6 +6361,15 @@ const I18N_EN = {
 [
 "Contador e app usam o mesmo fator: ",
 " µSv/h por CPM. Os dois mostram o mesmo µSv/h."
+]
+],
+[
+"Testando um objeto no GMC-800: atenção e alarme calados até ",
+"^Testando um objeto no GMC\\-800: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the GMC-800: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no GMC-800: atenção e alarme calados até ",
+". O perigo continua."
 ]
 ],
 [
@@ -6425,6 +6452,15 @@ const I18N_EN = {
 [
 "Saída programada \"",
 "\": já havia um trecho marcado à mão nesse horário; ficou o seu"
+]
+],
+[
+"Testando um objeto no RC102: atenção e alarme calados até ",
+"^Testando um objeto no RC102: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the RC102: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no RC102: atenção e alarme calados até ",
+". O perigo continua."
 ]
 ],
 [
@@ -8414,6 +8450,15 @@ const I18N_EN = {
 ": reiniciando em ",
 " (erro interno nº ",
 " na última hora)"
+]
+],
+[
+"Testando um objeto no ",
+"^Testando um objeto no ((?:(?! · ).)+?): atenção e alarme calados até ((?:(?! · ).)+?)$",
+"Testing an object with the ${1}: attention and alarm silenced until ${2}",
+[
+"Testando um objeto no ",
+": atenção e alarme calados até "
 ]
 ],
 [
