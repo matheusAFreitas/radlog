@@ -4703,8 +4703,6 @@ const I18N_EN = {
 "Espectrograma ao vivo: energia na vertical, tempo na horizontal": "Live spectrogram: energy on the vertical, time on the horizontal",
 "Cores": "Colors",
 "original": "original",
-"Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.",
-"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.",
 "2 h antes": "2 h before",
 "4 h depois": "4 h after",
 "Agora:": "Now:",
@@ -4765,7 +4763,13 @@ const I18N_EN = {
 "valor": "value",
 "A contagem não mudou, mas a dose subiu": "The count didn't change, but the dose went up",
 "a contagem não mudou, mas a dose subiu": "the count didn't change, but the dose went up",
-"Isso acontece com gama de energia alta: cada contagem vale mais dose.": "This happens with high-energy gamma: each count is worth more dose."
+"Isso acontece com gama de energia alta: cada contagem vale mais dose.": "This happens with high-energy gamma: each count is worth more dose.",
+"Perigo do outro aparelho durante a medição": "Danger on the other device during the measurement",
+"toca": "sounds",
+"fica calado": "stays silent",
+"Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.": "Attention and alarm stay silent either way, and the device on the object sounds nothing. This applies to the device that is not on the object.",
+"O Perigo só fica calado no aparelho que está no objeto.": "Danger is only muted on the device that is on the object.",
+"O Perigo também fica calado nos dois.": "Danger is muted on both too."
 },
 "patterns": [
 [
@@ -6069,6 +6073,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. ",
+"^Atenção e alarme do GMC\\-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado\\. ((?:(?! · ).)+?)$",
+"GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. ${1}",
+[
+"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. "
+]
+],
+[
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
 "RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
@@ -6251,6 +6263,14 @@ const I18N_EN = {
 "O período começa ",
 " antes do primeiro dado do GMC (",
 "); esse trecho não conta como lacuna."
+]
+],
+[
+"Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. ",
+"^Atenção e alarme do GMC\\-800 e do RC102 ficam em silêncio até 1 min depois do resultado\\. ((?:(?! · ).)+?)$",
+"GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. ${1}",
+[
+"Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. "
 ]
 ],
 [

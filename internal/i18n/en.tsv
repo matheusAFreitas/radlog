@@ -1520,7 +1520,6 @@ Versões	Versions
 1 medição	1 measurement
 1 detalhe de alerta	1 alert detail
 1 anotação	1 note
-
 +1 minuto de leitura	+1 minute of reading
 +1 evento/alerta	+1 event/alert
 +1 período fora de casa	+1 away-from-home period
@@ -1623,7 +1622,6 @@ provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou a
 — fundo da casa {0} ± {1}	— home background {0} ± {1}
 : o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	: the object came out below background, so the background probably changed (another spot, rain).
 A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
-
 RC102: desligou	RC102: turned off
 RC102: ligou	RC102: turned on
 RC102: desligou por bateria fraca	RC102: shut down on low battery
@@ -6152,7 +6150,6 @@ Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search:
 juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
 Medição no {0} terminada.	Measurement on the {0} finished.
-Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.
 2 h antes	2 h before
 4 h depois	4 h after
 Agora:	Now:
@@ -6248,3 +6245,10 @@ Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate 
 · {0}σ na dose	· {0}σ in the dose
 A contagem ficou igual ({0} σ), mas a taxa de dose subiu {1} σ: gama de energia alta, em que cada contagem vale mais dose.	The count stayed the same ({0} σ), but the dose rate went up {1} σ: high-energy gamma, where each count is worth more dose.
 {0}σ na dose · {1}σ na contagem	{0}σ in the dose · {1}σ in the count
+Perigo do outro aparelho durante a medição	Danger on the other device during the measurement
+toca	sounds
+fica calado	stays silent
+Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.	Attention and alarm stay silent either way, and the device on the object sounds nothing. This applies to the device that is not on the object.
+Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. {0}	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. {0}
+O Perigo só fica calado no aparelho que está no objeto.	Danger is only muted on the device that is on the object.
+O Perigo também fica calado nos dois.	Danger is muted on both too.

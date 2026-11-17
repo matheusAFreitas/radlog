@@ -55,6 +55,8 @@ type MeasureOpts struct {
 	// 2.81: com o fundo da casa, para em "fundo-pronto" (a pessoa ainda vai
 	// procurar o ponto) em vez de já começar pelo objeto
 	WaitObj bool `json:"waitObj"`
+	// 2.100.2 (pedido do ACE): o Perigo do outro aparelho também cala
+	QuietDanger bool `json:"quietDanger"`
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -250,7 +252,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	}
 	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance),
 		DistCM: o.DistCM, Size: o.Size, Test: alaraTest(o.Test), Material: strings.TrimSpace(o.Material), RelErr: math.Min(math.Max(o.RelErr, 0), 0.5),
-		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
+		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side, QuietDanger: o.QuietDanger}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
 			USv: hb.USv, ErrUSv: hb.ErrUSv, Start: hb.From, End: hb.To, Source: "casa"}

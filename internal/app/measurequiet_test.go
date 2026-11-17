@@ -135,3 +135,29 @@ func TestMeasureDoseUp(t *testing.T) {
 		t.Fatalf("meanErr %v", e)
 	}
 }
+
+// 2.100.2: com "fica calado" no Preparar, o Perigo do outro aparelho também cala.
+func TestMeasureQuietDangerOpt(t *testing.T) {
+	a := newTestApp(t)
+	now := time.Now()
+	a.mu.Lock()
+	a.measure = MeasureState{Phase: "objeto", Device: "gmc", QuietDanger: true}
+	a.mu.Unlock()
+	l := a.rcLimits()
+	a.rcAlertStep(now, l.Danger*1.2)
+	a.mu.Lock()
+	dang := a.rcAlert.dangOn
+	q := a.measureQuietLocked(devRC, now)
+	a.mu.Unlock()
+	if dang || !q {
+		t.Fatalf("Perigo calado pela opção: dangOn %v quiet %v", dang, q)
+	}
+	// sem medição, a opção não vale
+	a.mu.Lock()
+	a.measure = MeasureState{QuietDanger: true}
+	q = a.measureQuietLocked(devRC, now)
+	a.mu.Unlock()
+	if q {
+		t.Fatal("sem medição nada cala")
+	}
+}

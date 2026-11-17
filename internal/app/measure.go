@@ -93,6 +93,8 @@ type MeasureState struct {
 	// pessoa); Other é o segundo aparelho
 	Mode  string       `json:"mode,omitempty"`
 	Other *MeasureSide `json:"other,omitempty"`
+	// 2.100.2: true = o Perigo do aparelho que não está no objeto também cala
+	QuietDanger bool `json:"quietDanger,omitempty"`
 	// 2.40: distância em cm (0 = encostado ou não informada), tamanho do
 	// objeto (pequeno, espalhado), as medições anteriores do mesmo objeto em
 	// outras distâncias e as contas do resultado
@@ -169,7 +171,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 			seconds = 60
 		}
 		prev := a.measure
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode, QuietDanger: prev.QuietDanger}
 		if o := prev.Other; o != nil {
 			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
 		}
@@ -245,11 +247,12 @@ func (a *App) measureActiveLocked(now time.Time) bool {
 }
 
 // measureQuietLocked diz se TODOS os alertas do aparelho dev ficam calados
-// agora (inclusive o Perigo): só o que está no objeto, durante a medição.
+// agora (inclusive o Perigo): o que está no objeto, durante a medição, e os
+// outros também quando a pessoa escolheu calar o Perigo (QuietDanger).
 func (a *App) measureQuietLocked(dev string, now time.Time) bool {
 	m := &a.measure
 	onObj := devName(m.Device) == dev || (m.Other != nil && m.Other.Role == "objeto" && m.Other.Device == dev)
-	return onObj && a.measureActiveLocked(now)
+	return (onObj || m.QuietDanger) && a.measureActiveLocked(now)
 }
 
 // measStopMinSec: antes disso o "parar agora" espera (poucas contagens).

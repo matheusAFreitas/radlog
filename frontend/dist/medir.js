@@ -331,7 +331,7 @@ function measureOpts() {
   return {
     name: $("mName").value, distance: !has ? "" : cm === 0 ? "encostado" : `${fmt(cm, cm % 1 ? 1 : 0)} cm`, distCm: has ? cm : 0,
     size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado
-    auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
+    auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, quietDanger: mOpt("danger", "toca") === "cala", ...measureDevOpts(),
     seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat(mOpt("mPct", "20")),
   };
 }
@@ -409,7 +409,7 @@ function renderMeasure(st) {
   $("mQuiet").hidden = !qd;
   if (qd && st.phase === "pronto") setTimeout(() => { if (state.measureSt === st) $("mQuiet").hidden = true; }, Math.max(0, 60000 - (Date.now() - st.obj.end)) + 200);
   const qDev = escHtml(devLabel(isRcMeasure(st) ? "radiacode" : "gmc"));
-  if (qd) $("mQuiet").innerHTML = `<b>${st.phase === "pronto" ? `Medição no ${qDev} terminada.` : `Medindo um objeto no ${qDev}.`}</b> Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.`;
+  if (qd) $("mQuiet").innerHTML = `<b>${st.phase === "pronto" ? `Medição no ${qDev} terminada.` : `Medindo um objeto no ${qDev}.`}</b> Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. ${st.quietDanger ? "O Perigo também fica calado nos dois." : "O Perigo só fica calado no aparelho que está no objeto."}`;
   $("measureTitle").textContent = "Medir objeto" + (st.demo ? " (demo)" : "");
   for (const [id, s] of [["mPanePrep", "prep"], ["mPaneBusca", "busca"], ["mPaneFundo", "fundo"], ["mPaneObj", "objeto"], ["mPaneResult", "result"]]) $(id).hidden = step !== s;
   renderMeasureSteps(st, step);
@@ -443,6 +443,7 @@ function renderMeasurePrep() {
   const cm = $("mDistCm").value;
   document.querySelectorAll("#mDistSeg button").forEach((b) => b.setAttribute("aria-pressed", String(cm !== "" && +b.dataset.dist === +cm)));
   document.querySelectorAll("#mSizeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.size === o.size)));
+  document.querySelectorAll("#mDangerSeg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.danger === "cala") === o.quietDanger)));
   document.querySelectorAll("#mPctSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.pct === o.pct)));
   $("mPctBox").hidden = !o.maxSec; // só vale no automático (o.auto não existia: a caixa sumia sempre)
   refreshHomeBg(false);
@@ -1180,6 +1181,7 @@ function wireMeasure() {
   const rr = () => renderMeasure(state.measureSt || {});
   $("mDistCm").addEventListener("input", () => { mSetOpt("distCm", $("mDistCm").value); rr(); });
   const segs = [["#mDistSeg", "dist", (v) => { $("mDistCm").value = v; mSetOpt("distCm", v); }], ["#mSizeSeg", "size", (v) => mSetOpt("size", v)],
+    ["#mDangerSeg", "danger", (v) => mSetOpt("danger", v)],
     ["#mPctSeg", "pct", (v) => mSetOpt("mPct", v)],
     ["#mObjDevSeg", "objdev", (v) => { mSetOpt("mObjDev", v); refreshHomeBg(true); }]];
   for (const [sel, key, fn] of segs) document.querySelectorAll(sel + " button").forEach((b) => b.addEventListener("click", () => { fn(b.dataset[key]); rr(); }));
