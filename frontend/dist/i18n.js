@@ -150,11 +150,12 @@ const tr = (() => {
   const translate = LANG === "en" && typeof I18N_EN !== "undefined";
   const rem = typeof RATE_MREM !== "undefined" && RATE_MREM;
   const words = typeof UNIT_WORDS !== "undefined" && !!UNIT_WORDS;
-  if (!translate && !rem && !words) return;
+  const iso = typeof DATE_ISO !== "undefined" && DATE_ISO;
+  if (!translate && !rem && !words && !iso) return;
   const ATTRS = ["title", "placeholder", "aria-label"];
   const skip = (n) => { const p = n.parentNode; return p && (p.nodeName === "SCRIPT" || p.nodeName === "STYLE" || (p.closest && p.closest("[data-no-tr]"))); };
   const keep = (el) => !rem || (el && el.closest && el.closest("[data-unit-keep]"));
-  const conv = (s, el) => { const t = translate ? tr(s) : s; return keep(el) ? unitWord(t, el) : unitWord(remText(t), el); };
+  const conv = (s, el) => { const t = dateText(translate ? tr(s) : s); return keep(el) ? unitWord(t, el) : unitWord(remText(t), el); };
   const doText = (n) => {
     if (skip(n)) return;
     const t = conv(n.data, n.parentNode);

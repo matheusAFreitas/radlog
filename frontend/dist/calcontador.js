@@ -10,7 +10,7 @@
 const CC_SRC = { "intercalibração": "intercalibração com o RC102", "você": "informado à mão", "contador": "curva do contador" };
 
 function ccDay(t) {
-  return new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" });
+  return ddmm(t);
 }
 
 function ccList(pts) {

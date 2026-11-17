@@ -11,8 +11,7 @@
 const IC_WATCH_CLS = { concordam: "ok", "uma-semana": "warn", afastando: "bad" };
 
 function icWhen(t) {
-  const d = new Date(t);
-  return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+  return ddmm(t) + " " + hhmm(t);
 }
 
 // fator de cada hora com a margem, e a faixa do fator novo (±95%)
@@ -36,7 +35,7 @@ function icHoursSvg(r) {
     const cx = x(h.t);
     s += `<line class="ic-err" x1="${cx}" x2="${cx}" y1="${y(h.k + h.err)}" y2="${y(h.k - h.err)}"/><circle class="ic-dot" cx="${cx}" cy="${y(h.k)}" r="3"><title>${icWhen(h.t)} · ${fmt(h.k, 5)} ± ${fmt(h.err, 5)}</title></circle>`;
   }
-  const lab = (t) => new Date(t).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" });
+  const lab = (t) => hhmm(t);
   s += `<text class="ic-tick" x="${L}" y="${H - 6}">${lab(hs[0].t)}</text><text class="ic-tick" x="${W - R}" y="${H - 6}" text-anchor="end">${lab(hs[hs.length - 1].t)}</text>`;
   return s + "</svg>";
 }
@@ -165,7 +164,7 @@ function demoIntercal() {
     GetIntercal: async () => view(),
     StartIntercal: async () => { d = { state: "pronta", start: Date.now() - 864e5, end: Date.now(), result: res() }; return view(); },
     CancelIntercal: async () => { d = { state: "parado" }; },
-    ApplyIntercal: async (skip) => { if (skip) d.skipped = true; else { d.applied = true; await api.SetGMCFactor(0.00564, "com o RC102, coleta de " + new Date(d.start).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }), "intercalibração"); } return view(); },
-    GetConcord: async () => ({ state: "aprendendo", learnedMin: 1260, text: "Aprendendo o normal dos dois em casa: 21 h juntos até agora; a vigia começa em " + new Date(Date.now() + 27 * 864e5).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" }) + "." }),
+    ApplyIntercal: async (skip) => { if (skip) d.skipped = true; else { d.applied = true; await api.SetGMCFactor(0.00564, "com o RC102, coleta de " + ddmm(d.start), "intercalibração"); } return view(); },
+    GetConcord: async () => ({ state: "aprendendo", learnedMin: 1260, text: "Aprendendo o normal dos dois em casa: 21 h juntos até agora; a vigia começa em " + ddmm(Date.now() + 27 * 864e5) + "." }),
   };
 }

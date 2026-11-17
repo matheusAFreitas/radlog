@@ -66,6 +66,9 @@ type Settings struct {
 	// ou "cps" (2.84.0)
 	RateUnit  string `json:"rateUnit"`
 	CountUnit string `json:"countUnit"`
+	// formato da data (datefmt.go): "" dia/mês/ano ou "iso" ano-mês-dia,
+	// nos dois idiomas (2.97.0)
+	DateFormat string `json:"dateFormat"`
 	// pulso da contagem (pulso.js): o anel do mostrador pisca a cada
 	// contagem (ligado, a não ser que PulseOff) e a fita dos últimos 10 s
 	PulseOff   bool `json:"pulseOff"`
@@ -607,6 +610,7 @@ func (a *App) loadSettings() Settings {
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
 	s.UIScale, s.UIDensity = normUIScale(s.UIScale), normUIDensity(s.UIDensity)
 	s.RateUnit, s.CountUnit = normRateUnit(s.RateUnit), normCountUnit(s.CountUnit)
+	s.DateFormat = normDateFormat(s.DateFormat)
 	return s
 }
 
@@ -807,6 +811,7 @@ func (a *App) saveSettingsFrom(s Settings, source string) Settings {
 	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
 	s.RateUnit, s.CountUnit = normRateUnit(s.RateUnit), normCountUnit(s.CountUnit)
+	s.DateFormat = normDateFormat(s.DateFormat)
 	if s.AlarmUSv > 0 {
 		s.AlarmUSv = clampThr(s.AlarmUSv, 0.01, 1e4)
 	}

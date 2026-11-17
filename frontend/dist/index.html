@@ -2142,6 +2142,13 @@
         </details>
       </fieldset>
       <fieldset>
+        <legend>Datas</legend>
+        <span class="small muted" id="uDateLbl">Formato da data</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uDateLbl" id="segDateFmt" data-no-tr><button type="button" data-v="">16/11/2026</button><button type="button" data-v="iso">2026-11-16</button></div>
+        <input type="hidden" id="valDateFmt">
+        <p class="small muted">Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.</p>
+      </fieldset>
+      <fieldset>
         <legend>Tamanho e espaço</legend>
         <label for="rngUiScale">Tamanho de tudo: <span class="mono" id="uiScaleOut">100%</span></label>
         <div class="ui-range"><span class="small muted mono">90%</span><input type="range" id="rngUiScale" min="0" max="5" step="1"><span class="small muted mono">150%</span></div>

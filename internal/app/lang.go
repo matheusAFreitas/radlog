@@ -56,8 +56,9 @@ func (a *App) inLang(render func() []byte) []byte {
 	lang := a.uiLang()
 	a.mu.Lock()
 	mrem := a.settings.RateUnit == rateMrem
+	iso := a.settings.DateFormat == dateISO
 	a.mu.Unlock()
-	if lang == "pt" && !mrem {
+	if lang == "pt" && !mrem && !iso {
 		return render()
 	}
 	sep := ","
@@ -70,6 +71,9 @@ func (a *App) inLang(render func() []byte) []byte {
 		}
 		if mrem {
 			s = remText(s, sep)
+		}
+		if iso {
+			s = isoText(s)
 		}
 		return s
 	}, render)
