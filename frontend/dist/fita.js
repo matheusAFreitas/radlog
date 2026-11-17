@@ -10,7 +10,7 @@
 // Usa os globais do app.js; carregado antes dele.
 
 const FT_N = 144; // pedaços de 10 min num dia
-const FT_COL = { seguro: "var(--accent)", atencao: "var(--att)", alarme: "var(--alarm)", perigo: "var(--warn)" };
+const FT_COL = { seguro: "var(--ok)", atencao: "var(--att)", alarme: "var(--alarm)", perigo: "var(--warn)" };
 const FT_PEN = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>';
 const FT_RANK = { seguro: 1, atencao: 2, alarme: 3, perigo: 4 };
 const FT_DEV = { gmc: "GMC-800", radiacode: "RC102" };
@@ -159,7 +159,7 @@ function ftHover(box, strips, tipOf, slotT) {
 // (used: conjunto de chaves); sem used, mostra tudo
 function ftLegend(el, used) {
   const sw = (bg, op) => `<i class="ft-sw" style="background:${bg}${op ? ";opacity:" + op : ""}"></i>`;
-  const items = [["seguro", `${sw("var(--accent)", ".55")}seguro`], ["atencao", `${ftShape("atencao", 11)}atenção`], ["alarme", `${ftShape("alarme", 11)}alarme`],
+  const items = [["seguro", `${sw("var(--ok)", ".55")}seguro`], ["atencao", `${ftShape("atencao", 11)}atenção`], ["alarme", `${ftShape("alarme", 11)}alarme`],
     ["perigo", `${ftShape("perigo", 11)}perigo`], ["none", `${sw("var(--ft-none)")}sem leitura`], ["away", `${sw("var(--away)")}fora de casa`], ["rain", `${sw("var(--info)")}chuva`], ["nota", `${FT_PEN}anotação`]];
   el.innerHTML = items.filter(([k]) => !used || used.has(k)).map(([, h]) => `<span>${h}</span>`).join("");
 }
@@ -231,7 +231,7 @@ function renderFitaDay(box, strip, day0, opt = {}) {
   }).join("");
   let h = "";
   if (mk) h += `<div class="ft-lane"><span class="ft-lb">marcas</span><div class="ft-marks">${mk}</div></div>`;
-  h += ftDevLane("GQ GMC-800", "var(--accent)", gmc, gmcRole, nowIdx, "gmc");
+  h += ftDevLane("GQ GMC-800", "var(--gmc)", gmc, gmcRole, nowIdx, "gmc");
   if (showRc) h += ftDevLane("Radiacode 102", "var(--rc)", rc, rcRole, nowIdx, "rc");
   if (away.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">fora de casa</span><div class="ft-strip thin">${ftBandSvg(away, "var(--away)")}</div></div>`;
   if (rain.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">chuva</span><div class="ft-strip thin">${ftBandSvg(rain, "var(--info)")}</div></div>`;

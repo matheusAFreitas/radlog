@@ -79,8 +79,8 @@ function drawPressCharts(r) {
     return { svg, Y, key };
   };
   const unit = r.device === "radiacode" ? "RC102" : "GMC-800";
-  const a = one("prPChart", "hPa", true, "Pressão do ar (hPa)", "var(--info, #7CC7FF)", 0);
-  const b = one("prRChart", "usv", false, `Fundo em casa pelo ${unit} (µSv/h, mediana de 1 h)`, "var(--accent)", 3);
+  const a = one("prPChart", "hPa", true, "Pressão do ar (hPa)", "var(--info)", 0);
+  const b = one("prRChart", "usv", false, `Fundo em casa pelo ${unit} (µSv/h, mediana de 1 h)`, r.device === "radiacode" ? "var(--rc)" : "var(--gmc)", 3);
   const tip = $("prTip");
   const move = (ev) => {
     const bb = ev.currentTarget.ownerSVGElement.getBoundingClientRect(), sx = W / bb.width;

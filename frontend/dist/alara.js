@@ -34,7 +34,7 @@ async function refreshAlOrigin(from, to, label) {
   const [tv, tu] = agSv(o.minutes ? o.total : null);
   $("alOrTot").innerHTML = "";
   $("alOrTot").append(tv, " ", Object.assign(document.createElement("small"), { textContent: tu ? `${tu} no período` : "" }));
-  const parts = [["Fundo em casa", o.homeBg, "var(--accent)"], ["Fundo fora de casa", o.awayBg, "var(--away)"], ["Acima do fundo", o.above, "var(--obj)"]];
+  const parts = [["Fundo em casa", o.homeBg, "var(--ok)"], ["Fundo fora de casa", o.awayBg, "var(--away)"], ["Acima do fundo", o.above, "var(--obj)"]];
   const tot = parts.reduce((a, p) => a + p[1], 0) || 1;
   let x = 0, h = "";
   parts.forEach(([t, v, c], i) => {

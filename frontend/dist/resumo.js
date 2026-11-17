@@ -415,6 +415,7 @@ function renderSummary(r, per) {
     sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, "GMC-800 · " + covText(r) + days);
   }
   if (r.minutes && r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `GMC-800 · σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
+  if (r.minutes && r.dispersion != null) glMark(t.lastElementChild.children[0], "dispersao");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   const n = (k) => (r[k] || 0) + ((rc && rc[k]) || 0);
   if (n("danger") + n("alarm") + n("attention")) {
@@ -428,7 +429,7 @@ function renderSummary(r, per) {
   const chart = $("sumPlot").closest(".sum-chart");
   chart.hidden = !r.minutes && !rc;
   if (chart.hidden) { drawSumChart([]); sumOverlayClear(); return; }
-  drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]);
+  drawSumChart([{ r, color: COR.gmc, label: "GMC-800" }]);
   renderSumOverlay(per);
 }
 
@@ -546,7 +547,7 @@ function sumLegendExtra(runs, away, marks) {
   };
   const lvs = new Set(runs.map((r) => r[2]));
   for (const m of marks) if (m.kind !== "nota") lvs.add(LV_PATH[m.level] ? m.level : "atencao");
-  if (lvs.has("seguro")) add('<i class="ft-sw" style="background:var(--accent);opacity:.55"></i>', "seguro");
+  if (lvs.has("seguro")) add('<i class="ft-sw" style="background:var(--ok);opacity:.55"></i>', "seguro");
   for (const lv of ["atencao", "alarme", "perigo"]) if (lvs.has(lv)) add(ftShape(lv, 11), SUM_LV_TXT[lv]);
   if (away) add('<i class="ft-sw" style="background:var(--away);opacity:.5"></i>', "fora de casa");
   if (marks.some((m) => m.kind === "nota")) add(FT_PEN, "anotação");
@@ -613,7 +614,7 @@ function drawSumChart(series) {
   for (let i = 0; i < 4; i++) ys[i].textContent = axRate(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   const bg = series[0].r.bgOK ? series[0].r.bgUSv || series[0].r.bgCPM * k : 0;
-  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${COR.accent}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${series[0].color}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   for (const s of series.slice().reverse()) {
     let d = "", pen = "M";
     s.r.curve.forEach((p, i) => { const v = pu(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; });
@@ -644,7 +645,7 @@ function drawSumChartUSv(r, rc) {
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="${COR.rc}" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   const path = (pts, val) => { let d = "", pen = "M"; pts.forEach((p, i) => { const v = val(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; }); return d; };
-  out += `<path d="${path(r.curve, (p) => (p.usv != null ? p.usv : p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.accent}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(r.curve, (p) => (p.usv != null ? p.usv : p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="${COR.rc}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   svg.innerHTML = out;
   const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;
@@ -652,6 +653,6 @@ function drawSumChartUSv(r, rc) {
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
-  $("sumLegend").innerHTML = '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key" data-u="rate"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
+  $("sumLegend").innerHTML = '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key" data-u="rate"><i style="border-color:' + COR.gmc + '"></i>GMC-800 (µSv/h)</span>' +
     (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RC102)</span>' : "");
 }

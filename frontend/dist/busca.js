@@ -53,6 +53,7 @@ function qkMeasuring() {
 function qkActions() {
   const a = [
     { g: "Ações", ic: QK_IC.note, t: "Anotar agora", s: "nota presa a este minuto", k: "N", kw: "nota anotacao escrever", run: qkNote },
+    { g: "Ações", ic: QK_IC.page, t: "Os termos do app", s: "σ, mediana, dureza e outros, em palavras simples", kw: "glossario termos sigma mediana quartil dispersao poisson dureza saturando curva cpm cps fundo incerteza", run: () => { qkSheetClose(); glOpenAll(); } },
     { g: "Ações", ic: QK_IC.moved, t: "Mudei o aparelho de lugar", s: "a referência do fundo recomeça hoje", kw: "mudei lugar mover aparelho gmc fundo referencia", run: () => bsMarkMoved() },
     qkAway()
       ? { g: "Ações", ic: QK_IC.back, t: "Voltei", s: "encerra o período fora de casa", kw: "voltar casa chegar fora", run: qkBack, c: "away" }

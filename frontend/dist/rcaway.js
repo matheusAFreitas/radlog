@@ -185,7 +185,7 @@ function renderRcAway() {
   tag.className = "chip off"; tag.textContent = "a responder";
   head.append(h, tag);
   const sub = document.createElement("div");
-  sub.className = "mono small muted";
+  sub.className = "mono small muted rca-sub";
   sub.textContent = `${zoomRangeText(q.from, q.to)} · ` + (q.memMinutes ? `a memória do aparelho trouxe ${hm(q.memMinutes)}` : "a memória do aparelho não trouxe leituras");
   box.append(head, sub);
 
@@ -474,7 +474,7 @@ function renderAwayAsk(box, q, list) {
   tag.className = "chip off"; tag.textContent = "a responder";
   head.append(h, tag);
   const sub = document.createElement("div");
-  sub.className = "mono small muted";
+  sub.className = "mono small muted rca-sub";
   sub.textContent = awSub(q);
   box.append(head, sub);
   if (q.gmcMinutes) {

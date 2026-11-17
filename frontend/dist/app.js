@@ -548,8 +548,19 @@ async function refreshSpark() {
   if (my !== sparkSeq || !c) return;
   drawSpark("gTileSpark", c.values);
   drawSpark("rTileSpark", c.rc);
+  sparkSay("gTileSpark", "GMC-800", c.usv);
+  sparkSay("rTileSpark", "RC102", c.rc);
   drawSpark("gHeroSpark", c.values);
   drawSpark("rHeroSpark", c.rc);
+}
+// o que o leitor de tela ouve no lugar da curva (2.96.0, T4)
+function sparkSay(id, dev, usv) {
+  const el = $(id);
+  if (!el) return;
+  const v = (usv || []).filter((x) => x != null && isFinite(x));
+  if (!v.length) { el.setAttribute("aria-label", `${dev}: sem leituras na última hora`); return; }
+  const mean = v.reduce((a, x) => a + x, 0) / v.length;
+  el.setAttribute("aria-label", `${dev}, última hora: média ${usvTxt(mean)}, máximo ${usvTxt(Math.max(...v))}`);
 }
 function drawSpark(id, vals) {
   if (!$(id)) return;
@@ -1368,7 +1379,7 @@ function drawHeatTrecho() {
   const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="${COR.grid}" vector-effect="non-scaling-stroke"/>`).join("");
   $("htRate").innerHTML = grid(RH) +
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
-    line(g, g.length, ry, COR.accent) + line(r, r.length, ry, COR.rc);
+    line(g, g.length, ry, COR.gmc) + line(r, r.length, ry, COR.rc);
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
   // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
@@ -1378,7 +1389,7 @@ function drawHeatTrecho() {
   $("htDose").innerHTML = grid(DH) +
     (R ? line(R.ceiling, R.ceiling.length, dy, COR.warn) : "") +
     (G ? line(G.ceiling, G.ceiling.length, dy, COR.warn, R ? "2 4" : "") : "") +
-    (G ? line(G.dose, G.dose.length, dy, COR.accent) : "") +
+    (G ? line(G.dose, G.dose.length, dy, COR.gmc) : "") +
     (R ? line(R.dose, R.dose.length, dy, COR.rc) : "");
   $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
   $("htX0").textContent = hhmm(p.from);
@@ -3233,11 +3244,11 @@ function wire() {
     $("progressText").textContent = "Lendo a memória do contador…";
     try {
       const r = await api.DownloadHistory();
-      if (r.canceled) toast(`Leitura cancelada: ${r.added} minutos novos guardados`);
-      else if (r.partial) histFailToast(r.partial, true);
-      else toast(`Histórico: ${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""));
+      if (r.canceled) histDone(`Leitura cancelada: ${r.added} minutos novos guardados`, false);
+      else if (r.partial) { histFailToast(r.partial, true); histDone("Não deu para baixar tudo: os minutos que chegaram foram guardados.", false); }
+      else histDone(`${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""), true);
     } catch (e) {
-      toast("Histórico: " + (e && e.message ? e.message : e), true);
+      histDone("Não deu para baixar: " + errMsg(e), false);
     }
     refreshAll();
   });
@@ -3265,6 +3276,24 @@ function wire() {
   wireReportDlg();
   wireWhere();
   wireBusca();
+}
+
+// resultado do "Baixar histórico" (2.96.0, T7): fica escrito ao lado do
+// botão por 30 min; o aviso passageiro só aparece se a página for outra
+function histDone(text, ok) {
+  state.histLast = { t: Date.now(), text, ok };
+  renderHistLast();
+  const here = state.view === "gmc" && !$("syncCard").hidden;
+  if (!here) toast(ok ? "Histórico: " + text : text, !ok);
+}
+function renderHistLast() {
+  const h = state.histLast, el = $("syncRes");
+  const on = !!h && Date.now() - h.t < 30 * 60e3;
+  el.hidden = !on;
+  if (!on) return;
+  el.classList.toggle("bad", !h.ok);
+  $("syncResTxt").textContent = h.text;
+  $("syncResAgo").textContent = `· há ${agoTxt(h.t)}`;
 }
 
 // ---------- histórico do GMC-800 baixado sozinho (2.83.0) ----------
@@ -4077,7 +4106,9 @@ async function refreshCounterSync(cs) {
   const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
   const show = cs.state === "pendente" || warnMem;
   const card = $("syncCard");
-  card.hidden = !show;
+  const recent = !!state.histLast && Date.now() - state.histLast.t < 30 * 60e3;
+  card.hidden = !show && !recent;
+  renderHistLast();
   $("navGmcDot").hidden = !show;
   const gs = $("gTileSync");
   gs.hidden = !show;
@@ -4089,7 +4120,10 @@ async function refreshCounterSync(cs) {
   card.classList.toggle("cheia", cs.memLevel === "cheia");
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;
-  if (!show) return;
+  if (!show) {
+    if (recent) { $("syncTitle").textContent = "Memória do contador"; $("syncText").textContent = "Tudo baixado."; }
+    return;
+  }
   // aviso curto (2.85): título, uma linha e o botão
   $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do GMC-800 cheia" : `Memória do GMC-800 em ${pct}%`) : "Há minutos para buscar no contador";
   $("syncText").textContent = warnMem
@@ -4123,11 +4157,12 @@ function patVal(p, v, extra) { return p.unit === "CPM" ? fmt(v, 1 + (extra || 0)
 const patUnit = (p) => (p.unit === "CPM" ? "CPM" : rateLbl());
 
 function drawPatterns(p) {
-  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.accent;
+  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.gmc;
   const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
   $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
-    : `${fmt(p.minutes, 0)} min em casa (${patUnit(p)})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
+    : `${fmt(p.minutes, 0)} min em casa (${patUnit(p)})` +
       (p.peakHour >= 0 ? ` · mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h` : "");
+  if (p.minutes && p.first && p.first > p.from) glAppend($("patSub"), `ainda aprendendo o seu normal (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)`, "janela");
   // hora do dia
   const svg = $("patChart"), PH = 160;
   const hs = p.hours || [];
@@ -4154,7 +4189,7 @@ function drawPatterns(p) {
       out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="${COR.text}" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
     }
     svg.innerHTML = out;
-    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
+    $("patLegend").innerHTML = `<span class="key" data-gl="mediana" role="button" tabindex="0"><i style="border-color:${color}"></i>mediana</span><span class="key" data-gl="quartil" role="button" tabindex="0"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
   }
   // dia × noite
   const dn = $("patDN");
@@ -4242,8 +4277,8 @@ function drawBgTrend(tr) {
   const hist = tr.first ? Math.max(0, (tr.to - Math.max(tr.from, tr.first)) / DAY_MS) : 0;
   const forming = tr.first && tr.first > tr.from;
   $("bgSub").textContent = !tr.minutes ? "sem minutos em casa nessa janela"
-    : `${fmt(tr.minutes, 0)} min em casa · ${daily.length} ${daily.length === 1 ? "dia" : "dias"} com dado` +
-      (forming ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${tr.days} dias)` : "");
+    : `${fmt(tr.minutes, 0)} min em casa · ${daily.length} ${daily.length === 1 ? "dia" : "dias"} com dado`;
+  if (tr.minutes && forming) glAppend($("bgSub"), `ainda aprendendo o seu normal (${fmt(hist, hist < 10 ? 1 : 0)} de ${tr.days} dias)`, "janela");
   const fit = $("bgFit");
   const f = tr.fit || {};
   fit.hidden = !tr.minutes;
@@ -4298,7 +4333,7 @@ function drawBgTrend(tr) {
   let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="${COR.muted}" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
   for (const d of daily) {
     const h = (Math.min(dtop, d.dispersion) / dtop) * DH, cx = x(d.day + DAY_MS / 2);
-    const col = d.dispersion >= 1.2 ? COR.att : COR.accent;
+    const col = d.dispersion >= 1.2 ? COR.att : COR.ok;
     dout += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${(DH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" fill-opacity="${d.full ? 0.7 : 0.3}"/>`;
   }
   dsvg.innerHTML = dout;
@@ -4504,8 +4539,33 @@ async function migrateUnits() {
   try { state.settings = await api.SaveSettings(Object.assign({}, s, { rateUnit: rate, countUnit: count })); } catch (e) { /* fica o que estava */ }
 }
 
+// "Como funciona" num formato só (2.96.0, T5): o único de cada cartão vai
+// para o canto de cima, à direita, e abre flutuando
+function howCorners(root) {
+  const hosts = new Map();
+  (root || document).querySelectorAll("details.how:not(.ag-more)").forEach((d) => {
+    if (d.closest(".tb-ck")) return;
+    const host = d.parentElement && d.parentElement.closest(".card, .rc-card, .al-sec, #settings fieldset, .al-col, .m-alara-box");
+    if (!host) return;
+    hosts.set(host, (hosts.get(host) || []).concat(d));
+  });
+  for (const [host, ds] of hosts) {
+    if (ds.length !== 1) continue;
+    host.classList.add("how-host");
+    ds[0].classList.add("how-c");
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  document.querySelectorAll("details.how-c[open]").forEach((d) => { d.open = false; });
+});
+document.addEventListener("click", (e) => {
+  document.querySelectorAll("details.how-c[open]").forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+});
+
 async function init() {
   wire();
+  howCorners();
   listen();
   try {
     state.settings = await api.GetSettings();
