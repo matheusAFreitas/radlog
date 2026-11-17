@@ -2197,12 +2197,6 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .m-objdev { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .m-objdev[hidden] { display: none; }
 .m-size { width: fit-content; }
-.m-adj { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); background: var(--surface); }
-.m-adj summary { cursor: pointer; font-size: var(--fs-label); min-height: 24px; }
-.m-adj[open] summary { margin-bottom: var(--space-3); }
-.m-adj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
-.m-adj-grid select { width: 100%; }
-.m-adj-grid .m-field[hidden] { display: none; }
 .m-warn { margin: 0; color: var(--att); }
 .m-go { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .m-busca { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: var(--space-5); align-items: center; }
