@@ -13,6 +13,7 @@ package app
 // MobileMethods são os métodos do App que a tela do celular pode chamar.
 var MobileMethods = []string{
 	"AnalyzeSpectrum",
+	"CancelMeasure",
 	"CheckCloudCode",
 	"CloudCancel",
 	"CloudDisconnect",
@@ -24,6 +25,7 @@ var MobileMethods = []string{
 	"GetCloud",
 	"GetEvents",
 	"GetLogs",
+	"GetMeasure",
 	"GetPeriods",
 	"GetRadiacode",
 	"GetRcSettings",
@@ -38,5 +40,8 @@ var MobileMethods = []string{
 	"SetRadiacode",
 	"SetRcSettings",
 	"SetWhere",
+	"StartMeasure",
+	"StartMeasurePhase",
+	"StopMeasure",
 	"UndoRcSettings",
 }

@@ -21,7 +21,7 @@ window.__rl = {
     if (res && res.e) w.reject(new Error(res.e)); else w.resolve(res ? res.r : null);
   },
   event(name, data) { (evHandlers[name] || []).forEach((f) => { try { f(data); } catch (e) { console.error(e); } }); },
-  back() { if (!$("sheet").hidden) closeSheet(); else if (state.rcView) spClose(); else if (state.tab !== "agora") go("agora"); else nat("exit"); },
+  back() { if (!$("sheet").hidden) closeSheet(); else if (state.rcView === "espectro") spClose(); else if (state.rcView) mdClose(); else if (state.tab !== "agora") go("agora"); else nat("exit"); },
 };
 const on = (name, f) => (evHandlers[name] = evHandlers[name] || []).push(f);
 function call(method, ...args) {
@@ -150,7 +150,7 @@ function render() {
   if (!state.paired) m.innerHTML = firstRun();
   else if (state.tab === "alertas") m.innerHTML = alertas();
   else if (state.tab === "ajustes") m.innerHTML = ajustes();
-  else if (state.tab === "rc102") m.innerHTML = state.rcView === "espectro" ? espectro() : rc102();
+  else if (state.tab === "rc102") m.innerHTML = state.rcView === "espectro" ? espectro() : state.rcView === "medir" ? medir() : rc102();
   else m.innerHTML = agora();
   bind();
 }
@@ -269,7 +269,7 @@ function rc102() {
     + `<div class="row"><span>${esc(rc.todayDevOK ? T("Hoje (somada pelo RC102)") : T("Hoje (pelo que o app gravou)"))}</span><span class="m">${fmt(today, today < 10 ? 2 : 1)} µSv</span></div>`
     + `<div class="row"><span>${esc(T("Acumulado do aparelho"))}</span><span class="m">${acc > 0 ? (acc >= 1000 ? `${fmt(acc / 1000, 3)} mSv` : `${fmt(acc, acc < 10 ? 2 : 1)} µSv`) : "—"}</span></div>`
     + `<span class="small">${esc(T("O acumulado é o total que o RC102 soma sozinho. O app só mostra, não zera nem muda."))}</span></div>`;
-  h += `<div class="list">${li(T("Espectro"), T("Picos e isótopos"), "›", "rSpec")}${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
+  h += `<div class="list">${li(T("Espectro"), T("Picos e isótopos"), "›", "rSpec")}${li(T("Medir objeto"), T("Fundo, objeto, resultado"), "›", "rMeas")}${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
   h += `<div class="card"><div class="row"><span>${esc([rc.model || "Radiacode 102", rc.firmware ? T("firmware {0}", rc.firmware) : ""].filter(Boolean).join(" · "))}</span>${isOff(rc) ? "" : `<button class="btn" id="rRecon" style="width:auto;padding:8px 14px">${esc(T("Reconectar"))}</button>`}</div></div>`;
   return h;
 }
@@ -408,6 +408,79 @@ function bindSpectrum() {
   };
   svg.addEventListener("pointerdown", (e) => { svg.setPointerCapture(e.pointerId); move(e); });
   svg.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "touch") move(e); });
+}
+
+// ---------------- Medir objeto ----------------
+// O mesmo cálculo do Medir objeto do PC (no Go), com o RC102: primeiro o
+// fundo sem o objeto, depois o objeto encostado, cada fase com o mesmo tempo.
+// O resultado fica guardado no celular. O motor manda o estado a cada segundo
+// (evento "measure").
+const md = { secs: 120, name: "" };
+
+async function mdOpen() {
+  state.rcView = "medir";
+  try { state.meas = await call("GetMeasure"); } catch (e) { state.meas = null; }
+  render(); $("main").scrollTop = 0;
+}
+function mdClose() { state.rcView = ""; render(); }
+
+const mdK = (m) => (m && m.bg && m.bg.cpm > 0 ? m.bg.usv / m.bg.cpm : 0); // µSv/h por CPM do fundo
+const mdClock = (s) => `${Math.floor(s / 60)}:${pad(s % 60)}`;
+const mdUsv = (v) => (v == null || !isFinite(v) ? "—" : usv(Math.abs(v)));
+
+function mdStep(n, title, sub, val, on, prog) {
+  return `<div class="card mstep${on ? " on" : ""}"><div class="row"><span class="num">${n}</span><div class="grow"><div>${esc(title)}</div><div class="small">${esc(sub)}</div></div>${val ? `<span class="m">${val}</span>` : ""}</div>${prog != null ? `<div class="bar"><i style="width:${Math.round(prog * 100)}%"></i></div>` : ""}</div>`;
+}
+
+function medir() {
+  const m = state.meas || {};
+  const ph = m.phase || "";
+  let h = `<div class="subhead"><button id="mdBack" aria-label="${esc(T("Voltar"))}">‹</button><b>${esc(T("Medir objeto"))}</b></div>`;
+  if (!ph) {
+    const opt = (s) => `<option value="${s}"${s === md.secs ? " selected" : ""}>${esc(T("{0} min cada fase", s / 60))}</option>`;
+    h += `<div class="card"><span class="small">${esc(T("Primeiro o RC102 mede o fundo, com o objeto longe. Depois você encosta o objeto nele e mede pelo mesmo tempo. O app compara os dois e diz se o objeto é radioativo."))}</span></div>`;
+    h += `<div class="list"><label class="li sel"><span class="t">${esc(T("Nome da amostra"))}</span><input id="mdName" class="txt" value="${esc(md.name)}" placeholder="${esc(T("Amostra"))}"></label><label class="li sel"><span class="t">${esc(T("Tempo"))}</span><select id="mdSecs">${[60, 120, 300, 600].map(opt).join("")}</select></label></div>`;
+    h += `<span class="err" id="mdErr"></span><button class="btn pri" id="mdGo">${esc(T("Medir o fundo"))}</button>`;
+    return h;
+  }
+  const bgDone = m.bg && ph !== "fundo";
+  const prog = (el, tot) => Math.min(1, el / Math.max(tot, 1));
+  h += mdStep(1, T("Fundo, sem o objeto"),
+    ph === "fundo" ? T("medindo · {0} de {1}", mdClock(m.elapsed || 0), mdClock(m.seconds || 0)) : T("{0} · pronto", mdClock((m.bg && m.bg.seconds) || 0)),
+    bgDone ? `${mdUsv(m.bg.usv)} µSv/h` : "", ph === "fundo", ph === "fundo" ? prog(m.elapsed || 0, m.seconds) : null);
+  const objSub = ph === "objeto" ? T("medindo · {0} de {1}", mdClock(m.elapsed || 0), mdClock(m.seconds || 0)) : ph === "pronto" ? T("{0} · pronto", mdClock((m.obj && m.obj.seconds) || 0)) : T("encoste o objeto no RC102 e toque em Medir o objeto");
+  const objVal = ph === "objeto" && m.elapsed > 0 && m.live ? `${mdUsv(m.bg.usv + m.live.netUSv)} µSv/h` : ph === "pronto" && m.obj ? `${mdUsv(m.obj.usv)} µSv/h` : "";
+  h += mdStep(2, T("Objeto encostado no RC102"), objSub, objVal, ph === "objeto" || ph === "fundo-pronto", ph === "objeto" ? prog(m.elapsed || 0, m.seconds) : null);
+  const r = ph === "pronto" ? m.result : ph === "objeto" ? m.live : null;
+  if (r) {
+    const sign = r.netUSv < 0 ? "−" : "+";
+    const lv = ph === "pronto" ? r.level : "";
+    const verdict = { sim: T("Radioativo: a diferença para o fundo é clara."), talvez: T("Provavelmente um pouco radioativo. Meça por mais tempo para confirmar."), nada: T("Nenhuma diferença que dê para separar do fundo.") }[lv] || "";
+    h += `<div class="card mres ${lv}"><span class="k">${esc(ph === "pronto" ? T("Resultado") : T("Resultado (parcial)"))}</span>`
+      + `<div class="row big"><span class="n">${sign}${mdUsv(r.netUSv)}</span><span class="small">${esc(T("µSv/h acima do fundo"))}</span></div>`
+      + `<div class="row"><span>${esc(T("Vezes o fundo"))}</span><span class="m">${fmt(r.ratio, 1)}×</span></div>`
+      + `<div class="row"><span>${esc(T("Margem de erro"))}</span><span class="m">± ${mdUsv(r.netErr * mdK(m))}</span></div>`
+      + (verdict ? `<b class="vd">${esc(verdict)}</b>` : "")
+      + `<span class="small">${esc(state.cloud && state.cloud.email ? T("Mesmo cálculo do Medir objeto do PC. O resultado fica guardado no celular e vai para o PC pela nuvem.") : T("Mesmo cálculo do Medir objeto do PC, com o resultado guardado no celular."))}</span></div>`;
+  }
+  if (ph === "fundo") h += `<div class="two"><button class="btn ghost" id="mdCancel">${esc(T("Cancelar"))}</button></div>`;
+  if (ph === "fundo-pronto") h += `<span class="err" id="mdErr"></span><button class="btn pri" id="mdObj">${esc(T("Medir o objeto"))}</button><button class="btn ghost" id="mdCancel">${esc(T("Cancelar"))}</button>`;
+  if (ph === "objeto") h += `<div class="two"><button class="btn ghost" id="mdCancel">${esc(T("Cancelar"))}</button><button class="btn pri" id="mdStop"${(m.elapsed || 0) < 5 ? " disabled" : ""}>${esc(T("Terminar agora"))}</button></div>`;
+  if (ph === "pronto") h += `<button class="btn pri" id="mdNew">${esc(T("Medir outro objeto"))}</button>`;
+  return h;
+}
+
+function bindMedir() {
+  const q = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  const act = async (f) => { try { state.meas = await f(); } catch (e) { if ($("mdErr")) $("mdErr").textContent = errText(e); else toast(errText(e)); return; } render(); };
+  q("mdBack", mdClose);
+  if ($("mdName")) $("mdName").oninput = () => { md.name = $("mdName").value; };
+  if ($("mdSecs")) $("mdSecs").onchange = () => { md.secs = +$("mdSecs").value; };
+  q("mdGo", () => act(() => call("StartMeasure", { name: md.name.trim(), device: "radiacode", seconds: md.secs, auto: false, homeBg: false })));
+  q("mdObj", () => act(() => call("StartMeasurePhase", "objeto", md.secs, md.name.trim())));
+  q("mdStop", () => act(() => call("StopMeasure")));
+  q("mdCancel", () => act(() => call("CancelMeasure")));
+  q("mdNew", () => act(() => call("CancelMeasure")));
 }
 
 async function reconnectRc() {
@@ -880,7 +953,9 @@ function bind() {
   q("sRcAlarms", rcConfigSheet);
   q("rCfg", rcConfigSheet);
   q("rSpec", spOpen);
+  q("rMeas", mdOpen);
   if (state.rcView === "espectro") bindSpectrum();
+  if (state.rcView === "medir") bindMedir();
   q("rRecon", reconnectRc);
   q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
@@ -931,6 +1006,11 @@ on("radiacode", (rc) => {
   } else if (state.tab === "rc102" && !state.rcView && $("sheet").hidden) render();
   else { renderConn(); renderBand(); }
   if (was !== rc.state && rc.state === "conectado") loadChart();
+});
+on("measure", (m) => {
+  state.meas = m;
+  // não redesenha enquanto a pessoa digita o nome
+  if (state.tab === "rc102" && state.rcView === "medir" && $("sheet").hidden && document.activeElement && document.activeElement.id !== "mdName") render();
 });
 on("alarm", (a) => { state.alarm = a; renderBand(); });
 on("cloud", (c) => { state.cloud = c; if (state.tab === "ajustes") render(); });
@@ -983,6 +1063,12 @@ const mock = (() => {
   const where = scene === "fora" ? { open: { from: now - 2.5 * 3600e3 }, since: now - 2.5 * 3600e3, radiacode: "comigo", gmc: "casa" } : { open: null };
   const cloud = { state: "ok", email: "pessoa@exemplo.com", lastSync: now - 9 * 60e3, devices: [{ name: "PC de casa", lastUp: now - 12 * 60e3 }, { name: "Galaxy Z Flip6", lastUp: now - 9 * 60e3, me: true }] };
   const scan = [{ address: "AA:BB:CC:DD:EE:FF", name: "RadiaCode-102#RC-102-000000", rssi: -58 }];
+  // medição de mentira: ?cena=medir-fundo|medir-objeto|medir-pronto
+  const bg = { counts: 1600, seconds: 120, cpm: 800, errCPM: 20, usv: 0.11 };
+  let meas = scene === "medir-fundo" ? { phase: "fundo", seconds: 120, elapsed: 48, device: "radiacode" }
+    : scene === "medir-objeto" ? { phase: "objeto", seconds: 120, elapsed: 84, device: "radiacode", bg, live: { netUSv: 0.35, netErr: 290, ratio: 4.2, netCPM: 2545 } }
+    : scene === "medir-pronto" ? { phase: "pronto", seconds: 120, elapsed: 120, device: "radiacode", bg, obj: { seconds: 120, usv: 0.46, cpm: 3345 }, result: { netUSv: 0.35, netErr: 290, ratio: 4.2, netCPM: 2545, level: "sim" } }
+    : { phase: "" };
   let rcs2 = {
     doseRate1: 0.5, doseRate2: 2, dose1: 500, dose2: 1000, countRate1: 25, countRate2: 100,
     soundOn: true, soundCtrl: 0x1ffc, vibroOn: true, vibroCtrl: 0x1cfe, brightness: 5, offTime: 3,
@@ -1013,6 +1099,11 @@ const mock = (() => {
           });
           return ok({ seconds: sec, a, counts, accum: !!acc });
         }
+        case "GetMeasure": return ok(meas);
+        case "StartMeasure": meas = { phase: "fundo", seconds: arguments[1][0].seconds, elapsed: 0, name: arguments[1][0].name, device: "radiacode" }; return ok(meas);
+        case "StartMeasurePhase": meas = Object.assign({}, meas, { phase: "objeto", elapsed: 0, live: null }); return ok(meas);
+        case "StopMeasure": return ok(meas);
+        case "CancelMeasure": meas = { phase: "" }; return ok(meas);
         case "AnalyzeSpectrum": return ok([{ kev: 352, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 9 }, { kev: 609, nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", sigma: 7 }, { kev: 1461, nuclide: "K-40", group: "Potássio-40", sigma: 4 }]);
         case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);

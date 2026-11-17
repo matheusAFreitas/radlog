@@ -506,7 +506,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 		if id, err := a.addMeasurement(*save); err == nil {
 			a.mu.Lock()
 			a.measure.SavedID = id
-			auto := !a.settings.NoMeasureReport
+			auto := !a.settings.NoMeasureReport && !a.mobile // no celular não: a medição vai ao PC pela nuvem
 			a.mu.Unlock()
 			if auto {
 				a.goSafe("autoMeasureReport", func() { a.autoMeasureReport(id) })
