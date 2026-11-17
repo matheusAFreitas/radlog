@@ -61,7 +61,7 @@ async function openWhy(dev, at, title) {
 
 function whyGo(link) {
   const d = WHY.d || {};
-  if (link === "padroes") { setSub("graficos", "padroes"); showView("graficos", true); }
+  if (link === "padroes") { setSub("fundo", "padroes"); showView("fundo"); }
   else if (link === "graficos") showRange(d.at - 12 * 3600e3, d.at);
   else showView(link, true);
 }

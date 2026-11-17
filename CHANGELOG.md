@@ -1,5 +1,29 @@
 # Versões
 
+## 2.91.0
+- Página nova "Fundo de casa" na barra lateral. No topo, uma frase diz como
+  está o fundo da casa, e quatro quadros dão a resposta de cada recorte:
+  últimas semanas, hora do dia, dia da semana e ano. Clicar num quadro abre
+  o gráfico daquele recorte embaixo. Gráficos fica só com a leitura e a dose.
+- Últimas semanas: um veredito só. A outra conta (a reta dos últimos dias) e
+  a tabela "Fundo por dia" ficam recolhidas embaixo, com o nome de cada uma.
+- Dia da semana e mês: cada barra mostra a diferença para a média, em %,
+  saindo do meio. Os cartões dia × noite ganharam uma casa decimal, para
+  baterem com a frase.
+
+**English**
+
+- New "Home background" page in the sidebar. At the top, one sentence says
+  how the home background is doing, and four boxes give the answer for each
+  cut: last weeks, hour of day, day of week and year. Clicking a box opens
+  that chart below. Charts keeps only the reading and the dose.
+- Last weeks: a single verdict. The other calculation (the line over the
+  last days) and the "Background by day" table are folded below, each with
+  its name.
+- Day of week and month: each bar shows the difference from the average, in
+  %, starting from the middle. The day × night cards got one more decimal
+  place, to match the sentence.
+
 ## 2.90.0
 - Agora, Minha dose: um número só (hoje), uma frase comparando com o fundo
   da casa e uma linha com semana, mês e ano, tudo em µSv. A barra do ano

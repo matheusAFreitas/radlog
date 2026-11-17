@@ -113,6 +113,7 @@ function bsChart(b, W) {
 function bsRender() {
   const b = BS.b, card = $("slowCard");
   if (!b || !card) return;
+  fcSlow();
   const [ic, t, p] = bsVerdict(b);
   const hasRef = b.refGm > 0;
   let s = `<div class="tb-head"><h2>Fundo nas últimas semanas</h2><span class="small muted">GQ GMC-800 em casa · conferido ${tbChecked(b.at)}</span></div>`;
@@ -141,7 +142,7 @@ function bsRender() {
     n.hidden = !on;
     if (on) {
       const why = b.state === "step" ? "Subiu de uma vez e ficou." : !b.rcOk ? "Sem o RC102 em casa para comparar." : b.env ? "O RC102 subiu junto: é o ambiente." : "O RC102 não subiu: veja a Saúde do tubo.";
-      n.innerHTML = `<strong>${t}</strong>. <span>${why}</span> <span>Não é alarme.</span> <button type="button" class="link small-link" data-slowopen="1">Abrir em Gráficos › Tendência do fundo</button>`;
+      n.innerHTML = `<strong>${t}</strong>. <span>${why}</span> <span>Não é alarme.</span> <button type="button" class="link small-link" data-slowopen="1">Abrir em Fundo de casa</button>`;
     }
   }
 }
@@ -198,8 +199,8 @@ function slowInit() {
       if (await askConfirm({ title: `Mudou o GMC-800 de lugar em ${bsDay(d)}?`, text: "A referência do fundo recomeça nesse dia e fica uma nota no gráfico.", ok: "Mudei de lugar" })) bsSet(() => api.MarkBgMoved(d));
     } else if (e.target.closest("#btnBsUndo")) bsSet(() => api.ClearBgMoved());
     else if (e.target.closest("[data-slowopen]")) {
-      await showView("graficos");
-      setSub("graficos", "tendencia");
+      setSub("fundo", "tendencia");
+      await showView("fundo");
       setTimeout(() => { const c = $("slowCard"); if (c) c.scrollIntoView({ block: "start" }); }, 50);
     }
   });
@@ -216,6 +217,77 @@ function slowInit() {
   setInterval(() => bsLoad(false), 10 * 60000);
 }
 document.addEventListener("DOMContentLoaded", slowInit);
+
+// ---------- página Fundo de casa (2.91) ----------
+//
+// Uma frase no topo (o veredito da subida lenta) e quatro linhas com a
+// resposta de cada recorte: Últimas semanas, Hora do dia, Dia da semana e
+// Ano. Cada linha é uma aba: abre embaixo o gráfico grande daquele recorte.
+
+const FC = { seq: 0 };
+
+function fcSet(k, t) { const e = $("fcA_" + k); if (e) e.textContent = t; }
+
+function fcSlow() {
+  const b = BS.b;
+  if (!b || !$("fcSay")) return;
+  $("fcSay").textContent = bsVerdict(b)[1];
+  let a;
+  if (b.state === "na") a = `ainda medindo: faltam ${b.left} dias`;
+  else if (b.state === "ok") a = `estável, ${bsPct(b.rise)} em relação à referência`;
+  else if (b.state === "step") a = `mudou de patamar em ${bsDay(b.stepDay)}`;
+  else a = `subiu ${bsPct(b.rise)} em ${b.weeks} semanas`;
+  fcSet("tendencia", a);
+}
+
+function fcHour(p) {
+  if (!p || !p.minutes || !(p.peakHour >= 0)) return "sem dados ainda";
+  return `mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
+}
+
+// diferença de cada linha para a média das medianas, em %
+function fcDiffs(rows) {
+  const ok = rows.filter((r) => r.st && r.st.n >= 60);
+  if (ok.length < 2) return null;
+  const avg = ok.reduce((s, r) => s + r.st.median, 0) / ok.length;
+  return rows.map((r) => (r.st && r.st.n >= 60 && avg > 0 ? (r.st.median / avg - 1) * 100 : null));
+}
+
+const FC_WD = ["domingo", "segunda", "terça", "quarta", "quinta", "sexta", "sábado"];
+function fcWeek(p) {
+  const wd = (p && p.weekdays) || [];
+  const d = fcDiffs([0, 1, 2, 3, 4, 5, 6].map((i) => ({ st: wd[i] })));
+  if (!d) return "sem dados ainda";
+  let k = -1;
+  d.forEach((v, i) => { if (v != null && (k < 0 || Math.abs(v) > Math.abs(d[k]))) k = i; });
+  if (Math.abs(d[k]) < 1) return "sem diferença de verdade (tudo abaixo de 1%)";
+  return d[k] > 0 ? `o dia mais alto é ${FC_WD[k]}, ${fmt(d[k], 1)}% acima da média` : `o dia mais baixo é ${FC_WD[k]}, ${fmt(-d[k], 1)}% abaixo da média`;
+}
+
+function fcYear(c) {
+  const ok = ((c && c.days) || []).filter((d) => d.bg > 0 && d.n >= 720);
+  if (!ok.length) return "sem dados ainda";
+  const mo = (d) => new Date(d.day).getMonth();
+  const nM = new Set(ok.map(mo)).size;
+  const cold = ok.filter((d) => mo(d) >= 5 && mo(d) <= 7), hot = ok.filter((d) => mo(d) <= 2 || mo(d) >= 10);
+  if (nM >= 6 && cold.length >= 10 && hot.length >= 10) {
+    const a = bsMed(cold.map((d) => d.bg)), b = bsMed(hot.map((d) => d.bg)), v = fmt(Math.abs((a / b - 1) * 100), 1);
+    return a >= b ? `junho a agosto ficaram ${v}% acima de novembro a março` : `junho a agosto ficaram ${v}% abaixo de novembro a março`;
+  }
+  return nM === 1 ? "ainda é 1 mês de dado; fica mais útil depois de um ano" : `ainda são ${nM} meses de dado; fica mais útil depois de um ano`;
+}
+
+async function fcLoad() {
+  const my = ++FC.seq;
+  if (BS.b) fcSlow(); else bsLoad(false);
+  let p = null, c = null;
+  try { if (api.GetPatterns) p = await api.GetPatterns(90, ""); } catch (e) { /* fica o traço */ }
+  try { if (api.GetYearCal) c = await api.GetYearCal(new Date().getFullYear()); } catch (e) { /* fica o traço */ }
+  if (my !== FC.seq) return;
+  fcSet("hora", fcHour(p));
+  fcSet("padroes", fcWeek(p));
+  fcSet("ano", fcYear(c));
+}
 
 // ---------- demonstração (navegador sem o app) ----------
 // cenário pelo localStorage "fundoDemo": est, amb (padrão), apar, degrau, pouco

@@ -3118,3 +3118,20 @@ body.alarming #agSay, body.alarming #rcAwayBox, body.alarming #whSuggest { displ
 .ag-more { margin-top: var(--space-3); }
 .ag-more .ag-cells { margin-top: var(--space-3); }
 .ft-fail { margin: var(--space-2) 0 0; color: var(--att); }
+/* Fundo de casa (2.91, E4): uma frase no topo e uma linha por recorte; a linha escolhida abre o gráfico embaixo */
+.fc-sum h2 { margin: 0; }
+.fc-say { margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-body-l, 1.05rem); font-weight: 600; }
+.subtabs.fc-rows { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-2); border: 0; padding: 0; margin: 0; background: none; overflow: visible; }
+.subtabs.fc-rows button { display: flex; flex-direction: column; align-items: flex-start; gap: 2px; text-align: left; padding: var(--space-2) var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); color: var(--text); white-space: normal; min-height: 0; }
+.subtabs.fc-rows button[aria-selected="true"] { border-color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface-2)); box-shadow: none; }
+.subtabs.fc-rows button::after { display: none; }
+.subtabs.fc-rows b { font-size: var(--fs-label); }
+.fc-a { color: var(--muted); font-size: var(--fs-caption); }
+/* G3: as contas viram evidência recolhida, com o nome de cada uma */
+.fc-ev > details > summary { cursor: pointer; list-style-position: inside; }
+.fc-ev-k { font-weight: 600; }
+.fc-ev > details[open] > summary { margin-bottom: var(--space-3); }
+/* G4: barra da diferença para a média, saindo do meio */
+.pat-bars .track.pat-div { position: relative; height: 10px; }
+.pat-bars .track.pat-div::before { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; width: 1px; background: var(--border); }
+.pat-bars .pat-div .bar { position: absolute; top: 0; min-width: 1px; }
