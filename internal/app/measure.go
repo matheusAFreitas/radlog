@@ -155,7 +155,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 	a.measSpec0 = spec0
 	switch phase {
 	case "fundo":
-		if seconds < 10 || seconds > 1800 {
+		if seconds < 10 || seconds > 3600 {
 			seconds = 60
 		}
 		prev := a.measure

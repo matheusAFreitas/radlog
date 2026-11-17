@@ -1,5 +1,16 @@
 # Versões
 
+## 2.98.1
+- Medir objeto: o tempo fixo vai até 1 h (novas opções de 10 min, 30 min e
+  1 h). Serve para fontes fracas, como sal light, que pedem meia hora ou
+  mais para a diferença aparecer.
+
+**English**
+
+- Measure object: the fixed time now goes up to 1 h (new 10 min, 30 min and
+  1 h options). Useful for weak sources, like light salt, which need half an
+  hour or more for the difference to show.
+
 ## 2.98.0
 - A faixa dos aparelhos virou a barra compacta: fica presa no topo ao rolar,
   com o nível e a dose de hoje de cada um. No Agora ela aparece quando os
