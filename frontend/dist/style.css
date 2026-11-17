@@ -1329,7 +1329,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 /* 2.83.6: só a lista do meio rola; logo, nuvem e busca ficam presas em cima e as ferramentas embaixo */
 .side > .side-nav { display: flex; flex-direction: column; gap: 1px; flex: 1 1 auto; min-height: 0; overflow-y: auto; padding-bottom: var(--space-3); border-top: 1px solid transparent; scrollbar-width: thin; }
 .side > .side-nav.scrolled { border-top-color: var(--border); }
-.side > .side-nav.more { -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to bottom, #000 calc(100% - 40px), transparent); }
+/* 2.89.0 (T6): a lista continua embaixo: sombra e uma seta presas ao pé */
+.side > .side-nav.more::after { content: "⌄"; position: sticky; bottom: calc(-1 * var(--space-3)); flex: none; display: block; height: 28px; margin-top: -28px; padding-top: 4px; text-align: center; font-size: 16px; line-height: 1; color: var(--muted); background: linear-gradient(to bottom, transparent, var(--bg) 70%); pointer-events: none; }
 .side-group { font-size: var(--fs-caption); color: var(--dim); padding: var(--space-4) var(--space-3) var(--space-1); }
 .side-nav .side-group:first-child { padding-top: var(--space-1); }
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
@@ -3087,3 +3088,12 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .m-tempo-out b { font-size: var(--fs-number); font-weight: 500; }
 .ri-off { display: flex; align-items: center; justify-content: space-between; gap: var(--space-4); flex-wrap: wrap; padding: var(--space-4); border: 1px dashed var(--border-hover); border-radius: var(--radius-md); grid-column: 1 / -1; }
 .ri-off p { margin: 2px 0 0; }
+
+/* 2.89.0 (A5): no alarme e no perigo, só a faixa e as leituras; a frase que
+   repete a faixa e as perguntas pendentes voltam quando o alarme passar */
+body.alarming #agSay, body.alarming #rcAwayBox, body.alarming #whSuggest { display: none; }
+/* "Estou testando um objeto": aviso embaixo dos quadros enquanto vale */
+.obj-test { display: flex; flex-direction: column; gap: var(--space-2); margin-top: var(--space-3); padding: var(--space-2) var(--space-4); border: 1px solid color-mix(in srgb, var(--obj) 55%, transparent); border-radius: var(--radius-lg); background: color-mix(in srgb, var(--obj) 8%, var(--surface)); }
+.obj-test[hidden] { display: none; }
+.obj-test-row { display: flex; align-items: center; gap: var(--space-3); justify-content: space-between; font-size: var(--fs-label); }
+.qk-sheet .seg { align-self: flex-start; }

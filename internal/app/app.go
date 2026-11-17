@@ -444,9 +444,10 @@ type App struct {
 	bgOK  bool
 	bgAt  time.Time
 
-	measure      MeasureState   // medição de objeto (measure.go)
-	rain         *rainCache     // chuva (weather.go)
-	rainDays     *rainDaysStore // chuva por dia, para sempre (raindays.go)
+	measure      MeasureState         // medição de objeto (measure.go)
+	objTest      map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
+	rain         *rainCache           // chuva (weather.go)
+	rainDays     *rainDaysStore       // chuva por dia, para sempre (raindays.go)
 	yearMu       sync.Mutex
 	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
 	tubeMu       sync.Mutex
@@ -1388,19 +1389,24 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 	if quiet {
 		acpm = 0
 	}
-	alarm := set.AlarmEnabled && int(acpm) >= set.AlarmCPM
+	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	lcpm := acpm
+	if a.objTestQuietLocked("gmc", now) {
+		lcpm = 0
+	}
+	alarm := set.AlarmEnabled && int(lcpm) >= set.AlarmCPM
 	was := a.alarmOn
 	started := alarm && !a.alarmOn
 	if alarm {
 		a.alarmOn = true
-	} else if float64(acpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
+	} else if float64(lcpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
 		a.alarmOn = false
 	}
 	ended := was && !a.alarmOn
 	alarmOn := a.alarmOn && set.AlarmEnabled
 	attnWas := a.attnOn
 	lv := set.Levels.Norm()
-	attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(acpm), lv)
+	attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(lcpm), lv)
 	attnOn := a.attnOn
 	satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
 	dCPM := float64(acpm)

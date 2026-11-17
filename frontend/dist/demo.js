@@ -39,7 +39,8 @@ function demoPeakDetail(sp, peaks) {
   });
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
-const DEMO_VERSION = "2.88.0";
+const demoObjTest = {};
+const DEMO_VERSION = "2.89.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -1009,6 +1010,9 @@ const demoRc = () => {
     CloseActivity: async () => { demoAct.run = null; },
     SaveActSample: async (x) => { const id = x.id || "s" + Date.now(); demoAct.samples = [{ ...x, id }, ...demoAct.samples.filter((y) => y.id !== id)]; return id; },
     DeleteActSample: async (id) => { demoAct.samples = demoAct.samples.filter((y) => y.id !== id); },
+    TestObject: async (dev) => { demoObjTest[dev] = Date.now() + 600000; return demoObjTest[dev]; },
+    StopTestObject: async (dev) => { delete demoObjTest[dev]; },
+    ObjectTests: async () => ({ ...demoObjTest }),
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
     // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
     SpectrumContinuum: async (sp) => demoSnip(sp),

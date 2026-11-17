@@ -60,7 +60,6 @@
 <aside class="side" id="side">
   <div class="side-head"><div class="brand brand-word" role="img" aria-label="RadLog"><span aria-hidden="true">RadL</span><svg class="brand-o" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><circle cx="24" cy="24" r="9.4" stroke-width="4.6"/><path stroke-width="3" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/></svg><span aria-hidden="true">g</span></div><span class="side-ver mono" id="appVersion" title="Versão do RadLog"></span></div>
   <button type="button" class="side-cloud" id="sideCloud" title="Nuvem (Google Drive): abrir em Configurações" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17.5 18z"/></svg><span class="dot on" aria-hidden="true"></span><span class="side-cloud-t"></span></button>
-  <button type="button" class="side-quick" id="btnQuick" title="Buscar (Ctrl+K)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.5 3.5" stroke-linecap="round"/></svg><span class="sq-t">Buscar</span><span class="sq-k"><kbd>Ctrl</kbd><kbd>K</kbd></span></button>
   <nav class="side-nav" id="sideNav" aria-label="Páginas">
     <button type="button" data-view="agora" aria-current="page"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 16a8.5 8.5 0 0 1 17 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/><path d="M3.5 20h17"/></svg><span>Agora</span></button>
     <span class="side-group">Análise</span>
@@ -70,7 +69,7 @@
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
     <button type="button" data-view="medir"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Medir objeto</span></button>
     <button type="button" data-view="fora"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11.5 8.5 6l6.5 5.5"/><path d="M4 10v10h8"/><path d="M14.5 16H22M19 13l3 3-3 3"/></svg><span>Fora de casa</span></button>
-    <button type="button" data-view="chuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Clima</span></button>
+    <button type="button" data-view="chuva" id="navChuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Clima</span></button>
     <span class="side-group">Aparelhos</span>
     <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
@@ -83,13 +82,9 @@
       </button>
       <div class="qk-fab-menu" id="qkFabMenu" role="menu" aria-label="Ações rápidas"></div>
     </div>
-    <button type="button" class="side-link" id="btnHistory">
+    <button type="button" class="side-link" id="btnHistory" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
       Baixar histórico
-    </button>
-    <button type="button" class="side-link" id="btnDemo" aria-pressed="false">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>
-      <span id="btnDemoText">Demonstração</span>
     </button>
   </div>
   <button type="button" class="side-link" id="btnSettings" data-view="config">
@@ -211,6 +206,7 @@
   </details>
 </section>
 
+<div class="notice obj-test" id="objTestNote" role="status" hidden></div>
 <main class="pages" id="pages">
 <div class="page" id="pageAgora">
   <section class="card ag-say" id="agSay" aria-live="polite">
@@ -2308,6 +2304,11 @@
           <summary>Como funciona</summary>
           <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>
         </details>
+      </fieldset>
+      <fieldset>
+        <legend>Demonstração</legend>
+        <p class="small muted">Dados simulados no app todo, para conhecer as telas e os alarmes. Nada é gravado.</p>
+        <button type="button" class="btn" id="btnDemo" aria-pressed="false"><span id="btnDemoText">Demonstração</span></button>
       </fieldset>
       <fieldset>
         <legend>Eventos e log</legend>

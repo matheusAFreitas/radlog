@@ -1,5 +1,40 @@
 # Versões
 
+## 2.89.0
+- Barra lateral: a busca saiu. Ctrl+K abre as Ações rápidas, que agora
+  têm o que se faz no dia a dia: anotar, medir um objeto, "Estou testando
+  um objeto", saí de casa, programar saída, relatório em PDF, baixar
+  histórico e mudei o aparelho de lugar. A busca de ajustes continua em
+  Configurações.
+- "Estou testando um objeto": cala atenção e alarme do aparelho escolhido
+  por 10 min, sem abrir o Medir objeto. O perigo continua tocando. Um aviso
+  embaixo dos quadros mostra até quando e tem o botão "Parar".
+- Demonstração foi para Configurações › Atualizações e sobre. "Baixar
+  histórico" saiu do pé da barra e fica no aviso de memória e nas Ações.
+  O ponto laranja do GQ GMC-800 diz o que é ao passar o mouse.
+- Clima só aparece na barra quando o clima está ligado.
+- No alarme e no perigo, o Agora esconde a frase que repete a faixa e as
+  perguntas pendentes; elas voltam quando o alarme passar.
+- Em janela baixa, uma seta no pé da lista avisa que há mais itens.
+
+**English**
+
+- Sidebar: search is gone. Ctrl+K opens Quick actions, which now have the
+  everyday tasks: note, measure an object, "I'm testing an object", left
+  home, plan a trip, PDF report, download history and moved the device.
+  The settings search stays in Settings.
+- "I'm testing an object": silences attention and alarm on the chosen
+  device for 10 min, without opening Measure object. Danger still sounds.
+  A notice under the cards shows until when and has a "Stop" button.
+- Demo moved to Settings › Updates and about. "Download history" left the
+  bottom of the sidebar; it lives in the memory notice and in Quick actions.
+  The orange dot on GQ GMC-800 says what it means on hover.
+- Weather only shows in the sidebar when weather is turned on.
+- During an alarm or danger, Now hides the sentence that repeats the band
+  and the pending questions; they come back when the alarm ends.
+- In a short window, an arrow at the bottom of the list shows there are
+  more items.
+
 ## 2.88.0
 - Fora do Agora, os quadros dos aparelhos viram uma faixa de uma linha com
   nome, número, nível e a dose de hoje. Um clique abre o quadro inteiro ali

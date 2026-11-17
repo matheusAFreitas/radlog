@@ -26,6 +26,9 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   if (await p.evaluate(() => inDemo)) fail("abriu já na demonstração");
 
   // 1) liga: a tela recarrega com o mundo simulado
+  // 2.89.0: o botão mora em Configurações › Atualizações e sobre
+  await p.evaluate(() => openSettings("btnDemo"));
+  await p.waitForTimeout(500);
   await p.click("#btnDemo");
   await p.locator("#demoStripe").waitFor({ state: "visible", timeout: 10000 });
   await p.waitForTimeout(1000);
