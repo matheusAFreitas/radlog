@@ -1,5 +1,42 @@
 # Versões
 
+## 2.95.0
+- Níveis e alarmes virou uma tela só: o app, o GMC-800 e o RC102 lado a
+  lado, cada nível com a forma, o nome e o valor. Os valores dos aparelhos
+  dá para mudar ali mesmo e vão com "Gravar no GMC-800" e "Gravar no
+  RC102", como antes. Os alarmes de dose do RC102 também estão ali.
+- RC102: os alarmes de dose agora têm o interruptor "ligado" (antes era uma
+  caixa "desligado", que ficava marcada com o alarme desligado).
+- Calibração (em teste, fácil de voltar): na frente só o fator em uso, de
+  onde veio e o botão de intercalibrar. Fator à mão, versões, lado a lado
+  com o RC102 e pontos do contador ficam em "Avançado". Antes de gravar no
+  contador, a confirmação mostra o que muda, ponto por ponto.
+- Janela e tela: cartões na altura do conteúdo, tamanho num controle
+  deslizante, menos texto (o resto em "Como funciona"). A chuva ganhou
+  seção própria: Configurações › Chuva no gráfico.
+- Botões em duas alturas e uma caixa de marcar só no app todo.
+- Sobras da sincronização tiradas dos textos da demonstração e do registro.
+
+**English**
+
+- Levels and alarms is now a single screen: the app, the GMC-800 and the
+  RC102 side by side, each level with its shape, name and value. The
+  devices' values can be changed right there and go with "Write to the
+  GMC-800" and "Write to the RC102", as before. The RC102 dose alarms are
+  there too.
+- RC102: dose alarms now have an "on" switch (it used to be an "off" box
+  that was ticked when the alarm was off).
+- Calibration (being tested, easy to undo): up front only the factor in use,
+  where it came from and the cross-calibrate button. Factor by hand,
+  versions, side by side with the RC102 and the counter's points are under
+  "Advanced". Before writing to the counter, the confirmation shows what
+  changes, point by point.
+- Window and display: cards as tall as their content, size on a slider, less
+  text (the rest under "How it works"). Rain got its own section: Settings ›
+  Rain on the chart.
+- Buttons in two heights and one checkbox style across the app.
+- Leftovers from sync removed from the demo and log texts.
+
 ## 2.94.0
 - Medir objeto: "tem algo" agora usa a cor do Medir objeto (turquesa); o
   vermelho fica só quando a leitura com o objeto passa do nível de perigo. O

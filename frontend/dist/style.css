@@ -186,7 +186,10 @@ h2 { margin: 0; font-size: var(--fs-heading); font-weight: 600; }
 .info dt { color: var(--muted); }
 .info dd { margin: 0; text-align: right; overflow-wrap: anywhere; }
 .sep { height: 1px; background: var(--border); }
-.toggle input { width: 20px; height: 20px; accent-color: var(--accent); flex: none; }
+/* uma caixa só no app todo (2.95.0) */
+:where(input[type="checkbox"]) { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); flex: none; cursor: pointer; }
+:where(label > input[type="checkbox"]:first-child) { margin-right: 6px; vertical-align: -3px; }
+.toggle input { flex: none; }
 
 .events { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; }
 .events li:first-child { border-top: 0; padding-top: 0; }
@@ -730,7 +733,6 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-seg button { font-family: var(--sans); }
 .rc-inline { display: inline-flex; align-items: center; gap: var(--space-2); color: var(--muted); }
 .rc-inline select { min-height: 34px; padding: 0 var(--space-2); }
-.rc-inline input[type="checkbox"] { width: 16px; height: 16px; accent-color: var(--accent); }
 .rc-plot { position: relative; min-width: 0; }
 .rc-canvas { display: block; width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .rc-tip { position: absolute; z-index: 5; pointer-events: none; max-width: 300px; padding: var(--space-2) var(--space-3); font-size: var(--fs-caption); line-height: 1.4; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 6px 18px rgba(0, 0, 0, .45); }
@@ -962,7 +964,6 @@ dialog#settings { width: min(1040px, calc(100vw - 32px)); height: min(780px, cal
 .rccfg .rc-pair label { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; font-size: var(--fs-label); color: var(--muted); }
 .rccfg .rc-pair input[type=number] { width: 100%; min-width: 0; }
 .rccfg #rcEnergy { font-size: var(--fs-label); }
-.rccfg .rc-pair label.rc-check { flex-direction: row; align-items: center; gap: var(--space-2); }
 .rccfg .rc-adv { grid-column: 1 / -1; }
 .rccfg .rc-adv .dc-grid { margin-top: var(--space-3); }
 table.rc-ctrl-tbl { width: 100%; border-collapse: collapse; font-size: var(--fs-label); }
@@ -981,7 +982,7 @@ body { background: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, 
 .card h2 { font-size: var(--fs-body); letter-spacing: .01em; }
 
 /* topo: ações discretas, o destaque fica para o status */
-.top .actions .btn { min-height: 36px; padding: 0 var(--space-3); background: transparent; border-color: transparent; color: var(--muted); font-size: var(--fs-label); }
+.top .actions .btn { min-height: 34px; padding: 0 var(--space-3); background: transparent; border-color: transparent; color: var(--muted); font-size: var(--fs-label); }
 .top .actions .btn:hover:not(:disabled) { background: var(--surface-2); border-color: var(--border); color: var(--text); }
 .pill { min-height: 32px; background: var(--surface); }
 
@@ -1254,7 +1255,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .cal-ver td.num { font-variant-numeric: tabular-nums; }
 .cal-ver tr.cur td { font-weight: 600; }
 .cal-ver tr.retro td { background: color-mix(in srgb, var(--accent) 8%, transparent); }
-.cal-ver .btn.small { min-height: 26px; padding: 0 var(--space-2); font-size: var(--fs-caption); }
+.cal-ver .btn.small { padding: 0 var(--space-2); }
 .cal-cmp .row { margin-top: var(--space-2); gap: var(--space-2); }
 #calK { max-width: 130px; }
 
@@ -1515,7 +1516,6 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #settings .set-note { max-width: 860px; }
 .set-bar { position: fixed; z-index: 14; left: var(--side-w); right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
 .set-bar > i { width: 8px; height: 8px; border-radius: 50%; background: var(--att); flex: none; }
-.set-bar .btn { min-height: 38px; }
 html.set-dirty { scroll-padding-bottom: 84px; scroll-padding-top: calc(var(--barsH, 0px) + 56px); }
 html.set-dirty .main { padding-bottom: 72px; }
 #btnSettings.dirty::after { content: ""; width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--att); flex: none; }
@@ -1893,18 +1893,17 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .set-tabs button:hover { color: var(--text); }
 #settings .set-tabs button[aria-selected="true"] { background: none; color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
 .set-tabs button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
-.set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: stretch; }
+.set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
 /* duas colunas que empilham sozinhas (2.68.4): o último cartão visível de cada uma estica */
 .set-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
-.set-col > fieldset.is-last { flex: 1 1 auto; }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
-#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset, #settings .cal-adv > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
 /* o título fica dentro do quadro: posicionado, a legenda não vai para a
    borda em nenhum motor (no WebKitGTK do Linux, o float é ignorado dentro
    do fieldset em flex e o título caía em cima da borda; ACE, 15/11) */
-#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset { padding-top: calc(var(--space-4) + var(--fs-heading) * 1.45 + var(--space-1) + var(--space-2)); }
-#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend { position: absolute; top: var(--space-4); left: var(--space-4); right: var(--space-4); width: auto; padding: 0; line-height: 1.45; font-size: var(--fs-heading); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+#settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset, #settings .cal-adv > fieldset { padding-top: calc(var(--space-4) + var(--fs-heading) * 1.45 + var(--space-1) + var(--space-2)); }
+#settings .set-cards > fieldset > legend, #settings .dc-grid > fieldset > legend, #settings .set-col > fieldset > legend, #settings .cal-adv > fieldset > legend { position: absolute; top: var(--space-4); left: var(--space-4); right: var(--space-4); width: auto; padding: 0; line-height: 1.45; font-size: var(--fs-heading); font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 #settings fieldset.dev-card > legend { padding-right: 96px; }
 #settings fieldset.dev-card::after { content: attr(data-dev); position: absolute; top: calc(var(--space-4) + 2px); right: var(--space-4); padding: 1px 8px; border: 1px solid var(--accent-line); border-radius: var(--radius-pill); color: var(--accent); font-family: var(--mono); font-size: var(--fs-micro); line-height: 1.6; }
 #settings fieldset.dev-card { box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, var(--border)); }
@@ -1933,6 +1932,41 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .lv-bar .perigo { background: var(--warn); }
 .lv-bar.no-attn .atencao, .lv-bar.no-alarm .alarme { opacity: .3; }
 .lv-scale { display: flex; justify-content: space-between; gap: var(--space-2); color: var(--dim); font-size: var(--fs-micro); }
+/* tela única de alarmes (2.95.0): app e aparelhos lado a lado */
+/* calibração (2.95.0): o fator na frente, o resto em "Avançado" */
+.cal-big { margin: 0; display: flex; align-items: baseline; gap: var(--space-2); }
+.cal-big .mono { font-size: 28px; font-weight: 600; color: var(--text); }
+.cal-adv { display: flex; flex-direction: column; gap: var(--space-3); }
+.cal-adv > summary { cursor: pointer; padding: var(--space-3) var(--space-4); border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); font-size: var(--fs-label); }
+.cal-adv[open] > summary { margin-bottom: var(--space-3); }
+.cal-adv > fieldset + fieldset { margin-top: var(--space-3) !important; }
+.al-wrap { overflow-x: auto; margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); }
+.al-tbl { width: 100%; border-collapse: collapse; background: var(--bg); }
+.al-tbl th, .al-tbl td { padding: var(--space-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.al-tbl tbody tr:last-child > * { border-bottom: 0; }
+.al-tbl thead th { font-size: var(--fs-label); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.al-tbl tbody th { width: 22%; font-weight: 400; }
+.al-tbl tbody th .lv-name { margin-bottom: 2px; }
+.al-tbl tr.atencao .lv-name { color: var(--att); }
+.al-tbl tr.alarme .lv-name { color: var(--alarm); }
+.al-tbl tr.perigo .lv-name { color: var(--warn); }
+.al-say { display: block; color: var(--dim); font-size: var(--fs-caption); }
+.al-none { color: var(--dim); font-size: var(--fs-label); }
+.al-in { display: flex; align-items: center; gap: var(--space-2); }
+.al-in input { width: 7.5em; min-width: 0; }
+.al-u { color: var(--muted); font-size: var(--fs-label); white-space: nowrap; }
+.al-tbl .lv-eq { margin: 2px 0 0; color: var(--dim); font-size: var(--fs-caption); }
+.al-tbl .toggle.al-on, .al-dose .toggle.al-on { min-height: 30px; justify-content: flex-start; font-size: var(--fs-label); color: var(--muted); }
+.al-chip { display: inline-block; margin-left: var(--space-1); padding: 0 6px; border: 1px solid var(--border); border-radius: var(--radius-pill); font-size: var(--fs-caption); font-weight: 400; vertical-align: 1px; }
+.al-chip.gmc { border-color: color-mix(in srgb, var(--gmc, var(--accent)) 50%, transparent); color: var(--gmc, var(--accent)); }
+.al-chip.rc { border-color: color-mix(in srgb, var(--rc) 50%, transparent); color: var(--rc); }
+.al-dose { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4); margin-top: var(--space-3); padding: var(--space-3); border: 1px solid var(--border); border-radius: var(--radius-md); background: var(--bg); }
+.al-dose-t { font-size: var(--fs-label); font-weight: 600; flex: 1 1 100%; }
+.al-dose-f { display: inline-flex; align-items: center; gap: var(--space-2); }
+.al-dose-f .al-say { display: inline; }
+.al-dose-f input { width: 7em; }
+.al-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); margin-top: var(--space-3); }
+.al-foot p { margin: 0; }
 .lv-ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
 .lv-step { display: flex; flex-direction: column; gap: var(--space-2); min-width: 0; padding: var(--space-3); background: var(--bg); border-right: 1px solid var(--border); }
 .lv-step:last-child { border-right: 0; }
@@ -2386,6 +2420,8 @@ dialog.qk-dlg:not([open]) { display: none; }
 /* tamanho e espaço (2.49) */
 .ui-seg { margin: var(--space-1) 0 var(--space-2); }
 .ui-seg button { min-height: 32px; }
+.ui-range { display: flex; align-items: center; gap: var(--space-2); }
+.ui-range input { flex: 1 1 auto; min-width: 0; }
 
 /* aba do Radiacode 102 repaginada (2.51) */
 .subtabs[data-page="radiacode"] button[aria-selected="true"] { box-shadow: inset 0 -2px 0 var(--rc); }
@@ -3064,7 +3100,7 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .rca1-t small { display: block; margin-top: 2px; color: var(--dim); font-size: var(--fs-caption); }
 .rca1-hint { color: var(--away); }
 .rca1-btns { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); flex: 0 1 auto; min-width: 0; max-width: 100%; }
-.rca1-btns .btn { min-height: 36px; }
+.rca1-btns .btn { min-height: 34px; }
 .rca1-dots .dot { border: 0; background: var(--rc); }
 .rca1-dots .dot.gmc { background: var(--accent); }
 .wh-card > div:empty, .wh-card > #whBack:empty { display: none; }

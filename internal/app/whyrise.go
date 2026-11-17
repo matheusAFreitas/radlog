@@ -353,7 +353,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	}
 	a.mu.Unlock()
 	if !rainOn {
-		chuva.State, chuva.Ev = "na", "Sem dado: a chuva não está ligada (Configurações › Janela e tela)."
+		chuva.State, chuva.Ev = "na", "Sem dado: a chuva não está ligada (Configurações › Chuva no gráfico)."
 	} else {
 		slots := a.rainSlots(t.Add(-whyRainWin), t)
 		if len(slots) == 0 {
@@ -401,7 +401,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	// pressão caindo
 	pr := WhyCause{Key: "pressao", Title: "Pressão caindo", More: "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.", Link: "chuva", LinkT: "Abrir a tela Clima"}
 	if !rainOn || len(press) == 0 {
-		pr.State, pr.Ev = "na", "Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela)."
+		pr.State, pr.Ev = "na", "Sem dado de pressão (vem com a chuva, em Configurações › Chuva no gráfico)."
 	} else {
 		var last, first float64
 		lastK, firstK := int64(0), int64(math.MaxInt64)

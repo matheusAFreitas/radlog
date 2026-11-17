@@ -3053,13 +3053,13 @@ const I18N_EN = {
 "Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só.": "If it were the environment, both would rise together. That's what separates real radiation from something in one device.",
 "Fora de casa o fundo muda: granito, prédios, solo, altitude e avião sobem a dose. Isso entra na Minha dose, não no fundo de casa.": "Away from home the background changes: granite, buildings, soil, altitude and flying raise the dose. That goes into My dose, not into the home background.",
 "A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.": "Rain brings radon's decay products in the air down to the ground. They have short half-lives (minutes), so the rise lasts a few hours and goes away on its own.",
-"Sem dado: a chuva não está ligada (Configurações › Janela e tela).": "No data: rain is off (Settings › Window and screen).",
+"Sem dado: a chuva não está ligada (Configurações › Chuva no gráfico).": "No data: rain is off (Settings › Rain on the chart).",
 "Sem dado de chuva nessa hora.": "No rain data at that time.",
 "Não choveu nas 4 horas antes.": "It didn't rain in the 4 hours before.",
 "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.": "With the house closed and the air still, radon coming out of the floor and walls builds up. During the day, with windows open and wind, it spreads out.",
 "Sem dado: ainda são poucos dias para saber o padrão de cada hora.": "No data: still too few days to know each hour's pattern.",
 "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.": "When air pressure drops, more radon comes out of the soil and walls, and the home background rises a few hours later.",
-"Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela).": "No pressure data (it comes with rain, in Settings › Window and screen).",
+"Sem dado de pressão (vem com a chuva, em Configurações › Chuva no gráfico).": "No pressure data (it comes with rain, in Settings › Rain on the chart).",
 "Sem dado de pressão nessa hora.": "No pressure data at that time.",
 "Um objeto perto do aparelho sobe muito a leitura dele, e quase nada a do outro aparelho. Para medir direito, use o Medir objeto.": "An object near a device raises its reading a lot, and the other device's barely at all. To measure properly, use Measure object.",
 "A subida é do tamanho do acaso.": "The rise is the size of chance.",
@@ -4247,7 +4247,7 @@ const I18N_EN = {
 "Demonstração ligada": "Demo on",
 "Escolha um cenário. Os dois aparelhos andam juntos, cada um com os próprios limites. O app todo mostra dados simulados até você sair. Nada vai para os arquivos, e os aparelhos de verdade continuam gravando por baixo.": "Pick a scenario. Both devices move together, each with its own limits. The whole app shows simulated data until you leave. Nothing goes to the files, and the real devices keep recording underneath.",
 "Espectro com Cs-137": "Spectrum with Cs-137",
-"Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.": "CSV export, PDF report, backup, cloud and sync stay off until you leave. A real alarm ends the demo right away.",
+"Exportar CSV, relatório em PDF, backup e nuvem ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.": "CSV export, PDF report, backup and cloud stay off until you leave. A real alarm ends the demo right away.",
 "Fechar controles": "Close controls",
 "Fundo de casa · nada é gravado": "Home background · nothing is recorded",
 "Leitura real do GMC-800: —": "Real GMC-800 reading: —",
@@ -4325,7 +4325,7 @@ const I18N_EN = {
 "Configurações › Dados e backup": "Settings › Data and backup",
 "Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.": "Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.",
 "Nuvem (Google Drive): abrir em Configurações": "Cloud (Google Drive): open in Settings",
-"O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.",
+"O que o app fez e os erros que encontrou: conexões, downloads, alertas, nuvem. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, cloud. Useful when something is not working.",
 "Exportar leituras": "Export readings",
 "Exportar leituras (CSV)": "Export readings (CSV)",
 "µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
@@ -4600,7 +4600,41 @@ const I18N_EN = {
 "leitura com problema": "reading with a problem",
 "saiu do normal": "left normal",
 "você não estava em casa": "you weren't home",
-"← Voltar para o Medir objeto": "← Back to Measure object"
+"← Voltar para o Medir objeto": "← Back to Measure object",
+"Alarme 1 de dose do RC102": "RC102 dose alarm 1",
+"Alarme 1 de dose do RadiaCode": "RC102 dose alarm 1",
+"Alarme 1 do RC102": "RC102 alarm 1",
+"Alarme 1 do RadiaCode": "RC102 alarm 1",
+"Alarme 1 ligado": "Alarm 1 on",
+"Alarme 2 de dose do RC102": "RC102 dose alarm 2",
+"Alarme 2 de dose do RadiaCode": "RC102 dose alarm 2",
+"Alarme 2 do RC102": "RC102 alarm 2",
+"Alarme 2 do RadiaCode": "RC102 alarm 2",
+"Alarme 2 ligado": "Alarm 2 on",
+"Alarme do GMC-800": "GMC-800 alarm",
+"Alarme do app": "App alarm",
+"Antes, o app salva uma cópia do que está no contador agora.": "First, the app saves a copy of what is on the counter now.",
+"Atenção do app": "App attention",
+"Perigo do app": "App danger",
+"Avançado": "Advanced",
+"Chuva da sua cidade": "Rain in your city",
+"Fator em uso": "Factor in use",
+"Fator à mão e versões": "Factor by hand and versions",
+"Igualar o contador": "Match the counter",
+"Mais ajustes do GMC-800": "More GMC-800 settings",
+"Mais ajustes do RC102": "More RC102 settings",
+"Mais ajustes do RadiaCode": "More RC102 settings",
+"Os do app vão com \"Salvar\". Os dos aparelhos só vão com o botão de cada um.": "The app's values go with \"Save\". The devices' values only go with each device's button.",
+"Tamanho de tudo:": "Size of everything:",
+"Vale para o app todo. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem).": "Applies to the whole app. Dose follows the rate (µSv/h → µSv, mrem/h → mrem).",
+"conecte para mudar": "connect to change",
+"grava no aparelho": "writes to the device",
+"não tem": "none",
+"sirene que não desliga": "siren that doesn't stop",
+"amarelo e 3 bipes": "yellow and 3 beeps",
+"toca o som escolhido": "plays the chosen sound",
+"· fator à mão, versões, lado a lado com o RC102 e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter",
+"· fator à mão, versões, lado a lado com o RadiaCode e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter"
 },
 "patterns": [
 [
@@ -10254,6 +10288,15 @@ const I18N_EN = {
 "${1} with the object, above the danger level.",
 [
 " com o objeto, acima do nível de perigo."
+]
+],
+[
+"O contador usa ",
+"^O contador usa ((?:(?! · ).)+?) µSv/h por CPM e o app, ((?:(?! · ).)+?)\\.$",
+"The counter uses ${1} µSv/h per CPM and the app, ${2}.",
+[
+"O contador usa ",
+" µSv/h por CPM e o app, "
 ]
 ],
 [
@@ -17125,6 +17168,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) CPM no aparelho$",
+"${1} CPM on the device",
+[
+" CPM no aparelho"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -17861,6 +17912,14 @@ const I18N_EN = {
 ]
 ],
 [
+"De onde veio: ",
+"^De onde veio: ((?:(?! · ).)+?)$",
+"Where it came from: ${1}",
+[
+"De onde veio: "
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -18172,6 +18231,15 @@ const I18N_EN = {
 "${1}:00 · no data",
 [
 "h · sem dados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) CPM = ((?:(?! · ).)+?) µSv/h$",
+"${1} CPM = ${2} µSv/h",
+[
+" CPM = ",
+" µSv/h"
 ]
 ],
 [
@@ -20006,6 +20074,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?), desde ((?:(?! · ).)+?)$",
+"${1}, since ${2}",
+[
+", desde "
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -20499,6 +20575,14 @@ const I18N_EN = {
 "group ${1}",
 [
 "grupo "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) CPM$",
+"≈ ${1} CPM",
+[
+" CPM"
 ]
 ],
 [
