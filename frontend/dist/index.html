@@ -831,10 +831,34 @@
           </div>
           <span class="small muted" id="mSizeHint">O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.</span>
         </div>
+        <div class="m-field m-time" id="mTimeBox">
+          <span class="m-label" id="mTimeLabel">Quanto tempo medir</span>
+          <div class="seg m-tmode" role="group" aria-labelledby="mTimeLabel" id="mTimeModeSeg">
+            <button type="button" data-tmode="auto" aria-pressed="false"><strong>Automático</strong><span>para quando tiver certeza</span></button>
+            <button type="button" data-tmode="fixo" aria-pressed="false"><strong>Tempo fixo</strong><span>mede o tempo todo</span></button>
+          </div>
+          <div class="m-tsub">
+            <div class="seg" role="group" aria-label="Limite do automático" id="mTimeAutoSeg">
+              <button type="button" data-secs="auto600" aria-pressed="false">até 10 min</button>
+              <button type="button" data-secs="auto1800" aria-pressed="false">até 30 min</button>
+              <button type="button" data-secs="auto3600" aria-pressed="false">até 1 h</button>
+            </div>
+            <div class="seg" role="group" aria-label="Tempo de cada fase" id="mTimeFixSeg" hidden>
+              <button type="button" data-secs="30" aria-pressed="false">30 s</button>
+              <button type="button" data-secs="60" aria-pressed="false">1 min</button>
+              <button type="button" data-secs="120" aria-pressed="false">2 min</button>
+              <button type="button" data-secs="300" aria-pressed="false">5 min</button>
+              <button type="button" data-secs="600" aria-pressed="false">10 min</button>
+              <button type="button" data-secs="1800" aria-pressed="false">30 min</button>
+              <button type="button" data-secs="3600" aria-pressed="false">1 h</button>
+            </div>
+          </div>
+          <span class="small muted" id="mTimeHint"></span>
+        </div>
         <details class="m-adj" id="mAdj">
-          <summary>Ajustes da medição: tempo e quando conta como “tem algo”</summary>
+          <summary>Ajustes da medição: quando conta como “tem algo”</summary>
           <div class="m-adj-grid">
-            <div class="m-field">
+            <div class="m-field" hidden>
               <label for="mSecs">Tempo</label>
               <select id="mSecs">
                 <option value="auto600">automático, até 10 min</option>

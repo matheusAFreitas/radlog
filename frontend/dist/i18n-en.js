@@ -4685,7 +4685,20 @@ const I18N_EN = {
 "Clique para mostrar ou esconder no gráfico": "Click to show or hide on the chart",
 "fixo: 10 min": "fixed: 10 min",
 "fixo: 30 min": "fixed: 30 min",
-"fixo: 1 h": "fixed: 1 h"
+"fixo: 1 h": "fixed: 1 h",
+"Quanto tempo medir": "How long to measure",
+"Automático": "Automatic",
+"para quando tiver certeza": "stops once it is sure",
+"Tempo fixo": "Fixed time",
+"mede o tempo todo": "measures the whole time",
+"Limite do automático": "Automatic limit",
+"até 10 min": "up to 10 min",
+"até 30 min": "up to 30 min",
+"até 1 h": "up to 1 h",
+"Tempo de cada fase": "Time for each phase",
+"Ajustes da medição: quando conta como “tem algo”": "Measurement settings: when it counts as “something there”",
+"Cada fase para sozinha assim que der para saber se tem algo ou não. Objeto forte pode terminar em 20 s; fonte fraca vai até o limite.": "Each phase stops on its own as soon as it can tell whether something is there. A strong object can finish in 20 s; a weak source goes up to the limit.",
+"Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.": "Each phase (background and object) measures for the chosen time, even if the answer is clear sooner. Good for weak sources and for comparing measurements."
 },
 "patterns": [
 [

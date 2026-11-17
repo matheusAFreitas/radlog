@@ -3320,3 +3320,10 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .m-alara-box.how-host > details.how-c { top: 0; right: 0; }
 .m-item-meta { display: flex; flex-wrap: wrap; column-gap: 0.35em; }
 .m-item-meta > span { white-space: nowrap; }
+
+/* 2.99.0: Medir objeto, automático × tempo fixo à vista antes de começar */
+.m-tmode { width: fit-content; max-width: 100%; }
+.m-tmode button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: var(--space-2) var(--space-4); text-align: left; }
+.m-tmode button strong { font-weight: 600; }
+.m-tmode button span { font-size: var(--fs-caption); color: var(--muted); }
+.m-tsub .seg { flex-wrap: wrap; width: fit-content; max-width: 100%; }
