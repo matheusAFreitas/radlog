@@ -142,7 +142,7 @@ const tr = (() => {
       // 2.101.1: "Backup salvo: arquivo", "Não consegui ler o log: erro":
       // rótulo conhecido + o resto traduzido à parte (ou como está)
       const m = /^([^:]{3,80}?): ([^]+)$/.exec(core);
-      if (m) { const lp = one(m[1], false, false); if (lp != null) out = lp + ": " + tr(m[2]); }
+      if (m) { const lp = one(m[1], false, false); if (lp != null) { const r = tr(m[2]); out = lp + ": " + (r === m[2] ? fixNums(r) : r); } }
     }
     if (out == null) out = one(core, false, true);
     if (out == null) {
