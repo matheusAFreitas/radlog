@@ -10,7 +10,7 @@
 // Usa os globais do app.js; carregado antes dele.
 
 const FT_N = 144; // pedaços de 10 min num dia
-const FT_COL = { seguro: "var(--accent)", atencao: "var(--att)", alarme: "var(--alarm)", perigo: "var(--warn)" };
+const FT_COL = { seguro: "var(--ok)", atencao: "var(--att)", alarme: "var(--alarm)", perigo: "var(--warn)" };
 const FT_PEN = '<svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="var(--text)" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.5 2.5l3 3L6 13H3v-3z"/></svg>';
 const FT_RANK = { seguro: 1, atencao: 2, alarme: 3, perigo: 4 };
 const FT_DEV = { gmc: "GMC-800", radiacode: "RC102" };
@@ -67,7 +67,7 @@ function ftShapesOver(levels) {
 
 const ftHm = (i) => { const m = i * 10; return pad(Math.floor(m / 60)) + ":" + pad(m % 60); };
 // papel de cada aparelho (roles.go)
-const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "fora do cálculo" };
+const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "ignorado" };
 // em tela estreita a faixa do papel usa o nome curto (2.83.10)
 const FT_ROLE_SHORT = { casa: "casa", comigo: "você", fora: "fora" };
 
@@ -112,7 +112,7 @@ function ftSay(el, day, marks, label, nowIdx) {
   const add = (t) => { const s = document.createElement("span"); s.textContent = t; el.appendChild(s); el.append(" "); };
   if (!has) add(`${label}: sem leitura ainda.`);
   else if (!alerts && !above) add(`${label}: dia tranquilo, tudo no nível seguro.`);
-  else if (alerts) add(`${label}: ${alerts} ${alerts === 1 ? "aviso" : "avisos"}.`);
+  else if (alerts) add(`${label}: ${alerts} ${alerts === 1 ? "alerta" : "alertas"}.`);
   else add(`${label}: ${above * 10} min acima do seguro, sem alerta.`);
   const away = ftRuns(day.map((s) => !!(s && s.away)));
   if (away.length) {
@@ -155,10 +155,38 @@ function ftHover(box, strips, tipOf, slotT) {
   });
 }
 
-function ftLegend(el) {
+// 2.90.0 (avaliação A4): a legenda só traz o que aparece na fita
+// (used: conjunto de chaves); sem used, mostra tudo
+function ftLegend(el, used) {
   const sw = (bg, op) => `<i class="ft-sw" style="background:${bg}${op ? ";opacity:" + op : ""}"></i>`;
-  el.innerHTML = `<span>${sw("var(--accent)", ".55")}seguro</span><span>${ftShape("atencao", 11)}atenção</span><span>${ftShape("alarme", 11)}alarme</span>` +
-    `<span>${ftShape("perigo", 11)}perigo</span><span>${sw("var(--ft-none)")}sem dado</span><span>${sw("var(--away)")}fora de casa</span><span>${sw("var(--info)")}chuva</span><span>${FT_PEN}anotação</span>`;
+  const items = [["seguro", `${sw("var(--ok)", ".55")}seguro`], ["atencao", `${ftShape("atencao", 11)}atenção`], ["alarme", `${ftShape("alarme", 11)}alarme`],
+    ["perigo", `${ftShape("perigo", 11)}perigo`], ["none", `${sw("var(--ft-none)")}sem leitura`], ["away", `${sw("var(--away)")}fora de casa`], ["rain", `${sw("var(--info)")}chuva`], ["nota", `${FT_PEN}anotação`]];
+  el.innerHTML = items.filter(([k]) => !used || used.has(k)).map(([, h]) => `<span>${h}</span>`).join("");
+}
+// o que aparece na fita, para a legenda
+function ftUsed(levelsList, nowIdx, marks, away, rain) {
+  const u = new Set();
+  for (const lv of levelsList) for (let i = 0; i < Math.min(nowIdx, FT_N); i++) u.add(lv[i] && FT_COL[lv[i]] ? lv[i] : "none");
+  for (const m of marks || []) u.add(m.kind === "nota" ? "nota" : LV_PATH[m.level] ? m.level : "atencao");
+  if (away && away.some(Boolean)) u.add("away");
+  if (rain && rain.some(Boolean)) u.add("rain");
+  return u;
+}
+// falha escrita (A4): trechos de 30 min ou mais sem leitura de um aparelho,
+// até agora ("GMC-800 sem leitura das 10:00 às 11:20")
+function ftGapLines(name, levels, nowIdx) {
+  const end = Math.min(nowIdx, FT_N), out = [];
+  const first = levels.findIndex(Boolean);
+  if (first < 0) return out;
+  let i = first;
+  while (i < end) {
+    if (levels[i]) { i++; continue; }
+    let j = i;
+    while (j < end && !levels[j]) j++;
+    if (j - i >= 3) out.push(j >= nowIdx ? `${name} sem leitura desde ${ftHm(i)}.` : `${name} sem leitura das ${ftHm(i)} às ${ftHm(j)}.`);
+    i = j;
+  }
+  return out.slice(-3);
 }
 
 const ftHours = (marks) => `<div class="ft-hours"><span></span><div>${marks.map((h) => `<span>${pad(h)}</span>`).join("")}</div></div>`;
@@ -203,13 +231,16 @@ function renderFitaDay(box, strip, day0, opt = {}) {
   }).join("");
   let h = "";
   if (mk) h += `<div class="ft-lane"><span class="ft-lb">marcas</span><div class="ft-marks">${mk}</div></div>`;
-  h += ftDevLane("GQ GMC-800", "var(--accent)", gmc, gmcRole, nowIdx, "gmc");
+  h += ftDevLane("GQ GMC-800", "var(--gmc)", gmc, gmcRole, nowIdx, "gmc");
   if (showRc) h += ftDevLane("Radiacode 102", "var(--rc)", rc, rcRole, nowIdx, "rc");
   if (away.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">fora de casa</span><div class="ft-strip thin">${ftBandSvg(away, "var(--away)")}</div></div>`;
   if (rain.some(Boolean)) h += `<div class="ft-lane"><span class="ft-lb">chuva</span><div class="ft-strip thin">${ftBandSvg(rain, "var(--info)")}</div></div>`;
   h += ftHours([0, 4, 8, 12, 16, 20, 24]);
+  const gaps = [...ftGapLines("GMC-800", gmc, nowIdx), ...(showRc ? ftGapLines("RC102", rc, nowIdx) : [])];
+  if (gaps.length) h += `<p class="ft-fail small">${gaps.map((g) => `<span>${escHtml(g)}</span>`).join(" ")}</p>`;
   box.innerHTML = h;
   ftHover(box, [...box.querySelectorAll(".ft-strip")], (i) => ftSlotTip(day[i], i, showRc), (i) => (i < nowIdx ? day0 + i * 6e5 : null));
+  return ftUsed(showRc ? [gmc, rc] : [gmc], nowIdx, marks, away, rain);
 }
 
 // vários dias empilhados (semana no Agora; dias do período no Resumo)
@@ -241,9 +272,14 @@ function renderFitaWeek(box, strips, days, opt = {}) {
     opt.say.textContent = "";
     const s = document.createElement("span");
     s.textContent = !alerts && !above ? `${opt.label || "Semana"}: tudo no nível seguro.`
-      : !above ? `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "aviso curto" : "avisos curtos"}, nenhum trecho de 10 min acima do seguro.`
-      : `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "aviso" : "avisos"}, ${above} ${above === 1 ? "dia" : "dias"} com trecho acima do seguro.`;
+      : !above ? `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "alerta curto" : "alertas curtos"}, nenhum trecho de 10 min acima do seguro.`
+      : `${opt.label || "Semana"}: ${alerts} ${alerts === 1 ? "alerta" : "alertas"}, ${above} ${above === 1 ? "dia" : "dias"} com trecho acima do seguro.`;
     opt.say.appendChild(s);
+  }
+  const used = new Set();
+  for (const r of rows) {
+    const nowIdx = now < r.d0 + 864e5 ? Math.max(0, Math.ceil((now - r.d0) / 6e5)) : FT_N;
+    ftUsed([r.lv], nowIdx).forEach((k) => used.add(k));
   }
   const byD0 = new Map(rows.map((r) => [r.d0, r]));
   ftHover(box, [...box.querySelectorAll(".ft-strip")], (i, st) => {
@@ -253,6 +289,7 @@ function renderFitaWeek(box, strips, days, opt = {}) {
     const t = +st.dataset.d0 + i * 6e5;
     return t < now ? t : null;
   });
+  return used;
 }
 
 // junta várias respostas de GetDayStrip (de até 8 dias cada)
@@ -282,12 +319,13 @@ async function refreshAgFita() {
   try { s = await ftFetch(from, Date.now()); } catch (e) { return; }
   if (my !== ftSeq) return;
   const box = $("ftBox");
+  let used;
   if (mode === "semana") {
     const days = [];
     for (let i = 0; i < 7; i++) days.push(addDays(from, i));
-    renderFitaWeek(box, s, days, { say: $("ftSay"), label: "Semana" });
-  } else renderFitaDay(box, s, d0, { say: $("ftSay"), label: "Hoje" });
-  ftLegend($("ftLeg"));
+    used = renderFitaWeek(box, s, days, { say: $("ftSay"), label: "Semana" });
+  } else used = renderFitaDay(box, s, d0, { say: $("ftSay"), label: "Hoje" });
+  ftLegend($("ftLeg"), used);
 }
 
 // ---------- no Resumo ----------
@@ -306,9 +344,8 @@ async function renderSumFita(per) {
   if (my !== ftSumSeq) return;
   box.parentElement.hidden = false;
   const label = per[2].charAt(0).toUpperCase() + per[2].slice(1);
-  if (days.length === 1) renderFitaDay(box, s, d0, { say, label });
-  else renderFitaWeek(box, s, days, { say, label });
-  ftLegend($("sumFitaLeg"));
+  const used = days.length === 1 ? renderFitaDay(box, s, d0, { say, label }) : renderFitaWeek(box, s, days, { say, label });
+  ftLegend($("sumFitaLeg"), used);
 }
 
 document.addEventListener("click", (e) => {

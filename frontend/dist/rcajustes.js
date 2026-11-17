@@ -42,11 +42,12 @@ function setRcCfgEnabled(on) {
   $("rcResetDose").disabled = !on;
   $("rcUndo").disabled = !on || !(rcCfg && rcCfg.canUndo);
   rcDoseOffSync();
+  if (typeof alSync === "function") alSync();
 }
 
 function rcDoseOffSync() {
   for (const n of ["1", "2"]) {
-    const off = $("rcDS" + n + "Off").checked;
+    const off = !$("rcDS" + n + "On").checked;
     $("rcDS" + n).disabled = off || $("rcCfgSave").disabled;
   }
 }
@@ -76,7 +77,7 @@ function fillRcCfg(c) {
   $("rcDR2").value = c.doseRate2;
   for (const n of ["1", "2"]) {
     const v = c["dose" + n], off = v >= RC_DOSE_OFF;
-    $("rcDS" + n + "Off").checked = off;
+    $("rcDS" + n + "On").checked = !off;
     $("rcDS" + n).value = off ? "" : v;
   }
   $("rcCR1").value = c.countRate1;
@@ -98,13 +99,14 @@ function fillRcCfg(c) {
   $("rcIntro").textContent = "Valores lidos do RC102 agora. Mude o que quiser e clique em \"Gravar no RC102\".";
   rcHints();
   setRcCfgEnabled(true);
+  if (typeof alSync === "function") alSync();
 }
 
 function readRcCfgForm() {
   const n = (id) => parseFloat($(id).value);
   const s = Object.assign({}, rcCfg);
   s.doseRate1 = n("rcDR1"); s.doseRate2 = n("rcDR2");
-  for (const k of ["1", "2"]) s["dose" + k] = $("rcDS" + k + "Off").checked ? 1e7 : n("rcDS" + k);
+  for (const k of ["1", "2"]) s["dose" + k] = !$("rcDS" + k + "On").checked ? 1e7 : n("rcDS" + k);
   s.countRate1 = n("rcCR1"); s.countRate2 = n("rcCR2");
   s.soundOn = $("rcSoundOn").checked;
   s.vibroOn = $("rcVibroOn").checked;
@@ -205,9 +207,9 @@ function wireRcCfg() {
   rcCtrlRows();
   setRcCfgEnabled(false);
   ["rcDR1", "rcBrt", "rcDS1", "rcDS2"].forEach((id) => $(id).addEventListener("input", rcHints));
-  ["rcDS1Off", "rcDS2Off"].forEach((id) => $(id).addEventListener("change", () => {
+  ["rcDS1On", "rcDS2On"].forEach((id) => $(id).addEventListener("change", () => {
     const n = id[4], inp = $("rcDS" + n);
-    if (!$(id).checked && !inp.value) inp.value = n === "1" ? 1000 : 5000;
+    if ($(id).checked && !inp.value) inp.value = n === "1" ? 1000 : 5000;
     rcDoseOffSync();
   }));
   $("btnRcAdjust").addEventListener("click", () => openSettings("rcCfg"));

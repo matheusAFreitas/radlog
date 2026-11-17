@@ -19,7 +19,7 @@ const demoApi = !hasGo || inDemo ? makeDemoApi({ inApp: inDemo }) : null;
 const DEMO_GO = new Set(["GetDemo", "StopDemo", "DemoTray"]);
 const DEMO_BLOCK = new Set(["ExportCSV", "ExportReport", "ExportReportWith", "ExportMeasureReport", "ExportBackup", "ImportBackup", "ApplyBackupSettings",
   "CloudLogin", "CloudLoginWait", "CloudFinishSetup", "CloudOpen", "CloudSyncNow", "CloudRestart", "CloudRejoin", "CloudReset", "CloudDisconnect", "CloudRemoveDevice", "CloudDupAnswer", "CloudVaultRetry", "SetCloudAuto", "SetCloudName", "SaveCloudCode",
-  "SyncNow", "PairWith", "ShowPairCode", "SetSyncListen", "SetSyncAuto", "DiscoverPeers", "SetPeerAddrs", "ForgetPeer", "ImportRcLog"]);
+  "ImportRcLog"]);
 // ações no aparelho: a demonstração finge que fez, e avisa (2.83.1)
 const DEMO_DEVICE = new Set(["SetDeviceConfig", "RestoreDeviceConfig", "SyncClock", "ResetRcSpectrum", "SetRadiacode", "ReconnectRadiacode", "Connect", "Disconnect"]);
 const demoRefuse = async () => { throw new Error("saia da demonstração para usar"); };
@@ -65,6 +65,8 @@ const fmt = (v, d) => (v == null || !isFinite(v) ? "—" : nf(d).format(v));
 const pad = (n) => String(n).padStart(2, "0");
 const hhmm = (ms) => { const t = new Date(ms); return pad(t.getHours()) + ":" + pad(t.getMinutes()); };
 const ddmm = (ms) => { const t = new Date(ms); return pad(t.getDate()) + "/" + pad(t.getMonth() + 1); };
+// 2.97.0: sempre dia/mês/ano; o formato escolhido (unidades.js) troca na tela
+const ddmmyyyy = (ms) => { const t = new Date(ms); return ddmm(ms) + "/" + t.getFullYear(); };
 const hhmmss = (ms) => { const t = new Date(ms); return hhmm(ms) + ":" + pad(t.getSeconds()); };
 const isShortRange = () => state.range === "15m" || state.range === "30m";
 const isLongRange = () => state.range === "7d" || state.range === "30d" || state.range === "1y";
@@ -80,11 +82,9 @@ const calK = () => (state.status && (state.status.usvPerCPM || (state.status.dev
 
 // ---------- estado ----------
 
-// 2.8: os dois aparelhos abrem em µSv/h; quem ainda estava no padrão antigo
-// (CPM) passa para µSv/h uma vez, depois vale o que escolher
-if (!localGet("unit28", "")) { localSet("unit", "usv"); localSet("unit28", "1"); }
+// 2.84.0: a unidade do número grande é a taxa das Configurações (unidades.js)
 const state = {
-  unit: localGet("unit", "usv"),
+  unit: UNITS.rate,
   range: localGet("range", "1h"),
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
@@ -236,7 +236,6 @@ function renderReading() {
   const u = state.unit;
   const units = { cpm: "CPM", usv: "µSv/h", mrh: "mrem/h", cps: "CPS" };
   $("readUnit").textContent = units[u];
-  document.querySelectorAll("#unitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.unit === u)));
 
   $("demoTag").hidden = !state.demo.active;
   if (!r || (!connected && !state.demo.active)) {
@@ -257,11 +256,11 @@ function renderReading() {
     cps: fmt(r.cps, 0),
   };
   $("readValue").textContent = vals[u];
+  // a contagem na unidade escolhida e a outra unidade de taxa (2.84.0)
+  const cnt = UNITS.count === "cpm" ? `${vals.cpm} CPM` : `${fmt(r.cpm / 60, 2)} CPS`;
   const alt = {
-    cpm: `≈ ${vals.usv} µSv/h · ${vals.cps} CPS`,
-    usv: `${vals.cpm} CPM · ${vals.mrh} mrem/h`,
-    mrh: `${vals.cpm} CPM · ${vals.usv} µSv/h`,
-    cps: `último segundo · ${vals.cpm} CPM`,
+    usv: `${cnt} · ${vals.mrh} mrem/h`,
+    mrh: `${cnt} · ${vals.usv} µSv/h`,
   };
   $("readAlt").textContent = alt[u] + (r.dtPct >= 0.1 ? ` · tempo morto +${fmt(r.dtPct, r.dtPct < 10 ? 1 : 0)}% (contador: ${fmt(r.rawCPM, 0)} CPM)` : "");
   renderSigma(r);
@@ -321,7 +320,7 @@ function tileVals(usv, cpm, cps) {
 // no lugar das outras unidades vai "última leitura às HH:MM" em cinza, e a
 // dose diz "até HH:MM", como no cartão do aparelho
 function tileFoot(el, u, v, dose, doseSub, lost) {
-  const keys = u === "cpm" ? ["usv", "cps"] : u === "cps" ? ["usv", "cpm"] : ["cpm", "cps"];
+  const keys = [UNITS.count]; // 2.84.0: a contagem na unidade escolhida
   el.textContent = "";
   const num = (t) => { const b = document.createElement("b"); b.className = "mono"; b.textContent = t; return b; };
   if (lost) {
@@ -333,11 +332,12 @@ function tileFoot(el, u, v, dose, doseSub, lost) {
   }
   for (const k of lost ? [] : keys) {
     const sp = document.createElement("span");
+    sp.className = "inst-cnt";
     sp.append(num(v ? v[k] : "—"), " " + UNIT_TXT[k]);
     el.appendChild(sp);
   }
   const sp = document.createElement("span");
-  sp.append("hoje", " ", num(dose == null ? "—" : fmt(dose, 2)), " µSv");
+  sp.append("hoje", " ", num(doseNum(dose)), " " + doseLbl());
   if (doseSub) { const s2 = document.createElement("span"); s2.className = "inst-sub"; s2.textContent = doseSub; sp.append(" ", s2); }
   el.appendChild(sp);
 }
@@ -378,16 +378,37 @@ const LV_SAY = {
 function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
-  lvLabel($(pfx + "TileState"), lvl, word, 18);
+  // 2.87.0: a forma do nível fica no meio do trifólio; a palavra vai sozinha
+  // 2.97.1: a forma também vai na palavra, mas só aparece na faixa fechada,
+  // onde o mostrador some
+  lvLabel($(pfx + "TileState"), lvl, word, 12);
+  const lv = $(pfx + "TileLv");
+  if (lv && lv._lv !== lvl) { lv._lv = lvl; lv.innerHTML = LV_PATH[lvl] || ""; }
   const sayEl = $(pfx + "TileSay");
   if (sayEl) sayEl.textContent = say != null ? say : LV_SAY[lvl] || "";
 }
-// número dentro do anel: encolhe quando não cabe
-function dialVal(pfx, txt) {
-  const el = $(pfx + "TileVal");
-  el.textContent = txt;
-  el.setAttribute("font-size", txt.length > 6 ? "3.4" : txt.length > 4 ? "4.2" : "5.2");
+// 2.84.0 (revisão da interface): o número grande do quadro, na unidade da
+// taxa, e os valores do "detalhes" (CPM, CPS e a outra unidade de taxa)
+function tileBig(pfx, u, v) {
+  $(pfx + "TileNum").textContent = v ? v[u] : "—";
+  $(pfx + "TileUnitT").textContent = UNIT_TXT[u];
+  const o = u === "mrh" ? "usv" : "mrh";
+  // 2.88.0 (R2): os valores vão para o "detalhes" único embaixo dos quadros
+  $(pfx + "DetCnt").textContent = v ? `${v.cpm} CPM · ${v.cps} CPS` : "—";
+  $(pfx + "DetAlt").textContent = v ? v[o] : "—";
+  $("instDetAltL").textContent = o === "mrh" ? "Em mrem/h" : "Em µSv/h";
 }
+// um "detalhes" só para os dois quadros (2.88.0, avaliação R2: antes cada
+// quadro tinha o seu e abrir um deixava buraco no outro); lembra se ficou aberto
+{
+  const d = $("instDet");
+  d.open = localGet("tileDet.g", "") === "1" || localGet("tileDet.r", "") === "1";
+  d.addEventListener("toggle", () => {
+    localSet("tileDet.g", d.open ? "1" : ""); localSet("tileDet.r", "");
+    if (d.open && typeof pulseApply === "function") pulseApply();
+  });
+}
+
 
 // faixa compacta: o mesmo valor, o número secundário (CPM, ou µSv/h se o
 // grande já for CPM/CPS) e o estado na cor do nível
@@ -398,7 +419,7 @@ function miniDev(pfx, u, v, lvl, word, dotCls, stale) {
   $("mini" + pfx + "Dot").className = "dot" + dotCls;
   $("mini" + pfx + "Val").textContent = v ? v[u] : "—";
   $("mini" + pfx + "Unit").textContent = UNIT_TXT[u];
-  const k2 = u === "cpm" || u === "cps" ? "usv" : "cpm";
+  const k2 = UNITS.count; // a contagem na unidade escolhida (2.84.0)
   $("mini" + pfx + "Sec").textContent = v ? `${v[k2]} ${UNIT_TXT[k2]}` : "";
   lvLabel($("mini" + pfx + "State"), lvl, word, 12);
 }
@@ -408,16 +429,13 @@ function renderGTile() {
   const connected = s.state === "conectado";
   const live = !!r && (connected || state.demo.active);
   const u = state.unit;
-  $("gTileUnit").textContent = UNIT_TXT[u];
   $("gTileDemo").hidden = !state.demo.active;
   $("gTile").classList.toggle("stale", !live);
   const gc = gmcConn();
   $("gTile").classList.toggle("conn-off", gc === "off");
   $("gTile").classList.toggle("conn-wait", gc === "wait");
   const v = live ? tileVals(r.usv, r.cpm) : null;
-  dialVal("g", v ? v[u] : "—");
-  // mrem/h pequeno embaixo do mostrador (ACE 11/11); só quando o grande é µSv/h
-  $("gTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
+  tileBig("g", u, v);
   // os níveis do app (os mesmos que disparam os avisos), régua até 1,5× o alarme
   const k = calK(), [tA, tB] = gmcThrCPM(), top = tB * 1.5;
   const tick = (cpm) => (u === "cpm" ? fmt(cpm, 0) : u === "cps" ? fmt(cpm / 60, 2) : u === "mrh" ? fmt(cpm * k / 10, 3) : fmt(cpm * k, 2));
@@ -448,21 +466,19 @@ function renderRTile(st, o) {
     : st.state === "conectando" ? "Radiacode 102 · conectando…" : "Radiacode 102 · desconectado";
   $("rTileConn").title = on ? `Radiacode 102 conectado pelo ${via}` : st.err || "Radiacode 102";
   const u = state.rcUnit;
-  $("rTileUnit").textContent = UNIT_TXT[u];
   $("rTile").classList.toggle("stale", !o.live);
   const rcc = rcConn(st);
   $("rTile").classList.toggle("conn-off", rcc === "off");
   $("rTile").classList.toggle("conn-wait", rcc === "wait");
   const v = o.usv == null ? null : tileVals(o.usv, o.cps * 60, o.cps);
-  dialVal("r", v ? v[u] : "—");
-  // mrem/h pequeno embaixo do mostrador, igual ao do GMC-800 (ACE 11/11)
-  $("rTileAlt").textContent = v && u === "usv" ? `${v.mrh} mrem/h` : "";
-  $("rTileVal").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
+  tileBig("r", u, v);
+  $("rTileNum").closest(".inst-read").title = !o.live && st.lastT ? `última leitura: ${whenLabel(st.lastT)}` : "";
   // marcas da régua na unidade do número (CPM/CPS pela relação de agora)
   const perUSv = o.usv > 0 && o.cps > 0 ? o.cps / o.usv : null;
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
-  const names = o.own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : LV_WORD;
+  const names = LV_WORD; // 2.88.0 (R2): os mesmos nomes nos dois aparelhos
   const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
+  state.rLvl = o.live ? o.lvl : "";
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
   tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
@@ -536,8 +552,19 @@ async function refreshSpark() {
   if (my !== sparkSeq || !c) return;
   drawSpark("gTileSpark", c.values);
   drawSpark("rTileSpark", c.rc);
+  sparkSay("gTileSpark", "GMC-800", c.usv);
+  sparkSay("rTileSpark", "RC102", c.rc);
   drawSpark("gHeroSpark", c.values);
   drawSpark("rHeroSpark", c.rc);
+}
+// o que o leitor de tela ouve no lugar da curva (2.96.0, T4)
+function sparkSay(id, dev, usv) {
+  const el = $(id);
+  if (!el) return;
+  const v = (usv || []).filter((x) => x != null && isFinite(x));
+  if (!v.length) { el.setAttribute("aria-label", `${dev}: sem leituras na última hora`); return; }
+  const mean = v.reduce((a, x) => a + x, 0) / v.length;
+  el.setAttribute("aria-label", `${dev}, última hora: média ${usvTxt(mean)}, máximo ${usvTxt(Math.max(...v))}`);
 }
 function drawSpark(id, vals) {
   if (!$(id)) return;
@@ -586,9 +613,9 @@ function renderStatus() {
   $("clockChip").hidden = !connected;
   if (connected) {
     const drift = d.clockDrift || 0;
-    const clock = Math.abs(drift) <= 2 ? "certo" : `${fmt(Math.abs(drift), 0)} s ${drift > 0 ? "adiantado" : "atrasado"}`;
-    $("iClock").textContent = clock;
-    $("clockText").textContent = "relógio " + clock;
+    const clock = Math.abs(drift) <= 2 ? "" : `${fmt(Math.abs(drift), 0)} s ${drift > 0 ? "adiantado" : "atrasado"}`;
+    $("iClock").textContent = clock || "na hora certa";
+    $("clockText").textContent = clock ? "relógio " + clock : "relógio certo";
     $("clockChip").classList.toggle("off", Math.abs(drift) > 2);
     const cal = d.calibration || {};
     $("iCal").textContent = `${cal.source || "padrão"} · ${fmt(d.usvPerCPM, 4)} µSv/h por CPM`;
@@ -626,20 +653,20 @@ async function refreshStats() {
   state.bgCPM = s.bgCPM || null;
   const cal = calK();
   // em µSv/h desde a 2.29 (a última hora e o último dia: calibração de agora)
-  const u = (v) => (v == null ? "—" : fmt(v * cal, usvDigits(v * cal)));
+  const u = (v) => (v == null ? "—" : rateNum(v * cal, usvDigits(v * cal)));
   $("tAvg").textContent = u(s.avg1h);
-  $("tAvgSub").textContent = s.avg1h == null ? "µSv/h" : `µSv/h · ${fmt(s.avg1h, 1)} CPM`;
+  $("tAvgSub").textContent = s.avg1h == null ? rateLbl() : `${rateLbl()} · ${countTxt(s.avg1h)}`;
   $("tMin").textContent = u(s.min24h);
   $("tMax").textContent = u(s.max24h);
-  $("tMaxSub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
+  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o Radiacode)
   $("hAvg1h").textContent = u(s.avg1h);
   $("hMin24").textContent = u(s.min24h);
   $("hMax24").textContent = u(s.max24h);
-  $("hMax24Sub").textContent = s.max24h == null ? "µSv/h" : `µSv/h às ${hhmm(s.max24hAt)}`;
+  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
   state.gDose = s.minutesToday ? s.doseToday : null;
   renderGTile();
-  $("tDose").textContent = s.minutesToday ? fmt(s.doseToday, 2) : "—";
+  $("tDose").textContent = s.minutesToday ? doseNum(s.doseToday) : "—";
   $("tDoseSub").textContent = s.minutesToday ? `${s.minutesToday} min medidos` : "acumulados";
   if (gmcConn()) renderGmcConn(); // desconectado: "até HH:MM"
   $("heroDose").title = s.minutesToday ? `Hoje: ${doseKnown(s.doseToday, homeBgUSv()).join(" · ")} · calculada pelo app (o GMC não informa a dose que soma)` : "";
@@ -648,7 +675,7 @@ async function refreshStats() {
 // Fundo por dia (Gráficos › Tendência do fundo, 2.65): 14 dias e "Ver mais"
 let dailyN = 14;
 async function refreshDaily() {
-  if (!gfxShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
+  if (!fundoShown("tendencia")) return; // só com a sub-aba aberta (2.83.10)
   // GetDaily conta dias do calendário (até 60): pede um a mais para saber se tem mais
   const days = await api.GetDaily(Math.min(60, dailyN + 1));
   const tb = $("days");
@@ -661,7 +688,7 @@ async function refreshDaily() {
   for (const d of days.slice(0, dailyN)) {
     const tr = document.createElement("tr");
     const label = isToday(d.day) ? "hoje" : isYesterday(d.day) ? "ontem" : ddmm(d.day);
-    for (const [txt, cls] of [[label, ""], [fmt(d.usv, 3), "num"], [fmt(d.cpm, 1), "num"]]) {
+    for (const [txt, cls] of [[label, ""], [rateNum(d.usv, 3), "num"], [UNITS.count === "cps" ? fmt(d.cpm / 60, 3) : fmt(d.cpm, 1), "num"]]) {
       const td = document.createElement("td");
       td.textContent = txt;
       if (cls) td.className = cls;
@@ -852,10 +879,22 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
-const PAGES = { agora: "pageAgora", graficos: "pageGraficos", resumo: "pageResumo", alara: "pageAlara", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+
+// página marcada na barra; o Espectro (2.93) marca no lugar do Radiacode 102
+function navMark() {
+  const v = state.view, spec = v === "radiacode" && state.sub && state.sub.radiacode === "espectro" && !$("navSpec").hidden;
+  document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
+    const on = spec ? b.dataset.view === "espectro" : b.dataset.view === v;
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+}
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
+  if (v === "espectro") { setSub("radiacode", "espectro"); v = "radiacode"; } // 2.93 (E3): entrada direta na barra
+  if (v === "padroes" || v === "tendencia") { setSub("fundo", v); v = "fundo"; } // 2.91: o fundo de casa virou página
+  if (v === "alara") { setSub("medir", "distancia"); v = "medir"; } // o ALARA saiu na 2.85: os testes ficam no Medir objeto
   if (!PAGES[v]) v = "graficos";
   if (v !== "alertas") state.alertRange = null; // o filtro de período vale só na ida pelo Resumo
   const changed = state.view !== v;
@@ -863,15 +902,14 @@ async function showView(v, skipRender) {
   qkTrack(v);
   if (changed) usoView(v);
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
-  document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
-    if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
-  });
+  navMark();
   // trocou de página com a tela rolada: volta para o começo da página
   if (changed && !skipRender) {
     const top = $("pages").getBoundingClientRect().top + window.scrollY - 12;
     if (window.scrollY > top) window.scrollTo({ top: Math.max(0, top) });
   }
   if (v === "graficos") refreshSub("graficos");
+  if (v === "fundo") { refreshSub("fundo"); fcLoad(); }
   if (window.rcDemo) { if (v === "radiacode") window.rcDemo.show(); else window.rcDemo.hide(); }
   renderDevMini();
   if (skipRender) return;
@@ -879,8 +917,7 @@ async function showView(v, skipRender) {
   if (v === "fora") { renderPeriods(); refreshPlanned(); }
   if (v === "chuva") refreshRainImpact(true);
   if (v === "resumo") refreshSummary();
-  if (v === "alara") refreshAlara();
-  if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); }
+  if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); refreshAlara(); }
   if (v === "radiacode") { if (api.GetRadiacode) renderRc(await api.GetRadiacode()); refreshRc24(); }
   if (v === "config") openSettings();
   if (v === "agora") refreshAgora();
@@ -888,8 +925,10 @@ async function showView(v, skipRender) {
 
 // sub-abas: Gráficos e Radiacode mostram uma parte de cada vez (a última
 // escolhida volta quando abre o app)
-const SUBS = { graficos: ["tempo", "hora", "padroes", "tendencia", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"] };
+const SUBS = { graficos: ["tempo"], fundo: ["tendencia", "hora", "padroes", "ano"], radiacode: ["agora", "espectro", "busca", "atividade", "log"], gmc: ["agora", "tubo"], medir: ["objeto", "distancia", "blindagem"] };
 state.sub = {};
+// 2.91: Hora do dia, Padrões, Tendência e Ano saíram de Gráficos para a página Fundo de casa
+{ const old = localGet("sub.graficos", ""); if (["hora", "padroes", "tendencia", "ano"].includes(old)) { localSet("sub." + "fundo", old); localSet("sub.graficos", "tempo"); } }
 // 2.51: o espectrograma virou "Ao longo do tempo" dentro do Espectro
 if (localGet("sub.radiacode", "") === "espectrograma") { localSet("sub.radiacode", "espectro"); localSet("rcSpecView", "tempo"); }
 for (const pg of Object.keys(SUBS)) { const v = localGet("sub." + pg, ""); state.sub[pg] = SUBS[pg].includes(v) ? v : SUBS[pg][0]; }
@@ -907,8 +946,9 @@ function setSub(pg, sub, focus) {
     if (on && focus) b.focus();
   });
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
-  if (pg === "graficos") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
+  if (pg === "fundo") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
   if (changed) usoSub(pg, sub);
+  if (pg === "radiacode") navMark();
   if (changed && state.view === pg) refreshSub(pg);
   // fora da aba Agora a fileira de cima volta a mostrar os dois aparelhos (2.65)
   if (DEV_PAGES[pg]) renderDevMini();
@@ -916,9 +956,9 @@ function setSub(pg, sub, focus) {
 
 function refreshSub(pg) {
   const s = state.sub[pg];
-  if (pg === "graficos") {
-    if (s === "tempo") { refreshChart(); refreshDose(); }
-    else if (s === "hora") refreshHeat();
+  if (pg === "graficos") { refreshChart(); refreshDose(); }
+  if (pg === "fundo") {
+    if (s === "hora") refreshHeat();
     else if (s === "padroes") refreshPatterns();
     else if (s === "ano") refreshYearCal();
     else { refreshBgTrend(); refreshDaily(); }
@@ -927,6 +967,7 @@ function refreshSub(pg) {
   if (pg === "radiacode" && window.rcDemo && window.rcDemo.redraw) requestAnimationFrame(() => window.rcDemo.redraw());
   if (pg === "radiacode" && s === "agora") refreshRc24();
   if (pg === "gmc" && s === "tubo" && typeof tbLoad === "function" && !TB.h) tbLoad();
+  if (pg === "medir") refreshAlara();
 }
 
 for (const pg of Object.keys(SUBS)) setSub(pg, state.sub[pg]);
@@ -1005,7 +1046,7 @@ function renderDemo() {
   $("demoStripe").hidden = !on;
   $("btnDemo").setAttribute("aria-pressed", String(on));
   $("btnDemo").classList.toggle("demo-on", on);
-  $("btnDemoText").textContent = on ? "Demonstração ligada" : "Demonstração";
+  $("btnDemoText").textContent = on ? "Sair da demonstração" : "Ligar a demonstração";
   if (!on) { $("demoPanel").hidden = true; renderStatus(); return; }
   $("demoStripeTxt").textContent = `${demoName(d.scenario)} · nada é gravado`;
   const open = !$("demoPanel").hidden;
@@ -1085,7 +1126,7 @@ function demoTray(r) {
 }
 
 function wireDemo() {
-  $("btnDemo").addEventListener("click", () => (state.demo.active ? ($("demoPanel").hidden = !$("demoPanel").hidden, renderDemo()) : demoStart()));
+  $("btnDemo").addEventListener("click", () => (state.demo.active ? demoStop() : demoStart()));
   $("demoExit").addEventListener("click", demoStop);
   $("demoPanelExit").addEventListener("click", demoStop);
   $("demoOpen").addEventListener("click", () => {
@@ -1112,7 +1153,7 @@ function wireDemo() {
 function heatMonthStart(hm) { return new Date(hm.y, hm.m - 1, 1).getTime(); }
 
 async function refreshHeat() {
-  if (!gfxShown("hora")) return; // só com a sub-aba aberta (2.83.10)
+  if (!fundoShown("hora")) return; // só com a sub-aba aberta (2.83.10)
   const mm = state.heatMonthMode;
   document.querySelectorAll("#heatSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.hmonth ? mm : !mm && parseInt(b.dataset.hdays, 10) === state.heatDays)));
   $("heatMonthNav").hidden = !mm;
@@ -1136,8 +1177,8 @@ async function refreshHeat() {
   const rcMap = h.device === "radiacode";
   // tudo em µSv/h; no GMC-800 cada minuto pela calibração que valia nele
   // (2.83.8; os campos em CPM ficam só para o σ)
-  const hv = (v) => fmt(v, usvDigits(v));
-  $("heatUnit").textContent = rcMap ? "µSv/h médio (RC102) · cinza = sem dados" : "µSv/h médio · cinza = sem dados";
+  const hv = (v) => rateNum(v, usvDigits(v)); // na unidade da tela (2.84.0)
+  $("heatUnit").textContent = rcMap ? `${rateLbl()} médio (RC102) · cinza = sem dados` : `${rateLbl()} médio · cinza = sem dados`;
   state.heat = h;
   hideHeatTip();
   const box = $("heat");
@@ -1183,7 +1224,7 @@ async function refreshHeat() {
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} µSv/h) · mais baixo por volta das ${h.lowHour}h (${hv(l)} µSv/h)`;
+    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
   }
 }
 
@@ -1195,7 +1236,7 @@ function showHeatTip(c) {
   const v = h.values[i][hr];
   const day = new Date(h.days[i]);
   const dayTxt = isToday(h.days[i]) ? "hoje" : isYesterday(h.days[i]) ? "ontem" :
-    day.toLocaleDateString(LOCALE, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+    day.toLocaleDateString(LOCALE, { weekday: "short" }).replace(".", "") + " " + ddmm(h.days[i]);
   const tip = $("heatTip");
   tip.textContent = "";
   const line = (txt, cls) => { const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = txt; tip.appendChild(d); };
@@ -1211,14 +1252,14 @@ function showHeatTip(c) {
     const n = h.counts && h.counts[i] ? h.counts[i][hr] : 0;
     if (rcMap && avg != null && h.days.length > 1) {
       const d = v - avg;
-      line(Math.abs(d) < avg * 0.005 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${fmt(Math.abs(d), usvDigits(avg) + 1)} da média das ${hr}h (${fmt(avg, usvDigits(avg))})`, "ht-dim");
+      line(Math.abs(d) < avg * 0.005 ? `igual à média das ${hr}h` : `${d > 0 ? "+" : "−"}${rateNum(Math.abs(d), usvDigits(avg) + 1)} da média das ${hr}h (${rateNum(avg, usvDigits(avg))})`, "ht-dim");
     } else if (avg != null && h.days.length > 1) {
       const d = v - avg;
       // σ de uma média de n minutos: √(média ÷ n), bem menor que o de 1 minuto
       const sm = n > 0 ? Math.sqrt(avg / n) : 0;
       // o σ sai das contagens (CPM); o texto, em µSv/h
       const du = u - uAvg;
-      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${fmt(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${uv(uAvg)})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
+      line(Math.abs(d) < 0.05 ? `igual à média das ${hr}h` : `${du > 0 ? "+" : "−"}${rateNum(Math.abs(du), usvDigits(uAvg) + 1)} da média das ${hr}h (${rateNum(uAvg, usvDigits(uAvg))})` + (sm > 0 ? ` · ${fmtSig(d / sm)}` : ""), "ht-dim");
     }
     if (n) line(n >= 60 ? "hora completa" : `${n} de 60 min medidos`, "ht-dim");
   }
@@ -1233,7 +1274,7 @@ function showHeatTip(c) {
     (rank[x.level] ?? 2) - (rank[y.level] ?? 2) || (y.peak || 0) - (x.peak || 0) || x.time - y.time);
   for (const a of al.slice(0, 4)) {
     const nm = { perigo: "Perigo", alarme: "Alarme" }[a.level] || "Atenção";
-    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (do contador)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
+    line(`${nm} às ${hhmm(a.time)}${a.peakUSv ? " · pico " + usvVal(a.peakUSv) : ""}${a.retro ? " (achado depois)" : ""}`, { perigo: "ht-danger", alarme: "ht-alarm" }[a.level] || "ht-att");
   }
   if (al.length > 4) line(`+${al.length - 4} alertas nesta hora`, "ht-dim");
   tip.hidden = false;
@@ -1328,7 +1369,7 @@ function drawHeatTrecho() {
   const g = ch && showG ? ch.usv || [] : [], r = ch && showR ? ch.rc || [] : [];
   const vals = g.concat(r).filter((v) => v != null && isFinite(v));
   const attn = ch && ch.attentionUSv;
-  const rtop = niceTop(Math.max(...vals, 0.05) * 1.15);
+  const rtop = niceN(Math.max(...vals, 0.05) * 1.15, 2);
   const ry = (v) => RH - (v / rtop) * RH;
   const line = (arr, n, yf, color, dash) => {
     let d = "", pen = false;
@@ -1342,17 +1383,17 @@ function drawHeatTrecho() {
   const grid = (hh) => [0.5, hh / 2, hh - 0.5].map((gy) => `<line x1="0" y1="${gy}" x2="${VW}" y2="${gy}" stroke="${COR.grid}" vector-effect="non-scaling-stroke"/>`).join("");
   $("htRate").innerHTML = grid(RH) +
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
-    line(g, g.length, ry, COR.accent) + line(r, r.length, ry, COR.rc);
+    line(g, g.length, ry, COR.gmc) + line(r, r.length, ry, COR.rc);
   $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
   // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
   const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
-  const dtop = niceTop(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1);
+  const dtop = niceN(Math.max(G ? Math.max(G.total, G.ceilingTotal) : 0, R ? Math.max(R.total, R.ceilingTotal) : 0) * 1.1 || 1, 2);
   const dy = (v) => DH - (v / dtop) * DH;
   $("htDose").innerHTML = grid(DH) +
     (R ? line(R.ceiling, R.ceiling.length, dy, COR.warn) : "") +
     (G ? line(G.ceiling, G.ceiling.length, dy, COR.warn, R ? "2 4" : "") : "") +
-    (G ? line(G.dose, G.dose.length, dy, COR.accent) : "") +
+    (G ? line(G.dose, G.dose.length, dy, COR.gmc) : "") +
     (R ? line(R.dose, R.dose.length, dy, COR.rc) : "");
   $("htDoseY").innerHTML = `<span>${fmtDose(dtop)[0]}</span><span>${fmtDose(dtop / 2)[0]}</span><span>0</span>`;
   $("htX0").textContent = hhmm(p.from);
@@ -1538,6 +1579,7 @@ function renderRainStatus() {
     title = "";
   }
   btn.className = "rain-status " + cls;
+  btn.hidden = !st.enabled; // 2.92 (G2): a legenda só mostra o que está desenhado
   $("rainStatusText").textContent = text;
   btn.title = title;
   const set = $("rainStatusSet");
@@ -1777,7 +1819,7 @@ function updateAlarm() {
     $("alarmTitle").textContent = `${BAND_NAME[sev]} no ${dev}`;
     $("alarmDetail").textContent = perigo
       ? `perigo a partir de ${kind === "rc" ? usvTxt(rcl.danger || 0) : usvTxt(dangerUSv())}`
-      : kind === "rc" ? (rcl.device ? `alarme 2 do aparelho: ${usvTxt(rcl.alarm || 0)}` : `limite ${usvTxt(rcl.alarm || 0)}`)
+      : kind === "rc" ? (rcl.device ? `alarme 2 (alarme) do aparelho: ${usvTxt(rcl.alarm || 0)}` : `limite ${usvTxt(rcl.alarm || 0)}`)
       : `seu limite: ${usvTxt(alarmUSv())}`;
   }
   // o outro aparelho: no mesmo nível, os dois números lado a lado; abaixo,
@@ -1907,9 +1949,9 @@ function renderRise(rise, usvNow) {
 
 // aviso nas Configurações sobre o alarme de perigo
 function renderDangerNote() {
-  const v = parseFloat($("numAlarm").value) || 0;
+  const v = rateIn($("numAlarm").value) || 0;
   const el = $("dangerNote");
-  const d = parseFloat($("lvDanger").value) || dangerUSv();
+  const d = rateIn($("lvDanger").value) || dangerUSv();
   if (v >= d) {
     el.className = "danger-note warn";
     el.textContent = `Seu limite (${usvTxt(v)}) está acima do perigo do app (${usvTxt(d)}): quem toca é o alarme de perigo.`;
@@ -1924,10 +1966,11 @@ function renderDangerNote() {
 const LV_FIELDS = { lvAttn: "attentionUSv", lvDanger: "dangerUSv", lvSnooze: "snoozeMin", lvSatMax: "satMaxUSv", lvSatDrop: "satDropUSv", lvSatHold: "satHoldSec", lvRcSat: "rcSatUSv", lvDTUs: "deadTimeUs" };
 
 function fillLevels(l) {
-  for (const [id, k] of Object.entries(LV_FIELDS)) $(id).value = l[k] ?? LV_DEFAULT[k];
+  // limites em µSv/h aparecem na unidade da tela (2.84.0)
+  for (const [id, k] of Object.entries(LV_FIELDS)) { const v = l[k] ?? LV_DEFAULT[k]; $(id).value = k.endsWith("USv") ? rateOut(v) : v; }
   // limites em µSv/h: sem o valor salvo, o equivalente do CPM antigo
-  if (!(l.attentionUSv > 0)) $("lvAttn").value = usv3((l.attentionCPM || LV_DEFAULT.attentionCPM) * calK());
-  if (!(l.dangerUSv > 0)) $("lvDanger").value = usv3((l.dangerCPM || LV_DEFAULT.dangerCPM) * calK());
+  if (!(l.attentionUSv > 0)) $("lvAttn").value = rateOut(usv3((l.attentionCPM || LV_DEFAULT.attentionCPM) * calK()));
+  if (!(l.dangerUSv > 0)) $("lvDanger").value = rateOut(usv3((l.dangerCPM || LV_DEFAULT.dangerCPM) * calK()));
   $("lvDTOn").checked = !!l.deadTimeOn;
   renderLevelEq();
   renderDeadTime();
@@ -1950,7 +1993,7 @@ function renderDeadTime() {
 function readLevels() {
   const out = {};
   for (const [id, k] of Object.entries(LV_FIELDS)) {
-    const v = parseFloat($(id).value);
+    const v = k.endsWith("USv") ? rateIn($(id).value) : parseFloat($(id).value);
     out[k] = v > 0 ? (k.endsWith("USv") || k === "deadTimeUs" ? v : Math.round(v)) : LV_DEFAULT[k];
   }
   // em branco: o padrão do app, em µSv/h pela calibração atual
@@ -1965,7 +2008,7 @@ function renderLevelEq() {
   const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
     const v = parseFloat($(el.dataset.eq).value) || 0;
-    el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM no GMC-800 com a calibração atual` : "";
+    el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM` : "";
   });
 }
 
@@ -1978,13 +2021,14 @@ function renderLevelEq() {
 const SET_LAYOUT = [
   { group: "Aparelhos", id: "gmc", name: "GQ GMC-800", tabs: [["con", "Conexão"], ["dev", "No aparelho"], ["cal", "Calibração"], ["tubo", "Tubo"], ["test", "Testes"]] },
   { id: "rc", name: "Radiacode 102", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
-  { group: "Avisos", id: "alarm", name: "Alarmes e avisos" },
+  { group: "Alarmes", id: "alarm", name: "Níveis e alarmes" },
   { group: "App", id: "app", name: "Janela e tela" },
-  { id: "data", name: "Dados e backup" },
+  { id: "chuva", name: "Chuva no gráfico" },
+  { id: "data", name: "Dados e backup", tabs: [["arq", "Backup e arquivos"], ["nuvem", "Nuvem"], ["uso", "Uso do app"], ["hist", "Histórico"]] },
   { id: "about", name: "Atualizações e sobre" },
 ];
 state.setSec = "gmc";
-state.setTab = { gmc: "con", rc: "con" };
+state.setTab = { gmc: "con", rc: "con", data: "arq" };
 const setSecEl = (id) => document.querySelector(`#settings .set-sec[data-sec="${id}"]`);
 const setLay = (id) => SET_LAYOUT.find((x) => x.id === id);
 // o elemento está na seção e na aba abertas agora
@@ -2041,8 +2085,8 @@ function showSetSection(id, tab) {
   }
   if (["devcfg", "dcCalCard", "dcTube"].some((k) => setShown($(k)))) openDevCfg();
   if (setShown($("rcCfg"))) openRcCfg();
-  if (L.id === "alarm") { renderLadder(); renderDevAlarms(); openDevCfg().then(renderDevAlarms); }
-  if (L.id === "data") renderMaturity();
+  if (L.id === "alarm") { renderLadder(); alSync(); openDevCfg().then(alSync); openRcCfg(); }
+  if (L.id === "data" && state.setTab.data === "hist") renderMaturity();
 }
 
 // abre a seção e a aba onde está um campo (ex.: "txtPlace" → Janela e tela)
@@ -2052,6 +2096,8 @@ function showSetFor(elId, flash) {
   if (!sec) return;
   const t = el.closest(".set-tab");
   showSetSection(sec.dataset.sec, t ? t.dataset.tab : null);
+  const adv = el.closest("details.cal-adv");
+  if (adv) adv.open = true;
   const card = el.closest("fieldset") || el;
   if (flash) {
     card.scrollIntoView({ block: "nearest" });
@@ -2074,7 +2120,8 @@ function renderSetNavStatus() {
   const s = state.status || {}, d = s.device || {};
   put("gmc", s.state === "conectado" ? `conectado · ${d.port}` : s.state === "conectando" ? "conectando…" : "desconectado",
     s.state === "conectado" ? "on" : s.state === "erro" ? "err" : s.state === "conectando" ? "wait" : "off");
-  const rt = $("rcSetText") && $("rcSetText").textContent;
+  // 2.96.1: do mesmo jeito do GMC-800 ("conectado · USB"), sem o modelo
+  const rt = state.rcNavText || "";
   put("rc", rt || "", ($("rcSetDot").className.match(/\b(on|err|wait)\b/) || [])[1] || "off");
   const set = state.settings || {};
   put("alarm", !set.alarmEnabled ? "alarme desligado" : `toca a partir de ${usvTxt(alarmUSv())}`, "");
@@ -2087,9 +2134,9 @@ function renderSetNavStatus() {
 function renderLadder() {
   const bar = $("lvBar");
   if (!bar) return;
-  const a = parseFloat($("lvAttn").value) || attnUSv();
-  const al = parseFloat($("numAlarm").value) || alarmUSv();
-  const p = parseFloat($("lvDanger").value) || dangerUSv();
+  const a = rateIn($("lvAttn").value) || attnUSv();
+  const al = rateIn($("numAlarm").value) || alarmUSv();
+  const p = rateIn($("lvDanger").value) || dangerUSv();
   const lo = Math.min(a, al, p) / 10, hi = Math.max(a, al, p) * 1.5;
   const pos = (v) => Math.max(0, Math.min(100, (Math.log10(v / lo) / Math.log10(hi / lo)) * 100));
   const xs = [pos(Math.min(a, al)), pos(Math.max(a, al)), pos(p)];
@@ -2105,13 +2152,51 @@ function renderLadder() {
 document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
 document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
 
-// alarmes que tocam nos próprios aparelhos, em µSv/h para comparar
-function renderDevAlarms() {
-  if (!$("devAlGmc")) return;
-  const cpm = devCfgRead && devCfg ? parseFloat($("dcAlarm").value) : NaN;
-  $("devAlGmc").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM ≈ ${usvTxt(cpm * calK())}` : "conecte o GMC-800 para ver";
-  const l = ((state.rc || {}).st || {}).limits || {};
-  $("devAlRc").textContent = l.device ? `${usvTxt(l.attn || 0)} e ${usvTxt(l.alarm || 0)}` : "conecte o RC102 para ver";
+// alarmes dos aparelhos na tela de alarmes (2.95.0): espelhos dos campos das
+// páginas de cada aparelho. Mexer aqui é mexer lá; gravar continua sendo o
+// botão de cada aparelho (que confere, salva cópia e lê de volta)
+const AL_MIRROR = [
+  // [campo daqui, campo da página do aparelho, conversão]
+  ["alGmc", "dcAlarmRate", null],
+  ["alRc1", "rcDR1", "rate"],
+  ["alRc2", "rcDR2", "rate"],
+  ["alDs1", "rcDS1", null],
+  ["alDs2", "rcDS2", null],
+  ["alDs1On", "rcDS1On", null],
+  ["alDs2On", "rcDS2On", null],
+];
+// os do RC102 ficam em µSv/h no aparelho; aqui vão na unidade da tela
+const alOut = (src, conv) => (conv === "rate" ? rateOut(parseFloat(src.value)) : src.value);
+const alIn = (v, conv) => (conv === "rate" ? (rateIn(v) > 0 ? String(Math.round(rateIn(v) * 100) / 100) : "") : v);
+function alSync() {
+  if (!$("alGmc")) return;
+  for (const [d, s, conv] of AL_MIRROR) {
+    const dst = $(d), src = $(s);
+    if (!dst || !src) continue;
+    if (dst.type === "checkbox") dst.checked = src.checked;
+    else if (document.activeElement !== dst) dst.value = alOut(src, conv);
+    dst.disabled = src.matches(":disabled");
+  }
+  const cpm = devCfgRead && devCfg ? parseInt($("dcAlarm").value, 10) : NaN;
+  $("alGmcCpm").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM no aparelho` : "conecte para mudar";
+  $("alGmcSave").disabled = $("dcSaveBtn").disabled;
+  $("alRcSave").disabled = $("rcCfgSave").disabled;
+}
+function wireAlMirror() {
+  for (const [d, s, conv] of AL_MIRROR) {
+    const dst = $(d);
+    dst.addEventListener(dst.type === "checkbox" ? "change" : "input", () => {
+      const src = $(s);
+      if (dst.type === "checkbox") { src.checked = dst.checked; src.dispatchEvent(new Event("change", { bubbles: true })); }
+      else { src.value = alIn(dst.value, conv); src.dispatchEvent(new Event("input", { bubbles: true })); }
+      alSync();
+    });
+  }
+  $("alGmcSave").addEventListener("click", () => $("dcSaveBtn").click());
+  $("alRcSave").addEventListener("click", () => $("rcCfgSave").click());
+  // ligou, desligou ou gravou: os botões dos aparelhos mudam e os daqui acompanham
+  const mo = new MutationObserver(() => alSync());
+  for (const id of ["dcSaveBtn", "rcCfgSave"]) mo.observe($(id), { attributes: true, attributeFilter: ["disabled"] });
 }
 
 // links para fora (Sobre › Código) abrem no navegador do sistema
@@ -2301,7 +2386,7 @@ function updateAttention() {
     const rs = state.rc.st || {}, l = rs.limits || {};
     dev = "RC102";
     usv = rs.usvh || 0;
-    lim = l.device ? `alarme 1 do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
+    lim = l.device ? `alarme 1 (atenção) do aparelho: ${usvTxt(l.attn || 0)}` : `atenção a partir de ${usvTxt(l.attn || 0)}`;
     fake = !!rs.demo;
   } else {
     const r = kind === "real" && state.demo.active ? state.lastReal : state.last;
@@ -2424,7 +2509,7 @@ function wireBackup() {
 function backupFrom(r) {
   if (r.from) return asIs(r.from);
   const d = r.created ? new Date(r.created) : null;
-  return d && !isNaN(d) ? d.toLocaleDateString(LOCALE) : "outro PC";
+  return d && !isNaN(d) ? ddmmyyyy(d) : "outro PC";
 }
 
 // configurações do backup (2.74): o backup traz as que valem em qualquer
@@ -2480,7 +2565,7 @@ async function openSettings(focusId) {
   refreshUso();
   const s = state.settings;
   $("chkAuto").checked = !!s.autoConnect;
-  $("numAlarm").value = usv3(alarmUSv());
+  $("numAlarm").value = rateOut(usv3(alarmUSv()));
   renderLevelEq();
   $("selSound").value = s.alarmSound || "sirene";
   $("chkRaise").checked = s.alarmRaise !== false;
@@ -2501,6 +2586,8 @@ async function openSettings(focusId) {
   $("chkCleanOld").checked = !s.keepOldVersions;
   if (api.GetVersionsDir) api.GetVersionsDir().then((d) => { $("updDir").textContent = d; }).catch(() => {});
   $("selLang").value = s.lang || "auto";
+  unitSegSet(s.rateUnit || "usv", s.countUnit || "cps");
+  dateSegSet(s.dateFormat === "iso" ? "iso" : "");
   $("chkMeasReport").checked = !s.noMeasureReport;
   $("chkAutoHist").checked = !s.noAutoHistory;
   fillLevels(lv());
@@ -2520,10 +2607,10 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "valDateFmt", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
-  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", valDateFmt: "formato da data", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
@@ -2607,7 +2694,7 @@ function setSearch() {
 }
 
 // versões da calibração do GMC (2.2)
-const calWhen = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+const calWhen = (t) => ddmmyyyy(t) + " " + hhmm(t);
 const calSrcTxt = (v) => v.origem === "intercalibração" ? "intercalibração com o RC102" : v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
 async function renderCalHist() {
   if (!api.GetCalHistory) return;
@@ -2617,7 +2704,10 @@ async function renderCalHist() {
   const vs = h.versions || [];
   const cur = vs.find((v) => v.atual) || vs[0];
   if (cur) {
-    $("calNow").textContent = `${fmt(cur.k, 5)} µSv/h por CPM · ${calSrcTxt(cur)}` + (h.retro ? " · histórico recalculado" : "");
+    $("calNowK").textContent = fmt(cur.k, 5);
+    const src = cur.desde ? `${calSrcTxt(cur)}, desde ${calWhen(cur.desde)}` : calSrcTxt(cur);
+    $("calNow").textContent = `De onde veio: ${src}`;
+    if (h.retro) $("calNow").appendChild(Object.assign(document.createElement("span"), { textContent: " · histórico recalculado" }));
     $("calK").value = cur.k ? cur.k.toFixed(5) : "";
     $("calKReset").hidden = !(cur.fator > 0);
   }
@@ -2725,7 +2815,7 @@ async function renderCfgHist() {
   if (!api.GetConfigHistory) return;
   let h = [];
   try { h = (await api.GetConfigHistory()) || []; } catch (e) { h = []; }
-  const when = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+  const when = (t) => ddmmyyyy(t) + " " + hhmm(t);
   $("cfgHistBody").innerHTML = h.map((c) => `<tr><td class="when">${when(c.t)}</td><td>${escHtml(c.campo)}</td><td class="from">${escHtml(c.de || "—")}</td><td>${escHtml(c.para)}</td><td class="from">${escHtml(c.origem)}</td></tr>`).join("");
   $("cfgHistEmpty").hidden = h.length > 0;
 }
@@ -2746,6 +2836,7 @@ async function saveSettings(extra) {
   const rainWas = state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon;
   state.settings = await call(api.SaveSettings, s);
   syncLang(state.settings.lang);
+  syncUnits(state.settings.rateUnit, state.settings.countUnit, state.settings.dateFormat);
   if (rainWas !== state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon) refreshRainImpact(true);
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
@@ -2807,6 +2898,7 @@ function setDevCfgEnabled(on) {
   if (on && devCfg) {
     const locked = new Set(devCfg.locked || []);
     qsa("#devcfg [data-key]").forEach((el) => { el.disabled = locked.has(el.dataset.key); });
+    $("dcAlarmRate").disabled = locked.has("alarmCPM");
     qsa("#calRows input, #calSens, #calApply").forEach((el) => { el.disabled = !devCfg.calibrationEditable; });
   }
   renderSaveAdvice();
@@ -2871,6 +2963,7 @@ function fillDevCfg(c) {
     }
   });
   renderOutputs();
+  dcAlarmFill();
 
   const tb = $("calRows");
   tb.textContent = "";
@@ -2917,6 +3010,27 @@ async function openDevCfg() {
     $("dcIntro").textContent = "Não consegui ler a configuração: " + errMsg(e);
   }
 }
+
+// alarme do GMC-800 (2.84.0): o aparelho guarda em CPM; aqui ele é digitado
+// na unidade da tela e convertido pela calibração do app
+function dcAlarmFill() {
+  const cpm = parseInt($("dcAlarm").value, 10);
+  $("dcAlarmRate").value = cpm > 0 ? rateOut(cpm * calK()) : "";
+  $("dcAlarmRate").disabled = $("dcAlarm").disabled;
+  dcAlarmNote();
+  alSync();
+}
+function dcAlarmNote() {
+  const cpm = parseInt($("dcAlarm").value, 10);
+  $("dcAlarmNote").textContent = cpm > 0 ? `grava ${fmt(cpm, 0)} CPM no aparelho, pela calibração do app (${fmt(calK(), 5)} µSv/h por CPM)` : "";
+}
+document.addEventListener("input", (e) => {
+  if (e.target.id !== "dcAlarmRate") return;
+  const usv = rateIn(e.target.value);
+  if (usv > 0) $("dcAlarm").value = String(Math.max(1, Math.min(999999, Math.round(usv / calK()))));
+  dcAlarmNote();
+  renderOutputs();
+});
 
 function readDevCfgForm() {
   const values = Object.assign({}, devCfg.values);
@@ -2965,7 +3079,16 @@ function wireDevCfg() {
     if (!(a >= 1 && a <= 999999)) { toast("O limite do alarme precisa ficar entre 1 e 999999 CPM.", true); return; }
     const text = ["O app vai apagar e regravar a configuração do contador (leva alguns segundos)."];
     if (calChanged(next)) text.push("A calibração vai mudar: isso altera o µSv/h mostrado pelo contador e pelo app.");
-    if (!(await askConfirm({ title: "Gravar no GMC-800?", text, note: "Não desconecte o cabo nesse tempo.", ok: "Gravar" }))) return;
+    text.push("Antes, o app salva uma cópia do que está no contador agora.");
+    // resumo do que muda (2.95.0): o alarme e cada ponto da calibração
+    const diff = [];
+    if (next.values.alarmCPM !== devCfg.values.alarmCPM) diff.push(["Alarme", `${fmt(devCfg.values.alarmCPM, 0)} CPM`, `${fmt(a, 0)} CPM`]);
+    const was = devCfg.calibration.points || [];
+    next.calibration.points.forEach((pt, i) => {
+      const o = was[i];
+      if (o && (o.cpm !== pt.cpm || Math.abs(o.usv - pt.usv) > 1e-6 * o.usv)) diff.push([`Ponto ${i + 1}`, `${fmt(o.cpm, 0)} CPM = ${fmt(o.usv, 2)} µSv/h`, `${fmt(pt.cpm, 0)} CPM = ${fmt(pt.usv, 2)} µSv/h`]);
+    });
+    if (!(await askConfirm({ title: "Gravar no GMC-800?", diff: diff.length ? diff : null, text, textAfter: diff.length ? text.length : undefined, note: "Não desconecte o cabo nesse tempo.", ok: "Gravar" }))) return;
     setDevCfgEnabled(false);
     $("dcSaveBtn").textContent = "Gravando…";
     try {
@@ -3023,9 +3146,6 @@ function wireDevCfg() {
 // ---------- ligações da interface ----------
 
 function wire() {
-  document.querySelectorAll("#unitSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.unit = b.dataset.unit; localSet("unit", state.unit); renderReading();
-  }));
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.addEventListener("click", () => {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
@@ -3065,10 +3185,11 @@ function wire() {
   });
   $("chkTrayNum").addEventListener("change", () => { $("selTrayDev").disabled = !$("chkTrayNum").checked; });
   wireUiScale();
+  wireUnits();
   $("btnSave").addEventListener("click", async () => {
     if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
     if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
-    const alarm = parseFloat($("numAlarm").value);
+    const alarm = rateIn($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
@@ -3080,6 +3201,9 @@ function wire() {
       trayPlain: !$("chkTrayNum").checked,
       uiScale: parseFloat($("valUiScale").value) || 1,
       uiDensity: $("valUiDensity").value,
+      rateUnit: $("valRateUnit").value || "usv",
+      countUnit: $("valCountUnit").value || "cps",
+      dateFormat: $("valDateFmt").value === "iso" ? "iso" : "",
       trayDevice: $("selTrayDev").value,
       pulseOff: !$("chkPulse").checked,
       pulseStrip: $("chkPulseStrip").checked,
@@ -3127,11 +3251,11 @@ function wire() {
     $("progressText").textContent = "Lendo a memória do contador…";
     try {
       const r = await api.DownloadHistory();
-      if (r.canceled) toast(`Leitura cancelada: ${r.added} minutos novos guardados`);
-      else if (r.partial) histFailToast(r.partial, true);
-      else toast(`Histórico: ${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""));
+      if (r.canceled) histDone(`Leitura cancelada: ${r.added} minutos novos guardados`, false);
+      else if (r.partial) { histFailToast(r.partial, true); histDone("Não deu para baixar tudo: os minutos que chegaram foram guardados.", false); }
+      else histDone(`${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""), true);
     } catch (e) {
-      toast("Histórico: " + (e && e.message ? e.message : e), true);
+      histDone("Não deu para baixar: " + errMsg(e), false);
     }
     refreshAll();
   });
@@ -3139,12 +3263,14 @@ function wire() {
 
   setupChartHover();
   wireDevCfg();
+  wireAlMirror();
+  // o "lado a lado" só desenha aberto (precisa da largura)
+  $("calAdv").addEventListener("toggle", () => { if ($("calAdv").open) renderCalHist(); });
   wireDose();
   wireDemo();
   wireAlarm();
   wireHeat();
   wireUpdate();
-  wireSync();
   wireCloud();
   wireRc();
   wireMeasureSaved();
@@ -3157,6 +3283,24 @@ function wire() {
   wireReportDlg();
   wireWhere();
   wireBusca();
+}
+
+// resultado do "Baixar histórico" (2.96.0, T7): fica escrito ao lado do
+// botão por 30 min; o aviso passageiro só aparece se a página for outra
+function histDone(text, ok) {
+  state.histLast = { t: Date.now(), text, ok };
+  renderHistLast();
+  const here = state.view === "gmc" && !$("syncCard").hidden;
+  if (!here) toast(ok ? "Histórico: " + text : text, !ok);
+}
+function renderHistLast() {
+  const h = state.histLast, el = $("syncRes");
+  const on = !!h && Date.now() - h.t < 30 * 60e3;
+  el.hidden = !on;
+  if (!on) return;
+  el.classList.toggle("bad", !h.ok);
+  $("syncResTxt").textContent = h.text;
+  $("syncResAgo").textContent = `· há ${agoTxt(h.t)}`;
 }
 
 // ---------- histórico do GMC-800 baixado sozinho (2.83.0) ----------
@@ -3299,7 +3443,29 @@ function renderRainOff() {
   $("riSub").textContent = "chuva desligada";
   $("riChartBox").hidden = true;
   $("riList").textContent = "";
-  $("riTiles").innerHTML = '<p class="small muted">Para medir o efeito da chuva no CPM, ligue "Mostrar chuva no gráfico" e escolha a cidade em Configurações → Janela e tela → Chuva no gráfico.</p>';
+  // desligado: uma linha do que a tela mostra e "Ligar" (2.85)
+  const box = $("riTiles");
+  box.textContent = "";
+  const d = document.createElement("div");
+  d.className = "ri-off";
+  const t = document.createElement("div");
+  const b = document.createElement("b");
+  b.textContent = "Marcar a chuva no gráfico";
+  const p = document.createElement("p");
+  p.className = "small muted";
+  p.textContent = "Mostra quando choveu na sua cidade e quanto a leitura sobe depois. A cidade fica só neste PC.";
+  t.append(b, p);
+  const on = document.createElement("button");
+  on.type = "button"; on.className = "btn accent"; on.textContent = "Ligar";
+  on.addEventListener("click", async () => {
+    if (!state.settings.rainPlace) { await openSettings("txtPlace"); $("txtPlace").focus(); return; }
+    await saveSettings({ rainEnabled: true });
+    renderRainSettings();
+    refreshChart();
+    refreshRainImpact(true);
+  });
+  d.append(t, on);
+  box.appendChild(d);
 }
 
 function renderRainNow(n) {
@@ -3329,16 +3495,20 @@ function renderRainNow(n) {
 function renderRainImpact(r) {
   state.ri = r;
   renderRainNow(r.now);
-  const rc = r.device === "radiacode", k = r.usvPerCPM || 0, base = r.avgBase || 1;
-  $("riUnit").textContent = rc ? "% acima da média das 2 h antes (RC102)" : "CPM acima da média das 2 h antes";
+  // 2.85: o GMC-800 também sai na taxa (pela calibração) e a curva em % da
+  // base, como o RC102; o CPM só fica sem calibração conhecida
+  const k = r.usvPerCPM || 0, rc = r.device === "radiacode" || k > 0, base = r.avgBase || 1;
+  const devTxt = r.device === "radiacode" ? "RC102" : "GMC-800";
+  $("riUnit").textContent = rc ? `% acima da média das 2 h antes (${devTxt})` : "CPM acima da média das 2 h antes";
   const tiles = $("riTiles"), list = $("riList");
   tiles.textContent = ""; list.textContent = "";
   $("riChartBox").hidden = !r.n;
   if (!r.n) {
     $("riSub").textContent = r.skippedNoData ? `${r.skippedNoData} chuva(s) sem dados suficientes ${rc ? "do RC102" : "do contador"}` : "nenhuma chuva medida ainda";
     tiles.innerHTML = rc
-      ? '<p class="small muted">A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
-      : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto o CPM subiu depois e compara com horários sem chuva.</p>';
+      ? (r.device === "radiacode" ? '<p class="small muted">A cada chuva com o RC102 conectado ao PC em casa, o app mede quanto a leitura dele subiu depois e compara com horários sem chuva.</p>'
+        : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.</p>')
+      : '<p class="small muted">A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.</p>';
     return;
   }
   $("riSub").textContent = `${r.n} chuva${r.n > 1 ? "s" : ""} medida${r.n > 1 ? "s" : ""} nos últimos 60 dias` + (r.dryN ? ` · comparado com ${r.dryN} horários sem chuva` : "");
@@ -3377,7 +3547,7 @@ function renderRainImpact(r) {
 
 function drawRainCurve(r) {
   // Radiacode: a curva em % da base (a escala do CPM dele é outra)
-  const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+  const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
   const pts = (r.curve || []).map((p) => (pc ? { min: p.min, rain: p.rain == null ? null : p.rain * pc, dry: p.dry == null ? null : p.dry * pc } : p));
   let lo = 0, hi = 1;
   for (const p of pts) for (const v of [p.rain, p.dry]) if (v != null) { lo = Math.min(lo, v); hi = Math.max(hi, v); }
@@ -3515,138 +3685,6 @@ function wireUpdate() {
   if (api.GetUpdateInfo) api.GetUpdateInfo().then(renderUpdate).catch(() => {});
 }
 
-// ---------- sincronização entre PCs ----------
-
-let syncTimer = null;
-
-function renderSync(info) {
-  if (!info) return;
-  state.sync = info;
-  $("chkSyncListen").checked = !!info.listen;
-  $("chkSyncAuto").checked = !!info.auto;
-  const li = $("syncListenInfo");
-  if (info.listen && info.listenErr) {
-    li.textContent = "Não deu para aceitar conexões: " + info.listenErr;
-    li.className = "small warn-text";
-  } else if (info.listening) {
-    li.textContent = `Este PC: ${info.name} · ${(info.addrs || []).join(", ") || "sem rede"}`;
-    li.className = "small muted";
-  } else {
-    li.textContent = "Desligado: este PC só conecta nos outros (no Windows não pede liberação no firewall).";
-    li.className = "small muted";
-  }
-  $("syncCodeRow").hidden = !info.listening;
-  const codeOn = !!info.code;
-  $("syncCode").textContent = codeOn ? info.code.slice(0, 3) + " " + info.code.slice(3) : "";
-  $("btnSyncCode").textContent = codeOn ? "Cancelar código" : "Mostrar código para parear";
-  clearInterval(syncTimer);
-  const left = () => {
-    const s = Math.max(0, Math.round((info.codeUntil - Date.now()) / 1000));
-    $("syncCodeLeft").textContent = codeOn ? `vale por mais ${Math.floor(s / 60)}:${pad(s % 60)}` : "";
-    if (codeOn && s <= 0) { clearInterval(syncTimer); api.GetSync().then(renderSync).catch(() => {}); }
-  };
-  left();
-  if (codeOn) syncTimer = setInterval(left, 1000);
-  const ul = $("syncPeers");
-  ul.textContent = "";
-  if (!info.peers.length) ul.innerHTML = '<li class="small muted">Nenhum PC pareado ainda.</li>';
-  for (const p of info.peers) {
-    const item = document.createElement("li");
-    const g = document.createElement("span");
-    g.className = "grow";
-    const name = document.createElement("strong");
-    name.textContent = p.name;
-    const st = document.createElement("span");
-    st.className = "small " + (p.lastError ? "err" : "muted");
-    st.textContent = p.lastError ? `Última tentativa ${whenLabel(p.lastTry)}: ${p.lastError}`
-      : p.lastSync ? `Sincronizado ${whenLabel(p.lastSync)} · ${p.lastResult || ""}` : "Ainda não sincronizou.";
-    const ad = document.createElement("span");
-    ad.className = "small mono muted";
-    ad.dataset.noTr = "";
-    ad.textContent = [...(p.manualAddrs || []), ...(p.addrs || [])].join(", ");
-    g.append(name, st, ad);
-    const now = document.createElement("button");
-    now.type = "button"; now.className = "btn small"; now.textContent = info.running ? "Sincronizando…" : "Sincronizar agora";
-    now.disabled = !!info.running;
-    now.addEventListener("click", async () => {
-      try { await api.SyncNow(p.id); } catch (e) { toast(errMsg(e), true); }
-      renderSync(await api.GetSync());
-    });
-    const addrs = document.createElement("button");
-    addrs.type = "button"; addrs.className = "btn small"; addrs.textContent = "Endereços";
-    addrs.title = "Endereços extras deste PC, separados por vírgula (ex.: o IP do Tailscale)";
-    addrs.addEventListener("click", () => {
-      const f = item.querySelector(".nr-form");
-      if (f) { f.remove(); return; }
-      const form = document.createElement("div");
-      form.className = "nr-form sync-pair";
-      form.innerHTML = '<input type="text" aria-label="Endereços extras"><button type="button" class="btn small accent">Salvar</button>';
-      const inp = form.querySelector("input");
-      inp.value = (p.manualAddrs || []).join(", ");
-      inp.placeholder = "ex.: 100.101.102.103, notebook";
-      form.querySelector("button").addEventListener("click", async () => {
-        renderSync(await call(api.SetPeerAddrs, p.id, inp.value.split(/[,\s]+/).filter(Boolean)));
-      });
-      item.appendChild(form);
-      inp.focus();
-    });
-    const del = document.createElement("button");
-    del.type = "button"; del.className = "btn small danger-btn"; del.textContent = "Esquecer";
-    del.addEventListener("click", async () => {
-      if (del.dataset.sure !== "1") { del.dataset.sure = "1"; del.textContent = "Confirmar"; return; }
-      renderSync(await call(api.ForgetPeer, p.id));
-    });
-    item.append(g, now, addrs, del);
-    ul.appendChild(item);
-  }
-}
-
-function wireSync() {
-  on("sync", renderSync);
-  $("chkSyncListen").addEventListener("change", async (e) => renderSync(await call(api.SetSyncListen, e.target.checked)));
-  $("chkSyncAuto").addEventListener("change", async (e) => renderSync(await call(api.SetSyncAuto, e.target.checked)));
-  $("btnSyncCode").addEventListener("click", async () => {
-    try { renderSync(state.sync && state.sync.code ? await api.CancelPairCode() : await api.ShowPairCode()); }
-    catch (e) { toast(errMsg(e), true); }
-  });
-  $("btnSyncFind").addEventListener("click", async () => {
-    const msg = $("syncFindMsg"), ul = $("syncFound");
-    msg.textContent = "Procurando…";
-    ul.textContent = "";
-    let list = [];
-    try { list = await api.DiscoverPeers(); } catch (e) { msg.textContent = errMsg(e); return; }
-    msg.textContent = list.length ? "" : "Ninguém respondeu. O outro PC está com \"Aceitar conexões\" ligado e na mesma rede?";
-    for (const f of list) {
-      const li = document.createElement("li");
-      const g = document.createElement("span");
-      g.className = "grow";
-      g.innerHTML = "<strong></strong><span class='small mono muted' data-no-tr></span>";
-      g.firstChild.textContent = f.name + (f.paired ? " (já pareado)" : "");
-      g.lastChild.textContent = f.addr;
-      const b = document.createElement("button");
-      b.type = "button"; b.className = "btn small"; b.textContent = "Usar este";
-      b.addEventListener("click", () => { $("syncAddr").value = f.addr; $("syncPairCode").focus(); });
-      li.append(g, b);
-      ul.appendChild(li);
-    }
-  });
-  $("btnSyncPair").addEventListener("click", async () => {
-    const msg = $("syncPairMsg");
-    msg.className = "small";
-    msg.textContent = "Pareando…";
-    try {
-      renderSync(await api.PairWith($("syncAddr").value, $("syncPairCode").value));
-      msg.textContent = "Pareado. A primeira sincronização já começou.";
-      $("syncPairCode").value = "";
-      $("syncFound").textContent = "";
-    } catch (e) {
-      msg.className = "small warn-text";
-      msg.textContent = errMsg(e);
-    }
-  });
-  if (api.GetSync) api.GetSync().then(renderSync).catch(() => {});
-}
-
 // ---------- Radiacode (aparelho de verdade) ----------
 
 state.rc = { st: null, cmpMin: 360, accum: false, log: true, spec: null };
@@ -3708,6 +3746,7 @@ function renderRcSetState(st, prev) {
     off: "Procura desligada",
   }[st.state] || st.state;
   $("rcSetText").textContent = txt;
+  state.rcNavText = { conectado: `conectado · ${via}`, conectando: "conectando…", procurando: "procurando…", erro: "não conectou", off: "procura desligada" }[st.state] || "";
   $("rcSetDot").className = "dot " + (st.state === "conectado" ? "on" : st.state === "erro" ? "err" : "wait");
   $("rcSetState").classList.toggle("err", st.state === "erro");
   const p = state.rc.pendingBLE;
@@ -3730,7 +3769,7 @@ function renderRcSetState(st, prev) {
 // quadro do Radiacode na tela principal: cheio quando conectado, uma linha
 // com o último dado quando não
 // desde a 2.51 o RC102 mostra só µSv/h em destaque (CPM e cps na linha de baixo)
-state.rcUnit = "usv";
+state.rcUnit = UNITS.rate; // 2.84.0: a taxa das Configurações
 
 // quadro do Radiacode, com as mesmas informações do GMC: valor, dose de
 // hoje, normal/σ, régua e medidas
@@ -3772,14 +3811,14 @@ function renderRcMain(st) {
   $("rcMainAlt").textContent = live ? `${mrem}${fmt(cps * 60, 0)} CPM · ${fmt(cps, 1)} cps · ± ${fmt(st.usvhErr, 0)}%` : st.lastT ? `última leitura ${isToday(st.lastT) ? "às " + hhmm(st.lastT) : "(" + whenLabel(st.lastT) + ")"}` : "sem leituras ainda";
   // dose de hoje
   if (st.todayDevOK) {
-    $("rcDoseToday").textContent = fmt(st.todayDev, 2);
+    $("rcDoseToday").textContent = doseNum(st.todayDev);
     rcParts($("rcDoseTodaySub"), ["desde 00:00", rcAwayToday(), sx.todayMinutes || st.today ? `app ${fmt(st.today, 2)}` : ""]);
     const chk = $("rcDoseTodaySub").lastElementChild;
     if (chk && (sx.todayMinutes || st.today)) chk.className = "dose-chk";
     $("rcDoseToday").title = `Somada pelo próprio RC102, também longe do PC. Pelo app (só os minutos gravados): ${fmt(st.today, 2)} µSv`;
     $("rcDoseTodaySub").title = "O número grande é o do RC102. \"app\" é a soma que o app fez só com os minutos gravados, para conferir: costuma ficar um pouco abaixo, porque o app não vê o tempo longe do PC.";
   } else {
-    $("rcDoseToday").textContent = sx.todayMinutes || st.today ? fmt(st.today, 2) : "—";
+    $("rcDoseToday").textContent = sx.todayMinutes || st.today ? doseNum(st.today) : "—";
     rcParts($("rcDoseTodaySub"), [sx.todayMinutes ? `${sx.todayMinutes} min medidos` : "desde 00:00", rcAwayToday()]);
     $("rcDoseToday").title = "Calculada pelo app: só os minutos que o PC gravou";
     $("rcDoseTodaySub").title = "";
@@ -3813,9 +3852,9 @@ function renderRcMain(st) {
   const al = st.alarms || {};
   const own = al.DoseRate1 > 0 && al.DoseRate2 > al.DoseRate1;
   const attn = own ? al.DoseRate1 : st.attnUSv || 0.505, alarm = own ? al.DoseRate2 : st.alarmUSv || 1.01, top = alarm * 1.5;
-  $("rcLevelHint").textContent = own ? "alarmes do RC102" : "faixas do app em µSv/h";
+  $("rcLevelHint").textContent = own ? "atenção e alarme: os alarmes 1 e 2 do RC102" : "faixas do app em µSv/h";
   const lvl = usv == null ? "" : st.dangerUSv && usv >= st.dangerUSv ? "perigo" : usv >= alarm ? "alarme" : usv >= attn ? "atencao" : "seguro";
-  lvLabel($("rcLevelName"), lvl, (own ? { seguro: "Seguro", atencao: "Alarme 1", alarme: "Alarme 2", perigo: "Perigo" } : { seguro: "Seguro", atencao: "Atenção", alarme: "Alarme", perigo: "Perigo" })[lvl] || "—", 16);
+  lvLabel($("rcLevelName"), lvl, LV_WORD[lvl] || "—", 16);
   $("rcLevelName").className = "sr-only level-name " + lvl;
   ["seguro", "atencao", "alarme", "perigo"].forEach((l) => $("rcMain").classList.toggle("lv-" + l, live && lvl === l));
   renderRcDial(st, { usv, cps, lvl, own, attn, alarm });
@@ -3824,16 +3863,16 @@ function renderRcMain(st) {
   agoraNow();
   renderDevMini();
   // medidas
-  const fu = (x) => (x == null ? "—" : fmt(x, usvDigits(x)));
+  const fu = (x) => (x == null ? "—" : rateNum(x, usvDigits(x)));
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
-  $("rcMax24At").textContent = sx.n24h ? `µSv/h às ${hhmm(sx.max24hAt)}` : "µSv/h";
+  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} às ${hhmm(sx.max24hAt)}` : rateLbl();
   // dose que o próprio aparelho soma desde que foi zerado
   if (st.doseLiveAt) {
-    const mSv = st.doseLive >= 1000, v = mSv ? st.doseLive / 1000 : st.doseLive;
+    const mSv = !RATE_MREM && st.doseLive >= 1000, v = RATE_MREM ? st.doseLive / 10 : mSv ? st.doseLive / 1000 : st.doseLive;
     $("rcDevDose").textContent = fmt(v, v < 10 ? (mSv ? 2 : 3) : 2);
-    $("rcDevDoseSub").textContent = `${mSv ? "mSv" : "µSv"} desde que foi zerada`;
+    $("rcDevDoseSub").textContent = `${RATE_MREM ? "mrem" : mSv ? "mSv" : "µSv"} desde que foi zerada`;
     $("rcDevDose").title = st.doseLiveSec ? `em ${rcDur(st.doseLiveSec)} contando` + (st.doseLiveOn ? "" : ` · às ${hhmm(st.doseLiveAt)}`) : "";
   } else { $("rcDevDose").textContent = "—"; $("rcDevDoseSub").textContent = "desde que foi zerada"; }
 }
@@ -3841,7 +3880,7 @@ function renderRcMain(st) {
 // etiquetas ao lado do nome: conexão, onde está, bateria e temperatura
 function renderRcChips(st, via) {
   const box = $("rcChips"), on = st.state === "conectado";
-  const where = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" }[((state.where || {}).radiacode) || "comigo"];
+  const where = { casa: "em casa", comigo: "comigo", fora: "ignorado" }[((state.where || {}).radiacode) || "comigo"];
   const chips = [];
   if (on) chips.push(["on", via]);
   chips.push(["", where]);
@@ -3924,7 +3963,7 @@ function drawRc24(c, t0, t1) {
 }
 
 async function refreshRcCompare() {
-  // o cartão mora em Configurações › GQ GMC-800 › Calibração (2.51)
+  // o cartão mora em Configurações › GQ GMC-800 › Calibração › Avançado
   if (!api.GetRcCompare || !$("rcCmpCard").offsetParent) return;
   let c;
   try { c = await api.GetRcCompare(state.rc.cmpMin); } catch (e) { $("rcCmpStats").textContent = errMsg(e); return; }
@@ -3951,7 +3990,7 @@ function drawRcCompare(c) {
   let svg = `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" class="rc-cmp-svg">`;
   for (let k = 0; k <= 4; k++) {
     const v = (top / 4) * k, yy = y(v);
-    svg += `<line x1="${PL}" x2="${W - 8}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 6}" y="${yy + 4}" text-anchor="end" class="ax">${fmt(v, 2)}</text>`;
+    svg += `<line x1="${PL}" x2="${W - 8}" y1="${yy}" y2="${yy}" class="grid"/><text x="${PL - 6}" y="${yy + 4}" text-anchor="end" class="ax">${axRate(v, 2)}</text>`;
   }
   svg += `<text x="${PL}" y="${H - 4}" class="ax">${hhmm(t0)}</text><text x="${W - 8}" y="${H - 4}" text-anchor="end" class="ax">${hhmm(t1)}</text>`;
   svg += `<path d="${path(g)}" class="gmc"/><path d="${path(r)}" class="rc"/></svg>`;
@@ -4071,27 +4110,32 @@ async function refreshCounterSync(cs) {
   }
   state.counterSync = cs;
   const pct = fmt(cs.estPct, cs.estPct < 10 ? 1 : 0);
-  const memTxt = !cs.estPct ? "" : cs.fullIn > 0
-    ? `A memória está cerca de ${pct}% ocupada (estimado desde o download) e enche em cerca de ${fmtDuration(cs.fullIn)} no modo "${cs.saveMode}".`
-    : `A memória está cerca de ${pct}% ocupada (estimado desde o download).`;
   renderMemInfo(cs, pct);
   const warnMem = cs.memLevel === "atencao" || cs.memLevel === "cheia";
   const show = cs.state === "pendente" || warnMem;
   const card = $("syncCard");
-  card.hidden = !show;
+  const recent = !!state.histLast && Date.now() - state.histLast.t < 30 * 60e3;
+  card.hidden = !show && !recent;
+  renderHistLast();
   $("navGmcDot").hidden = !show;
   const gs = $("gTileSync");
   gs.hidden = !show;
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
   gs.title = cs.text;
+  // 2.89.0 (E5): o ponto da barra diz o que é ao passar o mouse
+  $("navGmcDot").closest("button").title = show ? gs.textContent : "";
   card.classList.toggle("cheia", cs.memLevel === "cheia");
   $("btnHistory").classList.toggle("pending", show);
   $("btnHistory").title = cs.text;
-  if (!show) return;
-  $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do contador praticamente cheia" : "Memória do contador perto de encher") : "Há minutos para buscar no contador";
+  if (!show) {
+    if (recent) { $("syncTitle").textContent = "Memória do contador"; $("syncText").textContent = "Tudo baixado."; }
+    return;
+  }
+  // aviso curto (2.85): título, uma linha e o botão
+  $("syncTitle").textContent = warnMem ? (cs.memLevel === "cheia" ? "Memória do GMC-800 cheia" : `Memória do GMC-800 em ${pct}%`) : "Há minutos para buscar no contador";
   $("syncText").textContent = warnMem
-    ? `${memTxt} Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador.` + (cs.state === "pendente" ? " " + cs.text : "")
+    ? (cs.memLevel === "cheia" ? "O aparelho para de gravar ou grava por cima (conforme o ajuste dele). Baixe o histórico para guardar tudo no app." : "Quando encher, o aparelho para de gravar ou grava por cima (conforme o ajuste dele).")
     : cs.text;
   $("btnSyncDl").disabled = $("btnHistory").disabled;
 }
@@ -4100,7 +4144,7 @@ async function refreshCounterSync(cs) {
 
 let patSeq = 0;
 async function refreshPatterns() {
-  if (!api.GetPatterns || state.view !== "graficos" || state.sub.graficos !== "padroes") return;
+  if (!api.GetPatterns || !fundoShown("padroes")) return;
   const rcOn = hasRcData();
   $("patDevSeg").hidden = !rcOn;
   if (!rcOn) state.patDev = "";
@@ -4115,14 +4159,18 @@ async function refreshPatterns() {
   drawPatterns(p);
 }
 
-function patVal(p, v) { return p.unit === "CPM" ? fmt(v, 1) : fmt(v, usvDigits(v)); }
+// 2.84.0: µSv/h na unidade da tela (rateNum); CPM do RC102 fica CPM
+// extra: casas a mais, para os cartões dia × noite baterem com a frase (2.91)
+function patVal(p, v, extra) { return p.unit === "CPM" ? fmt(v, 1 + (extra || 0)) : rateNum(v, usvDigits(v) + (extra || 0)); }
+const patUnit = (p) => (p.unit === "CPM" ? "CPM" : rateLbl());
 
 function drawPatterns(p) {
-  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.accent;
+  const rc = p.device === "radiacode", color = rc ? COR.rc : COR.gmc;
   const hist = p.first ? Math.max(0, (p.to - Math.max(p.from, p.first)) / DAY_MS) : 0;
   $("patSub").textContent = !p.minutes ? "sem minutos em casa nessa janela"
-    : `${fmt(p.minutes, 0)} min em casa (${p.unit})` + (p.first && p.first > p.from ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)` : "") +
+    : `${fmt(p.minutes, 0)} min em casa (${patUnit(p)})` +
       (p.peakHour >= 0 ? ` · mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h` : "");
+  if (p.minutes && p.first && p.first > p.from) glAppend($("patSub"), `ainda aprendendo o seu normal (${fmt(hist, hist < 10 ? 1 : 0)} de ${p.days} dias)`, "janela");
   // hora do dia
   const svg = $("patChart"), PH = 160;
   const hs = p.hours || [];
@@ -4149,7 +4197,7 @@ function drawPatterns(p) {
       out += `<path d="M${ok.map((q) => `${x(q.i).toFixed(1)} ${y(q.h.mean).toFixed(1)}`).join(" L")}" fill="none" stroke="${COR.text}" stroke-opacity="0.6" stroke-width="1.2" stroke-dasharray="4 3" vector-effect="non-scaling-stroke"/>`;
     }
     svg.innerHTML = out;
-    $("patLegend").innerHTML = `<span class="key"><i style="border-color:${color}"></i>mediana</span><span class="key"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
+    $("patLegend").innerHTML = `<span class="key" data-gl="mediana" role="button" tabindex="0"><i style="border-color:${color}"></i>mediana</span><span class="key" data-gl="quartil" role="button" tabindex="0"><b class="sw" style="background:${color}"></b>1º a 3º quartil</span><span class="key"><i style="border-color:${COR.text};border-top-style:dashed;opacity:.6"></i>média</span><span class="key"><b class="sw" style="background:#000;opacity:.5"></b>noite (18h–6h)</span>`;
   }
   // dia × noite
   const dn = $("patDN");
@@ -4159,27 +4207,32 @@ function drawPatterns(p) {
     d.className = "pat-dn-v";
     d.innerHTML = "<span class='small muted'></span><b></b><span class='small muted'></span>";
     d.children[0].textContent = lab;
-    d.children[1].textContent = st && st.n ? `${patVal(p, st.median)} ${p.unit}` : "—";
-    d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean)} · ${fmt(st.n, 0)} min` : "sem dados";
+    d.children[1].textContent = st && st.n ? `${patVal(p, st.median, 1)} ${patUnit(p)}` : "—";
+    d.children[2].textContent = st && st.n ? `mediana · média ${patVal(p, st.mean, 1)} · ${fmt(st.n, 0)} min` : "sem dados";
     dn.appendChild(d);
   }
   $("patDNText").textContent = p.minutes ? p.dnText : "";
-  // barras
+  // barras: diferença de cada linha para a média, em % (2.91, G4); a barra
+  // sai do meio, para a direita acima da média e para a esquerda abaixo
   const bars = (box, rows) => {
     box.textContent = "";
     box.classList.toggle("rc", rc);
-    const vals = rows.filter((r) => r.st && r.st.n >= 60).map((r) => r.st.median);
-    if (!vals.length) { box.innerHTML = '<span class="small muted">sem dados</span>'; return; }
-    const mn = Math.min(...vals), mx = Math.max(...vals), base = Math.max(0, mn - (mx - mn) * 0.6 - mx * 0.02);
-    for (const r of rows) {
+    const diffs = fcDiffs(rows);
+    if (!diffs) { box.innerHTML = '<span class="small muted">sem dados</span>'; return; }
+    const top = Math.max(2, ...diffs.filter((d) => d != null).map(Math.abs));
+    for (let i = 0; i < rows.length; i++) {
+      const r = rows[i], d = diffs[i];
       const l = document.createElement("span"); l.className = "lab"; l.textContent = r.label;
-      const wrap = document.createElement("span"); wrap.className = "track";
+      const wrap = document.createElement("span"); wrap.className = "track pat-div";
       const v = document.createElement("span"); v.className = "v";
-      if (r.st && r.st.n >= 60) {
+      if (d != null) {
         const b = document.createElement("span"); b.className = "bar";
-        b.style.width = `${Math.max(2, ((r.st.median - base) / (mx - base)) * 100).toFixed(1)}%`;
+        const w = Math.max(1, (Math.abs(d) / top) * 50);
+        b.style.width = `${w.toFixed(1)}%`;
+        b.style.left = d >= 0 ? "50%" : `${(50 - w).toFixed(1)}%`;
         wrap.appendChild(b);
-        v.textContent = `${patVal(p, r.st.median)} · ${r.st.days} ${r.st.days === 1 ? "dia" : "dias"}`;
+        wrap.title = `${patVal(p, r.st.median, 1)} ${patUnit(p)}`;
+        v.textContent = `${d >= 0 ? "+" : "−"}${fmt(Math.abs(d), 1)}% · ${r.st.days} ${r.st.days === 1 ? "dia" : "dias"}`;
       } else v.textContent = "—";
       box.append(l, wrap, v);
     }
@@ -4204,7 +4257,7 @@ function wirePatterns() {
     $("patCursor").style.left = (h / 23) * 100 + "%";
     const tip = $("patTip");
     tip.hidden = false;
-    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${p.unit} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
+    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
     const left = (h / 23) * r.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px";
   });
@@ -4216,7 +4269,7 @@ function wirePatterns() {
 const BG_STATE = { estavel: "Estável", subindo: "Tendência de alta", descendo: "Tendência de queda", degrau: "Mudança brusca", insuficiente: "Ainda sem tendência" };
 let bgSeq = 0;
 async function refreshBgTrend() {
-  if (!api.GetBgTrend || state.view !== "graficos" || state.sub.graficos !== "tendencia") return;
+  if (!api.GetBgTrend || !fundoShown("tendencia")) return;
   const days = state.bgDays || 30;
   document.querySelectorAll("#bgSeg button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.bgdays === days)));
   const my = ++bgSeq;
@@ -4232,8 +4285,8 @@ function drawBgTrend(tr) {
   const hist = tr.first ? Math.max(0, (tr.to - Math.max(tr.from, tr.first)) / DAY_MS) : 0;
   const forming = tr.first && tr.first > tr.from;
   $("bgSub").textContent = !tr.minutes ? "sem minutos em casa nessa janela"
-    : `${fmt(tr.minutes, 0)} min em casa · ${daily.length} ${daily.length === 1 ? "dia" : "dias"} com dado` +
-      (forming ? ` · janela em formação (${fmt(hist, hist < 10 ? 1 : 0)} de ${tr.days} dias)` : "");
+    : `${fmt(tr.minutes, 0)} min em casa · ${daily.length} ${daily.length === 1 ? "dia" : "dias"} com dado`;
+  if (tr.minutes && forming) glAppend($("bgSub"), `ainda aprendendo o seu normal (${fmt(hist, hist < 10 ? 1 : 0)} de ${tr.days} dias)`, "janela");
   const fit = $("bgFit");
   const f = tr.fit || {};
   fit.hidden = !tr.minutes;
@@ -4241,6 +4294,7 @@ function drawBgTrend(tr) {
   fit.innerHTML = "<strong></strong><span></span>";
   fit.children[0].textContent = BG_STATE[f.state] || "";
   fit.children[1].textContent = f.text || "";
+  $("bgFitShort").textContent = tr.minutes ? BG_STATE[f.state] || "" : "";
 
   // gráfico: média e mediana móveis, a média aparada de cada dia (pontos) e
   // a reta ou o degrau quando há aviso
@@ -4251,11 +4305,12 @@ function drawBgTrend(tr) {
   for (const d of daily) if (d.full) { lo = Math.min(lo, u(d.trimmed)); hi = Math.max(hi, u(d.trimmed)); }
   const ys = $("bgY").children;
   if (!isFinite(lo)) { svg.innerHTML = ""; for (const e of ys) e.textContent = ""; $("bgLegend").textContent = ""; $("bgDisp").innerHTML = ""; for (const e of $("bgX").children) e.textContent = ""; return; }
-  const pad = Math.max(k, (hi - lo) * 0.15), q = 0.005;
-  lo = Math.max(0, Math.floor((lo - pad) / q) * q); hi = Math.ceil((hi + pad) / q) * q;
+  const pad = Math.max(k, (hi - lo) * 0.15);
+  [lo, hi] = niceRange(Math.max(0, lo - pad), hi + pad, 3);
+  $("bgY").dataset.unit = rateLbl();
   const x = (t) => ((t - tr.from) / (tr.to - tr.from)) * W;
   const y = (v) => H - ((v - lo) / (hi - lo)) * H;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(hi - ((hi - lo) / 3) * i, 3);
+  for (let i = 0; i < 4; i++) ys[i].textContent = axRate(hi - ((hi - lo) / 3) * i, 3);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (forming) out += `<rect x="0" y="0" width="${Math.max(0, x(tr.first)).toFixed(1)}" height="${H}" fill="${COR.muted}" fill-opacity="0.06"/>`;
   const path = (val) => { let d = "", pen = "M"; for (const p of pts) { const v = u(val(p)); if (v == null) { pen = "M"; continue; } d += `${pen}${x(p.t).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; } return d; };
@@ -4274,7 +4329,7 @@ function drawBgTrend(tr) {
   $("bgLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.accent + '"></i>média móvel de 24 h</span><span class="key"><i style="border-color:#7DD3FC;border-top-style:dashed"></i>mediana móvel de 24 h</span>' +
     '<span class="key"><i class="dot-k"></i>média de cada dia (sem os 5% extremos)</span>' +
     (f.state === "subindo" || f.state === "descendo" || f.state === "degrau" ? '<span class="key"><i style="border-color:' + COR.att + ';border-top-style:dashed"></i>tendência</span>' : "") +
-    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + " (µSv/h)";
+    (forming ? '<span class="key"><i class="sw" style="background:' + COR.muted + '"></i>antes do primeiro dado</span>' : "") + '<span data-u="rate"> (µSv/h)</span>';
 
   // dispersão de cada dia
   const dsvg = $("bgDisp"), DH = 80;
@@ -4286,7 +4341,7 @@ function drawBgTrend(tr) {
   let dout = `<line x1="0" y1="${(DH - DH / dtop).toFixed(1)}" x2="${W}" y2="${(DH - DH / dtop).toFixed(1)}" stroke="${COR.muted}" stroke-opacity="0.5" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
   for (const d of daily) {
     const h = (Math.min(dtop, d.dispersion) / dtop) * DH, cx = x(d.day + DAY_MS / 2);
-    const col = d.dispersion >= 1.2 ? COR.att : COR.accent;
+    const col = d.dispersion >= 1.2 ? COR.att : COR.ok;
     dout += `<rect x="${(cx - bw / 2).toFixed(1)}" y="${(DH - h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}" fill="${col}" fill-opacity="${d.full ? 0.7 : 0.3}"/>`;
   }
   dsvg.innerHTML = dout;
@@ -4471,7 +4526,7 @@ function setupRainImpact() {
     const tip = $("riTip");
     tip.hidden = false;
     const when = p.min < 0 ? `${durMin(-p.min)} antes` : `${durMin(p.min)} depois`;
-    const pc = r.device === "radiacode" && r.avgBase > 0 ? 100 / r.avgBase : 0;
+    const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
     const v = (x) => (x == null ? "—" : pc ? sgn(x * pc, 1) + "%" : sgn(x, 1));
     tip.textContent = `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM");
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
@@ -4479,13 +4534,56 @@ function setupRainImpact() {
   plot.addEventListener("mouseleave", () => { $("riCursor").hidden = true; $("riTip").hidden = true; });
 }
 
+// 2.84.0: a unidade escolhida na página do aparelho (localStorage "unit")
+// vira a configuração do app, uma vez
+async function migrateUnits() {
+  if (localGet("unit84", "")) return;
+  localSet("unit84", "1");
+  const old = localGet("unit", "");
+  const s = state.settings || {};
+  const rate = old === "mrh" ? "mrh" : s.rateUnit || "usv";
+  const count = old === "cpm" || old === "cps" ? old : s.countUnit || "cps";
+  if (rate === s.rateUnit && count === s.countUnit) return;
+  try { state.settings = await api.SaveSettings(Object.assign({}, s, { rateUnit: rate, countUnit: count })); } catch (e) { /* fica o que estava */ }
+}
+
+// "Como funciona" num formato só (2.96.0, T5): o único de cada cartão vai
+// para o canto de cima, à direita, e abre flutuando
+function howCorners(root) {
+  const hosts = new Map();
+  (root || document).querySelectorAll("details.how:not(.ag-more)").forEach((d) => {
+    if (d.closest(".tb-ck")) return;
+    const host = d.parentElement && d.parentElement.closest(".card, .rc-card, .al-sec, #settings fieldset, .m-alara-box");
+    if (!host) return;
+    hosts.set(host, (hosts.get(host) || []).concat(d));
+  });
+  for (const [host, ds] of hosts) {
+    if (ds.length !== 1) continue;
+    host.classList.add("how-host");
+    ds[0].classList.add("how-c");
+  }
+}
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  document.querySelectorAll("details.how-c[open]").forEach((d) => { d.open = false; });
+});
+document.addEventListener("click", (e) => {
+  document.querySelectorAll("details.how-c[open]").forEach((d) => { if (!d.contains(e.target)) d.open = false; });
+});
+
 async function init() {
   wire();
+  howCorners();
   listen();
   try {
     state.settings = await api.GetSettings();
     applyUi(state.settings.uiScale, state.settings.uiDensity);
     if (hasGo) { syncLang(state.settings.lang); if (api.SetUILang) api.SetUILang(LANG).catch(() => {}); }
+    // modo navegador: a escolha fica só no navegador
+    if (!state.settings.rateUnit) Object.assign(state.settings, { rateUnit: UNITS.rate, countUnit: UNITS.count });
+    if (state.settings.dateFormat == null) state.settings.dateFormat = DATE_ISO ? "iso" : "";
+    if (hasGo) await migrateUnits();
+    if (syncUnits(state.settings.rateUnit, state.settings.countUnit, state.settings.dateFormat)) return;
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();
@@ -4551,8 +4649,28 @@ function applyUi(scale, dens) {
 function uiSegSet(scale, dens) {
   $("valUiScale").value = String(scale);
   $("valUiDensity").value = dens;
-  document.querySelectorAll("#segUiScale button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === +scale)));
+  const i = UI_STEPS.findIndex((s) => s >= +scale - 1e-6);
+  $("rngUiScale").value = String(i < 0 ? UI_STEPS.length - 1 : i);
+  $("uiScaleOut").textContent = `${Math.round((+scale || 1) * 100)}%`;
   document.querySelectorAll("#segUiDensity button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === dens)));
+}
+// unidades (2.84.0): os dois seletores escrevem nos campos escondidos
+function unitSegSet(rate, count) {
+  $("valRateUnit").value = rate;
+  $("valCountUnit").value = count;
+  document.querySelectorAll("#segRateUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === rate)));
+  document.querySelectorAll("#segCountUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === count)));
+}
+// formato da data (2.97.0)
+function dateSegSet(v) {
+  $("valDateFmt").value = v;
+  document.querySelectorAll("#segDateFmt button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+}
+function wireUnits() {
+  document.querySelectorAll("#segDateFmt button").forEach((b) => b.addEventListener("click", () => { dateSegSet(b.dataset.v); $("valDateFmt").dispatchEvent(new Event("change", { bubbles: true })); }));
+  const pick = (id, v) => { $(id).value = v; unitSegSet($("valRateUnit").value, $("valCountUnit").value); $(id).dispatchEvent(new Event("change", { bubbles: true })); };
+  document.querySelectorAll("#segRateUnit button").forEach((b) => b.addEventListener("click", () => pick("valRateUnit", b.dataset.v)));
+  document.querySelectorAll("#segCountUnit button").forEach((b) => b.addEventListener("click", () => pick("valCountUnit", b.dataset.v)));
 }
 function wireUiScale() {
   const pick = () => {
@@ -4560,7 +4678,7 @@ function wireUiScale() {
     applyUi(parseFloat($("valUiScale").value), $("valUiDensity").value);
     $("valUiScale").dispatchEvent(new Event("change", { bubbles: true }));
   };
-  document.querySelectorAll("#segUiScale button").forEach((b) => b.addEventListener("click", () => { $("valUiScale").value = b.dataset.v; pick(); }));
+  $("rngUiScale").addEventListener("input", () => { $("valUiScale").value = String(UI_STEPS[+$("rngUiScale").value] || 1); pick(); });
   document.querySelectorAll("#segUiDensity button").forEach((b) => b.addEventListener("click", () => { $("valUiDensity").value = b.dataset.v; pick(); }));
   document.addEventListener("keydown", async (e) => {
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
@@ -4582,31 +4700,3 @@ function wireUiScale() {
   });
 }
 
-// ---------- Configurações em duas colunas (2.68.4) ----------
-// O último cartão visível de cada coluna estica até o fim, para as duas
-// colunas terminarem juntas. É marcado aqui (e não com :last-child) porque
-// cartões aparecem e somem (aparelho desconectado, seção escondida).
-(function setColsLast() {
-  const root = document.getElementById("settings");
-  if (!root) return;
-  let pending = false;
-  const mark = () => {
-    pending = false;
-    for (const col of root.querySelectorAll(".set-col")) {
-      let last = null;
-      for (const f of col.children) {
-        if (f.tagName === "FIELDSET" && !f.hidden && getComputedStyle(f).display !== "none") last = f;
-      }
-      for (const f of col.children) {
-        const want = f === last;
-        if (f.classList.contains("is-last") !== want) f.classList.toggle("is-last", want);
-      }
-    }
-  };
-  const later = () => { if (!pending) { pending = true; requestAnimationFrame(mark); } };
-  new MutationObserver((recs) => {
-    if (recs.every((r) => r.attributeName === "class" && r.target.classList && r.target.parentElement && r.target.parentElement.classList.contains("set-col") && r.oldValue != null && r.oldValue.replace(/\s*is-last\s*/g, " ").trim() === r.target.className.replace(/\s*is-last\s*/g, " ").trim())) return;
-    later();
-  }).observe(root, { attributes: true, attributeOldValue: true, attributeFilter: ["hidden", "class", "style"], subtree: true, childList: true });
-  later();
-})();

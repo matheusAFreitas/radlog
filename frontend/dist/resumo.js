@@ -183,6 +183,9 @@ async function refreshSummary() {
   try { res = await Promise.all(periods.map((p) => api.GetSummary(p[0], p[1]))); } catch (e) { toast(errMsg(e), true); return; }
   if (my !== sumSeq) return;
   state.sumRes = { periods, res };
+  // de onde vem a dose (era do ALARA, 2.85): só no resumo de um período
+  if (res0) refreshAlOrigin(periods[0][0], periods[0][1], periods[0][3]);
+  else $("sumOrigin").hidden = true;
   if (res0) renderSummary(res[0], periods[0]);
   else { $("sumPlot").closest(".sum-chart").hidden = false; renderCompare(res, periods); sumOverlayClear(); }
   renderSumGaps(res0 ? res[0] : null);
@@ -269,7 +272,8 @@ function renderSumSay(r, rc) {
     else if (gAbove || rAbove) { lv = "atencao"; title = "Fundo acima do normal no período."; }
     else if (n.attention) { lv = "atencao"; title = "Período normal, com alertas de atenção."; }
     else title = "Período normal.";
-    if (r.minutes && r.bgOK) parts.push(sumPct(r.vsBgPct, "Casa"));
+    // 2.92 (G5): com alerta no período, a frase da casa diz que é fora deles
+    if (r.minutes && r.bgOK) parts.push(n.danger || n.alarm || n.attention ? sumPct(r.vsBgPct, "Fora dos alertas, a casa ficou") : sumPct(r.vsBgPct, "Casa"));
     if (rc && rc.bgUSv) parts.push(sumPct(rc.vsBgPct, "RC102"));
     const cov = rc ? rc.coverage : r.coverage;
     parts.push(`${fmt(cov * 100, 0)}% do tempo medido`);
@@ -335,6 +339,7 @@ function renderSumBig(r, rc) {
   const kn = doseKnownEl(rc ? (rc.devOK ? rc.devDose : rc.dose) : r.dose, rc && rc.bgUSv > 0 ? rc.bgUSv : null, "sum-known", doseXray);
   if (kn) k.appendChild(kn);
   sumAwayBar(k, rc);
+  k.dataset.k = "dose";
   if (r.minutes) {
     sumKpi(box, "Fundo da casa", usvVal(r.avgUSv), "GMC-800 · " + (r.bgOK ? sumPct(r.vsBgPct) : "normal ainda não calculado"), r.bgOK && r.vsBgPct >= 20 ? "up" : "");
   } else if (rc.homeMinutes) {
@@ -342,8 +347,52 @@ function renderSumBig(r, rc) {
     const p = rc.bgUSv ? ((home - rc.bgUSv) / rc.bgUSv) * 100 : 0;
     sumKpi(box, "Fundo da casa", `${d(home)} µSv/h`, "pelo RC102 em casa" + (rc.bgUSv ? " · " + sumPct(p) : ""), rc.bgUSv && p >= 20 ? "up rc" : "rc");
   }
-  if (rc) sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RC102 · ${atText(r, rc.maxAt)}`, "rc");
-  else sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+  const pk = rc ? sumKpi(box, "Pico", `${d(rc.max)} µSv/h`, `RC102 · ${atText(r, rc.maxAt)}`, "rc")
+    : sumKpi(box, "Pico", r.maxUSv != null ? usvVal(r.maxUSv) : `${fmt(r.max, 0)} CPM`, `GMC-800 · ${atText(r, r.maxAt)}`);
+  pk.dataset.k = "peak";
+  pk.dataset.v = String(rc ? rc.max : r.maxUSv || 0);
+  sumDoseSync();
+  sumPeakSync(r);
+}
+
+// 2.92 (G5): um total de dose por período, o mesmo do "De onde vem a sua
+// dose", com a conta à vista (fundo + acima do fundo)
+function sumDoseSync() {
+  const o = state.sumOrigin, k = document.querySelector('#sumBig [data-k="dose"]'), sr = state.sumRes;
+  if (!o || !k || !o.minutes || !sr || state.sum.mode !== "resumo" || Math.abs(o.from - sr.periods[0][0]) > 60e3) return;
+  const d = (v) => fmt(v, v < 10 ? 2 : 1);
+  k.children[0].textContent = "Sua dose";
+  k.children[1].textContent = sumUSv(o.total);
+  k.children[2].textContent = `fundo ${d(o.homeBg + o.awayBg)} + acima do fundo ${d(o.above)} µSv`;
+  k.classList.toggle("rc", o.device === "radiacode");
+  // casa × fora já aparece no quadro de baixo
+  k.querySelectorAll(".sum-away, .sum-known").forEach((e) => e.remove());
+  const kn = doseKnownEl(o.total, o.homeBgRate > 0 ? o.homeBgRate : null, "sum-known", doseXray);
+  if (kn) k.appendChild(kn);
+}
+
+// 2.92 (G5): o pico inclui os alertas do período (o pico do alerta é o da
+// leitura instantânea; o da tabela é o maior minuto)
+let sumPkSeq = 0;
+async function sumPeakSync(r) {
+  const pk = document.querySelector('#sumBig [data-k="peak"]');
+  if (!pk || !api.GetEvents) return;
+  const my = ++sumPkSeq;
+  let ev;
+  try { ev = await api.GetEvents("alerta"); } catch (e) { return; }
+  if (my !== sumPkSeq || !pk.isConnected) return;
+  let best = null, bv = +pk.dataset.v || 0;
+  for (const e of ev || []) {
+    const t = e.peakAt || e.time, v = e.device === "radiacode" ? e.peak : e.peakUSv;
+    if (!(v > bv) || t < r.from || t >= r.to) continue;
+    best = e; bv = v;
+  }
+  if (!best) return;
+  const t = best.peakAt || best.time, dev = best.device === "radiacode" ? "RC102" : "GMC-800";
+  const during = best.level === "perigo" ? `${dev} · ${atText(r, t)} · durante o perigo` : best.level === "alarme" ? `${dev} · ${atText(r, t)} · durante o alarme` : `${dev} · ${atText(r, t)} · durante a atenção`;
+  pk.children[1].textContent = usvVal(bv);
+  pk.children[2].textContent = during;
+  pk.classList.toggle("rc", best.device === "radiacode");
 }
 
 // "Mais números" (2.64): só o que não está em cima. Média, Máximo e Dose
@@ -366,6 +415,7 @@ function renderSummary(r, per) {
     sumTile(t, "Medido", `${fmt(r.coverage * 100, 0)}%`, "GMC-800 · " + covText(r) + days);
   }
   if (r.minutes && r.dispersion != null) sumTile(t, "Dispersão", fmt(r.dispersion, 2), `GMC-800 · σ real ${fmt(r.sd, 1)} ÷ acaso ${fmt(Math.sqrt(r.avg), 1)} · ${r.dispersion >= 1.2 ? "variou além do acaso" : "perto de 1: normal"}`, r.dispersion >= 1.2 ? "warn" : "");
+  if (r.minutes && r.dispersion != null) glMark(t.lastElementChild.children[0], "dispersao");
   sumTile(t, "Chuva", rainText(r), r.rainHours ? `${r.rainHours} h com chuva` : "");
   const n = (k) => (r[k] || 0) + ((rc && rc[k]) || 0);
   if (n("danger") + n("alarm") + n("attention")) {
@@ -379,7 +429,7 @@ function renderSummary(r, per) {
   const chart = $("sumPlot").closest(".sum-chart");
   chart.hidden = !r.minutes && !rc;
   if (chart.hidden) { drawSumChart([]); sumOverlayClear(); return; }
-  drawSumChart([{ r, color: COR.accent, label: "GMC-800" }]);
+  drawSumChart([{ r, color: COR.gmc, label: "GMC-800" }]);
   renderSumOverlay(per);
 }
 
@@ -497,7 +547,7 @@ function sumLegendExtra(runs, away, marks) {
   };
   const lvs = new Set(runs.map((r) => r[2]));
   for (const m of marks) if (m.kind !== "nota") lvs.add(LV_PATH[m.level] ? m.level : "atencao");
-  if (lvs.has("seguro")) add('<i class="ft-sw" style="background:var(--accent);opacity:.55"></i>', "seguro");
+  if (lvs.has("seguro")) add('<i class="ft-sw" style="background:var(--ok);opacity:.55"></i>', "seguro");
   for (const lv of ["atencao", "alarme", "perigo"]) if (lvs.has(lv)) add(ftShape(lv, 11), SUM_LV_TXT[lv]);
   if (away) add('<i class="ft-sw" style="background:var(--away);opacity:.5"></i>', "fora de casa");
   if (marks.some((m) => m.kind === "nota")) add(FT_PEN, "anotação");
@@ -557,14 +607,14 @@ function drawSumChart(series) {
   const pu = (p) => (p.usv != null ? p.usv : p.cpm != null ? p.cpm * k : null);
   let top = 0.05;
   for (const s of series) for (const p of s.r.curve) if (pu(p) != null) top = Math.max(top, pu(p));
-  top = niceTop(top * 1.15);
+  top = niceN(top * 1.15, 3);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
+  for (let i = 0; i < 4; i++) ys[i].textContent = axRate(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   const bg = series[0].r.bgOK ? series[0].r.bgUSv || series[0].r.bgCPM * k : 0;
-  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${COR.accent}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
+  if (bg) out += `<line x1="0" y1="${y(bg).toFixed(1)}" x2="${W}" y2="${y(bg).toFixed(1)}" stroke="${series[0].color}" stroke-opacity="0.35" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   for (const s of series.slice().reverse()) {
     let d = "", pen = "M";
     s.r.curve.forEach((p, i) => { const v = pu(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; });
@@ -587,15 +637,15 @@ function drawSumChartUSv(r, rc) {
   let top = 0.05;
   for (const p of rc.curve) if (p.usv != null) top = Math.max(top, p.usv);
   for (const p of r.curve) if (p.cpm != null) top = Math.max(top, p.usv != null ? p.usv : p.cpm * k);
-  top = niceTop(top * 1.15);
+  top = niceN(top * 1.15, 3);
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
   const y = (v) => H - (Math.min(top, v) / top) * H;
   const ys = $("sumY").children;
-  for (let i = 0; i < 4; i++) ys[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
+  for (let i = 0; i < 4; i++) ys[i].textContent = axRate(top - (top / 3) * i, i === 3 ? 0 : top < 0.3 ? 3 : 2);
   let out = [0, 1, 2, 3].map((i) => { const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i; return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`; }).join("");
   if (rc.bgUSv) out += `<line x1="0" y1="${y(rc.bgUSv).toFixed(1)}" x2="${W}" y2="${y(rc.bgUSv).toFixed(1)}" stroke="${COR.rc}" stroke-opacity="0.45" stroke-dasharray="4 4" vector-effect="non-scaling-stroke"/>`;
   const path = (pts, val) => { let d = "", pen = "M"; pts.forEach((p, i) => { const v = val(p); if (v == null) { pen = "M"; return; } d += `${pen}${x(i).toFixed(1)} ${y(v).toFixed(1)}`; pen = "L"; }); return d; };
-  out += `<path d="${path(r.curve, (p) => (p.usv != null ? p.usv : p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.accent}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+  out += `<path d="${path(r.curve, (p) => (p.usv != null ? p.usv : p.cpm == null ? null : p.cpm * k))}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.8" stroke-width="1.4" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   out += `<path d="${path(rc.curve, (p) => p.usv)}" fill="none" stroke="${COR.rc}" stroke-width="2.2" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   svg.innerHTML = out;
   const c0 = rc.curve.length >= r.curve.length ? rc.curve : r.curve, long = r.to - r.from > DAY_MS * 1.1;
@@ -603,6 +653,6 @@ function drawSumChartUSv(r, rc) {
   const lab = (t) => (long ? `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}` : hhmm(t));
   const xs = $("sumX").children;
   xs[0].textContent = lab(c0[0].t); xs[1].textContent = lab(c0[Math.floor(c0.length / 2)].t); xs[2].textContent = lab(r.to);
-  $("sumLegend").innerHTML = '<span class="key"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.accent + '"></i>GMC-800 (µSv/h)</span>' +
+  $("sumLegend").innerHTML = '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>RC102 (µSv/h)</span><span class="key" data-u="rate"><i style="border-color:' + COR.gmc + '"></i>GMC-800 (µSv/h)</span>' +
     (rc.bgUSv ? '<span class="key"><i style="border-color:' + COR.rc + ';border-top-style:dashed;opacity:.6"></i>seu normal em casa (RC102)</span>' : "");
 }

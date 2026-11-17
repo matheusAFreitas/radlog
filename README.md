@@ -105,7 +105,7 @@ the home background.
   settings and alarms, and the history it recorded away from the PC. Each
   card explains itself under "How it works".
 - **Settings**: app alarms and levels, window and display (size, density,
-  number on the tray icon, count blink), data, backup and sync between PCs.
+  number on the tray icon, count blink), data, backup and cloud.
 
 | Summary | Alerts |
 |---|---|
@@ -175,8 +175,6 @@ button opens it. File names are in Portuguese:
 - `medicoes-anexos/`: photos and files attached to measurements;
 - `chuva*.json`: rain and pressure (when Weather is on);
 - `config.json`: settings; `log.txt` and `diagnostico.txt`: technical log;
-- `sincronizacao.json`: the keys of the paired PCs. Don't share this file:
-  it is what lets another PC sync with yours. It never goes into a backup.
 
 A **backup** (.zip) only adds what is missing when imported, so it also moves
 data from one PC to another, Windows or Linux. It also carries the settings
@@ -199,8 +197,10 @@ turned off in Settings:
 - **Rain radar** (RainViewer): the map tile around the city (about 300 km
   across, so it doesn't pin down where you are). Also only with Weather on.
 
-Syncing between your PCs stays on the local network (or your VPN) and only
-talks to PCs you paired.
+To bring together the data of more than one PC (or the phone), use the
+**cloud** (Google Drive, experimental, off by default): each device uploads
+its own data to a RadLog folder in your Drive, encrypted with the recovery
+code. Sync over the local network was removed in 2.85.0.
 
 ## Building
 

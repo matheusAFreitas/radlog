@@ -10,7 +10,7 @@ let pw;
 try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
 const path = require("path");
 
-const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "alertas", "fora", "medir", "alara", "chuva", "config"];
+const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
 const SIZES = [{ width: 1280, height: 900 }, { width: 412, height: 915 }];
 const page0 = "file://" + path.resolve(__dirname, "../frontend/dist/index.html");
 
@@ -35,8 +35,11 @@ let subs = 0, dlgs = 0;
       for (const v of VIEWS) {
         where = v;
         const nav = p.locator(`[data-view="${v}"]:visible`).first();
-        if (!(await nav.count())) { fails.push(`${lang} ${vp.width}px: sem botão para a página ${v}`); continue; }
-        await nav.click();
+        // 2.89.0: o Clima só fica na barra com o clima ligado; desligado,
+        // a página continua existindo e é aberta direto
+        if (!(await nav.count()) && v === "chuva") await p.evaluate(() => showView("chuva"));
+        else if (!(await nav.count())) { fails.push(`${lang} ${vp.width}px: sem botão para a página ${v}`); continue; }
+        else await nav.click();
         await p.waitForTimeout(700);
         await checkOver(p, `${lang} ${vp.width}px ${v}`, fails);
         // sub-abas da página (Gráficos, RC102, GMC-800…)
@@ -50,6 +53,17 @@ let subs = 0, dlgs = 0;
           await p.waitForTimeout(300);
           await checkOver(p, `${lang} ${vp.width}px ${where}`, fails);
           subs++;
+        }
+        // 2.94: Distância e Blindagem saíram das abas (abrem pelo fim da medição)
+        if (v === "medir") {
+          for (const s of ["distancia", "blindagem"]) {
+            where = `${v} › ${s}`;
+            await p.evaluate((s) => setSub("medir", s), s);
+            await p.waitForTimeout(300);
+            await checkOver(p, `${lang} ${vp.width}px ${where}`, fails);
+            subs++;
+          }
+          await p.evaluate(() => setSub("medir", "objeto"));
         }
       }
       // janelas: abre cada <dialog> e confere se cabe na tela

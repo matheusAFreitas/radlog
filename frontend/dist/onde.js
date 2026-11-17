@@ -7,6 +7,8 @@
 
 let whPending = null; // { gmc, radiacode } esperando o Confirmar
 let whWhen = "now";   // tirar do cálculo: "now" ou "last" (última leitura boa)
+let whOpen = false;   // seletores abertos ("mudar"); fechado, o quadro é uma linha só (2.84)
+const WH_PLACE = { casa: "em casa", comigo: "com você", fora: "fora do cálculo" };
 
 const WH_ICON_HOME = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/></svg>';
 const WH_ICON_ME = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="6" r="2.6"/><path d="M8 21l2-7-2-3 4-2 4 2-2 3 2 7"/></svg>';
@@ -94,6 +96,22 @@ function renderWhere() {
   const chip = $("whChip");
   chip.hidden = !off;
   if (off && w.since) chip.textContent = `fora do normal desde ${hhmm(w.since)}` + (w.open && w.open.name ? ` · ${w.open.name}` : "");
+  // a linha: "GMC-800 em casa · RC102 com você · mudar"
+  const sum = $("whSum");
+  sum.textContent = "";
+  ["gmc", "radiacode"].forEach((dev, i) => {
+    if (i) sum.append(" · ");
+    const b = document.createElement("span");
+    b.textContent = WH_NAME[dev];
+    sum.append(b, " ", WH_PLACE[c[dev]]);
+  });
+  const open = whOpen || !!whPending;
+  $("whRows").hidden = !open;
+  const tg = $("whToggle");
+  tg.textContent = open ? "fechar" : "mudar";
+  tg.setAttribute("aria-expanded", String(open));
+  tg.hidden = !!whPending;
+  const L = whLines(c);
   for (const dev of ["gmc", "radiacode"]) {
     card.querySelectorAll(`.seg.loc[data-dev="${dev}"] button`).forEach((b) => {
       b.setAttribute("aria-pressed", String(b.dataset.v === show[dev]));
@@ -108,6 +126,13 @@ function renderWhere() {
     hs.className = "hstat " + h.cls;
     hs.innerHTML = '<span class="hd"></span>';
     hs.append(h.t + (c[dev] === "fora" && w.open && w.open.name ? ` · ${w.open.name}` : ""));
+    // RC102 longe do PC: continua somando a dose sozinho
+    if (!g && L.pr.curve && L.pr.src === "radiacode") {
+      const k = document.createElement("span");
+      k.className = "hs-more";
+      k.textContent = "continua somando a dose sozinho";
+      hs.append(k);
+    }
     hs.closest(".wh-row").classList.toggle("dead", c[dev] === "fora");
   }
   // GMC sem contagens: sugere tirar do cálculo
@@ -151,16 +176,29 @@ function renderWhere() {
       txt.append(b, " a partir de agora (", at, "): GMC-800 em casa, RC102 com você.");
     } else {
       const l = whLines(whPending);
-      b.textContent = whKind(whPending);
+      b.textContent = whWord(whKind(whPending));
       txt.append(b, fromLast ? ", a partir de " : ", a partir de agora (", at, fromLast ? ". " : "). ");
       // uma frase por nó de texto: a tradução acha cada uma no dicionário
       for (const x of [l.home, l.pers]) txt.append(x.t + ". ", x.d + " ", ...(x.sat ? [x.sat + " "] : []));
     }
   }
-  const L = whLines(c);
+  // 2.90.0 (avaliação A3): o lugar de cada aparelho vira um selo no quadro
+  // dele; o cartão "Onde estão" só aparece quando tem algo a dizer (fora do
+  // normal, mudando, ou com aviso) ou quando a pessoa abre pelo selo
+  document.querySelectorAll(".wh-selo[data-wh]").forEach((b) => {
+    const dev = b.dataset.wh, here = c[dev];
+    b.hidden = false;
+    b.textContent = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" }[here] || "—";
+    b.classList.toggle("off", here !== WH_NORMAL[dev]);
+    b.setAttribute("aria-expanded", String(open));
+    b.title = `Onde está o ${WH_NAME[dev]}: mudar`;
+  });
+  // as frases de consequência só aparecem quando algo fica em branco ou
+  // satura; o normal o seletor já diz (2.84)
   const box = $("whConseq");
   box.textContent = "";
   for (const [icon, line] of [[WH_ICON_HOME, L.home], [WH_ICON_ME, L.pers]]) {
+    if (!line.cls) continue;
     const d = document.createElement("div");
     d.className = "wh-cq" + (line.cls ? " " + line.cls : "");
     d.innerHTML = icon;
@@ -172,6 +210,7 @@ function renderWhere() {
     d.appendChild(s);
     box.appendChild(d);
   }
+  card.hidden = !(open || off || sug.childElementCount || box.childElementCount);
   const back = $("whBack");
   back.textContent = "";
   if (off && !whPending) {
@@ -199,7 +238,7 @@ async function whSet(w, name) {
     state.where = whWhen === "last" && lastGood && api.SetWhereAt
       ? await api.SetWhereAt(w.gmc, w.radiacode, name || "", lastGood)
       : await api.SetWhere(w.gmc, w.radiacode, name || "");
-    whPending = null; whWhen = "now";
+    whPending = null; whWhen = "now"; whOpen = false;
     $("whName").value = "";
     await refreshWhere();
   } catch (e) { toast(errMsg(e), true); }
@@ -221,6 +260,14 @@ function wireWhere() {
     if (!whPending || !whNewOff(whPending).length) whWhen = "now";
     renderWhere();
     if (whPending) $("whName").focus();
+  }));
+  $("whToggle").addEventListener("click", () => { whOpen = !whOpen; renderWhere(); });
+  // selo do lugar no quadro do aparelho (2.90.0): abre o "Onde estão"
+  document.querySelectorAll(".wh-selo[data-wh]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    whOpen = !whOpen;
+    renderWhere();
+    if (whOpen) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }));
   $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("whName").value = b.textContent.trim(); }));
   $("whWhenSeg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { whWhen = b.dataset.w; renderWhere(); }));

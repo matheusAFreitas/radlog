@@ -144,19 +144,27 @@ const tr = (() => {
 })();
 
 // traduz o que já está na tela e o que mudar depois
+// 2.84.0: o mesmo observador troca µSv por mrem nos textos com número
+// quando a taxa da tela é mrem/h (unidades.js); [data-unit-keep] fica como está
 (() => {
-  if (LANG !== "en" || typeof I18N_EN === "undefined") return;
+  const translate = LANG === "en" && typeof I18N_EN !== "undefined";
+  const rem = typeof RATE_MREM !== "undefined" && RATE_MREM;
+  const words = typeof UNIT_WORDS !== "undefined" && !!UNIT_WORDS;
+  const iso = typeof DATE_ISO !== "undefined" && DATE_ISO;
+  if (!translate && !rem && !words && !iso) return;
   const ATTRS = ["title", "placeholder", "aria-label"];
   const skip = (n) => { const p = n.parentNode; return p && (p.nodeName === "SCRIPT" || p.nodeName === "STYLE" || (p.closest && p.closest("[data-no-tr]"))); };
+  const keep = (el) => !rem || (el && el.closest && el.closest("[data-unit-keep]"));
+  const conv = (s, el) => { const t = dateText(translate ? tr(s) : s); return keep(el) ? unitWord(t, el) : unitWord(remText(t), el); };
   const doText = (n) => {
     if (skip(n)) return;
-    const t = tr(n.data);
+    const t = conv(n.data, n.parentNode);
     if (t !== n.data) n.data = t;
   };
   const doAttrs = (el) => {
     for (const a of ATTRS) {
       const v = el.getAttribute && el.getAttribute(a);
-      if (v) { const t = tr(v); if (t !== v) el.setAttribute(a, t); }
+      if (v) { const t = conv(v, el); if (t !== v) el.setAttribute(a, t); }
     }
   };
   const walk = (root) => {

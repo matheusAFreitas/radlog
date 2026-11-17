@@ -1,5 +1,600 @@
 # Versões
 
+## 2.97.1
+- Faixa dos aparelhos (fora do Agora): abrir um quadro não deixa mais um
+  buraco embaixo do outro. O aberto ganha a linha inteira, e o fechado fica
+  numa linha fina embaixo.
+- A forma do nível voltou junto da palavra: no número grande da página de
+  cada aparelho e na faixa fechada ("● Seguro").
+
+**English**
+
+- Device strip (outside Now): opening one card no longer leaves a hole under
+  the other. The open one takes the whole row and the closed one sits in a
+  thin row below.
+- The level shape is back next to the word: on each device page's big
+  number and on the closed strip ("● Safe").
+
+## 2.97.0
+- Formato da data à escolha, em Configurações › Janela e tela › Datas:
+  16/11/2026 (dia, mês e ano) ou 2026-11-16 (ano, mês e dia). Vale para a
+  tela e o relatório em PDF, nos dois idiomas. Em inglês o app não usa mais
+  mês/dia em lugar nenhum.
+- Página do RC102: a linha do σ saiu da fonte de código, como a do GMC-800.
+- Configurações em tela estreita: as abas quebram linha, e a última ("Testes"
+  no GMC-800) aparece sem rolar de lado.
+
+**English**
+
+- Choose the date format in Settings › Window and display › Dates:
+  16/11/2026 (day, month, year) or 2026-11-16 (year, month, day). It applies
+  to the screen and the PDF report, in both languages. In English the app no
+  longer uses month/day anywhere.
+- RC102 page: the σ line left the code font, like the GMC-800's.
+- Settings on narrow screens: the tabs wrap, and the last one ("Tests" on the
+  GMC-800) shows without sideways scrolling.
+
+## 2.96.1
+- "Os termos do app" entrou nas Ações rápidas (Ctrl+K).
+- Glossário pelo teclado: o quadro recebe o foco, Tab chega em "Todos os
+  termos" e Esc volta para o termo. Rolar a página não fecha mais o quadro.
+- Alertas: o "?" do Como funciona não fica mais por cima do primeiro alerta.
+- Níveis e alarmes em tela estreita: cada nível vira um bloco, com App,
+  GMC-800 e RC102 um embaixo do outro, sem rolar de lado. O "Ligado" da dose
+  do RC102 fica junto da caixa.
+- Mais frases saíram da fonte de código (relógio, calibração e memória do
+  GMC-800, data do alerta, linha do σ, total do período).
+- Lista das Configurações: o RC102 aparece como "conectado · USB", igual ao
+  GMC-800.
+- Inglês: relógio "on time", download "… to download", "same as your
+  normal" no Fora de casa e "click to open" no Medir objeto.
+
+**English**
+
+- "The app's terms" is now in Quick actions (Ctrl+K).
+- Glossary by keyboard: the box takes focus, Tab reaches "All terms" and Esc
+  goes back to the term. Scrolling no longer closes it.
+- Alerts: the "How it works" "?" no longer sits on top of the first alert.
+- Levels and alarms on narrow screens: each level becomes a block, with App,
+  GMC-800 and RC102 stacked, no sideways scrolling. The RC102 dose "On" sits
+  next to its box.
+- More sentences left the code font (GMC-800 clock, calibration and memory,
+  alert date, σ line, period total).
+- Settings list: the RC102 shows "connected · USB", like the GMC-800.
+- English: clock "on time", download "… to download", "same as your
+  normal" in Away from home and "click to open" in Measure object.
+
+## 2.96.0
+- Cores com um emprego só: verde é "seguro" (e "tudo certo"), azul é o
+  GMC-800, rosa continua o RC102, e o destaque e o botão principal ficam em
+  branco. A chuva passou para um azul acinzentado.
+- "Como funciona" num formato só: um "?" no canto de cima do cartão, que abre
+  o texto flutuando (Esc fecha). As caixas "Por que isso importa" entraram
+  nele.
+- Termos técnicos clicáveis: σ, mediana, quartis, dispersão, dureza e outros
+  abrem uma explicação curta. "Os termos do app" (Ctrl+K) mostra todos. A
+  frase simples vem antes do número ("bem acima do nível de fundo (4,2 σ)").
+- Texto um pouco maior (legendas e rótulos) e fonte de código só nos
+  números, não nas frases (em teste, fácil de voltar).
+- Acessibilidade: o leitor de tela ouve a última hora de cada aparelho e a
+  conclusão do espectro; os gráficos do RC102 têm nome; o anel de foco da
+  barra lateral não é mais cortado.
+- "Baixar histórico": o resultado fica escrito ao lado do botão por 30 min,
+  em vez de só num aviso que some.
+
+**English**
+
+- One job per colour: green is "safe" (and "all good"), blue is the GMC-800,
+  pink stays the RC102, and highlights and the main button are white. Rain
+  moved to a greyish blue.
+- "How it works" in a single format: a "?" in the card's top corner that
+  opens the text floating (Esc closes). The "Why it matters" boxes went into
+  it.
+- Clickable technical terms: σ, median, quartiles, dispersion, hardness and
+  others open a short explanation. "The app's terms" (Ctrl+K) lists them
+  all. The plain sentence comes before the number ("well above the
+  background level (4.2 σ)").
+- Slightly larger text (captions and labels) and code font only on numbers,
+  not on sentences (being tested, easy to undo).
+- Accessibility: screen readers hear each device's last hour and the
+  spectrum's conclusion; the RC102 charts have names; the sidebar focus ring
+  is no longer cut off.
+- "Download history": the result stays written next to the button for 30
+  min, instead of only in a notice that goes away.
+
+## 2.95.0
+- Níveis e alarmes virou uma tela só: o app, o GMC-800 e o RC102 lado a
+  lado, cada nível com a forma, o nome e o valor. Os valores dos aparelhos
+  dá para mudar ali mesmo e vão com "Gravar no GMC-800" e "Gravar no
+  RC102", como antes. Os alarmes de dose do RC102 também estão ali.
+- RC102: os alarmes de dose agora têm o interruptor "ligado" (antes era uma
+  caixa "desligado", que ficava marcada com o alarme desligado).
+- Calibração (em teste, fácil de voltar): na frente só o fator em uso, de
+  onde veio e o botão de intercalibrar. Fator à mão, versões, lado a lado
+  com o RC102 e pontos do contador ficam em "Avançado". Antes de gravar no
+  contador, a confirmação mostra o que muda, ponto por ponto.
+- Janela e tela: cartões na altura do conteúdo, tamanho num controle
+  deslizante, menos texto (o resto em "Como funciona"). A chuva ganhou
+  seção própria: Configurações › Chuva no gráfico.
+- Botões em duas alturas e uma caixa de marcar só no app todo.
+- Sobras da sincronização tiradas dos textos da demonstração e do registro.
+
+**English**
+
+- Levels and alarms is now a single screen: the app, the GMC-800 and the
+  RC102 side by side, each level with its shape, name and value. The
+  devices' values can be changed right there and go with "Write to the
+  GMC-800" and "Write to the RC102", as before. The RC102 dose alarms are
+  there too.
+- RC102: dose alarms now have an "on" switch (it used to be an "off" box
+  that was ticked when the alarm was off).
+- Calibration (being tested, easy to undo): up front only the factor in use,
+  where it came from and the cross-calibrate button. Factor by hand,
+  versions, side by side with the RC102 and the counter's points are under
+  "Advanced". Before writing to the counter, the confirmation shows what
+  changes, point by point.
+- Window and display: cards as tall as their content, size on a slider, less
+  text (the rest under "How it works"). Rain got its own section: Settings ›
+  Rain on the chart.
+- Buttons in two heights and one checkbox style across the app.
+- Leftovers from sync removed from the demo and log texts.
+
+## 2.94.0
+- Medir objeto: "tem algo" agora usa a cor do Medir objeto (turquesa); o
+  vermelho fica só quando a leitura com o objeto passa do nível de perigo. O
+  resultado diz a certeza em palavras ("Certeza: muito alta") e compara a
+  leitura com os níveis do app ("0,31 µSv/h com o objeto, abaixo do nível de
+  atenção"). O σ fica nos detalhes.
+- Passo 1 mais limpo: "(opcional)" separado, tamanho "pequeno" já marcado,
+  textos dos aparelhos sem fonte de código e as etapas como marcação, não
+  como botões. As quatro opções de aparelho continuam.
+- Distância e Blindagem saíram das abas: aparecem no fim da medição ("Quer
+  ver na prática?") e têm um link para voltar.
+- Fora de casa: a lista vem primeiro, com a dose de cada saída em destaque;
+  a linha do tempo fica recolhida. Três palavras para o lugar: em casa,
+  comigo e ignorar ("fora do cálculo" virou "ignorado").
+
+**English**
+
+- Measure object: "something there" now uses the Measure object colour
+  (teal); red only when the reading with the object goes over the danger
+  level. The result states the certainty in words ("Certainty: very high")
+  and compares the reading with the app's levels ("0.31 µSv/h with the
+  object, below the attention level"). σ stays in the details.
+- Cleaner step 1: "(optional)" set apart, size "small" already selected,
+  device texts without code font, and the steps as markers, not buttons.
+  The four device options stay.
+- Distance and Shielding left the tabs: they show up at the end of a
+  measurement ("Want to see it in practice?") and have a link back.
+- Away from home: the list comes first, with each trip's dose up front; the
+  timeline is folded. Three words for the place: at home, with me and
+  ignore ("out of the calculation" became "ignored").
+
+## 2.93.0
+- Espectro: o gráfico cresce com a janela e tem botão de tela cheia (Esc
+  sai). A conclusão aparece em destaque acima do gráfico ("Parece: …", com
+  os três mais prováveis e "+N"); a lista completa dos isótopos fica
+  embaixo. Os controles ficam numa linha só, a escala acompanha a curva mais
+  alta (inclusive a do fundo) e as marcas do eixo são redondas.
+- Espectro direto na barra lateral (em teste, fácil de voltar), quando o
+  RC102 já foi conectado. Dentro dele, um seletor só: Tela do aparelho,
+  Acumulado do aparelho e Ao longo do tempo.
+- Log do RC102: os filtros ganharam nome ao lado do ícone, e os valores
+  ficam em cor neutra.
+- Atividade (Bq): saiu a nota de projeto do rodapé; "talvez só 'abaixo de'"
+  virou "pode ficar abaixo do que o RC102 consegue medir"; o título "O que
+  vai medir" sem caixa alta.
+- Modo busca: o ponteiro e a linha têm a cor do nível agora (verde quando
+  seguro). Espectrograma: escala de cor contínua como opção ao lado da
+  original.
+
+**English**
+
+- Spectrum: the chart grows with the window and has a full screen button
+  (Esc leaves). The conclusion shows up front above the chart ("Looks like:
+  …", with the three most likely and "+N"); the full isotope list stays
+  below. Controls fit in one row, the scale follows the highest curve
+  (background included) and the axis ticks are round.
+- Spectrum straight in the sidebar (on trial, easy to undo), once the RC102
+  has been connected. Inside it, a single selector: Device screen, Device's
+  accumulated and Over time.
+- RC102 log: the filters got a name next to the icon, and values are in a
+  neutral colour.
+- Activity (Bq): the project note in the footer is gone; "maybe only
+  'below'" became "may stay below what the RC102 can measure"; the "What
+  you're measuring" title is no longer upper case.
+- Search mode: the needle and the line take the current level colour (green
+  when safe). Spectrogram: a continuous colour scale as an option next to
+  the original.
+
+## 2.92.0
+- Gráficos: as marcas do eixo saem em passos redondos (1,5 / 1,0 / 0,5) e
+  a unidade fica escrita embaixo do eixo.
+- Gráficos › Dose (em teste, fácil de voltar): o quadro de cada aparelho diz
+  só "dentro do teto"; a conta fica em "a conta". Mostrar ou esconder a
+  linha virou uma caixa "mostrar no gráfico". A legenda tira "chuva:
+  desligada" e encurta "medição".
+- Resumo: "Sua dose" usa o mesmo total do "De onde vem a sua dose", com a
+  conta à vista (fundo + acima do fundo). O pico inclui os alertas do
+  período e diz quando foi durante um. Com alerta no período, a frase da
+  casa diz "Fora dos alertas, a casa ficou…".
+- Palavras: "aviso" sai. Alertas marcados "do contador" agora dizem "achado
+  depois"; o filtro ganhou o rótulo "Mostrar"; nos limites do RC102 aparece
+  "alarme 1 (atenção)" e "alarme 2 (alarme)"; a linha do pico diz "bem acima
+  do fundo" em vez do σ. Configurações › "Alarmes e avisos" virou "Níveis e
+  alarmes".
+
+**English**
+
+- Charts: axis ticks now use round steps (1.5 / 1.0 / 0.5) and the unit is
+  written under the axis.
+- Charts › Dose (on trial, easy to undo): each device box only says "within
+  the ceiling"; the math is under "the math". Showing or hiding the line is
+  now a "show on chart" checkbox. The legend drops "rain: off" and shortens
+  "measurement".
+- Summary: "Your dose" uses the same total as "Where your dose comes from",
+  with the math in view (background + above background). The peak includes
+  the period's alerts and says when it happened during one. With an alert
+  in the period, the home sentence says "Outside the alerts, home was…".
+- Words: "warning" is gone. Alerts tagged "from the counter" now say "found
+  later"; the filter got a "Show" label; RC102 limits show "alarm 1
+  (attention)" and "alarm 2 (alarm)"; the peak line says "well above
+  background" instead of σ. Settings › "Alarms and warnings" became "Levels
+  and alarms".
+
+## 2.91.0
+- Página nova "Fundo de casa" na barra lateral. No topo, uma frase diz como
+  está o fundo da casa, e quatro quadros dão a resposta de cada recorte:
+  últimas semanas, hora do dia, dia da semana e ano. Clicar num quadro abre
+  o gráfico daquele recorte embaixo. Gráficos fica só com a leitura e a dose.
+- Últimas semanas: um veredito só. A outra conta (a reta dos últimos dias) e
+  a tabela "Fundo por dia" ficam recolhidas embaixo, com o nome de cada uma.
+- Dia da semana e mês: cada barra mostra a diferença para a média, em %,
+  saindo do meio. Os cartões dia × noite ganharam uma casa decimal, para
+  baterem com a frase.
+
+**English**
+
+- New "Home background" page in the sidebar. At the top, one sentence says
+  how the home background is doing, and four boxes give the answer for each
+  cut: last weeks, hour of day, day of week and year. Clicking a box opens
+  that chart below. Charts keeps only the reading and the dose.
+- Last weeks: a single verdict. The other calculation (the line over the
+  last days) and the "Background by day" table are folded below, each with
+  its name.
+- Day of week and month: each bar shows the difference from the average, in
+  %, starting from the middle. The day × night cards got one more decimal
+  place, to match the sentence.
+
+## 2.90.0
+- Agora, Minha dose: um número só (hoje), uma frase comparando com o fundo
+  da casa e uma linha com semana, mês e ano, tudo em µSv. A barra do ano
+  diz quanto já foi de um teto, na mesma unidade. Os quatro cartões de antes
+  ficam em "por período".
+- O lugar de cada aparelho (em casa, comigo) virou um selo no quadro dele.
+  O cartão "Onde estão" só aparece quando tem algo a dizer ou quando você
+  abre pelo selo.
+- A pergunta "O RC102 ficou sem conexão" pode ser fechada com o ×; ela
+  continua em Fora de casa como "a responder".
+- Fita do dia: a legenda só mostra o que aparece na fita. Trechos de 30 min
+  ou mais sem leitura ganham uma linha escrita embaixo. "Avisos" virou
+  "alertas", como no resto do app.
+
+**English**
+
+- Now, My dose: a single number (today), one sentence comparing it with the
+  home background, and one line with week, month and year, all in µSv. The
+  year bar says how much of a ceiling has gone, in the same unit. The four
+  cards from before are under "by period".
+- Where each device is (at home, with me) became a badge on its card. The
+  "Where they are" card only shows up when it has something to say or when
+  you open it from the badge.
+- The "The RC102 was disconnected" question can be closed with ×; it stays
+  in Away from home as "to answer".
+- Day strip: the legend only shows what appears on the strip. Stretches of
+  30 min or more with no reading get a written line below. "Warnings"
+  became "alerts", as in the rest of the app.
+
+## 2.89.0
+- Barra lateral: a busca saiu. Ctrl+K abre as Ações rápidas, que agora
+  têm o que se faz no dia a dia: anotar, medir um objeto, "Estou testando
+  um objeto", saí de casa, programar saída, relatório em PDF, baixar
+  histórico e mudei o aparelho de lugar. A busca de ajustes continua em
+  Configurações.
+- "Estou testando um objeto": cala atenção e alarme do aparelho escolhido
+  por 10 min, sem abrir o Medir objeto. O perigo continua tocando. Um aviso
+  embaixo dos quadros mostra até quando e tem o botão "Parar".
+- Demonstração foi para Configurações › Atualizações e sobre. "Baixar
+  histórico" saiu do pé da barra e fica no aviso de memória e nas Ações.
+  O ponto laranja do GQ GMC-800 diz o que é ao passar o mouse.
+- Clima só aparece na barra quando o clima está ligado.
+- No alarme e no perigo, o Agora esconde a frase que repete a faixa e as
+  perguntas pendentes; elas voltam quando o alarme passar.
+- Em janela baixa, uma seta no pé da lista avisa que há mais itens.
+
+**English**
+
+- Sidebar: search is gone. Ctrl+K opens Quick actions, which now have the
+  everyday tasks: note, measure an object, "I'm testing an object", left
+  home, plan a trip, PDF report, download history and moved the device.
+  The settings search stays in Settings.
+- "I'm testing an object": silences attention and alarm on the chosen
+  device for 10 min, without opening Measure object. Danger still sounds.
+  A notice under the cards shows until when and has a "Stop" button.
+- Demo moved to Settings › Updates and about. "Download history" left the
+  bottom of the sidebar; it lives in the memory notice and in Quick actions.
+  The orange dot on GQ GMC-800 says what it means on hover.
+- Weather only shows in the sidebar when weather is turned on.
+- During an alarm or danger, Now hides the sentence that repeats the band
+  and the pending questions; they come back when the alarm ends.
+- In a short window, an arrow at the bottom of the list shows there are
+  more items.
+
+## 2.88.0
+- Fora do Agora, os quadros dos aparelhos viram uma faixa de uma linha com
+  nome, número, nível e a dose de hoje. Um clique abre o quadro inteiro ali
+  mesmo; "fechar" volta para a faixa. Gráficos, Espectro e as outras telas
+  ganham quase 200 px de altura.
+- Página de cada aparelho: na aba Agora o cartão grande é o do próprio
+  aparelho; nas outras abas ele vem primeiro na faixa. O mostrador redondo
+  do cartão deu lugar a uma régua com atenção, alarme e perigo marcados e
+  quanto falta para o próximo limite. O trifólio continua no Agora.
+- Os dois aparelhos usam os mesmos nomes de nível (atenção e alarme também
+  no RC102, que usa os alarmes 1 e 2 dele) e o número no mesmo tamanho.
+- "detalhes" do Agora virou uma tabela só, embaixo dos dois quadros, sem
+  deixar buraco. A linha do σ do cartão grande foi para "detalhes".
+
+**English**
+
+- Outside Now, the device cards become a one-line strip with name, number,
+  level and today's dose. One click opens the full card right there;
+  "close" goes back to the strip. Charts, Spectrum and the other screens
+  gain almost 200 px of height.
+- Each device page: on the Now tab the big card is the device's own; on
+  the other tabs it comes first in the strip. The round dial on the card
+  gave way to a ruler with attention, alarm and danger marked and how far
+  it is to the next limit. The trefoil stays on Now.
+- Both devices use the same level names (attention and alarm on the RC102
+  too, which uses its alarms 1 and 2) and the number in the same size.
+- "details" on Now became a single table under both cards, with no empty
+  space. The σ line on the big card moved to "details".
+
+## 2.87.2
+- Ações rápidas: o menu abre num painel com fundo, em vez de bolhas soltas.
+  Os itens da barra lateral não aparecem mais entre elas, e o texto fica
+  fácil de ler.
+
+**English**
+
+- Quick actions: the menu opens in a panel with a background instead of
+  loose bubbles. The sidebar items no longer show between them, and the
+  text is easy to read.
+
+## 2.87.1
+- Agora: "detalhes" abre e fecha nos dois quadros juntos (GMC-800 e RC102).
+  Abrir só um deixava o outro quadro esticado, com um espaço vazio.
+
+**English**
+
+- Now: "details" opens and closes on both cards together (GMC-800 and
+  RC102). Opening just one left the other card stretched with an empty
+  space.
+
+## 2.87.0
+- Agora: o trifólio voltou para o quadro do GMC-800 e do RC102, à esquerda
+  do número grande e do tamanho de antes. No meio dele fica a forma do
+  nível (círculo, triângulo, losango, octógono) na cor do nível, e o anel
+  em volta pisca a cada contagem. A palavra do nível continua em cima do
+  gráfico, sem o pontinho que piscava ao lado dela.
+- "detalhes" fica só com CPM, CPS, a outra unidade de taxa e a fita dos
+  últimos 10 segundos.
+
+**English**
+
+- Now: the trefoil is back on the GMC-800 and RC102 cards, left of the big
+  number and at its old size. Inside it sits the level shape (circle,
+  triangle, diamond, octagon) in the level color, and the ring around it
+  blinks on every count. The level word stays above the chart, without the
+  blinking dot next to it.
+- "details" keeps only CPM, CPS, the other rate unit and the last 10
+  seconds strip.
+
+## 2.86.1
+- Atividade (Bq) em inglês: o valor típico da castanha, da areia e do
+  granito aparece traduzido; o preparo da pedra solta não sai mais com uma
+  frase trocada; o nome e a posição na linha da medida também são
+  traduzidos.
+- Na medida de uma pedra solta, a linha de cima diz "pedra solta" em vez da
+  posição do pote.
+- "Guardar como minha" a partir de um cartão da lista grava o nome no
+  idioma da tela.
+
+**English**
+
+- Activity (Bq) in English: the typical value for Brazil nuts, sand and
+  granite is translated; the loose-stone preparation no longer comes out
+  with a garbled sentence; the name and position in the measurement line
+  are translated too.
+- When measuring a loose stone, the top line says "loose stone" instead of
+  the jar position.
+- "Save as mine" from a list card saves the name in the screen's language.
+
+## 2.86.0
+- Atividade (Bq) do RC102 repaginada, na ordem em que as coisas acontecem.
+  No topo, uma linha diz se falta calibrar ou com o que está calibrado; a
+  tabela de eficiência foi para "detalhes".
+- Calibrar virou um passo guiado e separado: KCl (sal light ou KCl puro)
+  primeiro e o tório, opcional, depois. O tempo total aparece antes de
+  começar.
+- O que medir é escolhido por cartões, com o valor típico, o tempo
+  recomendado (já marcado) e o preparo de cada um. Nome, posição, fundo e
+  radionuclídeos foram para "Mais opções", e o tempo total fica ao lado do
+  Começar.
+- "Suas amostras": cartões guardados por você, começando com uraninita,
+  uranocircita e euxenita. A referência de cada uma vem da sua última
+  medição de objeto com o mesmo nome. Qualquer medida pode virar "minha".
+- Pedra solta: a massa é opcional e o resultado sai em Bq da peça (e em
+  Bq/g, se tiver a massa), com o aviso de que a forma é diferente da do
+  pote da calibração.
+- Durante a medida, os passos (fundo, colocar a amostra, medindo,
+  resultado). No resultado, a comparação com o valor típico quando a
+  amostra tem uma faixa conhecida, "Medir de novo" e as linhas usadas
+  recolhidas. O texto dos limites foi para o "Como funciona".
+
+**English**
+
+- The RC102 Activity (Bq) tab was redone, in the order things happen. At
+  the top, one line says whether calibration is missing or what it was
+  calibrated with; the efficiency table moved to "details".
+- Calibrating is now a separate guided step: KCl (lite salt or pure KCl)
+  first, then the optional thorium. The total time shows before starting.
+- What to measure is picked with cards, each with its typical value,
+  recommended time (already selected) and preparation. Name, position,
+  background and radionuclides moved to "More options", and the total time
+  sits next to Start.
+- "Your samples": cards you save, starting with uraninite, uranocircite
+  and euxenite. Each one's reference comes from your latest object
+  measurement with the same name. Any measurement can become "mine".
+- Loose stone: the mass is optional and the result is in Bq for the piece
+  (and Bq/g if the mass is given), with a note that the shape differs from
+  the calibration jar.
+- While measuring, the steps (background, place the sample, measuring,
+  result). The result compares with the typical value when the sample has
+  a known range, has "Measure again", and keeps the lines used collapsed.
+  The limits text moved to "How it works".
+
+## 2.85.1
+- Unidades: rótulos que ainda diziam µSv/h com a tela em mrem/h agora
+  seguem a unidade escolhida (a dica embaixo da régua do GMC-800 e do
+  RC102, as legendas do Resumo, do detalhe do alerta e da tendência do
+  fundo, a frase dos alarmes dos aparelhos e a da bandeja). A tabela, o
+  eixo e o resultado dos testes de distância e de blindagem também.
+- Na página do GMC-800 em mrem/h, a linha embaixo do número volta a mostrar
+  o µSv/h (estava sendo convertida para mrem/h de novo).
+
+**English**
+
+- Units: labels that still said µSv/h with the screen in mrem/h now follow
+  the chosen unit (the hint under the GMC-800 and RC102 scale, the legends
+  of the Summary, the alert detail and the background trend, the device
+  alarms sentence and the tray one). So do the table, axis and result of
+  the distance and shielding tests.
+- On the GMC-800 page in mrem/h, the line under the number shows µSv/h
+  again (it was being converted to mrem/h twice).
+
+## 2.85.0
+- Ações rápidas saíram do botão redondo do canto e foram para o pé da barra
+  lateral ("＋ Ações rápidas", junto de Baixar histórico e Configurações).
+  O menu abre para cima e some nas mesmas horas de antes (medição em
+  andamento, alarme tocando).
+- Fora de casa: cada saída mostra "Resumo da saída" e "Ver no gráfico";
+  Relatório (PDF), Editar e Apagar ficam no "⋯". Os itens "a responder"
+  ganharam título ("RC102 sem conexão", "GMC-800 sem conexão", "Os dois sem
+  conexão").
+- A tela ALARA saiu e as partes foram para onde fazem sentido: "De onde vem
+  a sua dose" virou um quadro do Resumo, no período escolhido lá (dia,
+  semana ou mês); os testes de distância e de blindagem viraram abas do
+  Medir objeto (Objeto · Distância · Blindagem); o resultado de cada
+  medição mostra quanto custa ficar perto ("ficar 30 min perto = X acima do
+  fundo"); e o "Como funciona" do Medir objeto explica os três jeitos.
+- Clima desligado: uma linha do que a tela mostra e o botão "Ligar". O
+  efeito da chuva no GMC-800 sai na unidade da tela, como no RC102.
+- Aviso de memória do GMC-800 curto: título, uma linha e o botão.
+- Configurações › Dados e backup em abas: Backup e arquivos · Nuvem · Uso
+  do app · Histórico.
+- A sincronização pela rede local entre PCs (pareamento por código) saiu do
+  app: a nuvem substitui. PCs que estavam pareados param de trocar dados por
+  ela; quem usa a nuvem não muda nada. O arquivo sincronizacao.json pode ser
+  apagado da pasta de dados.
+
+**English**
+
+- Quick actions left the round corner button and moved to the foot of the
+  sidebar ("＋ Quick actions", next to Download history and Settings). The
+  menu opens upwards and hides at the same times as before (measurement in
+  progress, alarm ringing).
+- Away from home: each trip shows "Trip summary" and "See on the chart";
+  Report (PDF), Edit and Delete are in the "⋯". The "to answer" items got a
+  title ("RC102 disconnected", "GMC-800 disconnected", "Both
+  disconnected").
+- The ALARA screen is gone and its parts moved where they make sense:
+  "Where your dose comes from" is now a Summary tile, for the period chosen
+  there (day, week or month); the distance and shielding tests became tabs
+  of Measure object (Object · Distance · Shielding); each measurement's
+  result shows how much staying close costs ("stay close 30 min = X above
+  background"); and Measure object's "How it works" explains the three
+  ways.
+- Weather off: one line about what the screen shows and a "Turn on"
+  button. The rain effect on the GMC-800 uses the screen unit, like the
+  RC102.
+- Short GMC-800 memory notice: title, one line and the button.
+- Settings › Data and backup in tabs: Backup and files · Cloud · App usage
+  · History.
+- Sync over the local network between PCs (pairing by code) was removed:
+  the cloud replaces it. PCs that were paired stop exchanging data through
+  it; nothing changes for those using the cloud. The sincronizacao.json
+  file can be deleted from the data folder.
+
+## 2.84.0
+- Unidades da tela para o app todo, em Configurações › Janela e tela ›
+  Unidades: taxa em µSv/h ou mrem/h e contagem em CPM ou CPS (dá para
+  misturar, por exemplo µSv/h com CPS). A dose acompanha a taxa (µSv ou
+  mrem), inclusive nos alarmes e no relatório. O RC102 segue a mesma
+  escolha. Os botões de unidade da página do GQ GMC-800 saíram.
+- A calibração, o tubo e as partes técnicas continuam em CPM, que é o que
+  o tubo mede. Os gráficos dentro do PDF continuam em µSv/h; o texto do
+  relatório sai na unidade escolhida.
+- Alarme do GMC-800 nas configurações do aparelho: você digita na unidade
+  da tela e o app grava em CPM, pela calibração do app ("grava N CPM no
+  aparelho"). Se o aparelho estiver com o alarme em µSv/h ou mR/h no menu
+  dele, esse campo ainda não é lido; fica para uma próxima versão.
+- Quadro do Agora: o número grande na unidade escolhida e, embaixo, uma
+  linha com a contagem e a dose de hoje. O mostrador com o pulso foi para
+  "detalhes" (fechado por padrão, o app lembra), com CPM, CPS, a outra
+  unidade de taxa e a fita dos últimos 10 segundos. O ícone do nível pisca
+  a cada contagem.
+- Pergunta "a responder" do Agora numa linha só: frase, dica, os dois
+  botões mais prováveis e "Ver detalhes" para abrir o cartão inteiro.
+- "Onde está cada aparelho" virou uma linha ("GMC-800 em casa · RC102 com
+  você · mudar"); "mudar" abre os seletores. Os cartões "Casa pelo GMC-800"
+  e "Sua dose pelo RC102" saíram; só aparece aviso quando algo fica em
+  branco ou satura. RC102 longe do PC mostra "continua somando a dose
+  sozinho" embaixo dele.
+- "Sem dado" neutro: a barra fica cinza e o texto diz "RC102 desligado em
+  X% do dia".
+- Fonte mono só nos números; rótulos, botões e etiquetas na fonte normal.
+
+**English**
+
+- Screen units for the whole app, in Settings › Window and display ›
+  Units: rate in µSv/h or mrem/h and count in CPM or CPS (they can be
+  mixed, for example µSv/h with CPS). Dose follows the rate (µSv or mrem),
+  including alarms and the report. The RC102 follows the same choice. The
+  unit buttons on the GQ GMC-800 page are gone.
+- Calibration, the tube and the technical parts stay in CPM, which is what
+  the tube measures. Charts inside the PDF stay in µSv/h; the report text
+  uses the chosen unit.
+- GMC-800 alarm in the device settings: you type it in the screen unit and
+  the app writes it in CPM, using the app's calibration ("writes N CPM to
+  the device"). If the device has its alarm set to µSv/h or mR/h in its own
+  menu, that field isn't read yet; that's for a later version.
+- Now tile: the big number in the chosen unit and, below it, one line with
+  the count and today's dose. The dial with the pulse moved into "details"
+  (closed by default, the app remembers), with CPM, CPS, the other rate
+  unit and the last-10-seconds strip. The level icon blinks with each
+  count.
+- The "to answer" question on Now fits on one line: sentence, hint, the
+  two likeliest buttons and "See details" to open the full card.
+- "Where each device is" became one line ("GMC-800 at home · RC102 with
+  you · change"); "change" opens the selectors. The "Home by the GMC-800"
+  and "Your dose by the RC102" cards are gone; a notice only shows when
+  something goes blank or saturates. An RC102 away from the PC shows
+  "keeps adding up the dose on its own" under it.
+- Neutral "no data": the bar turns gray and the text says "RC102 off for
+  X% of the day".
+- Mono font only for numbers; labels, buttons and tags use the regular
+  font.
+
 ## 2.83.10
 - Abertura mais leve: a tabela de tradução para o inglês (~700 KB) só
   carrega com o app em inglês, e os gráficos da aba Gráficos (tempo, dose,

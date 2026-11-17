@@ -5,7 +5,7 @@
 ## Reporting a problem
 
 If you find a security problem in RadLog (for example in the updater, the
-sync between PCs or the backup import), please open a
+cloud or the backup import), please open a
 [private security advisory](../../security/advisories/new) on GitHub instead
 of a public issue. Say what you found and how to reproduce it. You'll get an
 answer as soon as possible; RadLog is a study project kept by one person, so
@@ -91,7 +91,7 @@ until they update:
 ## Avisar de um problema
 
 Se achar um problema de segurança no RadLog (no atualizador, na
-sincronização entre PCs ou na importação de backup, por exemplo), abra um
+nuvem ou na importação de backup, por exemplo), abra um
 [aviso de segurança privado](../../security/advisories/new) no GitHub em vez
 de uma issue pública, dizendo o que achou e como repetir. A resposta vem
 assim que der: o RadLog é um projeto de estudo mantido por uma pessoa, sem

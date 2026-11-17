@@ -18,6 +18,19 @@ function niceTop(v) {
   for (const m of [1, 2, 2.5, 5, 10]) if (m * mag >= v) return m * mag;
   return 10 * mag;
 }
+// 2.92 (G1): topo para n intervalos de passo redondo (1, 2, 2,5 ou 5 × 10^k),
+// para as marcas do eixo saírem 1,5 / 1,0 / 0,5 em vez de 1,00 / 0,67 / 0,33
+const niceN = (v, n) => n * niceTop(v / n);
+// faixa [lo, hi] com n intervalos de passo redondo que cobre de a até b
+function niceRange(a, b, n) {
+  let step = niceTop((b - a) / n || Math.abs(b) / n || 1);
+  for (let k = 0; k < 6; k++) {
+    const lo = Math.floor(a / step + 1e-9) * step;
+    if (lo + n * step >= b - 1e-12) return [Math.max(0, lo), Math.max(0, lo) + n * step];
+    step = niceTop(step * 1.01);
+  }
+  return [a, b];
+}
 
 // formato de hora conforme o passo e o tamanho do período
 function chartTimeFmt(c) {
@@ -32,6 +45,7 @@ let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no m
 // 2.83.10 (auditoria 2.79.0 P4): os gráficos só são buscados e desenhados com
 // a sub-aba aberta; ao abrir, refreshSub (app.js) busca de novo
 const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
+const fundoShown = (sub) => state.view === "fundo" && state.sub.fundo === sub;
 
 async function refreshChart() {
   if (!gfxShown("tempo")) return;
@@ -60,8 +74,13 @@ async function refreshChart() {
   document.querySelectorAll("#chartUnitSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.cunit === state.chartUnit)));
   // o gráfico em µSv/h é o principal (limites, alarmes e picos); o de CPM é
   // só de análise: as contagens de cada aparelho, sem nenhum alarme (2.29)
-  $("chartTitle").textContent = usvMode ? "µSv/h ao longo do tempo" : "CPM ao longo do tempo (análise)";
-  const vals = (usvMode ? c.usv : c.values) || [];
+  // 2.84.0: a taxa e a contagem nas unidades das Configurações (unidades.js).
+  // Os textos com número e "µSv/h" a tela troca sozinha; aqui só o eixo, que
+  // não tem unidade, e a contagem em CPS (CPM ÷ 60)
+  const cps = !usvMode && UNITS.count === "cps", ck = cps ? 1 / 60 : 1;
+  const cScale = (a) => (cps && a ? a.map((v) => (v == null ? null : v * ck)) : a);
+  $("chartTitle").textContent = usvMode ? `${rateLbl()} ao longo do tempo` : `${countLbl()} ao longo do tempo (análise)`;
+  const vals = (usvMode ? c.usv : cScale(c.values)) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
   for (const v of vals) if (v != null && v > max) max = v;
@@ -74,7 +93,7 @@ async function refreshChart() {
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
-  const rcVals = usvMode ? c.rc || null : c.rcCPM || null;
+  const rcVals = usvMode ? c.rc || null : cScale(c.rcCPM) || null;
   let rcMax = 0;
   if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
   if (usvMode) max = Math.max(max, rcMax);
@@ -94,21 +113,25 @@ async function refreshChart() {
   // embaixo, cada um com a sua escala (2.81; antes eram dois eixos no mesmo
   // gráfico e a linha do GMC sumia no chão)
   const stacked = !usvMode && rcMax > 0;
-  const top = usvMode ? niceTop(Math.max(thrV * 1.2, want * 1.15)) : stacked ? niceTop(Math.max(30, want * 1.05)) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
+  const top = usvMode ? niceN(Math.max(thrV * 1.2, want * 1.15), 3) : stacked ? niceN(Math.max(30 * ck, want * 1.05), 2) : cps ? niceN(Math.max(0.5, want * 1.15), 3) : Math.max(30, Math.ceil((want * 1.15) / 15) * 15);
   c.top = top;
-  const yd = usvMode ? (top < 0.3 ? 3 : top < 10 ? 2 : 1) : 0;
-  const rcTop = stacked ? niceTop(Math.max(300, rcMax * 1.05)) : top;
+  // casas do eixo pelo valor na unidade da tela
+  const yTop = usvMode ? top * rateK() : top;
+  const yd = usvMode ? (yTop < 0.03 ? 4 : yTop < 0.3 ? 3 : yTop < 10 ? 2 : 1) : cps ? (top < 1 ? 2 : top < 10 ? 1 : 0) : 0;
+  const yk = usvMode ? rateK() : 1;
+  const rcTop = stacked ? niceN(Math.max(300 * ck, rcMax * 1.05), 2) : top;
   // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
   const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
   const yAx = $("yAxis");
   yAx.classList.toggle("stacked", stacked);
+  yAx.dataset.unit = usvMode ? rateLbl() : cps ? "CPS" : "CPM";
   if (stacked) {
     const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
     yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
-      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, 0)}</span>`).join("");
+      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? (v && v < 10 ? 1 : 0) : 0)}</span>`).join("");
   } else {
     if (yAx.children.length !== 4) yAx.innerHTML = "<span></span><span></span><span></span><span></span>";
-    for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt(top - (top / 3) * i, i === 3 ? 0 : yd);
+    for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt((top - (top / 3) * i) * yk, i === 3 ? 0 : yd);
   }
   $("yAxisR").hidden = true;
   $("plotLbls").hidden = !stacked;
@@ -173,7 +196,7 @@ async function refreshChart() {
   const mark = (v, lv) => `<span style="top:${((y(v) / H) * 100).toFixed(2)}%">${lvIcon(lv, 10)}</span>`;
   $("thrMarks").innerHTML = (usvMode && top >= thrV ? mark(thrV, "atencao") : "") +
     (showAlarm && !(dangerV && alarmV >= dangerV) ? mark(alarmV, "alarme") : "") + (showDanger ? mark(dangerV, "perigo") : "");
-  const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, 0)} CPM`);
+  const fmtV = (v) => (usvMode ? `${fmt(v, usvDigits(v))} µSv/h` : `${fmt(v, cps ? 2 : 0)} ${countLbl()}`);
   $("legAlarm").hidden = !ringing || !alarmV || (dangerV && alarmV >= dangerV);
   $("legAlarm").lastChild.textContent = `seu alarme: ${fmtV(alarmV)}`;
   $("legDanger").hidden = !ringing || !dangerV;
@@ -229,16 +252,16 @@ async function refreshChart() {
   // com o Radiacode (aparelho principal), ele é a curva cheia e o GMC (casa)
   // vira uma linha de referência
   $("chart").innerHTML = hatch + grid + away + gaps + meas + rainBars + thr + noteLines + (stacked
-    ? `<path d="${area}" fill="${COR.accent}" fill-opacity="0.10"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+    ? `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.10"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.10"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
     : rcLine
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="${COR.accent}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    : `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
 
   if (state.zoom) {
@@ -257,13 +280,15 @@ async function refreshChart() {
   $("chartStats").dataset.short = String(isShortRange());
   $("legendText").textContent = usvMode
     ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
-    : "análise: sem limites nem alarmes (eles ficam no µSv/h)";
+    : `análise: sem limites nem alarmes (eles ficam no ${rateLbl()})`;
   $("legDash").hidden = !usvMode;
   $("chartStats").textContent = c.avg == null
     ? "sem dados no período"
     : usvMode
       ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
-      : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
+      : cps
+        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
+        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -292,9 +317,11 @@ function setupChartHover() {
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
     const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
-    const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : ` · RC102 ${fmt(rcv, 0)} CPM`;
+    const cps = !usvMode && UNITS.count === "cps";
+    const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
     tip.textContent = (v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
+      : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
       : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
@@ -434,7 +461,9 @@ function renderZoomBar(c) {
 
 // ---------- dose acumulada (dosímetro) ----------
 
+// 2.84.0: na unidade da tela (mrem quando a taxa é mrem/h)
 function fmtDose(v) {
+  if (RATE_MREM) { const m = v / 10; return [fmt(m, m < 1 ? 3 : m < 10 ? 2 : m < 100 ? 1 : 0), "mrem"]; }
   if (v >= 1000) return [fmt(v / 1000, v >= 10000 ? 1 : 2), "mSv"];
   return [fmt(v, v < 10 ? 2 : v < 100 ? 1 : 0), "µSv"];
 }
@@ -457,18 +486,12 @@ function fetchDose(src, range) {
 function renderDevBoxes(box, list) {
   box.textContent = "";
   for (const d of list) {
-    const c = d.c, el = document.createElement(list.length > 1 ? "button" : "div");
+    const c = d.c, el = document.createElement("div");
     el.className = "dd-box " + d.key;
     el.dataset.key = d.key;
-    if (list.length > 1) {
-      el.type = "button";
-      const on = !!state.doseShow[d.key];
-      el.classList.toggle("off", !on);
-      el.setAttribute("aria-pressed", String(on));
-      el.title = "Mostrar ou esconder no gráfico";
-    }
+    if (list.length > 1) el.classList.toggle("off", !state.doseShow[d.key]);
     const has = c && c.measuredMinutes > 0;
-    const [tv, tu] = has ? fmtDose(c.total) : ["—", "µSv"];
+    const [tv, tu] = has ? fmtDose(c.total) : ["—", doseLbl()];
     const hours = has ? c.measuredMinutes / 60 : 0;
     const rate = has && hours ? c.total / hours : null;
     // quanto do limite já foi: só o que passou do fundo natural conta (o
@@ -476,21 +499,27 @@ function renderDevBoxes(box, list) {
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
     const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
-    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span>';
+    // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
+    el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
     el.querySelector(".dd-val > span").textContent = tu;
     el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
-    el.querySelector(".dd-pct").textContent = has && c.allowance > 0
+    const lim = has && c.allowance > 0;
+    el.querySelector(".dd-pct").textContent = !lim ? "" : pct > 100 ? "passou do teto" : "dentro do teto";
+    el.querySelector(".dd-more").hidden = !lim;
+    el.querySelector(".dd-more p").textContent = lim
       ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
       : "";
     if (list.length > 1) {
-      const s = document.createElement("span");
-      s.className = "dd-state";
-      s.textContent = state.doseShow[d.key] ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
-      el.appendChild(s);
+      const l = document.createElement("label");
+      l.className = "dd-state";
+      l.innerHTML = '<input type="checkbox"> <span>mostrar no gráfico</span>';
+      l.firstChild.checked = !!state.doseShow[d.key];
+      l.firstChild.dataset.key = d.key;
+      el.appendChild(l);
     }
     box.appendChild(el);
   }
@@ -500,23 +529,22 @@ function renderDevBoxes(box, list) {
 // e desliga); pelo menos um fica sempre visível
 const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
 const devName = (k) => (k === "rc" ? "RC102" : "GMC-800");
-const devColor = (k) => (k === "rc" ? COR.rc : COR.accent);
+const devColor = (k) => (k === "rc" ? COR.rc : COR.gmc);
 function toggleDoseDev(k) {
   const s = state.doseShow;
   s[k] = !s[k];
   if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
   localSet("doseShow", JSON.stringify(s));
-  document.querySelectorAll("button.dd-box").forEach((b) => {
-    const on = !!s[b.dataset.key];
+  document.querySelectorAll(".dd-box").forEach((b) => {
+    const on = !!s[b.dataset.key], cb = b.querySelector(".dd-state input");
+    if (!cb) return;
     b.classList.toggle("off", !on);
-    b.setAttribute("aria-pressed", String(on));
-    const st = b.querySelector(".dd-state");
-    if (st) st.textContent = on ? "no gráfico · clique para esconder" : "escondido do gráfico · clique para mostrar";
+    cb.checked = on;
   });
   drawDoseChart();
   if (state.heatPick && state.ht) drawHeatTrecho();
 }
-document.addEventListener("click", (e) => { const b = e.target.closest(".dd-box"); if (b) toggleDoseDev(b.dataset.key); });
+document.addEventListener("change", (e) => { const b = e.target.closest(".dd-state input"); if (b) toggleDoseDev(b.dataset.key); });
 
 function drawDoseChart() {
   const c = state.dose, c2raw = state.dose2;
@@ -534,8 +562,7 @@ function drawDoseChart() {
   $("doseKeyCeil2Txt").textContent = show1 && show2 ? `teto do ${devName(k2)}` : "";
   $("doseKeyRc").hidden = !((k1 === "rc" && show1) || (k2 === "rc" && show2));
   document.querySelector("#doseCard .dose-legend .sw-gmc").parentElement.hidden = !((k1 === "gmc" && show1) || (k2 === "gmc" && show2));
-  const mag = Math.pow(10, Math.floor(Math.log10(top0)));
-  const top = Math.ceil(top0 / mag * 2) / 2 * mag;
+  const top = niceN(top0, 3);
   const y = (v) => H - (v / top) * H;
   const path = (arr) => arr.map((v, i) => (i ? "L" : "M") + ((arr.length <= 1 ? 0 : (i / (arr.length - 1)) * W)).toFixed(1) + " " + y(v).toFixed(1)).join("");
   const grid = [0, 1, 2, 3].map((i) => {
@@ -555,6 +582,7 @@ function drawDoseChart() {
   const ys = $("doseY").children;
   for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
   ys[3].textContent = "0";
+  $("doseY").dataset.unit = fmtDose(top)[1];
 }
 
 // force: a régua usa a dose do período mesmo com a aba fechada

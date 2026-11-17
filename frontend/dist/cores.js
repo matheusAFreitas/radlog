@@ -5,7 +5,9 @@ const COR = (() => {
   const css = getComputedStyle(document.documentElement);
   const v = (name, fallback) => css.getPropertyValue("--" + name).trim() || fallback;
   return Object.freeze({
-    accent: v("accent", "#6EE7A0"), // GMC-800 e destaque
+    accent: v("accent", "#E9EDEF"), // destaque (2.96.0: era também o GMC-800)
+    gmc: v("gmc", "#7CC7FF"), // GMC-800
+    ok: v("ok", "#6EE7A0"), // seguro, tudo certo
     rc: v("rc", "#F472B6"), // RC102
     att: v("att", "#F5B84A"), // atenção
     alarm: v("alarm", "#F28C38"), // alarme
@@ -15,7 +17,7 @@ const COR = (() => {
     grid: v("chart-grid", "#2A3136"), // linhas de grade dos gráficos
     away: v("away", "#B79CFF"), // fora de casa / fora do lugar
     obj: v("obj", "#5EEAD4"), // Medir objeto
-    info: v("info", "#7CC7FF"), // chuva, informação
+    info: v("info", "#9AA8D6"), // chuva, informação
     note: v("note", "#A3ADB4"), // anotação (cinza)
   });
 })();

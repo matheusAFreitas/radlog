@@ -429,7 +429,7 @@ Ontem	Yesterday
 Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.	The device settings didn't go to the counter: use "Write to the counter" in the Counter section.
 Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.	CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.
 Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.	The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.
-Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.	The same 180 minutes: count (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.
+Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.	The same 180 minutes: count (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.
 Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.	PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.
 PERIGO	DANGER
 POR DIA	BY DAY
@@ -2043,7 +2043,7 @@ ainda sem dados: a primeira linha aparece em até 2 minutos	no data yet: the fir
 sem leitura nesse intervalo: média dele	no reading in this interval: its average
 {0}% do tempo com dados	{0}% of the time with data
 sem leitura (média)	no reading (average)
-Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.	From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.
+Do seu RC102, no mesmo período do espectrograma: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.	From your RC102, over the same period as the spectrogram: count rate (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.
 se a contagem sobe e a dureza	if the count rate goes up and hardness
 , costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza	, it's usually radon (rain, closed house: its daughters sit almost entirely below 1,500 keV). If hardness
 junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece.	goes up too, something with a high-energy line is nearby, like thorium (Tl-208 at 2,614 keV). Hover: the app adds up the spectra of that stretch, compares them with the background and says what it looks like.
@@ -3170,7 +3170,7 @@ Alarmes e avisos	Alarms and warnings
 Alarmes que tocam nos aparelhos	Alarms that sound on the devices
 Amarelo e 3 bipes.	Yellow and 3 beeps.
 Atualizações e sobre	Updates and about
-Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:	Each device also beeps on its own, with its own numbers. In µSv/h, to compare with the ones above:
+Cada aparelho também apita sozinho, com números próprios. Na unidade da tela, para comparar com os de cima:	Each device also beeps on its own, with its own numbers. In the screen unit, to compare with the ones above:
 Dados brutos	Raw data
 Dados e backup	Data and backup
 Depois do tempo, se continuar alto, volta a tocar.	After that time, if it is still high, it sounds again.
@@ -3775,7 +3775,7 @@ Mostrar a leitura no ícone da bandeja	Show the reading on the tray icon
 Aparelho no ícone	Device on the icon
 Automático (o mais grave)	Automatic (the most severe)
 O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.	Windows usually hides new icons inside the ^ arrow. To always see the number, drag the RadLog icon onto the taskbar, next to the clock.
-O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.	The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.
+O ícone mostra a leitura na unidade da tela, na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.	The icon shows the reading in the screen unit, in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.
 leitura no ícone	reading on the icon
 aparelho no ícone	device on the icon
 {0} · {1} µSv/h · {2}	{0} · {1} µSv/h · {2}
@@ -4006,7 +4006,7 @@ Fora de casa o fundo muda: granito, prédios, solo, altitude e avião sobem a do
 O {0} está fora de casa desde {1}.	The {0} has been away from home since {1}.
 O {0} estava em casa.	The {0} was at home.
 A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.	Rain brings radon's decay products in the air down to the ground. They have short half-lives (minutes), so the rise lasts a few hours and goes away on its own.
-Sem dado: a chuva não está ligada (Configurações › Janela e tela).	No data: rain is off (Settings › Window and screen).
+Sem dado: a chuva não está ligada (Configurações › Chuva no gráfico).	No data: rain is off (Settings › Rain on the chart).
 Sem dado de chuva nessa hora.	No rain data at that time.
 Choveu {0} mm nas 4 horas antes, a partir de {1}.	It rained {0} mm in the 4 hours before, from {1}.
 Na sua casa, a chuva costuma subir o fundo uns {0}%.	At your home, rain usually raises the background by about {0}%.
@@ -4018,7 +4018,7 @@ O {0} estava fora de casa.	The {0} was away from home.
 Às {0}h o seu fundo costuma ficar só {1}% acima da média do dia.	At {0}h your background is usually only {1}% above the day's average.
 Às {0}h o seu fundo costuma ficar na média do dia.	At {0}h your background is usually at the day's average.
 Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.	When air pressure drops, more radon comes out of the soil and walls, and the home background rises a few hours later.
-Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela).	No pressure data (it comes with rain, in Settings › Window and screen).
+Sem dado de pressão (vem com a chuva, em Configurações › Chuva no gráfico).	No pressure data (it comes with rain, in Settings › Rain on the chart).
 Sem dado de pressão nessa hora.	No pressure data at that time.
 A pressão caiu {0} hPa nas 12 horas antes.	Pressure dropped {0} hPa in the 12 hours before.
 A pressão mudou {0} hPa nas 12 horas antes.	Pressure changed {0} hPa in the 12 hours before.
@@ -4258,7 +4258,7 @@ Próximo período	Next period
 Escolher a data	Pick the date
 Compara dois períodos	Compares two periods
 Mostrar todos os alertas	Show all alerts
-µSv/h no período	µSv/h in the period
+Leitura no período	Reading in the period
 fora {0} µSv	away {0} µSv
 {0} (igual)	{0} (same)
 nenhum	none
@@ -4712,7 +4712,7 @@ Medida do uso	Usage measure
 Nunca usado em 30 dias	Never used in 30 days
 Nunca usado em 30 dias:	Never used in 30 days:
 Não consegui copiar	Couldn't copy
-Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.	It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the sync and the PDF. Turning it off stops counting and keeps what was counted; "Reset count" deletes it.
+Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da nuvem e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.	It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the cloud and the PDF. Turning it off stops counting and keeps what was counted; "Reset count" deletes it.
 Período do uso	Usage period
 Páginas:	Pages:
 Uso do RadLog ({0}, contando desde {1})	RadLog usage ({0}, counting since {1})
@@ -4742,7 +4742,7 @@ Em dia: nenhum trecho sem leitura no app desde o último download.	Up to date: n
 contador não grava	counter isn't saving
 em dia · {0}	up to date · {0}
 {0}% · enche em {1}	{0}% · full in {1}
-falta {0}	missing {0}
+falta {0}	{0} to download
 {0} · incompleto	{0} · incomplete
 Download	Download
 O backup de {0} tem 1 ajuste diferente do daqui.	The backup from {0} has 1 setting different from this one.
@@ -5594,7 +5594,7 @@ Demonstração desligada: alarme de verdade	Demo turned off: real alarm
 Demonstração ligada	Demo on
 Escolha um cenário. Os dois aparelhos andam juntos, cada um com os próprios limites. O app todo mostra dados simulados até você sair. Nada vai para os arquivos, e os aparelhos de verdade continuam gravando por baixo.	Pick a scenario. Both devices move together, each with its own limits. The whole app shows simulated data until you leave. Nothing goes to the files, and the real devices keep recording underneath.
 Espectro com Cs-137	Spectrum with Cs-137
-Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.	CSV export, PDF report, backup, cloud and sync stay off until you leave. A real alarm ends the demo right away.
+Exportar CSV, relatório em PDF, backup e nuvem ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.	CSV export, PDF report, backup and cloud stay off until you leave. A real alarm ends the demo right away.
 Fechar controles	Close controls
 Fundo de casa · nada é gravado	Home background · nothing is recorded
 Leitura real do GMC-800: {0}	Real GMC-800 reading: {0}
@@ -5683,11 +5683,11 @@ Configurações › Atualizações e sobre	Settings › Updates and about
 Configurações › Dados e backup	Settings › Data and backup
 Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.	Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.
 Nuvem (Google Drive): abrir em Configurações	Cloud (Google Drive): open in Settings
-O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.	What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.
+O que o app fez e os erros que encontrou: conexões, downloads, alertas, nuvem. Útil quando algo não funciona.	What the app did and the errors it found: connections, downloads, alerts, cloud. Useful when something is not working.
 Exportar leituras	Export readings
 Exportar leituras (CSV)	Export readings (CSV)
 µSv/h médio · cinza = sem dados	Average µSv/h · gray = no data
-Mapa de calor do µSv/h médio por dia e hora	Heat map of average µSv/h by day and hour
+Mapa de calor da leitura média por dia e hora	Heat map of the average reading by day and hour
 {0} · dispersão {1} (σ real ÷ σ do acaso, nas contagens) · mediana {2} · n = {3} min	{0} · dispersion {1} (real σ ÷ chance σ, in counts) · median {2} · n = {3} min
 {0}: sem dado{1}	{0}: no data{1}
 papel mudou	role changed
@@ -5700,3 +5700,427 @@ papel mudou	role changed
 fora	out
 abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started
 RC102 (Bluetooth): sem resposta em {0} ao pedido {1}: {2}	RC102 (Bluetooth): no answer in {0} to request {1}: {2}
+GMC-800 desligado em {0} do dia	GMC-800 off for {0} of the day
+RC102 desligado em {0} do dia	RC102 off for {0} of the day
+GMC-800 desligado em {0} da semana	GMC-800 off for {0} of the week
+RC102 desligado em {0} da semana	RC102 off for {0} of the week
+GMC-800 desligado em {0} do mês	GMC-800 off for {0} of the month
+RC102 desligado em {0} do mês	RC102 off for {0} of the month
+GMC-800 desligado em {0} do ano	GMC-800 off for {0} of the year
+RC102 desligado em {0} do ano	RC102 off for {0} of the year
+Os últimos 10 segundos · cada traço é uma contagem	The last 10 seconds · each mark is one count
+GMC-800 desligado em {0} do período	GMC-800 off for {0} of the period
+RC102 desligado em {0} do período	RC102 off for {0} of the period
+{0} desligado em {1} {2}	{0} off for {1} {2}
+do dia	of the day
+da semana	of the week
+do mês	of the month
+do ano	of the year
+do período	of the period
+Unidades	Units
+Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RC102 segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. "Salvar" recarrega a tela na unidade nova.	Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. "Save" reloads the screen in the new unit.
+unidade da taxa	rate unit
+unidade da contagem	count unit
+Limite (µSv/h)	Limit (µSv/h)
+grava {0} CPM no aparelho, pela calibração do app ({1} µSv/h por CPM)	writes {0} CPM to the device, using the app's calibration ({1} µSv/h per CPM)
+O RC102 ficou {0} sem conexão.	The RC102 was disconnected for {0}.
+GMC-800 em casa {0}	GMC-800 at home {0}
+mais 1 a responder	1 more to answer
+mais {0} a responder	{0} more to answer
+Ver detalhes	See details
+Onde estão	Where they are
+mudar	change
+continua somando a dose sozinho	keeps adding up the dose on its own
+{0}/dia	{0}/day
+{0} ao longo do tempo	{0} over time
+{0} ao longo do tempo (análise)	{0} over time (analysis)
+análise: sem limites nem alarmes (eles ficam no {0})	analysis: no limits or alarms (they stay in {0})
+GMC-800 média {0} · mín {1} · máx {2} CPS	GMC-800 average {0} · min {1} · max {2} CPS
+· RC102 média {0} · máx {1} CPS	· RC102 average {0} · max {1} CPS
+mais alto por volta das {0}h ({1} {2}) · mais baixo por volta das {3}h ({4} {5})	highest around {0}h ({1} {2}) · lowest around {3}h ({4} {5})
+{0} médio (RC102) · cinza = sem dados	Average {0} (RC102) · gray = no data
+{0} médio · cinza = sem dados	Average {0} · gray = no data
+/dia	/day
+GMC-800 média {0} · mín {1} · máx {2} CPS · RC102 média {3} · máx {4} CPS	GMC-800 average {0} · min {1} · max {2} CPS · RC102 average {3} · max {4} CPS
+GMC-800 média {0} · mín {1} · máx {2} CPM · RC102 média {3} · máx {4} CPM	GMC-800 average {0} · min {1} · max {2} CPM · RC102 average {3} · max {4} CPM
+% acima da média das 2 h antes	% above the average of the 2 h before
+% acima da média das 2 h antes ({0})	% above the average of the 2 h before ({0})
+A aba Distância mede isso com o seu objeto.	The Distance tab measures it with your object.
+A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.	With each rain while the counter is recording (app open or history downloaded), the app measures how much the reading rose afterwards and compares it with times without rain.
+A fatia que dá para baixar é a de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.	The slice you can lower is the top one, the dose that came from something: an object you measured, a spike, a different place.
+É nessa parte que tempo, distância e blindagem fazem diferença; os testes ficam no Medir objeto.	That is where time, distance and shielding make a difference; the tests are in Measure object.
+A memória do aparelho trouxe {0}.	The device memory brought back {0}.
+Como funciona: tempo, distância e blindagem	How it works: time, distance and shielding
+De uma fonte pequena, o dobro da distância deixa ¼ da taxa.	From a small source, twice the distance leaves ¼ of the rate.
+Distância.	Distance.
+Blindagem.	Shielding.
+Tempo.	Time.
+Divisão da dose do período	Split of the period's dose
+Dose = taxa × tempo: metade do tempo dá metade da dose.	Dose = rate × time: half the time gives half the dose.
+Ficar perto por	Stay close for
+GMC-800 sem conexão	GMC-800 disconnected
+RC102 sem conexão	RC102 disconnected
+Os dois sem conexão	Both disconnected
+RC102 voltou	RC102 came back
+Leitura média antes e depois da chuva, comparada com horários sem chuva	Average reading before and after rain, compared with times without rain
+Mais ações deste trecho	More actions for this period
+Marcar a chuva no gráfico	Mark rain on the chart
+Mostra quando choveu na sua cidade e quanto a leitura sobe depois. A cidade fica só neste PC.	Shows when it rained in your city and how much the reading rises afterwards. The city stays on this PC only.
+Ligar	Turn on
+Medir objeto › Distância	Measure object › Distance
+Medir objeto › Blindagem	Measure object › Shielding
+Blindagem	Shielding
+Teste de blindagem	Shielding test
+Memória do GMC-800 cheia	GMC-800 memory full
+Memória do GMC-800 em {0}%	GMC-800 memory at {0}%
+O aparelho para de gravar ou grava por cima (conforme o ajuste dele). Baixe o histórico para guardar tudo no app.	The device stops recording or overwrites (depending on its setting). Download the history to keep everything in the app.
+Quando encher, o aparelho para de gravar ou grava por cima (conforme o ajuste dele).	When it fills up, the device stops recording or overwrites (depending on its setting).
+Metade do tempo dá metade da dose. De uma fonte pequena, o dobro da distância deixa ¼.	Half the time gives half the dose. From a small source, twice the distance leaves ¼.
+Nenhum trecho acima do fundo no período: tudo foi fundo natural.	No period above background: it was all natural background.
+O resultado de cada medição mostra quanto custa ficar perto.	Each measurement's result shows how much staying close costs.
+Partes de Dados e backup	Parts of Data and backup
+Pôr matéria no caminho segura uma parte da radiação.	Putting matter in the way stops part of the radiation.
+A aba Blindagem compara antes e depois.	The Shielding tab compares before and after.
+Sem leituras da memória do aparelho.	No readings from the device memory.
+São três jeitos, e os três moram aqui:	There are three ways, and all three live here:
+Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.	All of this is about the dose above background. Natural background comes from the ground, the walls, the air and space, and you get it anywhere in the house.
+alara origem dose fundo acima	alara origin dose background above
+alara distancia inverso quadrado afastar	alara distance inverse square move away
+alara blindagem material chumbo antes depois	alara shielding material lead before after
+{0} no período	{0} in the period
+Backup e arquivos	Backup and files
+Nuvem	Cloud
+% de KCl no rótulo	% KCl on the label
+% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.	% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.
+(fundo salvo)	(saved background)
+1 · KCl	1 · KCl
+2 · Tório	2 · Thorium
+3 · Pronto	3 · Done
+31,7 Bq por grama de potássio	31.7 Bq per gram of potassium
+Adubo de potássio	Potash fertilizer
+Areia monazítica	Monazite sand
+Alimento	Food
+Calibrado com KCl em {0} ·	Calibrated with KCl on {0} ·
+Calibrar	Calibrate
+Calibrar de novo	Calibrate again
+Castanha-do-pará	Brazil nuts
+Coloque a amostra na posição da calibração e clique em Começar.	Put the sample in the calibration position and click Start.
+Começar a calibração	Start calibration
+Cs-137 "abaixo de"	Cs-137 "below"
+Cs-137 bem abaixo do que o RC102 vê	Cs-137 well below what the RC102 can see
+Depois, é só medir amostras na mesma posição.	After that, just measure samples in the same position.
+Dê um nome em Mais opções.	Give it a name in More options.
+Eletrodo de tungstênio toriado, se tiver.	Thoriated tungsten electrode, if you have one.
+Escala aproximada: falta o KCl.	Approximate scale: KCl still missing.
+Esquecer a calibração do KCl?	Forget the KCl calibration?
+Esquecer a calibração do tório?	Forget the thorium calibration?
+Euxenita pode ter urânio e tório. O app só conta tório com as linhas de 911 ou 2.614 keV.	Euxenite can have uranium and thorium. The app only counts thorium with the 911 or 2,614 keV lines.
+Falta calibrar.	Not calibrated yet.
+Forma diferente do pote da calibração: aproximado.	Different shape from the calibration jar: approximate.
+Guardar como minha	Save as mine
+＋ Guardar como minha	＋ Save as mine
+KCl puro	Pure KCl
+Linhas usadas e detalhes técnicos	Lines used and technical details
+Mais opções	More options
+Massa (g), só para o Bq/g	Mass (g), only for Bq/g
+Medindo	Measuring
+Colocar a amostra	Place the sample
+Medir o tório	Measure the thorium
+Moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226).	Ground or chopped, full jar, tightly closed ~3 weeks before (for Ra-226).
+Nome (para o histórico)	Name (for the history)
+O RC102 não chegou a ver. Mais tempo ajudaria.	The RC102 didn't see it. More time would help.
+O U-238 sai pela linha de 1.001 keV, que é fraca. O rádio costuma ser baixo porque o urânio foi purificado ao fazer o vidro.	U-238 comes from the 1,001 keV line, which is weak. Radium is usually low because the uranium was purified to make the glass.
+O que aparece é o K-40, do potássio da comida.	What shows up is K-40, from the potassium in the food.
+Outra coisa	Something else
+Outras	Others
+Para voltar, é preciso medir de novo.	To get it back, you have to measure again.
+Pedaços que caibam no pote, ou a peça encostada sempre do mesmo jeito.	Pieces that fit in the jar, or the piece touching it the same way every time.
+Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.	Loose stone: the result is in Bq for the whole piece, so weighing it is optional. The shape differs from the calibration jar, so it's approximate.
+Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RC102 quase não conta para a atividade.	Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.
+Pelo K-40 o app calcula quanto potássio tem.	From K-40 the app works out how much potassium there is.
+Preparo:	Preparation:
+Radionuclídeo	Radionuclide
+Sal light ou KCl puro, ~500 g, no pote.	Lite salt or pure KCl, ~500 g, in the jar.
+Sem isso, os Bq são só um chute (±100%).	Without it, the Bq are just a guess (±100%).
+Suas amostras	Your samples
+Tirar	Remove
+Tirar de Suas amostras?	Remove from Your samples?
+Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.	Move the sample away (about 3 m) and leave the RC102 in its usual place.
+Total:	Total:
+Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.	Just once, with lite salt or pure KCl, in the position you'll measure in.
+Vidro ou esmalte de urânio	Uranium glass or glaze
+abaixo de	below
+abaixo do típico	below typical
+abaixo do típico ({0} a {1} Bq/kg)	below typical ({0} to {1} Bq/kg)
+acima do típico	above typical
+acima do típico ({0} a {1} Bq/kg)	above typical ({0} to {1} Bq/kg)
+ainda não medida	not measured yet
+até você parar	until you stop
+com o eletrodo	with the electrode
+com o sal	with the salt
+com o que está escolhido	with what's selected
+comparado ao típico	compared to typical
+césio, de usinas e testes nucleares	cesium, from power plants and nuclear tests
+de amostra	of sample
+de fundo +	of background +
+dentro do esperado	as expected
+dentro do esperado ({0} a {1} Bq/kg)	as expected ({0} to {1} Bq/kg)
+dá o potássio em g/kg	gives potassium in g/kg
+dê um nome para a amostra	give the sample a name
+em 1.460 keV	at 1,460 keV
+encostada	touching
+escolher	choose
+falta para ±10%	left for ±10%
+fica guardado	it's kept
+forma da curva estimada (o tório melhora)	curve shape estimated (thorium improves it)
+forma da curva pelo tório em {0}	curve shape from thorium on {0}
+forma da curva: estimada (inclinação −1,3 ± 0,4)	curve shape: estimated (slope −1.3 ± 0.4)
+forte: sai rápido	strong: quick
+fundo de {0}	background of {0}
+{0} · fundo de {1}	{0} · background of {1}
+g de potássio por kg	g of potassium per kg
+inclinação	slope
+massa ou tempo inválido	invalid mass or time
+medir o tório	measure the thorium
+medir um novo	measure a new one
+na peça	in the piece
+no GMC-800	on the GMC-800
+no RC102	on the RC102
+obrigatório · ~1 h	required · ~1 h
+opcional · melhora a curva	optional · improves the curve
+para o RC102	for the RC102
+recomendado	recommended
+rádio costuma ser baixo	radium is usually low
+rádio, da série do tório	radium, thorium series
+rádio, da série do urânio	radium, uranium series
+sai fácil	easy
+sem massa	no mass
+sem valor típico na lista	no typical value on the list
+sua	yours
+sua referência	your reference
+só com peça forte	only with a strong piece
+talvez só "abaixo de"	maybe only "below"
+tirar de Suas amostras	remove from Your samples
+tório só se aparecer 911 ou 2.614 keV	thorium only if 911 or 2,614 keV shows up
+tório, a série inteira	thorium, whole series
+urânio	uranium
+urânio e tório?	uranium and thorium?
+usar o salvo	use the saved one
+usar o salvo ({0}, {1})	use the saved one ({0}, {1})
+usar o salvo (não tem)	use the saved one (none)
+valor típico	typical value
+voltar	back
+{0} · {1} · amostra {2} · fundo {3} · {4}{5}	{0} · {1} · sample {2} · background {3} · {4}{5}
+última medida	last measured
+tempo recomendado	recommended time
+Ra-226 ≈ 24 a 105 Bq/kg	Ra-226 ≈ 24 to 105 Bq/kg
+Th-232 ≈ 1.000 a 2.300 Bq/kg	Th-232 ≈ 1,000 to 2,300 Bq/kg
+solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg	soil: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg
+pedra solta	loose stone
+encostado	touching
+abrir o quadro	open the panel
+fechar o quadro	close the panel
+Em mrem/h	In mrem/h
+Em µSv/h	In µSv/h
+Últimos 10 s	Last 10 s
+falta {0} para a atenção	{0} below attention
+falta {0} para o alarme	{0} below alarm
+falta {0} para o perigo	{0} below danger
+atenção e alarme: os alarmes 1 e 2 do RC102	attention and alarm: the RC102's alarms 1 and 2
+Cala atenção e alarme do aparelho escolhido por 10 min. O perigo continua tocando.	Silences attention and alarm on the chosen device for 10 min. Danger still sounds.
+Dados simulados no app todo, para conhecer as telas e os alarmes. Nada é gravado.	Simulated data across the app, to get to know the screens and alarms. Nothing is saved.
+Estou testando um objeto	I'm testing an object
+Parar o teste do objeto	Stop the object test
+Testando um objeto no GMC-800: atenção e alarme calados até {0}. O perigo continua.	Testing an object with the GMC-800: attention and alarm silenced until {0}. Danger still sounds.
+Testando um objeto no RC102: atenção e alarme calados até {0}. O perigo continua.	Testing an object with the RC102: attention and alarm silenced until {0}. Danger still sounds.
+Testando um objeto no {0}: atenção e alarme calados até {1}	Testing an object with the {0}: attention and alarm silenced until {1}
+a memória do GMC-800	the GMC-800's memory
+atenção e alarme voltam a valer	attention and alarm work again
+baixar historico memoria gmc	download history memory gmc
+cala os alertas por 10 min	silences alerts for 10 min
+Parar	Stop
+Fechar a pergunta	Close the question
+Fechar: a pergunta continua em Fora de casa	Close: the question stays in Away from home
+Onde está o {0}: mudar	Where the {0} is: change
+Teto: o fundo da casa no ano todo ({0} {1}) mais {2} mSv/ano.	Ceiling: the home background for the whole year ({0} {1}) plus {2} mSv/year.
+alerta curto	short alert
+alertas curtos	short alerts
+ano: {0} {1} de um teto de {2} {3}	year: {0} {1} of a {2} {3} ceiling
+igual ao fundo da sua casa	same as your home background
+por período	by period
+sem dado hoje	no data today
+{0} sem leitura das {1} às {2}.	{0} had no reading from {1} to {2}.
+{0} sem leitura desde {1}.	{0} has had no reading since {1}.
+{0}% abaixo do fundo da sua casa	{0}% below your home background
+{0}% acima do fundo da sua casa	{0}% above your home background
+{0}sem leitura	{0}no reading
+ano	year
+Abrir em Fundo de casa	Open in Home background
+Abrir o Fundo de casa	Open Home background
+Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.	Each bar is the difference from the average, in %: to the right is above, to the left is below. The value shows on hover.
+Dia da semana, dia × noite e mês	Day of week, day × night and month
+Fundo por dia, em tabela	Background by day, as a table
+Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.	Median of the minutes at home (no object measurement and no saturated or interfered minutes). The day × night comparison uses the days with both halves measured (6 h or more each) and compares each day with its own night, so one day's weather doesn't weigh in.
+Outra conta: a reta dos últimos dias	Another calculation: the line over the last days
+ainda medindo: faltam {0} dias	still measuring: {0} days to go
+ainda são {0} meses de dado; fica mais útil depois de um ano	only {0} months of data so far; more useful after a year
+ainda é 1 mês de dado; fica mais útil depois de um ano	only 1 month of data so far; more useful after a year
+estável, {0} em relação à referência	steady, {0} against the reference
+junho a agosto ficaram {0}% abaixo de novembro a março	June to August were {0}% below November to March
+junho a agosto ficaram {0}% acima de novembro a março	June to August were {0}% above November to March
+mudou de patamar em {0}	stepped to a new level on {0}
+o dia mais alto é {0}, {1}% acima da média	the highest day is {0}, {1}% above the average
+o dia mais baixo é {0}, {1}% abaixo da média	the lowest day is {0}, {1}% below the average
+sem diferença de verdade (tudo abaixo de 1%)	no real difference (all below 1%)
+subiu {0} em {1} semanas	rose {0} in {1} weeks
+Últimas semanas	Last weeks
+Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados "achado depois" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.	All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged "found later" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.
+Níveis e alarmes	Levels and alarms
+Todos os alertas	All alerts
+alarme 1 (atenção) do aparelho: {0}	device alarm 1 (attention): {0}
+alarme 2 (alarme) do aparelho: {0}	device alarm 2 (alarm): {0}
+dentro do teto	within the ceiling
+fundo {0} + acima do fundo {1} µSv	background {0} + above background {1} µSv
+mostrar no gráfico	show on chart
+passou do teto	over the ceiling
+pico acima do fundo de {0}	peak above the background of {0}
+pico bem acima do fundo de {0}	peak well above the background of {0}
+pico dentro do vai e vem do fundo de {0}	peak within the usual ups and downs of the background of {0}
+{0} · {1} · durante a atenção	{0} · {1} · during attention
+{0} · {1} · durante o alarme	{0} · {1} · during the alarm
+{0} · {1} · durante o perigo	{0} · {1} · during danger
+achado depois	found later
+Achados depois	Found later
+(achado depois)	(found later)
+a conta	the math
+Alarmes	Alarms
+Fora dos alertas, a casa ficou igual ao normal	Outside the alerts, home was the same as normal
+Fora dos alertas, a casa ficou {0}% acima do normal	Outside the alerts, home was {0}% above normal
+Fora dos alertas, a casa ficou {0}% abaixo do normal	Outside the alerts, home was {0}% below normal
+Escala de cor	Colour scale
+Sair da tela cheia	Exit full screen
+Tela cheia	Full screen
+contínua	continuous
+cores: original	colours: original
+Parece:	Looks like:
+o Cs-137 pode ficar abaixo do que o RC102 consegue medir	Cs-137 may stay below what the RC102 can measure
+pode ficar abaixo do que o RC102 consegue medir	may stay below what the RC102 can measure
+(usada no Bq e na distância segura)	(used for Bq and the safe distance)
+Certeza: nenhuma, cabe no acaso.	Certainty: none, it fits chance.
+Certeza: muito alta.	Certainty: very high.
+Certeza: alta.	Certainty: high.
+Certeza: boa.	Certainty: good.
+Certeza: baixa, pode ser acaso.	Certainty: low, it may be chance.
+muito alta	very high
+alta	high
+boa	good
+baixa	low
+nenhuma	none
+(opcional)	(optional)
+ignorar	ignore
+ignorado	ignored
+GMC-800 ignorado	GMC-800 ignored
+RC102 ignorado	RC102 ignored
+{0} ignorado{1}	{0} ignored{1}
+Como cai com a distância	How it drops with distance
+Linha do tempo dos últimos 7 dias	Timeline of the last 7 days
+Os dois ignorados	Both ignored
+Quer ver na prática?	Want to see it in practice?
+Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RC102 com você.	Your trips and the dose of each one. Normal is the GMC-800 at home and the RC102 with you.
+Testar uma blindagem	Test a shield
+de dose em {0}, pelo RC102	of dose in {0}, by the RC102
+leitura com problema	reading with a problem
+os dois ignorados{0}	both ignored{0}
+saiu do normal	left normal
+você não estava em casa	you weren't home
+{0} com o objeto, abaixo do nível de atenção.	{0} with the object, below the attention level.
+{0} com o objeto, acima do nível de atenção.	{0} with the object, above the attention level.
+{0} com o objeto, acima do nível de perigo.	{0} with the object, above the danger level.
+← Voltar para o Medir objeto	← Back to Measure object
+certeza {0}	certainty {0}
+Alarme 1 de dose do RC102	RC102 dose alarm 1
+Alarme 1 do RC102	RC102 alarm 1
+Alarme 1 ligado	Alarm 1 on
+Alarme 2 de dose do RC102	RC102 dose alarm 2
+Alarme 2 do RC102	RC102 alarm 2
+Alarme 2 ligado	Alarm 2 on
+Alarme do GMC-800	GMC-800 alarm
+Alarme do app	App alarm
+Antes, o app salva uma cópia do que está no contador agora.	First, the app saves a copy of what is on the counter now.
+Atenção do app	App attention
+Perigo do app	App danger
+Avançado	Advanced
+Chuva da sua cidade	Rain in your city
+De onde veio: {0}	Where it came from: {0}
+{0}, desde {1}	{0}, since {1}
+Fator em uso	Factor in use
+Fator à mão e versões	Factor by hand and versions
+Igualar o contador	Match the counter
+Mais ajustes do GMC-800	More GMC-800 settings
+Mais ajustes do RC102	More RC102 settings
+O contador usa {0} µSv/h por CPM e o app, {1}.	The counter uses {0} µSv/h per CPM and the app, {1}.
+Os do app vão com "Salvar". Os dos aparelhos só vão com o botão de cada um.	The app's values go with "Save". The devices' values only go with each device's button.
+Tamanho de tudo:	Size of everything:
+Vale para o app todo. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem).	Applies to the whole app. Dose follows the rate (µSv/h → µSv, mrem/h → mrem).
+conecte para mudar	connect to change
+grava no aparelho	writes to the device
+não tem	none
+sirene que não desliga	siren that doesn't stop
+amarelo e 3 bipes	yellow and 3 beeps
+toca o som escolhido	plays the chosen sound
+{0} CPM no aparelho	{0} CPM on the device
+≈ {0} CPM	≈ {0} CPM
+{0} CPM = {1} µSv/h	{0} CPM = {1} µSv/h
+· fator à mão, versões, lado a lado com o RC102 e pontos gravados no contador	· factor by hand, versions, side by side with the RC102 and points stored on the counter
+Dureza do espectro ao longo do tempo	Spectrum hardness over time
+Espectro ao longo do tempo	Spectrum over time
+Espectro da amostra	Sample spectrum
+Espectro do RC102	RC102 spectrum
+Espectro do RC102. Parece: {0}	RC102 spectrum. Looks like: {0}
+Não deu para baixar tudo: os minutos que chegaram foram guardados.	Could not download everything: the minutes that arrived were kept.
+Não deu para baixar:	Could not download:
+Não deu para baixar: {0}	Could not download: {0}
+Taxa do RC102 ao longo do tempo	RC102 rate over time
+Trecho do espectro, de perto	Spectrum section, up close
+{0} registros, {1} minutos novos	{0} records, {1} new minutes
+{0}, última hora: média {1}, máximo {2}	{0}, last hour: average {1}, maximum {2}
+{0}: sem leituras na última hora	{0}: no readings in the last hour
+· há {0}	· {0} ago
+Última hora	Last hour
+Tudo baixado.	All downloaded.
+A conta do acaso para coisas que acontecem soltas no tempo, como os decaimentos. Diz quanto a contagem varia sozinha.	The math of chance for things that happen loosely in time, like decays. It says how much the count varies on its own.
+A radiação natural de sempre no lugar: solo, paredes, radônio do ar e raios cósmicos. Não dá para zerar, e é normal.	The usual natural radiation in a place: soil, walls, radon in the air and cosmic rays. It can't be zeroed, and it's normal.
+A tabela de fábrica do GMC-800 que transforma CPM em µSv/h. A intercalibração com o RC102 pode trocar o fator.	The GMC-800 factory table that turns CPM into µSv/h. Cross-calibration with the RC102 can replace the factor.
+Contagens por minuto e por segundo: quantos pulsos o aparelho viu. É o que ele mede de verdade; o µSv/h é uma conta feita em cima disso.	Counts per minute and per second: how many pulses the device saw. That's what it really measures; µSv/h is calculated from it.
+Cortam as leituras em quatro partes iguais. Entre o 1º e o 3º quartil ficam as leituras do meio, as mais comuns.	They cut the readings into four equal parts. Between the 1st and 3rd quartile are the middle readings, the most common ones.
+Curva do contador	Counter's curve
+Janela em formação	Window still forming
+O app ainda está juntando dias para saber o seu normal. Até completar, as comparações são só uma pista.	The app is still gathering days to learn your normal. Until then, comparisons are only a hint.
+O tamanho do vai e vem natural da contagem. Até 2σ é acaso. De 3σ para cima, a mudança é real.	The size of the count's natural ups and downs. Up to 2σ is chance. From 3σ up, the change is real.
+O valor do meio: metade das leituras fica abaixo, metade acima. Um pico curto não mexe nela, por isso serve para medir o fundo.	The middle value: half the readings are below, half above. A short peak doesn't move it, which is why it works for the background.
+Os termos do app	The app's terms
+Quanto as leituras variam comparado com o que o acaso explica. Perto de 1 é normal. Bem acima de 1, alguma coisa mexeu de verdade (radônio, chuva, o aparelho).	How much readings vary compared with what chance explains. Near 1 is normal. Well above 1, something really changed (radon, rain, the device).
+Quanto do espectro está nas energias altas. Sobe com fontes mais fortes em gama alta (tório, rádio) e atrás de blindagem, que segura mais as energias baixas.	How much of the spectrum is at high energies. It rises with sources strong in high gamma (thorium, radium) and behind shielding, which stops low energies more.
+Quanto o número pode estar fora por causa do acaso. Medir mais tempo diminui a incerteza.	How far the number may be off because of chance. Measuring longer reduces the uncertainty.
+Radiação tão alta que o tubo não consegue contar tudo: o número fica abaixo do real. Afaste-se e confie no RC102.	Radiation so high the tube can't count it all: the number reads lower than real. Step away and trust the RC102.
+Todos os termos	All terms
+ainda aprendendo o seu normal ({0} de {1} dias)	still learning your normal ({0} of {1} days)
+bem acima do nível de fundo ({0} σ)	well above the background level ({0} σ)
+glossario termos sigma mediana quartil dispersao poisson dureza saturando curva cpm cps fundo incerteza	glossary terms sigma median quartile dispersion poisson hardness saturating curve cpm cps background uncertainty
+nos gráficos	on the charts
+um pouco acima do fundo, dentro do acaso ({0} σ)	a little above background, within chance ({0} σ)
+σ, mediana, dureza e outros, em palavras simples	σ, median, hardness and others, in plain words
+Mediana	Median
+Quartis	Quartiles
+Poisson	Poisson
+Dureza	Hardness
+Saturando	Saturating
+CPM e CPS	CPM and CPS
+Incerteza (±)	Uncertainty (±)
+na hora certa	on time
+clique para abrir	click to open
+não conectou	did not connect
+Datas	Dates
+Formato da data	Date format
+Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.	Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.
+formato da data	date format

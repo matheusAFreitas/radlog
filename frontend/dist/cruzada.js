@@ -150,7 +150,7 @@ async function cxDetail(d) {
 function cxChart(c, dev, W) {
   const s = c.series, N = s.me.length, H = 170, L = 46, T = 10, B = 8, pw = W - L - 10, ph = H - T - B;
   const me = cxName(dev), ot = cxName(cxOther(dev));
-  const cMe = dev === "radiacode" ? "var(--rc)" : "var(--accent)", cOt = dev === "radiacode" ? "var(--accent)" : "var(--rc)";
+  const cMe = dev === "radiacode" ? "var(--rc)" : "var(--gmc)", cOt = dev === "radiacode" ? "var(--gmc)" : "var(--rc)";
   const all = s.me.concat(s.ot).filter((v) => v != null);
   const lo = Math.min(-0.3, Math.min(...all) - 0.05), hi = Math.max(1, Math.max(...all) + 0.1);
   const x = (i) => L + (i + 0.5) / N * pw, y = (v) => T + (hi - v) / (hi - lo) * ph, f = (v) => v.toFixed(1);

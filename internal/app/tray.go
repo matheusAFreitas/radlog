@@ -142,6 +142,7 @@ func (a *App) trayRefresh() {
 	r, showRc := a.trayRc()
 	a.mu.Lock()
 	plain, choice := a.settings.TrayPlain, a.settings.TrayDevice
+	mrem := a.settings.RateUnit == rateMrem
 	a.mu.Unlock()
 	sep := ","
 	if a.uiLang() == "en" {
@@ -164,9 +165,16 @@ func (a *App) trayRefresh() {
 	if me.Key == "rc" {
 		other = g
 	}
-	lines := []string{a.T(trayLine(me, sep))}
+	line := func(d trayDev) string {
+		t := a.T(trayLine(d, sep))
+		if mrem {
+			t = remText(t, sep)
+		}
+		return t
+	}
+	lines := []string{line(me)}
 	if showRc || other.Key == "gmc" {
-		lines = append(lines, a.T(trayLine(other, sep)))
+		lines = append(lines, line(other))
 	}
 	lines = append(lines, "RadLog")
 	tip := strings.Join(lines, "\n")
@@ -176,7 +184,11 @@ func (a *App) trayRefresh() {
 	if n := []rune(tip); len(n) > 127 { // limite do Windows
 		tip = string(n[:127])
 	}
-	txt, lvl := trayText(me, sep)
+	num := me
+	if mrem {
+		num.USv /= 10 // o número do ícone na unidade da tela
+	}
+	txt, lvl := trayText(num, sep)
 	if me.State != "ok" {
 		lvl = ""
 	}

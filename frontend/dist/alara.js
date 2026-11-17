@@ -1,9 +1,10 @@
-// ---------- ALARA (2.43) ----------
+// ---------- ALARA (2.43; espalhado na 2.85) ----------
 //
-// "Tão baixo quanto razoavelmente possível". A tela mostra de onde vem a sua
-// dose (GetDoseOrigin) e deixa testar os três jeitos de baixar: tempo (conta
-// na tela), distância (quatro pontos, ajuste k/r²) e blindagem (antes ×
-// depois). Os testes usam o motor do Medir objeto com o fundo da casa: cada
+// "Tão baixo quanto razoavelmente possível". A tela saiu na 2.85 e as partes
+// foram para onde fazem sentido: "De onde vem a sua dose" é um quadro do
+// Resumo (GetDoseOriginRange, no período de lá); distância (quatro pontos,
+// ajuste k/r²) e blindagem (antes × depois) são abas do Medir objeto; o
+// tempo aparece no resultado de cada medição (medir.js, mTempoCard). Os testes usam o motor do Medir objeto com o fundo da casa: cada
 // distância, ou cada fase da blindagem, é uma fase do objeto
 // (StartMeasure + MeasureAgainAt); as contas vêm em derived.dist e
 // derived.shield (alara.go). Usa os globais do app.js; carregado antes dele.
@@ -19,17 +20,21 @@ function alDev() {
 
 // ---------- de onde vem a sua dose ----------
 
-async function refreshAlOrigin() {
-  if (!api.GetDoseOrigin) return;
+let alOrSeq = 0;
+async function refreshAlOrigin(from, to, label) {
+  if (!api.GetDoseOriginRange) { $("sumOrigin").hidden = true; return; }
+  const my = ++alOrSeq;
   let o;
-  try { o = await api.GetDoseOrigin(7); } catch (e) { return; }
+  try { o = await api.GetDoseOriginRange(Math.round(from), Math.round(to)); } catch (e) { return; }
+  if (my !== alOrSeq) return;
+  $("sumOrigin").hidden = false;
   // o GMC-800 fica em casa: quando ele entra, é a dose pela leitura de casa
   const dev = { radiacode: "RC102 com você", gmc: "pela leitura de casa (GMC-800)", misto: "RC102 com você e leitura de casa (GMC-800)" }[o.device] || "nenhum aparelho com você";
-  $("alOrSub").textContent = `Últimos 7 dias · ${dev}`;
+  $("alOrSub").textContent = `${label} · ${dev}`;
   const [tv, tu] = agSv(o.minutes ? o.total : null);
   $("alOrTot").innerHTML = "";
-  $("alOrTot").append(tv, " ", Object.assign(document.createElement("small"), { textContent: tu ? `${tu} na semana` : "" }));
-  const parts = [["Fundo em casa", o.homeBg, "var(--accent)"], ["Fundo fora de casa", o.awayBg, "var(--away)"], ["Acima do fundo", o.above, "var(--obj)"]];
+  $("alOrTot").append(tv, " ", Object.assign(document.createElement("small"), { textContent: tu ? `${tu} no período` : "" }));
+  const parts = [["Fundo em casa", o.homeBg, "var(--ok)"], ["Fundo fora de casa", o.awayBg, "var(--away)"], ["Acima do fundo", o.above, "var(--obj)"]];
   const tot = parts.reduce((a, p) => a + p[1], 0) || 1;
   let x = 0, h = "";
   parts.forEach(([t, v, c], i) => {
@@ -56,7 +61,7 @@ async function refreshAlOrigin() {
     const td = tr.insertCell();
     td.colSpan = 3;
     td.className = "muted";
-    td.textContent = "Nenhum trecho acima do fundo nesses dias: tudo foi fundo natural.";
+    td.textContent = "Nenhum trecho acima do fundo no período: tudo foi fundo natural.";
   }
   for (const it of o.items) {
     const tr = tb.insertRow();
@@ -71,63 +76,8 @@ async function refreshAlOrigin() {
     tr.addEventListener("click", () => openGapOnChart(it));
   }
   AL.bg = o.homeBgRate || homeBgUSv();
-  renderAlTempo();
-}
-
-// ---------- tempo ----------
-
-// taxa inicial: a última medição de objeto que achou algo, ou a leitura de agora
-function alRateDefault() {
-  const ms = [...(state.measurements || [])].reverse().find((m) => m.result && m.result.level === "sim" && m.obj && m.obj.usv > 0);
-  if (ms) return [ms.obj.usv, `taxa da medição "${ms.name}" (${ddmm(ms.time)})`];
-  const r = (state.rNow && state.rNow.live && state.rNow.usv) || (state.gNow && state.gNow.live && state.gNow.usv);
-  if (r > 0) return [r, "taxa da leitura de agora"];
-  return [0.5, "taxa de exemplo"];
-}
-
-// dose do card Tempo: as mesmas casas no número grande e nas frases (3 casas
-// abaixo de 0,1 µSv, senão o 2× e o 4× viravam 0,01 e 0,00)
-function alSv(v) {
-  return v != null && isFinite(v) && Math.abs(v) < 0.1 ? [fmt(v, 3), "µSv"] : agSv(v);
-}
-function alDose(v) {
-  const [dv, du] = alSv(v);
-  return `${dv} ${du}`;
-}
-
-function renderAlTempo() {
-  const inp = $("alRate");
-  if (!inp.dataset.set) {
-    const [r, from] = alRateDefault();
-    inp.value = String(Math.round(r * 1000) / 1000);
-    $("alRateFrom").textContent = from;
-  }
-  const r = Math.max(0, parseFloat(String(inp.value).replace(",", ".")) || 0);
-  const m = Math.max(1, Math.min(6000, parseFloat(String($("alMin").value).replace(",", ".")) || 1));
-  const bg = AL.bg || homeBgUSv();
-  const d = (r * m) / 60;
-  // o custo de ficar perto é o que passa do fundo: o fundo você pega em
-  // qualquer canto da casa (2.46). Sem fundo conhecido, mostra o total.
-  const ex = bg > 0 ? (Math.max(0, r - bg) * m) / 60 : d;
-  const [dv, du] = alSv(ex);
-  $("alTDose").innerHTML = "";
-  $("alTDose").append(dv, Object.assign(document.createElement("small"), { textContent: " " + du + (bg > 0 ? " acima do fundo" : "") }));
-  const eq = $("alTEq");
-  eq.textContent = "";
-  if (ex > 0) for (const l of doseKnown(ex, bg, doseXray)) /* raio-X no lugar da banana (ACE, 11/11) */ eq.appendChild(Object.assign(document.createElement("span"), { textContent: l }));
-  if (bg > 0) eq.appendChild(Object.assign(document.createElement("span"), { textContent: `No lugar, ${alDose(d)} no total: ${alDose((bg * m) / 60)} disso é o fundo, que você receberia em qualquer canto da casa.` }));
-  const alt = $("alTAlt");
-  alt.textContent = "";
-  if (bg > 0 && r > bg) {
-    const net = r - bg, d2 = (net / 4 * m) / 60, d4 = (net / 16 * m) / 60;
-    const b = document.createElement("b");
-    b.append(Object.assign(document.createElement("span"), { textContent: `Se a fonte for pequena e você ficar ao dobro da distância: ${alDose(d2)} acima do fundo.` }), " ", Object.assign(document.createElement("span"), { textContent: `Ao quádruplo: ${alDose(d4)} acima do fundo.` }));
-    const p = document.createElement("span");
-    p.append(Object.assign(document.createElement("span"), { textContent: "Pelo inverso do quadrado, só a parte acima do fundo cai." }), " ", Object.assign(document.createElement("span"), { textContent: "O fundo continua o mesmo onde você estiver na casa." }));
-    alt.append(b, p);
-  } else if (bg > 0) {
-    alt.appendChild(Object.assign(document.createElement("span"), { textContent: `Essa taxa está no nível do fundo da sua casa (${alNum(bg)} µSv/h): não há fonte para afastar.` }));
-  }
+  state.sumOrigin = o;
+  sumDoseSync();
 }
 
 // ---------- testes (distância e blindagem) ----------
@@ -178,7 +128,7 @@ async function alCancel() {
 
 let alTickBusy = false;
 async function alTick() {
-  if (state.view !== "alara" || alTickBusy) return;
+  if (!alOnTest() || alTickBusy) return;
   alTickBusy = true;
   try {
     const st = await api.GetMeasure();
@@ -267,7 +217,7 @@ function renderAlDistChart(st) {
   let h = "";
   for (let i = 0; i <= 4; i++) {
     const v = (ymax * i) / 4, y = Y(v);
-    h += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--chart-grid)"/><text x="${L - 8}" y="${(y + 4).toFixed(1)}" class="al-ax" text-anchor="end">${alNum(v, v < 1 ? 2 : 1)}</text>`;
+    h += `<line x1="${L}" x2="${W - R}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}" stroke="var(--chart-grid)"/><text x="${L - 8}" y="${(y + 4).toFixed(1)}" class="al-ax" text-anchor="end">${axRate(v, v < 1 ? 2 : 1)}</text>`;
   }
   const step = xmax > 100 ? 50 : xmax > 50 ? 20 : 10;
   for (let r = 0; r <= xmax; r += step) h += `<text x="${X(r).toFixed(1)}" y="${H - B + 18}" class="al-ax" text-anchor="middle">${r} cm</text>`;
@@ -285,8 +235,8 @@ function renderAlDistChart(st) {
   for (const p of pts) {
     const tr = tb.insertRow();
     tr.insertCell().textContent = `${fmt(p.cm, 0)} cm`;
-    const a = tr.insertCell(); a.className = "n"; a.textContent = `${alNum(p.netUSv, 3)} ± ${alNum(p.errUSv, 3)}` + (p.lost ? " · sumiu no fundo" : "");
-    const b = tr.insertCell(); b.className = "n"; b.textContent = p.predict != null ? alNum(p.predict, 3) : "—";
+    const a = tr.insertCell(); a.className = "n"; a.textContent = `${rateNum(p.netUSv, 3)} ± ${rateNum(p.errUSv, 3)}` + (p.lost ? " · sumiu no fundo" : "");
+    const b = tr.insertCell(); b.className = "n"; b.textContent = p.predict != null ? rateNum(p.predict, 3) : "—";
     const c = tr.insertCell(); c.className = "n"; c.textContent = fmtMin(p.seconds || 0);
   }
 }
@@ -311,7 +261,7 @@ function renderAlShieldChart(s, st) {
     h += `<text x="${L - 10}" y="${y + rh / 2 + 4}" class="al-lb" text-anchor="end">${alEsc(t)}</text>`;
     h += `<rect x="${L}" y="${y}" width="${Math.max(2, X(v) - L).toFixed(1)}" height="${rh}" rx="4" fill="${c}" fill-opacity=".75"/>`;
     h += `<line x1="${X(v - e).toFixed(1)}" x2="${X(v + e).toFixed(1)}" y1="${y + rh / 2}" y2="${y + rh / 2}" stroke="var(--text)" stroke-width="2"/>`;
-    h += `<text x="${(X(v + e) + 8).toFixed(1)}" y="${y + rh / 2 + 4}" class="al-ax">${alNum(v, 3)}</text>`;
+    h += `<text x="${(X(v + e) + 8).toFixed(1)}" y="${y + rh / 2 + 4}" class="al-ax">${rateNum(v, 3)} ${rateLbl()}</text>`;
   });
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.innerHTML = h;
@@ -319,17 +269,18 @@ function renderAlShieldChart(s, st) {
 
 // ---------- página ----------
 
+// as abas Distância e Blindagem do Medir objeto estão à vista?
+const alOnTest = () => state.view === "medir" && ["distancia", "blindagem"].includes(state.sub.medir);
+
 async function refreshAlara() {
-  if (state.view !== "alara") return;
+  if (!alOnTest()) return;
   const dev = alDev();
   document.querySelectorAll("#alDevSeg button, #alBDevSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.aldev === dev)));
-  await Promise.allSettled([refreshAlOrigin(), alTick()]);
+  await alTick();
 }
 
 function wireAlara() {
-  if (!$("pageAlara")) return;
-  $("alRate").addEventListener("input", () => { $("alRate").dataset.set = "1"; $("alRateFrom").textContent = "taxa escrita à mão"; renderAlTempo(); });
-  $("alMin").addEventListener("input", renderAlTempo);
+  if (!$("alSecDist")) return;
   $("alDStart").addEventListener("click", () => alStart("distancia"));
   $("alBStart").addEventListener("click", () => alStart("blindagem"));
   $("alDNext").addEventListener("click", alNext);

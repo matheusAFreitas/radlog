@@ -101,23 +101,28 @@ func (a *App) rcAlertStep(now time.Time, usv float64) {
 	if a.measureQuietLocked(devRC, now) {
 		usv = 0 // medindo um objeto com o RC102: alertas calados (2.81)
 	}
+	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	lusv := usv
+	if a.objTestQuietLocked(devRC, now) {
+		lusv = 0
+	}
 	set := a.settings
 	s := &a.rcAlert
-	step := func(on *bool, enabled bool, enter float64) (started, ended bool) {
+	step := func(on *bool, enabled bool, v, enter float64) (started, ended bool) {
 		was := *on
 		switch {
 		case !enabled:
 			*on = false
-		case usv >= enter:
+		case v >= enter:
 			*on = true
-		case usv < enter*0.9:
+		case v < enter*0.9:
 			*on = false
 		}
 		return *on && !was, was && !*on
 	}
-	attnStarted, attnEnded := step(&s.attnOn, set.AttentionEnabled, l.Attn)
-	alarmStarted, alarmEnded := step(&s.alarmOn, set.AlarmEnabled, l.Alarm)
-	dangStarted, dangEnded := step(&s.dangOn, true, l.Danger)
+	attnStarted, attnEnded := step(&s.attnOn, set.AttentionEnabled, lusv, l.Attn)
+	alarmStarted, alarmEnded := step(&s.alarmOn, set.AlarmEnabled, lusv, l.Alarm)
+	dangStarted, dangEnded := step(&s.dangOn, true, usv, l.Danger)
 	attnOn, alarmOn := s.attnOn, s.alarmOn
 	a.mu.Unlock()
 

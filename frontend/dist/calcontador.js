@@ -10,7 +10,7 @@
 const CC_SRC = { "intercalibração": "intercalibração com o RC102", "você": "informado à mão", "contador": "curva do contador" };
 
 function ccDay(t) {
-  return new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" });
+  return ddmm(t);
 }
 
 function ccList(pts) {
@@ -65,6 +65,13 @@ async function renderCounterCal() {
   }
   box.innerHTML = h;
   box.hidden = !h;
+  // aviso na frente (2.95.0): a tabela mora em Avançado
+  const note = $("calDevNote");
+  if (note) {
+    const show = !v.same && !!(v.suggested && v.suggested.length);
+    note.hidden = !show;
+    if (show) $("calDevNoteTxt").textContent = `O contador usa ${fmt(v.devK, 5)} µSv/h por CPM e o app, ${fmt(v.appK, 5)}.`;
+  }
   qsa("#ccBox button").forEach((b) => { b.disabled = !(devCfg && devCfg.calibrationEditable) || $("dcSaveBtn").disabled; });
 }
 
@@ -87,6 +94,7 @@ async function ccWrite(fn, okMsg) {
 function initCounterCal() {
   const box = $("ccBox");
   if (!box) return;
+  $("calDevGo").addEventListener("click", () => { $("calAdv").open = true; box.scrollIntoView({ block: "start", behavior: "smooth" }); });
   box.addEventListener("click", async (e) => {
     const b = e.target.closest("button[data-cc]");
     if (!b || !ccView) return;

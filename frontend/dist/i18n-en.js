@@ -436,7 +436,7 @@ const I18N_EN = {
 "Os ajustes do aparelho não foram para o contador: use \"Gravar no contador\" na seção Contador.": "The device settings didn't go to the counter: use \"Write to the counter\" in the Counter section.",
 "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
 "Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.": "The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.",
-"Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
+"Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
 "Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.": "PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.",
 "PERIGO": "DANGER",
 "POR DIA": "BY DAY",
@@ -1506,8 +1506,8 @@ const I18N_EN = {
 "ainda sem dados: a primeira linha aparece em até 2 minutos": "no data yet: the first row shows up within 2 minutes",
 "sem leitura nesse intervalo: média dele": "no reading in this interval: its average",
 "sem leitura (média)": "no reading (average)",
-"Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
-"Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RC102, no mesmo período do espectrograma: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RadiaCode, no mesmo período do espectrograma: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
 "se a contagem sobe e a dureza": "if the count rate goes up and hardness",
 ", costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza": ", it's usually radon (rain, closed house: its daughters sit almost entirely below 1,500 keV). If hardness",
 "junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece.": "goes up too, something with a high-energy line is nearby, like thorium (Tl-208 at 2,614 keV). Hover: the app adds up the spectra of that stretch, compares them with the background and says what it looks like.",
@@ -2390,7 +2390,7 @@ const I18N_EN = {
 "Alarmes que tocam nos aparelhos": "Alarms that sound on the devices",
 "Amarelo e 3 bipes.": "Yellow and 3 beeps.",
 "Atualizações e sobre": "Updates and about",
-"Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:": "Each device also beeps on its own, with its own numbers. In µSv/h, to compare with the ones above:",
+"Cada aparelho também apita sozinho, com números próprios. Na unidade da tela, para comparar com os de cima:": "Each device also beeps on its own, with its own numbers. In the screen unit, to compare with the ones above:",
 "Dados brutos": "Raw data",
 "Dados e backup": "Data and backup",
 "Depois do tempo, se continuar alto, volta a tocar.": "After that time, if it is still high, it sounds again.",
@@ -2871,8 +2871,8 @@ const I18N_EN = {
 "Aparelho no ícone": "Device on the icon",
 "Automático (o mais grave)": "Automatic (the most severe)",
 "O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.": "Windows usually hides new icons inside the ^ arrow. To always see the number, drag the RadLog icon onto the taskbar, next to the clock.",
-"O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
-"O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RadiaCode esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in µSv/h in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
+"O ícone mostra a leitura na unidade da tela, na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in the screen unit, in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
+"O ícone mostra a leitura na unidade da tela, na cor do nível. No automático é a do GMC-800, a não ser que o RadiaCode esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.": "The icon shows the reading in the screen unit, in the level's color. On automatic it is the GMC-800's, unless the RC102 is at a more severe level. Turning off the reading on the icon brings back the logo with the colored dot in the corner.",
 "leitura no ícone": "reading on the icon",
 "aparelho no ícone": "device on the icon",
 "ATENÇÃO": "ATTENTION",
@@ -3053,13 +3053,13 @@ const I18N_EN = {
 "Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só.": "If it were the environment, both would rise together. That's what separates real radiation from something in one device.",
 "Fora de casa o fundo muda: granito, prédios, solo, altitude e avião sobem a dose. Isso entra na Minha dose, não no fundo de casa.": "Away from home the background changes: granite, buildings, soil, altitude and flying raise the dose. That goes into My dose, not into the home background.",
 "A chuva traz para o chão os produtos do radônio que estavam no ar. Eles têm meia-vida curta (minutos), então a subida dura poucas horas e some sozinha.": "Rain brings radon's decay products in the air down to the ground. They have short half-lives (minutes), so the rise lasts a few hours and goes away on its own.",
-"Sem dado: a chuva não está ligada (Configurações › Janela e tela).": "No data: rain is off (Settings › Window and screen).",
+"Sem dado: a chuva não está ligada (Configurações › Chuva no gráfico).": "No data: rain is off (Settings › Rain on the chart).",
 "Sem dado de chuva nessa hora.": "No rain data at that time.",
 "Não choveu nas 4 horas antes.": "It didn't rain in the 4 hours before.",
 "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.": "With the house closed and the air still, radon coming out of the floor and walls builds up. During the day, with windows open and wind, it spreads out.",
 "Sem dado: ainda são poucos dias para saber o padrão de cada hora.": "No data: still too few days to know each hour's pattern.",
 "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.": "When air pressure drops, more radon comes out of the soil and walls, and the home background rises a few hours later.",
-"Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela).": "No pressure data (it comes with rain, in Settings › Window and screen).",
+"Sem dado de pressão (vem com a chuva, em Configurações › Chuva no gráfico).": "No pressure data (it comes with rain, in Settings › Rain on the chart).",
 "Sem dado de pressão nessa hora.": "No pressure data at that time.",
 "Um objeto perto do aparelho sobe muito a leitura dele, e quase nada a do outro aparelho. Para medir direito, use o Medir objeto.": "An object near a device raises its reading a lot, and the other device's barely at all. To measure properly, use Measure object.",
 "A subida é do tamanho do acaso.": "The rise is the size of chance.",
@@ -3241,7 +3241,7 @@ const I18N_EN = {
 "Escolher a data": "Pick the date",
 "Compara dois períodos": "Compares two periods",
 "Mostrar todos os alertas": "Show all alerts",
-"µSv/h no período": "µSv/h in the period",
+"Leitura no período": "Reading in the period",
 "nenhum": "none",
 "Nenhum alerta agora": "No alert right now",
 "Nenhum alerta neste filtro.": "No alerts for this filter.",
@@ -3624,7 +3624,7 @@ const I18N_EN = {
 "Nunca usado em 30 dias": "Never used in 30 days",
 "Nunca usado em 30 dias:": "Never used in 30 days:",
 "Não consegui copiar": "Couldn't copy",
-"Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; \"Zerar contagem\" apaga.": "It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the sync and the PDF. Turning it off stops counting and keeps what was counted; \"Reset count\" deletes it.",
+"Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da nuvem e do PDF. Desligar para de contar e guarda o que já contou; \"Zerar contagem\" apaga.": "It doesn't count what you type, readings or times of day: only daily totals, in the uso.json file in the data folder. It never leaves the computer and stays out of the backup, the cloud and the PDF. Turning it off stops counting and keeps what was counted; \"Reset count\" deletes it.",
 "Período do uso": "Usage period",
 "Páginas:": "Pages:",
 "Uso do app": "App usage",
@@ -4247,7 +4247,7 @@ const I18N_EN = {
 "Demonstração ligada": "Demo on",
 "Escolha um cenário. Os dois aparelhos andam juntos, cada um com os próprios limites. O app todo mostra dados simulados até você sair. Nada vai para os arquivos, e os aparelhos de verdade continuam gravando por baixo.": "Pick a scenario. Both devices move together, each with its own limits. The whole app shows simulated data until you leave. Nothing goes to the files, and the real devices keep recording underneath.",
 "Espectro com Cs-137": "Spectrum with Cs-137",
-"Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.": "CSV export, PDF report, backup, cloud and sync stay off until you leave. A real alarm ends the demo right away.",
+"Exportar CSV, relatório em PDF, backup e nuvem ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.": "CSV export, PDF report, backup and cloud stay off until you leave. A real alarm ends the demo right away.",
 "Fechar controles": "Close controls",
 "Fundo de casa · nada é gravado": "Home background · nothing is recorded",
 "Leitura real do GMC-800: —": "Real GMC-800 reading: —",
@@ -4327,13 +4327,363 @@ const I18N_EN = {
 "Configurações › Dados e backup": "Settings › Data and backup",
 "Gera um arquivo CSV com as leituras por minuto dos dois aparelhos, para abrir em planilha.": "Creates a CSV file with the per-minute readings from both devices, to open in a spreadsheet.",
 "Nuvem (Google Drive): abrir em Configurações": "Cloud (Google Drive): open in Settings",
-"O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, sync. Useful when something is not working.",
+"O que o app fez e os erros que encontrou: conexões, downloads, alertas, nuvem. Útil quando algo não funciona.": "What the app did and the errors it found: connections, downloads, alerts, cloud. Useful when something is not working.",
 "Exportar leituras": "Export readings",
 "Exportar leituras (CSV)": "Export readings (CSV)",
 "µSv/h médio · cinza = sem dados": "Average µSv/h · gray = no data",
-"Mapa de calor do µSv/h médio por dia e hora": "Heat map of average µSv/h by day and hour",
+"Mapa de calor da leitura média por dia e hora": "Heat map of the average reading by day and hour",
 "papel mudou": "role changed",
-"fora": "out"
+"fora": "out",
+"Os últimos 10 segundos · cada traço é uma contagem": "The last 10 seconds · each mark is one count",
+"do dia": "of the day",
+"da semana": "of the week",
+"do mês": "of the month",
+"do ano": "of the year",
+"do período": "of the period",
+"Unidades": "Units",
+"Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RC102 segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. \"Salvar\" recarrega a tela na unidade nova.": "Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. \"Save\" reloads the screen in the new unit.",
+"Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RadiaCode segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. \"Salvar\" recarrega a tela na unidade nova.": "Applies to the whole app: Now tiles, each device's page, charts, alerts and report. Dose follows the rate (µSv/h → µSv, mrem/h → mrem). The RC102 follows the same choice. Calibration and the technical parts stay in CPM, which is what the tube measures. \"Save\" reloads the screen in the new unit.",
+"unidade da taxa": "rate unit",
+"unidade da contagem": "count unit",
+"Limite (µSv/h)": "Limit (µSv/h)",
+"mais 1 a responder": "1 more to answer",
+"Ver detalhes": "See details",
+"Onde estão": "Where they are",
+"mudar": "change",
+"continua somando a dose sozinho": "keeps adding up the dose on its own",
+"/dia": "/day",
+"% acima da média das 2 h antes": "% above the average of the 2 h before",
+"A aba Distância mede isso com o seu objeto.": "The Distance tab measures it with your object.",
+"A cada chuva com o contador gravando (app aberto ou histórico baixado), o app mede quanto a leitura subiu depois e compara com horários sem chuva.": "With each rain while the counter is recording (app open or history downloaded), the app measures how much the reading rose afterwards and compares it with times without rain.",
+"A fatia que dá para baixar é a de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.": "The slice you can lower is the top one, the dose that came from something: an object you measured, a spike, a different place.",
+"É nessa parte que tempo, distância e blindagem fazem diferença; os testes ficam no Medir objeto.": "That is where time, distance and shielding make a difference; the tests are in Measure object.",
+"Como funciona: tempo, distância e blindagem": "How it works: time, distance and shielding",
+"De uma fonte pequena, o dobro da distância deixa ¼ da taxa.": "From a small source, twice the distance leaves ¼ of the rate.",
+"Distância.": "Distance.",
+"Blindagem.": "Shielding.",
+"Tempo.": "Time.",
+"Divisão da dose do período": "Split of the period's dose",
+"Dose = taxa × tempo: metade do tempo dá metade da dose.": "Dose = rate × time: half the time gives half the dose.",
+"Ficar perto por": "Stay close for",
+"GMC-800 sem conexão": "GMC-800 disconnected",
+"RC102 sem conexão": "RC102 disconnected",
+"RadiaCode sem conexão": "RC102 disconnected",
+"Os dois sem conexão": "Both disconnected",
+"RC102 voltou": "RC102 came back",
+"RadiaCode voltou": "RC102 came back",
+"Leitura média antes e depois da chuva, comparada com horários sem chuva": "Average reading before and after rain, compared with times without rain",
+"Mais ações deste trecho": "More actions for this period",
+"Marcar a chuva no gráfico": "Mark rain on the chart",
+"Mostra quando choveu na sua cidade e quanto a leitura sobe depois. A cidade fica só neste PC.": "Shows when it rained in your city and how much the reading rises afterwards. The city stays on this PC only.",
+"Ligar": "Turn on",
+"Medir objeto › Distância": "Measure object › Distance",
+"Medir objeto › Blindagem": "Measure object › Shielding",
+"Blindagem": "Shielding",
+"Teste de blindagem": "Shielding test",
+"Memória do GMC-800 cheia": "GMC-800 memory full",
+"O aparelho para de gravar ou grava por cima (conforme o ajuste dele). Baixe o histórico para guardar tudo no app.": "The device stops recording or overwrites (depending on its setting). Download the history to keep everything in the app.",
+"Quando encher, o aparelho para de gravar ou grava por cima (conforme o ajuste dele).": "When it fills up, the device stops recording or overwrites (depending on its setting).",
+"Metade do tempo dá metade da dose. De uma fonte pequena, o dobro da distância deixa ¼.": "Half the time gives half the dose. From a small source, twice the distance leaves ¼.",
+"Nenhum trecho acima do fundo no período: tudo foi fundo natural.": "No period above background: it was all natural background.",
+"O resultado de cada medição mostra quanto custa ficar perto.": "Each measurement's result shows how much staying close costs.",
+"Partes de Dados e backup": "Parts of Data and backup",
+"Pôr matéria no caminho segura uma parte da radiação.": "Putting matter in the way stops part of the radiation.",
+"A aba Blindagem compara antes e depois.": "The Shielding tab compares before and after.",
+"Sem leituras da memória do aparelho.": "No readings from the device memory.",
+"São três jeitos, e os três moram aqui:": "There are three ways, and all three live here:",
+"Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.": "All of this is about the dose above background. Natural background comes from the ground, the walls, the air and space, and you get it anywhere in the house.",
+"alara origem dose fundo acima": "alara origin dose background above",
+"alara distancia inverso quadrado afastar": "alara distance inverse square move away",
+"alara blindagem material chumbo antes depois": "alara shielding material lead before after",
+"Backup e arquivos": "Backup and files",
+"Nuvem": "Cloud",
+"% de KCl no rótulo": "% KCl on the label",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RadiaCode encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"(fundo salvo)": "(saved background)",
+"1 · KCl": "1 · KCl",
+"2 · Tório": "2 · Thorium",
+"3 · Pronto": "3 · Done",
+"31,7 Bq por grama de potássio": "31.7 Bq per gram of potassium",
+"Adubo de potássio": "Potash fertilizer",
+"Areia monazítica": "Monazite sand",
+"Alimento": "Food",
+"Calibrar": "Calibrate",
+"Calibrar de novo": "Calibrate again",
+"Castanha-do-pará": "Brazil nuts",
+"Coloque a amostra na posição da calibração e clique em Começar.": "Put the sample in the calibration position and click Start.",
+"Começar a calibração": "Start calibration",
+"Cs-137 \"abaixo de\"": "Cs-137 \"below\"",
+"Cs-137 bem abaixo do que o RC102 vê": "Cs-137 well below what the RC102 can see",
+"Cs-137 bem abaixo do que o RadiaCode vê": "Cs-137 well below what the RC102 can see",
+"Depois, é só medir amostras na mesma posição.": "After that, just measure samples in the same position.",
+"Dê um nome em Mais opções.": "Give it a name in More options.",
+"Eletrodo de tungstênio toriado, se tiver.": "Thoriated tungsten electrode, if you have one.",
+"Escala aproximada: falta o KCl.": "Approximate scale: KCl still missing.",
+"Esquecer a calibração do KCl?": "Forget the KCl calibration?",
+"Esquecer a calibração do tório?": "Forget the thorium calibration?",
+"Euxenita pode ter urânio e tório. O app só conta tório com as linhas de 911 ou 2.614 keV.": "Euxenite can have uranium and thorium. The app only counts thorium with the 911 or 2,614 keV lines.",
+"Falta calibrar.": "Not calibrated yet.",
+"Forma diferente do pote da calibração: aproximado.": "Different shape from the calibration jar: approximate.",
+"Guardar como minha": "Save as mine",
+"＋ Guardar como minha": "＋ Save as mine",
+"KCl puro": "Pure KCl",
+"Linhas usadas e detalhes técnicos": "Lines used and technical details",
+"Mais opções": "More options",
+"Massa (g), só para o Bq/g": "Mass (g), only for Bq/g",
+"Medindo": "Measuring",
+"Colocar a amostra": "Place the sample",
+"Medir o tório": "Measure the thorium",
+"Moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226).": "Ground or chopped, full jar, tightly closed ~3 weeks before (for Ra-226).",
+"Nome (para o histórico)": "Name (for the history)",
+"O RC102 não chegou a ver. Mais tempo ajudaria.": "The RC102 didn't see it. More time would help.",
+"O RadiaCode não chegou a ver. Mais tempo ajudaria.": "The RC102 didn't see it. More time would help.",
+"O U-238 sai pela linha de 1.001 keV, que é fraca. O rádio costuma ser baixo porque o urânio foi purificado ao fazer o vidro.": "U-238 comes from the 1,001 keV line, which is weak. Radium is usually low because the uranium was purified to make the glass.",
+"O que aparece é o K-40, do potássio da comida.": "What shows up is K-40, from the potassium in the food.",
+"Outra coisa": "Something else",
+"Outras": "Others",
+"Para voltar, é preciso medir de novo.": "To get it back, you have to measure again.",
+"Pedaços que caibam no pote, ou a peça encostada sempre do mesmo jeito.": "Pieces that fit in the jar, or the piece touching it the same way every time.",
+"Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.": "Loose stone: the result is in Bq for the whole piece, so weighing it is optional. The shape differs from the calibration jar, so it's approximate.",
+"Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RC102 quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
+"Pedra solta: o resultado sai em Bq da peça inteira. Tem muito beta, que o RadiaCode quase não conta para a atividade.": "Loose stone: the result is in Bq for the whole piece. It has a lot of beta, which the RC102 barely counts for activity.",
+"Pelo K-40 o app calcula quanto potássio tem.": "From K-40 the app works out how much potassium there is.",
+"Preparo:": "Preparation:",
+"Radionuclídeo": "Radionuclide",
+"Sal light ou KCl puro, ~500 g, no pote.": "Lite salt or pure KCl, ~500 g, in the jar.",
+"Sem isso, os Bq são só um chute (±100%).": "Without it, the Bq are just a guess (±100%).",
+"Suas amostras": "Your samples",
+"Tirar": "Remove",
+"Tirar de Suas amostras?": "Remove from Your samples?",
+"Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre.": "Move the sample away (about 3 m) and leave the RC102 in its usual place.",
+"Tire a amostra de perto (uns 3 m) e deixe o RadiaCode no lugar de sempre.": "Move the sample away (about 3 m) and leave the RC102 in its usual place.",
+"Total:": "Total:",
+"Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.": "Just once, with lite salt or pure KCl, in the position you'll measure in.",
+"Vidro ou esmalte de urânio": "Uranium glass or glaze",
+"abaixo de": "below",
+"abaixo do típico": "below typical",
+"acima do típico": "above typical",
+"ainda não medida": "not measured yet",
+"até você parar": "until you stop",
+"com o eletrodo": "with the electrode",
+"com o que está escolhido": "with what's selected",
+"comparado ao típico": "compared to typical",
+"césio, de usinas e testes nucleares": "cesium, from power plants and nuclear tests",
+"de amostra": "of sample",
+"de fundo +": "of background +",
+"dentro do esperado": "as expected",
+"dá o potássio em g/kg": "gives potassium in g/kg",
+"dê um nome para a amostra": "give the sample a name",
+"em 1.460 keV": "at 1,460 keV",
+"encostada": "touching",
+"falta para ±10%": "left for ±10%",
+"fica guardado": "it's kept",
+"forma da curva estimada (o tório melhora)": "curve shape estimated (thorium improves it)",
+"forma da curva: estimada (inclinação −1,3 ± 0,4)": "curve shape: estimated (slope −1.3 ± 0.4)",
+"forte: sai rápido": "strong: quick",
+"g de potássio por kg": "g of potassium per kg",
+"inclinação": "slope",
+"massa ou tempo inválido": "invalid mass or time",
+"medir o tório": "measure the thorium",
+"medir um novo": "measure a new one",
+"na peça": "in the piece",
+"no GMC-800": "on the GMC-800",
+"obrigatório · ~1 h": "required · ~1 h",
+"opcional · melhora a curva": "optional · improves the curve",
+"para o RC102": "for the RC102",
+"para o RadiaCode": "for the RC102",
+"recomendado": "recommended",
+"rádio costuma ser baixo": "radium is usually low",
+"rádio, da série do tório": "radium, thorium series",
+"rádio, da série do urânio": "radium, uranium series",
+"sai fácil": "easy",
+"sem massa": "no mass",
+"sem valor típico na lista": "no typical value on the list",
+"sua": "yours",
+"sua referência": "your reference",
+"só com peça forte": "only with a strong piece",
+"talvez só \"abaixo de\"": "maybe only \"below\"",
+"tirar de Suas amostras": "remove from Your samples",
+"tório só se aparecer 911 ou 2.614 keV": "thorium only if 911 or 2,614 keV shows up",
+"tório, a série inteira": "thorium, whole series",
+"urânio": "uranium",
+"urânio e tório?": "uranium and thorium?",
+"usar o salvo": "use the saved one",
+"usar o salvo (não tem)": "use the saved one (none)",
+"valor típico": "typical value",
+"voltar": "back",
+"última medida": "last measured",
+"tempo recomendado": "recommended time",
+"Ra-226 ≈ 24 a 105 Bq/kg": "Ra-226 ≈ 24 to 105 Bq/kg",
+"Th-232 ≈ 1.000 a 2.300 Bq/kg": "Th-232 ≈ 1,000 to 2,300 Bq/kg",
+"solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg": "soil: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg",
+"pedra solta": "loose stone",
+"abrir o quadro": "open the panel",
+"fechar o quadro": "close the panel",
+"Em mrem/h": "In mrem/h",
+"Em µSv/h": "In µSv/h",
+"Últimos 10 s": "Last 10 s",
+"atenção e alarme: os alarmes 1 e 2 do RC102": "attention and alarm: the RC102's alarms 1 and 2",
+"atenção e alarme: os alarmes 1 e 2 do RadiaCode": "attention and alarm: the RC102's alarms 1 and 2",
+"Cala atenção e alarme do aparelho escolhido por 10 min. O perigo continua tocando.": "Silences attention and alarm on the chosen device for 10 min. Danger still sounds.",
+"Dados simulados no app todo, para conhecer as telas e os alarmes. Nada é gravado.": "Simulated data across the app, to get to know the screens and alarms. Nothing is saved.",
+"Estou testando um objeto": "I'm testing an object",
+"Parar o teste do objeto": "Stop the object test",
+"a memória do GMC-800": "the GMC-800's memory",
+"atenção e alarme voltam a valer": "attention and alarm work again",
+"baixar historico memoria gmc": "download history memory gmc",
+"cala os alertas por 10 min": "silences alerts for 10 min",
+"Parar": "Stop",
+"Fechar a pergunta": "Close the question",
+"Fechar: a pergunta continua em Fora de casa": "Close: the question stays in Away from home",
+"alerta curto": "short alert",
+"alertas curtos": "short alerts",
+"igual ao fundo da sua casa": "same as your home background",
+"por período": "by period",
+"sem dado hoje": "no data today",
+"ano": "year",
+"Abrir em Fundo de casa": "Open in Home background",
+"Abrir o Fundo de casa": "Open Home background",
+"Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.": "Each bar is the difference from the average, in %: to the right is above, to the left is below. The value shows on hover.",
+"Dia da semana, dia × noite e mês": "Day of week, day × night and month",
+"Fundo por dia, em tabela": "Background by day, as a table",
+"Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.": "Median of the minutes at home (no object measurement and no saturated or interfered minutes). The day × night comparison uses the days with both halves measured (6 h or more each) and compares each day with its own night, so one day's weather doesn't weigh in.",
+"Outra conta: a reta dos últimos dias": "Another calculation: the line over the last days",
+"ainda é 1 mês de dado; fica mais útil depois de um ano": "only 1 month of data so far; more useful after a year",
+"sem diferença de verdade (tudo abaixo de 1%)": "no real difference (all below 1%)",
+"Últimas semanas": "Last weeks",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"achado depois\" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged \"found later\" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"achado depois\" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged \"found later\" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Níveis e alarmes": "Levels and alarms",
+"Todos os alertas": "All alerts",
+"dentro do teto": "within the ceiling",
+"mostrar no gráfico": "show on chart",
+"passou do teto": "over the ceiling",
+"achado depois": "found later",
+"Achados depois": "Found later",
+"(achado depois)": "(found later)",
+"a conta": "the math",
+"Alarmes": "Alarms",
+"Fora dos alertas, a casa ficou igual ao normal": "Outside the alerts, home was the same as normal",
+"Escala de cor": "Colour scale",
+"Sair da tela cheia": "Exit full screen",
+"Tela cheia": "Full screen",
+"contínua": "continuous",
+"cores: original": "colours: original",
+"Parece:": "Looks like:",
+"o Cs-137 pode ficar abaixo do que o RC102 consegue medir": "Cs-137 may stay below what the RC102 can measure",
+"o Cs-137 pode ficar abaixo do que o RadiaCode consegue medir": "Cs-137 may stay below what the RC102 can measure",
+"pode ficar abaixo do que o RC102 consegue medir": "may stay below what the RC102 can measure",
+"pode ficar abaixo do que o RadiaCode consegue medir": "may stay below what the RC102 can measure",
+"(usada no Bq e na distância segura)": "(used for Bq and the safe distance)",
+"Certeza: nenhuma, cabe no acaso.": "Certainty: none, it fits chance.",
+"Certeza: muito alta.": "Certainty: very high.",
+"Certeza: alta.": "Certainty: high.",
+"Certeza: boa.": "Certainty: good.",
+"Certeza: baixa, pode ser acaso.": "Certainty: low, it may be chance.",
+"muito alta": "very high",
+"alta": "high",
+"boa": "good",
+"baixa": "low",
+"nenhuma": "none",
+"(opcional)": "(optional)",
+"ignorar": "ignore",
+"ignorado": "ignored",
+"GMC-800 ignorado": "GMC-800 ignored",
+"RC102 ignorado": "RC102 ignored",
+"RadiaCode ignorado": "RC102 ignored",
+"Como cai com a distância": "How it drops with distance",
+"Linha do tempo dos últimos 7 dias": "Timeline of the last 7 days",
+"Os dois ignorados": "Both ignored",
+"Quer ver na prática?": "Want to see it in practice?",
+"Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RC102 com você.": "Your trips and the dose of each one. Normal is the GMC-800 at home and the RC102 with you.",
+"Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RadiaCode com você.": "Your trips and the dose of each one. Normal is the GMC-800 at home and the RC102 with you.",
+"Testar uma blindagem": "Test a shield",
+"leitura com problema": "reading with a problem",
+"saiu do normal": "left normal",
+"você não estava em casa": "you weren't home",
+"← Voltar para o Medir objeto": "← Back to Measure object",
+"Alarme 1 de dose do RC102": "RC102 dose alarm 1",
+"Alarme 1 de dose do RadiaCode": "RC102 dose alarm 1",
+"Alarme 1 do RC102": "RC102 alarm 1",
+"Alarme 1 do RadiaCode": "RC102 alarm 1",
+"Alarme 1 ligado": "Alarm 1 on",
+"Alarme 2 de dose do RC102": "RC102 dose alarm 2",
+"Alarme 2 de dose do RadiaCode": "RC102 dose alarm 2",
+"Alarme 2 do RC102": "RC102 alarm 2",
+"Alarme 2 do RadiaCode": "RC102 alarm 2",
+"Alarme 2 ligado": "Alarm 2 on",
+"Alarme do GMC-800": "GMC-800 alarm",
+"Alarme do app": "App alarm",
+"Antes, o app salva uma cópia do que está no contador agora.": "First, the app saves a copy of what is on the counter now.",
+"Atenção do app": "App attention",
+"Perigo do app": "App danger",
+"Avançado": "Advanced",
+"Chuva da sua cidade": "Rain in your city",
+"Fator em uso": "Factor in use",
+"Fator à mão e versões": "Factor by hand and versions",
+"Igualar o contador": "Match the counter",
+"Mais ajustes do GMC-800": "More GMC-800 settings",
+"Mais ajustes do RC102": "More RC102 settings",
+"Mais ajustes do RadiaCode": "More RC102 settings",
+"Os do app vão com \"Salvar\". Os dos aparelhos só vão com o botão de cada um.": "The app's values go with \"Save\". The devices' values only go with each device's button.",
+"Tamanho de tudo:": "Size of everything:",
+"Vale para o app todo. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem).": "Applies to the whole app. Dose follows the rate (µSv/h → µSv, mrem/h → mrem).",
+"conecte para mudar": "connect to change",
+"grava no aparelho": "writes to the device",
+"não tem": "none",
+"sirene que não desliga": "siren that doesn't stop",
+"amarelo e 3 bipes": "yellow and 3 beeps",
+"toca o som escolhido": "plays the chosen sound",
+"· fator à mão, versões, lado a lado com o RC102 e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter",
+"· fator à mão, versões, lado a lado com o RadiaCode e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter",
+"Dureza do espectro ao longo do tempo": "Spectrum hardness over time",
+"Espectro ao longo do tempo": "Spectrum over time",
+"Espectro da amostra": "Sample spectrum",
+"Espectro do RC102": "RC102 spectrum",
+"Espectro do RadiaCode": "RC102 spectrum",
+"Não deu para baixar tudo: os minutos que chegaram foram guardados.": "Could not download everything: the minutes that arrived were kept.",
+"Não deu para baixar:": "Could not download:",
+"Taxa do RC102 ao longo do tempo": "RC102 rate over time",
+"Taxa do RadiaCode ao longo do tempo": "RC102 rate over time",
+"Trecho do espectro, de perto": "Spectrum section, up close",
+"Última hora": "Last hour",
+"Tudo baixado.": "All downloaded.",
+"A conta do acaso para coisas que acontecem soltas no tempo, como os decaimentos. Diz quanto a contagem varia sozinha.": "The math of chance for things that happen loosely in time, like decays. It says how much the count varies on its own.",
+"A radiação natural de sempre no lugar: solo, paredes, radônio do ar e raios cósmicos. Não dá para zerar, e é normal.": "The usual natural radiation in a place: soil, walls, radon in the air and cosmic rays. It can't be zeroed, and it's normal.",
+"A tabela de fábrica do GMC-800 que transforma CPM em µSv/h. A intercalibração com o RC102 pode trocar o fator.": "The GMC-800 factory table that turns CPM into µSv/h. Cross-calibration with the RC102 can replace the factor.",
+"A tabela de fábrica do GMC-800 que transforma CPM em µSv/h. A intercalibração com o RadiaCode pode trocar o fator.": "The GMC-800 factory table that turns CPM into µSv/h. Cross-calibration with the RC102 can replace the factor.",
+"Contagens por minuto e por segundo: quantos pulsos o aparelho viu. É o que ele mede de verdade; o µSv/h é uma conta feita em cima disso.": "Counts per minute and per second: how many pulses the device saw. That's what it really measures; µSv/h is calculated from it.",
+"Cortam as leituras em quatro partes iguais. Entre o 1º e o 3º quartil ficam as leituras do meio, as mais comuns.": "They cut the readings into four equal parts. Between the 1st and 3rd quartile are the middle readings, the most common ones.",
+"Curva do contador": "Counter's curve",
+"Janela em formação": "Window still forming",
+"O app ainda está juntando dias para saber o seu normal. Até completar, as comparações são só uma pista.": "The app is still gathering days to learn your normal. Until then, comparisons are only a hint.",
+"O tamanho do vai e vem natural da contagem. Até 2σ é acaso. De 3σ para cima, a mudança é real.": "The size of the count's natural ups and downs. Up to 2σ is chance. From 3σ up, the change is real.",
+"O valor do meio: metade das leituras fica abaixo, metade acima. Um pico curto não mexe nela, por isso serve para medir o fundo.": "The middle value: half the readings are below, half above. A short peak doesn't move it, which is why it works for the background.",
+"Os termos do app": "The app's terms",
+"Quanto as leituras variam comparado com o que o acaso explica. Perto de 1 é normal. Bem acima de 1, alguma coisa mexeu de verdade (radônio, chuva, o aparelho).": "How much readings vary compared with what chance explains. Near 1 is normal. Well above 1, something really changed (radon, rain, the device).",
+"Quanto do espectro está nas energias altas. Sobe com fontes mais fortes em gama alta (tório, rádio) e atrás de blindagem, que segura mais as energias baixas.": "How much of the spectrum is at high energies. It rises with sources strong in high gamma (thorium, radium) and behind shielding, which stops low energies more.",
+"Quanto o número pode estar fora por causa do acaso. Medir mais tempo diminui a incerteza.": "How far the number may be off because of chance. Measuring longer reduces the uncertainty.",
+"Radiação tão alta que o tubo não consegue contar tudo: o número fica abaixo do real. Afaste-se e confie no RC102.": "Radiation so high the tube can't count it all: the number reads lower than real. Step away and trust the RC102.",
+"Radiação tão alta que o tubo não consegue contar tudo: o número fica abaixo do real. Afaste-se e confie no RadiaCode.": "Radiation so high the tube can't count it all: the number reads lower than real. Step away and trust the RC102.",
+"Todos os termos": "All terms",
+"glossario termos sigma mediana quartil dispersao poisson dureza saturando curva cpm cps fundo incerteza": "glossary terms sigma median quartile dispersion poisson hardness saturating curve cpm cps background uncertainty",
+"nos gráficos": "on the charts",
+"σ, mediana, dureza e outros, em palavras simples": "σ, median, hardness and others, in plain words",
+"Mediana": "Median",
+"Quartis": "Quartiles",
+"Poisson": "Poisson",
+"Dureza": "Hardness",
+"Saturando": "Saturating",
+"CPM e CPS": "CPM and CPS",
+"Incerteza (±)": "Uncertainty (±)",
+"na hora certa": "on time",
+"clique para abrir": "click to open",
+"não conectou": "did not connect",
+"Datas": "Dates",
+"Formato da data": "Date format",
+"Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.": "Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.",
+"formato da data": "date format"
 },
 "patterns": [
 [
@@ -6131,6 +6481,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Testando um objeto no RadiaCode: atenção e alarme calados até ",
+"^Testando um objeto no RadiaCode: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the RC102: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no RadiaCode: atenção e alarme calados até ",
+". O perigo continua."
+]
+],
+[
 "não vou gravar: a configuração do contador tem valores que o app não reconhece (",
 "^não vou gravar: a configuração do contador tem valores que o app não reconhece \\(((?:(?! · ).)+?)\\)$",
 "won't write: the counter configuration has values the app doesn't recognize (${1})",
@@ -6154,6 +6513,15 @@ const I18N_EN = {
 [
 "Contador e app usam o mesmo fator: ",
 " µSv/h por CPM. Os dois mostram o mesmo µSv/h."
+]
+],
+[
+"Testando um objeto no GMC-800: atenção e alarme calados até ",
+"^Testando um objeto no GMC\\-800: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the GMC-800: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no GMC-800: atenção e alarme calados até ",
+". O perigo continua."
 ]
 ],
 [
@@ -6236,6 +6604,15 @@ const I18N_EN = {
 [
 "Saída programada \"",
 "\": já havia um trecho marcado à mão nesse horário; ficou o seu"
+]
+],
+[
+"Testando um objeto no RC102: atenção e alarme calados até ",
+"^Testando um objeto no RC102: atenção e alarme calados até ((?:(?! · ).)+?)\\. O perigo continua\\.$",
+"Testing an object with the RC102: attention and alarm silenced until ${1}. Danger still sounds.",
+[
+"Testando um objeto no RC102: atenção e alarme calados até ",
+". O perigo continua."
 ]
 ],
 [
@@ -6933,6 +7310,17 @@ const I18N_EN = {
 ]
 ],
 [
+"mais alto por volta das ",
+"^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
+"highest around ${1}h (${2} ${3}) · lowest around ${4}h (${5} ${6})",
+[
+"mais alto por volta das ",
+"h (",
+") · mais baixo por volta das ",
+"h ("
+]
+],
+[
 "não consegui salvar a cópia de segurança, então não gravei nada: ",
 "^não consegui salvar a cópia de segurança, então não gravei nada: ((?:(?! · ).)+?)$",
 "couldn't save the backup copy, so nothing was written: ${1}",
@@ -7045,6 +7433,16 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
+]
+],
+[
+"grava ",
+"^grava ((?:(?! · ).)+?) CPM no aparelho, pela calibração do app \\(((?:(?! · ).)+?) µSv/h por CPM\\)$",
+"writes ${1} CPM to the device, using the app's calibration (${2} µSv/h per CPM)",
+[
+"grava ",
+" CPM no aparelho, pela calibração do app (",
+" µSv/h por CPM)"
 ]
 ],
 [
@@ -7239,6 +7637,32 @@ const I18N_EN = {
 " tem ",
 " MB, acima do limite de ",
 " MB da nuvem, e não subiu"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS · RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS · RC102 average ${4} · max ${5} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS · RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM · RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPM · RC102 average ${4} · max ${5} CPM",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPM · RadiaCode média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -7550,6 +7974,32 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS · RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS · RC102 average ${4} · max ${5} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS · RC102 média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM · RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPM · RC102 average ${4} · max ${5} CPM",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPM · RC102 média ",
+" · máx ",
+" CPM"
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -7747,6 +8197,15 @@ const I18N_EN = {
 ]
 ],
 [
+"ainda são ",
+"^ainda são ((?:(?! · ).)+?) meses de dado; fica mais útil depois de um ano$",
+"only ${1} months of data so far; more useful after a year",
+[
+"ainda são ",
+" meses de dado; fica mais útil depois de um ano"
+]
+],
+[
 "esta versão (",
 "^esta versão \\(((?:(?! · ).)+?)\\) é mais nova que a última publicada \\(((?:(?! · ).)+?)\\)((?:(?! · ).)+?)$",
 "this version (${1}) is newer than the latest published (${2})${3}",
@@ -7924,6 +8383,16 @@ const I18N_EN = {
 [
 "· mais alto por volta das ",
 "h, mais baixo por volta das "
+]
+],
+[
+"Teto: o fundo da casa no ano todo (",
+"^Teto: o fundo da casa no ano todo \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\) mais ((?:(?! · ).)+?) mSv/ano\\.$",
+"Ceiling: the home background for the whole year (${1} ${2}) plus ${3} mSv/year.",
+[
+"Teto: o fundo da casa no ano todo (",
+") mais ",
+" mSv/ano."
 ]
 ],
 [
@@ -8182,6 +8651,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Testando um objeto no ",
+"^Testando um objeto no ((?:(?! · ).)+?): atenção e alarme calados até ((?:(?! · ).)+?)$",
+"Testing an object with the ${1}: attention and alarm silenced until ${2}",
+[
+"Testando um objeto no ",
+": atenção e alarme calados até "
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -8397,6 +8875,23 @@ const I18N_EN = {
 ]
 ],
 [
+"análise: sem limites nem alarmes (eles ficam no ",
+"^análise: sem limites nem alarmes \\(eles ficam no ((?:(?! · ).)+?)\\)$",
+"analysis: no limits or alarms (they stay in ${1})",
+[
+"análise: sem limites nem alarmes (eles ficam no "
+]
+],
+[
+"junho a agosto ficaram ",
+"^junho a agosto ficaram ((?:(?! · ).)+?)% abaixo de novembro a março$",
+"June to August were ${1}% below November to March",
+[
+"junho a agosto ficaram ",
+"% abaixo de novembro a março"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) permitidos no período \\(((?:(?! · ).)+?)%\\)\\.$",
 "Above background: ${1} of ${2} allowed in the period (${3}%).",
@@ -8562,6 +9057,15 @@ const I18N_EN = {
 ]
 ],
 [
+"junho a agosto ficaram ",
+"^junho a agosto ficaram ((?:(?! · ).)+?)% acima de novembro a março$",
+"June to August were ${1}% above November to March",
+[
+"junho a agosto ficaram ",
+"% acima de novembro a março"
+]
+],
+[
 "Acima do normal (",
 "^Acima do normal \\(((?:(?! · ).)+?)\\) — dificilmente é só variação$",
 "Above normal (${1}) — hardly just variation",
@@ -8660,6 +9164,15 @@ const I18N_EN = {
 "desde o primeiro dado (",
 ") · ",
 "% do período inteiro"
+]
+],
+[
+"Fora dos alertas, a casa ficou ",
+"^Fora dos alertas, a casa ficou ((?:(?! · ).)+?)% abaixo do normal$",
+"Outside the alerts, home was ${1}% below normal",
+[
+"Fora dos alertas, a casa ficou ",
+"% abaixo do normal"
 ]
 ],
 [
@@ -8785,6 +9298,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Fora dos alertas, a casa ficou ",
+"^Fora dos alertas, a casa ficou ((?:(?! · ).)+?)% acima do normal$",
+"Outside the alerts, home was ${1}% above normal",
+[
+"Fora dos alertas, a casa ficou ",
+"% acima do normal"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -8899,6 +9421,15 @@ const I18N_EN = {
 "cloud: could not open the saved key (${1})",
 [
 "nuvem: não consegui abrir a chave guardada ("
+]
+],
+[
+"um pouco acima do fundo, dentro do acaso (",
+"^um pouco acima do fundo, dentro do acaso \\(((?:(?! · ).)+?) σ\\)$",
+"a little above background, within chance (${1} σ)",
+[
+"um pouco acima do fundo, dentro do acaso (",
+" σ)"
 ]
 ],
 [
@@ -9507,6 +10038,24 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) com o objeto, abaixo do nível de atenção\\.$",
+"${1} with the object, below the attention level.",
+[
+" com o objeto, abaixo do nível de atenção."
+]
+],
+[
+"ainda aprendendo o seu normal (",
+"^ainda aprendendo o seu normal \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias\\)$",
+"still learning your normal (${1} of ${2} days)",
+[
+"ainda aprendendo o seu normal (",
+" de ",
+" dias)"
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -9642,6 +10191,14 @@ const I18N_EN = {
 [
 "[demo] Perigo no RadiaCode: ",
 " (limite "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com o objeto, acima do nível de atenção\\.$",
+"${1} with the object, above the attention level.",
+[
+" com o objeto, acima do nível de atenção."
 ]
 ],
 [
@@ -9830,6 +10387,23 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) com o objeto, acima do nível de perigo\\.$",
+"${1} with the object, above the danger level.",
+[
+" com o objeto, acima do nível de perigo."
+]
+],
+[
+"O contador usa ",
+"^O contador usa ((?:(?! · ).)+?) µSv/h por CPM e o app, ((?:(?! · ).)+?)\\.$",
+"The counter uses ${1} µSv/h per CPM and the app, ${2}.",
+[
+"O contador usa ",
+" µSv/h por CPM e o app, "
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -9993,6 +10567,14 @@ const I18N_EN = {
 "cloud: the system keyring did not open (${1})",
 [
 "nuvem: o cofre do sistema não abriu ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) médio \\(RadiaCode\\) · cinza = sem dados$",
+"Average ${1} (RC102) · gray = no data",
+[
+" médio (RadiaCode) · cinza = sem dados"
 ]
 ],
 [
@@ -10350,6 +10932,15 @@ const I18N_EN = {
 ]
 ],
 [
+"o dia mais baixo é ",
+"^o dia mais baixo é ((?:(?! · ).)+?), ((?:(?! · ).)+?)% abaixo da média$",
+"the lowest day is ${1}, ${2}% below the average",
+[
+"o dia mais baixo é ",
+"% abaixo da média"
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -10462,6 +11053,14 @@ const I18N_EN = {
 ", resposta pela metade (",
 " de ",
 " bytes)"
+]
+],
+[
+"pico dentro do vai e vem do fundo de ",
+"^pico dentro do vai e vem do fundo de ((?:(?! · ).)+?)$",
+"peak within the usual ups and downs of the background of ${1}",
+[
+"pico dentro do vai e vem do fundo de "
 ]
 ],
 [
@@ -10648,6 +11247,23 @@ const I18N_EN = {
 "could not save the deleted items (${1})",
 [
 "não consegui gravar os apagados ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) médio \\(RC102\\) · cinza = sem dados$",
+"Average ${1} (RC102) · gray = no data",
+[
+" médio (RC102) · cinza = sem dados"
+]
+],
+[
+"o dia mais alto é ",
+"^o dia mais alto é ((?:(?! · ).)+?), ((?:(?! · ).)+?)% acima da média$",
+"the highest day is ${1}, ${2}% above the average",
+[
+"o dia mais alto é ",
+"% acima da média"
 ]
 ],
 [
@@ -10876,6 +11492,14 @@ const I18N_EN = {
 ]
 ],
 [
+"% acima da média das 2 h antes (",
+"^% acima da média das 2 h antes \\(((?:(?! · ).)+?)\\)$",
+"% above the average of the 2 h before (${1})",
+[
+"% acima da média das 2 h antes ("
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -11037,6 +11661,32 @@ const I18N_EN = {
 "RC102: connected but did not open (${1})",
 [
 "RC102: conectou mas não abriu ("
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do período$",
+"RC102 off for ${1} of the period",
+[
+"RadiaCode desligado em ",
+" do período"
+]
+],
+[
+"alarme 1 (atenção) do aparelho: ",
+"^alarme 1 \\(atenção\\) do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 1 (attention): ${1}",
+[
+"alarme 1 (atenção) do aparelho: "
+]
+],
+[
+"bem acima do nível de fundo (",
+"^bem acima do nível de fundo \\(((?:(?! · ).)+?) σ\\)$",
+"well above the background level (${1} σ)",
+[
+"bem acima do nível de fundo (",
+" σ)"
 ]
 ],
 [
@@ -11223,6 +11873,52 @@ const I18N_EN = {
 " sobre o fundo · ",
 "σ · ",
 "× o fundo"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) da semana$",
+"RC102 off for ${1} of the week",
+[
+"RadiaCode desligado em ",
+" da semana"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do período$",
+"GMC-800 off for ${1} of the period",
+[
+"GMC-800 desligado em ",
+" do período"
+]
+],
+[
+"GMC-800 média ",
+"^GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"GMC-800 average ${1} · min ${2} · max ${3} CPS",
+[
+"GMC-800 média ",
+" · mín ",
+" · máx ",
+" CPS"
+]
+],
+[
+"estável, ",
+"^estável, ((?:(?! · ).)+?) em relação à referência$",
+"steady, ${1} against the reference",
+[
+"estável, ",
+" em relação à referência"
+]
+],
+[
+"alarme 2 (alarme) do aparelho: ",
+"^alarme 2 \\(alarme\\) do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 2 (alarm): ${1}",
+[
+"alarme 2 (alarme) do aparelho: "
 ]
 ],
 [
@@ -11454,6 +12150,41 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) da semana$",
+"GMC-800 off for ${1} of the week",
+[
+"GMC-800 desligado em ",
+" da semana"
+]
+],
+[
+"O RadiaCode ficou ",
+"^O RadiaCode ficou ((?:(?! · ).)+?) sem conexão\\.$",
+"The RC102 was disconnected for ${1}.",
+[
+"O RadiaCode ficou ",
+" sem conexão."
+]
+],
+[
+"dentro do esperado (",
+"^dentro do esperado \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"as expected (${1} to ${2} Bq/kg)",
+[
+"dentro do esperado (",
+" Bq/kg)"
+]
+],
+[
+"Espectro do RadiaCode. Parece: ",
+"^Espectro do RadiaCode\\. Parece: ((?:(?! · ).)+?)$",
+"RC102 spectrum. Looks like: ${1}",
+[
+"Espectro do RadiaCode. Parece: "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -11656,6 +12387,14 @@ const I18N_EN = {
 ]
 ],
 [
+"A memória do aparelho trouxe ",
+"^A memória do aparelho trouxe ((?:(?! · ).)+?)\\.$",
+"The device memory brought back ${1}.",
+[
+"A memória do aparelho trouxe "
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -11852,6 +12591,68 @@ const I18N_EN = {
 "${1}: no data (out of the calculation)",
 [
 ": sem dado (fora do cálculo)"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do dia$",
+"RC102 off for ${1} of the day",
+[
+"RadiaCode desligado em ",
+" do dia"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do mês$",
+"RC102 off for ${1} of the month",
+[
+"RadiaCode desligado em ",
+" do mês"
+]
+],
+[
+"RadiaCode desligado em ",
+"^RadiaCode desligado em ((?:(?! · ).)+?) do ano$",
+"RC102 off for ${1} of the year",
+[
+"RadiaCode desligado em ",
+" do ano"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do período$",
+"RC102 off for ${1} of the period",
+[
+"RC102 desligado em ",
+" do período"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) ao longo do tempo \\(análise\\)$",
+"${1} over time (analysis)",
+[
+" ao longo do tempo (análise)"
+]
+],
+[
+"abaixo do típico (",
+"^abaixo do típico \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"below typical (${1} to ${2} Bq/kg)",
+[
+"abaixo do típico (",
+" Bq/kg)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?), última hora: média ((?:(?! · ).)+?), máximo ((?:(?! · ).)+?)$",
+"${1}, last hour: average ${2}, maximum ${3}",
+[
+", última hora: média ",
+", máximo "
 ]
 ],
 [
@@ -12165,6 +12966,95 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do dia$",
+"GMC-800 off for ${1} of the day",
+[
+"GMC-800 desligado em ",
+" do dia"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) da semana$",
+"RC102 off for ${1} of the week",
+[
+"RC102 desligado em ",
+" da semana"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do mês$",
+"GMC-800 off for ${1} of the month",
+[
+"GMC-800 desligado em ",
+" do mês"
+]
+],
+[
+"GMC-800 desligado em ",
+"^GMC\\-800 desligado em ((?:(?! · ).)+?) do ano$",
+"GMC-800 off for ${1} of the year",
+[
+"GMC-800 desligado em ",
+" do ano"
+]
+],
+[
+"· RadiaCode média ",
+"^· RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"· RC102 average ${1} · max ${2} CPS",
+[
+"· RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"acima do típico (",
+"^acima do típico \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"above typical (${1} to ${2} Bq/kg)",
+[
+"acima do típico (",
+" Bq/kg)"
+]
+],
+[
+"forma da curva pelo tório em ",
+"^forma da curva pelo tório em ((?:(?! · ).)+?)$",
+"curve shape from thorium on ${1}",
+[
+"forma da curva pelo tório em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% abaixo do fundo da sua casa$",
+"${1}% below your home background",
+[
+"% abaixo do fundo da sua casa"
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) \\+ acima do fundo ((?:(?! · ).)+?) µSv$",
+"background ${1} + above background ${2} µSv",
+[
+"fundo ",
+" + acima do fundo ",
+" µSv"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): sem leituras na última hora$",
+"${1}: no readings in the last hour",
+[
+": sem leituras na última hora"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -12365,6 +13255,31 @@ const I18N_EN = {
 "${1}: ${2} µSv/h (out of the calculation)",
 [
 " µSv/h (fora do cálculo)"
+]
+],
+[
+"O RC102 ficou ",
+"^O RC102 ficou ((?:(?! · ).)+?) sem conexão\\.$",
+"The RC102 was disconnected for ${1}.",
+[
+"O RC102 ficou ",
+" sem conexão."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% acima do fundo da sua casa$",
+"${1}% above your home background",
+[
+"% acima do fundo da sua casa"
+]
+],
+[
+"Espectro do RC102. Parece: ",
+"^Espectro do RC102\\. Parece: ((?:(?! · ).)+?)$",
+"RC102 spectrum. Looks like: ${1}",
+[
+"Espectro do RC102. Parece: "
 ]
 ],
 [
@@ -12620,6 +13535,32 @@ const I18N_EN = {
 ]
 ],
 [
+"ainda medindo: faltam ",
+"^ainda medindo: faltam ((?:(?! · ).)+?) dias$",
+"still measuring: ${1} days to go",
+[
+"ainda medindo: faltam ",
+" dias"
+]
+],
+[
+"pico bem acima do fundo de ",
+"^pico bem acima do fundo de ((?:(?! · ).)+?)$",
+"peak well above the background of ${1}",
+[
+"pico bem acima do fundo de "
+]
+],
+[
+"de dose em ",
+"^de dose em ((?:(?! · ).)+?), pelo RadiaCode$",
+"of dose in ${1}, by the RC102",
+[
+"de dose em ",
+", pelo RadiaCode"
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -12844,6 +13785,59 @@ const I18N_EN = {
 "Real GMC-800 reading: ${1}",
 [
 "Leitura real do GMC-800: "
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do dia$",
+"RC102 off for ${1} of the day",
+[
+"RC102 desligado em ",
+" do dia"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do mês$",
+"RC102 off for ${1} of the month",
+[
+"RC102 desligado em ",
+" do mês"
+]
+],
+[
+"RC102 desligado em ",
+"^RC102 desligado em ((?:(?! · ).)+?) do ano$",
+"RC102 off for ${1} of the year",
+[
+"RC102 desligado em ",
+" do ano"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) médio · cinza = sem dados$",
+"Average ${1} · gray = no data",
+[
+" médio · cinza = sem dados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · amostra ((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) · ((?:(?! · ).)+?)((?:(?! · ).)+?)$",
+"${1} · ${2} · sample ${3} · background ${4} · ${5}${6}",
+[
+" · amostra ",
+" · fundo "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
+"${1} records, ${2} new minutes",
+[
+" registros, ",
+" minutos novos"
 ]
 ],
 [
@@ -13148,6 +14142,16 @@ const I18N_EN = {
 ]
 ],
 [
+"· RC102 média ",
+"^· RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"· RC102 average ${1} · max ${2} CPS",
+[
+"· RC102 média ",
+" · máx ",
+" CPS"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -13394,6 +14398,14 @@ const I18N_EN = {
 "≈ ${1} ${2} of your home background",
 [
 " do fundo da sua casa"
+]
+],
+[
+"Memória do GMC-800 em ",
+"^Memória do GMC\\-800 em ((?:(?! · ).)+?)%$",
+"GMC-800 memory at ${1}%",
+[
+"Memória do GMC-800 em "
 ]
 ],
 [
@@ -13655,6 +14667,48 @@ const I18N_EN = {
 "${1}: no data (with you)",
 [
 ": sem dado (com você)"
+]
+],
+[
+"Calibrado com KCl em ",
+"^Calibrado com KCl em ((?:(?! · ).)+?) ·$",
+"Calibrated with KCl on ${1} ·",
+[
+"Calibrado com KCl em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) sem leitura das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)\\.$",
+"${1} had no reading from ${2} to ${3}.",
+[
+" sem leitura das ",
+" às "
+]
+],
+[
+"pico acima do fundo de ",
+"^pico acima do fundo de ((?:(?! · ).)+?)$",
+"peak above the background of ${1}",
+[
+"pico acima do fundo de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante a atenção$",
+"${1} · ${2} · during attention",
+[
+" · durante a atenção"
+]
+],
+[
+"de dose em ",
+"^de dose em ((?:(?! · ).)+?), pelo RC102$",
+"of dose in ${1}, by the RC102",
+[
+"de dose em ",
+", pelo RC102"
 ]
 ],
 [
@@ -14034,6 +15088,31 @@ const I18N_EN = {
 ]
 ],
 [
+"ano: ",
+"^ano: ((?:(?! · ).)+?) ((?:(?! · ).)+?) de um teto de ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"year: ${1} ${2} of a ${3} ${4} ceiling",
+[
+"ano: ",
+" de um teto de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante o alarme$",
+"${1} · ${2} · during the alarm",
+[
+" · durante o alarme"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante o perigo$",
+"${1} · ${2} · during danger",
+[
+" · durante o perigo"
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -14372,6 +15451,31 @@ const I18N_EN = {
 ]
 ],
 [
+"falta ",
+"^falta ((?:(?! · ).)+?) para a atenção$",
+"${1} below attention",
+[
+"falta ",
+" para a atenção"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) sem leitura desde ((?:(?! · ).)+?)\\.$",
+"${1} has had no reading since ${2}.",
+[
+" sem leitura desde "
+]
+],
+[
+"Não deu para baixar: ",
+"^Não deu para baixar: ((?:(?! · ).)+?)$",
+"Could not download: ${1}",
+[
+"Não deu para baixar: "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -14686,6 +15790,32 @@ const I18N_EN = {
 "${1}: ${2} µSv/h (at home)",
 [
 " µSv/h (em casa)"
+]
+],
+[
+"falta ",
+"^falta ((?:(?! · ).)+?) para o alarme$",
+"${1} below alarm",
+[
+"falta ",
+" para o alarme"
+]
+],
+[
+"falta ",
+"^falta ((?:(?! · ).)+?) para o perigo$",
+"${1} below danger",
+[
+"falta ",
+" para o perigo"
+]
+],
+[
+"mudou de patamar em ",
+"^mudou de patamar em ((?:(?! · ).)+?)$",
+"stepped to a new level on ${1}",
+[
+"mudou de patamar em "
 ]
 ],
 [
@@ -15094,6 +16224,23 @@ const I18N_EN = {
 ]
 ],
 [
+"usar o salvo (",
+"^usar o salvo \\(((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"use the saved one (${1}, ${2})",
+[
+"usar o salvo ("
+]
+],
+[
+"Onde está o ",
+"^Onde está o ((?:(?! · ).)+?): mudar$",
+"Where the ${1} is: change",
+[
+"Onde está o ",
+": mudar"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -15484,6 +16631,24 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) ao longo do tempo$",
+"${1} over time",
+[
+" ao longo do tempo"
+]
+],
+[
+"subiu ",
+"^subiu ((?:(?! · ).)+?) em ((?:(?! · ).)+?) semanas$",
+"rose ${1} in ${2} weeks",
+[
+"subiu ",
+" em ",
+" semanas"
+]
+],
+[
 "backup: salvo em ",
 "^backup: salvo em ((?:(?! · ).)+?)$",
 "backup: saved to ${1}",
@@ -15858,6 +17023,31 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC-800 em casa ",
+"^GMC\\-800 em casa ((?:(?! · ).)+?)$",
+"GMC-800 at home ${1}",
+[
+"GMC-800 em casa "
+]
+],
+[
+"mais ",
+"^mais ((?:(?! · ).)+?) a responder$",
+"${1} more to answer",
+[
+"mais ",
+" a responder"
+]
+],
+[
+"os dois ignorados",
+"^os dois ignorados((?:(?! · ).)+?)$",
+"both ignored${1}",
+[
+"os dois ignorados"
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -16173,6 +17363,14 @@ const I18N_EN = {
 "Unavailable: ${1}.",
 [
 "Indisponível: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) CPM no aparelho$",
+"${1} CPM on the device",
+[
+" CPM no aparelho"
 ]
 ],
 [
@@ -16613,6 +17811,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) desligado em ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"${1} off for ${2} ${3}",
+[
+" desligado em "
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -16901,6 +18107,14 @@ const I18N_EN = {
 "${1} new, from ${2} to ${3}",
 [
 " novos, de "
+]
+],
+[
+"De onde veio: ",
+"^De onde veio: ((?:(?! · ).)+?)$",
+"Where it came from: ${1}",
+[
+"De onde veio: "
 ]
 ],
 [
@@ -17215,6 +18429,15 @@ const I18N_EN = {
 "${1}:00 · no data",
 [
 "h · sem dados"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) CPM = ((?:(?! · ).)+?) µSv/h$",
+"${1} CPM = ${2} µSv/h",
+[
+" CPM = ",
+" µSv/h"
 ]
 ],
 [
@@ -17665,6 +18888,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) · fundo de ((?:(?! · ).)+?)$",
+"${1} · background of ${2}",
+[
+" · fundo de "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -17933,6 +19164,22 @@ const I18N_EN = {
 "Attention on the ${1}",
 [
 "Atenção no "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) no período$",
+"${1} in the period",
+[
+" no período"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)sem leitura$",
+"${1}no reading",
+[
+"sem leitura"
 ]
 ],
 [
@@ -18700,6 +19947,22 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo de ",
+"^fundo de ((?:(?! · ).)+?)$",
+"background of ${1}",
+[
+"fundo de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) ignorado((?:(?! · ).)+?)$",
+"${1} ignored${2}",
+[
+" ignorado"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -18998,6 +20261,22 @@ const I18N_EN = {
 [
 "há ",
 " dias"
+]
+],
+[
+"certeza ",
+"^certeza ((?:(?! · ).)+?)$",
+"certainty ${1}",
+[
+"certeza "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?), desde ((?:(?! · ).)+?)$",
+"${1}, since ${2}",
+[
+", desde "
 ]
 ],
 [
@@ -19451,7 +20730,7 @@ const I18N_EN = {
 [
 "falta ",
 "^falta ((?:(?! · ).)+?)$",
-"missing ${1}",
+"${1} to download",
 [
 "falta "
 ]
@@ -19494,6 +20773,14 @@ const I18N_EN = {
 "group ${1}",
 [
 "grupo "
+]
+],
+[
+"≈ ",
+"^≈ ((?:(?! · ).)+?) CPM$",
+"≈ ${1} CPM",
+[
+" CPM"
 ]
 ],
 [
@@ -19590,6 +20877,14 @@ const I18N_EN = {
 "${1} h ago",
 [
 "há "
+]
+],
+[
+"· há ",
+"^· há ((?:(?! · ).)+?)$",
+"· ${1} ago",
+[
+"· há "
 ]
 ],
 [
@@ -19774,6 +21069,14 @@ const I18N_EN = {
 "max ${1}",
 [
 "máx "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)/dia$",
+"${1}/day",
+[
+"/dia"
 ]
 ],
 [

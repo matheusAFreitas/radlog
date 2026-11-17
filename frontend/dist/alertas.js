@@ -149,7 +149,7 @@ function alertLi(e, other) {
   if (e.retro) {
     const tag = document.createElement("span");
     tag.className = "tag-retro";
-    tag.textContent = "do contador";
+    tag.textContent = "achado depois"; // 2.92 (G6)
     tag.title = "Achado no histórico baixado do contador";
     sub.appendChild(tag);
   }
@@ -278,7 +278,7 @@ function renderAlertHistory(all) {
       day = key;
       const h = document.createElement("h3");
       h.textContent = isToday(e.time) ? "Hoje" : isYesterday(e.time) ? "Ontem" :
-        dt.toLocaleDateString(LOCALE, { weekday: "long", day: "2-digit", month: "2-digit", year: dt.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
+        dt.toLocaleDateString(LOCALE, { weekday: "long" }) + ", " + (dt.getFullYear() === new Date().getFullYear() ? ddmm(e.time) : ddmmyyyy(e.time));
       ul = document.createElement("ul");
       ul.className = "events alerts";
       box.append(h, ul);
@@ -354,16 +354,20 @@ function drawAlertDetail(d) {
   const dt = new Date(e.time);
   $("adWhen").textContent = `${dt.toLocaleDateString(LOCALE, { weekday: "long" })}, ${ddmm(e.time)} ${hhmm(e.time)}`;
   // os 3 números: pico, duração e limite
-  const num = (v) => (inUSv ? fmt(v, usvDigits(v)) : fmt(v, 0));
+  const num = (v) => (inUSv ? rateNum(v, usvDigits(v)) : fmt(v, 0));
   $("adPk").textContent = e.peak ? num(peakV) : "—";
-  $("adPkSub").textContent = e.peak ? `${inUSv ? "µSv/h" : "CPM"} às ${hhmmss(e.peakAt || e.time)}` : "";
+  $("adPkSub").textContent = e.peak ? `${inUSv ? rateLbl() : "CPM"} às ${hhmmss(e.peakAt || e.time)}` : "";
   $("adDur").textContent = fmtDur(d.end - e.time);
   $("adDurSub").textContent = e.active ? `desde ${hhmm(e.time)}` : `${hhmm(e.time)}–${hhmm(d.end)}`;
   $("adLim").textContent = d.limit ? num(d.limit) : "—";
-  $("adLim").nextElementSibling.textContent = inUSv ? "µSv/h" : "CPM";
+  $("adLim").nextElementSibling.textContent = inUSv ? rateLbl() : "CPM";
   const sub = [];
   if (e.startedAs) sub.push(`${e.startedAs.level === "alarme" ? "alarme" : "atenção"} às ${hhmm(e.startedAs.time)} → ${lvlName(e).toLowerCase()} às ${hhmm(e.upAt)}`);
-  if (e.peak && !rc && bgNow()) sub.push(`pico ${fmtSig(sigmaOf(e.peak, bgNow()))} acima do fundo de ${inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0)}`);
+  // 2.92 (G6): em palavras; o σ fica no detalhe do alerta
+  if (e.peak && !rc && bgNow()) {
+    const z = sigmaOf(e.peak, bgNow()), bgT = inUSv ? usvVal(bgNow() * calK()) : fmt(bgNow(), 0);
+    sub.push(z >= 4 ? `pico bem acima do fundo de ${bgT}` : z >= 2 ? `pico acima do fundo de ${bgT}` : `pico dentro do vai e vem do fundo de ${bgT}`);
+  }
   const ep = d.episode;
   if (ep && ep.n) {
     const unit = ep.src === "segundos" ? (ep.n === 1 ? "segundo" : "segundos") : ep.n === 1 ? "minuto" : "minutos";
@@ -377,11 +381,11 @@ function drawAlertDetail(d) {
   let top = Math.max(d.limit || 0, peakV || 0);
   for (const p of secs) top = Math.max(top, p.cpm);
   for (const p of mins) top = Math.max(top, p.cpm);
-  top = niceTop(top * 1.12);
+  top = niceN(top * 1.12, 3);
   const x = (t) => Math.max(0, Math.min(W, ((t - t0) / (t1 - t0)) * W));
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   const ys = $("adY").children;
-  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = inUSv ? fmt(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
+  for (let i = 0; i < 4; i++) { const v = top - (top / 3) * i; ys[i].textContent = inUSv ? axRate(v, v === 0 ? 0 : usvDigits(top)) : fmt(v, 0); }
   let out = [0, 1, 2, 3].map((i) => {
     const gy = i === 3 ? H - 0.5 : i === 0 ? 0.5 : (H / 3) * i;
     return `<line x1="0" y1="${gy}" x2="${W}" y2="${gy}" stroke="${COR.grid}" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
@@ -401,11 +405,11 @@ function drawAlertDetail(d) {
     }).join("");
     out += secs.length
       ? `<path d="${d1}" fill="none" stroke="${COR.muted}" stroke-opacity="0.55" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`
-      : `<path d="${d1}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      : `<path d="${d1}" fill="none" stroke="${rc ? COR.rc : COR.gmc}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
   }
   if (secs.length > 1) {
     const d2 = secs.map((p, i) => (i && p.t - secs[i - 1].t <= 10e3 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d2}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d2}" fill="none" stroke="${rc ? COR.rc : COR.gmc}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   // pico (bolinha em HTML para não esticar)
@@ -421,10 +425,10 @@ function drawAlertDetail(d) {
   const xs = $("adX").children;
   xs[0].textContent = xl(t0); xs[1].textContent = xl(t0 + (t1 - t0) / 2); xs[2].textContent = xl(t1);
   $("adLegend").innerHTML =
-    (rc ? (secs.length ? '<span class="key"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
-      : '<span class="key"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
-      : secs.length ? '<span class="key"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
-      : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
+    (rc ? (secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
+      : '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
+      : secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + (rc ? COR.rc : COR.gmc) + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
+      : '<span class="key"><i style="border-color:' + (rc ? COR.rc : COR.gmc) + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
   const note = $("adNote");

@@ -276,7 +276,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 
 	var C []WhyCause
 	// acaso
-	acaso := WhyCause{Key: "acaso", Title: "Acaso", More: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.", Link: "padroes", LinkT: "Abrir Padrões do fundo"}
+	acaso := WhyCause{Key: "acaso", Title: "Acaso", More: "O decaimento é aleatório, então a contagem varia sozinha. Até uns 2 σ isso é normal e acontece toda hora.", Link: "padroes", LinkT: "Abrir o Fundo de casa"}
 	if out.Acaso {
 		acaso.State = "yes"
 		acaso.Ev = fmt.Sprintf("A subida é de %s σ. Variações assim aparecem várias vezes por dia.", whyNum(math.Max(z, 0), 1))
@@ -353,7 +353,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	}
 	a.mu.Unlock()
 	if !rainOn {
-		chuva.State, chuva.Ev = "na", "Sem dado: a chuva não está ligada (Configurações › Janela e tela)."
+		chuva.State, chuva.Ev = "na", "Sem dado: a chuva não está ligada (Configurações › Chuva no gráfico)."
 	} else {
 		slots := a.rainSlots(t.Add(-whyRainWin), t)
 		if len(slots) == 0 {
@@ -381,7 +381,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 		}
 	}
 	// radônio da noite (hora do dia)
-	rad := WhyCause{Key: "radonio", Title: "Radônio da noite", More: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", Link: "padroes", LinkT: "Abrir Padrões do fundo"}
+	rad := WhyCause{Key: "radonio", Title: "Radônio da noite", More: "Com a casa fechada e o ar parado, o radônio que sai do chão e das paredes se acumula. De dia, com janela aberta e vento, ele se espalha.", Link: "padroes", LinkT: "Abrir o Fundo de casa"}
 	h := t.Add(-time.Minute).Hour()
 	if me.hourN[h] < 300 || me.norm <= 0 {
 		rad.State, rad.Ev = "na", "Sem dado: ainda são poucos dias para saber o padrão de cada hora."
@@ -401,7 +401,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	// pressão caindo
 	pr := WhyCause{Key: "pressao", Title: "Pressão caindo", More: "Quando a pressão do ar cai, sai mais radônio do solo e das paredes, e o fundo em casa sobe algumas horas depois.", Link: "chuva", LinkT: "Abrir a tela Clima"}
 	if !rainOn || len(press) == 0 {
-		pr.State, pr.Ev = "na", "Sem dado de pressão (vem com a chuva, em Configurações › Janela e tela)."
+		pr.State, pr.Ev = "na", "Sem dado de pressão (vem com a chuva, em Configurações › Chuva no gráfico)."
 	} else {
 		var last, first float64
 		lastK, firstK := int64(0), int64(math.MaxInt64)

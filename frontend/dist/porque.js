@@ -61,7 +61,7 @@ async function openWhy(dev, at, title) {
 
 function whyGo(link) {
   const d = WHY.d || {};
-  if (link === "padroes") { setSub("graficos", "padroes"); showView("graficos", true); }
+  if (link === "padroes") { setSub("fundo", "padroes"); showView("fundo"); }
   else if (link === "graficos") showRange(d.at - 12 * 3600e3, d.at);
   else showView(link, true);
 }
@@ -69,7 +69,7 @@ function whyGo(link) {
 function whyRender(w) {
   const b = $("whyBody");
   let h = "";
-  h += `<div class="why-head"><span></span>${w.noData ? "" : ` <span class="small mono muted">· ${fmt(Math.max(0, w.sigma), w.sigma < 10 ? 1 : 0)} σ</span>`}</div>`;
+  h += `<div class="why-head"><span></span>${w.noData ? "" : ` <span class="small mono muted" data-gl="sigma" role="button" tabindex="0">· ${fmt(Math.max(0, w.sigma), w.sigma < 10 ? 1 : 0)} σ</span>`}</div>`;
   h += `<div class="why-verdict"><span class="why-lab">${w.acaso ? "O mais provável" : w.noData ? "Sem dado" : "O mais provável"}</span><p></p></div>`;
   h += `<div class="why-charts" id="whyCharts">` +
     `<div class="why-row"><div class="why-nm"><span>GMC-800</span><b class="mono" id="whyGv"></b></div><svg id="whyG" viewBox="0 0 360 58" preserveAspectRatio="none"></svg></div>` +
@@ -124,7 +124,7 @@ function whyCharts(w) {
     s += `<line class="why-cur" x1="0" x2="0" y1="0" y2="${H}" visibility="hidden"/>`;
     svg.innerHTML = s;
   };
-  draw($("whyG"), "g", w.gNorm, "var(--accent)");
+  draw($("whyG"), "g", w.gNorm, "var(--gmc)");
   draw($("whyR"), "r", w.rNorm, "var(--rc)");
   const last = (k) => { for (let i = n - 1; i >= 0; i--) if (w.bins[i][k] != null) return w.bins[i][k]; return null; };
   $("whyGv").textContent = last("g") == null ? "—" : fmt(last("g"), 3);

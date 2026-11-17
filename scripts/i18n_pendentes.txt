@@ -3,7 +3,6 @@ configuracao
 mat aguardando
 na
 no
-no route
 os
 sem
 vem do

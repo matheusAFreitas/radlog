@@ -14,10 +14,21 @@ function agDev() {
 }
 
 // µSv com casas que façam sentido; de 1000 µSv em diante vira mSv
+const AG_OF = { dia: "do dia", semana: "da semana", mes: "do mês", ano: "do ano" };
 function agSv(usv) {
   if (usv == null || !isFinite(usv)) return ["—", ""];
+  if (RATE_MREM) return fmtDose(usv); // mrem (2.84.0)
   if (Math.abs(usv) >= 1000) return [fmt(usv / 1000, 2), "mSv"];
   return [fmt(usv, usv < 10 ? 2 : usv < 100 ? 1 : 0), "µSv"];
+}
+
+// 2.90.0 (A1): na Minha dose tudo numa unidade só (µSv, ou mrem com a
+// taxa em mrem/h), sem trocar para mSv no meio da linha
+function agU() { return RATE_MREM ? "mrem" : "µSv"; }
+function agN(usv) {
+  if (usv == null || !isFinite(usv)) return "—";
+  const v = RATE_MREM ? usv / 10 : usv;
+  return fmt(v, v < 10 ? 2 : v < 100 ? 1 : 0);
 }
 
 // ---------- frase do topo ----------
@@ -63,7 +74,7 @@ function agoraNow() {
       title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
       // tudo normal: a faixa some (só aparece quando tem algo a dizer)
       calm = !odd;
-      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : `${fmt(g.sigma, 1)} σ acima do nível de fundo`);
+      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : g.sigma < 3 ? `um pouco acima do fundo, dentro do acaso (${fmt(g.sigma, 1)} σ)` : `bem acima do nível de fundo (${fmt(g.sigma, 1)} σ)`);
       text = parts.join(" · ");
     }
   }
@@ -77,12 +88,11 @@ function agoraNow() {
   agBgChip();
 }
 
-// selo do fundo de casa no cabeçalho da Minha dose (acompanha pessoal/casa)
+// selo do fundo de casa no cabeçalho da Minha dose: saiu na 2.90.0 (A1), a
+// frase de hoje já compara com o fundo
 function agBgChip() {
-  const d = agDose && (agDev() === "pessoal" ? agDose.personal : agDose.home);
   const chip = $("agSayBg");
-  chip.hidden = !(d && d.backgroundRate > 0);
-  if (!chip.hidden) chip.textContent = `fundo de casa · ${fmt(d.backgroundRate, 3)} µSv/h`;
+  if (chip) chip.hidden = true;
 }
 
 // ---------- Minha dose ----------
@@ -100,7 +110,7 @@ function renderAgDose() {
   const devName = { radiacode: "RC102", gmc: "GMC-800" };
   // por que ninguém faz esse papel agora
   const wc = whCur(), outs = ["gmc", "radiacode"].filter((x) => wc[x] === "fora").map((x) => devName[x]);
-  const why = outs.length ? `${outs.join(" e ")} fora do cálculo${since}` : null;
+  const why = outs.length === 2 ? `os dois ignorados${since}` : outs.length ? `${outs[0]} ignorado${since}` : null;
   $("agDevNote").textContent = dev === "pessoal"
     ? (!now ? `Dose pessoal: nenhum aparelho está com você agora (${why || "os dois em casa" + since}).`
       : now === "gmc" && wc.gmc === "casa" ? `Dose pessoal pela leitura de casa${since} (os dois ficaram em casa, e você também).`
@@ -112,6 +122,9 @@ function renderAgDose() {
   // Radiacode com você mas longe do PC: a dose segue no aparelho, a curva não
   const rl = whLive("radiacode");
   if (dev === "pessoal" && whRole("comigo", whCur()).curve && rl.last) $("agDevNote").textContent += ` Curva incompleta desde ${hhmm(rl.last)}.`;
+  // 2.90.0 (A1): a frase de quem mede só aparece quando foge do de sempre
+  const usual = ["Dose pessoal, pelo RC102 (anda com você).", "Dose da casa, pelo GMC-800 (fica parado)."];
+  $("agDevNote").hidden = usual.includes($("agDevNote").textContent);
   const box = $("agCells");
   box.textContent = "";
   const periods = d.periods && d.periods.length ? d.periods : Object.keys(AG_KEYS).map((key) => ({ key, total: 0, measuredMinutes: 0 }));
@@ -131,7 +144,7 @@ function renderAgDose() {
     tag.className = "wh-src";
     if (swap && swap < meas) { tag.classList.add("mixed"); tag.innerHTML = '<span class="dot" style="background:var(--swap)"></span>'; tag.append("misto"); }
     else if (!meas && gap) { tag.classList.add("mixed"); tag.textContent = "sem medição"; cell.classList.add("blankv"); }
-    else if (!meas && nod) { tag.classList.add("mixed"); tag.textContent = "sem dado"; cell.classList.add("blankv"); }
+    else if (!meas && nod) { tag.classList.add("nodata"); tag.textContent = "sem dado"; cell.classList.add("blankv"); }
     else { const who = swap ? other : main; tag.innerHTML = `<span class="dot ${who === "gmc" ? "gmc" : "rc"}"></span>`; tag.append(devName[who]); }
     k.appendChild(tag);
     const v = document.createElement("span");
@@ -158,8 +171,8 @@ function renderAgDose() {
       const bar = document.createElement("div");
       bar.className = "wh-mix";
       bar.setAttribute("aria-hidden", "true");
-      const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--accent)");
-      for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nosig)"]]) {
+      const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--gmc)");
+      for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nodata)"]]) {
         const i = document.createElement("i");
         i.style.width = `${(w / tot) * 100}%`;
         i.style.background = bg;
@@ -170,7 +183,8 @@ function renderAgDose() {
       const pc = (x) => { const v = (x / tot) * 100; return v < 1 ? "<1%" : `${Math.round(v)}%`; };
       if (swap) parts.push(`${pc(swap)} pelo ${devName[other]}`);
       if (gap) parts.push(`${pc(gap)} sem medição`);
-      if (nod) parts.push(`${pc(nod)} sem dado`);
+      // 2.84.0: sem dado quase sempre é o aparelho desligado; texto neutro
+      if (nod) parts.push(`${devName[main]} desligado em ${pc(nod)} ${AG_OF[p.key] || "do período"}`);
       n.textContent = parts.join(" · ");
       n.classList.remove("up");
     }
@@ -189,26 +203,34 @@ function renderAgDose() {
   bar.querySelector(".ag-me").style.width = `${year ? Math.min(100, (year.total / top) * 100) : 0}%`;
   bar.querySelector(".ag-nat").style.width = `${Math.min(100, ((d.yearBackground || 0) / top) * 100)}%`;
   bar.querySelector(".ag-cap").style.left = `${Math.min(99.6, ((d.yearCeiling || 0) / top) * 100)}%`;
-  const leg = $("agLeg");
-  leg.textContent = "";
-  const item = (color, label, val) => {
-    const s = document.createElement("span");
-    const sw = document.createElement("i");
-    sw.className = "ag-sw";
-    sw.style.background = color;
-    const b = document.createElement("b");
-    b.textContent = label;
-    const v = document.createElement("span");
-    v.textContent = val;
-    s.append(sw, b, v);
-    leg.appendChild(s);
-  };
-  const [yn, yu] = agSv(year ? year.total : null);
-  const [bn, bu] = agSv(d.yearBackground);
-  const [cn, cu] = agSv(d.yearCeiling);
-  item(dev === "pessoal" ? COR.rc : "var(--accent)", "neste ano", `${yn} ${yu}`);
-  item("rgba(163, 173, 180, .5)", "só o fundo, no ano todo", `${bn} ${bu}`);
-  item("var(--warn)", "teto", `${cn} ${cu} (fundo + ${fmt(agDose.limitMSvYear, 0)} mSv/ano)`);
+  // 2.90.0 (A1): o número de hoje, uma frase só, e os outros períodos
+  // numa linha, tudo na mesma unidade
+  const per = (k) => periods.find((p) => p.key === k);
+  const has = (p) => p && (p.measuredMinutes || p.total);
+  const today = per("dia");
+  const u = agU();
+  $("agToday").textContent = has(today) ? (today.satMinutes && today.measuredMinutes ? "≥ " : "") + agN(today.total) : "—";
+  $("agTodayU").textContent = u;
+  const cmp = $("agCmp");
+  cmp.className = "ag-cmp";
+  if (!has(today)) cmp.textContent = "sem dado hoje";
+  else if (today.background > 0) {
+    const pct = Math.round(today.above * 100);
+    cmp.textContent = pct >= 10 ? `${pct}% acima do fundo da sua casa` : pct <= -10 ? `${-pct}% abaixo do fundo da sua casa` : "igual ao fundo da sua casa";
+    if (pct >= 10) cmp.classList.add("up");
+  } else cmp.textContent = "";
+  const line = $("agLine");
+  line.textContent = "";
+  [["semana", "semana"], ["mes", "mês"], ["ano", "ano"]].forEach(([k, label], i) => {
+    if (i) line.append(" · ");
+    const p = per(k), b = document.createElement("b");
+    b.className = "mono";
+    b.textContent = has(p) ? agN(p.total) : "—";
+    line.append(Object.assign(document.createElement("span"), { textContent: label }), " ", b);
+  });
+  line.append(" " + u);
+  $("agYr").textContent = d.yearCeiling > 0 ? `ano: ${agN(year ? year.total : 0)} ${u} de um teto de ${agN(d.yearCeiling)} ${u}` : "";
+  $("agYr").title = `Teto: o fundo da casa no ano todo (${agN(d.yearBackground)} ${u}) mais ${fmt(agDose.limitMSvYear, 0)} mSv/ano.`;
   agoraNow();
 }
 

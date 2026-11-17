@@ -62,6 +62,13 @@ type Settings struct {
 	// ("" normal, "compacto", "confortavel"), por PC (uiscale.go)
 	UIScale   float64 `json:"uiScale"`
 	UIDensity string  `json:"uiDensity"`
+	// unidades da tela (unidades.go): taxa "usv" ou "mrh", contagem "cpm"
+	// ou "cps" (2.84.0)
+	RateUnit  string `json:"rateUnit"`
+	CountUnit string `json:"countUnit"`
+	// formato da data (datefmt.go): "" dia/mês/ano ou "iso" ano-mês-dia,
+	// nos dois idiomas (2.97.0)
+	DateFormat string `json:"dateFormat"`
 	// pulso da contagem (pulso.js): o anel do mostrador pisca a cada
 	// contagem (ligado, a não ser que PulseOff) e a fita dos últimos 10 s
 	PulseOff   bool `json:"pulseOff"`
@@ -77,9 +84,6 @@ type Settings struct {
 	NoUpdateCheck   bool   `json:"noUpdateCheck"`
 	SkipVersion     string `json:"skipVersion"`     // "Pular esta versão"
 	KeepOldVersions bool   `json:"keepOldVersions"` // não apagar as versões antigas depois de atualizar
-	// sincronização entre PCs: aceitar conexões (porta 47862) e não sincronizar sozinho
-	SyncListen bool `json:"syncListen"`
-	NoSyncAuto bool `json:"noSyncAuto"`
 	// idioma da interface: "auto" (do sistema), "pt" ou "en"
 	Lang string `json:"lang"`
 	// Radiacode (radiacode.go): não procurar o aparelho; endereço Bluetooth
@@ -433,7 +437,7 @@ type App struct {
 	noCount  noCountState
 	interf   interferenceDetector
 	upd      updater
-	sync     syncState  // sincronização entre PCs (sync.go)
+	inv      invCache   // resumo dos dias gravados, para a nuvem (delta.go)
 	cloud    cloudState // nuvem no Google Drive (cloud.go)
 	rc       rcState    // RC102 (radiacode.go)
 
@@ -444,9 +448,10 @@ type App struct {
 	bgOK  bool
 	bgAt  time.Time
 
-	measure      MeasureState   // medição de objeto (measure.go)
-	rain         *rainCache     // chuva (weather.go)
-	rainDays     *rainDaysStore // chuva por dia, para sempre (raindays.go)
+	measure      MeasureState         // medição de objeto (measure.go)
+	objTest      map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
+	rain         *rainCache           // chuva (weather.go)
+	rainDays     *rainDaysStore       // chuva por dia, para sempre (raindays.go)
 	yearMu       sync.Mutex
 	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
 	tubeMu       sync.Mutex
@@ -536,7 +541,6 @@ func (a *App) startup(ctx context.Context) {
 	a.goLoop("alertSecondsLoop", a.alertSecondsLoop)
 	a.goLoop("memoryWatch", a.memoryWatch)
 	a.goLoop("pendingRetry", a.pendingRetry)
-	a.goLoop("syncLoop", a.syncLoop)
 	a.goLoop("cloudLoop", a.cloudLoop)
 	a.goLoop("rcLoop", a.rcLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
@@ -606,6 +610,8 @@ func (a *App) loadSettings() Settings {
 	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
 	s.UIScale, s.UIDensity = normUIScale(s.UIScale), normUIDensity(s.UIDensity)
+	s.RateUnit, s.CountUnit = normRateUnit(s.RateUnit), normCountUnit(s.CountUnit)
+	s.DateFormat = normDateFormat(s.DateFormat)
 	return s
 }
 
@@ -805,6 +811,8 @@ func (a *App) saveSettingsFrom(s Settings, source string) Settings {
 	}
 	s.Levels = s.Levels.Norm()
 	s.AwayAskMin = normAwayAsk(s.AwayAskMin)
+	s.RateUnit, s.CountUnit = normRateUnit(s.RateUnit), normCountUnit(s.CountUnit)
+	s.DateFormat = normDateFormat(s.DateFormat)
 	if s.AlarmUSv > 0 {
 		s.AlarmUSv = clampThr(s.AlarmUSv, 0.01, 1e4)
 	}
@@ -1387,19 +1395,24 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 	if quiet {
 		acpm = 0
 	}
-	alarm := set.AlarmEnabled && int(acpm) >= set.AlarmCPM
+	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	lcpm := acpm
+	if a.objTestQuietLocked("gmc", now) {
+		lcpm = 0
+	}
+	alarm := set.AlarmEnabled && int(lcpm) >= set.AlarmCPM
 	was := a.alarmOn
 	started := alarm && !a.alarmOn
 	if alarm {
 		a.alarmOn = true
-	} else if float64(acpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
+	} else if float64(lcpm) < float64(set.AlarmCPM)*0.9 || !set.AlarmEnabled {
 		a.alarmOn = false
 	}
 	ended := was && !a.alarmOn
 	alarmOn := a.alarmOn && set.AlarmEnabled
 	attnWas := a.attnOn
 	lv := set.Levels.Norm()
-	attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(acpm), lv)
+	attnStarted := levels.AttentionStep(&a.attnOn, set.AttentionEnabled, float64(lcpm), lv)
 	attnOn := a.attnOn
 	satOn, satStarted := a.sat.step(now, rawCal.USv(float64(rawCPM)), rawCal.USv(float64(rawCPS)*60), lv)
 	dCPM := float64(acpm)

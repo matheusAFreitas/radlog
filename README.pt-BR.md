@@ -106,7 +106,7 @@ trechos continuam contando na dose, mas não entram no fundo da casa.
   longe do PC. Cada cartão se explica em "Como funciona".
 - **Configurações**: alarmes e níveis do app, janela e tela (tamanho,
   densidade, número no ícone da bandeja, pulso), dados, backup e
-  sincronização entre PCs.
+  nuvem.
 
 | Resumo | Alertas |
 |---|---|
@@ -178,9 +178,6 @@ dados" abre a pasta. O que tem lá:
 - `medicoes-anexos/`: fotos e arquivos anexados às medições;
 - `chuva*.json`: chuva e pressão (se o Clima estiver ligado);
 - `config.json`: configurações; `log.txt` e `diagnostico.txt`: log técnico;
-- `sincronizacao.json`: as chaves dos PCs pareados. Não compartilhe este
-  arquivo: é ele que deixa outro PC sincronizar com o seu. Nunca entra no
-  backup.
 
 O **backup** (.zip) junta só o que falta ao importar e serve para levar os
 dados de um PC para outro, Windows ou Linux. Ele também leva as
@@ -205,8 +202,10 @@ desligada nas Configurações:
   (uns 300 km de lado, então não diz onde você está). Também só com o
   Clima ligado.
 
-A sincronização entre os seus PCs fica na rede local (ou na sua VPN) e só
-conversa com os PCs que você pareou.
+Para juntar os dados de mais de um PC (ou do celular), use a **nuvem**
+(Google Drive, experimental, desligada por padrão): cada aparelho sobe os
+próprios dados para uma pasta do RadLog no seu Drive, cifrados com o código
+de recuperação. A sincronização pela rede local saiu na 2.85.0.
 
 ## Compilar
 

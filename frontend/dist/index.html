@@ -60,30 +60,33 @@
 <aside class="side" id="side">
   <div class="side-head"><div class="brand brand-word" role="img" aria-label="RadLog"><span aria-hidden="true">RadL</span><svg class="brand-o" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-linecap="round" aria-hidden="true"><circle cx="24" cy="24" r="9.4" stroke-width="4.6"/><path stroke-width="3" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/></svg><span aria-hidden="true">g</span></div><span class="side-ver mono" id="appVersion" title="Versão do RadLog"></span></div>
   <button type="button" class="side-cloud" id="sideCloud" title="Nuvem (Google Drive): abrir em Configurações" hidden><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 18a4.5 4.5 0 0 1-.6-9 6 6 0 0 1 11.5 1.6A3.8 3.8 0 0 1 17.5 18z"/></svg><span class="dot on" aria-hidden="true"></span><span class="side-cloud-t"></span></button>
-  <button type="button" class="side-quick" id="btnQuick" title="Buscar (Ctrl+K)"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true"><circle cx="7" cy="7" r="4.6"/><path d="m10.5 10.5 3.5 3.5" stroke-linecap="round"/></svg><span class="sq-t">Buscar</span><span class="sq-k"><kbd>Ctrl</kbd><kbd>K</kbd></span></button>
   <nav class="side-nav" id="sideNav" aria-label="Páginas">
     <button type="button" data-view="agora" aria-current="page"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.5 16a8.5 8.5 0 0 1 17 0"/><path d="M12 16l4.5-5"/><circle cx="12" cy="16" r="1.2"/><path d="M3.5 20h17"/></svg><span>Agora</span></button>
     <span class="side-group">Análise</span>
     <button type="button" data-view="graficos"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L19 7"/></svg><span>Gráficos</span></button>
+    <button type="button" data-view="fundo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 16.5c1-1.6 2-2.4 3-2.4s2 .8 3 2.4"/></svg><span>Fundo de casa</span></button>
+    <button type="button" data-view="espectro" id="navSpec" hidden><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M4 20c2-1 3-9 4.5-9S10 17 12 17s2-12 3.5-12S17 18 20 20"/></svg><span>Espectro</span></button>
     <button type="button" data-view="resumo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="14" height="18" rx="2"/><path d="M10 3v18"/><path d="M3.5 7.5H6M3.5 12H6M3.5 16.5H6"/><path d="M13 8.5h4M13 12.5h4"/></svg><span>Resumo</span></button>
-    <button type="button" data-view="alara"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3 4.5 6v5.5c0 4.6 3.2 8.4 7.5 9.5 4.3-1.1 7.5-4.9 7.5-9.5V6Z"/><path d="m9 12 2 2 4-4"/></svg><span>ALARA</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
     <button type="button" data-view="medir"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/></svg><span>Medir objeto</span></button>
     <button type="button" data-view="fora"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 11.5 8.5 6l6.5 5.5"/><path d="M4 10v10h8"/><path d="M14.5 16H22M19 13l3 3-3 3"/></svg><span>Fora de casa</span></button>
-    <button type="button" data-view="chuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Clima</span></button>
+    <button type="button" data-view="chuva" id="navChuva"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 14.5a4 4 0 0 1-.4-8A5.5 5.5 0 0 1 17 6.6a3.9 3.9 0 0 1 .5 7.9Z"/><path d="M8 18l-1 2.5M12.5 18l-1 2.5M17 18l-1 2.5"/></svg><span>Clima</span></button>
     <span class="side-group">Aparelhos</span>
     <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
   </nav>
   <div class="side-tools">
-    <button type="button" class="side-link" id="btnHistory">
+    <div class="qk-side" id="qkFab">
+      <button type="button" class="side-link" id="qkFabMain" aria-expanded="false" aria-haspopup="menu" aria-controls="qkFabMenu">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+        <span>Ações rápidas</span>
+      </button>
+      <div class="qk-fab-menu" id="qkFabMenu" role="menu" aria-label="Ações rápidas"></div>
+    </div>
+    <button type="button" class="side-link" id="btnHistory" hidden>
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M4 20h16"/></svg>
       Baixar histórico
-    </button>
-    <button type="button" class="side-link" id="btnDemo" aria-pressed="false">
-      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 18.5A1.7 1.7 0 0 0 6 21h12a1.7 1.7 0 0 0 1.5-2.5L14 9V3"/><path d="M7 15h10"/></svg>
-      <span id="btnDemoText">Demonstração</span>
     </button>
   </div>
   <button type="button" class="side-link" id="btnSettings" data-view="config">
@@ -150,12 +153,13 @@
     <div class="seg" id="demoSound" role="group" aria-label="Som do alarme"><button type="button" data-v="0">mudo</button><button type="button" data-v="1">tocar</button></div>
   </div>
   <p class="small mono" id="demoRealLine">Leitura real do GMC-800: —</p>
-  <p class="small muted">Exportar CSV, relatório em PDF, backup, nuvem e sincronização ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.</p>
+  <p class="small muted">Exportar CSV, relatório em PDF, backup e nuvem ficam desligados até você sair. Um alarme de verdade tira da demonstração na hora.</p>
 </section>
 
 <div class="notice save-warn" id="dataWarn" role="alert" hidden></div>
 <div class="notice save-warn" id="saveWarn" role="alert" hidden></div>
 <section class="instruments" id="instruments" aria-label="Aparelhos agora">
+  <div class="inst-pair">
     <article class="inst" id="gTile">
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="statusPill" title="Conexão">
@@ -163,12 +167,15 @@
       <span id="statusText">desconectado</span>
     </button>
         <span class="inst-fill"></span>
+        <button type="button" class="chip wh-selo" data-wh="gmc" hidden></button>
+        <button type="button" class="inst-open" data-tile="g" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="gmc">
-        <div class="dial-col"><svg class="dial" id="gTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="gTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="gTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="gTileAlt"></span></div>
+        <div class="dial-col"><svg class="dial" id="gTileDial" viewBox="0 0 48 48" aria-hidden="true"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="gTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><g class="dial-lv" id="gTileLv" transform="translate(18.5 18.5) scale(.6875)" fill="currentColor"></g></svg></div>
+        <div class="inst-big"><span class="inst-num mono" id="gTileNum">—</span><span class="inst-unit" id="gTileUnitT">µSv/h</span></div>
         <div class="inst-say"><span class="inst-state" id="gTileState">—</span><span class="inst-sub-say" id="gTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="gTileDemo" hidden>demo</span>
-        <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
+        <svg class="inst-spark" id="gTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" role="img" aria-label="Última hora"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot"><span id="gTileFoot"></span><span class="inst-fill"></span><button type="button" class="link small-link inst-warn" id="gTileSync" hidden></button><button type="button" class="pill clock-chip" id="clockChip" title="Sincronizar o relógio do contador com o do PC" hidden>
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
@@ -179,17 +186,31 @@
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">Radiacode 102</span></button>
         <span class="inst-fill"></span>
+        <button type="button" class="chip wh-selo" data-wh="radiacode" hidden></button>
+        <button type="button" class="inst-open" data-tile="r" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="radiacode">
-        <div class="dial-col"><svg class="dial" id="rTileDial" viewBox="0 0 48 48"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><text class="dial-val mono" id="rTileVal" x="24" y="25.2" text-anchor="middle">—</text><text class="dial-unit" id="rTileUnit" x="24" y="29.6" text-anchor="middle">µSv/h</text></svg><span class="dial-alt mono" id="rTileAlt"></span></div>
+        <div class="dial-col"><svg class="dial" id="rTileDial" viewBox="0 0 48 48" aria-hidden="true"><path class="dial-track" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><path class="dial-arc" id="rTileArc" d=""/><circle class="dial-ring" cx="24" cy="24" r="9.4"/><path class="dial-dash" d="M18.4 24h11.2"/><g class="dial-lv" id="rTileLv" transform="translate(18.5 18.5) scale(.6875)" fill="currentColor"></g></svg></div>
+        <div class="inst-big"><span class="inst-num mono" id="rTileNum">—</span><span class="inst-unit" id="rTileUnitT">µSv/h</span></div>
         <div class="inst-say"><span class="inst-state" id="rTileState">—</span><span class="inst-sub-say" id="rTileSay"></span>
         <div class="inst-say-row"><span class="demo-tag" id="rTileDemo" hidden>demo</span>
-        <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" aria-hidden="true"><polyline points=""/></svg></div></div>
+        <svg class="inst-spark" id="rTileSpark" viewBox="0 0 160 40" preserveAspectRatio="none" role="img" aria-label="Última hora"><polyline points=""/></svg></div></div>
       </div>
       <footer class="inst-foot" id="rTileFoot"></footer>
     </article>
+  </div>
+  <!-- 2.88.0 (R2): um "detalhes" só, embaixo dos dois quadros -->
+  <details class="inst-det inst-det-all" id="instDet"><summary>detalhes</summary>
+    <div class="inst-dt">
+      <span></span><span class="inst-dt-h c-g">GMC-800</span><span class="inst-dt-h c-r">RC102</span>
+      <span class="inst-dt-l">Contagem</span><span class="mono c-g" id="gDetCnt">—</span><span class="mono c-r" id="rDetCnt">—</span>
+      <span class="inst-dt-l" id="instDetAltL">Em mrem/h</span><span class="mono c-g" id="gDetAlt">—</span><span class="mono c-r" id="rDetAlt">—</span>
+      <span class="inst-dt-l">Últimos 10 s</span><div class="c-g inst-dt-tape" id="gTileDetR"></div><div class="c-r inst-dt-tape" id="rTileDetR"></div>
+    </div>
+  </details>
 </section>
 
+<div class="notice obj-test" id="objTestNote" role="status" hidden></div>
 <main class="pages" id="pages">
 <div class="page" id="pageAgora">
   <section class="card ag-say" id="agSay" aria-live="polite">
@@ -204,14 +225,15 @@
 
   <section class="card wh-card" id="whCard">
     <div class="wh-head">
-      <h2>Onde está cada aparelho <span class="chip off" id="whChip" hidden></span></h2>
-      <span class="small muted">o normal: GMC-800 em casa, RC102 com você</span>
+      <h2>Onde estão <span class="chip off" id="whChip" hidden></span></h2>
+      <span class="wh-sum" id="whSum"></span>
+      <button type="button" class="link" id="whToggle" aria-expanded="false" aria-controls="whRows">mudar</button>
     </div>
-    <div class="wh-rows">
+    <div class="wh-rows" id="whRows" hidden>
       <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GQ GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
-        <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+        <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">ignorar</button></div></div>
       <div class="wh-row"><div class="t"><b><span class="dot rc"></span>Radiacode 102</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>
-        <div class="seg loc" role="group" aria-label="Onde está o RC102" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+        <div class="seg loc" role="group" aria-label="Onde está o RC102" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">ignorar</button></div></div>
     </div>
     <div id="whSuggest"></div>
     <div class="wh-sheet" id="whSheet" hidden>
@@ -237,9 +259,12 @@
       </div>
     </div>
     <p class="small muted" id="agDevNote"></p>
-    <div class="ag-cells" id="agCells"></div>
+    <!-- 2.90.0 (avaliação A1): um número, uma frase e uma linha com os outros períodos -->
+    <div class="ag-main"><span class="ag-big mono" id="agToday">—</span><span class="ag-u"><span id="agTodayU">µSv</span> <span>hoje</span></span><span class="ag-cmp" id="agCmp"></span></div>
+    <p class="ag-line" id="agLine"></p>
     <div class="ag-bar" id="agBar" aria-hidden="true"><i class="ag-nat"></i><i class="ag-me"></i><i class="ag-cap"></i></div>
-    <div class="ag-leg small" id="agLeg"></div>
+    <p class="ag-yr small muted" id="agYr"></p>
+    <details class="how ag-more" id="agMore"><summary>por período</summary><div class="ag-cells" id="agCells"></div></details>
     <details class="how"><summary>Como funciona</summary>
     <p><span>O µSv/h dos dois aparelhos é uma estimativa.</span> <span>Eles medem a radiação no ambiente e são calibrados para a energia do césio-137; o GMC-800 não distingue energia, então pode ler um pouco a mais ou a menos conforme a fonte.</span></p>
     <p><span>Os limites com que o app compara valem para a dose no corpo.</span> <span>O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.</span></p>
@@ -264,15 +289,8 @@
 </div>
 
 <div class="page" id="pageGraficos" hidden>
-  <nav class="subtabs" role="tablist" aria-label="Gráficos" data-page="graficos">
-    <button type="button" role="tab" data-sub="tempo" aria-selected="true">Dose</button>
-    <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1">Hora do dia</button>
-    <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1">Padrões do fundo</button>
-    <button type="button" role="tab" data-sub="tendencia" aria-selected="false" tabindex="-1">Tendência do fundo</button>
-    <button type="button" role="tab" data-sub="ano" aria-selected="false" tabindex="-1">Ano</button>
-  </nav>
   <div class="graf-period" data-subpane="tempo">
-    <span class="small muted">Período dos gráficos de CPM e de dose</span>
+    <span class="small muted">Período</span>
     <div class="seg" role="group" aria-label="Período" id="rangeSeg">
       <button type="button" data-range="15m" aria-pressed="false">15 min</button>
       <button type="button" data-range="30m" aria-pressed="false">30 min</button>
@@ -292,8 +310,8 @@
         </div>
         <div class="chart-ctrls">
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
-          <button type="button" data-cunit="usv" aria-pressed="true">µSv/h</button>
-          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes">CPM (análise)</button>
+          <button type="button" data-cunit="usv" aria-pressed="true" data-u="rate">µSv/h</button>
+          <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes" data-u="count">CPM (análise)</button>
         </div>
         </div>
       </div>
@@ -326,7 +344,7 @@
         <div class="y-axis y-axis-r mono" id="yAxisR" hidden title="CPM do RC102"><span></span><span></span><span></span><span></span></div>
       </div>
       <div class="legend small muted" id="legend">
-        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição (o número está na lista)</span><span class="gap-key" id="gapKey" hidden><i aria-hidden="true"></i>sem leitura</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RC102</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
+        <span class="leg-dash" id="legDash"><span class="dash" aria-hidden="true"></span><svg class="lv-ico atencao" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 1.2 15.2 14.4H.8Z"/></svg></span><span id="legendText">50 CPM · início do nível de atenção</span><span class="leg-thr alarm" id="legAlarm" hidden><i aria-hidden="true"></i><svg class="lv-ico alarme" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path d="M8 .6 15.4 8 8 15.4.6 8Z"/></svg><span></span></span><span class="leg-thr danger" id="legDanger" hidden><i aria-hidden="true"></i><svg class="lv-ico perigo" width="10" height="10" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M5.1 1h5.8L15 5.1v5.8L10.9 15H5.1L1 10.9V5.1ZM4 6.9v2.2h8V6.9Z"/></svg><span></span></span><span class="meas-key" id="measKey" hidden><i aria-hidden="true"></i>medição</span><span class="gap-key" id="gapKey" hidden><i aria-hidden="true"></i>sem leitura</span><span class="away-key" id="awayKey" hidden><i aria-hidden="true"></i>fora de casa</span><span class="rain-key" id="rainKey" hidden><i aria-hidden="true"></i>chuva (mm/h)</span><span class="note-key" id="noteKey" hidden><i aria-hidden="true"></i>anotação</span><span class="gmc-key" id="gmcKey" hidden><i aria-hidden="true"></i>GMC-800</span><button type="button" class="rc-key" id="rcKey" hidden><i aria-hidden="true"></i><span id="rcKeyText">RC102</span></button><button type="button" class="link small-link" id="btnAddNote" title="Anotar um momento (ou dê dois cliques no gráfico)">+ anotar</button><button type="button" class="rain-status" id="rainStatus"><span class="rs-dot" aria-hidden="true"></span><span id="rainStatusText">chuva: desligada</span></button>
       </div>
       <ol class="meas-list small muted" id="measList" hidden></ol>
     </section>
@@ -351,7 +369,7 @@
       <div class="dose-top">
         <div class="dose-big" hidden>
           <span class="value mono small-value" id="doseTotal">—</span>
-          <span class="unit">µSv</span>
+          <span class="unit" data-u="dose">µSv</span>
         </div>
         <div class="dose-status" id="doseStatus"></div>
         <p class="small muted mono dose-other" id="doseOther" hidden></p>
@@ -390,6 +408,18 @@
         <p class="small muted note" id="doseNote"></p>
       </details>
     </section>
+</div>
+<div class="page" id="pageFundo" hidden>
+  <section class="card fc-sum" id="fcSum">
+    <h2>Fundo de casa</h2>
+    <p class="fc-say" id="fcSay">Carregando…</p>
+    <div class="subtabs fc-rows" role="tablist" aria-label="Fundo de casa" data-page="fundo">
+      <button type="button" role="tab" data-sub="tendencia" aria-selected="true"><b>Últimas semanas</b><span class="fc-a" id="fcA_tendencia">—</span></button>
+      <button type="button" role="tab" data-sub="hora" aria-selected="false" tabindex="-1"><b>Hora do dia</b><span class="fc-a" id="fcA_hora">—</span></button>
+      <button type="button" role="tab" data-sub="padroes" aria-selected="false" tabindex="-1"><b>Dia da semana</b><span class="fc-a" id="fcA_padroes">—</span></button>
+      <button type="button" role="tab" data-sub="ano" aria-selected="false" tabindex="-1"><b>Ano</b><span class="fc-a" id="fcA_ano">—</span></button>
+    </div>
+  </section>
   <section class="card view-graficos" id="heatCard" role="tabpanel" data-subpane="hora" hidden>
       <div class="chart-head">
         <div>
@@ -415,7 +445,7 @@
         </div>
       </div>
       <div class="heat-wrap">
-        <div class="heat" id="heat" role="img" aria-label="Mapa de calor do µSv/h médio por dia e hora"></div>
+        <div class="heat" id="heat" role="img" aria-label="Mapa de calor da leitura média por dia e hora"></div>
       </div>
       <div class="heat-legend small muted">
         <span id="heatMin">—</span>
@@ -437,9 +467,9 @@
       </div>
     </div>
     <div class="dose-devs" id="htDevs"></div>
-    <span class="ht-lbl small muted" id="htRateLbl">Taxa de dose (µSv/h)</span>
+    <span class="ht-lbl small muted" id="htRateLbl" data-u="rate">Taxa de dose (µSv/h)</span>
     <div class="ht-plot"><div class="ht-y mono" id="htRateY"></div><svg id="htRate" viewBox="0 0 600 120" preserveAspectRatio="none" role="img" aria-label="Taxa de dose dos aparelhos no trecho"></svg></div>
-    <span class="ht-lbl small muted">Dose acumulada (µSv), cada aparelho a sua</span>
+    <span class="ht-lbl small muted" data-u="dose">Dose acumulada (µSv), cada aparelho a sua</span>
     <div class="ht-plot"><div class="ht-y mono" id="htDoseY"></div><svg id="htDose" viewBox="0 0 600 100" preserveAspectRatio="none" role="img" aria-label="Dose acumulada de cada aparelho no trecho"></svg></div>
     <div class="ht-x-axis mono"><span id="htX0"></span><span id="htX1"></span><span id="htX2"></span></div>
     <div class="legend small muted"><span class="key" id="htKeyGmc"><span class="swatch sw-gmc" aria-hidden="true"></span>GMC-800</span><span class="key" id="htKeyRc"><span class="swatch sw-rc" aria-hidden="true"></span>RC102</span><span class="key"><span class="swatch sw-ceil" aria-hidden="true"></span>teto (fundo + limite)</span></div>
@@ -447,7 +477,7 @@
   <section class="card view-graficos" id="patCard" role="tabpanel" data-subpane="padroes" hidden>
       <div class="chart-head">
         <div>
-          <h2>Padrões do fundo</h2>
+          <h2>Dia da semana, dia × noite e mês</h2>
           <span class="mono muted small" id="patSub">sem dados ainda</span>
         </div>
         <div class="heat-ctrl">
@@ -462,7 +492,7 @@
           </div>
         </div>
       </div>
-      <div class="pat-hours">
+      <div class="pat-hours" hidden>
         <h3 class="sub-head">Hora do dia</h3>
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="patY"><span></span><span></span><span></span><span></span></div>
@@ -482,13 +512,16 @@
         <div><h3 class="sub-head">Dia da semana</h3><div class="pat-bars" id="patWd"></div></div>
         <div><h3 class="sub-head">Mês</h3><div class="pat-bars" id="patMonths"></div></div>
       </div>
-      <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência); a faixa vai do 1º ao 3º quartil. A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
+      <p class="small muted">Cada barra é a diferença para a média, em %: para a direita fica acima, para a esquerda fica abaixo. O valor está ao passar o mouse.</p>
+      <p class="small muted">Mediana dos minutos em casa (sem medição de objeto e sem minutos saturados ou com interferência). A comparação dia × noite usa os dias com as duas metades medidas (6 h ou mais de cada) e compara cada dia com a própria noite, para o clima de um dia não pesar.</p>
     </section>
   <section class="card view-graficos tube-card" id="slowCard" data-subpane="tendencia" aria-label="Fundo nas últimas semanas" hidden></section>
-  <section class="card view-graficos" id="bgCard" role="tabpanel" data-subpane="tendencia" hidden>
+  <section class="card view-graficos fc-ev" id="bgCard" role="tabpanel" data-subpane="tendencia" hidden>
+    <details id="bgDet">
+      <summary><span class="fc-ev-k">Outra conta: a reta dos últimos dias</span> <span class="small muted" id="bgFitShort"></span></summary>
       <div class="chart-head">
         <div>
-          <h2>Fundo ao longo do tempo</h2>
+          <h2 class="sr-only">Fundo ao longo do tempo</h2>
           <span class="mono muted small" id="bgSub">sem dados ainda</span>
         </div>
         <div class="seg" role="group" aria-label="Janela do fundo" id="bgSeg">
@@ -518,17 +551,20 @@
         </div>
       </div>
       <p class="small muted">Barras: dispersão de cada dia, o desvio-padrão real dos minutos dividido pelo do acaso (√média). Perto de 1, o dia só variou por acaso; acima de 1,2, variou de verdade (radônio, chuva, objeto perto). Só os minutos em casa, sem medição de objeto e sem minutos saturados ou com interferência; a janela móvel precisa de pelo menos 6 h medidas nas 24 h.</p>
+    </details>
     </section>
-  <section class="card view-graficos days-card" id="daysCard" data-subpane="tendencia" hidden>
-      <h2>Fundo por dia</h2>
+  <section class="card view-graficos days-card fc-ev" id="daysCard" data-subpane="tendencia" hidden>
+    <details id="daysDet">
+      <summary><span class="fc-ev-k">Fundo por dia, em tabela</span></summary>
       <p class="small muted">Média de cada dia do GQ GMC-800 em casa.</p>
       <div class="table-box">
         <table>
-          <thead><tr><th scope="col">Dia</th><th scope="col" class="num">µSv/h</th><th scope="col" class="num">CPM</th></tr></thead>
+          <thead><tr><th scope="col">Dia</th><th scope="col" class="num" data-u="rate">µSv/h</th><th scope="col" class="num" data-u="count">CPM</th></tr></thead>
           <tbody id="days"><tr><td colspan="3" class="muted">Sem leituras guardadas.</td></tr></tbody>
         </table>
       </div>
       <button type="button" class="link small-link" id="btnDaysMore" hidden>Ver mais</button>
+    </details>
     </section>
   <section class="card view-graficos yc-card" id="ycCard" role="tabpanel" data-subpane="ano" hidden>
       <div class="chart-head">
@@ -624,7 +660,7 @@
           <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
           <div class="plot m-plot" id="sumPlot">
             <div class="sum-marks" id="sumMarks"></div>
-            <svg id="sumChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="µSv/h no período"></svg>
+            <svg id="sumChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Leitura no período"></svg>
             <div class="sum-band" id="sumBand"></div>
             <div class="cursor" id="sumCursor" hidden></div>
             <div class="tip mono" id="sumTip" hidden></div>
@@ -641,139 +677,21 @@
       </details>
       </div>
     </section>
-</div>
-<div class="page" id="pageAlara" hidden>
-  <section class="card view" id="viewAlara">
-      <div class="view-body">
-      <div class="dlg-head">
-        <div>
-          <h2>ALARA</h2>
-          <p class="small muted"><span>ALARA quer dizer "tão baixo quanto razoavelmente possível".</span> <span>Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.</span> <span>São três jeitos: tempo, distância e blindagem.</span></p>
-        </div>
-      </div>
-
-      <div class="al-sec">
+  <section class="card al-sec sum-origin" id="sumOrigin">
         <div class="al-main">
-          <h3>De onde vem a sua dose</h3>
+          <h2>De onde vem a sua dose</h2>
           <span class="mono small muted" id="alOrSub">—</span>
           <div class="al-big mono" id="alOrTot">—</div>
-          <svg class="al-bar" id="alOrBar" viewBox="0 0 600 36" preserveAspectRatio="none" role="img" aria-label="Divisão da dose da semana"></svg>
+          <svg class="al-bar" id="alOrBar" viewBox="0 0 600 36" preserveAspectRatio="none" role="img" aria-label="Divisão da dose do período"></svg>
           <div class="al-legend small" id="alOrLeg"></div>
           <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alOrTbl"><thead><tr><th>Acima do fundo</th><th>quando</th><th class="n">dose</th></tr></thead><tbody></tbody></table></div>
         </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
+        <details class="how"><summary>Como funciona</summary>
           <p><span>O fundo natural é quase tudo, e é normal.</span> <span>Ele vem do solo e das paredes, do radônio no ar, dos raios cósmicos e até do potássio do seu corpo.</span> <span>Não dá para zerar.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <p><span>O ALARA trabalha na fatia de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.</span> <span>É nessa parte que tempo, distância e blindagem fazem diferença.</span></p>
+          <p><span>A fatia que dá para baixar é a de cima, a dose que veio de alguma coisa: um objeto que você mediu, um pico, um lugar diferente.</span> <span>É nessa parte que tempo, distância e blindagem fazem diferença; os testes ficam no Medir objeto.</span></p>
           <p>Cada linha da tabela abre o momento no gráfico.</p>
-          </details>
-        </aside>
-      </div>
-
-      <div class="al-sec">
-        <div class="al-main">
-          <h3>Tempo: quanto custa ficar perto</h3>
-          <div class="al-row">
-            <label class="al-f">Taxa no lugar (µSv/h)<input type="number" id="alRate" min="0" step="0.01" inputmode="decimal"></label>
-            <label class="al-f">Minutos<input type="number" id="alMin" min="1" max="6000" step="1" value="30" inputmode="numeric"></label>
-            <span class="small muted" id="alRateFrom">—</span>
-          </div>
-          <div class="al-big mono" id="alTDose">—</div>
-          <div class="al-eq small" id="alTEq"></div>
-          <div class="al-alt small" id="alTAlt"></div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>Dose = taxa × tempo.</span> <span>A taxa (µSv/h) é a velocidade e a dose (µSv) é a distância percorrida.</span> <span>Metade do tempo dá metade da dose.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <p>A comparação com o fundo da sua casa ajuda a ter noção do tamanho.</p>
-          </details>
-        </aside>
-      </div>
-
-      <div class="al-sec" id="alSecDist">
-        <div class="al-main">
-          <h3>Teste de distância: o inverso do quadrado</h3>
-          <div class="al-row">
-            <div class="seg" role="group" aria-label="Aparelho do teste" id="alDevSeg">
-              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
-              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
-            </div>
-            <label class="al-f">Distâncias (cm)<input type="text" id="alDists" value="5, 10, 20, 40" autocomplete="off"></label>
-          </div>
-          <div class="al-steps" id="alDSteps"></div>
-          <p class="al-msg small" id="alDMsg"></p>
-          <div class="al-row">
-            <button type="button" class="btn accent" id="alDStart">Começar</button>
-            <button type="button" class="btn accent" id="alDNext" hidden>Medir</button>
-            <button type="button" class="btn" id="alDStop" hidden>Parar esta distância</button>
-            <button type="button" class="btn" id="alDCancel" hidden>Cancelar o teste</button>
-          </div>
-          <div class="al-verdict" id="alDVer" hidden></div>
-          <div id="alDBox" hidden>
-            <svg class="al-chart" id="alDChart" viewBox="0 0 640 280" role="img" aria-label="Taxa acima do fundo em cada distância e a curva do inverso do quadrado"></svg>
-            <div class="al-legend small"><span><i style="background:var(--rc)"></i>medido (acima do fundo), com a incerteza</span><span><i class="ln" style="background:var(--muted)"></i>o que o inverso do quadrado prevê</span><span><i class="ln" style="background:var(--dim)"></i>fundo de casa</span></div>
-            <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alDTbl"><thead><tr><th>distância</th><th class="n">medido (µSv/h)</th><th class="n">previsto</th><th class="n">tempo</th></tr></thead><tbody></tbody></table></div>
-          </div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>A radiação de uma fonte pequena se espalha como a luz de uma lâmpada.</span> <span>A 2× a distância, a mesma quantidade se espalha por uma área 4× maior.</span> <span>Por isso dobrar a distância deixa ¼ da taxa.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <p><span>Como o teste funciona: o app mede cada distância até a incerteza ficar abaixo de 10% (no máximo 5 min) e tira o fundo da sua casa.</span></p>
-          <ul>
-            <li>Meça do centro do cristal (a marca no corpo do aparelho), não da ponta.</li>
-            <li>Encostado demais a regra falha. Por isso o primeiro ponto é 5 cm e não 0.</li>
-            <li>Longe, a fonte some no fundo. O app avisa quando o sinal fica do tamanho do fundo.</li>
-            <li>Se a queda for mais lenta que a curva, a fonte é grande ou espalhada (um piso, uma bancada, várias peças).</li>
-          </ul>
-          </details>
-        </aside>
-      </div>
-
-      <div class="al-sec" id="alSecShield">
-        <div class="al-main">
-          <h3>Teste de blindagem: antes × depois</h3>
-          <div class="al-row">
-            <div class="seg" role="group" aria-label="Aparelho do teste" id="alBDevSeg">
-              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
-              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
-            </div>
-            <label class="al-f">Material<input type="text" id="alMat" autocomplete="off" placeholder="ex.: livro de 3 cm"></label>
-            <label class="al-f">Minutos em cada fase<input type="number" id="alBMin" min="0.5" max="30" step="0.5" value="2" inputmode="decimal"></label>
-          </div>
-          <div class="al-steps" id="alBSteps"></div>
-          <p class="al-msg small" id="alBMsg"></p>
-          <div class="al-row">
-            <button type="button" class="btn accent" id="alBStart">Começar</button>
-            <button type="button" class="btn accent" id="alBNext" hidden>Medir com o material</button>
-            <button type="button" class="btn" id="alBStop" hidden>Parar esta fase</button>
-            <button type="button" class="btn" id="alBCancel" hidden>Cancelar o teste</button>
-          </div>
-          <div class="al-verdict" id="alBVer" hidden></div>
-          <div id="alBBox" hidden>
-            <svg class="al-chart" id="alBChart" viewBox="0 0 640 114" role="img" aria-label="Taxa acima do fundo sem nada e com o material"></svg>
-          </div>
-        </div>
-        <aside class="al-why">
-          <details class="how al-how-why"><summary>Por que isso importa</summary>
-          <p><span>Blindar é pôr matéria no caminho.</span> <span>Cada camada segura uma parte da radiação.</span> <span>Materiais densos e grossos seguram mais, e a gama de energia alta passa mais fácil.</span></p>
-          </details>
-          <details class="how"><summary>Como funciona</summary>
-          <ul>
-            <li>Mesma posição nas duas fases. Se o aparelho mexer, o teste mede a distância em vez do material.</li>
-            <li>A incerteza decide. Se a diferença for menor que duas vezes a incerteza, o app diz "não deu para ver" em vez de inventar um número. Medir mais tempo ajuda.</li>
-            <li>Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RC102, parte do que o GMC via era beta. O RC102 mede gama.</li>
-          </ul>
-          </details>
-        </aside>
-      </div>
-      </div>
-    </section>
+        </details>
+      </section>
 </div>
 <div class="page" id="pageAlertas" hidden>
   <section class="card view al-page" id="alertsCard">
@@ -788,10 +706,11 @@
           <button type="button" data-adev="radiacode" aria-pressed="false">RC102</button>
           <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
         </div>
-        <select id="alertFilter" aria-label="Tipo de alerta">
-          <option value="">Todos</option>
+        <label class="small muted al-filter-l" for="alertFilter">Mostrar</label>
+        <select id="alertFilter">
+          <option value="">Todos os alertas</option>
           <option value="live">Ao vivo</option>
-          <option value="retro">Do contador</option>
+          <option value="retro">Achados depois</option>
           <option value="alarme">Só alarmes</option>
         </select>
         <button type="button" class="chip alert-range" id="alertRangeChip" title="Mostrar todos os alertas" hidden><span></span> ✕</button>
@@ -802,7 +721,7 @@
         <div class="al-col">
           <div id="alertHistList" class="alert-hist"></div>
           <details class="how al-how"><summary>Como funciona</summary>
-            <p class="small muted">Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados "do contador" foram achados depois, no histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.</p>
+            <p class="small muted" data-u="rate">Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados "achado depois" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.</p>
             <p class="small muted">Quando um aparelho apita, o outro confere. No filtro de um aparelho entram também os alertas do outro que ele confirmou, um pouco mais apagados.</p>
           </details>
         </div>
@@ -816,7 +735,7 @@
           <div class="ad-nums" id="adNums">
             <div><span class="tile-label">Pico</span><span class="mono" id="adPk">—</span><span class="tile-sub" id="adPkSub"></span></div>
             <div><span class="tile-label">Durou</span><span class="mono" id="adDur">—</span><span class="tile-sub" id="adDurSub"></span></div>
-            <div><span class="tile-label">Limite</span><span class="mono" id="adLim">—</span><span class="tile-sub">µSv/h</span></div>
+            <div><span class="tile-label">Limite</span><span class="mono" id="adLim">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
           </div>
           <p class="small muted mono ad-sub" id="adSub">Clique num alerta da lista.</p>
           <div class="m-chart-wrap">
@@ -842,7 +761,12 @@
     </section>
 </div>
 <div class="page" id="pageMedir" hidden>
-  <section class="card view view-measure" id="viewMeasure">
+  <nav class="subtabs" role="tablist" aria-label="Medir objeto" data-page="medir" hidden>
+    <button type="button" role="tab" data-sub="objeto" aria-selected="true">Objeto</button>
+    <button type="button" role="tab" data-sub="distancia" aria-selected="false" tabindex="-1">Distância</button>
+    <button type="button" role="tab" data-sub="blindagem" aria-selected="false" tabindex="-1">Blindagem</button>
+  </nav>
+  <section class="card view view-measure" id="viewMeasure" role="tabpanel" data-subpane="objeto">
       <div class="view-body">
       <div class="dlg-head m-head">
         <h2 id="measureTitle">Medir objeto</h2>
@@ -866,11 +790,11 @@
       <div class="m-pane" id="mPanePrep">
         <div class="m-prep-row">
           <div class="m-field">
-            <label for="mName">O que vai medir <span class="muted">opcional</span></label>
+            <label for="mName"><span>O que vai medir</span> <span class="m-opt">(opcional)</span></label>
             <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
           </div>
           <div class="m-field">
-            <label for="mDistCm">Distância do objeto até o aparelho <span class="m-tag mono">usada no Bq e na distância segura</span></label>
+            <label for="mDistCm"><span>Distância do objeto até o aparelho</span> <span class="m-opt">(usada no Bq e na distância segura)</span></label>
             <div class="m-dist" id="mDistBox">
               <input type="number" id="mDistCm" min="0" max="500" step="0.5" inputmode="decimal" aria-label="Distância em centímetros"><span class="muted">cm</span>
               <div class="seg" role="group" aria-label="Distâncias comuns" id="mDistSeg">
@@ -885,10 +809,10 @@
         <div class="m-field">
           <span class="m-label" id="mDevLabel">Com qual aparelho</span>
           <div class="m-devs" role="radiogroup" aria-labelledby="mDevLabel" id="mDevs">
-            <button type="button" role="radio" class="m-dev" data-dev="radiacode" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i>RC102</strong><span>Mais sensível e com espectro.</span><span class="mono">isótopos · espectrograma · Bq estimado</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="gmc" aria-checked="false"><strong><i class="m-dot gmc" aria-hidden="true"></i>GMC-800</strong><span>Só contagem, sem espectro.</span><span class="mono">tem algo ou não · distância segura</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="ambos" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i><i class="m-dot gmc" aria-hidden="true"></i>Os dois no objeto</strong><span>Um confere o outro.</span><span class="mono">tudo do RC102 + concordância</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="voce" aria-checked="false"><strong>Um no objeto, outro com você</strong><span>Quanto você recebe manuseando.</span><span class="mono">tem algo ou não · sua dose no período</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="radiacode" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i>RC102</strong><span>Mais sensível e com espectro.</span><span class="m-dev-f">isótopos · espectrograma · Bq estimado</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="gmc" aria-checked="false"><strong><i class="m-dot gmc" aria-hidden="true"></i>GMC-800</strong><span>Só contagem, sem espectro.</span><span class="m-dev-f">tem algo ou não · distância segura</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="ambos" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i><i class="m-dot gmc" aria-hidden="true"></i>Os dois no objeto</strong><span>Um confere o outro.</span><span class="m-dev-f">tudo do RC102 + concordância</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="voce" aria-checked="false"><strong>Um no objeto, outro com você</strong><span>Quanto você recebe manuseando.</span><span class="m-dev-f">tem algo ou não · sua dose no período</span></button>
           </div>
           <div class="m-objdev" id="mObjDevBox" hidden>
             <span class="small muted">no objeto:</span>
@@ -946,7 +870,7 @@
         <p class="small muted">A tela mostra só se está subindo ou descendo, rápido, sem média longa. Quando achar o ponto mais forte, pare ali.</p>
         <div class="m-busca">
           <div class="m-busca-main">
-            <div class="m-busca-val"><span class="mono" id="mBuscaVal">—</span><span class="muted">µSv/h</span><span class="mono m-busca-x" id="mBuscaX"></span></div>
+            <div class="m-busca-val"><span class="mono" id="mBuscaVal">—</span><span class="muted" data-u="rate">µSv/h</span><span class="mono m-busca-x" id="mBuscaX"></span></div>
             <div class="m-busca-trend" id="mBuscaTrend" aria-live="polite">esperando a leitura</div>
             <div class="m-busca-bar" aria-hidden="true"><div class="m-busca-fill" id="mBuscaFill"></div><i class="m-busca-bg" id="mBuscaBgMk"></i><i class="m-busca-pk" id="mBuscaPkMk"></i></div>
             <div class="m-busca-scale mono small muted"><span id="mBuscaBgTxt">fundo</span><span id="mBuscaPkTxt">pico —</span></div>
@@ -1005,7 +929,7 @@
             <div class="m-viz m-spec" id="mLiveSpecBox" hidden></div>
             <div class="m-viz" id="mSgBox" hidden>
               <div class="m-viz-head"><h4 id="mSgTitle">Espectrograma</h4><span class="small muted">cada linha é um instante; mais claro = mais contagens</span></div>
-              <canvas id="mSg" height="120" aria-label="Espectrograma da medição"></canvas>
+              <canvas id="mSg" height="120" role="img" aria-label="Espectrograma da medição"></canvas>
               <div class="m-bar-scale mono small muted"><span>0</span><span>energia →</span><span id="mSgMax">3000 keV</span></div>
             </div>
             <div class="m-side" id="mLiveSlotNew">
@@ -1055,6 +979,7 @@
           <span class="small muted" id="mExplain"></span>
         </div>
         <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span></div>
+        <p class="small m-more">Quer ver na prática? <button type="button" class="link small-link" data-msub="distancia">Como cai com a distância</button> · <button type="button" class="link small-link" data-msub="blindagem">Testar uma blindagem</button></p>
         <div class="m-go m-res-actions">
           <button type="button" class="btn accent" id="btnMOpenSaved">Ver em Medições salvas</button>
           <button type="button" class="btn" id="btnMAgain">Medir em outra distância</button>
@@ -1077,6 +1002,16 @@
         <p class="small muted" id="mSaved">“Medir em outra distância” repete só a etapa do objeto, com o mesmo fundo. Com duas distâncias, o app confere se a radiação cai pelo inverso do quadrado: se cair, a distância segura e o Bq ficam mais confiáveis; se não cair, o objeto é espalhado e o app avisa.</p>
       </div>
       </div>
+
+      <div class="m-alara-box"><details class="how m-alara" id="mAlara"><summary>Como funciona: tempo, distância e blindagem</summary>
+        <p><span>ALARA quer dizer "tão baixo quanto razoavelmente possível".</span> <span>Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.</span> <span>São três jeitos, e os três moram aqui:</span></p>
+        <ul>
+          <li><b>Tempo.</b> <span>Dose = taxa × tempo: metade do tempo dá metade da dose.</span> <span>O resultado de cada medição mostra quanto custa ficar perto.</span></li>
+          <li><b>Distância.</b> <span>De uma fonte pequena, o dobro da distância deixa ¼ da taxa.</span> <span>A aba Distância mede isso com o seu objeto.</span></li>
+          <li><b>Blindagem.</b> <span>Pôr matéria no caminho segura uma parte da radiação.</span> <span>A aba Blindagem compara antes e depois.</span></li>
+        </ul>
+        <p class="small muted">Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.</p>
+      </details></div>
 
       <div class="m-saved-grid" id="mSavedPane" hidden>
         <aside class="m-history" id="mHistory">
@@ -1139,6 +1074,77 @@
 
         </div>
     </section>
+  <section class="card al-sec" id="alSecDist" role="tabpanel" data-subpane="distancia" hidden>
+        <div class="al-main">
+          <button type="button" class="link small-link m-back" data-msub="objeto">← Voltar para o Medir objeto</button>
+          <h2>Teste de distância: o inverso do quadrado</h2>
+          <div class="al-row">
+            <div class="seg" role="group" aria-label="Aparelho do teste" id="alDevSeg">
+              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
+              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
+            </div>
+            <label class="al-f">Distâncias (cm)<input type="text" id="alDists" value="5, 10, 20, 40" autocomplete="off"></label>
+          </div>
+          <div class="al-steps" id="alDSteps"></div>
+          <p class="al-msg small" id="alDMsg"></p>
+          <div class="al-row">
+            <button type="button" class="btn accent" id="alDStart">Começar</button>
+            <button type="button" class="btn accent" id="alDNext" hidden>Medir</button>
+            <button type="button" class="btn" id="alDStop" hidden>Parar esta distância</button>
+            <button type="button" class="btn" id="alDCancel" hidden>Cancelar o teste</button>
+          </div>
+          <div class="al-verdict" id="alDVer" hidden></div>
+          <div id="alDBox" hidden>
+            <svg class="al-chart" id="alDChart" viewBox="0 0 640 280" role="img" aria-label="Taxa acima do fundo em cada distância e a curva do inverso do quadrado"></svg>
+            <div class="al-legend small"><span><i style="background:var(--rc)"></i>medido (acima do fundo), com a incerteza</span><span><i class="ln" style="background:var(--muted)"></i>o que o inverso do quadrado prevê</span><span><i class="ln" style="background:var(--dim)"></i>fundo de casa</span></div>
+            <div class="cfg-hist-wrap"><table class="cfg-hist al-tbl" id="alDTbl"><thead><tr><th>distância</th><th class="n" data-u="rate">medido (µSv/h)</th><th class="n">previsto</th><th class="n">tempo</th></tr></thead><tbody></tbody></table></div>
+          </div>
+        </div>
+        <details class="how"><summary>Como funciona</summary>
+          <p><span>A radiação de uma fonte pequena se espalha como a luz de uma lâmpada.</span> <span>A 2× a distância, a mesma quantidade se espalha por uma área 4× maior.</span> <span>Por isso dobrar a distância deixa ¼ da taxa.</span></p>
+          <p><span>Como o teste funciona: o app mede cada distância até a incerteza ficar abaixo de 10% (no máximo 5 min) e tira o fundo da sua casa.</span></p>
+          <ul>
+            <li>Meça do centro do cristal (a marca no corpo do aparelho), não da ponta.</li>
+            <li>Encostado demais a regra falha. Por isso o primeiro ponto é 5 cm e não 0.</li>
+            <li>Longe, a fonte some no fundo. O app avisa quando o sinal fica do tamanho do fundo.</li>
+            <li>Se a queda for mais lenta que a curva, a fonte é grande ou espalhada (um piso, uma bancada, várias peças).</li>
+          </ul>
+        </details>
+      </section>
+  <section class="card al-sec" id="alSecShield" role="tabpanel" data-subpane="blindagem" hidden>
+        <div class="al-main">
+          <button type="button" class="link small-link m-back" data-msub="objeto">← Voltar para o Medir objeto</button>
+          <h2>Teste de blindagem: antes × depois</h2>
+          <div class="al-row">
+            <div class="seg" role="group" aria-label="Aparelho do teste" id="alBDevSeg">
+              <button type="button" data-aldev="radiacode" aria-pressed="false">RC102</button>
+              <button type="button" data-aldev="gmc" aria-pressed="false">GMC-800</button>
+            </div>
+            <label class="al-f">Material<input type="text" id="alMat" autocomplete="off" placeholder="ex.: livro de 3 cm"></label>
+            <label class="al-f">Minutos em cada fase<input type="number" id="alBMin" min="0.5" max="30" step="0.5" value="2" inputmode="decimal"></label>
+          </div>
+          <div class="al-steps" id="alBSteps"></div>
+          <p class="al-msg small" id="alBMsg"></p>
+          <div class="al-row">
+            <button type="button" class="btn accent" id="alBStart">Começar</button>
+            <button type="button" class="btn accent" id="alBNext" hidden>Medir com o material</button>
+            <button type="button" class="btn" id="alBStop" hidden>Parar esta fase</button>
+            <button type="button" class="btn" id="alBCancel" hidden>Cancelar o teste</button>
+          </div>
+          <div class="al-verdict" id="alBVer" hidden></div>
+          <div id="alBBox" hidden>
+            <svg class="al-chart" id="alBChart" viewBox="0 0 640 114" role="img" aria-label="Taxa acima do fundo sem nada e com o material"></svg>
+          </div>
+        </div>
+        <details class="how"><summary>Como funciona</summary>
+          <p><span>Blindar é pôr matéria no caminho.</span> <span>Cada camada segura uma parte da radiação.</span> <span>Materiais densos e grossos seguram mais, e a gama de energia alta passa mais fácil.</span></p>
+          <ul>
+            <li>Mesma posição nas duas fases. Se o aparelho mexer, o teste mede a distância em vez do material.</li>
+            <li>A incerteza decide. Se a diferença for menor que duas vezes a incerteza, o app diz "não deu para ver" em vez de inventar um número. Medir mais tempo ajuda.</li>
+            <li>Dica com os dois aparelhos: se uma folha de papel derruba a contagem do GMC-800 e não muda a do RC102, parte do que o GMC via era beta. O RC102 mede gama.</li>
+          </ul>
+        </details>
+      </section>
 </div>
 <div class="page" id="pageFora" hidden>
   <section class="card view view-periods" id="viewPeriods">
@@ -1146,7 +1152,7 @@
       <div class="dlg-head">
         <div>
           <h2 id="periodsTitle">Fora de casa</h2>
-          <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RC102 com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
+          <p class="small muted">Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RC102 com você.</p>
         </div>
         <div class="row-btns pl-head-btns">
           <button type="button" class="btn small" id="btnPlanAdd">Programar saída</button>
@@ -1155,14 +1161,14 @@
       </div>
       <div id="plannedForm"></div>
       <div class="card pl-box" id="plannedBox" hidden></div>
-      <div class="card">
-        <div class="wh-head"><h3>Últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></div>
-        <div class="wh-tl" id="whTimeline"></div>
-        <div class="wh-legend"><span><i style="background:var(--surface-2);border:1px solid var(--border-hover)"></i>no lugar de sempre</span><span><i style="background:var(--swap)"></i>fora do lugar de sempre</span><span><i style="background:var(--nosig);border:1px solid var(--border-hover)"></i>sem dado</span><span><i style="background:var(--alarm)"></i>saturando ou sem contagens</span><span><i style="background:var(--outc)"></i>fora do cálculo</span></div>
-      </div>
       <p class="small p-total" id="periodTotal" hidden></p>
       <div id="periodAddForm"></div>
       <ul class="wh-list" id="periodList"></ul>
+      <details class="card wh-tl-det">
+        <summary class="wh-head"><h3>Linha do tempo dos últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></summary>
+        <div class="wh-tl" id="whTimeline"></div>
+        <div class="wh-legend"><span><i style="background:var(--surface-2);border:1px solid var(--border-hover)"></i>normal</span><span><i style="background:var(--swap)"></i>saiu do normal</span><span><i style="background:var(--nosig);border:1px solid var(--border-hover)"></i>sem dado</span><span><i style="background:var(--alarm)"></i>leitura com problema</span><span><i style="background:var(--outc)"></i>ignorado</span></div>
+      </details>
         </div>
     </section>
 </div>
@@ -1192,7 +1198,7 @@
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="riY"><span></span><span></span><span></span><span></span></div>
           <div class="plot m-plot" id="riPlot">
-            <svg id="riChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="CPM médio antes e depois da chuva, comparado com horários sem chuva"></svg>
+            <svg id="riChart" viewBox="0 0 600 200" preserveAspectRatio="none" role="img" aria-label="Leitura média antes e depois da chuva, comparada com horários sem chuva"></svg>
             <div class="cursor" id="riCursor" hidden></div>
             <div class="tip mono" id="riTip" hidden></div>
           </div>
@@ -1201,7 +1207,7 @@
         <div class="legend small muted ad-legend">
           <span class="key"><i style="border-color:#3DA5FF"></i>depois da chuva</span>
           <span class="key"><i style="border-color:#A3ADB4"></i>sem chuva (variação normal)</span>
-          <span class="small muted" id="riUnit">CPM acima da média das 2 h antes</span>
+          <span class="small muted" id="riUnit">% acima da média das 2 h antes</span>
         </div>
       </div>
       <ul class="ri-list" id="riList"></ul>
@@ -1217,8 +1223,7 @@
           </div>
           <div class="al-verdict" id="prVer" hidden></div>
         </div>
-        <aside class="al-why">
-          <h4>Por que isso importa</h4>
+        <details class="how"><summary>Como funciona</summary>
           <p><span>Radônio é um gás radioativo que sai do solo e dos tijolos.</span> <span>Ele não tem cheiro nem cor.</span> <span>Os "filhos" dele (bismuto-214 e chumbo-214) emitem gama, e é isso que os seus aparelhos veem subir.</span></p>
           <ul>
             <li>Pressão caindo: o ar do chão sai com mais facilidade e traz mais radônio. Costuma vir antes de frente fria e chuva.</li>
@@ -1227,7 +1232,7 @@
           </ul>
           <p>Abrir a casa para ventilar é ALARA de graça.</p>
           <p><span>Com uma semana de dados dá só uma pista.</span> <span>Com quatro semanas ou mais a relação fica confiável.</span></p>
-        </aside>
+        </details>
       </div>
       </div>
     </section>
@@ -1236,7 +1241,7 @@
   <section class="card sync-card" id="syncCard" hidden>
     <div class="sync-row">
       <div><strong id="syncTitle">Memória do contador</strong><p class="small" id="syncText"></p></div>
-      <button type="button" class="btn small accent" id="btnSyncDl">Baixar histórico</button>
+      <div class="sync-act"><button type="button" class="btn small accent" id="btnSyncDl">Baixar histórico</button><p class="small sync-res" id="syncRes" role="status" hidden><span class="sync-ok" aria-hidden="true"></span><span id="syncResTxt"></span> <span class="muted" id="syncResAgo"></span></p></div>
     </div>
   </section>
   <nav class="subtabs" role="tablist" aria-label="GMC-800" data-page="gmc">
@@ -1253,38 +1258,29 @@
               <div class="value-row">
                 <span class="value" id="readValue">—</span>
                 <span class="unit" id="readUnit">CPM</span>
+                <span class="hero-lv" id="gHeroState">—</span>
               </div>
             </div>
             <div class="hero-spark" aria-hidden="true"><svg id="gHeroSpark" viewBox="0 0 160 40" preserveAspectRatio="none"><polyline points=""/></svg><span class="tile-sub">última hora</span></div>
             <div class="hero-dose" id="heroDose">
               <span class="tile-label">Dose hoje</span>
-              <span class="hero-dose-v mono"><span id="tDose">—</span> <span class="hero-dose-u">µSv</span></span>
+              <span class="hero-dose-v mono"><span id="tDose">—</span> <span class="hero-dose-u" data-u="dose">µSv</span></span>
               <span class="tile-sub" id="tDoseSub">acumulados</span>
             </div>
           </div>
+          <div class="dev-regua" id="gHeroRegua"></div>
+          <p class="dr-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint" data-u="rate">faixas do app em µSv/h</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></p>
           <div class="dev-lost" id="gLost" hidden></div>
           <p class="read-last mono" id="gLast"></p>
-          <span class="alt" id="readAlt">sem contador conectado</span>
+          <span class="alt" id="readAlt" data-unit-keep>sem contador conectado</span>
           <span class="sigma" id="readSigma" hidden></span>
-          <span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span>
+          <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="readSigmaNum" hidden><span class="mono" id="readSigmaVal"></span> <button type="button" class="link small-link" id="btnSigmaHelp">o que é σ?</button></span></details>
         </div>
-        <div class="seg" role="group" aria-label="Unidade" id="unitSeg">
-          <button type="button" data-unit="cpm" aria-pressed="true">CPM</button>
-          <button type="button" data-unit="usv" aria-pressed="false">µSv/h</button>
-          <button type="button" data-unit="mrh" aria-pressed="false" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button>
-          <button type="button" data-unit="cps" aria-pressed="false">CPS</button>
-        </div>
-      </div>
-
-      <div class="hero-dial">
-        <svg class="dev-dial" id="gHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
-        <div class="hero-dial-state" id="gHeroState">—</div>
-        <div class="hero-dial-cap"><span class="sr-only level-name" id="levelName">—</span><span id="levelHint">faixas do app em µSv/h</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
       </div>
 
       <div class="rc-mini">
-        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
-        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub">µSv/h</span></div>
+        <div><span class="tile-label">Média 1 h</span><span class="mono" id="hAvg1h">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
+        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
 
@@ -1301,7 +1297,7 @@
   </div>
   <section class="tiles" hidden>
       <div class="card tile"><span class="tile-label">Média · 1 h</span><span class="tile-value mono" id="tAvg">—</span><span class="tile-sub" id="tAvgSub">CPM</span></div>
-      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub">µSv/h</span></div>
+      <div class="card tile"><span class="tile-label">Mínimo · 24 h</span><span class="tile-value mono" id="tMin">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
       <div class="card tile"><span class="tile-label">Máximo · 24 h</span><span class="tile-value mono" id="tMax">—</span><span class="tile-sub" id="tMaxSub">CPM</span></div>
     </section>
 </div>
@@ -1320,31 +1316,28 @@
         <div class="read-head">
           <div class="read-main">
             <span class="eyebrow rc-eyebrow" id="rcEyebrow">Radiacode 102 <span class="rc-main-via mono" id="rcMainVia"></span><span class="rc-chips" id="rcChips"></span></span>
-            <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span></div>
+            <div class="value-row"><span class="value rc-main-val" id="rcMainVal">—</span><span class="unit" id="rcMainUnit">µSv/h</span><span class="hero-lv" id="rHeroState">—</span></div>
           </div>
           <div class="hero-dose">
             <span class="tile-label">Minha dose hoje</span>
-            <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u">µSv</span></span>
+            <span class="hero-dose-v mono"><span id="rcDoseToday">—</span> <span class="hero-dose-u" data-u="dose">µSv</span></span>
             <span class="tile-sub" id="rcDoseTodaySub"></span>
           </div>
         </div>
+        <div class="dev-regua" id="rHeroRegua"></div>
+        <p class="dr-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint" data-u="rate">alarmes do RC102</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></p>
         <div class="dev-lost" id="rLost" hidden></div>
         <p class="read-last mono" id="rLast"></p>
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
-        <span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span>
+        <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span></details>
         <div class="rc-acts"><button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button><button type="button" class="btn small" id="btnRcConn">Conexão</button></div>
         </div>
       </div>
 
-      <div class="hero-dial">
-        <svg class="dev-dial" id="rHeroDial" viewBox="-9 -7 66 62" role="img" aria-label="Mostrador"></svg>
-        <div class="hero-dial-state" id="rHeroState">—</div>
-        <div class="hero-dial-cap"><span class="sr-only level-name" id="rcLevelName">—</span><span id="rcLevelHint">alarmes do RC102</span> · <button type="button" class="link small-link" data-regua="taxa">ver na régua</button></div>
-      </div>
       <div class="rc-mini">
-        <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub">µSv/h</span></div>
-        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="rcMin24">—</span><span class="tile-sub">µSv/h</span></div>
+        <div><span class="tile-label">Média 1 h</span><span class="mono" id="rcAvg1h">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
+        <div><span class="tile-label">Mín 24 h</span><span class="mono" id="rcMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="rcMax24">—</span><span class="tile-sub" id="rcMax24At"></span></div>
         <div><span class="tile-label">Dose no aparelho</span><span class="mono" id="rcDevDose">—</span><span class="tile-sub" id="rcDevDoseSub"></span></div>
       </div>
@@ -1353,7 +1346,7 @@
       <div class="rc-24-head"><h3 id="rc24Title">Últimas 24 horas</h3>
         <div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div></div>
       <div class="rc-24-chart" id="rc24Chart"></div>
-      <p class="small muted rc-24-key"><span><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
+      <p class="small muted rc-24-key"><span data-u="rate"><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
     </section>
     <section class="card rc-none" id="rcNone" hidden>
       <div class="rc-head"><h3>Radiacode 102</h3><span class="rc-state mono small" id="rcState">procurando</span></div>
@@ -1364,7 +1357,7 @@
   <section class="card view" id="viewRadiacode">
       <div class="view-body">
       <div class="subpane" role="tabpanel" data-subpane="espectro" hidden>
-      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" aria-pressed="true">Espectro</button><button type="button" data-v="tempo" aria-pressed="false">Espectrograma</button></div>
+      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" data-o="sim" aria-pressed="true">Espectro</button><button type="button" data-v="acc" data-m="agora" aria-pressed="false" hidden>Tela do aparelho</button><button type="button" data-v="acc" data-m="acc" aria-pressed="false" hidden>Acumulado do aparelho</button><button type="button" data-v="tempo" aria-pressed="false">Ao longo do tempo</button></div>
       <div class="rc-specv" data-specview="acc">
       <article class="rc-card">
         <div class="rc-head"><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
@@ -1379,24 +1372,24 @@
         <div class="rc-ctrl">
           <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RC102"></div>
           <div class="seg rc-seg" id="rcSpecMode" aria-label="Qual espectro" hidden><button type="button" data-m="agora" aria-pressed="true">Tela do aparelho</button><button type="button" data-m="acc" aria-pressed="false">Acumulado do aparelho</button></div>
-        </div>
-        <div class="rc-ctrl">
           <button type="button" class="btn small" id="rcSpecPlay">Pausar</button>
           <button type="button" class="btn small" id="rcSpecReset">Recomeçar</button>
           <button type="button" class="btn small" id="rcSpecLog">Escala: linear</button>
           <label class="rc-inline small" id="rcSpecSpeedBox">velocidade
             <select id="rcSpecSpeed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select></label>
           <label class="rc-inline small"><input type="checkbox" id="rcSpecBg" checked> fundo por cima</label>
+          <button type="button" class="btn small" id="rcSpecFull" aria-pressed="false">Tela cheia</button>
         </div>
-        <div class="rc-isos" id="rcIsos" role="group" aria-label="Isótopos mais detectados" hidden></div>
-        <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
+        <p class="rc-says" id="rcSpecSays" aria-live="polite" hidden></p>
+        <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas" role="img" aria-label="Espectro do RC102"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
         <p class="mono small rc-info" id="rcSpecInfo"></p>
+        <div class="rc-isos" id="rcIsos" role="group" aria-label="Isótopos mais detectados" hidden></div>
         <p class="small muted rc-drag-hint" id="rcDragHint">Clique num isótopo ou arraste no espectro para ver um trecho de perto.</p>
         <div class="rc-zoom" id="rcZoom" hidden>
           <div class="rc-zoom-head"><h4 id="rcZoomTitle">Zoom no pico</h4><span class="small muted" id="rcZoomSub"></span><button type="button" class="link small-link" id="rcZoomClose">fechar</button></div>
           <div class="rc-zoom-body">
             <div class="rc-zoom-main">
-              <div class="rc-plot"><canvas id="rcZoomCv" class="rc-canvas"></canvas></div>
+              <div class="rc-plot"><canvas id="rcZoomCv" class="rc-canvas" role="img" aria-label="Trecho do espectro, de perto"></canvas></div>
               <p class="small muted rc-legend rc-zoom-key" id="rcZoomKey"><span class="lg-ch">canais</span><span class="lg-fit">curva ajustada</span><span class="lg-base">linha de base</span><span class="lg-fwhm">largura na metade da altura</span></p>
               <p class="small muted rc-legend rc-zoom-key" id="rcZoomKeyIso" hidden><span class="lg-ch">canais</span><span class="lg-base" id="rcZoomBaseKey">contínuo (sem o pico)</span><span class="lg-net">o que sobra: o pico</span></p>
             </div>
@@ -1419,17 +1412,17 @@
         </div>
         <div class="rc-sgram">
           <div class="rc-sg-time mono small" id="rcSgTime"><span>min 0</span><span>min 60</span><span>min 120</span><span>min 180</span></div>
-          <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
+          <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas" role="img" aria-label="Espectro ao longo do tempo"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
             <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
         </div>
-        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="seg rc-seg" id="rcLoupe" role="group" aria-label="Lupa"><button type="button" data-n="0" aria-pressed="false">sem lupa</button><button type="button" data-n="5" aria-pressed="true">lupa 5×5</button></span><span class="mono small muted" id="rcSgInfo"></span></div>
+        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="seg rc-seg" id="rcCmap" role="group" aria-label="Escala de cor"><button type="button" data-c="orig" aria-pressed="true">cores: original</button><button type="button" data-c="cont" aria-pressed="false">contínua</button></span><span class="seg rc-seg" id="rcLoupe" role="group" aria-label="Lupa"><button type="button" data-n="0" aria-pressed="false">sem lupa</button><button type="button" data-n="5" aria-pressed="true">lupa 5×5</button></span><span class="mono small muted" id="rcSgInfo"></span></div>
       </article>
 
       <article class="rc-card" id="rcHardCard">
-        <div class="rc-head"><h3>Dureza nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
-        <details class="how rc-how"><summary>Como funciona</summary><p id="rcHdDesc" class="small muted">Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p></details>
+        <div class="rc-head"><h3><span data-gl="dureza">Dureza</span> nos gráficos</h3><span id="rcHdSimTags"><span class="sim-tag">exemplo simulado</span><span class="wip-tag">em breve</span></span><span class="live-tag" id="rcHdLiveTag" hidden>do aparelho</span></div>
+        <details class="how rc-how"><summary>Como funciona</summary><p id="rcHdDesc" class="small muted">Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.</p></details>
         <div class="rc-ctrl" id="rcHdCtrl" hidden><div class="seg rc-seg rc-per" id="rcHdPeriod" aria-label="Período"><button type="button" data-p="3h" aria-pressed="true">3 h</button><button type="button" data-p="12h" aria-pressed="false">12 h</button><button type="button" data-p="24h" aria-pressed="false">24 h</button><button type="button" data-p="7d" aria-pressed="false">7 dias</button></div></div>
-        <div class="rc-plot"><canvas id="rcHard" class="rc-canvas"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
+        <div class="rc-plot"><canvas id="rcHard" class="rc-canvas" role="img" aria-label="Dureza do espectro ao longo do tempo"></canvas><div class="rc-tip" id="rcHardTip" hidden></div></div>
         <p class="small muted rc-legend"><span class="lg-rain">chuva</span><span class="lg-elec">eletrodo perto</span><span class="lg-gap" hidden>sem leitura (média)</span></p>
         <p class="mono small muted" id="rcHdInfo" hidden></p>
       </article>
@@ -1457,7 +1450,7 @@
             </div>
             <label class="rc-inline small" id="rcSoundBox"><input type="checkbox" id="rcSound"> som (cliques)</label>
             <label class="rc-inline small" id="rcSrSoundBox" hidden>Som <select id="rcSrSound"><option value="">desligado</option><option value="cliques">cliques</option><option value="tom">tom (mais agudo = mais forte)</option></select></label>
-            <canvas id="rcTrend" class="rc-canvas"></canvas>
+            <canvas id="rcTrend" class="rc-canvas" role="img" aria-label="Taxa do RC102 ao longo do tempo"></canvas>
             <p class="mono small rc-info" id="rcSearchInfo"></p>
           </div>
         </div>
@@ -1467,41 +1460,61 @@
       <div class="subpane" role="tabpanel" data-subpane="atividade" hidden>
       <article class="rc-card" id="rcActCard">
         <div class="rc-head"><h3>Atividade (Bq)</h3><span class="live-tag">do aparelho</span></div>
-        <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p></details>
-        <div class="rc-act-cal" id="rcActCal"></div>
-        <div id="rcActForm">
-          <div class="seg rc-seg" id="rcActKind" aria-label="Tipo"><button type="button" data-k="amostra" aria-pressed="true">Medir amostra</button><button type="button" data-k="kcl" aria-pressed="false">Calibrar com KCl</button><button type="button" data-k="torio" aria-pressed="false">Calibrar com tório</button></div>
-          <div class="rc-act-grid">
-            <label data-for="amostra"><span class="small muted">O que é</span><select id="rcActPreset"></select></label>
-            <label data-for="amostra"><span class="small muted">Nome</span><input type="text" id="rcActName" maxlength="60"></label>
-            <label data-for="kcl"><span class="small muted">Amostra</span><select id="rcActKclType"><option value="100">KCl puro (substituto de sal)</option><option value="light" selected>Sal light</option></select></label>
-            <label data-for="kcl" id="rcActPctBox"><span class="small muted">% de KCl</span><input type="number" id="rcActPct" min="1" max="100" step="1" value="50"><span class="small muted">no rótulo: mg de potássio em 1 g × 0,19</span></label>
+        <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Atividade (Bq) é quantos átomos decaem por segundo na amostra; dose (µSv) é quanto disso chega no corpo. Para saber a atividade, o app precisa saber quanto o RC102 enxerga de cada energia naquela posição (a eficiência): isso se mede uma vez com referências conhecidas, o KCl (potássio) e, se tiver, o eletrodo de tório. Depois dá para medir amostras na mesma posição.</p><p class="small muted">Limites: o cristal do RC102 é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.</p></details>
+        <div id="rcActCal"></div>
+        <div class="rc-act-eff-wrap" id="rcActEff" data-no-tr hidden></div>
+        <div id="rcActCalFlow" class="rc-act-sec" hidden>
+          <p class="rc-act-lbl">Calibrar</p>
+          <div class="rc-act-steps3" id="rcActCalSteps">
+            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, no pote. <span class="st">obrigatório · ~1 h</span></button>
+            <button type="button" data-k="torio"><b>2 · Tório</b>Eletrodo de tungstênio toriado, se tiver. <span class="st">opcional · melhora a curva</span></button>
+            <div><b>3 · Pronto</b>Depois, é só medir amostras na mesma posição. <span class="st">fica guardado</span></div>
+          </div>
+          <div class="rc-act-row">
+            <div class="rc-act-f" data-for="kcl"><span class="small muted">Amostra</span><span class="seg rc-seg" id="rcActKclType"><button type="button" data-v="light" aria-pressed="true">Sal light</button><button type="button" data-v="100" aria-pressed="false">KCl puro</button></span></div>
+            <label data-for="kcl" id="rcActPctBox"><span class="small muted">% de KCl no rótulo</span><input type="number" id="rcActPct" min="1" max="100" step="1" value="50"></label>
             <label data-for="torio"><span class="small muted">Eletrodo</span><select id="rcActTh"><option value="1">WT10 (amarelo, 1% de ThO₂)</option><option value="2" selected>WT20 (vermelho, 2%)</option><option value="3">WT30 (roxo, 3%)</option><option value="4">WT40 (laranja, 4%)</option></select></label>
             <label data-for="torio"><span class="small muted">Idade do eletrodo (anos)</span><input type="number" id="rcActAge" min="0" max="80" step="0.5" placeholder="não sei"></label>
-            <label><span class="small muted">Massa (g)</span><input type="number" id="rcActMass" min="0.1" step="0.1" value="500"></label>
-            <label><span class="small muted">Posição</span><input type="text" id="rcActGeom" maxlength="80"></label>
-            <label><span class="small muted">Fundo</span><select id="rcActBg"><option value="novo">medir um fundo novo</option><option value="salvo">usar o fundo salvo</option></select></label>
-            <label id="rcActBgTBox"><span class="small muted">Tempo do fundo</span><select id="rcActBgT"><option value="600">10 min</option><option value="1800">30 min</option><option value="3600" selected>1 h</option><option value="7200">2 h</option><option value="14400">4 h</option><option value="28800">8 h</option><option value="43200">12 h</option><option value="86400">24 h</option><option value="0">até eu parar</option></select></label>
-            <label><span class="small muted">Tempo da amostra</span><select id="rcActSmpT"><option value="600">10 min</option><option value="1800">30 min</option><option value="3600" selected>1 h</option><option value="7200">2 h</option><option value="14400">4 h</option><option value="28800">8 h</option><option value="43200">12 h</option><option value="86400">24 h</option><option value="0">até eu parar</option></select></label>
+            <label><span class="small muted">Massa (g)</span><input type="number" id="rcActCalMass" min="0.1" step="0.1" value="500"></label>
+            <label><span class="small muted">Posição</span><input type="text" id="rcActCalGeom" maxlength="80"></label>
           </div>
-          <div class="rc-act-nucs" data-for="amostra" id="rcActNucs"></div>
-          <p class="small muted" id="rcActHint"></p>
-          <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActStart">Começar</button><span class="small warn-text" id="rcActErr"></span></div>
+          <p class="small muted" id="rcActCalHint"></p>
+          <div class="rc-act-total"><span id="rcActCalTot"></span><button type="button" class="btn accent" id="rcActCalStart">Começar a calibração</button><button type="button" class="link" id="rcActCalBack">voltar</button><span class="small warn-text" id="rcActCalErr"></span></div>
+        </div>
+        <div id="rcActForm" class="rc-act-sec">
+          <p class="rc-act-lbl">O que vai medir</p>
+          <div class="rc-act-chips" id="rcActChips"></div>
+          <div class="rc-act-expect" id="rcActExpect"></div>
+          <p class="small muted" id="rcActPrep"></p>
+          <div class="rc-act-row">
+            <label><span class="small muted" id="rcActMassLbl">Massa (g)</span><input type="number" id="rcActMass" min="0" step="0.1" value="500"></label>
+            <div class="rc-act-f rc-act-wide"><span class="small muted">Tempo da amostra</span><span class="seg rc-seg" id="rcActSmpT"></span></div>
+          </div>
+          <details class="rc-act-more" id="rcActMore"><summary>Mais opções</summary>
+            <div class="rc-act-moregrid">
+              <label><span class="small muted">Nome (para o histórico)</span><input type="text" id="rcActName" maxlength="60"></label>
+              <label><span class="small muted">Posição</span><input type="text" id="rcActGeom" maxlength="80"></label>
+              <div class="rc-act-f"><span class="small muted">Fundo</span><span class="seg rc-seg" id="rcActBg"><button type="button" data-v="novo" aria-pressed="true">medir um novo</button><button type="button" data-v="salvo" aria-pressed="false" id="rcActBgSaved">usar o salvo</button></span></div>
+              <div class="rc-act-f" id="rcActBgTBox"><span class="small muted">Tempo do fundo</span><span class="seg rc-seg" id="rcActBgT"></span></div>
+              <div class="rc-act-full"><span class="small muted">Procurar</span><div class="rc-act-nucs" id="rcActNucs"></div></div>
+            </div>
+          </details>
+          <div class="rc-act-total"><span id="rcActTot"></span><button type="button" class="btn accent" id="rcActStart">Começar</button><span class="small warn-text" id="rcActErr"></span></div>
         </div>
         <div id="rcActRun" hidden>
-          <p class="rc-act-step" id="rcActStep"></p>
+          <div class="rc-act-stepper" id="rcActStep"></div>
+          <p class="rc-act-what" id="rcActWhat"></p>
+          <p class="small" id="rcActDo"></p>
           <div class="rc-act-prog"><i id="rcActBar"></i></div>
           <p class="mono small muted" id="rcActTime"></p>
-          <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActNext">Próximo</button><button type="button" class="btn" id="rcActCancel">Cancelar</button></div>
           <div id="rcActLive"></div>
+          <div class="rc-ctrl"><button type="button" class="btn accent" id="rcActNext">Próximo</button><button type="button" class="btn" id="rcActAgain" hidden>Medir de novo</button><button type="button" class="btn" id="rcActKeep" hidden>Guardar como minha</button><button type="button" class="link" id="rcActCancel">Cancelar</button><span class="small warn-text" id="rcActRunErr"></span></div>
         </div>
-        <div class="rc-plot" id="rcActPlot" hidden><canvas id="rcActSpec" class="rc-canvas"></canvas></div>
+        <div class="rc-plot" id="rcActPlot" hidden><canvas id="rcActSpec" class="rc-canvas" role="img" aria-label="Espectro da amostra"></canvas></div>
         <p class="small muted rc-legend" id="rcActLegend" hidden><span class="lg-samp">amostra</span><span class="lg-bg">fundo</span></p>
         <div id="rcActHist"></div>
-        <p class="small muted">Limites: o cristal do RC102 é pequeno e os picos são largos, então linhas vizinhas se misturam (o app ajusta todas juntas, mas a incerteza cresce) e coisas fracas, como comida, precisam de muitas horas. A amostra não pode ser muito diferente da referência em densidade e tamanho, e precisa ficar sempre na mesma posição.</p>
       </article>
 
-      <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>
       </div>
 
       <div class="subpane" role="tabpanel" data-subpane="log" hidden>
@@ -1510,7 +1523,7 @@
         <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p></details>
         <div class="rc-ctrl rc-log-bar">
           <span class="small muted">Mostrar:</span>
-          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
+          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true"><span>Taxa de dose</span></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true"><span>Eventos</span></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true"><span>Temperatura, bateria e dose</span></button></span>
           <span class="mono small" id="rcLogCount"></span>
           <div class="seg rc-seg" id="rcLogPeriod" aria-label="Período"><button type="button" data-p="1" aria-pressed="false">Hoje</button><button type="button" data-p="7" aria-pressed="false">7 dias</button><button type="button" data-p="30" aria-pressed="false">30 dias</button><button type="button" data-p="0" aria-pressed="true">Tudo</button></div>
           <button type="button" class="btn small" id="rcLogImport">Importar do celular</button>
@@ -1639,8 +1652,10 @@
       <div class="set-col">
         <fieldset data-dev="GMC-800" class="dev-card gmc dc-edit">
           <legend>Alarme do aparelho</legend>
-          <label for="dcAlarm">Limite (CPM)</label>
-          <input type="number" id="dcAlarm" data-key="alarmCPM" min="1" max="999999" step="1" inputmode="numeric">
+          <label for="dcAlarmRate" data-u="rate">Limite (µSv/h)</label>
+          <input type="number" id="dcAlarmRate" min="0.001" step="any" inputmode="decimal">
+          <input type="hidden" id="dcAlarm" data-key="alarmCPM">
+          <p class="small muted" id="dcAlarmNote"></p>
           <label for="dcVol">Volume do alarme: <span class="mono" data-out="alarmVolume"></span></label>
           <input type="range" id="dcVol" data-key="alarmVolume" min="0" max="15" step="1">
           <label class="toggle"><span>Vibração</span><input type="checkbox" data-key="vibration"></label>
@@ -1674,9 +1689,18 @@
     <div class="set-tab" data-tab="cal" hidden>
     <div class="set-cards">
     <fieldset id="setCalHist" class="set-wide">
-      <legend>Fator que o app usa</legend>
+      <legend>Fator em uso</legend>
+      <p class="cal-big"><span class="mono" id="calNowK">—</span> <span class="muted">µSv/h por CPM</span></p>
+      <p class="small muted" id="calNow">—</p>
+      <p class="small" id="calDevNote" hidden><span id="calDevNoteTxt"></span> <button type="button" class="link small-link" id="calDevGo">Igualar o contador</button></p>
+      <div class="ic" id="icBox"></div>
+      <p class="ic-watch" id="icWatch" hidden></p>
+    </fieldset>
+    <details class="set-wide cal-adv" id="calAdv">
+    <summary><b>Avançado</b> <span class="muted">· fator à mão, versões, lado a lado com o RC102 e pontos gravados no contador</span></summary>
+    <fieldset id="calAdvF">
+      <legend>Fator à mão e versões</legend>
       <dl class="info">
-        <dt>Em uso</dt><dd class="mono" id="calNow">—</dd>
         <dt>Do contador</dt><dd class="mono" id="calDev">—</dd>
       </dl>
       <label for="calK">µSv/h por CPM no fundo</label>
@@ -1686,9 +1710,6 @@
         <button type="button" class="btn" id="calKReset" hidden>Voltar à curva do contador</button>
       </div>
       <p class="small" id="calKHint" hidden></p>
-      <h3 class="sub-head">Intercalibração com o RC102</h3>
-      <div class="ic" id="icBox"></div>
-      <p class="ic-watch" id="icWatch" hidden></p>
       <h3 class="sub-head">Versões</h3>
       <div class="cfg-hist-wrap"><table class="cfg-hist cal-ver"><thead><tr><th>desde</th><th>até</th><th>µSv/h por CPM</th><th>origem</th><th>minutos</th><th></th></tr></thead><tbody id="calVerBody"></tbody></table></div>
       <div class="notice cal-cmp" id="calCmp" hidden></div>
@@ -1730,6 +1751,7 @@
           <button type="button" class="btn accent" id="dcCalSave" disabled>Gravar no GMC-800</button>
         </div>
       </fieldset>
+    </details>
     </div>
     </div>
     <div class="set-tab" data-tab="tubo" hidden>
@@ -1751,11 +1773,11 @@
     <div class="set-col">
       <fieldset>
           <legend>Geiger saturado</legend>
-          <label for="lvSatMax">Fim da escala (µSv/h)</label>
-          <input type="number" id="lvSatMax" min="10" step="1" inputmode="decimal">
+          <label for="lvSatMax" data-u="rate">Fim da escala (µSv/h)</label>
+          <input type="number" id="lvSatMax" min="0.1" step="any" inputmode="decimal">
           <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
-          <label for="lvSatDrop">Queda brusca a partir de (µSv/h)</label>
-          <input type="number" id="lvSatDrop" min="1" step="1" inputmode="decimal">
+          <label for="lvSatDrop" data-u="rate">Queda brusca a partir de (µSv/h)</label>
+          <input type="number" id="lvSatDrop" min="0.1" step="any" inputmode="decimal">
           <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
           <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
           <details class="how">
@@ -1832,8 +1854,8 @@
     <div class="set-col">
       <fieldset>
         <legend>RC102 saturado</legend>
-        <label for="lvRcSat">Fim da escala (µSv/h)</label>
-        <input type="number" id="lvRcSat" min="1" step="1" inputmode="decimal">
+        <label for="lvRcSat" data-u="rate">Fim da escala (µSv/h)</label>
+        <input type="number" id="lvRcSat" min="0.1" step="any" inputmode="decimal">
         <details class="how">
           <summary>Como funciona</summary>
           <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
@@ -1843,7 +1865,7 @@
   </div>
     </div>
     <div class="set-tab" data-tab="dev" hidden>
-    <div class="devcfg rccfg" id="rcCfg">
+    <div class="devcfg rccfg" id="rcCfg" data-unit-keep>
       <p class="small muted" id="rcIntro">Conecte o RC102 para ver e mudar os ajustes do aparelho.</p>
       <div class="dc-grid" id="rcCfgBody">
       <div class="set-col">
@@ -1865,10 +1887,8 @@
             <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
             <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
           </div>
-          <div class="rc-pair">
-            <label class="rc-check"><input type="checkbox" id="rcDS1Off"> alarme 1 desligado</label>
-            <label class="rc-check"><input type="checkbox" id="rcDS2Off"> alarme 2 desligado</label>
-          </div>
+          <label class="toggle"><span>Alarme 1 ligado</span><input type="checkbox" id="rcDS1On"></label>
+          <label class="toggle"><span>Alarme 2 ligado</span><input type="checkbox" id="rcDS2On"></label>
           <p class="small muted" id="rcDSHint"></p>
           <details class="how">
             <summary>Como funciona</summary>
@@ -1964,43 +1984,51 @@
 
   </section>
   <section class="set-sec" data-sec="alarm" hidden>
-    <h2 class="set-sec-title">Alarmes e avisos</h2>
+    <h2 class="set-sec-title">Níveis e alarmes</h2>
     <div class="set-cards">
     <fieldset class="set-wide lv-card" id="lvCard">
       <legend>Os níveis</legend>
       <div class="lv-bar" id="lvBar" aria-hidden="true"><i class="seguro"></i><i class="atencao"></i><i class="alarme"></i><i class="perigo"></i></div>
       <div class="lv-scale small mono" id="lvScale" aria-hidden="true"></div>
-      <div class="lv-ladder">
-        <div class="lv-step seguro">
-          <span class="lv-name" data-lv="seguro">Seguro</span>
-          <p class="small muted">Abaixo da atenção. Sem som.</p>
-        </div>
-        <div class="lv-step atencao">
-          <span class="lv-name" data-lv="atencao">Atenção</span>
-          <label for="lvAttn">A partir de (µSv/h)</label>
-          <input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal">
-          <p class="small muted lv-eq" data-eq="lvAttn"></p>
-          <p class="small muted">Amarelo e 3 bipes.</p>
-          <label class="toggle"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label>
-        </div>
-        <div class="lv-step alarme">
-          <span class="lv-name" data-lv="alarme">Alarme</span>
-          <label for="numAlarm">A partir de (µSv/h)</label>
-          <input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal">
-          <p class="small muted lv-eq" data-eq="numAlarm"></p>
-          <p class="small muted">O seu alarme: toca o som escolhido abaixo.</p>
-          <label class="toggle"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label>
-        </div>
-        <div class="lv-step perigo">
-          <span class="lv-name" data-lv="perigo">Perigo</span>
-          <label for="lvDanger">A partir de (µSv/h)</label>
-          <input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal">
-          <p class="small muted lv-eq" data-eq="lvDanger"></p>
-          <p class="small muted">Vermelho e sirene. Passa na frente do seu alarme e não desliga.</p>
-        </div>
+      <div class="al-wrap">
+      <table class="al-tbl">
+        <thead><tr><th scope="col"><span class="sr-only">Nível</span></th><th scope="col">App</th><th scope="col">GMC-800 <span class="al-chip gmc">grava no aparelho</span></th><th scope="col">RC102 <span class="al-chip rc">grava no aparelho</span></th></tr></thead>
+        <tbody>
+          <tr class="atencao">
+            <th scope="row"><span class="lv-name" data-lv="atencao">Atenção</span><span class="al-say">amarelo e 3 bipes</span></th>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal" aria-label="Atenção do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvAttn"></p><label class="toggle al-on"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label></td>
+            <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
+            <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc1" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 1 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 1</span></td>
+          </tr>
+          <tr class="alarme">
+            <th scope="row"><span class="lv-name" data-lv="alarme">Alarme</span><span class="al-say">toca o som escolhido</span></th>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal" aria-label="Alarme do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="numAlarm"></p><label class="toggle al-on"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label></td>
+            <td><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alGmc" min="0.001" step="any" inputmode="decimal" aria-label="Alarme do GMC-800"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say" id="alGmcCpm"></span></td>
+            <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc2" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 2 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 2</span></td>
+          </tr>
+          <tr class="perigo">
+            <th scope="row"><span class="lv-name" data-lv="perigo">Perigo</span><span class="al-say">sirene que não desliga</span></th>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal" aria-label="Perigo do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvDanger"></p></td>
+            <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
+            <td class="al-none"><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span>não tem</td>
+          </tr>
+        </tbody>
+      </table>
+      </div>
+      <div class="al-dose" data-unit-keep>
+        <span class="al-dose-t">Dose acumulada do RC102</span>
+        <span class="al-dose-f"><span class="al-say">alarme 1</span><input type="number" id="alDs1" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 1 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs1On"></label></span>
+        <span class="al-dose-f"><span class="al-say">alarme 2</span><input type="number" id="alDs2" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 2 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs2On"></label></span>
       </div>
       <p class="small" id="dangerNote" hidden></p>
-      <p class="small muted">Os três valem para o GMC-800 e para o RC102. <button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button></p>
+      <div class="al-foot">
+        <p class="small muted" id="alFootNote">Os do app vão com "Salvar". Os dos aparelhos só vão com o botão de cada um.</p>
+        <div class="row-btns">
+          <button type="button" class="btn" id="alGmcSave" disabled>Gravar no GMC-800</button>
+          <button type="button" class="btn" id="alRcSave" disabled>Gravar no RC102</button>
+        </div>
+      </div>
+      <p class="small muted"><button type="button" class="link small-link" id="btnLevelsReset">Restaurar padrões dos níveis</button> · <button type="button" class="link small-link" data-setgo="gmc/dev">Mais ajustes do GMC-800</button> · <button type="button" class="link small-link" data-setgo="rc/dev">Mais ajustes do RC102</button></p>
     </fieldset>
     <div class="set-col">
       <fieldset>
@@ -2021,20 +2049,6 @@
         <div class="row-btns">
           <button type="button" class="btn" id="btnTestAlarm">Testar alarme (5 s)</button>
           <button type="button" class="btn" id="btnTestDanger">Testar alarme de perigo (5 s)</button>
-        </div>
-      </fieldset>
-    </div>
-    <div class="set-col">
-      <fieldset id="devAlarms">
-        <legend>Alarmes que tocam nos aparelhos</legend>
-        <p class="small muted">Cada aparelho também apita sozinho, com números próprios. Em µSv/h, para comparar com os de cima:</p>
-        <dl class="info">
-          <dt>GMC-800</dt><dd class="mono" id="devAlGmc">—</dd>
-          <dt>RC102 1 e 2</dt><dd class="mono" id="devAlRc">—</dd>
-        </dl>
-        <div class="row-btns">
-          <button type="button" class="link small-link" data-setgo="gmc/dev">Mudar no GMC-800</button>
-          <button type="button" class="link small-link" data-setgo="rc/dev">Mudar no RC102</button>
         </div>
       </fieldset>
     </div>
@@ -2064,12 +2078,12 @@
           <option value="gmc">GQ GMC-800</option>
           <option value="radiacode">Radiacode 102</option>
         </select>
-        <p class="small muted">O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.</p>
         <div class="as-info small" id="autostartInfo" hidden><span id="autostartText"></span> <button type="button" class="btn small" id="btnFixAutostart" hidden>Corrigir</button></div>
         <details class="how">
           <summary>Como funciona</summary>
+          <p class="small muted">O Windows costuma esconder ícones novos dentro da setinha ^. Para ver o número sempre, arraste o ícone do RadLog para a barra, ao lado do relógio.</p>
           <p class="small muted">Na bandeja o app continua lendo, gravando e alarmando. Alarme e perigo trazem a janela de volta. Para fechar de vez: clique no ícone e em "Sair".</p>
-          <p class="small muted">O ícone mostra a leitura em µSv/h na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.</p>
+          <p class="small muted">O ícone mostra a leitura na unidade da tela, na cor do nível. No automático é a do GMC-800, a não ser que o RC102 esteja num nível mais grave. Desligando a leitura no ícone, ele volta a ser o logo, com a bolinha colorida no canto.</p>
         </details>
       </fieldset>
       <fieldset>
@@ -2093,12 +2107,10 @@
           <span>Piscar o mostrador a cada contagem</span>
           <input type="checkbox" id="chkPulse" checked>
         </label>
-        <p class="small muted">O anel do meio pisca de leve a cada contagem do aparelho. Desliga sozinho se o Windows estiver sem efeitos de animação.</p>
         <label class="toggle">
           <span>Mostrar a fita dos últimos 10 segundos</span>
           <input type="checkbox" id="chkPulseStrip">
         </label>
-        <p class="small muted">Um risco por contagem, embaixo do cartão de cada aparelho no Agora e na tela do aparelho. Só aparece com o pulso ligado: desligando o pulso, a fita some e esta opção fica apagada.</p>
         <label for="selPulseLogo">O logo pisca com</label>
         <select id="selPulseLogo">
           <option value="">O mesmo aparelho do ícone da bandeja</option>
@@ -2108,25 +2120,52 @@
         </select>
         <details class="how">
           <summary>Como funciona</summary>
+          <p class="small muted">O anel do meio pisca de leve a cada contagem do aparelho. Desliga sozinho se o Windows estiver sem efeitos de animação.</p>
+          <p class="small muted">Um risco por contagem, embaixo do cartão de cada aparelho no Agora e na tela do aparelho. Só aparece com o pulso ligado: desligando o pulso, a fita some e esta opção fica apagada.</p>
           <p class="small muted">Uma piscada é sempre uma contagem. Com o fundo de casa, o GMC-800 dá uma piscada a cada 3 segundos, mais ou menos; numa subida, as piscadas aceleram e dá para perceber antes de ler o número. As piscadas não vêm em ritmo certo: é o decaimento radioativo sendo aleatório.</p>
           <p class="small muted">No GMC-800 cada piscada é uma contagem de verdade; só o instante dentro do segundo é sorteado.</p>
           <p class="small muted">O RC102 manda a taxa, não cada contagem: o ritmo é o real, as piscadas são sorteadas a partir dele.</p>
         </details>
       </fieldset>
       <fieldset>
+        <legend>Unidades</legend>
+        <span class="small muted" id="uRateLbl">Taxa de dose</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uRateLbl" id="segRateUnit"><button type="button" data-v="usv">µSv/h</button><button type="button" data-v="mrh" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button></div>
+        <input type="hidden" id="valRateUnit">
+        <span class="small muted" id="uCountLbl">Contagem</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uCountLbl" id="segCountUnit"><button type="button" data-v="cpm">CPM</button><button type="button" data-v="cps">CPS</button></div>
+        <input type="hidden" id="valCountUnit">
+        <p class="small muted">Vale para o app todo. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem).</p>
+        <details class="how">
+          <summary>Como funciona</summary>
+          <p class="small muted">Vale para o app todo: quadros do Agora, página de cada aparelho, gráficos, alertas e relatório. A dose acompanha a taxa (µSv/h → µSv, mrem/h → mrem). O RC102 segue a mesma escolha. A calibração e a parte técnica continuam em CPM, que é o que o tubo mede. "Salvar" recarrega a tela na unidade nova.</p>
+        </details>
+      </fieldset>
+      <fieldset>
+        <legend>Datas</legend>
+        <span class="small muted" id="uDateLbl">Formato da data</span>
+        <div class="seg ui-seg" role="group" aria-labelledby="uDateLbl" id="segDateFmt" data-no-tr><button type="button" data-v="">16/11/2026</button><button type="button" data-v="iso">2026-11-16</button></div>
+        <input type="hidden" id="valDateFmt">
+        <p class="small muted">Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.</p>
+      </fieldset>
+      <fieldset>
         <legend>Tamanho e espaço</legend>
-        <span class="small muted" id="uiScaleLbl">Tamanho de tudo (texto, números e gráficos)</span>
-        <div class="seg ui-seg" role="group" aria-labelledby="uiScaleLbl" id="segUiScale"><button type="button" data-v="0.9">90%</button><button type="button" data-v="1">100%</button><button type="button" data-v="1.08">108%</button><button type="button" data-v="1.15">115%</button><button type="button" data-v="1.3">130%</button><button type="button" data-v="1.5">150%</button></div>
+        <label for="rngUiScale">Tamanho de tudo: <span class="mono" id="uiScaleOut">100%</span></label>
+        <div class="ui-range"><span class="small muted mono">90%</span><input type="range" id="rngUiScale" min="0" max="5" step="1"><span class="small muted mono">150%</span></div>
         <input type="hidden" id="valUiScale">
         <p class="small muted">Atalhos: <kbd>Ctrl</kbd> <kbd>+</kbd>, <kbd>Ctrl</kbd> <kbd>−</kbd> e <kbd>Ctrl</kbd> <kbd>0</kbd> para voltar a 100%.</p>
         <span class="small muted" id="uiDensLbl">Espaço entre as coisas</span>
         <div class="seg ui-seg" role="group" aria-labelledby="uiDensLbl" id="segUiDensity"><button type="button" data-v="confortavel">confortável</button><button type="button" data-v="">normal</button><button type="button" data-v="compacto">compacto</button></div>
         <input type="hidden" id="valUiDensity">
-        <p class="small muted">Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; "Salvar" guarda neste PC.</p>
       </fieldset>
     </div>
+  </div>
+  </section>
+  <section class="set-sec" data-sec="chuva" hidden>
+    <h2 class="set-sec-title">Chuva no gráfico</h2>
+    <div class="set-cards">
     <fieldset class="set-wide">
-      <legend>Chuva no gráfico</legend>
+      <legend>Chuva da sua cidade</legend>
       <label class="toggle">
         <span>Mostrar chuva no gráfico</span>
         <input type="checkbox" id="chkRain">
@@ -2148,10 +2187,12 @@
         <p class="small muted">Marca a chuva da sua cidade no gráfico de CPM. Com o app aberto, lê o radar meteorológico (RainViewer) a cada 10 min. Para os horários sem radar (app fechado, histórico baixado do contador), usa o modelo do tempo do Open-Meteo, menos preciso. A chuva traz para o chão produtos do radônio do ar e costuma dar picos leves que somem em algumas horas.</p>
       </details>
     </fieldset>
-  </div>
+    </div>
   </section>
   <section class="set-sec" data-sec="data" hidden>
     <h2 class="set-sec-title">Dados e backup</h2>
+    <div class="set-tabs" role="tablist" aria-label="Partes de Dados e backup"></div>
+    <div class="set-tab" data-tab="arq" hidden>
     <div class="set-cards">
     <div class="set-col">
       <fieldset>
@@ -2196,43 +2237,18 @@
         </details>
       </fieldset>
     </div>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="nuvem" hidden>
+    <div class="set-cards">
     <fieldset class="set-wide cloud-box" id="cloudBox">
       <legend>Nuvem (Google Drive) <span class="chip cloud-exp">experimental</span> <span class="chip cloud-st" id="cloudTag" hidden></span></legend>
       <div class="cloud-body" id="cloudBody"></div>
     </fieldset>
-    <fieldset class="set-wide">
-      <legend>Sincronização</legend>
-      <label class="toggle">
-        <span>Aceitar conexões de outros PCs (este PC aparece na rede)</span>
-        <input type="checkbox" id="chkSyncListen">
-      </label>
-      <p class="small muted" id="syncListenInfo"></p>
-      <div class="upd-row" id="syncCodeRow" hidden>
-        <button type="button" class="btn small" id="btnSyncCode">Mostrar código para parear</button>
-        <span class="sync-code mono" id="syncCode" data-no-tr></span>
-        <span class="small muted" id="syncCodeLeft"></span>
-      </div>
-      <label class="toggle">
-        <span>Sincronizar sozinho a cada 10 min</span>
-        <input type="checkbox" id="chkSyncAuto">
-      </label>
-      <h4 class="sync-h">PCs pareados</h4>
-      <ul class="sync-list" id="syncPeers"></ul>
-      <h4 class="sync-h">Parear com outro PC</h4>
-      <p class="small muted">No outro PC, ligue "Aceitar conexões" e clique em "Mostrar código para parear". Aqui, escolha ele na lista (ou digite o endereço) e digite o código.</p>
-      <div class="upd-row"><button type="button" class="btn small" id="btnSyncFind">Procurar na rede</button> <span class="small muted" id="syncFindMsg"></span></div>
-      <ul class="sync-list" id="syncFound"></ul>
-      <div class="sync-pair">
-        <input type="text" id="syncAddr" placeholder="endereço (ex.: 192.168.0.20 ou o 100.x.y.z do Tailscale)" autocomplete="off" aria-label="Endereço do outro PC">
-        <input type="text" id="syncPairCode" inputmode="numeric" maxlength="7" placeholder="código" autocomplete="off" aria-label="Código de 6 dígitos">
-        <button type="button" class="btn small accent" id="btnSyncPair">Parear</button>
-      </div>
-      <p class="small" id="syncPairMsg"></p>
-      <details class="how">
-        <summary>Como funciona</summary>
-        <p class="small muted">Junta os dados de dois PCs com o RadLog (ex.: o PC do contador e o notebook): leituras, alertas, fora de casa, medições e anotações. Só entra o que falta; nada é apagado nem substituído.</p>
-      </details>
-    </fieldset>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="uso" hidden>
+    <div class="set-cards">
     <fieldset class="set-wide" id="usoBox">
       <legend>Uso do app</legend>
       <label class="toggle">
@@ -2267,9 +2283,13 @@
       <details class="how">
         <summary>Como funciona</summary>
         <p class="small muted">Conta cada vez que uma página ou aba abre, os cliques nos botões, nos "Como funciona" e nos seletores, e o tempo olhando: só com a janela em primeiro plano e você mexendo no mouse ou no teclado (parado mais de 2 minutos, para de contar).</p>
-        <p class="small muted">Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da sincronização e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.</p>
+        <p class="small muted">Não conta o que você digita, nem leituras, nem horário: só totais por dia, no arquivo uso.json da pasta de dados. Nunca sai do computador e fica fora do backup, da nuvem e do PDF. Desligar para de contar e guarda o que já contou; "Zerar contagem" apaga.</p>
       </details>
     </fieldset>
+    </div>
+    </div>
+    <div class="set-tab" data-tab="hist" hidden>
+    <div class="set-cards">
     <fieldset id="setMature" class="set-wide">
       <legend>Histórico disponível</legend>
       <div class="sum-notes" id="sumMature"><p class="small muted">Carregando…</p></div>
@@ -2283,7 +2303,8 @@
         <p class="small muted">Tudo o que muda a comparação entre períodos fica registrado com a data: limites, tempo morto, calibração do GMC, saturação, modo de gravação da memória e mudanças feitas no contador pelo app. Entra no backup.</p>
       </details>
     </fieldset>
-  </div>
+    </div>
+    </div>
   </section>
   <section class="set-sec" data-sec="about" hidden>
     <h2 class="set-sec-title">Atualizações e sobre</h2>
@@ -2307,8 +2328,13 @@
         </details>
       </fieldset>
       <fieldset>
+        <legend>Demonstração</legend>
+        <p class="small muted">Dados simulados no app todo, para conhecer as telas e os alarmes. Nada é gravado.</p>
+        <button type="button" class="btn" id="btnDemo" aria-pressed="false"><span id="btnDemoText">Demonstração</span></button>
+      </fieldset>
+      <fieldset>
         <legend>Eventos e log</legend>
-        <p class="small muted">O que o app fez e os erros que encontrou: conexões, downloads, alertas, sincronização. Útil quando algo não funciona.</p>
+        <p class="small muted">O que o app fez e os erros que encontrou: conexões, downloads, alertas, nuvem. Útil quando algo não funciona.</p>
         <button type="button" class="btn" id="btnEvents">Abrir eventos</button>
       </fieldset>
     </div>
@@ -2368,12 +2394,6 @@
   <div class="qk-foot"><span><kbd>↑</kbd> <kbd>↓</kbd> escolher</span><span><kbd>Enter</kbd> abrir</span><span><kbd>Esc</kbd> fechar</span></div>
 </dialog>
 
-<div class="qk-fab" id="qkFab">
-  <div class="qk-fab-menu" id="qkFabMenu"></div>
-  <button type="button" class="qk-fab-main" id="qkFabMain" aria-expanded="false" aria-label="Ações rápidas" title="Ações rápidas">
-    <svg width="32" height="32" viewBox="0 0 48 48" aria-hidden="true"><path fill="none" stroke="var(--accent)" stroke-width="3.4" stroke-linecap="round" d="M34.07 40.11A19 19 0 0 1 13.93 40.11M5.01 24.66A19 19 0 0 1 15.08 7.22M32.92 7.22A19 19 0 0 1 42.99 24.66"/><circle cx="24" cy="24" r="5" fill="var(--accent)"/></svg>
-  </button>
-</div>
 <div class="qk-sheet" id="qkSheet" role="dialog" aria-label="Saí de casa" hidden></div>
 
 <dialog id="repDlg" aria-labelledby="repTitle">
@@ -2422,8 +2442,8 @@
     </div>
     <p class="small muted">Onde você está entre referências conhecidas, para ter noção de grandeza. Os valores são típicos e arredondados; as linhas em verde são suas (casa e medições salvas), as rosa são do RC102 e as vermelhas, dos maiores acidentes (Goiânia, Chernobyl e Fukushima). A barra é em escala logarítmica: cada passo é 10 vezes mais.</p>
     <div class="seg" id="rgTabs" role="group" aria-label="Taxa ou dose">
-      <button type="button" data-rg="taxa" aria-pressed="true">Taxa agora (µSv/h)</button>
-      <button type="button" data-rg="dose" aria-pressed="false">Dose recebida (µSv)</button>
+      <button type="button" data-rg="taxa" aria-pressed="true" data-u="rate">Taxa agora (µSv/h)</button>
+      <button type="button" data-rg="dose" aria-pressed="false" data-u="dose">Dose recebida (µSv)</button>
     </div>
     <div id="rgPaneTaxa">
       <p class="small" id="rgTaxaSub"></p>
@@ -2434,6 +2454,17 @@
       <ol class="rg-list" id="rgDose"></ol>
     </div>
     <p class="small muted">Taxa é quanto está chegando agora, por hora (a velocidade); dose é o total recebido (a distância). Dose = taxa × tempo.</p>
+  </form>
+</dialog>
+<dialog id="glDlg" class="wide" aria-labelledby="glTitle">
+  <form method="dialog" class="dlg">
+    <div class="dlg-head">
+      <h2 id="glTitle">Os termos do app</h2>
+      <button type="submit" class="btn icon" aria-label="Fechar" value="close">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+      </button>
+    </div>
+    <dl class="gl-list" id="glList"></dl>
   </form>
 </dialog>
 <dialog id="sigmaDlg" class="wide" aria-labelledby="sigmaTitle">
@@ -2554,8 +2585,10 @@
 <div class="toasts" id="toasts" aria-live="polite"></div>
 
 <script src="i18n-loader.js"></script>
+<script src="unidades.js"></script>
 <script src="i18n.js"></script>
 <script src="util.js"></script>
+<script src="glossario.js"></script>
 <script src="confirma.js"></script>
 <script src="cores.js"></script>
 <script src="regua.js"></script>
