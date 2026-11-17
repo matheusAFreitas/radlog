@@ -405,11 +405,11 @@ function drawAlertDetail(d) {
     }).join("");
     out += secs.length
       ? `<path d="${d1}" fill="none" stroke="${COR.muted}" stroke-opacity="0.55" stroke-width="1.5" vector-effect="non-scaling-stroke"/>`
-      : `<path d="${d1}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
+      : `<path d="${d1}" fill="none" stroke="${rc ? COR.rc : COR.gmc}" stroke-width="2" vector-effect="non-scaling-stroke"/>`;
   }
   if (secs.length > 1) {
     const d2 = secs.map((p, i) => (i && p.t - secs[i - 1].t <= 10e3 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d2}" fill="none" stroke="${rc ? COR.rc : COR.accent}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d2}" fill="none" stroke="${rc ? COR.rc : COR.gmc}" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
   }
   svg.innerHTML = out;
   // pico (bolinha em HTML para não esticar)
@@ -427,8 +427,8 @@ function drawAlertDetail(d) {
   $("adLegend").innerHTML =
     (rc ? (secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>leitura ao vivo do RC102 (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto</span>'
       : '<span class="key" data-u="rate"><i style="border-color:' + COR.rc + '"></i>valor do minuto do RC102 (µSv/h)</span>')
-      : secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + COR.accent + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
-      : '<span class="key"><i style="border-color:' + COR.accent + '"></i>valor do minuto (gráfico principal)</span>') +
+      : secs.length ? '<span class="key" data-u="rate"><i style="border-color:' + (rc ? COR.rc : COR.gmc) + '"></i>leitura a cada segundo (µSv/h)</span><span class="key"><i style="border-color:' + COR.muted + '"></i>valor do minuto (gráfico principal)</span>'
+      : '<span class="key"><i style="border-color:' + (rc ? COR.rc : COR.gmc) + '"></i>valor do minuto (gráfico principal)</span>') +
     `<span class="key"><i style="border-color:${color};border-top-style:dashed"></i>limite</span>` +
     `<span class="key"><b class="sw" style="background:${color}"></b>alerta</span>`;
   const note = $("adNote");

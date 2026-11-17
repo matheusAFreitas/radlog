@@ -74,7 +74,7 @@ function agoraNow() {
       title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
       // tudo normal: a faixa some (só aparece quando tem algo a dizer)
       calm = !odd;
-      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : `${fmt(g.sigma, 1)} σ acima do nível de fundo`);
+      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : g.sigma < 3 ? `um pouco acima do fundo, dentro do acaso (${fmt(g.sigma, 1)} σ)` : `bem acima do nível de fundo (${fmt(g.sigma, 1)} σ)`);
       text = parts.join(" · ");
     }
   }
@@ -171,7 +171,7 @@ function renderAgDose() {
       const bar = document.createElement("div");
       bar.className = "wh-mix";
       bar.setAttribute("aria-hidden", "true");
-      const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--accent)");
+      const col = (x) => (x === "radiacode" ? "var(--rc)" : "var(--gmc)");
       for (const [w, bg] of [[meas - swap, col(main)], [swap, col(other)], [gap, "var(--gap)"], [nod, "var(--nodata)"]]) {
         const i = document.createElement("i");
         i.style.width = `${(w / tot) * 100}%`;

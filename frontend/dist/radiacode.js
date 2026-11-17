@@ -473,6 +473,8 @@
     const el = $("rcSpecSays"); if (!el) return;
     names = names.filter(Boolean);
     el.hidden = !names.length;
+    // o leitor de tela ouve a conclusão no lugar do desenho (2.96.0, T4)
+    $("rcSpec").setAttribute("aria-label", names.length ? `Espectro do RC102. Parece: ${names.join(", ")}` : "Espectro do RC102");
     if (!names.length) { el.textContent = ""; return; }
     const more = names.length - 3;
     el.innerHTML = `<span>Parece:</span> <b>${names.slice(0, 3).map(escHtml).join(", ")}</b>${more > 0 ? ` <span class="muted mono">+${more}</span>` : ""}`;
@@ -1153,7 +1155,7 @@
   }
   function hdFrame(g, L, pw, P, c, hd) {
     g.strokeStyle = css("--border"); g.lineWidth = 1; g.font = "11px " + css("--mono");
-    for (const [T0, lo, hi, dig, color] of [[P.T1, 0, c.max, c.dig, COR.accent], [P.T2, hd.min, hd.max, 2, COR.away]]) {
+    for (const [T0, lo, hi, dig, color] of [[P.T1, 0, c.max, c.dig, COR.rc], [P.T2, hd.min, hd.max, 2, COR.away]]) {
       for (let k = 0; k <= 2; k++) {
         const y = T0 + (P.ph * k) / 2; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke();
         g.fillStyle = css("--dim"); g.textAlign = "right"; g.fillText(nf(hi - ((hi - lo) * k) / 2, dig), L - 6, y + 4);
@@ -1186,7 +1188,7 @@
       for (let t = 0; t < tl.shown; t++) { const x = xOf(t), y = yf(arr[t]); t ? g.lineTo(x, y) : g.moveTo(x, y); }
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
-    line(tl.cps, yC, COR.accent);
+    line(tl.cps, yC, COR.rc);
     line(tl.hard, yH, COR.away);
     if (tl.hover != null && tl.hover < tl.shown) { const x = xOf(tl.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
@@ -1253,7 +1255,7 @@
       }
       g.strokeStyle = color; g.lineWidth = 1.6; g.stroke(); g.lineWidth = 1;
     };
-    line(d.cps, yC, COR.accent);
+    line(d.cps, yC, COR.rc);
     line(d.hard, yH, COR.away);
     if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
     if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
@@ -1549,20 +1551,20 @@
   // 2.93 (R5): o ponteiro tem a cor do nível do RC102 agora (verde quando seguro)
   function srNeedleColor() {
     const lv = typeof state !== "undefined" && state.rLvl;
-    return lv === "perigo" ? COR.warn : lv === "alarme" ? COR.alarm : lv === "atencao" ? COR.att : COR.accent;
+    return lv === "perigo" ? COR.warn : lv === "alarme" ? COR.alarm : lv === "atencao" ? COR.att : COR.ok;
   }
   function gaugeSVG() {
     const cx = 120, cy = 120, r = 96, pt = (a, rr) => { const t = ((a - 90) * Math.PI) / 180; return [cx + rr * Math.cos(t), cy + rr * Math.sin(t)]; };
     let ticks = "", labels = "";
     for (let k = 0; k <= 50; k++) {
       const a = -120 + (k / 50) * 240, big = k % 10 === 0, [x1, y1] = pt(a, r), [x2, y2] = pt(a, r - (big ? 12 : 6));
-      const col = k > 40 ? COR.warn : k > 30 ? COR.att : COR.accent;
+      const col = k > 40 ? COR.warn : k > 30 ? COR.att : COR.ok;
       ticks += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="${col}" stroke-width="${big ? 2 : 1}" stroke-opacity="${big ? 1 : 0.7}"/>`;
       if (big) { const [lx, ly] = pt(a, r - 26); labels += `<text x="${lx.toFixed(1)}" y="${(ly + 4).toFixed(1)}">0</text>`; }
     }
     return `<svg viewBox="0 0 240 200" class="rc-gauge-svg" role="img" aria-label="Mostrador de contagem">
       ${ticks}<g id="rcGaugeTicks" class="rc-gauge-lbl">${labels}</g>
-      <g id="rcNeedle" style="color:${COR.accent}"><line x1="120" y1="120" x2="120" y2="36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="120" cy="120" r="7" fill="currentColor" transform="rotate(0)"/></g>
+      <g id="rcNeedle" style="color:${COR.ok}"><line x1="120" y1="120" x2="120" y2="36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="120" cy="120" r="7" fill="currentColor" transform="rotate(0)"/></g>
       <text x="120" y="162" class="rc-gauge-num" id="rcGaugeVal">0</text>
       <text x="120" y="182" class="rc-gauge-unit">cps</text></svg>`;
   }

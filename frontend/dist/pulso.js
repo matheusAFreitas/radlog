@@ -26,7 +26,7 @@ const PU = {
   reduced: false, preview: null,
 };
 const PU_TAPE_MS = 10000;
-const PU_LV_VAR = { seguro: "--accent", atencao: "--att", alarme: "--alarm", perigo: "--warn" };
+const PU_LV_VAR = { seguro: "--ok", atencao: "--att", alarme: "--alarm", perigo: "--warn" };
 
 // as opções (a prévia do que está marcado em Configurações vale antes de salvar)
 function pulseOn() {
@@ -53,7 +53,7 @@ function pulseLevel(dev) {
   return "seguro";
 }
 function pulseColor(dev) {
-  return getComputedStyle(document.documentElement).getPropertyValue(PU_LV_VAR[pulseLevel(dev)] || "--accent").trim() || "#6EE7A0";
+  return getComputedStyle(document.documentElement).getPropertyValue(PU_LV_VAR[pulseLevel(dev)] || "--ok").trim() || "#6EE7A0";
 }
 // aparelho do logo: o escolhido em Configurações (2.55.1) ou, em "igual
 // à bandeja", o mesmo do ícone da bandeja (automático: o GMC-800, a

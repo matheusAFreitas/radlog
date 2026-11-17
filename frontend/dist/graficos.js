@@ -252,16 +252,16 @@ async function refreshChart() {
   // com o Radiacode (aparelho principal), ele é a curva cheia e o GMC (casa)
   // vira uma linha de referência
   $("chart").innerHTML = hatch + grid + away + gaps + meas + rainBars + thr + noteLines + (stacked
-    ? `<path d="${area}" fill="${COR.accent}" fill-opacity="0.10"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+    ? `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.10"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.10"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="1.6" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
     : rcLine
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="${COR.accent}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.accent}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    : `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
 
   if (state.zoom) {
@@ -529,7 +529,7 @@ function renderDevBoxes(box, list) {
 // e desliga); pelo menos um fica sempre visível
 const devKey = (c) => (c && c.device === "radiacode" ? "rc" : "gmc");
 const devName = (k) => (k === "rc" ? "RC102" : "GMC-800");
-const devColor = (k) => (k === "rc" ? COR.rc : COR.accent);
+const devColor = (k) => (k === "rc" ? COR.rc : COR.gmc);
 function toggleDoseDev(k) {
   const s = state.doseShow;
   s[k] = !s[k];

@@ -1,5 +1,43 @@
 # Versões
 
+## 2.96.0
+- Cores com um emprego só: verde é "seguro" (e "tudo certo"), azul é o
+  GMC-800, rosa continua o RC102, e o destaque e o botão principal ficam em
+  branco. A chuva passou para um azul acinzentado.
+- "Como funciona" num formato só: um "?" no canto de cima do cartão, que abre
+  o texto flutuando (Esc fecha). As caixas "Por que isso importa" entraram
+  nele.
+- Termos técnicos clicáveis: σ, mediana, quartis, dispersão, dureza e outros
+  abrem uma explicação curta. "Os termos do app" (Ctrl+K) mostra todos. A
+  frase simples vem antes do número ("bem acima do nível de fundo (4,2 σ)").
+- Texto um pouco maior (legendas e rótulos) e fonte de código só nos
+  números, não nas frases (em teste, fácil de voltar).
+- Acessibilidade: o leitor de tela ouve a última hora de cada aparelho e a
+  conclusão do espectro; os gráficos do RC102 têm nome; o anel de foco da
+  barra lateral não é mais cortado.
+- "Baixar histórico": o resultado fica escrito ao lado do botão por 30 min,
+  em vez de só num aviso que some.
+
+**English**
+
+- One job per colour: green is "safe" (and "all good"), blue is the GMC-800,
+  pink stays the RC102, and highlights and the main button are white. Rain
+  moved to a greyish blue.
+- "How it works" in a single format: a "?" in the card's top corner that
+  opens the text floating (Esc closes). The "Why it matters" boxes went into
+  it.
+- Clickable technical terms: σ, median, quartiles, dispersion, hardness and
+  others open a short explanation. "The app's terms" (Ctrl+K) lists them
+  all. The plain sentence comes before the number ("well above the
+  background level (4.2 σ)").
+- Slightly larger text (captions and labels) and code font only on numbers,
+  not on sentences (being tested, easy to undo).
+- Accessibility: screen readers hear each device's last hour and the
+  spectrum's conclusion; the RC102 charts have names; the sidebar focus ring
+  is no longer cut off.
+- "Download history": the result stays written next to the button for 30
+  min, instead of only in a notice that goes away.
+
 ## 2.95.0
 - Níveis e alarmes virou uma tela só: o app, o GMC-800 e o RC102 lado a
   lado, cada nível com a forma, o nome e o valor. Os valores dos aparelhos

@@ -205,7 +205,7 @@ function drawMeasureSrc(src) {
   if (src.live.length > 1) {
     // quebra a linha nos intervalos (ex.: entre o fundo e o objeto)
     const d = src.live.map((p, i) => (i && p.t - src.live[i - 1].t <= 3000 ? "L" : "M") + `${x(p.t).toFixed(1)} ${y(p.cpm).toFixed(1)}`).join("");
-    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || COR.accent}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="${d}" fill="none" stroke="${DEV_COLOR[src.dev] || COR.gmc}" stroke-opacity="0.6" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
   }
   // segundo aparelho: a leitura dele em µSv/h, por cima
   if (oth.length > 1) {
@@ -214,7 +214,7 @@ function drawMeasureSrc(src) {
   }
   svg.innerHTML = out;
   // legenda: de que aparelho é cada linha
-  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || COR.accent;
+  $("mLiveKey").style.borderColor = DEV_COLOR[src.dev] || COR.gmc;
   $("mLiveKeyTxt").textContent = src.otherDev ? `${devLabel(src.dev)} ao vivo (no objeto)` : "leitura ao vivo";
   $("mOtherKey").hidden = !src.otherDev;
   if (src.otherDev) {
@@ -780,6 +780,7 @@ function renderMeasureResult(st) {
   t.textContent = "";
   sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
   sumTile(t, "certeza", mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
+  glMark(t.lastElementChild.children[2], "sigma");
   sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "obj" : "");
   const sf = d.safe || {};
   sumTile(t, "distância segura", sf.ok ? (sf.below ? `≤ ${cmTxt(sf.cm)}` : `${sf.approx ? "~" : ""}${cmTxt(sf.cm)}`) : "—",
@@ -939,7 +940,7 @@ function renderNetSpec(box, sp) {
 // ---------- segundo aparelho (os dois perto, ou um com você) ----------
 
 const devLabel = (d) => (d === "radiacode" ? "RC102" : "GMC-800");
-const DEV_COLOR = { radiacode: COR.rc, gmc: COR.accent };
+const DEV_COLOR = { radiacode: COR.rc, gmc: COR.gmc };
 
 // os dois aparelhos ao vivo, um embaixo do outro (tudo em µSv/h)
 function renderMeasureDuo(st, running) {

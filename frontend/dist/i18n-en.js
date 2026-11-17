@@ -436,7 +436,7 @@ const I18N_EN = {
 "Os ajustes do aparelho não foram para o contador: use \"Gravar no contador\" na seção Contador.": "The device settings didn't go to the counter: use \"Write to the counter\" in the Counter section.",
 "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
 "Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.": "The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.",
-"Os mesmos 180 minutos: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
+"Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
 "Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.": "PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.",
 "PERIGO": "DANGER",
 "POR DIA": "BY DAY",
@@ -1506,8 +1506,8 @@ const I18N_EN = {
 "ainda sem dados: a primeira linha aparece em até 2 minutos": "no data yet: the first row shows up within 2 minutes",
 "sem leitura nesse intervalo: média dele": "no reading in this interval: its average",
 "sem leitura (média)": "no reading (average)",
-"Do seu RC102, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
-"Do seu RadiaCode, no mesmo período do espectrograma: contagem (verde, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (green, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RC102, no mesmo período do espectrograma: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
+"Do seu RadiaCode, no mesmo período do espectrograma: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa (a mediana das horas dos últimos 7 dias): 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, cada ponto usa uns 20 minutos em volta; a faixa clara é a incerteza. Azul: chuva.": "From your RC102, over the same period as the spectrogram: count rate (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background (the median of the hours in the last 7 days): 1.00 equals the background. Since few photons arrive above 1,500 keV, each point uses about 20 minutes around it; the light band is the uncertainty. Blue: rain.",
 "se a contagem sobe e a dureza": "if the count rate goes up and hardness",
 ", costuma ser radônio (chuva, casa fechada: os filhos dele ficam quase todos abaixo de 1.500 keV). Se a dureza": ", it's usually radon (rain, closed house: its daughters sit almost entirely below 1,500 keV). If hardness",
 "junto, tem perto algo com linha alta, como o tório (Tl-208 em 2.614 keV). Passe o mouse: o app soma os espectros daquele trecho, compara com o fundo e diz com o que parece.": "goes up too, something with a high-energy line is nearby, like thorium (Tl-208 at 2,614 keV). Hover: the app adds up the spectra of that stretch, compares them with the background and says what it looks like.",
@@ -4634,7 +4634,47 @@ const I18N_EN = {
 "amarelo e 3 bipes": "yellow and 3 beeps",
 "toca o som escolhido": "plays the chosen sound",
 "· fator à mão, versões, lado a lado com o RC102 e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter",
-"· fator à mão, versões, lado a lado com o RadiaCode e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter"
+"· fator à mão, versões, lado a lado com o RadiaCode e pontos gravados no contador": "· factor by hand, versions, side by side with the RC102 and points stored on the counter",
+"Dureza do espectro ao longo do tempo": "Spectrum hardness over time",
+"Espectro ao longo do tempo": "Spectrum over time",
+"Espectro da amostra": "Sample spectrum",
+"Espectro do RC102": "RC102 spectrum",
+"Espectro do RadiaCode": "RC102 spectrum",
+"Não deu para baixar tudo: os minutos que chegaram foram guardados.": "Could not download everything: the minutes that arrived were kept.",
+"Não deu para baixar:": "Could not download:",
+"Taxa do RC102 ao longo do tempo": "RC102 rate over time",
+"Taxa do RadiaCode ao longo do tempo": "RC102 rate over time",
+"Trecho do espectro, de perto": "Spectrum section, up close",
+"Última hora": "Last hour",
+"Tudo baixado.": "All downloaded.",
+"A conta do acaso para coisas que acontecem soltas no tempo, como os decaimentos. Diz quanto a contagem varia sozinha.": "The math of chance for things that happen loosely in time, like decays. It says how much the count varies on its own.",
+"A radiação natural de sempre no lugar: solo, paredes, radônio do ar e raios cósmicos. Não dá para zerar, e é normal.": "The usual natural radiation in a place: soil, walls, radon in the air and cosmic rays. It can't be zeroed, and it's normal.",
+"A tabela de fábrica do GMC-800 que transforma CPM em µSv/h. A intercalibração com o RC102 pode trocar o fator.": "The GMC-800 factory table that turns CPM into µSv/h. Cross-calibration with the RC102 can replace the factor.",
+"A tabela de fábrica do GMC-800 que transforma CPM em µSv/h. A intercalibração com o RadiaCode pode trocar o fator.": "The GMC-800 factory table that turns CPM into µSv/h. Cross-calibration with the RC102 can replace the factor.",
+"Contagens por minuto e por segundo: quantos pulsos o aparelho viu. É o que ele mede de verdade; o µSv/h é uma conta feita em cima disso.": "Counts per minute and per second: how many pulses the device saw. That's what it really measures; µSv/h is calculated from it.",
+"Cortam as leituras em quatro partes iguais. Entre o 1º e o 3º quartil ficam as leituras do meio, as mais comuns.": "They cut the readings into four equal parts. Between the 1st and 3rd quartile are the middle readings, the most common ones.",
+"Curva do contador": "Counter's curve",
+"Janela em formação": "Window still forming",
+"O app ainda está juntando dias para saber o seu normal. Até completar, as comparações são só uma pista.": "The app is still gathering days to learn your normal. Until then, comparisons are only a hint.",
+"O tamanho do vai e vem natural da contagem. Até 2σ é acaso. De 3σ para cima, a mudança é real.": "The size of the count's natural ups and downs. Up to 2σ is chance. From 3σ up, the change is real.",
+"O valor do meio: metade das leituras fica abaixo, metade acima. Um pico curto não mexe nela, por isso serve para medir o fundo.": "The middle value: half the readings are below, half above. A short peak doesn't move it, which is why it works for the background.",
+"Os termos do app": "The app's terms",
+"Quanto as leituras variam comparado com o que o acaso explica. Perto de 1 é normal. Bem acima de 1, alguma coisa mexeu de verdade (radônio, chuva, o aparelho).": "How much readings vary compared with what chance explains. Near 1 is normal. Well above 1, something really changed (radon, rain, the device).",
+"Quanto do espectro está nas energias altas. Sobe com fontes mais fortes em gama alta (tório, rádio) e atrás de blindagem, que segura mais as energias baixas.": "How much of the spectrum is at high energies. It rises with sources strong in high gamma (thorium, radium) and behind shielding, which stops low energies more.",
+"Quanto o número pode estar fora por causa do acaso. Medir mais tempo diminui a incerteza.": "How far the number may be off because of chance. Measuring longer reduces the uncertainty.",
+"Radiação tão alta que o tubo não consegue contar tudo: o número fica abaixo do real. Afaste-se e confie no RC102.": "Radiation so high the tube can't count it all: the number reads lower than real. Step away and trust the RC102.",
+"Radiação tão alta que o tubo não consegue contar tudo: o número fica abaixo do real. Afaste-se e confie no RadiaCode.": "Radiation so high the tube can't count it all: the number reads lower than real. Step away and trust the RC102.",
+"Todos os termos": "All terms",
+"glossario termos sigma mediana quartil dispersao poisson dureza saturando curva cpm cps fundo incerteza": "glossary terms sigma median quartile dispersion poisson hardness saturating curve cpm cps background uncertainty",
+"nos gráficos": "on the charts",
+"σ, mediana, dureza e outros, em palavras simples": "σ, median, hardness and others, in plain words",
+"Mediana": "Median",
+"Quartis": "Quartiles",
+"Poisson": "Poisson",
+"Dureza": "Hardness",
+"Saturando": "Saturating",
+"CPM e CPS": "CPM and CPS",
+"Incerteza (±)": "Uncertainty (±)"
 },
 "patterns": [
 [
@@ -9339,6 +9379,15 @@ const I18N_EN = {
 ]
 ],
 [
+"um pouco acima do fundo, dentro do acaso (",
+"^um pouco acima do fundo, dentro do acaso \\(((?:(?! · ).)+?) σ\\)$",
+"a little above background, within chance (${1} σ)",
+[
+"um pouco acima do fundo, dentro do acaso (",
+" σ)"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) chuva\\(s\\) sem dados suficientes do RadiaCode$",
 "${1} rain(s) without enough RC102 data",
@@ -9949,6 +9998,16 @@ const I18N_EN = {
 "${1} with the object, below the attention level.",
 [
 " com o objeto, abaixo do nível de atenção."
+]
+],
+[
+"ainda aprendendo o seu normal (",
+"^ainda aprendendo o seu normal \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) dias\\)$",
+"still learning your normal (${1} of ${2} days)",
+[
+"ainda aprendendo o seu normal (",
+" de ",
+" dias)"
 ]
 ],
 [
@@ -11551,6 +11610,15 @@ const I18N_EN = {
 ]
 ],
 [
+"bem acima do nível de fundo (",
+"^bem acima do nível de fundo \\(((?:(?! · ).)+?) σ\\)$",
+"well above the background level (${1} σ)",
+[
+"bem acima do nível de fundo (",
+" σ)"
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -12038,6 +12106,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Espectro do RadiaCode. Parece: ",
+"^Espectro do RadiaCode\\. Parece: ((?:(?! · ).)+?)$",
+"RC102 spectrum. Looks like: ${1}",
+[
+"Espectro do RadiaCode. Parece: "
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -12500,6 +12576,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?), última hora: média ((?:(?! · ).)+?), máximo ((?:(?! · ).)+?)$",
+"${1}, last hour: average ${2}, maximum ${3}",
+[
+", última hora: média ",
+", máximo "
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -12891,6 +12976,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): sem leituras na última hora$",
+"${1}: no readings in the last hour",
+[
+": sem leituras na última hora"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -13108,6 +13201,14 @@ const I18N_EN = {
 "${1}% above your home background",
 [
 "% acima do fundo da sua casa"
+]
+],
+[
+"Espectro do RC102. Parece: ",
+"^Espectro do RC102\\. Parece: ((?:(?! · ).)+?)$",
+"RC102 spectrum. Looks like: ${1}",
+[
+"Espectro do RC102. Parece: "
 ]
 ],
 [
@@ -13657,6 +13758,15 @@ const I18N_EN = {
 [
 " · amostra ",
 " · fundo "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
+"${1} records, ${2} new minutes",
+[
+" registros, ",
+" minutos novos"
 ]
 ],
 [
@@ -15275,6 +15385,14 @@ const I18N_EN = {
 "${1} has had no reading since ${2}.",
 [
 " sem leitura desde "
+]
+],
+[
+"Não deu para baixar: ",
+"^Não deu para baixar: ((?:(?! · ).)+?)$",
+"Could not download: ${1}",
+[
+"Não deu para baixar: "
 ]
 ],
 [
@@ -20679,6 +20797,14 @@ const I18N_EN = {
 "${1} h ago",
 [
 "há "
+]
+],
+[
+"· há ",
+"^· há ((?:(?! · ).)+?)$",
+"· ${1} ago",
+[
+"· há "
 ]
 ],
 [
