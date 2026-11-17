@@ -45,7 +45,9 @@ function atTxt(t) { return isToday(t) ? hhmm(t) : whenLabel(t); }
 function devDialState(el, conn, lv, word) {
   if (!el) return;
   el.className = "hero-lv " + (conn ? "conn-" + conn : lv || "");
-  el.textContent = conn === "off" ? "Desconectado" : conn === "wait" ? "Conectando…" : word || "—";
+  // 2.97.1: a forma do nível volta junto da palavra (saiu com o mostrador na 2.88)
+  if (!conn && lv && word) lvLabel(el, lv, word, 16);
+  else el.textContent = conn === "off" ? "Desconectado" : conn === "wait" ? "Conectando…" : word || "—";
 }
 
 // 2.88.0 (avaliação A2/E2): na página do aparelho a régua dos níveis fica

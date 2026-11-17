@@ -379,7 +379,9 @@ function tileState(pfx, lvl, word, say) {
   const el = $(pfx + "Tile");
   TILE_LV.forEach((l) => el.classList.toggle("lv-" + l, lvl === l));
   // 2.87.0: a forma do nível fica no meio do trifólio; a palavra vai sozinha
-  $(pfx + "TileState").textContent = word;
+  // 2.97.1: a forma também vai na palavra, mas só aparece na faixa fechada,
+  // onde o mostrador some
+  lvLabel($(pfx + "TileState"), lvl, word, 12);
   const lv = $(pfx + "TileLv");
   if (lv && lv._lv !== lvl) { lv._lv = lvl; lv.innerHTML = LV_PATH[lvl] || ""; }
   const sayEl = $(pfx + "TileSay");
