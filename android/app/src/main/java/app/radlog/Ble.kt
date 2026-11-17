@@ -46,9 +46,6 @@ class Ble(private val ctx: Context) {
     private var ready: CountDownLatch? = null
     private var readyErr: String? = null
     private val writeDone = Semaphore(0)
-    // resubscribe(): espera a escrita do CCCD fora da conexão inicial
-    @Volatile private var cccdWait: CountDownLatch? = null
-    @Volatile private var cccdStatus = 0
     @Volatile private var writeStatus = 0
 
     /** Liga? (o Bluetooth do celular pode estar desligado) */
@@ -136,7 +133,6 @@ class Ble(private val ctx: Context) {
         }
 
         override fun onDescriptorWrite(g: BluetoothGatt, d: BluetoothGattDescriptor, status: Int) {
-            cccdWait?.let { cccdStatus = status; cccdWait = null; it.countDown(); return }
             if (status != BluetoothGatt.GATT_SUCCESS) return fail(g, "não consegui ligar as notificações (status $status)")
             val l: CountDownLatch?
             synchronized(lock) { l = ready; ready = null }
@@ -224,36 +220,6 @@ class Ble(private val ctx: Context) {
         }
         if (!writeDone.tryAcquire(3, TimeUnit.SECONDS)) throw Exception("o envio não terminou")
         if (writeStatus != BluetoothGatt.GATT_SUCCESS) throw Exception("envio recusado (status $writeStatus)")
-    }
-
-    /** Liga de novo as notificações (a resposta parou de chegar com a conexão de pé). */
-    fun resubscribe() {
-        val g: BluetoothGatt
-        synchronized(lock) { g = gatt ?: throw Exception("conexão perdida") }
-        var n: BluetoothGattCharacteristic? = null
-        for (s in g.services) for (c in s.characteristics) if (c.uuid == NOTIFY) n = c
-        val c = n ?: throw Exception("o aparelho não mostrou o serviço do RC102")
-        val d = c.getDescriptor(CCCD) ?: throw Exception("o aparelho não aceita notificações")
-        g.setCharacteristicNotification(c, true)
-        val l = CountDownLatch(1)
-        cccdWait = l
-        val v = BluetoothGattDescriptor.ENABLE_NOTIFICATION_VALUE
-        var tries = 0
-        while (true) {
-            val ok = if (Build.VERSION.SDK_INT >= 33) {
-                g.writeDescriptor(d, v) == BluetoothGatt.GATT_SUCCESS
-            } else {
-                @Suppress("DEPRECATION")
-                d.value = v
-                @Suppress("DEPRECATION")
-                g.writeDescriptor(d)
-            }
-            if (ok) break
-            if (++tries > 50) { cccdWait = null; throw Exception("o Android não aceitou o pedido") }
-            Thread.sleep(10)
-        }
-        if (!l.await(3, TimeUnit.SECONDS)) { cccdWait = null; throw Exception("o aparelho não confirmou") }
-        if (cccdStatus != BluetoothGatt.GATT_SUCCESS) throw Exception("recusado (status $cccdStatus)")
     }
 
     fun close() {

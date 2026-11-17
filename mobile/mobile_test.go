@@ -76,7 +76,6 @@ func (h *fakeHost) BLEScan(int) (string, error) { return "[]", nil }
 func (h *fakeHost) BLEConnect(string) error     { return errors.New("sem rádio") }
 func (h *fakeHost) BLEWrite([]byte) error       { return nil }
 func (h *fakeHost) BLEClose()                   {}
-func (h *fakeHost) BLEResubscribe() error       { return nil }
 
 // O motor sobe no modo celular e responde aos métodos da tela.
 func TestStartEngine(t *testing.T) {

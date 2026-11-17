@@ -5679,9 +5679,6 @@ chegaram {0} pedaço(s)	{0} chunk(s) arrived
 nada chegou	nothing arrived
 RC102: conectou mas não abriu ({0})	RC102: connected but did not open ({0})
 RC102: não conectou ({0}); próxima tentativa pelo Bluetooth em {1}	RC102: did not connect ({0}); next Bluetooth try in {1}
-RC102 (Bluetooth): não deu para ligar as notificações de novo: {0}	RC102 (Bluetooth): could not turn notifications back on: {0}
-RC102 (Bluetooth): notificações ligadas de novo	RC102 (Bluetooth): notifications turned back on
-RC102 (Bluetooth): a resposta voltou depois de ligar as notificações de novo	RC102 (Bluetooth): the answer came back after turning notifications back on
 Abrir eventos	Open events
 Configurações › Atualizações e sobre	Settings › Updates and about
 Configurações › Dados e backup	Settings › Data and backup

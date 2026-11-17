@@ -23,9 +23,6 @@ type BLEHost interface {
 	Close()
 }
 
-// bleResubscriber: o host sabe ligar de novo as notificações (Android).
-type bleResubscriber interface{ Resubscribe() error }
-
 var (
 	bleMu   sync.Mutex
 	bleHost BLEHost
@@ -65,8 +62,6 @@ type bleAndroid struct {
 	got  int
 	bad  string
 	sent time.Time
-	// resub: as notificações foram ligadas de novo e ainda não veio resposta
-	resub bool
 }
 
 // BLENotify entrega uma notificação que chegou no Android.
@@ -177,13 +172,6 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 		if out == nil {
 			return nil, errors.New("Bluetooth: conexão perdida")
 		}
-		b.mu.Lock()
-		was := b.resub
-		b.resub = false
-		b.mu.Unlock()
-		if f := BLELogf; was && f != nil {
-			f("RC102 (Bluetooth): a resposta voltou depois de ligar as notificações de novo")
-		}
 		return out, nil
 	case <-time.After(10 * time.Second):
 		b.logTimeout(req)
@@ -214,18 +202,6 @@ func (b *bleAndroid) logTimeout(req []byte) {
 		what += "; montagem: " + bad
 	}
 	f("RC102 (Bluetooth): sem resposta em 10 s ao pedido %s: %s", cmd, what)
-	// nada chegou com a conexão de pé: liga as notificações de novo (o
-	// próximo pedido mostra se era isso)
-	if r, ok := b.h.(bleResubscriber); ok && got == 0 {
-		if err := r.Resubscribe(); err != nil {
-			f("RC102 (Bluetooth): não deu para ligar as notificações de novo: %v", err)
-		} else {
-			b.mu.Lock()
-			b.resub = true
-			b.mu.Unlock()
-			f("RC102 (Bluetooth): notificações ligadas de novo")
-		}
-	}
 }
 
 func (b *bleAndroid) Close() error {

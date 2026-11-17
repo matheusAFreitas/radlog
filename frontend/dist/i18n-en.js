@@ -4322,10 +4322,6 @@ const I18N_EN = {
 "a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%",
 "Bluetooth: o app ainda não ligou o rádio": "Bluetooth: the app hasn't turned on the radio yet",
 "nada chegou": "nothing arrived",
-"RC102 (Bluetooth): notificações ligadas de novo": "RC102 (Bluetooth): notifications turned back on",
-"RadiaCode (Bluetooth): notificações ligadas de novo": "RC102 (Bluetooth): notifications turned back on",
-"RC102 (Bluetooth): a resposta voltou depois de ligar as notificações de novo": "RC102 (Bluetooth): the answer came back after turning notifications back on",
-"RadiaCode (Bluetooth): a resposta voltou depois de ligar as notificações de novo": "RC102 (Bluetooth): the answer came back after turning notifications back on",
 "Abrir eventos": "Open events",
 "Configurações › Atualizações e sobre": "Settings › Updates and about",
 "Configurações › Dados e backup": "Settings › Data and backup",
@@ -6757,14 +6753,6 @@ const I18N_EN = {
 ]
 ],
 [
-"RadiaCode (Bluetooth): não deu para ligar as notificações de novo: ",
-"^RadiaCode \\(Bluetooth\\): não deu para ligar as notificações de novo: ((?:(?! · ).)+?)$",
-"RC102 (Bluetooth): could not turn notifications back on: ${1}",
-[
-"RadiaCode (Bluetooth): não deu para ligar as notificações de novo: "
-]
-],
-[
 "Atenção (histórico do contador): pico de ",
 "^Atenção \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(a partir de ((?:(?! · ).)+?)\\)$",
 "Attention (counter history): peak of ${1} CPM at ${2} (from ${3})",
@@ -7057,14 +7045,6 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
-]
-],
-[
-"RC102 (Bluetooth): não deu para ligar as notificações de novo: ",
-"^RC102 \\(Bluetooth\\): não deu para ligar as notificações de novo: ((?:(?! · ).)+?)$",
-"RC102 (Bluetooth): could not turn notifications back on: ${1}",
-[
-"RC102 (Bluetooth): não deu para ligar as notificações de novo: "
 ]
 ],
 [

@@ -84,5 +84,4 @@ object Engine : Host {
     override fun bleConnect(addr: String) = ble.connect(addr)
     override fun bleWrite(chunk: ByteArray) = ble.write(chunk)
     override fun bleClose() = ble.close()
-    override fun bleResubscribe() = ble.resubscribe()
 }
