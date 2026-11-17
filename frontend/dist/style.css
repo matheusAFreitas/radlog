@@ -1586,8 +1586,6 @@ button.dd-box.off { opacity: .45; border-style: dashed; }
 button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--c); height: 5px; }
 .dd-state { font-size: var(--fs-micro); color: var(--dim); }
 #doseCard .chart-head { flex-wrap: wrap; }
-.dd-dev { display: flex; flex-direction: column; gap: 1px; color: var(--muted); font-size: var(--fs-caption); }
-.dd-dev b { color: var(--text); font-weight: 500; }
 
 /* ---------- Agora (2.17) ---------- */
 #pageAgora { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -2467,6 +2465,8 @@ dialog.qk-dlg:not([open]) { display: none; }
 .rc-24 { padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
 .rc-24-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .rc-24-head h3 { margin: 0; font-size: var(--fs-body); }
+.rc-24-acts { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.hero-acts { display: flex; justify-content: flex-end; margin-top: var(--space-2); }
 .rc-24-svg { width: 100%; height: 150px; display: block; }
 .rc-24-svg .grid { stroke: var(--chart-grid, var(--border)); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .rc-24-svg .rc { fill: none; stroke: var(--rc); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }

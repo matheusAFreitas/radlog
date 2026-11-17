@@ -103,6 +103,8 @@ const state = {
   heatDataStart: 0, // início do mês da leitura mais antiga (ms)
   dosePeriod: localGet("range", "1h"), // 2.12: o mesmo período da taxa
   doseLimit: localGet("doseLimit", "publico"),
+  doseAll: localGet("doseAll") === "1", // 2.101.0: "Tudo" na dose acumulada
+  chartDev: localGet("chartDev", "todos"), // 2.101.0: aparelho no gráfico de cima
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
   settings: {},
   last: null,
@@ -3195,6 +3197,17 @@ function wire() {
   document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
     state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
     state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
+  }));
+  // 2.101.0: "Analisar nos gráficos" nas páginas dos aparelhos. Genérico: data-charts é a
+  // chave do aparelho em CHART_DEVS e o período vem de data-crange (ou do gráfico da página).
+  document.querySelectorAll("[data-charts]").forEach((b) => b.addEventListener("click", () => {
+    const dev = b.dataset.charts;
+    const range = b.dataset.crange || ({ 6: "6h", 24: "24h", 168: "7d" })[state.rc24.h] || "24h";
+    state.chartDev = dev; localSet("chartDev", dev);
+    setSub("graficos", "tempo");
+    showView("graficos");
+    const rb = document.querySelector(`#rangeSeg button[data-range="${range}"]`);
+    if (rb) rb.click(); else refreshChart();
   }));
 
   $("statusPill").addEventListener("click", () => openSettings("selPort"));

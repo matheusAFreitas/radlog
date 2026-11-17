@@ -107,11 +107,15 @@ const tr = (() => {
     }
     return inner ? s : null;
   }
+  const done = new Set(); // traduções já entregues
   return function tr(s) {
     if (s == null || typeof s !== "string" || !hasWord.test(s)) return s;
     const c = cache.get(s);
     if (c !== undefined) return c;
     const core = s.trim().replace(/\s+/g, " ");
+    // 2.101.0: texto que já é uma tradução não passa de novo (o molde
+    // genérico "{0} no {1}" virava "no limits" em "on the limits")
+    if (done.has(core)) return s;
     if (named(core)) return s;
     let out = one(core, false, false);
     if (out == null) out = wide(core);
@@ -137,8 +141,9 @@ const tr = (() => {
     }
     // sem tradução: deixa como está (espaços e quebras de linha inclusive)
     const res = out == null ? s : s.match(/^\s*/)[0] + out + s.match(/\s*$/)[0];
-    if (cache.size > 5000) cache.clear();
+    if (cache.size > 5000) { cache.clear(); done.clear(); }
     cache.set(s, res);
+    if (out != null) done.add(out);
     return res;
   };
 })();

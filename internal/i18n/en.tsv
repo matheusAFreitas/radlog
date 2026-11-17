@@ -3151,7 +3151,6 @@ o aparelho recusou os registros {0}	the device refused registers {0}
 {0} desconectado	{0} disconnected
 desconectado há {0}	disconnected {0} ago
 · desconectado há {0}	· disconnected {0} ago
-menos de 1 min	less than 1 min
 Última leitura às {0}:	Last reading at {0}:
 Sem leituras ainda	No readings yet
 Conectando ao {0}…	Connecting to the {0}…
@@ -3600,13 +3599,6 @@ Fora de casa: {0}.	Away from home: {0}.
 {0}: {1} avisos, {2} dias com trecho acima do seguro.	{0}: {1} alerts, {2} days with a stretch above safe.
 Cada linha junta casa e você: vale o nível mais alto dos dois.	Each row combines home and you: the higher level of the two counts.
 FITA DOS DIAS (PEDAÇOS DE 10 MIN; VALE O NÍVEL MAIS ALTO ENTRE CASA E VOCÊ)	DAY STRIPS (10-MIN PIECES; THE HIGHER LEVEL BETWEEN HOME AND YOU COUNTS)
-dom {0}	Sun {0}
-seg {0}	Mon {0}
-ter {0}	Tue {0}
-qua {0}	Wed {0}
-qui {0}	Thu {0}
-sex {0}	Fri {0}
-sáb {0}	Sat {0}
 ALARA quer dizer "tão baixo quanto razoavelmente possível".	ALARA means "as low as reasonably achievable".
 Não existe dose boa, então a gente tira a que dá para tirar sem atrapalhar a vida.	There is no good dose, so you remove what you can without getting in the way of life.
 São três jeitos: tempo, distância e blindagem.	There are three ways: time, distance and shielding.
@@ -3808,7 +3800,6 @@ encerra o período fora de casa	ends the away-from-home period
 abre o Medir objeto no passo 1	opens Measure object at step 1
 Relatório em PDF do Resumo	Summary PDF report
 do período escolhido no Resumo	for the period chosen in Summary
-Testar alarme (5 s)	Test alarm (5 s)
 Silenciar o alarme	Silence the alarm
 a faixa continua até o nível baixar	the banner stays until the level drops
 Abrir os gráficos em {0}	Open charts at {0}
@@ -3831,7 +3822,6 @@ Espaço entre as coisas	Spacing between things
 confortável	comfortable
 compacto	compact
 Compacto cabe mais na tela; confortável é melhor de longe ou com tela de toque. A mudança aparece na hora; "Salvar" guarda neste PC.	Compact fits more on screen; comfortable is better from a distance or on a touch screen. The change shows right away; "Save" keeps it on this PC.
-tamanho	size
 espaço	spacing
 Tamanho: {0}%	Size: {0}%
 e	and
@@ -3919,7 +3909,6 @@ sem dados do GMC-800 neste ano	no GMC-800 data this year
 sem dados do RC102 neste ano	no RC102 data this year
 sem um dia com 12 h de dado ainda	no day with 12 h of data yet
 1 dia com dado	1 day with data
-{0} dias com dado	{0} days with data
 sua média do ano: {0} µSv/h	your average this year: {0} µSv/h
 sua média do ano: {0} µSv por dia	your average this year: {0} µSv per day
 mediana {0} µSv/h	median {0} µSv/h
@@ -4082,7 +4071,6 @@ Parou de contar	It stopped counting
 Confira o cabo USB e se o GMC-800 desligou sozinho (bateria).	Check the USB cable and whether the GMC-800 turned itself off (battery).
 Sem dado: nenhuma leitura do GMC-800 nos últimos 30 dias.	No data: no GMC-800 readings in the last 30 days.
 Sem dado: ainda não há um dia inteiro com o GMC-800 em casa, sem chuva e sem medição.	No data: there is not yet a full day with the GMC-800 at home, without rain or measurements.
-Dispersão	Dispersion
 : os seus minutos seguem a curva do acaso.	: your minutes follow the chance curve.
 , acima de 1,2 em {0} dos últimos {1} dias: a contagem varia mais do que o acaso explica, e não foi chuva nem objeto. Pode ser ruído no tubo ou interferência elétrica.	, above 1.2 on {0} of the last {1} days: the count varies more than chance explains, and it was not rain or an object. It may be tube noise or electrical interference.
 Nenhuma rajada suspeita em	No suspicious burst in
@@ -4141,7 +4129,6 @@ mediana de 120 a 30 dias atrás	median from 120 to 30 days ago
 Últimas 2 semanas	Last 2 weeks
 esperando a referência	waiting for the reference
 {0} de {1} dias acima de +5%	{0} of {1} days above +5%
-RC102 em casa	RC102 at home
 mesma conta, com a contagem do RC102	same math, with the RC102 counts
 sem o RC102 em casa nas duas épocas	no RC102 at home in both periods
 GMC-800 (mediana de 7 dias)	GMC-800 (7-day median)
@@ -4161,7 +4148,6 @@ bancada ou piso de granito, revestimento cerâmico, areia, adubo com potássio, 
 se a referência é de meses mais ventilados, um pouco de subida é esperado. O Calendário do ano mostra se aconteceu no ano passado.	if the reference comes from better ventilated months, some rise is expected. The year calendar shows whether it happened last year.
 Saúde do tubo:	Tube health:
 veja se a sensibilidade ou a dispersão mudaram no cartão da tela do GMC-800.	check whether sensitivity or dispersion changed on the card in the GMC-800 screen.
-Calibração:	Calibration:
 a conta é em contagens, então trocar o fator não muda nada aqui. Se mudou, foi o tubo contando diferente.	the math uses counts, so changing the factor changes nothing here. If it moved, the tube is counting differently.
 Interferência:	Interference:
 fonte, carregador ou aparelho novo ligado perto do GMC-800 pode somar pulsos falsos.	a power supply, charger or new device switched on near the GMC-800 can add false pulses.
@@ -4297,14 +4283,12 @@ Ok, marquei a volta às {0}. O trecho "{1}" foi de {2}.	Ok, I marked the return 
 Ok, o trecho continua aberto. Quando voltar, use "Voltei".	Ok, the stretch stays open. When you get back, use "I'm back".
 A volta precisa ser depois da saída e não pode estar no futuro.	The return has to be after you left and can't be in the future.
 RC102 voltou a conectar às {0}: voltou para casa?	RC102 reconnected at {0}: are you back home?
-Voltei em	Back at
 máx {0}	max {0}
 quase sem leitura nesse trecho	barely any readings in this stretch
 Não estava comigo	Wasn't with me
 Marca o {0} como fora do cálculo neste trecho	Marks the {0} as left out of the calculation in this stretch
 Saída fechada: {0} → {1}	Trip closed: {0} → {1}
 Ver o resumo da saída	See the trip summary
-Depois	Later
 Dose {0} µSv · pico {1} µSv/h às {2}	Dose {0} µSv · peak {1} µSv/h at {2}
 Abrir resumo da saída	Open trip summary
 Resumo da saída	Trip summary
@@ -4318,7 +4302,6 @@ Onde você foi	Where you went
 Título da saída	Trip title
 {0} dos minutos	{0} of the minutes
 Relatório da saída (PDF)	Trip report (PDF)
-Ver nos gráficos	See on the charts
 Sem leitura do RC102 nessa saída. Se ele ainda não voltou a conectar no PC, o histórico dele chega quando conectar.	No RC102 reading for this trip. If it hasn't reconnected to the PC yet, its history arrives when it does.
 Dose na saída	Dose on the trip
 {0}× casa ({1})	{0}× home ({1})
@@ -4368,8 +4351,6 @@ Incluir o anexo de configurações vigentes	Include the appendix of settings in 
 O app lembra a última escolha. Papel branco, para imprimir; nunca entra localização.	The app remembers your last choice. White paper, for printing; location never goes in.
 O que entra no PDF	What goes in the PDF
 página {0} de {1}	page {0} of {1}
-Sua dose (RC102)	Your dose (RC102)
-Dose da casa (GMC-800)	Home dose (GMC-800)
 Normal para {0}	Normal for {0}
 Acima do normal para {0}	Above normal for {0}
 Alto para {0}	High for {0}
@@ -4396,8 +4377,6 @@ SAÍDAS DE CASA (COM O RC102)	TRIPS AWAY FROM HOME (WITH THE RC102)
 ESPECTRO DO RC102 NO PERÍODO × EM CASA (MESMO TEMPO)	RC102 SPECTRUM IN THE PERIOD × AT HOME (SAME TIME)
 ESPECTRO DE CADA SAÍDA DE CASA	SPECTRUM OF EACH TRIP AWAY FROM HOME
 no período ({0})	in the period ({0})
-na saída ({0})	on the trip ({0})
-em casa	at home
 sem espectro desta saída	no spectrum for this trip
 Espectro somado das leituras que o app guarda a cada minuto (e, com o RC102 longe do PC, da leitura que cobre o tempo todo fora). Em casa: no período, o tempo fora das saídas; numa saída, as 24 h antes dela. As curvas estão por segundo, para comparar tempos diferentes. Linhas de isótopo são uma pista, não uma identificação garantida.	Spectrum summed from the readings the app saves every minute (and, with the RC102 away from the PC, from the reading that covers the whole time away). At home: in the period, the time outside trips; for a trip, the 24 h before it. Curves are per second, to compare different times. Isotope lines are a hint, not a guaranteed identification.
 Nenhuma linha gama conhecida se destacou no período.	No known gamma line stood out in the period.
@@ -5398,9 +5377,6 @@ enviando {0} · {1} de {2}	uploading {0} · {1} of {2}
 essa conta ainda não tem uma nuvem do RadLog	this account does not have a RadLog cloud yet
 essa conta já tem uma nuvem do RadLog	this account already has a RadLog cloud
 esta cópia do app não tem a chave do Google	this copy of the app does not have the Google key
-há pouco	just now
-há {0} dias	{0} days ago
-há {0} h	{0} h ago
 nome deste aparelho na nuvem	this device's name in the cloud
 nuvem de uma versão mais nova do RadLog	cloud from a newer version of RadLog
 nuvem em dia · {0}	cloud up to date · {0}
@@ -5583,8 +5559,6 @@ medição (o número está na lista)	measurement (the number is in the list)
 {0} · {1} min até {2}	{0} · {1} min until {2}
 · RC102 média {0} · máx {1} CPM	· RC102 average {0} · max {1} CPM
 · guarda o espectro do fundo	· keeps the background spectrum
-{0}× o fundo	{0}× the background
-sem leitura	no reading
 Abrir controles	Open controls
 Cada aparelho logo acima do próprio limite de atenção.	Each device just above its own attention limit.
 Cenários	Scenarios
@@ -5851,7 +5825,6 @@ acima do típico ({0} a {1} Bq/kg)	above typical ({0} to {1} Bq/kg)
 ainda não medida	not measured yet
 até você parar	until you stop
 com o eletrodo	with the electrode
-com o sal	with the salt
 com o que está escolhido	with what's selected
 comparado ao típico	compared to typical
 césio, de usinas e testes nucleares	cesium, from power plants and nuclear tests
@@ -5863,14 +5836,12 @@ dá o potássio em g/kg	gives potassium in g/kg
 dê um nome para a amostra	give the sample a name
 em 1.460 keV	at 1,460 keV
 encostada	touching
-escolher	choose
 falta para ±10%	left for ±10%
 fica guardado	it's kept
 forma da curva estimada (o tório melhora)	curve shape estimated (thorium improves it)
 forma da curva pelo tório em {0}	curve shape from thorium on {0}
 forma da curva: estimada (inclinação −1,3 ± 0,4)	curve shape: estimated (slope −1.3 ± 0.4)
 forte: sai rápido	strong: quick
-fundo de {0}	background of {0}
 {0} · fundo de {1}	{0} · background of {1}
 g de potássio por kg	g of potassium per kg
 inclinação	slope
@@ -5879,7 +5850,6 @@ medir o tório	measure the thorium
 medir um novo	measure a new one
 na peça	in the piece
 no GMC-800	on the GMC-800
-no RC102	on the RC102
 obrigatório · ~1 h	required · ~1 h
 opcional · melhora a curva	optional · improves the curve
 para o RC102	for the RC102
@@ -5911,7 +5881,6 @@ Ra-226 ≈ 24 a 105 Bq/kg	Ra-226 ≈ 24 to 105 Bq/kg
 Th-232 ≈ 1.000 a 2.300 Bq/kg	Th-232 ≈ 1,000 to 2,300 Bq/kg
 solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg	soil: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg
 pedra solta	loose stone
-encostado	touching
 abrir o quadro	open the panel
 fechar o quadro	close the panel
 Em mrem/h	In mrem/h
@@ -6149,6 +6118,19 @@ original	original
 Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search: the RC102 spectrum took {0} s to arrive; columns every {1} s
 juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
+Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.
+Do gráfico de cima	From the chart above
+faltam {0} sem dado	{0} missing without data
+todo o histórico	the whole history
+· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero	· same stretch as the chart above · dose only in this stretch, starting from zero
+{0} µSv/h em média	{0} µSv/h on average
+Aparelho no gráfico	Device in the chart
+sem dados do RC102 no período	no RC102 data in the period
+RC102 média {0} · mín {1} · máx {2} µSv/h	RC102 average {0} · min {1} · max {2} µSv/h
+RC102 média {0} · máx {1} CPS	RC102 average {0} · max {1} CPS
+RC102 média {0} · máx {1} CPM	RC102 average {0} · max {1} CPM
+média {0} · máx {1}	average {0} · max {1}
+Analisar nos gráficos	Analyze in the charts
 Medição no {0} terminada.	Measurement on the {0} finished.
 2 h antes	2 h before
 4 h depois	4 h after

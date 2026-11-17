@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.100.2";
+const DEMO_VERSION = "2.101.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -481,7 +481,7 @@ function makeDemoApi(opts) {
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   // na demonstração o RC102 existe (menos no cenário "Aparelho desconecta")
   const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
-  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.2: quando a aba Busca abriu (demo)
+  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.1: quando a aba Busca abriu (demo)
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
     run: null,
@@ -857,7 +857,7 @@ const demoRc = () => {
       }
       return out;
     },
-    // espectrograma da busca de mentira (2.100.2): colunas de 2 s com o fundo
+    // espectrograma da busca de mentira (2.100.1): colunas de 2 s com o fundo
     // e, quando passa perto da amostra (mesmo ciclo de 40 s), as linhas do urânio
     GetRcSearchSg: async (since, win) => {
       const live = demoRcFake(), now = Date.now(), NB = 256, EM = 1500, out = { on: live, eMax: EM, bins: NB, every: 2, rows: [], peaks: [] };
@@ -1469,7 +1469,7 @@ const demoRc = () => {
       return api._dose(f, f + Math.ceil(span / step) * step, step, limit);
     },
     GetDose: async (period, limit) => {
-      const [span, step] = { "15m": [9e5, 6e4], "30m": [18e5, 6e4], "1h": [36e5, 6e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5] }[period] || [864e5, 3e5];
+      const [span, step] = { "15m": [9e5, 6e4], "30m": [18e5, 6e4], "1h": [36e5, 6e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5], all: [12 * 864e5, 36e5] }[period] || [864e5, 3e5];
       const to = Math.floor(Date.now() / 6e4) * 6e4 + 6e4;
       return api._dose(to - span, to, step, limit);
     },

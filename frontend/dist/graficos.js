@@ -47,6 +47,30 @@ let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no m
 const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
 const fundoShown = (sub) => state.view === "fundo" && state.sub.fundo === sub;
 
+// 2.101.0 (ACE): aparelho no gráfico de cima: "Todos" ou um só. A lista é
+// genérica (mais para frente entra um terceiro contador)
+const CHART_DEVS = [{ k: "todos", name: "Todos" }, { k: "gmc", name: "GMC-800" }, { k: "rc", name: "RC102" }];
+// o aparelho em vigor: com um aparelho só (sem dado do RC102), "todos"
+const chartHasRc = (c) => hasRcData() || !!(c && ((c.rc || []).some((v) => v != null) || (c.rcCPM || []).some((v) => v != null)));
+function chartDevOf(c) {
+  return chartHasRc(c) && CHART_DEVS.some((d) => d.k === state.chartDev) ? state.chartDev : "todos";
+}
+function renderChartDevSeg(c) {
+  const seg = $("chartDevSeg"), dev = chartDevOf(c);
+  seg.hidden = !chartHasRc(c);
+  if (!seg.children.length) {
+    for (const d of CHART_DEVS) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.dev = d.k;
+      b.textContent = d.name;
+      b.addEventListener("click", () => { state.chartDev = d.k; localSet("chartDev", d.k); refreshChart(); });
+      seg.appendChild(b);
+    }
+  }
+  seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dev === dev)));
+}
+
 async function refreshChart() {
   if (!gfxShown("tempo")) return;
   const my = ++chartSeq;
@@ -80,7 +104,10 @@ async function refreshChart() {
   const cps = !usvMode && UNITS.count === "cps", ck = cps ? 1 / 60 : 1;
   const cScale = (a) => (cps && a ? a.map((v) => (v == null ? null : v * ck)) : a);
   $("chartTitle").textContent = usvMode ? `${rateLbl()} ao longo do tempo` : `${countLbl()} ao longo do tempo (análise)`;
-  const vals = (usvMode ? c.usv : cScale(c.values)) || [];
+  renderChartDevSeg(c);
+  const dev = chartDevOf(c), onlyRc = dev === "rc";
+  // só o RC102: a linha dele vira a principal (eixo ajustado a ele)
+  const vals = (onlyRc ? (usvMode ? c.rc : cScale(c.rcCPM)) : usvMode ? c.usv : cScale(c.values)) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
   for (const v of vals) if (v != null && v > max) max = v;
@@ -89,11 +116,11 @@ async function refreshChart() {
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
   // (só no µSv/h, onde viram ponto; no CPM o pico de 1 s nem aparece, então
   // não estica a escala, 2.81)
-  if (usvMode) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
+  if (usvMode && !onlyRc) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
-  const rcVals = usvMode ? c.rc || null : cScale(c.rcCPM) || null;
+  const rcVals = dev !== "todos" ? null : usvMode ? c.rc || null : cScale(c.rcCPM) || null;
   let rcMax = 0;
   if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
   if (usvMode) max = Math.max(max, rcMax);
@@ -243,7 +270,7 @@ async function refreshChart() {
   $("noteKey").hidden = !(c.notes || []).length;
   // ponto de cada pico, em cima do ponto do gráfico daquele trecho
   const stepMs = c.stepMs || 60000;
-  $("peakDots").innerHTML = (usvMode ? c.peaks || [] : []).map((p) => {
+  $("peakDots").innerHTML = (usvMode && !onlyRc ? c.peaks || [] : []).map((p) => {
     const i = Math.floor((p.t - c.from) / stepMs);
     if (i < 0 || i >= n) return "";
     const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
@@ -260,9 +287,10 @@ async function refreshChart() {
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
       `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    : `<path d="${area}" fill="${onlyRc ? COR.rc : COR.gmc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${onlyRc ? COR.rc : COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
+  if (onlyRc) $("rcKey").hidden = false;
 
   if (state.zoom) {
     const f = chartTimeFmt(c);
@@ -282,13 +310,19 @@ async function refreshChart() {
     ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
     : `análise: sem limites nem alarmes (eles ficam no ${rateLbl()})`;
   $("legDash").hidden = !usvMode;
-  $("chartStats").textContent = c.avg == null
+  const rcMaxU = (c.rc || []).reduce((m, v) => (v != null && v > m ? v : m), 0);
+  const rcMinU = (c.rc || []).reduce((m, v) => (v != null && v < m ? v : m), Infinity);
+  $("chartStats").textContent = onlyRc
+    ? (c.rcAvg == null && c.rcAvgCPM == null ? "sem dados do RC102 no período"
+      : usvMode ? `RC102 média ${fmt(c.rcAvg, 3)} · mín ${fmt(rcMinU, 3)} · máx ${fmt(rcMaxU, 3)} µSv/h`
+      : cps ? `RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(max, 1)} CPS` : `RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(max, 0)} CPM`)
+    : c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
+      ? (c.rcAvg != null && dev === "todos" ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
       : cps
-        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
-        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
+        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
+        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -300,7 +334,8 @@ function setupChartHover() {
     const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
     const i = Math.round(f * (c.values.length - 1));
     const usvMode = state.chartUnit === "usv";
-    const v = (usvMode ? c.usv : c.values)[i];
+    const onlyRc = chartDevOf(c) === "rc", onlyGmc = chartDevOf(c) === "gmc";
+    const v = onlyRc ? null : (usvMode ? c.usv : c.values)[i];
     const t = c.times[i];
     const cur = $("cursor"), tip = $("tip");
     cur.hidden = false;
@@ -316,10 +351,10 @@ function setupChartHover() {
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
-    const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
+    const rcv = onlyGmc ? null : usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
     const cps = !usvMode && UNITS.count === "cps";
     const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
-    tip.textContent = (v == null ? `${when} · sem dados`
+    tip.textContent = (onlyRc ? (rcv == null ? `${when} · sem dados` : `${when}`) : v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
       : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
       : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
@@ -390,16 +425,44 @@ function zoomRangeText(t0, t1) {
 
 const stepText = (ms) => (ms < 60000 ? `${Math.round(ms / 1000)} s` : fmtDur(ms));
 
+// 2.101.0 (ACE): um trecho só para a página: arrastar no gráfico de cima ou
+// no da dose marca o mesmo trecho nos dois (e a dose volta para "Do gráfico
+// de cima")
+function pushZoom(from, to) {
+  if (state.zoom) state.zoomStack.push(state.zoom);
+  else state.zoomStack = [];
+  state.zoom = { from, to };
+  state.doseZoom = { from, to }; state.doseZoomStack = [];
+  state.zoomLinked = true;
+  setDoseAll(false, true);
+  refreshChart();
+  refreshDose();
+}
+function backZoom() {
+  const z = state.zoomStack.pop() || null;
+  state.zoom = z;
+  state.doseZoom = state.doseAll ? null : z; state.doseZoomStack = [];
+  state.zoomLinked = !!z && !state.doseAll;
+  refreshChart();
+  refreshDose();
+}
+// "Do gráfico de cima" | "Tudo" (guardado)
+function setDoseAll(on, quiet) {
+  state.doseAll = !!on;
+  localSet("doseAll", on ? "1" : "0");
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "tudo") === state.doseAll)));
+  if (quiet) return;
+  state.doseZoom = on ? null : state.zoom; state.doseZoomStack = [];
+  state.zoomLinked = !on && !!state.zoom;
+  refreshDose();
+}
+
 function setupChartZoom() {
-  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, (from, to) => {
-    if (state.zoom) state.zoomStack.push(state.zoom);
-    else state.zoomStack = [];
-    state.zoom = { from, to };
-    unlinkZoom();
-    refreshChart();
-  });
-  $("btnZoomBack").addEventListener("click", () => { state.zoom = state.zoomStack.pop() || null; unlinkZoom(); refreshChart(); });
+  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, pushZoom);
+  $("btnZoomBack").addEventListener("click", backZoom);
   $("btnZoomOut").addEventListener("click", resetAllZoom);
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.addEventListener("click", () => setDoseAll(b.dataset.v === "tudo")));
+  setDoseAll(state.doseAll, true);
 }
 
 // Um só "Sair do zoom": tira o zoom dos dois gráficos (e a seleção do mapa).
@@ -423,22 +486,17 @@ function unlinkZoom() {
   refreshDose();
 }
 
+// um "Sair do zoom" e um "Voltar" só, no gráfico de cima (2.101.0)
 function renderZoomButtons() {
   $("btnZoomOut").hidden = !state.zoom;
   $("btnDoseZoomOut").hidden = !state.doseZoom || !!state.zoom;
   $("btnZoomBack").hidden = !state.zoomStack.length;
-  $("btnDoseZoomBack").hidden = !state.doseZoomStack.length;
+  $("btnDoseZoomBack").hidden = true;
 }
 
 function setupDoseZoom() {
-  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, (from, to) => {
-    if (state.doseZoom) state.doseZoomStack.push(state.doseZoom);
-    else state.doseZoomStack = [];
-    state.doseZoom = { from, to };
-    unlinkZoom();
-    refreshDose();
-  });
-  $("btnDoseZoomBack").addEventListener("click", () => { state.doseZoom = state.doseZoomStack.pop() || null; unlinkZoom(); refreshDose(); });
+  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, pushZoom);
+  $("btnDoseZoomBack").addEventListener("click", backZoom);
   $("btnDoseZoomOut").addEventListener("click", resetAllZoom);
 }
 
@@ -479,7 +537,7 @@ function hasRcData() {
 function fetchDose(src, range) {
   return range
     ? (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(range.from, range.to, state.doseLimit, src) : api.GetDoseRange(range.from, range.to, state.doseLimit))
-    : (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
+    : (api.GetDoseSrc ? api.GetDoseSrc(state.doseAll ? "all" : state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
 }
 
 // quadros da dose de cada aparelho: total, média e quanto do teto já foi
@@ -498,13 +556,16 @@ function renderDevBoxes(box, list) {
     // limite não inclui a radiação natural), cada aparelho com esse nível de fundo
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
+    // 2.101.0: o RC102 tem um número só (o do período, com os buracos
+    // preenchidos pelo histórico do aparelho); só avisa se faltar mais de 5%
+    const miss = has && d.key === "rc" && c.coverage < 0.95 ? (1 - c.coverage) * (c.to - c.from) : 0;
+    const src = !has ? "sem dados no período" : d.key === "rc" ? (miss >= 60e3 ? `faltam ${fmtDur(miss)} sem dado` : "") : "calculada pelo app";
     // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
     el.querySelector(".dd-val > span").textContent = tu;
-    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
+    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média` + (src ? ` · ${src}` : "");
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
     const lim = has && c.allowance > 0;
@@ -614,14 +675,13 @@ async function refreshDose(force) {
   state.dose = c;
   state.dose2 = c2;
   renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RC102", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
-  placeRcDevLines();
   $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
   dz.hidden = !state.doseZoom;
   if (state.doseZoom) {
     $("doseZoomRange").textContent = zoomRangeText(c.from, c.to);
     $("doseZoomStats").textContent = state.zoomLinked
-      ? `· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero`
+      ? `· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero`
       : `· dose acumulada só nesse trecho, começando do zero · um ponto a cada ${stepText(c.stepMs)}`;
   }
   renderZoomButtons();
@@ -693,8 +753,8 @@ async function refreshDose(force) {
     $("dx2").textContent = f(c.to);
     return;
   }
-  const hourly = HOURLY.includes(state.dosePeriod);
-  const lbl = hourly ? hhmm : state.dosePeriod === "1y"
+  const hourly = !state.doseAll && HOURLY.includes(state.dosePeriod);
+  const lbl = hourly ? hhmm : state.doseAll ? ddmm : state.dosePeriod === "1y"
     ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); }
     : ddmm;
   $("dx0").textContent = lbl(c.from);
@@ -715,7 +775,7 @@ function setupDoseHover() {
     cur.hidden = false;
     cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
     tip.hidden = false;
-    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
+    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom && !state.doseAll ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
     const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
     if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
       tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;

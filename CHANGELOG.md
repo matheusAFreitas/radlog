@@ -1,5 +1,46 @@
 # Versões
 
+## 2.101.0
+- Gráficos, dose por período (pedido do ACE): um trecho só para a página.
+  Arrastar no gráfico de cima ou no da dose marca o mesmo trecho nos dois, e
+  um "Sair do zoom" tira dos dois.
+- Dose acumulada com "Do gráfico de cima" (padrão) ou "Tudo": do primeiro dado
+  gravado até agora, os dois aparelhos, com o teto proporcional ao tempo
+  medido. A escolha fica guardada; marcar um trecho volta para "Do gráfico de
+  cima".
+- O quadro do RC102 na dose tem um número só: a dose do período, com os
+  buracos preenchidos pelo histórico do aparelho. Saem as linhas "Contador do
+  aparelho" e "Pelo app"; se faltar mais de 5% do período, aparece quanto
+  falta. O contador do aparelho continua na página do RC102, intocado.
+- Gráfico de cima com o seletor "Todos | GMC-800 | RC102" (guardado), ao lado
+  de µSv/h e CPM. Com um aparelho só, aparece só a linha dele, com o eixo
+  ajustado a ele; no CPM fica um eixo só. Sem dado do RC102, o seletor some.
+- Botão "Analisar nos gráficos" no gráfico de 24 h do RC102 e no quadro do
+  GMC-800: abre os Gráficos já naquele aparelho e no mesmo período.
+- Inglês: um texto já traduzido não é traduzido de novo (a legenda do CPM
+  dizia "on the limits" em vez de "no limits").
+
+**English**
+- Charts, dose by period (ACE's request): one stretch for the whole page.
+  Dragging on the chart above or on the dose chart marks the same stretch on
+  both, and one "Exit zoom" clears both.
+- Accumulated dose with "From the chart above" (default) or "All": from the
+  first recorded data point until now, both devices, with the ceiling
+  proportional to the measured time. The choice is remembered; marking a
+  stretch goes back to "From the chart above".
+- The RC102 tile in the dose has a single number: the period's dose, with
+  gaps filled from the device's history. The "Device counter" and "By the app"
+  lines are gone; if more than 5% of the period is missing, it says how much.
+  The device counter stays on the RC102 page, untouched.
+- The chart above has an "All | GMC-800 | RC102" selector (remembered), next
+  to µSv/h and CPM. With a single device, only its line shows, with the axis
+  fitted to it; in CPM there is a single axis. Without RC102 data, the
+  selector goes away.
+- "Analyze in the charts" button on the RC102 24 h chart and on the GMC-800
+  card: opens Charts on that device and the same period.
+- English: text that is already translated is not translated again (the CPM
+  legend said "on the limits" instead of "no limits").
+
 ## 2.100.2
 - Medir objeto: atenção e alarme dos dois aparelhos continuam em silêncio
   durante a medição, mas o Perigo (e a saturação) do aparelho que não está no

@@ -309,6 +309,7 @@
           <span class="mono muted small" id="chartStats">sem dados no período</span>
         </div>
         <div class="chart-ctrls">
+        <div class="seg" role="group" aria-label="Aparelho no gráfico" id="chartDevSeg" hidden></div>
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
           <button type="button" data-cunit="usv" aria-pressed="true" data-u="rate">µSv/h</button>
           <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes" data-u="count">CPM (análise)</button>
@@ -355,6 +356,7 @@
           <h2 id="doseTitle">Dose acumulada</h2>
           <span class="mono muted small" id="doseSub">sem dados no período</span>
         </div>
+        <div class="seg" id="doseSpanSeg" role="group" aria-label="Período da dose"><button type="button" data-v="cima" aria-pressed="true">Do gráfico de cima</button><button type="button" data-v="tudo" aria-pressed="false">Tudo</button></div>
       </div>
 
       <div class="zoom-bar" id="doseZoomBar" hidden>
@@ -1310,6 +1312,7 @@
         <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
+      <div class="hero-acts"><button type="button" class="btn small" data-charts="gmc" data-crange="24h">Analisar nos gráficos</button></div>
 
       <div class="empty" id="emptyHint" hidden>
         <span>Nenhum contador conectado.</span>
@@ -1370,7 +1373,8 @@
     </section>
     <section class="card rc-24" id="rc24Card" hidden>
       <div class="rc-24-head"><h3 id="rc24Title">Últimas 24 horas</h3>
-        <div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div></div>
+        <div class="rc-24-acts"><div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div>
+        <button type="button" class="btn small" data-charts="rc">Analisar nos gráficos</button></div></div>
       <div class="rc-24-chart" id="rc24Chart"></div>
       <p class="small muted rc-24-key"><span data-u="rate"><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
     </section>

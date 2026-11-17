@@ -2554,7 +2554,7 @@ const I18N_EN = {
 "Restaurar uma cópia no GMC-800?": "Restore a copy to the GMC-800?",
 "Escolha uma cópia salva para gravar de volta no contador. A configuração atual também é salva antes.": "Choose a saved copy to write back to the counter. The current configuration is also saved first.",
 "Escolher a cópia": "Choose the copy",
-"Depois": "Later",
+"Depois": "After",
 "Gravar": "Write",
 "Continuar?": "Continue?",
 "Novo": "New",
@@ -4703,6 +4703,15 @@ const I18N_EN = {
 "Espectrograma ao vivo: energia na vertical, tempo na horizontal": "Live spectrogram: energy on the vertical, time on the horizontal",
 "Cores": "Colors",
 "original": "original",
+"Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
+"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
+"Do gráfico de cima": "From the chart above",
+"todo o histórico": "the whole history",
+"· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero": "· same stretch as the chart above · dose only in this stretch, starting from zero",
+"Aparelho no gráfico": "Device in the chart",
+"sem dados do RC102 no período": "no RC102 data in the period",
+"sem dados do RadiaCode no período": "no RC102 data in the period",
+"Analisar nos gráficos": "Analyze in the charts",
 "2 h antes": "2 h before",
 "4 h depois": "4 h after",
 "Agora:": "Now:",
@@ -11459,6 +11468,17 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RC102 average ${1} · min ${2} · max ${3} µSv/h",
+[
+"RadiaCode média ",
+" · mín ",
+" · máx ",
+" µSv/h"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -12383,6 +12403,17 @@ const I18N_EN = {
 "RC102 spectrum. Looks like: ${1}",
 [
 "Espectro do RadiaCode. Parece: "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RC102 average ${1} · min ${2} · max ${3} µSv/h",
+[
+"RC102 média ",
+" · mín ",
+" · máx ",
+" µSv/h"
 ]
 ],
 [
@@ -13787,6 +13818,26 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"RC102 average ${1} · max ${2} CPS",
+[
+"RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"RC102 average ${1} · max ${2} CPM",
+[
+"RadiaCode média ",
+" · máx ",
+" CPM"
+]
+],
+[
 "O ",
 "^O ((?:(?! · ).)+?) ficou parado \\(((?:(?! · ).)+?)%, ((?:(?! · ).)+?) σ\\)\\.$",
 "The ${1} stayed flat (${2}%, ${3} σ).",
@@ -14962,6 +15013,26 @@ const I18N_EN = {
 "Measuring an object on the ${1}.",
 [
 "Medindo um objeto no "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"RC102 average ${1} · max ${2} CPS",
+[
+"RC102 média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"RC102 average ${1} · max ${2} CPM",
+[
+"RC102 média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -17719,6 +17790,15 @@ const I18N_EN = {
 ]
 ],
 [
+"faltam ",
+"^faltam ((?:(?! · ).)+?) sem dado$",
+"${1} missing without data",
+[
+"faltam ",
+" sem dado"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -18172,6 +18252,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h em média$",
+"${1} µSv/h on average",
+[
+" µSv/h em média"
+]
+],
+[
 "mês inválido: ",
 "^mês inválido: ((?:(?! · ).)+?)$",
 "invalid month: ${1}",
@@ -18411,14 +18499,6 @@ const I18N_EN = {
 [
 "Últimas ",
 " horas"
-]
-],
-[
-"",
-"^((?:(?! · ).)+?) dias com dado$",
-"${1} days with data",
-[
-" dias com dado"
 ]
 ],
 [
@@ -18729,14 +18809,6 @@ const I18N_EN = {
 ]
 ],
 [
-"na saída (",
-"^na saída \\(((?:(?! · ).)+?)\\)$",
-"on the trip (${1})",
-[
-"na saída ("
-]
-],
-[
 "apareceu · ",
 "^apareceu · ((?:(?! · ).)+?) σ$",
 "showed up · ${1} σ",
@@ -18807,6 +18879,15 @@ const I18N_EN = {
 [
 " CPM = ",
 " µSv/h"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
+"average ${1} · max ${2}",
+[
+"média ",
+" · máx "
 ]
 ],
 [
@@ -20373,22 +20454,6 @@ const I18N_EN = {
 ],
 [
 "",
-"^((?:(?! · ).)+?)× o fundo$",
-"${1}× the background",
-[
-"× o fundo"
-]
-],
-[
-"fundo de ",
-"^fundo de ((?:(?! · ).)+?)$",
-"background of ${1}",
-[
-"fundo de "
-]
-],
-[
-"",
 "^((?:(?! · ).)+?) ignorado((?:(?! · ).)+?)$",
 "${1} ignored${2}",
 [
@@ -20692,15 +20757,6 @@ const I18N_EN = {
 "${1}no data",
 [
 "sem dado"
-]
-],
-[
-"há ",
-"^há ((?:(?! · ).)+?) dias$",
-"${1} days ago",
-[
-"há ",
-" dias"
 ]
 ],
 [
@@ -21369,14 +21425,6 @@ const I18N_EN = {
 ]
 ],
 [
-"há ",
-"^há ((?:(?! · ).)+?) h$",
-"${1} h ago",
-[
-"há "
-]
-],
-[
 "· há ",
 "^· há ((?:(?! · ).)+?)$",
 "· ${1} ago",
@@ -21486,62 +21534,6 @@ const I18N_EN = {
 "${1} min",
 [
 " min"
-]
-],
-[
-"dom ",
-"^dom ((?:(?! · ).)+?)$",
-"Sun ${1}",
-[
-"dom "
-]
-],
-[
-"seg ",
-"^seg ((?:(?! · ).)+?)$",
-"Mon ${1}",
-[
-"seg "
-]
-],
-[
-"ter ",
-"^ter ((?:(?! · ).)+?)$",
-"Tue ${1}",
-[
-"ter "
-]
-],
-[
-"qua ",
-"^qua ((?:(?! · ).)+?)$",
-"Wed ${1}",
-[
-"qua "
-]
-],
-[
-"qui ",
-"^qui ((?:(?! · ).)+?)$",
-"Thu ${1}",
-[
-"qui "
-]
-],
-[
-"sex ",
-"^sex ((?:(?! · ).)+?)$",
-"Fri ${1}",
-[
-"sex "
-]
-],
-[
-"sáb ",
-"^sáb ((?:(?! · ).)+?)$",
-"Sat ${1}",
-[
-"sáb "
 ]
 ],
 [
