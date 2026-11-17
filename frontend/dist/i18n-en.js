@@ -4702,8 +4702,8 @@ const I18N_EN = {
 "Espectrograma ao vivo: energia na vertical, tempo na horizontal": "Live spectrogram: energy on the vertical, time on the horizontal",
 "Cores": "Colors",
 "original": "original",
-"Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
-"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result."
+"Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.",
+"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object."
 },
 "patterns": [
 [
@@ -14743,6 +14743,15 @@ const I18N_EN = {
 "Measuring an object on the ${1}.",
 [
 "Medindo um objeto no "
+]
+],
+[
+"Medição no ",
+"^Medição no ((?:(?! · ).)+?) terminada\\.$",
+"Measurement on the ${1} finished.",
+[
+"Medição no ",
+" terminada."
 ]
 ],
 [

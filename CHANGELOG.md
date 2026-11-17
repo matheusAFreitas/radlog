@@ -1,5 +1,21 @@
 # Versões
 
+## 2.100.2
+- Medir objeto: atenção e alarme dos dois aparelhos continuam em silêncio
+  durante a medição, mas o Perigo (e a saturação) do aparelho que não está no
+  objeto volta a valer: ali seria radiação de verdade. O aparelho no objeto
+  segue calado por inteiro até o resultado.
+- O aviso na tela diz isso e fica até 1 min depois do resultado, o mesmo
+  tempo em que os alertas continuam calados.
+
+**English**
+- Measure object: attention and alarm on both devices stay silent during the
+  measurement, but Danger (and saturation) on the device that is not on the
+  object counts again, since that would be real radiation. The device on the
+  object stays fully silent until the result.
+- The on-screen notice says so and stays until 1 min after the result, the
+  same time the alerts stay silent.
+
 ## 2.100.1
 - Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
   para a medição o aparelho escolhido, o modo automático nem o fundo da casa.

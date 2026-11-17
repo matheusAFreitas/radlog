@@ -209,22 +209,20 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 //
 // Medindo uma pedra, o aparelho que está nela sobe de propósito (e o GMC,
 // encostado, conta beta e exagera o µSv/h). Do começo da medição até o
-// resultado, os alertas do app ficam calados: nada de som, de janela
-// piscando nem de linha em Alertas; o valor fica salvo na medição.
-// 2.100.1 (ACE): calam os dois aparelhos, não só o do objeto (o outro
-// costuma estar na mesma mesa e sobe junto).
+// resultado, os alertas desse aparelho ficam calados: nada de som, de
+// janela piscando nem de linha em Alertas; o valor fica salvo na medição.
+// 2.100.1 (ACE): o outro aparelho também cala atenção e alarme (costuma
+// estar na mesma mesa e sobe junto). 2.100.2: mas o Perigo e a saturação
+// dele continuam valendo, porque ali seria radiação de verdade.
 const (
 	measQuietIdle  = 30 * time.Minute // procurando o ponto há mais que isso: volta a valer
 	measQuietGrace = time.Minute      // depois do resultado, para tirar o objeto de perto
 )
 
-// measureQuietLocked diz se os alertas do aparelho dev ficam calados agora
-// (durante a medição, os de todos os aparelhos).
-func (a *App) measureQuietLocked(_ string, now time.Time) bool {
+// measureActiveLocked diz se há uma medição em andamento (do começo até um
+// minuto depois do resultado): atenção e alarme de todos os aparelhos calam.
+func (a *App) measureActiveLocked(now time.Time) bool {
 	m := &a.measure
-	if m.Phase == "" {
-		return false
-	}
 	switch m.Phase {
 	case "fundo", "objeto":
 		return true
@@ -234,6 +232,14 @@ func (a *App) measureQuietLocked(_ string, now time.Time) bool {
 		return m.Obj != nil && now.UnixMilli()-m.Obj.End < measQuietGrace.Milliseconds()
 	}
 	return false
+}
+
+// measureQuietLocked diz se TODOS os alertas do aparelho dev ficam calados
+// agora (inclusive o Perigo): só o que está no objeto, durante a medição.
+func (a *App) measureQuietLocked(dev string, now time.Time) bool {
+	m := &a.measure
+	onObj := devName(m.Device) == dev || (m.Other != nil && m.Other.Role == "objeto" && m.Other.Device == dev)
+	return onObj && a.measureActiveLocked(now)
 }
 
 // measStopMinSec: antes disso o "parar agora" espera (poucas contagens).

@@ -6148,4 +6148,5 @@ original	original
 Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search: the RC102 spectrum took {0} s to arrive; columns every {1} s
 juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
-Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.
+Medição no {0} terminada.	Measurement on the {0} finished.
+Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.

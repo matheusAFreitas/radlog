@@ -382,11 +382,13 @@ function measureStep(st) {
   return state.mBgPick ? "fundo" : "prep";
 }
 
-// aparelhos que estão no objeto (os alarmes deles ficam calados até o
-// resultado, 2.81); o que fica com a pessoa continua normal
-// 2.100.1 (ACE): durante a medição calam os alertas do app dos dois aparelhos
+// 2.100.1 (ACE): durante a medição calam atenção e alarme dos dois
+// aparelhos; 2.100.2: o Perigo só cala no aparelho que está no objeto. O Go
+// cala até 1 min depois do resultado, e o aviso fica até lá também.
 function measureQuietText(st) {
-  return st && !st.demo && ["fundo", "fundo-pronto", "objeto"].includes(st.phase);
+  if (!st || st.demo) return false;
+  if (["fundo", "fundo-pronto", "objeto"].includes(st.phase)) return true;
+  return st.phase === "pronto" && !!st.obj && Date.now() - st.obj.end < 60000;
 }
 
 function renderMeasure(st) {
@@ -402,7 +404,9 @@ function renderMeasure(st) {
   if (st.phase) state.mBgPick = false;
   const qd = measureQuietText(st);
   $("mQuiet").hidden = !qd;
-  if (qd) $("mQuiet").innerHTML = `<b>Medindo um objeto no ${escHtml(devLabel(isRcMeasure(st) ? "radiacode" : "gmc"))}.</b> Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.`;
+  if (qd && st.phase === "pronto") setTimeout(() => { if (state.measureSt === st) $("mQuiet").hidden = true; }, Math.max(0, 60000 - (Date.now() - st.obj.end)) + 200);
+  const qDev = escHtml(devLabel(isRcMeasure(st) ? "radiacode" : "gmc"));
+  if (qd) $("mQuiet").innerHTML = `<b>${st.phase === "pronto" ? `Medição no ${qDev} terminada.` : `Medindo um objeto no ${qDev}.`}</b> Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.`;
   $("measureTitle").textContent = "Medir objeto" + (st.demo ? " (demo)" : "");
   for (const [id, s] of [["mPanePrep", "prep"], ["mPaneBusca", "busca"], ["mPaneFundo", "fundo"], ["mPaneObj", "objeto"], ["mPaneResult", "result"]]) $(id).hidden = step !== s;
   renderMeasureSteps(st, step);
