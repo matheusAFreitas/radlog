@@ -4703,7 +4703,10 @@ const I18N_EN = {
 "Cores": "Colors",
 "original": "original",
 "Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
-"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result."
+"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
+"Do gráfico de cima": "From the chart above",
+"todo o histórico": "the whole history",
+"· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero": "· same stretch as the chart above · dose only in this stretch, starting from zero"
 },
 "patterns": [
 [
@@ -17399,6 +17402,15 @@ const I18N_EN = {
 ]
 ],
 [
+"faltam ",
+"^faltam ((?:(?! · ).)+?) sem dado$",
+"${1} missing without data",
+[
+"faltam ",
+" sem dado"
+]
+],
+[
 "Choveu das ",
 "^Choveu das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
 "It rained from ${1} to ${2}",
@@ -17849,6 +17861,14 @@ const I18N_EN = {
 "collecting since ${1}",
 [
 "juntando desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h em média$",
+"${1} µSv/h on average",
+[
+" µSv/h em média"
 ]
 ],
 [

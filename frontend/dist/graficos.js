@@ -390,16 +390,44 @@ function zoomRangeText(t0, t1) {
 
 const stepText = (ms) => (ms < 60000 ? `${Math.round(ms / 1000)} s` : fmtDur(ms));
 
+// 2.101.0 (ACE): um trecho só para a página: arrastar no gráfico de cima ou
+// no da dose marca o mesmo trecho nos dois (e a dose volta para "Do gráfico
+// de cima")
+function pushZoom(from, to) {
+  if (state.zoom) state.zoomStack.push(state.zoom);
+  else state.zoomStack = [];
+  state.zoom = { from, to };
+  state.doseZoom = { from, to }; state.doseZoomStack = [];
+  state.zoomLinked = true;
+  setDoseAll(false, true);
+  refreshChart();
+  refreshDose();
+}
+function backZoom() {
+  const z = state.zoomStack.pop() || null;
+  state.zoom = z;
+  state.doseZoom = state.doseAll ? null : z; state.doseZoomStack = [];
+  state.zoomLinked = !!z && !state.doseAll;
+  refreshChart();
+  refreshDose();
+}
+// "Do gráfico de cima" | "Tudo" (guardado)
+function setDoseAll(on, quiet) {
+  state.doseAll = !!on;
+  localSet("doseAll", on ? "1" : "0");
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "tudo") === state.doseAll)));
+  if (quiet) return;
+  state.doseZoom = on ? null : state.zoom; state.doseZoomStack = [];
+  state.zoomLinked = !on && !!state.zoom;
+  refreshDose();
+}
+
 function setupChartZoom() {
-  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, (from, to) => {
-    if (state.zoom) state.zoomStack.push(state.zoom);
-    else state.zoomStack = [];
-    state.zoom = { from, to };
-    unlinkZoom();
-    refreshChart();
-  });
-  $("btnZoomBack").addEventListener("click", () => { state.zoom = state.zoomStack.pop() || null; unlinkZoom(); refreshChart(); });
+  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, pushZoom);
+  $("btnZoomBack").addEventListener("click", backZoom);
   $("btnZoomOut").addEventListener("click", resetAllZoom);
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.addEventListener("click", () => setDoseAll(b.dataset.v === "tudo")));
+  setDoseAll(state.doseAll, true);
 }
 
 // Um só "Sair do zoom": tira o zoom dos dois gráficos (e a seleção do mapa).
@@ -423,22 +451,17 @@ function unlinkZoom() {
   refreshDose();
 }
 
+// um "Sair do zoom" e um "Voltar" só, no gráfico de cima (2.101.0)
 function renderZoomButtons() {
   $("btnZoomOut").hidden = !state.zoom;
   $("btnDoseZoomOut").hidden = !state.doseZoom || !!state.zoom;
   $("btnZoomBack").hidden = !state.zoomStack.length;
-  $("btnDoseZoomBack").hidden = !state.doseZoomStack.length;
+  $("btnDoseZoomBack").hidden = true;
 }
 
 function setupDoseZoom() {
-  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, (from, to) => {
-    if (state.doseZoom) state.doseZoomStack.push(state.doseZoom);
-    else state.doseZoomStack = [];
-    state.doseZoom = { from, to };
-    unlinkZoom();
-    refreshDose();
-  });
-  $("btnDoseZoomBack").addEventListener("click", () => { state.doseZoom = state.doseZoomStack.pop() || null; unlinkZoom(); refreshDose(); });
+  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, pushZoom);
+  $("btnDoseZoomBack").addEventListener("click", backZoom);
   $("btnDoseZoomOut").addEventListener("click", resetAllZoom);
 }
 
@@ -479,7 +502,7 @@ function hasRcData() {
 function fetchDose(src, range) {
   return range
     ? (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(range.from, range.to, state.doseLimit, src) : api.GetDoseRange(range.from, range.to, state.doseLimit))
-    : (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
+    : (api.GetDoseSrc ? api.GetDoseSrc(state.doseAll ? "all" : state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
 }
 
 // quadros da dose de cada aparelho: total, média e quanto do teto já foi
@@ -498,13 +521,16 @@ function renderDevBoxes(box, list) {
     // limite não inclui a radiação natural), cada aparelho com esse nível de fundo
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
+    // 2.101.0: o RC102 tem um número só (o do período, com os buracos
+    // preenchidos pelo histórico do aparelho); só avisa se faltar mais de 5%
+    const miss = has && d.key === "rc" && c.coverage < 0.95 ? (1 - c.coverage) * (c.to - c.from) : 0;
+    const src = !has ? "sem dados no período" : d.key === "rc" ? (miss >= 60e3 ? `faltam ${fmtDur(miss)} sem dado` : "") : "calculada pelo app";
     // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
     el.querySelector(".dd-val > span").textContent = tu;
-    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
+    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média` + (src ? ` · ${src}` : "");
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
     const lim = has && c.allowance > 0;
@@ -614,14 +640,13 @@ async function refreshDose(force) {
   state.dose = c;
   state.dose2 = c2;
   renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RC102", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
-  placeRcDevLines();
   $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
   dz.hidden = !state.doseZoom;
   if (state.doseZoom) {
     $("doseZoomRange").textContent = zoomRangeText(c.from, c.to);
     $("doseZoomStats").textContent = state.zoomLinked
-      ? `· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero`
+      ? `· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero`
       : `· dose acumulada só nesse trecho, começando do zero · um ponto a cada ${stepText(c.stepMs)}`;
   }
   renderZoomButtons();
@@ -693,8 +718,8 @@ async function refreshDose(force) {
     $("dx2").textContent = f(c.to);
     return;
   }
-  const hourly = HOURLY.includes(state.dosePeriod);
-  const lbl = hourly ? hhmm : state.dosePeriod === "1y"
+  const hourly = !state.doseAll && HOURLY.includes(state.dosePeriod);
+  const lbl = hourly ? hhmm : state.doseAll ? ddmm : state.dosePeriod === "1y"
     ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); }
     : ddmm;
   $("dx0").textContent = lbl(c.from);
@@ -715,7 +740,7 @@ function setupDoseHover() {
     cur.hidden = false;
     cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
     tip.hidden = false;
-    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
+    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom && !state.doseAll ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
     const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
     if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
       tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;

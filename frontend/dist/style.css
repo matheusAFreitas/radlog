@@ -1586,8 +1586,6 @@ button.dd-box.off { opacity: .45; border-style: dashed; }
 button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--c); height: 5px; }
 .dd-state { font-size: var(--fs-micro); color: var(--dim); }
 #doseCard .chart-head { flex-wrap: wrap; }
-.dd-dev { display: flex; flex-direction: column; gap: 1px; color: var(--muted); font-size: var(--fs-caption); }
-.dd-dev b { color: var(--text); font-weight: 500; }
 
 /* ---------- Agora (2.17) ---------- */
 #pageAgora { display: flex; flex-direction: column; gap: var(--space-4); }

@@ -103,6 +103,7 @@ const state = {
   heatDataStart: 0, // início do mês da leitura mais antiga (ms)
   dosePeriod: localGet("range", "1h"), // 2.12: o mesmo período da taxa
   doseLimit: localGet("doseLimit", "publico"),
+  doseAll: localGet("doseAll") === "1", // 2.101.0: "Tudo" na dose acumulada
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
   settings: {},
   last: null,

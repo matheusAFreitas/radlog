@@ -33,42 +33,10 @@ function measureLogReading(r) {
   mlog.live.push({ t: Date.now(), cpm: r.cpm });
 }
 
-// dose acumulada do próprio Radiacode (desde que foi zerado), no cartão de
-// dose: anda ao vivo com ele conectado
-// dose do próprio Radiacode (desde que foi zerado) e a conta do app, em duas
-// linhas curtas dentro do quadro do Radiacode
+// 2.101.0 (ACE): o quadro do RC102 nos Gráficos tem um número só; o
+// contador do aparelho fica só na página do RC102
 function renderDoseDevice() {
-  const st = state.rc.st || {}, c = state.dose;
   $("doseDevice").hidden = true;
-  const on = st.state === "conectado";
-  const lines = [];
-  if (c && c.device === "radiacode" && (st.doseLiveAt > 0 || on)) {
-    if (st.doseLiveAt > 0) {
-      const v = st.doseLive;
-      const when = st.doseLiveOn ? "ao vivo" : on ? `total das ${hhmm(st.doseLiveAt)}` : `${whenLabel(st.doseLiveAt)}, desconectado`;
-      lines.push(["Contador do aparelho:", `${fmt(v, v < 10 ? 3 : 2)} µSv desde que foi zerado` + (st.doseLiveSec ? ` (${rcDur(st.doseLiveSec)})` : "") + ` · ${when}`]);
-    } else lines.push(["Contador do aparelho:", "esperando o primeiro total (vem a cada 3 a 4 min)"]);
-    const dev = c.doseSource === "aparelho";
-    const tot = dev ? c.appTotal : c.total, mins = dev ? c.appMinutes : c.measuredMinutes;
-    const cov = (dev ? c.appCoverage : c.coverage) * 100;
-    if (mins) lines.push(["Pelo app:", `${doseTxt(tot)} (${fmt(cov, cov < 10 ? 1 : 0)}% do período gravado)`]);
-  }
-  state.rcDevLines = lines;
-  placeRcDevLines();
-}
-function placeRcDevLines() {
-  const box = document.querySelector("#doseDevs .dd-box.rc");
-  if (!box) return;
-  let el = box.querySelector(".dd-dev");
-  if (!el) { el = document.createElement("span"); el.className = "dd-dev small"; box.insertBefore(el, box.querySelector(".meter")); }
-  el.textContent = "";
-  for (const [k, v] of state.rcDevLines || []) {
-    const row = document.createElement("span"), b = document.createElement("b");
-    b.textContent = k;
-    row.append(b, " " + v);
-    el.appendChild(row);
-  }
-  el.hidden = !(state.rcDevLines || []).length;
 }
 
 // alertas do Radiacode: a faixa de alarme/atenção e o som seguem o nível que

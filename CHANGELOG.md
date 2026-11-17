@@ -1,5 +1,31 @@
 # Versões
 
+## 2.101.0
+- Gráficos, dose por período (pedido do ACE): um trecho só para a página.
+  Arrastar no gráfico de cima ou no da dose marca o mesmo trecho nos dois, e
+  um "Sair do zoom" tira dos dois.
+- Dose acumulada com "Do gráfico de cima" (padrão) ou "Tudo": do primeiro dado
+  gravado até agora, os dois aparelhos, com o teto proporcional ao tempo
+  medido. A escolha fica guardada; marcar um trecho volta para "Do gráfico de
+  cima".
+- O quadro do RC102 na dose tem um número só: a dose do período, com os
+  buracos preenchidos pelo histórico do aparelho. Saem as linhas "Contador do
+  aparelho" e "Pelo app"; se faltar mais de 5% do período, aparece quanto
+  falta. O contador do aparelho continua na página do RC102, intocado.
+
+**English**
+- Charts, dose by period (ACE's request): one stretch for the whole page.
+  Dragging on the chart above or on the dose chart marks the same stretch on
+  both, and one "Exit zoom" clears both.
+- Accumulated dose with "From the chart above" (default) or "All": from the
+  first recorded data point until now, both devices, with the ceiling
+  proportional to the measured time. The choice is remembered; marking a
+  stretch goes back to "From the chart above".
+- The RC102 tile in the dose has a single number: the period's dose, with
+  gaps filled from the device's history. The "Device counter" and "By the app"
+  lines are gone; if more than 5% of the period is missing, it says how much.
+  The device counter stays on the RC102 page, untouched.
+
 ## 2.100.1
 - Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
   para a medição o aparelho escolhido, o modo automático nem o fundo da casa.

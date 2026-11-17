@@ -6149,3 +6149,9 @@ Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search:
 juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
 Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.
+Período da dose	Dose period
+Do gráfico de cima	From the chart above
+faltam {0} sem dado	{0} missing without data
+todo o histórico	the whole history
+· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero	· same stretch as the chart above · dose only in this stretch, starting from zero
+{0} µSv/h em média	{0} µSv/h on average
