@@ -364,18 +364,24 @@
     const counts = real ? real.c : sp.counts, tNow = real ? real.t : sp.t;
     const bgRate = real && rl.acc && rl.acc.seconds > 0 && rl.mode === "agora" ? Float64Array.from(rl.acc.counts, (v) => v / rl.acc.seconds) : null;
     const nch = counts.length;
-    const f = fit(cv, 260); if (!f) return;
+    const f = fit(cv, spH()); if (!f) return;
     const { g, w, h } = f, L = 44, R = 10, T = 10, B = 24, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
     const EMAX = 3000, xOf = (e) => L + (Math.max(0, e) / EMAX) * pw;
     let max = 1; for (let i = 0; i < nch; i++) if (EN[i] > 25 && counts[i] > max) max = counts[i];
+    // 2.93 (R1): a escala acompanha a curva mais alta, inclusive a do fundo
+    if (sp.bg && (real ? bgRate : sp.scen !== "fundo") && tNow > 0) for (let i = 0; i < nch; i++) {
+      if (EN[i] <= 25 || EN[i] > EMAX) continue;
+      const v = (real ? bgRate[i] : SHAPE.fundo[i]) * tNow;
+      if (v > max) max = v;
+    }
     const yOf = sp.log ? (v) => T + ph - (Math.log10(1 + v) / Math.log10(1 + max * 1.15)) * ph : (v) => T + ph - (v / (max * 1.1)) * ph;
     // grade
     g.strokeStyle = css("--border"); g.lineWidth = 1; g.fillStyle = css("--dim"); g.font = "11px " + css("--mono");
     g.textAlign = "center";
     for (let e = 0; e <= EMAX; e += 500) { const x = xOf(e); g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); g.textAlign = e === EMAX ? "right" : "center"; g.fillText(e === 0 ? "0" : e + "", e === EMAX ? x + 6 : x, h - 7); }
     g.textAlign = "right";
-    const ticks = sp.log ? [0, 1, 10, 100, 1000, 10000, 100000].filter((v) => v <= max * 1.15) : [0, max * 0.25, max * 0.5, max * 0.75, max].map(Math.round);
+    const ticks = sp.log ? [0, 1, 10, 100, 1000, 10000, 100000].filter((v) => v <= max * 1.15) : (() => { const st = Math.max(1, niceTop((max * 1.1) / 4)), out = []; for (let v = 0; v <= max * 1.1; v += st) out.push(v); return out; })(); // 2.93 (G1): marcas redondas
     for (const v of ticks) { const y = yOf(v); g.globalAlpha = 0.5; g.beginPath(); g.moveTo(L, y + 0.5); g.lineTo(L + pw, y + 0.5); g.stroke(); g.globalAlpha = 1; g.fillText(v >= 1000 ? nf(v / 1000, v >= 10000 ? 0 : 1) + "k" : String(v), L - 6, y + 4); }
     // fundo esperado no mesmo tempo
     if (sp.bg && (real ? bgRate : sp.scen !== "fundo") && tNow > 0) {
@@ -432,11 +438,12 @@
         const bgTot = bgT.reduce((a, b) => a + b, 0), net = tot - bgTot, nerr = Math.sqrt(tot + bgTot * tNow / Math.max(1, rl.acc.seconds));
         txt += ` · dureza ${nf(hr(counts) / Math.max(1e-9, hr(bgT)), 2)}`;
         const groups = [...new Set(rl.peaks.map((p) => p.group))];
-        if (groups.length) txt += ` · parece: <b>${groups.map((g) => escHtml(GROUP_SHORT[g] || g)).join(", ")}</b>`;
+        if (groups.length) { /* a conclusão fica em destaque acima do gráfico (2.93, R1) */ }
         else if (net > 3 * nerr) txt += ` · acima do fundo (${nf(net / tNow, 2)} cps a mais), sem linha conhecida ainda`;
         else txt += tNow < 60 ? " · juntando contagens…" : " · igual ao fundo";
       }
       $("rcSpecInfo").innerHTML = txt;
+      saysSet([...new Set(peaks.slice().sort((a, b) => (b.sigma || 0) - (a.sigma || 0)).map((p) => GROUP_SHORT[p.group] || p.group))]);
       isoRender(peaks);
       zoomDraw(counts);
       return;
@@ -449,9 +456,33 @@
     if (sp.scen !== "fundo" && sp.t > 0) {
       const n = Float64Array.from(sp.counts, (v, i) => v - SHAPE.fundo[i] * sp.t);
       const nt = n.reduce((a, b) => a + b, 0), nerr = Math.sqrt(tot + SHAPE.fundo.reduce((a, b) => a + b, 0) * sp.t);
-      net = ` · dureza ${nf(hardRel(sp.counts), 2)}` + (nt > 3 * nerr ? ` · parece: <b>${guessFrom(n)}</b>` : " · ainda não dá para separar do fundo");
-    } else if (sp.t > 0) net = ` · dureza ${nf(hardRel(sp.counts), 2)} (1,00 = fundo)`;
+      const gs = nt > 3 * nerr ? guessFrom(n) : "";
+      saysSet(gs ? [gs] : []);
+      net = ` · dureza ${nf(hardRel(sp.counts), 2)}` + (gs ? "" : " · ainda não dá para separar do fundo");
+    } else if (sp.t > 0) { saysSet([]); net = ` · dureza ${nf(hardRel(sp.counts), 2)} (1,00 = fundo)`; } else saysSet([]);
     $("rcSpecInfo").innerHTML = `${fmtT(sp.t)} acumulados · ${Math.round(tot).toLocaleString(LOCALE)} contagens · ${nf(cps, 2)} cps ±${nf(err, 1)}% · ≈ ${nf(cps / CPS_PER_USV, 3)} µSv/h${net}`;
+  }
+  // 2.93 (R1): altura do espectro pela janela; em tela cheia, quase toda
+  function spH() {
+    const card = $("rcSpec") && $("rcSpec").closest(".rc-card");
+    if (card && card.classList.contains("rc-full")) return Math.max(300, window.innerHeight - 230);
+    return Math.max(260, Math.min(480, Math.round(window.innerHeight * 0.42)));
+  }
+  // "Parece:" acima do gráfico: os 3 mais prováveis e "+N" (a lista completa fica embaixo)
+  function saysSet(names) {
+    const el = $("rcSpecSays"); if (!el) return;
+    names = names.filter(Boolean);
+    el.hidden = !names.length;
+    if (!names.length) { el.textContent = ""; return; }
+    const more = names.length - 3;
+    el.innerHTML = `<span>Parece:</span> <b>${names.slice(0, 3).map(escHtml).join(", ")}</b>${more > 0 ? ` <span class="muted mono">+${more}</span>` : ""}`;
+  }
+  function spFull(on) {
+    const card = $("rcSpec").closest(".rc-card");
+    card.classList.toggle("rc-full", on);
+    $("rcSpecFull").setAttribute("aria-pressed", String(on));
+    $("rcSpecFull").textContent = on ? "Sair da tela cheia" : "Tela cheia";
+    requestAnimationFrame(spDraw);
   }
   function spHover(ev) {
     const cv = $("rcSpec"), r = cv.getBoundingClientRect(), L = 44, R = 10, pw = r.width - L - R;
@@ -919,13 +950,26 @@
     tl.shown = 0;
   }
   const CMAP = [[0, [6, 6, 26]], [0.15, [26, 26, 168]], [0.35, [31, 111, 224]], [0.5, [25, 195, 214]], [0.65, [78, 227, 106]], [0.78, [242, 227, 58]], [0.9, [242, 139, 43]], [1, [232, 49, 122]]];
+  // 2.93 (R5): escala contínua (o claro sobe sempre junto com o valor, sem
+  // fronteiras de cor), como opção ao lado da original
+  const CMAP_CONT = [[0, [10, 8, 30]], [0.2, [55, 18, 104]], [0.4, [121, 40, 130]], [0.6, [190, 58, 116]], [0.8, [245, 120, 92]], [1, [252, 240, 180]]];
+  let cmapCont = false;
+  try { cmapCont = localStorage.getItem("rcCmap") === "cont"; } catch (e) { /* sem armazenamento */ }
   function cmap(v) {
+    const M = cmapCont ? CMAP_CONT : CMAP;
     v = Math.max(0, Math.min(1, v));
-    for (let k = 1; k < CMAP.length; k++) if (v <= CMAP[k][0]) {
-      const [a, ca] = CMAP[k - 1], [b, cb] = CMAP[k], u = (v - a) / (b - a);
+    for (let k = 1; k < M.length; k++) if (v <= M[k][0]) {
+      const [a, ca] = M[k - 1], [b, cb] = M[k], u = (v - a) / (b - a);
       return ca.map((c, j) => Math.round(c + (cb[j] - c) * u));
     }
-    return CMAP[CMAP.length - 1][1];
+    return M[M.length - 1][1];
+  }
+  function cmapSet(cont) {
+    cmapCont = cont;
+    try { localStorage.setItem("rcCmap", cont ? "cont" : "orig"); } catch (e) { /* sem armazenamento */ }
+    document.querySelectorAll("#rcCmap button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.c === "cont") === cont)));
+    const bar = document.querySelector("#rcSgCard .rc-cbar"); if (bar) bar.classList.toggle("cont", cont);
+    sgDraw();
   }
   const SG_EMAX = 1500;
   const SG_COLS = (() => { let n = 0; for (let i = 0; i < NCH; i++) if (EN[i] <= SG_EMAX) n = i + 1; return n; })();
@@ -1360,7 +1404,7 @@
     if (sr.real) { srDrawReal(); return; }
     const v = sr.val, mult = v < 100 ? 1 : v < 1000 ? 10 : v < 10000 ? 100 : 1000, frac = Math.min(1, v / (100 * mult));
     const ang = -120 + frac * 240;
-    const nd = $("rcNeedle"); if (nd) nd.setAttribute("transform", `rotate(${ang.toFixed(1)} 120 120)`);
+    const nd = $("rcNeedle"); if (nd) { nd.setAttribute("transform", `rotate(${ang.toFixed(1)} 120 120)`); nd.style.color = srNeedleColor(); }
     const val = $("rcGaugeVal"); if (val) val.textContent = nf(v, v < 100 ? 2 : 0);
     document.querySelectorAll("#rcMult span").forEach((s) => s.classList.toggle("on", +s.dataset.m === mult));
     const lbl = $("rcGaugeTicks"); if (lbl) lbl.querySelectorAll("text").forEach((t, k) => { t.textContent = String(k * 20 * mult); });
@@ -1372,7 +1416,7 @@
     g.strokeStyle = css("--border"); g.beginPath(); g.moveTo(0, h - 0.5); g.lineTo(w, h - 0.5); g.stroke();
     g.beginPath();
     sr.trend.forEach((y, i) => { const x = (i / 119) * w, yy = h - 4 - (y / m) * (h - 8); i ? g.lineTo(x, yy) : g.moveTo(x, yy); });
-    g.strokeStyle = COR.warn; g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = srNeedleColor(); g.lineWidth = 1.5; g.stroke(); g.lineWidth = 1;
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
   }
 
@@ -1437,7 +1481,7 @@
   const srRefNow = () => sr.myRef || sr.ref;
   function srDrawReal() {
     const v = sr.sm, mult = v < 100 ? 1 : v < 1000 ? 10 : v < 10000 ? 100 : 1000, frac = Math.min(1, v / (100 * mult));
-    const nd = $("rcNeedle"); if (nd) nd.setAttribute("transform", `rotate(${(-120 + frac * 240).toFixed(1)} 120 120)`);
+    const nd = $("rcNeedle"); if (nd) { nd.setAttribute("transform", `rotate(${(-120 + frac * 240).toFixed(1)} 120 120)`); nd.style.color = srNeedleColor(); }
     const val = $("rcGaugeVal"); if (val) val.textContent = nf(v, v < 100 ? 2 : 0);
     document.querySelectorAll("#rcMult span").forEach((el) => el.classList.toggle("on", +el.dataset.m === mult));
     const lbl = $("rcGaugeTicks"); if (lbl) lbl.querySelectorAll("text").forEach((t, k) => { t.textContent = String(k * 20 * mult); });
@@ -1463,11 +1507,11 @@
     if (ref > 0) { g.setLineDash([3, 3]); g.strokeStyle = "rgba(110,231,160,.55)"; g.beginPath(); g.moveTo(0, yOf(ref)); g.lineTo(w, yOf(ref)); g.stroke(); g.setLineDash([]); }
     g.beginPath();
     win.forEach((p, i) => { const x = xOf(p.t), y = yOf(p.cps); i ? g.lineTo(x, y) : g.moveTo(x, y); });
-    g.strokeStyle = "rgba(240,101,106,.55)"; g.lineWidth = 1; g.stroke();
+    g.strokeStyle = css("--muted"); g.globalAlpha = 0.55; g.lineWidth = 1; g.stroke(); g.globalAlpha = 1;
     // a média que se adapta, por cima
     g.beginPath();
     sr.hist.filter((p) => p.t > now - 60e3).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
-    g.strokeStyle = COR.warn; g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1;
+    g.strokeStyle = srNeedleColor(); g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1; // 2.93 (R5): cor do nível
     g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
   }
   // som: cliques (um por contagem, espalhados no tempo da amostra) ou um tom
@@ -1502,6 +1546,11 @@
       sr.osc.frequency.setTargetAtTime(f, sr.ctx.currentTime, 0.12);
     }
   }
+  // 2.93 (R5): o ponteiro tem a cor do nível do RC102 agora (verde quando seguro)
+  function srNeedleColor() {
+    const lv = typeof state !== "undefined" && state.rLvl;
+    return lv === "perigo" ? COR.warn : lv === "alarme" ? COR.alarm : lv === "atencao" ? COR.att : COR.accent;
+  }
   function gaugeSVG() {
     const cx = 120, cy = 120, r = 96, pt = (a, rr) => { const t = ((a - 90) * Math.PI) / 180; return [cx + rr * Math.cos(t), cy + rr * Math.sin(t)]; };
     let ticks = "", labels = "";
@@ -1513,8 +1562,7 @@
     }
     return `<svg viewBox="0 0 240 200" class="rc-gauge-svg" role="img" aria-label="Mostrador de contagem">
       ${ticks}<g id="rcGaugeTicks" class="rc-gauge-lbl">${labels}</g>
-      <g id="rcNeedle"><line x1="120" y1="120" x2="120" y2="36" stroke="${COR.warn}" stroke-width="3" stroke-linecap="round"/></g>
-      <circle cx="120" cy="120" r="7" fill="${COR.warn}"/>
+      <g id="rcNeedle" style="color:${COR.accent}"><line x1="120" y1="120" x2="120" y2="36" stroke="currentColor" stroke-width="3" stroke-linecap="round"/><circle cx="120" cy="120" r="7" fill="currentColor" transform="rotate(0)"/></g>
       <text x="120" y="162" class="rc-gauge-num" id="rcGaugeVal">0</text>
       <text x="120" y="182" class="rc-gauge-unit">cps</text></svg>`;
   }
@@ -1527,7 +1575,7 @@
   // range: faixa típica em Bq/kg, para o "comparado ao típico" do resultado.
   const ACT_PRESETS = {
     castanha: { name: "castanha-do-pará", label: "Castanha-do-pará", sub: "Ra-226, Ra-228", mass: 500, nucs: ["Ra-226", "Ra-228", "K-40"], time: 43200,
-      typical: "Ra-226 ≈ 24 a 105 Bq/kg", note: "talvez só \"abaixo de\"", range: { "Ra-226": [24, 105], "Ra-228": [26, 99] },
+      typical: "Ra-226 ≈ 24 a 105 Bq/kg", note: "pode ficar abaixo do que o RC102 consegue medir", range: { "Ra-226": [24, 105], "Ra-228": [26, 99] },
       prep: "Moída ou picada, pote cheio e bem fechado ~3 semanas antes (para o Ra-226)." },
     areia: { name: "areia monazítica", label: "Areia monazítica", sub: "Th-232", mass: 500, nucs: ["Th-232", "Ra-226", "K-40"], time: 3600,
       typical: "Th-232 ≈ 1.000 a 2.300 Bq/kg", note: "sai fácil", range: { "Th-232": [1000, 2300] },
@@ -1539,7 +1587,7 @@
       typical: "rádio costuma ser baixo", note: "só com peça forte",
       prep: "O U-238 sai pela linha de 1.001 keV, que é fraca. O rádio costuma ser baixo porque o urânio foi purificado ao fazer o vidro." },
     comida: { name: "alimento", label: "Alimento", sub: "K-40, Cs-137", mass: 500, nucs: ["Cs-137", "K-40"], time: 3600,
-      typical: "Cs-137 bem abaixo do que o RC102 vê", note: "Cs-137 \"abaixo de\"",
+      typical: "Cs-137 bem abaixo do que o RC102 vê", note: "o Cs-137 pode ficar abaixo do que o RC102 consegue medir",
       prep: "O que aparece é o K-40, do potássio da comida." },
     adubo: { name: "adubo de potássio", label: "Adubo de potássio", sub: "K-40", mass: 500, nucs: ["K-40"], time: 3600,
       typical: "31,7 Bq por grama de potássio", note: "dá o potássio em g/kg",
@@ -1898,6 +1946,8 @@
     $("rcSpecLog").addEventListener("click", () => { sp.log = !sp.log; spMark(); spDraw(); });
     $("rcSpecBg").addEventListener("change", (e) => { sp.bg = e.target.checked; spDraw(); });
     $("rcSpecSpeed").addEventListener("change", (e) => { sp.speed = +e.target.value; });
+    $("rcSpecFull").addEventListener("click", () => spFull(!$("rcSpec").closest(".rc-card").classList.contains("rc-full")));
+    document.addEventListener("keydown", (e) => { if (e.key === "Escape" && document.querySelector(".rc-card.rc-full")) spFull(false); });
     $("rcSpecPlay").addEventListener("click", () => { sp.run = !sp.run; spMark(); if (sp.run && rl.on) realTick(); });
     $("rcSpecReset").addEventListener("click", () => {
       if (rl.on) { screenReset(); return; }
@@ -1943,12 +1993,15 @@
     $("rcSgram").addEventListener("mousemove", sgHover);
     $("rcSgram").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcSgTip"), null); sgDraw(); hdDraw(); });
     for (const id of ["rcSgPeriod", "rcHdPeriod"]) $(id).addEventListener("click", (e) => { const b = e.target.closest("button[data-p]"); if (!b) return; sg.period = b.dataset.p; sg.hover = null; sgMark(); sgLoad(); });
+    $("rcCmap").addEventListener("click", (e) => { const b = e.target.closest("button[data-c]"); if (b) cmapSet(b.dataset.c === "cont"); });
+    cmapSet(cmapCont);
     $("rcSgE").addEventListener("click", (e) => { const b = e.target.closest("button[data-e]"); if (!b) return; sg.emax = +b.dataset.e; sgMark(); sgLoad(); });
     $("rcHard").addEventListener("mousemove", hdHover);
     $("rcHard").addEventListener("mouseleave", () => { tl.hover = null; sg.hover = null; tip($("rcHardTip"), null); hdDraw(); sgDraw(); });
     sgMark();
     // log
-    for (const b of document.querySelectorAll("#rcLogKinds button")) b.innerHTML = LOG_IC[b.dataset.k];
+    // 2.93 (R3): o ícone fica e o botão ganha o nome
+    for (const b of document.querySelectorAll("#rcLogKinds button")) b.insertAdjacentHTML("afterbegin", LOG_IC[b.dataset.k]);
     $("rcLogKinds").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-k]"); if (!b) return;
       if (lg.kinds.has(b.dataset.k)) lg.kinds.delete(b.dataset.k); else lg.kinds.add(b.dataset.k);
@@ -2013,24 +2066,39 @@
     $("rcActEff").addEventListener("click", calClick);
     new ResizeObserver(() => { if (visible) drawAll(); }).observe($("viewRadiacode"));
     // Espectro: espectro (acumulado) ou espectrograma (com a dureza)
+    // 2.93 (E3): um seletor só: Tela do aparelho, Acumulado do aparelho e Ao
+    // longo do tempo (no exemplo simulado: Espectro e Ao longo do tempo)
     const sv = $("rcSpecView");
     const setSv = (v) => {
-      sv.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+      rl.sv = v;
+      svMark();
       document.querySelectorAll("[data-specview]").forEach((el) => { el.hidden = el.dataset.specview !== v; });
       try { localStorage.setItem("rcSpecView", v); } catch (e) { /* sem armazenamento */ }
       if (visible) requestAnimationFrame(drawAll);
     };
-    sv.addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (b) setSv(b.dataset.v); });
+    sv.addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-v]"); if (!b) return;
+      if (b.dataset.m) { const m = $("rcSpecMode").querySelector(`button[data-m="${b.dataset.m}"]`); if (m) m.click(); }
+      setSv(b.dataset.v);
+    });
     let sv0 = "acc";
     try { sv0 = localStorage.getItem("rcSpecView") === "tempo" ? "tempo" : "acc"; } catch (e) { /* sem armazenamento */ }
     setSv(sv0);
     spMark();
   }
+  function svMark() {
+    const v = rl.sv || "acc";
+    $("rcSpecView").querySelectorAll("button").forEach((b) => {
+      b.hidden = b.dataset.m ? !rl.on : b.dataset.o === "sim" ? rl.on : false;
+      b.setAttribute("aria-pressed", String(b.dataset.v === v && (!b.dataset.m || b.dataset.m === rl.mode)));
+    });
+  }
   function spMark() {
+    svMark();
     document.querySelectorAll("#rcSpecScen button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.s === sp.scen)));
     document.querySelectorAll("#rcSpecMode button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.m === rl.mode)));
     $("rcSpecScen").hidden = rl.on;
-    $("rcSpecMode").hidden = !rl.on;
+    $("rcSpecMode").hidden = true; // 2.93 (E3): o seletor de cima faz isso
     $("rcSpecSpeedBox").hidden = rl.on;
     $("rcSpecSimTag").hidden = rl.on;
     $("rcSpecLiveTag").hidden = !rl.on;

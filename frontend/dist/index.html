@@ -65,6 +65,7 @@
     <span class="side-group">Análise</span>
     <button type="button" data-view="graficos"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 15l3.5-4 3 2.5L19 7"/></svg><span>Gráficos</span></button>
     <button type="button" data-view="fundo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 16.5c1-1.6 2-2.4 3-2.4s2 .8 3 2.4"/></svg><span>Fundo de casa</span></button>
+    <button type="button" data-view="espectro" id="navSpec" hidden><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 20h18"/><path d="M4 20c2-1 3-9 4.5-9S10 17 12 17s2-12 3.5-12S17 18 20 20"/></svg><span>Espectro</span></button>
     <button type="button" data-view="resumo"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="6" y="3" width="14" height="18" rx="2"/><path d="M10 3v18"/><path d="M3.5 7.5H6M3.5 12H6M3.5 16.5H6"/><path d="M13 8.5h4M13 12.5h4"/></svg><span>Resumo</span></button>
     <span class="side-group">Registros</span>
     <button type="button" data-view="alertas"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9a6 6 0 0 1 12 0c0 6 2.5 8 2.5 8h-17S6 15 6 9Z"/><path d="M10 20.5a2.2 2.2 0 0 0 4 0"/></svg><span>Alertas</span><span class="side-badge mono" id="navAlerts" hidden></span></button>
@@ -1366,7 +1367,7 @@
   <section class="card view" id="viewRadiacode">
       <div class="view-body">
       <div class="subpane" role="tabpanel" data-subpane="espectro" hidden>
-      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" aria-pressed="true">Espectro</button><button type="button" data-v="tempo" aria-pressed="false">Espectrograma</button></div>
+      <div class="seg rc-spec-view" role="group" aria-label="Qual espectro" id="rcSpecView"><button type="button" data-v="acc" data-o="sim" aria-pressed="true">Espectro</button><button type="button" data-v="acc" data-m="agora" aria-pressed="false" hidden>Tela do aparelho</button><button type="button" data-v="acc" data-m="acc" aria-pressed="false" hidden>Acumulado do aparelho</button><button type="button" data-v="tempo" aria-pressed="false">Ao longo do tempo</button></div>
       <div class="rc-specv" data-specview="acc">
       <article class="rc-card">
         <div class="rc-head"><h3>Espectro</h3><span class="sim-tag" id="rcSpecSimTag">exemplo simulado</span><span class="live-tag" id="rcSpecLiveTag" hidden>ao vivo</span></div>
@@ -1381,18 +1382,18 @@
         <div class="rc-ctrl">
           <div class="seg rc-seg" id="rcSpecScen" aria-label="O que está perto do RC102"></div>
           <div class="seg rc-seg" id="rcSpecMode" aria-label="Qual espectro" hidden><button type="button" data-m="agora" aria-pressed="true">Tela do aparelho</button><button type="button" data-m="acc" aria-pressed="false">Acumulado do aparelho</button></div>
-        </div>
-        <div class="rc-ctrl">
           <button type="button" class="btn small" id="rcSpecPlay">Pausar</button>
           <button type="button" class="btn small" id="rcSpecReset">Recomeçar</button>
           <button type="button" class="btn small" id="rcSpecLog">Escala: linear</button>
           <label class="rc-inline small" id="rcSpecSpeedBox">velocidade
             <select id="rcSpecSpeed"><option value="1">1×</option><option value="10" selected>10×</option><option value="60">60×</option><option value="600">600×</option></select></label>
           <label class="rc-inline small"><input type="checkbox" id="rcSpecBg" checked> fundo por cima</label>
+          <button type="button" class="btn small" id="rcSpecFull" aria-pressed="false">Tela cheia</button>
         </div>
-        <div class="rc-isos" id="rcIsos" role="group" aria-label="Isótopos mais detectados" hidden></div>
+        <p class="rc-says" id="rcSpecSays" aria-live="polite" hidden></p>
         <div class="rc-plot"><canvas id="rcSpec" class="rc-canvas"></canvas><div class="rc-tip" id="rcSpecTip" hidden></div></div>
         <p class="mono small rc-info" id="rcSpecInfo"></p>
+        <div class="rc-isos" id="rcIsos" role="group" aria-label="Isótopos mais detectados" hidden></div>
         <p class="small muted rc-drag-hint" id="rcDragHint">Clique num isótopo ou arraste no espectro para ver um trecho de perto.</p>
         <div class="rc-zoom" id="rcZoom" hidden>
           <div class="rc-zoom-head"><h4 id="rcZoomTitle">Zoom no pico</h4><span class="small muted" id="rcZoomSub"></span><button type="button" class="link small-link" id="rcZoomClose">fechar</button></div>
@@ -1424,7 +1425,7 @@
           <div class="rc-plot rc-sg-plot"><canvas id="rcSgram" class="rc-sg-canvas"></canvas><div class="rc-tip" id="rcSgTip" hidden></div>
             <div class="rc-sg-axis mono small" id="rcSgAxis"></div></div>
         </div>
-        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="seg rc-seg" id="rcLoupe" role="group" aria-label="Lupa"><button type="button" data-n="0" aria-pressed="false">sem lupa</button><button type="button" data-n="5" aria-pressed="true">lupa 5×5</button></span><span class="mono small muted" id="rcSgInfo"></span></div>
+        <div class="rc-ctrl"><button type="button" class="btn small" id="rcTlReplay">Gerar de novo</button><span class="rc-cbar small muted">pouco <i></i> muito</span><span class="seg rc-seg" id="rcCmap" role="group" aria-label="Escala de cor"><button type="button" data-c="orig" aria-pressed="true">cores: original</button><button type="button" data-c="cont" aria-pressed="false">contínua</button></span><span class="seg rc-seg" id="rcLoupe" role="group" aria-label="Lupa"><button type="button" data-n="0" aria-pressed="false">sem lupa</button><button type="button" data-n="5" aria-pressed="true">lupa 5×5</button></span><span class="mono small muted" id="rcSgInfo"></span></div>
       </article>
 
       <article class="rc-card" id="rcHardCard">
@@ -1524,7 +1525,6 @@
         <div id="rcActHist"></div>
       </article>
 
-      <p class="small muted">Fora da lista: trilha no mapa e câmera, que o app do celular já faz melhor.</p>
       </div>
 
       <div class="subpane" role="tabpanel" data-subpane="log" hidden>
@@ -1533,7 +1533,7 @@
         <details class="how rc-how"><summary>Como funciona</summary><p class="small muted">Igual à aba Log do app do celular: a taxa de dose que o RC102 manda a cada ~1,5 minuto, a temperatura, a bateria e a dose acumulada, e os eventos (ligou, carregando, alarmes). O aparelho não guarda isso para baixar depois: cada app só tem o que recebeu enquanto estava conectado. Para juntar o que ficou no celular (fora de casa, por exemplo), exporte o log no app do celular e importe aqui.</p></details>
         <div class="rc-ctrl rc-log-bar">
           <span class="small muted">Mostrar:</span>
-          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true" title="Taxa de dose"></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true" title="Eventos"></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true" title="Temperatura, bateria e dose"></button></span>
+          <span class="rc-log-kinds" id="rcLogKinds"><button type="button" class="rc-lk" data-k="taxa" aria-pressed="true"><span>Taxa de dose</span></button><button type="button" class="rc-lk" data-k="evento" aria-pressed="true"><span>Eventos</span></button><button type="button" class="rc-lk" data-k="raro" aria-pressed="true"><span>Temperatura, bateria e dose</span></button></span>
           <span class="mono small" id="rcLogCount"></span>
           <div class="seg rc-seg" id="rcLogPeriod" aria-label="Período"><button type="button" data-p="1" aria-pressed="false">Hoje</button><button type="button" data-p="7" aria-pressed="false">7 dias</button><button type="button" data-p="30" aria-pressed="false">30 dias</button><button type="button" data-p="0" aria-pressed="true">Tudo</button></div>
           <button type="button" class="btn small" id="rcLogImport">Importar do celular</button>

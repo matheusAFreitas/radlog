@@ -4562,7 +4562,17 @@ const I18N_EN = {
 "(achado depois)": "(found later)",
 "a conta": "the math",
 "Alarmes": "Alarms",
-"Fora dos alertas, a casa ficou igual ao normal": "Outside the alerts, home was the same as normal"
+"Fora dos alertas, a casa ficou igual ao normal": "Outside the alerts, home was the same as normal",
+"Escala de cor": "Colour scale",
+"Sair da tela cheia": "Exit full screen",
+"Tela cheia": "Full screen",
+"contínua": "continuous",
+"cores: original": "colours: original",
+"Parece:": "Looks like:",
+"o Cs-137 pode ficar abaixo do que o RC102 consegue medir": "Cs-137 may stay below what the RC102 can measure",
+"o Cs-137 pode ficar abaixo do que o RadiaCode consegue medir": "Cs-137 may stay below what the RC102 can measure",
+"pode ficar abaixo do que o RC102 consegue medir": "may stay below what the RC102 can measure",
+"pode ficar abaixo do que o RadiaCode consegue medir": "may stay below what the RC102 can measure"
 },
 "patterns": [
 [

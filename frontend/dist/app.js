@@ -474,6 +474,7 @@ function renderRTile(st, o) {
   const tick = (x) => (u === "mrh" ? fmt(x / 10, 3) : u === "cps" && perUSv ? fmt(x * perUSv, 1) : u === "cpm" && perUSv ? fmt(x * perUSv * 60, 0) : fmt(x, 2));
   const names = LV_WORD; // 2.88.0 (R2): os mesmos nomes nos dois aparelhos
   const ownSay = { atencao: "passou o 1º limite do aparelho", alarme: "passou o 2º limite do aparelho" };
+  state.rLvl = o.live ? o.lvl : "";
   if (o.live) tileState("r", o.lvl, names[o.lvl] || "—", o.own ? ownSay[o.lvl] : null);
   else tileState("r", "", st.state === "conectando" ? "Conectando…" : on ? "Aguardando…" : "Desconectado");
   tileScale("r", o.attn / o.top, o.alarm / o.top, o.usv == null ? null : Math.min(o.usv, o.top) / o.top, tick(o.attn), tick(o.alarm));
@@ -865,8 +866,18 @@ function wireLogs() {
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
 const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
+// página marcada na barra; o Espectro (2.93) marca no lugar do Radiacode 102
+function navMark() {
+  const v = state.view, spec = v === "radiacode" && state.sub && state.sub.radiacode === "espectro" && !$("navSpec").hidden;
+  document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
+    const on = spec ? b.dataset.view === "espectro" : b.dataset.view === v;
+    if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
+  });
+}
+
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
+  if (v === "espectro") { setSub("radiacode", "espectro"); v = "radiacode"; } // 2.93 (E3): entrada direta na barra
   if (v === "padroes" || v === "tendencia") { setSub("fundo", v); v = "fundo"; } // 2.91: o fundo de casa virou página
   if (v === "alara") { setSub("medir", "distancia"); v = "medir"; } // o ALARA saiu na 2.85: os testes ficam no Medir objeto
   if (!PAGES[v]) v = "graficos";
@@ -876,9 +887,7 @@ async function showView(v, skipRender) {
   qkTrack(v);
   if (changed) usoView(v);
   for (const [k, id] of Object.entries(PAGES)) $(id).hidden = k !== v;
-  document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
-    if (b.dataset.view === v) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
-  });
+  navMark();
   // trocou de página com a tela rolada: volta para o começo da página
   if (changed && !skipRender) {
     const top = $("pages").getBoundingClientRect().top + window.scrollY - 12;
@@ -924,6 +933,7 @@ function setSub(pg, sub, focus) {
   page.querySelectorAll("[data-subpane]").forEach((el) => { el.hidden = el.dataset.subpane !== sub; });
   if (pg === "fundo") $("heatTrecho").hidden = sub !== "hora" || !state.heatPick;
   if (changed) usoSub(pg, sub);
+  if (pg === "radiacode") navMark();
   if (changed && state.view === pg) refreshSub(pg);
   // fora da aba Agora a fileira de cima volta a mostrar os dois aparelhos (2.65)
   if (DEV_PAGES[pg]) renderDevMini();
