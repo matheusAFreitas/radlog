@@ -1,5 +1,49 @@
 # Versões
 
+## 2.100.1
+- Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
+  para a medição o aparelho escolhido, o modo automático nem o fundo da casa.
+  Toda medição rodava no GMC-800, com tempo fixo e medindo o fundo na hora,
+  mesmo com o RC102 marcado. Agora vale o que está marcado. As medições
+  salvas desde a 2.94.0 dizem o aparelho em que rodaram de verdade.
+- Durante a medição, os alertas do app dos dois aparelhos (GMC-800 e RC102)
+  ficam em silêncio até o resultado, não só os do aparelho no objeto. O aviso
+  diz isso e mostra em qual aparelho a medição está rodando.
+- Modo busca no Bluetooth mais leve: o espectro é lido a cada 5 s, e se uma
+  leitura demorar mais que 2 s o app espaça as próximas (até 15 s) para não
+  atrasar a taxa e os alarmes. Quando isso acontece, fica uma linha no
+  registro dizendo quanto levou.
+- O espectrograma da busca começa quando a aba abre. O trecho de antes agora
+  diz "juntando desde HH:MM", em vez de ficar só vazio.
+- "Parece": as linhas em ordem de energia, sem parênteses em sequência (ex.:
+  "Rádio-226 (série do urânio) · 295, 352, 609 keV").
+- Celular: "Janela" e "Cores" não se separam dos botões ao quebrar a linha; o
+  título "Minha dose" do Agora fica numa linha só.
+- Textos do normal e do máximo da busca em fonte de texto (números seguem
+  iguais).
+
+**English**
+
+- Important Measure object fix: since 2.94.0 the screen didn't pass the
+  chosen device, automatic mode or home background to the measurement. Every
+  measurement ran on the GMC-800, with a fixed time and measuring the
+  background on the spot, even with the RC102 selected. Now what is selected
+  is used. Measurements saved since 2.94.0 show the device they really ran on.
+- During a measurement, the app alerts of both devices (GMC-800 and RC102)
+  stay silent until the result, not only those of the device on the object.
+  The notice says so and shows which device the measurement runs on.
+- Lighter search mode over Bluetooth: the spectrum is read every 5 s, and if
+  a read takes more than 2 s the app spaces the next ones (up to 15 s) so the
+  rate and alarms are not delayed. When that happens, a line in the log says
+  how long it took.
+- The search spectrogram starts when the tab opens. The part before that now
+  says "collecting since HH:MM" instead of just being empty.
+- "Looks like": lines in energy order, without back-to-back parentheses (e.g.
+  "Radium-226 (uranium series) · 295, 352, 609 keV").
+- Phone: "Window" and "Colors" stay with their buttons when the line wraps;
+  the "My dose" title on Now stays on one line.
+- The search's normal and max texts in the text font.
+
 ## 2.100.0
 - Modo busca do RC102 com espectrograma ao vivo: embaixo da linha da taxa,
   no mesmo eixo de tempo, aparece de que energia chega o que chega (0 a

@@ -41,16 +41,16 @@ func TestMeasureQuiet(t *testing.T) {
 		t.Fatal("sem medição não cala")
 	}
 	set(MeasureState{Phase: "objeto", Device: "gmc"})
-	if !q("gmc") || q(devRC) {
-		t.Fatal("GMC no objeto: só ele cala")
+	if !q("gmc") || !q(devRC) {
+		t.Fatal("GMC no objeto: os dois calam (2.100.1)")
 	}
 	set(MeasureState{Phase: "fundo", Device: devRC, Mode: "ambos", Other: &MeasureSide{Device: "gmc", Role: "objeto"}})
 	if !q("gmc") || !q(devRC) {
 		t.Fatal("os dois no objeto: os dois calam")
 	}
 	set(MeasureState{Phase: "objeto", Device: "gmc", Mode: "voce", Other: &MeasureSide{Device: devRC, Role: "voce"}})
-	if !q("gmc") || q(devRC) {
-		t.Fatal("o que fica com a pessoa continua com alarme")
+	if !q("gmc") || !q(devRC) {
+		t.Fatal("um com a pessoa: os dois calam também (2.100.1)")
 	}
 	set(MeasureState{Phase: "", Device: "gmc"})
 	if q("gmc") {

@@ -327,7 +327,8 @@ function measureOpts() {
   const has = isFinite(cm) && cm >= 0;
   return {
     name: $("mName").value, distance: !has ? "" : cm === 0 ? "encostado" : `${fmt(cm, cm % 1 ? 1 : 0)} cm`, distCm: has ? cm : 0,
-    size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
+    size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado
+    auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
     seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat(mOpt("mPct", "20")),
   };
 }
@@ -383,11 +384,9 @@ function measureStep(st) {
 
 // aparelhos que estão no objeto (os alarmes deles ficam calados até o
 // resultado, 2.81); o que fica com a pessoa continua normal
+// 2.100.1 (ACE): durante a medição calam os alertas do app dos dois aparelhos
 function measureQuietText(st) {
-  if (!st || st.demo || !["fundo", "fundo-pronto", "objeto"].includes(st.phase)) return "";
-  const devs = [devLabel(isRcMeasure(st) ? "radiacode" : "gmc")];
-  if (st.other && st.other.role === "objeto") devs.push(devLabel(st.other.device));
-  return devs.join(" e ");
+  return st && !st.demo && ["fundo", "fundo-pronto", "objeto"].includes(st.phase);
 }
 
 function renderMeasure(st) {
@@ -403,7 +402,7 @@ function renderMeasure(st) {
   if (st.phase) state.mBgPick = false;
   const qd = measureQuietText(st);
   $("mQuiet").hidden = !qd;
-  if (qd) $("mQuiet").innerHTML = `<b>Medindo um objeto.</b> Os alarmes do ${escHtml(qd)} ficam em silêncio até o resultado.`;
+  if (qd) $("mQuiet").innerHTML = `<b>Medindo um objeto no ${escHtml(devLabel(isRcMeasure(st) ? "radiacode" : "gmc"))}.</b> Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.`;
   $("measureTitle").textContent = "Medir objeto" + (st.demo ? " (demo)" : "");
   for (const [id, s] of [["mPanePrep", "prep"], ["mPaneBusca", "busca"], ["mPaneFundo", "fundo"], ["mPaneObj", "objeto"], ["mPaneResult", "result"]]) $(id).hidden = step !== s;
   renderMeasureSteps(st, step);

@@ -1530,8 +1530,8 @@ const I18N_EN = {
 "celular": "phone",
 "carregando na fonte externa": "charging from external power",
 "na fonte externa": "on external power",
-"Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (3,5 s no Bluetooth); nada disso é gravado.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it. Below, the spectrogram: at which energy things arrive, on the same time axis as the line. Near a source, its lines light up and the app says what it looks like. With this tab open, the spectrum is read every 2 s (3.5 s over Bluetooth); none of it is saved.",
-"Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (3,5 s no Bluetooth); nada disso é gravado.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it. Below, the spectrogram: at which energy things arrive, on the same time axis as the line. Near a source, its lines light up and the app says what it looks like. With this tab open, the spectrum is read every 2 s (3.5 s over Bluetooth); none of it is saved.",
+"Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (5 s ou mais no Bluetooth); nada disso é gravado.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it. Below, the spectrogram: at which energy things arrive, on the same time axis as the line. Near a source, its lines light up and the app says what it looks like. With this tab open, the spectrum is read every 2 s (5 s or more over Bluetooth); none of it is saved.",
+"Do seu RadiaCode, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (5 s ou mais no Bluetooth); nada disso é gravado.": "From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it. Below, the spectrogram: at which energy things arrive, on the same time axis as the line. Near a source, its lines light up and the app says what it looks like. With this tab open, the spectrum is read every 2 s (5 s or more over Bluetooth); none of it is saved.",
 "passe o RC102 devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RC102 slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
 "passe o RadiaCode devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.": "sweep the RC102 slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.",
 "sem referência": "no reference",
@@ -4701,7 +4701,9 @@ const I18N_EN = {
 "Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.": "Each phase (background and object) measures for the chosen time, even if the answer is clear sooner. Good for weak sources and for comparing measurements.",
 "Espectrograma ao vivo: energia na vertical, tempo na horizontal": "Live spectrogram: energy on the vertical, time on the horizontal",
 "Cores": "Colors",
-"original": "original"
+"original": "original",
+"Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
+"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result."
 },
 "patterns": [
 [
@@ -7071,6 +7073,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Busca: o espectro do RadiaCode levou ",
+"^Busca: o espectro do RadiaCode levou ((?:(?! · ).)+?) s para chegar; colunas a cada ((?:(?! · ).)+?) s$",
+"Search: the RC102 spectrum took ${1} s to arrive; columns every ${2} s",
+[
+"Busca: o espectro do RadiaCode levou ",
+" s para chegar; colunas a cada "
+]
+],
+[
 "leitura ao vivo: encerrada em ",
 "^leitura ao vivo: encerrada em ((?:(?! · ).)+?) após ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) leituras, ((?:(?! · ).)+?) erros\\) — motivo: ((?:(?! · ).)+?)$",
 "live reading: ended on ${1} after ${2} (${3} readings, ${4} errors) — reason: ${5}",
@@ -7327,6 +7338,15 @@ const I18N_EN = {
 "h (",
 ") · mais baixo por volta das ",
 "h ("
+]
+],
+[
+"Busca: o espectro do RC102 levou ",
+"^Busca: o espectro do RC102 levou ((?:(?! · ).)+?) s para chegar; colunas a cada ((?:(?! · ).)+?) s$",
+"Search: the RC102 spectrum took ${1} s to arrive; columns every ${2} s",
+[
+"Busca: o espectro do RC102 levou ",
+" s para chegar; colunas a cada "
 ]
 ],
 [
@@ -14718,6 +14738,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Medindo um objeto no ",
+"^Medindo um objeto no ((?:(?! · ).)+?)\\.$",
+"Measuring an object on the ${1}.",
+[
+"Medindo um objeto no "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -17813,6 +17841,14 @@ const I18N_EN = {
 "${1} off for ${2} ${3}",
 [
 " desligado em "
+]
+],
+[
+"juntando desde ",
+"^juntando desde ((?:(?! · ).)+?)$",
+"collecting since ${1}",
+[
+"juntando desde "
 ]
 ],
 [
