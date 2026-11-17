@@ -4706,7 +4706,10 @@ const I18N_EN = {
 "Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
 "Do gráfico de cima": "From the chart above",
 "todo o histórico": "the whole history",
-"· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero": "· same stretch as the chart above · dose only in this stretch, starting from zero"
+"· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero": "· same stretch as the chart above · dose only in this stretch, starting from zero",
+"Aparelho no gráfico": "Device in the chart",
+"sem dados do RC102 no período": "no RC102 data in the period",
+"sem dados do RadiaCode no período": "no RC102 data in the period"
 },
 "patterns": [
 [
@@ -11304,6 +11307,17 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RC102 average ${1} · min ${2} · max ${3} µSv/h",
+[
+"RadiaCode média ",
+" · mín ",
+" · máx ",
+" µSv/h"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",
@@ -12211,6 +12225,17 @@ const I18N_EN = {
 "RC102 spectrum. Looks like: ${1}",
 [
 "Espectro do RadiaCode. Parece: "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) µSv/h$",
+"RC102 average ${1} · min ${2} · max ${3} µSv/h",
+[
+"RC102 média ",
+" · mín ",
+" · máx ",
+" µSv/h"
 ]
 ],
 [
@@ -13590,6 +13615,26 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"RC102 average ${1} · max ${2} CPS",
+[
+"RadiaCode média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"RC102 average ${1} · max ${2} CPM",
+[
+"RadiaCode média ",
+" · máx ",
+" CPM"
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -14746,6 +14791,26 @@ const I18N_EN = {
 "Measuring an object on the ${1}.",
 [
 "Medindo um objeto no "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPS$",
+"RC102 average ${1} · max ${2} CPS",
+[
+"RC102 média ",
+" · máx ",
+" CPS"
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) CPM$",
+"RC102 average ${1} · max ${2} CPM",
+[
+"RC102 média ",
+" · máx ",
+" CPM"
 ]
 ],
 [
@@ -18491,6 +18556,15 @@ const I18N_EN = {
 [
 " CPM = ",
 " µSv/h"
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
+"average ${1} · max ${2}",
+[
+"média ",
+" · máx "
 ]
 ],
 [

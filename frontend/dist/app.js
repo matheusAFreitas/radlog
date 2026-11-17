@@ -104,6 +104,7 @@ const state = {
   dosePeriod: localGet("range", "1h"), // 2.12: o mesmo período da taxa
   doseLimit: localGet("doseLimit", "publico"),
   doseAll: localGet("doseAll") === "1", // 2.101.0: "Tudo" na dose acumulada
+  chartDev: localGet("chartDev", "todos"), // 2.101.0: aparelho no gráfico de cima
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
   settings: {},
   last: null,

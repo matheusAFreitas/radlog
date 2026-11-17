@@ -12,6 +12,11 @@
   buracos preenchidos pelo histórico do aparelho. Saem as linhas "Contador do
   aparelho" e "Pelo app"; se faltar mais de 5% do período, aparece quanto
   falta. O contador do aparelho continua na página do RC102, intocado.
+- Gráfico de cima com o seletor "Todos | GMC-800 | RC102" (guardado), ao lado
+  de µSv/h e CPM. Com um aparelho só, aparece só a linha dele, com o eixo
+  ajustado a ele; no CPM fica um eixo só. Sem dado do RC102, o seletor some.
+- Inglês: um texto já traduzido não é traduzido de novo (a legenda do CPM
+  dizia "on the limits" em vez de "no limits").
 
 **English**
 - Charts, dose by period (ACE's request): one stretch for the whole page.
@@ -25,6 +30,12 @@
   gaps filled from the device's history. The "Device counter" and "By the app"
   lines are gone; if more than 5% of the period is missing, it says how much.
   The device counter stays on the RC102 page, untouched.
+- The chart above has an "All | GMC-800 | RC102" selector (remembered), next
+  to µSv/h and CPM. With a single device, only its line shows, with the axis
+  fitted to it; in CPM there is a single axis. Without RC102 data, the
+  selector goes away.
+- English: text that is already translated is not translated again (the CPM
+  legend said "on the limits" instead of "no limits").
 
 ## 2.100.1
 - Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava

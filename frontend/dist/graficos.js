@@ -47,6 +47,30 @@ let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no m
 const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
 const fundoShown = (sub) => state.view === "fundo" && state.sub.fundo === sub;
 
+// 2.101.0 (ACE): aparelho no gráfico de cima: "Todos" ou um só. A lista é
+// genérica (mais para frente entra um terceiro contador)
+const CHART_DEVS = [{ k: "todos", name: "Todos" }, { k: "gmc", name: "GMC-800" }, { k: "rc", name: "RC102" }];
+// o aparelho em vigor: com um aparelho só (sem dado do RC102), "todos"
+const chartHasRc = (c) => hasRcData() || !!(c && ((c.rc || []).some((v) => v != null) || (c.rcCPM || []).some((v) => v != null)));
+function chartDevOf(c) {
+  return chartHasRc(c) && CHART_DEVS.some((d) => d.k === state.chartDev) ? state.chartDev : "todos";
+}
+function renderChartDevSeg(c) {
+  const seg = $("chartDevSeg"), dev = chartDevOf(c);
+  seg.hidden = !chartHasRc(c);
+  if (!seg.children.length) {
+    for (const d of CHART_DEVS) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.dev = d.k;
+      b.textContent = d.name;
+      b.addEventListener("click", () => { state.chartDev = d.k; localSet("chartDev", d.k); refreshChart(); });
+      seg.appendChild(b);
+    }
+  }
+  seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dev === dev)));
+}
+
 async function refreshChart() {
   if (!gfxShown("tempo")) return;
   const my = ++chartSeq;
@@ -80,7 +104,10 @@ async function refreshChart() {
   const cps = !usvMode && UNITS.count === "cps", ck = cps ? 1 / 60 : 1;
   const cScale = (a) => (cps && a ? a.map((v) => (v == null ? null : v * ck)) : a);
   $("chartTitle").textContent = usvMode ? `${rateLbl()} ao longo do tempo` : `${countLbl()} ao longo do tempo (análise)`;
-  const vals = (usvMode ? c.usv : cScale(c.values)) || [];
+  renderChartDevSeg(c);
+  const dev = chartDevOf(c), onlyRc = dev === "rc";
+  // só o RC102: a linha dele vira a principal (eixo ajustado a ele)
+  const vals = (onlyRc ? (usvMode ? c.rc : cScale(c.rcCPM)) : usvMode ? c.usv : cScale(c.values)) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
   for (const v of vals) if (v != null && v > max) max = v;
@@ -89,11 +116,11 @@ async function refreshChart() {
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
   // (só no µSv/h, onde viram ponto; no CPM o pico de 1 s nem aparece, então
   // não estica a escala, 2.81)
-  if (usvMode) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
+  if (usvMode && !onlyRc) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
-  const rcVals = usvMode ? c.rc || null : cScale(c.rcCPM) || null;
+  const rcVals = dev !== "todos" ? null : usvMode ? c.rc || null : cScale(c.rcCPM) || null;
   let rcMax = 0;
   if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
   if (usvMode) max = Math.max(max, rcMax);
@@ -243,7 +270,7 @@ async function refreshChart() {
   $("noteKey").hidden = !(c.notes || []).length;
   // ponto de cada pico, em cima do ponto do gráfico daquele trecho
   const stepMs = c.stepMs || 60000;
-  $("peakDots").innerHTML = (usvMode ? c.peaks || [] : []).map((p) => {
+  $("peakDots").innerHTML = (usvMode && !onlyRc ? c.peaks || [] : []).map((p) => {
     const i = Math.floor((p.t - c.from) / stepMs);
     if (i < 0 || i >= n) return "";
     const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
@@ -260,9 +287,10 @@ async function refreshChart() {
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
       `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    : `<path d="${area}" fill="${onlyRc ? COR.rc : COR.gmc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${onlyRc ? COR.rc : COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
+  if (onlyRc) $("rcKey").hidden = false;
 
   if (state.zoom) {
     const f = chartTimeFmt(c);
@@ -282,13 +310,19 @@ async function refreshChart() {
     ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
     : `análise: sem limites nem alarmes (eles ficam no ${rateLbl()})`;
   $("legDash").hidden = !usvMode;
-  $("chartStats").textContent = c.avg == null
+  const rcMaxU = (c.rc || []).reduce((m, v) => (v != null && v > m ? v : m), 0);
+  const rcMinU = (c.rc || []).reduce((m, v) => (v != null && v < m ? v : m), Infinity);
+  $("chartStats").textContent = onlyRc
+    ? (c.rcAvg == null && c.rcAvgCPM == null ? "sem dados do RC102 no período"
+      : usvMode ? `RC102 média ${fmt(c.rcAvg, 3)} · mín ${fmt(rcMinU, 3)} · máx ${fmt(rcMaxU, 3)} µSv/h`
+      : cps ? `RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(max, 1)} CPS` : `RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(max, 0)} CPM`)
+    : c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
+      ? (c.rcAvg != null && dev === "todos" ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
       : cps
-        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
-        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
+        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
+        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -300,7 +334,8 @@ function setupChartHover() {
     const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
     const i = Math.round(f * (c.values.length - 1));
     const usvMode = state.chartUnit === "usv";
-    const v = (usvMode ? c.usv : c.values)[i];
+    const onlyRc = chartDevOf(c) === "rc", onlyGmc = chartDevOf(c) === "gmc";
+    const v = onlyRc ? null : (usvMode ? c.usv : c.values)[i];
     const t = c.times[i];
     const cur = $("cursor"), tip = $("tip");
     cur.hidden = false;
@@ -316,10 +351,10 @@ function setupChartHover() {
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
     const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
-    const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
+    const rcv = onlyGmc ? null : usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
     const cps = !usvMode && UNITS.count === "cps";
     const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
-    tip.textContent = (v == null ? `${when} · sem dados`
+    tip.textContent = (onlyRc ? (rcv == null ? `${when} · sem dados` : `${when}`) : v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
       : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
       : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;

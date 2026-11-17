@@ -6155,3 +6155,9 @@ faltam {0} sem dado	{0} missing without data
 todo o histórico	the whole history
 · mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero	· same stretch as the chart above · dose only in this stretch, starting from zero
 {0} µSv/h em média	{0} µSv/h on average
+Aparelho no gráfico	Device in the chart
+sem dados do RC102 no período	no RC102 data in the period
+RC102 média {0} · mín {1} · máx {2} µSv/h	RC102 average {0} · min {1} · max {2} µSv/h
+RC102 média {0} · máx {1} CPS	RC102 average {0} · max {1} CPS
+RC102 média {0} · máx {1} CPM	RC102 average {0} · max {1} CPM
+média {0} · máx {1}	average {0} · max {1}
