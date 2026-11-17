@@ -1,6 +1,7 @@
 package app
 
 import (
+	"fmt"
 	"math"
 	"sync"
 	"time"
@@ -11,15 +12,17 @@ import (
 // ---------- espectrograma ao vivo do modo busca (2.100.0) ----------
 //
 // Com a aba Busca aberta (a tela pergunta GetRcSearchSg de tempos em
-// tempos), o app lê o espectro do aparelho a cada 2 s no USB e a cada 3,5 s
-// no Bluetooth e guarda na memória a diferença entre leituras: o que chegou
+// tempos), o app lê o espectro do aparelho a cada 2 s no USB e a cada 5 s
+// no Bluetooth (mais espaçado se a leitura demorar) e guarda na memória a diferença entre leituras: o que chegou
 // naquele intervalo. Fechou a aba, volta a ler só de minuto em minuto (o
 // espectrograma gravado). Nada disso vai para o disco.
 
 const (
 	rcSgFastUSB  = 2 * time.Second
-	rcSgFastBLE  = 3500 * time.Millisecond
-	rcSgFastSeen = 6 * time.Second // a tela parou de perguntar: para
+	rcSgFastBLE  = 5 * time.Second  // 2.100.1: Bluetooth com folga (o RC102 do BLE já cai às vezes)
+	rcSgFastMax  = 15 * time.Second // leitura lenta: espaça até aqui
+	rcSgFastSlow = 2 * time.Second  // leitura que demora mais que isso é lenta
+	rcSgFastSeen = 6 * time.Second  // a tela parou de perguntar: para
 	rcSgFastKeep = 5*time.Minute + 30*time.Second
 	rcSgFastBins = 256
 	rcSgFastEMax = 1500.0
@@ -46,22 +49,28 @@ type rcSgFast struct {
 	bg      []uint32
 	bgSec   float64
 	bgAt    time.Time
+	since   int64         // quando a aba abriu (as colunas começam aqui)
+	every   time.Duration // intervalo atual (cresce se a leitura for lenta)
+	logged  bool          // já avisou no registro que está lento (uma vez por abertura da aba)
 }
 
 // rcSgFastTick roda a cada volta do rcRun: lê o espectro se a aba Busca
 // estiver aberta e já deu o intervalo.
 func (a *App) rcSgFastTick(dev *radiacode.Device, ble bool) {
 	f := &a.rc.sgFast
-	every := rcSgFastUSB
+	base := rcSgFastUSB
 	if ble {
-		every = rcSgFastBLE
+		base = rcSgFastBLE
 	}
 	f.mu.Lock()
 	on := time.Since(f.seen) < rcSgFastSeen
 	if !on && f.prev != nil { // aba fechada: esquece tudo
-		f.prev, f.rows, f.peaks = nil, nil, nil
+		f.prev, f.rows, f.peaks, f.logged = nil, nil, nil, false
 	}
-	due := on && time.Since(f.at) >= every
+	if !on || f.every < base {
+		f.every = base
+	}
+	due := on && time.Since(f.at) >= f.every
 	if due {
 		f.at = time.Now()
 	}
@@ -69,7 +78,24 @@ func (a *App) rcSgFastTick(dev *radiacode.Device, ble bool) {
 	if !due {
 		return
 	}
+	t0 := time.Now()
 	s, err := dev.Spectrum()
+	took := time.Since(t0)
+	// leitura lenta (Bluetooth fraco): espaça as próximas para não atrasar a
+	// taxa e os alarmes; volta aos poucos quando melhora
+	f.mu.Lock()
+	logIt := false
+	if took > rcSgFastSlow {
+		f.every = min(f.every*2, rcSgFastMax)
+		logIt, f.logged = !f.logged, true
+	} else if f.every > base {
+		f.every = max(f.every-time.Second, base)
+	}
+	every := f.every
+	f.mu.Unlock()
+	if logIt {
+		a.logEvent(fmt.Sprintf("Busca: o espectro do RC102 levou %.1f s para chegar; colunas a cada %.0f s", took.Seconds(), every.Seconds()))
+	}
 	if err != nil || len(s.Counts) == 0 {
 		return
 	}
@@ -86,7 +112,7 @@ func (a *App) rcSgFastAdd(serial string, now time.Time, s radiacode.Spectrum) {
 	if prev == nil || prev.Serial != serial {
 		return
 	}
-	if cur.T-prev.T > int64(3*rcSgFastBLE/time.Millisecond) {
+	if cur.T-prev.T > int64(2*rcSgFastMax/time.Millisecond) {
 		return // ficou um tempo sem ler (aba fechada, Bluetooth caiu): recomeça daqui
 	}
 	r := rcSpecDiff(prev, cur)
@@ -135,6 +161,7 @@ type RcSearchSg struct {
 	EMax  float64         `json:"eMax"`
 	Bins  int             `json:"bins"`
 	Every float64         `json:"every"` // segundos entre colunas
+	Since int64           `json:"since"` // desde quando junta (a aba abriu)
 	Rows  []RcSearchSgRow `json:"rows"`  // colunas depois de sinceMs
 	Peaks []SpecPeak      `json:"peaks"` // o que parece, na janela (só o que passou do fundo)
 }
@@ -152,6 +179,13 @@ func (a *App) GetRcSearchSg(sinceMs int64, windowSec int) RcSearchSg {
 	}
 	f := &a.rc.sgFast
 	f.mu.Lock()
+	if f.every > 0 {
+		out.Every = f.every.Seconds()
+	}
+	if time.Since(f.seen) >= rcSgFastSeen || f.since == 0 {
+		f.since = time.Now().UnixMilli() // a aba (re)abriu: as colunas começam aqui
+	}
+	out.Since = f.since
 	f.seen = time.Now()
 	if !live {
 		f.mu.Unlock()

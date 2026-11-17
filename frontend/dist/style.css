@@ -3354,3 +3354,12 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .rc-sr-opts { align-items: center; }
 .rc-sr-ax span { white-space: nowrap; }
 @media (max-width: 600px) { #rcSrSg { height: 160px; } }
+
+/* 2.100.1: busca. Rótulo e botões juntos ao quebrar; o trecho do
+   espectrograma de antes da aba abrir diz "juntando desde"; "Minha dose" numa
+   linha só no celular */
+.rc-sr-opt { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: nowrap; }
+.rc-sr-sgw { position: relative; min-width: 0; }
+.rc-sr-wait { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 var(--space-2); background: color-mix(in srgb, var(--bg) 70%, transparent); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.rc-sr-wait[hidden] { display: none; }
+.ag-dose-title h2 { white-space: nowrap; }

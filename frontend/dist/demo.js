@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.100.0";
+const DEMO_VERSION = "2.100.1";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -481,6 +481,7 @@ function makeDemoApi(opts) {
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   // na demonstração o RC102 existe (menos no cenário "Aparelho desconecta")
   const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
+  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.1: quando a aba Busca abriu (demo)
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
     run: null,
@@ -848,7 +849,7 @@ const demoRc = () => {
       // perto de uma amostra (sobe até ~90 cps e volta)
       const live = demoRcFake(), now = Date.now(), out = { live, now, pts: [], raw: true, cps: 12.3, usv: 0.15, refCps: 12.1, refUsv: 0.148, ble: false };
       if (!live) return out;
-      const p0 = Math.max(since || now - 60e3, now - 60e3);
+      const p0 = Math.max(since || now - 60e3, now - 330e3);
       const rate = (t) => { const ph = (t / 1000) % 40; return 12 + (ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0); };
       for (let t = Math.floor(p0 / 500) * 500 + 500; t <= now; t += 500) {
         const lam = rate(t) * 0.5; let n = 0, L = Math.exp(-lam), pp = 1; do { n++; pp *= Math.random(); } while (pp > L); n--;
@@ -856,7 +857,7 @@ const demoRc = () => {
       }
       return out;
     },
-    // espectrograma da busca de mentira (2.100.0): colunas de 2 s com o fundo
+    // espectrograma da busca de mentira (2.100.1): colunas de 2 s com o fundo
     // e, quando passa perto da amostra (mesmo ciclo de 40 s), as linhas do urânio
     GetRcSearchSg: async (since, win) => {
       const live = demoRcFake(), now = Date.now(), NB = 256, EM = 1500, out = { on: live, eMax: EM, bins: NB, every: 2, rows: [], peaks: [] };
@@ -865,7 +866,10 @@ const demoRc = () => {
       const BGS = sh([[1460, 0.04], [609, 0.02]], 1, 260), SRC = sh([[93, 0.5], [186, 0.35], [242, 0.25], [295, 0.45], [352, 0.7], [609, 0.65], [768, 0.08], [1120, 0.18], [1238, 0.07]], 1.6, 180);
       const extra = (t) => { const ph = (t / 1000) % 40; return ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0; };
       const pois = (l) => { if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * Math.sqrt(-2 * Math.log(Math.random() + 1e-12)) * Math.cos(2 * Math.PI * Math.random()))); let L = Math.exp(-l), k = 0, pp = 1; do { k++; pp *= Math.random(); } while (pp > L); return k - 1; };
-      const t1 = Math.floor(now / 2000) * 2000, t0 = Math.max(since || 0, t1 - 300e3);
+      // como no app: as colunas só começam quando a aba abre
+      if (!GetRcSearchSgSince.t || now - GetRcSearchSgSince.at > 6000) GetRcSearchSgSince.t = now;
+      GetRcSearchSgSince.at = now; out.since = GetRcSearchSgSince.t;
+      const t1 = Math.floor(now / 2000) * 2000, t0 = Math.max(since || 0, t1 - 300e3, GetRcSearchSgSince.t);
       for (let t = Math.floor(t0 / 2000) * 2000 + 2000; t <= t1; t += 2000) {
         const x = extra(t - 1000), c = new Array(NB);
         for (let i = 0; i < NB; i++) c[i] = pois(2 * (12 * BGS[i] + x * SRC[i]));

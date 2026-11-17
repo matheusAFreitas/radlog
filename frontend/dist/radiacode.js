@@ -1444,7 +1444,7 @@
     $("rcSrSgBox").hidden = !on;
     if (!on) { sr.sgRows = []; sr.sgLast = 0; sr.sgPeaks = []; }
     $("rcSrDesc").textContent = on
-      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (3,5 s no Bluetooth); nada disso é gravado."
+      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (5 s ou mais no Bluetooth); nada disso é gravado."
       : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.";
     if (!on) srSound("");
     else srSound($("rcSrSound").value);
@@ -1484,7 +1484,7 @@
     try { r = await api.GetRcSearchSg(sr.sgLast, sr.win); } catch (e) { r = null; }
     sr.sgBusy = false;
     if (!r || !r.on) return;
-    sr.sgEvery = r.every || 2; sr.sgBins = r.bins || 256; sr.sgEMax = r.eMax || 1500;
+    sr.sgEvery = r.every || 2; sr.sgBins = r.bins || 256; sr.sgEMax = r.eMax || 1500; sr.sgSince = r.since || 0;
     for (const row of r.rows || []) { if (row.t > sr.sgLast) { sr.sgRows.push(row); sr.sgLast = row.t; } }
     const cut = Date.now() - SR_KEEP;
     while (sr.sgRows.length && sr.sgRows[0].t < cut) sr.sgRows.shift();
@@ -1515,6 +1515,10 @@
     }
     g.putImageData(img, 0, 0);
     $("rcSrX0").textContent = "−" + srWinTxt();
+    // as colunas só começam quando a aba abre: o trecho vazio diz isso
+    const wait = $("rcSrWait"), from = sr.sgSince, empty = sr.sgSince ? (sr.sgSince - (now - sr.win * 1000)) / (sr.win * 1000) : 0;
+    wait.hidden = !(empty > 0.08);
+    if (!wait.hidden) { wait.style.width = Math.min(100, empty * 100).toFixed(1) + "%"; wait.textContent = `juntando desde ${fmtTime(from).slice(0, 5)}`; }
     // o que parece: só quando alguma linha passou do fundo da casa
     const like = $("rcSrLike"), list = isoList(sr.sgPeaks).filter((o) => o.sigma >= 5);
     like.textContent = "";
@@ -1526,8 +1530,8 @@
       groups.forEach((gname, i) => {
         if (i) like.append(document.createTextNode(" · "));
         const b = document.createElement("b"); b.textContent = gname; like.append(b);
-        const kev = by[gname].sort((x, y) => y.sigma - x.sigma).slice(0, 3).map((l) => nf(l.kev, 0)).join(", ");
-        like.append(document.createTextNode(` (${kev} keV)`));
+        const kev = by[gname].sort((x, y) => y.sigma - x.sigma).slice(0, 3).sort((x, y) => x.kev - y.kev).map((l) => nf(l.kev, 0)).join(", ");
+        const k = document.createElement("span"); k.className = "mono"; k.textContent = ` · ${kev} keV`; like.append(k);
       });
     }
   }
