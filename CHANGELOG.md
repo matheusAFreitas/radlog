@@ -6,6 +6,9 @@
   Toda medição rodava no GMC-800, com tempo fixo e medindo o fundo na hora,
   mesmo com o RC102 marcado. Agora vale o que está marcado. As medições
   salvas desde a 2.94.0 dizem o aparelho em que rodaram de verdade.
+- Durante a medição, os alertas do app dos dois aparelhos (GMC-800 e RC102)
+  ficam em silêncio até o resultado, não só os do aparelho no objeto. O aviso
+  diz isso e mostra em qual aparelho a medição está rodando.
 - Modo busca no Bluetooth mais leve: o espectro é lido a cada 5 s, e se uma
   leitura demorar mais que 2 s o app espaça as próximas (até 15 s) para não
   atrasar a taxa e os alarmes. Quando isso acontece, fica uma linha no
@@ -26,6 +29,9 @@
   measurement ran on the GMC-800, with a fixed time and measuring the
   background on the spot, even with the RC102 selected. Now what is selected
   is used. Measurements saved since 2.94.0 show the device they really ran on.
+- During a measurement, the app alerts of both devices (GMC-800 and RC102)
+  stay silent until the result, not only those of the device on the object.
+  The notice says so and shows which device the measurement runs on.
 - Lighter search mode over Bluetooth: the spectrum is read every 5 s, and if
   a read takes more than 2 s the app spaces the next ones (up to 15 s) so the
   rate and alarms are not delayed. When that happens, a line in the log says

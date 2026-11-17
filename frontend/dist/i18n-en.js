@@ -4701,7 +4701,9 @@ const I18N_EN = {
 "Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.": "Each phase (background and object) measures for the chosen time, even if the answer is clear sooner. Good for weak sources and for comparing measurements.",
 "Espectrograma ao vivo: energia na vertical, tempo na horizontal": "Live spectrogram: energy on the vertical, time on the horizontal",
 "Cores": "Colors",
-"original": "original"
+"original": "original",
+"Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result.",
+"Os alertas do app (GMC-800 e RadiaCode) ficam em silêncio até o resultado.": "The app alerts (GMC-800 and RC102) stay silent until the result."
 },
 "patterns": [
 [
@@ -14733,6 +14735,14 @@ const I18N_EN = {
 [
 "de dose em ",
 ", pelo RC102"
+]
+],
+[
+"Medindo um objeto no ",
+"^Medindo um objeto no ((?:(?! · ).)+?)\\.$",
+"Measuring an object on the ${1}.",
+[
+"Medindo um objeto no "
 ]
 ],
 [

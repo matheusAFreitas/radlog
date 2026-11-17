@@ -6147,3 +6147,5 @@ Cores	Colors
 original	original
 Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search: the RC102 spectrum took {0} s to arrive; columns every {1} s
 juntando desde {0}	collecting since {0}
+Medindo um objeto no {0}.	Measuring an object on the {0}.
+Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.

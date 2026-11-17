@@ -384,11 +384,9 @@ function measureStep(st) {
 
 // aparelhos que estão no objeto (os alarmes deles ficam calados até o
 // resultado, 2.81); o que fica com a pessoa continua normal
+// 2.100.1 (ACE): durante a medição calam os alertas do app dos dois aparelhos
 function measureQuietText(st) {
-  if (!st || st.demo || !["fundo", "fundo-pronto", "objeto"].includes(st.phase)) return "";
-  const devs = [devLabel(isRcMeasure(st) ? "radiacode" : "gmc")];
-  if (st.other && st.other.role === "objeto") devs.push(devLabel(st.other.device));
-  return devs.join(" e ");
+  return st && !st.demo && ["fundo", "fundo-pronto", "objeto"].includes(st.phase);
 }
 
 function renderMeasure(st) {
@@ -404,7 +402,7 @@ function renderMeasure(st) {
   if (st.phase) state.mBgPick = false;
   const qd = measureQuietText(st);
   $("mQuiet").hidden = !qd;
-  if (qd) $("mQuiet").innerHTML = `<b>Medindo um objeto.</b> Os alarmes do ${escHtml(qd)} ficam em silêncio até o resultado.`;
+  if (qd) $("mQuiet").innerHTML = `<b>Medindo um objeto no ${escHtml(devLabel(isRcMeasure(st) ? "radiacode" : "gmc"))}.</b> Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.`;
   $("measureTitle").textContent = "Medir objeto" + (st.demo ? " (demo)" : "");
   for (const [id, s] of [["mPanePrep", "prep"], ["mPaneBusca", "busca"], ["mPaneFundo", "fundo"], ["mPaneObj", "objeto"], ["mPaneResult", "result"]]) $(id).hidden = step !== s;
   renderMeasureSteps(st, step);
