@@ -4572,7 +4572,35 @@ const I18N_EN = {
 "o Cs-137 pode ficar abaixo do que o RC102 consegue medir": "Cs-137 may stay below what the RC102 can measure",
 "o Cs-137 pode ficar abaixo do que o RadiaCode consegue medir": "Cs-137 may stay below what the RC102 can measure",
 "pode ficar abaixo do que o RC102 consegue medir": "may stay below what the RC102 can measure",
-"pode ficar abaixo do que o RadiaCode consegue medir": "may stay below what the RC102 can measure"
+"pode ficar abaixo do que o RadiaCode consegue medir": "may stay below what the RC102 can measure",
+"(usada no Bq e na distância segura)": "(used for Bq and the safe distance)",
+"Certeza: nenhuma, cabe no acaso.": "Certainty: none, it fits chance.",
+"Certeza: muito alta.": "Certainty: very high.",
+"Certeza: alta.": "Certainty: high.",
+"Certeza: boa.": "Certainty: good.",
+"Certeza: baixa, pode ser acaso.": "Certainty: low, it may be chance.",
+"muito alta": "very high",
+"alta": "high",
+"boa": "good",
+"baixa": "low",
+"nenhuma": "none",
+"(opcional)": "(optional)",
+"ignorar": "ignore",
+"ignorado": "ignored",
+"GMC-800 ignorado": "GMC-800 ignored",
+"RC102 ignorado": "RC102 ignored",
+"RadiaCode ignorado": "RC102 ignored",
+"Como cai com a distância": "How it drops with distance",
+"Linha do tempo dos últimos 7 dias": "Timeline of the last 7 days",
+"Os dois ignorados": "Both ignored",
+"Quer ver na prática?": "Want to see it in practice?",
+"Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RC102 com você.": "Your trips and the dose of each one. Normal is the GMC-800 at home and the RC102 with you.",
+"Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RadiaCode com você.": "Your trips and the dose of each one. Normal is the GMC-800 at home and the RC102 with you.",
+"Testar uma blindagem": "Test a shield",
+"leitura com problema": "reading with a problem",
+"saiu do normal": "left normal",
+"você não estava em casa": "you weren't home",
+"← Voltar para o Medir objeto": "← Back to Measure object"
 },
 "patterns": [
 [
@@ -9882,6 +9910,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) com o objeto, abaixo do nível de atenção\\.$",
+"${1} with the object, below the attention level.",
+[
+" com o objeto, abaixo do nível de atenção."
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -10017,6 +10053,14 @@ const I18N_EN = {
 [
 "[demo] Perigo no RadiaCode: ",
 " (limite "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com o objeto, acima do nível de atenção\\.$",
+"${1} with the object, above the attention level.",
+[
+" com o objeto, acima do nível de atenção."
 ]
 ],
 [
@@ -10202,6 +10246,14 @@ const I18N_EN = {
 "one spectrum per minute · recording since ${1} ${2}",
 [
 "um espectro por minuto · gravando desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) com o objeto, acima do nível de perigo\\.$",
+"${1} with the object, above the danger level.",
+[
+" com o objeto, acima do nível de perigo."
 ]
 ],
 [
@@ -13285,6 +13337,15 @@ const I18N_EN = {
 ]
 ],
 [
+"de dose em ",
+"^de dose em ((?:(?! · ).)+?), pelo RadiaCode$",
+"of dose in ${1}, by the RC102",
+[
+"de dose em ",
+", pelo RadiaCode"
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -14415,6 +14476,15 @@ const I18N_EN = {
 "${1} · ${2} · during attention",
 [
 " · durante a atenção"
+]
+],
+[
+"de dose em ",
+"^de dose em ((?:(?! · ).)+?), pelo RC102$",
+"of dose in ${1}, by the RC102",
+[
+"de dose em ",
+", pelo RC102"
 ]
 ],
 [
@@ -16726,6 +16796,14 @@ const I18N_EN = {
 [
 "mais ",
 " a responder"
+]
+],
+[
+"os dois ignorados",
+"^os dois ignorados((?:(?! · ).)+?)$",
+"both ignored${1}",
+[
+"os dois ignorados"
 ]
 ],
 [
@@ -19612,6 +19690,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) ignorado((?:(?! · ).)+?)$",
+"${1} ignored${2}",
+[
+" ignorado"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
 [
@@ -19909,6 +19995,14 @@ const I18N_EN = {
 [
 "há ",
 " dias"
+]
+],
+[
+"certeza ",
+"^certeza ((?:(?! · ).)+?)$",
+"certainty ${1}",
+[
+"certeza "
 ]
 ],
 [

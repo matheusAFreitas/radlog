@@ -3786,7 +3786,7 @@ function renderRcMain(st) {
 // etiquetas ao lado do nome: conexão, onde está, bateria e temperatura
 function renderRcChips(st, via) {
   const box = $("rcChips"), on = st.state === "conectado";
-  const where = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" }[((state.where || {}).radiacode) || "comigo"];
+  const where = { casa: "em casa", comigo: "comigo", fora: "ignorado" }[((state.where || {}).radiacode) || "comigo"];
   const chips = [];
   if (on) chips.push(["on", via]);
   chips.push(["", where]);

@@ -67,7 +67,7 @@ function ftShapesOver(levels) {
 
 const ftHm = (i) => { const m = i * 10; return pad(Math.floor(m / 60)) + ":" + pad(m % 60); };
 // papel de cada aparelho (roles.go)
-const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "fora do cálculo" };
+const FT_ROLE = { casa: "em casa", comigo: "com você", fora: "ignorado" };
 // em tela estreita a faixa do papel usa o nome curto (2.83.10)
 const FT_ROLE_SHORT = { casa: "casa", comigo: "você", fora: "fora" };
 

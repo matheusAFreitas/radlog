@@ -1,5 +1,36 @@
 # Versões
 
+## 2.94.0
+- Medir objeto: "tem algo" agora usa a cor do Medir objeto (turquesa); o
+  vermelho fica só quando a leitura com o objeto passa do nível de perigo. O
+  resultado diz a certeza em palavras ("Certeza: muito alta") e compara a
+  leitura com os níveis do app ("0,31 µSv/h com o objeto, abaixo do nível de
+  atenção"). O σ fica nos detalhes.
+- Passo 1 mais limpo: "(opcional)" separado, tamanho "pequeno" já marcado,
+  textos dos aparelhos sem fonte de código e as etapas como marcação, não
+  como botões. As quatro opções de aparelho continuam.
+- Distância e Blindagem saíram das abas: aparecem no fim da medição ("Quer
+  ver na prática?") e têm um link para voltar.
+- Fora de casa: a lista vem primeiro, com a dose de cada saída em destaque;
+  a linha do tempo fica recolhida. Três palavras para o lugar: em casa,
+  comigo e ignorar ("fora do cálculo" virou "ignorado").
+
+**English**
+
+- Measure object: "something there" now uses the Measure object colour
+  (teal); red only when the reading with the object goes over the danger
+  level. The result states the certainty in words ("Certainty: very high")
+  and compares the reading with the app's levels ("0.31 µSv/h with the
+  object, below the attention level"). σ stays in the details.
+- Cleaner step 1: "(optional)" set apart, size "small" already selected,
+  device texts without code font, and the steps as markers, not buttons.
+  The four device options stay.
+- Distance and Shielding left the tabs: they show up at the end of a
+  measurement ("Want to see it in practice?") and have a link back.
+- Away from home: the list comes first, with each trip's dose up front; the
+  timeline is folded. Three words for the place: at home, with me and
+  ignore ("out of the calculation" became "ignored").
+
 ## 2.93.0
 - Espectro: o gráfico cresce com a janela e tem botão de tela cheia (Esc
   sai). A conclusão aparece em destaque acima do gráfico ("Parece: …", com
