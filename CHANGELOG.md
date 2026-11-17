@@ -1,5 +1,63 @@
 # Versões
 
+## 2.100.2
+- Medir objeto: atenção e alarme dos dois aparelhos continuam em silêncio
+  durante a medição, mas o Perigo (e a saturação) do aparelho que não está no
+  objeto volta a valer: ali seria radiação de verdade. O aparelho no objeto
+  segue calado por inteiro até o resultado.
+- No Preparar, a opção "Perigo do outro aparelho durante a medição": toca
+  (padrão) ou fica calado (pedido do ACE). A escolha fica guardada.
+- O aviso na tela diz isso e fica até 1 min depois do resultado, o mesmo
+  tempo em que os alertas continuam calados.
+- Medir objeto com o RC102 e fundo da casa: o espectro de fundo passa a ser o
+  dos espectros gravados em casa nos últimos 7 dias, sem os minutos de pedra
+  ou fonte perto. O acumulado do aparelho juntava tudo o que ele já mediu
+  (pedras inclusive) e ficava 2 a 3 vezes acima em todas as energias. O mesmo
+  filtro vale para o "Parece" da busca e do espectrograma.
+- Medir objeto com o RC102: quando a contagem não muda mas a taxa de dose
+  sobe (gama de energia alta, como o K-40 do sal light), o resumo diz "a
+  contagem não mudou, mas a dose subiu", com quantos σ a dose subiu e a linha
+  que apareceu no espectro. O ± do µSv/h do RC102 passa a vir do espalhamento
+  da própria dose, e não mais do √N das contagens (também no PDF).
+- Faixa dos aparelhos: o "do aparelho" da dose de hoje do RC102 virou dica.
+  Na janela estreita ele quebrava a linha e deixava o quadro com o dobro da
+  altura do quadro do GMC-800.
+- Página do RC102: os botões "Ajustes do aparelho" e "Conexão" saíram do
+  quadro principal. Os dois continuam em Configurações.
+- Inglês: textos que ainda apareciam em português foram traduzidos (a dica
+  "nenhum pico conhecido aqui" do espectro e outros 80). A conferência das
+  traduções agora pega mais frases em português.
+
+**English**
+- Measure object: attention and alarm on both devices stay silent during the
+  measurement, but Danger (and saturation) on the device that is not on the
+  object counts again, since that would be real radiation. The device on the
+  object stays fully silent until the result.
+- In Prepare, the option "Danger on the other device during the measurement":
+  sounds (default) or stays silent (ACE's request). The choice is remembered.
+- The on-screen notice says so and stays until 1 min after the result, the
+  same time the alerts stay silent.
+- Measure object with the RC102 and home background: the background spectrum
+  is now the spectra recorded at home over the last 7 days, without the
+  minutes of rocks or nearby sources. The device's accumulated spectrum held
+  everything it ever measured (rocks included) and sat 2 to 3 times higher at
+  every energy. The same filter applies to the "Looks like" in the search
+  and in the spectrogram.
+- Measure object with the RC102: when the count doesn't change but the dose
+  rate goes up (high-energy gamma, like the K-40 in lite salt), the summary
+  says "the count didn't change, but the dose went up", with how many σ the
+  dose rose and the line that showed up in the spectrum. The ± of the RC102
+  µSv/h now comes from the spread of the dose itself, no longer from the √N
+  of the counts (also in the PDF).
+- Device strip: the RC102's "from the device" next to today's dose became a
+  tooltip. In a narrow window it broke the line and made the tile twice as
+  tall as the GMC-800's.
+- RC102 page: the "Device settings" and "Connection" buttons left the main
+  tile. Both are still in Settings.
+- English: texts still showing in Portuguese were translated (the spectrum's
+  "no known peak here" tooltip and about 80 others). The translation check
+  now catches more Portuguese phrases.
+
 ## 2.100.1
 - Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
   para a medição o aparelho escolhido, o modo automático nem o fundo da casa.

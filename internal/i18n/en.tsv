@@ -1520,7 +1520,6 @@ Versões	Versions
 1 medição	1 measurement
 1 detalhe de alerta	1 alert detail
 1 anotação	1 note
-
 +1 minuto de leitura	+1 minute of reading
 +1 evento/alerta	+1 event/alert
 +1 período fora de casa	+1 away-from-home period
@@ -1623,7 +1622,6 @@ provavelmente um pouco radioativo; meça por mais tempo para confirmar (chegou a
 — fundo da casa {0} ± {1}	— home background {0} ± {1}
 : o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	: the object came out below background, so the background probably changed (another spot, rain).
 A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
-
 RC102: desligou	RC102: turned off
 RC102: ligou	RC102: turned on
 RC102: desligou por bateria fraca	RC102: shut down on low battery
@@ -1837,6 +1835,7 @@ Espectro do objeto e do fundo	Spectrum of the object and of the background
 com o objeto ({0})	with the object ({0})
 fundo ({0})	background ({0})
 fundo: espectro acumulado do aparelho ({0}), na escala do tempo do objeto	background: the device's accumulated spectrum ({0}), scaled to the object's time
+fundo: espectros gravados em casa ({0}), na escala do tempo do objeto	background: spectra recorded at home ({0}), scaled to the object's time
 contagens/s em escala log	counts/s on a log scale
 Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.	No background spectrum: the object's peaks couldn't be told apart from the surroundings'.
 Nenhuma linha gama conhecida subiu acima do fundo (3σ).	No known gamma line rose above the background (3σ).
@@ -1854,6 +1853,7 @@ conecte o RC102 para medir	connect the RC102 to measure
 ESPECTRO (RADIACODE)	SPECTRUM (RADIACODE)
 contagens/s (faixas de meio pico)	counts/s (half-peak-wide bins)
 fundo: espectro acumulado do aparelho ({0})	background: the device's accumulated spectrum ({0})
+fundo: espectros gravados em casa ({0})	background: spectra recorded at home ({0})
 GEOMETRIA, APARELHO E MÉTODO	GEOMETRY, DEVICE AND METHOD
 o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)	the µSv/h is what the RC102 itself calculates (factory calibration, energy-based)
 soma das amostras do RC102 (a cada 0,5 s), em cada fase	sum of the RC102's samples (every 0.5 s), in each phase
@@ -2028,6 +2028,7 @@ Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele
 canal {0} · {1} contagens	channel {0} · {1} counts
 {0} keV · canal {1} · {2} contagens	{0} keV · channel {1} · {2} counts
 do aparelho	from the device
+dose de hoje: a que o próprio aparelho conta	today's dose: the one the device itself counts
 Energia	Energy
 3 h	3 h
 12 h	12 h
@@ -6148,4 +6149,106 @@ original	original
 Busca: o espectro do RC102 levou {0} s para chegar; colunas a cada {1} s	Search: the RC102 spectrum took {0} s to arrive; columns every {1} s
 juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
-Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.
+Medição no {0} terminada.	Measurement on the {0} finished.
+2 h antes	2 h before
+4 h depois	4 h after
+Agora:	Now:
+Casa pelo {0}	Home via the {0}
+Esconder	Hide
+GMC desde {0} {1}	GMC since {0} {1}
+Medir objeto ·	Measure object ·
+Nenhum byte mudou desde a foto.	Not a single byte changed since the snapshot.
+Nenhuma cidade encontrada.	No city found.
+Objeto desconhecido?	Unknown object?
+Pronto agora.	Done now.
+RC102 agora: {0}	RC102 now: {0}
+RC102 desde {0} {1}	RC102 since {0} {1}
+RC102 · somada pelo aparelho	RC102 · summed by the device
+Sua dose pelo {0}	Your dose via the {0}
+antes	before
+aparelho desconhecido {0}	unknown device {0}
+carregando	loading
+desde o primeiro dado	since the first data point
+desde {0} ({1}) · pico {2}{3}	since {0} ({1}) · peak {2}{3}
+espectro	spectrum
+espectro zerado	spectrum reset
+espectro: formato {0} desconhecido	spectrum: unknown format {0}
+falhou	failed
+log aberto pela tela	log opened from the screen
+medido desde o primeiro dado ({0})	measured since the first data point ({0})
+nenhum pico conhecido aqui	no known peak here
+nenhuma release publicada	no release published
+nuvem	cloud
+nuvem desligada neste PC	cloud turned off on this PC
+nuvem: cofre	cloud: vault
+nuvem: revogar	cloud: revoke
+nuvem: subiu {0} arquivo(s), juntou {1}	cloud: uploaded {0} file(s), merged {1}
+nuvem: {0}	cloud: {0}
+o aparelho recusou zerar a dose	the device refused to reset the dose
+objeto	object
+pelo GMC-800	via the GMC-800
+pelo RC102	via the RC102
+pico —	peak —
+pronto	done
+vezes	times
+{0} acumulados · {1} contagens · {2} cps ±{3}% · ≈ {4} µSv/h agora	{0} accumulated · {1} counts · {2} cps ±{3}% · ≈ {4} µSv/h now
+{0} agora{1}{2}	{0} now{1}{2}
+{0} antes	{0} before
+{0} depois	{0} after
+{0} pelo {1}	{0} via the {1}
+{0} µSv/h pelo GMC-800	{0} µSv/h via the GMC-800
+{0} µSv/h pelo RC102	{0} µSv/h via the RC102
+{0} · pico {1}{2}	{0} · peak {1}{2}
+· ativo agora	· active now
+· desde o primeiro dado ({0} {1})	· since the first data point ({0} {1})
+· maior pico	· highest peak
+· pico	· peak
+· {0} desde {1}	· {0} since {1}
+−{0} h … agora	−{0} h … now
+). Pode ser outro firmware.	). It may be a different firmware.
+Alto	High
+alto	high
+Areia seca, pote cheio. Solo comum tem ~45 Bq/kg.	Dry sand, full jar. Ordinary soil has ~45 Bq/kg.
+Casa	Home
+Contagens	Counts
+Escolha a cidade primeiro.	Pick the city first.
+Iguais a casa:	Same as home:
+Limite	Limit
+Mostra a janela	Shows the window
+Onde estava o {0}	Where the {0} was
+aviso	notice
+avisos	notices
+escala	scale
+nova	new
+novo	new
+outro	other
+outro PC	other PC
+pequeno	small
+registros	records
+sim	yes
+taxa	rate
+tem algo	something there
+valor	value
+O {0} ficou parado ({1}%, {2} σ).	The {0} stayed flat ({1}%, {2} σ).
+seu normal: {0} a {1} µSv/h	your normal: {0} to {1} µSv/h
+~1 vez a cada {0} anos	~once every {0} years
+~1 vez a cada {0} meses	~once every {0} months
+· limite {0}	· limit {0}
+{0} O tubo conta igual.	{0} The tube counts the same.
+v{0}: troca quando o CPM normalizar	v{0}: switches when the CPM normalizes
+A contagem não mudou, mas a dose subiu	The count didn't change, but the dose went up
+{0}: a contagem não mudou, mas a dose subiu	{0}: the count didn't change, but the dose went up
+a contagem não mudou, mas a dose subiu	the count didn't change, but the dose went up
+O RC102 contou o mesmo que no fundo ({0}σ), mas a taxa de dose subiu {1} ({2}σ).	The RC102 counted the same as the background ({0}σ), but the dose rate went up {1} ({2}σ).
+Isso acontece com gama de energia alta: cada contagem vale mais dose.	This happens with high-energy gamma: each count is worth more dose.
+Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o {0} ({1} keV) que apareceu no espectro.	This happens with high-energy gamma: each count is worth more dose. Here it matches the {0} ({1} keV) that showed up in the spectrum.
+· {0}σ na dose	· {0}σ in the dose
+A contagem ficou igual ({0} σ), mas a taxa de dose subiu {1} σ: gama de energia alta, em que cada contagem vale mais dose.	The count stayed the same ({0} σ), but the dose rate went up {1} σ: high-energy gamma, where each count is worth more dose.
+{0}σ na dose · {1}σ na contagem	{0}σ in the dose · {1}σ in the count
+Perigo do outro aparelho durante a medição	Danger on the other device during the measurement
+toca	sounds
+fica calado	stays silent
+Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.	Attention and alarm stay silent either way, and the device on the object sounds nothing. This applies to the device that is not on the object.
+Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. {0}	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. {0}
+O Perigo só fica calado no aparelho que está no objeto.	Danger is only muted on the device that is on the object.
+O Perigo também fica calado nos dois.	Danger is muted on both too.

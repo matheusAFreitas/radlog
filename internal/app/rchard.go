@@ -88,7 +88,20 @@ func (a *App) rcSpecSummary(name string) *rcSpecSum {
 	s := &rcSpecSum{size: fi.Size()}
 	var calA [3]float64
 	var en []float64
-	for _, r := range a.rcSpecRead(name) {
+	rows := a.rcSpecRead(name)
+	// 2.100.2: o fundo (sum/secs) deixa de fora as linhas bem acima da
+	// mediana do dia (medições de pedras, fonte perto): só o fundo da casa
+	rates := make([]float64, 0, len(rows))
+	for _, r := range rows {
+		var t float64
+		for _, v := range r.C {
+			t += float64(v)
+		}
+		rates = append(rates, t/r.S)
+	}
+	med := stats.Median(rates)
+	for k, r := range rows {
+		bgOK := rates[k]*r.S <= med*r.S+5*math.Sqrt(math.Max(med*r.S, 1))
 		if en == nil || r.A != calA || len(en) != len(r.C) {
 			calA, en = r.A, make([]float64, len(r.C))
 			for i := range en {
@@ -103,7 +116,9 @@ func (a *App) rcSpecSummary(name string) *rcSpecSum {
 		for i, v := range r.C {
 			f := float64(v)
 			h.Tot += f
-			s.sum[i] += f
+			if bgOK {
+				s.sum[i] += f
+			}
 			if en[i] >= rcHardMid {
 				h.Hi += f
 			} else if en[i] >= rcHardLo {
@@ -111,7 +126,9 @@ func (a *App) rcSpecSummary(name string) *rcSpecSum {
 			}
 		}
 		s.rows = append(s.rows, h)
-		s.secs += r.S
+		if bgOK {
+			s.secs += r.S
+		}
 		s.a = r.A
 	}
 	c.mu.Lock()

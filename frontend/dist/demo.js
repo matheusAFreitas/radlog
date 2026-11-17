@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.100.1";
+const DEMO_VERSION = "2.100.2";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -481,7 +481,7 @@ function makeDemoApi(opts) {
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   // na demonstração o RC102 existe (menos no cenário "Aparelho desconecta")
   const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
-  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.1: quando a aba Busca abriu (demo)
+  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.2: quando a aba Busca abriu (demo)
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
     run: null,
@@ -857,7 +857,7 @@ const demoRc = () => {
       }
       return out;
     },
-    // espectrograma da busca de mentira (2.100.1): colunas de 2 s com o fundo
+    // espectrograma da busca de mentira (2.100.2): colunas de 2 s com o fundo
     // e, quando passa perto da amostra (mesmo ciclo de 40 s), as linhas do urânio
     GetRcSearchSg: async (since, win) => {
       const live = demoRcFake(), now = Date.now(), NB = 256, EM = 1500, out = { on: live, eMax: EM, bins: NB, every: 2, rows: [], peaks: [] };

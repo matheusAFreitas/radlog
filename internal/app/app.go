@@ -1394,9 +1394,10 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 	if quiet {
 		acpm = 0
 	}
-	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	// "Estou testando um objeto" (2.89.0) ou medindo com o outro aparelho
+	// (2.100.2): só atenção e alarme ficam calados
 	lcpm := acpm
-	if a.objTestQuietLocked("gmc", now) {
+	if a.objTestQuietLocked("gmc", now) || a.measureActiveLocked(now) {
 		lcpm = 0
 	}
 	alarm := set.AlarmEnabled && int(lcpm) >= set.AlarmCPM

@@ -249,10 +249,10 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	// conclusão em destaque
 	vc := cMuted
-	switch r.Level {
-	case "sim":
+	switch {
+	case r.Level == "sim":
 		vc = cWarn
-	case "talvez":
+	case r.Level == "talvez" || r.DoseUp:
 		vc = cAtt
 	}
 	verdict := r.Verdict
@@ -261,7 +261,12 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	d.Rect(pm, p.y, 4, 30, &vc, nil)
 	d.Text(pm+12, p.y+12, pdf.SansBold, 11, cInk, pdf.Fit(verdict, pdf.SansBold, 11, pdf.W-2*pm-12))
-	d.Text(pm+12, p.y+26, pdf.Sans, 8.5, cMuted, fmt.Sprintf("Diferença de %s σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.", fmtBR(r.Sigma, 1)))
+	sub := fmt.Sprintf("Diferença de %s σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.", fmtBR(r.Sigma, 1))
+	if r.DoseUp {
+		// 2.100.2: a dose subiu sem a contagem subir (gama de energia alta)
+		sub = fmt.Sprintf("A contagem ficou igual (%s σ), mas a taxa de dose subiu %s σ: gama de energia alta, em que cada contagem vale mais dose.", fmtBR(r.Sigma, 1), fmtBR(r.DoseSigma, 0))
+	}
+	d.Text(pm+12, p.y+26, pdf.Sans, 8.5, cMuted, pdf.Fit(sub, pdf.Sans, 8.5, pdf.W-2*pm-12))
 	p.y += 42
 
 	// cartões
@@ -282,14 +287,25 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	bk, ok := kOf(m.Bg), kOf(m.Obj)
 	uv := func(v, k float64) string { return usvTxt(v*k) + " µSv/h" }
+	// 2.100.2: no RC102 o ± do µSv/h vem do espalhamento da dose
+	eph := func(ph MeasurePhase, k float64) string {
+		if ph.ErrUSv > 0 {
+			return usvTxt(ph.ErrUSv) + " µSv/h"
+		}
+		return uv(ph.ErrCPM, k)
+	}
+	enet := uv(r.NetErr, ok)
+	if r.NetErrUSv > 0 {
+		enet = usvTxt(r.NetErrUSv) + " µSv/h"
+	}
 	nsign := "+"
 	if r.NetUSv < 0 {
 		nsign = "−"
 	}
 	tiles := [][4]string{
-		{bgLabel, uv(m.Bg.CPM, bk), "± " + uv(m.Bg.ErrCPM, bk) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
-		{"Com o objeto", uv(m.Obj.CPM, ok), "± " + uv(m.Obj.ErrCPM, ok) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
-		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + uv(r.NetErr, ok) + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
+		{bgLabel, uv(m.Bg.CPM, bk), "± " + eph(m.Bg, bk) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
+		{"Com o objeto", uv(m.Obj.CPM, ok), "± " + eph(m.Obj, ok) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
+		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + enet + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
 	}
 	for i, tl := range tiles {
@@ -733,7 +749,9 @@ func (p *reportPDF) measSpectrum(m SavedMeasure) {
 	}
 	leg(cAccent, fmt.Sprintf("com o objeto (%s)", specDur(s.ObjSec)))
 	if bins[0].HasBg {
-		if s.BgSrc == "acumulado" {
+		if s.BgSrc == "casa" {
+			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectros gravados em casa (%s)", fmtDurSec(s.BgSec)))
+		} else if s.BgSrc == "acumulado" {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectro acumulado do aparelho (%s)", fmtDurSec(s.BgSec)))
 		} else {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo (%s)", specDur(s.BgSec)))

@@ -212,7 +212,6 @@ function wireRcCfg() {
     if ($(id).checked && !inp.value) inp.value = n === "1" ? 1000 : 5000;
     rcDoseOffSync();
   }));
-  $("btnRcAdjust").addEventListener("click", () => openSettings("rcCfg"));
   $("rcBackups").addEventListener("click", () => call(api.OpenRcConfigBackups));
 
   $("rcCfgSave").addEventListener("click", async () => {

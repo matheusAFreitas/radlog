@@ -486,7 +486,9 @@ function renderRTile(st, o) {
   miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
   const dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
-  tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "", rcc ? { t: st.lastT || 0 } : null);
+  // 2.100.2: "do aparelho" só na dica (na faixa estreita quebrava a linha)
+  tileFoot($("rTileFoot"), u, v, dose, "", rcc ? { t: st.lastT || 0 } : null);
+  $("rTileFoot").title = st.todayDevOK ? "dose de hoje: a que o próprio aparelho conta" : "";
 }
 
 // alertas ativos: a marca no menu (#navAlerts) e no topo compacto (#miniAlert);
@@ -4051,7 +4053,7 @@ function wireRc() {
     if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
   });
   for (const id of ["btnRcRetry", "btnRcRetrySet"]) $(id).addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
-  for (const id of ["btnRcSettings", "btnRcConn"]) $(id).addEventListener("click", () => openSettings("chkRcOn"));
+  $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
   $("rc24Range").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-h]");
     if (!b) return;

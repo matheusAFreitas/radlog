@@ -1099,16 +1099,19 @@ func (a *App) rcHomeBackground() HomeBg {
 	hb := homeBgFrom(mins, sp[0].T, sp[len(sp)-1].T.Add(time.Minute))
 	// µSv/h: média dos mesmos minutos que ficaram (sem os picos)
 	lim := stats.Median(mins) + 5*math.Sqrt(math.Max(stats.Median(mins), 1))
-	var su float64
+	var su, sq float64
 	k := 0
 	for _, p := range sp {
 		if p.CPM <= lim {
-			su += byT[p.T.Unix()].USvh
+			u := byT[p.T.Unix()].USvh
+			su += u
+			sq += u * u
 			k++
 		}
 	}
 	if k > 0 {
 		hb.USv = su / float64(k)
+		hb.ErrUSv = meanErr(su, sq, k)
 	}
 	hb.Device = "radiacode"
 	return hb

@@ -55,6 +55,8 @@ type MeasureOpts struct {
 	// 2.81: com o fundo da casa, para em "fundo-pronto" (a pessoa ainda vai
 	// procurar o ponto) em vez de já começar pelo objeto
 	WaitObj bool `json:"waitObj"`
+	// 2.100.2 (pedido do ACE): o Perigo do outro aparelho também cala
+	QuietDanger bool `json:"quietDanger"`
 }
 
 // HomeBg é o fundo da casa da última hora.
@@ -70,6 +72,7 @@ type HomeBg struct {
 	Demo    bool    `json:"demo"`
 	// µSv/h do fundo (Radiacode: média do aparelho; GMC: pela calibração)
 	USv    float64 `json:"usv"`
+	ErrUSv float64 `json:"errUSv,omitempty"` // RC102: incerteza do µSv/h (espalhamento dos minutos)
 	Device string  `json:"device"`
 }
 
@@ -224,7 +227,12 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		}
 		spec0 = a.rcSpectrumNow(false)
 		if o.HomeBg || (side != nil && side.Role == "voce") {
-			if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
+			// 2.100.2: fundo = espectros gravados em casa nos últimos dias, sem
+			// os minutos de pedra; o acumulado do aparelho junta tudo o que ele
+			// já mediu (pedras inclusive) e só fica de reserva
+			if bg, sec := a.rcHomeBg(time.Now().UnixMilli()); len(bg) > 0 && sec >= 3600 && spec0 != nil && len(spec0.Counts) == len(bg) {
+				specBg = &MeasureSpectrum{A: [3]float64{spec0.A0, spec0.A1, spec0.A2}, Bg: bg, BgSec: sec, BgSrc: "casa"}
+			} else if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
 				specBg = &MeasureSpectrum{A: [3]float64{acc.A0, acc.A1, acc.A2}, Bg: acc.Counts, BgSec: acc.Duration.Seconds(), BgSrc: "acumulado"}
 			}
 		}
@@ -244,10 +252,10 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	}
 	m := MeasureState{Name: strings.TrimSpace(o.Name), Distance: strings.TrimSpace(o.Distance),
 		DistCM: o.DistCM, Size: o.Size, Test: alaraTest(o.Test), Material: strings.TrimSpace(o.Material), RelErr: math.Min(math.Max(o.RelErr, 0), 0.5),
-		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
+		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side, QuietDanger: o.QuietDanger}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
-			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}
+			USv: hb.USv, ErrUSv: hb.ErrUSv, Start: hb.From, End: hb.To, Source: "casa"}
 		m.Bg = &bg
 		m.Phase = "objeto"
 		m.Seconds = o.Seconds
