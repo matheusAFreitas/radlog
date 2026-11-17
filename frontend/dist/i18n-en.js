@@ -4685,7 +4685,20 @@ const I18N_EN = {
 "Clique para mostrar ou esconder no gráfico": "Click to show or hide on the chart",
 "fixo: 10 min": "fixed: 10 min",
 "fixo: 30 min": "fixed: 30 min",
-"fixo: 1 h": "fixed: 1 h"
+"fixo: 1 h": "fixed: 1 h",
+"Quanto tempo medir": "How long to measure",
+"Automático": "Automatic",
+"para quando tiver certeza": "stops once it is sure",
+"Tempo fixo": "Fixed time",
+"mede o tempo todo": "measures the whole time",
+"Limite do automático": "Automatic limit",
+"até 10 min": "up to 10 min",
+"até 30 min": "up to 30 min",
+"até 1 h": "up to 1 h",
+"Tempo de cada fase": "Time for each phase",
+"Ajustes da medição: quando conta como “tem algo”": "Measurement settings: when it counts as “something there”",
+"Cada fase para sozinha assim que der para saber se tem algo ou não. Objeto forte pode terminar em 20 s; fonte fraca vai até o limite.": "Each phase stops on its own as soon as it can tell whether something is there. A strong object can finish in 20 s; a weak source goes up to the limit.",
+"Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.": "Each phase (background and object) measures for the chosen time, even if the answer is clear sooner. Good for weak sources and for comparing measurements."
 },
 "patterns": [
 [
@@ -7858,6 +7871,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas curtos, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: ${2} short alerts, no 10 min stretch above safe.",
+[
+" alertas curtos, nenhum trecho de 10 min acima do seguro."
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RC102 readings at home in the last hour (needs ${2})",
@@ -7981,6 +8002,14 @@ const I18N_EN = {
 " CPM · RC102 média ",
 " · máx ",
 " CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta curto, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: 1 short alert, no 10 min stretch above safe.",
+[
+": 1 alerta curto, nenhum trecho de 10 min acima do seguro."
 ]
 ],
 [
@@ -9508,6 +9537,40 @@ const I18N_EN = {
 " · quartis ",
 " · média ",
 " min em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta, 1 dia com trecho acima do seguro\\.$",
+"${1}: 1 alert, 1 day with a stretch above safe.",
+[
+": 1 alerta, 1 dia com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: 1 alert, ${2} days with a stretch above safe.",
+[
+": 1 alerta, ",
+" dias com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas, 1 dia com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, 1 day with a stretch above safe.",
+[
+" alertas, 1 dia com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, ${3} days with a stretch above safe.",
+[
+" alertas, ",
+" dias com trecho acima do seguro."
 ]
 ],
 [
@@ -18823,6 +18886,22 @@ const I18N_EN = {
 "${1} · background of ${2}",
 [
 " · fundo de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta\\.$",
+"${1}: 1 alert.",
+[
+": 1 alerta."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas\\.$",
+"${1}: ${2} alerts.",
+[
+" alertas."
 ]
 ],
 [

@@ -1,5 +1,32 @@
 # Versões
 
+## 2.99.0
+- Medir objeto: antes de começar, a escolha fica à vista em "Quanto tempo
+  medir": Automático (para quando tiver certeza, até 10 min, 30 min ou 1 h)
+  ou Tempo fixo (de 30 s a 1 h, mede o tempo todo). Cada modo lembra o último
+  tempo usado. Os Ajustes ficam só com quando conta como "tem algo".
+- No celular, a faixa dos aparelhos presa no topo fica com uma linha por
+  aparelho (nome, número e nível), ocupando metade da altura.
+- Dose acumulada: o nome do aparelho é o botão para o teclado e o leitor de
+  tela; clicar no único aparelho aceso não troca mais para o outro.
+- Em inglês, a frase de alertas da Fita do dia e da semana sai traduzida
+  inteira.
+
+**English**
+
+- Measure object: before starting, the choice is in plain sight under "How
+  long to measure": Automatic (stops once it is sure, up to 10 min, 30 min or
+  1 h) or Fixed time (30 s to 1 h, measures the whole time). Each mode
+  remembers the last time used. Settings keep only when it counts as
+  "something there".
+- On the phone, the device strip pinned to the top shows one line per device
+  (name, number and level), at half the height.
+- Accumulated dose: the device name is the button for the keyboard and screen
+  readers; clicking the only device that is on no longer switches to the
+  other one.
+- In English, the alerts sentence of the day and week tapes is fully
+  translated.
+
 ## 2.98.1
 - Medir objeto: o tempo fixo vai até 1 h (novas opções de 10 min, 30 min e
   1 h). Serve para fontes fracas, como sal light, que pedem meia hora ou

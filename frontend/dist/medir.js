@@ -332,6 +332,18 @@ function measureOpts() {
   };
 }
 
+function mTimeSync() {
+  const v = $("mSecs").value, auto = v.startsWith("auto");
+  mSetOpt(auto ? "mSecsAuto" : "mSecsFix", v);
+  $("mTimeModeSeg").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.tmode === "auto") === auto)));
+  $("mTimeAutoSeg").hidden = !auto;
+  $("mTimeFixSeg").hidden = auto;
+  $(auto ? "mTimeAutoSeg" : "mTimeFixSeg").querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.secs === v)));
+  $("mTimeHint").textContent = auto
+    ? "Cada fase para sozinha assim que der para saber se tem algo ou não. Objeto forte pode terminar em 20 s; fonte fraca vai até o limite."
+    : "Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.";
+}
+
 // aparelho no objeto e modo (os dois perto, ou um com você)
 function measureDevOpts() {
   const v = mOpt("mDev", "", (x) => M_DEVS.includes(x)) || (rcOnline() ? "radiacode" : "gmc");
@@ -1133,7 +1145,22 @@ function wireMeasure() {
   // escolhas lembradas
   const sv = localGet("m-mSecs");
   if (sv && [...$("mSecs").options].some((o) => o.value === sv)) $("mSecs").value = sv;
-  $("mSecs").addEventListener("change", () => { mSetOpt("mSecs", $("mSecs").value); renderMeasure(state.measureSt || {}); });
+  $("mSecs").addEventListener("change", () => { mSetOpt("mSecs", $("mSecs").value); mTimeSync(); renderMeasure(state.measureSt || {}); });
+  // 2.99.0: automático ou tempo fixo, escolhido à vista antes de começar;
+  // cada modo lembra o último tempo usado
+  const setSecs = (v) => { $("mSecs").value = v; $("mSecs").dispatchEvent(new Event("change")); };
+  $("mTimeModeSeg").addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-tmode]");
+    if (!b) return;
+    const auto = b.dataset.tmode === "auto";
+    if (auto === $("mSecs").value.startsWith("auto")) return;
+    setSecs(mOpt(auto ? "mSecsAuto" : "mSecsFix", auto ? "auto1800" : "300", (x) => [...$("mSecs").options].some((o) => o.value === x)));
+  });
+  ["mTimeAutoSeg", "mTimeFixSeg"].forEach((id) => $(id).addEventListener("click", (e) => {
+    const b = e.target.closest("button[data-secs]");
+    if (b) setSecs(b.dataset.secs);
+  }));
+  mTimeSync();
   const dist = localGet("m-distCm");
   if (dist != null && dist !== "") $("mDistCm").value = dist;
   const rr = () => renderMeasure(state.measureSt || {});
