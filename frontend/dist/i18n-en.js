@@ -7871,6 +7871,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas curtos, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: ${2} short alerts, no 10 min stretch above safe.",
+[
+" alertas curtos, nenhum trecho de 10 min acima do seguro."
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RC102 readings at home in the last hour (needs ${2})",
@@ -7994,6 +8002,14 @@ const I18N_EN = {
 " CPM · RC102 média ",
 " · máx ",
 " CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta curto, nenhum trecho de 10 min acima do seguro\\.$",
+"${1}: 1 short alert, no 10 min stretch above safe.",
+[
+": 1 alerta curto, nenhum trecho de 10 min acima do seguro."
 ]
 ],
 [
@@ -9521,6 +9537,40 @@ const I18N_EN = {
 " · quartis ",
 " · média ",
 " min em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta, 1 dia com trecho acima do seguro\\.$",
+"${1}: 1 alert, 1 day with a stretch above safe.",
+[
+": 1 alerta, 1 dia com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: 1 alert, ${2} days with a stretch above safe.",
+[
+": 1 alerta, ",
+" dias com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas, 1 dia com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, 1 day with a stretch above safe.",
+[
+" alertas, 1 dia com trecho acima do seguro."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas, ((?:(?! · ).)+?) dias com trecho acima do seguro\\.$",
+"${1}: ${2} alerts, ${3} days with a stretch above safe.",
+[
+" alertas, ",
+" dias com trecho acima do seguro."
 ]
 ],
 [
@@ -18836,6 +18886,22 @@ const I18N_EN = {
 "${1} · background of ${2}",
 [
 " · fundo de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): 1 alerta\\.$",
+"${1}: 1 alert.",
+[
+": 1 alerta."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?): ((?:(?! · ).)+?) alertas\\.$",
+"${1}: ${2} alerts.",
+[
+" alertas."
 ]
 ],
 [

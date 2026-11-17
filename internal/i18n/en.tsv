@@ -6134,3 +6134,11 @@ Tempo de cada fase	Time for each phase
 Ajustes da medição: quando conta como “tem algo”	Measurement settings: when it counts as “something there”
 Cada fase para sozinha assim que der para saber se tem algo ou não. Objeto forte pode terminar em 20 s; fonte fraca vai até o limite.	Each phase stops on its own as soon as it can tell whether something is there. A strong object can finish in 20 s; a weak source goes up to the limit.
 Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber antes. Bom para fontes fracas e para comparar medições.	Each phase (background and object) measures for the chosen time, even if the answer is clear sooner. Good for weak sources and for comparing measurements.
+{0}: 1 alerta.	{0}: 1 alert.
+{0}: {1} alertas.	{0}: {1} alerts.
+{0}: 1 alerta curto, nenhum trecho de 10 min acima do seguro.	{0}: 1 short alert, no 10 min stretch above safe.
+{0}: {1} alertas curtos, nenhum trecho de 10 min acima do seguro.	{0}: {1} short alerts, no 10 min stretch above safe.
+{0}: 1 alerta, 1 dia com trecho acima do seguro.	{0}: 1 alert, 1 day with a stretch above safe.
+{0}: 1 alerta, {1} dias com trecho acima do seguro.	{0}: 1 alert, {1} days with a stretch above safe.
+{0}: {1} alertas, 1 dia com trecho acima do seguro.	{0}: {1} alerts, 1 day with a stretch above safe.
+{0}: {1} alertas, {2} dias com trecho acima do seguro.	{0}: {1} alerts, {2} days with a stretch above safe.
