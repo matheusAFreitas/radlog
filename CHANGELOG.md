@@ -1,5 +1,20 @@
 # Versões
 
+## 2.97.1
+- Faixa dos aparelhos (fora do Agora): abrir um quadro não deixa mais um
+  buraco embaixo do outro. O aberto ganha a linha inteira, e o fechado fica
+  numa linha fina embaixo.
+- A forma do nível voltou junto da palavra: no número grande da página de
+  cada aparelho e na faixa fechada ("● Seguro").
+
+**English**
+
+- Device strip (outside Now): opening one card no longer leaves a hole under
+  the other. The open one takes the whole row and the closed one sits in a
+  thin row below.
+- The level shape is back next to the word: on each device page's big
+  number and on the closed strip ("● Safe").
+
 ## 2.97.0
 - Formato da data à escolha, em Configurações › Janela e tela › Datas:
   16/11/2026 (dia, mês e ano) ou 2026-11-16 (ano, mês e dia). Vale para a
