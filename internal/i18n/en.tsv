@@ -5967,3 +5967,26 @@ o dia mais baixo é {0}, {1}% abaixo da média	the lowest day is {0}, {1}% below
 sem diferença de verdade (tudo abaixo de 1%)	no real difference (all below 1%)
 subiu {0} em {1} semanas	rose {0} in {1} weeks
 Últimas semanas	Last weeks
+Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados "achado depois" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.	All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged "found later" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.
+Níveis e alarmes	Levels and alarms
+Todos os alertas	All alerts
+alarme 1 (atenção) do aparelho: {0}	device alarm 1 (attention): {0}
+alarme 2 (alarme) do aparelho: {0}	device alarm 2 (alarm): {0}
+dentro do teto	within the ceiling
+fundo {0} + acima do fundo {1} µSv	background {0} + above background {1} µSv
+mostrar no gráfico	show on chart
+passou do teto	over the ceiling
+pico acima do fundo de {0}	peak above the background of {0}
+pico bem acima do fundo de {0}	peak well above the background of {0}
+pico dentro do vai e vem do fundo de {0}	peak within the usual ups and downs of the background of {0}
+{0} · {1} · durante a atenção	{0} · {1} · during attention
+{0} · {1} · durante o alarme	{0} · {1} · during the alarm
+{0} · {1} · durante o perigo	{0} · {1} · during danger
+achado depois	found later
+Achados depois	Found later
+(achado depois)	(found later)
+a conta	the math
+Alarmes	Alarms
+Fora dos alertas, a casa ficou igual ao normal	Outside the alerts, home was the same as normal
+Fora dos alertas, a casa ficou {0}% acima do normal	Outside the alerts, home was {0}% above normal
+Fora dos alertas, a casa ficou {0}% abaixo do normal	Outside the alerts, home was {0}% below normal

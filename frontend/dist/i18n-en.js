@@ -4549,7 +4549,20 @@ const I18N_EN = {
 "Outra conta: a reta dos últimos dias": "Another calculation: the line over the last days",
 "ainda é 1 mês de dado; fica mais útil depois de um ano": "only 1 month of data so far; more useful after a year",
 "sem diferença de verdade (tudo abaixo de 1%)": "no real difference (all below 1%)",
-"Últimas semanas": "Last weeks"
+"Últimas semanas": "Last weeks",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RC102, em µSv/h (no RC102, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"achado depois\" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged \"found later\" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Aqui ficam todos os alertas de radiação, com data e hora, do GMC-800 e do RadiaCode, em µSv/h (no RadiaCode, junto com os alarmes 1 e 2 do próprio aparelho). Os marcados \"achado depois\" vieram do histórico baixado do GMC-800: aconteceram enquanto o app estava fechado ou desconectado.": "All radiation alerts are here, with date and time, from the GMC-800 and the RC102, in µSv/h (on the RC102, together with the device's own alarms 1 and 2). The ones tagged \"found later\" came from the history downloaded from the GMC-800: they happened while the app was closed or disconnected.",
+"Níveis e alarmes": "Levels and alarms",
+"Todos os alertas": "All alerts",
+"dentro do teto": "within the ceiling",
+"mostrar no gráfico": "show on chart",
+"passou do teto": "over the ceiling",
+"achado depois": "found later",
+"Achados depois": "Found later",
+"(achado depois)": "(found later)",
+"a conta": "the math",
+"Alarmes": "Alarms",
+"Fora dos alertas, a casa ficou igual ao normal": "Outside the alerts, home was the same as normal"
 },
 "patterns": [
 [
@@ -8997,6 +9010,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Fora dos alertas, a casa ficou ",
+"^Fora dos alertas, a casa ficou ((?:(?! · ).)+?)% abaixo do normal$",
+"Outside the alerts, home was ${1}% below normal",
+[
+"Fora dos alertas, a casa ficou ",
+"% abaixo do normal"
+]
+],
+[
 "Contador voltou a contar depois de ",
 "^Contador voltou a contar depois de ((?:(?! · ).)+?) min em 0 CPM$",
 "Counter counting again after ${1} min at 0 CPM",
@@ -9116,6 +9138,15 @@ const I18N_EN = {
 [
 "Abaixo do normal (seu normal: ",
 ") — sem problema"
+]
+],
+[
+"Fora dos alertas, a casa ficou ",
+"^Fora dos alertas, a casa ficou ((?:(?! · ).)+?)% acima do normal$",
+"Outside the alerts, home was ${1}% above normal",
+[
+"Fora dos alertas, a casa ficou ",
+"% acima do normal"
 ]
 ],
 [
@@ -10798,6 +10829,14 @@ const I18N_EN = {
 ]
 ],
 [
+"pico dentro do vai e vem do fundo de ",
+"^pico dentro do vai e vem do fundo de ((?:(?! · ).)+?)$",
+"peak within the usual ups and downs of the background of ${1}",
+[
+"pico dentro do vai e vem do fundo de "
+]
+],
+[
 "Abaixo do normal (",
 "^Abaixo do normal \\(((?:(?! · ).)+?)\\) — sem problema$",
 "Below normal (${1}) — no problem",
@@ -11399,6 +11438,14 @@ const I18N_EN = {
 ]
 ],
 [
+"alarme 1 (atenção) do aparelho: ",
+"^alarme 1 \\(atenção\\) do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 1 (attention): ${1}",
+[
+"alarme 1 (atenção) do aparelho: "
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -11620,6 +11667,14 @@ const I18N_EN = {
 [
 "estável, ",
 " em relação à referência"
+]
+],
+[
+"alarme 2 (alarme) do aparelho: ",
+"^alarme 2 \\(alarme\\) do aparelho: ((?:(?! · ).)+?)$",
+"device alarm 2 (alarm): ${1}",
+[
+"alarme 2 (alarme) do aparelho: "
 ]
 ],
 [
@@ -12721,6 +12776,16 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo ",
+"^fundo ((?:(?! · ).)+?) \\+ acima do fundo ((?:(?! · ).)+?) µSv$",
+"background ${1} + above background ${2} µSv",
+[
+"fundo ",
+" + acima do fundo ",
+" µSv"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -13199,6 +13264,14 @@ const I18N_EN = {
 [
 "ainda medindo: faltam ",
 " dias"
+]
+],
+[
+"pico bem acima do fundo de ",
+"^pico bem acima do fundo de ((?:(?! · ).)+?)$",
+"peak well above the background of ${1}",
+[
+"pico bem acima do fundo de "
 ]
 ],
 [
@@ -14319,6 +14392,22 @@ const I18N_EN = {
 ]
 ],
 [
+"pico acima do fundo de ",
+"^pico acima do fundo de ((?:(?! · ).)+?)$",
+"peak above the background of ${1}",
+[
+"pico acima do fundo de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante a atenção$",
+"${1} · ${2} · during attention",
+[
+" · durante a atenção"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -14701,6 +14790,22 @@ const I18N_EN = {
 [
 "ano: ",
 " de um teto de "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante o alarme$",
+"${1} · ${2} · during the alarm",
+[
+" · durante o alarme"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) · ((?:(?! · ).)+?) · durante o perigo$",
+"${1} · ${2} · during danger",
+[
+" · durante o perigo"
 ]
 ],
 [

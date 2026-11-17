@@ -114,7 +114,7 @@ function fmtLim(x, u) {
   return fmt(x, x < 1 ? 2 : 1);
 }
 
-// os três níveis do app (Configurações › Alarmes e avisos) em CPM pela
+// os três níveis do app (Configurações › Níveis e alarmes) em CPM pela
 // calibração atual: são eles que disparam os avisos do GMC-800
 function gmcThrCPM() {
   const k = calK();
