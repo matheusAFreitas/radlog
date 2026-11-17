@@ -176,3 +176,24 @@ input.code:focus { outline: none; border-color: var(--accent); }
 .cell { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; display: grid; }
 .cell .k { font-size: 11.5px; color: var(--dim); }
 .cell .v { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+
+/* Espectro */
+.subhead { display: flex; align-items: center; gap: 6px; }
+.subhead button { width: 44px; height: 44px; font-size: 26px; line-height: 1; color: var(--fg); margin-left: -10px; }
+.subhead b { font-size: 16px; }
+.subhead .small { margin-left: auto; }
+.chips { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.chips > button { font-size: 12.5px; border: 1px solid var(--line-2); border-radius: 999px; padding: 0 12px; min-height: 36px; color: var(--muted); }
+.chips > button.on { color: #08130D; background: var(--accent); border-color: transparent; }
+.sp svg { width: 100%; height: auto; display: block; touch-action: none; }
+.sp .gr { stroke: var(--line); stroke-width: 1; fill: none; }
+.sp .ln { stroke: var(--rc); stroke-width: 1.6; fill: none; stroke-linejoin: round; }
+.sp .pk { stroke: var(--info); stroke-width: 1; stroke-dasharray: 3 3; opacity: .7; }
+.sp .cur { stroke: var(--fg); stroke-width: 1; opacity: .6; }
+.sp .ax { fill: var(--dim); font-family: var(--mono); font-size: 10px; }
+.pkrow { display: grid; grid-template-columns: 76px minmax(0,1fr) auto; gap: 8px; align-items: center; min-height: 36px; border-top: 1px solid var(--line); font-size: 13px; }
+.pkrow .m { font-family: var(--mono); }
+.pkrow > span:nth-child(2) { display: grid; }
+.pkrow i { font-style: normal; font-size: 11.5px; color: var(--muted); }
+.chips .seg { background: var(--surface); border: 1px solid var(--line); border-radius: 999px; padding: 2px; }
+.chips .seg button { min-height: 34px; padding: 0 12px; font-size: 12.5px; }

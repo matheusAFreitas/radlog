@@ -21,7 +21,7 @@ window.__rl = {
     if (res && res.e) w.reject(new Error(res.e)); else w.resolve(res ? res.r : null);
   },
   event(name, data) { (evHandlers[name] || []).forEach((f) => { try { f(data); } catch (e) { console.error(e); } }); },
-  back() { if (!$("sheet").hidden) closeSheet(); else if (state.tab !== "agora") go("agora"); else nat("exit"); },
+  back() { if (!$("sheet").hidden) closeSheet(); else if (state.rcView) spClose(); else if (state.tab !== "agora") go("agora"); else nat("exit"); },
 };
 const on = (name, f) => (evHandlers[name] = evHandlers[name] || []).push(f);
 function call(method, ...args) {
@@ -124,6 +124,7 @@ function renderBand() {
 }
 
 function go(tab) {
+  if (state.rcView && tab !== "rc102") { clearInterval(sp.timer); sp.timer = 0; state.rcView = ""; }
   state.tab = tab;
   document.querySelectorAll(".nav button").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
   render();
@@ -149,7 +150,7 @@ function render() {
   if (!state.paired) m.innerHTML = firstRun();
   else if (state.tab === "alertas") m.innerHTML = alertas();
   else if (state.tab === "ajustes") m.innerHTML = ajustes();
-  else if (state.tab === "rc102") m.innerHTML = rc102();
+  else if (state.tab === "rc102") m.innerHTML = state.rcView === "espectro" ? espectro() : rc102();
   else m.innerHTML = agora();
   bind();
 }
@@ -268,9 +269,145 @@ function rc102() {
     + `<div class="row"><span>${esc(rc.todayDevOK ? T("Hoje (somada pelo RC102)") : T("Hoje (pelo que o app gravou)"))}</span><span class="m">${fmt(today, today < 10 ? 2 : 1)} µSv</span></div>`
     + `<div class="row"><span>${esc(T("Acumulado do aparelho"))}</span><span class="m">${acc > 0 ? (acc >= 1000 ? `${fmt(acc / 1000, 3)} mSv` : `${fmt(acc, acc < 10 ? 2 : 1)} µSv`) : "—"}</span></div>`
     + `<span class="small">${esc(T("O acumulado é o total que o RC102 soma sozinho. O app só mostra, não zera nem muda."))}</span></div>`;
-  h += `<div class="list">${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
+  h += `<div class="list">${li(T("Espectro"), T("Picos e isótopos"), "›", "rSpec")}${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
   h += `<div class="card"><div class="row"><span>${esc([rc.model || "Radiacode 102", rc.firmware ? T("firmware {0}", rc.firmware) : ""].filter(Boolean).join(" · "))}</span>${isOff(rc) ? "" : `<button class="btn" id="rRecon" style="width:auto;padding:8px 14px">${esc(T("Reconectar"))}</button>`}</div></div>`;
   return h;
+}
+
+// ---------------- Espectro ----------------
+// O RC102 junta dois espectros: o da tela dele (recomeça quando zera) e o
+// acumulado do aparelho (horas em casa, não dá para zerar). A tela mostra um
+// dos dois, com os picos achados no Go (o mesmo do PC): na tela do RC102, o
+// que subiu acima do acumulado (o fundo da casa); no acumulado, o que sobe
+// acima do contínuo. Pelo Bluetooth cada leitura é pesada: relê a cada 10 s,
+// e o acumulado (fundo) a cada 10 min, só com a tela aberta.
+const sp = { mode: "tela", log: true, cur: null, acc: null, accAt: 0, peaks: [], timer: 0, busy: false, err: "", tip: "" };
+const SP_W = 344, SP_H = 230, SP_L = 30, SP_B = 20, SP_EMAX = 3000;
+
+function spOpen() {
+  state.rcView = "espectro";
+  sp.cur = null; sp.peaks = []; sp.err = ""; sp.tip = "";
+  render(); $("main").scrollTop = 0;
+  spTick(true);
+  clearInterval(sp.timer);
+  sp.timer = setInterval(() => spTick(false), 10000);
+}
+function spClose() {
+  clearInterval(sp.timer); sp.timer = 0;
+  state.rcView = "";
+  render();
+}
+
+async function spTick(force) {
+  if (state.rcView !== "espectro" || sp.busy) return;
+  if (!state.rc || state.rc.state !== "conectado") { sp.err = T("Conecte o RC102 para ver o espectro."); spRedraw(); return; }
+  sp.busy = true;
+  try {
+    if (!sp.acc || force || Date.now() - sp.accAt > (sp.mode === "acc" ? 60e3 : 10 * 60e3)) {
+      const a = await call("GetRcSpectrum", true);
+      if (a && a.counts && a.counts.length) { sp.acc = a; sp.accAt = Date.now(); }
+    }
+    if (sp.mode === "tela") {
+      const s = await call("GetRcSpectrum", false);
+      if (s && s.counts && s.counts.length) sp.cur = s;
+    }
+    const shown = sp.mode === "acc" ? sp.acc : sp.cur;
+    sp.peaks = [];
+    if (shown && shown.seconds > 60) {
+      const zero = new Array(shown.counts.length).fill(0);
+      const bg = sp.mode === "tela" && sp.acc ? sp.acc : null;
+      sp.peaks = (await call("AnalyzeSpectrum", { a: shown.a, obj: shown.counts, objSec: shown.seconds, bg: bg ? bg.counts : zero, bgSec: bg ? bg.seconds : 1 })) || [];
+    }
+    sp.err = "";
+  } catch (e) { sp.err = errText(e); }
+  sp.busy = false;
+  spRedraw();
+}
+
+function spRedraw() { if (state.tab === "rc102" && state.rcView === "espectro" && $("sheet").hidden) { const y = $("main").scrollTop; render(); $("main").scrollTop = y; } }
+
+const spEn = (a, i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) * (i + 0.5);
+const spX = (e) => SP_L + (Math.min(Math.max(e, 0), SP_EMAX) / SP_EMAX) * (SP_W - SP_L - 4);
+
+// média de contagens por canal em cada coluna da tela
+function spCols(s) {
+  const n = SP_W - SP_L - 4, sum = new Float64Array(n), cnt = new Uint16Array(n);
+  for (let i = 0; i < s.counts.length; i++) {
+    const e = spEn(s.a, i);
+    if (e < 0 || e > SP_EMAX) continue;
+    const k = Math.min(n - 1, Math.floor(spX(e) - SP_L));
+    sum[k] += s.counts[i]; cnt[k]++;
+  }
+  return Array.from(sum, (v, k) => (cnt[k] ? v / cnt[k] : null));
+}
+
+function spDur(sec) {
+  const m = Math.floor(sec / 60), h = Math.floor(m / 60);
+  return h ? T("{0} h {1} min", h, m % 60) : m ? T("{0} min", m) : T("{0} s", Math.round(sec));
+}
+
+function spSvg(s) {
+  const cols = spCols(s);
+  const vals = cols.filter((v) => v != null && v > 0);
+  const hi = vals.length ? Math.max(...vals) : 1;
+  const y = (v) => {
+    const f = sp.log ? Math.log10(1 + v) / Math.log10(1 + hi) : v / hi;
+    return SP_H - SP_B - f * (SP_H - SP_B - 8);
+  };
+  let d = "";
+  cols.forEach((v, k) => { if (v != null) d += `${d ? "L" : "M"}${(SP_L + k + 0.5).toFixed(1)} ${y(v).toFixed(1)}`; });
+  const grid = [0.25, 0.5, 0.75, 1].map((f) => `M${SP_L} ${(SP_H - SP_B - f * (SP_H - SP_B - 8)).toFixed(0)}H${SP_W - 4}`).join("");
+  const ticks = [0, 1000, 2000, 3000].map((e) => `<text x="${spX(e)}" y="${SP_H - 5}" text-anchor="${e === 0 ? "start" : e === 3000 ? "end" : "middle"}">${e}</text>`).join("");
+  const marks = sp.peaks.slice(0, 6).map((p) => `<path d="M${spX(p.kev).toFixed(1)} ${SP_H - SP_B}V8" class="pk"/>`).join("");
+  return `<svg id="spSvg" viewBox="0 0 ${SP_W} ${SP_H}" role="img" aria-label="${esc(T("Espectro"))}"><path d="${grid}" class="gr"/>${marks}<path d="${d}" class="ln"/><g class="ax">${ticks}<text x="${SP_W - 4}" y="12" text-anchor="end">${esc(sp.log ? T("contagens (log)") : T("contagens"))}</text></g><line id="spCur" y1="8" y2="${SP_H - SP_B}" class="cur" visibility="hidden"/></svg>`;
+}
+
+function espectro() {
+  const s = sp.mode === "acc" ? sp.acc : sp.cur;
+  const seg = (k, t) => `<button data-spm="${k}" class="${sp.mode === k ? "on" : ""}">${esc(t)}</button>`;
+  let h = `<div class="subhead"><button id="spBack" aria-label="${esc(T("Voltar"))}">‹</button><b>${esc(T("Espectro"))}</b><span class="small">${s ? esc(T("juntando há {0}", spDur(s.seconds))) : ""}</span></div>`;
+  h += `<div class="chips"><span class="seg">${seg("tela", T("Tela do RC102"))}${seg("acc", T("Acumulado"))}</span><button id="spLog" class="${sp.log ? "on" : ""}">${esc(T("Escala log"))}</button></div>`;
+  if (sp.err) h += `<div class="card"><span class="err">${esc(sp.err)}</span></div>`;
+  h += `<div class="card sp">${s ? spSvg(s) : `<span class="small">${esc(T("Lendo o espectro do RC102…"))}</span>`}<div class="small" id="spTip">${sp.tip || esc(T("Toque no gráfico para ver a energia e a contagem."))}</div></div>`;
+  const pk = sp.peaks.slice(0, 8);
+  h += `<div class="card"><span class="k">${esc(sp.mode === "tela" ? T("Picos acima do fundo de casa") : T("Picos achados"))}</span>`
+    + (pk.length ? pk.map((p) => `<div class="pkrow"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(p.nuclide)}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small">${esc(p.sigma >= 5 ? T("forte") : T("provável"))}</span></div>`).join("")
+      : `<span class="small">${esc(s && s.seconds <= 60 ? T("Ainda pouco tempo: os picos aparecem depois de 1 min.") : T("Nenhum pico conhecido acima do esperado."))}</span>`)
+    + `</div>`;
+  h += `<span class="small">${esc(sp.mode === "tela" ? T("A tela do RC102 é o espectro que aparece nele e recomeça quando zera. O acumulado junta tudo desde que o aparelho foi zerado e serve de fundo de casa.") : T("O acumulado é o espectro que o RC102 junta sozinho. O app só mostra, não zera."))}</span>`;
+  if (sp.mode === "tela") h += `<button class="btn danger" id="spReset">${esc(T("Zerar o espectro da tela…"))}</button>`;
+  return h;
+}
+
+function bindSpectrum() {
+  const q = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  q("spBack", spClose);
+  q("spLog", () => { sp.log = !sp.log; spRedraw(); });
+  document.querySelectorAll("[data-spm]").forEach((b) => (b.onclick = () => { if (sp.mode === b.dataset.spm) return; sp.mode = b.dataset.spm; sp.peaks = []; sp.tip = ""; spRedraw(); spTick(false); }));
+  q("spReset", () => {
+    sheet(`<h3>${esc(T("Zerar o espectro da tela do RC102?"))}</h3><p>${esc(T("O aparelho recomeça o espectro que aparece na tela dele. As contagens não se perdem: continuam no acumulado."))}</p><span class="err" id="zErr"></span><button class="btn danger" id="zOk">${esc(T("Zerar"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
+    $("zOk").onclick = async () => {
+      $("zOk").disabled = true;
+      try { await call("ResetRcSpectrum"); closeSheet(); toast(T("Espectro da tela zerado.")); sp.cur = null; sp.peaks = []; sp.tip = ""; spRedraw(); spTick(false); }
+      catch (e) { $("zErr").textContent = errText(e); $("zOk").disabled = false; }
+    };
+  });
+  const svg = $("spSvg");
+  const s = sp.mode === "acc" ? sp.acc : sp.cur;
+  if (!svg || !s) return;
+  const cols = spCols(s);
+  const move = (ev) => {
+    const r = svg.getBoundingClientRect();
+    const x = ((ev.clientX - r.left) / r.width) * SP_W;
+    const k = Math.round(x - SP_L - 0.5);
+    if (k < 0 || k >= cols.length) return;
+    const e = ((x - SP_L) / (SP_W - SP_L - 4)) * SP_EMAX;
+    $("spCur").setAttribute("x1", x); $("spCur").setAttribute("x2", x); $("spCur").setAttribute("visibility", "visible");
+    sp.tip = esc(T("{0} keV · {1} contagens por canal", fmt(e, 0), fmt(cols[k] || 0, cols[k] < 10 ? 1 : 0)));
+    $("spTip").innerHTML = sp.tip;
+  };
+  svg.addEventListener("pointerdown", (e) => { svg.setPointerCapture(e.pointerId); move(e); });
+  svg.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "touch") move(e); });
 }
 
 async function reconnectRc() {
@@ -742,6 +879,8 @@ function bind() {
   q("sSound", soundSheet);
   q("sRcAlarms", rcConfigSheet);
   q("rCfg", rcConfigSheet);
+  q("rSpec", spOpen);
+  if (state.rcView === "espectro") bindSpectrum();
   q("rRecon", reconnectRc);
   q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
@@ -789,7 +928,7 @@ on("radiacode", (rc) => {
     const tip = $("chTip");
     if (tip && $("chCur") && !$("chCur").hidden) { renderConn(); renderBand(); return; }
     render();
-  } else if (state.tab === "rc102" && $("sheet").hidden) render();
+  } else if (state.tab === "rc102" && !state.rcView && $("sheet").hidden) render();
   else { renderConn(); renderBand(); }
   if (was !== rc.state && rc.state === "conectado") loadChart();
 });
@@ -863,6 +1002,18 @@ const mock = (() => {
         case "GetPeriods": return ok(scene === "fora" ? [{ from: now - 2.5 * 3600e3, to: 0 }] : []);
         case "ScanRadiacodeBLE": return new Promise((res) => setTimeout(() => res(scan), 800));
         case "GetRcSettings": case "UndoRcSettings": return ok(rcs2);
+        case "GetRcSpectrum": {
+          // fundo de casa de mentira: contínuo caindo + Pb-214, Bi-214 e K-40
+          const acc = arguments[1][0], sec = acc ? 11520 : 600, a = [-6, 2.4, 0.0004];
+          const counts = Array.from({ length: 1024 }, (_, i) => {
+            const e = a[0] + a[1] * i + a[2] * i * i;
+            const g = (c, w, h) => h * Math.exp(-((e - c) ** 2) / (2 * w * w));
+            const v = (e < 30 ? e / 30 : 1) * 900 * Math.exp(-e / 260) + 6 + g(352, 14, 60) + g(609, 20, 45) + g(1461, 34, 14);
+            return Math.max(0, Math.round((v * sec) / 11520 * (1 + (r() - 0.5) * 0.2)));
+          });
+          return ok({ seconds: sec, a, counts, accum: !!acc });
+        }
+        case "AnalyzeSpectrum": return ok([{ kev: 352, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 9 }, { kev: 609, nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", sigma: 7 }, { kev: 1461, nuclide: "K-40", group: "Potássio-40", sigma: 4 }]);
         case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);
       }
