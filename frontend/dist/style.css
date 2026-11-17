@@ -1600,8 +1600,6 @@ button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--
 .ag-bar .ag-me { background: var(--accent); }
 #agDose.rc .ag-bar .ag-me { background: var(--rc); }
 .ag-bar .ag-cap { width: 2px; top: -4px; bottom: -4px; background: var(--warn); border-radius: 0; }
-.ag-leg { display: flex; flex-wrap: wrap; gap: var(--space-1) var(--space-5); color: var(--dim); }
-.ag-leg b { color: var(--muted); font-weight: 500; margin-right: var(--space-2); }
 .ag-sw { display: inline-block; width: 10px; height: 3px; border-radius: var(--radius-xs); vertical-align: middle; margin-right: var(--space-2); }
 .ag-chart { width: 100%; height: 120px; display: block; }
 .ag-axis { display: flex; justify-content: space-between; color: var(--dim); }
@@ -3065,7 +3063,7 @@ dialog.cloud-dlg { width: min(520px, calc(100vw - 32px)); }
 .rca1-t { flex: 1 1 320px; min-width: 0; }
 .rca1-t small { display: block; margin-top: 2px; color: var(--dim); font-size: var(--fs-caption); }
 .rca1-hint { color: var(--away); }
-.rca1-btns { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); flex: none; }
+.rca1-btns { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); flex: 0 1 auto; min-width: 0; max-width: 100%; }
 .rca1-btns .btn { min-height: 36px; }
 .rca1-dots .dot { border: 0; background: var(--rc); }
 .rca1-dots .dot.gmc { background: var(--accent); }
@@ -3097,3 +3095,26 @@ body.alarming #agSay, body.alarming #rcAwayBox, body.alarming #whSuggest { displ
 .obj-test[hidden] { display: none; }
 .obj-test-row { display: flex; align-items: center; gap: var(--space-3); justify-content: space-between; font-size: var(--fs-label); }
 .qk-sheet .seg { align-self: flex-start; }
+
+/* 2.90.0 (A3): o lugar do aparelho é um selo no quadro; abre o "Onde estão" */
+.inst .wh-selo { min-height: 24px; padding: 0 var(--space-2); font-size: var(--fs-caption); color: var(--muted); background: transparent; border: 1px solid var(--border); border-radius: 999px; cursor: pointer; }
+.inst .wh-selo::after { content: " ▾"; }
+.inst .wh-selo[aria-expanded="true"]::after { content: " ▴"; }
+.inst .wh-selo:hover { color: var(--text); border-color: var(--border-hover); }
+.inst .wh-selo.off { color: var(--away); border-color: color-mix(in srgb, var(--away) 55%, transparent); }
+.instruments[data-strip] .wh-selo { display: none; }
+.rca-x { min-width: 28px; min-height: 28px; padding: 0; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.rca-x:hover { color: var(--text); background: var(--surface-2); }
+
+/* 2.90.0 (A1): Minha dose com um número, uma frase e uma linha */
+.ag-main { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2) var(--space-3); margin-top: var(--space-2); }
+.ag-big { font-size: var(--fs-reading-m); font-weight: 500; line-height: 1; font-variant-numeric: tabular-nums; }
+.ag-u { color: var(--muted); }
+.ag-cmp { color: var(--muted); }
+.ag-cmp.up { color: var(--att); }
+.ag-line { margin: var(--space-2) 0 var(--space-3); color: var(--muted); }
+.ag-line b { color: var(--text); font-weight: 500; }
+.ag-yr { margin: var(--space-1) 0 0; }
+.ag-more { margin-top: var(--space-3); }
+.ag-more .ag-cells { margin-top: var(--space-3); }
+.ft-fail { margin: var(--space-2) 0 0; color: var(--att); }

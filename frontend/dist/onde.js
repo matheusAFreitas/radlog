@@ -182,6 +182,17 @@ function renderWhere() {
       for (const x of [l.home, l.pers]) txt.append(x.t + ". ", x.d + " ", ...(x.sat ? [x.sat + " "] : []));
     }
   }
+  // 2.90.0 (avaliação A3): o lugar de cada aparelho vira um selo no quadro
+  // dele; o cartão "Onde estão" só aparece quando tem algo a dizer (fora do
+  // normal, mudando, ou com aviso) ou quando a pessoa abre pelo selo
+  document.querySelectorAll(".wh-selo[data-wh]").forEach((b) => {
+    const dev = b.dataset.wh, here = c[dev];
+    b.hidden = false;
+    b.textContent = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" }[here] || "—";
+    b.classList.toggle("off", here !== WH_NORMAL[dev]);
+    b.setAttribute("aria-expanded", String(open));
+    b.title = `Onde está o ${WH_NAME[dev]}: mudar`;
+  });
   // as frases de consequência só aparecem quando algo fica em branco ou
   // satura; o normal o seletor já diz (2.84)
   const box = $("whConseq");
@@ -199,6 +210,7 @@ function renderWhere() {
     d.appendChild(s);
     box.appendChild(d);
   }
+  card.hidden = !(open || off || sug.childElementCount || box.childElementCount);
   const back = $("whBack");
   back.textContent = "";
   if (off && !whPending) {
@@ -250,6 +262,13 @@ function wireWhere() {
     if (whPending) $("whName").focus();
   }));
   $("whToggle").addEventListener("click", () => { whOpen = !whOpen; renderWhere(); });
+  // selo do lugar no quadro do aparelho (2.90.0): abre o "Onde estão"
+  document.querySelectorAll(".wh-selo[data-wh]").forEach((b) => b.addEventListener("click", (e) => {
+    e.stopPropagation();
+    whOpen = !whOpen;
+    renderWhere();
+    if (whOpen) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }));
   $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("whName").value = b.textContent.trim(); }));
   $("whWhenSeg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { whWhen = b.dataset.w; renderWhere(); }));
   $("whOk").addEventListener("click", () => whPending && whSet(whPending, $("whName").value));

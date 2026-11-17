@@ -115,6 +115,14 @@ function rcaCompact(box, q, list) {
   more.type = "button"; more.className = "link"; more.textContent = "Ver detalhes";
   more.addEventListener("click", () => { rcaOpen.add(q.id); renderRcAway(); });
   row.appendChild(more);
+  // 2.90.0 (avaliação A3): a pergunta pode ser fechada; continua em Fora de
+  // casa como "a responder" e volta quando o app abrir de novo
+  const x = document.createElement("button");
+  x.type = "button"; x.className = "rca-x"; x.textContent = "×";
+  x.setAttribute("aria-label", "Fechar a pergunta");
+  x.title = "Fechar: a pergunta continua em Fora de casa";
+  x.addEventListener("click", () => { awLater.add(q.id); renderRcAway(); });
+  row.appendChild(x);
   box.append(dots, t, row);
 }
 

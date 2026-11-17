@@ -1,5 +1,34 @@
 # Versões
 
+## 2.90.0
+- Agora, Minha dose: um número só (hoje), uma frase comparando com o fundo
+  da casa e uma linha com semana, mês e ano, tudo em µSv. A barra do ano
+  diz quanto já foi de um teto, na mesma unidade. Os quatro cartões de antes
+  ficam em "por período".
+- O lugar de cada aparelho (em casa, comigo) virou um selo no quadro dele.
+  O cartão "Onde estão" só aparece quando tem algo a dizer ou quando você
+  abre pelo selo.
+- A pergunta "O RC102 ficou sem conexão" pode ser fechada com o ×; ela
+  continua em Fora de casa como "a responder".
+- Fita do dia: a legenda só mostra o que aparece na fita. Trechos de 30 min
+  ou mais sem leitura ganham uma linha escrita embaixo. "Avisos" virou
+  "alertas", como no resto do app.
+
+**English**
+
+- Now, My dose: a single number (today), one sentence comparing it with the
+  home background, and one line with week, month and year, all in µSv. The
+  year bar says how much of a ceiling has gone, in the same unit. The four
+  cards from before are under "by period".
+- Where each device is (at home, with me) became a badge on its card. The
+  "Where they are" card only shows up when it has something to say or when
+  you open it from the badge.
+- The "The RC102 was disconnected" question can be closed with ×; it stays
+  in Away from home as "to answer".
+- Day strip: the legend only shows what appears on the strip. Stretches of
+  30 min or more with no reading get a written line below. "Warnings"
+  became "alerts", as in the rest of the app.
+
 ## 2.89.0
 - Barra lateral: a busca saiu. Ctrl+K abre as Ações rápidas, que agora
   têm o que se faz no dia a dia: anotar, medir um objeto, "Estou testando

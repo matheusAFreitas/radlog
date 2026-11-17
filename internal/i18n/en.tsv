@@ -5932,3 +5932,19 @@ atenção e alarme voltam a valer	attention and alarm work again
 baixar historico memoria gmc	download history memory gmc
 cala os alertas por 10 min	silences alerts for 10 min
 Parar	Stop
+Fechar a pergunta	Close the question
+Fechar: a pergunta continua em Fora de casa	Close: the question stays in Away from home
+Onde está o {0}: mudar	Where the {0} is: change
+Teto: o fundo da casa no ano todo ({0} {1}) mais {2} mSv/ano.	Ceiling: the home background for the whole year ({0} {1}) plus {2} mSv/year.
+alerta curto	short alert
+alertas curtos	short alerts
+ano: {0} {1} de um teto de {2} {3}	year: {0} {1} of a {2} {3} ceiling
+igual ao fundo da sua casa	same as your home background
+por período	by period
+sem dado hoje	no data today
+{0} sem leitura das {1} às {2}.	{0} had no reading from {1} to {2}.
+{0} sem leitura desde {1}.	{0} has had no reading since {1}.
+{0}% abaixo do fundo da sua casa	{0}% below your home background
+{0}% acima do fundo da sua casa	{0}% above your home background
+{0}sem leitura	{0}no reading
+ano	year
