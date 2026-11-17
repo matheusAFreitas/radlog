@@ -7611,14 +7611,6 @@ const I18N_EN = {
 ]
 ],
 [
-"RadiaCode (Bluetooth): sem resposta em 10 s ao pedido ",
-"^RadiaCode \\(Bluetooth\\): sem resposta em 10 s ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
-"RC102 (Bluetooth): no answer in 10 s to request ${1}: ${2}",
-[
-"RadiaCode (Bluetooth): sem resposta em 10 s ao pedido "
-]
-],
-[
 "ponto ",
 "^ponto ((?:(?! · ).)+?) dá ((?:(?! · ).)+?) CPM por µSv/h, fora da faixa plausível \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
 "point ${1} gives ${2} CPM per µSv/h, outside the plausible range (${3} to ${4})",
@@ -8042,11 +8034,12 @@ const I18N_EN = {
 ]
 ],
 [
-"RC102 (Bluetooth): sem resposta em 10 s ao pedido ",
-"^RC102 \\(Bluetooth\\): sem resposta em 10 s ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
-"RC102 (Bluetooth): no answer in 10 s to request ${1}: ${2}",
+"RadiaCode (Bluetooth): sem resposta em ",
+"^RadiaCode \\(Bluetooth\\): sem resposta em ((?:(?! · ).)+?) ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in ${1} to request ${2}: ${3}",
 [
-"RC102 (Bluetooth): sem resposta em 10 s ao pedido "
+"RadiaCode (Bluetooth): sem resposta em ",
+" ao pedido "
 ]
 ],
 [
@@ -8557,6 +8550,15 @@ const I18N_EN = {
 "A conta RC102 ÷ GMC-800 mudou: ",
 " contra ",
 " em casa."
+]
+],
+[
+"RC102 (Bluetooth): sem resposta em ",
+"^RC102 \\(Bluetooth\\): sem resposta em ((?:(?! · ).)+?) ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in ${1} to request ${2}: ${3}",
+[
+"RC102 (Bluetooth): sem resposta em ",
+" ao pedido "
 ]
 ],
 [

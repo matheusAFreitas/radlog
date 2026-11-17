@@ -442,7 +442,12 @@ func (a *App) rcLoop() {
 		lastErr = ""
 		began := time.Now()
 		a.rcRun(dev)
-		if viaBLE {
+		if viaBLE && a.mobile {
+			// no celular ninguém mais disputa o RC102: a conexão caiu (o
+			// Bluetooth travou), reconecta já
+			a.rc.bleNow.Store(true)
+			bleFails = 0
+		} else if viaBLE {
 			if time.Since(began) < 2*time.Minute {
 				bleFails++
 				a.logf("RC102: a conexão pelo Bluetooth caiu em %s; próxima tentativa em %s", time.Since(began).Round(time.Second), bleGap())

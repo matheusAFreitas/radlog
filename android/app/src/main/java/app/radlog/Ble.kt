@@ -47,6 +47,7 @@ class Ble(private val ctx: Context) {
     private var readyErr: String? = null
     private val writeDone = Semaphore(0)
     @Volatile private var writeStatus = 0
+    @Volatile private var closedAt = 0L // quando a última conexão foi fechada
 
     /** Liga? (o Bluetooth do celular pode estar desligado) */
     fun enabled(): Boolean = manager?.adapter?.isEnabled == true
@@ -97,6 +98,7 @@ class Ble(private val ctx: Context) {
                     if (gatt === g) { gatt = null; wr = null }
                 }
                 g.close()
+                closedAt = android.os.SystemClock.elapsedRealtime()
                 fail(g, "o aparelho não aceitou a conexão (status $status)")
                 writeStatus = -1
                 writeDone.release()
@@ -171,7 +173,11 @@ class Ble(private val ctx: Context) {
     fun connect(addr: String) {
         val ad = manager?.adapter ?: throw Exception("este celular não tem Bluetooth")
         if (!ad.isEnabled) throw Exception("o Bluetooth do celular está desligado")
+        // a conexão anterior acabou de cair: o Android precisa de um instante
+        // para soltar o rádio (sem isso vinha status 133 ou 25 s sem resposta)
         close()
+        val since = android.os.SystemClock.elapsedRealtime() - closedAt
+        if (since in 0 until 1500) Thread.sleep(1500 - since)
         val dev = try { ad.getRemoteDevice(addr) } catch (e: IllegalArgumentException) {
             throw Exception("endereço Bluetooth inválido: $addr")
         }
@@ -184,7 +190,7 @@ class Ble(private val ctx: Context) {
                 ?: throw Exception("o Android não abriu a conexão")
             gatt = g
         }
-        if (!l.await(25, TimeUnit.SECONDS)) {
+        if (!l.await(15, TimeUnit.SECONDS)) {
             synchronized(lock) { ready = null }
             close()
             throw Exception("o RC102 não respondeu (longe, desligado ou com outro aparelho)")
@@ -228,6 +234,7 @@ class Ble(private val ctx: Context) {
         if (g != null) {
             try { g.disconnect() } catch (_: Exception) {}
             try { g.close() } catch (_: Exception) {}
+            closedAt = android.os.SystemClock.elapsedRealtime()
         }
     }
 }

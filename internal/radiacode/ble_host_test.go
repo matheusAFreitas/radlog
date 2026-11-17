@@ -90,9 +90,8 @@ func TestHostBLE(t *testing.T) {
 
 // resposta que não vem: o registro diz se nada chegou ou se veio pela metade.
 func TestBLEHostTimeoutLog(t *testing.T) {
-	if testing.Short() {
-		t.Skip("espera 10 s")
-	}
+	defer func(q, s time.Duration) { bleQuiet, bleSlow = q, s }(bleQuiet, bleSlow)
+	bleQuiet, bleSlow = 200*time.Millisecond, 600*time.Millisecond
 	var lines []string
 	BLELogf = func(f string, a ...any) { lines = append(lines, fmt.Sprintf(f, a...)) }
 	defer func() { BLELogf = nil }()
@@ -113,9 +112,31 @@ func TestBLEHostTimeoutLog(t *testing.T) {
 	}
 }
 
-type nopHost struct{}
+type nopHost struct{ closed *bool }
 
 func (nopHost) Scan(time.Duration) ([]BLEDevice, error) { return nil, nil }
 func (nopHost) Connect(string) error                    { return nil }
 func (nopHost) Write([]byte) error                      { return nil }
-func (nopHost) Close()                                  {}
+func (h nopHost) Close() {
+	if h.closed != nil {
+		*h.closed = true
+	}
+}
+
+// nada chega: em bleQuiet a conexão cai na hora (o próximo pedido nem tenta)
+func TestBLEHostQuietDrops(t *testing.T) {
+	defer func(q, s time.Duration) { bleQuiet, bleSlow = q, s }(bleQuiet, bleSlow)
+	bleQuiet, bleSlow = 100*time.Millisecond, time.Second
+	closed := false
+	b := &bleAndroid{h: nopHost{closed: &closed}, as: newAssembler(), resp: make(chan []byte, 1)}
+	start := time.Now()
+	if _, err := b.Exchange([]byte{4, 0, 0, 0, 0x26, 0x08, 0, 0x80}); err == nil {
+		t.Fatal("devia falhar")
+	}
+	if time.Since(start) > 500*time.Millisecond || !closed {
+		t.Fatalf("demorou %s ou não fechou (%v)", time.Since(start), closed)
+	}
+	if _, err := b.Exchange([]byte{4, 0, 0, 0, 0x26, 0x08, 0, 0x81}); err == nil || !strings.Contains(err.Error(), "perdida") {
+		t.Fatalf("depois da queda: %v", err)
+	}
+}

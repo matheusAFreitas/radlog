@@ -5674,7 +5674,6 @@ a memória do GMC-800 de verdade passou de 95%	the real GMC-800 memory is over 9
 a memória do GMC-800 de verdade passou de 80%	the real GMC-800 memory is over 80%
 Bluetooth: o app ainda não ligou o rádio	Bluetooth: the app hasn't turned on the radio yet
 , resposta pela metade ({0} de {1} bytes)	, half a response ({0} of {1} bytes)
-RC102 (Bluetooth): sem resposta em 10 s ao pedido {0}: {1}	RC102 (Bluetooth): no answer in 10 s to request {0}: {1}
 chegaram {0} pedaço(s)	{0} chunk(s) arrived
 nada chegou	nothing arrived
 RC102: conectou mas não abriu ({0})	RC102: connected but did not open ({0})
@@ -5700,3 +5699,4 @@ papel mudou	role changed
 {0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)
 fora	out
 abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started
+RC102 (Bluetooth): sem resposta em {0} ao pedido {1}: {2}	RC102 (Bluetooth): no answer in {0} to request {1}: {2}

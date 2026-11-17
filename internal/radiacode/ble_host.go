@@ -167,19 +167,51 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 			return nil, fmt.Errorf("Bluetooth (envio): %v", err)
 		}
 	}
-	select {
-	case out := <-b.resp:
-		if out == nil {
-			return nil, errors.New("Bluetooth: conexão perdida")
+	// sem nenhum pedaço em bleQuiet a conexão travou (no celular o GATT
+	// inteiro fica preso: nada mais é aceito); com pedaços chegando, uma
+	// resposta grande tem até bleSlow
+	quiet := time.NewTimer(bleQuiet)
+	defer quiet.Stop()
+	slow := time.NewTimer(bleSlow)
+	defer slow.Stop()
+	for {
+		select {
+		case out := <-b.resp:
+			if out == nil {
+				return nil, errors.New("Bluetooth: conexão perdida")
+			}
+			return out, nil
+		case <-quiet.C:
+			b.mu.Lock()
+			got := b.got
+			b.mu.Unlock()
+			if got > 0 {
+				continue // está chegando: espera o bleSlow
+			}
+			b.logTimeout(req, bleQuiet)
+			// travou: derruba já para o laço reconectar sem esperar mais
+			// pedidos falharem (ACE, 17/11: 30 s parado a cada queda)
+			b.mu.Lock()
+			b.lost = true
+			b.mu.Unlock()
+			b.h.Close()
+			return nil, errors.New("Bluetooth: o RC102 não respondeu")
+		case <-slow.C:
+			b.logTimeout(req, bleSlow)
+			return nil, errors.New("Bluetooth: o RC102 não respondeu")
 		}
-		return out, nil
-	case <-time.After(10 * time.Second):
-		b.logTimeout(req)
-		return nil, errors.New("Bluetooth: o RC102 não respondeu")
 	}
 }
 
-func (b *bleAndroid) logTimeout(req []byte) {
+// bleQuiet: sem nenhum pedaço de resposta nesse tempo, a conexão travou (uma
+// resposta normal chega em menos de 0,5 s). bleSlow: o máximo para uma
+// resposta que está chegando.
+var (
+	bleQuiet = 4 * time.Second
+	bleSlow  = 10 * time.Second
+)
+
+func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	f := BLELogf
 	if f == nil {
 		return
@@ -201,7 +233,7 @@ func (b *bleAndroid) logTimeout(req []byte) {
 	if bad != "" {
 		what += "; montagem: " + bad
 	}
-	f("RC102 (Bluetooth): sem resposta em 10 s ao pedido %s: %s", cmd, what)
+	f("RC102 (Bluetooth): sem resposta em %s ao pedido %s: %s", after, cmd, what)
 }
 
 func (b *bleAndroid) Close() error {
