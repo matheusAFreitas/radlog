@@ -6118,3 +6118,6 @@ Formato da data	Date format
 Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.	Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.
 formato da data	date format
 Clique para mostrar ou esconder no gráfico	Click to show or hide on the chart
+fixo: 10 min	fixed: 10 min
+fixo: 30 min	fixed: 30 min
+fixo: 1 h	fixed: 1 h

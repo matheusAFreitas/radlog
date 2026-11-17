@@ -191,7 +191,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 	if o.Pct <= 0 || o.Pct > 200 {
 		o.Pct = 20
 	}
-	if o.Seconds < 10 || o.Seconds > 1800 {
+	if o.Seconds < 10 || o.Seconds > 3600 {
 		o.Seconds = 60
 	}
 	dev := devName(o.Device)
