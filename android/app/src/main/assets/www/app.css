@@ -164,3 +164,15 @@ input.code:focus { outline: none; border-color: var(--accent); }
 .li.sel select { font: inherit; font-size: 13px; color: var(--fg); background: var(--surface-2); border: 1px solid var(--line-2); border-radius: 8px; padding: 6px 8px; min-height: 40px; max-width: 190px; }
 .li.sel input[type=range] { width: 140px; accent-color: var(--accent); }
 .li.sel .r { grid-row: auto; grid-column: auto; min-width: 14px; }
+
+/* aba RC102 */
+.card .row { display: flex; justify-content: space-between; align-items: center; gap: 10px; }
+.card .row .m { font-family: var(--mono); font-weight: 600; white-space: nowrap; }
+.rcnow .big { justify-content: flex-start; align-items: baseline; gap: 8px; }
+.rcnow .big .n { font-family: var(--mono); font-size: 40px; font-weight: 600; color: var(--rc); line-height: 1.1; font-variant-numeric: tabular-nums; }
+.rcnow .big .u { color: var(--muted); }
+.rcnow .big .x { margin-left: auto; font-family: var(--mono); font-size: 12.5px; color: var(--muted); }
+.cells { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.cell { background: var(--surface-2); border-radius: 10px; padding: 8px 10px; display: grid; }
+.cell .k { font-size: 11.5px; color: var(--dim); }
+.cell .v { font-family: var(--mono); font-weight: 600; white-space: nowrap; }

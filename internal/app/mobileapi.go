@@ -29,6 +29,7 @@ var MobileMethods = []string{
 	"GetSettings",
 	"GetWhereabouts",
 	"LeaveHome",
+	"ReconnectRadiacode",
 	"SaveSettings",
 	"ScanRadiacodeBLE",
 	"SetRadiacode",

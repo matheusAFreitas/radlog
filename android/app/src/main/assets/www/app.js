@@ -149,6 +149,7 @@ function render() {
   if (!state.paired) m.innerHTML = firstRun();
   else if (state.tab === "alertas") m.innerHTML = alertas();
   else if (state.tab === "ajustes") m.innerHTML = ajustes();
+  else if (state.tab === "rc102") m.innerHTML = rc102();
   else m.innerHTML = agora();
   bind();
 }
@@ -244,6 +245,37 @@ function agora() {
     h += `<div class="small" style="text-align:center">${esc(T("Bateria do RC102: {0}%", fmt(rc.battery, 0)))}</div>`;
   }
   return h;
+}
+
+// ---------------- RC102 ----------------
+// o aparelho em detalhe: leitura com a margem, contagem, bateria, temperatura,
+// a dose de hoje e o acumulado do aparelho (só leitura: o app não zera nem muda),
+// e a configuração dele
+function rc102() {
+  const rc = state.rc || {};
+  const live = rc.state === "conectado";
+  const age = live && rc.time ? Math.max(0, Math.round((Date.now() - rc.time) / 1000)) : null;
+  const st = isOff(rc) ? T("O RC102 está com o PC") : live ? (age != null ? T("há {0} s", age) : "") : rc.state === "erro" ? rc.err || T("erro") : rc.state === "conectando" ? T("Conectando ao RC102…") : T("Procurando o Radiacode 102…");
+  const v = live ? rc.usvh : null;
+  const cell = (k, x) => `<div class="cell"><span class="k">${esc(k)}</span><span class="v">${x}</span></div>`;
+  let h = `<div class="card rcnow"><div class="row"><span class="k">${esc(T("Agora no RC102"))}</span><span class="k">${esc(st)}</span></div>`
+    + `<div class="row big"><span class="n">${v != null ? usv(v) : "—"}</span><span class="u">µSv/h</span>${v != null ? `<span class="x">${fmt(v / 10, v < 1 ? 4 : 3)} mrem/h</span>` : ""}</div>`
+    + (live && rc.usvhErr > 0 ? `<span class="small">${esc(T("margem de ± {0}%", fmt(rc.usvhErr, 0)))}</span>` : "")
+    + `<div class="cells">${cell(T("Contagem"), live ? `${fmt(rc.cps, rc.cps < 100 ? 1 : 0)} cps` : "—")}${cell(T("Bateria"), live && rc.battery > 0 ? `${fmt(rc.battery, 0)}%` : "—")}${cell(T("Temperatura"), live && rc.tempC ? `${fmt(rc.tempC, 0)} °C` : "—")}</div></div>`;
+  const today = todayDose(rc);
+  const acc = rc.doseLive || rc.dose;
+  h += `<div class="card"><span class="k">${esc(T("Dose"))}</span>`
+    + `<div class="row"><span>${esc(rc.todayDevOK ? T("Hoje (somada pelo RC102)") : T("Hoje (pelo que o app gravou)"))}</span><span class="m">${fmt(today, today < 10 ? 2 : 1)} µSv</span></div>`
+    + `<div class="row"><span>${esc(T("Acumulado do aparelho"))}</span><span class="m">${acc > 0 ? (acc >= 1000 ? `${fmt(acc / 1000, 3)} mSv` : `${fmt(acc, acc < 10 ? 2 : 1)} µSv`) : "—"}</span></div>`
+    + `<span class="small">${esc(T("O acumulado é o total que o RC102 soma sozinho. O app só mostra, não zera nem muda."))}</span></div>`;
+  h += `<div class="list">${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
+  h += `<div class="card"><div class="row"><span>${esc([rc.model || "Radiacode 102", rc.firmware ? T("firmware {0}", rc.firmware) : ""].filter(Boolean).join(" · "))}</span>${isOff(rc) ? "" : `<button class="btn" id="rRecon" style="width:auto;padding:8px 14px">${esc(T("Reconectar"))}</button>`}</div></div>`;
+  return h;
+}
+
+async function reconnectRc() {
+  try { state.rc = await call("ReconnectRadiacode"); toast(T("Reconectando ao RC102…")); } catch (e) { toast(errText(e)); }
+  render();
 }
 
 function releaseSheet() {
@@ -709,6 +741,8 @@ function bind() {
   q("sForget", forgetSheet);
   q("sSound", soundSheet);
   q("sRcAlarms", rcConfigSheet);
+  q("rCfg", rcConfigSheet);
+  q("rRecon", reconnectRc);
   q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
   q("sCloud", cloudToggle);
@@ -755,7 +789,8 @@ on("radiacode", (rc) => {
     const tip = $("chTip");
     if (tip && $("chCur") && !$("chCur").hidden) { renderConn(); renderBand(); return; }
     render();
-  } else { renderConn(); renderBand(); }
+  } else if (state.tab === "rc102" && $("sheet").hidden) render();
+  else { renderConn(); renderBand(); }
   if (was !== rc.state && rc.state === "conectado") loadChart();
 });
 on("alarm", (a) => { state.alarm = a; renderBand(); });
@@ -786,7 +821,7 @@ const mock = (() => {
   const val = scene === "alarme" ? 0.742 : scene === "atencao" ? 0.284 : 0.112;
   const rc = {
     state: scene === "solto" ? "off" : "conectado", off: scene === "solto", via: "bluetooth", serial: "RC-102-000000", ble: "AA:BB:CC:DD:EE:FF",
-    usvh: val, cps: 12.3, today: 1.86, todayDev: 1.92, todayDevOK: true, lastT: now - 60000, lastUSv: 0.111, battery: 87,
+    usvh: val, cps: 12.3, today: 1.86, todayDev: 1.92, todayDevOK: true, lastT: now - 60000, lastUSv: 0.111, battery: 87, time: now - 1000, tempC: 27, usvhErr: 12, model: "RadiaCode-102", firmware: "4.15", doseLive: 48.7,
     alertLevel: lvl, limits: { attn: 0.25, alarm: 0.56, danger: 10 }, stats: { bgUSv: 0.108 },
   };
   const N = 72, from = now - 6 * 3600e3, times = [], rcs = [];
@@ -819,7 +854,7 @@ const mock = (() => {
   return {
     call(m) {
       switch (m) {
-        case "GetRadiacode": return ok(rc);
+        case "GetRadiacode": case "ReconnectRadiacode": return ok(rc);
         case "GetChart": return ok(chart);
         case "GetEvents": return ok(events);
         case "GetSettings": return ok(settings);
