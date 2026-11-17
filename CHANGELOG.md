@@ -1,6 +1,11 @@
 # Versões
 
 ## 2.100.1
+- Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
+  para a medição o aparelho escolhido, o modo automático nem o fundo da casa.
+  Toda medição rodava no GMC-800, com tempo fixo e medindo o fundo na hora,
+  mesmo com o RC102 marcado. Agora vale o que está marcado. As medições
+  salvas desde a 2.94.0 dizem o aparelho em que rodaram de verdade.
 - Modo busca no Bluetooth mais leve: o espectro é lido a cada 5 s, e se uma
   leitura demorar mais que 2 s o app espaça as próximas (até 15 s) para não
   atrasar a taxa e os alarmes. Quando isso acontece, fica uma linha no
@@ -16,6 +21,11 @@
 
 **English**
 
+- Important Measure object fix: since 2.94.0 the screen didn't pass the
+  chosen device, automatic mode or home background to the measurement. Every
+  measurement ran on the GMC-800, with a fixed time and measuring the
+  background on the spot, even with the RC102 selected. Now what is selected
+  is used. Measurements saved since 2.94.0 show the device they really ran on.
 - Lighter search mode over Bluetooth: the spectrum is read every 5 s, and if
   a read takes more than 2 s the app spaces the next ones (up to 15 s) so the
   rate and alarms are not delayed. When that happens, a line in the log says

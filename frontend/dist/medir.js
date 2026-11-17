@@ -327,7 +327,8 @@ function measureOpts() {
   const has = isFinite(cm) && cm >= 0;
   return {
     name: $("mName").value, distance: !has ? "" : cm === 0 ? "encostado" : `${fmt(cm, cm % 1 ? 1 : 0)} cm`, distCm: has ? cm : 0,
-    size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
+    size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado
+    auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
     seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat(mOpt("mPct", "20")),
   };
 }
