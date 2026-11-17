@@ -165,6 +165,7 @@
       <span id="statusText">desconectado</span>
     </button>
         <span class="inst-fill"></span>
+        <button type="button" class="chip wh-selo" data-wh="gmc" hidden></button>
         <button type="button" class="inst-open" data-tile="g" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="gmc">
@@ -183,6 +184,7 @@
       <header class="inst-head">
         <button type="button" class="pill inst-conn" id="rTileConn" data-view="radiacode"><span class="dot" id="rTileDot" aria-hidden="true"></span><span id="rTileConnText">Radiacode 102</span></button>
         <span class="inst-fill"></span>
+        <button type="button" class="chip wh-selo" data-wh="radiacode" hidden></button>
         <button type="button" class="inst-open" data-tile="r" aria-expanded="false" aria-label="abrir o quadro"><span class="inst-open-t">fechar</span><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg></button>
       </header>
       <div class="inst-read" data-view="radiacode">
@@ -255,9 +257,12 @@
       </div>
     </div>
     <p class="small muted" id="agDevNote"></p>
-    <div class="ag-cells" id="agCells"></div>
+    <!-- 2.90.0 (avaliação A1): um número, uma frase e uma linha com os outros períodos -->
+    <div class="ag-main"><span class="ag-big mono" id="agToday">—</span><span class="ag-u"><span id="agTodayU">µSv</span> <span>hoje</span></span><span class="ag-cmp" id="agCmp"></span></div>
+    <p class="ag-line" id="agLine"></p>
     <div class="ag-bar" id="agBar" aria-hidden="true"><i class="ag-nat"></i><i class="ag-me"></i><i class="ag-cap"></i></div>
-    <div class="ag-leg small" id="agLeg"></div>
+    <p class="ag-yr small muted" id="agYr"></p>
+    <details class="how ag-more" id="agMore"><summary>por período</summary><div class="ag-cells" id="agCells"></div></details>
     <details class="how"><summary>Como funciona</summary>
     <p><span>O µSv/h dos dois aparelhos é uma estimativa.</span> <span>Eles medem a radiação no ambiente e são calibrados para a energia do césio-137; o GMC-800 não distingue energia, então pode ler um pouco a mais ou a menos conforme a fonte.</span></p>
     <p><span>Os limites com que o app compara valem para a dose no corpo.</span> <span>O número serve bem para comparar dias e lugares, mas não é uma dose oficial: essa só vem de um dosímetro de trabalho, lido por um laboratório.</span></p>

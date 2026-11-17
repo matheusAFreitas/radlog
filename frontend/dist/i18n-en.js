@@ -4531,7 +4531,15 @@ const I18N_EN = {
 "atenção e alarme voltam a valer": "attention and alarm work again",
 "baixar historico memoria gmc": "download history memory gmc",
 "cala os alertas por 10 min": "silences alerts for 10 min",
-"Parar": "Stop"
+"Parar": "Stop",
+"Fechar a pergunta": "Close the question",
+"Fechar: a pergunta continua em Fora de casa": "Close: the question stays in Away from home",
+"alerta curto": "short alert",
+"alertas curtos": "short alerts",
+"igual ao fundo da sua casa": "same as your home background",
+"por período": "by period",
+"sem dado hoje": "no data today",
+"ano": "year"
 },
 "patterns": [
 [
@@ -8204,6 +8212,16 @@ const I18N_EN = {
 [
 "· mais alto por volta das ",
 "h, mais baixo por volta das "
+]
+],
+[
+"Teto: o fundo da casa no ano todo (",
+"^Teto: o fundo da casa no ano todo \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\) mais ((?:(?! · ).)+?) mSv/ano\\.$",
+"Ceiling: the home background for the whole year (${1} ${2}) plus ${3} mSv/year.",
+[
+"Teto: o fundo da casa no ano todo (",
+") mais ",
+" mSv/ano."
 ]
 ],
 [
@@ -12631,6 +12649,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)% abaixo do fundo da sua casa$",
+"${1}% below your home background",
+[
+"% abaixo do fundo da sua casa"
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -12840,6 +12866,14 @@ const I18N_EN = {
 [
 "O RC102 ficou ",
 " sem conexão."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)% acima do fundo da sua casa$",
+"${1}% above your home background",
+[
+"% acima do fundo da sua casa"
 ]
 ],
 [
@@ -14204,6 +14238,15 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) sem leitura das ((?:(?! · ).)+?) às ((?:(?! · ).)+?)\\.$",
+"${1} had no reading from ${2} to ${3}.",
+[
+" sem leitura das ",
+" às "
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
 [
@@ -14579,6 +14622,15 @@ const I18N_EN = {
 ]
 ],
 [
+"ano: ",
+"^ano: ((?:(?! · ).)+?) ((?:(?! · ).)+?) de um teto de ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"year: ${1} ${2} of a ${3} ${4} ceiling",
+[
+"ano: ",
+" de um teto de "
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -14914,6 +14966,14 @@ const I18N_EN = {
 [
 "falta ",
 " para a atenção"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) sem leitura desde ((?:(?! · ).)+?)\\.$",
+"${1} has had no reading since ${2}.",
+[
+" sem leitura desde "
 ]
 ],
 [
@@ -15662,6 +15722,15 @@ const I18N_EN = {
 "use the saved one (${1}, ${2})",
 [
 "usar o salvo ("
+]
+],
+[
+"Onde está o ",
+"^Onde está o ((?:(?! · ).)+?): mudar$",
+"Where the ${1} is: change",
+[
+"Onde está o ",
+": mudar"
 ]
 ],
 [
@@ -18553,6 +18622,14 @@ const I18N_EN = {
 "${1} in the period",
 [
 " no período"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)sem leitura$",
+"${1}no reading",
+[
+"sem leitura"
 ]
 ],
 [
