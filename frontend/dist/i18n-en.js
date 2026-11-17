@@ -4515,7 +4515,14 @@ const I18N_EN = {
 "Ra-226 ≈ 24 a 105 Bq/kg": "Ra-226 ≈ 24 to 105 Bq/kg",
 "Th-232 ≈ 1.000 a 2.300 Bq/kg": "Th-232 ≈ 1,000 to 2,300 Bq/kg",
 "solo: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg": "soil: K-40 ≈ 420, Ra-226 ≈ 32, Th-232 ≈ 45 Bq/kg",
-"pedra solta": "loose stone"
+"pedra solta": "loose stone",
+"abrir o quadro": "open the panel",
+"fechar o quadro": "close the panel",
+"Em mrem/h": "In mrem/h",
+"Em µSv/h": "In µSv/h",
+"Últimos 10 s": "Last 10 s",
+"atenção e alarme: os alarmes 1 e 2 do RC102": "attention and alarm: the RC102's alarms 1 and 2",
+"atenção e alarme: os alarmes 1 e 2 do RadiaCode": "attention and alarm: the RC102's alarms 1 and 2"
 },
 "patterns": [
 [
@@ -14856,6 +14863,15 @@ const I18N_EN = {
 ]
 ],
 [
+"falta ",
+"^falta ((?:(?! · ).)+?) para a atenção$",
+"${1} below attention",
+[
+"falta ",
+" para a atenção"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -15170,6 +15186,24 @@ const I18N_EN = {
 "${1}: ${2} µSv/h (at home)",
 [
 " µSv/h (em casa)"
+]
+],
+[
+"falta ",
+"^falta ((?:(?! · ).)+?) para o alarme$",
+"${1} below alarm",
+[
+"falta ",
+" para o alarme"
+]
+],
+[
+"falta ",
+"^falta ((?:(?! · ).)+?) para o perigo$",
+"${1} below danger",
+[
+"falta ",
+" para o perigo"
 ]
 ],
 [
