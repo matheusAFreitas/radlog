@@ -28,8 +28,11 @@ type MeasurePhase struct {
 	CPM     float64 `json:"cpm"`
 	ErrCPM  float64 `json:"errCPM"` // 1 desvio
 	USv     float64 `json:"usv"`
-	Start   int64   `json:"start"` // ms
-	End     int64   `json:"end"`   // ms
+	// RC102 (2.100.2): incerteza do µSv/h pelo espalhamento da própria dose
+	// (a dose pesa a energia; o √N das contagens não serve para ela)
+	ErrUSv float64 `json:"errUSv,omitempty"`
+	Start  int64   `json:"start"` // ms
+	End    int64   `json:"end"`   // ms
 	// "casa" = fundo da última hora gravada (não medido na hora)
 	Source string `json:"source,omitempty"`
 }
@@ -50,6 +53,12 @@ type MeasureResult struct {
 	// automático: o que contava como "tem algo" (% do fundo e em CPM)
 	Pct       float64 `json:"pct,omitempty"`
 	Threshold float64 `json:"threshold,omitempty"`
+	// RC102 (2.100.2): incerteza do líquido em µSv/h pela dose, quantos σ a
+	// dose subiu, e DoseUp quando a dose subiu (≥ 3σ) sem a contagem subir
+	// (gama de energia alta, como o K-40: cada contagem vale mais dose)
+	NetErrUSv float64 `json:"netErrUSv,omitempty"`
+	DoseSigma float64 `json:"doseSigma,omitempty"`
+	DoseUp    bool    `json:"doseUp,omitempty"`
 }
 
 // MeasureState é o estado da medição, mandado para a tela a cada segundo.
@@ -98,6 +107,7 @@ type MeasureState struct {
 	RelErr   float64 `json:"relErr,omitempty"`
 	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
+	usvSq  float64 // soma dos quadrados (incerteza da dose)
 	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
 	stopReq bool
 	// 2.81: quando o fundo ficou pronto (a pessoa está procurando o ponto)
@@ -172,7 +182,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Phase = "objeto"
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
-		a.measure.Spectrum, a.measure.usvSum = nil, 0
+		a.measure.Spectrum, a.measure.usvSum, a.measure.usvSq = nil, 0, 0
 		a.measure.Derived, a.measure.stopReq = nil, false
 		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
@@ -370,6 +380,7 @@ func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
 	ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 	if devName(m.Device) == "radiacode" && m.Elapsed > 0 {
 		ph.USv = m.usvSum / float64(m.Elapsed)
+		ph.ErrUSv = meanErr(m.usvSum, m.usvSq, m.Elapsed)
 	}
 	return ph
 }
@@ -387,6 +398,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 	}
 	m.Counts += f.counts
 	m.usvSum += f.usv
+	m.usvSq += f.usv * f.usv
 	m.Elapsed++
 	start := measT0(m)
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
@@ -578,7 +590,25 @@ func compareMeasure(bg, obj MeasurePhase, usv func(float64) float64) MeasureResu
 	default:
 		r.Level, r.Verdict = "nada", "nenhuma diferença que dê para separar do fundo"
 	}
+	if bg.ErrUSv > 0 && obj.ErrUSv > 0 {
+		r.NetErrUSv = math.Hypot(bg.ErrUSv, obj.ErrUSv)
+		r.DoseSigma = r.NetUSv / r.NetErrUSv
+		if r.Level != "sim" && r.DoseSigma >= 3 {
+			r.DoseUp, r.Verdict = true, "a contagem não mudou, mas a dose subiu"
+		}
+	}
 	return r
+}
+
+// meanErr é a incerteza da média (desvio padrão ÷ √n) a partir da soma e
+// da soma dos quadrados.
+func meanErr(sum, sq float64, n int) float64 {
+	if n < 2 {
+		return 0
+	}
+	fn := float64(n)
+	v := (sq - sum*sum/fn) / (fn - 1)
+	return math.Sqrt(math.Max(v, 0) / fn)
 }
 
 // br formata com uma casa e vírgula decimal (ex.: +63,0).

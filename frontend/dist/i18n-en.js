@@ -1493,6 +1493,7 @@ const I18N_EN = {
 "Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: it's the same spectrum as on the device's screen. Each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. To measure a sample, put it against the device and click Restart (the device resets too). The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.",
 "Ao vivo, do seu RadiaCode: cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Conta desde o Recomeçar; para medir uma amostra, encoste-a e clique em Recomeçar. A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os riscos vermelhos são as linhas que subiram acima dele. Passe o mouse num pico para ver qual isótopo costuma aparecer ali.": "Live, from your RC102: it's the same spectrum as on the device's screen. Each photon that arrives is counted in its energy's channel, and each isotope's peaks show up over time. To measure a sample, put it against the device and click Restart (the device resets too). The dashed line is the home background (the device's accumulated spectrum) over the same time; the red marks are the lines that rose above it. Hover over a peak to see which isotope usually shows up there.",
 "do aparelho": "from the device",
+"dose de hoje: a que o próprio aparelho conta": "today's dose: the one the device itself counts",
 "Energia": "Energy",
 "3 h": "3 h",
 "12 h": "12 h",
@@ -4703,7 +4704,68 @@ const I18N_EN = {
 "Cores": "Colors",
 "original": "original",
 "Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.",
-"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object."
+"Atenção e alarme do GMC-800 e do RadiaCode ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.": "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.",
+"2 h antes": "2 h before",
+"4 h depois": "4 h after",
+"Agora:": "Now:",
+"Esconder": "Hide",
+"Medir objeto ·": "Measure object ·",
+"Nenhum byte mudou desde a foto.": "Not a single byte changed since the snapshot.",
+"Nenhuma cidade encontrada.": "No city found.",
+"Objeto desconhecido?": "Unknown object?",
+"Pronto agora.": "Done now.",
+"RC102 · somada pelo aparelho": "RC102 · summed by the device",
+"RadiaCode · somada pelo aparelho": "RC102 · summed by the device",
+"antes": "before",
+"carregando": "loading",
+"desde o primeiro dado": "since the first data point",
+"espectro": "spectrum",
+"espectro zerado": "spectrum reset",
+"falhou": "failed",
+"log aberto pela tela": "log opened from the screen",
+"nenhum pico conhecido aqui": "no known peak here",
+"nenhuma release publicada": "no release published",
+"nuvem": "cloud",
+"nuvem desligada neste PC": "cloud turned off on this PC",
+"nuvem: cofre": "cloud: vault",
+"nuvem: revogar": "cloud: revoke",
+"o aparelho recusou zerar a dose": "the device refused to reset the dose",
+"objeto": "object",
+"pelo GMC-800": "via the GMC-800",
+"pelo RC102": "via the RC102",
+"pelo RadiaCode": "via the RC102",
+"pico —": "peak —",
+"pronto": "done",
+"vezes": "times",
+"· ativo agora": "· active now",
+"· maior pico": "· highest peak",
+"· pico": "· peak",
+"). Pode ser outro firmware.": "). It may be a different firmware.",
+"Alto": "High",
+"alto": "high",
+"Areia seca, pote cheio. Solo comum tem ~45 Bq/kg.": "Dry sand, full jar. Ordinary soil has ~45 Bq/kg.",
+"Casa": "Home",
+"Contagens": "Counts",
+"Escolha a cidade primeiro.": "Pick the city first.",
+"Iguais a casa:": "Same as home:",
+"Limite": "Limit",
+"Mostra a janela": "Shows the window",
+"aviso": "notice",
+"avisos": "notices",
+"escala": "scale",
+"nova": "new",
+"novo": "new",
+"outro": "other",
+"outro PC": "other PC",
+"pequeno": "small",
+"registros": "records",
+"sim": "yes",
+"taxa": "rate",
+"tem algo": "something there",
+"valor": "value",
+"A contagem não mudou, mas a dose subiu": "The count didn't change, but the dose went up",
+"a contagem não mudou, mas a dose subiu": "the count didn't change, but the dose went up",
+"Isso acontece com gama de energia alta: cada contagem vale mais dose.": "This happens with high-energy gamma: each count is worth more dose."
 },
 "patterns": [
 [
@@ -5380,6 +5442,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o ",
+"^Isso acontece com gama de energia alta: cada contagem vale mais dose\\. Aqui bate com o ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) keV\\) que apareceu no espectro\\.$",
+"This happens with high-energy gamma: each count is worth more dose. Here it matches the ${1} (${2} keV) that showed up in the spectrum.",
+[
+"Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o ",
+" keV) que apareceu no espectro."
+]
+],
+[
 "O RC102 em casa subiu junto (",
 "^O RC102 em casa subiu junto \\(((?:(?! · ).)+?)\\), então é o ambiente, não o aparelho\\. Ainda é fundo baixo, mas vale descobrir o motivo\\.$",
 "The RC102 at home rose too (${1}), so it is the environment, not the device. It is still a low background, but worth finding out why.",
@@ -5405,6 +5476,16 @@ const I18N_EN = {
 [
 "Subiu de uma vez (",
 ") e ficou. O RC102 em casa subiu junto. Mudou o aparelho de lugar ou chegou algo novo perto dele?"
+]
+],
+[
+"A contagem ficou igual (",
+"^A contagem ficou igual \\(((?:(?! · ).)+?) σ\\), mas a taxa de dose subiu ((?:(?! · ).)+?) σ: gama de energia alta, em que cada contagem vale mais dose\\.$",
+"The count stayed the same (${1} σ), but the dose rate went up ${2} σ: high-energy gamma, where each count is worth more dose.",
+[
+"A contagem ficou igual (",
+" σ), mas a taxa de dose subiu ",
+" σ: gama de energia alta, em que cada contagem vale mais dose."
 ]
 ],
 [
@@ -6636,6 +6717,16 @@ const I18N_EN = {
 ]
 ],
 [
+"O RadiaCode contou o mesmo que no fundo (",
+"^O RadiaCode contou o mesmo que no fundo \\(((?:(?! · ).)+?)σ\\), mas a taxa de dose subiu ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)σ\\)\\.$",
+"The RC102 counted the same as the background (${1}σ), but the dose rate went up ${2} (${3}σ).",
+[
+"O RadiaCode contou o mesmo que no fundo (",
+"σ), mas a taxa de dose subiu ",
+"σ)."
+]
+],
+[
 "Baixado e conferido. Troca sozinho quando o CPM voltar ao normal (agora: ",
 "^Baixado e conferido\\. Troca sozinho quando o CPM voltar ao normal \\(agora: ((?:(?! · ).)+?)\\)\\.$",
 "Downloaded and checked. Switches on its own when the CPM is back to normal (now: ${1}).",
@@ -6820,6 +6911,16 @@ const I18N_EN = {
 "Começou: o ",
 " desconectou às ",
 ". A volta fica aberta até ele conectar de novo."
+]
+],
+[
+"O RC102 contou o mesmo que no fundo (",
+"^O RC102 contou o mesmo que no fundo \\(((?:(?! · ).)+?)σ\\), mas a taxa de dose subiu ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)σ\\)\\.$",
+"The RC102 counted the same as the background (${1}σ), but the dose rate went up ${2} (${3}σ).",
+[
+"O RC102 contou o mesmo que no fundo (",
+"σ), mas a taxa de dose subiu ",
+"σ)."
 ]
 ],
 [
@@ -8928,6 +9029,18 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) acumulados · ((?:(?! · ).)+?) contagens · ((?:(?! · ).)+?) cps ±((?:(?! · ).)+?)% · ≈ ((?:(?! · ).)+?) µSv/h agora$",
+"${1} accumulated · ${2} counts · ${3} cps ±${4}% · ≈ ${5} µSv/h now",
+[
+" acumulados · ",
+" contagens · ",
+" cps ±",
+"% · ≈ ",
+" µSv/h agora"
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) permitidos no período \\(((?:(?! · ).)+?)%\\)\\.$",
 "Above background: ${1} of ${2} allowed in the period (${3}%).",
@@ -10639,6 +10752,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): a contagem não mudou, mas a dose subiu$",
+"${1}: the count didn't change, but the dose went up",
+[
+": a contagem não mudou, mas a dose subiu"
+]
+],
+[
 "Memória: ",
 "^Memória: ((?:(?! · ).)+?) KB de ((?:(?! · ).)+?) MB usados \\(((?:(?! · ).)+?)%, em ((?:(?! · ).)+?)\\)\\.$",
 "Memory: ${1} KB of ${2} MB used (${3}%, on ${4}).",
@@ -11551,6 +11672,15 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: subiu ",
+"^nuvem: subiu ((?:(?! · ).)+?) arquivo\\(s\\), juntou ((?:(?! · ).)+?)$",
+"cloud: uploaded ${1} file(s), merged ${2}",
+[
+"nuvem: subiu ",
+" arquivo(s), juntou "
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -11965,6 +12095,14 @@ const I18N_EN = {
 ]
 ],
 [
+"medido desde o primeiro dado (",
+"^medido desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"measured since the first data point (${1})",
+[
+"medido desde o primeiro dado ("
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -12228,6 +12366,14 @@ const I18N_EN = {
 ]
 ],
 [
+"v",
+"^v((?:(?! · ).)+?): troca quando o CPM normalizar$",
+"v${1}: switches when the CPM normalizes",
+[
+": troca quando o CPM normalizar"
+]
+],
+[
 "a calibração precisa de ",
 "^a calibração precisa de ((?:(?! · ).)+?) pontos$",
 "the calibration needs ${1} points",
@@ -12435,6 +12581,15 @@ const I18N_EN = {
 "The device memory brought back ${1}.",
 [
 "A memória do aparelho trouxe "
+]
+],
+[
+"espectro: formato ",
+"^espectro: formato ((?:(?! · ).)+?) desconhecido$",
+"spectrum: unknown format ${1}",
+[
+"espectro: formato ",
+" desconhecido"
 ]
 ],
 [
@@ -13098,6 +13253,14 @@ const I18N_EN = {
 ]
 ],
 [
+"· desde o primeiro dado (",
+"^· desde o primeiro dado \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
+"· since the first data point (${1} ${2})",
+[
+"· desde o primeiro dado ("
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -13601,6 +13764,16 @@ const I18N_EN = {
 [
 "de dose em ",
 ", pelo RadiaCode"
+]
+],
+[
+"O ",
+"^O ((?:(?! · ).)+?) ficou parado \\(((?:(?! · ).)+?)%, ((?:(?! · ).)+?) σ\\)\\.$",
+"The ${1} stayed flat (${2}%, ${3} σ).",
+[
+" ficou parado (",
+"%, ",
+" σ)."
 ]
 ],
 [
@@ -14192,6 +14365,15 @@ const I18N_EN = {
 "· RC102 média ",
 " · máx ",
 " CPS"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)σ na dose · ((?:(?! · ).)+?)σ na contagem$",
+"${1}σ in the dose · ${2}σ in the count",
+[
+"σ na dose · ",
+"σ na contagem"
 ]
 ],
 [
@@ -15173,6 +15355,14 @@ const I18N_EN = {
 ]
 ],
 [
+"aparelho desconhecido ",
+"^aparelho desconhecido ((?:(?! · ).)+?)$",
+"unknown device ${1}",
+[
+"aparelho desconhecido "
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -15527,6 +15717,40 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) µSv/h pelo RadiaCode$",
+"${1} µSv/h via the RC102",
+[
+" µSv/h pelo RadiaCode"
+]
+],
+[
+"seu normal: ",
+"^seu normal: ((?:(?! · ).)+?) a ((?:(?! · ).)+?) µSv/h$",
+"your normal: ${1} to ${2} µSv/h",
+[
+"seu normal: ",
+" µSv/h"
+]
+],
+[
+"~1 vez a cada ",
+"^\\~1 vez a cada ((?:(?! · ).)+?) meses$",
+"~once every ${1} months",
+[
+"~1 vez a cada ",
+" meses"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) O tubo conta igual\\.$",
+"${1} The tube counts the same.",
+[
+" O tubo conta igual."
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -15867,6 +16091,23 @@ const I18N_EN = {
 "stepped to a new level on ${1}",
 [
 "mudou de patamar em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h pelo GMC\\-800$",
+"${1} µSv/h via the GMC-800",
+[
+" µSv/h pelo GMC-800"
+]
+],
+[
+"~1 vez a cada ",
+"^\\~1 vez a cada ((?:(?! · ).)+?) anos$",
+"~once every ${1} years",
+[
+"~1 vez a cada ",
+" anos"
 ]
 ],
 [
@@ -16289,6 +16530,15 @@ const I18N_EN = {
 [
 "Onde está o ",
 ": mudar"
+]
+],
+[
+"desde ",
+"^desde ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\) · pico ((?:(?! · ).)+?)((?:(?! · ).)+?)$",
+"since ${1} (${2}) · peak ${3}${4}",
+[
+"desde ",
+") · pico "
 ]
 ],
 [
@@ -17096,6 +17346,30 @@ const I18N_EN = {
 "both ignored${1}",
 [
 "os dois ignorados"
+]
+],
+[
+"RadiaCode agora: ",
+"^RadiaCode agora: ((?:(?! · ).)+?)$",
+"RC102 now: ${1}",
+[
+"RadiaCode agora: "
+]
+],
+[
+"RadiaCode desde ",
+"^RadiaCode desde ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 since ${1} ${2}",
+[
+"RadiaCode desde "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) µSv/h pelo RC102$",
+"${1} µSv/h via the RC102",
+[
+" µSv/h pelo RC102"
 ]
 ],
 [
@@ -18177,6 +18451,22 @@ const I18N_EN = {
 ]
 ],
 [
+"Sua dose pelo ",
+"^Sua dose pelo ((?:(?! · ).)+?)$",
+"Your dose via the ${1}",
+[
+"Sua dose pelo "
+]
+],
+[
+"Onde estava o ",
+"^Onde estava o ((?:(?! · ).)+?)$",
+"Where the ${1} was",
+[
+"Onde estava o "
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -18497,6 +18787,22 @@ const I18N_EN = {
 [
 " CPM = ",
 " µSv/h"
+]
+],
+[
+"RC102 agora: ",
+"^RC102 agora: ((?:(?! · ).)+?)$",
+"RC102 now: ${1}",
+[
+"RC102 agora: "
+]
+],
+[
+"RC102 desde ",
+"^RC102 desde ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 since ${1} ${2}",
+[
+"RC102 desde "
 ]
 ],
 [
@@ -19258,6 +19564,30 @@ const I18N_EN = {
 ]
 ],
 [
+"GMC desde ",
+"^GMC desde ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"GMC since ${1} ${2}",
+[
+"GMC desde "
+]
+],
+[
+"−",
+"^−((?:(?! · ).)+?) h … agora$",
+"−${1} h … now",
+[
+" h … agora"
+]
+],
+[
+"· ",
+"^· ((?:(?! · ).)+?)σ na dose$",
+"· ${1}σ in the dose",
+[
+"σ na dose"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -19655,6 +19985,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Casa pelo ",
+"^Casa pelo ((?:(?! · ).)+?)$",
+"Home via the ${1}",
+[
+"Casa pelo "
+]
+],
+[
 "fundo ",
 "^fundo ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)$",
 "background ${1} ± ${2}",
@@ -20038,6 +20376,22 @@ const I18N_EN = {
 ]
 ],
 [
+"· ",
+"^· ((?:(?! · ).)+?) desde ((?:(?! · ).)+?)$",
+"· ${1} since ${2}",
+[
+" desde "
+]
+],
+[
+"· limite ",
+"^· limite ((?:(?! · ).)+?)$",
+"· limit ${1}",
+[
+"· limite "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -20355,6 +20709,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · pico ((?:(?! · ).)+?)((?:(?! · ).)+?)$",
+"${1} · peak ${2}${3}",
+[
+" · pico "
+]
+],
+[
 "CPM às ",
 "^CPM às ((?:(?! · ).)+?)$",
 "CPM at ${1}",
@@ -20643,6 +21005,22 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: ",
+"^nuvem: ((?:(?! · ).)+?)$",
+"cloud: ${1}",
+[
+"nuvem: "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) depois$",
+"${1} after",
+[
+" depois"
+]
+],
+[
 "Hoje: ",
 "^Hoje: ((?:(?! · ).)+?)$",
 "Today: ${1}",
@@ -20856,6 +21234,30 @@ const I18N_EN = {
 "≈ ${1} CPM",
 [
 " CPM"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) agora((?:(?! · ).)+?)((?:(?! · ).)+?)$",
+"${1} now${2}${3}",
+[
+" agora"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) antes$",
+"${1} before",
+[
+" antes"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) pelo ((?:(?! · ).)+?)$",
+"${1} via the ${2}",
+[
+" pelo "
 ]
 ],
 [

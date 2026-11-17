@@ -2030,6 +2030,7 @@ Ao vivo, do seu RC102: cada fóton que chega é contado no canal da energia dele
 canal {0} · {1} contagens	channel {0} · {1} counts
 {0} keV · canal {1} · {2} contagens	{0} keV · channel {1} · {2} counts
 do aparelho	from the device
+dose de hoje: a que o próprio aparelho conta	today's dose: the one the device itself counts
 Energia	Energy
 3 h	3 h
 12 h	12 h
@@ -6152,3 +6153,98 @@ juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
 Medição no {0} terminada.	Measurement on the {0} finished.
 Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. O Perigo só fica calado no aparelho que está no objeto.	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. Danger is only muted on the device that is on the object.
+2 h antes	2 h before
+4 h depois	4 h after
+Agora:	Now:
+Casa pelo {0}	Home via the {0}
+Esconder	Hide
+GMC desde {0} {1}	GMC since {0} {1}
+Medir objeto ·	Measure object ·
+Nenhum byte mudou desde a foto.	Not a single byte changed since the snapshot.
+Nenhuma cidade encontrada.	No city found.
+Objeto desconhecido?	Unknown object?
+Pronto agora.	Done now.
+RC102 agora: {0}	RC102 now: {0}
+RC102 desde {0} {1}	RC102 since {0} {1}
+RC102 · somada pelo aparelho	RC102 · summed by the device
+Sua dose pelo {0}	Your dose via the {0}
+antes	before
+aparelho desconhecido {0}	unknown device {0}
+carregando	loading
+desde o primeiro dado	since the first data point
+desde {0} ({1}) · pico {2}{3}	since {0} ({1}) · peak {2}{3}
+espectro	spectrum
+espectro zerado	spectrum reset
+espectro: formato {0} desconhecido	spectrum: unknown format {0}
+falhou	failed
+log aberto pela tela	log opened from the screen
+medido desde o primeiro dado ({0})	measured since the first data point ({0})
+nenhum pico conhecido aqui	no known peak here
+nenhuma release publicada	no release published
+nuvem	cloud
+nuvem desligada neste PC	cloud turned off on this PC
+nuvem: cofre	cloud: vault
+nuvem: revogar	cloud: revoke
+nuvem: subiu {0} arquivo(s), juntou {1}	cloud: uploaded {0} file(s), merged {1}
+nuvem: {0}	cloud: {0}
+o aparelho recusou zerar a dose	the device refused to reset the dose
+objeto	object
+pelo GMC-800	via the GMC-800
+pelo RC102	via the RC102
+pico —	peak —
+pronto	done
+vezes	times
+{0} acumulados · {1} contagens · {2} cps ±{3}% · ≈ {4} µSv/h agora	{0} accumulated · {1} counts · {2} cps ±{3}% · ≈ {4} µSv/h now
+{0} agora{1}{2}	{0} now{1}{2}
+{0} antes	{0} before
+{0} depois	{0} after
+{0} pelo {1}	{0} via the {1}
+{0} µSv/h pelo GMC-800	{0} µSv/h via the GMC-800
+{0} µSv/h pelo RC102	{0} µSv/h via the RC102
+{0} · pico {1}{2}	{0} · peak {1}{2}
+· ativo agora	· active now
+· desde o primeiro dado ({0} {1})	· since the first data point ({0} {1})
+· maior pico	· highest peak
+· pico	· peak
+· {0} desde {1}	· {0} since {1}
+−{0} h … agora	−{0} h … now
+). Pode ser outro firmware.	). It may be a different firmware.
+Alto	High
+alto	high
+Areia seca, pote cheio. Solo comum tem ~45 Bq/kg.	Dry sand, full jar. Ordinary soil has ~45 Bq/kg.
+Casa	Home
+Contagens	Counts
+Escolha a cidade primeiro.	Pick the city first.
+Iguais a casa:	Same as home:
+Limite	Limit
+Mostra a janela	Shows the window
+Onde estava o {0}	Where the {0} was
+aviso	notice
+avisos	notices
+escala	scale
+nova	new
+novo	new
+outro	other
+outro PC	other PC
+pequeno	small
+registros	records
+sim	yes
+taxa	rate
+tem algo	something there
+valor	value
+O {0} ficou parado ({1}%, {2} σ).	The {0} stayed flat ({1}%, {2} σ).
+seu normal: {0} a {1} µSv/h	your normal: {0} to {1} µSv/h
+~1 vez a cada {0} anos	~once every {0} years
+~1 vez a cada {0} meses	~once every {0} months
+· limite {0}	· limit {0}
+{0} O tubo conta igual.	{0} The tube counts the same.
+v{0}: troca quando o CPM normalizar	v{0}: switches when the CPM normalizes
+A contagem não mudou, mas a dose subiu	The count didn't change, but the dose went up
+{0}: a contagem não mudou, mas a dose subiu	{0}: the count didn't change, but the dose went up
+a contagem não mudou, mas a dose subiu	the count didn't change, but the dose went up
+O RC102 contou o mesmo que no fundo ({0}σ), mas a taxa de dose subiu {1} ({2}σ).	The RC102 counted the same as the background ({0}σ), but the dose rate went up {1} ({2}σ).
+Isso acontece com gama de energia alta: cada contagem vale mais dose.	This happens with high-energy gamma: each count is worth more dose.
+Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o {0} ({1} keV) que apareceu no espectro.	This happens with high-energy gamma: each count is worth more dose. Here it matches the {0} ({1} keV) that showed up in the spectrum.
+· {0}σ na dose	· {0}σ in the dose
+A contagem ficou igual ({0} σ), mas a taxa de dose subiu {1} σ: gama de energia alta, em que cada contagem vale mais dose.	The count stayed the same ({0} σ), but the dose rate went up {1} σ: high-energy gamma, where each count is worth more dose.
+{0}σ na dose · {1}σ na contagem	{0}σ in the dose · {1}σ in the count

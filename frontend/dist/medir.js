@@ -269,6 +269,9 @@ const devK = (dev) => (dev === "radiacode" ? rcK() : calK());
 const phK = (ph, dev) => (ph && ph.cpm > 0 && ph.usv > 0 ? ph.usv / ph.cpm : devK(dev));
 const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
 const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
+// 2.100.2: ± do µSv/h; no RC102 vem do espalhamento da dose (errUSv), não do √N
+const phErr = (ph, k) => (ph.errUSv ? usvVal(ph.errUSv) : uS(ph.errCPM, k));
+const netErr = (r, k) => (r.netErrUSv ? usvVal(r.netErrUSv) : uS(r.netErr, k));
 const sgnUS = (v) => (v >= 0 ? "+" : "−") + usvVal(Math.abs(v));
 const numU = (v) => fmt(v, v === 0 ? 0 : usvDigits(Math.abs(v)));
 const cntTxt = (n) => `${(n || 0).toLocaleString(LOCALE)} ${n === 1 ? "contagem" : "contagens"}`;
@@ -289,12 +292,12 @@ function measureStats(m) {
   for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
     if (!x) continue;
     const k = phK(x, dev);
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), numU(x.cpm * k), `±${numU(x.errCPM * k)}`]));
+    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), numU(x.cpm * k), `±${x.errUSv ? numU(x.errUSv) : numU(x.errCPM * k)}`]));
   }
   const r = m.result;
   if (r) {
     const k = phK(m.obj, dev);
-    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv)), `±${numU(r.netErr * k)}`], "m-diff"));
+    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv)), `±${r.netErrUSv ? numU(r.netErrUSv) : numU(r.netErr * k)}`], "m-diff"));
   }
   tbl.append(thead, tb);
   const box = document.createElement("div");
@@ -764,10 +767,11 @@ function mLevelTxt(objU) {
   return `${v} com o objeto, abaixo do nível de atenção.`;
 }
 // classe de cor: a do Medir objeto para "tem algo"; vermelho só no perigo
-const mLvCls = (r, objU) => (r.level === "sim" && objU >= dangerUSv() ? r.level + " perigo" : r.level);
+const mLvCls = (r, objU) => (r.level === "sim" && objU >= dangerUSv() ? r.level + " perigo" : r.doseUp ? "talvez" : r.level);
 
 function measBannerTitle(st, r) {
   const nm = (st.name || "").trim();
+  if (r.doseUp) return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)}: a contagem não mudou, mas a dose subiu` : "A contagem não mudou, mas a dose subiu";
   if (r.level === "sim") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} emite radiação acima do fundo` : "O objeto emite radiação acima do fundo";
   if (r.level === "talvez") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} talvez emita um pouco acima do fundo` : "O objeto talvez emita um pouco acima do fundo";
   return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)}: nenhuma diferença que dê para ver` : "Nenhuma diferença do fundo que dê para ver";
@@ -782,21 +786,22 @@ function renderMeasureResult(st) {
   // faixa de cima
   const ban = $("mBanner");
   ban.className = "m-banner " + mLvCls(r, st.obj.cpm * ok);
-  ban.querySelector(".m-banner-ico").textContent = r.level === "nada" ? "✓" : "!";
+  ban.querySelector(".m-banner-ico").textContent = r.level === "nada" && !r.doseUp ? "✓" : "!";
   $("mVerdict").textContent = measBannerTitle(st, r);
   const objU = st.obj.cpm * ok;
   // duas frases em dois pedaços (cada um é traduzido inteiro)
   const bt = $("mBannerText"), s1 = document.createElement("span"), s2 = document.createElement("span");
-  s1.textContent = r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `${mSureTxt(r.sigma)} ${mLevelTxt(objU)}`;
-  s2.textContent = measureExplain(r, st.obj, auto, ok);
+  s1.textContent = r.doseUp ? `O RC102 contou o mesmo que no fundo (${fmt(r.sigma, 1)}σ), mas a taxa de dose subiu ${sgnUS(r.netUSv)} (${fmt(r.doseSigma, 0)}σ).` : r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `${mSureTxt(r.sigma)} ${mLevelTxt(objU)}`;
+  s2.textContent = r.doseUp ? doseUpExplain(st.spectrum) : measureExplain(r, st.obj, auto, ok);
   bt.replaceChildren(s1, " ", s2);
   // quatro números
   const t = $("mTilesNew");
   t.textContent = "";
   sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
-  sumTile(t, "certeza", mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
+  if (r.doseUp) sumTile(t, "certeza", mSure(r.doseSigma), `${fmt(r.doseSigma, 0)}σ na dose · ${fmt(r.sigma, 1)}σ na contagem`);
+  else sumTile(t, "certeza", mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
   glMark(t.lastElementChild.children[2], "sigma");
-  sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "obj" : "");
+  sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${netErr(r, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "obj" : "");
   const sf = d.safe || {};
   sumTile(t, "distância segura", sf.ok ? (sf.below ? `≤ ${cmTxt(sf.cm)}` : `${sf.approx ? "~" : ""}${cmTxt(sf.cm)}`) : "—",
     sf.ok ? (sf.below ? "já aqui o extra fica abaixo de 10% do fundo" : "onde o extra cai a 10% do fundo" + (sf.approx ? " (aproximada)" : "")) : sf.why || "");
@@ -1021,7 +1026,7 @@ function renderSideResult(box, m) {
   }
   add("strong", `${name} (também perto do objeto)`);
   const r = o.result;
-  if (r) add("mono", `${sgnUS(r.netUSv)} ± ${uS(r.netErr, phK(o.obj, o.device))} sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo`);
+  if (r) add("mono", `${sgnUS(r.netUSv)} ± ${netErr(r, phK(o.obj, o.device))} sobre o fundo · ${fmt(r.sigma, 1)}σ · ${fmt(r.ratio, 1)}× o fundo`);
   else add("small muted", "Sem leituras suficientes desse aparelho.");
   if (o.hint) add("small", o.hint);
   add("small muted", "O GMC vê beta e gama; o RC102, quase só gama. Vale como pista: o tubo e o cristal ficam em lugares diferentes do objeto.");
@@ -1129,6 +1134,12 @@ function renderMeasSpec(box, sp, opt) {
     li.append(b, " ", k);
     ul.appendChild(li);
   }
+}
+
+// 2.100.2: a dose subiu sem a contagem subir: gama de energia alta
+function doseUpExplain(sp) {
+  const hi = ((sp && sp.peaks) || []).filter((p) => p.kev >= 1000).sort((a, b) => b.kev - a.kev)[0];
+  return hi ? `Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o ${hi.nuclide} (${fmt(hi.kev, 0)} keV) que apareceu no espectro.` : "Isso acontece com gama de energia alta: cada contagem vale mais dose.";
 }
 
 function measureExplain(r, obj, auto, k) {
@@ -1398,9 +1409,9 @@ function renderMeasureDetail() {
   const t = $("mdTiles");
   t.textContent = "";
   const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
-  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${uS(m.bg.errCPM, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${uS(m.obj.errCPM, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)} ` + (rc ? "no detector" : "no tubo"), r.level === "sim" ? "obj" : "");
+  sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${phErr(m.bg, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
+  sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${phErr(m.obj, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
+  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (r.doseUp ? ` · ${fmt(r.doseSigma, 0)}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
   sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);

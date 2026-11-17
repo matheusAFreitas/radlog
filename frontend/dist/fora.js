@@ -219,7 +219,7 @@ function whSeg(dev, value, disabled) {
   const seg = document.createElement("div");
   seg.className = "seg loc";
   seg.setAttribute("role", "group");
-  seg.setAttribute("aria-label", "Onde estava o " + WH_NAME[dev]);
+  seg.setAttribute("aria-label", `Onde estava o ${WH_NAME[dev]}`);
   seg.dataset.dev = dev;
   for (const [v, t] of [["casa", "em casa"], ["comigo", "comigo"], ["fora", "ignorar"]]) {
     const b = document.createElement("button");

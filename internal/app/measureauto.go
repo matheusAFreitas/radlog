@@ -70,6 +70,7 @@ type HomeBg struct {
 	Demo    bool    `json:"demo"`
 	// µSv/h do fundo (Radiacode: média do aparelho; GMC: pela calibração)
 	USv    float64 `json:"usv"`
+	ErrUSv float64 `json:"errUSv,omitempty"` // RC102: incerteza do µSv/h (espalhamento dos minutos)
 	Device string  `json:"device"`
 }
 
@@ -252,7 +253,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		Auto: o.Auto, MaxSec: o.MaxSec, Pct: o.Pct, PhaseStart: now, Eta: -1, Device: dev, Mode: o.Mode, Other: side}
 	if o.HomeBg {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
-			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}
+			USv: hb.USv, ErrUSv: hb.ErrUSv, Start: hb.From, End: hb.To, Source: "casa"}
 		m.Bg = &bg
 		m.Phase = "objeto"
 		m.Seconds = o.Seconds

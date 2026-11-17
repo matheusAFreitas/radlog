@@ -116,3 +116,22 @@ func TestMeasureOtherDanger(t *testing.T) {
 		t.Fatal("o aparelho no objeto cala o Perigo")
 	}
 }
+
+// 2.100.2 (sal light): no RC102 a contagem não muda, mas a dose sobe muito
+// acima da incerteza da própria dose: o resumo diz isso.
+func TestMeasureDoseUp(t *testing.T) {
+	bg := MeasurePhase{Counts: 41650, Seconds: 3420, CPM: 41650 / 57.0, ErrCPM: 3.58, USv: 0.169, ErrUSv: 0.0007}
+	obj := MeasurePhase{Counts: 43645, Seconds: 3600, CPM: 43645 / 60.0, ErrCPM: 3.48, USv: 0.188, ErrUSv: 0.0012}
+	r := compareMeasure(bg, obj, nil)
+	if r.Level != "nada" || !r.DoseUp || r.DoseSigma < 10 || r.Verdict != "a contagem não mudou, mas a dose subiu" {
+		t.Fatalf("sal: %+v", r)
+	}
+	// GMC (sem incerteza da dose): como antes
+	bg.ErrUSv, obj.ErrUSv = 0, 0
+	if r := compareMeasure(bg, obj, nil); r.DoseUp || r.NetErrUSv != 0 {
+		t.Fatalf("GMC: %+v", r)
+	}
+	if e := meanErr(10, 50, 4); e < 1.443 || e > 1.444 { // √((50−25)/3 ÷ 4)
+		t.Fatalf("meanErr %v", e)
+	}
+}
