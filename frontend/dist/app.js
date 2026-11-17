@@ -1993,7 +1993,7 @@ function renderLevelEq() {
   const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
     const v = parseFloat($(el.dataset.eq).value) || 0;
-    el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM no GMC-800 com a calibração atual` : "";
+    el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM` : "";
   });
 }
 
@@ -2008,6 +2008,7 @@ const SET_LAYOUT = [
   { id: "rc", name: "Radiacode 102", tabs: [["con", "Conexão"], ["dev", "No aparelho"]] },
   { group: "Alarmes", id: "alarm", name: "Níveis e alarmes" },
   { group: "App", id: "app", name: "Janela e tela" },
+  { id: "chuva", name: "Chuva no gráfico" },
   { id: "data", name: "Dados e backup", tabs: [["arq", "Backup e arquivos"], ["nuvem", "Nuvem"], ["uso", "Uso do app"], ["hist", "Histórico"]] },
   { id: "about", name: "Atualizações e sobre" },
 ];
@@ -2069,7 +2070,7 @@ function showSetSection(id, tab) {
   }
   if (["devcfg", "dcCalCard", "dcTube"].some((k) => setShown($(k)))) openDevCfg();
   if (setShown($("rcCfg"))) openRcCfg();
-  if (L.id === "alarm") { renderLadder(); renderDevAlarms(); openDevCfg().then(renderDevAlarms); }
+  if (L.id === "alarm") { renderLadder(); alSync(); openDevCfg().then(alSync); openRcCfg(); }
   if (L.id === "data" && state.setTab.data === "hist") renderMaturity();
 }
 
@@ -2080,6 +2081,8 @@ function showSetFor(elId, flash) {
   if (!sec) return;
   const t = el.closest(".set-tab");
   showSetSection(sec.dataset.sec, t ? t.dataset.tab : null);
+  const adv = el.closest("details.cal-adv");
+  if (adv) adv.open = true;
   const card = el.closest("fieldset") || el;
   if (flash) {
     card.scrollIntoView({ block: "nearest" });
@@ -2133,13 +2136,51 @@ function renderLadder() {
 document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
 document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#lvCard")) renderLadder(); });
 
-// alarmes que tocam nos próprios aparelhos, em µSv/h para comparar
-function renderDevAlarms() {
-  if (!$("devAlGmc")) return;
-  const cpm = devCfgRead && devCfg ? parseFloat($("dcAlarm").value) : NaN;
-  $("devAlGmc").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM ≈ ${usvTxt(cpm * calK())}` : "conecte o GMC-800 para ver";
-  const l = ((state.rc || {}).st || {}).limits || {};
-  $("devAlRc").textContent = l.device ? `${usvTxt(l.attn || 0)} e ${usvTxt(l.alarm || 0)}` : "conecte o RC102 para ver";
+// alarmes dos aparelhos na tela de alarmes (2.95.0): espelhos dos campos das
+// páginas de cada aparelho. Mexer aqui é mexer lá; gravar continua sendo o
+// botão de cada aparelho (que confere, salva cópia e lê de volta)
+const AL_MIRROR = [
+  // [campo daqui, campo da página do aparelho, conversão]
+  ["alGmc", "dcAlarmRate", null],
+  ["alRc1", "rcDR1", "rate"],
+  ["alRc2", "rcDR2", "rate"],
+  ["alDs1", "rcDS1", null],
+  ["alDs2", "rcDS2", null],
+  ["alDs1On", "rcDS1On", null],
+  ["alDs2On", "rcDS2On", null],
+];
+// os do RC102 ficam em µSv/h no aparelho; aqui vão na unidade da tela
+const alOut = (src, conv) => (conv === "rate" ? rateOut(parseFloat(src.value)) : src.value);
+const alIn = (v, conv) => (conv === "rate" ? (rateIn(v) > 0 ? String(Math.round(rateIn(v) * 100) / 100) : "") : v);
+function alSync() {
+  if (!$("alGmc")) return;
+  for (const [d, s, conv] of AL_MIRROR) {
+    const dst = $(d), src = $(s);
+    if (!dst || !src) continue;
+    if (dst.type === "checkbox") dst.checked = src.checked;
+    else if (document.activeElement !== dst) dst.value = alOut(src, conv);
+    dst.disabled = src.matches(":disabled");
+  }
+  const cpm = devCfgRead && devCfg ? parseInt($("dcAlarm").value, 10) : NaN;
+  $("alGmcCpm").textContent = cpm > 0 ? `${fmt(cpm, 0)} CPM no aparelho` : "conecte para mudar";
+  $("alGmcSave").disabled = $("dcSaveBtn").disabled;
+  $("alRcSave").disabled = $("rcCfgSave").disabled;
+}
+function wireAlMirror() {
+  for (const [d, s, conv] of AL_MIRROR) {
+    const dst = $(d);
+    dst.addEventListener(dst.type === "checkbox" ? "change" : "input", () => {
+      const src = $(s);
+      if (dst.type === "checkbox") { src.checked = dst.checked; src.dispatchEvent(new Event("change", { bubbles: true })); }
+      else { src.value = alIn(dst.value, conv); src.dispatchEvent(new Event("input", { bubbles: true })); }
+      alSync();
+    });
+  }
+  $("alGmcSave").addEventListener("click", () => $("dcSaveBtn").click());
+  $("alRcSave").addEventListener("click", () => $("rcCfgSave").click());
+  // ligou, desligou ou gravou: os botões dos aparelhos mudam e os daqui acompanham
+  const mo = new MutationObserver(() => alSync());
+  for (const id of ["dcSaveBtn", "rcCfgSave"]) mo.observe($(id), { attributes: true, attributeFilter: ["disabled"] });
 }
 
 // links para fora (Sobre › Código) abrem no navegador do sistema
@@ -2646,7 +2687,10 @@ async function renderCalHist() {
   const vs = h.versions || [];
   const cur = vs.find((v) => v.atual) || vs[0];
   if (cur) {
-    $("calNow").textContent = `${fmt(cur.k, 5)} µSv/h por CPM · ${calSrcTxt(cur)}` + (h.retro ? " · histórico recalculado" : "");
+    $("calNowK").textContent = fmt(cur.k, 5);
+    const src = cur.desde ? `${calSrcTxt(cur)}, desde ${calWhen(cur.desde)}` : calSrcTxt(cur);
+    $("calNow").textContent = `De onde veio: ${src}`;
+    if (h.retro) $("calNow").appendChild(Object.assign(document.createElement("span"), { textContent: " · histórico recalculado" }));
     $("calK").value = cur.k ? cur.k.toFixed(5) : "";
     $("calKReset").hidden = !(cur.fator > 0);
   }
@@ -2957,6 +3001,7 @@ function dcAlarmFill() {
   $("dcAlarmRate").value = cpm > 0 ? rateOut(cpm * calK()) : "";
   $("dcAlarmRate").disabled = $("dcAlarm").disabled;
   dcAlarmNote();
+  alSync();
 }
 function dcAlarmNote() {
   const cpm = parseInt($("dcAlarm").value, 10);
@@ -3017,7 +3062,16 @@ function wireDevCfg() {
     if (!(a >= 1 && a <= 999999)) { toast("O limite do alarme precisa ficar entre 1 e 999999 CPM.", true); return; }
     const text = ["O app vai apagar e regravar a configuração do contador (leva alguns segundos)."];
     if (calChanged(next)) text.push("A calibração vai mudar: isso altera o µSv/h mostrado pelo contador e pelo app.");
-    if (!(await askConfirm({ title: "Gravar no GMC-800?", text, note: "Não desconecte o cabo nesse tempo.", ok: "Gravar" }))) return;
+    text.push("Antes, o app salva uma cópia do que está no contador agora.");
+    // resumo do que muda (2.95.0): o alarme e cada ponto da calibração
+    const diff = [];
+    if (next.values.alarmCPM !== devCfg.values.alarmCPM) diff.push(["Alarme", `${fmt(devCfg.values.alarmCPM, 0)} CPM`, `${fmt(a, 0)} CPM`]);
+    const was = devCfg.calibration.points || [];
+    next.calibration.points.forEach((pt, i) => {
+      const o = was[i];
+      if (o && (o.cpm !== pt.cpm || Math.abs(o.usv - pt.usv) > 1e-6 * o.usv)) diff.push([`Ponto ${i + 1}`, `${fmt(o.cpm, 0)} CPM = ${fmt(o.usv, 2)} µSv/h`, `${fmt(pt.cpm, 0)} CPM = ${fmt(pt.usv, 2)} µSv/h`]);
+    });
+    if (!(await askConfirm({ title: "Gravar no GMC-800?", diff: diff.length ? diff : null, text, textAfter: diff.length ? text.length : undefined, note: "Não desconecte o cabo nesse tempo.", ok: "Gravar" }))) return;
     setDevCfgEnabled(false);
     $("dcSaveBtn").textContent = "Gravando…";
     try {
@@ -3191,6 +3245,9 @@ function wire() {
 
   setupChartHover();
   wireDevCfg();
+  wireAlMirror();
+  // o "lado a lado" só desenha aberto (precisa da largura)
+  $("calAdv").addEventListener("toggle", () => { if ($("calAdv").open) renderCalHist(); });
   wireDose();
   wireDemo();
   wireAlarm();
@@ -3869,7 +3926,7 @@ function drawRc24(c, t0, t1) {
 }
 
 async function refreshRcCompare() {
-  // o cartão mora em Configurações › GQ GMC-800 › Calibração (2.51)
+  // o cartão mora em Configurações › GQ GMC-800 › Calibração › Avançado
   if (!api.GetRcCompare || !$("rcCmpCard").offsetParent) return;
   let c;
   try { c = await api.GetRcCompare(state.rc.cmpMin); } catch (e) { $("rcCmpStats").textContent = errMsg(e); return; }
@@ -4523,7 +4580,9 @@ function applyUi(scale, dens) {
 function uiSegSet(scale, dens) {
   $("valUiScale").value = String(scale);
   $("valUiDensity").value = dens;
-  document.querySelectorAll("#segUiScale button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.v === +scale)));
+  const i = UI_STEPS.findIndex((s) => s >= +scale - 1e-6);
+  $("rngUiScale").value = String(i < 0 ? UI_STEPS.length - 1 : i);
+  $("uiScaleOut").textContent = `${Math.round((+scale || 1) * 100)}%`;
   document.querySelectorAll("#segUiDensity button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === dens)));
 }
 // unidades (2.84.0): os dois seletores escrevem nos campos escondidos
@@ -4544,7 +4603,7 @@ function wireUiScale() {
     applyUi(parseFloat($("valUiScale").value), $("valUiDensity").value);
     $("valUiScale").dispatchEvent(new Event("change", { bubbles: true }));
   };
-  document.querySelectorAll("#segUiScale button").forEach((b) => b.addEventListener("click", () => { $("valUiScale").value = b.dataset.v; pick(); }));
+  $("rngUiScale").addEventListener("input", () => { $("valUiScale").value = String(UI_STEPS[+$("rngUiScale").value] || 1); pick(); });
   document.querySelectorAll("#segUiDensity button").forEach((b) => b.addEventListener("click", () => { $("valUiDensity").value = b.dataset.v; pick(); }));
   document.addEventListener("keydown", async (e) => {
     if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
@@ -4566,31 +4625,3 @@ function wireUiScale() {
   });
 }
 
-// ---------- Configurações em duas colunas (2.68.4) ----------
-// O último cartão visível de cada coluna estica até o fim, para as duas
-// colunas terminarem juntas. É marcado aqui (e não com :last-child) porque
-// cartões aparecem e somem (aparelho desconectado, seção escondida).
-(function setColsLast() {
-  const root = document.getElementById("settings");
-  if (!root) return;
-  let pending = false;
-  const mark = () => {
-    pending = false;
-    for (const col of root.querySelectorAll(".set-col")) {
-      let last = null;
-      for (const f of col.children) {
-        if (f.tagName === "FIELDSET" && !f.hidden && getComputedStyle(f).display !== "none") last = f;
-      }
-      for (const f of col.children) {
-        const want = f === last;
-        if (f.classList.contains("is-last") !== want) f.classList.toggle("is-last", want);
-      }
-    }
-  };
-  const later = () => { if (!pending) { pending = true; requestAnimationFrame(mark); } };
-  new MutationObserver((recs) => {
-    if (recs.every((r) => r.attributeName === "class" && r.target.classList && r.target.parentElement && r.target.parentElement.classList.contains("set-col") && r.oldValue != null && r.oldValue.replace(/\s*is-last\s*/g, " ").trim() === r.target.className.replace(/\s*is-last\s*/g, " ").trim())) return;
-    later();
-  }).observe(root, { attributes: true, attributeOldValue: true, attributeFilter: ["hidden", "class", "style"], subtree: true, childList: true });
-  later();
-})();
