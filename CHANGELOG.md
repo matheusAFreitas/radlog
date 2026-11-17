@@ -1,5 +1,35 @@
 # Versões
 
+## 2.96.1
+- "Os termos do app" entrou nas Ações rápidas (Ctrl+K).
+- Glossário pelo teclado: o quadro recebe o foco, Tab chega em "Todos os
+  termos" e Esc volta para o termo. Rolar a página não fecha mais o quadro.
+- Alertas: o "?" do Como funciona não fica mais por cima do primeiro alerta.
+- Níveis e alarmes em tela estreita: cada nível vira um bloco, com App,
+  GMC-800 e RC102 um embaixo do outro, sem rolar de lado. O "Ligado" da dose
+  do RC102 fica junto da caixa.
+- Mais frases saíram da fonte de código (relógio, calibração e memória do
+  GMC-800, data do alerta, linha do σ, total do período).
+- Lista das Configurações: o RC102 aparece como "conectado · USB", igual ao
+  GMC-800.
+- Inglês: relógio "on time", download "… to download", "same as your
+  normal" no Fora de casa e "click to open" no Medir objeto.
+
+**English**
+
+- "The app's terms" is now in Quick actions (Ctrl+K).
+- Glossary by keyboard: the box takes focus, Tab reaches "All terms" and Esc
+  goes back to the term. Scrolling no longer closes it.
+- Alerts: the "How it works" "?" no longer sits on top of the first alert.
+- Levels and alarms on narrow screens: each level becomes a block, with App,
+  GMC-800 and RC102 stacked, no sideways scrolling. The RC102 dose "On" sits
+  next to its box.
+- More sentences left the code font (GMC-800 clock, calibration and memory,
+  alert date, σ line, period total).
+- Settings list: the RC102 shows "connected · USB", like the GMC-800.
+- English: clock "on time", download "… to download", "same as your
+  normal" in Away from home and "click to open" in Measure object.
+
 ## 2.96.0
 - Cores com um emprego só: verde é "seguro" (e "tudo certo"), azul é o
   GMC-800, rosa continua o RC102, e o destaque e o botão principal ficam em

@@ -609,9 +609,9 @@ function renderStatus() {
   $("clockChip").hidden = !connected;
   if (connected) {
     const drift = d.clockDrift || 0;
-    const clock = Math.abs(drift) <= 2 ? "certo" : `${fmt(Math.abs(drift), 0)} s ${drift > 0 ? "adiantado" : "atrasado"}`;
-    $("iClock").textContent = clock;
-    $("clockText").textContent = "relógio " + clock;
+    const clock = Math.abs(drift) <= 2 ? "" : `${fmt(Math.abs(drift), 0)} s ${drift > 0 ? "adiantado" : "atrasado"}`;
+    $("iClock").textContent = clock || "na hora certa";
+    $("clockText").textContent = clock ? "relógio " + clock : "relógio certo";
     $("clockChip").classList.toggle("off", Math.abs(drift) > 2);
     const cal = d.calibration || {};
     $("iCal").textContent = `${cal.source || "padrão"} · ${fmt(d.usvPerCPM, 4)} µSv/h por CPM`;
@@ -2116,7 +2116,8 @@ function renderSetNavStatus() {
   const s = state.status || {}, d = s.device || {};
   put("gmc", s.state === "conectado" ? `conectado · ${d.port}` : s.state === "conectando" ? "conectando…" : "desconectado",
     s.state === "conectado" ? "on" : s.state === "erro" ? "err" : s.state === "conectando" ? "wait" : "off");
-  const rt = $("rcSetText") && $("rcSetText").textContent;
+  // 2.96.1: do mesmo jeito do GMC-800 ("conectado · USB"), sem o modelo
+  const rt = state.rcNavText || "";
   put("rc", rt || "", ($("rcSetDot").className.match(/\b(on|err|wait)\b/) || [])[1] || "off");
   const set = state.settings || {};
   put("alarm", !set.alarmEnabled ? "alarme desligado" : `toca a partir de ${usvTxt(alarmUSv())}`, "");
@@ -3739,6 +3740,7 @@ function renderRcSetState(st, prev) {
     off: "Procura desligada",
   }[st.state] || st.state;
   $("rcSetText").textContent = txt;
+  state.rcNavText = { conectado: `conectado · ${via}`, conectando: "conectando…", procurando: "procurando…", erro: "não conectou", off: "procura desligada" }[st.state] || "";
   $("rcSetDot").className = "dot " + (st.state === "conectado" ? "on" : st.state === "erro" ? "err" : "wait");
   $("rcSetState").classList.toggle("err", st.state === "erro");
   const p = state.rc.pendingBLE;
@@ -4545,7 +4547,7 @@ function howCorners(root) {
   const hosts = new Map();
   (root || document).querySelectorAll("details.how:not(.ag-more)").forEach((d) => {
     if (d.closest(".tb-ck")) return;
-    const host = d.parentElement && d.parentElement.closest(".card, .rc-card, .al-sec, #settings fieldset, .al-col, .m-alara-box");
+    const host = d.parentElement && d.parentElement.closest(".card, .rc-card, .al-sec, #settings fieldset, .m-alara-box");
     if (!host) return;
     hosts.set(host, (hosts.get(host) || []).concat(d));
   });

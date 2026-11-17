@@ -20,10 +20,27 @@ const GLOSS = {
   incerteza: ["Incerteza (±)", "Quanto o número pode estar fora por causa do acaso. Medir mais tempo diminui a incerteza."],
 };
 
-function glClose() {
+let glAnchor = null;
+
+// back: volta o foco para o termo (Esc, ou Tab para fora do quadro)
+function glClose(back) {
   const p = $("glPop");
   if (p) p.hidden = true;
   document.querySelectorAll("[data-gl][aria-expanded=true]").forEach((x) => x.setAttribute("aria-expanded", "false"));
+  if (back && glAnchor && glAnchor.focus) glAnchor.focus({ preventScroll: true });
+  glAnchor = null;
+}
+
+// o quadro acompanha o termo quando a página rola; some se o termo sair da tela
+function glPlace() {
+  const p = $("glPop");
+  if (!p || p.hidden || !glAnchor) return;
+  const r = glAnchor.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
+  if (r.bottom < 0 || r.top > window.innerHeight || (!r.width && !r.height)) { glClose(); return; }
+  const left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left));
+  const below = r.bottom + 6 + h < window.innerHeight;
+  p.style.left = left + "px";
+  p.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - h - 6)) + "px";
 }
 
 function glOpen(el) {
@@ -35,9 +52,17 @@ function glOpen(el) {
     p.id = "glPop";
     p.className = "gl-pop";
     p.setAttribute("role", "dialog");
+    p.tabIndex = -1;
     p.innerHTML = '<b class="gl-t"></b><p class="gl-x"></p><button type="button" class="link small-link" id="glAll">Todos os termos</button>';
     document.body.appendChild(p);
     $("glAll").addEventListener("click", () => { glClose(); glOpenAll(); });
+    // o foco fica no quadro: Tab vai para "Todos os termos"; sair dele fecha
+    // e devolve o foco ao termo
+    p.addEventListener("keydown", (e) => {
+      if (e.key !== "Tab") return;
+      const onAll = document.activeElement === $("glAll");
+      if ((e.shiftKey && !onAll) || (!e.shiftKey && onAll)) { e.preventDefault(); glClose(true); }
+    });
   }
   glClose();
   p.querySelector(".gl-t").textContent = g[0];
@@ -45,11 +70,9 @@ function glOpen(el) {
   p.setAttribute("aria-label", g[0]);
   p.hidden = false;
   el.setAttribute("aria-expanded", "true");
-  const r = el.getBoundingClientRect(), w = p.offsetWidth, h = p.offsetHeight;
-  const left = Math.max(8, Math.min(window.innerWidth - w - 8, r.left));
-  const below = r.bottom + 6 + h < window.innerHeight;
-  p.style.left = left + "px";
-  p.style.top = (below ? r.bottom + 6 : Math.max(8, r.top - h - 6)) + "px";
+  glAnchor = el;
+  glPlace();
+  p.focus({ preventScroll: true });
 }
 
 // a lista inteira, num diálogo
@@ -89,10 +112,11 @@ document.addEventListener("click", (e) => {
   if (p && !p.hidden && !p.contains(e.target)) glClose();
 }, true);
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { glClose(); return; }
+  if (e.key === "Escape") { const p = $("glPop"); glClose(p && !p.hidden); return; }
   const t = e.target.closest && e.target.closest("[data-gl]");
   if (t && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); glOpen(t); }
 });
-window.addEventListener("scroll", glClose, true);
+window.addEventListener("scroll", glPlace, true);
+window.addEventListener("resize", glPlace);
 // o que vem escrito no index.html com data-gl ganha o mesmo jeito de botão
 document.addEventListener("DOMContentLoaded", () => document.querySelectorAll("[data-gl]").forEach((el) => glMark(el, el.dataset.gl)));

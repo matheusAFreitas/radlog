@@ -1980,7 +1980,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .al-dose-t { font-size: var(--fs-label); font-weight: 600; flex: 1 1 100%; }
 .al-dose-f { display: inline-flex; align-items: center; gap: var(--space-2); }
 .al-dose-f .al-say { display: inline; }
-.al-dose-f input { width: 7em; }
+.al-dose-f input[type=number] { width: 7em; }
 .al-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--space-2) var(--space-3); margin-top: var(--space-3); }
 .al-foot p { margin: 0; }
 .lv-ladder { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); overflow: hidden; }
@@ -3267,4 +3267,22 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 /* T1 (2.96.0, em teste): fonte de código só em números. Estas linhas são
    frases (subtítulos, status) e passam para a fonte normal, com algarismos de
    largura fixa para não dançarem. Para voltar, apague este bloco. */
-:is(#patSub, #bgSub, #heatSub, #doseSub, #ycSub, #sumSub, #alOrSub, #adSub, #riSub, #prSub, #whTlRange, #mHomeBgLine, #mBgNowLine, #heroVia, #rcMainVia, #gLast, #rLast, #rc24Info, #rcState, #rcSpecInfo, #rcSgInfo, #rcHdInfo, #rcSearchInfo, #rcCmpStats, #lvScale, #placeChosen, #rcLogCount, #dcMem, #chartStats, #zoomStats, #doseZoomStats, .m-sig-scale, .wh-trow .when, .rca-sub, .rca-ends, .sum-note > span:first-child) { font-family: var(--sans); font-variant-numeric: tabular-nums; }
+:is(#patSub, #bgSub, #heatSub, #doseSub, #ycSub, #sumSub, #alOrSub, #adSub, #riSub, #prSub, #whTlRange, #mHomeBgLine, #mBgNowLine, #heroVia, #rcMainVia, #gLast, #rLast, #rc24Info, #rcState, #rcSpecInfo, #rcSgInfo, #rcHdInfo, #rcSearchInfo, #rcCmpStats, #lvScale, #placeChosen, #rcLogCount, #dcMem, #chartStats, #zoomStats, #doseZoomStats, .m-sig-scale, .wh-trow .when, .rca-sub, .rca-ends, .sum-note > span:first-child, #alOrTot small, #adWhen, .cx-ax span:first-child, #iClock, #iCal, #iMem, #readSigmaVal) { font-family: var(--sans); font-variant-numeric: tabular-nums; }
+
+/* 2.96.1 (QA): no celular a tabela de níveis vira um bloco por nível, com
+   o nome da coluna em cima de cada campo; "não tem" some */
+.al-h { display: none; }
+.al-dose .toggle.al-on { flex: none; gap: var(--space-2); }
+.al-dose-f .al-say { white-space: nowrap; }
+@media (max-width: 640px) {
+  .al-wrap { overflow-x: visible; }
+  .al-tbl thead { display: none; }
+  .al-tbl, .al-tbl tbody, .al-tbl tr, .al-tbl th, .al-tbl td { display: block; width: auto; }
+  .al-tbl tbody th { width: auto; padding-bottom: 0; border-bottom: 0; }
+  .al-tbl td { border: 0; padding-top: var(--space-2); padding-bottom: 0; }
+  .al-tbl tr > :last-child { padding-bottom: var(--space-3); }
+  .al-tbl tbody tr { border-bottom: 1px solid var(--border); }
+  .al-tbl tbody tr:last-child { border-bottom: 0; }
+  .al-tbl td.al-none { display: none; }
+  .al-h { display: block; margin-bottom: 4px; font-size: var(--fs-label); font-weight: 600; color: var(--muted); }
+}

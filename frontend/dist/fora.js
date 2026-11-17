@@ -91,7 +91,7 @@ function periodStatsEl(p) {
         const parts = [`média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
         if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
         if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
-        line("p-rc", "RC102", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
+        line("p-rc", "RC102", parts.map((x) => tr(x)).join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
       }
     }
     if (went.includes("gmc")) {

@@ -1244,7 +1244,7 @@ function measureMarks(t0, t1, xt) {
     b.textContent = String(k + 1);
     b.style.left = pct.toFixed(2) + "%";
     b.style.top = r * 16 + "px";
-    b.title = desc + " (clique para abrir)";
+    b.title = [desc, "clique para abrir"].join(" · ");
     b.addEventListener("click", () => openSavedMeasure(m0.id));
     pins.appendChild(b);
     const li = document.createElement("li");
