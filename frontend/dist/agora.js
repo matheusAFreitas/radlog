@@ -110,7 +110,7 @@ function renderAgDose() {
   const devName = { radiacode: "RC102", gmc: "GMC-800" };
   // por que ninguém faz esse papel agora
   const wc = whCur(), outs = ["gmc", "radiacode"].filter((x) => wc[x] === "fora").map((x) => devName[x]);
-  const why = outs.length ? `${outs.join(" e ")} fora do cálculo${since}` : null;
+  const why = outs.length === 2 ? `os dois ignorados${since}` : outs.length ? `${outs[0]} ignorado${since}` : null;
   $("agDevNote").textContent = dev === "pessoal"
     ? (!now ? `Dose pessoal: nenhum aparelho está com você agora (${why || "os dois em casa" + since}).`
       : now === "gmc" && wc.gmc === "casa" ? `Dose pessoal pela leitura de casa${since} (os dois ficaram em casa, e você também).`

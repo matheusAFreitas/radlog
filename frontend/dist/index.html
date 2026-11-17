@@ -231,9 +231,9 @@
     </div>
     <div class="wh-rows" id="whRows" hidden>
       <div class="wh-row"><div class="t"><b><span class="dot gmc"></span>GQ GMC-800</b><span id="whGmcSince"></span><span class="hstat" id="whGmcH"></span></div>
-        <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+        <div class="seg loc" role="group" aria-label="Onde está o GMC-800" data-dev="gmc"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">ignorar</button></div></div>
       <div class="wh-row"><div class="t"><b><span class="dot rc"></span>Radiacode 102</b><span id="whRcSince"></span><span class="hstat" id="whRcH"></span></div>
-        <div class="seg loc" role="group" aria-label="Onde está o RC102" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">fora do cálculo</button></div></div>
+        <div class="seg loc" role="group" aria-label="Onde está o RC102" data-dev="radiacode"><button type="button" data-v="casa">em casa</button><button type="button" data-v="comigo">comigo</button><button type="button" data-v="fora">ignorar</button></div></div>
     </div>
     <div id="whSuggest"></div>
     <div class="wh-sheet" id="whSheet" hidden>
@@ -765,7 +765,7 @@
     </section>
 </div>
 <div class="page" id="pageMedir" hidden>
-  <nav class="subtabs" role="tablist" aria-label="Medir objeto" data-page="medir">
+  <nav class="subtabs" role="tablist" aria-label="Medir objeto" data-page="medir" hidden>
     <button type="button" role="tab" data-sub="objeto" aria-selected="true">Objeto</button>
     <button type="button" role="tab" data-sub="distancia" aria-selected="false" tabindex="-1">Distância</button>
     <button type="button" role="tab" data-sub="blindagem" aria-selected="false" tabindex="-1">Blindagem</button>
@@ -794,11 +794,11 @@
       <div class="m-pane" id="mPanePrep">
         <div class="m-prep-row">
           <div class="m-field">
-            <label for="mName">O que vai medir <span class="muted">opcional</span></label>
+            <label for="mName"><span>O que vai medir</span> <span class="m-opt">(opcional)</span></label>
             <input type="text" id="mName" autocomplete="off" placeholder="ex.: prato laranja antigo">
           </div>
           <div class="m-field">
-            <label for="mDistCm">Distância do objeto até o aparelho <span class="m-tag mono">usada no Bq e na distância segura</span></label>
+            <label for="mDistCm"><span>Distância do objeto até o aparelho</span> <span class="m-opt">(usada no Bq e na distância segura)</span></label>
             <div class="m-dist" id="mDistBox">
               <input type="number" id="mDistCm" min="0" max="500" step="0.5" inputmode="decimal" aria-label="Distância em centímetros"><span class="muted">cm</span>
               <div class="seg" role="group" aria-label="Distâncias comuns" id="mDistSeg">
@@ -813,10 +813,10 @@
         <div class="m-field">
           <span class="m-label" id="mDevLabel">Com qual aparelho</span>
           <div class="m-devs" role="radiogroup" aria-labelledby="mDevLabel" id="mDevs">
-            <button type="button" role="radio" class="m-dev" data-dev="radiacode" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i>RC102</strong><span>Mais sensível e com espectro.</span><span class="mono">isótopos · espectrograma · Bq estimado</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="gmc" aria-checked="false"><strong><i class="m-dot gmc" aria-hidden="true"></i>GMC-800</strong><span>Só contagem, sem espectro.</span><span class="mono">tem algo ou não · distância segura</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="ambos" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i><i class="m-dot gmc" aria-hidden="true"></i>Os dois no objeto</strong><span>Um confere o outro.</span><span class="mono">tudo do RC102 + concordância</span></button>
-            <button type="button" role="radio" class="m-dev" data-dev="voce" aria-checked="false"><strong>Um no objeto, outro com você</strong><span>Quanto você recebe manuseando.</span><span class="mono">tem algo ou não · sua dose no período</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="radiacode" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i>RC102</strong><span>Mais sensível e com espectro.</span><span class="m-dev-f">isótopos · espectrograma · Bq estimado</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="gmc" aria-checked="false"><strong><i class="m-dot gmc" aria-hidden="true"></i>GMC-800</strong><span>Só contagem, sem espectro.</span><span class="m-dev-f">tem algo ou não · distância segura</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="ambos" aria-checked="false"><strong><i class="m-dot rc" aria-hidden="true"></i><i class="m-dot gmc" aria-hidden="true"></i>Os dois no objeto</strong><span>Um confere o outro.</span><span class="m-dev-f">tudo do RC102 + concordância</span></button>
+            <button type="button" role="radio" class="m-dev" data-dev="voce" aria-checked="false"><strong>Um no objeto, outro com você</strong><span>Quanto você recebe manuseando.</span><span class="m-dev-f">tem algo ou não · sua dose no período</span></button>
           </div>
           <div class="m-objdev" id="mObjDevBox" hidden>
             <span class="small muted">no objeto:</span>
@@ -983,6 +983,7 @@
           <span class="small muted" id="mExplain"></span>
         </div>
         <div class="m-report" id="mReport" hidden><span class="small" id="mReportText"></span></div>
+        <p class="small m-more">Quer ver na prática? <button type="button" class="link small-link" data-msub="distancia">Como cai com a distância</button> · <button type="button" class="link small-link" data-msub="blindagem">Testar uma blindagem</button></p>
         <div class="m-go m-res-actions">
           <button type="button" class="btn accent" id="btnMOpenSaved">Ver em Medições salvas</button>
           <button type="button" class="btn" id="btnMAgain">Medir em outra distância</button>
@@ -1079,6 +1080,7 @@
     </section>
   <section class="card al-sec" id="alSecDist" role="tabpanel" data-subpane="distancia" hidden>
         <div class="al-main">
+          <button type="button" class="link small-link m-back" data-msub="objeto">← Voltar para o Medir objeto</button>
           <h2>Teste de distância: o inverso do quadrado</h2>
           <div class="al-row">
             <div class="seg" role="group" aria-label="Aparelho do teste" id="alDevSeg">
@@ -1119,6 +1121,7 @@
       </section>
   <section class="card al-sec" id="alSecShield" role="tabpanel" data-subpane="blindagem" hidden>
         <div class="al-main">
+          <button type="button" class="link small-link m-back" data-msub="objeto">← Voltar para o Medir objeto</button>
           <h2>Teste de blindagem: antes × depois</h2>
           <div class="al-row">
             <div class="seg" role="group" aria-label="Aparelho do teste" id="alBDevSeg">
@@ -1161,7 +1164,7 @@
       <div class="dlg-head">
         <div>
           <h2 id="periodsTitle">Fora de casa</h2>
-          <p class="small muted">Trechos em que algum aparelho não estava no lugar de sempre (GMC-800 em casa, RC102 com você). Um aparelho com você sai do fundo da casa; as leituras continuam na dose. Marque na tela Agora ou adicione um trecho passado aqui.</p>
+          <p class="small muted">Suas saídas e a dose de cada uma. O normal é o GMC-800 em casa e o RC102 com você.</p>
         </div>
         <div class="row-btns pl-head-btns">
           <button type="button" class="btn small" id="btnPlanAdd">Programar saída</button>
@@ -1170,14 +1173,14 @@
       </div>
       <div id="plannedForm"></div>
       <div class="card pl-box" id="plannedBox" hidden></div>
-      <div class="card">
-        <div class="wh-head"><h3>Últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></div>
-        <div class="wh-tl" id="whTimeline"></div>
-        <div class="wh-legend"><span><i style="background:var(--surface-2);border:1px solid var(--border-hover)"></i>no lugar de sempre</span><span><i style="background:var(--swap)"></i>fora do lugar de sempre</span><span><i style="background:var(--nosig);border:1px solid var(--border-hover)"></i>sem dado</span><span><i style="background:var(--alarm)"></i>saturando ou sem contagens</span><span><i style="background:var(--outc)"></i>fora do cálculo</span></div>
-      </div>
       <p class="small p-total" id="periodTotal" hidden></p>
       <div id="periodAddForm"></div>
       <ul class="wh-list" id="periodList"></ul>
+      <details class="card wh-tl-det">
+        <summary class="wh-head"><h3>Linha do tempo dos últimos 7 dias</h3><span class="mono small muted" id="whTlRange"></span></summary>
+        <div class="wh-tl" id="whTimeline"></div>
+        <div class="wh-legend"><span><i style="background:var(--surface-2);border:1px solid var(--border-hover)"></i>normal</span><span><i style="background:var(--swap)"></i>saiu do normal</span><span><i style="background:var(--nosig);border:1px solid var(--border-hover)"></i>sem dado</span><span><i style="background:var(--alarm)"></i>leitura com problema</span><span><i style="background:var(--outc)"></i>ignorado</span></div>
+      </details>
         </div>
     </section>
 </div>

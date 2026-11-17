@@ -174,7 +174,7 @@ function drawMeasureSrc(src) {
   const first = {};
   for (const p of src.ph) { if (!(p.phase in first)) first[p.phase] = p.t; if (p.t - first[p.phase] >= 5000) top = Math.max(top, p.avg); }
   if (src.bgFlat) top = Math.max(top, src.bgFlat.cpm + src.bgFlat.errCPM);
-  top = Math.max(10, Math.ceil((top * 1.15) / 10) * 10);
+  top = niceN(Math.max(10, top * 1.15) * k, 3) / k; // 2.94 (G1): marcas redondas em µSv/h
   const x = (t) => ((t - t0) / (t1 - t0)) * W;
   const y = (v) => H - (Math.min(top, Math.max(0, v)) / top) * H;
   // o gráfico fica em CPM por dentro; os números saem em µSv/h
@@ -327,7 +327,7 @@ function measureOpts() {
   const has = isFinite(cm) && cm >= 0;
   return {
     name: $("mName").value, distance: !has ? "" : cm === 0 ? "encostado" : `${fmt(cm, cm % 1 ? 1 : 0)} cm`, distCm: has ? cm : 0,
-    size: mOpt("size", ""), auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
+    size: mOpt("size", "pequeno"), // 2.94 (M3): já vem marcado auto, homeBg: mOpt("mBgSrc", "casa") === "casa", waitObj: true, ...measureDevOpts(),
     seconds: auto ? 0 : parseInt(t, 10), maxSec: auto ? parseInt(t.slice(4), 10) : 0, pct: parseFloat(mOpt("mPct", "20")),
   };
 }
@@ -735,6 +735,22 @@ function mTempoCard(c, net) {
   c.append(row, tip);
 }
 
+// 2.94 (M1, M2): a certeza em palavras (o σ fica nos detalhes) e a leitura
+// com o objeto comparada aos níveis do app
+const mSure = (s) => (s >= 10 ? "muito alta" : s >= 5 ? "alta" : s >= 3 ? "boa" : s >= 2 ? "baixa" : "nenhuma");
+function mSureTxt(s) {
+  const w = mSure(s);
+  return w === "muito alta" ? "Certeza: muito alta." : w === "alta" ? "Certeza: alta." : w === "boa" ? "Certeza: boa." : w === "baixa" ? "Certeza: baixa, pode ser acaso." : "Certeza: nenhuma, cabe no acaso.";
+}
+function mLevelTxt(objU) {
+  const v = usvVal(objU);
+  if (objU >= dangerUSv()) return `${v} com o objeto, acima do nível de perigo.`;
+  if (objU >= attnUSv()) return `${v} com o objeto, acima do nível de atenção.`;
+  return `${v} com o objeto, abaixo do nível de atenção.`;
+}
+// classe de cor: a do Medir objeto para "tem algo"; vermelho só no perigo
+const mLvCls = (r, objU) => (r.level === "sim" && objU >= dangerUSv() ? r.level + " perigo" : r.level);
+
 function measBannerTitle(st, r) {
   const nm = (st.name || "").trim();
   if (r.level === "sim") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} emite radiação acima do fundo` : "O objeto emite radiação acima do fundo";
@@ -750,21 +766,21 @@ function renderMeasureResult(st) {
   const auto = !!st.auto;
   // faixa de cima
   const ban = $("mBanner");
-  ban.className = "m-banner " + r.level;
+  ban.className = "m-banner " + mLvCls(r, st.obj.cpm * ok);
   ban.querySelector(".m-banner-ico").textContent = r.level === "nada" ? "✓" : "!";
   $("mVerdict").textContent = measBannerTitle(st, r);
   const objU = st.obj.cpm * ok;
   // duas frases em dois pedaços (cada um é traduzido inteiro)
   const bt = $("mBannerText"), s1 = document.createElement("span"), s2 = document.createElement("span");
-  s1.textContent = r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `Ficou ${fmt(r.ratio, 1)}× o fundo (${usvVal(objU)}), com ${fmt(r.sigma, 1)}σ de certeza.`;
+  s1.textContent = r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `${mSureTxt(r.sigma)} ${mLevelTxt(objU)}`;
   s2.textContent = measureExplain(r, st.obj, auto, ok);
   bt.replaceChildren(s1, " ", s2);
   // quatro números
   const t = $("mTilesNew");
   t.textContent = "";
   sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
-  sumTile(t, "certeza", `${fmt(r.sigma, 1)}σ`, r.sigma >= 3 ? "acima de 3σ: diferença real" : r.sigma >= 2 ? "entre 2σ e 3σ: talvez" : "abaixo de 2σ: cabe no acaso");
-  sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "warn" : "");
+  sumTile(t, "certeza", mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
+  sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "obj" : "");
   const sf = d.safe || {};
   sumTile(t, "distância segura", sf.ok ? (sf.below ? `≤ ${cmTxt(sf.cm)}` : `${sf.approx ? "~" : ""}${cmTxt(sf.cm)}`) : "—",
     sf.ok ? (sf.below ? "já aqui o extra fica abaixo de 10% do fundo" : "onde o extra cai a 10% do fundo" + (sf.approx ? " (aproximada)" : "")) : sf.why || "");
@@ -1290,7 +1306,7 @@ function renderMeasureHistory() {
     b.className = "m-item" + (state.mSel === m.id ? " sel" : "");
     b.dataset.id = m.id;
     b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
-    b.querySelector(".mh-dot").classList.add(m.result.level);
+    b.querySelector(".mh-dot").classList.add(...mLvCls(m.result, m.obj.cpm * phK(m.obj, isRcMeasure(m) ? "radiacode" : "gmc")).split(" "));
     b.querySelector("strong").textContent = m.name;
     b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}` + ((m.attachments || []).length ? ` · ${m.attachments.length} anexo${m.attachments.length > 1 ? "s" : ""}` : "");
     if (m.notComparable) { const tg = document.createElement("span"); tg.className = "nc-tag"; tg.textContent = "não comparável"; b.querySelector("strong").appendChild(tg); }
@@ -1334,16 +1350,17 @@ function renderMeasureDetail() {
   $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "") +
     (m.mode === "ambos" ? " · os dois aparelhos" : m.mode === "voce" ? ` · ${rc ? "RC102" : "GMC-800"} no objeto, ${rc ? "GMC-800" : "RC102"} com você` : rc ? " · RC102" : "");
   const v = $("mdVerdict");
-  v.className = "m-verdict " + r.level;
+  const objU0 = m.obj.cpm * phK(m.obj, rc ? "radiacode" : "gmc");
+  v.className = "m-verdict " + mLvCls(r, objU0);
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
-  v.querySelector("span").textContent = `${fmt(r.sigma, 1)}σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.`;
+  v.querySelector("span").textContent = r.level === "nada" ? mSureTxt(r.sigma) : `${mSureTxt(r.sigma)} ${mLevelTxt(objU0)}`;
   const t = $("mdTiles");
   t.textContent = "";
   const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
   sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${uS(m.bg.errCPM, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
   sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${uS(m.obj.errCPM, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)} ` + (rc ? "no detector" : "no tubo"), r.level === "sim" ? "warn" : "");
-  sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `${fmt(r.sigma, 1)}σ acima do acaso`);
+  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${uS(r.netErr, ok)} ` + (rc ? "no detector" : "no tubo"), r.level === "sim" ? "obj" : "");
+  sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);
   renderSideResult($("mdOther"), m);
@@ -1483,3 +1500,12 @@ async function refreshMeasurements() {
   try { state.measurements = (await api.GetMeasurements()) || []; } catch (e) { state.measurements = []; }
   renderMeasureHistory();
 }
+
+// 2.94 (M4): Distância e Blindagem abrem do fim da medição e voltam pelo link
+document.addEventListener("click", (e) => {
+  const b = e.target.closest("[data-msub]");
+  if (!b) return;
+  setSub("medir", b.dataset.msub);
+  const pg = $("pageMedir");
+  if (pg) window.scrollTo({ top: Math.max(0, pg.getBoundingClientRect().top + window.scrollY - 12) });
+});

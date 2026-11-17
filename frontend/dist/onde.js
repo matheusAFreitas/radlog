@@ -176,7 +176,7 @@ function renderWhere() {
       txt.append(b, " a partir de agora (", at, "): GMC-800 em casa, RC102 com você.");
     } else {
       const l = whLines(whPending);
-      b.textContent = whKind(whPending);
+      b.textContent = whWord(whKind(whPending));
       txt.append(b, fromLast ? ", a partir de " : ", a partir de agora (", at, fromLast ? ". " : "). ");
       // uma frase por nó de texto: a tradução acha cada uma no dicionário
       for (const x of [l.home, l.pers]) txt.append(x.t + ". ", x.d + " ", ...(x.sat ? [x.sat + " "] : []));

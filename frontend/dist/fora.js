@@ -41,7 +41,7 @@ const P_FEW = 0.1;
 
 function periodStatsEl(p) {
   const box = document.createElement("div");
-  box.className = "p-stats mono";
+  box.className = "p-stats";
   const went = whWent(p);
   if (!went.length) { box.hidden = true; return box; }
   box.textContent = "…";
@@ -81,7 +81,14 @@ function periodStatsEl(p) {
       if (!rc || rc.coverageAll < P_FEW) few("radiacode", "p-rc");
       else {
         const vs = rc.bgUSv ? (Math.abs(rc.vsBgPct) < 5 ? " (igual ao seu normal)" : ` (${rc.vsBgPct > 0 ? "+" : "−"}${fmt(Math.abs(rc.vsBgPct), 0)}% do seu normal)`) : "";
-        const parts = [`${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv em ${hm(rc.minutes)}`, `média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
+        // 2.94 (M5): a dose da saída em destaque; o resto na linha de baixo
+        const ds = document.createElement("div");
+        ds.className = "p-dose";
+        ds.innerHTML = '<b class="mono"></b> <span class="small muted"></span>';
+        ds.children[0].textContent = `${fmt(rc.dose, rc.dose < 10 ? 2 : 1)} µSv`;
+        ds.children[1].textContent = `de dose em ${hm(rc.minutes)}, pelo RC102`;
+        box.appendChild(ds);
+        const parts = [`média ${dg(rc.avg)} µSv/h${vs}`, `máx ${dg(rc.max)} µSv/h`];
         if (rc.coverage < 0.95) parts.push(`${fmt(rc.coverage * 100, 0)}% medido`);
         if (rc.danger || rc.alarm || rc.attention) parts.push(`alertas: ${alertsText(rc)}`);
         line("p-rc", "RC102", parts.join(" · "), rc.bgUSv && rc.vsBgPct >= 20);
@@ -118,7 +125,10 @@ const WH_NORMAL = { gmc: "casa", radiacode: "comigo" };
 const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo", notHome: !!p.notHome });
 // saí com o Radiacode e deixei o GMC (2.38.0): o Radiacode fora do fundo da casa
 const whOut = (w) => w.gmc === "casa" && w.radiacode === "comigo" && !!w.notHome;
-const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "fora do cálculo" };
+const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "ignorado" };
+// 2.94 (M5): três palavras (em casa, comigo, ignorar). Os nomes guardados
+// continuam os de antes ("… fora do cálculo"); só a tela troca
+const whWord = (s) => ({ "Os dois fora do cálculo": "Os dois ignorados", "GMC-800 fora do cálculo": "GMC-800 ignorado", "RC102 fora do cálculo": "RC102 ignorado" })[s] || s;
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
   : w.radiacode === "fora" ? "RC102 fora do cálculo"
@@ -211,7 +221,7 @@ function whSeg(dev, value, disabled) {
   seg.setAttribute("role", "group");
   seg.setAttribute("aria-label", "Onde estava o " + WH_NAME[dev]);
   seg.dataset.dev = dev;
-  for (const [v, t] of [["casa", "em casa"], ["comigo", "comigo"], ["fora", "fora do cálculo"]]) {
+  for (const [v, t] of [["casa", "em casa"], ["comigo", "comigo"], ["fora", "ignorar"]]) {
     const b = document.createElement("button");
     b.type = "button"; b.dataset.v = v; b.textContent = t; b.disabled = !!disabled;
     b.setAttribute("aria-pressed", String(v === value));
@@ -346,14 +356,14 @@ function renderPeriods() {
     const t = document.createElement("div");
     t.className = "t";
     const b = document.createElement("b");
-    b.textContent = p.name;
+    b.textContent = whWord(p.name);
     if (p.name !== whKind(whOf(p))) b.dataset.noTr = "";
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);
     const kind = document.createElement("div");
     kind.className = "wh-kind";
-    kind.textContent = whKind(w);
+    kind.textContent = whWord(whKind(w));
     kind.hidden = p.name === whKind(w);
     const when = document.createElement("div");
     when.className = "when";
@@ -369,8 +379,8 @@ function renderPeriods() {
       c.append(`${WH_NAME[dev]} ${WH_LOCTXT[w[dev]]}`);
       who.appendChild(c);
     }
-    if (p.notHome) { const c = document.createElement("span"); c.className = "chip"; c.textContent = "eu não estava em casa"; who.appendChild(c); }
-    if (p.planned) { const c = document.createElement("span"); c.className = "chip"; c.textContent = "programada"; who.appendChild(c); }
+    if (p.notHome) { const c = document.createElement("span"); c.className = "wh-note"; c.textContent = "você não estava em casa"; who.appendChild(c); }
+    if (p.planned) { const c = document.createElement("span"); c.className = "wh-note"; c.textContent = "programada"; who.appendChild(c); }
     if (p.estimated) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "horário estimado"; c.title = "A saída ficou no horário programado: nada nos aparelhos deu certeza."; who.appendChild(c); }
     t.append(kind, when, who);
     const acts = document.createElement("div");

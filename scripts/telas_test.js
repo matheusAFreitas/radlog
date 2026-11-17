@@ -54,6 +54,17 @@ let subs = 0, dlgs = 0;
           await checkOver(p, `${lang} ${vp.width}px ${where}`, fails);
           subs++;
         }
+        // 2.94: Distância e Blindagem saíram das abas (abrem pelo fim da medição)
+        if (v === "medir") {
+          for (const s of ["distancia", "blindagem"]) {
+            where = `${v} › ${s}`;
+            await p.evaluate((s) => setSub("medir", s), s);
+            await p.waitForTimeout(300);
+            await checkOver(p, `${lang} ${vp.width}px ${where}`, fails);
+            subs++;
+          }
+          await p.evaluate(() => setSub("medir", "objeto"));
+        }
       }
       // janelas: abre cada <dialog> e confere se cabe na tela
       for (const id of await p.evaluate(() => [...document.querySelectorAll("dialog[id]")].map((d) => d.id))) {
