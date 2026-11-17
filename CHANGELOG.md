@@ -1,5 +1,42 @@
 # Versões
 
+## 2.93.0
+- Espectro: o gráfico cresce com a janela e tem botão de tela cheia (Esc
+  sai). A conclusão aparece em destaque acima do gráfico ("Parece: …", com
+  os três mais prováveis e "+N"); a lista completa dos isótopos fica
+  embaixo. Os controles ficam numa linha só, a escala acompanha a curva mais
+  alta (inclusive a do fundo) e as marcas do eixo são redondas.
+- Espectro direto na barra lateral (em teste, fácil de voltar), quando o
+  RC102 já foi conectado. Dentro dele, um seletor só: Tela do aparelho,
+  Acumulado do aparelho e Ao longo do tempo.
+- Log do RC102: os filtros ganharam nome ao lado do ícone, e os valores
+  ficam em cor neutra.
+- Atividade (Bq): saiu a nota de projeto do rodapé; "talvez só 'abaixo de'"
+  virou "pode ficar abaixo do que o RC102 consegue medir"; o título "O que
+  vai medir" sem caixa alta.
+- Modo busca: o ponteiro e a linha têm a cor do nível agora (verde quando
+  seguro). Espectrograma: escala de cor contínua como opção ao lado da
+  original.
+
+**English**
+
+- Spectrum: the chart grows with the window and has a full screen button
+  (Esc leaves). The conclusion shows up front above the chart ("Looks like:
+  …", with the three most likely and "+N"); the full isotope list stays
+  below. Controls fit in one row, the scale follows the highest curve
+  (background included) and the axis ticks are round.
+- Spectrum straight in the sidebar (on trial, easy to undo), once the RC102
+  has been connected. Inside it, a single selector: Device screen, Device's
+  accumulated and Over time.
+- RC102 log: the filters got a name next to the icon, and values are in a
+  neutral colour.
+- Activity (Bq): the project note in the footer is gone; "maybe only
+  'below'" became "may stay below what the RC102 can measure"; the "What
+  you're measuring" title is no longer upper case.
+- Search mode: the needle and the line take the current level colour (green
+  when safe). Spectrogram: a continuous colour scale as an option next to
+  the original.
+
 ## 2.92.0
 - Gráficos: as marcas do eixo saem em passos redondos (1,5 / 1,0 / 0,5) e
   a unidade fica escrita embaixo do eixo.
