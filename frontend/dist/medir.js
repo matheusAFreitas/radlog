@@ -1309,7 +1309,17 @@ function renderMeasureHistory() {
     b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
     b.querySelector(".mh-dot").classList.add(...mLvCls(m.result, m.obj.cpm * phK(m.obj, isRcMeasure(m) ? "radiacode" : "gmc")).split(" "));
     b.querySelector("strong").textContent = m.name;
-    b.querySelector(".m-item-main .muted").textContent = `${whenLabel(m.time)} · ${fmtDur(m.obj.end - m.obj.start)}` + ((m.attachments || []).length ? ` · ${m.attachments.length} anexo${m.attachments.length > 1 ? "s" : ""}` : "");
+    // cada pedaço numa linha só: quebra só entre eles (2.98.1)
+    const meta = b.querySelector(".m-item-main .muted");
+    meta.classList.add("m-item-meta");
+    const bits = [whenLabel(m.time), fmtDur(m.obj.end - m.obj.start)];
+    if ((m.attachments || []).length) bits.push(`${m.attachments.length} anexo${m.attachments.length > 1 ? "s" : ""}`);
+    bits.forEach((t, i) => {
+      const sp = document.createElement("span");
+      if (i) sp.appendChild(document.createTextNode("·\u00a0"));
+      sp.appendChild(document.createTextNode(t));
+      meta.appendChild(sp);
+    });
     if (m.notComparable) { const tg = document.createElement("span"); tg.className = "nc-tag"; tg.textContent = "não comparável"; b.querySelector("strong").appendChild(tg); }
     const net = b.querySelector(".m-item-net");
     net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${numU(Math.abs(m.result.netUSv))}`;

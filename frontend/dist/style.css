@@ -3312,3 +3312,11 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .dd-box.dd-tog { cursor: pointer; transition: opacity .2s, border-color .2s; }
 .dd-box.dd-tog:hover { border-color: var(--border-hover); }
 .dd-box.dd-tog[aria-pressed="true"] { border-color: color-mix(in srgb, var(--c) 45%, var(--border)); }
+
+/* 2.98.1: Medir objeto › Medições salvas. O "Como funciona" do canto ganha a
+   própria linha (a caixa tinha altura zero e ele caía em cima dos botões) e
+   a data e a duração da lista não quebram no meio */
+.m-alara-box.how-host { min-height: 32px; }
+.m-alara-box.how-host > details.how-c { top: 0; right: 0; }
+.m-item-meta { display: flex; flex-wrap: wrap; column-gap: 0.35em; }
+.m-item-meta > span { white-space: nowrap; }
