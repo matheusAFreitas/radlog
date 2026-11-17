@@ -1837,6 +1837,7 @@ Espectro do objeto e do fundo	Spectrum of the object and of the background
 com o objeto ({0})	with the object ({0})
 fundo ({0})	background ({0})
 fundo: espectro acumulado do aparelho ({0}), na escala do tempo do objeto	background: the device's accumulated spectrum ({0}), scaled to the object's time
+fundo: espectros gravados em casa ({0}), na escala do tempo do objeto	background: spectra recorded at home ({0}), scaled to the object's time
 contagens/s em escala log	counts/s on a log scale
 Sem o espectro do fundo: não deu para separar os picos do objeto dos do ambiente.	No background spectrum: the object's peaks couldn't be told apart from the surroundings'.
 Nenhuma linha gama conhecida subiu acima do fundo (3σ).	No known gamma line rose above the background (3σ).
@@ -1854,6 +1855,7 @@ conecte o RC102 para medir	connect the RC102 to measure
 ESPECTRO (RADIACODE)	SPECTRUM (RADIACODE)
 contagens/s (faixas de meio pico)	counts/s (half-peak-wide bins)
 fundo: espectro acumulado do aparelho ({0})	background: the device's accumulated spectrum ({0})
+fundo: espectros gravados em casa ({0})	background: spectra recorded at home ({0})
 GEOMETRIA, APARELHO E MÉTODO	GEOMETRY, DEVICE AND METHOD
 o µSv/h é o que o próprio RC102 calcula (calibração de fábrica, por energia)	the µSv/h is what the RC102 itself calculates (factory calibration, energy-based)
 soma das amostras do RC102 (a cada 0,5 s), em cada fase	sum of the RC102's samples (every 0.5 s), in each phase

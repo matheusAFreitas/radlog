@@ -82,3 +82,29 @@ func TestRcHardness(t *testing.T) {
 		t.Fatalf("5 min: %v", h2.Hard[12])
 	}
 }
+
+// 2.100.2: o fundo da casa (espectros gravados) deixa de fora os minutos de
+// pedra; o acumulado do aparelho não serve porque junta tudo.
+func TestRcHomeBgSkipsSamples(t *testing.T) {
+	a := newTestApp(t)
+	t0 := time.Now().Add(-3 * time.Hour).Truncate(time.Hour)
+	c := make([]uint32, 1024)
+	sec := 100.0
+	a.rcSpecAdd("RC-1", t0, fakeSpec(sec, c))
+	for i := 1; i <= 120; i++ {
+		n := uint32(720) // 12 cps
+		if i > 60 && i <= 70 {
+			n = 60000 // pedra encostada: 1.000 cps
+		}
+		c[200] += n
+		sec += 60
+		a.rcSpecAdd("RC-1", t0.Add(time.Duration(i)*time.Minute), fakeSpec(sec, c))
+	}
+	bg, bgSec := a.rcHomeBg(time.Now().UnixMilli())
+	if len(bg) == 0 || bgSec <= 0 {
+		t.Fatalf("sem fundo: %v %v", len(bg), bgSec)
+	}
+	if r := float64(bg[200]) / bgSec; math.Abs(r-12) > 0.5 {
+		t.Fatalf("fundo %v cps (devia ficar em 12, sem a pedra)", r)
+	}
+}

@@ -7,6 +7,11 @@
   segue calado por inteiro até o resultado.
 - O aviso na tela diz isso e fica até 1 min depois do resultado, o mesmo
   tempo em que os alertas continuam calados.
+- Medir objeto com o RC102 e fundo da casa: o espectro de fundo passa a ser o
+  dos espectros gravados em casa nos últimos 7 dias, sem os minutos de pedra
+  ou fonte perto. O acumulado do aparelho juntava tudo o que ele já mediu
+  (pedras inclusive) e ficava 2 a 3 vezes acima em todas as energias. O mesmo
+  filtro vale para o "Parece" da busca e do espectrograma.
 
 **English**
 - Measure object: attention and alarm on both devices stay silent during the
@@ -15,6 +20,12 @@
   object stays fully silent until the result.
 - The on-screen notice says so and stays until 1 min after the result, the
   same time the alerts stay silent.
+- Measure object with the RC102 and home background: the background spectrum
+  is now the spectra recorded at home over the last 7 days, without the
+  minutes of rocks or nearby sources. The device's accumulated spectrum held
+  everything it ever measured (rocks included) and sat 2 to 3 times higher at
+  every energy. The same filter applies to the "Looks like" in the search
+  and in the spectrogram.
 
 ## 2.100.1
 - Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava

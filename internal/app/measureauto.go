@@ -224,7 +224,12 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		}
 		spec0 = a.rcSpectrumNow(false)
 		if o.HomeBg || (side != nil && side.Role == "voce") {
-			if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
+			// 2.100.2: fundo = espectros gravados em casa nos últimos dias, sem
+			// os minutos de pedra; o acumulado do aparelho junta tudo o que ele
+			// já mediu (pedras inclusive) e só fica de reserva
+			if bg, sec := a.rcHomeBg(time.Now().UnixMilli()); len(bg) > 0 && sec >= 3600 && spec0 != nil && len(spec0.Counts) == len(bg) {
+				specBg = &MeasureSpectrum{A: [3]float64{spec0.A0, spec0.A1, spec0.A2}, Bg: bg, BgSec: sec, BgSrc: "casa"}
+			} else if acc := a.rcSpectrumNow(true); acc != nil && len(acc.Counts) > 0 {
 				specBg = &MeasureSpectrum{A: [3]float64{acc.A0, acc.A1, acc.A2}, Bg: acc.Counts, BgSec: acc.Duration.Seconds(), BgSrc: "acumulado"}
 			}
 		}

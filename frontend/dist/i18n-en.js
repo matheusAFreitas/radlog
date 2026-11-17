@@ -7198,6 +7198,15 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo: espectros gravados em casa (",
+"^fundo: espectros gravados em casa \\(((?:(?! · ).)+?)\\), na escala do tempo do objeto$",
+"background: spectra recorded at home (${1}), scaled to the object's time",
+[
+"fundo: espectros gravados em casa (",
+"), na escala do tempo do objeto"
+]
+],
+[
 "Memória do GMC praticamente cheia: cerca de ",
 "^Memória do GMC praticamente cheia: cerca de ((?:(?! · ).)+?)% ocupada \\(estimado\\)\\.$",
 "GMC memory practically full: about ${1}% used (estimated).",
@@ -10847,6 +10856,14 @@ const I18N_EN = {
 "${1} µSv (measured minutes only; average ${2})",
 [
 " µSv (só os minutos medidos; média "
+]
+],
+[
+"fundo: espectros gravados em casa (",
+"^fundo: espectros gravados em casa \\(((?:(?! · ).)+?)\\)$",
+"background: spectra recorded at home (${1})",
+[
+"fundo: espectros gravados em casa ("
 ]
 ],
 [

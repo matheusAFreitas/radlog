@@ -110,7 +110,7 @@ type MeasureSpectrum struct {
 	A      [3]float64 `json:"a"`
 	Bg     []uint32   `json:"bg,omitempty"`
 	BgSec  float64    `json:"bgSec"`
-	BgSrc  string     `json:"bgSrc,omitempty"` // "acumulado" = espectro acumulado do aparelho (fundo da casa)
+	BgSrc  string     `json:"bgSrc,omitempty"` // "casa" = espectros gravados em casa (2.100.2); "acumulado" = acumulado do aparelho
 	Obj    []uint32   `json:"obj"`
 	ObjSec float64    `json:"objSec"`
 	// linhas gama que subiram acima do fundo (pista do radionuclídeo)

@@ -733,7 +733,9 @@ func (p *reportPDF) measSpectrum(m SavedMeasure) {
 	}
 	leg(cAccent, fmt.Sprintf("com o objeto (%s)", specDur(s.ObjSec)))
 	if bins[0].HasBg {
-		if s.BgSrc == "acumulado" {
+		if s.BgSrc == "casa" {
+			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectros gravados em casa (%s)", fmtDurSec(s.BgSec)))
+		} else if s.BgSrc == "acumulado" {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectro acumulado do aparelho (%s)", fmtDurSec(s.BgSec)))
 		} else {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo (%s)", specDur(s.BgSec)))
