@@ -86,7 +86,9 @@ function ftSlotTip(s, i, showRc) {
   return parts.join(" · ");
 }
 
-const ftMarkTip = (m) => `${hhmm(m.t)} · ${m.kind === "nota" ? "anotação: " + m.text : m.text}`;
+// 2.101.1: cada pedaço traduzido antes de juntar (a dica inteira não está na
+// tradução); a anotação da pessoa fica como ela escreveu
+const ftMarkTip = (m) => `${hhmm(m.t)} · ${m.kind === "nota" ? tr("anotação") + ": " + asIs(m.text) : tr(m.text)}`;
 
 // trechos seguidos de um sinal (ex.: fora de casa) como [início, fim]
 function ftRuns(flags) {

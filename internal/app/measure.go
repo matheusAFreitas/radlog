@@ -110,6 +110,9 @@ type MeasureState struct {
 	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
 	usvSq  float64 // soma dos quadrados (incerteza da dose)
+	// 2.101.1: o µSv/h do RC102 vem suavizado (segundos seguidos não são
+	// independentes): a incerteza sai das médias de blocos de 30 s
+	usvBlk measBlocks
 	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
 	stopReq bool
 	// 2.81: quando o fundo ficou pronto (a pessoa está procurando o ponto)
@@ -185,6 +188,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
 		a.measure.Spectrum, a.measure.usvSum, a.measure.usvSq = nil, 0, 0
+		a.measure.usvBlk = measBlocks{}
 		a.measure.Derived, a.measure.stopReq = nil, false
 		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
@@ -383,7 +387,7 @@ func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
 	ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 	if devName(m.Device) == "radiacode" && m.Elapsed > 0 {
 		ph.USv = m.usvSum / float64(m.Elapsed)
-		ph.ErrUSv = meanErr(m.usvSum, m.usvSq, m.Elapsed)
+		ph.ErrUSv = m.usvBlk.err(m.usvSum, m.usvSq, m.Elapsed)
 	}
 	return ph
 }
@@ -402,6 +406,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 	m.Counts += f.counts
 	m.usvSum += f.usv
 	m.usvSq += f.usv * f.usv
+	m.usvBlk.add(f.usv)
 	m.Elapsed++
 	start := measT0(m)
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
@@ -605,6 +610,43 @@ func compareMeasure(bg, obj MeasurePhase, usv func(float64) float64) MeasureResu
 
 // meanErr é a incerteza da média (desvio padrão ÷ √n) a partir da soma e
 // da soma dos quadrados.
+// measBlkSec: tamanho do bloco; measBlkMin: blocos para valer a conta.
+const (
+	measBlkSec = 30
+	measBlkMin = 4
+)
+
+// measBlocks junta o µSv/h em blocos de measBlkSec segundos (médias de
+// blocos: o jeito padrão de medir a incerteza de uma série correlacionada).
+type measBlocks struct {
+	cur     float64
+	curN    int
+	sum, sq float64
+	n       int
+}
+
+func (b *measBlocks) add(v float64) {
+	b.cur += v
+	b.curN++
+	if b.curN == measBlkSec {
+		m := b.cur / measBlkSec
+		b.sum += m
+		b.sq += m * m
+		b.n++
+		b.cur, b.curN = 0, 0
+	}
+}
+
+// err é a incerteza da média: pelos blocos quando há measBlkMin ou mais;
+// antes disso, a dos segundos vezes √measBlkSec (como se só 1 a cada 30 s
+// fosse independente: do lado seguro).
+func (b *measBlocks) err(sum, sq float64, n int) float64 {
+	if b.n >= measBlkMin {
+		return meanErr(b.sum, b.sq, b.n)
+	}
+	return meanErr(sum, sq, n) * math.Sqrt(measBlkSec)
+}
+
 func meanErr(sum, sq float64, n int) float64 {
 	if n < 2 {
 		return 0

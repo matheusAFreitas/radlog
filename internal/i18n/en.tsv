@@ -6120,7 +6120,7 @@ juntando desde {0}	collecting since {0}
 Medindo um objeto no {0}.	Measuring an object on the {0}.
 Os alertas do app (GMC-800 e RC102) ficam em silêncio até o resultado.	The app alerts (GMC-800 and RC102) stay silent until the result.
 Do gráfico de cima	From the chart above
-faltam {0} sem dado	{0} missing without data
+faltam {0} sem dado	no data for {0}
 todo o histórico	the whole history
 · mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero	· same stretch as the chart above · dose only in this stretch, starting from zero
 {0} µSv/h em média	{0} µSv/h on average
@@ -6234,3 +6234,53 @@ Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não 
 Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. {0}	GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. {0}
 O Perigo só fica calado no aparelho que está no objeto.	Danger is only muted on the device that is on the object.
 O Perigo também fica calado nos dois.	Danger is muted on both too.
+eletrodo	electrode
+Backup salvo	Backup saved
+Conexão perdida	Connection lost
+Erro ao abrir os dados	Error opening the data
+Erro ao gravar leitura	Error saving reading
+Erro ao gravar os ajustes do RC102	Error saving the RC102 settings
+Configuração do contador alterada	Counter configuration changed
+Não consegui mudar o início com o Windows	Couldn't change starting with Windows
+Não consegui reativar o início no Windows	Couldn't re-enable starting with Windows
+Iguais a casa	Same as home
+Mais que em casa (acima de 3σ)	More than at home (above 3σ)
+Menos que em casa	Less than at home
+ficando em casa	staying home
+não consegui apagar a pasta antiga	couldn't delete the old folder
+não consegui olhar o GitHub	couldn't check GitHub
+som em	sound on
+vibração em	vibration on
+Conclusão	Conclusion
+Alguns campos ficaram travados porque o valor lido não é o esperado	Some fields were locked because the value read is not the expected one
+Configuração restaurada de {0}	Configuration restored from {0}
+Configuração do contador restaurada de {0}	Counter configuration restored from {0}
+Modelo: última tentativa falhou	Model: last attempt failed
+Não consegui corrigir	Couldn't fix it
+Não consegui ler a configuração	Couldn't read the configuration
+Não consegui ler o log	Couldn't read the log
+Não consegui ler os ajustes	Couldn't read the settings
+Não consegui listar as portas	Couldn't list the ports
+Não deu para ligar a demonstração	Couldn't turn on the demo
+Não deu para recomeçar	Couldn't start over
+Não vai entrar na conta	Won't be counted
+Relatório não saiu	Report failed
+Relatório salvo	Report saved
+Código salvo em {0}	Code saved in {0}
+Leituras exportadas para {0}	Readings exported to {0}
+Conectado em {0}	Connected on {0}
+Conectando em {0}…	Connecting on {0}…
+Abrindo a versão {0}	Opening version {0}
+Atualizando para a versão {0}	Updating to version {0}
+{0} sumiu da lista de portas (cabo ou USB)	{0} disappeared from the port list (cable or USB)
+leitura ao vivo sem resposta em 6 s ({0})	live reading with no answer in 6 s ({0})
+a gravação falhou ({0})	saving failed ({0})
+a assinatura do {0} não confere; não vou instalar esta versão	the signature of {0} doesn't match; I won't install this version
+a release não tem a assinatura ({0}); baixe pela página e confira	the release has no signature ({0}); download it from the page and check it
+a release não tem o {0} para conferir o arquivo	the release doesn't have {0} to check the file
+pasta antiga apagada em {0}	old folder deleted on {0}
+Não consegui terminar a mudança da pasta de dados para RadLog: {0}. Os dados continuam na pasta antiga; tento de novo ao abrir.	Couldn't finish moving the data folder to RadLog: {0}. The data stays in the old folder; I'll try again on opening.
+O fundo da casa (GMC-800) ficou em {0} µSv/h: {1}	The home background (GMC-800) was {0} µSv/h: {1}
+encontrei em {0}	found on {0}
+relógio {0}	clock {0}
+leitura interrompida	reading interrupted

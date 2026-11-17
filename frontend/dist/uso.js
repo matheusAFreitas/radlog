@@ -207,6 +207,7 @@ function usoNever() {
   for (const k of Object.keys(PAGES)) if (!usoGet(i, "p:" + k).n) out.push(usoPageName(k));
   for (const [pg, subs] of Object.entries(SUBS)) {
     if (!usoGet(i, "p:" + pg).n) continue; // a página inteira já está na lista
+    if (subs.length < 2) continue; // 2.101.1: página sem sub-abas (Gráficos) não lista "› tempo"
     for (const s of subs) if (!usoGet(i, "a:" + pg + "/" + s).n) out.push(usoPageName(pg) + " › " + usoTabName(pg, s));
   }
   if (!usoGet(i, "c:busca/ctrlk").n) out.push(tr("Busca (Ctrl+K)"));

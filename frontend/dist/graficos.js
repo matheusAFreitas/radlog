@@ -652,7 +652,8 @@ function drawDoseChart() {
     (show1 ? fillOf(c, k1) + lineOf(c.background, COR.muted, 1.5, "5 5") + lineOf(c.ceiling, COR.warn, 2) + lineOf(c.dose, devColor(k1), 2) : "") +
     (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, COR.muted, 1.5, "5 5") + lineOf(c2.ceiling, COR.warn, 2) : lineOf(c2.ceiling, COR.warn, 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
   const ys = $("doseY").children;
-  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
+  // 2.101.1: sem zeros inúteis no eixo ("60.0" → "60")
+  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0].replace(LANG === "en" ? /(\.\d*?)0+$/ : /(,\d*?)0+$/, "$1").replace(/[.,]$/, "");
   ys[3].textContent = "0";
   $("doseY").dataset.unit = fmtDose(top)[1];
 }

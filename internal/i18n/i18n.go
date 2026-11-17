@@ -214,7 +214,22 @@ func (d *dict) tr(s string) string {
 		}
 	}
 	if !ok {
+		// 2.101.1: "Backup salvo: arquivo": rótulo conhecido + o resto à parte
+		if i := strings.Index(core, ": "); i >= 3 && i <= 80 {
+			if lp, ok2 := d.one(core[:i], false); ok2 {
+				out, ok = lp+": "+d.tr(core[i+2:]), true
+			}
+		}
+	}
+	if !ok {
 		out, ok = d.one(core, true)
+	}
+	if !ok && len(core) > 2 && strings.HasPrefix(core, "(") && strings.HasSuffix(core, ")") {
+		// 2.101.1: "(actínio · série do tório)": traduz o que está dentro
+		in := core[1 : len(core)-1]
+		if t := d.tr(in); t != in {
+			out, ok = "("+t+")", true
+		}
 	}
 	res := s
 	if ok {

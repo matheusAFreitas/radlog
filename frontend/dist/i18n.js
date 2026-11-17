@@ -133,6 +133,17 @@ const tr = (() => {
       });
       if (ts.some((g, i) => g !== segs[i])) out = ts.join(" ");
     }
+    if (out == null && core.length > 2 && core.startsWith("(") && core.endsWith(")")) {
+      // 2.101.1: "(actínio · série do tório)": traduz o que está dentro
+      const t = tr(core.slice(1, -1));
+      if (t !== core.slice(1, -1)) out = "(" + t + ")";
+    }
+    if (out == null) {
+      // 2.101.1: "Backup salvo: arquivo", "Não consegui ler o log: erro":
+      // rótulo conhecido + o resto traduzido à parte (ou como está)
+      const m = /^([^:]{3,80}?): ([^]+)$/.exec(core);
+      if (m) { const lp = one(m[1], false, false); if (lp != null) out = lp + ": " + tr(m[2]); }
+    }
     if (out == null) out = one(core, false, true);
     if (out == null) {
       // "nome (12)": contador no fim
