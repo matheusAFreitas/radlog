@@ -1,5 +1,23 @@
 # Versões
 
+## 2.98.0
+- A faixa dos aparelhos virou a barra compacta: fica presa no topo ao rolar,
+  com o nível e a dose de hoje de cada um. No Agora ela aparece quando os
+  quadros grandes saem da tela; um clique volta para eles. A barra antiga
+  ("voltar ao topo") saiu.
+- Com os dois quadros abertos na faixa, eles ficam lado a lado, sem empilhar.
+  Com um só aberto, a faixa rola junto para não cobrir a tela.
+
+**English**
+
+- The device strip became the compact bar: it stays pinned to the top while
+  scrolling, with each device's level and today's dose. On Now it shows up
+  once the big cards leave the screen; a click goes back to them. The old bar
+  ("back to top") is gone.
+- With both cards open on the strip, they sit side by side instead of
+  stacking. With only one open, the strip scrolls along so it doesn't cover
+  the screen.
+
 ## 2.97.1
 - Faixa dos aparelhos (fora do Agora): abrir um quadro não deixa mais um
   buraco embaixo do outro. O aberto ganha a linha inteira, e o fechado fica
