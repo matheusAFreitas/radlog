@@ -29,6 +29,7 @@ var MobileMethods = []string{
 	"GetPeriods",
 	"GetRadiacode",
 	"GetRcSettings",
+	"GetRcSpectrogram",
 	"GetRcSpectrum",
 	"GetSettings",
 	"GetWhereabouts",

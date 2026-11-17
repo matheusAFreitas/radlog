@@ -21,7 +21,7 @@ window.__rl = {
     if (res && res.e) w.reject(new Error(res.e)); else w.resolve(res ? res.r : null);
   },
   event(name, data) { (evHandlers[name] || []).forEach((f) => { try { f(data); } catch (e) { console.error(e); } }); },
-  back() { if (!$("sheet").hidden) closeSheet(); else if (state.rcView === "espectro") spClose(); else if (state.rcView) mdClose(); else if (state.tab !== "agora") go("agora"); else nat("exit"); },
+  back() { if (!$("sheet").hidden) closeSheet(); else if (state.rcView === "espectro") spClose(); else if (state.rcView === "medir") mdClose(); else if (state.rcView) { state.rcView = ""; render(); } else if (state.tab !== "agora") go("agora"); else nat("exit"); },
 };
 const on = (name, f) => (evHandlers[name] = evHandlers[name] || []).push(f);
 function call(method, ...args) {
@@ -150,7 +150,7 @@ function render() {
   if (!state.paired) m.innerHTML = firstRun();
   else if (state.tab === "alertas") m.innerHTML = alertas();
   else if (state.tab === "ajustes") m.innerHTML = ajustes();
-  else if (state.tab === "rc102") m.innerHTML = state.rcView === "espectro" ? espectro() : state.rcView === "medir" ? medir() : rc102();
+  else if (state.tab === "rc102") m.innerHTML = state.rcView === "espectro" ? espectro() : state.rcView === "medir" ? medir() : state.rcView === "sgram" ? sgram() : rc102();
   else m.innerHTML = agora();
   bind();
 }
@@ -269,7 +269,7 @@ function rc102() {
     + `<div class="row"><span>${esc(rc.todayDevOK ? T("Hoje (somada pelo RC102)") : T("Hoje (pelo que o app gravou)"))}</span><span class="m">${fmt(today, today < 10 ? 2 : 1)} µSv</span></div>`
     + `<div class="row"><span>${esc(T("Acumulado do aparelho"))}</span><span class="m">${acc > 0 ? (acc >= 1000 ? `${fmt(acc / 1000, 3)} mSv` : `${fmt(acc, acc < 10 ? 2 : 1)} µSv`) : "—"}</span></div>`
     + `<span class="small">${esc(T("O acumulado é o total que o RC102 soma sozinho. O app só mostra, não zera nem muda."))}</span></div>`;
-  h += `<div class="list">${li(T("Espectro"), T("Picos e isótopos"), "›", "rSpec")}${li(T("Medir objeto"), T("Fundo, objeto, resultado"), "›", "rMeas")}${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
+  h += `<div class="list">${li(T("Espectro"), T("Picos e isótopos"), "›", "rSpec")}${li(T("Espectrograma"), T("Espectro ao longo do tempo"), "›", "rSgram")}${li(T("Medir objeto"), T("Fundo, objeto, resultado"), "›", "rMeas")}${li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela"), "›", "rCfg")}</div>`;
   h += `<div class="card"><div class="row"><span>${esc([rc.model || "Radiacode 102", rc.firmware ? T("firmware {0}", rc.firmware) : ""].filter(Boolean).join(" · "))}</span>${isOff(rc) ? "" : `<button class="btn" id="rRecon" style="width:auto;padding:8px 14px">${esc(T("Reconectar"))}</button>`}</div></div>`;
   return h;
 }
@@ -481,6 +481,98 @@ function bindMedir() {
   q("mdStop", () => act(() => call("StopMeasure")));
   q("mdCancel", () => act(() => call("CancelMeasure")));
   q("mdNew", () => act(() => call("CancelMeasure")));
+}
+
+// ---------------- Espectrograma ----------------
+// O espectro ao longo do tempo, montado no Go com o que o app grava a cada
+// minuto (o mesmo do PC): cada linha é um intervalo, de cima (mais antigo)
+// para baixo (agora); a cor é a contagem por minuto em cada faixa de energia,
+// com as cores originais do PC. Intervalo sem leitura sai mais escuro (média).
+const SG_SPANS = { "6h": [6, 120], "24h": [24, 300], "7d": [168, 1800] };
+const SG_CMAP = [[0, [6, 6, 26]], [0.15, [26, 26, 168]], [0.35, [31, 111, 224]], [0.5, [25, 195, 214]], [0.65, [78, 227, 106]], [0.78, [242, 227, 58]], [0.9, [242, 139, 43]], [1, [232, 49, 122]]];
+const sg = { span: "24h", data: null, max: 1, busy: false, err: "", tip: "" };
+
+function sgCmap(v) {
+  v = Math.max(0, Math.min(1, v));
+  for (let k = 1; k < SG_CMAP.length; k++) if (v <= SG_CMAP[k][0]) {
+    const [a, ca] = SG_CMAP[k - 1], [b, cb] = SG_CMAP[k], u = (v - a) / (b - a);
+    return ca.map((c, j) => Math.round(c + (cb[j] - c) * u));
+  }
+  return SG_CMAP[SG_CMAP.length - 1][1];
+}
+
+function sgOpen() { state.rcView = "sgram"; sg.tip = ""; render(); $("main").scrollTop = 0; sgLoad(); }
+
+async function sgLoad() {
+  if (sg.busy) return;
+  sg.busy = true; sg.err = "";
+  const [h, row] = SG_SPANS[sg.span], to = Date.now();
+  try {
+    const d = await call("GetRcSpectrogram", to - h * 3600e3, to, row, 1500);
+    sg.data = d && d.rows ? d : null;
+    // a cor vai até o 99,5% (um pico raro não apaga o resto)
+    const v = [];
+    if (sg.data) for (const r of sg.data.rows) if (r) for (const x of r) if (x > 0) v.push(x);
+    v.sort((a, b) => a - b);
+    sg.max = v.length ? v[Math.min(v.length - 1, Math.floor(v.length * 0.995))] : 1;
+  } catch (e) { sg.err = errText(e); sg.data = null; }
+  sg.busy = false;
+  if (state.tab === "rc102" && state.rcView === "sgram") render();
+}
+
+function sgram() {
+  const seg = (k, t) => `<button data-sgs="${k}" class="${sg.span === k ? "on" : ""}">${esc(t)}</button>`;
+  const d = sg.data;
+  const any = d && d.rows.some(Boolean);
+  let h = `<div class="subhead"><button id="sgBack" aria-label="${esc(T("Voltar"))}">‹</button><b>${esc(T("Espectrograma"))}</b></div>`;
+  h += `<div class="chips"><span class="seg">${seg("6h", T("6 h"))}${seg("24h", T("24 h"))}${seg("7d", T("7 dias"))}</span></div>`;
+  if (sg.err) h += `<div class="card"><span class="err">${esc(sg.err)}</span></div>`;
+  h += `<div class="card sgc">`;
+  if (!d) h += `<span class="small">${esc(sg.busy ? T("Montando o espectrograma…") : T("Sem dados."))}</span>`;
+  else {
+    const t0 = d.from, t1 = d.to, long = t1 - t0 > 26 * 3600e3;
+    const lbl = (t) => (long ? ddmm(t) + " " : "") + hhmm(t);
+    h += `<div class="sgwrap"><div class="sgy"><span>${lbl(t0)}</span><span>${lbl((t0 + t1) / 2)}</span><span>${esc(T("agora"))}</span></div><canvas id="sgCv"></canvas></div>`
+      + `<div class="sgx"><span>0</span><span>500</span><span>1000</span><span>1500 keV</span></div>`;
+    if (!any) h += `<span class="small">${esc(T("Nada gravado nesse período. O app grava o espectro a cada minuto com o RC102 conectado."))}</span>`;
+  }
+  h += `<div class="small" id="sgTip">${sg.tip || esc(T("Toque para ver a hora, a energia e a contagem."))}</div></div>`;
+  h += `<span class="small">${esc(T("De cima (mais antigo) para baixo (agora). A cor é a contagem por minuto em cada energia: um isótopo aparece como uma faixa em pé, e a chuva acende tudo de uma vez."))}</span>`;
+  return h;
+}
+
+function bindSgram() {
+  const q = (id, f) => { const el = $(id); if (el) el.onclick = f; };
+  q("sgBack", () => { state.rcView = ""; render(); });
+  document.querySelectorAll("[data-sgs]").forEach((b) => (b.onclick = () => { if (sg.span === b.dataset.sgs) return; sg.span = b.dataset.sgs; sg.data = null; sg.tip = ""; render(); sgLoad(); }));
+  const cv = $("sgCv"), d = sg.data;
+  if (!cv || !d) return;
+  const W = d.bins, H = d.rows.length;
+  cv.width = W; cv.height = H;
+  const g = cv.getContext("2d"), img = g.createImageData(W, H), lm = Math.log1p(sg.max);
+  for (let y = 0; y < H; y++) {
+    const row = d.rows[y], dim = d.gap[y] ? 0.5 : 1;
+    for (let x = 0; x < W; x++) {
+      const o = (y * W + x) * 4;
+      if (!row) { img.data[o] = 13; img.data[o + 1] = 16; img.data[o + 2] = 18; img.data[o + 3] = 255; continue; }
+      const [r, gg, b] = sgCmap(Math.log1p(row[x]) / lm);
+      img.data[o] = r * dim; img.data[o + 1] = gg * dim; img.data[o + 2] = b * dim; img.data[o + 3] = 255;
+    }
+  }
+  g.putImageData(img, 0, 0);
+  const move = (ev) => {
+    const r = cv.getBoundingClientRect();
+    const k = Math.floor(((ev.clientY - r.top) / r.height) * H), e = Math.max(0, ((ev.clientX - r.left) / r.width) * d.eMax);
+    if (k < 0 || k >= H) return;
+    const a = d.from + k * d.rowSec * 1000, b = a + d.rowSec * 1000;
+    const when = (d.to - d.from > 26 * 3600e3 ? ddmm(a) + " " : "") + hhmm(a) + "–" + hhmm(b);
+    const row = d.rows[k];
+    const bin = Math.min(d.bins - 1, Math.floor((e / d.eMax) * d.bins));
+    sg.tip = esc(row ? T("{0} · {1} keV · {2} por minuto · {3} cps no total", when, fmt(e, 0), fmt(row[bin], row[bin] < 10 ? 2 : 1), fmt(d.cps[k], 1)) : T("{0} · sem dados", when));
+    $("sgTip").innerHTML = sg.tip;
+  };
+  cv.addEventListener("pointerdown", (e) => { cv.setPointerCapture(e.pointerId); move(e); });
+  cv.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "touch") move(e); });
 }
 
 async function reconnectRc() {
@@ -956,6 +1048,8 @@ function bind() {
   q("rMeas", mdOpen);
   if (state.rcView === "espectro") bindSpectrum();
   if (state.rcView === "medir") bindMedir();
+  q("rSgram", sgOpen);
+  if (state.rcView === "sgram") bindSgram();
   q("rRecon", reconnectRc);
   q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
@@ -1104,6 +1198,15 @@ const mock = (() => {
         case "StartMeasurePhase": meas = Object.assign({}, meas, { phase: "objeto", elapsed: 0, live: null }); return ok(meas);
         case "StopMeasure": return ok(meas);
         case "CancelMeasure": meas = { phase: "" }; return ok(meas);
+        case "GetRcSpectrogram": {
+          const [f, t, rs] = arguments[1], n = Math.ceil((t - f) / (rs * 1000)), rows = [], gap = [], cps = [];
+          for (let k = 0; k < n; k++) {
+            const rain = k > n * 0.55 && k < n * 0.62 ? 1.8 : 1;
+            rows.push(k < n * 0.08 ? null : Array.from({ length: 256 }, (_, b) => { const e = b * 1500 / 256; return rain * (40 * Math.exp(-e / 200) + 0.6 + 6 * Math.exp(-((e - 352) ** 2) / 300) + 5 * Math.exp(-((e - 609) ** 2) / 500)) * (0.8 + r() * 0.4); }));
+            gap.push(k > n * 0.3 && k < n * 0.34); cps.push(rows[k] ? 5.8 * rain : 0);
+          }
+          return ok({ from: f, to: t, rowSec: rs, eMax: 1500, bins: 256, rows, gap, cps, secs: [] });
+        }
         case "AnalyzeSpectrum": return ok([{ kev: 352, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 9 }, { kev: 609, nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", sigma: 7 }, { kev: 1461, nuclide: "K-40", group: "Potássio-40", sigma: 4 }]);
         case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);
