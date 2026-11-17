@@ -367,7 +367,7 @@ function ajustes() {
   h += li(T("Esquecer o aparelho"), T("Volta para a primeira vez"), "›", "sForget");
   h += `</div><div class="gh">${esc(T("Alarmes"))}</div><div class="list">`;
   h += li(T("Som do alarme"), T("O perigo tem som próprio, como no PC"), SOUNDS()[s.alarmSound || "sirene"] || "", "sSound");
-  h += li(T("Alarmes do RC102"), T("Atenção {0}, alarme {1} µSv/h (os mesmos do aparelho)", usv((rc.limits || {}).attn || 0), usv((rc.limits || {}).alarm || 0)), "›", "sRcAlarms");
+  h += li(T("Configurar o RC102"), T("Alarmes, som, vibração e tela (atenção {0}, alarme {1} µSv/h)", usv((rc.limits || {}).attn || 0), usv((rc.limits || {}).alarm || 0)), "›", "sRcAlarms");
   h += li(T("Testar o alarme"), T("Toca 5 s no volume de alarme"), "›", "sTest");
   const [ct, cs] = cloudLine();
   h += `</div><div class="gh">${esc(T("Nuvem"))}</div><div class="list">`;
@@ -506,34 +506,161 @@ function soundSheet() {
   }));
 }
 
-// alarmes do próprio RC102 (os mesmos que o PC muda em Configurações do
-// Radiacode): taxa de dose 1 e 2 em µSv/h e dose acumulada 1 e 2 em µSv.
-// O app usa a taxa 1 e 2 como atenção e alarme.
-async function rcAlarmSheet() {
+// Configurar o RC102: os mesmos ajustes do PC (Configurações › Radiacode),
+// lidos do aparelho agora. Alarmes de taxa, dose e contagem, som e vibração
+// (e o que faz cada um disparar), tela e unidades. Nada vai para o aparelho
+// sem "Gravar no RC102", e antes a tela mostra o que muda. O Go guarda a
+// cópia de antes, grava só o que mudou e lê de volta; "Desfazer a última"
+// grava a cópia de volta. O app usa a taxa 1 e 2 como atenção e alarme.
+const RC_CTRL = () => [
+  { bit: 1 << 2, name: T("Alarme 1 de taxa") },
+  { bit: 1 << 3, name: T("Alarme 2 de taxa") },
+  { bit: 1 << 4, name: T("Taxa fora da escala") },
+  { bit: 1 << 5, name: T("Alarme 1 de dose") },
+  { bit: 1 << 6, name: T("Alarme 2 de dose") },
+  { bit: 1 << 7, name: T("Dose fora da escala") },
+  { bit: 1 << 0, name: T("Botões") },
+];
+const RC_CLICK = 1 << 1; // som a cada contagem (só som)
+const RC_DOSE_OFF = 9e6; // µSv: acima disso o alarme de dose está desligado
+const RC_DIRS = () => [T("Automática"), T("Virada para a direita"), T("Virada para a esquerda")];
+
+const rcDoseTxt = (v) => (v >= RC_DOSE_OFF ? T("desligado") : v >= 1000 ? `${fmt(v / 1000, v % 1000 ? 3 : 0)} mSv` : `${fmt(v, v < 10 ? 2 : 0)} µSv`);
+const rcNum = (v, d) => (v > 0 && v < RC_DOSE_OFF ? fmt(v, d) : "");
+// número digitado como "0,50", "1500", "1.500" ou "0.5"; vazio = 0
+const rcParse = (id) => {
+  let t = $(id).value.trim().replace(/\s/g, "");
+  if (!t) return 0;
+  if (t.includes(",")) t = t.replace(/\./g, "").replace(",", ".");
+  else if (/^\d{1,3}(\.\d{3})+$/.test(t)) t = t.replace(/\./g, "");
+  const v = Number(t);
+  return isFinite(v) ? v : NaN;
+};
+
+function rcCfgForm(c) {
+  const inp = (id, v, label) => `<input id="${id}" inputmode="decimal" value="${esc(v)}" aria-label="${esc(label)}">`;
+  const row = (label, a, b, unit) => `<span class="t">${esc(label)}</span>${a}${b}<i>${esc(unit)}</i>`;
+  const sw = (id, on, label, sub) => `<button class="li" id="${id}" data-on="${on ? 1 : 0}" aria-pressed="${!!on}"><span class="t">${esc(label)}</span>${sub ? `<span class="s">${esc(sub)}</span>` : ""}<span class="sw ${on ? "on" : ""}"></span></button>`;
+  const sel = (id, opts, v, label) => `<label class="li sel"><span class="t">${esc(label)}</span><select id="${id}">${opts.map((o, i) => `<option value="${i}"${i === v ? " selected" : ""}>${esc(o)}</option>`).join("")}</select></label>`;
+  const offs = c.offTimes && c.offTimes.length ? c.offTimes : ["5 s", "10 s", "15 s", "30 s"];
+  const ctrl = RC_CTRL().map((k) => `<span>${esc(k.name)}</span><input type="checkbox" data-snd="${k.bit}"${c.soundCtrl & k.bit ? " checked" : ""} aria-label="${esc(T("Som") + ": " + k.name)}"><input type="checkbox" data-vib="${k.bit}"${c.vibroCtrl & k.bit ? " checked" : ""} aria-label="${esc(T("Vibração") + ": " + k.name)}">`).join("");
+  const bg = ((state.rc && state.rc.st && state.rc.st.stats) || {}).bgUSv;
+  return `<h3>${esc(T("Configurar o RC102"))}</h3>
+<p>${esc(T("Lido do aparelho agora. Fica gravado nele: vale também longe do celular e do PC."))}</p>
+<div class="rcg"><span class="h">${esc(T("Alarmes"))}</span><span class="h">${esc(T("nível 1"))}</span><span class="h">${esc(T("nível 2"))}</span><span></span>
+${row(T("Taxa de dose"), inp("cR1", rcNum(c.doseRate1, 2), T("Taxa de dose, nível 1")), inp("cR2", rcNum(c.doseRate2, 2), T("Taxa de dose, nível 2")), "µSv/h")}
+${row(T("Dose acumulada"), inp("cD1", rcNum(c.dose1, c.dose1 < 10 ? 2 : 0), T("Dose acumulada, nível 1")), inp("cD2", rcNum(c.dose2, c.dose2 < 10 ? 2 : 0), T("Dose acumulada, nível 2")), "µSv")}
+${row(T("Contagem"), inp("cC1", rcNum(c.countRate1 * 60, 0), T("Contagem, nível 1")), inp("cC2", rcNum(c.countRate2 * 60, 0), T("Contagem, nível 2")), "cpm")}
+</div>
+<p class="hint">${esc(T("O app usa a taxa 1 como atenção e a taxa 2 como alarme. Dose vazia = desligada."))}${bg ? " " + esc(T("Fundo em casa pelo RC102: {0} µSv/h.", usv(bg))) : ""}</p>
+<div class="list">${sw("cSnd", c.soundOn, T("Som no aparelho"))}${sw("cVib", c.vibroOn, T("Vibração"))}${sw("cClk", c.soundCtrl & RC_CLICK, T("Clique a cada contagem"))}</div>
+<details class="rcd"><summary>${esc(T("O que faz apitar e vibrar"))}</summary><div class="rcc"><span></span><span class="h">${esc(T("Som"))}</span><span class="h">${esc(T("Vibra"))}</span>${ctrl}</div></details>
+<div class="list"><label class="li sel"><span class="t">${esc(T("Brilho da tela"))}</span><input id="cBrt" type="range" min="0" max="9" value="${c.brightness}"><span class="r" id="cBrtOut">${c.brightness}</span></label>
+${sel("cOff", offs, c.offTime, T("Tela apaga em"))}${sel("cDir", RC_DIRS(), c.direction, T("Orientação"))}
+${sel("cUD", ["R (rem)", "Sv"], c.unitSv ? 1 : 0, T("Unidade de dose na tela dele"))}${sel("cUC", ["cps", "cpm"], c.unitCPM ? 1 : 0, T("Unidade de contagem na tela dele"))}</div>
+<span class="err" id="cErr"></span>
+<button class="btn pri" id="cOk">${esc(T("Gravar no RC102"))}</button>
+${c.canUndo ? `<button class="btn ghost" id="cUndo">${esc(T("Desfazer a última gravação"))}</button>` : ""}
+<button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`;
+}
+
+function rcCfgRead(c) {
+  const s = Object.assign({}, c);
+  // campo que ficou como veio mantém o valor exato do aparelho (o da tela é arredondado)
+  const keep = (id, k, f) => { if ($(id).value !== $(id).defaultValue) s[k] = f(rcParse(id)); };
+  keep("cR1", "doseRate1", (v) => v); keep("cR2", "doseRate2", (v) => v);
+  keep("cD1", "dose1", (v) => v || 1e7); keep("cD2", "dose2", (v) => v || 1e7);
+  keep("cC1", "countRate1", (v) => v / 60); keep("cC2", "countRate2", (v) => v / 60);
+  const on = (id) => $(id).dataset.on === "1";
+  s.soundOn = on("cSnd"); s.vibroOn = on("cVib");
+  let snd = c.soundCtrl & ~0xff, vib = c.vibroCtrl & ~0xfd;
+  if (on("cClk")) snd |= RC_CLICK;
+  document.querySelectorAll("[data-snd]").forEach((el) => { if (el.checked) snd |= +el.dataset.snd; });
+  document.querySelectorAll("[data-vib]").forEach((el) => { if (el.checked) vib |= +el.dataset.vib; });
+  s.soundCtrl = snd >>> 0; s.vibroCtrl = vib >>> 0;
+  s.brightness = parseInt($("cBrt").value, 10);
+  s.offTime = parseInt($("cOff").value, 10);
+  s.direction = parseInt($("cDir").value, 10);
+  s.unitSv = $("cUD").value === "1";
+  s.unitCPM = $("cUC").value === "1";
+  return s;
+}
+
+function rcCfgCheck(s) {
+  const bad = (v) => !(v > 0) || !isFinite(v);
+  if (bad(s.doseRate1) || bad(s.doseRate2) || s.doseRate1 < 0.01 || s.doseRate2 > 1000) return T("Os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h.");
+  if (s.doseRate2 <= s.doseRate1) return T("O alarme 2 de taxa precisa ser maior que o alarme 1.");
+  if (bad(s.dose1) || bad(s.dose2) || s.dose1 < 0.01) return T("Os alarmes de dose começam em 0,01 µSv (ou ficam vazios para desligar).");
+  if (s.dose2 < s.dose1) return T("O alarme 2 de dose não pode ser menor que o alarme 1.");
+  if (bad(s.countRate1) || bad(s.countRate2) || s.countRate1 < 0.1 || s.countRate2 > 50000) return T("Os alarmes de contagem precisam ficar entre 6 e 3.000.000 cpm.");
+  if (s.countRate2 <= s.countRate1) return T("O alarme 2 de contagem precisa ser maior que o alarme 1.");
+  return "";
+}
+
+// o que muda de a para b: [ajuste, agora, depois]
+function rcCfgDiff(a, b) {
+  const out = [];
+  const f = (name, x, y) => { if (x !== y) out.push([name, x, y]); };
+  const u = (v) => `${fmt(v, v < 10 ? 2 : 1)} µSv/h`;
+  const cpm = (v) => `${fmt(Math.round(v * 60), 0)} cpm`;
+  const lig = (v) => (v ? T("ligado") : T("desligado"));
+  f(T("Alarme 1 de taxa"), u(a.doseRate1), u(b.doseRate1));
+  f(T("Alarme 2 de taxa"), u(a.doseRate2), u(b.doseRate2));
+  f(T("Alarme 1 de dose"), rcDoseTxt(a.dose1), rcDoseTxt(b.dose1));
+  f(T("Alarme 2 de dose"), rcDoseTxt(a.dose2), rcDoseTxt(b.dose2));
+  f(T("Alarme 1 de contagem"), cpm(a.countRate1), cpm(b.countRate1));
+  f(T("Alarme 2 de contagem"), cpm(a.countRate2), cpm(b.countRate2));
+  f(T("Som no aparelho"), lig(a.soundOn), lig(b.soundOn));
+  f(T("Vibração"), lig(a.vibroOn), lig(b.vibroOn));
+  f(T("Clique a cada contagem"), lig(a.soundCtrl & RC_CLICK), lig(b.soundCtrl & RC_CLICK));
+  for (const c of RC_CTRL()) {
+    f(T("Som em \"{0}\"", c.name), lig(a.soundCtrl & c.bit), lig(b.soundCtrl & c.bit));
+    f(T("Vibração em \"{0}\"", c.name), lig(a.vibroCtrl & c.bit), lig(b.vibroCtrl & c.bit));
+  }
+  f(T("Brilho da tela"), String(a.brightness), String(b.brightness));
+  const offs = a.offTimes || [];
+  f(T("Tela apaga em"), offs[a.offTime] || String(a.offTime), offs[b.offTime] || String(b.offTime));
+  f(T("Orientação"), RC_DIRS()[a.direction] || String(a.direction), RC_DIRS()[b.direction] || String(b.direction));
+  f(T("Unidade de dose na tela dele"), a.unitSv ? "Sv" : "R", b.unitSv ? "Sv" : "R");
+  f(T("Unidade de contagem na tela dele"), a.unitCPM ? "cpm" : "cps", b.unitCPM ? "cpm" : "cps");
+  return out;
+}
+
+async function rcConfigSheet() {
   let cur;
   try { cur = await call("GetRcSettings"); } catch (e) { toast(errText(e)); return; }
-  const num = (v) => (v > 0 && v < 9e6 ? fmt(v, v < 10 ? 2 : 0) : "");
-  const row = (id, label, v, unit) => `<label class="fld"><span>${esc(label)}</span><input id="${id}" inputmode="decimal" value="${esc(num(v))}"><i>${unit}</i></label>`;
-  sheet(`<h3>${esc(T("Alarmes do RC102"))}</h3><p>${esc(T("Ficam gravados no aparelho: valem também longe do celular e do PC. O app usa a taxa 1 como atenção e a taxa 2 como alarme. Dose vazia = desligada."))}</p>`
-    + row("aR1", T("Taxa 1 (atenção)"), cur.doseRate1, "µSv/h") + row("aR2", T("Taxa 2 (alarme)"), cur.doseRate2, "µSv/h")
-    + row("aD1", T("Dose acumulada 1"), cur.dose1, "µSv") + row("aD2", T("Dose acumulada 2"), cur.dose2, "µSv")
-    + `<span class="err" id="aErr"></span><button class="btn pri" id="aOk">${esc(T("Gravar no RC102"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
-  const val = (id) => {
-    const t = $(id).value.trim().replace(",", ".");
-    if (!t) return 0;
-    const v = Number(t);
-    return isFinite(v) && v > 0 ? v : NaN;
+  sheet(`<div id="cForm">${rcCfgForm(cur)}</div><div id="cAsk" hidden></div>`);
+  document.querySelectorAll("#cForm button.li[data-on]").forEach((b) => (b.onclick = () => {
+    const on = b.dataset.on !== "1";
+    b.dataset.on = on ? "1" : "0"; b.setAttribute("aria-pressed", String(on));
+    b.querySelector(".sw").classList.toggle("on", on);
+  }));
+  $("cBrt").oninput = () => { $("cBrtOut").textContent = $("cBrt").value; };
+  const ask = (html, ok) => {
+    $("cForm").hidden = true; $("cAsk").hidden = false;
+    $("cAsk").innerHTML = html + `<span class="err" id="kErr"></span><button class="btn pri" id="kOk">${esc(ok)}</button><button class="btn ghost" id="kBack">${esc(T("Voltar"))}</button>`;
+    $("kBack").onclick = () => { $("cAsk").hidden = true; $("cForm").hidden = false; };
+    return $("kOk");
   };
-  $("aOk").onclick = async () => {
-    const n = { doseRate1: val("aR1"), doseRate2: val("aR2"), dose1: val("aD1"), dose2: val("aD2") };
-    if (Object.values(n).some((v) => isNaN(v)) || !n.doseRate1 || !n.doseRate2) { $("aErr").textContent = T("Use só números maiores que zero (as duas taxas são obrigatórias)."); return; }
-    if (n.doseRate2 <= n.doseRate1) { $("aErr").textContent = T("A taxa 2 precisa ser maior que a taxa 1."); return; }
-    // dose vazia = desligada: o aparelho usa 10 Sv (o máximo) como desligado
-    const next = Object.assign({}, cur, { doseRate1: n.doseRate1, doseRate2: n.doseRate2, dose1: n.dose1 || 1e7, dose2: n.dose2 || 1e7 });
-    if (next.dose2 < next.dose1) { $("aErr").textContent = T("A dose 2 não pode ser menor que a dose 1."); return; }
-    $("aOk").disabled = true;
-    try { await call("SetRcSettings", next); closeSheet(); toast(T("Gravado no RC102.")); refreshRc(); }
-    catch (e) { $("aErr").textContent = errText(e); $("aOk").disabled = false; }
+  const run = async (b, fn, done) => {
+    b.disabled = true;
+    try { await fn(); closeSheet(); toast(done); refreshRc(); }
+    catch (e) { $("kErr").textContent = errText(e); b.disabled = false; }
+  };
+  $("cOk").onclick = () => {
+    const next = rcCfgRead(cur);
+    const err = rcCfgCheck(next);
+    $("cErr").textContent = err;
+    if (err) return;
+    const diff = rcCfgDiff(cur, next);
+    if (!diff.length) { $("cErr").textContent = T("Nada mudou: o aparelho já está assim."); return; }
+    const rows = diff.map(([k, a, b]) => `<div class="li"><span class="t">${esc(k)}</span><span class="s">${esc(a)} → ${esc(b)}</span></div>`).join("");
+    const ok = ask(`<h3>${esc(T("Gravar no RC102?"))}</h3><div class="list">${rows}</div><p>${esc(T("Antes de gravar, o app guarda uma cópia do que está agora."))}</p>`, T("Gravar"));
+    ok.onclick = () => run(ok, () => call("SetRcSettings", next), T("Gravado no RC102."));
+  };
+  if ($("cUndo")) $("cUndo").onclick = () => {
+    const ok = ask(`<h3>${esc(T("Desfazer a última gravação?"))}</h3><p>${esc(T("O app grava de volta no RC102 os ajustes de antes da última gravação."))}</p>`, T("Desfazer"));
+    ok.onclick = () => run(ok, () => call("UndoRcSettings"), T("Ajustes de antes gravados de volta."));
   };
 }
 
@@ -581,7 +708,7 @@ function bind() {
   q("sOwner", () => (isOff(state.rc) ? nat("owner", "phone").then(() => setTimeout(refreshRc, 600)) : releaseSheet()));
   q("sForget", forgetSheet);
   q("sSound", soundSheet);
-  q("sRcAlarms", rcAlarmSheet);
+  q("sRcAlarms", rcConfigSheet);
   q("sLog", copyLog);
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
   q("sCloud", cloudToggle);
@@ -682,6 +809,12 @@ const mock = (() => {
   const where = scene === "fora" ? { open: { from: now - 2.5 * 3600e3 }, since: now - 2.5 * 3600e3, radiacode: "comigo", gmc: "casa" } : { open: null };
   const cloud = { state: "ok", email: "pessoa@exemplo.com", lastSync: now - 9 * 60e3, devices: [{ name: "PC de casa", lastUp: now - 12 * 60e3 }, { name: "Galaxy Z Flip6", lastUp: now - 9 * 60e3, me: true }] };
   const scan = [{ address: "AA:BB:CC:DD:EE:FF", name: "RadiaCode-102#RC-102-000000", rssi: -58 }];
+  let rcs2 = {
+    doseRate1: 0.5, doseRate2: 2, dose1: 500, dose2: 1000, countRate1: 25, countRate2: 100,
+    soundOn: true, soundCtrl: 0x1ffc, vibroOn: true, vibroCtrl: 0x1cfe, brightness: 5, offTime: 3,
+    offTimes: ["5 s", "10 s", "15 s", "30 s", "2 min", "5 min"], direction: 0, unitSv: true, unitCPM: true,
+    energyA0: 5.43, energyA1: 2.351, energyA2: 0.000381, canUndo: true,
+  };
   const ok = (v) => new Promise((res) => setTimeout(() => res(JSON.parse(JSON.stringify(v))), 30));
   return {
     call(m) {
@@ -694,6 +827,8 @@ const mock = (() => {
         case "GetWhereabouts": return ok(where);
         case "GetPeriods": return ok(scene === "fora" ? [{ from: now - 2.5 * 3600e3, to: 0 }] : []);
         case "ScanRadiacodeBLE": return new Promise((res) => setTimeout(() => res(scan), 800));
+        case "GetRcSettings": case "UndoRcSettings": return ok(rcs2);
+        case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);
       }
     },

@@ -20,6 +20,7 @@ func ScanRadiacodeBLE() ([]radiacode.BLEDevice, error)
 func SetRadiacode(bool, string) (app.RcState)
 func SetRcSettings(radiacode.Settings) (app.RcSettings, error)
 func SetWhere(string, string, string) (app.Whereabouts, error)
+func UndoRcSettings() (app.RcSettings, error)
 type app.Chart {from int64; to int64; stepMs int64; times []int64; values []*float64; avg *float64; min *float64; max *float64; usv []*float64; avgUSv *float64; minUSv *float64; maxUSv *float64; attentionCPM int; attentionUSv float64; alarmCPM int; alarmUSv float64; dangerCPM int; dangerUSv float64; peaks []app.ChartPeak; fineAlertsOnly bool; rc []*float64; rcAvg *float64; rcCPM []*float64; rcAvgCPM *float64}
 type app.ChartPeak {t int64; cpm float64; level string; retro bool}
 type app.CloudDevice {id string; name string; lastUp int64; me bool}

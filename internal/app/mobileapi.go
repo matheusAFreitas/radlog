@@ -34,4 +34,5 @@ var MobileMethods = []string{
 	"SetRadiacode",
 	"SetRcSettings",
 	"SetWhere",
+	"UndoRcSettings",
 }
