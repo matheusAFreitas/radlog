@@ -1466,12 +1466,20 @@
               <p class="mono small rc-info" id="rcSrRef"></p>
               <p class="mono small rc-info" id="rcSrMax"></p>
               <div class="rc-ctrl"><button type="button" class="btn small" id="rcSrHere">Usar o agora como normal</button><button type="button" class="btn small" id="rcSrRefReset" hidden>Voltar ao normal das 24 h</button><button type="button" class="btn small" id="rcSrMaxReset">Zerar máximo</button></div>
+              <div class="rc-ctrl rc-sr-opts"><span class="small muted" id="rcSrWinLbl">Janela</span><span class="seg rc-seg" id="rcSrWin" role="group" aria-labelledby="rcSrWinLbl"><button type="button" data-w="60" aria-pressed="false">1 min</button><button type="button" data-w="120" aria-pressed="true">2 min</button><button type="button" data-w="300" aria-pressed="false">5 min</button></span><span class="small muted" id="rcSrCmapLbl">Cores</span><span class="seg rc-seg" id="rcSrCmap" role="group" aria-labelledby="rcSrCmapLbl"><button type="button" data-c="orig" aria-pressed="true">original</button><button type="button" data-c="cont" aria-pressed="false">contínua</button></span></div>
             </div>
             <label class="rc-inline small" id="rcSoundBox"><input type="checkbox" id="rcSound"> som (cliques)</label>
             <label class="rc-inline small" id="rcSrSoundBox" hidden>Som <select id="rcSrSound"><option value="">desligado</option><option value="cliques">cliques</option><option value="tom">tom (mais agudo = mais forte)</option></select></label>
-            <canvas id="rcTrend" class="rc-canvas" role="img" aria-label="Taxa do RC102 ao longo do tempo"></canvas>
-            <p class="mono small rc-info" id="rcSearchInfo"></p>
           </div>
+        </div>
+        <div class="rc-sr-plot">
+          <canvas id="rcTrend" class="rc-canvas" role="img" aria-label="Taxa do RC102 ao longo do tempo"></canvas>
+          <div id="rcSrSgBox" hidden>
+            <div class="rc-sr-sg"><div class="rc-sr-ax mono" aria-hidden="true"><span>1500</span><span>1000</span><span>500</span><span>0 keV</span></div><canvas id="rcSrSg" role="img" aria-label="Espectrograma ao vivo: energia na vertical, tempo na horizontal"></canvas></div>
+            <div class="rc-sr-x mono small muted" aria-hidden="true"><span id="rcSrX0">−2 min</span><span>agora</span></div>
+            <div class="rc-sr-foot"><span class="rc-cbar small muted" id="rcSrCbar">pouco <i></i> muito</span><span class="small rc-sr-like" id="rcSrLike" aria-live="polite"></span></div>
+          </div>
+          <p class="mono small rc-info" id="rcSearchInfo"></p>
         </div>
       </article>
       </div>

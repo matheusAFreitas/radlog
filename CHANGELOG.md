@@ -1,5 +1,29 @@
 # Versões
 
+## 2.100.0
+- Modo busca do RC102 com espectrograma ao vivo: embaixo da linha da taxa,
+  no mesmo eixo de tempo, aparece de que energia chega o que chega (0 a
+  1500 keV). Perto de uma fonte, as linhas dela acendem e o app escreve com o
+  que se parece (ex.: "Parece: Rádio-226 (série do urânio)"); só fundo, não
+  escreve nada.
+- Janela de 1, 2 (padrão) ou 5 min, guardada. As cores são as mesmas da aba
+  Espectrograma (original ou contínua), e trocar num lugar troca no outro.
+- Com a aba Busca aberta, o espectro é lido a cada 2 s no USB e a cada 3,5 s
+  no Bluetooth. Fechou a aba, volta ao normal. Nada a mais é gravado.
+
+**English**
+
+- RC102 search mode with a live spectrogram: below the rate line, on the same
+  time axis, it shows at which energy things arrive (0 to 1500 keV). Near a
+  source, its lines light up and the app says what it looks like (e.g. "Looks
+  like: Radium-226 (uranium series)"); with only background, it says nothing.
+- Window of 1, 2 (default) or 5 min, remembered. Colors are the same as the
+  Spectrogram tab (original or continuous), and changing one changes the
+  other.
+- With the Search tab open, the spectrum is read every 2 s over USB and every
+  3.5 s over Bluetooth. Close the tab and it goes back to normal. Nothing
+  extra is saved.
+
 ## 2.99.1
 - Medir objeto: a caixa "Ajustes da medição" saiu (no tempo fixo ela abria
   vazia, e no automático também, porque a opção de dentro nunca aparecia). O

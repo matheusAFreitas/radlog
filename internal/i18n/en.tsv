@@ -2074,7 +2074,7 @@ Não consegui importar: {0}	Couldn't import: {0}
 {0}: {1} registros novos de {2}	{0}: {1} new records out of {2}
 {0} linhas ignoradas	{0} lines skipped
 de {0} a {1}	from {0} to {1}
-Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar.	From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it.
+Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (3,5 s no Bluetooth); nada disso é gravado.	From your RC102, live: updates twice a second, with automatic scale (×1 to ×1000). While the count holds steady, the number is the average of up to 20 s (more stable); when it jumps, it switches to just the last second and responds right away. The color compares with normal: the median of the last 24 h, or the place you're at, if you mark it. Below, the spectrogram: at which energy things arrive, on the same time axis as the line. Near a source, its lines light up and the app says what it looks like. With this tab open, the spectrum is read every 2 s (3.5 s over Bluetooth); none of it is saved.
 passe o RC102 devagar pelas amostras (uns 5 cm por segundo, encostando) e veja onde o número sobe. Ligue o tom para procurar sem olhar a tela. Lembre: o dobro da distância dá um quarto da radiação.	sweep the RC102 slowly over the samples (about 5 cm per second, touching them) and see where the number rises. Turn on the tone to search without looking at the screen. Remember: twice the distance gives a quarter of the radiation.
 {0}× o normal	{0}× normal
 sem referência	no reference
@@ -6142,3 +6142,6 @@ Cada fase (fundo e objeto) mede o tempo escolhido, mesmo que já dê para saber 
 {0}: 1 alerta, {1} dias com trecho acima do seguro.	{0}: 1 alert, {1} days with a stretch above safe.
 {0}: {1} alertas, 1 dia com trecho acima do seguro.	{0}: {1} alerts, 1 day with a stretch above safe.
 {0}: {1} alertas, {2} dias com trecho acima do seguro.	{0}: {1} alerts, {2} days with a stretch above safe.
+Espectrograma ao vivo: energia na vertical, tempo na horizontal	Live spectrogram: energy on the vertical, time on the horizontal
+Cores	Colors
+original	original

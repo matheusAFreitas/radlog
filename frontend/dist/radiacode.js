@@ -969,9 +969,10 @@
   function cmapSet(cont) {
     cmapCont = cont;
     try { localStorage.setItem("rcCmap", cont ? "cont" : "orig"); } catch (e) { /* sem armazenamento */ }
-    document.querySelectorAll("#rcCmap button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.c === "cont") === cont)));
-    const bar = document.querySelector("#rcSgCard .rc-cbar"); if (bar) bar.classList.toggle("cont", cont);
+    document.querySelectorAll("#rcCmap button, #rcSrCmap button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.c === "cont") === cont)));
+    document.querySelectorAll("#rcSgCard .rc-cbar, #rcSrCbar").forEach((bar) => bar.classList.toggle("cont", cont));
     sgDraw();
+    if (sr.real) srSgDraw();
   }
   const SG_EMAX = 1500;
   const SG_COLS = (() => { let n = 0; for (let i = 0; i < NCH; i++) if (EN[i] <= SG_EMAX) n = i + 1; return n; })();
@@ -1427,6 +1428,11 @@
   // e mostra uma média que se adapta: longa (até 20 s) enquanto nada muda e
   // curta (~1 s) quando a contagem pula, como os medidores de busca.
   Object.assign(sr, { real: false, pts: [], hist: [], last: 0, busy: false, ref: 0, myRef: 0, refUsv: 0, k: 0, max: 0, maxAt: 0, sm: 0, raw: true, ble: false, mode: "", osc: null, oscGain: null });
+  // 2.100.0: janela da linha e do espectrograma ao vivo (1, 2 ou 5 min)
+  Object.assign(sr, { win: 120, sgRows: [], sgLast: 0, sgEvery: 2, sgPeaks: [], sgBusy: false, sgAt: 0, sgBins: 256, sgEMax: 1500 });
+  try { const w = +localStorage.getItem("rcSrWin"); if ([60, 120, 300].includes(w)) sr.win = w; } catch (e) { /* sem armazenamento */ }
+  const SR_KEEP = 330e3;
+  const srBuscaOpen = () => { const p = document.querySelector('[data-subpane="busca"]'); return !!p && !p.hidden; };
   function srMark(on) {
     sr.real = on;
     $("rcSrSimTags").hidden = on;
@@ -1435,8 +1441,10 @@
     $("rcSrReal").hidden = !on;
     $("rcSoundBox").hidden = on;
     $("rcSrSoundBox").hidden = !on;
+    $("rcSrSgBox").hidden = !on;
+    if (!on) { sr.sgRows = []; sr.sgLast = 0; sr.sgPeaks = []; }
     $("rcSrDesc").textContent = on
-      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
+      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (3,5 s no Bluetooth); nada disso é gravado."
       : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.";
     if (!on) srSound("");
     else srSound($("rcSrSound").value);
@@ -1445,7 +1453,7 @@
     if (sr.busy) return;
     sr.busy = true;
     let r = null;
-    try { r = await api.GetRcSearch(sr.last); } catch (e) { r = null; }
+    try { r = await api.GetRcSearch(sr.last || Date.now() - SR_KEEP); } catch (e) { r = null; }
     sr.busy = false;
     if (!r || !r.live) { if (sr.real) { srMark(false); srDraw(); } return; }
     if (!sr.real) { sr.pts = []; sr.hist = []; sr.last = 0; sr.max = 0; srMark(true); }
@@ -1458,14 +1466,72 @@
       sr.pts.push(p);
     }
     if (fresh.length) sr.last = fresh[fresh.length - 1].t;
-    const cut = r.now - 180e3;
+    const cut = r.now - SR_KEEP;
     while (sr.pts.length && sr.pts[0].t < cut) sr.pts.shift();
     sr.sm = srSmooth();
     if (fresh.length) { sr.hist.push({ t: sr.last, v: sr.sm }); while (sr.hist.length && sr.hist[0].t < cut) sr.hist.shift(); }
     if (sr.sm > sr.max) { sr.max = sr.sm; sr.maxAt = sr.pts.length ? sr.pts[sr.pts.length - 1].t : r.now; }
     srPlay(fresh);
+    if (srBuscaOpen() && Date.now() - sr.sgAt >= 1000) srSgPoll();
     srDraw();
   }
+  // espectrograma ao vivo: pergunta de 1 em 1 s (só com a aba Busca aberta;
+  // é isso que mantém o app lendo o espectro de 2 em 2 s)
+  async function srSgPoll() {
+    if (sr.sgBusy || !api.GetRcSearchSg) return;
+    sr.sgBusy = true; sr.sgAt = Date.now();
+    let r = null;
+    try { r = await api.GetRcSearchSg(sr.sgLast, sr.win); } catch (e) { r = null; }
+    sr.sgBusy = false;
+    if (!r || !r.on) return;
+    sr.sgEvery = r.every || 2; sr.sgBins = r.bins || 256; sr.sgEMax = r.eMax || 1500;
+    for (const row of r.rows || []) { if (row.t > sr.sgLast) { sr.sgRows.push(row); sr.sgLast = row.t; } }
+    const cut = Date.now() - SR_KEEP;
+    while (sr.sgRows.length && sr.sgRows[0].t < cut) sr.sgRows.shift();
+    sr.sgPeaks = r.peaks || [];
+    srSgDraw();
+  }
+  function srSgDraw() {
+    const cv = $("rcSrSg"); if (!cv || !sr.real) return;
+    const every = sr.sgEvery * 1000, n = Math.max(10, Math.round((sr.win * 1000) / every)), nb = sr.sgBins;
+    if (cv.width !== n || cv.height !== nb) { cv.width = n; cv.height = nb; }
+    const g = cv.getContext("2d"), img = g.createImageData(n, nb);
+    const now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now();
+    // contagens por coluna de 2 s; o fundo vira chuvisco, as linhas acendem
+    let top = 12;
+    const cols = [];
+    for (const row of sr.sgRows) {
+      const x = n - 1 - Math.floor((now - row.t) / every);
+      if (x < 0 || x >= n) continue;
+      const k = row.s > 0 ? 2 / row.s : 1, c = row.c.map((v) => v * k);
+      cols.push([x, c]);
+      for (const v of c) if (v > top) top = v;
+    }
+    const lm = Math.log1p(Math.min(top, 60)), [br, bgc, bb] = cmap(0);
+    for (let o = 0; o < img.data.length; o += 4) { img.data[o] = br; img.data[o + 1] = bgc; img.data[o + 2] = bb; img.data[o + 3] = 255; }
+    for (const [x, c] of cols) for (let b = 0; b < nb; b++) {
+      const [rr, gg, bl] = cmap(Math.log1p(c[b]) / lm), o = ((nb - 1 - b) * n + x) * 4;
+      img.data[o] = rr; img.data[o + 1] = gg; img.data[o + 2] = bl;
+    }
+    g.putImageData(img, 0, 0);
+    $("rcSrX0").textContent = "−" + srWinTxt();
+    // o que parece: só quando alguma linha passou do fundo da casa
+    const like = $("rcSrLike"), list = isoList(sr.sgPeaks).filter((o) => o.sigma >= 5);
+    like.textContent = "";
+    if (list.length) {
+      const by = {};
+      for (const o of list) (by[o.group] = by[o.group] || []).push(...o.lines);
+      const groups = Object.keys(by).slice(0, 2);
+      like.append(document.createTextNode("Parece:"), document.createTextNode(" "));
+      groups.forEach((gname, i) => {
+        if (i) like.append(document.createTextNode(" · "));
+        const b = document.createElement("b"); b.textContent = gname; like.append(b);
+        const kev = by[gname].sort((x, y) => y.sigma - x.sigma).slice(0, 3).map((l) => nf(l.kev, 0)).join(", ");
+        like.append(document.createTextNode(` (${kev} keV)`));
+      });
+    }
+  }
+  const srWinTxt = () => (sr.win >= 120 ? `${sr.win / 60} min` : "1 min");
   function srSmooth() {
     const p = sr.pts; if (!p.length) return 0;
     let c1 = 0, s1 = 0;
@@ -1502,9 +1568,9 @@
     const cv = $("rcTrend"); if (!cv) return;
     const f = fit(cv, 90); if (!f) return;
     const { g, w, h } = f; g.clearRect(0, 0, w, h);
-    const now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now(), win = sr.pts.filter((p) => p.t > now - 60e3);
+    const W = sr.win * 1000, now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now(), win = sr.pts.filter((p) => p.t > now - W);
     const m = Math.max(15, ref * 1.6, ...win.map((p) => p.cps)) * 1.1;
-    const yOf = (y) => h - 4 - (y / m) * (h - 8), xOf = (t) => w - ((now - t) / 60e3) * w;
+    const yOf = (y) => h - 4 - (y / m) * (h - 8), xOf = (t) => w - ((now - t) / W) * w;
     g.strokeStyle = css("--border"); g.beginPath(); g.moveTo(0, h - 0.5); g.lineTo(w, h - 0.5); g.stroke();
     if (ref > 0) { g.setLineDash([3, 3]); g.strokeStyle = "rgba(110,231,160,.55)"; g.beginPath(); g.moveTo(0, yOf(ref)); g.lineTo(w, yOf(ref)); g.stroke(); g.setLineDash([]); }
     g.beginPath();
@@ -1512,9 +1578,10 @@
     g.strokeStyle = css("--muted"); g.globalAlpha = 0.55; g.lineWidth = 1; g.stroke(); g.globalAlpha = 1;
     // a média que se adapta, por cima
     g.beginPath();
-    sr.hist.filter((p) => p.t > now - 60e3).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    sr.hist.filter((p) => p.t > now - W).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.strokeStyle = srNeedleColor(); g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1; // 2.93 (R5): cor do nível
-    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
+    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12);
+    srSgDraw();
   }
   // som: cliques (um por contagem, espalhados no tempo da amostra) ou um tom
   // que fica mais agudo quanto mais acima do normal
@@ -2029,6 +2096,16 @@
     $("rcSrHere").addEventListener("click", () => { if (sr.sm > 0) { sr.myRef = sr.sm; srDraw(); } });
     $("rcSrRefReset").addEventListener("click", () => { sr.myRef = 0; srDraw(); });
     $("rcSrMaxReset").addEventListener("click", () => { sr.max = 0; srDraw(); });
+    $("rcSrCmap").addEventListener("click", (e) => { const b = e.target.closest("button[data-c]"); if (b) cmapSet(b.dataset.c === "cont"); });
+    const srWinSet = (w) => {
+      sr.win = w;
+      try { localStorage.setItem("rcSrWin", String(w)); } catch (e) { /* sem armazenamento */ }
+      document.querySelectorAll("#rcSrWin button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.w === w)));
+      sr.sgAt = 0; // "Parece" refeito na janela nova
+      srDraw();
+    };
+    $("rcSrWin").addEventListener("click", (e) => { const b = e.target.closest("button[data-w]"); if (b) srWinSet(+b.dataset.w); });
+    srWinSet(sr.win);
     // atividade
     $("rcActNucs").innerHTML = ACT_NUCS.map((id) => `<label><input type="checkbox" value="${id}"> ${id}</label>`).join("");
     actPick(act.pick);

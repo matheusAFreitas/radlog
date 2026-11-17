@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.99.1";
+const DEMO_VERSION = "2.100.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -854,6 +854,28 @@ const demoRc = () => {
         const lam = rate(t) * 0.5; let n = 0, L = Math.exp(-lam), pp = 1; do { n++; pp *= Math.random(); } while (pp > L); n--;
         out.pts.push({ t, sec: 0.5, cps: n / 0.5, usv: (n / 0.5) * 0.0122 });
       }
+      return out;
+    },
+    // espectrograma da busca de mentira (2.100.0): colunas de 2 s com o fundo
+    // e, quando passa perto da amostra (mesmo ciclo de 40 s), as linhas do urânio
+    GetRcSearchSg: async (since, win) => {
+      const live = demoRcFake(), now = Date.now(), NB = 256, EM = 1500, out = { on: live, eMax: EM, bins: NB, every: 2, rows: [], peaks: [] };
+      if (!live) return out;
+      const sh = (pk, c0, dec) => { const w = new Float64Array(NB); let tot = 0; for (let i = 0; i < NB; i++) { const e = (i + 0.5) * EM / NB; w[i] = e < 25 ? 0 : c0 * Math.exp(-e / dec); for (const [p, a] of pk) { const sd = (p * 0.085 / 2.355) * Math.sqrt(662 / p); w[i] += a * Math.exp(-(((e - p) / sd) ** 2) / 2); } tot += w[i]; } return w.map((v) => v / tot); };
+      const BGS = sh([[1460, 0.04], [609, 0.02]], 1, 260), SRC = sh([[93, 0.5], [186, 0.35], [242, 0.25], [295, 0.45], [352, 0.7], [609, 0.65], [768, 0.08], [1120, 0.18], [1238, 0.07]], 1.6, 180);
+      const extra = (t) => { const ph = (t / 1000) % 40; return ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0; };
+      const pois = (l) => { if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * Math.sqrt(-2 * Math.log(Math.random() + 1e-12)) * Math.cos(2 * Math.PI * Math.random()))); let L = Math.exp(-l), k = 0, pp = 1; do { k++; pp *= Math.random(); } while (pp > L); return k - 1; };
+      const t1 = Math.floor(now / 2000) * 2000, t0 = Math.max(since || 0, t1 - 300e3);
+      for (let t = Math.floor(t0 / 2000) * 2000 + 2000; t <= t1; t += 2000) {
+        const x = extra(t - 1000), c = new Array(NB);
+        for (let i = 0; i < NB; i++) c[i] = pois(2 * (12 * BGS[i] + x * SRC[i]));
+        out.rows.push({ t, s: 2, c });
+      }
+      const near = Array.from({ length: Math.round((win || 120) / 2) }, (_, k) => extra(now - k * 2000)).reduce((a, b) => a + b, 0) * 2;
+      if (near > 150) out.peaks = [
+        { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: Math.round(near * 0.07), sigma: Math.min(40, near / 25) },
+        { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: Math.round(near * 0.06), sigma: Math.min(30, near / 30) },
+        { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: Math.round(near * 0.04), sigma: Math.min(20, near / 45) }];
       return out;
     },
     // atividade de mentira: o tempo passa 120× mais rápido
