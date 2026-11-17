@@ -101,9 +101,10 @@ func (a *App) rcAlertStep(now time.Time, usv float64) {
 	if a.measureQuietLocked(devRC, now) {
 		usv = 0 // medindo um objeto com o RC102: alertas calados (2.81)
 	}
-	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	// "Estou testando um objeto" (2.89.0) ou medindo com o outro aparelho
+	// (2.100.2): só atenção e alarme ficam calados
 	lusv := usv
-	if a.objTestQuietLocked(devRC, now) {
+	if a.objTestQuietLocked(devRC, now) || a.measureActiveLocked(now) {
 		lusv = 0
 	}
 	set := a.settings

@@ -28,8 +28,11 @@ type MeasurePhase struct {
 	CPM     float64 `json:"cpm"`
 	ErrCPM  float64 `json:"errCPM"` // 1 desvio
 	USv     float64 `json:"usv"`
-	Start   int64   `json:"start"` // ms
-	End     int64   `json:"end"`   // ms
+	// RC102 (2.100.2): incerteza do µSv/h pelo espalhamento da própria dose
+	// (a dose pesa a energia; o √N das contagens não serve para ela)
+	ErrUSv float64 `json:"errUSv,omitempty"`
+	Start  int64   `json:"start"` // ms
+	End    int64   `json:"end"`   // ms
 	// "casa" = fundo da última hora gravada (não medido na hora)
 	Source string `json:"source,omitempty"`
 }
@@ -50,6 +53,12 @@ type MeasureResult struct {
 	// automático: o que contava como "tem algo" (% do fundo e em CPM)
 	Pct       float64 `json:"pct,omitempty"`
 	Threshold float64 `json:"threshold,omitempty"`
+	// RC102 (2.100.2): incerteza do líquido em µSv/h pela dose, quantos σ a
+	// dose subiu, e DoseUp quando a dose subiu (≥ 3σ) sem a contagem subir
+	// (gama de energia alta, como o K-40: cada contagem vale mais dose)
+	NetErrUSv float64 `json:"netErrUSv,omitempty"`
+	DoseSigma float64 `json:"doseSigma,omitempty"`
+	DoseUp    bool    `json:"doseUp,omitempty"`
 }
 
 // MeasureState é o estado da medição, mandado para a tela a cada segundo.
@@ -84,6 +93,8 @@ type MeasureState struct {
 	// pessoa); Other é o segundo aparelho
 	Mode  string       `json:"mode,omitempty"`
 	Other *MeasureSide `json:"other,omitempty"`
+	// 2.100.2: true = o Perigo do aparelho que não está no objeto também cala
+	QuietDanger bool `json:"quietDanger,omitempty"`
 	// 2.40: distância em cm (0 = encostado ou não informada), tamanho do
 	// objeto (pequeno, espalhado), as medições anteriores do mesmo objeto em
 	// outras distâncias e as contas do resultado
@@ -98,6 +109,7 @@ type MeasureState struct {
 	RelErr   float64 `json:"relErr,omitempty"`
 	// Radiacode: soma do µSv/h do aparelho a cada segundo da fase atual
 	usvSum float64
+	usvSq  float64 // soma dos quadrados (incerteza da dose)
 	// pediu para parar a fase do objeto agora (botão "Parar e ver o resultado")
 	stopReq bool
 	// 2.81: quando o fundo ficou pronto (a pessoa está procurando o ponto)
@@ -110,7 +122,7 @@ type MeasureSpectrum struct {
 	A      [3]float64 `json:"a"`
 	Bg     []uint32   `json:"bg,omitempty"`
 	BgSec  float64    `json:"bgSec"`
-	BgSrc  string     `json:"bgSrc,omitempty"` // "acumulado" = espectro acumulado do aparelho (fundo da casa)
+	BgSrc  string     `json:"bgSrc,omitempty"` // "casa" = espectros gravados em casa (2.100.2); "acumulado" = acumulado do aparelho
 	Obj    []uint32   `json:"obj"`
 	ObjSec float64    `json:"objSec"`
 	// linhas gama que subiram acima do fundo (pista do radionuclídeo)
@@ -159,7 +171,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 			seconds = 60
 		}
 		prev := a.measure
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode, QuietDanger: prev.QuietDanger}
 		if o := prev.Other; o != nil {
 			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
 		}
@@ -172,7 +184,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		a.measure.Phase = "objeto"
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
-		a.measure.Spectrum, a.measure.usvSum = nil, 0
+		a.measure.Spectrum, a.measure.usvSum, a.measure.usvSq = nil, 0, 0
 		a.measure.Derived, a.measure.stopReq = nil, false
 		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
@@ -209,22 +221,20 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 //
 // Medindo uma pedra, o aparelho que está nela sobe de propósito (e o GMC,
 // encostado, conta beta e exagera o µSv/h). Do começo da medição até o
-// resultado, os alertas do app ficam calados: nada de som, de janela
-// piscando nem de linha em Alertas; o valor fica salvo na medição.
-// 2.100.1 (ACE): calam os dois aparelhos, não só o do objeto (o outro
-// costuma estar na mesma mesa e sobe junto).
+// resultado, os alertas desse aparelho ficam calados: nada de som, de
+// janela piscando nem de linha em Alertas; o valor fica salvo na medição.
+// 2.100.1 (ACE): o outro aparelho também cala atenção e alarme (costuma
+// estar na mesma mesa e sobe junto). 2.100.2: mas o Perigo e a saturação
+// dele continuam valendo, porque ali seria radiação de verdade.
 const (
 	measQuietIdle  = 30 * time.Minute // procurando o ponto há mais que isso: volta a valer
 	measQuietGrace = time.Minute      // depois do resultado, para tirar o objeto de perto
 )
 
-// measureQuietLocked diz se os alertas do aparelho dev ficam calados agora
-// (durante a medição, os de todos os aparelhos).
-func (a *App) measureQuietLocked(_ string, now time.Time) bool {
+// measureActiveLocked diz se há uma medição em andamento (do começo até um
+// minuto depois do resultado): atenção e alarme de todos os aparelhos calam.
+func (a *App) measureActiveLocked(now time.Time) bool {
 	m := &a.measure
-	if m.Phase == "" {
-		return false
-	}
 	switch m.Phase {
 	case "fundo", "objeto":
 		return true
@@ -234,6 +244,15 @@ func (a *App) measureQuietLocked(_ string, now time.Time) bool {
 		return m.Obj != nil && now.UnixMilli()-m.Obj.End < measQuietGrace.Milliseconds()
 	}
 	return false
+}
+
+// measureQuietLocked diz se TODOS os alertas do aparelho dev ficam calados
+// agora (inclusive o Perigo): o que está no objeto, durante a medição, e os
+// outros também quando a pessoa escolheu calar o Perigo (QuietDanger).
+func (a *App) measureQuietLocked(dev string, now time.Time) bool {
+	m := &a.measure
+	onObj := devName(m.Device) == dev || (m.Other != nil && m.Other.Role == "objeto" && m.Other.Device == dev)
+	return (onObj || m.QuietDanger) && a.measureActiveLocked(now)
 }
 
 // measStopMinSec: antes disso o "parar agora" espera (poucas contagens).
@@ -364,6 +383,7 @@ func (a *App) measPhaseLocked(m *MeasureState) MeasurePhase {
 	ph := phaseResult(m.Counts, m.Elapsed, a.convCalLocked().USv)
 	if devName(m.Device) == "radiacode" && m.Elapsed > 0 {
 		ph.USv = m.usvSum / float64(m.Elapsed)
+		ph.ErrUSv = meanErr(m.usvSum, m.usvSq, m.Elapsed)
 	}
 	return ph
 }
@@ -381,6 +401,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 	}
 	m.Counts += f.counts
 	m.usvSum += f.usv
+	m.usvSq += f.usv * f.usv
 	m.Elapsed++
 	start := measT0(m)
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
@@ -572,7 +593,25 @@ func compareMeasure(bg, obj MeasurePhase, usv func(float64) float64) MeasureResu
 	default:
 		r.Level, r.Verdict = "nada", "nenhuma diferença que dê para separar do fundo"
 	}
+	if bg.ErrUSv > 0 && obj.ErrUSv > 0 {
+		r.NetErrUSv = math.Hypot(bg.ErrUSv, obj.ErrUSv)
+		r.DoseSigma = r.NetUSv / r.NetErrUSv
+		if r.Level != "sim" && r.DoseSigma >= 3 {
+			r.DoseUp, r.Verdict = true, "a contagem não mudou, mas a dose subiu"
+		}
+	}
 	return r
+}
+
+// meanErr é a incerteza da média (desvio padrão ÷ √n) a partir da soma e
+// da soma dos quadrados.
+func meanErr(sum, sq float64, n int) float64 {
+	if n < 2 {
+		return 0
+	}
+	fn := float64(n)
+	v := (sq - sum*sum/fn) / (fn - 1)
+	return math.Sqrt(math.Max(v, 0) / fn)
 }
 
 // br formata com uma casa e vírgula decimal (ex.: +63,0).

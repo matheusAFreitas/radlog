@@ -39,7 +39,7 @@ async function refreshAlOrigin(from, to, label) {
   let x = 0, h = "";
   parts.forEach(([t, v, c], i) => {
     const w = (v / tot) * 600;
-    if (v > 0) h += `<rect x="${x.toFixed(1)}" y="4" width="${Math.max(2, w - (i < 2 ? 2 : 0)).toFixed(1)}" height="28" rx="4" fill="${c}"><title>${alEsc(t)}: ${alNum(v, 2)} µSv</title></rect>`;
+    if (v > 0) h += `<rect x="${x.toFixed(1)}" y="4" width="${Math.max(2, w - (i < 2 ? 2 : 0)).toFixed(1)}" height="28" rx="4" fill="${c}"><title>${alEsc(tr(t))}: ${alNum(v, 2)} µSv</title></rect>`;
     x += w;
   });
   $("alOrBar").innerHTML = h;

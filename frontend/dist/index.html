@@ -833,6 +833,14 @@
           </div>
           <span class="small muted" id="mSizeHint">O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.</span>
         </div>
+        <div class="m-field">
+          <span class="m-label" id="mDangerLabel">Perigo do outro aparelho durante a medição</span>
+          <div class="seg m-size" role="group" aria-labelledby="mDangerLabel" id="mDangerSeg">
+            <button type="button" data-danger="toca" aria-pressed="false">toca</button>
+            <button type="button" data-danger="cala" aria-pressed="false">fica calado</button>
+          </div>
+          <span class="small muted" id="mDangerHint">Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.</span>
+        </div>
         <div class="m-field m-time" id="mTimeBox">
           <span class="m-label" id="mTimeLabel">Quanto tempo medir</span>
           <div class="seg m-tmode" role="group" aria-labelledby="mTimeLabel" id="mTimeModeSeg">
@@ -1353,7 +1361,6 @@
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
         <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span></details>
-        <div class="rc-acts"><button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button><button type="button" class="btn small" id="btnRcConn">Conexão</button></div>
         </div>
       </div>
 
