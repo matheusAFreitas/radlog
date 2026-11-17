@@ -4,11 +4,46 @@
 - Faixa dos aparelhos presa no topo (fora do Agora): atrás da bolha do
   aparelho aparecia um retângulo de outra cor, de cantos retos. A faixa agora
   usa o mesmo fundo da página (pedido do ACE).
+- Inglês, varredura completa (pedido do ACE): a dica do espectro mostrava os
+  isótopos em português ("actínio · série do tório"); as marcas da fita, a
+  lista de uso do app ("Gráficos › tempo") e várias mensagens montadas com um
+  valor no fim ("Backup salvo: …", "Conexão perdida: …", "Não consegui ler o
+  log: …", erros da atualização, avisos do GMC-800) também. Agora um rótulo
+  conhecido seguido de ": valor" e um texto entre parênteses são traduzidos em
+  pedaços, na tela e no PDF.
+- Relatório da medição: a anotação que você escreveu fica como está (antes,
+  em inglês, saía meio traduzida).
+- Medir objeto no RC102: a incerteza do µSv/h agora sai das médias de blocos
+  de 30 s. O µSv/h do aparelho vem suavizado, e contar cada segundo como
+  independente deixava a incerteza pequena demais; o "a dose subiu" podia
+  aparecer à toa (achado do QA).
+- Gráfico da dose: o eixo não mostra mais zeros inúteis ("60" em vez de
+  "60,0"); em inglês, "no data for 6 days" no lugar de "6 days missing
+  without data".
+- Testes novos: todo PDF gerado em inglês nos testes e a bandeja em todos os
+  estados não podem ter texto em português.
 
 **English**
 - Device strip pinned to the top (outside Now): a rectangle of a different
   color, with square corners, showed behind the device bubble. The strip now
   uses the same background as the page (ACE's request).
+- English, full sweep (ACE's request): the spectrum tip showed the isotopes
+  in Portuguese ("actínio · série do tório"); the strip marks, the app usage
+  list ("Charts › tempo") and several messages built with a value at the end
+  ("Backup saved: …", "Connection lost: …", "Couldn't read the log: …", update
+  errors, GMC-800 notices) too. Now a known label followed by ": value" and a
+  text in parentheses are translated piece by piece, on screen and in the PDF.
+- Measurement report: the note you wrote stays as written (before, in
+  English, it came out half translated).
+- Measure object on the RC102: the µSv/h uncertainty now comes from the means
+  of 30 s blocks. The device's µSv/h is smoothed, and counting each second as
+  independent made the uncertainty too small; "the dose went up" could show
+  up for nothing (found by QA).
+- Dose chart: the axis no longer shows useless zeros ("60" instead of
+  "60.0"); in English, "no data for 6 days" instead of "6 days missing
+  without data".
+- New tests: every PDF generated in English in the tests and the tray in every
+  state must have no Portuguese text.
 
 ## 2.101.0
 - Gráficos, dose por período (pedido do ACE): um trecho só para a página.

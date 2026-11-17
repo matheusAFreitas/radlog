@@ -1,6 +1,7 @@
 package app
 
 import (
+	"math"
 	"testing"
 	"time"
 )
@@ -159,5 +160,29 @@ func TestMeasureQuietDangerOpt(t *testing.T) {
 	a.mu.Unlock()
 	if q {
 		t.Fatal("sem medição nada cala")
+	}
+}
+
+// 2.101.1: µSv/h suavizado (segundos seguidos parecidos): a incerteza vem
+// das médias de blocos de 30 s, não dos segundos como se fossem independentes.
+func TestMeasBlocks(t *testing.T) {
+	var b measBlocks
+	var sum, sq float64
+	n := 0
+	for k := 0; k < 8; k++ {
+		v := 1.0 + float64(k%2)
+		for i := 0; i < measBlkSec; i++ {
+			b.add(v)
+			sum, sq, n = sum+v, sq+v*v, n+1
+		}
+	}
+	naive := meanErr(sum, sq, n)
+	if e := b.err(sum, sq, n); e < 4*naive || math.Abs(e-meanErr(12, 20, 8)) > 1e-9 {
+		t.Fatalf("blocos %v, segundos %v", e, naive)
+	}
+	var few measBlocks
+	few.add(1)
+	if e := few.err(10, 50, 4); math.Abs(e-meanErr(10, 50, 4)*math.Sqrt(measBlkSec)) > 1e-9 {
+		t.Fatalf("poucos blocos: %v", e)
 	}
 }

@@ -4778,7 +4778,39 @@ const I18N_EN = {
 "fica calado": "stays silent",
 "Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.": "Attention and alarm stay silent either way, and the device on the object sounds nothing. This applies to the device that is not on the object.",
 "O Perigo só fica calado no aparelho que está no objeto.": "Danger is only muted on the device that is on the object.",
-"O Perigo também fica calado nos dois.": "Danger is muted on both too."
+"O Perigo também fica calado nos dois.": "Danger is muted on both too.",
+"eletrodo": "electrode",
+"Backup salvo": "Backup saved",
+"Conexão perdida": "Connection lost",
+"Erro ao abrir os dados": "Error opening the data",
+"Erro ao gravar leitura": "Error saving reading",
+"Erro ao gravar os ajustes do RC102": "Error saving the RC102 settings",
+"Erro ao gravar os ajustes do RadiaCode": "Error saving the RC102 settings",
+"Configuração do contador alterada": "Counter configuration changed",
+"Não consegui mudar o início com o Windows": "Couldn't change starting with Windows",
+"Não consegui reativar o início no Windows": "Couldn't re-enable starting with Windows",
+"Iguais a casa": "Same as home",
+"Mais que em casa (acima de 3σ)": "More than at home (above 3σ)",
+"Menos que em casa": "Less than at home",
+"ficando em casa": "staying home",
+"não consegui apagar a pasta antiga": "couldn't delete the old folder",
+"não consegui olhar o GitHub": "couldn't check GitHub",
+"som em": "sound on",
+"vibração em": "vibration on",
+"Conclusão": "Conclusion",
+"Alguns campos ficaram travados porque o valor lido não é o esperado": "Some fields were locked because the value read is not the expected one",
+"Modelo: última tentativa falhou": "Model: last attempt failed",
+"Não consegui corrigir": "Couldn't fix it",
+"Não consegui ler a configuração": "Couldn't read the configuration",
+"Não consegui ler o log": "Couldn't read the log",
+"Não consegui ler os ajustes": "Couldn't read the settings",
+"Não consegui listar as portas": "Couldn't list the ports",
+"Não deu para ligar a demonstração": "Couldn't turn on the demo",
+"Não deu para recomeçar": "Couldn't start over",
+"Não vai entrar na conta": "Won't be counted",
+"Relatório não saiu": "Report failed",
+"Relatório salvo": "Report saved",
+"leitura interrompida": "reading interrupted"
 },
 "patterns": [
 [
@@ -5379,6 +5411,15 @@ const I18N_EN = {
 "Começou: o ",
 " desconectou às ",
 ". Quando ele conectar de novo, o app lê a memória dele e pergunta na tela Agora, uns 2 min depois."
+]
+],
+[
+"Não consegui terminar a mudança da pasta de dados para RadLog: ",
+"^Não consegui terminar a mudança da pasta de dados para RadLog: ((?:(?! · ).)+?)\\. Os dados continuam na pasta antiga; tento de novo ao abrir\\.$",
+"Couldn't finish moving the data folder to RadLog: ${1}. The data stays in the old folder; I'll try again on opening.",
+[
+"Não consegui terminar a mudança da pasta de dados para RadLog: ",
+". Os dados continuam na pasta antiga; tento de novo ao abrir."
 ]
 ],
 [
@@ -7743,6 +7784,15 @@ const I18N_EN = {
 ]
 ],
 [
+"a release não tem a assinatura (",
+"^a release não tem a assinatura \\(((?:(?! · ).)+?)\\); baixe pela página e confira$",
+"the release has no signature (${1}); download it from the page and check it",
+[
+"a release não tem a assinatura (",
+"); baixe pela página e confira"
+]
+],
+[
 "Dentro do normal — o nível de fundo costuma ficar entre ",
 "^Dentro do normal — o nível de fundo costuma ficar entre ((?:(?! · ).)+?) e ((?:(?! · ).)+?) CPM$",
 "Within normal — your background usually stays between ${1} and ${2} CPM",
@@ -8233,6 +8283,15 @@ const I18N_EN = {
 [
 "ERRO interno em ",
 " vezes na última hora, não vou reiniciar"
+]
+],
+[
+"a assinatura do ",
+"^a assinatura do ((?:(?! · ).)+?) não confere; não vou instalar esta versão$",
+"the signature of ${1} doesn't match; I won't install this version",
+[
+"a assinatura do ",
+" não confere; não vou instalar esta versão"
 ]
 ],
 [
@@ -9748,6 +9807,15 @@ const I18N_EN = {
 ]
 ],
 [
+"O fundo da casa (GMC-800) ficou em ",
+"^O fundo da casa \\(GMC\\-800\\) ficou em ((?:(?! · ).)+?) µSv/h: ((?:(?! · ).)+?)$",
+"The home background (GMC-800) was ${1} µSv/h: ${2}",
+[
+"O fundo da casa (GMC-800) ficou em ",
+" µSv/h: "
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -10081,6 +10149,15 @@ const I18N_EN = {
 "cloud: Google sign-in did not work (${1})",
 [
 "nuvem: login com o Google não deu certo ("
+]
+],
+[
+"a release não tem o ",
+"^a release não tem o ((?:(?! · ).)+?) para conferir o arquivo$",
+"the release doesn't have ${1} to check the file",
+[
+"a release não tem o ",
+" para conferir o arquivo"
 ]
 ],
 [
@@ -10607,6 +10684,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) sumiu da lista de portas \\(cabo ou USB\\)$",
+"${1} disappeared from the port list (cable or USB)",
+[
+" sumiu da lista de portas (cabo ou USB)"
+]
+],
+[
 "atualização: troca cancelada; ",
 "^atualização: troca cancelada; ((?:(?! · ).)+?) ficou em ((?:(?! · ).)+?)$",
 "update: switch cancelled; ${1} stayed in ${2}",
@@ -10786,6 +10871,14 @@ const I18N_EN = {
 "${1}: the count didn't change, but the dose went up",
 [
 ": a contagem não mudou, mas a dose subiu"
+]
+],
+[
+"leitura ao vivo sem resposta em 6 s (",
+"^leitura ao vivo sem resposta em 6 s \\(((?:(?! · ).)+?)\\)$",
+"live reading with no answer in 6 s (${1})",
+[
+"leitura ao vivo sem resposta em 6 s ("
 ]
 ],
 [
@@ -10980,6 +11073,14 @@ const I18N_EN = {
 [
 "[demo] Atenção no RC102: ",
 " (limite "
+]
+],
+[
+"Configuração do contador restaurada de ",
+"^Configuração do contador restaurada de ((?:(?! · ).)+?)$",
+"Counter configuration restored from ${1}",
+[
+"Configuração do contador restaurada de "
 ]
 ],
 [
@@ -13848,6 +13949,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Configuração restaurada de ",
+"^Configuração restaurada de ((?:(?! · ).)+?)$",
+"Configuration restored from ${1}",
+[
+"Configuração restaurada de "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -14125,6 +14234,14 @@ const I18N_EN = {
 [
 " registros, ",
 " minutos novos"
+]
+],
+[
+"Atualizando para a versão ",
+"^Atualizando para a versão ((?:(?! · ).)+?)$",
+"Updating to version ${1}",
+[
+"Atualizando para a versão "
 ]
 ],
 [
@@ -14448,6 +14565,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Leituras exportadas para ",
+"^Leituras exportadas para ((?:(?! · ).)+?)$",
+"Readings exported to ${1}",
+[
+"Leituras exportadas para "
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -14702,6 +14827,14 @@ const I18N_EN = {
 "GMC-800 memory at ${1}%",
 [
 "Memória do GMC-800 em "
+]
+],
+[
+"pasta antiga apagada em ",
+"^pasta antiga apagada em ((?:(?! · ).)+?)$",
+"old folder deleted on ${1}",
+[
+"pasta antiga apagada em "
 ]
 ],
 [
@@ -15451,6 +15584,14 @@ const I18N_EN = {
 "unknown device ${1}",
 [
 "aparelho desconhecido "
+]
+],
+[
+"a gravação falhou (",
+"^a gravação falhou \\(((?:(?! · ).)+?)\\)$",
+"saving failed (${1})",
+[
+"a gravação falhou ("
 ]
 ],
 [
@@ -17464,6 +17605,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Abrindo a versão ",
+"^Abrindo a versão ((?:(?! · ).)+?)$",
+"Opening version ${1}",
+[
+"Abrindo a versão "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -17792,10 +17941,18 @@ const I18N_EN = {
 [
 "faltam ",
 "^faltam ((?:(?! · ).)+?) sem dado$",
-"${1} missing without data",
+"no data for ${1}",
 [
 "faltam ",
 " sem dado"
+]
+],
+[
+"Código salvo em ",
+"^Código salvo em ((?:(?! · ).)+?)$",
+"Code saved in ${1}",
+[
+"Código salvo em "
 ]
 ],
 [
@@ -18257,6 +18414,14 @@ const I18N_EN = {
 "${1} µSv/h on average",
 [
 " µSv/h em média"
+]
+],
+[
+"Conectando em ",
+"^Conectando em ((?:(?! · ).)+?)…$",
+"Connecting on ${1}…",
+[
+"Conectando em "
 ]
 ],
 [
@@ -18904,6 +19069,22 @@ const I18N_EN = {
 "RC102 since ${1} ${2}",
 [
 "RC102 desde "
+]
+],
+[
+"Conectado em ",
+"^Conectado em ((?:(?! · ).)+?)$",
+"Connected on ${1}",
+[
+"Conectado em "
+]
+],
+[
+"encontrei em ",
+"^encontrei em ((?:(?! · ).)+?)$",
+"found on ${1}",
+[
+"encontrei em "
 ]
 ],
 [
@@ -20790,6 +20971,14 @@ const I18N_EN = {
 "${1} · peak ${2}${3}",
 [
 " · pico "
+]
+],
+[
+"relógio ",
+"^relógio ((?:(?! · ).)+?)$",
+"clock ${1}",
+[
+"relógio "
 ]
 ],
 [

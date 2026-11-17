@@ -103,9 +103,12 @@
   // o nome do elemento sempre junto (ACE): "bismuto · filho do radônio",
   // como no K-40, que já aparece como potássio
   const ELEM = { Pb: "chumbo", Bi: "bismuto", Tl: "tálio", Ac: "actínio", Th: "tório", Pa: "protactínio", Am: "amerício", Tc: "tecnécio", I: "iodo", Cs: "césio", Co: "cobalto", K: "potássio" };
+  // 2.101.1: cada pedaço traduzido antes de juntar (a frase junta não está
+  // na tradução e aparecia em português na dica do espectro)
   for (const l of LIB) {
     const el = /^[A-Z][a-z]?-\d/.test(l[1]) ? ELEM[l[1].split("-")[0]] : null;
-    if (el && l[2] !== el) l[2] = l[2] ? el + " · " + l[2] : el;
+    if (el && l[2] !== el) l[2] = l[2] ? tr(el) + " · " + tr(l[2]) : tr(el);
+    else l[2] = tr(l[2]);
   }
   function libNear(e) {
     const tol = 1.2 * sig(e);
@@ -498,7 +501,7 @@
     const near = libNear(e);
     // o que não é isótopo (raio X, aniquilação) diz de onde vem (2.69)
     const notIso = (n) => { const m = NOT_ISO.find(([re]) => re.test(n)); return m ? `<br><span class="muted">${escHtml(tr(m[1]))}</span>` : ""; };
-    const lib = near.length ? near.map(([le, n, d]) => `<b>${escHtml(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${escHtml(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
+    const lib = near.length ? near.map(([le, n, d]) => `<b>${escHtml(tr(n))}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${escHtml(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
     tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(cnt[ch] || 0)} contagens</span><br>${lib}`, x, ev.clientY - r.top);
     spDraw();
   }
@@ -1012,7 +1015,7 @@
       const cell = (yy, xx) => (yy < tl.shown ? { rate: ((tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0)) / 2, n: (tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0) } : null);
       lh = loupeHtml(cell, TL_N, W, t, x, Math.log1p(tl.max)) + `<span class="mono">${nf(EN[2 * x], 0)}–${nf(EN[Math.min(NCH - 1, 2 * x + 2)], 0)} keV · ${tr("pixel do meio")}</span><br>`;
     }
-    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
+    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${escHtml(tr(near[0][1]))}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
   }
 
@@ -1140,7 +1143,7 @@
       html += `<br><span class="mono">${nf(d.cps[k], 2)} cps · ${nf(e, 0)} keV · ${nf(row[b], 2)} por min</span>`;
       if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
       else if (d.secs[k] < d.rowSec * 0.9) html += `<br>${nf((d.secs[k] / d.rowSec) * 100, 0)}% do tempo com dados`;
-      if (near.length) html += `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
+      if (near.length) html += `<br><b>${escHtml(tr(near[0][1]))}</b> ${nf(near[0][0], 1)} keV`;
     }
     tip($("rcSgTip"), html, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();

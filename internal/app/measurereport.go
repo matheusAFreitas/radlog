@@ -409,6 +409,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		p.section("GEOMETRIA, CONTADOR E MÉTODO")
 	}
 	geo := strings.TrimSpace(m.Note)
+	if geo != "" {
+		pdf.MarkTranslated(geo) // 2.101.1: anotação da pessoa fica como ela escreveu
+	}
 	if geo == "" {
 		geo = "não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)"
 	}
