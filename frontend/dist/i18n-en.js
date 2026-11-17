@@ -4709,7 +4709,8 @@ const I18N_EN = {
 "· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero": "· same stretch as the chart above · dose only in this stretch, starting from zero",
 "Aparelho no gráfico": "Device in the chart",
 "sem dados do RC102 no período": "no RC102 data in the period",
-"sem dados do RadiaCode no período": "no RC102 data in the period"
+"sem dados do RadiaCode no período": "no RC102 data in the period",
+"Analisar nos gráficos": "Analyze in the charts"
 },
 "patterns": [
 [

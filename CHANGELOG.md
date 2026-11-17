@@ -15,6 +15,8 @@
 - Gráfico de cima com o seletor "Todos | GMC-800 | RC102" (guardado), ao lado
   de µSv/h e CPM. Com um aparelho só, aparece só a linha dele, com o eixo
   ajustado a ele; no CPM fica um eixo só. Sem dado do RC102, o seletor some.
+- Botão "Analisar nos gráficos" no gráfico de 24 h do RC102 e no quadro do
+  GMC-800: abre os Gráficos já naquele aparelho e no mesmo período.
 - Inglês: um texto já traduzido não é traduzido de novo (a legenda do CPM
   dizia "on the limits" em vez de "no limits").
 
@@ -34,6 +36,8 @@
   to µSv/h and CPM. With a single device, only its line shows, with the axis
   fitted to it; in CPM there is a single axis. Without RC102 data, the
   selector goes away.
+- "Analyze in the charts" button on the RC102 24 h chart and on the GMC-800
+  card: opens Charts on that device and the same period.
 - English: text that is already translated is not translated again (the CPM
   legend said "on the limits" instead of "no limits").
 

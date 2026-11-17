@@ -1304,6 +1304,7 @@
         <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
+      <div class="hero-acts"><button type="button" class="btn small" data-charts="gmc" data-crange="24h">Analisar nos gráficos</button></div>
 
       <div class="empty" id="emptyHint" hidden>
         <span>Nenhum contador conectado.</span>
@@ -1365,7 +1366,8 @@
     </section>
     <section class="card rc-24" id="rc24Card" hidden>
       <div class="rc-24-head"><h3 id="rc24Title">Últimas 24 horas</h3>
-        <div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div></div>
+        <div class="rc-24-acts"><div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div>
+        <button type="button" class="btn small" data-charts="rc">Analisar nos gráficos</button></div></div>
       <div class="rc-24-chart" id="rc24Chart"></div>
       <p class="small muted rc-24-key"><span data-u="rate"><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
     </section>
