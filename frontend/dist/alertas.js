@@ -278,7 +278,7 @@ function renderAlertHistory(all) {
       day = key;
       const h = document.createElement("h3");
       h.textContent = isToday(e.time) ? "Hoje" : isYesterday(e.time) ? "Ontem" :
-        dt.toLocaleDateString(LOCALE, { weekday: "long", day: "2-digit", month: "2-digit", year: dt.getFullYear() === new Date().getFullYear() ? undefined : "numeric" });
+        dt.toLocaleDateString(LOCALE, { weekday: "long" }) + ", " + (dt.getFullYear() === new Date().getFullYear() ? ddmm(e.time) : ddmmyyyy(e.time));
       ul = document.createElement("ul");
       ul.className = "events alerts";
       box.append(h, ul);

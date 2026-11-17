@@ -65,6 +65,8 @@ const fmt = (v, d) => (v == null || !isFinite(v) ? "—" : nf(d).format(v));
 const pad = (n) => String(n).padStart(2, "0");
 const hhmm = (ms) => { const t = new Date(ms); return pad(t.getHours()) + ":" + pad(t.getMinutes()); };
 const ddmm = (ms) => { const t = new Date(ms); return pad(t.getDate()) + "/" + pad(t.getMonth() + 1); };
+// 2.97.0: sempre dia/mês/ano; o formato escolhido (unidades.js) troca na tela
+const ddmmyyyy = (ms) => { const t = new Date(ms); return ddmm(ms) + "/" + t.getFullYear(); };
 const hhmmss = (ms) => { const t = new Date(ms); return hhmm(ms) + ":" + pad(t.getSeconds()); };
 const isShortRange = () => state.range === "15m" || state.range === "30m";
 const isLongRange = () => state.range === "7d" || state.range === "30d" || state.range === "1y";
@@ -1232,7 +1234,7 @@ function showHeatTip(c) {
   const v = h.values[i][hr];
   const day = new Date(h.days[i]);
   const dayTxt = isToday(h.days[i]) ? "hoje" : isYesterday(h.days[i]) ? "ontem" :
-    day.toLocaleDateString(LOCALE, { weekday: "short", day: "2-digit", month: "2-digit" }).replace(".", "");
+    day.toLocaleDateString(LOCALE, { weekday: "short" }).replace(".", "") + " " + ddmm(h.days[i]);
   const tip = $("heatTip");
   tip.textContent = "";
   const line = (txt, cls) => { const d = document.createElement("div"); if (cls) d.className = cls; d.textContent = txt; tip.appendChild(d); };
@@ -2505,7 +2507,7 @@ function wireBackup() {
 function backupFrom(r) {
   if (r.from) return asIs(r.from);
   const d = r.created ? new Date(r.created) : null;
-  return d && !isNaN(d) ? d.toLocaleDateString(LOCALE) : "outro PC";
+  return d && !isNaN(d) ? ddmmyyyy(d) : "outro PC";
 }
 
 // configurações do backup (2.74): o backup traz as que valem em qualquer
@@ -2583,6 +2585,7 @@ async function openSettings(focusId) {
   if (api.GetVersionsDir) api.GetVersionsDir().then((d) => { $("updDir").textContent = d; }).catch(() => {});
   $("selLang").value = s.lang || "auto";
   unitSegSet(s.rateUnit || "usv", s.countUnit || "cps");
+  dateSegSet(s.dateFormat === "iso" ? "iso" : "");
   $("chkMeasReport").checked = !s.noMeasureReport;
   $("chkAutoHist").checked = !s.noAutoHistory;
   fillLevels(lv());
@@ -2602,10 +2605,10 @@ async function openSettings(focusId) {
 // ---------- mudanças não salvas ----------
 // Os campos que só valem com "Salvar" (os outros salvam na hora ou têm botão
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
-const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
+const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "valDateFmt", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
 const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
-  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
+  chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", valDateFmt: "formato da data", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
@@ -2689,7 +2692,7 @@ function setSearch() {
 }
 
 // versões da calibração do GMC (2.2)
-const calWhen = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+const calWhen = (t) => ddmmyyyy(t) + " " + hhmm(t);
 const calSrcTxt = (v) => v.origem === "intercalibração" ? "intercalibração com o RC102" : v.fator > 0 ? "informado à mão" : v.origem === "contador" ? "curva do contador" : v.origem === "padrão" ? "padrão de fábrica" : "curva do contador (início)";
 async function renderCalHist() {
   if (!api.GetCalHistory) return;
@@ -2810,7 +2813,7 @@ async function renderCfgHist() {
   if (!api.GetConfigHistory) return;
   let h = [];
   try { h = (await api.GetConfigHistory()) || []; } catch (e) { h = []; }
-  const when = (t) => { const d = new Date(t); return d.toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" }) + " " + d.toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit" }); };
+  const when = (t) => ddmmyyyy(t) + " " + hhmm(t);
   $("cfgHistBody").innerHTML = h.map((c) => `<tr><td class="when">${when(c.t)}</td><td>${escHtml(c.campo)}</td><td class="from">${escHtml(c.de || "—")}</td><td>${escHtml(c.para)}</td><td class="from">${escHtml(c.origem)}</td></tr>`).join("");
   $("cfgHistEmpty").hidden = h.length > 0;
 }
@@ -2831,7 +2834,7 @@ async function saveSettings(extra) {
   const rainWas = state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon;
   state.settings = await call(api.SaveSettings, s);
   syncLang(state.settings.lang);
-  syncUnits(state.settings.rateUnit, state.settings.countUnit);
+  syncUnits(state.settings.rateUnit, state.settings.countUnit, state.settings.dateFormat);
   if (rainWas !== state.settings.rainEnabled + "|" + state.settings.rainLat + "|" + state.settings.rainLon) refreshRainImpact(true);
   $("chkAlarm").checked = !!state.settings.alarmEnabled;
   renderAlarmLabel();
@@ -3198,6 +3201,7 @@ function wire() {
       uiDensity: $("valUiDensity").value,
       rateUnit: $("valRateUnit").value || "usv",
       countUnit: $("valCountUnit").value || "cps",
+      dateFormat: $("valDateFmt").value === "iso" ? "iso" : "",
       trayDevice: $("selTrayDev").value,
       pulseOff: !$("chkPulse").checked,
       pulseStrip: $("chkPulseStrip").checked,
@@ -4575,8 +4579,9 @@ async function init() {
     if (hasGo) { syncLang(state.settings.lang); if (api.SetUILang) api.SetUILang(LANG).catch(() => {}); }
     // modo navegador: a escolha fica só no navegador
     if (!state.settings.rateUnit) Object.assign(state.settings, { rateUnit: UNITS.rate, countUnit: UNITS.count });
+    if (state.settings.dateFormat == null) state.settings.dateFormat = DATE_ISO ? "iso" : "";
     if (hasGo) await migrateUnits();
-    if (syncUnits(state.settings.rateUnit, state.settings.countUnit)) return;
+    if (syncUnits(state.settings.rateUnit, state.settings.countUnit, state.settings.dateFormat)) return;
     else state.settings.lang = LANG_PREF; // modo navegador: vale o que está no navegador
     state.status = await api.GetStatus();
     state.demo = await api.GetDemo();
@@ -4654,7 +4659,13 @@ function unitSegSet(rate, count) {
   document.querySelectorAll("#segRateUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === rate)));
   document.querySelectorAll("#segCountUnit button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === count)));
 }
+// formato da data (2.97.0)
+function dateSegSet(v) {
+  $("valDateFmt").value = v;
+  document.querySelectorAll("#segDateFmt button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === v)));
+}
 function wireUnits() {
+  document.querySelectorAll("#segDateFmt button").forEach((b) => b.addEventListener("click", () => { dateSegSet(b.dataset.v); $("valDateFmt").dispatchEvent(new Event("change", { bubbles: true })); }));
   const pick = (id, v) => { $(id).value = v; unitSegSet($("valRateUnit").value, $("valCountUnit").value); $(id).dispatchEvent(new Event("change", { bubbles: true })); };
   document.querySelectorAll("#segRateUnit button").forEach((b) => b.addEventListener("click", () => pick("valRateUnit", b.dataset.v)));
   document.querySelectorAll("#segCountUnit button").forEach((b) => b.addEventListener("click", () => pick("valCountUnit", b.dataset.v)));

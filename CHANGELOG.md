@@ -1,5 +1,24 @@
 # Versões
 
+## 2.97.0
+- Formato da data à escolha, em Configurações › Janela e tela › Datas:
+  16/11/2026 (dia, mês e ano) ou 2026-11-16 (ano, mês e dia). Vale para a
+  tela e o relatório em PDF, nos dois idiomas. Em inglês o app não usa mais
+  mês/dia em lugar nenhum.
+- Página do RC102: a linha do σ saiu da fonte de código, como a do GMC-800.
+- Configurações em tela estreita: as abas quebram linha, e a última ("Testes"
+  no GMC-800) aparece sem rolar de lado.
+
+**English**
+
+- Choose the date format in Settings › Window and display › Dates:
+  16/11/2026 (day, month, year) or 2026-11-16 (year, month, day). It applies
+  to the screen and the PDF report, in both languages. In English the app no
+  longer uses month/day anywhere.
+- RC102 page: the σ line left the code font, like the GMC-800's.
+- Settings on narrow screens: the tabs wrap, and the last one ("Tests" on the
+  GMC-800) shows without sideways scrolling.
+
 ## 2.96.1
 - "Os termos do app" entrou nas Ações rápidas (Ctrl+K).
 - Glossário pelo teclado: o quadro recebe o foco, Tab chega em "Todos os

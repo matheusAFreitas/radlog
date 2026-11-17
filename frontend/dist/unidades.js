@@ -21,6 +21,19 @@ const UNITS = (() => {
 })();
 const RATE_MREM = UNITS.rate === "mrh";
 
+// 2.97.0: formato da data, nos dois idiomas. O app escreve sempre dia/mês
+// ("16/11", "16/11/2026"); com "iso" o observador da tela (i18n.js) troca
+// para "11-16" e "2026-11-16". Mês/dia não existe, de propósito.
+const DATE_ISO = (() => { try { return localStorage.getItem("dateFmt") === "iso"; } catch (e) { return false; } })();
+const dateText = (() => {
+  if (!DATE_ISO) return (s) => s;
+  const re = /(?<![\d/.,:-])(\d{2})\/(\d{2})(?:\/(\d{4}))?(?![\d/])/g;
+  return (s) => {
+    if (typeof s !== "string" || s.indexOf("/") < 0) return s;
+    return s.replace(re, (m, d, mo, y) => (+d < 1 || +d > 31 || +mo < 1 || +mo > 12 ? m : y ? `${y}-${mo}-${d}` : `${mo}-${d}`));
+  };
+})();
+
 // fator da taxa e da dose na tela (µSv → mrem = ÷10)
 const rateK = () => (RATE_MREM ? 0.1 : 1);
 const rateLbl = () => (RATE_MREM ? "mrem/h" : "µSv/h");
@@ -86,13 +99,15 @@ function unitWord(s, el) {
 }
 
 // guarda a escolha (vinda das Configurações) e recarrega se mudou
-function syncUnits(rate, count) {
+function syncUnits(rate, count, date) {
   rate = rate === "mrh" ? "mrh" : "usv";
   count = count === "cpm" ? "cpm" : "cps";
-  if (rate === UNITS.rate && count === UNITS.count) return false;
+  const iso = date === "iso";
+  if (rate === UNITS.rate && count === UNITS.count && iso === DATE_ISO) return false;
   try {
     localStorage.setItem("rateUnit", rate);
     localStorage.setItem("countUnit", count);
+    localStorage.setItem("dateFmt", iso ? "iso" : "");
     if (localStorage.getItem("rateUnit") !== rate) return false; // sem localStorage: não recarrega em volta
   } catch (e) { return false; }
   location.reload();

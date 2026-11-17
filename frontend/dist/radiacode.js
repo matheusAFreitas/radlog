@@ -1339,8 +1339,8 @@
     lg.more = p.more; lg.shown = p.shown; lg.total = p.total; lg.loaded = true;
     lgRender();
   }
-  const fmtDate = (t) => new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit", year: "numeric" });
-  const fmtTime = (t) => new Date(t).toLocaleTimeString(LOCALE, { hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  const fmtDate = (t) => ddmmyyyy(t);
+  const fmtTime = (t) => hhmmss(t);
   const fmtDur = (s) => { s = Math.round(s); const d = Math.floor(s / 86400), h = Math.floor((s % 86400) / 3600), m = Math.floor((s % 3600) / 60), ss = s % 60; return (d ? d + "d " : "") + h + ":" + pad2(m) + ":" + pad2(ss); };
   function lgRow(it) {
     const src = it.src === "celular" ? '<span class="src">celular</span>' : it.src === "memoria" ? '<span class="src">memória do aparelho</span>' : "";
@@ -1607,7 +1607,7 @@
   // "4 h 33 min", "30 min", "12 h"
   const fmtHM = (s) => { s = Math.max(0, Math.round(s / 60)); const h = Math.floor(s / 60), m = s % 60; return h ? `${h} h${m ? " " + m + " min" : ""}` : `${m} min`; };
   const fmtAT = (s) => (s > 0 ? fmtHM(s) : "até eu parar");
-  const fmtDM = (t) => new Date(t).toLocaleDateString(LOCALE, { day: "2-digit", month: "2-digit" });
+  const fmtDM = (t) => ddmm(t);
   const setHTML = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
   const actNum = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
   async function actLoad() {

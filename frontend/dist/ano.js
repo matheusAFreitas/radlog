@@ -113,7 +113,7 @@ function ycBin(p) {
   return p < b[0] ? 0 : p < b[1] ? 1 : p <= b[2] ? 2 : p <= b[3] ? 3 : 4;
 }
 const ycDate = (d) => {
-  const s = new Date(d.day).toLocaleDateString(LOCALE, { weekday: "short", day: "2-digit", month: "2-digit", year: "numeric" });
+  const s = new Date(d.day).toLocaleDateString(LOCALE, { weekday: "short" }) + ", " + ddmmyyyy(d.day);
   return s.replace(/\./g, "");
 };
 const ycMonthName = (m) => new Date(2000, m, 1).toLocaleDateString(LOCALE, { month: "short" }).replace(/\./g, "");
