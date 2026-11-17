@@ -463,7 +463,7 @@ function qkFab(open) {
 // 2.89.0 (avaliação E7/E8): a busca saiu da barra e as Ações ficaram com o
 // que se faz no dia a dia, na ordem de uso. Ctrl+K abre este menu.
 const QK_FAB = ["Anotar agora", "Medir um objeto", "Estou testando um objeto", "Parar o teste do objeto", "Silenciar o alarme",
-  "Saí de casa", "Voltei", "Programar saída", "Relatório em PDF do Resumo", "Baixar histórico", "Mudei o aparelho de lugar"];
+  "Saí de casa", "Voltei", "Programar saída", "Relatório em PDF do Resumo", "Baixar histórico", "Mudei o aparelho de lugar", "Os termos do app"];
 function qkFabItems() {
   const all = qkActions().filter((it) => !(it.off && it.off()));
   return QK_FAB.map((t) => all.find((it) => it.t === t)).filter(Boolean);

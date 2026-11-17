@@ -4742,7 +4742,7 @@ Em dia: nenhum trecho sem leitura no app desde o último download.	Up to date: n
 contador não grava	counter isn't saving
 em dia · {0}	up to date · {0}
 {0}% · enche em {1}	{0}% · full in {1}
-falta {0}	missing {0}
+falta {0}	{0} to download
 {0} · incompleto	{0} · incomplete
 Download	Download
 O backup de {0} tem 1 ajuste diferente do daqui.	The backup from {0} has 1 setting different from this one.
@@ -6110,3 +6110,6 @@ Dureza	Hardness
 Saturando	Saturating
 CPM e CPS	CPM and CPS
 Incerteza (±)	Uncertainty (±)
+na hora certa	on time
+clique para abrir	click to open
+não conectou	did not connect

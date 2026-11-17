@@ -4674,7 +4674,10 @@ const I18N_EN = {
 "Dureza": "Hardness",
 "Saturando": "Saturating",
 "CPM e CPS": "CPM and CPS",
-"Incerteza (±)": "Uncertainty (±)"
+"Incerteza (±)": "Uncertainty (±)",
+"na hora certa": "on time",
+"clique para abrir": "click to open",
+"não conectou": "did not connect"
 },
 "patterns": [
 [
@@ -20650,7 +20653,7 @@ const I18N_EN = {
 [
 "falta ",
 "^falta ((?:(?! · ).)+?)$",
-"missing ${1}",
+"${1} to download",
 [
 "falta "
 ]
