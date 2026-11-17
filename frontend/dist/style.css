@@ -3297,7 +3297,18 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 /* 2.97.1: com um quadro da faixa aberto, cada um ganha a linha inteira (o
    fechado não deixa mais um buraco embaixo dele). A forma do nível aparece
    na palavra só com o quadro fechado; aberto, ela está no meio do mostrador. */
-.instruments[data-strip] .inst-pair:has(.inst.open) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
+.instruments[data-strip] .inst-pair:has(.inst.open):has(.inst:not(.open):not([hidden])) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
 .inst-state .lv-ico { display: none; }
 .instruments[data-strip] .inst:not(.open) .inst-state .lv-ico { display: inline-block; }
 .hero-lv { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+/* 2.98.0 (ACE): a faixa dos aparelhos (fora do Agora) fica presa no topo ao
+   rolar, no lugar da barra compacta antiga. Com um quadro aberto ela rola
+   junto, para não cobrir a tela. Com os dois abertos, ficam lado a lado. */
+.instruments[data-strip]:not(:has(.inst.open)) { position: sticky; top: var(--barsH, 0px); z-index: 14; margin-top: calc(-1 * var(--space-2)); padding: var(--space-2) 0; background: var(--bg); }
+#instruments.inst-float { position: fixed; top: var(--barsH, 0px); left: var(--side-w); right: 0; z-index: 15; margin: 0; padding: var(--space-2) var(--space-6); background: var(--bg); border-bottom: 1px solid var(--border); }
+#instruments.inst-float .inst-open { display: none; }
+@media (max-width: 900px) { #instruments.inst-float { left: 0; padding: var(--space-2) var(--space-4); } }
+.dd-box.dd-tog { cursor: pointer; transition: opacity .2s, border-color .2s; }
+.dd-box.dd-tog:hover { border-color: var(--border-hover); }
+.dd-box.dd-tog[aria-pressed="true"] { border-color: color-mix(in srgb, var(--c) 45%, var(--border)); }

@@ -523,7 +523,10 @@ function renderAlertMarks() {
 // a faixa aparece quando os quadros grandes saem da tela
 (() => {
   const mini = $("mini"), inst = $("instruments");
-  if (!window.IntersectionObserver) return;
+  // 2.98.0 (ACE): a faixa dos aparelhos fica presa no topo e substitui esta
+  // barra (instFloat, abaixo). Para voltar com ela, apague a linha MINI_OFF.
+  const MINI_OFF = true;
+  if (MINI_OFF || !window.IntersectionObserver) return;
   // aparece quando os valores dos quadros já saíram por cima (mais da
   // metade do painel escondida), não só quando ele some inteiro: páginas
   // curtas rolam pouco e o painel ficava cortado sem a faixa
@@ -540,6 +543,44 @@ function renderAlertMarks() {
   }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 1] }).observe(inst);
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   ["miniG", "miniR", "miniTop"].forEach((id) => $(id).addEventListener("click", toTop));
+})();
+
+// 2.98.0 (ACE): no Agora, quando mais da metade dos quadros grandes sai por
+// cima, a faixa compacta dos aparelhos fica presa no topo (no lugar da barra
+// antiga). Um espaço do mesmo tamanho segura a página para ela não pular.
+let instFloat = () => {};
+(() => {
+  const inst = $("instruments");
+  if (!inst) return;
+  const sp = document.createElement("div");
+  sp.className = "inst-spacer";
+  sp.hidden = true;
+  inst.before(sp);
+  instFloat = (on) => {
+    if (on === inst.classList.contains("inst-float")) return;
+    if (on) {
+      sp.style.height = inst.offsetHeight + "px";
+      sp.hidden = false;
+      inst.querySelectorAll(".inst.open").forEach((t) => instOpen(t, false));
+      inst.dataset.strip = "";
+      inst.classList.add("inst-float");
+    } else {
+      sp.hidden = true;
+      inst.classList.remove("inst-float");
+      if (inst._page === "agora" || !inst._page) delete inst.dataset.strip;
+    }
+  };
+  let busy = false;
+  const check = () => {
+    busy = false;
+    if ((inst._page || "agora") !== "agora" || inst.hidden) { instFloat(false); return; }
+    const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--barsH")) || 0;
+    const ref = inst.classList.contains("inst-float") ? sp : inst;
+    const r = ref.getBoundingClientRect();
+    instFloat(r.height > 0 && r.top + r.height * 0.55 < top);
+  };
+  window.addEventListener("scroll", () => { if (!busy) { busy = true; requestAnimationFrame(check); } }, { passive: true });
+  window.addEventListener("resize", check);
 })();
 
 // a última hora de cada aparelho, desenhada pequena no quadro

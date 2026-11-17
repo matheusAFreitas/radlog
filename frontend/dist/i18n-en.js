@@ -4681,7 +4681,8 @@ const I18N_EN = {
 "Datas": "Dates",
 "Formato da data": "Date format",
 "Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.": "Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.",
-"formato da data": "date format"
+"formato da data": "date format",
+"Clique para mostrar ou esconder no gráfico": "Click to show or hide on the chart"
 },
 "patterns": [
 [

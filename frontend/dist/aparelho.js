@@ -225,6 +225,12 @@ function instOpen(tile, on) {
 document.addEventListener("click", (e) => {
   const inst = $("instruments");
   if (!inst || !("strip" in inst.dataset)) return;
+  // presa no topo do Agora (2.98.0): um clique volta para os quadros grandes
+  if (inst.classList.contains("inst-float") && inst.contains(e.target)) {
+    e.stopPropagation(); e.preventDefault();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    return;
+  }
   const tile = e.target.closest(".inst");
   if (!tile || !inst.contains(tile)) return;
   const ob = e.target.closest(".inst-open");
@@ -274,7 +280,8 @@ function renderDevMini() {
   inst.dataset.devpage = DEV_PAGES[page] ? page : "";
   // 2.88.0 (avaliação E1): fora do Agora os quadros viram a faixa compacta;
   // trocar de página fecha o que estava aberto
-  const strip = page !== "agora";
+  if (page !== "agora") instFloat(false);
+  const strip = page !== "agora" || inst.classList.contains("inst-float");
   if (strip !== ("strip" in inst.dataset) || inst._page !== page) {
     inst._page = page;
     if (strip) inst.dataset.strip = ""; else delete inst.dataset.strip;
