@@ -1,5 +1,21 @@
 # Versões
 
+## 2.101.4
+- Calibração do KCl: quando o pico do K-40 quase não aparece acima do fundo
+  (incerteza da eficiência acima de ±20%), a calibração não é mais guardada.
+  Antes, qualquer pico positivo virava calibração, e uma medida ruim (o sal
+  longe do cristal, por exemplo) deixava todos os Bq seguintes dezenas de
+  vezes altos demais. O resultado mostra a eficiência medida e avisa que não
+  foi guardada; a calibração anterior continua valendo.
+
+**English**
+- KCl calibration: when the K-40 peak barely shows above the background
+  (efficiency uncertainty above ±20%), the calibration is no longer saved.
+  Before, any positive peak became the calibration, and a bad measurement
+  (the salt away from the crystal, for example) made every later Bq tens of
+  times too high. The result shows the measured efficiency and says it was
+  not saved; the previous calibration stays.
+
 ## 2.101.3
 - Calibração do KCl: a massa digitada voltava para 500 g quando se clicava
   em "Sal light", "KCl puro" ou no cartão "1 · KCl" depois de digitar (pedido

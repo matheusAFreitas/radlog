@@ -4811,7 +4811,10 @@ const I18N_EN = {
 "Relatório não saiu": "Report failed",
 "Relatório salvo": "Report saved",
 "leitura interrompida": "reading interrupted",
-"Marcado": "Marked"
+"Marcado": "Marked",
+"O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.": "The K-40 peak barely showed above the background, so the calibration was not saved (it needs ±20% or less). Check that the RC102 is touching the salt on the crystal side and measure again.",
+"O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RadiaCode está encostado no sal pelo lado do cristal e meça de novo.": "The K-40 peak barely showed above the background, so the calibration was not saved (it needs ±20% or less). Check that the RC102 is touching the salt on the crystal side and measure again.",
+"pico fraco: não guardada": "weak peak: not saved"
 },
 "patterns": [
 [

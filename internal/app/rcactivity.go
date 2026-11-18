@@ -27,15 +27,16 @@ import (
 // atual.json (a medição em andamento, para continuar se o app fechar).
 
 const (
-	actDir      = "atividade"
-	actCalFile  = "calibracao.json"
-	actBgFile   = "fundo.json"
-	actResFile  = "medidas.jsonl"
-	actCurFile  = "atual.json"
-	actTickUSB  = 5 * time.Second
-	actTickBLE  = 15 * time.Second
-	actMaxHist  = 20
-	actBgMaxAge = 30 * 24 * time.Hour
+	actDir       = "atividade"
+	actCalFile   = "calibracao.json"
+	actBgFile    = "fundo.json"
+	actResFile   = "medidas.jsonl"
+	actCurFile   = "atual.json"
+	actTickUSB   = 5 * time.Second
+	actCalMaxErr = 0.20 // incerteza máxima da eficiência do KCl para virar calibração
+	actTickBLE   = 15 * time.Second
+	actMaxHist   = 20
+	actBgMaxAge  = 30 * 24 * time.Hour
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -165,8 +166,9 @@ type ActResult struct {
 	Prev     float64      `json:"prev,omitempty"` // eficiência anterior em 1.460 keV (para comparar)
 	Loose    bool         `json:"loose,omitempty"`
 	SampleID string       `json:"sampleId,omitempty"`
-	Nucs     []string     `json:"nucs,omitempty"`    // o que foi procurado
-	SmpSecO  int          `json:"smpSecO,omitempty"` // tempo escolhido (para medir de novo)
+	Nucs     []string     `json:"nucs,omitempty"`     // o que foi procurado
+	SmpSecO  int          `json:"smpSecO,omitempty"`  // tempo escolhido (para medir de novo)
+	NotSaved bool         `json:"notSaved,omitempty"` // calibração incerta demais: não foi guardada
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -382,7 +384,12 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.Pct = o.Pct
 		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
-		if k != nil {
+		if k != nil && k.EffErr > actCalMaxErr {
+			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
+			// estragaria todos os Bq daqui para frente
+			k.T = res.T
+			res.KCl, res.NotSaved = k, true
+		} else if k != nil {
 			k.T = res.T
 			res.KCl = k
 			cal.KCl = k

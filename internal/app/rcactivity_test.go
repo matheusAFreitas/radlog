@@ -144,3 +144,26 @@ func TestActivityFlow(t *testing.T) {
 		t.Fatalf("sem aparelho deveria dar erro")
 	}
 }
+
+// 2.101.4: uma calibração em que o pico do K-40 quase não aparece (o sal longe
+// do cristal) não é guardada: estragaria todos os Bq dali para frente.
+func TestActivityCalWeakNotSaved(t *testing.T) {
+	a := newTestApp(t)
+	rng := rand.New(rand.NewSource(11))
+	bg := actFake(rng, 3600, map[float64]float64{1460.8: 2 * 3600, 609.3: 1.5 * 3600}, 0.5)
+	smp := actFake(rng, 2940, map[float64]float64{1460.8: (2 + 0.01) * 2940, 609.3: 1.5 * 2940}, 0.5)
+	st := &a.rc.act
+	st.mu.Lock()
+	st.loaded = true
+	r := &actRun{Opts: ActOpts{Kind: "kcl", Name: "KCl (51%)", MassG: 250, Pct: 51, Geometry: "Becker"}, Phase: "amostra"}
+	r.Bg = &actSaved{Sec: bg.Sec, A: bg.A, C: bg.C}
+	r.Smp = &actSaved{Sec: smp.Sec, A: smp.A, C: smp.C}
+	res := a.actFinish(r, time.Now())
+	st.mu.Unlock()
+	if res.KCl == nil || !res.NotSaved || res.KCl.EffErr <= actCalMaxErr {
+		t.Fatalf("pico fraco: %+v (KCl %+v)", res, res.KCl)
+	}
+	if v := a.GetActivity(); v.Cal.KCl != nil {
+		t.Fatalf("guardou a calibração ruim: %+v", v.Cal.KCl)
+	}
+}
