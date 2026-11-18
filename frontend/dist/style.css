@@ -893,10 +893,13 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 @media (max-width: 1200px) { .rc-kout { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rc-search { grid-template-columns: 1fr; } }
 
 /* tabela da compensação de tempo morto */
-.lv-dt-wrap { overflow-x: auto; container-type: inline-size; }
+/* 2.101.13 (QA): o contêiner é o cartão; na caixa da tabela, um aviso que
+   aparece embaixo do campo zerava a largura (a tabela sumia) */
+.lv-dt-wrap { overflow-x: auto; }
+.lv-dt-card { container-type: inline-size; }
 /* 2.101.8: o cabeçalho quebra e, em caixa estreita, as células apertam (cabe em qualquer escala) */
 .lv-dt thead th { white-space: normal; }
-@container (max-width: 400px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
+@container (max-width: 432px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 .lv-dt th:first-child, .lv-dt td:first-child { text-align: left; }
 .lv-dt.off { opacity: .45; }
 
@@ -3301,9 +3304,9 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .al-dose-f .al-say { white-space: nowrap; }
 /* 2.101.8: empilha pela largura da caixa da tabela (a janela não desconta a
    barra lateral, o menu das Configurações e a escala) */
-.al-wrap { container-type: inline-size; }
+#lvCard { container-type: inline-size; } /* 2.101.13 (QA, item 132): no cartão, não na caixa da tabela */
 @media (max-width: 640px) { .al-wrap { overflow-x: visible; } }
-@container (max-width: 620px) {
+@container (max-width: 652px) {
   .al-tbl thead { display: none; }
   .al-tbl, .al-tbl tbody, .al-tbl tr, .al-tbl th, .al-tbl td { display: block; width: auto; }
   .al-tbl tbody th { width: auto; padding-bottom: 0; border-bottom: 0; }

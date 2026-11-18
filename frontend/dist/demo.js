@@ -1306,6 +1306,10 @@ const demoRc = () => {
     SavePlannedTrip: async (p) => {
       if (!p.gmc && !p.rc) throw new Error("escolha pelo menos um aparelho que vai com você");
       const q = { ...p, nome: (p.nome || "").trim() || "Saída programada", id: p.id || Date.now() };
+      // como o Go (planned.go): com o mesmo horário, a começada continua começada
+      // enquanto o aparelho que saiu continua indo
+      const old = planned.find((x) => x.id === q.id);
+      if (old && old.de === q.de && old.saiu && (old.saiuAparelho === "radiacode" ? q.rc : q.gmc)) { q.saiu = old.saiu; q.saiuAparelho = old.saiuAparelho; }
       planned = planned.filter((x) => x.id !== q.id).concat(q).sort((a, b) => a.de - b.de);
       setTimeout(() => emit("planned", planned.slice()), 0);
       return q;

@@ -1,7 +1,7 @@
 # Versões
 
 ## 2.101.13
-Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE):
+Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE), e o 132:
 - Configurações: valor fora da faixa já avisa no campo, antes de salvar
   ("O mínimo é 5 min. Vai gravar 5."); depois de salvar aparece corrigido e
   o aviso diz o que ficou ("Fora da faixa, ficou: …").
@@ -13,7 +13,10 @@ Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE):
   continua começada se o aparelho que saiu continua indo.
 - Agora: quando o fundo de casa fica acima do normal sem alerta (pela média
   dos últimos 10 min: aparece com 3σ, some abaixo de 2σ), a frase do topo
-  diz isso e mostra o "Por que?".
+  diz isso e mostra o "Por que?". Os segundos com o GMC-800 num objeto
+  (Medir objeto ou "Estou testando") ficam fora dessa média.
+- Configurações › Níveis e alarmes e GQ GMC-800 › Tubo: a tabela não some
+  mais quando aparece um aviso embaixo de um campo (item 132).
 - Aviso de memória no quadro do GQ GMC-800: clicar abre a Memória do
   contador.
 - Janela estreita: o menu de páginas mostra botões redondos ‹ › e degradê
@@ -24,7 +27,7 @@ Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE):
   nuvem) saem em inglês.
 
 **English**
-Items 21, 22, 62, 66, 67, 79, 92 and 125 from the sweep (ACE's ok):
+Items 21, 22, 62, 66, 67, 79, 92 and 125 from the sweep (ACE's ok), and 132:
 - Settings: an out-of-range value warns on the field before saving ("The
   minimum is 5 min. It will save 5."); after saving it shows corrected and
   the saved message says what was kept ("Out of range, set to: …").
@@ -36,7 +39,10 @@ Items 21, 22, 62, 66, 67, 79, 92 and 125 from the sweep (ACE's ok):
   device that left still goes.
 - Now: when the home background stays above normal without an alert (by the
   last 10 min average: shows at 3σ, hides below 2σ), the top sentence says
-  so and shows "Why?".
+  so and shows "Why?". Seconds with the GMC-800 on an object (Measure object
+  or "Testing an object") stay out of that average.
+- Settings › Levels and alarms and GQ GMC-800 › Tube: the table no longer
+  disappears when a warning shows under a field (item 132).
 - Memory warning on the GQ GMC-800 card: clicking opens the counter memory.
 - Narrow window: the page menu shows round ‹ › buttons and a fade when
   there are more pages, and the mouse wheel scrolls the menu sideways.

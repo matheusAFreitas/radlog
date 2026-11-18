@@ -1812,10 +1812,10 @@
       <fieldset>
           <legend>Geiger saturado</legend>
           <label for="lvSatMax" data-u="rate">Fim da escala (µSv/h)</label>
-          <input type="number" id="lvSatMax" min="0.1" step="any" inputmode="decimal">
+          <input type="number" id="lvSatMax" min="10" max="1000000" step="any" inputmode="decimal">
           <p class="small muted">Padrão 2.000 µSv/h: o máximo do GMC-800 pelo manual.</p>
           <label for="lvSatDrop" data-u="rate">Queda brusca a partir de (µSv/h)</label>
-          <input type="number" id="lvSatDrop" min="0.1" step="any" inputmode="decimal">
+          <input type="number" id="lvSatDrop" min="1" max="1000000" step="any" inputmode="decimal">
           <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
           <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
           <details class="how">
@@ -1893,7 +1893,7 @@
       <fieldset>
         <legend>RC102 saturado</legend>
         <label for="lvRcSat" data-u="rate">Fim da escala (µSv/h)</label>
-        <input type="number" id="lvRcSat" min="0.1" step="any" inputmode="decimal">
+        <input type="number" id="lvRcSat" min="1" max="1000000" step="any" inputmode="decimal">
         <details class="how">
           <summary>Como funciona</summary>
           <p class="small muted">Padrão 1.000 µSv/h: o fim da faixa do RC102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
@@ -2034,7 +2034,7 @@
         <tbody>
           <tr class="atencao">
             <th scope="row"><span class="lv-name" data-lv="atencao">Atenção</span><span class="al-say">amarelo e 3 bipes</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal" aria-label="Atenção do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvAttn"></p><label class="toggle al-on"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvAttn" min="0.01" max="10000" step="any" inputmode="decimal" aria-label="Atenção do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvAttn"></p><label class="toggle al-on"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label></td>
             <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
             <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc1" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 1 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 1</span></td>
           </tr>
@@ -2046,7 +2046,7 @@
           </tr>
           <tr class="perigo">
             <th scope="row"><span class="lv-name" data-lv="perigo">Perigo</span><span class="al-say">sirene que não desliga</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal" aria-label="Perigo do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvDanger"></p></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvDanger" min="0.05" max="100000" step="any" inputmode="decimal" aria-label="Perigo do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvDanger"></p></td>
             <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
             <td class="al-none"><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span>não tem</td>
           </tr>

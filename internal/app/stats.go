@@ -67,16 +67,20 @@ const sigma10Win = 10 * time.Minute
 
 // sigmaOver é o desvio da média do CPM das leituras por segundo em relação ao
 // fundo, com o erro de Poisson para o tempo coberto; nulo com menos de 5 min.
+// Os segundos com o aparelho num objeto não contam.
 func sigmaOver(ss []sample, bg float64) *float64 {
-	if len(ss) < 300 || bg <= 0 {
+	sum, n := 0.0, 0
+	for _, s := range ss {
+		if !s.obj {
+			sum += s.cpm
+			n++
+		}
+	}
+	if n < 300 || bg <= 0 {
 		return nil
 	}
-	sum := 0.0
-	for _, s := range ss {
-		sum += s.cpm
-	}
-	mean := sum / float64(len(ss))
-	z := (mean - bg) / math.Sqrt(bg/(float64(len(ss))/60))
+	mean := sum / float64(n)
+	z := (mean - bg) / math.Sqrt(bg/(float64(n)/60))
 	return &z
 }
 

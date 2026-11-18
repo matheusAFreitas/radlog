@@ -450,7 +450,7 @@ function renderGTile() {
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
   tileScale("g", tA / top, tB / top, live ? Math.min(r.cpm, top) / top : null, tick(tA), tick(tB));
-  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
+  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null, sigma10: live && r.sigma10 != null ? r.sigma10 : null };
   agoraNow();
   const gl = state.gLastSeen;
   tileFoot($("gTileFoot"), u, v, state.gDose, "", gc ? { t: (gl && gl.time) || state.gOffSince || 0 } : null);
@@ -2080,7 +2080,8 @@ function setRepaintClamped(typed) {
     if (!(id in typed) || !(v > 0)) continue;
     const shown = u === "rate" ? rateOut(v) : v;
     const was = setShownNum(typed[id], u), now = setNum(shown);
-    if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) continue;
+    // arredondado pelo próprio app (5,5 → 6): o campo mostra o que ficou, sem aviso
+    if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) { if (setNum($(id).value) !== now) $(id).value = shown; continue; }
     $(id).value = shown;
     // µSv/h: a tela troca para mrem/h sozinha
     out.push(`${tr(label)} ${u === "rate" ? usvTxt(v) : fmt(v, 0) + " " + u}`);
@@ -2099,8 +2100,10 @@ function setRangeHint(id) {
     const v = u === "rate" ? rateIn(raw) : setNum(raw);
     const mn = parseFloat(el.getAttribute("min")), mx = parseFloat(el.getAttribute("max"));
     const show = (x) => (u === "rate" ? usvTxt(x) : `${fmt(x, 0)} ${u}`), keep = (x) => (u === "rate" ? usvTxt(x) : fmt(x, 0));
-    if (v > 0 && mn > 0 && v < mn) msg = `O mínimo é ${show(mn)}. Vai gravar ${keep(mn)}.`;
-    else if (v > 0 && mx > 0 && v > mx) msg = `O máximo é ${show(mx)}. Vai gravar ${keep(mx)}.`;
+    // folga de 4 algarismos: 0,005 mrem/h vira 0,04999… µSv/h na conversão
+    const tol = 1e-4;
+    if (v > 0 && mn > 0 && v < mn * (1 - tol)) msg = `O mínimo é ${show(mn)}. Vai gravar ${keep(mn)}.`;
+    else if (v > 0 && mx > 0 && v > mx * (1 + tol)) msg = `O máximo é ${show(mx)}. Vai gravar ${keep(mx)}.`;
   }
   el.classList.toggle("out-range", !!msg);
   let h = el.parentElement.querySelector(".range-hint");
@@ -2361,7 +2364,11 @@ function wireLevels() {
     $("chkAlarm").checked = true;
     renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderSetBar();
   });
-  $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
+  $("btnSetDiscard").addEventListener("click", () => {
+    // 2.101.13 (item 22): o "Ligado" do alarme marcado pelo Restaurar volta também
+    if (state.settings) $("chkAlarm").checked = !!state.settings.alarmEnabled;
+    state.setSnap = null; openSettings();
+  });
   $("setSearch").addEventListener("input", setSearch);
   $("setSearch").addEventListener("keydown", (e) => {
     if (e.key === "Enter") { const b = document.querySelector("#setResults button"); if (b) b.click(); }

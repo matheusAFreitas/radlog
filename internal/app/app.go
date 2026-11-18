@@ -449,6 +449,8 @@ type App struct {
 	live *ring     // última hora de leituras reais por segundo
 	demo DemoState // modo demonstração (só na memória)
 
+	sigObjUntil time.Time // item 66: até quando o CPM ainda tem o objeto
+
 	bgCPM float64 // fundo em cache (stats.go)
 	bgOK  bool
 	bgAt  time.Time
@@ -1507,7 +1509,13 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 		a.trayTick(usv, trayLvl, noCount, satOn, false) // na demonstração, o ícone mostra a demonstração
 	}
 	a.mu.Lock()
-	a.live.add(now, float64(cpm))
+	// 2.101.13 (item 66): segundos com o GMC-800 num objeto (Medir objeto ou
+	// "Estou testando"), mais 60 s (o CPM soma o último minuto), ficam fora
+	// do σ de 10 min do Agora
+	if a.measureActiveLocked(now) || a.objTestQuietLocked("gmc", now) {
+		a.sigObjUntil = now.Add(time.Minute)
+	}
+	a.live.addObj(now, float64(cpm), now.Before(a.sigObjUntil))
 	a.mu.Unlock()
 	a.feedMeasure(float64(cpm), cps)
 	// na demonstração a tela troca este evento para a "leitura real"
