@@ -893,7 +893,10 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 @media (max-width: 1200px) { .rc-kout { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rc-search { grid-template-columns: 1fr; } }
 
 /* tabela da compensação de tempo morto */
-.lv-dt-wrap { overflow-x: auto; }
+.lv-dt-wrap { overflow-x: auto; container-type: inline-size; }
+/* 2.101.8: o cabeçalho quebra e, em caixa estreita, as células apertam (cabe em qualquer escala) */
+.lv-dt thead th { white-space: normal; }
+@container (max-width: 400px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 .lv-dt th:first-child, .lv-dt td:first-child { text-align: left; }
 .lv-dt.off { opacity: .45; }
 
@@ -1916,10 +1919,10 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings .set-tabs button[aria-selected="true"] { background: none; color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
 .set-tabs button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
 .set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
-/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala); depois da regra base para ganhar dela */
-@container (max-width: 760px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 /* duas colunas que empilham sozinhas (2.68.4): o último cartão visível de cada uma estica */
 .set-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala); depois da regra base para ganhar dela */
+@container (max-width: 760px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
 #settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset, #settings .cal-adv > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
