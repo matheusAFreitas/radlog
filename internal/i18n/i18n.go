@@ -41,7 +41,7 @@ func hasPTLeft(s string) bool { return ptLeft.MatchString(named.ReplaceAllString
 
 var named = regexp.MustCompile("\u2068[^\u2069]*\u2069")
 
-var ptLeft = regexp.MustCompile(`(?i)[ãõçáéíóúâêôà]|\b(de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|dia|dias|casa|fundo|aparelho|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui)\b`)
+var ptLeft = regexp.MustCompile(`(?i)[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa)\b`)
 
 var (
 	once sync.Once
@@ -304,7 +304,10 @@ next:
 			}
 		}
 		if p.re.MatchString(s) {
-			return d.apply(p, s), true
+			// 2.101.2: com português sobrando, quebrar em frases ainda pode dar certo
+			if out := d.apply(p, s); !hasPTLeft(out) {
+				return out, true
+			}
 		}
 	}
 	return "", false

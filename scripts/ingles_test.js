@@ -61,6 +61,21 @@ function part1() {
       if (PT.test(chk) && !okText(out)) fails.push(`${x}\n      → ${out}`);
     }
   }
+  // frases que o app junta numa só ("Certeza: alta. 0,31 µSv/h com o
+  // objeto…"): pares de frases do catálogo, uma fixa e uma de molde
+  const ends = (x) => /[.!?]$/.test(x);
+  const E = [], Pf = [];
+  for (const ln of cat.split("\n")) {
+    const s = ln.slice(2);
+    if (!s || skip.has(s) || !ends(s)) continue;
+    if (ln[0] === "E") E.push(s); else Pf.push(s.replace(/\{(\d+)\}/g, (_, i) => FILL[0][+i % 4]));
+  }
+  for (let k = 0; k < 1500 && E.length && Pf.length; k++) {
+    const x = E[(k * 7919) % E.length] + " " + Pf[(k * 104729) % Pf.length];
+    n++;
+    const out = tr(x);
+    if (PT.test(out) && !okText(out)) fails.push(`${x}\n      → ${out}`);
+  }
   return { n, fails };
 }
 
