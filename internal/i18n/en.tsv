@@ -6297,7 +6297,6 @@ O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar
 · GMC-800 ≈ {0} · RC102 ≈ {1} mrem · um ponto a cada {2}	· GMC-800 ≈ {0} · RC102 ≈ {1} mrem · one point every {2}
 em casa {0} µSv · fora {1} µSv	at home {0} µSv · away {1} µSv
 fundo {0} µSv + acima do fundo {1} µSv	background {0} µSv + above background {1} µSv
-µSv/h acima do fundo	µSv/h above background
 mrem/h acima do fundo	mrem/h above background
 Minutos do RC102 que estavam na memória gravados ({0})	RC102 minutes that were in memory written ({0})
 Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.	Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.
@@ -6399,7 +6398,6 @@ Local: oculto	Place: hidden
 Local: {0}	Place: {0}
 nota	note
 obrigatório · ~4 h com sal light, ~2 h com KCl puro	required · ~4 h with lite salt, ~2 h with pure KCl
-ontem às {0}	yesterday at {0}
 em {0} às {1}	on {0} at {1}
 Diferença pequena ({0}%), mas real: a noite fica acima do dia (noite − dia = {1} ± {2} {3}, {4} dias com as duas metades).	Small difference ({0}%), but real: night is above day (night − day = {1} ± {2} {3}, {4} days with both halves).
 Diferença pequena ({0}%), mas real: o dia fica acima da noite (noite − dia = {1} ± {2} {3}, {4} dias com as duas metades).	Small difference ({0}%), but real: day is above night (night − day = {1} ± {2} {3}, {4} days with both halves).
@@ -6440,3 +6438,23 @@ O mínimo é {0}. Vai gravar {1}.	The minimum is {0}. It will save {1}.
 alarme ligado	alarm on
 bem acima do nível de fundo nos últimos 10 min ({0} σ)	well above the background level over the last 10 min ({0} σ)
 you@gmail.com	you@gmail.com
+A calibração foi atualizada	The calibration was updated
+Atividade: calibração trocada pela nova ({0})	Activity: calibration replaced by the new one ({0})
+Como está a amostra	How the sample is
+Para procurar algo mais fraco, escolha “+10% do fundo”.	To look for something weaker, choose “+10% of background”.
+Parou em {0}, quando deu para garantir que o objeto sobe menos de {1}% do fundo (+{2}).	Stopped at {0}, once it could guarantee the object adds less than {1}% of background (+{2}).
+Parou em {0}: a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.	Stopped at {0}: the dose went past 4σ, well above the natural variation, even with the same count. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.
+Você escolheu usar a nova calibração. A de antes ficou guardada: dá para voltar em detalhes.	You chose to use the new calibration. The previous one was kept: you can go back to it in details.
+Voltou para a calibração anterior	Back to the previous calibration
+automático: parou quando a dose passou de 4σ ({0} s com o objeto)	automatic: stopped when the dose went past 4σ ({0} s with the object)
+calibração desconhecida	unknown calibration
+essa calibração não está mais na tela	that calibration is no longer on screen
+essa medição não tem calibração	that measurement has no calibration
+no pote	in the jar
+não há calibração anterior	there is no previous calibration
+não há calibração anterior do KCl	there is no previous KCl calibration
+não há calibração anterior do tório	there is no previous thorium calibration
+pior que a atual: não usada	worse than the current one: not used
+Esta saiu com {0}, pior que a que está em uso ({1}), então a atual continua valendo.	This one came out at {0}, worse than the one in use ({1}), so the current one stays.
+Usar a nova ({0})	Use the new one ({0})
+voltar à anterior ({0})	go back to the previous one ({0})

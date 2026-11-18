@@ -105,6 +105,9 @@ type ActCal struct {
 	Geometry string     `json:"geometry"`
 	KCl      *ActCalKCl `json:"kcl,omitempty"`
 	Th       *ActCalTh  `json:"th,omitempty"`
+	// 2.101.14 (item 35): a calibração de antes, para poder voltar
+	PrevKCl *ActCalKCl `json:"prevKcl,omitempty"`
+	PrevTh  *ActCalTh  `json:"prevTh,omitempty"`
 }
 
 // ActCalKCl é a calibração pelo K-40 do KCl (absoluta, em 1.460,8 keV).

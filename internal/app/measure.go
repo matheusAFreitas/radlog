@@ -53,6 +53,10 @@ type MeasureResult struct {
 	// automático: o que contava como "tem algo" (% do fundo e em CPM)
 	Pct       float64 `json:"pct,omitempty"`
 	Threshold float64 `json:"threshold,omitempty"`
+	// 2.101.14 (item 17): o mesmo teto e limiar em µSv/h em todo lugar (tela,
+	// PDF, Eventos): no RC102 pela dose; no GMC-800 pelo fator do fundo
+	LimitUSv     float64 `json:"limitUSv,omitempty"`
+	ThresholdUSv float64 `json:"thresholdUSv,omitempty"`
 	// RC102 (2.100.2): incerteza do líquido em µSv/h pela dose, quantos σ a
 	// dose subiu, e DoseUp quando a dose subiu (≥ 3σ) sem a contagem subir
 	// (gama de energia alta, como o K-40: cada contagem vale mais dose)

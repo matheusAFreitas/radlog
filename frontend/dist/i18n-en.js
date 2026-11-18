@@ -4921,7 +4921,20 @@ const I18N_EN = {
 "corrigir aparelhos": "fix devices",
 "silenciar": "silence",
 "alarme ligado": "alarm on",
-"you@gmail.com": "you@gmail.com"
+"you@gmail.com": "you@gmail.com",
+"A calibração foi atualizada": "The calibration was updated",
+"Como está a amostra": "How the sample is",
+"Para procurar algo mais fraco, escolha “+10% do fundo”.": "To look for something weaker, choose “+10% of background”.",
+"Você escolheu usar a nova calibração. A de antes ficou guardada: dá para voltar em detalhes.": "You chose to use the new calibration. The previous one was kept: you can go back to it in details.",
+"Voltou para a calibração anterior": "Back to the previous calibration",
+"calibração desconhecida": "unknown calibration",
+"essa calibração não está mais na tela": "that calibration is no longer on screen",
+"essa medição não tem calibração": "that measurement has no calibration",
+"no pote": "in the jar",
+"não há calibração anterior": "there is no previous calibration",
+"não há calibração anterior do KCl": "there is no previous KCl calibration",
+"não há calibração anterior do tório": "there is no previous thorium calibration",
+"pior que a atual: não usada": "worse than the current one: not used"
 },
 "patterns": [
 [
@@ -5140,6 +5153,15 @@ const I18N_EN = {
 "A noite (18h–6h) fica ",
 "% acima do dia (+",
 " dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite."
+]
+],
+[
+"Parou em ",
+"^Parou em ((?:(?! · ).)+?): a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual\\. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos\\.$",
+"Stopped at ${1}: the dose went past 4σ, well above the natural variation, even with the same count. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.",
+[
+"Parou em ",
+": a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos."
 ]
 ],
 [
@@ -6960,6 +6982,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Parou em ",
+"^Parou em ((?:(?! · ).)+?), quando deu para garantir que o objeto sobe menos de ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?)\\)\\.$",
+"Stopped at ${1}, once it could guarantee the object adds less than ${2}% of background (+${3}).",
+[
+"Parou em ",
+", quando deu para garantir que o objeto sobe menos de ",
+"% do fundo (+",
+")."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): cabe na variação natural da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): within the natural variation of the count.",
@@ -6985,6 +7018,16 @@ const I18N_EN = {
 [
 "Outro aparelho tirou este PC da nuvem em ",
 ". Os dados daqui continuam todos aqui."
+]
+],
+[
+"Esta saiu com ",
+"^Esta saiu com ((?:(?! · ).)+?), pior que a que está em uso \\(((?:(?! · ).)+?)\\), então a atual continua valendo\\.$",
+"This one came out at ${1}, worse than the one in use (${2}), so the current one stays.",
+[
+"Esta saiu com ",
+", pior que a que está em uso (",
+"), então a atual continua valendo."
 ]
 ],
 [
@@ -8046,6 +8089,15 @@ const I18N_EN = {
 [
 "a release não tem a assinatura (",
 "); baixe pela página e confira"
+]
+],
+[
+"automático: parou quando a dose passou de 4σ (",
+"^automático: parou quando a dose passou de 4σ \\(((?:(?! · ).)+?) s com o objeto\\)$",
+"automatic: stopped when the dose went past 4σ (${1} s with the object)",
+[
+"automático: parou quando a dose passou de 4σ (",
+" s com o objeto)"
 ]
 ],
 [
@@ -10602,6 +10654,14 @@ const I18N_EN = {
 [
 "a release não tem o ",
 " para conferir o arquivo"
+]
+],
+[
+"Atividade: calibração trocada pela nova (",
+"^Atividade: calibração trocada pela nova \\(((?:(?! · ).)+?)\\)$",
+"Activity: calibration replaced by the new one (${1})",
+[
+"Atividade: calibração trocada pela nova ("
 ]
 ],
 [
@@ -16212,6 +16272,14 @@ const I18N_EN = {
 ]
 ],
 [
+"voltar à anterior (",
+"^voltar à anterior \\(((?:(?! · ).)+?)\\)$",
+"go back to the previous one (${1})",
+[
+"voltar à anterior ("
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -18645,6 +18713,14 @@ const I18N_EN = {
 "Marked: ${1} · ${2} · ${3}–${4}",
 [
 "Marcado: "
+]
+],
+[
+"Usar a nova (",
+"^Usar a nova \\(((?:(?! · ).)+?)\\)$",
+"Use the new one (${1})",
+[
+"Usar a nova ("
 ]
 ],
 [
@@ -21355,14 +21431,6 @@ const I18N_EN = {
 "· limit ${1}",
 [
 "· limite "
-]
-],
-[
-"ontem às ",
-"^ontem às ((?:(?! · ).)+?)$",
-"yesterday at ${1}",
-[
-"ontem às "
 ]
 ],
 [

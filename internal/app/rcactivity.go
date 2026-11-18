@@ -185,6 +185,12 @@ type ActResult struct {
 	Nucs     []string     `json:"nucs,omitempty"`     // o que foi procurado
 	SmpSecO  int          `json:"smpSecO,omitempty"`  // tempo escolhido (para medir de novo)
 	NotSaved bool         `json:"notSaved,omitempty"` // calibração incerta demais: não foi guardada
+	// 2.101.14 (item 35): saiu pior que a que está em uso, então não foi
+	// trocada sozinha; PrevErr é o ± da atual (KCl: relativo; tório: da
+	// inclinação) e Used diz que a pessoa escolheu usar a nova mesmo assim
+	Worse   bool    `json:"worse,omitempty"`
+	PrevErr float64 `json:"prevErr,omitempty"`
+	Used    bool    `json:"used,omitempty"`
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -420,10 +426,14 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 			// estragaria todos os Bq daqui para frente
 			k.T = res.T
 			res.KCl, res.NotSaved = k, true
+		} else if k != nil && cal.KCl != nil && k.EffErr > cal.KCl.EffErr {
+			// 2.101.14 (item 35): pior que a atual: pergunta antes de trocar
+			k.T = res.T
+			res.KCl, res.Worse, res.PrevErr = k, true, cal.KCl.EffErr
 		} else if k != nil {
 			k.T = res.T
 			res.KCl = k
-			cal.KCl = k
+			cal.KCl, cal.PrevKCl = k, cal.KCl
 			if o.Geometry != "" {
 				cal.Geometry = o.Geometry
 			}
@@ -435,10 +445,13 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.ThLines = lines
 		_, f228, _ := actThFactors(o.AgeY)
 		res.Expected = o.MassG * o.Pct / 100 * actThPerTO2 * actBqPerGTh * f228
-		if th != nil {
+		if th != nil && cal.Th != nil && th.BErr > cal.Th.BErr {
+			th.T = res.T
+			res.Th, res.Worse, res.PrevErr = th, true, cal.Th.BErr
+		} else if th != nil {
 			th.T = res.T
 			res.Th = th
-			cal.Th = th
+			cal.Th, cal.PrevTh = th, cal.Th
 			a.actWriteJSON(actCalFile, cal)
 		}
 	}
@@ -746,13 +759,90 @@ func (a *App) ForgetActivityCal(which string) {
 	c := a.actCal()
 	switch which {
 	case "kcl":
-		c.KCl = nil
+		c.KCl, c.PrevKCl = nil, nil
 	case "torio":
-		c.Th = nil
+		c.Th, c.PrevTh = nil, nil
 	default:
 		return
 	}
 	a.actWriteJSON(actCalFile, c)
+}
+
+// UseActivityCal usa a calibração que acabou de sair pior que a atual
+// (2.101.14, item 35): a atual vira a anterior, para poder voltar.
+func (a *App) UseActivityCal(t int64) error {
+	st := &a.rc.act
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	r := st.run
+	if r == nil || r.Result == nil || r.Result.T != t || !r.Result.Worse || r.Result.Used {
+		return errors.New("essa calibração não está mais na tela")
+	}
+	res := r.Result
+	c := a.actCal()
+	switch {
+	case res.KCl != nil && res.Kind == "kcl":
+		c.KCl, c.PrevKCl = res.KCl, c.KCl
+		if res.Geometry != "" {
+			c.Geometry = res.Geometry
+		}
+	case res.Th != nil && res.Kind == "torio":
+		c.Th, c.PrevTh = res.Th, c.Th
+	default:
+		return errors.New("essa medição não tem calibração")
+	}
+	a.actWriteJSON(actCalFile, c)
+	res.Used = true
+	_, _, res.CalSrc = c.eff(1000)
+	a.actRewriteResult(*res)
+	a.actSaveLocked()
+	a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	return nil
+}
+
+// RestoreActivityCal volta para a calibração de antes (KCl ou tório).
+func (a *App) RestoreActivityCal(which string) error {
+	c := a.actCal()
+	switch which {
+	case "kcl":
+		if c.PrevKCl == nil {
+			return errors.New("não há calibração anterior do KCl")
+		}
+		c.KCl, c.PrevKCl = c.PrevKCl, c.KCl
+	case "torio":
+		if c.PrevTh == nil {
+			return errors.New("não há calibração anterior do tório")
+		}
+		c.Th, c.PrevTh = c.PrevTh, c.Th
+	default:
+		return errors.New("calibração desconhecida")
+	}
+	a.actWriteJSON(actCalFile, c)
+	return nil
+}
+
+// actRewriteResult troca, no histórico, o resultado com o mesmo horário.
+func (a *App) actRewriteResult(res ActResult) {
+	p := a.actPath(actResFile)
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return
+	}
+	nb, err := json.Marshal(res)
+	if err != nil {
+		return
+	}
+	lines := bytes.Split(b, []byte("\n"))
+	for i, ln := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+		}
+		if json.Unmarshal(ln, &q) == nil && q.T == res.T && q.Kind == res.Kind {
+			lines[i] = nb
+		}
+	}
+	writeFileAtomic(p, bytes.Join(lines, []byte("\n")), 0o644)
 }
 
 // ---------- backup ----------

@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.13";
+const DEMO_VERSION = "2.101.14";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -521,8 +521,12 @@ function makeDemoApi(opts) {
       else if (r.phase === "trocar") { r.phase = "amostra"; r.at = Date.now(); r.target = r.o.smpSec; }
       else if (r.phase === "amostra") {
         r.sec = this.sec(); r.phase = "pronto"; r.result = this.result(r.sec); this.hist.unshift(r.result);
-        if (r.o.kind === "kcl") this.cal.kcl = { ...r.result.kcl };
-        if (r.o.kind === "torio") this.cal.th = { ...r.result.th };
+        // 2.101.14 (item 35): pior que a atual não troca sozinha; a de antes fica guardada
+        const res = r.result, c = this.cal;
+        if (r.o.kind === "kcl" && c.kcl && res.kcl.effErr > c.kcl.effErr) { res.worse = true; res.prevErr = c.kcl.effErr; }
+        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.kcl = { ...res.kcl }; }
+        if (r.o.kind === "torio" && c.th && res.th.bErr > c.th.bErr) { res.worse = true; res.prevErr = c.th.bErr; }
+        else if (r.o.kind === "torio") { c.prevTh = c.th || null; c.th = { ...res.th }; }
       }
     },
     nucRes(sec, massG, ids) {
@@ -1049,7 +1053,19 @@ const demoRc = () => {
     TestObject: async (dev) => { demoObjTest[dev] = Date.now() + 600000; return demoObjTest[dev]; },
     StopTestObject: async (dev) => { delete demoObjTest[dev]; },
     ObjectTests: async () => ({ ...demoObjTest }),
-    ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
+    ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = demoAct.cal.prevKcl = null; if (w === "torio") demoAct.cal.th = demoAct.cal.prevTh = null; },
+    UseActivityCal: async (t) => {
+      const r = demoAct.run && demoAct.run.result, c = demoAct.cal;
+      if (!r || r.t !== t || !r.worse || r.used) throw new Error("essa calibração não está mais na tela");
+      if (r.kind === "kcl") { c.prevKcl = c.kcl; c.kcl = { ...r.kcl }; } else { c.prevTh = c.th; c.th = { ...r.th }; }
+      r.used = true;
+    },
+    RestoreActivityCal: async (w) => {
+      const c = demoAct.cal;
+      if (w === "kcl" && c.prevKcl) [c.kcl, c.prevKcl] = [c.prevKcl, c.kcl];
+      else if (w === "torio" && c.prevTh) [c.th, c.prevTh] = [c.prevTh, c.th];
+      else throw new Error("não há calibração anterior");
+    },
     // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
     SpectrumContinuum: async (sp) => demoSnip(sp),
     // acumulado do aparelho (sem fundo): as linhas do fundo natural
