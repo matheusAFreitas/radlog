@@ -40,22 +40,25 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.97.1";
+const DEMO_VERSION = "2.101.14";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
   // evento "demo"; a leitura real chega pelo Go
   const inApp = !!(opts && opts.inApp);
+  // 2.101.13 (item 125): o que a "pessoa" da demonstração escreveu já nasce no idioma da demonstração
+  // (nome dado pela pessoa nunca é traduzido pelo app)
+  const demoOwn = (pt, en) => (LANG === "en" ? en : pt);
   let demoCloud = { state: "off", ready: true, auto: true };
   let demoCloudCode = "";
-  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
-    devices: [{ id: "a0", name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
+  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: demoOwn("voce@gmail.com", "you@gmail.com"), lastSync: Date.now(), used: 38e6, queue: [],
+    devices: [{ id: "a0", name: demoOwn("pc-sala", "living-room-pc"), lastUp: Date.now(), me: true }, ...others] });
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
   // atual (DEMO_VERSION, conferida pelo scripts/check-version.sh) e a
   // seguinte (auditoria 2.76.0, U1)
   const [vMaj, vMin] = DEMO_VERSION.split(".").map(Number);
   let demoUpd = { current: DEMO_VERSION, latest: `${vMaj}.${vMin + 1}.0`, available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
-    notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
+    notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.\n\n**English**\n- **Update from the app**: tells you when a new version is out.\n- Something else that got better.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
   const now = Date.now();
@@ -87,19 +90,19 @@ function makeDemoApi(opts) {
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
-  let measurements = [{ id: 1, name: "Banana com casca", note: "", time: mt,
+  let measurements = [{ id: 1, name: demoOwn("Banana com casca", "Banana with peel"), note: "", time: mt,
     bg: { counts: 155, seconds: 300, cpm: 31, errCPM: 2.5, usv: 0.2, start: mt, end: mt + 300e3 },
     obj: { counts: 161, seconds: 300, cpm: 32.2, errCPM: 2.5, usv: 0.21, start: mt + 360e3, end: mt + 660e3 },
     result: { netCPM: 1.2, netErr: 3.6, netUSv: 0.012, ratio: 1.04, sigma: 0.33, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" },
     samples: (() => { const out = []; let cpm = 30; for (let i = 0; i < 600; i++) { const ph = i < 300 ? "fundo" : "objeto"; const t = (ph === "fundo" ? i : i + 60) * 1000; const cps = Math.random() < 0.52 ? 1 : 0; cpm = Math.max(10, Math.round(cpm + (Math.random() - 0.5) * 3)); out.push({ t, phase: ph, cpm, cps }); } return out; })() },
-    { id: 2, name: "Medição antiga", note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
+    { id: 2, name: demoOwn("Medição antiga", "Old measurement"), note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
       obj: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5 + 90e3, end: mt - 864e5 + 150e3 },
       result: { netCPM: 0, netErr: 7.2, netUSv: 0, ratio: 1, sigma: 0, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" } }].sort((a, b) => a.time - b.time);
   const mockWhere = () => {
     const now = Date.now();
     const o = periods.find((q) => now >= q.from && now < (q.to || Infinity));
     const g = o ? o.gmc || "comigo" : "casa", r = o ? o.radiacode || "comigo" : "comigo";
-    const nh = !!(o && o.notHome && g === "casa" && r !== "fora");
+    const nh = !!(o && o.notHome && (g === "casa" || g === "fora") && r !== "fora");
     const pers = r === "comigo" ? "radiacode" : g === "comigo" ? "gmc" : g === "casa" && r === "casa" && !nh ? "gmc" : "", home = g === "casa" ? "gmc" : r === "casa" ? "radiacode" : "";
     return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo" && !nh, personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
   };
@@ -118,8 +121,8 @@ function makeDemoApi(opts) {
     return { gmc: one("gmc"), radiacode: one("radiacode") };
   };
   const d1 = new Date(now - 864e5).setHours(0, 0, 0, 0);
-  let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
-    { id: 2, name: "Centro e metrô", from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
+  let periods = [{ id: 1, name: demoOwn("Passeio no parque", "Walk in the park"), from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
+    { id: 2, name: demoOwn("Centro e metrô", "Downtown and subway"), from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
   // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
@@ -141,7 +144,7 @@ function makeDemoApi(opts) {
   let planned = [{ id: plTomorrow, nome: plDemoName, de: plTomorrow, rc: true, gmc: false }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
-  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
+  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: demoOwn("abri a janela", "opened the window"), created: now }], noteSeq = 1;
   // ---------- demonstração (2.82): cenários tocados no tempo ----------
   // Os dois aparelhos andam juntos, cada um com os próprios limites. Vale no
   // navegador e dentro do app (lá o app.js troca a ponte com o Go por esta).
@@ -234,9 +237,16 @@ function makeDemoApi(opts) {
     }
     while (demoSecs.length && demoSecs[0].t < now - 36e5) demoSecs.shift();
     while (demoRcSecs.length && demoRcSecs[0].t < now - 36e5) demoRcSecs.shift();
+    // 2.101.13 (item 66): o σ dos últimos 10 min, como o Go (stats.go)
+    const demoSigma10 = (t, bg) => {
+      const xs = demoSecs.filter((x) => x.t > t - 6e5);
+      if (xs.length < 300) return null;
+      const mean = xs.reduce((a, x) => a + x.cpm, 0) / xs.length;
+      return (mean - bg) / Math.sqrt(bg / (xs.length / 60));
+    };
     const lvl = danger ? "perigo" : v.g >= l.alarm ? "alarme" : v.g >= l.attn ? "atencao" : "seguro";
     emit("reading", { time: now, cpm: Math.round(c), cps: pulsePoisson(c / 60), usv: v.g, mrh: v.g / 10, level: lvl, alarm: settings.alarmEnabled && v.g >= l.alarm, danger,
-      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12) });
+      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12), sigma10: demoSigma10(now, 12) });
     feed(Math.max(0, pulsePoisson(c / 60)));
     emit("radiacode", demoRc());
     demoAwayAsk(!!v.away);
@@ -468,7 +478,7 @@ function makeDemoApi(opts) {
     const t0 = Date.now() - 3 * 3600e3, sec = 95, samples = [];
     let cpm = 2300;
     for (let i = 0; i < sec; i++) { cpm = Math.max(1500, cpm + (Math.random() - 0.5) * 60); samples.push({ t: (i + 1) * 1000, phase: "objeto", cpm: Math.round(cpm), cps: Math.round(38 + (Math.random() - 0.5) * 12) }); }
-    measurements.push({ id: 3, name: "Camisa de lampião antiga", note: "", time: t0, device: "radiacode", distance: "encostado",
+    measurements.push({ id: 3, name: demoOwn("Camisa de lampião antiga", "Old gas lantern mantle"), note: "", time: t0, device: "radiacode", distance: "encostado",
       bg: { counts: 40926, seconds: 3420, cpm: 718, errCPM: 3.5, usv: 0.092, start: t0 - 3600e3, end: t0 - 60e3, source: "casa" },
       obj: { counts: 3790, seconds: sec, cpm: 2393.7, errCPM: 38.9, usv: 0.31, start: t0, end: t0 + sec * 1000 },
       result: { netCPM: 1675.7, netErr: 39.1, netUSv: 0.218, ratio: 3.33, sigma: 42.9, level: "sim", verdict: "radioativo: a diferença para o fundo é clara", stop: "achou", pct: 20, threshold: 143.6 },
@@ -481,6 +491,7 @@ function makeDemoApi(opts) {
     : { ...e, usvPerCPM: 0.0101, usv: e.cpm ? e.cpm * 0.0101 : 0, peakUSv: e.peak ? e.peak * 0.0101 : 0 });
   // na demonstração o RC102 existe (menos no cenário "Aparelho desconecta")
   const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
+  const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.1: quando a aba Busca abriu (demo)
   // medição de atividade de mentira (para ver a tela sem o aparelho)
   const demoAct = {
     run: null,
@@ -510,8 +521,12 @@ function makeDemoApi(opts) {
       else if (r.phase === "trocar") { r.phase = "amostra"; r.at = Date.now(); r.target = r.o.smpSec; }
       else if (r.phase === "amostra") {
         r.sec = this.sec(); r.phase = "pronto"; r.result = this.result(r.sec); this.hist.unshift(r.result);
-        if (r.o.kind === "kcl") this.cal.kcl = { ...r.result.kcl };
-        if (r.o.kind === "torio") this.cal.th = { ...r.result.th };
+        // 2.101.14 (item 35): pior que a atual não troca sozinha; a de antes fica guardada
+        const res = r.result, c = this.cal;
+        if (r.o.kind === "kcl" && c.kcl && res.kcl.effErr > c.kcl.effErr) { res.worse = true; res.prevErr = c.kcl.effErr; }
+        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.prevGeometry = c.geometry; c.kcl = { ...res.kcl }; }
+        if (r.o.kind === "torio" && c.th && res.th.bErr > c.th.bErr) { res.worse = true; res.prevErr = c.th.bErr; }
+        else if (r.o.kind === "torio") { c.prevTh = c.th || null; c.th = { ...res.th }; }
       }
     },
     nucRes(sec, massG, ids) {
@@ -703,7 +718,7 @@ const demoRc = () => {
       let other = false;
       try { other = localStorage.getItem("gmc.cloudDemo") === "outro"; } catch (e) { /* sem localStorage */ }
       const was = demoCloud.was;
-      demoCloud = { ...demoCloud, state: was || "off", email: "voce@gmail.com" };
+      demoCloud = { ...demoCloud, state: was || "off", email: demoOwn("voce@gmail.com", "you@gmail.com") };
       if (was) return { info: (demoCloud = { ...demoCloud, state: "ok", was: "" }), next: "" };
       return { info: demoCloud, next: other ? "existing" : "new", lastUp: Date.now() - 864e5 };
     },
@@ -713,7 +728,7 @@ const demoRc = () => {
     CloudCode: async () => demoCloudCode,
     SaveCloudCode: async () => "C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt",
     CloudFinishSetup: async (code) => { demoCloudCode = code; return (demoCloud = demoCloudOn([])); },
-    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: "PC antigo", lastUp: Date.now() - 42 * 864e5 }])); },
+    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: demoOwn("PC antigo", "Old PC"), lastUp: Date.now() - 42 * 864e5 }])); },
     CloudReset: async () => demoCloud,
     CloudSyncNow: async () => (demoCloud = { ...demoCloud, state: "ok", lastSync: Date.now(), queue: [] }),
     CloudPause: async () => (demoCloud = { ...demoCloud, state: "ok" }),
@@ -848,12 +863,37 @@ const demoRc = () => {
       // perto de uma amostra (sobe até ~90 cps e volta)
       const live = demoRcFake(), now = Date.now(), out = { live, now, pts: [], raw: true, cps: 12.3, usv: 0.15, refCps: 12.1, refUsv: 0.148, ble: false };
       if (!live) return out;
-      const p0 = Math.max(since || now - 60e3, now - 60e3);
+      const p0 = Math.max(since || now - 60e3, now - 330e3);
       const rate = (t) => { const ph = (t / 1000) % 40; return 12 + (ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0); };
       for (let t = Math.floor(p0 / 500) * 500 + 500; t <= now; t += 500) {
         const lam = rate(t) * 0.5; let n = 0, L = Math.exp(-lam), pp = 1; do { n++; pp *= Math.random(); } while (pp > L); n--;
         out.pts.push({ t, sec: 0.5, cps: n / 0.5, usv: (n / 0.5) * 0.0122 });
       }
+      return out;
+    },
+    // espectrograma da busca de mentira (2.100.1): colunas de 2 s com o fundo
+    // e, quando passa perto da amostra (mesmo ciclo de 40 s), as linhas do urânio
+    GetRcSearchSg: async (since, win) => {
+      const live = demoRcFake(), now = Date.now(), NB = 256, EM = 1500, out = { on: live, eMax: EM, bins: NB, every: 2, rows: [], peaks: [] };
+      if (!live) return out;
+      const sh = (pk, c0, dec) => { const w = new Float64Array(NB); let tot = 0; for (let i = 0; i < NB; i++) { const e = (i + 0.5) * EM / NB; w[i] = e < 25 ? 0 : c0 * Math.exp(-e / dec); for (const [p, a] of pk) { const sd = (p * 0.085 / 2.355) * Math.sqrt(662 / p); w[i] += a * Math.exp(-(((e - p) / sd) ** 2) / 2); } tot += w[i]; } return w.map((v) => v / tot); };
+      const BGS = sh([[1460, 0.04], [609, 0.02]], 1, 260), SRC = sh([[93, 0.5], [186, 0.35], [242, 0.25], [295, 0.45], [352, 0.7], [609, 0.65], [768, 0.08], [1120, 0.18], [1238, 0.07]], 1.6, 180);
+      const extra = (t) => { const ph = (t / 1000) % 40; return ph > 22 && ph < 30 ? 80 * Math.exp(-(((ph - 26) / 1.6) ** 2)) : 0; };
+      const pois = (l) => { if (l > 30) return Math.max(0, Math.round(l + Math.sqrt(l) * Math.sqrt(-2 * Math.log(Math.random() + 1e-12)) * Math.cos(2 * Math.PI * Math.random()))); let L = Math.exp(-l), k = 0, pp = 1; do { k++; pp *= Math.random(); } while (pp > L); return k - 1; };
+      // como no app: as colunas só começam quando a aba abre
+      if (!GetRcSearchSgSince.t || now - GetRcSearchSgSince.at > 6000) GetRcSearchSgSince.t = now;
+      GetRcSearchSgSince.at = now; out.since = GetRcSearchSgSince.t;
+      const t1 = Math.floor(now / 2000) * 2000, t0 = Math.max(since || 0, t1 - 300e3, GetRcSearchSgSince.t);
+      for (let t = Math.floor(t0 / 2000) * 2000 + 2000; t <= t1; t += 2000) {
+        const x = extra(t - 1000), c = new Array(NB);
+        for (let i = 0; i < NB; i++) c[i] = pois(2 * (12 * BGS[i] + x * SRC[i]));
+        out.rows.push({ t, s: 2, c });
+      }
+      const near = Array.from({ length: Math.round((win || 120) / 2) }, (_, k) => extra(now - k * 2000)).reduce((a, b) => a + b, 0) * 2;
+      if (near > 150) out.peaks = [
+        { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: Math.round(near * 0.07), sigma: Math.min(40, near / 25) },
+        { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: Math.round(near * 0.06), sigma: Math.min(30, near / 30) },
+        { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: Math.round(near * 0.04), sigma: Math.min(20, near / 45) }];
       return out;
     },
     // atividade de mentira: o tempo passa 120× mais rápido
@@ -1013,7 +1053,19 @@ const demoRc = () => {
     TestObject: async (dev) => { demoObjTest[dev] = Date.now() + 600000; return demoObjTest[dev]; },
     StopTestObject: async (dev) => { delete demoObjTest[dev]; },
     ObjectTests: async () => ({ ...demoObjTest }),
-    ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = null; if (w === "torio") demoAct.cal.th = null; },
+    ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = demoAct.cal.prevKcl = null; if (w === "torio") demoAct.cal.th = demoAct.cal.prevTh = null; },
+    UseActivityCal: async (t) => {
+      const r = demoAct.run && demoAct.run.result, c = demoAct.cal;
+      if (!r || r.t !== t || !r.worse || r.used) throw new Error("essa calibração não está mais na tela");
+      if (r.kind === "kcl") { c.prevKcl = c.kcl; c.prevGeometry = c.geometry; c.kcl = { ...r.kcl }; if (r.geometry) c.geometry = r.geometry; } else { c.prevTh = c.th; c.th = { ...r.th }; }
+      r.used = true;
+    },
+    RestoreActivityCal: async (w) => {
+      const c = demoAct.cal;
+      if (w === "kcl" && c.prevKcl) { [c.kcl, c.prevKcl] = [c.prevKcl, c.kcl]; if (c.prevGeometry) [c.geometry, c.prevGeometry] = [c.prevGeometry, c.geometry]; }
+      else if (w === "torio" && c.prevTh) [c.th, c.prevTh] = [c.prevTh, c.th];
+      else throw new Error("não há calibração anterior");
+    },
     // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
     SpectrumContinuum: async (sp) => demoSnip(sp),
     // acumulado do aparelho (sem fundo): as linhas do fundo natural
@@ -1094,7 +1146,7 @@ const demoRc = () => {
       meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
         distCm: o.distCm > 0 ? o.distCm : 0, size: o.size || "", prev: [], derived: null, spectrum: null,
         test: o.test === "distancia" || o.test === "blindagem" ? o.test : "", material: (o.material || "").trim(), relErr: Math.min(Math.max(o.relErr || 0, 0), 0.5),
-        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
+        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device, quietDanger: !!o.quietDanger };
       if (mode) {
         const od = device === "radiacode" ? "gmc" : "radiacode", oh = await api.GetHomeBackgroundDev(od);
         meas.mode = mode;
@@ -1270,6 +1322,10 @@ const demoRc = () => {
     SavePlannedTrip: async (p) => {
       if (!p.gmc && !p.rc) throw new Error("escolha pelo menos um aparelho que vai com você");
       const q = { ...p, nome: (p.nome || "").trim() || "Saída programada", id: p.id || Date.now() };
+      // como o Go (planned.go): com o mesmo horário, a começada continua começada
+      // enquanto o aparelho que saiu continua indo
+      const old = planned.find((x) => x.id === q.id);
+      if (old && old.de === q.de && old.saiu && (old.saiuAparelho === "radiacode" ? q.rc : q.gmc)) { q.saiu = old.saiu; q.saiuAparelho = old.saiuAparelho; }
       planned = planned.filter((x) => x.id !== q.id).concat(q).sort((a, b) => a.de - b.de);
       setTimeout(() => emit("planned", planned.slice()), 0);
       return q;
@@ -1301,7 +1357,7 @@ const demoRc = () => {
       const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
       if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
       if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
-      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && (r === "casa" || r === "comigo"), name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r, notHome: out }) };
+      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && (g === "casa" || g === "fora") && (r === "casa" || r === "comigo"), name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r, notHome: out }) };
       if (p.id) periods = periods.map((q) => (q.id === p.id ? p : q));
       else { p.id = Math.max(0, ...periods.map((q) => q.id)) + 1; periods.push(p); }
       periods.sort((a, b) => a.from - b.from);
@@ -1360,7 +1416,7 @@ const demoRc = () => {
     LeaveHome: async (gGoes, rGoes) => api.SetWhere(gGoes ? "comigo" : "casa", rGoes ? "comigo" : "casa", "", !gGoes),
     SetWhere: async (g, r, name, notHome) => {
       const now = Math.floor(Date.now() / 6e4) * 6e4;
-      const cur = mockWhere(), nh = !!notHome && g === "casa" && r !== "fora";
+      const cur = mockWhere(), nh = !!notHome && (g === "casa" || g === "fora") && r !== "fora";
       if (cur.gmc === g && cur.radiacode === r && cur.notHome === nh) return cur;
       periods = periods.filter((q) => !(q.to === 0 && now - q.from < 6e4)).map((q) => (q.to === 0 ? { ...q, to: now } : q));
       if (!(g === "casa" && r === "comigo" && !nh)) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || (nh && r === "comigo" ? "Saí com o RC102" : whKind({ gmc: g, radiacode: r })), gmc: g, radiacode: r, notHome: nh });
@@ -1443,7 +1499,7 @@ const demoRc = () => {
       return api._dose(f, f + Math.ceil(span / step) * step, step, limit);
     },
     GetDose: async (period, limit) => {
-      const [span, step] = { "15m": [9e5, 6e4], "30m": [18e5, 6e4], "1h": [36e5, 6e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5] }[period] || [864e5, 3e5];
+      const [span, step] = { "15m": [9e5, 6e4], "30m": [18e5, 6e4], "1h": [36e5, 6e4], "3h": [108e5, 6e4], "6h": [216e5, 6e4], "12h": [432e5, 12e4], "24h": [864e5, 3e5], "7d": [6048e5, 36e5], "30d": [2592e6, 216e5], "1y": [31536e6, 864e5], all: [12 * 864e5, 36e5] }[period] || [864e5, 3e5];
       const to = Math.floor(Date.now() / 6e4) * 6e4 + 6e4;
       return api._dose(to - span, to, step, limit);
     },
@@ -1539,7 +1595,7 @@ const demoRc = () => {
         if (x.away) o.awayBg += base; else o.homeBg += base;
       }
       const now = Date.now();
-      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
+      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · " + demoOwn("Banana com casca", "Banana with peel"), kind: "medicao" },
         { from: now - 5 * 36e5, to: now - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }].filter((i) => i.from >= from && i.to <= to);
       for (const i of o.items) { o.above += i.dose; o.total += i.dose; }
       return o;
@@ -1553,9 +1609,9 @@ const demoRc = () => {
       for (let i = 0; i < n; i++) {
         const t = f + i * step, p = range(t, t + step), s = { t };
         const o = periods.find((q) => q.from < t + step && (q.to || Infinity) > t);
-        if (o) s.away = true;
+        if (o && ((o.gmc || "comigo") === "comigo" || o.notHome)) s.away = true; // youOut do Go
         const g = o ? o.gmc || "comigo" : "casa";
-        s.gmcRole = g; s.rcRole = o ? o.rc || "comigo" : "comigo";
+        s.gmcRole = g; s.rcRole = o ? o.radiacode || "comigo" : "comigo";
         if (p.length) {
           const u = (p.reduce((x, q) => x + q.cpm, 0) / p.length) * 0.0101;
           Object.assign(s, { gmc: lv(u, gb), gmcUSv: u });
@@ -1577,6 +1633,9 @@ const demoRc = () => {
       if (demoRcFake()) {
         c.rc = (c.usv || []).map((v, i) => (v == null ? null : v * 0.6 + Math.sin(i / 3) * 0.004));
         c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
+        // 2.101.6: as médias que o Go manda junto (o zoom do RC102 usa)
+        const ok = c.rc.filter((v) => v != null);
+        if (ok.length) { c.rcAvg = ok.reduce((a, b) => a + b, 0) / ok.length; c.rcAvgCPM = c.rcAvg * 4950; }
       }
       return c;
     },

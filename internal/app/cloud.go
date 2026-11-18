@@ -922,8 +922,8 @@ func (a *App) SaveCloudCode(code string) (string, error) {
 		return "", errors.New("sem janela")
 	}
 	dst, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
-		Title: "Salvar código de recuperação", DefaultFilename: "radlog-codigo-de-recuperacao.txt",
-		Filters: []wruntime.FileFilter{{DisplayName: "Texto (*.txt)", Pattern: "*.txt"}},
+		Title: a.T("Salvar código de recuperação"), DefaultFilename: a.T("radlog-codigo-de-recuperacao.txt"),
+		Filters: []wruntime.FileFilter{{DisplayName: a.T("Texto (*.txt)"), Pattern: "*.txt"}},
 	})
 	if err != nil || dst == "" {
 		return "", err

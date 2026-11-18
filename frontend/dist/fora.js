@@ -10,7 +10,11 @@ const normPeriods = (list) => (list || []).map((p) => (p.to ? p : { ...p, open: 
 const pTo = (p) => (p.open ? Math.max(p.to, Date.now()) : p.to);
 
 const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < pTo(p)) || null;
-const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${p.name}` : ""; };
+// 2.101.9: nome padrão de trecho é do app e traduz; o que a pessoa escreveu fica como está
+const P_DEF_NAMES = new Set(["", "Fora de casa", "Saída programada", "Saí de casa", "Saí com o RC102", "Os dois fora do cálculo", "GMC-800 fora do cálculo", "RC102 fora do cálculo", "Levei os dois", "Levei o GMC-800, deixei o RC102", "Deixei os dois em casa"]);
+// os motivos prontos do chip (WH_REASONS, mais abaixo) também são do app
+const pNameTxt = (n) => (P_DEF_NAMES.has(n || "") || WH_REASONS.includes(n) ? n || "" : asIs(n));
+const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${pNameTxt(p.name)}` : ""; };
 
 // faixas lilás no gráfico para os períodos fora de casa
 function awayBands(t0, t1, xt) {
@@ -108,10 +112,10 @@ function periodStatsEl(p) {
   return box;
 }
 
-// total do Radiacode fora de casa (todos os períodos)
+// total do Radiacode fora de casa (só as saídas: 2.101.8)
 async function renderPeriodTotal() {
   const el = $("periodTotal");
-  const list = state.periods || [];
+  const list = (state.periods || []).filter(isTripP);
   if (!list.length) { el.hidden = true; return; }
   const sums = await Promise.all(list.map(periodSummary));
   let dose = 0, min = 0;
@@ -124,10 +128,12 @@ const WH_NAME = { gmc: "GMC-800", radiacode: "RC102" };
 const WH_NORMAL = { gmc: "casa", radiacode: "comigo" };
 const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo", notHome: !!p.notHome });
 // saí com o Radiacode e deixei o GMC (2.38.0): o Radiacode fora do fundo da casa
-const whOut = (w) => w.gmc === "casa" && w.radiacode === "comigo" && !!w.notHome;
+const whOut = (w) => (w.gmc === "casa" || w.gmc === "fora") && w.radiacode === "comigo" && !!w.notHome;
 const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "ignorado" };
 // 2.94 (M5): três palavras (em casa, comigo, ignorar). Os nomes guardados
 // continuam os de antes ("… fora do cálculo"); só a tela troca
+// motivos prontos do chip (2.101.8): gravados em português, mostrados no idioma da tela
+const WH_REASONS = ["quebrado", "em manutenção", "desligado de propósito", "leitura não confiável"];
 const whWord = (s) => ({ "Os dois fora do cálculo": "Os dois ignorados", "GMC-800 fora do cálculo": "GMC-800 ignorado", "RC102 fora do cálculo": "RC102 ignorado" })[s] || s;
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
@@ -186,7 +192,7 @@ function renderTimeline() {
       if ((at === WH_NORMAL[dev] && !(dev === "radiacode" && whOut(whOf(p)))) || pTo(p) <= t0) continue;
       const a = pct(p.from), b = pct(pTo(p));
       const i = document.createElement("i");
-      i.title = `${p.name} · ${zoomRangeText(p.from, p.to)}`;
+      i.title = `${pNameTxt(p.name)} · ${zoomRangeText(p.from, p.to)}`;
       i.style.cssText = `left:${a}%;width:${Math.max(0.6, b - a)}%;background:var(${at === "fora" ? "--outc" : "--swap"})`;
       bar.appendChild(i);
     }
@@ -219,7 +225,7 @@ function whSeg(dev, value, disabled) {
   const seg = document.createElement("div");
   seg.className = "seg loc";
   seg.setAttribute("role", "group");
-  seg.setAttribute("aria-label", "Onde estava o " + WH_NAME[dev]);
+  seg.setAttribute("aria-label", `Onde estava o ${WH_NAME[dev]}`);
   seg.dataset.dev = dev;
   for (const [v, t] of [["casa", "em casa"], ["comigo", "comigo"], ["fora", "ignorar"]]) {
     const b = document.createElement("button");
@@ -251,7 +257,9 @@ function periodForm(p, onDone) {
     return f;
   };
   const name = document.createElement("input");
-  name.type = "text"; name.maxLength = 60; name.value = p.name || ""; name.placeholder = "ex.: viagem";
+  // 2.101.5: nome automático fica vazio (segue os aparelhos ao salvar) e aparece como dica
+  const autoName = p.name && typeof whOf === "function" && p.name === whKind(whOf(p));
+  name.type = "text"; name.maxLength = 60; name.value = autoName ? "" : p.name || ""; name.placeholder = autoName ? tr(p.name) : "ex.: viagem";
   const from = document.createElement("input");
   from.type = "datetime-local"; from.value = toLocalInput(p.from); from.disabled = open;
   const to = document.createElement("input");
@@ -272,7 +280,8 @@ function periodForm(p, onDone) {
   const nhTxt = document.createElement("span");
   nh.append(nhBox, nhTxt);
   // os dois em casa: esqueci de levar; GMC em casa e Radiacode comigo: saí com ele (2.38.0)
-  const both = () => pick(segG) === "casa" && (pick(segR) === "casa" || pick(segR) === "comigo");
+  // 2.101.8: com o GMC-800 ignorado (tubo quebrado) também dá para sair com o RC102
+  const both = () => (pick(segG) === "casa" || pick(segG) === "fora") && (pick(segR) === "casa" || pick(segR) === "comigo");
   const syncNh = () => {
     nh.hidden = !both();
     nhTxt.textContent = pick(segR) === "comigo" ? " eu não estava em casa (saí com o RC102)" : " eu não estava em casa (esqueci de levar os dois)";
@@ -334,12 +343,31 @@ document.addEventListener("keydown", (e) => {
   document.querySelectorAll("details.more-menu[open]").forEach((d) => { d.open = false; d.querySelector("summary").focus(); });
 });
 
+// 2.101.5: redesenhar a lista (troca de tela, evento) não apaga o que se
+// digitou num formulário aberto: copia os campos do velho para o novo
+let keepSeq = 0;
+const keepKey = (o) => (typeof o !== "object" ? String(o) : String(o.__keep || (Object.defineProperty(o, "__keep", { value: ++keepSeq }), o.__keep)));
+function keepInputs(oldRoot, newRoot, obj) {
+  if (!newRoot) return;
+  // só o formulário da mesma coisa (outro trecho aberto não herda nada)
+  if (obj) newRoot.dataset.keep = keepKey(obj);
+  if (!oldRoot || (obj && oldRoot.dataset.keep !== newRoot.dataset.keep)) return;
+  const a = [...oldRoot.querySelectorAll("input,select,textarea")], b = [...newRoot.querySelectorAll("input,select,textarea")];
+  if (a.length !== b.length) return;
+  a.forEach((x, i) => {
+    const y = b[i];
+    if (x.tagName !== y.tagName || x.type !== y.type) return;
+    if (x.type === "checkbox" || x.type === "radio") y.checked = x.checked; else y.value = x.value;
+  });
+}
+
 function renderPeriods() {
   renderTimeline();
   const add = $("periodAddForm");
+  const oldAdd = add.firstElementChild, oldEdit = document.querySelector("#periodList .wh-edit");
   add.textContent = "";
   $("btnPeriodAdd").hidden = !!periodAdding;
-  if (periodAdding) add.appendChild(periodForm(periodAdding, () => { periodAdding = null; renderPeriods(); }));
+  if (periodAdding) { const f = periodForm(periodAdding, () => { periodAdding = null; renderPeriods(); }); add.appendChild(f); keepInputs(oldAdd, f, periodAdding); }
   const ul = $("periodList");
   ul.textContent = "";
   if (typeof rcAwayRows === "function") rcAwayRows(ul);
@@ -357,7 +385,7 @@ function renderPeriods() {
     t.className = "t";
     const b = document.createElement("b");
     b.textContent = whWord(p.name);
-    if (p.name !== whKind(whOf(p))) b.dataset.noTr = "";
+    if (!P_DEF_NAMES.has(p.name || "") && p.name !== whKind(whOf(p)) && !WH_REASONS.includes(p.name)) b.dataset.noTr = ""; // 2.101.12: nome padrão traduz
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);
@@ -398,7 +426,7 @@ function renderPeriods() {
     btn("Ver no gráfico", "", () => showRange(p.from, pTo(p)));
     // o resto fica no "⋯" (2.85)
     const more = moreMenu("Mais ações deste trecho", [
-      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, more.querySelector("summary"))],
+      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + pNameTxt(p.name), more.querySelector("summary"))],
       [p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); }],
       ["Apagar…", "danger", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); }],
     ]);
@@ -420,7 +448,7 @@ function renderPeriods() {
       c.append(msg, sp, ok, no);
       li.appendChild(c);
     }
-    if (periodEditing === p.id) li.appendChild(periodForm(p, () => { periodEditing = 0; renderPeriods(); }));
+    if (periodEditing === p.id) { const f = periodForm(p, () => { periodEditing = 0; renderPeriods(); }); li.appendChild(f); keepInputs(oldEdit, f, "trecho:" + p.id); }
     li.appendChild(periodStatsEl(p));
     ul.appendChild(li);
   }

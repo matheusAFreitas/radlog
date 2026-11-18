@@ -65,6 +65,14 @@ func (a *App) inLang(render func() []byte) []byte {
 	if lang == "en" {
 		sep = "."
 	}
+	// 2.101.6: as tabelas do PDF convertem as colunas de µSv (pdfMrem é lido
+	// só durante o render, que o pdf.WithTranslator faz um de cada vez)
+	inner := render
+	render = func() []byte {
+		pdfMrem = mrem
+		defer func() { pdfMrem = false }()
+		return inner()
+	}
 	return pdf.WithTranslator(func(s string) string {
 		if lang != "pt" {
 			s = i18n.T(lang, s)

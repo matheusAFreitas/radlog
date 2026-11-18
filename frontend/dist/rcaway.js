@@ -152,12 +152,12 @@ function renderRcAway() {
       box.appendChild(u);
       return;
     }
-    if (rcaDone.ans === "voltei" && p && p.id) t.textContent = `Ok, marquei a volta às ${hhmm(p.to)}. O trecho "${p.name}" foi de ${zoomRangeText(p.from, p.to)}.`;
+    if (rcaDone.ans === "voltei" && p && p.id) t.textContent = `Ok, marquei a volta às ${hhmm(p.to)}. O trecho "${pNameTxt(p.name)}" foi de ${zoomRangeText(p.from, p.to)}.`;
     else if (rcaDone.ans === "aindafora") t.textContent = "Ok, o trecho continua aberto. Quando voltar, use \"Voltei\".";
     else if (rcaDone.ans === "fora" && p && p.id) {
       const c = document.createElement("span");
       c.className = "chip off"; c.textContent = "fora de casa";
-      t.append(c, ` Marcado: ${p.name} · RC102 com você, GMC-800 em casa · ${hhmm(p.from)}–${hhmm(p.to)}`);
+      t.append(c, ` Marcado: ${pNameTxt(p.name)} · RC102 com você, GMC-800 em casa · ${hhmm(p.from)}–${hhmm(p.to)}`);
     } else t.textContent = rcaDone.ans === "casa" ? "Ok, ficou como em casa." : "Ok, ficou sem marcar.";
     const u = document.createElement("button");
     u.type = "button"; u.className = "link"; u.textContent = "Desfazer";
@@ -255,7 +255,7 @@ function renderRcBack(box, q, list) {
   head.append(h, tag);
   const sub = document.createElement("div");
   sub.className = "small muted";
-  sub.textContent = `"${q.name || "Saí de casa"}" está aberto desde ${whenLabel(q.since || q.from)}. O RC102 voltou a conectar no PC às ${hhmm(q.to)}, depois de ${hm(rcaMin(q))} sem conexão.`;
+  sub.textContent = `"${pNameTxt(q.name || "Saí de casa")}" está aberto desde ${whenLabel(q.since || q.from)}. O RC102 voltou a conectar no PC às ${hhmm(q.to)}, depois de ${hm(rcaMin(q))} sem conexão.`;
   box.append(head, sub);
   if (q.memMinutes) {
     const g = document.createElement("div");
@@ -398,7 +398,7 @@ function rcAwayRows(ul) {
     what.className = "small muted";
     what.textContent = q.kind === "gmc" || q.kind === "ambos" ? "Você estava fora de casa?"
       : q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
-      : q.kind === "programada" ? `Saída programada "${asIs(q.name)}": você saiu mesmo?`
+      : q.kind === "programada" ? `Saída programada "${plNameTxt(q.name)}": você saiu mesmo?`
       : q.memMinutes ? `A memória do aparelho trouxe ${hm(q.memMinutes)}.` : "Sem leituras da memória do aparelho.";
     const tt = document.createElement("b");
     tt.textContent = q.kind === "gmc" ? "GMC-800 sem conexão" : q.kind === "ambos" ? "Os dois sem conexão"
@@ -459,7 +459,7 @@ function awDoneText(box, d) {
   if (d.ans === "awsai" && p && p.id) {
     const c = document.createElement("span");
     c.className = "chip off"; c.textContent = "fora de casa";
-    t.append(c, ` Marcado: ${asIs(p.name)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")} · ${hhmm(p.from)}–${hhmm(p.to)}`);
+    t.append(c, ` Marcado: ${pNameTxt(p.name)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")} · ${hhmm(p.from)}–${hhmm(p.to)}`);
   } else t.textContent = "Ok, ficou como em casa.";
   box.appendChild(t);
 }

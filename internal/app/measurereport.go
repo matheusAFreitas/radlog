@@ -9,7 +9,9 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
+	"radlog/internal/gmc"
 	"radlog/internal/pdf"
 )
 
@@ -149,6 +151,12 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	cal := a.convCalLocked()
 	lv := a.effLocked().Levels.Norm()
 	info, connected := a.info, a.state == "conectado"
+	var calThen, calNow gmc.Calibration
+	if m != nil {
+		tl := a.calTLLocked()
+		// a medição salva nunca é recalculada: o fator de então ignora o retroativo
+		calThen, calNow = tl.withRetro(0).calAt(m.Time, lv.DeadTimeOn), tl.calAt(time.Now().UnixMilli(), lv.DeadTimeOn)
+	}
 	a.mu.Unlock()
 	if m == nil {
 		return "", errors.New("medição não encontrada")
@@ -171,6 +179,17 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		dev = info.Version
 	}
 	calTxt := fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM (para gama do Cs-137)"
+	// 2.101.6: o fator que valeu nos números da medição (o PDF pode ser feito
+	// depois de mudar a calibração)
+	// 2.101.8: o fator do fundo (100 CPM) da calibração de então, contra o de
+	// hoje no mesmo ponto (Obj.USv/Obj.CPM dava o fator efetivo da curva)
+	if m.Obj.CPM > 0 && m.Obj.USv > 0 {
+		k := calThen.USv(100) / 100
+		calTxt = fmtBR(k, 4) + " µSv/h por CPM (a que valia na medição, para gama do Cs-137)"
+		if now := calNow.USv(100) / 100; math.Abs(now-k) > 0.00005 {
+			calTxt += "; hoje: " + fmtBR(now, 4)
+		}
+	}
 	dt := "desligada"
 	if lv.DeadTimeOn {
 		dt = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
@@ -196,6 +215,15 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	return dst, nil
 }
 
+// usvErrTxt escreve um ± com pelo menos um algarismo significativo (2.101.6:
+// "± 0,000 µSv/h" com muitas contagens).
+func usvErrTxt(v float64) string {
+	if v > 0 && v < 0.001 {
+		return fmtBR(v, int(math.Min(6, math.Ceil(-math.Log10(v)))))
+	}
+	return usvTxt(v)
+}
+
 // asciiFold tira acentos para o nome do arquivo.
 func asciiFold(s string) string {
 	r := strings.NewReplacer("á", "a", "à", "a", "â", "a", "ã", "a", "é", "e", "ê", "e", "í", "i", "ó", "o", "ô", "o", "õ", "o", "ú", "u", "ç", "c",
@@ -205,7 +233,7 @@ func asciiFold(s string) string {
 
 func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows ...[2]string) []byte {
 	t0 := time.UnixMilli(m.Time)
-	title := "Medição: " + m.Name
+	title := "Medição: " + measNameTr(m) // 2.101.9: o nome da pessoa não se traduz
 	home := m.Bg.Source == "casa"
 	period := t0.Format("02/01/2006 15:04") + " · fundo " + fmt.Sprint(m.Bg.Seconds) + " s + objeto " + fmt.Sprint(m.Obj.Seconds) + " s"
 	if home {
@@ -249,10 +277,10 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	// conclusão em destaque
 	vc := cMuted
-	switch r.Level {
-	case "sim":
+	switch {
+	case r.Level == "sim":
 		vc = cWarn
-	case "talvez":
+	case r.Level == "talvez" || r.DoseUp:
 		vc = cAtt
 	}
 	verdict := r.Verdict
@@ -261,7 +289,12 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	d.Rect(pm, p.y, 4, 30, &vc, nil)
 	d.Text(pm+12, p.y+12, pdf.SansBold, 11, cInk, pdf.Fit(verdict, pdf.SansBold, 11, pdf.W-2*pm-12))
-	d.Text(pm+12, p.y+26, pdf.Sans, 8.5, cMuted, fmt.Sprintf("Diferença de %s σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.", fmtBR(r.Sigma, 1)))
+	sub := fmt.Sprintf("Diferença de %s σ: até ~2σ é a variação natural da contagem; de 3σ para cima a diferença é real.", fmtBR(r.Sigma, 1))
+	if r.DoseUp {
+		// 2.100.2: a dose subiu sem a contagem subir (gama de energia alta)
+		sub = fmt.Sprintf("A contagem ficou igual (%s σ), mas a taxa de dose subiu %s σ: gama de energia alta, em que cada contagem vale mais dose.", fmtBR(r.Sigma, 1), fmtBR(r.DoseSigma, 0))
+	}
+	d.Text(pm+12, p.y+26, pdf.Sans, 8.5, cMuted, pdf.Fit(sub, pdf.Sans, 8.5, pdf.W-2*pm-12))
 	p.y += 42
 
 	// cartões
@@ -282,15 +315,29 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	}
 	bk, ok := kOf(m.Bg), kOf(m.Obj)
 	uv := func(v, k float64) string { return usvTxt(v*k) + " µSv/h" }
+	// 2.100.2: no RC102 o ± do µSv/h vem do espalhamento da dose
+	eph := func(ph MeasurePhase, k float64) string {
+		if ph.ErrUSv > 0 {
+			return usvErrTxt(ph.ErrUSv) + " µSv/h"
+		}
+		return usvErrTxt(ph.ErrCPM*k) + " µSv/h"
+	}
+	enet := usvErrTxt(r.NetErr*ok) + " µSv/h"
+	if r.NetErrUSv > 0 {
+		enet = usvErrTxt(r.NetErrUSv) + " µSv/h"
+	}
 	nsign := "+"
 	if r.NetUSv < 0 {
 		nsign = "−"
 	}
 	tiles := [][4]string{
-		{bgLabel, uv(m.Bg.CPM, bk), "± " + uv(m.Bg.ErrCPM, bk) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
-		{"Com o objeto", uv(m.Obj.CPM, ok), "± " + uv(m.Obj.ErrCPM, ok) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
-		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + uv(r.NetErr, ok) + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
+		{bgLabel, uv(m.Bg.CPM, bk), "± " + eph(m.Bg, bk) + " · " + fmt.Sprintf("%d contagens em %d s", m.Bg.Counts, m.Bg.Seconds), "m"},
+		{"Com o objeto", uv(m.Obj.CPM, ok), "± " + eph(m.Obj, ok) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
+		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + enet + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
+	}
+	if r.DoseUp && m.Bg.USv > 0 { // 2.101.6: a dose subiu: a razão e o σ são os da dose
+		tiles[3] = [4]string{"Objeto ÷ fundo (dose)", fmtBR(m.Obj.USv/m.Bg.USv, 2) + "×", fmtBR(r.DoseSigma, 1) + " σ na dose · " + fmtBR(r.Sigma, 1) + " σ na contagem", "m"}
 	}
 	for i, tl := range tiles {
 		p.tile(pm+float64(i)*(tw+tg), p.y, tw, th, tl[0], tl[1], tl[2], pdf.MonoBold)
@@ -304,7 +351,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		d.Text(pm, p.y+11, pdf.Sans, 8.5, cMuted, "Esta medição é de antes da versão 0.20.3 e não guardou os segundos.")
 		p.y += 16
 	} else {
-		p.measChart(m, bk)
+		p.measChart(m, bk, ok)
 	}
 	if m.Spectrum != nil && len(m.Spectrum.Obj) > 0 {
 		p.measSpectrum(m)
@@ -336,7 +383,11 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 			when = time.UnixMilli(ph.Start).Format("15:04:05") + "–" + time.UnixMilli(ph.End).Format("15:04:05")
 		}
 		k := kOf(ph)
-		return []string{name, when, fmt.Sprint(ph.Counts), fmt.Sprint(ph.Seconds), usvTxt(ph.CPM*k) + " ± " + usvTxt(ph.ErrCPM*k), mean, disp, mx}
+		e := ph.ErrCPM * k
+		if ph.ErrUSv > 0 { // 2.101.6: o mesmo ± dos cartões (RC102: pela dose)
+			e = ph.ErrUSv
+		}
+		return []string{name, when, fmt.Sprint(ph.Counts), fmt.Sprint(ph.Seconds), usvTxt(ph.CPM*k) + " ± " + usvErrTxt(e), mean, disp, mx}
 	}
 	cw := pdf.W - 2*pm
 	p.table([]string{"Fase", "Horário", "Contagens", "Segundos", "µSv/h ± σ", "Média/s", "Var ÷ média", "Máx/s"},
@@ -355,18 +406,22 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	rows := [][2]string{
 		{"Limite de detecção", fmt.Sprintf("%s µSv/h acima do fundo (Currie, 95%%, com %d s de fundo e %d s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido.", usvTxt(ld*ok), m.Bg.Seconds, m.Obj.Seconds)},
 	}
-	if r.Limit > 0 {
-		rows = append(rows, [2]string{"Limite superior", fmt.Sprintf("se o objeto emite algo, é menos que +%s µSv/h acima do fundo (líquido + 2σ, ~97,5%%)", usvTxt(r.Limit*ok))})
+	if lim := measLimitUSv(r, ok); lim > 0 {
+		rows = append(rows, [2]string{"Limite superior", fmt.Sprintf("se o objeto emite algo, é menos que +%s µSv/h acima do fundo (líquido + 2σ, ~97,5%%)", usvTxt(lim))})
 	}
 	switch r.Stop {
 	case "achou":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando o líquido passou de 4σ (%s s com o objeto)", fmt.Sprint(m.Obj.Seconds))})
+	case "dose":
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando a dose passou de 4σ (%s s com o objeto)", fmt.Sprint(m.Obj.Seconds))})
 	case "nada":
-		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando deu para garantir que o objeto sobe menos que %s%% do fundo (+%s µSv/h)", fmtBR(r.Pct, 0), usvTxt(r.Threshold*ok))})
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando deu para garantir que o objeto sobe menos que %s%% do fundo (+%s µSv/h)", fmtBR(r.Pct, 0), usvTxt(measThresholdUSv(r, ok)))})
 	case "limite":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: chegou ao tempo máximo (%s) sem decidir", fmtDurSec(float64(m.Obj.Seconds)))})
 	}
-	if r.NetCPM > 0 {
+	if r.DoseUp && r.NetUSv > 0 && r.NetErrUSv > 0 {
+		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ, pela dose do RC102)", fmtBR(r.NetErrUSv/r.NetUSv*100, 0))})
+	} else if r.NetCPM > 0 {
 		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ)", fmtBR(r.NetErr/r.NetCPM*100, 0))})
 		if home {
 			rows = append(rows,
@@ -393,6 +448,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		p.section("GEOMETRIA, CONTADOR E MÉTODO")
 	}
 	geo := strings.TrimSpace(m.Note)
+	if geo != "" {
+		pdf.MarkTranslated(geo) // 2.101.1: anotação da pessoa fica como ela escreveu
+	}
 	if geo == "" {
 		geo = "não anotada (na aba Medir, a anotação da medição guarda lado encostado no tubo, embalagem etc.)"
 	}
@@ -422,9 +480,13 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	if rc {
 		count = "soma das amostras do RC102 (a cada 0,5 s), em cada fase"
 	}
+	unc := "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"
+	if rc && m.Obj.ErrUSv > 0 { // 2.101.6: no RC102 o ± do µSv/h vem da dose
+		unc = "µSv/h: espalhamento da dose do RC102 em blocos de 30 s; contagens: √N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"
+	}
 	method = append(method,
 		[2]string{"Contagens", count},
-		[2]string{"Incerteza", "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"},
+		[2]string{"Incerteza", unc},
 		[2]string{"Significância", "líquido ÷ incerteza do líquido (σ)"},
 		[2]string{"Limite de detecção", "Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto"},
 	)
@@ -460,8 +522,15 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 
 // measChart: contagem por segundo (média de 10 s, em CPM) das duas fases,
 // com a média e a margem de erro (±1σ) de cada uma.
-func (p *reportPDF) measChart(m SavedMeasure, k float64) {
+func (p *reportPDF) measChart(m SavedMeasure, k, ok float64) {
 	d := p.d
+	// 2.101.5: o objeto fica na altura da taxa dele (no RC102 o µSv/h por
+	// contagem do objeto não é o do fundo); o gráfico segue em CPM do fundo
+	objPh, of := m.Obj, 1.0
+	if k > 0 && ok > 0 {
+		of = ok / k
+	}
+	objPh.CPM, objPh.ErrCPM = objPh.CPM*of, objPh.ErrCPM*of
 	p.need(150)
 	x0, y0, w, h := pm+28, p.y+8, pdf.W-2*pm-28, 110.0
 	var tmax float64
@@ -496,7 +565,10 @@ func (p *reportPDF) measChart(m SavedMeasure, k float64) {
 		return out
 	}
 	bgL, objL := smooth("fundo"), smooth("objeto")
-	top := math.Max(m.Obj.CPM+m.Obj.ErrCPM, m.Bg.CPM+m.Bg.ErrCPM)
+	for i := range objL {
+		objL[i].v *= of
+	}
+	top := math.Max(objPh.CPM+objPh.ErrCPM, m.Bg.CPM+m.Bg.ErrCPM)
 	for _, q := range append(append([]pt{}, bgL...), objL...) {
 		top = math.Max(top, q.v)
 	}
@@ -552,7 +624,7 @@ func (p *reportPDF) measChart(m SavedMeasure, k float64) {
 		ba, bb = oa, ob // o fundo da casa vale para a fase toda
 	}
 	band(m.Bg, ba, bb, cMuted)
-	band(m.Obj, oa, ob, cAccent)
+	band(objPh, oa, ob, cAccent)
 	line := func(l []pt, c pdf.RGB) {
 		var seg [][2]float64
 		for _, q := range l {
@@ -733,7 +805,9 @@ func (p *reportPDF) measSpectrum(m SavedMeasure) {
 	}
 	leg(cAccent, fmt.Sprintf("com o objeto (%s)", specDur(s.ObjSec)))
 	if bins[0].HasBg {
-		if s.BgSrc == "acumulado" {
+		if s.BgSrc == "casa" {
+			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectros gravados em casa (%s)", fmtDurSec(s.BgSec)))
+		} else if s.BgSrc == "acumulado" {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo: espectro acumulado do aparelho (%s)", fmtDurSec(s.BgSec)))
 		} else {
 			leg(pdf.Hex("#8C99A3"), fmt.Sprintf("fundo (%s)", specDur(s.BgSec)))
@@ -874,14 +948,19 @@ func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
 		var then []string
 		for _, c := range ctx.Cfg {
 			if c.Then != "" {
-				then = append(then, strings.ToLower(c.Field[:1])+c.Field[1:]+": "+c.Then)
+				// 2.101.9: cada pedaço traduz sozinho (junto, o molde não casava)
+				then = append(then, lowerFirst(a.T(c.Field))+": "+a.trCfgVal(c.Then))
 			}
 		}
-		txt := strings.Join(then, "; ")
+		// 2.101.6: o que mudou vem numa linha própria (a da época é cortada em 3 linhas)
 		if len(ctx.Changed) > 0 {
-			txt += ". Mudou desde a medição: " + strings.ToLower(strings.Join(ctx.Changed, ", "))
+			var ch []string
+			for _, c := range ctx.Changed {
+				ch = append(ch, lowerFirst(a.T(c)))
+			}
+			method = append(method, [2]string{"Mudou desde a medição", strings.Join(ch, ", ")})
 		}
-		method = append(method, [2]string{"Configuração na época", txt})
+		method = append(method, [2]string{"Configuração na época", strings.Join(then, "; ")})
 	}
 	if len(m.Attachments) > 0 {
 		var names []string
@@ -902,4 +981,60 @@ func fmtBq(v float64) string {
 		return fmtBR(v/1e3, 1) + " kBq"
 	}
 	return fmtBR(v, 0) + " Bq"
+}
+
+// lowerFirst põe a 1ª letra em minúscula, menos numa sigla ("GMC-800", "RC102").
+func lowerFirst(s string) string {
+	r := []rune(s)
+	if len(r) == 0 || (len(r) > 1 && unicode.IsUpper(r[1])) {
+		return s
+	}
+	r[0] = unicode.ToLower(r[0])
+	return string(r)
+}
+
+// trCfgVal traduz um valor do histórico de configurações por partes: a
+// frase antes do "(" e cada pedaço de dentro, separado por "; " (inteiro, o
+// molde não casava com a lista de pontos da curva).
+func (a *App) trCfgVal(s string) string {
+	i := strings.Index(s, " (")
+	if i <= 0 || !strings.HasSuffix(s, ")") {
+		return a.T(s)
+	}
+	parts := strings.Split(s[i+2:len(s)-1], "; ")
+	for k, p := range parts {
+		parts[k] = a.T(p)
+	}
+	return a.T(s[:i]) + " (" + strings.Join(parts, "; ") + ")"
+}
+
+// measNameTr: o nome que a pessoa deu fica como está (asIs); os nomes que o
+// app dá aos testes de Distância e Blindagem e à medição sem nome traduzem
+// (o material, não).
+func measNameTr(m SavedMeasure) string {
+	switch {
+	case m.Test == "distancia" && m.Name == "Teste de distância":
+		return m.Name
+	case m.Test == "blindagem" && strings.HasPrefix(m.Name, "Blindagem: "):
+		return "Blindagem: " + asIs(strings.TrimPrefix(m.Name, "Blindagem: "))
+	case m.Name == measNameDefault: // sem nome: o app chama de "objeto" (2.101.12)
+		return m.Name
+	}
+	return asIs(m.Name)
+}
+
+// measLimitUSv e measThresholdUSv: o teto e o limiar já em µSv/h (2.101.14);
+// medições salvas antes disso convertem o CPM pelo fator do objeto.
+func measLimitUSv(r MeasureResult, k float64) float64 {
+	if r.LimitUSv > 0 {
+		return r.LimitUSv
+	}
+	return r.Limit * k
+}
+
+func measThresholdUSv(r MeasureResult, k float64) float64 {
+	if r.ThresholdUSv > 0 {
+		return r.ThresholdUSv
+	}
+	return r.Threshold * k
 }

@@ -58,6 +58,7 @@ function askConfirm(o) {
   const body = cfmDlg.querySelector("#cfmBody");
   body.replaceChildren();
   cfmDlg.querySelector("#cfmTitle").textContent = o.title || "Continuar?";
+  cfmDlg.querySelector("#cfmNo").textContent = o.no || "Cancelar"; // 2.101.13: rótulo do botão de recusa
   const paras = o.text == null ? [] : Array.isArray(o.text) ? o.text : [o.text];
   const lead = paras.slice(0, o.textAfter ? paras.length - o.textAfter : paras.length);
   const tail = o.textAfter ? paras.slice(-o.textAfter) : [];

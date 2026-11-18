@@ -105,6 +105,10 @@ type ActCal struct {
 	Geometry string     `json:"geometry"`
 	KCl      *ActCalKCl `json:"kcl,omitempty"`
 	Th       *ActCalTh  `json:"th,omitempty"`
+	// 2.101.14 (item 35): a calibração de antes, para poder voltar
+	PrevKCl      *ActCalKCl `json:"prevKcl,omitempty"`
+	PrevTh       *ActCalTh  `json:"prevTh,omitempty"`
+	PrevGeometry string     `json:"prevGeometry,omitempty"` // a Posição da KCl anterior
 }
 
 // ActCalKCl é a calibração pelo K-40 do KCl (absoluta, em 1.460,8 keV).
@@ -131,6 +135,11 @@ type ActCalTh struct {
 	Sec      float64 `json:"sec"`
 }
 
+// actEffGuess é a eficiência no pico de 1.460 keV sem calibração. 2.101.11:
+// era 0,1%; o cristal de 1 cm³ do RC102 deu 0,0045% com o sal em volta
+// (calibração do ACE de 18/11), então o chute é 0,005%.
+const actEffGuess = 0.00005
+
 const (
 	actDefB    = -1.3 // inclinação típica de um cristal pequeno encostado (sem o tório)
 	actDefBErr = 0.4
@@ -151,9 +160,9 @@ func (c ActCal) eff(e float64) (eps, rel float64, src string) {
 		x := math.Log(e / c.Th.Pivot)
 		return math.Exp(c.Th.LnEps + c.Th.B*x), math.Hypot(c.Th.LnEpsErr, c.Th.BErr*x), "torio"
 	}
-	// sem calibração: chute de 0,1% em 1.460 keV, com 100% de dúvida
+	// sem calibração: chute em 1.460 keV, com 100% de dúvida
 	x := math.Log(e / 1460.8)
-	return math.Exp(math.Log(0.001) + b*x), math.Hypot(1, bErr*x), "chute"
+	return math.Exp(math.Log(actEffGuess) + b*x), math.Hypot(1, bErr*x), "chute"
 }
 
 // ---------- ajuste ----------
@@ -171,6 +180,20 @@ type actSpec struct {
 }
 
 func (s actSpec) energy(c float64) float64 { return s.A[0] + s.A[1]*c + s.A[2]*c*c }
+
+// bandCps é a contagem por segundo entre lo e hi keV.
+func (s actSpec) bandCps(lo, hi float64) float64 {
+	if s.Sec <= 0 {
+		return 0
+	}
+	t := 0.0
+	for i, v := range s.C {
+		if e := s.energy(float64(i) + 0.5); e >= lo && e < hi {
+			t += v
+		}
+	}
+	return t / s.Sec
+}
 
 // actFit ajusta a região em volta de kev e devolve a área do pico de kev.
 // Todas as linhas conhecidas com centro dentro da região entram no ajuste;
@@ -394,7 +417,7 @@ type ActNucRes struct {
 	ErrKg    float64      `json:"errKg"`
 	MDAKg    float64      `json:"mdaKg"`
 	Lines    []ActLineRes `json:"lines"`
-	NeedSec  float64      `json:"needSec"` // tempo para ±10% (contagem)
+	NeedSec  float64      `json:"needSec"` // tempo para ±10% (contagem e calibração; -1 = não chega)
 }
 
 // actAnalyze mede os radionuclídeos pedidos.
@@ -439,7 +462,13 @@ func actAnalyze(smp, bg actSpec, ids []string, cal ActCal, massG float64) []ActN
 			res.Detected = res.Bq > 1.645*res.StatErr
 			res.MDA = 4.65 * res.StatErr
 			if res.Bq > 0 {
-				res.NeedSec = smp.Sec * math.Pow(res.StatErr/res.Bq/0.10, 2)
+				// 2.101.6: o mesmo ± da tela (contagem e calibração); a parte da
+				// calibração não cai com o tempo: acima de 10% nunca chega (-1)
+				if sr := res.StatErr / res.Bq; rel >= 0.10 {
+					res.NeedSec = -1
+				} else {
+					res.NeedSec = smp.Sec * sr * sr / (0.01 - rel*rel)
+				}
 			}
 		}
 		if massG > 0 {

@@ -96,6 +96,17 @@ func (a *App) GetDose(period, limit string) (DoseChart, error) {
 
 // GetDoseSrc é o GetDose escolhendo o aparelho: "radiacode" ou "gmc".
 func (a *App) GetDoseSrc(period, limit, src string) (DoseChart, error) {
+	if period == "all" {
+		// 2.101.0: "Tudo" = do primeiro dado gravado (qualquer aparelho) até agora
+		first := a.gmcFirst()
+		if rf := a.rcFirst(); !rf.IsZero() && (first.IsZero() || rf.Before(first)) {
+			first = rf
+		}
+		if !first.IsZero() {
+			return a.GetDoseRangeSrc(first.UnixMilli(), time.Now().UnixMilli(), limit, src)
+		}
+		period = "24h"
+	}
 	var span, step time.Duration
 	switch period {
 	case "15m": // 2.12: o mesmo período do gráfico da taxa

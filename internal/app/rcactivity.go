@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/radiacode"
 )
 
@@ -27,15 +28,23 @@ import (
 // atual.json (a medição em andamento, para continuar se o app fechar).
 
 const (
-	actDir      = "atividade"
-	actCalFile  = "calibracao.json"
-	actBgFile   = "fundo.json"
-	actResFile  = "medidas.jsonl"
-	actCurFile  = "atual.json"
-	actTickUSB  = 5 * time.Second
-	actTickBLE  = 15 * time.Second
-	actMaxHist  = 20
-	actBgMaxAge = 30 * 24 * time.Hour
+	actDir         = "atividade"
+	actCalFile     = "calibracao.json"
+	actBgFile      = "fundo.json"
+	actResFile     = "medidas.jsonl"
+	actCurFile     = "atual.json"
+	actTickUSB     = 5 * time.Second
+	actWeakSec     = 1200    // a partir de quando avisar que o RC102 não está vendo o sal (20 min: com +10% de subida, ~8% de alarme falso)
+	actEffMin      = 0.00001 // 0,001%: abaixo disso o RC102 não está vendo o sal (2.101.11: era 0,03%)
+	actWeakPeakSec = 1800    // e a partir de quando o pico sozinho decide
+	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
+	actWeakLo      = 300.0   // faixa do espalhamento do K-40 (keV): o sal em volta do
+	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
+	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): o sal está perto
+	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
+	actTickBLE     = 15 * time.Second
+	actMaxHist     = 20
+	actBgMaxAge    = 30 * 24 * time.Hour
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -53,6 +62,10 @@ type ActOpts struct {
 	// pedra solta (forma diferente do pote): massa opcional, resultado em Bq da peça
 	Loose    bool   `json:"loose,omitempty"`
 	SampleID string `json:"sampleId,omitempty"` // de "Suas amostras"
+	// 2.101.12: o nome foi escrito pela pessoa (a tela diz). Os nomes que o app
+	// dá (cartão pronto, amostra que vem com o app, calibração, "amostra")
+	// traduzem nos Eventos; o da pessoa fica como está.
+	NameOwn bool `json:"nameOwn,omitempty"`
 }
 
 // actSaved é um espectro somado guardado.
@@ -143,6 +156,10 @@ type actState struct {
 	loaded bool
 	tickAt time.Time
 	saveAt time.Time
+	// contagem normal da casa (cache para o aviso do fundo alto)
+	homeCps    float64
+	homeAt     time.Time
+	homeBefore int64
 }
 
 // ActResult é uma medição terminada.
@@ -165,8 +182,15 @@ type ActResult struct {
 	Prev     float64      `json:"prev,omitempty"` // eficiência anterior em 1.460 keV (para comparar)
 	Loose    bool         `json:"loose,omitempty"`
 	SampleID string       `json:"sampleId,omitempty"`
-	Nucs     []string     `json:"nucs,omitempty"`    // o que foi procurado
-	SmpSecO  int          `json:"smpSecO,omitempty"` // tempo escolhido (para medir de novo)
+	Nucs     []string     `json:"nucs,omitempty"`     // o que foi procurado
+	SmpSecO  int          `json:"smpSecO,omitempty"`  // tempo escolhido (para medir de novo)
+	NotSaved bool         `json:"notSaved,omitempty"` // calibração incerta demais: não foi guardada
+	// 2.101.14 (item 35): saiu pior que a que está em uso, então não foi
+	// trocada sozinha; PrevErr é o ± da atual (KCl: relativo; tório: da
+	// inclinação) e Used diz que a pessoa escolheu usar a nova mesmo assim
+	Worse   bool    `json:"worse,omitempty"`
+	PrevErr float64 `json:"prevErr,omitempty"`
+	Used    bool    `json:"used,omitempty"`
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -228,6 +252,15 @@ func (a *App) actSaveLocked() {
 	st.saveAt = time.Now()
 }
 
+// actEvName é o nome nos Eventos: o da pessoa fica como está (asIs); os que o
+// app dá traduzem (2.101.12).
+func actEvName(o ActOpts) string {
+	if o.NameOwn {
+		return asIs(o.Name)
+	}
+	return o.Name
+}
+
 func actValidate(o *ActOpts) error {
 	o.Name = strings.TrimSpace(o.Name)
 	o.Geometry = strings.TrimSpace(o.Geometry)
@@ -240,6 +273,7 @@ func actValidate(o *ActOpts) error {
 		if o.Name == "" {
 			o.Name = fmt.Sprintf("KCl (%g%%)", o.Pct)
 		}
+		o.NameOwn = false
 	case "torio":
 		if o.Pct <= 0 || o.Pct > 10 {
 			return errors.New("informe a % de ThO₂ do eletrodo (2 no WT20)")
@@ -248,6 +282,7 @@ func actValidate(o *ActOpts) error {
 		if o.Name == "" {
 			o.Name = fmt.Sprintf("eletrodo de tório (%g%% ThO₂)", o.Pct)
 		}
+		o.NameOwn = false
 	case "amostra":
 		var ok []string
 		for _, id := range o.Nuclides {
@@ -260,7 +295,7 @@ func actValidate(o *ActOpts) error {
 		}
 		o.Nuclides = ok
 		if o.Name == "" {
-			o.Name = "amostra"
+			o.Name, o.NameOwn = "amostra", false
 		}
 	default:
 		return errors.New("tipo de medição desconhecido")
@@ -310,7 +345,11 @@ func (a *App) StartActivity(o ActOpts) error {
 	a.actLoadLocked()
 	st.run = r
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", o.Name, o.MassG))
+	if o.Loose && o.MassG <= 0 { // pedra solta sem massa: não "0 g" (2.101.12)
+		a.logEvent(fmt.Sprintf("Atividade: começou (%s, pedra solta)", actEvName(o)))
+	} else {
+		a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", actEvName(o), o.MassG))
+	}
 	return nil
 }
 
@@ -362,7 +401,7 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 		r.Result = &res
 		r.Phase, r.PhaseAt = "pronto", now.UnixMilli()
 		a.actAppendResult(res)
-		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", r.Opts.Name))
+		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", actEvName(r.Opts)))
 	}
 	a.actSaveLocked()
 }
@@ -382,10 +421,19 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.Pct = o.Pct
 		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
-		if k != nil {
+		if k != nil && k.EffErr > actCalMaxErr {
+			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
+			// estragaria todos os Bq daqui para frente
+			k.T = res.T
+			res.KCl, res.NotSaved = k, true
+		} else if k != nil && cal.KCl != nil && k.EffErr > cal.KCl.EffErr {
+			// 2.101.14 (item 35): pior que a atual: pergunta antes de trocar
+			k.T = res.T
+			res.KCl, res.Worse, res.PrevErr = k, true, cal.KCl.EffErr
+		} else if k != nil {
 			k.T = res.T
 			res.KCl = k
-			cal.KCl = k
+			cal.KCl, cal.PrevKCl, cal.PrevGeometry = k, cal.KCl, cal.Geometry
 			if o.Geometry != "" {
 				cal.Geometry = o.Geometry
 			}
@@ -397,10 +445,13 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.ThLines = lines
 		_, f228, _ := actThFactors(o.AgeY)
 		res.Expected = o.MassG * o.Pct / 100 * actThPerTO2 * actBqPerGTh * f228
-		if th != nil {
+		if th != nil && cal.Th != nil && th.BErr > cal.Th.BErr {
+			th.T = res.T
+			res.Th, res.Worse, res.PrevErr = th, true, cal.Th.BErr
+		} else if th != nil {
 			th.T = res.T
 			res.Th = th
-			cal.Th = th
+			cal.Th, cal.PrevTh = th, cal.Th
 			a.actWriteJSON(actCalFile, cal)
 		}
 	}
@@ -519,6 +570,12 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	SmpCps    float64         `json:"smpCps,omitempty"`   // cps de 300 a 1.400 keV da amostra (calibração; 2.101.11: era o total)
+	BgCps     float64         `json:"bgCps,omitempty"`    // e do fundo
+	KCLWeak   bool            `json:"kclWeak,omitempty"`  // o pico do K-40 não está aparecendo
+	HomeCps   float64         `json:"homeCps,omitempty"`  // contagem normal da casa (mediana dos 7 dias antes)
+	PhaseCps  float64         `json:"phaseCps,omitempty"` // contagem do RC102 nesta fase (mediana dos minutos)
+	BgHigh    bool            `json:"bgHigh,omitempty"`   // o fundo está bem acima do normal da casa
 	LiveTh    *ActCalTh       `json:"liveTh"`
 	Expected  float64         `json:"expected"`
 	Result    *ActResult      `json:"result"`
@@ -610,10 +667,20 @@ func (a *App) GetActivity() ActView {
 	if smp.Sec > 0 || bg.Sec > 0 {
 		v.Chart = actChart(smp, bg)
 	}
+	// 2.101.4: compara com a contagem normal da casa (minutos gravados pelo
+	// RC102), para avisar de um fundo medido com o sal perto
+	if (r.Phase == "fundo" || r.Phase == "amostra") && v.PhaseSec >= actWeakSec {
+		at := time.UnixMilli(r.PhaseAt)
+		v.HomeCps = a.actHomeCps(at)
+		v.PhaseCps = a.actPhaseCps(at.Add(time.Minute))
+		v.BgHigh = r.Phase == "fundo" && actBgHigh(v.PhaseCps, v.HomeCps)
+	}
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
 		switch o.Kind {
 		case "kcl":
 			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
+			v.SmpCps, v.BgCps = smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
+			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
@@ -624,6 +691,66 @@ func (a *App) GetActivity() ActView {
 	return v
 }
 
+// actKCLWeak avisa cedo (2.101.4) que o RC102 não está vendo o sal: depois
+// de 20 min, a contagem de 300 a 1.400 keV (o espalhamento do K-40) quase
+// não subiu em relação ao fundo; depois de 30 min, também se nem a
+// eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
+// 2.101.11: a calibração do ACE (18/11, 250 g de sal light no Marinelli)
+// mostrou o total CAINDO 1% (o sal blinda abaixo de 100 keV) e a faixa de
+// 300 a 1.400 keV subindo 20%, com eficiência de 0,0045% no pico.
+func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
+	if sec < actWeakSec {
+		return false
+	}
+	if bgCps > 0 && smpCps < bgCps*actWeakRise {
+		return true
+	}
+	// o pico sozinho só decide com mais tempo (aos 20 min o ruído ainda é grande)
+	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
+}
+
+// actBgHigh: o fundo está mais de 25% acima do normal da casa (o sal, ou
+// outra amostra, ficou perto do aparelho).
+func actBgHigh(phaseCps, homeCps float64) bool {
+	return homeCps > 0 && phaseCps > homeCps*actBgHighRise
+}
+
+// actHomeCps é a mediana da contagem por segundo do RC102 nos 7 dias antes de
+// before (sem minutos incompletos); 0 se tiver menos de 1 h gravada.
+func (a *App) actHomeCps(before time.Time) float64 {
+	st := &a.rc.act
+	st.mu.Lock()
+	if st.homeBefore == before.Unix() && time.Since(st.homeAt) < 10*time.Minute {
+		v := st.homeCps
+		st.mu.Unlock()
+		return v
+	}
+	st.mu.Unlock()
+	v := actMedianCps(a.rcRange(before.Add(-7*24*time.Hour), before), 60)
+	st.mu.Lock()
+	st.homeCps, st.homeAt, st.homeBefore = v, time.Now(), before.Unix()
+	st.mu.Unlock()
+	return v
+}
+
+// actPhaseCps é a mediana da contagem por segundo desde from.
+func (a *App) actPhaseCps(from time.Time) float64 {
+	return actMedianCps(a.rcRange(from, time.Now().Add(time.Minute)), 3)
+}
+
+func actMedianCps(pts []RcPoint, min int) float64 {
+	var xs []float64
+	for _, p := range pts {
+		if p.N >= 20 && p.CPS > 0 {
+			xs = append(xs, p.CPS)
+		}
+	}
+	if len(xs) < min {
+		return 0
+	}
+	return stats.Median(xs)
+}
+
 // CloseActivity fecha o resultado (volta para o formulário).
 func (a *App) CloseActivity() { a.CancelActivity() }
 
@@ -632,13 +759,93 @@ func (a *App) ForgetActivityCal(which string) {
 	c := a.actCal()
 	switch which {
 	case "kcl":
-		c.KCl = nil
+		c.KCl, c.PrevKCl, c.PrevGeometry = nil, nil, ""
 	case "torio":
-		c.Th = nil
+		c.Th, c.PrevTh = nil, nil
 	default:
 		return
 	}
 	a.actWriteJSON(actCalFile, c)
+}
+
+// UseActivityCal usa a calibração que acabou de sair pior que a atual
+// (2.101.14, item 35): a atual vira a anterior, para poder voltar.
+func (a *App) UseActivityCal(t int64) error {
+	st := &a.rc.act
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	r := st.run
+	if r == nil || r.Result == nil || r.Result.T != t || !r.Result.Worse || r.Result.Used {
+		return errors.New("essa calibração não está mais na tela")
+	}
+	res := r.Result
+	c := a.actCal()
+	switch {
+	case res.KCl != nil && res.Kind == "kcl":
+		c.KCl, c.PrevKCl, c.PrevGeometry = res.KCl, c.KCl, c.Geometry
+		if res.Geometry != "" {
+			c.Geometry = res.Geometry
+		}
+	case res.Th != nil && res.Kind == "torio":
+		c.Th, c.PrevTh = res.Th, c.Th
+	default:
+		return errors.New("essa medição não tem calibração")
+	}
+	a.actWriteJSON(actCalFile, c)
+	res.Used = true
+	_, _, res.CalSrc = c.eff(1000)
+	a.actRewriteResult(*res)
+	a.actSaveLocked()
+	a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	return nil
+}
+
+// RestoreActivityCal volta para a calibração de antes (KCl ou tório).
+func (a *App) RestoreActivityCal(which string) error {
+	c := a.actCal()
+	switch which {
+	case "kcl":
+		if c.PrevKCl == nil {
+			return errors.New("não há calibração anterior do KCl")
+		}
+		c.KCl, c.PrevKCl = c.PrevKCl, c.KCl
+		if c.PrevGeometry != "" { // a Posição volta junto
+			c.Geometry, c.PrevGeometry = c.PrevGeometry, c.Geometry
+		}
+	case "torio":
+		if c.PrevTh == nil {
+			return errors.New("não há calibração anterior do tório")
+		}
+		c.Th, c.PrevTh = c.PrevTh, c.Th
+	default:
+		return errors.New("calibração desconhecida")
+	}
+	a.actWriteJSON(actCalFile, c)
+	return nil
+}
+
+// actRewriteResult troca, no histórico, o resultado com o mesmo horário.
+func (a *App) actRewriteResult(res ActResult) {
+	p := a.actPath(actResFile)
+	b, err := os.ReadFile(p)
+	if err != nil {
+		return
+	}
+	nb, err := json.Marshal(res)
+	if err != nil {
+		return
+	}
+	lines := bytes.Split(b, []byte("\n"))
+	for i, ln := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+		}
+		if json.Unmarshal(ln, &q) == nil && q.T == res.T && q.Kind == res.Kind {
+			lines[i] = nb
+		}
+	}
+	writeFileAtomic(p, bytes.Join(lines, []byte("\n")), 0o644)
 }
 
 // ---------- backup ----------

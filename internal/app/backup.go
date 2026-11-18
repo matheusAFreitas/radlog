@@ -185,8 +185,8 @@ func (a *App) ExportBackup() (string, error) {
 	// sem o nome do PC (D4): ele ia dentro do arquivo e no nome sugerido
 	name := fmt.Sprintf("radlog-backup-%s.zip", time.Now().Format("2006-01-02"))
 	dst, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
-		Title: "Salvar backup", DefaultFilename: name,
-		Filters: []wruntime.FileFilter{{DisplayName: "Backup do RadLog (*.zip)", Pattern: "*.zip"}},
+		Title: a.T("Salvar backup"), DefaultFilename: name,
+		Filters: []wruntime.FileFilter{{DisplayName: a.T("Backup do RadLog (*.zip)"), Pattern: "*.zip"}},
 	})
 	if err != nil || dst == "" {
 		return "", err
@@ -212,8 +212,8 @@ func (a *App) ImportBackup() (MergeResult, error) {
 		return MergeResult{}, errors.New("sem janela")
 	}
 	src, err := wruntime.OpenFileDialog(a.ctx, wruntime.OpenDialogOptions{
-		Title:   "Importar backup",
-		Filters: []wruntime.FileFilter{{DisplayName: "Backup do RadLog (*.zip)", Pattern: "*.zip"}},
+		Title:   a.T("Importar backup"),
+		Filters: []wruntime.FileFilter{{DisplayName: a.T("Backup do RadLog (*.zip)"), Pattern: "*.zip"}},
 	})
 	if err != nil || src == "" {
 		return MergeResult{}, err

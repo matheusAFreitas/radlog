@@ -119,9 +119,12 @@ type rcState struct {
 	ring         []rcSample // última hora ao vivo (para o gráfico nos períodos curtos)
 	today        rcToday
 	spec         rcSpecLog // espectro de minuto em minuto (espectrograma)
+	sgFast       rcSgFast  // espectro de 2 em 2 s com a aba Busca aberta (só na memória)
 	specSum      rcSpecCache
-	act          actState  // medição de atividade (Bq)
-	macc         rcMeasAcc // só a goroutine do rcRun mexe
+	act          actState                             // medição de atividade (Bq)
+	pend         []rcMinute                           // minutos que não deu para gravar (arquivo travado; com fileM)
+	specTest     func(accum bool) *radiacode.Spectrum // só nos testes: aparelho de mentira
+	macc         rcMeasAcc                            // só a goroutine do rcRun mexe
 	dose         rcDoseLive
 	cfgLogAt     time.Time
 	offRef       float64      // µSv/h no aviso de "fora da escala"
@@ -544,6 +547,7 @@ func (a *App) rcRun(dev *radiacode.Device) {
 			askAway()
 		}
 		a.rcSpecTick(dev)
+		a.rcSgFastTick(dev, dev.Kind() == "bluetooth")
 		a.rcActTick(dev)
 		for _, r := range recs {
 			if e, ok := r.(radiacode.Event); ok && e.ID == 17 { // mensagem de texto nova
@@ -723,8 +727,33 @@ func (a *App) rcWriteMinute(m rcMinute) {
 		return
 	}
 	n := float64(m.n)
-	if !a.rcAppend(m) {
-		return
+	// 2.101.5: arquivo travado (Excel, antivírus, OneDrive): o minuto fica na
+	// memória e vai junto no próximo que der certo, com um evento
+	a.rc.fileM.Lock()
+	queue := append(a.rc.pend, m)
+	a.rc.fileM.Unlock()
+	for i, q := range queue {
+		if !a.rcAppend(q) {
+			a.rc.fileM.Lock()
+			if len(a.rc.pend) == 0 {
+				a.rc.fileM.Unlock()
+				a.logEvent("Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.")
+				a.rc.fileM.Lock()
+			}
+			a.rc.pend = append([]rcMinute(nil), queue[i:]...)
+			if len(a.rc.pend) > rcPendMax {
+				a.rc.pend = a.rc.pend[len(a.rc.pend)-rcPendMax:]
+			}
+			a.rc.fileM.Unlock()
+			return
+		}
+	}
+	a.rc.fileM.Lock()
+	had := len(a.rc.pend) > 0
+	a.rc.pend = nil
+	a.rc.fileM.Unlock()
+	if had {
+		a.logEvent(fmt.Sprintf("Minutos do RC102 que estavam na memória gravados (%d)", len(queue)-1))
 	}
 	// dose de hoje e último minuto, sem reler o arquivo (fora do fileM: o
 	// GetRadiacode tranca rc.mu e depois fileM)
@@ -757,10 +786,33 @@ func (a *App) rcAppend(m rcMinute) bool {
 	defer f.Close()
 	if statErr != nil {
 		fmt.Fprintln(f, rcHeader)
+	} else {
+		endLine(f, path)
 	}
 	n := float64(m.n)
-	fmt.Fprintf(f, "%s,%.3f,%.5f,%d\n", m.t.Format(time.RFC3339), m.cps/n, m.usv/n, m.n)
-	return true
+	_, err = fmt.Fprintf(f, "%s,%.3f,%.5f,%d\n", m.t.Format(time.RFC3339), m.cps/n, m.usv/n, m.n)
+	return err == nil
+}
+
+// rcPendMax: até 3 dias de minutos esperando o arquivo destravar.
+const rcPendMax = 3 * 24 * 60
+
+// endLine fecha uma linha cortada no fim do arquivo (queda de energia no meio
+// da gravação) antes de anexar: sem isso, a linha nova gruda nela (2.101.5).
+func endLine(f *os.File, path string) {
+	r, err := os.Open(path)
+	if err != nil {
+		return
+	}
+	defer r.Close()
+	st, err := r.Stat()
+	if err != nil || st.Size() == 0 {
+		return
+	}
+	b := make([]byte, 1)
+	if _, err := r.ReadAt(b, st.Size()-1); err == nil && b[0] != '\n' {
+		_, _ = f.WriteString("\n")
+	}
 }
 
 // RcPoint é um minuto gravado do Radiacode.
@@ -837,6 +889,7 @@ type RcCompare struct {
 	Corr    float64   `json:"corr"`    // correlação minuto a minuto
 	Minutes int       `json:"minutes"` // minutos com os dois
 	RCOnly  int       `json:"rcOnly"`  // minutos só do RC102
+	Away    int       `json:"away"`    // 2.101.5: minutos juntos deixados de fora (fora de casa ou medindo)
 	// SuggestK é o µSv/h por CPM que faria o GMC bater com o Radiacode na
 	// média desses minutos (taxas baixas, sem a curva); CurK é o em uso.
 	SuggestK float64 `json:"suggestK"`
@@ -867,12 +920,31 @@ func (a *App) GetRcCompare(minutes int) (RcCompare, error) {
 	for _, p := range pts {
 		gm[p.T.Truncate(time.Minute).Unix()] = p
 	}
+	// 2.101.5: só os minutos normais em casa (fora de qualquer trecho fora de
+	// casa e de medição), como a intercalibração
+	a.mu.Lock()
+	periods := append([]Period{}, a.periods...)
+	a.mu.Unlock()
+	measuring := a.measuringChecker()
+	away := func(t time.Time) bool {
+		ms := t.UnixMilli()
+		for _, p := range periods {
+			if ms >= p.From && ms < periodEnd(p) {
+				return true
+			}
+		}
+		return measuring(t)
+	}
 	var scpm float64
 	var sg, sr, sgg, srr, sgr float64
 	for _, r := range rcs {
 		gp, ok := gm[r.T.Truncate(time.Minute).Unix()]
 		if !ok {
 			out.RCOnly++
+			continue
+		}
+		if away(r.T) {
+			out.Away++
 			continue
 		}
 		cpm := gp.CPM
@@ -1069,14 +1141,17 @@ func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
 func (a *App) rcConnected() bool {
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
-	return a.rc.dev != nil
+	return a.rc.dev != nil || a.rc.specTest != nil
 }
 
 // rcSpectrumNow lê o espectro do aparelho (nil se não deu).
 func (a *App) rcSpectrumNow(accum bool) *radiacode.Spectrum {
 	a.rc.mu.Lock()
-	dev := a.rc.dev
+	dev, fake := a.rc.dev, a.rc.specTest
 	a.rc.mu.Unlock()
+	if fake != nil {
+		return fake(accum)
+	}
 	if dev == nil {
 		return nil
 	}
@@ -1122,16 +1197,19 @@ func (a *App) rcHomeBackground() HomeBg {
 	hb := homeBgFrom(mins, sp[0].T, sp[len(sp)-1].T.Add(time.Minute))
 	// µSv/h: média dos mesmos minutos que ficaram (sem os picos)
 	lim := stats.Median(mins) + 5*math.Sqrt(math.Max(stats.Median(mins), 1))
-	var su float64
+	var su, sq float64
 	k := 0
 	for _, p := range sp {
 		if p.CPM <= lim {
-			su += byT[p.T.Unix()].USvh
+			u := byT[p.T.Unix()].USvh
+			su += u
+			sq += u * u
 			k++
 		}
 	}
 	if k > 0 {
 		hb.USv = su / float64(k)
+		hb.ErrUSv = meanErr(su, sq, k)
 	}
 	hb.Device = "radiacode"
 	return hb

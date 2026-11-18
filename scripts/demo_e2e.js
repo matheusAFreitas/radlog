@@ -52,6 +52,19 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   const d = await goCall("GetDemo");
   if (!d.sound || d.speed !== 10) fail("som e velocidade: " + JSON.stringify(d));
 
+  // 2.100.1: a escolha da tela chega inteira ao StartMeasure (na 2.94 um
+  // comentário engoliu o aparelho, o automático e o fundo da casa)
+  await p.click('#sideNav [data-view="medir"]');
+  await p.waitForTimeout(500);
+  for (const [dev, tmode, want] of [["radiacode", "auto", { device: "radiacode", mode: "", auto: true }], ["gmc", "fixo", { device: "gmc", mode: "", auto: false }], ["ambos", "auto", { device: "radiacode", mode: "ambos", auto: true }]]) {
+    await p.click(`#mDevs .m-dev[data-dev="${dev}"]`);
+    await p.click(`#mTimeModeSeg button[data-tmode="${tmode}"]`);
+    const o = await p.evaluate(() => measureOpts());
+    for (const k of Object.keys(want)) if (o[k] !== want[k]) fail(`measureOpts com ${dev}/${tmode}: ${k} = ${JSON.stringify(o[k])}, esperado ${JSON.stringify(want[k])}`);
+    if (typeof o.homeBg !== "boolean" || o.waitObj !== true) fail("measureOpts sem homeBg/waitObj: " + JSON.stringify(o));
+    if (tmode === "auto" ? !(o.maxSec >= 600) : !(o.seconds >= 30)) fail("measureOpts sem tempo: " + JSON.stringify(o));
+  }
+
   // 3) páginas com o mundo simulado
   for (const v of ["graficos", "fundo", "resumo", "alertas", "medir", "fora", "gmc", "radiacode", "agora"]) {
     await p.click(`#sideNav [data-view="${v}"]`);

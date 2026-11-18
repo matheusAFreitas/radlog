@@ -61,15 +61,27 @@ type TripSummary struct {
 	Events    []TripEvent      `json:"events"`
 }
 
-// isTrip: o RC102 foi junto (é ele que mede a saída).
+// youOut: você saiu de casa no trecho. É o GMC-800 junto, ou o trecho diz "eu
+// não estava em casa" (2.101.8: a mesma regra do awayCheckerFor do RC102).
+// Ignorar o GMC-800 ou deixar os dois em casa não é sair.
+func youOut(p Period) bool {
+	g, _ := periodWhere(p)
+	return g == WhereMe || p.NotHome
+}
+
+// isTrip: você saiu de casa e o RC102 foi junto (é ele que mede a saída).
 func isTrip(p Period) bool {
 	_, rc := periodWhere(p)
-	return rc == WhereMe
+	return rc == WhereMe && youOut(p)
 }
+
+// plannedNameDefault é o nome que o app dá a uma saída programada sem nome
+// (2.101.8: conta como nome padrão, e a tela traduz).
+const plannedNameDefault = "Saída programada"
 
 // isDefaultPeriodName: o nome ainda é o que o app deu.
 func isDefaultPeriodName(name string) bool {
-	if name == "" || name == periodNameOut || name == "Fora de casa" {
+	if name == "" || name == periodNameOut || name == "Fora de casa" || name == plannedNameDefault {
 		return true
 	}
 	ws := []string{WhereHome, WhereMe, WhereOff}
@@ -127,8 +139,11 @@ func (a *App) tripSummary(p Period, now time.Time) TripSummary {
 	out.RC = a.rcSummary(from, to, step, n)
 
 	// fundo de casa no dia: mediana do GMC-800 em casa, pela calibração de agora
+	// 2.101.5: o RC102 foi junto e tem fundo de casa: compara com o dele
 	d0 := time.Date(from.Year(), from.Month(), from.Day(), 0, 0, 0, 0, from.Location())
-	if med, nm := a.homeMedian(d0, d0.AddDate(0, 0, 1)); nm >= 60 && med > 0 {
+	if p.RC == WhereMe && out.RC != nil && out.RC.BgUSv > 0 {
+		out.HomeUSv, out.HomeSrc = out.RC.BgUSv, "rc"
+	} else if med, nm := a.homeMedian(d0, d0.AddDate(0, 0, 1)); nm >= 60 && med > 0 {
 		a.mu.Lock()
 		out.HomeUSv = a.convCalLocked().USv(med)
 		a.mu.Unlock()

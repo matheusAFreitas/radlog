@@ -37,11 +37,18 @@ func normCountUnit(u string) string {
 // sem separador de milhar) seguido, com ou sem espaço, de µSv ou mSv (com
 // /h, /ano, /dia...). Faixas ("0,10 a 0,20 µSv/h", "0,1–0,2 µSv/h") entram
 // juntas, para os dois números mudarem.
-var unitRe = regexp.MustCompile(`([+±−-]?\d[\d.,]*)((?:\s?(?:–|-|±|a|e|até|ou|to|and|or)\s?[+±−-]?\d[\d.,]*)*)(\s|\x{00A0})?(µSv|mSv)(/h|/ano|/dia|/year|/day|\b)`)
+var unitRe = regexp.MustCompile(`([+±−-]?\d[\d.,]*)((?:\s?(?:–|-|±|→|a|e|até|ou|para|to|and|or)\s?[+±−-]?\d[\d.,]*)*)(\s|\x{00A0})?(µSv|mSv)(/h|/ano|/dia|/year|/day|\b)`)
 
 // "0,52 µSv/h (limite 0,50)": o limite entre parênteses é na mesma unidade;
 // ganha a unidade escrita para mudar junto
 var unitParenRe = regexp.MustCompile(`(\d\s?)µSv/h \(([^()]{0,40}?\s)(\d[\d.,]*\d|\d)\)`)
+
+var (
+	unitNamedRe = regexp.MustCompile(`[A-Za-z]+-?\d+`) // 2.101.6: "RC102" também
+	// 2.101.6: fator de calibração ("0,00564 µSv/h por CPM"): constante, não taxa
+	unitFactorRe = regexp.MustCompile(`[+±−-]?\d[\d.,]*\s?µSv/h (?:por|per) CP[MS]`)
+	unitKeptRe   = regexp.MustCompile("+")
+)
 
 var unitNumRe = regexp.MustCompile(`[+±−-]?\d[\d.,]*`)
 
@@ -51,8 +58,18 @@ func remText(s, sep string) string {
 	if !strings.Contains(s, "Sv") {
 		return s
 	}
+	// 2.101.5: nome com número ("GMC-800", "Cs-137") não é número de taxa
+	var kept []string
+	s = unitNamedRe.ReplaceAllStringFunc(s, func(m string) string {
+		kept = append(kept, m)
+		return "" + strings.Repeat("", len(kept)) + ""
+	})
+	s = unitFactorRe.ReplaceAllStringFunc(s, func(m string) string {
+		kept = append(kept, m)
+		return "" + strings.Repeat("", len(kept)) + ""
+	})
 	s = unitParenRe.ReplaceAllString(s, "${1}µSv/h ($2$3 µSv/h)")
-	return unitRe.ReplaceAllStringFunc(s, func(m string) string {
+	s = unitRe.ReplaceAllStringFunc(s, func(m string) string {
 		p := unitRe.FindStringSubmatch(m)
 		k := 0.1
 		if p[4] == "mSv" {
@@ -61,6 +78,12 @@ func remText(s, sep string) string {
 		nums := unitNumRe.ReplaceAllStringFunc(p[1]+p[2], func(n string) string { return remNum(n, sep, k) })
 		return nums + p[3] + "mrem" + p[5]
 	})
+	if len(kept) > 0 {
+		s = unitKeptRe.ReplaceAllStringFunc(s, func(m string) string {
+			return kept[strings.Count(m, "")-1]
+		})
+	}
+	return s
 }
 
 // remNum converte um número escrito, mantendo o sinal, o separador e uma

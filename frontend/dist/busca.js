@@ -111,7 +111,7 @@ function qkSettings() {
 
 function qkMeasurements() {
   return [...(state.measurements || [])].reverse().map((m) => ({
-    g: "Medições salvas", ic: QK_IC.obj, t: m.name, raw: true,
+    g: "Medições salvas", ic: QK_IC.obj, t: m.name === "objeto" ? qkTr(m.name) : m.name, raw: true,
     s: whenLabel(m.time) + (m.result ? ` · ${m.result.netUSv >= 0 ? "+" : "−"}${fmt(Math.abs(m.result.netUSv), 3)} µSv/h` : ""),
     kw: "medicao objeto " + (m.note || ""),
     run: async () => {
@@ -212,7 +212,8 @@ function qkList() {
     const t = document.createElement("span");
     t.className = "qk-t";
     t.appendChild(qkMark(it.raw ? it.t : qkTr(it.t), nq));
-    if (it.s) t.appendChild(Object.assign(document.createElement("small"), { textContent: it.raw ? it.s : qkTr(it.s) }));
+    // 2.101.12: no raw só o nome fica como está; a linha de baixo é do app ("hoje 14:07 · +0,012 µSv/h")
+    if (it.s) t.appendChild(Object.assign(document.createElement("small"), { textContent: it.raw ? (typeof screenText === "function" ? screenText(it.s) : it.s) : qkTr(it.s) }));
     li.append(ic, t);
     if (it.k) li.appendChild(Object.assign(document.createElement("kbd"), { textContent: it.k }));
     else {
@@ -424,7 +425,9 @@ async function objTestSync() {
 async function qkBack() {
   qkSheetClose();
   try {
-    state.where = await api.SetWhere("casa", "comigo", "");
+    // 2.101.5: quem estava fora do cálculo continua fora
+    const w = state.where || {};
+    state.where = await api.SetWhere(w.gmc === "fora" ? "fora" : "casa", w.radiacode === "fora" ? "fora" : "comigo", "");
     toast(`Bem-vindo de volta · período fora de casa encerrado às ${qkHM()}`);
     if (typeof refreshWhere === "function") refreshWhere();
     if (typeof refreshPeriods === "function" && state.view === "fora") refreshPeriods();

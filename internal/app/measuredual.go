@@ -43,6 +43,9 @@ type MeasureSide struct {
 
 	usvSum float64
 	usvN   int
+	// 2.101.8: incerteza da dose do RC102 de 2º aparelho (para "a dose subiu")
+	usvSq  float64
+	usvBlk measBlocks
 }
 
 // clone copia o lado (para mandar à tela sem dividir o ponteiro).
@@ -74,6 +77,7 @@ func (a *App) sidePhaseLocked(s *MeasureSide) MeasurePhase {
 	ph := phaseResult(s.Counts, max(s.Elapsed, 1), a.convCalLocked().USv)
 	if s.Device == devRC && s.usvN > 0 {
 		ph.USv = s.usvSum / float64(s.usvN)
+		ph.ErrUSv = s.usvBlk.err(s.usvSum, s.usvSq, s.usvN)
 	}
 	return ph
 }
@@ -109,6 +113,10 @@ func (a *App) feedSideLocked(m *MeasureState, f measFeed) bool {
 	}
 	s.usvSum += usv
 	s.usvN++
+	if s.Device == devRC {
+		s.usvSq += usv * usv
+		s.usvBlk.add(usv)
+	}
 	if m.Phase == "objeto" {
 		s.MaxUSv = math.Max(s.MaxUSv, usv)
 		if s.Role == "objeto" && s.Bg != nil {
@@ -139,7 +147,7 @@ func (a *App) endSidePhaseLocked(m *MeasureState, phase string, start, end int64
 	if s == nil {
 		return
 	}
-	defer func() { s.Counts, s.Elapsed, s.usvSum, s.usvN = 0, 0, 0, 0 }()
+	defer func() { s.Counts, s.Elapsed, s.usvSum, s.usvN, s.usvSq, s.usvBlk = 0, 0, 0, 0, 0, measBlocks{} }()
 	if s.Elapsed == 0 {
 		return
 	}
@@ -151,8 +159,9 @@ func (a *App) endSidePhaseLocked(m *MeasureState, phase string, start, end int64
 	case phase == "objeto" && s.Role == "objeto" && s.Bg != nil:
 		s.Obj = &ph
 		r := compareMeasure(*s.Bg, ph, a.convCalLocked().USv)
-		if r.Level != "sim" {
+		if r.Level != "sim" && !r.DoseUp { // 2.101.8: com a dose que subiu, sem limite pela contagem
 			r.Limit = math.Max(r.NetCPM, 0) + 2*r.NetErr
+			r.LimitUSv = limitUSv(r, *s.Bg)
 		}
 		s.Result, s.Live = &r, nil
 	case phase == "objeto" && s.Role == "voce":
@@ -164,7 +173,7 @@ func (a *App) endSidePhaseLocked(m *MeasureState, phase string, start, end int64
 // startSideObjLocked limpa o segundo aparelho para medir o objeto de novo.
 func startSideObjLocked(m *MeasureState) {
 	if s := m.Other; s != nil {
-		s.Counts, s.Elapsed, s.usvSum, s.usvN = 0, 0, 0, 0
+		s.Counts, s.Elapsed, s.usvSum, s.usvN, s.usvSq, s.usvBlk = 0, 0, 0, 0, 0, measBlocks{}
 		s.Obj, s.Result, s.Live, s.Hint = nil, nil, nil, ""
 		s.Dose, s.AvgUSv, s.MaxUSv, s.Excess = 0, 0, 0, 0
 	}
@@ -181,9 +190,10 @@ func sideDecide(m *MeasureState) string {
 
 // dualHint compara o GMC (beta e gama) com o Radiacode (quase só gama).
 func dualHint(gmc, rc MeasureResult) string {
-	gs, rs := gmc.Sigma >= 3, rc.Sigma >= 3
+	// 2.101.6: a dose que subiu no RC102 conta como "o RC102 viu"
+	gs, rs := gmc.Sigma >= 3, rc.Sigma >= 3 || (rc.DoseUp && rc.NetUSv > 0)
 	switch {
-	case gs && rc.Sigma < 2:
+	case gs && !rs && rc.Sigma < 2:
 		return "O GMC viu o objeto e o RC102 quase não: ele deve emitir principalmente beta (o cristal do RC102 quase não vê beta)."
 	case gs && !rs:
 		return "O GMC viu claramente e o RC102 só um pouco: o objeto deve emitir bastante beta."
@@ -244,7 +254,7 @@ func (a *App) newSide(primary, mode string, homeBg bool) (*MeasureSide, error) {
 			return nil, fmt.Errorf("fundo da casa do %s indisponível: %s", map[string]string{"gmc": "GMC-800", devRC: "RC102"}[s.Device], hb.Why)
 		}
 		s.Bg = &MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
-			USv: hb.USv, Start: hb.From, End: hb.To, Source: "casa"}
+			USv: hb.USv, ErrUSv: hb.ErrUSv, Start: hb.From, End: hb.To, Source: "casa"}
 	}
 	return s, nil
 }

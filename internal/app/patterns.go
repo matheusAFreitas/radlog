@@ -231,7 +231,9 @@ func fillPatterns(out *Patterns, vals []patVal) {
 		dec = 4
 	}
 	num := func(v float64) string { return fmtBR(v, dec) }
-	sig := math.Abs(mean) >= 3*out.DNErr && math.Abs(out.DNPct) >= 2
+	// 2.101.8: "clara" é pela incerteza (3σ); "importante" é pelo tamanho (2%)
+	dnReal := math.Abs(mean) >= 3*out.DNErr
+	sig := dnReal && math.Abs(out.DNPct) >= 2
 	switch {
 	case sig && mean > 0:
 		out.DNText = fmt.Sprintf("A noite (18h–6h) fica %s%% acima do dia (+%s ± %s %s, %d dias com as duas metades). É o padrão comum do radônio, que se acumula com a casa fechada e o ar parado à noite.",
@@ -239,6 +241,13 @@ func fillPatterns(out *Patterns, vals []patVal) {
 	case sig:
 		out.DNText = fmt.Sprintf("O dia (6h–18h) fica %s%% acima da noite (%s ± %s %s, %d dias com as duas metades).",
 			fmtBR(-out.DNPct, 0), num(-mean), num(out.DNErr), out.Unit, len(diffs))
+	case dnReal:
+		hi := "a noite fica acima do dia"
+		if mean < 0 {
+			hi = "o dia fica acima da noite"
+		}
+		out.DNText = fmt.Sprintf("Diferença pequena (%s%%), mas real: %s (noite − dia = %s ± %s %s, %d dias com as duas metades).",
+			fmtBR(math.Abs(out.DNPct), 1), hi, fmtSigned(mean, dec), num(out.DNErr), out.Unit, len(diffs))
 	default:
 		out.DNText = fmt.Sprintf("Sem diferença clara entre dia e noite (noite − dia = %s ± %s %s, %d dias com as duas metades).",
 			fmtSigned(mean, dec), num(out.DNErr), out.Unit, len(diffs))

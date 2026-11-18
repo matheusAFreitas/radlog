@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"fmt"
 	"os"
 	"path/filepath"
 	"sync"
@@ -50,6 +51,8 @@ func (a *App) readStateJSON(path, what string, v any) bool {
 		bad := path + ".ilegivel"
 		_ = os.WriteFile(bad, b, 0o644)
 		a.logf("%s: não consegui ler o %s (%v); comecei vazio e guardei o arquivo em %s", what, filepath.Base(path), jerr, bad)
+		// 2.101.5: em Eventos também (o comentário acima já prometia)
+		a.logEvent(fmt.Sprintf("Não consegui ler o arquivo %s (%s): estava estragado. Guardei uma cópia em %s e segui sem o que tinha nele.", filepath.Base(path), what, filepath.Base(bad)))
 		return false
 	}
 	return true

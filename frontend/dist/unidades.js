@@ -57,7 +57,7 @@ const rateOut = (usv) => (usv > 0 ? +(usv * rateK()).toPrecision(4) : "");
 // textos com número: µSv → mrem (o mesmo de unidades.go)
 const remText = (() => {
   if (!RATE_MREM) return (s) => s;
-  const re = /([+±−-]?\d[\d.,]*)((?:\s?(?:–|-|±|a|e|até|ou|to|and|or)\s?[+±−-]?\d[\d.,]*)*)(\s| )?(µSv|mSv)(\/h|\/ano|\/dia|\/year|\/day|\b|(?=[^A-Za-z]|$))/g;
+  const re = /([+±−-]?\d[\d.,]*)((?:\s?(?:–|-|±|→|a|e|até|ou|para|to|and|or)\s?[+±−-]?\d[\d.,]*)*)(\s| )?(µSv|mSv)(\/h|\/ano|\/dia|\/year|\/day|\b|(?=[^A-Za-z]|$))/g;
   const paren = /(\d\s?)µSv\/h \(([^()]{0,40}?\s)(\d[\d.,]*\d|\d)\)/g;
   const num = (n, k) => {
     const sep = typeof LANG !== "undefined" && LANG === "en" ? "." : ",", th = sep === "." ? "," : ".";
@@ -74,12 +74,21 @@ const remText = (() => {
     if (sep !== ".") out = out.replace(".", sep);
     return sign + out;
   };
+  // 2.101.5: nome com número ("GMC-800", "Cs-137") não é número de taxa;
+  // "para" e "→" também ligam números da mesma unidade
+  const named = /[A-Za-z]+-?\d+/g; // 2.101.6: "RC102" também (sem hífen)
+  // 2.101.6: fator de calibração ("0,00564 µSv/h por CPM") é constante do aparelho, não taxa
+  const factor = /[+±−-]?\d[\d.,]*\s?µSv\/h (?:por|per) CP[MS]/g;
   return (s) => {
     if (typeof s !== "string" || s.indexOf("Sv") < 0) return s;
-    return s.replace(paren, "$1µSv/h ($2$3 µSv/h)").replace(re, (m, a, b, sp, u, suf) => {
+    const kept = [];
+    s = s.replace(named, (m) => { kept.push(m); return "" + "".repeat(kept.length) + ""; });
+    s = s.replace(factor, (m) => { kept.push(m); return "" + "".repeat(kept.length) + ""; });
+    s = s.replace(paren, "$1µSv/h ($2$3 µSv/h)").replace(re, (m, a, b, sp, u, suf) => {
       const k = u === "mSv" ? 100 : 0.1;
       return (a + b).replace(/[+±−-]?\d[\d.,]*/g, (n) => num(n, k)) + (sp || "") + "mrem" + suf;
     });
+    return kept.length ? s.replace(/(+)/g, (m, k) => kept[k.length - 1]) : s;
   };
 })();
 

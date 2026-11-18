@@ -4,9 +4,12 @@
 // Nunca GPS: o lugar é o nome da saída, editável aqui mesmo.
 // Carregado antes do app.js; só define funções.
 
-// saída = trecho em que o RC102 foi junto (é ele que mede a saída)
-const isTripP = (p) => (p.radiacode || "comigo") === "comigo";
-const tripDefaultName = (p) => !p.name || p.name === "Fora de casa" || p.name === whKind(whOf(p));
+// você saiu de casa: o GMC-800 foi junto ou o trecho diz "eu não estava em casa"
+// (2.101.8: ignorar o GMC-800 ou deixar os dois em casa não é sair; igual ao youOut do Go)
+const youOutP = (p) => (p.gmc || "comigo") === "comigo" || !!p.notHome;
+// saída = você saiu e o RC102 foi junto (é ele que mede a saída)
+const isTripP = (p) => (p.radiacode || "comigo") === "comigo" && youOutP(p);
+const tripDefaultName = (p) => P_DEF_NAMES.has(p.name || "") || p.name === whKind(whOf(p)); // 2.101.12: todos os nomes padrão (fora.js)
 const tripDay = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
 const tripTitle = (p) => (tripDefaultName(p) ? `Saída de ${tripDay(p.from)}` : p.name);
 const tripDose = (rc) => (rc.devOK ? rc.devDose : rc.dose);
@@ -39,7 +42,7 @@ function tripToastShow(p) {
 // chamado quando a lista de trechos muda: uma saída que estava aberta fechou
 function tripCheckClosed(prev, list) {
   for (const q of list || []) {
-    if (!q.to || !isTripP(q)) continue;
+    if (q.open || !q.to || !isTripP(q)) continue; // aberto (normPeriods põe to = agora)
     const old = (prev || []).find((p) => p.id === q.id);
     if (old && old.open) tripToastShow(q);
   }
@@ -122,7 +125,11 @@ function renderTripTitle(s) {
     const inp = document.createElement("input");
     inp.type = "text"; inp.maxLength = 60; inp.value = s.defaultName ? "" : p.name;
     inp.placeholder = "Onde você foi"; inp.setAttribute("aria-label", "Título da saída");
+    // 2.101.6: Esc desiste e Enter grava uma vez só (tirar o campo dispara o blur)
+    let done = false;
     const save = async () => {
+      if (done) return;
+      done = true;
       const v = inp.value.trim();
       try {
         const q = await api.SavePeriod({ ...p, name: v });
@@ -132,7 +139,7 @@ function renderTripTitle(s) {
     };
     inp.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); save(); }
-      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); renderTripTitle(s); }
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); done = true; renderTripTitle(s); }
     });
     inp.addEventListener("blur", save, { once: true });
     h.textContent = "";
@@ -158,7 +165,7 @@ function renderTrip(s) {
   acts.className = "trip-acts";
   const pdf = document.createElement("button");
   pdf.type = "button"; pdf.className = "btn small"; pdf.textContent = "Relatório da saída (PDF)";
-  pdf.addEventListener("click", (e) => exportReport(s.from, to, "Fora de casa: " + (s.defaultName ? `Saída de ${tripDay(s.from)}` : s.period.name), e.currentTarget));
+  pdf.addEventListener("click", (e) => exportReport(s.from, to, "Fora de casa: " + (s.defaultName ? `Saída de ${tripDay(s.from)}` : asIs(s.period.name)), e.currentTarget));
   const see = document.createElement("button");
   see.type = "button"; see.className = "btn small"; see.textContent = "Ver nos gráficos";
   see.addEventListener("click", () => { $("tripDlg").close(); showRange(s.from, to); });
@@ -186,13 +193,14 @@ function renderTrip(s) {
     const kd = kpi("Dose na saída", `${fmt(dose, 2)} µSv`, "", "rc");
     const kn = doseKnownEl(dose, s.homeUSv > 0 ? s.homeUSv : null, "sum-known", doseXray);
     if (kn) kd.appendChild(kn);
-    kpi("Média", `${tripUSv(rc.avg)} µSv/h`, s.homeUSv > 0 ? `${fmt(rc.avg / s.homeUSv, 1)}× casa (${tripUSv(s.homeUSv)})` : "", "rc");
+    kpi("Média", `${tripUSv(rc.avg)} µSv/h`, s.homeUSv > 0 ? `${fmt(rc.avg / s.homeUSv, 1)}× casa (${tripUSv(s.homeUSv)} µSv/h)` : "", "rc");
     kpi("Pico", `${tripUSv(rc.max)} µSv/h`, `às ${hhmm(rc.maxAt)}`, "rc");
     const al = rc.danger + rc.alarm + rc.attention;
     kpi("Alertas", al ? alertsText(rc) : "nenhum", al ? `pico ${tripUSv(rc.peakAlert)} µSv/h` : "sempre no nível seguro", al ? "up rc" : "rc");
     body.appendChild(k);
     // o gráfico
     const ch = tripCard("trip-chart", "A saída, minuto a minuto", "RC102 em µSv/h" + (s.homeUSv > 0 ? " · tracejado: fundo de casa" : ""));
+    ch.querySelector(".trip-card-h span").dataset.u = "rate"; // 2.101.6: "µSv/h" sem número também troca
     ch.appendChild(tripChartSvg(s, rc));
     body.appendChild(ch);
   }

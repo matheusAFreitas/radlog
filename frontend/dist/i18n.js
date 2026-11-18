@@ -31,6 +31,10 @@ const tr = (() => {
     else (byLead.get(k) || byLead.set(k, []).get(k)).push(p);
   }
   const cache = new Map();
+  // 2.101.2: sobra de português num resultado (acento ou palavra comum)
+  // o nome que a pessoa deu (⁨…⁩, asIs) não conta: pode ter acento à vontade
+  const ptLeft = (s) => PT_LEFT.test(s.replace(/\u2068[^\u2069]*\u2069/g, ""));
+  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa|igual|trecho|selecionado|percentis|lacuna)\b/i;
   const hasWord = /[A-Za-zÀ-ú]{2}/;
   // números do Go vêm com vírgula decimal ("52,3"); os do app já saem no
   // formato do idioma ("1,239" = mil duzentos…). Só troca a vírgula quando é
@@ -54,7 +58,10 @@ const tr = (() => {
       if (p.fixed * 10 < s.length * 4) continue;
       if (!p.pieces.every((x) => s.includes(x))) continue;
       const m = p.re.exec(s);
-      if (m) return p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+      if (!m) continue;
+      // 2.101.2: com português sobrando, quebrar em frases ainda pode dar certo
+      const out = p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+      if (!ptLeft(out)) return out;
     }
     return null;
   }
@@ -88,34 +95,56 @@ const tr = (() => {
     const e = exact.get(s);
     if (e != null) return e;
     const k = s.slice(0, 3).toLowerCase();
-    const lists = generic ? [byLead.get(k) || [], anyLead] : [byLead.get(k) || []];
-    for (const list of lists) {
+    // 2.101.2: entre os moldes que batem, vale o de mais texto fixo (antes
+    // valia o primeiro: "Hoje: {0}" ganhava de "{0}: dia tranquilo, tudo no
+    // nível seguro." e o resto saía meio traduzido). Sem generic, os que
+    // começam variáveis só entram com 40%+ de texto fixo.
+    // Um molde cujo resultado ainda tem português (a parte variável não
+    // traduziu) só vale se nenhum outro der certo, e aí a frase ainda pode
+    // ser quebrada em frases ou pedaços antes.
+    let best = null, bestOut = null, half = null;
+    const tryList = (list, wideOnly) => {
       for (const p of list) {
+        if (best && p.fixed <= best.fixed) continue;
+        if (wideOnly && p.fixed * 10 < s.length * 4) continue;
         // os pedaços fixos precisam estar no texto (barato) antes da expressão
         if (!p.pieces.every((x) => s.includes(x))) continue;
-        if (list === anyLead && s.length > 300) continue;
         const m = p.re.exec(s);
-        if (m) return p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+        if (!m) continue;
+        const out = p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
+        if (ptLeft(out)) { if (!half || p.fixed > half.fixed) half = { fixed: p.fixed, out }; continue; }
+        best = p; bestOut = out;
       }
-    }
+    };
+    tryList(byLead.get(k) || [], false);
+    if (s.length <= 300) tryList(anyLead, !generic);
+    if (best) return bestOut;
+    if (half && generic) return half.out;
     // "Frase com maiúscula." ↔ "frase com maiúscula" do dicionário
     const low = s.charAt(0).toLowerCase() + s.slice(1);
     const bare = low.replace(/\.$/, "");
     if (bare !== s) {
       const t = exact.get(bare);
-      if (t != null) return t.charAt(0).toUpperCase() + t.slice(1) + (s.endsWith(".") && !t.endsWith(".") ? "." : "");
+      // 2.101.2: a primeira letra segue a do português ("sem leitura." → "no reading.")
+      const up = s.charAt(0) !== low.charAt(0);
+      if (t != null) return (up ? t.charAt(0).toUpperCase() : t.charAt(0)) + t.slice(1) + (s.endsWith(".") && !t.endsWith(".") ? "." : "");
     }
     return inner ? s : null;
   }
-  return function tr(s) {
+  const done = new Set(); // traduções já entregues
+  function trCore(s) {
     if (s == null || typeof s !== "string" || !hasWord.test(s)) return s;
     const c = cache.get(s);
     if (c !== undefined) return c;
     const core = s.trim().replace(/\s+/g, " ");
+    // 2.101.0: texto que já é uma tradução não passa de novo (o molde
+    // genérico "{0} no {1}" virava "no limits" em "on the limits")
+    if (done.has(core)) return s;
     if (named(core)) return s;
     let out = one(core, false, false);
     if (out == null) out = wide(core);
     if (out == null) out = sentences(core);
+    let segFallback = null;
     if (out == null && core.includes(" · ")) {
       // pedaços juntados com " · ": traduz cada um (com e sem o "· ")
       const segs = core.split(/ (?=· )/);
@@ -124,12 +153,29 @@ const tr = (() => {
         const r = dot ? g.slice(2) : g;
         // primeiro os moldes que começam com texto fixo; os genéricos por último
         const t = (dot && one(g, false, false)) || one(r, false, false) || wide(r) || sentences(r) || one(r, false, true);
-        if (t == null) return g;
+        if (t == null) return fixNums(g);
         return dot && !t.startsWith("· ") ? "· " + t : t;
       });
-      if (ts.some((g, i) => g !== segs[i])) out = ts.join(" ");
+      if (ts.some((g, i) => g !== segs[i])) {
+        // 2.101.2: com português sobrando, um molde da frase inteira ainda
+        // pode ganhar (o resultado em pedaços fica de reserva)
+        const j = ts.join(" ");
+        if (ptLeft(j)) segFallback = j; else out = j;
+      }
+    }
+    if (out == null && core.length > 2 && core.startsWith("(") && core.endsWith(")")) {
+      // 2.101.1: "(actínio · série do tório)": traduz o que está dentro
+      const t = tr(core.slice(1, -1));
+      if (t !== core.slice(1, -1)) out = "(" + t + ")";
+    }
+    if (out == null) {
+      // 2.101.1: "Backup salvo: arquivo", "Não consegui ler o log: erro":
+      // rótulo conhecido + o resto traduzido à parte (ou como está)
+      const m = /^([^:]{3,80}?): ([^]+)$/.exec(core);
+      if (m) { const lp = one(m[1], false, false); if (lp != null) { const r = tr(m[2]); out = lp + ": " + (r === m[2] ? fixNums(r) : r); } }
     }
     if (out == null) out = one(core, false, true);
+    if (out == null && segFallback != null) out = segFallback;
     if (out == null) {
       // "nome (12)": contador no fim
       const m = /^(.+) \((\d+)\)$/.exec(core);
@@ -137,9 +183,19 @@ const tr = (() => {
     }
     // sem tradução: deixa como está (espaços e quebras de linha inclusive)
     const res = out == null ? s : s.match(/^\s*/)[0] + out + s.match(/\s*$/)[0];
-    if (cache.size > 5000) cache.clear();
+    if (cache.size > 5000) { cache.clear(); done.clear(); }
     cache.set(s, res);
+    if (out != null) done.add(out);
     return res;
+  }
+  // 2.101.2: o nome que a pessoa deu (⁨…⁩, asIs) vira uma marca antes dos
+  // moldes: um "em" ou "de" dentro do nome não pode ser lido como parte da frase
+  return function tr(s) {
+    if (typeof s !== "string" || s.indexOf("\u2068") < 0) return trCore(s);
+    const names = [];
+    const t = s.replace(/\u2068[^\u2069]*\u2069/g, (m) => { names.push(m); return "\u2068" + (names.length - 1) + "\u2069"; });
+    if (!names.length || /^\s*\u20680\u2069\s*$/.test(t)) return trCore(s);
+    return trCore(t).replace(/\u2068(\d+)\u2069/g, (x, i) => (names[+i] != null ? names[+i] : x));
   };
 })();
 
@@ -156,6 +212,7 @@ const tr = (() => {
   const skip = (n) => { const p = n.parentNode; return p && (p.nodeName === "SCRIPT" || p.nodeName === "STYLE" || (p.closest && p.closest("[data-no-tr]"))); };
   const keep = (el) => !rem || (el && el.closest && el.closest("[data-unit-keep]"));
   const conv = (s, el) => { const t = dateText(translate ? tr(s) : s); return keep(el) ? unitWord(t, el) : unitWord(remText(t), el); };
+  window.screenText = conv;
   const doText = (n) => {
     if (skip(n)) return;
     const t = conv(n.data, n.parentNode);

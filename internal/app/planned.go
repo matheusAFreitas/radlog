@@ -95,9 +95,24 @@ func (a *App) GetPlannedTrips() []PlannedTrip {
 	out := append([]PlannedTrip{}, kept...)
 	a.mu.Unlock()
 	for _, p := range gone {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", asIs(p.Name), time.UnixMilli(p.From).Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", plannedEvName(p.Name), time.UnixMilli(p.From).Format("02/01 15:04")))
 	}
 	return out
+}
+
+// plannedSameFrom diz se p é uma programada que já existe, com o mesmo horário.
+func (a *App) plannedSameFrom(p PlannedTrip) bool {
+	if p.ID == 0 {
+		return false
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	for _, q := range a.loadPlannedLocked() {
+		if q.ID == p.ID {
+			return q.From == p.From
+		}
+	}
+	return false
 }
 
 // SavePlannedTrip cria (ID 0) ou muda uma programada.
@@ -107,13 +122,15 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 		p.Name = string([]rune(p.Name)[:60])
 	}
 	if p.Name == "" {
-		p.Name = "Saída programada"
+		p.Name = plannedNameDefault
 	}
 	if !p.GMC && !p.RC {
 		return p, errors.New("escolha pelo menos um aparelho que vai com você")
 	}
 	now := time.Now()
-	if time.UnixMilli(p.From).Before(now.Add(-plannedWindow)) {
+	// 2.101.13 (item 62): numa programada que já passou dá para corrigir os
+	// aparelhos, com o mesmo horário
+	if time.UnixMilli(p.From).Before(now.Add(-plannedWindow)) && !a.plannedSameFrom(p) {
 		return p, errors.New("esse horário já passou; para uma saída que já aconteceu, use \"Adicionar trecho passado\"")
 	}
 	a.mu.Lock()
@@ -128,7 +145,11 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 	}
 	if idx >= 0 {
 		old := list[idx]
-		if old.From == p.From && old.GMC == p.GMC && old.RC == p.RC {
+		// 2.101.13 (item 62): com o mesmo horário, a saída continua
+		// começada enquanto o aparelho que saiu continua indo
+		if old.From == p.From && old.Left > 0 && plannedGoes(p, old.LeftDev) {
+			p.Left, p.LeftDev = old.Left, old.LeftDev
+		} else if old.From == p.From && old.GMC == p.GMC && old.RC == p.RC {
 			p.Left, p.LeftDev = old.Left, old.LeftDev
 		} else {
 			p.Left, p.LeftDev = 0, ""
@@ -143,7 +164,7 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 	}
 	a.savePlannedLocked()
 	a.mu.Unlock()
-	a.logEvent(fmt.Sprintf("Saída programada: %s, por volta de %s (%s)", p.Name, time.UnixMilli(p.From).Format("02/01 15:04"), plannedWho(p.GMC, p.RC)))
+	a.logEvent(fmt.Sprintf("Saída programada: %s, por volta de %s (%s)", plannedEvName(p.Name), time.UnixMilli(p.From).Format("02/01 15:04"), plannedWho(p.GMC, p.RC)))
 	a.emitPlanned()
 	return p, nil
 }
@@ -238,7 +259,7 @@ func (a *App) plannedDisconnected(dev string, t time.Time) {
 	}
 	a.mu.Unlock()
 	if hit != nil {
-		a.logEvent(fmt.Sprintf("Começou a saída programada \"%s\": o %s desconectou às %s", hit.Name, devLabel(dev), t.Format("15:04")))
+		a.logEvent(fmt.Sprintf("Começou a saída programada \"%s\": o %s desconectou às %s", plannedEvName(hit.Name), devLabel(dev), t.Format("15:04")))
 		a.emitPlanned()
 	}
 }
@@ -316,9 +337,9 @@ func (a *App) plannedOnConnect(dev string, conn time.Time) bool {
 	}
 	a.mu.Unlock()
 	if manual {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", asIs(trip.Name)))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", plannedEvName(trip.Name)))
 	} else {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", asIs(trip.Name), devLabel(dev), conn.Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", plannedEvName(trip.Name), devLabel(dev), conn.Format("02/01 15:04")))
 		a.emitRcAway()
 	}
 	a.emitPlanned()
@@ -587,6 +608,14 @@ func (a *App) plannedRefine() {
 
 // asIs marca o nome que a pessoa deu (U+2068…U+2069, invisíveis) para a
 // tradução da tela não mexer nele: "Escritório" não vira "Office".
+// plannedEvName: o nome da pessoa fica como está; o padrão do app traduz (2.101.8)
+func plannedEvName(n string) string {
+	if n == plannedNameDefault {
+		return n
+	}
+	return asIs(n)
+}
+
 func asIs(s string) string {
 	return "\u2068" + strings.NewReplacer("\u2068", "", "\u2069", "").Replace(s) + "\u2069"
 }

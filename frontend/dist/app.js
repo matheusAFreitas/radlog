@@ -103,6 +103,8 @@ const state = {
   heatDataStart: 0, // início do mês da leitura mais antiga (ms)
   dosePeriod: localGet("range", "1h"), // 2.12: o mesmo período da taxa
   doseLimit: localGet("doseLimit", "publico"),
+  doseAll: localGet("doseAll") === "1", // 2.101.0: "Tudo" na dose acumulada
+  chartDev: localGet("chartDev", "todos"), // 2.101.0: aparelho no gráfico de cima
   status: { state: "desconectado", message: "", device: {}, downloading: false, dataDir: "" },
   settings: {},
   last: null,
@@ -448,7 +450,7 @@ function renderGTile() {
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
   tileScale("g", tA / top, tB / top, live ? Math.min(r.cpm, top) / top : null, tick(tA), tick(tB));
-  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
+  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null, sigma10: live && r.sigma10 != null ? r.sigma10 : null };
   agoraNow();
   const gl = state.gLastSeen;
   tileFoot($("gTileFoot"), u, v, state.gDose, "", gc ? { t: (gl && gl.time) || state.gOffSince || 0 } : null);
@@ -486,7 +488,9 @@ function renderRTile(st, o) {
   miniDev("R", u, v, o.live ? o.lvl : "", $("rTileState").textContent, $("rTileDot").className.replace(/^dot/, ""), !o.live);
   const sx = st.stats || {};
   const dose = st.todayDevOK ? st.todayDev : sx.todayMinutes || st.today ? st.today : null;
-  tileFoot($("rTileFoot"), u, v, dose, st.todayDevOK ? "do aparelho" : "", rcc ? { t: st.lastT || 0 } : null);
+  // 2.100.2: "do aparelho" só na dica (na faixa estreita quebrava a linha)
+  tileFoot($("rTileFoot"), u, v, dose, "", rcc ? { t: st.lastT || 0 } : null);
+  $("rTileFoot").title = st.todayDevOK ? "dose de hoje: a que o próprio aparelho conta" : "";
 }
 
 // alertas ativos: a marca no menu (#navAlerts) e no topo compacto (#miniAlert);
@@ -518,12 +522,26 @@ function renderAlertMarks() {
   const bars = document.querySelector(".bars");
   if (!bars || !window.ResizeObserver) return;
   new ResizeObserver(() => document.documentElement.style.setProperty("--barsH", bars.offsetHeight + "px")).observe(bars);
+  // 2.101.8: a faixa dos aparelhos presa no topo também tampa o destino de um
+  // scrollIntoView ("Ver no gráfico"): o html desconta a altura dela
+  const inst = document.getElementById("instruments");
+  if (!inst) return;
+  const instH = () => {
+    const pos = getComputedStyle(inst).position, h = inst.offsetParent === null && pos !== "fixed" ? 0 : inst.offsetHeight;
+    document.documentElement.style.setProperty("--instH", (pos === "sticky" || pos === "fixed" ? h : 0) + "px");
+  };
+  new ResizeObserver(instH).observe(inst);
+  new MutationObserver(instH).observe(inst, { attributes: true, attributeFilter: ["class", "hidden"], subtree: true });
+  instH();
 })();
 
 // a faixa aparece quando os quadros grandes saem da tela
 (() => {
   const mini = $("mini"), inst = $("instruments");
-  if (!window.IntersectionObserver) return;
+  // 2.98.0 (ACE): a faixa dos aparelhos fica presa no topo e substitui esta
+  // barra (instFloat, abaixo). Para voltar com ela, apague a linha MINI_OFF.
+  const MINI_OFF = true;
+  if (MINI_OFF || !window.IntersectionObserver) return;
   // aparece quando os valores dos quadros já saíram por cima (mais da
   // metade do painel escondida), não só quando ele some inteiro: páginas
   // curtas rolam pouco e o painel ficava cortado sem a faixa
@@ -540,6 +558,44 @@ function renderAlertMarks() {
   }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.55, 0.6, 0.7, 0.8, 0.9, 1] }).observe(inst);
   const toTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
   ["miniG", "miniR", "miniTop"].forEach((id) => $(id).addEventListener("click", toTop));
+})();
+
+// 2.98.0 (ACE): no Agora, quando mais da metade dos quadros grandes sai por
+// cima, a faixa compacta dos aparelhos fica presa no topo (no lugar da barra
+// antiga). Um espaço do mesmo tamanho segura a página para ela não pular.
+let instFloat = () => {};
+(() => {
+  const inst = $("instruments");
+  if (!inst) return;
+  const sp = document.createElement("div");
+  sp.className = "inst-spacer";
+  sp.hidden = true;
+  inst.before(sp);
+  instFloat = (on) => {
+    if (on === inst.classList.contains("inst-float")) return;
+    if (on) {
+      sp.style.height = inst.offsetHeight + "px";
+      sp.hidden = false;
+      inst.querySelectorAll(".inst.open").forEach((t) => instOpen(t, false));
+      inst.dataset.strip = "";
+      inst.classList.add("inst-float");
+    } else {
+      sp.hidden = true;
+      inst.classList.remove("inst-float");
+      if (inst._page === "agora" || !inst._page) delete inst.dataset.strip;
+    }
+  };
+  let busy = false;
+  const check = () => {
+    busy = false;
+    if ((inst._page || "agora") !== "agora" || inst.hidden) { instFloat(false); return; }
+    const top = parseFloat(getComputedStyle(document.documentElement).getPropertyValue("--barsH")) || 0;
+    const ref = inst.classList.contains("inst-float") ? sp : inst;
+    const r = ref.getBoundingClientRect();
+    instFloat(r.height > 0 && r.top + r.height * 0.55 < top);
+  };
+  window.addEventListener("scroll", () => { if (!busy) { busy = true; requestAnimationFrame(check); } }, { passive: true });
+  window.addEventListener("resize", check);
 })();
 
 // a última hora de cada aparelho, desenhada pequena no quadro
@@ -648,6 +704,9 @@ function renderStatus() {
 
 // ---------- cartões, tabela e eventos ----------
 
+// 2.101.8: "às 03:46" de ontem parecia hora no futuro: fora de hoje, leva o dia
+const atWhen = (t) => tr(isToday(t) ? `às ${hhmm(t)}` : isYesterday(t) ? `ontem às ${hhmm(t)}` : `em ${ddmm(t)} às ${hhmm(t)}`);
+
 async function refreshStats() {
   const s = await api.GetStats();
   state.bgCPM = s.bgCPM || null;
@@ -658,12 +717,12 @@ async function refreshStats() {
   $("tAvgSub").textContent = s.avg1h == null ? rateLbl() : `${rateLbl()} · ${countTxt(s.avg1h)}`;
   $("tMin").textContent = u(s.min24h);
   $("tMax").textContent = u(s.max24h);
-  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
+  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} ${atWhen(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o Radiacode)
   $("hAvg1h").textContent = u(s.avg1h);
   $("hMin24").textContent = u(s.min24h);
   $("hMax24").textContent = u(s.max24h);
-  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
+  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} ${atWhen(s.max24hAt)}`;
   state.gDose = s.minutesToday ? s.doseToday : null;
   renderGTile();
   $("tDose").textContent = s.minutesToday ? doseNum(s.doseToday) : "—";
@@ -780,7 +839,7 @@ function renderLogs(r) {
   sel.innerHTML = '<option value="">todos os componentes</option>';
   for (const c of r.comps || []) {
     const o = document.createElement("option");
-    o.value = c.name; o.textContent = `${c.name} (${fmt(c.count, 0)})`;
+    o.value = c.name; o.textContent = `${tr(c.name)} (${fmt(c.count, 0)})`;
     sel.appendChild(o);
   }
   if (cur && !(r.comps || []).some((c) => c.name === cur)) { const o = document.createElement("option"); o.value = cur; o.textContent = cur + " (0)"; sel.appendChild(o); }
@@ -864,7 +923,7 @@ function wireLogs() {
     if (!h || !r) { tip.hidden = true; return; }
     const x = r.buckets[+h.dataset.i];
     const lines = Object.keys(LG_COLORS).filter((l) => x.counts[l]).map((l) => `${l} ${x.counts[l]}`);
-    tip.textContent = `${lgTime(x.t).slice(0, 11)}–${hhmm(x.t + r.bucketMs)} · ${lines.join(" · ") || "nada"} · clique para ver`;
+    tipSet(tip, `${lgTime(x.t).slice(0, 11)}–${hhmm(x.t + r.bucketMs)} · ${lines.join(" · ") || "nada"} · clique para ver`);
     const box = svg.getBoundingClientRect(), hb = $("lgChart").parentElement.getBoundingClientRect();
     tip.style.left = Math.min(e.clientX - hb.left + 10, hb.width - 260) + "px";
     tip.hidden = false;
@@ -1224,7 +1283,7 @@ async function refreshHeat() {
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
+    $("heatSub").textContent = `em ${daysWith} dias: mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
   }
 }
 
@@ -1384,7 +1443,7 @@ function drawHeatTrecho() {
   $("htRate").innerHTML = grid(RH) +
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
     line(g, g.length, ry, COR.gmc) + line(r, r.length, ry, COR.rc);
-  $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
+  $("htRateY").innerHTML = `<span>${rateNum(rtop)}</span><span>${rateNum(rtop / 2)}</span><span>0</span>`; // 2.101.6: na unidade escolhida
   // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
   const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
@@ -1473,7 +1532,7 @@ function wireHeat() {
 function renderRainSettings() {
   const s = state.settings;
   $("chkRain").checked = !!s.rainEnabled;
-  $("placeChosen").textContent = s.rainPlace ? (s.rainHidePlace ? "Local: oculto" : "Local: " + s.rainPlace) : "Nenhuma cidade escolhida.";
+  $("placeChosen").textContent = s.rainPlace ? (s.rainHidePlace ? "Local: oculto" : "Local: " + asIs(s.rainPlace)) : "Nenhuma cidade escolhida.";
   $("chkRainHide").checked = !!s.rainHidePlace;
 }
 
@@ -1615,6 +1674,8 @@ function lv() {
   const out = Object.assign({}, LV_DEFAULT);
   const s = (state.settings && state.settings.levels) || {};
   for (const k of Object.keys(out)) if (s[k] > 0) out[k] = s[k];
+  // 2.101.5: o µSv/h salvo vale (sem ele, a tela refazia pelo CPM e mudava o número)
+  for (const k of ["attentionUSv", "dangerUSv"]) if (s[k] > 0) out[k] = s[k];
   return out;
 }
 const dangerCPM = () => lv().dangerCPM;
@@ -1984,11 +2045,78 @@ function renderDeadTime() {
   const k = calK();
   const rows = [28, 1000, 10000, 30000, 100000, 200000].map((c) => {
     const f = dtFactor(c / 60, tau), cap = f >= 9.999;
-    return `<tr><td>${fmt(c, 0)}</td><td>${fmt(c * f, 0)}</td><td>${f < 1.0005 ? "+" + fmt((f - 1) * 100, 3) : "+" + fmt((f - 1) * 100, f < 1.1 ? 1 : 0)}%${cap ? " (teto)" : ""}</td><td>${fmt(c * f * k, usvDigits(c * f * k))}</td></tr>`;
+    return `<tr><td>${fmt(c, 0)}</td><td>${fmt(c * f, 0)}</td><td>${f < 1.0005 ? "+" + fmt((f - 1) * 100, 3) : "+" + fmt((f - 1) * 100, f < 1.1 ? 1 : 0)}%${cap ? " (teto)" : ""}</td><td>${rateNum(c * f * k)}</td></tr>`;
   }).join("");
-  $("lvDTTable").innerHTML = `<thead><tr><th>contador (CPM)</th><th>corrigido</th><th>soma</th><th>µSv/h</th></tr></thead><tbody>${rows}</tbody>`;
+  $("lvDTTable").innerHTML = `<thead><tr><th>contador (CPM)</th><th>corrigido</th><th>soma</th><th>${rateLbl()}</th></tr></thead><tbody>${rows}</tbody>`;
   $("lvDTTable").classList.toggle("off", !on);
 }
+
+// 2.101.13 (item 21): campos de número que o app pode cortar ao salvar
+const SET_CLAMP = [
+  ["numAwayAsk", "perguntar se foi fora de casa", (s) => s.awayAskMin, "min"],
+  ["lvSnooze", "silenciar", (s) => (s.levels || {}).snoozeMin, "min"],
+  ["numAlarm", "alarme", () => alarmUSv(), "rate"],
+  ["lvAttn", "atenção", (s) => (s.levels || {}).attentionUSv, "rate"],
+  ["lvDanger", "perigo", (s) => (s.levels || {}).dangerUSv, "rate"],
+  ["lvDTUs", "τ do tempo morto", (s) => (s.levels || {}).deadTimeUs, "µs"],
+  ["lvSatMax", "Geiger saturado", (s) => (s.levels || {}).satMaxUSv, "rate"],
+  ["lvSatDrop", "aviso de queda", (s) => (s.levels || {}).satDropUSv, "rate"],
+  ["lvSatHold", "tempo da queda", (s) => (s.levels || {}).satHoldSec, "s"],
+  ["lvRcSat", "RC102 saturado", (s) => (s.levels || {}).rcSatUSv, "rate"],
+];
+const setNum = (v) => parseFloat(String(v).replace(",", "."));
+function setTypedNums() {
+  const o = {};
+  for (const [id] of SET_CLAMP) if ($(id) && $(id).value !== "") o[id] = setNum($(id).value);
+  return o;
+}
+// o que a tela mostraria do digitado (o app arredonda sozinho: inteiros e
+// 4 algarismos na taxa), para não chamar de "fora da faixa" o que não foi cortado
+const setShownNum = (x, u) => (u === "rate" ? setNum(rateOut(x / rateK())) : u === "µs" ? x : Math.round(x));
+function setRepaintClamped(typed) {
+  const s = state.settings || {}, out = [];
+  for (const [id, label, get, u] of SET_CLAMP) {
+    const v = get(s);
+    if (!(id in typed) || !(v > 0)) continue;
+    const shown = u === "rate" ? rateOut(v) : v;
+    const was = setShownNum(typed[id], u), now = setNum(shown);
+    // arredondado pelo próprio app (5,5 → 6): o campo mostra o que ficou, sem aviso
+    if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) { if (setNum($(id).value) !== now) $(id).value = shown; continue; }
+    $(id).value = shown;
+    // µSv/h: a tela troca para mrem/h sozinha
+    out.push(`${tr(label)} ${u === "rate" ? usvTxt(v) : fmt(v, 0) + " " + u}`);
+  }
+  if (out.length) { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); }
+  return out;
+}
+// 2.101.13 (item 21): fora da faixa já avisa no campo, antes de salvar
+// (min/max do campo: na taxa, em µSv/h, convertidos para a unidade da tela)
+function setRangeHint(id) {
+  const ent = SET_CLAMP.find((x) => x[0] === id), el = $(id);
+  if (!ent || !el) return;
+  const u = ent[3], raw = el.value.trim();
+  let msg = "";
+  if (raw !== "") {
+    const v = u === "rate" ? rateIn(raw) : setNum(raw);
+    const mn = parseFloat(el.getAttribute("min")), mx = parseFloat(el.getAttribute("max"));
+    const show = (x) => (u === "rate" ? usvTxt(x) : `${fmt(x, 0)} ${u}`), keep = (x) => (u === "rate" ? usvTxt(x) : fmt(x, 0));
+    // folga de 4 algarismos: 0,005 mrem/h vira 0,04999… µSv/h na conversão
+    const tol = 1e-4;
+    if (v > 0 && mn > 0 && v < mn * (1 - tol)) msg = `O mínimo é ${show(mn)}. Vai gravar ${keep(mn)}.`;
+    else if (v > 0 && mx > 0 && v > mx * (1 + tol)) msg = `O máximo é ${show(mx)}. Vai gravar ${keep(mx)}.`;
+  }
+  el.classList.toggle("out-range", !!msg);
+  let h = el.parentElement.querySelector(".range-hint");
+  if (msg && !h) {
+    h = document.createElement("small");
+    h.className = "range-hint warn-text";
+    h.setAttribute("aria-live", "polite");
+    el.insertAdjacentElement("afterend", h);
+  }
+  if (h) { h.textContent = msg ? tr(msg) : ""; h.hidden = !msg; }
+}
+const setRangeHints = () => SET_CLAMP.forEach(([id]) => setRangeHint(id));
+document.addEventListener("input", (e) => { if (e.target && e.target.id && SET_CLAMP.some((x) => x[0] === e.target.id)) setRangeHint(e.target.id); });
 
 function readLevels() {
   const out = {};
@@ -2007,7 +2135,7 @@ function readLevels() {
 function renderLevelEq() {
   const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
-    const v = parseFloat($(el.dataset.eq).value) || 0;
+    const v = rateIn($(el.dataset.eq).value) || 0; // 2.101.6: o campo está na unidade da tela
     el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM` : "";
   });
 }
@@ -2158,8 +2286,8 @@ document.addEventListener("change", (e) => { if (e.target.closest && e.target.cl
 const AL_MIRROR = [
   // [campo daqui, campo da página do aparelho, conversão]
   ["alGmc", "dcAlarmRate", null],
-  ["alRc1", "rcDR1", "rate"],
-  ["alRc2", "rcDR2", "rate"],
+  ["alRc1", "rcDR1", null], // 2.101.6: a página do RC102 já está na unidade da tela
+  ["alRc2", "rcDR2", null],
   ["alDs1", "rcDS1", null],
   ["alDs2", "rcDS2", null],
   ["alDs1On", "rcDS1On", null],
@@ -2224,8 +2352,23 @@ document.addEventListener("click", async (e) => {
 function wireLevels() {
   for (const id of Object.keys(LV_FIELDS)) $(id).addEventListener("input", () => { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); });
   $("lvDTOn").addEventListener("change", renderDeadTime);
-  $("btnLevelsReset").addEventListener("click", () => { fillLevels(LV_DEFAULT); renderDangerNote(); renderAttnLabel(); renderSetBar(); });
-  $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
+  // 2.101.13 (item 22): só os campos desta seção (Atenção, Alarme, Perigo, os
+  // "Ligado" e o Silenciar); o tubo e a saturação ficam como estão
+  $("btnLevelsReset").addEventListener("click", () => {
+    $("lvAttn").value = rateOut(usv3(LV_DEFAULT.attentionCPM * calK()));
+    $("lvDanger").value = rateOut(usv3(LV_DEFAULT.dangerCPM * calK()));
+    $("numAlarm").value = rateOut(usv3(100 * calK()));
+    $("lvSnooze").value = LV_DEFAULT.snoozeMin;
+    $("chkAttn").checked = true;
+    // 2.101.13 (item 22, conferência do QA): o alarme religa só no Salvar (Descartar volta tudo)
+    $("chkAlarm").checked = true;
+    renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderSetBar();
+  });
+  $("btnSetDiscard").addEventListener("click", () => {
+    // 2.101.13 (item 22): o "Ligado" do alarme marcado pelo Restaurar volta também
+    if (state.settings) $("chkAlarm").checked = !!state.settings.alarmEnabled;
+    state.setSnap = null; openSettings();
+  });
   $("setSearch").addEventListener("input", setSearch);
   $("setSearch").addEventListener("keydown", (e) => {
     if (e.key === "Enter") { const b = document.querySelector("#setResults button"); if (b) b.click(); }
@@ -2520,6 +2663,8 @@ async function askBackupSettings(r) {
     n === 1 ? `O backup de ${from} tem 1 ajuste diferente do daqui.` : `O backup de ${from} tem ${n} ajustes diferentes dos daqui.`,
     "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",
   ];
+  // 2.101.6: com mudança não salva, o formulário é refeito com o backup (avisa antes)
+  if (setDirty().length) text.push("As mudanças que você fez aqui e ainda não salvou serão descartadas.");
   if (!(await askConfirm({ title: "Usar as configurações do backup?", text, ok: "Usar as do backup" }))) return;
   try {
     state.settings = await api.ApplyBackupSettings();
@@ -2527,7 +2672,7 @@ async function askBackupSettings(r) {
     syncLang(state.settings.lang);
     $("chkAlarm").checked = !!state.settings.alarmEnabled;
     renderAlarmLabel();
-    if (state.view === "config") openSettings("btnImportBackup");
+    if (state.view === "config") { state.setSnap = null; openSettings("btnImportBackup"); }
   } catch (e) { toast(errMsg(e), true); }
 }
 
@@ -2558,8 +2703,9 @@ async function openSettings(focusId) {
     renderStatus();
     return;
   }
-  devCfgRead = false;
-  rcCfgRead = false;
+  // 2.101.5: ajuste de aparelho digitado e ainda não gravado não é relido por cima
+  if (!devCfgDirty()) devCfgRead = false;
+  if (typeof rcCfgDirty !== "function" || !rcCfgDirty()) rcCfgRead = false;
   refreshReportDir();
   refreshAutostart();
   refreshUso();
@@ -2609,20 +2755,24 @@ async function openSettings(focusId) {
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
 const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "valDateFmt", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
-const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
+const SET_FIELD_NAMES = { chkAlarm: "alarme ligado", chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", valDateFmt: "formato da data", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
 function setSnap() {
+  setRangeHints();
   state.setSnap = {};
   for (const id of SET_SAVE_IDS()) if ($(id)) state.setSnap[id] = setVal($(id));
   renderSetBar();
 }
 function setDirty() {
   if (!state.setSnap) return [];
-  return SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  const out = SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  // o "Ligado" do alarme grava na hora; só fica pendente depois do Restaurar
+  if ($("chkAlarm") && state.settings && $("chkAlarm").checked !== !!state.settings.alarmEnabled) out.push("chkAlarm");
+  return out;
 }
 function setFieldName(id) {
   if (SET_FIELD_NAMES[id]) return SET_FIELD_NAMES[id];
@@ -2636,15 +2786,26 @@ function setFieldName(id) {
 }
 function renderSetBar() {
   const d = setDirty();
-  $("setBar").hidden = !d.length;
-  document.documentElement.classList.toggle("set-dirty", d.length > 0);
-  $("btnSettings").classList.toggle("dirty", d.length > 0);
-  if (!d.length) return;
-  const names = [...new Set(d.map(setFieldName))];
+  // 2.101.5: ajustes dos aparelhos digitados e ainda não gravados também aparecem
+  const dev = [];
+  if (typeof devCfgDirty === "function" && devCfgDirty()) dev.push("GMC-800");
+  if (typeof rcCfgDirty === "function" && rcCfgDirty()) dev.push("RC102");
+  const any = d.length > 0 || dev.length > 0;
+  $("setBar").hidden = !any;
+  document.documentElement.classList.toggle("set-dirty", any);
+  $("btnSettings").classList.toggle("dirty", any);
+  if (!any) return;
   const bar = $("setBarText");
-  bar.textContent = d.length === 1 ? "1 mudança não salva: " : `${d.length} mudanças não salvas: `;
-  names.slice(0, 4).forEach((n, i) => { if (i) bar.append(", "); const b = document.createElement("b"); b.textContent = n; bar.appendChild(b); });
-  if (names.length > 4) bar.append(` e mais ${names.length - 4}`);
+  bar.textContent = "";
+  if (d.length) {
+    const names = [...new Set(d.map(setFieldName))];
+    bar.textContent = d.length === 1 ? "1 mudança não salva: " : `${d.length} mudanças não salvas: `;
+    names.slice(0, 4).forEach((n, i) => { if (i) bar.append(", "); const b = document.createElement("b"); b.textContent = n; bar.appendChild(b); });
+    if (names.length > 4) bar.append(` e mais ${names.length - 4}`);
+  }
+  for (const x of dev) bar.append((bar.textContent ? " · " : "") + (x === "RC102" ? "ajustes ainda não gravados no RC102 (use Gravar no RC102)" : "ajustes ainda não gravados no GMC-800 (use Gravar no GMC-800)"));
+  // só ajuste de aparelho pendente: o Salvar e o Descartar daqui não valem para ele
+  $("btnSetDiscard").hidden = $("btnSave").hidden = !d.length;
 }
 document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
 document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
@@ -2708,7 +2869,9 @@ async function renderCalHist() {
     const src = cur.desde ? `${calSrcTxt(cur)}, desde ${calWhen(cur.desde)}` : calSrcTxt(cur);
     $("calNow").textContent = `De onde veio: ${src}`;
     if (h.retro) $("calNow").appendChild(Object.assign(document.createElement("span"), { textContent: " · histórico recalculado" }));
-    $("calK").value = cur.k ? cur.k.toFixed(5) : "";
+    // 2.101.6: o fator digitado e ainda não usado fica (até a calibração mudar)
+    const ck = $("calK");
+    if (!ck.dataset.typed || ck.dataset.k !== String(cur.k)) { ck.value = cur.k ? cur.k.toFixed(5) : ""; ck.dataset.typed = ""; ck.dataset.k = String(cur.k); }
     $("calKReset").hidden = !(cur.fator > 0);
   }
   $("calDev").textContent = h.devK ? `${fmt(h.devK, 5)} µSv/h por CPM` : "—";
@@ -2736,7 +2899,7 @@ async function calSuggest() {
   if (!c || c.minutes < 60 || !(c.suggestK > 0)) return;
   el.innerHTML = `Lado a lado com o RC102 (${fmt(c.minutes, 0)} min nas últimas 6 h): <strong class="mono">${fmt(c.suggestK, 5)}</strong> µSv/h por CPM faria o GMC bater com ele na média. <button type="button" class="btn small" id="calUseSug">Preencher</button>`;
   el.hidden = false;
-  $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").focus(); });
+  $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").dataset.typed = "1"; $("calK").focus(); });
 }
 
 async function calCompare(id) {
@@ -2763,9 +2926,17 @@ async function calHistChanged() {
   await renderCalHist();
   renderCfgHist();
   refreshAll();
+  calKChanged();
+}
+// 2.101.6: com o fator novo, o alarme do aparelho (em CPM) e os "≈ CPM" dos
+// níveis são refeitos na hora, sem sair das Configurações
+function calKChanged() {
+  if ($("dcAlarm") && $("dcAlarm").value) dcAlarmFill();
+  renderLevelEq();
 }
 
 function initCalHist() {
+  $("calK").addEventListener("input", () => { $("calK").dataset.typed = "1"; });
   $("calKApply").addEventListener("click", async () => {
     const k = parseFloat(String($("calK").value).replace(",", "."));
     if (!(k > 0)) { toast("Informe o µSv/h por CPM", true); return; }
@@ -2945,6 +3116,7 @@ function fillThemeOptions() {
 }
 
 function fillDevCfg(c) {
+  setTimeout(() => { if (typeof renderSetBar === "function") renderSetBar(); }, 0); // 2.101.5: a barra acompanha o que está no aparelho
   fillThemeOptions();
   const v = c.values || {};
   qsa("#devcfg [data-key]").forEach((el) => {
@@ -3094,14 +3266,14 @@ function wireDevCfg() {
     try {
       devCfg = await api.SetDeviceConfig(next);
       fillDevCfg(devCfg);
-      toast("Configuração gravada no contador");
+      toast("Configuração gravada no GMC-800");
       state.status = await api.GetStatus();
       renderStatus();
     } catch (e) {
       toast(errMsg(e), true);
       setDevCfgEnabled(!!(devCfg && devCfg.editable));
     } finally {
-      $("dcSaveBtn").textContent = "Gravar no contador";
+      $("dcSaveBtn").textContent = "Gravar no GMC-800";
     }
   });
 
@@ -3153,6 +3325,17 @@ function wire() {
     state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
     state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
   }));
+  // 2.101.0: "Analisar nos gráficos" nas páginas dos aparelhos. Genérico: data-charts é a
+  // chave do aparelho em CHART_DEVS e o período vem de data-crange (ou do gráfico da página).
+  document.querySelectorAll("[data-charts]").forEach((b) => b.addEventListener("click", () => {
+    const dev = b.dataset.charts;
+    const range = b.dataset.crange || ({ 6: "6h", 24: "24h", 168: "7d" })[state.rc24.h] || "24h";
+    state.chartDev = dev; localSet("chartDev", dev);
+    setSub("graficos", "tempo");
+    showView("graficos");
+    const rb = document.querySelector(`#rangeSeg button[data-range="${range}"]`);
+    if (rb) rb.click(); else refreshChart();
+  }));
 
   $("statusPill").addEventListener("click", () => openSettings("selPort"));
   $("btnConnectHint").addEventListener("click", () => openSettings("selPort")); // direto na seção Conexão
@@ -3187,12 +3370,14 @@ function wire() {
   wireUiScale();
   wireUnits();
   $("btnSave").addEventListener("click", async () => {
-    if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
-    if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
+    if (devCfgDirty()) toast('Os ajustes do GMC-800 ainda não foram gravados: use "Gravar no GMC-800" (GQ GMC-800 › No aparelho).', true);
+    if (rcCfgDirty()) toast('Os ajustes do RC102 ainda não foram gravados: use "Gravar no RC102" (Radiacode 102 › No aparelho).', true);
     const alarm = rateIn($("numAlarm").value);
+    const typed = setTypedNums();
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
+      alarmEnabled: $("chkAlarm").checked,
       alarmSound: $("selSound").value,
       alarmRaise: $("chkRaise").checked,
       attentionEnabled: $("chkAttn").checked,
@@ -3216,8 +3401,12 @@ function wire() {
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
+    // 2.101.13 (item 21): o que o app cortou (fora da faixa) volta para a tela
+    // com o valor gravado, e o aviso diz qual ficou
+    const cut = setRepaintClamped(typed);
     setSnap();
-    toast("Configurações salvas");
+    if (cut.length) toast(`Configurações salvas. Fora da faixa, ficou: ${cut.join("; ")}.`, true);
+    else toast("Configurações salvas");
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
@@ -3227,6 +3416,17 @@ function wire() {
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
+  // 2.101.13 (item 67): o aviso da memória no quadro leva ao que resolve
+  $("gTileSync").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showView("gmc");
+    requestAnimationFrame(() => {
+      const card = $("syncCard");
+      if (card && !card.hidden) card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const b = $("btnSyncDl");
+      if (b) b.focus({ preventScroll: true });
+    });
+  });
 ;
 
   $("clockChip").addEventListener("click", async () => {
@@ -3238,9 +3438,41 @@ function wire() {
   const sideEdges = () => {
     sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2);
     sideNav.classList.toggle("more", sideNav.scrollHeight - sideNav.clientHeight - sideNav.scrollTop > 2);
+    // 2.101.13 (item 79): janela estreita, menu em linha: setas ‹ › e degradê de cada lado que ainda tem página
+    const wide = sideNav.scrollWidth - sideNav.clientWidth > 2;
+    const hl = wide && sideNav.scrollLeft > 2, hr = wide && sideNav.scrollWidth - sideNav.clientWidth - sideNav.scrollLeft > 2;
+    sideNav.classList.toggle("hl", hl);
+    sideNav.classList.toggle("hr", hr);
+    for (const [a, on] of [[sideArrL, hl], [sideArrR, hr]]) {
+      a.hidden = !on;
+      if (on) a.style.top = sideNav.offsetTop + Math.max(0, (sideNav.offsetHeight - 28) / 2) + "px"; // redondo, no meio da linha
+    }
   };
+  const sideArr = (cls, txt, label, dir) => {
+    const a = document.createElement("button");
+    a.type = "button"; a.className = "side-arr " + cls; a.textContent = txt; a.hidden = true;
+    a.tabIndex = -1; a.setAttribute("aria-hidden", "true"); a.title = tr(label);
+    a.addEventListener("click", () => sideNav.scrollBy({ left: dir * sideNav.clientWidth * 0.7, behavior: "smooth" }));
+    sideNav.parentElement.appendChild(a);
+    return a;
+  };
+  const sideArrL = sideArr("l", "‹", "Mais páginas à esquerda", -1);
+  const sideArrR = sideArr("r", "›", "Mais páginas à direita", 1);
   sideNav.addEventListener("scroll", sideEdges, { passive: true });
+  // roda do mouse (vertical) rola o menu em linha para os lados
+  sideNav.addEventListener("wheel", (e) => {
+    if (sideNav.scrollWidth - sideNav.clientWidth <= 2 || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    sideNav.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+  }, { passive: false });
   window.addEventListener("resize", sideEdges);
+  // 2.101.8: a lista cresce depois (escala, Espectro e Clima, versão nova): recalcula
+  if (typeof ResizeObserver === "function") {
+    const ro = new ResizeObserver(sideEdges);
+    ro.observe(sideNav);
+    for (const c of sideNav.children) ro.observe(c);
+    new MutationObserver(() => { for (const c of sideNav.children) ro.observe(c); sideEdges(); }).observe(sideNav, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+  }
   sideEdges();
   $("btnExport").addEventListener("click", async () => {
     const path = await call(api.ExportCSV);
@@ -3251,9 +3483,10 @@ function wire() {
     $("progressText").textContent = "Lendo a memória do contador…";
     try {
       const r = await api.DownloadHistory();
-      if (r.canceled) histDone(`Leitura cancelada: ${r.added} minutos novos guardados`, false);
+      if (r.canceled) histDone(r.added === 1 ? "Leitura cancelada: 1 minuto novo guardado" : `Leitura cancelada: ${r.added} minutos novos guardados`, false);
       else if (r.partial) { histFailToast(r.partial, true); histDone("Não deu para baixar tudo: os minutos que chegaram foram guardados.", false); }
-      else histDone(`${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""), true);
+      // 2.101.8: plural pelo número, e cada frase traduz sozinha
+      else histDone(tr(`${r.records} ${r.records === 1 ? "registro" : "registros"}, ${r.added} ${r.added === 1 ? "minuto novo" : "minutos novos"}`) + (r.asks ? ". " + tr("A pergunta \"fora de casa?\" está no Agora.") : ""), true);
     } catch (e) {
       histDone("Não deu para baixar: " + errMsg(e), false);
     }
@@ -3338,7 +3571,10 @@ function listen() {
     setAttention(r.demo ? "demo" : "real", !!r.attention);
     tickActive();
   });
-  on("alerts", (list) => { state.activeAlerts = list || []; renderActive(); });
+  // 2.101.8: a Fita do dia conta o alerta novo logo (junta vários num só pedido)
+  let fitaSoon = 0;
+  const fitaNudge = () => { if (typeof refreshAgFita !== "function") return; clearTimeout(fitaSoon); fitaSoon = setTimeout(() => { if (state.view === "agora") refreshAgFita(); }, 1500); };
+  on("alerts", (list) => { state.activeAlerts = list || []; renderActive(); fitaNudge(); });
   on("rain-status", (st) => { state.rainStatus = st || {}; renderRainStatus(); });
   on("notes", () => { refreshChart(); if (state.view === "resumo") refreshSummary(); });
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
@@ -3354,14 +3590,15 @@ function listen() {
   }));
   on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
-    const was = state.status.state;
+    const was = state.status.state, k0 = calK();
     state.status = s;
+    if (calK() !== k0) calKChanged();
     if (was === "conectado" && s.state !== "conectado") state.gOffSince = Date.now();
     if (s.state !== "conectado") { state.last = null; alarmCtl.real = false; alarmCtl.realDanger = false; attnCtl.real = false; updateAlarm(); updateAttention(); }
     renderStatus();
     if (was !== s.state) refreshStats();
   });
-  on("event", (e) => { refreshEvents(); if (e && e.kind === "alerta") refreshHeat(); });
+  on("event", (e) => { refreshEvents(); if (e && e.kind === "alerta") { refreshHeat(); fitaNudge(); } });
   on("demo", (d) => {
     // dentro do app, ligar ou sair (ou um alarme de verdade) recarrega a tela
     if (hasGo && !!d.active !== inDemo) { demoReload(!!d.active); return; }
@@ -3637,7 +3874,14 @@ function renderUpdate(u) {
   // diálogo
   $("updTitle").textContent = u.latest ? `Versão ${u.latest}` : "Versão nova";
   $("updSub").textContent = `Você está na ${u.current || "?"}.` + (u.canAuto ? "" : u.manual ? ` Atualizar por aqui não dá: ${u.manual}.` : "");
-  $("updNotes").textContent = (u.notes || "Sem notas.").replace(/\*\*/g, "");
+  // 2.101.2: as notas vêm nos dois idiomas (o inglês depois de "**English**"):
+  // mostra só o do idioma da tela
+  let notes = u.notes || "";
+  const enAt = notes.search(/^\*\*English\*\*\s*$/m);
+  if (enAt >= 0) notes = LANG === "en" ? notes.slice(enAt).replace(/^\*\*English\*\*\s*/, "") : notes.slice(0, enAt);
+  const updNotes = $("updNotes");
+  updNotes.textContent = (notes.trim() || "Sem notas.").replace(/\*\*/g, "");
+  if (enAt >= 0 && LANG === "en") updNotes.setAttribute("data-no-tr", ""); else updNotes.removeAttribute("data-no-tr");
   const st = $("updState");
   const msg = {
     baixando: `Baixando e conferindo… ${fmt((u.progress || 0) * 100, 0)}%`,
@@ -3867,7 +4111,7 @@ function renderRcMain(st) {
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
-  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} às ${hhmm(sx.max24hAt)}` : rateLbl();
+  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} ${atWhen(sx.max24hAt)}` : rateLbl();
   // dose que o próprio aparelho soma desde que foi zerado
   if (st.doseLiveAt) {
     const mSv = !RATE_MREM && st.doseLive >= 1000, v = RATE_MREM ? st.doseLive / 10 : mSv ? st.doseLive / 1000 : st.doseLive;
@@ -4010,7 +4254,7 @@ function wireRc() {
     if (rcOnline() !== state.rcWasOnline) { state.rcWasOnline = rcOnline(); if (state.measureSt) renderMeasure(state.measureSt); }
   });
   for (const id of ["btnRcRetry", "btnRcRetrySet"]) $(id).addEventListener("click", async () => renderRc(await call(api.ReconnectRadiacode)));
-  for (const id of ["btnRcSettings", "btnRcConn"]) $(id).addEventListener("click", () => openSettings("chkRcOn"));
+  $("btnRcSettings").addEventListener("click", () => openSettings("chkRcOn"));
   $("rc24Range").addEventListener("click", (e) => {
     const b = e.target.closest("button[data-h]");
     if (!b) return;
@@ -4122,7 +4366,7 @@ async function refreshCounterSync(cs) {
   gs.hidden = !show;
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
-  gs.title = cs.text;
+  gs.title = warnMem ? tr("Abrir GQ GMC-800 › Memória do contador") : cs.text;
   // 2.89.0 (E5): o ponto da barra diz o que é ao passar o mouse
   $("navGmcDot").closest("button").title = show ? gs.textContent : "";
   card.classList.toggle("cheia", cs.memLevel === "cheia");
@@ -4257,7 +4501,7 @@ function wirePatterns() {
     $("patCursor").style.left = (h / 23) * 100 + "%";
     const tip = $("patTip");
     tip.hidden = false;
-    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
+    tipSet(tip, st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`);
     const left = (h / 23) * r.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px";
   });
@@ -4364,7 +4608,7 @@ function wireBgTrend() {
     $("bgCursor").style.left = (((best.t - tr.from) / (tr.to - tr.from)) * 100) + "%";
     const tip = $("bgTip");
     tip.hidden = false;
-    tip.textContent = `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`);
+    tipSet(tip, `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} µSv/h · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`));
     const left = ((best.t - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
@@ -4378,7 +4622,7 @@ function wireBgTrend() {
     const tip = $("bgDTip");
     if (!d) { tip.hidden = true; return; }
     tip.hidden = false;
-    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
+    tipSet(tip, `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`);
     const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
@@ -4428,7 +4672,12 @@ function exportReport(from, to, label, btn) {
   document.querySelectorAll("#repModes .rep-mode").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === mode)));
   $("repNotes").checked = !!st.reportNotes;
   $("repCfg").checked = !st.reportNoCfg;
-  $("repSub").textContent = `${label} · ${dayLabel(from)} ${hhmm(from)} → ${dayLabel(Math.min(to, Date.now()) - 1)} ${hhmm(Math.min(to, Date.now()))}`;
+  // 2.101.8: cada parte traduz sozinha (o molde "seg {0}" não pegava "→ hoje" nem "dom")
+  const dl = (t) => (isToday(t) ? tr("hoje") : isYesterday(t) ? tr("ontem") : `${tr(WEEKDAY[new Date(t).getDay()])} ${ddmm(t)}`);
+  // 2.101.9: fim à meia-noite é "24:00" do dia que acabou (não "00:00" do mesmo dia)
+  const end = Math.min(to, Date.now()), ed = new Date(end);
+  const endTxt = end > from && !ed.getHours() && !ed.getMinutes() ? `${dl(end - 1)} 24:00` : `${dl(end)} ${hhmm(end)}`;
+  $("repSub").textContent = `${tr(label)} · ${dl(from)} ${hhmm(from)} → ${endTxt}`;
   $("repDlg").showModal();
 }
 function wireReportDlg() {
@@ -4507,7 +4756,7 @@ function setupSummary() {
     }).filter(Boolean);
     const tip = $("sumTip");
     tip.hidden = false;
-    tip.textContent = parts.join(" · ");
+    tipSet(tip, parts.join(" · "));
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("sumCursor").hidden = true; $("sumTip").hidden = true; });
@@ -4528,7 +4777,7 @@ function setupRainImpact() {
     const when = p.min < 0 ? `${durMin(-p.min)} antes` : `${durMin(p.min)} depois`;
     const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
     const v = (x) => (x == null ? "—" : pc ? sgn(x * pc, 1) + "%" : sgn(x, 1));
-    tip.textContent = `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM");
+    tipSet(tip, `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM"));
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("riCursor").hidden = true; $("riTip").hidden = true; });

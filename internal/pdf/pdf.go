@@ -106,6 +106,9 @@ func winAnsi(s string) []byte {
 	repl, special := winAnsiRepl, winAnsiSpecial
 	out := make([]byte, 0, len(s))
 	for _, r := range s {
+		if r >= 0x2066 && r <= 0x2069 { // marcas de nome da pessoa (asIs): não desenha
+			continue
+		}
 		if t, ok := repl[r]; ok {
 			out = append(out, t...)
 			continue
@@ -197,6 +200,13 @@ func Tr(s string) string {
 	return t
 }
 
+// textHook recebe cada texto escrito com o tradutor ligado (só nos testes:
+// confere se sobrou português num PDF em inglês).
+var textHook func(string)
+
+// SetTextHook liga (ou desliga, com nil) o textHook.
+func SetTextHook(f func(string)) { textHook = f }
+
 // MarkTranslated diz que s já está no idioma certo (ex.: linha quebrada de
 // um texto já traduzido).
 func MarkTranslated(s string) {
@@ -267,6 +277,9 @@ func (d *Doc) color(c RGB, fill bool) {
 // text escreve com a linha de base em y (medido do topo).
 func (d *Doc) Text(x, y float64, f Font, size float64, c RGB, s string) {
 	s = Tr(s)
+	if textHook != nil && trFn != nil {
+		textHook(s)
+	}
 	d.color(c, true)
 	fmt.Fprintf(d.cur, "BT %.2f %.2f Td", x, H-y)
 	for _, run := range splitSym(s) {

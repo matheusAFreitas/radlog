@@ -114,12 +114,15 @@ func TestReportNewPages(t *testing.T) {
 	if len(short) >= len(full) {
 		t.Fatalf("só o resumo (%d) não é menor que o completo (%d)", len(short), len(full))
 	}
+	// em inglês, completo e só o resumo (o TestMain confere se sobrou português)
+	enShort := pdf.WithTranslator(func(s string) string { return i18n.T("en", s) }, func() []byte { return renderReportPDF(r) })
+	r.Opts.Summary, r.pages = false, 0
+	en := pdf.WithTranslator(func(s string) string { return i18n.T("en", s) }, func() []byte { return renderReportPDF(r) })
 	if out := os.Getenv("REPORT2_OUT"); out != "" {
 		_ = os.WriteFile(out, full, 0o644)
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-resumo.pdf", short, 0o644)
-		r.Opts.Summary, r.pages = false, 0
-		en := pdf.WithTranslator(func(s string) string { return i18n.T("en", s) }, func() []byte { return renderReportPDF(r) })
 		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-en.pdf", en, 0o644)
+		_ = os.WriteFile(strings.TrimSuffix(out, ".pdf")+"-resumo-en.pdf", enShort, 0o644)
 	}
 }
 

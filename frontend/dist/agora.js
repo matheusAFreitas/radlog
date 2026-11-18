@@ -6,6 +6,7 @@
 
 const AG_KEYS = { dia: "Hoje", semana: "Semana", mes: "Mês", ano: "Ano" };
 let agDose = null, agSeq = 0, agAt = 0;
+let agUp = false; // item 66: o fundo está acima do normal (com folga)
 
 function agDev() {
   const pref = localGet("agDev", "");
@@ -71,10 +72,17 @@ function agoraNow() {
       lv = "atencao"; title = "Falta medição agora.";
       text = [L.home, L.pers].filter((x) => x.cls === "warnb" && !x.sat).map((x) => x.d).join(" ");
     } else {
-      title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
+      // 2.101.13 (item 66): fundo acima do normal sem alerta também é algo a
+      // dizer (e o "Por que?"), pelo σ dos últimos 10 min e com folga: aparece
+      // com 3σ e só some abaixo de 2σ (o σ de um minuto passa de 2 pelo acaso)
+      const s10 = g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma10 != null ? g.sigma10 : null;
+      agUp = s10 != null && (agUp ? s10 >= 2 : s10 >= 3);
+      const up = agUp;
+      title = odd ? "Medindo, com um aparelho fora do normal." : up ? "Fundo acima do normal, sem alerta." : "Tudo normal agora.";
       // tudo normal: a faixa some (só aparece quando tem algo a dizer)
-      calm = !odd;
-      if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : g.sigma < 3 ? `um pouco acima do fundo, dentro do acaso (${fmt(g.sigma, 1)} σ)` : `bem acima do nível de fundo (${fmt(g.sigma, 1)} σ)`);
+      calm = !odd && !up;
+      if (up) parts.push(`bem acima do nível de fundo nos últimos 10 min (${fmt(s10, 1)} σ)`);
+      else if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : g.sigma < 3 ? `um pouco acima do fundo, dentro do acaso (${fmt(g.sigma, 1)} σ)` : `bem acima do nível de fundo (${fmt(g.sigma, 1)} σ)`);
       text = parts.join(" · ");
     }
   }
@@ -84,7 +92,7 @@ function agoraNow() {
   $("agSayText").textContent = text;
   // fundo acima do normal sem alerta: "Por que?" (porque.js)
   const why = $("agWhy");
-  if (why) why.hidden = !(api.GetWhyRise && !top && g.live && gHome && g.sigma != null && g.sigma >= 2);
+  if (why) why.hidden = !(api.GetWhyRise && !top && g.live && gHome && agUp);
   agBgChip();
 }
 
@@ -162,7 +170,7 @@ function renderAgDose() {
     } else if (p.background > 0) {
       const pct = Math.round(p.above * 100);
       const [bn, bu] = agSv(p.background);
-      n.textContent = `o fundo daria ${bn} ${bu}` + (pct >= 1 ? ` · +${pct}%` : pct <= -1 ? ` · ${pct}%` : " · igual");
+      n.textContent = `o fundo daria ${bn} ${bu}` + (pct >= 1 ? ` · +${pct}%` : pct <= -1 ? ` · −${-pct}%` : " · " + tr("igual"));
       if (pct >= 10) n.classList.add("up");
     } else n.textContent = `${fmt(p.coverage * 100, 0)}% medido`;
     cell.append(k, v);
@@ -216,7 +224,7 @@ function renderAgDose() {
   if (!has(today)) cmp.textContent = "sem dado hoje";
   else if (today.background > 0) {
     const pct = Math.round(today.above * 100);
-    cmp.textContent = pct >= 10 ? `${pct}% acima do fundo da sua casa` : pct <= -10 ? `${-pct}% abaixo do fundo da sua casa` : "igual ao fundo da sua casa";
+    cmp.textContent = pct >= 10 ? `${pct}% acima do fundo da sua casa` : pct <= -10 ? `${-pct}% abaixo do fundo da sua casa` : pct >= 1 || pct <= -1 ? `perto do fundo da sua casa (${pct > 0 ? "+" : "−"}${Math.abs(pct)}%)` : "igual ao fundo da sua casa"; // 2.101.6: o mesmo % da célula
     if (pct >= 10) cmp.classList.add("up");
   } else cmp.textContent = "";
   const line = $("agLine");

@@ -1,5 +1,859 @@
 # Versões
 
+## 2.101.14
+Itens 17, 35 e 68 da varredura (ok do ACE):
+- Medir objeto com o RC102 no automático: a dose também decide. Ele só diz
+  "igual ao fundo" quando a contagem e a dose ficam abaixo do limiar (depois
+  de 5 min), e para dizendo que a dose subiu quando ela passa de 4σ. A
+  medição salva, os Eventos e o PDF não dizem mais "igual ao fundo" quando a
+  dose subiu, e o "menos que +X" tem um número só em todo lugar (no RC102,
+  pela dose).
+- Atividade (Bq): uma calibração nova pior que a que está em uso não troca
+  sozinha. O app mostra as duas e oferece "Usar a nova"; a de antes fica
+  guardada e dá para voltar em detalhes.
+- Atividade (Bq) › Mais opções: "Como está a amostra: no pote | pedra
+  solta" para qualquer amostra (pedra solta deixa a massa opcional).
+
+**English**
+Items 17, 35 and 68 from the sweep (ACE's ok):
+- Measure object with the RC102 in automatic: the dose also decides. It only
+  says "same as background" when both count and dose stay below the
+  threshold (after 5 min), and stops saying the dose rose when it passes 4σ.
+  The saved measurement, Events and PDF no longer say "same as background"
+  when the dose rose, and the "less than +X" has a single number everywhere
+  (on the RC102, from the dose).
+- Activity (Bq): a new calibration worse than the one in use no longer
+  replaces it by itself. The app shows both and offers "Use the new one";
+  the previous one is kept and you can go back to it in details.
+- Activity (Bq) › More options: "How the sample is: in the jar | loose
+  stone" for any sample (loose stone makes the mass optional).
+
+## 2.101.13
+Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE), e o 132:
+- Configurações: valor fora da faixa já avisa no campo, antes de salvar
+  ("O mínimo é 5 min. Vai gravar 5."); depois de salvar aparece corrigido e
+  o aviso diz o que ficou ("Fora da faixa, ficou: …").
+- "Restaurar padrões dos níveis" volta também o Alarme e o "Ligado" da
+  Atenção e do alarme (o alarme religa no Salvar), e só mexe na seção
+  Níveis e alarmes.
+- Saída programada que passou do horário (começada ou não): no lugar de
+  "editar" aparece "corrigir aparelhos", que salva a correção; a começada
+  continua começada se o aparelho que saiu continua indo.
+- Agora: quando o fundo de casa fica acima do normal sem alerta (pela média
+  dos últimos 10 min: aparece com 3σ, some abaixo de 2σ), a frase do topo
+  diz isso e mostra o "Por que?". Os segundos com o GMC-800 num objeto
+  (Medir objeto ou "Estou testando") ficam fora dessa média.
+- Configurações › Níveis e alarmes e GQ GMC-800 › Tubo: a tabela não some
+  mais quando aparece um aviso embaixo de um campo (item 132).
+- Aviso de memória no quadro do GQ GMC-800: clicar abre a Memória do
+  contador.
+- Janela estreita: o menu de páginas mostra botões redondos ‹ › e degradê
+  quando há mais páginas, e a roda do mouse rola o menu para os lados.
+- "Cancelar a saída programada?": os botões viram "Manter a saída" e
+  "Cancelar a saída".
+- Demonstração em inglês: os nomes de exemplo (medições, saídas, notas e
+  nuvem) saem em inglês.
+
+**English**
+Items 21, 22, 62, 66, 67, 79, 92 and 125 from the sweep (ACE's ok), and 132:
+- Settings: an out-of-range value warns on the field before saving ("The
+  minimum is 5 min. It will save 5."); after saving it shows corrected and
+  the saved message says what was kept ("Out of range, set to: …").
+- "Restore level defaults" also restores the Alarm and the "On" boxes (the
+  alarm turns back on at Save), and only touches the Levels and alarms
+  section.
+- Planned trip past its time (started or not): instead of "edit" there is
+  "fix devices", which saves the fix; a started trip stays started while the
+  device that left still goes.
+- Now: when the home background stays above normal without an alert (by the
+  last 10 min average: shows at 3σ, hides below 2σ), the top sentence says
+  so and shows "Why?". Seconds with the GMC-800 on an object (Measure object
+  or "Testing an object") stay out of that average.
+- Settings › Levels and alarms and GQ GMC-800 › Tube: the table no longer
+  disappears when a warning shows under a field (item 132).
+- Memory warning on the GQ GMC-800 card: clicking opens the counter memory.
+- Narrow window: the page menu shows round ‹ › buttons and a fade when
+  there are more pages, and the mouse wheel scrolls the menu sideways.
+- "Cancel the planned trip?": the buttons are now "Keep the trip" and
+  "Cancel the trip".
+- English demo: sample names (measurements, trips, notes and cloud) are in
+  English.
+
+## 2.101.12
+Itens 130 e 131 da varredura do QA:
+- App em inglês: os nomes que o próprio app dá saem traduzidos ("amostra"
+  da Atividade sem nome, "objeto" da medição sem nome, "Saída programada",
+  "Levei os dois", cartões prontos e calibração nos Eventos); a pedra solta
+  sem massa aparece como "pedra solta" nos Eventos, não "0 g".
+- Busca (Ctrl+K) › Medições salvas: a linha de baixo segue a unidade e o
+  formato de data escolhidos e o idioma.
+
+**English**
+Items 130 and 131 from QA's sweep:
+- English app: names the app itself gives are translated ("sample" for an
+  unnamed Activity, "object" for an unnamed measurement, "Planned trip",
+  "Took both", ready cards and calibration in Events); a loose stone without
+  mass shows as "loose stone" in Events, not "0 g".
+- Search (Ctrl+K) › Saved measurements: the second line follows the chosen
+  unit, date format and language.
+
+## 2.101.11
+Calibração do KCl (Atividade, RC102) com tempo honesto:
+- O chute de eficiência sem calibração cai de 0,1% para 0,005% em 1.460 keV,
+  que é o que o cristal de 1 cm³ do RC102 deu com 250 g de sal light em volta.
+  Os Bq sem calibração mudam de acordo (seguem com ±100%).
+- O tempo da calibração sai da massa e do % de KCl: o fundo e o sal medem o
+  mesmo tempo, o suficiente para a eficiência sair com ~15% de dúvida (500 g
+  de sal light: ~4 h; 500 g de KCl puro: ~2 h). Se passar de 24 h, o app
+  avisa antes de começar.
+- O aviso "não está vendo o sal" olha a faixa de 300 a 1.400 keV aos 20 min
+  (o sal em volta blinda o fundo de baixa energia, e o total pode até cair) e
+  o mínimo plausível no pico passa a 0,001%.
+
+**English**
+KCl calibration (Activity, RC102) with an honest time:
+- The efficiency guess without calibration drops from 0.1% to 0.005% at
+  1,460 keV, which is what the RC102's 1 cm³ crystal gave with 250 g of lite
+  salt around it. Bq without calibration change accordingly (still ±100%).
+- The calibration time comes from the mass and the KCl %: background and
+  salt measure the same time, enough for the efficiency to come out at ~15%
+  uncertainty (500 g of lite salt: ~4 h; 500 g of pure KCl: ~2 h). Over 24 h,
+  the app warns before starting.
+- The "not seeing the salt" warning looks at 300 to 1,400 keV at 20 min (the
+  salt around the device shields the low-energy background, and the total can
+  even drop) and the plausible minimum at the peak becomes 0.001%.
+
+## 2.101.10
+Sobras da conferência do QA na 2.101.9:
+- Resumo, "De onde vem a sua dose": o nome da medição, da anotação e do
+  trecho fica como você escreveu no app em inglês ("Relógio" não vira
+  "Clock").
+- Na mesma tabela, só saída de verdade (GMC-800 junto ou "eu não estava em
+  casa") vira "Fora de casa"; GMC-800 ignorado ou os dois em casa não.
+- Por que subiu?: a anotação perto da subida fica como você escreveu.
+- Atividade (Bq): o nome que você deu à amostra não é traduzido no
+  histórico, no resultado e nos detalhes; os cartões prontos continuam
+  traduzidos (também durante a medida, nas medidas antigas e no aviso de
+  tirar a amostra); Uraninita, Uranocircita e Euxenita ganham nome em inglês.
+- Gráficos, Resumo, Fundo e Padrões: a dica perto da borda direita não passa
+  mais da janela em inglês nem em mrem/h (era medida antes de traduzir e
+  converter). Na dica do Fundo da casa > Outra conta a média também sai em mrem/h.
+
+**English**
+Leftovers from QA's check of 2.101.9:
+- Summary, "Where your dose comes from": the measurement, note and stretch
+  names stay as you wrote them in the English app ("Relógio" no longer
+  becomes "Clock").
+- In the same table, only a real trip (GMC-800 with you or "I wasn't home")
+  becomes "Away from home"; an ignored GMC-800 or both left at home does not.
+- Why did it rise?: the note near the rise stays as you wrote it.
+- Activity (Bq): the name you gave the sample is not translated in the
+  history, the result and the details; ready cards are still translated
+  (also during the measurement, in older measurements and in the remove
+  notice); Uraninite, Uranocircite and Euxenite get English names.
+- Charts, Summary, Background and Patterns: the tooltip near the right edge
+  no longer runs past the window in English or in mrem/h (it was measured
+  before translating and converting). In the Home background > Another calculation
+  tooltip the average is also shown in mrem/h.
+
+## 2.101.9
+Achados da conferência do QA na 2.101.8:
+- O nome que você deu a uma medição ou a um trecho não é mais traduzido no
+  app em inglês (a medição "Sal light" não vira "Lite salt", o trecho
+  "Escritório" não vira "Office"), em todo lugar: lista e detalhe da
+  medição, dica e marcadores do gráfico, anotações e notas, faixa do trecho,
+  Onde do Agora, etiqueta do alerta, régua, avisos do RC102 fora, evento
+  "Medição de …", janela e PDF. Os nomes que o app dá (testes de Distância e Blindagem, "Saída de …")
+  continuam traduzidos.
+- Relatório de Fora de casa em inglês: o rodapé das páginas sai em inglês.
+- PDF da medição em inglês: "Configuração na época" traduz cada ajuste e a
+  origem da curva; o rótulo "Mudou desde a medição" cabe na coluna.
+- Janela do relatório: um dia fechado termina em "24:00" do mesmo dia (não
+  "00:00").
+
+**English**
+Findings from QA's check of 2.101.8:
+- The name you gave a measurement or a stretch is no longer translated in
+  the English app ("Sal light" no longer becomes "Lite salt", "Escritório" no
+  longer becomes "Office"), everywhere: measurement list and detail, chart
+  tooltip and markers, notes, stretch strip, Where on Now, alert tag, ruler,
+  RC102-away notices, the "Measurement of …" event, the window and the PDF.
+  Names the app gives (Distance and Shielding tests, "Trip on …") are still
+  translated.
+- Away from home report in English: the page footer is in English.
+- Measurement PDF in English: "Settings at the time" translates each setting
+  and the curve source; the "Changed since then" label fits its column.
+- Report window: a closed day ends at "24:00" of that day (not "00:00").
+
+## 2.101.8
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 3,
+e as sobras da conferência da 2.101.6):
+- Saída de casa tem uma regra só: o GMC-800 foi junto ou o trecho diz "eu
+  não estava em casa". Ignorar o GMC-800 (tubo quebrado) ou deixar os dois em
+  casa não vira saída: sem "Resumo da saída", sem aviso "Saída fechada", fora
+  do total "RC102 fora de casa", sem "fora de casa" na Fita e fora das saídas
+  do PDF; o fundo desses trechos conta como fundo em casa. Com o GMC-800
+  ignorado também dá para marcar "eu não estava em casa".
+- O aviso "Saída fechada" não aparece mais com a saída ainda aberta (ao
+  renomear, adicionar trecho ou responder o cartão do RC102).
+- Gráficos em CPS: os andares dizem "· CPS" e o eixo mostra 0,25 (não 0,3).
+- Espectrograma e log do RC102: trocar o período ou o filtro durante a
+  leitura não perde mais o pedido novo. O log sem nenhum tipo marcado diz
+  isso (não "Ainda sem registros").
+- Som da Busca só toca com a aba Busca aberta.
+- Telas estreitas e letra grande: tabela dos níveis, setinha da barra
+  lateral, valor do RC102 e da Busca em mrem/h, "← Voltar" da Distância e
+  Blindagem, tabela do Comparar, "Ver no gráfico" sem ficar sob a faixa dos
+  aparelhos, tabela do tempo morto, caminho das versões baixadas, horas do
+  detalhe do alerta, seletores do Agora e dos Alertas, tabela das duas fases
+  e o número do mostrador da Busca.
+- "Máx 24 h" diz "ontem às 03:46" quando o máximo foi ontem.
+- Padrões: diferença pequena entre dia e noite, mas fora do acaso, diz
+  "pequena, mas real" (não "sem diferença clara").
+- A Fita do dia conta um alerta novo na hora e não acumula ouvintes.
+- PDF: a linha "Unidade" do anexo (e a "Configuração na época" da medição)
+  não sai mais cortada.
+- Plural certo em "1 registro", "1 minuto novo", "1 linha ignorada".
+- Atividade (Bq): "Guardar como minha" de um cartão pronto leva o subtítulo e
+  o preparo de novo (só o "Outra coisa" vai sem); a lista de distâncias
+  aceita "2,5, 5, 10" e "2,5 5 10".
+- Calibrar: o cartão do KCl diz ~3 h com sal light e ~2 h com KCl puro.
+- Inglês: saída programada sem nome, notas do Ra-226/Ra-228, "your
+  reference" depois de "Save as mine", "Download history", janelas de
+  arquivo do Windows, "· same" da dose por período, janela e PDF do relatório
+  ("this week", "selected stretch", "Percentiles", "Gap", "Program", dias da
+  semana), chip de motivo, Nome e Posição em Atividade, "no mass", filtro do
+  log, eventos com o nome da pessoa, textos do espectrograma, nota e chuva na
+  dica dos Gráficos, "Place:", "what is σ?" e "(2 days)" do zoom.
+- Modo demonstração: "fica calado" para o Perigo do outro aparelho vale.
+- Sobras da 2.101.7: o PDF da medição compara o fator do fundo de então com
+  o de hoje (acima da curva não dá mais "hoje" falso); a Hora do dia diz os
+  dias com dado (não "em 90 dias" com 8 dias de histórico); o ± do subtítulo
+  do gráfico da medição com um algarismo; "−9%" com sinal de menos na dose
+  por período.
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 3, and the
+leftovers from the 2.101.6 check):
+- Leaving home has a single rule: the GMC-800 went with you or the stretch
+  says "I wasn't home". Ignoring the GMC-800 (broken tube) or leaving both at
+  home is no longer a trip: no "Trip summary", no "Trip closed" notice, left
+  out of the "RC102 away from home" total, no "away from home" on the day
+  strip and out of the PDF trips; the background of those stretches counts as
+  home background. With the GMC-800 ignored you can also mark "I wasn't
+  home".
+- The "Trip closed" notice no longer shows while the trip is still open
+  (when renaming, adding a stretch or answering the RC102 card).
+- Charts in CPS: the stacked panels say "· CPS" and the axis shows 0.25 (not
+  0.3).
+- RC102 spectrogram and log: changing the period or filter during a load no
+  longer loses the new request. The log with no type selected says so (not
+  "No records yet").
+- The Search sound only plays with the Search tab open.
+- Narrow windows and large text: level table, side bar arrow, RC102 and
+  Search value in mrem/h, "← Back" in Distance and Shielding, Compare table,
+  "Show on chart" no longer under the device strip, dead-time table, download
+  folder path, alert detail times, Now and Alerts selectors, two-phase table
+  and the Search dial number.
+- "Max 24 h" says "yesterday at 03:46" when the maximum was yesterday.
+- Patterns: a small but real day/night difference says "small, but real"
+  (not "no clear difference").
+- The day strip counts a new alert right away and no longer piles up
+  listeners.
+- PDF: the appendix "Unit" row (and the measurement "Settings at the time")
+  are no longer cut off.
+- Correct singular in "1 record", "1 new minute", "1 line skipped".
+- Activity (Bq): "Save as mine" from a ready card keeps the subtitle and
+  preparation again (only "Something else" goes without); the distance list
+  accepts "2,5, 5, 10" and "2,5 5 10".
+- Calibrate: the KCl card says ~3 h with lite salt and ~2 h with pure KCl.
+- English: unnamed planned trip, Ra-226/Ra-228 notes, "your reference" after
+  "Save as mine", "Download history", Windows file dialogs, "· same" in dose
+  by period, report window and PDF ("this week", "selected stretch",
+  "Percentiles", "Gap", "Program", weekdays), reason chip, Name and Position
+  in Activity, "no mass", log filter, events with your own names,
+  spectrogram texts, note and rain in the chart tooltip, "Place:", "what is
+  σ?" and the zoom "(2 days)".
+- Demo mode: "stays quiet" for the other device's Danger now applies.
+- Leftovers from 2.101.7: the measurement PDF compares the background
+  factor then with today's (no false "today" above the curve); Time of day
+  says the days with data (not "over 90 days" with 8 days of history); the ±
+  in the measurement chart subtitle has at least one digit; "−9%" with a
+  minus sign in dose by period.
+
+## 2.101.7
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 2,
+e as sobras da conferência da 2.101.5):
+- Medir objeto no RC102 com "a contagem não mudou, mas a dose subiu": a
+  certeza, o "Objeto ÷ fundo", a precisão, o texto da tabela, os Eventos e o
+  PDF passam a falar da dose (sem "menos que +X" pela contagem); a distância
+  segura e os "Os dois aparelhos" contam a dose que subiu como "viu".
+- PDF de uma medição salva mostra o fator que valeu nos números ("hoje: …"
+  quando mudou) e o "Mudou desde a medição" numa linha própria.
+- Fundo de casa: o RC102 que subiu um pouco "subiu menos" (não "ficou
+  igual"); "Por que subiu?" diz "o RC102 também subiu, menos" em vez de
+  "ficou parado"; as duas frases da Hora do dia dizem de quantos dias são.
+- Minha dose: "perto do fundo da sua casa (+8%)" com o mesmo % da célula.
+- Resumo › Comparar: "igual" só com os números mostrados iguais, sem
+  "(igual)" ao lado de uma diferença, e o % da dose do RC102 só com tempos
+  parecidos.
+- mrem/h: eixo do mapa de calor, "≈ CPM" dos níveis, coluna do tempo morto,
+  ajustes do RC102 (alarmes de taxa e de dose, dicas e janelas), Resumo da
+  saída, "Por que subiu?", título da janela no alarme, tabelas do PDF e dicas
+  de padrão ("Padrão 100 mrem/h"); o fator de calibração fica sempre em
+  µSv/h por CPM; "RC102" não é mais lido como número.
+- Resumo da saída: Esc no "editar título" desiste (e o Enter grava uma vez).
+- Ajuda do "RC102 saturado" sem o "RC102 102".
+- ± pequeno com pelo menos um algarismo (não mais "± 0,000").
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 2, and the
+leftovers from the 2.101.5 check):
+- Measure object with the RC102 when "the count didn't change, but the dose
+  rose": certainty, "Object ÷ background", precision, the table text, Events
+  and the PDF now talk about the dose (no "less than +X" from the count); the
+  safe distance and "Both devices" count the rising dose as "seen".
+- The PDF of a saved measurement shows the factor used in its numbers
+  ("today: …" when it changed) and "Changed since the measurement" on its own
+  line.
+- Home background: an RC102 that rose a bit "rose less" (not "stayed the
+  same"); "Why did it rise?" says "the RC102 also rose, less" instead of
+  "stayed flat"; both Time of day sentences say how many days they cover.
+- My dose: "close to your home background (+8%)" with the cell's same %.
+- Summary › Compare: "same" only when the shown numbers are equal, no
+  "(same)" next to a difference, and the RC102 dose % only with similar times.
+- mrem/h: heat map axis, the levels' "≈ CPM", the dead time column, RC102
+  settings (rate and dose alarms, hints and dialogs), trip summary, "Why did
+  it rise?", the window title on alarm, PDF tables and default hints
+  ("Default 100 mrem/h"); the calibration factor always stays in µSv/h per
+  CPM; "RC102" is no longer read as a number.
+- Trip summary: Esc in "edit title" cancels (and Enter saves once).
+- "RC102 saturated" help without "RC102 102".
+- Small ± values keep at least one digit (no more "± 0.000").
+
+## 2.101.6
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 1):
+- RC102: dá para ligar só o alarme 2 de dose (com o 1 desligado, o app não
+  diz mais que o 2 é menor que o 1).
+- RC102 › Desfazer a última gravação: com o aparelho já igual à cópia, avisa
+  que nada foi gravado e não perde o passo anterior do Desfazer.
+- Atividade (Bq): "até eu parar" guardado em Suas amostras volta como "até eu
+  parar" (não como 1 h); guardar de novo atualiza a mesma amostra (sem cartões
+  repetidos e sem os textos do cartão de modelo), e o botão vira "Atualizar
+  minha amostra"; a Posição segue a da calibração enquanto você não mexe nela
+  e não volta sozinha com o cursor no campo; "dentro do típico" segue a marca
+  (com a ressalva "mas a incerteza é grande"); "falta para ±10%" conta a
+  incerteza da calibração e diz quando não chega.
+- Importar backup com uma mudança ainda não salva: avisa que ela será
+  descartada e mostra os valores do backup (o Salvar seguinte não desfaz mais
+  o backup).
+- Calibração › Avançado: o fator digitado e ainda não usado não volta sozinho
+  ao fechar e abrir.
+- Fator da intercalibração com o RC102 aparece como tal no relatório e na
+  origem da calibração (não como "informado à mão").
+- Depois de mudar o fator do GMC-800, o alarme do aparelho e os "≈ CPM" dos
+  níveis são refeitos na hora.
+- Os avisos do Salvar e o botão "Gravar no GMC-800" usam os nomes certos.
+- Medir objeto: objeto bem abaixo do fundo (−3σ ou menos) diz que o fundo
+  provavelmente mudou, em vez de "nenhuma diferença, cabe no acaso".
+- Medir objeto › Distância: "2,5; 5; 10; 20" vira 2,5, 5, 10 e 20 cm (com ";"
+  a vírgula é decimal).
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 1):
+- RC102: you can turn on only dose alarm 2 (with alarm 1 off, the app no
+  longer says 2 is lower than 1).
+- RC102 › Undo the last write: with the device already matching the copy, it
+  says nothing was written and doesn't lose the previous Undo step.
+- Activity (Bq): "until I stop" saved in Your samples comes back as "until I
+  stop" (not 1 h); saving again updates the same sample (no duplicate cards
+  and no template texts), and the button becomes "Update my sample"; the
+  Position follows the calibration's while you haven't touched it and no
+  longer refills itself with the cursor in the field; "within typical"
+  follows the mark (with "but the uncertainty is large"); "left for ±10%"
+  includes the calibration uncertainty and says when it can't get there.
+- Importing a backup with an unsaved change: warns it will be discarded and
+  shows the backup's values (the next Save no longer undoes the backup).
+- Calibration › Advanced: a typed factor not yet used no longer resets when
+  closing and opening it.
+- The RC102 intercalibration factor shows as such in the report and the
+  calibration source (not as "entered by hand").
+- After changing the GMC-800 factor, the device alarm and the levels'
+  "≈ CPM" are redone right away.
+- The Save warnings and the "Write to the GMC-800" button use the right names.
+- Measure object: an object well below the background (−3σ or less) says the
+  background probably changed, instead of "no difference, within chance".
+- Measure object › Distance: "2,5; 5; 10; 20" becomes 2.5, 5, 10 and 20 cm
+  (with ";" the comma is decimal).
+
+## 2.101.5
+Correções da varredura do QA na 2.101.2 (os defeitos de gravidade alta):
+- Medir objeto: se o aparelho da medição desconecta, a medição não fica mais
+  presa calando a atenção e o alarme do outro aparelho; depois de 2 min sem
+  leitura o silêncio acaba.
+- Níveis de Atenção e Perigo: o valor salvo reaparece igual na tela, e salvar
+  de novo não troca o número.
+- Configurações: alarmes e ajustes dos aparelhos digitados e não gravados não
+  somem ao sair e voltar; a barra de salvar mostra que há ajuste pendente.
+- Fotos .jfif, .jpe, .pjpeg e parecidas têm o GPS tirado antes do backup e da
+  nuvem (o app olha o conteúdo do arquivo, não só a extensão).
+- RC102: uma linha cortada no fim do CSV não gruda mais na próxima (o minuto
+  falso de 5,3 µSv/h some). Com o CSV do mês travado (Excel, antivírus,
+  OneDrive), os minutos esperam na memória e entram quando o arquivo libera,
+  com aviso nos Eventos.
+- "Saí de casa" e "Voltei" não devolvem ao cálculo o aparelho que estava fora
+  dele (tubo com defeito, por exemplo).
+- Calibrar o GMC-800 lado a lado com o RC102 ignora os minutos fora de casa e
+  os de medição de objeto.
+- Em mrem/h: frases com vários números convertem todos (e o "800" do
+  "GMC-800" fica como está); o Medir objeto, o Resumo (Sua dose), a
+  Blindagem e a estatística dos Gráficos saem todos na unidade escolhida.
+- Gráficos: a "dose ≈" do zoom é a do aparelho escolhido.
+- Medir objeto no RC102: "com o objeto" usa a taxa do próprio RC102 na fase
+  (ao vivo, no gráfico salvo e no PDF), em vez da conversão do fundo, que
+  escondia a subida do sal (K-40).
+- Medições salvas › Editar e os formulários do Fora de casa (Programar saída,
+  Adicionar e Editar trecho) guardam o que foi digitado ao trocar de tela.
+- Atividade (Bq): clicar de novo no cartão já escolhido não apaga mais massa,
+  nome, radionuclídeos e tempo.
+- Também: desfazer "Mudei o aparelho de lugar" tira a anotação; editar um
+  trecho com nome automático troca o nome junto com os aparelhos; "Estou
+  testando um objeto" no RC102 não entra na dose; o backup leva as unidades e
+  o formato da data; a porta USB escolhida não se perde ao salvar.
+- Alertas: um alerta que começava no mesmo instante em que outro terminava
+  (dois aparelhos) podia sumir do alertas.csv e só existir até fechar o app.
+
+**English**
+Fixes from QA's sweep of 2.101.2 (the high-severity defects):
+- Measure object: if the measuring device disconnects, the measurement no
+  longer stays stuck muting the other device's attention and alarm; after
+  2 min without readings the mute ends.
+- Attention and Danger levels: the saved value shows up unchanged, and saving
+  again no longer changes the number.
+- Settings: device alarms and settings typed but not written no longer vanish
+  when leaving and coming back; the save bar shows a pending device setting.
+- .jfif, .jpe, .pjpeg and similar photos have their GPS removed before backup
+  and cloud (the app checks the file content, not only the extension).
+- RC102: a cut line at the end of the CSV no longer sticks to the next one
+  (the fake 5.3 µSv/h minute is gone). With the month's CSV locked (Excel,
+  antivirus, OneDrive), minutes wait in memory and go in once the file is
+  free, with a note in Events.
+- "Left home" and "Back home" no longer put back into the calculation a
+  device that was left out (a faulty tube, for example).
+- Calibrating the GMC-800 side by side with the RC102 skips the minutes away
+  from home and the ones measuring an object.
+- In mrem/h: sentences with several numbers convert all of them (and the
+  "800" in "GMC-800" stays as is); Measure object, Summary (Your dose),
+  Shielding and the Charts statistics all show the chosen unit.
+- Charts: the zoom's "dose ≈" is the chosen device's.
+- Measure object with the RC102: "with the object" uses the RC102's own rate
+  in that phase (live, in the saved chart and in the PDF) instead of the
+  background's conversion, which hid the salt's rise (K-40).
+- Saved measurements › Edit and the Away forms (Schedule a trip, Add and Edit
+  a stretch) keep what was typed when switching screens.
+- Activity (Bq): clicking the already chosen card again no longer clears
+  mass, name, radionuclides and time.
+- Also: undoing "I moved the device" removes its note; editing a stretch with
+  an automatic name updates the name along with the devices; "I'm testing an
+  object" on the RC102 stays out of the dose; the backup carries the units
+  and the date format; the chosen USB port is no longer lost on saving.
+- Alerts: an alert starting at the same moment another one ended (two
+  devices) could vanish from alertas.csv and only last until the app closed.
+
+## 2.101.4
+- Calibração do KCl: quando o pico do K-40 quase não aparece acima do fundo
+  (incerteza da eficiência acima de ±20%), a calibração não é mais guardada.
+  Antes, qualquer pico positivo virava calibração, e uma medida ruim (o sal
+  longe do cristal, por exemplo) deixava todos os Bq seguintes dezenas de
+  vezes altos demais. O resultado mostra a eficiência medida e avisa que não
+  foi guardada; a calibração anterior continua valendo.
+- Aviso cedo (pedido do ACE, depois de 3 h perdidas numa calibração sem
+  pico): durante o sal, a tela mostra a contagem total com o sal e a do fundo
+  (+X%). Se aos 5 min ela quase não subiu (menos de 5%), ou se aos 30 min o
+  pico do K-40 continua abaixo do mínimo plausível, aparece "O RC102 não está
+  vendo o sal", com o que conferir, em vez de deixar rodar 2 h.
+- Durante o fundo, a tela compara a contagem com o normal da casa (mediana
+  dos 7 dias antes) e avisa se ela está mais de 25% acima: o sal ficou perto
+  e a calibração sairia errada.
+
+**English**
+- KCl calibration: when the K-40 peak barely shows above the background
+  (efficiency uncertainty above ±20%), the calibration is no longer saved.
+  Before, any positive peak became the calibration, and a bad measurement
+  (the salt away from the crystal, for example) made every later Bq tens of
+  times too high. The result shows the measured efficiency and says it was
+  not saved; the previous calibration stays.
+- Early warning (ACE's request, after losing 3 h on a calibration with no
+  peak): during the salt phase, the screen shows the total count rate with
+  the salt and the background's (+X%). If after 5 min it barely rose (less
+  than 5%), or after 30 min the K-40 peak is still below the lowest plausible
+  value, "The RC102 isn't seeing the salt" appears with what to check,
+  instead of running for 2 h.
+- During the background, the screen compares the count rate with the home
+  normal (median of the previous 7 days) and warns if it is more than 25%
+  higher: the salt was nearby and the calibration would come out wrong.
+
+## 2.101.3
+- Calibração do KCl: a massa digitada voltava para 500 g quando se clicava
+  em "Sal light", "KCl puro" ou no cartão "1 · KCl" depois de digitar (pedido
+  do ACE: 250 g viraram 500 g). Agora a massa digitada fica, e cada referência
+  (KCl e tório) guarda a sua; o padrão só entra num campo que ainda não foi
+  mexido.
+- Teste novo de ponta a ponta (roda no CI): pela tela, com o App de verdade e
+  um RC102 de mentira, digita 250 g, 51% e a posição, clica em tudo que antes
+  trocava a massa, passa pelo fundo e pelo sal e confere o resultado na tela,
+  a calibração, o histórico e o que ficou salvo no disco. Com a versão
+  anterior ele falha em "massa 500 depois de Sal light".
+
+**English**
+- KCl calibration: the typed mass went back to 500 g when you clicked "Lite
+  salt", "Pure KCl" or the "1 · KCl" card after typing it (reported by ACE:
+  250 g became 500 g). Now the typed mass stays, and each reference (KCl and
+  thorium) keeps its own; the default only fills a field you haven't touched.
+- New end-to-end test (runs in CI): through the screen, with the real App and
+  a fake RC102, it types 250 g, 51% and the position, clicks everything that
+  used to reset the mass, goes through the background and the salt, and
+  checks the result on screen, the calibration, the history and what was
+  saved on disk. With the previous version it fails at "mass 500 after Lite
+  salt".
+
+## 2.101.2
+- Inglês sem meia tradução (pedido do ACE): a Fita do dia dizia "Today: dia
+  tranquilo, all on the nível seguro". O tradutor pegava o primeiro molde que
+  servia ("Hoje: {0}") e o resto saía meio traduzido. Agora, na tela e no Go,
+  vale o molde com mais texto fixo, e um resultado que ainda tem português é
+  recusado enquanto houver outro jeito (frases, pedaços, molde genérico).
+- Teste novo (scripts/ingles_test.js, roda no CI): todo texto em português do
+  código (5.076, frases fixas e moldes preenchidos com valores de exemplo)
+  passa pelo tradutor, e o demo em inglês é aberto em todos os cenários
+  (seguro, atenção, alarme, perigo, saída, saturado, desconectado, Cs-137…),
+  em todas as páginas, sub-abas, detalhes, janelas e hover. Sobrou
+  português: o CI falha.
+- Depois de "rótulo:", o número sai no formato do inglês (0.12, não 0,12).
+- Notas da atualização: em inglês, só a parte em inglês (antes vinham as
+  duas, com o português primeiro).
+- O nome que você dá (saída, medição, amostra) fica protegido antes da
+  tradução: um "em" ou "de" dentro dele não é mais lido como parte da frase.
+  "Marcado: …" do Fora de casa traduzido; "sem leitura" não ganha maiúscula
+  no meio da frase (achados do QA).
+
+**English**
+- English without half translations (ACE's request): the Day strip said
+  "Today: dia tranquilo, all on the nível seguro". The translator took the
+  first template that fit ("Hoje: {0}") and the rest came out half
+  translated. Now, on screen and in Go, the template with the most fixed text
+  wins, and a result that still has Portuguese is rejected while there is
+  another way (sentences, pieces, generic template).
+- New test (scripts/ingles_test.js, runs in CI): every Portuguese text in the
+  code (5,076, fixed sentences and templates filled with sample values) goes
+  through the translator, and the English demo is opened in every scenario
+  (safe, attention, alarm, danger, trip, saturated, disconnected, Cs-137…), on
+  every page, sub-tab, details, dialog and hover. Any Portuguese left: CI
+  fails.
+- After "label:", the number comes out in the English format (0.12, not
+  0,12).
+- Update notes: in English, only the English part (before, both came, with
+  the Portuguese first).
+- The name you give (trip, measurement, sample) is protected before
+  translation: an "em" or "de" inside it is no longer read as part of the
+  sentence. "Marked: …" in Away from home translated; "no reading" no longer
+  gets a capital letter mid-sentence (found by QA).
+
+## 2.101.1
+- Faixa dos aparelhos presa no topo (fora do Agora): atrás da bolha do
+  aparelho aparecia um retângulo de outra cor, de cantos retos. A faixa agora
+  usa o mesmo fundo da página (pedido do ACE).
+- Inglês, varredura completa (pedido do ACE): a dica do espectro mostrava os
+  isótopos em português ("actínio · série do tório"); as marcas da fita, a
+  lista de uso do app ("Gráficos › tempo") e várias mensagens montadas com um
+  valor no fim ("Backup salvo: …", "Conexão perdida: …", "Não consegui ler o
+  log: …", erros da atualização, avisos do GMC-800) também. Agora um rótulo
+  conhecido seguido de ": valor" e um texto entre parênteses são traduzidos em
+  pedaços, na tela e no PDF.
+- Relatório da medição: a anotação que você escreveu fica como está (antes,
+  em inglês, saía meio traduzida).
+- Medir objeto no RC102: a incerteza do µSv/h agora sai das médias de blocos
+  de 30 s. O µSv/h do aparelho vem suavizado, e contar cada segundo como
+  independente deixava a incerteza pequena demais; o "a dose subiu" podia
+  aparecer à toa (achado do QA).
+- Gráfico da dose: o eixo não mostra mais zeros inúteis ("60" em vez de
+  "60,0"); em inglês, "no data for 6 days" no lugar de "6 days missing
+  without data".
+- Testes novos: todo PDF gerado em inglês nos testes e a bandeja em todos os
+  estados não podem ter texto em português.
+
+**English**
+- Device strip pinned to the top (outside Now): a rectangle of a different
+  color, with square corners, showed behind the device bubble. The strip now
+  uses the same background as the page (ACE's request).
+- English, full sweep (ACE's request): the spectrum tip showed the isotopes
+  in Portuguese ("actínio · série do tório"); the strip marks, the app usage
+  list ("Charts › tempo") and several messages built with a value at the end
+  ("Backup saved: …", "Connection lost: …", "Couldn't read the log: …", update
+  errors, GMC-800 notices) too. Now a known label followed by ": value" and a
+  text in parentheses are translated piece by piece, on screen and in the PDF.
+- Measurement report: the note you wrote stays as written (before, in
+  English, it came out half translated).
+- Measure object on the RC102: the µSv/h uncertainty now comes from the means
+  of 30 s blocks. The device's µSv/h is smoothed, and counting each second as
+  independent made the uncertainty too small; "the dose went up" could show
+  up for nothing (found by QA).
+- Dose chart: the axis no longer shows useless zeros ("60" instead of
+  "60.0"); in English, "no data for 6 days" instead of "6 days missing
+  without data".
+- New tests: every PDF generated in English in the tests and the tray in every
+  state must have no Portuguese text.
+
+## 2.101.0
+- Gráficos, dose por período (pedido do ACE): um trecho só para a página.
+  Arrastar no gráfico de cima ou no da dose marca o mesmo trecho nos dois, e
+  um "Sair do zoom" tira dos dois.
+- Dose acumulada com "Do gráfico de cima" (padrão) ou "Tudo": do primeiro dado
+  gravado até agora, os dois aparelhos, com o teto proporcional ao tempo
+  medido. A escolha fica guardada; marcar um trecho volta para "Do gráfico de
+  cima".
+- O quadro do RC102 na dose tem um número só: a dose do período, com os
+  buracos preenchidos pelo histórico do aparelho. Saem as linhas "Contador do
+  aparelho" e "Pelo app"; se faltar mais de 5% do período, aparece quanto
+  falta. O contador do aparelho continua na página do RC102, intocado.
+- Gráfico de cima com o seletor "Todos | GMC-800 | RC102" (guardado), ao lado
+  de µSv/h e CPM. Com um aparelho só, aparece só a linha dele, com o eixo
+  ajustado a ele; no CPM fica um eixo só. Sem dado do RC102, o seletor some.
+- Botão "Analisar nos gráficos" no gráfico de 24 h do RC102 e no quadro do
+  GMC-800: abre os Gráficos já naquele aparelho e no mesmo período.
+- Inglês: um texto já traduzido não é traduzido de novo (a legenda do CPM
+  dizia "on the limits" em vez de "no limits").
+
+**English**
+- Charts, dose by period (ACE's request): one stretch for the whole page.
+  Dragging on the chart above or on the dose chart marks the same stretch on
+  both, and one "Exit zoom" clears both.
+- Accumulated dose with "From the chart above" (default) or "All": from the
+  first recorded data point until now, both devices, with the ceiling
+  proportional to the measured time. The choice is remembered; marking a
+  stretch goes back to "From the chart above".
+- The RC102 tile in the dose has a single number: the period's dose, with
+  gaps filled from the device's history. The "Device counter" and "By the app"
+  lines are gone; if more than 5% of the period is missing, it says how much.
+  The device counter stays on the RC102 page, untouched.
+- The chart above has an "All | GMC-800 | RC102" selector (remembered), next
+  to µSv/h and CPM. With a single device, only its line shows, with the axis
+  fitted to it; in CPM there is a single axis. Without RC102 data, the
+  selector goes away.
+- "Analyze in the charts" button on the RC102 24 h chart and on the GMC-800
+  card: opens Charts on that device and the same period.
+- English: text that is already translated is not translated again (the CPM
+  legend said "on the limits" instead of "no limits").
+
+## 2.100.2
+- Medir objeto: atenção e alarme dos dois aparelhos continuam em silêncio
+  durante a medição, mas o Perigo (e a saturação) do aparelho que não está no
+  objeto volta a valer: ali seria radiação de verdade. O aparelho no objeto
+  segue calado por inteiro até o resultado.
+- No Preparar, a opção "Perigo do outro aparelho durante a medição": toca
+  (padrão) ou fica calado (pedido do ACE). A escolha fica guardada.
+- O aviso na tela diz isso e fica até 1 min depois do resultado, o mesmo
+  tempo em que os alertas continuam calados.
+- Medir objeto com o RC102 e fundo da casa: o espectro de fundo passa a ser o
+  dos espectros gravados em casa nos últimos 7 dias, sem os minutos de pedra
+  ou fonte perto. O acumulado do aparelho juntava tudo o que ele já mediu
+  (pedras inclusive) e ficava 2 a 3 vezes acima em todas as energias. O mesmo
+  filtro vale para o "Parece" da busca e do espectrograma.
+- Medir objeto com o RC102: quando a contagem não muda mas a taxa de dose
+  sobe (gama de energia alta, como o K-40 do sal light), o resumo diz "a
+  contagem não mudou, mas a dose subiu", com quantos σ a dose subiu e a linha
+  que apareceu no espectro. O ± do µSv/h do RC102 passa a vir do espalhamento
+  da própria dose, e não mais do √N das contagens (também no PDF).
+- Faixa dos aparelhos: o "do aparelho" da dose de hoje do RC102 virou dica.
+  Na janela estreita ele quebrava a linha e deixava o quadro com o dobro da
+  altura do quadro do GMC-800.
+- Página do RC102: os botões "Ajustes do aparelho" e "Conexão" saíram do
+  quadro principal. Os dois continuam em Configurações.
+- Inglês: textos que ainda apareciam em português foram traduzidos (a dica
+  "nenhum pico conhecido aqui" do espectro e outros 80). A conferência das
+  traduções agora pega mais frases em português.
+
+**English**
+- Measure object: attention and alarm on both devices stay silent during the
+  measurement, but Danger (and saturation) on the device that is not on the
+  object counts again, since that would be real radiation. The device on the
+  object stays fully silent until the result.
+- In Prepare, the option "Danger on the other device during the measurement":
+  sounds (default) or stays silent (ACE's request). The choice is remembered.
+- The on-screen notice says so and stays until 1 min after the result, the
+  same time the alerts stay silent.
+- Measure object with the RC102 and home background: the background spectrum
+  is now the spectra recorded at home over the last 7 days, without the
+  minutes of rocks or nearby sources. The device's accumulated spectrum held
+  everything it ever measured (rocks included) and sat 2 to 3 times higher at
+  every energy. The same filter applies to the "Looks like" in the search
+  and in the spectrogram.
+- Measure object with the RC102: when the count doesn't change but the dose
+  rate goes up (high-energy gamma, like the K-40 in lite salt), the summary
+  says "the count didn't change, but the dose went up", with how many σ the
+  dose rose and the line that showed up in the spectrum. The ± of the RC102
+  µSv/h now comes from the spread of the dose itself, no longer from the √N
+  of the counts (also in the PDF).
+- Device strip: the RC102's "from the device" next to today's dose became a
+  tooltip. In a narrow window it broke the line and made the tile twice as
+  tall as the GMC-800's.
+- RC102 page: the "Device settings" and "Connection" buttons left the main
+  tile. Both are still in Settings.
+- English: texts still showing in Portuguese were translated (the spectrum's
+  "no known peak here" tooltip and about 80 others). The translation check
+  now catches more Portuguese phrases.
+
+## 2.100.1
+- Correção importante no Medir objeto: desde a 2.94.0 a tela não mandava
+  para a medição o aparelho escolhido, o modo automático nem o fundo da casa.
+  Toda medição rodava no GMC-800, com tempo fixo e medindo o fundo na hora,
+  mesmo com o RC102 marcado. Agora vale o que está marcado. As medições
+  salvas desde a 2.94.0 dizem o aparelho em que rodaram de verdade.
+- Durante a medição, os alertas do app dos dois aparelhos (GMC-800 e RC102)
+  ficam em silêncio até o resultado, não só os do aparelho no objeto. O aviso
+  diz isso e mostra em qual aparelho a medição está rodando.
+- Modo busca no Bluetooth mais leve: o espectro é lido a cada 5 s, e se uma
+  leitura demorar mais que 2 s o app espaça as próximas (até 15 s) para não
+  atrasar a taxa e os alarmes. Quando isso acontece, fica uma linha no
+  registro dizendo quanto levou.
+- O espectrograma da busca começa quando a aba abre. O trecho de antes agora
+  diz "juntando desde HH:MM", em vez de ficar só vazio.
+- "Parece": as linhas em ordem de energia, sem parênteses em sequência (ex.:
+  "Rádio-226 (série do urânio) · 295, 352, 609 keV").
+- Celular: "Janela" e "Cores" não se separam dos botões ao quebrar a linha; o
+  título "Minha dose" do Agora fica numa linha só.
+- Textos do normal e do máximo da busca em fonte de texto (números seguem
+  iguais).
+
+**English**
+
+- Important Measure object fix: since 2.94.0 the screen didn't pass the
+  chosen device, automatic mode or home background to the measurement. Every
+  measurement ran on the GMC-800, with a fixed time and measuring the
+  background on the spot, even with the RC102 selected. Now what is selected
+  is used. Measurements saved since 2.94.0 show the device they really ran on.
+- During a measurement, the app alerts of both devices (GMC-800 and RC102)
+  stay silent until the result, not only those of the device on the object.
+  The notice says so and shows which device the measurement runs on.
+- Lighter search mode over Bluetooth: the spectrum is read every 5 s, and if
+  a read takes more than 2 s the app spaces the next ones (up to 15 s) so the
+  rate and alarms are not delayed. When that happens, a line in the log says
+  how long it took.
+- The search spectrogram starts when the tab opens. The part before that now
+  says "collecting since HH:MM" instead of just being empty.
+- "Looks like": lines in energy order, without back-to-back parentheses (e.g.
+  "Radium-226 (uranium series) · 295, 352, 609 keV").
+- Phone: "Window" and "Colors" stay with their buttons when the line wraps;
+  the "My dose" title on Now stays on one line.
+- The search's normal and max texts in the text font.
+
+## 2.100.0
+- Modo busca do RC102 com espectrograma ao vivo: embaixo da linha da taxa,
+  no mesmo eixo de tempo, aparece de que energia chega o que chega (0 a
+  1500 keV). Perto de uma fonte, as linhas dela acendem e o app escreve com o
+  que se parece (ex.: "Parece: Rádio-226 (série do urânio)"); só fundo, não
+  escreve nada.
+- Janela de 1, 2 (padrão) ou 5 min, guardada. As cores são as mesmas da aba
+  Espectrograma (original ou contínua), e trocar num lugar troca no outro.
+- Com a aba Busca aberta, o espectro é lido a cada 2 s no USB e a cada 3,5 s
+  no Bluetooth. Fechou a aba, volta ao normal. Nada a mais é gravado.
+
+**English**
+
+- RC102 search mode with a live spectrogram: below the rate line, on the same
+  time axis, it shows at which energy things arrive (0 to 1500 keV). Near a
+  source, its lines light up and the app says what it looks like (e.g. "Looks
+  like: Radium-226 (uranium series)"); with only background, it says nothing.
+- Window of 1, 2 (default) or 5 min, remembered. Colors are the same as the
+  Spectrogram tab (original or continuous), and changing one changes the
+  other.
+- With the Search tab open, the spectrum is read every 2 s over USB and every
+  3.5 s over Bluetooth. Close the tab and it goes back to normal. Nothing
+  extra is saved.
+
+## 2.99.1
+- Medir objeto: a caixa "Ajustes da medição" saiu (no tempo fixo ela abria
+  vazia, e no automático também, porque a opção de dentro nunca aparecia). O
+  "Conta como tem algo" (+10%, +20%, +50% do fundo) agora fica logo abaixo
+  do tempo e aparece no automático, que é onde ele vale.
+
+**English**
+
+- Measure object: the "Measurement settings" box is gone (with a fixed time
+  it opened empty, and in automatic too, because the option inside never
+  showed). "Counts as something there" (+10%, +20%, +50% of background) now
+  sits right below the time and shows in automatic, which is where it
+  applies.
+
+## 2.99.0
+- Medir objeto: antes de começar, a escolha fica à vista em "Quanto tempo
+  medir": Automático (para quando tiver certeza, até 10 min, 30 min ou 1 h)
+  ou Tempo fixo (de 30 s a 1 h, mede o tempo todo). Cada modo lembra o último
+  tempo usado. Os Ajustes ficam só com quando conta como "tem algo".
+- No celular, a faixa dos aparelhos presa no topo fica com uma linha por
+  aparelho (nome, número e nível), ocupando metade da altura.
+- Dose acumulada: o nome do aparelho é o botão para o teclado e o leitor de
+  tela; clicar no único aparelho aceso não troca mais para o outro.
+- Em inglês, a frase de alertas da Fita do dia e da semana sai traduzida
+  inteira.
+
+**English**
+
+- Measure object: before starting, the choice is in plain sight under "How
+  long to measure": Automatic (stops once it is sure, up to 10 min, 30 min or
+  1 h) or Fixed time (30 s to 1 h, measures the whole time). Each mode
+  remembers the last time used. Settings keep only when it counts as
+  "something there".
+- On the phone, the device strip pinned to the top shows one line per device
+  (name, number and level), at half the height.
+- Accumulated dose: the device name is the button for the keyboard and screen
+  readers; clicking the only device that is on no longer switches to the
+  other one.
+- In English, the alerts sentence of the day and week tapes is fully
+  translated.
+
+## 2.98.1
+- Medir objeto: o tempo fixo vai até 1 h (novas opções de 10 min, 30 min e
+  1 h). Serve para fontes fracas, como sal light, que pedem meia hora ou
+  mais para a diferença aparecer.
+- Medições salvas: o "Como funciona: tempo, distância e blindagem" ganhou a
+  própria linha e não fica mais por cima dos botões Relatório, Ver no
+  gráfico, Editar e Apagar. Na lista, a data e a duração não quebram no meio.
+
+**English**
+
+- Measure object: the fixed time now goes up to 1 h (new 10 min, 30 min and
+  1 h options). Useful for weak sources, like light salt, which need half an
+  hour or more for the difference to show.
+- Saved measurements: "How it works: time, distance and shielding" got its
+  own line and no longer sits on top of the Report, See on the chart, Edit
+  and Delete buttons. In the list, the date and duration no longer break in
+  the middle.
+
+## 2.98.0
+- A faixa dos aparelhos virou a barra compacta: fica presa no topo ao rolar,
+  com o nível e a dose de hoje de cada um. No Agora ela aparece quando os
+  quadros grandes saem da tela; um clique volta para eles. A barra antiga
+  ("voltar ao topo") saiu.
+- Com os dois quadros abertos na faixa, eles ficam lado a lado, sem empilhar.
+  Com um só aberto, a faixa rola junto para não cobrir a tela.
+- Dose acumulada: clicar no quadro do aparelho volta a mostrar ou esconder a
+  linha dele no gráfico (no lugar da caixa "mostrar no gráfico"). Escondido,
+  o quadro fica apagado.
+
+**English**
+
+- The device strip became the compact bar: it stays pinned to the top while
+  scrolling, with each device's level and today's dose. On Now it shows up
+  once the big cards leave the screen; a click goes back to them. The old bar
+  ("back to top") is gone.
+- With both cards open on the strip, they sit side by side instead of
+  stacking. With only one open, the strip scrolls along so it doesn't cover
+  the screen.
+- Accumulated dose: clicking a device's card shows or hides its line on the
+  chart again (instead of the "show on chart" box). Hidden, the card is
+  dimmed.
+
 ## 2.97.1
 - Faixa dos aparelhos (fora do Agora): abrir um quadro não deixa mais um
   buraco embaixo do outro. O aberto ganha a linha inteira, e o fechado fica

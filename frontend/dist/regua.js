@@ -45,7 +45,7 @@ function reguaTaxaRefs() {
     const key = m.name.toLowerCase();
     if (seen.has(key) || seen.size >= 4) continue;
     seen.add(key);
-    out.push({ v: m.obj.usv, t: `${m.name}, encostado`, d: `sua medição de ${ddmm(m.time)}`, mine: true });
+    out.push({ v: m.obj.usv, t: `${mNameTxt(m)}, encostado`, d: `sua medição de ${ddmm(m.time)}`, mine: true });
   }
   return out;
 }
@@ -205,7 +205,7 @@ function openRegua(which) {
   ], "µSv/h");
   const d = state.dose;
   const doseHere = d && d.measuredMinutes ? d.total : null;
-  const per = state.doseZoom ? "trecho do zoom" : (document.querySelector(`#rangeSeg button[data-range="${state.dosePeriod}"]`)?.textContent.trim() || "período");
+  const per = state.doseZoom ? "trecho do zoom" : state.doseAll ? "todo o histórico" : (document.querySelector(`#rangeSeg button[data-range="${state.dosePeriod}"]`)?.textContent.trim() || "período");
   const lbl = d && d.measuredMinutes ? `Dose no contador (${per})` : "";
   // o cartão de dose pode estar no Radiacode (sua dose) ou no GMC (casa):
   // entram os dois, no mesmo período

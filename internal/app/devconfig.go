@@ -145,9 +145,9 @@ func (a *App) SetDeviceConfig(c gmc.Config800) (gmc.Config800, error) {
 func (a *App) RestoreDeviceConfig() (string, error) {
 	_ = os.MkdirAll(a.backupDir(), 0o755)
 	path, err := wruntime.OpenFileDialog(a.ctx, wruntime.OpenDialogOptions{
-		Title:            "Escolha a cópia da configuração",
+		Title:            a.T("Escolha a cópia da configuração"),
 		DefaultDirectory: a.backupDir(),
-		Filters:          []wruntime.FileFilter{{DisplayName: "Configuração do GMC (*.bin)", Pattern: "*.bin"}},
+		Filters:          []wruntime.FileFilter{{DisplayName: a.T("Configuração do GMC (*.bin)"), Pattern: "*.bin"}},
 	})
 	if err != nil || path == "" {
 		return "", err

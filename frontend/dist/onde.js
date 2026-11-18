@@ -95,7 +95,7 @@ function renderWhere() {
   card.classList.toggle("off", off);
   const chip = $("whChip");
   chip.hidden = !off;
-  if (off && w.since) chip.textContent = `fora do normal desde ${hhmm(w.since)}` + (w.open && w.open.name ? ` · ${w.open.name}` : "");
+  if (off && w.since) chip.textContent = `fora do normal desde ${hhmm(w.since)}` + (w.open && w.open.name ? ` · ${pNameTxt(w.open.name)}` : "");
   // a linha: "GMC-800 em casa · RC102 com você · mudar"
   const sum = $("whSum");
   sum.textContent = "";
@@ -125,7 +125,7 @@ function renderWhere() {
     const h = whHealth(dev, c), hs = $(g ? "whGmcH" : "whRcH");
     hs.className = "hstat " + h.cls;
     hs.innerHTML = '<span class="hd"></span>';
-    hs.append(h.t + (c[dev] === "fora" && w.open && w.open.name ? ` · ${w.open.name}` : ""));
+    hs.append(h.t + (c[dev] === "fora" && w.open && w.open.name ? ` · ${pNameTxt(w.open.name)}` : ""));
     // RC102 longe do PC: continua somando a dose sozinho
     if (!g && L.pr.curve && L.pr.src === "radiacode") {
       const k = document.createElement("span");
@@ -239,7 +239,7 @@ async function whSet(w, name) {
       ? await api.SetWhereAt(w.gmc, w.radiacode, name || "", lastGood)
       : await api.SetWhere(w.gmc, w.radiacode, name || "");
     whPending = null; whWhen = "now"; whOpen = false;
-    $("whName").value = "";
+    $("whName").value = ""; delete $("whName").dataset.r;
     await refreshWhere();
   } catch (e) { toast(errMsg(e), true); }
 }
@@ -269,11 +269,13 @@ function wireWhere() {
     renderWhere();
     if (whOpen) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }));
-  $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("whName").value = b.textContent.trim(); }));
+  $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { const r = (b.dataset.r || b.textContent).trim(); $("whName").value = tr(r); $("whName").dataset.r = r; })); // 2.101.8: mostra traduzido, grava a palavra original
   $("whWhenSeg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { whWhen = b.dataset.w; renderWhere(); }));
-  $("whOk").addEventListener("click", () => whPending && whSet(whPending, $("whName").value));
+  // o campo ainda com o motivo do chip (traduzido) grava a palavra original
+  const whNameVal = () => { const el = $("whName"), r = el.dataset.r; return r && el.value.trim() === tr(r) ? r : el.value; };
+  $("whOk").addEventListener("click", () => whPending && whSet(whPending, whNameVal()));
   $("whNo").addEventListener("click", () => { whPending = null; whWhen = "now"; renderWhere(); });
-  $("whName").addEventListener("keydown", (e) => { if (e.key === "Enter" && whPending) { e.preventDefault(); whSet(whPending, $("whName").value); } });
+  $("whName").addEventListener("keydown", (e) => { if (e.key === "Enter" && whPending) { e.preventDefault(); whSet(whPending, whNameVal()); } });
   // o estado ao vivo muda sozinho: confere a cada 30 s na tela Agora
   setInterval(() => { if (state.view === "agora" && !whPending) refreshWhere(); }, 30e3);
 }

@@ -18,6 +18,10 @@ const RC_CTRL = [
 ];
 const RC_DOSE_OFF = 9e6; // µSv: acima disso o alarme de dose está desligado
 const RC_DIRS = ["automática", "virada para a direita", "virada para a esquerda"];
+// 2.101.6: os campos ficam na unidade da tela (µSv/h ou mrem/h; µSv ou mrem);
+// o aparelho e as contas, em µSv. A volta arredonda para não "mudar" sozinho
+const rcIn = (v) => { const x = parseFloat(v); return x > 0 ? +(x / rateK()).toPrecision(10) : NaN; };
+const rcOut = (usv) => (usv > 0 ? +(usv * rateK()).toPrecision(6) : "");
 
 let rcCfg = null, rcCfgRead = false, rcCfgBusy = false;
 
@@ -55,7 +59,7 @@ function rcDoseOffSync() {
 function rcHints() {
   const st = (state.rc && state.rc.st) || {};
   const bg = st.stats && st.stats.bgUSv;
-  const a1 = parseFloat($("rcDR1").value);
+  const a1 = rcIn($("rcDR1").value);
   // uma frase por <span>: cada uma é traduzida sozinha
   const parts = [bg ? `Nível de fundo em casa pelo RC102: ${fmt(bg, 3)} µSv/h.` : "Nível de fundo típico dentro de casa: perto de 0,1 µSv/h."];
   if (bg && a1 > 0) parts.push(`O alarme 1 está em ${fmt(a1 / bg, 1)}× o nível de fundo.`);
@@ -71,14 +75,15 @@ function rcHints() {
 }
 
 function fillRcCfg(c) {
+  setTimeout(() => { if (typeof renderSetBar === "function") renderSetBar(); }, 0); // 2.101.5: a barra acompanha o que está no aparelho
   rcCfg = c;
   rcCtrlRows();
-  $("rcDR1").value = c.doseRate1;
-  $("rcDR2").value = c.doseRate2;
+  $("rcDR1").value = rcOut(c.doseRate1);
+  $("rcDR2").value = rcOut(c.doseRate2);
   for (const n of ["1", "2"]) {
     const v = c["dose" + n], off = v >= RC_DOSE_OFF;
     $("rcDS" + n + "On").checked = !off;
-    $("rcDS" + n).value = off ? "" : v;
+    $("rcDS" + n).value = off ? "" : rcOut(v);
   }
   $("rcCR1").value = c.countRate1;
   $("rcCR2").value = c.countRate2;
@@ -105,8 +110,8 @@ function fillRcCfg(c) {
 function readRcCfgForm() {
   const n = (id) => parseFloat($(id).value);
   const s = Object.assign({}, rcCfg);
-  s.doseRate1 = n("rcDR1"); s.doseRate2 = n("rcDR2");
-  for (const k of ["1", "2"]) s["dose" + k] = !$("rcDS" + k + "On").checked ? 1e7 : n("rcDS" + k);
+  s.doseRate1 = rcIn($("rcDR1").value); s.doseRate2 = rcIn($("rcDR2").value);
+  for (const k of ["1", "2"]) s["dose" + k] = !$("rcDS" + k + "On").checked ? 1e7 : rcIn($("rcDS" + k).value);
   s.countRate1 = n("rcCR1"); s.countRate2 = n("rcCR2");
   s.soundOn = $("rcSoundOn").checked;
   s.vibroOn = $("rcVibroOn").checked;
@@ -154,7 +159,7 @@ function rcCfgCheck(s) {
   if (bad(s.doseRate1) || bad(s.doseRate2) || s.doseRate1 < 0.01 || s.doseRate2 > 1000) return "Os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h.";
   if (s.doseRate2 <= s.doseRate1) return "O alarme 2 de taxa precisa ser maior que o alarme 1.";
   if (bad(s.dose1) || bad(s.dose2) || s.dose1 < 0.01) return "Preencha os alarmes de dose (a partir de 0,01 µSv) ou marque \"desligado\".";
-  if (s.dose2 < s.dose1) return "O alarme 2 de dose não pode ser menor que o alarme 1.";
+  if (s.dose2 < s.dose1 && s.dose1 < 9e6) return "O alarme 2 de dose não pode ser menor que o alarme 1.";
   if (bad(s.countRate1) || bad(s.countRate2) || s.countRate1 < 0.1 || s.countRate2 > 50000) return "Os alarmes de contagem precisam ficar entre 0,1 e 50.000 cps.";
   if (s.countRate2 <= s.countRate1) return "O alarme 2 de contagem precisa ser maior que o alarme 1.";
   return "";
@@ -193,7 +198,8 @@ async function rcCfgRun(label, fn, okMsg) {
   try {
     const c = await fn();
     if (c) fillRcCfg(c);
-    if (okMsg) toast(okMsg);
+    if (c && c.unchanged) toast("O RC102 já estava com esses ajustes: nada foi gravado.");
+    else if (okMsg) toast(okMsg);
   } catch (e) {
     toast(errMsg(e), true);
     try { fillRcCfg(await api.GetRcSettings()); } catch (e2) { setRcCfgEnabled(!!rcCfg); }
@@ -209,10 +215,9 @@ function wireRcCfg() {
   ["rcDR1", "rcBrt", "rcDS1", "rcDS2"].forEach((id) => $(id).addEventListener("input", rcHints));
   ["rcDS1On", "rcDS2On"].forEach((id) => $(id).addEventListener("change", () => {
     const n = id[4], inp = $("rcDS" + n);
-    if ($(id).checked && !inp.value) inp.value = n === "1" ? 1000 : 5000;
+    if ($(id).checked && !inp.value) inp.value = rcOut(n === "1" ? 1000 : 5000);
     rcDoseOffSync();
   }));
-  $("btnRcAdjust").addEventListener("click", () => openSettings("rcCfg"));
   $("rcBackups").addEventListener("click", () => call(api.OpenRcConfigBackups));
 
   $("rcCfgSave").addEventListener("click", async () => {

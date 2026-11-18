@@ -144,3 +144,85 @@ func TestActivityFlow(t *testing.T) {
 		t.Fatalf("sem aparelho deveria dar erro")
 	}
 }
+
+// 2.101.4: uma calibração em que o pico do K-40 quase não aparece (o sal longe
+// do cristal) não é guardada: estragaria todos os Bq dali para frente.
+func TestActivityCalWeakNotSaved(t *testing.T) {
+	a := newTestApp(t)
+	rng := rand.New(rand.NewSource(11))
+	bg := actFake(rng, 3600, map[float64]float64{1460.8: 2 * 3600, 609.3: 1.5 * 3600}, 0.5)
+	smp := actFake(rng, 2940, map[float64]float64{1460.8: (2 + 0.01) * 2940, 609.3: 1.5 * 2940}, 0.5)
+	st := &a.rc.act
+	st.mu.Lock()
+	st.loaded = true
+	r := &actRun{Opts: ActOpts{Kind: "kcl", Name: "KCl (51%)", MassG: 250, Pct: 51, Geometry: "Becker"}, Phase: "amostra"}
+	r.Bg = &actSaved{Sec: bg.Sec, A: bg.A, C: bg.C}
+	r.Smp = &actSaved{Sec: smp.Sec, A: smp.A, C: smp.C}
+	res := a.actFinish(r, time.Now())
+	st.mu.Unlock()
+	if res.KCl == nil || !res.NotSaved || res.KCl.EffErr <= actCalMaxErr {
+		t.Fatalf("pico fraco: %+v (KCl %+v)", res, res.KCl)
+	}
+	if v := a.GetActivity(); v.Cal.KCl != nil {
+		t.Fatalf("guardou a calibração ruim: %+v", v.Cal.KCl)
+	}
+}
+
+// 2.101.4: aos 20 min (2.101.11) já dá para avisar que o RC102 não está
+// vendo o sal, em vez de deixar rodar horas. O KCl sobe o pico de 1.460 keV
+// e o espalhamento de 300 a 1.400 keV; sem o sal, nada sobe.
+func TestActivityKCLWeakEarly(t *testing.T) {
+	aK := 250 * 0.51 * actKPerKCl * actBqPerGK
+	for _, c := range []struct {
+		eff, rise float64 // eficiência no pico e quanto o contínuo sobe
+		weak      bool
+	}{{0, 0, true}, {0.00003, 0.01, true}, {0.000045, 0.2, false}, {0.0006, 0.15, false}, {0.002, 0.5, false}} {
+		for seed := int64(1); seed <= 20; seed++ {
+			rng := rand.New(rand.NewSource(seed))
+			net := c.eff * aK * 0.1066
+			bg := actFake(rng, 3600, map[float64]float64{1460.8: 0.3 * 3600, 609.3: 0.2 * 3600}, 0.5)
+			smp := actFake(rng, actWeakSec, map[float64]float64{1460.8: (0.3 + net) * actWeakSec, 609.3: 0.2 * actWeakSec}, 0.5*(1+c.rise))
+			k, _, _ := actCalKCl(smp, bg, 250, 51)
+			sb, bb := smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
+			if got := actKCLWeak(smp.Sec, sb, bb, k); got != c.weak {
+				t.Fatalf("eficiência %g%%, contínuo +%g (semente %d): aviso %v, queria %v (cps %v / %v, %+v)", c.eff*100, c.rise, seed, got, c.weak, sb, bb, k)
+			}
+			if actKCLWeak(actWeakSec-1, sb, bb, k) {
+				t.Fatal("avisou antes dos 20 min")
+			}
+		}
+	}
+	// a calibração do ACE de 18/11 (250 g de sal light no Marinelli): de 300
+	// a 1.400 keV 1,07 cps contra 0,90 no fundo, eficiência 0,0045% ± 31%.
+	// O RC102 via o sal: não pode avisar
+	if k := (&ActCalKCl{Eff: 0.000045, EffErr: 0.31}); actKCLWeak(10724, 1.074, 0.897, k) {
+		t.Fatal("avisou na calibração de 18/11, em que o sal aparecia")
+	}
+	// sem subir nada de 300 a 1.400 keV, avisa
+	if !actKCLWeak(actWeakSec, 0.9, 0.9, &ActCalKCl{Eff: 0.00005, EffErr: 0.9}) {
+		t.Fatal("não avisou sem o sal")
+	}
+	// o pico abaixo do mínimo plausível (0,001%) aos 30 min avisa mesmo se subiu
+	if !actKCLWeak(actWeakPeakSec, 1.2, 0.9, &ActCalKCl{Eff: 0.000002, EffErr: 0.5}) {
+		t.Fatal("não avisou com o pico abaixo do mínimo")
+	}
+	for _, sec := range []float64{actWeakSec, actWeakPeakSec} {
+		if actKCLWeak(sec, 20, 10, &ActCalKCl{Eff: 0.002, EffErr: 0.1}) {
+			t.Fatal("avisou com o pico normal")
+		}
+	}
+}
+
+// 2.101.4: fundo bem acima do normal da casa (o sal perto do aparelho) avisa.
+func TestActivityBgHigh(t *testing.T) {
+	if actBgHigh(10, 0) || actBgHigh(11, 10) || !actBgHigh(13, 10) {
+		t.Fatal("actBgHigh")
+	}
+	pts := []RcPoint{{CPS: 5, N: 60}, {CPS: 6, N: 60}, {CPS: 100, N: 5}, {CPS: 7, N: 60}}
+	if v := actMedianCps(pts, 3); v != 6 {
+		t.Fatalf("mediana %v", v)
+	}
+	if v := actMedianCps(pts, 4); v != 0 {
+		t.Fatalf("com poucos minutos: %v", v)
+	}
+}

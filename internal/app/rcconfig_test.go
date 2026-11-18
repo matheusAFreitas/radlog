@@ -116,3 +116,38 @@ func TestRcSettingsSetUndo(t *testing.T) {
 		t.Fatal(err)
 	}
 }
+
+// 2.101.6 (varredura, item 24): desfazer com o aparelho já igual à cópia não
+// grava nada, avisa e não tira da fila a gravação anterior.
+func TestRcUndoNoopKeepsChain(t *testing.T) {
+	a := newTestApp(t)
+	f := &rcRegs{regs: map[uint32]uint32{
+		0x8000: 40, 0x8001: 120, 0x8014: 999999999, 0x8015: 999999999, 0x8002: 9999999, 0x8003: 9999999,
+		0x8008: 200, 0x8009: 600, 0x0522: 1, 0x0520: 0x1ffc, 0x0531: 1, 0x0530: 0x1cfe,
+		0x0511: 1, 0x0513: 1, 0x0515: 0, 0x8004: 1, 0x8013: 1, 0x8010: 0, 0x8011: 0, 0x8012: 0, 0x8022: 500,
+	}}
+	a.rc.dev = radiacode.NewRaw(f)
+	a.rc.st.Since = 1
+	s, err := a.GetRcSettings()
+	if err != nil {
+		t.Fatal(err)
+	}
+	set := func(b int) {
+		n := s.Settings
+		n.Brightness = b
+		if _, err := a.SetRcSettings(n); err != nil {
+			t.Fatal(err)
+		}
+	}
+	set(3)
+	set(5)
+	f.regs[0x0511] = 3 // mexeu no próprio aparelho
+	u, err := a.UndoRcSettings()
+	if err != nil || !u.Unchanged || u.Brightness != 3 || !u.CanUndo {
+		t.Fatalf("desfazer sem mudança: %+v %v", u, err)
+	}
+	u, err = a.UndoRcSettings()
+	if err != nil || u.Brightness != 1 {
+		t.Fatalf("segundo desfazer: %+v %v", u, err)
+	}
+}

@@ -39,6 +39,8 @@ function bsVerdict(b) {
   }
   if (!b.rcOk) return ["warn", `O fundo de casa subiu devagar: ${bsPct(b.rise)} em ${b.weeks} semanas`, "Sem o RC102 em casa nas duas épocas, não dá para saber se foi o ambiente ou o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo."];
   if (b.env) return ["warn", `O fundo de casa subiu devagar: ${bsPct(b.rise)} em ${b.weeks} semanas`, `O RC102 em casa subiu junto (${bsPct(b.rcRise)}), então é o ambiente, não o aparelho. Ainda é fundo baixo, mas vale descobrir o motivo.`];
+  // 2.101.6: o RC102 que subiu um pouco "subiu menos", não "ficou igual"
+  if (b.rcRise > 0.03) return ["warn", `O GMC-800 subiu mais que o RC102: ${bsPct(b.rise)} em ${b.weeks} semanas`, `O RC102 em casa subiu menos (${bsPct(b.rcRise)} contra ${bsPct(b.rise)}). Parte pode ser o ambiente, mas a diferença aponta para o aparelho.`];
   return ["warn", `Só o GMC-800 subiu: ${bsPct(b.rise)} em ${b.weeks} semanas`, `O RC102 em casa ficou igual (${bsPct(b.rcRise)}). Isso aponta para o aparelho, não para o ambiente.`];
 }
 
@@ -141,7 +143,7 @@ function bsRender() {
     const on = b.state === "warn" || b.state === "step";
     n.hidden = !on;
     if (on) {
-      const why = b.state === "step" ? "Subiu de uma vez e ficou." : !b.rcOk ? "Sem o RC102 em casa para comparar." : b.env ? "O RC102 subiu junto: é o ambiente." : "O RC102 não subiu: veja a Saúde do tubo.";
+      const why = b.state === "step" ? "Subiu de uma vez e ficou." : !b.rcOk ? "Sem o RC102 em casa para comparar." : b.env ? "O RC102 subiu junto: é o ambiente." : b.rcRise > 0.03 ? "O RC102 subiu menos: veja a Saúde do tubo." : "O RC102 não subiu: veja a Saúde do tubo.";
       n.innerHTML = `<strong>${t}</strong>. <span>${why}</span> <span>Não é alarme.</span> <button type="button" class="link small-link" data-slowopen="1">Abrir em Fundo de casa</button>`;
     }
   }
@@ -242,7 +244,12 @@ function fcSlow() {
 
 function fcHour(p) {
   if (!p || !p.minutes || !(p.peakHour >= 0)) return "sem dados ainda";
-  return `mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
+  // 2.101.6: diz de que período é (o quadro do mapa de calor é de outro)
+  // 2.101.8: os dias com dado (a janela pedida pode ser maior que o histórico)
+  const hd = Math.max(...(p.hours || []).map((h) => (h && h.days) || 0));
+  const n = hd > 0 ? Math.min(hd, p.days || hd) : p.days || 90;
+  if (n === 1) return `em 1 dia: mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
+  return `em ${n} dias: mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
 }
 
 // diferença de cada linha para a média das medianas, em %

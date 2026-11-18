@@ -691,6 +691,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .sum-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1100px) { .sum-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ri-tile.warn .value { color: var(--warn); }
+.sum-table-wrap { overflow-x: auto; max-width: 100%; }
 .sum-table { width: 100%; border-collapse: collapse; font-size: var(--fs-label); }
 .sum-table th, .sum-table td { text-align: left; padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); }
 .sum-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
@@ -797,9 +798,10 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-sr-read .mono { color: var(--text); }
 .rc-gauge { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); }
 .rc-gauge-svg { width: 100%; max-width: 260px; }
-.rc-gauge-lbl text { fill: var(--muted); font: var(--fs-micro) var(--mono); text-anchor: middle; }
-.rc-gauge-num { fill: var(--text); font: 600 var(--fs-number-l) var(--mono); text-anchor: middle; }
-.rc-gauge-unit { fill: var(--muted); font: var(--fs-caption) var(--sans); text-anchor: middle; }
+/* 2.101.8: dentro do SVG o tamanho é nas unidades do desenho (ele já escala com a largura) */
+.rc-gauge-lbl text { fill: var(--muted); font: 11px var(--mono); text-anchor: middle; }
+.rc-gauge-num { fill: var(--text); font: 600 28px var(--mono); text-anchor: middle; }
+.rc-gauge-unit { fill: var(--muted); font: 12px var(--sans); text-anchor: middle; }
 .rc-mult { display: flex; gap: var(--space-3); color: var(--dim); }
 .rc-mult span.on { color: var(--accent); font-weight: 600; }
 .rc-act-calrow { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-label); border: 1px solid var(--border); background: var(--bg); }
@@ -891,7 +893,13 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 @media (max-width: 1200px) { .rc-kout { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rc-search { grid-template-columns: 1fr; } }
 
 /* tabela da compensação de tempo morto */
+/* 2.101.13 (QA): o contêiner é o cartão; na caixa da tabela, um aviso que
+   aparece embaixo do campo zerava a largura (a tabela sumia) */
 .lv-dt-wrap { overflow-x: auto; }
+.lv-dt-card { container-type: inline-size; }
+/* 2.101.8: o cabeçalho quebra e, em caixa estreita, as células apertam (cabe em qualquer escala) */
+.lv-dt thead th { white-space: normal; }
+@container (max-width: 400px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 .lv-dt th:first-child, .lv-dt td:first-child { text-align: left; }
 .lv-dt.off { opacity: .45; }
 
@@ -983,7 +991,10 @@ table.rc-ctrl-tbl thead th { color: var(--muted); font-weight: 500; }
 .rc-reset p { margin: var(--space-1) 0 0; }
 
 /* ===== repaginação 1.10 ===== */
-body { background: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%), var(--bg); }
+/* 2.101.1: o fundo fica preso na janela (fixed) para a faixa presa dos aparelhos
+   usar o mesmo fundo e não aparecer como um retângulo de outra cor */
+:root { --page-bg: radial-gradient(1200px 500px at 15% -10%, color-mix(in srgb, var(--accent) 6%, transparent), transparent 60%) fixed, var(--bg); }
+body { background: var(--page-bg); }
 
 /* cartões: borda mais leve, um pouco mais de respiro */
 .card { border-radius: var(--radius-lg); border-color: var(--border); box-shadow: 0 1px 0 rgba(255,255,255,.02) inset; }
@@ -1086,6 +1097,12 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .upd-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
 .upd-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .warn-text { color: var(--warn); }
+/* 2.101.14 (item 68): no pote | pedra solta, com a frase ao lado */
+.rc-act-loose { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.rc-act-loose .seg { flex: none; }
+/* 2.101.13 (item 21): número fora da faixa nas Configurações, antes de salvar */
+input.out-range { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
+.range-hint { display: block; margin-top: 4px; }
 #btnUpdPage { margin-right: auto; }
 .m-report { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-2); }
 
@@ -1112,7 +1129,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .m-verdict.talvez { border-color: var(--att); }
 .m-verdict.nada { border-color: var(--ok); }
 .m-tiles { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: var(--space-4); }
-.m-detail-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-5); margin-top: var(--space-2); }
+.m-detail-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: var(--space-5); margin-top: var(--space-2); }
+.m-detail-cols > * { min-width: 0; overflow-x: auto; } /* 2.101.8: a tabela das fases rola dentro da caixa */
 .m-detail-cols .m-stats { width: 100%; }
 .m-history input[type=search] { width: 100%; color-scheme: dark; color: var(--text); }
 .m-detail-cols h4 { margin: 0 0 var(--space-2); font-size: var(--fs-body); }
@@ -1183,7 +1201,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-main .read-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .rc-main-via { margin-left: var(--space-2); letter-spacing: 0; text-transform: none; color: var(--muted); }
 .rc-main-via.on { color: var(--rc); }
-.rc-main .value-row { flex-wrap: nowrap; white-space: nowrap; }
+.rc-main .value-row { flex-wrap: wrap; white-space: nowrap; row-gap: var(--space-1); } /* 2.101.8: em tela estreita o nível desce */
 .rc-main .value, .hero .value { font-size: var(--fs-reading-l); font-weight: 600; letter-spacing: -.03em; } /* 2.88.0 (R2): o mesmo tamanho nos dois */
 .gmc-via.on { color: var(--gmc); }
 .rc-main.stale .rc-main-val { color: var(--dim, var(--muted)); }
@@ -1348,6 +1366,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .side > .side-nav.scrolled { border-top-color: var(--border); }
 /* 2.89.0 (T6): a lista continua embaixo: sombra e uma seta presas ao pé */
 .side > .side-nav.more::after { content: "⌄"; position: sticky; bottom: calc(-1 * var(--space-3)); flex: none; display: block; height: 28px; margin-top: -28px; padding-top: 4px; text-align: center; font-size: 16px; line-height: 1; color: var(--muted); background: linear-gradient(to bottom, transparent, var(--bg) 70%); pointer-events: none; }
+.side-arr { display: none; }
 .side-group { font-size: var(--fs-caption); color: var(--dim); padding: var(--space-4) var(--space-3) var(--space-1); }
 .side-nav .side-group:first-child { padding-top: var(--space-1); }
 .side-nav button { display: flex; align-items: center; justify-content: space-between; gap: var(--space-2); min-height: 36px; padding: 0 var(--space-3); border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font-size: var(--fs-label); text-align: left; }
@@ -1450,6 +1469,15 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
   .side .brand { padding: 0 var(--space-2) 0 var(--space-1); }
   .side > .side-nav { order: 9; flex: 1 1 100%; flex-direction: row; overflow-x: auto; overflow-y: hidden; padding-bottom: 0; border-top: 0; scrollbar-width: none; gap: 2px; -webkit-mask-image: none; mask-image: none; }
   .side-nav button { flex: 0 0 auto; white-space: nowrap; }
+  .side > .side-nav.more::after { content: none; }
+  .side { position: relative; }
+  .side > .side-nav.hr { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent); }
+  .side > .side-nav.hl { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 40px), transparent); }
+  .side > .side-nav.hl.hr { -webkit-mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); mask-image: linear-gradient(to right, transparent, #000 40px, #000 calc(100% - 40px), transparent); }
+  .side-arr:not([hidden]) { position: absolute; z-index: 2; display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; padding: 0 0 2px; border: 1px solid var(--border); border-radius: 50%; background: var(--surface-2); color: var(--text); font-size: 18px; line-height: 1; cursor: pointer; box-shadow: 0 0 0 6px var(--bg); }
+  .side-arr:hover { background: var(--surface-3, var(--surface-2)); border-color: var(--muted); }
+  .side-arr.l { left: var(--space-2); }
+  .side-arr.r { right: var(--space-2); }
   .side-nav button[aria-current="page"] { box-shadow: inset 0 -2px 0 var(--accent); }
   .side-group { display: none; }
   .side-tools { flex-direction: row; padding-top: 0; margin: 0 0 0 auto; border-top: 0; }
@@ -1532,6 +1560,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #settings .set-note { max-width: 860px; }
 .set-bar { position: fixed; z-index: 14; left: var(--side-w); right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
 .set-bar > i { width: 8px; height: 8px; border-radius: 50%; background: var(--att); flex: none; }
+html { scroll-padding-top: calc(var(--barsH, 0px) + var(--instH, 0px) + 8px); }
 html.set-dirty { scroll-padding-bottom: 84px; scroll-padding-top: calc(var(--barsH, 0px) + 56px); }
 html.set-dirty .main { padding-bottom: 72px; }
 #btnSettings.dirty::after { content: ""; width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--att); flex: none; }
@@ -1586,8 +1615,6 @@ button.dd-box.off { opacity: .45; border-style: dashed; }
 button.dd-box.off .dd-name i { background: transparent; border: 1px solid var(--c); height: 5px; }
 .dd-state { font-size: var(--fs-micro); color: var(--dim); }
 #doseCard .chart-head { flex-wrap: wrap; }
-.dd-dev { display: flex; flex-direction: column; gap: 1px; color: var(--muted); font-size: var(--fs-caption); }
-.dd-dev b { color: var(--text); font-weight: 500; }
 
 /* ---------- Agora (2.17) ---------- */
 #pageAgora { display: flex; flex-direction: column; gap: var(--space-4); }
@@ -1903,6 +1930,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings .set-content { background: transparent; border: 0; border-radius: 0; padding: 0 0 var(--space-12); display: flex; flex-direction: column; gap: var(--space-4); }
 .set-sec, .set-tab { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 .set-sec[hidden], .set-tab[hidden] { display: none; }
+.set-sec { container-type: inline-size; }
 .set-sec-title { margin: 0; font-size: var(--fs-title); font-weight: 600; }
 .set-tabs { display: flex; gap: 2px; margin-top: calc(-1 * var(--space-2)); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
 .set-tabs button { flex: none; min-height: 38px; padding: var(--space-2) var(--space-3); margin-bottom: -1px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: var(--fs-label); cursor: pointer; white-space: nowrap; }
@@ -1912,6 +1940,8 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
 /* duas colunas que empilham sozinhas (2.68.4): o último cartão visível de cada uma estica */
 .set-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
+/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala); depois da regra base para ganhar dela */
+@container (max-width: 760px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
 #settings .devcfg { margin: 0; padding: 0; border: 0; gap: var(--space-3); }
 #settings .set-cards > fieldset, #settings .dc-grid > fieldset, #settings .set-col > fieldset, #settings .cal-adv > fieldset { position: relative; margin: 0; min-width: 0; padding: var(--space-4); border: 0; border-radius: var(--radius-md); background: var(--surface); box-shadow: inset 0 0 0 1px var(--border); gap: var(--space-2); }
@@ -1958,9 +1988,9 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .cal-adv > fieldset + fieldset { margin-top: var(--space-3) !important; }
 .al-wrap { overflow-x: auto; margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); }
 .al-tbl { width: 100%; border-collapse: collapse; background: var(--bg); }
-.al-tbl th, .al-tbl td { padding: var(--space-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.al-tbl th, .al-tbl td { padding: var(--space-2); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
 .al-tbl tbody tr:last-child > * { border-bottom: 0; }
-.al-tbl thead th { font-size: var(--fs-label); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.al-tbl thead th { font-size: var(--fs-label); font-weight: 600; color: var(--muted); white-space: normal; }
 .al-tbl tbody th { width: 22%; font-weight: 400; }
 .al-tbl tbody th .lv-name { margin-bottom: 2px; }
 .al-tbl tr.atencao .lv-name { color: var(--att); }
@@ -1969,7 +1999,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .al-say { display: block; color: var(--dim); font-size: var(--fs-caption); }
 .al-none { color: var(--dim); font-size: var(--fs-label); }
 .al-in { display: flex; align-items: center; gap: var(--space-2); }
-.al-in input { width: 7.5em; min-width: 0; }
+.al-in input { width: 5.2em; min-width: 0; }
 .al-u { color: var(--muted); font-size: var(--fs-label); white-space: nowrap; }
 .al-tbl .lv-eq { margin: 2px 0 0; color: var(--dim); font-size: var(--fs-caption); }
 .al-tbl .toggle.al-on, .al-dose .toggle.al-on { min-height: 30px; justify-content: flex-start; font-size: var(--fs-label); color: var(--muted); }
@@ -2121,7 +2151,12 @@ details.how.how-c[open] { width: min(460px, calc(100% - 2 * var(--space-3))); ma
 details.how.how-c[open] > summary { position: sticky; top: 0; background: var(--surface-2); }
 /* o título não passa por baixo do "?" */
 .how-host > :is(h2, h3, h4, .card-head, .rc-head, .ag-dose-head, .al-main > h2:first-child) { padding-right: 120px; }
+/* 2.101.8: o seletor não empilha os botões; "Mostrar" fica junto do seu seletor */
+#agDevSeg { flex-wrap: nowrap; }
+.al-filter-g { display: inline-flex; align-items: center; gap: var(--space-2); }
 .how-host > .al-main > :is(h2, h3):first-child { padding-right: 120px; }
+/* 2.101.8: "← Voltar" no topo (Distância, Blindagem): fica à esquerda, longe do "?" */
+.how-host > .al-main > .m-back:first-child { justify-self: start; text-align: left; max-width: calc(100% - 120px); }
 /* nas configurações o cartão é estreito: só o "?" (o texto fica para o leitor de tela) */
 #settings details.how-c > summary { font-size: 0; gap: 0; min-width: 28px; justify-content: center; }
 #settings details.how-c[open] > summary { font-size: var(--fs-caption); gap: 6px; }
@@ -2197,17 +2232,11 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .m-objdev { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .m-objdev[hidden] { display: none; }
 .m-size { width: fit-content; }
-.m-adj { border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3) var(--space-4); background: var(--surface); }
-.m-adj summary { cursor: pointer; font-size: var(--fs-label); min-height: 24px; }
-.m-adj[open] summary { margin-bottom: var(--space-3); }
-.m-adj-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: var(--space-4); }
-.m-adj-grid select { width: 100%; }
-.m-adj-grid .m-field[hidden] { display: none; }
 .m-warn { margin: 0; color: var(--att); }
 .m-go { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .m-busca { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: var(--space-5); align-items: center; }
 .m-busca-main { display: flex; flex-direction: column; gap: var(--space-2); }
-.m-busca-val { display: flex; align-items: baseline; gap: var(--space-2); }
+.m-busca-val { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .m-busca-val .mono { font-size: var(--fs-reading-l); line-height: 1; font-weight: 500; }
 .m-busca-trend { font-size: var(--fs-heading); font-weight: 600; color: var(--muted); }
 .m-busca-trend.up { color: var(--obj); }
@@ -2468,12 +2497,13 @@ dialog.qk-dlg:not([open]) { display: none; }
 .rc-chip { padding: 0 var(--space-2); line-height: 20px; border-color: var(--border-hover); }
 .rc-24 .seg button[aria-pressed="true"] { background: color-mix(in srgb, var(--rc) 12%, transparent); color: var(--rc-ink); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--rc) 55%, transparent); }
 .rc-chip.on { color: var(--rc-ink); border-color: color-mix(in srgb, var(--rc) 55%, transparent); }
-.rc-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-2); }
 .rc-mini { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 700px) { .rc-mini { grid-template-columns: repeat(2, minmax(0, 1fr)); row-gap: var(--space-3); } }
 .rc-24 { padding: var(--space-4) var(--space-5); display: flex; flex-direction: column; gap: var(--space-3); }
 .rc-24-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; }
 .rc-24-head h3 { margin: 0; font-size: var(--fs-body); }
+.rc-24-acts { display: flex; align-items: center; gap: var(--space-2); flex-wrap: wrap; }
+.hero-acts { display: flex; justify-content: flex-end; margin-top: var(--space-2); }
 .rc-24-svg { width: 100%; height: 150px; display: block; }
 .rc-24-svg .grid { stroke: var(--chart-grid, var(--border)); stroke-width: 1; vector-effect: non-scaling-stroke; }
 .rc-24-svg .rc { fill: none; stroke: var(--rc); stroke-width: 1.6; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
@@ -2857,7 +2887,8 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .ad-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-3) 0; }
 .ad-nums > div { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); min-width: 0; }
 .ad-nums .mono { font-size: var(--fs-number); color: var(--text); }
-.ad-nums .tile-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-nums .tile-sub { overflow: visible; text-overflow: clip; white-space: normal; } /* 2.101.8: quebra em vez de cortar a hora */
+@media (max-width: 520px) { .ad-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .al-page .ad-sub { margin: 0 0 var(--space-3); }
 .al-page .ad-sub[hidden] { display: none; }
 .ad-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }
@@ -3274,8 +3305,11 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .al-h { display: none; }
 .al-dose .toggle.al-on { flex: none; gap: var(--space-2); }
 .al-dose-f .al-say { white-space: nowrap; }
-@media (max-width: 640px) {
-  .al-wrap { overflow-x: visible; }
+/* 2.101.8: empilha pela largura da caixa da tabela (a janela não desconta a
+   barra lateral, o menu das Configurações e a escala) */
+#lvCard { container-type: inline-size; } /* 2.101.13 (QA, item 132): no cartão, não na caixa da tabela */
+@media (max-width: 640px) { .al-wrap { overflow-x: visible; } }
+@container (max-width: 622px) {
   .al-tbl thead { display: none; }
   .al-tbl, .al-tbl tbody, .al-tbl tr, .al-tbl th, .al-tbl td { display: block; width: auto; }
   .al-tbl tbody th { width: auto; padding-bottom: 0; border-bottom: 0; }
@@ -3297,7 +3331,75 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 /* 2.97.1: com um quadro da faixa aberto, cada um ganha a linha inteira (o
    fechado não deixa mais um buraco embaixo dele). A forma do nível aparece
    na palavra só com o quadro fechado; aberto, ela está no meio do mostrador. */
-.instruments[data-strip] .inst-pair:has(.inst.open) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
+.instruments[data-strip] .inst-pair:has(.inst.open):has(.inst:not(.open):not([hidden])) { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); }
 .inst-state .lv-ico { display: none; }
 .instruments[data-strip] .inst:not(.open) .inst-state .lv-ico { display: inline-block; }
 .hero-lv { display: inline-flex; align-items: center; gap: var(--space-2); }
+
+/* 2.98.0 (ACE): a faixa dos aparelhos (fora do Agora) fica presa no topo ao
+   rolar, no lugar da barra compacta antiga. Com um quadro aberto ela rola
+   junto, para não cobrir a tela. Com os dois abertos, ficam lado a lado. */
+.instruments[data-strip]:not(:has(.inst.open)) { position: sticky; top: var(--barsH, 0px); z-index: 14; margin-top: calc(-1 * var(--space-2)); padding: var(--space-2) 0; background: var(--page-bg); }
+#instruments.inst-float { position: fixed; top: var(--barsH, 0px); left: var(--side-w); right: 0; z-index: 15; margin: 0; padding: var(--space-2) var(--space-6); background: var(--page-bg); border-bottom: 1px solid var(--border); }
+#instruments.inst-float .inst-open { display: none; }
+@media (max-width: 900px) { #instruments.inst-float { left: 0; padding: var(--space-2) var(--space-4); } }
+.dd-box.dd-tog { cursor: pointer; transition: opacity .2s, border-color .2s; }
+.dd-box.dd-tog:hover { border-color: var(--border-hover); }
+.dd-box.dd-tog:not(.off) { border-color: color-mix(in srgb, var(--c) 45%, var(--border)); }
+
+/* 2.98.1: Medir objeto › Medições salvas. O "Como funciona" do canto ganha a
+   própria linha (a caixa tinha altura zero e ele caía em cima dos botões) e
+   a data e a duração da lista não quebram no meio */
+.m-alara-box.how-host { min-height: 32px; }
+.m-alara-box.how-host > details.how-c { top: 0; right: 0; }
+.m-item-meta { display: flex; flex-wrap: wrap; column-gap: 0.35em; }
+.m-item-meta > span { white-space: nowrap; }
+
+/* 2.99.0: Medir objeto, automático × tempo fixo à vista antes de começar */
+.m-tmode { width: fit-content; max-width: 100%; }
+.m-tmode button { display: flex; flex-direction: column; align-items: flex-start; gap: 1px; padding: var(--space-2) var(--space-4); text-align: left; }
+.m-tmode button strong { font-weight: 600; }
+.m-tmode button span { font-size: var(--fs-caption); color: var(--muted); }
+.m-tsub .seg { flex-wrap: wrap; width: fit-content; max-width: 100%; }
+.dd-box.dd-tog .dd-name:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; border-radius: var(--radius-sm); }
+
+/* 2.99.0 (QA): no celular, a faixa presa fica com uma linha por aparelho
+   (nome, número e nível); a dose de hoje e a seta saem até abrir */
+@media (max-width: 600px) {
+  .instruments[data-strip]:not(:has(.inst.open)) .inst-pair { gap: var(--space-1); }
+  .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) { flex-wrap: nowrap; gap: var(--space-3); padding: var(--space-1) var(--space-3); min-height: 40px; }
+  .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) :is(.inst-foot, .inst-open) { display: none; }
+  .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) .inst-head { min-width: 0; flex: 0 1 auto; overflow: hidden; }
+  .instruments[data-strip]:not(:has(.inst.open)) .inst:not(.open) .inst-conn { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
+
+/* 2.99.1: o "conta como tem algo" mora no bloco do tempo e só aparece no
+   automático (no fixo não vale); a caixa de Ajustes saiu */
+.m-time .m-pct { margin-top: var(--space-2); }
+.m-time .m-pct[hidden] { display: none; }
+.m-time .m-pct .seg { width: fit-content; max-width: 100%; }
+
+/* 2.100.0: Modo busca com espectrograma ao vivo. A linha da taxa ocupa a
+   largura toda e o espectrograma fica embaixo, no mesmo eixo de tempo
+   ("agora" à direita), energia de 0 a 1500 keV na vertical */
+.rc-sr-plot { margin-top: var(--space-4); display: flex; flex-direction: column; gap: var(--space-2); }
+.rc-sr-plot #rcTrend { margin-left: 48px; width: calc(100% - 48px); }
+.rc-sr-sg { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 6px; }
+.rc-sr-ax { display: flex; flex-direction: column; justify-content: space-between; text-align: right; font-size: var(--fs-micro); color: var(--dim); }
+#rcSrSg { width: 100%; height: 200px; display: block; border-radius: var(--radius-sm); background: #0A0D0F; image-rendering: pixelated; }
+.rc-sr-x { display: flex; justify-content: space-between; margin-left: 48px; }
+.rc-sr-foot { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); flex-wrap: wrap; margin-left: 48px; }
+.rc-sr-like:empty { display: none; }
+.rc-sr-like b { color: var(--text); font-weight: 600; }
+.rc-sr-opts { align-items: center; }
+.rc-sr-ax span { white-space: nowrap; }
+@media (max-width: 600px) { #rcSrSg { height: 160px; } }
+
+/* 2.100.1: busca. Rótulo e botões juntos ao quebrar; o trecho do
+   espectrograma de antes da aba abrir diz "juntando desde"; "Minha dose" numa
+   linha só no celular */
+.rc-sr-opt { display: inline-flex; align-items: center; gap: var(--space-2); flex-wrap: nowrap; }
+.rc-sr-sgw { position: relative; min-width: 0; }
+.rc-sr-wait { position: absolute; left: 0; top: 0; bottom: 0; display: flex; align-items: center; justify-content: center; text-align: center; padding: 0 var(--space-2); background: color-mix(in srgb, var(--bg) 70%, transparent); border-radius: var(--radius-sm) 0 0 var(--radius-sm); }
+.rc-sr-wait[hidden] { display: none; }
+.ag-dose-title h2 { white-space: nowrap; }

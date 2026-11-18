@@ -459,7 +459,7 @@ function medir() {
     h += `<div class="card mres ${lv}"><span class="k">${esc(ph === "pronto" ? T("Resultado") : T("Resultado (parcial)"))}</span>`
       + `<div class="row big"><span class="n">${sign}${mdUsv(r.netUSv)}</span><span class="small">${esc(T("µSv/h acima do fundo"))}</span></div>`
       + `<div class="row"><span>${esc(T("Vezes o fundo"))}</span><span class="m">${fmt(r.ratio, 1)}×</span></div>`
-      + `<div class="row"><span>${esc(T("Margem de erro"))}</span><span class="m">± ${mdUsv(r.netErr * mdK(m))}</span></div>`
+      + `<div class="row"><span>${esc(T("Margem de erro"))}</span><span class="m">± ${mdUsv(r.netErrUSv > 0 ? r.netErrUSv : r.netErr * mdK(m))}</span></div>`
       + (verdict ? `<b class="vd">${esc(verdict)}</b>` : "")
       + `<span class="small">${esc(state.cloud && state.cloud.email ? T("Mesmo cálculo do Medir objeto do PC. O resultado fica guardado no celular e vai para o PC pela nuvem.") : T("Mesmo cálculo do Medir objeto do PC, com o resultado guardado no celular."))}</span></div>`;
   }

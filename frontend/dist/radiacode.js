@@ -103,9 +103,12 @@
   // o nome do elemento sempre junto (ACE): "bismuto · filho do radônio",
   // como no K-40, que já aparece como potássio
   const ELEM = { Pb: "chumbo", Bi: "bismuto", Tl: "tálio", Ac: "actínio", Th: "tório", Pa: "protactínio", Am: "amerício", Tc: "tecnécio", I: "iodo", Cs: "césio", Co: "cobalto", K: "potássio" };
+  // 2.101.1: cada pedaço traduzido antes de juntar (a frase junta não está
+  // na tradução e aparecia em português na dica do espectro)
   for (const l of LIB) {
     const el = /^[A-Z][a-z]?-\d/.test(l[1]) ? ELEM[l[1].split("-")[0]] : null;
-    if (el && l[2] !== el) l[2] = l[2] ? el + " · " + l[2] : el;
+    if (el && l[2] !== el) l[2] = l[2] ? tr(el) + " · " + tr(l[2]) : tr(el);
+    else l[2] = tr(l[2]);
   }
   function libNear(e) {
     const tol = 1.2 * sig(e);
@@ -498,7 +501,7 @@
     const near = libNear(e);
     // o que não é isótopo (raio X, aniquilação) diz de onde vem (2.69)
     const notIso = (n) => { const m = NOT_ISO.find(([re]) => re.test(n)); return m ? `<br><span class="muted">${escHtml(tr(m[1]))}</span>` : ""; };
-    const lib = near.length ? near.map(([le, n, d]) => `<b>${escHtml(n)}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${escHtml(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
+    const lib = near.length ? near.map(([le, n, d]) => `<b>${escHtml(tr(n))}</b> ${nf(le, 1)} keV${d ? ` <span class="muted">(${escHtml(d)})</span>` : ""}${notIso(n)}`).join("<br>") : '<span class="muted">nenhum pico conhecido aqui</span>';
     tip($("rcSpecTip"), `<span class="mono">${nf(e, 0)} keV · canal ${ch} · ${Math.round(cnt[ch] || 0)} contagens</span><br>${lib}`, x, ev.clientY - r.top);
     spDraw();
   }
@@ -969,9 +972,10 @@
   function cmapSet(cont) {
     cmapCont = cont;
     try { localStorage.setItem("rcCmap", cont ? "cont" : "orig"); } catch (e) { /* sem armazenamento */ }
-    document.querySelectorAll("#rcCmap button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.c === "cont") === cont)));
-    const bar = document.querySelector("#rcSgCard .rc-cbar"); if (bar) bar.classList.toggle("cont", cont);
+    document.querySelectorAll("#rcCmap button, #rcSrCmap button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.c === "cont") === cont)));
+    document.querySelectorAll("#rcSgCard .rc-cbar, #rcSrCbar").forEach((bar) => bar.classList.toggle("cont", cont));
     sgDraw();
+    if (sr.real) srSgDraw();
   }
   const SG_EMAX = 1500;
   const SG_COLS = (() => { let n = 0; for (let i = 0; i < NCH; i++) if (EN[i] <= SG_EMAX) n = i + 1; return n; })();
@@ -1011,7 +1015,7 @@
       const cell = (yy, xx) => (yy < tl.shown ? { rate: ((tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0)) / 2, n: (tl.rows[yy][2 * xx] || 0) + (tl.rows[yy][2 * xx + 1] || 0) } : null);
       lh = loupeHtml(cell, TL_N, W, t, x, Math.log1p(tl.max)) + `<span class="mono">${nf(EN[2 * x], 0)}–${nf(EN[Math.min(NCH - 1, 2 * x + 2)], 0)} keV · ${tr("pixel do meio")}</span><br>`;
     }
-    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
+    tip($("rcSgTip"), `${lh}<span class="mono">min ${t} · ${nf(tl.cps[t], 1)} cps · ${nf(e, 0)} keV</span>${ev2 ? `<br>${ev2}` : ""}${near.length ? `<br><b>${escHtml(tr(near[0][1]))}</b> ${nf(near[0][0], 1)} keV` : ""}`, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
   }
 
@@ -1025,7 +1029,9 @@
   const hhmm = (ms) => { const d = new Date(ms); return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
   const ddmm = (ms) => { const d = new Date(ms); return pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1); };
   async function sgLoad() {
-    if (typeof api === "undefined" || !api.GetRcSpectrogram || sg.busy) return;
+    if (typeof api === "undefined" || !api.GetRcSpectrogram) return;
+    // 2.101.8: pedido novo durante a leitura não se perde: lê de novo no fim
+    if (sg.busy) { sg.again = true; return; }
     const [span, rowSec] = SG_PER[sg.period], rowMs = rowSec * 1000;
     const to = Math.ceil(Date.now() / rowMs) * rowMs, from = to - span * 1000;
     const want = ++sg.want;
@@ -1035,6 +1041,7 @@
       [d, hd] = await Promise.all([api.GetRcSpectrogram(from, to, rowSec, sg.emax), api.GetRcHardness ? api.GetRcHardness(from, to, rowSec).catch(() => null) : null]);
     } catch (e) { d = null; }
     sg.busy = false;
+    if (sg.again) { sg.again = false; sgLoad(); return; }
     if (want !== sg.want) return;
     if (hd && (!sg.hd || sg.hd.from !== hd.from || sg.hd.rowSec !== hd.rowSec)) sg.guess = {};
     sg.hd = hd && hd.cps ? hd : null;
@@ -1139,7 +1146,7 @@
       html += `<br><span class="mono">${nf(d.cps[k], 2)} cps · ${nf(e, 0)} keV · ${nf(row[b], 2)} por min</span>`;
       if (d.gap[k]) html += "<br>sem leitura nesse intervalo: média dele";
       else if (d.secs[k] < d.rowSec * 0.9) html += `<br>${nf((d.secs[k] / d.rowSec) * 100, 0)}% do tempo com dados`;
-      if (near.length) html += `<br><b>${escHtml(near[0][1])}</b> ${nf(near[0][0], 1)} keV`;
+      if (near.length) html += `<br><b>${escHtml(tr(near[0][1]))}</b> ${nf(near[0][0], 1)} keV`;
     }
     tip($("rcSgTip"), html, ev.clientX - r.left, ev.clientY - r.top);
     sgDraw(); hdDraw();
@@ -1226,7 +1233,7 @@
     for (let k = 0; k <= 4; k++) {
       const t = d.from + ((d.to - d.from) * k) / 4, x = L + (pw * k) / 4;
       g.textAlign = k === 0 ? "left" : k === 4 ? "right" : "center";
-      g.fillText(long ? ddmm(t) : hhmm(t), x, h - 6);
+      g.fillText(long ? dateText(ddmm(t)) : hhmm(t), x, h - 6); // 2.101.8: canvas não passa pelo observador
     }
     // referências: dureza 1,00 e o fundo em cps
     g.setLineDash([3, 3]);
@@ -1257,7 +1264,7 @@
     };
     line(d.cps, yC, COR.rc);
     line(d.hard, yH, COR.away);
-    if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
+    if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText(tr("sem dados neste período"), L + pw / 2, T + ph / 2); }
     if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
   // com o que parece o trecho (no Go, como na medição de objeto)
@@ -1323,13 +1330,16 @@
     return d.getTime() - (lg.period - 1) * 86400e3;
   };
   async function lgLoad(more) {
-    if (typeof api === "undefined" || !api.GetRcLog || lg.busy) return;
+    if (typeof api === "undefined" || !api.GetRcLog) return;
+    // 2.101.8: filtro ou período trocado durante a leitura: lê de novo no fim
+    if (lg.busy) { if (!more) lg.again = true; return; }
     lg.busy = true;
     const before = more && lg.items.length ? lg.items[lg.items.length - 1].t : 0;
     const limit = more ? 100 : Math.max(100, Math.min(lg.items.length, 1000));
     let p = null;
     try { p = await api.GetRcLog(lgFrom(), 0, [...lg.kinds], limit, before); } catch (e) { p = null; }
     lg.busy = false;
+    if (lg.again) { lg.again = false; lgLoad(); return; }
     if (!p) return;
     // o "antes de" junta registros do mesmo segundo: tira os repetidos
     if (more) {
@@ -1364,7 +1374,13 @@
     $("rcLogBody").innerHTML = lg.items.map(lgRow).join("");
     $("rcLogCount").textContent = lg.loaded ? `${lg.shown}/${lg.total}` : "";
     $("rcLogMore").hidden = !lg.more;
-    $("rcLogEmpty").hidden = !lg.loaded || lg.items.length > 0;
+    const em = $("rcLogEmpty");
+    em.hidden = !lg.loaded || lg.items.length > 0;
+    // 2.101.8: o texto segue o caso (nenhum tipo marcado, nada dos tipos marcados, nada no período)
+    if (!em.dataset.base) em.dataset.base = em.textContent;
+    em.textContent = !lg.kinds.size ? "Nenhum tipo marcado: marque pelo menos um tipo acima para ver os registros."
+      : lg.total > 0 ? "Nenhum registro dos tipos marcados neste período."
+      : em.dataset.base;
     document.querySelectorAll("#rcLogKinds button").forEach((b) => b.setAttribute("aria-pressed", String(lg.kinds.has(b.dataset.k))));
     document.querySelectorAll("#rcLogPeriod button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.p === lg.period)));
   }
@@ -1378,7 +1394,8 @@
     if (!r || !r.file) return; // cancelou
     m.hidden = false; m.className = "small muted";
     const span = r.from ? ` · de ${fmtDate(r.from)} ${fmtTime(r.from)} a ${fmtDate(r.to)} ${fmtTime(r.to)}` : "";
-    m.textContent = `${r.file}: ${r.added} registros novos de ${r.read}` + (r.skipped ? ` · ${r.skipped} linhas ignoradas` : "") + span;
+    // 2.101.8: plural pelo número
+    m.textContent = `${r.file}: ` + tr(r.added === 1 ? `1 registro novo de ${r.read}` : `${r.added} registros novos de ${r.read}`) + (r.skipped ? " · " + tr(r.skipped === 1 ? "1 linha ignorada" : `${r.skipped} linhas ignoradas`) : "") + span;
     lg.items = []; lgLoad();
   }
 
@@ -1427,6 +1444,11 @@
   // e mostra uma média que se adapta: longa (até 20 s) enquanto nada muda e
   // curta (~1 s) quando a contagem pula, como os medidores de busca.
   Object.assign(sr, { real: false, pts: [], hist: [], last: 0, busy: false, ref: 0, myRef: 0, refUsv: 0, k: 0, max: 0, maxAt: 0, sm: 0, raw: true, ble: false, mode: "", osc: null, oscGain: null });
+  // 2.100.0: janela da linha e do espectrograma ao vivo (1, 2 ou 5 min)
+  Object.assign(sr, { win: 120, sgRows: [], sgLast: 0, sgEvery: 2, sgPeaks: [], sgBusy: false, sgAt: 0, sgBins: 256, sgEMax: 1500 });
+  try { const w = +localStorage.getItem("rcSrWin"); if ([60, 120, 300].includes(w)) sr.win = w; } catch (e) { /* sem armazenamento */ }
+  const SR_KEEP = 330e3;
+  const srBuscaOpen = () => { const p = document.querySelector('[data-subpane="busca"]'); return !!p && !p.hidden; };
   function srMark(on) {
     sr.real = on;
     $("rcSrSimTags").hidden = on;
@@ -1435,8 +1457,10 @@
     $("rcSrReal").hidden = !on;
     $("rcSoundBox").hidden = on;
     $("rcSrSoundBox").hidden = !on;
+    $("rcSrSgBox").hidden = !on;
+    if (!on) { sr.sgRows = []; sr.sgLast = 0; sr.sgPeaks = []; }
     $("rcSrDesc").textContent = on
-      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar."
+      ? "Do seu RC102, ao vivo: atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Enquanto a contagem fica parada, o número é a média de até 20 s (mais estável); quando ela pula, ele passa a usar só o último segundo e responde na hora. A cor compara com o normal: a mediana das últimas 24 h, ou o lugar onde você estiver, se marcar. Embaixo, o espectrograma: de que energia chega o que chega, no mesmo tempo da linha. Perto de uma fonte, as linhas dela acendem e o app diz com o que se parece. Com esta aba aberta, o espectro é lido a cada 2 s (5 s ou mais no Bluetooth); nada disso é gravado."
       : "Atualiza 2 vezes por segundo, com escala automática (×1 a ×1000). Escolha uma fonte e mexa na distância, como se estivesse aproximando o RC102 dela.";
     if (!on) srSound("");
     else srSound($("rcSrSound").value);
@@ -1445,7 +1469,7 @@
     if (sr.busy) return;
     sr.busy = true;
     let r = null;
-    try { r = await api.GetRcSearch(sr.last); } catch (e) { r = null; }
+    try { r = await api.GetRcSearch(sr.last || Date.now() - SR_KEEP); } catch (e) { r = null; }
     sr.busy = false;
     if (!r || !r.live) { if (sr.real) { srMark(false); srDraw(); } return; }
     if (!sr.real) { sr.pts = []; sr.hist = []; sr.last = 0; sr.max = 0; srMark(true); }
@@ -1458,14 +1482,76 @@
       sr.pts.push(p);
     }
     if (fresh.length) sr.last = fresh[fresh.length - 1].t;
-    const cut = r.now - 180e3;
+    const cut = r.now - SR_KEEP;
     while (sr.pts.length && sr.pts[0].t < cut) sr.pts.shift();
     sr.sm = srSmooth();
     if (fresh.length) { sr.hist.push({ t: sr.last, v: sr.sm }); while (sr.hist.length && sr.hist[0].t < cut) sr.hist.shift(); }
     if (sr.sm > sr.max) { sr.max = sr.sm; sr.maxAt = sr.pts.length ? sr.pts[sr.pts.length - 1].t : r.now; }
     srPlay(fresh);
+    if (srBuscaOpen() && Date.now() - sr.sgAt >= 1000) srSgPoll();
     srDraw();
   }
+  // espectrograma ao vivo: pergunta de 1 em 1 s (só com a aba Busca aberta;
+  // é isso que mantém o app lendo o espectro de 2 em 2 s)
+  async function srSgPoll() {
+    if (sr.sgBusy || !api.GetRcSearchSg) return;
+    sr.sgBusy = true; sr.sgAt = Date.now();
+    let r = null;
+    try { r = await api.GetRcSearchSg(sr.sgLast, sr.win); } catch (e) { r = null; }
+    sr.sgBusy = false;
+    if (!r || !r.on) return;
+    sr.sgEvery = r.every || 2; sr.sgBins = r.bins || 256; sr.sgEMax = r.eMax || 1500; sr.sgSince = r.since || 0;
+    for (const row of r.rows || []) { if (row.t > sr.sgLast) { sr.sgRows.push(row); sr.sgLast = row.t; } }
+    const cut = Date.now() - SR_KEEP;
+    while (sr.sgRows.length && sr.sgRows[0].t < cut) sr.sgRows.shift();
+    sr.sgPeaks = r.peaks || [];
+    srSgDraw();
+  }
+  function srSgDraw() {
+    const cv = $("rcSrSg"); if (!cv || !sr.real) return;
+    const every = sr.sgEvery * 1000, n = Math.max(10, Math.round((sr.win * 1000) / every)), nb = sr.sgBins;
+    if (cv.width !== n || cv.height !== nb) { cv.width = n; cv.height = nb; }
+    const g = cv.getContext("2d"), img = g.createImageData(n, nb);
+    const now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now();
+    // contagens por coluna de 2 s; o fundo vira chuvisco, as linhas acendem
+    let top = 12;
+    const cols = [];
+    for (const row of sr.sgRows) {
+      const x = n - 1 - Math.floor((now - row.t) / every);
+      if (x < 0 || x >= n) continue;
+      const k = row.s > 0 ? 2 / row.s : 1, c = row.c.map((v) => v * k);
+      cols.push([x, c]);
+      for (const v of c) if (v > top) top = v;
+    }
+    const lm = Math.log1p(Math.min(top, 60)), [br, bgc, bb] = cmap(0);
+    for (let o = 0; o < img.data.length; o += 4) { img.data[o] = br; img.data[o + 1] = bgc; img.data[o + 2] = bb; img.data[o + 3] = 255; }
+    for (const [x, c] of cols) for (let b = 0; b < nb; b++) {
+      const [rr, gg, bl] = cmap(Math.log1p(c[b]) / lm), o = ((nb - 1 - b) * n + x) * 4;
+      img.data[o] = rr; img.data[o + 1] = gg; img.data[o + 2] = bl;
+    }
+    g.putImageData(img, 0, 0);
+    $("rcSrX0").textContent = "−" + srWinTxt();
+    // as colunas só começam quando a aba abre: o trecho vazio diz isso
+    const wait = $("rcSrWait"), from = sr.sgSince, empty = sr.sgSince ? (sr.sgSince - (now - sr.win * 1000)) / (sr.win * 1000) : 0;
+    wait.hidden = !(empty > 0.08);
+    if (!wait.hidden) { wait.style.width = Math.min(100, empty * 100).toFixed(1) + "%"; wait.textContent = `juntando desde ${fmtTime(from).slice(0, 5)}`; }
+    // o que parece: só quando alguma linha passou do fundo da casa
+    const like = $("rcSrLike"), list = isoList(sr.sgPeaks).filter((o) => o.sigma >= 5);
+    like.textContent = "";
+    if (list.length) {
+      const by = {};
+      for (const o of list) (by[o.group] = by[o.group] || []).push(...o.lines);
+      const groups = Object.keys(by).slice(0, 2);
+      like.append(document.createTextNode("Parece:"), document.createTextNode(" "));
+      groups.forEach((gname, i) => {
+        if (i) like.append(document.createTextNode(" · "));
+        const b = document.createElement("b"); b.textContent = gname; like.append(b);
+        const kev = by[gname].sort((x, y) => y.sigma - x.sigma).slice(0, 3).sort((x, y) => x.kev - y.kev).map((l) => nf(l.kev, 0)).join(", ");
+        const k = document.createElement("span"); k.className = "mono"; k.textContent = ` · ${kev} keV`; like.append(k);
+      });
+    }
+  }
+  const srWinTxt = () => (sr.win >= 120 ? `${sr.win / 60} min` : "1 min");
   function srSmooth() {
     const p = sr.pts; if (!p.length) return 0;
     let c1 = 0, s1 = 0;
@@ -1502,9 +1588,9 @@
     const cv = $("rcTrend"); if (!cv) return;
     const f = fit(cv, 90); if (!f) return;
     const { g, w, h } = f; g.clearRect(0, 0, w, h);
-    const now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now(), win = sr.pts.filter((p) => p.t > now - 60e3);
+    const W = sr.win * 1000, now = sr.pts.length ? sr.pts[sr.pts.length - 1].t : Date.now(), win = sr.pts.filter((p) => p.t > now - W);
     const m = Math.max(15, ref * 1.6, ...win.map((p) => p.cps)) * 1.1;
-    const yOf = (y) => h - 4 - (y / m) * (h - 8), xOf = (t) => w - ((now - t) / 60e3) * w;
+    const yOf = (y) => h - 4 - (y / m) * (h - 8), xOf = (t) => w - ((now - t) / W) * w;
     g.strokeStyle = css("--border"); g.beginPath(); g.moveTo(0, h - 0.5); g.lineTo(w, h - 0.5); g.stroke();
     if (ref > 0) { g.setLineDash([3, 3]); g.strokeStyle = "rgba(110,231,160,.55)"; g.beginPath(); g.moveTo(0, yOf(ref)); g.lineTo(w, yOf(ref)); g.stroke(); g.setLineDash([]); }
     g.beginPath();
@@ -1512,9 +1598,10 @@
     g.strokeStyle = css("--muted"); g.globalAlpha = 0.55; g.lineWidth = 1; g.stroke(); g.globalAlpha = 1;
     // a média que se adapta, por cima
     g.beginPath();
-    sr.hist.filter((p) => p.t > now - 60e3).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
+    sr.hist.filter((p) => p.t > now - W).forEach((p, i) => { const x = xOf(p.t), y = yOf(p.v); i ? g.lineTo(x, y) : g.moveTo(x, y); });
     g.strokeStyle = srNeedleColor(); g.lineWidth = 1.8; g.stroke(); g.lineWidth = 1; // 2.93 (R5): cor do nível
-    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12); g.fillText("60 s", w - 4, h - 6);
+    g.fillStyle = css("--dim"); g.font = "11px " + css("--mono"); g.textAlign = "right"; g.fillText(nf(m, 0) + " cps", w - 4, 12);
+    srSgDraw();
   }
   // som: cliques (um por contagem, espalhados no tempo da amostra) ou um tom
   // que fica mais agudo quanto mais acima do normal
@@ -1536,6 +1623,10 @@
   }
   function srPlay(fresh) {
     if (!sr.real || !sr.mode || !sr.ctx) return;
+    // 2.101.8: som só com a aba Busca aberta (o controle "Som" só existe lá)
+    const open = srBuscaOpen();
+    if (sr.oscGain) sr.oscGain.gain.setTargetAtTime(open ? 0.06 : 0, sr.ctx.currentTime, 0.05);
+    if (!open) return;
     if (sr.mode === "cliques") {
       // uma amostra por vez, atrasada de 1 s para dar tempo de espalhar
       for (const p of fresh) {
@@ -1600,7 +1691,7 @@
   const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
   const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
   const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
-  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, effOpen: false, busy: false, at: 0, chartKey: "" };
+  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
   const fmtSec = (s) => { if (!isFinite(s) || s <= 0) return "—"; if (s < 90) return nf(s, 0) + " s"; if (s < 5400) return nf(s / 60, 0) + " min"; return nf(s / 3600, s < 36000 ? 1 : 0) + " h"; };
@@ -1609,6 +1700,7 @@
   const fmtAT = (s) => (s > 0 ? fmtHM(s) : "até eu parar");
   const fmtDM = (t) => ddmm(t);
   const setHTML = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
+  const calMassShow = () => { const k = act.calKind; $("rcActCalMass").value = act.calMass[k] || (k === "torio" ? 40 : 500); };
   const actNum = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
   async function actLoad() {
     if (typeof api === "undefined" || !api.GetActivity || act.busy) return;
@@ -1625,7 +1717,7 @@
     const v = act.v || {}, [t, k] = act.pick.split(/:(.*)/s);
     if (t === "s") {
       const s = (v.samples || []).find((x) => x.id === k);
-      if (s) return { saved: s, name: s.name, label: s.name, nucs: s.nuclides || [], time: s.smpSec || 3600, mass: s.massG || 0, loose: !!s.loose, prep: s.prep || "", note: s.note || "" };
+      if (s) return { saved: s, name: s.name, label: s.name, nucs: s.nuclides || [], time: s.smpSec ?? 3600, mass: s.massG || 0, loose: !!s.loose, prep: s.prep || "", note: s.note || "" };
     }
     const p = ACT_PRESETS[k] || ACT_PRESETS.castanha;
     return { preset: ACT_PRESETS[k] ? k : "castanha", ...p, loose: false };
@@ -1645,17 +1737,28 @@
       `<tr><th>${tr("eficiência")}</th>${es.map((_, i) => `<td class="mono">${fmtPct(v.calEff[i])}</td>`).join("")}</tr>` +
       `<tr><th>${tr("incerteza")}</th>${es.map((_, i) => `<td class="mono">±${nf(v.calErr[i] * 100, 0)}%</td>`).join("")}</tr></tbody></table>`;
     const parts = [];
-    if (c.kcl) parts.push(`${tr("KCl")} ${fmtDate(c.kcl.t)}: <span class="mono">${fmtPct(c.kcl.eff)}</span> ${tr("em 1.460 keV")} <button type="button" class="link" data-forget="kcl">${tr("esquecer")}</button>`);
-    if (c.th) parts.push(`${tr("tório")} ${fmtDate(c.th.t)}: ${tr("inclinação")} <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span> <button type="button" class="link" data-forget="torio">${tr("esquecer")}</button>`);
+    // 2.101.14 (item 35): a calibração de antes fica guardada para voltar
+    const back = (p, which, txt) => (p ? ` <button type="button" class="link" data-restore="${which}">${tr(`voltar à anterior (${txt})`)}</button>` : "");
+    if (c.kcl) parts.push(`${tr("KCl")} ${fmtDate(c.kcl.t)}: <span class="mono">${fmtPct(c.kcl.eff)}</span> ${tr("em 1.460 keV")} <button type="button" class="link" data-forget="kcl">${tr("esquecer")}</button>` + back(c.prevKcl, "kcl", c.prevKcl ? `${fmtDM(c.prevKcl.t)}, ±${nf(c.prevKcl.effErr * 100, 0)}%` : ""));
+    if (c.th) parts.push(`${tr("tório")} ${fmtDate(c.th.t)}: ${tr("inclinação")} <span class="mono">${nf(c.th.b, 2)} ± ${nf(c.th.bErr, 2)}</span> <button type="button" class="link" data-forget="torio">${tr("esquecer")}</button>` + back(c.prevTh, "torio", c.prevTh ? `${fmtDM(c.prevTh.t)}, ± ${nf(c.prevTh.bErr, 2)}` : ""));
     else parts.push(`${tr("forma da curva: estimada (inclinação −1,3 ± 0,4)")} <button type="button" class="link" data-cal="torio">${tr("medir o tório")}</button>`);
     return tab + `<p class="small muted">${parts.join("<br>")}</p>`;
   }
+  // 2.101.6: a Posição segue a da calibração enquanto a pessoa não mexeu nela;
+  // com o cursor no campo, ou depois de digitar (até apagar), o app não toca
+  function actGeomFill(el, g) {
+    if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
+    if (document.activeElement === el || el.dataset.touched) return;
+    if (el.value !== tr(g)) el.value = tr(g); // 2.101.8: no idioma da tela (grava o original)
+  }
+  // o campo ainda com o texto padrão traduzido manda o original (2.86.1: grava em português)
+  const actOrig = (v, orig) => (orig && v === tr(orig) ? orig : v);
   // cartões: suas amostras, depois a lista
   function actChipsHtml(v) {
     const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
     let h = `<p class="rc-act-grp">Suas amostras</p>`;
-    for (const s of v.samples || []) h += chip("s:" + s.id, `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
-    h += `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
+    for (const s of v.samples || []) h += chip("s:" + s.id, s.seed ? `<span>${escHtml(s.name)}</span>` : `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
+    h += (act.pick || "").startsWith("s:") ? `<button type="button" class="rc-act-chip add" data-keep>＋ Atualizar minha amostra<small>com o que está escolhido</small></button>` : `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
     h += `<p class="rc-act-grp">Outras</p>`;
     for (const [k, p] of Object.entries(ACT_PRESETS)) h += chip("p:" + k, p.label, p.sub);
     return h;
@@ -1663,7 +1766,7 @@
   function actRefText(s, hist) {
     const out = [];
     if (s.refUSv > 0) out.push(`<span>${escHtml(s.refDist || tr("encostada"))}</span>: <span class="mono">${rateNum(s.refUSv, 2)}</span> <span data-unit-keep>${rateLbl()}</span> ${s.refDev === "radiacode" ? tr("no RC102") : tr("no GMC-800")} (<span class="mono">${fmtDM(s.refT)}</span>)`);
-    const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name)));
+    const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name) || foldTxt(tr(r.name)) === foldTxt(s.name)));
     if (last) out.push(`${tr("última medida")} <span class="mono">${fmtDM(last.t)}</span>: ${escHtml(actSummary(last))}`);
     return out.length ? out.join("<br>") : tr("ainda não medida");
   }
@@ -1673,12 +1776,16 @@
     if (rec != null && !opts.includes(rec)) { opts.push(rec); opts.sort((a, b) => (a || 1e9) - (b || 1e9)); }
     return opts.map((s) => `<button type="button" data-v="${s}" aria-pressed="${s === cur}">${fmtAT(s)}${s === rec ? `<span class="rc-rec">recomendado</span>` : ""}</button>`).join("");
   }
+  // 2.101.14 (item 68): pote ou pedra solta, para qualquer amostra; segue o
+  // cartão até a pessoa escolher em Mais opções
+  const actLoose = (c) => (act.loose == null ? !!c.loose : act.loose);
   // escolheu outro cartão: o formulário segue o cartão
   function actPick(key) {
     act.pick = key;
+    act.loose = null;
     const c = actChoice();
-    $("rcActName").value = c.name || "";
-    $("rcActMass").value = c.loose ? (c.mass > 0 ? c.mass : "") : c.mass;
+    $("rcActName").value = c.preset ? tr(c.name || "") : c.name || ""; // 2.101.8: no idioma da tela
+    $("rcActMass").value = actLoose(c) ? (c.mass > 0 ? c.mass : "") : c.mass;
     act.smpSec = c.time;
     document.querySelectorAll("#rcActNucs input").forEach((x) => { x.checked = c.nucs.includes(x.value); });
     $("rcActErr").dataset.msg = "";
@@ -1698,8 +1805,11 @@
     setHTML($("rcActExpect"), exp + `<div><span class="k">tempo recomendado</span><b>${fmtAT(c.time)}</b></div><div><span class="k">para o RC102</span><b>${escHtml(c.note || "—")}</b></div>` +
       (c.saved ? `<div class="rc-act-full"><button type="button" class="link" data-forget-sample="${escHtml(c.saved.id)}">tirar de Suas amostras</button></div>` : ""));
     setHTML($("rcActPrep"), c.prep ? `<span>Preparo:</span> <span>${escHtml(c.prep)}</span>` : "");
-    $("rcActMassLbl").textContent = c.loose ? tr("Massa (g), só para o Bq/g") : tr("Massa (g)");
-    $("rcActMass").placeholder = c.loose ? tr("opcional") : "";
+    const loose = actLoose(c);
+    $("rcActMassLbl").textContent = loose ? tr("Massa (g), só para o Bq/g") : tr("Massa (g)");
+    $("rcActMass").placeholder = loose ? tr("opcional") : "";
+    document.querySelectorAll("#rcActLoose button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "solta") === loose)));
+    $("rcActLooseHint").hidden = !loose;
     setHTML($("rcActSmpT"), actSegHtml(ACT_SMP_T, act.smpSec, c.time));
     const saved = v.savedBg, fresh = saved && Date.now() - saved.t < 30 * 864e5;
     if (!fresh && act.bgMode === "salvo") act.bgMode = "novo";
@@ -1709,10 +1819,22 @@
     document.querySelectorAll("#rcActBg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.bgMode)));
     $("rcActBgTBox").hidden = act.bgMode !== "novo";
     setHTML($("rcActBgT"), actSegHtml(ACT_BG_T, act.bgSec, null));
-    if (!$("rcActGeom").value) $("rcActGeom").value = (v.cal && v.cal.geometry) || "";
+    actGeomFill($("rcActGeom"), (v.cal && v.cal.geometry) || "");
     setHTML($("rcActTot"), actTotal(act.bgMode === "novo", act.bgSec, act.smpSec, tr("de amostra")));
     $("rcActStart").disabled = !v.connected;
     $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
+  }
+  // 2.101.11: tempo de cada fase da calibração do KCl (fundo = sal), para a
+  // eficiência sair com ~15% de dúvida (o app guarda até 20%). Conta com o
+  // chute de 0,005% em 1.460 keV (o que o RC102 deu com 250 g de sal light
+  // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
+  const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
+  function actCalPhaseSec(massG, pct) {
+    const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * (39.0983 / 74.551) * 31.7; // K-40 do KCl (o mesmo do Go)
+    const net = bq * 0.1066 * ACT_EFF_GUESS;
+    if (!(net > 0)) return 0;
+    const sec = (net + 2 * ACT_K_BG) / (ACT_CAL_REL * net) ** 2;
+    return Math.max(3600, Math.ceil(sec / 1800) * 1800);
   }
   function actRenderCal(v) {
     const k = act.calKind, light = act.kclType !== "100";
@@ -1720,12 +1842,17 @@
     document.querySelectorAll("#rcActCalFlow [data-for]").forEach((el) => { el.hidden = el.dataset.for !== k; });
     $("rcActPctBox").hidden = k !== "kcl" || !light;
     document.querySelectorAll("#rcActKclType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.kclType)));
-    if (!$("rcActCalGeom").value) $("rcActCalGeom").value = (v.cal && v.cal.geometry) || "";
+    actGeomFill($("rcActCalGeom"), (v.cal && v.cal.geometry) || "");
     $("rcActCalHint").textContent = k === "kcl"
-      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.")
+      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RC102 (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RC102 vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.")
       : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
-    act.calSmpSec = k === "kcl" ? (light ? 7200 : 3600) : 3600;
-    setHTML($("rcActCalTot"), actTotal(true, 3600, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo")));
+    const calSec = k === "kcl" ? actCalPhaseSec(actNum("rcActCalMass"), light ? actNum("rcActPct") : 100) : 3600;
+    act.calSmpSec = calSec || 3600;
+    act.calBgSec = act.calSmpSec;
+    let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
+    // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
+    if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${light ? tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`) : tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais KCl, bem apertado em volta do RC102.`)}</span>`;
+    setHTML($("rcActCalTot"), tot);
     $("rcActCalStart").textContent = k === "kcl" ? tr("Começar a calibração") : tr("Medir o tório");
     $("rcActCalStart").disabled = !v.connected;
     $("rcActCalErr").textContent = v.connected ? $("rcActCalErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
@@ -1744,14 +1871,15 @@
       let sub = ACT_SUB[n.id] ? tr(ACT_SUB[n.id]) : "";
       if (n.id === "K-40" && n.detected && perKg) sub = `≈ ${nf(n.bq * 1000 / massG / 31.7, 1)} ${tr("g de potássio por kg")}`;
       let third = "";
-      if (live) third = `<td>${n.detected ? (n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? tr("já chegou") : "~" + fmtSec(n.needSec) + " no total") : "—") : tr("ainda não aparece")}</td>`;
+      if (live) third = `<td>${n.detected ? (n.needSec < 0 ? tr("não chega a ±10% (limite da calibração)") : n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? tr("já chegou") : "~" + fmtSec(n.needSec) + " no total") : "—") : tr("ainda não aparece")}</td>`;
       else if (range) {
         const rg = range[n.id];
         if (!n.detected) third = `<td><span class="sub">${tr("O RC102 não chegou a ver. Mais tempo ajudaria.")}</span></td>`;
         else if (!rg) third = `<td><span class="sub">${tr("sem valor típico na lista")}</span></td>`;
         else {
           const x = val(n.bq), e = val(n.err), lo = Math.log10(rg[0] / 3), hi = Math.log10(rg[1] * 3), pos = (y) => Math.max(0, Math.min(100, ((Math.log10(Math.max(y, 1e-6)) - lo) / (hi - lo)) * 100));
-          const word = x + e < rg[0] ? "abaixo do típico" : x - e > rg[1] ? "acima do típico" : "dentro do esperado";
+          // 2.101.6: a palavra segue o valor central (a marca); o ± que cruza a borda vira ressalva
+          const word = (x < rg[0] ? "abaixo do típico" : x > rg[1] ? "acima do típico" : "dentro do típico") + ((x < rg[0] && x + e >= rg[0]) || (x > rg[1] && x - e <= rg[1]) ? ", mas a incerteza é grande" : "");
           third = `<td><div class="rc-act-bar2" aria-hidden="true"><i style="left:${pos(rg[0]).toFixed(1)}%;width:${(pos(rg[1]) - pos(rg[0])).toFixed(1)}%"></i><b style="left:${pos(x).toFixed(1)}%"></b></div><span class="sub">${word} (${nf(rg[0], 0)} a ${nf(rg[1], 0)} Bq/kg)</span></td>`;
         }
       } else if (!live && !n.detected) sub = (sub ? sub + ". " : "") + tr("O RC102 não chegou a ver. Mais tempo ajudaria.");
@@ -1760,12 +1888,22 @@
     return `<div class="rc-act-wrap">${h}</tbody></table></div>`;
   }
   const calTxt = (r) => ({ kcl: "calibração pelo KCl", torio: "calibração pelo tório (aproximada)", chute: "sem calibração: chute" }[r.calSrc] || "");
+  // 2.101.14 (item 35): a nova saiu pior que a que está em uso: não troca
+  // sozinha; a pessoa pode usar a nova mesmo assim (e voltar depois)
+  function actWorseHtml(r, nova, atual) {
+    const live = act.v && act.v.phase === "pronto" && act.v.result && act.v.result.t === r.t;
+    if (r.used) return `<p>${tr("Você escolheu usar a nova calibração. A de antes ficou guardada: dá para voltar em detalhes.")}</p>`;
+    return `<p class="att-text">${tr(`Esta saiu com ${nova}, pior que a que está em uso (${atual}), então a atual continua valendo.`)}</p>` +
+      (live ? `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Usar a nova (${nova})`)}</button></p>` : "");
+  }
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
-      h += r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
+      if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
+      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p><p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
-      h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
+      if (r.th && r.worse) h += `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p>` + actWorseHtml(r, `± ${nf(r.th.bErr, 2)}`, `± ${nf(r.prevErr, 2)}`);
+      else h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
     }
     if (r.kind === "amostra") {
       if (r.loose) h += `<p class="small att-text">${tr("Forma diferente do pote da calibração: aproximado.")}</p>`;
@@ -1775,13 +1913,14 @@
     const lines = [];
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
-    const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted">${escHtml(n.id)}: ${escHtml(n.note)}</p>`).join("");
-    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : tr("sem massa")} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
+    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
   function actSummary(r) {
-    if (r.kind === "kcl") return r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
+    if (r.worse && !r.used) return tr("pior que a atual: não usada");
+    if (r.kind === "kcl") return r.kcl && r.notSaved ? tr("pico fraco: não guardada") : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
     if (r.kind === "torio") return r.th ? `inclinação ${nf(r.th.b, 2)}` : "sem linhas";
     const perKg = r.massG > 0 && !r.loose, u = perKg ? "Bq/kg" : "Bq";
     return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(perKg ? n.bqKg : n.bq) + u : "< " + fmtBq(perKg ? n.mdaKg : n.mda) + u}`).join(" · ");
@@ -1805,7 +1944,7 @@
     if (ch) actDraw(ch, v);
     // histórico
     const hist = v.history || [];
-    const what = (r) => (r.kind === "amostra" ? `<span>${escHtml(r.name)}</span>` : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
+    const what = (r) => (r.kind === "amostra" ? actNameHtml(r) : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
     setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
       hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
   }
@@ -1816,7 +1955,7 @@
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
     const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
-    setHTML($("rcActWhat"), `<b>${nm}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
+    setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
       fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
@@ -1831,18 +1970,27 @@
     nx.classList.toggle("accent", ph !== "amostra" && ph !== "fundo");
     $("rcActCancel").hidden = ph === "pronto";
     $("rcActAgain").hidden = ph !== "pronto" || o.kind !== "amostra";
-    const mine = (o.sampleId || "").startsWith("s:") && (v.samples || []).some((s) => "s:" + s.id === o.sampleId);
+    // 2.101.6: depois de guardar, o botão some (a amostra com esse nome já é sua)
+    const mine = (v.samples || []).some((s) => "s:" + s.id === o.sampleId || foldTxt(s.name) === foldTxt(o.name || ""));
     $("rcActKeep").hidden = ph !== "pronto" || o.kind !== "amostra" || mine;
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
       if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
+      // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
+      // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
+      if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
+      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.")}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
       if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;
+    } else if (ph === "fundo" && v.phaseCps > 0 && v.homeCps > 0) {
+      // 2.101.4: fundo medido com o sal perto estraga a calibração inteira
+      live = `<p class="mono small">${tr("contagem agora")}: ${nf(v.phaseCps, 1)} cps · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps</p>`;
+      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
-      live = `<div class="rc-act-res"><h4>${escHtml(r.name)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
+      live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
     }
     setHTML($("rcActLive"), live);
   }
@@ -1852,15 +2000,17 @@
   }
   function actFormOpts() {
     const c = actChoice();
-    return {
-      kind: "amostra", name: $("rcActName").value.trim() || c.name || "", massG: actNum("rcActMass"), geometry: $("rcActGeom").value,
-      newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: c.loose, sampleId: act.pick,
+    const o = {
+      kind: "amostra", name: actOrig($("rcActName").value.trim(), c.preset && c.name) || c.name || "", massG: actNum("rcActMass"), geometry: actOrig($("rcActGeom").value, act.v && act.v.cal && act.v.cal.geometry),
+      newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: actLoose(c), sampleId: act.pick,
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
+    o.nameOwn = !!o.name && actNameOwn(o); // 2.101.12: nos Eventos, só o nome da pessoa fica como está
+    return o;
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
-    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: $("rcActCalGeom").value, newBg: true, bgSec: 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
+    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
     if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
     else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
     actStartOpts(o, $("rcActCalErr"));
@@ -1879,13 +2029,33 @@
     actStartOpts(o, $("rcActRunErr"));
   }
   // guarda como "minha": da medida terminada ou do que está escolhido
+  // 2.101.10: o nome que a pessoa digitou não traduz; o dos cartões prontos
+  // (p:…) e das amostras que vêm com o app (seed) traduz
+  function actNameOwn(r) {
+    if (r.kind !== "amostra") return false;
+    if ((r.name || "") === "amostra") return false; // 2.101.12: o nome que o app dá quando fica em branco
+    const id = r.sampleId || "";
+    if (id.startsWith("p:")) { const pk = ACT_PRESETS[id.slice(2)]; return !pk || !pk.name || pk.name !== r.name; } // "Outra coisa" tem nome vazio
+    if (id.startsWith("s:")) {
+      const s = ((act.v && act.v.samples) || []).find((x) => "s:" + x.id === id);
+      return !(s && s.seed);
+    }
+    if (!id) return !Object.values(ACT_PRESETS).some((p) => p.name && p.name === r.name); // antes da 2.86: sem sampleId
+    return true;
+  }
+  const actNameHtml = (r) => (actNameOwn(r) ? `<span data-no-tr>${escHtml(r.name)}</span>` : `<span>${escHtml(r.name)}</span>`);
+
   async function actKeep(o) {
     if (!api.SaveActSample) return;
     const c = actChoice();
     // nome do preset: grava no idioma da tela (o cartão fica com o nome dele)
     const pk = (o.sampleId || "").startsWith("p:") ? ACT_PRESETS[o.sampleId.slice(2)] : null;
     const nm0 = (o.name || "").trim(), nm = pk && pk.name && nm0 === pk.name ? tr(pk.label) : nm0;
-    const s = { id: "", name: nm, sub: c.saved ? c.saved.sub || "" : c.sub || "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: c.prep || "", note: c.note || "" };
+    // 2.101.6: guardar de novo uma amostra sua atualiza a mesma (não cria outra); textos
+    // do "Outra coisa" não vão para a sua; de um cartão pronto, sub e preparo vêm junto
+    const own = c.saved || ((act.v && act.v.samples) || []).find((x) => foldTxt(x.name) === foldTxt(nm));
+    const tpl = !own && c.preset && c.preset !== "outro" ? c : null;
+    const s = { id: own ? own.id : "", name: nm, sub: own ? own.sub || "" : tpl ? tpl.sub || "" : "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: own ? own.prep || "" : tpl ? tpl.prep || "" : "", note: c.note || "" };
     const err = o === act.v?.opts ? $("rcActRunErr") : $("rcActErr");
     if (!s.name) { err.dataset.msg = tr("Dê um nome em Mais opções."); $("rcActMore").open = true; $("rcActName").focus(); actRender(); return; }
     try { const id = await api.SaveActSample(s); err.dataset.msg = ""; act.pick = "s:" + id; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }
@@ -1894,10 +2064,10 @@
   }
   async function actForgetSample(id) {
     const s = ((act.v && act.v.samples) || []).find((x) => x.id === id);
-    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? s.name : "", ok: tr("Tirar") });
+    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? (s.seed ? s.name : asIs(s.name)) : "", ok: tr("Tirar") });
     if (!ok) return;
     await api.DeleteActSample(id);
-    act.pick = "p:castanha";
+    act.pick = "p:castanha"; act.loose = null;
     await actLoad();
     actPick(act.pick);
   }
@@ -2029,6 +2199,16 @@
     $("rcSrHere").addEventListener("click", () => { if (sr.sm > 0) { sr.myRef = sr.sm; srDraw(); } });
     $("rcSrRefReset").addEventListener("click", () => { sr.myRef = 0; srDraw(); });
     $("rcSrMaxReset").addEventListener("click", () => { sr.max = 0; srDraw(); });
+    $("rcSrCmap").addEventListener("click", (e) => { const b = e.target.closest("button[data-c]"); if (b) cmapSet(b.dataset.c === "cont"); });
+    const srWinSet = (w) => {
+      sr.win = w;
+      try { localStorage.setItem("rcSrWin", String(w)); } catch (e) { /* sem armazenamento */ }
+      document.querySelectorAll("#rcSrWin button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.w === w)));
+      sr.sgAt = 0; // "Parece" refeito na janela nova
+      srDraw();
+    };
+    $("rcSrWin").addEventListener("click", (e) => { const b = e.target.closest("button[data-w]"); if (b) srWinSet(+b.dataset.w); });
+    srWinSet(sr.win);
     // atividade
     $("rcActNucs").innerHTML = ACT_NUCS.map((id) => `<label><input type="checkbox" value="${id}"> ${id}</label>`).join("");
     actPick(act.pick);
@@ -2036,22 +2216,32 @@
     segPick("rcActSmpT", (x) => { act.smpSec = +x; });
     segPick("rcActBgT", (x) => { act.bgSec = +x; });
     segPick("rcActBg", (x) => { act.bgMode = x; });
-    segPick("rcActKclType", (x) => { act.kclType = x; $("rcActCalMass").value = 500; });
+    segPick("rcActKclType", (x) => { act.kclType = x; });
+    // 2.101.3: a massa digitada fica; o padrão (500 g / 40 g) só entra no campo
+    // que a pessoa ainda não mexeu, e cada referência guarda a sua
+    $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; if (act.v) actRenderCal(act.v); });
+    $("rcActPct").addEventListener("input", () => { if (act.v) actRenderCal(act.v); });
     $("rcActChips").addEventListener("click", (e) => {
       if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
-      const b = e.target.closest("button[data-pick]"); if (b) actPick(b.dataset.pick);
+      const b = e.target.closest("button[data-pick]"); if (b && b.dataset.pick !== act.pick) actPick(b.dataset.pick); // 2.101.5: o mesmo cartão não apaga o digitado
     });
     $("rcActExpect").addEventListener("click", (e) => { const b = e.target.closest("[data-forget-sample]"); if (b) actForgetSample(b.dataset.forgetSample); });
     $("rcActCalSteps").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-k]"); if (!b) return;
       act.calKind = b.dataset.k;
-      $("rcActCalMass").value = act.calKind === "torio" ? 40 : 500;
+      calMassShow();
       actRender();
     });
-    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; $("rcActCalMass").value = k === "torio" ? 40 : 500; actRender(); };
+    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; calMassShow(); actRender(); };
     $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
     $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);
+    $("rcActLoose").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-v]"); if (!b) return;
+      act.loose = b.dataset.v === "solta";
+      $("rcActErr").dataset.msg = "";
+      actRender();
+    });
     $("rcActNext").addEventListener("click", actNext);
     $("rcActAgain").addEventListener("click", actAgain);
     $("rcActKeep").addEventListener("click", () => { if (act.v && act.v.opts) actKeep(act.v.opts); });
@@ -2059,12 +2249,22 @@
     const calClick = async (e) => {
       const c = e.target.closest("[data-cal]"); if (c) { openCal(c.dataset.cal); return; }
       if (e.target.closest("[data-eff]")) { act.effOpen = !act.effOpen; actRender(); return; }
+      const rs = e.target.closest("[data-restore]");
+      if (rs) {
+        try { await api.RestoreActivityCal(rs.dataset.restore); toast("Voltou para a calibração anterior"); } catch (err) { toast(String(err), true); }
+        actLoad(); return;
+      }
       const b = e.target.closest("[data-forget]"); if (!b) return;
       const ok = await askConfirm({ title: b.dataset.forget === "kcl" ? tr("Esquecer a calibração do KCl?") : tr("Esquecer a calibração do tório?"), text: tr("Para voltar, é preciso medir de novo."), ok: tr("Esquecer") });
       if (!ok) return;
       await api.ForgetActivityCal(b.dataset.forget); actLoad();
     };
     $("rcActCal").addEventListener("click", calClick);
+    $("viewRadiacode").addEventListener("click", async (e) => {
+      const u = e.target.closest("[data-usecal]"); if (!u) return;
+      try { await api.UseActivityCal(Number(u.dataset.usecal)); toast("A calibração foi atualizada"); } catch (err) { toast(String(err), true); }
+      actLoad();
+    });
     $("rcActEff").addEventListener("click", calClick);
     new ResizeObserver(() => { if (visible) drawAll(); }).observe($("viewRadiacode"));
     // Espectro: espectro (acumulado) ou espectrograma (com a dureza)

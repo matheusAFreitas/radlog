@@ -200,6 +200,11 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	cal := a.convCalLocked()
 	tl := a.calTLLocked()
 	devSrc := a.cal.Source
+	// 2.101.6: com o fator do app em uso, a origem é a dele, não a do contador
+	appSrc := ""
+	if last := a.calLastLocked(); last != nil && last.Factor > 0 {
+		appSrc = "fator do app, " + calFactorSrc(*last)
+	}
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
@@ -593,6 +598,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	case "padrão":
 		calSrc = "padrão de fábrica do GMC-800; o app ainda não leu a do contador"
 	}
+	if appSrc != "" {
+		calSrc = appSrc
+	}
 	alarm := "desligado"
 	if alarmOn {
 		alarm = fmt.Sprintf("a partir de %s µSv/h (≈ %d CPM com a calibração atual; limite operacional)", fmtU(alarmU), alarmCPM)
@@ -707,7 +715,7 @@ func (a *App) ChooseReportDir() (ReportDirInfo, error) {
 	}
 	cur := a.reportDir().Dir
 	_ = os.MkdirAll(cur, 0o755)
-	dir, err := wruntime.OpenDirectoryDialog(a.ctx, wruntime.OpenDialogOptions{Title: "Pasta dos relatórios", DefaultDirectory: cur, CanCreateDirectories: true})
+	dir, err := wruntime.OpenDirectoryDialog(a.ctx, wruntime.OpenDialogOptions{Title: a.T("Pasta dos relatórios"), DefaultDirectory: cur, CanCreateDirectories: true})
 	if err != nil || dir == "" {
 		return a.reportDir(), err
 	}

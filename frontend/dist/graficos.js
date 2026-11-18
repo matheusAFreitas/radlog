@@ -47,6 +47,30 @@ let chartSeq = 0, doseSeq = 0; // descarta respostas atrasadas (zoom trocou no m
 const gfxShown = (sub) => state.view === "graficos" && state.sub.graficos === sub;
 const fundoShown = (sub) => state.view === "fundo" && state.sub.fundo === sub;
 
+// 2.101.0 (ACE): aparelho no gráfico de cima: "Todos" ou um só. A lista é
+// genérica (mais para frente entra um terceiro contador)
+const CHART_DEVS = [{ k: "todos", name: "Todos" }, { k: "gmc", name: "GMC-800" }, { k: "rc", name: "RC102" }];
+// o aparelho em vigor: com um aparelho só (sem dado do RC102), "todos"
+const chartHasRc = (c) => hasRcData() || !!(c && ((c.rc || []).some((v) => v != null) || (c.rcCPM || []).some((v) => v != null)));
+function chartDevOf(c) {
+  return chartHasRc(c) && CHART_DEVS.some((d) => d.k === state.chartDev) ? state.chartDev : "todos";
+}
+function renderChartDevSeg(c) {
+  const seg = $("chartDevSeg"), dev = chartDevOf(c);
+  seg.hidden = !chartHasRc(c);
+  if (!seg.children.length) {
+    for (const d of CHART_DEVS) {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.dataset.dev = d.k;
+      b.textContent = d.name;
+      b.addEventListener("click", () => { state.chartDev = d.k; localSet("chartDev", d.k); refreshChart(); });
+      seg.appendChild(b);
+    }
+  }
+  seg.querySelectorAll("button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.dev === dev)));
+}
+
 async function refreshChart() {
   if (!gfxShown("tempo")) return;
   const my = ++chartSeq;
@@ -80,7 +104,10 @@ async function refreshChart() {
   const cps = !usvMode && UNITS.count === "cps", ck = cps ? 1 / 60 : 1;
   const cScale = (a) => (cps && a ? a.map((v) => (v == null ? null : v * ck)) : a);
   $("chartTitle").textContent = usvMode ? `${rateLbl()} ao longo do tempo` : `${countLbl()} ao longo do tempo (análise)`;
-  const vals = (usvMode ? c.usv : cScale(c.values)) || [];
+  renderChartDevSeg(c);
+  const dev = chartDevOf(c), onlyRc = dev === "rc";
+  // só o RC102: a linha dele vira a principal (eixo ajustado a ele)
+  const vals = (onlyRc ? (usvMode ? c.rc : cScale(c.rcCPM)) : usvMode ? c.usv : cScale(c.values)) || [];
   const thrV = usvMode ? c.attentionUSv : c.attentionCPM || 50;
   let max = 0;
   for (const v of vals) if (v != null && v > max) max = v;
@@ -89,11 +116,11 @@ async function refreshChart() {
   const peakV = (p) => (usvMode ? p.cpm * kU : p.cpm);
   // (só no µSv/h, onde viram ponto; no CPM o pico de 1 s nem aparece, então
   // não estica a escala, 2.81)
-  if (usvMode) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
+  if (usvMode && !onlyRc) for (const p of c.peaks || []) max = Math.max(max, peakV(p)); // o "máx" já os inclui
   // Radiacode: no µSv/h, na mesma escala do GMC; no CPM, com escala própria
   // no eixo da direita (conta umas 28 vezes mais que o GMC, então na mesma
   // escala a linha do GMC sumiria no chão do gráfico)
-  const rcVals = usvMode ? c.rc || null : cScale(c.rcCPM) || null;
+  const rcVals = dev !== "todos" ? null : usvMode ? c.rc || null : cScale(c.rcCPM) || null;
   let rcMax = 0;
   if (rcVals) for (const v of rcVals) if (v != null && v > rcMax) rcMax = v;
   if (usvMode) max = Math.max(max, rcMax);
@@ -120,6 +147,8 @@ async function refreshChart() {
   const yd = usvMode ? (yTop < 0.03 ? 4 : yTop < 0.3 ? 3 : yTop < 10 ? 2 : 1) : cps ? (top < 1 ? 2 : top < 10 ? 1 : 0) : 0;
   const yk = usvMode ? rateK() : 1;
   const rcTop = stacked ? niceN(Math.max(300 * ck, rcMax * 1.05), 2) : top;
+  // casas do eixo em CPS: a metade do topo tem que sair certa (0,25 e não 0,3)
+  const axDig = (t) => (t >= 20 ? 0 : t >= 2 ? 1 : 2);
   // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
   const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
   const yAx = $("yAxis");
@@ -128,13 +157,15 @@ async function refreshChart() {
   if (stacked) {
     const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
     yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
-      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? (v && v < 10 ? 1 : 0) : 0)}</span>`).join("");
+      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? axDig(i < 3 ? top : rcTop) : 0)}</span>`).join("");
   } else {
     if (yAx.children.length !== 4) yAx.innerHTML = "<span></span><span></span><span></span><span></span>";
     for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt((top - (top / 3) * i) * yk, i === 3 ? 0 : yd);
   }
   $("yAxisR").hidden = true;
   $("plotLbls").hidden = !stacked;
+  // 2.101.8: o rótulo dos andares segue a unidade do eixo (CPS é o padrão)
+  if (stacked) { const u = cps ? "CPS" : "CPM", l = $("plotLbls").children; l[0].textContent = `GMC-800 · ${u}`; l[1].textContent = `RC102 · ${u}`; }
 
   const n = vals.length;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
@@ -230,7 +261,7 @@ async function refreshChart() {
     m.type = "button";
     m.className = "note-mark";
     m.style.left = ((nx / W) * 100).toFixed(2) + "%";
-    m.title = `${nt.end ? hhmm(nt.time) + "–" + hhmm(nt.end) : hhmm(nt.time)} · ${nt.text} (clique para editar)`;
+    m.title = `${nt.end ? hhmm(nt.time) + "–" + hhmm(nt.end) : hhmm(nt.time)} · ${asIs(nt.text)} (clique para editar)`;
     m.addEventListener("mousedown", (e) => e.stopPropagation());
     m.addEventListener("click", (e) => { e.stopPropagation(); openNote(nt); });
     $("noteMarks").appendChild(m);
@@ -243,7 +274,7 @@ async function refreshChart() {
   $("noteKey").hidden = !(c.notes || []).length;
   // ponto de cada pico, em cima do ponto do gráfico daquele trecho
   const stepMs = c.stepMs || 60000;
-  $("peakDots").innerHTML = (usvMode ? c.peaks || [] : []).map((p) => {
+  $("peakDots").innerHTML = (usvMode && !onlyRc ? c.peaks || [] : []).map((p) => {
     const i = Math.floor((p.t - c.from) / stepMs);
     if (i < 0 || i >= n) return "";
     const col = { perigo: COR.warn, alarme: COR.alarm }[p.level] || COR.att;
@@ -260,9 +291,10 @@ async function refreshChart() {
     ? `<path d="${rcArea}" fill="${COR.rc}" fill-opacity="0.12"/>` +
       `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-opacity="0.75" stroke-width="1.4" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>` +
       `<path d="${rcLine}" fill="none" stroke="${COR.rc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`
-    : `<path d="${area}" fill="${COR.gmc}" fill-opacity="0.12"/>` +
-      `<path d="${line}" fill="none" stroke="${COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
+    : `<path d="${area}" fill="${onlyRc ? COR.rc : COR.gmc}" fill-opacity="0.12"/>` +
+      `<path d="${line}" fill="none" stroke="${onlyRc ? COR.rc : COR.gmc}" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>`);
   $("gmcKey").hidden = !rcLine;
+  if (onlyRc) $("rcKey").hidden = false;
 
   if (state.zoom) {
     const f = chartTimeFmt(c);
@@ -282,13 +314,21 @@ async function refreshChart() {
     ? `atenção: ${fmt(c.attentionUSv, usvDigits(c.attentionUSv))} µSv/h`
     : `análise: sem limites nem alarmes (eles ficam no ${rateLbl()})`;
   $("legDash").hidden = !usvMode;
-  $("chartStats").textContent = c.avg == null
+  const rcMaxU = (c.rc || []).reduce((m, v) => (v != null && v > m ? v : m), 0);
+  const rcMinU = (c.rc || []).reduce((m, v) => (v != null && v < m ? v : m), Infinity);
+  // 2.101.5: os números já saem na unidade da tela (o conversor só pegava o último)
+  $("chartStats").setAttribute("data-unit-keep", "");
+  $("chartStats").textContent = onlyRc
+    ? (c.rcAvg == null && c.rcAvgCPM == null ? "sem dados do RC102 no período"
+      : usvMode ? `RC102 média ${rateNum(c.rcAvg, 3)} · mín ${rateNum(rcMinU, 3)} · máx ${rateNum(rcMaxU, 3)} ${rateLbl()}`
+      : cps ? `RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(max, 1)} CPS` : `RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(max, 0)} CPM`)
+    : c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? (c.rcAvg != null ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
+      ? (c.rcAvg != null && dev === "todos" ? `RC102 média ${rateNum(c.rcAvg, 3)} · GMC-800 média ${rateNum(c.avgUSv, 3)} · mín ${rateNum(c.minUSv, 3)} · máx ${rateNum(c.maxUSv, 3)} ${rateLbl()}` : `média ${rateNum(c.avgUSv, 3)} · mín ${rateNum(c.minUSv, 3)} · máx ${rateNum(c.maxUSv, 3)} ${rateLbl()}`)
       : cps
-        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
-        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
+        ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
+        : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
 }
 
 function setupChartHover() {
@@ -300,7 +340,8 @@ function setupChartHover() {
     const f = Math.min(1, Math.max(0, (ev.clientX - r.left) / r.width));
     const i = Math.round(f * (c.values.length - 1));
     const usvMode = state.chartUnit === "usv";
-    const v = (usvMode ? c.usv : c.values)[i];
+    const onlyRc = chartDevOf(c) === "rc", onlyGmc = chartDevOf(c) === "gmc";
+    const v = onlyRc ? null : (usvMode ? c.usv : c.values)[i];
     const t = c.times[i];
     const cur = $("cursor"), tip = $("tip");
     cur.hidden = false;
@@ -315,14 +356,14 @@ function setupChartHover() {
     const rh = rr ? null : (c.rain || []).find((p) => t >= p.time && t < p.time + 3600e3 && p.mm >= 0.1);
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
-    const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
-    const rcv = usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
+    const ntText = nt.length ? ` · ${tr("nota")}: ${asIs(nt.join("; "))}` : ""; // 2.101.8: a nota é texto da pessoa
+    const rcv = onlyGmc ? null : usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
     const cps = !usvMode && UNITS.count === "cps";
     const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
-    tip.textContent = (v == null ? `${when} · sem dados`
+    tipSet(tip, (onlyRc ? (rcv == null ? `${when} · sem dados` : `${when}`) : v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
       : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
-      : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
+      : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText);
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
   });
@@ -383,23 +424,52 @@ function attachDragZoom(plot, sel, getChart, onZoom) {
 function zoomRangeText(t0, t1) {
   const sameDay = new Date(t0).toDateString() === new Date(t1 - 1).toDateString();
   const day = isToday(t0) ? "hoje" : isYesterday(t0) ? "ontem" : ddmm(t0);
+  // 2.101.8: a duração traduz sozinha ("(2 dias)" ficava em português)
   return sameDay
-    ? `${day} ${hhmm(t0)}–${hhmm(t1)} (${fmtDur(t1 - t0)})`
-    : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)} (${fmtDur(t1 - t0)})`;
+    ? `${day} ${hhmm(t0)}–${hhmm(t1)} (${tr(fmtDur(t1 - t0))})`
+    : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)} (${tr(fmtDur(t1 - t0))})`;
 }
 
 const stepText = (ms) => (ms < 60000 ? `${Math.round(ms / 1000)} s` : fmtDur(ms));
 
+// 2.101.0 (ACE): um trecho só para a página: arrastar no gráfico de cima ou
+// no da dose marca o mesmo trecho nos dois (e a dose volta para "Do gráfico
+// de cima")
+function pushZoom(from, to) {
+  if (state.zoom) state.zoomStack.push(state.zoom);
+  else state.zoomStack = [];
+  state.zoom = { from, to };
+  state.doseZoom = { from, to }; state.doseZoomStack = [];
+  state.zoomLinked = true;
+  setDoseAll(false, true);
+  refreshChart();
+  refreshDose();
+}
+function backZoom() {
+  const z = state.zoomStack.pop() || null;
+  state.zoom = z;
+  state.doseZoom = state.doseAll ? null : z; state.doseZoomStack = [];
+  state.zoomLinked = !!z && !state.doseAll;
+  refreshChart();
+  refreshDose();
+}
+// "Do gráfico de cima" | "Tudo" (guardado)
+function setDoseAll(on, quiet) {
+  state.doseAll = !!on;
+  localSet("doseAll", on ? "1" : "0");
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "tudo") === state.doseAll)));
+  if (quiet) return;
+  state.doseZoom = on ? null : state.zoom; state.doseZoomStack = [];
+  state.zoomLinked = !on && !!state.zoom;
+  refreshDose();
+}
+
 function setupChartZoom() {
-  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, (from, to) => {
-    if (state.zoom) state.zoomStack.push(state.zoom);
-    else state.zoomStack = [];
-    state.zoom = { from, to };
-    unlinkZoom();
-    refreshChart();
-  });
-  $("btnZoomBack").addEventListener("click", () => { state.zoom = state.zoomStack.pop() || null; unlinkZoom(); refreshChart(); });
+  attachDragZoom($("plot"), $("zoomSel"), () => state.chart, pushZoom);
+  $("btnZoomBack").addEventListener("click", backZoom);
   $("btnZoomOut").addEventListener("click", resetAllZoom);
+  document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.addEventListener("click", () => setDoseAll(b.dataset.v === "tudo")));
+  setDoseAll(state.doseAll, true);
 }
 
 // Um só "Sair do zoom": tira o zoom dos dois gráficos (e a seleção do mapa).
@@ -423,22 +493,17 @@ function unlinkZoom() {
   refreshDose();
 }
 
+// um "Sair do zoom" e um "Voltar" só, no gráfico de cima (2.101.0)
 function renderZoomButtons() {
   $("btnZoomOut").hidden = !state.zoom;
   $("btnDoseZoomOut").hidden = !state.doseZoom || !!state.zoom;
   $("btnZoomBack").hidden = !state.zoomStack.length;
-  $("btnDoseZoomBack").hidden = !state.doseZoomStack.length;
+  $("btnDoseZoomBack").hidden = true;
 }
 
 function setupDoseZoom() {
-  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, (from, to) => {
-    if (state.doseZoom) state.doseZoomStack.push(state.doseZoom);
-    else state.doseZoomStack = [];
-    state.doseZoom = { from, to };
-    unlinkZoom();
-    refreshDose();
-  });
-  $("btnDoseZoomBack").addEventListener("click", () => { state.doseZoom = state.doseZoomStack.pop() || null; unlinkZoom(); refreshDose(); });
+  attachDragZoom($("dosePlot"), $("doseZoomSel"), () => state.dose, pushZoom);
+  $("btnDoseZoomBack").addEventListener("click", backZoom);
   $("btnDoseZoomOut").addEventListener("click", resetAllZoom);
 }
 
@@ -450,12 +515,17 @@ function renderZoomBar(c) {
   const t0 = c.times && c.times.length ? c.times[0] : c.from;
   const t1 = c.to;
   $("zoomRange").textContent = zoomRangeText(t0, t1);
-  const n = (c.values || []).filter((v) => v != null).length;
-  const hours = (n * (c.stepMs || 60000)) / 3600e3;
-  const dose = c.avgUSv != null ? c.avgUSv * hours : null;
+  // 2.101.5: a dose do aparelho escolhido (antes era sempre a do GMC-800) e
+  // já na unidade da tela (o span fica fora da troca µSv → mrem)
+  const doseOf = (arr, avg) => { const n = (arr || []).filter((v) => v != null).length; return avg != null && n ? (avg * n * (c.stepMs || 60000)) / 3600e3 : null; };
+  const dev = chartDevOf(c), dG = dev === "rc" ? null : doseOf(c.values, c.avgUSv), dR = dev === "gmc" ? null : doseOf(c.rc, c.rcAvg);
+  const dn = (v) => doseNum(v, v < 1 ? 3 : 2);
+  const doseT = dG != null && dR != null ? `GMC-800 ≈ ${dn(dG)} · RC102 ≈ ${dn(dR)} ${doseLbl()}` : dG != null ? `dose ≈ ${dn(dG)} ${doseLbl()}` : dR != null ? `dose ≈ ${dn(dR)} ${doseLbl()}` : "";
   const step = stepText(c.stepMs || 60000);
-  $("zoomStats").textContent = c.avg == null ? "· sem dados nesse trecho"
-    : `· dose ≈ ${fmt(dose, dose < 1 ? 3 : 2)} µSv · um ponto a cada ${step}` + (c.fineAlertsOnly ? " (por segundo só perto dos alertas)" : "");
+  const zs = $("zoomStats");
+  zs.setAttribute("data-unit-keep", "");
+  zs.textContent = !doseT ? "· sem dados nesse trecho" : `· ${doseT} · um ponto a cada ${step}`;
+  if (doseT && c.fineAlertsOnly) { const x = document.createElement("span"); x.textContent = " (por segundo só perto dos alertas)"; zs.appendChild(x); }
   renderZoomButtons();
 }
 
@@ -479,7 +549,7 @@ function hasRcData() {
 function fetchDose(src, range) {
   return range
     ? (api.GetDoseRangeSrc ? api.GetDoseRangeSrc(range.from, range.to, state.doseLimit, src) : api.GetDoseRange(range.from, range.to, state.doseLimit))
-    : (api.GetDoseSrc ? api.GetDoseSrc(state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
+    : (api.GetDoseSrc ? api.GetDoseSrc(state.doseAll ? "all" : state.dosePeriod, state.doseLimit, src) : api.GetDose(state.dosePeriod, state.doseLimit));
 }
 
 // quadros da dose de cada aparelho: total, média e quanto do teto já foi
@@ -498,13 +568,16 @@ function renderDevBoxes(box, list) {
     // limite não inclui a radiação natural), cada aparelho com esse nível de fundo
     const excess = has ? Math.max(0, c.excess) : 0;
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
-    const src = !has ? "sem dados no período" : d.key === "rc" ? (c.doseSource === "aparelho" ? "medida pelo aparelho no período" : "calculada pelo app") : "calculada pelo app";
+    // 2.101.0: o RC102 tem um número só (o do período, com os buracos
+    // preenchidos pelo histórico do aparelho); só avisa se faltar mais de 5%
+    const miss = has && d.key === "rc" && c.coverage < 0.95 ? (1 - c.coverage) * (c.to - c.from) : 0;
+    const src = !has ? "sem dados no período" : d.key === "rc" ? (miss >= 60e3 ? `faltam ${fmtDur(miss)} sem dado` : "") : "calculada pelo app";
     // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';
     el.querySelector(".dd-name span").textContent = d.name;
     el.querySelector(".dd-val b").textContent = tv;
     el.querySelector(".dd-val > span").textContent = tu;
-    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média · ${src}`;
+    el.querySelector(".dd-sub").textContent = rate == null ? src : `${fmt(rate, usvDigits(rate))} µSv/h em média` + (src ? ` · ${src}` : "");
     el.querySelector(".meter span").style.width = Math.min(100, pct) + "%";
     el.querySelector(".meter").classList.toggle("over", pct > 100);
     const lim = has && c.allowance > 0;
@@ -513,13 +586,17 @@ function renderDevBoxes(box, list) {
     el.querySelector(".dd-more p").textContent = lim
       ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
       : "";
+    // 2.98.0 (ACE): o quadro inteiro liga e desliga a linha no gráfico,
+    // como antes da 2.92 (no lugar da caixa "mostrar no gráfico")
     if (list.length > 1) {
-      const l = document.createElement("label");
-      l.className = "dd-state";
-      l.innerHTML = '<input type="checkbox"> <span>mostrar no gráfico</span>';
-      l.firstChild.checked = !!state.doseShow[d.key];
-      l.firstChild.dataset.key = d.key;
-      el.appendChild(l);
+      // o botão (teclado, leitor de tela) é só o nome: o quadro tem "a conta"
+      // dentro, e controle dentro de botão confunde o leitor (2.99.0)
+      el.classList.add("dd-tog");
+      el.title = "Clique para mostrar ou esconder no gráfico";
+      const nm = el.querySelector(".dd-name");
+      nm.setAttribute("role", "button");
+      nm.tabIndex = 0;
+      nm.setAttribute("aria-pressed", String(!!state.doseShow[d.key]));
     }
     box.appendChild(el);
   }
@@ -532,19 +609,26 @@ const devName = (k) => (k === "rc" ? "RC102" : "GMC-800");
 const devColor = (k) => (k === "rc" ? COR.rc : COR.gmc);
 function toggleDoseDev(k) {
   const s = state.doseShow;
+  if (s[k] && !s[k === "rc" ? "gmc" : "rc"]) return; // o único aceso fica aceso (nunca os dois apagados)
   s[k] = !s[k];
-  if (!s.gmc && !s.rc) s[k === "rc" ? "gmc" : "rc"] = true; // nunca os dois apagados
   localSet("doseShow", JSON.stringify(s));
   document.querySelectorAll(".dd-box").forEach((b) => {
-    const on = !!s[b.dataset.key], cb = b.querySelector(".dd-state input");
-    if (!cb) return;
+    if (!b.classList.contains("dd-tog")) return;
+    const on = !!s[b.dataset.key];
     b.classList.toggle("off", !on);
-    cb.checked = on;
+    b.querySelector(".dd-name").setAttribute("aria-pressed", String(on));
   });
   drawDoseChart();
   if (state.heatPick && state.ht) drawHeatTrecho();
 }
-document.addEventListener("change", (e) => { const b = e.target.closest(".dd-state input"); if (b) toggleDoseDev(b.dataset.key); });
+document.addEventListener("click", (e) => {
+  const b = e.target.closest(".dd-box.dd-tog");
+  if (b && !e.target.closest("details, a, button")) toggleDoseDev(b.dataset.key);
+});
+document.addEventListener("keydown", (e) => {
+  const b = e.target.classList && e.target.classList.contains("dd-name") ? e.target.closest(".dd-box.dd-tog") : null;
+  if (b && (e.key === "Enter" || e.key === " ")) { e.preventDefault(); toggleDoseDev(b.dataset.key); }
+});
 
 function drawDoseChart() {
   const c = state.dose, c2raw = state.dose2;
@@ -580,7 +664,8 @@ function drawDoseChart() {
     (show1 ? fillOf(c, k1) + lineOf(c.background, COR.muted, 1.5, "5 5") + lineOf(c.ceiling, COR.warn, 2) + lineOf(c.dose, devColor(k1), 2) : "") +
     (show2 ? (solid2 ? fillOf(c2, k2) + lineOf(c2.background, COR.muted, 1.5, "5 5") + lineOf(c2.ceiling, COR.warn, 2) : lineOf(c2.ceiling, COR.warn, 1.5, "2 4", ".75")) + lineOf(c2.dose, devColor(k2), 2) : "");
   const ys = $("doseY").children;
-  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0];
+  // 2.101.1: sem zeros inúteis no eixo ("60.0" → "60")
+  for (let i = 0; i < 3; i++) ys[i].textContent = fmtDose(top - (top / 3) * i)[0].replace(LANG === "en" ? /(\.\d*?)0+$/ : /(,\d*?)0+$/, "$1").replace(/[.,]$/, "");
   ys[3].textContent = "0";
   $("doseY").dataset.unit = fmtDose(top)[1];
 }
@@ -603,14 +688,13 @@ async function refreshDose(force) {
   state.dose = c;
   state.dose2 = c2;
   renderDevBoxes($("doseDevs"), rcOn0 ? [{ key: "gmc", name: "GMC-800", c: swap ? c : c2 }, { key: "rc", name: "RC102", c: swap ? c2 : c }] : [{ key: "gmc", name: "GMC-800", c }]);
-  placeRcDevLines();
   $("doseKeyRc").hidden = !rcOn0;
   const dz = $("doseZoomBar");
   dz.hidden = !state.doseZoom;
   if (state.doseZoom) {
     $("doseZoomRange").textContent = zoomRangeText(c.from, c.to);
     $("doseZoomStats").textContent = state.zoomLinked
-      ? `· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero`
+      ? `· mesmo trecho do gráfico de cima · dose só nesse trecho, começando do zero`
       : `· dose acumulada só nesse trecho, começando do zero · um ponto a cada ${stepText(c.stepMs)}`;
   }
   renderZoomButtons();
@@ -682,8 +766,8 @@ async function refreshDose(force) {
     $("dx2").textContent = f(c.to);
     return;
   }
-  const hourly = HOURLY.includes(state.dosePeriod);
-  const lbl = hourly ? hhmm : state.dosePeriod === "1y"
+  const hourly = !state.doseAll && HOURLY.includes(state.dosePeriod);
+  const lbl = hourly ? hhmm : state.doseAll ? ddmm : state.dosePeriod === "1y"
     ? (ms) => { const t = new Date(ms); return pad(t.getMonth() + 1) + "/" + String(t.getFullYear()).slice(2); }
     : ddmm;
   $("dx0").textContent = lbl(c.from);
@@ -704,15 +788,15 @@ function setupDoseHover() {
     cur.hidden = false;
     cur.style.left = (i / Math.max(1, c.times.length - 1)) * 100 + "%";
     tip.hidden = false;
-    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
+    const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom && !state.doseAll ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
     const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
     if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
-      tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;
-    } else tip.textContent = c2 && j2 >= 0
+      tipSet(tip, `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`);
+    } else tipSet(tip, c2 && j2 >= 0
       ? (c.device === "radiacode"
         ? `${when} · RC102 ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
         : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RC102 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
-      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
+      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`);
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";
   });

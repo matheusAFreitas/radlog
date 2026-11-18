@@ -140,6 +140,9 @@ type Reading struct {
 	// leitura está acima dele. Sigma vem nulo enquanto não houver fundo.
 	BgCPM float64  `json:"bgCPM"`
 	Sigma *float64 `json:"sigma"`
+	// 2.101.13 (item 66): o mesmo desvio pela média dos últimos 10 min (não
+	// pisca com o acaso de um minuto); nulo com menos de 5 min de leitura
+	Sigma10 *float64 `json:"sigma10,omitempty"`
 }
 
 // DeviceInfo descreve o contador conectado.
@@ -384,6 +387,9 @@ type App struct {
 	rcAlert        rcAlertState
 
 	connMu sync.Mutex // uma conexão por vez
+	// 2.101.5: alertas.csv/eventos.csv: a regravação inteira (saveEvents) e o
+	// anexo no fim (addEvent) não se cruzam, senão o anexo some na troca
+	evFileMu sync.Mutex
 
 	downloading    atomic.Bool
 	savePending    int         // minutos esperando para gravar (B2); com a.mu
@@ -444,32 +450,36 @@ type App struct {
 	live *ring     // última hora de leituras reais por segundo
 	demo DemoState // modo demonstração (só na memória)
 
+	sigObjUntil time.Time // item 66: até quando o CPM ainda tem o objeto
+
 	bgCPM float64 // fundo em cache (stats.go)
 	bgOK  bool
 	bgAt  time.Time
 
-	measure      MeasureState         // medição de objeto (measure.go)
-	objTest      map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
-	rain         *rainCache           // chuva (weather.go)
-	rainDays     *rainDaysStore       // chuva por dia, para sempre (raindays.go)
-	yearMu       sync.Mutex
-	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
-	tubeMu       sync.Mutex
-	tubeCache    *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
-	bgSlowCache  *BgSlow     // subida lenta do fundo, junto da saúde do tubo (bgslow.go)
-	rainSt       rainState
-	radar        *radarStore   // chuva pelo radar (radar.go)
-	radarKick    chan struct{} // busca o radar já (lugar novo)
-	periods      []Period      // fora de casa (periods.go)
-	rcAsks       []RcAwayAsk   // "o RC102 estava fora de casa?" sem resposta (rcaway.go)
-	rcAsksLoaded bool
-	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
-	measSamples  []MeasureSample  // segundos da medição em andamento
-	measSamples2 []MeasureSample  // os do segundo aparelho (µSv/h)
-	minuteObs    map[int64]string // marcas do minuto (saturação, interferência) até ele ser gravado
-	cfgMu        sync.Mutex       // histórico de configurações
-	devSaveMode  string           // modo de gravação da memória do GMC (lido ao conectar)
-	alertWatch   map[int64]bool   // alertas do GMC com segundos sendo gravados
+	measure        MeasureState         // medição de objeto (measure.go)
+	objTest        map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
+	objSpans       []objSpan            // 2.101.5: os testes de objeto gravados (fora da dose e do fundo)
+	objSpansLoaded bool
+	rain           *rainCache     // chuva (weather.go)
+	rainDays       *rainDaysStore // chuva por dia, para sempre (raindays.go)
+	yearMu         sync.Mutex
+	yearCache      map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
+	tubeMu         sync.Mutex
+	tubeCache      *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
+	bgSlowCache    *BgSlow     // subida lenta do fundo, junto da saúde do tubo (bgslow.go)
+	rainSt         rainState
+	radar          *radarStore   // chuva pelo radar (radar.go)
+	radarKick      chan struct{} // busca o radar já (lugar novo)
+	periods        []Period      // fora de casa (periods.go)
+	rcAsks         []RcAwayAsk   // "o RC102 estava fora de casa?" sem resposta (rcaway.go)
+	rcAsksLoaded   bool
+	measurements   []SavedMeasure   // medições de objeto salvas (measure.go)
+	measSamples    []MeasureSample  // segundos da medição em andamento
+	measSamples2   []MeasureSample  // os do segundo aparelho (µSv/h)
+	minuteObs      map[int64]string // marcas do minuto (saturação, interferência) até ele ser gravado
+	cfgMu          sync.Mutex       // histórico de configurações
+	devSaveMode    string           // modo de gravação da memória do GMC (lido ao conectar)
+	alertWatch     map[int64]bool   // alertas do GMC com segundos sendo gravados
 	// saídas programadas (planned.go)
 	planned       []PlannedTrip
 	plannedLoaded bool
@@ -817,7 +827,7 @@ func (a *App) saveSettingsFrom(s Settings, source string) Settings {
 		s.AlarmUSv = clampThr(s.AlarmUSv, 0.01, 1e4)
 	}
 	a.mu.Lock()
-	s.Port = a.settings.Port // a porta é salva ao conectar
+	s.Port, s.PortUSB = a.settings.Port, a.settings.PortUSB // a porta (e a identificação USB, 2.101.5) é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
 	s.ReportMode, s.ReportNotes, s.ReportNoCfg = a.settings.ReportMode, a.settings.ReportNotes, a.settings.ReportNoCfg
 	s.BgMoved = a.settings.BgMoved                        // só por MarkBgMoved/ClearBgMoved
@@ -1395,9 +1405,10 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 	if quiet {
 		acpm = 0
 	}
-	// "Estou testando um objeto" (2.89.0): só atenção e alarme ficam calados
+	// "Estou testando um objeto" (2.89.0) ou medindo com o outro aparelho
+	// (2.100.2): só atenção e alarme ficam calados
 	lcpm := acpm
-	if a.objTestQuietLocked("gmc", now) {
+	if a.objTestQuietLocked("gmc", now) || a.measureActiveLocked(now) {
 		lcpm = 0
 	}
 	alarm := set.AlarmEnabled && int(lcpm) >= set.AlarmCPM
@@ -1499,7 +1510,13 @@ func (a *App) gmcReading(now time.Time, cpm, cps uint32, minute *gmcMinute) {
 		a.trayTick(usv, trayLvl, noCount, satOn, false) // na demonstração, o ícone mostra a demonstração
 	}
 	a.mu.Lock()
-	a.live.add(now, float64(cpm))
+	// 2.101.13 (item 66): segundos com o GMC-800 num objeto (Medir objeto ou
+	// "Estou testando"), mais 60 s (o CPM soma o último minuto), ficam fora
+	// do σ de 10 min do Agora
+	if a.measureActiveLocked(now) || a.objTestQuietLocked("gmc", now) {
+		a.sigObjUntil = now.Add(time.Minute)
+	}
+	a.live.addObj(now, float64(cpm), now.Before(a.sigObjUntil))
 	a.mu.Unlock()
 	a.feedMeasure(float64(cpm), cps)
 	// na demonstração a tela troca este evento para a "leitura real"
@@ -2065,8 +2082,8 @@ func (a *App) ExportCSV() (string, error) {
 		return "", errDemo
 	}
 	path, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
-		Title:           "Exportar leituras",
-		DefaultFilename: "radlog-gmc-leituras-" + time.Now().Format("2006-01-02") + ".csv",
+		Title:           a.T("Exportar leituras"),
+		DefaultFilename: a.T("radlog-gmc-leituras-") + time.Now().Format("2006-01-02") + ".csv",
 		Filters:         []wruntime.FileFilter{{DisplayName: "CSV", Pattern: "*.csv"}},
 	})
 	if err != nil || path == "" {

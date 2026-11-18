@@ -557,7 +557,7 @@ func (a *App) alertSamples(from, to time.Time) []sample {
 		for _, p := range a.readAlertSeconds(e) {
 			if p.T >= f && p.T < t && !seen[p.T] {
 				seen[p.T] = true
-				out = append(out, sample{time.UnixMilli(p.T), p.CPM})
+				out = append(out, sample{t: time.UnixMilli(p.T), cpm: p.CPM})
 			}
 		}
 	}

@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -49,7 +50,10 @@ type reportPDF struct {
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
-	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("RadLog "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
+	// 2.101.9: o período traduz sozinho (o molde "rótulo: valor" não vale dentro de um pedaço " · ")
+	foot := pdf.Fit("RadLog "+p.r.Version+" · "+pdf.Tr(p.r.Period), pdf.Sans, 7.5, pdf.W-2*pm-60)
+	pdf.MarkTranslated(foot)
+	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, foot)
 	pg := fmt.Sprintf("página %d", p.page)
 	if p.r.pages > 0 {
 		pg = fmt.Sprintf("página %d de %d", p.page, p.r.pages)
@@ -124,7 +128,58 @@ func wrapText(s string, f pdf.Font, size, w float64, max int) []string {
 
 // table desenha cabeçalho e linhas, quebrando página quando precisa.
 // cols: largura de cada coluna; right: alinhada à direita; mono: fonte mono.
+// pdfMrem: o PDF em render agora usa mrem/h (lang.go, inLang)
+var pdfMrem bool
+
+// pdfMremNum é um número de tabela que muda com a unidade: não é hora
+// ("15:04"), nome ("GMC-800") nem razão ("×1,34")
+var pdfMremNum = regexp.MustCompile(`(^|[^×\d:.,\pL-])([+±−-]?\d[\d.,]*)`)
+
+// mremTable passa as colunas em µSv (e "Acima do limite") para mrem: o
+// cabeçalho troca a unidade e os números são divididos por 10. Célula que já
+// traz a unidade fica para o tradutor (remText).
+func mremTable(head []string, rows [][]string) ([]string, [][]string) {
+	conv := make([]bool, len(head))
+	h2 := append([]string{}, head...)
+	any := false
+	for i, h := range head {
+		if strings.Contains(h, "µSv") || h == "Acima do limite" {
+			conv[i], any = true, true
+			h2[i] = strings.ReplaceAll(strings.ReplaceAll(h, "µSv/h", "mrem/h"), "µSv", "mrem")
+		}
+	}
+	if !any {
+		return head, rows
+	}
+	r2 := make([][]string, len(rows))
+	for j, row := range rows {
+		r2[j] = append([]string{}, row...)
+		for i, c := range row {
+			if i >= len(conv) || !conv[i] || strings.Contains(c, "Sv") {
+				continue
+			}
+			var b strings.Builder
+			last := 0
+			for _, ix := range pdfMremNum.FindAllStringSubmatchIndex(c, -1) {
+				ns, ne := ix[4], ix[5]
+				if ne < len(c) && c[ne] == ':' { // hora
+					continue
+				}
+				b.WriteString(c[last:ns])
+				b.WriteString(remNum(c[ns:ne], ",", 0.1))
+				last = ne
+			}
+			b.WriteString(c[last:])
+			r2[j][i] = b.String()
+		}
+	}
+	return h2, r2
+}
+
 func (p *reportPDF) table(head []string, rows [][]string, cols []float64, right []bool, mono []bool, rowColor func(i int) *pdf.RGB) {
+	if pdfMrem {
+		head, rows = mremTable(head, rows)
+	}
 	drawHead := func() {
 		x := pm
 		for i, h := range head {
@@ -198,7 +253,7 @@ func (p *reportPDF) levelShape(x, y, size float64, c pdf.RGB) {
 // kv desenha linhas "rótulo: valor" em duas colunas de texto.
 func (p *reportPDF) kv(rows [][2]string, keyW float64) {
 	for _, r := range rows {
-		lines := wrapText(r[1], pdf.Sans, 8, pdf.W-2*pm-keyW, 3)
+		lines := wrapText(r[1], pdf.Sans, 8, pdf.W-2*pm-keyW, 8) // 2.101.8: até 8 linhas, como o paragraph (3 cortava o texto)
 		p.need(float64(len(lines))*10 + 6)
 		p.d.Text(pm, p.y+10, pdf.SansBold, 8, cMuted, r[0])
 		for i, ln := range lines {
@@ -1118,7 +1173,9 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		net += " · " + fmtBR(x.Result.Sigma, 1) + "σ"
 	}
 	note := strings.TrimSpace(x.Note)
-	if note == "" {
+	if note != "" {
+		note = asIs(note) // 2.101.9: texto da pessoa
+	} else {
 		note = "não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)"
 	}
 	lines := [][2]string{
@@ -1128,7 +1185,7 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		{"Geometria / anotação", note},
 	}
 	p.need(14 + float64(len(lines))*10 + 8)
-	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+m.Name, pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
+	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+measNameTr(x), pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
 	d.TextRight(pdf.W-pm, p.y+11, pdf.SansBold, 8, cMuted, pdf.Fit(m.Verdict, pdf.SansBold, 8, (pdf.W-2*pm)*0.33))
 	p.y += 15
 	for _, l := range lines {

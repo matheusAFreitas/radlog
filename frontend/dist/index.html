@@ -309,6 +309,7 @@
           <span class="mono muted small" id="chartStats">sem dados no período</span>
         </div>
         <div class="chart-ctrls">
+        <div class="seg" role="group" aria-label="Aparelho no gráfico" id="chartDevSeg" hidden></div>
         <div class="seg" role="group" aria-label="Unidade do gráfico" id="chartUnitSeg">
           <button type="button" data-cunit="usv" aria-pressed="true" data-u="rate">µSv/h</button>
           <button type="button" data-cunit="cpm" aria-pressed="false" title="Gráfico de análise: contagens do GMC-800 e do RC102, sem limites nem alarmes" data-u="count">CPM (análise)</button>
@@ -355,6 +356,7 @@
           <h2 id="doseTitle">Dose acumulada</h2>
           <span class="mono muted small" id="doseSub">sem dados no período</span>
         </div>
+        <div class="seg" id="doseSpanSeg" role="group" aria-label="Período da dose"><button type="button" data-v="cima" aria-pressed="true">Do gráfico de cima</button><button type="button" data-v="tudo" aria-pressed="false">Tudo</button></div>
       </div>
 
       <div class="zoom-bar" id="doseZoomBar" hidden>
@@ -654,7 +656,7 @@
       <div class="sum-top" id="sumTop">
         <div class="sum-big" id="sumBig"></div>
       </div>
-      <table class="sum-table" id="sumTable" hidden></table>
+      <div class="sum-table-wrap"><table class="sum-table" id="sumTable" hidden></table></div>
       <div class="ri-chart sum-chart">
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
@@ -706,13 +708,13 @@
           <button type="button" data-adev="radiacode" aria-pressed="false">RC102</button>
           <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
         </div>
-        <label class="small muted al-filter-l" for="alertFilter">Mostrar</label>
+        <span class="al-filter-g"><label class="small muted al-filter-l" for="alertFilter">Mostrar</label>
         <select id="alertFilter">
           <option value="">Todos os alertas</option>
           <option value="live">Ao vivo</option>
           <option value="retro">Achados depois</option>
           <option value="alarme">Só alarmes</option>
-        </select>
+        </select></span>
         <button type="button" class="chip alert-range" id="alertRangeChip" title="Mostrar todos os alertas" hidden><span></span> ✕</button>
         <span class="inst-fill"></span>
         <span class="small muted" id="alertCount"></span>
@@ -831,32 +833,59 @@
           </div>
           <span class="small muted" id="mSizeHint">O Bq só sai estimado para objeto pequeno. Num objeto espalhado, a conta pela distância não vale.</span>
         </div>
-        <details class="m-adj" id="mAdj">
-          <summary>Ajustes da medição: tempo e quando conta como “tem algo”</summary>
-          <div class="m-adj-grid">
-            <div class="m-field">
-              <label for="mSecs">Tempo</label>
-              <select id="mSecs">
-                <option value="auto600">automático, até 10 min</option>
-                <option value="auto1800" selected>automático, até 30 min</option>
-                <option value="auto3600">automático, até 1 h</option>
-                <option value="30">fixo: 30 s</option>
-                <option value="60">fixo: 1 min</option>
-                <option value="120">fixo: 2 min</option>
-                <option value="300">fixo: 5 min</option>
-              </select>
+        <div class="m-field">
+          <span class="m-label" id="mDangerLabel">Perigo do outro aparelho durante a medição</span>
+          <div class="seg m-size" role="group" aria-labelledby="mDangerLabel" id="mDangerSeg">
+            <button type="button" data-danger="toca" aria-pressed="false">toca</button>
+            <button type="button" data-danger="cala" aria-pressed="false">fica calado</button>
+          </div>
+          <span class="small muted" id="mDangerHint">Atenção e alarme ficam calados de qualquer jeito, e o aparelho no objeto não toca nada. Isto vale para o aparelho que não está no objeto.</span>
+        </div>
+        <div class="m-field m-time" id="mTimeBox">
+          <span class="m-label" id="mTimeLabel">Quanto tempo medir</span>
+          <div class="seg m-tmode" role="group" aria-labelledby="mTimeLabel" id="mTimeModeSeg">
+            <button type="button" data-tmode="auto" aria-pressed="false"><strong>Automático</strong><span>para quando tiver certeza</span></button>
+            <button type="button" data-tmode="fixo" aria-pressed="false"><strong>Tempo fixo</strong><span>mede o tempo todo</span></button>
+          </div>
+          <div class="m-tsub">
+            <div class="seg" role="group" aria-label="Limite do automático" id="mTimeAutoSeg">
+              <button type="button" data-secs="auto600" aria-pressed="false">até 10 min</button>
+              <button type="button" data-secs="auto1800" aria-pressed="false">até 30 min</button>
+              <button type="button" data-secs="auto3600" aria-pressed="false">até 1 h</button>
             </div>
-            <div class="m-field" id="mPctBox">
-              <span class="m-label" id="mPctLabel">Conta como “tem algo”</span>
-              <div class="seg" role="group" aria-labelledby="mPctLabel" id="mPctSeg">
-                <button type="button" data-pct="10" aria-pressed="false">+10%</button>
-                <button type="button" data-pct="20" aria-pressed="false">+20%</button>
-                <button type="button" data-pct="50" aria-pressed="false">+50%</button>
-              </div>
-              <span class="small muted">do fundo; menor acha coisas mais fracas, mas demora mais</span>
+            <div class="seg" role="group" aria-label="Tempo de cada fase" id="mTimeFixSeg" hidden>
+              <button type="button" data-secs="30" aria-pressed="false">30 s</button>
+              <button type="button" data-secs="60" aria-pressed="false">1 min</button>
+              <button type="button" data-secs="120" aria-pressed="false">2 min</button>
+              <button type="button" data-secs="300" aria-pressed="false">5 min</button>
+              <button type="button" data-secs="600" aria-pressed="false">10 min</button>
+              <button type="button" data-secs="1800" aria-pressed="false">30 min</button>
+              <button type="button" data-secs="3600" aria-pressed="false">1 h</button>
             </div>
           </div>
-        </details>
+          <span class="small muted" id="mTimeHint"></span>
+          <div class="m-field m-pct" id="mPctBox">
+            <span class="m-label" id="mPctLabel">Conta como “tem algo”</span>
+            <div class="seg" role="group" aria-labelledby="mPctLabel" id="mPctSeg">
+              <button type="button" data-pct="10" aria-pressed="false">+10%</button>
+              <button type="button" data-pct="20" aria-pressed="false">+20%</button>
+              <button type="button" data-pct="50" aria-pressed="false">+50%</button>
+            </div>
+            <span class="small muted">do fundo; menor acha coisas mais fracas, mas demora mais</span>
+          </div>
+        </div>
+        <select id="mSecs" hidden aria-hidden="true" tabindex="-1">
+          <option value="auto600">automático, até 10 min</option>
+          <option value="auto1800" selected>automático, até 30 min</option>
+          <option value="auto3600">automático, até 1 h</option>
+          <option value="30">fixo: 30 s</option>
+          <option value="60">fixo: 1 min</option>
+          <option value="120">fixo: 2 min</option>
+          <option value="300">fixo: 5 min</option>
+          <option value="600">fixo: 10 min</option>
+          <option value="1800">fixo: 30 min</option>
+          <option value="3600">fixo: 1 h</option>
+        </select>
         <p class="small m-warn" id="mOptHint" hidden></p>
         <div class="m-go">
           <button type="button" class="btn accent" id="btnMStart">Começar</button>
@@ -1283,6 +1312,7 @@
         <div><span class="tile-label">Mín 24 h</span><span class="mono" id="hMin24">—</span><span class="tile-sub" data-u="rate">µSv/h</span></div>
         <div><span class="tile-label">Máx 24 h</span><span class="mono" id="hMax24">—</span><span class="tile-sub" id="hMax24Sub"></span></div>
       </div>
+      <div class="hero-acts"><button type="button" class="btn small" data-charts="gmc" data-crange="24h">Analisar nos gráficos</button></div>
 
       <div class="empty" id="emptyHint" hidden>
         <span>Nenhum contador conectado.</span>
@@ -1331,7 +1361,6 @@
         <span class="alt" id="rcMainAlt"></span>
         <span class="sigma" id="rcMainSigma" hidden></span>
         <details class="inst-det hero-det"><summary>detalhes</summary><span class="sigma-line" id="rcMainSigmaNum" hidden><span class="mono" id="rcMainSigmaVal"></span> <button type="button" class="link small-link rc-sigma-help">o que é σ?</button></span></details>
-        <div class="rc-acts"><button type="button" class="btn small" id="btnRcAdjust">Ajustes do aparelho</button><button type="button" class="btn small" id="btnRcConn">Conexão</button></div>
         </div>
       </div>
 
@@ -1344,7 +1373,8 @@
     </section>
     <section class="card rc-24" id="rc24Card" hidden>
       <div class="rc-24-head"><h3 id="rc24Title">Últimas 24 horas</h3>
-        <div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div></div>
+        <div class="rc-24-acts"><div class="seg" role="group" aria-label="Período" id="rc24Range"><button type="button" data-h="6" aria-pressed="false">6 h</button><button type="button" data-h="24" aria-pressed="true">24 h</button><button type="button" data-h="168" aria-pressed="false">7 dias</button></div>
+        <button type="button" class="btn small" data-charts="rc">Analisar nos gráficos</button></div></div>
       <div class="rc-24-chart" id="rc24Chart"></div>
       <p class="small muted rc-24-key"><span data-u="rate"><i class="k rc"></i>RC102 (µSv/h)</span><span id="rc24AwayKey"><i class="k away"></i>fora de casa</span><span class="mono" id="rc24Info"></span></p>
     </section>
@@ -1444,15 +1474,23 @@
             </div>
             <div id="rcSrReal" class="rc-sr-real" hidden>
               <div class="rc-sr-read"><span class="rc-sr-ratio mono" id="rcSrRatio">–</span><span class="mono" id="rcSrUsv"></span></div>
-              <p class="mono small rc-info" id="rcSrRef"></p>
-              <p class="mono small rc-info" id="rcSrMax"></p>
+              <p class="small rc-info" id="rcSrRef"></p>
+              <p class="small rc-info" id="rcSrMax"></p>
               <div class="rc-ctrl"><button type="button" class="btn small" id="rcSrHere">Usar o agora como normal</button><button type="button" class="btn small" id="rcSrRefReset" hidden>Voltar ao normal das 24 h</button><button type="button" class="btn small" id="rcSrMaxReset">Zerar máximo</button></div>
+              <div class="rc-ctrl rc-sr-opts"><span class="rc-sr-opt"><span class="small muted" id="rcSrWinLbl">Janela</span><span class="seg rc-seg" id="rcSrWin" role="group" aria-labelledby="rcSrWinLbl"><button type="button" data-w="60" aria-pressed="false">1 min</button><button type="button" data-w="120" aria-pressed="true">2 min</button><button type="button" data-w="300" aria-pressed="false">5 min</button></span></span><span class="rc-sr-opt"><span class="small muted" id="rcSrCmapLbl">Cores</span><span class="seg rc-seg" id="rcSrCmap" role="group" aria-labelledby="rcSrCmapLbl"><button type="button" data-c="orig" aria-pressed="true">original</button><button type="button" data-c="cont" aria-pressed="false">contínua</button></span></span></div>
             </div>
             <label class="rc-inline small" id="rcSoundBox"><input type="checkbox" id="rcSound"> som (cliques)</label>
             <label class="rc-inline small" id="rcSrSoundBox" hidden>Som <select id="rcSrSound"><option value="">desligado</option><option value="cliques">cliques</option><option value="tom">tom (mais agudo = mais forte)</option></select></label>
-            <canvas id="rcTrend" class="rc-canvas" role="img" aria-label="Taxa do RC102 ao longo do tempo"></canvas>
-            <p class="mono small rc-info" id="rcSearchInfo"></p>
           </div>
+        </div>
+        <div class="rc-sr-plot">
+          <canvas id="rcTrend" class="rc-canvas" role="img" aria-label="Taxa do RC102 ao longo do tempo"></canvas>
+          <div id="rcSrSgBox" hidden>
+            <div class="rc-sr-sg"><div class="rc-sr-ax mono" aria-hidden="true"><span>1500</span><span>1000</span><span>500</span><span>0 keV</span></div><div class="rc-sr-sgw"><canvas id="rcSrSg" role="img" aria-label="Espectrograma ao vivo: energia na vertical, tempo na horizontal"></canvas><span class="rc-sr-wait small muted" id="rcSrWait" hidden></span></div></div>
+            <div class="rc-sr-x mono small muted" aria-hidden="true"><span id="rcSrX0">−2 min</span><span>agora</span></div>
+            <div class="rc-sr-foot"><span class="rc-cbar small muted" id="rcSrCbar">pouco <i></i> muito</span><span class="small rc-sr-like" id="rcSrLike" aria-live="polite"></span></div>
+          </div>
+          <p class="mono small rc-info" id="rcSearchInfo"></p>
         </div>
       </article>
       </div>
@@ -1466,7 +1504,7 @@
         <div id="rcActCalFlow" class="rc-act-sec" hidden>
           <p class="rc-act-lbl">Calibrar</p>
           <div class="rc-act-steps3" id="rcActCalSteps">
-            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, no pote. <span class="st">obrigatório · ~1 h</span></button>
+            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, em volta do RC102. <span class="st">obrigatório · ~4 h com sal light, ~2 h com KCl puro</span></button>
             <button type="button" data-k="torio"><b>2 · Tório</b>Eletrodo de tungstênio toriado, se tiver. <span class="st">opcional · melhora a curva</span></button>
             <div><b>3 · Pronto</b>Depois, é só medir amostras na mesma posição. <span class="st">fica guardado</span></div>
           </div>
@@ -1492,6 +1530,7 @@
           </div>
           <details class="rc-act-more" id="rcActMore"><summary>Mais opções</summary>
             <div class="rc-act-moregrid">
+              <div class="rc-act-f rc-act-full"><span class="small muted">Como está a amostra</span><span class="rc-act-loose"><span class="seg rc-seg" id="rcActLoose"><button type="button" data-v="pote" aria-pressed="true">no pote</button><button type="button" data-v="solta" aria-pressed="false">pedra solta</button></span><span class="small muted" id="rcActLooseHint" hidden>Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.</span></span></div>
               <label><span class="small muted">Nome (para o histórico)</span><input type="text" id="rcActName" maxlength="60"></label>
               <label><span class="small muted">Posição</span><input type="text" id="rcActGeom" maxlength="80"></label>
               <div class="rc-act-f"><span class="small muted">Fundo</span><span class="seg rc-seg" id="rcActBg"><button type="button" data-v="novo" aria-pressed="true">medir um novo</button><button type="button" data-v="salvo" aria-pressed="false" id="rcActBgSaved">usar o salvo</button></span></div>
@@ -1757,7 +1796,7 @@
     <div class="set-tab" data-tab="tubo" hidden>
     <div class="set-cards">
     <div class="set-col">
-      <fieldset>
+      <fieldset class="lv-dt-card">
           <legend>Tempo morto do tubo</legend>
           <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
           <label for="lvDTUs">Tempo morto τ (µs)</label>
@@ -1774,10 +1813,10 @@
       <fieldset>
           <legend>Geiger saturado</legend>
           <label for="lvSatMax" data-u="rate">Fim da escala (µSv/h)</label>
-          <input type="number" id="lvSatMax" min="0.1" step="any" inputmode="decimal">
-          <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
+          <input type="number" id="lvSatMax" min="10" max="1000000" step="any" inputmode="decimal">
+          <p class="small muted">Padrão 2.000 µSv/h: o máximo do GMC-800 pelo manual.</p>
           <label for="lvSatDrop" data-u="rate">Queda brusca a partir de (µSv/h)</label>
-          <input type="number" id="lvSatDrop" min="0.1" step="any" inputmode="decimal">
+          <input type="number" id="lvSatDrop" min="1" max="1000000" step="any" inputmode="decimal">
           <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
           <input type="number" id="lvSatHold" min="5" max="3600" step="1" inputmode="numeric">
           <details class="how">
@@ -1855,25 +1894,25 @@
       <fieldset>
         <legend>RC102 saturado</legend>
         <label for="lvRcSat" data-u="rate">Fim da escala (µSv/h)</label>
-        <input type="number" id="lvRcSat" min="0.1" step="any" inputmode="decimal">
+        <input type="number" id="lvRcSat" min="1" max="1000000" step="any" inputmode="decimal">
         <details class="how">
           <summary>Como funciona</summary>
-          <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+          <p class="small muted">Padrão 1.000 µSv/h: o fim da faixa do RC102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
         </details>
       </fieldset>
     </div>
   </div>
     </div>
     <div class="set-tab" data-tab="dev" hidden>
-    <div class="devcfg rccfg" id="rcCfg" data-unit-keep>
+    <div class="devcfg rccfg" id="rcCfg">
       <p class="small muted" id="rcIntro">Conecte o RC102 para ver e mudar os ajustes do aparelho.</p>
       <div class="dc-grid" id="rcCfgBody">
       <div class="set-col">
         <fieldset data-dev="RC102" class="dev-card rc dc-edit">
           <legend>Alarmes de taxa de dose</legend>
           <div class="rc-pair">
-            <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
-            <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+            <label><span data-u="rate">Alarme 1 (µSv/h)</span><input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+            <label><span data-u="rate">Alarme 2 (µSv/h)</span><input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
           </div>
           <p class="small muted" id="rcDRHint"></p>
           <details class="how">
@@ -1884,8 +1923,8 @@
         <fieldset data-dev="RC102" class="dev-card rc dc-edit">
           <legend>Alarmes de dose acumulada</legend>
           <div class="rc-pair">
-            <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
-            <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+            <label><span data-u="dose">Alarme 1 (µSv)</span><input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+            <label><span data-u="dose">Alarme 2 (µSv)</span><input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
           </div>
           <label class="toggle"><span>Alarme 1 ligado</span><input type="checkbox" id="rcDS1On"></label>
           <label class="toggle"><span>Alarme 2 ligado</span><input type="checkbox" id="rcDS2On"></label>
@@ -1996,29 +2035,29 @@
         <tbody>
           <tr class="atencao">
             <th scope="row"><span class="lv-name" data-lv="atencao">Atenção</span><span class="al-say">amarelo e 3 bipes</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvAttn" min="0.01" step="any" inputmode="decimal" aria-label="Atenção do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvAttn"></p><label class="toggle al-on"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvAttn" min="0.01" max="10000" step="any" inputmode="decimal" aria-label="Atenção do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvAttn"></p><label class="toggle al-on"><span id="attnToggleLabel">Ligado</span><input type="checkbox" id="chkAttn"></label></td>
             <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
             <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc1" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 1 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 1</span></td>
           </tr>
           <tr class="alarme">
             <th scope="row"><span class="lv-name" data-lv="alarme">Alarme</span><span class="al-say">toca o som escolhido</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal" aria-label="Alarme do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="numAlarm"></p><label class="toggle al-on"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="numAlarm" min="0.01" max="10000" step="any" inputmode="decimal" aria-label="Alarme do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="numAlarm"></p><label class="toggle al-on"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label></td>
             <td><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alGmc" min="0.001" step="any" inputmode="decimal" aria-label="Alarme do GMC-800"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say" id="alGmcCpm"></span></td>
             <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc2" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 2 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 2</span></td>
           </tr>
           <tr class="perigo">
             <th scope="row"><span class="lv-name" data-lv="perigo">Perigo</span><span class="al-say">sirene que não desliga</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvDanger" min="0.05" step="any" inputmode="decimal" aria-label="Perigo do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvDanger"></p></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="lvDanger" min="0.05" max="100000" step="any" inputmode="decimal" aria-label="Perigo do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="lvDanger"></p></td>
             <td class="al-none"><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span>não tem</td>
             <td class="al-none"><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span>não tem</td>
           </tr>
         </tbody>
       </table>
       </div>
-      <div class="al-dose" data-unit-keep>
+      <div class="al-dose">
         <span class="al-dose-t">Dose acumulada do RC102</span>
-        <span class="al-dose-f"><span class="al-say">alarme 1</span><input type="number" id="alDs1" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 1 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs1On"></label></span>
-        <span class="al-dose-f"><span class="al-say">alarme 2</span><input type="number" id="alDs2" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 2 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs2On"></label></span>
+        <span class="al-dose-f"><span class="al-say">alarme 1</span><input type="number" id="alDs1" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 1 de dose do RC102"><span class="al-u" data-u="dose">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs1On"></label></span>
+        <span class="al-dose-f"><span class="al-say">alarme 2</span><input type="number" id="alDs2" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 2 de dose do RC102"><span class="al-u" data-u="dose">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs2On"></label></span>
       </div>
       <p class="small" id="dangerNote" hidden></p>
       <div class="al-foot">
@@ -2130,7 +2169,7 @@
       <fieldset>
         <legend>Unidades</legend>
         <span class="small muted" id="uRateLbl">Taxa de dose</span>
-        <div class="seg ui-seg" role="group" aria-labelledby="uRateLbl" id="segRateUnit"><button type="button" data-v="usv">µSv/h</button><button type="button" data-v="mrh" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button></div>
+        <div class="seg ui-seg" role="group" aria-labelledby="uRateLbl" id="segRateUnit" data-unit-keep><button type="button" data-v="usv">µSv/h</button><button type="button" data-v="mrh" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button></div>
         <input type="hidden" id="valRateUnit">
         <span class="small muted" id="uCountLbl">Contagem</span>
         <div class="seg ui-seg" role="group" aria-labelledby="uCountLbl" id="segCountUnit"><button type="button" data-v="cpm">CPM</button><button type="button" data-v="cps">CPS</button></div>
@@ -2321,7 +2360,7 @@
           <span>Apagar as versões antigas depois que a nova abrir</span>
           <input type="checkbox" id="chkCleanOld">
         </label>
-        <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
+        <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono path" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
         <details class="how">
           <summary>Como funciona</summary>
           <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>

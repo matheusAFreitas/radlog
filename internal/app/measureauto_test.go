@@ -131,3 +131,16 @@ func TestMeasureReportHome(t *testing.T) {
 		t.Fatal("PDF vazio")
 	}
 }
+
+// 2.98.1: tempo fixo vai até 1 h (sal light com o RC102 pede meia hora ou mais)
+func TestStartMeasureFixedHour(t *testing.T) {
+	a := newTestApp(t)
+	fakeGMC(t, a, 25)
+	st, err := a.StartMeasure(MeasureOpts{Name: "sal", Distance: "encostado", HomeBg: true, Seconds: 3600, Pct: 20})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if st.Seconds != 3600 {
+		t.Fatalf("tempo fixo de 1 h virou %d s", st.Seconds)
+	}
+}
