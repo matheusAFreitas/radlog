@@ -127,14 +127,14 @@ function whyCharts(w) {
   draw($("whyG"), "g", w.gNorm, "var(--gmc)");
   draw($("whyR"), "r", w.rNorm, "var(--rc)");
   const last = (k) => { for (let i = n - 1; i >= 0; i--) if (w.bins[i][k] != null) return w.bins[i][k]; return null; };
-  $("whyGv").textContent = last("g") == null ? "—" : fmt(last("g"), 3);
-  $("whyRv").textContent = last("r") == null ? "—" : fmt(last("r"), 3);
+  $("whyGv").textContent = last("g") == null ? "—" : rateNum(last("g"), 3); // 2.101.6: na unidade da tela
+  $("whyRv").textContent = last("r") == null ? "—" : rateNum(last("r"), 3);
   const leg = [];
   if (w.rain.length) leg.push('<span><i class="why-k rain"></i>chuva</span>');
   if (w.marks.some((m) => m.kind === "fora")) leg.push('<span><i class="why-k away"></i>fora de casa</span>');
   if (w.marks.some((m) => m.kind !== "fora")) leg.push('<span><i class="why-k mark"></i>nota ou medição de objeto</span>');
   leg.push('<span><i class="why-k norm"></i>normal</span>');
-  leg.push("<span>µSv/h · cada gráfico com a sua escala, nunca menor que ±25% do normal, para o ruído não parecer subida</span>");
+  leg.push('<span data-u="rate">µSv/h · cada gráfico com a sua escala, nunca menor que ±25% do normal, para o ruído não parecer subida</span>');
   $("whyLeg").innerHTML = leg.join("");
   const box = $("whyCharts"), tip = $("whyTip");
   box.addEventListener("mousemove", (e) => {
@@ -143,7 +143,7 @@ function whyCharts(w) {
     const i = Math.min(n - 1, Math.floor(f * n)), b = w.bins[i];
     box.querySelectorAll(".why-cur").forEach((l) => { const x = ((i + 0.5) / n * W).toFixed(1); l.setAttribute("x1", x); l.setAttribute("x2", x); l.setAttribute("visibility", "visible"); });
     tip.hidden = false;
-    tip.textContent = `${hhmm(b.t)} · GMC ${b.g == null ? "—" : fmt(b.g, 3)} · RC ${b.r == null ? "—" : fmt(b.r, 3)}`;
+    tip.textContent = `${hhmm(b.t)} · GMC ${b.g == null ? "—" : rateNum(b.g, 3)} · RC ${b.r == null ? "—" : rateNum(b.r, 3)}`;
     const cr = box.getBoundingClientRect();
     tip.style.left = Math.min(cr.width - tip.offsetWidth - 4, Math.max(0, e.clientX - cr.left + 10)) + "px";
     tip.style.top = "-26px";

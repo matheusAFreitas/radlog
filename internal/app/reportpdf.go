@@ -3,6 +3,7 @@ package app
 import (
 	"fmt"
 	"math"
+	"regexp"
 	"sort"
 	"strings"
 	"time"
@@ -124,7 +125,58 @@ func wrapText(s string, f pdf.Font, size, w float64, max int) []string {
 
 // table desenha cabeçalho e linhas, quebrando página quando precisa.
 // cols: largura de cada coluna; right: alinhada à direita; mono: fonte mono.
+// pdfMrem: o PDF em render agora usa mrem/h (lang.go, inLang)
+var pdfMrem bool
+
+// pdfMremNum é um número de tabela que muda com a unidade: não é hora
+// ("15:04"), nome ("GMC-800") nem razão ("×1,34")
+var pdfMremNum = regexp.MustCompile(`(^|[^×\d:.,\pL-])([+±−-]?\d[\d.,]*)`)
+
+// mremTable passa as colunas em µSv (e "Acima do limite") para mrem: o
+// cabeçalho troca a unidade e os números são divididos por 10. Célula que já
+// traz a unidade fica para o tradutor (remText).
+func mremTable(head []string, rows [][]string) ([]string, [][]string) {
+	conv := make([]bool, len(head))
+	h2 := append([]string{}, head...)
+	any := false
+	for i, h := range head {
+		if strings.Contains(h, "µSv") || h == "Acima do limite" {
+			conv[i], any = true, true
+			h2[i] = strings.ReplaceAll(strings.ReplaceAll(h, "µSv/h", "mrem/h"), "µSv", "mrem")
+		}
+	}
+	if !any {
+		return head, rows
+	}
+	r2 := make([][]string, len(rows))
+	for j, row := range rows {
+		r2[j] = append([]string{}, row...)
+		for i, c := range row {
+			if i >= len(conv) || !conv[i] || strings.Contains(c, "Sv") {
+				continue
+			}
+			var b strings.Builder
+			last := 0
+			for _, ix := range pdfMremNum.FindAllStringSubmatchIndex(c, -1) {
+				ns, ne := ix[4], ix[5]
+				if ne < len(c) && c[ne] == ':' { // hora
+					continue
+				}
+				b.WriteString(c[last:ns])
+				b.WriteString(remNum(c[ns:ne], ",", 0.1))
+				last = ne
+			}
+			b.WriteString(c[last:])
+			r2[j][i] = b.String()
+		}
+	}
+	return h2, r2
+}
+
 func (p *reportPDF) table(head []string, rows [][]string, cols []float64, right []bool, mono []bool, rowColor func(i int) *pdf.RGB) {
+	if pdfMrem {
+		head, rows = mremTable(head, rows)
+	}
 	drawHead := func() {
 		x := pm
 		for i, h := range head {

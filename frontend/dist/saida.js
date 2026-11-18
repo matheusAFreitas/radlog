@@ -122,7 +122,11 @@ function renderTripTitle(s) {
     const inp = document.createElement("input");
     inp.type = "text"; inp.maxLength = 60; inp.value = s.defaultName ? "" : p.name;
     inp.placeholder = "Onde você foi"; inp.setAttribute("aria-label", "Título da saída");
+    // 2.101.6: Esc desiste e Enter grava uma vez só (tirar o campo dispara o blur)
+    let done = false;
     const save = async () => {
+      if (done) return;
+      done = true;
       const v = inp.value.trim();
       try {
         const q = await api.SavePeriod({ ...p, name: v });
@@ -132,7 +136,7 @@ function renderTripTitle(s) {
     };
     inp.addEventListener("keydown", (e) => {
       if (e.key === "Enter") { e.preventDefault(); save(); }
-      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); renderTripTitle(s); }
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); done = true; renderTripTitle(s); }
     });
     inp.addEventListener("blur", save, { once: true });
     h.textContent = "";
@@ -186,13 +190,14 @@ function renderTrip(s) {
     const kd = kpi("Dose na saída", `${fmt(dose, 2)} µSv`, "", "rc");
     const kn = doseKnownEl(dose, s.homeUSv > 0 ? s.homeUSv : null, "sum-known", doseXray);
     if (kn) kd.appendChild(kn);
-    kpi("Média", `${tripUSv(rc.avg)} µSv/h`, s.homeUSv > 0 ? `${fmt(rc.avg / s.homeUSv, 1)}× casa (${tripUSv(s.homeUSv)})` : "", "rc");
+    kpi("Média", `${tripUSv(rc.avg)} µSv/h`, s.homeUSv > 0 ? `${fmt(rc.avg / s.homeUSv, 1)}× casa (${tripUSv(s.homeUSv)} µSv/h)` : "", "rc");
     kpi("Pico", `${tripUSv(rc.max)} µSv/h`, `às ${hhmm(rc.maxAt)}`, "rc");
     const al = rc.danger + rc.alarm + rc.attention;
     kpi("Alertas", al ? alertsText(rc) : "nenhum", al ? `pico ${tripUSv(rc.peakAlert)} µSv/h` : "sempre no nível seguro", al ? "up rc" : "rc");
     body.appendChild(k);
     // o gráfico
     const ch = tripCard("trip-chart", "A saída, minuto a minuto", "RC102 em µSv/h" + (s.homeUSv > 0 ? " · tracejado: fundo de casa" : ""));
+    ch.querySelector(".trip-card-h span").dataset.u = "rate"; // 2.101.6: "µSv/h" sem número também troca
     ch.appendChild(tripChartSvg(s, rc));
     body.appendChild(ch);
   }

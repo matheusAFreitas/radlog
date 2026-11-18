@@ -1269,7 +1269,7 @@ async function refreshHeat() {
   else if (daysWith < 2) $("heatSub").textContent = "com mais dias de dados dá para ver se o fundo muda com a hora";
   else {
     const p = h.hourAvgUSv[h.peakHour], l = h.hourAvgUSv[h.lowHour];
-    $("heatSub").textContent = `mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
+    $("heatSub").textContent = `em ${daysWith} dias: mais alto por volta das ${h.peakHour}h (${hv(p)} ${rateLbl()}) · mais baixo por volta das ${h.lowHour}h (${hv(l)} ${rateLbl()})`;
   }
 }
 
@@ -1429,7 +1429,7 @@ function drawHeatTrecho() {
   $("htRate").innerHTML = grid(RH) +
     (attn && attn < rtop ? `<line x1="0" y1="${ry(attn)}" x2="${VW}" y2="${ry(attn)}" stroke="${COR.att}" stroke-opacity=".6" stroke-dasharray="6 5" vector-effect="non-scaling-stroke"/>` : "") +
     line(g, g.length, ry, COR.gmc) + line(r, r.length, ry, COR.rc);
-  $("htRateY").innerHTML = `<span>${fmt(rtop, usvDigits(rtop))}</span><span>${fmt(rtop / 2, usvDigits(rtop / 2))}</span><span>0</span>`;
+  $("htRateY").innerHTML = `<span>${rateNum(rtop)}</span><span>${rateNum(rtop / 2)}</span><span>0</span>`; // 2.101.6: na unidade escolhida
   // dose acumulada: cada aparelho a sua, com o seu teto (o do Radiacode cheio,
   // o do GMC pontilhado quando os dois aparecem)
   const G = showG && dg && dg.measuredMinutes ? dg : null, R = showR && dr && dr.measuredMinutes ? dr : null;
@@ -2031,9 +2031,9 @@ function renderDeadTime() {
   const k = calK();
   const rows = [28, 1000, 10000, 30000, 100000, 200000].map((c) => {
     const f = dtFactor(c / 60, tau), cap = f >= 9.999;
-    return `<tr><td>${fmt(c, 0)}</td><td>${fmt(c * f, 0)}</td><td>${f < 1.0005 ? "+" + fmt((f - 1) * 100, 3) : "+" + fmt((f - 1) * 100, f < 1.1 ? 1 : 0)}%${cap ? " (teto)" : ""}</td><td>${fmt(c * f * k, usvDigits(c * f * k))}</td></tr>`;
+    return `<tr><td>${fmt(c, 0)}</td><td>${fmt(c * f, 0)}</td><td>${f < 1.0005 ? "+" + fmt((f - 1) * 100, 3) : "+" + fmt((f - 1) * 100, f < 1.1 ? 1 : 0)}%${cap ? " (teto)" : ""}</td><td>${rateNum(c * f * k)}</td></tr>`;
   }).join("");
-  $("lvDTTable").innerHTML = `<thead><tr><th>contador (CPM)</th><th>corrigido</th><th>soma</th><th>µSv/h</th></tr></thead><tbody>${rows}</tbody>`;
+  $("lvDTTable").innerHTML = `<thead><tr><th>contador (CPM)</th><th>corrigido</th><th>soma</th><th>${rateLbl()}</th></tr></thead><tbody>${rows}</tbody>`;
   $("lvDTTable").classList.toggle("off", !on);
 }
 
@@ -2054,7 +2054,7 @@ function readLevels() {
 function renderLevelEq() {
   const k = calK();
   document.querySelectorAll(".lv-eq").forEach((el) => {
-    const v = parseFloat($(el.dataset.eq).value) || 0;
+    const v = rateIn($(el.dataset.eq).value) || 0; // 2.101.6: o campo está na unidade da tela
     el.textContent = v ? `≈ ${fmt(v / k, 0)} CPM` : "";
   });
 }
@@ -2205,8 +2205,8 @@ document.addEventListener("change", (e) => { if (e.target.closest && e.target.cl
 const AL_MIRROR = [
   // [campo daqui, campo da página do aparelho, conversão]
   ["alGmc", "dcAlarmRate", null],
-  ["alRc1", "rcDR1", "rate"],
-  ["alRc2", "rcDR2", "rate"],
+  ["alRc1", "rcDR1", null], // 2.101.6: a página do RC102 já está na unidade da tela
+  ["alRc2", "rcDR2", null],
   ["alDs1", "rcDS1", null],
   ["alDs2", "rcDS2", null],
   ["alDs1On", "rcDS1On", null],

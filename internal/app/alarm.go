@@ -40,7 +40,19 @@ func (a *App) flagWindowText(tag, value string, demo, raise bool) {
 	if demo {
 		tag += " (demo)"
 	}
-	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %s — %s", a.T(tag), a.T(value), appTitle))
+	// 2.101.6: na unidade da tela, como a bandeja
+	v := a.T(value)
+	a.mu.Lock()
+	mrem := a.settings.RateUnit == rateMrem
+	a.mu.Unlock()
+	if mrem {
+		sep := ","
+		if a.uiLang() == "en" {
+			sep = "."
+		}
+		v = remText(v, sep)
+	}
+	wruntime.WindowSetTitle(a.ctx, fmt.Sprintf("%s: %s — %s", a.T(tag), v, appTitle))
 	// escondida na bandeja: sempre volta (escondida, o som pode não tocar)
 	if a.inTray.Load() {
 		raise = true

@@ -187,11 +187,15 @@ func deriveMeasure(in deriveIn) *MeasureDerived {
 		k = in.bg.USv / in.bg.CPM
 	}
 	d := &MeasureDerived{NetUSv: in.r.NetUSv, ErrUSv: in.r.NetErr * k, BgUSv: in.bg.USv}
+	if in.r.NetErrUSv > 0 {
+		d.ErrUSv = in.r.NetErrUSv // RC102: o ± da dose
+	}
 	rcObj := devName(in.device) == devRC
 	if rcObj && in.spec != nil && in.spec.Role != "voce" {
 		d.Isotopes = isoGuesses(in.spec)
 	}
-	real := in.r.Level == "sim" && in.r.NetUSv > 0
+	// 2.101.6: no RC102, a dose que subiu (K-40) também é "tem algo"
+	real := (in.r.Level == "sim" || in.r.DoseUp) && in.r.NetUSv > 0
 	d.InvSq = invSquare(in)
 	switch in.test {
 	case "distancia":

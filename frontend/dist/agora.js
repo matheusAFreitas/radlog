@@ -216,7 +216,7 @@ function renderAgDose() {
   if (!has(today)) cmp.textContent = "sem dado hoje";
   else if (today.background > 0) {
     const pct = Math.round(today.above * 100);
-    cmp.textContent = pct >= 10 ? `${pct}% acima do fundo da sua casa` : pct <= -10 ? `${-pct}% abaixo do fundo da sua casa` : "igual ao fundo da sua casa";
+    cmp.textContent = pct >= 10 ? `${pct}% acima do fundo da sua casa` : pct <= -10 ? `${-pct}% abaixo do fundo da sua casa` : pct >= 1 || pct <= -1 ? `perto do fundo da sua casa (${pct > 0 ? "+" : "−"}${Math.abs(pct)}%)` : "igual ao fundo da sua casa"; // 2.101.6: o mesmo % da célula
     if (pct >= 10) cmp.classList.add("up");
   } else cmp.textContent = "";
   const line = $("agLine");

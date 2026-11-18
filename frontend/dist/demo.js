@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.6";
+const DEMO_VERSION = "2.101.7";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -1603,6 +1603,9 @@ const demoRc = () => {
       if (demoRcFake()) {
         c.rc = (c.usv || []).map((v, i) => (v == null ? null : v * 0.6 + Math.sin(i / 3) * 0.004));
         c.rcCPM = c.rc.map((v) => (v == null ? null : v * 4950));
+        // 2.101.6: as médias que o Go manda junto (o zoom do RC102 usa)
+        const ok = c.rc.filter((v) => v != null);
+        if (ok.length) { c.rcAvg = ok.reduce((a, b) => a + b, 0) / ok.length; c.rcAvgCPM = c.rcAvg * 4950; }
       }
       return c;
     },

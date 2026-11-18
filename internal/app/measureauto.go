@@ -331,7 +331,9 @@ func autoEta(bg, obj MeasurePhase, elapsed, maxSec int, pct float64) int {
 // que a medição parou.
 func finishResult(r *MeasureResult, stop string, bg MeasurePhase, pct float64, auto bool) {
 	r.Stop = stop
-	if r.Level != "sim" {
+	// 2.101.6: com a dose subindo, "menos que +X" pela contagem não vale (o
+	// automático que parou em "nada" é o item que espera o ACE)
+	if r.Level != "sim" && !(r.DoseUp && stop != "nada") {
 		r.Limit = math.Max(r.NetCPM, 0) + 2*r.NetErr
 	}
 	switch stop {
