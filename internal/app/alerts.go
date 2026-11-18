@@ -100,6 +100,10 @@ func eventRow(e Event) []string {
 // eventos.csv se persist e avisa a tela. Devolve o ID.
 func (a *App) addEvent(ev Event, persist bool) int64 {
 	ev.Demo = !persist
+	if persist && a.dataDir != "" {
+		// a regravação não pega o evento na memória e depois perde o anexo
+		a.evFileMu.Lock()
+	}
 	a.mu.Lock()
 	a.evSeq++
 	ev.ID = a.evSeq
@@ -127,8 +131,9 @@ func (a *App) addEvent(ev Event, persist bool) int64 {
 				f.Close()
 			}
 		} else {
-			a.saveEvents()
+			a.saveEventsLocked()
 		}
+		a.evFileMu.Unlock()
 	}
 	a.emit("event", ev)
 	return ev.ID
@@ -141,6 +146,13 @@ func (a *App) saveEvents() {
 	if a.dataDir == "" {
 		return
 	}
+	a.evFileMu.Lock()
+	defer a.evFileMu.Unlock()
+	a.saveEventsLocked()
+}
+
+// saveEventsLocked é o saveEvents com o evFileMu já preso.
+func (a *App) saveEventsLocked() {
 	var alerts, rest bytes.Buffer
 	wa, wr := csv.NewWriter(&alerts), csv.NewWriter(&rest)
 	a.mu.Lock()

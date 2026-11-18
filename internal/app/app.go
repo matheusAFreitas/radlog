@@ -384,6 +384,9 @@ type App struct {
 	rcAlert        rcAlertState
 
 	connMu sync.Mutex // uma conexão por vez
+	// 2.101.5: alertas.csv/eventos.csv: a regravação inteira (saveEvents) e o
+	// anexo no fim (addEvent) não se cruzam, senão o anexo some na troca
+	evFileMu sync.Mutex
 
 	downloading    atomic.Bool
 	savePending    int         // minutos esperando para gravar (B2); com a.mu

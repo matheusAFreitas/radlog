@@ -34,6 +34,8 @@ Correções da varredura do QA na 2.101.2 (os defeitos de gravidade alta):
   trecho com nome automático troca o nome junto com os aparelhos; "Estou
   testando um objeto" no RC102 não entra na dose; o backup leva as unidades e
   o formato da data; a porta USB escolhida não se perde ao salvar.
+- Alertas: um alerta que começava no mesmo instante em que outro terminava
+  (dois aparelhos) podia sumir do alertas.csv e só existir até fechar o app.
 
 **English**
 Fixes from QA's sweep of 2.101.2 (the high-severity defects):
@@ -69,6 +71,8 @@ Fixes from QA's sweep of 2.101.2 (the high-severity defects):
   an automatic name updates the name along with the devices; "I'm testing an
   object" on the RC102 stays out of the dose; the backup carries the units
   and the date format; the chosen USB port is no longer lost on saving.
+- Alerts: an alert starting at the same moment another one ended (two
+  devices) could vanish from alertas.csv and only last until the app closed.
 
 ## 2.101.4
 - Calibração do KCl: quando o pico do K-40 quase não aparece acima do fundo
