@@ -12,7 +12,8 @@ const pTo = (p) => (p.open ? Math.max(p.to, Date.now()) : p.to);
 const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < pTo(p)) || null;
 // 2.101.9: nome padrão de trecho é do app e traduz; o que a pessoa escreveu fica como está
 const P_DEF_NAMES = new Set(["", "Fora de casa", "Saída programada", "Saí de casa", "Saí com o RC102", "Os dois fora do cálculo", "GMC-800 fora do cálculo", "RC102 fora do cálculo", "Levei os dois", "Levei o GMC-800, deixei o RC102", "Deixei os dois em casa"]);
-const pNameTxt = (n) => (P_DEF_NAMES.has(n || "") ? n || "" : asIs(n));
+// os motivos prontos do chip (WH_REASONS, mais abaixo) também são do app
+const pNameTxt = (n) => (P_DEF_NAMES.has(n || "") || WH_REASONS.includes(n) ? n || "" : asIs(n));
 const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${pNameTxt(p.name)}` : ""; };
 
 // faixas lilás no gráfico para os períodos fora de casa

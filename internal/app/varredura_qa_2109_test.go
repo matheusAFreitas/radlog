@@ -26,3 +26,12 @@ func TestMeasNameTrKeepsOwnName(t *testing.T) {
 		}
 	}
 }
+
+// motivo pronto do chip ("quebrado") traduz; nome da pessoa não
+func TestPeriodNameOwnReasons(t *testing.T) {
+	for n, want := range map[string]bool{"quebrado": false, "em manutenção": false, "Saí com o RC102": false, "": false, "Escritório": true} {
+		if got := periodNameOwn(n); got != want {
+			t.Errorf("periodNameOwn(%q) = %v, quer %v", n, got, want)
+		}
+	}
+}
