@@ -168,7 +168,7 @@ func TestActivityCalWeakNotSaved(t *testing.T) {
 	}
 }
 
-// 2.101.4: aos 10 min (2.101.11) já dá para avisar que o RC102 não está
+// 2.101.4: aos 20 min (2.101.11) já dá para avisar que o RC102 não está
 // vendo o sal, em vez de deixar rodar horas. O KCl sobe o pico de 1.460 keV
 // e o espalhamento de 300 a 1.400 keV; sem o sal, nada sobe.
 func TestActivityKCLWeakEarly(t *testing.T) {
@@ -188,7 +188,7 @@ func TestActivityKCLWeakEarly(t *testing.T) {
 				t.Fatalf("eficiência %g%%, contínuo +%g (semente %d): aviso %v, queria %v (cps %v / %v, %+v)", c.eff*100, c.rise, seed, got, c.weak, sb, bb, k)
 			}
 			if actKCLWeak(actWeakSec-1, sb, bb, k) {
-				t.Fatal("avisou antes dos 10 min")
+				t.Fatal("avisou antes dos 20 min")
 			}
 		}
 	}

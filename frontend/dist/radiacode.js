@@ -1821,7 +1821,7 @@
   // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
   const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
   function actCalPhaseSec(massG, pct) {
-    const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * 16.3; // K-40 do KCl: 16,3 Bq/g
+    const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * (39.0983 / 74.551) * 31.7; // K-40 do KCl (o mesmo do Go)
     const net = bq * 0.1066 * ACT_EFF_GUESS;
     if (!(net > 0)) return 0;
     const sec = (net + 2 * ACT_K_BG) / (ACT_CAL_REL * net) ** 2;
@@ -1835,14 +1835,14 @@
     document.querySelectorAll("#rcActKclType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.kclType)));
     actGeomFill($("rcActCalGeom"), (v.cal && v.cal.geometry) || "");
     $("rcActCalHint").textContent = k === "kcl"
-      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.")
+      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RC102 (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RC102 vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.")
       : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
     const calSec = k === "kcl" ? actCalPhaseSec(actNum("rcActCalMass"), light ? actNum("rcActPct") : 100) : 3600;
     act.calSmpSec = calSec || 3600;
     act.calBgSec = act.calSmpSec;
     let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
     // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
-    if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`)}</span>`;
+    if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${light ? tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`) : tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais KCl, bem apertado em volta do RC102.`)}</span>`;
     setHTML($("rcActCalTot"), tot);
     $("rcActCalStart").textContent = k === "kcl" ? tr("Começar a calibração") : tr("Medir o tório");
     $("rcActCalStart").disabled = !v.connected;
@@ -1960,7 +1960,7 @@
       // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
       // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
       if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
-      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.")}</p>`;
+      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.")}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
       if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;

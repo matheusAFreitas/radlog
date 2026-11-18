@@ -62,7 +62,7 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   await (await p.request.get(url + "__fundo")).text();
   await next("trocar");
   await next("amostra");
-  // 2.101.4: 10 min sem o RC102 ver o sal: avisa na hora, sem esperar as 2 h
+  // 2.101.4: 20 min (2.101.11) sem o RC102 ver o sal: avisa na hora, sem esperar as 2 h
   const liveTxt = async (re) => { let t = ""; for (let i = 0; i < 40; i++) { t = (await p.textContent("#rcActLive")).replace(/\s+/g, " "); if (re.test(t)) break; await p.waitForTimeout(200); } return t; };
   await (await p.request.get(url + "__semsal")).text();
   let live = await liveTxt(/não está vendo o sal/);

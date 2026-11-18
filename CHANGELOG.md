@@ -9,7 +9,7 @@ Calibração do KCl (Atividade, RC102) com tempo honesto:
   mesmo tempo, o suficiente para a eficiência sair com ~15% de dúvida (500 g
   de sal light: ~4 h; 500 g de KCl puro: ~2 h). Se passar de 24 h, o app
   avisa antes de começar.
-- O aviso "não está vendo o sal" olha a faixa de 300 a 1.400 keV aos 10 min
+- O aviso "não está vendo o sal" olha a faixa de 300 a 1.400 keV aos 20 min
   (o sal em volta blinda o fundo de baixa energia, e o total pode até cair) e
   o mínimo plausível no pico passa a 0,001%.
 
@@ -22,7 +22,7 @@ KCl calibration (Activity, RC102) with an honest time:
   salt measure the same time, enough for the efficiency to come out at ~15%
   uncertainty (500 g of lite salt: ~4 h; 500 g of pure KCl: ~2 h). Over 24 h,
   the app warns before starting.
-- The "not seeing the salt" warning looks at 300 to 1,400 keV at 10 min (the
+- The "not seeing the salt" warning looks at 300 to 1,400 keV at 20 min (the
   salt around the device shields the low-energy background, and the total can
   even drop) and the plausible minimum at the peak becomes 0.001%.
 

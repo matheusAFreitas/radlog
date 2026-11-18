@@ -4397,8 +4397,8 @@ const I18N_EN = {
 "Backup e arquivos": "Backup and files",
 "Nuvem": "Cloud",
 "% de KCl no rótulo": "% KCl on the label",
-"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
-"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RadiaCode encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). Full jar, the RC102 touching it the same way every time. The background is measured with the jar far away (about 3 m) and the device in the same place.",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RC102 (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RC102 vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). The salt around the RC102 (Marinelli beaker), the same way every time; with the jar just touching it, the RC102 sees much less and the time is not enough. The background is measured with the salt far away (about 3 m) and the device in the same place.",
+"% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RadiaCode (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RadiaCode vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.": "% KCl: mg of potassium in 1 g × 0.19 (it's on the label). The salt around the RC102 (Marinelli beaker), the same way every time; with the jar just touching it, the RC102 sees much less and the time is not enough. The background is measured with the salt far away (about 3 m) and the device in the same place.",
 "(fundo salvo)": "(saved background)",
 "1 · KCl": "1 · KCl",
 "2 · Tório": "2 · Thorium",
@@ -4449,7 +4449,8 @@ const I18N_EN = {
 "Pelo K-40 o app calcula quanto potássio tem.": "From K-40 the app works out how much potassium there is.",
 "Preparo:": "Preparation:",
 "Radionuclídeo": "Radionuclide",
-"Sal light ou KCl puro, ~500 g, no pote.": "Lite salt or pure KCl, ~500 g, in the jar.",
+"Sal light ou KCl puro, ~500 g, em volta do RC102.": "Lite salt or pure KCl, ~500 g, around the RC102.",
+"Sal light ou KCl puro, ~500 g, em volta do RadiaCode.": "Lite salt or pure KCl, ~500 g, around the RC102.",
 "Sem isso, os Bq são só um chute (±100%).": "Without it, the Bq are just a guess (±100%).",
 "Suas amostras": "Your samples",
 "Tirar": "Remove",
@@ -4815,8 +4816,8 @@ const I18N_EN = {
 "O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RadiaCode está encostado no sal pelo lado do cristal e meça de novo.": "The K-40 peak barely showed above the background, so the calibration was not saved (it needs ±20% or less). Check that the RC102 is touching the salt on the crystal side and measure again.",
 "pico fraco: não guardada": "weak peak: not saved",
 "contagem total": "total count rate",
-"O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away; waiting will not help.",
-"O RadiaCode não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away; waiting will not help.",
+"O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away.",
+"O RadiaCode não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away.",
 "normal da casa": "home normal",
 "contagem agora": "count rate now",
 "O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
@@ -6428,6 +6429,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Com essa quantidade, a calibração leva ",
+"^Com essa quantidade, a calibração leva ((?:(?! · ).)+?)\\. Use mais KCl, bem apertado em volta do RadiaCode\\.$",
+"With this amount, the calibration takes ${1}. Use more KCl, packed tightly around the RC102.",
+[
+"Com essa quantidade, a calibração leva ",
+". Use mais KCl, bem apertado em volta do RadiaCode."
+]
+],
+[
 "O ",
 "^O ((?:(?! · ).)+?) não viu: ((?:(?! · ).)+?) sobre o fundo dele\\. Pode ser algo perto só do ((?:(?! · ).)+?), interferência ou o aparelho\\.$",
 "${1} saw nothing: ${2} above its background. It may be something close only to ${3}, interference or the device.",
@@ -6648,6 +6658,15 @@ const I18N_EN = {
 "Pelos minutos em casa dos últimos 7 dias, o RC102 costuma marcar ",
 " µSv/h (80% entre ",
 ")."
+]
+],
+[
+"Com essa quantidade, a calibração leva ",
+"^Com essa quantidade, a calibração leva ((?:(?! · ).)+?)\\. Use mais KCl, bem apertado em volta do RC102\\.$",
+"With this amount, the calibration takes ${1}. Use more KCl, packed tightly around the RC102.",
+[
+"Com essa quantidade, a calibração leva ",
+". Use mais KCl, bem apertado em volta do RC102."
 ]
 ],
 [

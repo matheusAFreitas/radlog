@@ -34,7 +34,7 @@ const (
 	actResFile     = "medidas.jsonl"
 	actCurFile     = "atual.json"
 	actTickUSB     = 5 * time.Second
-	actWeakSec     = 600     // a partir de quando avisar que o RC102 não está vendo o sal
+	actWeakSec     = 1200    // a partir de quando avisar que o RC102 não está vendo o sal (20 min: com +10% de subida, ~8% de alarme falso)
 	actEffMin      = 0.00001 // 0,001%: abaixo disso o RC102 não está vendo o sal (2.101.11: era 0,03%)
 	actWeakPeakSec = 1800    // e a partir de quando o pico sozinho decide
 	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
@@ -660,7 +660,7 @@ func (a *App) GetActivity() ActView {
 }
 
 // actKCLWeak avisa cedo (2.101.4) que o RC102 não está vendo o sal: depois
-// de 10 min, a contagem de 300 a 1.400 keV (o espalhamento do K-40) quase
+// de 20 min, a contagem de 300 a 1.400 keV (o espalhamento do K-40) quase
 // não subiu em relação ao fundo; depois de 30 min, também se nem a
 // eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
 // 2.101.11: a calibração do ACE (18/11, 250 g de sal light no Marinelli)
@@ -673,7 +673,7 @@ func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	if bgCps > 0 && smpCps < bgCps*actWeakRise {
 		return true
 	}
-	// o pico sozinho só decide com mais tempo (aos 10 min o ruído ainda é grande)
+	// o pico sozinho só decide com mais tempo (aos 20 min o ruído ainda é grande)
 	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 
