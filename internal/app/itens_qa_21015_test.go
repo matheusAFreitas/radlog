@@ -40,7 +40,8 @@ func TestRCDoseEverywhereItem133(t *testing.T) {
 		t.Fatal(err)
 	}
 	txt := strings.Join(strings.Fields(string(out)), " ")
-	for _, s := range []string{"Objeto ÷ fundo (dose)", "pela dose do RC102"} {
+	// só ASCII: o pdftotext do Windows troca o ÷
+	for _, s := range []string{"fundo (dose)", "pela dose do RC102"} {
 		if !strings.Contains(txt, s) {
 			t.Fatalf("PDF sem %q", s)
 		}
