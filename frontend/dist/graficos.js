@@ -360,10 +360,10 @@ function setupChartHover() {
     const rcv = onlyGmc ? null : usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
     const cps = !usvMode && UNITS.count === "cps";
     const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
-    tip.textContent = (onlyRc ? (rcv == null ? `${when} · sem dados` : `${when}`) : v == null ? `${when} · sem dados`
+    tipSet(tip, (onlyRc ? (rcv == null ? `${when} · sem dados` : `${when}`) : v == null ? `${when} · sem dados`
       : usvMode ? `${when} · ${fmt(v, usvDigits(v))} µSv/h`
       : cps ? `${when} · GMC-800 ${fmt(v / 60, 2)} CPS`
-      : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText;
+      : `${when} · GMC-800 ${fmt(v, (c.stepMs || 0) >= 300000 ? 1 : 0)} CPM`) + pkText + (rr && rr.mmh > 0 ? ` · chuva ${rainWord(rr.mmh)} (radar)` : rh ? ` · chuva ${fmt(rh.mm, 1)} mm (modelo)` : "") + rcText + awayLabel(t) + measureLabel(t) + ntText);
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.min(left, r.width - tip.offsetWidth - 4) + "px";
   });
@@ -791,12 +791,12 @@ function setupDoseHover() {
     const when = HOURLY.includes(state.dosePeriod) && !state.doseZoom && !state.doseAll ? hhmm(t) : `${ddmm(t)} ${hhmm(t)}`;
     const c2 = state.dose2 && state.dose2.measuredMinutes && state.doseShow[devKey(state.dose2)] ? state.dose2 : null, j2 = c2 && c2.dose && c2.dose.length ? Math.round(f * (c2.dose.length - 1)) : -1;
     if (!state.doseShow[devKey(c)] && c2 && j2 >= 0) {
-      tip.textContent = `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`;
-    } else tip.textContent = c2 && j2 >= 0
+      tipSet(tip, `${when} · ${devName(devKey(c2))} ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c2.ceiling[j2])}`);
+    } else tipSet(tip, c2 && j2 >= 0
       ? (c.device === "radiacode"
         ? `${when} · RC102 ${doseTxt(c.dose[i])} · GMC-800 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`
         : `${when} · GMC-800 ${doseTxt(c.dose[i])} · RC102 ${doseTxt(c2.dose[j2])} · teto ${doseTxt(c.ceiling[i])}`)
-      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`;
+      : `${when} · dose ${doseTxt(c.dose[i])} · teto ${doseTxt(c.ceiling[i])}`);
     const left = (ev.clientX - r.left) + 12;
     tip.style.left = Math.max(0, Math.min(left, r.width - tip.offsetWidth - 4)) + "px";
   });

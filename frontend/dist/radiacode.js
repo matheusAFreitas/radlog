@@ -1878,7 +1878,7 @@
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
-    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
@@ -1907,7 +1907,7 @@
     if (ch) actDraw(ch, v);
     // histórico
     const hist = v.history || [];
-    const what = (r) => (r.kind === "amostra" ? `<span>${escHtml(r.name)}</span>` : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
+    const what = (r) => (r.kind === "amostra" ? actNameHtml(r) : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
     setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
       hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
   }
@@ -1952,7 +1952,7 @@
       if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
-      live = `<div class="rc-act-res"><h4>${escHtml(r.name)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
+      live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
     }
     setHTML($("rcActLive"), live);
   }
@@ -1989,6 +1989,20 @@
     actStartOpts(o, $("rcActRunErr"));
   }
   // guarda como "minha": da medida terminada ou do que está escolhido
+  // 2.101.10: o nome que a pessoa digitou não traduz; o dos cartões prontos
+  // (p:…) e das amostras que vêm com o app (seed) traduz
+  function actNameOwn(r) {
+    if (r.kind !== "amostra") return false;
+    const id = r.sampleId || "";
+    if (id.startsWith("p:")) { const pk = ACT_PRESETS[id.slice(2)]; return !pk || !pk.name || pk.name !== r.name; } // "Outra coisa" tem nome vazio
+    if (id.startsWith("s:")) {
+      const s = ((act.v && act.v.samples) || []).find((x) => "s:" + x.id === id);
+      return !(s && s.seed);
+    }
+    return true;
+  }
+  const actNameHtml = (r) => (actNameOwn(r) ? `<span data-no-tr>${escHtml(r.name)}</span>` : `<span>${escHtml(r.name)}</span>`);
+
   async function actKeep(o) {
     if (!api.SaveActSample) return;
     const c = actChoice();

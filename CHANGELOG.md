@@ -1,5 +1,32 @@
 # Versões
 
+## 2.101.10
+Sobras da conferência do QA na 2.101.9:
+- Resumo, "De onde vem a sua dose": o nome da medição, da anotação e do
+  trecho fica como você escreveu no app em inglês ("Relógio" não vira
+  "Clock").
+- Na mesma tabela, só saída de verdade (GMC-800 junto ou "eu não estava em
+  casa") vira "Fora de casa"; GMC-800 ignorado ou os dois em casa não.
+- Por que subiu?: a anotação perto da subida fica como você escreveu.
+- Atividade (Bq): o nome que você deu à amostra não é traduzido no
+  histórico, no resultado e nos detalhes; os cartões prontos continuam
+  traduzidos.
+- Gráficos e Padrões em inglês: a dica perto da borda direita não passa mais
+  da janela (era medida antes de traduzir).
+
+**English**
+Leftovers from QA's check of 2.101.9:
+- Summary, "Where your dose comes from": the measurement, note and stretch
+  names stay as you wrote them in the English app ("Relógio" no longer
+  becomes "Clock").
+- In the same table, only a real trip (GMC-800 with you or "I wasn't home")
+  becomes "Away from home"; an ignored GMC-800 or both left at home does not.
+- Why did it rise?: the note near the rise stays as you wrote it.
+- Activity (Bq): the name you gave the sample is not translated in the
+  history, the result and the details; ready cards are still translated.
+- Charts and Patterns in English: the tooltip near the right edge no longer
+  runs past the window (it was measured before translating).
+
 ## 2.101.9
 Achados da conferência do QA na 2.101.8:
 - O nome que você deu a uma medição ou a um trecho não é mais traduzido no

@@ -14,6 +14,12 @@ function asIs(s) {
   return "\u2068" + String(s == null ? "" : s).replace(/[\u2068\u2069]/g, "") + "\u2069";
 }
 
+// 2.101.10: dica que se mede logo depois (offsetWidth) já vai traduzida;
+// se o observador traduzisse depois, o inglês (mais largo) passava da borda
+function tipSet(el, s) {
+  el.textContent = tr(s);
+}
+
 // CSP (S5, 2.73.2): o que a política bloquear fica no console
 document.addEventListener("securitypolicyviolation", (e) => {
   console.warn(`CSP bloqueou: ${e.violatedDirective} ${e.blockedURI || ""} ${e.sourceFile ? e.sourceFile.split("/").pop() + ":" + e.lineNumber : ""}`);

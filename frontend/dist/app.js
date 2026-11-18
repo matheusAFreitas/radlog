@@ -923,7 +923,7 @@ function wireLogs() {
     if (!h || !r) { tip.hidden = true; return; }
     const x = r.buckets[+h.dataset.i];
     const lines = Object.keys(LG_COLORS).filter((l) => x.counts[l]).map((l) => `${l} ${x.counts[l]}`);
-    tip.textContent = `${lgTime(x.t).slice(0, 11)}–${hhmm(x.t + r.bucketMs)} · ${lines.join(" · ") || "nada"} · clique para ver`;
+    tipSet(tip, `${lgTime(x.t).slice(0, 11)}–${hhmm(x.t + r.bucketMs)} · ${lines.join(" · ") || "nada"} · clique para ver`);
     const box = svg.getBoundingClientRect(), hb = $("lgChart").parentElement.getBoundingClientRect();
     tip.style.left = Math.min(e.clientX - hb.left + 10, hb.width - 260) + "px";
     tip.hidden = false;
@@ -4373,7 +4373,7 @@ function wirePatterns() {
     $("patCursor").style.left = (h / 23) * 100 + "%";
     const tip = $("patTip");
     tip.hidden = false;
-    tip.textContent = st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`;
+    tipSet(tip, st.n ? `${pad(h)}h · mediana ${patVal(p, st.median)} · quartis ${patVal(p, st.p25)}–${patVal(p, st.p75)} · média ${patVal(p, st.mean)} ${patUnit(p)} · ${fmt(st.n, 0)} min em ${st.days} ${st.days === 1 ? "dia" : "dias"}` : `${pad(h)}h · sem dados`);
     const left = (h / 23) * r.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), r.width - tip.offsetWidth) + "px";
   });
@@ -4480,7 +4480,7 @@ function wireBgTrend() {
     $("bgCursor").style.left = (((best.t - tr.from) / (tr.to - tr.from)) * 100) + "%";
     const tip = $("bgTip");
     tip.hidden = false;
-    tip.textContent = `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`);
+    tipSet(tip, `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`));
     const left = ((best.t - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
@@ -4494,7 +4494,7 @@ function wireBgTrend() {
     const tip = $("bgDTip");
     if (!d) { tip.hidden = true; return; }
     tip.hidden = false;
-    tip.textContent = `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`;
+    tipSet(tip, `${dayLabel(d.day)} · dispersão ${fmt(d.dispersion, 2)} (σ real ÷ σ do acaso, nas contagens) · mediana ${usvVal(d.median * calK())} · n = ${fmt(d.n, 0)} min`);
     const left = ((d.day + DAY_MS / 2 - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });
@@ -4628,7 +4628,7 @@ function setupSummary() {
     }).filter(Boolean);
     const tip = $("sumTip");
     tip.hidden = false;
-    tip.textContent = parts.join(" · ");
+    tipSet(tip, parts.join(" · "));
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("sumCursor").hidden = true; $("sumTip").hidden = true; });
@@ -4649,7 +4649,7 @@ function setupRainImpact() {
     const when = p.min < 0 ? `${durMin(-p.min)} antes` : `${durMin(p.min)} depois`;
     const pc = (r.device === "radiacode" || r.usvPerCPM > 0) && r.avgBase > 0 ? 100 / r.avgBase : 0;
     const v = (x) => (x == null ? "—" : pc ? sgn(x * pc, 1) + "%" : sgn(x, 1));
-    tip.textContent = `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM");
+    tipSet(tip, `${when} · chuva ${v(p.rain)} · sem chuva ${v(p.dry)}` + (pc ? "" : " CPM"));
     tip.style.left = Math.max(0, Math.min(ev.clientX - b.left + 12, b.width - tip.offsetWidth - 4)) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("riCursor").hidden = true; $("riTip").hidden = true; });
