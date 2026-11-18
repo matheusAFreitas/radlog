@@ -1724,11 +1724,11 @@
   }
   // linha da calibração no topo
   function actCalHtml(v) {
-    const c = v.cal || {}, geo = escHtml(c.geometry || "");
+    const c = v.cal || {}, geo = actGeomHtml(c.geometry || "");
     if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
     const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
     const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
-    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · ${shape}</small></div>` +
+    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · <span>${shape}</span></small></div>` +
       `<button type="button" class="link" data-eff aria-expanded="${act.effOpen}">detalhes</button><button type="button" class="btn${c.kcl ? "" : " accent"}" data-cal="kcl">${c.kcl ? "Calibrar de novo" : "Calibrar"}</button></div>`;
   }
   function actEffHtml(v) {
@@ -1746,10 +1746,16 @@
   }
   // 2.101.6: a Posição segue a da calibração enquanto a pessoa não mexeu nela;
   // com o cursor no campo, ou depois de digitar (até apagar), o app não toca
+  // 2.101.15 (item 138): só a Posição padrão do app se traduz; a escrita pela
+  // pessoa fica como está (como o nome)
+  const ACT_GEOM_APP = ["pote encostado no RC102", "pote de 500 mL encostado"];
+  const actGeomApp = (g) => ACT_GEOM_APP.includes(g);
+  const actGeomHtml = (g) => (!g ? "" : actGeomApp(g) ? `<span>${escHtml(g)}</span>` : `<span data-no-tr>${escHtml(g)}</span>`);
   function actGeomFill(el, g) {
     if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
     if (document.activeElement === el || el.dataset.touched) return;
-    if (el.value !== tr(g)) el.value = tr(g); // 2.101.8: no idioma da tela (grava o original)
+    const shown = actGeomApp(g) ? tr(g) : g; // 2.101.8: no idioma da tela (grava o original)
+    if (el.value !== shown) el.value = shown;
   }
   // o campo ainda com o texto padrão traduzido manda o original (2.86.1: grava em português)
   const actOrig = (v, orig) => (orig && v === tr(orig) ? orig : v);
@@ -1914,7 +1920,7 @@
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
-    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const meta = `${actNameHtml(r)}<span> · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}</span>${actWhereTxt(r)}`; // 2.101.15 (item 138): a parte do app num span, a Posição da pessoa fora
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
@@ -1948,13 +1954,21 @@
     setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
       hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
   }
+  // 2.101.15 (item 135): numa pedra solta, o histórico diz "pedra solta", como
+  // a tela da medição; a Posição só vai junto se não for a do pote da calibração
+  function actWhereTxt(r) {
+    const c = (act.v && act.v.cal) || {};
+    if (!r.loose) return r.geometry ? " · " + actGeomHtml(r.geometry) : "";
+    const own = r.geometry && r.geometry !== c.geometry && r.geometry !== c.prevGeometry;
+    return " · " + tr("pedra solta") + (own ? " · " + actGeomHtml(r.geometry) : "");
+  }
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
     const idx = { fundo: 0, trocar: 1, amostra: 2, pronto: 3 }[ph] ?? 0;
     const steps = ["Fundo", "Colocar a amostra", "Medindo", "Resultado"];
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
-    const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
+    const where = o.loose ? tr("pedra solta") : actGeomHtml(o.geometry || "");
     setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
@@ -2005,6 +2019,8 @@
       newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: actLoose(c), sampleId: act.pick,
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
+    // 2.101.15 (item 135): pedra solta não leva a Posição do pote da calibração
+    if (o.loose && act.v && act.v.cal && o.geometry === act.v.cal.geometry) o.geometry = "";
     o.nameOwn = !!o.name && actNameOwn(o); // 2.101.12: nos Eventos, só o nome da pessoa fica como está
     return o;
   }

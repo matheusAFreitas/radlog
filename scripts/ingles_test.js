@@ -84,7 +84,8 @@ async function part2() {
   let pw;
   try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
   const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
-  const SCEN = ["", "casa", "atencao", "alarme", "perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta"];
+  // "posicao" (2.101.15, item 138): Posição escrita pela pessoa na calibração e no histórico da Atividade (Bq)
+  const SCEN = ["", "casa", "atencao", "alarme", "perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta", "posicao"];
   const b = await pw.chromium.launch(process.env.RADLOG_CHROME ? { channel: process.env.RADLOG_CHROME } : {});
   const found = new Map(), errs = new Set();
   let scans = 0;
@@ -95,7 +96,18 @@ async function part2() {
     p.on("pageerror", (e) => errs.add(e.message));
     await p.goto("file://" + D + "index.html");
     await p.waitForTimeout(1500);
-    if (sc) { await p.evaluate((s) => api.SetDemo({ active: true, scenario: s, speed: 10 }).then((d) => { state.demo = d; if (typeof renderDemo === "function") renderDemo(); }), sc); await p.waitForTimeout(2500); }
+    if (sc === "posicao") {
+      await p.evaluate(() => {
+        const g = api.GetActivity, mine = "pote C, encostada no RC102";
+        api.GetActivity = async () => {
+          const v = await g();
+          if (v.cal) v.cal.geometry = mine;
+          const h = (v.history || [])[0];
+          v.history = [{ ...(h || { t: Date.now() - 864e5, kind: "amostra", name: "pedra do quintal", massG: 0, sec: 3600, bgSec: 3600, calSrc: "kcl", nuclides: [] }), geometry: mine }, ...(v.history || []).slice(1)];
+          return v;
+        };
+      });
+    } else if (sc) { await p.evaluate((s) => api.SetDemo({ active: true, scenario: s, speed: 10 }).then((d) => { state.demo = d; if (typeof renderDemo === "function") renderDemo(); }), sc); await p.waitForTimeout(2500); }
     const scan = async (where) => {
       scans++;
       const r = await p.evaluate((src) => {

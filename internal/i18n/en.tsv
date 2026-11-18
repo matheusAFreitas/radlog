@@ -1971,6 +1971,11 @@ Limite de detecção: {0} acima do fundo.	Detection limit: {0} above background.
 Se o objeto emite algo, é menos que +{0}.	If the object emits anything, it's less than +{0}.
 Se o objeto emite algo, é menos que +{0}; para ir além, aumente o tempo máximo.	If the object emits anything, it's less than +{0}; to go further, raise the time limit.
 Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1}; para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1}; to go further, raise the time limit.
+Chegou ao tempo máximo ({0}) sem decidir. Para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. To go further, raise the time limit.
+Chegou ao tempo máximo ({0}) sem decidir. Quem limita é o fundo medido na hora (± {1} em {2}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	Reached the time limit ({0}) without deciding. The background measured on the spot is what limits it (± {1} in {2}): to go further, measure the background longer or use the home background.
+Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1}. Quem limita é o fundo medido na hora (± {2} em {3}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1}. The background measured on the spot is what limits it (± {2} in {3}): to go further, measure the background longer or use the home background.
+Em {0}, se o objeto emite algo, é menos que +{1}; para ir além, aumente o tempo máximo.	In {0}, if the object emits anything, it's less than +{1}; to go further, raise the time limit.
+Em {0}, se o objeto emite algo, é menos que +{1}. Quem limita é o fundo medido na hora (± {2} em {3}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	In {0}, if the object emits anything, it's less than +{1}. The background measured on the spot is what limits it (± {2} in {3}): to go further, measure the background longer or use the home background.
 Parou em {0}, quando deu para garantir que o objeto sobe menos de {1}% do fundo (+{2}). Para procurar algo mais fraco, escolha “+10% do fundo”.	Stopped at {0}, once it could guarantee the object adds less than {1}% of background (+{2}). To look for something weaker, choose “+10% of background”.
 Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo (menos que +{0}). Use o modo automático para mais certeza.	If the object emits anything, it's below what can be seen in that time (less than +{0}). Use automatic mode for more certainty.
 {0} ± {1} µSv/h sobre o fundo no tubo	{0} ± {1} µSv/h above background at the tube
@@ -5874,6 +5879,7 @@ usar o salvo (não tem)	use the saved one (none)
 valor típico	typical value
 voltar	back
 {0} · {1} · amostra {2} · fundo {3} · {4}{5}	{0} · {1} · sample {2} · background {3} · {4}{5}
+· {0} · amostra {1} · fundo {2} · {3}	 · {0} · sample {1} · background {2} · {3}
 última medida	last measured
 tempo recomendado	recommended time
 Ra-226 ≈ 24 a 105 Bq/kg	Ra-226 ≈ 24 to 105 Bq/kg
@@ -6346,6 +6352,7 @@ Mudou desde a medição	Changed since then
 Medição de {0}{1}: {2}{3} ± {4} µSv/h sobre o fundo ({5}σ na dose) — {6}	Measurement of {0}{1}: {2}{3} ± {4} µSv/h above background ({5}σ in dose) — {6}
 No RC102, a incerteza do µSv/h vem do espalhamento da dose do próprio aparelho. A contagem ficou igual ({0}σ), mas a dose subiu {1}σ: é real. Gama de energia alta, como o do K-40, dá mais dose por contagem.	On the RC102, the µSv/h uncertainty comes from the spread of the device's own dose. The count stayed the same ({0}σ), but the dose rose {1}σ: it's real. High-energy gamma, like K-40's, gives more dose per count.
 na dose · certeza {0}	in dose · certainty {0}
+na dose	in dose
 Precisão do líquido (pela dose): ±{0}%.	Net precision (from dose): ±{0}%.
 Certeza pela dose: muito alta.	Certainty from dose: very high.
 Certeza pela dose: alta.	Certainty from dose: high.

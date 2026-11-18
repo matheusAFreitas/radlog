@@ -336,7 +336,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + enet + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
 	}
-	if r.DoseUp && m.Bg.USv > 0 { // 2.101.6: a dose subiu: a razão e o σ são os da dose
+	// 2.101.6: a dose subiu: a razão e o σ são os da dose; 2.101.15 (item 133):
+	// no RC102 com o ± da dose, sempre
+	if (r.DoseUp || (m.Device == "radiacode" && r.NetErrUSv > 0)) && m.Bg.USv > 0 {
 		tiles[3] = [4]string{"Objeto ÷ fundo (dose)", fmtBR(m.Obj.USv/m.Bg.USv, 2) + "×", fmtBR(r.DoseSigma, 1) + " σ na dose · " + fmtBR(r.Sigma, 1) + " σ na contagem", "m"}
 	}
 	for i, tl := range tiles {
@@ -419,8 +421,11 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	case "limite":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: chegou ao tempo máximo (%s) sem decidir", fmtDurSec(float64(m.Obj.Seconds)))})
 	}
-	if r.DoseUp && r.NetUSv > 0 && r.NetErrUSv > 0 {
-		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ, pela dose do RC102)", fmtBR(r.NetErrUSv/r.NetUSv*100, 0))})
+	// 2.101.15 (item 133): no RC102 com o ± da dose, a precisão é a da dose
+	if r.DoseUp || (m.Device == "radiacode" && r.NetErrUSv > 0) {
+		if r.NetUSv > 0 && r.NetErrUSv > 0 {
+			rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ, pela dose do RC102)", fmtBR(r.NetErrUSv/r.NetUSv*100, 0))})
+		}
 	} else if r.NetCPM > 0 {
 		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ)", fmtBR(r.NetErr/r.NetCPM*100, 0))})
 		if home {

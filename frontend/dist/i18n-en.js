@@ -4851,6 +4851,7 @@ const I18N_EN = {
 "O RC102 subiu menos: veja a Saúde do tubo.": "The RC102 rose less: check Tube health.",
 "O RadiaCode subiu menos: veja a Saúde do tubo.": "The RC102 rose less: check Tube health.",
 "Mudou desde a medição": "Changed since then",
+"na dose": "in dose",
 "Certeza pela dose: muito alta.": "Certainty from dose: very high.",
 "Certeza pela dose: alta.": "Certainty from dose: high.",
 "Certeza pela dose: boa.": "Certainty from dose: good.",
@@ -5021,6 +5022,18 @@ const I18N_EN = {
 "${1} When it fills up, new data may not be saved or may overwrite the old. Download the history to keep everything in the app; then, if you want to free space, erase the memory from the counter's menu.",
 [
 " Quando enche, dados novos podem não ser gravados ou podem sobrescrever os antigos. Baixe o histórico para guardar tudo no app; depois, se quiser liberar espaço, apague a memória pelo menu do contador."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?)\\. Quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2}. The background measured on the spot is what limits it (± ${3} in ${4}): to go further, measure the background longer or use the home background.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Se o objeto emite algo, é menos que +",
+". Quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
 ]
 ],
 [
@@ -5204,6 +5217,29 @@ const I18N_EN = {
 "Não estou conseguindo gravar em ",
 ": se ele estiver aberto no Excel ou em outro programa, feche. ",
 " minuto(s) esperando na memória; nada se perde com o app aberto."
+]
+],
+[
+"Em ",
+"^Em ((?:(?! · ).)+?), se o objeto emite algo, é menos que \\+((?:(?! · ).)+?)\\. Quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"In ${1}, if the object emits anything, it's less than +${2}. The background measured on the spot is what limits it (± ${3} in ${4}): to go further, measure the background longer or use the home background.",
+[
+"Em ",
+", se o objeto emite algo, é menos que +",
+". Quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"Reached the time limit (${1}) without deciding. The background measured on the spot is what limits it (± ${2} in ${3}): to go further, measure the background longer or use the home background.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
 ]
 ],
 [
@@ -6938,6 +6974,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Em ",
+"^Em ((?:(?! · ).)+?), se o objeto emite algo, é menos que \\+((?:(?! · ).)+?); para ir além, aumente o tempo máximo\\.$",
+"In ${1}, if the object emits anything, it's less than +${2}; to go further, raise the time limit.",
+[
+"Em ",
+", se o objeto emite algo, é menos que +",
+"; para ir além, aumente o tempo máximo."
+]
+],
+[
 "Contador e app usam o mesmo fator: ",
 "^Contador e app usam o mesmo fator: ((?:(?! · ).)+?) µSv/h por CPM\\. Os dois mostram o mesmo µSv/h\\.$",
 "Counter and app use the same factor: ${1} µSv/h per CPM. Both show the same µSv/h.",
@@ -7038,6 +7084,15 @@ const I18N_EN = {
 "Esta saiu com ",
 ", pior que a que está em uso (",
 "), então a atual continua valendo."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Para ir além, aumente o tempo máximo\\.$",
+"Reached the time limit (${1}) without deciding. To go further, raise the time limit.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Para ir além, aumente o tempo máximo."
 ]
 ],
 [
@@ -15203,6 +15258,15 @@ const I18N_EN = {
 "· RC102 média ",
 " · máx ",
 " CPS"
+]
+],
+[
+"· ",
+"^· ((?:(?! · ).)+?) · amostra ((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) · ((?:(?! · ).)+?)$",
+" · ${1} · sample ${2} · background ${3} · ${4}",
+[
+" · amostra ",
+" · fundo "
 ]
 ],
 [

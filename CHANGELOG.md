@@ -1,5 +1,33 @@
 # Versões
 
+## 2.101.15
+Itens 133 a 138 da varredura (achados do QA):
+- Medir objeto com o RC102: o ± e o σ do líquido, o "Objeto ÷ fundo" e a
+  precisão vêm todos da dose (na tela, no PDF e nos Eventos), e não mais
+  metade da contagem.
+- Medir objeto, parada no tempo máximo: o "menos que +X" sai uma vez só, e
+  quando quem limita é o fundo medido na hora, a dica diz para medir o fundo
+  por mais tempo ou usar o fundo da casa. Na tela ao vivo, a frase não
+  repete mais "chegou ao tempo máximo".
+- Atividade (Bq): numa pedra solta, as medidas anteriores dizem "pedra
+  solta" em vez da Posição do pote da calibração, e a Posição escrita por
+  você não é mais traduzida pela metade em inglês.
+- Demonstração: a calibração nova grava a Posição nova, como no app.
+
+**English**
+Items 133 to 138 from the sweep (QA findings):
+- Measure object with the RC102: the net ± and σ, "Object ÷ background" and
+  the precision all come from the dose (on screen, in the PDF and in
+  Events), no longer half from the count.
+- Measure object, stop at the time limit: the "less than +X" shows only once,
+  and when the background measured on the spot is what limits, the tip says
+  to measure the background longer or use the home background. On the live
+  screen, the sentence no longer repeats "reached the time limit".
+- Activity (Bq): for a loose stone, past measurements say "loose stone"
+  instead of the calibration jar's Position, and a Position you typed is no
+  longer half translated in English.
+- Demo: a new calibration saves the new Position, as in the app.
+
 ## 2.101.14
 Itens 17, 35 e 68 da varredura (ok do ACE):
 - Medir objeto com o RC102 no automático: a dose também decide. Ele só diz
