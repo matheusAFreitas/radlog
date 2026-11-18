@@ -9,6 +9,7 @@ import (
 	_ "embed"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"unicode"
@@ -35,6 +36,11 @@ type dict struct {
 }
 
 // ptLeft: sobra de português num resultado (acento ou palavra comum).
+// O nome que a pessoa deu (U+2068…U+2069, asIs) não conta.
+func hasPTLeft(s string) bool { return ptLeft.MatchString(named.ReplaceAllString(s, "")) }
+
+var named = regexp.MustCompile("\u2068[^\u2069]*\u2069")
+
 var ptLeft = regexp.MustCompile(`(?i)[ãõçáéíóúâêôà]|\b(de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|dia|dias|casa|fundo|aparelho|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui)\b`)
 
 var (
@@ -144,8 +150,28 @@ func T(lang, s string) string {
 		return FixNums(s)
 	}
 	once.Do(load)
-	return en.tr(s)
+	// 2.101.2: o nome que a pessoa deu (U+2068…U+2069) vira uma marca antes
+	// dos moldes: um "em" ou "de" dentro dele não vira parte da frase
+	if !strings.Contains(s, "\u2068") {
+		return en.tr(s)
+	}
+	var names []string
+	t := named.ReplaceAllStringFunc(s, func(m string) string {
+		names = append(names, m)
+		return "\u2068" + strconv.Itoa(len(names)-1) + "\u2069"
+	})
+	if len(names) == 0 || strings.TrimSpace(t) == "\u20680\u2069" {
+		return en.tr(s)
+	}
+	return nameMark.ReplaceAllStringFunc(en.tr(t), func(m string) string {
+		if i, err := strconv.Atoi(m[len("\u2068") : len(m)-len("\u2069")]); err == nil && i < len(names) {
+			return names[i]
+		}
+		return m
+	})
 }
+
+var nameMark = regexp.MustCompile("\u2068[0-9]+\u2069")
 
 func hasWord(s string) bool {
 	n := 0
@@ -216,7 +242,7 @@ func (d *dict) tr(s string) string {
 		if changed {
 			// 2.101.2: com português sobrando, um molde da frase inteira ainda
 			// pode ganhar (o resultado em pedaços fica de reserva)
-			if j := strings.Join(segs, " · "); ptLeft.MatchString(j) {
+			if j := strings.Join(segs, " · "); hasPTLeft(j) {
 				segFallback = j
 			} else {
 				out, ok = j, true
@@ -313,7 +339,7 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 	// traduziu) só vale se nenhum outro der certo.
 	var best *pattern
 	var bestOut, half string
-	halfOK := false
+	halfOK, halfFixed := false, 0
 	try := func(list []*pattern, wideOnly bool) {
 	next:
 		for _, p := range list {
@@ -344,9 +370,9 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 				}
 				return tok
 			})
-			if ptLeft.MatchString(out) {
-				if !halfOK {
-					half, halfOK = out, true
+			if hasPTLeft(out) {
+				if !halfOK || fixedLen(p) > halfFixed {
+					half, halfOK, halfFixed = out, true, fixedLen(p)
 				}
 				continue
 			}
@@ -368,8 +394,11 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 		bare := strings.TrimSuffix(string(unicode.ToLower(r))+s[size:], ".")
 		if bare != s {
 			if e, ok := d.exact[bare]; ok {
-				er, es := utf8.DecodeRuneInString(e)
-				e = string(unicode.ToUpper(er)) + e[es:]
+				// 2.101.2: a primeira letra segue a do português
+				if unicode.IsUpper(r) {
+					er, es := utf8.DecodeRuneInString(e)
+					e = string(unicode.ToUpper(er)) + e[es:]
+				}
 				if strings.HasSuffix(s, ".") && !strings.HasSuffix(e, ".") {
 					e += "."
 				}

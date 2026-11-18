@@ -32,6 +32,8 @@ const tr = (() => {
   }
   const cache = new Map();
   // 2.101.2: sobra de português num resultado (acento ou palavra comum)
+  // o nome que a pessoa deu (⁨…⁩, asIs) não conta: pode ter acento à vontade
+  const ptLeft = (s) => PT_LEFT.test(s.replace(/\u2068[^\u2069]*\u2069/g, ""));
   const PT_LEFT = /[ãõçáéíóúâêôà]|\b(de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|dia|dias|casa|fundo|aparelho|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui)\b/i;
   const hasWord = /[A-Za-zÀ-ú]{2}/;
   // números do Go vêm com vírgula decimal ("52,3"); os do app já saem no
@@ -107,25 +109,27 @@ const tr = (() => {
         const m = p.re.exec(s);
         if (!m) continue;
         const out = p.out.replace(/\$\{(\d+)\}/g, (_, i) => part(m[+i] || ""));
-        if (PT_LEFT.test(out)) { if (half == null) half = out; continue; }
+        if (ptLeft(out)) { if (!half || p.fixed > half.fixed) half = { fixed: p.fixed, out }; continue; }
         best = p; bestOut = out;
       }
     };
     tryList(byLead.get(k) || [], false);
     if (s.length <= 300) tryList(anyLead, !generic);
     if (best) return bestOut;
-    if (half != null && generic) return half;
+    if (half && generic) return half.out;
     // "Frase com maiúscula." ↔ "frase com maiúscula" do dicionário
     const low = s.charAt(0).toLowerCase() + s.slice(1);
     const bare = low.replace(/\.$/, "");
     if (bare !== s) {
       const t = exact.get(bare);
-      if (t != null) return t.charAt(0).toUpperCase() + t.slice(1) + (s.endsWith(".") && !t.endsWith(".") ? "." : "");
+      // 2.101.2: a primeira letra segue a do português ("sem leitura." → "no reading.")
+      const up = s.charAt(0) !== low.charAt(0);
+      if (t != null) return (up ? t.charAt(0).toUpperCase() : t.charAt(0)) + t.slice(1) + (s.endsWith(".") && !t.endsWith(".") ? "." : "");
     }
     return inner ? s : null;
   }
   const done = new Set(); // traduções já entregues
-  return function tr(s) {
+  function trCore(s) {
     if (s == null || typeof s !== "string" || !hasWord.test(s)) return s;
     const c = cache.get(s);
     if (c !== undefined) return c;
@@ -153,7 +157,7 @@ const tr = (() => {
         // 2.101.2: com português sobrando, um molde da frase inteira ainda
         // pode ganhar (o resultado em pedaços fica de reserva)
         const j = ts.join(" ");
-        if (PT_LEFT.test(j)) segFallback = j; else out = j;
+        if (ptLeft(j)) segFallback = j; else out = j;
       }
     }
     if (out == null && core.length > 2 && core.startsWith("(") && core.endsWith(")")) {
@@ -180,6 +184,15 @@ const tr = (() => {
     cache.set(s, res);
     if (out != null) done.add(out);
     return res;
+  }
+  // 2.101.2: o nome que a pessoa deu (⁨…⁩, asIs) vira uma marca antes dos
+  // moldes: um "em" ou "de" dentro do nome não pode ser lido como parte da frase
+  return function tr(s) {
+    if (typeof s !== "string" || s.indexOf("\u2068") < 0) return trCore(s);
+    const names = [];
+    const t = s.replace(/\u2068[^\u2069]*\u2069/g, (m) => { names.push(m); return "\u2068" + (names.length - 1) + "\u2069"; });
+    if (!names.length || /^\s*\u20680\u2069\s*$/.test(t)) return trCore(s);
+    return trCore(t).replace(/\u2068(\d+)\u2069/g, (x, i) => (names[+i] != null ? names[+i] : x));
   };
 })();
 

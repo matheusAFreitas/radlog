@@ -43,7 +43,10 @@ function part1() {
   const tr = loadTr();
   const cat = cp.execFileSync("python3", [path.join(ROOT, "scripts/i18n_extract.py")], { encoding: "utf8", maxBuffer: 64 << 20 });
   const skip = new Set(fs.readFileSync(path.join(ROOT, "scripts/i18n_pendentes.txt"), "utf8").split("\n").map((s) => s.trim()).filter(Boolean));
-  const FILL = [["3", "14:05", "GMC-800", "0,12"], ["Hoje", "RC102", "12/11", "2 h"]];
+  // o terceiro jogo tem o nome que a pessoa deu (⁨…⁩, com acento e "da/em"):
+  // ele fica como está, mas o resto da frase tem de sair em inglês
+  const NAME = "\u2068Casa da avó em São João\u2069";
+  const FILL = [["3", "14:05", "GMC-800", "0,12"], ["Hoje", "RC102", "12/11", "2 h"], [NAME, "16:20", "RC102", "1,5"]];
   const fails = [];
   let n = 0;
   for (const ln of cat.split("\n")) {
@@ -54,7 +57,7 @@ function part1() {
       n++;
       // o valor de exemplo "Hoje" no lugar de uma palavra (linha, linhas…)
       // fica como está: o que conta é o texto fixo
-      const out = tr(x), chk = kind === "P" ? out.replace(/\bHoje\b/g, "") : out;
+      const out = tr(x), chk = kind === "P" ? out.replace(/\bHoje\b/g, "").split(NAME).join("") : out;
       if (PT.test(chk) && !okText(out)) fails.push(`${x}\n      → ${out}`);
     }
   }

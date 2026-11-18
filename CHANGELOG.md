@@ -15,6 +15,10 @@
 - Depois de "rótulo:", o número sai no formato do inglês (0.12, não 0,12).
 - Notas da atualização: em inglês, só a parte em inglês (antes vinham as
   duas, com o português primeiro).
+- O nome que você dá (saída, medição, amostra) fica protegido antes da
+  tradução: um "em" ou "de" dentro dele não é mais lido como parte da frase.
+  "Marcado: …" do Fora de casa traduzido; "sem leitura" não ganha maiúscula
+  no meio da frase (achados do QA).
 
 **English**
 - English without half translations (ACE's request): the Day strip said
@@ -33,6 +37,10 @@
   0,12).
 - Update notes: in English, only the English part (before, both came, with
   the Portuguese first).
+- The name you give (trip, measurement, sample) is protected before
+  translation: an "em" or "de" inside it is no longer read as part of the
+  sentence. "Marked: …" in Away from home translated; "no reading" no longer
+  gets a capital letter mid-sentence (found by QA).
 
 ## 2.101.1
 - Faixa dos aparelhos presa no topo (fora do Agora): atrás da bolha do
