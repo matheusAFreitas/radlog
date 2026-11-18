@@ -5024,6 +5024,18 @@ const I18N_EN = {
 ]
 ],
 [
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?); quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2}; what limits is the background measured on the spot (± ${3} in ${4}): to go further, measure the background longer or use the home background.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Se o objeto emite algo, é menos que +",
+"; quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
+]
+],
+[
 "O fundo desceu cerca de ",
 "^O fundo desceu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) µSv/h por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
 "The background fell about ${1}% in ${2} days (${3} ± ${4} µSv/h per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
@@ -5204,6 +5216,17 @@ const I18N_EN = {
 "Não estou conseguindo gravar em ",
 ": se ele estiver aberto no Excel ou em outro programa, feche. ",
 " minuto(s) esperando na memória; nada se perde com o app aberto."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir: quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"Reached the time limit (${1}) without deciding: what limits is the background measured on the spot (± ${2} in ${3}): to go further, measure the background longer or use the home background.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir: quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
 ]
 ],
 [
@@ -7093,6 +7116,15 @@ const I18N_EN = {
 [
 "choveu até as ",
 ", menos de 3 h antes, então não há uma base limpa para comparar."
+]
+],
+[
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir: para ir além, aumente o tempo máximo\\.$",
+"Reached the time limit (${1}) without deciding: to go further, raise the time limit.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir: para ir além, aumente o tempo máximo."
 ]
 ],
 [

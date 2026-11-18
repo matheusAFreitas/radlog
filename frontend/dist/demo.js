@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.14";
+const DEMO_VERSION = "2.101.15";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -524,7 +524,7 @@ function makeDemoApi(opts) {
         // 2.101.14 (item 35): pior que a atual não troca sozinha; a de antes fica guardada
         const res = r.result, c = this.cal;
         if (r.o.kind === "kcl" && c.kcl && res.kcl.effErr > c.kcl.effErr) { res.worse = true; res.prevErr = c.kcl.effErr; }
-        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.prevGeometry = c.geometry; c.kcl = { ...res.kcl }; }
+        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.prevGeometry = c.geometry; c.kcl = { ...res.kcl }; if (r.o.geometry) c.geometry = r.o.geometry; } // 2.101.15 (item 136): como no Go
         if (r.o.kind === "torio" && c.th && res.th.bErr > c.th.bErr) { res.worse = true; res.prevErr = c.th.bErr; }
         else if (r.o.kind === "torio") { c.prevTh = c.th || null; c.th = { ...res.th }; }
       }

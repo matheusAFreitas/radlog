@@ -1914,7 +1914,7 @@
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
-    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${actWhereTxt(r)}`;
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
@@ -1947,6 +1947,14 @@
     const what = (r) => (r.kind === "amostra" ? actNameHtml(r) : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
     setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
       hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
+  }
+  // 2.101.15 (item 135): numa pedra solta, o histórico diz "pedra solta", como
+  // a tela da medição; a Posição só vai junto se não for a do pote da calibração
+  function actWhereTxt(r) {
+    const c = (act.v && act.v.cal) || {};
+    if (!r.loose) return r.geometry ? " · " + escHtml(r.geometry) : "";
+    const own = r.geometry && r.geometry !== c.geometry && r.geometry !== c.prevGeometry;
+    return " · " + tr("pedra solta") + (own ? " · " + escHtml(r.geometry) : "");
   }
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
