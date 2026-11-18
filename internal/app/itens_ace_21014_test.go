@@ -14,17 +14,17 @@ func TestAutoRCDoseItem17(t *testing.T) {
 		return MeasurePhase{Counts: 10 * sec, Seconds: sec, CPM: 600, ErrCPM: 600 / (float64(sec) / 60) / 600 * 24.5, USv: usv, ErrUSv: err}
 	}
 	usv := func(c float64) float64 { return c * 0.169 / 600 }
-	// 33 s: contagem igual e dose subindo; antes de 4 blocos, nada decide
+	// 33 s: contagem igual e dose subindo; antes de 10 blocos, nada decide
 	r := compareMeasure(bg, obj(33, 0.188, 0.004), usv)
 	if got := autoDecide(r, bg, 33, 10); got != "" {
 		t.Fatalf("33 s no RC102 decidiu %q; esperado continuar", got)
 	}
-	// 150 s: dose 0,019 com ± 0,002: para como "dose"
-	r = compareMeasure(bg, obj(150, 0.188, 0.0015), usv)
+	// 330 s (10 blocos): dose 0,019 com ± 0,0015: para como "dose"
+	r = compareMeasure(bg, obj(330, 0.188, 0.0015), usv)
 	if !r.DoseUp {
 		t.Fatal("dose subiu e DoseUp ficou false")
 	}
-	if got := autoDecide(r, bg, 150, 20); got != "dose" {
+	if got := autoDecide(r, bg, 330, 20); got != "dose" {
 		t.Fatalf("autoDecide = %q; esperado dose", got)
 	}
 	finishResult(&r, "dose", bg, 20, true)
@@ -32,14 +32,14 @@ func TestAutoRCDoseItem17(t *testing.T) {
 		t.Fatalf("dose subiu e saiu %q (limite %v / %v)", r.Verdict, r.Limit, r.LimitUSv)
 	}
 	// mesmo que algo chame "nada" com a dose subindo, o veredito fica
-	r2 := compareMeasure(bg, obj(150, 0.188, 0.0015), usv)
+	r2 := compareMeasure(bg, obj(330, 0.188, 0.0015), usv)
 	finishResult(&r2, "nada", bg, 20, true)
 	if !strings.Contains(r2.Verdict, "a dose subiu") {
 		t.Fatalf("nada com DoseUp trocou o veredito: %q", r2.Verdict)
 	}
 	// dose parada: "nada" só depois dos blocos e com um teto só, pela dose
-	r3 := compareMeasure(bg, obj(150, 0.169, 0.0015), usv)
-	if got := autoDecide(r3, bg, 150, 20); got != "nada" {
+	r3 := compareMeasure(bg, obj(330, 0.169, 0.0015), usv)
+	if got := autoDecide(r3, bg, 330, 20); got != "nada" {
 		t.Fatalf("dose parada: autoDecide = %q; esperado nada", got)
 	}
 	finishResult(&r3, "nada", bg, 20, true)
@@ -70,9 +70,9 @@ func TestAutoGMCItem17(t *testing.T) {
 func TestActWorseCalItem35(t *testing.T) {
 	a := newTestApp(t)
 	old := &ActCalKCl{T: 1, Eff: 0.00187, EffErr: 0.04}
-	a.actWriteJSON(actCalFile, ActCal{KCl: old})
+	a.actWriteJSON(actCalFile, ActCal{KCl: old, Geometry: "pote antigo"})
 	nova := &ActCalKCl{T: 2, Eff: 0.00282, EffErr: 0.15}
-	res := ActResult{T: 2, Kind: "kcl", KCl: nova, Worse: true, PrevErr: old.EffErr}
+	res := ActResult{T: 2, Kind: "kcl", KCl: nova, Worse: true, PrevErr: old.EffErr, Geometry: "becker"}
 	a.actAppendResult(res)
 	a.rc.act.run = &actRun{Phase: "pronto", Result: &res}
 	if a.actCal().KCl.EffErr != 0.04 {
@@ -97,7 +97,7 @@ func TestActWorseCalItem35(t *testing.T) {
 	if err := a.RestoreActivityCal("kcl"); err != nil {
 		t.Fatal(err)
 	}
-	if c := a.actCal(); c.KCl.EffErr != 0.04 || c.PrevKCl.EffErr != 0.15 {
+	if c := a.actCal(); c.KCl.EffErr != 0.04 || c.PrevKCl.EffErr != 0.15 || c.Geometry != "pote antigo" {
 		t.Fatalf("voltar não trocou: %+v / %+v", c.KCl, c.PrevKCl)
 	}
 	a.ForgetActivityCal("kcl")
@@ -106,5 +106,25 @@ func TestActWorseCalItem35(t *testing.T) {
 	}
 	if err := a.RestoreActivityCal("kcl"); err == nil {
 		t.Fatal("voltou sem anterior")
+	}
+}
+
+// Conferência do QA (item 17): entre 3σ e 4σ não para em "nada", e com 4
+// blocos a dose ainda não decide.
+func TestAutoAmbiguousItem17(t *testing.T) {
+	bg := MeasurePhase{Counts: 600, Seconds: 60, CPM: 600, ErrCPM: 24.5, USv: 0.169, ErrUSv: 0.0015}
+	r := MeasureResult{NetCPM: 50, NetErr: 15, Sigma: 3.3, NetUSv: 0.02, NetErrUSv: 0.01, DoseSigma: 2}
+	if got := autoDecide(r, bg, 400, 20); got != "" {
+		t.Fatalf("contagem a 3,3σ decidiu %q", got)
+	}
+	r = MeasureResult{NetCPM: 0, NetErr: 15, NetUSv: 0.006, NetErrUSv: 0.0015, DoseSigma: 4.2}
+	if got := autoDecide(r, bg, 150, 20); got != "" {
+		t.Fatalf("dose com 5 blocos decidiu %q", got)
+	}
+	// "nada" sempre com teto, mesmo com Level "sim" vindo de fora
+	r = MeasureResult{Level: "sim", NetCPM: 10, NetErr: 5, NetUSv: 0.01, NetErrUSv: 0.004}
+	finishResult(&r, "nada", bg, 20, true)
+	if r.LimitUSv <= r.NetUSv {
+		t.Fatalf("nada sem teto: %v", r.LimitUSv)
 	}
 }

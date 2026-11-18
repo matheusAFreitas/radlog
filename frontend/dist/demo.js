@@ -524,7 +524,7 @@ function makeDemoApi(opts) {
         // 2.101.14 (item 35): pior que a atual não troca sozinha; a de antes fica guardada
         const res = r.result, c = this.cal;
         if (r.o.kind === "kcl" && c.kcl && res.kcl.effErr > c.kcl.effErr) { res.worse = true; res.prevErr = c.kcl.effErr; }
-        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.kcl = { ...res.kcl }; }
+        else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.prevGeometry = c.geometry; c.kcl = { ...res.kcl }; }
         if (r.o.kind === "torio" && c.th && res.th.bErr > c.th.bErr) { res.worse = true; res.prevErr = c.th.bErr; }
         else if (r.o.kind === "torio") { c.prevTh = c.th || null; c.th = { ...res.th }; }
       }
@@ -1057,12 +1057,12 @@ const demoRc = () => {
     UseActivityCal: async (t) => {
       const r = demoAct.run && demoAct.run.result, c = demoAct.cal;
       if (!r || r.t !== t || !r.worse || r.used) throw new Error("essa calibração não está mais na tela");
-      if (r.kind === "kcl") { c.prevKcl = c.kcl; c.kcl = { ...r.kcl }; } else { c.prevTh = c.th; c.th = { ...r.th }; }
+      if (r.kind === "kcl") { c.prevKcl = c.kcl; c.prevGeometry = c.geometry; c.kcl = { ...r.kcl }; if (r.geometry) c.geometry = r.geometry; } else { c.prevTh = c.th; c.th = { ...r.th }; }
       r.used = true;
     },
     RestoreActivityCal: async (w) => {
       const c = demoAct.cal;
-      if (w === "kcl" && c.prevKcl) [c.kcl, c.prevKcl] = [c.prevKcl, c.kcl];
+      if (w === "kcl" && c.prevKcl) { [c.kcl, c.prevKcl] = [c.prevKcl, c.kcl]; if (c.prevGeometry) [c.geometry, c.prevGeometry] = [c.prevGeometry, c.geometry]; }
       else if (w === "torio" && c.prevTh) [c.th, c.prevTh] = [c.prevTh, c.th];
       else throw new Error("não há calibração anterior");
     },

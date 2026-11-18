@@ -6458,3 +6458,5 @@ pior que a atual: não usada	worse than the current one: not used
 Esta saiu com {0}, pior que a que está em uso ({1}), então a atual continua valendo.	This one came out at {0}, worse than the one in use ({1}), so the current one stays.
 Usar a nova ({0})	Use the new one ({0})
 voltar à anterior ({0})	go back to the previous one ({0})
+Parou em {0}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.	Stopped at {0}: the dose went past 4σ, well above the natural variation. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.
+Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.	Loose stone: the mass is optional and the result comes in Bq for the piece.

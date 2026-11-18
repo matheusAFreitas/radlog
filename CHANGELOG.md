@@ -4,7 +4,7 @@
 Itens 17, 35 e 68 da varredura (ok do ACE):
 - Medir objeto com o RC102 no automático: a dose também decide. Ele só diz
   "igual ao fundo" quando a contagem e a dose ficam abaixo do limiar (depois
-  de 2 min), e para dizendo que a dose subiu quando ela passa de 4σ. A
+  de 5 min), e para dizendo que a dose subiu quando ela passa de 4σ. A
   medição salva, os Eventos e o PDF não dizem mais "igual ao fundo" quando a
   dose subiu, e o "menos que +X" tem um número só em todo lugar (no RC102,
   pela dose).
@@ -18,7 +18,7 @@ Itens 17, 35 e 68 da varredura (ok do ACE):
 Items 17, 35 and 68 from the sweep (ACE's ok):
 - Measure object with the RC102 in automatic: the dose also decides. It only
   says "same as background" when both count and dose stay below the
-  threshold (after 2 min), and stops saying the dose rose when it passes 4σ.
+  threshold (after 5 min), and stops saying the dose rose when it passes 4σ.
   The saved measurement, Events and PDF no longer say "same as background"
   when the dose rose, and the "less than +X" has a single number everywhere
   (on the RC102, from the dose).

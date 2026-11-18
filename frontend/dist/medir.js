@@ -1132,7 +1132,9 @@ function measureExplain(r, obj, auto, k) {
   const t = obj ? fmtMin(obj.seconds) : "";
   k = k || 1;
   if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
-  if (r.stop === "dose") return `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
+  if (r.stop === "dose") return r.doseUp
+    ? `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`
+    : `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
   if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${thrUS(r, k)}).` + (r.pct > 10 ? " Para procurar algo mais fraco, escolha “+10% do fundo”." : "");
   if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" || r.doseUp || !(r.limit || r.limitUSv) ? "" : ` Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`);
   return {

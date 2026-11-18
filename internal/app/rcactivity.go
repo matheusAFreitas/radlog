@@ -433,7 +433,7 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		} else if k != nil {
 			k.T = res.T
 			res.KCl = k
-			cal.KCl, cal.PrevKCl = k, cal.KCl
+			cal.KCl, cal.PrevKCl, cal.PrevGeometry = k, cal.KCl, cal.Geometry
 			if o.Geometry != "" {
 				cal.Geometry = o.Geometry
 			}
@@ -759,7 +759,7 @@ func (a *App) ForgetActivityCal(which string) {
 	c := a.actCal()
 	switch which {
 	case "kcl":
-		c.KCl, c.PrevKCl = nil, nil
+		c.KCl, c.PrevKCl, c.PrevGeometry = nil, nil, ""
 	case "torio":
 		c.Th, c.PrevTh = nil, nil
 	default:
@@ -782,7 +782,7 @@ func (a *App) UseActivityCal(t int64) error {
 	c := a.actCal()
 	switch {
 	case res.KCl != nil && res.Kind == "kcl":
-		c.KCl, c.PrevKCl = res.KCl, c.KCl
+		c.KCl, c.PrevKCl, c.PrevGeometry = res.KCl, c.KCl, c.Geometry
 		if res.Geometry != "" {
 			c.Geometry = res.Geometry
 		}
@@ -809,6 +809,9 @@ func (a *App) RestoreActivityCal(which string) error {
 			return errors.New("não há calibração anterior do KCl")
 		}
 		c.KCl, c.PrevKCl = c.PrevKCl, c.KCl
+		if c.PrevGeometry != "" { // a Posição volta junto
+			c.Geometry, c.PrevGeometry = c.PrevGeometry, c.Geometry
+		}
 	case "torio":
 		if c.PrevTh == nil {
 			return errors.New("não há calibração anterior do tório")

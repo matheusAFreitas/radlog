@@ -32,8 +32,10 @@ const (
 	homeBgMinMins = 30 // minutos válidos para confiar no fundo da casa
 	autoMinSec    = 20 // antes disso não decide (poucas contagens)
 	autoDetectSig = 4.0
-	// 2.101.14: a dose do RC102 só decide com measBlkMin blocos de 30 s
-	autoDoseMinSec = measBlkSec * measBlkMin
+	// 2.101.14: a dose do RC102 só decide com 10 blocos de 30 s (5 min; com
+	// 4 blocos o ± da dose tem poucos graus de liberdade e dava "a dose
+	// subiu" à toa, conferência do QA)
+	autoDoseMinSec = measBlkSec * 10
 	autoBgSec      = 300 // fase do fundo medida na hora, no automático
 )
 
@@ -301,6 +303,11 @@ func autoDecide(r MeasureResult, bg MeasurePhase, elapsed int, pct float64) stri
 	if doseOK && r.DoseSigma >= autoDetectSig {
 		return "dose"
 	}
+	// entre 3σ e 4σ (contagem ou, no RC102, dose) ainda não dá para dizer
+	// "nada": continua até passar de 4σ ou voltar para baixo de 3σ
+	if r.Sigma >= 3 || (rc && r.DoseSigma >= 3) {
+		return ""
+	}
 	if math.Max(r.NetCPM, 0)+2*r.NetErr < autoThreshold(bg, pct) {
 		if !rc {
 			return "nada"
@@ -376,7 +383,7 @@ func finishResult(r *MeasureResult, stop string, bg MeasurePhase, pct float64, a
 	r.Stop = stop
 	// 2.101.14 (item 17): com a dose subindo não há "menos que +X" e o
 	// veredito "a dose subiu" nunca é trocado por "igual ao fundo"
-	if r.Level != "sim" && !r.DoseUp {
+	if (r.Level != "sim" && !r.DoseUp) || (stop == "nada" && !r.DoseUp) {
 		r.Limit = math.Max(r.NetCPM, 0) + 2*r.NetErr
 		r.LimitUSv = limitUSv(*r, bg)
 	}

@@ -1809,6 +1809,7 @@
     $("rcActMassLbl").textContent = loose ? tr("Massa (g), só para o Bq/g") : tr("Massa (g)");
     $("rcActMass").placeholder = loose ? tr("opcional") : "";
     document.querySelectorAll("#rcActLoose button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "solta") === loose)));
+    $("rcActLooseHint").hidden = !loose;
     setHTML($("rcActSmpT"), actSegHtml(ACT_SMP_T, act.smpSec, c.time));
     const saved = v.savedBg, fresh = saved && Date.now() - saved.t < 30 * 864e5;
     if (!fresh && act.bgMode === "salvo") act.bgMode = "novo";

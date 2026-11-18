@@ -4934,7 +4934,8 @@ const I18N_EN = {
 "não há calibração anterior": "there is no previous calibration",
 "não há calibração anterior do KCl": "there is no previous KCl calibration",
 "não há calibração anterior do tório": "there is no previous thorium calibration",
-"pior que a atual: não usada": "worse than the current one: not used"
+"pior que a atual: não usada": "worse than the current one: not used",
+"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece."
 },
 "patterns": [
 [
@@ -5408,6 +5409,15 @@ const I18N_EN = {
 ". Depois dele, o app ficou ",
 " sem leitura (desde ",
 "); a memória do contador pode ter esses minutos: baixe o histórico."
+]
+],
+[
+"Parou em ",
+"^Parou em ((?:(?! · ).)+?): a dose passou de 4σ, bem acima da variação natural\\. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos\\.$",
+"Stopped at ${1}: the dose went past 4σ, well above the natural variation. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.",
+[
+"Parou em ",
+": a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos."
 ]
 ],
 [
