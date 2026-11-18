@@ -67,10 +67,10 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   await (await p.request.get(url + "__semsal")).text();
   let live = await liveTxt(/não está vendo o sal/);
   if (!/não está vendo o sal/.test(live)) fail("não avisou com o sal fora do aparelho: " + live.slice(0, 300));
-  // com o sal visto, a contagem total sobe e o aviso some
+  // com o sal visto, a contagem de 300 a 1.400 keV sobe e o aviso some (2.101.11)
   await (await p.request.get(url + "__sal")).text();
   live = await liveTxt(/\(\+([1-9]\d|\d{3,})%\)/);
-  if (!/contagem total: [\d.,]+ cps · fundo [\d.,]+ cps \(\+\d+%\)/.test(live)) fail("sem a contagem total durante o sal: " + live.slice(0, 300));
+  if (!/contagem de 300 a 1.400 keV: [\d.,]+ cps · fundo [\d.,]+ cps \(\+\d+%\)/.test(live)) fail("sem a contagem de 300 a 1.400 keV durante o sal: " + live.slice(0, 300));
   if (/não está vendo o sal/.test(live)) fail("avisou com o sal visto: " + live.slice(0, 300));
   await next("pronto");
   await p.waitForTimeout(800);

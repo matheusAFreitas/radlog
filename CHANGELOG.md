@@ -1,5 +1,31 @@
 # Versões
 
+## 2.101.11
+Calibração do KCl (Atividade, RC102) com tempo honesto:
+- O chute de eficiência sem calibração cai de 0,1% para 0,005% em 1.460 keV,
+  que é o que o cristal de 1 cm³ do RC102 deu com 250 g de sal light em volta.
+  Os Bq sem calibração mudam de acordo (seguem com ±100%).
+- O tempo da calibração sai da massa e do % de KCl: o fundo e o sal medem o
+  mesmo tempo, o suficiente para a eficiência sair com ~15% de dúvida (500 g
+  de sal light: ~4 h; 500 g de KCl puro: ~2 h). Se passar de 24 h, o app
+  avisa antes de começar.
+- O aviso "não está vendo o sal" olha a faixa de 300 a 1.400 keV aos 10 min
+  (o sal em volta blinda o fundo de baixa energia, e o total pode até cair) e
+  o mínimo plausível no pico passa a 0,001%.
+
+**English**
+KCl calibration (Activity, RC102) with an honest time:
+- The efficiency guess without calibration drops from 0.1% to 0.005% at
+  1,460 keV, which is what the RC102's 1 cm³ crystal gave with 250 g of lite
+  salt around it. Bq without calibration change accordingly (still ±100%).
+- The calibration time comes from the mass and the KCl %: background and
+  salt measure the same time, enough for the efficiency to come out at ~15%
+  uncertainty (500 g of lite salt: ~4 h; 500 g of pure KCl: ~2 h). Over 24 h,
+  the app warns before starting.
+- The "not seeing the salt" warning looks at 300 to 1,400 keV at 10 min (the
+  salt around the device shields the low-energy background, and the total can
+  even drop) and the plausible minimum at the peak becomes 0.001%.
+
 ## 2.101.10
 Sobras da conferência do QA na 2.101.9:
 - Resumo, "De onde vem a sua dose": o nome da medição, da anotação e do

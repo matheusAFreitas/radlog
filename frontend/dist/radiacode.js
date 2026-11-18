@@ -1815,6 +1815,18 @@
     $("rcActStart").disabled = !v.connected;
     $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
   }
+  // 2.101.11: tempo de cada fase da calibração do KCl (fundo = sal), para a
+  // eficiência sair com ~15% de dúvida (o app guarda até 20%). Conta com o
+  // chute de 0,005% em 1.460 keV (o que o RC102 deu com 250 g de sal light
+  // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
+  const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
+  function actCalPhaseSec(massG, pct) {
+    const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * 16.3; // K-40 do KCl: 16,3 Bq/g
+    const net = bq * 0.1066 * ACT_EFF_GUESS;
+    if (!(net > 0)) return 0;
+    const sec = (net + 2 * ACT_K_BG) / (ACT_CAL_REL * net) ** 2;
+    return Math.max(3600, Math.ceil(sec / 1800) * 1800);
+  }
   function actRenderCal(v) {
     const k = act.calKind, light = act.kclType !== "100";
     document.querySelectorAll("#rcActCalSteps [data-k]").forEach((b) => { b.classList.toggle("cur", b.dataset.k === k); b.setAttribute("aria-pressed", String(b.dataset.k === k)); });
@@ -1825,8 +1837,13 @@
     $("rcActCalHint").textContent = k === "kcl"
       ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.")
       : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
-    act.calSmpSec = k === "kcl" ? (light ? 7200 : 3600) : 3600;
-    setHTML($("rcActCalTot"), actTotal(true, 3600, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo")));
+    const calSec = k === "kcl" ? actCalPhaseSec(actNum("rcActCalMass"), light ? actNum("rcActPct") : 100) : 3600;
+    act.calSmpSec = calSec || 3600;
+    act.calBgSec = act.calSmpSec;
+    let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
+    // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
+    if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`)}</span>`;
+    setHTML($("rcActCalTot"), tot);
     $("rcActCalStart").textContent = k === "kcl" ? tr("Começar a calibração") : tr("Medir o tório");
     $("rcActCalStart").disabled = !v.connected;
     $("rcActCalErr").textContent = v.connected ? $("rcActCalErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
@@ -1940,9 +1957,10 @@
     let live = "";
     if (ph === "amostra") {
       if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
-      // 2.101.4: a contagem total mostra na hora se o RC102 está vendo o sal
-      if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem total")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
-      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal encostado (ou o aparelho dentro do becker), ela sobe bem. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar as 2 h.")}</p>`;
+      // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
+      // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
+      if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
+      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.")}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
       if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;
@@ -1970,7 +1988,7 @@
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
-    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
+    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
     if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
     else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
     actStartOpts(o, $("rcActCalErr"));
@@ -2178,7 +2196,8 @@
     segPick("rcActKclType", (x) => { act.kclType = x; });
     // 2.101.3: a massa digitada fica; o padrão (500 g / 40 g) só entra no campo
     // que a pessoa ainda não mexeu, e cada referência guarda a sua
-    $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; });
+    $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; if (act.v) actRenderCal(act.v); });
+    $("rcActPct").addEventListener("input", () => { if (act.v) actRenderCal(act.v); });
     $("rcActChips").addEventListener("click", (e) => {
       if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
       const b = e.target.closest("button[data-pick]"); if (b && b.dataset.pick !== act.pick) actPick(b.dataset.pick); // 2.101.5: o mesmo cartão não apaga o digitado

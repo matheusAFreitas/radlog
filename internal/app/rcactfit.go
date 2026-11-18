@@ -131,6 +131,11 @@ type ActCalTh struct {
 	Sec      float64 `json:"sec"`
 }
 
+// actEffGuess é a eficiência no pico de 1.460 keV sem calibração. 2.101.11:
+// era 0,1%; o cristal de 1 cm³ do RC102 deu 0,0045% com o sal em volta
+// (calibração do ACE de 18/11), então o chute é 0,005%.
+const actEffGuess = 0.00005
+
 const (
 	actDefB    = -1.3 // inclinação típica de um cristal pequeno encostado (sem o tório)
 	actDefBErr = 0.4
@@ -151,9 +156,9 @@ func (c ActCal) eff(e float64) (eps, rel float64, src string) {
 		x := math.Log(e / c.Th.Pivot)
 		return math.Exp(c.Th.LnEps + c.Th.B*x), math.Hypot(c.Th.LnEpsErr, c.Th.BErr*x), "torio"
 	}
-	// sem calibração: chute de 0,1% em 1.460 keV, com 100% de dúvida
+	// sem calibração: chute em 1.460 keV, com 100% de dúvida
 	x := math.Log(e / 1460.8)
-	return math.Exp(math.Log(0.001) + b*x), math.Hypot(1, bErr*x), "chute"
+	return math.Exp(math.Log(actEffGuess) + b*x), math.Hypot(1, bErr*x), "chute"
 }
 
 // ---------- ajuste ----------
@@ -170,19 +175,21 @@ type actSpec struct {
 	A   [3]float64
 }
 
-// cps é a contagem total por segundo.
-func (s actSpec) cps() float64 {
+func (s actSpec) energy(c float64) float64 { return s.A[0] + s.A[1]*c + s.A[2]*c*c }
+
+// bandCps é a contagem por segundo entre lo e hi keV.
+func (s actSpec) bandCps(lo, hi float64) float64 {
 	if s.Sec <= 0 {
 		return 0
 	}
 	t := 0.0
-	for _, v := range s.C {
-		t += v
+	for i, v := range s.C {
+		if e := s.energy(float64(i) + 0.5); e >= lo && e < hi {
+			t += v
+		}
 	}
 	return t / s.Sec
 }
-
-func (s actSpec) energy(c float64) float64 { return s.A[0] + s.A[1]*c + s.A[2]*c*c }
 
 // actFit ajusta a região em volta de kev e devolve a área do pico de kev.
 // Todas as linhas conhecidas com centro dentro da região entram no ajuste;

@@ -34,12 +34,14 @@ const (
 	actResFile     = "medidas.jsonl"
 	actCurFile     = "atual.json"
 	actTickUSB     = 5 * time.Second
-	actWeakSec     = 300    // a partir de quando avisar que o pico não aparece
-	actEffMin      = 0.0003 // 0,03%: abaixo disso o RC102 não está vendo o sal
-	actWeakPeakSec = 1800   // e a partir de quando o pico sozinho decide
-	actWeakRise    = 1.05   // a contagem total com o sal tem que subir mais que isso
-	actBgHighRise  = 1.25   // fundo acima disso (× o normal da casa): o sal está perto
-	actCalMaxErr   = 0.20   // incerteza máxima da eficiência do KCl para virar calibração
+	actWeakSec     = 600     // a partir de quando avisar que o RC102 não está vendo o sal
+	actEffMin      = 0.00001 // 0,001%: abaixo disso o RC102 não está vendo o sal (2.101.11: era 0,03%)
+	actWeakPeakSec = 1800    // e a partir de quando o pico sozinho decide
+	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
+	actWeakLo      = 300.0   // faixa do espalhamento do K-40 (keV): o sal em volta do
+	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
+	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): o sal está perto
+	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
@@ -536,7 +538,7 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
-	SmpCps    float64         `json:"smpCps,omitempty"`   // contagem total por segundo da amostra (calibração)
+	SmpCps    float64         `json:"smpCps,omitempty"`   // cps de 300 a 1.400 keV da amostra (calibração; 2.101.11: era o total)
 	BgCps     float64         `json:"bgCps,omitempty"`    // e do fundo
 	KCLWeak   bool            `json:"kclWeak,omitempty"`  // o pico do K-40 não está aparecendo
 	HomeCps   float64         `json:"homeCps,omitempty"`  // contagem normal da casa (mediana dos 7 dias antes)
@@ -645,7 +647,7 @@ func (a *App) GetActivity() ActView {
 		switch o.Kind {
 		case "kcl":
 			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
-			v.SmpCps, v.BgCps = smp.cps(), bg.cps()
+			v.SmpCps, v.BgCps = smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
 			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
@@ -658,9 +660,12 @@ func (a *App) GetActivity() ActView {
 }
 
 // actKCLWeak avisa cedo (2.101.4) que o RC102 não está vendo o sal: depois
-// de 5 min, a contagem total quase não subiu em relação ao fundo (o KCl
-// encostado ou em volta do aparelho sobe bem mais de 5%); depois de 30 min,
-// também se nem a eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
+// de 10 min, a contagem de 300 a 1.400 keV (o espalhamento do K-40) quase
+// não subiu em relação ao fundo; depois de 30 min, também se nem a
+// eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
+// 2.101.11: a calibração do ACE (18/11, 250 g de sal light no Marinelli)
+// mostrou o total CAINDO 1% (o sal blinda abaixo de 100 keV) e a faixa de
+// 300 a 1.400 keV subindo 20%, com eficiência de 0,0045% no pico.
 func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	if sec < actWeakSec {
 		return false
@@ -668,7 +673,7 @@ func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	if bgCps > 0 && smpCps < bgCps*actWeakRise {
 		return true
 	}
-	// o pico sozinho só decide com mais tempo (aos 5 min o ruído ainda é grande)
+	// o pico sozinho só decide com mais tempo (aos 10 min o ruído ainda é grande)
 	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 

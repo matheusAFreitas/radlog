@@ -4815,8 +4815,8 @@ const I18N_EN = {
 "O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RadiaCode está encostado no sal pelo lado do cristal e meça de novo.": "The K-40 peak barely showed above the background, so the calibration was not saved (it needs ±20% or less). Check that the RC102 is touching the salt on the crystal side and measure again.",
 "pico fraco: não guardada": "weak peak: not saved",
 "contagem total": "total count rate",
-"O RC102 não está vendo o sal: a contagem quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal encostado (ou o aparelho dentro do becker), ela sobe bem. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar as 2 h.": "The RC102 isn't seeing the salt: the count rate barely rose above the background and the K-40 peak isn't showing. With the salt touching (or the device inside the beaker), it rises a lot. Check the position and that the background was measured with the salt far away; there's no point waiting the 2 h.",
-"O RadiaCode não está vendo o sal: a contagem quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal encostado (ou o aparelho dentro do becker), ela sobe bem. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar as 2 h.": "The RC102 isn't seeing the salt: the count rate barely rose above the background and the K-40 peak isn't showing. With the salt touching (or the device inside the beaker), it rises a lot. Check the position and that the background was measured with the salt far away; there's no point waiting the 2 h.",
+"O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away; waiting will not help.",
+"O RadiaCode não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away; waiting will not help.",
 "normal da casa": "home normal",
 "contagem agora": "count rate now",
 "O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
@@ -4895,7 +4895,7 @@ const I18N_EN = {
 ". Uma leitura \"em σ\" é quantos desses passos ela está acima ou abaixo do fundo: (leitura − fundo) ÷ σ.": ". A reading \"in σ\" is how many of these steps it sits above or below background: (reading − background) ÷ σ.",
 "Local: oculto": "Place: hidden",
 "nota": "note",
-"obrigatório · ~3 h com sal light, ~2 h com KCl puro": "required · ~3 h with lite salt, ~2 h with pure KCl",
+"obrigatório · ~4 h com sal light, ~2 h com KCl puro": "required · ~4 h with lite salt, ~2 h with pure KCl",
 "Nenhum tipo marcado: marque pelo menos um tipo acima para ver os registros.": "No type selected: select at least one type above to see the records.",
 "Nenhum registro dos tipos marcados neste período.": "No records of the selected types in this period.",
 "1 linha ignorada": "1 line skipped",
@@ -4905,7 +4905,8 @@ const I18N_EN = {
 "minutos novos": "new minutes",
 "Uraninita": "Uraninite",
 "Uranocircita": "Uranocircite",
-"Euxenita": "Euxenite"
+"Euxenita": "Euxenite",
+"contagem de 300 a 1.400 keV": "count from 300 to 1,400 keV"
 },
 "patterns": [
 [
@@ -6012,6 +6013,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Com essa quantidade, a calibração leva ",
+"^Com essa quantidade, a calibração leva ((?:(?! · ).)+?)\\. Use mais sal, bem apertado em volta do RadiaCode, ou KCl puro\\.$",
+"With this amount, the calibration takes ${1}. Use more salt, packed tightly around the RC102, or pure KCl.",
+[
+"Com essa quantidade, a calibração leva ",
+". Use mais sal, bem apertado em volta do RadiaCode, ou KCl puro."
+]
+],
+[
 "Fundo da casa: ",
 "^Fundo da casa: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) min até ((?:(?! · ).)+?)\\)\\. Só vale se o RC102 passou a última hora parado no lugar onde vai medir\\.$",
 "Home background: ${1} (${2} min until ${3}). Only valid if the RC102 spent the last hour still at the spot where you'll measure.",
@@ -6094,6 +6104,15 @@ const I18N_EN = {
 [
 "O mesmo: este PC continua a linha do ",
 ". Se o outro ligar de novo, ele é que vai cair nesta pergunta."
+]
+],
+[
+"Com essa quantidade, a calibração leva ",
+"^Com essa quantidade, a calibração leva ((?:(?! · ).)+?)\\. Use mais sal, bem apertado em volta do RC102, ou KCl puro\\.$",
+"With this amount, the calibration takes ${1}. Use more salt, packed tightly around the RC102, or pure KCl.",
+[
+"Com essa quantidade, a calibração leva ",
+". Use mais sal, bem apertado em volta do RC102, ou KCl puro."
 ]
 ],
 [
