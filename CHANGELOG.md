@@ -14,7 +14,7 @@ Sobras da conferência do QA na 2.101.9:
   tirar a amostra); Uraninita, Uranocircita e Euxenita ganham nome em inglês.
 - Gráficos, Resumo, Fundo e Padrões: a dica perto da borda direita não passa
   mais da janela em inglês nem em mrem/h (era medida antes de traduzir e
-  converter). Na dica do Fundo > Outro cálculo a média também sai em mrem/h.
+  converter). Na dica do Fundo da casa > Outra conta a média também sai em mrem/h.
 
 **English**
 Leftovers from QA's check of 2.101.9:
@@ -30,7 +30,7 @@ Leftovers from QA's check of 2.101.9:
   notice); Uraninite, Uranocircite and Euxenite get English names.
 - Charts, Summary, Background and Patterns: the tooltip near the right edge
   no longer runs past the window in English or in mrem/h (it was measured
-  before translating and converting). In the Background > Other calculation
+  before translating and converting). In the Home background > Another calculation
   tooltip the average is also shown in mrem/h.
 
 ## 2.101.9
