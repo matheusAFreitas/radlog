@@ -450,7 +450,7 @@ function renderGTile() {
   } else word = connected ? "Aguardando…" : s.state === "conectando" ? "Conectando…" : "Desconectado";
   tileState("g", lvl, word, live && r.saturated ? "o tubo saturou; a taxa real é maior" : null);
   tileScale("g", tA / top, tB / top, live ? Math.min(r.cpm, top) / top : null, tick(tA), tick(tB));
-  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null };
+  state.gNow = { live, lvl, usv: live ? r.usv : null, sigma: live && r.sigma != null ? r.sigma : null, sigma10: live && r.sigma10 != null ? r.sigma10 : null };
   agoraNow();
   const gl = state.gLastSeen;
   tileFoot($("gTileFoot"), u, v, state.gDose, "", gc ? { t: (gl && gl.time) || state.gOffSince || 0 } : null);
@@ -2051,6 +2051,73 @@ function renderDeadTime() {
   $("lvDTTable").classList.toggle("off", !on);
 }
 
+// 2.101.13 (item 21): campos de número que o app pode cortar ao salvar
+const SET_CLAMP = [
+  ["numAwayAsk", "perguntar se foi fora de casa", (s) => s.awayAskMin, "min"],
+  ["lvSnooze", "silenciar", (s) => (s.levels || {}).snoozeMin, "min"],
+  ["numAlarm", "alarme", () => alarmUSv(), "rate"],
+  ["lvAttn", "atenção", (s) => (s.levels || {}).attentionUSv, "rate"],
+  ["lvDanger", "perigo", (s) => (s.levels || {}).dangerUSv, "rate"],
+  ["lvDTUs", "τ do tempo morto", (s) => (s.levels || {}).deadTimeUs, "µs"],
+  ["lvSatMax", "Geiger saturado", (s) => (s.levels || {}).satMaxUSv, "rate"],
+  ["lvSatDrop", "aviso de queda", (s) => (s.levels || {}).satDropUSv, "rate"],
+  ["lvSatHold", "tempo da queda", (s) => (s.levels || {}).satHoldSec, "s"],
+  ["lvRcSat", "RC102 saturado", (s) => (s.levels || {}).rcSatUSv, "rate"],
+];
+const setNum = (v) => parseFloat(String(v).replace(",", "."));
+function setTypedNums() {
+  const o = {};
+  for (const [id] of SET_CLAMP) if ($(id) && $(id).value !== "") o[id] = setNum($(id).value);
+  return o;
+}
+// o que a tela mostraria do digitado (o app arredonda sozinho: inteiros e
+// 4 algarismos na taxa), para não chamar de "fora da faixa" o que não foi cortado
+const setShownNum = (x, u) => (u === "rate" ? setNum(rateOut(x / rateK())) : u === "µs" ? x : Math.round(x));
+function setRepaintClamped(typed) {
+  const s = state.settings || {}, out = [];
+  for (const [id, label, get, u] of SET_CLAMP) {
+    const v = get(s);
+    if (!(id in typed) || !(v > 0)) continue;
+    const shown = u === "rate" ? rateOut(v) : v;
+    const was = setShownNum(typed[id], u), now = setNum(shown);
+    // arredondado pelo próprio app (5,5 → 6): o campo mostra o que ficou, sem aviso
+    if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) { if (setNum($(id).value) !== now) $(id).value = shown; continue; }
+    $(id).value = shown;
+    // µSv/h: a tela troca para mrem/h sozinha
+    out.push(`${tr(label)} ${u === "rate" ? usvTxt(v) : fmt(v, 0) + " " + u}`);
+  }
+  if (out.length) { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); }
+  return out;
+}
+// 2.101.13 (item 21): fora da faixa já avisa no campo, antes de salvar
+// (min/max do campo: na taxa, em µSv/h, convertidos para a unidade da tela)
+function setRangeHint(id) {
+  const ent = SET_CLAMP.find((x) => x[0] === id), el = $(id);
+  if (!ent || !el) return;
+  const u = ent[3], raw = el.value.trim();
+  let msg = "";
+  if (raw !== "") {
+    const v = u === "rate" ? rateIn(raw) : setNum(raw);
+    const mn = parseFloat(el.getAttribute("min")), mx = parseFloat(el.getAttribute("max"));
+    const show = (x) => (u === "rate" ? usvTxt(x) : `${fmt(x, 0)} ${u}`), keep = (x) => (u === "rate" ? usvTxt(x) : fmt(x, 0));
+    // folga de 4 algarismos: 0,005 mrem/h vira 0,04999… µSv/h na conversão
+    const tol = 1e-4;
+    if (v > 0 && mn > 0 && v < mn * (1 - tol)) msg = `O mínimo é ${show(mn)}. Vai gravar ${keep(mn)}.`;
+    else if (v > 0 && mx > 0 && v > mx * (1 + tol)) msg = `O máximo é ${show(mx)}. Vai gravar ${keep(mx)}.`;
+  }
+  el.classList.toggle("out-range", !!msg);
+  let h = el.parentElement.querySelector(".range-hint");
+  if (msg && !h) {
+    h = document.createElement("small");
+    h.className = "range-hint warn-text";
+    h.setAttribute("aria-live", "polite");
+    el.insertAdjacentElement("afterend", h);
+  }
+  if (h) { h.textContent = msg ? tr(msg) : ""; h.hidden = !msg; }
+}
+const setRangeHints = () => SET_CLAMP.forEach(([id]) => setRangeHint(id));
+document.addEventListener("input", (e) => { if (e.target && e.target.id && SET_CLAMP.some((x) => x[0] === e.target.id)) setRangeHint(e.target.id); });
+
 function readLevels() {
   const out = {};
   for (const [id, k] of Object.entries(LV_FIELDS)) {
@@ -2285,8 +2352,23 @@ document.addEventListener("click", async (e) => {
 function wireLevels() {
   for (const id of Object.keys(LV_FIELDS)) $(id).addEventListener("input", () => { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); });
   $("lvDTOn").addEventListener("change", renderDeadTime);
-  $("btnLevelsReset").addEventListener("click", () => { fillLevels(LV_DEFAULT); renderDangerNote(); renderAttnLabel(); renderSetBar(); });
-  $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
+  // 2.101.13 (item 22): só os campos desta seção (Atenção, Alarme, Perigo, os
+  // "Ligado" e o Silenciar); o tubo e a saturação ficam como estão
+  $("btnLevelsReset").addEventListener("click", () => {
+    $("lvAttn").value = rateOut(usv3(LV_DEFAULT.attentionCPM * calK()));
+    $("lvDanger").value = rateOut(usv3(LV_DEFAULT.dangerCPM * calK()));
+    $("numAlarm").value = rateOut(usv3(100 * calK()));
+    $("lvSnooze").value = LV_DEFAULT.snoozeMin;
+    $("chkAttn").checked = true;
+    // 2.101.13 (item 22, conferência do QA): o alarme religa só no Salvar (Descartar volta tudo)
+    $("chkAlarm").checked = true;
+    renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderSetBar();
+  });
+  $("btnSetDiscard").addEventListener("click", () => {
+    // 2.101.13 (item 22): o "Ligado" do alarme marcado pelo Restaurar volta também
+    if (state.settings) $("chkAlarm").checked = !!state.settings.alarmEnabled;
+    state.setSnap = null; openSettings();
+  });
   $("setSearch").addEventListener("input", setSearch);
   $("setSearch").addEventListener("keydown", (e) => {
     if (e.key === "Enter") { const b = document.querySelector("#setResults button"); if (b) b.click(); }
@@ -2673,20 +2755,24 @@ async function openSettings(focusId) {
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
 const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "valDateFmt", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
-const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
+const SET_FIELD_NAMES = { chkAlarm: "alarme ligado", chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", valDateFmt: "formato da data", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
 function setSnap() {
+  setRangeHints();
   state.setSnap = {};
   for (const id of SET_SAVE_IDS()) if ($(id)) state.setSnap[id] = setVal($(id));
   renderSetBar();
 }
 function setDirty() {
   if (!state.setSnap) return [];
-  return SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  const out = SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  // o "Ligado" do alarme grava na hora; só fica pendente depois do Restaurar
+  if ($("chkAlarm") && state.settings && $("chkAlarm").checked !== !!state.settings.alarmEnabled) out.push("chkAlarm");
+  return out;
 }
 function setFieldName(id) {
   if (SET_FIELD_NAMES[id]) return SET_FIELD_NAMES[id];
@@ -3287,9 +3373,11 @@ function wire() {
     if (devCfgDirty()) toast('Os ajustes do GMC-800 ainda não foram gravados: use "Gravar no GMC-800" (GQ GMC-800 › No aparelho).', true);
     if (rcCfgDirty()) toast('Os ajustes do RC102 ainda não foram gravados: use "Gravar no RC102" (Radiacode 102 › No aparelho).', true);
     const alarm = rateIn($("numAlarm").value);
+    const typed = setTypedNums();
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
+      alarmEnabled: $("chkAlarm").checked,
       alarmSound: $("selSound").value,
       alarmRaise: $("chkRaise").checked,
       attentionEnabled: $("chkAttn").checked,
@@ -3313,8 +3401,12 @@ function wire() {
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
+    // 2.101.13 (item 21): o que o app cortou (fora da faixa) volta para a tela
+    // com o valor gravado, e o aviso diz qual ficou
+    const cut = setRepaintClamped(typed);
     setSnap();
-    toast("Configurações salvas");
+    if (cut.length) toast(`Configurações salvas. Fora da faixa, ficou: ${cut.join("; ")}.`, true);
+    else toast("Configurações salvas");
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
@@ -3324,6 +3416,17 @@ function wire() {
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
+  // 2.101.13 (item 67): o aviso da memória no quadro leva ao que resolve
+  $("gTileSync").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showView("gmc");
+    requestAnimationFrame(() => {
+      const card = $("syncCard");
+      if (card && !card.hidden) card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const b = $("btnSyncDl");
+      if (b) b.focus({ preventScroll: true });
+    });
+  });
 ;
 
   $("clockChip").addEventListener("click", async () => {
@@ -3335,8 +3438,33 @@ function wire() {
   const sideEdges = () => {
     sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2);
     sideNav.classList.toggle("more", sideNav.scrollHeight - sideNav.clientHeight - sideNav.scrollTop > 2);
+    // 2.101.13 (item 79): janela estreita, menu em linha: setas ‹ › e degradê de cada lado que ainda tem página
+    const wide = sideNav.scrollWidth - sideNav.clientWidth > 2;
+    const hl = wide && sideNav.scrollLeft > 2, hr = wide && sideNav.scrollWidth - sideNav.clientWidth - sideNav.scrollLeft > 2;
+    sideNav.classList.toggle("hl", hl);
+    sideNav.classList.toggle("hr", hr);
+    for (const [a, on] of [[sideArrL, hl], [sideArrR, hr]]) {
+      a.hidden = !on;
+      if (on) a.style.top = sideNav.offsetTop + Math.max(0, (sideNav.offsetHeight - 28) / 2) + "px"; // redondo, no meio da linha
+    }
   };
+  const sideArr = (cls, txt, label, dir) => {
+    const a = document.createElement("button");
+    a.type = "button"; a.className = "side-arr " + cls; a.textContent = txt; a.hidden = true;
+    a.tabIndex = -1; a.setAttribute("aria-hidden", "true"); a.title = tr(label);
+    a.addEventListener("click", () => sideNav.scrollBy({ left: dir * sideNav.clientWidth * 0.7, behavior: "smooth" }));
+    sideNav.parentElement.appendChild(a);
+    return a;
+  };
+  const sideArrL = sideArr("l", "‹", "Mais páginas à esquerda", -1);
+  const sideArrR = sideArr("r", "›", "Mais páginas à direita", 1);
   sideNav.addEventListener("scroll", sideEdges, { passive: true });
+  // roda do mouse (vertical) rola o menu em linha para os lados
+  sideNav.addEventListener("wheel", (e) => {
+    if (sideNav.scrollWidth - sideNav.clientWidth <= 2 || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    sideNav.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+  }, { passive: false });
   window.addEventListener("resize", sideEdges);
   // 2.101.8: a lista cresce depois (escala, Espectro e Clima, versão nova): recalcula
   if (typeof ResizeObserver === "function") {
@@ -4238,7 +4366,7 @@ async function refreshCounterSync(cs) {
   gs.hidden = !show;
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
-  gs.title = cs.text;
+  gs.title = warnMem ? tr("Abrir GQ GMC-800 › Memória do contador") : cs.text;
   // 2.89.0 (E5): o ponto da barra diz o que é ao passar o mouse
   $("navGmcDot").closest("button").title = show ? gs.textContent : "";
   card.classList.toggle("cheia", cs.memLevel === "cheia");

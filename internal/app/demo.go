@@ -13,6 +13,7 @@ import (
 type sample struct {
 	t   time.Time
 	cpm float64
+	obj bool // 2.101.13 (item 66): o GMC-800 estava num objeto (fora do σ de 10 min)
 }
 
 // ring guarda a última hora de leituras por segundo.
@@ -26,8 +27,10 @@ const ringSize = 3600
 
 func newRing() *ring { return &ring{buf: make([]sample, ringSize)} }
 
-func (r *ring) add(t time.Time, cpm float64) {
-	r.buf[r.next] = sample{t, cpm}
+func (r *ring) add(t time.Time, cpm float64) { r.addObj(t, cpm, false) }
+
+func (r *ring) addObj(t time.Time, cpm float64, obj bool) {
+	r.buf[r.next] = sample{t, cpm, obj}
 	r.next = (r.next + 1) % ringSize
 	if r.next == 0 {
 		r.full = true

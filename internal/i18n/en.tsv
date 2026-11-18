@@ -6422,3 +6422,21 @@ Com essa quantidade, a calibração leva {0}. Use mais sal, bem apertado em volt
 contagem de 300 a 1.400 keV	count from 300 to 1,400 keV
 Com essa quantidade, a calibração leva {0}. Use mais KCl, bem apertado em volta do RC102.	With this amount, the calibration takes {0}. Use more KCl, packed tightly around the RC102.
 Atividade: começou ({0}, pedra solta)	Activity: started ({0}, loose stone)
+Abrir GQ GMC-800 › Memória do contador	Open GQ GMC-800 › Counter memory
+Configurações salvas. Fora da faixa, ficou: {0}.	Settings saved. Out of range, set to: {0}.
+Corrigir os aparelhos da saída	Fix the trip's devices
+Fundo acima do normal, sem alerta.	Background above normal, no alert.
+Mais páginas à direita	More pages to the right
+Mais páginas à esquerda	More pages to the left
+Manter a saída	Keep the trip
+aviso de queda	drop warning
+perguntar se foi fora de casa	ask if it was away from home
+tempo da queda	drop time
+τ do tempo morto	dead time τ
+corrigir aparelhos	fix devices
+silenciar	silence
+O máximo é {0}. Vai gravar {1}.	The maximum is {0}. It will save {1}.
+O mínimo é {0}. Vai gravar {1}.	The minimum is {0}. It will save {1}.
+alarme ligado	alarm on
+bem acima do nível de fundo nos últimos 10 min ({0} σ)	well above the background level over the last 10 min ({0} σ)
+you@gmail.com	you@gmail.com

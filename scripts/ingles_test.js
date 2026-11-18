@@ -79,10 +79,6 @@ function part1() {
   return { n, fails };
 }
 
-// 2.101.9: nomes e notas que a "pessoa" da demonstração escreveu (demo.js):
-// ficam como foram escritos, então saem do texto antes de procurar português
-const DEMO_OWN = ["Banana com casca", "Medição antiga", "Camisa de lampião antiga", "Centro e metrô", "abri a janela"];
-const ownOut = (t) => DEMO_OWN.reduce((x, n) => x.split(n).join(""), t.replace(/[\u2068\u2069]/g, ""));
 
 async function part2() {
   let pw;
@@ -117,7 +113,7 @@ async function part2() {
         for (const el of document.querySelectorAll("option")) { const t = el.textContent.trim(); if (re.test(t)) out.push(t.slice(0, 200)); }
         return out;
       }, PT.source);
-      for (const t of r) if (!found.has(t) && !okText(t.replace(/^@[\w-]+: /, "")) && PT.test(ownOut(t))) found.set(t, `${sc || "normal"}/${where}`);
+      for (const t of r) if (!found.has(t) && !okText(t.replace(/^@[\w-]+: /, "")) && PT.test(t.replace(/[\u2068\u2069]/g, ""))) found.set(t, `${sc || "normal"}/${where}`);
     };
     const hover = async (where) => {
       const boxes = await p.evaluate(() => [...document.querySelectorAll("svg, canvas, .ft-row, [data-tip]")].map((e) => e.getBoundingClientRect()).filter((r) => r.width > 100 && r.height > 20 && r.bottom > 0 && r.top < innerHeight).map((r) => [r.x, r.y, r.width, r.height]));

@@ -40,16 +40,19 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.12";
+const DEMO_VERSION = "2.101.13";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
   // evento "demo"; a leitura real chega pelo Go
   const inApp = !!(opts && opts.inApp);
+  // 2.101.13 (item 125): o que a "pessoa" da demonstração escreveu já nasce no idioma da demonstração
+  // (nome dado pela pessoa nunca é traduzido pelo app)
+  const demoOwn = (pt, en) => (LANG === "en" ? en : pt);
   let demoCloud = { state: "off", ready: true, auto: true };
   let demoCloudCode = "";
-  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
-    devices: [{ id: "a0", name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
+  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: demoOwn("voce@gmail.com", "you@gmail.com"), lastSync: Date.now(), used: 38e6, queue: [],
+    devices: [{ id: "a0", name: demoOwn("pc-sala", "living-room-pc"), lastUp: Date.now(), me: true }, ...others] });
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
   // atual (DEMO_VERSION, conferida pelo scripts/check-version.sh) e a
   // seguinte (auditoria 2.76.0, U1)
@@ -87,12 +90,12 @@ function makeDemoApi(opts) {
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
-  let measurements = [{ id: 1, name: "Banana com casca", note: "", time: mt,
+  let measurements = [{ id: 1, name: demoOwn("Banana com casca", "Banana with peel"), note: "", time: mt,
     bg: { counts: 155, seconds: 300, cpm: 31, errCPM: 2.5, usv: 0.2, start: mt, end: mt + 300e3 },
     obj: { counts: 161, seconds: 300, cpm: 32.2, errCPM: 2.5, usv: 0.21, start: mt + 360e3, end: mt + 660e3 },
     result: { netCPM: 1.2, netErr: 3.6, netUSv: 0.012, ratio: 1.04, sigma: 0.33, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" },
     samples: (() => { const out = []; let cpm = 30; for (let i = 0; i < 600; i++) { const ph = i < 300 ? "fundo" : "objeto"; const t = (ph === "fundo" ? i : i + 60) * 1000; const cps = Math.random() < 0.52 ? 1 : 0; cpm = Math.max(10, Math.round(cpm + (Math.random() - 0.5) * 3)); out.push({ t, phase: ph, cpm, cps }); } return out; })() },
-    { id: 2, name: "Medição antiga", note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
+    { id: 2, name: demoOwn("Medição antiga", "Old measurement"), note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
       obj: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5 + 90e3, end: mt - 864e5 + 150e3 },
       result: { netCPM: 0, netErr: 7.2, netUSv: 0, ratio: 1, sigma: 0, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" } }].sort((a, b) => a.time - b.time);
   const mockWhere = () => {
@@ -118,8 +121,8 @@ function makeDemoApi(opts) {
     return { gmc: one("gmc"), radiacode: one("radiacode") };
   };
   const d1 = new Date(now - 864e5).setHours(0, 0, 0, 0);
-  let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
-    { id: 2, name: "Centro e metrô", from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
+  let periods = [{ id: 1, name: demoOwn("Passeio no parque", "Walk in the park"), from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
+    { id: 2, name: demoOwn("Centro e metrô", "Downtown and subway"), from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
   // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
@@ -141,7 +144,7 @@ function makeDemoApi(opts) {
   let planned = [{ id: plTomorrow, nome: plDemoName, de: plTomorrow, rc: true, gmc: false }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
-  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
+  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: demoOwn("abri a janela", "opened the window"), created: now }], noteSeq = 1;
   // ---------- demonstração (2.82): cenários tocados no tempo ----------
   // Os dois aparelhos andam juntos, cada um com os próprios limites. Vale no
   // navegador e dentro do app (lá o app.js troca a ponte com o Go por esta).
@@ -234,9 +237,16 @@ function makeDemoApi(opts) {
     }
     while (demoSecs.length && demoSecs[0].t < now - 36e5) demoSecs.shift();
     while (demoRcSecs.length && demoRcSecs[0].t < now - 36e5) demoRcSecs.shift();
+    // 2.101.13 (item 66): o σ dos últimos 10 min, como o Go (stats.go)
+    const demoSigma10 = (t, bg) => {
+      const xs = demoSecs.filter((x) => x.t > t - 6e5);
+      if (xs.length < 300) return null;
+      const mean = xs.reduce((a, x) => a + x.cpm, 0) / xs.length;
+      return (mean - bg) / Math.sqrt(bg / (xs.length / 60));
+    };
     const lvl = danger ? "perigo" : v.g >= l.alarm ? "alarme" : v.g >= l.attn ? "atencao" : "seguro";
     emit("reading", { time: now, cpm: Math.round(c), cps: pulsePoisson(c / 60), usv: v.g, mrh: v.g / 10, level: lvl, alarm: settings.alarmEnabled && v.g >= l.alarm, danger,
-      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12) });
+      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12), sigma10: demoSigma10(now, 12) });
     feed(Math.max(0, pulsePoisson(c / 60)));
     emit("radiacode", demoRc());
     demoAwayAsk(!!v.away);
@@ -468,7 +478,7 @@ function makeDemoApi(opts) {
     const t0 = Date.now() - 3 * 3600e3, sec = 95, samples = [];
     let cpm = 2300;
     for (let i = 0; i < sec; i++) { cpm = Math.max(1500, cpm + (Math.random() - 0.5) * 60); samples.push({ t: (i + 1) * 1000, phase: "objeto", cpm: Math.round(cpm), cps: Math.round(38 + (Math.random() - 0.5) * 12) }); }
-    measurements.push({ id: 3, name: "Camisa de lampião antiga", note: "", time: t0, device: "radiacode", distance: "encostado",
+    measurements.push({ id: 3, name: demoOwn("Camisa de lampião antiga", "Old gas lantern mantle"), note: "", time: t0, device: "radiacode", distance: "encostado",
       bg: { counts: 40926, seconds: 3420, cpm: 718, errCPM: 3.5, usv: 0.092, start: t0 - 3600e3, end: t0 - 60e3, source: "casa" },
       obj: { counts: 3790, seconds: sec, cpm: 2393.7, errCPM: 38.9, usv: 0.31, start: t0, end: t0 + sec * 1000 },
       result: { netCPM: 1675.7, netErr: 39.1, netUSv: 0.218, ratio: 3.33, sigma: 42.9, level: "sim", verdict: "radioativo: a diferença para o fundo é clara", stop: "achou", pct: 20, threshold: 143.6 },
@@ -704,7 +714,7 @@ const demoRc = () => {
       let other = false;
       try { other = localStorage.getItem("gmc.cloudDemo") === "outro"; } catch (e) { /* sem localStorage */ }
       const was = demoCloud.was;
-      demoCloud = { ...demoCloud, state: was || "off", email: "voce@gmail.com" };
+      demoCloud = { ...demoCloud, state: was || "off", email: demoOwn("voce@gmail.com", "you@gmail.com") };
       if (was) return { info: (demoCloud = { ...demoCloud, state: "ok", was: "" }), next: "" };
       return { info: demoCloud, next: other ? "existing" : "new", lastUp: Date.now() - 864e5 };
     },
@@ -714,7 +724,7 @@ const demoRc = () => {
     CloudCode: async () => demoCloudCode,
     SaveCloudCode: async () => "C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt",
     CloudFinishSetup: async (code) => { demoCloudCode = code; return (demoCloud = demoCloudOn([])); },
-    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: "PC antigo", lastUp: Date.now() - 42 * 864e5 }])); },
+    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: demoOwn("PC antigo", "Old PC"), lastUp: Date.now() - 42 * 864e5 }])); },
     CloudReset: async () => demoCloud,
     CloudSyncNow: async () => (demoCloud = { ...demoCloud, state: "ok", lastSync: Date.now(), queue: [] }),
     CloudPause: async () => (demoCloud = { ...demoCloud, state: "ok" }),
@@ -1296,6 +1306,10 @@ const demoRc = () => {
     SavePlannedTrip: async (p) => {
       if (!p.gmc && !p.rc) throw new Error("escolha pelo menos um aparelho que vai com você");
       const q = { ...p, nome: (p.nome || "").trim() || "Saída programada", id: p.id || Date.now() };
+      // como o Go (planned.go): com o mesmo horário, a começada continua começada
+      // enquanto o aparelho que saiu continua indo
+      const old = planned.find((x) => x.id === q.id);
+      if (old && old.de === q.de && old.saiu && (old.saiuAparelho === "radiacode" ? q.rc : q.gmc)) { q.saiu = old.saiu; q.saiuAparelho = old.saiuAparelho; }
       planned = planned.filter((x) => x.id !== q.id).concat(q).sort((a, b) => a.de - b.de);
       setTimeout(() => emit("planned", planned.slice()), 0);
       return q;
@@ -1565,7 +1579,7 @@ const demoRc = () => {
         if (x.away) o.awayBg += base; else o.homeBg += base;
       }
       const now = Date.now();
-      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
+      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · " + demoOwn("Banana com casca", "Banana with peel"), kind: "medicao" },
         { from: now - 5 * 36e5, to: now - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }].filter((i) => i.from >= from && i.to <= to);
       for (const i of o.items) { o.above += i.dose; o.total += i.dose; }
       return o;
