@@ -4907,7 +4907,19 @@ const I18N_EN = {
 "Uraninita": "Uraninite",
 "Uranocircita": "Uranocircite",
 "Euxenita": "Euxenite",
-"contagem de 300 a 1.400 keV": "count from 300 to 1,400 keV"
+"contagem de 300 a 1.400 keV": "count from 300 to 1,400 keV",
+"Abrir GQ GMC-800 › Memória do contador": "Open GQ GMC-800 › Counter memory",
+"Corrigir os aparelhos da saída": "Fix the trip's devices",
+"Fundo acima do normal, sem alerta.": "Background above normal, no alert.",
+"Mais páginas à direita": "More pages to the right",
+"Mais páginas à esquerda": "More pages to the left",
+"Manter a saída": "Keep the trip",
+"aviso de queda": "drop warning",
+"perguntar se foi fora de casa": "ask if it was away from home",
+"tempo da queda": "drop time",
+"τ do tempo morto": "dead time τ",
+"corrigir aparelhos": "fix devices",
+"silenciar": "silence"
 },
 "patterns": [
 [
@@ -10060,6 +10072,14 @@ const I18N_EN = {
 "O GMC-800 subiu mais que o RC102: ",
 " em ",
 " semanas"
+]
+],
+[
+"Configurações salvas. Fora da faixa, ficou: ",
+"^Configurações salvas\\. Fora da faixa, ficou: ((?:(?! · ).)+?)\\.$",
+"Settings saved. Out of range, set to: ${1}.",
+[
+"Configurações salvas. Fora da faixa, ficou: "
 ]
 ],
 [

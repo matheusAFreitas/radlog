@@ -71,9 +71,11 @@ function agoraNow() {
       lv = "atencao"; title = "Falta medição agora.";
       text = [L.home, L.pers].filter((x) => x.cls === "warnb" && !x.sat).map((x) => x.d).join(" ");
     } else {
-      title = odd ? "Medindo, com um aparelho fora do normal." : "Tudo normal agora.";
+      // 2.101.13 (item 66): fundo 2σ acima sem alerta também é algo a dizer (e o "Por que?")
+      const up = g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null && g.sigma >= 2;
+      title = odd ? "Medindo, com um aparelho fora do normal." : up ? "Fundo acima do normal, sem alerta." : "Tudo normal agora.";
       // tudo normal: a faixa some (só aparece quando tem algo a dizer)
-      calm = !odd;
+      calm = !odd && !up;
       if (g.live && gHome && cw.gmc === "casa" && whMeasuring("gmc") && g.sigma != null) parts.push(g.sigma < 2 ? "no nível de fundo habitual" : g.sigma < 3 ? `um pouco acima do fundo, dentro do acaso (${fmt(g.sigma, 1)} σ)` : `bem acima do nível de fundo (${fmt(g.sigma, 1)} σ)`);
       text = parts.join(" · ");
     }

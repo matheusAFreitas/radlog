@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.12";
+const DEMO_VERSION = "2.101.13";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -87,12 +87,15 @@ function makeDemoApi(opts) {
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
-  let measurements = [{ id: 1, name: "Banana com casca", note: "", time: mt,
+  // 2.101.13 (item 125): o que a "pessoa" da demonstração escreveu já nasce no idioma da demonstração
+  // (nome dado pela pessoa nunca é traduzido pelo app)
+  const demoOwn = (pt, en) => (LANG === "en" ? en : pt);
+  let measurements = [{ id: 1, name: demoOwn("Banana com casca", "Banana with peel"), note: "", time: mt,
     bg: { counts: 155, seconds: 300, cpm: 31, errCPM: 2.5, usv: 0.2, start: mt, end: mt + 300e3 },
     obj: { counts: 161, seconds: 300, cpm: 32.2, errCPM: 2.5, usv: 0.21, start: mt + 360e3, end: mt + 660e3 },
     result: { netCPM: 1.2, netErr: 3.6, netUSv: 0.012, ratio: 1.04, sigma: 0.33, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" },
     samples: (() => { const out = []; let cpm = 30; for (let i = 0; i < 600; i++) { const ph = i < 300 ? "fundo" : "objeto"; const t = (ph === "fundo" ? i : i + 60) * 1000; const cps = Math.random() < 0.52 ? 1 : 0; cpm = Math.max(10, Math.round(cpm + (Math.random() - 0.5) * 3)); out.push({ t, phase: ph, cpm, cps }); } return out; })() },
-    { id: 2, name: "Medição antiga", note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
+    { id: 2, name: demoOwn("Medição antiga", "Old measurement"), note: "", time: mt - 864e5, bg: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5, end: mt - 864e5 + 60e3 },
       obj: { counts: 26, seconds: 60, cpm: 26, errCPM: 5.1, usv: 0.17, start: mt - 864e5 + 90e3, end: mt - 864e5 + 150e3 },
       result: { netCPM: 0, netErr: 7.2, netUSv: 0, ratio: 1, sigma: 0, verdict: "nenhuma diferença que dê para separar do fundo", level: "nada" } }].sort((a, b) => a.time - b.time);
   const mockWhere = () => {
@@ -119,7 +122,7 @@ function makeDemoApi(opts) {
   };
   const d1 = new Date(now - 864e5).setHours(0, 0, 0, 0);
   let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
-    { id: 2, name: "Centro e metrô", from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
+    { id: 2, name: demoOwn("Centro e metrô", "Downtown and subway"), from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
   // demonstração da pergunta "voltou para casa?" (2.66.0): localStorage rcBack=1
@@ -141,7 +144,7 @@ function makeDemoApi(opts) {
   let planned = [{ id: plTomorrow, nome: plDemoName, de: plTomorrow, rc: true, gmc: false }];
   let rainBusy = false, rainFetched = 0;
   const rainStatus = () => ({ enabled: !!settings.rainEnabled, place: settings.rainPlace || "", busy: rainBusy, fetched: rainFetched, next: rainFetched ? rainFetched + 18e5 : 0, error: "", radarFetched: rainFetched, radarCovered: rainFetched ? true : null, radarNow: rainFetched ? { time: Math.floor(Date.now() / 6e5) * 6e5, mmh: 0, dbz: 0 } : null });
-  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: "abri a janela", created: now }], noteSeq = 1;
+  let notes = [{ id: 1, time: Math.floor(now / 6e4) * 6e4 - 35 * 6e4, text: demoOwn("abri a janela", "opened the window"), created: now }], noteSeq = 1;
   // ---------- demonstração (2.82): cenários tocados no tempo ----------
   // Os dois aparelhos andam juntos, cada um com os próprios limites. Vale no
   // navegador e dentro do app (lá o app.js troca a ponte com o Go por esta).
@@ -468,7 +471,7 @@ function makeDemoApi(opts) {
     const t0 = Date.now() - 3 * 3600e3, sec = 95, samples = [];
     let cpm = 2300;
     for (let i = 0; i < sec; i++) { cpm = Math.max(1500, cpm + (Math.random() - 0.5) * 60); samples.push({ t: (i + 1) * 1000, phase: "objeto", cpm: Math.round(cpm), cps: Math.round(38 + (Math.random() - 0.5) * 12) }); }
-    measurements.push({ id: 3, name: "Camisa de lampião antiga", note: "", time: t0, device: "radiacode", distance: "encostado",
+    measurements.push({ id: 3, name: demoOwn("Camisa de lampião antiga", "Old gas lantern mantle"), note: "", time: t0, device: "radiacode", distance: "encostado",
       bg: { counts: 40926, seconds: 3420, cpm: 718, errCPM: 3.5, usv: 0.092, start: t0 - 3600e3, end: t0 - 60e3, source: "casa" },
       obj: { counts: 3790, seconds: sec, cpm: 2393.7, errCPM: 38.9, usv: 0.31, start: t0, end: t0 + sec * 1000 },
       result: { netCPM: 1675.7, netErr: 39.1, netUSv: 0.218, ratio: 3.33, sigma: 42.9, level: "sim", verdict: "radioativo: a diferença para o fundo é clara", stop: "achou", pct: 20, threshold: 143.6 },
@@ -1565,7 +1568,7 @@ const demoRc = () => {
         if (x.away) o.awayBg += base; else o.homeBg += base;
       }
       const now = Date.now();
-      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · Banana com casca", kind: "medicao" },
+      o.items = [{ from: now - 40 * 6e4, to: now - 30 * 6e4, dose: 0.021, label: "Medir objeto · " + demoOwn("Banana com casca", "Banana with peel"), kind: "medicao" },
         { from: now - 5 * 36e5, to: now - 5 * 36e5 + 6e5, dose: 0.012, label: "Alarme no RC102", kind: "alerta" }].filter((i) => i.from >= from && i.to <= to);
       for (const i of o.items) { o.above += i.dose; o.total += i.dose; }
       return o;

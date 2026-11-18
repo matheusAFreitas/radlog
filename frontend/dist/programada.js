@@ -112,9 +112,12 @@ function renderPlanned() {
       acts.appendChild(x);
     };
     if (p.saiu) link("Não estou saindo", () => call(api.NotLeaving, p.id).then(refreshPlanned));
-    link("editar", () => openPlanForm(p));
+    // 2.101.13 (item 62): passou do horário, só dá para corrigir os aparelhos
+    if (!p.saiu && Date.now() > p.de + 3600e3) link("corrigir aparelhos", () => openPlanForm({ ...p, devOnly: true }));
+    else link("editar", () => openPlanForm(p));
     link("cancelar", async () => {
-      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${plNameTxt(p.nome)}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", danger: true }))) return;
+      // 2.101.13 (item 92): "Manter a saída" no lugar de "Cancelar" ao lado de "Cancelar a saída"
+      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${plNameTxt(p.nome)}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", no: "Manter a saída", danger: true }))) return;
       try { await api.DeletePlannedTrip(p.id); } catch (e) { toast(errMsg(e), true); }
       refreshPlanned();
     });
@@ -128,7 +131,7 @@ function planForm(p) {
   const box = document.createElement("div");
   box.className = "wh-edit pl-form";
   const h = document.createElement("b");
-  h.textContent = p.id ? "Editar saída programada" : "Programar saída";
+  h.textContent = p.devOnly ? "Corrigir os aparelhos da saída" : p.id ? "Editar saída programada" : "Programar saída";
   const field = (label, input) => {
     const f = document.createElement("div");
     f.className = "wh-field";
@@ -217,14 +220,15 @@ function planForm(p) {
   const g2 = document.createElement("div");
   g2.className = "pl-g";
   g2.append(field("Para onde (vira o título da saída)", name), whenBox, field("Saio por volta de", time));
+  g2.hidden = !!p.devOnly; // corrigir aparelhos: nome e horário ficam como estão
   box.append(h, g2, devBox, note, err, btns);
   cancel.addEventListener("click", () => { plEditing = null; renderPlanned(); });
   save.addEventListener("click", async () => {
     const at = new Date(`${day}T${time.value || "00:00"}`).getTime();
     if (!goes.rc && !goes.gmc) { err.textContent = "Escolha pelo menos um aparelho que vai com você."; err.hidden = false; return; }
-    if (!(at > Date.now() - 3600e3)) { err.textContent = "Esse horário já passou. Para uma saída que já aconteceu, use \"Adicionar trecho passado\"."; err.hidden = false; return; }
+    if (!p.devOnly && !(at > Date.now() - 3600e3)) { err.textContent = "Esse horário já passou. Para uma saída que já aconteceu, use \"Adicionar trecho passado\"."; err.hidden = false; return; }
     try {
-      const r = await api.SavePlannedTrip({ id: p.id || 0, nome: name.value, de: at, gmc: goes.gmc, rc: goes.rc });
+      const r = await api.SavePlannedTrip({ id: p.id || 0, nome: p.devOnly ? p.nome : name.value, de: p.devOnly ? p.de : at, gmc: goes.gmc, rc: goes.rc });
       plEditing = null;
       toast(`Saída programada: ${plNameTxt(r.nome)}, ${plDate(r.de)} por volta de ${hhmm(r.de)}`);
       refreshPlanned();

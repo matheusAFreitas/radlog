@@ -100,6 +100,21 @@ func (a *App) GetPlannedTrips() []PlannedTrip {
 	return out
 }
 
+// plannedSameFrom diz se p é uma programada que já existe, com o mesmo horário.
+func (a *App) plannedSameFrom(p PlannedTrip) bool {
+	if p.ID == 0 {
+		return false
+	}
+	a.mu.Lock()
+	defer a.mu.Unlock()
+	for _, q := range a.loadPlannedLocked() {
+		if q.ID == p.ID {
+			return q.From == p.From
+		}
+	}
+	return false
+}
+
 // SavePlannedTrip cria (ID 0) ou muda uma programada.
 func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 	p.Name = strings.TrimSpace(p.Name)
@@ -113,7 +128,9 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 		return p, errors.New("escolha pelo menos um aparelho que vai com você")
 	}
 	now := time.Now()
-	if time.UnixMilli(p.From).Before(now.Add(-plannedWindow)) {
+	// 2.101.13 (item 62): numa programada que já passou dá para corrigir os
+	// aparelhos, com o mesmo horário
+	if time.UnixMilli(p.From).Before(now.Add(-plannedWindow)) && !a.plannedSameFrom(p) {
 		return p, errors.New("esse horário já passou; para uma saída que já aconteceu, use \"Adicionar trecho passado\"")
 	}
 	a.mu.Lock()

@@ -2051,6 +2051,41 @@ function renderDeadTime() {
   $("lvDTTable").classList.toggle("off", !on);
 }
 
+// 2.101.13 (item 21): campos de número que o app pode cortar ao salvar
+const SET_CLAMP = [
+  ["numAwayAsk", "perguntar se foi fora de casa", (s) => s.awayAskMin, "min"],
+  ["lvSnooze", "silenciar", (s) => (s.levels || {}).snoozeMin, "min"],
+  ["numAlarm", "alarme", () => alarmUSv(), "rate"],
+  ["lvAttn", "atenção", (s) => (s.levels || {}).attentionUSv, "rate"],
+  ["lvDanger", "perigo", (s) => (s.levels || {}).dangerUSv, "rate"],
+  ["lvDTUs", "τ do tempo morto", (s) => (s.levels || {}).deadTimeUs, "µs"],
+  ["lvSatMax", "Geiger saturado", (s) => (s.levels || {}).satMaxUSv, "rate"],
+  ["lvSatDrop", "aviso de queda", (s) => (s.levels || {}).satDropUSv, "rate"],
+  ["lvSatHold", "tempo da queda", (s) => (s.levels || {}).satHoldSec, "s"],
+  ["lvRcSat", "RC102 saturado", (s) => (s.levels || {}).rcSatUSv, "rate"],
+];
+const setNum = (v) => parseFloat(String(v).replace(",", "."));
+function setTypedNums() {
+  const o = {};
+  for (const [id] of SET_CLAMP) if ($(id) && $(id).value !== "") o[id] = setNum($(id).value);
+  return o;
+}
+function setRepaintClamped(typed) {
+  const s = state.settings || {}, out = [];
+  for (const [id, label, get, u] of SET_CLAMP) {
+    const v = get(s);
+    if (!(id in typed) || !(v > 0)) continue;
+    const shown = u === "rate" ? rateOut(v) : v;
+    const was = typed[id], now = setNum(shown);
+    if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) continue;
+    $(id).value = shown;
+    // µSv/h: a tela troca para mrem/h sozinha
+    out.push(`${tr(label)} ${u === "rate" ? usvTxt(v) : fmt(v, 0) + " " + u}`);
+  }
+  if (out.length) { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); }
+  return out;
+}
+
 function readLevels() {
   const out = {};
   for (const [id, k] of Object.entries(LV_FIELDS)) {
@@ -2285,7 +2320,17 @@ document.addEventListener("click", async (e) => {
 function wireLevels() {
   for (const id of Object.keys(LV_FIELDS)) $(id).addEventListener("input", () => { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); });
   $("lvDTOn").addEventListener("change", renderDeadTime);
-  $("btnLevelsReset").addEventListener("click", () => { fillLevels(LV_DEFAULT); renderDangerNote(); renderAttnLabel(); renderSetBar(); });
+  // 2.101.13 (item 22): só os campos desta seção (Atenção, Alarme, Perigo, os
+  // "Ligado" e o Silenciar); o tubo e a saturação ficam como estão
+  $("btnLevelsReset").addEventListener("click", () => {
+    $("lvAttn").value = rateOut(usv3(LV_DEFAULT.attentionCPM * calK()));
+    $("lvDanger").value = rateOut(usv3(LV_DEFAULT.dangerCPM * calK()));
+    $("numAlarm").value = rateOut(usv3(100 * calK()));
+    $("lvSnooze").value = LV_DEFAULT.snoozeMin;
+    $("chkAttn").checked = true;
+    if (!$("chkAlarm").checked) { $("chkAlarm").checked = true; $("chkAlarm").dispatchEvent(new Event("change")); }
+    renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderSetBar();
+  });
   $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
   $("setSearch").addEventListener("input", setSearch);
   $("setSearch").addEventListener("keydown", (e) => {
@@ -3287,6 +3332,7 @@ function wire() {
     if (devCfgDirty()) toast('Os ajustes do GMC-800 ainda não foram gravados: use "Gravar no GMC-800" (GQ GMC-800 › No aparelho).', true);
     if (rcCfgDirty()) toast('Os ajustes do RC102 ainda não foram gravados: use "Gravar no RC102" (Radiacode 102 › No aparelho).', true);
     const alarm = rateIn($("numAlarm").value);
+    const typed = setTypedNums();
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
@@ -3313,8 +3359,12 @@ function wire() {
       awayAskMin: Math.min(240, Math.max(5, parseInt($("numAwayAsk").value, 10) || 15)),
       levels: readLevels(),
     });
+    // 2.101.13 (item 21): o que o app cortou (fora da faixa) volta para a tela
+    // com o valor gravado, e o aviso diz qual ficou
+    const cut = setRepaintClamped(typed);
     setSnap();
-    toast("Configurações salvas");
+    if (cut.length) toast(`Configurações salvas. Fora da faixa, ficou: ${cut.join("; ")}.`, true);
+    else toast("Configurações salvas");
   });
   $("btnOpenData").addEventListener("click", () => call(api.OpenDataFolder));
   initCalHist();
@@ -3324,6 +3374,17 @@ function wire() {
   $("btnOpenLog").addEventListener("click", () => call(api.OpenLogFile));
 
   $("chkAlarm").addEventListener("change", (e) => saveSettings({ alarmEnabled: e.target.checked }));
+  // 2.101.13 (item 67): o aviso da memória no quadro leva ao que resolve
+  $("gTileSync").addEventListener("click", (e) => {
+    e.stopPropagation();
+    showView("gmc");
+    requestAnimationFrame(() => {
+      const card = $("syncCard");
+      if (card && !card.hidden) card.scrollIntoView({ behavior: "smooth", block: "center" });
+      const b = $("btnSyncDl");
+      if (b) b.focus({ preventScroll: true });
+    });
+  });
 ;
 
   $("clockChip").addEventListener("click", async () => {
@@ -3335,8 +3396,33 @@ function wire() {
   const sideEdges = () => {
     sideNav.classList.toggle("scrolled", sideNav.scrollTop > 2);
     sideNav.classList.toggle("more", sideNav.scrollHeight - sideNav.clientHeight - sideNav.scrollTop > 2);
+    // 2.101.13 (item 79): janela estreita, menu em linha: setas ‹ › e degradê de cada lado que ainda tem página
+    const wide = sideNav.scrollWidth - sideNav.clientWidth > 2;
+    const hl = wide && sideNav.scrollLeft > 2, hr = wide && sideNav.scrollWidth - sideNav.clientWidth - sideNav.scrollLeft > 2;
+    sideNav.classList.toggle("hl", hl);
+    sideNav.classList.toggle("hr", hr);
+    for (const [a, on] of [[sideArrL, hl], [sideArrR, hr]]) {
+      a.hidden = !on;
+      if (on) { a.style.top = sideNav.offsetTop + "px"; a.style.height = sideNav.offsetHeight + "px"; }
+    }
   };
+  const sideArr = (cls, txt, label, dir) => {
+    const a = document.createElement("button");
+    a.type = "button"; a.className = "side-arr " + cls; a.textContent = txt; a.hidden = true;
+    a.tabIndex = -1; a.setAttribute("aria-hidden", "true"); a.title = tr(label);
+    a.addEventListener("click", () => sideNav.scrollBy({ left: dir * sideNav.clientWidth * 0.7, behavior: "smooth" }));
+    sideNav.parentElement.appendChild(a);
+    return a;
+  };
+  const sideArrL = sideArr("l", "‹", "Mais páginas à esquerda", -1);
+  const sideArrR = sideArr("r", "›", "Mais páginas à direita", 1);
   sideNav.addEventListener("scroll", sideEdges, { passive: true });
+  // roda do mouse (vertical) rola o menu em linha para os lados
+  sideNav.addEventListener("wheel", (e) => {
+    if (sideNav.scrollWidth - sideNav.clientWidth <= 2 || Math.abs(e.deltaY) <= Math.abs(e.deltaX)) return;
+    e.preventDefault();
+    sideNav.scrollLeft += e.deltaMode === 1 ? e.deltaY * 16 : e.deltaY;
+  }, { passive: false });
   window.addEventListener("resize", sideEdges);
   // 2.101.8: a lista cresce depois (escala, Espectro e Clima, versão nova): recalcula
   if (typeof ResizeObserver === "function") {
@@ -4238,7 +4324,7 @@ async function refreshCounterSync(cs) {
   gs.hidden = !show;
   gs.textContent = warnMem ? (cs.memLevel === "cheia" ? "memória cheia" : `memória em ${pct}%`) : "minutos para baixar";
   gs.classList.toggle("full", cs.memLevel === "cheia");
-  gs.title = cs.text;
+  gs.title = warnMem ? tr("Abrir GQ GMC-800 › Memória do contador") : cs.text;
   // 2.89.0 (E5): o ponto da barra diz o que é ao passar o mouse
   $("navGmcDot").closest("button").title = show ? gs.textContent : "";
   card.classList.toggle("cheia", cs.memLevel === "cheia");
