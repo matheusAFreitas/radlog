@@ -899,7 +899,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .lv-dt-card { container-type: inline-size; }
 /* 2.101.8: o cabeçalho quebra e, em caixa estreita, as células apertam (cabe em qualquer escala) */
 .lv-dt thead th { white-space: normal; }
-@container (max-width: 432px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
+@container (max-width: 400px) { .lv-dt th, .lv-dt td { padding-left: var(--space-1); padding-right: var(--space-1); } }
 .lv-dt th:first-child, .lv-dt td:first-child { text-align: left; }
 .lv-dt.off { opacity: .45; }
 
@@ -3306,7 +3306,7 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
    barra lateral, o menu das Configurações e a escala) */
 #lvCard { container-type: inline-size; } /* 2.101.13 (QA, item 132): no cartão, não na caixa da tabela */
 @media (max-width: 640px) { .al-wrap { overflow-x: visible; } }
-@container (max-width: 652px) {
+@container (max-width: 622px) {
   .al-tbl thead { display: none; }
   .al-tbl, .al-tbl tbody, .al-tbl tr, .al-tbl th, .al-tbl td { display: block; width: auto; }
   .al-tbl tbody th { width: auto; padding-bottom: 0; border-bottom: 0; }

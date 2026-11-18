@@ -1795,7 +1795,7 @@
     <div class="set-tab" data-tab="tubo" hidden>
     <div class="set-cards">
     <div class="set-col">
-      <fieldset>
+      <fieldset class="lv-dt-card">
           <legend>Tempo morto do tubo</legend>
           <label class="toggle"><span>Compensar contagens perdidas</span><input type="checkbox" id="lvDTOn"></label>
           <label for="lvDTUs">Tempo morto τ (µs)</label>
@@ -2040,7 +2040,7 @@
           </tr>
           <tr class="alarme">
             <th scope="row"><span class="lv-name" data-lv="alarme">Alarme</span><span class="al-say">toca o som escolhido</span></th>
-            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="numAlarm" min="0.01" step="any" inputmode="decimal" aria-label="Alarme do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="numAlarm"></p><label class="toggle al-on"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label></td>
+            <td><span class="al-h" aria-hidden="true">App</span><div class="al-in"><input type="number" id="numAlarm" min="0.01" max="10000" step="any" inputmode="decimal" aria-label="Alarme do app"><span class="al-u" data-u="rate">µSv/h</span></div><p class="lv-eq" data-eq="numAlarm"></p><label class="toggle al-on"><span id="alarmLabel">Ligado</span><input type="checkbox" id="chkAlarm"></label></td>
             <td><span class="al-h" aria-hidden="true">GMC-800 <span class="al-chip gmc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alGmc" min="0.001" step="any" inputmode="decimal" aria-label="Alarme do GMC-800"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say" id="alGmcCpm"></span></td>
             <td><span class="al-h" aria-hidden="true">RC102 <span class="al-chip rc">grava no aparelho</span></span><div class="al-in"><input type="number" id="alRc2" min="0.001" step="any" inputmode="decimal" aria-label="Alarme 2 do RC102"><span class="al-u" data-u="rate">µSv/h</span></div><span class="al-say">alarme 2</span></td>
           </tr>
