@@ -2,8 +2,9 @@ package app
 
 import "testing"
 
-// 2.101.8 (QA, item 119): em "Os dois aparelhos" com o GMC-800 principal, o
-// RC102 de 2º aparelho vira "a dose subiu" quando a contagem não muda.
+// 2.101.8: só robustez. Hoje o RC102 nunca é o 2º aparelho com papel
+// "objeto" ("Os dois aparelhos" põe o RC102 como principal), mas se for, o
+// lado dele tem a incerteza da dose e vira "a dose subiu".
 func TestSideRcDoseUp(t *testing.T) {
 	a := newTestApp(t)
 	m := &MeasureState{Phase: "fundo", Device: "gmc", Other: &MeasureSide{Device: devRC, Role: "objeto"}}
