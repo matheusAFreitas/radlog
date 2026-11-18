@@ -5127,7 +5127,7 @@ mudou no período ·	changed in the period ·
 mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)	changed in the period · until 05/11/2026 16:27: 0.01014 µSv/h per CPM at background (version 1, counter's curve) · since 05/11/2026 16:27: 0.00550 µSv/h per CPM at background (version 2, entered by hand)
 máx	max
 média {0} µSv/h{1}	average {0} µSv/h{1}
-média {0} · mediana {1} µSv/h · n = {2} min	average {0} · median {1} µSv/h · n = {2} min
+média {0} µSv/h · mediana {1} µSv/h · n = {2} min	average {0} µSv/h · median {1} µSv/h · n = {2} min
 média · máximo	average · maximum
 mês	month
 mín {0} · média {1} ({2} {3})	min {0} · average {1} ({2} {3})
@@ -6415,3 +6415,6 @@ o dia fica acima da noite	day is above night
 minuto novo	new minute
 minutos novos	new minutes
 em 1 dia: mais alto por volta das {0}h, mais baixo por volta das {1}h	over 1 day: highest around {0}h, lowest around {1}h
+Uraninita	Uraninite
+Uranocircita	Uranocircite
+Euxenita	Euxenite

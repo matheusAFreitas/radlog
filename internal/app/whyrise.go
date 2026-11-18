@@ -455,7 +455,7 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 		}
 		if end >= near.UnixMilli() && m.T <= t.UnixMilli() {
 			if m.Kind == "nota" {
-				objTxt = fmt.Sprintf("Anotação às %s: \"%s\".", time.UnixMilli(m.T).Format("15:04"), m.Text)
+				objTxt = fmt.Sprintf("Anotação às %s: \"%s\".", time.UnixMilli(m.T).Format("15:04"), asIs(m.Text))
 			} else if objTxt == "" {
 				objTxt = fmt.Sprintf("Medição de objeto às %s.", time.UnixMilli(m.T).Format("15:04"))
 			}

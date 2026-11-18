@@ -1755,7 +1755,7 @@
   function actChipsHtml(v) {
     const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
     let h = `<p class="rc-act-grp">Suas amostras</p>`;
-    for (const s of v.samples || []) h += chip("s:" + s.id, `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
+    for (const s of v.samples || []) h += chip("s:" + s.id, s.seed ? `<span>${escHtml(s.name)}</span>` : `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
     h += (act.pick || "").startsWith("s:") ? `<button type="button" class="rc-act-chip add" data-keep>＋ Atualizar minha amostra<small>com o que está escolhido</small></button>` : `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
     h += `<p class="rc-act-grp">Outras</p>`;
     for (const [k, p] of Object.entries(ACT_PRESETS)) h += chip("p:" + k, p.label, p.sub);
@@ -1878,7 +1878,7 @@
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
-    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
@@ -1907,7 +1907,7 @@
     if (ch) actDraw(ch, v);
     // histórico
     const hist = v.history || [];
-    const what = (r) => (r.kind === "amostra" ? `<span>${escHtml(r.name)}</span>` : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
+    const what = (r) => (r.kind === "amostra" ? actNameHtml(r) : `<span>${tr("Calibração")}</span> · <span>${escHtml(r.name)}</span>`);
     setHTML($("rcActHist"), hist.length ? `<p class="rc-act-lbl">Medidas anteriores</p><div class="rc-act-hist"><div class="rc-act-hrow head"><span>quando</span><span>o quê</span><span>resultado</span></div>` +
       hist.map((r) => `<details${r.kind === "amostra" ? "" : ' class="cal"'}><summary class="rc-act-hrow"><span class="mono">${fmtDM(r.t)} ${fmtTime(r.t).slice(0, 5)}</span><span>${what(r)}</span><span>${escHtml(actSummary(r))}</span></summary><div class="rc-act-res">${actResHtml(r)}</div></details>`).join("") + `</div>` : "");
   }
@@ -1918,7 +1918,7 @@
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
     const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
-    setHTML($("rcActWhat"), `<b>${nm}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
+    setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
       fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
@@ -1952,7 +1952,7 @@
       if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
-      live = `<div class="rc-act-res"><h4>${escHtml(r.name)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
+      live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
     }
     setHTML($("rcActLive"), live);
   }
@@ -1989,6 +1989,21 @@
     actStartOpts(o, $("rcActRunErr"));
   }
   // guarda como "minha": da medida terminada ou do que está escolhido
+  // 2.101.10: o nome que a pessoa digitou não traduz; o dos cartões prontos
+  // (p:…) e das amostras que vêm com o app (seed) traduz
+  function actNameOwn(r) {
+    if (r.kind !== "amostra") return false;
+    const id = r.sampleId || "";
+    if (id.startsWith("p:")) { const pk = ACT_PRESETS[id.slice(2)]; return !pk || !pk.name || pk.name !== r.name; } // "Outra coisa" tem nome vazio
+    if (id.startsWith("s:")) {
+      const s = ((act.v && act.v.samples) || []).find((x) => "s:" + x.id === id);
+      return !(s && s.seed);
+    }
+    if (!id) return !Object.values(ACT_PRESETS).some((p) => p.name && p.name === r.name); // antes da 2.86: sem sampleId
+    return true;
+  }
+  const actNameHtml = (r) => (actNameOwn(r) ? `<span data-no-tr>${escHtml(r.name)}</span>` : `<span>${escHtml(r.name)}</span>`);
+
   async function actKeep(o) {
     if (!api.SaveActSample) return;
     const c = actChoice();
@@ -2008,7 +2023,7 @@
   }
   async function actForgetSample(id) {
     const s = ((act.v && act.v.samples) || []).find((x) => x.id === id);
-    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? s.name : "", ok: tr("Tirar") });
+    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? (s.seed ? s.name : asIs(s.name)) : "", ok: tr("Tirar") });
     if (!ok) return;
     await api.DeleteActSample(id);
     act.pick = "p:castanha";

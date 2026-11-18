@@ -284,7 +284,6 @@ func tripReportTitle(p Period) string {
 	return strings.TrimSpace(p.Name)
 }
 
-// shownTitle é o título para desenhar: o nome da pessoa fica como está.
 // whReasons são os motivos prontos do chip do Onde (fora.js WH_REASONS):
 // gravados em português como nome do trecho, traduzem como os nomes padrão.
 var whReasons = []string{"quebrado", "em manutenção", "desligado de propósito", "leitura não confiável"}
@@ -294,6 +293,7 @@ func periodNameOwn(name string) bool {
 	return !isDefaultPeriodName(name) && !slices.Contains(whReasons, strings.TrimSpace(name))
 }
 
+// shownTitle é o título para desenhar: o nome da pessoa fica como está.
 func (t reportTrip) shownTitle() string {
 	if t.Own {
 		return asIs(t.Title)

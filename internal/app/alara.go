@@ -297,7 +297,7 @@ func (a *App) GetDoseOriginRange(fromMs, toMs int64) (DoseOrigin, error) {
 		over := func(t0, t1 int64) bool { return t0 < r.to && t1 > r.from }
 		for _, m := range meas {
 			if over(m.Time, max(m.Obj.End, m.Time+int64(m.Obj.Seconds)*1000)) {
-				it.Label, it.Kind = "Medir objeto · "+m.Name, "medicao"
+				it.Label, it.Kind = "Medir objeto · "+measNameTr(m), "medicao" // 2.101.10: nome da pessoa não traduz
 				break
 			}
 		}
@@ -319,10 +319,14 @@ func (a *App) GetDoseOriginRange(fromMs, toMs int64) (DoseOrigin, error) {
 		}
 		if it.Kind == "" {
 			for _, p := range periods {
-				if over(p.From, periodEnd(p)) {
+				// 2.101.10: só saída de verdade (youOut, 2.101.8) é "Fora de casa"
+				if youOut(p) && over(p.From, periodEnd(p)) {
 					it.Label, it.Kind = "Fora de casa", "fora"
-					if p.Name != "" {
-						it.Label += " · " + p.Name
+					if n := strings.TrimSpace(p.Name); n != "" {
+						if periodNameOwn(n) {
+							n = asIs(n)
+						}
+						it.Label += " · " + n
 					}
 					break
 				}
@@ -331,7 +335,7 @@ func (a *App) GetDoseOriginRange(fromMs, toMs int64) (DoseOrigin, error) {
 		if it.Kind == "" {
 			for _, n := range notes {
 				if over(n.Time, max(n.End, n.Time+60e3)) {
-					it.Label, it.Kind = "Anotação · "+n.Text, "nota"
+					it.Label, it.Kind = "Anotação · "+asIs(n.Text), "nota"
 					break
 				}
 			}

@@ -212,6 +212,7 @@ const tr = (() => {
   const skip = (n) => { const p = n.parentNode; return p && (p.nodeName === "SCRIPT" || p.nodeName === "STYLE" || (p.closest && p.closest("[data-no-tr]"))); };
   const keep = (el) => !rem || (el && el.closest && el.closest("[data-unit-keep]"));
   const conv = (s, el) => { const t = dateText(translate ? tr(s) : s); return keep(el) ? unitWord(t, el) : unitWord(remText(t), el); };
+  window.screenText = conv;
   const doText = (n) => {
     if (skip(n)) return;
     const t = conv(n.data, n.parentNode);
