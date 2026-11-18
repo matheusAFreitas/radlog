@@ -4480,7 +4480,7 @@ function wireBgTrend() {
     $("bgCursor").style.left = (((best.t - tr.from) / (tr.to - tr.from)) * 100) + "%";
     const tip = $("bgTip");
     tip.hidden = false;
-    tipSet(tip, `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`));
+    tipSet(tip, `24 h até ${dayLabel(best.t - 1)} ${hhmm(best.t)} · ` + (best.mean == null ? `poucos dados (${fmt(best.n, 0)} min)` : `média ${fmt(best.mean * calK(), 3)} µSv/h · mediana ${fmt(best.median * calK(), 3)} µSv/h · n = ${fmt(best.n, 0)} min`));
     const left = ((best.t - tr.from) / (tr.to - tr.from)) * b.width;
     tip.style.left = Math.min(Math.max(0, left - tip.offsetWidth / 2), b.width - tip.offsetWidth) + "px";
   });

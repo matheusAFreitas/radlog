@@ -1755,7 +1755,7 @@
   function actChipsHtml(v) {
     const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
     let h = `<p class="rc-act-grp">Suas amostras</p>`;
-    for (const s of v.samples || []) h += chip("s:" + s.id, `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
+    for (const s of v.samples || []) h += chip("s:" + s.id, s.seed ? `<span>${escHtml(s.name)}</span>` : `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
     h += (act.pick || "").startsWith("s:") ? `<button type="button" class="rc-act-chip add" data-keep>＋ Atualizar minha amostra<small>com o que está escolhido</small></button>` : `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
     h += `<p class="rc-act-grp">Outras</p>`;
     for (const [k, p] of Object.entries(ACT_PRESETS)) h += chip("p:" + k, p.label, p.sub);
@@ -1918,7 +1918,7 @@
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
     const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
-    setHTML($("rcActWhat"), `<b>${nm}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
+    setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
       fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
@@ -1999,6 +1999,7 @@
       const s = ((act.v && act.v.samples) || []).find((x) => "s:" + x.id === id);
       return !(s && s.seed);
     }
+    if (!id) return !Object.values(ACT_PRESETS).some((p) => p.name && p.name === r.name); // antes da 2.86: sem sampleId
     return true;
   }
   const actNameHtml = (r) => (actNameOwn(r) ? `<span data-no-tr>${escHtml(r.name)}</span>` : `<span>${escHtml(r.name)}</span>`);
@@ -2022,7 +2023,7 @@
   }
   async function actForgetSample(id) {
     const s = ((act.v && act.v.samples) || []).find((x) => x.id === id);
-    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? s.name : "", ok: tr("Tirar") });
+    const ok = await askConfirm({ title: tr("Tirar de Suas amostras?"), text: s ? (s.seed ? s.name : asIs(s.name)) : "", ok: tr("Tirar") });
     if (!ok) return;
     await api.DeleteActSample(id);
     act.pick = "p:castanha";

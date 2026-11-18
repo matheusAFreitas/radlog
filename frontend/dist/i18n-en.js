@@ -4902,7 +4902,10 @@ const I18N_EN = {
 "a noite fica acima do dia": "night is above day",
 "o dia fica acima da noite": "day is above night",
 "minuto novo": "new minute",
-"minutos novos": "new minutes"
+"minutos novos": "new minutes",
+"Uraninita": "Uraninite",
+"Uranocircita": "Uranocircite",
+"Euxenita": "Euxenite"
 },
 "patterns": [
 [
@@ -11198,6 +11201,17 @@ const I18N_EN = {
 ]
 ],
 [
+"média ",
+"^média ((?:(?! · ).)+?) µSv/h · mediana ((?:(?! · ).)+?) µSv/h · n = ((?:(?! · ).)+?) min$",
+"average ${1} µSv/h · median ${2} µSv/h · n = ${3} min",
+[
+"média ",
+" µSv/h · mediana ",
+" µSv/h · n = ",
+" min"
+]
+],
+[
 "não consegui ler os serviços (status ",
 "^não consegui ler os serviços \\(status ((?:(?! · ).)+?)\\)$",
 "couldn't read the services (status ${1})",
@@ -12320,17 +12334,6 @@ const I18N_EN = {
 [
 "RC102 (mensagem do aparelho, ",
 "): "
-]
-],
-[
-"média ",
-"^média ((?:(?! · ).)+?) · mediana ((?:(?! · ).)+?) µSv/h · n = ((?:(?! · ).)+?) min$",
-"average ${1} · median ${2} µSv/h · n = ${3} min",
-[
-"média ",
-" · mediana ",
-" µSv/h · n = ",
-" min"
 ]
 ],
 [

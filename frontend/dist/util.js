@@ -17,7 +17,7 @@ function asIs(s) {
 // 2.101.10: dica que se mede logo depois (offsetWidth) já vai traduzida;
 // se o observador traduzisse depois, o inglês (mais largo) passava da borda
 function tipSet(el, s) {
-  el.textContent = tr(s);
+  el.textContent = typeof window.screenText === "function" ? window.screenText(s, el) : tr(s);
 }
 
 // CSP (S5, 2.73.2): o que a política bloquear fica no console

@@ -10,9 +10,11 @@ Sobras da conferência do QA na 2.101.9:
 - Por que subiu?: a anotação perto da subida fica como você escreveu.
 - Atividade (Bq): o nome que você deu à amostra não é traduzido no
   histórico, no resultado e nos detalhes; os cartões prontos continuam
-  traduzidos.
-- Gráficos e Padrões em inglês: a dica perto da borda direita não passa mais
-  da janela (era medida antes de traduzir).
+  traduzidos (também durante a medida, nas medidas antigas e no aviso de
+  tirar a amostra); Uraninita, Uranocircita e Euxenita ganham nome em inglês.
+- Gráficos, Resumo, Fundo e Padrões: a dica perto da borda direita não passa
+  mais da janela em inglês nem em mrem/h (era medida antes de traduzir e
+  converter). Na dica do Fundo > Outro cálculo a média também sai em mrem/h.
 
 **English**
 Leftovers from QA's check of 2.101.9:
@@ -23,9 +25,13 @@ Leftovers from QA's check of 2.101.9:
   becomes "Away from home"; an ignored GMC-800 or both left at home does not.
 - Why did it rise?: the note near the rise stays as you wrote it.
 - Activity (Bq): the name you gave the sample is not translated in the
-  history, the result and the details; ready cards are still translated.
-- Charts and Patterns in English: the tooltip near the right edge no longer
-  runs past the window (it was measured before translating).
+  history, the result and the details; ready cards are still translated
+  (also during the measurement, in older measurements and in the remove
+  notice); Uraninite, Uranocircite and Euxenite get English names.
+- Charts, Summary, Background and Patterns: the tooltip near the right edge
+  no longer runs past the window in English or in mrem/h (it was measured
+  before translating and converting). In the Background > Other calculation
+  tooltip the average is also shown in mrem/h.
 
 ## 2.101.9
 Achados da conferência do QA na 2.101.8:
