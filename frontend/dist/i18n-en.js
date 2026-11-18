@@ -8103,6 +8103,15 @@ const I18N_EN = {
 ]
 ],
 [
+"em 1 dia: mais alto por volta das ",
+"^em 1 dia: mais alto por volta das ((?:(?! · ).)+?)h, mais baixo por volta das ((?:(?! · ).)+?)h$",
+"over 1 day: highest around ${1}h, lowest around ${2}h",
+[
+"em 1 dia: mais alto por volta das ",
+"h, mais baixo por volta das "
+]
+],
+[
 "Alarme (histórico do contador): pico de ",
 "^Alarme \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
 "Alarm (counter history): peak of ${1} CPM at ${2} (limit ${3})",

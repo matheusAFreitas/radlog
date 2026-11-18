@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"radlog/internal/gmc"
 	"radlog/internal/pdf"
 )
 
@@ -149,6 +150,11 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	cal := a.convCalLocked()
 	lv := a.effLocked().Levels.Norm()
 	info, connected := a.info, a.state == "conectado"
+	var calThen, calNow gmc.Calibration
+	if m != nil {
+		tl := a.calTLLocked()
+		calThen, calNow = tl.calAt(m.Time, lv.DeadTimeOn), tl.calAt(time.Now().UnixMilli(), lv.DeadTimeOn)
+	}
 	a.mu.Unlock()
 	if m == nil {
 		return "", errors.New("medição não encontrada")
@@ -173,10 +179,12 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	calTxt := fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM (para gama do Cs-137)"
 	// 2.101.6: o fator que valeu nos números da medição (o PDF pode ser feito
 	// depois de mudar a calibração)
+	// 2.101.8: o fator do fundo (100 CPM) da calibração de então, contra o de
+	// hoje no mesmo ponto (Obj.USv/Obj.CPM dava o fator efetivo da curva)
 	if m.Obj.CPM > 0 && m.Obj.USv > 0 {
-		k := m.Obj.USv / m.Obj.CPM
+		k := calThen.USv(100) / 100
 		calTxt = fmtBR(k, 4) + " µSv/h por CPM (a que valia na medição, para gama do Cs-137)"
-		if now := cal.USv(100) / 100; math.Abs(now-k) > 0.00005 {
+		if now := calNow.USv(100) / 100; math.Abs(now-k) > 0.00005 {
 			calTxt += "; hoje: " + fmtBR(now, 4)
 		}
 	}

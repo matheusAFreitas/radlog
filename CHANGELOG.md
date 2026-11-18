@@ -41,6 +41,12 @@ e as sobras da conferência da 2.101.6):
   log, eventos com o nome da pessoa, textos do espectrograma, nota e chuva na
   dica dos Gráficos, "Place:", "what is σ?" e "(2 days)" do zoom.
 - Modo demonstração: "fica calado" para o Perigo do outro aparelho vale.
+- Sobras da 2.101.7: o PDF da medição compara o fator do fundo de então com
+  o de hoje (acima da curva não dá mais "hoje" falso); a Hora do dia diz os
+  dias com dado (não "em 90 dias" com 8 dias de histórico); o ± do subtítulo
+  do gráfico da medição com um algarismo; em "Os dois aparelhos" com o
+  GMC-800 principal, o RC102 também vira "a dose subiu"; "−9%" com sinal de
+  menos na dose por período.
 
 **English**
 Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 3, and the
@@ -85,6 +91,12 @@ leftovers from the 2.101.6 check):
   spectrogram texts, note and rain in the chart tooltip, "Place:", "what is
   σ?" and the zoom "(2 days)".
 - Demo mode: "stays quiet" for the other device's Danger now applies.
+- Leftovers from 2.101.7: the measurement PDF compares the background
+  factor then with today's (no false "today" above the curve); Time of day
+  says the days with data (not "over 90 days" with 8 days of history); the ±
+  in the measurement chart subtitle has at least one digit; in "Both
+  devices" with the GMC-800 as main, the RC102 also becomes "the dose rose";
+  "−9%" with a minus sign in dose by period.
 
 ## 2.101.7
 Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 2,
