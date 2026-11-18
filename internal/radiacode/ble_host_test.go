@@ -140,3 +140,19 @@ func TestBLEHostQuietDrops(t *testing.T) {
 		t.Fatalf("depois da queda: %v", err)
 	}
 }
+
+type rssiHost struct{ nopHost }
+
+func (rssiHost) RSSI() int { return -88 }
+
+// o registro diz qual leitura travou (DATA_BUF, SPECTRUM…) e o sinal
+func TestBLEHostTimeoutLogVSAndRSSI(t *testing.T) {
+	var lines []string
+	BLELogf = func(f string, a ...any) { lines = append(lines, fmt.Sprintf(f, a...)) }
+	defer func() { BLELogf = nil }()
+	b := &bleAndroid{h: rssiHost{}, as: newAssembler(), resp: make(chan []byte, 1)}
+	b.logTimeout([]byte{8, 0, 0, 0, 0x26, 0x08, 0, 0x80, 0x00, 0x02, 0, 0}, 4*time.Second)
+	if len(lines) != 1 || !strings.Contains(lines[0], "0826 (SPECTRUM)") || !strings.Contains(lines[0], "sinal -88 dBm") {
+		t.Fatalf("registro: %q", lines)
+	}
+}

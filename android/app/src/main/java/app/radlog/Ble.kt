@@ -48,6 +48,9 @@ class Ble(private val ctx: Context) {
     private val writeDone = Semaphore(0)
     @Volatile private var writeStatus = 0
     @Volatile private var closedAt = 0L // quando a última conexão foi fechada
+    @Volatile private var lastRssi = 0 // último sinal lido do RC102 (dBm)
+    @Volatile private var rssiAt = 0L
+    private var rssiAsked = 0L
 
     /** Liga? (o Bluetooth do celular pode estar desligado) */
     fun enabled(): Boolean = manager?.adapter?.isEnabled == true
@@ -141,6 +144,10 @@ class Ble(private val ctx: Context) {
             l?.countDown()
         }
 
+        override fun onReadRemoteRssi(g: BluetoothGatt, rssi: Int, status: Int) {
+            if (status == BluetoothGatt.GATT_SUCCESS) { lastRssi = rssi; rssiAt = android.os.SystemClock.elapsedRealtime() }
+        }
+
         override fun onCharacteristicWrite(g: BluetoothGatt, c: BluetoothGattCharacteristic, status: Int) {
             writeStatus = status
             writeDone.release()
@@ -206,6 +213,9 @@ class Ble(private val ctx: Context) {
             g = gatt ?: throw Exception("conexão perdida")
             c = wr ?: throw Exception("conexão perdida")
         }
+        // o sinal do RC102 a cada 20 s, para o registro dizer se a queda foi rádio fraco
+        val now = android.os.SystemClock.elapsedRealtime()
+        if (now - rssiAsked > 20_000) { rssiAsked = now; try { g.readRemoteRssi() } catch (_: Exception) {} }
         val t = BluetoothGattCharacteristic.WRITE_TYPE_NO_RESPONSE
         var tries = 0
         while (true) {
@@ -227,6 +237,9 @@ class Ble(private val ctx: Context) {
         if (!writeDone.tryAcquire(3, TimeUnit.SECONDS)) throw Exception("o envio não terminou")
         if (writeStatus != BluetoothGatt.GATT_SUCCESS) throw Exception("envio recusado (status $writeStatus)")
     }
+
+    // último sinal lido (dBm), se tiver menos de 1 min; 0 = não sabe
+    fun rssi(): Int = if (android.os.SystemClock.elapsedRealtime() - rssiAt < 60_000) lastRssi else 0
 
     fun close() {
         val g: BluetoothGatt?

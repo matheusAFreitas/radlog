@@ -42,6 +42,8 @@ type Host interface {
 	BLEWrite(chunk []byte) error
 	// BLEClose desconecta.
 	BLEClose()
+	// BLERssi é o último sinal lido do RC102 em dBm (0 = não sabe).
+	BLERssi() int
 }
 
 var (
@@ -232,3 +234,4 @@ func (b bleHost) Scan(d time.Duration) ([]radiacode.BLEDevice, error) {
 func (b bleHost) Connect(addr string) error { return b.h.BLEConnect(addr) }
 func (b bleHost) Write(chunk []byte) error  { return b.h.BLEWrite(chunk) }
 func (b bleHost) Close()                    { b.h.BLEClose() }
+func (b bleHost) RSSI() int                 { return b.h.BLERssi() }

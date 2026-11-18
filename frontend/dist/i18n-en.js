@@ -18895,6 +18895,15 @@ const I18N_EN = {
 ]
 ],
 [
+"; sinal ",
+"^; sinal ((?:(?! · ).)+?) dBm$",
+"; signal ${1} dBm",
+[
+"; sinal ",
+" dBm"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",

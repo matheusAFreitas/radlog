@@ -223,6 +223,20 @@ func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	if len(req) >= 6 {
 		cmd = fmt.Sprintf("%02x%02x", req[5], req[4])
 	}
+	// qual string virtual (a leitura de cada segundo ou o espectro)
+	if len(req) >= 12 && uint16(req[4])|uint16(req[5])<<8 == cmdRdVirtString {
+		id := uint32(req[8]) | uint32(req[9])<<8 | uint32(req[10])<<16 | uint32(req[11])<<24
+		name := fmt.Sprintf("%#x", id)
+		if id == vsDataBuf {
+			name = "DATA_BUF"
+		}
+		for _, k := range KnownVS {
+			if k.ID == id {
+				name = k.Name
+			}
+		}
+		cmd += " (" + name + ")"
+	}
 	what := "nada chegou"
 	if got > 0 {
 		what = fmt.Sprintf("chegaram %d pedaço(s)", got)
@@ -232,6 +246,12 @@ func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	}
 	if bad != "" {
 		what += "; montagem: " + bad
+	}
+	// o sinal do RC102 no celular (o último lido): separa rádio fraco de travamento
+	if r, ok := b.h.(interface{ RSSI() int }); ok {
+		if v := r.RSSI(); v != 0 {
+			what += fmt.Sprintf("; sinal %d dBm", v)
+		}
 	}
 	f("RC102 (Bluetooth): sem resposta em %s ao pedido %s: %s", after, cmd, what)
 }
