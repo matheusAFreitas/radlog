@@ -8,7 +8,7 @@ sem
 vem do
 vêm
 às
-- **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor.
+- **Atualização pelo app**: avisa quando sai versão nova. - Outra coisa melhor. **English** - **Update from the app**: tells you when a new version is out. - Something else that got better.
 dia|
 , pela dica
 ajustes-*-antes.json
@@ -23,3 +23,4 @@ radlog nuvem v1
 s + objeto
 testar objeto calar silenciar pedra
 testar objeto parar
+# linhas que o RadLog não conseguiu ler, tiradas em {0}

@@ -9,6 +9,7 @@ import (
 	_ "embed"
 	"regexp"
 	"sort"
+	"strconv"
 	"strings"
 	"sync"
 	"unicode"
@@ -33,6 +34,14 @@ type dict struct {
 	mu     sync.Mutex
 	cache  map[string]string
 }
+
+// ptLeft: sobra de português num resultado (acento ou palavra comum).
+// O nome que a pessoa deu (U+2068…U+2069, asIs) não conta.
+func hasPTLeft(s string) bool { return ptLeft.MatchString(named.ReplaceAllString(s, "")) }
+
+var named = regexp.MustCompile("\u2068[^\u2069]*\u2069")
+
+var ptLeft = regexp.MustCompile(`(?i)[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa)\b`)
 
 var (
 	once sync.Once
@@ -141,8 +150,28 @@ func T(lang, s string) string {
 		return FixNums(s)
 	}
 	once.Do(load)
-	return en.tr(s)
+	// 2.101.2: o nome que a pessoa deu (U+2068…U+2069) vira uma marca antes
+	// dos moldes: um "em" ou "de" dentro dele não vira parte da frase
+	if !strings.Contains(s, "\u2068") {
+		return en.tr(s)
+	}
+	var names []string
+	t := named.ReplaceAllStringFunc(s, func(m string) string {
+		names = append(names, m)
+		return "\u2068" + strconv.Itoa(len(names)-1) + "\u2069"
+	})
+	if len(names) == 0 || strings.TrimSpace(t) == "\u20680\u2069" {
+		return en.tr(s)
+	}
+	return nameMark.ReplaceAllStringFunc(en.tr(t), func(m string) string {
+		if i, err := strconv.Atoi(m[len("\u2068") : len(m)-len("\u2069")]); err == nil && i < len(names) {
+			return names[i]
+		}
+		return m
+	})
 }
+
+var nameMark = regexp.MustCompile("\u2068[0-9]+\u2069")
 
 func hasWord(s string) bool {
 	n := 0
@@ -181,6 +210,7 @@ func (d *dict) tr(s string) string {
 	if !ok {
 		out, ok = d.sentences(core)
 	}
+	segFallback := ""
 	if !ok && strings.Contains(core, " · ") {
 		segs := strings.Split(core, " · ")
 		changed := false
@@ -210,7 +240,13 @@ func (d *dict) tr(s string) string {
 			}
 		}
 		if changed {
-			out, ok = strings.Join(segs, " · "), true
+			// 2.101.2: com português sobrando, um molde da frase inteira ainda
+			// pode ganhar (o resultado em pedaços fica de reserva)
+			if j := strings.Join(segs, " · "); hasPTLeft(j) {
+				segFallback = j
+			} else {
+				out, ok = j, true
+			}
 		}
 	}
 	if !ok {
@@ -223,6 +259,9 @@ func (d *dict) tr(s string) string {
 	}
 	if !ok {
 		out, ok = d.one(core, true)
+	}
+	if !ok && segFallback != "" {
+		out, ok = segFallback, true
 	}
 	if !ok && len(core) > 2 && strings.HasPrefix(core, "(") && strings.HasSuffix(core, ")") {
 		// 2.101.1: "(actínio · série do tório)": traduz o que está dentro
@@ -265,7 +304,10 @@ next:
 			}
 		}
 		if p.re.MatchString(s) {
-			return d.apply(p, s), true
+			// 2.101.2: com português sobrando, quebrar em frases ainda pode dar certo
+			if out := d.apply(p, s); !hasPTLeft(out) {
+				return out, true
+			}
 		}
 	}
 	return "", false
@@ -292,13 +334,24 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 	if e, ok := d.exact[s]; ok {
 		return e, true
 	}
-	lists := [][]*pattern{d.byLead[lower3(s)]}
-	if generic && len(s) <= 300 {
-		lists = append(lists, d.any)
-	}
-	for _, list := range lists {
+	// 2.101.2: entre os moldes que batem, vale o de mais texto fixo (antes
+	// valia o primeiro do começo: "Hoje: {0}" ganhava de "{0}: dia
+	// tranquilo, tudo no nível seguro." e o resto saía meio traduzido).
+	// Sem generic, os que começam variáveis só entram com 40%+ de texto fixo.
+	// Um molde cujo resultado ainda tem português (a parte variável não
+	// traduziu) só vale se nenhum outro der certo.
+	var best *pattern
+	var bestOut, half string
+	halfOK, halfFixed := false, 0
+	try := func(list []*pattern, wideOnly bool) {
 	next:
 		for _, p := range list {
+			if best != nil && fixedLen(p) <= fixedLen(best) {
+				continue
+			}
+			if wideOnly && fixedLen(p)*10 < len(s)*4 {
+				continue
+			}
 			for _, x := range p.pieces {
 				if !strings.Contains(s, x) {
 					continue next
@@ -308,7 +361,7 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 			if m == nil {
 				continue
 			}
-			return ph.ReplaceAllStringFunc(p.out, func(tok string) string {
+			out := ph.ReplaceAllStringFunc(p.out, func(tok string) string {
 				n := 0
 				for _, c := range tok[1 : len(tok)-1] {
 					n = n*10 + int(c-'0')
@@ -319,16 +372,36 @@ func (d *dict) one(s string, generic bool) (string, bool) {
 					}
 				}
 				return tok
-			}), true
+			})
+			if hasPTLeft(out) {
+				if !halfOK || fixedLen(p) > halfFixed {
+					half, halfOK, halfFixed = out, true, fixedLen(p)
+				}
+				continue
+			}
+			best, bestOut = p, out
 		}
+	}
+	try(d.byLead[lower3(s)], false)
+	if len(s) <= 300 {
+		try(d.any, !generic)
+	}
+	if best != nil {
+		return bestOut, true
+	}
+	if halfOK && generic {
+		return half, true
 	}
 	// "Frase com maiúscula." ↔ "frase com maiúscula" do dicionário
 	if r, size := utf8.DecodeRuneInString(s); size > 0 {
 		bare := strings.TrimSuffix(string(unicode.ToLower(r))+s[size:], ".")
 		if bare != s {
 			if e, ok := d.exact[bare]; ok {
-				er, es := utf8.DecodeRuneInString(e)
-				e = string(unicode.ToUpper(er)) + e[es:]
+				// 2.101.2: a primeira letra segue a do português
+				if unicode.IsUpper(r) {
+					er, es := utf8.DecodeRuneInString(e)
+					e = string(unicode.ToUpper(er)) + e[es:]
+				}
 				if strings.HasSuffix(s, ".") && !strings.HasSuffix(e, ".") {
 					e += "."
 				}

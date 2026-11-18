@@ -4810,7 +4810,8 @@ const I18N_EN = {
 "Não vai entrar na conta": "Won't be counted",
 "Relatório não saiu": "Report failed",
 "Relatório salvo": "Report saved",
-"leitura interrompida": "reading interrupted"
+"leitura interrompida": "reading interrupted",
+"Marcado": "Marked"
 },
 "patterns": [
 [
@@ -17953,6 +17954,14 @@ const I18N_EN = {
 "Code saved in ${1}",
 [
 "Código salvo em "
+]
+],
+[
+"Marcado: ",
+"^Marcado: ((?:(?! · ).)+?) · ((?:(?! · ).)+?) · ((?:(?! · ).)+?)–((?:(?! · ).)+?)$",
+"Marked: ${1} · ${2} · ${3}–${4}",
+[
+"Marcado: "
 ]
 ],
 [

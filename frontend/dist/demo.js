@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.1";
+const DEMO_VERSION = "2.101.2";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -55,7 +55,7 @@ function makeDemoApi(opts) {
   // seguinte (auditoria 2.76.0, U1)
   const [vMaj, vMin] = DEMO_VERSION.split(".").map(Number);
   let demoUpd = { current: DEMO_VERSION, latest: `${vMaj}.${vMin + 1}.0`, available: true, canAuto: true, url: "https://github.com/matheusAFreitas/radlog/releases",
-    notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.", checkedAt: Date.now(), state: "" };
+    notes: "- **Atualização pelo app**: avisa quando sai versão nova.\n- Outra coisa melhor.\n\n**English**\n- **Update from the app**: tells you when a new version is out.\n- Something else that got better.", checkedAt: Date.now(), state: "" };
   demoBus = {};
   const emit = (n, d) => (demoBus[n] || []).forEach((f) => f(d));
   const now = Date.now();

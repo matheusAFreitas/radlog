@@ -1,5 +1,47 @@
 # Versões
 
+## 2.101.2
+- Inglês sem meia tradução (pedido do ACE): a Fita do dia dizia "Today: dia
+  tranquilo, all on the nível seguro". O tradutor pegava o primeiro molde que
+  servia ("Hoje: {0}") e o resto saía meio traduzido. Agora, na tela e no Go,
+  vale o molde com mais texto fixo, e um resultado que ainda tem português é
+  recusado enquanto houver outro jeito (frases, pedaços, molde genérico).
+- Teste novo (scripts/ingles_test.js, roda no CI): todo texto em português do
+  código (5.076, frases fixas e moldes preenchidos com valores de exemplo)
+  passa pelo tradutor, e o demo em inglês é aberto em todos os cenários
+  (seguro, atenção, alarme, perigo, saída, saturado, desconectado, Cs-137…),
+  em todas as páginas, sub-abas, detalhes, janelas e hover. Sobrou
+  português: o CI falha.
+- Depois de "rótulo:", o número sai no formato do inglês (0.12, não 0,12).
+- Notas da atualização: em inglês, só a parte em inglês (antes vinham as
+  duas, com o português primeiro).
+- O nome que você dá (saída, medição, amostra) fica protegido antes da
+  tradução: um "em" ou "de" dentro dele não é mais lido como parte da frase.
+  "Marcado: …" do Fora de casa traduzido; "sem leitura" não ganha maiúscula
+  no meio da frase (achados do QA).
+
+**English**
+- English without half translations (ACE's request): the Day strip said
+  "Today: dia tranquilo, all on the nível seguro". The translator took the
+  first template that fit ("Hoje: {0}") and the rest came out half
+  translated. Now, on screen and in Go, the template with the most fixed text
+  wins, and a result that still has Portuguese is rejected while there is
+  another way (sentences, pieces, generic template).
+- New test (scripts/ingles_test.js, runs in CI): every Portuguese text in the
+  code (5,076, fixed sentences and templates filled with sample values) goes
+  through the translator, and the English demo is opened in every scenario
+  (safe, attention, alarm, danger, trip, saturated, disconnected, Cs-137…), on
+  every page, sub-tab, details, dialog and hover. Any Portuguese left: CI
+  fails.
+- After "label:", the number comes out in the English format (0.12, not
+  0,12).
+- Update notes: in English, only the English part (before, both came, with
+  the Portuguese first).
+- The name you give (trip, measurement, sample) is protected before
+  translation: an "em" or "de" inside it is no longer read as part of the
+  sentence. "Marked: …" in Away from home translated; "no reading" no longer
+  gets a capital letter mid-sentence (found by QA).
+
 ## 2.101.1
 - Faixa dos aparelhos presa no topo (fora do Agora): atrás da bolha do
   aparelho aparecia um retângulo de outra cor, de cantos retos. A faixa agora
