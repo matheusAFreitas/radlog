@@ -783,7 +783,9 @@ function renderMeasureResult(st) {
   // quatro números
   const t = $("mTilesNew");
   t.textContent = "";
-  sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
+  // 2.101.15 (item 133): no RC102 com o ± da dose, a razão também é da dose
+  const liveRatio = rc && r.netErrUSv > 0 && st.bg.usv > 0 ? st.obj.usv / st.bg.usv : r.ratio;
+  sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(liveRatio, 1)}× o fundo`);
   if (r.doseUp) sumTile(t, "certeza", mSure(r.doseSigma), `${fmt(r.doseSigma, 0)}σ na dose · ${fmt(r.sigma, 1)}σ na contagem`);
   else sumTile(t, "certeza", r.belowBg ? "abaixo do fundo" : mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
   glMark(t.lastElementChild.children[2], "sigma");
@@ -1150,10 +1152,11 @@ function measureExplain(r, obj, auto, k, bg, noLim) {
     if (limitBg(r, bg)) {
       const be = phErr(bg, bg.cpm > 0 && bg.usv > 0 ? bg.usv / bg.cpm : k), bt = fmtMin(bg.seconds);
       return noLim
-        ? `Chegou ao tempo máximo (${t}) sem decidir: quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`
-        : `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}; quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
+        ? `Chegou ao tempo máximo (${t}) sem decidir. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`
+        : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
     }
-    return noLim ? `Chegou ao tempo máximo (${t}) sem decidir: para ir além, aumente o tempo máximo.` : `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
+    // 2.101.15 (item 137): ao vivo, a faixa de cima já diz que chegou ao tempo máximo
+    return noLim ? `Chegou ao tempo máximo (${t}) sem decidir. Para ir além, aumente o tempo máximo.` : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
   }
   return {
     sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.",
@@ -1421,8 +1424,8 @@ function renderMeasureDetail() {
   sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${phErr(m.obj, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
   // 2.101.15 (item 133): no RC102 com o ± da dose, os números do líquido são todos da dose
   const byDose = r.doseUp || (rc && r.netErrUSv > 0);
-  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (byDose ? ` · ${fmt(r.doseSigma, 0)}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
-  if (byDose && m.bg.usv > 0) sumTile(t, "Objeto ÷ fundo", `${fmt(m.obj.usv / m.bg.usv, 2)}×`, `na dose · certeza ${mSure(r.doseSigma)}`);
+  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (byDose ? ` · ${fmt(r.doseSigma, 0).replace("-", "−")}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
+  if (byDose && m.bg.usv > 0) sumTile(t, "Objeto ÷ fundo", `${fmt(m.obj.usv / m.bg.usv, 2)}×`, r.doseUp ? `na dose · certeza ${mSure(r.doseSigma)}` : "na dose");
   else sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);

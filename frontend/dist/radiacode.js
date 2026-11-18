@@ -1724,7 +1724,7 @@
   }
   // linha da calibração no topo
   function actCalHtml(v) {
-    const c = v.cal || {}, geo = escHtml(c.geometry || "");
+    const c = v.cal || {}, geo = actGeomHtml(c.geometry || "");
     if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
     const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
     const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
@@ -1746,10 +1746,16 @@
   }
   // 2.101.6: a Posição segue a da calibração enquanto a pessoa não mexeu nela;
   // com o cursor no campo, ou depois de digitar (até apagar), o app não toca
+  // 2.101.15 (item 138): só a Posição padrão do app se traduz; a escrita pela
+  // pessoa fica como está (como o nome)
+  const ACT_GEOM_APP = ["pote encostado no RC102", "pote de 500 mL encostado"];
+  const actGeomApp = (g) => ACT_GEOM_APP.includes(g);
+  const actGeomHtml = (g) => (!g ? "" : actGeomApp(g) ? escHtml(g) : `<span data-no-tr>${escHtml(g)}</span>`);
   function actGeomFill(el, g) {
     if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
     if (document.activeElement === el || el.dataset.touched) return;
-    if (el.value !== tr(g)) el.value = tr(g); // 2.101.8: no idioma da tela (grava o original)
+    const shown = actGeomApp(g) ? tr(g) : g; // 2.101.8: no idioma da tela (grava o original)
+    if (el.value !== shown) el.value = shown;
   }
   // o campo ainda com o texto padrão traduzido manda o original (2.86.1: grava em português)
   const actOrig = (v, orig) => (orig && v === tr(orig) ? orig : v);
@@ -1952,9 +1958,9 @@
   // a tela da medição; a Posição só vai junto se não for a do pote da calibração
   function actWhereTxt(r) {
     const c = (act.v && act.v.cal) || {};
-    if (!r.loose) return r.geometry ? " · " + escHtml(r.geometry) : "";
+    if (!r.loose) return r.geometry ? " · " + actGeomHtml(r.geometry) : "";
     const own = r.geometry && r.geometry !== c.geometry && r.geometry !== c.prevGeometry;
-    return " · " + tr("pedra solta") + (own ? " · " + escHtml(r.geometry) : "");
+    return " · " + tr("pedra solta") + (own ? " · " + actGeomHtml(r.geometry) : "");
   }
   function actRenderRun(v) {
     const o = v.opts || {}, ph = v.phase, t = v.phaseSec || 0, tg = v.target || 0;
@@ -1962,7 +1968,7 @@
     const steps = ["Fundo", "Colocar a amostra", "Medindo", "Resultado"];
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
-    const where = o.loose ? tr("pedra solta") : o.geometry ? escHtml(o.geometry) : "";
+    const where = o.loose ? tr("pedra solta") : actGeomHtml(o.geometry || "");
     setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
     $("rcActDo").textContent = {
@@ -2013,6 +2019,8 @@
       newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: actLoose(c), sampleId: act.pick,
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
+    // 2.101.15 (item 135): pedra solta não leva a Posição do pote da calibração
+    if (o.loose && act.v && act.v.cal && o.geometry === act.v.cal.geometry) o.geometry = "";
     o.nameOwn = !!o.name && actNameOwn(o); // 2.101.12: nos Eventos, só o nome da pessoa fica como está
     return o;
   }
