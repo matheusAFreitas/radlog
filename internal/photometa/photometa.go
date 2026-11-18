@@ -17,7 +17,7 @@ var ErrFormat = errors.New("formato de imagem não reconhecido")
 // Handles diz se a extensão é de uma foto que pode levar metadados.
 func Handles(ext string) bool {
 	switch strings.ToLower(strings.TrimPrefix(ext, ".")) {
-	case "jpg", "jpeg", "png", "webp", "heic", "heif", "avif":
+	case "jpg", "jpeg", "jpe", "jfif", "jif", "pjpeg", "pjp", "png", "webp", "heic", "heif", "avif":
 		return true
 	}
 	return false
@@ -29,6 +29,7 @@ func Handles(ext string) bool {
 func Risky(ext string) bool {
 	switch strings.ToLower(strings.TrimPrefix(ext, ".")) {
 	case "tif", "tiff", "dng", "cr2", "cr3", "crw", "nef", "nrw", "arw", "srf", "sr2", "orf", "rw2", "raf", "pef", "srw", "x3f", "3fr", "rwl", "iiq",
+		"jxl", "gif", // 2.101.5: JPEG XL e GIF podem levar Exif/XMP, e o app não sabe limpar
 		"mp4", "m4v", "mov", "qt", "3gp", "3g2", "avi", "mkv", "webm", "mts", "m2ts":
 		return true
 	}
@@ -38,8 +39,16 @@ func Risky(ext string) bool {
 // Strip devolve a imagem sem os metadados. Para extensões que não são de
 // foto devolve b como veio.
 func Strip(b []byte, ext string) ([]byte, error) {
+	// 2.101.5: decide pelo conteúdo quando dá (um .jfif ou .jpe é JPEG, e
+	// uma extensão trocada não deixa a localização passar)
+	if len(b) >= 3 && b[0] == 0xFF && b[1] == 0xD8 && b[2] == 0xFF {
+		return stripJPEG(b)
+	}
+	if bytes.HasPrefix(b, []byte("\x89PNG\r\n\x1a\n")) {
+		return stripPNG(b)
+	}
 	switch strings.ToLower(strings.TrimPrefix(ext, ".")) {
-	case "jpg", "jpeg":
+	case "jpg", "jpeg", "jpe", "jfif", "jif", "pjpeg", "pjp":
 		return stripJPEG(b)
 	case "png":
 		return stripPNG(b)

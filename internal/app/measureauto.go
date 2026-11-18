@@ -257,7 +257,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 		bg := MeasurePhase{Counts: hb.Counts, Seconds: hb.Minutes * 60, CPM: hb.CPM, ErrCPM: hb.ErrCPM,
 			USv: hb.USv, ErrUSv: hb.ErrUSv, Start: hb.From, End: hb.To, Source: "casa"}
 		m.Bg = &bg
-		m.Phase = "objeto"
+		m.Phase, m.feedAt = "objeto", time.Now()
 		m.Seconds = o.Seconds
 		if o.Auto {
 			m.Seconds = o.MaxSec
@@ -266,7 +266,7 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 			m.Phase, m.readyAt = "fundo-pronto", time.Now()
 		}
 	} else {
-		m.Phase = "fundo"
+		m.Phase, m.feedAt = "fundo", time.Now()
 		m.Seconds = o.Seconds
 		if o.Auto {
 			m.Seconds = autoBgSec

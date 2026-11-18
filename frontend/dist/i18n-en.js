@@ -4821,7 +4821,14 @@ const I18N_EN = {
 "normal da casa": "home normal",
 "contagem agora": "count rate now",
 "O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
-"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RadiaCode. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong."
+"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RadiaCode. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
+"mrem/h acima do fundo": "mrem/h above background",
+"Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
+"Não consegui gravar os minutos do RadiaCode: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
+"ajustes ainda não gravados no GMC-800 (use Gravar no GMC-800)": "settings not yet written to the GMC-800 (use Write to the GMC-800)",
+"ajustes ainda não gravados no RC102 (use Gravar no RC102)": "settings not yet written to the RC102 (use Write to the RC102)",
+"ajustes ainda não gravados no RadiaCode (use Gravar no RadiaCode)": "settings not yet written to the RC102 (use Write to the RC102)",
+"testes de objeto": "object tests"
 },
 "patterns": [
 [
@@ -5855,6 +5862,16 @@ const I18N_EN = {
 " KB), ",
 " já existiam; backup ",
 "; pasta antiga apagada: "
+]
+],
+[
+"Não consegui ler o arquivo ",
+"^Não consegui ler o arquivo ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\): estava estragado\\. Guardei uma cópia em ((?:(?! · ).)+?) e segui sem o que tinha nele\\.$",
+"Couldn't read the file ${1} (${2}): it was damaged. I kept a copy at ${3} and went on without its contents.",
+[
+"Não consegui ler o arquivo ",
+"): estava estragado. Guardei uma cópia em ",
+" e segui sem o que tinha nele."
 ]
 ],
 [
@@ -8451,6 +8468,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Minutos do RadiaCode que estavam na memória gravados (",
+"^Minutos do RadiaCode que estavam na memória gravados \\(((?:(?! · ).)+?)\\)$",
+"RC102 minutes that were in memory written (${1})",
+[
+"Minutos do RadiaCode que estavam na memória gravados ("
+]
+],
+[
 "esta versão (",
 "^esta versão \\(((?:(?! · ).)+?)\\) é mais nova que a última publicada \\(((?:(?! · ).)+?)\\)((?:(?! · ).)+?)$",
 "this version (${1}) is newer than the latest published (${2})${3}",
@@ -8896,6 +8921,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Minutos do RC102 que estavam na memória gravados (",
+"^Minutos do RC102 que estavam na memória gravados \\(((?:(?! · ).)+?)\\)$",
+"RC102 minutes that were in memory written (${1})",
+[
+"Minutos do RC102 que estavam na memória gravados ("
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -8986,6 +9019,16 @@ const I18N_EN = {
 "${1} is now another device: waiting for the counter to come back",
 [
 " agora é outro aparelho: esperando o contador voltar"
+]
+],
+[
+"· GMC-800 ≈ ",
+"^· GMC\\-800 ≈ ((?:(?! · ).)+?) · RadiaCode ≈ ((?:(?! · ).)+?) mrem · um ponto a cada ((?:(?! · ).)+?)$",
+"· GMC-800 ≈ ${1} · RC102 ≈ ${2} mrem · one point every ${3}",
+[
+"· GMC-800 ≈ ",
+" · RadiaCode ≈ ",
+" mrem · um ponto a cada "
 ]
 ],
 [
@@ -9137,6 +9180,16 @@ const I18N_EN = {
 " cps ±",
 "% · ≈ ",
 " µSv/h agora"
+]
+],
+[
+"· GMC-800 ≈ ",
+"^· GMC\\-800 ≈ ((?:(?! · ).)+?) · RadiaCode ≈ ((?:(?! · ).)+?) µSv · um ponto a cada ((?:(?! · ).)+?)$",
+"· GMC-800 ≈ ${1} · RC102 ≈ ${2} µSv · one point every ${3}",
+[
+"· GMC-800 ≈ ",
+" · RadiaCode ≈ ",
+" µSv · um ponto a cada "
 ]
 ],
 [
@@ -9415,6 +9468,17 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 average ${1} · GMC-800 average ${2} · min ${3} · max ${4} ${5}",
+[
+"RadiaCode média ",
+" · GMC-800 média ",
+" · mín ",
+" · máx "
+]
+],
+[
 "Contador voltou a contar depois de ",
 "^Contador voltou a contar depois de ((?:(?! · ).)+?) min em 0 CPM$",
 "Counter counting again after ${1} min at 0 CPM",
@@ -9546,6 +9610,16 @@ const I18N_EN = {
 ]
 ],
 [
+"· GMC-800 ≈ ",
+"^· GMC\\-800 ≈ ((?:(?! · ).)+?) · RC102 ≈ ((?:(?! · ).)+?) mrem · um ponto a cada ((?:(?! · ).)+?)$",
+"· GMC-800 ≈ ${1} · RC102 ≈ ${2} mrem · one point every ${3}",
+[
+"· GMC-800 ≈ ",
+" · RC102 ≈ ",
+" mrem · um ponto a cada "
+]
+],
+[
 "Acima do fundo: ",
 "^Acima do fundo: ((?:(?! · ).)+?); o permitido no período era ((?:(?! · ).)+?)\\.$",
 "Above background: ${1}; the allowance for the period was ${2}.",
@@ -9669,6 +9743,16 @@ const I18N_EN = {
 [
 "um pouco acima do fundo, dentro do acaso (",
 " σ)"
+]
+],
+[
+"· GMC-800 ≈ ",
+"^· GMC\\-800 ≈ ((?:(?! · ).)+?) · RC102 ≈ ((?:(?! · ).)+?) µSv · um ponto a cada ((?:(?! · ).)+?)$",
+"· GMC-800 ≈ ${1} · RC102 ≈ ${2} µSv · one point every ${3}",
+[
+"· GMC-800 ≈ ",
+" · RC102 ≈ ",
+" µSv · um ponto a cada "
 ]
 ],
 [
@@ -9990,6 +10074,17 @@ const I18N_EN = {
 "Medição de ",
 " µSv/h sobre o fundo (",
 "σ) — "
+]
+],
+[
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · GMC\\-800 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 average ${1} · GMC-800 average ${2} · min ${3} · max ${4} ${5}",
+[
+"RC102 média ",
+" · GMC-800 média ",
+" · mín ",
+" · máx "
 ]
 ],
 [
@@ -12255,6 +12350,25 @@ const I18N_EN = {
 ]
 ],
 [
+"· dose ≈ ",
+"^· dose ≈ ((?:(?! · ).)+?) mrem · um ponto a cada ((?:(?! · ).)+?)$",
+"· dose ≈ ${1} mrem · one point every ${2}",
+[
+"· dose ≈ ",
+" mrem · um ponto a cada "
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) µSv \\+ acima do fundo ((?:(?! · ).)+?) µSv$",
+"background ${1} µSv + above background ${2} µSv",
+[
+"fundo ",
+" µSv + acima do fundo ",
+" µSv"
+]
+],
+[
 "sem acesso ao serviço de clima: ",
 "^sem acesso ao serviço de clima: ((?:(?! · ).)+?)$",
 "no access to the weather service: ${1}",
@@ -12753,6 +12867,16 @@ const I18N_EN = {
 [
 "espectro: formato ",
 " desconhecido"
+]
+],
+[
+"RadiaCode média ",
+"^RadiaCode média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 average ${1} · min ${2} · max ${3} ${4}",
+[
+"RadiaCode média ",
+" · mín ",
+" · máx "
 ]
 ],
 [
@@ -13968,6 +14092,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 média ",
+"^RC102 média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"RC102 average ${1} · min ${2} · max ${3} ${4}",
+[
+"RC102 média ",
+" · mín ",
+" · máx "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -14846,6 +14980,16 @@ const I18N_EN = {
 "old folder deleted on ${1}",
 [
 "pasta antiga apagada em "
+]
+],
+[
+"em casa ",
+"^em casa ((?:(?! · ).)+?) µSv · fora ((?:(?! · ).)+?) µSv$",
+"at home ${1} µSv · away ${2} µSv",
+[
+"em casa ",
+" µSv · fora ",
+" µSv"
 ]
 ],
 [
@@ -15991,6 +16135,24 @@ const I18N_EN = {
 "${1} The tube counts the same.",
 [
 " O tubo conta igual."
+]
+],
+[
+"média ",
+"^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
+"average ${1} · min ${2} · max ${3} ${4}",
+[
+"média ",
+" · mín ",
+" · máx "
+]
+],
+[
+"· ",
+"^· ((?:(?! · ).)+?) · um ponto a cada ((?:(?! · ).)+?)$",
+"· ${1} · one point every ${2}",
+[
+" · um ponto a cada "
 ]
 ],
 [
@@ -18441,6 +18603,14 @@ const I18N_EN = {
 "Connecting on ${1}…",
 [
 "Conectando em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) acima do fundo$",
+"${1} above background",
+[
+" acima do fundo"
 ]
 ],
 [

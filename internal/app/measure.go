@@ -85,6 +85,10 @@ type MeasureState struct {
 	Distance string         `json:"distance"`
 	Live     *MeasureResult `json:"live"`
 	Eta      int            `json:"eta"`
+	// 2.101.5: RC102, µSv/h médio do próprio aparelho na fase atual e a
+	// incerteza (o objeto não usa o µSv/h por contagem do fundo)
+	PhUSv    float64 `json:"phUsv,omitempty"`
+	PhErrUSv float64 `json:"phErrUsv,omitempty"`
 	// aparelho que está medindo: "gmc" (ou "") e "radiacode"
 	Device string `json:"device"`
 	// espectro (Radiacode), quando a medição termina
@@ -117,6 +121,9 @@ type MeasureState struct {
 	stopReq bool
 	// 2.81: quando o fundo ficou pronto (a pessoa está procurando o ponto)
 	readyAt time.Time
+	// 2.101.5: último segundo que chegou do aparelho da medição (aparelho
+	// que caiu no meio não cala os alertas para sempre)
+	feedAt time.Time
 }
 
 // MeasureSpectrum são os espectros do Radiacode de cada fase (contagens por
@@ -174,7 +181,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 			seconds = 60
 		}
 		prev := a.measure
-		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode, QuietDanger: prev.QuietDanger}
+		a.measure = MeasureState{Phase: "fundo", Seconds: seconds, Name: strings.TrimSpace(name), PhaseStart: time.Now().UnixMilli(), Eta: -1, Device: dev, Mode: prev.Mode, QuietDanger: prev.QuietDanger, feedAt: time.Now()}
 		if o := prev.Other; o != nil {
 			a.measure.Other = &MeasureSide{Device: o.Device, Role: o.Role, BgUSv: o.BgUSv}
 		}
@@ -184,11 +191,12 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 		if a.measure.Bg == nil {
 			return a.measure, errors.New("meça o fundo primeiro")
 		}
-		a.measure.Phase = "objeto"
+		a.measure.Phase, a.measure.feedAt = "objeto", time.Now()
 		a.measure.Elapsed, a.measure.Counts = 0, 0
 		a.measure.Obj, a.measure.Result, a.measure.Live, a.measure.Eta = nil, nil, nil, -1
 		a.measure.Spectrum, a.measure.usvSum, a.measure.usvSq = nil, 0, 0
 		a.measure.usvBlk = measBlocks{}
+		a.measure.PhUSv, a.measure.PhErrUSv = 0, 0
 		a.measure.Derived, a.measure.stopReq = nil, false
 		startSideObjLocked(&a.measure)
 		if a.measure.Auto {
@@ -233,6 +241,7 @@ func (a *App) StartMeasurePhase(phase string, seconds int, name string) (Measure
 const (
 	measQuietIdle  = 30 * time.Minute // procurando o ponto há mais que isso: volta a valer
 	measQuietGrace = time.Minute      // depois do resultado, para tirar o objeto de perto
+	measQuietStall = 2 * time.Minute  // sem segundo novo do aparelho: os alertas voltam
 )
 
 // measureActiveLocked diz se há uma medição em andamento (do começo até um
@@ -241,7 +250,8 @@ func (a *App) measureActiveLocked(now time.Time) bool {
 	m := &a.measure
 	switch m.Phase {
 	case "fundo", "objeto":
-		return true
+		// sem segundo novo há 2 min (o aparelho caiu): a medição está parada
+		return m.feedAt.IsZero() || now.Sub(m.feedAt) < measQuietStall
 	case "fundo-pronto":
 		return now.Sub(m.readyAt) < measQuietIdle
 	case "pronto":
@@ -403,11 +413,16 @@ func (a *App) feedMeasureDev(f measFeed) {
 		a.mu.Unlock()
 		return
 	}
+	m.feedAt = time.Now()
 	m.Counts += f.counts
 	m.usvSum += f.usv
 	m.usvSq += f.usv * f.usv
 	m.usvBlk.add(f.usv)
 	m.Elapsed++
+	if devName(m.Device) == devRC {
+		m.PhUSv = m.usvSum / float64(m.Elapsed)
+		m.PhErrUSv = m.usvBlk.err(m.usvSum, m.usvSq, m.Elapsed)
+	}
 	start := measT0(m)
 	a.measSamples = append(a.measSamples, MeasureSample{T: time.Now().UnixMilli() - start, Phase: m.Phase, CPM: f.cpm, CPS: uint32(max(f.counts, 0))})
 	var logText string
@@ -839,6 +854,12 @@ func (a *App) onObjectChecker(dev string) func(time.Time) bool {
 	}
 	for _, m := range a.measurements {
 		add(m)
+	}
+	// 2.101.5: "Estou testando um objeto" também
+	for _, o := range a.objSpansLocked() {
+		if devName(o.Dev) == dev {
+			spans = append(spans, [2]int64{o.From - 60_000, o.To + 60_000})
+		}
 	}
 	a.mu.Unlock()
 	return func(t time.Time) bool {

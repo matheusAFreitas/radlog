@@ -114,8 +114,20 @@ func (a *App) MarkBgMoved(dayMs int64) (BgSlow, error) {
 	if dayMs <= 0 || at.After(now) {
 		at = now
 	}
-	_, _ = a.SaveNote(Note{Time: at.UnixMilli(), Text: "Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)"})
+	a.dropMovedNotes() // 2.101.5: clicar de novo não repete a anotação
+	_, _ = a.SaveNote(Note{Time: at.UnixMilli(), Text: bgMovedNote})
 	return a.GetBgSlow(true)
+}
+
+const bgMovedNote = "Mudei o GMC-800 de lugar (o fundo de referência recomeça aqui)"
+
+// dropMovedNotes apaga as anotações automáticas da marca de mudança de lugar.
+func (a *App) dropMovedNotes() {
+	for _, n := range a.GetNotes(0, 0) {
+		if n.Text == bgMovedNote {
+			_ = a.DeleteNote(n.ID)
+		}
+	}
 }
 
 // ClearBgMoved desfaz a marca de mudança de lugar.
@@ -124,6 +136,7 @@ func (a *App) ClearBgMoved() (BgSlow, error) {
 	a.settings.BgMoved = 0
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	a.dropMovedNotes() // 2.101.5: desfez a marca, a anotação sai junto
 	return a.GetBgSlow(true)
 }
 

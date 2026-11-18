@@ -384,6 +384,9 @@ type App struct {
 	rcAlert        rcAlertState
 
 	connMu sync.Mutex // uma conexão por vez
+	// 2.101.5: alertas.csv/eventos.csv: a regravação inteira (saveEvents) e o
+	// anexo no fim (addEvent) não se cruzam, senão o anexo some na troca
+	evFileMu sync.Mutex
 
 	downloading    atomic.Bool
 	savePending    int         // minutos esperando para gravar (B2); com a.mu
@@ -447,28 +450,30 @@ type App struct {
 	bgOK  bool
 	bgAt  time.Time
 
-	measure      MeasureState         // medição de objeto (measure.go)
-	objTest      map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
-	rain         *rainCache           // chuva (weather.go)
-	rainDays     *rainDaysStore       // chuva por dia, para sempre (raindays.go)
-	yearMu       sync.Mutex
-	yearCache    map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
-	tubeMu       sync.Mutex
-	tubeCache    *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
-	bgSlowCache  *BgSlow     // subida lenta do fundo, junto da saúde do tubo (bgslow.go)
-	rainSt       rainState
-	radar        *radarStore   // chuva pelo radar (radar.go)
-	radarKick    chan struct{} // busca o radar já (lugar novo)
-	periods      []Period      // fora de casa (periods.go)
-	rcAsks       []RcAwayAsk   // "o RC102 estava fora de casa?" sem resposta (rcaway.go)
-	rcAsksLoaded bool
-	measurements []SavedMeasure   // medições de objeto salvas (measure.go)
-	measSamples  []MeasureSample  // segundos da medição em andamento
-	measSamples2 []MeasureSample  // os do segundo aparelho (µSv/h)
-	minuteObs    map[int64]string // marcas do minuto (saturação, interferência) até ele ser gravado
-	cfgMu        sync.Mutex       // histórico de configurações
-	devSaveMode  string           // modo de gravação da memória do GMC (lido ao conectar)
-	alertWatch   map[int64]bool   // alertas do GMC com segundos sendo gravados
+	measure        MeasureState         // medição de objeto (measure.go)
+	objTest        map[string]time.Time // "Estou testando um objeto": até quando (objtest.go)
+	objSpans       []objSpan            // 2.101.5: os testes de objeto gravados (fora da dose e do fundo)
+	objSpansLoaded bool
+	rain           *rainCache     // chuva (weather.go)
+	rainDays       *rainDaysStore // chuva por dia, para sempre (raindays.go)
+	yearMu         sync.Mutex
+	yearCache      map[string]yearMonth // resumo por dia de cada mês (yearcal.go)
+	tubeMu         sync.Mutex
+	tubeCache      *TubeHealth // saúde do tubo, recalculada às 06:00 (tubehealth.go)
+	bgSlowCache    *BgSlow     // subida lenta do fundo, junto da saúde do tubo (bgslow.go)
+	rainSt         rainState
+	radar          *radarStore   // chuva pelo radar (radar.go)
+	radarKick      chan struct{} // busca o radar já (lugar novo)
+	periods        []Period      // fora de casa (periods.go)
+	rcAsks         []RcAwayAsk   // "o RC102 estava fora de casa?" sem resposta (rcaway.go)
+	rcAsksLoaded   bool
+	measurements   []SavedMeasure   // medições de objeto salvas (measure.go)
+	measSamples    []MeasureSample  // segundos da medição em andamento
+	measSamples2   []MeasureSample  // os do segundo aparelho (µSv/h)
+	minuteObs      map[int64]string // marcas do minuto (saturação, interferência) até ele ser gravado
+	cfgMu          sync.Mutex       // histórico de configurações
+	devSaveMode    string           // modo de gravação da memória do GMC (lido ao conectar)
+	alertWatch     map[int64]bool   // alertas do GMC com segundos sendo gravados
 	// saídas programadas (planned.go)
 	planned       []PlannedTrip
 	plannedLoaded bool
@@ -816,7 +821,7 @@ func (a *App) saveSettingsFrom(s Settings, source string) Settings {
 		s.AlarmUSv = clampThr(s.AlarmUSv, 0.01, 1e4)
 	}
 	a.mu.Lock()
-	s.Port = a.settings.Port // a porta é salva ao conectar
+	s.Port, s.PortUSB = a.settings.Port, a.settings.PortUSB // a porta (e a identificação USB, 2.101.5) é salva ao conectar
 	s.ReportDir = a.settings.ReportDir
 	s.ReportMode, s.ReportNotes, s.ReportNoCfg = a.settings.ReportMode, a.settings.ReportNotes, a.settings.ReportNoCfg
 	s.BgMoved = a.settings.BgMoved                        // só por MarkBgMoved/ClearBgMoved

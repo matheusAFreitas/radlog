@@ -2134,7 +2134,7 @@
     $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; });
     $("rcActChips").addEventListener("click", (e) => {
       if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
-      const b = e.target.closest("button[data-pick]"); if (b) actPick(b.dataset.pick);
+      const b = e.target.closest("button[data-pick]"); if (b && b.dataset.pick !== act.pick) actPick(b.dataset.pick); // 2.101.5: o mesmo cartão não apaga o digitado
     });
     $("rcActExpect").addEventListener("click", (e) => { const b = e.target.closest("[data-forget-sample]"); if (b) actForgetSample(b.dataset.forgetSample); });
     $("rcActCalSteps").addEventListener("click", (e) => {
