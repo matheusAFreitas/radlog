@@ -39,6 +39,7 @@ func qaCalOnly(l []string) string {
 // 2.101.8 (item 44): na faixa da curva, sem mudar nada, não aparece "hoje".
 func TestQA2108CalTxtCurva(t *testing.T) {
 	a, _ := testApp(t)
+	a.SetUILang("pt") // o CI tem LANG em inglês
 	a.settings.ReportDir = t.TempDir()
 	a.settings.DateFormat = "iso"
 	pts, err := suggestCounterCal(gmc.DefaultCalibration().Points, 0.00564)
@@ -72,6 +73,7 @@ func TestQA2108CalTxtCurva(t *testing.T) {
 func TestQA2108CalTxtLater(t *testing.T) {
 	for _, retro := range []bool{false, true} {
 		a, _ := testApp(t)
+		a.SetUILang("pt") // o CI tem LANG em inglês
 		a.settings.ReportDir = t.TempDir()
 		a.settings.DateFormat = "iso"
 		a.loadCalHist() // como no app: a calibração de antes vale desde o começo
