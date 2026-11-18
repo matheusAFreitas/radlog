@@ -1674,7 +1674,7 @@
   const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
   const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
   const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
-  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, effOpen: false, busy: false, at: 0, chartKey: "" };
+  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
   const fmtSec = (s) => { if (!isFinite(s) || s <= 0) return "—"; if (s < 90) return nf(s, 0) + " s"; if (s < 5400) return nf(s / 60, 0) + " min"; return nf(s / 3600, s < 36000 ? 1 : 0) + " h"; };
@@ -1683,6 +1683,7 @@
   const fmtAT = (s) => (s > 0 ? fmtHM(s) : "até eu parar");
   const fmtDM = (t) => ddmm(t);
   const setHTML = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
+  const calMassShow = () => { const k = act.calKind; $("rcActCalMass").value = act.calMass[k] || (k === "torio" ? 40 : 500); };
   const actNum = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
   async function actLoad() {
     if (typeof api === "undefined" || !api.GetActivity || act.busy) return;
@@ -2120,7 +2121,10 @@
     segPick("rcActSmpT", (x) => { act.smpSec = +x; });
     segPick("rcActBgT", (x) => { act.bgSec = +x; });
     segPick("rcActBg", (x) => { act.bgMode = x; });
-    segPick("rcActKclType", (x) => { act.kclType = x; $("rcActCalMass").value = 500; });
+    segPick("rcActKclType", (x) => { act.kclType = x; });
+    // 2.101.3: a massa digitada fica; o padrão (500 g / 40 g) só entra no campo
+    // que a pessoa ainda não mexeu, e cada referência guarda a sua
+    $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; });
     $("rcActChips").addEventListener("click", (e) => {
       if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
       const b = e.target.closest("button[data-pick]"); if (b) actPick(b.dataset.pick);
@@ -2129,10 +2133,10 @@
     $("rcActCalSteps").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-k]"); if (!b) return;
       act.calKind = b.dataset.k;
-      $("rcActCalMass").value = act.calKind === "torio" ? 40 : 500;
+      calMassShow();
       actRender();
     });
-    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; $("rcActCalMass").value = k === "torio" ? 40 : 500; actRender(); };
+    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; calMassShow(); actRender(); };
     $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
     $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);

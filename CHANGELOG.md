@@ -1,5 +1,29 @@
 # Versões
 
+## 2.101.3
+- Calibração do KCl: a massa digitada voltava para 500 g quando se clicava
+  em "Sal light", "KCl puro" ou no cartão "1 · KCl" depois de digitar (pedido
+  do ACE: 250 g viraram 500 g). Agora a massa digitada fica, e cada referência
+  (KCl e tório) guarda a sua; o padrão só entra num campo que ainda não foi
+  mexido.
+- Teste novo de ponta a ponta (roda no CI): pela tela, com o App de verdade e
+  um RC102 de mentira, digita 250 g, 51% e a posição, clica em tudo que antes
+  trocava a massa, passa pelo fundo e pelo sal e confere o resultado na tela,
+  a calibração, o histórico e o que ficou salvo no disco. Com a versão
+  anterior ele falha em "massa 500 depois de Sal light".
+
+**English**
+- KCl calibration: the typed mass went back to 500 g when you clicked "Lite
+  salt", "Pure KCl" or the "1 · KCl" card after typing it (reported by ACE:
+  250 g became 500 g). Now the typed mass stays, and each reference (KCl and
+  thorium) keeps its own; the default only fills a field you haven't touched.
+- New end-to-end test (runs in CI): through the screen, with the real App and
+  a fake RC102, it types 250 g, 51% and the position, clicks everything that
+  used to reset the mass, goes through the background and the salt, and
+  checks the result on screen, the calibration, the history and what was
+  saved on disk. With the previous version it fails at "mass 500 after Lite
+  salt".
+
 ## 2.101.2
 - Inglês sem meia tradução (pedido do ACE): a Fita do dia dizia "Today: dia
   tranquilo, all on the nível seguro". O tradutor pegava o primeiro molde que
