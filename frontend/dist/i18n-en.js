@@ -4849,7 +4849,7 @@ const I18N_EN = {
 "fator do app,": "app factor,",
 "O RC102 subiu menos: veja a Saúde do tubo.": "The RC102 rose less: check Tube health.",
 "O RadiaCode subiu menos: veja a Saúde do tubo.": "The RC102 rose less: check Tube health.",
-"Mudou desde a medição": "Changed since the measurement",
+"Mudou desde a medição": "Changed since then",
 "Certeza pela dose: muito alta.": "Certainty from dose: very high.",
 "Certeza pela dose: alta.": "Certainty from dose: high.",
 "Certeza pela dose: boa.": "Certainty from dose: good.",

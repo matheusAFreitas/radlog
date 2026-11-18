@@ -4546,7 +4546,10 @@ function exportReport(from, to, label, btn) {
   $("repCfg").checked = !st.reportNoCfg;
   // 2.101.8: cada parte traduz sozinha (o molde "seg {0}" não pegava "→ hoje" nem "dom")
   const dl = (t) => (isToday(t) ? tr("hoje") : isYesterday(t) ? tr("ontem") : `${tr(WEEKDAY[new Date(t).getDay()])} ${ddmm(t)}`);
-  $("repSub").textContent = `${tr(label)} · ${dl(from)} ${hhmm(from)} → ${dl(Math.min(to, Date.now()) - 1)} ${hhmm(Math.min(to, Date.now()))}`;
+  // 2.101.9: fim à meia-noite é "24:00" do dia que acabou (não "00:00" do mesmo dia)
+  const end = Math.min(to, Date.now()), ed = new Date(end);
+  const endTxt = end > from && !ed.getHours() && !ed.getMinutes() ? `${dl(end - 1)} 24:00` : `${dl(end)} ${hhmm(end)}`;
+  $("repSub").textContent = `${tr(label)} · ${dl(from)} ${hhmm(from)} → ${endTxt}`;
   $("repDlg").showModal();
 }
 function wireReportDlg() {

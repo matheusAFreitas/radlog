@@ -50,7 +50,10 @@ type reportPDF struct {
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
-	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("RadLog "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
+	// 2.101.9: o período traduz sozinho (o molde "rótulo: valor" não vale dentro de um pedaço " · ")
+	foot := pdf.Fit("RadLog "+p.r.Version+" · "+pdf.Tr(p.r.Period), pdf.Sans, 7.5, pdf.W-2*pm-60)
+	pdf.MarkTranslated(foot)
+	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, foot)
 	pg := fmt.Sprintf("página %d", p.page)
 	if p.r.pages > 0 {
 		pg = fmt.Sprintf("página %d de %d", p.page, p.r.pages)

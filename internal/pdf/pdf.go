@@ -106,6 +106,9 @@ func winAnsi(s string) []byte {
 	repl, special := winAnsiRepl, winAnsiSpecial
 	out := make([]byte, 0, len(s))
 	for _, r := range s {
+		if r >= 0x2066 && r <= 0x2069 { // marcas de nome da pessoa (asIs): não desenha
+			continue
+		}
 		if t, ok := repl[r]; ok {
 			out = append(out, t...)
 			continue

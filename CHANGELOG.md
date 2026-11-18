@@ -1,5 +1,30 @@
 # Versões
 
+## 2.101.9
+Achados da conferência do QA na 2.101.8:
+- O nome que você deu a uma medição ou a um trecho não é mais traduzido no
+  app em inglês (a medição "Sal light" não vira "Lite salt", o trecho
+  "Escritório" não vira "Office"), na lista, no detalhe, na janela e no PDF.
+  Os nomes que o app dá (testes de Distância e Blindagem, "Saída de …")
+  continuam traduzidos.
+- Relatório de Fora de casa em inglês: o rodapé das páginas sai em inglês.
+- PDF da medição em inglês: "Configuração na época" traduz cada ajuste e a
+  origem da curva; o rótulo "Mudou desde a medição" cabe na coluna.
+- Janela do relatório: um dia fechado termina em "24:00" do mesmo dia (não
+  "00:00").
+
+**English**
+Findings from QA's check of 2.101.8:
+- The name you gave a measurement or a stretch is no longer translated in
+  the English app ("Sal light" no longer becomes "Lite salt", "Escritório" no
+  longer becomes "Office"), in the list, the detail, the window and the PDF.
+  Names the app gives (Distance and Shielding tests, "Trip on …") are still
+  translated.
+- Away from home report in English: the page footer is in English.
+- Measurement PDF in English: "Settings at the time" translates each setting
+  and the curve source; the "Changed since then" label fits its column.
+- Report window: a closed day ends at "24:00" of that day (not "00:00").
+
 ## 2.101.8
 Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 3,
 e as sobras da conferência da 2.101.6):

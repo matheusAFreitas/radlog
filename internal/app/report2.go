@@ -47,6 +47,7 @@ type reportAlert2 struct {
 // reportTrip é uma saída de casa (o RC102 foi junto) no período.
 type reportTrip struct {
 	Title    string
+	Own      bool // 2.101.9: nome que a pessoa deu (não se traduz)
 	From, To time.Time
 	Dose     float64
 	HasDose  bool
@@ -218,7 +219,7 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 	// saídas de casa: horário, dose e pico (e o espectro de cada uma)
 	for _, p := range periods {
 		if !isTrip(p) { // saída só com o GMC-800: média e pico dele
-			tr := reportTrip{Title: tripReportTitle(p), From: time.UnixMilli(p.From), To: time.UnixMilli(periodEnd(p)), GMC: true}
+			tr := reportTrip{Title: tripReportTitle(p), Own: !isDefaultPeriodName(p.Name), From: time.UnixMilli(p.From), To: time.UnixMilli(periodEnd(p)), GMC: true}
 			if tr.From.Before(r.From) {
 				tr.From = r.From
 			}
@@ -245,7 +246,7 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 			continue
 		}
 		ts := a.tripSummary(p, now)
-		tr := reportTrip{Title: tripReportTitle(p), From: time.UnixMilli(ts.From), To: time.UnixMilli(ts.To), Spec: ts.Spec, SpecRows: ts.SpecRows}
+		tr := reportTrip{Title: tripReportTitle(p), Own: !isDefaultPeriodName(p.Name), From: time.UnixMilli(ts.From), To: time.UnixMilli(ts.To), Spec: ts.Spec, SpecRows: ts.SpecRows}
 		if rc := ts.RC; rc != nil && rc.Minutes > 0 {
 			tr.Dose, tr.HasDose = rc.Dose, true
 			if rc.DevOK {
@@ -280,4 +281,12 @@ func tripReportTitle(p Period) string {
 		return "Saída de " + weekdayBR(t) + " " + t.Format("02/01")
 	}
 	return strings.TrimSpace(p.Name)
+}
+
+// shownTitle é o título para desenhar: o nome da pessoa fica como está.
+func (t reportTrip) shownTitle() string {
+	if t.Own {
+		return asIs(t.Title)
+	}
+	return t.Title
 }

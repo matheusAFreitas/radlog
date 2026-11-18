@@ -1332,7 +1332,7 @@ function renderMeasureHistory() {
     b.dataset.id = m.id;
     b.innerHTML = '<span class="mh-dot"></span><span class="m-item-main"><strong></strong><span class="mono small muted"></span></span><span class="mono small m-item-net"></span>';
     b.querySelector(".mh-dot").classList.add(...mLvCls(m.result, m.obj.cpm * phK(m.obj, isRcMeasure(m) ? "radiacode" : "gmc")).split(" "));
-    b.querySelector("strong").textContent = m.name;
+    mNameFill(b.querySelector("strong"), m); // 2.101.9: o nome da pessoa não se traduz
     // cada pedaço numa linha só: quebra só entre eles (2.98.1)
     const meta = b.querySelector(".m-item-main .muted");
     meta.classList.add("m-item-meta");
@@ -1379,7 +1379,7 @@ function renderMeasureDetail() {
   $("mDetailBody").hidden = !m;
   if (!m) return;
   const r = m.result;
-  $("mdName").textContent = m.name;
+  mNameFill($("mdName"), m);
   const home = m.bg.source === "casa";
   const rc = isRcMeasure(m);
   $("mdWhen").textContent = `${whenLabel(m.time)} · ` + (home ? `fundo da casa (${Math.round(m.bg.seconds / 60)} min) + objeto ${fmtMin(m.obj.seconds)}` : `fundo ${m.bg.seconds} s + objeto ${m.obj.seconds} s`) + (m.distance ? ` · ${m.distance}` : "") +
@@ -1554,3 +1554,13 @@ document.addEventListener("click", (e) => {
   const pg = $("pageMedir");
   if (pg) window.scrollTo({ top: Math.max(0, pg.getBoundingClientRect().top + window.scrollY - 12) });
 });
+
+// 2.101.9: o nome que a pessoa deu fica como está; o dos testes de Distância
+// e Blindagem é do app e traduz (o material, não)
+function mNameFill(el, m) {
+  const n = m.name || "";
+  delete el.dataset.noTr;
+  if (m.test === "distancia" && n === "Teste de distância") el.textContent = n;
+  else if (m.test === "blindagem" && n.startsWith("Blindagem: ")) el.textContent = "Blindagem: " + asIs(n.slice(11));
+  else { el.textContent = n; el.dataset.noTr = ""; }
+}

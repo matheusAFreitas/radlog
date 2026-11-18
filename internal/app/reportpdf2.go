@@ -344,7 +344,7 @@ func (p *reportPDF) pageDays() {
 			if t.Peak > 0 {
 				pk = fmtU(t.Peak) + " às " + t.PeakAt.Format("15:04")
 			}
-			rows = append(rows, []string{t.Title, dev, t.From.Format("02/01 15:04") + " → " + t.To.Format("15:04"), fmtMinutes(int(t.To.Sub(t.From).Minutes())), dose, pk})
+			rows = append(rows, []string{t.shownTitle(), dev, t.From.Format("02/01 15:04") + " → " + t.To.Format("15:04"), fmtMinutes(int(t.To.Sub(t.From).Minutes())), dose, pk})
 		}
 		p.table([]string{"Saída", "Levou", "Horário", "Duração", "Dose µSv", "Pico µSv/h"}, rows,
 			[]float64{cw * .22, cw * .1, cw * .2, cw * .1, cw * .18, cw * .2},
@@ -404,7 +404,7 @@ func (p *reportPDF) pageSpectrum() {
 			if t.HasDose {
 				sub += " · " + fmtBR(t.Dose, 2) + " µSv"
 			}
-			p.d.Text(x, p.y+10, pdf.SansBold, 8, cInk, pdf.Fit(t.Title, pdf.SansBold, 8, w))
+			p.d.Text(x, p.y+10, pdf.SansBold, 8, cInk, pdf.Fit(t.shownTitle(), pdf.SansBold, 8, w))
 			p.d.Text(x, p.y+20, pdf.Sans, 7, cMuted, sub)
 			p.y += 24
 			if t.Spec == nil {
