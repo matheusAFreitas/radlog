@@ -46,10 +46,13 @@ function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
   // evento "demo"; a leitura real chega pelo Go
   const inApp = !!(opts && opts.inApp);
+  // 2.101.13 (item 125): o que a "pessoa" da demonstração escreveu já nasce no idioma da demonstração
+  // (nome dado pela pessoa nunca é traduzido pelo app)
+  const demoOwn = (pt, en) => (LANG === "en" ? en : pt);
   let demoCloud = { state: "off", ready: true, auto: true };
   let demoCloudCode = "";
-  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: "voce@gmail.com", lastSync: Date.now(), used: 38e6, queue: [],
-    devices: [{ id: "a0", name: "pc-sala", lastUp: Date.now(), me: true }, ...others] });
+  const demoCloudOn = (others) => ({ state: "ok", ready: true, auto: true, email: demoOwn("voce@gmail.com", "you@gmail.com"), lastSync: Date.now(), used: 38e6, queue: [],
+    devices: [{ id: "a0", name: demoOwn("pc-sala", "living-room-pc"), lastUp: Date.now(), me: true }, ...others] });
   // versões que o modo demonstração mostra em "Atualizações e sobre": a
   // atual (DEMO_VERSION, conferida pelo scripts/check-version.sh) e a
   // seguinte (auditoria 2.76.0, U1)
@@ -87,9 +90,6 @@ function makeDemoApi(opts) {
   ].sort((x, y) => x.time - y.time).map((e, i) => ({ id: i + 1, ...e }));
   let demoAlerts = [], demoAlertSeq = 1000;
   const mt = now - 40 * 60e3;
-  // 2.101.13 (item 125): o que a "pessoa" da demonstração escreveu já nasce no idioma da demonstração
-  // (nome dado pela pessoa nunca é traduzido pelo app)
-  const demoOwn = (pt, en) => (LANG === "en" ? en : pt);
   let measurements = [{ id: 1, name: demoOwn("Banana com casca", "Banana with peel"), note: "", time: mt,
     bg: { counts: 155, seconds: 300, cpm: 31, errCPM: 2.5, usv: 0.2, start: mt, end: mt + 300e3 },
     obj: { counts: 161, seconds: 300, cpm: 32.2, errCPM: 2.5, usv: 0.21, start: mt + 360e3, end: mt + 660e3 },
@@ -121,7 +121,7 @@ function makeDemoApi(opts) {
     return { gmc: one("gmc"), radiacode: one("radiacode") };
   };
   const d1 = new Date(now - 864e5).setHours(0, 0, 0, 0);
-  let periods = [{ id: 1, name: "Passeio no parque", from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
+  let periods = [{ id: 1, name: demoOwn("Passeio no parque", "Walk in the park"), from: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 2 * 36e5, to: Math.floor((now - 2 * 864e5) / 36e5) * 36e5 + 5.5 * 36e5 },
     { id: 2, name: demoOwn("Centro e metrô", "Downtown and subway"), from: d1 + 13 * 36e5 + 10 * 6e4, to: d1 + 17 * 36e5 + 40 * 6e4, gmc: "casa", radiacode: "comigo", notHome: true }];
   const rcY = Math.floor((now - 864e5) / 6e4) * 6e4 - 3 * 36e5;
   const rcAsksAll = [{ id: rcY, from: rcY, to: rcY + 130 * 6e4, memMinutes: 128, avgUSv: 0.142, maxUSv: 0.231, maxAt: rcY + 57 * 6e4, doseUSv: 0.30, gmcUSv: 0.098, ratio: 41, normalRatio: 28, hint: "fora" }];
@@ -237,9 +237,16 @@ function makeDemoApi(opts) {
     }
     while (demoSecs.length && demoSecs[0].t < now - 36e5) demoSecs.shift();
     while (demoRcSecs.length && demoRcSecs[0].t < now - 36e5) demoRcSecs.shift();
+    // 2.101.13 (item 66): o σ dos últimos 10 min, como o Go (stats.go)
+    const demoSigma10 = (t, bg) => {
+      const xs = demoSecs.filter((x) => x.t > t - 6e5);
+      if (xs.length < 300) return null;
+      const mean = xs.reduce((a, x) => a + x.cpm, 0) / xs.length;
+      return (mean - bg) / Math.sqrt(bg / (xs.length / 60));
+    };
     const lvl = danger ? "perigo" : v.g >= l.alarm ? "alarme" : v.g >= l.attn ? "atencao" : "seguro";
     emit("reading", { time: now, cpm: Math.round(c), cps: pulsePoisson(c / 60), usv: v.g, mrh: v.g / 10, level: lvl, alarm: settings.alarmEnabled && v.g >= l.alarm, danger,
-      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12) });
+      saturated: !!v.sat, satReason: v.sat || "", rise: danger ? { fromUSv: 0.12, seconds: 3 } : null, demo: true, attention: v.g >= l.attn, bgCPM: 12, sigma: (c - 12) / Math.sqrt(12), sigma10: demoSigma10(now, 12) });
     feed(Math.max(0, pulsePoisson(c / 60)));
     emit("radiacode", demoRc());
     demoAwayAsk(!!v.away);
@@ -707,7 +714,7 @@ const demoRc = () => {
       let other = false;
       try { other = localStorage.getItem("gmc.cloudDemo") === "outro"; } catch (e) { /* sem localStorage */ }
       const was = demoCloud.was;
-      demoCloud = { ...demoCloud, state: was || "off", email: "voce@gmail.com" };
+      demoCloud = { ...demoCloud, state: was || "off", email: demoOwn("voce@gmail.com", "you@gmail.com") };
       if (was) return { info: (demoCloud = { ...demoCloud, state: "ok", was: "" }), next: "" };
       return { info: demoCloud, next: other ? "existing" : "new", lastUp: Date.now() - 864e5 };
     },
@@ -717,7 +724,7 @@ const demoRc = () => {
     CloudCode: async () => demoCloudCode,
     SaveCloudCode: async () => "C:\\Users\\voce\\Documents\\radlog-codigo-de-recuperacao.txt",
     CloudFinishSetup: async (code) => { demoCloudCode = code; return (demoCloud = demoCloudOn([])); },
-    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: "PC antigo", lastUp: Date.now() - 42 * 864e5 }])); },
+    CloudOpen: async (code) => { if (!demoCloudCode || code !== demoCloudCode) { demoCloudCode = code; } return (demoCloud = demoCloudOn([{ id: "b1", name: "Notebook", lastUp: Date.now() - 6e6 }, { id: "c2", name: demoOwn("PC antigo", "Old PC"), lastUp: Date.now() - 42 * 864e5 }])); },
     CloudReset: async () => demoCloud,
     CloudSyncNow: async () => (demoCloud = { ...demoCloud, state: "ok", lastSync: Date.now(), queue: [] }),
     CloudPause: async () => (demoCloud = { ...demoCloud, state: "ok" }),

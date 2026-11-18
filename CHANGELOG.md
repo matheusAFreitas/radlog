@@ -2,38 +2,48 @@
 
 ## 2.101.13
 Itens 21, 22, 62, 66, 67, 79, 92 e 125 da varredura (ok do ACE):
-- Configurações: valor fora da faixa agora aparece corrigido na tela e o
-  aviso de salvo diz o que ficou ("Fora da faixa, ficou: …").
+- Configurações: valor fora da faixa já avisa no campo, antes de salvar
+  ("O mínimo é 5 min. Vai gravar 5."); depois de salvar aparece corrigido e
+  o aviso diz o que ficou ("Fora da faixa, ficou: …").
 - "Restaurar padrões dos níveis" volta também o Alarme e o "Ligado" da
-  Atenção e do alarme, e só mexe na seção Níveis e alarmes.
-- Saída programada que passou do horário: no lugar de "editar" aparece
-  "corrigir aparelhos", que salva a correção dos aparelhos.
-- Agora: quando o fundo de casa sobe sem alerta, a frase do topo diz isso e
-  mostra o "Por que?".
+  Atenção e do alarme (o alarme religa no Salvar), e só mexe na seção
+  Níveis e alarmes.
+- Saída programada que passou do horário (começada ou não): no lugar de
+  "editar" aparece "corrigir aparelhos", que salva a correção; a começada
+  continua começada se o aparelho que saiu continua indo.
+- Agora: quando o fundo de casa fica acima do normal sem alerta (pela média
+  dos últimos 10 min: aparece com 3σ, some abaixo de 2σ), a frase do topo
+  diz isso e mostra o "Por que?".
 - Aviso de memória no quadro do GQ GMC-800: clicar abre a Memória do
   contador.
-- Janela estreita: o menu de páginas mostra setas ‹ › e degradê quando há
-  mais páginas, e a roda do mouse rola o menu para os lados.
+- Janela estreita: o menu de páginas mostra botões redondos ‹ › e degradê
+  quando há mais páginas, e a roda do mouse rola o menu para os lados.
 - "Cancelar a saída programada?": os botões viram "Manter a saída" e
   "Cancelar a saída".
-- Demonstração em inglês: os nomes de exemplo saem em inglês.
+- Demonstração em inglês: os nomes de exemplo (medições, saídas, notas e
+  nuvem) saem em inglês.
 
 **English**
 Items 21, 22, 62, 66, 67, 79, 92 and 125 from the sweep (ACE's ok):
-- Settings: an out-of-range value now shows corrected on screen and the
-  saved message says what was kept ("Out of range, set to: …").
-- "Restore level defaults" also restores the Alarm and the "On" boxes, and
-  only touches the Levels and alarms section.
-- Planned trip past its time: instead of "edit" there is "fix devices",
-  which saves the device fix.
-- Now: when the home background rises without an alert, the top sentence
-  says so and shows "Why?".
+- Settings: an out-of-range value warns on the field before saving ("The
+  minimum is 5 min. It will save 5."); after saving it shows corrected and
+  the saved message says what was kept ("Out of range, set to: …").
+- "Restore level defaults" also restores the Alarm and the "On" boxes (the
+  alarm turns back on at Save), and only touches the Levels and alarms
+  section.
+- Planned trip past its time (started or not): instead of "edit" there is
+  "fix devices", which saves the fix; a started trip stays started while the
+  device that left still goes.
+- Now: when the home background stays above normal without an alert (by the
+  last 10 min average: shows at 3σ, hides below 2σ), the top sentence says
+  so and shows "Why?".
 - Memory warning on the GQ GMC-800 card: clicking opens the counter memory.
-- Narrow window: the page menu shows ‹ › arrows and a fade when there are
-  more pages, and the mouse wheel scrolls the menu sideways.
+- Narrow window: the page menu shows round ‹ › buttons and a fade when
+  there are more pages, and the mouse wheel scrolls the menu sideways.
 - "Cancel the planned trip?": the buttons are now "Keep the trip" and
   "Cancel the trip".
-- English demo: sample names are in English.
+- English demo: sample names (measurements, trips, notes and cloud) are in
+  English.
 
 ## 2.101.12
 Itens 130 e 131 da varredura do QA:

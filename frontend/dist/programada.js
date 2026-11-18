@@ -112,8 +112,8 @@ function renderPlanned() {
       acts.appendChild(x);
     };
     if (p.saiu) link("Não estou saindo", () => call(api.NotLeaving, p.id).then(refreshPlanned));
-    // 2.101.13 (item 62): passou do horário, só dá para corrigir os aparelhos
-    if (!p.saiu && Date.now() > p.de + 3600e3) link("corrigir aparelhos", () => openPlanForm({ ...p, devOnly: true }));
+    // 2.101.13 (item 62): passou do horário (começada ou não), só dá para corrigir os aparelhos
+    if (Date.now() > p.de + 3600e3) link("corrigir aparelhos", () => openPlanForm({ ...p, devOnly: true }));
     else link("editar", () => openPlanForm(p));
     link("cancelar", async () => {
       // 2.101.13 (item 92): "Manter a saída" no lugar de "Cancelar" ao lado de "Cancelar a saída"
@@ -234,7 +234,8 @@ function planForm(p) {
       refreshPlanned();
     } catch (e) { err.textContent = errMsg(e); err.hidden = false; }
   });
-  setTimeout(() => name.focus(), 0);
+  // corrigir aparelhos: o nome está escondido, o foco vai para o primeiro aparelho
+  setTimeout(() => (p.devOnly ? devs.querySelector("input") || save : name).focus(), 0);
   return box;
 }
 

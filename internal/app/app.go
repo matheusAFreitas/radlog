@@ -140,6 +140,9 @@ type Reading struct {
 	// leitura está acima dele. Sigma vem nulo enquanto não houver fundo.
 	BgCPM float64  `json:"bgCPM"`
 	Sigma *float64 `json:"sigma"`
+	// 2.101.13 (item 66): o mesmo desvio pela média dos últimos 10 min (não
+	// pisca com o acaso de um minuto); nulo com menos de 5 min de leitura
+	Sigma10 *float64 `json:"sigma10,omitempty"`
 }
 
 // DeviceInfo descreve o contador conectado.

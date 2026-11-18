@@ -6435,3 +6435,8 @@ tempo da queda	drop time
 τ do tempo morto	dead time τ
 corrigir aparelhos	fix devices
 silenciar	silence
+O máximo é {0}. Vai gravar {1}.	The maximum is {0}. It will save {1}.
+O mínimo é {0}. Vai gravar {1}.	The minimum is {0}. It will save {1}.
+alarme ligado	alarm on
+bem acima do nível de fundo nos últimos 10 min ({0} σ)	well above the background level over the last 10 min ({0} σ)
+you@gmail.com	you@gmail.com

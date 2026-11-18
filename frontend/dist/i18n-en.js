@@ -4919,7 +4919,9 @@ const I18N_EN = {
 "tempo da queda": "drop time",
 "τ do tempo morto": "dead time τ",
 "corrigir aparelhos": "fix devices",
-"silenciar": "silence"
+"silenciar": "silence",
+"alarme ligado": "alarm on",
+"you@gmail.com": "you@gmail.com"
 },
 "patterns": [
 [
@@ -9207,6 +9209,15 @@ const I18N_EN = {
 "Medição de ",
 " µSv/h sobre o fundo (",
 "σ na dose) — "
+]
+],
+[
+"bem acima do nível de fundo nos últimos 10 min (",
+"^bem acima do nível de fundo nos últimos 10 min \\(((?:(?! · ).)+?) σ\\)$",
+"well above the background level over the last 10 min (${1} σ)",
+[
+"bem acima do nível de fundo nos últimos 10 min (",
+" σ)"
 ]
 ],
 [
@@ -14505,6 +14516,24 @@ const I18N_EN = {
 [
 " σ na dose · ",
 " σ na contagem"
+]
+],
+[
+"O máximo é ",
+"^O máximo é ((?:(?! · ).)+?)\\. Vai gravar ((?:(?! · ).)+?)\\.$",
+"The maximum is ${1}. It will save ${2}.",
+[
+"O máximo é ",
+". Vai gravar "
+]
+],
+[
+"O mínimo é ",
+"^O mínimo é ((?:(?! · ).)+?)\\. Vai gravar ((?:(?! · ).)+?)\\.$",
+"The minimum is ${1}. It will save ${2}.",
+[
+"O mínimo é ",
+". Vai gravar "
 ]
 ],
 [

@@ -145,7 +145,11 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 	}
 	if idx >= 0 {
 		old := list[idx]
-		if old.From == p.From && old.GMC == p.GMC && old.RC == p.RC {
+		// 2.101.13 (item 62): com o mesmo horário, a saída continua
+		// começada enquanto o aparelho que saiu continua indo
+		if old.From == p.From && old.Left > 0 && plannedGoes(p, old.LeftDev) {
+			p.Left, p.LeftDev = old.Left, old.LeftDev
+		} else if old.From == p.From && old.GMC == p.GMC && old.RC == p.RC {
 			p.Left, p.LeftDev = old.Left, old.LeftDev
 		} else {
 			p.Left, p.LeftDev = 0, ""

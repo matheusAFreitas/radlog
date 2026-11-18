@@ -58,7 +58,26 @@ func (a *App) fillSigma(r *Reading) {
 	if bg, ok := a.backgroundCPM(); ok && bg > 0 {
 		r.BgCPM = bg
 		r.Sigma = stats.Sigma(float64(r.CPM), bg)
+		r.Sigma10 = sigmaOver(a.liveSamples(time.UnixMilli(r.Time).Add(-sigma10Win), time.UnixMilli(r.Time).Add(time.Second)), bg)
 	}
+}
+
+// sigma10Win: janela do σ do cartão do Agora (item 66).
+const sigma10Win = 10 * time.Minute
+
+// sigmaOver é o desvio da média do CPM das leituras por segundo em relação ao
+// fundo, com o erro de Poisson para o tempo coberto; nulo com menos de 5 min.
+func sigmaOver(ss []sample, bg float64) *float64 {
+	if len(ss) < 300 || bg <= 0 {
+		return nil
+	}
+	sum := 0.0
+	for _, s := range ss {
+		sum += s.cpm
+	}
+	mean := sum / float64(len(ss))
+	z := (mean - bg) / math.Sqrt(bg/(float64(len(ss))/60))
+	return &z
 }
 
 // ---------- padrão por hora do dia ----------

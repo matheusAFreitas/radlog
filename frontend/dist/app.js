@@ -2070,13 +2070,16 @@ function setTypedNums() {
   for (const [id] of SET_CLAMP) if ($(id) && $(id).value !== "") o[id] = setNum($(id).value);
   return o;
 }
+// o que a tela mostraria do digitado (o app arredonda sozinho: inteiros e
+// 4 algarismos na taxa), para não chamar de "fora da faixa" o que não foi cortado
+const setShownNum = (x, u) => (u === "rate" ? setNum(rateOut(x / rateK())) : u === "µs" ? x : Math.round(x));
 function setRepaintClamped(typed) {
   const s = state.settings || {}, out = [];
   for (const [id, label, get, u] of SET_CLAMP) {
     const v = get(s);
     if (!(id in typed) || !(v > 0)) continue;
     const shown = u === "rate" ? rateOut(v) : v;
-    const was = typed[id], now = setNum(shown);
+    const was = setShownNum(typed[id], u), now = setNum(shown);
     if (!(Math.abs(was - now) > 1e-6 * Math.max(1, Math.abs(now)))) continue;
     $(id).value = shown;
     // µSv/h: a tela troca para mrem/h sozinha
@@ -2085,6 +2088,32 @@ function setRepaintClamped(typed) {
   if (out.length) { renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderDeadTime(); }
   return out;
 }
+// 2.101.13 (item 21): fora da faixa já avisa no campo, antes de salvar
+// (min/max do campo: na taxa, em µSv/h, convertidos para a unidade da tela)
+function setRangeHint(id) {
+  const ent = SET_CLAMP.find((x) => x[0] === id), el = $(id);
+  if (!ent || !el) return;
+  const u = ent[3], raw = el.value.trim();
+  let msg = "";
+  if (raw !== "") {
+    const v = u === "rate" ? rateIn(raw) : setNum(raw);
+    const mn = parseFloat(el.getAttribute("min")), mx = parseFloat(el.getAttribute("max"));
+    const show = (x) => (u === "rate" ? usvTxt(x) : `${fmt(x, 0)} ${u}`), keep = (x) => (u === "rate" ? usvTxt(x) : fmt(x, 0));
+    if (v > 0 && mn > 0 && v < mn) msg = `O mínimo é ${show(mn)}. Vai gravar ${keep(mn)}.`;
+    else if (v > 0 && mx > 0 && v > mx) msg = `O máximo é ${show(mx)}. Vai gravar ${keep(mx)}.`;
+  }
+  el.classList.toggle("out-range", !!msg);
+  let h = el.parentElement.querySelector(".range-hint");
+  if (msg && !h) {
+    h = document.createElement("small");
+    h.className = "range-hint warn-text";
+    h.setAttribute("aria-live", "polite");
+    el.insertAdjacentElement("afterend", h);
+  }
+  if (h) { h.textContent = msg ? tr(msg) : ""; h.hidden = !msg; }
+}
+const setRangeHints = () => SET_CLAMP.forEach(([id]) => setRangeHint(id));
+document.addEventListener("input", (e) => { if (e.target && e.target.id && SET_CLAMP.some((x) => x[0] === e.target.id)) setRangeHint(e.target.id); });
 
 function readLevels() {
   const out = {};
@@ -2328,7 +2357,8 @@ function wireLevels() {
     $("numAlarm").value = rateOut(usv3(100 * calK()));
     $("lvSnooze").value = LV_DEFAULT.snoozeMin;
     $("chkAttn").checked = true;
-    if (!$("chkAlarm").checked) { $("chkAlarm").checked = true; $("chkAlarm").dispatchEvent(new Event("change")); }
+    // 2.101.13 (item 22, conferência do QA): o alarme religa só no Salvar (Descartar volta tudo)
+    $("chkAlarm").checked = true;
     renderLevelEq(); renderDangerNote(); renderAttnLabel(); renderSetBar();
   });
   $("btnSetDiscard").addEventListener("click", () => { state.setSnap = null; openSettings(); });
@@ -2718,20 +2748,24 @@ async function openSettings(focusId) {
 // próprio, como "Gravar no contador"). A barra de baixo diz quais mudaram.
 const SET_SAVE_IDS = () => ["chkAuto", "numAlarm", "selSound", "chkRaise", "chkAttn", "chkTray", "chkAutostart", "chkTrayNum", "selTrayDev", "chkPulse", "chkPulseStrip", "selPulseLogo", "valUiScale", "valUiDensity", "valRateUnit", "valCountUnit", "valDateFmt", "chkUpdCheck", "chkCleanOld", "selLang", "chkMeasReport", "chkAutoHist", "numAwayAsk", "lvDTOn", ...Object.keys(LV_FIELDS)];
 // nomes curtos na barra de mudanças
-const SET_FIELD_NAMES = { chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
+const SET_FIELD_NAMES = { chkAlarm: "alarme ligado", chkAuto: "conectar sozinho", numAlarm: "limite do alarme", selSound: "som do alarme", chkRaise: "trazer a janela para a frente", chkAttn: "aviso de atenção",
   chkTray: "bandeja ao fechar", chkAutostart: "iniciar com o Windows", chkTrayNum: "leitura no ícone", valUiScale: "tamanho", valUiDensity: "espaço", valRateUnit: "unidade da taxa", valCountUnit: "unidade da contagem", valDateFmt: "formato da data", selTrayDev: "aparelho no ícone", chkPulse: "piscar a cada contagem", chkPulseStrip: "fita dos últimos 10 segundos", selPulseLogo: "aparelho do logo", chkUpdCheck: "procurar versão nova", chkCleanOld: "apagar versões antigas", selLang: "idioma",
   chkMeasReport: "relatório da medição", chkAutoHist: "histórico do GMC-800 sozinho", numAwayAsk: "pergunta de fora de casa", lvAttn: "nível de atenção", lvDanger: "nível de perigo", lvSnooze: "tempo do silenciar",
   lvSatMax: "fim da escala", lvSatDrop: "queda brusca", lvSatHold: "tempo do aviso de queda", lvRcSat: "fim da escala do RC102", lvDTOn: "compensar o tempo morto", lvDTUs: "tempo morto τ" };
 const setVal = (el) => (el.type === "checkbox" ? el.checked : el.value);
 state.setSnap = null;
 function setSnap() {
+  setRangeHints();
   state.setSnap = {};
   for (const id of SET_SAVE_IDS()) if ($(id)) state.setSnap[id] = setVal($(id));
   renderSetBar();
 }
 function setDirty() {
   if (!state.setSnap) return [];
-  return SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  const out = SET_SAVE_IDS().filter((id) => $(id) && id in state.setSnap && setVal($(id)) !== state.setSnap[id]);
+  // o "Ligado" do alarme grava na hora; só fica pendente depois do Restaurar
+  if ($("chkAlarm") && state.settings && $("chkAlarm").checked !== !!state.settings.alarmEnabled) out.push("chkAlarm");
+  return out;
 }
 function setFieldName(id) {
   if (SET_FIELD_NAMES[id]) return SET_FIELD_NAMES[id];
@@ -3336,6 +3370,7 @@ function wire() {
     await saveSettings({
       autoConnect: $("chkAuto").checked,
       alarmUSv: alarm > 0 ? alarm : usv3(100 * calK()),
+      alarmEnabled: $("chkAlarm").checked,
       alarmSound: $("selSound").value,
       alarmRaise: $("chkRaise").checked,
       attentionEnabled: $("chkAttn").checked,
@@ -3403,7 +3438,7 @@ function wire() {
     sideNav.classList.toggle("hr", hr);
     for (const [a, on] of [[sideArrL, hl], [sideArrR, hr]]) {
       a.hidden = !on;
-      if (on) { a.style.top = sideNav.offsetTop + "px"; a.style.height = sideNav.offsetHeight + "px"; }
+      if (on) a.style.top = sideNav.offsetTop + Math.max(0, (sideNav.offsetHeight - 28) / 2) + "px"; // redondo, no meio da linha
     }
   };
   const sideArr = (cls, txt, label, dir) => {
