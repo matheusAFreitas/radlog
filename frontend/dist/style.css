@@ -1908,9 +1908,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings .set-content { background: transparent; border: 0; border-radius: 0; padding: 0 0 var(--space-12); display: flex; flex-direction: column; gap: var(--space-4); }
 .set-sec, .set-tab { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 .set-sec[hidden], .set-tab[hidden] { display: none; }
-/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala) */
 .set-sec { container-type: inline-size; }
-@container (max-width: 760px) { .set-cards, .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 .set-sec-title { margin: 0; font-size: var(--fs-title); font-weight: 600; }
 .set-tabs { display: flex; gap: 2px; margin-top: calc(-1 * var(--space-2)); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
 .set-tabs button { flex: none; min-height: 38px; padding: var(--space-2) var(--space-3); margin-bottom: -1px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: var(--fs-label); cursor: pointer; white-space: nowrap; }
@@ -1918,6 +1916,8 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings .set-tabs button[aria-selected="true"] { background: none; color: var(--text); border-bottom-color: var(--accent); font-weight: 500; }
 .set-tabs button:focus-visible { outline: 2px solid var(--accent-line); outline-offset: -2px; }
 .set-cards, #settings .devcfg .dc-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); align-items: start; }
+/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala); depois da regra base para ganhar dela */
+@container (max-width: 760px) { .set-cards, #settings .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 /* duas colunas que empilham sozinhas (2.68.4): o último cartão visível de cada uma estica */
 .set-col { display: flex; flex-direction: column; gap: var(--space-3); min-width: 0; }
 .set-cards > .set-wide, #settings .dc-grid > .set-wide { grid-column: 1 / -1; }
@@ -2130,7 +2130,7 @@ details.how.how-c[open] > summary { position: sticky; top: 0; background: var(--
 /* o título não passa por baixo do "?" */
 .how-host > :is(h2, h3, h4, .card-head, .rc-head, .ag-dose-head, .al-main > h2:first-child) { padding-right: 120px; }
 /* 2.101.8: o seletor não empilha os botões; "Mostrar" fica junto do seu seletor */
-.ag-dose-head .seg { flex-wrap: nowrap; }
+#agDevSeg { flex-wrap: nowrap; }
 .al-filter-g { display: inline-flex; align-items: center; gap: var(--space-2); }
 .how-host > .al-main > :is(h2, h3):first-child { padding-right: 120px; }
 /* 2.101.8: "← Voltar" no topo (Distância, Blindagem): fica à esquerda, longe do "?" */
@@ -3283,8 +3283,11 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .al-h { display: none; }
 .al-dose .toggle.al-on { flex: none; gap: var(--space-2); }
 .al-dose-f .al-say { white-space: nowrap; }
-@media (max-width: 640px) {
-  .al-wrap { overflow-x: visible; }
+/* 2.101.8: empilha pela largura da caixa da tabela (a janela não desconta a
+   barra lateral, o menu das Configurações e a escala) */
+.al-wrap { container-type: inline-size; }
+@media (max-width: 640px) { .al-wrap { overflow-x: visible; } }
+@container (max-width: 620px) {
   .al-tbl thead { display: none; }
   .al-tbl, .al-tbl tbody, .al-tbl tr, .al-tbl th, .al-tbl td { display: block; width: auto; }
   .al-tbl tbody th { width: auto; padding-bottom: 0; border-bottom: 0; }

@@ -95,7 +95,7 @@ func (a *App) GetPlannedTrips() []PlannedTrip {
 	out := append([]PlannedTrip{}, kept...)
 	a.mu.Unlock()
 	for _, p := range gone {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", asIs(p.Name), time.UnixMilli(p.From).Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\" de %s apagada: passou uma semana sem o aparelho voltar", plannedEvName(p.Name), time.UnixMilli(p.From).Format("02/01 15:04")))
 	}
 	return out
 }
@@ -316,9 +316,9 @@ func (a *App) plannedOnConnect(dev string, conn time.Time) bool {
 	}
 	a.mu.Unlock()
 	if manual {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", asIs(trip.Name)))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": já havia um trecho marcado à mão nesse horário; ficou o seu", plannedEvName(trip.Name)))
 	} else {
-		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", asIs(trip.Name), devLabel(dev), conn.Format("02/01 15:04")))
+		a.logEvent(fmt.Sprintf("Saída programada \"%s\": o %s voltou a conectar às %s; o app pergunta na tela Agora se você saiu mesmo", plannedEvName(trip.Name), devLabel(dev), conn.Format("02/01 15:04")))
 		a.emitRcAway()
 	}
 	a.emitPlanned()

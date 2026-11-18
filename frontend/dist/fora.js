@@ -128,6 +128,8 @@ const whOut = (w) => (w.gmc === "casa" || w.gmc === "fora") && w.radiacode === "
 const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "ignorado" };
 // 2.94 (M5): três palavras (em casa, comigo, ignorar). Os nomes guardados
 // continuam os de antes ("… fora do cálculo"); só a tela troca
+// motivos prontos do chip (2.101.8): gravados em português, mostrados no idioma da tela
+const WH_REASONS = ["quebrado", "em manutenção", "desligado de propósito", "leitura não confiável"];
 const whWord = (s) => ({ "Os dois fora do cálculo": "Os dois ignorados", "GMC-800 fora do cálculo": "GMC-800 ignorado", "RC102 fora do cálculo": "RC102 ignorado" })[s] || s;
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
@@ -379,7 +381,7 @@ function renderPeriods() {
     t.className = "t";
     const b = document.createElement("b");
     b.textContent = whWord(p.name);
-    if (p.name !== whKind(whOf(p))) b.dataset.noTr = "";
+    if (p.name !== whKind(whOf(p)) && !WH_REASONS.includes(p.name)) b.dataset.noTr = "";
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);
