@@ -136,7 +136,7 @@ function alertLi(e, other) {
   if (ap) {
     const tag = document.createElement("span");
     tag.className = "tag-retro tag-away";
-    tag.textContent = ap.name;
+    tag.textContent = pNameTxt(ap.name);
     tag.title = "Aconteceu num período marcado como fora de casa";
     ttl.appendChild(tag);
   }

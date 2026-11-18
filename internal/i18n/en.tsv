@@ -6341,7 +6341,7 @@ em {0} dias: mais alto por volta das {1}h, mais baixo por volta das {2}h	over {0
 em {0} dias: mais alto por volta das {1}h ({2} {3}) · mais baixo por volta das {4}h ({5} {6})	over {0} days: highest around {1}h ({2} {3}) · lowest around {4}h ({5} {6})
 perto do fundo da sua casa ({0}{1}%)	close to your home background ({0}{1}%)
 {0}× casa ({1} µSv/h)	{0}× home ({1} µSv/h)
-Mudou desde a medição	Changed since the measurement
+Mudou desde a medição	Changed since then
 {0} µSv/h por CPM (a que valia na medição, para gama do Cs-137)	{0} µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma)
 {0} µSv/h por CPM (a que valia na medição, para gama do Cs-137); hoje: {1}	{0} µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma); today: {1}
 Medição de {0}{1}: {2}{3} ± {4} µSv/h sobre o fundo ({5}σ na dose) — {6}	Measurement of {0}{1}: {2}{3} ± {4} µSv/h above background ({5}σ in dose) — {6}

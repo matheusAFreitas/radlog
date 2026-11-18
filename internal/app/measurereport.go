@@ -9,6 +9,7 @@ import (
 	"sort"
 	"strings"
 	"time"
+	"unicode"
 
 	"radlog/internal/gmc"
 	"radlog/internal/pdf"
@@ -232,7 +233,7 @@ func asciiFold(s string) string {
 
 func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows ...[2]string) []byte {
 	t0 := time.UnixMilli(m.Time)
-	title := "Medição: " + m.Name
+	title := "Medição: " + measNameTr(m) // 2.101.9: o nome da pessoa não se traduz
 	home := m.Bg.Source == "casa"
 	period := t0.Format("02/01/2006 15:04") + " · fundo " + fmt.Sprint(m.Bg.Seconds) + " s + objeto " + fmt.Sprint(m.Obj.Seconds) + " s"
 	if home {
@@ -945,12 +946,17 @@ func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
 		var then []string
 		for _, c := range ctx.Cfg {
 			if c.Then != "" {
-				then = append(then, strings.ToLower(c.Field[:1])+c.Field[1:]+": "+c.Then)
+				// 2.101.9: cada pedaço traduz sozinho (junto, o molde não casava)
+				then = append(then, lowerFirst(a.T(c.Field))+": "+a.trCfgVal(c.Then))
 			}
 		}
 		// 2.101.6: o que mudou vem numa linha própria (a da época é cortada em 3 linhas)
 		if len(ctx.Changed) > 0 {
-			method = append(method, [2]string{"Mudou desde a medição", strings.ToLower(strings.Join(ctx.Changed, ", "))})
+			var ch []string
+			for _, c := range ctx.Changed {
+				ch = append(ch, lowerFirst(a.T(c)))
+			}
+			method = append(method, [2]string{"Mudou desde a medição", strings.Join(ch, ", ")})
 		}
 		method = append(method, [2]string{"Configuração na época", strings.Join(then, "; ")})
 	}
@@ -973,4 +979,41 @@ func fmtBq(v float64) string {
 		return fmtBR(v/1e3, 1) + " kBq"
 	}
 	return fmtBR(v, 0) + " Bq"
+}
+
+// lowerFirst põe a 1ª letra em minúscula, menos numa sigla ("GMC-800", "RC102").
+func lowerFirst(s string) string {
+	r := []rune(s)
+	if len(r) == 0 || (len(r) > 1 && unicode.IsUpper(r[1])) {
+		return s
+	}
+	r[0] = unicode.ToLower(r[0])
+	return string(r)
+}
+
+// trCfgVal traduz um valor do histórico de configurações por partes: a
+// frase antes do "(" e cada pedaço de dentro, separado por "; " (inteiro, o
+// molde não casava com a lista de pontos da curva).
+func (a *App) trCfgVal(s string) string {
+	i := strings.Index(s, " (")
+	if i <= 0 || !strings.HasSuffix(s, ")") {
+		return a.T(s)
+	}
+	parts := strings.Split(s[i+2:len(s)-1], "; ")
+	for k, p := range parts {
+		parts[k] = a.T(p)
+	}
+	return a.T(s[:i]) + " (" + strings.Join(parts, "; ") + ")"
+}
+
+// measNameTr: o nome que a pessoa deu fica como está (asIs); os nomes que o
+// app dá aos testes de Distância e Blindagem traduzem (o material, não).
+func measNameTr(m SavedMeasure) string {
+	switch {
+	case m.Test == "distancia" && m.Name == "Teste de distância":
+		return m.Name
+	case m.Test == "blindagem" && strings.HasPrefix(m.Name, "Blindagem: "):
+		return "Blindagem: " + asIs(strings.TrimPrefix(m.Name, "Blindagem: "))
+	}
+	return asIs(m.Name)
 }

@@ -91,7 +91,7 @@ async function renderSumNotes(from, to) {
     b.innerHTML = '<span class="mono muted"></span><span></span>';
     const at = (t) => (long ? `${dayLabel(t)} ${hhmm(t)}` : hhmm(t));
     b.children[0].textContent = n.end ? `${at(n.time)}–${long && dayLabel(n.end) !== dayLabel(n.time) ? at(n.end) : hhmm(n.end)}` : at(n.time);
-    b.children[1].textContent = n.text;
+    b.children[1].textContent = asIs(n.text);
     b.title = "Editar";
     b.addEventListener("click", () => openNote(n));
     box.appendChild(b);

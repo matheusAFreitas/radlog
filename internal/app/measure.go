@@ -470,6 +470,10 @@ func (a *App) feedMeasureDev(f measFeed) {
 			if name == "" {
 				name = "objeto"
 			}
+			evName := "objeto"
+			if m.Name != "" { // 2.101.9: no evento, o nome da pessoa não se traduz
+				evName = measNameTr(SavedMeasure{Name: m.Name, Test: m.Test})
+			}
 			via := ""
 			if f.dev == "radiacode" {
 				via = " (RC102)"
@@ -483,10 +487,10 @@ func (a *App) feedMeasureDev(f measFeed) {
 				sign = "−"
 			}
 			logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ) — %s",
-				name, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
+				evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
 			if r.DoseUp { // 2.101.6: a dose subiu: o ± e o σ são os da dose
 				logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ na dose) — %s",
-					name, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErrUSv), br(r.DoseSigma, false), r.Verdict)
+					evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErrUSv), br(r.DoseSigma, false), r.Verdict)
 			}
 			{
 				when := m.Bg.Start

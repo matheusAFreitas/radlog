@@ -50,7 +50,10 @@ type reportPDF struct {
 
 func (p *reportPDF) footer() {
 	p.d.Line(pm, pdf.H-36, pdf.W-pm, pdf.H-36, 0.5, cLine, false)
-	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, pdf.Fit("RadLog "+p.r.Version+" · "+p.r.Period, pdf.Sans, 7.5, pdf.W-2*pm-60))
+	// 2.101.9: o período traduz sozinho (o molde "rótulo: valor" não vale dentro de um pedaço " · ")
+	foot := pdf.Fit("RadLog "+p.r.Version+" · "+pdf.Tr(p.r.Period), pdf.Sans, 7.5, pdf.W-2*pm-60)
+	pdf.MarkTranslated(foot)
+	p.d.Text(pm, pdf.H-24, pdf.Sans, 7.5, cMuted, foot)
 	pg := fmt.Sprintf("página %d", p.page)
 	if p.r.pages > 0 {
 		pg = fmt.Sprintf("página %d de %d", p.page, p.r.pages)
@@ -1170,7 +1173,9 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		net += " · " + fmtBR(x.Result.Sigma, 1) + "σ"
 	}
 	note := strings.TrimSpace(x.Note)
-	if note == "" {
+	if note != "" {
+		note = asIs(note) // 2.101.9: texto da pessoa
+	} else {
 		note = "não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)"
 	}
 	lines := [][2]string{
@@ -1180,7 +1185,7 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		{"Geometria / anotação", note},
 	}
 	p.need(14 + float64(len(lines))*10 + 8)
-	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+m.Name, pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
+	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+measNameTr(x), pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
 	d.TextRight(pdf.W-pm, p.y+11, pdf.SansBold, 8, cMuted, pdf.Fit(m.Verdict, pdf.SansBold, 8, (pdf.W-2*pm)*0.33))
 	p.y += 15
 	for _, l := range lines {

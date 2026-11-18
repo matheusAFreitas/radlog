@@ -10,7 +10,11 @@ const normPeriods = (list) => (list || []).map((p) => (p.to ? p : { ...p, open: 
 const pTo = (p) => (p.open ? Math.max(p.to, Date.now()) : p.to);
 
 const periodAt = (ms) => (state.periods || []).find((p) => ms >= p.from && ms < pTo(p)) || null;
-const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${p.name}` : ""; };
+// 2.101.9: nome padrão de trecho é do app e traduz; o que a pessoa escreveu fica como está
+const P_DEF_NAMES = new Set(["", "Fora de casa", "Saída programada", "Saí de casa", "Saí com o RC102", "Os dois fora do cálculo", "GMC-800 fora do cálculo", "RC102 fora do cálculo", "Levei os dois", "Levei o GMC-800, deixei o RC102", "Deixei os dois em casa"]);
+// os motivos prontos do chip (WH_REASONS, mais abaixo) também são do app
+const pNameTxt = (n) => (P_DEF_NAMES.has(n || "") || WH_REASONS.includes(n) ? n || "" : asIs(n));
+const awayLabel = (ms) => { const p = periodAt(ms); return p ? ` · ${pNameTxt(p.name)}` : ""; };
 
 // faixas lilás no gráfico para os períodos fora de casa
 function awayBands(t0, t1, xt) {
@@ -188,7 +192,7 @@ function renderTimeline() {
       if ((at === WH_NORMAL[dev] && !(dev === "radiacode" && whOut(whOf(p)))) || pTo(p) <= t0) continue;
       const a = pct(p.from), b = pct(pTo(p));
       const i = document.createElement("i");
-      i.title = `${p.name} · ${zoomRangeText(p.from, p.to)}`;
+      i.title = `${pNameTxt(p.name)} · ${zoomRangeText(p.from, p.to)}`;
       i.style.cssText = `left:${a}%;width:${Math.max(0.6, b - a)}%;background:var(${at === "fora" ? "--outc" : "--swap"})`;
       bar.appendChild(i);
     }
@@ -422,7 +426,7 @@ function renderPeriods() {
     btn("Ver no gráfico", "", () => showRange(p.from, pTo(p)));
     // o resto fica no "⋯" (2.85)
     const more = moreMenu("Mais ações deste trecho", [
-      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + p.name, more.querySelector("summary"))],
+      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + asIs(p.name), more.querySelector("summary"))],
       [p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); }],
       ["Apagar…", "danger", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); }],
     ]);

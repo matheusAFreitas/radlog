@@ -165,7 +165,7 @@ function renderTrip(s) {
   acts.className = "trip-acts";
   const pdf = document.createElement("button");
   pdf.type = "button"; pdf.className = "btn small"; pdf.textContent = "Relatório da saída (PDF)";
-  pdf.addEventListener("click", (e) => exportReport(s.from, to, "Fora de casa: " + (s.defaultName ? `Saída de ${tripDay(s.from)}` : s.period.name), e.currentTarget));
+  pdf.addEventListener("click", (e) => exportReport(s.from, to, "Fora de casa: " + (s.defaultName ? `Saída de ${tripDay(s.from)}` : asIs(s.period.name)), e.currentTarget));
   const see = document.createElement("button");
   see.type = "button"; see.className = "btn small"; see.textContent = "Ver nos gráficos";
   see.addEventListener("click", () => { $("tripDlg").close(); showRange(s.from, to); });
