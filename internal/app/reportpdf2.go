@@ -365,7 +365,7 @@ func (p *reportPDF) pageDays() {
 			if n.End > n.Time {
 				when += "–" + time.UnixMilli(n.End).Format("15:04")
 			}
-			p.paragraph(when+" · "+n.Text, 8, cInk)
+			p.paragraph(when+" · "+asIs(n.Text), 8, cInk)
 		}
 	}
 }

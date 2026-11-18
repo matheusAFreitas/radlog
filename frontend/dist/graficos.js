@@ -261,7 +261,7 @@ async function refreshChart() {
     m.type = "button";
     m.className = "note-mark";
     m.style.left = ((nx / W) * 100).toFixed(2) + "%";
-    m.title = `${nt.end ? hhmm(nt.time) + "–" + hhmm(nt.end) : hhmm(nt.time)} · ${nt.text} (clique para editar)`;
+    m.title = `${nt.end ? hhmm(nt.time) + "–" + hhmm(nt.end) : hhmm(nt.time)} · ${asIs(nt.text)} (clique para editar)`;
     m.addEventListener("mousedown", (e) => e.stopPropagation());
     m.addEventListener("click", (e) => { e.stopPropagation(); openNote(nt); });
     $("noteMarks").appendChild(m);

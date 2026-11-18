@@ -95,7 +95,7 @@ function renderWhere() {
   card.classList.toggle("off", off);
   const chip = $("whChip");
   chip.hidden = !off;
-  if (off && w.since) chip.textContent = `fora do normal desde ${hhmm(w.since)}` + (w.open && w.open.name ? ` · ${w.open.name}` : "");
+  if (off && w.since) chip.textContent = `fora do normal desde ${hhmm(w.since)}` + (w.open && w.open.name ? ` · ${pNameTxt(w.open.name)}` : "");
   // a linha: "GMC-800 em casa · RC102 com você · mudar"
   const sum = $("whSum");
   sum.textContent = "";
@@ -125,7 +125,7 @@ function renderWhere() {
     const h = whHealth(dev, c), hs = $(g ? "whGmcH" : "whRcH");
     hs.className = "hstat " + h.cls;
     hs.innerHTML = '<span class="hd"></span>';
-    hs.append(h.t + (c[dev] === "fora" && w.open && w.open.name ? ` · ${w.open.name}` : ""));
+    hs.append(h.t + (c[dev] === "fora" && w.open && w.open.name ? ` · ${pNameTxt(w.open.name)}` : ""));
     // RC102 longe do PC: continua somando a dose sozinho
     if (!g && L.pr.curve && L.pr.src === "radiacode") {
       const k = document.createElement("span");

@@ -1173,7 +1173,9 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		net += " · " + fmtBR(x.Result.Sigma, 1) + "σ"
 	}
 	note := strings.TrimSpace(x.Note)
-	if note == "" {
+	if note != "" {
+		note = asIs(note) // 2.101.9: texto da pessoa
+	} else {
 		note = "não anotada (dá para anotar na aba Medir: distância, lado encostado no tubo, com ou sem embalagem)"
 	}
 	lines := [][2]string{
@@ -1183,7 +1185,7 @@ func (p *reportPDF) measBlock(m reportMeas) {
 		{"Geometria / anotação", note},
 	}
 	p.need(14 + float64(len(lines))*10 + 8)
-	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+m.Name, pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
+	d.Text(pm, p.y+11, pdf.SansBold, 8.5, cInk, pdf.Fit(m.When+" · "+measNameTr(x), pdf.SansBold, 8.5, (pdf.W-2*pm)*0.65))
 	d.TextRight(pdf.W-pm, p.y+11, pdf.SansBold, 8, cMuted, pdf.Fit(m.Verdict, pdf.SansBold, 8, (pdf.W-2*pm)*0.33))
 	p.y += 15
 	for _, l := range lines {

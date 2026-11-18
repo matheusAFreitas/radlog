@@ -45,7 +45,7 @@ function reguaTaxaRefs() {
     const key = m.name.toLowerCase();
     if (seen.has(key) || seen.size >= 4) continue;
     seen.add(key);
-    out.push({ v: m.obj.usv, t: `${m.name}, encostado`, d: `sua medição de ${ddmm(m.time)}`, mine: true });
+    out.push({ v: m.obj.usv, t: `${mNameTxt(m)}, encostado`, d: `sua medição de ${ddmm(m.time)}`, mine: true });
   }
   return out;
 }

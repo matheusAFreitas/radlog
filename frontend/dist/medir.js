@@ -1228,7 +1228,7 @@ const measureAt = (ms) => {
   }
   return null;
 };
-const measureLabel = (ms) => { const x = measureAt(ms); return x ? ` · medição: ${x[0].name} (${x[1]})` : ""; };
+const measureLabel = (ms) => { const x = measureAt(ms); return x ? ` · medição: ${mNameTxt(x[0])} (${x[1]})` : ""; };
 
 // marcas das medições nos gráficos (2.81): uma linha fina e um número no
 // topo por objeto (a mesma pedra medida em seguida vira um número só), e a
@@ -1258,7 +1258,7 @@ function measureMarks(t0, t1, xt) {
     let r = rows.findIndex((last) => pct - last >= 2.6);
     if (r < 0) r = rows.length < 3 ? rows.length : rows.indexOf(Math.min(...rows));
     rows[r] = pct;
-    const m0 = g.items[0], name = m0.name || "objeto";
+    const m0 = g.items[0], name = m0.name ? mNameTxt(m0) : "objeto";
     const dists = g.items.map((m) => m.distance).filter(Boolean);
     const dev = devLabel(m0.device === "radiacode" ? "radiacode" : "gmc");
     const desc = `${name}` + (g.items.length > 1 ? ` (${g.items.length}×${dists.length ? ": " + dists.join(", ") : ""})` : dists.length ? ` · ${dists[0]}` : "") + ` · ${hhmm(g.start)} · ${dev}`;
@@ -1400,7 +1400,7 @@ function renderMeasureDetail() {
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);
   renderSideResult($("mdOther"), m);
-  $("mdNote").textContent = m.note || "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
+  $("mdNote").textContent = m.note ? asIs(m.note) : "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
   $("mdNote").classList.toggle("muted", !m.note);
   let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
   if (r.limit) lim += ` Se o objeto emite algo, é menos que +${uS(r.limit, ok)}.`;
@@ -1557,6 +1557,12 @@ document.addEventListener("click", (e) => {
 
 // 2.101.9: o nome que a pessoa deu fica como está; o dos testes de Distância
 // e Blindagem é do app e traduz (o material, não)
+function mNameTxt(m) {
+  const n = m.name || "";
+  if (m.test === "distancia" && n === "Teste de distância") return n;
+  if (m.test === "blindagem" && n.startsWith("Blindagem: ")) return "Blindagem: " + asIs(n.slice(11));
+  return asIs(n);
+}
 function mNameFill(el, m) {
   const n = m.name || "";
   delete el.dataset.noTr;

@@ -4,8 +4,10 @@
 Achados da conferência do QA na 2.101.8:
 - O nome que você deu a uma medição ou a um trecho não é mais traduzido no
   app em inglês (a medição "Sal light" não vira "Lite salt", o trecho
-  "Escritório" não vira "Office"), na lista, no detalhe, na janela e no PDF.
-  Os nomes que o app dá (testes de Distância e Blindagem, "Saída de …")
+  "Escritório" não vira "Office"), em todo lugar: lista e detalhe da
+  medição, dica e marcadores do gráfico, anotações e notas, faixa do trecho,
+  Onde do Agora, etiqueta do alerta, régua, avisos do RC102 fora, evento
+  "Medição de …", janela e PDF. Os nomes que o app dá (testes de Distância e Blindagem, "Saída de …")
   continuam traduzidos.
 - Relatório de Fora de casa em inglês: o rodapé das páginas sai em inglês.
 - PDF da medição em inglês: "Configuração na época" traduz cada ajuste e a
@@ -17,7 +19,9 @@ Achados da conferência do QA na 2.101.8:
 Findings from QA's check of 2.101.8:
 - The name you gave a measurement or a stretch is no longer translated in
   the English app ("Sal light" no longer becomes "Lite salt", "Escritório" no
-  longer becomes "Office"), in the list, the detail, the window and the PDF.
+  longer becomes "Office"), everywhere: measurement list and detail, chart
+  tooltip and markers, notes, stretch strip, Where on Now, alert tag, ruler,
+  RC102-away notices, the "Measurement of …" event, the window and the PDF.
   Names the app gives (Distance and Shielding tests, "Trip on …") are still
   translated.
 - Away from home report in English: the page footer is in English.

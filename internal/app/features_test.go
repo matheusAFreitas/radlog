@@ -142,7 +142,7 @@ func TestMeasureObject(t *testing.T) {
 	}
 	found := false
 	for _, e := range a.GetEvents(kindEvent) {
-		if strings.Contains(e.Text, "Medição de vidro verde: +0,639 ± 0,110 µSv/h") {
+		if strings.Contains(e.Text, "Medição de "+asIs("vidro verde")+": +0,639 ± 0,110 µSv/h") {
 			found = true
 		}
 	}
