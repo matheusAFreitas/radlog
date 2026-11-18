@@ -62,7 +62,16 @@ const fail = (m) => { console.error("FALHOU: " + m); process.exit(1); };
   await (await p.request.get(url + "__fundo")).text();
   await next("trocar");
   await next("amostra");
+  // 2.101.4: 10 min sem o RC102 ver o sal: avisa na hora, sem esperar as 2 h
+  const liveTxt = async (re) => { let t = ""; for (let i = 0; i < 40; i++) { t = (await p.textContent("#rcActLive")).replace(/\s+/g, " "); if (re.test(t)) break; await p.waitForTimeout(200); } return t; };
+  await (await p.request.get(url + "__semsal")).text();
+  let live = await liveTxt(/não está vendo o sal/);
+  if (!/não está vendo o sal/.test(live)) fail("não avisou com o sal fora do aparelho: " + live.slice(0, 300));
+  // com o sal visto, a contagem total sobe e o aviso some
   await (await p.request.get(url + "__sal")).text();
+  live = await liveTxt(/\(\+([1-9]\d|\d{3,})%\)/);
+  if (!/contagem total: [\d.,]+ cps · fundo [\d.,]+ cps \(\+\d+%\)/.test(live)) fail("sem a contagem total durante o sal: " + live.slice(0, 300));
+  if (/não está vendo o sal/.test(live)) fail("avisou com o sal visto: " + live.slice(0, 300));
   await next("pronto");
   await p.waitForTimeout(800);
   const res = (await p.textContent("#rcActLive")).replace(/\s+/g, " ").trim();

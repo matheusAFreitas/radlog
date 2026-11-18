@@ -170,6 +170,18 @@ type actSpec struct {
 	A   [3]float64
 }
 
+// cps é a contagem total por segundo.
+func (s actSpec) cps() float64 {
+	if s.Sec <= 0 {
+		return 0
+	}
+	t := 0.0
+	for _, v := range s.C {
+		t += v
+	}
+	return t / s.Sec
+}
+
 func (s actSpec) energy(c float64) float64 { return s.A[0] + s.A[1]*c + s.A[2]*c*c }
 
 // actFit ajusta a região em volta de kev e devolve a área do pico de kev.

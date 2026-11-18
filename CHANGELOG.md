@@ -7,6 +7,11 @@
   longe do cristal, por exemplo) deixava todos os Bq seguintes dezenas de
   vezes altos demais. O resultado mostra a eficiência medida e avisa que não
   foi guardada; a calibração anterior continua valendo.
+- Aviso cedo (pedido do ACE, depois de 3 h perdidas numa calibração sem
+  pico): durante o sal, a tela mostra a contagem total com o sal e a do fundo
+  (+X%). Se aos 5 min ela quase não subiu (menos de 5%), ou se aos 30 min o
+  pico do K-40 continua abaixo do mínimo plausível, aparece "O RC102 não está
+  vendo o sal", com o que conferir, em vez de deixar rodar 2 h.
 
 **English**
 - KCl calibration: when the K-40 peak barely shows above the background
@@ -15,6 +20,12 @@
   (the salt away from the crystal, for example) made every later Bq tens of
   times too high. The result shows the measured efficiency and says it was
   not saved; the previous calibration stays.
+- Early warning (ACE's request, after losing 3 h on a calibration with no
+  peak): during the salt phase, the screen shows the total count rate with
+  the salt and the background's (+X%). If after 5 min it barely rose (less
+  than 5%), or after 30 min the K-40 peak is still below the lowest plausible
+  value, "The RC102 isn't seeing the salt" appears with what to check,
+  instead of running for 2 h.
 
 ## 2.101.3
 - Calibração do KCl: a massa digitada voltava para 500 g quando se clicava

@@ -167,3 +167,39 @@ func TestActivityCalWeakNotSaved(t *testing.T) {
 		t.Fatalf("guardou a calibração ruim: %+v", v.Cal.KCl)
 	}
 }
+
+// 2.101.4: aos 5 min já dá para avisar que o RC102 não está vendo o sal, em
+// vez de deixar rodar 2 h. O KCl sobe o pico de 1.460 keV e o contínuo
+// (espalhamento), e a contagem total junto; sem o sal, nada sobe.
+func TestActivityKCLWeakEarly(t *testing.T) {
+	aK := 250 * 0.51 * actKPerKCl * actBqPerGK
+	for _, c := range []struct {
+		eff, rise float64 // eficiência no pico e quanto o contínuo sobe
+		weak      bool
+	}{{0, 0, true}, {0.00003, 0.01, true}, {0.0006, 0.15, false}, {0.002, 0.5, false}, {0.006, 1.5, false}} {
+		for seed := int64(1); seed <= 20; seed++ {
+			rng := rand.New(rand.NewSource(seed))
+			net := c.eff * aK * 0.1066
+			bg := actFake(rng, 3600, map[float64]float64{1460.8: 0.3 * 3600, 609.3: 0.2 * 3600}, 0.5)
+			smp := actFake(rng, actWeakSec, map[float64]float64{1460.8: (0.3 + net) * actWeakSec, 609.3: 0.2 * actWeakSec}, 0.5*(1+c.rise))
+			k, _, _ := actCalKCl(smp, bg, 250, 51)
+			if got := actKCLWeak(smp.Sec, smp.cps(), bg.cps(), k); got != c.weak {
+				t.Fatalf("eficiência %g%%, contínuo +%g (semente %d): aviso %v, queria %v (cps %v / %v, %+v)", c.eff*100, c.rise, seed, got, c.weak, smp.cps(), bg.cps(), k)
+			}
+			if actKCLWeak(actWeakSec-1, smp.cps(), bg.cps(), k) {
+				t.Fatal("avisou antes dos 5 min")
+			}
+		}
+	}
+	// a medida da madrugada de 18/11: 0,003% ± 80% aos 49 min, contagem igual
+	// ao fundo; avisa (e pelo pico sozinho também, mesmo se o total subisse)
+	k := &ActCalKCl{Eff: 0.00003, EffErr: 0.796}
+	if !actKCLWeak(2940, 10, 10, k) || !actKCLWeak(2940, 20, 10, k) {
+		t.Fatal("não avisou a medida de 18/11")
+	}
+	for _, sec := range []float64{actWeakSec, actWeakPeakSec} {
+		if actKCLWeak(sec, 20, 10, &ActCalKCl{Eff: 0.002, EffErr: 0.1}) {
+			t.Fatal("avisou com o pico normal")
+		}
+	}
+}

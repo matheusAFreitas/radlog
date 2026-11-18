@@ -38,7 +38,11 @@ func TestActivityCalScreenE2E(t *testing.T) {
 			pk[k] = v * sec
 		}
 		mu.Lock()
-		dev.add(actFake(rng, sec, pk, 0.5))
+		cont := 0.5
+		if p == "kcl" {
+			cont = 0.6 // o KCl também sobe o contínuo (espalhamento)
+		}
+		dev.add(actFake(rng, sec, pk, cont))
 		mu.Unlock()
 	}
 	feed("bg", 1)
@@ -53,8 +57,21 @@ func TestActivityCalScreenE2E(t *testing.T) {
 		switch r.URL.Path {
 		case "/__fundo":
 			feed("bg", 7200)
-		case "/__sal":
-			feed("kcl", 7200)
+		case "/__semsal", "/__sal":
+			// sem o sal visto (10 min) ou com o sal (2 h)
+			if r.URL.Path == "/__sal" {
+				feed("kcl", 7200)
+			} else {
+				feed("bg", 600)
+			}
+			// o que o rcActTick faria com o aparelho de verdade
+			if sp := a.rc.specTest(false); sp != nil {
+				a.rc.act.mu.Lock()
+				if a.rc.act.run != nil {
+					a.rc.act.run.Cur.feed(*sp)
+				}
+				a.rc.act.mu.Unlock()
+			}
 		default:
 			return false
 		}

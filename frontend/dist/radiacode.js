@@ -1912,6 +1912,9 @@
     let live = "";
     if (ph === "amostra") {
       if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
+      // 2.101.4: a contagem total mostra na hora se o RC102 está vendo o sal
+      if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem total")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)</p>`;
+      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal encostado (ou o aparelho dentro do becker), ela sobe bem. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar as 2 h.")}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
       if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;

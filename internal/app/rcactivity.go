@@ -27,16 +27,20 @@ import (
 // atual.json (a medição em andamento, para continuar se o app fechar).
 
 const (
-	actDir       = "atividade"
-	actCalFile   = "calibracao.json"
-	actBgFile    = "fundo.json"
-	actResFile   = "medidas.jsonl"
-	actCurFile   = "atual.json"
-	actTickUSB   = 5 * time.Second
-	actCalMaxErr = 0.20 // incerteza máxima da eficiência do KCl para virar calibração
-	actTickBLE   = 15 * time.Second
-	actMaxHist   = 20
-	actBgMaxAge  = 30 * 24 * time.Hour
+	actDir         = "atividade"
+	actCalFile     = "calibracao.json"
+	actBgFile      = "fundo.json"
+	actResFile     = "medidas.jsonl"
+	actCurFile     = "atual.json"
+	actTickUSB     = 5 * time.Second
+	actWeakSec     = 300    // a partir de quando avisar que o pico não aparece
+	actEffMin      = 0.0003 // 0,03%: abaixo disso o RC102 não está vendo o sal
+	actWeakPeakSec = 1800   // e a partir de quando o pico sozinho decide
+	actWeakRise    = 1.05   // a contagem total com o sal tem que subir mais que isso
+	actCalMaxErr   = 0.20   // incerteza máxima da eficiência do KCl para virar calibração
+	actTickBLE     = 15 * time.Second
+	actMaxHist     = 20
+	actBgMaxAge    = 30 * 24 * time.Hour
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -526,6 +530,9 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	SmpCps    float64         `json:"smpCps,omitempty"`  // contagem total por segundo da amostra (calibração)
+	BgCps     float64         `json:"bgCps,omitempty"`   // e do fundo
+	KCLWeak   bool            `json:"kclWeak,omitempty"` // o pico do K-40 não está aparecendo
 	LiveTh    *ActCalTh       `json:"liveTh"`
 	Expected  float64         `json:"expected"`
 	Result    *ActResult      `json:"result"`
@@ -621,6 +628,8 @@ func (a *App) GetActivity() ActView {
 		switch o.Kind {
 		case "kcl":
 			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
+			v.SmpCps, v.BgCps = smp.cps(), bg.cps()
+			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
@@ -629,6 +638,21 @@ func (a *App) GetActivity() ActView {
 		v.Live = actAnalyze(smp, bg, o.Nuclides, v.Cal, o.MassG)
 	}
 	return v
+}
+
+// actKCLWeak avisa cedo (2.101.4) que o RC102 não está vendo o sal: depois
+// de 5 min, a contagem total quase não subiu em relação ao fundo (o KCl
+// encostado ou em volta do aparelho sobe bem mais de 5%); depois de 30 min,
+// também se nem a eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
+func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
+	if sec < actWeakSec {
+		return false
+	}
+	if bgCps > 0 && smpCps < bgCps*actWeakRise {
+		return true
+	}
+	// o pico sozinho só decide com mais tempo (aos 5 min o ruído ainda é grande)
+	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 
 // CloseActivity fecha o resultado (volta para o formulário).

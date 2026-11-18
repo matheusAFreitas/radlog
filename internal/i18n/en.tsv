@@ -6288,3 +6288,5 @@ Marcado	Marked
 Marcado: {0} · {1} · {2}–{3}	Marked: {0} · {1} · {2}–{3}
 O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.	The K-40 peak barely showed above the background, so the calibration was not saved (it needs ±20% or less). Check that the RC102 is touching the salt on the crystal side and measure again.
 pico fraco: não guardada	weak peak: not saved
+contagem total	total count rate
+O RC102 não está vendo o sal: a contagem quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal encostado (ou o aparelho dentro do becker), ela sobe bem. Confira a posição e se o fundo foi medido com o sal longe; não adianta esperar as 2 h.	The RC102 isn't seeing the salt: the count rate barely rose above the background and the K-40 peak isn't showing. With the salt touching (or the device inside the beaker), it rises a lot. Check the position and that the background was measured with the salt far away; there's no point waiting the 2 h.
