@@ -181,9 +181,10 @@ func sideDecide(m *MeasureState) string {
 
 // dualHint compara o GMC (beta e gama) com o Radiacode (quase só gama).
 func dualHint(gmc, rc MeasureResult) string {
-	gs, rs := gmc.Sigma >= 3, rc.Sigma >= 3
+	// 2.101.6: a dose que subiu no RC102 conta como "o RC102 viu"
+	gs, rs := gmc.Sigma >= 3, rc.Sigma >= 3 || (rc.DoseUp && rc.NetUSv > 0)
 	switch {
-	case gs && rc.Sigma < 2:
+	case gs && !rs && rc.Sigma < 2:
 		return "O GMC viu o objeto e o RC102 quase não: ele deve emitir principalmente beta (o cristal do RC102 quase não vê beta)."
 	case gs && !rs:
 		return "O GMC viu claramente e o RC102 só um pouco: o objeto deve emitir bastante beta."

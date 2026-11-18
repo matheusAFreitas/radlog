@@ -44,8 +44,10 @@ var unitRe = regexp.MustCompile(`([+±−-]?\d[\d.,]*)((?:\s?(?:–|-|±|→|a|e
 var unitParenRe = regexp.MustCompile(`(\d\s?)µSv/h \(([^()]{0,40}?\s)(\d[\d.,]*\d|\d)\)`)
 
 var (
-	unitNamedRe = regexp.MustCompile(`[A-Za-zÀ-ÿ]+-\d+`)
-	unitKeptRe  = regexp.MustCompile("+")
+	unitNamedRe = regexp.MustCompile(`[A-Za-z]+-?\d+`) // 2.101.6: "RC102" também
+	// 2.101.6: fator de calibração ("0,00564 µSv/h por CPM"): constante, não taxa
+	unitFactorRe = regexp.MustCompile(`[+±−-]?\d[\d.,]*\s?µSv/h (?:por|per) CP[MS]`)
+	unitKeptRe   = regexp.MustCompile("+")
 )
 
 var unitNumRe = regexp.MustCompile(`[+±−-]?\d[\d.,]*`)
@@ -59,6 +61,10 @@ func remText(s, sep string) string {
 	// 2.101.5: nome com número ("GMC-800", "Cs-137") não é número de taxa
 	var kept []string
 	s = unitNamedRe.ReplaceAllStringFunc(s, func(m string) string {
+		kept = append(kept, m)
+		return "" + strings.Repeat("", len(kept)) + ""
+	})
+	s = unitFactorRe.ReplaceAllStringFunc(s, func(m string) string {
 		kept = append(kept, m)
 		return "" + strings.Repeat("", len(kept)) + ""
 	})

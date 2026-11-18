@@ -243,8 +243,11 @@ const liveObjK = (st) => (isRcMeasure(st) && st.phase === "objeto" && st.phUsv >
 const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
 const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
 // 2.100.2: ± do µSv/h; no RC102 vem do espalhamento da dose (errUSv), não do √N
-const phErr = (ph, k) => (ph.errUSv ? usvVal(ph.errUSv) : uS(ph.errCPM, k));
-const netErr = (r, k) => (r.netErrUSv ? usvVal(r.netErrUSv) : uS(r.netErr, k));
+// 2.101.6: ± pequeno não vira "± 0,000": pelo menos um algarismo significativo
+const errDig = (v) => (v > 0 ? Math.max(usvDigits(v), Math.min(6, Math.ceil(-Math.log10(v)))) : usvDigits(v));
+const usvErrVal = (v) => `${fmt(v, errDig(v))} µSv/h`;
+const phErr = (ph, k) => usvErrVal(ph.errUSv ? ph.errUSv : ph.errCPM * k);
+const netErr = (r, k) => usvErrVal(r.netErrUSv ? r.netErrUSv : r.netErr * k);
 const sgnUS = (v) => (v >= 0 ? "+" : "−") + usvVal(Math.abs(v));
 const numU = (v) => fmt(v, v === 0 ? 0 : usvDigits(Math.abs(v)));
 const cntTxt = (n) => `${(n || 0).toLocaleString(LOCALE)} ${n === 1 ? "contagem" : "contagens"}`;
@@ -280,7 +283,9 @@ function measureStats(m) {
     const p = document.createElement("p");
     p.className = "small muted";
     const sig = Math.abs(r.sigma);
-    p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados). ` +
+    // 2.101.6: com a dose subindo, o texto fala da dose (a tabela já usa o ± dela)
+    if (r.doseUp) p.textContent = `No RC102, a incerteza do µSv/h vem do espalhamento da dose do próprio aparelho. A contagem ficou igual (${fmt(r.sigma, 1)}σ), mas a dose subiu ${fmt(r.doseSigma, 0)}σ: é real. Gama de energia alta, como o do K-40, dá mais dose por contagem.`;
+    else p.textContent = `A incerteza de cada linha é a de Poisson: raiz das contagens, convertida para µSv/h. A da diferença junta as duas (raiz da soma dos quadrados). ` +
       `A diferença vale ${fmt(sig, 1)} vezes a incerteza (${fmt(sig, 1)}σ)` +
       (r.sigma >= 3 ? ": é real, não variação da contagem." : r.sigma >= 2 ? ": provavelmente real, mas vale repetir." : r.sigma <= -3 ? ": o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)." : ": cabe na variação natural da contagem.");
     box.appendChild(p);
@@ -835,7 +840,7 @@ function renderMeasureResult(st) {
       add("certeza", `${fmt(rcr.sigma, 1)}σ`, `${fmt(gr.sigma, 1)}σ`);
     }
     c.appendChild(tb);
-    const agree = rcr && gr && (rcr.sigma >= 3) === (gr.sigma >= 3);
+    const agree = rcr && gr && (rcr.sigma >= 3 || (rcr.doseUp && rcr.netUSv > 0)) === (gr.sigma >= 3);
     const q = p(c, "");
     const b = document.createElement("b");
     b.textContent = agree ? "Concordam? Sim." : "Concordam? Não totalmente.";
@@ -1381,14 +1386,15 @@ function renderMeasureDetail() {
   const objU0 = m.obj.cpm * phK(m.obj, rc ? "radiacode" : "gmc");
   v.className = "m-verdict " + mLvCls(r, objU0);
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
-  v.querySelector("span").textContent = r.belowBg ? `${fmt(r.sigma, 1)}σ abaixo do fundo.` : r.level === "nada" ? mSureTxt(r.sigma) : `${mSureTxt(r.sigma)} ${mLevelTxt(objU0)}`;
+  v.querySelector("span").textContent = r.doseUp ? mSureTxt(r.doseSigma).replace("Certeza:", "Certeza pela dose:") : r.belowBg ? `${fmt(r.sigma, 1)}σ abaixo do fundo.` : r.level === "nada" ? mSureTxt(r.sigma) : `${mSureTxt(r.sigma)} ${mLevelTxt(objU0)}`;
   const t = $("mdTiles");
   t.textContent = "";
   const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
   sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${phErr(m.bg, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
   sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${phErr(m.obj, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
   sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (r.doseUp ? ` · ${fmt(r.doseSigma, 0)}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
-  sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
+  if (r.doseUp && m.bg.usv > 0) sumTile(t, "Objeto ÷ fundo", `${fmt(m.obj.usv / m.bg.usv, 2)}×`, `na dose · certeza ${mSure(r.doseSigma)}`);
+  else sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);
   renderSideResult($("mdOther"), m);
@@ -1396,7 +1402,8 @@ function renderMeasureDetail() {
   $("mdNote").classList.toggle("muted", !m.note);
   let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
   if (r.limit) lim += ` Se o objeto emite algo, é menos que +${uS(r.limit, ok)}.`;
-  if (r.netCPM > 0) lim += home
+  if (r.doseUp && r.netUSv > 0 && r.netErrUSv > 0) lim += ` Precisão do líquido (pela dose): ±${fmt((r.netErrUSv / r.netUSv) * 100, 0)}%.`;
+  else if (r.netCPM > 0) lim += home
     ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`
     : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
   if (r.stop) lim = measureExplain(r, m.obj, true, ok) + " " + lim;

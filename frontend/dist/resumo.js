@@ -565,13 +565,20 @@ function renderCompare(res, periods) {
   tb.hidden = false;
   // tempos medidos muito diferentes: a dose não dá para comparar em %
   const fair = Math.abs(a.minutes - b.minutes) <= 0.1 * Math.max(a.minutes, b.minutes);
-  const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? " (igual)" : ` (${sgn(p, 0)}%)`; };
-  const diff = (x, y, d, unit, timed) => (x == null || y == null ? "—" : Math.abs(x - y) < Math.pow(10, -d) / 2 ? "igual" : `${sgn(x - y, d)}${unit}` + (y && (!timed || fair) ? pctTxt(x, y) : ""));
+  // 2.101.6: compara os números como aparecem (arredondados); o % só com os
+  // tempos parecidos (pctOk) e sem "(igual)" ao lado de uma diferença
+  const pctTxt = (x, y) => { const p = ((x - y) / y) * 100; return Math.abs(p) < 0.5 ? "" : ` (${sgn(p, 0)}%)`; };
+  const rnd = (v, d) => Math.round(v * Math.pow(10, d)) / Math.pow(10, d);
+  const diff = (x, y, d, unit, pctOk = true) => {
+    if (x == null || y == null) return "—";
+    const xr = rnd(x, d), yr = rnd(y, d);
+    return xr === yr ? "igual" : `${sgn(xr - yr, d)}${unit}` + (yr && pctOk ? pctTxt(xr, yr) : "");
+  };
   const rows = [
     ["Média", a.avgUSv, b.avgUSv, 3, " µSv/h"],
     ["Máximo", a.maxUSv, b.maxUSv, 3, " µSv/h"],
     ["Mínimo", a.minUSv, b.minUSv, 3, " µSv/h"],
-    ["Dose", a.dose, b.dose, 2, " µSv", true],
+    ["Dose", a.dose, b.dose, 2, " µSv", fair],
   ];
   let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>A − B</th></tr></thead><tbody>`;
   tb.innerHTML = html + "</tbody>";
@@ -579,7 +586,7 @@ function renderCompare(res, periods) {
   head[1].append(" " + periods[0][2]); head[2].append(" " + periods[1][2]);
   const body = tb.querySelector("tbody");
   const row = (cells) => { const tr = document.createElement("tr"); cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); td.textContent = c; tr.appendChild(td); }); body.appendChild(tr); };
-  for (const [n, x, y, d, u, timed] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u, timed)]);
+  for (const [n, x, y, d, u, pctOk] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u, pctOk)]);
   if ((a.rc && a.rc.minutes) || (b.rc && b.rc.minutes)) {
     const ra = a.rc || {}, rb = b.rc || {};
     const v = (o, k, dd, u) => (o.minutes ? fmt(o[k], dd) + u : "—");

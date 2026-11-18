@@ -1,5 +1,55 @@
 # Versões
 
+## 2.101.7
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 2,
+e as sobras da conferência da 2.101.5):
+- Medir objeto no RC102 com "a contagem não mudou, mas a dose subiu": a
+  certeza, o "Objeto ÷ fundo", a precisão, o texto da tabela, os Eventos e o
+  PDF passam a falar da dose (sem "menos que +X" pela contagem); a distância
+  segura e os "Os dois aparelhos" contam a dose que subiu como "viu".
+- PDF de uma medição salva mostra o fator que valeu nos números ("hoje: …"
+  quando mudou) e o "Mudou desde a medição" numa linha própria.
+- Fundo de casa: o RC102 que subiu um pouco "subiu menos" (não "ficou
+  igual"); "Por que subiu?" diz "o RC102 também subiu, menos" em vez de
+  "ficou parado"; as duas frases da Hora do dia dizem de quantos dias são.
+- Minha dose: "perto do fundo da sua casa (+8%)" com o mesmo % da célula.
+- Resumo › Comparar: "igual" só com os números mostrados iguais, sem
+  "(igual)" ao lado de uma diferença, e o % da dose do RC102 só com tempos
+  parecidos.
+- mrem/h: eixo do mapa de calor, "≈ CPM" dos níveis, coluna do tempo morto,
+  ajustes do RC102 (alarmes de taxa e de dose, dicas e janelas), Resumo da
+  saída, "Por que subiu?", título da janela no alarme, tabelas do PDF e dicas
+  de padrão ("Padrão 100 mrem/h"); o fator de calibração fica sempre em
+  µSv/h por CPM; "RC102" não é mais lido como número.
+- Resumo da saída: Esc no "editar título" desiste (e o Enter grava uma vez).
+- Ajuda do "RC102 saturado" sem o "RC102 102".
+- ± pequeno com pelo menos um algarismo (não mais "± 0,000").
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 2, and the
+leftovers from the 2.101.5 check):
+- Measure object with the RC102 when "the count didn't change, but the dose
+  rose": certainty, "Object ÷ background", precision, the table text, Events
+  and the PDF now talk about the dose (no "less than +X" from the count); the
+  safe distance and "Both devices" count the rising dose as "seen".
+- The PDF of a saved measurement shows the factor used in its numbers
+  ("today: …" when it changed) and "Changed since the measurement" on its own
+  line.
+- Home background: an RC102 that rose a bit "rose less" (not "stayed the
+  same"); "Why did it rise?" says "the RC102 also rose, less" instead of
+  "stayed flat"; both Time of day sentences say how many days they cover.
+- My dose: "close to your home background (+8%)" with the cell's same %.
+- Summary › Compare: "same" only when the shown numbers are equal, no
+  "(same)" next to a difference, and the RC102 dose % only with similar times.
+- mrem/h: heat map axis, the levels' "≈ CPM", the dead time column, RC102
+  settings (rate and dose alarms, hints and dialogs), trip summary, "Why did
+  it rise?", the window title on alarm, PDF tables and default hints
+  ("Default 100 mrem/h"); the calibration factor always stays in µSv/h per
+  CPM; "RC102" is no longer read as a number.
+- Trip summary: Esc in "edit title" cancels (and Enter saves once).
+- "RC102 saturated" help without "RC102 102".
+- Small ± values keep at least one digit (no more "± 0.000").
+
 ## 2.101.6
 Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 1):
 - RC102: dá para ligar só o alarme 2 de dose (com o 1 desligado, o app não

@@ -1813,7 +1813,7 @@
           <legend>Geiger saturado</legend>
           <label for="lvSatMax" data-u="rate">Fim da escala (µSv/h)</label>
           <input type="number" id="lvSatMax" min="0.1" step="any" inputmode="decimal">
-          <p class="small muted">Padrão 2.000: o máximo do GMC-800 pelo manual.</p>
+          <p class="small muted">Padrão 2.000 µSv/h: o máximo do GMC-800 pelo manual.</p>
           <label for="lvSatDrop" data-u="rate">Queda brusca a partir de (µSv/h)</label>
           <input type="number" id="lvSatDrop" min="0.1" step="any" inputmode="decimal">
           <label for="lvSatHold">Manter o aviso de queda por (segundos)</label>
@@ -1896,22 +1896,22 @@
         <input type="number" id="lvRcSat" min="0.1" step="any" inputmode="decimal">
         <details class="how">
           <summary>Como funciona</summary>
-          <p class="small muted">Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
+          <p class="small muted">Padrão 1.000 µSv/h: o fim da faixa do RC102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.</p>
         </details>
       </fieldset>
     </div>
   </div>
     </div>
     <div class="set-tab" data-tab="dev" hidden>
-    <div class="devcfg rccfg" id="rcCfg" data-unit-keep>
+    <div class="devcfg rccfg" id="rcCfg">
       <p class="small muted" id="rcIntro">Conecte o RC102 para ver e mudar os ajustes do aparelho.</p>
       <div class="dc-grid" id="rcCfgBody">
       <div class="set-col">
         <fieldset data-dev="RC102" class="dev-card rc dc-edit">
           <legend>Alarmes de taxa de dose</legend>
           <div class="rc-pair">
-            <label>Alarme 1 (µSv/h)<input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
-            <label>Alarme 2 (µSv/h)<input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+            <label><span data-u="rate">Alarme 1 (µSv/h)</span><input type="number" id="rcDR1" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
+            <label><span data-u="rate">Alarme 2 (µSv/h)</span><input type="number" id="rcDR2" min="0.01" max="1000" step="0.01" inputmode="decimal"></label>
           </div>
           <p class="small muted" id="rcDRHint"></p>
           <details class="how">
@@ -1922,8 +1922,8 @@
         <fieldset data-dev="RC102" class="dev-card rc dc-edit">
           <legend>Alarmes de dose acumulada</legend>
           <div class="rc-pair">
-            <label>Alarme 1 (µSv)<input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
-            <label>Alarme 2 (µSv)<input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+            <label><span data-u="dose">Alarme 1 (µSv)</span><input type="number" id="rcDS1" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
+            <label><span data-u="dose">Alarme 2 (µSv)</span><input type="number" id="rcDS2" min="0.01" max="9000000" step="any" inputmode="decimal"></label>
           </div>
           <label class="toggle"><span>Alarme 1 ligado</span><input type="checkbox" id="rcDS1On"></label>
           <label class="toggle"><span>Alarme 2 ligado</span><input type="checkbox" id="rcDS2On"></label>
@@ -2053,10 +2053,10 @@
         </tbody>
       </table>
       </div>
-      <div class="al-dose" data-unit-keep>
+      <div class="al-dose">
         <span class="al-dose-t">Dose acumulada do RC102</span>
-        <span class="al-dose-f"><span class="al-say">alarme 1</span><input type="number" id="alDs1" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 1 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs1On"></label></span>
-        <span class="al-dose-f"><span class="al-say">alarme 2</span><input type="number" id="alDs2" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 2 de dose do RC102"><span class="al-u">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs2On"></label></span>
+        <span class="al-dose-f"><span class="al-say">alarme 1</span><input type="number" id="alDs1" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 1 de dose do RC102"><span class="al-u" data-u="dose">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs1On"></label></span>
+        <span class="al-dose-f"><span class="al-say">alarme 2</span><input type="number" id="alDs2" min="0.01" max="9000000" step="any" inputmode="decimal" aria-label="Alarme 2 de dose do RC102"><span class="al-u" data-u="dose">µSv</span><label class="toggle al-on"><span>Ligado</span><input type="checkbox" id="alDs2On"></label></span>
       </div>
       <p class="small" id="dangerNote" hidden></p>
       <div class="al-foot">
@@ -2168,7 +2168,7 @@
       <fieldset>
         <legend>Unidades</legend>
         <span class="small muted" id="uRateLbl">Taxa de dose</span>
-        <div class="seg ui-seg" role="group" aria-labelledby="uRateLbl" id="segRateUnit"><button type="button" data-v="usv">µSv/h</button><button type="button" data-v="mrh" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button></div>
+        <div class="seg ui-seg" role="group" aria-labelledby="uRateLbl" id="segRateUnit" data-unit-keep><button type="button" data-v="usv">µSv/h</button><button type="button" data-v="mrh" title="milirem por hora (1 mrem/h = 10 µSv/h)">mrem/h</button></div>
         <input type="hidden" id="valRateUnit">
         <span class="small muted" id="uCountLbl">Contagem</span>
         <div class="seg ui-seg" role="group" aria-labelledby="uCountLbl" id="segCountUnit"><button type="button" data-v="cpm">CPM</button><button type="button" data-v="cps">CPS</button></div>

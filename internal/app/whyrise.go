@@ -290,11 +290,15 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 	on := whyDevName(other)
 	both := WhyCause{Key: "ambos", Title: "Os dois aparelhos viram", More: "Se fosse o ambiente, os dois subiriam juntos. É o que separa radiação de verdade de coisa de um aparelho só."}
 	opct, oz, on2 := ot.rise(rf, t)
+	// 2.101.6: o outro subiu bem acima do acaso, só que menos: não "ficou parado"
+	bothLess := on2 >= 5 && ot.norm > 0 && oz >= whyAcasoZ && opct > 0 && !(pct > 0 && opct >= pct*0.4)
 	switch {
 	case on2 < 5 || ot.norm <= 0:
 		both.State, both.Ev = "na", fmt.Sprintf("Sem dado: o %s não tem leituras nessa hora.", on)
 	case oz >= whyAcasoZ && pct > 0 && opct >= pct*0.4:
 		both.State, both.Ev = "yes", fmt.Sprintf("O %s também subiu, %s%% no mesmo trecho.", on, whyPct(opct))
+	case bothLess:
+		both.State, both.Ev = "no", fmt.Sprintf("O %s também subiu, menos (+%s%%, %s σ).", on, whyPct(opct), whyNum(oz, 1))
 	default:
 		both.State = "no"
 		both.Ev = fmt.Sprintf("O %s ficou parado (%s%%, %s σ).", on, whyPct(opct), whyNum(oz, 1))
@@ -473,6 +477,8 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 		apar.State, apar.Ev = "no", "Os dois aparelhos subiram juntos."
 	case both.State == "na":
 		apar.State, apar.Ev = "na", fmt.Sprintf("Sem o %s para comparar.", on)
+	case bothLess:
+		apar.State, apar.Ev = "no", fmt.Sprintf("O %s também subiu, só que menos.", on)
 	case explained:
 		apar.State, apar.Ev = "no", "Outra causa explica a subida."
 	default:
@@ -513,6 +519,8 @@ func (a *App) GetWhyRise(dev string, atMs int64) (WhyRise, error) {
 				v = append(v, "Nenhuma das causas comuns apoia.")
 			}
 			v = append(v, "Os dois aparelhos subiram juntos, então é radiação de verdade.")
+		case bothLess:
+			v = append(v, fmt.Sprintf("O %s também subiu, só que menos: parte da subida é radiação de verdade.", on))
 		case both.State == "no" && (obj.State == "yes" || fora.State == "yes"):
 			v = append(v, fmt.Sprintf("Só o %s subiu: é o que estava perto dele, não a casa.", dn))
 		case both.State == "no" && !explained:

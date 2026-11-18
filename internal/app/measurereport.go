@@ -171,6 +171,15 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 		dev = info.Version
 	}
 	calTxt := fmtBR(cal.USv(100)/100, 4) + " µSv/h por CPM (para gama do Cs-137)"
+	// 2.101.6: o fator que valeu nos números da medição (o PDF pode ser feito
+	// depois de mudar a calibração)
+	if m.Obj.CPM > 0 && m.Obj.USv > 0 {
+		k := m.Obj.USv / m.Obj.CPM
+		calTxt = fmtBR(k, 4) + " µSv/h por CPM (a que valia na medição, para gama do Cs-137)"
+		if now := cal.USv(100) / 100; math.Abs(now-k) > 0.00005 {
+			calTxt += "; hoje: " + fmtBR(now, 4)
+		}
+	}
 	dt := "desligada"
 	if lv.DeadTimeOn {
 		dt = fmt.Sprintf("ligada (τ = %s µs)", fmtBR(lv.DeadTimeUs, 0))
@@ -194,6 +203,15 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	}
 	a.logf("relatório da medição salvo: %s", dst)
 	return dst, nil
+}
+
+// usvErrTxt escreve um ± com pelo menos um algarismo significativo (2.101.6:
+// "± 0,000 µSv/h" com muitas contagens).
+func usvErrTxt(v float64) string {
+	if v > 0 && v < 0.001 {
+		return fmtBR(v, int(math.Min(6, math.Ceil(-math.Log10(v)))))
+	}
+	return usvTxt(v)
 }
 
 // asciiFold tira acentos para o nome do arquivo.
@@ -290,13 +308,13 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	// 2.100.2: no RC102 o ± do µSv/h vem do espalhamento da dose
 	eph := func(ph MeasurePhase, k float64) string {
 		if ph.ErrUSv > 0 {
-			return usvTxt(ph.ErrUSv) + " µSv/h"
+			return usvErrTxt(ph.ErrUSv) + " µSv/h"
 		}
-		return uv(ph.ErrCPM, k)
+		return usvErrTxt(ph.ErrCPM*k) + " µSv/h"
 	}
-	enet := uv(r.NetErr, ok)
+	enet := usvErrTxt(r.NetErr*ok) + " µSv/h"
 	if r.NetErrUSv > 0 {
-		enet = usvTxt(r.NetErrUSv) + " µSv/h"
+		enet = usvErrTxt(r.NetErrUSv) + " µSv/h"
 	}
 	nsign := "+"
 	if r.NetUSv < 0 {
@@ -307,6 +325,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		{"Com o objeto", uv(m.Obj.CPM, ok), "± " + eph(m.Obj, ok) + " · " + fmt.Sprintf("%d contagens em %d s", m.Obj.Counts, m.Obj.Seconds), "m"},
 		{"Líquido (objeto − fundo)", nsign + usvTxt(math.Abs(r.NetUSv)) + " µSv/h", "± " + enet + " " + at + " · " + sign + fmtBR(r.NetCPM, 1) + " CPM", "m"},
 		{"Objeto ÷ fundo", fmtBR(r.Ratio, 2) + "×", fmtBR(r.Sigma, 1) + " σ acima do acaso", "m"},
+	}
+	if r.DoseUp && m.Bg.USv > 0 { // 2.101.6: a dose subiu: a razão e o σ são os da dose
+		tiles[3] = [4]string{"Objeto ÷ fundo (dose)", fmtBR(m.Obj.USv/m.Bg.USv, 2) + "×", fmtBR(r.DoseSigma, 1) + " σ na dose · " + fmtBR(r.Sigma, 1) + " σ na contagem", "m"}
 	}
 	for i, tl := range tiles {
 		p.tile(pm+float64(i)*(tw+tg), p.y, tw, th, tl[0], tl[1], tl[2], pdf.MonoBold)
@@ -352,7 +373,11 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 			when = time.UnixMilli(ph.Start).Format("15:04:05") + "–" + time.UnixMilli(ph.End).Format("15:04:05")
 		}
 		k := kOf(ph)
-		return []string{name, when, fmt.Sprint(ph.Counts), fmt.Sprint(ph.Seconds), usvTxt(ph.CPM*k) + " ± " + usvTxt(ph.ErrCPM*k), mean, disp, mx}
+		e := ph.ErrCPM * k
+		if ph.ErrUSv > 0 { // 2.101.6: o mesmo ± dos cartões (RC102: pela dose)
+			e = ph.ErrUSv
+		}
+		return []string{name, when, fmt.Sprint(ph.Counts), fmt.Sprint(ph.Seconds), usvTxt(ph.CPM*k) + " ± " + usvErrTxt(e), mean, disp, mx}
 	}
 	cw := pdf.W - 2*pm
 	p.table([]string{"Fase", "Horário", "Contagens", "Segundos", "µSv/h ± σ", "Média/s", "Var ÷ média", "Máx/s"},
@@ -382,7 +407,9 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	case "limite":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: chegou ao tempo máximo (%s) sem decidir", fmtDurSec(float64(m.Obj.Seconds)))})
 	}
-	if r.NetCPM > 0 {
+	if r.DoseUp && r.NetUSv > 0 && r.NetErrUSv > 0 {
+		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ, pela dose do RC102)", fmtBR(r.NetErrUSv/r.NetUSv*100, 0))})
+	} else if r.NetCPM > 0 {
 		rows = append(rows, [2]string{"Precisão do líquido", fmt.Sprintf("± %s%% (1σ)", fmtBR(r.NetErr/r.NetCPM*100, 0))})
 		if home {
 			rows = append(rows,
@@ -441,9 +468,13 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	if rc {
 		count = "soma das amostras do RC102 (a cada 0,5 s), em cada fase"
 	}
+	unc := "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"
+	if rc && m.Obj.ErrUSv > 0 { // 2.101.6: no RC102 o ± do µSv/h vem da dose
+		unc = "µSv/h: espalhamento da dose do RC102 em blocos de 30 s; contagens: √N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"
+	}
 	method = append(method,
 		[2]string{"Contagens", count},
-		[2]string{"Incerteza", "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados"},
+		[2]string{"Incerteza", unc},
 		[2]string{"Significância", "líquido ÷ incerteza do líquido (σ)"},
 		[2]string{"Limite de detecção", "Currie: L_D = 2,71/t_o + 3,29·√(r_b/t_o + r_b/t_b), com r_b = taxa do fundo e t_b, t_o = tempos do fundo e do objeto"},
 	)
@@ -908,11 +939,11 @@ func (a *App) measureExtraRows(m SavedMeasure) [][2]string {
 				then = append(then, strings.ToLower(c.Field[:1])+c.Field[1:]+": "+c.Then)
 			}
 		}
-		txt := strings.Join(then, "; ")
+		// 2.101.6: o que mudou vem numa linha própria (a da época é cortada em 3 linhas)
 		if len(ctx.Changed) > 0 {
-			txt += ". Mudou desde a medição: " + strings.ToLower(strings.Join(ctx.Changed, ", "))
+			method = append(method, [2]string{"Mudou desde a medição", strings.ToLower(strings.Join(ctx.Changed, ", "))})
 		}
-		method = append(method, [2]string{"Configuração na época", txt})
+		method = append(method, [2]string{"Configuração na época", strings.Join(then, "; ")})
 	}
 	if len(m.Attachments) > 0 {
 		var names []string

@@ -433,7 +433,7 @@ Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da
 Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.	PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.
 PERIGO	DANGER
 POR DIA	BY DAY
-Padrão 2.000: o máximo do GMC-800 pelo manual.	Default 2,000: the GMC-800's maximum according to the manual.
+Padrão 2.000 µSv/h: o máximo do GMC-800 pelo manual.	Default 2,000 µSv/h: the GMC-800's maximum according to the manual.
 Padrão por hora do dia	Hour-of-day pattern
 Para mapear ajustes que o app ainda não conhece (como ligar/desligar o alarme): tire a foto, mude só esse ajuste no menu do contador e compare.	To map settings the app doesn't know yet (like turning the alarm on/off): take the snapshot, change only that setting in the counter menu and compare.
 Para você:	For you:
@@ -3223,7 +3223,7 @@ TESTE	TEST
 REAL	REAL
 Some sozinha em 1 min.	Goes away on its own in 1 min.
 RC102 saturado	RC102 saturated
-Padrão 1.000: o fim da faixa do RC102 102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.	Default 1,000: the top of the RC102 102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with "≥" and warns not to trust it.
+Padrão 1.000 µSv/h: o fim da faixa do RC102 pela especificação do fabricante (0,1 a 1.000 µSv/h). Daí para cima, o alarme mostra o número com "≥" e avisa para não confiar nele.	Default 1,000 µSv/h: the top of the RC102 range in the maker's specification (0.1 to 1,000 µSv/h). From there up, the alarm shows the number with "≥" and warns not to trust it.
 fim da escala do RC102	RC102 end of scale
 Saturação do RC102	RC102 saturation
 fim da escala {0} µSv/h	end of scale {0} µSv/h
@@ -6333,3 +6333,44 @@ O objeto deu abaixo do fundo	The object came out below the background
 abaixo do fundo	below the background
 , mas a incerteza é grande	, but the uncertainty is large
 fator do app,	app factor,
+O GMC-800 subiu mais que o RC102: {0} em {1} semanas	The GMC-800 rose more than the RC102: {0} in {1} weeks
+O RC102 em casa subiu menos ({0} contra {1}). Parte pode ser o ambiente, mas a diferença aponta para o aparelho.	The RC102 at home rose less ({0} vs. {1}). Part of it may be the environment, but the difference points to the device.
+O RC102 subiu menos: veja a Saúde do tubo.	The RC102 rose less: check Tube health.
+O {0} também subiu, menos (+{1}%, {2} σ).	The {0} also rose, less (+{1}%, {2} σ).
+O {0} também subiu, só que menos.	The {0} also rose, only less.
+O {0} também subiu, só que menos: parte da subida é radiação de verdade.	The {0} also rose, only less: part of the rise is real radiation.
+em {0} dias: mais alto por volta das {1}h, mais baixo por volta das {2}h	over {0} days: highest around {1}h, lowest around {2}h
+em {0} dias: mais alto por volta das {1}h ({2} {3}) · mais baixo por volta das {4}h ({5} {6})	over {0} days: highest around {1}h ({2} {3}) · lowest around {4}h ({5} {6})
+perto do fundo da sua casa ({0}{1}%)	close to your home background ({0}{1}%)
+{0}× casa ({1} µSv/h)	{0}× home ({1} µSv/h)
+Mudou desde a medição	Changed since the measurement
+{0} µSv/h por CPM (a que valia na medição, para gama do Cs-137)	{0} µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma)
+{0} µSv/h por CPM (a que valia na medição, para gama do Cs-137); hoje: {1}	{0} µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma); today: {1}
+Medição de {0}{1}: {2}{3} ± {4} µSv/h sobre o fundo ({5}σ na dose) — {6}	Measurement of {0}{1}: {2}{3} ± {4} µSv/h above background ({5}σ in dose) — {6}
+No RC102, a incerteza do µSv/h vem do espalhamento da dose do próprio aparelho. A contagem ficou igual ({0}σ), mas a dose subiu {1}σ: é real. Gama de energia alta, como o do K-40, dá mais dose por contagem.	On the RC102, the µSv/h uncertainty comes from the spread of the device's own dose. The count stayed the same ({0}σ), but the dose rose {1}σ: it's real. High-energy gamma, like K-40's, gives more dose per count.
+na dose · certeza {0}	in dose · certainty {0}
+Precisão do líquido (pela dose): ±{0}%.	Net precision (from dose): ±{0}%.
+Certeza pela dose: muito alta.	Certainty from dose: very high.
+Certeza pela dose: alta.	Certainty from dose: high.
+Certeza pela dose: boa.	Certainty from dose: good.
+Certeza pela dose: baixa, pode ser acaso.	Certainty from dose: low, may be chance.
+Certeza pela dose: nenhuma, cabe no acaso.	Certainty from dose: none, within chance.
+Objeto ÷ fundo (dose)	Object ÷ background (dose)
+{0} σ na dose · {1} σ na contagem	{0} σ in dose · {1} σ in count
+± {0}% (1σ, pela dose do RC102)	± {0}% (1σ, from the RC102 dose)
+µSv/h: espalhamento da dose do RC102 em blocos de 30 s; contagens: √N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados	µSv/h: spread of the RC102 dose in 30 s blocks; counts: √N of each phase (Poisson); the net one combines both: root of the sum of squares
+Média mrem/h (C)	Average mrem/h (C)
+Mín mrem/h	Min mrem/h
+Máx mrem/h	Max mrem/h
+Dose mrem (C)	Dose mrem (C)
+mrem/h (C)	mrem/h (C)
+Mín/méd/máx mrem/h	Min/avg/max mrem/h
+Pico mrem/h	Peak mrem/h
+Limite mrem/h	Limit mrem/h
+Casa mrem/h	Home mrem/h
+Sua dose mrem	Your dose mrem
+; hoje:	; today:
+Certeza pela dose:	Certainty from dose:
+µSv/h por CPM (a que valia na medição, para gama do Cs-137)	µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma)
+σ na contagem	σ in count
+σ na dose ·	σ in dose ·
