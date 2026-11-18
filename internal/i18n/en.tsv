@@ -1973,6 +1973,7 @@ Se o objeto emite algo, é menos que +{0}; para ir além, aumente o tempo máxim
 Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1}; para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1}; to go further, raise the time limit.
 Chegou ao tempo máximo ({0}) sem decidir. Para ir além, aumente o tempo máximo.	Reached the time limit ({0}) without deciding. To go further, raise the time limit.
 Chegou ao tempo máximo ({0}) sem decidir. Quem limita é o fundo medido na hora (± {1} em {2}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	Reached the time limit ({0}) without deciding. The background measured on the spot is what limits it (± {1} in {2}): to go further, measure the background longer or use the home background.
+Chegou ao tempo máximo ({0}) sem decidir. Se o objeto emite algo, é menos que +{1}. Quem limita é o fundo medido na hora (± {2} em {3}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	Reached the time limit ({0}) without deciding. If the object emits anything, it's less than +{1}. The background measured on the spot is what limits it (± {2} in {3}): to go further, measure the background longer or use the home background.
 Em {0}, se o objeto emite algo, é menos que +{1}; para ir além, aumente o tempo máximo.	In {0}, if the object emits anything, it's less than +{1}; to go further, raise the time limit.
 Em {0}, se o objeto emite algo, é menos que +{1}. Quem limita é o fundo medido na hora (± {2} em {3}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.	In {0}, if the object emits anything, it's less than +{1}. The background measured on the spot is what limits it (± {2} in {3}): to go further, measure the background longer or use the home background.
 Parou em {0}, quando deu para garantir que o objeto sobe menos de {1}% do fundo (+{2}). Para procurar algo mais fraco, escolha “+10% do fundo”.	Stopped at {0}, once it could guarantee the object adds less than {1}% of background (+{2}). To look for something weaker, choose “+10% of background”.
@@ -5878,6 +5879,7 @@ usar o salvo (não tem)	use the saved one (none)
 valor típico	typical value
 voltar	back
 {0} · {1} · amostra {2} · fundo {3} · {4}{5}	{0} · {1} · sample {2} · background {3} · {4}{5}
+· {0} · amostra {1} · fundo {2} · {3}	 · {0} · sample {1} · background {2} · {3}
 última medida	last measured
 tempo recomendado	recommended time
 Ra-226 ≈ 24 a 105 Bq/kg	Ra-226 ≈ 24 to 105 Bq/kg

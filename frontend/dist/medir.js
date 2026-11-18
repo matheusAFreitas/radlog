@@ -1151,11 +1151,13 @@ function measureExplain(r, obj, auto, k, bg, noLim) {
     if (r.level === "sim" || r.doseUp || !(r.limit || r.limitUSv)) return `Chegou ao tempo máximo (${t}) sem decidir.`;
     if (limitBg(r, bg)) {
       const be = phErr(bg, bg.cpm > 0 && bg.usv > 0 ? bg.usv / bg.cpm : k), bt = fmtMin(bg.seconds);
+      if (!noLim && r.level !== "nada") return `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
       return noLim
         ? `Chegou ao tempo máximo (${t}) sem decidir. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`
         : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
     }
     // 2.101.15 (item 137): ao vivo, a faixa de cima já diz que chegou ao tempo máximo
+    if (!noLim && r.level !== "nada") return `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
     return noLim ? `Chegou ao tempo máximo (${t}) sem decidir. Para ir além, aumente o tempo máximo.` : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
   }
   return {

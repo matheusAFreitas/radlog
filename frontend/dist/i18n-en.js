@@ -5025,6 +5025,18 @@ const I18N_EN = {
 ]
 ],
 [
+"Chegou ao tempo máximo (",
+"^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Se o objeto emite algo, é menos que \\+((?:(?! · ).)+?)\\. Quem limita é o fundo medido na hora \\(± ((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\): para ir além, meça o fundo por mais tempo ou use o fundo da casa\\.$",
+"Reached the time limit (${1}) without deciding. If the object emits anything, it's less than +${2}. The background measured on the spot is what limits it (± ${3} in ${4}): to go further, measure the background longer or use the home background.",
+[
+"Chegou ao tempo máximo (",
+") sem decidir. Se o objeto emite algo, é menos que +",
+". Quem limita é o fundo medido na hora (± ",
+" em ",
+"): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
+]
+],
+[
 "O fundo desceu cerca de ",
 "^O fundo desceu cerca de ((?:(?! · ).)+?)% em ((?:(?! · ).)+?) dias \\(((?:(?! · ).)+?) ± ((?:(?! · ).)+?) µSv/h por dia, ((?:(?! · ).)+?) dias completos\\)\\. É um aviso, não uma conclusão: estação do ano, chuva, ventilação e o contador em outro lugar também mudam o fundo\\.$",
 "The background fell about ${1}% in ${2} days (${3} ± ${4} µSv/h per day, ${5} complete days). It's a warning, not a conclusion: season, rain, ventilation and the counter in another spot also change the background.",
@@ -15246,6 +15258,15 @@ const I18N_EN = {
 "· RC102 média ",
 " · máx ",
 " CPS"
+]
+],
+[
+"· ",
+"^· ((?:(?! · ).)+?) · amostra ((?:(?! · ).)+?) · fundo ((?:(?! · ).)+?) · ((?:(?! · ).)+?)$",
+" · ${1} · sample ${2} · background ${3} · ${4}",
+[
+" · amostra ",
+" · fundo "
 ]
 ],
 [

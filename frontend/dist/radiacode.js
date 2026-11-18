@@ -1728,7 +1728,7 @@
     if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
     const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
     const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
-    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · ${shape}</small></div>` +
+    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · <span>${shape}</span></small></div>` +
       `<button type="button" class="link" data-eff aria-expanded="${act.effOpen}">detalhes</button><button type="button" class="btn${c.kcl ? "" : " accent"}" data-cal="kcl">${c.kcl ? "Calibrar de novo" : "Calibrar"}</button></div>`;
   }
   function actEffHtml(v) {
@@ -1750,7 +1750,7 @@
   // pessoa fica como está (como o nome)
   const ACT_GEOM_APP = ["pote encostado no RC102", "pote de 500 mL encostado"];
   const actGeomApp = (g) => ACT_GEOM_APP.includes(g);
-  const actGeomHtml = (g) => (!g ? "" : actGeomApp(g) ? escHtml(g) : `<span data-no-tr>${escHtml(g)}</span>`);
+  const actGeomHtml = (g) => (!g ? "" : actGeomApp(g) ? `<span>${escHtml(g)}</span>` : `<span data-no-tr>${escHtml(g)}</span>`);
   function actGeomFill(el, g) {
     if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
     if (document.activeElement === el || el.dataset.touched) return;
@@ -1920,7 +1920,7 @@
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
-    const meta = `${actNameHtml(r)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${actWhereTxt(r)}`;
+    const meta = `${actNameHtml(r)}<span> · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}</span>${actWhereTxt(r)}`; // 2.101.15 (item 138): a parte do app num span, a Posição da pessoa fora
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
