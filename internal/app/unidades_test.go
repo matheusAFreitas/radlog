@@ -17,6 +17,10 @@ func TestRemText(t *testing.T) {
 		{"sem número µSv/h", ",", "sem número µSv/h"},
 		{"50 CPM", ",", "50 CPM"},
 		{"0,31 ± 0,02 µSv/h", ",", "0,031 ± 0,002 mrem/h"},
+		// 2.101.5 (varredura do QA): "para" liga, e o "-800" do nome não é número
+		{"caiu de 0,151 para 0,108 µSv/h", ",", "caiu de 0,0151 para 0,0108 mrem/h"},
+		{"GMC-800 e 0,151 µSv/h", ",", "GMC-800 e 0,0151 mrem/h"},
+		{"Cs-137 a 0,5 µSv/h", ",", "Cs-137 a 0,05 mrem/h"},
 	} {
 		if got := remText(c.in, c.sep); got != c.want {
 			t.Errorf("remText(%q) = %q, quero %q", c.in, got, c.want)

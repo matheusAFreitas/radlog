@@ -320,7 +320,7 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 		d.Text(pm, p.y+11, pdf.Sans, 8.5, cMuted, "Esta medição é de antes da versão 0.20.3 e não guardou os segundos.")
 		p.y += 16
 	} else {
-		p.measChart(m, bk)
+		p.measChart(m, bk, ok)
 	}
 	if m.Spectrum != nil && len(m.Spectrum.Obj) > 0 {
 		p.measSpectrum(m)
@@ -479,8 +479,15 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 
 // measChart: contagem por segundo (média de 10 s, em CPM) das duas fases,
 // com a média e a margem de erro (±1σ) de cada uma.
-func (p *reportPDF) measChart(m SavedMeasure, k float64) {
+func (p *reportPDF) measChart(m SavedMeasure, k, ok float64) {
 	d := p.d
+	// 2.101.5: o objeto fica na altura da taxa dele (no RC102 o µSv/h por
+	// contagem do objeto não é o do fundo); o gráfico segue em CPM do fundo
+	objPh, of := m.Obj, 1.0
+	if k > 0 && ok > 0 {
+		of = ok / k
+	}
+	objPh.CPM, objPh.ErrCPM = objPh.CPM*of, objPh.ErrCPM*of
 	p.need(150)
 	x0, y0, w, h := pm+28, p.y+8, pdf.W-2*pm-28, 110.0
 	var tmax float64
@@ -515,7 +522,10 @@ func (p *reportPDF) measChart(m SavedMeasure, k float64) {
 		return out
 	}
 	bgL, objL := smooth("fundo"), smooth("objeto")
-	top := math.Max(m.Obj.CPM+m.Obj.ErrCPM, m.Bg.CPM+m.Bg.ErrCPM)
+	for i := range objL {
+		objL[i].v *= of
+	}
+	top := math.Max(objPh.CPM+objPh.ErrCPM, m.Bg.CPM+m.Bg.ErrCPM)
 	for _, q := range append(append([]pt{}, bgL...), objL...) {
 		top = math.Max(top, q.v)
 	}
@@ -571,7 +581,7 @@ func (p *reportPDF) measChart(m SavedMeasure, k float64) {
 		ba, bb = oa, ob // o fundo da casa vale para a fase toda
 	}
 	band(m.Bg, ba, bb, cMuted)
-	band(m.Obj, oa, ob, cAccent)
+	band(objPh, oa, ob, cAccent)
 	line := func(l []pt, c pdf.RGB) {
 		var seg [][2]float64
 		for _, q := range l {

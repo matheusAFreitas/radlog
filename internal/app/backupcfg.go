@@ -38,6 +38,10 @@ func portableCopy(dst *Settings, src Settings) {
 	dst.Lang = src.Lang
 	dst.NoMeasureReport = src.NoMeasureReport
 	dst.NoAutoHistory = src.NoAutoHistory
+	// 2.101.5: unidades e formato da data (vieram depois do backup)
+	dst.RateUnit = normRateUnit(src.RateUnit)
+	dst.CountUnit = normCountUnit(src.CountUnit)
+	dst.DateFormat = normDateFormat(src.DateFormat)
 }
 
 // portableSettings é o que vai para o backup.

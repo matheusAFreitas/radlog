@@ -59,6 +59,8 @@ func (a *App) rcDoseLogAppend(t time.Time, dose, sec float64) {
 	defer f.Close()
 	if statErr != nil {
 		fmt.Fprintln(f, rcDoseHeader)
+	} else {
+		endLine(f, path)
 	}
 	fmt.Fprintf(f, "%s,%.4f,%.0f\n", t.Format(time.RFC3339), dose, sec)
 }

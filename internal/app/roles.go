@@ -291,6 +291,17 @@ func (a *App) SetWhereAt(gmc, rc, name string, fromMs int64) (Whereabouts, error
 // "Voltei" é o SetWhere de volta ao normal.
 func (a *App) LeaveHome(gmcGoes, rcGoes bool) (Whereabouts, error) {
 	gmc, rc := WhereHome, WhereHome
+	// 2.101.5: quem está fora do cálculo (tubo com defeito) e não vai junto
+	// continua fora
+	a.mu.Lock()
+	cur := a.whereaboutsLocked(time.Now())
+	a.mu.Unlock()
+	if cur.GMC == WhereOff {
+		gmc = WhereOff
+	}
+	if cur.RC == WhereOff {
+		rc = WhereOff
+	}
 	if gmcGoes {
 		gmc = WhereMe
 	}
@@ -312,7 +323,7 @@ func (a *App) setWhereOut(now time.Time, gmc, rc, name string, notHome bool) (Wh
 			return a.GetWhereabouts(), errors.New("local inválido")
 		}
 	}
-	notHome = notHome && gmc == WhereHome && rc != WhereOff
+	notHome = notHome && (gmc == WhereHome || gmc == WhereOff) && rc != WhereOff
 	ms := now.Truncate(time.Minute).UnixMilli()
 	a.mu.Lock()
 	if cur := a.whereaboutsLocked(now); cur.GMC == gmc && cur.RC == rc && cur.NotHome == notHome {

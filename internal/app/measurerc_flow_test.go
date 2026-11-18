@@ -48,3 +48,33 @@ func TestMeasureRcFlow(t *testing.T) {
 		t.Fatalf("salva: %+v", ms)
 	}
 }
+
+// 2.101.5 (varredura, item 16): na fase do objeto, o RC102 manda o µSv/h do
+// próprio aparelho (o sal dá a mesma contagem e mais dose), não contagem × k
+// do fundo.
+func TestMeasureRcObjUsesOwnRate(t *testing.T) {
+	a := newTestApp(t)
+	a.rc.dev = radiacode.NewRaw(&rcRegs{regs: map[uint32]uint32{}})
+	if _, err := a.StartMeasure(MeasureOpts{Name: "sal", Device: "radiacode", Seconds: 20, Distance: "encostado"}); err != nil {
+		t.Fatal(err)
+	}
+	feed := func(n int, usv float64) {
+		for i := 0; i < n; i++ {
+			a.feedMeasureDev(measFeed{dev: "radiacode", cpm: 600, counts: 10, usv: usv})
+		}
+	}
+	feed(20, 0.169)
+	if st := a.GetMeasure(); st.Phase == "fundo-pronto" {
+		if _, err := a.StartMeasurePhase("objeto", 0, ""); err != nil {
+			t.Fatal(err)
+		}
+	}
+	if st := a.GetMeasure(); st.PhUSv != 0 {
+		t.Fatalf("começo do objeto ainda com a taxa do fundo: %v", st.PhUSv)
+	}
+	feed(10, 0.185)
+	st := a.GetMeasure()
+	if st.Phase != "objeto" || st.PhUSv < 0.184 || st.PhUSv > 0.186 {
+		t.Fatalf("objeto: fase %q µSv/h %v (esperado 0,185)", st.Phase, st.PhUSv)
+	}
+}

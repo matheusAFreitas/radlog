@@ -1,7 +1,9 @@
 package app
 
 import (
+	"encoding/json"
 	"fmt"
+	"path/filepath"
 	"time"
 )
 
@@ -37,6 +39,7 @@ func (a *App) TestObject(dev string) (int64, error) {
 	}
 	a.objTest[d] = until
 	a.mu.Unlock()
+	a.objSpanSet(d, time.Now(), until)
 	name := "GMC-800"
 	if d == devRC {
 		name = "RC102"
@@ -48,8 +51,62 @@ func (a *App) TestObject(dev string) (int64, error) {
 // StopTestObject devolve os alertas do aparelho antes da hora.
 func (a *App) StopTestObject(dev string) {
 	a.mu.Lock()
+	_, on := a.objTest[dev]
 	delete(a.objTest, dev)
 	a.mu.Unlock()
+	if on {
+		a.objSpanSet(dev, time.Time{}, time.Now())
+	}
+}
+
+// ---------- os minutos do teste ficam fora da dose e do fundo (2.101.5) ----------
+
+const objTestFile = "testes-objeto.json"
+
+// objSpan é um intervalo com o aparelho encostado num objeto.
+type objSpan struct {
+	Dev  string `json:"dev"`
+	From int64  `json:"from"`
+	To   int64  `json:"to"`
+}
+
+func (a *App) objSpansLocked() []objSpan {
+	if !a.objSpansLoaded {
+		a.objSpansLoaded = true
+		if a.dataDir != "" {
+			a.readStateJSON(filepath.Join(a.dataDir, objTestFile), "testes de objeto", &a.objSpans)
+		}
+	}
+	return a.objSpans
+}
+
+// objSpanSet abre (from ≠ 0) ou estende/fecha o intervalo do aparelho que
+// toca agora; guarda só os últimos 400.
+func (a *App) objSpanSet(dev string, from, to time.Time) {
+	a.mu.Lock()
+	list := a.objSpansLocked()
+	now := time.Now().UnixMilli()
+	n := len(list) - 1
+	for ; n >= 0; n-- {
+		if list[n].Dev == dev {
+			break
+		}
+	}
+	if n >= 0 && list[n].To >= now {
+		list[n].To = to.UnixMilli() // estende (de novo) ou fecha (parou antes)
+	} else if !from.IsZero() {
+		list = append(list, objSpan{Dev: dev, From: from.UnixMilli(), To: to.UnixMilli()})
+	}
+	if len(list) > 400 {
+		list = list[len(list)-400:]
+	}
+	a.objSpans = list
+	b, _ := json.Marshal(list)
+	dir := a.dataDir
+	a.mu.Unlock()
+	if dir != "" {
+		_ = writeFileAtomic(filepath.Join(dir, objTestFile), b, 0o644)
+	}
 }
 
 // ObjectTests diz até quando cada aparelho está calado (ms); só os que valem.

@@ -56,9 +56,10 @@ function openPlanForm(p) {
 function renderPlanned() {
   const form = $("plannedForm"), box = $("plannedBox");
   if (!form || !box) return;
+  const old = form.firstElementChild; // 2.101.5: o digitado fica (keepInputs, fora.js)
   form.textContent = "";
   form.hidden = !plEditing;
-  if (plEditing) form.appendChild(planForm(plEditing));
+  if (plEditing) { const f = planForm(plEditing); form.appendChild(f); if (typeof keepInputs === "function") keepInputs(old, f, plEditing); }
   const btn = $("btnPlanAdd");
   if (btn) btn.hidden = !!plEditing;
   const list = state.planned || [];

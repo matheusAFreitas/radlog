@@ -6293,3 +6293,21 @@ O RC102 não está vendo o sal: a contagem quase não subiu em relação ao fund
 normal da casa	home normal
 contagem agora	count rate now
 O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.	The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.
+· dose ≈ {0} mrem · um ponto a cada {1}	· dose ≈ {0} mrem · one point every {1}
+· GMC-800 ≈ {0} · RC102 ≈ {1} µSv · um ponto a cada {2}	· GMC-800 ≈ {0} · RC102 ≈ {1} µSv · one point every {2}
+· GMC-800 ≈ {0} · RC102 ≈ {1} mrem · um ponto a cada {2}	· GMC-800 ≈ {0} · RC102 ≈ {1} mrem · one point every {2}
+em casa {0} µSv · fora {1} µSv	at home {0} µSv · away {1} µSv
+fundo {0} µSv + acima do fundo {1} µSv	background {0} µSv + above background {1} µSv
+µSv/h acima do fundo	µSv/h above background
+mrem/h acima do fundo	mrem/h above background
+Minutos do RC102 que estavam na memória gravados ({0})	RC102 minutes that were in memory written ({0})
+Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.	Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.
+Não consegui ler o arquivo {0} ({1}): estava estragado. Guardei uma cópia em {2} e segui sem o que tinha nele.	Couldn't read the file {0} ({1}): it was damaged. I kept a copy at {2} and went on without its contents.
+RC102 média {0} · GMC-800 média {1} · mín {2} · máx {3} {4}	RC102 average {0} · GMC-800 average {1} · min {2} · max {3} {4}
+RC102 média {0} · mín {1} · máx {2} {3}	RC102 average {0} · min {1} · max {2} {3}
+ajustes ainda não gravados no GMC-800 (use Gravar no GMC-800)	settings not yet written to the GMC-800 (use Write to the GMC-800)
+ajustes ainda não gravados no RC102 (use Gravar no RC102)	settings not yet written to the RC102 (use Write to the RC102)
+média {0} · mín {1} · máx {2} {3}	average {0} · min {1} · max {2} {3}
+testes de objeto	object tests
+{0} acima do fundo	{0} above background
+· {0} · um ponto a cada {1}	· {0} · one point every {1}

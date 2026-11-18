@@ -78,7 +78,7 @@ function liveMeasureSrc() {
     expectSec = before + st.elapsed + (st.eta >= 0 ? st.eta : 60) + 5;
   } else if (st.auto && st.phase === "fundo") expectSec = st.seconds + 60;
   else if (st.phase !== "fundo" && st.phase !== "objeto") expectSec = 1; // terminou: o eixo vai até o último ponto
-  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st),
+  return { start: mlog.start, live: mlog.live, ph: mlog.ph, seconds: st.seconds || 60, expectSec, bgFlat: home ? st.bg : null, k: mK(st), kObj: liveObjK(st),
     dev: isRcMeasure(st) ? "radiacode" : "gmc", other: st.other ? mlog.other : null, otherDev: st.other && st.other.device, otherRole: st.other && st.other.role };
 }
 
@@ -98,7 +98,7 @@ function savedMeasureSrc(m) {
   }
   const o = m.other;
   const other = o && o.samples ? o.samples.filter((s) => s.usv > 0).map((s) => ({ t: start + s.t, usv: s.usv, phase: s.phase })) : null;
-  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m),
+  return { start, live, ph, seconds: m.bg.seconds || 60, done: true, bgFlat: home ? m.bg : null, k: mK(m), kObj: isRcMeasure(m) && m.obj ? phK(m.obj, "radiacode") : 0,
     dev: isRcMeasure(m) ? "radiacode" : "gmc", other, otherDev: o && o.device, otherRole: o && o.role };
 }
 
@@ -140,7 +140,8 @@ function drawMeasureSrc(src) {
   // a média dos primeiros segundos pula muito (1 contagem em 1 s = 60 CPM):
   // ela não entra na escala; a faixa de erro também pode passar do topo
   const first = {};
-  for (const p of src.ph) { if (!(p.phase in first)) first[p.phase] = p.t; if (p.t - first[p.phase] >= 5000) top = Math.max(top, p.avg); }
+  const okf = src.kObj ? src.kObj / k : 1, fk = (p) => (p.phase === "objeto" ? okf : 1); // 2.101.5: no RC102 o objeto tem o µSv/h por contagem dele
+  for (const p of src.ph) { if (!(p.phase in first)) first[p.phase] = p.t; if (p.t - first[p.phase] >= 5000) top = Math.max(top, p.avg * fk(p)); }
   if (src.bgFlat) top = Math.max(top, src.bgFlat.cpm + src.bgFlat.errCPM);
   top = niceN(Math.max(10, top * 1.15) * k, 3) / k; // 2.94 (G1): marcas redondas em µSv/h
   const x = (t) => ((t - t0) / (t1 - t0)) * W;
@@ -161,10 +162,10 @@ function drawMeasureSrc(src) {
   for (const [phase, color] of [["fundo", COR.muted], ["objeto", COR.obj]]) {
     const pts = src.ph.filter((p) => p.phase === phase);
     if (!pts.length) continue;
-    const up = pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg + p.err).toFixed(1)}`);
-    const dn = pts.slice().reverse().map((p) => `${x(p.t).toFixed(1)} ${y(p.avg - p.err).toFixed(1)}`);
+    const up = pts.map((p) => `${x(p.t).toFixed(1)} ${y((p.avg + p.err) * fk(p)).toFixed(1)}`);
+    const dn = pts.slice().reverse().map((p) => `${x(p.t).toFixed(1)} ${y((p.avg - p.err) * fk(p)).toFixed(1)}`);
     out += `<path d="M${up.join("L")}L${dn.join("L")}Z" fill="${color}" fill-opacity="0.18"/>`;
-    out += `<path d="M${pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg).toFixed(1)}`).join("L")}" fill="none" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
+    out += `<path d="M${pts.map((p) => `${x(p.t).toFixed(1)} ${y(p.avg * fk(p)).toFixed(1)}`).join("L")}" fill="none" stroke="${color}" stroke-width="2.5" vector-effect="non-scaling-stroke"/>`;
     if (phase === "objeto") {
       const xs = x(pts[0].t).toFixed(1);
       out += `<line x1="${xs}" y1="0" x2="${xs}" y2="${H}" stroke="${COR.obj}" stroke-width="1" stroke-dasharray="3 3" vector-effect="non-scaling-stroke"/>`;
@@ -193,10 +194,11 @@ function drawMeasureSrc(src) {
   const last = (ph) => { const l = src.ph.filter((p) => p.phase === ph); return l[l.length - 1]; };
   const b = last("fundo"), o = last("objeto");
   const parts = [];
-  if (b) parts.push(`fundo ${numU(b.avg * k)} ± ${numU(b.err * k)}`);
-  else if (src.bgFlat) parts.push(`fundo da casa ${numU(src.bgFlat.cpm * k)} ± ${numU(src.bgFlat.errCPM * k)}`);
-  if (o) parts.push(`objeto ${numU(o.avg * k)} ± ${numU(o.err * k)}`);
-  $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " µSv/h" : "";
+  if (b) parts.push(`fundo ${rateNum(b.avg * k)} ± ${rateNum(b.err * k)}`);
+  else if (src.bgFlat) parts.push(`fundo da casa ${rateNum(src.bgFlat.cpm * k)} ± ${rateNum(src.bgFlat.errCPM * k)}`);
+  if (o) { const kk = src.kObj || k; parts.push(`objeto ${rateNum(o.avg * kk)} ± ${rateNum(o.err * kk)}`); };
+  $("mLiveSub").dataset.unitKeep = "";
+  $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " " + rateLbl() : "";
 }
 
 function setupMeasureHover() {
@@ -217,7 +219,7 @@ function setupMeasureHover() {
     const k = src.k || calK();
     const ov = src.other && src.other.length ? near(src.other) : null;
     tip.textContent = `${Math.round((ref.t - t0) / 1000)} s` + (lv ? ` · ${src.otherDev ? devLabel(src.dev) : "ao vivo"} ${uS(lv.cpm, k)}` : "") +
-      (ov && Math.abs(ov.t - ref.t) < 5000 ? ` · ${devLabel(src.otherDev)} ${usvVal(ov.usv)}` : "") + (ph ? ` · média (${ph.phase}) ${numU(ph.avg * k)} ± ${numU(ph.err * k)} µSv/h` : "");
+      (ov && Math.abs(ov.t - ref.t) < 5000 ? ` · ${devLabel(src.otherDev)} ${usvVal(ov.usv)}` : "") + (ph ? ((kk) => ` · média (${ph.phase}) ${numU(ph.avg * kk)} ± ${numU(ph.err * kk)} µSv/h`)(ph.phase === "objeto" && src.kObj ? src.kObj : k) : "");
     tip.style.left = Math.min(ev.clientX - r.left + 12, r.width - tip.offsetWidth - 4) + "px";
   });
   plot.addEventListener("mouseleave", () => { $("mCursor").hidden = true; $("mTip").hidden = true; });
@@ -235,6 +237,9 @@ const plusMinus = (v) => (v >= 0 ? "+" : "−") + fmt(Math.abs(v), 1);
 const rcK = () => { const s = state.rc.st || {}; return s.cps > 0 && s.usvh > 0 ? s.usvh / (s.cps * 60) : 0.1 / 720; };
 const devK = (dev) => (dev === "radiacode" ? rcK() : calK());
 const phK = (ph, dev) => (ph && ph.cpm > 0 && ph.usv > 0 ? ph.usv / ph.cpm : devK(dev));
+// 2.101.5: µSv/h por contagem do objeto no RC102 ao vivo (o µSv/h do próprio
+// aparelho na fase); 0 = sem taxa medida (usa o k do fundo)
+const liveObjK = (st) => (isRcMeasure(st) && st.phase === "objeto" && st.phUsv > 0 && st.counts > 0 && st.elapsed > 0 ? st.phUsv / ((st.counts * 60) / st.elapsed) : 0);
 const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
 const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
 // 2.100.2: ± do µSv/h; no RC102 vem do espalhamento da dose (errUSv), não do √N
@@ -254,18 +259,18 @@ function measureStats(m) {
     return tr;
   };
   const thead = document.createElement("thead");
-  thead.appendChild(row(["", "contagens", "tempo", "µSv/h", "± 1σ"]));
+  thead.appendChild(row(["", "contagens", "tempo", rateLbl(), "± 1σ"]));
   const tb = document.createElement("tbody");
   const dev = isRcMeasure(m) ? "radiacode" : "gmc";
   for (const [nm, x] of [["Fundo", m.bg], ["Com o objeto", m.obj]]) {
     if (!x) continue;
     const k = phK(x, dev);
-    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), numU(x.cpm * k), `±${x.errUSv ? numU(x.errUSv) : numU(x.errCPM * k)}`]));
+    tb.appendChild(row([nm === "Com o objeto" ? "Objeto" : x.source === "casa" ? "Fundo (casa)" : nm, x.counts.toLocaleString(LOCALE), mDurTxt(x.seconds), rateNum(x.cpm * k), `±${x.errUSv ? rateNum(x.errUSv) : rateNum(x.errCPM * k)}`]));
   }
   const r = m.result;
   if (r) {
     const k = phK(m.obj, dev);
-    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + numU(Math.abs(r.netUSv)), `±${r.netErrUSv ? numU(r.netErrUSv) : numU(r.netErr * k)}`], "m-diff"));
+    tb.appendChild(row(["Diferença", "", "", (r.netUSv >= 0 ? "+" : "−") + rateNum(Math.abs(r.netUSv)), `±${r.netErrUSv ? rateNum(r.netErrUSv) : rateNum(r.netErr * k)}`], "m-diff"));
   }
   tbl.append(thead, tb);
   const box = document.createElement("div");
@@ -469,7 +474,7 @@ function renderMeasureBusca() {
   $("mBuscaBgMk").hidden = !hb;
   $("mBuscaPkMk").style.left = pos(mBusca.peak);
   $("mBuscaPkMk").hidden = !mBusca.peak;
-  $("mBuscaBgTxt").textContent = hb ? `fundo ${numU(hb)}` : "fundo";
+  $("mBuscaBgTxt").textContent = hb ? `fundo ${rateNum(hb)}` : "fundo";
   $("mBuscaPkTxt").textContent = mBusca.peak ? `pico ${usvVal(mBusca.peak)}` : "pico —";
   const pts = mBusca.vals, sp = $("mBuscaSpark").querySelector("polyline"), bl = $("mBuscaSpark").querySelector("line.bg");
   const mx = Math.max(...pts.map((p) => p.v), hb * 2, 1e-6) * 1.1;
@@ -562,9 +567,9 @@ function measKV(box, rows) {
 function renderMeasureObj(st) {
   const rc = isRcMeasure(st), k = mK(st), o = st.other;
   $("mObjTitle").textContent = `Objeto na frente do aparelho${st.distance ? ", " + st.distance : ""}`;
-  const lv = st.live, okk = st.elapsed > 0 ? k : k;
+  const lv = st.live, okk = (rc && st.phase === "objeto" && liveObjK(st)) || k;
   const objUSv = st.elapsed > 0 ? ((st.counts * 60) / st.elapsed) * okk : null;
-  const objErr = st.elapsed > 0 ? ((Math.sqrt(Math.max(st.counts, 1)) * 60) / st.elapsed) * okk : null;
+  const objErr = rc && st.phErrUsv > 0 ? st.phErrUsv : st.elapsed > 0 ? ((Math.sqrt(Math.max(st.counts, 1)) * 60) / st.elapsed) * okk : null;
   const bk = phK(st.bg, rc ? "radiacode" : "gmc");
   const rows = [];
   const pName = devLabel(rc ? "radiacode" : "gmc");
@@ -1333,8 +1338,8 @@ function renderMeasureHistory() {
     });
     if (m.notComparable) { const tg = document.createElement("span"); tg.className = "nc-tag"; tg.textContent = "não comparável"; b.querySelector("strong").appendChild(tg); }
     const net = b.querySelector(".m-item-net");
-    net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${numU(Math.abs(m.result.netUSv))}`;
-    net.title = "µSv/h acima do fundo";
+    net.textContent = `${m.result.netUSv >= 0 ? "+" : "−"}${rateNum(Math.abs(m.result.netUSv))}`;
+    net.title = `${rateLbl()} acima do fundo`;
     b.addEventListener("click", () => { state.mSel = m.id; renderMeasureHistory(); drawMeasureChart(); });
     li.appendChild(b);
     ul.appendChild(li);
@@ -1395,8 +1400,14 @@ function renderMeasureDetail() {
     : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
   if (r.stop) lim = measureExplain(r, m.obj, true, ok) + " " + lim;
   $("mdLimits").textContent = lim;
-  $("mdEditName").value = m.name;
-  $("mdEditNote").value = m.note || "";
+  // 2.101.5: com o Editar aberto na mesma medição, o digitado fica
+  const ef = $("mdEditForm");
+  if (ef.hidden || ef.dataset.for !== String(m.id)) {
+    $("mdEditName").value = m.name;
+    $("mdEditNote").value = m.note || "";
+    ef.dataset.for = String(m.id);
+    if (!ef.hidden) ef.hidden = true;
+  }
   const del = $("btnMdDel");
   del.dataset.sure = "";
   del.textContent = "Apagar";
@@ -1410,7 +1421,9 @@ async function renderMeasureExtra(m) {
     ? `Marcada como não comparável${m.ncReason ? ": " + m.ncReason : ""}. Ela continua salva, mas não deve ser comparada com as outras medições deste objeto.`
     : "Comparável com as outras medições do mesmo objeto (mesmo nome), se a distância e a configuração forem as mesmas.";
   $("btnMdComp").textContent = m.notComparable ? "Desmarcar" : "Marcar como não comparável";
-  $("mdCompForm").hidden = true;
+  // 2.101.5: o quadro do motivo só fecha ao trocar de medição
+  const cf = $("mdCompForm");
+  if (cf.dataset.for !== String(m.id)) { cf.hidden = true; cf.dataset.for = String(m.id); }
   renderAttachments(m);
   const my = ++mCtxSeq;
   let ctx = null;
@@ -1442,7 +1455,7 @@ async function renderMeasureExtra(m) {
     tr.append(...c);
     tb.appendChild(tr);
   };
-  const netTxt = (v, e) => `${v >= 0 ? "+" : "−"}${numU(Math.abs(v))}` + (e ? ` ± ${numU(Math.abs(e))}` : "");
+  const netTxt = (v, e) => `${v >= 0 ? "+" : "−"}${rateNum(Math.abs(v))}` + (e ? ` ± ${rateNum(Math.abs(e))}` : "");
   row(0, `${ddmm(m.time)} (esta)`, netTxt(m.result.netUSv, m.result.netCPM ? (m.result.netErr * m.result.netUSv) / m.result.netCPM : 0), m.distance || "—", m.notComparable ? "não comparável" : "", "cur");
   for (const r of list) row(r.id, ddmm(r.time), netTxt(r.netUSv, r.netErrUSv), r.distance || "—", r.diff.length ? r.diff.join(", ") : "comparável", r.diff.length ? "nc" : "");
   rel.appendChild(tb);

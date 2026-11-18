@@ -88,6 +88,9 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 		p.From, p.To = p.To, p.From
 	}
 	p.Name = strings.TrimSpace(p.Name)
+	if isAutoPeriodName(p.Name) {
+		p.Name = "" // 2.101.5: nome automático segue os aparelhos novos
+	}
 	if p.Name == "" {
 		p.Name = periodName(p.GMC, p.RC)
 		if p.NotHome && p.RC == WhereMe {
@@ -255,4 +258,20 @@ func normAwayAsk(m int) int {
 		return 240
 	}
 	return m
+}
+
+// isAutoPeriodName diz se o nome é um dos automáticos (o da tela volta igual
+// quando a pessoa só troca os aparelhos).
+func isAutoPeriodName(n string) bool {
+	if n == periodNameOut {
+		return true
+	}
+	for _, g := range []string{WhereHome, WhereMe, WhereOff} {
+		for _, r := range []string{WhereHome, WhereMe, WhereOff} {
+			if n == periodName(g, r) {
+				return true
+			}
+		}
+	}
+	return false
 }

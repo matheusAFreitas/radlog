@@ -322,7 +322,7 @@ function sumAwayBar(k, rc) {
   const hp = (rc.homeDose / tot) * 100;
   w.querySelector(".home").style.width = hp.toFixed(1) + "%";
   w.querySelector(".away").style.width = (100 - hp).toFixed(1) + "%";
-  w.lastElementChild.textContent = `em casa ${d(rc.homeDose)} · fora ${d(rc.awayDose)} µSv`;
+  w.lastElementChild.textContent = `em casa ${d(rc.homeDose)} µSv · fora ${d(rc.awayDose)} µSv`; // 2.101.5: unidade em cada número (mrem converte os dois)
   w.title = `Fora de casa: ${hm(rc.awayMinutes)}, ${fmt(100 - hp, 0)}% da dose`;
   k.appendChild(w);
 }
@@ -363,7 +363,7 @@ function sumDoseSync() {
   const d = (v) => fmt(v, v < 10 ? 2 : 1);
   k.children[0].textContent = "Sua dose";
   k.children[1].textContent = sumUSv(o.total);
-  k.children[2].textContent = `fundo ${d(o.homeBg + o.awayBg)} + acima do fundo ${d(o.above)} µSv`;
+  k.children[2].textContent = `fundo ${d(o.homeBg + o.awayBg)} µSv + acima do fundo ${d(o.above)} µSv`; // 2.101.5: idem
   k.classList.toggle("rc", o.device === "radiacode");
   // casa × fora já aparece no quadro de baixo
   k.querySelectorAll(".sum-away, .sum-known").forEach((e) => e.remove());

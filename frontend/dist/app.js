@@ -1660,6 +1660,8 @@ function lv() {
   const out = Object.assign({}, LV_DEFAULT);
   const s = (state.settings && state.settings.levels) || {};
   for (const k of Object.keys(out)) if (s[k] > 0) out[k] = s[k];
+  // 2.101.5: o µSv/h salvo vale (sem ele, a tela refazia pelo CPM e mudava o número)
+  for (const k of ["attentionUSv", "dangerUSv"]) if (s[k] > 0) out[k] = s[k];
   return out;
 }
 const dangerCPM = () => lv().dangerCPM;
@@ -2603,8 +2605,9 @@ async function openSettings(focusId) {
     renderStatus();
     return;
   }
-  devCfgRead = false;
-  rcCfgRead = false;
+  // 2.101.5: ajuste de aparelho digitado e ainda não gravado não é relido por cima
+  if (!devCfgDirty()) devCfgRead = false;
+  if (typeof rcCfgDirty !== "function" || !rcCfgDirty()) rcCfgRead = false;
   refreshReportDir();
   refreshAutostart();
   refreshUso();
@@ -2681,15 +2684,26 @@ function setFieldName(id) {
 }
 function renderSetBar() {
   const d = setDirty();
-  $("setBar").hidden = !d.length;
-  document.documentElement.classList.toggle("set-dirty", d.length > 0);
-  $("btnSettings").classList.toggle("dirty", d.length > 0);
-  if (!d.length) return;
-  const names = [...new Set(d.map(setFieldName))];
+  // 2.101.5: ajustes dos aparelhos digitados e ainda não gravados também aparecem
+  const dev = [];
+  if (typeof devCfgDirty === "function" && devCfgDirty()) dev.push("GMC-800");
+  if (typeof rcCfgDirty === "function" && rcCfgDirty()) dev.push("RC102");
+  const any = d.length > 0 || dev.length > 0;
+  $("setBar").hidden = !any;
+  document.documentElement.classList.toggle("set-dirty", any);
+  $("btnSettings").classList.toggle("dirty", any);
+  if (!any) return;
   const bar = $("setBarText");
-  bar.textContent = d.length === 1 ? "1 mudança não salva: " : `${d.length} mudanças não salvas: `;
-  names.slice(0, 4).forEach((n, i) => { if (i) bar.append(", "); const b = document.createElement("b"); b.textContent = n; bar.appendChild(b); });
-  if (names.length > 4) bar.append(` e mais ${names.length - 4}`);
+  bar.textContent = "";
+  if (d.length) {
+    const names = [...new Set(d.map(setFieldName))];
+    bar.textContent = d.length === 1 ? "1 mudança não salva: " : `${d.length} mudanças não salvas: `;
+    names.slice(0, 4).forEach((n, i) => { if (i) bar.append(", "); const b = document.createElement("b"); b.textContent = n; bar.appendChild(b); });
+    if (names.length > 4) bar.append(` e mais ${names.length - 4}`);
+  }
+  for (const x of dev) bar.append((bar.textContent ? " · " : "") + (x === "RC102" ? "ajustes ainda não gravados no RC102 (use Gravar no RC102)" : "ajustes ainda não gravados no GMC-800 (use Gravar no GMC-800)"));
+  // só ajuste de aparelho pendente: o Salvar e o Descartar daqui não valem para ele
+  $("btnSetDiscard").hidden = $("btnSave").hidden = !d.length;
 }
 document.addEventListener("input", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
 document.addEventListener("change", (e) => { if (e.target.closest && e.target.closest("#settings")) renderSetBar(); });
@@ -2990,6 +3004,7 @@ function fillThemeOptions() {
 }
 
 function fillDevCfg(c) {
+  setTimeout(() => { if (typeof renderSetBar === "function") renderSetBar(); }, 0); // 2.101.5: a barra acompanha o que está no aparelho
   fillThemeOptions();
   const v = c.values || {};
   qsa("#devcfg [data-key]").forEach((el) => {

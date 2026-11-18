@@ -424,7 +424,9 @@ async function objTestSync() {
 async function qkBack() {
   qkSheetClose();
   try {
-    state.where = await api.SetWhere("casa", "comigo", "");
+    // 2.101.5: quem estava fora do cálculo continua fora
+    const w = state.where || {};
+    state.where = await api.SetWhere(w.gmc === "fora" ? "fora" : "casa", w.radiacode === "fora" ? "fora" : "comigo", "");
     toast(`Bem-vindo de volta · período fora de casa encerrado às ${qkHM()}`);
     if (typeof refreshWhere === "function") refreshWhere();
     if (typeof refreshPeriods === "function" && state.view === "fora") refreshPeriods();

@@ -312,14 +312,16 @@ async function refreshChart() {
   $("legDash").hidden = !usvMode;
   const rcMaxU = (c.rc || []).reduce((m, v) => (v != null && v > m ? v : m), 0);
   const rcMinU = (c.rc || []).reduce((m, v) => (v != null && v < m ? v : m), Infinity);
+  // 2.101.5: os números já saem na unidade da tela (o conversor só pegava o último)
+  $("chartStats").setAttribute("data-unit-keep", "");
   $("chartStats").textContent = onlyRc
     ? (c.rcAvg == null && c.rcAvgCPM == null ? "sem dados do RC102 no período"
-      : usvMode ? `RC102 média ${fmt(c.rcAvg, 3)} · mín ${fmt(rcMinU, 3)} · máx ${fmt(rcMaxU, 3)} µSv/h`
+      : usvMode ? `RC102 média ${rateNum(c.rcAvg, 3)} · mín ${rateNum(rcMinU, 3)} · máx ${rateNum(rcMaxU, 3)} ${rateLbl()}`
       : cps ? `RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(max, 1)} CPS` : `RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(max, 0)} CPM`)
     : c.avg == null
     ? "sem dados no período"
     : usvMode
-      ? (c.rcAvg != null && dev === "todos" ? `RC102 média ${fmt(c.rcAvg, 3)} · GMC-800 média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h` : `média ${fmt(c.avgUSv, 3)} · mín ${fmt(c.minUSv, 3)} · máx ${fmt(c.maxUSv, 3)} µSv/h`)
+      ? (c.rcAvg != null && dev === "todos" ? `RC102 média ${rateNum(c.rcAvg, 3)} · GMC-800 média ${rateNum(c.avgUSv, 3)} · mín ${rateNum(c.minUSv, 3)} · máx ${rateNum(c.maxUSv, 3)} ${rateLbl()}` : `média ${rateNum(c.avgUSv, 3)} · mín ${rateNum(c.minUSv, 3)} · máx ${rateNum(c.maxUSv, 3)} ${rateLbl()}`)
       : cps
         ? `GMC-800 média ${fmt(c.avg / 60, 2)} · mín ${fmt(c.min / 60, 2)} · máx ${fmt(max, 2)} CPS` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM / 60, 1)} · máx ${fmt(rcMax, 1)} CPS` : "")
         : `GMC-800 média ${fmt(c.avg, 1)} · mín ${fmt(c.min, 0)} · máx ${fmt(max, 0)} CPM` + (c.rcAvgCPM != null && dev === "todos" ? ` · RC102 média ${fmt(c.rcAvgCPM, 0)} · máx ${fmt(rcMax, 0)} CPM` : "");
@@ -508,12 +510,17 @@ function renderZoomBar(c) {
   const t0 = c.times && c.times.length ? c.times[0] : c.from;
   const t1 = c.to;
   $("zoomRange").textContent = zoomRangeText(t0, t1);
-  const n = (c.values || []).filter((v) => v != null).length;
-  const hours = (n * (c.stepMs || 60000)) / 3600e3;
-  const dose = c.avgUSv != null ? c.avgUSv * hours : null;
+  // 2.101.5: a dose do aparelho escolhido (antes era sempre a do GMC-800) e
+  // já na unidade da tela (o span fica fora da troca µSv → mrem)
+  const doseOf = (arr, avg) => { const n = (arr || []).filter((v) => v != null).length; return avg != null && n ? (avg * n * (c.stepMs || 60000)) / 3600e3 : null; };
+  const dev = chartDevOf(c), dG = dev === "rc" ? null : doseOf(c.values, c.avgUSv), dR = dev === "gmc" ? null : doseOf(c.rc, c.rcAvg);
+  const dn = (v) => doseNum(v, v < 1 ? 3 : 2);
+  const doseT = dG != null && dR != null ? `GMC-800 ≈ ${dn(dG)} · RC102 ≈ ${dn(dR)} ${doseLbl()}` : dG != null ? `dose ≈ ${dn(dG)} ${doseLbl()}` : dR != null ? `dose ≈ ${dn(dR)} ${doseLbl()}` : "";
   const step = stepText(c.stepMs || 60000);
-  $("zoomStats").textContent = c.avg == null ? "· sem dados nesse trecho"
-    : `· dose ≈ ${fmt(dose, dose < 1 ? 3 : 2)} µSv · um ponto a cada ${step}` + (c.fineAlertsOnly ? " (por segundo só perto dos alertas)" : "");
+  const zs = $("zoomStats");
+  zs.setAttribute("data-unit-keep", "");
+  zs.textContent = !doseT ? "· sem dados nesse trecho" : `· ${doseT} · um ponto a cada ${step}`;
+  if (doseT && c.fineAlertsOnly) { const x = document.createElement("span"); x.textContent = " (por segundo só perto dos alertas)"; zs.appendChild(x); }
   renderZoomButtons();
 }
 

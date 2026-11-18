@@ -251,7 +251,9 @@ function periodForm(p, onDone) {
     return f;
   };
   const name = document.createElement("input");
-  name.type = "text"; name.maxLength = 60; name.value = p.name || ""; name.placeholder = "ex.: viagem";
+  // 2.101.5: nome automático fica vazio (segue os aparelhos ao salvar) e aparece como dica
+  const autoName = p.name && typeof whOf === "function" && p.name === whKind(whOf(p));
+  name.type = "text"; name.maxLength = 60; name.value = autoName ? "" : p.name || ""; name.placeholder = autoName ? tr(p.name) : "ex.: viagem";
   const from = document.createElement("input");
   from.type = "datetime-local"; from.value = toLocalInput(p.from); from.disabled = open;
   const to = document.createElement("input");
@@ -334,12 +336,31 @@ document.addEventListener("keydown", (e) => {
   document.querySelectorAll("details.more-menu[open]").forEach((d) => { d.open = false; d.querySelector("summary").focus(); });
 });
 
+// 2.101.5: redesenhar a lista (troca de tela, evento) não apaga o que se
+// digitou num formulário aberto: copia os campos do velho para o novo
+let keepSeq = 0;
+const keepKey = (o) => (typeof o !== "object" ? String(o) : String(o.__keep || (Object.defineProperty(o, "__keep", { value: ++keepSeq }), o.__keep)));
+function keepInputs(oldRoot, newRoot, obj) {
+  if (!newRoot) return;
+  // só o formulário da mesma coisa (outro trecho aberto não herda nada)
+  if (obj) newRoot.dataset.keep = keepKey(obj);
+  if (!oldRoot || (obj && oldRoot.dataset.keep !== newRoot.dataset.keep)) return;
+  const a = [...oldRoot.querySelectorAll("input,select,textarea")], b = [...newRoot.querySelectorAll("input,select,textarea")];
+  if (a.length !== b.length) return;
+  a.forEach((x, i) => {
+    const y = b[i];
+    if (x.tagName !== y.tagName || x.type !== y.type) return;
+    if (x.type === "checkbox" || x.type === "radio") y.checked = x.checked; else y.value = x.value;
+  });
+}
+
 function renderPeriods() {
   renderTimeline();
   const add = $("periodAddForm");
+  const oldAdd = add.firstElementChild, oldEdit = document.querySelector("#periodList .wh-edit");
   add.textContent = "";
   $("btnPeriodAdd").hidden = !!periodAdding;
-  if (periodAdding) add.appendChild(periodForm(periodAdding, () => { periodAdding = null; renderPeriods(); }));
+  if (periodAdding) { const f = periodForm(periodAdding, () => { periodAdding = null; renderPeriods(); }); add.appendChild(f); keepInputs(oldAdd, f, periodAdding); }
   const ul = $("periodList");
   ul.textContent = "";
   if (typeof rcAwayRows === "function") rcAwayRows(ul);
@@ -420,7 +441,7 @@ function renderPeriods() {
       c.append(msg, sp, ok, no);
       li.appendChild(c);
     }
-    if (periodEditing === p.id) li.appendChild(periodForm(p, () => { periodEditing = 0; renderPeriods(); }));
+    if (periodEditing === p.id) { const f = periodForm(p, () => { periodEditing = 0; renderPeriods(); }); li.appendChild(f); keepInputs(oldEdit, f, "trecho:" + p.id); }
     li.appendChild(periodStatsEl(p));
     ul.appendChild(li);
   }

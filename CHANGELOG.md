@@ -1,5 +1,75 @@
 # Versões
 
+## 2.101.5
+Correções da varredura do QA na 2.101.2 (os defeitos de gravidade alta):
+- Medir objeto: se o aparelho da medição desconecta, a medição não fica mais
+  presa calando a atenção e o alarme do outro aparelho; depois de 2 min sem
+  leitura o silêncio acaba.
+- Níveis de Atenção e Perigo: o valor salvo reaparece igual na tela, e salvar
+  de novo não troca o número.
+- Configurações: alarmes e ajustes dos aparelhos digitados e não gravados não
+  somem ao sair e voltar; a barra de salvar mostra que há ajuste pendente.
+- Fotos .jfif, .jpe, .pjpeg e parecidas têm o GPS tirado antes do backup e da
+  nuvem (o app olha o conteúdo do arquivo, não só a extensão).
+- RC102: uma linha cortada no fim do CSV não gruda mais na próxima (o minuto
+  falso de 5,3 µSv/h some). Com o CSV do mês travado (Excel, antivírus,
+  OneDrive), os minutos esperam na memória e entram quando o arquivo libera,
+  com aviso nos Eventos.
+- "Saí de casa" e "Voltei" não devolvem ao cálculo o aparelho que estava fora
+  dele (tubo com defeito, por exemplo).
+- Calibrar o GMC-800 lado a lado com o RC102 ignora os minutos fora de casa e
+  os de medição de objeto.
+- Em mrem/h: frases com vários números convertem todos (e o "800" do
+  "GMC-800" fica como está); o Medir objeto, o Resumo (Sua dose), a
+  Blindagem e a estatística dos Gráficos saem todos na unidade escolhida.
+- Gráficos: a "dose ≈" do zoom é a do aparelho escolhido.
+- Medir objeto no RC102: "com o objeto" usa a taxa do próprio RC102 na fase
+  (ao vivo, no gráfico salvo e no PDF), em vez da conversão do fundo, que
+  escondia a subida do sal (K-40).
+- Medições salvas › Editar e os formulários do Fora de casa (Programar saída,
+  Adicionar e Editar trecho) guardam o que foi digitado ao trocar de tela.
+- Atividade (Bq): clicar de novo no cartão já escolhido não apaga mais massa,
+  nome, radionuclídeos e tempo.
+- Também: desfazer "Mudei o aparelho de lugar" tira a anotação; editar um
+  trecho com nome automático troca o nome junto com os aparelhos; "Estou
+  testando um objeto" no RC102 não entra na dose; o backup leva as unidades e
+  o formato da data; a porta USB escolhida não se perde ao salvar.
+
+**English**
+Fixes from QA's sweep of 2.101.2 (the high-severity defects):
+- Measure object: if the measuring device disconnects, the measurement no
+  longer stays stuck muting the other device's attention and alarm; after
+  2 min without readings the mute ends.
+- Attention and Danger levels: the saved value shows up unchanged, and saving
+  again no longer changes the number.
+- Settings: device alarms and settings typed but not written no longer vanish
+  when leaving and coming back; the save bar shows a pending device setting.
+- .jfif, .jpe, .pjpeg and similar photos have their GPS removed before backup
+  and cloud (the app checks the file content, not only the extension).
+- RC102: a cut line at the end of the CSV no longer sticks to the next one
+  (the fake 5.3 µSv/h minute is gone). With the month's CSV locked (Excel,
+  antivirus, OneDrive), minutes wait in memory and go in once the file is
+  free, with a note in Events.
+- "Left home" and "Back home" no longer put back into the calculation a
+  device that was left out (a faulty tube, for example).
+- Calibrating the GMC-800 side by side with the RC102 skips the minutes away
+  from home and the ones measuring an object.
+- In mrem/h: sentences with several numbers convert all of them (and the
+  "800" in "GMC-800" stays as is); Measure object, Summary (Your dose),
+  Shielding and the Charts statistics all show the chosen unit.
+- Charts: the zoom's "dose ≈" is the chosen device's.
+- Measure object with the RC102: "with the object" uses the RC102's own rate
+  in that phase (live, in the saved chart and in the PDF) instead of the
+  background's conversion, which hid the salt's rise (K-40).
+- Saved measurements › Edit and the Away forms (Schedule a trip, Add and Edit
+  a stretch) keep what was typed when switching screens.
+- Activity (Bq): clicking the already chosen card again no longer clears
+  mass, name, radionuclides and time.
+- Also: undoing "I moved the device" removes its note; editing a stretch with
+  an automatic name updates the name along with the devices; "I'm testing an
+  object" on the RC102 stays out of the dose; the backup carries the units
+  and the date format; the chosen USB port is no longer lost on saving.
+
 ## 2.101.4
 - Calibração do KCl: quando o pico do K-40 quase não aparece acima do fundo
   (incerteza da eficiência acima de ±20%), a calibração não é mais guardada.

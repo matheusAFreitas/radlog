@@ -71,6 +71,7 @@ function rcHints() {
 }
 
 function fillRcCfg(c) {
+  setTimeout(() => { if (typeof renderSetBar === "function") renderSetBar(); }, 0); // 2.101.5: a barra acompanha o que está no aparelho
   rcCfg = c;
   rcCtrlRows();
   $("rcDR1").value = c.doseRate1;
