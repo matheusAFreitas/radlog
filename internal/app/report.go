@@ -200,6 +200,11 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 	cal := a.convCalLocked()
 	tl := a.calTLLocked()
 	devSrc := a.cal.Source
+	// 2.101.6: com o fator do app em uso, a origem é a dele, não a do contador
+	appSrc := ""
+	if last := a.calLastLocked(); last != nil && last.Factor > 0 {
+		appSrc = "fator do app, " + calFactorSrc(*last)
+	}
 	info := a.info
 	connected := a.state == "conectado"
 	demo := a.demo.Active
@@ -592,6 +597,9 @@ func (a *App) buildReport(fromMs, toMs int64, label string) (reportData, error) 
 		calSrc = "última lida do contador; ele não estava conectado"
 	case "padrão":
 		calSrc = "padrão de fábrica do GMC-800; o app ainda não leu a do contador"
+	}
+	if appSrc != "" {
+		calSrc = appSrc
 	}
 	alarm := "desligado"
 	if alarmOn {

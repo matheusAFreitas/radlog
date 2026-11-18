@@ -1,5 +1,60 @@
 # Versões
 
+## 2.101.6
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 1):
+- RC102: dá para ligar só o alarme 2 de dose (com o 1 desligado, o app não
+  diz mais que o 2 é menor que o 1).
+- RC102 › Desfazer a última gravação: com o aparelho já igual à cópia, avisa
+  que nada foi gravado e não perde o passo anterior do Desfazer.
+- Atividade (Bq): "até eu parar" guardado em Suas amostras volta como "até eu
+  parar" (não como 1 h); guardar de novo atualiza a mesma amostra (sem cartões
+  repetidos e sem os textos do cartão de modelo), e o botão vira "Atualizar
+  minha amostra"; a Posição segue a da calibração enquanto você não mexe nela
+  e não volta sozinha com o cursor no campo; "dentro do típico" segue a marca
+  (com a ressalva "mas a incerteza é grande"); "falta para ±10%" conta a
+  incerteza da calibração e diz quando não chega.
+- Importar backup com uma mudança ainda não salva: avisa que ela será
+  descartada e mostra os valores do backup (o Salvar seguinte não desfaz mais
+  o backup).
+- Calibração › Avançado: o fator digitado e ainda não usado não volta sozinho
+  ao fechar e abrir.
+- Fator da intercalibração com o RC102 aparece como tal no relatório e na
+  origem da calibração (não como "informado à mão").
+- Depois de mudar o fator do GMC-800, o alarme do aparelho e os "≈ CPM" dos
+  níveis são refeitos na hora.
+- Os avisos do Salvar e o botão "Gravar no GMC-800" usam os nomes certos.
+- Medir objeto: objeto bem abaixo do fundo (−3σ ou menos) diz que o fundo
+  provavelmente mudou, em vez de "nenhuma diferença, cabe no acaso".
+- Medir objeto › Distância: "2,5; 5; 10; 20" vira 2,5, 5, 10 e 20 cm (com ";"
+  a vírgula é decimal).
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 1):
+- RC102: you can turn on only dose alarm 2 (with alarm 1 off, the app no
+  longer says 2 is lower than 1).
+- RC102 › Undo the last write: with the device already matching the copy, it
+  says nothing was written and doesn't lose the previous Undo step.
+- Activity (Bq): "until I stop" saved in Your samples comes back as "until I
+  stop" (not 1 h); saving again updates the same sample (no duplicate cards
+  and no template texts), and the button becomes "Update my sample"; the
+  Position follows the calibration's while you haven't touched it and no
+  longer refills itself with the cursor in the field; "within typical"
+  follows the mark (with "but the uncertainty is large"); "left for ±10%"
+  includes the calibration uncertainty and says when it can't get there.
+- Importing a backup with an unsaved change: warns it will be discarded and
+  shows the backup's values (the next Save no longer undoes the backup).
+- Calibration › Advanced: a typed factor not yet used no longer resets when
+  closing and opening it.
+- The RC102 intercalibration factor shows as such in the report and the
+  calibration source (not as "entered by hand").
+- After changing the GMC-800 factor, the device alarm and the levels'
+  "≈ CPM" are redone right away.
+- The Save warnings and the "Write to the GMC-800" button use the right names.
+- Measure object: an object well below the background (−3σ or less) says the
+  background probably changed, instead of "no difference, within chance".
+- Measure object › Distance: "2,5; 5; 10; 20" becomes 2.5, 5, 10 and 20 cm
+  (with ";" the comma is decimal).
+
 ## 2.101.5
 Correções da varredura do QA na 2.101.2 (os defeitos de gravidade alta):
 - Medir objeto: se o aparelho da medição desconecta, a medição não fica mais

@@ -209,3 +209,16 @@ func TestOffTimesFromConfig(t *testing.T) {
 		t.Fatal("sem a chave")
 	}
 }
+
+// 2.101.6 (varredura, item 23): só o alarme 2 de dose ligado (o 1 desligado
+// fica em 1e7) passa no Check; com os dois ligados, 2 < 1 continua recusado.
+func TestCheckDose2Alone(t *testing.T) {
+	s := Settings{DoseRate1: 0.5, DoseRate2: 2, Dose1: 1e7, Dose2: 5000, CountRate1: 10, CountRate2: 100}
+	if p := s.Check(); len(p) > 0 {
+		t.Fatalf("só o alarme 2 ligado: %v", p)
+	}
+	s.Dose1 = 6000
+	if p := s.Check(); len(p) == 0 {
+		t.Fatal("alarme 2 menor que o 1 passou")
+	}
+}

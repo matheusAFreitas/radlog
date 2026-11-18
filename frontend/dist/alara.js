@@ -83,7 +83,9 @@ async function refreshAlOrigin(from, to, label) {
 // ---------- testes (distância e blindagem) ----------
 
 function alDists() {
-  const v = String($("alDists").value || "").split(/[;,\s]+/).map((x) => parseFloat(x.replace(",", "."))).filter((x) => x > 0 && x <= 500);
+  // 2.101.6: com ";" na lista, a vírgula é decimal ("2,5; 5; 10"); sem ";", separa
+  const raw = String($("alDists").value || "");
+  const v = raw.split(raw.includes(";") ? /[;\s]+/ : /[,\s]+/).map((x) => parseFloat(x.replace(",", "."))).filter((x) => x > 0 && x <= 500);
   return v.length >= 2 ? v.slice(0, 8) : [5, 10, 20, 40];
 }
 
@@ -94,7 +96,7 @@ async function alStart(test) {
     if (test === "distancia") {
       AL.dists = alDists();
       const d = AL.dists[0];
-      await api.StartMeasure({ name: "Teste de distância", distance: `${fmt(d, 0)} cm`, distCm: d, size: "pequeno", homeBg: true, auto: false, seconds: 300, relErr: 0.1, test, device: dev, mode: "" });
+      await api.StartMeasure({ name: "Teste de distância", distance: `${fmt(d, d % 1 ? 1 : 0)} cm`, distCm: d, size: "pequeno", homeBg: true, auto: false, seconds: 300, relErr: 0.1, test, device: dev, mode: "" });
     } else {
       const mat = String($("alMat").value || "").trim() || "material";
       const min = Math.max(0.5, Math.min(30, parseFloat(String($("alBMin").value).replace(",", ".")) || 2));
@@ -114,7 +116,7 @@ async function alNext() {
     if (st.test === "distancia") {
       const n = (st.prev || []).length + 1;
       const d = AL.dists[n] || AL.dists[AL.dists.length - 1];
-      await api.MeasureAgainAt(`${fmt(d, 0)} cm`, d);
+      await api.MeasureAgainAt(`${fmt(d, d % 1 ? 1 : 0)} cm`, d);
     } else await api.MeasureAgainAt("", 0);
   } catch (e) { AL.err = errMsg(e); AL.errTest = st.test; }
   alTick();
@@ -156,7 +158,7 @@ function renderAlTest(test, st) {
   // passos
   const steps = $(P + "Steps");
   steps.textContent = "";
-  const labels = test === "distancia" ? (AL.dists.length ? AL.dists : alDists()).map((d) => `${fmt(d, 0)} cm`) : ["1. sem nada", "2. com o material no meio"];
+  const labels = test === "distancia" ? (AL.dists.length ? AL.dists : alDists()).map((d) => `${fmt(d, d % 1 ? 1 : 0)} cm`) : ["1. sem nada", "2. com o material no meio"];
   labels.concat(test === "distancia" ? ["resultado"] : ["3. resultado"]).forEach((l, i) => {
     const s = document.createElement("span");
     s.textContent = l;
@@ -182,7 +184,7 @@ function renderAlTest(test, st) {
     msg.textContent = test === "distancia"
       ? `Pronto. Ponha a fonte a ${fmt(AL.dists[nPrev + 1], 0)} cm do centro do cristal, na mesma linha, e clique no botão abaixo.`
       : "Pronto. Ponha o material entre a fonte e o aparelho sem mexer em mais nada, e clique no botão abaixo.";
-    $(P + "Next").textContent = test === "distancia" ? `Medir a ${fmt(AL.dists[nPrev + 1], 0)} cm` : "Medir com o material";
+    $(P + "Next").textContent = test === "distancia" ? `Medir a ${fmt(AL.dists[nPrev + 1], AL.dists[nPrev + 1] % 1 ? 1 : 0)} cm` : "Medir com o material";
   } else if (done) msg.textContent = "Teste salvo em Medições salvas.";
   else msg.textContent = test === "distancia" ? "Use uma fonte pequena (pedra, relógio, a camisa de lampião). O fundo é o da sua casa na última hora." : "Escolha um material e deixe a fonte e o aparelho fixos nas duas fases.";
   // resultado
@@ -234,7 +236,7 @@ function renderAlDistChart(st) {
   svg.innerHTML = h;
   for (const p of pts) {
     const tr = tb.insertRow();
-    tr.insertCell().textContent = `${fmt(p.cm, 0)} cm`;
+    tr.insertCell().textContent = `${fmt(p.cm, p.cm % 1 ? 1 : 0)} cm`;
     const a = tr.insertCell(); a.className = "n"; a.textContent = `${rateNum(p.netUSv, 3)} ± ${rateNum(p.errUSv, 3)}` + (p.lost ? " · sumiu no fundo" : "");
     const b = tr.insertCell(); b.className = "n"; b.textContent = p.predict != null ? rateNum(p.predict, 3) : "—";
     const c = tr.insertCell(); c.className = "n"; c.textContent = fmtMin(p.seconds || 0);

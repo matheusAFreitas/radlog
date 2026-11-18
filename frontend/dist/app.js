@@ -2567,6 +2567,8 @@ async function askBackupSettings(r) {
     n === 1 ? `O backup de ${from} tem 1 ajuste diferente do daqui.` : `O backup de ${from} tem ${n} ajustes diferentes dos daqui.`,
     "Vêm do backup: alarme, níveis, som, bandeja, pulso, idioma, atualização, conexão automática e medição. O lugar da chuva e o que é só deste PC (porta, Bluetooth, pastas, tamanho da tela, início com o Windows) continuam como estão.",
   ];
+  // 2.101.6: com mudança não salva, o formulário é refeito com o backup (avisa antes)
+  if (setDirty().length) text.push("As mudanças que você fez aqui e ainda não salvou serão descartadas.");
   if (!(await askConfirm({ title: "Usar as configurações do backup?", text, ok: "Usar as do backup" }))) return;
   try {
     state.settings = await api.ApplyBackupSettings();
@@ -2574,7 +2576,7 @@ async function askBackupSettings(r) {
     syncLang(state.settings.lang);
     $("chkAlarm").checked = !!state.settings.alarmEnabled;
     renderAlarmLabel();
-    if (state.view === "config") openSettings("btnImportBackup");
+    if (state.view === "config") { state.setSnap = null; openSettings("btnImportBackup"); }
   } catch (e) { toast(errMsg(e), true); }
 }
 
@@ -2767,7 +2769,9 @@ async function renderCalHist() {
     const src = cur.desde ? `${calSrcTxt(cur)}, desde ${calWhen(cur.desde)}` : calSrcTxt(cur);
     $("calNow").textContent = `De onde veio: ${src}`;
     if (h.retro) $("calNow").appendChild(Object.assign(document.createElement("span"), { textContent: " · histórico recalculado" }));
-    $("calK").value = cur.k ? cur.k.toFixed(5) : "";
+    // 2.101.6: o fator digitado e ainda não usado fica (até a calibração mudar)
+    const ck = $("calK");
+    if (!ck.dataset.typed || ck.dataset.k !== String(cur.k)) { ck.value = cur.k ? cur.k.toFixed(5) : ""; ck.dataset.typed = ""; ck.dataset.k = String(cur.k); }
     $("calKReset").hidden = !(cur.fator > 0);
   }
   $("calDev").textContent = h.devK ? `${fmt(h.devK, 5)} µSv/h por CPM` : "—";
@@ -2795,7 +2799,7 @@ async function calSuggest() {
   if (!c || c.minutes < 60 || !(c.suggestK > 0)) return;
   el.innerHTML = `Lado a lado com o RC102 (${fmt(c.minutes, 0)} min nas últimas 6 h): <strong class="mono">${fmt(c.suggestK, 5)}</strong> µSv/h por CPM faria o GMC bater com ele na média. <button type="button" class="btn small" id="calUseSug">Preencher</button>`;
   el.hidden = false;
-  $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").focus(); });
+  $("calUseSug").addEventListener("click", () => { $("calK").value = c.suggestK.toFixed(5); $("calK").dataset.typed = "1"; $("calK").focus(); });
 }
 
 async function calCompare(id) {
@@ -2822,9 +2826,17 @@ async function calHistChanged() {
   await renderCalHist();
   renderCfgHist();
   refreshAll();
+  calKChanged();
+}
+// 2.101.6: com o fator novo, o alarme do aparelho (em CPM) e os "≈ CPM" dos
+// níveis são refeitos na hora, sem sair das Configurações
+function calKChanged() {
+  if ($("dcAlarm") && $("dcAlarm").value) dcAlarmFill();
+  renderLevelEq();
 }
 
 function initCalHist() {
+  $("calK").addEventListener("input", () => { $("calK").dataset.typed = "1"; });
   $("calKApply").addEventListener("click", async () => {
     const k = parseFloat(String($("calK").value).replace(",", "."));
     if (!(k > 0)) { toast("Informe o µSv/h por CPM", true); return; }
@@ -3154,14 +3166,14 @@ function wireDevCfg() {
     try {
       devCfg = await api.SetDeviceConfig(next);
       fillDevCfg(devCfg);
-      toast("Configuração gravada no contador");
+      toast("Configuração gravada no GMC-800");
       state.status = await api.GetStatus();
       renderStatus();
     } catch (e) {
       toast(errMsg(e), true);
       setDevCfgEnabled(!!(devCfg && devCfg.editable));
     } finally {
-      $("dcSaveBtn").textContent = "Gravar no contador";
+      $("dcSaveBtn").textContent = "Gravar no GMC-800";
     }
   });
 
@@ -3258,8 +3270,8 @@ function wire() {
   wireUiScale();
   wireUnits();
   $("btnSave").addEventListener("click", async () => {
-    if (devCfgDirty()) toast('Os ajustes do aparelho não foram para o contador: use "Gravar no contador" na seção Contador.', true);
-    if (rcCfgDirty()) toast('Os ajustes do RC102 não foram para o aparelho: use "Gravar no RC102" na seção RC102.', true);
+    if (devCfgDirty()) toast('Os ajustes do GMC-800 ainda não foram gravados: use "Gravar no GMC-800" (GQ GMC-800 › No aparelho).', true);
+    if (rcCfgDirty()) toast('Os ajustes do RC102 ainda não foram gravados: use "Gravar no RC102" (Radiacode 102 › No aparelho).', true);
     const alarm = rateIn($("numAlarm").value);
     await saveSettings({
       autoConnect: $("chkAuto").checked,
@@ -3425,8 +3437,9 @@ function listen() {
   }));
   on("whereabouts", (w) => { state.where = w; renderWhere(); refreshAgDose(true); });
   on("status", (s) => {
-    const was = state.status.state;
+    const was = state.status.state, k0 = calK();
     state.status = s;
+    if (calK() !== k0) calKChanged();
     if (was === "conectado" && s.state !== "conectado") state.gOffSince = Date.now();
     if (s.state !== "conectado") { state.last = null; alarmCtl.real = false; alarmCtl.realDanger = false; attnCtl.real = false; updateAlarm(); updateAttention(); }
     renderStatus();

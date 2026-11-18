@@ -519,10 +519,19 @@ func (a *App) calMerge(b []byte) {
 	}
 }
 
+// calFactorSrc diz de onde veio o fator de uma versão (2.101.6: a
+// intercalibração com o RC102 não é "informado à mão").
+func calFactorSrc(v CalVersion) string {
+	if v.Source == srcIntercal {
+		return "intercalibração com o RC102"
+	}
+	return "informado à mão"
+}
+
 // calSourceLocked diz de onde vem a calibração em uso. (a.mu travado)
 func (a *App) calSourceLocked() string {
 	if last := a.calLastLocked(); last != nil && last.Factor > 0 {
-		return "informado à mão"
+		return calFactorSrc(*last)
 	}
 	return a.cal.Source
 }
@@ -539,7 +548,7 @@ func (tl calTL) periodDesc(from, to int64) string {
 		v := tl.vers[i]
 		src := "curva do contador"
 		if v.Factor > 0 {
-			src = "informado à mão"
+			src = calFactorSrc(v)
 		}
 		s := fmt.Sprintf("%s µSv/h por CPM no fundo (versão %d, %s", fmtBR(v.K(), 5), v.ID, src)
 		if i == tl.retro && since < v.Since {

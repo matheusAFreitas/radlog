@@ -59,6 +59,8 @@ type MeasureResult struct {
 	NetErrUSv float64 `json:"netErrUSv,omitempty"`
 	DoseSigma float64 `json:"doseSigma,omitempty"`
 	DoseUp    bool    `json:"doseUp,omitempty"`
+	// 2.101.6: líquido ≤ −3σ (o fundo mudou entre as fases)
+	BelowBg bool `json:"belowBg,omitempty"`
 }
 
 // MeasureState é o estado da medição, mandado para a tela a cada segundo.
@@ -610,6 +612,9 @@ func compareMeasure(bg, obj MeasurePhase, usv func(float64) float64) MeasureResu
 		r.Level, r.Verdict = "sim", "radioativo: a diferença para o fundo é clara"
 	case r.Sigma >= 2:
 		r.Level, r.Verdict = "talvez", "provavelmente um pouco radioativo; meça por mais tempo para confirmar"
+	case r.Sigma <= -3:
+		// 2.101.6: bem abaixo do fundo não é "cabe no acaso": o fundo mudou
+		r.Level, r.Verdict, r.BelowBg = "nada", "o objeto deu abaixo do fundo: o fundo provavelmente mudou desde que foi medido; meça o fundo de novo", true
 	default:
 		r.Level, r.Verdict = "nada", "nenhuma diferença que dê para separar do fundo"
 	}

@@ -1700,7 +1700,7 @@
     const v = act.v || {}, [t, k] = act.pick.split(/:(.*)/s);
     if (t === "s") {
       const s = (v.samples || []).find((x) => x.id === k);
-      if (s) return { saved: s, name: s.name, label: s.name, nucs: s.nuclides || [], time: s.smpSec || 3600, mass: s.massG || 0, loose: !!s.loose, prep: s.prep || "", note: s.note || "" };
+      if (s) return { saved: s, name: s.name, label: s.name, nucs: s.nuclides || [], time: s.smpSec ?? 3600, mass: s.massG || 0, loose: !!s.loose, prep: s.prep || "", note: s.note || "" };
     }
     const p = ACT_PRESETS[k] || ACT_PRESETS.castanha;
     return { preset: ACT_PRESETS[k] ? k : "castanha", ...p, loose: false };
@@ -1725,12 +1725,19 @@
     else parts.push(`${tr("forma da curva: estimada (inclinação −1,3 ± 0,4)")} <button type="button" class="link" data-cal="torio">${tr("medir o tório")}</button>`);
     return tab + `<p class="small muted">${parts.join("<br>")}</p>`;
   }
+  // 2.101.6: a Posição segue a da calibração enquanto a pessoa não mexeu nela;
+  // com o cursor no campo, ou depois de digitar (até apagar), o app não toca
+  function actGeomFill(el, g) {
+    if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
+    if (document.activeElement === el || el.dataset.touched) return;
+    if (el.value !== g) el.value = g;
+  }
   // cartões: suas amostras, depois a lista
   function actChipsHtml(v) {
     const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
     let h = `<p class="rc-act-grp">Suas amostras</p>`;
     for (const s of v.samples || []) h += chip("s:" + s.id, `<span data-no-tr>${escHtml(s.name)}</span>`, `${tr("sua")}${s.sub ? " · " + escHtml(tr(s.sub)) : ""}`);
-    h += `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
+    h += (act.pick || "").startsWith("s:") ? `<button type="button" class="rc-act-chip add" data-keep>＋ Atualizar minha amostra<small>com o que está escolhido</small></button>` : `<button type="button" class="rc-act-chip add" data-keep>＋ Guardar como minha<small>com o que está escolhido</small></button>`;
     h += `<p class="rc-act-grp">Outras</p>`;
     for (const [k, p] of Object.entries(ACT_PRESETS)) h += chip("p:" + k, p.label, p.sub);
     return h;
@@ -1784,7 +1791,7 @@
     document.querySelectorAll("#rcActBg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.bgMode)));
     $("rcActBgTBox").hidden = act.bgMode !== "novo";
     setHTML($("rcActBgT"), actSegHtml(ACT_BG_T, act.bgSec, null));
-    if (!$("rcActGeom").value) $("rcActGeom").value = (v.cal && v.cal.geometry) || "";
+    actGeomFill($("rcActGeom"), (v.cal && v.cal.geometry) || "");
     setHTML($("rcActTot"), actTotal(act.bgMode === "novo", act.bgSec, act.smpSec, tr("de amostra")));
     $("rcActStart").disabled = !v.connected;
     $("rcActErr").textContent = v.connected ? $("rcActErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
@@ -1795,7 +1802,7 @@
     document.querySelectorAll("#rcActCalFlow [data-for]").forEach((el) => { el.hidden = el.dataset.for !== k; });
     $("rcActPctBox").hidden = k !== "kcl" || !light;
     document.querySelectorAll("#rcActKclType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.kclType)));
-    if (!$("rcActCalGeom").value) $("rcActCalGeom").value = (v.cal && v.cal.geometry) || "";
+    actGeomFill($("rcActCalGeom"), (v.cal && v.cal.geometry) || "");
     $("rcActCalHint").textContent = k === "kcl"
       ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). Pote cheio, o RC102 encostado sempre do mesmo jeito. O fundo é medido com o pote longe (uns 3 m) e o aparelho no mesmo lugar.")
       : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
@@ -1819,14 +1826,15 @@
       let sub = ACT_SUB[n.id] ? tr(ACT_SUB[n.id]) : "";
       if (n.id === "K-40" && n.detected && perKg) sub = `≈ ${nf(n.bq * 1000 / massG / 31.7, 1)} ${tr("g de potássio por kg")}`;
       let third = "";
-      if (live) third = `<td>${n.detected ? (n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? tr("já chegou") : "~" + fmtSec(n.needSec) + " no total") : "—") : tr("ainda não aparece")}</td>`;
+      if (live) third = `<td>${n.detected ? (n.needSec < 0 ? tr("não chega a ±10% (limite da calibração)") : n.needSec > 0 ? (n.needSec <= ((act.v && act.v.phaseSec) || 0) ? tr("já chegou") : "~" + fmtSec(n.needSec) + " no total") : "—") : tr("ainda não aparece")}</td>`;
       else if (range) {
         const rg = range[n.id];
         if (!n.detected) third = `<td><span class="sub">${tr("O RC102 não chegou a ver. Mais tempo ajudaria.")}</span></td>`;
         else if (!rg) third = `<td><span class="sub">${tr("sem valor típico na lista")}</span></td>`;
         else {
           const x = val(n.bq), e = val(n.err), lo = Math.log10(rg[0] / 3), hi = Math.log10(rg[1] * 3), pos = (y) => Math.max(0, Math.min(100, ((Math.log10(Math.max(y, 1e-6)) - lo) / (hi - lo)) * 100));
-          const word = x + e < rg[0] ? "abaixo do típico" : x - e > rg[1] ? "acima do típico" : "dentro do esperado";
+          // 2.101.6: a palavra segue o valor central (a marca); o ± que cruza a borda vira ressalva
+          const word = (x < rg[0] ? "abaixo do típico" : x > rg[1] ? "acima do típico" : "dentro do típico") + ((x < rg[0] && x + e >= rg[0]) || (x > rg[1] && x - e <= rg[1]) ? ", mas a incerteza é grande" : "");
           third = `<td><div class="rc-act-bar2" aria-hidden="true"><i style="left:${pos(rg[0]).toFixed(1)}%;width:${(pos(rg[1]) - pos(rg[0])).toFixed(1)}%"></i><b style="left:${pos(x).toFixed(1)}%"></b></div><span class="sub">${word} (${nf(rg[0], 0)} a ${nf(rg[1], 0)} Bq/kg)</span></td>`;
         }
       } else if (!live && !n.detected) sub = (sub ? sub + ". " : "") + tr("O RC102 não chegou a ver. Mais tempo ajudaria.");
@@ -1906,7 +1914,8 @@
     nx.classList.toggle("accent", ph !== "amostra" && ph !== "fundo");
     $("rcActCancel").hidden = ph === "pronto";
     $("rcActAgain").hidden = ph !== "pronto" || o.kind !== "amostra";
-    const mine = (o.sampleId || "").startsWith("s:") && (v.samples || []).some((s) => "s:" + s.id === o.sampleId);
+    // 2.101.6: depois de guardar, o botão some (a amostra com esse nome já é sua)
+    const mine = (v.samples || []).some((s) => "s:" + s.id === o.sampleId || foldTxt(s.name) === foldTxt(o.name || ""));
     $("rcActKeep").hidden = ph !== "pronto" || o.kind !== "amostra" || mine;
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
@@ -1967,7 +1976,10 @@
     // nome do preset: grava no idioma da tela (o cartão fica com o nome dele)
     const pk = (o.sampleId || "").startsWith("p:") ? ACT_PRESETS[o.sampleId.slice(2)] : null;
     const nm0 = (o.name || "").trim(), nm = pk && pk.name && nm0 === pk.name ? tr(pk.label) : nm0;
-    const s = { id: "", name: nm, sub: c.saved ? c.saved.sub || "" : c.sub || "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: c.prep || "", note: c.note || "" };
+    // 2.101.6: guardar de novo uma amostra sua atualiza a mesma (não cria outra); textos
+    // de modelo (sub e preparo dos cartões prontos) não vão para a sua
+    const own = c.saved || ((act.v && act.v.samples) || []).find((x) => foldTxt(x.name) === foldTxt(nm));
+    const s = { id: own ? own.id : "", name: nm, sub: own ? own.sub || "" : "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: own ? own.prep || "" : "", note: c.note || "" };
     const err = o === act.v?.opts ? $("rcActRunErr") : $("rcActErr");
     if (!s.name) { err.dataset.msg = tr("Dê um nome em Mais opções."); $("rcActMore").open = true; $("rcActName").focus(); actRender(); return; }
     try { const id = await api.SaveActSample(s); err.dataset.msg = ""; act.pick = "s:" + id; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }
