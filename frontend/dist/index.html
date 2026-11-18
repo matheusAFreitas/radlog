@@ -656,7 +656,7 @@
       <div class="sum-top" id="sumTop">
         <div class="sum-big" id="sumBig"></div>
       </div>
-      <table class="sum-table" id="sumTable" hidden></table>
+      <div class="sum-table-wrap"><table class="sum-table" id="sumTable" hidden></table></div>
       <div class="ri-chart sum-chart">
         <div class="m-chart-wrap">
           <div class="y-axis mono" id="sumY"><span></span><span></span><span></span><span>0</span></div>
@@ -708,13 +708,13 @@
           <button type="button" data-adev="radiacode" aria-pressed="false">RC102</button>
           <button type="button" data-adev="gmc" aria-pressed="false">GMC-800</button>
         </div>
-        <label class="small muted al-filter-l" for="alertFilter">Mostrar</label>
+        <span class="al-filter-g"><label class="small muted al-filter-l" for="alertFilter">Mostrar</label>
         <select id="alertFilter">
           <option value="">Todos os alertas</option>
           <option value="live">Ao vivo</option>
           <option value="retro">Achados depois</option>
           <option value="alarme">Só alarmes</option>
-        </select>
+        </select></span>
         <button type="button" class="chip alert-range" id="alertRangeChip" title="Mostrar todos os alertas" hidden><span></span> ✕</button>
         <span class="inst-fill"></span>
         <span class="small muted" id="alertCount"></span>
@@ -1504,7 +1504,7 @@
         <div id="rcActCalFlow" class="rc-act-sec" hidden>
           <p class="rc-act-lbl">Calibrar</p>
           <div class="rc-act-steps3" id="rcActCalSteps">
-            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, no pote. <span class="st">obrigatório · ~1 h</span></button>
+            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, no pote. <span class="st">obrigatório · ~3 h com sal light, ~2 h com KCl puro</span></button>
             <button type="button" data-k="torio"><b>2 · Tório</b>Eletrodo de tungstênio toriado, se tiver. <span class="st">opcional · melhora a curva</span></button>
             <div><b>3 · Pronto</b>Depois, é só medir amostras na mesma posição. <span class="st">fica guardado</span></div>
           </div>
@@ -2359,7 +2359,7 @@
           <span>Apagar as versões antigas depois que a nova abrir</span>
           <input type="checkbox" id="chkCleanOld">
         </label>
-        <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
+        <div class="upd-row"><span class="small muted">Versões baixadas em</span> <span class="small mono path" id="updDir" data-no-tr></span> <button type="button" class="btn small" id="btnUpdDir">Abrir pasta</button></div>
         <details class="how">
           <summary>Como funciona</summary>
           <p class="small muted">Olha as releases em github.com/matheusAFreitas/radlog. Nada é baixado sem você clicar em Atualizar.</p>

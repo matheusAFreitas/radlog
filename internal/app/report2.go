@@ -127,8 +127,7 @@ func (a *App) reportExtras(r *reportData, o reportOpts) {
 	}
 	var periods []Period
 	for _, p := range a.periods {
-		g, _ := periodWhere(p)
-		if (isTrip(p) || g == WhereMe) && periodEnd(p) > r.From.UnixMilli() && p.From < r.To.UnixMilli() {
+		if youOut(p) && periodEnd(p) > r.From.UnixMilli() && p.From < r.To.UnixMilli() {
 			periods = append(periods, p)
 		}
 	}

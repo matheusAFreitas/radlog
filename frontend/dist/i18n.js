@@ -34,7 +34,7 @@ const tr = (() => {
   // 2.101.2: sobra de português num resultado (acento ou palavra comum)
   // o nome que a pessoa deu (⁨…⁩, asIs) não conta: pode ter acento à vontade
   const ptLeft = (s) => PT_LEFT.test(s.replace(/\u2068[^\u2069]*\u2069/g, ""));
-  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa)\b/i;
+  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa|igual|trecho|selecionado|percentis|lacuna)\b/i;
   const hasWord = /[A-Za-zÀ-ú]{2}/;
   // números do Go vêm com vírgula decimal ("52,3"); os do app já saem no
   // formato do idioma ("1,239" = mil duzentos…). Só troca a vírgula quando é

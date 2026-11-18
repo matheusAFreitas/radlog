@@ -107,7 +107,7 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 		p.Name = string([]rune(p.Name)[:60])
 	}
 	if p.Name == "" {
-		p.Name = "Saída programada"
+		p.Name = plannedNameDefault
 	}
 	if !p.GMC && !p.RC {
 		return p, errors.New("escolha pelo menos um aparelho que vai com você")
@@ -143,7 +143,7 @@ func (a *App) SavePlannedTrip(p PlannedTrip) (PlannedTrip, error) {
 	}
 	a.savePlannedLocked()
 	a.mu.Unlock()
-	a.logEvent(fmt.Sprintf("Saída programada: %s, por volta de %s (%s)", p.Name, time.UnixMilli(p.From).Format("02/01 15:04"), plannedWho(p.GMC, p.RC)))
+	a.logEvent(fmt.Sprintf("Saída programada: %s, por volta de %s (%s)", plannedEvName(p.Name), time.UnixMilli(p.From).Format("02/01 15:04"), plannedWho(p.GMC, p.RC)))
 	a.emitPlanned()
 	return p, nil
 }
@@ -238,7 +238,7 @@ func (a *App) plannedDisconnected(dev string, t time.Time) {
 	}
 	a.mu.Unlock()
 	if hit != nil {
-		a.logEvent(fmt.Sprintf("Começou a saída programada \"%s\": o %s desconectou às %s", hit.Name, devLabel(dev), t.Format("15:04")))
+		a.logEvent(fmt.Sprintf("Começou a saída programada \"%s\": o %s desconectou às %s", plannedEvName(hit.Name), devLabel(dev), t.Format("15:04")))
 		a.emitPlanned()
 	}
 }
@@ -587,6 +587,14 @@ func (a *App) plannedRefine() {
 
 // asIs marca o nome que a pessoa deu (U+2068…U+2069, invisíveis) para a
 // tradução da tela não mexer nele: "Escritório" não vira "Office".
+// plannedEvName: o nome da pessoa fica como está; o padrão do app traduz (2.101.8)
+func plannedEvName(n string) string {
+	if n == plannedNameDefault {
+		return n
+	}
+	return asIs(n)
+}
+
 func asIs(s string) string {
 	return "\u2068" + strings.NewReplacer("\u2068", "", "\u2069", "").Replace(s) + "\u2069"
 }

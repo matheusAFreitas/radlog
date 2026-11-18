@@ -1029,7 +1029,9 @@
   const hhmm = (ms) => { const d = new Date(ms); return pad2(d.getHours()) + ":" + pad2(d.getMinutes()); };
   const ddmm = (ms) => { const d = new Date(ms); return pad2(d.getDate()) + "/" + pad2(d.getMonth() + 1); };
   async function sgLoad() {
-    if (typeof api === "undefined" || !api.GetRcSpectrogram || sg.busy) return;
+    if (typeof api === "undefined" || !api.GetRcSpectrogram) return;
+    // 2.101.8: pedido novo durante a leitura não se perde: lê de novo no fim
+    if (sg.busy) { sg.again = true; return; }
     const [span, rowSec] = SG_PER[sg.period], rowMs = rowSec * 1000;
     const to = Math.ceil(Date.now() / rowMs) * rowMs, from = to - span * 1000;
     const want = ++sg.want;
@@ -1039,6 +1041,7 @@
       [d, hd] = await Promise.all([api.GetRcSpectrogram(from, to, rowSec, sg.emax), api.GetRcHardness ? api.GetRcHardness(from, to, rowSec).catch(() => null) : null]);
     } catch (e) { d = null; }
     sg.busy = false;
+    if (sg.again) { sg.again = false; sgLoad(); return; }
     if (want !== sg.want) return;
     if (hd && (!sg.hd || sg.hd.from !== hd.from || sg.hd.rowSec !== hd.rowSec)) sg.guess = {};
     sg.hd = hd && hd.cps ? hd : null;
@@ -1230,7 +1233,7 @@
     for (let k = 0; k <= 4; k++) {
       const t = d.from + ((d.to - d.from) * k) / 4, x = L + (pw * k) / 4;
       g.textAlign = k === 0 ? "left" : k === 4 ? "right" : "center";
-      g.fillText(long ? ddmm(t) : hhmm(t), x, h - 6);
+      g.fillText(long ? dateText(ddmm(t)) : hhmm(t), x, h - 6); // 2.101.8: canvas não passa pelo observador
     }
     // referências: dureza 1,00 e o fundo em cps
     g.setLineDash([3, 3]);
@@ -1261,7 +1264,7 @@
     };
     line(d.cps, yC, COR.rc);
     line(d.hard, yH, COR.away);
-    if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText("sem dados neste período", L + pw / 2, T + ph / 2); }
+    if (!cs.length) { g.fillStyle = css("--dim"); g.textAlign = "center"; g.fillText(tr("sem dados neste período"), L + pw / 2, T + ph / 2); }
     if (sg.hover != null && sg.hover < n) { const x = xOf(sg.hover); g.strokeStyle = "rgba(255,255,255,.5)"; g.beginPath(); g.moveTo(x + 0.5, T); g.lineTo(x + 0.5, T + ph); g.stroke(); }
   }
   // com o que parece o trecho (no Go, como na medição de objeto)
@@ -1327,13 +1330,16 @@
     return d.getTime() - (lg.period - 1) * 86400e3;
   };
   async function lgLoad(more) {
-    if (typeof api === "undefined" || !api.GetRcLog || lg.busy) return;
+    if (typeof api === "undefined" || !api.GetRcLog) return;
+    // 2.101.8: filtro ou período trocado durante a leitura: lê de novo no fim
+    if (lg.busy) { if (!more) lg.again = true; return; }
     lg.busy = true;
     const before = more && lg.items.length ? lg.items[lg.items.length - 1].t : 0;
     const limit = more ? 100 : Math.max(100, Math.min(lg.items.length, 1000));
     let p = null;
     try { p = await api.GetRcLog(lgFrom(), 0, [...lg.kinds], limit, before); } catch (e) { p = null; }
     lg.busy = false;
+    if (lg.again) { lg.again = false; lgLoad(); return; }
     if (!p) return;
     // o "antes de" junta registros do mesmo segundo: tira os repetidos
     if (more) {
@@ -1368,7 +1374,13 @@
     $("rcLogBody").innerHTML = lg.items.map(lgRow).join("");
     $("rcLogCount").textContent = lg.loaded ? `${lg.shown}/${lg.total}` : "";
     $("rcLogMore").hidden = !lg.more;
-    $("rcLogEmpty").hidden = !lg.loaded || lg.items.length > 0;
+    const em = $("rcLogEmpty");
+    em.hidden = !lg.loaded || lg.items.length > 0;
+    // 2.101.8: o texto segue o caso (nenhum tipo marcado, nada dos tipos marcados, nada no período)
+    if (!em.dataset.base) em.dataset.base = em.textContent;
+    em.textContent = !lg.kinds.size ? "Nenhum tipo marcado: marque pelo menos um tipo acima para ver os registros."
+      : lg.total > 0 ? "Nenhum registro dos tipos marcados neste período."
+      : em.dataset.base;
     document.querySelectorAll("#rcLogKinds button").forEach((b) => b.setAttribute("aria-pressed", String(lg.kinds.has(b.dataset.k))));
     document.querySelectorAll("#rcLogPeriod button").forEach((b) => b.setAttribute("aria-pressed", String(+b.dataset.p === lg.period)));
   }
@@ -1382,7 +1394,8 @@
     if (!r || !r.file) return; // cancelou
     m.hidden = false; m.className = "small muted";
     const span = r.from ? ` · de ${fmtDate(r.from)} ${fmtTime(r.from)} a ${fmtDate(r.to)} ${fmtTime(r.to)}` : "";
-    m.textContent = `${r.file}: ${r.added} registros novos de ${r.read}` + (r.skipped ? ` · ${r.skipped} linhas ignoradas` : "") + span;
+    // 2.101.8: plural pelo número
+    m.textContent = `${r.file}: ` + tr(r.added === 1 ? `1 registro novo de ${r.read}` : `${r.added} registros novos de ${r.read}`) + (r.skipped ? " · " + tr(r.skipped === 1 ? "1 linha ignorada" : `${r.skipped} linhas ignoradas`) : "") + span;
     lg.items = []; lgLoad();
   }
 
@@ -1610,6 +1623,10 @@
   }
   function srPlay(fresh) {
     if (!sr.real || !sr.mode || !sr.ctx) return;
+    // 2.101.8: som só com a aba Busca aberta (o controle "Som" só existe lá)
+    const open = srBuscaOpen();
+    if (sr.oscGain) sr.oscGain.gain.setTargetAtTime(open ? 0.06 : 0, sr.ctx.currentTime, 0.05);
+    if (!open) return;
     if (sr.mode === "cliques") {
       // uma amostra por vez, atrasada de 1 s para dar tempo de espalhar
       for (const p of fresh) {
@@ -1730,8 +1747,10 @@
   function actGeomFill(el, g) {
     if (!el.dataset.geomWired) { el.dataset.geomWired = "1"; el.addEventListener("input", () => { el.dataset.touched = "1"; }); }
     if (document.activeElement === el || el.dataset.touched) return;
-    if (el.value !== g) el.value = g;
+    if (el.value !== tr(g)) el.value = tr(g); // 2.101.8: no idioma da tela (grava o original)
   }
+  // o campo ainda com o texto padrão traduzido manda o original (2.86.1: grava em português)
+  const actOrig = (v, orig) => (orig && v === tr(orig) ? orig : v);
   // cartões: suas amostras, depois a lista
   function actChipsHtml(v) {
     const chip = (key, n, s, cls = "") => `<button type="button" class="rc-act-chip${cls}${act.pick === key ? " on" : ""}" data-pick="${escHtml(key)}" aria-pressed="${act.pick === key}">${n}<small>${s}</small></button>`;
@@ -1745,7 +1764,7 @@
   function actRefText(s, hist) {
     const out = [];
     if (s.refUSv > 0) out.push(`<span>${escHtml(s.refDist || tr("encostada"))}</span>: <span class="mono">${rateNum(s.refUSv, 2)}</span> <span data-unit-keep>${rateLbl()}</span> ${s.refDev === "radiacode" ? tr("no RC102") : tr("no GMC-800")} (<span class="mono">${fmtDM(s.refT)}</span>)`);
-    const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name)));
+    const last = hist.find((r) => r.kind === "amostra" && (r.sampleId === "s:" + s.id || foldTxt(r.name) === foldTxt(s.name) || foldTxt(tr(r.name)) === foldTxt(s.name)));
     if (last) out.push(`${tr("última medida")} <span class="mono">${fmtDM(last.t)}</span>: ${escHtml(actSummary(last))}`);
     return out.length ? out.join("<br>") : tr("ainda não medida");
   }
@@ -1759,7 +1778,7 @@
   function actPick(key) {
     act.pick = key;
     const c = actChoice();
-    $("rcActName").value = c.name || "";
+    $("rcActName").value = c.preset ? tr(c.name || "") : c.name || ""; // 2.101.8: no idioma da tela
     $("rcActMass").value = c.loose ? (c.mass > 0 ? c.mass : "") : c.mass;
     act.smpSec = c.time;
     document.querySelectorAll("#rcActNucs input").forEach((x) => { x.checked = c.nucs.includes(x.value); });
@@ -1858,8 +1877,8 @@
     const lines = [];
     for (const n of r.nuclides || []) for (const l of n.lines || []) lines.push(`${nf(l.kev, 1)} keV (${escHtml(l.who)}): ${fmtBq(l.bq)}± ${fmtBq(l.err)}Bq`);
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
-    const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted">${escHtml(n.id)}: ${escHtml(n.note)}</p>`).join("");
-    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : tr("sem massa")} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
+    const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
+    const meta = `${escHtml(r.name)} · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}${r.geometry ? " · " + escHtml(r.geometry) : ""}`;
     h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
@@ -1944,14 +1963,14 @@
   function actFormOpts() {
     const c = actChoice();
     return {
-      kind: "amostra", name: $("rcActName").value.trim() || c.name || "", massG: actNum("rcActMass"), geometry: $("rcActGeom").value,
+      kind: "amostra", name: actOrig($("rcActName").value.trim(), c.preset && c.name) || c.name || "", massG: actNum("rcActMass"), geometry: actOrig($("rcActGeom").value, act.v && act.v.cal && act.v.cal.geometry),
       newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: c.loose, sampleId: act.pick,
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
-    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: $("rcActCalGeom").value, newBg: true, bgSec: 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
+    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
     if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
     else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
     actStartOpts(o, $("rcActCalErr"));
@@ -1977,9 +1996,10 @@
     const pk = (o.sampleId || "").startsWith("p:") ? ACT_PRESETS[o.sampleId.slice(2)] : null;
     const nm0 = (o.name || "").trim(), nm = pk && pk.name && nm0 === pk.name ? tr(pk.label) : nm0;
     // 2.101.6: guardar de novo uma amostra sua atualiza a mesma (não cria outra); textos
-    // de modelo (sub e preparo dos cartões prontos) não vão para a sua
+    // do "Outra coisa" não vão para a sua; de um cartão pronto, sub e preparo vêm junto
     const own = c.saved || ((act.v && act.v.samples) || []).find((x) => foldTxt(x.name) === foldTxt(nm));
-    const s = { id: own ? own.id : "", name: nm, sub: own ? own.sub || "" : "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: own ? own.prep || "" : "", note: c.note || "" };
+    const tpl = !own && c.preset && c.preset !== "outro" ? c : null;
+    const s = { id: own ? own.id : "", name: nm, sub: own ? own.sub || "" : tpl ? tpl.sub || "" : "", nuclides: o.nuclides || [], smpSec: o.smpSec || 0, massG: o.massG || 0, loose: !!o.loose, prep: own ? own.prep || "" : tpl ? tpl.prep || "" : "", note: c.note || "" };
     const err = o === act.v?.opts ? $("rcActRunErr") : $("rcActErr");
     if (!s.name) { err.dataset.msg = tr("Dê um nome em Mais opções."); $("rcActMore").open = true; $("rcActName").focus(); actRender(); return; }
     try { const id = await api.SaveActSample(s); err.dataset.msg = ""; act.pick = "s:" + id; } catch (e) { err.dataset.msg = String(e && e.message ? e.message : e); }

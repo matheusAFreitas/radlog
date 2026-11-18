@@ -269,7 +269,7 @@ function wireWhere() {
     renderWhere();
     if (whOpen) card.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }));
-  $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("whName").value = b.textContent.trim(); }));
+  $("whReasons").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { $("whName").value = (b.dataset.r || b.textContent).trim(); })); // 2.101.8: a palavra original
   $("whWhenSeg").querySelectorAll("button").forEach((b) => b.addEventListener("click", () => { whWhen = b.dataset.w; renderWhere(); }));
   $("whOk").addEventListener("click", () => whPending && whSet(whPending, $("whName").value));
   $("whNo").addEventListener("click", () => { whPending = null; whWhen = "now"; renderWhere(); });

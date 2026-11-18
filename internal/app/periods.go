@@ -83,7 +83,9 @@ func (a *App) SavePeriod(p Period) (Period, error) {
 	} else if p.GMC, p.RC, err = normWhere(p.GMC, p.RC); err != nil {
 		return p, err
 	}
-	p.NotHome = p.NotHome && p.GMC == WhereHome && (p.RC == WhereHome || p.RC == WhereMe)
+	// 2.101.8: com o GMC-800 ignorado (tubo quebrado) também dá para dizer que
+	// você não estava em casa
+	p.NotHome = p.NotHome && (p.GMC == WhereHome || p.GMC == WhereOff) && (p.RC == WhereHome || p.RC == WhereMe)
 	if p.To != 0 && p.To < p.From {
 		p.From, p.To = p.To, p.From
 	}

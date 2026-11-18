@@ -19,7 +19,7 @@ import (
 var (
 	ptLeftMu sync.Mutex
 	ptLeft   = map[string]bool{}
-	ptLooks  = regexp.MustCompile(`(?i)[ãçõâêôáéíóúà]|\b(não|nenhum|nenhuma|aqui|ainda|com|para|sem|uma|pelo|pela|desde|agora|hoje|ontem|aparelho|contagens|fundo|objeto|medição|limite|tempo|vezes|pico|picos|espectro|casa|dias|horas|minutos|segundos|da|das|dos|na|nos|nas|em|de|que|ou|mais|menos|muito|pouco|chuva|fora|medida|série|filho|chumbo|tório|urânio|até|sobre|entre|cada|quando|onde|como)\b`)
+	ptLooks  = regexp.MustCompile(`(?i)[ãçõâêôáéíóúà]|\b(não|nenhum|nenhuma|aqui|ainda|com|para|sem|uma|pelo|pela|desde|agora|hoje|ontem|aparelho|contagens|fundo|objeto|medição|limite|tempo|vezes|pico|picos|espectro|casa|dias|horas|minutos|segundos|da|das|dos|na|nos|nas|em|de|que|ou|mais|menos|muito|pouco|chuva|fora|medida|série|filho|chumbo|tório|urânio|até|sobre|entre|cada|quando|onde|como|semana|trecho|selecionado|percentis|lacuna|programa|dom)\b`)
 )
 
 // nome que a pessoa deu à medição nos testes: fica como foi escrito

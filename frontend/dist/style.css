@@ -691,6 +691,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .sum-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 @media (max-width: 1100px) { .sum-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .ri-tile.warn .value { color: var(--warn); }
+.sum-table-wrap { overflow-x: auto; max-width: 100%; }
 .sum-table { width: 100%; border-collapse: collapse; font-size: var(--fs-label); }
 .sum-table th, .sum-table td { text-align: left; padding: var(--space-2) var(--space-3); border-top: 1px solid var(--border); }
 .sum-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
@@ -797,9 +798,10 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-sr-read .mono { color: var(--text); }
 .rc-gauge { display: flex; flex-direction: column; align-items: center; gap: var(--space-1); background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-md); padding: var(--space-3); }
 .rc-gauge-svg { width: 100%; max-width: 260px; }
-.rc-gauge-lbl text { fill: var(--muted); font: var(--fs-micro) var(--mono); text-anchor: middle; }
-.rc-gauge-num { fill: var(--text); font: 600 var(--fs-number-l) var(--mono); text-anchor: middle; }
-.rc-gauge-unit { fill: var(--muted); font: var(--fs-caption) var(--sans); text-anchor: middle; }
+/* 2.101.8: dentro do SVG o tamanho é nas unidades do desenho (ele já escala com a largura) */
+.rc-gauge-lbl text { fill: var(--muted); font: 11px var(--mono); text-anchor: middle; }
+.rc-gauge-num { fill: var(--text); font: 600 28px var(--mono); text-anchor: middle; }
+.rc-gauge-unit { fill: var(--muted); font: 12px var(--sans); text-anchor: middle; }
 .rc-mult { display: flex; gap: var(--space-3); color: var(--dim); }
 .rc-mult span.on { color: var(--accent); font-weight: 600; }
 .rc-act-calrow { display: flex; gap: var(--space-3); align-items: center; flex-wrap: wrap; padding: var(--space-2) var(--space-3); border-radius: var(--radius-md); margin: var(--space-1) 0 var(--space-3); font-size: var(--fs-label); border: 1px solid var(--border); background: var(--bg); }
@@ -1115,7 +1117,8 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .m-verdict.talvez { border-color: var(--att); }
 .m-verdict.nada { border-color: var(--ok); }
 .m-tiles { grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); margin-bottom: var(--space-4); }
-.m-detail-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-5); margin-top: var(--space-2); }
+.m-detail-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(300px, 100%), 1fr)); gap: var(--space-5); margin-top: var(--space-2); }
+.m-detail-cols > * { min-width: 0; overflow-x: auto; } /* 2.101.8: a tabela das fases rola dentro da caixa */
 .m-detail-cols .m-stats { width: 100%; }
 .m-history input[type=search] { width: 100%; color-scheme: dark; color: var(--text); }
 .m-detail-cols h4 { margin: 0 0 var(--space-2); font-size: var(--fs-body); }
@@ -1186,7 +1189,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .rc-main .read-head { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-3); }
 .rc-main-via { margin-left: var(--space-2); letter-spacing: 0; text-transform: none; color: var(--muted); }
 .rc-main-via.on { color: var(--rc); }
-.rc-main .value-row { flex-wrap: nowrap; white-space: nowrap; }
+.rc-main .value-row { flex-wrap: wrap; white-space: nowrap; row-gap: var(--space-1); } /* 2.101.8: em tela estreita o nível desce */
 .rc-main .value, .hero .value { font-size: var(--fs-reading-l); font-weight: 600; letter-spacing: -.03em; } /* 2.88.0 (R2): o mesmo tamanho nos dois */
 .gmc-via.on { color: var(--gmc); }
 .rc-main.stale .rc-main-val { color: var(--dim, var(--muted)); }
@@ -1535,6 +1538,7 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 #settings .set-note { max-width: 860px; }
 .set-bar { position: fixed; z-index: 14; left: var(--side-w); right: 0; bottom: 0; display: flex; align-items: center; gap: var(--space-3); padding: var(--space-3) var(--space-6); background: var(--surface); border-top: 1px solid var(--att); box-shadow: 0 -8px 24px rgba(0, 0, 0, .35); }
 .set-bar > i { width: 8px; height: 8px; border-radius: 50%; background: var(--att); flex: none; }
+html { scroll-padding-top: calc(var(--barsH, 0px) + var(--instH, 0px) + 8px); }
 html.set-dirty { scroll-padding-bottom: 84px; scroll-padding-top: calc(var(--barsH, 0px) + 56px); }
 html.set-dirty .main { padding-bottom: 72px; }
 #btnSettings.dirty::after { content: ""; width: 7px; height: 7px; margin-left: auto; border-radius: 50%; background: var(--att); flex: none; }
@@ -1904,6 +1908,9 @@ table.cc-cmp td:first-child { color: var(--muted); }
 #settings .set-content { background: transparent; border: 0; border-radius: 0; padding: 0 0 var(--space-12); display: flex; flex-direction: column; gap: var(--space-4); }
 .set-sec, .set-tab { display: flex; flex-direction: column; gap: var(--space-4); min-width: 0; }
 .set-sec[hidden], .set-tab[hidden] { display: none; }
+/* 2.101.8: 1 coluna pela largura da seção (a janela não desconta a barra e o menu, que crescem com a escala) */
+.set-sec { container-type: inline-size; }
+@container (max-width: 760px) { .set-cards, .devcfg .dc-grid { grid-template-columns: minmax(0, 1fr); } .set-col { display: contents; } }
 .set-sec-title { margin: 0; font-size: var(--fs-title); font-weight: 600; }
 .set-tabs { display: flex; gap: 2px; margin-top: calc(-1 * var(--space-2)); border-bottom: 1px solid var(--border); overflow-x: auto; scrollbar-width: thin; }
 .set-tabs button { flex: none; min-height: 38px; padding: var(--space-2) var(--space-3); margin-bottom: -1px; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); font: inherit; font-size: var(--fs-label); cursor: pointer; white-space: nowrap; }
@@ -1959,9 +1966,9 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .cal-adv > fieldset + fieldset { margin-top: var(--space-3) !important; }
 .al-wrap { overflow-x: auto; margin-top: var(--space-2); border: 1px solid var(--border); border-radius: var(--radius-md); }
 .al-tbl { width: 100%; border-collapse: collapse; background: var(--bg); }
-.al-tbl th, .al-tbl td { padding: var(--space-3); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
+.al-tbl th, .al-tbl td { padding: var(--space-2); text-align: left; vertical-align: top; border-bottom: 1px solid var(--border); }
 .al-tbl tbody tr:last-child > * { border-bottom: 0; }
-.al-tbl thead th { font-size: var(--fs-label); font-weight: 600; color: var(--muted); white-space: nowrap; }
+.al-tbl thead th { font-size: var(--fs-label); font-weight: 600; color: var(--muted); white-space: normal; }
 .al-tbl tbody th { width: 22%; font-weight: 400; }
 .al-tbl tbody th .lv-name { margin-bottom: 2px; }
 .al-tbl tr.atencao .lv-name { color: var(--att); }
@@ -1970,7 +1977,7 @@ table.cc-cmp td:first-child { color: var(--muted); }
 .al-say { display: block; color: var(--dim); font-size: var(--fs-caption); }
 .al-none { color: var(--dim); font-size: var(--fs-label); }
 .al-in { display: flex; align-items: center; gap: var(--space-2); }
-.al-in input { width: 7.5em; min-width: 0; }
+.al-in input { width: 5.2em; min-width: 0; }
 .al-u { color: var(--muted); font-size: var(--fs-label); white-space: nowrap; }
 .al-tbl .lv-eq { margin: 2px 0 0; color: var(--dim); font-size: var(--fs-caption); }
 .al-tbl .toggle.al-on, .al-dose .toggle.al-on { min-height: 30px; justify-content: flex-start; font-size: var(--fs-label); color: var(--muted); }
@@ -2122,7 +2129,12 @@ details.how.how-c[open] { width: min(460px, calc(100% - 2 * var(--space-3))); ma
 details.how.how-c[open] > summary { position: sticky; top: 0; background: var(--surface-2); }
 /* o título não passa por baixo do "?" */
 .how-host > :is(h2, h3, h4, .card-head, .rc-head, .ag-dose-head, .al-main > h2:first-child) { padding-right: 120px; }
+/* 2.101.8: o seletor não empilha os botões; "Mostrar" fica junto do seu seletor */
+.ag-dose-head .seg { flex-wrap: nowrap; }
+.al-filter-g { display: inline-flex; align-items: center; gap: var(--space-2); }
 .how-host > .al-main > :is(h2, h3):first-child { padding-right: 120px; }
+/* 2.101.8: "← Voltar" no topo (Distância, Blindagem): fica à esquerda, longe do "?" */
+.how-host > .al-main > .m-back:first-child { justify-self: start; text-align: left; max-width: calc(100% - 120px); }
 /* nas configurações o cartão é estreito: só o "?" (o texto fica para o leitor de tela) */
 #settings details.how-c > summary { font-size: 0; gap: 0; min-width: 28px; justify-content: center; }
 #settings details.how-c[open] > summary { font-size: var(--fs-caption); gap: 6px; }
@@ -2202,7 +2214,7 @@ dialog.cfm-dlg { width: min(480px, calc(100vw - 32px)); }
 .m-go { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .m-busca { display: grid; grid-template-columns: minmax(0, 1fr) 240px; gap: var(--space-5); align-items: center; }
 .m-busca-main { display: flex; flex-direction: column; gap: var(--space-2); }
-.m-busca-val { display: flex; align-items: baseline; gap: var(--space-2); }
+.m-busca-val { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--space-2); min-width: 0; }
 .m-busca-val .mono { font-size: var(--fs-reading-l); line-height: 1; font-weight: 500; }
 .m-busca-trend { font-size: var(--fs-heading); font-weight: 600; color: var(--muted); }
 .m-busca-trend.up { color: var(--obj); }
@@ -2853,7 +2865,8 @@ dialog.why-dlg::backdrop { background: rgba(0, 0, 0, .45); }
 .ad-nums { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-2); margin: var(--space-3) 0; }
 .ad-nums > div { display: flex; flex-direction: column; gap: 2px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-2) var(--space-3); min-width: 0; }
 .ad-nums .mono { font-size: var(--fs-number); color: var(--text); }
-.ad-nums .tile-sub { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ad-nums .tile-sub { overflow: visible; text-overflow: clip; white-space: normal; } /* 2.101.8: quebra em vez de cortar a hora */
+@media (max-width: 520px) { .ad-nums { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .al-page .ad-sub { margin: 0 0 var(--space-3); }
 .al-page .ad-sub[hidden] { display: none; }
 .ad-acts { display: flex; flex-wrap: wrap; gap: var(--space-2); margin-top: var(--space-3); }

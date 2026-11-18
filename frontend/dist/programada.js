@@ -9,6 +9,9 @@
 // rcaway.js). Usa os globais do app.js, fora.js e rcaway.js.
 
 let plEditing = null; // null = sem formulário; {id: 0} = nova
+// 2.101.8: o nome padrão é do app (traduz); o que a pessoa escreveu fica como está
+const plDefName = (n) => !n || n === "Saída programada";
+const plNameTxt = (n) => (plDefName(n) ? tr("Saída programada") : asIs(n));
 const plBackUse = {}; // id da pergunta → usar a volta da dica
 
 async function refreshPlanned() {
@@ -81,8 +84,9 @@ function renderPlanned() {
     const t = document.createElement("div");
     t.className = "pl-t";
     const b = document.createElement("b");
-    b.textContent = p.nome;
-    b.dataset.noTr = "";
+    // 2.101.8: sem nome (ou o padrão) mostra "Saída programada" traduzido
+    if (plDefName(p.nome)) b.textContent = "Saída programada";
+    else { b.textContent = p.nome; b.dataset.noTr = ""; }
     const s = document.createElement("span");
     s.className = "small muted";
     s.textContent = `sai ~${hhmm(p.de)} · ${plWho(p.gmc, p.rc)}`;
@@ -222,7 +226,7 @@ function planForm(p) {
     try {
       const r = await api.SavePlannedTrip({ id: p.id || 0, nome: name.value, de: at, gmc: goes.gmc, rc: goes.rc });
       plEditing = null;
-      toast(`Saída programada: ${asIs(r.nome)}, ${plDate(r.de)} por volta de ${hhmm(r.de)}`);
+      toast(`Saída programada: ${plNameTxt(r.nome)}, ${plDate(r.de)} por volta de ${hhmm(r.de)}`);
       refreshPlanned();
     } catch (e) { err.textContent = errMsg(e); err.hidden = false; }
   });
@@ -278,7 +282,7 @@ function renderPlannedAsk(box, q, list) {
   head.className = "rca-head";
   head.innerHTML = q.missed ? '<span class="dot pl-miss" aria-hidden="true"></span>' : '<span class="dot rc" aria-hidden="true"></span>';
   const h = document.createElement("h2");
-  h.textContent = q.missed ? `A saída programada de ${plDate(q.planAt)} não aconteceu?` : `Você saiu mesmo? ${asIs(q.name)}, ${plDate(q.planAt)}`;
+  h.textContent = q.missed ? `A saída programada de ${plDate(q.planAt)} não aconteceu?` : `Você saiu mesmo? ${plNameTxt(q.name)}, ${plDate(q.planAt)}`;
   const tag = document.createElement("span");
   tag.className = "chip off"; tag.textContent = "a responder";
   head.append(h, tag);
@@ -344,7 +348,7 @@ function plForm(q) {
   };
   const from = Object.assign(document.createElement("input"), { type: "datetime-local", value: toLocalInput(q.from) });
   const to = Object.assign(document.createElement("input"), { type: "datetime-local", value: toLocalInput(plTo(q)) });
-  const name = Object.assign(document.createElement("input"), { type: "text", maxLength: 60, value: q.name || "" });
+  const name = Object.assign(document.createElement("input"), { type: "text", maxLength: 60, value: plDefName(q.name) ? "" : q.name || "", placeholder: plDefName(q.name) ? tr("Saída programada") : "" });
   g.append(field("Saí em", from), field("Voltei em", to), field("Nome", name));
   const devs = document.createElement("div");
   devs.className = "row-btns";

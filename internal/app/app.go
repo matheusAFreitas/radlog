@@ -2070,8 +2070,8 @@ func (a *App) ExportCSV() (string, error) {
 		return "", errDemo
 	}
 	path, err := wruntime.SaveFileDialog(a.ctx, wruntime.SaveDialogOptions{
-		Title:           "Exportar leituras",
-		DefaultFilename: "radlog-gmc-leituras-" + time.Now().Format("2006-01-02") + ".csv",
+		Title:           a.T("Exportar leituras"),
+		DefaultFilename: a.T("radlog-gmc-leituras-") + time.Now().Format("2006-01-02") + ".csv",
 		Filters:         []wruntime.FileFilter{{DisplayName: "CSV", Pattern: "*.csv"}},
 	})
 	if err != nil || path == "" {

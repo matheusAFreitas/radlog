@@ -147,6 +147,8 @@ async function refreshChart() {
   const yd = usvMode ? (yTop < 0.03 ? 4 : yTop < 0.3 ? 3 : yTop < 10 ? 2 : 1) : cps ? (top < 1 ? 2 : top < 10 ? 1 : 0) : 0;
   const yk = usvMode ? rateK() : 1;
   const rcTop = stacked ? niceN(Math.max(300 * ck, rcMax * 1.05), 2) : top;
+  // casas do eixo em CPS: a metade do topo tem que sair certa (0,25 e não 0,3)
+  const axDig = (t) => (t >= 20 ? 0 : t >= 2 ? 1 : 2);
   // andares em unidades do SVG: GMC de 0 a G1, RC102 de R0 a H
   const G1 = stacked ? H / 2 - 5 : H, R0 = H / 2 + 5, PAD = stacked ? 2 : 0;
   const yAx = $("yAxis");
@@ -155,13 +157,15 @@ async function refreshChart() {
   if (stacked) {
     const pos = (yy) => ((yy / H) * 100).toFixed(2) + "%";
     yAx.innerHTML = [[top, 0], [top / 2, G1 / 2], [0, G1], [rcTop, R0], [rcTop / 2, (R0 + H) / 2], [0, H]]
-      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? (v && v < 10 ? 1 : 0) : 0)}</span>`).join("");
+      .map(([v, yy], i) => `<span class="${i < 3 ? "gmc" : "rc"}" style="top:${pos(yy)}">${fmt(v, cps ? axDig(i < 3 ? top : rcTop) : 0)}</span>`).join("");
   } else {
     if (yAx.children.length !== 4) yAx.innerHTML = "<span></span><span></span><span></span><span></span>";
     for (let i = 0; i < 4; i++) yAx.children[i].textContent = fmt((top - (top / 3) * i) * yk, i === 3 ? 0 : yd);
   }
   $("yAxisR").hidden = true;
   $("plotLbls").hidden = !stacked;
+  // 2.101.8: o rótulo dos andares segue a unidade do eixo (CPS é o padrão)
+  if (stacked) { const u = cps ? "CPS" : "CPM", l = $("plotLbls").children; l[0].textContent = `GMC-800 · ${u}`; l[1].textContent = `RC102 · ${u}`; }
 
   const n = vals.length;
   const x = (i) => (n <= 1 ? 0 : (i / (n - 1)) * W);
@@ -352,7 +356,7 @@ function setupChartHover() {
     const rh = rr ? null : (c.rain || []).find((p) => t >= p.time && t < p.time + 3600e3 && p.mm >= 0.1);
     const half = Math.max(60e3, c.stepMs || 60000);
     const nt = (c.notes || []).filter((n) => (n.end ? t >= n.time - half && t <= n.end : Math.abs(n.time - t) <= half)).map((n) => n.text);
-    const ntText = nt.length ? ` · nota: ${nt.join("; ")}` : "";
+    const ntText = nt.length ? ` · ${tr("nota")}: ${asIs(nt.join("; "))}` : ""; // 2.101.8: a nota é texto da pessoa
     const rcv = onlyGmc ? null : usvMode ? (c.rc ? c.rc[i] : null) : c.rcCPM ? c.rcCPM[i] : null;
     const cps = !usvMode && UNITS.count === "cps";
     const rcText = rcv == null ? "" : usvMode ? ` · RC102 ${fmt(rcv, usvDigits(rcv))} µSv/h` : cps ? ` · RC102 ${fmt(rcv / 60, 1)} CPS` : ` · RC102 ${fmt(rcv, 0)} CPM`;
@@ -420,9 +424,10 @@ function attachDragZoom(plot, sel, getChart, onZoom) {
 function zoomRangeText(t0, t1) {
   const sameDay = new Date(t0).toDateString() === new Date(t1 - 1).toDateString();
   const day = isToday(t0) ? "hoje" : isYesterday(t0) ? "ontem" : ddmm(t0);
+  // 2.101.8: a duração traduz sozinha ("(2 dias)" ficava em português)
   return sameDay
-    ? `${day} ${hhmm(t0)}–${hhmm(t1)} (${fmtDur(t1 - t0)})`
-    : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)} (${fmtDur(t1 - t0)})`;
+    ? `${day} ${hhmm(t0)}–${hhmm(t1)} (${tr(fmtDur(t1 - t0))})`
+    : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)} (${tr(fmtDur(t1 - t0))})`;
 }
 
 const stepText = (ms) => (ms < 60000 ? `${Math.round(ms / 1000)} s` : fmtDur(ms));

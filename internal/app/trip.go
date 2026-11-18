@@ -61,15 +61,27 @@ type TripSummary struct {
 	Events    []TripEvent      `json:"events"`
 }
 
-// isTrip: o RC102 foi junto (é ele que mede a saída).
+// youOut: você saiu de casa no trecho. É o GMC-800 junto, ou o trecho diz "eu
+// não estava em casa" (2.101.8: a mesma regra do awayCheckerFor do RC102).
+// Ignorar o GMC-800 ou deixar os dois em casa não é sair.
+func youOut(p Period) bool {
+	g, _ := periodWhere(p)
+	return g == WhereMe || p.NotHome
+}
+
+// isTrip: você saiu de casa e o RC102 foi junto (é ele que mede a saída).
 func isTrip(p Period) bool {
 	_, rc := periodWhere(p)
-	return rc == WhereMe
+	return rc == WhereMe && youOut(p)
 }
+
+// plannedNameDefault é o nome que o app dá a uma saída programada sem nome
+// (2.101.8: conta como nome padrão, e a tela traduz).
+const plannedNameDefault = "Saída programada"
 
 // isDefaultPeriodName: o nome ainda é o que o app deu.
 func isDefaultPeriodName(name string) bool {
-	if name == "" || name == periodNameOut || name == "Fora de casa" {
+	if name == "" || name == periodNameOut || name == "Fora de casa" || name == plannedNameDefault {
 		return true
 	}
 	ws := []string{WhereHome, WhereMe, WhereOff}
