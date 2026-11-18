@@ -1,5 +1,101 @@
 # Versões
 
+## 2.101.8
+Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 3,
+e as sobras da conferência da 2.101.6):
+- Saída de casa tem uma regra só: o GMC-800 foi junto ou o trecho diz "eu
+  não estava em casa". Ignorar o GMC-800 (tubo quebrado) ou deixar os dois em
+  casa não vira saída: sem "Resumo da saída", sem aviso "Saída fechada", fora
+  do total "RC102 fora de casa", sem "fora de casa" na Fita e fora das saídas
+  do PDF; o fundo desses trechos conta como fundo em casa. Com o GMC-800
+  ignorado também dá para marcar "eu não estava em casa".
+- O aviso "Saída fechada" não aparece mais com a saída ainda aberta (ao
+  renomear, adicionar trecho ou responder o cartão do RC102).
+- Gráficos em CPS: os andares dizem "· CPS" e o eixo mostra 0,25 (não 0,3).
+- Espectrograma e log do RC102: trocar o período ou o filtro durante a
+  leitura não perde mais o pedido novo. O log sem nenhum tipo marcado diz
+  isso (não "Ainda sem registros").
+- Som da Busca só toca com a aba Busca aberta.
+- Telas estreitas e letra grande: tabela dos níveis, setinha da barra
+  lateral, valor do RC102 e da Busca em mrem/h, "← Voltar" da Distância e
+  Blindagem, tabela do Comparar, "Ver no gráfico" sem ficar sob a faixa dos
+  aparelhos, tabela do tempo morto, caminho das versões baixadas, horas do
+  detalhe do alerta, seletores do Agora e dos Alertas, tabela das duas fases
+  e o número do mostrador da Busca.
+- "Máx 24 h" diz "ontem às 03:46" quando o máximo foi ontem.
+- Padrões: diferença pequena entre dia e noite, mas fora do acaso, diz
+  "pequena, mas real" (não "sem diferença clara").
+- A Fita do dia conta um alerta novo na hora e não acumula ouvintes.
+- PDF: a linha "Unidade" do anexo (e a "Configuração na época" da medição)
+  não sai mais cortada.
+- Plural certo em "1 registro", "1 minuto novo", "1 linha ignorada".
+- Atividade (Bq): "Guardar como minha" de um cartão pronto leva o subtítulo e
+  o preparo de novo (só o "Outra coisa" vai sem); a lista de distâncias
+  aceita "2,5, 5, 10" e "2,5 5 10".
+- Calibrar: o cartão do KCl diz ~3 h com sal light e ~2 h com KCl puro.
+- Inglês: saída programada sem nome, notas do Ra-226/Ra-228, "your
+  reference" depois de "Save as mine", "Download history", janelas de
+  arquivo do Windows, "· same" da dose por período, janela e PDF do relatório
+  ("this week", "selected stretch", "Percentiles", "Gap", "Program", dias da
+  semana), chip de motivo, Nome e Posição em Atividade, "no mass", filtro do
+  log, eventos com o nome da pessoa, textos do espectrograma, nota e chuva na
+  dica dos Gráficos, "Place:", "what is σ?" e "(2 days)" do zoom.
+- Modo demonstração: "fica calado" para o Perigo do outro aparelho vale.
+- Sobras da 2.101.7: o PDF da medição compara o fator do fundo de então com
+  o de hoje (acima da curva não dá mais "hoje" falso); a Hora do dia diz os
+  dias com dado (não "em 90 dias" com 8 dias de histórico); o ± do subtítulo
+  do gráfico da medição com um algarismo; "−9%" com sinal de menos na dose
+  por período.
+
+**English**
+Fixes from QA's sweep of 2.101.2 (medium-severity defects, part 3, and the
+leftovers from the 2.101.6 check):
+- Leaving home has a single rule: the GMC-800 went with you or the stretch
+  says "I wasn't home". Ignoring the GMC-800 (broken tube) or leaving both at
+  home is no longer a trip: no "Trip summary", no "Trip closed" notice, left
+  out of the "RC102 away from home" total, no "away from home" on the day
+  strip and out of the PDF trips; the background of those stretches counts as
+  home background. With the GMC-800 ignored you can also mark "I wasn't
+  home".
+- The "Trip closed" notice no longer shows while the trip is still open
+  (when renaming, adding a stretch or answering the RC102 card).
+- Charts in CPS: the stacked panels say "· CPS" and the axis shows 0.25 (not
+  0.3).
+- RC102 spectrogram and log: changing the period or filter during a load no
+  longer loses the new request. The log with no type selected says so (not
+  "No records yet").
+- The Search sound only plays with the Search tab open.
+- Narrow windows and large text: level table, side bar arrow, RC102 and
+  Search value in mrem/h, "← Back" in Distance and Shielding, Compare table,
+  "Show on chart" no longer under the device strip, dead-time table, download
+  folder path, alert detail times, Now and Alerts selectors, two-phase table
+  and the Search dial number.
+- "Max 24 h" says "yesterday at 03:46" when the maximum was yesterday.
+- Patterns: a small but real day/night difference says "small, but real"
+  (not "no clear difference").
+- The day strip counts a new alert right away and no longer piles up
+  listeners.
+- PDF: the appendix "Unit" row (and the measurement "Settings at the time")
+  are no longer cut off.
+- Correct singular in "1 record", "1 new minute", "1 line skipped".
+- Activity (Bq): "Save as mine" from a ready card keeps the subtitle and
+  preparation again (only "Something else" goes without); the distance list
+  accepts "2,5, 5, 10" and "2,5 5 10".
+- Calibrate: the KCl card says ~3 h with lite salt and ~2 h with pure KCl.
+- English: unnamed planned trip, Ra-226/Ra-228 notes, "your reference" after
+  "Save as mine", "Download history", Windows file dialogs, "· same" in dose
+  by period, report window and PDF ("this week", "selected stretch",
+  "Percentiles", "Gap", "Program", weekdays), reason chip, Name and Position
+  in Activity, "no mass", log filter, events with your own names,
+  spectrogram texts, note and rain in the chart tooltip, "Place:", "what is
+  σ?" and the zoom "(2 days)".
+- Demo mode: "stays quiet" for the other device's Danger now applies.
+- Leftovers from 2.101.7: the measurement PDF compares the background
+  factor then with today's (no false "today" above the curve); Time of day
+  says the days with data (not "over 90 days" with 8 days of history); the ±
+  in the measurement chart subtitle has at least one digit; "−9%" with a
+  minus sign in dose by period.
+
 ## 2.101.7
 Correções da varredura do QA na 2.101.2 (defeitos de gravidade média, parte 2,
 e as sobras da conferência da 2.101.5):

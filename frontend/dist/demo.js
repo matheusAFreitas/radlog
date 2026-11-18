@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.7";
+const DEMO_VERSION = "2.101.8";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -99,7 +99,7 @@ function makeDemoApi(opts) {
     const now = Date.now();
     const o = periods.find((q) => now >= q.from && now < (q.to || Infinity));
     const g = o ? o.gmc || "comigo" : "casa", r = o ? o.radiacode || "comigo" : "comigo";
-    const nh = !!(o && o.notHome && g === "casa" && r !== "fora");
+    const nh = !!(o && o.notHome && (g === "casa" || g === "fora") && r !== "fora");
     const pers = r === "comigo" ? "radiacode" : g === "comigo" ? "gmc" : g === "casa" && r === "casa" && !nh ? "gmc" : "", home = g === "casa" ? "gmc" : r === "casa" ? "radiacode" : "";
     return { gmc: g, radiacode: r, normal: g === "casa" && r === "comigo" && !nh, personal: pers, home, notHome: nh, since: o ? o.from : 0, open: o && !o.to ? o : null, live: mockLive() };
   };
@@ -1120,7 +1120,7 @@ const demoRc = () => {
       meas = { phase: "fundo", seconds: o.auto ? 300 : o.seconds || 60, elapsed: 0, counts: 0, name: (o.name || "").trim(), distance: (o.distance || "").trim(), demo: demoSt.active && device === "gmc",
         distCm: o.distCm > 0 ? o.distCm : 0, size: o.size || "", prev: [], derived: null, spectrum: null,
         test: o.test === "distancia" || o.test === "blindagem" ? o.test : "", material: (o.material || "").trim(), relErr: Math.min(Math.max(o.relErr || 0, 0), 0.5),
-        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device };
+        auto: !!o.auto, maxSec, pct, bg: null, obj: null, result: null, live: null, eta: -1, phaseStart: Date.now(), device, quietDanger: !!o.quietDanger };
       if (mode) {
         const od = device === "radiacode" ? "gmc" : "radiacode", oh = await api.GetHomeBackgroundDev(od);
         meas.mode = mode;
@@ -1327,7 +1327,7 @@ const demoRc = () => {
       const open = !p.to && periods.some((q) => q.id === p.id && !q.to);
       if (!open && !(p.to - p.from >= 6e4)) throw new Error("o período precisa ter pelo menos 1 minuto");
       if (periods.some((q) => q.id !== p.id && p.from < (q.to || Infinity) && q.from < (p.to || Infinity))) throw new Error("esse trecho cruza com outro já marcado");
-      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && g === "casa" && (r === "casa" || r === "comigo"), name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r, notHome: out }) };
+      p = { ...p, gmc: g, radiacode: r, notHome: !!p.notHome && (g === "casa" || g === "fora") && (r === "casa" || r === "comigo"), name: (p.name || "").trim() || whKind({ gmc: g, radiacode: r, notHome: out }) };
       if (p.id) periods = periods.map((q) => (q.id === p.id ? p : q));
       else { p.id = Math.max(0, ...periods.map((q) => q.id)) + 1; periods.push(p); }
       periods.sort((a, b) => a.from - b.from);
@@ -1386,7 +1386,7 @@ const demoRc = () => {
     LeaveHome: async (gGoes, rGoes) => api.SetWhere(gGoes ? "comigo" : "casa", rGoes ? "comigo" : "casa", "", !gGoes),
     SetWhere: async (g, r, name, notHome) => {
       const now = Math.floor(Date.now() / 6e4) * 6e4;
-      const cur = mockWhere(), nh = !!notHome && g === "casa" && r !== "fora";
+      const cur = mockWhere(), nh = !!notHome && (g === "casa" || g === "fora") && r !== "fora";
       if (cur.gmc === g && cur.radiacode === r && cur.notHome === nh) return cur;
       periods = periods.filter((q) => !(q.to === 0 && now - q.from < 6e4)).map((q) => (q.to === 0 ? { ...q, to: now } : q));
       if (!(g === "casa" && r === "comigo" && !nh)) periods.push({ id: Math.max(0, ...periods.map((q) => q.id)) + 1, from: now, to: 0, name: (name || "").trim() || (nh && r === "comigo" ? "Saí com o RC102" : whKind({ gmc: g, radiacode: r })), gmc: g, radiacode: r, notHome: nh });
@@ -1579,9 +1579,9 @@ const demoRc = () => {
       for (let i = 0; i < n; i++) {
         const t = f + i * step, p = range(t, t + step), s = { t };
         const o = periods.find((q) => q.from < t + step && (q.to || Infinity) > t);
-        if (o) s.away = true;
+        if (o && ((o.gmc || "comigo") === "comigo" || o.notHome)) s.away = true; // youOut do Go
         const g = o ? o.gmc || "comigo" : "casa";
-        s.gmcRole = g; s.rcRole = o ? o.rc || "comigo" : "comigo";
+        s.gmcRole = g; s.rcRole = o ? o.radiacode || "comigo" : "comigo";
         if (p.length) {
           const u = (p.reduce((x, q) => x + q.cpm, 0) / p.length) * 0.0101;
           Object.assign(s, { gmc: lv(u, gb), gmcUSv: u });

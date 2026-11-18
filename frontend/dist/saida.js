@@ -4,9 +4,12 @@
 // Nunca GPS: o lugar é o nome da saída, editável aqui mesmo.
 // Carregado antes do app.js; só define funções.
 
-// saída = trecho em que o RC102 foi junto (é ele que mede a saída)
-const isTripP = (p) => (p.radiacode || "comigo") === "comigo";
-const tripDefaultName = (p) => !p.name || p.name === "Fora de casa" || p.name === whKind(whOf(p));
+// você saiu de casa: o GMC-800 foi junto ou o trecho diz "eu não estava em casa"
+// (2.101.8: ignorar o GMC-800 ou deixar os dois em casa não é sair; igual ao youOut do Go)
+const youOutP = (p) => (p.gmc || "comigo") === "comigo" || !!p.notHome;
+// saída = você saiu e o RC102 foi junto (é ele que mede a saída)
+const isTripP = (p) => (p.radiacode || "comigo") === "comigo" && youOutP(p);
+const tripDefaultName = (p) => !p.name || p.name === "Fora de casa" || p.name === "Saída programada" || p.name === whKind(whOf(p));
 const tripDay = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
 const tripTitle = (p) => (tripDefaultName(p) ? `Saída de ${tripDay(p.from)}` : p.name);
 const tripDose = (rc) => (rc.devOK ? rc.devDose : rc.dose);
@@ -39,7 +42,7 @@ function tripToastShow(p) {
 // chamado quando a lista de trechos muda: uma saída que estava aberta fechou
 function tripCheckClosed(prev, list) {
   for (const q of list || []) {
-    if (!q.to || !isTripP(q)) continue;
+    if (q.open || !q.to || !isTripP(q)) continue; // aberto (normPeriods põe to = agora)
     const old = (prev || []).find((p) => p.id === q.id);
     if (old && old.open) tripToastShow(q);
   }

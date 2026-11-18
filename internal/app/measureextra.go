@@ -163,10 +163,10 @@ func (a *App) attachFiles(id int64, paths []string) ([]MeasureAttachment, error)
 // anexa à medição.
 func (a *App) AddMeasurementAttachment(id int64) ([]MeasureAttachment, error) {
 	paths, err := wruntime.OpenMultipleFilesDialog(a.ctx, wruntime.OpenDialogOptions{
-		Title: "Anexar à medição",
+		Title: a.T("Anexar à medição"),
 		Filters: []wruntime.FileFilter{
-			{DisplayName: "Fotos e documentos", Pattern: "*.jpg;*.jpeg;*.png;*.webp;*.gif;*.heic;*.pdf;*.txt;*.csv"},
-			{DisplayName: "Todos os arquivos", Pattern: "*.*"},
+			{DisplayName: a.T("Fotos e documentos"), Pattern: "*.jpg;*.jpeg;*.png;*.webp;*.gif;*.heic;*.pdf;*.txt;*.csv"},
+			{DisplayName: a.T("Todos os arquivos"), Pattern: "*.*"},
 		},
 	})
 	if err != nil || len(paths) == 0 {

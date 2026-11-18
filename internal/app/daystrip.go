@@ -189,7 +189,7 @@ func (a *App) GetDayStrip(fromMs, toMs int64) (DayStrip, error) {
 	for i := range out.Slots {
 		t0, t1 := out.Slots[i].T, out.Slots[i].T+out.StepMs
 		for _, p := range periods {
-			if p.From < t1 && periodEnd(p) > t0 {
+			if youOut(p) && p.From < t1 && periodEnd(p) > t0 {
 				out.Slots[i].Away = true
 				break
 			}

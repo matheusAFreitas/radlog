@@ -194,9 +194,11 @@ function drawMeasureSrc(src) {
   const last = (ph) => { const l = src.ph.filter((p) => p.phase === ph); return l[l.length - 1]; };
   const b = last("fundo"), o = last("objeto");
   const parts = [];
-  if (b) parts.push(`fundo ${rateNum(b.avg * k)} ± ${rateNum(b.err * k)}`);
-  else if (src.bgFlat) parts.push(`fundo da casa ${rateNum(src.bgFlat.cpm * k)} ± ${rateNum(src.bgFlat.errCPM * k)}`);
-  if (o) { const kk = src.kObj || k; parts.push(`objeto ${rateNum(o.avg * kk)} ± ${rateNum(o.err * kk)}`); };
+  // 2.101.8: o ± com pelo menos um algarismo (não "± 0,000")
+  const pm = (v) => rateNum(v, errDig(v));
+  if (b) parts.push(`fundo ${rateNum(b.avg * k)} ± ${pm(b.err * k)}`);
+  else if (src.bgFlat) parts.push(`fundo da casa ${rateNum(src.bgFlat.cpm * k)} ± ${pm(src.bgFlat.errCPM * k)}`);
+  if (o) { const kk = src.kObj || k; parts.push(`objeto ${rateNum(o.avg * kk)} ± ${pm(o.err * kk)}`); };
   $("mLiveSub").dataset.unitKeep = "";
   $("mLiveSub").textContent = parts.length ? "— " + parts.join(" · ") + " " + rateLbl() : "";
 }

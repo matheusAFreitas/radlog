@@ -250,7 +250,7 @@ func (p *reportPDF) levelShape(x, y, size float64, c pdf.RGB) {
 // kv desenha linhas "rótulo: valor" em duas colunas de texto.
 func (p *reportPDF) kv(rows [][2]string, keyW float64) {
 	for _, r := range rows {
-		lines := wrapText(r[1], pdf.Sans, 8, pdf.W-2*pm-keyW, 3)
+		lines := wrapText(r[1], pdf.Sans, 8, pdf.W-2*pm-keyW, 8) // 2.101.8: até 8 linhas, como o paragraph (3 cortava o texto)
 		p.need(float64(len(lines))*10 + 6)
 		p.d.Text(pm, p.y+10, pdf.SansBold, 8, cMuted, r[0])
 		for i, ln := range lines {

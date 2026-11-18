@@ -715,7 +715,7 @@ func (a *App) ChooseReportDir() (ReportDirInfo, error) {
 	}
 	cur := a.reportDir().Dir
 	_ = os.MkdirAll(cur, 0o755)
-	dir, err := wruntime.OpenDirectoryDialog(a.ctx, wruntime.OpenDialogOptions{Title: "Pasta dos relatórios", DefaultDirectory: cur, CanCreateDirectories: true})
+	dir, err := wruntime.OpenDirectoryDialog(a.ctx, wruntime.OpenDialogOptions{Title: a.T("Pasta dos relatórios"), DefaultDirectory: cur, CanCreateDirectories: true})
 	if err != nil || dir == "" {
 		return a.reportDir(), err
 	}

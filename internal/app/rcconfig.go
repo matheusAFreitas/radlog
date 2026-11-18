@@ -48,7 +48,17 @@ func (a *App) rcCfgBackup(s radiacode.Settings, dev *radiacode.Device, tag strin
 		"quando": time.Now().Format(time.RFC3339), "app": AppVersion,
 		"modelo": dev.Model, "firmware": dev.Firmware, "ajustes": s,
 	}, "", "  ")
-	path := a.rcCfgPath("ajustes-" + time.Now().Format("2006-01-02_150405.000") + "-" + tag + ".json")
+	// 2.101.8: duas gravações no mesmo milissegundo não se sobrescrevem (a
+	// fila do desfazer vai pelo nome): o horário anda 1 ms até achar um livre
+	t := time.Now()
+	path := a.rcCfgPath("ajustes-" + t.Format("2006-01-02_150405.000") + "-" + tag + ".json")
+	for i := 0; i < 1000; i++ {
+		if _, err := os.Stat(path); err != nil {
+			break
+		}
+		t = t.Add(time.Millisecond)
+		path = a.rcCfgPath("ajustes-" + t.Format("2006-01-02_150405.000") + "-" + tag + ".json")
+	}
 	return path, writeFileAtomic(path, b, 0o644)
 }
 

@@ -2205,7 +2205,7 @@ const I18N_EN = {
 "Intercalibração com o RadiaCode": "Cross-calibration with the RC102",
 "Intercalibrar com o RC102": "Cross-calibrate with the RC102",
 "Intercalibrar com o RadiaCode": "Cross-calibrate with the RC102",
-"intercalibração com o RC102": "intercalibration with the RC102",
+"intercalibração com o RC102": "cross-calibration with the RC102",
 "intercalibração com o RadiaCode": "cross-calibration with the RC102",
 "fator novo": "new factor",
 "margem (95%)": "margin (95%)",
@@ -4487,7 +4487,6 @@ const I18N_EN = {
 "medir um novo": "measure a new one",
 "na peça": "in the piece",
 "no GMC-800": "on the GMC-800",
-"obrigatório · ~1 h": "required · ~1 h",
 "opcional · melhora a curva": "optional · improves the curve",
 "para o RC102": "for the RC102",
 "para o RadiaCode": "for the RC102",
@@ -4835,8 +4834,8 @@ const I18N_EN = {
 "As mudanças que você fez aqui e ainda não salvou serão descartadas.": "The changes you made here and haven't saved will be discarded.",
 "dentro do típico": "within typical",
 "não chega a ±10% (limite da calibração)": "doesn't reach ±10% (calibration limit)",
-"fator do app, intercalibração com o RC102": "app factor, intercalibration with the RC102",
-"fator do app, intercalibração com o RadiaCode": "app factor, intercalibration with the RC102",
+"fator do app, intercalibração com o RC102": "app factor, cross-calibration with the RC102",
+"fator do app, intercalibração com o RadiaCode": "app factor, cross-calibration with the RC102",
 "fator do app, informado à mão": "app factor, entered by hand",
 "Os ajustes do GMC-800 ainda não foram gravados: use \"Gravar no GMC-800\" (GQ GMC-800 › No aparelho).": "The GMC-800 settings haven't been written yet: use \"Write to the GMC-800\" (GQ GMC-800 › On the device).",
 "Configuração gravada no GMC-800": "Settings written to the GMC-800",
@@ -4873,7 +4872,37 @@ const I18N_EN = {
 "Certeza pela dose:": "Certainty from dose:",
 "µSv/h por CPM (a que valia na medição, para gama do Cs-137)": "µSv/h per CPM (the one in use at the measurement, for Cs-137 gamma)",
 "σ na contagem": "σ in count",
-"σ na dose ·": "σ in dose ·"
+"σ na dose ·": "σ in dose ·",
+"lendo…": "reading…",
+"Leitura cancelada: 1 minuto novo guardado": "Download canceled: 1 new minute kept",
+"A pergunta \"fora de casa?\" está no Agora.": "The \"away from home?\" question is on Now.",
+"Importar backup": "Import backup",
+"Texto (*.txt)": "Text (*.txt)",
+"radlog-codigo-de-recuperacao.txt": "radlog-recovery-code.txt",
+"radlog-gmc-leituras-": "radlog-gmc-readings-",
+"esta semana": "this week",
+"semana passada": "last week",
+"trecho selecionado": "selected stretch",
+"Percentis": "Percentiles",
+"Lacuna": "Gap",
+"Programa": "Program",
+"dom": "Sun",
+"seg": "Mon",
+"ter": "Tue",
+"qua": "Wed",
+"qui": "Thu",
+"sex": "Fri",
+". Uma leitura \"em σ\" é quantos desses passos ela está acima ou abaixo do fundo: (leitura − fundo) ÷ σ.": ". A reading \"in σ\" is how many of these steps it sits above or below background: (reading − background) ÷ σ.",
+"Local: oculto": "Place: hidden",
+"nota": "note",
+"obrigatório · ~3 h com sal light, ~2 h com KCl puro": "required · ~3 h with lite salt, ~2 h with pure KCl",
+"Nenhum tipo marcado: marque pelo menos um tipo acima para ver os registros.": "No type selected: select at least one type above to see the records.",
+"Nenhum registro dos tipos marcados neste período.": "No records of the selected types in this period.",
+"1 linha ignorada": "1 line skipped",
+"a noite fica acima do dia": "night is above day",
+"o dia fica acima da noite": "day is above night",
+"minuto novo": "new minute",
+"minutos novos": "new minutes"
 },
 "patterns": [
 [
@@ -5811,6 +5840,26 @@ const I18N_EN = {
 ]
 ],
 [
+"Diferença pequena (",
+"^Diferença pequena \\(((?:(?! · ).)+?)%\\), mas real: a noite fica acima do dia \\(noite − dia = ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\.$",
+"Small difference (${1}%), but real: night is above day (night − day = ${2} ± ${3} ${4}, ${5} days with both halves).",
+[
+"Diferença pequena (",
+"%), mas real: a noite fica acima do dia (noite − dia = ",
+" dias com as duas metades)."
+]
+],
+[
+"Diferença pequena (",
+"^Diferença pequena \\(((?:(?! · ).)+?)%\\), mas real: o dia fica acima da noite \\(noite − dia = ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\.$",
+"Small difference (${1}%), but real: day is above night (night − day = ${2} ± ${3} ${4}, ${5} days with both halves).",
+[
+"Diferença pequena (",
+"%), mas real: o dia fica acima da noite (noite − dia = ",
+" dias com as duas metades)."
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) CPM acima do fundo \\(Currie, 95%, com ((?:(?! · ).)+?) s de fundo\\)\\. Abaixo disso, um objeto fraco pode passar despercebido\\.$",
 "${1} CPM above background (Currie, 95%, with ${2} s of background). Below that, a weak object may go unnoticed.",
@@ -6608,6 +6657,17 @@ const I18N_EN = {
 " ms (scripts lidos em ",
 " ms); ",
 " ms desde que o programa começou"
+]
+],
+[
+"Diferença pequena (",
+"^Diferença pequena \\(((?:(?! · ).)+?)%\\), mas real: ((?:(?! · ).)+?) \\(noite − dia = ((?:(?! · ).)+?) ± ((?:(?! · ).)+?) ((?:(?! · ).)+?), ((?:(?! · ).)+?) dias com as duas metades\\)\\.$",
+"Small difference (${1}%), but real: ${2} (night − day = ${3} ± ${4} ${5}, ${6} days with both halves).",
+[
+"Diferença pequena (",
+"%), mas real: ",
+" (noite − dia = ",
+" dias com as duas metades)."
 ]
 ],
 [
@@ -8043,6 +8103,15 @@ const I18N_EN = {
 ]
 ],
 [
+"em 1 dia: mais alto por volta das ",
+"^em 1 dia: mais alto por volta das ((?:(?! · ).)+?)h, mais baixo por volta das ((?:(?! · ).)+?)h$",
+"over 1 day: highest around ${1}h, lowest around ${2}h",
+[
+"em 1 dia: mais alto por volta das ",
+"h, mais baixo por volta das "
+]
+],
+[
 "Alarme (histórico do contador): pico de ",
 "^Alarme \\(histórico do contador\\): pico de ((?:(?! · ).)+?) CPM às ((?:(?! · ).)+?) \\(limite ((?:(?! · ).)+?)\\)$",
 "Alarm (counter history): peak of ${1} CPM at ${2} (limit ${3})",
@@ -9191,6 +9260,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Log do RadiaCode importado (",
+"^Log do RadiaCode importado \\(((?:(?! · ).)+?)\\): 1 registro novo de ((?:(?! · ).)+?)$",
+"RC102 log imported (${1}): 1 new record out of ${2}",
+[
+"Log do RadiaCode importado (",
+"): 1 registro novo de "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM \\(limite operacional configurado\\)$",
 "from ${1} CPM (configured operating limit)",
@@ -9786,6 +9864,15 @@ const I18N_EN = {
 "· GMC-800 ≈ ",
 " · RC102 ≈ ",
 " mrem · um ponto a cada "
+]
+],
+[
+"Log do RC102 importado (",
+"^Log do RC102 importado \\(((?:(?! · ).)+?)\\): 1 registro novo de ((?:(?! · ).)+?)$",
+"RC102 log imported (${1}): 1 new record out of ${2}",
+[
+"Log do RC102 importado (",
+"): 1 registro novo de "
 ]
 ],
 [
@@ -14967,6 +15054,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) registro, ((?:(?! · ).)+?) minutos novos$",
+"${1} record, ${2} new minutes",
+[
+" registro, ",
+" minutos novos"
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -15239,6 +15335,15 @@ const I18N_EN = {
 "em casa ",
 " µSv · fora ",
 " µSv"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minuto novo$",
+"${1} records, ${2} new minute",
+[
+" registros, ",
+" minuto novo"
 ]
 ],
 [
@@ -15579,6 +15684,15 @@ const I18N_EN = {
 [
 "Medição no ",
 " terminada."
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) registro, ((?:(?! · ).)+?) minuto novo$",
+"${1} record, ${2} new minute",
+[
+" registro, ",
+" minuto novo"
 ]
 ],
 [
@@ -16773,6 +16887,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) registros novos de ((?:(?! · ).)+?)$",
+"${1} new records out of ${2}",
+[
+" registros novos de "
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -17212,6 +17334,14 @@ const I18N_EN = {
 ]
 ],
 [
+"1 registro novo de ",
+"^1 registro novo de ((?:(?! · ).)+?)$",
+"1 new record out of ${1}",
+[
+"1 registro novo de "
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -17579,7 +17709,7 @@ const I18N_EN = {
 [
 "· chuva ",
 "^· chuva ((?:(?! · ).)+?) \\(radar\\)$",
-"· rain ${1} (radar)",
+"· rain: ${1} (radar)",
 [
 "· chuva ",
 " (radar)"
@@ -21129,6 +21259,14 @@ const I18N_EN = {
 ]
 ],
 [
+"ontem às ",
+"^ontem às ((?:(?! · ).)+?)$",
+"yesterday at ${1}",
+[
+"ontem às "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) alarmes$",
 "${1} alarms",
@@ -21754,6 +21892,23 @@ const I18N_EN = {
 "${1} after",
 [
 " depois"
+]
+],
+[
+"Local: ",
+"^Local: ((?:(?! · ).)+?)$",
+"Place: ${1}",
+[
+"Local: "
+]
+],
+[
+"em ",
+"^em ((?:(?! · ).)+?) às ((?:(?! · ).)+?)$",
+"on ${1} at ${2}",
+[
+"em ",
+" às "
 ]
 ],
 [

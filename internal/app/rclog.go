@@ -430,8 +430,8 @@ func (a *App) ImportRcLog() (RcLogImport, error) {
 		return RcLogImport{}, errors.New("sem janela")
 	}
 	src, err := wruntime.OpenFileDialog(a.ctx, wruntime.OpenDialogOptions{
-		Title:   "Importar o log do app do RC102",
-		Filters: []wruntime.FileFilter{{DisplayName: "Log do RC102 (*.csv)", Pattern: "*.csv"}},
+		Title:   a.T("Importar o log do app do RC102"),
+		Filters: []wruntime.FileFilter{{DisplayName: a.T("Log do RC102 (*.csv)"), Pattern: "*.csv"}},
 	})
 	if err != nil || src == "" {
 		return RcLogImport{}, err
@@ -445,7 +445,11 @@ func (a *App) ImportRcLog() (RcLogImport, error) {
 	if err != nil {
 		return res, err
 	}
-	a.logEvent(fmt.Sprintf("Log do RC102 importado (%s): %d registros novos de %d", res.File, res.Added, res.Read))
+	if res.Added == 1 {
+		a.logEvent(fmt.Sprintf("Log do RC102 importado (%s): 1 registro novo de %d", asIs(res.File), res.Read))
+	} else {
+		a.logEvent(fmt.Sprintf("Log do RC102 importado (%s): %d registros novos de %d", asIs(res.File), res.Added, res.Read))
+	}
 	return res, nil
 }
 

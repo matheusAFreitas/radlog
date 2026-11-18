@@ -83,9 +83,11 @@ async function refreshAlOrigin(from, to, label) {
 // ---------- testes (distância e blindagem) ----------
 
 function alDists() {
-  // 2.101.6: com ";" na lista, a vírgula é decimal ("2,5; 5; 10"); sem ";", separa
+  // 2.101.8: separa por ";", espaço ou vírgula seguida de espaço; vírgula entre
+  // dígitos é decimal ("2,5, 5, 10"); um pedaço com 2+ vírgulas ("5,10,20") é lista
   const raw = String($("alDists").value || "");
-  const v = raw.split(raw.includes(";") ? /[;\s]+/ : /[,\s]+/).map((x) => parseFloat(x.replace(",", "."))).filter((x) => x > 0 && x <= 500);
+  const v = raw.split(/;|\s+|,(?=\s|$)/).flatMap((x) => ((x.match(/,/g) || []).length >= 2 ? x.split(",") : [x]))
+    .map((x) => parseFloat(x.replace(",", "."))).filter((x) => x > 0 && x <= 500);
   return v.length >= 2 ? v.slice(0, 8) : [5, 10, 20, 40];
 }
 

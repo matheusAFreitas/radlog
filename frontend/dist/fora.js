@@ -108,10 +108,10 @@ function periodStatsEl(p) {
   return box;
 }
 
-// total do Radiacode fora de casa (todos os períodos)
+// total do Radiacode fora de casa (só as saídas: 2.101.8)
 async function renderPeriodTotal() {
   const el = $("periodTotal");
-  const list = state.periods || [];
+  const list = (state.periods || []).filter(isTripP);
   if (!list.length) { el.hidden = true; return; }
   const sums = await Promise.all(list.map(periodSummary));
   let dose = 0, min = 0;
@@ -124,10 +124,12 @@ const WH_NAME = { gmc: "GMC-800", radiacode: "RC102" };
 const WH_NORMAL = { gmc: "casa", radiacode: "comigo" };
 const whOf = (p) => ({ gmc: p.gmc || "comigo", radiacode: p.radiacode || "comigo", notHome: !!p.notHome });
 // saí com o Radiacode e deixei o GMC (2.38.0): o Radiacode fora do fundo da casa
-const whOut = (w) => w.gmc === "casa" && w.radiacode === "comigo" && !!w.notHome;
+const whOut = (w) => (w.gmc === "casa" || w.gmc === "fora") && w.radiacode === "comigo" && !!w.notHome;
 const WH_LOCTXT = { casa: "em casa", comigo: "comigo", fora: "ignorado" };
 // 2.94 (M5): três palavras (em casa, comigo, ignorar). Os nomes guardados
 // continuam os de antes ("… fora do cálculo"); só a tela troca
+// motivos prontos do chip (2.101.8): gravados em português, mostrados no idioma da tela
+const WH_REASONS = ["quebrado", "em manutenção", "desligado de propósito", "leitura não confiável"];
 const whWord = (s) => ({ "Os dois fora do cálculo": "Os dois ignorados", "GMC-800 fora do cálculo": "GMC-800 ignorado", "RC102 fora do cálculo": "RC102 ignorado" })[s] || s;
 const whKind = (w) => (w.gmc === "fora" && w.radiacode === "fora" ? "Os dois fora do cálculo"
   : w.gmc === "fora" ? "GMC-800 fora do cálculo"
@@ -274,7 +276,8 @@ function periodForm(p, onDone) {
   const nhTxt = document.createElement("span");
   nh.append(nhBox, nhTxt);
   // os dois em casa: esqueci de levar; GMC em casa e Radiacode comigo: saí com ele (2.38.0)
-  const both = () => pick(segG) === "casa" && (pick(segR) === "casa" || pick(segR) === "comigo");
+  // 2.101.8: com o GMC-800 ignorado (tubo quebrado) também dá para sair com o RC102
+  const both = () => (pick(segG) === "casa" || pick(segG) === "fora") && (pick(segR) === "casa" || pick(segR) === "comigo");
   const syncNh = () => {
     nh.hidden = !both();
     nhTxt.textContent = pick(segR) === "comigo" ? " eu não estava em casa (saí com o RC102)" : " eu não estava em casa (esqueci de levar os dois)";
@@ -378,7 +381,7 @@ function renderPeriods() {
     t.className = "t";
     const b = document.createElement("b");
     b.textContent = whWord(p.name);
-    if (p.name !== whKind(whOf(p))) b.dataset.noTr = "";
+    if (p.name !== whKind(whOf(p)) && !WH_REASONS.includes(p.name)) b.dataset.noTr = "";
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);

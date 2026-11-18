@@ -322,7 +322,7 @@ func (a *App) StartActivity(o ActOpts) error {
 	a.actLoadLocked()
 	st.run = r
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", o.Name, o.MassG))
+	a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", asIs(o.Name), o.MassG))
 	return nil
 }
 
@@ -374,7 +374,7 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 		r.Result = &res
 		r.Phase, r.PhaseAt = "pronto", now.UnixMilli()
 		a.actAppendResult(res)
-		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", r.Opts.Name))
+		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", asIs(r.Opts.Name)))
 	}
 	a.actSaveLocked()
 }

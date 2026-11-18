@@ -245,7 +245,11 @@ function fcSlow() {
 function fcHour(p) {
   if (!p || !p.minutes || !(p.peakHour >= 0)) return "sem dados ainda";
   // 2.101.6: diz de que período é (o quadro do mapa de calor é de outro)
-  return `em ${p.days || 90} dias: mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
+  // 2.101.8: os dias com dado (a janela pedida pode ser maior que o histórico)
+  const hd = Math.max(...(p.hours || []).map((h) => (h && h.days) || 0));
+  const n = hd > 0 ? Math.min(hd, p.days || hd) : p.days || 90;
+  if (n === 1) return `em 1 dia: mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
+  return `em ${n} dias: mais alto por volta das ${p.peakHour}h, mais baixo por volta das ${p.lowHour}h`;
 }
 
 // diferença de cada linha para a média das medianas, em %

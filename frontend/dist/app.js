@@ -522,6 +522,17 @@ function renderAlertMarks() {
   const bars = document.querySelector(".bars");
   if (!bars || !window.ResizeObserver) return;
   new ResizeObserver(() => document.documentElement.style.setProperty("--barsH", bars.offsetHeight + "px")).observe(bars);
+  // 2.101.8: a faixa dos aparelhos presa no topo também tampa o destino de um
+  // scrollIntoView ("Ver no gráfico"): o html desconta a altura dela
+  const inst = document.getElementById("instruments");
+  if (!inst) return;
+  const instH = () => {
+    const pos = getComputedStyle(inst).position, h = inst.offsetParent === null && pos !== "fixed" ? 0 : inst.offsetHeight;
+    document.documentElement.style.setProperty("--instH", (pos === "sticky" || pos === "fixed" ? h : 0) + "px");
+  };
+  new ResizeObserver(instH).observe(inst);
+  new MutationObserver(instH).observe(inst, { attributes: true, attributeFilter: ["class", "hidden"], subtree: true });
+  instH();
 })();
 
 // a faixa aparece quando os quadros grandes saem da tela
@@ -693,6 +704,9 @@ function renderStatus() {
 
 // ---------- cartões, tabela e eventos ----------
 
+// 2.101.8: "às 03:46" de ontem parecia hora no futuro: fora de hoje, leva o dia
+const atWhen = (t) => tr(isToday(t) ? `às ${hhmm(t)}` : isYesterday(t) ? `ontem às ${hhmm(t)}` : `em ${ddmm(t)} às ${hhmm(t)}`);
+
 async function refreshStats() {
   const s = await api.GetStats();
   state.bgCPM = s.bgCPM || null;
@@ -703,12 +717,12 @@ async function refreshStats() {
   $("tAvgSub").textContent = s.avg1h == null ? rateLbl() : `${rateLbl()} · ${countTxt(s.avg1h)}`;
   $("tMin").textContent = u(s.min24h);
   $("tMax").textContent = u(s.max24h);
-  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
+  $("tMaxSub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} ${atWhen(s.max24hAt)}`;
   // as mesmas medidas dentro do quadro do GMC (quando está lado a lado com o Radiacode)
   $("hAvg1h").textContent = u(s.avg1h);
   $("hMin24").textContent = u(s.min24h);
   $("hMax24").textContent = u(s.max24h);
-  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} às ${hhmm(s.max24hAt)}`;
+  $("hMax24Sub").textContent = s.max24h == null ? rateLbl() : `${rateLbl()} ${atWhen(s.max24hAt)}`;
   state.gDose = s.minutesToday ? s.doseToday : null;
   renderGTile();
   $("tDose").textContent = s.minutesToday ? doseNum(s.doseToday) : "—";
@@ -825,7 +839,7 @@ function renderLogs(r) {
   sel.innerHTML = '<option value="">todos os componentes</option>';
   for (const c of r.comps || []) {
     const o = document.createElement("option");
-    o.value = c.name; o.textContent = `${c.name} (${fmt(c.count, 0)})`;
+    o.value = c.name; o.textContent = `${tr(c.name)} (${fmt(c.count, 0)})`;
     sel.appendChild(o);
   }
   if (cur && !(r.comps || []).some((c) => c.name === cur)) { const o = document.createElement("option"); o.value = cur; o.textContent = cur + " (0)"; sel.appendChild(o); }
@@ -1518,7 +1532,7 @@ function wireHeat() {
 function renderRainSettings() {
   const s = state.settings;
   $("chkRain").checked = !!s.rainEnabled;
-  $("placeChosen").textContent = s.rainPlace ? (s.rainHidePlace ? "Local: oculto" : "Local: " + s.rainPlace) : "Nenhuma cidade escolhida.";
+  $("placeChosen").textContent = s.rainPlace ? (s.rainHidePlace ? "Local: oculto" : "Local: " + asIs(s.rainPlace)) : "Nenhuma cidade escolhida.";
   $("chkRainHide").checked = !!s.rainHidePlace;
 }
 
@@ -3324,6 +3338,13 @@ function wire() {
   };
   sideNav.addEventListener("scroll", sideEdges, { passive: true });
   window.addEventListener("resize", sideEdges);
+  // 2.101.8: a lista cresce depois (escala, Espectro e Clima, versão nova): recalcula
+  if (typeof ResizeObserver === "function") {
+    const ro = new ResizeObserver(sideEdges);
+    ro.observe(sideNav);
+    for (const c of sideNav.children) ro.observe(c);
+    new MutationObserver(() => { for (const c of sideNav.children) ro.observe(c); sideEdges(); }).observe(sideNav, { childList: true, subtree: true, attributes: true, attributeFilter: ["hidden"] });
+  }
   sideEdges();
   $("btnExport").addEventListener("click", async () => {
     const path = await call(api.ExportCSV);
@@ -3334,9 +3355,10 @@ function wire() {
     $("progressText").textContent = "Lendo a memória do contador…";
     try {
       const r = await api.DownloadHistory();
-      if (r.canceled) histDone(`Leitura cancelada: ${r.added} minutos novos guardados`, false);
+      if (r.canceled) histDone(r.added === 1 ? "Leitura cancelada: 1 minuto novo guardado" : `Leitura cancelada: ${r.added} minutos novos guardados`, false);
       else if (r.partial) { histFailToast(r.partial, true); histDone("Não deu para baixar tudo: os minutos que chegaram foram guardados.", false); }
-      else histDone(`${r.records} registros, ${r.added} minutos novos` + (r.asks ? ". A pergunta \"fora de casa?\" está no Agora." : ""), true);
+      // 2.101.8: plural pelo número, e cada frase traduz sozinha
+      else histDone(tr(`${r.records} ${r.records === 1 ? "registro" : "registros"}, ${r.added} ${r.added === 1 ? "minuto novo" : "minutos novos"}`) + (r.asks ? ". " + tr("A pergunta \"fora de casa?\" está no Agora.") : ""), true);
     } catch (e) {
       histDone("Não deu para baixar: " + errMsg(e), false);
     }
@@ -3421,7 +3443,10 @@ function listen() {
     setAttention(r.demo ? "demo" : "real", !!r.attention);
     tickActive();
   });
-  on("alerts", (list) => { state.activeAlerts = list || []; renderActive(); });
+  // 2.101.8: a Fita do dia conta o alerta novo logo (junta vários num só pedido)
+  let fitaSoon = 0;
+  const fitaNudge = () => { if (typeof refreshAgFita !== "function") return; clearTimeout(fitaSoon); fitaSoon = setTimeout(() => { if (state.view === "agora") refreshAgFita(); }, 1500); };
+  on("alerts", (list) => { state.activeAlerts = list || []; renderActive(); fitaNudge(); });
   on("rain-status", (st) => { state.rainStatus = st || {}; renderRainStatus(); });
   on("notes", () => { refreshChart(); if (state.view === "resumo") refreshSummary(); });
   on("radar", () => { if (state.settings.rainEnabled) { refreshChart(); refreshRainImpact(); } });
@@ -3445,7 +3470,7 @@ function listen() {
     renderStatus();
     if (was !== s.state) refreshStats();
   });
-  on("event", (e) => { refreshEvents(); if (e && e.kind === "alerta") refreshHeat(); });
+  on("event", (e) => { refreshEvents(); if (e && e.kind === "alerta") { refreshHeat(); fitaNudge(); } });
   on("demo", (d) => {
     // dentro do app, ligar ou sair (ou um alarme de verdade) recarrega a tela
     if (hasGo && !!d.active !== inDemo) { demoReload(!!d.active); return; }
@@ -3958,7 +3983,7 @@ function renderRcMain(st) {
   $("rcAvg1h").textContent = sx.n1h ? fu(sx.avg1h) : "—";
   $("rcMin24").textContent = sx.n24h ? fu(sx.min24h) : "—";
   $("rcMax24").textContent = sx.n24h ? fu(sx.max24h) : "—";
-  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} às ${hhmm(sx.max24hAt)}` : rateLbl();
+  $("rcMax24At").textContent = sx.n24h ? `${rateLbl()} ${atWhen(sx.max24hAt)}` : rateLbl();
   // dose que o próprio aparelho soma desde que foi zerado
   if (st.doseLiveAt) {
     const mSv = !RATE_MREM && st.doseLive >= 1000, v = RATE_MREM ? st.doseLive / 10 : mSv ? st.doseLive / 1000 : st.doseLive;
@@ -4519,7 +4544,9 @@ function exportReport(from, to, label, btn) {
   document.querySelectorAll("#repModes .rep-mode").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.mode === mode)));
   $("repNotes").checked = !!st.reportNotes;
   $("repCfg").checked = !st.reportNoCfg;
-  $("repSub").textContent = `${label} · ${dayLabel(from)} ${hhmm(from)} → ${dayLabel(Math.min(to, Date.now()) - 1)} ${hhmm(Math.min(to, Date.now()))}`;
+  // 2.101.8: cada parte traduz sozinha (o molde "seg {0}" não pegava "→ hoje" nem "dom")
+  const dl = (t) => (isToday(t) ? tr("hoje") : isYesterday(t) ? tr("ontem") : `${tr(WEEKDAY[new Date(t).getDay()])} ${ddmm(t)}`);
+  $("repSub").textContent = `${tr(label)} · ${dl(from)} ${hhmm(from)} → ${dl(Math.min(to, Date.now()) - 1)} ${hhmm(Math.min(to, Date.now()))}`;
   $("repDlg").showModal();
 }
 function wireReportDlg() {

@@ -19,20 +19,23 @@ import (
 var (
 	ptLeftMu sync.Mutex
 	ptLeft   = map[string]bool{}
-	ptLooks  = regexp.MustCompile(`(?i)[ãçõâêôáéíóúà]|\b(não|nenhum|nenhuma|aqui|ainda|com|para|sem|uma|pelo|pela|desde|agora|hoje|ontem|aparelho|contagens|fundo|objeto|medição|limite|tempo|vezes|pico|picos|espectro|casa|dias|horas|minutos|segundos|da|das|dos|na|nos|nas|em|de|que|ou|mais|menos|muito|pouco|chuva|fora|medida|série|filho|chumbo|tório|urânio|até|sobre|entre|cada|quando|onde|como)\b`)
+	ptLooks  = regexp.MustCompile(`(?i)[ãçõâêôáéíóúà]|\b(não|nenhum|nenhuma|aqui|ainda|com|para|sem|uma|pelo|pela|desde|agora|hoje|ontem|aparelho|contagens|fundo|objeto|medição|limite|tempo|vezes|pico|picos|espectro|casa|dias|horas|minutos|segundos|da|das|dos|na|nos|nas|em|de|que|ou|mais|menos|muito|pouco|chuva|fora|medida|série|filho|chumbo|tório|urânio|até|sobre|entre|cada|quando|onde|como|semana|trecho|selecionado|percentis|lacuna|programa|dom)\b`)
 )
 
 // nome que a pessoa deu à medição nos testes: fica como foi escrito
 const ptUserName = "Eletrodo de tungstênio toriado"
 
+// ptTextHook é o gancho de sempre; um teste que troca o gancho devolve este
+func ptTextHook(s string) {
+	if ptLooks.MatchString(s) && i18n.T("en", s) == s && !strings.Contains(s, ptUserName) {
+		ptLeftMu.Lock()
+		ptLeft[s] = true
+		ptLeftMu.Unlock()
+	}
+}
+
 func TestMain(m *testing.M) {
-	pdf.SetTextHook(func(s string) {
-		if ptLooks.MatchString(s) && i18n.T("en", s) == s && !strings.Contains(s, ptUserName) {
-			ptLeftMu.Lock()
-			ptLeft[s] = true
-			ptLeftMu.Unlock()
-		}
-	})
+	pdf.SetTextHook(ptTextHook)
 	code := m.Run()
 	if len(ptLeft) > 0 && os.Getenv("RADLOG_PT_OK") == "" {
 		var l []string

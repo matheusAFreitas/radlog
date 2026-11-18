@@ -126,6 +126,10 @@ function ftSay(el, day, marks, label, nowIdx) {
 
 // liga a dica e o clique de uma fita (fn(i, el) devolve o texto do pedaço)
 function ftHover(box, strips, tipOf, slotT) {
+  // 2.101.8: um jogo de ouvintes por caixa (cada desenho tira os do anterior)
+  if (box._ftAbort) box._ftAbort.abort();
+  const ac = new AbortController(), sig = { signal: ac.signal };
+  box._ftAbort = ac;
   const tip = document.createElement("div"), cur = document.createElement("div");
   tip.className = "ft-tip"; tip.hidden = true;
   cur.className = "ft-cursor"; cur.hidden = true;
@@ -147,15 +151,15 @@ function ftHover(box, strips, tipOf, slotT) {
     cur.style.left = e.clientX - fr.left + "px";
     tip.style.left = Math.min(fr.width - tip.offsetWidth, Math.max(0, e.clientX - fr.left - tip.offsetWidth / 2)) + "px";
     tip.style.top = e.clientY - fr.top + 16 + "px";
-  });
-  box.addEventListener("mouseleave", () => { tip.hidden = cur.hidden = true; });
+  }, sig);
+  box.addEventListener("mouseleave", () => { tip.hidden = cur.hidden = true; }, sig);
   box.addEventListener("click", (e) => {
     const mk = e.target.closest("[data-t]");
     const p = at(e);
     const t = mk ? +mk.dataset.t : p ? slotT(p.i, p.st) : null;
     if (t == null) return;
     openGapOnChart({ from: t, to: t + 6e5 });
-  });
+  }, sig);
 }
 
 // 2.90.0 (avaliação A4): a legenda só traz o que aparece na fita

@@ -162,7 +162,7 @@ function renderAgDose() {
     } else if (p.background > 0) {
       const pct = Math.round(p.above * 100);
       const [bn, bu] = agSv(p.background);
-      n.textContent = `o fundo daria ${bn} ${bu}` + (pct >= 1 ? ` · +${pct}%` : pct <= -1 ? ` · ${pct}%` : " · igual");
+      n.textContent = `o fundo daria ${bn} ${bu}` + (pct >= 1 ? ` · +${pct}%` : pct <= -1 ? ` · −${-pct}%` : " · " + tr("igual"));
       if (pct >= 10) n.classList.add("up");
     } else n.textContent = `${fmt(p.coverage * 100, 0)}% medido`;
     cell.append(k, v);
