@@ -153,7 +153,8 @@ func (a *App) saveMeasureReport(id int64) (string, error) {
 	var calThen, calNow gmc.Calibration
 	if m != nil {
 		tl := a.calTLLocked()
-		calThen, calNow = tl.calAt(m.Time, lv.DeadTimeOn), tl.calAt(time.Now().UnixMilli(), lv.DeadTimeOn)
+		// a medição salva nunca é recalculada: o fator de então ignora o retroativo
+		calThen, calNow = tl.withRetro(0).calAt(m.Time, lv.DeadTimeOn), tl.calAt(time.Now().UnixMilli(), lv.DeadTimeOn)
 	}
 	a.mu.Unlock()
 	if m == nil {

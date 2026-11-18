@@ -25,14 +25,17 @@ var (
 // nome que a pessoa deu à medição nos testes: fica como foi escrito
 const ptUserName = "Eletrodo de tungstênio toriado"
 
+// ptTextHook é o gancho de sempre; um teste que troca o gancho devolve este
+func ptTextHook(s string) {
+	if ptLooks.MatchString(s) && i18n.T("en", s) == s && !strings.Contains(s, ptUserName) {
+		ptLeftMu.Lock()
+		ptLeft[s] = true
+		ptLeftMu.Unlock()
+	}
+}
+
 func TestMain(m *testing.M) {
-	pdf.SetTextHook(func(s string) {
-		if ptLooks.MatchString(s) && i18n.T("en", s) == s && !strings.Contains(s, ptUserName) {
-			ptLeftMu.Lock()
-			ptLeft[s] = true
-			ptLeftMu.Unlock()
-		}
-	})
+	pdf.SetTextHook(ptTextHook)
 	code := m.Run()
 	if len(ptLeft) > 0 && os.Getenv("RADLOG_PT_OK") == "" {
 		var l []string
