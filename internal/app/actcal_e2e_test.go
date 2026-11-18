@@ -58,11 +58,11 @@ func TestActivityCalScreenE2E(t *testing.T) {
 		case "/__fundo":
 			feed("bg", 7200)
 		case "/__semsal", "/__sal":
-			// sem o sal visto (10 min) ou com o sal (2 h)
+			// sem o sal visto (20 min, actWeakSec) ou com o sal (2 h)
 			if r.URL.Path == "/__sal" {
 				feed("kcl", 7200)
 			} else {
-				feed("bg", 600)
+				feed("bg", actWeakSec)
 			}
 			// o que o rcActTick faria com o aparelho de verdade
 			if sp := a.rc.specTest(false); sp != nil {
@@ -98,8 +98,9 @@ func TestActivityCalScreenE2E(t *testing.T) {
 		if math.Abs(v.History[0].Expected/aK-1) > 1e-9 {
 			t.Fatalf("%s: Bq esperados %v, queria %v", where, v.History[0].Expected, aK)
 		}
-		// 1,5 contagem/s a mais em 1.460 keV com 250 g a 51%
-		if want := 1.5 / (aK * 0.1066); math.Abs(k.Eff/want-1) > 3*k.EffErr+0.02 {
+		// 1,5 contagem/s a mais em 1.460 keV com 250 g a 51%, só nas 2 h com o
+		// sal (os actWeakSec do __semsal entram na amostra sem o sal)
+		if want := 1.5 / (aK * 0.1066) * 7200 / (7200 + actWeakSec); math.Abs(k.Eff/want-1) > 3*k.EffErr+0.02 {
 			t.Fatalf("%s: eficiência %v, queria %v", where, k.Eff, want)
 		}
 	}
