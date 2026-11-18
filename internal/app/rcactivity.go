@@ -13,6 +13,7 @@ import (
 	"sync"
 	"time"
 
+	"radlog/internal/core/stats"
 	"radlog/internal/radiacode"
 )
 
@@ -27,15 +28,21 @@ import (
 // atual.json (a medição em andamento, para continuar se o app fechar).
 
 const (
-	actDir      = "atividade"
-	actCalFile  = "calibracao.json"
-	actBgFile   = "fundo.json"
-	actResFile  = "medidas.jsonl"
-	actCurFile  = "atual.json"
-	actTickUSB  = 5 * time.Second
-	actTickBLE  = 15 * time.Second
-	actMaxHist  = 20
-	actBgMaxAge = 30 * 24 * time.Hour
+	actDir         = "atividade"
+	actCalFile     = "calibracao.json"
+	actBgFile      = "fundo.json"
+	actResFile     = "medidas.jsonl"
+	actCurFile     = "atual.json"
+	actTickUSB     = 5 * time.Second
+	actWeakSec     = 300    // a partir de quando avisar que o pico não aparece
+	actEffMin      = 0.0003 // 0,03%: abaixo disso o RC102 não está vendo o sal
+	actWeakPeakSec = 1800   // e a partir de quando o pico sozinho decide
+	actWeakRise    = 1.05   // a contagem total com o sal tem que subir mais que isso
+	actBgHighRise  = 1.25   // fundo acima disso (× o normal da casa): o sal está perto
+	actCalMaxErr   = 0.20   // incerteza máxima da eficiência do KCl para virar calibração
+	actTickBLE     = 15 * time.Second
+	actMaxHist     = 20
+	actBgMaxAge    = 30 * 24 * time.Hour
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -143,6 +150,10 @@ type actState struct {
 	loaded bool
 	tickAt time.Time
 	saveAt time.Time
+	// contagem normal da casa (cache para o aviso do fundo alto)
+	homeCps    float64
+	homeAt     time.Time
+	homeBefore int64
 }
 
 // ActResult é uma medição terminada.
@@ -165,8 +176,9 @@ type ActResult struct {
 	Prev     float64      `json:"prev,omitempty"` // eficiência anterior em 1.460 keV (para comparar)
 	Loose    bool         `json:"loose,omitempty"`
 	SampleID string       `json:"sampleId,omitempty"`
-	Nucs     []string     `json:"nucs,omitempty"`    // o que foi procurado
-	SmpSecO  int          `json:"smpSecO,omitempty"` // tempo escolhido (para medir de novo)
+	Nucs     []string     `json:"nucs,omitempty"`     // o que foi procurado
+	SmpSecO  int          `json:"smpSecO,omitempty"`  // tempo escolhido (para medir de novo)
+	NotSaved bool         `json:"notSaved,omitempty"` // calibração incerta demais: não foi guardada
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -382,7 +394,12 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.Pct = o.Pct
 		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
-		if k != nil {
+		if k != nil && k.EffErr > actCalMaxErr {
+			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
+			// estragaria todos os Bq daqui para frente
+			k.T = res.T
+			res.KCl, res.NotSaved = k, true
+		} else if k != nil {
 			k.T = res.T
 			res.KCl = k
 			cal.KCl = k
@@ -519,6 +536,12 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	SmpCps    float64         `json:"smpCps,omitempty"`   // contagem total por segundo da amostra (calibração)
+	BgCps     float64         `json:"bgCps,omitempty"`    // e do fundo
+	KCLWeak   bool            `json:"kclWeak,omitempty"`  // o pico do K-40 não está aparecendo
+	HomeCps   float64         `json:"homeCps,omitempty"`  // contagem normal da casa (mediana dos 7 dias antes)
+	PhaseCps  float64         `json:"phaseCps,omitempty"` // contagem do RC102 nesta fase (mediana dos minutos)
+	BgHigh    bool            `json:"bgHigh,omitempty"`   // o fundo está bem acima do normal da casa
 	LiveTh    *ActCalTh       `json:"liveTh"`
 	Expected  float64         `json:"expected"`
 	Result    *ActResult      `json:"result"`
@@ -610,10 +633,20 @@ func (a *App) GetActivity() ActView {
 	if smp.Sec > 0 || bg.Sec > 0 {
 		v.Chart = actChart(smp, bg)
 	}
+	// 2.101.4: compara com a contagem normal da casa (minutos gravados pelo
+	// RC102), para avisar de um fundo medido com o sal perto
+	if (r.Phase == "fundo" || r.Phase == "amostra") && v.PhaseSec >= actWeakSec {
+		at := time.UnixMilli(r.PhaseAt)
+		v.HomeCps = a.actHomeCps(at)
+		v.PhaseCps = a.actPhaseCps(at.Add(time.Minute))
+		v.BgHigh = r.Phase == "fundo" && actBgHigh(v.PhaseCps, v.HomeCps)
+	}
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
 		switch o.Kind {
 		case "kcl":
 			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
+			v.SmpCps, v.BgCps = smp.cps(), bg.cps()
+			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
@@ -622,6 +655,63 @@ func (a *App) GetActivity() ActView {
 		v.Live = actAnalyze(smp, bg, o.Nuclides, v.Cal, o.MassG)
 	}
 	return v
+}
+
+// actKCLWeak avisa cedo (2.101.4) que o RC102 não está vendo o sal: depois
+// de 5 min, a contagem total quase não subiu em relação ao fundo (o KCl
+// encostado ou em volta do aparelho sobe bem mais de 5%); depois de 30 min,
+// também se nem a eficiência mais 2σ chega ao mínimo plausível em 1.460 keV.
+func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
+	if sec < actWeakSec {
+		return false
+	}
+	if bgCps > 0 && smpCps < bgCps*actWeakRise {
+		return true
+	}
+	// o pico sozinho só decide com mais tempo (aos 5 min o ruído ainda é grande)
+	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
+}
+
+// actBgHigh: o fundo está mais de 25% acima do normal da casa (o sal, ou
+// outra amostra, ficou perto do aparelho).
+func actBgHigh(phaseCps, homeCps float64) bool {
+	return homeCps > 0 && phaseCps > homeCps*actBgHighRise
+}
+
+// actHomeCps é a mediana da contagem por segundo do RC102 nos 7 dias antes de
+// before (sem minutos incompletos); 0 se tiver menos de 1 h gravada.
+func (a *App) actHomeCps(before time.Time) float64 {
+	st := &a.rc.act
+	st.mu.Lock()
+	if st.homeBefore == before.Unix() && time.Since(st.homeAt) < 10*time.Minute {
+		v := st.homeCps
+		st.mu.Unlock()
+		return v
+	}
+	st.mu.Unlock()
+	v := actMedianCps(a.rcRange(before.Add(-7*24*time.Hour), before), 60)
+	st.mu.Lock()
+	st.homeCps, st.homeAt, st.homeBefore = v, time.Now(), before.Unix()
+	st.mu.Unlock()
+	return v
+}
+
+// actPhaseCps é a mediana da contagem por segundo desde from.
+func (a *App) actPhaseCps(from time.Time) float64 {
+	return actMedianCps(a.rcRange(from, time.Now().Add(time.Minute)), 3)
+}
+
+func actMedianCps(pts []RcPoint, min int) float64 {
+	var xs []float64
+	for _, p := range pts {
+		if p.N >= 20 && p.CPS > 0 {
+			xs = append(xs, p.CPS)
+		}
+	}
+	if len(xs) < min {
+		return 0
+	}
+	return stats.Median(xs)
 }
 
 // CloseActivity fecha o resultado (volta para o formulário).

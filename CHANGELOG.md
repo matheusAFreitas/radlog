@@ -1,5 +1,38 @@
 # Versões
 
+## 2.101.4
+- Calibração do KCl: quando o pico do K-40 quase não aparece acima do fundo
+  (incerteza da eficiência acima de ±20%), a calibração não é mais guardada.
+  Antes, qualquer pico positivo virava calibração, e uma medida ruim (o sal
+  longe do cristal, por exemplo) deixava todos os Bq seguintes dezenas de
+  vezes altos demais. O resultado mostra a eficiência medida e avisa que não
+  foi guardada; a calibração anterior continua valendo.
+- Aviso cedo (pedido do ACE, depois de 3 h perdidas numa calibração sem
+  pico): durante o sal, a tela mostra a contagem total com o sal e a do fundo
+  (+X%). Se aos 5 min ela quase não subiu (menos de 5%), ou se aos 30 min o
+  pico do K-40 continua abaixo do mínimo plausível, aparece "O RC102 não está
+  vendo o sal", com o que conferir, em vez de deixar rodar 2 h.
+- Durante o fundo, a tela compara a contagem com o normal da casa (mediana
+  dos 7 dias antes) e avisa se ela está mais de 25% acima: o sal ficou perto
+  e a calibração sairia errada.
+
+**English**
+- KCl calibration: when the K-40 peak barely shows above the background
+  (efficiency uncertainty above ±20%), the calibration is no longer saved.
+  Before, any positive peak became the calibration, and a bad measurement
+  (the salt away from the crystal, for example) made every later Bq tens of
+  times too high. The result shows the measured efficiency and says it was
+  not saved; the previous calibration stays.
+- Early warning (ACE's request, after losing 3 h on a calibration with no
+  peak): during the salt phase, the screen shows the total count rate with
+  the salt and the background's (+X%). If after 5 min it barely rose (less
+  than 5%), or after 30 min the K-40 peak is still below the lowest plausible
+  value, "The RC102 isn't seeing the salt" appears with what to check,
+  instead of running for 2 h.
+- During the background, the screen compares the count rate with the home
+  normal (median of the previous 7 days) and warns if it is more than 25%
+  higher: the salt was nearby and the calibration would come out wrong.
+
 ## 2.101.3
 - Calibração do KCl: a massa digitada voltava para 500 g quando se clicava
   em "Sal light", "KCl puro" ou no cartão "1 · KCl" depois de digitar (pedido
