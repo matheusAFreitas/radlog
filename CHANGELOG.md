@@ -12,6 +12,9 @@
   (+X%). Se aos 5 min ela quase não subiu (menos de 5%), ou se aos 30 min o
   pico do K-40 continua abaixo do mínimo plausível, aparece "O RC102 não está
   vendo o sal", com o que conferir, em vez de deixar rodar 2 h.
+- Durante o fundo, a tela compara a contagem com o normal da casa (mediana
+  dos 7 dias antes) e avisa se ela está mais de 25% acima: o sal ficou perto
+  e a calibração sairia errada.
 
 **English**
 - KCl calibration: when the K-40 peak barely shows above the background
@@ -26,6 +29,9 @@
   than 5%), or after 30 min the K-40 peak is still below the lowest plausible
   value, "The RC102 isn't seeing the salt" appears with what to check,
   instead of running for 2 h.
+- During the background, the screen compares the count rate with the home
+  normal (median of the previous 7 days) and warns if it is more than 25%
+  higher: the salt was nearby and the calibration would come out wrong.
 
 ## 2.101.3
 - Calibração do KCl: a massa digitada voltava para 500 g quando se clicava

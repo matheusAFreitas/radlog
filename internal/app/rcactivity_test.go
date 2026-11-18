@@ -203,3 +203,17 @@ func TestActivityKCLWeakEarly(t *testing.T) {
 		}
 	}
 }
+
+// 2.101.4: fundo bem acima do normal da casa (o sal perto do aparelho) avisa.
+func TestActivityBgHigh(t *testing.T) {
+	if actBgHigh(10, 0) || actBgHigh(11, 10) || !actBgHigh(13, 10) {
+		t.Fatal("actBgHigh")
+	}
+	pts := []RcPoint{{CPS: 5, N: 60}, {CPS: 6, N: 60}, {CPS: 100, N: 5}, {CPS: 7, N: 60}}
+	if v := actMedianCps(pts, 3); v != 6 {
+		t.Fatalf("mediana %v", v)
+	}
+	if v := actMedianCps(pts, 4); v != 0 {
+		t.Fatalf("com poucos minutos: %v", v)
+	}
+}
