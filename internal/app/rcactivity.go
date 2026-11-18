@@ -62,6 +62,10 @@ type ActOpts struct {
 	// pedra solta (forma diferente do pote): massa opcional, resultado em Bq da peça
 	Loose    bool   `json:"loose,omitempty"`
 	SampleID string `json:"sampleId,omitempty"` // de "Suas amostras"
+	// 2.101.12: o nome foi escrito pela pessoa (a tela diz). Os nomes que o app
+	// dá (cartão pronto, amostra que vem com o app, calibração, "amostra")
+	// traduzem nos Eventos; o da pessoa fica como está.
+	NameOwn bool `json:"nameOwn,omitempty"`
 }
 
 // actSaved é um espectro somado guardado.
@@ -242,6 +246,15 @@ func (a *App) actSaveLocked() {
 	st.saveAt = time.Now()
 }
 
+// actEvName é o nome nos Eventos: o da pessoa fica como está (asIs); os que o
+// app dá traduzem (2.101.12).
+func actEvName(o ActOpts) string {
+	if o.NameOwn {
+		return asIs(o.Name)
+	}
+	return o.Name
+}
+
 func actValidate(o *ActOpts) error {
 	o.Name = strings.TrimSpace(o.Name)
 	o.Geometry = strings.TrimSpace(o.Geometry)
@@ -254,6 +267,7 @@ func actValidate(o *ActOpts) error {
 		if o.Name == "" {
 			o.Name = fmt.Sprintf("KCl (%g%%)", o.Pct)
 		}
+		o.NameOwn = false
 	case "torio":
 		if o.Pct <= 0 || o.Pct > 10 {
 			return errors.New("informe a % de ThO₂ do eletrodo (2 no WT20)")
@@ -262,6 +276,7 @@ func actValidate(o *ActOpts) error {
 		if o.Name == "" {
 			o.Name = fmt.Sprintf("eletrodo de tório (%g%% ThO₂)", o.Pct)
 		}
+		o.NameOwn = false
 	case "amostra":
 		var ok []string
 		for _, id := range o.Nuclides {
@@ -274,7 +289,7 @@ func actValidate(o *ActOpts) error {
 		}
 		o.Nuclides = ok
 		if o.Name == "" {
-			o.Name = "amostra"
+			o.Name, o.NameOwn = "amostra", false
 		}
 	default:
 		return errors.New("tipo de medição desconhecido")
@@ -324,7 +339,11 @@ func (a *App) StartActivity(o ActOpts) error {
 	a.actLoadLocked()
 	st.run = r
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", asIs(o.Name), o.MassG))
+	if o.Loose && o.MassG <= 0 { // pedra solta sem massa: não "0 g" (2.101.12)
+		a.logEvent(fmt.Sprintf("Atividade: começou (%s, pedra solta)", actEvName(o)))
+	} else {
+		a.logEvent(fmt.Sprintf("Atividade: começou (%s, %g g)", actEvName(o), o.MassG))
+	}
 	return nil
 }
 
@@ -376,7 +395,7 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 		r.Result = &res
 		r.Phase, r.PhaseAt = "pronto", now.UnixMilli()
 		a.actAppendResult(res)
-		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", asIs(r.Opts.Name)))
+		a.logEvent(fmt.Sprintf("Atividade: terminou (%s)", actEvName(r.Opts)))
 	}
 	a.actSaveLocked()
 }

@@ -114,7 +114,7 @@ function renderPlanned() {
     if (p.saiu) link("Não estou saindo", () => call(api.NotLeaving, p.id).then(refreshPlanned));
     link("editar", () => openPlanForm(p));
     link("cancelar", async () => {
-      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${asIs(p.nome)}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", danger: true }))) return;
+      if (!(await askConfirm({ title: "Cancelar a saída programada?", text: `${plNameTxt(p.nome)}, ${plDate(p.de)} por volta de ${hhmm(p.de)}.`, ok: "Cancelar a saída", danger: true }))) return;
       try { await api.DeletePlannedTrip(p.id); } catch (e) { toast(errMsg(e), true); }
       refreshPlanned();
     });
@@ -263,7 +263,7 @@ function plDoneText(box, d) {
   if (d.ans === "programada" && p && p.id) {
     const c = document.createElement("span");
     c.className = "chip off"; c.textContent = "saída marcada";
-    t.append(c, ` ${asIs(p.name)} · ${plDate(p.from)} · ${hhmm(p.from)}–${hhmm(p.to)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")}`);
+    t.append(c, ` ${pNameTxt(p.name)} · ${plDate(p.from)} · ${hhmm(p.from)}–${hhmm(p.to)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")}`);
     box.appendChild(t);
     if (typeof openTrip === "function" && isTripP(p)) {
       const v = document.createElement("button");

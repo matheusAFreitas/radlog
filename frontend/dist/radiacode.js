@@ -1980,11 +1980,13 @@
   }
   function actFormOpts() {
     const c = actChoice();
-    return {
+    const o = {
       kind: "amostra", name: actOrig($("rcActName").value.trim(), c.preset && c.name) || c.name || "", massG: actNum("rcActMass"), geometry: actOrig($("rcActGeom").value, act.v && act.v.cal && act.v.cal.geometry),
       newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: c.loose, sampleId: act.pick,
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
+    o.nameOwn = !!o.name && actNameOwn(o); // 2.101.12: nos Eventos, só o nome da pessoa fica como está
+    return o;
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
@@ -2011,6 +2013,7 @@
   // (p:…) e das amostras que vêm com o app (seed) traduz
   function actNameOwn(r) {
     if (r.kind !== "amostra") return false;
+    if ((r.name || "") === "amostra") return false; // 2.101.12: o nome que o app dá quando fica em branco
     const id = r.sampleId || "";
     if (id.startsWith("p:")) { const pk = ACT_PRESETS[id.slice(2)]; return !pk || !pk.name || pk.name !== r.name; } // "Outra coisa" tem nome vazio
     if (id.startsWith("s:")) {

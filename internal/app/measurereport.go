@@ -1007,13 +1007,16 @@ func (a *App) trCfgVal(s string) string {
 }
 
 // measNameTr: o nome que a pessoa deu fica como está (asIs); os nomes que o
-// app dá aos testes de Distância e Blindagem traduzem (o material, não).
+// app dá aos testes de Distância e Blindagem e à medição sem nome traduzem
+// (o material, não).
 func measNameTr(m SavedMeasure) string {
 	switch {
 	case m.Test == "distancia" && m.Name == "Teste de distância":
 		return m.Name
 	case m.Test == "blindagem" && strings.HasPrefix(m.Name, "Blindagem: "):
 		return "Blindagem: " + asIs(strings.TrimPrefix(m.Name, "Blindagem: "))
+	case m.Name == measNameDefault: // sem nome: o app chama de "objeto" (2.101.12)
+		return m.Name
 	}
 	return asIs(m.Name)
 }

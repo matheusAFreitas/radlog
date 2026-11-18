@@ -9,7 +9,7 @@
 const youOutP = (p) => (p.gmc || "comigo") === "comigo" || !!p.notHome;
 // saída = você saiu e o RC102 foi junto (é ele que mede a saída)
 const isTripP = (p) => (p.radiacode || "comigo") === "comigo" && youOutP(p);
-const tripDefaultName = (p) => !p.name || p.name === "Fora de casa" || p.name === "Saída programada" || p.name === whKind(whOf(p));
+const tripDefaultName = (p) => P_DEF_NAMES.has(p.name || "") || p.name === whKind(whOf(p)); // 2.101.12: todos os nomes padrão (fora.js)
 const tripDay = (t) => `${WEEKDAY[new Date(t).getDay()]} ${ddmm(t)}`;
 const tripTitle = (p) => (tripDefaultName(p) ? `Saída de ${tripDay(p.from)}` : p.name);
 const tripDose = (rc) => (rc.devOK ? rc.devDose : rc.dose);

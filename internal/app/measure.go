@@ -274,6 +274,10 @@ func (a *App) measureQuietLocked(dev string, now time.Time) bool {
 // measStopMinSec: antes disso o "parar agora" espera (poucas contagens).
 const measStopMinSec = 5
 
+// measNameDefault é o nome que o app dá à medição sem nome (traduz na tela e
+// no PDF; 2.101.12).
+const measNameDefault = "objeto"
+
 // measRcInvolved diz se o RC102 participa da medição (no objeto ou com a
 // pessoa): aí o app guarda o espectro de cada fase.
 func measRcInvolved(m *MeasureState) bool {
@@ -468,7 +472,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			m.Phase = "pronto"
 			name := m.Name
 			if name == "" {
-				name = "objeto"
+				name = measNameDefault
 			}
 			evName := "objeto"
 			if m.Name != "" { // 2.101.9: no evento, o nome da pessoa não se traduz
