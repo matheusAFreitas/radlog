@@ -205,7 +205,7 @@ func (s Settings) Check() []string {
 	}
 	if bad(s.Dose1) || bad(s.Dose2) || s.Dose1 < DoseMinUSv || s.Dose2 > DoseMaxUSv {
 		p = append(p, "os alarmes de dose precisam ficar entre 0,01 µSv e 10 Sv")
-	} else if s.Dose2 < s.Dose1 {
+	} else if s.Dose2 < s.Dose1 && s.Dose1 < DoseOffUSv { // 2.101.6: alarme 1 desligado não conta
 		p = append(p, "o alarme 2 de dose não pode ser menor que o alarme 1")
 	}
 	if bad(s.CountRate1) || bad(s.CountRate2) || s.CountRate1 < CountMinCPS || s.CountRate2 > CountMaxCPS {

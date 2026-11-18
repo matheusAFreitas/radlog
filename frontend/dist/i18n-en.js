@@ -2205,7 +2205,7 @@ const I18N_EN = {
 "Intercalibração com o RadiaCode": "Cross-calibration with the RC102",
 "Intercalibrar com o RC102": "Cross-calibrate with the RC102",
 "Intercalibrar com o RadiaCode": "Cross-calibrate with the RC102",
-"intercalibração com o RC102": "cross-calibration with the RC102",
+"intercalibração com o RC102": "intercalibration with the RC102",
 "intercalibração com o RadiaCode": "cross-calibration with the RC102",
 "fator novo": "new factor",
 "margem (95%)": "margin (95%)",
@@ -4828,7 +4828,26 @@ const I18N_EN = {
 "ajustes ainda não gravados no GMC-800 (use Gravar no GMC-800)": "settings not yet written to the GMC-800 (use Write to the GMC-800)",
 "ajustes ainda não gravados no RC102 (use Gravar no RC102)": "settings not yet written to the RC102 (use Write to the RC102)",
 "ajustes ainda não gravados no RadiaCode (use Gravar no RadiaCode)": "settings not yet written to the RC102 (use Write to the RC102)",
-"testes de objeto": "object tests"
+"testes de objeto": "object tests",
+"O RC102 já estava com esses ajustes: nada foi gravado.": "The RC102 already had these settings: nothing was written.",
+"O RadiaCode já estava com esses ajustes: nada foi gravado.": "The RC102 already had these settings: nothing was written.",
+"＋ Atualizar minha amostra": "＋ Update my sample",
+"As mudanças que você fez aqui e ainda não salvou serão descartadas.": "The changes you made here and haven't saved will be discarded.",
+"dentro do típico": "within typical",
+"não chega a ±10% (limite da calibração)": "doesn't reach ±10% (calibration limit)",
+"fator do app, intercalibração com o RC102": "app factor, intercalibration with the RC102",
+"fator do app, intercalibração com o RadiaCode": "app factor, intercalibration with the RC102",
+"fator do app, informado à mão": "app factor, entered by hand",
+"Os ajustes do GMC-800 ainda não foram gravados: use \"Gravar no GMC-800\" (GQ GMC-800 › No aparelho).": "The GMC-800 settings haven't been written yet: use \"Write to the GMC-800\" (GQ GMC-800 › On the device).",
+"Configuração gravada no GMC-800": "Settings written to the GMC-800",
+"Os ajustes do RC102 ainda não foram gravados: use \"Gravar no RC102\" (Radiacode 102 › No aparelho).": "The RC102 settings haven't been written yet: use \"Write to the RC102\" (Radiacode 102 › On the device).",
+"Os ajustes do RadiaCode ainda não foram gravados: use \"Gravar no RadiaCode\" (Radiacode 102 › No aparelho).": "The RC102 settings haven't been written yet: use \"Write to the RC102\" (Radiacode 102 › On the device).",
+"o objeto deu abaixo do fundo: o fundo provavelmente mudou desde que foi medido; meça o fundo de novo": "the object came out below the background: the background probably changed since it was measured; measure the background again",
+"O objeto deu abaixo do fundo: o fundo provavelmente mudou desde que foi medido; meça o fundo de novo.": "The object came out below the background: the background probably changed since it was measured; measure the background again.",
+"O objeto deu abaixo do fundo": "The object came out below the background",
+"abaixo do fundo": "below the background",
+", mas a incerteza é grande": ", but the uncertainty is large",
+"fator do app,": "app factor,"
 },
 "patterns": [
 [
@@ -8576,6 +8595,15 @@ const I18N_EN = {
 ]
 ],
 [
+"abaixo do típico, mas a incerteza é grande (",
+"^abaixo do típico, mas a incerteza é grande \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"below typical, but the uncertainty is large (${1} to ${2} Bq/kg)",
+[
+"abaixo do típico, mas a incerteza é grande (",
+" Bq/kg)"
+]
+],
+[
 "Aviso de atenção a partir de ",
 "^Aviso de atenção a partir de ((?:(?! · ).)+?) CPM \\(amarelo e 3 bipes\\)$",
 "Attention warning from ${1} CPM (yellow and 3 beeps)",
@@ -8663,6 +8691,15 @@ const I18N_EN = {
 "Teto: o fundo da casa no ano todo (",
 ") mais ",
 " mSv/ano."
+]
+],
+[
+"acima do típico, mas a incerteza é grande (",
+"^acima do típico, mas a incerteza é grande \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"above typical, but the uncertainty is large (${1} to ${2} Bq/kg)",
+[
+"acima do típico, mas a incerteza é grande (",
+" Bq/kg)"
 ]
 ],
 [
@@ -13141,6 +13178,15 @@ const I18N_EN = {
 ]
 ],
 [
+"dentro do típico (",
+"^dentro do típico \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?) Bq/kg\\)$",
+"within typical (${1} to ${2} Bq/kg)",
+[
+"dentro do típico (",
+" Bq/kg)"
+]
+],
+[
 "Atualizar por aqui não dá: ",
 "^Atualizar por aqui não dá: ((?:(?! · ).)+?)\\.$",
 "Can't update from here: ${1}.",
@@ -16156,6 +16202,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): deu abaixo do fundo$",
+"${1}: came out below the background",
+[
+": deu abaixo do fundo"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -16944,6 +16998,14 @@ const I18N_EN = {
 [
 "desde ",
 ") · pico "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)σ abaixo do fundo\\.$",
+"${1}σ below the background.",
+[
+"σ abaixo do fundo."
 ]
 ],
 [

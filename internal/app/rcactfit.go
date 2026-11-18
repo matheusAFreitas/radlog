@@ -406,7 +406,7 @@ type ActNucRes struct {
 	ErrKg    float64      `json:"errKg"`
 	MDAKg    float64      `json:"mdaKg"`
 	Lines    []ActLineRes `json:"lines"`
-	NeedSec  float64      `json:"needSec"` // tempo para ±10% (contagem)
+	NeedSec  float64      `json:"needSec"` // tempo para ±10% (contagem e calibração; -1 = não chega)
 }
 
 // actAnalyze mede os radionuclídeos pedidos.
@@ -451,7 +451,13 @@ func actAnalyze(smp, bg actSpec, ids []string, cal ActCal, massG float64) []ActN
 			res.Detected = res.Bq > 1.645*res.StatErr
 			res.MDA = 4.65 * res.StatErr
 			if res.Bq > 0 {
-				res.NeedSec = smp.Sec * math.Pow(res.StatErr/res.Bq/0.10, 2)
+				// 2.101.6: o mesmo ± da tela (contagem e calibração); a parte da
+				// calibração não cai com o tempo: acima de 10% nunca chega (-1)
+				if sr := res.StatErr / res.Bq; rel >= 0.10 {
+					res.NeedSec = -1
+				} else {
+					res.NeedSec = smp.Sec * sr * sr / (0.01 - rel*rel)
+				}
 			}
 		}
 		if massG > 0 {

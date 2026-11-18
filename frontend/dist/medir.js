@@ -748,6 +748,7 @@ function measBannerTitle(st, r) {
   if (r.doseUp) return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)}: a contagem não mudou, mas a dose subiu` : "A contagem não mudou, mas a dose subiu";
   if (r.level === "sim") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} emite radiação acima do fundo` : "O objeto emite radiação acima do fundo";
   if (r.level === "talvez") return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)} talvez emita um pouco acima do fundo` : "O objeto talvez emita um pouco acima do fundo";
+  if (r.belowBg) return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)}: deu abaixo do fundo` : "O objeto deu abaixo do fundo";
   return nm ? `${nm.charAt(0).toUpperCase() + nm.slice(1)}: nenhuma diferença que dê para ver` : "Nenhuma diferença do fundo que dê para ver";
 }
 
@@ -760,20 +761,20 @@ function renderMeasureResult(st) {
   // faixa de cima
   const ban = $("mBanner");
   ban.className = "m-banner " + mLvCls(r, st.obj.cpm * ok);
-  ban.querySelector(".m-banner-ico").textContent = r.level === "nada" && !r.doseUp ? "✓" : "!";
+  ban.querySelector(".m-banner-ico").textContent = r.level === "nada" && !r.doseUp && !r.belowBg ? "✓" : "!";
   $("mVerdict").textContent = measBannerTitle(st, r);
   const objU = st.obj.cpm * ok;
   // duas frases em dois pedaços (cada um é traduzido inteiro)
   const bt = $("mBannerText"), s1 = document.createElement("span"), s2 = document.createElement("span");
   s1.textContent = r.doseUp ? `O RC102 contou o mesmo que no fundo (${fmt(r.sigma, 1)}σ), mas a taxa de dose subiu ${sgnUS(r.netUSv)} (${fmt(r.doseSigma, 0)}σ).` : r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `${mSureTxt(r.sigma)} ${mLevelTxt(objU)}`;
-  s2.textContent = r.doseUp ? doseUpExplain(st.spectrum) : measureExplain(r, st.obj, auto, ok);
+  s2.textContent = r.doseUp ? doseUpExplain(st.spectrum) : r.belowBg ? "" : measureExplain(r, st.obj, auto, ok);
   bt.replaceChildren(s1, " ", s2);
   // quatro números
   const t = $("mTilesNew");
   t.textContent = "";
   sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
   if (r.doseUp) sumTile(t, "certeza", mSure(r.doseSigma), `${fmt(r.doseSigma, 0)}σ na dose · ${fmt(r.sigma, 1)}σ na contagem`);
-  else sumTile(t, "certeza", mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
+  else sumTile(t, "certeza", r.belowBg ? "abaixo do fundo" : mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
   glMark(t.lastElementChild.children[2], "sigma");
   sumTile(t, "taxa extra", sgnUS(r.netUSv), `± ${netErr(r, ok)}` + (st.distance ? ` · ${st.distance === "encostado" ? "encostado" : "a " + st.distance}` : ""), r.level === "sim" ? "obj" : "");
   const sf = d.safe || {};
@@ -1380,7 +1381,7 @@ function renderMeasureDetail() {
   const objU0 = m.obj.cpm * phK(m.obj, rc ? "radiacode" : "gmc");
   v.className = "m-verdict " + mLvCls(r, objU0);
   v.querySelector("strong").textContent = r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + ".";
-  v.querySelector("span").textContent = r.level === "nada" ? mSureTxt(r.sigma) : `${mSureTxt(r.sigma)} ${mLevelTxt(objU0)}`;
+  v.querySelector("span").textContent = r.belowBg ? `${fmt(r.sigma, 1)}σ abaixo do fundo.` : r.level === "nada" ? mSureTxt(r.sigma) : `${mSureTxt(r.sigma)} ${mLevelTxt(objU0)}`;
   const t = $("mdTiles");
   t.textContent = "";
   const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);

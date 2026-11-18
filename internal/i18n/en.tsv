@@ -6311,3 +6311,25 @@ média {0} · mín {1} · máx {2} {3}	average {0} · min {1} · max {2} {3}
 testes de objeto	object tests
 {0} acima do fundo	{0} above background
 · {0} · um ponto a cada {1}	· {0} · one point every {1}
+O RC102 já estava com esses ajustes: nada foi gravado.	The RC102 already had these settings: nothing was written.
+＋ Atualizar minha amostra	＋ Update my sample
+As mudanças que você fez aqui e ainda não salvou serão descartadas.	The changes you made here and haven't saved will be discarded.
+dentro do típico	within typical
+dentro do típico ({0} a {1} Bq/kg)	within typical ({0} to {1} Bq/kg)
+abaixo do típico, mas a incerteza é grande ({0} a {1} Bq/kg)	below typical, but the uncertainty is large ({0} to {1} Bq/kg)
+acima do típico, mas a incerteza é grande ({0} a {1} Bq/kg)	above typical, but the uncertainty is large ({0} to {1} Bq/kg)
+não chega a ±10% (limite da calibração)	doesn't reach ±10% (calibration limit)
+fator do app, intercalibração com o RC102	app factor, intercalibration with the RC102
+fator do app, informado à mão	app factor, entered by hand
+intercalibração com o RC102	intercalibration with the RC102
+Os ajustes do GMC-800 ainda não foram gravados: use "Gravar no GMC-800" (GQ GMC-800 › No aparelho).	The GMC-800 settings haven't been written yet: use "Write to the GMC-800" (GQ GMC-800 › On the device).
+Configuração gravada no GMC-800	Settings written to the GMC-800
+Os ajustes do RC102 ainda não foram gravados: use "Gravar no RC102" (Radiacode 102 › No aparelho).	The RC102 settings haven't been written yet: use "Write to the RC102" (Radiacode 102 › On the device).
+o objeto deu abaixo do fundo: o fundo provavelmente mudou desde que foi medido; meça o fundo de novo	the object came out below the background: the background probably changed since it was measured; measure the background again
+O objeto deu abaixo do fundo: o fundo provavelmente mudou desde que foi medido; meça o fundo de novo.	The object came out below the background: the background probably changed since it was measured; measure the background again.
+{0}: deu abaixo do fundo	{0}: came out below the background
+O objeto deu abaixo do fundo	The object came out below the background
+{0}σ abaixo do fundo.	{0}σ below the background.
+abaixo do fundo	below the background
+, mas a incerteza é grande	, but the uncertainty is large
+fator do app,	app factor,

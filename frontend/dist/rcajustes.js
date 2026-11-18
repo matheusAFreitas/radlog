@@ -155,7 +155,7 @@ function rcCfgCheck(s) {
   if (bad(s.doseRate1) || bad(s.doseRate2) || s.doseRate1 < 0.01 || s.doseRate2 > 1000) return "Os alarmes de taxa de dose precisam ficar entre 0,01 e 1.000 µSv/h.";
   if (s.doseRate2 <= s.doseRate1) return "O alarme 2 de taxa precisa ser maior que o alarme 1.";
   if (bad(s.dose1) || bad(s.dose2) || s.dose1 < 0.01) return "Preencha os alarmes de dose (a partir de 0,01 µSv) ou marque \"desligado\".";
-  if (s.dose2 < s.dose1) return "O alarme 2 de dose não pode ser menor que o alarme 1.";
+  if (s.dose2 < s.dose1 && s.dose1 < 9e6) return "O alarme 2 de dose não pode ser menor que o alarme 1.";
   if (bad(s.countRate1) || bad(s.countRate2) || s.countRate1 < 0.1 || s.countRate2 > 50000) return "Os alarmes de contagem precisam ficar entre 0,1 e 50.000 cps.";
   if (s.countRate2 <= s.countRate1) return "O alarme 2 de contagem precisa ser maior que o alarme 1.";
   return "";
@@ -194,7 +194,8 @@ async function rcCfgRun(label, fn, okMsg) {
   try {
     const c = await fn();
     if (c) fillRcCfg(c);
-    if (okMsg) toast(okMsg);
+    if (c && c.unchanged) toast("O RC102 já estava com esses ajustes: nada foi gravado.");
+    else if (okMsg) toast(okMsg);
   } catch (e) {
     toast(errMsg(e), true);
     try { fillRcCfg(await api.GetRcSettings()); } catch (e2) { setRcCfgEnabled(!!rcCfg); }

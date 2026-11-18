@@ -78,6 +78,8 @@ type RcSettings struct {
 	radiacode.Settings
 	CanUndo bool   `json:"canUndo"`
 	UndoAt  string `json:"undoAt"` // quando foi a última gravação (nome da cópia)
+	// 2.101.6: o aparelho já estava assim; nada foi gravado
+	Unchanged bool `json:"unchanged,omitempty"`
 }
 
 func (a *App) rcSettingsOut(s radiacode.Settings) RcSettings {
@@ -111,26 +113,36 @@ func (a *App) GetRcSettings() (RcSettings, error) {
 
 // rcApply grava next no aparelho (cópia antes, relê, registra).
 func (a *App) rcApply(next radiacode.Settings, what string) (RcSettings, error) {
+	out, _, err := a.rcApplyCopy(next, what)
+	return out, err
+}
+
+// rcApplyCopy é o rcApply que devolve também a cópia "antes" que criou ("" =
+// não criou: nada mudou ou deu erro antes).
+func (a *App) rcApplyCopy(next radiacode.Settings, what string) (RcSettings, string, error) {
 	dev := a.rcDevice()
 	if dev == nil {
-		return RcSettings{}, errRcOff
+		return RcSettings{}, "", errRcOff
 	}
 	if !a.rcCfgBusy.CompareAndSwap(false, true) {
-		return RcSettings{}, errors.New("já estou gravando no RC102")
+		return RcSettings{}, "", errors.New("já estou gravando no RC102")
 	}
 	defer a.rcCfgBusy.Store(false)
 	cur, err := dev.ReadSettings()
 	if err != nil {
-		return RcSettings{}, err
+		return RcSettings{}, "", err
 	}
 	if p := next.Check(); len(p) > 0 {
-		return a.rcSettingsOut(cur), fmt.Errorf("não gravei: %s", strings.Join(p, "; "))
+		return a.rcSettingsOut(cur), "", fmt.Errorf("não gravei: %s", strings.Join(p, "; "))
 	}
 	if radiacode.DescribeChanges(cur, next) == "nada mudou" {
-		return a.rcSettingsOut(cur), nil
+		out := a.rcSettingsOut(cur)
+		out.Unchanged = true
+		return out, "", nil
 	}
-	if _, err := a.rcCfgBackup(cur, dev, "antes"); err != nil {
-		return a.rcSettingsOut(cur), fmt.Errorf("não consegui salvar a cópia de segurança, então não gravei nada: %w", err)
+	bk, err := a.rcCfgBackup(cur, dev, "antes")
+	if err != nil {
+		return a.rcSettingsOut(cur), "", fmt.Errorf("não consegui salvar a cópia de segurança, então não gravei nada: %w", err)
 	}
 	got, n, werr := dev.WriteSettings(cur, next)
 	desc := radiacode.DescribeChanges(cur, got)
@@ -144,12 +156,12 @@ func (a *App) rcApply(next radiacode.Settings, what string) (RcSettings, error) 
 	}
 	if werr != nil {
 		a.logEvent("Erro ao gravar os ajustes do RC102: " + werr.Error())
-		return a.rcSettingsOut(got), fmt.Errorf("a gravação parou no %dº ajuste (%s); o que já foi gravado ficou, e a cópia de antes está salva", n+1, werr.Error())
+		return a.rcSettingsOut(got), bk, fmt.Errorf("a gravação parou no %dº ajuste (%s); o que já foi gravado ficou, e a cópia de antes está salva", n+1, werr.Error())
 	}
 	if left := radiacode.DescribeChanges(got, next); left != "nada mudou" {
-		return a.rcSettingsOut(got), fmt.Errorf("o aparelho aceitou, mas leu de volta diferente: %s", left)
+		return a.rcSettingsOut(got), bk, fmt.Errorf("o aparelho aceitou, mas leu de volta diferente: %s", left)
 	}
-	return a.rcSettingsOut(got), nil
+	return a.rcSettingsOut(got), bk, nil
 }
 
 // SetRcSettings grava os ajustes no Radiacode (só o que mudou).
@@ -163,15 +175,18 @@ func (a *App) UndoRcSettings() (RcSettings, error) {
 	if err != nil {
 		return RcSettings{}, err
 	}
-	out, err := a.rcApply(prev, " (desfeito)")
+	out, bk, err := a.rcApplyCopy(prev, " (desfeito)")
 	if err == nil {
 		// a cópia usada vira "desfeita" para o próximo desfazer pegar a anterior
 		_ = os.Rename(p, p[:len(p)-len("-antes.json")]+"-desfeita.json")
-		// e a cópia que o rcApply acabou de criar não é uma gravação nova
-		if _, q, e := a.rcCfgLastBefore(); e == nil && q != p {
-			_ = os.Rename(q, q[:len(q)-len("-antes.json")]+"-desfazer.json")
+		// e a cópia que o rcApply acabou de criar (se criou: com o aparelho já
+		// igual à cópia não cria nenhuma) não é uma gravação nova
+		if strings.HasSuffix(bk, "-antes.json") {
+			_ = os.Rename(bk, bk[:len(bk)-len("-antes.json")]+"-desfazer.json")
 		}
+		un := out.Unchanged
 		out = a.rcSettingsOut(out.Settings)
+		out.Unchanged = un
 	}
 	return out, err
 }
