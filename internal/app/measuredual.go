@@ -161,6 +161,7 @@ func (a *App) endSidePhaseLocked(m *MeasureState, phase string, start, end int64
 		r := compareMeasure(*s.Bg, ph, a.convCalLocked().USv)
 		if r.Level != "sim" && !r.DoseUp { // 2.101.8: com a dose que subiu, sem limite pela contagem
 			r.Limit = math.Max(r.NetCPM, 0) + 2*r.NetErr
+			r.LimitUSv = limitUSv(r, *s.Bg)
 		}
 		s.Result, s.Live = &r, nil
 	case phase == "objeto" && s.Role == "voce":

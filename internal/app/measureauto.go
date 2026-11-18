@@ -24,6 +24,7 @@ import (
 //     com 3σ, olhar tantas vezes daria alarme falso em ~6% das medições);
 //   - nada: o limite superior (máx(líquido, 0) + 2σ) ficou abaixo do que
 //     conta como "tem algo" (um % do fundo);
+//   - dose (RC102, 2.101.14): a dose subiu 4σ sem a contagem subir;
 //   - limite: chegou ao tempo máximo sem decidir.
 
 const (
@@ -31,7 +32,11 @@ const (
 	homeBgMinMins = 30 // minutos válidos para confiar no fundo da casa
 	autoMinSec    = 20 // antes disso não decide (poucas contagens)
 	autoDetectSig = 4.0
-	autoBgSec     = 300 // fase do fundo medida na hora, no automático
+	// 2.101.14: a dose do RC102 só decide com 10 blocos de 30 s (5 min; com
+	// 4 blocos o ± da dose tem poucos graus de liberdade e dava "a dose
+	// subiu" à toa, conferência do QA)
+	autoDoseMinSec = measBlkSec * 10
+	autoBgSec      = 300 // fase do fundo medida na hora, no automático
 )
 
 // MeasureOpts são as escolhas da tela antes de começar.
@@ -282,7 +287,10 @@ func (a *App) StartMeasure(o MeasureOpts) (MeasureState, error) {
 }
 
 // autoDecide olha o resultado parcial da fase do objeto e diz se já dá para
-// parar ("achou", "nada"), ou "" para continuar.
+// parar ("achou", "dose", "nada"), ou "" para continuar.
+// 2.101.14 (item 17): no RC102 (fundo com ± da dose) a dose também decide:
+// "dose" quando ela sobe autoDetectSig, e "nada" só quando a dose também fica
+// abaixo do limiar; as duas só depois de measBlkMin blocos de dose.
 func autoDecide(r MeasureResult, bg MeasurePhase, elapsed int, pct float64) string {
 	if elapsed < autoMinSec {
 		return ""
@@ -290,10 +298,49 @@ func autoDecide(r MeasureResult, bg MeasurePhase, elapsed int, pct float64) stri
 	if r.Sigma >= autoDetectSig {
 		return "achou"
 	}
+	rc := bg.ErrUSv > 0
+	doseOK := rc && r.NetErrUSv > 0 && elapsed >= autoDoseMinSec
+	if doseOK && r.DoseSigma >= autoDetectSig {
+		return "dose"
+	}
+	// entre 3σ e 4σ (contagem ou, no RC102, dose) ainda não dá para dizer
+	// "nada": continua até passar de 4σ ou voltar para baixo de 3σ
+	if r.Sigma >= 3 || (rc && r.DoseSigma >= 3) {
+		return ""
+	}
 	if math.Max(r.NetCPM, 0)+2*r.NetErr < autoThreshold(bg, pct) {
-		return "nada"
+		if !rc {
+			return "nada"
+		}
+		if doseOK && math.Max(r.NetUSv, 0)+2*r.NetErrUSv < autoThresholdUSv(bg, pct) {
+			return "nada"
+		}
 	}
 	return ""
+}
+
+// autoThresholdUSv é o limiar em µSv/h: no RC102, % da dose do fundo; no
+// GMC-800, o limiar em CPM pelo fator do fundo.
+func autoThresholdUSv(bg MeasurePhase, pct float64) float64 {
+	if bg.ErrUSv > 0 && bg.USv > 0 {
+		return bg.USv * pct / 100
+	}
+	if bg.CPM > 0 {
+		return autoThreshold(bg, pct) * bg.USv / bg.CPM
+	}
+	return 0
+}
+
+// limitUSv é o "menos que +X" em µSv/h: no RC102 pela dose (líquido + 2σ da
+// dose); no GMC-800, o limite em CPM pelo fator do fundo.
+func limitUSv(r MeasureResult, bg MeasurePhase) float64 {
+	if r.NetErrUSv > 0 {
+		return math.Max(r.NetUSv, 0) + 2*r.NetErrUSv
+	}
+	if bg.CPM > 0 {
+		return r.Limit * bg.USv / bg.CPM
+	}
+	return 0
 }
 
 // autoThreshold é o que conta como "tem algo", em CPM acima do fundo.
@@ -321,6 +368,9 @@ func autoEta(bg, obj MeasurePhase, elapsed, maxSec int, pct float64) int {
 		}
 	}
 	need = math.Max(need, autoMinSec)
+	if bg.ErrUSv > 0 { // RC102: a dose só decide depois dos blocos
+		need = math.Max(need, autoDoseMinSec)
+	}
 	if math.IsInf(need, 1) || need > float64(maxSec) {
 		return -1
 	}
@@ -331,16 +381,20 @@ func autoEta(bg, obj MeasurePhase, elapsed, maxSec int, pct float64) int {
 // que a medição parou.
 func finishResult(r *MeasureResult, stop string, bg MeasurePhase, pct float64, auto bool) {
 	r.Stop = stop
-	// 2.101.6: com a dose subindo, "menos que +X" pela contagem não vale (o
-	// automático que parou em "nada" é o item que espera o ACE)
-	if r.Level != "sim" && !(r.DoseUp && stop != "nada") {
+	// 2.101.14 (item 17): com a dose subindo não há "menos que +X" e o
+	// veredito "a dose subiu" nunca é trocado por "igual ao fundo"
+	if (r.Level != "sim" && !r.DoseUp) || (stop == "nada" && !r.DoseUp) {
 		r.Limit = math.Max(r.NetCPM, 0) + 2*r.NetErr
+		r.LimitUSv = limitUSv(*r, bg)
 	}
 	switch stop {
 	case "nada":
+		if r.DoseUp {
+			break
+		}
 		r.Level = "nada"
 		if bg.CPM > 0 && bg.USv > 0 { // em µSv/h, como o resto da tela
-			r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s µSv/h", usvTxt(r.Limit*bg.USv/bg.CPM))
+			r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s µSv/h", usvTxt(r.LimitUSv))
 		} else {
 			r.Verdict = fmt.Sprintf("igual ao fundo: se o objeto emite algo, é menos que +%s CPM", br(r.Limit, false))
 		}
@@ -352,5 +406,6 @@ func finishResult(r *MeasureResult, stop string, bg MeasurePhase, pct float64, a
 	if auto {
 		r.Pct = pct
 		r.Threshold = autoThreshold(bg, pct)
+		r.ThresholdUSv = autoThresholdUSv(bg, pct)
 	}
 }

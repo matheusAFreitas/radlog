@@ -244,6 +244,10 @@ const phK = (ph, dev) => (ph && ph.cpm > 0 && ph.usv > 0 ? ph.usv / ph.cpm : dev
 const liveObjK = (st) => (isRcMeasure(st) && st.phase === "objeto" && st.phUsv > 0 && st.counts > 0 && st.elapsed > 0 ? st.phUsv / ((st.counts * 60) / st.elapsed) : 0);
 const mK = (m) => phK(m && (m.bg || m.obj), isRcMeasure(m) ? "radiacode" : "gmc");
 const uS = (cpm, k) => usvVal(cpm * k); // CPM → "0,146 µSv/h"
+// 2.101.14 (item 17): teto e limiar já em µSv/h (RC102 pela dose); medições
+// salvas antes convertem o CPM pelo fator de antes
+const limUS = (r, k) => (r.limitUSv > 0 ? usvVal(r.limitUSv) : uS(r.limit, k));
+const thrUS = (r, k) => (r.thresholdUSv > 0 ? usvVal(r.thresholdUSv) : uS(r.threshold, k));
 // 2.100.2: ± do µSv/h; no RC102 vem do espalhamento da dose (errUSv), não do √N
 // 2.101.6: ± pequeno não vira "± 0,000": pelo menos um algarismo significativo
 const errDig = (v) => (v > 0 ? Math.max(usvDigits(v), Math.min(6, Math.ceil(-Math.log10(v)))) : usvDigits(v));
@@ -1128,12 +1132,15 @@ function measureExplain(r, obj, auto, k) {
   const t = obj ? fmtMin(obj.seconds) : "";
   k = k || 1;
   if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
-  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${uS(r.threshold, k)}). Para procurar algo mais fraco, escolha “+10% do fundo”.`;
-  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" ? "" : ` Se o objeto emite algo, é menos que +${uS(r.limit, k)}; para ir além, aumente o tempo máximo.`);
+  if (r.stop === "dose") return r.doseUp
+    ? `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`
+    : `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
+  if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${thrUS(r, k)}).` + (r.pct > 10 ? " Para procurar algo mais fraco, escolha “+10% do fundo”." : "");
+  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" || r.doseUp || !(r.limit || r.limitUSv) ? "" : ` Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`);
   return {
     sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.",
     talvez: "A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.",
-    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit ? ` (menos que +${uS(r.limit, k)})` : "") + ". Use o modo automático para mais certeza.",
+    nada: "Se o objeto emitir alguma coisa, está abaixo do que dá para ver nesse tempo" + (r.limit || r.limitUSv ? ` (menos que +${limUS(r, k)})` : "") + ". Use o modo automático para mais certeza.",
   }[r.level];
 }
 
@@ -1403,7 +1410,7 @@ function renderMeasureDetail() {
   $("mdNote").textContent = m.note ? asIs(m.note) : "Não anotada. Use Editar para guardar o lado encostado no tubo, a embalagem etc.";
   $("mdNote").classList.toggle("muted", !m.note);
   let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
-  if (r.limit) lim += ` Se o objeto emite algo, é menos que +${uS(r.limit, ok)}.`;
+  if (r.limit || r.limitUSv) lim += ` Se o objeto emite algo, é menos que +${limUS(r, ok)}.`;
   if (r.doseUp && r.netUSv > 0 && r.netErrUSv > 0) lim += ` Precisão do líquido (pela dose): ±${fmt((r.netErrUSv / r.netUSv) * 100, 0)}%.`;
   else if (r.netCPM > 0) lim += home
     ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`

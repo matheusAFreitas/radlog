@@ -406,14 +406,16 @@ func renderMeasurePDF(m SavedMeasure, device, calTxt, deadTime string, extraRows
 	rows := [][2]string{
 		{"Limite de detecção", fmt.Sprintf("%s µSv/h acima do fundo (Currie, 95%%, com %d s de fundo e %d s com o objeto). Abaixo disso, um objeto fraco pode passar despercebido.", usvTxt(ld*ok), m.Bg.Seconds, m.Obj.Seconds)},
 	}
-	if r.Limit > 0 {
-		rows = append(rows, [2]string{"Limite superior", fmt.Sprintf("se o objeto emite algo, é menos que +%s µSv/h acima do fundo (líquido + 2σ, ~97,5%%)", usvTxt(r.Limit*ok))})
+	if lim := measLimitUSv(r, ok); lim > 0 {
+		rows = append(rows, [2]string{"Limite superior", fmt.Sprintf("se o objeto emite algo, é menos que +%s µSv/h acima do fundo (líquido + 2σ, ~97,5%%)", usvTxt(lim))})
 	}
 	switch r.Stop {
 	case "achou":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando o líquido passou de 4σ (%s s com o objeto)", fmt.Sprint(m.Obj.Seconds))})
+	case "dose":
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando a dose passou de 4σ (%s s com o objeto)", fmt.Sprint(m.Obj.Seconds))})
 	case "nada":
-		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando deu para garantir que o objeto sobe menos que %s%% do fundo (+%s µSv/h)", fmtBR(r.Pct, 0), usvTxt(r.Threshold*ok))})
+		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: parou quando deu para garantir que o objeto sobe menos que %s%% do fundo (+%s µSv/h)", fmtBR(r.Pct, 0), usvTxt(measThresholdUSv(r, ok)))})
 	case "limite":
 		rows = append(rows, [2]string{"Como parou", fmt.Sprintf("automático: chegou ao tempo máximo (%s) sem decidir", fmtDurSec(float64(m.Obj.Seconds)))})
 	}
@@ -1019,4 +1021,20 @@ func measNameTr(m SavedMeasure) string {
 		return m.Name
 	}
 	return asIs(m.Name)
+}
+
+// measLimitUSv e measThresholdUSv: o teto e o limiar já em µSv/h (2.101.14);
+// medições salvas antes disso convertem o CPM pelo fator do objeto.
+func measLimitUSv(r MeasureResult, k float64) float64 {
+	if r.LimitUSv > 0 {
+		return r.LimitUSv
+	}
+	return r.Limit * k
+}
+
+func measThresholdUSv(r MeasureResult, k float64) float64 {
+	if r.ThresholdUSv > 0 {
+		return r.ThresholdUSv
+	}
+	return r.Threshold * k
 }

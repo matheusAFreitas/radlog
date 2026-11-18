@@ -1097,6 +1097,9 @@ dialog.logs-dlg { width: min(1180px, calc(100vw - 32px)); height: min(860px, cal
 .upd-bar i { display: block; height: 100%; width: 0; background: var(--accent); transition: width .3s; }
 .upd-row { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
 .warn-text { color: var(--warn); }
+/* 2.101.14 (item 68): no pote | pedra solta, com a frase ao lado */
+.rc-act-loose { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-3); }
+.rc-act-loose .seg { flex: none; }
 /* 2.101.13 (item 21): número fora da faixa nas Configurações, antes de salvar */
 input.out-range { border-color: var(--warn); box-shadow: 0 0 0 1px var(--warn); }
 .range-hint { display: block; margin-top: 4px; }
