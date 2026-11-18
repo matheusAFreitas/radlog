@@ -385,7 +385,7 @@ function renderPeriods() {
     t.className = "t";
     const b = document.createElement("b");
     b.textContent = whWord(p.name);
-    if (p.name !== whKind(whOf(p)) && !WH_REASONS.includes(p.name)) b.dataset.noTr = "";
+    if (!P_DEF_NAMES.has(p.name || "") && p.name !== whKind(whOf(p)) && !WH_REASONS.includes(p.name)) b.dataset.noTr = ""; // 2.101.12: nome padrão traduz
     t.appendChild(b);
     if (p.open) { const c = document.createElement("span"); c.className = "chip off"; c.textContent = "valendo agora"; t.append(" ", c); }
     const w = whOf(p);
@@ -426,7 +426,7 @@ function renderPeriods() {
     btn("Ver no gráfico", "", () => showRange(p.from, pTo(p)));
     // o resto fica no "⋯" (2.85)
     const more = moreMenu("Mais ações deste trecho", [
-      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + asIs(p.name), more.querySelector("summary"))],
+      ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + pNameTxt(p.name), more.querySelector("summary"))],
       [p.open ? "Renomear" : "Editar", "", () => { periodEditing = periodEditing === p.id ? 0 : p.id; periodConfirm = 0; renderPeriods(); }],
       ["Apagar…", "danger", () => { periodConfirm = p.id; periodEditing = 0; renderPeriods(); }],
     ]);

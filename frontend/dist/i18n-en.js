@@ -12023,6 +12023,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Atividade: começou (",
+"^Atividade: começou \\(((?:(?! · ).)+?), pedra solta\\)$",
+"Activity: started (${1}, loose stone)",
+[
+"Atividade: começou (",
+", pedra solta)"
+]
+],
+[
 "(travado: valor ",
 "^\\(travado: valor ((?:(?! · ).)+?) não reconhecido\\)$",
 "(locked: value ${1} not recognized)",

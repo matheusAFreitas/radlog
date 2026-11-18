@@ -1559,6 +1559,7 @@ document.addEventListener("click", (e) => {
 // e Blindagem é do app e traduz (o material, não)
 function mNameTxt(m) {
   const n = m.name || "";
+  if (n === "objeto") return n; // 2.101.12: sem nome, o app chama de "objeto" (traduz)
   if (m.test === "distancia" && n === "Teste de distância") return n;
   if (m.test === "blindagem" && n.startsWith("Blindagem: ")) return "Blindagem: " + asIs(n.slice(11));
   return asIs(n);
@@ -1566,7 +1567,7 @@ function mNameTxt(m) {
 function mNameFill(el, m) {
   const n = m.name || "";
   delete el.dataset.noTr;
-  if (m.test === "distancia" && n === "Teste de distância") el.textContent = n;
+  if (n === "objeto" || (m.test === "distancia" && n === "Teste de distância")) el.textContent = n;
   else if (m.test === "blindagem" && n.startsWith("Blindagem: ")) el.textContent = "Blindagem: " + asIs(n.slice(11));
   else { el.textContent = n; el.dataset.noTr = ""; }
 }

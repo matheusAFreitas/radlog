@@ -1,5 +1,23 @@
 # Versões
 
+## 2.101.12
+Itens 130 e 131 da varredura do QA:
+- App em inglês: os nomes que o próprio app dá saem traduzidos ("amostra"
+  da Atividade sem nome, "objeto" da medição sem nome, "Saída programada",
+  "Levei os dois", cartões prontos e calibração nos Eventos); a pedra solta
+  sem massa aparece como "pedra solta" nos Eventos, não "0 g".
+- Busca (Ctrl+K) › Medições salvas: a linha de baixo segue a unidade e o
+  formato de data escolhidos e o idioma.
+
+**English**
+Items 130 and 131 from QA's sweep:
+- English app: names the app itself gives are translated ("sample" for an
+  unnamed Activity, "object" for an unnamed measurement, "Planned trip",
+  "Took both", ready cards and calibration in Events); a loose stone without
+  mass shows as "loose stone" in Events, not "0 g".
+- Search (Ctrl+K) › Saved measurements: the second line follows the chosen
+  unit, date format and language.
+
 ## 2.101.11
 Calibração do KCl (Atividade, RC102) com tempo honesto:
 - O chute de eficiência sem calibração cai de 0,1% para 0,005% em 1.460 keV,

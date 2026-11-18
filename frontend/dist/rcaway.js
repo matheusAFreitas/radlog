@@ -398,7 +398,7 @@ function rcAwayRows(ul) {
     what.className = "small muted";
     what.textContent = q.kind === "gmc" || q.kind === "ambos" ? "Você estava fora de casa?"
       : q.kind === "volta" ? `RC102 voltou a conectar às ${hhmm(q.to)}: voltou para casa?`
-      : q.kind === "programada" ? `Saída programada "${asIs(q.name)}": você saiu mesmo?`
+      : q.kind === "programada" ? `Saída programada "${plNameTxt(q.name)}": você saiu mesmo?`
       : q.memMinutes ? `A memória do aparelho trouxe ${hm(q.memMinutes)}.` : "Sem leituras da memória do aparelho.";
     const tt = document.createElement("b");
     tt.textContent = q.kind === "gmc" ? "GMC-800 sem conexão" : q.kind === "ambos" ? "Os dois sem conexão"
@@ -459,7 +459,7 @@ function awDoneText(box, d) {
   if (d.ans === "awsai" && p && p.id) {
     const c = document.createElement("span");
     c.className = "chip off"; c.textContent = "fora de casa";
-    t.append(c, ` Marcado: ${asIs(p.name)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")} · ${hhmm(p.from)}–${hhmm(p.to)}`);
+    t.append(c, ` Marcado: ${pNameTxt(p.name)} · ${plWhere(p.gmc === "comigo", p.radiacode === "comigo")} · ${hhmm(p.from)}–${hhmm(p.to)}`);
   } else t.textContent = "Ok, ficou como em casa.";
   box.appendChild(t);
 }
