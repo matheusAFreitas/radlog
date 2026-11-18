@@ -121,8 +121,9 @@ type rcState struct {
 	spec         rcSpecLog // espectro de minuto em minuto (espectrograma)
 	sgFast       rcSgFast  // espectro de 2 em 2 s com a aba Busca aberta (só na memória)
 	specSum      rcSpecCache
-	act          actState  // medição de atividade (Bq)
-	macc         rcMeasAcc // só a goroutine do rcRun mexe
+	act          actState                             // medição de atividade (Bq)
+	specTest     func(accum bool) *radiacode.Spectrum // só nos testes: aparelho de mentira
+	macc         rcMeasAcc                            // só a goroutine do rcRun mexe
 	dose         rcDoseLive
 	cfgLogAt     time.Time
 	offRef       float64      // µSv/h no aviso de "fora da escala"
@@ -1046,14 +1047,17 @@ func (a *App) rcMeasureSamples(v radiacode.RawSamples) {
 func (a *App) rcConnected() bool {
 	a.rc.mu.Lock()
 	defer a.rc.mu.Unlock()
-	return a.rc.dev != nil
+	return a.rc.dev != nil || a.rc.specTest != nil
 }
 
 // rcSpectrumNow lê o espectro do aparelho (nil se não deu).
 func (a *App) rcSpectrumNow(accum bool) *radiacode.Spectrum {
 	a.rc.mu.Lock()
-	dev := a.rc.dev
+	dev, fake := a.rc.dev, a.rc.specTest
 	a.rc.mu.Unlock()
+	if fake != nil {
+		return fake(accum)
+	}
 	if dev == nil {
 		return nil
 	}
