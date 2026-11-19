@@ -156,10 +156,14 @@
   const FAM = { "Pb-212": "th", "Tl-208": "th", "Ac-228": "th", "Bi-212": "th", "Pb-214": "u", "Bi-214": "u", "Pb-210": "u", "Ra-226": "u", "Th-234": "u", "Pa-234m": "u" };
   const FAM_NAME = { th: "série do tório", u: "série do urânio" };
   // as linhas que o Go procura (specLines em measurespec.go)
-  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
+  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["Ra-226", 186.2], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
     ["Cs-137", 661.7], ["Ac-228", 911.2], ["Pa-234m", 1001], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5]];
   // biblioteca com um isótopo por entrada ("Ra-226 / U-235" vira duas)
-  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => [e, x, d]));
+  // 2.102.1: cada um na sua energia (Ra-226 186,2 keV, U-235 185,7 keV)
+  const LIB_OWN = { "Ra-226": [186.2, "rádio"], "U-235": [185.7, "urânio"] };
+  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => (n.includes(" / ") && LIB_OWN[x] ? [LIB_OWN[x][0], x, LIB_OWN[x][1]] : [e, x, d])));
+  // 2.102.1: a linha de 186 keV fica com o Ra-226, mas pode ser U-235
+  const nucOr = (n) => (n === "Ra-226" ? " " + tr("(ou U-235)") : "");
   const isIso = (n) => /^[A-Z][a-z]?-\d/.test(n);
   // largura do pico como o Go mede (specFWHM)
   const goFW = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
@@ -555,7 +559,7 @@
       b.dataset.nuc = o.nuclide;
       b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
       const [pt, cls] = sureOf(o);
-      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide + nucOr(o.nuclide))}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
         `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>${emitHtml(o.nuclide)}`;
       // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
       // gama; o título diz de qual família ele vem
@@ -792,9 +796,12 @@
     if (o.sigma >= 5) h += chk(true, tr("Não é flutuação"), tr(`${sg} σ: a chance de ser só ruído é praticamente zero.`) + " " + (acc ? tr("Precisa de pelo menos 5 σ para entrar na lista e 10 σ para \"certo\".") : tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ.")));
     else h += chk(false, tr("Pode ser flutuação"), tr(`${sg} σ: pode ser acaso.`) + " " + tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ."));
     // 2.102.1: o σ sozinho não basta; conta também quanto o pico sobe acima do que tem embaixo
-    if (o.level && p.cont > 0) {
-      const pct = nf((p.net / p.cont) * 100, 0);
-      h += chk(p.net / p.cont >= 0.3, tr(`Sobe ${pct}% acima do que tem embaixo`), tr("Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho)."));
+    if (o.level && p.cont > 0 && !acc) {
+      const pct = nf((p.net / p.cont) * 100, 0), r = p.net / p.cont;
+      // sozinho (sem outra linha da mesma série), "certo" pede 60% (QA 2.102.1)
+      const conf = peaks.some((q) => q !== p && q.group === p.group);
+      const okR = r >= (conf ? 0.3 : 0.6);
+      h += chk(okR, okR || conf ? tr(`Sobe ${pct}% acima do que tem embaixo`) : tr(`Sobe ${pct}% acima do que tem embaixo; sozinho, "certo" pede 60%`), tr("Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho)."));
     }
     if (p.center) {
       const d = Math.abs(p.center - p.kev);
@@ -845,7 +852,7 @@
     const box = $("rcZoom"), p = o.lines[0], acc = isAccMode();
     box.hidden = false; zoomMode(true);
     const lib = LIBN.find((l) => l[1] === o.nuclide);
-    $("rcZoomTitle").textContent = o.nuclide;
+    $("rcZoomTitle").textContent = o.nuclide + nucOr(o.nuclide);
     $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${escHtml(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
     $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
     $("rcZoomWarn").hidden = true;

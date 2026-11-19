@@ -135,8 +135,11 @@ func TestGradePeaks(t *testing.T) {
 	got := map[string]string{}
 	for _, p := range live {
 		got[p.Nuclide] = p.Level
-		if p.KeV == 185.7 && p.Group != "Rádio-226 (série do urânio)" {
-			t.Errorf("186 keV deveria ir para o Ra-226, veio %q", p.Group)
+		if p.Nuclide == "Ra-226" && p.KeV != 186.2 {
+			t.Errorf("Ra-226 deveria sair em 186,2 keV, veio %v", p.KeV)
+		}
+		if p.Nuclide == "U-235" {
+			t.Error("186 keV deveria ir para o Ra-226")
 		}
 	}
 	want := map[string]string{"Ra-226": "forte", "Bi-214": "forte", "K-40": "forte", "Am-241": "provável", "Co-60": "fraco"}
@@ -156,7 +159,8 @@ func TestGradePeaks(t *testing.T) {
 	for _, p := range acc {
 		if p.Nuclide == "Cs-137" {
 			found = true
-			if p.Level != "fraco" {
+			// no acumulado o r não conta: 8 σ = provável
+			if p.Level != "provável" {
 				t.Errorf("Cs-137 no acumulado: %q", p.Level)
 			}
 		}

@@ -4941,7 +4941,9 @@ const I18N_EN = {
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
 "gráfico parado neste trecho": "chart frozen on this stretch",
-"Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone)."
+"Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
+"(ou U-235)": "(or U-235)",
+"rádio": "radium"
 },
 "patterns": [
 [
@@ -8697,6 +8699,15 @@ const I18N_EN = {
 [
 "a assinatura do ",
 " não confere; não vou instalar esta versão"
+]
+],
+[
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo; sozinho, \"certo\" pede 60%$",
+"Rises ${1}% above what is underneath; alone, \"sure\" needs 60%",
+[
+"Sobe ",
+"% acima do que tem embaixo; sozinho, \"certo\" pede 60%"
 ]
 ],
 [

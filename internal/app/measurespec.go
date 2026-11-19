@@ -294,8 +294,9 @@ func (s *MeasureSpectrum) bgZero() bool {
 //     de 10% do que tem embaixo é ruído ou deriva: sai.
 func gradePeaks(ps []SpecPeak, live bool) []SpecPeak {
 	for i := range ps {
-		if math.Abs(ps[i].KeV-185.7) < 1 {
-			ps[i].Nuclide, ps[i].Group = "Ra-226", "Rádio-226 (série do urânio)"
+		if math.Abs(ps[i].KeV-185.7) < 0.1 {
+			// 186,2 keV é a linha do Ra-226 (a procurada, 185,7, é a do U-235)
+			ps[i].Nuclide, ps[i].Group, ps[i].KeV = "Ra-226", "Rádio-226 (série do urânio)", 186.2
 		}
 	}
 	n := map[string]int{}
@@ -304,8 +305,10 @@ func gradePeaks(ps []SpecPeak, live bool) []SpecPeak {
 	}
 	out := ps[:0]
 	for _, p := range ps {
+		// no Acumulado do aparelho (sem fundo, contínuo do SNIP) o r depende do
+		// formato do espectro, não do tempo: lá vale só o σ (QA 2.102.1)
 		r, conf := 1.0, n[p.Group] > 1
-		if p.Cont > 0 {
+		if p.Cont > 0 && live {
 			r = p.Net / p.Cont
 		}
 		if live && !conf && r < 0.1 {

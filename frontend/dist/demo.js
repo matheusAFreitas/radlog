@@ -40,12 +40,12 @@ function demoPeakDetail(sp, peaks) {
 }
 // 2.102.1: a mesma graduação do Go (gradePeaks em measurespec.go)
 function demoGrade(ps, live) {
-  ps = ps.map((p) => (Math.abs(p.kev - 185.7) < 1 ? { ...p, nuclide: "Ra-226", group: "Rádio-226 (série do urânio)" } : { ...p }));
+  ps = ps.map((p) => (Math.abs(p.kev - 185.7) < 0.1 ? { ...p, nuclide: "Ra-226", group: "Rádio-226 (série do urânio)", kev: 186.2 } : { ...p }));
   const n = {};
   for (const p of ps) n[p.group] = (n[p.group] || 0) + 1;
   const out = [];
   for (const p of ps) {
-    const r = p.cont > 0 ? p.net / p.cont : 1, conf = n[p.group] > 1;
+    const r = p.cont > 0 && live ? p.net / p.cont : 1, conf = n[p.group] > 1;
     if (live && !conf && r < 0.1) continue;
     p.level = p.sigma >= 10 && r >= 0.3 && (conf || r >= 0.6) ? "forte" : p.sigma >= 5 && (r >= 0.1 || conf) ? "provável" : "fraco";
     out.push(p);

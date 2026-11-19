@@ -6,11 +6,15 @@ Espectro: análise dos picos mais honesta (o mesmo critério do celular):
   "certo". Agora cada linha é graduada como certo, provável ou fraco pelo σ,
   por quanto o pico sobe acima do que tem embaixo (pelo menos 30%, ou 60% se
   estiver sozinho) e se outra linha da mesma série apareceu junto. O detalhe
-  "Por que" mostra essa conta.
+  "Por que" mostra essa conta. No Acumulado do aparelho continua valendo só
+  o σ (lá essa conta depende do formato do espectro, não do tempo).
 - Linha sozinha que sobe menos de 10% acima do que tem embaixo some da tela
   ao vivo (é ruído ou deriva, não isótopo).
 - 186 keV agora é "Ra-226 (ou U-235)": o rádio solta quase a mesma energia e
-  está em tudo que tem urânio.
+  está em tudo que tem urânio. Cada um aparece com a sua energia (Ra-226
+  186,2 keV, U-235 185,7 keV).
+- Inglês: frases já traduzidas coladas uma na outra não são mais traduzidas
+  de novo ("has no other" virava "has on the other").
 - O último canal (onde caem as contagens que estouram a escala) não é mais
   desenhado, então sumiu o falso pico perto de 3000 keV.
 
@@ -20,11 +24,15 @@ Spectrum: more honest peak analysis (the same criterion as the phone):
   "sure". Each line is now graded sure, likely or weak by σ, by how much the
   peak rises above what is underneath it (at least 30%, or 60% if it is
   alone) and by whether another line from the same series showed up too. The
-  "Why" detail shows the math.
+  "Why" detail shows the math. In the device's Accumulated mode only σ still
+  counts (there this math depends on the spectrum's shape, not on time).
 - A lone line rising less than 10% above what is underneath disappears from
   the live screen (it is noise or drift, not an isotope).
 - 186 keV is now "Ra-226 (or U-235)": radium gives off almost the same energy
-  and is in everything that has uranium.
+  and is in everything that has uranium. Each one shows its own energy
+  (Ra-226 186.2 keV, U-235 185.7 keV).
+- English: sentences already translated and joined together are no longer
+  translated again ("has no other" became "has on the other").
 - The last channel (where counts beyond the scale land) is no longer drawn,
   so the false peak near 3000 keV is gone.
 
