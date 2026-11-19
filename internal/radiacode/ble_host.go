@@ -162,6 +162,14 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 	case <-b.resp:
 	default:
 	}
+	// 19/11: a conexão fica na prioridade normal (o carro e o fone dividem o
+	// rádio do celular; ACE: "prioridade ao carro"); só a resposta grande
+	// (espectro, espectrograma…) pede a rápida por uns segundos
+	if bigReq(req) {
+		if f, ok := b.h.(interface{ Fast() }); ok {
+			f.Fast()
+		}
+	}
 	for p := 0; p < len(req); p += bleChunk {
 		if err := b.h.Write(req[p:min(p+bleChunk, len(req))]); err != nil {
 			return nil, fmt.Errorf("Bluetooth (envio): %v", err)
@@ -210,6 +218,15 @@ var (
 	bleQuiet = 4 * time.Second
 	bleSlow  = 10 * time.Second
 )
+
+// bigReq: leitura de string virtual que não é a do segundo (DATA_BUF)
+func bigReq(req []byte) bool {
+	if len(req) < 12 || uint16(req[4])|uint16(req[5])<<8 != cmdRdVirtString {
+		return false
+	}
+	id := uint32(req[8]) | uint32(req[9])<<8 | uint32(req[10])<<16 | uint32(req[11])<<24
+	return id != vsDataBuf
+}
 
 func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	f := BLELogf

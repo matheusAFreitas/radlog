@@ -78,6 +78,7 @@ func (h *fakeHost) BLEWrite([]byte) error       { return nil }
 func (h *fakeHost) BLEClose()                   {}
 func (h *fakeHost) BLERssi() int                { return 0 }
 func (h *fakeHost) BLEProbe() int               { return 0 }
+func (h *fakeHost) BLEFast()                    {}
 
 // O motor sobe no modo celular e responde aos métodos da tela.
 func TestStartEngine(t *testing.T) {

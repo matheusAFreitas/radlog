@@ -102,4 +102,5 @@ object Engine : Host {
     override fun bleClose() = ble.close()
     override fun bleRssi(): Long = ble.rssi().toLong()
     override fun bleProbe(): Long = ble.probe().toLong()
+    override fun bleFast() = ble.fast()
 }

@@ -47,6 +47,9 @@ type Host interface {
 	// BLEProbe pergunta o sinal ao rádio agora: o valor em dBm, 0 se o
 	// rádio não respondeu em 1,5 s, 1 se não deu para perguntar.
 	BLEProbe() int
+	// BLEFast pede a conexão rápida por alguns segundos (resposta grande
+	// chegando); depois ela volta sozinha para a normal.
+	BLEFast()
 }
 
 var (
@@ -246,3 +249,4 @@ func (b bleHost) Write(chunk []byte) error  { return b.h.BLEWrite(chunk) }
 func (b bleHost) Close()                    { b.h.BLEClose() }
 func (b bleHost) RSSI() int                 { return b.h.BLERssi() }
 func (b bleHost) Probe() int                { return b.h.BLEProbe() }
+func (b bleHost) Fast()                     { b.h.BLEFast() }

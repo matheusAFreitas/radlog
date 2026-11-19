@@ -158,3 +158,13 @@ func TestBLEHostTimeoutLogVSAndRSSI(t *testing.T) {
 		t.Fatalf("registro: %q", lines)
 	}
 }
+
+// 19/11: só o pedido grande (espectro) pede a conexão rápida; o do segundo não
+func TestBLEBigReq(t *testing.T) {
+	if !bigReq([]byte{8, 0, 0, 0, 0x26, 0x08, 0, 0x80, 0x00, 0x02, 0, 0}) {
+		t.Fatal("SPECTRUM não é grande")
+	}
+	if bigReq([]byte{8, 0, 0, 0, 0x26, 0x08, 0, 0x80, 0x00, 0x01, 0, 0}) {
+		t.Fatal("DATA_BUF virou grande")
+	}
+}

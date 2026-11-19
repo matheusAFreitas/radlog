@@ -52,6 +52,15 @@ class Ble(private val ctx: Context) {
     @Volatile private var rssiAt = 0L
     private var rssiAsked = 0L
     @Volatile private var probeWait: CountDownLatch? = null
+    @Volatile private var fastUntil = 0L // até quando fica na conexão rápida
+    private val handler = android.os.Handler(android.os.Looper.getMainLooper())
+    private val slowDown = Runnable {
+        if (android.os.SystemClock.elapsedRealtime() >= fastUntil && fastUntil != 0L) {
+            fastUntil = 0
+            val g = synchronized(lock) { gatt }
+            try { g?.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED) } catch (_: Exception) {}
+        }
+    }
 
     /** Liga? (o Bluetooth do celular pode estar desligado) */
     fun enabled(): Boolean = manager?.adapter?.isEnabled == true
@@ -88,10 +97,12 @@ class Ble(private val ctx: Context) {
     private val callback = object : BluetoothGattCallback() {
         override fun onConnectionStateChange(g: BluetoothGatt, status: Int, state: Int) {
             if (state == BluetoothProfile.STATE_CONNECTED && status == BluetoothGatt.GATT_SUCCESS) {
-                // conexão rápida e pacotes maiores: as respostas grandes do
-                // RC102 (espectro) chegavam devagar demais com os 20 bytes
-                // padrão e estouravam o tempo, e o app reconectava
-                g.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH)
+                // pacotes maiores: as respostas grandes do RC102 (espectro)
+                // chegavam devagar demais com os 20 bytes padrão. A prioridade
+                // fica a normal (19/11: o carro e o fone dividem o rádio); a
+                // rápida só enquanto chega resposta grande (fast())
+                fastUntil = 0
+                g.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_BALANCED)
                 if (!g.requestMtu(247) && !g.discoverServices()) fail(g, "não consegui ler os serviços do aparelho")
                 return
             }
@@ -255,6 +266,19 @@ class Ble(private val ctx: Context) {
         } finally {
             probeWait = null
         }
+    }
+
+    // resposta grande chegando: conexão rápida por 8 s (cada pedido grande
+    // estica); depois volta sozinha para a normal
+    fun fast() {
+        val g = synchronized(lock) { gatt } ?: return
+        val was = fastUntil
+        fastUntil = android.os.SystemClock.elapsedRealtime() + 8_000
+        if (was == 0L) {
+            try { g.requestConnectionPriority(BluetoothGatt.CONNECTION_PRIORITY_HIGH) } catch (_: Exception) {}
+        }
+        handler.removeCallbacks(slowDown)
+        handler.postDelayed(slowDown, 8_200)
     }
 
     fun close() {
