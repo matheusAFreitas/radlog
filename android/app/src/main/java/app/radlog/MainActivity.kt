@@ -5,6 +5,7 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
+import android.content.res.Configuration
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -38,6 +39,7 @@ class MainActivity : Activity() {
         super.onCreate(saved)
         try { Engine.start(this) } catch (_: Exception) { /* a tela mostra o erro */ }
         if (prefs().getBoolean("paired", false)) RadLogService.start(this)
+        shape = shapeOf(resources.configuration)
         newWeb()
     }
 
@@ -83,7 +85,41 @@ class MainActivity : Activity() {
         w.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
     }
 
+    /**
+     * Flip 6 (19/11): fechar o celular com o app aberto e abrir na tela de
+     * fora, ou o contrário, troca de tela sem recriar a Activity
+     * (configChanges). O WebView, pausado no meio da troca, ficava com o
+     * tamanho da tela anterior: preto na tela de fora e um retângulo no
+     * canto ao abrir. Quando a tela muda de verdade (densidade ou menor
+     * lado), um WebView novo sobe no lugar; a página recomeça e pega o
+     * estado do motor, que não parou. Girar a tela só pede um novo layout.
+     */
+    private var shape = ""
+    private var resumed = false
+    private var rebuild = false
+
+    private fun shapeOf(c: Configuration) = "${c.densityDpi}/${c.smallestScreenWidthDp}"
+
+    override fun onConfigurationChanged(c: Configuration) {
+        super.onConfigurationChanged(c)
+        val s = shapeOf(c)
+        if (shape.isNotEmpty() && s != shape) rebuild = true
+        shape = s
+        if (rebuild && resumed) rebuildWeb() else web.requestLayout()
+    }
+
+    private fun rebuildWeb() {
+        rebuild = false
+        val old = web
+        UiBridge.detach(old)
+        (old.parent as? ViewGroup)?.removeView(old)
+        old.destroy()
+        newWeb()
+        UiBridge.paused = !resumed
+    }
+
     override fun onPause() {
+        resumed = false
         // tela fora de vista: para os relógios da página e os eventos
         UiBridge.paused = true
         web.onPause()
@@ -92,6 +128,11 @@ class MainActivity : Activity() {
 
     override fun onResume() {
         super.onResume()
+        resumed = true
+        val s = shapeOf(resources.configuration)
+        if (shape.isNotEmpty() && s != shape) rebuild = true
+        shape = s
+        if (rebuild) rebuildWeb()
         Engine.syncTimeZone()
         web.onResume()
         UiBridge.resumed()
