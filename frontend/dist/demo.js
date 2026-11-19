@@ -40,7 +40,7 @@ function demoPeakDetail(sp, peaks) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.101.15";
+const DEMO_VERSION = "2.101.16";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -1572,7 +1572,7 @@ const demoRc = () => {
         times.push(e); dose.push(d); bg.push(b); ceil.push(b + al);
       }
       return { from, to, stepMs: step, times, dose, background: bg, ceiling: ceil, total: d, doseSource: "app", calNote: "mudou no período · até 05/11/2026 16:27: 0,01014 µSv/h por CPM no fundo (versão 1, curva do contador) · desde 05/11/2026 16:27: 0,00550 µSv/h por CPM no fundo (versão 2, informado à mão)", backgroundTotal: b, ceilingTotal: b + al,
-        allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY, limitName: limY === 20 ? "Trabalhador exposto" : "Público",
+        allowance: al, excess: d - b, backgroundRate: rate, backgroundSource: "mediana dos últimos 30 dias", limitMSvYear: limY, limitName: limY === 20 ? "Trabalhador exposto: 20 mSv/ano acima do fundo" : "Público: 1 mSv/ano acima do fundo", // 2.101.16: igual ao Go (dose.go)
         measuredMinutes: p.length, coverage: Math.min(1, p.length / (span / 6e4)) };
     },
     // de onde vem a dose (2.43): pela fita, com o fundo fingido do RC102 a 0,092

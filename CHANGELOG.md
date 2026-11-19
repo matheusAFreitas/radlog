@@ -1,5 +1,17 @@
 # Versões
 
+## 2.101.16
+- Dose acumulada › a conta, em inglês: o limite saía pela metade em
+  português ("público: 1 mSv/ano above background"). Agora sai inteiro no
+  idioma da tela. A demonstração passou a usar o mesmo nome do limite que o
+  app, e o teste do inglês pega esse caso.
+
+**English**
+- Accumulated dose › the math, in English: the limit came out half in
+  Portuguese ("público: 1 mSv/ano above background"). It now comes out whole
+  in the screen's language. The demo now uses the same limit name as the app,
+  and the English test catches this case.
+
 ## 2.101.15
 Itens 133 a 138 da varredura (achados do QA):
 - Medir objeto com o RC102: o ± e o σ do líquido, o "Objeto ÷ fundo" e a
