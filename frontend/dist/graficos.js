@@ -91,7 +91,8 @@ async function refreshChart() {
     c.rain = rain || [];
     c.radar = radar || [];
   }
-  document.querySelectorAll("#rangeSeg button").forEach((b) => b.setAttribute("aria-pressed", String(!state.zoom && b.dataset.range === state.range)));
+  // 2.102.0: com zoom, o período guardado fica marcado de leve (contorno)
+  document.querySelectorAll("#rangeSeg button").forEach((b) => { b.setAttribute("aria-pressed", String(!state.zoom && b.dataset.range === state.range)); b.classList.toggle("was", !!state.zoom && b.dataset.range === state.range); });
   renderZoomBar(c);
 
   const usvMode = state.chartUnit === "usv";
@@ -389,9 +390,18 @@ function chartTimeAt(c, frac) {
 }
 
 // arrastar num gráfico para escolher um trecho (usado no CPM e na dose)
+// 2.102.0 (zoom, parte 4): só vira zoom depois de 24 px (antes eram 8: um
+// clique com a mão tremendo bastava); durante o arraste, o horário do trecho
+// aparece na seleção; Esc cancela
+const DRAG_MIN_PX = 24;
+function dragRangeTxt(t0, t1) {
+  return new Date(t0).toDateString() === new Date(t1).toDateString() ? `${hhmm(t0)}–${hhmm(t1)}` : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)}`;
+}
 function attachDragZoom(plot, sel, getChart, onZoom) {
   let x0 = null;
   const frac = (ev) => { const r = plot.getBoundingClientRect(); return { f: (ev.clientX - r.left) / r.width, w: r.width }; };
+  let lbl = sel.querySelector(".zoom-sel-lbl");
+  if (!lbl) { lbl = document.createElement("span"); lbl.className = "zoom-sel-lbl mono"; sel.appendChild(lbl); }
   plot.addEventListener("mousedown", (ev) => {
     const c = getChart();
     if (ev.button !== 0 || !c || !c.times || !c.times.length) return;
@@ -399,13 +409,22 @@ function attachDragZoom(plot, sel, getChart, onZoom) {
     x0 = frac(ev).f;
     sel.style.left = x0 * 100 + "%";
     sel.style.width = "0";
-    sel.hidden = false;
+    sel.hidden = true; // aparece depois dos 24 px
   });
   window.addEventListener("mousemove", (ev) => {
     if (x0 == null) return;
-    const f = Math.min(1, Math.max(0, frac(ev).f));
-    sel.style.left = Math.min(x0, f) * 100 + "%";
-    sel.style.width = Math.abs(f - x0) * 100 + "%";
+    const { f: f0, w } = frac(ev), f = Math.min(1, Math.max(0, f0));
+    const lo = Math.min(x0, f), hi = Math.max(x0, f);
+    sel.style.left = lo * 100 + "%";
+    sel.style.width = (hi - lo) * 100 + "%";
+    sel.hidden = (hi - lo) * w < DRAG_MIN_PX;
+    const c = getChart();
+    if (!sel.hidden && c) lbl.textContent = dragRangeTxt(chartTimeAt(c, lo), chartTimeAt(c, hi));
+  });
+  window.addEventListener("keydown", (ev) => {
+    if (ev.key !== "Escape" || x0 == null) return;
+    x0 = null;
+    sel.hidden = true;
   });
   window.addEventListener("mouseup", (ev) => {
     if (x0 == null) return;
@@ -413,7 +432,7 @@ function attachDragZoom(plot, sel, getChart, onZoom) {
     const lo = Math.min(x0, f), hi = Math.max(x0, f);
     x0 = null;
     sel.hidden = true;
-    if ((hi - lo) * w < 8) return; // foi só um clique
+    if ((hi - lo) * w < DRAG_MIN_PX) return; // foi só um clique (ou voltou para o começo)
     const c = getChart();
     // a dica do mouse era do gráfico antigo
     plot.querySelectorAll(".tip, .cursor").forEach((el) => { el.hidden = true; });
@@ -448,6 +467,7 @@ function pushZoom(from, to) {
 function backZoom() {
   const z = state.zoomStack.pop() || null;
   state.zoom = z;
+  if (!z) state.zoomFrom = null;
   state.doseZoom = state.doseAll ? null : z; state.doseZoomStack = [];
   state.zoomLinked = !!z && !state.doseAll;
   refreshChart();
@@ -464,9 +484,41 @@ function setDoseAll(on, quiet) {
   refreshDose();
 }
 
+// 2.102.0 (zoom, parte 2): de que página o trecho veio ("aberto pelo X" e
+// o link "← X"); o nome de cada uma é o da barra lateral
+const ZOOM_FROM = {
+  agora: ["Agora", 0], fundo: ["Fundo de casa", 0], resumo: ["Resumo", 0], alertas: ["Alertas", 1],
+  medir: ["Medir objeto", 0], fora: ["Fora de casa", 0], chuva: ["Clima", 0], gmc: ["GQ GMC-800", 0],
+  radiacode: ["Radiacode 102", 0], config: ["Configurações", 2],
+};
+// o = { name } opcional (nome do trecho, já pronto para a tela); a página
+// de origem é a de agora
+function zoomOrigin(o) {
+  const v = state.view, name = (o && o.name) || "";
+  if (v === "graficos" || !ZOOM_FROM[v]) return name ? { name } : null;
+  return { view: v, name };
+}
+// 2.102.0 (zoom, parte 1): o zoom vale só enquanto a pessoa está nos Gráficos
+function clearZoomState() {
+  state.zoom = null; state.zoomStack = [];
+  state.doseZoom = null; state.doseZoomStack = [];
+  state.zoomLinked = false;
+  state.heatPick = null;
+  state.zoomFrom = null;
+}
+// "Voltar para 1 h": o período guardado (o nome do botão da barra)
+function zoomPeriodTxt() {
+  const b = document.querySelector(`#rangeSeg button[data-range="${state.range}"]`);
+  const per = b ? b.textContent.trim() : "";
+  return per ? `Voltar para ${per}` : "Voltar para o período";
+}
+
 function setupChartZoom() {
   attachDragZoom($("plot"), $("zoomSel"), () => state.chart, pushZoom);
   $("btnZoomBack").addEventListener("click", backZoom);
+  $("btnZoomOrigin").addEventListener("click", () => { const o = state.zoomFrom; if (o && o.view) showView(o.view); });
+  // o "⋯" fecha ao escolher (o clique fora e o Esc já fecham pelo fora.js)
+  $("zoomMore").querySelectorAll(".more-list button").forEach((b) => b.addEventListener("click", () => { $("zoomMore").open = false; }));
   $("btnZoomOut").addEventListener("click", resetAllZoom);
   document.querySelectorAll("#doseSpanSeg button").forEach((b) => b.addEventListener("click", () => setDoseAll(b.dataset.v === "tudo")));
   setDoseAll(state.doseAll, true);
@@ -479,6 +531,7 @@ function resetAllZoom() {
   state.doseZoom = null; state.doseZoomStack = [];
   state.zoomLinked = false;
   state.heatPick = null;
+  state.zoomFrom = null;
   refreshChart();
   refreshDose();
   markHeatPick();
@@ -496,6 +549,7 @@ function unlinkZoom() {
 // um "Sair do zoom" e um "Voltar" só, no gráfico de cima (2.101.0)
 function renderZoomButtons() {
   $("btnZoomOut").hidden = !state.zoom;
+  $("btnZoomOut").textContent = $("btnDoseZoomOut").textContent = zoomPeriodTxt();
   $("btnDoseZoomOut").hidden = !state.doseZoom || !!state.zoom;
   $("btnZoomBack").hidden = !state.zoomStack.length;
   $("btnDoseZoomBack").hidden = true;
@@ -515,6 +569,17 @@ function renderZoomBar(c) {
   const t0 = c.times && c.times.length ? c.times[0] : c.from;
   const t1 = c.to;
   $("zoomRange").textContent = zoomRangeText(t0, t1);
+  // 2.102.0 (zoom, parte 2): nome do trecho, de onde veio e o caminho de volta
+  const o = state.zoomFrom, from = o && o.view && ZOOM_FROM[o.view];
+  $("zoomName").hidden = !(o && o.name);
+  $("zoomName").textContent = (o && o.name) || ""; // o " · " vem do CSS (o nome traduz sozinho)
+  const fl = from ? tr(from[0]) : "";
+  $("zoomVia").textContent = !from ? "gráfico parado neste trecho"
+    : from[1] === 1 ? `aberto pelos ${fl} · gráfico parado neste trecho`
+    : from[1] === 2 ? `aberto pelas ${fl} · gráfico parado neste trecho`
+    : `aberto pelo ${fl} · gráfico parado neste trecho`;
+  $("btnZoomOrigin").hidden = !from;
+  if (from) $("btnZoomOrigin").textContent = `← ${tr(from[0])}`;
   // 2.101.5: a dose do aparelho escolhido (antes era sempre a do GMC-800) e
   // já na unidade da tela (o span fica fora da troca µSv → mrem)
   const doseOf = (arr, avg) => { const n = (arr || []).filter((v) => v != null).length; return avg != null && n ? (avg * n * (c.stepMs || 60000)) / 3600e3 : null; };

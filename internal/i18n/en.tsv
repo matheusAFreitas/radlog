@@ -6467,3 +6467,12 @@ Usar a nova ({0})	Use the new one ({0})
 voltar à anterior ({0})	go back to the previous one ({0})
 Parou em {0}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.	Stopped at {0}: the dose went past 4σ, well above the natural variation. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.
 Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.	Loose stone: the mass is optional and the result comes in Bq for the piece.
+Abrir {0}–{1} nos gráficos	Open {0}–{1} on the charts
+Mais ações do trecho	More actions for this stretch
+Voltar ao zoom anterior	Back to the previous zoom
+Voltar para o período	Back to the period
+Voltar para {0}	Back to {0}
+aberto pelo {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
+aberto pelos {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
+aberto pelas {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
+gráfico parado neste trecho	chart frozen on this stretch

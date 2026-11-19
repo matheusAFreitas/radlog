@@ -423,7 +423,7 @@ function renderPeriods() {
     };
     if (p.open) btn("Voltar ao normal", "accent", () => call(api.SetWhere, "casa", "comigo", ""));
     if (isTripP(p)) btn("Resumo da saída", "away-btn", () => openTrip(p.id), "Dose, gráfico, espectro e como o RC102 estava");
-    btn("Ver no gráfico", "", () => showRange(p.from, pTo(p)));
+    btn("Ver no gráfico", "", () => showRange(p.from, pTo(p), { name: pNameTxt(p.name) }));
     // o resto fica no "⋯" (2.85)
     const more = moreMenu("Mais ações deste trecho", [
       ["Relatório (PDF)", "", () => exportReport(p.from, Math.min(pTo(p), Date.now()), "Fora de casa: " + pNameTxt(p.name), more.querySelector("summary"))],
@@ -469,10 +469,13 @@ function openPeriods(prefill) {
   else renderPeriods();
 }
 
-// abre um trecho nos dois gráficos (mesmo jeito do mapa de calor)
-function showRange(from, to) {
+// abre um trecho nos dois gráficos (mesmo jeito do mapa de calor);
+// 2.102.0: o = { name } opcional, e a barra diz de que página veio
+function showRange(from, to, o) {
+  const org = zoomOrigin(o);
   setSub("graficos", "tempo");
   if (state.view !== "graficos") showView("graficos", true);
+  state.zoomFrom = org;
   state.zoom = { from, to }; state.zoomStack = [];
   state.doseZoom = { from, to }; state.doseZoomStack = [];
   state.zoomLinked = true;

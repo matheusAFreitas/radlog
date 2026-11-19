@@ -1540,7 +1540,7 @@ function wireMeasureSaved() {
   const cur = () => (state.measurements || []).find((x) => x.id === state.mSel);
   $("btnMOpenSaved").addEventListener("click", () => { const id = state.mLastSaved; setMeasureMode("salvas"); if (id) { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); } });
   $("btnMdReport").addEventListener("click", (e) => { const m = cur(); if (m) exportMeasureReport(m.id, e.currentTarget); });
-  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3); });
+  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3, { name: mNameTxt(m) }); });
   $("btnMdEdit").addEventListener("click", () => { const f = $("mdEditForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdEditName").focus(); });
   $("btnMdSave").addEventListener("click", async () => {
     const m = cur();

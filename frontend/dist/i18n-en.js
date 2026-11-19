@@ -4936,7 +4936,11 @@ const I18N_EN = {
 "não há calibração anterior do KCl": "there is no previous KCl calibration",
 "não há calibração anterior do tório": "there is no previous thorium calibration",
 "pior que a atual: não usada": "worse than the current one: not used",
-"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece."
+"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece.",
+"Mais ações do trecho": "More actions for this stretch",
+"Voltar ao zoom anterior": "Back to the previous zoom",
+"Voltar para o período": "Back to the period",
+"gráfico parado neste trecho": "chart frozen on this stretch"
 },
 "patterns": [
 [
@@ -10905,6 +10909,24 @@ const I18N_EN = {
 ]
 ],
 [
+"aberto pelos ",
+"^aberto pelos ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelos ",
+" · gráfico parado neste trecho"
+]
+],
+[
+"aberto pelas ",
+"^aberto pelas ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelas ",
+" · gráfico parado neste trecho"
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -11048,6 +11070,15 @@ const I18N_EN = {
 "${1} with the object, above the attention level.",
 [
 " com o objeto, acima do nível de atenção."
+]
+],
+[
+"aberto pelo ",
+"^aberto pelo ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelo ",
+" · gráfico parado neste trecho"
 ]
 ],
 [
@@ -17136,6 +17167,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Abrir ",
+"^Abrir ((?:(?! · ).)+?)–((?:(?! · ).)+?) nos gráficos$",
+"Open ${1}–${2} on the charts",
+[
+"Abrir ",
+" nos gráficos"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -20405,6 +20445,14 @@ const I18N_EN = {
 "${1}: ${2} alerts.",
 [
 " alertas."
+]
+],
+[
+"Voltar para ",
+"^Voltar para ((?:(?! · ).)+?)$",
+"Back to ${1}",
+[
+"Voltar para "
 ]
 ],
 [

@@ -317,13 +317,19 @@
         </div>
       </div>
       <div class="zoom-bar" id="zoomBar" hidden>
-        <span class="zoom-info"><strong id="zoomRange"></strong> <span class="mono small" id="zoomStats"></span></span>
+        <span class="zoom-info"><span><strong id="zoomName" hidden></strong><strong id="zoomRange"></strong> <span class="mono small" id="zoomStats"></span></span><small class="zoom-via" id="zoomVia">gráfico parado neste trecho</small></span>
         <span class="zoom-btns">
-          <button type="button" class="btn small note-btn" id="btnZoomNote">Anotar este trecho</button>
-          <button type="button" class="btn small away-btn" id="btnZoomAway">Marcar como fora de casa</button>
-          <button type="button" class="btn small" id="btnZoomReport" title="Relatório em PDF só deste trecho">Relatório (PDF)</button>
-          <button type="button" class="btn small" id="btnZoomBack">Voltar</button>
-          <button type="button" class="btn small" id="btnZoomOut">Sair do zoom</button>
+          <button type="button" class="link zoom-origin" id="btnZoomOrigin" hidden></button>
+          <button type="button" class="btn small" id="btnZoomOut">Voltar para o período</button>
+          <details class="more-menu" id="zoomMore">
+            <summary class="btn small icon" aria-label="Mais ações do trecho" title="Mais ações do trecho">⋯</summary>
+            <div class="more-list" role="menu">
+              <button type="button" role="menuitem" class="note-btn" id="btnZoomNote">Anotar este trecho</button>
+              <button type="button" role="menuitem" class="away-btn" id="btnZoomAway">Marcar como fora de casa</button>
+              <button type="button" role="menuitem" id="btnZoomReport" title="Relatório em PDF só deste trecho">Relatório (PDF)</button>
+              <button type="button" role="menuitem" id="btnZoomBack">Voltar ao zoom anterior</button>
+            </div>
+          </details>
         </span>
       </div>
       <div class="chart-body" id="chartBody">
@@ -364,7 +370,7 @@
         <span class="zoom-btns">
           <button type="button" class="btn small away-btn" id="btnDoseZoomAway">Marcar como fora de casa</button>
           <button type="button" class="btn small" id="btnDoseZoomBack">Voltar</button>
-          <button type="button" class="btn small" id="btnDoseZoomOut">Sair do zoom</button>
+          <button type="button" class="btn small" id="btnDoseZoomOut">Voltar para o período</button>
         </span>
       </div>
       <div class="dose-devs" id="doseDevs"></div>

@@ -1,5 +1,37 @@
 # Versões
 
+## 2.102.0
+Zoom dos gráficos (pedido do ACE, com o design aprovado):
+- O zoom vale só enquanto você está nos Gráficos. Saiu da página, ele some,
+  e na volta pela barra lateral os gráficos abrem no período de sempre, ao
+  vivo. Quem chega por um "Ver no gráfico" continua vendo o trecho.
+- A barra do zoom diz de onde o trecho veio ("aberto pelo Fora de casa", com
+  o nome do trecho) e tem o link de volta ("← Fora de casa"). "Sair do zoom"
+  virou "Voltar para 1 h" (o período guardado, que fica marcado de leve), e a
+  barra avisa que o gráfico está parado no trecho. Anotar, Fora de casa,
+  Relatório e Voltar ao zoom anterior foram para o "⋯".
+- Fita do dia: o clique abre um balão com o horário e o que aconteceu, e um
+  botão "Abrir 04:15–05:15 nos gráficos" (1 h em volta do ponto). Não troca
+  mais de tela sozinho. Esc ou clique fora fecha.
+- Arrastar no gráfico só vira zoom depois de uns 24 px (antes eram 8), e
+  mostra o horário do trecho enquanto arrasta. Esc cancela.
+
+**English**
+Chart zoom (ACE's request, with the approved design):
+- Zoom only lasts while you are on Charts. Leave the page and it goes away;
+  coming back from the sidebar, the charts open on the usual period, live.
+  Arriving from a "See on the chart" still shows the stretch.
+- The zoom bar says where the stretch came from ("opened from Away from
+  home", with the stretch's name) and has a link back ("← Away from home").
+  "Exit zoom" became "Back to 1 h" (the saved period, lightly outlined), and
+  the bar says the chart is frozen on the stretch. Note, Away from home,
+  Report and Back to the previous zoom moved into the "⋯".
+- Day strip: a click opens a balloon with the time and what happened, and a
+  button "Open 04:15–05:15 on the charts" (1 h around the point). It no
+  longer switches screens by itself. Esc or a click outside closes it.
+- Dragging on the chart only zooms after about 24 px (it was 8), and shows
+  the stretch's time while dragging. Esc cancels.
+
 ## 2.101.16
 - Dose acumulada › a conta, em inglês: o limite saía pela metade em
   português ("público: 1 mSv/ano above background"). Agora sai inteiro no
