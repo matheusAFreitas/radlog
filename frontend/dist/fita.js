@@ -157,7 +157,7 @@ function ftHover(box, strips, tipOf, slotT) {
     tip.style.left = Math.min(fr.width - tip.offsetWidth, Math.max(0, e.clientX - fr.left - tip.offsetWidth / 2)) + "px";
     tip.style.top = e.clientY - fr.top + 16 + "px";
   }, sig);
-  box.addEventListener("mouseleave", () => { tip.hidden = cur.hidden = true; }, sig);
+  box.addEventListener("mouseleave", () => { tip.hidden = true; if (pop.hidden) cur.hidden = true; }, sig);
   box.addEventListener("click", (e) => {
     if (e.target.closest(".ft-pop")) return;
     const mk = e.target.closest("[data-t]");

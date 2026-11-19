@@ -1110,7 +1110,7 @@ v{0} disponível	v{0} available
 {0} perigo	{0} danger
 {0} períodos fora de casa	{0} away-from-home periods
 {0} respondeu {1}, não parece um contador GMC	{0} answered {1}, doesn't look like a GMC counter
-{0} sem leitura no período, em {1} trecho(s). Lacuna não conta como zero em nenhum cálculo.	{0} without readings in the period, in {1} stretch(s). A gap never counts as zero in any calculation.
+{0} sem leitura no período, em {1} trecho(s). Lacuna não conta como zero em nenhum cálculo.	{0} without readings in the period, in {1} stretch(es). A gap never counts as zero in any calculation.
 {0} sem resposta em {1} s: porta travada no driver	{0} with no answer in {1} s: port locked in the driver
 {0} ± {1} CPM ({2} em {3} s)	{0} ± {1} CPM ({2} in {3} s)
 {0} · chuva {1} · sem chuva {2} CPM	{0} · rain {1} · no rain {2} CPM

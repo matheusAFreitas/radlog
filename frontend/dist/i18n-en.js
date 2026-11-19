@@ -6615,7 +6615,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) sem leitura no período, em ((?:(?! · ).)+?) trecho\\(s\\)\\. Lacuna não conta como zero em nenhum cálculo\\.$",
-"${1} without readings in the period, in ${2} stretch(s). A gap never counts as zero in any calculation.",
+"${1} without readings in the period, in ${2} stretch(es). A gap never counts as zero in any calculation.",
 [
 " sem leitura no período, em ",
 " trecho(s). Lacuna não conta como zero em nenhum cálculo."
