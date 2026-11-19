@@ -229,7 +229,7 @@ function agora() {
   let h = dial(val > 0 || rc.state === "conectado" ? usv(val || 0) : "—", lv, sub);
   const w = state.where;
   if (w && w.open && w.radiacode === "comigo") {
-    h += `<div class="away">${AWAY}<span>${esc(T("Fora de casa desde {0}", when(w.since || w.open.from)))}</span><button id="bBack">${esc(T("Voltei"))}</button></div>`;
+    h += `<div class="away">${AWAY}<button class="since" id="bSince">${esc(T("Fora de casa desde {0}", when(w.since || w.open.from)))}</button><button id="bBack">${esc(T("Voltei"))}</button></div>`;
   }
   if (off) {
     h += `<div class="card" style="gap:8px"><b style="font-size:14px">${esc(T("O RC102 está com o PC"))}</b><span class="small">${esc(T("O celular não tenta conectar até você pegar de volta. Nada se perde: o RC102 guarda o histórico e o PC lê quando conectar."))}</span><button class="btn pri" id="bTake">${esc(T("Pegar o RC102"))}</button></div>`;
@@ -585,6 +585,32 @@ function releaseSheet() {
     + `<div class="tl"><i style="background:var(--accent)"></i><span>${esc(T("Nada se perde: o RC102 guarda o histórico e o PC lê quando conectar."))}</span><i style="background:var(--info)"></i><span>${esc(T("O que o celular já gravou vai para o PC pela nuvem."))}</span></div>`
     + `<button class="btn pri" id="bRelOk">${esc(T("Soltar o RC102"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
   $("bRelOk").onclick = async () => { closeSheet(); await nat("owner", "pc"); setTimeout(refreshRc, 600); };
+}
+
+// 19/11 (ACE): saiu às 5:30 e só tocou às 7:02: ajusta a hora da saída
+function sinceSheet() {
+  const w = state.where;
+  if (!w || !w.open) return;
+  const cur = new Date(w.open.from);
+  const v = String(cur.getHours()).padStart(2, "0") + ":" + String(cur.getMinutes()).padStart(2, "0");
+  sheet(`<h3>${esc(T("Que horas você saiu de casa?"))}</h3><p>${esc(T("As leituras desde essa hora contam como fora de casa e saem do fundo da casa."))}</p>`
+    + `<input class="txt" id="sinceT" type="time" value="${v}">`
+    + `<button class="btn pri" id="bSinceOk">${esc(T("Salvar"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
+  $("bSinceOk").onclick = async () => {
+    const m = /^(\d{1,2}):(\d{2})/.exec($("sinceT").value || "");
+    if (!m) return;
+    const d = new Date();
+    d.setHours(+m[1], +m[2], 0, 0);
+    if (d.getTime() > Date.now()) d.setDate(d.getDate() - 1); // depois de agora: foi ontem
+    try {
+      await call("SavePeriod", Object.assign({}, w.open, { from: d.getTime() }));
+      state.where = await call("GetWhereabouts");
+      loadPeriods();
+      closeSheet();
+      toast(T("Saída ajustada para {0}", when(d.getTime())));
+    } catch (e) { toast(errText(e)); }
+    render();
+  };
 }
 
 async function toggleAway() {
@@ -1053,6 +1079,7 @@ function bind() {
   q("bRelease", releaseSheet);
   q("bAway", toggleAway);
   q("bBack", toggleAway);
+  q("bSince", sinceSheet);
   q("sOwner", () => (isOff(state.rc) ? nat("owner", "phone").then(() => setTimeout(refreshRc, 600)) : releaseSheet()));
   q("sForget", forgetSheet);
   q("sSound", soundSheet);
@@ -1194,6 +1221,7 @@ const mock = (() => {
         case "GetSettings": return ok(settings);
         case "GetCloud": return ok(cloud);
         case "GetWhereabouts": return ok(where);
+        case "SavePeriod": { if (where.open) where.open.from = where.since = arguments[1][0].from; return ok(arguments[1][0]); }
         case "GetPeriods": return ok(scene === "fora" ? [{ from: now - 2.5 * 3600e3, to: 0 }] : []);
         case "ScanRadiacodeBLE": return new Promise((res) => setTimeout(() => res(scan), 800));
         case "GetRcSettings": case "UndoRcSettings": return ok(rcs2);

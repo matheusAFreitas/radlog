@@ -292,4 +292,8 @@ window.I18N_EN = {
   "Enviar só no Wi-Fi": "Send only on Wi-Fi",
   "Nuvem na rede móvel": "Cloud on mobile data",
   "Quando o celular está nos dados móveis. No Wi-Fi envia sempre a cada 15 min, e \"Sincronizar agora\" envia na hora em qualquer rede.": "When the phone is on mobile data. On Wi-Fi it always sends every 15 min, and \"Sync now\" sends right away on any network.",
+  "Que horas você saiu de casa?": "What time did you leave home?",
+  "As leituras desde essa hora contam como fora de casa e saem do fundo da casa.": "Readings since then count as away from home and leave the home background.",
+  "Saída ajustada para {0}": "Departure set to {0}",
+  "Salvar": "Save",
 };

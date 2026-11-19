@@ -36,6 +36,7 @@ var MobileMethods = []string{
 	"LeaveHome",
 	"ReconnectRadiacode",
 	"ResetRcSpectrum",
+	"SavePeriod",
 	"SaveSettings",
 	"ScanRadiacodeBLE",
 	"SetRadiacode",
