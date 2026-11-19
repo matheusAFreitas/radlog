@@ -34,3 +34,24 @@ func TestRcTextsRepeat(t *testing.T) {
 		t.Fatalf("repetiu na reconexão: %v", again)
 	}
 }
+
+// Histórico velho (de ontem) e o que já entrou não voltam ao log, mesmo com
+// a hora escorregando mais de 5 s entre uma leitura e outra (19/11).
+func TestRcTextsOldAndDrift(t *testing.T) {
+	var tx rcTexts
+	now := time.Date(2026, 11, 19, 12, 0, 0, 0, time.Local)
+	lines := []radiacode.TextLine{
+		{AgoSec: 20 * 3600, Text: "Error: S1 Data frame corrupted!"}, // ontem
+		{AgoSec: 600, Text: "BLE: client connected"},
+	}
+	if out := tx.take(lines, now); len(out) != 1 || !strings.Contains(out[0], "BLE") {
+		t.Fatalf("primeira leitura: %v", out)
+	}
+	// 30 min depois, a mesma de 10 min atrás volta com 40 s de diferença,
+	// e uma nova chega
+	later := now.Add(30 * time.Minute)
+	again := []radiacode.TextLine{{AgoSec: 1800 + 600 - 40, Text: "BLE: client connected"}, {AgoSec: 60, Text: "BLE: disconnected by remote user"}}
+	if out := tx.take(again, later); len(out) != 1 || !strings.Contains(out[0], "disconnected") {
+		t.Fatalf("segunda leitura: %v", out)
+	}
+}
