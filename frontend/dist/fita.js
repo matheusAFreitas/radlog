@@ -130,10 +130,14 @@ function ftHover(box, strips, tipOf, slotT) {
   if (box._ftAbort) box._ftAbort.abort();
   const ac = new AbortController(), sig = { signal: ac.signal };
   box._ftAbort = ac;
-  const tip = document.createElement("div"), cur = document.createElement("div");
+  const tip = document.createElement("div"), cur = document.createElement("div"), pop = document.createElement("div");
   tip.className = "ft-tip"; tip.hidden = true;
   cur.className = "ft-cursor"; cur.hidden = true;
-  box.append(tip, cur);
+  // 2.102.0 (zoom, parte 3): o clique abre um balão; a ida para os Gráficos
+  // é um botão nele, com 1 h em volta do ponto
+  pop.className = "ft-pop"; pop.hidden = true; pop.setAttribute("role", "dialog");
+  box.append(tip, cur, pop);
+  const closePop = () => { pop.hidden = true; cur.hidden = true; };
   const at = (e) => {
     const st = e.target.closest(".ft-strip") || strips[0];
     if (!st) return null;
@@ -144,6 +148,7 @@ function ftHover(box, strips, tipOf, slotT) {
   box.addEventListener("mousemove", (e) => {
     const mk = e.target.closest("[data-tip]");
     const p = at(e);
+    if (!pop.hidden) { tip.hidden = true; return; }
     if (!p && !mk) { tip.hidden = cur.hidden = true; return; }
     tip.textContent = mk ? mk.dataset.tip : tipOf(p.i, p.st);
     tip.hidden = cur.hidden = false;
@@ -152,14 +157,33 @@ function ftHover(box, strips, tipOf, slotT) {
     tip.style.left = Math.min(fr.width - tip.offsetWidth, Math.max(0, e.clientX - fr.left - tip.offsetWidth / 2)) + "px";
     tip.style.top = e.clientY - fr.top + 16 + "px";
   }, sig);
-  box.addEventListener("mouseleave", () => { tip.hidden = cur.hidden = true; }, sig);
+  box.addEventListener("mouseleave", () => { tip.hidden = true; if (pop.hidden) cur.hidden = true; }, sig);
   box.addEventListener("click", (e) => {
+    if (e.target.closest(".ft-pop")) return;
     const mk = e.target.closest("[data-t]");
     const p = at(e);
     const t = mk ? +mk.dataset.t : p ? slotT(p.i, p.st) : null;
-    if (t == null) return;
-    openGapOnChart({ from: t, to: t + 6e5 });
+    if (t == null) { closePop(); return; }
+    const mid = mk ? t : t + 3e5; // o meio do pedaço de 10 min
+    const a = mid - 30 * 6e4, b = Math.min(Date.now(), mid + 30 * 6e4);
+    const txt = document.createElement("span"), go = document.createElement("button");
+    txt.textContent = mk ? mk.dataset.tip : tipOf(p.i, p.st);
+    go.type = "button"; go.className = "btn small";
+    go.textContent = `Abrir ${hhmm(a)}–${hhmm(b)} nos gráficos`;
+    go.addEventListener("click", () => { closePop(); showRange(a, b); });
+    pop.replaceChildren(txt, go);
+    tip.hidden = true;
+    pop.hidden = false;
+    // o cursor fica marcando o ponto do balão
+    cur.hidden = false;
+    cur.style.left = e.clientX - box.getBoundingClientRect().left + "px";
+    const fr = box.getBoundingClientRect();
+    pop.style.left = Math.min(fr.width - pop.offsetWidth, Math.max(0, e.clientX - fr.left - pop.offsetWidth / 2)) + "px";
+    pop.style.top = e.clientY - fr.top + 12 + "px";
+    go.focus({ preventScroll: true });
   }, sig);
+  document.addEventListener("click", (e) => { if (!pop.hidden && !box.contains(e.target)) closePop(); }, sig);
+  document.addEventListener("keydown", (e) => { if (e.key === "Escape" && !pop.hidden) closePop(); }, sig);
 }
 
 // 2.90.0 (avaliação A4): a legenda só traz o que aparece na fita
@@ -320,8 +344,11 @@ async function ftFetch(from, to) {
 let ftSeq = 0;
 const ftMode = () => (localGet("ftMode", "dia") === "semana" ? "semana" : "dia");
 
-async function refreshAgFita() {
+async function refreshAgFita(force) {
   if (!api.GetDayStrip) return;
+  // 2.102.0: com o balão aberto, a atualização de cada minuto (e a de um
+  // alerta) espera; só a troca de Dia/Semana redesenha
+  if (!force && document.querySelector("#pageAgora .ft-pop:not([hidden])")) return;
   const my = ++ftSeq, mode = ftMode();
   document.querySelectorAll("#ftSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ft === mode)));
   const d0 = startDay(Date.now());
@@ -363,5 +390,5 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("#ftSeg button");
   if (!b) return;
   localSet("ftMode", b.dataset.ft);
-  refreshAgFita();
+  refreshAgFita(true);
 });

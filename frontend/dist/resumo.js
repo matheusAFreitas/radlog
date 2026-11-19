@@ -63,7 +63,9 @@ function renderSumGaps(r) {
 async function openGapOnChart(g) {
   const pad = Math.max(10 * 6e4, (g.to - g.from) * 0.3);
   const from = g.from - pad, to = Math.min(Date.now(), g.to + pad);
+  const org = zoomOrigin(); // 2.102.0: de que página veio
   await showView("graficos");
+  state.zoomFrom = org;
   state.zoom = { from, to };
   state.zoomStack = [];
   state.doseZoom = { from, to };

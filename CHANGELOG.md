@@ -1,5 +1,77 @@
 # Versões
 
+## 2.102.0
+Zoom dos gráficos (pedido do ACE, com o design aprovado):
+- O zoom vale só enquanto você está nos Gráficos. Saiu da página, ele some,
+  e na volta pela barra lateral os gráficos abrem no período de sempre, ao
+  vivo. Quem chega por um "Ver no gráfico" continua vendo o trecho.
+- A barra do zoom diz de onde o trecho veio ("aberto pelo Fora de casa", com
+  o nome do trecho) e tem o link de volta ("← Fora de casa"). "Sair do zoom"
+  virou "Voltar para 1 h" (o período guardado, que fica marcado de leve), e a
+  barra avisa que o gráfico está parado no trecho. Anotar, Fora de casa,
+  Relatório e Voltar ao zoom anterior foram para o "⋯".
+- Fita do dia: o clique abre um balão com o horário e o que aconteceu, e um
+  botão "Abrir 04:15–05:15 nos gráficos" (1 h em volta do ponto). Não troca
+  mais de tela sozinho. Esc ou clique fora fecha.
+- Arrastar no gráfico só vira zoom depois de uns 24 px (antes eram 8), e
+  mostra o horário do trecho enquanto arrasta. Esc cancela.
+
+**English**
+Chart zoom (ACE's request, with the approved design):
+- Zoom only lasts while you are on Charts. Leave the page and it goes away;
+  coming back from the sidebar, the charts open on the usual period, live.
+  Arriving from a "See on the chart" still shows the stretch.
+- The zoom bar says where the stretch came from ("opened from Away from
+  home", with the stretch's name) and has a link back ("← Away from home").
+  "Exit zoom" became "Back to 1 h" (the saved period, lightly outlined), and
+  the bar says the chart is frozen on the stretch. Note, Away from home,
+  Report and Back to the previous zoom moved into the "⋯".
+- Day strip: a click opens a balloon with the time and what happened, and a
+  button "Open 04:15–05:15 on the charts" (1 h around the point). It no
+  longer switches screens by itself. Esc or a click outside closes it.
+- Dragging on the chart only zooms after about 24 px (it was 8), and shows
+  the stretch's time while dragging. Esc cancels.
+
+## 2.101.16
+- Dose acumulada › a conta, em inglês: o limite saía pela metade em
+  português ("público: 1 mSv/ano above background"). Agora sai inteiro no
+  idioma da tela. A demonstração passou a usar o mesmo nome do limite que o
+  app, e o teste do inglês pega esse caso.
+
+**English**
+- Accumulated dose › the math, in English: the limit came out half in
+  Portuguese ("público: 1 mSv/ano above background"). It now comes out whole
+  in the screen's language. The demo now uses the same limit name as the app,
+  and the English test catches this case.
+
+## 2.101.15
+Itens 133 a 138 da varredura (achados do QA):
+- Medir objeto com o RC102: o ± e o σ do líquido, o "Objeto ÷ fundo" e a
+  precisão vêm todos da dose (na tela, no PDF e nos Eventos), e não mais
+  metade da contagem.
+- Medir objeto, parada no tempo máximo: o "menos que +X" sai uma vez só, e
+  quando quem limita é o fundo medido na hora, a dica diz para medir o fundo
+  por mais tempo ou usar o fundo da casa. Na tela ao vivo, a frase não
+  repete mais "chegou ao tempo máximo".
+- Atividade (Bq): numa pedra solta, as medidas anteriores dizem "pedra
+  solta" em vez da Posição do pote da calibração, e a Posição escrita por
+  você não é mais traduzida pela metade em inglês.
+- Demonstração: a calibração nova grava a Posição nova, como no app.
+
+**English**
+Items 133 to 138 from the sweep (QA findings):
+- Measure object with the RC102: the net ± and σ, "Object ÷ background" and
+  the precision all come from the dose (on screen, in the PDF and in
+  Events), no longer half from the count.
+- Measure object, stop at the time limit: the "less than +X" shows only once,
+  and when the background measured on the spot is what limits, the tip says
+  to measure the background longer or use the home background. On the live
+  screen, the sentence no longer repeats "reached the time limit".
+- Activity (Bq): for a loose stone, past measurements say "loose stone"
+  instead of the calibration jar's Position, and a Position you typed is no
+  longer half translated in English.
+- Demo: a new calibration saves the new Position, as in the app.
+
 ## 2.101.14
 Itens 17, 35 e 68 da varredura (ok do ACE):
 - Medir objeto com o RC102 no automático: a dose também decide. Ele só diz

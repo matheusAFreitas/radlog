@@ -778,12 +778,14 @@ function renderMeasureResult(st) {
   // duas frases em dois pedaços (cada um é traduzido inteiro)
   const bt = $("mBannerText"), s1 = document.createElement("span"), s2 = document.createElement("span");
   s1.textContent = r.doseUp ? `O RC102 contou o mesmo que no fundo (${fmt(r.sigma, 1)}σ), mas a taxa de dose subiu ${sgnUS(r.netUSv)} (${fmt(r.doseSigma, 0)}σ).` : r.level === "nada" ? r.verdict.charAt(0).toUpperCase() + r.verdict.slice(1) + "." : `${mSureTxt(r.sigma)} ${mLevelTxt(objU)}`;
-  s2.textContent = r.doseUp ? doseUpExplain(st.spectrum) : r.belowBg ? "" : measureExplain(r, st.obj, auto, ok);
+  s2.textContent = r.doseUp ? doseUpExplain(st.spectrum) : r.belowBg ? "" : measureExplain(r, st.obj, auto, ok, st.bg);
   bt.replaceChildren(s1, " ", s2);
   // quatro números
   const t = $("mTilesNew");
   t.textContent = "";
-  sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(r.ratio, 1)}× o fundo`);
+  // 2.101.15 (item 133): no RC102 com o ± da dose, a razão também é da dose
+  const liveRatio = rc && r.netErrUSv > 0 && st.bg.usv > 0 ? st.obj.usv / st.bg.usv : r.ratio;
+  sumTile(t, "com o objeto", usvVal(objU), `fundo ${usvVal(st.bg.cpm * bk)} · ${fmt(liveRatio, 1)}× o fundo`);
   if (r.doseUp) sumTile(t, "certeza", mSure(r.doseSigma), `${fmt(r.doseSigma, 0)}σ na dose · ${fmt(r.sigma, 1)}σ na contagem`);
   else sumTile(t, "certeza", r.belowBg ? "abaixo do fundo" : mSure(r.sigma), `${fmt(r.sigma, 1)}σ`);
   glMark(t.lastElementChild.children[2], "sigma");
@@ -1128,7 +1130,16 @@ function doseUpExplain(sp) {
   return hi ? `Isso acontece com gama de energia alta: cada contagem vale mais dose. Aqui bate com o ${hi.nuclide} (${fmt(hi.kev, 0)} keV) que apareceu no espectro.` : "Isso acontece com gama de energia alta: cada contagem vale mais dose.";
 }
 
-function measureExplain(r, obj, auto, k) {
+// 2.101.15 (item 134): no tempo máximo, se o fundo medido na hora pesa mais
+// que o objeto no ± do líquido, medir mais o objeto não ajuda
+function limitBg(r, bg) {
+  const dose = r.netErrUSv > 0 && bg && bg.errUSv > 0;
+  const be = bg ? (dose ? bg.errUSv : bg.errCPM) : 0, ne = dose ? r.netErrUSv : r.netErr;
+  return !!(bg && bg.source !== "casa" && be > 0 && ne > 0 && be * be > (ne * ne) / 2);
+}
+
+// noLim: o "menos que" já vai na linha de baixo (detalhe da medição salva)
+function measureExplain(r, obj, auto, k, bg, noLim) {
   const t = obj ? fmtMin(obj.seconds) : "";
   k = k || 1;
   if (r.stop === "achou") return `Parou em ${t}: a diferença passou de 4σ, bem acima da variação natural da contagem. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
@@ -1136,7 +1147,19 @@ function measureExplain(r, obj, auto, k) {
     ? `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural, mesmo com a contagem igual. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`
     : `Parou em ${t}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.`;
   if (r.stop === "nada") return `Parou em ${t}, quando deu para garantir que o objeto sobe menos de ${fmt(r.pct, 0)}% do fundo (+${thrUS(r, k)}).` + (r.pct > 10 ? " Para procurar algo mais fraco, escolha “+10% do fundo”." : "");
-  if (r.stop === "limite") return `Chegou ao tempo máximo (${t}) sem decidir.` + (r.level === "sim" || r.doseUp || !(r.limit || r.limitUSv) ? "" : ` Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`);
+  if (r.stop === "limite") {
+    if (r.level === "sim" || r.doseUp || !(r.limit || r.limitUSv)) return `Chegou ao tempo máximo (${t}) sem decidir.`;
+    if (limitBg(r, bg)) {
+      const be = phErr(bg, bg.cpm > 0 && bg.usv > 0 ? bg.usv / bg.cpm : k), bt = fmtMin(bg.seconds);
+      if (!noLim && r.level !== "nada") return `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
+      return noLim
+        ? `Chegou ao tempo máximo (${t}) sem decidir. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`
+        : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}. Quem limita é o fundo medido na hora (± ${be} em ${bt}): para ir além, meça o fundo por mais tempo ou use o fundo da casa.`;
+    }
+    // 2.101.15 (item 137): ao vivo, a faixa de cima já diz que chegou ao tempo máximo
+    if (!noLim && r.level !== "nada") return `Chegou ao tempo máximo (${t}) sem decidir. Se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
+    return noLim ? `Chegou ao tempo máximo (${t}) sem decidir. Para ir além, aumente o tempo máximo.` : `Em ${t}, se o objeto emite algo, é menos que +${limUS(r, k)}; para ir além, aumente o tempo máximo.`;
+  }
   return {
     sim: "A diferença é bem maior que a variação natural da contagem. O valor em µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.",
     talvez: "A diferença está perto do limite da variação natural. Use o modo automático para medir até ter certeza.",
@@ -1401,8 +1424,10 @@ function renderMeasureDetail() {
   const dv = rc ? "radiacode" : "gmc", bk = phK(m.bg, dv), ok = phK(m.obj, dv);
   sumTile(t, home ? "Fundo da casa" : "Fundo (objeto longe)", uS(m.bg.cpm, bk), `± ${phErr(m.bg, bk)} · ${m.bg.counts.toLocaleString(LOCALE)} contagens`);
   sumTile(t, "Com o objeto", uS(m.obj.cpm, ok), `± ${phErr(m.obj, ok)} · ${m.obj.counts.toLocaleString(LOCALE)} contagens`);
-  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (r.doseUp ? ` · ${fmt(r.doseSigma, 0)}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
-  if (r.doseUp && m.bg.usv > 0) sumTile(t, "Objeto ÷ fundo", `${fmt(m.obj.usv / m.bg.usv, 2)}×`, `na dose · certeza ${mSure(r.doseSigma)}`);
+  // 2.101.15 (item 133): no RC102 com o ± da dose, os números do líquido são todos da dose
+  const byDose = r.doseUp || (rc && r.netErrUSv > 0);
+  sumTile(t, "Líquido", sgnUS(r.netUSv), `± ${netErr(r, ok)} ` + (rc ? "no detector" : "no tubo") + (byDose ? ` · ${fmt(r.doseSigma, 0).replace("-", "−")}σ na dose` : ""), r.level === "sim" || r.doseUp ? "obj" : "");
+  if (byDose && m.bg.usv > 0) sumTile(t, "Objeto ÷ fundo", `${fmt(m.obj.usv / m.bg.usv, 2)}×`, r.doseUp ? `na dose · certeza ${mSure(r.doseSigma)}` : "na dose");
   else sumTile(t, "Objeto ÷ fundo", `${fmt(r.ratio, 2)}×`, `certeza ${mSure(r.sigma)}`);
   $("mdStats").replaceChildren(measureStats(m));
   renderMeasSpec($("mdSpec"), m.spectrum);
@@ -1411,11 +1436,12 @@ function renderMeasureDetail() {
   $("mdNote").classList.toggle("muted", !m.note);
   let lim = `Limite de detecção: ${uS(mDetLimit(m.bg, m.obj.seconds), ok)} acima do fundo.`;
   if (r.limit || r.limitUSv) lim += ` Se o objeto emite algo, é menos que +${limUS(r, ok)}.`;
-  if (r.doseUp && r.netUSv > 0 && r.netErrUSv > 0) lim += ` Precisão do líquido (pela dose): ±${fmt((r.netErrUSv / r.netUSv) * 100, 0)}%.`;
-  else if (r.netCPM > 0) lim += home
+  if (byDose) {
+    if (r.netUSv > 0 && r.netErrUSv > 0) lim += ` Precisão do líquido (pela dose): ±${fmt((r.netErrUSv / r.netUSv) * 100, 0)}%.`;
+  } else if (r.netCPM > 0) lim += home
     ? ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.1))} com o objeto; para ±5%: ${mDurTxt(mObjSecsFor(m.bg, m.obj, 0.05))}.`
     : ` Precisão do líquido: ±${fmt((r.netErr / r.netCPM) * 100, 0)}%. Para ±10%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.1))} em cada fase; para ±5%: ${mDurTxt(mSecsFor(m.bg, m.obj, 0.05))}.`;
-  if (r.stop) lim = measureExplain(r, m.obj, true, ok) + " " + lim;
+  if (r.stop) lim = measureExplain(r, m.obj, true, ok, m.bg, true) + " " + lim;
   $("mdLimits").textContent = lim;
   // 2.101.5: com o Editar aberto na mesma medição, o digitado fica
   const ef = $("mdEditForm");
@@ -1514,7 +1540,7 @@ function wireMeasureSaved() {
   const cur = () => (state.measurements || []).find((x) => x.id === state.mSel);
   $("btnMOpenSaved").addEventListener("click", () => { const id = state.mLastSaved; setMeasureMode("salvas"); if (id) { state.mSel = id; renderMeasureHistory(); drawMeasureChart(); } });
   $("btnMdReport").addEventListener("click", (e) => { const m = cur(); if (m) exportMeasureReport(m.id, e.currentTarget); });
-  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3); });
+  $("btnMdChart").addEventListener("click", () => { const m = cur(); if (m) showRange((m.bg.source === "casa" ? m.obj.start : m.bg.start) - 120e3, m.obj.end + 120e3, { name: mNameTxt(m) }); });
   $("btnMdEdit").addEventListener("click", () => { const f = $("mdEditForm"); f.hidden = !f.hidden; if (!f.hidden) $("mdEditName").focus(); });
   $("btnMdSave").addEventListener("click", async () => {
     const m = cur();

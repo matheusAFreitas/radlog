@@ -490,16 +490,7 @@ func (a *App) feedMeasureDev(f measFeed) {
 			if ph.CPM > 0 {
 				k = ph.USv / ph.CPM
 			}
-			sign := "+"
-			if r.NetUSv < 0 {
-				sign = "−"
-			}
-			logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ) — %s",
-				evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
-			if r.DoseUp { // 2.101.6: a dose subiu: o ± e o σ são os da dose
-				logText = fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ na dose) — %s",
-					evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErrUSv), br(r.DoseSigma, false), r.Verdict)
-			}
+			logText = measEventText(evName, via, r, k, f.dev == "radiacode")
 			{
 				when := m.Bg.Start
 				if m.Bg.Source == "casa" {
@@ -911,4 +902,20 @@ func (a *App) autoMeasureReport(id int64) {
 		a.logf("relatório da medição %d: %v", id, err)
 	}
 	a.emit("measure", st)
+}
+
+// measEventText é a linha dos Eventos de uma medição. 2.101.6: com a dose
+// subindo, o ± e o σ são os da dose; 2.101.15 (item 133): no RC102 com o ±
+// da dose, sempre (o líquido em µSv/h é da dose).
+func measEventText(evName, via string, r MeasureResult, k float64, rc bool) string {
+	sign := "+"
+	if r.NetUSv < 0 {
+		sign = "−"
+	}
+	if r.DoseUp || (rc && r.NetErrUSv > 0) {
+		return fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ na dose) — %s",
+			evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErrUSv), br(r.DoseSigma, false), r.Verdict)
+	}
+	return fmt.Sprintf("Medição de %s%s: %s%s ± %s µSv/h sobre o fundo (%sσ) — %s",
+		evName, via, sign, usvTxt(math.Abs(r.NetUSv)), usvTxt(r.NetErr*k), br(r.Sigma, false), r.Verdict)
 }
