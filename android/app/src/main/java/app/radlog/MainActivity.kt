@@ -59,6 +59,7 @@ class MainActivity : Activity() {
         w.setBackgroundColor(0xFF0B0E10.toInt())
         w.settings.javaScriptEnabled = true
         w.settings.domStorageEnabled = true
+        w.settings.setSupportZoom(false) // a página não amplia; o gráfico do espectro tem zoom próprio
         w.settings.allowFileAccess = false
         w.settings.allowContentAccess = false
         w.webViewClient = object : WebViewClient() {

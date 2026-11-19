@@ -294,7 +294,9 @@ function rc102() {
 // acima do contínuo. Pelo Bluetooth cada leitura é pesada: relê a cada 10 s,
 // e o acumulado (fundo) a cada 10 min, só com a tela aberta.
 const sp = { mode: "tela", log: true, cur: null, acc: null, accAt: 0, peaks: [], timer: 0, busy: false, err: "", tip: "" };
-const SP_W = 344, SP_H = 230, SP_L = 30, SP_B = 20, SP_EMAX = 3000;
+const SP_W = 344, SP_H = 230, SP_L = 30, SP_B = 20, SP_EMAX = 3000, SP_MINW = 40;
+// faixa de energia à vista (zoom com dois dedos, arrastar com um quando ampliado)
+sp.v0 = 0; sp.v1 = SP_EMAX;
 
 function spOpen() {
   state.rcView = "espectro";
@@ -397,7 +399,21 @@ function isoSheet(label) {
 function spRedraw() { if (state.tab === "rc102" && state.rcView === "espectro" && $("sheet").hidden) { const y = $("main").scrollTop; render(); $("main").scrollTop = y; } }
 
 const spEn = (a, i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) * (i + 0.5);
-const spX = (e) => SP_L + (Math.min(Math.max(e, 0), SP_EMAX) / SP_EMAX) * (SP_W - SP_L - 4);
+const spX = (e) => SP_L + ((Math.min(Math.max(e, sp.v0), sp.v1) - sp.v0) / (sp.v1 - sp.v0)) * (SP_W - SP_L - 4);
+const spE = (x) => sp.v0 + ((x - SP_L) / (SP_W - SP_L - 4)) * (sp.v1 - sp.v0);
+const spZoomed = () => sp.v0 > 0 || sp.v1 < SP_EMAX;
+function spView(a, b) {
+  let w = Math.min(SP_EMAX, Math.max(SP_MINW, b - a));
+  a = Math.max(0, Math.min(a, SP_EMAX - w));
+  sp.v0 = a; sp.v1 = a + w;
+}
+// marcas do eixo: passo redondo para a faixa à vista
+function spTicks() {
+  const w = sp.v1 - sp.v0, st = [10, 20, 50, 100, 200, 250, 500, 1000].find((x) => w / x <= 4) || 1000;
+  const out = [];
+  for (let e = Math.ceil(sp.v0 / st) * st; e <= sp.v1 + 1e-6; e += st) out.push(e);
+  return out;
+}
 
 // média de contagens por canal em cada coluna da tela
 function spCols(s) {
@@ -406,7 +422,7 @@ function spCols(s) {
   // espectro e faria um "pico" falso em ~3.000 keV
   for (let i = 0; i < s.counts.length - 1; i++) {
     const e = spEn(s.a, i);
-    if (e < 0 || e > SP_EMAX) continue;
+    if (e < sp.v0 || e > sp.v1) continue;
     const k = Math.min(n - 1, Math.floor(spX(e) - SP_L));
     sum[k] += s.counts[i]; cnt[k]++;
   }
@@ -429,8 +445,8 @@ function spSvg(s) {
   let d = "";
   cols.forEach((v, k) => { if (v != null) d += `${d ? "L" : "M"}${(SP_L + k + 0.5).toFixed(1)} ${y(v).toFixed(1)}`; });
   const grid = [0.25, 0.5, 0.75, 1].map((f) => `M${SP_L} ${(SP_H - SP_B - f * (SP_H - SP_B - 8)).toFixed(0)}H${SP_W - 4}`).join("");
-  const ticks = [0, 1000, 2000, 3000].map((e) => `<text x="${spX(e)}" y="${SP_H - 5}" text-anchor="${e === 0 ? "start" : e === 3000 ? "end" : "middle"}">${e}</text>`).join("");
-  const marks = spGrade(sp.peaks, sp.mode === "tela").slice(0, 6).map((p) => `<path d="M${spX(p.kev).toFixed(1)} ${SP_H - SP_B}V8" class="pk"/>`).join("");
+  const ticks = spTicks().map((e) => `<text x="${spX(e)}" y="${SP_H - 5}" text-anchor="${spX(e) < SP_L + 12 ? "start" : spX(e) > SP_W - 16 ? "end" : "middle"}">${e}</text>`).join("");
+  const marks = spGrade(sp.peaks, sp.mode === "tela").slice(0, 6).filter((p) => p.kev >= sp.v0 && p.kev <= sp.v1).map((p) => `<path d="M${spX(p.kev).toFixed(1)} ${SP_H - SP_B}V8" class="pk"/>`).join("");
   return `<svg id="spSvg" viewBox="0 0 ${SP_W} ${SP_H}" role="img" aria-label="${esc(T("Espectro"))}"><path d="${grid}" class="gr"/>${marks}<path d="${d}" class="ln"/><g class="ax">${ticks}<text x="${SP_W - 4}" y="12" text-anchor="end">${esc(sp.log ? T("contagens (log)") : T("contagens"))}</text></g><line id="spCur" y1="8" y2="${SP_H - SP_B}" class="cur" visibility="hidden"/></svg>`;
 }
 
@@ -440,7 +456,7 @@ function espectro() {
   let h = `<div class="subhead"><button id="spBack" aria-label="${esc(T("Voltar"))}">‹</button><b>${esc(T("Espectro"))}</b><span class="small">${s ? esc(T("juntando há {0}", spDur(s.seconds))) : ""}</span></div>`;
   h += `<div class="chips"><span class="seg">${seg("tela", T("Tela do RC102"))}${seg("acc", T("Acumulado"))}</span><button id="spLog" class="${sp.log ? "on" : ""}">${esc(T("Escala log"))}</button></div>`;
   if (sp.err) h += `<div class="card"><span class="err">${esc(sp.err)}</span></div>`;
-  h += `<div class="card sp">${s ? spSvg(s) : `<span class="small">${esc(T("Lendo o espectro do RC102…"))}</span>`}<div class="small" id="spTip">${sp.tip || esc(T("Toque no gráfico para ver a energia e a contagem."))}</div></div>`;
+  h += `<div class="card sp">${spZoomed() ? `<div class="spz"><span class="small">${esc(T("{0} a {1} keV", fmt(sp.v0, 0), fmt(sp.v1, 0)))}</span><button id="spAll">${esc(T("Ver tudo"))}</button></div>` : ""}<div id="spBox">${s ? spSvg(s) : `<span class="small">${esc(T("Lendo o espectro do RC102…"))}</span>`}</div><div class="small" id="spTip">${sp.tip || esc(T("Toque no gráfico para ver a energia e a contagem. Dois dedos ampliam."))}</div></div>`;
   const pk = spGrade(sp.peaks, sp.mode === "tela").slice(0, 8);
   h += `<div class="card"><span class="k">${esc(sp.mode === "tela" ? T("Picos acima do fundo de casa") : T("Picos achados"))}</span>`
     + (pk.length ? pk.map((p) => `<div class="pkrow" data-pk="${esc(p.nuclide)}"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(T(p.nuclide))}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small lv-${p.lv}">${esc(T(p.lv))}</span></div>`).join("")
@@ -465,22 +481,74 @@ function bindSpectrum() {
       catch (e) { $("zErr").textContent = errText(e); $("zOk").disabled = false; }
     };
   });
-  const svg = $("spSvg");
+  q("spAll", () => { spView(0, SP_EMAX); spRedraw(); });
+  const box = $("spBox");
   const s = sp.mode === "acc" ? sp.acc : sp.cur;
-  if (!svg || !s) return;
-  const cols = spCols(s);
-  const move = (ev) => {
-    const r = svg.getBoundingClientRect();
-    const x = ((ev.clientX - r.left) / r.width) * SP_W;
-    const k = Math.round(x - SP_L - 0.5);
+  if (!box || !s || !$("spSvg")) return;
+  let cols = spCols(s);
+  const svgX = (cx) => { const r = $("spSvg").getBoundingClientRect(); return ((cx - r.left) / r.width) * SP_W; };
+  const draw = () => {
+    box.innerHTML = spSvg(s); cols = spCols(s);
+    const z = document.querySelector(".spz .small");
+    if (z) z.textContent = T("{0} a {1} keV", fmt(sp.v0, 0), fmt(sp.v1, 0));
+  };
+  const cursor = (cx) => {
+    const x = svgX(cx), k = Math.round(x - SP_L - 0.5);
     if (k < 0 || k >= cols.length) return;
-    const e = ((x - SP_L) / (SP_W - SP_L - 4)) * SP_EMAX;
-    $("spCur").setAttribute("x1", x); $("spCur").setAttribute("x2", x); $("spCur").setAttribute("visibility", "visible");
-    sp.tip = esc(T("{0} keV · {1} contagens por canal", fmt(e, 0), fmt(cols[k] || 0, cols[k] < 10 ? 1 : 0)));
+    const c = $("spCur");
+    c.setAttribute("x1", x); c.setAttribute("x2", x); c.setAttribute("visibility", "visible");
+    sp.tip = esc(T("{0} keV · {1} contagens por canal", fmt(spE(x), 0), fmt(cols[k] || 0, cols[k] < 10 ? 1 : 0)));
     $("spTip").innerHTML = sp.tip;
   };
-  svg.addEventListener("pointerdown", (e) => { svg.setPointerCapture(e.pointerId); move(e); });
-  svg.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "touch") move(e); });
+  // dedos na tela: um mostra a energia (ou arrasta, quando ampliado); dois
+  // ampliam em volta do meio; toque duplo volta a ver tudo
+  const pts = new Map();
+  let g = null, lastTap = 0;
+  const start = () => {
+    const p = [...pts.values()];
+    if (p.length >= 2) {
+      const a = svgX(p[0].x), b = svgX(p[1].x);
+      g = { pinch: true, d: Math.max(8, Math.abs(a - b)), e: spE((a + b) / 2), v0: sp.v0, v1: sp.v1 };
+    } else if (p.length === 1) g = { x: p[0].x, v0: sp.v0, v1: sp.v1, pan: false };
+  };
+  box.addEventListener("pointerdown", (e) => {
+    try { box.setPointerCapture(e.pointerId); } catch (_) { /* */ }
+    pts.set(e.pointerId, { x: e.clientX });
+    start();
+    if (pts.size === 1) {
+      if (Date.now() - lastTap < 300 && spZoomed()) { spView(0, SP_EMAX); spRedraw(); return; }
+      lastTap = Date.now();
+      cursor(e.clientX);
+    }
+  });
+  box.addEventListener("pointermove", (e) => {
+    if (!pts.has(e.pointerId)) { if (e.pointerType === "mouse" && e.buttons) cursor(e.clientX); return; }
+    pts.get(e.pointerId).x = e.clientX;
+    if (!g) return;
+    const p = [...pts.values()];
+    if (g.pinch && p.length >= 2) {
+      const a = svgX(p[0].x), b = svgX(p[1].x), d = Math.max(8, Math.abs(a - b));
+      const w = ((g.v1 - g.v0) * g.d) / d, f = ((a + b) / 2 - SP_L) / (SP_W - SP_L - 4);
+      spView(g.e - f * w, g.e - f * w + w);
+      draw();
+    } else if (!g.pinch) {
+      const dx = svgX(e.clientX) - svgX(g.x);
+      if (spZoomed() && (g.pan || Math.abs(dx) > 10)) {
+        g.pan = true;
+        const de = (dx / (SP_W - SP_L - 4)) * (g.v1 - g.v0);
+        spView(g.v0 - de, g.v1 - de);
+        draw();
+      } else cursor(e.clientX);
+    }
+  });
+  const end = (e) => {
+    pts.delete(e.pointerId);
+    if (g && g.pinch && pts.size < 2) { g = null; spRedraw(); return; } // marcas e faixa no lugar
+    if (g && g.pan && !pts.size) { g = null; spRedraw(); return; }
+    if (!pts.size) g = null;
+  };
+  box.addEventListener("pointerup", end);
+  box.addEventListener("pointercancel", end);
 }
 
 // ---------------- Medir objeto ----------------

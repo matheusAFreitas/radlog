@@ -186,6 +186,9 @@ input.code:focus { outline: none; border-color: var(--accent); }
 .chips { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .chips > button { font-size: 12.5px; border: 1px solid var(--line-2); border-radius: 999px; padding: 0 12px; min-height: 36px; color: var(--muted); }
 .chips > button.on { color: #08130D; background: var(--accent); border-color: transparent; }
+#spBox { touch-action: none; }
+.spz { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 6px; }
+.spz button { background: var(--surface-2); color: var(--fg); border: 1px solid var(--line-2); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 12.5px; }
 .sp svg { width: 100%; height: auto; display: block; touch-action: none; }
 .sp .gr { stroke: var(--line); stroke-width: 1; fill: none; }
 .sp .ln { stroke: var(--rc); stroke-width: 1.6; fill: none; stroke-linejoin: round; }
