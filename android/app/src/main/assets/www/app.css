@@ -193,6 +193,11 @@ input.code:focus { outline: none; border-color: var(--accent); }
 .sp .cur { stroke: var(--fg); stroke-width: 1; opacity: .6; }
 .sp .ax { fill: var(--dim); font-family: var(--mono); font-size: 10px; }
 .pkrow { display: grid; grid-template-columns: 76px minmax(0,1fr) auto; gap: 8px; align-items: center; min-height: 36px; border-top: 1px solid var(--line); font-size: 13px; }
+.pkrow[data-pk] { cursor: pointer; }
+.pkrow .lv-forte { color: var(--accent); } .pkrow .lv-fraco { color: var(--dim); }
+.isoem { display: grid; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.isoem div { display: grid; grid-template-columns: 28px 1fr; gap: 6px; }
+.isoem b { font-family: var(--mono); color: var(--fg); }
 .pkrow .m { font-family: var(--mono); }
 .pkrow > span:nth-child(2) { display: grid; }
 .pkrow i { font-style: normal; font-size: 11.5px; color: var(--muted); }

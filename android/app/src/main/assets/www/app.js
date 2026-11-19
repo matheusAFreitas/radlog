@@ -336,6 +336,62 @@ async function spTick(force) {
   spRedraw();
 }
 
+// Gradua os picos que o Go achou. O σ sozinho não serve: com 1 h de espectro
+// qualquer diferença pequena entre a tela e o acumulado (radônio que muda de
+// lugar para lugar, deriva do ganho com a temperatura) passa de 5σ. Então
+// pesa também quanto o pico sobe acima do que tem embaixo (net ÷ cont) e se
+// outra linha da mesma série apareceu junto.
+// - 186 keV: o Ra-226 também solta 186,2 keV e está em qualquer coisa com
+//   urânio; U-235 só se desse para ver o 143,8 keV (que não é procurado),
+//   então vira Ra-226 (ou U-235).
+// - Linha sozinha que sobe pouco (< 10% do que tem embaixo) na tela é ruído
+//   ou deriva: não aparece.
+function spGrade(peaks, tela) {
+  const ps = (peaks || []).map((p) => (Math.abs(p.kev - 185.7) < 1
+    ? { ...p, nuclide: "Ra-226 (ou U-235)", group: "Rádio-226 (série do urânio)" } : { ...p }));
+  const n = {};
+  for (const p of ps) n[p.group] = (n[p.group] || 0) + 1;
+  const out = [];
+  for (const p of ps) {
+    const r = p.cont > 0 ? p.net / p.cont : 1, conf = n[p.group] > 1;
+    if (tela && !conf && r < 0.1) continue;
+    p.lv = p.sigma >= 10 && r >= 0.3 && (conf || r >= 0.6) ? "forte" : p.sigma >= 5 && (r >= 0.1 || conf) ? "provável" : "fraco";
+    out.push(p);
+  }
+  const rank = { forte: 0, "provável": 1, fraco: 2 };
+  return out.sort((a, b) => rank[a.lv] - rank[b.lv] || b.sigma - a.sigma);
+}
+
+// Detalhe do isótopo, com o mesmo texto do desktop (iso.js, gerado do
+// radiacode.js): natural ou não, o que solta, de onde vem, meia-vida, onde
+// aparece e as linhas dele neste espectro.
+function isoSheet(label) {
+  const I = window.ISO;
+  if (!I) return;
+  const keys = label.startsWith("Ra-226") ? ["Ra-226", "U-235"] : [label];
+  const peaks = spGrade(sp.peaks, sp.mode === "tela");
+  let h = "";
+  keys.forEach((k, ki) => {
+    const o = I.origin[k];
+    if (!o) return;
+    if (ki) h += `<p class="hint">${esc(T("Na mesma energia (186 keV):"))}</p>`;
+    h += `<h3>${esc(k)} <span class="small">${esc(T(o[1]))}</span></h3>`;
+    h += `<div class="small">${esc(o[0] ? T("Natural") : T("Feito pelo homem"))} · ${esc(T("meia-vida {0}", T(o[3])))}</div>`;
+    h += `<p>${esc(T(o[2]))}</p>`;
+    h += `<p><b>${esc(T("Onde aparece"))}:</b> ${esc(T(o[4]))}</p>`;
+    const em = [...(I.emit[k] || "")];
+    if (em.length) h += `<div class="isoem">${em.map((x) => `<div><b>${x === "x" ? "rX" : x}</b><span>${esc(T(I.tip[x]))}</span></div>`).join("")}</div>`;
+  });
+  const mine = peaks.filter((p) => p.nuclide === label);
+  const fam = I.fam[keys[0]];
+  const kin = peaks.filter((p) => p.nuclide !== label && ((fam && I.fam[p.nuclide.split(" ")[0]] === fam) || p.group === (mine[0] && mine[0].group)));
+  if (mine.length) {
+    h += `<p><b>${esc(T("Neste espectro"))}:</b> ${mine.map((p) => esc(T("{0} keV ({1}, {2} σ)", fmt(p.kev, 0), T(p.lv), fmt(p.sigma, 0)))).join(" · ")}</p>`;
+    h += `<p class="hint">${esc(kin.length ? T("Outras linhas da mesma série apareceram junto ({0}): isso confirma.", kin.map((p) => p.nuclide.split(" ")[0] + " " + fmt(p.kev, 0)).join(", ")) : T("Só esta linha apareceu. Pode ser outra coisa na mesma energia; com mais tempo fica mais claro."))}</p>`;
+  }
+  sheet(h + `<button class="btn ghost" onclick="closeSheet()">${esc(T("Fechar"))}</button>`);
+}
+
 function spRedraw() { if (state.tab === "rc102" && state.rcView === "espectro" && $("sheet").hidden) { const y = $("main").scrollTop; render(); $("main").scrollTop = y; } }
 
 const spEn = (a, i) => a[0] + a[1] * (i + 0.5) + a[2] * (i + 0.5) * (i + 0.5);
@@ -344,7 +400,9 @@ const spX = (e) => SP_L + (Math.min(Math.max(e, 0), SP_EMAX) / SP_EMAX) * (SP_W 
 // média de contagens por canal em cada coluna da tela
 function spCols(s) {
   const n = SP_W - SP_L - 4, sum = new Float64Array(n), cnt = new Uint16Array(n);
-  for (let i = 0; i < s.counts.length; i++) {
+  // o último canal junta tudo que passou do fim da escala (estouro): não é
+  // espectro e faria um "pico" falso em ~3.000 keV
+  for (let i = 0; i < s.counts.length - 1; i++) {
     const e = spEn(s.a, i);
     if (e < 0 || e > SP_EMAX) continue;
     const k = Math.min(n - 1, Math.floor(spX(e) - SP_L));
@@ -370,7 +428,7 @@ function spSvg(s) {
   cols.forEach((v, k) => { if (v != null) d += `${d ? "L" : "M"}${(SP_L + k + 0.5).toFixed(1)} ${y(v).toFixed(1)}`; });
   const grid = [0.25, 0.5, 0.75, 1].map((f) => `M${SP_L} ${(SP_H - SP_B - f * (SP_H - SP_B - 8)).toFixed(0)}H${SP_W - 4}`).join("");
   const ticks = [0, 1000, 2000, 3000].map((e) => `<text x="${spX(e)}" y="${SP_H - 5}" text-anchor="${e === 0 ? "start" : e === 3000 ? "end" : "middle"}">${e}</text>`).join("");
-  const marks = sp.peaks.slice(0, 6).map((p) => `<path d="M${spX(p.kev).toFixed(1)} ${SP_H - SP_B}V8" class="pk"/>`).join("");
+  const marks = spGrade(sp.peaks, sp.mode === "tela").slice(0, 6).map((p) => `<path d="M${spX(p.kev).toFixed(1)} ${SP_H - SP_B}V8" class="pk"/>`).join("");
   return `<svg id="spSvg" viewBox="0 0 ${SP_W} ${SP_H}" role="img" aria-label="${esc(T("Espectro"))}"><path d="${grid}" class="gr"/>${marks}<path d="${d}" class="ln"/><g class="ax">${ticks}<text x="${SP_W - 4}" y="12" text-anchor="end">${esc(sp.log ? T("contagens (log)") : T("contagens"))}</text></g><line id="spCur" y1="8" y2="${SP_H - SP_B}" class="cur" visibility="hidden"/></svg>`;
 }
 
@@ -381,9 +439,9 @@ function espectro() {
   h += `<div class="chips"><span class="seg">${seg("tela", T("Tela do RC102"))}${seg("acc", T("Acumulado"))}</span><button id="spLog" class="${sp.log ? "on" : ""}">${esc(T("Escala log"))}</button></div>`;
   if (sp.err) h += `<div class="card"><span class="err">${esc(sp.err)}</span></div>`;
   h += `<div class="card sp">${s ? spSvg(s) : `<span class="small">${esc(T("Lendo o espectro do RC102…"))}</span>`}<div class="small" id="spTip">${sp.tip || esc(T("Toque no gráfico para ver a energia e a contagem."))}</div></div>`;
-  const pk = sp.peaks.slice(0, 8);
+  const pk = spGrade(sp.peaks, sp.mode === "tela").slice(0, 8);
   h += `<div class="card"><span class="k">${esc(sp.mode === "tela" ? T("Picos acima do fundo de casa") : T("Picos achados"))}</span>`
-    + (pk.length ? pk.map((p) => `<div class="pkrow"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(p.nuclide)}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small">${esc(p.sigma >= 5 ? T("forte") : T("provável"))}</span></div>`).join("")
+    + (pk.length ? pk.map((p) => `<div class="pkrow" data-pk="${esc(p.nuclide)}"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(p.nuclide)}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small lv-${p.lv}">${esc(T(p.lv))}</span></div>`).join("")
       : `<span class="small">${esc(s && s.seconds <= 60 ? T("Ainda pouco tempo: os picos aparecem depois de 1 min.") : T("Nenhum pico conhecido acima do esperado."))}</span>`)
     + `</div>`;
   h += `<span class="small">${esc(sp.mode === "tela" ? T("A tela do RC102 é o espectro que aparece nele e recomeça quando zera. O acumulado junta tudo desde que o aparelho foi zerado e serve de fundo de casa.") : T("O acumulado é o espectro que o RC102 junta sozinho. O app só mostra, não zera."))}</span>`;
@@ -395,6 +453,7 @@ function bindSpectrum() {
   const q = (id, f) => { const el = $(id); if (el) el.onclick = f; };
   q("spBack", spClose);
   q("spLog", () => { sp.log = !sp.log; spRedraw(); });
+  document.querySelectorAll("[data-pk]").forEach((b) => (b.onclick = () => isoSheet(b.dataset.pk)));
   document.querySelectorAll("[data-spm]").forEach((b) => (b.onclick = () => { if (sp.mode === b.dataset.spm) return; sp.mode = b.dataset.spm; sp.peaks = []; sp.tip = ""; spRedraw(); spTick(false); }));
   q("spReset", () => {
     sheet(`<h3>${esc(T("Zerar o espectro da tela do RC102?"))}</h3><p>${esc(T("O aparelho recomeça o espectro que aparece na tela dele. As contagens não se perdem: continuam no acumulado."))}</p><span class="err" id="zErr"></span><button class="btn danger" id="zOk">${esc(T("Zerar"))}</button><button class="btn ghost" onclick="closeSheet()">${esc(T("Cancelar"))}</button>`);
@@ -1262,7 +1321,13 @@ const mock = (() => {
           }
           return ok({ from: f, to: t, rowSec: rs, eMax: 1500, bins: 256, rows, gap, cps, secs: [] });
         }
-        case "AnalyzeSpectrum": return ok([{ kev: 352, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 9 }, { kev: 609, nuclide: "Bi-214", group: "Rádio-226 (série do urânio)", sigma: 7 }, { kev: 1461, nuclide: "K-40", group: "Potássio-40", sigma: 4 }]);
+        case "AnalyzeSpectrum": return ok([ // o caso do ACE em 19/11: escritório × fundo de casa
+          { kev: 351.9, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 31, net: 900, cont: 6000 },
+          { kev: 295.2, nuclide: "Pb-214", group: "Rádio-226 (série do urânio)", sigma: 19, net: 520, cont: 4800 },
+          { kev: 185.7, nuclide: "U-235", group: "Urânio-235", sigma: 8, net: 400, cont: 5200 },
+          { kev: 661.7, nuclide: "Cs-137", group: "Césio-137", sigma: 6, net: 150, cont: 3600 },
+          { kev: 911.2, nuclide: "Ac-228", group: "Tório-232 (série)", sigma: 5, net: 110, cont: 2300 },
+          { kev: 1460.8, nuclide: "K-40", group: "Potássio-40", sigma: 12, net: 700, cont: 1000 }]);
         case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);
       }
