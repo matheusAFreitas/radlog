@@ -366,7 +366,9 @@
     const real = rl.on ? realCounts() : null;
     const counts = real ? real.c : sp.counts, tNow = real ? real.t : sp.t;
     const bgRate = real && rl.acc && rl.acc.seconds > 0 && rl.mode === "agora" ? Float64Array.from(rl.acc.counts, (v) => v / rl.acc.seconds) : null;
-    const nch = counts.length;
+    // 2.102.1: o último canal do RC102 junta tudo que passou do fim da escala
+    // (estouro): não é espectro e faria um "pico" falso em ~3.000 keV
+    const nch = counts.length - (real && counts.length > 1 ? 1 : 0);
     const f = fit(cv, spH()); if (!f) return;
     const { g, w, h } = f, L = 44, R = 10, T = 10, B = 24, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
@@ -514,21 +516,26 @@
   // gaussiana ajustada e a crista.
   const pk = { sel: null, win: null, range: null, drag: null };
   const curPeaks = () => (rl.on ? (rl.mode === "acc" ? rl.accPeaks : rl.peaks) || [] : []);
-  const SURE = (sg) => (sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
+  // 2.102.1: o Go gradua cada linha (level: forte, provável, fraco) pelo σ,
+  // por quanto ela sobe acima do que tem embaixo e por outra linha da mesma
+  // série; sem level (versão antiga), vale só o σ
+  const LV_RANK = { forte: 0, "provável": 1, fraco: 2 };
+  const SURE = (sg, lv) => (lv ? [["certo", "sure"], ["provável", "likely"], ["fraco", "weak"]][LV_RANK[lv] ?? 2] : sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
   function isoList(peaks) {
     const by = {};
     for (const p of peaks) {
-      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0 });
+      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0, level: null });
       o.lines.push(p);
       o.sigma = Math.max(o.sigma, p.sigma);
+      if (p.level && (o.level == null || LV_RANK[p.level] < LV_RANK[o.level])) o.level = p.level;
     }
-    const out = Object.values(by).sort((a, b) => b.sigma - a.sigma);
+    const out = Object.values(by).sort((a, b) => (LV_RANK[a.level] ?? 3) - (LV_RANK[b.level] ?? 3) || b.sigma - a.sigma);
     for (const o of out) o.lines.sort((a, b) => b.sigma - a.sigma);
     return out;
   }
   // "certo" pede também a identidade (2.69): sem vizinho que não deu para
   // descartar, ou outra linha da mesma família achada
-  const sureOf = (o) => { const r = SURE(o.sigma); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
+  const sureOf = (o) => { const r = SURE(o.sigma, o.level); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
   function isoListId(peaks) { const list = isoList(peaks); for (const o of list) o.id = isoIdent(o, peaks, isAccMode()); return list; }
   function isoRender(peaks) {
     const box = $("rcIsos"), list = isoListId(peaks);
@@ -771,7 +778,8 @@
     const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = escHtml(o.nuclide);
     const fw = goFW(p.kev), tol = 0.2 * fw;
     const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
-    const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
+    const ex = SURE(o.sigma, o.level)[1];
+    const exist = ex === "sure" ? [tr("Sim, forte"), 3, "sure"] : ex === "likely" ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
     // vizinho que também foi achado: os dois devem somar nesse pico (QA 2.69.0)
     const mix = id.neigh.filter((x) => !x.out && x.why === "found").map((x) => x.n);
     const ident = !id.ok ? [tr("Provavelmente"), 2, "likely"] : mix.length ? [tr(`Sim, junto com ${mix.join(", ")}`), 2, "sure"] : [tr("Sim"), 3, "sure"];
@@ -783,6 +791,11 @@
     const sg = nf(o.sigma, o.sigma < 10 ? 1 : 0);
     if (o.sigma >= 5) h += chk(true, tr("Não é flutuação"), tr(`${sg} σ: a chance de ser só ruído é praticamente zero.`) + " " + (acc ? tr("Precisa de pelo menos 5 σ para entrar na lista e 10 σ para \"certo\".") : tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ.")));
     else h += chk(false, tr("Pode ser flutuação"), tr(`${sg} σ: pode ser acaso.`) + " " + tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ."));
+    // 2.102.1: o σ sozinho não basta; conta também quanto o pico sobe acima do que tem embaixo
+    if (o.level && p.cont > 0) {
+      const pct = nf((p.net / p.cont) * 100, 0);
+      h += chk(p.net / p.cont >= 0.3, tr(`Sobe ${pct}% acima do que tem embaixo`), tr("Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho)."));
+    }
     if (p.center) {
       const d = Math.abs(p.center - p.kev);
       h += chk(d <= tol, tr(`A energia bate com o ${o.nuclide} (${nf(p.kev, 1)} keV)`), tr(`O centro caiu a ${nf(d, 1)} keV da linha.`) + " " + (acc ? tr(`O app aceita até ${nf(tol, 0)} keV aqui (um quinto da largura de um pico nessa energia).`) : d <= tol ? tr(`Dentro de ${nf(tol, 0)} keV (um quinto da largura de um pico nessa energia).`) : tr("Mais longe que o normal: pode ter outro pico do lado.")));

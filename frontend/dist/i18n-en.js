@@ -4940,7 +4940,8 @@ const I18N_EN = {
 "Mais ações do trecho": "More actions for this stretch",
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
-"gráfico parado neste trecho": "chart frozen on this stretch"
+"gráfico parado neste trecho": "chart frozen on this stretch",
+"Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone)."
 },
 "patterns": [
 [
@@ -13424,6 +13425,15 @@ const I18N_EN = {
 "The ${1} also rose, only less.",
 [
 " também subiu, só que menos."
+]
+],
+[
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo$",
+"Rises ${1}% above what is underneath",
+[
+"Sobe ",
+"% acima do que tem embaixo"
 ]
 ],
 [

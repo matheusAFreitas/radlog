@@ -28,6 +28,8 @@ type SpecPeak struct {
 	Cont   float64 `json:"cont,omitempty"`
 	Half   float64 `json:"half,omitempty"`
 	Side   float64 `json:"side,omitempty"`
+	// 2.102.1: "forte", "provável" ou "fraco" (gradePeaks), na tela do espectro
+	Level string `json:"level,omitempty"`
 }
 
 type specLine struct {
@@ -262,9 +264,69 @@ func (a *App) SpectrumContinuum(s MeasureSpectrum) []float64 {
 // AnalyzeSpectrum procura as linhas conhecidas num espectro com o fundo (a
 // tela do espectro ao vivo manda o que juntou e o acumulado do aparelho).
 func (a *App) AnalyzeSpectrum(s MeasureSpectrum) []SpecPeak {
-	p := s.findPeaks()
+	p := gradePeaks(s.findPeaks(), !s.bgZero())
 	if p == nil {
 		p = []SpecPeak{}
 	}
 	return p
+}
+
+// bgZero: sem fundo (o acumulado do aparelho, analisado pelo SNIP)
+func (s *MeasureSpectrum) bgZero() bool {
+	for _, b := range s.Bg {
+		if b != 0 {
+			return false
+		}
+	}
+	return true
+}
+
+// gradePeaks gradua os picos da tela do espectro (2.102.1, o mesmo critério
+// do celular). O σ sozinho não serve: com pouco tempo de espectro, qualquer
+// diferença pequena entre a tela e o acumulado (radônio que muda de lugar
+// para lugar, deriva do ganho com a temperatura) passa de 5σ. Então pesa
+// também quanto o pico sobe acima do que tem embaixo (Net ÷ Cont) e se outra
+// linha da mesma série apareceu junto.
+//   - 186 keV: o Ra-226 também solta 186,2 keV e está em qualquer coisa com
+//     urânio; o U-235 só daria para separar pelo 143,8 keV (que não é
+//     procurado), então a linha vai para o Ra-226 (a tela diz "ou U-235").
+//   - Ao vivo (live: comparado com o acumulado), linha sozinha que sobe menos
+//     de 10% do que tem embaixo é ruído ou deriva: sai.
+func gradePeaks(ps []SpecPeak, live bool) []SpecPeak {
+	for i := range ps {
+		if math.Abs(ps[i].KeV-185.7) < 1 {
+			ps[i].Nuclide, ps[i].Group = "Ra-226", "Rádio-226 (série do urânio)"
+		}
+	}
+	n := map[string]int{}
+	for _, p := range ps {
+		n[p.Group]++
+	}
+	out := ps[:0]
+	for _, p := range ps {
+		r, conf := 1.0, n[p.Group] > 1
+		if p.Cont > 0 {
+			r = p.Net / p.Cont
+		}
+		if live && !conf && r < 0.1 {
+			continue
+		}
+		switch {
+		case p.Sigma >= 10 && r >= 0.3 && (conf || r >= 0.6):
+			p.Level = "forte"
+		case p.Sigma >= 5 && (r >= 0.1 || conf):
+			p.Level = "provável"
+		default:
+			p.Level = "fraco"
+		}
+		out = append(out, p)
+	}
+	rank := map[string]int{"forte": 0, "provável": 1, "fraco": 2}
+	sort.SliceStable(out, func(i, j int) bool {
+		if rank[out[i].Level] != rank[out[j].Level] {
+			return rank[out[i].Level] < rank[out[j].Level]
+		}
+		return out[i].Sigma > out[j].Sigma
+	})
+	return out
 }

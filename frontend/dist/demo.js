@@ -38,9 +38,24 @@ function demoPeakDetail(sp, peaks) {
     return { ...p, center: cw > 0 ? ce / cw : 0, cont: Math.max(b, 1), half: h, side: 0 };
   });
 }
+// 2.102.1: a mesma graduação do Go (gradePeaks em measurespec.go)
+function demoGrade(ps, live) {
+  ps = ps.map((p) => (Math.abs(p.kev - 185.7) < 1 ? { ...p, nuclide: "Ra-226", group: "Rádio-226 (série do urânio)" } : { ...p }));
+  const n = {};
+  for (const p of ps) n[p.group] = (n[p.group] || 0) + 1;
+  const out = [];
+  for (const p of ps) {
+    const r = p.cont > 0 ? p.net / p.cont : 1, conf = n[p.group] > 1;
+    if (live && !conf && r < 0.1) continue;
+    p.level = p.sigma >= 10 && r >= 0.3 && (conf || r >= 0.6) ? "forte" : p.sigma >= 5 && (r >= 0.1 || conf) ? "provável" : "fraco";
+    out.push(p);
+  }
+  const rank = { forte: 0, "provável": 1, fraco: 2 };
+  return out.sort((a, b) => rank[a.level] - rank[b.level] || b.sigma - a.sigma);
+}
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.102.0";
+const DEMO_VERSION = "2.102.1";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -1069,7 +1084,7 @@ const demoRc = () => {
     // o mesmo SNIP do Go (snip.go), para o detalhe do isótopo no modo demonstração
     SpectrumContinuum: async (sp) => demoSnip(sp),
     // acumulado do aparelho (sem fundo): as linhas do fundo natural
-    AnalyzeSpectrum: async (sp) => demoPeakDetail(sp, sp.bgSec === 1 ? [
+    AnalyzeSpectrum: async (sp) => demoGrade(demoPeakDetail(sp, sp.bgSec === 1 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 5200, sigma: 22 },
       { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 351.9, net: 44000, sigma: 125 }, { group: "Rádio-226 (série do urânio)", nuclide: "Pb-214", kev: 295.2, net: 21000, sigma: 60 },
       { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 609.3, net: 30000, sigma: 80 }, { group: "Rádio-226 (série do urânio)", nuclide: "Bi-214", kev: 1764.5, net: 2000, sigma: 9 },
@@ -1077,7 +1092,7 @@ const demoRc = () => {
       { group: "Tório-232 (série)", nuclide: "Ac-228", kev: 911.2, net: 700, sigma: 6 }] : sp.objSec > 20 && demoSt.active && demoSt.scenario === "cs137" ? [
       { group: "Césio-137", nuclide: "Cs-137", kev: 661.7, net: 640, sigma: 21 }] : sp.objSec > 20 ? [
       { group: "Tório-232 (série)", nuclide: "Pb-212", kev: 238.6, net: 300, sigma: 12 }, { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 583.2, net: 90, sigma: 6 },
-      { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []),
+      { group: "Tório-232 (série)", nuclide: "Tl-208", kev: 2614.5, net: 30, sigma: 4 }] : []), sp.bgSec !== 1),
     // uso do app (uso.js): números de exemplo, como na maquete da spec
     GetUsage: async (days) => {
       if (demoUsageReset) return { on: demoUsageOn, since: demoUsageReset, days: 0, totals: {} };
