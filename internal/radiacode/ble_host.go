@@ -241,16 +241,29 @@ func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	if got > 0 {
 		what = fmt.Sprintf("chegaram %d pedaço(s)", got)
 		if want >= 0 {
-			what += fmt.Sprintf(", resposta pela metade (%d de %d bytes)", part, want)
+			what += fmt.Sprintf(" · resposta pela metade (%d de %d bytes)", part, want)
 		}
 	}
 	if bad != "" {
-		what += "; montagem: " + bad
+		what += " · montagem: " + bad
 	}
 	// o sinal do RC102 no celular (o último lido): separa rádio fraco de travamento
 	if r, ok := b.h.(interface{ RSSI() int }); ok {
 		if v := r.RSSI(); v != 0 {
-			what += fmt.Sprintf("; sinal %d dBm", v)
+			what += fmt.Sprintf(" · sinal %d dBm", v)
+		}
+	}
+	// 19/11: queda com sinal forte (-43 dBm lado a lado): o rádio ainda
+	// responde na hora do travamento? Separa "o RC102 parou de mandar" de
+	// "a ligação caiu"
+	if p, ok := b.h.(interface{ Probe() int }); ok {
+		switch v := p.Probe(); {
+		case v < 0:
+			what += fmt.Sprintf(" · o rádio ainda responde (%d dBm)", v)
+		case v == 0:
+			what += " · o rádio não respondeu"
+		default:
+			what += " · não deu para perguntar ao rádio"
 		}
 	}
 	f("RC102 (Bluetooth): sem resposta em %s ao pedido %s: %s", after, cmd, what)

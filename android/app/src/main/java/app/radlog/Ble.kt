@@ -51,6 +51,7 @@ class Ble(private val ctx: Context) {
     @Volatile private var lastRssi = 0 // último sinal lido do RC102 (dBm)
     @Volatile private var rssiAt = 0L
     private var rssiAsked = 0L
+    @Volatile private var probeWait: CountDownLatch? = null
 
     /** Liga? (o Bluetooth do celular pode estar desligado) */
     fun enabled(): Boolean = manager?.adapter?.isEnabled == true
@@ -145,7 +146,7 @@ class Ble(private val ctx: Context) {
         }
 
         override fun onReadRemoteRssi(g: BluetoothGatt, rssi: Int, status: Int) {
-            if (status == BluetoothGatt.GATT_SUCCESS) { lastRssi = rssi; rssiAt = android.os.SystemClock.elapsedRealtime() }
+            if (status == BluetoothGatt.GATT_SUCCESS) { lastRssi = rssi; rssiAt = android.os.SystemClock.elapsedRealtime(); probeWait?.countDown() }
         }
 
         override fun onCharacteristicWrite(g: BluetoothGatt, c: BluetoothGattCharacteristic, status: Int) {
@@ -240,6 +241,21 @@ class Ble(private val ctx: Context) {
 
     // último sinal lido (dBm), se tiver menos de 1 min; 0 = não sabe
     fun rssi(): Int = if (android.os.SystemClock.elapsedRealtime() - rssiAt < 60_000) lastRssi else 0
+
+    // pergunta o sinal ao rádio agora (na hora do travamento): dBm se ele
+    // respondeu em 1,5 s, 0 se não respondeu, 1 se não deu para perguntar
+    fun probe(): Int {
+        val g = synchronized(lock) { gatt } ?: return 1
+        val l = CountDownLatch(1)
+        probeWait = l
+        try {
+            val asked = try { g.readRemoteRssi() } catch (_: Exception) { false }
+            if (!asked) return 1
+            return if (l.await(1500, TimeUnit.MILLISECONDS)) lastRssi else 0
+        } finally {
+            probeWait = null
+        }
+    }
 
     fun close() {
         val g: BluetoothGatt?

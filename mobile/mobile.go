@@ -44,6 +44,9 @@ type Host interface {
 	BLEClose()
 	// BLERssi é o último sinal lido do RC102 em dBm (0 = não sabe).
 	BLERssi() int
+	// BLEProbe pergunta o sinal ao rádio agora: o valor em dBm, 0 se o
+	// rádio não respondeu em 1,5 s, 1 se não deu para perguntar.
+	BLEProbe() int
 }
 
 var (
@@ -242,3 +245,4 @@ func (b bleHost) Connect(addr string) error { return b.h.BLEConnect(addr) }
 func (b bleHost) Write(chunk []byte) error  { return b.h.BLEWrite(chunk) }
 func (b bleHost) Close()                    { b.h.BLEClose() }
 func (b bleHost) RSSI() int                 { return b.h.BLERssi() }
+func (b bleHost) Probe() int                { return b.h.BLEProbe() }

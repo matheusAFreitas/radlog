@@ -101,4 +101,5 @@ object Engine : Host {
     override fun bleWrite(chunk: ByteArray) = ble.write(chunk)
     override fun bleClose() = ble.close()
     override fun bleRssi(): Long = ble.rssi().toLong()
+    override fun bleProbe(): Long = ble.probe().toLong()
 }

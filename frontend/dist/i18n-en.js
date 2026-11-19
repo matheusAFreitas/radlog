@@ -4685,6 +4685,8 @@ const I18N_EN = {
 "Formato da data": "Date format",
 "Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.": "Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.",
 "formato da data": "date format",
+"o rádio não respondeu": "the radio didn't answer",
+"não deu para perguntar ao rádio": "couldn't ask the radio",
 "Clique para mostrar ou esconder no gráfico": "Click to show or hide on the chart",
 "fixo: 10 min": "fixed: 10 min",
 "fixo: 30 min": "fixed: 30 min",
@@ -4937,7 +4939,20 @@ const I18N_EN = {
 "não há calibração anterior do KCl": "there is no previous KCl calibration",
 "não há calibração anterior do tório": "there is no previous thorium calibration",
 "pior que a atual: não usada": "worse than the current one: not used",
-"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece."
+"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece.",
+"o RC102 não respondeu (longe, desligado ou com outro aparelho)": "the RC102 didn't respond (too far, off, or with another device)",
+"o RadiaCode não respondeu (longe, desligado ou com outro aparelho)": "the RC102 didn't respond (too far, off, or with another device)",
+"o aparelho não aceita notificações": "the device doesn't accept notifications",
+"não consegui ler os serviços do aparelho": "couldn't read the device's services",
+"não consegui ligar as notificações": "couldn't turn on notifications",
+"o Android não abriu a conexão": "Android didn't open the connection",
+"o Android não aceitou o envio": "Android didn't accept the send",
+"o envio não terminou": "the send didn't finish",
+"este celular não tem Bluetooth": "this phone has no Bluetooth",
+"o Bluetooth do celular está desligado": "the phone's Bluetooth is off",
+"modo celular (Android)": "phone mode (Android)",
+"· não deu para perguntar ao rádio": "· couldn't ask the radio",
+"· o rádio não respondeu": "· the radio didn't answer"
 },
 "patterns": [
 [
@@ -10349,6 +10364,14 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui ligar as notificações (status ",
+"^não consegui ligar as notificações \\(status ((?:(?! · ).)+?)\\)$",
+"couldn't turn on notifications (status ${1})",
+[
+"não consegui ligar as notificações (status "
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -10710,6 +10733,14 @@ const I18N_EN = {
 "Activity: calibration replaced by the new one (${1})",
 [
 "Atividade: calibração trocada pela nova ("
+]
+],
+[
+"o aparelho não aceitou a conexão (status ",
+"^o aparelho não aceitou a conexão \\(status ((?:(?! · ).)+?)\\)$",
+"the device refused the connection (status ${1})",
+[
+"o aparelho não aceitou a conexão (status "
 ]
 ],
 [
@@ -11938,21 +11969,21 @@ const I18N_EN = {
 ]
 ],
 [
-", resposta pela metade (",
-"^, resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
-", half a response (${1} of ${2} bytes)",
-[
-", resposta pela metade (",
-" de ",
-" bytes)"
-]
-],
-[
 "pico dentro do vai e vem do fundo de ",
 "^pico dentro do vai e vem do fundo de ((?:(?! · ).)+?)$",
 "peak within the usual ups and downs of the background of ${1}",
 [
 "pico dentro do vai e vem do fundo de "
+]
+],
+[
+"· resposta pela metade (",
+"^· resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+"· half a response (${1} of ${2} bytes)",
+[
+"· resposta pela metade (",
+" de ",
+" bytes)"
 ]
 ],
 [
@@ -12414,6 +12445,16 @@ const I18N_EN = {
 ]
 ],
 [
+"resposta pela metade (",
+"^resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+"half a response (${1} of ${2} bytes)",
+[
+"resposta pela metade (",
+" de ",
+" bytes)"
+]
+],
+[
 "% acima da média das 2 h antes (",
 "^% acima da média das 2 h antes \\(((?:(?! · ).)+?)\\)$",
 "% above the average of the 2 h before (${1})",
@@ -12615,6 +12656,16 @@ const I18N_EN = {
 "± ${1}% (1σ, from the RC102 dose)",
 [
 "% (1σ, pela dose do RadiaCode)"
+]
+],
+[
+"==== RadLog ",
+"^==== RadLog ((?:(?! · ).)+?) iniciado \\(((?:(?! · ).)+?)/((?:(?! · ).)+?), ((?:(?! · ).)+?), PC ((?:(?! · ).)+?)\\)$",
+"==== RadLog ${1} started (${2}/${3}, ${4}, PC ${5})",
+[
+"==== RadLog ",
+" iniciado (",
+", PC "
 ]
 ],
 [
@@ -12874,6 +12925,15 @@ const I18N_EN = {
 "fundo ",
 " µSv + acima do fundo ",
 " µSv"
+]
+],
+[
+"· o rádio ainda responde (",
+"^· o rádio ainda responde \\(((?:(?! · ).)+?) dBm\\)$",
+"· the radio still answers (${1} dBm)",
+[
+"· o rádio ainda responde (",
+" dBm)"
 ]
 ],
 [
@@ -13375,6 +13435,15 @@ const I18N_EN = {
 "The device memory brought back ${1}.",
 [
 "A memória do aparelho trouxe "
+]
+],
+[
+"o rádio ainda responde (",
+"^o rádio ainda responde \\(((?:(?! · ).)+?) dBm\\)$",
+"the radio still answers (${1} dBm)",
+[
+"o rádio ainda responde (",
+" dBm)"
 ]
 ],
 [
@@ -14956,6 +15025,14 @@ const I18N_EN = {
 "Updating to version ${1}",
 [
 "Atualizando para a versão "
+]
+],
+[
+"envio recusado (status ",
+"^envio recusado \\(status ((?:(?! · ).)+?)\\)$",
+"send refused (status ${1})",
+[
+"envio recusado (status "
 ]
 ],
 [
@@ -20401,15 +20478,6 @@ const I18N_EN = {
 ]
 ],
 [
-"; sinal ",
-"^; sinal ((?:(?! · ).)+?) dBm$",
-"; signal ${1} dBm",
-[
-"; sinal ",
-" dBm"
-]
-],
-[
 "",
 "^((?:(?! · ).)+?): 1 alerta\\.$",
 "${1}: 1 alert.",
@@ -21127,11 +21195,28 @@ const I18N_EN = {
 ]
 ],
 [
+"montagem: ",
+"^montagem: ((?:(?! · ).)+?)$",
+"assembly: ${1}",
+[
+"montagem: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?): sem dado((?:(?! · ).)+?)$",
 "${1}: no data${2}",
 [
 ": sem dado"
+]
+],
+[
+"sinal ",
+"^sinal ((?:(?! · ).)+?) dBm$",
+"signal ${1} dBm",
+[
+"sinal ",
+" dBm"
 ]
 ],
 [
