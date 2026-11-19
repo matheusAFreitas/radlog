@@ -7333,6 +7333,18 @@ const I18N_EN = {
 ]
 ],
 [
+"nuvem: subiu ",
+"^nuvem: subiu ((?:(?! · ).)+?) arquivo\\(s\\), juntou ((?:(?! · ).)+?) · ((?:(?! · ).)+?) KB enviados, ((?:(?! · ).)+?) KB recebidos, ((?:(?! · ).)+?) pedidos$",
+"cloud: uploaded ${1} file(s), merged ${2} · ${3} KB sent, ${4} KB received, ${5} requests",
+[
+"nuvem: subiu ",
+" arquivo(s), juntou ",
+" KB enviados, ",
+" KB recebidos, ",
+" pedidos"
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) com CPM bruto e corrigido gravados \\(correção de tempo morto ligada em ((?:(?! · ).)+?)\\)$",
 "${1} with raw and corrected CPM recorded (dead-time correction on in ${2})",

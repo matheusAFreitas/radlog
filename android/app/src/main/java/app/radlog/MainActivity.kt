@@ -83,10 +83,18 @@ class MainActivity : Activity() {
         w.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
     }
 
+    override fun onPause() {
+        // tela fora de vista: para os relógios da página e os eventos
+        UiBridge.paused = true
+        web.onPause()
+        super.onPause()
+    }
+
     override fun onResume() {
         super.onResume()
         Engine.syncTimeZone()
-        UiBridge.js("window.__rl&&__rl.event(\"resume\",{})")
+        web.onResume()
+        UiBridge.resumed()
         // rede de segurança: se a página voltou vazia (sem o script de pé), recarrega
         val w = web
         w.postDelayed({

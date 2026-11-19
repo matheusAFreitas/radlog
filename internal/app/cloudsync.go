@@ -463,7 +463,8 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 	a.cloudSaveLocked()
 	c.mu.Unlock()
 	if sent > 0 || got > 0 {
-		a.logf("nuvem: subiu %d arquivo(s), juntou %d", sent, got)
+		a.logf("nuvem: subiu %d arquivo(s), juntou %d · %d KB enviados, %d KB recebidos, %d pedidos", sent, got,
+			(d.Sent.Load()+512)/1024, (d.Recv.Load()+512)/1024, d.Calls.Load())
 	}
 	if bad > 0 {
 		// o resto sincronizou; os que não entraram são tentados de novo (N2)

@@ -14,6 +14,10 @@ object UiBridge : Engine.Listener {
         private set
     @Volatile var alarmQuiet = false
         private set
+    // 19/11: tela fechada (celular no bolso) não recebe os eventos de cada
+    // segundo: a página redesenhava o Agora inteiro sem ninguém olhar e
+    // gastava CPU. Ao voltar, "resume" relê tudo.
+    @Volatile var paused = false
 
     fun attach(w: WebView) {
         web = WeakReference(w)
@@ -33,13 +37,23 @@ object UiBridge : Engine.Listener {
     }
 
     override fun onEvent(name: String, data: String) {
+        if (paused) return
         js("window.__rl&&__rl.event(${JSONObject.quote(name)},$data)")
+    }
+
+    // de volta à tela: o alarme de agora (pode ter mudado com a tela fechada)
+    fun resumed() {
+        paused = false
+        val s = alarmSev?.let { JSONObject.quote(it) } ?: "null"
+        js("window.__rl&&__rl.event(\"alarm\",{\"sev\":$s,\"quiet\":$alarmQuiet})")
+        js("window.__rl&&__rl.event(\"resume\",{})")
     }
 
     fun alarm(sev: String?, quiet: Boolean) {
         if (sev == alarmSev && quiet == alarmQuiet) return
         alarmSev = sev
         alarmQuiet = quiet
+        if (paused) return
         val s = if (sev == null) "null" else JSONObject.quote(sev)
         js("window.__rl&&__rl.event(\"alarm\",{\"sev\":$s,\"quiet\":$quiet})")
     }
