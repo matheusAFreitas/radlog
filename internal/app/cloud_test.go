@@ -1,6 +1,8 @@
 package app
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"net/http"
 	"net/url"
@@ -260,7 +262,7 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 	for _, p := range ps {
 		keys = append(keys, p.key)
 	}
-	if strings.Join(keys, ",") != "comum,dia|2026-09-20,dia|2026-10-20" {
+	if strings.Join(keys, ",") != "comum,medicoes,dia|2026-09-20,dia|2026-10-20" {
 		t.Fatalf("pacotes: %v", keys)
 	}
 	z1, _ := a.buildDelta(ps[0].req)
@@ -273,7 +275,7 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 		t.Fatal("nome do PC no pacote da nuvem")
 	}
 	ps2, _ := a.cloudPacks()
-	if ps2[1].digest != ps[1].digest {
+	if ps2[2].digest != ps[2].digest {
 		t.Fatal("resumo do mês mudou sem mudança")
 	}
 }
@@ -363,5 +365,40 @@ func TestCloudPacksSpectraPerDay(t *testing.T) {
 	after := dig()
 	if after["espectros|2026-11-18"] != before["espectros|2026-11-18"] || after["espectros|2026-11-19"] == before["espectros|2026-11-19"] {
 		t.Fatalf("só o dia do arquivo novo muda: %v → %v", before, after)
+	}
+}
+
+// As medições (grandes, com espectros) sobem num pacote só delas: o comum,
+// que muda a cada minuto, não leva elas junto (191 KB por envio no dev.617).
+func TestCloudMeasuresOwnPack(t *testing.T) {
+	a, dir := testApp(t)
+	if err := os.WriteFile(filepath.Join(dir, "medicoes.json"), []byte(`[{"id":1}]`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ps, err := a.cloudPacks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	has := func(key string) bool {
+		for _, p := range ps {
+			if p.key == key {
+				z, _ := a.buildDelta(p.req)
+				zr, err := zip.NewReader(bytes.NewReader(z), int64(len(z)))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, f := range zr.File {
+					if f.Name == "medicoes.json" {
+						return true
+					}
+				}
+				return false
+			}
+		}
+		t.Fatalf("sem o pacote %s", key)
+		return false
+	}
+	if has("comum") || !has("medicoes") {
+		t.Fatal("medicoes.json tem que ir só no pacote medicoes")
 	}
 }

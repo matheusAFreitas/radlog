@@ -78,6 +78,7 @@ O envelope é:
 |---|---|---|
 | `D` | `aparelho` | JSON do aparelho (abaixo) |
 | `C` | `comum` | zip com os pequenos |
+| `C` | `medicoes` | zip só com o `medicoes.json` (desde a 3.0.0; antes ia no comum) |
 | `P` | `dia\|AAAA-MM-DD` | zip com um dia (UTC) |
 | `S` | `espectros\|AAAA-MM-DD` (ou `espectros\|sem-data`) | zip com os espectros fechados do dia (até a 3.0.0 era um por mês) |
 | `X` | `anexo\|<UID da medição>/<arquivo>` | um anexo de medição |
@@ -88,10 +89,11 @@ Os zips têm a mesma estrutura do "Exportar backup", com um `backup.json` de
 - **comum**:
   - `eventos.csv` (alertas encerrados)
   - `fora-de-casa.json`
-  - `medicoes.json`
   - `anotacoes.json`
   - `apagados.json`
   - os pequenos do RC102 e os históricos de configuração e calibração
+- **medicoes**: `medicoes.json` (as medições levam os espectros de cada fase;
+  o comum muda a cada minuto e não deve carregar isso junto)
 - **dia**:
   - `leituras/sincronizacao.csv` (minutos do GMC-800)
   - as linhas do RC102 daquele dia

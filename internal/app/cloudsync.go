@@ -26,6 +26,7 @@ import (
 //   - "aparelho": nome, último envio e quem escreve (para achar PC copiado);
 //   - "comum": os pequenos (alertas encerrados, saídas, medições, anotações,
 //     apagados, históricos), igual se nada mudou;
+//   - "medicoes": as medições (com os espectros), fora do comum desde a 3.0.0;
 //   - "dia|AAAA-MM-DD": minutos do GMC-800 e do RC102 e segundos de alerta
 //     daquele dia (UTC). Só o dia que mudou sobe de novo (N7);
 //   - "espectros|AAAA-MM-DD": os espectros fechados do dia (até a 3.0.0-dev
@@ -36,6 +37,8 @@ import (
 const (
 	cloudKeyDevice = "aparelho"
 	cloudKeyCommon = "comum"
+	// as medições, fora do comum (3.0.0): mudam pouco e são grandes
+	cloudKeyMeasures = "medicoes"
 	// marca de um pacote que já está na nuvem pelo aparelho que mandou: não
 	// sobe de novo daqui (eco)
 	cloudEcho = "e:"
@@ -101,14 +104,18 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 		parts[d] = append(parts[d], "a"+n)
 	}
 	// o comum: o resumo é o próprio pacote (pequeno e igual se nada mudou)
-	common := cloudPack{key: cloudKeyCommon, kind: rs.KindCommon, month: time.Now().UTC().Format("2006-01"), req: pullReq{Rc: true, cloud: true}}
-	z, err := a.buildDelta(common.req)
-	if err != nil {
-		return nil, err
+	common := cloudPack{key: cloudKeyCommon, kind: rs.KindCommon, month: time.Now().UTC().Format("2006-01"), req: pullReq{Rc: true, cloud: true, noMeasures: true}}
+	meas := cloudPack{key: cloudKeyMeasures, kind: rs.KindCommon, month: common.month, req: pullReq{Rc: true, cloud: true, onlyMeasures: true}}
+	var out []cloudPack
+	for _, p := range []*cloudPack{&common, &meas} {
+		z, err := a.buildDelta(p.req)
+		if err != nil {
+			return nil, err
+		}
+		sum := sha256.Sum256(z)
+		p.digest = hex.EncodeToString(sum[:16])
+		out = append(out, *p)
 	}
-	sum := sha256.Sum256(z)
-	common.digest = hex.EncodeToString(sum[:16])
-	out := []cloudPack{common}
 	var ds []string
 	for d := range byDay {
 		ds = append(ds, d)
