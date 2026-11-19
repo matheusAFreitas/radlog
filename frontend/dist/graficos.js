@@ -584,7 +584,7 @@ function renderDevBoxes(box, list) {
     el.querySelector(".dd-pct").textContent = !lim ? "" : pct > 100 ? "passou do teto" : "dentro do teto";
     el.querySelector(".dd-more").hidden = !lim;
     el.querySelector(".dd-more p").textContent = lim
-      ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName || "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})`
+      ? `${fmt(pct, pct < 10 ? 1 : 0)}% do limite · ${doseTxt(excess)} acima do fundo, de ${doseTxt(c.allowance)} permitidos (${(c.limitName ? tr(c.limitName) : "").replace(/^\p{Lu}(?!\p{Lu})/u, (m) => m.toLowerCase())})` // 2.101.16: o nome do limite vem do Go inteiro; traduz antes de pôr em minúscula
       : "";
     // 2.98.0 (ACE): o quadro inteiro liga e desliga a linha no gráfico,
     // como antes da 2.92 (no lugar da caixa "mostrar no gráfico")
