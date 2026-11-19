@@ -7140,6 +7140,18 @@ const I18N_EN = {
 ]
 ],
 [
+"fundo ",
+"^fundo ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)\\) · ≈ ((?:(?! · ).)+?) mSv/ano nesse ritmo · ((?:(?! · ).)+?)% medido desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"background ${1} µSv/h (${2}) · ≈ ${3} mSv/year at this rate · ${4}% measured since the first reading (${5})",
+[
+"fundo ",
+" µSv/h (",
+") · ≈ ",
+" mSv/ano nesse ritmo · ",
+"% medido desde o primeiro dado ("
+]
+],
+[
 "Baixado e conferido. Troca sozinho quando o CPM voltar ao normal (agora: ",
 "^Baixado e conferido\\. Troca sozinho quando o CPM voltar ao normal \\(agora: ((?:(?! · ).)+?)\\)\\.$",
 "Downloaded and checked. Switches on its own when the CPM is back to normal (now: ${1}).",
