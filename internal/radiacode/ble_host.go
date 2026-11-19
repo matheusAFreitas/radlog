@@ -170,11 +170,18 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 			f.Fast()
 		}
 	}
-	for p := 0; p < len(req); p += bleChunk {
-		if err := b.h.Write(req[p:min(p+bleChunk, len(req))]); err != nil {
-			return nil, fmt.Errorf("Bluetooth (envio): %v", err)
+	send := func() error {
+		for p := 0; p < len(req); p += bleChunk {
+			if err := b.h.Write(req[p:min(p+bleChunk, len(req))]); err != nil {
+				return fmt.Errorf("Bluetooth (envio): %v", err)
+			}
 		}
+		return nil
 	}
+	if err := send(); err != nil {
+		return nil, err
+	}
+	resent := false
 	// sem nenhum pedaço em bleQuiet a conexão travou (no celular o GATT
 	// inteiro fica preso: nada mais é aceito); com pedaços chegando, uma
 	// resposta grande tem até bleSlow
@@ -188,6 +195,9 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 			if out == nil {
 				return nil, errors.New("Bluetooth: conexão perdida")
 			}
+			if resent && BLELogf != nil {
+				BLELogf("RC102 (Bluetooth): o pedido %s ficou %s sem resposta; mandado de novo, respondeu", reqName(req), bleQuiet)
+			}
 			return out, nil
 		case <-quiet.C:
 			b.mu.Lock()
@@ -195,6 +205,17 @@ func (b *bleAndroid) Exchange(req []byte) ([]byte, error) {
 			b.mu.Unlock()
 			if got > 0 {
 				continue // está chegando: espera o bleSlow
+			}
+			// 19/11: na queda o rádio ainda responde (o celular lê o sinal):
+			// o pedido vai sem confirmação e pode ter se perdido no RC102.
+			// Manda de novo uma vez antes de derrubar a conexão.
+			if !resent {
+				resent = true
+				if err := send(); err == nil {
+					quiet.Reset(bleQuiet)
+					slow.Reset(bleSlow)
+					continue
+				}
 			}
 			b.logTimeout(req, bleQuiet)
 			// travou: derruba já para o laço reconectar sem esperar mais
@@ -219,6 +240,29 @@ var (
 	bleSlow  = 10 * time.Second
 )
 
+// reqName: o comando ("0826") e, na leitura de string virtual, qual
+// (DATA_BUF, SPECTRUM…)
+func reqName(req []byte) string {
+	cmd := ""
+	if len(req) >= 6 {
+		cmd = fmt.Sprintf("%02x%02x", req[5], req[4])
+	}
+	if len(req) >= 12 && uint16(req[4])|uint16(req[5])<<8 == cmdRdVirtString {
+		id := uint32(req[8]) | uint32(req[9])<<8 | uint32(req[10])<<16 | uint32(req[11])<<24
+		name := fmt.Sprintf("%#x", id)
+		if id == vsDataBuf {
+			name = "DATA_BUF"
+		}
+		for _, k := range KnownVS {
+			if k.ID == id {
+				name = k.Name
+			}
+		}
+		cmd += " (" + name + ")"
+	}
+	return cmd
+}
+
 // bigReq: leitura de string virtual que não é a do segundo (DATA_BUF)
 func bigReq(req []byte) bool {
 	if len(req) < 12 || uint16(req[4])|uint16(req[5])<<8 != cmdRdVirtString {
@@ -236,24 +280,7 @@ func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	b.mu.Lock()
 	got, bad, part, want := b.got, b.bad, len(b.as.data), b.as.want
 	b.mu.Unlock()
-	cmd := ""
-	if len(req) >= 6 {
-		cmd = fmt.Sprintf("%02x%02x", req[5], req[4])
-	}
-	// qual string virtual (a leitura de cada segundo ou o espectro)
-	if len(req) >= 12 && uint16(req[4])|uint16(req[5])<<8 == cmdRdVirtString {
-		id := uint32(req[8]) | uint32(req[9])<<8 | uint32(req[10])<<16 | uint32(req[11])<<24
-		name := fmt.Sprintf("%#x", id)
-		if id == vsDataBuf {
-			name = "DATA_BUF"
-		}
-		for _, k := range KnownVS {
-			if k.ID == id {
-				name = k.Name
-			}
-		}
-		cmd += " (" + name + ")"
-	}
+	cmd := reqName(req)
 	what := "nada chegou"
 	if got > 0 {
 		what = fmt.Sprintf("chegaram %d pedaço(s)", got)
@@ -263,6 +290,9 @@ func (b *bleAndroid) logTimeout(req []byte, after time.Duration) {
 	}
 	if bad != "" {
 		what += " · montagem: " + bad
+	}
+	if after == bleQuiet {
+		what += " · mandado de novo, nada"
 	}
 	// o sinal do RC102 no celular (o último lido): separa rádio fraco de travamento
 	if r, ok := b.h.(interface{ RSSI() int }); ok {

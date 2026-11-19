@@ -4952,7 +4952,9 @@ const I18N_EN = {
 "o Bluetooth do celular está desligado": "the phone's Bluetooth is off",
 "modo celular (Android)": "phone mode (Android)",
 "· não deu para perguntar ao rádio": "· couldn't ask the radio",
-"· o rádio não respondeu": "· the radio didn't answer"
+"· o rádio não respondeu": "· the radio didn't answer",
+"· mandado de novo, nada": "· sent again, nothing",
+"mandado de novo, nada": "sent again, nothing"
 },
 "patterns": [
 [
@@ -7020,6 +7022,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode (Bluetooth): o pedido ",
+"^RadiaCode \\(Bluetooth\\): o pedido ((?:(?! · ).)+?) ficou ((?:(?! · ).)+?) sem resposta; mandado de novo, respondeu$",
+"RC102 (Bluetooth): request ${1} got no answer for ${2}; sent again, it answered",
+[
+"RadiaCode (Bluetooth): o pedido ",
+" ficou ",
+" sem resposta; mandado de novo, respondeu"
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): cabe na variação natural da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): within the natural variation of the count.",
@@ -7201,6 +7213,16 @@ const I18N_EN = {
 [
 "O app aceita até ",
 " keV aqui (um quinto da largura de um pico nessa energia)."
+]
+],
+[
+"RC102 (Bluetooth): o pedido ",
+"^RC102 \\(Bluetooth\\): o pedido ((?:(?! · ).)+?) ficou ((?:(?! · ).)+?) sem resposta; mandado de novo, respondeu$",
+"RC102 (Bluetooth): request ${1} got no answer for ${2}; sent again, it answered",
+[
+"RC102 (Bluetooth): o pedido ",
+" ficou ",
+" sem resposta; mandado de novo, respondeu"
 ]
 ],
 [

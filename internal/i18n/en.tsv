@@ -6491,3 +6491,6 @@ modo celular (Android)	phone mode (Android)
 · o rádio não respondeu	· the radio didn't answer
 · resposta pela metade ({0} de {1} bytes)	· half a response ({0} of {1} bytes)
 nuvem: subiu {0} arquivo(s), juntou {1} · {2} KB enviados, {3} KB recebidos, {4} pedidos	cloud: uploaded {0} file(s), merged {1} · {2} KB sent, {3} KB received, {4} requests
+RC102 (Bluetooth): o pedido {0} ficou {1} sem resposta; mandado de novo, respondeu	RC102 (Bluetooth): request {0} got no answer for {1}; sent again, it answered
+· mandado de novo, nada	· sent again, nothing
+mandado de novo, nada	sent again, nothing

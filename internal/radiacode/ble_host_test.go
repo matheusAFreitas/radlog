@@ -168,3 +168,39 @@ func TestBLEBigReq(t *testing.T) {
 		t.Fatal("DATA_BUF virou grande")
 	}
 }
+
+type secondHost struct {
+	nopHost
+	n *int
+}
+
+func (h secondHost) Write([]byte) error {
+	*h.n++
+	if *h.n == 2 {
+		go BLENotify([]byte{3, 0, 0, 0, 1, 2, 3})
+	}
+	return nil
+}
+
+// 19/11: o pedido se perdeu (o rádio ainda responde): manda de novo uma vez
+// e, respondendo, a conexão segue e o registro diz que foi repetido
+func TestBLEHostResendOnce(t *testing.T) {
+	defer func(q, s time.Duration) { bleQuiet, bleSlow = q, s }(bleQuiet, bleSlow)
+	bleQuiet, bleSlow = 100*time.Millisecond, time.Second
+	var lines []string
+	BLELogf = func(f string, a ...any) { lines = append(lines, fmt.Sprintf(f, a...)) }
+	defer func() { BLELogf = nil }()
+	n := 0
+	b := &bleAndroid{h: secondHost{n: &n}, as: newAssembler(), resp: make(chan []byte, 1)}
+	bleMu.Lock()
+	bleCur = b
+	bleMu.Unlock()
+	defer func() { bleMu.Lock(); bleCur = nil; bleMu.Unlock() }()
+	out, err := b.Exchange([]byte{4, 0, 0, 0, 0x26, 0x08, 0, 0x80})
+	if err != nil || len(out) != 3 || n != 2 {
+		t.Fatalf("out %v err %v envios %d", out, err, n)
+	}
+	if len(lines) != 1 || !strings.Contains(lines[0], "mandado de novo, respondeu") {
+		t.Fatalf("registro: %q", lines)
+	}
+}
