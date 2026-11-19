@@ -112,6 +112,13 @@ func Flush() {
 	}
 }
 
+// SetNetwork avisa a rede de agora: metered = dados móveis (pagos).
+func SetNetwork(metered bool) {
+	if a := cur(); a != nil {
+		a.NetChanged(metered)
+	}
+}
+
 // Stop grava e solta o aparelho. O processo vai fechar.
 func Stop() {
 	if a := cur(); a != nil {

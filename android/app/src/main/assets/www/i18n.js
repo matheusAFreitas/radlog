@@ -286,4 +286,10 @@ window.I18N_EN = {
   "De cima (mais antigo) para baixo (agora). A cor é a contagem por minuto em cada energia: um isótopo aparece como uma faixa em pé, e a chuva acende tudo de uma vez.": "From the top (oldest) to the bottom (now). The color is the count per minute at each energy: an isotope shows up as a vertical band, and rain lights everything up at once.",
   "{0} · {1} keV · {2} por minuto · {3} cps no total": "{0} · {1} keV · {2} per minute · {3} cps in total",
   "{0} · sem dados": "{0} · no data",
+  "Na rede móvel": "On mobile data",
+  "Enviar a cada 15 min, como no Wi-Fi": "Send every 15 min, like on Wi-Fi",
+  "Enviar de hora em hora": "Send every hour",
+  "Enviar só no Wi-Fi": "Send only on Wi-Fi",
+  "Nuvem na rede móvel": "Cloud on mobile data",
+  "Quando o celular está nos dados móveis. No Wi-Fi envia sempre a cada 15 min, e \"Sincronizar agora\" envia na hora em qualquer rede.": "When the phone is on mobile data. On Wi-Fi it always sends every 15 min, and \"Sync now\" sends right away on any network.",
 };

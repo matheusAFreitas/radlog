@@ -1242,6 +1242,7 @@ func (a *App) cloudLoop() {
 	kick := a.cloud.kick
 	a.cloud.mu.Unlock()
 	t := time.NewTimer(time.Minute)
+	var lastRun time.Time
 	for {
 		byTimer := false
 		select {
@@ -1259,7 +1260,39 @@ func (a *App) cloudLoop() {
 		if byTimer && !auto {
 			continue
 		}
+		if byTimer && a.cloudHoldForNet(lastRun) {
+			continue
+		}
+		lastRun = time.Now()
+		a.cloudWaitNet.Store(false)
 		a.cloudSync()
+	}
+}
+
+// cloudHoldForNet diz se a sincronização do relógio espera: no celular, na
+// rede móvel, conforme Settings.CloudCell. "Sincronizar agora" não espera.
+func (a *App) cloudHoldForNet(lastRun time.Time) bool {
+	if !a.mobile || !a.netMetered.Load() {
+		return false
+	}
+	a.mu.Lock()
+	cell := a.settings.CloudCell
+	a.mu.Unlock()
+	hold := cell == "wifi" || (cell == "hora" && time.Since(lastRun) < cloudCellEvery)
+	if hold {
+		a.cloudWaitNet.Store(true)
+	}
+	return hold
+}
+
+const cloudCellEvery = time.Hour
+
+// NetChanged é chamado pelo celular quando a rede muda (metered = dados
+// móveis). Voltou para o Wi-Fi com uma sincronização esperando: vai já.
+func (a *App) NetChanged(metered bool) {
+	was := a.netMetered.Swap(metered)
+	if was && !metered && a.cloudWaitNet.Load() {
+		a.cloudKick()
 	}
 }
 

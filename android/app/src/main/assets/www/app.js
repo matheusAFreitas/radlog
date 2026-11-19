@@ -706,7 +706,10 @@ function ajustes() {
   const [ct, cs] = cloudLine();
   h += `</div><div class="gh">${esc(T("Nuvem"))}</div><div class="list">`;
   h += li(ct, cs, state.cloud && state.cloud.state !== "off" ? "on" : "off", "sCloud");
-  if (state.cloud && state.cloud.state !== "off") h += li(T("Sincronizar agora"), "", "›", "sSync");
+  if (state.cloud && state.cloud.state !== "off") {
+    h += li(T("Sincronizar agora"), "", "›", "sSync");
+    h += li(T("Na rede móvel"), CELL()[(state.settings || {}).cloudCell || ""], "›", "sCell");
+  }
   h += `</div><div class="gh">${esc(T("Android"))}</div><div class="list">`;
   const p = state.perms || {};
   h += li(T("Sem restrição de bateria"), T("Sem isso, alguns celulares fecham o app de madrugada"), p.battery ? "on" : "off", "sBattery");
@@ -998,6 +1001,17 @@ async function rcConfigSheet() {
   };
 }
 
+// nuvem pela rede móvel (dados pagos): a cada 15 min, de hora em hora ou só no Wi-Fi
+const CELL = () => ({ "": T("Enviar a cada 15 min, como no Wi-Fi"), hora: T("Enviar de hora em hora"), wifi: T("Enviar só no Wi-Fi") });
+function cellSheet() {
+  const cur = (state.settings || {}).cloudCell || "";
+  sheet(`<h3>${esc(T("Nuvem na rede móvel"))}</h3><p>${esc(T("Quando o celular está nos dados móveis. No Wi-Fi envia sempre a cada 15 min, e \"Sincronizar agora\" envia na hora em qualquer rede."))}</p><div class="list">${Object.entries(CELL()).map(([k, v]) => `<button class="li" data-cell="${k}"><span class="t">${esc(v)}</span><span class="r">${k === cur ? "✓" : ""}</span></button>`).join("")}</div><button class="btn ghost" onclick="closeSheet()">${esc(T("Fechar"))}</button>`);
+  document.querySelectorAll("[data-cell]").forEach((b) => (b.onclick = async () => {
+    try { state.settings = await call("SaveSettings", Object.assign({}, state.settings, { cloudCell: b.dataset.cell })); } catch (e) { toast(errText(e)); }
+    closeSheet(); render();
+  }));
+}
+
 async function copyLog() {
   try {
     const r = await call("GetLogs", { from: 0, to: 0, levels: [], comp: "", text: "", limit: 300 });
@@ -1055,6 +1069,7 @@ function bind() {
   q("sTest", () => { const m = (state.settings || {}).alarmSound || "sirene"; nat("testAlarm", m === "mudo" ? "sirene" : m).catch(() => {}); });
   q("sCloud", cloudToggle);
   q("sSync", syncNow);
+  q("sCell", cellSheet);
   q("sBattery", () => nat("askBattery").then(() => setTimeout(loadPerms, 1500)));
   q("sFull", () => nat("askFullScreen"));
   q("sLang", () => setLang(lang === "en" ? "pt" : "en"));

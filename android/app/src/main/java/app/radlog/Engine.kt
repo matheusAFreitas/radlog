@@ -42,6 +42,22 @@ object Engine : Host {
         dir.mkdirs()
         val name = (Build.MODEL ?: "Android").take(40)
         Mobile.start(dir.absolutePath, name, this)
+        watchNetwork()
+    }
+
+    /** Diz ao motor se a rede de agora é paga (dados móveis), para a nuvem. */
+    private fun watchNetwork() {
+        val cm = app.getSystemService(android.net.ConnectivityManager::class.java) ?: return
+        try {
+            cm.registerDefaultNetworkCallback(object : android.net.ConnectivityManager.NetworkCallback() {
+                override fun onCapabilitiesChanged(n: android.net.Network, c: android.net.NetworkCapabilities) {
+                    val metered = !c.hasCapability(android.net.NetworkCapabilities.NET_CAPABILITY_NOT_METERED)
+                    try { Mobile.setNetwork(metered) } catch (_: Exception) { }
+                }
+            })
+        } catch (e: Exception) {
+            Log.w(TAG, "rede: $e")
+        }
     }
 
     /** O Go no Android fica em UTC: passa o fuso do celular. */
