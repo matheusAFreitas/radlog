@@ -501,7 +501,9 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		askAway()
 		a.rcAlertsOff()
 		a.rcFlushMinute()
-		a.rcSpecClose()
+		if !a.mobile { // no celular fica aberto (ver rcSpecRotate)
+			a.rcSpecClose()
+		}
 		a.rc.mu.Lock()
 		a.rc.dev = nil
 		a.rcDoseSaveLiveLocked(time.Now())

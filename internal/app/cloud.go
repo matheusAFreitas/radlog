@@ -26,7 +26,7 @@ import (
 // pessoa, cifrados com a chave do código de recuperação (internal/sync), no
 // formato 2 (docs/nuvem-formato.md; envio e recebimento em cloudsync.go): um
 // arquivo do aparelho, um "comum" com os pequenos, um por dia de minutos, um
-// por mês de espectros e um por anexo. Os pacotes são os mesmos da
+// por dia de espectros e um por anexo. Os pacotes são os mesmos da
 // sincronização pela rede (buildDelta) e quem baixa junta com a mesma mescla
 // do "Importar backup".
 //

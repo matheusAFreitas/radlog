@@ -79,7 +79,7 @@ O envelope é:
 | `D` | `aparelho` | JSON do aparelho (abaixo) |
 | `C` | `comum` | zip com os pequenos |
 | `P` | `dia\|AAAA-MM-DD` | zip com um dia (UTC) |
-| `S` | `espectros\|AAAA-MM` (ou `espectros\|sem-data`) | zip com os espectros fechados do mês |
+| `S` | `espectros\|AAAA-MM-DD` (ou `espectros\|sem-data`) | zip com os espectros fechados do dia (até a 3.0.0 era um por mês) |
 | `X` | `anexo\|<UID da medição>/<arquivo>` | um anexo de medição |
 
 Os zips têm a mesma estrutura do "Exportar backup", com um `backup.json` de

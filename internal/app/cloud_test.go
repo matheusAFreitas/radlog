@@ -327,3 +327,41 @@ func TestCopyCloudCodeClears(t *testing.T) {
 		t.Fatalf("apagou o que a pessoa copiou depois: %q", read())
 	}
 }
+
+// Espectros sobem por dia: um arquivo novo (no celular, a cada queda do
+// Bluetooth) não faz o mês inteiro subir de novo (~2,8 MB por envio no
+// dev.612).
+func TestCloudPacksSpectraPerDay(t *testing.T) {
+	a, _ := testApp(t)
+	dir := a.rcSpecPath("")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, n := range []string{"2026-11-18-070000.jsonl.gz", "2026-11-19-070000.jsonl.gz"} {
+		if err := os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	dig := func() map[string]string {
+		ps, err := a.cloudPacks()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := map[string]string{}
+		for _, p := range ps {
+			if p.kind == rs.KindSpectra {
+				m[p.key] = p.digest + " " + p.month
+			}
+		}
+		return m
+	}
+	before := dig()
+	if len(before) != 2 || before["espectros|2026-11-18"] == "" || !strings.HasSuffix(before["espectros|2026-11-19"], " 2026-11") {
+		t.Fatalf("pacotes: %v", before)
+	}
+	_ = os.WriteFile(filepath.Join(dir, "2026-11-19-090000.jsonl.gz"), []byte("y"), 0o644)
+	after := dig()
+	if after["espectros|2026-11-18"] != before["espectros|2026-11-18"] || after["espectros|2026-11-19"] == before["espectros|2026-11-19"] {
+		t.Fatalf("só o dia do arquivo novo muda: %v → %v", before, after)
+	}
+}
