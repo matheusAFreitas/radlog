@@ -344,8 +344,8 @@ async function spTick(force) {
 // - 186 keV: o Ra-226 também solta 186,2 keV e está em qualquer coisa com
 //   urânio; U-235 só se desse para ver o 143,8 keV (que não é procurado),
 //   então vira Ra-226 (ou U-235).
-// - Linha sozinha que sobe pouco (< 10% do que tem embaixo) na tela é ruído
-//   ou deriva: não aparece.
+// - Linha sozinha na tela que sobe pouco (< 10% do que tem embaixo) ou não
+//   passa de 5σ é ruído ou deriva: não aparece (abaixo de 100 keV pede mais).
 function spGrade(peaks, tela) {
   const ps = (peaks || []).map((p) => (Math.abs(p.kev - 185.7) < 1
     ? { ...p, nuclide: "Ra-226 (ou U-235)", group: "Rádio-226 (série do urânio)" } : { ...p }));
@@ -354,7 +354,9 @@ function spGrade(peaks, tela) {
   const out = [];
   for (const p of ps) {
     const r = p.cont > 0 ? p.net / p.cont : 1, conf = n[p.group] > 1;
-    if (tela && !conf && r < 0.1) continue;
+    // sozinha: tem que subir 10% e passar de 5σ; embaixo de 100 keV (raios X
+    // e retroespalhamento, onde o Am-241 de 60 keV cai) pede 10σ e 30%
+    if (tela && !conf && (r < 0.1 || p.sigma < 5 || (p.kev < 100 && (p.sigma < 10 || r < 0.3)))) continue;
     p.lv = p.sigma >= 10 && r >= 0.3 && (conf || r >= 0.6) ? "forte" : p.sigma >= 5 && (r >= 0.1 || conf) ? "provável" : "fraco";
     out.push(p);
   }
@@ -441,7 +443,7 @@ function espectro() {
   h += `<div class="card sp">${s ? spSvg(s) : `<span class="small">${esc(T("Lendo o espectro do RC102…"))}</span>`}<div class="small" id="spTip">${sp.tip || esc(T("Toque no gráfico para ver a energia e a contagem."))}</div></div>`;
   const pk = spGrade(sp.peaks, sp.mode === "tela").slice(0, 8);
   h += `<div class="card"><span class="k">${esc(sp.mode === "tela" ? T("Picos acima do fundo de casa") : T("Picos achados"))}</span>`
-    + (pk.length ? pk.map((p) => `<div class="pkrow" data-pk="${esc(p.nuclide)}"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(p.nuclide)}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small lv-${p.lv}">${esc(T(p.lv))}</span></div>`).join("")
+    + (pk.length ? pk.map((p) => `<div class="pkrow" data-pk="${esc(p.nuclide)}"><span class="m">${fmt(p.kev, 0)} keV</span><span>${esc(T(p.nuclide))}${p.group && p.group !== p.nuclide ? `<i>${esc(T(p.group))}</i>` : ""}</span><span class="small lv-${p.lv}">${esc(T(p.lv))}</span></div>`).join("")
       : `<span class="small">${esc(s && s.seconds <= 60 ? T("Ainda pouco tempo: os picos aparecem depois de 1 min.") : T("Nenhum pico conhecido acima do esperado."))}</span>`)
     + `</div>`;
   h += `<span class="small">${esc(sp.mode === "tela" ? T("A tela do RC102 é o espectro que aparece nele e recomeça quando zera. O acumulado junta tudo desde que o aparelho foi zerado e serve de fundo de casa.") : T("O acumulado é o espectro que o RC102 junta sozinho. O app só mostra, não zera."))}</span>`;
@@ -1327,7 +1329,8 @@ const mock = (() => {
           { kev: 185.7, nuclide: "U-235", group: "Urânio-235", sigma: 8, net: 400, cont: 5200 },
           { kev: 661.7, nuclide: "Cs-137", group: "Césio-137", sigma: 6, net: 150, cont: 3600 },
           { kev: 911.2, nuclide: "Ac-228", group: "Tório-232 (série)", sigma: 5, net: 110, cont: 2300 },
-          { kev: 1460.8, nuclide: "K-40", group: "Potássio-40", sigma: 12, net: 700, cont: 1000 }]);
+          { kev: 1460.8, nuclide: "K-40", group: "Potássio-40", sigma: 12, net: 700, cont: 1000 },
+          { kev: 59.5, nuclide: "Am-241", group: "Amerício-241", sigma: 6, net: 900, cont: 6000 }]);
         case "SetRcSettings": rcs2 = Object.assign({}, arguments[1][0], { canUndo: true }); return ok(rcs2);
         default: return ok(null);
       }
