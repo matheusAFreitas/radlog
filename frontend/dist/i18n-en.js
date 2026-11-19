@@ -125,7 +125,7 @@ const I18N_EN = {
 "Atualizando para a versão": "Updating to version",
 "Atualizações": "Updates",
 "Até": "To",
-"Até (para um trecho; vazio = um momento)": "To (for a span; empty = a moment)",
+"Até (para um trecho; vazio = um momento)": "To (for a stretch; empty = a moment)",
 "Aviso de atenção": "Attention warning",
 "Aviso de atenção a partir de 50 CPM (aviso amarelo e 3 bipes)": "Attention warning from 50 CPM (yellow warning and 3 beeps)",
 "Avião em altitude de cruzeiro": "Airplane at cruising altitude",
@@ -220,7 +220,7 @@ const I18N_EN = {
 "Duas medições do mesmo tempo: primeiro o fundo, com o objeto longe (2 m ou mais); depois com o objeto encostado no contador, do lado do tubo. O app compara as duas e diz se a diferença é real ou só a variação natural da contagem. Quanto mais tempo, mais confiável.": "Two measurements of the same length: first the background, with the object far away (2 m or more); then with the object touching the counter, on the tube side. The app compares both and says whether the difference is real or just the natural variation of the count. The longer, the more reliable.",
 "Durante a medição": "During the measurement",
 "Duração": "Duration",
-"Duração (trechos de 10 min ou mais)": "Duration (spans of 10 min or more)",
+"Duração (trechos de 10 min ou mais)": "Duration (stretches of 10 min or more)",
 "Dureza nos gráficos": "Hardness on the charts",
 "EPISÓDIOS: 30 MIN ANTES E DEPOIS": "EPISODES: 30 MIN BEFORE AND AFTER",
 "ESTATÍSTICA DAS FASES": "PHASE STATISTICS",
@@ -277,7 +277,7 @@ const I18N_EN = {
 "Gravar no contador": "Write to the counter",
 "Gráfico da dose acumulada, do fundo esperado e do teto": "Chart of accumulated dose, expected background and ceiling",
 "Gráfico da medição: CPM ao vivo e média de cada fase": "Measurement chart: live CPM and average of each phase",
-"Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho.": "CPM chart for the selected period. Drag to zoom into a span.",
+"Gráfico de CPM no período selecionado. Arraste para dar zoom num trecho.": "CPM chart for the selected period. Drag to zoom into a stretch.",
 "Gráfico do alerta": "Alert chart",
 "Gráficos": "Charts",
 "Histórico baixado: 1440 registros, 32 minutos novos": "History downloaded: 1440 records, 32 new minutes",
@@ -410,7 +410,7 @@ const I18N_EN = {
 "O contador só mede radiação externa (gama e beta): radônio inalado e outras fontes internas ficam de fora. Minutos sem leitura não entram em nenhuma das linhas.": "The counter only measures external radiation (gamma and beta): inhaled radon and other internal sources are left out. Minutes without readings aren't counted in any of the lines.",
 "O detalhe por segundo não cobre o alerta inteiro (o app foi fechado ou reaberto no meio).": "The per-second detail doesn't cover the whole alert (the app was closed or reopened in the middle).",
 "O fim precisa ser depois do início.": "The end must be after the start.",
-"O histórico trouxe trechos que o app não tinha visto. Algum foi fora de casa? Se você só estava dormindo ou com o PC desligado, é \"Em casa\".": "The history brought spans the app hadn't seen. Was any of it away from home? If you were just sleeping or the PC was off, it's \"At home\".",
+"O histórico trouxe trechos que o app não tinha visto. Algum foi fora de casa? Se você só estava dormindo ou com o PC desligado, é \"Em casa\".": "The history brought stretches the app hadn't seen. Was any of it away from home? If you were just sleeping or the PC was off, it's \"At home\".",
 "O limite do alarme precisa ficar entre 1 e 999999 CPM.": "The alarm limit must be between 1 and 999999 CPM.",
 "O número que o contador manda pela USB (GETSERIAL). É o que a GQ usa para gerar a atualização de firmware (o arquivo vem com esse número). A tela Sobre do GMC-800 mostra outro código, de 12 bytes.": "The number the counter sends over USB (GETSERIAL). It's what GQ uses to build the firmware update (the file comes with this number). The GMC-800 About screen shows another, 12-byte code.",
 "O que aconteceu": "What happened",
@@ -437,7 +437,7 @@ const I18N_EN = {
 "Os limites da CNEN e da ICRP não contam a radiação natural nem exames médicos; por isso o teto é a radiação de fundo medida mais o limite anual, proporcional ao tempo medido.": "CNEN and ICRP limits don't count natural radiation or medical exams; so the ceiling is your measured background plus the annual limit, proportional to the measured time.",
 "Os limites do app são operacionais, configurados pelo usuário; não são limites regulamentares nem limiares de segurança.": "The app's limits are operational, set by the user; they're not regulatory limits or safety thresholds.",
 "Os mesmos 180 minutos: contagem (rosa, eixo da esquerda) e dureza (roxo, eixo da direita). Dureza é a proporção de fótons acima de 1.500 keV sobre os de 150 a 1.500 keV, relativa ao fundo da casa: 1,00 é igual ao fundo. Como chegam poucos fótons acima de 1.500 keV, a dureza usa 20 minutos em volta de cada ponto.": "The same 180 minutes: count (pink, left axis) and hardness (purple, right axis). Hardness is the ratio of photons above 1,500 keV to those from 150 to 1,500 keV, relative to the home background: 1.00 equals background. Since few photons above 1,500 keV arrive, hardness uses 20 minutes around each point.",
-"Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.": "PDF reports (Summary → Report, a span selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.",
+"Os relatórios em PDF (Resumo → Relatório, um trecho selecionado no gráfico ou no padrão por hora, um período fora de casa ou uma medição de objeto) são salvos direto nesta pasta e abertos no leitor de PDF.": "PDF reports (Summary → Report, a stretch selected on the chart or in the hourly pattern, an away-from-home period or an object measurement) are saved straight to this folder and opened in the PDF reader.",
 "PERIGO": "DANGER",
 "POR DIA": "BY DAY",
 "Padrão 2.000 µSv/h: o máximo do GMC-800 pelo manual.": "Default 2,000 µSv/h: the GMC-800's maximum according to the manual.",
@@ -448,7 +448,7 @@ const I18N_EN = {
 "Passeio no parque": "Walk in the park",
 "Pasta dos relatórios": "Reports folder",
 "Pelo rótulo: mg de potássio por grama": "From the label: mg of potassium per gram",
-"Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)": "Ask if it was away from home when the downloaded history brings a new span of at least (min)",
+"Perguntar se foi fora de casa quando o histórico baixado trouxer um trecho novo de pelo menos (min)": "Ask if it was away from home when the downloaded history brings a new stretch of at least (min)",
 "Perigo": "Danger",
 "Período": "Period",
 "Período da dose": "Dose period",
@@ -481,8 +481,8 @@ const I18N_EN = {
 "Recomeçar": "Start over",
 "Relatório (PDF)": "Report (PDF)",
 "Relatório de radiação": "Radiation report",
-"Relatório em PDF só desse trecho fora de casa": "PDF report of just this away-from-home span",
-"Relatório em PDF só deste trecho": "PDF report of just this span",
+"Relatório em PDF só desse trecho fora de casa": "PDF report of just this away-from-home stretch",
+"Relatório em PDF só deste trecho": "PDF report of just this stretch",
 "Relatório não saiu:": "Report didn't come out:",
 "Relatório salvo:": "Report saved:",
 "Relatórios": "Reports",
@@ -560,12 +560,12 @@ const I18N_EN = {
 "Variar como um contador de verdade (o CPM leva até 1 min para chegar no valor)": "Vary like a real counter (the CPM takes up to 1 min to reach the value)",
 "Ver cópias": "See copies",
 "Ver em Medições salvas": "See in Saved measurements",
-"Ver esse trecho nos gráficos": "See this span on the charts",
+"Ver esse trecho nos gráficos": "See this stretch on the charts",
 "Ver no GitHub": "See on GitHub",
 "Ver no gráfico": "See on the chart",
 "Ver nos gráficos": "See on the charts",
 "Ver o gráfico deste alerta": "See this alert's chart",
-"Ver o trecho no gráfico": "See the span on the chart",
+"Ver o trecho no gráfico": "See the stretch on the chart",
 "Versão nova": "New version",
 "Versão nova do app": "New app version",
 "Vibração": "Vibration",
@@ -764,7 +764,7 @@ const I18N_EN = {
 "o arquivo baixado não confere com o SHA256SUMS.txt; não vou abrir": "the downloaded file doesn't match SHA256SUMS.txt; won't open it",
 "o contador não respondeu a tempo": "the counter didn't answer in time",
 "o contador parou de responder (a porta travou)": "the counter stopped responding (the port locked up)",
-"o fim do trecho tem que ser depois do começo": "the end of the span must be after the start",
+"o fim do trecho tem que ser depois do começo": "the end of the stretch must be after the start",
 "o maior valor visto, no resumo e na tabela por dia (igual ao app): o maior minuto gravado ou, se for maior, o pico ao vivo de um alerta (marcado com *). A estatística usa só os minutos gravados.": "the highest value seen, in the summary and in the daily table (same as the app): the highest recorded minute or, if higher, a live alert peak (marked with *). The statistics use only the recorded minutes.",
 "o período precisa ter pelo menos 1 minuto": "the period must be at least 1 minute",
 "o que é σ?": "what is σ?",
@@ -844,7 +844,7 @@ const I18N_EN = {
 "teve perigo": "had danger",
 "tire a foto da configuração primeiro": "take the configuration snapshot first",
 "todos os componentes": "all components",
-"trecho do zoom": "zoomed span",
+"trecho do zoom": "zoomed stretch",
 "um exame comum, de frente": "a common exam, from the front",
 "valor do minuto (gráfico principal)": "minute value (main chart)",
 "variou além do acaso": "varied beyond chance",
@@ -871,12 +871,12 @@ const I18N_EN = {
 "· PERIGO REAL": "· REAL DANGER",
 "· ainda não dá para separar do fundo": "· can't be told apart from background yet",
 "· fundo": "· background",
-"· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero": "· same span as the CPM chart · dose only in this span, starting from zero",
+"· mesmo trecho do gráfico de CPM · dose só nesse trecho, começando do zero": "· same stretch as the CPM chart · dose only in this stretch, starting from zero",
 "· máx. = pico ao vivo (maior minuto:": "· max. = live peak (highest minute:",
 "· méd.": "· avg.",
 "· objeto ÷ fundo =": "· object ÷ background =",
 "· pico ao vivo": "· live peak",
-"· sem dados nesse trecho": "· no data in this span",
+"· sem dados nesse trecho": "· no data in this stretch",
 "· sem radar aqui": "· no radar here",
 "· série": "· series",
 "· tenta de novo às": "· tries again at",
@@ -897,7 +897,7 @@ const I18N_EN = {
 "√N de cada fase (Poisson); a do líquido junta as duas: raiz da soma dos quadrados": "√N of each phase (Poisson); the net's combines both: square root of the sum of squares",
 "√média: a variação que o acaso sozinho dá numa contagem de 1 minuto": "√mean: the variation chance alone gives in a 1-minute count",
 "Medir objeto": "Measure object",
-"Anotar este trecho": "Note this span",
+"Anotar este trecho": "Note this stretch",
 "Esta semana": "This week",
 "Semana passada": "Last week",
 "Aplicar nos pontos": "Apply to the points",
@@ -4936,7 +4936,11 @@ const I18N_EN = {
 "não há calibração anterior do KCl": "there is no previous KCl calibration",
 "não há calibração anterior do tório": "there is no previous thorium calibration",
 "pior que a atual: não usada": "worse than the current one: not used",
-"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece."
+"Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece.",
+"Mais ações do trecho": "More actions for this stretch",
+"Voltar ao zoom anterior": "Back to the previous zoom",
+"Voltar para o período": "Back to the period",
+"gráfico parado neste trecho": "chart frozen on this stretch"
 },
 "patterns": [
 [
@@ -6611,7 +6615,7 @@ const I18N_EN = {
 [
 "",
 "^((?:(?! · ).)+?) sem leitura no período, em ((?:(?! · ).)+?) trecho\\(s\\)\\. Lacuna não conta como zero em nenhum cálculo\\.$",
-"${1} without readings in the period, in ${2} span(s). A gap never counts as zero in any calculation.",
+"${1} without readings in the period, in ${2} stretch(es). A gap never counts as zero in any calculation.",
 [
 " sem leitura no período, em ",
 " trecho(s). Lacuna não conta como zero em nenhum cálculo."
@@ -7565,7 +7569,7 @@ const I18N_EN = {
 [
 "· dose acumulada só nesse trecho, começando do zero · um ponto a cada ",
 "^· dose acumulada só nesse trecho, começando do zero · um ponto a cada ((?:(?! · ).)+?)$",
-"· accumulated dose only in this span, starting from zero · one point every ${1}",
+"· accumulated dose only in this stretch, starting from zero · one point every ${1}",
 [
 "· dose acumulada só nesse trecho, começando do zero · um ponto a cada "
 ]
@@ -10905,6 +10909,24 @@ const I18N_EN = {
 ]
 ],
 [
+"aberto pelos ",
+"^aberto pelos ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelos ",
+" · gráfico parado neste trecho"
+]
+],
+[
+"aberto pelas ",
+"^aberto pelas ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelas ",
+" · gráfico parado neste trecho"
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -11048,6 +11070,15 @@ const I18N_EN = {
 "${1} with the object, above the attention level.",
 [
 " com o objeto, acima do nível de atenção."
+]
+],
+[
+"aberto pelo ",
+"^aberto pelo ((?:(?! · ).)+?) · gráfico parado neste trecho$",
+"opened from ${1} · chart frozen on this stretch",
+[
+"aberto pelo ",
+" · gráfico parado neste trecho"
 ]
 ],
 [
@@ -17136,6 +17167,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Abrir ",
+"^Abrir ((?:(?! · ).)+?)–((?:(?! · ).)+?) nos gráficos$",
+"Open ${1}–${2} on the charts",
+[
+"Abrir ",
+" nos gráficos"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -20405,6 +20445,14 @@ const I18N_EN = {
 "${1}: ${2} alerts.",
 [
 " alertas."
+]
+],
+[
+"Voltar para ",
+"^Voltar para ((?:(?! · ).)+?)$",
+"Back to ${1}",
+[
+"Voltar para "
 ]
 ],
 [

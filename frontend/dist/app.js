@@ -88,6 +88,7 @@ const state = {
   range: localGet("range", "1h"),
   zoom: null,      // { from, to } quando arrastou no gráfico
   zoomStack: [],   // zooms anteriores (botão Voltar)
+  zoomFrom: null,  // 2.102.0: de que página o trecho veio ({ view, name })
   periods: [],     // fora de casa
   where: null,     // onde está cada aparelho (onde.js)
   measurements: [], // medições de objeto salvas
@@ -957,6 +958,8 @@ async function showView(v, skipRender) {
   if (!PAGES[v]) v = "graficos";
   if (v !== "alertas") state.alertRange = null; // o filtro de período vale só na ida pelo Resumo
   const changed = state.view !== v;
+  // 2.102.0 (zoom, parte 1): saiu dos Gráficos, o zoom some (volta ao período guardado, ao vivo)
+  if (changed && state.view === "graficos" && typeof clearZoomState === "function") clearZoomState();
   state.view = v;
   qkTrack(v);
   if (changed) usoView(v);
@@ -3322,7 +3325,7 @@ function wire() {
     state.chartUnit = b.dataset.cunit; localSet("chartUnit", state.chartUnit); refreshChart();
   }));
   document.querySelectorAll("#rangeSeg button").forEach((b) => b.addEventListener("click", () => {
-    state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; unlinkZoom(); refreshChart();
+    state.range = b.dataset.range; localSet("range", state.range); state.zoom = null; state.zoomStack = []; state.zoomFrom = null; unlinkZoom(); refreshChart();
     state.dosePeriod = state.range; state.doseZoom = null; state.doseZoomStack = []; refreshDose();
   }));
   // 2.101.0: "Analisar nos gráficos" nas páginas dos aparelhos. Genérico: data-charts é a
