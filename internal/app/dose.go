@@ -439,7 +439,21 @@ func (a *App) rcDoseFromDevice(c *DoseChart, from, to time.Time, step time.Durat
 	c.CeilingTotal = c.BackgroundTotal + c.Allowance
 	c.Excess = dose - c.BackgroundTotal
 	c.MeasuredMinutes = int(m + 0.5)
-	c.Coverage = math.Min(1, m/to.Sub(from).Minutes())
+	// 2.102.1: cobertura desde o primeiro dado do RC102 (como na soma do
+	// app): no "Tudo", que começa no primeiro dado do GMC-800, os dias antes
+	// de existir o RC102 apareciam como "faltam 10 dias sem dado"
+	rf := a.rcFirst()
+	if rf.IsZero() || first.Before(rf) {
+		rf = first
+	}
+	cs := coverageSpan(from, to, rf, time.Now())
+	c.Coverage, c.HistMinutes, c.SpanMinutes = math.Min(1, m/math.Max(1, float64(cs.Hist))), cs.Hist, cs.Span
+	if cs.Hist <= 0 {
+		c.Coverage = 0
+	}
+	if cs.Pre > 0 && cs.Hist > 0 {
+		c.HistFrom = cs.HistFrom.UnixMilli()
+	}
 	c.DoseSource = "aparelho"
 	for _, p := range mins {
 		c.AppTotal += p.USv / 60
