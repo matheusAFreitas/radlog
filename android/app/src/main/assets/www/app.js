@@ -126,6 +126,7 @@ function renderBand() {
 function go(tab) {
   if (state.rcView && tab !== "rc102") { clearInterval(sp.timer); sp.timer = 0; state.rcView = ""; }
   state.tab = tab;
+  if (tab === "rc102") state.rcUnitAsk = false; // relê a unidade do aparelho (pode ter mudado nele)
   document.querySelectorAll(".nav button").forEach((b) => b.classList.toggle("on", b.dataset.tab === tab));
   render();
   $("main").scrollTop = 0;
@@ -252,6 +253,14 @@ function agora() {
 // o aparelho em detalhe: leitura com a margem, contagem, bateria, temperatura,
 // a dose de hoje e o acumulado do aparelho (só leitura: o app não zera nem muda),
 // e a configuração dele
+async function loadRcUnit() {
+  try {
+    const s = await call("GetRcSettings");
+    const cpm = !!(s && s.unitCPM);
+    if (cpm !== !!state.rcCPM) { state.rcCPM = cpm; if (state.tab === "rc102" && !state.rcView) render(); }
+  } catch (e) { state.rcUnitAsk = false; }
+}
+
 function rc102() {
   const rc = state.rc || {};
   const live = rc.state === "conectado";
@@ -259,10 +268,13 @@ function rc102() {
   const st = isOff(rc) ? T("O RC102 está com o PC") : live ? (age != null ? T("há {0} s", age) : "") : rc.state === "erro" ? rc.err || T("erro") : rc.state === "conectando" ? T("Conectando ao RC102…") : T("Procurando o Radiacode 102…");
   const v = live ? rc.usvh : null;
   const cell = (k, x) => `<div class="cell"><span class="k">${esc(k)}</span><span class="v">${x}</span></div>`;
+  // 19/11 (ACE): a contagem segue a unidade que o RC102 usa na tela dele
+  if (live && !state.rcUnitAsk) { state.rcUnitAsk = true; loadRcUnit(); }
+  const cnt = state.rcCPM ? `${fmt(rc.cps * 60, 0)} cpm` : `${fmt(rc.cps, rc.cps < 100 ? 1 : 0)} cps`;
   let h = `<div class="card rcnow"><div class="row"><span class="k">${esc(T("Agora no RC102"))}</span><span class="k">${esc(st)}</span></div>`
     + `<div class="row big"><span class="n">${v != null ? usv(v) : "—"}</span><span class="u">µSv/h</span>${v != null ? `<span class="x">${fmt(v / 10, v < 1 ? 4 : 3)} mrem/h</span>` : ""}</div>`
     + (live && rc.usvhErr > 0 ? `<span class="small">${esc(T("margem de ± {0}%", fmt(rc.usvhErr, 0)))}</span>` : "")
-    + `<div class="cells">${cell(T("Contagem"), live ? `${fmt(rc.cps, rc.cps < 100 ? 1 : 0)} cps` : "—")}${cell(T("Bateria"), live && rc.battery > 0 ? `${fmt(rc.battery, 0)}%` : "—")}${cell(T("Temperatura"), live && rc.tempC ? `${fmt(rc.tempC, 0)} °C` : "—")}</div></div>`;
+    + `<div class="cells">${cell(T("Contagem"), live ? cnt : "—")}${cell(T("Bateria"), live && rc.battery > 0 ? `${fmt(rc.battery, 0)}%` : "—")}${cell(T("Temperatura"), live && rc.tempC ? `${fmt(rc.tempC, 0)} °C` : "—")}</div></div>`;
   const today = todayDose(rc);
   const acc = rc.doseLive || rc.dose;
   h += `<div class="card"><span class="k">${esc(T("Dose"))}</span>`
@@ -1007,7 +1019,7 @@ async function rcConfigSheet() {
   };
   const run = async (b, fn, done) => {
     b.disabled = true;
-    try { await fn(); closeSheet(); toast(done); refreshRc(); }
+    try { await fn(); closeSheet(); toast(done); state.rcUnitAsk = false; refreshRc(); }
     catch (e) { $("kErr").textContent = errText(e); b.disabled = false; }
   };
   $("cOk").onclick = () => {
