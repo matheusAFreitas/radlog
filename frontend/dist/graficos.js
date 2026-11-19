@@ -394,8 +394,11 @@ function chartTimeAt(c, frac) {
 // clique com a mão tremendo bastava); durante o arraste, o horário do trecho
 // aparece na seleção; Esc cancela
 const DRAG_MIN_PX = 24;
-function dragRangeTxt(t0, t1) {
-  return new Date(t0).toDateString() === new Date(t1).toDateString() ? `${hhmm(t0)}–${hhmm(t1)}` : `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)}`;
+// com o período de mais de um dia, a data vai junto mesmo num trecho de um dia só
+function dragRangeTxt(t0, t1, c) {
+  const long = c && c.to - c.from > 864e5;
+  if (new Date(t0).toDateString() !== new Date(t1).toDateString()) return `${ddmm(t0)} ${hhmm(t0)} – ${ddmm(t1)} ${hhmm(t1)}`;
+  return long ? `${ddmm(t0)} ${hhmm(t0)}–${hhmm(t1)}` : `${hhmm(t0)}–${hhmm(t1)}`;
 }
 function attachDragZoom(plot, sel, getChart, onZoom) {
   let x0 = null;
@@ -419,7 +422,15 @@ function attachDragZoom(plot, sel, getChart, onZoom) {
     sel.style.width = (hi - lo) * 100 + "%";
     sel.hidden = (hi - lo) * w < DRAG_MIN_PX;
     const c = getChart();
-    if (!sel.hidden && c) lbl.textContent = dragRangeTxt(chartTimeAt(c, lo), chartTimeAt(c, hi));
+    if (sel.hidden || !c) return;
+    // a dica do mouse cobria o rótulo: some durante o arraste (como no soltar)
+    plot.querySelectorAll(".tip, .cursor").forEach((el) => { el.hidden = true; });
+    lbl.textContent = dragRangeTxt(chartTimeAt(c, lo), chartTimeAt(c, hi), c);
+    // o rótulo fica no meio da seleção, mas não passa da borda do gráfico
+    lbl.style.left = "50%"; lbl.style.right = "auto"; lbl.style.transform = "translateX(-50%)";
+    const pr = plot.getBoundingClientRect(), lr = lbl.getBoundingClientRect();
+    if (lr.left < pr.left) { lbl.style.left = "0"; lbl.style.transform = `translateX(${pr.left - sel.getBoundingClientRect().left}px)`; }
+    else if (lr.right > pr.right) { lbl.style.left = "auto"; lbl.style.transform = "none"; lbl.style.right = "0"; }
   });
   window.addEventListener("keydown", (ev) => {
     if (ev.key !== "Escape" || x0 == null) return;

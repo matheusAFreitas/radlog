@@ -137,7 +137,7 @@ function ftHover(box, strips, tipOf, slotT) {
   // é um botão nele, com 1 h em volta do ponto
   pop.className = "ft-pop"; pop.hidden = true; pop.setAttribute("role", "dialog");
   box.append(tip, cur, pop);
-  const closePop = () => { pop.hidden = true; };
+  const closePop = () => { pop.hidden = true; cur.hidden = true; };
   const at = (e) => {
     const st = e.target.closest(".ft-strip") || strips[0];
     if (!st) return null;
@@ -148,7 +148,8 @@ function ftHover(box, strips, tipOf, slotT) {
   box.addEventListener("mousemove", (e) => {
     const mk = e.target.closest("[data-tip]");
     const p = at(e);
-    if (!pop.hidden || (!p && !mk)) { tip.hidden = cur.hidden = true; return; }
+    if (!pop.hidden) { tip.hidden = true; return; }
+    if (!p && !mk) { tip.hidden = cur.hidden = true; return; }
     tip.textContent = mk ? mk.dataset.tip : tipOf(p.i, p.st);
     tip.hidden = cur.hidden = false;
     const fr = box.getBoundingClientRect();
@@ -171,8 +172,11 @@ function ftHover(box, strips, tipOf, slotT) {
     go.textContent = `Abrir ${hhmm(a)}–${hhmm(b)} nos gráficos`;
     go.addEventListener("click", () => { closePop(); showRange(a, b); });
     pop.replaceChildren(txt, go);
-    tip.hidden = cur.hidden = true;
+    tip.hidden = true;
     pop.hidden = false;
+    // o cursor fica marcando o ponto do balão
+    cur.hidden = false;
+    cur.style.left = e.clientX - box.getBoundingClientRect().left + "px";
     const fr = box.getBoundingClientRect();
     pop.style.left = Math.min(fr.width - pop.offsetWidth, Math.max(0, e.clientX - fr.left - pop.offsetWidth / 2)) + "px";
     pop.style.top = e.clientY - fr.top + 12 + "px";
@@ -340,8 +344,11 @@ async function ftFetch(from, to) {
 let ftSeq = 0;
 const ftMode = () => (localGet("ftMode", "dia") === "semana" ? "semana" : "dia");
 
-async function refreshAgFita() {
+async function refreshAgFita(force) {
   if (!api.GetDayStrip) return;
+  // 2.102.0: com o balão aberto, a atualização de cada minuto (e a de um
+  // alerta) espera; só a troca de Dia/Semana redesenha
+  if (!force && document.querySelector("#pageAgora .ft-pop:not([hidden])")) return;
   const my = ++ftSeq, mode = ftMode();
   document.querySelectorAll("#ftSeg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.ft === mode)));
   const d0 = startDay(Date.now());
@@ -383,5 +390,5 @@ document.addEventListener("click", (e) => {
   const b = e.target.closest("#ftSeg button");
   if (!b) return;
   localSet("ftMode", b.dataset.ft);
-  refreshAgFita();
+  refreshAgFita(true);
 });
