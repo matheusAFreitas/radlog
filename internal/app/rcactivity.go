@@ -40,7 +40,7 @@ const (
 	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
 	actWeakLo      = 300.0   // faixa do espalhamento do K-40 (keV): o sal em volta do
 	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
-	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): o sal está perto
+	actBgHighRise  = 1.5     // fundo acima disso (× o normal da casa): tem amostra perto (2.102.1: era 1,25)
 	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
@@ -709,8 +709,11 @@ func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 
-// actBgHigh: o fundo está mais de 25% acima do normal da casa (o sal, ou
-// outra amostra, ficou perto do aparelho).
+// actBgHigh: o fundo está mais de 50% acima do normal da casa (outra amostra
+// ficou perto do aparelho). 2.102.1: com 25% acusava à toa: o normal da casa
+// é a mediana dos 7 dias do RC102 em todo lugar onde ele andou, e um cômodo
+// pode ter fundo uns 30% mais alto (o ACE: 15,8 × 12,4 cps sem nada perto).
+// O sal mesmo quase não mexe no total, nem encostado.
 func actBgHigh(phaseCps, homeCps float64) bool {
 	return homeCps > 0 && phaseCps > homeCps*actBgHighRise
 }

@@ -6297,7 +6297,7 @@ contagem total	total count rate
 O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.	The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away.
 normal da casa	home normal
 contagem agora	count rate now
-O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.	The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.
+O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Se não tiver nada perto, pode seguir: o lugar pode ter um fundo mais alto que o normal.	The background is well above the home normal. If there is any sample near the RC102, move it about 3 m away and start again. If there is nothing nearby, you can go on: this spot may have a higher background than usual.
 · dose ≈ {0} mrem · um ponto a cada {1}	· dose ≈ {0} mrem · one point every {1}
 · GMC-800 ≈ {0} · RC102 ≈ {1} µSv · um ponto a cada {2}	· GMC-800 ≈ {0} · RC102 ≈ {1} µSv · one point every {2}
 · GMC-800 ≈ {0} · RC102 ≈ {1} mrem · um ponto a cada {2}	· GMC-800 ≈ {0} · RC102 ≈ {1} mrem · one point every {2}

@@ -18,6 +18,10 @@ Espectro: análise dos picos mais honesta (o mesmo critério do celular):
 - Dose acumulada, "Tudo": o quadro do RC102 dizia "faltam 10 dias sem dado"
   contando os dias antes de existir o RC102 (o "Tudo" começa no primeiro dado
   do GMC-800). Agora a falta conta desde o primeiro dado do RC102.
+- Atividade (Bq): o aviso de "fundo bem acima do normal da casa" acusava o
+  sal à toa (o ACE, com nada perto: 15,8 × 12,4 cps). Agora só aparece com
+  50% acima (antes 25%) e diz que, sem nada perto, pode seguir. O aviso nunca
+  travou a medição.
 - O último canal (onde caem as contagens que estouram a escala) não é mais
   desenhado, então sumiu o falso pico perto de 3000 keV.
 
@@ -39,6 +43,10 @@ Spectrum: more honest peak analysis (the same criterion as the phone):
 - Accumulated dose, "All": the RC102 box said "no data for 10 days",
   counting the days before the RC102 existed ("All" starts at the GMC-800's
   first data). Missing time now counts from the RC102's first data.
+- Activity (Bq): the "background well above the home normal" warning blamed
+  the salt for nothing (ACE, with nothing nearby: 15.8 × 12.4 cps). It now
+  only shows at 50% above (was 25%) and says that, with nothing nearby, you
+  can go on. The warning never blocked the measurement.
 - The last channel (where counts beyond the scale land) is no longer drawn,
   so the false peak near 3000 keV is gone.
 
