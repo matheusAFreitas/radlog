@@ -79,5 +79,11 @@ func TestWdFireAndReport(t *testing.T) {
 	}
 }
 
+var wdTestN int
+
 // wdBlocked só existe para o teste ter uma goroutine do RadLog presa.
-func (a *App) wdBlocked(mu *sync.Mutex) { mu.Lock(); mu.Unlock() }
+func (a *App) wdBlocked(mu *sync.Mutex) {
+	mu.Lock()
+	wdTestN++ // algo dentro da trava (staticcheck SA2001)
+	mu.Unlock()
+}
