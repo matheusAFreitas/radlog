@@ -317,7 +317,7 @@
   }
   async function realTick(force) {
     if (!rcLive()) { if (rl.on) { rl.on = false; EN = SIM_EN; DE = SIM_DE; spMark(); spDraw(); } return; }
-    if (!rl.on) { rl.on = true; rl.base = null; spMark(); }
+    if (!rl.on) { rl.on = true; rl.base = null; spMark(); if (!sg.on) sgLoad(); } // 2.102.1 (QA): o espectrograma acende na hora, sem esperar o próximo minuto
     if ((!sp.run && !force && rl.mode !== "acc") || rl.busy) return;
     // pelo Bluetooth a leitura do espectro é mais lenta: lê a cada 6 s
     const every = state.rc.st.via === "bluetooth" ? 6000 : 2000;
