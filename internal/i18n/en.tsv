@@ -6482,3 +6482,7 @@ Sobe {0}% acima do que tem embaixo	Rises {0}% above what is underneath
 Sobe {0}% acima do que tem embaixo; sozinho, "certo" pede 60%	Rises {0}% above what is underneath; alone, "sure" needs 60%
 rádio	radium
 fundo {0} µSv/h ({1}) · ≈ {2} mSv/ano nesse ritmo · {3}% medido desde o primeiro dado ({4})	background {0} µSv/h ({1}) · ≈ {2} mSv/year at this rate · {3}% measured since the first reading ({4})
+Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.	Connect the RC102 to see the live spectrum and the device's accumulated one.
+O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.	The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.
+A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.	Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.
+Conecte o RC102 para usar o modo busca.	Connect the RC102 to use search mode.

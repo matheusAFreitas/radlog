@@ -4943,7 +4943,15 @@ const I18N_EN = {
 "gráfico parado neste trecho": "chart frozen on this stretch",
 "Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
 "(ou U-235)": "(or U-235)",
-"rádio": "radium"
+"rádio": "radium",
+"Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"Conecte o RadiaCode para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"O espectrograma aparece quando o RadiaCode estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"A dureza aparece junto com o espectrograma, quando o RadiaCode tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"Conecte o RC102 para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode."
 },
 "patterns": [
 [

@@ -281,6 +281,17 @@
   // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
+  // 2.102.1 (pedido do ACE): no app de verdade, sem o RC102 os cartões não
+  // mostram mais o exemplo simulado, só um aviso; o exemplo fica para a
+  // demonstração (navegador e o modo demonstração do app)
+  const simOK = () => typeof hasGo === "undefined" || !hasGo || (typeof inDemo !== "undefined" && inDemo);
+  function offCard(card, off, msg) {
+    if (!card) return;
+    card.classList.toggle("rc-off", off);
+    let p = card.querySelector(":scope > .rc-off-msg");
+    if (off && !p) { p = document.createElement("p"); p.className = "rc-off-msg small muted"; card.querySelector(".rc-head").after(p); }
+    if (p) { p.hidden = !off; if (off) p.textContent = tr(msg); }
+  }
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
   // o acumulado do aparelho é mostrado como ele é (não dá para zerar); a foto
   // do "zerado no RadLog" da 2.60/2.61.0 deixa de valer
@@ -1081,6 +1092,7 @@
   }
   function sgMark() {
     $("rcSgSimTags").hidden = sg.on;
+    offCard($("rcSgCard"), !sg.on && !simOK(), "O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.");
     $("rcSgLiveTag").hidden = !sg.on;
     $("rcSgCtrl").hidden = !sg.on;
     $("rcTlReplay").hidden = sg.on;
@@ -1117,6 +1129,7 @@
     // cartão 3 (dureza): mesmo período
     const hdOn = sg.on && !!sg.hd;
     $("rcHdSimTags").hidden = hdOn;
+    offCard($("rcHardCard"), !hdOn && !simOK(), "A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.");
     $("rcHdLiveTag").hidden = !hdOn;
     $("rcHdCtrl").hidden = !hdOn;
     document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
@@ -1472,6 +1485,7 @@
   function srMark(on) {
     sr.real = on;
     $("rcSrSimTags").hidden = on;
+    offCard($("rcSrCard"), !on && !simOK(), "Conecte o RC102 para usar o modo busca.");
     $("rcSrLiveTag").hidden = !on;
     $("rcSrSim").hidden = on;
     $("rcSrReal").hidden = !on;
@@ -2339,6 +2353,7 @@
     $("rcSpecMode").hidden = true; // 2.93 (E3): o seletor de cima faz isso
     $("rcSpecSpeedBox").hidden = rl.on;
     $("rcSpecSimTag").hidden = rl.on;
+    offCard($("rcSpecSimTag").closest(".rc-card"), !rl.on && !simOK(), "Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.");
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
       ? "Ao vivo, do seu RC102: é o mesmo espectro da tela do aparelho. Cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Para medir uma amostra, encoste-a e clique em Recomeçar (o aparelho zera junto). A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Aqui só aparece o que está acima do fundo da casa; os isótopos do próprio fundo aparecem no “Acumulado do aparelho”, depois de algumas horas. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro."
@@ -2352,6 +2367,7 @@
   function show() {
     build();
     visible = true;
+    if (!sr.real) srMark(false); // 2.102.1: sem o RC102, o cartão da busca já abre com o aviso
     realTick(true);
     sgLoad();
     lgLoad();
