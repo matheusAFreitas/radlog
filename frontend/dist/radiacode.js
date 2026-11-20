@@ -2021,7 +2021,7 @@
     } else if (ph === "fundo" && v.phaseCps > 0 && v.homeCps > 0) {
       // 2.101.4: fundo medido com o sal perto estraga a calibração inteira
       live = `<p class="mono small">${tr("contagem agora")}: ${nf(v.phaseCps, 1)} cps · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps</p>`;
-      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Se não tiver nada perto, pode seguir: o lugar pode ter um fundo mais alto que o normal.")}</p>`;
+      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
       live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;

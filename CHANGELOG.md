@@ -19,9 +19,9 @@ Espectro: análise dos picos mais honesta (o mesmo critério do celular):
   contando os dias antes de existir o RC102 (o "Tudo" começa no primeiro dado
   do GMC-800). Agora a falta conta desde o primeiro dado do RC102.
 - Atividade (Bq): o aviso de "fundo bem acima do normal da casa" acusava o
-  sal à toa (o ACE, com nada perto: 15,8 × 12,4 cps). Agora só aparece com
-  50% acima (antes 25%) e diz que, sem nada perto, pode seguir. O aviso nunca
-  travou a medição.
+  sal à toa (o ACE, com nada perto: 15,8 × 12,4 cps). Agora não culpa o sal
+  e diz que minério no mesmo cômodo também sobe o fundo: se ele ficar no
+  mesmo lugar até o fim, pode seguir. O aviso nunca travou a medição.
 - O último canal (onde caem as contagens que estouram a escala) não é mais
   desenhado, então sumiu o falso pico perto de 3000 keV.
 
@@ -44,9 +44,10 @@ Spectrum: more honest peak analysis (the same criterion as the phone):
   counting the days before the RC102 existed ("All" starts at the GMC-800's
   first data). Missing time now counts from the RC102's first data.
 - Activity (Bq): the "background well above the home normal" warning blamed
-  the salt for nothing (ACE, with nothing nearby: 15.8 × 12.4 cps). It now
-  only shows at 50% above (was 25%) and says that, with nothing nearby, you
-  can go on. The warning never blocked the measurement.
+  the salt for nothing (ACE, with nothing nearby: 15.8 × 12.4 cps). It no
+  longer blames the salt and says ore in the same room also raises the
+  background: if it stays in place until the end, you can go on. The warning
+  never blocked the measurement.
 - The last channel (where counts beyond the scale land) is no longer drawn,
   so the false peak near 3000 keV is gone.
 

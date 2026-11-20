@@ -215,7 +215,7 @@ func TestActivityKCLWeakEarly(t *testing.T) {
 
 // 2.101.4: fundo bem acima do normal da casa (o sal perto do aparelho) avisa.
 func TestActivityBgHigh(t *testing.T) {
-	if actBgHigh(10, 0) || actBgHigh(13, 10) || !actBgHigh(16, 10) {
+	if actBgHigh(10, 0) || actBgHigh(11, 10) || !actBgHigh(13, 10) {
 		t.Fatal("actBgHigh")
 	}
 	pts := []RcPoint{{CPS: 5, N: 60}, {CPS: 6, N: 60}, {CPS: 100, N: 5}, {CPS: 7, N: 60}}
