@@ -6510,3 +6510,6 @@ aberto pelo {0} · gráfico parado neste trecho	opened from {0} · chart frozen 
 aberto pelos {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
 aberto pelas {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
 gráfico parado neste trecho	chart frozen on this stretch
+ERRO motor travado ({0} presa desde {1}): reiniciando o app	ERROR engine stuck ({0} held since {1}): restarting the app
+trava nuvem	cloud lock
+{0} travou: {1} presa desde {2} (versão {3})	{0} stuck: {1} held since {2} (version {3})

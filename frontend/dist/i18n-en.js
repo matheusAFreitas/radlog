@@ -4959,7 +4959,8 @@ const I18N_EN = {
 "Mais ações do trecho": "More actions for this stretch",
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
-"gráfico parado neste trecho": "chart frozen on this stretch"
+"gráfico parado neste trecho": "chart frozen on this stretch",
+"trava nuvem": "cloud lock"
 },
 "patterns": [
 [
@@ -9129,6 +9130,16 @@ const I18N_EN = {
 ]
 ],
 [
+"ERRO motor travado (",
+"^ERRO motor travado \\(((?:(?! · ).)+?) presa desde ((?:(?! · ).)+?)\\): reiniciando o app$",
+"ERROR engine stuck (${1} held since ${2}): restarting the app",
+[
+"ERRO motor travado (",
+" presa desde ",
+"): reiniciando o app"
+]
+],
+[
 "Dose medida no período escolhido no cartão de dose: ",
 "^Dose medida no período escolhido no cartão de dose: ((?:(?! · ).)+?)\\.$",
 "Dose measured in the period chosen on the dose card: ${1}.",
@@ -12786,6 +12797,16 @@ const I18N_EN = {
 "==== RadLog ",
 " iniciado (",
 ", PC "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) travou: ((?:(?! · ).)+?) presa desde ((?:(?! · ).)+?) \\(versão ((?:(?! · ).)+?)\\)$",
+"${1} stuck: ${2} held since ${3} (version ${4})",
+[
+" travou: ",
+" presa desde ",
+" (versão "
 ]
 ],
 [
