@@ -16,6 +16,7 @@ func TestNoBareGoroutines(t *testing.T) {
 		"app.go:go a.poll(d, stop, port)":              true, // recover próprio (lostConnection)
 		"applog.go:go func() {":                        true, // withTimeout
 		"watchdog.go:go func() {":                      true, // withTimeout
+		"hangwatch.go:go func() {":                     true, // log com prazo antes de fechar
 		"panics.go:go func() {":                        true, // o próprio goSafe
 		"panics.go:go a.runLoop(name, fn, time.Sleep)": true,
 	}

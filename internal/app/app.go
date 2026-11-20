@@ -92,6 +92,9 @@ type Settings struct {
 	RcBLE string `json:"rcBLE"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
+	// celular: nuvem pela rede móvel (dados pagos): "" a cada 15 min, como no
+	// Wi-Fi; "hora" de hora em hora; "wifi" só no Wi-Fi (ACE, 19/11)
+	CloudCell string `json:"cloudCell"`
 	// baixar a memória do GMC-800 sozinho ao conectar (ligado se false; 2.83.0)
 	NoAutoHistory bool `json:"noAutoHistory"`
 	// pasta dos relatórios em PDF; vazio = Documentos/RadLog/Relatórios
@@ -404,6 +407,11 @@ type App struct {
 	histAskFrom    int64                        // sem pasta de dados: o mesmo que perguntarDesde (autohist.go)
 	histDownload   func() (ImportResult, error) // testes: no lugar do downloadHistory
 	emitHook       func(name string, data any)  // testes: os eventos para a tela
+	mobile         bool                         // app de Android (mobile.go)
+	// celular: a rede de agora é paga (dados móveis), e a nuvem deixou de
+	// sincronizar por isso (sincroniza quando o Wi-Fi voltar)
+	netMetered   atomic.Bool
+	cloudWaitNet atomic.Bool
 
 	// pausa a reconexão automática quando o usuário desconecta na mão
 	manualOff bool

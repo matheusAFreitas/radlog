@@ -1,3 +1,5 @@
+func AnalyzeSpectrum(app.MeasureSpectrum) ([]app.SpecPeak)
+func CancelMeasure() (app.MeasureState)
 func CheckCloudCode(string) (string, error)
 func CloudCancel() (app.CloudInfo)
 func CloudDisconnect() (app.CloudInfo)
@@ -9,35 +11,65 @@ func GetChart(string) (app.Chart, error)
 func GetCloud() (app.CloudInfo)
 func GetEvents(string) ([]app.Event)
 func GetLogs(app.LogQuery) (app.LogResult, error)
+func GetMeasure() (app.MeasureState)
 func GetPeriods() ([]app.Period)
 func GetRadiacode() (app.RcState)
 func GetRcSettings() (app.RcSettings, error)
+func GetRcSpectrogram(int64, int64, int, float64) (app.RcSpectrogram, error)
+func GetRcSpectrum(bool) (app.RcSpectrum, error)
 func GetSettings() (app.Settings)
 func GetWhereabouts() (app.Whereabouts)
 func LeaveHome(bool, bool) (app.Whereabouts, error)
+func ReconnectRadiacode() (app.RcState)
+func ResetRcSpectrum() (error)
+func SavePeriod(app.Period) (app.Period, error)
 func SaveSettings(app.Settings) (app.Settings)
 func ScanRadiacodeBLE() ([]radiacode.BLEDevice, error)
 func SetRadiacode(bool, string) (app.RcState)
 func SetRcSettings(radiacode.Settings) (app.RcSettings, error)
 func SetWhere(string, string, string) (app.Whereabouts, error)
+func StartMeasure(app.MeasureOpts) (app.MeasureState, error)
+func StartMeasurePhase(string, int, string) (app.MeasureState, error)
+func StopMeasure() (app.MeasureState)
+func UndoRcSettings() (app.RcSettings, error)
+type app.BqCheck {text string; ok bool}
+type app.BqEstimate {ok bool; bq float64; lo float64; hi float64; group string; gamma float64; checks []app.BqCheck; missing string}
 type app.Chart {from int64; to int64; stepMs int64; times []int64; values []*float64; avg *float64; min *float64; max *float64; usv []*float64; avgUSv *float64; minUSv *float64; maxUSv *float64; attentionCPM int; attentionUSv float64; alarmCPM int; alarmUSv float64; dangerCPM int; dangerUSv float64; peaks []app.ChartPeak; fineAlertsOnly bool; rc []*float64; rcAvg *float64; rcCPM []*float64; rcAvgCPM *float64}
 type app.ChartPeak {t int64; cpm float64; level string; retro bool}
 type app.CloudDevice {id string; name string; lastUp int64; me bool}
 type app.CloudInfo {state string; ready bool; email string; lastSync int64; queue []string; used int64; devices []app.CloudDevice; auto bool; skewSec int; dupOf string; sendNow string; sendI int; sendN int; err string; removed int64; restart bool; restarted int64; vaultWait bool}
 type app.CloudLoginDone {info app.CloudInfo; next string; lastUp int64}
 type app.DevLive {connected bool; state string; since int64; last int64; lastGood int64; countsOffline bool}
+type app.DistFit {points []app.DistPoint; k float64; chi2 float64; verdict string; title string; text string}
+type app.DistPoint {cm float64; netUSv float64; errUSv float64; predict float64; seconds int; lost bool}
 type app.Event {id int64; time int64; text string; kind string; level string; cpm float64; peak float64; peakAt int64; end int64; retro bool; active bool; demo bool; device string; endReason string; usv float64; peakUSv float64; usvPerCPM float64}
+type app.InvSq {d1 float64; d2 float64; n1 float64; n2 float64; ratio float64; expect float64; power float64; errPow float64; ok bool; text string}
+type app.IsoGuess {group string; nuclides []string; kev []float64; lines int; of int; conf float64}
 type app.LogBucket {t int64; counts map[string]int}
 type app.LogComp {name string; count int}
 type app.LogEntry {t int64; level string; comp string; msg string}
 type app.LogQuery {from int64; to int64; levels []string; comp string; text string; limit int}
 type app.LogResult {entries []app.LogEntry; total int; counts map[string]int; comps []app.LogComp; buckets []app.LogBucket; bucketMs int64; from int64; to int64}
+type app.MeasureAt {distance string; distCm float64; netUSv float64; errUSv float64; sigma float64; level string; seconds int}
+type app.MeasureDerived {netUSv float64; errUSv float64; bgUSv float64; isotopes []app.IsoGuess; safe app.SafeDist; bq *app.BqEstimate; invSq *app.InvSq; dist *app.DistFit; shield *app.ShieldCut}
+type app.MeasureOpts {name string; distance string; auto bool; homeBg bool; seconds int; maxSec int; pct float64; device string; mode string; distCm float64; size string; test string; material string; relErr float64; waitObj bool; quietDanger bool}
+type app.MeasurePhase {counts int; seconds int; cpm float64; errCPM float64; usv float64; errUSv float64; start int64; end int64; source string}
+type app.MeasureResult {netCPM float64; netErr float64; netUSv float64; ratio float64; sigma float64; verdict string; level string; stop string; limit float64; pct float64; threshold float64; limitUSv float64; thresholdUSv float64; netErrUSv float64; doseSigma float64; doseUp bool; belowBg bool}
+type app.MeasureSample {t int64; phase string; cpm float64; cps uint32; usv float64}
+type app.MeasureSide {device string; role string; counts int; elapsed int; bg *app.MeasurePhase; obj *app.MeasurePhase; result *app.MeasureResult; live *app.MeasureResult; dose float64; avgUSv float64; maxUSv float64; bgUSv float64; excess float64; nowUSv float64; hint string; samples []app.MeasureSample}
+type app.MeasureSpectrum {a [3]float64; bg []uint32; bgSec float64; bgSrc string; obj []uint32; objSec float64; peaks []app.SpecPeak; role string}
+type app.MeasureState {phase string; seconds int; elapsed int; counts int; name string; bg *app.MeasurePhase; obj *app.MeasurePhase; result *app.MeasureResult; phaseStart int64; savedId int64; reportPath string; reportError string; auto bool; maxSec int; pct float64; distance string; live *app.MeasureResult; eta int; phUsv float64; phErrUsv float64; device string; spectrum *app.MeasureSpectrum; mode string; other *app.MeasureSide; quietDanger bool; distCm float64; size string; prev []app.MeasureAt; derived *app.MeasureDerived; test string; material string; relErr float64}
 type app.Period {id int64; from int64; to int64; name string; gmc string; radiacode string; notHome bool; planned int64; estimated bool; uid string; edited int64}
 type app.RcLimits {attn float64; alarm float64; danger float64; device bool}
 type app.RcSettings {(embutido) radiacode.Settings; canUndo bool; undoAt string; unchanged bool}
+type app.RcSpectrogram {from int64; to int64; rowSec int; eMax float64; bins int; rows [][]float64; secs []float64; cps []float64; gap []bool; first int64}
+type app.RcSpectrum {seconds float64; a [3]float64; counts []uint32; accum bool}
 type app.RcState {state string; via string; model string; serial string; firmware string; err string; ble string; bleOK bool; off bool; time int64; cps float64; cpsErr float64; usvh float64; usvhErr float64; dose float64; doseSec int64; battery float64; tempC float64; hasRare bool; alarms *radiacode.AlarmLimits; since int64; today float64; todayDev float64; todayDevOK bool; lastT int64; lastUSv float64; lastCPS float64; stats *app.RcStats; attnUSv float64; alarmUSv float64; dangerUSv float64; alertLevel string; limits app.RcLimits; doseLive float64; doseLiveSec float64; doseLiveAt int64; offscale bool; doseLiveOn bool}
 type app.RcStats {bgUSv float64; bgLo float64; bgHi float64; bgMinutes int; avg1h float64; n1h int; min24h float64; max24h float64; max24hAt int64; n24h int; todayMinutes int}
-type app.Settings {port string; portUsb string; autoConnect bool; alarmEnabled bool; alarmCPM int; alarmUSv float64; alarmSound string; alarmRaise bool; attentionEnabled bool; rainEnabled bool; rainLat float64; rainLon float64; rainPlace string; rainHidePlace bool; levels levels.Levels; awayAskMin int; trayOnClose bool; trayPlain bool; trayDevice string; uiScale float64; uiDensity string; rateUnit string; countUnit string; dateFormat string; pulseOff bool; pulseStrip bool; pulseLogo string; bgMoved int64; startWithWindows bool; noUpdateCheck bool; skipVersion string; keepOldVersions bool; lang string; rcOff bool; rcBLE string; noMeasureReport bool; noAutoHistory bool; reportDir string; reportMode string; reportNotes bool; reportNoCfg bool; usageOn bool}
+type app.SafeDist {ok bool; cm float64; below bool; approx bool; why string}
+type app.Settings {port string; portUsb string; autoConnect bool; alarmEnabled bool; alarmCPM int; alarmUSv float64; alarmSound string; alarmRaise bool; attentionEnabled bool; rainEnabled bool; rainLat float64; rainLon float64; rainPlace string; rainHidePlace bool; levels levels.Levels; awayAskMin int; trayOnClose bool; trayPlain bool; trayDevice string; uiScale float64; uiDensity string; rateUnit string; countUnit string; dateFormat string; pulseOff bool; pulseStrip bool; pulseLogo string; bgMoved int64; startWithWindows bool; noUpdateCheck bool; skipVersion string; keepOldVersions bool; lang string; rcOff bool; rcBLE string; noMeasureReport bool; cloudCell string; noAutoHistory bool; reportDir string; reportMode string; reportNotes bool; reportNoCfg bool; usageOn bool}
+type app.ShieldCut {material string; beforeUSv float64; beforeErr float64; afterUSv float64; afterErr float64; cut float64; cutErr float64; seen bool; title string; text string; beforeSecs int; afterSecs int}
+type app.SpecPeak {group string; nuclide string; kev float64; net float64; sigma float64; center float64; cont float64; half float64; side float64}
 type app.Whereabouts {gmc string; radiacode string; normal bool; personal string; home string; since int64; notHome bool; open *app.Period; live map[string]app.DevLive}
 type levels.Levels {attentionCPM int; dangerCPM int; attentionUSv float64; dangerUSv float64; snoozeMin int; satMaxUSv float64; satDropUSv float64; satHoldSec int; rcSatUSv float64; deadTimeOn bool; deadTimeUs float64}
 type radiacode.AlarmLimits {CountRate1 float64; CountRate2 float64; DoseRate1 float64; DoseRate2 float64; Dose1 float64; Dose2 float64; ShowSv bool; ShowCPM bool}

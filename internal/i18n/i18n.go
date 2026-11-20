@@ -254,6 +254,12 @@ func (d *dict) tr(s string) string {
 		if i := strings.Index(core, ": "); i >= 3 && i <= 80 {
 			if lp, ok2 := d.one(core[:i], false); ok2 {
 				out, ok = lp+": "+d.tr(core[i+2:]), true
+			} else if lb := core[:i]; !hasPTLeft(lb) {
+				// 19/11: rótulo que não se traduz ("Bluetooth", "RC102") e o
+				// resto em português: só o resto
+				if t := d.tr(core[i+2:]); t != core[i+2:] && !hasPTLeft(t) {
+					out, ok = lb+": "+t, true
+				}
 			}
 		}
 	}
@@ -419,10 +425,41 @@ func (d *dict) part(s string) string {
 	}
 	i := strings.Index(s, core)
 	t, ok := d.one(core, true)
-	if !ok {
-		t = FixNums(core)
+	if !ok || hasPTLeft(t) {
+		// 19/11: parte composta ("nada chegou; sinal -63 dBm", "BLE: client
+		// connected (repetiu mais 1 vezes desde 01:24)"): o tradutor inteiro,
+		// que quebra em frases e em rótulo + resto (sempre num texto menor)
+		if t2 := d.tr(core); t2 != core && (!ok || !hasPTLeft(t2)) {
+			t = t2
+		} else if t2 := d.tail(core); t2 != FixNums(core) {
+			t = t2
+		} else if !ok {
+			t = FixNums(core)
+		}
 	}
 	return s[:i] + t + s[i+len(core):]
+}
+
+// tail: "texto (complemento)": traduz o texto e o parêntese do fim à parte
+// (a mensagem do RC102 vem em inglês e o "(repetiu mais…)" é nosso).
+func (d *dict) tail(s string) string {
+	if !strings.HasSuffix(s, ")") {
+		return FixNums(s)
+	}
+	i := strings.LastIndex(s, " (")
+	if i <= 0 {
+		return FixNums(s)
+	}
+	head, par := s[:i], s[i+1:]
+	t, ok := d.one(par, false)
+	if !ok {
+		return FixNums(s)
+	}
+	h, ok := d.one(head, true)
+	if !ok {
+		h = FixNums(head)
+	}
+	return h + " " + t
 }
 
 // sentences: várias frases no mesmo texto; junta as que formam uma frase

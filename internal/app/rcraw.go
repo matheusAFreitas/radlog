@@ -207,7 +207,17 @@ type rcTexts struct {
 	seen    map[string][]time.Time // texto → quando cada uma aconteceu
 	last    map[string]time.Time   // texto → quando entrou no log pela última vez
 	skipped map[string]int         // texto → repetições desde então
+	// mark: a mais nova que já entrou. A cada conexão o aparelho devolve o
+	// histórico inteiro (quase um dia) e a hora calculada pelo "segundos
+	// atrás" escorrega mais que os 5 s do dup nas antigas: o log do celular
+	// enchia com ~50 linhas de "Data frame corrupted" de ontem a cada queda
+	// (19/11). O que é mais velho que isso, ou que rcTextMaxAge, não entra.
+	mark time.Time
 }
+
+// rcTextMaxAge: mensagem do aparelho mais velha que isso é histórico (de
+// quando outro app ou ninguém estava conectado) e não vai para o log.
+const rcTextMaxAge = 6 * time.Hour
 
 func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
 	t.mu.Lock()
@@ -229,6 +239,8 @@ func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
 		}
 	}
 	var out []string
+	prev, mark := t.mark, t.mark // a marca vale da leitura anterior em diante
+	defer func() { t.mark = mark }()
 	for _, l := range lines {
 		when := now.Add(-time.Duration(l.AgoSec) * time.Second)
 		// a mesma mensagem lida de novo vem com outro "segundos atrás"
@@ -240,7 +252,15 @@ func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
 				break
 			}
 		}
-		if dup {
+		// "segundos atrás" com o sinal trocado dá hora no futuro: no dev.619
+		// (20/11 03:11) entrou um dia inteiro de "Data frame corrupted" assim
+		if when.After(now.Add(time.Minute)) {
+			continue
+		}
+		if when.After(mark) {
+			mark = when
+		}
+		if dup || now.Sub(when) > rcTextMaxAge || (!prev.IsZero() && !when.After(prev.Add(5*time.Second))) {
 			continue
 		}
 		t.seen[l.Text] = append(t.seen[l.Text], when)

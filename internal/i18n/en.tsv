@@ -5652,6 +5652,13 @@ o GMC-800 de verdade saturou	the real GMC-800 saturated
 o GMC-800 de verdade está sem contagens	the real GMC-800 has no counts
 a memória do GMC-800 de verdade passou de 95%	the real GMC-800 memory is over 95%
 a memória do GMC-800 de verdade passou de 80%	the real GMC-800 memory is over 80%
+Bluetooth: o app ainda não ligou o rádio	Bluetooth: the app hasn't turned on the radio yet
+resposta pela metade ({0} de {1} bytes)	half a response ({0} of {1} bytes)
+montagem: {0}	assembly: {0}
+chegaram {0} pedaço(s)	{0} chunk(s) arrived
+nada chegou	nothing arrived
+RC102: conectou mas não abriu ({0})	RC102: connected but did not open ({0})
+RC102: não conectou ({0}); próxima tentativa pelo Bluetooth em {1}	RC102: did not connect ({0}); next Bluetooth try in {1}
 Abrir eventos	Open events
 Configurações › Atualizações e sobre	Settings › Updates and about
 Configurações › Dados e backup	Settings › Data and backup
@@ -5673,6 +5680,7 @@ papel mudou	role changed
 {0}: sem dado (fora do cálculo)	{0}: no data (out of the calculation)
 fora	out
 abertura: tela pronta em {0} ms (scripts lidos em {1} ms); {2} ms desde que o programa começou	startup: screen ready in {0} ms (scripts read in {1} ms); {2} ms since the program started
+RC102 (Bluetooth): sem resposta em {0} ao pedido {1}: {2}	RC102 (Bluetooth): no answer in {0} to request {1}: {2}
 GMC-800 desligado em {0} do dia	GMC-800 off for {0} of the day
 RC102 desligado em {0} do dia	RC102 off for {0} of the day
 GMC-800 desligado em {0} da semana	GMC-800 off for {0} of the week
@@ -6092,6 +6100,10 @@ Datas	Dates
 Formato da data	Date format
 Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.	Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.
 formato da data	date format
+sinal {0} dBm	signal {0} dBm
+o rádio ainda responde ({0} dBm)	the radio still answers ({0} dBm)
+o rádio não respondeu	the radio didn't answer
+não deu para perguntar ao rádio	couldn't ask the radio
 Clique para mostrar ou esconder no gráfico	Click to show or hide on the chart
 fixo: 10 min	fixed: 10 min
 fixo: 30 min	fixed: 30 min
@@ -6467,6 +6479,28 @@ Usar a nova ({0})	Use the new one ({0})
 voltar à anterior ({0})	go back to the previous one ({0})
 Parou em {0}: a dose passou de 4σ, bem acima da variação natural. O µSv/h vale para o objeto na distância medida; a 1 metro é muito menos.	Stopped at {0}: the dose went past 4σ, well above the natural variation. The µSv/h applies to the object at the measured distance; at 1 meter it's much less.
 Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.	Loose stone: the mass is optional and the result comes in Bq for the piece.
+o RC102 não respondeu (longe, desligado ou com outro aparelho)	the RC102 didn't respond (too far, off, or with another device)
+o aparelho não aceitou a conexão (status {0})	the device refused the connection (status {0})
+o aparelho não aceita notificações	the device doesn't accept notifications
+não consegui ler os serviços do aparelho	couldn't read the device's services
+não consegui ligar as notificações	couldn't turn on notifications
+não consegui ligar as notificações (status {0})	couldn't turn on notifications (status {0})
+o Android não abriu a conexão	Android didn't open the connection
+o Android não aceitou o envio	Android didn't accept the send
+o envio não terminou	the send didn't finish
+envio recusado (status {0})	send refused (status {0})
+este celular não tem Bluetooth	this phone has no Bluetooth
+o Bluetooth do celular está desligado	the phone's Bluetooth is off
+==== RadLog {0} iniciado ({1}/{2}, {3}, PC {4})	==== RadLog {0} started ({1}/{2}, {3}, PC {4})
+modo celular (Android)	phone mode (Android)
+· não deu para perguntar ao rádio	· couldn't ask the radio
+· o rádio ainda responde ({0} dBm)	· the radio still answers ({0} dBm)
+· o rádio não respondeu	· the radio didn't answer
+· resposta pela metade ({0} de {1} bytes)	· half a response ({0} of {1} bytes)
+nuvem: subiu {0} arquivo(s), juntou {1} · {2} KB enviados, {3} KB recebidos, {4} pedidos	cloud: uploaded {0} file(s), merged {1} · {2} KB sent, {3} KB received, {4} requests
+RC102 (Bluetooth): o pedido {0} ficou {1} sem resposta; mandado de novo, respondeu	RC102 (Bluetooth): request {0} got no answer for {1}; sent again, it answered
+· mandado de novo, nada	· sent again, nothing
+mandado de novo, nada	sent again, nothing
 Abrir {0}–{1} nos gráficos	Open {0}–{1} on the charts
 Mais ações do trecho	More actions for this stretch
 Voltar ao zoom anterior	Back to the previous zoom
@@ -6476,3 +6510,7 @@ aberto pelo {0} · gráfico parado neste trecho	opened from {0} · chart frozen 
 aberto pelos {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
 aberto pelas {0} · gráfico parado neste trecho	opened from {0} · chart frozen on this stretch
 gráfico parado neste trecho	chart frozen on this stretch
+ERRO motor travado ({0} presa desde {1}): reiniciando o app	ERROR engine stuck ({0} held since {1}): restarting the app
+trava nuvem	cloud lock
+{0} travou: {1} presa desde {2} (versão {3})	{0} stuck: {1} held since {2} (version {3})
+==== RadLog {0} iniciado (android/{1}, {2}, motor {3}, {4})	==== RadLog {0} started (android/{1}, {2}, engine {3}, {4})
