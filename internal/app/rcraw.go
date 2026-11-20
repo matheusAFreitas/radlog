@@ -252,6 +252,11 @@ func (t *rcTexts) take(lines []radiacode.TextLine, now time.Time) []string {
 				break
 			}
 		}
+		// "segundos atrás" com o sinal trocado dá hora no futuro: no dev.619
+		// (20/11 03:11) entrou um dia inteiro de "Data frame corrupted" assim
+		if when.After(now.Add(time.Minute)) {
+			continue
+		}
 		if when.After(mark) {
 			mark = when
 		}

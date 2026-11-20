@@ -132,7 +132,7 @@ func (a *App) wdFire(l *wdLock) {
 	buf := make([]byte, wdDumpMax)
 	buf = buf[:runtime.Stack(buf, true)]
 	head := fmt.Sprintf("%s travou: %s presa desde %s (versão %s)\n\n",
-		time.Now().Format("2006-01-02 15:04:05"), l.name, l.held.Format("15:04:05"), AppVersion)
+		time.Now().Format("2006-01-02 15:04:05"), l.name, l.held.Format("15:04:05"), runVersion())
 	_ = os.WriteFile(filepath.Join(a.dataDir, wdDumpFile), append([]byte(head), buf...), 0o644)
 	done := make(chan struct{})
 	go func() {

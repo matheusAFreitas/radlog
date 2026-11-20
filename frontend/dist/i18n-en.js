@@ -10476,6 +10476,16 @@ const I18N_EN = {
 ]
 ],
 [
+"==== RadLog ",
+"^==== RadLog ((?:(?! · ).)+?) iniciado \\(android/((?:(?! · ).)+?), ((?:(?! · ).)+?), motor ((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"==== RadLog ${1} started (android/${2}, ${3}, engine ${4}, ${5})",
+[
+"==== RadLog ",
+" iniciado (android/",
+", motor "
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",

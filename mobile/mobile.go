@@ -100,6 +100,9 @@ func SetTimeZone(id string) error {
 	return nil
 }
 
+// SetVersion dá a versão do APK (chamar antes do Start), que vai no log.
+func SetVersion(v string) { app.SetMobileVersion(v) }
+
 // Running diz se o motor já foi ligado.
 func Running() bool {
 	mu.Lock()

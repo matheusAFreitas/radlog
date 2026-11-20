@@ -40,6 +40,21 @@ func SetMobileOpenURL(f func(string)) {
 // na lista de aparelhos da nuvem.
 func SetMobileHost(name string) { mobileHost = name }
 
+// mobileVersion é a versão do APK (ex.: 3.0.0-dev.619), dada pelo Android.
+var mobileVersion string
+
+// SetMobileVersion dá a versão do APK, que vai no log e no retrato de
+// travamento (o AppVersion do motor é o do desktop e confundia: "2.102.0").
+func SetMobileVersion(v string) { mobileVersion = v }
+
+// runVersion é a versão que está rodando: a do APK no celular.
+func runVersion() string {
+	if mobileVersion != "" {
+		return mobileVersion
+	}
+	return AppVersion
+}
+
 // IsMobile diz se este App é o do celular.
 func (a *App) IsMobile() bool { return a.mobile }
 

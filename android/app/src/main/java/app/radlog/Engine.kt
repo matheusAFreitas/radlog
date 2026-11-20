@@ -41,6 +41,7 @@ object Engine : Host {
         val dir = app.filesDir.resolve("RadLog")
         dir.mkdirs()
         val name = (Build.MODEL ?: "Android").take(40)
+        try { Mobile.setVersion(app.packageManager.getPackageInfo(app.packageName, 0).versionName ?: "") } catch (_: Exception) { }
         Mobile.start(dir.absolutePath, name, this)
         watchNetwork()
     }

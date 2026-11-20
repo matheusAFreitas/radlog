@@ -55,3 +55,19 @@ func TestRcTextsOldAndDrift(t *testing.T) {
 		t.Fatalf("segunda leitura: %v", out)
 	}
 }
+
+// dev.619 (20/11): mensagens com hora no futuro não entram nem mexem na marca.
+func TestRcTextsFuture(t *testing.T) {
+	var tx rcTexts
+	now := time.Date(2026, 11, 20, 3, 11, 0, 0, time.Local)
+	lines := []radiacode.TextLine{
+		{AgoSec: -9 * 3600, Text: "Error: S1 Data frame corrupted!"},
+		{AgoSec: 30, Text: "BLE: client connected"},
+	}
+	if out := tx.take(lines, now); len(out) != 1 || !strings.Contains(out[0], "BLE") {
+		t.Fatalf("futuro entrou: %v", out)
+	}
+	if out := tx.take([]radiacode.TextLine{{AgoSec: 10, Text: "BLE: disconnected by remote user"}}, now.Add(time.Minute)); len(out) != 1 {
+		t.Fatalf("a marca andou com a do futuro: %v", out)
+	}
+}
