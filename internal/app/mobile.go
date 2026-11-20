@@ -48,6 +48,7 @@ func (a *App) StartMobile() {
 	_ = os.MkdirAll(a.dataDir, 0o755)
 	a.logStart()
 	a.logf("modo celular (Android)")
+	a.wdReport()
 	radiacode.BLELogf = a.logf
 	a.settings = a.loadSettings()
 	a.loadLastCal()
@@ -69,6 +70,7 @@ func (a *App) StartMobile() {
 	a.goLoop("pendingRetry", a.pendingRetry)
 	a.goLoop("cloudLoop", a.cloudLoop)
 	a.goLoop("rcLoop", a.rcLoop)
+	a.goLoop("watchdog", a.watchdogLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill() })
 }
 

@@ -32,7 +32,7 @@ import java.util.concurrent.Executors
  */
 class MainActivity : Activity() {
     private lateinit var web: WebView
-    private val pool = Executors.newFixedThreadPool(3)
+    private val pool = Executors.newCachedThreadPool()
     private var permCb: String? = null
 
     override fun onCreate(saved: Bundle?) {

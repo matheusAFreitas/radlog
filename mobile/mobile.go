@@ -181,6 +181,7 @@ func Call(method, args string) (out string) {
 	if !allowed(method) {
 		return answer(nil, fmt.Errorf("método desconhecido: %s", method))
 	}
+	defer app.WatchCall(method)()
 	return call(reflect.ValueOf(a), method, args)
 }
 
