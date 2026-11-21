@@ -1725,10 +1725,10 @@
   const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
   const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
   const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
-  // 2.102.2 (pedido do ACE): tempo de cada fase da calibração (fundo = sal);
+  // 2.103.0 (pedido do ACE): tempo de cada fase da calibração (fundo = sal);
   // o recomendado vem da conta de actCalPhaseSec
   const ACT_CAL_T = [3600, 7200, 10800, 21600, 43200]; const ACT_CAL_EARLY = 900;
-  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
+  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", calBgMode: "novo", calAuto: true, calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
   const fmtSec = (s) => { if (!isFinite(s) || s <= 0) return "—"; if (s < 90) return nf(s, 0) + " s"; if (s < 5400) return nf(s / 60, 0) + " min"; return nf(s / 3600, s < 36000 ? 1 : 0) + " h"; };
@@ -1898,7 +1898,20 @@
     act.calSmpSec = act.calPick || rec;
     act.calBgSec = act.calSmpSec;
     setHTML($("rcActCalT"), actSegHtml(ACT_CAL_T, act.calSmpSec, rec));
-    let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
+    // 2.103.0 (ACE, item 5): fundo salvo das últimas 24 h, no mesmo lugar, pula a fase do fundo
+    const sb = v.savedBg, sbOk = !!(sb && Date.now() - sb.t < 864e5);
+    if (!sbOk) act.calBgMode = "novo";
+    const cbs = $("rcActCalBgSaved");
+    cbs.disabled = !sbOk;
+    cbs.textContent = sbOk ? `usar o de ${fmtDM(sb.t)} (${fmtSec(sb.sec)})` : tr("usar o salvo (não tem das últimas 24 h)");
+    document.querySelectorAll("#rcActCalBg button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.calBgMode)));
+    $("rcActCalBgHint").hidden = act.calBgMode !== "salvo";
+    // 2.103.0 (ACE, item 4): a fase com o sal para sozinha em ±15%; o tempo vira o limite
+    $("rcActCalAutoBox").hidden = k !== "kcl";
+    document.querySelectorAll("#rcActCalAuto button").forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.v === "auto") === act.calAuto)));
+    const auto = k === "kcl" && act.calAuto, newBg = act.calBgMode !== "salvo";
+    let tot = actTotal(newBg, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
+    if (auto) tot += `<span class="small muted" style="display:block">${tr("A fase com o sal para antes se chegar a ±15% (depois de 1 h, no mínimo).")}</span>`;
     // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
     if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${light ? tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`) : tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais KCl, bem apertado em volta do RC102.`)}</span>`;
     setHTML($("rcActCalTot"), tot);
@@ -2033,7 +2046,7 @@
     }[ph] || "";
     $("rcActBar").style.width = (tg > 0 && (ph === "fundo" || ph === "amostra") ? Math.min(100, (t / tg) * 100) : ph === "pronto" ? 100 : 0) + "%";
     $("rcActBar").parentElement.hidden = ph === "trocar" || ph === "pronto";
-    // 2.102.2 (pedido do ACE): estender ou encurtar a fase sem recomeçar; o que
+    // 2.103.0 (pedido do ACE): estender ou encurtar a fase sem recomeçar; o que
     // já passou do tempo medido fica desligado (para parar já, "Encerrar agora")
     const running = ph === "fundo" || ph === "amostra", calRun = o.kind === "kcl" || o.kind === "torio";
     $("rcActRunTBox").hidden = !running;
@@ -2059,9 +2072,10 @@
       // no pico fica abaixo do fundo (normal no começo), a linha não some mais
       // 2.102.2 (QA): passado o alvo, a conta dava um total menor que o já medido ("~7 h" com 11 h)
       if (v.liveKcl && v.liveKcl.effErr > ACT_CAL_REL) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · para ±15%: ~${fmtSec(t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2)} no total</p>`;
+      else if (v.liveKcl && v.liveKcl.effErr > 0 && o.autoStop && t < 3600) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · já está em ±15%: para sozinha com 1 h</p>`;
       else if (v.liveKcl && v.liveKcl.effErr > 0) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · já chegou a ±15%: pode encerrar</p>`;
       else if (o.kind === "kcl" && t >= 60) live += `<p class="mono small">${tr("eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)")}</p>`;
-      // 2.102.2 (depois da 2ª calibração perdida): o tempo sugerido sai da massa,
+      // 2.103.0 (depois da 2ª calibração perdida): o tempo sugerido sai da massa,
       // e o sinal de verdade pode ser bem menor. Com 15 min de sal o app já sabe
       // o ritmo real e avisa se o tempo marcado não fecha em ±15%
       if (calRun && t >= ACT_CAL_EARLY) {
@@ -2110,7 +2124,7 @@
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
-    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
+    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: act.calBgMode !== "salvo", autoStop: k === "kcl" && act.calAuto, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
     if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
     else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
     actStartOpts(o, $("rcActCalErr"));
@@ -2316,6 +2330,8 @@
     segPick("rcActSmpT", (x) => { act.smpSec = +x; });
     segPick("rcActBgT", (x) => { act.bgSec = +x; });
     segPick("rcActCalT", (x) => { act.calPick = +x; });
+    segPick("rcActCalBg", (x) => { act.calBgMode = x; });
+    segPick("rcActCalAuto", (x) => { act.calAuto = x === "auto"; });
     const actSetTime = async (sec) => {
       try { await api.SetActivityTime(sec); $("rcActRunErr").dataset.msg = ""; } catch (err) { $("rcActRunErr").dataset.msg = String(err && err.message ? err.message : err); }
       actLoad();

@@ -275,7 +275,7 @@ func TestActHistoryDedupe(t *testing.T) {
 	}
 }
 
-// 2.102.2 (pedido do ACE): o tempo da fase muda com ela rodando; na
+// 2.103.0 (pedido do ACE): o tempo da fase muda com ela rodando; na
 // calibração, no fundo, o tempo do sal acompanha
 func TestSetActivityTime(t *testing.T) {
 	a := newTestApp(t)
@@ -306,5 +306,53 @@ func TestSetActivityTime(t *testing.T) {
 	st.run.Phase = "pronto"
 	if err := a.SetActivityTime(3600); err == nil {
 		t.Fatal("pronta não muda o tempo")
+	}
+}
+
+// 2.103.0 (ACE, item 4): a fase com o sal para sozinha em ±15%, nunca antes de 1 h
+func TestActAutoDone(t *testing.T) {
+	r := &actRun{Opts: ActOpts{Kind: "kcl", AutoStop: true, MassG: 750, Pct: 51}, Phase: "amostra"}
+	if actAutoDone(r) {
+		t.Fatal("sem fundo não pode parar")
+	}
+	rng := rand.New(rand.NewSource(5))
+	bg := actFake(rng, 3*3600, map[float64]float64{1460.8: 0.3 * 3 * 3600}, 0.5)
+	r.Bg = &actSaved{Sec: bg.Sec, A: bg.A, C: bg.C}
+	set := func(sec, net float64) {
+		s := actFake(rng, sec, map[float64]float64{1460.8: (0.3 + net) * sec}, 0.5)
+		z := make([]float64, len(s.C))
+		r.Cur = actAcc{Acc: s.C, AccSec: s.Sec, Last: z, Base: z, A: s.A}
+	}
+	set(3000, 2) // sinal forte: já está em ±15%, mas ainda não deu 1 h
+	if actAutoDone(r) {
+		t.Fatal("parou antes de 1 h")
+	}
+	set(4000, 2)
+	if !actAutoDone(r) {
+		t.Fatal("sinal forte com mais de 1 h tinha que parar")
+	}
+	r.Opts.AutoStop = false
+	if actAutoDone(r) {
+		t.Fatal("sem a opção não para")
+	}
+	r.Opts.AutoStop = true
+	set(4000, 0.005) // sinal fraco: longe de ±15%
+	if actAutoDone(r) {
+		t.Fatal("sinal fraco não pode parar")
+	}
+}
+
+// 2.103.0 (ACE, item 5): a calibração usa o fundo salvo só se for das últimas 24 h
+func TestCalSavedBgAge(t *testing.T) {
+	a := newTestApp(t)
+	a.actWriteJSON(actBgFile, &actSaved{T: time.Now().Add(-48 * time.Hour).UnixMilli(), Sec: 3600, C: []float64{1, 2}})
+	err := a.StartActivity(ActOpts{Kind: "kcl", MassG: 750, Pct: 51, SmpSec: 3600})
+	if err == nil || !strings.Contains(err.Error(), "24 h") {
+		t.Fatalf("fundo de 2 dias na calibração: %v", err)
+	}
+	// para amostra, 2 dias ainda vale (o limite lá é 30 dias); cai no RC102 desconectado
+	err = a.StartActivity(ActOpts{Kind: "amostra", MassG: 10, Nuclides: []string{"K-40"}, SmpSec: 3600})
+	if err == nil || strings.Contains(err.Error(), "24 h") {
+		t.Fatalf("amostra com fundo de 2 dias: %v", err)
 	}
 }

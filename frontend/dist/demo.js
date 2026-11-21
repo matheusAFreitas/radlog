@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.102.2";
+const DEMO_VERSION = "2.103.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -567,6 +567,8 @@ function makeDemoApi(opts) {
       const v = { phase: "", cal, calSrc: cal.kcl ? "kcl" : "chute", calEff: E.map(effAt), calErr: E.map((e) => Math.hypot(cal.kcl ? cal.kcl.effErr : 1, (cal.th ? 0.07 : 0.4) * Math.log(e / 1460.8))),
         savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, history: this.hist, samples: this.samples, nuclides: this.nucs, connected: demoRcFake() };
       if (this.run && (this.run.phase === "fundo" || this.run.phase === "amostra") && this.run.target > 0 && this.sec() >= this.run.target) this.next();
+      // 2.103.0: como no Go, a calibração do KCl para sozinha em ±15% (depois de 1 h)
+      if (this.run && this.run.phase === "amostra" && this.run.o.kind === "kcl" && this.run.o.autoStop && this.sec() >= 3600 && 0.03 * Math.sqrt(3600 / this.sec()) <= 0.15) this.next();
       const r = this.run; if (!r) return v;
       v.opts = r.o; v.phase = r.phase; v.phaseAt = r.at; v.bgSec = r.bgSec;
       if (r.phase === "fundo" || r.phase === "amostra") { v.phaseSec = this.sec(); v.target = r.target; }
@@ -1061,7 +1063,7 @@ const demoRc = () => {
     GetActivity: async () => demoAct.view(),
     StartActivity: async (o) => demoAct.start(o),
     ActivityNext: async () => demoAct.next(),
-    // 2.102.2: muda o tempo da fase que está rodando (como o Go)
+    // 2.103.0: muda o tempo da fase que está rodando (como o Go)
     SetActivityTime: async (sec) => {
       const r = demoAct.run; if (!r || (r.phase !== "fundo" && r.phase !== "amostra")) throw new Error("não tem medição rodando");
       const cal = r.o.kind === "kcl" || r.o.kind === "torio";

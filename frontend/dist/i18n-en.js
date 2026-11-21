@@ -4962,7 +4962,15 @@ const I18N_EN = {
 "É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RC102.": "That is a long time: the salt signal is weak. Check that the salt is touching the RC102.",
 "É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RadiaCode.": "That is a long time: the salt signal is weak. Check that the salt is touching the RC102.",
 "Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RC102 antes de esperar mais.": "It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer.",
-"Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RadiaCode antes de esperar mais.": "It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer."
+"Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RadiaCode antes de esperar mais.": "It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer.",
+"para calibrar, o fundo salvo precisa ser das últimas 24 h: meça um novo": "to calibrate, the saved background must be from the last 24 h: measure a new one",
+"usar o salvo (não tem das últimas 24 h)": "use the saved one (none from the last 24 h)",
+"A fase com o sal para antes se chegar a ±15% (depois de 1 h, no mínimo).": "The salt phase stops earlier if it reaches ±15% (after 1 h at least).",
+"Fim da fase com o sal": "End of the salt phase",
+"ao chegar a ±15%": "on reaching ±15%",
+"no tempo marcado": "at the chosen time",
+"Só vale com o RC102 no mesmo lugar e na mesma posição em que o fundo foi medido, e sem amostra nova por perto.": "Only valid with the RC102 in the same place and position where the background was measured, and no new sample nearby.",
+"Só vale com o RadiaCode no mesmo lugar e na mesma posição em que o fundo foi medido, e sem amostra nova por perto.": "Only valid with the RC102 in the same place and position where the background was measured, and no new sample nearby."
 },
 "patterns": [
 [
@@ -7958,6 +7966,15 @@ const I18N_EN = {
 [
 "Busca: o espectro do RC102 levou ",
 " s para chegar; colunas a cada "
+]
+],
+[
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · já está em ±15%: para sozinha com 1 h$",
+"efficiency so far: ${1} ± ${2}% · already at ±15%: it stops on its own at 1 h",
+[
+"eficiência até agora: ",
+"% · já está em ±15%: para sozinha com 1 h"
 ]
 ],
 [
@@ -19437,6 +19454,14 @@ const I18N_EN = {
 "${1} above background",
 [
 " acima do fundo"
+]
+],
+[
+"usar o de ",
+"^usar o de ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"use the one from ${1} (${2})",
+[
+"usar o de "
 ]
 ],
 [

@@ -1,5 +1,35 @@
 # Versões
 
+## 2.103.0
+Calibração sem tempo perdido (os 5 itens escolhidos pelo ACE na proposta):
+1. Tempo de cada fase escolhível antes de começar (1, 2, 3, 6 ou 12 h); o
+   tempo que sai da massa aparece como recomendado.
+2. O tempo da fase que está rodando muda sem recomeçar, para mais ou para
+   menos (vale também para as amostras).
+3. Aos 15 min com o sal, o app usa a contagem real: se o tempo marcado não
+   fecha em ±15%, avisa quanto precisa e oferece o tempo num botão; se o
+   pico do K-40 nem aparece, manda conferir a posição.
+4. A fase com o sal pode parar sozinha ao chegar a ±15% (depois de 1 h, no
+   mínimo); o tempo marcado vira o limite.
+5. A calibração pode usar o fundo salvo, se for das últimas 24 h, e começa
+   direto no sal. Só vale com o RC102 no mesmo lugar e posição.
+
+**English**
+Calibration without wasted time (the 5 items ACE chose in the proposal):
+1. Time for each phase chosen before starting (1, 2, 3, 6 or 12 h); the
+   time worked out from the mass shows as recommended.
+2. The time of the running phase changes without starting over, longer or
+   shorter (also for samples).
+3. After 15 min with the salt, the app uses the real count: if the chosen
+   time will not reach ±15%, it says how much is needed and offers that
+   time in a button; if the K-40 peak does not show up, it asks to check
+   the position.
+4. The salt phase can stop on its own on reaching ±15% (after 1 h at
+   least); the chosen time becomes the limit.
+5. The calibration can use the saved background, if it is from the last
+   24 h, and starts right at the salt. Only valid with the RC102 in the
+   same place and position.
+
 ## 2.102.2
 Calibração do KCl:
 - "eficiência até agora": o tempo estimado agora é para ±15%, o que a

@@ -46,6 +46,10 @@ const (
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
+	// 2.103.0 (ACE): a calibração pode usar o fundo salvo, se for das últimas 24 h
+	actCalBgMaxAge = 24 * time.Hour
+	actAutoRel     = 0.15 // a fase com o sal para sozinha aqui (o que a tela mira)
+	actAutoMinSec  = 3600 // e não antes de 1 h, para não parar cedo por sorte
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -60,6 +64,9 @@ type ActOpts struct {
 	NewBg    bool     `json:"newBg"`
 	BgSec    int      `json:"bgSec"`  // 0 = até parar
 	SmpSec   int      `json:"smpSec"` // 0 = até parar
+	// 2.103.0 (ACE): a fase com o sal do KCl para sozinha ao chegar a ±15%
+	// (depois de 1 h no mínimo); SmpSec vira o limite
+	AutoStop bool `json:"autoStop,omitempty"`
 	// pedra solta (forma diferente do pote): massa opcional, resultado em Bq da peça
 	Loose    bool   `json:"loose,omitempty"`
 	SampleID string `json:"sampleId,omitempty"` // de "Suas amostras"
@@ -156,6 +163,7 @@ type actState struct {
 	run    *actRun
 	loaded bool
 	tickAt time.Time
+	autoAt time.Time // última conta da parada em ±15%
 	saveAt time.Time
 	// contagem normal da casa (cache para o aviso do fundo alto)
 	homeCps    float64
@@ -325,6 +333,9 @@ func (a *App) StartActivity(o ActOpts) error {
 		}
 		if time.Since(time.UnixMilli(bg.T)) > actBgMaxAge {
 			return errors.New("o fundo salvo tem mais de 30 dias: meça um novo")
+		}
+		if o.Kind != "amostra" && time.Since(time.UnixMilli(bg.T)) > actCalBgMaxAge {
+			return errors.New("para calibrar, o fundo salvo precisa ser das últimas 24 h: meça um novo")
 		}
 	}
 	s := a.rcSpectrumNow(false)
@@ -500,7 +511,7 @@ func (a *App) actHistory() []ActResult {
 	return out
 }
 
-// SetActivityTime muda o tempo da fase que está rodando (2.102.2, pedido do
+// SetActivityTime muda o tempo da fase que está rodando (2.103.0, pedido do
 // ACE: estender ou encurtar sem recomeçar). Na calibração o fundo e a fase
 // com o sal ficam com o mesmo tempo; se a fase já passou do novo tempo, ela
 // fecha na próxima leitura. sec = 0: até a pessoa parar (só na fase da amostra).
@@ -582,9 +593,25 @@ func (a *App) rcActTick(dev *radiacode.Device) {
 		a.actAdvanceLocked(&s, time.Now())
 		return
 	}
+	if r.Phase == "amostra" && r.Opts.AutoStop && time.Since(st.autoAt) > 30*time.Second {
+		st.autoAt = time.Now()
+		if actAutoDone(r) {
+			a.actAdvanceLocked(&s, time.Now())
+			return
+		}
+	}
 	if time.Since(st.saveAt) > 30*time.Second {
 		a.actSaveLocked()
 	}
+}
+
+// actAutoDone: a calibração do KCl com "parar em ±15%" já chegou lá.
+func actAutoDone(r *actRun) bool {
+	if r.Opts.Kind != "kcl" || !r.Opts.AutoStop || r.Bg == nil || r.Cur.sec() < actAutoMinSec {
+		return false
+	}
+	k, _, _ := actCalKCl(r.Cur.saved(time.Now()).spec(), r.Bg.spec(), r.Opts.MassG, r.Opts.Pct)
+	return k != nil && k.EffErr > 0 && k.EffErr <= actAutoRel
 }
 
 // ---------- tela ----------

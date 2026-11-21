@@ -1522,6 +1522,8 @@
             <label><span class="small muted">Massa (g)</span><input type="number" id="rcActCalMass" min="0.1" step="0.1" value="500"></label>
             <label><span class="small muted">Posição</span><input type="text" id="rcActCalGeom" maxlength="80"></label>
             <div class="rc-act-f rc-act-wide"><span class="small muted">Tempo de cada fase</span><span class="seg rc-seg" id="rcActCalT"></span></div>
+            <div class="rc-act-f rc-act-wide" id="rcActCalAutoBox"><span class="small muted">Fim da fase com o sal</span><span class="seg rc-seg" id="rcActCalAuto"><button type="button" data-v="auto" aria-pressed="true">ao chegar a ±15%</button><button type="button" data-v="tempo" aria-pressed="false">no tempo marcado</button></span></div>
+            <div class="rc-act-f rc-act-wide"><span class="small muted">Fundo</span><span class="seg rc-seg" id="rcActCalBg"><button type="button" data-v="novo" aria-pressed="true">medir um novo</button><button type="button" data-v="salvo" aria-pressed="false" id="rcActCalBgSaved">usar o salvo</button></span><span class="small warn-text" id="rcActCalBgHint" hidden>Só vale com o RC102 no mesmo lugar e na mesma posição em que o fundo foi medido, e sem amostra nova por perto.</span></div>
           </div>
           <p class="small muted" id="rcActCalHint"></p>
           <div class="rc-act-total"><span id="rcActCalTot"></span><button type="button" class="btn accent" id="rcActCalStart">Começar a calibração</button><button type="button" class="link" id="rcActCalBack">voltar</button><span class="small warn-text" id="rcActCalErr"></span></div>
