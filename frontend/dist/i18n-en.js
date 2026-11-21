@@ -7697,6 +7697,16 @@ const I18N_EN = {
 ]
 ],
 [
+"A montagem fica com ±",
+"^A montagem fica com ±((?:(?! · ).)+?)% no total \\(contagem ±((?:(?! · ).)+?)% e o rótulo do material\\)\\.$",
+"The setup ends up at ±${1}% in total (counting ±${2}% plus the material label).",
+[
+"A montagem fica com ±",
+"% no total (contagem ±",
+"% e o rótulo do material)."
+]
+],
+[
 "Sem contagens há ",
 "^Sem contagens há ((?:(?! · ).)+?): o tubo pode estar com defeito\\. Confira o contador\\.$",
 "No counts for ${1}: the tube may be faulty. Check the counter.",

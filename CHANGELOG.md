@@ -19,7 +19,10 @@ Atividade (Bq): calibração por montagem.
   combina com a faixa e a previsão de ± no fim do tempo marcado.
 - Na medida de amostra, escolha a montagem; a conta usa a eficiência e a
   escala de energia dela. A calibração feita depois da correção do pico
-  (2.103.0) vira a primeira montagem sozinha.
+  (2.103.0) vira a primeira montagem sozinha. Sem montagem, a amostra sai
+  com o chute (±100%), não mais com a calibração única de antes.
+- Durante o KCl, a previsão mostra o ± total da montagem no fim (as rodadas
+  somadas mais o teor do material), e o tempo recomendado já conta com ele.
 
 **English**
 Activity (Bq): calibration per setup.
@@ -40,7 +43,11 @@ Activity (Bq): calibration per setup.
   signal matches the band and the ± forecast at the end of the chosen time.
 - When measuring a sample, pick the setup; the calculation uses its
   efficiency and energy scale. The calibration made after the peak fix
-  (2.103.0) becomes the first setup on its own.
+  (2.103.0) becomes the first setup on its own. Without a setup, a sample
+  uses the guess (±100%), no longer the single calibration from before.
+- During the KCl phase, the forecast shows the setup's total ± at the end
+  (rounds summed plus the material's content), and the recommended time
+  already accounts for it.
 
 ## 2.103.0
 Atividade (Bq): o pico do K-40 achado onde ele está (avaliação independente

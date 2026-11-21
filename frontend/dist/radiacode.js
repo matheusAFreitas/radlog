@@ -1903,7 +1903,9 @@
   function actCalRec(m) {
     if (m && m.eff > 0 && m.countErr > 0 && m.sec > 0) {
       // para a soma chegar a ±15% de contagem: rel² cai com o tempo somado
-      const need = m.sec * ((m.countErr / 0.15) ** 2) - m.sec;
+      // QA 2.104.0: pronta é total ≤ 20%; com sal light (fixos ±15%) a contagem precisa de ≤ ±13%
+      const goal = Math.min(0.15, 0.9 * Math.sqrt(Math.max(0.0004, 0.04 - (m.fixErr || 0) ** 2)));
+      const need = m.sec * ((m.countErr / goal) ** 2) - m.sec;
       return ACT_CAL_T.find((x) => x >= need) || ACT_CAL_T[ACT_CAL_T.length - 1];
     }
     return act.setup === "becker" && act.mat === "light" ? 10800 : 3600;
@@ -2002,7 +2004,8 @@
     if (!c.ready) return h + `<p class="small muted">${tr("O pico do K-40, o sinal e a previsão aparecem com 30 min.")}</p>`;
     h += actK40Html(v.k40, true);
     if (c.signalCpm > 0 && c.expectHi > 0) {
-      const okSig = c.signalCpm >= c.expectLo && c.signalCpm <= c.expectHi;
+      // QA 2.104.0: com 30 min o pico ainda tem ±20–40%; só diz "fora" além disso
+      const e = 1.64 * (c.signalErr || 0), okSig = c.signalCpm * (1 + e) >= c.expectLo && c.signalCpm * (1 - e) <= c.expectHi;
       h += okSig
         ? `<p class="small ok-text">✓ Sinal: ${nf(c.signalCpm, 1)} contagens/min, combina com a faixa (esperado ${nf(c.expectLo, 1)}–${nf(c.expectHi, 1)})</p>`
         : `<p class="small att-text">Sinal: ${nf(c.signalCpm, 1)} contagens/min, fora do esperado pela faixa (${nf(c.expectLo, 1)}–${nf(c.expectHi, 1)}): confira a posição.</p>`;
@@ -2010,7 +2013,9 @@
     if (v.liveKcl && v.liveKcl.eff > 0) h += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 0)}%</p>`;
     if (c.forecast > 0) {
       h += `<p class="small"><b>Previsão:</b> no fim de ${fmtHM(tg || t)}: ±${nf(c.forecast * 100, 0)}% de contagem. Com este fundo, o melhor possível é ±${nf(c.best * 100, 0)}%.</p>`;
-      if (c.forecast > 0.2) h += `<p class="small att-text">${tr("Vai faltar tempo: no fim, rode mais uma rodada e o app soma as duas.")}</p>`;
+      // QA 2.104.0: o que decide é a montagem inteira (as rodadas somadas e os fixos do material)
+      if (c.sumTotal > 0) h += `<p class="small">A montagem fica com ±${nf(c.sumTotal * 100, 0)}% no total (contagem ±${nf(c.sumCount * 100, 0)}% e o rótulo do material).</p>`;
+      if ((c.sumTotal || c.forecast) > 0.2) h += `<p class="small att-text">${tr("Vai faltar tempo: no fim, rode mais uma rodada e o app soma as duas.")}</p>`;
     }
     return h;
   }

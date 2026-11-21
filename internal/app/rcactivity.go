@@ -437,6 +437,8 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	mv, hasMount := a.actMount(o.MountID)
 	if hasMount && o.Kind == "amostra" && mv.Eff > 0 {
 		cal = mv.cal() // 2.104.0: a amostra usa a eficiência da montagem
+	} else if o.Kind == "amostra" {
+		cal = ActCal{} // QA 2.104.0: sem montagem é o chute (±100%), não a calibracao.json de antes
 	}
 	fb := cal.gain()
 	if hasMount && mv.Found && mv.Gain > 0 {
@@ -703,8 +705,10 @@ func actChart(smp, bg actSpec) *ActChart {
 func (a *App) GetActivity() ActView {
 	v := ActView{Nuclides: actNuclides, Connected: a.rcConnected()}
 	v.Cal = a.actCal()
+	a.rc.act.mu.Lock()
 	a.actMigrateLegacy()
 	v.Mounts = a.actMountViews()
+	a.rc.act.mu.Unlock()
 	for _, e := range actCalE {
 		eps, rel, src := v.Cal.eff(e)
 		v.CalEff, v.CalErr, v.CalSrc = append(v.CalEff, eps), append(v.CalErr, rel), src
@@ -755,7 +759,12 @@ func (a *App) GetActivity() ActView {
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
 		var gn ActGain
 		cal, fb := v.Cal, v.Cal.gain()
+		if o.Kind == "amostra" {
+			cal = ActCal{} // QA 2.104.0: sem montagem, o chute (como no actFinish)
+		}
+		var prev *ActMountView
 		if mv, ok := a.actMount(o.MountID); ok {
+			prev = &mv
 			if o.Kind == "amostra" && mv.Eff > 0 {
 				cal = mv.cal()
 			}
@@ -772,6 +781,9 @@ func (a *App) GetActivity() ActView {
 			v.SmpCps, v.BgCps = smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
 			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
 			v.Check = actCalCheck(smp.Sec, float64(o.SmpSec), bg.Sec, v.SmpCps, v.BgCps, v.LiveKCl, area)
+			if v.Check != nil && v.Check.Forecast > 0 {
+				v.Check.sum(prev, area/smp.Sec, float64(o.SmpSec), actFixErr(o.Material, o.BgMode))
+			}
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
@@ -1017,6 +1029,11 @@ func (a *App) actMerge(name string, data []byte) {
 		if json.Unmarshal(data, &in) != nil {
 			return
 		}
+		// QA 2.104.0: o actFinish soma a rodada com este cadeado; sem ele, a
+		// nuvem podia gravar por cima e a rodada sumia
+		st := &a.rc.act
+		st.mu.Lock()
+		defer st.mu.Unlock()
 		a.actSaveMounts(actMergeMounts(a.actMountsAll(), in.Mounts))
 	case actResFile:
 		cur, _ := os.ReadFile(a.actPath(name))

@@ -6572,3 +6572,4 @@ fixos ±{0}%	fixed ±{0}%
 total ±{0}%	total ±{0}%
 somadas {0} rodadas: {1} + {2}	{0} rounds summed: {1} + {2}
 sal light	light salt
+A montagem fica com ±{0}% no total (contagem ±{1}% e o rótulo do material).	The setup ends up at ±{0}% in total (counting ±{1}% plus the material label).

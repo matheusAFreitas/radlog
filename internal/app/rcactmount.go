@@ -210,6 +210,8 @@ func (a *App) actAddRound(o ActOpts, r ActRound) ActMountView {
 
 // RenameActMount muda o nome de uma montagem.
 func (a *App) RenameActMount(id, name string) error {
+	a.rc.act.mu.Lock()
+	defer a.rc.act.mu.Unlock()
 	name = strings.TrimSpace(name)
 	if name == "" {
 		return errors.New("escreva um nome")
@@ -227,6 +229,8 @@ func (a *App) RenameActMount(id, name string) error {
 
 // DeleteActMount apaga uma montagem (fica marcada, para a nuvem não trazer de volta).
 func (a *App) DeleteActMount(id string) error {
+	a.rc.act.mu.Lock()
+	defer a.rc.act.mu.Unlock()
 	ms := a.actMountsAll()
 	for i := range ms {
 		if ms[i].ID == id && !ms[i].Deleted {
@@ -284,9 +288,37 @@ type ActCalCheck struct {
 	SignalCpm float64 `json:"signalCpm"` // contagens/min no pico do K-40, desde 30 min
 	ExpectLo  float64 `json:"expectLo"`  // o que a subida da faixa diz que o pico deve dar
 	ExpectHi  float64 `json:"expectHi"`
-	Forecast  float64 `json:"forecast"` // ± da contagem no fim do tempo marcado
-	Best      float64 `json:"best"`     // o melhor possível com este fundo
-	Ready     bool    `json:"ready"`    // já tem 30 min: mostra pico, sinal e previsão
+	Forecast  float64 `json:"forecast"`            // ± da contagem no fim do tempo marcado
+	Best      float64 `json:"best"`                // o melhor possível com este fundo
+	Ready     bool    `json:"ready"`               // já tem 30 min: mostra pico, sinal e previsão
+	SignalErr float64 `json:"signalErr,omitempty"` // ± relativo do sinal (QA: entra antes de dizer "fora")
+	// QA 2.104.0: a montagem no fim desta rodada (as rodadas que já tem mais
+	// esta): o que decide se fica pronta (total ≤ 20%)
+	SumCount float64 `json:"sumCount,omitempty"`
+	SumTotal float64 `json:"sumTotal,omitempty"`
+}
+
+// sum soma a previsão desta rodada às rodadas que a montagem já tem.
+func (c *ActCalCheck) sum(prev *ActMountView, S, tgt, fix float64) {
+	if S <= 0 {
+		return
+	}
+	if tgt <= 0 {
+		tgt = 1
+	}
+	A := S * tgt
+	V := math.Pow(c.Forecast*A, 2)
+	if prev != nil {
+		for _, r := range prev.Rounds {
+			A += r.Area
+			V += r.AreaErr * r.AreaErr
+		}
+	}
+	if A <= 0 {
+		return
+	}
+	c.SumCount = math.Sqrt(V) / A
+	c.SumTotal = math.Hypot(c.SumCount, fix)
 }
 
 const (
@@ -316,6 +348,7 @@ func actCalCheck(smpSec, tgt, bgSec, smpCps, bgCps float64, k *ActCalKCl, area f
 	}
 	S := area / smpSec
 	c.SignalCpm = S * 60
+	c.SignalErr = k.EffErr
 	rel2 := k.EffErr * k.EffErr
 	B := (rel2*S*S - S/smpSec) / (1/smpSec + 1/bgSec)
 	if B < 0 {
