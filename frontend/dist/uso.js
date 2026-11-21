@@ -41,15 +41,18 @@ function usoFlush() {
 }
 
 function usoSegVal(btn) {
-  const v = Object.values(btn.dataset)[0];
+  const vals = Object.values(btn.dataset), v = vals[0];
+  // 2.102.x (QA): no seletor do Espectro do RC102, três botões têm data-v="acc";
+  // com o mesmo primeiro valor de um irmão, a chave leva os outros valores junto
+  if (v && vals.length > 1 && [...btn.parentElement.children].some((x) => x !== btn && Object.values(x.dataset)[0] === v)) return vals.join("+");
   if (v) return v;
   return String([...btn.parentElement.children].indexOf(btn));
 }
 
 function usoClick(e) {
-  if (!usoOn()) return;
+  if (!usoOn() || !e.isTrusted) return; // 2.102.x (QA): clique feito pelo código não conta
   const t = e.target.closest && e.target.closest("button, summary");
-  if (!t || t.closest("#usoBox")) return;
+  if (!t || t.closest("#usoBox") || t.closest("#confirmDlg")) return; // a confirmação já contou no botão que a abriu
   const pg = state.view;
   if (t.tagName === "SUMMARY") {
     const d = t.parentElement;
@@ -136,7 +139,8 @@ function usoPageName(v) {
 
 function usoTabName(pg, sub) {
   const page = $(PAGES[pg]);
-  return usoTxt(page && page.querySelector('.subtabs [data-sub="' + sub + '"]')) || sub;
+  const b = page && page.querySelector('.subtabs [data-sub="' + sub + '"]');
+  return usoTxt(b && (b.querySelector("b") || b)) || sub; // 2.102.x (QA): sem o resumo grudado
 }
 
 function usoKeyName(k) {
@@ -163,7 +167,7 @@ function usoKeyName(k) {
     const seg = document.getElementById(sid);
     let b = null;
     if (seg) {
-      b = [...seg.querySelectorAll("button")].find((x) => usoSegVal(x) === val);
+      b = [...seg.querySelectorAll("button")].find((x) => usoSegVal(x) === val) || [...seg.querySelectorAll("button")].find((x) => Object.values(x.dataset)[0] === val);
     }
     return usoTxt(b) || val;
   }
@@ -184,8 +188,14 @@ function usoDur(s) {
 }
 
 const usoTimes = (n) => tr(n === 1 ? "1 vez" : `${n} vezes`);
+// 2.102.x (QA): "0, 1 vez" e "0, 0 vezes" no resumo
+const usoDurN = (c) => (c.n && !c.s ? "<1 min" : usoDur(c.s));
+const usoCell = (c) => (c.n ? usoDurN(c) + ", " + usoTimes(c.n) : tr("nunca"));
 const usoClicks = (n) => tr(n === 1 ? "1 clique" : `${n} cliques`);
 const usoOpens = (n) => tr(n === 1 ? "1 abertura" : `${n} aberturas`);
+
+// 2.102.x (QA): cliques antigos na janela de confirmação (cfmYes/cfmNo) saem da lista
+const usoDlgKey = (k) => /\/cfm(Yes|No)$/.test(k);
 
 function usoGet(info, k) { return (info && info.totals && info.totals[k]) || { n: 0, s: 0 }; }
 
@@ -265,14 +275,15 @@ function renderUso() {
   const pg = USO.page;
   const tabs = $("usoTabs");
   tabs.textContent = "";
-  $("usoTabsH").hidden = tabs.hidden = !SUBS[pg];
-  if (SUBS[pg]) {
+  const hasTabs = !!SUBS[pg] && SUBS[pg].length > 1; // 2.102.x (QA): Gráficos não tem abas
+  $("usoTabsH").hidden = tabs.hidden = !hasTabs;
+  if (hasTabs) {
     $("usoTabsH").textContent = tr(`Abas de ${usoPageName(pg)}`);
     const list = SUBS[pg].map((s) => ({ name: usoTabName(pg, s), c: usoGet(info, "a:" + pg + "/" + s) }))
       .sort((a, b) => usoVal(b.c) - usoVal(a.c));
     const tmax = Math.max(...list.map((x) => usoVal(x.c)));
     for (const x of list) {
-      const val = x.c.n ? usoDur(x.c.s) + " · " + usoTimes(x.c.n) : tr("0 · nunca");
+      const val = x.c.n ? usoDurN(x.c) + " · " + usoTimes(x.c.n) : tr("0 · nunca");
       const lvl = usoHeat(usoVal(x.c), tmax);
       tabs.append(usoLi(x.name, val, lvl ? "uso-h" + lvl : ""));
     }
@@ -281,7 +292,7 @@ function renderUso() {
   // botões, "Como funciona" e seletores da página
   const pre = [":" + pg + "/"];
   const clicks = Object.entries(info.totals || {})
-    .filter(([k, c]) => "chs".includes(k[0]) && k.slice(1).startsWith(pre[0]) && c.n)
+    .filter(([k, c]) => "chs".includes(k[0]) && k.slice(1).startsWith(pre[0]) && c.n && !usoDlgKey(k))
     .sort((a, b) => b[1].n - a[1].n).slice(0, 8);
   const cl = $("usoClicks");
   cl.textContent = "";
@@ -308,12 +319,13 @@ function usoSummaryText() {
   const since = info.since ? usoDate(info.since) : "—";
   const L = [tr(`Uso do RadLog (${tr(per)}, contando desde ${since})`)];
   L.push(tr("Páginas:"));
-  for (const p of usoPages(info)) L.push("- " + p.name + ": " + usoDur(p.c.s) + ", " + usoTimes(p.c.n || 0));
+  for (const p of usoPages(info)) L.push("- " + p.name + ": " + usoCell(p.c));
   for (const [pg, subs] of Object.entries(SUBS)) {
+    if (subs.length < 2) continue; // 2.102.x (QA): Gráficos não tem abas ("tempo")
     L.push(tr(`Abas de ${usoPageName(pg)}`) + ":");
-    for (const s of subs) { const c = usoGet(info, "a:" + pg + "/" + s); L.push("- " + usoTabName(pg, s) + ": " + usoDur(c.s) + ", " + usoTimes(c.n || 0)); }
+    for (const s of subs) { const c = usoGet(info, "a:" + pg + "/" + s); L.push("- " + usoTabName(pg, s) + ": " + usoCell(c)); }
   }
-  const top = Object.entries(info.totals || {}).filter(([k, c]) => "chs".includes(k[0]) && c.n).sort((a, b) => b[1].n - a[1].n).slice(0, 15);
+  const top = Object.entries(info.totals || {}).filter(([k, c]) => "chs".includes(k[0]) && c.n && !usoDlgKey(k)).sort((a, b) => b[1].n - a[1].n).slice(0, 15);
   if (top.length) {
     L.push(tr("Botões mais usados:"));
     for (const [k, c] of top) {
