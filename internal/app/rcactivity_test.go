@@ -274,3 +274,37 @@ func TestActHistoryDedupe(t *testing.T) {
 		t.Fatalf("arquivo ficou com as duas: %s", raw)
 	}
 }
+
+// 2.102.2 (pedido do ACE): o tempo da fase muda com ela rodando; na
+// calibração, no fundo, o tempo do sal acompanha
+func TestSetActivityTime(t *testing.T) {
+	a := newTestApp(t)
+	if err := a.SetActivityTime(3600); err == nil {
+		t.Fatal("sem medição rodando tinha que dar erro")
+	}
+	st := &a.rc.act
+	st.loaded, st.run = true, &actRun{Opts: ActOpts{Kind: "kcl", BgSec: 5400, SmpSec: 5400}, Phase: "fundo"}
+	if err := a.SetActivityTime(10800); err != nil {
+		t.Fatal(err)
+	}
+	if o := st.run.Opts; o.BgSec != 10800 || o.SmpSec != 10800 {
+		t.Fatalf("fundo da calibração: %+v", o)
+	}
+	for _, bad := range []int{0, 60, 8 * 86400} {
+		if err := a.SetActivityTime(bad); err == nil {
+			t.Fatalf("%d s tinha que dar erro", bad)
+		}
+	}
+	st.run.Phase = "amostra"
+	if err := a.SetActivityTime(21600); err != nil || st.run.Opts.SmpSec != 21600 || st.run.Opts.BgSec != 10800 {
+		t.Fatalf("sal: %v %+v", err, st.run.Opts)
+	}
+	st.run.Opts.Kind = "amostra"
+	if err := a.SetActivityTime(0); err != nil || st.run.Opts.SmpSec != 0 {
+		t.Fatalf("amostra até parar: %v %+v", err, st.run.Opts)
+	}
+	st.run.Phase = "pronto"
+	if err := a.SetActivityTime(3600); err == nil {
+		t.Fatal("pronta não muda o tempo")
+	}
+}

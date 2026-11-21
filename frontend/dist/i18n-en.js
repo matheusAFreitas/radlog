@@ -4954,7 +4954,15 @@ const I18N_EN = {
 "Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
 "Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
 "Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
-"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)"
+"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)",
+"Mudar o tempo desta fase": "Change the time of this phase",
+"não tem medição rodando": "no measurement running",
+"o fundo e a calibração precisam de um tempo": "the background and the calibration need a time",
+"tempo fora do intervalo": "time out of range",
+"É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RC102.": "That is a long time: the salt signal is weak. Check that the salt is touching the RC102.",
+"É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RadiaCode.": "That is a long time: the salt signal is weak. Check that the salt is touching the RC102.",
+"Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RC102 antes de esperar mais.": "It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer.",
+"Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RadiaCode antes de esperar mais.": "It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer."
 },
 "patterns": [
 [
@@ -7884,6 +7892,17 @@ const I18N_EN = {
 [
 "RadiaCode: a conexão pelo Bluetooth caiu em ",
 "; próxima tentativa em "
+]
+],
+[
+"Nesse ritmo, em ",
+"^Nesse ritmo, em ((?:(?! · ).)+?) fecha em ±((?:(?! · ).)+?)%\\. Para ±15% precisa de uns ((?:(?! · ).)+?) no total\\.$",
+"At this rate, ${1} ends at ±${2}%. For ±15% it needs about ${3} in total.",
+[
+"Nesse ritmo, em ",
+" fecha em ±",
+"%. Para ±15% precisa de uns ",
+" no total."
 ]
 ],
 [
@@ -20871,6 +20890,14 @@ const I18N_EN = {
 "· ${1}σ in the dose",
 [
 "σ na dose"
+]
+],
+[
+"Mudar para ",
+"^Mudar para ((?:(?! · ).)+?)$",
+"Change to ${1}",
+[
+"Mudar para "
 ]
 ],
 [

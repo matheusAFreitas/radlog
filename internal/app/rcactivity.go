@@ -500,6 +500,38 @@ func (a *App) actHistory() []ActResult {
 	return out
 }
 
+// SetActivityTime muda o tempo da fase que está rodando (2.102.2, pedido do
+// ACE: estender ou encurtar sem recomeçar). Na calibração o fundo e a fase
+// com o sal ficam com o mesmo tempo; se a fase já passou do novo tempo, ela
+// fecha na próxima leitura. sec = 0: até a pessoa parar (só na fase da amostra).
+func (a *App) SetActivityTime(sec int) error {
+	st := &a.rc.act
+	st.mu.Lock()
+	defer st.mu.Unlock()
+	a.actLoadLocked()
+	r := st.run
+	if r == nil || (r.Phase != "fundo" && r.Phase != "amostra") {
+		return errors.New("não tem medição rodando")
+	}
+	if sec < 0 || (sec > 0 && sec < 300) || sec > 7*86400 {
+		return errors.New("tempo fora do intervalo")
+	}
+	cal := r.Opts.Kind == "kcl" || r.Opts.Kind == "torio"
+	if sec == 0 && (cal || r.Phase == "fundo") {
+		return errors.New("o fundo e a calibração precisam de um tempo")
+	}
+	switch {
+	case r.Phase == "fundo" && cal:
+		r.Opts.BgSec, r.Opts.SmpSec = sec, sec
+	case r.Phase == "fundo":
+		r.Opts.BgSec = sec
+	default:
+		r.Opts.SmpSec = sec
+	}
+	a.actSaveLocked()
+	return nil
+}
+
 // CancelActivity para a medição sem resultado (o fundo, se já terminou, fica salvo).
 func (a *App) CancelActivity() {
 	st := &a.rc.act

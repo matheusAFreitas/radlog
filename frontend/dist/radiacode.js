@@ -1725,6 +1725,9 @@
   const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
   const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
   const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
+  // 2.102.2 (pedido do ACE): tempo de cada fase da calibração (fundo = sal);
+  // o recomendado vem da conta de actCalPhaseSec
+  const ACT_CAL_T = [3600, 7200, 10800, 21600, 43200]; const ACT_CAL_EARLY = 900;
   const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
@@ -1891,8 +1894,10 @@
       ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RC102 (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RC102 vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.")
       : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
     const calSec = k === "kcl" ? actCalPhaseSec(actNum("rcActCalMass"), light ? actNum("rcActPct") : 100) : 3600;
-    act.calSmpSec = calSec || 3600;
+    const rec = calSec || 3600;
+    act.calSmpSec = act.calPick || rec;
     act.calBgSec = act.calSmpSec;
+    setHTML($("rcActCalT"), actSegHtml(ACT_CAL_T, act.calSmpSec, rec));
     let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
     // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
     if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${light ? tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`) : tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais KCl, bem apertado em volta do RC102.`)}</span>`;
@@ -2028,6 +2033,15 @@
     }[ph] || "";
     $("rcActBar").style.width = (tg > 0 && (ph === "fundo" || ph === "amostra") ? Math.min(100, (t / tg) * 100) : ph === "pronto" ? 100 : 0) + "%";
     $("rcActBar").parentElement.hidden = ph === "trocar" || ph === "pronto";
+    // 2.102.2 (pedido do ACE): estender ou encurtar a fase sem recomeçar; o que
+    // já passou do tempo medido fica desligado (para parar já, "Encerrar agora")
+    const running = ph === "fundo" || ph === "amostra", calRun = o.kind === "kcl" || o.kind === "torio";
+    $("rcActRunTBox").hidden = !running;
+    if (running) {
+      const list = [...(calRun ? ACT_CAL_T : ph === "fundo" ? ACT_BG_T : ACT_SMP_T)];
+      if (tg > 0 && !list.includes(tg)) { list.push(tg); list.sort((a, b) => (a || 1e9) - (b || 1e9)); }
+      setHTML($("rcActRunT"), list.map((s) => `<button type="button" data-v="${s}" aria-pressed="${s === tg}"${s > 0 && s <= t ? " disabled" : ""}>${fmtAT(s)}</button>`).join(""));
+    }
     $("rcActTime").textContent = ph === "fundo" || ph === "amostra" ? `${fmtHM(t)}${tg > 0 ? " / " + fmtHM(tg) : ""}${v.bgSec && ph === "amostra" ? " · fundo de " + fmtHM(v.bgSec) : ""}` : "";
     const nx = $("rcActNext");
     nx.textContent = tr({ fundo: "Encerrar o fundo agora", trocar: "Começar", amostra: "Encerrar agora", pronto: "Nova medida" }[ph] || "");
@@ -2047,6 +2061,20 @@
       if (v.liveKcl && v.liveKcl.effErr > ACT_CAL_REL) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · para ±15%: ~${fmtSec(t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2)} no total</p>`;
       else if (v.liveKcl && v.liveKcl.effErr > 0) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · já chegou a ±15%: pode encerrar</p>`;
       else if (o.kind === "kcl" && t >= 60) live += `<p class="mono small">${tr("eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)")}</p>`;
+      // 2.102.2 (depois da 2ª calibração perdida): o tempo sugerido sai da massa,
+      // e o sinal de verdade pode ser bem menor. Com 15 min de sal o app já sabe
+      // o ritmo real e avisa se o tempo marcado não fecha em ±15%
+      if (calRun && t >= ACT_CAL_EARLY) {
+        if (v.liveKcl && v.liveKcl.effErr > ACT_CAL_REL) {
+          const need = t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2;
+          if (tg > 0 && need > tg * 1.1) {
+            const at = v.liveKcl.effErr * Math.sqrt(t / tg), pick = Math.min(7 * 86400, Math.ceil(need / 3600) * 3600);
+            live += `<p class="warn-text">Nesse ritmo, em ${fmtHM(tg)} fecha em ±${nf(at * 100, 0)}%. Para ±15% precisa de uns ${fmtSec(need)} no total.</p>${need > 12 * 3600 ? `<p class="warn-text">${tr("É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RC102.")}</p>` : ""}<p><button type="button" class="btn small" data-settime="${pick}">Mudar para ${fmtHM(pick)}</button></p>`;
+          }
+        } else if (!(v.liveKcl && v.liveKcl.effErr > 0) && o.kind === "kcl") {
+          live += `<p class="warn-text">${tr("Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RC102 antes de esperar mais.")}</p>`;
+        }
+      }
       // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
       // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
       if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
@@ -2287,6 +2315,16 @@
     const segPick = (id, fn) => $(id).addEventListener("click", (e) => { const b = e.target.closest("button[data-v]"); if (!b || b.disabled) return; fn(b.dataset.v); actRender(); });
     segPick("rcActSmpT", (x) => { act.smpSec = +x; });
     segPick("rcActBgT", (x) => { act.bgSec = +x; });
+    segPick("rcActCalT", (x) => { act.calPick = +x; });
+    const actSetTime = async (sec) => {
+      try { await api.SetActivityTime(sec); $("rcActRunErr").dataset.msg = ""; } catch (err) { $("rcActRunErr").dataset.msg = String(err && err.message ? err.message : err); }
+      actLoad();
+    };
+    $("rcActRunT").addEventListener("click", (e) => {
+      const b = e.target.closest("button[data-v]"); if (!b || b.disabled || b.getAttribute("aria-pressed") === "true") return;
+      actSetTime(+b.dataset.v);
+    });
+    $("rcActLive").addEventListener("click", (e) => { const b = e.target.closest("button[data-settime]"); if (b) actSetTime(+b.dataset.settime); });
     segPick("rcActBg", (x) => { act.bgMode = x; });
     segPick("rcActKclType", (x) => { act.kclType = x; });
     // 2.101.3: a massa digitada fica; o padrão (500 g / 40 g) só entra no campo
@@ -2300,11 +2338,11 @@
     $("rcActExpect").addEventListener("click", (e) => { const b = e.target.closest("[data-forget-sample]"); if (b) actForgetSample(b.dataset.forgetSample); });
     $("rcActCalSteps").addEventListener("click", (e) => {
       const b = e.target.closest("button[data-k]"); if (!b) return;
-      act.calKind = b.dataset.k;
+      act.calKind = b.dataset.k; act.calPick = 0;
       calMassShow();
       actRender();
     });
-    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; calMassShow(); actRender(); };
+    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; act.calPick = 0; calMassShow(); actRender(); };
     $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
     $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);

@@ -6496,3 +6496,12 @@ para ±15%: ~{0} no total	for ±15%: ~{0} in total
 eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)	efficiency so far: the K-40 peak is still below the background (normal at the start)
 eficiência até agora: {0} ± {1}% · para ±15%: ~{2} no total	efficiency so far: {0} ± {1}% · for ±15%: ~{2} in total
 eficiência até agora: {0} ± {1}% · já chegou a ±15%: pode encerrar	efficiency so far: {0} ± {1}% · already at ±15%: you can stop
+Tempo de cada fase	Time for each phase
+Mudar o tempo desta fase	Change the time of this phase
+não tem medição rodando	no measurement running
+o fundo e a calibração precisam de um tempo	the background and the calibration need a time
+tempo fora do intervalo	time out of range
+Nesse ritmo, em {0} fecha em ±{1}%. Para ±15% precisa de uns {2} no total.	At this rate, {0} ends at ±{1}%. For ±15% it needs about {2} in total.
+É muito tempo: o sinal do sal está fraco. Confira se o sal está encostado no RC102.	That is a long time: the salt signal is weak. Check that the salt is touching the RC102.
+Mudar para {0}	Change to {0}
+Já são 15 min com o sal e o pico do K-40 ainda não passou do fundo. Nesse ritmo o tempo marcado não fecha; confira se o sal está encostado no RC102 antes de esperar mais.	It has been 15 min with the salt and the K-40 peak is still not above the background. At this rate the chosen time will not be enough; check that the salt is touching the RC102 before waiting longer.

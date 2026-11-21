@@ -1061,6 +1061,13 @@ const demoRc = () => {
     GetActivity: async () => demoAct.view(),
     StartActivity: async (o) => demoAct.start(o),
     ActivityNext: async () => demoAct.next(),
+    // 2.102.2: muda o tempo da fase que está rodando (como o Go)
+    SetActivityTime: async (sec) => {
+      const r = demoAct.run; if (!r || (r.phase !== "fundo" && r.phase !== "amostra")) throw new Error("não tem medição rodando");
+      const cal = r.o.kind === "kcl" || r.o.kind === "torio";
+      if (r.phase === "fundo" && cal) { r.o.bgSec = r.o.smpSec = sec; } else if (r.phase === "fundo") r.o.bgSec = sec; else r.o.smpSec = sec;
+      r.target = sec;
+    },
     CancelActivity: async () => { demoAct.run = null; },
     CloseActivity: async () => { demoAct.run = null; },
     SaveActSample: async (x) => { const id = x.id || "s" + Date.now(); demoAct.samples = [{ ...x, id }, ...demoAct.samples.filter((y) => y.id !== id)]; return id; },
