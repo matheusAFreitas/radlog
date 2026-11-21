@@ -4954,7 +4954,7 @@ const I18N_EN = {
 "Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
 "Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
 "Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
-"A eficiência aparece quando o pico do K-40 sair do ruído (alguns minutos a algumas horas, conforme o sal).": "The efficiency shows up once the K-40 peak rises above the noise (a few minutes to a few hours, depending on the salt)."
+"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)"
 },
 "patterns": [
 [
