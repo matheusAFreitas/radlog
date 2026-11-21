@@ -1762,7 +1762,9 @@
     if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
     const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
     const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
-    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · <span>${shape}</span></small></div>` +
+    // 2.103.0: antes da correção do pico a eficiência saiu ~40% baixa
+    const old = c.kcl && !c.kcl.gain ? `<small class="att-text">${tr("Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.")}</small>` : "";
+    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · <span>${shape}</span></small>${old}</div>` +
       `<button type="button" class="link" data-eff aria-expanded="${act.effOpen}">detalhes</button><button type="button" class="btn${c.kcl ? "" : " accent"}" data-cal="kcl">${c.kcl ? "Calibrar de novo" : "Calibrar"}</button></div>`;
   }
   function actEffHtml(v) {
@@ -1952,9 +1954,21 @@
       `<p class="small muted">${tr("Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.")}</p>` +
       `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Salvar mesmo assim (${pe})`)}</button></p>`;
   }
+  // 2.103.0 (avaliação do Bq): onde o K-40 foi achado; a escala do RC102 pode
+  // estar uns % fora (no do ACE, o pico aparece em ~1.415 keV), e a conta corrige
+  function actK40Html(g, kcl) {
+    if (!g) return "";
+    const pk = nf(g.peakKeV, 0), pct = nf(Math.abs(g.gain - 1) * 100, 1);
+    if (g.found && Math.abs(g.peakKeV - 1460.8) > 15) return `<p class="small att-text">${g.gain > 1 ? `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% baixa; a conta corrige.` : `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% alta; a conta corrige.`}</p>`;
+    if (g.found) return `<p class="small ok-text">K-40 achado em ${pk} keV.</p>`;
+    // QA: numa amostra o K-40 é procurado no fundo, que já está pronto: "ainda" não cabe
+    if (g.gain !== 1) return `<p class="small muted">Escala de energia: a achada na calibração (K-40 em ${pk} keV).</p>`;
+    return `<p class="small muted">${kcl ? tr("K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.") : tr("O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.")}</p>`;
+  }
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
+      h += actK40Html(r.k40, true);
       if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
       else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>${actNotSavedHtml(r)}` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
@@ -1971,7 +1985,7 @@
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
     const meta = `${actNameHtml(r)}<span> · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}</span>${actWhereTxt(r)}`; // 2.101.15 (item 138): a parte do app num span, a Posição da pessoa fora
-    h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
+    h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${r.kind !== "kcl" ? actK40Html(r.k40) : ""}${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
   function actSummary(r) {
@@ -2040,6 +2054,7 @@
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
+      live += actK40Html(v.k40, o.kind === "kcl");
       // 2.102.2: o tempo é para ±15% (o que a calibração mira; ±3% o RC102 não
       // alcança). O ACE gosta de ver a conta desde o começo; quando a contagem
       // no pico fica abaixo do fundo (normal no começo), a linha não some mais

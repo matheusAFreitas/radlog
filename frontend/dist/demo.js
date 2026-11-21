@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.102.2";
+const DEMO_VERSION = "2.103.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -511,7 +511,7 @@ function makeDemoApi(opts) {
   const demoAct = {
     run: null,
     bg: null,
-    cal: { geometry: "pote de 500 mL encostado", kcl: { t: Date.now() - 3 * 86400e3, eff: 0.00182, effErr: 0.031, massG: 500, pct: 100, sec: 3600 }, th: null },
+    cal: { geometry: "pote de 500 mL encostado", kcl: { t: Date.now() - 3 * 86400e3, eff: 0.00182, effErr: 0.031, massG: 500, pct: 100, sec: 3600, peakKeV: 1415, gain: 1.0324 }, th: null },
     hist: [],
     samples: [
       { id: "uraninita", name: "Uraninita", sub: "urânio", nuclides: ["U-238", "Ra-226", "Th-232"], smpSec: 1800, massG: 0, loose: true, seed: true, prep: "Pedra solta: o resultado sai em Bq da peça inteira, não precisa pesar. A forma é diferente do pote da calibração, então é aproximado.", note: "forte: sai rápido", refUSv: 1.2, refDev: "radiacode", refT: Date.now() - 2 * 864e5, refDist: "encostada" },
@@ -555,8 +555,8 @@ function makeDemoApi(opts) {
       });
     },
     result(sec) {
-      const o = this.run.o, r = { t: Date.now(), kind: o.kind, name: o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : "eletrodo de tório"), massG: o.massG, geometry: o.geometry, sec, bgSec: this.run.bgSec, calSrc: "kcl", nuclides: [], loose: !!o.loose, sampleId: o.sampleId || "", nucs: o.nuclides, smpSecO: o.smpSec };
-      if (o.kind === "kcl") { r.expected = (o.massG * o.pct) / 100 * 0.52445 * 31.7; r.kcl = { t: r.t, eff: 0.00179 + Math.random() * 0.00008, effErr: 0.03 * Math.sqrt(3600 / sec), massG: o.massG, pct: o.pct, sec }; r.prev = this.cal.kcl && this.cal.kcl.eff; }
+      const o = this.run.o, r = { k40: { found: true, peakKeV: 1415, gain: 1.0324 }, t: Date.now(), kind: o.kind, name: o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : "eletrodo de tório"), massG: o.massG, geometry: o.geometry, sec, bgSec: this.run.bgSec, calSrc: "kcl", nuclides: [], loose: !!o.loose, sampleId: o.sampleId || "", nucs: o.nuclides, smpSecO: o.smpSec };
+      if (o.kind === "kcl") { r.expected = (o.massG * o.pct) / 100 * 0.52445 * 31.7; r.kcl = { t: r.t, eff: 0.00179 + Math.random() * 0.00008, effErr: 0.03 * Math.sqrt(3600 / sec), massG: o.massG, pct: o.pct, sec, peakKeV: 1415, gain: 1.0324 }; r.prev = this.cal.kcl && this.cal.kcl.eff; }
       else if (o.kind === "torio") { r.th = { t: r.t, b: -1.24, bErr: 0.07, pivot: 583.2 }; r.thLines = [{ kev: 238.6, area: 41230, areaErr: 410 }, { kev: 583.2, area: 9120, areaErr: 260 }, { kev: 2614.5, area: 2210, areaErr: 120 }]; r.nuclides = this.nucRes(sec, o.massG, ["Th-232"]); }
       else r.nuclides = this.nucRes(sec, o.massG, o.nuclides);
       return r;
@@ -571,6 +571,7 @@ function makeDemoApi(opts) {
       v.opts = r.o; v.phase = r.phase; v.phaseAt = r.at; v.bgSec = r.bgSec;
       if (r.phase === "fundo" || r.phase === "amostra") { v.phaseSec = this.sec(); v.target = r.target; }
       if (r.phase === "amostra" && v.phaseSec > 10) {
+        v.k40 = { found: v.phaseSec > 600, peakKeV: 1415, gain: 1.0324 }; // 2.103.0: como no Go
         if (r.o.kind === "kcl") { v.liveKcl = { eff: 0.0018, effErr: 0.03 * Math.sqrt(3600 / v.phaseSec) }; v.expected = 8300; }
         else if (r.o.kind === "torio") v.liveTh = { b: -1.24, bErr: 0.07 * Math.sqrt(3600 / v.phaseSec) };
         else v.live = this.nucRes(v.phaseSec, r.o.massG, r.o.nuclides);

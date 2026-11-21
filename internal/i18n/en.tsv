@@ -6496,3 +6496,10 @@ para ±15%: ~{0} no total	for ±15%: ~{0} in total
 eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)	efficiency so far: the K-40 peak is still below the background (normal at the start)
 eficiência até agora: {0} ± {1}% · para ±15%: ~{2} no total	efficiency so far: {0} ± {1}% · for ±15%: ~{2} in total
 eficiência até agora: {0} ± {1}% · já chegou a ±15%: pode encerrar	efficiency so far: {0} ± {1}% · already at ±15%: you can stop
+K-40 achado em {0} keV: a escala de energia do RC102 está {1}% baixa; a conta corrige.	K-40 found at {0} keV: the RC102 energy scale is {1}% low; the calculation corrects it.
+K-40 achado em {0} keV: a escala de energia do RC102 está {1}% alta; a conta corrige.	K-40 found at {0} keV: the RC102 energy scale is {1}% high; the calculation corrects it.
+K-40 achado em {0} keV.	K-40 found at {0} keV.
+Escala de energia: a achada na calibração (K-40 em {0} keV).	Energy scale: the one found in the calibration (K-40 at {0} keV).
+K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.	K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.
+O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.	The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.
+Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.	Made before the K-40 peak fix: it came out low. Calibrate again.

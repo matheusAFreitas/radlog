@@ -4954,7 +4954,12 @@ const I18N_EN = {
 "Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
 "Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
 "Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
-"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)"
+"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RadiaCode manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RadiaCode manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
+"Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.": "Made before the K-40 peak fix: it came out low. Calibrate again."
 },
 "patterns": [
 [
@@ -6887,6 +6892,16 @@ const I18N_EN = {
 ]
 ],
 [
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RadiaCode está ((?:(?! · ).)+?)% baixa; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% low; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RadiaCode está ",
+"% baixa; a conta corrige."
+]
+],
+[
 "O período começa ",
 "^O período começa ((?:(?! · ).)+?) antes do primeiro dado do contador \\(((?:(?! · ).)+?)\\); esse trecho não é lacuna\\.$",
 "The period starts ${1} before the counter's first reading (${2}); that stretch is not a gap.",
@@ -6924,6 +6939,16 @@ const I18N_EN = {
 ". O RC102 voltou a conectar no PC às ",
 ", depois de ",
 " sem conexão."
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RadiaCode está ((?:(?! · ).)+?)% alta; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% high; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RadiaCode está ",
+"% alta; a conta corrige."
 ]
 ],
 [
@@ -7085,6 +7110,16 @@ const I18N_EN = {
 ]
 ],
 [
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RC102 está ((?:(?! · ).)+?)% baixa; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% low; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RC102 está ",
+"% baixa; a conta corrige."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): cabe na variação natural da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): within the natural variation of the count.",
@@ -7120,6 +7155,16 @@ const I18N_EN = {
 "Esta saiu com ",
 ", pior que a que está em uso (",
 "), então a atual continua valendo."
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RC102 está ((?:(?! · ).)+?)% alta; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% high; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RC102 está ",
+"% alta; a conta corrige."
 ]
 ],
 [
@@ -8449,6 +8494,15 @@ const I18N_EN = {
 "A conta RC102 ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
+]
+],
+[
+"Escala de energia: a achada na calibração (K-40 em ",
+"^Escala de energia: a achada na calibração \\(K\\-40 em ((?:(?! · ).)+?) keV\\)\\.$",
+"Energy scale: the one found in the calibration (K-40 at ${1} keV).",
+[
+"Escala de energia: a achada na calibração (K-40 em ",
+" keV)."
 ]
 ],
 [
@@ -16480,6 +16534,15 @@ const I18N_EN = {
 [
 "para ±15%: ~",
 " no total"
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV\\.$",
+"K-40 found at ${1} keV.",
+[
+"K-40 achado em ",
+" keV."
 ]
 ],
 [
