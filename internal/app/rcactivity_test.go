@@ -226,3 +226,30 @@ func TestActivityBgHigh(t *testing.T) {
 		t.Fatalf("com poucos minutos: %v", v)
 	}
 }
+
+// 2.102.1: a do KCl que não foi guardada por pouco (até ±30%) pode ser salva
+// mesmo assim, também pelo histórico; acima disso, não
+func TestUseActivityCalAnyway(t *testing.T) {
+	a := newTestApp(t)
+	ok := ActResult{T: 1000, Kind: "kcl", NotSaved: true, KCl: &ActCalKCl{Eff: 6e-5, EffErr: 0.203}}
+	bad := ActResult{T: 2000, Kind: "kcl", NotSaved: true, KCl: &ActCalKCl{Eff: 6e-5, EffErr: 0.45}}
+	a.actAppendResult(ok)
+	a.actAppendResult(bad)
+	if err := a.UseActivityCal(2000); err == nil {
+		t.Fatal("±45% não pode ser salva")
+	}
+	if err := a.UseActivityCal(1000); err != nil {
+		t.Fatalf("±20,3%% deveria salvar: %v", err)
+	}
+	if c := a.actCal(); c.KCl == nil || c.KCl.EffErr != 0.203 {
+		t.Fatalf("calibração não ficou: %+v", c.KCl)
+	}
+	for _, h := range a.actHistory() {
+		if h.T == 1000 && !h.Used {
+			t.Fatal("o histórico não marcou como usada")
+		}
+	}
+	if err := a.UseActivityCal(1000); err == nil {
+		t.Fatal("não pode usar duas vezes")
+	}
+}

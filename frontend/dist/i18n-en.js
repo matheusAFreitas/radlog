@@ -1603,7 +1603,7 @@ const I18N_EN = {
 "As linhas do tório não apareceram o bastante (precisa de pelo menos duas).": "The thorium lines didn't show up enough (at least two are needed).",
 "calibração pelo KCl": "calibrated with KCl",
 "calibração pelo tório (aproximada)": "calibrated with thorium (approximate)",
-"sem calibração: chute": "no calibration: guess",
+"sem calibração: chute": "not calibrated: rough estimate",
 "sem pico": "no peak",
 "sem linhas": "no lines",
 "Medidas anteriores": "Previous measurements",
@@ -4820,8 +4820,8 @@ const I18N_EN = {
 "O RadiaCode não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away.",
 "normal da casa": "home normal",
 "contagem agora": "count rate now",
-"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
-"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RadiaCode. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
+"O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.": "The background is well above the home normal. If there is any sample near the RC102, move it about 3 m away and start again. Ore kept in the same room also raises the background; if it stays in the same place until the end, you can go on.",
+"O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RadiaCode, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.": "The background is well above the home normal. If there is any sample near the RC102, move it about 3 m away and start again. Ore kept in the same room also raises the background; if it stays in the same place until the end, you can go on.",
 "mrem/h acima do fundo": "mrem/h above background",
 "Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
 "Não consegui gravar os minutos do RadiaCode: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
@@ -4940,7 +4940,20 @@ const I18N_EN = {
 "Mais ações do trecho": "More actions for this stretch",
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
-"gráfico parado neste trecho": "chart frozen on this stretch"
+"gráfico parado neste trecho": "chart frozen on this stretch",
+"Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
+"(ou U-235)": "(or U-235)",
+"rádio": "radium",
+"Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"Conecte o RadiaCode para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"O espectrograma aparece quando o RadiaCode estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"A dureza aparece junto com o espectrograma, quando o RadiaCode tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"Conecte o RC102 para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
+"Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one"
 },
 "patterns": [
 [
@@ -5907,6 +5920,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Você salvou esta calibração mesmo assim (",
+"^Você salvou esta calibração mesmo assim \\(((?:(?! · ).)+?)\\)\\. A de antes, se tinha, ficou guardada: dá para voltar em detalhes\\.$",
+"You saved this calibration anyway (${1}). The previous one, if any, was kept: you can go back to it in details.",
+[
+"Você salvou esta calibração mesmo assim (",
+"). A de antes, se tinha, ficou guardada: dá para voltar em detalhes."
+]
+],
+[
 "início com o Windows: opção ",
 "^início com o Windows: opção ((?:(?! · ).)+?), registrado ((?:(?! · ).)+?) \\(existe ((?:(?! · ).)+?), este \\.exe ((?:(?! · ).)+?)\\), desativado no Windows ((?:(?! · ).)+?), abriu com o Windows ((?:(?! · ).)+?)$",
 "start with Windows: option ${1}, registered ${2} (exists ${3}, this .exe ${4}), disabled in Windows ${5}, started with Windows ${6}",
@@ -6462,6 +6484,15 @@ const I18N_EN = {
 [
 "configurações: não consegui ler o config.json (",
 "); voltei ao padrão e guardei o arquivo em "
+]
+],
+[
+"A incerteza ficou em ",
+"^A incerteza ficou em ((?:(?! · ).)+?), acima do limite de ±20%, então a calibração não foi guardada sozinha\\.$",
+"The uncertainty came out at ${1}, above the ±20% limit, so the calibration was not saved automatically.",
+[
+"A incerteza ficou em ",
+", acima do limite de ±20%, então a calibração não foi guardada sozinha."
 ]
 ],
 [
@@ -7134,6 +7165,18 @@ const I18N_EN = {
 "O RadiaCode contou o mesmo que no fundo (",
 "σ), mas a taxa de dose subiu ",
 "σ)."
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)\\) · ≈ ((?:(?! · ).)+?) mSv/ano nesse ritmo · ((?:(?! · ).)+?)% medido desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"background ${1} µSv/h (${2}) · ≈ ${3} mSv/year at this rate · ${4}% measured since the first reading (${5})",
+[
+"fundo ",
+" µSv/h (",
+") · ≈ ",
+" mSv/ano nesse ritmo · ",
+"% medido desde o primeiro dado ("
 ]
 ],
 [
@@ -8696,6 +8739,15 @@ const I18N_EN = {
 [
 "a assinatura do ",
 " não confere; não vou instalar esta versão"
+]
+],
+[
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo; sozinho, \"certo\" pede 60%$",
+"Rises ${1}% above what is underneath; alone, \"sure\" needs 60%",
+[
+"Sobe ",
+"% acima do que tem embaixo; sozinho, \"certo\" pede 60%"
 ]
 ],
 [
@@ -13427,6 +13479,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo$",
+"Rises ${1}% above what is underneath",
+[
+"Sobe ",
+"% acima do que tem embaixo"
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -15957,6 +16018,14 @@ const I18N_EN = {
 [
 " registro, ",
 " minuto novo"
+]
+],
+[
+"Salvar mesmo assim (",
+"^Salvar mesmo assim \\(((?:(?! · ).)+?)\\)$",
+"Save anyway (${1})",
+[
+"Salvar mesmo assim ("
 ]
 ],
 [
@@ -18835,6 +18904,14 @@ const I18N_EN = {
 "Use the new one (${1})",
 [
 "Usar a nova ("
+]
+],
+[
+"±",
+"^±((?:(?! · ).)+?)%: não guardada$",
+"±${1}%: not saved",
+[
+"%: não guardada"
 ]
 ],
 [

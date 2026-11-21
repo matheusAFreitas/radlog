@@ -742,6 +742,9 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 /* exemplos simulados da aba RC102 */
 .live-tag { display: inline-block; font-size: var(--fs-micro); font-family: var(--sans); line-height: 1.5; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--rc) 60%, transparent); color: var(--rc-ink); white-space: nowrap; }
 .sim-tag { display: inline-block; font-size: var(--fs-micro); font-family: var(--sans); line-height: 1.5; padding: 0 var(--space-2); border-radius: var(--radius-sm); border: 1px solid color-mix(in srgb, var(--away) 50%, transparent); color: var(--away-ink); white-space: nowrap; }
+/* 2.102.1: sem o RC102 (app de verdade), o cartão mostra só o aviso, sem o exemplo simulado */
+.rc-card.rc-off > :not(.rc-head):not(.rc-off-msg), .rc-card.rc-off .sim-tag, .rc-card.rc-off .wip-tag { display: none !important; }
+.rc-off-msg { margin: var(--space-2) 0 0; }
 .rc-card { border: 1px dashed var(--border); border-radius: var(--radius-md); padding: var(--space-4) var(--space-4); background: var(--surface-2); display: flex; flex-direction: column; gap: var(--space-3); }
 .rc-ctrl { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2); }
 .rc-seg button { font-family: var(--sans); }

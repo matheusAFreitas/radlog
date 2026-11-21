@@ -646,7 +646,8 @@ function renderDevBoxes(box, list) {
     const pct = has && c.allowance > 0 ? (excess / c.allowance) * 100 : 0;
     // 2.101.0: o RC102 tem um número só (o do período, com os buracos
     // preenchidos pelo histórico do aparelho); só avisa se faltar mais de 5%
-    const miss = has && d.key === "rc" && c.coverage < 0.95 ? (1 - c.coverage) * (c.to - c.from) : 0;
+    // 2.102.1: a falta conta desde o primeiro dado do RC102 (histMinutes), não do começo do "Tudo"
+    const miss = has && d.key === "rc" && c.coverage < 0.95 ? (1 - c.coverage) * (c.histMinutes > 0 ? c.histMinutes * 6e4 : c.to - c.from) : 0;
     const src = !has ? "sem dados no período" : d.key === "rc" ? (miss >= 60e3 ? `faltam ${fmtDur(miss)} sem dado` : "") : "calculada pelo app";
     // 2.92 (G2): a frase do limite fica curta ("dentro do teto") e a conta vai para "a conta"
     el.innerHTML = '<span class="dd-name"><i aria-hidden="true"></i><span></span></span><span class="dd-val mono"><b></b> <span></span></span><span class="dd-sub small"></span><span class="meter" aria-hidden="true"><span></span></span><span class="dd-pct small"></span><details class="dd-more small"><summary>a conta</summary><p></p></details>';

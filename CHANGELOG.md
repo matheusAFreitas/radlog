@@ -1,5 +1,72 @@
 # Versões
 
+## 2.102.1
+Espectro: análise dos picos mais honesta (o mesmo critério do celular):
+- Com pouco tempo de espectro, o modo "agora" marcava quase tudo como
+  "certo". Agora cada linha é graduada como certo, provável ou fraco pelo σ,
+  por quanto o pico sobe acima do que tem embaixo (pelo menos 30%, ou 60% se
+  estiver sozinho) e se outra linha da mesma série apareceu junto. O detalhe
+  "Por que" mostra essa conta. No Acumulado do aparelho continua valendo só
+  o σ (lá essa conta depende do formato do espectro, não do tempo).
+- Linha sozinha que sobe menos de 10% acima do que tem embaixo some da tela
+  ao vivo (é ruído ou deriva, não isótopo).
+- 186 keV agora é "Ra-226 (ou U-235)": o rádio solta quase a mesma energia e
+  está em tudo que tem urânio. Cada um aparece com a sua energia (Ra-226
+  186,2 keV, U-235 185,7 keV).
+- Inglês: frases já traduzidas coladas uma na outra não são mais traduzidas
+  de novo ("has no other" virava "has on the other").
+- Dose acumulada, "Tudo": o quadro do RC102 dizia "faltam 10 dias sem dado"
+  contando os dias antes de existir o RC102 (o "Tudo" começa no primeiro dado
+  do GMC-800). Agora a falta conta desde o primeiro dado do RC102.
+- Atividade (Bq): o aviso de "fundo bem acima do normal da casa" acusava o
+  sal à toa (o ACE, com nada perto: 15,8 × 12,4 cps). Agora não culpa o sal
+  e diz que minério no mesmo cômodo também sobe o fundo: se ele ficar no
+  mesmo lugar até o fim, pode seguir. O aviso nunca travou a medição.
+- Radiacode 102: sem o aparelho conectado, Espectro, Busca, Espectrograma e
+  Dureza não mostram mais os exemplos simulados (pedido do ACE); cada cartão
+  diz só o que falta. Os exemplos ficam na demonstração.
+- Calibração do KCl: quando a incerteza passa um pouco do limite de ±20%
+  (até ±30%), aparece "Salvar mesmo assim", também no histórico (o ACE tinha
+  ficado em ±20,3%). O aviso agora diz a incerteza em vez de "o pico quase
+  não apareceu". O tempo sugerido de cada fase passou a usar o que as duas
+  calibrações do ACE mostraram (250 g de sal light: ~11 h por fase).
+- O último canal (onde caem as contagens que estouram a escala) não é mais
+  desenhado, então sumiu o falso pico perto de 3000 keV.
+
+**English**
+Spectrum: more honest peak analysis (the same criterion as the phone):
+- With little spectrum time, the "now" mode marked almost everything as
+  "sure". Each line is now graded sure, likely or weak by σ, by how much the
+  peak rises above what is underneath it (at least 30%, or 60% if it is
+  alone) and by whether another line from the same series showed up too. The
+  "Why" detail shows the math. In the device's Accumulated mode only σ still
+  counts (there this math depends on the spectrum's shape, not on time).
+- A lone line rising less than 10% above what is underneath disappears from
+  the live screen (it is noise or drift, not an isotope).
+- 186 keV is now "Ra-226 (or U-235)": radium gives off almost the same energy
+  and is in everything that has uranium. Each one shows its own energy
+  (Ra-226 186.2 keV, U-235 185.7 keV).
+- English: sentences already translated and joined together are no longer
+  translated again ("has no other" became "has on the other").
+- Accumulated dose, "All": the RC102 box said "no data for 10 days",
+  counting the days before the RC102 existed ("All" starts at the GMC-800's
+  first data). Missing time now counts from the RC102's first data.
+- Activity (Bq): the "background well above the home normal" warning blamed
+  the salt for nothing (ACE, with nothing nearby: 15.8 × 12.4 cps). It no
+  longer blames the salt and says ore in the same room also raises the
+  background: if it stays in place until the end, you can go on. The warning
+  never blocked the measurement.
+- Radiacode 102: with the device disconnected, Spectrum, Search, Spectrogram
+  and Hardness no longer show the simulated examples (ACE's request); each
+  card just says what is missing. The examples stay in the demo.
+- KCl calibration: when the uncertainty is a bit over the ±20% limit (up to
+  ±30%), "Save anyway" shows up, in the history too (ACE's came out at
+  ±20.3%). The warning now states the uncertainty instead of "the peak barely
+  showed". The suggested time for each phase now uses what ACE's two
+  calibrations showed (250 g of lite salt: ~11 h per phase).
+- The last channel (where counts beyond the scale land) is no longer drawn,
+  so the false peak near 3000 keV is gone.
+
 ## 2.102.0
 Zoom dos gráficos (pedido do ACE, com o design aprovado):
 - O zoom vale só enquanto você está nos Gráficos. Saiu da página, ele some,

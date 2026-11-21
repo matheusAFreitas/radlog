@@ -156,10 +156,14 @@
   const FAM = { "Pb-212": "th", "Tl-208": "th", "Ac-228": "th", "Bi-212": "th", "Pb-214": "u", "Bi-214": "u", "Pb-210": "u", "Ra-226": "u", "Th-234": "u", "Pa-234m": "u" };
   const FAM_NAME = { th: "série do tório", u: "série do urânio" };
   // as linhas que o Go procura (specLines em measurespec.go)
-  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
+  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["Ra-226", 186.2], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
     ["Cs-137", 661.7], ["Ac-228", 911.2], ["Pa-234m", 1001], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5]];
   // biblioteca com um isótopo por entrada ("Ra-226 / U-235" vira duas)
-  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => [e, x, d]));
+  // 2.102.1: cada um na sua energia (Ra-226 186,2 keV, U-235 185,7 keV)
+  const LIB_OWN = { "Ra-226": [186.2, "rádio"], "U-235": [185.7, "urânio"] };
+  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => (n.includes(" / ") && LIB_OWN[x] ? [LIB_OWN[x][0], x, LIB_OWN[x][1]] : [e, x, d])));
+  // 2.102.1: a linha de 186 keV fica com o Ra-226, mas pode ser U-235
+  const nucOr = (n) => (n === "Ra-226" ? " " + tr("(ou U-235)") : "");
   const isIso = (n) => /^[A-Z][a-z]?-\d/.test(n);
   // largura do pico como o Go mede (specFWHM)
   const goFW = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
@@ -277,6 +281,17 @@
   // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
+  // 2.102.1 (pedido do ACE): no app de verdade, sem o RC102 os cartões não
+  // mostram mais o exemplo simulado, só um aviso; o exemplo fica para a
+  // demonstração (navegador e o modo demonstração do app)
+  const simOK = () => typeof hasGo === "undefined" || !hasGo || (typeof inDemo !== "undefined" && inDemo);
+  function offCard(card, off, msg) {
+    if (!card) return;
+    card.classList.toggle("rc-off", off);
+    let p = card.querySelector(":scope > .rc-off-msg");
+    if (off && !p) { p = document.createElement("p"); p.className = "rc-off-msg small muted"; card.querySelector(".rc-head").after(p); }
+    if (p) { p.hidden = !off; if (off) p.textContent = tr(msg); }
+  }
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
   // o acumulado do aparelho é mostrado como ele é (não dá para zerar); a foto
   // do "zerado no RadLog" da 2.60/2.61.0 deixa de valer
@@ -302,7 +317,7 @@
   }
   async function realTick(force) {
     if (!rcLive()) { if (rl.on) { rl.on = false; EN = SIM_EN; DE = SIM_DE; spMark(); spDraw(); } return; }
-    if (!rl.on) { rl.on = true; rl.base = null; spMark(); }
+    if (!rl.on) { rl.on = true; rl.base = null; spMark(); if (!sg.on) sgLoad(); } // 2.102.1 (QA): o espectrograma acende na hora, sem esperar o próximo minuto
     if ((!sp.run && !force && rl.mode !== "acc") || rl.busy) return;
     // pelo Bluetooth a leitura do espectro é mais lenta: lê a cada 6 s
     const every = state.rc.st.via === "bluetooth" ? 6000 : 2000;
@@ -366,7 +381,9 @@
     const real = rl.on ? realCounts() : null;
     const counts = real ? real.c : sp.counts, tNow = real ? real.t : sp.t;
     const bgRate = real && rl.acc && rl.acc.seconds > 0 && rl.mode === "agora" ? Float64Array.from(rl.acc.counts, (v) => v / rl.acc.seconds) : null;
-    const nch = counts.length;
+    // 2.102.1: o último canal do RC102 junta tudo que passou do fim da escala
+    // (estouro): não é espectro e faria um "pico" falso em ~3.000 keV
+    const nch = counts.length - (real && counts.length > 1 ? 1 : 0);
     const f = fit(cv, spH()); if (!f) return;
     const { g, w, h } = f, L = 44, R = 10, T = 10, B = 24, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
@@ -514,21 +531,26 @@
   // gaussiana ajustada e a crista.
   const pk = { sel: null, win: null, range: null, drag: null };
   const curPeaks = () => (rl.on ? (rl.mode === "acc" ? rl.accPeaks : rl.peaks) || [] : []);
-  const SURE = (sg) => (sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
+  // 2.102.1: o Go gradua cada linha (level: forte, provável, fraco) pelo σ,
+  // por quanto ela sobe acima do que tem embaixo e por outra linha da mesma
+  // série; sem level (versão antiga), vale só o σ
+  const LV_RANK = { forte: 0, "provável": 1, fraco: 2 };
+  const SURE = (sg, lv) => (lv ? [["certo", "sure"], ["provável", "likely"], ["fraco", "weak"]][LV_RANK[lv] ?? 2] : sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
   function isoList(peaks) {
     const by = {};
     for (const p of peaks) {
-      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0 });
+      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0, level: null });
       o.lines.push(p);
       o.sigma = Math.max(o.sigma, p.sigma);
+      if (p.level && (o.level == null || LV_RANK[p.level] < LV_RANK[o.level])) o.level = p.level;
     }
-    const out = Object.values(by).sort((a, b) => b.sigma - a.sigma);
+    const out = Object.values(by).sort((a, b) => (LV_RANK[a.level] ?? 3) - (LV_RANK[b.level] ?? 3) || b.sigma - a.sigma);
     for (const o of out) o.lines.sort((a, b) => b.sigma - a.sigma);
     return out;
   }
   // "certo" pede também a identidade (2.69): sem vizinho que não deu para
   // descartar, ou outra linha da mesma família achada
-  const sureOf = (o) => { const r = SURE(o.sigma); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
+  const sureOf = (o) => { const r = SURE(o.sigma, o.level); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
   function isoListId(peaks) { const list = isoList(peaks); for (const o of list) o.id = isoIdent(o, peaks, isAccMode()); return list; }
   function isoRender(peaks) {
     const box = $("rcIsos"), list = isoListId(peaks);
@@ -548,7 +570,7 @@
       b.dataset.nuc = o.nuclide;
       b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
       const [pt, cls] = sureOf(o);
-      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide + nucOr(o.nuclide))}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
         `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>${emitHtml(o.nuclide)}`;
       // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
       // gama; o título diz de qual família ele vem
@@ -771,7 +793,8 @@
     const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = escHtml(o.nuclide);
     const fw = goFW(p.kev), tol = 0.2 * fw;
     const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
-    const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
+    const ex = SURE(o.sigma, o.level)[1];
+    const exist = ex === "sure" ? [tr("Sim, forte"), 3, "sure"] : ex === "likely" ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
     // vizinho que também foi achado: os dois devem somar nesse pico (QA 2.69.0)
     const mix = id.neigh.filter((x) => !x.out && x.why === "found").map((x) => x.n);
     const ident = !id.ok ? [tr("Provavelmente"), 2, "likely"] : mix.length ? [tr(`Sim, junto com ${mix.join(", ")}`), 2, "sure"] : [tr("Sim"), 3, "sure"];
@@ -783,6 +806,14 @@
     const sg = nf(o.sigma, o.sigma < 10 ? 1 : 0);
     if (o.sigma >= 5) h += chk(true, tr("Não é flutuação"), tr(`${sg} σ: a chance de ser só ruído é praticamente zero.`) + " " + (acc ? tr("Precisa de pelo menos 5 σ para entrar na lista e 10 σ para \"certo\".") : tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ.")));
     else h += chk(false, tr("Pode ser flutuação"), tr(`${sg} σ: pode ser acaso.`) + " " + tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ."));
+    // 2.102.1: o σ sozinho não basta; conta também quanto o pico sobe acima do que tem embaixo
+    if (o.level && p.cont > 0 && !acc) {
+      const pct = nf((p.net / p.cont) * 100, 0), r = p.net / p.cont;
+      // sozinho (sem outra linha da mesma série), "certo" pede 60% (QA 2.102.1)
+      const conf = peaks.some((q) => q !== p && q.group === p.group);
+      const okR = r >= (conf ? 0.3 : 0.6);
+      h += chk(okR, okR || conf ? tr(`Sobe ${pct}% acima do que tem embaixo`) : tr(`Sobe ${pct}% acima do que tem embaixo; sozinho, "certo" pede 60%`), tr("Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho)."));
+    }
     if (p.center) {
       const d = Math.abs(p.center - p.kev);
       h += chk(d <= tol, tr(`A energia bate com o ${o.nuclide} (${nf(p.kev, 1)} keV)`), tr(`O centro caiu a ${nf(d, 1)} keV da linha.`) + " " + (acc ? tr(`O app aceita até ${nf(tol, 0)} keV aqui (um quinto da largura de um pico nessa energia).`) : d <= tol ? tr(`Dentro de ${nf(tol, 0)} keV (um quinto da largura de um pico nessa energia).`) : tr("Mais longe que o normal: pode ter outro pico do lado.")));
@@ -832,7 +863,7 @@
     const box = $("rcZoom"), p = o.lines[0], acc = isAccMode();
     box.hidden = false; zoomMode(true);
     const lib = LIBN.find((l) => l[1] === o.nuclide);
-    $("rcZoomTitle").textContent = o.nuclide;
+    $("rcZoomTitle").textContent = o.nuclide + nucOr(o.nuclide);
     $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${escHtml(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
     $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
     $("rcZoomWarn").hidden = true;
@@ -1061,6 +1092,7 @@
   }
   function sgMark() {
     $("rcSgSimTags").hidden = sg.on;
+    offCard($("rcSgCard"), !sg.on && !simOK(), "O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.");
     $("rcSgLiveTag").hidden = !sg.on;
     $("rcSgCtrl").hidden = !sg.on;
     $("rcTlReplay").hidden = sg.on;
@@ -1097,6 +1129,7 @@
     // cartão 3 (dureza): mesmo período
     const hdOn = sg.on && !!sg.hd;
     $("rcHdSimTags").hidden = hdOn;
+    offCard($("rcHardCard"), !hdOn && !simOK(), "A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.");
     $("rcHdLiveTag").hidden = !hdOn;
     $("rcHdCtrl").hidden = !hdOn;
     document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
@@ -1452,6 +1485,7 @@
   function srMark(on) {
     sr.real = on;
     $("rcSrSimTags").hidden = on;
+    offCard($("rcSrCard"), !on && !simOK(), "Conecte o RC102 para usar o modo busca.");
     $("rcSrLiveTag").hidden = !on;
     $("rcSrSim").hidden = on;
     $("rcSrReal").hidden = !on;
@@ -1834,7 +1868,11 @@
   // eficiência sair com ~15% de dúvida (o app guarda até 20%). Conta com o
   // chute de 0,005% em 1.460 keV (o que o RC102 deu com 250 g de sal light
   // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
-  const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
+  // 2.102.1: pelas duas calibrações do ACE (0,0045% e 0,006%; 6 h deram
+  // ±20,3% em vez dos 15% previstos), eficiência 0,006% e fundo efetivo no
+  // pico de 0,075 cps (com as linhas do Bi-214 vizinhas no ajuste): 250 g de
+  // sal light passam a pedir ~11 h por fase
+  const ACT_EFF_GUESS = 0.00006, ACT_K_BG = 0.075, ACT_CAL_REL = 0.15;
   function actCalPhaseSec(massG, pct) {
     const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * (39.0983 / 74.551) * 31.7; // K-40 do KCl (o mesmo do Go)
     const net = bq * 0.1066 * ACT_EFF_GUESS;
@@ -1902,11 +1940,23 @@
     return `<p class="att-text">${tr(`Esta saiu com ${nova}, pior que a que está em uso (${atual}), então a atual continua valendo.`)}</p>` +
       (live ? `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Usar a nova (${nova})`)}</button></p>` : "");
   }
+  // 2.102.1: a do KCl que não foi guardada; até ±30% dá para salvar mesmo assim
+  // (o chute sem calibração é ±100%), também pelo histórico
+  function actNotSavedHtml(r) {
+    const pe = `±${nf(r.kcl.effErr * 100, 1)}%`;
+    if (r.used) return `<p>${tr(`Você salvou esta calibração mesmo assim (${pe}). A de antes, se tinha, ficou guardada: dá para voltar em detalhes.`)}</p>`;
+    if (r.kcl.effErr > 0.3) return `<p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>`;
+    const cur = act.v && act.v.cal && act.v.cal.kcl;
+    if (cur && cur.effErr <= r.kcl.effErr) return `<p class="att-text">${tr(`Esta saiu com ${pe}, pior que a que está em uso (±${nf(cur.effErr * 100, 1)}%), então a atual continua valendo.`)}</p>`;
+    return `<p class="warn-text">${tr(`A incerteza ficou em ${pe}, acima do limite de ±20%, então a calibração não foi guardada sozinha.`)}</p>` +
+      `<p class="small muted">${tr("Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.")}</p>` +
+      `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Salvar mesmo assim (${pe})`)}</button></p>`;
+  }
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
       if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
-      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p><p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
+      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>${actNotSavedHtml(r)}` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
       if (r.th && r.worse) h += `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p>` + actWorseHtml(r, `± ${nf(r.th.bErr, 2)}`, `± ${nf(r.prevErr, 2)}`);
       else h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
@@ -1926,7 +1976,7 @@
   }
   function actSummary(r) {
     if (r.worse && !r.used) return tr("pior que a atual: não usada");
-    if (r.kind === "kcl") return r.kcl && r.notSaved ? tr("pico fraco: não guardada") : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
+    if (r.kind === "kcl") return r.kcl && r.notSaved && !r.used ? (r.kcl.effErr > 0.3 ? tr("pico fraco: não guardada") : tr(`±${nf(r.kcl.effErr * 100, 1)}%: não guardada`)) : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
     if (r.kind === "torio") return r.th ? `inclinação ${nf(r.th.b, 2)}` : "sem linhas";
     const perKg = r.massG > 0 && !r.loose, u = perKg ? "Bq/kg" : "Bq";
     return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(perKg ? n.bqKg : n.bq) + u : "< " + fmtBq(perKg ? n.mdaKg : n.mda) + u}`).join(" · ");
@@ -2001,7 +2051,7 @@
     } else if (ph === "fundo" && v.phaseCps > 0 && v.homeCps > 0) {
       // 2.101.4: fundo medido com o sal perto estraga a calibração inteira
       live = `<p class="mono small">${tr("contagem agora")}: ${nf(v.phaseCps, 1)} cps · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps</p>`;
-      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.")}</p>`;
+      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
       live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
@@ -2319,6 +2369,7 @@
     $("rcSpecMode").hidden = true; // 2.93 (E3): o seletor de cima faz isso
     $("rcSpecSpeedBox").hidden = rl.on;
     $("rcSpecSimTag").hidden = rl.on;
+    offCard($("rcSpecSimTag").closest(".rc-card"), !rl.on && !simOK(), "Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.");
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
       ? "Ao vivo, do seu RC102: é o mesmo espectro da tela do aparelho. Cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Para medir uma amostra, encoste-a e clique em Recomeçar (o aparelho zera junto). A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Aqui só aparece o que está acima do fundo da casa; os isótopos do próprio fundo aparecem no “Acumulado do aparelho”, depois de algumas horas. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro."
@@ -2332,6 +2383,7 @@
   function show() {
     build();
     visible = true;
+    if (!sr.real) srMark(false); // 2.102.1: sem o RC102, o cartão da busca já abre com o aviso
     realTick(true);
     sgLoad();
     lgLoad();

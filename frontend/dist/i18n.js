@@ -132,6 +132,18 @@ const tr = (() => {
     return inner ? s : null;
   }
   const done = new Set(); // traduções já entregues
+  // 2.102.1: o texto é todo feito de frases já traduzidas?
+  function allDone(core) {
+    const bits = core.split(/(?<=[.!?;])\s+/);
+    if (bits.length < 2) return false;
+    for (let i = 0; i < bits.length; ) {
+      let j = bits.length;
+      while (j > i && !done.has(bits.slice(i, j).join(" "))) j--;
+      if (j === i) return false;
+      i = j;
+    }
+    return true;
+  }
   function trCore(s) {
     if (s == null || typeof s !== "string" || !hasWord.test(s)) return s;
     const c = cache.get(s);
@@ -140,6 +152,9 @@ const tr = (() => {
     // 2.101.0: texto que já é uma tradução não passa de novo (o molde
     // genérico "{0} no {1}" virava "no limits" em "on the limits")
     if (done.has(core)) return s;
+    // 2.102.1 (QA): traduções já entregues juntadas num texto só ("…to check.
+    // Even so, …") não passam de novo: o "no" do inglês não é o do português
+    if (allDone(core)) return s;
     if (named(core)) return s;
     let out = one(core, false, false);
     if (out == null) out = wide(core);

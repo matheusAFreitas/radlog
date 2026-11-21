@@ -40,8 +40,9 @@ const (
 	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
 	actWeakLo      = 300.0   // faixa do espalhamento do K-40 (keV): o sal em volta do
 	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
-	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): o sal está perto
+	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): tem amostra perto
 	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
+	actCalSaveMax  = 0.30    // 2.102.1: até aqui, a pessoa pode salvar mesmo assim (o chute é ±100%)
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
@@ -709,8 +710,11 @@ func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 
-// actBgHigh: o fundo está mais de 25% acima do normal da casa (o sal, ou
-// outra amostra, ficou perto do aparelho).
+// actBgHigh: o fundo está mais de 25% acima do normal da casa (alguma
+// amostra perto do aparelho). 2.102.1: o limite fica (na casa do ACE, fora
+// das amostras de minério, nenhuma janela de 20 min passou de 1,25×), mas o
+// texto não acusa mais o sal e deixa seguir: o que importa é o fundo ficar
+// igual até o fim (o ACE: 15,8 × 12,4 cps sem nada perto do aparelho).
 func actBgHigh(phaseCps, homeCps float64) bool {
 	return homeCps > 0 && phaseCps > homeCps*actBgHighRise
 }
@@ -774,12 +778,30 @@ func (a *App) UseActivityCal(t int64) error {
 	st := &a.rc.act
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	r := st.run
-	if r == nil || r.Result == nil || r.Result.T != t || !r.Result.Worse || r.Result.Used {
+	a.actLoadLocked() // reaberto: lê a medida em andamento antes (o actSaveLocked do fim a apagaria)
+	// 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%,
+	// "Salvar mesmo assim"), e também pelo histórico (a tela já pode ter
+	// passado para uma medida nova, ou o app ter sido reaberto)
+	var res *ActResult
+	if r := st.run; r != nil && r.Result != nil && r.Result.T == t {
+		res = r.Result
+	} else {
+		for _, h := range a.actHistory() {
+			if h.T == t {
+				h := h
+				res = &h
+				break
+			}
+		}
+	}
+	c := a.actCal()
+	// só se for melhor que a do KCl em uso (se tiver): trocar por uma pior é
+	// o caminho do "pior que a atual"
+	anyway := res != nil && res.NotSaved && res.Kind == "kcl" && res.KCl != nil && res.KCl.EffErr <= actCalSaveMax &&
+		(c.KCl == nil || res.KCl.EffErr < c.KCl.EffErr)
+	if res == nil || res.Used || !(res.Worse || anyway) {
 		return errors.New("essa calibração não está mais na tela")
 	}
-	res := r.Result
-	c := a.actCal()
 	switch {
 	case res.KCl != nil && res.Kind == "kcl":
 		c.KCl, c.PrevKCl, c.PrevGeometry = res.KCl, c.KCl, c.Geometry
@@ -796,7 +818,11 @@ func (a *App) UseActivityCal(t int64) error {
 	_, _, res.CalSrc = c.eff(1000)
 	a.actRewriteResult(*res)
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	if r := st.run; r != nil && r.Result == res {
+		a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	} else {
+		a.logEvent("Atividade: calibração trocada pela nova")
+	}
 	return nil
 }
 
