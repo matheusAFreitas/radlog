@@ -2,10 +2,12 @@ package app
 
 import (
 	"bytes"
+	"encoding/json"
 	"math"
 	"math/rand"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 	"time"
 
@@ -251,5 +253,24 @@ func TestUseActivityCalAnyway(t *testing.T) {
 	}
 	if err := a.UseActivityCal(1000); err == nil {
 		t.Fatal("não pode usar duas vezes")
+	}
+}
+
+// 2.102.2: a nuvem juntava a linha antiga ("não guardada") de volta junto da
+// usada; o histórico fica com uma só, a usada
+func TestActHistoryDedupe(t *testing.T) {
+	a := newTestApp(t)
+	old := ActResult{T: 1000, Kind: "kcl", NotSaved: true, KCl: &ActCalKCl{Eff: 6e-5, EffErr: 0.203}}
+	used := old
+	used.Used = true
+	a.actAppendResult(used)
+	b, _ := json.Marshal(old)
+	a.actMerge(actResFile, append(b, '\n'))
+	h := a.actHistory()
+	if len(h) != 1 || !h[0].Used {
+		t.Fatalf("histórico: %+v", h)
+	}
+	if raw, _ := os.ReadFile(a.actPath(actResFile)); strings.Count(string(raw), `"t":1000`) != 1 {
+		t.Fatalf("arquivo ficou com as duas: %s", raw)
 	}
 }

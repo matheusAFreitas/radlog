@@ -1,5 +1,26 @@
 # Versões
 
+## 2.102.2
+Calibração do KCl:
+- Nos primeiros minutos com o sal, a tela mostrava "eficiência até agora:
+  0,001% ± 426%" e "~1.676 h" (o pico ainda é ruído). Agora a conta só
+  aparece quando o pico do K-40 sai do ruído (±50% ou menos), e o tempo é
+  para ±15%, o que a calibração mira (antes ±3%, que o RC102 não alcança).
+- Histórico: a calibração salva com "Salvar mesmo assim" aparecia duas vezes
+  (a nuvem trazia de volta a linha antiga, "não guardada"). Agora fica uma
+  linha por medida, a usada.
+
+**English**
+KCl calibration:
+- In the first minutes with the salt, the screen showed "efficiency so far:
+  0.001% ± 426%" and "~1,676 h" (the peak is still noise). The numbers now
+  only show once the K-40 peak rises above the noise (±50% or less), and the
+  time is for ±15%, what the calibration aims for (it was ±3%, which the
+  RC102 cannot reach).
+- History: a calibration saved with "Save anyway" showed up twice (the cloud
+  brought back the old "not saved" line). Now there is one line per
+  measurement, the used one.
+
 ## 2.102.1
 Espectro: análise dos picos mais honesta (o mesmo critério do celular):
 - Com pouco tempo de espectro, o modo "agora" marcava quase tudo como

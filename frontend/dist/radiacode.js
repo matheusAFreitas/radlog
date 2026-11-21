@@ -2040,7 +2040,11 @@
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
-      if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
+      // 2.102.2: nos primeiros minutos o pico ainda é ruído (o ACE viu "± 426%"
+      // e "~1.676 h"): a conta só aparece com o pico acima de 2 σ (±50%), e o
+      // tempo é para ±15% (o que a calibração mira; ±3% não é alcançável)
+      if (v.liveKcl && v.liveKcl.effErr > 0 && v.liveKcl.effErr <= 0.5) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · para ±15%: ~${fmtSec(t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2)} no total</p>`;
+      else if (v.liveKcl) live += `<p class="small muted">${tr("A eficiência aparece quando o pico do K-40 sair do ruído (alguns minutos a algumas horas, conforme o sal).")}</p>`;
       // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
       // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
       if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
