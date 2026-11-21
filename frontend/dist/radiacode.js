@@ -2358,7 +2358,7 @@
       calMassShow();
       actRender();
     });
-    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; act.calPick = 0; calMassShow(); actRender(); };
+    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; act.calPick = 0; act.calBgMode = "novo"; /* QA: o fundo salvo não fica escolhido de uma calibração para a outra */ calMassShow(); actRender(); };
     $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
     $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);
