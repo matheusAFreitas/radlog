@@ -4955,8 +4955,10 @@ const I18N_EN = {
 "Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
 "Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
 "eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)",
-"K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda.": "K-40 not clear yet: the calculation uses the scale the RC102 sends.",
-"K-40 ainda não apareceu claro: a conta usa a escala que o RadiaCode manda.": "K-40 not clear yet: the calculation uses the scale the RC102 sends.",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RadiaCode manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RadiaCode manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
 "Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.": "Made before the K-40 peak fix: it came out low. Calibrate again."
 },
 "patterns": [
@@ -6313,15 +6315,6 @@ const I18N_EN = {
 "RC102: voltou a conectar às ",
 " com \"",
 "\" aberto; o app pergunta na tela Agora se você voltou para casa"
-]
-],
-[
-"K-40 ainda não apareceu claro nesta medida: a conta usa a escala achada na calibração (",
-"^K\\-40 ainda não apareceu claro nesta medida: a conta usa a escala achada na calibração \\(((?:(?! · ).)+?) keV\\)\\.$",
-"K-40 not clear yet in this measurement: the calculation uses the scale found in the calibration (${1} keV).",
-[
-"K-40 ainda não apareceu claro nesta medida: a conta usa a escala achada na calibração (",
-" keV)."
 ]
 ],
 [
@@ -8501,6 +8494,15 @@ const I18N_EN = {
 "A conta RC102 ÷ GMC-800 ficou perto da normal (",
 " contra ",
 ")."
+]
+],
+[
+"Escala de energia: a achada na calibração (K-40 em ",
+"^Escala de energia: a achada na calibração \\(K\\-40 em ((?:(?! · ).)+?) keV\\)\\.$",
+"Energy scale: the one found in the calibration (K-40 at ${1} keV).",
+[
+"Escala de energia: a achada na calibração (K-40 em ",
+" keV)."
 ]
 ],
 [

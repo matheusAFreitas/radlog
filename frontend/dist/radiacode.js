@@ -1956,18 +1956,19 @@
   }
   // 2.103.0 (avaliação do Bq): onde o K-40 foi achado; a escala do RC102 pode
   // estar uns % fora (no do ACE, o pico aparece em ~1.415 keV), e a conta corrige
-  function actK40Html(g) {
+  function actK40Html(g, kcl) {
     if (!g) return "";
     const pk = nf(g.peakKeV, 0), pct = nf(Math.abs(g.gain - 1) * 100, 1);
     if (g.found && Math.abs(g.peakKeV - 1460.8) > 15) return `<p class="small att-text">${g.gain > 1 ? `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% baixa; a conta corrige.` : `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% alta; a conta corrige.`}</p>`;
     if (g.found) return `<p class="small ok-text">K-40 achado em ${pk} keV.</p>`;
-    if (g.gain !== 1) return `<p class="small muted">K-40 ainda não apareceu claro nesta medida: a conta usa a escala achada na calibração (${pk} keV).</p>`;
-    return `<p class="small muted">${tr("K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda.")}</p>`;
+    // QA: numa amostra o K-40 é procurado no fundo, que já está pronto: "ainda" não cabe
+    if (g.gain !== 1) return `<p class="small muted">Escala de energia: a achada na calibração (K-40 em ${pk} keV).</p>`;
+    return `<p class="small muted">${kcl ? tr("K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.") : tr("O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.")}</p>`;
   }
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
-      h += actK40Html(r.k40);
+      h += actK40Html(r.k40, true);
       if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
       else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>${actNotSavedHtml(r)}` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
@@ -2053,7 +2054,7 @@
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
-      live += actK40Html(v.k40);
+      live += actK40Html(v.k40, o.kind === "kcl");
       // 2.102.2: o tempo é para ±15% (o que a calibração mira; ±3% o RC102 não
       // alcança). O ACE gosta de ver a conta desde o começo; quando a contagem
       // no pico fica abaixo do fundo (normal no começo), a linha não some mais

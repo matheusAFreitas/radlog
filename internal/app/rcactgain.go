@@ -129,7 +129,13 @@ func actAlign(smp, bg actSpec, inSum bool, fb float64) (actSpec, actSpec, ActGai
 	} else if bg.Sec <= 0 {
 		ref = smp
 	}
-	if c, ok := actFindK40(ref); ok {
+	// QA 2.103.0: numa medida de amostra, o ganho da calibração (achado no sal,
+	// bem contado) vale mais que o K-40 das paredes num fundo de poucas horas:
+	// ali o pico achado sai até 1–3% fora, e 1% fora já tira 15–20% da área
+	// em 352/609 keV e metade em 1.764 keV. O fundo só decide sem calibração.
+	if !inSum && fb > 0 && math.Abs(fb-1) <= actGainMax {
+		g = ActGain{Gain: fb, PeakKeV: actK40 / fb}
+	} else if c, ok := actFindK40(ref); ok {
 		g = ActGain{Found: true, PeakKeV: c, Gain: actK40 / c}
 	} else if fb > 0 && math.Abs(fb-1) <= actGainMax {
 		g = ActGain{Gain: fb, PeakKeV: actK40 / fb}
