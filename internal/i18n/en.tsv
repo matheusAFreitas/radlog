@@ -6503,3 +6503,72 @@ Escala de energia: a achada na calibração (K-40 em {0} keV).	Energy scale: the
 K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.	K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.
 O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.	The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.
 Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.	Made before the K-40 peak fix: it came out low. Calibrate again.
+% de KCl (mg de K por g × 0,19)	% KCl (mg of K per g × 0.19)
+1 h recomendado para esta montagem (deve dar ±10–15%). Aos 30 min o app confere o pico e diz quanto vai dar.	1 h recommended for this setup (should give ±10–15%). At 30 min the app checks the peak and tells you what it will reach.
+A calibração só vale para amostras medidas nesta mesma montagem. Mais sal só ajuda se ficar em volta da ponta do cristal.	The calibration only holds for samples measured in this same setup. More salt only helps if it sits around the crystal end.
+A eficiência e as rodadas dela somem. As medidas já feitas ficam no histórico.	Its efficiency and rounds are removed. Measurements already made stay in the history.
+A faixa de 300 a 1.400 keV quase não subiu ({0}{1}%): confira se o RC102 está dentro do KCl.	The 300 to 1,400 keV band barely rose ({0}{1}%): check that the RC102 is inside the KCl.
+Ainda não dá para usar: rode mais uma rodada e o app soma.	Not usable yet: run one more round and the app adds it up.
+Aos 30 min o app confere o pico e diz quanto vai dar com o tempo marcado.	At 30 min the app checks the peak and tells you what the chosen time will reach.
+As conferências aparecem com 10 min.	The checks show up at 10 min.
+Béquer	Beaker
+Calibrar uma montagem	Calibrate a setup
+Calibração de {0} · ±{1}%	Calibration from {0} · ±{1}%
+Começar a rodada	Start the round
+Deixe o KCl longe (uns 3 m) e o RC102 no lugar de sempre.	Keep the KCl far away (about 3 m) and the RC102 in its usual spot.
+K-40 achado em {0} keV	K-40 found at {0} keV
+KCl de adubo	Fertilizer KCl
+KCl de adubo (60% K₂O)	Fertilizer KCl (60% K₂O)
+Mais uma rodada em	One more round in
+Medir com esta	Measure with this one
+Montagem (a calibração usada)	Setup (the calibration used)
+Monte igual à rodada anterior: o mesmo pote, a mesma altura e o RC102 na mesma posição. O app soma esta rodada às anteriores.	Set it up like the previous round: same pot, same height and the RC102 in the same position. The app adds this round to the earlier ones.
+Nenhuma montagem calibrada.	No calibrated setup.
+O pico do K-40 ainda não passou do fundo: confira se o RC102 está dentro do KCl.	The K-40 peak is not above the background yet: check that the RC102 is inside the KCl.
+O pico do K-40 não passou do fundo nesta rodada. Ela entra na soma mesmo assim (tirar só as baixas puxaria a eficiência para cima).	The K-40 peak did not rise above the background in this round. It goes into the sum anyway (dropping only the low ones would push the efficiency up).
+O pico do K-40, o sinal e a previsão aparecem com 30 min.	The K-40 peak, the signal and the forecast show up at 30 min.
+Passe o RC102 para o pote com o KCl, na mesma posição, e clique em Começar.	Move the RC102 to the pot with the KCl, in the same position, and click Start.
+Ponha o RC102 no pote com sal de cozinha comum, na mesma posição em que vai ficar no KCl. O KCl fica longe (uns 3 m).	Put the RC102 in the pot with regular table salt, in the same position it will have in the KCl. The KCl stays far away (about 3 m).
+Pote de 1 L com tubo	1 L pot with tube
+Pote igual com sal de cozinha comum (recomendado)	Same pot with regular table salt (recommended)
+Previsão:	Forecast:
+Pronta para medir amostras nesta montagem.	Ready to measure samples in this setup.
+Sem nada, KCl a 3 m (fica 2–5% baixo)	Nothing, KCl 3 m away (comes out 2–5% low)
+Sinal: {0} contagens/min, fora do esperado pela faixa ({1}–{2}): confira a posição.	Signal: {0} counts/min, outside what the band suggests ({1}–{2}): check the position.
+Uma vez por montagem (o pote, o material e a posição do RC102), com KCl.	Once per setup (the pot, the material and the RC102 position), with KCl.
+Vai faltar tempo: no fim, rode mais uma rodada e o app soma as duas.	Not enough time: at the end, run one more round and the app adds both.
+de KCl	of KCl
+descreva no nome, para repetir igual	describe it in the name, to repeat it the same way
+eficiência da montagem:	setup efficiency:
+eficiência em 1.461 keV nesta rodada:	efficiency at 1,461 keV in this round:
+escreva um nome	type a name
+fundo e KCl sempre com o mesmo tempo	background and KCl always take the same time
+montagem não encontrada	setup not found
+no fim de {0}: ±{1}% de contagem. Com este fundo, o melhor possível é ±{2}%.	at the end of {0}: ±{1}% from counting. With this background, the best possible is ±{2}%.
+o pico do K-40 ainda não apareceu	the K-40 peak has not shown up yet
+o sal em volta do RC102, como nas primeiras calibrações	the salt around the RC102, as in the first calibrations
+recomendado: RC102 de pé num tubo de PVC no meio, cristal (sob o "+") a ~3 cm do fundo	recommended: RC102 standing in a PVC tube in the middle, crystal (under the "+") ~3 cm from the bottom
+sem calibração (Bq só um chute, ±100%)	no calibration (Bq just a guess, ±100%)
+{0} · eficiência {1} ±{2}%	{0} · efficiency {1} ±{2}%
+✓ O RC102 está vendo o KCl: faixa de 300 a 1.400 keV {0}{1}%	✓ The RC102 sees the KCl: 300 to 1,400 keV band {0}{1}%
+✓ Sinal: {0} contagens/min, combina com a faixa (esperado {1}–{2})	✓ Signal: {0} counts/min, matches the band (expected {1}–{2})
+Renomear a montagem	Rename the setup
+Apagar esta montagem?	Delete this setup?
+mais opções	more options
+somar outra rodada	add another round
+apagar	delete
+Montagem	Setup
+Outra	Other
+Massa pesada (g)	Weighed mass (g)
+Somar outra rodada	Add another round
+Suas montagens calibradas	Your calibrated setups
++ Calibrar outra montagem	+ Calibrate another setup
+Escala de energia do RC102 {0}% baixa: corrigida na conta	RC102 energy scale {0}% low: corrected in the calculation
+Escala de energia do RC102 {0}% alta: corrigida na conta	RC102 energy scale {0}% high: corrected in the calculation
+{0} rodadas ({1} + {2})	{0} rounds ({1} + {2})
+1 rodada ({0} + {1})	1 round ({0} + {1})
+contagem ±{0}%	counting ±{0}%
+fixos ±{0}%	fixed ±{0}%
+total ±{0}%	total ±{0}%
+somadas {0} rodadas: {1} + {2}	{0} rounds summed: {1} + {2}
+sal light	light salt

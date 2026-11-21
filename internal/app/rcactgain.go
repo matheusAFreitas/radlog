@@ -154,3 +154,14 @@ func (c ActCal) gain() float64 {
 	}
 	return 0
 }
+
+// actK40Net é a área líquida do K-40 (sal − fundo) com só o K-40 e uma reta
+// no ajuste; pode sair negativa (pico abaixo do fundo, por acaso).
+func actK40Net(smp, bg actSpec) (actPeak, bool) {
+	F := specFWHM(actK40)
+	area, aerr, ok := actFitSet(smp, bg, actK40, F, actK40-1.6*F, actK40+1.6*F, []float64{actK40})
+	if !ok {
+		return actPeak{}, false
+	}
+	return actPeak{Area: area[0], Err: aerr[0], ok: true}, true
+}

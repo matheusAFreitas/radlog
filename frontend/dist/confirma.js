@@ -99,3 +99,21 @@ function askConfirm(o) {
     (o.noCancel ? yes : no).focus();
   });
 }
+
+// askText: a mesma caixa com um campo de texto (2.104.0, renomear a
+// montagem). Devolve o texto, ou null se cancelou.
+async function askText(o) {
+  const inp = document.createElement("input");
+  inp.type = "text";
+  inp.id = "cfmText";
+  inp.className = "cfm-input";
+  inp.maxLength = o.max || 60;
+  inp.value = o.value || "";
+  inp.setAttribute("aria-label", o.title || "");
+  const p = askConfirm(o);
+  cfmDlg.querySelector("#cfmBody").appendChild(inp);
+  inp.addEventListener("keydown", (e) => { if (e.key === "Enter") { e.preventDefault(); cfmDlg.close("yes"); } });
+  inp.focus();
+  inp.select();
+  return (await p) ? inp.value : null;
+}

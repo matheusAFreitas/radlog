@@ -68,6 +68,13 @@ type ActOpts struct {
 	// dá (cartão pronto, amostra que vem com o app, calibração, "amostra")
 	// traduzem nos Eventos; o da pessoa fica como está.
 	NameOwn bool `json:"nameOwn,omitempty"`
+	// 2.104.0: a montagem (calibração do KCl: a que recebe a rodada, "" =
+	// nova, descrita pelos campos abaixo; amostra: a calibração usada)
+	MountID   string `json:"mountId,omitempty"`
+	MountName string `json:"mountName,omitempty"`
+	Setup     string `json:"setup,omitempty"`    // pote1l | becker | outra
+	Material  string `json:"material,omitempty"` // adubo | puro | light
+	BgMode    string `json:"bgMode,omitempty"`   // branco | vazio
 }
 
 // actSaved é um espectro somado guardado.
@@ -195,6 +202,10 @@ type ActResult struct {
 	Used    bool    `json:"used,omitempty"`
 	// 2.103.0: onde o K-40 foi achado e o ganho usado na conta
 	K40 *ActGain `json:"k40,omitempty"`
+	// 2.104.0: a montagem da calibração (ou a usada na amostra) e, na
+	// calibração, a soma das rodadas depois desta
+	MountID string        `json:"mountId,omitempty"`
+	Mount   *ActMountView `json:"mount,omitempty"`
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -318,6 +329,14 @@ func actValidate(o *ActOpts) error {
 // StartActivity começa uma medição: pelo fundo (novo) ou direto pela amostra
 // (com o fundo salvo).
 func (a *App) StartActivity(o ActOpts) error {
+	// 2.104.0: mais uma rodada numa montagem: o material e a massa são os dela
+	if o.Kind == "kcl" && o.MountID != "" {
+		m, ok := a.actMount(o.MountID)
+		if !ok {
+			return errors.New("montagem não encontrada")
+		}
+		o.Setup, o.Material, o.Pct, o.MassG, o.BgMode, o.MountName = m.Setup, m.Material, m.Pct, m.MassG, m.BgMode, m.Name
+	}
 	if err := actValidate(&o); err != nil {
 		return err
 	}
@@ -415,7 +434,15 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	o := r.Opts
 	cal := a.actCal()
-	smp, bg, gn := actAlign(r.Smp.spec(), r.Bg.spec(), o.Kind == "kcl", cal.gain())
+	mv, hasMount := a.actMount(o.MountID)
+	if hasMount && o.Kind == "amostra" && mv.Eff > 0 {
+		cal = mv.cal() // 2.104.0: a amostra usa a eficiência da montagem
+	}
+	fb := cal.gain()
+	if hasMount && mv.Found && mv.Gain > 0 {
+		fb = mv.Gain
+	}
+	smp, bg, gn := actAlign(r.Smp.spec(), r.Bg.spec(), o.Kind == "kcl", fb)
 	res := ActResult{K40: &gn, T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
 		Loose: o.Loose, SampleID: o.SampleID, Nucs: o.Nuclides, SmpSecO: o.SmpSec}
 	if cal.KCl != nil {
@@ -424,10 +451,25 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	switch o.Kind {
 	case "kcl":
 		res.Pct = o.Pct
-		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
+		k, aK, area := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
 		if k != nil {
 			k.PeakKeV, k.Gain = gn.PeakKeV, gn.Gain
+		}
+		if o.Setup != "" || o.MountID != "" {
+			// 2.104.0: calibração por montagem: a rodada entra na soma da
+			// montagem, sempre (sem "a melhor", sem "salvar mesmo assim")
+			rd := ActRound{T: res.T, Sec: smp.Sec, BgSec: bg.Sec, ExpK: aK * 0.1066 * smp.Sec, PeakKeV: gn.PeakKeV, Gain: gn.Gain, Found: gn.Found}
+			if k != nil {
+				k.T = res.T
+				rd.Area, rd.AreaErr = area, k.EffErr*area
+			} else if pk, ok := actK40Net(smp, bg); ok {
+				rd.Area, rd.AreaErr = pk.Area, pk.Err // negativa também entra: tirar só as baixas puxaria a soma para cima
+			}
+			res.KCl = k
+			m := a.actAddRound(o, rd)
+			res.MountID, res.Mount = m.ID, &m
+			break
 		}
 		if k != nil && k.EffErr > actCalMaxErr {
 			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
@@ -464,6 +506,9 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		}
 	}
 	_, _, res.CalSrc = cal.eff(1000)
+	if hasMount && o.Kind == "amostra" {
+		res.MountID, res.Mount = mv.ID, &mv
+	}
 	res.Nuclides = actAnalyze(smp, bg, o.Nuclides, cal, o.MassG)
 	return res
 }
@@ -605,6 +650,8 @@ type ActView struct {
 	PhaseCps  float64         `json:"phaseCps,omitempty"` // contagem do RC102 nesta fase (mediana dos minutos)
 	BgHigh    bool            `json:"bgHigh,omitempty"`   // o fundo está bem acima do normal da casa
 	LiveTh    *ActCalTh       `json:"liveTh"`
+	Check     *ActCalCheck    `json:"check,omitempty"` // 2.104.0: conferências e previsão da calibração
+	Mounts    []ActMountView  `json:"mounts"`          // 2.104.0: montagens calibradas
 	Expected  float64         `json:"expected"`
 	Result    *ActResult      `json:"result"`
 	Cal       ActCal          `json:"cal"`
@@ -656,6 +703,8 @@ func actChart(smp, bg actSpec) *ActChart {
 func (a *App) GetActivity() ActView {
 	v := ActView{Nuclides: actNuclides, Connected: a.rcConnected()}
 	v.Cal = a.actCal()
+	a.actMigrateLegacy()
+	v.Mounts = a.actMountViews()
 	for _, e := range actCalE {
 		eps, rel, src := v.Cal.eff(e)
 		v.CalEff, v.CalErr, v.CalSrc = append(v.CalEff, eps), append(v.CalErr, rel), src
@@ -705,19 +754,30 @@ func (a *App) GetActivity() ActView {
 	}
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
 		var gn ActGain
-		smp, bg, gn = actAlign(smp, bg, o.Kind == "kcl", v.Cal.gain())
+		cal, fb := v.Cal, v.Cal.gain()
+		if mv, ok := a.actMount(o.MountID); ok {
+			if o.Kind == "amostra" && mv.Eff > 0 {
+				cal = mv.cal()
+			}
+			if mv.Found && mv.Gain > 0 {
+				fb = mv.Gain
+			}
+		}
+		smp, bg, gn = actAlign(smp, bg, o.Kind == "kcl", fb)
 		v.K40 = &gn
 		switch o.Kind {
 		case "kcl":
-			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
+			var area float64
+			v.LiveKCl, v.Expected, area = actCalKCl(smp, bg, o.MassG, o.Pct)
 			v.SmpCps, v.BgCps = smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
 			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
+			v.Check = actCalCheck(smp.Sec, float64(o.SmpSec), bg.Sec, v.SmpCps, v.BgCps, v.LiveKCl, area)
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
 			v.Expected = o.MassG * o.Pct / 100 * actThPerTO2 * actBqPerGTh * f228
 		}
-		v.Live = actAnalyze(smp, bg, o.Nuclides, v.Cal, o.MassG)
+		v.Live = actAnalyze(smp, bg, o.Nuclides, cal, o.MassG)
 	}
 	return v
 }
@@ -908,7 +968,7 @@ func (a *App) actRewriteResult(res ActResult) {
 
 func (a *App) actBackupFiles() []string {
 	var out []string
-	for _, n := range []string{actCalFile, actBgFile, actResFile, actSamplesFile} {
+	for _, n := range []string{actCalFile, actBgFile, actResFile, actSamplesFile, actMountsFile} {
 		if _, err := os.Stat(a.actPath(n)); err == nil {
 			out = append(out, rcDirName+"/"+actDir+"/"+n)
 		}
@@ -952,6 +1012,12 @@ func (a *App) actMerge(name string, data []byte) {
 			os.MkdirAll(a.actPath(""), 0o755)
 			_ = writeFileAtomic(a.actPath(name), data, 0o644)
 		}
+	case actMountsFile:
+		var in actMountsDoc
+		if json.Unmarshal(data, &in) != nil {
+			return
+		}
+		a.actSaveMounts(actMergeMounts(a.actMountsAll(), in.Mounts))
 	case actResFile:
 		cur, _ := os.ReadFile(a.actPath(name))
 		have := map[string]bool{}

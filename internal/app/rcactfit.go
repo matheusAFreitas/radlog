@@ -503,12 +503,7 @@ func actCalKCl(smp, bg actSpec, massG, pct float64) (*ActCalKCl, float64, float6
 	aK := massG * pct / 100 * actKPerKCl * actBqPerGK
 	// 2.103.0: no sal − fundo só existe o K-40; as vizinhas do ajuste geral
 	// (Bi-214, Ac-228…) só tiravam ou inventavam área. O K-40 mais uma reta.
-	F := specFWHM(actK40)
-	area, aerr, ok := actFitSet(smp, bg, actK40, F, actK40-1.6*F, actK40+1.6*F, []float64{actK40})
-	pk := actPeak{}
-	if ok {
-		pk = actPeak{Area: area[0], Err: aerr[0], ok: true}
-	}
+	pk, _ := actK40Net(smp, bg)
 	if !pk.ok || aK <= 0 || pk.Area <= 0 {
 		return nil, aK, 0
 	}
