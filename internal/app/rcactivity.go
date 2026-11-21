@@ -42,6 +42,7 @@ const (
 	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
 	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): tem amostra perto
 	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
+	actCalSaveMax  = 0.30    // 2.102.1: até aqui, a pessoa pode salvar mesmo assim (o chute é ±100%)
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
@@ -777,11 +778,25 @@ func (a *App) UseActivityCal(t int64) error {
 	st := &a.rc.act
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	r := st.run
-	if r == nil || r.Result == nil || r.Result.T != t || !r.Result.Worse || r.Result.Used {
+	// 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%,
+	// "Salvar mesmo assim"), e também pelo histórico (a tela já pode ter
+	// passado para uma medida nova, ou o app ter sido reaberto)
+	var res *ActResult
+	if r := st.run; r != nil && r.Result != nil && r.Result.T == t {
+		res = r.Result
+	} else {
+		for _, h := range a.actHistory() {
+			if h.T == t {
+				h := h
+				res = &h
+				break
+			}
+		}
+	}
+	anyway := res != nil && res.NotSaved && res.Kind == "kcl" && res.KCl != nil && res.KCl.EffErr <= actCalSaveMax
+	if res == nil || res.Used || !(res.Worse || anyway) {
 		return errors.New("essa calibração não está mais na tela")
 	}
-	res := r.Result
 	c := a.actCal()
 	switch {
 	case res.KCl != nil && res.Kind == "kcl":
@@ -799,7 +814,11 @@ func (a *App) UseActivityCal(t int64) error {
 	_, _, res.CalSrc = c.eff(1000)
 	a.actRewriteResult(*res)
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	if r := st.run; r != nil && r.Result == res {
+		a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	} else {
+		a.logEvent("Atividade: calibração trocada pela nova")
+	}
 	return nil
 }
 

@@ -2171,7 +2171,7 @@ amostra {0}	sample {0}
 fundo {0}	background {0}
 calibração pelo KCl	calibrated with KCl
 calibração pelo tório (aproximada)	calibrated with thorium (approximate)
-sem calibração: chute	no calibration: guess
+sem calibração: chute	not calibrated: rough estimate
 eficiência {0} em 1.460 keV	efficiency {0} at 1,460 keV
 sem pico	no peak
 inclinação {0}	slope {0}
@@ -6486,3 +6486,9 @@ Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.	Connect t
 O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.	The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.
 A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.	Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.
 Conecte o RC102 para usar o modo busca.	Connect the RC102 to use search mode.
+Você salvou esta calibração mesmo assim ({0}). A de antes, se tinha, ficou guardada: dá para voltar em detalhes.	You saved this calibration anyway ({0}). The previous one, if any, was kept: you can go back to it in details.
+A incerteza ficou em {0}, acima do limite de ±20%, então a calibração não foi guardada sozinha.	The uncertainty came out at {0}, above the ±20% limit, so the calibration was not saved automatically.
+Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.	It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.
+Salvar mesmo assim ({0})	Save anyway ({0})
+±{0}%: não guardada	±{0}%: not saved
+Atividade: calibração trocada pela nova	Activity: calibration replaced by the new one

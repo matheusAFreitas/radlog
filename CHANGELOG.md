@@ -25,6 +25,11 @@ Espectro: análise dos picos mais honesta (o mesmo critério do celular):
 - Radiacode 102: sem o aparelho conectado, Espectro, Busca, Espectrograma e
   Dureza não mostram mais os exemplos simulados (pedido do ACE); cada cartão
   diz só o que falta. Os exemplos ficam na demonstração.
+- Calibração do KCl: quando a incerteza passa um pouco do limite de ±20%
+  (até ±30%), aparece "Salvar mesmo assim", também no histórico (o ACE tinha
+  ficado em ±20,3%). O aviso agora diz a incerteza em vez de "o pico quase
+  não apareceu". O tempo sugerido de cada fase passou a usar o que as duas
+  calibrações do ACE mostraram (250 g de sal light: ~11 h por fase).
 - O último canal (onde caem as contagens que estouram a escala) não é mais
   desenhado, então sumiu o falso pico perto de 3000 keV.
 
@@ -54,6 +59,11 @@ Spectrum: more honest peak analysis (the same criterion as the phone):
 - Radiacode 102: with the device disconnected, Spectrum, Search, Spectrogram
   and Hardness no longer show the simulated examples (ACE's request); each
   card just says what is missing. The examples stay in the demo.
+- KCl calibration: when the uncertainty is a bit over the ±20% limit (up to
+  ±30%), "Save anyway" shows up, in the history too (ACE's came out at
+  ±20.3%). The warning now states the uncertainty instead of "the peak barely
+  showed". The suggested time for each phase now uses what ACE's two
+  calibrations showed (250 g of lite salt: ~11 h per phase).
 - The last channel (where counts beyond the scale land) is no longer drawn,
   so the false peak near 3000 keV is gone.
 

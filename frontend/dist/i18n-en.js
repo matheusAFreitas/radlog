@@ -1603,7 +1603,7 @@ const I18N_EN = {
 "As linhas do tório não apareceram o bastante (precisa de pelo menos duas).": "The thorium lines didn't show up enough (at least two are needed).",
 "calibração pelo KCl": "calibrated with KCl",
 "calibração pelo tório (aproximada)": "calibrated with thorium (approximate)",
-"sem calibração: chute": "no calibration: guess",
+"sem calibração: chute": "not calibrated: rough estimate",
 "sem pico": "no peak",
 "sem linhas": "no lines",
 "Medidas anteriores": "Previous measurements",
@@ -4951,7 +4951,9 @@ const I18N_EN = {
 "A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
 "A dureza aparece junto com o espectrograma, quando o RadiaCode tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
 "Conecte o RC102 para usar o modo busca.": "Connect the RC102 to use search mode.",
-"Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode."
+"Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
+"Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one"
 },
 "patterns": [
 [
@@ -5918,6 +5920,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Você salvou esta calibração mesmo assim (",
+"^Você salvou esta calibração mesmo assim \\(((?:(?! · ).)+?)\\)\\. A de antes, se tinha, ficou guardada: dá para voltar em detalhes\\.$",
+"You saved this calibration anyway (${1}). The previous one, if any, was kept: you can go back to it in details.",
+[
+"Você salvou esta calibração mesmo assim (",
+"). A de antes, se tinha, ficou guardada: dá para voltar em detalhes."
+]
+],
+[
 "início com o Windows: opção ",
 "^início com o Windows: opção ((?:(?! · ).)+?), registrado ((?:(?! · ).)+?) \\(existe ((?:(?! · ).)+?), este \\.exe ((?:(?! · ).)+?)\\), desativado no Windows ((?:(?! · ).)+?), abriu com o Windows ((?:(?! · ).)+?)$",
 "start with Windows: option ${1}, registered ${2} (exists ${3}, this .exe ${4}), disabled in Windows ${5}, started with Windows ${6}",
@@ -6473,6 +6484,15 @@ const I18N_EN = {
 [
 "configurações: não consegui ler o config.json (",
 "); voltei ao padrão e guardei o arquivo em "
+]
+],
+[
+"A incerteza ficou em ",
+"^A incerteza ficou em ((?:(?! · ).)+?), acima do limite de ±20%, então a calibração não foi guardada sozinha\\.$",
+"The uncertainty came out at ${1}, above the ±20% limit, so the calibration was not saved automatically.",
+[
+"A incerteza ficou em ",
+", acima do limite de ±20%, então a calibração não foi guardada sozinha."
 ]
 ],
 [
@@ -16001,6 +16021,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Salvar mesmo assim (",
+"^Salvar mesmo assim \\(((?:(?! · ).)+?)\\)$",
+"Save anyway (${1})",
+[
+"Salvar mesmo assim ("
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -18876,6 +18904,14 @@ const I18N_EN = {
 "Use the new one (${1})",
 [
 "Usar a nova ("
+]
+],
+[
+"±",
+"^±((?:(?! · ).)+?)%: não guardada$",
+"±${1}%: not saved",
+[
+"%: não guardada"
 ]
 ],
 [

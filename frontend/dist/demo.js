@@ -1071,7 +1071,9 @@ const demoRc = () => {
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = demoAct.cal.prevKcl = null; if (w === "torio") demoAct.cal.th = demoAct.cal.prevTh = null; },
     UseActivityCal: async (t) => {
       const r = demoAct.run && demoAct.run.result, c = demoAct.cal;
-      if (!r || r.t !== t || !r.worse || r.used) throw new Error("essa calibração não está mais na tela");
+      // 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%), como o Go
+      const anyway = r && r.notSaved && r.kind === "kcl" && r.kcl && r.kcl.effErr <= 0.3;
+      if (!r || r.t !== t || !(r.worse || anyway) || r.used) throw new Error("essa calibração não está mais na tela");
       if (r.kind === "kcl") { c.prevKcl = c.kcl; c.prevGeometry = c.geometry; c.kcl = { ...r.kcl }; if (r.geometry) c.geometry = r.geometry; } else { c.prevTh = c.th; c.th = { ...r.th }; }
       r.used = true;
     },

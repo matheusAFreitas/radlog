@@ -1868,7 +1868,11 @@
   // eficiência sair com ~15% de dúvida (o app guarda até 20%). Conta com o
   // chute de 0,005% em 1.460 keV (o que o RC102 deu com 250 g de sal light
   // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
-  const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
+  // 2.102.1: pelas duas calibrações do ACE (0,0045% e 0,006%; 6 h deram
+  // ±20,3% em vez dos 15% previstos), eficiência 0,006% e fundo efetivo no
+  // pico de 0,075 cps (com as linhas do Bi-214 vizinhas no ajuste): 250 g de
+  // sal light passam a pedir ~11 h por fase
+  const ACT_EFF_GUESS = 0.00006, ACT_K_BG = 0.075, ACT_CAL_REL = 0.15;
   function actCalPhaseSec(massG, pct) {
     const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * (39.0983 / 74.551) * 31.7; // K-40 do KCl (o mesmo do Go)
     const net = bq * 0.1066 * ACT_EFF_GUESS;
@@ -1936,11 +1940,21 @@
     return `<p class="att-text">${tr(`Esta saiu com ${nova}, pior que a que está em uso (${atual}), então a atual continua valendo.`)}</p>` +
       (live ? `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Usar a nova (${nova})`)}</button></p>` : "");
   }
+  // 2.102.1: a do KCl que não foi guardada; até ±30% dá para salvar mesmo assim
+  // (o chute sem calibração é ±100%), também pelo histórico
+  function actNotSavedHtml(r) {
+    const pe = `±${nf(r.kcl.effErr * 100, 1)}%`;
+    if (r.used) return `<p>${tr(`Você salvou esta calibração mesmo assim (${pe}). A de antes, se tinha, ficou guardada: dá para voltar em detalhes.`)}</p>`;
+    if (r.kcl.effErr > 0.3) return `<p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>`;
+    return `<p class="warn-text">${tr(`A incerteza ficou em ${pe}, acima do limite de ±20%, então a calibração não foi guardada sozinha.`)}</p>` +
+      `<p class="small muted">${tr("Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.")}</p>` +
+      `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Salvar mesmo assim (${pe})`)}</button></p>`;
+  }
   function actResHtml(r) {
     let h = "";
     if (r.kind === "kcl") {
       if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
-      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p><p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
+      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>${actNotSavedHtml(r)}` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
       if (r.th && r.worse) h += `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p>` + actWorseHtml(r, `± ${nf(r.th.bErr, 2)}`, `± ${nf(r.prevErr, 2)}`);
       else h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
@@ -1960,7 +1974,7 @@
   }
   function actSummary(r) {
     if (r.worse && !r.used) return tr("pior que a atual: não usada");
-    if (r.kind === "kcl") return r.kcl && r.notSaved ? tr("pico fraco: não guardada") : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
+    if (r.kind === "kcl") return r.kcl && r.notSaved && !r.used ? (r.kcl.effErr > 0.3 ? tr("pico fraco: não guardada") : tr(`±${nf(r.kcl.effErr * 100, 1)}%: não guardada`)) : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
     if (r.kind === "torio") return r.th ? `inclinação ${nf(r.th.b, 2)}` : "sem linhas";
     const perKg = r.massG > 0 && !r.loose, u = perKg ? "Bq/kg" : "Bq";
     return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(perKg ? n.bqKg : n.bq) + u : "< " + fmtBq(perKg ? n.mdaKg : n.mda) + u}`).join(" · ");
