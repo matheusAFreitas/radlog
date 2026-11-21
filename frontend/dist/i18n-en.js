@@ -8539,6 +8539,15 @@ const I18N_EN = {
 ]
 ],
 [
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · já chegou a ±15%: pode encerrar$",
+"efficiency so far: ${1} ± ${2}% · already at ±15%: you can stop",
+[
+"eficiência até agora: ",
+"% · já chegou a ±15%: pode encerrar"
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RC102 readings at home in the last hour (needs ${2})",
