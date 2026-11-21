@@ -5020,7 +5020,8 @@ const I18N_EN = {
 "Somar outra rodada": "Add another round",
 "Suas montagens calibradas": "Your calibrated setups",
 "+ Calibrar outra montagem": "+ Calibrate another setup",
-"sal light": "light salt"
+"sal light": "light salt",
+"diferença": "difference"
 },
 "patterns": [
 [

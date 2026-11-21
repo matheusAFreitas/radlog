@@ -1,5 +1,14 @@
 # Versões
 
+## 2.104.1
+- Resumo, Comparar: a coluna "A − B" agora se chama "diferença" e diz o
+  sentido com os nomes dos dois períodos (por exemplo, Hoje − Ontem).
+
+**English**
+- Summary, Compare: the "A − B" column is now called "difference" and shows
+  the direction with the names of the two periods (for example, Today −
+  Yesterday).
+
 ## 2.104.0
 Atividade (Bq): calibração por montagem.
 - A calibração com KCl agora é de uma montagem (o pote, o material e a

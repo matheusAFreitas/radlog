@@ -582,10 +582,13 @@ function renderCompare(res, periods) {
     ["Mínimo", a.minUSv, b.minUSv, 3, " µSv/h"],
     ["Dose", a.dose, b.dose, 2, " µSv", fair],
   ];
-  let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>A − B</th></tr></thead><tbody>`;
+  let html = `<thead><tr><th></th><th><i class="sw" style="background:${COR.accent}"></i></th><th><i class="sw" style="background:${COR.muted}"></i></th><th>diferença<small class="sum-dh"></small></th></tr></thead><tbody>`;
   tb.innerHTML = html + "</tbody>";
   const head = tb.querySelectorAll("th");
   head[1].append(" " + periods[0][2]); head[2].append(" " + periods[1][2]);
+  // 2.104.1 (UX G7): o sentido da diferença com os nomes dos períodos, não "A − B"
+  const dh = head[3].querySelector(".sum-dh");
+  dh.append(sp(periods[0][2]), " − ", sp(periods[1][2]));
   const body = tb.querySelector("tbody");
   const row = (cells) => { const tr = document.createElement("tr"); cells.forEach((c, i) => { const td = document.createElement(i ? "td" : "th"); td.textContent = c; tr.appendChild(td); }); body.appendChild(tr); };
   for (const [n, x, y, d, u, pctOk] of rows) row([n, x == null ? "—" : fmt(x, d) + u, y == null ? "—" : fmt(y, d) + u, diff(x, y, d, u, pctOk)]);

@@ -702,6 +702,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .sum-table thead th { border-top: 0; color: var(--muted); font-weight: 500; }
 .sum-table td { font-family: var(--mono); }
 .sum-table .sw { display: inline-block; width: 10px; height: 10px; border-radius: var(--radius-xs); vertical-align: middle; }
+.sum-table .sum-dh { display: block; font-size: var(--fs-caption); color: var(--dim); font-weight: 400; }
 
 /* anotações */
 .note-marks { position: absolute; inset: 0 0 auto 0; height: 0; pointer-events: none; }
