@@ -46,6 +46,7 @@ const (
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
+	actSpecDir     = "espectros" // 2.103.0: os dois espectros de cada medida
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -192,6 +193,8 @@ type ActResult struct {
 	Worse   bool    `json:"worse,omitempty"`
 	PrevErr float64 `json:"prevErr,omitempty"`
 	Used    bool    `json:"used,omitempty"`
+	// 2.103.0: onde o K-40 foi achado e o ganho usado na conta
+	K40 *ActGain `json:"k40,omitempty"`
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -399,6 +402,7 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 		r.Cur.feed(*s)
 		r.Smp = r.Cur.saved(now)
 		res := a.actFinish(r, now)
+		a.actSaveSpectra(res.T, r.Smp, r.Bg)
 		r.Result = &res
 		r.Phase, r.PhaseAt = "pronto", now.UnixMilli()
 		a.actAppendResult(res)
@@ -411,8 +415,8 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	o := r.Opts
 	cal := a.actCal()
-	smp, bg := r.Smp.spec(), r.Bg.spec()
-	res := ActResult{T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
+	smp, bg, gn := actAlign(r.Smp.spec(), r.Bg.spec(), o.Kind == "kcl", cal.gain())
+	res := ActResult{K40: &gn, T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
 		Loose: o.Loose, SampleID: o.SampleID, Nucs: o.Nuclides, SmpSecO: o.SmpSec}
 	if cal.KCl != nil {
 		res.Prev = cal.KCl.Eff
@@ -422,6 +426,9 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		res.Pct = o.Pct
 		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
+		if k != nil {
+			k.PeakKeV, k.Gain = gn.PeakKeV, gn.Gain
+		}
 		if k != nil && k.EffErr > actCalMaxErr {
 			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
 			// estragaria todos os Bq daqui para frente
@@ -459,6 +466,21 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	_, _, res.CalSrc = cal.eff(1000)
 	res.Nuclides = actAnalyze(smp, bg, o.Nuclides, cal, o.MassG)
 	return res
+}
+
+// actSaveSpectra guarda os dois espectros de cada medida (2.103.0), para dar
+// para refazer a conta quando o programa melhorar.
+func (a *App) actSaveSpectra(t int64, smp, bg *actSaved) {
+	b, err := json.Marshal(struct {
+		Smp *actSaved `json:"smp"`
+		Bg  *actSaved `json:"bg"`
+	}{smp, bg})
+	if err != nil {
+		return
+	}
+	dir := a.actPath(actSpecDir)
+	os.MkdirAll(dir, 0o755)
+	_ = writeFileAtomic(filepath.Join(dir, fmt.Sprintf("%d.json", t)), b, 0o644)
 }
 
 func (a *App) actAppendResult(res ActResult) {
@@ -575,6 +597,7 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	K40       *ActGain        `json:"k40,omitempty"`      // 2.103.0: onde o K-40 foi achado agora
 	SmpCps    float64         `json:"smpCps,omitempty"`   // cps de 300 a 1.400 keV da amostra (calibração; 2.101.11: era o total)
 	BgCps     float64         `json:"bgCps,omitempty"`    // e do fundo
 	KCLWeak   bool            `json:"kclWeak,omitempty"`  // o pico do K-40 não está aparecendo
@@ -681,6 +704,9 @@ func (a *App) GetActivity() ActView {
 		v.BgHigh = r.Phase == "fundo" && actBgHigh(v.PhaseCps, v.HomeCps)
 	}
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
+		var gn ActGain
+		smp, bg, gn = actAlign(smp, bg, o.Kind == "kcl", v.Cal.gain())
+		v.K40 = &gn
 		switch o.Kind {
 		case "kcl":
 			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)

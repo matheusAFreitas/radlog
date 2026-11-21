@@ -1,5 +1,43 @@
 # Versões
 
+## 2.103.0
+Atividade (Bq): o pico do K-40 achado onde ele está (avaliação independente
+de 21/11):
+- A escala de energia que o RC102 manda pode estar uns % fora; no aparelho
+  do ACE o K-40 aparece em ~1.415 keV, não em 1.461. O app procurava o pico
+  no lugar fixo e pegava só 40–60% dele: as calibrações saíam ~40% baixas.
+  Agora cada medida acha o K-40, corrige a escala e mostra "K-40 achado em
+  X keV". Calibrações feitas antes disso aparecem como "feita antes da
+  correção do pico: calibre de novo".
+- O ajuste dos picos pesa cada canal pela média dos vizinhos, não pela
+  contagem dele sozinho: a área não sai mais 20–30% baixa em medidas curtas
+  e o "detectado" falso em pote vazio volta a ~5%.
+- Na calibração com KCl, o ajuste usa só o K-40 (mais o contínuo): as linhas
+  vizinhas não existem no sal − fundo e só tiravam ou inventavam área.
+- O fundo é posto na mesma escala de energia da amostra antes da conta.
+- Os dois espectros de cada medida (amostra e fundo) ficam guardados, para
+  refazer a conta quando o programa melhorar.
+
+**English**
+Activity (Bq): the K-40 peak found where it really is (independent review of
+11/21):
+- The energy scale the RC102 sends can be a few % off; on ACE's device K-40
+  shows at ~1,415 keV, not 1,461. The app looked for the peak at a fixed
+  place and caught only 40–60% of it: calibrations came out ~40% low. Now
+  each measurement finds K-40, corrects the scale and shows "K-40 found at
+  X keV". Calibrations made before this show as "made before the K-40 peak
+  fix: calibrate again".
+- The peak fit weights each channel by the average of its neighbours, not
+  by its own count: the area no longer comes out 20–30% low in short
+  measurements, and false "detected" in an empty jar is back to ~5%.
+- In the KCl calibration the fit uses only K-40 (plus the continuum): the
+  neighbouring lines do not exist in salt − background and only took away or
+  invented area.
+- The background is put on the same energy scale as the sample before the
+  calculation.
+- Both spectra of each measurement (sample and background) are kept, so the
+  calculation can be redone when the program improves.
+
 ## 2.102.2
 Calibração do KCl:
 - "eficiência até agora": o tempo estimado agora é para ±15%, o que a

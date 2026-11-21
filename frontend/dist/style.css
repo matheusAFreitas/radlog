@@ -867,6 +867,7 @@ dialog { width: min(720px, calc(100vw - 32px)); }
 .rc-act-tab .lo { color: var(--muted); }
 .rc-act-tab td.nw { white-space: nowrap; }
 .att-text { color: var(--att); }
+.ok-text { color: var(--ok); } /* 2.103.0: "K-40 achado" */
 .rc-act-hist { font-size: var(--fs-label); }
 .rc-act-hrow { display: grid; grid-template-columns: 110px minmax(0, 1fr) minmax(0, 2fr); gap: var(--space-3); padding: var(--space-2) 0; }
 .rc-act-hrow.head { color: var(--muted); font-size: var(--fs-caption); padding-bottom: 0; }
