@@ -2040,7 +2040,13 @@
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
-      if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
+      // 2.102.2: o tempo é para ±15% (o que a calibração mira; ±3% o RC102 não
+      // alcança). O ACE gosta de ver a conta desde o começo; quando a contagem
+      // no pico fica abaixo do fundo (normal no começo), a linha não some mais
+      // 2.102.2 (QA): passado o alvo, a conta dava um total menor que o já medido ("~7 h" com 11 h)
+      if (v.liveKcl && v.liveKcl.effErr > ACT_CAL_REL) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · para ±15%: ~${fmtSec(t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2)} no total</p>`;
+      else if (v.liveKcl && v.liveKcl.effErr > 0) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · já chegou a ±15%: pode encerrar</p>`;
+      else if (o.kind === "kcl" && t >= 60) live += `<p class="mono small">${tr("eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)")}</p>`;
       // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
       // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
       if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;

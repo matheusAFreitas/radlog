@@ -4953,7 +4953,8 @@ const I18N_EN = {
 "Conecte o RC102 para usar o modo busca.": "Connect the RC102 to use search mode.",
 "Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
 "Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
-"Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one"
+"Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
+"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)"
 },
 "patterns": [
 [
@@ -8538,6 +8539,15 @@ const I18N_EN = {
 ]
 ],
 [
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · já chegou a ±15%: pode encerrar$",
+"efficiency so far: ${1} ± ${2}% · already at ±15%: you can stop",
+[
+"eficiência até agora: ",
+"% · já chegou a ±15%: pode encerrar"
+]
+],
+[
 "só ",
 "^só ((?:(?! · ).)+?) min do RadiaCode em casa na última hora \\(precisa de ((?:(?! · ).)+?)\\)$",
 "only ${1} min of RC102 readings at home in the last hour (needs ${2})",
@@ -9674,6 +9684,16 @@ const I18N_EN = {
 "O GMC-800 subiu mais que o RadiaCode: ",
 " em ",
 " semanas"
+]
+],
+[
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · para ±15%: \\~((?:(?! · ).)+?) no total$",
+"efficiency so far: ${1} ± ${2}% · for ±15%: ~${3} in total",
+[
+"eficiência até agora: ",
+"% · para ±15%: ~",
+" no total"
 ]
 ],
 [
@@ -16451,6 +16471,15 @@ const I18N_EN = {
 "go back to the previous one (${1})",
 [
 "voltar à anterior ("
+]
+],
+[
+"para ±15%: ~",
+"^para ±15%: \\~((?:(?! · ).)+?) no total$",
+"for ±15%: ~${1} in total",
+[
+"para ±15%: ~",
+" no total"
 ]
 ],
 [

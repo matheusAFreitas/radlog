@@ -1,5 +1,39 @@
 # Versões
 
+## 2.102.2
+Calibração do KCl:
+- "eficiência até agora": o tempo estimado agora é para ±15%, o que a
+  calibração mira (antes ±3%, que o RC102 não alcança: dava "~1.676 h"). E
+  a linha não some mais quando o pico ainda está abaixo do fundo (normal no
+  começo): diz isso.
+- Histórico: a calibração salva com "Salvar mesmo assim" aparecia duas vezes
+  (a nuvem trazia de volta a linha antiga, "não guardada"). Agora fica uma
+  linha por medida, a usada.
+
+Uso do app (o resumo que o ACE copia), conferido pelo QA:
+- Abas do Fundo da casa sem o resumo grudado no nome; Gráficos sem a
+  sub-aba única; o OK da janela de confirmação não conta mais como botão da
+  página; "<1 min" quando abriu sem tempo e "nunca" quando nunca abriu; o
+  seletor do Espectro do RC102 separa Espectro, Tela e Acumulado e não conta
+  o clique feito por código.
+
+**English**
+KCl calibration:
+- "efficiency so far": the time estimate is now for ±15%, what the
+  calibration aims for (it was ±3%, which the RC102 cannot reach: it gave
+  "~1,676 h"). And the line no longer disappears while the peak is still
+  below the background (normal at the start): it says so.
+- History: a calibration saved with "Save anyway" showed up twice (the cloud
+  brought back the old "not saved" line). Now there is one line per
+  measurement, the used one.
+
+App usage (the summary ACE copies), checked by QA:
+- Home background tabs without the summary stuck to the name; Charts
+  without its single sub-tab; the confirmation dialog's OK no longer counts
+  as a page button; "<1 min" when opened without time and "never" when never
+  opened; the RC102 Spectrum selector tells Spectrum, Device screen and
+  Accumulated apart and ignores clicks made by code.
+
 ## 2.102.1
 Espectro: análise dos picos mais honesta (o mesmo critério do celular):
 - Com pouco tempo de espectro, o modo "agora" marcava quase tudo como

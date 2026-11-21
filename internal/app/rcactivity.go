@@ -483,9 +483,13 @@ func (a *App) actHistory() []ActResult {
 	}
 	sc := rcScanner(bytes.NewReader(b))
 	sc.Buffer(make([]byte, 1<<20), 1<<22)
+	var lines []string
 	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+	for _, l := range actDedupe(lines) { // 2.102.2: uma por medida
 		var r ActResult
-		if json.Unmarshal(sc.Bytes(), &r) == nil && r.T > 0 {
+		if json.Unmarshal([]byte(l), &r) == nil && r.T > 0 {
 			out = append(out, r)
 		}
 	}
@@ -938,7 +942,46 @@ func (a *App) actMerge(name string, data []byte) {
 				lines = append(lines, l)
 			}
 		}
+		lines = actDedupe(lines)
 		os.MkdirAll(a.actPath(""), 0o755)
 		_ = writeFileAtomic(a.actPath(name), []byte(strings.Join(lines, "\n")+"\n"), 0o644)
 	}
+}
+
+// actDedupe deixa uma linha por medida (horário + tipo). 2.102.2: a mesma
+// medida reescrita (usada pelo "Salvar mesmo assim" ou "Usar a nova") tem
+// outra linha; a junção por linha igual (nuvem, backup) trazia a antiga de
+// volta e o histórico mostrava as duas. Fica a usada; senão, a última.
+func actDedupe(lines []string) []string {
+	type key struct {
+		t    int64
+		kind string
+	}
+	best := map[key]int{}
+	used := map[key]bool{}
+	for i, l := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+			Used bool   `json:"used"`
+		}
+		if json.Unmarshal([]byte(l), &q) != nil || q.T == 0 {
+			continue
+		}
+		k := key{q.T, q.Kind}
+		if _, ok := best[k]; !ok || q.Used || !used[k] {
+			best[k], used[k] = i, used[k] || q.Used
+		}
+	}
+	out := lines[:0:0]
+	for i, l := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+		}
+		if json.Unmarshal([]byte(l), &q) != nil || q.T == 0 || best[key{q.T, q.Kind}] == i {
+			out = append(out, l)
+		}
+	}
+	return out
 }
