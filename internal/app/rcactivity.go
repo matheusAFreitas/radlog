@@ -778,6 +778,7 @@ func (a *App) UseActivityCal(t int64) error {
 	st := &a.rc.act
 	st.mu.Lock()
 	defer st.mu.Unlock()
+	a.actLoadLocked() // reaberto: lê a medida em andamento antes (o actSaveLocked do fim a apagaria)
 	// 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%,
 	// "Salvar mesmo assim"), e também pelo histórico (a tela já pode ter
 	// passado para uma medida nova, ou o app ter sido reaberto)
@@ -793,11 +794,14 @@ func (a *App) UseActivityCal(t int64) error {
 			}
 		}
 	}
-	anyway := res != nil && res.NotSaved && res.Kind == "kcl" && res.KCl != nil && res.KCl.EffErr <= actCalSaveMax
+	c := a.actCal()
+	// só se for melhor que a do KCl em uso (se tiver): trocar por uma pior é
+	// o caminho do "pior que a atual"
+	anyway := res != nil && res.NotSaved && res.Kind == "kcl" && res.KCl != nil && res.KCl.EffErr <= actCalSaveMax &&
+		(c.KCl == nil || res.KCl.EffErr < c.KCl.EffErr)
 	if res == nil || res.Used || !(res.Worse || anyway) {
 		return errors.New("essa calibração não está mais na tela")
 	}
-	c := a.actCal()
 	switch {
 	case res.KCl != nil && res.Kind == "kcl":
 		c.KCl, c.PrevKCl, c.PrevGeometry = res.KCl, c.KCl, c.Geometry

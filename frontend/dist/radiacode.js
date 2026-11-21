@@ -1946,6 +1946,8 @@
     const pe = `±${nf(r.kcl.effErr * 100, 1)}%`;
     if (r.used) return `<p>${tr(`Você salvou esta calibração mesmo assim (${pe}). A de antes, se tinha, ficou guardada: dá para voltar em detalhes.`)}</p>`;
     if (r.kcl.effErr > 0.3) return `<p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>`;
+    const cur = act.v && act.v.cal && act.v.cal.kcl;
+    if (cur && cur.effErr <= r.kcl.effErr) return `<p class="att-text">${tr(`Esta saiu com ${pe}, pior que a que está em uso (±${nf(cur.effErr * 100, 1)}%), então a atual continua valendo.`)}</p>`;
     return `<p class="warn-text">${tr(`A incerteza ficou em ${pe}, acima do limite de ±20%, então a calibração não foi guardada sozinha.`)}</p>` +
       `<p class="small muted">${tr("Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.")}</p>` +
       `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Salvar mesmo assim (${pe})`)}</button></p>`;

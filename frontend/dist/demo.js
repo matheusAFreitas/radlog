@@ -1072,7 +1072,7 @@ const demoRc = () => {
     UseActivityCal: async (t) => {
       const r = demoAct.run && demoAct.run.result, c = demoAct.cal;
       // 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%), como o Go
-      const anyway = r && r.notSaved && r.kind === "kcl" && r.kcl && r.kcl.effErr <= 0.3;
+      const anyway = r && r.notSaved && r.kind === "kcl" && r.kcl && r.kcl.effErr <= 0.3 && (!c.kcl || r.kcl.effErr < c.kcl.effErr);
       if (!r || r.t !== t || !(r.worse || anyway) || r.used) throw new Error("essa calibração não está mais na tela");
       if (r.kind === "kcl") { c.prevKcl = c.kcl; c.prevGeometry = c.geometry; c.kcl = { ...r.kcl }; if (r.geometry) c.geometry = r.geometry; } else { c.prevTh = c.th; c.th = { ...r.th }; }
       r.used = true;
