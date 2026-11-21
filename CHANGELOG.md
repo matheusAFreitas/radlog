@@ -1,5 +1,54 @@
 # Versões
 
+## 2.104.0
+Atividade (Bq): calibração por montagem.
+- A calibração com KCl agora é de uma montagem (o pote, o material e a
+  posição do RC102). Escolha o pote (pote de 1 L com tubo, béquer ou outra),
+  o material (KCl de adubo, KCl puro ou sal light) e o fundo (pote igual com
+  sal de cozinha comum, ou sem nada com o KCl a 3 m). Cada montagem ganha um
+  nome e pode ser renomeada ou apagada.
+- Fundo e KCl têm sempre o mesmo tempo. Uma rodada curta não se perde: dá
+  para somar outra rodada na mesma montagem e o app junta as duas (a soma
+  das áreas sobre a soma do esperado, inclusive rodadas em que o pico não
+  passou do fundo).
+- O ± da montagem separa a contagem dos erros fixos (o teor do material e,
+  sem branco, o fundo sem sal). A montagem só fica pronta para medir com
+  ±20% ou menos no total.
+- Conferências durante o KCl: com 10 min, se a faixa de 300 a 1.400 keV
+  subiu (o RC102 está vendo o KCl); com 30 min, o pico do K-40, se o sinal
+  combina com a faixa e a previsão de ± no fim do tempo marcado.
+- Na medida de amostra, escolha a montagem; a conta usa a eficiência e a
+  escala de energia dela. A calibração feita depois da correção do pico
+  (2.103.0) vira a primeira montagem sozinha. Sem montagem, a amostra sai
+  com o chute (±100%), não mais com a calibração única de antes.
+- Durante o KCl, a previsão mostra o ± total da montagem no fim (as rodadas
+  somadas mais o teor do material), e o tempo recomendado já conta com ele.
+
+**English**
+Activity (Bq): calibration per setup.
+- The KCl calibration now belongs to a setup (the pot, the material and the
+  RC102 position). Pick the pot (1 L pot with tube, beaker or other), the
+  material (fertilizer KCl, pure KCl or light salt) and the background (same
+  pot with regular table salt, or nothing with the KCl 3 m away). Each setup
+  gets a name and can be renamed or deleted.
+- Background and KCl always take the same time. A short round is not
+  wasted: you can add another round to the same setup and the app combines
+  them (sum of areas over sum of expected, including rounds where the peak
+  did not rise above the background).
+- The setup's ± separates counting from the fixed errors (the material's
+  content and, without a blank, the salt-free background). A setup is only
+  ready to measure at ±20% or less in total.
+- Checks during the KCl phase: at 10 min, whether the 300 to 1,400 keV band
+  rose (the RC102 sees the KCl); at 30 min, the K-40 peak, whether the
+  signal matches the band and the ± forecast at the end of the chosen time.
+- When measuring a sample, pick the setup; the calculation uses its
+  efficiency and energy scale. The calibration made after the peak fix
+  (2.103.0) becomes the first setup on its own. Without a setup, a sample
+  uses the guess (±100%), no longer the single calibration from before.
+- During the KCl phase, the forecast shows the setup's total ± at the end
+  (rounds summed plus the material's content), and the recommended time
+  already accounts for it.
+
 ## 2.103.0
 Atividade (Bq): o pico do K-40 achado onde ele está (avaliação independente
 de 21/11):

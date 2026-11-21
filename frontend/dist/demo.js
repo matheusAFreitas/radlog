@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.103.0";
+const DEMO_VERSION = "2.104.0";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o
@@ -508,7 +508,18 @@ function makeDemoApi(opts) {
   const demoRcFake = () => { if (demoSt.active) return demoSt.scenario !== "desconecta"; try { return localStorage.getItem("rcFake") === "1"; } catch { return false; } };
   const GetRcSearchSgSince = { t: 0, at: 0 }; // 2.100.1: quando a aba Busca abriu (demo)
   // medição de atividade de mentira (para ver a tela sem o aparelho)
+  // 2.104.0: montagens (como no Go: rodadas somadas, contagem + fixos)
+  const demoFix = (mat, bg) => { const f = { puro: 0.04, light: 0.15 }[mat] || 0.06; return bg === "vazio" ? Math.hypot(f, 0.035) : f; };
+  const demoMountView = (m) => {
+    let area = 0, v2 = 0, exp = 0, sec = 0, bgSec = 0, last = null;
+    for (const r of m.rounds) { area += r.area; v2 += r.areaErr ** 2; exp += r.expK; sec += r.sec; bgSec += r.bgSec; if (!last || r.t >= last.t) last = r; }
+    const v = { ...m, fixErr: demoFix(m.material, m.bgMode), sec, bgSec, eff: 0, countErr: 0, totErr: 0, usable: false, lastT: last ? last.t : 0, peakKeV: last ? last.peakKeV : 0, gain: last ? last.gain : 0, found: !!(last && last.found) };
+    if (area > 0 && exp > 0) { v.eff = area / exp; v.countErr = Math.sqrt(v2) / area; v.totErr = Math.hypot(v.countErr, v.fixErr); v.usable = v.totErr <= 0.2; }
+    return v;
+  };
   const demoAct = {
+    mounts: [{ id: "demo1", name: "", setup: "pote1l", material: "adubo", pct: 95, massG: 1012, bgMode: "branco",
+      rounds: [{ t: Date.now() - 3 * 864e5, sec: 3600, bgSec: 3600, area: 228, areaErr: 27, expK: 2.17e6, peakKeV: 1415, gain: 1.0324, found: true }, { t: Date.now() - 3 * 864e5 + 8e6, sec: 3600, bgSec: 3600, area: 236, areaErr: 27, expK: 2.17e6, peakKeV: 1416, gain: 1.0317, found: true }] }],
     run: null,
     bg: null,
     cal: { geometry: "pote de 500 mL encostado", kcl: { t: Date.now() - 3 * 86400e3, eff: 0.00182, effErr: 0.031, massG: 500, pct: 100, sec: 3600, peakKeV: 1415, gain: 1.0324 }, th: null },
@@ -528,6 +539,7 @@ function makeDemoApi(opts) {
       if (!demoRcFake()) throw new Error("RC102 não conectado");
       if (!(o.massG > 0) && !(o.kind === "amostra" && o.loose)) throw new Error("informe a massa em gramas");
       o.name = o.name || (o.kind === "kcl" ? "KCl (" + o.pct + "%)" : o.kind === "torio" ? "eletrodo de tório (" + o.pct + "% ThO₂)" : "amostra");
+      if (o.kind === "kcl" && o.mountId) { const m = this.mounts.find((x) => x.id === o.mountId); if (!m) throw new Error("montagem não encontrada"); Object.assign(o, { setup: m.setup, material: m.material, pct: m.pct, massG: m.massG, bgMode: m.bgMode, mountName: m.name }); }
       this.run = { o, phase: o.newBg ? "fundo" : "amostra", at: Date.now(), target: o.newBg ? o.bgSec : o.smpSec, bgSec: o.newBg ? 0 : 7200 };
     },
     next() {
@@ -538,6 +550,15 @@ function makeDemoApi(opts) {
         r.sec = this.sec(); r.phase = "pronto"; r.result = this.result(r.sec); this.hist.unshift(r.result);
         // 2.101.14 (item 35): pior que a atual não troca sozinha; a de antes fica guardada
         const res = r.result, c = this.cal;
+        if (r.o.kind === "kcl" && (r.o.setup || r.o.mountId)) {
+          let m = this.mounts.find((x) => x.id === r.o.mountId);
+          if (!m) { m = { id: "m" + Date.now(), name: r.o.mountName || "", setup: r.o.setup, material: r.o.material, pct: r.o.pct, massG: r.o.massG, bgMode: r.o.bgMode, rounds: [] }; this.mounts.push(m); }
+          const expK = r.o.massG * r.o.pct / 100 * 0.52445 * 31.7 * 0.1066 * r.sec, eff = 0.000105 * (0.9 + Math.random() * 0.2), area = eff * expK;
+          m.rounds.push({ t: res.t, sec: r.sec, bgSec: r.bgSec, area, areaErr: area * 0.12 * Math.sqrt(3600 / r.sec), expK, peakKeV: 1415, gain: 1.0324, found: true });
+          res.kcl = { t: res.t, eff, effErr: 0.12 * Math.sqrt(3600 / r.sec), massG: r.o.massG, pct: r.o.pct, sec: r.sec, peakKeV: 1415, gain: 1.0324 };
+          res.mountId = m.id; res.mount = demoMountView(m);
+          return;
+        }
         if (r.o.kind === "kcl" && c.kcl && res.kcl.effErr > c.kcl.effErr) { res.worse = true; res.prevErr = c.kcl.effErr; }
         else if (r.o.kind === "kcl") { c.prevKcl = c.kcl || null; c.prevGeometry = c.geometry; c.kcl = { ...res.kcl }; if (r.o.geometry) c.geometry = r.o.geometry; } // 2.101.15 (item 136): como no Go
         if (r.o.kind === "torio" && c.th && res.th.bErr > c.th.bErr) { res.worse = true; res.prevErr = c.th.bErr; }
@@ -565,14 +586,18 @@ function makeDemoApi(opts) {
       const cal = this.cal, effAt = (e) => (cal.kcl ? cal.kcl.eff : 0.001) * Math.pow(e / 1460.8, cal.th ? cal.th.b : -1.3);
       const E = [250, 500, 1000, 1500, 2000, 2500];
       const v = { phase: "", cal, calSrc: cal.kcl ? "kcl" : "chute", calEff: E.map(effAt), calErr: E.map((e) => Math.hypot(cal.kcl ? cal.kcl.effErr : 1, (cal.th ? 0.07 : 0.4) * Math.log(e / 1460.8))),
-        savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, history: this.hist, samples: this.samples, nuclides: this.nucs, connected: demoRcFake() };
+        savedBg: this.bg || { t: Date.now() - 86400e3, sec: 7200 }, mounts: this.mounts.map(demoMountView).sort((a, b) => b.lastT - a.lastT), history: this.hist, samples: this.samples, nuclides: this.nucs, connected: demoRcFake() };
       if (this.run && (this.run.phase === "fundo" || this.run.phase === "amostra") && this.run.target > 0 && this.sec() >= this.run.target) this.next();
       const r = this.run; if (!r) return v;
       v.opts = r.o; v.phase = r.phase; v.phaseAt = r.at; v.bgSec = r.bgSec;
       if (r.phase === "fundo" || r.phase === "amostra") { v.phaseSec = this.sec(); v.target = r.target; }
       if (r.phase === "amostra" && v.phaseSec > 10) {
         v.k40 = { found: v.phaseSec > 600, peakKeV: 1415, gain: 1.0324 }; // 2.103.0: como no Go
-        if (r.o.kind === "kcl") { v.liveKcl = { eff: 0.0018, effErr: 0.03 * Math.sqrt(3600 / v.phaseSec) }; v.expected = 8300; }
+        if (r.o.kind === "kcl" && v.phaseSec >= 600) { // 2.104.0: conferências e previsão
+          v.check = { bandRise: 0.49, ready: v.phaseSec >= 1800 };
+          if (v.check.ready) { const S = 0.068, B = 0.07, T = r.target || v.phaseSec, Tb = r.bgSec || T; Object.assign(v.check, { signalCpm: S * 60, expectLo: 0.49 * 60 / 9 * 0.5 * 1.3, expectHi: 0.49 * 60 / 9 * 2 * 1.3, forecast: Math.sqrt((S + B) / (S * S * T) + B / (S * S * Tb)), best: Math.sqrt(B / (S * S * Tb)) }); }
+        }
+        if (r.o.kind === "kcl") { v.liveKcl = { eff: 0.000105, effErr: 0.12 * Math.sqrt(3600 / v.phaseSec) }; v.expected = 8300; }
         else if (r.o.kind === "torio") v.liveTh = { b: -1.24, bErr: 0.07 * Math.sqrt(3600 / v.phaseSec) };
         else v.live = this.nucRes(v.phaseSec, r.o.massG, r.o.nuclides);
       }
@@ -1069,6 +1094,8 @@ const demoRc = () => {
     TestObject: async (dev) => { demoObjTest[dev] = Date.now() + 600000; return demoObjTest[dev]; },
     StopTestObject: async (dev) => { delete demoObjTest[dev]; },
     ObjectTests: async () => ({ ...demoObjTest }),
+    RenameActMount: async (id, name) => { const m = demoAct.mounts.find((x) => x.id === id); if (!m) throw new Error("montagem não encontrada"); if (!String(name).trim()) throw new Error("escreva um nome"); m.name = String(name).trim(); },
+    DeleteActMount: async (id) => { demoAct.mounts = demoAct.mounts.filter((x) => x.id !== id); },
     ForgetActivityCal: async (w) => { if (w === "kcl") demoAct.cal.kcl = demoAct.cal.prevKcl = null; if (w === "torio") demoAct.cal.th = demoAct.cal.prevTh = null; },
     UseActivityCal: async (t) => {
       const r = demoAct.run && demoAct.run.result, c = demoAct.cal;

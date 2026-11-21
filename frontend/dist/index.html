@@ -1508,19 +1508,29 @@
         <div id="rcActCal"></div>
         <div class="rc-act-eff-wrap" id="rcActEff" data-no-tr hidden></div>
         <div id="rcActCalFlow" class="rc-act-sec" hidden>
-          <p class="rc-act-lbl">Calibrar</p>
-          <div class="rc-act-steps3" id="rcActCalSteps">
-            <button type="button" data-k="kcl"><b>1 · KCl</b>Sal light ou KCl puro, ~500 g, em volta do RC102. <span class="st">obrigatório · ~4 h com sal light, ~2 h com KCl puro</span></button>
-            <button type="button" data-k="torio"><b>2 · Tório</b>Eletrodo de tungstênio toriado, se tiver. <span class="st">opcional · melhora a curva</span></button>
-            <div><b>3 · Pronto</b>Depois, é só medir amostras na mesma posição. <span class="st">fica guardado</span></div>
+          <p class="rc-act-lbl" id="rcActCalTitle">Calibrar uma montagem</p>
+          <div id="rcActCalNew">
+            <p class="rc-act-step"><b>1</b> Montagem</p>
+            <div class="rc-act-setups" id="rcActSetup">
+              <button type="button" data-v="pote1l" aria-pressed="true"><svg viewBox="0 0 64 72" aria-hidden="true" class="rc-act-pot"><path d="M10 14h44v50a4 4 0 0 1-4 4H14a4 4 0 0 1-4-4z" class="pot"/><rect x="24" y="8" width="16" height="50" rx="2" class="tube"/><rect x="27" y="14" width="10" height="40" rx="2" class="dev"/><circle cx="32" cy="50" r="3" class="cry"/><path d="M42 50h10" class="arr"/></svg><b>Pote de 1 L com tubo</b><span class="small muted">recomendado: RC102 de pé num tubo de PVC no meio, cristal (sob o "+") a ~3 cm do fundo</span></button>
+              <button type="button" data-v="becker" aria-pressed="false"><svg viewBox="0 0 64 72" aria-hidden="true" class="rc-act-pot"><path d="M8 20h48l-4 44a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" class="pot"/><path d="M22 20v-8h20v8" class="tube"/><rect x="24" y="22" width="16" height="30" rx="2" class="dev"/><circle cx="32" cy="46" r="3" class="cry"/></svg><b>Béquer</b><span class="small muted">o sal em volta do RC102, como nas primeiras calibrações</span></button>
+              <button type="button" data-v="outra" aria-pressed="false"><svg viewBox="0 0 64 72" aria-hidden="true" class="rc-act-pot"><path d="M12 30h40v34a4 4 0 0 1-4 4H16a4 4 0 0 1-4-4z" class="pot"/><path d="M22 18h20v20H22z" class="dev"/><circle cx="32" cy="32" r="3" class="cry"/></svg><b>Outra</b><span class="small muted">descreva no nome, para repetir igual</span></button>
+            </div>
+            <p class="small muted">A calibração só vale para amostras medidas nesta mesma montagem. Mais sal só ajuda se ficar em volta da ponta do cristal.</p>
+            <p class="rc-act-step"><b>2</b> Material</p>
+            <div class="rc-act-row">
+              <div class="rc-act-f rc-act-wide"><span class="seg rc-seg" id="rcActMat"><button type="button" data-v="adubo" aria-pressed="true">KCl de adubo (60% K₂O)</button><button type="button" data-v="puro" aria-pressed="false">KCl puro</button><button type="button" data-v="light" aria-pressed="false">Sal light</button></span></div>
+              <label id="rcActPctBox" hidden><span class="small muted">% de KCl (mg de K por g × 0,19)</span><input type="number" id="rcActPct" min="1" max="100" step="1" value="50"></label>
+              <label><span class="small muted">Massa pesada (g)</span><input type="number" id="rcActCalMass" min="0.1" step="0.1" value="1000"></label>
+              <label><span class="small muted">Nome (opcional)</span><input type="text" id="rcActMountName" maxlength="60"></label>
+            </div>
+            <p class="rc-act-step"><b>3</b> Fundo</p>
+            <div class="rc-act-row">
+              <div class="rc-act-f rc-act-wide"><span class="seg rc-seg" id="rcActBgMode"><button type="button" data-v="branco" aria-pressed="true">Pote igual com sal de cozinha comum (recomendado)</button><button type="button" data-v="vazio" aria-pressed="false">Sem nada, KCl a 3 m (fica 2–5% baixo)</button></span></div>
+            </div>
           </div>
           <div class="rc-act-row">
-            <div class="rc-act-f" data-for="kcl"><span class="small muted">Amostra</span><span class="seg rc-seg" id="rcActKclType"><button type="button" data-v="light" aria-pressed="true">Sal light</button><button type="button" data-v="100" aria-pressed="false">KCl puro</button></span></div>
-            <label data-for="kcl" id="rcActPctBox"><span class="small muted">% de KCl no rótulo</span><input type="number" id="rcActPct" min="1" max="100" step="1" value="50"></label>
-            <label data-for="torio"><span class="small muted">Eletrodo</span><select id="rcActTh"><option value="1">WT10 (amarelo, 1% de ThO₂)</option><option value="2" selected>WT20 (vermelho, 2%)</option><option value="3">WT30 (roxo, 3%)</option><option value="4">WT40 (laranja, 4%)</option></select></label>
-            <label data-for="torio"><span class="small muted">Idade do eletrodo (anos)</span><input type="number" id="rcActAge" min="0" max="80" step="0.5" placeholder="não sei"></label>
-            <label><span class="small muted">Massa (g)</span><input type="number" id="rcActCalMass" min="0.1" step="0.1" value="500"></label>
-            <label><span class="small muted">Posição</span><input type="text" id="rcActCalGeom" maxlength="80"></label>
+            <div class="rc-act-f rc-act-wide"><span class="small muted">Tempo de cada fase</span><span class="seg rc-seg" id="rcActCalT"></span></div>
           </div>
           <p class="small muted" id="rcActCalHint"></p>
           <div class="rc-act-total"><span id="rcActCalTot"></span><button type="button" class="btn accent" id="rcActCalStart">Começar a calibração</button><button type="button" class="link" id="rcActCalBack">voltar</button><span class="small warn-text" id="rcActCalErr"></span></div>
@@ -1531,6 +1541,7 @@
           <div class="rc-act-expect" id="rcActExpect"></div>
           <p class="small muted" id="rcActPrep"></p>
           <div class="rc-act-row">
+            <label class="rc-act-wide"><span class="small muted">Montagem (a calibração usada)</span><select id="rcActMount"></select></label>
             <label><span class="small muted" id="rcActMassLbl">Massa (g)</span><input type="number" id="rcActMass" min="0" step="0.1" value="500"></label>
             <div class="rc-act-f rc-act-wide"><span class="small muted">Tempo da amostra</span><span class="seg rc-seg" id="rcActSmpT"></span></div>
           </div>
