@@ -58,6 +58,16 @@ class RadLogService : Service(), Engine.Listener {
     private var muted = false
     private var snoozeUntil = 0L
     private var attnShown = false
+    private var alarmTitle = ""
+    private var alarmQuiet = false
+
+    /** O alarme de agora para a tela de alarme (null = sem alarme). */
+    data class AlarmInfo(val sev: String, val title: String, val quiet: Boolean, val color: Int)
+
+    fun alarmInfo(): AlarmInfo? {
+        val s = sev ?: return null
+        return AlarmInfo(s, alarmTitle, alarmQuiet, color(s))
+    }
 
     override fun onBind(intent: Intent?): IBinder? = null
 
@@ -172,6 +182,10 @@ class RadLogService : Service(), Engine.Listener {
         Intent(this, MainActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP),
         PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
 
+    private fun openAlarm(): PendingIntent = PendingIntent.getActivity(this, 5,
+        Intent(this, AlarmActivity::class.java).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+        PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT)
+
     private fun action(act: String, req: Int): PendingIntent = PendingIntent.getBroadcast(this, req,
         Intent(this, ActionReceiver::class.java).setAction(act), PendingIntent.FLAG_IMMUTABLE)
 
@@ -266,6 +280,8 @@ class RadLogService : Service(), Engine.Listener {
     private fun alarmNote(st: JSONObject, quiet: Boolean) {
         val v = fmt(st.optDouble("usvh", 0.0))
         val title = getString(if (sev == "perigo") R.string.a_danger_title else R.string.a_alarm_title, v)
+        alarmTitle = title
+        alarmQuiet = quiet
         val b = Notification.Builder(this, RadLogApp.CH_ALARMS)
             .setSmallIcon(R.drawable.ic_stat)
             .setContentTitle(title)
@@ -275,7 +291,8 @@ class RadLogService : Service(), Engine.Listener {
             .setOnlyAlertOnce(true)
             .setOngoing(true)
             .setContentIntent(openApp())
-            .setFullScreenIntent(openApp(), true)
+            // por cima da tela de bloqueio vai só a tela do alarme, nunca o app
+            .setFullScreenIntent(openAlarm(), true)
         if (!quiet) b.addAction(Notification.Action.Builder(null, getString(R.string.act_silence), action(ACTION_SILENCE, 1)).build())
         nm.notify(N_ALARM, b.build())
     }

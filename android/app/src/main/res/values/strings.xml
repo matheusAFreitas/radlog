@@ -23,4 +23,7 @@
     <string name="act_silence">Silenciar</string>
     <string name="act_release">Soltar o RC102</string>
     <string name="act_take">Pegar o RC102</string>
+    <string name="a_lock_text">Afaste-se e procure a fonte.</string>
+    <string name="a_silenced">Silenciado</string>
+    <string name="act_open">Abrir o RadLog</string>
 </resources>

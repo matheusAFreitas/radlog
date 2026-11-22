@@ -37,8 +37,6 @@
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:showWhenLocked="true"
-            android:turnScreenOn="true"
             android:configChanges="orientation|screenSize|screenLayout|keyboardHidden|smallestScreenSize|uiMode|density"
             android:windowSoftInputMode="adjustResize">
             <intent-filter>
@@ -46,6 +44,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- só o alarme aparece por cima da tela de bloqueio; o app inteiro
+             (MainActivity) só depois de desbloquear (bug de 22/11) -->
+        <activity
+            android:name=".AlarmActivity"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:taskAffinity="app.radlog.alarm"
+            android:excludeFromRecents="true"
+            android:showWhenLocked="true"
+            android:turnScreenOn="true" />
 
         <service
             android:name=".RadLogService"
