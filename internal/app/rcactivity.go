@@ -40,11 +40,13 @@ const (
 	actWeakRise    = 1.05    // a contagem de 300 a 1.400 keV com o sal tem que subir mais que isso
 	actWeakLo      = 300.0   // faixa do espalhamento do K-40 (keV): o sal em volta do
 	actWeakHi      = 1400.0  // aparelho blinda o fundo de baixa energia, então o total não serve
-	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): o sal está perto
+	actBgHighRise  = 1.25    // fundo acima disso (× o normal da casa): tem amostra perto
 	actCalMaxErr   = 0.20    // incerteza máxima da eficiência do KCl para virar calibração
+	actCalSaveMax  = 0.30    // 2.102.1: até aqui, a pessoa pode salvar mesmo assim (o chute é ±100%)
 	actTickBLE     = 15 * time.Second
 	actMaxHist     = 20
 	actBgMaxAge    = 30 * 24 * time.Hour
+	actSpecDir     = "espectros" // 2.103.0: os dois espectros de cada medida
 )
 
 // ActOpts é o que a pessoa escolhe para medir.
@@ -66,6 +68,13 @@ type ActOpts struct {
 	// dá (cartão pronto, amostra que vem com o app, calibração, "amostra")
 	// traduzem nos Eventos; o da pessoa fica como está.
 	NameOwn bool `json:"nameOwn,omitempty"`
+	// 2.104.0: a montagem (calibração do KCl: a que recebe a rodada, "" =
+	// nova, descrita pelos campos abaixo; amostra: a calibração usada)
+	MountID   string `json:"mountId,omitempty"`
+	MountName string `json:"mountName,omitempty"`
+	Setup     string `json:"setup,omitempty"`    // pote1l | becker | outra
+	Material  string `json:"material,omitempty"` // adubo | puro | light
+	BgMode    string `json:"bgMode,omitempty"`   // branco | vazio
 }
 
 // actSaved é um espectro somado guardado.
@@ -191,6 +200,12 @@ type ActResult struct {
 	Worse   bool    `json:"worse,omitempty"`
 	PrevErr float64 `json:"prevErr,omitempty"`
 	Used    bool    `json:"used,omitempty"`
+	// 2.103.0: onde o K-40 foi achado e o ganho usado na conta
+	K40 *ActGain `json:"k40,omitempty"`
+	// 2.104.0: a montagem da calibração (ou a usada na amostra) e, na
+	// calibração, a soma das rodadas depois desta
+	MountID string        `json:"mountId,omitempty"`
+	Mount   *ActMountView `json:"mount,omitempty"`
 }
 
 func (a *App) actPath(name string) string { return filepath.Join(a.rcDir(), actDir, name) }
@@ -314,6 +329,14 @@ func actValidate(o *ActOpts) error {
 // StartActivity começa uma medição: pelo fundo (novo) ou direto pela amostra
 // (com o fundo salvo).
 func (a *App) StartActivity(o ActOpts) error {
+	// 2.104.0: mais uma rodada numa montagem: o material e a massa são os dela
+	if o.Kind == "kcl" && o.MountID != "" {
+		m, ok := a.actMount(o.MountID)
+		if !ok {
+			return errors.New("montagem não encontrada")
+		}
+		o.Setup, o.Material, o.Pct, o.MassG, o.BgMode, o.MountName = m.Setup, m.Material, m.Pct, m.MassG, m.BgMode, m.Name
+	}
 	if err := actValidate(&o); err != nil {
 		return err
 	}
@@ -398,6 +421,7 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 		r.Cur.feed(*s)
 		r.Smp = r.Cur.saved(now)
 		res := a.actFinish(r, now)
+		a.actSaveSpectra(res.T, r.Smp, r.Bg)
 		r.Result = &res
 		r.Phase, r.PhaseAt = "pronto", now.UnixMilli()
 		a.actAppendResult(res)
@@ -410,8 +434,18 @@ func (a *App) actAdvanceLocked(s *radiacode.Spectrum, now time.Time) {
 func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	o := r.Opts
 	cal := a.actCal()
-	smp, bg := r.Smp.spec(), r.Bg.spec()
-	res := ActResult{T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
+	mv, hasMount := a.actMount(o.MountID)
+	if hasMount && o.Kind == "amostra" && mv.Eff > 0 {
+		cal = mv.cal() // 2.104.0: a amostra usa a eficiência da montagem
+	} else if o.Kind == "amostra" {
+		cal = ActCal{} // QA 2.104.0: sem montagem é o chute (±100%), não a calibracao.json de antes
+	}
+	fb := cal.gain()
+	if hasMount && mv.Found && mv.Gain > 0 {
+		fb = mv.Gain
+	}
+	smp, bg, gn := actAlign(r.Smp.spec(), r.Bg.spec(), o.Kind == "kcl", fb)
+	res := ActResult{K40: &gn, T: now.UnixMilli(), Kind: o.Kind, Name: o.Name, MassG: o.MassG, Geometry: o.Geometry, Sec: smp.Sec, BgSec: bg.Sec,
 		Loose: o.Loose, SampleID: o.SampleID, Nucs: o.Nuclides, SmpSecO: o.SmpSec}
 	if cal.KCl != nil {
 		res.Prev = cal.KCl.Eff
@@ -419,8 +453,26 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 	switch o.Kind {
 	case "kcl":
 		res.Pct = o.Pct
-		k, aK, _ := actCalKCl(smp, bg, o.MassG, o.Pct)
+		k, aK, area := actCalKCl(smp, bg, o.MassG, o.Pct)
 		res.Expected = aK
+		if k != nil {
+			k.PeakKeV, k.Gain = gn.PeakKeV, gn.Gain
+		}
+		if o.Setup != "" || o.MountID != "" {
+			// 2.104.0: calibração por montagem: a rodada entra na soma da
+			// montagem, sempre (sem "a melhor", sem "salvar mesmo assim")
+			rd := ActRound{T: res.T, Sec: smp.Sec, BgSec: bg.Sec, ExpK: aK * 0.1066 * smp.Sec, PeakKeV: gn.PeakKeV, Gain: gn.Gain, Found: gn.Found}
+			if k != nil {
+				k.T = res.T
+				rd.Area, rd.AreaErr = area, k.EffErr*area
+			} else if pk, ok := actK40Net(smp, bg); ok {
+				rd.Area, rd.AreaErr = pk.Area, pk.Err // negativa também entra: tirar só as baixas puxaria a soma para cima
+			}
+			res.KCl = k
+			m := a.actAddRound(o, rd)
+			res.MountID, res.Mount = m.ID, &m
+			break
+		}
 		if k != nil && k.EffErr > actCalMaxErr {
 			// 2.101.4: o pico mal apareceu acima do fundo; guardar isso
 			// estragaria todos os Bq daqui para frente
@@ -456,8 +508,26 @@ func (a *App) actFinish(r *actRun, now time.Time) ActResult {
 		}
 	}
 	_, _, res.CalSrc = cal.eff(1000)
+	if hasMount && o.Kind == "amostra" {
+		res.MountID, res.Mount = mv.ID, &mv
+	}
 	res.Nuclides = actAnalyze(smp, bg, o.Nuclides, cal, o.MassG)
 	return res
+}
+
+// actSaveSpectra guarda os dois espectros de cada medida (2.103.0), para dar
+// para refazer a conta quando o programa melhorar.
+func (a *App) actSaveSpectra(t int64, smp, bg *actSaved) {
+	b, err := json.Marshal(struct {
+		Smp *actSaved `json:"smp"`
+		Bg  *actSaved `json:"bg"`
+	}{smp, bg})
+	if err != nil {
+		return
+	}
+	dir := a.actPath(actSpecDir)
+	os.MkdirAll(dir, 0o755)
+	_ = writeFileAtomic(filepath.Join(dir, fmt.Sprintf("%d.json", t)), b, 0o644)
 }
 
 func (a *App) actAppendResult(res ActResult) {
@@ -482,9 +552,13 @@ func (a *App) actHistory() []ActResult {
 	}
 	sc := rcScanner(bytes.NewReader(b))
 	sc.Buffer(make([]byte, 1<<20), 1<<22)
+	var lines []string
 	for sc.Scan() {
+		lines = append(lines, sc.Text())
+	}
+	for _, l := range actDedupe(lines) { // 2.102.2: uma por medida
 		var r ActResult
-		if json.Unmarshal(sc.Bytes(), &r) == nil && r.T > 0 {
+		if json.Unmarshal([]byte(l), &r) == nil && r.T > 0 {
 			out = append(out, r)
 		}
 	}
@@ -570,6 +644,7 @@ type ActView struct {
 	BgT       int64           `json:"bgT"`
 	Live      []ActNucRes     `json:"live"`
 	LiveKCl   *ActCalKCl      `json:"liveKcl"`
+	K40       *ActGain        `json:"k40,omitempty"`      // 2.103.0: onde o K-40 foi achado agora
 	SmpCps    float64         `json:"smpCps,omitempty"`   // cps de 300 a 1.400 keV da amostra (calibração; 2.101.11: era o total)
 	BgCps     float64         `json:"bgCps,omitempty"`    // e do fundo
 	KCLWeak   bool            `json:"kclWeak,omitempty"`  // o pico do K-40 não está aparecendo
@@ -577,6 +652,8 @@ type ActView struct {
 	PhaseCps  float64         `json:"phaseCps,omitempty"` // contagem do RC102 nesta fase (mediana dos minutos)
 	BgHigh    bool            `json:"bgHigh,omitempty"`   // o fundo está bem acima do normal da casa
 	LiveTh    *ActCalTh       `json:"liveTh"`
+	Check     *ActCalCheck    `json:"check,omitempty"` // 2.104.0: conferências e previsão da calibração
+	Mounts    []ActMountView  `json:"mounts"`          // 2.104.0: montagens calibradas
 	Expected  float64         `json:"expected"`
 	Result    *ActResult      `json:"result"`
 	Cal       ActCal          `json:"cal"`
@@ -628,6 +705,10 @@ func actChart(smp, bg actSpec) *ActChart {
 func (a *App) GetActivity() ActView {
 	v := ActView{Nuclides: actNuclides, Connected: a.rcConnected()}
 	v.Cal = a.actCal()
+	a.rc.act.mu.Lock()
+	a.actMigrateLegacy()
+	v.Mounts = a.actMountViews()
+	a.rc.act.mu.Unlock()
 	for _, e := range actCalE {
 		eps, rel, src := v.Cal.eff(e)
 		v.CalEff, v.CalErr, v.CalSrc = append(v.CalEff, eps), append(v.CalErr, rel), src
@@ -676,17 +757,39 @@ func (a *App) GetActivity() ActView {
 		v.BgHigh = r.Phase == "fundo" && actBgHigh(v.PhaseCps, v.HomeCps)
 	}
 	if r.Phase == "amostra" && smp.Sec >= 10 && bg.Sec > 0 {
+		var gn ActGain
+		cal, fb := v.Cal, v.Cal.gain()
+		if o.Kind == "amostra" {
+			cal = ActCal{} // QA 2.104.0: sem montagem, o chute (como no actFinish)
+		}
+		var prev *ActMountView
+		if mv, ok := a.actMount(o.MountID); ok {
+			prev = &mv
+			if o.Kind == "amostra" && mv.Eff > 0 {
+				cal = mv.cal()
+			}
+			if mv.Found && mv.Gain > 0 {
+				fb = mv.Gain
+			}
+		}
+		smp, bg, gn = actAlign(smp, bg, o.Kind == "kcl", fb)
+		v.K40 = &gn
 		switch o.Kind {
 		case "kcl":
-			v.LiveKCl, v.Expected, _ = actCalKCl(smp, bg, o.MassG, o.Pct)
+			var area float64
+			v.LiveKCl, v.Expected, area = actCalKCl(smp, bg, o.MassG, o.Pct)
 			v.SmpCps, v.BgCps = smp.bandCps(actWeakLo, actWeakHi), bg.bandCps(actWeakLo, actWeakHi)
 			v.KCLWeak = actKCLWeak(smp.Sec, v.SmpCps, v.BgCps, v.LiveKCl)
+			v.Check = actCalCheck(smp.Sec, float64(o.SmpSec), bg.Sec, v.SmpCps, v.BgCps, v.LiveKCl, area)
+			if v.Check != nil && v.Check.Forecast > 0 {
+				v.Check.sum(prev, area/smp.Sec, float64(o.SmpSec), actFixErr(o.Material, o.BgMode))
+			}
 		case "torio":
 			v.LiveTh, _ = actCalTh(smp, bg, o.MassG, o.Pct, o.AgeY)
 			_, f228, _ := actThFactors(o.AgeY)
 			v.Expected = o.MassG * o.Pct / 100 * actThPerTO2 * actBqPerGTh * f228
 		}
-		v.Live = actAnalyze(smp, bg, o.Nuclides, v.Cal, o.MassG)
+		v.Live = actAnalyze(smp, bg, o.Nuclides, cal, o.MassG)
 	}
 	return v
 }
@@ -709,8 +812,11 @@ func actKCLWeak(sec, smpCps, bgCps float64, k *ActCalKCl) bool {
 	return sec >= actWeakPeakSec && (k == nil || k.Eff*(1+2*k.EffErr) < actEffMin)
 }
 
-// actBgHigh: o fundo está mais de 25% acima do normal da casa (o sal, ou
-// outra amostra, ficou perto do aparelho).
+// actBgHigh: o fundo está mais de 25% acima do normal da casa (alguma
+// amostra perto do aparelho). 2.102.1: o limite fica (na casa do ACE, fora
+// das amostras de minério, nenhuma janela de 20 min passou de 1,25×), mas o
+// texto não acusa mais o sal e deixa seguir: o que importa é o fundo ficar
+// igual até o fim (o ACE: 15,8 × 12,4 cps sem nada perto do aparelho).
 func actBgHigh(phaseCps, homeCps float64) bool {
 	return homeCps > 0 && phaseCps > homeCps*actBgHighRise
 }
@@ -774,12 +880,30 @@ func (a *App) UseActivityCal(t int64) error {
 	st := &a.rc.act
 	st.mu.Lock()
 	defer st.mu.Unlock()
-	r := st.run
-	if r == nil || r.Result == nil || r.Result.T != t || !r.Result.Worse || r.Result.Used {
+	a.actLoadLocked() // reaberto: lê a medida em andamento antes (o actSaveLocked do fim a apagaria)
+	// 2.102.1: também a do KCl que não foi guardada por pouco (até ±30%,
+	// "Salvar mesmo assim"), e também pelo histórico (a tela já pode ter
+	// passado para uma medida nova, ou o app ter sido reaberto)
+	var res *ActResult
+	if r := st.run; r != nil && r.Result != nil && r.Result.T == t {
+		res = r.Result
+	} else {
+		for _, h := range a.actHistory() {
+			if h.T == t {
+				h := h
+				res = &h
+				break
+			}
+		}
+	}
+	c := a.actCal()
+	// só se for melhor que a do KCl em uso (se tiver): trocar por uma pior é
+	// o caminho do "pior que a atual"
+	anyway := res != nil && res.NotSaved && res.Kind == "kcl" && res.KCl != nil && res.KCl.EffErr <= actCalSaveMax &&
+		(c.KCl == nil || res.KCl.EffErr < c.KCl.EffErr)
+	if res == nil || res.Used || !(res.Worse || anyway) {
 		return errors.New("essa calibração não está mais na tela")
 	}
-	res := r.Result
-	c := a.actCal()
 	switch {
 	case res.KCl != nil && res.Kind == "kcl":
 		c.KCl, c.PrevKCl, c.PrevGeometry = res.KCl, c.KCl, c.Geometry
@@ -796,7 +920,11 @@ func (a *App) UseActivityCal(t int64) error {
 	_, _, res.CalSrc = c.eff(1000)
 	a.actRewriteResult(*res)
 	a.actSaveLocked()
-	a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	if r := st.run; r != nil && r.Result == res {
+		a.logEvent(fmt.Sprintf("Atividade: calibração trocada pela nova (%s)", actEvName(r.Opts)))
+	} else {
+		a.logEvent("Atividade: calibração trocada pela nova")
+	}
 	return nil
 }
 
@@ -852,7 +980,7 @@ func (a *App) actRewriteResult(res ActResult) {
 
 func (a *App) actBackupFiles() []string {
 	var out []string
-	for _, n := range []string{actCalFile, actBgFile, actResFile, actSamplesFile} {
+	for _, n := range []string{actCalFile, actBgFile, actResFile, actSamplesFile, actMountsFile} {
 		if _, err := os.Stat(a.actPath(n)); err == nil {
 			out = append(out, rcDirName+"/"+actDir+"/"+n)
 		}
@@ -896,6 +1024,17 @@ func (a *App) actMerge(name string, data []byte) {
 			os.MkdirAll(a.actPath(""), 0o755)
 			_ = writeFileAtomic(a.actPath(name), data, 0o644)
 		}
+	case actMountsFile:
+		var in actMountsDoc
+		if json.Unmarshal(data, &in) != nil {
+			return
+		}
+		// QA 2.104.0: o actFinish soma a rodada com este cadeado; sem ele, a
+		// nuvem podia gravar por cima e a rodada sumia
+		st := &a.rc.act
+		st.mu.Lock()
+		defer st.mu.Unlock()
+		a.actSaveMounts(actMergeMounts(a.actMountsAll(), in.Mounts))
 	case actResFile:
 		cur, _ := os.ReadFile(a.actPath(name))
 		have := map[string]bool{}
@@ -912,7 +1051,46 @@ func (a *App) actMerge(name string, data []byte) {
 				lines = append(lines, l)
 			}
 		}
+		lines = actDedupe(lines)
 		os.MkdirAll(a.actPath(""), 0o755)
 		_ = writeFileAtomic(a.actPath(name), []byte(strings.Join(lines, "\n")+"\n"), 0o644)
 	}
+}
+
+// actDedupe deixa uma linha por medida (horário + tipo). 2.102.2: a mesma
+// medida reescrita (usada pelo "Salvar mesmo assim" ou "Usar a nova") tem
+// outra linha; a junção por linha igual (nuvem, backup) trazia a antiga de
+// volta e o histórico mostrava as duas. Fica a usada; senão, a última.
+func actDedupe(lines []string) []string {
+	type key struct {
+		t    int64
+		kind string
+	}
+	best := map[key]int{}
+	used := map[key]bool{}
+	for i, l := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+			Used bool   `json:"used"`
+		}
+		if json.Unmarshal([]byte(l), &q) != nil || q.T == 0 {
+			continue
+		}
+		k := key{q.T, q.Kind}
+		if _, ok := best[k]; !ok || q.Used || !used[k] {
+			best[k], used[k] = i, used[k] || q.Used
+		}
+	}
+	out := lines[:0:0]
+	for i, l := range lines {
+		var q struct {
+			T    int64  `json:"t"`
+			Kind string `json:"kind"`
+		}
+		if json.Unmarshal([]byte(l), &q) != nil || q.T == 0 || best[key{q.T, q.Kind}] == i {
+			out = append(out, l)
+		}
+	}
+	return out
 }

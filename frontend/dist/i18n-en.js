@@ -1603,7 +1603,7 @@ const I18N_EN = {
 "As linhas do tório não apareceram o bastante (precisa de pelo menos duas).": "The thorium lines didn't show up enough (at least two are needed).",
 "calibração pelo KCl": "calibrated with KCl",
 "calibração pelo tório (aproximada)": "calibrated with thorium (approximate)",
-"sem calibração: chute": "no calibration: guess",
+"sem calibração: chute": "not calibrated: rough estimate",
 "sem pico": "no peak",
 "sem linhas": "no lines",
 "Medidas anteriores": "Previous measurements",
@@ -4824,8 +4824,8 @@ const I18N_EN = {
 "O RadiaCode não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.": "The RC102 is not seeing the salt: the count from 300 to 1,400 keV barely rose above the background and the K-40 peak does not show. With the salt around the device, it rises about 20%. Check the position and that the background was measured with the salt far away.",
 "normal da casa": "home normal",
 "contagem agora": "count rate now",
-"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
-"O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RadiaCode. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.": "The background is well above the home normal: the salt (or another sample) seems to be near the RC102. Move the salt about 3 m away, take the device out of the beaker and start again; with the salt nearby, the calibration comes out wrong.",
+"O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.": "The background is well above the home normal. If there is any sample near the RC102, move it about 3 m away and start again. Ore kept in the same room also raises the background; if it stays in the same place until the end, you can go on.",
+"O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RadiaCode, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.": "The background is well above the home normal. If there is any sample near the RC102, move it about 3 m away and start again. Ore kept in the same room also raises the background; if it stays in the same place until the end, you can go on.",
 "mrem/h acima do fundo": "mrem/h above background",
 "Não consegui gravar os minutos do RC102: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
 "Não consegui gravar os minutos do RadiaCode: o arquivo do mês está aberto em outro programa. Eles ficam na memória e são gravados assim que der.": "Couldn't write the RC102 minutes: the month's file is open in another program. They stay in memory and are written as soon as possible.",
@@ -4960,7 +4960,88 @@ const I18N_EN = {
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
 "gráfico parado neste trecho": "chart frozen on this stretch",
-"trava nuvem": "cloud lock"
+"trava nuvem": "cloud lock",
+"Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
+"(ou U-235)": "(or U-235)",
+"rádio": "radium",
+"Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"Conecte o RadiaCode para ver o espectro ao vivo e o acumulado do aparelho.": "Connect the RC102 to see the live spectrum and the device's accumulated one.",
+"O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"O espectrograma aparece quando o RadiaCode estiver conectado: o app guarda um espectro por minuto.": "The spectrogram shows up once the RC102 is connected: the app saves one spectrum per minute.",
+"A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"A dureza aparece junto com o espectrograma, quando o RadiaCode tiver gravado um tempo.": "Hardness shows up along with the spectrogram, once the RC102 has recorded for a while.",
+"Conecte o RC102 para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Conecte o RadiaCode para usar o modo busca.": "Connect the RC102 to use search mode.",
+"Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.": "It is still much better than no calibration (±100%). You can save it as is and measure again later with more salt or more time: the app asks before replacing it with a worse one.",
+"Atividade: calibração trocada pela nova": "Activity: calibration replaced by the new one",
+"eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)": "efficiency so far: the K-40 peak is still below the background (normal at the start)",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"K-40 ainda não apareceu claro: a conta usa a escala que o RadiaCode manda e pode mudar bastante quando ele aparecer.": "K-40 not clear yet: the calculation uses the scale the RC102 sends and may change a lot when it shows up.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
+"O K-40 do fundo não apareceu claro: a conta usa a escala que o RadiaCode manda. Calibrar com o KCl corrige.": "The K-40 in the background was not clear: the calculation uses the scale the RC102 sends. Calibrating with KCl fixes it.",
+"Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.": "Made before the K-40 peak fix: it came out low. Calibrate again.",
+"% de KCl (mg de K por g × 0,19)": "% KCl (mg of K per g × 0.19)",
+"1 h recomendado para esta montagem (deve dar ±10–15%). Aos 30 min o app confere o pico e diz quanto vai dar.": "1 h recommended for this setup (should give ±10–15%). At 30 min the app checks the peak and tells you what it will reach.",
+"A calibração só vale para amostras medidas nesta mesma montagem. Mais sal só ajuda se ficar em volta da ponta do cristal.": "The calibration only holds for samples measured in this same setup. More salt only helps if it sits around the crystal end.",
+"A eficiência e as rodadas dela somem. As medidas já feitas ficam no histórico.": "Its efficiency and rounds are removed. Measurements already made stay in the history.",
+"Ainda não dá para usar: rode mais uma rodada e o app soma.": "Not usable yet: run one more round and the app adds it up.",
+"Aos 30 min o app confere o pico e diz quanto vai dar com o tempo marcado.": "At 30 min the app checks the peak and tells you what the chosen time will reach.",
+"As conferências aparecem com 10 min.": "The checks show up at 10 min.",
+"Béquer": "Beaker",
+"Calibrar uma montagem": "Calibrate a setup",
+"Começar a rodada": "Start the round",
+"Deixe o KCl longe (uns 3 m) e o RC102 no lugar de sempre.": "Keep the KCl far away (about 3 m) and the RC102 in its usual spot.",
+"Deixe o KCl longe (uns 3 m) e o RadiaCode no lugar de sempre.": "Keep the KCl far away (about 3 m) and the RC102 in its usual spot.",
+"KCl de adubo": "Fertilizer KCl",
+"KCl de adubo (60% K₂O)": "Fertilizer KCl (60% K₂O)",
+"Mais uma rodada em": "One more round in",
+"Medir com esta": "Measure with this one",
+"Montagem (a calibração usada)": "Setup (the calibration used)",
+"Monte igual à rodada anterior: o mesmo pote, a mesma altura e o RC102 na mesma posição. O app soma esta rodada às anteriores.": "Set it up like the previous round: same pot, same height and the RC102 in the same position. The app adds this round to the earlier ones.",
+"Monte igual à rodada anterior: o mesmo pote, a mesma altura e o RadiaCode na mesma posição. O app soma esta rodada às anteriores.": "Set it up like the previous round: same pot, same height and the RC102 in the same position. The app adds this round to the earlier ones.",
+"Nenhuma montagem calibrada.": "No calibrated setup.",
+"O pico do K-40 ainda não passou do fundo: confira se o RC102 está dentro do KCl.": "The K-40 peak is not above the background yet: check that the RC102 is inside the KCl.",
+"O pico do K-40 ainda não passou do fundo: confira se o RadiaCode está dentro do KCl.": "The K-40 peak is not above the background yet: check that the RC102 is inside the KCl.",
+"O pico do K-40 não passou do fundo nesta rodada. Ela entra na soma mesmo assim (tirar só as baixas puxaria a eficiência para cima).": "The K-40 peak did not rise above the background in this round. It goes into the sum anyway (dropping only the low ones would push the efficiency up).",
+"O pico do K-40, o sinal e a previsão aparecem com 30 min.": "The K-40 peak, the signal and the forecast show up at 30 min.",
+"Passe o RC102 para o pote com o KCl, na mesma posição, e clique em Começar.": "Move the RC102 to the pot with the KCl, in the same position, and click Start.",
+"Passe o RadiaCode para o pote com o KCl, na mesma posição, e clique em Começar.": "Move the RC102 to the pot with the KCl, in the same position, and click Start.",
+"Ponha o RC102 no pote com sal de cozinha comum, na mesma posição em que vai ficar no KCl. O KCl fica longe (uns 3 m).": "Put the RC102 in the pot with regular table salt, in the same position it will have in the KCl. The KCl stays far away (about 3 m).",
+"Ponha o RadiaCode no pote com sal de cozinha comum, na mesma posição em que vai ficar no KCl. O KCl fica longe (uns 3 m).": "Put the RC102 in the pot with regular table salt, in the same position it will have in the KCl. The KCl stays far away (about 3 m).",
+"Pote de 1 L com tubo": "1 L pot with tube",
+"Pote igual com sal de cozinha comum (recomendado)": "Same pot with regular table salt (recommended)",
+"Previsão:": "Forecast:",
+"Pronta para medir amostras nesta montagem.": "Ready to measure samples in this setup.",
+"Sem nada, KCl a 3 m (fica 2–5% baixo)": "Nothing, KCl 3 m away (comes out 2–5% low)",
+"Uma vez por montagem (o pote, o material e a posição do RC102), com KCl.": "Once per setup (the pot, the material and the RC102 position), with KCl.",
+"Uma vez por montagem (o pote, o material e a posição do RadiaCode), com KCl.": "Once per setup (the pot, the material and the RC102 position), with KCl.",
+"Vai faltar tempo: no fim, rode mais uma rodada e o app soma as duas.": "Not enough time: at the end, run one more round and the app adds both.",
+"de KCl": "of KCl",
+"descreva no nome, para repetir igual": "describe it in the name, to repeat it the same way",
+"eficiência da montagem:": "setup efficiency:",
+"eficiência em 1.461 keV nesta rodada:": "efficiency at 1,461 keV in this round:",
+"escreva um nome": "type a name",
+"fundo e KCl sempre com o mesmo tempo": "background and KCl always take the same time",
+"montagem não encontrada": "setup not found",
+"o pico do K-40 ainda não apareceu": "the K-40 peak has not shown up yet",
+"o sal em volta do RC102, como nas primeiras calibrações": "the salt around the RC102, as in the first calibrations",
+"o sal em volta do RadiaCode, como nas primeiras calibrações": "the salt around the RC102, as in the first calibrations",
+"recomendado: RC102 de pé num tubo de PVC no meio, cristal (sob o \"+\") a ~3 cm do fundo": "recommended: RC102 standing in a PVC tube in the middle, crystal (under the \"+\") ~3 cm from the bottom",
+"recomendado: RadiaCode de pé num tubo de PVC no meio, cristal (sob o \"+\") a ~3 cm do fundo": "recommended: RC102 standing in a PVC tube in the middle, crystal (under the \"+\") ~3 cm from the bottom",
+"sem calibração (Bq só um chute, ±100%)": "no calibration (Bq just a guess, ±100%)",
+"Renomear a montagem": "Rename the setup",
+"Apagar esta montagem?": "Delete this setup?",
+"mais opções": "more options",
+"somar outra rodada": "add another round",
+"apagar": "delete",
+"Montagem": "Setup",
+"Outra": "Other",
+"Massa pesada (g)": "Weighed mass (g)",
+"Somar outra rodada": "Add another round",
+"Suas montagens calibradas": "Your calibrated setups",
+"+ Calibrar outra montagem": "+ Calibrate another setup",
+"sal light": "light salt",
+"diferença": "difference"
 },
 "patterns": [
 [
@@ -5927,6 +6008,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Você salvou esta calibração mesmo assim (",
+"^Você salvou esta calibração mesmo assim \\(((?:(?! · ).)+?)\\)\\. A de antes, se tinha, ficou guardada: dá para voltar em detalhes\\.$",
+"You saved this calibration anyway (${1}). The previous one, if any, was kept: you can go back to it in details.",
+[
+"Você salvou esta calibração mesmo assim (",
+"). A de antes, se tinha, ficou guardada: dá para voltar em detalhes."
+]
+],
+[
 "início com o Windows: opção ",
 "^início com o Windows: opção ((?:(?! · ).)+?), registrado ((?:(?! · ).)+?) \\(existe ((?:(?! · ).)+?), este \\.exe ((?:(?! · ).)+?)\\), desativado no Windows ((?:(?! · ).)+?), abriu com o Windows ((?:(?! · ).)+?)$",
 "start with Windows: option ${1}, registered ${2} (exists ${3}, this .exe ${4}), disabled in Windows ${5}, started with Windows ${6}",
@@ -6422,6 +6512,15 @@ const I18N_EN = {
 ]
 ],
 [
+"A faixa de 300 a 1.400 keV quase não subiu (",
+"^A faixa de 300 a 1\\.400 keV quase não subiu \\(((?:(?! · ).)+?)((?:(?! · ).)+?)%\\): confira se o RadiaCode está dentro do KCl\\.$",
+"The 300 to 1,400 keV band barely rose (${1}${2}%): check that the RC102 is inside the KCl.",
+[
+"A faixa de 300 a 1.400 keV quase não subiu (",
+"%): confira se o RadiaCode está dentro do KCl."
+]
+],
+[
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
 "RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
@@ -6482,6 +6581,15 @@ const I18N_EN = {
 [
 "configurações: não consegui ler o config.json (",
 "); voltei ao padrão e guardei o arquivo em "
+]
+],
+[
+"A incerteza ficou em ",
+"^A incerteza ficou em ((?:(?! · ).)+?), acima do limite de ±20%, então a calibração não foi guardada sozinha\\.$",
+"The uncertainty came out at ${1}, above the ±20% limit, so the calibration was not saved automatically.",
+[
+"A incerteza ficou em ",
+", acima do limite de ±20%, então a calibração não foi guardada sozinha."
 ]
 ],
 [
@@ -6621,6 +6729,15 @@ const I18N_EN = {
 "GMC-800 and RC102 attention and alarm stay silent until 1 min after the result. ${1}",
 [
 "Atenção e alarme do GMC-800 e do RC102 ficam em silêncio até 1 min depois do resultado. "
+]
+],
+[
+"A faixa de 300 a 1.400 keV quase não subiu (",
+"^A faixa de 300 a 1\\.400 keV quase não subiu \\(((?:(?! · ).)+?)((?:(?! · ).)+?)%\\): confira se o RC102 está dentro do KCl\\.$",
+"The 300 to 1,400 keV band barely rose (${1}${2}%): check that the RC102 is inside the KCl.",
+[
+"A faixa de 300 a 1.400 keV quase não subiu (",
+"%): confira se o RC102 está dentro do KCl."
 ]
 ],
 [
@@ -6875,6 +6992,16 @@ const I18N_EN = {
 ]
 ],
 [
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RadiaCode está ((?:(?! · ).)+?)% baixa; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% low; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RadiaCode está ",
+"% baixa; a conta corrige."
+]
+],
+[
 "O período começa ",
 "^O período começa ((?:(?! · ).)+?) antes do primeiro dado do contador \\(((?:(?! · ).)+?)\\); esse trecho não é lacuna\\.$",
 "The period starts ${1} before the counter's first reading (${2}); that stretch is not a gap.",
@@ -6912,6 +7039,16 @@ const I18N_EN = {
 ". O RC102 voltou a conectar no PC às ",
 ", depois de ",
 " sem conexão."
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RadiaCode está ((?:(?! · ).)+?)% alta; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% high; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RadiaCode está ",
+"% alta; a conta corrige."
 ]
 ],
 [
@@ -7083,6 +7220,16 @@ const I18N_EN = {
 ]
 ],
 [
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RC102 está ((?:(?! · ).)+?)% baixa; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% low; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RC102 está ",
+"% baixa; a conta corrige."
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): cabe na variação natural da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): within the natural variation of the count.",
@@ -7118,6 +7265,16 @@ const I18N_EN = {
 "Esta saiu com ",
 ", pior que a que está em uso (",
 "), então a atual continua valendo."
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RC102 está ((?:(?! · ).)+?)% alta; a conta corrige\\.$",
+"K-40 found at ${1} keV: the RC102 energy scale is ${2}% high; the calculation corrects it.",
+[
+"K-40 achado em ",
+" keV: a escala de energia do RC102 está ",
+"% alta; a conta corrige."
 ]
 ],
 [
@@ -7164,6 +7321,18 @@ const I18N_EN = {
 "O RadiaCode contou o mesmo que no fundo (",
 "σ), mas a taxa de dose subiu ",
 "σ)."
+]
+],
+[
+"fundo ",
+"^fundo ((?:(?! · ).)+?) µSv/h \\(((?:(?! · ).)+?)\\) · ≈ ((?:(?! · ).)+?) mSv/ano nesse ritmo · ((?:(?! · ).)+?)% medido desde o primeiro dado \\(((?:(?! · ).)+?)\\)$",
+"background ${1} µSv/h (${2}) · ≈ ${3} mSv/year at this rate · ${4}% measured since the first reading (${5})",
+[
+"fundo ",
+" µSv/h (",
+") · ≈ ",
+" mSv/ano nesse ritmo · ",
+"% medido desde o primeiro dado ("
 ]
 ],
 [
@@ -7293,6 +7462,16 @@ const I18N_EN = {
 "A diferença vale ",
 " vezes a incerteza (",
 "σ): é real, não variação da contagem."
+]
+],
+[
+"Sinal: ",
+"^Sinal: ((?:(?! · ).)+?) contagens/min, fora do esperado pela faixa \\(((?:(?! · ).)+?)–((?:(?! · ).)+?)\\): confira a posição\\.$",
+"Signal: ${1} counts/min, outside what the band suggests (${2}–${3}): check the position.",
+[
+"Sinal: ",
+" contagens/min, fora do esperado pela faixa (",
+"): confira a posição."
 ]
 ],
 [
@@ -7571,6 +7750,16 @@ const I18N_EN = {
 ]
 ],
 [
+"A montagem fica com ±",
+"^A montagem fica com ±((?:(?! · ).)+?)% no total \\(contagem ±((?:(?! · ).)+?)% e o rótulo do material\\)\\.$",
+"The setup ends up at ±${1}% in total (counting ±${2}% plus the material label).",
+[
+"A montagem fica com ±",
+"% no total (contagem ±",
+"% e o rótulo do material)."
+]
+],
+[
 "Sem contagens há ",
 "^Sem contagens há ((?:(?! · ).)+?): o tubo pode estar com defeito\\. Confira o contador\\.$",
 "No counts for ${1}: the tube may be faulty. Check the counter.",
@@ -7747,6 +7936,17 @@ const I18N_EN = {
 [
 "nuvem: um aparelho foi removido (",
 " arquivo(s) na lixeira do Drive)"
+]
+],
+[
+"no fim de ",
+"^no fim de ((?:(?! · ).)+?): ±((?:(?! · ).)+?)% de contagem\\. Com este fundo, o melhor possível é ±((?:(?! · ).)+?)%\\.$",
+"at the end of ${1}: ±${2}% from counting. With this background, the best possible is ±${3}%.",
+[
+"no fim de ",
+": ±",
+"% de contagem. Com este fundo, o melhor possível é ±",
+"%."
 ]
 ],
 [
@@ -8478,6 +8678,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Escala de energia: a achada na calibração (K-40 em ",
+"^Escala de energia: a achada na calibração \\(K\\-40 em ((?:(?! · ).)+?) keV\\)\\.$",
+"Energy scale: the one found in the calibration (K-40 at ${1} keV).",
+[
+"Escala de energia: a achada na calibração (K-40 em ",
+" keV)."
+]
+],
+[
 "Igual ao fundo: se o objeto emite algo, é menos que +",
 "^Igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM\\.$",
 "Same as background: if the object emits anything, it's less than +${1} CPM.",
@@ -8562,6 +8771,15 @@ const I18N_EN = {
 "${1}: ${2} short alerts, no 10 min stretch above safe.",
 [
 " alertas curtos, nenhum trecho de 10 min acima do seguro."
+]
+],
+[
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · já chegou a ±15%: pode encerrar$",
+"efficiency so far: ${1} ± ${2}% · already at ±15%: you can stop",
+[
+"eficiência até agora: ",
+"% · já chegou a ±15%: pode encerrar"
 ]
 ],
 [
@@ -8699,6 +8917,23 @@ const I18N_EN = {
 ]
 ],
 [
+"✓ O RadiaCode está vendo o KCl: faixa de 300 a 1.400 keV ",
+"^✓ O RadiaCode está vendo o KCl: faixa de 300 a 1\\.400 keV ((?:(?! · ).)+?)((?:(?! · ).)+?)%$",
+"✓ The RC102 sees the KCl: 300 to 1,400 keV band ${1}${2}%",
+[
+"✓ O RadiaCode está vendo o KCl: faixa de 300 a 1.400 keV "
+]
+],
+[
+"✓ Sinal: ",
+"^✓ Sinal: ((?:(?! · ).)+?) contagens/min, combina com a faixa \\(esperado ((?:(?! · ).)+?)–((?:(?! · ).)+?)\\)$",
+"✓ Signal: ${1} counts/min, matches the band (expected ${2}–${3})",
+[
+"✓ Sinal: ",
+" contagens/min, combina com a faixa (esperado "
+]
+],
+[
 "igual ao fundo: se o objeto emite algo, é menos que +",
 "^igual ao fundo: se o objeto emite algo, é menos que \\+((?:(?! · ).)+?) CPM$",
 "same as background: if the object emits anything, it's less than +${1} CPM",
@@ -8766,6 +9001,24 @@ const I18N_EN = {
 [
 "a assinatura do ",
 " não confere; não vou instalar esta versão"
+]
+],
+[
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo; sozinho, \"certo\" pede 60%$",
+"Rises ${1}% above what is underneath; alone, \"sure\" needs 60%",
+[
+"Sobe ",
+"% acima do que tem embaixo; sozinho, \"certo\" pede 60%"
+]
+],
+[
+"Escala de energia do RadiaCode ",
+"^Escala de energia do RadiaCode ((?:(?! · ).)+?)% baixa: corrigida na conta$",
+"RC102 energy scale ${1}% low: corrected in the calculation",
+[
+"Escala de energia do RadiaCode ",
+"% baixa: corrigida na conta"
 ]
 ],
 [
@@ -8919,6 +9172,15 @@ const I18N_EN = {
 "RC102 minutes that were in memory written (${1})",
 [
 "Minutos do RadiaCode que estavam na memória gravados ("
+]
+],
+[
+"Escala de energia do RadiaCode ",
+"^Escala de energia do RadiaCode ((?:(?! · ).)+?)% alta: corrigida na conta$",
+"RC102 energy scale ${1}% high: corrected in the calculation",
+[
+"Escala de energia do RadiaCode ",
+"% alta: corrigida na conta"
 ]
 ],
 [
@@ -9140,6 +9402,14 @@ const I18N_EN = {
 ]
 ],
 [
+"✓ O RC102 está vendo o KCl: faixa de 300 a 1.400 keV ",
+"^✓ O RC102 está vendo o KCl: faixa de 300 a 1\\.400 keV ((?:(?! · ).)+?)((?:(?! · ).)+?)%$",
+"✓ The RC102 sees the KCl: 300 to 1,400 keV band ${1}${2}%",
+[
+"✓ O RC102 está vendo o KCl: faixa de 300 a 1.400 keV "
+]
+],
+[
 "Dose medida no período escolhido no cartão de dose: ",
 "^Dose medida no período escolhido no cartão de dose: ((?:(?! · ).)+?)\\.$",
 "Dose measured in the period chosen on the dose card: ${1}.",
@@ -9253,6 +9523,15 @@ const I18N_EN = {
 [
 "RadiaCode (Bluetooth): sem resposta em ",
 " ao pedido "
+]
+],
+[
+"Escala de energia do RC102 ",
+"^Escala de energia do RC102 ((?:(?! · ).)+?)% baixa: corrigida na conta$",
+"RC102 energy scale ${1}% low: corrected in the calculation",
+[
+"Escala de energia do RC102 ",
+"% baixa: corrigida na conta"
 ]
 ],
 [
@@ -9428,6 +9707,15 @@ const I18N_EN = {
 [
 "bem acima do nível de fundo nos últimos 10 min (",
 " σ)"
+]
+],
+[
+"Escala de energia do RC102 ",
+"^Escala de energia do RC102 ((?:(?! · ).)+?)% alta: corrigida na conta$",
+"RC102 energy scale ${1}% high: corrected in the calculation",
+[
+"Escala de energia do RC102 ",
+"% alta: corrigida na conta"
 ]
 ],
 [
@@ -9711,6 +9999,16 @@ const I18N_EN = {
 "O GMC-800 subiu mais que o RadiaCode: ",
 " em ",
 " semanas"
+]
+],
+[
+"eficiência até agora: ",
+"^eficiência até agora: ((?:(?! · ).)+?) ± ((?:(?! · ).)+?)% · para ±15%: \\~((?:(?! · ).)+?) no total$",
+"efficiency so far: ${1} ± ${2}% · for ±15%: ~${3} in total",
+[
+"eficiência até agora: ",
+"% · para ±15%: ~",
+" no total"
 ]
 ],
 [
@@ -13625,6 +13923,15 @@ const I18N_EN = {
 ]
 ],
 [
+"Sobe ",
+"^Sobe ((?:(?! · ).)+?)% acima do que tem embaixo$",
+"Rises ${1}% above what is underneath",
+[
+"Sobe ",
+"% acima do que tem embaixo"
+]
+],
+[
 "(mais ",
 "^\\(mais ((?:(?! · ).)+?) desde o último aviso\\)$",
 "(${1} more since the last warning)",
@@ -16166,6 +16473,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Salvar mesmo assim (",
+"^Salvar mesmo assim \\(((?:(?! · ).)+?)\\)$",
+"Save anyway (${1})",
+[
+"Salvar mesmo assim ("
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -16588,6 +16903,33 @@ const I18N_EN = {
 "go back to the previous one (${1})",
 [
 "voltar à anterior ("
+]
+],
+[
+"para ±15%: ~",
+"^para ±15%: \\~((?:(?! · ).)+?) no total$",
+"for ±15%: ~${1} in total",
+[
+"para ±15%: ~",
+" no total"
+]
+],
+[
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV\\.$",
+"K-40 found at ${1} keV.",
+[
+"K-40 achado em ",
+" keV."
+]
+],
+[
+"somadas ",
+"^somadas ((?:(?! · ).)+?) rodadas: ((?:(?! · ).)+?) \\+ ((?:(?! · ).)+?)$",
+"${1} rounds summed: ${2} + ${3}",
+[
+"somadas ",
+" rodadas: "
 ]
 ],
 [
@@ -17391,6 +17733,15 @@ const I18N_EN = {
 ]
 ],
 [
+"K-40 achado em ",
+"^K\\-40 achado em ((?:(?! · ).)+?) keV$",
+"K-40 found at ${1} keV",
+[
+"K-40 achado em ",
+" keV"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -17835,6 +18186,15 @@ const I18N_EN = {
 "1 new record out of ${1}",
 [
 "1 registro novo de "
+]
+],
+[
+"Calibração de ",
+"^Calibração de ((?:(?! · ).)+?) · ±((?:(?! · ).)+?)%$",
+"Calibration from ${1} · ±${2}%",
+[
+"Calibração de ",
+" · ±"
 ]
 ],
 [
@@ -18694,6 +19054,30 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?) · eficiência ((?:(?! · ).)+?) ±((?:(?! · ).)+?)%$",
+"${1} · efficiency ${2} ±${3}%",
+[
+" · eficiência "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) rodadas \\(((?:(?! · ).)+?) \\+ ((?:(?! · ).)+?)\\)$",
+"${1} rounds (${2} + ${3})",
+[
+" rodadas ("
+]
+],
+[
+"1 rodada (",
+"^1 rodada \\(((?:(?! · ).)+?) \\+ ((?:(?! · ).)+?)\\)$",
+"1 round (${1} + ${2})",
+[
+"1 rodada ("
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -19050,6 +19434,14 @@ const I18N_EN = {
 "Use the new one (${1})",
 [
 "Usar a nova ("
+]
+],
+[
+"±",
+"^±((?:(?! · ).)+?)%: não guardada$",
+"±${1}%: not saved",
+[
+"%: não guardada"
 ]
 ],
 [
@@ -20983,6 +21375,14 @@ const I18N_EN = {
 ]
 ],
 [
+"contagem ±",
+"^contagem ±((?:(?! · ).)+?)%$",
+"counting ±${1}%",
+[
+"contagem ±"
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -22109,6 +22509,22 @@ const I18N_EN = {
 "clock ${1}",
 [
 "relógio "
+]
+],
+[
+"fixos ±",
+"^fixos ±((?:(?! · ).)+?)%$",
+"fixed ±${1}%",
+[
+"fixos ±"
+]
+],
+[
+"total ±",
+"^total ±((?:(?! · ).)+?)%$",
+"total ±${1}%",
+[
+"total ±"
 ]
 ],
 [

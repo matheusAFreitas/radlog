@@ -120,3 +120,52 @@ func TestFindPeaksThoriumNeedsConfirm(t *testing.T) {
 		t.Fatal("com 2.614 keV, o tório tem que aparecer")
 	}
 }
+
+// 2.102.1: graduação dos picos da tela do espectro (mesmo critério do celular)
+func TestGradePeaks(t *testing.T) {
+	ps := []SpecPeak{
+		{Group: "Urânio-235", Nuclide: "U-235", KeV: 185.7, Net: 50, Cont: 100, Sigma: 12},
+		{Group: "Rádio-226 (série do urânio)", Nuclide: "Bi-214", KeV: 609.3, Net: 40, Cont: 100, Sigma: 11},
+		{Group: "Césio-137", Nuclide: "Cs-137", KeV: 661.7, Net: 5, Cont: 100, Sigma: 8},
+		{Group: "Potássio-40", Nuclide: "K-40", KeV: 1460.8, Net: 70, Cont: 100, Sigma: 15},
+		{Group: "Amerício-241", Nuclide: "Am-241", KeV: 59.5, Net: 20, Cont: 100, Sigma: 6},
+		{Group: "Cobalto-60", Nuclide: "Co-60", KeV: 1173.2, Net: 40, Cont: 100, Sigma: 3},
+	}
+	live := gradePeaks(append([]SpecPeak(nil), ps...), true)
+	got := map[string]string{}
+	for _, p := range live {
+		got[p.Nuclide] = p.Level
+		if p.Nuclide == "Ra-226" && p.KeV != 186.2 {
+			t.Errorf("Ra-226 deveria sair em 186,2 keV, veio %v", p.KeV)
+		}
+		if p.Nuclide == "U-235" {
+			t.Error("186 keV deveria ir para o Ra-226")
+		}
+	}
+	want := map[string]string{"Ra-226": "forte", "Bi-214": "forte", "K-40": "forte", "Am-241": "provável", "Co-60": "fraco"}
+	for k, v := range want {
+		if got[k] != v {
+			t.Errorf("%s: nível %q, queria %q", k, got[k], v)
+		}
+	}
+	if _, ok := got["Cs-137"]; ok {
+		t.Error("Cs-137 sozinho com 5% ao vivo deveria sair")
+	}
+	if len(live) != 5 || live[len(live)-1].Level != "fraco" || live[0].Level != "forte" {
+		t.Errorf("ordem errada: %+v", live)
+	}
+	acc := gradePeaks(append([]SpecPeak(nil), ps...), false)
+	found := false
+	for _, p := range acc {
+		if p.Nuclide == "Cs-137" {
+			found = true
+			// no acumulado o r não conta: 8 σ = provável
+			if p.Level != "provável" {
+				t.Errorf("Cs-137 no acumulado: %q", p.Level)
+			}
+		}
+	}
+	if !found {
+		t.Error("no acumulado a linha sozinha fica (só ao vivo sai)")
+	}
+}

@@ -156,10 +156,14 @@
   const FAM = { "Pb-212": "th", "Tl-208": "th", "Ac-228": "th", "Bi-212": "th", "Pb-214": "u", "Bi-214": "u", "Pb-210": "u", "Ra-226": "u", "Th-234": "u", "Pa-234m": "u" };
   const FAM_NAME = { th: "série do tório", u: "série do urânio" };
   // as linhas que o Go procura (specLines em measurespec.go)
-  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["U-235", 185.7], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
+  const SEARCHED = [["Am-241", 59.5], ["Th-234", 63.3], ["Th-234", 92.6], ["Ra-226", 186.2], ["Pb-212", 238.6], ["Pb-214", 295.2], ["Pb-214", 351.9], ["Tl-208", 583.2], ["Bi-214", 609.3],
     ["Cs-137", 661.7], ["Ac-228", 911.2], ["Pa-234m", 1001], ["Co-60", 1173.2], ["Co-60", 1332.5], ["K-40", 1460.8], ["Bi-214", 1764.5], ["Tl-208", 2614.5]];
   // biblioteca com um isótopo por entrada ("Ra-226 / U-235" vira duas)
-  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => [e, x, d]));
+  // 2.102.1: cada um na sua energia (Ra-226 186,2 keV, U-235 185,7 keV)
+  const LIB_OWN = { "Ra-226": [186.2, "rádio"], "U-235": [185.7, "urânio"] };
+  const LIBN = LIB.flatMap(([e, n, d]) => n.split(" / ").map((x) => (n.includes(" / ") && LIB_OWN[x] ? [LIB_OWN[x][0], x, LIB_OWN[x][1]] : [e, x, d])));
+  // 2.102.1: a linha de 186 keV fica com o Ra-226, mas pode ser U-235
+  const nucOr = (n) => (n === "Ra-226" ? " " + tr("(ou U-235)") : "");
   const isIso = (n) => /^[A-Z][a-z]?-\d/.test(n);
   // largura do pico como o Go mede (specFWHM)
   const goFW = (e) => 65 * Math.sqrt(Math.max(e, 1) / 661.7);
@@ -277,6 +281,17 @@
   // desde o "Recomeçar" (o atual menos a foto tirada naquela hora). O fundo
   // tracejado é o acumulado do aparelho (horas em casa), na escala do tempo.
   const rl = { on: false, mode: "agora", base: null, last: null, acc: null, accAt: 0, busy: false, peaks: [], accPeaks: [], peaksAt: 0, n: NCH };
+  // 2.102.1 (pedido do ACE): no app de verdade, sem o RC102 os cartões não
+  // mostram mais o exemplo simulado, só um aviso; o exemplo fica para a
+  // demonstração (navegador e o modo demonstração do app)
+  const simOK = () => typeof hasGo === "undefined" || !hasGo || (typeof inDemo !== "undefined" && inDemo);
+  function offCard(card, off, msg) {
+    if (!card) return;
+    card.classList.toggle("rc-off", off);
+    let p = card.querySelector(":scope > .rc-off-msg");
+    if (off && !p) { p = document.createElement("p"); p.className = "rc-off-msg small muted"; card.querySelector(".rc-head").after(p); }
+    if (p) { p.hidden = !off; if (off) p.textContent = tr(msg); }
+  }
   const rcLive = () => typeof state !== "undefined" && state.rc && state.rc.st && state.rc.st.state === "conectado" && typeof api !== "undefined" && api.GetRcSpectrum;
   // o acumulado do aparelho é mostrado como ele é (não dá para zerar); a foto
   // do "zerado no RadLog" da 2.60/2.61.0 deixa de valer
@@ -302,7 +317,7 @@
   }
   async function realTick(force) {
     if (!rcLive()) { if (rl.on) { rl.on = false; EN = SIM_EN; DE = SIM_DE; spMark(); spDraw(); } return; }
-    if (!rl.on) { rl.on = true; rl.base = null; spMark(); }
+    if (!rl.on) { rl.on = true; rl.base = null; spMark(); if (!sg.on) sgLoad(); } // 2.102.1 (QA): o espectrograma acende na hora, sem esperar o próximo minuto
     if ((!sp.run && !force && rl.mode !== "acc") || rl.busy) return;
     // pelo Bluetooth a leitura do espectro é mais lenta: lê a cada 6 s
     const every = state.rc.st.via === "bluetooth" ? 6000 : 2000;
@@ -366,7 +381,9 @@
     const real = rl.on ? realCounts() : null;
     const counts = real ? real.c : sp.counts, tNow = real ? real.t : sp.t;
     const bgRate = real && rl.acc && rl.acc.seconds > 0 && rl.mode === "agora" ? Float64Array.from(rl.acc.counts, (v) => v / rl.acc.seconds) : null;
-    const nch = counts.length;
+    // 2.102.1: o último canal do RC102 junta tudo que passou do fim da escala
+    // (estouro): não é espectro e faria um "pico" falso em ~3.000 keV
+    const nch = counts.length - (real && counts.length > 1 ? 1 : 0);
     const f = fit(cv, spH()); if (!f) return;
     const { g, w, h } = f, L = 44, R = 10, T = 10, B = 24, pw = w - L - R, ph = h - T - B;
     g.clearRect(0, 0, w, h);
@@ -514,21 +531,26 @@
   // gaussiana ajustada e a crista.
   const pk = { sel: null, win: null, range: null, drag: null };
   const curPeaks = () => (rl.on ? (rl.mode === "acc" ? rl.accPeaks : rl.peaks) || [] : []);
-  const SURE = (sg) => (sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
+  // 2.102.1: o Go gradua cada linha (level: forte, provável, fraco) pelo σ,
+  // por quanto ela sobe acima do que tem embaixo e por outra linha da mesma
+  // série; sem level (versão antiga), vale só o σ
+  const LV_RANK = { forte: 0, "provável": 1, fraco: 2 };
+  const SURE = (sg, lv) => (lv ? [["certo", "sure"], ["provável", "likely"], ["fraco", "weak"]][LV_RANK[lv] ?? 2] : sg >= 10 ? ["certo", "sure"] : sg >= 5 ? ["provável", "likely"] : ["fraco", "weak"]);
   function isoList(peaks) {
     const by = {};
     for (const p of peaks) {
-      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0 });
+      const o = by[p.nuclide] || (by[p.nuclide] = { nuclide: p.nuclide, group: p.group, lines: [], sigma: 0, level: null });
       o.lines.push(p);
       o.sigma = Math.max(o.sigma, p.sigma);
+      if (p.level && (o.level == null || LV_RANK[p.level] < LV_RANK[o.level])) o.level = p.level;
     }
-    const out = Object.values(by).sort((a, b) => b.sigma - a.sigma);
+    const out = Object.values(by).sort((a, b) => (LV_RANK[a.level] ?? 3) - (LV_RANK[b.level] ?? 3) || b.sigma - a.sigma);
     for (const o of out) o.lines.sort((a, b) => b.sigma - a.sigma);
     return out;
   }
   // "certo" pede também a identidade (2.69): sem vizinho que não deu para
   // descartar, ou outra linha da mesma família achada
-  const sureOf = (o) => { const r = SURE(o.sigma); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
+  const sureOf = (o) => { const r = SURE(o.sigma, o.level); return r[1] === "sure" && o.id && !o.id.ok ? ["provável", "likely"] : r; };
   function isoListId(peaks) { const list = isoList(peaks); for (const o of list) o.id = isoIdent(o, peaks, isAccMode()); return list; }
   function isoRender(peaks) {
     const box = $("rcIsos"), list = isoListId(peaks);
@@ -548,7 +570,7 @@
       b.dataset.nuc = o.nuclide;
       b.setAttribute("aria-pressed", String(pk.sel === o.nuclide));
       const [pt, cls] = sureOf(o);
-      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide)}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
+      b.innerHTML = `<span class="rc-iso-n mono" data-no-tr>${escHtml(o.nuclide + nucOr(o.nuclide))}</span><span class="rc-iso-s ${cls}">${tr(pt)}</span>` +
         `<span class="rc-iso-e mono" data-no-tr>${o.lines.map((l) => nf(l.kev, 0)).join(" · ")} keV</span>${emitHtml(o.nuclide)}`;
       // das séries (Pb-214, Bi-214, Tl-208…) o nome do cartão é quem emite o
       // gama; o título diz de qual família ele vem
@@ -771,7 +793,8 @@
     const acc = isAccMode(), p = o.lines[0], id = o.id, nuc = escHtml(o.nuclide);
     const fw = goFW(p.kev), tol = 0.2 * fw;
     const meter = (n, cls) => `<span class="rc-why-bars ${cls}">${[0, 1, 2].map((i) => `<i class="${i < n ? "on" : ""}"></i>`).join("")}</span>`;
-    const exist = o.sigma >= 10 ? [tr("Sim, forte"), 3, "sure"] : o.sigma >= 5 ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
+    const ex = SURE(o.sigma, o.level)[1];
+    const exist = ex === "sure" ? [tr("Sim, forte"), 3, "sure"] : ex === "likely" ? [tr("Sim"), 2, "likely"] : [tr("Talvez"), 1, "weak"];
     // vizinho que também foi achado: os dois devem somar nesse pico (QA 2.69.0)
     const mix = id.neigh.filter((x) => !x.out && x.why === "found").map((x) => x.n);
     const ident = !id.ok ? [tr("Provavelmente"), 2, "likely"] : mix.length ? [tr(`Sim, junto com ${mix.join(", ")}`), 2, "sure"] : [tr("Sim"), 3, "sure"];
@@ -783,6 +806,14 @@
     const sg = nf(o.sigma, o.sigma < 10 ? 1 : 0);
     if (o.sigma >= 5) h += chk(true, tr("Não é flutuação"), tr(`${sg} σ: a chance de ser só ruído é praticamente zero.`) + " " + (acc ? tr("Precisa de pelo menos 5 σ para entrar na lista e 10 σ para \"certo\".") : tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ.")));
     else h += chk(false, tr("Pode ser flutuação"), tr(`${sg} σ: pode ser acaso.`) + " " + tr("Ao vivo entra com 3 σ; \"provável\" pede 5 σ e \"certo\", 10 σ."));
+    // 2.102.1: o σ sozinho não basta; conta também quanto o pico sobe acima do que tem embaixo
+    if (o.level && p.cont > 0 && !acc) {
+      const pct = nf((p.net / p.cont) * 100, 0), r = p.net / p.cont;
+      // sozinho (sem outra linha da mesma série), "certo" pede 60% (QA 2.102.1)
+      const conf = peaks.some((q) => q !== p && q.group === p.group);
+      const okR = r >= (conf ? 0.3 : 0.6);
+      h += chk(okR, okR || conf ? tr(`Sobe ${pct}% acima do que tem embaixo`) : tr(`Sobe ${pct}% acima do que tem embaixo; sozinho, "certo" pede 60%`), tr("Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho)."));
+    }
     if (p.center) {
       const d = Math.abs(p.center - p.kev);
       h += chk(d <= tol, tr(`A energia bate com o ${o.nuclide} (${nf(p.kev, 1)} keV)`), tr(`O centro caiu a ${nf(d, 1)} keV da linha.`) + " " + (acc ? tr(`O app aceita até ${nf(tol, 0)} keV aqui (um quinto da largura de um pico nessa energia).`) : d <= tol ? tr(`Dentro de ${nf(tol, 0)} keV (um quinto da largura de um pico nessa energia).`) : tr("Mais longe que o normal: pode ter outro pico do lado.")));
@@ -832,7 +863,7 @@
     const box = $("rcZoom"), p = o.lines[0], acc = isAccMode();
     box.hidden = false; zoomMode(true);
     const lib = LIBN.find((l) => l[1] === o.nuclide);
-    $("rcZoomTitle").textContent = o.nuclide;
+    $("rcZoomTitle").textContent = o.nuclide + nucOr(o.nuclide);
     $("rcZoomSub").innerHTML = (lib && lib[2] ? `<span>${escHtml(tr(lib[2]))}</span>` : "") + emitHtml(o.nuclide);
     $("rcZoomBaseKey").textContent = tr(acc ? "contínuo (sem o pico)" : "fundo da casa e lados");
     $("rcZoomWarn").hidden = true;
@@ -1061,6 +1092,7 @@
   }
   function sgMark() {
     $("rcSgSimTags").hidden = sg.on;
+    offCard($("rcSgCard"), !sg.on && !simOK(), "O espectrograma aparece quando o RC102 estiver conectado: o app guarda um espectro por minuto.");
     $("rcSgLiveTag").hidden = !sg.on;
     $("rcSgCtrl").hidden = !sg.on;
     $("rcTlReplay").hidden = sg.on;
@@ -1097,6 +1129,7 @@
     // cartão 3 (dureza): mesmo período
     const hdOn = sg.on && !!sg.hd;
     $("rcHdSimTags").hidden = hdOn;
+    offCard($("rcHardCard"), !hdOn && !simOK(), "A dureza aparece junto com o espectrograma, quando o RC102 tiver gravado um tempo.");
     $("rcHdLiveTag").hidden = !hdOn;
     $("rcHdCtrl").hidden = !hdOn;
     document.querySelector("#rcHardCard .lg-elec").hidden = hdOn;
@@ -1452,6 +1485,7 @@
   function srMark(on) {
     sr.real = on;
     $("rcSrSimTags").hidden = on;
+    offCard($("rcSrCard"), !on && !simOK(), "Conecte o RC102 para usar o modo busca.");
     $("rcSrLiveTag").hidden = !on;
     $("rcSrSim").hidden = on;
     $("rcSrReal").hidden = !on;
@@ -1691,7 +1725,7 @@
   const ACT_NUCS = ["K-40", "Cs-137", "Ra-226", "Ra-228", "Th-232", "U-238"];
   const ACT_SUB = { "K-40": "potássio", "Cs-137": "césio, de usinas e testes nucleares", "Ra-226": "rádio, da série do urânio", "Ra-228": "rádio, da série do tório", "Th-232": "tório, a série inteira", "U-238": "urânio" };
   const ACT_SMP_T = [1800, 3600, 14400, 43200, 86400, 0], ACT_BG_T = [1800, 3600, 7200];
-  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
+  const act = { v: null, mode: "medir", calKind: "kcl", kclType: "light", pick: "p:castanha", loose: null, smpSec: 43200, bgSec: 3600, bgMode: "novo", setup: "pote1l", mat: "adubo", calBgMode: "branco", calMount: "", calPick: 0, mount: "", calSmpSec: 0, calMass: { kcl: "", torio: "" }, effOpen: false, busy: false, at: 0, chartKey: "" };
   const fmtBq = (v) => (Math.abs(v) >= 1e4 ? nf(v / 1000, 1) + " k" : nf(v, Math.abs(v) >= 100 ? 0 : Math.abs(v) >= 10 ? 1 : 2) + " ");
   const fmtPct = (v) => nf(v * 100, v >= 0.01 ? 2 : 3) + "%";
   const fmtSec = (s) => { if (!isFinite(s) || s <= 0) return "—"; if (s < 90) return nf(s, 0) + " s"; if (s < 5400) return nf(s / 60, 0) + " min"; return nf(s / 3600, s < 36000 ? 1 : 0) + " h"; };
@@ -1700,7 +1734,7 @@
   const fmtAT = (s) => (s > 0 ? fmtHM(s) : "até eu parar");
   const fmtDM = (t) => ddmm(t);
   const setHTML = (el, html) => { if (el._h !== html) { el._h = html; el.innerHTML = html; } };
-  const calMassShow = () => { const k = act.calKind; $("rcActCalMass").value = act.calMass[k] || (k === "torio" ? 40 : 500); };
+  const calMassShow = () => { $("rcActCalMass").value = act.calMass.kcl || 1000; };
   const actNum = (id) => parseFloat(String($(id).value).replace(",", ".")) || 0;
   async function actLoad() {
     if (typeof api === "undefined" || !api.GetActivity || act.busy) return;
@@ -1722,14 +1756,32 @@
     const p = ACT_PRESETS[k] || ACT_PRESETS.castanha;
     return { preset: ACT_PRESETS[k] ? k : "castanha", ...p, loose: false };
   }
-  // linha da calibração no topo
+  // 2.104.0 (avaliação do Bq): uma calibração por montagem; cada linha diz a
+  // eficiência, o ± (contagem e fixos), onde o K-40 foi achado e as rodadas
+  const ACT_MAT = { adubo: "KCl de adubo", puro: "KCl puro", light: "sal light" };
+  // o nome que a pessoa deu (não traduz) ou, sem nome, o do tipo de pote (traduz)
+  const ACT_SETUP = { pote1l: "Pote de 1 L com tubo", becker: "Béquer", outra: "Montagem" };
+  const mountNm = (m) => (m.name ? `<span data-no-tr>${escHtml(m.name)}</span>` : `<span>${tr(ACT_SETUP[m.setup] || "Montagem")}</span>`);
+  const mountTx = (m) => m.name || tr(ACT_SETUP[m.setup] || "Montagem");
+  function actMountRow(m) {
+    const pk = m.found && Math.abs(m.peakKeV - 1460.8) > 15
+      ? `<span class="rc-act-badge att">${m.gain > 1 ? `Escala de energia do RC102 ${nf(Math.abs(m.gain - 1) * 100, 1)}% baixa: corrigida na conta` : `Escala de energia do RC102 ${nf(Math.abs(m.gain - 1) * 100, 1)}% alta: corrigida na conta`}</span>`
+      : m.found ? `<span class="rc-act-badge ok">K-40 achado em ${nf(m.peakKeV, 0)} keV</span>` : "";
+    const n = (m.rounds || []).length;
+    const rounds = n === 1 ? `1 rodada (${fmtHM(m.bgSec)} + ${fmtHM(m.sec)})` : `${n} rodadas (${fmtHM(m.bgSec)} + ${fmtHM(m.sec)})`;
+    const errs = m.eff > 0 ? `<span>eficiência</span> <b class="mono">${fmtPct(m.eff)}</b> · <span>contagem ±${nf(m.countErr * 100, 0)}%</span> · <span>fixos ±${nf(m.fixErr * 100, 0)}%</span>` : tr("o pico do K-40 ainda não apareceu");
+    const not = m.usable ? "" : `<small class="att-text">${tr("Ainda não dá para usar: rode mais uma rodada e o app soma.")}</small>`;
+    return `<div class="rc-act-mount"><div class="t"><b>${mountNm(m)}</b> <span class="muted">· <span>${tr(ACT_MAT[m.material] || "KCl")}</span> · ${nf(m.massG, 0)} g</span><small>${errs}</small><small>${pk} <span class="mono">${fmtDM(m.lastT)}</span> · <span>${rounds}</span></small>${not}</div>` +
+      `<button type="button" class="btn${m.usable ? " accent" : ""}" data-mmeasure="${escHtml(m.id)}"${m.usable ? "" : " disabled"}>Medir com esta</button>` +
+      `<details class="rc-act-menu"><summary aria-label="${tr("mais opções")}">⋯</summary><div><button type="button" class="link" data-mround="${escHtml(m.id)}">somar outra rodada</button><button type="button" class="link" data-mrename="${escHtml(m.id)}">renomear</button><button type="button" class="link" data-mdel="${escHtml(m.id)}">apagar</button></div></details></div>`;
+  }
   function actCalHtml(v) {
-    const c = v.cal || {}, geo = actGeomHtml(c.geometry || "");
-    if (!c.kcl && !c.th) return `<div class="rc-act-calrow no"><span class="d"></span><div class="t">Falta calibrar. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez só, com sal light ou KCl puro, na posição em que você vai medir.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar</button></div>`;
-    const shape = c.th ? `forma da curva pelo tório em ${fmtDM(c.th.t)}` : "forma da curva estimada (o tório melhora)";
-    const head = c.kcl ? `Calibrado com KCl em ${fmtDM(c.kcl.t)} · <span class="mono">±${nf(c.kcl.effErr * 100, 0)}%</span>` : "Escala aproximada: falta o KCl.";
-    return `<div class="rc-act-calrow${c.kcl ? " ok" : " no"}"><span class="d"></span><div class="t">${head}<small>${geo} · <span>${shape}</span></small></div>` +
-      `<button type="button" class="link" data-eff aria-expanded="${act.effOpen}">detalhes</button><button type="button" class="btn${c.kcl ? "" : " accent"}" data-cal="kcl">${c.kcl ? "Calibrar de novo" : "Calibrar"}</button></div>`;
+    const ms = v.mounts || [], c = v.cal || {};
+    // a calibração única de antes das montagens: riscada (a de depois da
+    // correção do pico já virou montagem no Go)
+    const old = c.kcl && !c.kcl.gain ? `<div class="rc-act-mount old"><div class="t"><s>Calibração de ${fmtDM(c.kcl.t)} · ±${nf(c.kcl.effErr * 100, 0)}%</s><small class="att-text">${tr("Feita antes da correção do pico do K-40: saiu baixa. Calibre de novo.")}</small></div></div>` : "";
+    if (!ms.length) return `<p class="rc-act-lbl">Suas montagens calibradas</p>${old}<div class="rc-act-calrow no"><span class="d"></span><div class="t">Nenhuma montagem calibrada. <span class="muted">Sem isso, os Bq são só um chute (±100%).</span><small>Uma vez por montagem (o pote, o material e a posição do RC102), com KCl.</small></div><button type="button" class="btn accent" data-cal="kcl">Calibrar uma montagem</button></div>`;
+    return `<p class="rc-act-lbl">Suas montagens calibradas</p><div class="rc-act-mounts">${ms.map(actMountRow).join("")}${old}</div><p><button type="button" class="btn" data-cal="kcl">+ Calibrar outra montagem</button></p>`;
   }
   function actEffHtml(v) {
     const c = v.cal || {}, es = [250, 500, 1000, 1500, 2000, 2500];
@@ -1804,6 +1856,11 @@
   }
   function actRenderForm(v) {
     const c = actChoice(), hist = v.history || [];
+    // 2.104.0: a amostra é medida com a calibração de uma montagem
+    const usable = (v.mounts || []).filter((m) => m.usable);
+    if (act.mount !== "-" && !usable.some((m) => m.id === act.mount)) act.mount = usable.length ? usable[0].id : "-";
+    setHTML($("rcActMount"), usable.map((m) => `<option value="${escHtml(m.id)}" data-no-tr${m.id === act.mount ? " selected" : ""}>${escHtml(mountTx(m))} · ±${nf(m.totErr * 100, 0)}%</option>`).join("") +
+      `<option value="-"${act.mount === "-" ? " selected" : ""}>${tr("sem calibração (Bq só um chute, ±100%)")}</option>`);
     setHTML($("rcActChips"), actChipsHtml(v));
     const exp = c.saved
       ? `<div><span class="k">sua referência</span><b>${actRefText(c.saved, hist)}</b></div>`
@@ -1834,32 +1891,42 @@
   // eficiência sair com ~15% de dúvida (o app guarda até 20%). Conta com o
   // chute de 0,005% em 1.460 keV (o que o RC102 deu com 250 g de sal light
   // em volta) e ~0,025 cps de fundo no pico. Arredonda para 30 min, mín. 1 h.
-  const ACT_EFF_GUESS = 0.00005, ACT_K_BG = 0.025, ACT_CAL_REL = 0.15;
-  function actCalPhaseSec(massG, pct) {
-    const bq = Math.max(0, massG) * (Math.max(0, pct) / 100) * (39.0983 / 74.551) * 31.7; // K-40 do KCl (o mesmo do Go)
-    const net = bq * 0.1066 * ACT_EFF_GUESS;
-    if (!(net > 0)) return 0;
-    const sec = (net + 2 * ACT_K_BG) / (ACT_CAL_REL * net) ** 2;
-    return Math.max(3600, Math.ceil(sec / 1800) * 1800);
+  // 2.102.1: pelas duas calibrações do ACE (0,0045% e 0,006%; 6 h deram
+  // ±20,3% em vez dos 15% previstos), eficiência 0,006% e fundo efetivo no
+  // pico de 0,075 cps (com as linhas do Bi-214 vizinhas no ajuste): 250 g de
+  // sal light passam a pedir ~11 h por fase
+  // 2.104.0: fundo e KCl sempre com o mesmo tempo; o tempo não sai mais da
+  // massa (mais sal longe do cristal não aumenta o sinal). Uma montagem que já
+  // tem rodada recomenda pelo sinal dela.
+  const ACT_CAL_REL = 0.15;
+  const ACT_CAL_T = [3600, 7200, 10800, 21600];
+  function actCalRec(m) {
+    if (m && m.eff > 0 && m.countErr > 0 && m.sec > 0) {
+      // para a soma chegar a ±15% de contagem: rel² cai com o tempo somado
+      // QA 2.104.0: pronta é total ≤ 20%; com sal light (fixos ±15%) a contagem precisa de ≤ ±13%
+      const goal = Math.min(0.15, 0.9 * Math.sqrt(Math.max(0.0004, 0.04 - (m.fixErr || 0) ** 2)));
+      const need = m.sec * ((m.countErr / goal) ** 2) - m.sec;
+      return ACT_CAL_T.find((x) => x >= need) || ACT_CAL_T[ACT_CAL_T.length - 1];
+    }
+    return act.setup === "becker" && act.mat === "light" ? 10800 : 3600;
   }
   function actRenderCal(v) {
-    const k = act.calKind, light = act.kclType !== "100";
-    document.querySelectorAll("#rcActCalSteps [data-k]").forEach((b) => { b.classList.toggle("cur", b.dataset.k === k); b.setAttribute("aria-pressed", String(b.dataset.k === k)); });
-    document.querySelectorAll("#rcActCalFlow [data-for]").forEach((el) => { el.hidden = el.dataset.for !== k; });
-    $("rcActPctBox").hidden = k !== "kcl" || !light;
-    document.querySelectorAll("#rcActKclType button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.kclType)));
-    actGeomFill($("rcActCalGeom"), (v.cal && v.cal.geometry) || "");
-    $("rcActCalHint").textContent = k === "kcl"
-      ? tr("% de KCl: mg de potássio em 1 g × 0,19 (está no rótulo). O sal em volta do RC102 (becker Marinelli), sempre do mesmo jeito; com o pote só encostado, o RC102 vê bem menos e o tempo não basta. O fundo é medido com o sal longe (uns 3 m) e o aparelho no mesmo lugar.")
-      : tr("O eletrodo encostado no RC102. Serve para a forma da curva (como a eficiência muda com a energia): as três linhas usadas vêm do mesmo ramo da série, então a idade não atrapalha a forma, só a escala.");
-    const calSec = k === "kcl" ? actCalPhaseSec(actNum("rcActCalMass"), light ? actNum("rcActPct") : 100) : 3600;
-    act.calSmpSec = calSec || 3600;
+    const m = act.calMount ? (v.mounts || []).find((x) => x.id === act.calMount) : null;
+    $("rcActCalNew").hidden = !!m;
+    setHTML($("rcActCalTitle"), m ? `<span>${tr("Mais uma rodada em")}</span> <b>${mountNm(m)}</b>` : tr("Calibrar uma montagem"));
+    document.querySelectorAll("#rcActSetup button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.setup)));
+    document.querySelectorAll("#rcActMat button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.mat)));
+    document.querySelectorAll("#rcActBgMode button").forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.v === act.calBgMode)));
+    $("rcActPctBox").hidden = act.mat !== "light";
+    const rec = actCalRec(m);
+    act.calSmpSec = act.calPick || rec;
     act.calBgSec = act.calSmpSec;
-    let tot = actTotal(true, act.calBgSec, act.calSmpSec, k === "kcl" ? tr("com o sal") : tr("com o eletrodo"));
-    // muito tempo: diz antes de começar (mais sal ou KCl puro encurtam)
-    if (k === "kcl" && 2 * act.calSmpSec > 24 * 3600) tot += `<span class="warn-text small" style="display:block">${light ? tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais sal, bem apertado em volta do RC102, ou KCl puro.`) : tr(`Com essa quantidade, a calibração leva ${fmtHM(2 * act.calSmpSec)}. Use mais KCl, bem apertado em volta do RC102.`)}</span>`;
-    setHTML($("rcActCalTot"), tot);
-    $("rcActCalStart").textContent = k === "kcl" ? tr("Começar a calibração") : tr("Medir o tório");
+    setHTML($("rcActCalT"), actSegHtml(ACT_CAL_T, act.calSmpSec, rec));
+    $("rcActCalHint").textContent = m
+      ? tr("Monte igual à rodada anterior: o mesmo pote, a mesma altura e o RC102 na mesma posição. O app soma esta rodada às anteriores.")
+      : act.setup === "pote1l" ? tr("1 h recomendado para esta montagem (deve dar ±10–15%). Aos 30 min o app confere o pico e diz quanto vai dar.") : tr("Aos 30 min o app confere o pico e diz quanto vai dar com o tempo marcado.");
+    setHTML($("rcActCalTot"), `<span>Total:</span> <b>${fmtHM(act.calBgSec)}</b> <span>de fundo +</span> <b>${fmtHM(act.calSmpSec)}</b> <span>de KCl</span><span class="small muted" style="display:block">${tr("fundo e KCl sempre com o mesmo tempo")}</span>`);
+    $("rcActCalStart").textContent = m ? tr("Começar a rodada") : tr("Começar a calibração");
     $("rcActCalStart").disabled = !v.connected;
     $("rcActCalErr").textContent = v.connected ? $("rcActCalErr").dataset.msg || "" : tr("Conecte o RC102 para medir.");
   }
@@ -1902,11 +1969,74 @@
     return `<p class="att-text">${tr(`Esta saiu com ${nova}, pior que a que está em uso (${atual}), então a atual continua valendo.`)}</p>` +
       (live ? `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Usar a nova (${nova})`)}</button></p>` : "");
   }
+  // 2.102.1: a do KCl que não foi guardada; até ±30% dá para salvar mesmo assim
+  // (o chute sem calibração é ±100%), também pelo histórico
+  function actNotSavedHtml(r) {
+    const pe = `±${nf(r.kcl.effErr * 100, 1)}%`;
+    if (r.used) return `<p>${tr(`Você salvou esta calibração mesmo assim (${pe}). A de antes, se tinha, ficou guardada: dá para voltar em detalhes.`)}</p>`;
+    if (r.kcl.effErr > 0.3) return `<p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>`;
+    const cur = act.v && act.v.cal && act.v.cal.kcl;
+    if (cur && cur.effErr <= r.kcl.effErr) return `<p class="att-text">${tr(`Esta saiu com ${pe}, pior que a que está em uso (±${nf(cur.effErr * 100, 1)}%), então a atual continua valendo.`)}</p>`;
+    return `<p class="warn-text">${tr(`A incerteza ficou em ${pe}, acima do limite de ±20%, então a calibração não foi guardada sozinha.`)}</p>` +
+      `<p class="small muted">${tr("Ainda é bem melhor que sem calibração (±100%). Dá para salvar assim e medir de novo depois com mais sal ou mais tempo: o app pergunta antes de trocar por uma pior.")}</p>` +
+      `<p><button type="button" class="btn" data-usecal="${r.t}">${tr(`Salvar mesmo assim (${pe})`)}</button></p>`;
+  }
+  // 2.103.0 (avaliação do Bq): onde o K-40 foi achado; a escala do RC102 pode
+  // estar uns % fora (no do ACE, o pico aparece em ~1.415 keV), e a conta corrige
+  function actK40Html(g, kcl) {
+    if (!g) return "";
+    const pk = nf(g.peakKeV, 0), pct = nf(Math.abs(g.gain - 1) * 100, 1);
+    if (g.found && Math.abs(g.peakKeV - 1460.8) > 15) return `<p class="small att-text">${g.gain > 1 ? `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% baixa; a conta corrige.` : `K-40 achado em ${pk} keV: a escala de energia do RC102 está ${pct}% alta; a conta corrige.`}</p>`;
+    if (g.found) return `<p class="small ok-text">K-40 achado em ${pk} keV.</p>`;
+    // QA: numa amostra o K-40 é procurado no fundo, que já está pronto: "ainda" não cabe
+    if (g.gain !== 1) return `<p class="small muted">Escala de energia: a achada na calibração (K-40 em ${pk} keV).</p>`;
+    return `<p class="small muted">${kcl ? tr("K-40 ainda não apareceu claro: a conta usa a escala que o RC102 manda e pode mudar bastante quando ele aparecer.") : tr("O K-40 do fundo não apareceu claro: a conta usa a escala que o RC102 manda. Calibrar com o KCl corrige.")}</p>`;
+  }
+  // 2.104.0 (avaliação do Bq): com o KCl rodando, três conferências e a
+  // previsão pelo sinal real; nada de eficiência piscando antes de 30 min
+  function actCheckHtml(v, t, tg) {
+    const c = v.check;
+    if (!c) return `<p class="small muted">${tr("As conferências aparecem com 10 min.")}</p>`;
+    const pct = nf(Math.abs(c.bandRise) * 100, 0), sg = c.bandRise >= 0 ? "+" : "−";
+    let h = c.bandRise >= 0.05
+      ? `<p class="small ok-text">✓ O RC102 está vendo o KCl: faixa de 300 a 1.400 keV ${sg}${pct}%</p>`
+      : `<p class="small warn-text">A faixa de 300 a 1.400 keV quase não subiu (${sg}${pct}%): confira se o RC102 está dentro do KCl.</p>`;
+    if (!c.ready) return h + `<p class="small muted">${tr("O pico do K-40, o sinal e a previsão aparecem com 30 min.")}</p>`;
+    h += actK40Html(v.k40, true);
+    if (c.signalCpm > 0 && c.expectHi > 0) {
+      // QA 2.104.0: com 30 min o pico ainda tem ±20–40%; só diz "fora" além disso
+      const e = 1.64 * (c.signalErr || 0), okSig = c.signalCpm * (1 + e) >= c.expectLo && c.signalCpm * (1 - e) <= c.expectHi;
+      h += okSig
+        ? `<p class="small ok-text">✓ Sinal: ${nf(c.signalCpm, 1)} contagens/min, combina com a faixa (esperado ${nf(c.expectLo, 1)}–${nf(c.expectHi, 1)})</p>`
+        : `<p class="small att-text">Sinal: ${nf(c.signalCpm, 1)} contagens/min, fora do esperado pela faixa (${nf(c.expectLo, 1)}–${nf(c.expectHi, 1)}): confira a posição.</p>`;
+    } else if (!(c.signalCpm > 0)) h += `<p class="small att-text">${tr("O pico do K-40 ainda não passou do fundo: confira se o RC102 está dentro do KCl.")}</p>`;
+    if (v.liveKcl && v.liveKcl.eff > 0) h += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 0)}%</p>`;
+    if (c.forecast > 0) {
+      h += `<p class="small"><b>Previsão:</b> no fim de ${fmtHM(tg || t)}: ±${nf(c.forecast * 100, 0)}% de contagem. Com este fundo, o melhor possível é ±${nf(c.best * 100, 0)}%.</p>`;
+      // QA 2.104.0: o que decide é a montagem inteira (as rodadas somadas e os fixos do material)
+      if (c.sumTotal > 0) h += `<p class="small">A montagem fica com ±${nf(c.sumTotal * 100, 0)}% no total (contagem ±${nf(c.sumCount * 100, 0)}% e o rótulo do material).</p>`;
+      if ((c.sumTotal || c.forecast) > 0.2) h += `<p class="small att-text">${tr("Vai faltar tempo: no fim, rode mais uma rodada e o app soma as duas.")}</p>`;
+    }
+    return h;
+  }
+  function actMountResHtml(r) {
+    const m = r.mount;
+    const head = `<p class="small muted">${mountNm(m)} · <span>${tr(ACT_MAT[m.material] || "KCl")}</span> · ${nf(m.massG, 0)} g · ${fmtHM(r.bgSec)} + ${fmtHM(r.sec)}</p>`;
+    const k = r.kcl;
+    let h = head + actK40Html(r.k40, true);
+    h += k ? `<p><span>eficiência em 1.461 keV nesta rodada:</span> <b class="mono">${fmtPct(k.eff)}</b> · <span>contagem ±${nf(k.effErr * 100, 0)}%</span></p>` : `<p class="att-text">${tr("O pico do K-40 não passou do fundo nesta rodada. Ela entra na soma mesmo assim (tirar só as baixas puxaria a eficiência para cima).")}</p>`;
+    const n = (m.rounds || []).length;
+    h += m.eff > 0 ? `<p class="rc-act-big"><span>eficiência da montagem:</span> <b class="mono">${fmtPct(m.eff)}</b></p><p class="small"><span>contagem ±${nf(m.countErr * 100, 0)}%</span> · <span>fixos ±${nf(m.fixErr * 100, 0)}%</span> · <span>total ±${nf(m.totErr * 100, 0)}%</span>${n > 1 ? ` · <span>somadas ${n} rodadas: ${fmtHM(m.bgSec)} + ${fmtHM(m.sec)}</span>` : ""}</p>` : "";
+    h += m.usable ? `<p class="ok-text small">${tr("Pronta para medir amostras nesta montagem.")}</p>` : `<p class="att-text small">${tr("Ainda não dá para usar: rode mais uma rodada e o app soma.")}</p>`;
+    return h;
+  }
   function actResHtml(r) {
     let h = "";
+    if (r.kind === "kcl" && r.mount) return actMountResHtml(r);
     if (r.kind === "kcl") {
+      h += actK40Html(r.k40, true);
       if (r.kcl && r.worse) h += `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>` + actWorseHtml(r, `±${nf(r.kcl.effErr * 100, 1)}%`, `±${nf(r.prevErr * 100, 1)}%`);
-      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p><p class="warn-text">${tr("O pico do K-40 quase não apareceu acima do fundo, então a calibração não foi guardada (precisa de ±20% ou menos). Confira se o RC102 está encostado no sal pelo lado do cristal e meça de novo.")}</p>` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
+      else h += r.kcl && r.notSaved ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b></p>${actNotSavedHtml(r)}` : r.kcl ? `<p>KCl: ${fmtBq(r.expected)}Bq de K-40 esperados · eficiência medida em 1.460 keV: <b class="mono">${fmtPct(r.kcl.eff)} ± ${nf(r.kcl.effErr * 100, 1)}%</b>${r.prev ? ` (antes: ${fmtPct(r.prev)})` : ""}</p><p>A calibração foi atualizada.</p>` : `<p class="warn-text">O pico do K-40 não apareceu: confira a massa, a posição e o tempo.</p>`;
     } else if (r.kind === "torio") {
       if (r.th && r.worse) h += `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p>` + actWorseHtml(r, `± ${nf(r.th.bErr, 2)}`, `± ${nf(r.prevErr, 2)}`);
       else h += r.th ? `<p>Tório: inclinação da curva <b class="mono">${nf(r.th.b, 2)} ± ${nf(r.th.bErr, 2)}</b> (pelas linhas de 238,6, 583,2 e 2.614,5 keV)</p><p>${act.v && act.v.cal && act.v.cal.kcl ? "A calibração foi atualizada; a escala continua a do KCl." : "A calibração foi atualizada; sem KCl, a escala vem do tório (aproximada, depende da idade)."}</p>` : `<p class="warn-text">As linhas do tório não apareceram o bastante (precisa de pelo menos duas).</p>`;
@@ -1921,12 +2051,13 @@
     for (const l of r.thLines || []) lines.push(`${nf(l.kev, 1)} keV: ${nf(l.area, 0)} ± ${nf(l.areaErr, 0)} contagens`);
     const notes = (r.nuclides || []).filter((n) => n.note).map((n) => `<p class="small muted"><span data-no-tr>${escHtml(n.id)}</span>: <span>${escHtml(n.note)}</span></p>`).join(""); // 2.101.8: a nota traduz sozinha
     const meta = `${actNameHtml(r)}<span> · ${r.massG > 0 ? nf(r.massG, 1) + " g" : "sem massa"} · amostra ${fmtSec(r.sec)} · fundo ${fmtSec(r.bgSec)} · ${calTxt(r)}</span>${actWhereTxt(r)}`; // 2.101.15 (item 138): a parte do app num span, a Posição da pessoa fora
-    h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
+    h += `<details class="rc-act-more"><summary>Linhas usadas e detalhes técnicos</summary>${r.kind !== "kcl" ? actK40Html(r.k40) : ""}${lines.length ? `<p class="small muted mono">${lines.join(" · ")}</p>` : ""}${notes}<p class="small muted">${meta}</p></details>`;
     return h;
   }
   function actSummary(r) {
     if (r.worse && !r.used) return tr("pior que a atual: não usada");
-    if (r.kind === "kcl") return r.kcl && r.notSaved ? tr("pico fraco: não guardada") : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
+    if (r.kind === "kcl" && r.mount) return r.mount.eff > 0 ? `${mountTx(r.mount)} · eficiência ${fmtPct(r.mount.eff)} ±${nf(r.mount.totErr * 100, 0)}%` : mountTx(r.mount);
+    if (r.kind === "kcl") return r.kcl && r.notSaved && !r.used ? (r.kcl.effErr > 0.3 ? tr("pico fraco: não guardada") : tr(`±${nf(r.kcl.effErr * 100, 1)}%: não guardada`)) : r.kcl ? `eficiência ${fmtPct(r.kcl.eff)} em 1.460 keV` : "sem pico";
     if (r.kind === "torio") return r.th ? `inclinação ${nf(r.th.b, 2)}` : "sem linhas";
     const perKg = r.massG > 0 && !r.loose, u = perKg ? "Bq/kg" : "Bq";
     return (r.nuclides || []).map((n) => `${n.id} ${n.detected ? fmtBq(perKg ? n.bqKg : n.bq) + u : "< " + fmtBq(perKg ? n.mdaKg : n.mda) + u}`).join(" · ");
@@ -1968,10 +2099,16 @@
     const steps = ["Fundo", "Colocar a amostra", "Medindo", "Resultado"];
     setHTML($("rcActStep"), steps.map((s, i) => `<span class="${i < idx || (i === 3 && ph === "pronto") ? "done" : i === idx ? "now" : ""}"><i>${i < idx || (i === 3 && ph === "pronto") ? "✓" : i + 1}</i>${tr(s)}</span>`).join(""));
     const nm = escHtml(o.name || ""), mass = o.massG > 0 ? ` · ${nf(o.massG, 1)} g` : "";
-    const where = o.loose ? tr("pedra solta") : actGeomHtml(o.geometry || "");
+    const where = o.loose ? tr("pedra solta") : o.kind === "kcl" && (o.mountName || o.setup) ? mountNm({ name: o.mountName, setup: o.setup }) : actGeomHtml(o.geometry || "");
     setHTML($("rcActWhat"), `<b>${actNameHtml({ ...o, name: o.name || "" })}</b><span class="muted">${mass}</span>${where ? ` <span class="muted">·</span> <span class="muted">${where}</span>` : ""}`);
     $("rcActWhat").hidden = ph === "pronto";
-    $("rcActDo").textContent = {
+    const mnt = o.kind === "kcl" && (o.setup || o.mountId);
+    $("rcActDo").textContent = mnt ? {
+      // 2.104.0: calibração por montagem: o fundo no pote com sal comum (o branco) ou sem nada
+      fundo: o.bgMode === "branco" ? tr("Ponha o RC102 no pote com sal de cozinha comum, na mesma posição em que vai ficar no KCl. O KCl fica longe (uns 3 m).") : tr("Deixe o KCl longe (uns 3 m) e o RC102 no lugar de sempre."),
+      trocar: tr("Passe o RC102 para o pote com o KCl, na mesma posição, e clique em Começar."),
+      amostra: "", pronto: "",
+    }[ph] || "" : {
       fundo: tr("Tire a amostra de perto (uns 3 m) e deixe o RC102 no lugar de sempre."),
       trocar: tr("Coloque a amostra na posição da calibração e clique em Começar."),
       amostra: "", pronto: "",
@@ -1983,25 +2120,34 @@
     nx.textContent = tr({ fundo: "Encerrar o fundo agora", trocar: "Começar", amostra: "Encerrar agora", pronto: "Nova medida" }[ph] || "");
     nx.classList.toggle("accent", ph !== "amostra" && ph !== "fundo");
     $("rcActCancel").hidden = ph === "pronto";
-    $("rcActAgain").hidden = ph !== "pronto" || o.kind !== "amostra";
+    $("rcActAgain").hidden = ph !== "pronto" || !(o.kind === "amostra" || (mnt && v.result && v.result.mountId));
+    $("rcActAgain").textContent = o.kind === "kcl" ? tr("Somar outra rodada") : tr("Medir de novo");
     // 2.101.6: depois de guardar, o botão some (a amostra com esse nome já é sua)
     const mine = (v.samples || []).some((s) => "s:" + s.id === o.sampleId || foldTxt(s.name) === foldTxt(o.name || ""));
     $("rcActKeep").hidden = ph !== "pronto" || o.kind !== "amostra" || mine;
     $("rcActRunErr").textContent = $("rcActRunErr").dataset.msg || "";
     let live = "";
     if (ph === "amostra") {
-      if (v.liveKcl) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}%${v.liveKcl.effErr > 0 ? ` · para ±3%: ~${fmtSec(t * (v.liveKcl.effErr / 0.03) ** 2)} no total` : ""}</p>`;
+      if (mnt) live += actCheckHtml(v, t, tg);
+      else live += actK40Html(v.k40, o.kind === "kcl");
+      // 2.102.2: o tempo é para ±15% (o que a calibração mira; ±3% o RC102 não
+      // alcança). O ACE gosta de ver a conta desde o começo; quando a contagem
+      // no pico fica abaixo do fundo (normal no começo), a linha não some mais
+      // 2.102.2 (QA): passado o alvo, a conta dava um total menor que o já medido ("~7 h" com 11 h)
+      if (mnt) { /* 2.104.0: as conferências acima */ } else if (v.liveKcl && v.liveKcl.effErr > ACT_CAL_REL) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · para ±15%: ~${fmtSec(t * (v.liveKcl.effErr / ACT_CAL_REL) ** 2)} no total</p>`;
+      else if (v.liveKcl && v.liveKcl.effErr > 0) live += `<p class="mono small">eficiência até agora: ${fmtPct(v.liveKcl.eff)} ± ${nf(v.liveKcl.effErr * 100, 1)}% · já chegou a ±15%: pode encerrar</p>`;
+      else if (o.kind === "kcl" && t >= 60) live += `<p class="mono small">${tr("eficiência até agora: o pico do K-40 ainda está abaixo do fundo (normal no começo)")}</p>`;
       // 2.101.4: a contagem mostra na hora se o RC102 está vendo o sal (2.101.11: de
       // 300 a 1.400 keV; o total pode até cair, porque o sal blinda o fundo baixo)
-      if (o.kind === "kcl" && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
-      if (v.kclWeak) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.")}</p>`;
+      if (o.kind === "kcl" && !mnt && v.bgCps > 0 && v.smpCps > 0) live += `<p class="mono small">${tr("contagem de 300 a 1.400 keV")}: ${nf(v.smpCps, 1)} cps · ${tr("fundo")} ${nf(v.bgCps, 1)} cps (${v.smpCps >= v.bgCps ? "+" : "−"}${nf(Math.abs(v.smpCps / v.bgCps - 1) * 100, 0)}%)${v.homeCps > 0 ? ` · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps` : ""}</p>`;
+      if (v.kclWeak && !mnt) live += `<p class="warn-text">${tr("O RC102 não está vendo o sal: a contagem de 300 a 1.400 keV quase não subiu em relação ao fundo e o pico do K-40 não aparece. Com o sal em volta do aparelho, ela sobe uns 20%. Confira a posição e se o fundo foi medido com o sal longe.")}</p>`;
       if (v.liveTh) live += `<p class="mono small">inclinação até agora: ${nf(v.liveTh.b, 2)} ± ${nf(v.liveTh.bErr, 2)}</p>`;
       if (o.kind === "amostra") live += actNucRows(v.live, o, true);
       if (!live && t < 10) live = `<p class="small muted">Os números aparecem depois de alguns segundos.</p>`;
     } else if (ph === "fundo" && v.phaseCps > 0 && v.homeCps > 0) {
       // 2.101.4: fundo medido com o sal perto estraga a calibração inteira
       live = `<p class="mono small">${tr("contagem agora")}: ${nf(v.phaseCps, 1)} cps · ${tr("normal da casa")} ${nf(v.homeCps, 1)} cps</p>`;
-      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa: o sal (ou outra amostra) parece estar perto do RC102. Afaste o sal uns 3 m, tire o aparelho do becker e comece de novo; com o sal perto, a calibração sai errada.")}</p>`;
+      if (v.bgHigh) live += `<p class="warn-text">${tr("O fundo está bem acima do normal da casa. Se tiver alguma amostra perto do RC102, afaste uns 3 m e comece de novo. Minério guardado no mesmo cômodo também sobe o fundo; se ele ficar no mesmo lugar até o fim, pode seguir.")}</p>`;
     } else if (ph === "pronto" && v.result) {
       const r = v.result, mass = r.massG > 0 ? ` · ${nf(r.massG, 1)} g` : "";
       live = `<div class="rc-act-res"><h4>${actNameHtml(r)}</h4><p class="small muted">${fmtHM(r.sec)}${mass} · ${tr(calTxt(r))}</p>${actResHtml(r)}</div>`;
@@ -2016,7 +2162,7 @@
     const c = actChoice();
     const o = {
       kind: "amostra", name: actOrig($("rcActName").value.trim(), c.preset && c.name) || c.name || "", massG: actNum("rcActMass"), geometry: actOrig($("rcActGeom").value, act.v && act.v.cal && act.v.cal.geometry),
-      newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: actLoose(c), sampleId: act.pick,
+      newBg: act.bgMode === "novo", bgSec: act.bgSec, smpSec: act.smpSec, pct: 0, ageY: 0, loose: actLoose(c), sampleId: act.pick, mountId: act.mount !== "-" ? act.mount : "",
       nuclides: [...document.querySelectorAll("#rcActNucs input:checked")].map((x) => x.value),
     };
     // 2.101.15 (item 135): pedra solta não leva a Posição do pote da calibração
@@ -2026,9 +2172,12 @@
   }
   function actStart() { actStartOpts(actFormOpts(), $("rcActErr")); }
   function actStartCal() {
-    const k = act.calKind, o = { kind: k, name: "", massG: actNum("rcActCalMass"), geometry: actOrig($("rcActCalGeom").value, act.v && act.v.cal && act.v.cal.geometry), newBg: true, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec, nuclides: [], pct: 0, ageY: 0 };
-    if (k === "kcl") o.pct = act.kclType === "100" ? 100 : actNum("rcActPct");
-    else { o.pct = +$("rcActTh").value; o.ageY = actNum("rcActAge"); }
+    const o = { kind: "kcl", name: "", newBg: true, bgSec: act.calBgSec || 3600, smpSec: act.calSmpSec || 3600, nuclides: [], pct: 0, ageY: 0, geometry: "" };
+    if (act.calMount) o.mountId = act.calMount;
+    else {
+      Object.assign(o, { setup: act.setup, material: act.mat, bgMode: act.calBgMode, massG: actNum("rcActCalMass"), mountName: $("rcActMountName").value.trim() });
+      o.pct = act.mat === "puro" ? 100 : act.mat === "adubo" ? 95 : actNum("rcActPct");
+    }
     actStartOpts(o, $("rcActCalErr"));
   }
   async function actNext() {
@@ -2040,7 +2189,8 @@
   // medir de novo: as mesmas escolhas, com o fundo que acabou de ser medido
   async function actAgain() {
     const v = act.v; if (!v || !v.opts) return;
-    const o = { ...v.opts, newBg: !(v.savedBg && Date.now() - v.savedBg.t < 864e5) };
+    // 2.104.0: na calibração por montagem, outra rodada na mesma montagem (fundo novo)
+    const o = v.opts.kind === "kcl" && v.result && v.result.mountId ? { ...v.opts, mountId: v.result.mountId, newBg: true } : { ...v.opts, newBg: !(v.savedBg && Date.now() - v.savedBg.t < 864e5) };
     await api.CloseActivity();
     actStartOpts(o, $("rcActRunErr"));
   }
@@ -2232,23 +2382,21 @@
     segPick("rcActSmpT", (x) => { act.smpSec = +x; });
     segPick("rcActBgT", (x) => { act.bgSec = +x; });
     segPick("rcActBg", (x) => { act.bgMode = x; });
-    segPick("rcActKclType", (x) => { act.kclType = x; });
+    segPick("rcActSetup", (x) => { act.setup = x; act.calPick = 0; });
+    segPick("rcActMat", (x) => { act.mat = x; act.calPick = 0; });
+    segPick("rcActBgMode", (x) => { act.calBgMode = x; });
+    segPick("rcActCalT", (x) => { act.calPick = +x; });
+    $("rcActMount").addEventListener("change", (e) => { act.mount = e.target.value; actRender(); });
     // 2.101.3: a massa digitada fica; o padrão (500 g / 40 g) só entra no campo
     // que a pessoa ainda não mexeu, e cada referência guarda a sua
-    $("rcActCalMass").addEventListener("input", (e) => { act.calMass[act.calKind] = e.target.value; if (act.v) actRenderCal(act.v); });
+    $("rcActCalMass").addEventListener("input", (e) => { act.calMass.kcl = e.target.value; if (act.v) actRenderCal(act.v); });
     $("rcActPct").addEventListener("input", () => { if (act.v) actRenderCal(act.v); });
     $("rcActChips").addEventListener("click", (e) => {
       if (e.target.closest("[data-keep]")) { actKeep(actFormOpts()); return; }
       const b = e.target.closest("button[data-pick]"); if (b && b.dataset.pick !== act.pick) actPick(b.dataset.pick); // 2.101.5: o mesmo cartão não apaga o digitado
     });
     $("rcActExpect").addEventListener("click", (e) => { const b = e.target.closest("[data-forget-sample]"); if (b) actForgetSample(b.dataset.forgetSample); });
-    $("rcActCalSteps").addEventListener("click", (e) => {
-      const b = e.target.closest("button[data-k]"); if (!b) return;
-      act.calKind = b.dataset.k;
-      calMassShow();
-      actRender();
-    });
-    const openCal = (k) => { act.mode = "calibrar"; act.calKind = k; calMassShow(); actRender(); };
+    const openCal = (k, mountId) => { act.mode = "calibrar"; act.calKind = "kcl"; act.calMount = mountId || ""; act.calPick = 0; calMassShow(); actRender(); };
     $("rcActCalBack").addEventListener("click", () => { act.mode = "medir"; actRender(); });
     $("rcActCalStart").addEventListener("click", actStartCal);
     $("rcActStart").addEventListener("click", actStart);
@@ -2264,6 +2412,26 @@
     $("rcActCancel").addEventListener("click", async () => { await api.CancelActivity(); actLoad(); });
     const calClick = async (e) => {
       const c = e.target.closest("[data-cal]"); if (c) { openCal(c.dataset.cal); return; }
+      // 2.104.0: montagens
+      const mm = e.target.closest("[data-mmeasure]");
+      if (mm) { act.mode = "medir"; act.mount = mm.dataset.mmeasure; actRender(); $("rcActForm").scrollIntoView({ block: "nearest" }); return; }
+      const mr = e.target.closest("[data-mround]"); if (mr) { openCal("kcl", mr.dataset.mround); return; }
+      const mn = e.target.closest("[data-mrename]");
+      if (mn) {
+        const m = ((act.v && act.v.mounts) || []).find((x) => x.id === mn.dataset.mrename);
+        const name = await askText({ title: tr("Renomear a montagem"), value: m ? m.name : "", ok: tr("Salvar") });
+        if (name == null) return;
+        try { await api.RenameActMount(mn.dataset.mrename, name); } catch (err) { toast(String(err), true); }
+        actLoad(); return;
+      }
+      const md = e.target.closest("[data-mdel]");
+      if (md) {
+        const ok = await askConfirm({ title: tr("Apagar esta montagem?"), text: tr("A eficiência e as rodadas dela somem. As medidas já feitas ficam no histórico."), ok: tr("Apagar") });
+        if (!ok) return;
+        try { await api.DeleteActMount(md.dataset.mdel); } catch (err) { toast(String(err), true); }
+        if (act.mount === md.dataset.mdel) act.mount = "";
+        actLoad(); return;
+      }
       if (e.target.closest("[data-eff]")) { act.effOpen = !act.effOpen; actRender(); return; }
       const rs = e.target.closest("[data-restore]");
       if (rs) {
@@ -2319,6 +2487,7 @@
     $("rcSpecMode").hidden = true; // 2.93 (E3): o seletor de cima faz isso
     $("rcSpecSpeedBox").hidden = rl.on;
     $("rcSpecSimTag").hidden = rl.on;
+    offCard($("rcSpecSimTag").closest(".rc-card"), !rl.on && !simOK(), "Conecte o RC102 para ver o espectro ao vivo e o acumulado do aparelho.");
     $("rcSpecLiveTag").hidden = !rl.on;
     $("rcSpecDesc").textContent = rl.on
       ? "Ao vivo, do seu RC102: é o mesmo espectro da tela do aparelho. Cada fóton que chega é contado no canal da energia dele, e os picos de cada isótopo vão aparecendo. Para medir uma amostra, encoste-a e clique em Recomeçar (o aparelho zera junto). A linha tracejada é o fundo da casa (o acumulado do aparelho) no mesmo tempo; os isótopos achados ficam marcados em cima dos picos. Aqui só aparece o que está acima do fundo da casa; os isótopos do próprio fundo aparecem no “Acumulado do aparelho”, depois de algumas horas. Passe o mouse num pico para ver qual isótopo costuma aparecer ali. O morro grande à esquerda, abaixo de uns 200 keV, não é um isótopo: são fótons que perderam energia no caminho (espalhados), e aparece em todo espectro."
@@ -2332,6 +2501,7 @@
   function show() {
     build();
     visible = true;
+    if (!sr.real) srMark(false); // 2.102.1: sem o RC102, o cartão da busca já abre com o aviso
     realTick(true);
     sgLoad();
     lgLoad();

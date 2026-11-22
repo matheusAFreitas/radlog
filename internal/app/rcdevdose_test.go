@@ -69,3 +69,26 @@ func TestRcDoseFromDeviceTail(t *testing.T) {
 		t.Fatalf("total %v, quero ~%v", c.Total, want)
 	}
 }
+
+// 2.102.1: no "Tudo" (que começa no primeiro dado do GMC-800), os dias antes
+// do primeiro dado do RC102 não são falta (o ACE via "faltam 10 dias sem dado")
+func TestRcDoseFromDeviceCoverageSinceFirst(t *testing.T) {
+	a := newTestApp(t)
+	to := time.Now().Truncate(time.Minute)
+	from := to.Add(-20 * 24 * time.Hour)
+	rcFrom := to.Add(-10 * 24 * time.Hour)
+	// o aparelho contou o tempo todo desde que chegou (total a cada hora)
+	for h := 0; h <= 240; h++ {
+		a.rcDoseLogAppend(rcFrom.Add(time.Duration(h)*time.Hour), 0.15*float64(h), float64(h)*3600)
+	}
+	var c DoseChart
+	if !a.rcDoseFromDevice(&c, from, to, time.Hour, nil, 0.15/60, 0.11/60) {
+		t.Fatal("não usou o aparelho")
+	}
+	if c.Coverage < 0.99 {
+		t.Fatalf("cobertura %.2f (quero ~1: antes do RC102 não é falta)", c.Coverage)
+	}
+	if c.HistFrom == 0 || c.HistMinutes > 10*24*60+5 {
+		t.Fatalf("histFrom %d, histMinutes %d", c.HistFrom, c.HistMinutes)
+	}
+}

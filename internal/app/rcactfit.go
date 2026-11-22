@@ -119,6 +119,10 @@ type ActCalKCl struct {
 	MassG  float64 `json:"massG"`
 	Pct    float64 `json:"pct"`
 	Sec    float64 `json:"sec"`
+	// 2.103.0: onde o K-40 foi achado (escala do aparelho) e o ganho usado;
+	// Gain 0 = calibração feita antes da correção do pico (saiu baixa)
+	PeakKeV float64 `json:"peakKeV,omitempty"`
+	Gain    float64 `json:"gain,omitempty"`
 }
 
 // ActCalTh é a forma da curva (e um valor absoluto aproximado) pelo tório.
@@ -293,10 +297,14 @@ func actFitSet(smp, bg actSpec, kev, F, lo, hi float64, cen []float64) (area, ae
 			continue
 		}
 		y := smp.C[i]
-		v := smp.C[i]
+		// 2.103.0 (avaliação do Bq): a variância vem da média de 9 canais
+		// vizinhos, não do canal sozinho. Com 0 a 5 contagens por canal, os
+		// canais que caíram por acaso pesavam mais e a área saía 20–30% baixa
+		// em medidas curtas (e aparecia "detectado" falso em pote vazio)
+		v := actNear(smp.C, i)
 		if r > 0 {
 			y -= r * bg.C[i]
-			v += r * r * bg.C[i]
+			v += r * r * actNear(bg.C, i)
 		}
 		w := 1 / math.Max(v, 1)
 		for k, c := range cen {
@@ -345,6 +353,16 @@ func actFitSet(smp, bg actSpec, kev, F, lo, hi float64, cen []float64) (area, ae
 		aerr[k] = math.Sqrt(math.Max(inv[k][k], 0)) * scale
 	}
 	return area, aerr, true
+}
+
+// actNear é a média de c nos 9 canais em volta de i.
+func actNear(c []float64, i int) float64 {
+	lo, hi := max(i-4, 0), min(i+4, len(c)-1)
+	t := 0.0
+	for k := lo; k <= hi; k++ {
+		t += c[k]
+	}
+	return t / float64(hi-lo+1)
 }
 
 // invert inverte uma matriz pequena (Gauss-Jordan com pivô).
@@ -483,7 +501,9 @@ func actAnalyze(smp, bg actSpec, ids []string, cal ActCal, massG float64) []ActN
 // actCalKCl mede a eficiência em 1.460,8 keV com o KCl.
 func actCalKCl(smp, bg actSpec, massG, pct float64) (*ActCalKCl, float64, float64) {
 	aK := massG * pct / 100 * actKPerKCl * actBqPerGK
-	pk := actFit(smp, bg, 1460.8)
+	// 2.103.0: no sal − fundo só existe o K-40; as vizinhas do ajuste geral
+	// (Bi-214, Ac-228…) só tiravam ou inventavam área. O K-40 mais uma reta.
+	pk, _ := actK40Net(smp, bg)
 	if !pk.ok || aK <= 0 || pk.Area <= 0 {
 		return nil, aK, 0
 	}

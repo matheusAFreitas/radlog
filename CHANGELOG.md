@@ -1,5 +1,202 @@
 # Versões
 
+## 2.104.1
+- Resumo, Comparar: a coluna "A − B" agora se chama "diferença" e diz o
+  sentido com os nomes dos dois períodos (por exemplo, Hoje − Ontem).
+
+**English**
+- Summary, Compare: the "A − B" column is now called "difference" and shows
+  the direction with the names of the two periods (for example, Today −
+  Yesterday).
+
+## 2.104.0
+Atividade (Bq): calibração por montagem.
+- A calibração com KCl agora é de uma montagem (o pote, o material e a
+  posição do RC102). Escolha o pote (pote de 1 L com tubo, béquer ou outra),
+  o material (KCl de adubo, KCl puro ou sal light) e o fundo (pote igual com
+  sal de cozinha comum, ou sem nada com o KCl a 3 m). Cada montagem ganha um
+  nome e pode ser renomeada ou apagada.
+- Fundo e KCl têm sempre o mesmo tempo. Uma rodada curta não se perde: dá
+  para somar outra rodada na mesma montagem e o app junta as duas (a soma
+  das áreas sobre a soma do esperado, inclusive rodadas em que o pico não
+  passou do fundo).
+- O ± da montagem separa a contagem dos erros fixos (o teor do material e,
+  sem branco, o fundo sem sal). A montagem só fica pronta para medir com
+  ±20% ou menos no total.
+- Conferências durante o KCl: com 10 min, se a faixa de 300 a 1.400 keV
+  subiu (o RC102 está vendo o KCl); com 30 min, o pico do K-40, se o sinal
+  combina com a faixa e a previsão de ± no fim do tempo marcado.
+- Na medida de amostra, escolha a montagem; a conta usa a eficiência e a
+  escala de energia dela. A calibração feita depois da correção do pico
+  (2.103.0) vira a primeira montagem sozinha. Sem montagem, a amostra sai
+  com o chute (±100%), não mais com a calibração única de antes.
+- Durante o KCl, a previsão mostra o ± total da montagem no fim (as rodadas
+  somadas mais o teor do material), e o tempo recomendado já conta com ele.
+
+**English**
+Activity (Bq): calibration per setup.
+- The KCl calibration now belongs to a setup (the pot, the material and the
+  RC102 position). Pick the pot (1 L pot with tube, beaker or other), the
+  material (fertilizer KCl, pure KCl or light salt) and the background (same
+  pot with regular table salt, or nothing with the KCl 3 m away). Each setup
+  gets a name and can be renamed or deleted.
+- Background and KCl always take the same time. A short round is not
+  wasted: you can add another round to the same setup and the app combines
+  them (sum of areas over sum of expected, including rounds where the peak
+  did not rise above the background).
+- The setup's ± separates counting from the fixed errors (the material's
+  content and, without a blank, the salt-free background). A setup is only
+  ready to measure at ±20% or less in total.
+- Checks during the KCl phase: at 10 min, whether the 300 to 1,400 keV band
+  rose (the RC102 sees the KCl); at 30 min, the K-40 peak, whether the
+  signal matches the band and the ± forecast at the end of the chosen time.
+- When measuring a sample, pick the setup; the calculation uses its
+  efficiency and energy scale. The calibration made after the peak fix
+  (2.103.0) becomes the first setup on its own. Without a setup, a sample
+  uses the guess (±100%), no longer the single calibration from before.
+- During the KCl phase, the forecast shows the setup's total ± at the end
+  (rounds summed plus the material's content), and the recommended time
+  already accounts for it.
+
+## 2.103.0
+Atividade (Bq): o pico do K-40 achado onde ele está (avaliação independente
+de 21/11):
+- A escala de energia que o RC102 manda pode estar uns % fora; no aparelho
+  do ACE o K-40 aparece em ~1.415 keV, não em 1.461. O app procurava o pico
+  no lugar fixo e pegava só 40–60% dele: as calibrações saíam ~40% baixas.
+  Agora cada medida acha o K-40, corrige a escala e mostra "K-40 achado em
+  X keV". Calibrações feitas antes disso aparecem como "feita antes da
+  correção do pico: calibre de novo".
+- O ajuste dos picos pesa cada canal pela média dos vizinhos, não pela
+  contagem dele sozinho: a área não sai mais 20–30% baixa em medidas curtas
+  e o "detectado" falso em pote vazio volta a ~5%.
+- Na calibração com KCl, o ajuste usa só o K-40 (mais o contínuo): as linhas
+  vizinhas não existem no sal − fundo e só tiravam ou inventavam área.
+- O fundo é posto na mesma escala de energia da amostra antes da conta.
+- Os dois espectros de cada medida (amostra e fundo) ficam guardados, para
+  refazer a conta quando o programa melhorar.
+
+**English**
+Activity (Bq): the K-40 peak found where it really is (independent review of
+11/21):
+- The energy scale the RC102 sends can be a few % off; on ACE's device K-40
+  shows at ~1,415 keV, not 1,461. The app looked for the peak at a fixed
+  place and caught only 40–60% of it: calibrations came out ~40% low. Now
+  each measurement finds K-40, corrects the scale and shows "K-40 found at
+  X keV". Calibrations made before this show as "made before the K-40 peak
+  fix: calibrate again".
+- The peak fit weights each channel by the average of its neighbours, not
+  by its own count: the area no longer comes out 20–30% low in short
+  measurements, and false "detected" in an empty jar is back to ~5%.
+- In the KCl calibration the fit uses only K-40 (plus the continuum): the
+  neighbouring lines do not exist in salt − background and only took away or
+  invented area.
+- The background is put on the same energy scale as the sample before the
+  calculation.
+- Both spectra of each measurement (sample and background) are kept, so the
+  calculation can be redone when the program improves.
+
+## 2.102.2
+Calibração do KCl:
+- "eficiência até agora": o tempo estimado agora é para ±15%, o que a
+  calibração mira (antes ±3%, que o RC102 não alcança: dava "~1.676 h"). E
+  a linha não some mais quando o pico ainda está abaixo do fundo (normal no
+  começo): diz isso.
+- Histórico: a calibração salva com "Salvar mesmo assim" aparecia duas vezes
+  (a nuvem trazia de volta a linha antiga, "não guardada"). Agora fica uma
+  linha por medida, a usada.
+
+Uso do app (o resumo que o ACE copia), conferido pelo QA:
+- Abas do Fundo da casa sem o resumo grudado no nome; Gráficos sem a
+  sub-aba única; o OK da janela de confirmação não conta mais como botão da
+  página; "<1 min" quando abriu sem tempo e "nunca" quando nunca abriu; o
+  seletor do Espectro do RC102 separa Espectro, Tela e Acumulado e não conta
+  o clique feito por código.
+
+**English**
+KCl calibration:
+- "efficiency so far": the time estimate is now for ±15%, what the
+  calibration aims for (it was ±3%, which the RC102 cannot reach: it gave
+  "~1,676 h"). And the line no longer disappears while the peak is still
+  below the background (normal at the start): it says so.
+- History: a calibration saved with "Save anyway" showed up twice (the cloud
+  brought back the old "not saved" line). Now there is one line per
+  measurement, the used one.
+
+App usage (the summary ACE copies), checked by QA:
+- Home background tabs without the summary stuck to the name; Charts
+  without its single sub-tab; the confirmation dialog's OK no longer counts
+  as a page button; "<1 min" when opened without time and "never" when never
+  opened; the RC102 Spectrum selector tells Spectrum, Device screen and
+  Accumulated apart and ignores clicks made by code.
+
+## 2.102.1
+Espectro: análise dos picos mais honesta (o mesmo critério do celular):
+- Com pouco tempo de espectro, o modo "agora" marcava quase tudo como
+  "certo". Agora cada linha é graduada como certo, provável ou fraco pelo σ,
+  por quanto o pico sobe acima do que tem embaixo (pelo menos 30%, ou 60% se
+  estiver sozinho) e se outra linha da mesma série apareceu junto. O detalhe
+  "Por que" mostra essa conta. No Acumulado do aparelho continua valendo só
+  o σ (lá essa conta depende do formato do espectro, não do tempo).
+- Linha sozinha que sobe menos de 10% acima do que tem embaixo some da tela
+  ao vivo (é ruído ou deriva, não isótopo).
+- 186 keV agora é "Ra-226 (ou U-235)": o rádio solta quase a mesma energia e
+  está em tudo que tem urânio. Cada um aparece com a sua energia (Ra-226
+  186,2 keV, U-235 185,7 keV).
+- Inglês: frases já traduzidas coladas uma na outra não são mais traduzidas
+  de novo ("has no other" virava "has on the other").
+- Dose acumulada, "Tudo": o quadro do RC102 dizia "faltam 10 dias sem dado"
+  contando os dias antes de existir o RC102 (o "Tudo" começa no primeiro dado
+  do GMC-800). Agora a falta conta desde o primeiro dado do RC102.
+- Atividade (Bq): o aviso de "fundo bem acima do normal da casa" acusava o
+  sal à toa (o ACE, com nada perto: 15,8 × 12,4 cps). Agora não culpa o sal
+  e diz que minério no mesmo cômodo também sobe o fundo: se ele ficar no
+  mesmo lugar até o fim, pode seguir. O aviso nunca travou a medição.
+- Radiacode 102: sem o aparelho conectado, Espectro, Busca, Espectrograma e
+  Dureza não mostram mais os exemplos simulados (pedido do ACE); cada cartão
+  diz só o que falta. Os exemplos ficam na demonstração.
+- Calibração do KCl: quando a incerteza passa um pouco do limite de ±20%
+  (até ±30%), aparece "Salvar mesmo assim", também no histórico (o ACE tinha
+  ficado em ±20,3%). O aviso agora diz a incerteza em vez de "o pico quase
+  não apareceu". O tempo sugerido de cada fase passou a usar o que as duas
+  calibrações do ACE mostraram (250 g de sal light: ~11 h por fase).
+- O último canal (onde caem as contagens que estouram a escala) não é mais
+  desenhado, então sumiu o falso pico perto de 3000 keV.
+
+**English**
+Spectrum: more honest peak analysis (the same criterion as the phone):
+- With little spectrum time, the "now" mode marked almost everything as
+  "sure". Each line is now graded sure, likely or weak by σ, by how much the
+  peak rises above what is underneath it (at least 30%, or 60% if it is
+  alone) and by whether another line from the same series showed up too. The
+  "Why" detail shows the math. In the device's Accumulated mode only σ still
+  counts (there this math depends on the spectrum's shape, not on time).
+- A lone line rising less than 10% above what is underneath disappears from
+  the live screen (it is noise or drift, not an isotope).
+- 186 keV is now "Ra-226 (or U-235)": radium gives off almost the same energy
+  and is in everything that has uranium. Each one shows its own energy
+  (Ra-226 186.2 keV, U-235 185.7 keV).
+- English: sentences already translated and joined together are no longer
+  translated again ("has no other" became "has on the other").
+- Accumulated dose, "All": the RC102 box said "no data for 10 days",
+  counting the days before the RC102 existed ("All" starts at the GMC-800's
+  first data). Missing time now counts from the RC102's first data.
+- Activity (Bq): the "background well above the home normal" warning blamed
+  the salt for nothing (ACE, with nothing nearby: 15.8 × 12.4 cps). It no
+  longer blames the salt and says ore in the same room also raises the
+  background: if it stays in place until the end, you can go on. The warning
+  never blocked the measurement.
+- Radiacode 102: with the device disconnected, Spectrum, Search, Spectrogram
+  and Hardness no longer show the simulated examples (ACE's request); each
+  card just says what is missing. The examples stay in the demo.
+- KCl calibration: when the uncertainty is a bit over the ±20% limit (up to
+  ±30%), "Save anyway" shows up, in the history too (ACE's came out at
+  ±20.3%). The warning now states the uncertainty instead of "the peak barely
+  showed". The suggested time for each phase now uses what ACE's two
+  calibrations showed (250 g of lite salt: ~11 h per phase).
+- The last channel (where counts beyond the scale land) is no longer drawn,
+  so the false peak near 3000 keV is gone.
+
 ## 2.102.0
 Zoom dos gráficos (pedido do ACE, com o design aprovado):
 - O zoom vale só enquanto você está nos Gráficos. Saiu da página, ele some,
