@@ -3,7 +3,7 @@
 ## 2.104.2
 Itens de interface em teste, decididos pelo ACE:
 - O Espectro sai da barra lateral e volta a ser só uma aba dentro do
-  Radiacode 102.
+  Radiacode 102. A busca (Ctrl+K) continua achando a aba Espectro.
 - Clicar em Radiacode 102 ou GQ GMC-800 vindo de outra página abre a aba
   Agora, não a última aba usada (o Espectro aparecia sozinho e confundia).
 - Ficam como estão: a Dose enxuta, a Calibração com Avançado, o texto maior
@@ -12,6 +12,7 @@ Itens de interface em teste, decididos pelo ACE:
 **English**
 UI items under test, decided by ACE:
 - Spectrum leaves the sidebar and is again just a tab inside Radiacode 102.
+  Search (Ctrl+K) still finds the Spectrum tab.
 - Clicking Radiacode 102 or GQ GMC-800 from another page opens the Now tab,
   not the last tab used (Spectrum showed up on its own and was confusing).
 - Staying as they are: the lean Dose, Calibration with Advanced, larger text
