@@ -15,6 +15,9 @@ const RN_DAY = 864e5;
 
 const rnBq = (pci) => pci * RN_BQ;
 const rnNum = (bq) => Math.round(bq).toLocaleString(LOCALE);
+// 2.105.2: o aparelho só manda pCi/L com 2 casas (0,01 pCi/L = 0,37 Bq/m³);
+// abaixo de 100 Bq/m³ uma casa decimal fica mais perto da tela dele
+const rnBqTxt = (bq) => bq < 100 ? bq.toLocaleString(LOCALE, { minimumFractionDigits: 1, maximumFractionDigits: 1 }) : rnNum(bq);
 const rnPci = (pci) => pci.toLocaleString(LOCALE, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 function rnLevel(bq) {
   if (bq >= 300) return { cls: "rn-alto", word: "Alto" };
@@ -36,7 +39,7 @@ function rnTile(label, pci, span, first) {
   const wait = span && first && left > 0;
   const sub = wait ? `pronta em ${rnHours(left / 36e5)}` : `${rnPci(pci)} pCi/L`;
   const prog = wait ? `<span class="rn-prog"><i style="width:${Math.max(2, Math.min(100, 100 * (1 - left / span))).toFixed(0)}%"></i></span>` : "";
-  return `<div class="rn-tile${wait ? " rn-wait" : ""}"><span class="tile-label">${label}</span><span class="mono rn-tv">${rnNum(rnBq(pci))}</span><span class="tile-sub">${sub}</span>${prog}</div>`;
+  return `<div class="rn-tile${wait ? " rn-wait" : ""}"><span class="tile-label">${label}</span><span class="mono rn-tv">${rnBqTxt(rnBq(pci))}</span><span class="tile-sub">${sub}</span>${prog}</div>`;
 }
 
 function rnBar(bq) {
@@ -84,7 +87,7 @@ function rnChart(rows) {
 function rnPlacesTable(places) {
   const rows = (places || []).filter((p) => p.hours > 0);
   if (!rows.length) return `<p class="small muted">Escolha onde o RadonScan está (em cima, à direita). Com pelo menos um dia em cada cômodo, o radônio de cada um aparece aqui junto do fundo do GMC-800 no mesmo período.</p>`;
-  const body = rows.map((p) => `<tr><td>${rnPlaceName(p.place)}</td><td class="mono">${rnHours(p.hours)}</td><td class="mono">${rnNum(rnBq(p.pciL))} Bq/m³</td><td class="mono">${p.gmcMin ? rnNum(p.gmcCpm) + " cpm" : "—"}</td></tr>`).join("");
+  const body = rows.map((p) => `<tr><td>${rnPlaceName(p.place)}</td><td class="mono">${rnHours(p.hours)}</td><td class="mono">${rnBqTxt(rnBq(p.pciL))} Bq/m³</td><td class="mono">${p.gmcMin ? rnNum(p.gmcCpm) + " cpm" : "—"}</td></tr>`).join("");
   const short = rows.some((p) => p.hours < 24);
   return `<div class="rn-tw"><table class="rn-table"><thead><tr><th>Cômodo</th><th>Tempo</th><th>Radônio médio</th><th>Fundo GMC-800</th></tr></thead><tbody>${body}</tbody></table></div>` +
     `<p class="small muted">${short ? "<span>Menos de um dia num cômodo ainda é pouco: o radônio muda bastante entre o dia e a noite.</span> " : ""}<span>O fundo do GMC-800 conta só os minutos em que ele estava em casa, fora das medições de objeto.</span></p>`;
@@ -113,7 +116,7 @@ function renderRadon(st) {
   }
   const bq = rnBq(l.hour), lv = rnLevel(bq);
   const when = st.readAt && on ? `atualizado ${hhmm(st.readAt)}` : `última leitura ${whenLabel(l.t)}`;
-  html += `<div class="value-row"><span class="value">${rnNum(bq)}</span><span class="unit">Bq/m³</span><span class="hero-lv ${lv.cls}">${lv.word}</span></div>` +
+  html += `<div class="value-row"><span class="value">${rnBqTxt(bq)}</span><span class="unit">Bq/m³</span><span class="hero-lv ${lv.cls}">${lv.word}</span></div>` +
     `<p class="rn-alt mono">${rnPci(l.hour)} pCi/L · média da última hora · ${when}</p>` + rnBar(bq) +
     `<p class="small muted">Ar de dentro de casa costuma ficar entre 10 e 50 Bq/m³. Acima de 100 vale ventilar mais; acima de 300 é alto.</p>` +
     `<div class="rn-tiles">${rnTile("1 hora", l.hour, 0, 0)}${rnTile("1 dia", l.day, RN_DAY, st.first)}${rnTile("1 semana", l.week, 7 * RN_DAY, st.first)}${rnTile("Longo prazo", l.long, 0, 0)}</div>` +
@@ -135,7 +138,7 @@ function renderRadonAgora() {
   const on = st.state === "conectado";
   const when = on && st.readAt ? `média 1 h · atualizado ${hhmm(st.readAt)}` : `desconectado · última ${whenLabel(l.t)}`;
   card.innerHTML = `<button type="button" class="rn-card" data-view="radonscan"><span class="rn-card-n"><span class="dot rn-dot${on ? "" : " off"}" aria-hidden="true"></span>GQ RadonScan${where}</span>` +
-    `<span class="mono rn-card-v">${rnNum(bq)}</span><span class="rn-card-u">Bq/m³</span><span class="hero-lv ${lv.cls}">${lv.word}</span><span class="rn-card-w small muted">${when}</span></button>`;
+    `<span class="mono rn-card-v">${rnBqTxt(bq)}</span><span class="rn-card-u">Bq/m³</span><span class="hero-lv ${lv.cls}">${lv.word}</span><span class="rn-card-w small muted">${when}</span></button>`;
 }
 
 async function refreshRadon() {
