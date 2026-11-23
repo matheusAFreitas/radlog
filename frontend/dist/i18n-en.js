@@ -4393,6 +4393,8 @@ const I18N_EN = {
 "Tudo isso vale para a dose acima do fundo. O fundo natural vem do solo, das paredes, do ar e do espaço, e você recebe em qualquer canto da casa.": "All of this is about the dose above background. Natural background comes from the ground, the walls, the air and space, and you get it anywhere in the house.",
 "alara origem dose fundo acima": "alara origin dose background above",
 "alara distancia inverso quadrado afastar": "alara distance inverse square move away",
+"Radiacode 102 › Espectro": "Radiacode 102 › Spectrum",
+"espectro picos isotopos energia kev": "spectrum peaks isotopes energy kev",
 "alara blindagem material chumbo antes depois": "alara shielding material lead before after",
 "Backup e arquivos": "Backup and files",
 "Nuvem": "Cloud",
