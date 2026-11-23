@@ -144,6 +144,8 @@ function qkResults(q) {
     // o que era a tela ALARA (2.85): cada parte no lugar novo
     { g: "Telas", ic: QK_IC.obj, t: "Teste de distância", s: "Medir objeto › Distância", kw: "alara distancia inverso quadrado afastar", run: () => { setSub("medir", "distancia"); qkGo("medir"); } },
     { g: "Telas", ic: QK_IC.obj, t: "Teste de blindagem", s: "Medir objeto › Blindagem", kw: "alara blindagem material chumbo antes depois", run: () => { setSub("medir", "blindagem"); qkGo("medir"); } },
+    // 2.104.2: o Espectro saiu da barra, mas a busca continua achando a aba dele
+    { g: "Telas", ic: QK_IC.page, t: "Espectro", s: "Radiacode 102 › Espectro", kw: "espectro picos isotopos energia kev", run: () => { setSub("radiacode", "espectro"); qkGo("radiacode"); } },
     { g: "Telas", ic: QK_IC.page, t: "De onde vem a sua dose", s: "Resumo", kw: "alara origem dose fundo acima", run: async () => { await showView("resumo"); const c = $("sumOrigin"); if (c) c.scrollIntoView({ block: "start" }); } },
     ...qkSettings(),
     ...qkMeasurements(),

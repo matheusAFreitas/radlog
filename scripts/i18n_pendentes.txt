@@ -24,3 +24,4 @@ s + objeto
 testar objeto calar silenciar pedra
 testar objeto parar
 # linhas que o RadLog não conseguiu ler, tiradas em {0}
+hora,comodo,media_1h_pCiL,media_1d_pCiL,media_1sem_pCiL,longo_prazo_pCiL

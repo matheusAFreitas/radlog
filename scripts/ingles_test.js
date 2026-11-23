@@ -83,7 +83,7 @@ function part1() {
 async function part2() {
   let pw;
   try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
-  const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
+  const VIEWS = ["agora", "resumo", "gmc", "radiacode", "radonscan", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
   // "posicao" (2.101.15, item 138): Posição escrita pela pessoa na calibração e no histórico da Atividade (Bq)
   const SCEN = ["", "casa", "atencao", "alarme", "perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta", "posicao"];
   const b = await pw.chromium.launch(process.env.RADLOG_CHROME ? { channel: process.env.RADLOG_CHROME } : {});

@@ -72,6 +72,16 @@ func ListPorts() ([]PortInfo, error) {
 
 // Open abre a porta e devolve o contador pronto para uso.
 func Open(name string) (*Device, error) {
+	p, err := OpenPort(name)
+	if err != nil {
+		return nil, err
+	}
+	return New(p), nil
+}
+
+// OpenPort abre a porta a 115200 baud, 8N1, sem falar nada com o aparelho
+// (o RadonScan usa o mesmo chip e a mesma velocidade; 2.105.0).
+func OpenPort(name string) (Port, error) {
 	p, err := serial.Open(name, &serial.Mode{
 		BaudRate: Baud,
 		DataBits: 8,
@@ -81,7 +91,7 @@ func Open(name string) (*Device, error) {
 	if err != nil {
 		return nil, openError(name, err)
 	}
-	return New(p), nil
+	return p, nil
 }
 
 // ErrNotFound quer dizer que a porta não existe (contador desligado ou cabo

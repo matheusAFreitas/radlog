@@ -108,6 +108,10 @@ type Settings struct {
 	// uso do app (usage.go, 2.72): contar páginas, abas e botões abertos;
 	// desligado por padrão, só muda por SetUsageOn
 	UsageOn bool `json:"usageOn"`
+	// GQ RadonScan (radonscan.go, 2.105.0): última porta dele e o cômodo
+	// onde a pessoa disse que ele está ("sala", "quarto", "outro" ou "")
+	RadonPort  string `json:"radonPort,omitempty"`
+	RadonPlace string `json:"radonPlace,omitempty"`
 }
 
 func defaultSettings() Settings {
@@ -453,6 +457,7 @@ type App struct {
 	inv      invCache   // resumo dos dias gravados, para a nuvem (delta.go)
 	cloud    cloudState // nuvem no Google Drive (cloud.go)
 	rc       rcState    // RC102 (radiacode.go)
+	radon    radonState // GQ RadonScan (radonscan.go)
 
 	live *ring     // última hora de leituras reais por segundo
 	demo DemoState // modo demonstração (só na memória)
@@ -560,6 +565,7 @@ func (a *App) startup(ctx context.Context) {
 	a.goLoop("pendingRetry", a.pendingRetry)
 	a.goLoop("cloudLoop", a.cloudLoop)
 	a.goLoop("rcLoop", a.rcLoop)
+	a.goLoop("radonLoop", a.radonLoop)
 	a.goSafe("rcBackfill", func() { a.rcDoseBackfill(); a.rcLogBackfill(); a.rcMemRawBackfill() })
 
 	if a.settings.AutoConnect && a.settings.Port != "" {
@@ -588,6 +594,7 @@ func (a *App) shutdown(ctx context.Context) {
 	a.mu.Unlock()
 	a.StopDemo()
 	a.disconnect("")
+	a.radonClose()
 	if a.store != nil {
 		n, f := a.store.Pending()
 		if err := a.store.FlushOrKeep(); err != nil {
@@ -971,7 +978,7 @@ func (a *App) DetectPort() (string, error) {
 	a.mu.Lock()
 	known := a.settings.PortUSB
 	a.mu.Unlock()
-	for _, p := range detectOrder(ports, known) {
+	for _, p := range detectOrder(withoutPort(ports, a.radonPort()), known) {
 		d, err := gmc.Open(p.Name)
 		if err != nil {
 			continue
@@ -1008,6 +1015,20 @@ func detectOrder(ports []gmc.PortInfo, known string) []gmc.PortInfo {
 	return rest
 }
 
+// withoutPort tira a porta name da lista (name "" = nenhuma).
+func withoutPort(ports []gmc.PortInfo, name string) []gmc.PortInfo {
+	if name == "" {
+		return ports
+	}
+	out := make([]gmc.PortInfo, 0, len(ports))
+	for _, p := range ports {
+		if p.Name != name {
+			out = append(out, p)
+		}
+	}
+	return out
+}
+
 // resolvePort acha a porta do contador para a reconexão (B5). Se o número
 // da porta mudou, segue o contador; se outro aparelho está naquele número,
 // não abre (ok = false). Sem USBID guardado (versão antiga) fica a porta
@@ -1021,13 +1042,22 @@ func resolvePort(ports []gmc.PortInfo, name, usb string) (string, bool) {
 			return name, true
 		}
 	}
+	// 2.105.0: o RadonScan tem o mesmo chip; no Linux os dois ficam com o
+	// mesmo USBID (o CH340 não tem número de série). Com mais de uma porta
+	// assim, não dá para saber qual é o contador: fica na porta salva.
+	same := 0
 	for _, p := range ports {
 		if p.USBID == usb {
+			same++
+		}
+	}
+	for _, p := range ports {
+		if p.USBID == usb && same == 1 {
 			return p.Name, true
 		}
 	}
 	for _, p := range ports {
-		if p.Name == name && p.USBID != "" {
+		if p.Name == name && p.USBID != "" && same <= 1 {
 			return "", false // outro aparelho USB pegou o número
 		}
 	}
@@ -1233,6 +1263,7 @@ func (a *App) autoReconnect(wait time.Duration) {
 		default:
 		}
 		if ports, err := gmc.ListPorts(); err == nil {
+			ports = withoutPort(ports, a.radonPort()) // a do RadonScan nunca é o contador
 			p, ok := resolvePort(ports, port, usb)
 			if !ok {
 				a.logf("reconexão: %s agora é outro aparelho; esperando o contador", port)

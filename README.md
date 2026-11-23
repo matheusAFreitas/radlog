@@ -10,7 +10,8 @@ RadLog is a desktop app that logs ionizing radiation from two devices: the
 spectrometer. It runs on Windows and Linux, works with one device or both,
 and is available in English and Brazilian Portuguese.
 
-It reads the devices over USB (the Radiacode 102 also over Bluetooth), keeps
+It reads the devices over USB (the Radiacode 102 also over Bluetooth; a GQ
+RadonScan radon detector can be added too), keeps
 one reading per minute and shows everything in µSv/h: live readings, charts,
 dose, alerts, spectra, weather × radiation, object measurements and PDF
 reports. All data stays on your computer.
@@ -104,6 +105,10 @@ the home background.
   **Spectrogram** (spectrum over time), search, activity (Bq), log, device
   settings and alarms, and the history it recorded away from the PC. Each
   card explains itself under "How it works".
+- **GQ RadonScan** (optional): radon in the air, in Bq/m³. The four averages
+  the device keeps (1 hour, 1 day, 1 week, long term), the last week chart,
+  where it is (living room, bedroom, other) and each room's radon next to
+  the GMC-800 background. Read only; not part of the dose.
 - **Settings**: app alarms and levels, window and display (size, density,
   number on the tray icon, count blink), data, backup and cloud.
 
