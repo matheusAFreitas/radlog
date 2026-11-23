@@ -5053,7 +5053,8 @@ const I18N_EN = {
 "1 semana": "1 week",
 "Radônio": "Radon",
 "pronta em": "ready in",
-"Pronta em": "Ready in"
+"Pronta em": "Ready in",
+"nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800": "no USB port with the GQ devices' chip besides the GMC-800's"
 },
 "patterns": [
 [
@@ -16365,6 +16366,14 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: procurando: ",
+"^radonscan: procurando: ((?:(?! · ).)+?)$",
+"radonscan: searching: ${1}",
+[
+"radonscan: procurando: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -17255,6 +17264,14 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): outro aparelho \\(((?:(?! · ).)+?)\\)$",
+"${1}: another device (${2})",
+[
+": outro aparelho ("
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) · mín ((?:(?! · ).)+?) · máx ((?:(?! · ).)+?)$",
 "average ${1} · min ${2} · max ${3}",
@@ -18094,6 +18111,14 @@ const I18N_EN = {
 [
 "Calibração de ",
 " · ±"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) não respondeu \\(((?:(?! · ).)+?)\\)$",
+"${1} did not answer (${2})",
+[
+" não respondeu ("
 ]
 ],
 [
@@ -19818,6 +19843,14 @@ const I18N_EN = {
 "${1} above background",
 [
 " acima do fundo"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) não abriu \\(((?:(?! · ).)+?)\\)$",
+"${1} did not open (${2})",
+[
+" não abriu ("
 ]
 ],
 [

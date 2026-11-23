@@ -6618,3 +6618,8 @@ Longo prazo	Long term
 Radônio	Radon
 pronta em	ready in
 Pronta em	Ready in
+radonscan: procurando: {0}	radonscan: searching: {0}
+{0} não abriu ({1})	{0} did not open ({1})
+{0} não respondeu ({1})	{0} did not answer ({1})
+{0}: outro aparelho ({1})	{0}: another device ({1})
+nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800	no USB port with the GQ devices' chip besides the GMC-800's
