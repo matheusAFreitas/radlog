@@ -86,6 +86,7 @@ type radonState struct {
 	last    *RadonRow
 	readAt  time.Time
 	saved   *RadonRow // última linha gravada
+	lastWhy string    // último resultado da procura que foi para o log
 	wake    chan struct{}
 }
 
@@ -165,18 +166,43 @@ func (a *App) radonFind() (*radonscan.Device, string, string, error) {
 		return nil, "", "", errRadonBusy
 	}
 	a.connMu.Unlock()
-	for _, p := range radonCandidates(ports, known, gmcPort) {
+	cands := radonCandidates(ports, known, gmcPort)
+	var why []string
+	for _, p := range cands {
 		d, err := withTimeout(5*time.Second, func() (*radonscan.Device, error) { return radonscan.Open(p.Name) })
 		if err != nil {
+			why = append(why, fmt.Sprintf("%s não abriu (%v)", p.Name, err))
 			continue
 		}
 		ver, err := withTimeout(5*time.Second, d.Version)
 		if err == nil && radonscan.IsRadonScan(ver) {
+			a.radonProbeLog("")
 			return d, p.Name, ver, nil
 		}
 		d.Close()
+		if err != nil {
+			why = append(why, fmt.Sprintf("%s não respondeu (%v)", p.Name, err))
+		} else {
+			why = append(why, fmt.Sprintf("%s: outro aparelho (%q)", p.Name, ver))
+		}
 	}
+	if len(cands) == 0 {
+		why = append(why, "nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800")
+	}
+	a.radonProbeLog(strings.Join(why, "; "))
 	return nil, "", "", errRadonNotFound
+}
+
+// radonProbeLog registra no log técnico o resultado da procura só quando
+// ele muda (a procura roda a cada 30 s; 2.105.1).
+func (a *App) radonProbeLog(why string) {
+	a.radon.mu.Lock()
+	same := a.radon.lastWhy == why
+	a.radon.lastWhy = why
+	a.radon.mu.Unlock()
+	if !same && why != "" {
+		a.logf("radonscan: procurando: %s", why)
+	}
 }
 
 var (

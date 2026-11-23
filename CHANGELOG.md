@@ -1,5 +1,17 @@
 # Versões
 
+## 2.105.1
+- GQ RadonScan: quando o app não consegue reconectar (por exemplo, depois de
+  uma queda do USB), o registro técnico passa a dizer o motivo de cada porta
+  tentada (não abriu, não respondeu ou é outro aparelho). Só grava quando o
+  motivo muda.
+
+**English**
+- GQ RadonScan: when the app can't reconnect (for example, after a USB
+  drop), the technical log now says why for each port it tried (did not
+  open, did not answer or is another device). It only writes when the reason
+  changes.
+
 ## 2.105.0
 Novo aparelho: GQ RadonScan (radônio no ar).
 - O app acha o RadonScan sozinho no USB e lê as quatro médias dele (1 hora,
