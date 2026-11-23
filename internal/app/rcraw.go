@@ -117,6 +117,25 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 		a.rcLogMergeLocked(name, lines)
 		return 0
 	}
+	added := a.rcMergeMinutes(name, data)
+	if added == 0 {
+		return 0
+	}
+	// fora do fileM: a ordem das travas é rc.mu → fileM (GetRadiacode lê
+	// os minutos do disco com rc.mu). Com rc.mu pego aqui dentro do fileM o
+	// celular travou em 23/11 12:08 (nuvem juntando enquanto a tela lia).
+	a.rc.mu.Lock()
+	a.rc.today.loaded = false // recalcula a dose de hoje
+	a.rc.mu.Unlock()
+	a.rc.statsM.Lock()
+	a.rc.stats = nil
+	a.rc.statsM.Unlock()
+	return added
+}
+
+// rcMergeMinutes junta os minutos de um AAAA-MM.csv (ou dose-) no arquivo
+// daqui, com o fileM. Devolve quantos entraram.
+func (a *App) rcMergeMinutes(name string, data []byte) int {
 	a.rc.fileM.Lock()
 	defer a.rc.fileM.Unlock()
 	dst := filepath.Join(a.rcDir(), name)
@@ -173,12 +192,6 @@ func (a *App) rcMergeFile(rel string, data []byte) int {
 	if writeFileAtomic(dst, out.Bytes(), 0o644) == nil {
 		bad.save(a, dst)
 	}
-	a.rc.mu.Lock()
-	a.rc.today.loaded = false // recalcula a dose de hoje
-	a.rc.mu.Unlock()
-	a.rc.statsM.Lock()
-	a.rc.stats = nil
-	a.rc.statsM.Unlock()
 	return added
 }
 
