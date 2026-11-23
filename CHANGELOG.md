@@ -1,5 +1,16 @@
 # Versões
 
+## 2.105.3
+- Agora: ao abrir o app, o aviso "Falta medição agora" não aparece mais com
+  o GMC-800 ou o RC102 já conectado e lendo ao vivo. Antes ele podia ficar
+  alguns minutos na tela até o primeiro minuto ser gravado.
+
+**English**
+- Now: when the app opens, the "Measurement missing now" warning no longer
+  shows while the GMC-800 or the RC102 is already connected and reading
+  live. Before, it could stay on screen for a few minutes until the first
+  minute was saved.
+
 ## 2.105.2
 - GQ RadonScan: o radônio abaixo de 100 Bq/m³ aparece com uma casa decimal
   (4,8 em vez de 5), mais perto do que a tela do aparelho mostra. O aparelho
