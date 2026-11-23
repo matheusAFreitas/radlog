@@ -1,5 +1,17 @@
 # Versões
 
+## 2.105.2
+- GQ RadonScan: o radônio abaixo de 100 Bq/m³ aparece com uma casa decimal
+  (4,8 em vez de 5), mais perto do que a tela do aparelho mostra. O aparelho
+  só manda pCi/L com 2 casas para o PC, então o valor pode diferir alguns
+  décimos da tela dele.
+
+**English**
+- GQ RadonScan: radon below 100 Bq/m³ is shown with one decimal (4.8
+  instead of 5), closer to what the device screen shows. The device only
+  sends pCi/L with 2 decimals to the PC, so the value may differ from its
+  screen by a few tenths.
+
 ## 2.105.1
 - GQ RadonScan: quando o app não consegue reconectar (por exemplo, depois de
   uma queda do USB), o registro técnico passa a dizer o motivo de cada porta
