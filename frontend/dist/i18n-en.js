@@ -5023,7 +5023,37 @@ const I18N_EN = {
 "Suas montagens calibradas": "Your calibrated setups",
 "+ Calibrar outra montagem": "+ Calibrate another setup",
 "sal light": "light salt",
-"diferença": "difference"
+"diferença": "difference",
+"Ar de dentro de casa costuma ficar entre 10 e 50 Bq/m³. Acima de 100 vale ventilar mais; acima de 300 é alto.": "Indoor air is usually between 10 and 50 Bq/m³. Above 100, ventilate more; above 300 is high.",
+"Cômodo": "Room",
+"Escolha onde o RadonScan está (em cima, à direita). Com pelo menos um dia em cada cômodo, o radônio de cada um aparece aqui junto do fundo do GMC-800 no mesmo período.": "Choose where the RadonScan is (top right). After at least one day in each room, the radon of each one shows up here next to the GMC-800 background for the same period.",
+"Esperando a primeira leitura do RadonScan…": "Waiting for the first RadonScan reading…",
+"Fundo GMC-800": "GMC-800 background",
+"Ligue o RadonScan no USB do PC. O app acha ele sozinho.": "Plug the RadonScan into a USB port on this PC. The app finds it by itself.",
+"Menos de um dia num cômodo ainda é pouco: o radônio muda bastante entre o dia e a noite.": "Less than a day in a room is still too little: radon changes a lot between day and night.",
+"O RadonScan recalcula o radônio de hora em hora. \"Pronta em\" conta desde que o app começou a ler o aparelho.": "The RadonScan recalculates radon every hour. \"Ready in\" counts from when the app started reading the device.",
+"O gráfico aparece depois de algumas horas de leitura.": "The chart shows up after a few hours of readings.",
+"O fundo do GMC-800 conta só os minutos em que ele estava em casa, fora das medições de objeto.": "The GMC-800 background only counts the minutes it was at home, outside object measurements.",
+"Onde está o RadonScan": "Where the RadonScan is",
+"RadonScan desconectado": "RadonScan disconnected",
+"RadonScan não encontrado": "RadonScan not found",
+"Radônio e fundo por cômodo": "Radon and background by room",
+"Radônio médio": "Average radon",
+"Radônio por hora nos últimos 7 dias": "Radon per hour over the last 7 days",
+"o RadonScan não respondeu a tempo": "the RadonScan did not answer in time",
+"onde está": "where it is",
+"referência OMS": "WHO reference",
+"Última semana, média de 1 hora": "Last week, 1-hour average",
+"Sala": "Living room",
+"Quarto": "Bedroom",
+"Outro": "Other",
+"Moderado": "Moderate",
+"Baixo": "Low",
+"Longo prazo": "Long term",
+"1 semana": "1 week",
+"Radônio": "Radon",
+"pronta em": "ready in",
+"Pronta em": "Ready in"
 },
 "patterns": [
 [
@@ -12940,6 +12970,14 @@ const I18N_EN = {
 ]
 ],
 [
+"resposta inesperada do RadonScan: ",
+"^resposta inesperada do RadonScan: ((?:(?! · ).)+?)$",
+"unexpected answer from the RadonScan: ${1}",
+[
+"resposta inesperada do RadonScan: "
+]
+],
+[
 "Histórico já baixado conferido: ",
 "^Histórico já baixado conferido: ((?:(?! · ).)+?) ((?:(?! · ).)+?)$",
 "Already downloaded history checked: ${1} ${2}",
@@ -13196,6 +13234,14 @@ const I18N_EN = {
 "fundo ",
 " µSv + acima do fundo ",
 " µSv"
+]
+],
+[
+"radonscan: não gravei a leitura: ",
+"^radonscan: não gravei a leitura: ((?:(?! · ).)+?)$",
+"radonscan: did not save the reading: ${1}",
+[
+"radonscan: não gravei a leitura: "
 ]
 ],
 [
@@ -13487,6 +13533,14 @@ const I18N_EN = {
 [
 "perto do fundo da sua casa (",
 "%)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) pCi/L · média da última hora · ((?:(?! · ).)+?)$",
+"${1} pCi/L · last hour average · ${2}",
+[
+" pCi/L · média da última hora · "
 ]
 ],
 [
@@ -14649,6 +14703,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadonScan conectado (",
+"^RadonScan conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
+"RadonScan connected (${1} on ${2})",
+[
+"RadonScan conectado (",
+" em "
+]
+],
+[
 "Contador conectado (",
 "^Contador conectado \\(((?:(?! · ).)+?) em ((?:(?! · ).)+?)\\)$",
 "Counter connected (${1} on ${2})",
@@ -15002,6 +15065,14 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: leitura falhou: ",
+"^radonscan: leitura falhou: ((?:(?! · ).)+?)$",
+"radonscan: reading failed: ${1}",
+[
+"radonscan: leitura falhou: "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -15287,6 +15358,15 @@ const I18N_EN = {
 "Updating to version ${1}",
 [
 "Atualizando para a versão "
+]
+],
+[
+"radonscan: conectado, ",
+"^radonscan: conectado, ((?:(?! · ).)+?) em ((?:(?! · ).)+?)$",
+"radonscan: connected, ${1} on ${2}",
+[
+"radonscan: conectado, ",
+" em "
 ]
 ],
 [
@@ -16277,6 +16357,14 @@ const I18N_EN = {
 ]
 ],
 [
+"média 1 h · atualizado ",
+"^média 1 h · atualizado ((?:(?! · ).)+?)$",
+"1 h average · updated ${1}",
+[
+"média 1 h · atualizado "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?) \\(recebi ((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
 "${1} (got ${2} of ${3} bytes)",
@@ -16729,6 +16817,14 @@ const I18N_EN = {
 ]
 ],
 [
+"desconectado · última ",
+"^desconectado · última ((?:(?! · ).)+?)$",
+"disconnected · last ${1}",
+[
+"desconectado · última "
+]
+],
+[
 "não consegui baixar: ",
 "^não consegui baixar: ((?:(?! · ).)+?)$",
 "couldn't download: ${1}",
@@ -17140,6 +17236,22 @@ const I18N_EN = {
 "${1}: came out below the background",
 [
 ": deu abaixo do fundo"
+]
+],
+[
+"cômodo desconhecido: ",
+"^cômodo desconhecido: ((?:(?! · ).)+?)$",
+"unknown room: ${1}",
+[
+"cômodo desconhecido: "
+]
+],
+[
+"radonscan: cômodo ",
+"^radonscan: cômodo ((?:(?! · ).)+?) → ((?:(?! · ).)+?)$",
+"radonscan: room ${1} → ${2}",
+[
+"radonscan: cômodo "
 ]
 ],
 [
@@ -21170,6 +21282,14 @@ const I18N_EN = {
 ]
 ],
 [
+"atualizado ",
+"^atualizado ((?:(?! · ).)+?)$",
+"updated ${1}",
+[
+"atualizado "
+]
+],
+[
 "média ",
 "^média ((?:(?! · ).)+?) CPM$",
 "average ${1} CPM",
@@ -21572,6 +21692,14 @@ const I18N_EN = {
 "Home via the ${1}",
 [
 "Casa pelo "
+]
+],
+[
+"pronta em ",
+"^pronta em ((?:(?! · ).)+?)$",
+"ready in ${1}",
+[
+"pronta em "
 ]
 ],
 [

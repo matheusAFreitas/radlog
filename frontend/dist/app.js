@@ -939,7 +939,7 @@ function wireLogs() {
 // cima. Gráficos é a página de abertura.
 
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
-const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
+const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", radonscan: "pageRadonscan", config: "pageConfig" };
 
 // página marcada na barra (2.104.2: o Espectro voltou para dentro do Radiacode 102)
 function navMark() {
@@ -982,6 +982,7 @@ async function showView(v, skipRender) {
   if (v === "medir") { renderMeasure(await api.GetMeasure()); setMeasureMode(state.mMode); refreshAlara(); }
   if (v === "radiacode") { if (api.GetRadiacode) renderRc(await api.GetRadiacode()); refreshRc24(); }
   if (v === "config") openSettings();
+  if (v === "radonscan") refreshRadon();
   if (v === "agora") refreshAgora();
 }
 
@@ -4864,6 +4865,7 @@ async function init() {
   await refreshMeasurements();
   await refreshAll();
   refreshAgora(true);
+  wireRadon();
   // tempo de abertura no log (2.83.10): para comparar antes e depois de mexer no carregamento
   if (hasGo && goApp.UIReady) requestAnimationFrame(() => goApp.UIReady(T_SCRIPTS, performance.now()).catch(() => {}));
   if (!hasGo) toast("Modo demonstração: abra pelo app para usar o contador de verdade.");

@@ -1,5 +1,5 @@
 // Teste de tela: abre o app no modo demonstração do navegador (sem Go),
-// passa pelas 11 páginas em 1280 px e em 412 px, nos dois idiomas, abre as
+// passa pelas 12 páginas em 1280 px e em 412 px, nos dois idiomas, abre as
 // sub-abas de cada página e as janelas (<dialog>), e falha se aparecer erro
 // de script, rolagem horizontal ou janela saindo da tela.
 //
@@ -10,7 +10,7 @@ let pw;
 try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
 const path = require("path");
 
-const VIEWS = ["agora", "resumo", "gmc", "radiacode", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
+const VIEWS = ["agora", "resumo", "gmc", "radiacode", "radonscan", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
 const SIZES = [{ width: 1280, height: 900 }, { width: 412, height: 915 }];
 const page0 = "file://" + path.resolve(__dirname, "../frontend/dist/index.html");
 

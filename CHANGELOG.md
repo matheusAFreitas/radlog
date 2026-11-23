@@ -1,5 +1,44 @@
 # Versões
 
+## 2.105.0
+Novo aparelho: GQ RadonScan (radônio no ar).
+- O app acha o RadonScan sozinho no USB e lê as quatro médias dele (1 hora,
+  1 dia, 1 semana e longo prazo). Ele tem o mesmo chip USB do GMC-800: o app
+  pergunta quem é cada um antes de conectar e nunca confunde os dois. Só
+  leitura: o app não muda nada no aparelho.
+- Página própria em Aparelhos: a média da última hora em Bq/m³, com pCi/L
+  pequeno do lado, e uma régua com a referência da OMS (100), a da EPA (148)
+  e o alto (300). Cada média mostra quanto falta para fechar o período dela.
+- "Onde está" (sala, quarto ou outro): o gráfico da última semana mostra o
+  cômodo, e o quadro "Radônio e fundo por cômodo" junta o radônio médio de
+  cada cômodo com o fundo do GMC-800 em casa no mesmo período.
+- Cartão pequeno no Agora com a média de 1 hora. O radônio não entra na dose
+  e não tem alarme por enquanto.
+- As leituras ficam em radonscan.csv, na pasta de dados (uma linha quando as
+  médias mudam ou a cada hora).
+- No Linux, com o RadonScan e o GMC-800 ligados juntos, a reconexão do
+  GMC-800 não pula mais para a porta do outro aparelho.
+
+**English**
+New device: GQ RadonScan (radon in the air).
+- The app finds the RadonScan on USB by itself and reads its four averages
+  (1 hour, 1 day, 1 week and long term). It has the same USB chip as the
+  GMC-800: the app asks each one what it is before connecting and never
+  mixes them up. Read only: the app never changes anything on the device.
+- Its own page under Devices: the last hour average in Bq/m³, with pCi/L
+  small beside it, and a scale with the WHO reference (100), the EPA one
+  (148) and high (300). Each average shows how long until its period is
+  complete.
+- "Where it is" (living room, bedroom or other): the last week chart shows
+  the room, and the "Radon and background by room" table puts each room's
+  average radon next to the GMC-800 home background for the same period.
+- Small card on Now with the 1-hour average. Radon does not count toward
+  the dose and has no alarm for now.
+- Readings are saved in radonscan.csv, in the data folder (one line when
+  the averages change or every hour).
+- On Linux, with the RadonScan and the GMC-800 plugged in together, the
+  GMC-800 reconnection no longer jumps to the other device's port.
+
 ## 2.104.2
 Itens de interface em teste, decididos pelo ACE:
 - O Espectro sai da barra lateral e volta a ser só uma aba dentro do

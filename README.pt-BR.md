@@ -10,7 +10,8 @@ aparelhos: o contador Geiger **GQ GMC-800** e o dosímetro e espectrômetro
 gama **Radiacode 102**. Roda no Windows e no Linux, funciona com um aparelho
 ou com os dois e está em português e em inglês.
 
-Ele lê os aparelhos pela USB (o Radiacode 102 também pelo Bluetooth), guarda
+Ele lê os aparelhos pela USB (o Radiacode 102 também pelo Bluetooth; dá
+para somar um detector de radônio GQ RadonScan), guarda
 uma leitura por minuto e mostra tudo em µSv/h: leitura ao vivo, gráficos,
 dose, alertas, espectro, clima × radiação, medição de objetos e relatórios em
 PDF. Os dados ficam só no seu computador.
@@ -104,6 +105,10 @@ trechos continuam contando na dose, mas não entram no fundo da casa.
   pico; **Espectrograma** (espectro ao longo do tempo), busca, atividade
   (Bq), log, ajustes e alarmes do aparelho, e o histórico que ele gravou
   longe do PC. Cada cartão se explica em "Como funciona".
+- **GQ RadonScan** (opcional): radônio no ar, em Bq/m³. As quatro médias
+  que o aparelho guarda (1 hora, 1 dia, 1 semana, longo prazo), o gráfico da
+  última semana, onde ele está (sala, quarto, outro) e o radônio de cada
+  cômodo junto do fundo do GMC-800. Só leitura; não entra na dose.
 - **Configurações**: alarmes e níveis do app, janela e tela (tamanho,
   densidade, número no ícone da bandeja, pulso), dados, backup e
   nuvem.
