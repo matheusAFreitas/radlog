@@ -24,6 +24,10 @@ function whLive(dev) {
   const c = whConn(dev);
   if (c === "wait") return { ...l, connected: false, state: "conectando" };
   if (c === "off" && l.state !== "sem dado") return { ...l, connected: false, state: "sem dado" };
+  // 2.105.3: conectado e com leitura ao vivo chegando, já está lendo, mesmo
+  // antes do primeiro minuto gravado (o estado do app só é conferido a cada 30 s)
+  const now = dev === "gmc" ? state.gNow : state.rNow;
+  if (c === "" && l.state === "sem dado" && now && now.live) return { ...l, connected: true, state: "lendo" };
   return l;
 }
 // quando a conexão de um aparelho muda, o quadro é refeito na hora
