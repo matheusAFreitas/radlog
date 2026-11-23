@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.104.1";
+const DEMO_VERSION = "2.104.2";
 
 function makeDemoApi(opts) {
   // dentro do app (2.82) o Go guarda o estado da demonstração e manda o

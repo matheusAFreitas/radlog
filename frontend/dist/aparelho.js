@@ -267,9 +267,6 @@ function renderDevMini() {
   // 2.89.0 (E6): o Clima só aparece na barra com o clima ligado
   const nc = $("navChuva");
   if (nc) nc.hidden = !(state.settings && state.settings.rainEnabled) && page !== "chuva";
-  // 2.93 (E3, em teste): Espectro direto na barra, com o RC102 conhecido
-  const ns = $("navSpec");
-  if (ns) { const was = ns.hidden; ns.hidden = !hasRcData(); if (was !== ns.hidden) navMark(); }
   const inst = $("instruments");
   if (!inst) return;
   // na tela de um aparelho, na aba Agora, a fileira de cima é a mesma do

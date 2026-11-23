@@ -941,18 +941,18 @@ function wireLogs() {
 state.view = "agora"; // 2.17: a tela inicial é a "Agora"
 const PAGES = { agora: "pageAgora", graficos: "pageGraficos", fundo: "pageFundo", resumo: "pageResumo", alertas: "pageAlertas", medir: "pageMedir", fora: "pageFora", chuva: "pageChuva", gmc: "pageGmc", radiacode: "pageRadiacode", config: "pageConfig" };
 
-// página marcada na barra; o Espectro (2.93) marca no lugar do Radiacode 102
+// página marcada na barra (2.104.2: o Espectro voltou para dentro do Radiacode 102)
 function navMark() {
-  const v = state.view, spec = v === "radiacode" && state.sub && state.sub.radiacode === "espectro" && !$("navSpec").hidden;
+  const v = state.view;
   document.querySelectorAll("#sideNav [data-view], #btnSettings").forEach((b) => {
-    const on = spec ? b.dataset.view === "espectro" : b.dataset.view === v;
+    const on = b.dataset.view === v;
     if (on) b.setAttribute("aria-current", "page"); else b.removeAttribute("aria-current");
   });
 }
 
 async function showView(v, skipRender) {
   if (v === "dose") { setSub("graficos", "tempo"); v = "graficos"; } // a Dose virou sub-aba de Gráficos
-  if (v === "espectro") { setSub("radiacode", "espectro"); v = "radiacode"; } // 2.93 (E3): entrada direta na barra
+  if (v === "espectro") { setSub("radiacode", "espectro"); v = "radiacode"; } // link antigo direto para o Espectro
   if (v === "padroes" || v === "tendencia") { setSub("fundo", v); v = "fundo"; } // 2.91: o fundo de casa virou página
   if (v === "alara") { setSub("medir", "distancia"); v = "medir"; } // o ALARA saiu na 2.85: os testes ficam no Medir objeto
   if (!PAGES[v]) v = "graficos";
@@ -1052,6 +1052,9 @@ document.addEventListener("click", (e) => {
   if (!b) return;
   // o quadro do aparelho da própria página (fora da aba Agora) volta para a aba Agora
   if (b.dataset.view === state.view && SUBS[state.view]) setSub(state.view, "agora");
+  // 2.104.2 (ACE, E3): vindo de outra página, a de um aparelho abre na aba
+  // Agora, não na última sub-aba (o Espectro aparecia sozinho e confundia)
+  else if (b.dataset.view !== state.view && DEV_PAGES[b.dataset.view]) setSub(b.dataset.view, "agora");
   showView(b.dataset.view);
 });
 
