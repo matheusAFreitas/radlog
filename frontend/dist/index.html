@@ -74,6 +74,7 @@
     <span class="side-group">Aparelhos</span>
     <button type="button" data-view="gmc"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="18" height="12" rx="2"/><path d="M7 8V5h10v3"/><path d="M7 12.5h6M7 16h2.5"/><circle cx="17" cy="14" r="1.5"/></svg><span>GQ GMC-800</span><span class="side-dot" id="navGmcDot" hidden></span></button>
     <button type="button" data-view="radiacode"><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="7" y="2.5" width="10" height="19" rx="2.5"/><path d="M9.5 6h5v4h-5Z"/><path d="M11 17h2"/></svg><span>Radiacode 102</span><span class="side-dot" id="navRcDot" hidden></span></button>
+    <button type="button" data-view="radonscan" id="navRadon" hidden><svg class="side-ico" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11 12 4l9 7"/><path d="M5 9.5V20h14V9.5"/><path d="M9 13.5c1.2-.9 2.3-.9 3 0s1.8.9 3 0M9 17c1.2-.9 2.3-.9 3 0s1.8.9 3 0"/></svg><span>GQ RadonScan</span><span class="side-dot" id="navRadonDot" hidden></span></button>
   </nav>
   <div class="side-tools">
     <div class="qk-side" id="qkFab">
@@ -221,6 +222,7 @@
   </section>
 
   <section class="card rca" id="rcAwayBox" aria-live="polite" hidden></section>
+  <section class="card rn-agora" id="agRadon" hidden></section>
 
   <section class="card wh-card" id="whCard">
     <div class="wh-head">
@@ -1593,6 +1595,11 @@
       </div>
     </section>
 </div>
+<div class="page" id="pageRadonscan" hidden>
+  <section class="card rn-main" id="rnMain"><p class="small muted">Procurando o RadonScan…</p></section>
+  <section class="card" id="rnWeek" hidden></section>
+  <section class="card" id="rnPlaces" hidden></section>
+</div>
 <div class="page" id="pageConfig" hidden>
   <div class="set-page" id="settings">
     <div class="set-top">
@@ -2671,6 +2678,7 @@
 <script src="rcajustes.js"></script>
 <script src="alara.js"></script>
 <script src="clima.js"></script>
+<script src="radonscan.js"></script>
 <script src="busca.js"></script>
 <script src="uso.js"></script>
 <script src="nuvem.js"></script>

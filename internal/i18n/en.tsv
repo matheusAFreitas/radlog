@@ -6576,3 +6576,45 @@ somadas {0} rodadas: {1} + {2}	{0} rounds summed: {1} + {2}
 sal light	light salt
 A montagem fica com ±{0}% no total (contagem ±{1}% e o rótulo do material).	The setup ends up at ±{0}% in total (counting ±{1}% plus the material label).
 diferença	difference
+Ar de dentro de casa costuma ficar entre 10 e 50 Bq/m³. Acima de 100 vale ventilar mais; acima de 300 é alto.	Indoor air is usually between 10 and 50 Bq/m³. Above 100, ventilate more; above 300 is high.
+Cômodo	Room
+Escolha onde o RadonScan está (em cima, à direita). Com pelo menos um dia em cada cômodo, o radônio de cada um aparece aqui junto do fundo do GMC-800 no mesmo período.	Choose where the RadonScan is (top right). After at least one day in each room, the radon of each one shows up here next to the GMC-800 background for the same period.
+Esperando a primeira leitura do RadonScan…	Waiting for the first RadonScan reading…
+Fundo GMC-800	GMC-800 background
+Ligue o RadonScan no USB do PC. O app acha ele sozinho.	Plug the RadonScan into a USB port on this PC. The app finds it by itself.
+Menos de um dia num cômodo ainda é pouco: o radônio muda bastante entre o dia e a noite.	Less than a day in a room is still too little: radon changes a lot between day and night.
+O RadonScan recalcula o radônio de hora em hora. "Pronta em" conta desde que o app começou a ler o aparelho.	The RadonScan recalculates radon every hour. "Ready in" counts from when the app started reading the device.
+O gráfico aparece depois de algumas horas de leitura.	The chart shows up after a few hours of readings.
+O fundo do GMC-800 conta só os minutos em que ele estava em casa, fora das medições de objeto.	The GMC-800 background only counts the minutes it was at home, outside object measurements.
+Onde está o RadonScan	Where the RadonScan is
+RadonScan conectado ({0} em {1})	RadonScan connected ({0} on {1})
+RadonScan desconectado	RadonScan disconnected
+RadonScan não encontrado	RadonScan not found
+Radônio e fundo por cômodo	Radon and background by room
+Radônio médio	Average radon
+Radônio por hora nos últimos 7 dias	Radon per hour over the last 7 days
+cômodo desconhecido: {0}	unknown room: {0}
+desconectado · última {0}	disconnected · last {0}
+média 1 h · atualizado {0}	1 h average · updated {0}
+atualizado {0}	updated {0}
+o RadonScan não respondeu a tempo	the RadonScan did not answer in time
+onde está	where it is
+pronta em {0}	ready in {0}
+radonscan: conectado, {0} em {1}	radonscan: connected, {0} on {1}
+radonscan: cômodo {0} → {1}	radonscan: room {0} → {1}
+radonscan: leitura falhou: {0}	radonscan: reading failed: {0}
+radonscan: não gravei a leitura: {0}	radonscan: did not save the reading: {0}
+referência OMS	WHO reference
+resposta inesperada do RadonScan: {0}	unexpected answer from the RadonScan: {0}
+{0} pCi/L · média da última hora · {1}	{0} pCi/L · last hour average · {1}
+Última semana, média de 1 hora	Last week, 1-hour average
+Sala	Living room
+Quarto	Bedroom
+Outro	Other
+Moderado	Moderate
+Baixo	Low
+Longo prazo	Long term
+1 semana	1 week
+Radônio	Radon
+pronta em	ready in
+Pronta em	Ready in
