@@ -62,13 +62,19 @@ function rnChart(rows) {
     const v = top * k / 4;
     s += `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="rn-grid"/><text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${rnNum(v)}</text>`;
   }
-  // faixas de cômodo
+  // faixas de cômodo; 2.106.1: troca de cômodo que durou menos de 10 min
+  // (clique por engano, desfeito logo) não parte a faixa em duas
+  const pl = [];
+  rows.forEach((r, k) => {
+    const next = k + 1 < rows.length ? rows[k + 1].t : t1;
+    pl.push(k && r.place !== pl[k - 1] && next - r.t < 10 * 6e4 ? pl[k - 1] : r.place);
+  });
   let i = 0;
   while (i < rows.length) {
     let j = i;
-    while (j + 1 < rows.length && rows[j + 1].place === rows[i].place) j++;
+    while (j + 1 < rows.length && pl[j + 1] === pl[i]) j++;
     const a = x(rows[i].t), b = j + 1 < rows.length ? x(rows[j + 1].t) : x(t1);
-    if (rows[i].place) s += `<rect x="${a.toFixed(1)}" y="6" width="${Math.max(1, b - a - 2).toFixed(1)}" height="12" rx="3" class="rn-band rn-band-${rows[i].place}"/>` + (b - a > 46 ? `<text x="${(a + 5).toFixed(1)}" y="15.5" class="rn-band-t">${rnPlaceName(rows[i].place)}</text>` : "");
+    if (pl[i]) s += `<rect x="${a.toFixed(1)}" y="6" width="${Math.max(1, b - a - 2).toFixed(1)}" height="12" rx="3" class="rn-band rn-band-${pl[i]}"/>` + (b - a > 46 ? `<text x="${(a + 5).toFixed(1)}" y="15.5" class="rn-band-t">${rnPlaceName(pl[i])}</text>` : "");
     i = j + 1;
   }
   // linha (quebra nos buracos de mais de 2 h); trecho que toca hora da
