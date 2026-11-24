@@ -6623,3 +6623,32 @@ radonscan: procurando: {0}	radonscan: searching: {0}
 {0} não respondeu ({1})	{0} did not answer ({1})
 {0}: outro aparelho ({1})	{0}: another device ({1})
 nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800	no USB port with the GQ devices' chip besides the GMC-800's
+# 2.106.0: histórico da memória do GQ RadonScan
+Baixar da memória do aparelho	Download from the device memory
+Baixando…	Downloading…
+1 hora trazida da memória ({0} a {1}).	1 hour brought from the memory ({0} to {1}).
+{0} horas trazidas da memória ({1} a {2}).	{0} hours brought from the memory ({1} to {2}).
+Média dessas horas:	Average of these hours:
+{0} sem leitura ({1} a {2}).	{0} without readings ({1} to {2}).
+O RadonScan guarda a contagem de cada hora: dá pra trazer.	The RadonScan keeps the count for each hour: it can be brought in.
+A memória do aparelho não tinha horas novas pra trazer.	The device memory had no new hours to bring in.
+Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho.	It is not possible yet to tell the time of each record in the memory. The app needs a few hours reading the device live; it tries again by itself.
+Não consegui gravar as horas da memória.	Could not save the hours from the memory.
+Não consegui ler a memória do RadonScan. Tente de novo daqui a pouco.	Could not read the RadonScan memory. Try again in a little while.
+O RadonScan não está conectado.	The RadonScan is not connected.
+Só lê, não muda nada no aparelho. Quando ele reconecta depois de um buraco, o app já baixa sozinho.	Read only, nothing changes on the device. When it reconnects after a gap, the app downloads by itself.
+lido ao vivo	read live
+da memória do aparelho (uma média por hora)	from the device memory (one average per hour)
+1 contagem	1 count
+{0} contagens	{0} counts
+RadonScan: {0} hora(s) trazida(s) da memória ({1} a {2})	RadonScan: {0} hour(s) brought from the memory ({1} to {2})
+a memória do RadonScan está vazia	the RadonScan memory is empty
+tabela de horas curta: {0} bytes	hour table too short: {0} bytes
+não deu pra encaixar a memória nas leituras do app	could not match the memory to the app's readings
+automático	automatic
+botão	button
+radonscan: memória ({0}): {1}	radonscan: memory ({0}): {1}
+radonscan: memória: encaixe na entrada {0} às {1} (virada da hora aos {2} min), ligado há {3} h; {4} hora(s) nova(s)	radonscan: memory: matched at entry {0} at {1} (hour turns at minute {2}), on for {3} h; {4} new hour(s)
+radonscan: memória: leitura falhou: {0}	radonscan: memory: read failed: {0}
+radonscan: memória: não gravei: {0}	radonscan: memory: not saved: {0}
+radonscan: memória: {0} (ligado há {1} s)	radonscan: memory: {0} (on for {1} s)

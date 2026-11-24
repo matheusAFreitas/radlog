@@ -5054,7 +5054,24 @@ const I18N_EN = {
 "Radônio": "Radon",
 "pronta em": "ready in",
 "Pronta em": "Ready in",
-"nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800": "no USB port with the GQ devices' chip besides the GMC-800's"
+"nenhuma porta USB com o chip dos aparelhos GQ além da do GMC-800": "no USB port with the GQ devices' chip besides the GMC-800's",
+"Baixar da memória do aparelho": "Download from the device memory",
+"Baixando…": "Downloading…",
+"Média dessas horas:": "Average of these hours:",
+"O RadonScan guarda a contagem de cada hora: dá pra trazer.": "The RadonScan keeps the count for each hour: it can be brought in.",
+"A memória do aparelho não tinha horas novas pra trazer.": "The device memory had no new hours to bring in.",
+"Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho.": "It is not possible yet to tell the time of each record in the memory. The app needs a few hours reading the device live; it tries again by itself.",
+"Não consegui gravar as horas da memória.": "Could not save the hours from the memory.",
+"Não consegui ler a memória do RadonScan. Tente de novo daqui a pouco.": "Could not read the RadonScan memory. Try again in a little while.",
+"O RadonScan não está conectado.": "The RadonScan is not connected.",
+"Só lê, não muda nada no aparelho. Quando ele reconecta depois de um buraco, o app já baixa sozinho.": "Read only, nothing changes on the device. When it reconnects after a gap, the app downloads by itself.",
+"lido ao vivo": "read live",
+"da memória do aparelho (uma média por hora)": "from the device memory (one average per hour)",
+"1 contagem": "1 count",
+"a memória do RadonScan está vazia": "the RadonScan memory is empty",
+"não deu pra encaixar a memória nas leituras do app": "could not match the memory to the app's readings",
+"automático": "automatic",
+"botão": "button"
 },
 "patterns": [
 [
@@ -6171,6 +6188,19 @@ const I18N_EN = {
 " por dia, ",
 "% no período, ",
 " dias completos)."
+]
+],
+[
+"radonscan: memória: encaixe na entrada ",
+"^radonscan: memória: encaixe na entrada ((?:(?! · ).)+?) às ((?:(?! · ).)+?) \\(virada da hora aos ((?:(?! · ).)+?) min\\), ligado há ((?:(?! · ).)+?) h; ((?:(?! · ).)+?) hora\\(s\\) nova\\(s\\)$",
+"radonscan: memory: matched at entry ${1} at ${2} (hour turns at minute ${3}), on for ${4} h; ${5} new hour(s)",
+[
+"radonscan: memória: encaixe na entrada ",
+" às ",
+" (virada da hora aos ",
+" min), ligado há ",
+" h; ",
+" hora(s) nova(s)"
 ]
 ],
 [
@@ -9663,6 +9693,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadonScan: ",
+"^RadonScan: ((?:(?! · ).)+?) hora\\(s\\) trazida\\(s\\) da memória \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)$",
+"RadonScan: ${1} hour(s) brought from the memory (${2} to ${3})",
+[
+"RadonScan: ",
+" hora(s) trazida(s) da memória ("
+]
+],
+[
 "Um pouco acima do normal (",
 "^Um pouco acima do normal \\(((?:(?! · ).)+?)\\) — pode ser só variação$",
 "A little above normal (${1}) — may be just variation",
@@ -12317,6 +12356,16 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: memória: ",
+"^radonscan: memória: ((?:(?! · ).)+?) \\(ligado há ((?:(?! · ).)+?) s\\)$",
+"radonscan: memory: ${1} (on for ${2} s)",
+[
+"radonscan: memória: ",
+" (ligado há ",
+" s)"
+]
+],
+[
 "Abaixo do normal (",
 "^Abaixo do normal \\(((?:(?! · ).)+?)\\) — sem problema$",
 "Below normal (${1}) — no problem",
@@ -12547,6 +12596,23 @@ const I18N_EN = {
 [
 "Atividade: começou (",
 ", pedra solta)"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) horas trazidas da memória \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)\\.$",
+"${1} hours brought from the memory (${2} to ${3}).",
+[
+" horas trazidas da memória (",
+")."
+]
+],
+[
+"radonscan: memória: leitura falhou: ",
+"^radonscan: memória: leitura falhou: ((?:(?! · ).)+?)$",
+"radonscan: memory: read failed: ${1}",
+[
+"radonscan: memória: leitura falhou: "
 ]
 ],
 [
@@ -12789,6 +12855,15 @@ const I18N_EN = {
 [
 "nuvem: subiu ",
 " arquivo(s), juntou "
+]
+],
+[
+"1 hora trazida da memória (",
+"^1 hora trazida da memória \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)\\.$",
+"1 hour brought from the memory (${1} to ${2}).",
+[
+"1 hora trazida da memória (",
+")."
 ]
 ],
 [
@@ -13542,6 +13617,14 @@ const I18N_EN = {
 "${1} pCi/L · last hour average · ${2}",
 [
 " pCi/L · média da última hora · "
+]
+],
+[
+"radonscan: memória: não gravei: ",
+"^radonscan: memória: não gravei: ((?:(?! · ).)+?)$",
+"radonscan: memory: not saved: ${1}",
+[
+"radonscan: memória: não gravei: "
 ]
 ],
 [
@@ -14473,6 +14556,15 @@ const I18N_EN = {
 "· since the first data point (${1} ${2})",
 [
 "· desde o primeiro dado ("
+]
+],
+[
+"tabela de horas curta: ",
+"^tabela de horas curta: ((?:(?! · ).)+?) bytes$",
+"hour table too short: ${1} bytes",
+[
+"tabela de horas curta: ",
+" bytes"
 ]
 ],
 [
@@ -15717,6 +15809,15 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: memória (",
+"^radonscan: memória \\(((?:(?! · ).)+?)\\): ((?:(?! · ).)+?)$",
+"radonscan: memory (${1}): ${2}",
+[
+"radonscan: memória (",
+"): "
+]
+],
+[
 "não é um backup válido: ",
 "^não é um backup válido: ((?:(?! · ).)+?)$",
 "not a valid backup: ${1}",
@@ -16831,6 +16932,15 @@ const I18N_EN = {
 "disconnected · last ${1}",
 [
 "desconectado · última "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) sem leitura \\(((?:(?! · ).)+?) a ((?:(?! · ).)+?)\\)\\.$",
+"${1} without readings (${2} to ${3}).",
+[
+" sem leitura (",
+")."
 ]
 ],
 [
@@ -21733,6 +21843,14 @@ const I18N_EN = {
 "ready in ${1}",
 [
 "pronta em "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) contagens$",
+"${1} counts",
+[
+" contagens"
 ]
 ],
 [
