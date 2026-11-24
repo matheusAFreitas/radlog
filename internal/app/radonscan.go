@@ -49,6 +49,9 @@ type RadonRow struct {
 	Day   float64 `json:"day"`
 	Week  float64 `json:"week"`
 	Long  float64 `json:"long"`
+	// 2.106.0: hora trazida da memória do aparelho (só Hour vale; T = fim da hora)
+	Mem    bool `json:"mem,omitempty"`
+	Counts int  `json:"counts,omitempty"`
 }
 
 // RadonPlaceStat junta o tempo de cada cômodo com o fundo do GMC-800 do
@@ -74,6 +77,10 @@ type RadonState struct {
 	Rows    []RadonRow       `json:"rows"`   // últimos 7 dias
 	Places  []RadonPlaceStat `json:"places"` // tempo e média por cômodo
 	Seen    bool             `json:"seen"`   // já conectou alguma vez (mostra a página)
+	// 2.106.0: horas trazidas da memória do aparelho (também entram em Rows,
+	// com Mem), buracos que a memória ainda não cobriu e a última leitura dela
+	Gaps    []RadonGap      `json:"gaps"`
+	MemLast *RadonMemResult `json:"memLast"`
 }
 
 type radonState struct {
@@ -88,6 +95,10 @@ type radonState struct {
 	saved   *RadonRow // última linha gravada
 	lastWhy string    // último resultado da procura que foi para o log
 	wake    chan struct{}
+	// memória do aparelho (2.106.0)
+	memLast  *RadonMemResult
+	memTries int       // tentativas automáticas nesta conexão
+	memNext  time.Time // próxima tentativa automática
 }
 
 func (a *App) radonPath() string { return filepath.Join(a.dataDir, "radonscan.csv") }
@@ -235,6 +246,8 @@ func (a *App) radonLoop() {
 		}
 		a.radon.mu.Lock()
 		a.radon.dev, a.radon.port, a.radon.version = d, port, ver
+		// memória: primeira tentativa uns segundos depois da 1ª leitura
+		a.radon.memTries, a.radon.memNext = 0, time.Now().Add(10*time.Second)
 		a.radon.mu.Unlock()
 		a.mu.Lock()
 		if a.settings.RadonPort != port {
@@ -252,6 +265,7 @@ func (a *App) radonLoop() {
 				break
 			}
 			a.radonReading(time.Now(), avg)
+			a.radonMemAuto(time.Now())
 			wait(radonPoll)
 			if a.closing.Load() || a.quitting.Load() {
 				break
@@ -494,13 +508,22 @@ func (a *App) GetRadonScan() RadonState {
 	if len(rows) > 0 {
 		st.First = rows[0].T
 	}
+	mem := a.radonMemRows()
+	all := radonMergeMem(rows, mem)
 	cut := now.Add(-radonWeek).UnixMilli()
-	for _, r := range rows {
+	for _, r := range all {
 		if r.T >= cut {
 			st.Rows = append(st.Rows, r)
 		}
 	}
-	st.Places = radonPlaceStats(rows, now, a.radonGmcMean())
+	st.Places = radonPlaceStats(all, now, a.radonGmcMean())
+	st.Gaps = radonGaps(rows, mem, now)
+	a.radon.mu.Lock()
+	if a.radon.memLast != nil {
+		m := *a.radon.memLast
+		st.MemLast = &m
+	}
+	a.radon.mu.Unlock()
 	st.Seen = known || len(rows) > 0 || st.State == "conectado"
 	return st
 }

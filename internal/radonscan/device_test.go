@@ -122,3 +122,28 @@ func TestSilentDeviceTimesOut(t *testing.T) {
 		t.Fatal("devia dar erro")
 	}
 }
+
+func TestParseMemory(t *testing.T) {
+	table := make([]byte, HourSlots*4)
+	table[3865*4], table[3867*4] = 10, 15
+	var marks []byte
+	for h := 0; h < 24; h++ {
+		s := h * 3600
+		marks = append(marks, 0xAA, 0x55, byte(s>>24), byte(s>>16), byte(s>>8), byte(s), 0, 0, 0, 0, 0, 0, 0, 0)
+	}
+	marks = append(marks, 0xFF, 0xFF)
+	m, err := ParseMemory(table, marks)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if m.Hours[3865] != 10 || m.Hours[3867] != 15 || m.Hours[3866] != 0 || m.Uptime != 23*3600 {
+		t.Fatalf("%v %v %d", m.Hours[3865:3868], m.Uptime, len(m.Hours))
+	}
+	ff := make([]byte, HourSlots*4)
+	for i := range ff {
+		ff[i] = 0xFF
+	}
+	if _, err := ParseMemory(ff, nil); err == nil {
+		t.Fatal("memória apagada passou")
+	}
+}

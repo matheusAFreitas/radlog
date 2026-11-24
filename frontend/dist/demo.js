@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.105.3";
+const DEMO_VERSION = "2.106.0";
 
 let demoRadonPlace = "quarto";
 function demoRadon() {
@@ -64,11 +64,16 @@ function demoRadon() {
     const t = h0 + i * 36e5, hr = new Date(t).getHours(), sala = i < 120;
     // de madrugada, com a casa fechada, sobe; de dia, com janela aberta, cai
     const v = (sala ? 0.62 : 0.38) + Math.cos((hr - 4) / 24 * 2 * Math.PI) * 0.2 + Math.sin(i * 1.7) * 0.05;
-    rows.push({ t, place: sala ? "sala" : "quarto", hour: Math.max(0.05, +v.toFixed(2)), day: sala ? 0.6 : 0.42, week: 0.55, long: 0.55 });
+    const r = { t, place: sala ? "sala" : "quarto", hour: Math.max(0.05, +v.toFixed(2)), day: sala ? 0.6 : 0.42, week: 0.55, long: 0.55 };
+    // 2.106.0: uma noite com o PC desligado, trazida da memória do aparelho
+    if (i >= 150 && i < 159) { const c = Math.max(1, Math.round(r.hour * 24)); Object.assign(r, { hour: c / 24, mem: true, counts: c }); }
+    rows.push(r);
   }
+  const memRows = rows.filter((r) => r.mem), memLast = { at: now - 3 * 36e5, hours: memRows.length, from: memRows[0].t - 36e5, to: memRows[memRows.length - 1].t,
+    mean: memRows.reduce((a, r) => a + r.hour, 0) / memRows.length, err: "" };
   const last = { ...rows[rows.length - 1], place: demoRadonPlace };
   return { state: "conectado", port: "COM13", version: "RadonScanRe2.02", err: "", place: demoRadonPlace, last, readAt: now - 4 * 6e4, first: rows[0].t, rows,
-    places: [{ place: "sala", hours: 120, pciL: 0.61, gmcCpm: 41.8, gmcMin: 7200 }, { place: "quarto", hours: 48, pciL: 0.39, gmcCpm: 36.2, gmcMin: 2880 }], seen: true };
+    places: [{ place: "sala", hours: 120, pciL: 0.61, gmcCpm: 41.8, gmcMin: 7200 }, { place: "quarto", hours: 48, pciL: 0.39, gmcCpm: 36.2, gmcMin: 2880 }], seen: true, gaps: [], memLast };
 }
 
 function makeDemoApi(opts) {
@@ -799,6 +804,7 @@ const demoRc = () => {
     // GQ RadonScan (2.105.0): 7 dias de exemplo, 5 na sala e 2 no quarto
     GetRadonScan: async () => demoRadon(),
     SetRadonPlace: async (p) => { demoRadonPlace = p; return demoRadon(); },
+    DownloadRadonMemory: async () => demoRadon(),
     SetRadiacode: async (on, ble) => {
       const nb = (ble || "").toUpperCase(), changed = nb && nb !== demoRcCfg.ble;
       demoRcCfg.off = !on; demoRcCfg.ble = nb;
