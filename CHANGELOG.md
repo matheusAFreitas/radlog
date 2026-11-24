@@ -1,5 +1,15 @@
 # Versões
 
+## 2.106.1
+- GQ RadonScan: no gráfico da semana, a faixa do cômodo não se parte mais
+  em duas ("Quarto" "Quarto") quando o cômodo foi trocado e desfeito em
+  menos de 10 minutos.
+
+**English**
+- GQ RadonScan: on the week chart, the room band no longer splits in two
+  ("Bedroom" "Bedroom") when the room was changed and changed back within
+  10 minutes.
+
 ## 2.106.0
 - GQ RadonScan: o app traz da memória do aparelho as horas em que ele não
   estava lendo (PC desligado, app fechado). O RadonScan guarda quantas
