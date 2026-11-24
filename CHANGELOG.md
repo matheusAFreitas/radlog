@@ -22,6 +22,19 @@
   the counts), count in the per-room average and are kept in
   radonscan-memoria.csv. Read only: nothing changes on the device.
 
+## 2.105.4
+- Nuvem: juntar os minutos do RC102 vindos de outro aparelho podia travar o
+  app se a tela do Radiacode 102 estivesse lendo os mesmos arquivos na mesma
+  hora (as duas partes esperavam uma pela outra). Achado no celular; o PC
+  junta a nuvem do mesmo jeito. Agora a junção solta o arquivo antes de
+  avisar a tela.
+
+**English**
+- Cloud: merging RC102 minutes from another device could freeze the app if
+  the Radiacode 102 screen was reading the same files at that moment (each
+  side waited for the other). Found on the phone; the PC merges the cloud the
+  same way. The merge now releases the file before notifying the screen.
+
 ## 2.105.3
 - Agora: ao abrir o app, o aviso "Falta medição agora" não aparece mais com
   o GMC-800 ou o RC102 já conectado e lendo ao vivo. Antes ele podia ficar
