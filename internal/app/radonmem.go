@@ -252,6 +252,68 @@ func radonStretches(live []RadonRow, from time.Time) []radonStretch {
 	return out
 }
 
+// radonOn é o tempo ligado do aparelho lido ao conectar
+// (radonscan-ligado.csv).
+type radonOn struct {
+	T  int64 // ms
+	Up int   // segundos
+}
+
+func (a *App) radonOnPath() string { return filepath.Join(a.dataDir, "radonscan-ligado.csv") }
+
+func (a *App) radonOnLog(t time.Time, up int) {
+	path := a.radonOnPath()
+	_, statErr := os.Stat(path)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		a.logf("radonscan: não gravei o tempo ligado: %v", err)
+		return
+	}
+	defer f.Close()
+	if os.IsNotExist(statErr) {
+		f.WriteString("hora,segundos_ligado\n")
+	}
+	f.WriteString(t.Format(time.RFC3339) + "," + strconv.Itoa(up) + "\n")
+}
+
+func (a *App) radonOns() []radonOn {
+	b, err := os.ReadFile(a.radonOnPath())
+	if err != nil {
+		return nil
+	}
+	var out []radonOn
+	for _, ln := range strings.Split(string(b), "\n") {
+		f := strings.Split(strings.TrimSpace(ln), ",")
+		if len(f) != 2 {
+			continue
+		}
+		t, err1 := time.Parse(time.RFC3339, f[0])
+		up, err2 := strconv.Atoi(f[1])
+		if err1 == nil && err2 == nil && up >= 0 {
+			out = append(out, radonOn{t.UnixMilli(), up})
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].T < out[j].T })
+	return out
+}
+
+// radonHoursSince: quantas horas o aparelho fechou desde a conexão que
+// começou o trecho de agora (em S), pelo tempo ligado gravado ao conectar.
+func radonHoursSince(ons []radonOn, S time.Time, upNow int) (int64, bool) {
+	if upNow < 0 {
+		return 0, false
+	}
+	for _, o := range ons {
+		if d := o.T - S.UnixMilli(); d >= -2*60000 && d <= 15*60000 {
+			if o.Up > upNow {
+				return 0, false
+			}
+			return int64((upNow - o.Up) / 3600), true
+		}
+	}
+	return 0, false
+}
+
 // radonFillInfo conta o que deu pra encaixar (vai pro log e pra mensagem).
 type radonFillInfo struct {
 	stretches, aligned int
@@ -272,7 +334,7 @@ type radonFillInfo struct {
 //   - quando o trecho de agora ainda não tem encaixe, só dá pra saber onde
 //     param as horas do buraco logo depois de conectar (antes de o aparelho
 //     fechar uma hora nova) ou se ele ficou ligado direto.
-func radonFill(mem radonscan.Memory, live []RadonRow, now time.Time, place func(start, end int64) string) ([]RadonMemRow, radonFillInfo) {
+func radonFill(mem radonscan.Memory, live []RadonRow, ons []radonOn, now time.Time, place func(start, end int64) string) ([]RadonMemRow, radonFillInfo) {
 	var info radonFillInfo
 	sts := radonStretches(live, now.Add(-radonAlignDays*24*time.Hour))
 	info.stretches = len(sts)
@@ -317,14 +379,22 @@ func radonFill(mem radonscan.Memory, live []RadonRow, now time.Time, place func(
 		}
 		if i+1 == len(sts)-1 && !sts[i+1].ok {
 			// o trecho de agora ainda não tem encaixe
-			switch {
-			case now.Sub(S) <= 15*time.Minute:
-				// acabou de conectar: a mais nova ainda é do buraco
-			case A.index(now) <= newest:
-				// ficou ligado direto desde o trecho de antes
-			default:
-				info.pending = true
-				continue
+			if c, ok := radonHoursSince(ons, S, mem.Uptime); ok {
+				// o tempo ligado gravado ao conectar diz quantas horas
+				// são desta conexão
+				hi = min(hi, newest-c)
+			} else {
+				switch {
+				case now.Sub(S) <= 15*time.Minute:
+					// acabou de conectar: a mais nova ainda é do buraco
+				case A.index(now) <= newest+1:
+					// ficou ligado direto, ou parou menos de uma hora: as
+					// horas desta conexão caem em cima das leituras ao
+					// vivo e ficam de fora
+				default:
+					info.pending = true
+					continue
+				}
 			}
 		}
 		for idx := lo + 1; idx <= hi; idx++ {
@@ -547,7 +617,7 @@ func (a *App) radonReadMemory(why string) RadonMemResult {
 	a.mu.Lock()
 	cur := a.settings.RadonPlace
 	a.mu.Unlock()
-	fill, info := radonFill(mem, live, now, radonPlaceAt(live, a.radonPlaceEvents(), cur))
+	fill, info := radonFill(mem, live, a.radonOns(), now, radonPlaceAt(live, a.radonPlaceEvents(), cur))
 	for _, n := range info.notes {
 		a.logf("radonscan: memória: trecho %s", n)
 	}

@@ -6658,3 +6658,6 @@ radonscan: memória: {0} ({1} trecho(s), {2} encaixado(s), ligado {3} h no total
 radonscan: memória: {0} de {1} trecho(s) encaixado(s), ligado {2} h no total; {3} hora(s) nova(s)	radonscan: memory: {0} of {1} stretch(es) matched, on for {2} h in total; {3} new hour(s)
 radonscan: não gravei a troca de cômodo: {0}	radonscan: room change not saved: {0}
 {0}–{1}: virada aos {2} min, última hora na entrada {3}	{0}–{1}: hour turns at minute {2}, last hour at entry {3}
+# 2.106.3: tempo ligado ao conectar
+radonscan: não li o tempo ligado: {0}	radonscan: could not read the time on: {0}
+radonscan: não gravei o tempo ligado: {0}	radonscan: time on not saved: {0}

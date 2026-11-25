@@ -68,7 +68,7 @@ func TestRadonAlignAndFill(t *testing.T) {
 	if d := al.end(3865).Sub(on.Add(time.Hour)); d < -5*time.Minute || d > 5*time.Minute {
 		t.Fatalf("virada da hora errada: %v", d)
 	}
-	fill, info := radonFill(mem, rows, now, radonPlaceAt(rows, nil, ""))
+	fill, info := radonFill(mem, rows, nil, now, radonPlaceAt(rows, nil, ""))
 	t.Logf("%+v", info)
 	if len(fill) != 9 {
 		for _, r := range fill {
@@ -105,7 +105,7 @@ func TestRadonMemSaveAndGaps(t *testing.T) {
 	if g := radonGaps(rows, nil, now); len(g) != 1 {
 		t.Fatalf("buracos: %+v", g)
 	}
-	fill, _ := radonFill(mem, rows, now, radonPlaceAt(rows, nil, ""))
+	fill, _ := radonFill(mem, rows, nil, now, radonPlaceAt(rows, nil, ""))
 	add, err := a.radonMemSave(fill)
 	if err != nil || len(add) != 9 {
 		t.Fatal(len(add), err)
@@ -215,7 +215,7 @@ func TestRadonFillAfterPowerCycle(t *testing.T) {
 	now := d(25, 11, 28)
 	// o cômodo foi trocado pra sala com o aparelho desconectado
 	evs := []radonPlaceEvent{{d(24, 20, 0).UnixMilli(), "sala"}}
-	fill, info := radonFill(mem, rows, now, radonPlaceAt(rows, evs, "quarto"))
+	fill, info := radonFill(mem, rows, nil, now, radonPlaceAt(rows, evs, "quarto"))
 	t.Logf("%+v", info)
 	var want []radonSimHour
 	for _, h := range hours {
@@ -239,7 +239,7 @@ func TestRadonFillAfterPowerCycle(t *testing.T) {
 		}
 	}
 	// sem a troca gravada (antes da 2.106.2), vale o cômodo de quando voltou
-	fill2, _ := radonFill(mem, rows, now, radonPlaceAt(rows, nil, "quarto"))
+	fill2, _ := radonFill(mem, rows, nil, now, radonPlaceAt(rows, nil, "quarto"))
 	for _, r := range fill2 {
 		if time.UnixMilli(r.Start).After(d(24, 20, 0)) && r.Place != "sala" {
 			t.Fatalf("sem troca gravada: %+v", r)
@@ -247,8 +247,53 @@ func TestRadonFillAfterPowerCycle(t *testing.T) {
 	}
 	// horas depois, sem o trecho de agora encaixar e sem estar ligado direto,
 	// não chuta onde param as horas do buraco
-	_, info3 := radonFill(mem, rows, now.Add(3*time.Hour), radonPlaceAt(rows, evs, "quarto"))
+	_, info3 := radonFill(mem, rows, nil, now.Add(3*time.Hour), radonPlaceAt(rows, evs, "quarto"))
 	if !info3.pending {
 		t.Fatalf("devia esperar: %+v", info3)
+	}
+}
+
+// horas depois de reconectar, o tempo ligado gravado ao conectar diz
+// quantas horas da memória são da conexão de agora
+func TestRadonFillLaterWithUptime(t *testing.T) {
+	loc := time.FixedZone("BRT", -3*3600)
+	d := func(day, h, m int) time.Time { return time.Date(2026, 11, day, h, m, 0, 0, loc) }
+	segs := []radonSimSeg{
+		{d(23, 11, 4), d(24, 19, 58), 5, true, "quarto"},
+		{d(24, 21, 30), d(25, 11, 22), 14, false, ""}, // 1h30 desligado antes de ligar na sala
+		{d(25, 11, 25), d(25, 15, 10), 5, true, "sala"},
+	}
+	mem, rows, hours := radonSim(segs)
+	now := d(25, 15, 10)
+	conn := d(25, 11, 25)
+	k := 0
+	for _, h := range hours {
+		if !h.end.After(conn) {
+			k++
+		}
+	}
+	ons := []radonOn{{conn.Add(5 * time.Second).UnixMilli(), k * 3600}}
+	evs := []radonPlaceEvent{{d(24, 20, 0).UnixMilli(), "sala"}}
+	fill, info := radonFill(mem, rows, ons, now, radonPlaceAt(rows, evs, "quarto"))
+	t.Logf("%+v", info)
+	var want []radonSimHour
+	for _, h := range hours {
+		// a hora que mistura o fim do quarto com o começo da sala fica de
+		// fora: no relógio do app ela cai em cima das leituras ao vivo
+		if h.end.After(d(24, 22, 30)) && !h.end.After(conn) {
+			want = append(want, h)
+		}
+	}
+	if info.pending || len(fill) != len(want) {
+		t.Fatalf("%d horas, queria %d (%+v)", len(fill), len(want), info)
+	}
+	for i, r := range fill {
+		if r.Counts != want[i].counts || r.Place != "sala" {
+			t.Fatalf("hora %d: %+v, queria %+v", i, r, want[i])
+		}
+	}
+	// sem o registro, o trecho de agora (3h45 ao vivo) se encaixa sozinho
+	if fill2, _ := radonFill(mem, rows, nil, now, radonPlaceAt(rows, evs, "quarto")); len(fill2) != len(want) {
+		t.Fatalf("sem registro: %d horas", len(fill2))
 	}
 }
