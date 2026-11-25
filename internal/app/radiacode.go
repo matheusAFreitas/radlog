@@ -30,12 +30,14 @@ import (
 // do µSv/h que o aparelho calcula), separado das leituras do GMC.
 
 const (
-	rcPollEvery  = time.Second
-	rcRetryUSB   = 10 * time.Second
-	rcRetryBLE   = 30 * time.Second
-	rcDirName    = "radiacode"
-	rcHeader     = "hora,cps,usvh,n"
-	rcCompareMax = 24 * 60
+	rcPollEvery = time.Second
+	rcRetryUSB  = 10 * time.Second
+	rcRetryBLE  = 30 * time.Second
+	// rcRetryBLEMobile: o primeiro intervalo no celular (15 s, 30 s, 1 min)
+	rcRetryBLEMobile = 15 * time.Second
+	rcDirName        = "radiacode"
+	rcHeader         = "hora,cps,usvh,n"
+	rcCompareMax     = 24 * 60
 )
 
 // RcState é o que a tela mostra do Radiacode.
@@ -377,11 +379,13 @@ func (a *App) rcLoop() {
 	// aparelho e pode levar dados que iriam para quem está com ele no USB.
 	bleFails := 0
 	//
-	// No celular o teto é 2 min: ele é quem fica com o RC102 (16 min sem
-	// tentar fazia a conexão parecer quebrada; ACE, 15/11).
+	// No celular é 15 s, 30 s e no máximo 1 min: ele é quem fica com o RC102
+	// (16 min sem tentar fazia a conexão parecer quebrada; ACE, 15/11). O
+	// "status 133" do Android costuma passar em segundos e os 2 min de antes
+	// deixavam o RC102 de fora 4 a 6 min por queda (registros de 23 a 25/11).
 	bleGap := func() time.Duration {
 		if a.mobile {
-			return rcRetryBLE << min(bleFails, 2)
+			return rcRetryBLEMobile << min(bleFails, 2)
 		}
 		return rcRetryBLE << min(bleFails, 5)
 	}
