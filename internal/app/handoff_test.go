@@ -16,7 +16,7 @@ func TestHandoff(t *testing.T) {
 		t.Fatal("sem identificação não troca")
 	}
 	// outro .exe que existe: troca e repassa os argumentos (sem a identificação)
-	other := filepath.Join(t.TempDir(), "GMC-Monitor-v9.9.9.exe")
+	other := filepath.Join(t.TempDir(), "RadLog-v9.9.9.exe")
 	if err := os.WriteFile(other, []byte("x"), 0o755); err != nil {
 		t.Fatal(err)
 	}
@@ -43,7 +43,7 @@ func TestHandoff(t *testing.T) {
 	if len(rest) != 1 || rest[0] != "--bandeja" {
 		t.Fatalf("resto: %v", rest)
 	}
-	if runExe(`"C:\Program Files\GMC\GMC-Monitor-v1.6.1.exe" --bandeja`) != `C:\Program Files\GMC\GMC-Monitor-v1.6.1.exe` {
+	if runExe(`"C:\Program Files\RadLog\RadLog-v2.1.0.exe" --bandeja`) != `C:\Program Files\RadLog\RadLog-v2.1.0.exe` {
 		t.Fatal("caminho do Run")
 	}
 }

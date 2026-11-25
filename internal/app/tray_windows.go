@@ -100,29 +100,6 @@ func (a *App) trayApply(tip string, plain bool, level, key string, mk func() []b
 const runKey = `Software\Microsoft\Windows\CurrentVersion\Run`
 const runName = "RadLog"
 
-// oldRunName é o nome da 1.x (GMC Monitor) no Run e no StartupApproved.
-const oldRunName = "GMC Monitor"
-
-// renameAutostart troca o item "GMC Monitor" do início com o Windows pelo
-// "RadLog", levando a marca de desativado do Gerenciador de Tarefas.
-func renameAutostart() {
-	if k, err := registry.OpenKey(registry.CURRENT_USER, runKey, registry.SET_VALUE|registry.QUERY_VALUE); err == nil {
-		k.DeleteValue(oldRunName)
-		k.Close()
-	}
-	k, err := registry.OpenKey(registry.CURRENT_USER, approvedKey, registry.SET_VALUE|registry.QUERY_VALUE)
-	if err != nil {
-		return
-	}
-	defer k.Close()
-	if b, _, err := k.GetBinaryValue(oldRunName); err == nil {
-		if _, _, err := k.GetBinaryValue(runName); err != nil {
-			k.SetBinaryValue(runName, b)
-		}
-		k.DeleteValue(oldRunName)
-	}
-}
-
 // O Gerenciador de Tarefas (Aplicativos de inicialização) desativa um item
 // sem apagar a linha do Run: marca aqui, com o 1º byte ímpar (0x03).
 const approvedKey = `Software\Microsoft\Windows\CurrentVersion\Explorer\StartupApproved\Run`

@@ -19,8 +19,9 @@ PDF. Os dados ficam só no seu computador.
 Versão atual: veja as [Releases](../../releases) e o [CHANGELOG](CHANGELOG.md).
 Um app de Android (3.0) está a caminho.
 
-> Até a 1.x se chamava **GMC Monitor**. A 2.0 leva os dados sozinha para a
-> pasta nova na primeira vez que abre.
+> Até a 1.x se chamava **GMC Monitor**. A partir da 3.0 o app não lê mais
+> os dados nem os backups da 1.x: quem ainda usa a 1.x instala antes uma 2.x,
+> que leva os dados para a pasta nova.
 
 ![Tela Agora, com o GQ GMC-800 e o Radiacode 102 lado a lado](docs/prints/pt-agora.png)
 

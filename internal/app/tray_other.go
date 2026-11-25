@@ -17,5 +17,3 @@ func enableStartup() error                                                      
 type trayState struct{}
 
 func (a *App) trayRelabel() {}
-
-func renameAutostart() {}
