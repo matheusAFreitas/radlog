@@ -8,8 +8,12 @@ package app
 // radonscan.csv: procura o deslocamento (qual entrada é qual hora) e o
 // minuto em que a hora do aparelho vira. Só usa o resultado quando um
 // encaixe só bate com folga. Depois preenche as horas em que o app não
-// estava lendo (PC desligado, app fechado) em radonscan-memoria.csv, sem
-// mexer no radonscan.csv.
+// estava lendo (PC desligado, app fechado, aparelho levado pra outro
+// cômodo) em radonscan-memoria.csv, sem mexer no radonscan.csv.
+//
+// 2.106.2: o relógio do aparelho para quando ele fica sem energia, então
+// cada trecho de leitura ao vivo é encaixado sozinho (radonFill), e as
+// horas de quando ele ficou fora do PC entram logo que ele reconecta.
 //
 // Baixa sozinho quando o aparelho reconecta depois de um buraco (e tenta
 // de novo a cada hora, até 12 vezes, se ainda não deu pra encaixar) e pelo
@@ -87,35 +91,38 @@ func radonValueAt(rows []RadonRow, t int64) (float64, bool) {
 	return p.Hour, true
 }
 
-// radonAlign encaixa a tabela nas leituras ao vivo. since limita às horas
-// desde que o aparelho foi ligado (zero = sem limite).
-func radonAlign(hours []int, rows []RadonRow, now, since time.Time) (radonAlignment, error) {
+// radonCand é um encaixe possível: a hora que termina em e (Unix) fica na
+// entrada (e + o)/3600, com o = s·3600 − ph. Encaixes com o perto um do
+// outro são o mesmo encaixe visto em minutos vizinhos.
+type radonCand struct {
+	s, ph, o int64
+	score    float64
+}
+
+// radonNewest é a entrada da hora mais nova já fechada (ver
+// radonscan.HourNewest).
+func radonNewest(hours []int) int64 {
+	return int64(min(len(hours)-1, radonscan.HourNewest))
+}
+
+// radonCands compara a tabela com as médias de 1 hora que o app leu ao vivo
+// entre from e to e devolve os encaixes que batem.
+func radonCands(hours []int, rows []RadonRow, from, to time.Time) []radonCand {
 	type sample struct {
 		k int64
 		v int // centésimos de pCi/L
 	}
-	from := now.Add(-radonAlignDays * 24 * time.Hour)
-	if since.After(from) {
-		from = since
-	}
-	n := int64(len(hours))
-	// cada encaixe (deslocamento s, virada ph) leva a hora que termina em e
-	// para a entrada (e + o)/3600, com o = s·3600 − ph: encaixes com o perto
-	// um do outro são o mesmo encaixe visto em minutos vizinhos
-	type cand struct {
-		s, ph, o int64
-		score    float64
-	}
-	var cs []cand
+	n := radonNewest(hours) + 1
+	var cs []radonCand
 	for ph := int64(0); ph < 3600; ph += 60 {
 		var ss []sample
-		kNow := (now.Unix() - ph) / 3600
-		for k := kNow; ; k-- {
+		kTo := (to.Unix() - ph) / 3600
+		for k := kTo; ; k-- {
 			e := k*3600 + ph
 			if time.Unix(e-3600, 0).Before(from) {
 				break
 			}
-			if e > now.Unix() {
+			if e > to.Unix() {
 				continue
 			}
 			if v, ok := radonValueAt(rows, e*1000); ok {
@@ -125,7 +132,7 @@ func radonAlign(hours []int, rows []RadonRow, now, since time.Time) (radonAlignm
 		if len(ss) < radonAlignMinNZ {
 			continue
 		}
-		for s := -kNow; s+kNow < n; s++ {
+		for s := -kTo; s+kTo < n; s++ {
 			var score float64
 			nz, bad := 0, 0
 			for _, x := range ss {
@@ -153,21 +160,33 @@ func radonAlign(hours []int, rows []RadonRow, now, since time.Time) (radonAlignm
 			if nz < radonAlignMinNZ || float64(bad) > 0.2*float64(len(ss)) {
 				continue
 			}
-			cs = append(cs, cand{s, ph, s*3600 - ph, score})
+			cs = append(cs, radonCand{s, ph, s*3600 - ph, score})
+		}
+	}
+	return cs
+}
+
+// radonPick escolhe o encaixe de nota maior com o entre oMin e oMax. Recusa
+// quando outro encaixe, a uma hora ou mais de distância, bate quase igual.
+func radonPick(all []radonCand, oMin, oMax int64) (radonAlignment, int64, error) {
+	var cs []radonCand
+	for _, c := range all {
+		if c.o >= oMin && c.o <= oMax {
+			cs = append(cs, c)
 		}
 	}
 	if len(cs) == 0 {
-		return radonAlignment{}, errRadonNoFit
+		return radonAlignment{}, 0, errRadonNoFit
 	}
-	sort.Slice(cs, func(i, j int) bool { return cs[i].score > cs[j].score })
+	sort.SliceStable(cs, func(i, j int) bool { return cs[i].score > cs[j].score })
 	best := cs[0]
 	for _, c := range cs[1:] {
 		if abs64(c.o-best.o) >= 3600 && best.score-c.score < 2 {
-			return radonAlignment{}, errRadonNoFit // outro encaixe bate quase igual
+			return radonAlignment{}, 0, errRadonNoFit // outro encaixe bate quase igual
 		}
 	}
 	// o minuto da virada: o do meio entre os de nota máxima desse encaixe
-	var same []cand
+	var same []radonCand
 	for _, c := range cs {
 		if c.score == best.score && abs64(c.o-best.o) < 3600 {
 			same = append(same, c)
@@ -175,7 +194,25 @@ func radonAlign(hours []int, rows []RadonRow, now, since time.Time) (radonAlignm
 	}
 	sort.Slice(same, func(i, j int) bool { return same[i].o < same[j].o })
 	m := same[len(same)/2]
-	return radonAlignment{phase: m.ph, shift: m.s}, nil
+	return radonAlignment{phase: m.ph, shift: m.s}, m.o, nil
+}
+
+// radonOMin: o aparelho não conta mais tempo ligado do que passou no
+// relógio, então a hora mais nova da tabela não pode ser mais nova que
+// agora (folga de 10 min pro minuto da virada).
+func radonOMin(hours []int, now time.Time) int64 {
+	return radonNewest(hours)*3600 - (now.Unix() + 600)
+}
+
+// radonAlign encaixa a tabela nas leituras ao vivo entre since e now
+// (since zero = os últimos radonAlignDays dias), como um trecho só.
+func radonAlign(hours []int, rows []RadonRow, now, since time.Time) (radonAlignment, error) {
+	from := now.Add(-radonAlignDays * 24 * time.Hour)
+	if since.After(from) {
+		from = since
+	}
+	al, _, err := radonPick(radonCands(hours, rows, from, now), radonOMin(hours, now), math.MaxInt64)
+	return al, err
 }
 
 func abs64(x int64) int64 {
@@ -187,27 +224,127 @@ func abs64(x int64) int64 {
 
 var errRadonNoFit = errors.New("não deu pra encaixar a memória nas leituras do app")
 
-// radonFill escolhe as horas da memória que entram: dentro do tempo em que o
-// aparelho estava ligado, já fechadas e sem leitura ao vivo do app nelas.
-func radonFill(mem radonscan.Memory, al radonAlignment, live []RadonRow, now, since time.Time, place func(t int64) string) []RadonMemRow {
+// radonStretch é um trecho de leituras ao vivo sem buraco. O relógio do
+// aparelho é o tempo que ele ficou ligado: cada vez que ele fica sem
+// energia (o RadonScan não tem bateria), a conta para e a virada da hora
+// muda. Por isso cada trecho tem o seu encaixe.
+type radonStretch struct {
+	from, to int64 // ms: primeira e última leitura
+	rows     []RadonRow
+	al       radonAlignment
+	ok       bool
+}
+
+func radonStretches(live []RadonRow, from time.Time) []radonStretch {
+	gap := radonGapMin.Milliseconds()
+	var out []radonStretch
+	for _, r := range live {
+		if r.T < from.UnixMilli() {
+			continue
+		}
+		if n := len(out); n > 0 && r.T-out[n-1].to <= gap {
+			out[n-1].to = r.T
+			out[n-1].rows = append(out[n-1].rows, r)
+			continue
+		}
+		out = append(out, radonStretch{from: r.T, to: r.T, rows: []RadonRow{r}})
+	}
+	return out
+}
+
+// radonFillInfo conta o que deu pra encaixar (vai pro log e pra mensagem).
+type radonFillInfo struct {
+	stretches, aligned int
+	pending            bool // há buraco que só dá pra encaixar com mais horas ao vivo
+	notes              []string
+}
+
+// radonFill escolhe as horas da memória que entram nos buracos entre os
+// trechos de leitura ao vivo:
+//
+//   - cada trecho é encaixado sozinho, do mais velho pro mais novo; um trecho
+//     não pode estar adiantado em relação ao anterior (o aparelho não conta
+//     mais tempo ligado do que o relógio);
+//   - as entradas depois do fim de um trecho, até o começo do próximo, são as
+//     horas do buraco. Ficam com a hora contada a partir do trecho de antes:
+//     se o aparelho foi desligado pra mudar de lugar, o erro é só o tempo da
+//     mudança;
+//   - quando o trecho de agora ainda não tem encaixe, só dá pra saber onde
+//     param as horas do buraco logo depois de conectar (antes de o aparelho
+//     fechar uma hora nova) ou se ele ficou ligado direto.
+func radonFill(mem radonscan.Memory, live []RadonRow, now time.Time, place func(start, end int64) string) ([]RadonMemRow, radonFillInfo) {
+	var info radonFillInfo
+	sts := radonStretches(live, now.Add(-radonAlignDays*24*time.Hour))
+	info.stretches = len(sts)
+	newest := radonNewest(mem.Hours)
+	oMin := radonOMin(mem.Hours, now)
+	oMax, prev := int64(math.MaxInt64), false
+	for i := range sts {
+		st := &sts[i]
+		cs := radonCands(mem.Hours, st.rows, time.UnixMilli(st.from), time.UnixMilli(st.to))
+		al, o, err := radonPick(cs, oMin, oMax)
+		if err != nil {
+			continue
+		}
+		st.al, st.ok = al, true
+		info.aligned++
+		info.notes = append(info.notes, fmt.Sprintf("%s–%s: virada aos %d min, última hora na entrada %d",
+			time.UnixMilli(st.from).Format("02/01 15:04"), time.UnixMilli(st.to).Format("02/01 15:04"), al.phase/60, al.index(time.UnixMilli(st.to))))
+		if !prev || o+600 < oMax {
+			oMax, prev = o+600, true
+		}
+	}
 	var out []RadonMemRow
-	idxNow := al.index(now.Add(-3 * time.Minute))
-	for idx := idxNow; idx >= 0 && idx < int64(len(mem.Hours)); idx-- {
-		end := al.end(idx)
-		start := end.Add(-time.Hour)
-		if start.Before(since.Add(-5*time.Minute)) || now.Sub(end) > radonWeek+24*time.Hour {
-			break
+	last := -1
+	for i := 0; i+1 < len(sts); i++ {
+		if sts[i].ok {
+			last = i
 		}
-		lo, hi := start.Add(15*time.Minute).UnixMilli(), end.Add(5*time.Minute).UnixMilli()
-		i := sort.Search(len(live), func(i int) bool { return live[i].T > lo })
-		if i < len(live) && live[i].T <= hi {
-			continue // o app estava lendo nessa hora
+		if last < 0 {
+			continue
 		}
-		c := mem.Hours[idx]
-		out = append(out, RadonMemRow{Start: start.UnixMilli(), End: end.UnixMilli(), Place: place(end.UnixMilli()), Counts: c, PCiL: float64(c) * radonscan.PCiPerCount})
+		A := sts[last].al
+		E, S := time.UnixMilli(sts[i].to), time.UnixMilli(sts[i+1].from)
+		if now.Sub(S) > radonWeek+24*time.Hour {
+			continue
+		}
+		lo, hi := A.index(E), min(A.index(S), newest)
+		for j := i + 1; j < len(sts); j++ {
+			if sts[j].ok {
+				hi = min(hi, sts[j].al.index(time.UnixMilli(sts[j].from)))
+				break
+			}
+		}
+		if i+1 == len(sts)-1 && !sts[i+1].ok {
+			// o trecho de agora ainda não tem encaixe
+			switch {
+			case now.Sub(S) <= 15*time.Minute:
+				// acabou de conectar: a mais nova ainda é do buraco
+			case A.index(now) <= newest:
+				// ficou ligado direto desde o trecho de antes
+			default:
+				info.pending = true
+				continue
+			}
+		}
+		for idx := lo + 1; idx <= hi; idx++ {
+			end := A.end(idx)
+			start := end.Add(-time.Hour)
+			if end.After(now.Add(-3*time.Minute)) || now.Sub(end) > radonWeek+24*time.Hour {
+				continue
+			}
+			l, h := start.Add(15*time.Minute).UnixMilli(), end.Add(5*time.Minute).UnixMilli()
+			k := sort.Search(len(live), func(k int) bool { return live[k].T > l })
+			if k < len(live) && live[k].T <= h {
+				continue // o app estava lendo nessa hora
+			}
+			c := mem.Hours[idx]
+			out = append(out, RadonMemRow{Start: start.UnixMilli(), End: end.UnixMilli(), Place: place(start.UnixMilli(), end.UnixMilli()),
+				Counts: c, PCiL: float64(c) * radonscan.PCiPerCount})
+		}
 	}
 	sort.Slice(out, func(i, j int) bool { return out[i].End < out[j].End })
-	return out
+	return out, info
 }
 
 // RadonMemRow é uma hora trazida da memória do aparelho.
@@ -317,14 +454,74 @@ func radonGaps(live []RadonRow, mem []RadonMemRow, now time.Time) []RadonGap {
 	return out
 }
 
-// radonPlaceAt é o cômodo da última leitura ao vivo antes de t.
-func radonPlaceAt(live []RadonRow, fallback string) func(int64) string {
-	return func(t int64) string {
-		i := sort.Search(len(live), func(i int) bool { return live[i].T > t })
-		if i == 0 {
-			return fallback
+// radonPlaceEvent é uma troca de cômodo (radonscan-comodos.csv). Grava
+// também as trocas feitas com o aparelho desconectado, que não viram linha
+// no radonscan.csv.
+type radonPlaceEvent struct {
+	T     int64
+	Place string
+}
+
+func (a *App) radonPlacePath() string { return filepath.Join(a.dataDir, "radonscan-comodos.csv") }
+
+func (a *App) radonPlaceLog(place string, t time.Time) {
+	path := a.radonPlacePath()
+	_, statErr := os.Stat(path)
+	f, err := os.OpenFile(path, os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
+	if err != nil {
+		a.logf("radonscan: não gravei a troca de cômodo: %v", err)
+		return
+	}
+	defer f.Close()
+	if os.IsNotExist(statErr) {
+		f.WriteString("hora,comodo\n")
+	}
+	f.WriteString(t.Format(time.RFC3339) + "," + place + "\n")
+}
+
+func (a *App) radonPlaceEvents() []radonPlaceEvent {
+	b, err := os.ReadFile(a.radonPlacePath())
+	if err != nil {
+		return nil
+	}
+	var out []radonPlaceEvent
+	for _, ln := range strings.Split(string(b), "\n") {
+		f := strings.Split(strings.TrimSpace(ln), ",")
+		if len(f) != 2 || !radonPlaces[f[1]] {
+			continue
 		}
-		return live[i-1].Place
+		if t, err := time.Parse(time.RFC3339, f[0]); err == nil {
+			out = append(out, radonPlaceEvent{T: t.UnixMilli(), Place: f[1]})
+		}
+	}
+	sort.SliceStable(out, func(i, j int) bool { return out[i].T < out[j].T })
+	return out
+}
+
+// radonPlaceAt diz o cômodo de uma hora da memória, olhando o meio dela:
+// vale a última leitura ao vivo ou a última troca de cômodo, a mais nova.
+// Num buraco sem troca gravada (antes da 2.106.2) em que o cômodo mudou de
+// um lado pro outro, vale o de quando o aparelho voltou: a troca foi feita
+// com ele fora.
+func radonPlaceAt(live []RadonRow, evs []radonPlaceEvent, fallback string) func(start, end int64) string {
+	return func(start, end int64) string {
+		t := (start + end) / 2
+		i := sort.Search(len(live), func(i int) bool { return live[i].T > t })
+		place, at := fallback, int64(math.MinInt64)
+		if i > 0 {
+			place, at = live[i-1].Place, live[i-1].T
+		}
+		j := sort.Search(len(evs), func(j int) bool { return evs[j].T > t })
+		if j > 0 && evs[j-1].T > at {
+			return evs[j-1].Place
+		}
+		if i > 0 && i < len(live) && live[i].T-at > radonGapMin.Milliseconds() && live[i].Place != place {
+			if j < len(evs) && evs[j].T < live[i].T {
+				return place // a troca gravada veio depois desta hora
+			}
+			return live[i].Place
+		}
+		return place
 	}
 }
 
@@ -347,31 +544,26 @@ func (a *App) radonReadMemory(why string) RadonMemResult {
 		return a.radonMemDone(res, why)
 	}
 	live := a.radonRows()
-	var since time.Time
-	if mem.Uptime >= 0 {
-		since = now.Add(-time.Duration(mem.Uptime+3600) * time.Second)
-	}
-	al, err := radonAlign(mem.Hours, live, now, since)
-	if err != nil {
-		a.logf("radonscan: memória: %v (ligado há %d s)", err, mem.Uptime)
-		res.Err = "Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho."
-		return a.radonMemDone(res, why)
-	}
 	a.mu.Lock()
 	cur := a.settings.RadonPlace
 	a.mu.Unlock()
-	if since.IsZero() {
-		since = now.Add(-radonWeek)
+	fill, info := radonFill(mem, live, now, radonPlaceAt(live, a.radonPlaceEvents(), cur))
+	for _, n := range info.notes {
+		a.logf("radonscan: memória: trecho %s", n)
 	}
-	fill := radonFill(mem, al, live, now, since, radonPlaceAt(live, cur))
+	if info.aligned == 0 || (info.pending && len(fill) == 0) {
+		a.logf("radonscan: memória: %v (%d trecho(s), %d encaixado(s), ligado %d h no total)", errRadonNoFit, info.stretches, info.aligned, mem.Uptime/3600)
+		res.Err = "Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho."
+		return a.radonMemDone(res, why)
+	}
 	add, err := a.radonMemSave(fill)
 	if err != nil {
 		a.logf("radonscan: memória: não gravei: %v", err)
 		res.Err = "Não consegui gravar as horas da memória."
 		return a.radonMemDone(res, why)
 	}
-	a.logf("radonscan: memória: encaixe na entrada %d às %s (virada da hora aos %d min), ligado há %d h; %d hora(s) nova(s)",
-		al.index(now), now.Format("15:04"), al.phase/60, mem.Uptime/3600, len(add))
+	a.logf("radonscan: memória: %d de %d trecho(s) encaixado(s), ligado %d h no total; %d hora(s) nova(s)",
+		info.aligned, info.stretches, mem.Uptime/3600, len(add))
 	if len(add) > 0 {
 		res.Hours = len(add)
 		res.From, res.To = add[0].Start, add[len(add)-1].End
