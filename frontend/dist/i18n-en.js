@@ -6656,6 +6656,18 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: memória: ",
+"^radonscan: memória: ((?:(?! · ).)+?) de ((?:(?! · ).)+?) trecho\\(s\\) encaixado\\(s\\), ligado ((?:(?! · ).)+?) h no total; ((?:(?! · ).)+?) hora\\(s\\) nova\\(s\\)$",
+"radonscan: memory: ${1} of ${2} stretch(es) matched, on for ${3} h in total; ${4} new hour(s)",
+[
+"radonscan: memória: ",
+" de ",
+" trecho(s) encaixado(s), ligado ",
+" h no total; ",
+" hora(s) nova(s)"
+]
+],
+[
 "automático: parou quando deu para garantir que o objeto sobe menos que ",
 "^automático: parou quando deu para garantir que o objeto sobe menos que ((?:(?! · ).)+?)% do fundo \\(\\+((?:(?! · ).)+?) CPM\\)$",
 "automatic: stopped once it could guarantee the object adds less than ${1}% of background (+${2} CPM)",
@@ -7694,6 +7706,17 @@ const I18N_EN = {
 " (σ real ÷ σ do acaso, nas contagens) · mediana ",
 " · n = ",
 " min"
+]
+],
+[
+"radonscan: memória: ",
+"^radonscan: memória: ((?:(?! · ).)+?) \\(((?:(?! · ).)+?) trecho\\(s\\), ((?:(?! · ).)+?) encaixado\\(s\\), ligado ((?:(?! · ).)+?) h no total\\)$",
+"radonscan: memory: ${1} (${2} stretch(es), ${3} matched, on for ${4} h in total)",
+[
+"radonscan: memória: ",
+" trecho(s), ",
+" encaixado(s), ligado ",
+" h no total)"
 ]
 ],
 [
@@ -11421,6 +11444,15 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?)–((?:(?! · ).)+?): virada aos ((?:(?! · ).)+?) min, última hora na entrada ((?:(?! · ).)+?)$",
+"${1}–${2}: hour turns at minute ${3}, last hour at entry ${4}",
+[
+": virada aos ",
+" min, última hora na entrada "
+]
+],
+[
 "atualização: não consegui olhar o GitHub: ",
 "^atualização: não consegui olhar o GitHub: ((?:(?! · ).)+?)$",
 "update: couldn't check GitHub: ${1}",
@@ -11783,6 +11815,14 @@ const I18N_EN = {
 "${1} disappeared from the port list (cable or USB)",
 [
 " sumiu da lista de portas (cabo ou USB)"
+]
+],
+[
+"radonscan: não gravei a troca de cômodo: ",
+"^radonscan: não gravei a troca de cômodo: ((?:(?! · ).)+?)$",
+"radonscan: room change not saved: ${1}",
+[
+"radonscan: não gravei a troca de cômodo: "
 ]
 ],
 [
@@ -12372,6 +12412,14 @@ const I18N_EN = {
 [
 "o dia mais baixo é ",
 "% abaixo da média"
+]
+],
+[
+"radonscan: não gravei o tempo ligado: ",
+"^radonscan: não gravei o tempo ligado: ((?:(?! · ).)+?)$",
+"radonscan: time on not saved: ${1}",
+[
+"radonscan: não gravei o tempo ligado: "
 ]
 ],
 [
@@ -13231,6 +13279,14 @@ const I18N_EN = {
 "unexpected answer from the RadonScan: ${1}",
 [
 "resposta inesperada do RadonScan: "
+]
+],
+[
+"radonscan: não li o tempo ligado: ",
+"^radonscan: não li o tempo ligado: ((?:(?! · ).)+?)$",
+"radonscan: could not read the time on: ${1}",
+[
+"radonscan: não li o tempo ligado: "
 ]
 ],
 [
@@ -15361,6 +15417,14 @@ const I18N_EN = {
 "radonscan: reading failed: ${1}",
 [
 "radonscan: leitura falhou: "
+]
+],
+[
+"radonscan: memória: trecho ",
+"^radonscan: memória: trecho ((?:(?! · ).)+?)$",
+"radonscan: memory: stretch ${1}",
+[
+"radonscan: memória: trecho "
 ]
 ],
 [

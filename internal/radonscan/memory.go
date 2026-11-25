@@ -8,8 +8,16 @@ package radonscan
 //     contagens o detector teve numa hora. 1 contagem por hora vale 1/24
 //     pCi/L (é o degrau da média de 1 hora: 0,04; 0,08; 0,13...). Conferido
 //     contra 11 horas que o RadLog leu ao vivo: bateu dentro do arredondamento.
-//   - 0x1FE000: um registro de 14 bytes por hora desde que o aparelho foi
-//     ligado: AA 55, segundos ligado (4 bytes, big-endian) e 8 bytes zerados.
+//   - 0x1FE000: um registro de 14 bytes por hora: AA 55, segundos ligado (4
+//     bytes, big-endian) e 8 bytes zerados.
+//
+// Uma segunda cópia (25/11/2026, depois de o aparelho ficar 15 h fora do PC
+// ligado num carregador) mostrou como a tabela anda: a hora mais nova fica
+// sempre na entrada HourNewest e as outras vão descendo uma entrada por
+// hora. Os segundos ligado não zeram quando ele fica sem energia (ele não
+// tem bateria): a conta para e continua de onde estava quando ele volta.
+// A média de 1 dia que ele mostra bate com a soma das 24 entradas que
+// terminam em HourNewest.
 //
 // O aparelho não diz qual entrada é a hora de agora nem tem relógio: o app
 // descobre isso comparando a tabela com as médias que ele mesmo gravou
@@ -24,6 +32,9 @@ import (
 const (
 	HourTableAddr = 0x1F9000
 	HourSlots     = 4253 // 17012 bytes
+	// HourNewest é a entrada da hora fechada mais nova (3888 = 162 dias de
+	// horas; as entradas depois dela não são horas).
+	HourNewest    = 3887
 	HourMarksAddr = 0x1FE000
 	hourMarksLen  = 4096
 	spirBlock     = 4096
@@ -34,7 +45,7 @@ const (
 // Memory é o que o app lê da memória do aparelho.
 type Memory struct {
 	Hours  []int // contagens por hora, HourSlots entradas
-	Uptime int   // segundos ligado no último registro de hora (-1 = sem registro)
+	Uptime int   // segundos ligado no total, no último registro de hora (-1 = sem registro)
 }
 
 // spir lê n bytes da flash a partir de addr.
@@ -118,14 +129,32 @@ func ParseMemory(table, marks []byte) (Memory, error) {
 	if erased == HourSlots {
 		return Memory{}, fmt.Errorf("a memória do RadonScan está vazia")
 	}
+	m.Uptime = parseMarks(marks)
+	return m, nil
+}
+
+// parseMarks devolve os segundos ligado do último registro de hora (-1 =
+// sem registro).
+func parseMarks(marks []byte) int {
+	up := -1
 	for i := 0; i+14 <= len(marks); i += 14 {
 		r := marks[i : i+14]
 		if r[0] != 0xAA || r[1] != 0x55 {
 			break
 		}
-		if s := int(binary.BigEndian.Uint32(r[2:6])); s > m.Uptime {
-			m.Uptime = s
+		if s := int(binary.BigEndian.Uint32(r[2:6])); s > up {
+			up = s
 		}
 	}
-	return m, nil
+	return up
+}
+
+// ReadUptime lê só os registros de hora (um bloco de 4 KB): quantos
+// segundos o aparelho já contou ligado, de hora em hora.
+func (d *Device) ReadUptime() (int, error) {
+	marks, err := d.spir(HourMarksAddr, hourMarksLen)
+	if err != nil {
+		return -1, err
+	}
+	return parseMarks(marks), nil
 }

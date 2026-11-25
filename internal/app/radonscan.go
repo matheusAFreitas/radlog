@@ -258,6 +258,13 @@ func (a *App) radonLoop() {
 		a.logf("radonscan: conectado, %s em %s", ver, port)
 		a.logEvent(fmt.Sprintf("RadonScan conectado (%s em %s)", ver, port))
 		a.radonSet("conectado", "")
+		// quanto o relógio do aparelho já andou ao conectar: diz depois
+		// quantas horas da memória são desta conexão
+		if up, err := withTimeout(15*time.Second, d.ReadUptime); err != nil {
+			a.logf("radonscan: não li o tempo ligado: %v", err)
+		} else if up >= 0 {
+			a.radonOnLog(time.Now(), up)
+		}
 		for {
 			avg, err := withTimeout(10*time.Second, d.ReadAverages)
 			if err != nil {
@@ -541,6 +548,7 @@ func (a *App) SetRadonPlace(place string) (RadonState, error) {
 	a.mu.Unlock()
 	if old != place {
 		a.logf("radonscan: cômodo %q → %q", old, place)
+		a.radonPlaceLog(place, time.Now())
 		a.radonWake() // lê agora e grava a linha com o cômodo novo
 	}
 	return a.GetRadonScan(), nil

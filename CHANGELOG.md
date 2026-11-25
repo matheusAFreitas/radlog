@@ -1,5 +1,43 @@
 # Versões
 
+## 2.106.3
+- GQ RadonScan: as horas de fora do PC agora entram também quando o app
+  baixa a memória mais de 15 minutos depois de o aparelho reconectar (por
+  exemplo, depois de atualizar o app). Ao conectar, o app anota quanto o
+  relógio do aparelho já andou, e assim sabe quais horas da memória são da
+  conexão de agora.
+
+**English**
+- GQ RadonScan: hours away from the PC now also come in when the app reads
+  the memory more than 15 minutes after the device reconnects (for
+  example, after updating the app). On connecting, the app notes how far
+  the device clock has run, so it knows which memory hours belong to the
+  current connection.
+
+## 2.106.2
+- GQ RadonScan: as horas da memória agora entram também quando o aparelho
+  foi levado pra longe do PC e ligado num carregador. O relógio dele para
+  quando fica sem energia (ele não tem bateria), e antes o app só
+  conseguia encaixar a memória depois de horas lendo ao vivo. Agora cada
+  trecho de leitura ao vivo é encaixado sozinho e as horas de fora entram
+  logo que ele reconecta, com o horário contado a partir de quando ele
+  saiu do PC (o erro é só o tempo da mudança).
+- GQ RadonScan: a troca de cômodo feita com o aparelho desconectado fica
+  gravada, e as horas da memória ficam no cômodo certo (no exemplo acima,
+  na sala, não no quarto).
+
+**English**
+- GQ RadonScan: memory hours now come in also when the device was taken
+  away from the PC and plugged into a charger. Its clock stops while it
+  has no power (it has no battery), and before the app could only place
+  the memory after hours of live reading. Now each stretch of live reading
+  is matched on its own and the hours away come in as soon as it
+  reconnects, timed from when it left the PC (off only by the time the
+  move took).
+- GQ RadonScan: a room change made while the device is disconnected is
+  saved, and memory hours land in the right room (in the case above, the
+  living room, not the bedroom).
+
 ## 2.106.1
 - GQ RadonScan: no gráfico da semana, a faixa do cômodo não se parte mais
   em duas ("Quarto" "Quarto") quando o cômodo foi trocado e desfeito em
