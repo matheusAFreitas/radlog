@@ -55,7 +55,7 @@ function demoGrade(ps, live) {
 }
 // a versão do app (igual à do internal/app/version.go: o CI confere)
 const demoObjTest = {};
-const DEMO_VERSION = "2.106.1";
+const DEMO_VERSION = "2.106.2";
 
 let demoRadonPlace = "quarto";
 function demoRadon() {

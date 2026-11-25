@@ -541,6 +541,7 @@ func (a *App) SetRadonPlace(place string) (RadonState, error) {
 	a.mu.Unlock()
 	if old != place {
 		a.logf("radonscan: cômodo %q → %q", old, place)
+		a.radonPlaceLog(place, time.Now())
 		a.radonWake() // lê agora e grava a linha com o cômodo novo
 	}
 	return a.GetRadonScan(), nil
