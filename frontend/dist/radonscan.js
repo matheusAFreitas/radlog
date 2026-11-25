@@ -62,26 +62,67 @@ function rnChart(rows) {
     const v = top * k / 4;
     s += `<line x1="${L}" x2="${W - R}" y1="${y(v).toFixed(1)}" y2="${y(v).toFixed(1)}" class="rn-grid"/><text x="${L - 6}" y="${(y(v) + 4).toFixed(1)}" text-anchor="end">${rnNum(v)}</text>`;
   }
-  // faixas de cômodo
+  // faixas de cômodo; 2.106.1: troca de cômodo que durou menos de 10 min
+  // (clique por engano, desfeito logo) não parte a faixa em duas
+  const pl = [];
+  rows.forEach((r, k) => {
+    const next = k + 1 < rows.length ? rows[k + 1].t : t1;
+    pl.push(k && r.place !== pl[k - 1] && next - r.t < 10 * 6e4 ? pl[k - 1] : r.place);
+  });
   let i = 0;
   while (i < rows.length) {
     let j = i;
-    while (j + 1 < rows.length && rows[j + 1].place === rows[i].place) j++;
+    while (j + 1 < rows.length && pl[j + 1] === pl[i]) j++;
     const a = x(rows[i].t), b = j + 1 < rows.length ? x(rows[j + 1].t) : x(t1);
-    if (rows[i].place) s += `<rect x="${a.toFixed(1)}" y="6" width="${Math.max(1, b - a - 2).toFixed(1)}" height="12" rx="3" class="rn-band rn-band-${rows[i].place}"/>` + (b - a > 46 ? `<text x="${(a + 5).toFixed(1)}" y="15.5" class="rn-band-t">${rnPlaceName(rows[i].place)}</text>` : "");
+    if (pl[i]) s += `<rect x="${a.toFixed(1)}" y="6" width="${Math.max(1, b - a - 2).toFixed(1)}" height="12" rx="3" class="rn-band rn-band-${pl[i]}"/>` + (b - a > 46 ? `<text x="${(a + 5).toFixed(1)}" y="15.5" class="rn-band-t">${rnPlaceName(pl[i])}</text>` : "");
     i = j + 1;
   }
-  // linha (quebra nos buracos de mais de 2 h)
-  let d = "";
-  rows.forEach((r, k) => { d += (k && r.t - rows[k - 1].t <= 2 * 36e5 ? "L" : "M") + x(r.t).toFixed(1) + " " + y(rnBq(r.hour)).toFixed(1); });
+  // linha (quebra nos buracos de mais de 2 h); trecho que toca hora da
+  // memória do aparelho sai tracejado (2.106.0)
+  let d = "", dm = "";
+  rows.forEach((r, k) => {
+    if (!k || r.t - rows[k - 1].t > 2 * 36e5) return;
+    const p = rows[k - 1], seg = `M${x(p.t).toFixed(1)} ${y(rnBq(p.hour)).toFixed(1)}L${x(r.t).toFixed(1)} ${y(rnBq(r.hour)).toFixed(1)}`;
+    if (r.mem || p.mem) dm += seg; else d += seg;
+  });
   s += `<path d="${d}" class="rn-line"/>`;
+  if (dm) s += `<path d="${dm}" class="rn-line rn-line-mem"/>`;
+  rows.forEach((r) => {
+    if (!r.mem) return;
+    const tip = `${ddmm(r.t - 36e5)} ${hhmm(r.t - 36e5)}–${hhmm(r.t)} · ${rnBqTxt(rnBq(r.hour))} Bq/m³ · ${r.counts === 1 ? "1 contagem" : `${r.counts || 0} contagens`}`;
+    s += `<circle cx="${x(r.t).toFixed(1)}" cy="${y(rnBq(r.hour)).toFixed(1)}" r="3" class="rn-mem-pt"><title>${tip}</title></circle>`;
+  });
   // dias embaixo
   const day0 = new Date(t0); day0.setHours(24, 0, 0, 0);
   for (let t = day0.getTime(); t < t1; t += RN_DAY) {
     s += `<line x1="${x(t).toFixed(1)}" x2="${x(t).toFixed(1)}" y1="${T}" y2="${H - B}" class="rn-grid"/><text x="${(x(t) + 3).toFixed(1)}" y="${H - 8}">${isToday(t) ? "hoje" : isYesterday(t) ? "ontem" : ddmm(t)}</text>`;
   }
   s += `<text x="${L - 6}" y="${T - 10}" text-anchor="end" class="rn-u">Bq/m³</text>`;
-  return `<div class="rn-chart"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Radônio por hora nos últimos 7 dias">${s}</svg></div>`;
+  const legend = rows.some((r) => r.mem) ? `<div class="rn-legend small muted"><span><i class="rn-lg"></i>lido ao vivo</span><span><i class="rn-lg rn-lg-mem"></i>da memória do aparelho (uma média por hora)</span></div>` : "";
+  return `<div class="rn-chart"><svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Radônio por hora nos últimos 7 dias">${s}</svg></div>${legend}`;
+}
+
+// 2.106.0: botão da memória do aparelho, aviso do buraco e resultado
+let rnMemBusy = false;
+// início e fim de um trecho ("24/11 01:04" e "10:04"; o dia só se mudar)
+const rnEnds = (a, b) => [`${ddmm(a)} ${hhmm(a)}`, `${ddmm(b) === ddmm(a) ? "" : ddmm(b) + " "}${hhmm(b)}`];
+function rnMemBox(st) {
+  const on = st.state === "conectado";
+  const btn = `<button type="button" class="btn${st.gaps && st.gaps.length && on ? " accent" : ""}" data-rn-mem ${on && !rnMemBusy ? "" : "disabled"}><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="m7 10 5 5 5-5"/><path d="M5 20h14"/></svg><span>${rnMemBusy ? "Baixando…" : "Baixar da memória do aparelho"}</span></button>`;
+  const m = st.memLast, gap = st.gaps && st.gaps.length ? st.gaps[st.gaps.length - 1] : null;
+  let note = "";
+  if (m && m.hours > 0) {
+    const [ra, rb] = rnEnds(m.from, m.to);
+    note = `<p class="rn-mem-ok"><span>${m.hours === 1 ? `1 hora trazida da memória (${ra} a ${rb}).` : `${m.hours} horas trazidas da memória (${ra} a ${rb}).`}</span> <span>Média dessas horas: <b class="mono">${rnBqTxt(rnBq(m.mean))} Bq/m³</b>.</span></p>`;
+  } else if (gap && on && !(m && m.at >= gap.to)) {
+    const h = (gap.to - gap.from) / 36e5, [ga, gb] = rnEnds(gap.from, gap.to);
+    note = `<p class="notice rn-mem-gap"><span>${rnHours(h)} sem leitura (${ga} a ${gb}).</span> <span>O RadonScan guarda a contagem de cada hora: dá pra trazer.</span></p>`;
+  } else if (m && m.err) {
+    note = `<p class="small muted">${escHtml(m.err)}</p>`;
+  } else if (m) {
+    note = `<p class="small muted">A memória do aparelho não tinha horas novas pra trazer.</p>`;
+  }
+  return { btn, note };
 }
 
 function rnPlacesTable(places) {
@@ -122,7 +163,9 @@ function renderRadon(st) {
     `<div class="rn-tiles">${rnTile("1 hora", l.hour, 0, 0)}${rnTile("1 dia", l.day, RN_DAY, st.first)}${rnTile("1 semana", l.week, 7 * RN_DAY, st.first)}${rnTile("Longo prazo", l.long, 0, 0)}</div>` +
     `<p class="small muted">O RadonScan recalcula o radônio de hora em hora. "Pronta em" conta desde que o app começou a ler o aparelho.</p>`;
   box.innerHTML = html;
-  $("rnWeek").innerHTML = `<h2 class="rn-h">Última semana, média de 1 hora</h2>` + rnChart(st.rows);
+  const mb = rnMemBox(st);
+  $("rnWeek").innerHTML = `<div class="rn-wh"><h2 class="rn-h">Última semana, média de 1 hora</h2>${mb.btn}</div>${mb.note}` + rnChart(st.rows) +
+    `<p class="small muted">Só lê, não muda nada no aparelho. Quando ele reconecta depois de um buraco, o app já baixa sozinho.</p>`;
   $("rnPlaces").innerHTML = `<h2 class="rn-h">Radônio e fundo por cômodo</h2>` + rnPlacesTable(st.places);
   $("rnWeek").hidden = $("rnPlaces").hidden = false;
 }
@@ -149,6 +192,13 @@ async function refreshRadon() {
 function wireRadon() {
   on("radonscan", renderRadon);
   document.addEventListener("click", async (e) => {
+    const mbtn = e.target.closest("[data-rn-mem]");
+    if (mbtn && api.DownloadRadonMemory && !rnMemBusy) {
+      rnMemBusy = true;
+      renderRadon();
+      try { rnMemBusy = false; renderRadon(await api.DownloadRadonMemory()); } catch (err) { rnMemBusy = false; renderRadon(); toast(String(err.message || err), true); }
+      return;
+    }
     const b = e.target.closest("[data-rn-place]");
     if (!b || !api.SetRadonPlace) return;
     const p = b.dataset.rnPlace === (state.radon && state.radon.place) ? "" : b.dataset.rnPlace;

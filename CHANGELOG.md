@@ -1,5 +1,50 @@
 # Versões
 
+## 2.106.1
+- GQ RadonScan: no gráfico da semana, a faixa do cômodo não se parte mais
+  em duas ("Quarto" "Quarto") quando o cômodo foi trocado e desfeito em
+  menos de 10 minutos.
+
+**English**
+- GQ RadonScan: on the week chart, the room band no longer splits in two
+  ("Bedroom" "Bedroom") when the room was changed and changed back within
+  10 minutes.
+
+## 2.106.0
+- GQ RadonScan: o app traz da memória do aparelho as horas em que ele não
+  estava lendo (PC desligado, app fechado). O RadonScan guarda quantas
+  contagens teve em cada hora; o app descobre que hora é cada uma
+  comparando com as médias que ele mesmo gravou e preenche o buraco.
+  Baixa sozinho quando o aparelho reconecta depois de um buraco, e tem o
+  botão "Baixar da memória do aparelho" no gráfico da semana. As horas da
+  memória aparecem tracejadas no gráfico (passe o mouse num ponto para ver
+  a hora e as contagens), entram na média por cômodo e ficam em
+  radonscan-memoria.csv. Só lê: nada muda no aparelho.
+
+**English**
+- GQ RadonScan: the app brings in, from the device memory, the hours when
+  it was not reading (PC off, app closed). The RadonScan keeps how many
+  counts it had in each hour; the app works out which hour each one is by
+  comparing them with the averages it saved itself, and fills the gap. It
+  downloads by itself when the device reconnects after a gap, and there is
+  a "Download from the device memory" button on the week chart. Hours from
+  the memory show dashed on the chart (hover a point to see the hour and
+  the counts), count in the per-room average and are kept in
+  radonscan-memoria.csv. Read only: nothing changes on the device.
+
+## 2.105.4
+- Nuvem: juntar os minutos do RC102 vindos de outro aparelho podia travar o
+  app se a tela do Radiacode 102 estivesse lendo os mesmos arquivos na mesma
+  hora (as duas partes esperavam uma pela outra). Achado no celular; o PC
+  junta a nuvem do mesmo jeito. Agora a junção solta o arquivo antes de
+  avisar a tela.
+
+**English**
+- Cloud: merging RC102 minutes from another device could freeze the app if
+  the Radiacode 102 screen was reading the same files at that moment (each
+  side waited for the other). Found on the phone; the PC merges the cloud the
+  same way. The merge now releases the file before notifying the screen.
+
 ## 2.105.3
 - Agora: ao abrir o app, o aviso "Falta medição agora" não aparece mais com
   o GMC-800 ou o RC102 já conectado e lendo ao vivo. Antes ele podia ficar

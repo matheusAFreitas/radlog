@@ -3502,3 +3502,15 @@ label.dd-state { display: inline-flex; align-items: center; gap: var(--space-1);
 .rn-card .hero-lv { margin-left: 0; font-size: var(--fs-body); }
 .rn-card-w { margin-left: auto; }
 @media (max-width: 640px) { .rn-ticks i { display: none; } .rn-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); } .rn-card-w { margin-left: 0; width: 100%; } }
+
+/* 2.106.0: histórico da memória do GQ RadonScan */
+.rn-wh { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-2); }
+.rn-wh .rn-h { margin: 0; flex: 1 1 auto; }
+.rn-line-mem { stroke-dasharray: 5 4; }
+.rn-mem-pt { fill: var(--bg); stroke: var(--rn); stroke-width: 1.5; }
+.rn-mem-gap { margin: 0 0 var(--space-3); background: var(--attn-bg); color: var(--attn-ink); border-color: transparent; }
+.rn-mem-ok { margin: 0 0 var(--space-3); padding: var(--space-2) var(--space-4); border-radius: var(--radius-md); background: var(--ok-soft); color: var(--text); font-size: var(--fs-body); }
+.rn-legend { display: flex; gap: var(--space-4); flex-wrap: wrap; margin-top: var(--space-2); }
+.rn-legend span { display: inline-flex; align-items: center; gap: var(--space-2); }
+.rn-lg { display: inline-block; width: 24px; border-top: 2px solid var(--rn); }
+.rn-lg-mem { border-top-style: dashed; }
