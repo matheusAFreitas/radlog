@@ -507,23 +507,16 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.dataDir = migNow.dir
-	if a.dataDir == "" {
-		base, err := os.UserConfigDir()
-		if err != nil || base == "" {
-			base, _ = os.Getwd()
-		}
-		a.dataDir = filepath.Join(base, appDirName)
+	base, err := os.UserConfigDir()
+	if err != nil || base == "" {
+		base, _ = os.Getwd()
 	}
+	a.dataDir = filepath.Join(base, appDirName)
 	_ = os.MkdirAll(a.dataDir, 0o755)
 	a.logStart()
 
 	a.settings = a.loadSettings()
 	defer a.cfgRecord("app") // estado inicial (ou o que mudou com o app fechado)
-	if d := docsBase(); d != "" && a.settings.ReportDir == filepath.Join(d, oldDirName, "Relatórios") {
-		a.settings.ReportDir = "" // era a pasta padrão antiga: vale a nova (a migração levou os PDFs)
-	}
-	renameAutostart() // tira o "GMC Monitor" da 1.x do início com o Windows
 	a.loadLastCal()
 	a.loadCalHist()
 	a.mu.Lock()
@@ -553,7 +546,6 @@ func (a *App) startup(ctx context.Context) {
 	if a.settingsBroken {
 		a.logEvent("Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração")
 	}
-	a.logMigration(migNow, migDocsMoved, migDocsErr)
 
 	a.store = a.openStore()
 	// tarefas de fundo protegidas contra panic (panics.go)

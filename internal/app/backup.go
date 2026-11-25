@@ -50,11 +50,8 @@ func (m MergeResult) total() int {
 	return m.Minutes + m.Events + m.Periods + m.Measurements + m.AlertFiles + m.Notes + m.RcMinutes + m.Deleted
 }
 
-// backupAppID marca os backups; os da 1.x (GMC Monitor) continuam valendo.
-const (
-	backupAppID    = "radlog"
-	oldBackupAppID = "gmc-monitor"
-)
+// backupAppID marca os backups (3.0.0: os da 1.x, "gmc-monitor", não entram mais).
+const backupAppID = "radlog"
 
 type backupManifest struct {
 	App     string `json:"app"`
@@ -286,7 +283,7 @@ func (a *App) mergeZip(src string, backup bool) (MergeResult, error) {
 	if b, err := readZipFile(mf); err == nil {
 		var m backupManifest
 		if json.Unmarshal(b, &m) == nil {
-			if m.App != backupAppID && m.App != oldBackupAppID {
+			if m.App != backupAppID {
 				return res, errors.New("não é um backup do RadLog")
 			}
 			res.From, res.Created = m.Host, m.Created

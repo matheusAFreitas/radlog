@@ -489,8 +489,8 @@ func (a *App) OpenVersionsDir() error {
 // Depois que a versão nova fica aberta e funcionando por cleanAfter, o app
 // apaga os .exe (ou AppImages) de versões mais antigas que ela: os da pasta
 // das versões e os da pasta de onde veio a versão anterior (normalmente
-// Downloads). Só arquivos com o nome das releases (RadLog-vX.Y.Z.exe ou,
-// da 1.x, GMC-Monitor-vX.Y.Z.exe) e o RadLog.old.exe da troca de nome fixo,
+// Downloads). Só arquivos com o nome das releases (RadLog-vX.Y.Z.exe) e o
+// RadLog.old.exe da troca de nome fixo,
 // nunca a versão que está aberta nem uma mais nova.
 
 const (
@@ -498,7 +498,7 @@ const (
 	cleanAfter = 2 * time.Minute
 )
 
-var releaseName = regexp.MustCompile(`^(?i)(?:GMC-Monitor|RadLog)-v(\d+\.\d+\.\d+)(\.exe|-x86_64\.AppImage)(\.part)?$`)
+var releaseName = regexp.MustCompile(`^(?i)RadLog-v(\d+\.\d+\.\d+)(\.exe|-x86_64\.AppImage)(\.part)?$`)
 
 // oldVersionsIn lista os arquivos de releases mais antigas que AppVersion.
 func oldVersionsIn(dir, self string) []string {
@@ -555,9 +555,6 @@ func (a *App) cleanOldVersionsLater() {
 		dirs[d] = true
 	}
 	dirs[filepath.Join(a.dataDir, "versoes")] = true
-	if d := oldVersionsDir(); d != "" {
-		dirs[d] = true // Documentos/GMC Monitor/Versões, da 1.x
-	}
 	if prev := previousExe(); prev != "" {
 		dirs[filepath.Dir(prev)] = true
 	}

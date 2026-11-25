@@ -54,11 +54,11 @@ func TestUpdateFlow(t *testing.T) {
 	t.Setenv("HOME", home)
 	t.Setenv("USERPROFILE", home)
 	if runtime.GOOS == "linux" {
-		t.Setenv("APPIMAGE", filepath.Join(t.TempDir(), "GMC-Monitor-v1.0.0-x86_64.AppImage"))
+		t.Setenv("APPIMAGE", filepath.Join(t.TempDir(), "RadLog-v1.0.0-x86_64.AppImage"))
 	}
-	name := "GMC-Monitor-v99.0.0.exe"
+	name := "RadLog-v99.0.0.exe"
 	if runtime.GOOS == "linux" {
-		name = "GMC-Monitor-v99.0.0-x86_64.AppImage"
+		name = "RadLog-v99.0.0-x86_64.AppImage"
 	}
 	payload := []byte(strings.Repeat("binário novo ", 5000))
 	h := sha256.Sum256(payload)
@@ -171,18 +171,19 @@ func TestUpdateFlow(t *testing.T) {
 
 func TestOldVersionsIn(t *testing.T) {
 	dir := t.TempDir()
-	for _, n := range []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.21.0.exe", "GMC-Monitor-v99.0.0.exe",
-		"GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "outro.exe", "GMC-Monitor-v1.0.0-notas.txt",
-		"RadLog-v1.9.0.exe", "RadLog-v99.0.0.exe", fixedExe, oldExe} {
+	// 3.0.0: os da 1.x (GMC-Monitor-v…) não são mais reconhecidos: ficam
+	for _, n := range []string{"RadLog-v1.0.0.exe", "RadLog-v1.21.0.exe", "RadLog-v99.0.0.exe",
+		"RadLog-v1.2.0-x86_64.AppImage", "RadLog-v1.5.0.exe.part", "outro.exe", "RadLog-v1.0.0-notas.txt",
+		"GMC-Monitor-v1.9.0.exe", "GMC-Monitor-v1.5.0.exe.part", fixedExe, oldExe} {
 		_ = os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644)
 	}
-	self := filepath.Join(dir, "GMC-Monitor-v1.21.0.exe")
+	self := filepath.Join(dir, "RadLog-v1.21.0.exe")
 	var got []string
 	for _, p := range oldVersionsIn(dir, self) {
 		got = append(got, filepath.Base(p))
 	}
 	sort.Strings(got)
-	want := []string{"GMC-Monitor-v1.0.0.exe", "GMC-Monitor-v1.2.0-x86_64.AppImage", "GMC-Monitor-v1.5.0.exe.part", "RadLog-v1.9.0.exe", oldExe}
+	want := []string{"RadLog-v1.0.0.exe", "RadLog-v1.2.0-x86_64.AppImage", "RadLog-v1.5.0.exe.part", oldExe}
 	sort.Strings(want)
 	if strings.Join(got, ",") != strings.Join(want, ",") {
 		t.Fatalf("apagaria %v", got)

@@ -20,7 +20,7 @@ func TestNoBareWriteFile(t *testing.T) {
 	allowed := map[string]bool{ // trocas de nome que não são gravação
 		"applog.go":    true, // log-anterior.txt
 		"hangwatch.go": true, // retrato do travamento: sem travas (a presa pode ser a do writeFileAtomic)
-		"migrate.go":   true, // mudança de pasta
+		"datadir.go":   true, // copyFile (cópia por temporário)
 		"rcconfig.go":  true, // desfazer
 		"update.go":    true, // troca do .exe
 		"atomic.go":    true, // o próprio writeFileAtomic e a cópia .ilegivel
