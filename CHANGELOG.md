@@ -1,5 +1,19 @@
 # Versões
 
+## 2.106.3
+- GQ RadonScan: as horas de fora do PC agora entram também quando o app
+  baixa a memória mais de 15 minutos depois de o aparelho reconectar (por
+  exemplo, depois de atualizar o app). Ao conectar, o app anota quanto o
+  relógio do aparelho já andou, e assim sabe quais horas da memória são da
+  conexão de agora.
+
+**English**
+- GQ RadonScan: hours away from the PC now also come in when the app reads
+  the memory more than 15 minutes after the device reconnects (for
+  example, after updating the app). On connecting, the app notes how far
+  the device clock has run, so it knows which memory hours belong to the
+  current connection.
+
 ## 2.106.2
 - GQ RadonScan: as horas da memória agora entram também quando o aparelho
   foi levado pra longe do PC e ligado num carregador. O relógio dele para

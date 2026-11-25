@@ -12283,6 +12283,14 @@ const I18N_EN = {
 ]
 ],
 [
+"radonscan: não gravei o tempo ligado: ",
+"^radonscan: não gravei o tempo ligado: ((?:(?! · ).)+?)$",
+"radonscan: time on not saved: ${1}",
+[
+"radonscan: não gravei o tempo ligado: "
+]
+],
+[
 "Histórico: ",
 "^Histórico: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History: ${1} records, ${2} new minutes",
@@ -13091,6 +13099,14 @@ const I18N_EN = {
 "unexpected answer from the RadonScan: ${1}",
 [
 "resposta inesperada do RadonScan: "
+]
+],
+[
+"radonscan: não li o tempo ligado: ",
+"^radonscan: não li o tempo ligado: ((?:(?! · ).)+?)$",
+"radonscan: could not read the time on: ${1}",
+[
+"radonscan: não li o tempo ligado: "
 ]
 ],
 [

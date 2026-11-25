@@ -129,14 +129,32 @@ func ParseMemory(table, marks []byte) (Memory, error) {
 	if erased == HourSlots {
 		return Memory{}, fmt.Errorf("a memória do RadonScan está vazia")
 	}
+	m.Uptime = parseMarks(marks)
+	return m, nil
+}
+
+// parseMarks devolve os segundos ligado do último registro de hora (-1 =
+// sem registro).
+func parseMarks(marks []byte) int {
+	up := -1
 	for i := 0; i+14 <= len(marks); i += 14 {
 		r := marks[i : i+14]
 		if r[0] != 0xAA || r[1] != 0x55 {
 			break
 		}
-		if s := int(binary.BigEndian.Uint32(r[2:6])); s > m.Uptime {
-			m.Uptime = s
+		if s := int(binary.BigEndian.Uint32(r[2:6])); s > up {
+			up = s
 		}
 	}
-	return m, nil
+	return up
+}
+
+// ReadUptime lê só os registros de hora (um bloco de 4 KB): quantos
+// segundos o aparelho já contou ligado, de hora em hora.
+func (d *Device) ReadUptime() (int, error) {
+	marks, err := d.spir(HourMarksAddr, hourMarksLen)
+	if err != nil {
+		return -1, err
+	}
+	return parseMarks(marks), nil
 }
