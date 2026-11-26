@@ -5,7 +5,7 @@ on:
     branches: [main]
   pull_request:
 
-# só leitura: o CI não publica nada
+# só leitura: o CI não publica nada (exceto a pré-release do Android, no job android)
 permissions:
   contents: read
 
@@ -83,6 +83,10 @@ jobs:
     # chave de teste fixa do repositório (android/chave-teste.jks).
     runs-on: ubuntu-24.04
     timeout-minutes: 40
+    # só este job escreve: publica a pré-release do Android quando existe
+    # android/alpha.txt (nunca vira /releases/latest: o PC não vê)
+    permissions:
+      contents: write
     env:
       # gomobile preso pela versão do módulo (golang.org/x/mobile não tem etiquetas)
       GOMOBILE: v0.0.0-20261011034528-197770444867
@@ -131,8 +135,14 @@ jobs:
             echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/radlog.jks"
             SIGN="-Pradlog.storeFile=$RUNNER_TEMP/radlog.jks -Pradlog.storePassword=$KS_PASS -Pradlog.keyAlias=$KEY_ALIAS -Pradlog.keyPassword=$KEY_PASS"
           fi
+          # android/alpha.txt (ex. 3.0.0-alpha.1) dá o nome da pré-release;
+          # sem ele é o build de teste 3.0.0-dev.N. O código é sempre o número
+          # do CI, para um instalar por cima do outro.
+          VER=3.0.0-dev.${{ github.run_number }}
+          [ -f alpha.txt ] && VER=$(tr -d ' \r\n' < alpha.txt)
+          echo "RADLOG_APK_VER=$VER" >> "$GITHUB_ENV"
           ./gradlew --no-daemon assembleRelease \
-            -PradlogVersion=3.0.0-dev.${{ github.run_number }} -PradlogCode=${{ github.run_number }} $SIGN
+            -PradlogVersion=$VER -PradlogCode=${{ github.run_number }} $SIGN
           # confere no registro qual chave assinou (a definitiva ou a de teste)
           APKS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner
           GOT=$("$APKS" verify --print-certs app/build/outputs/apk/release/app-release.apk | grep -m1 'SHA-256' | awk '{print $NF}')
@@ -150,3 +160,22 @@ jobs:
           name: RadLog-android
           path: ${{ runner.temp }}/RadLog-android-*.apk
           retention-days: 14
+      - name: Pré-release do Android (só com android/alpha.txt)
+        # só com a chave definitiva e fora de PR de fork; publica uma vez por
+        # versão. A etiqueta começa com "android-" (não "v"): o release.yml do
+        # PC não dispara e o atualizador do PC só olha /releases/latest.
+        if: ${{ hashFiles('android/alpha.txt') != '' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HAS_KEY: ${{ secrets.RADLOG_ANDROID_KEYSTORE != '' }}
+        run: |
+          [ "$HAS_KEY" = "true" ] || { echo "sem a chave definitiva: não publica"; exit 1; }
+          TAG="android-$RADLOG_APK_VER"
+          if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "$TAG já publicada: nada a fazer"; exit 0
+          fi
+          APK="$RUNNER_TEMP/RadLog-android-$RADLOG_APK_VER.apk"
+          cp "$RUNNER_TEMP"/RadLog-android-dev.*.apk "$APK"
+          gh release create "$TAG" "$APK" -R "$GITHUB_REPOSITORY" --prerelease --latest=false \
+            --target "${{ github.event.pull_request.head.sha || github.sha }}" \
+            --title "RadLog Android $RADLOG_APK_VER (pré-release)" --notes-file android/alpha-notas.md
