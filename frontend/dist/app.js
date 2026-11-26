@@ -3315,7 +3315,7 @@ function wireDevCfg() {
       if (!diff.length) { ul.innerHTML = '<li class="muted">Nenhum byte mudou desde a foto.</li>'; return; }
       for (const d of diff) {
         const li = document.createElement("li");
-        li.textContent = `byte ${d.index}: ${d.before} → ${d.after}  ${d.field ? "(" + d.field + ")" : "(campo desconhecido)"}`;
+        li.textContent = `byte ${d.index}: ${d.before} → ${d.after}  ${d.field ? "(" + d.field + ")" : tr("(campo desconhecido)")}`;
         ul.appendChild(li);
       }
     } catch (e) { toast(errMsg(e), true); }
@@ -3872,10 +3872,12 @@ function renderUpdate(u) {
     : u.state === "esperando" ? `v${u.latest}: troca quando o CPM normalizar`
     : `v${u.latest} disponível`;
   // configurações
-  const when = u.checkedAt ? ` (olhou às ${hhmm(u.checkedAt)})` : "";
+  // 2.106.5: os pedaços passam pelo tr() sozinhos; juntos numa frase, o
+  // tradutor da tela só traduzia o molde e deixava "(pulada)"/"(olhou às…)"
+  const when = u.checkedAt ? " " + tr(`(olhou às ${hhmm(u.checkedAt)})`) : "";
   $("updStatus").textContent = u.state === "procurando" ? "procurando…"
     : u.error && u.state !== "erro" ? u.error
-    : !u.latest ? "" : u.available ? `versão ${u.latest} disponível${u.skipped ? " (pulada)" : ""}${when}`
+    : !u.latest ? "" : u.available ? `versão ${u.latest} disponível${u.skipped ? " " + tr("(pulada)") : ""}${when}`
     : verCmp(u.current, u.latest) > 0 ? `esta versão (${u.current}) é mais nova que a última publicada (${u.latest})${when}`
     : `você está na versão mais nova (${u.current})${when}`;
   // diálogo
