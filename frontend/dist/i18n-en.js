@@ -5061,6 +5061,7 @@ const I18N_EN = {
 "O RadonScan guarda a contagem de cada hora: dá pra trazer.": "The RadonScan keeps the count for each hour: it can be brought in.",
 "A memória do aparelho não tinha horas novas pra trazer.": "The device memory had no new hours to bring in.",
 "Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho.": "It is not possible yet to tell the time of each record in the memory. The app needs a few hours reading the device live; it tries again by itself.",
+"O RadonScan ficou um tempo sem energia enquanto estava fora do PC. Sem relógio, não dá pra saber a hora de cada registro desse buraco, e essas horas ficaram de fora.": "The RadonScan was without power for a while when it was away from the PC. With no clock, there is no way to tell the time of each record in that gap, so those hours were left out.",
 "Não consegui gravar as horas da memória.": "Could not save the hours from the memory.",
 "Não consegui ler a memória do RadonScan. Tente de novo daqui a pouco.": "Could not read the RadonScan memory. Try again in a little while.",
 "O RadonScan não está conectado.": "The RadonScan is not connected.",
@@ -7378,6 +7379,16 @@ const I18N_EN = {
 ") · ≈ ",
 " mSv/ano nesse ritmo · ",
 "% medido desde o primeiro dado ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)–((?:(?! · ).)+?): ((?:(?! · ).)+?) hora\\(s\\) do aparelho em ((?:(?! · ).)+?) h de relógio \\(\\~((?:(?! · ).)+?) h sem energia\\): ficaram de fora$",
+"${1}–${2}: ${3} device hour(s) in ${4} h of clock time (~${5} h without power): left out",
+[
+" hora(s) do aparelho em ",
+" h de relógio (~",
+" h sem energia): ficaram de fora"
 ]
 ],
 [

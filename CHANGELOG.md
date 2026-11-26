@@ -1,5 +1,23 @@
 # Versões
 
+## 2.106.4
+- GQ RadonScan: se o aparelho ficou sem energia por mais de umas 3 h
+  enquanto estava fora do PC, as horas desse buraco ficam de fora em vez de
+  entrar com a hora errada (o relógio dele para sem energia, e as horas de
+  depois da parada saíam adiantadas por todo o tempo desligado). O app avisa
+  quando isso acontece.
+- GQ RadonScan, tabela dos cômodos: o fundo do GMC-800 segue a unidade de
+  contagem escolhida nas configurações (CPM ou CPS).
+
+**English**
+- GQ RadonScan: if the device was without power for more than about 3 h
+  while away from the PC, the hours in that gap are left out instead of
+  coming in at the wrong time (its clock stops without power, and the hours
+  after the outage came out early by the whole time it was off). The app
+  says so when this happens.
+- GQ RadonScan, rooms table: the GMC-800 background follows the count unit
+  chosen in the settings (CPM or CPS).
+
 ## 2.106.3
 - GQ RadonScan: as horas de fora do PC agora entram também quando o app
   baixa a memória mais de 15 minutos depois de o aparelho reconectar (por

@@ -318,6 +318,7 @@ func radonHoursSince(ons []radonOn, S time.Time, upNow int) (int64, bool) {
 type radonFillInfo struct {
 	stretches, aligned int
 	pending            bool // há buraco que só dá pra encaixar com mais horas ao vivo
+	unpowered          int  // buracos deixados de fora: o aparelho ficou sem energia no meio
 	notes              []string
 }
 
@@ -396,6 +397,20 @@ func radonFill(mem radonscan.Memory, live []RadonRow, ons []radonOn, now time.Ti
 					continue
 				}
 			}
+		}
+		// o relógio do aparelho é o tempo ligado: se o buraco durou bem mais no
+		// relógio do PC do que as horas que o aparelho fechou nele, ele ficou
+		// sem energia no meio e não dá pra saber onde. Contadas a partir do
+		// trecho de antes, as horas de depois da parada sairiam adiantadas
+		// por todo o tempo sem energia (e podiam cair no cômodo de antes).
+		// Até umas 3 h (a mudança de cômodo de 25/11 ficou 1h30 sem energia)
+		// o erro é pequeno e as horas entram; mais que isso, ficam de fora
+		// (QA, pente fino da v3)
+		if off := S.Sub(E) - time.Duration(hi-lo)*time.Hour; off > 3*time.Hour {
+			info.unpowered++
+			info.notes = append(info.notes, fmt.Sprintf("%s–%s: %d hora(s) do aparelho em %.1f h de relógio (~%.1f h sem energia): ficaram de fora",
+				E.Format("02/01 15:04"), S.Format("02/01 15:04"), hi-lo, S.Sub(E).Hours(), off.Hours()))
+			continue
 		}
 		for idx := lo + 1; idx <= hi; idx++ {
 			end := A.end(idx)
@@ -634,6 +649,9 @@ func (a *App) radonReadMemory(why string) RadonMemResult {
 	}
 	a.logf("radonscan: memória: %d de %d trecho(s) encaixado(s), ligado %d h no total; %d hora(s) nova(s)",
 		info.aligned, info.stretches, mem.Uptime/3600, len(add))
+	if len(add) == 0 && info.unpowered > 0 {
+		res.Err = "O RadonScan ficou um tempo sem energia enquanto estava fora do PC. Sem relógio, não dá pra saber a hora de cada registro desse buraco, e essas horas ficaram de fora."
+	}
 	if len(add) > 0 {
 		res.Hours = len(add)
 		res.From, res.To = add[0].Start, add[len(add)-1].End
