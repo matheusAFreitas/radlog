@@ -779,14 +779,28 @@ function bindChart() {
     const mid = (lo + hi) / 2 || 0.1; lo = Math.min(lo, mid * 0.75); hi = Math.max(hi, mid * 1.25);
     const pd = (hi - lo) * 0.08; lo = Math.max(0, lo - pd); hi += pd;
     const x = ((best[0] - c.from) / (c.to - c.from)) * W, y = H - 4 - ((best[1] - lo) / (hi - lo)) * (H - 10);
-    $("chCur").hidden = false;
+    $("chCur").removeAttribute("hidden");
     $("chLine").setAttribute("x1", x); $("chLine").setAttribute("x2", x);
     $("chDot").setAttribute("cx", x); $("chDot").setAttribute("cy", y);
     $("chTip").textContent = `${hhmm(best[0])} · ${usv(best[1])} µSv/h`;
   };
   svg.addEventListener("pointerdown", (e) => { svg.setPointerCapture(e.pointerId); move(e); });
   svg.addEventListener("pointermove", (e) => { if (e.buttons || e.pointerType === "touch") move(e); });
+  // soltou: o cursor some depois de 4 s e a tela volta a atualizar ao vivo
+  const done = () => {
+    clearTimeout(chHide);
+    chHide = setTimeout(() => {
+      const cur = $("chCur");
+      if (!cur) return;
+      cur.setAttribute("hidden", "");
+      $("chTip").innerHTML = "&nbsp;";
+      if (state.tab === "agora" && $("sheet").hidden) render();
+    }, 4000);
+  };
+  svg.addEventListener("pointerup", done);
+  svg.addEventListener("pointercancel", done);
 }
+let chHide = 0;
 
 // ---------------- Alertas ----------------
 // junta os alertas do mesmo episódio numa linha, como o PC (frontend/dist/alertas.js,
@@ -1278,7 +1292,8 @@ on("radiacode", (rc) => {
   if (state.tab === "agora" && state.paired) {
     // não redesenha o gráfico a cada segundo enquanto a pessoa arrasta
     const tip = $("chTip");
-    if (tip && $("chCur") && !$("chCur").hidden) { renderConn(); renderBand(); return; }
+    // (o cursor é um <g> do SVG: lá não existe .hidden, só o atributo)
+    if (tip && $("chCur") && !$("chCur").hasAttribute("hidden")) { renderConn(); renderBand(); return; }
     render();
   } else if (state.tab === "rc102" && !state.rcView && $("sheet").hidden) render();
   else { renderConn(); renderBand(); }
