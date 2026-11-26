@@ -1,5 +1,31 @@
 # Versões
 
+## 2.106.5
+- App em inglês: a janela de atualização mostrava "Baixando and
+  conferindo…" durante o download. Ela agora sai toda em inglês, inclusive
+  "(skipped)", "(checked at …)" e as mensagens de erro do download.
+- App em inglês: outros textos que ficavam em português também foram
+  traduzidos, como a tendência do fundo ("rose"/"fell"), os eventos do
+  RC102 ("turned on", "dose reset"), as rajadas suspeitas do GMC-800, o
+  aviso de histórico baixado com alertas e a explicação da medição de
+  objeto quando a diferença dá entre 2σ e 3σ.
+- A conferência de idioma agora reconhece português sem acento (como
+  "baixando", "conferido" e o " e "), e o teste de telas passa pela janela
+  de atualização em todos os estados.
+
+**English**
+- English app: the update window showed "Baixando and conferindo…" while
+  downloading. It is now fully in English, including "(skipped)",
+  "(checked at …)" and the download error messages.
+- English app: other texts that stayed in Portuguese were translated too,
+  such as the background trend ("rose"/"fell"), RC102 events ("turned on",
+  "dose reset"), the GMC-800 suspicious bursts, the history download notice
+  with alerts, and the object measurement explanation when the difference
+  is between 2σ and 3σ.
+- The language check now recognizes Portuguese without accents (such as
+  "baixando", "conferido" and " e "), and the screen test goes through the
+  update window in every state.
+
 ## 2.106.4
 - GQ RadonScan: se o aparelho ficou sem energia por mais de umas 3 h
   enquanto estava fora do PC, as horas desse buraco ficam de fora em vez de

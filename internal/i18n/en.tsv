@@ -6663,3 +6663,54 @@ radonscan: não gravei a troca de cômodo: {0}	radonscan: room change not saved:
 # 2.106.3: tempo ligado ao conectar
 radonscan: não li o tempo ligado: {0}	radonscan: could not read the time on: {0}
 radonscan: não gravei o tempo ligado: {0}	radonscan: time on not saved: {0}
+# 2.106.5: atualizador e textos que o extrator não via (sem acento)
+Baixando e conferindo… {0}%	Downloading and checking… {0}%
+baixando v{0}… {1}%	downloading v{0}… {1}%
+(pulada)	(skipped)
+Procurando o RadonScan…	Looking for the RadonScan…
+GMC-800 conectando	GMC-800 connecting
+testando… ({0})	testing… ({0})
+o Google recusou o login ({0})	Google refused the sign-in ({0})
+copiando {0}: {1}	copying {0}: {1}
+: provavelmente real, mas vale repetir.	: probably real, but worth repeating.
+A diferença vale {0} vezes a incerteza ({1}σ): provavelmente real, mas vale repetir.	The difference is {0} times the uncertainty ({1}σ): probably real, but worth repeating.
+A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
+(campo desconhecido)	(unknown field)
+{0} (cortado)	{0} (cut)
+Desconhecido	Unknown
+GMC-800 saturado	GMC-800 saturated
+acumulados	accumulated
+zerada	reset
+subiu	rose
+desceu	fell
+desligou	turned off
+ligou	turned on
+dose zerada	dose reset
+rajada suspeita em 30 dias	suspicious burst in 30 days
+rajadas suspeitas em 30 dias	suspicious bursts in 30 days
+rajadas suspeitas em 30 dias, a maioria perto das {0}h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800.	suspicious bursts in 30 days, most around {0}h. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.
+rajadas suspeitas em 30 dias. A última foi {0}. Veja se algum aparelho elétrico ficou perto do GMC-800.	suspicious bursts in 30 days. The last one was {0}. Check whether some electrical device was near the GMC-800.
+Backup importado ({0}): {1}	Backup imported ({0}): {1}
+GitHub respondeu {0}	GitHub answered {0}
+{0}: GitHub respondeu {1}	{0}: GitHub answered {1}
+download: GitHub respondeu {0}	download: GitHub answered {0}
+download interrompido: {0}	download interrupted: {0}
+Google respondeu {0} ({1})	Google answered {0} ({1})
+radar respondeu {0}	radar answered {0}
+SETDATETIME: resposta inesperada 0x{0}	SETDATETIME: unexpected answer 0x{0}
+escrita recusada (status {0})	write refused (status {0})
+fase desconhecida {0}	unknown phase {0}
+login cancelado	sign-in cancelled
+GMC-800 · {0}% medido	GMC-800 · {0}% measured
+RC102 · {0}% medido	RC102 · {0}% measured
+{0}, encostado	{0}, touching
+{0}–{1} · durou {2}	{0}–{1} · lasted {2}
+(aproximada)	(approximate)
+Histórico baixado: {0} registros, {1} minutos novos, 1 alerta encontrado	History downloaded: {0} records, {1} new minutes, 1 alert found
+Histórico baixado: {0} registros, {1} minutos novos, {2} alertas encontrados	History downloaded: {0} records, {1} new minutes, {2} alerts found
+Histórico baixado: {0} registros, {1} minutos novos (leitura interrompida: {2})	History downloaded: {0} records, {1} new minutes (reading interrupted: {2})
+Histórico baixado: {0} registros, {1} minutos novos, 1 alerta encontrado (leitura interrompida: {2})	History downloaded: {0} records, {1} new minutes, 1 alert found (reading interrupted: {2})
+Histórico baixado: {0} registros, {1} minutos novos, {2} alertas encontrados (leitura interrompida: {3})	History downloaded: {0} records, {1} new minutes, {2} alerts found (reading interrupted: {3})
+escrita {0} recusada	write {0} refused
+Google respondeu {0}	Google answered {0}
+alarmes: registros recusados ({0})	alarms: registers refused ({0})

@@ -25,3 +25,55 @@ testar objeto calar silenciar pedra
 testar objeto parar
 # linhas que o RadLog não conseguiu ler, tiradas em {0}
 hora,comodo,media_1h_pCiL,media_1d_pCiL,media_1sem_pCiL,longo_prazo_pCiL
+).join(", ")}{0}. Confira o cabo USB e se o GMC-800 desligou sozinho (bateria).
+1 vez a cada X
+; o fator manual foi mantido
+==== fechando o app
+E(c) = {0} + {1}·c + {2}·c² keV
+Procurando
+a cada segundo
+abrindo
+afastando
+aprendendo
+baixadoEm
+baixando
+button[data-e]
+coletando
+conferindo
+contando
+descendo
+esperando
+mSv/ano
+medindo
+o material
+subindo
+{0} · volta {1} (o {2} conectou{3}) · {4}
+· juntando contagens…
+(cortado)
++ 1 confirmado
++ {0} confirmados
+, {0} alertas encontrados
+2. Comandos conhecidos (controle)
+:recalculado
+==== RadLog {0} iniciado ({1}/{2}, {3}, PC {4})
+CSP bloqueou: {0} {1} {2}
+Fora dos alertas, a casa ficou
+achou
+acumulado
+alarmes: registros recusados (%b)
+alertas encontrados
+apagados
+avisado
+backup: mesclado {0} ({1}): {2}
+cancelado
+demonstracao demo simulado cenario testar
+demonstracao demo simulado sair
+ignorada
+interrompido
+parado
+rajada suspeita
+rajadas suspeitas
+saturado
+seguiu
+tempo morto desligado
+travou
