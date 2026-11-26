@@ -589,6 +589,7 @@ alarme	alarm
 alarme ativo	alarm active
 alerta	alert
 alerta encontrado	alert found
+alertas encontrados	alerts found
 alerta não encontrado	alert not found
 aniquilação	annihilation
 anotação	note
@@ -6688,7 +6689,7 @@ ligou	turned on
 dose zerada	dose reset
 rajada suspeita em 30 dias	suspicious burst in 30 days
 rajadas suspeitas em 30 dias	suspicious bursts in 30 days
-rajadas suspeitas em 30 dias, a maioria perto das {0}h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800.	suspicious bursts in 30 days, most around {0}h. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.
+rajadas suspeitas em 30 dias, a maioria perto das {0}h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800.	suspicious bursts in 30 days, most of them around {0}:00. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.
 rajadas suspeitas em 30 dias. A última foi {0}. Veja se algum aparelho elétrico ficou perto do GMC-800.	suspicious bursts in 30 days. The last one was {0}. Check whether some electrical device was near the GMC-800.
 Backup importado ({0}): {1}	Backup imported ({0}): {1}
 GitHub respondeu {0}	GitHub answered {0}

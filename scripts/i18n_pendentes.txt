@@ -61,7 +61,6 @@ Fora dos alertas, a casa ficou
 achou
 acumulado
 alarmes: registros recusados (%b)
-alertas encontrados
 apagados
 avisado
 backup: mesclado {0} ({1}): {2}

@@ -596,6 +596,7 @@ const I18N_EN = {
 "alarme ativo": "alarm active",
 "alerta": "alert",
 "alerta encontrado": "alert found",
+"alertas encontrados": "alerts found",
 "alerta não encontrado": "alert not found",
 "aniquilação": "annihilation",
 "anotação": "note",
@@ -5388,7 +5389,7 @@ const I18N_EN = {
 [
 "rajadas suspeitas em 30 dias, a maioria perto das ",
 "^rajadas suspeitas em 30 dias, a maioria perto das ((?:(?! · ).)+?)h\\. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC\\-800\\.$",
-"suspicious bursts in 30 days, most around ${1}h. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.",
+"suspicious bursts in 30 days, most of them around ${1}:00. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.",
 [
 "rajadas suspeitas em 30 dias, a maioria perto das ",
 "h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800."
