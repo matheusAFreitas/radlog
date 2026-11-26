@@ -1286,10 +1286,18 @@ async function refreshAll() {
   loadChart();
 }
 
+// dedo na tela: não troca o conteúdo entre o apertar e o soltar (o toque
+// num botão se perderia com o redesenho de cada leitura)
+let touching = false;
+$("main").addEventListener("pointerdown", () => { touching = true; }, true);
+const untouch = () => { setTimeout(() => { touching = false; }, 150); };
+window.addEventListener("pointerup", untouch, true);
+window.addEventListener("pointercancel", untouch, true);
 on("radiacode", (rc) => {
   const was = state.rc && state.rc.state;
   state.rc = rc;
-  if (state.tab === "agora" && state.paired) {
+  if (touching) { renderConn(); renderBand(); }
+  else if (state.tab === "agora" && state.paired) {
     // não redesenha o gráfico a cada segundo enquanto a pessoa arrasta
     const tip = $("chTip");
     // (o cursor é um <g> do SVG: lá não existe .hidden, só o atributo)
