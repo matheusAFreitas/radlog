@@ -78,87 +78,40 @@ jobs:
         run: go test ./internal/...
 
   android:
-    # o app de Android (3.0.0): o motor em Go vira uma .aar pelo gomobile e o
-    # Gradle monta o APK. Sem o keystore do RadLog nos segredos, sai com a
-    # chave de teste fixa do repositório (android/chave-teste.jks).
+    # o app de Android (3.0.0): build de teste 3.0.0-dev.N, montado pela ação
+    # .github/actions/android-apk (a mesma do release.yml)
     runs-on: ubuntu-24.04
     timeout-minutes: 40
     # só este job escreve: publica a pré-release do Android quando existe
     # android/alpha.txt (nunca vira /releases/latest: o PC não vê)
     permissions:
       contents: write
-    env:
-      # gomobile preso pela versão do módulo (golang.org/x/mobile não tem etiquetas)
-      GOMOBILE: v0.0.0-20261011034528-197770444867
     steps:
       - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
       - uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
         with:
           go-version: "1.27"
-      - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
-        with:
-          distribution: temurin
-          java-version: "17"
-      - name: Motor compila para o Android
+      - name: Versão do APK
+        # android/alpha.txt (ex. 3.0.0-alpha.1) dá o nome da pré-release;
+        # sem ele é o build de teste 3.0.0-dev.N
         run: |
-          CGO_ENABLED=0 GOOS=android GOARCH=arm64 go vet ./internal/... ./mobile
-          go test -race ./mobile
-      - name: gomobile (motor em .aar)
-        env:
-          # a mesma chave do Google do PC (login da nuvem); não chega a PR de fork
-          GOOGLE_CLIENT_ID: ${{ secrets.GOOGLE_CLIENT_ID }}
-          GOOGLE_CLIENT_SECRET: ${{ secrets.GOOGLE_CLIENT_SECRET }}
-        run: |
-          go install golang.org/x/mobile/cmd/gomobile@$GOMOBILE
-          go install golang.org/x/mobile/cmd/gobind@$GOMOBILE
-          # só no CI: o go.mod do repositório não leva o gomobile
-          go get golang.org/x/mobile/bind@$GOMOBILE
-          export ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME"
-          gomobile init
-          mkdir -p android/app/libs
-          gomobile bind -target=android/arm64 -androidapi 29 -javapkg=app.radlog.go \
-            -ldflags "-s -w -X radlog/internal/app.googleClientID=$GOOGLE_CLIENT_ID -X radlog/internal/app.googleClientSecret=$GOOGLE_CLIENT_SECRET" \
-            -o android/app/libs/radlog.aar ./mobile
-      - name: APK
-        working-directory: android
-        env:
-          # a chave de verdade em todo build daqui (PR de fork não recebe
-          # segredos): assim o APK de teste e o publicado atualizam um por cima
-          # do outro. Sem ela, vale a chave de teste fixa (android/chave-teste.jks)
-          KEYSTORE: ${{ secrets.RADLOG_ANDROID_KEYSTORE }}
-          KS_PASS: ${{ secrets.RADLOG_ANDROID_KEYSTORE_PASSWORD }}
-          KEY_ALIAS: ${{ secrets.RADLOG_ANDROID_KEY_ALIAS }}
-          KEY_PASS: ${{ secrets.RADLOG_ANDROID_KEY_PASSWORD }}
-        run: |
-          SIGN=""
-          if [ -n "$KEYSTORE" ]; then
-            echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/radlog.jks"
-            SIGN="-Pradlog.storeFile=$RUNNER_TEMP/radlog.jks -Pradlog.storePassword=$KS_PASS -Pradlog.keyAlias=$KEY_ALIAS -Pradlog.keyPassword=$KEY_PASS"
-          fi
-          # android/alpha.txt (ex. 3.0.0-alpha.1) dá o nome da pré-release;
-          # sem ele é o build de teste 3.0.0-dev.N. O código é sempre o número
-          # do CI, para um instalar por cima do outro.
           VER=3.0.0-dev.${{ github.run_number }}
-          [ -f alpha.txt ] && VER=$(tr -d ' \r\n' < alpha.txt)
+          [ -f android/alpha.txt ] && VER=$(tr -d ' \r\n' < android/alpha.txt)
           echo "RADLOG_APK_VER=$VER" >> "$GITHUB_ENV"
-          ./gradlew --no-daemon assembleRelease \
-            -PradlogVersion=$VER -PradlogCode=${{ github.run_number }} $SIGN
-          # confere no registro qual chave assinou (a definitiva ou a de teste)
-          APKS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner
-          GOT=$("$APKS" verify --print-certs app/build/outputs/apk/release/app-release.apk | grep -m1 'SHA-256' | awk '{print $NF}')
-          if [ -n "$KEYSTORE" ]; then
-            WANT=$(keytool -list -v -keystore "$RUNNER_TEMP/radlog.jks" -storepass "$KS_PASS" -alias "$KEY_ALIAS" | grep -m1 'SHA256:' | awk '{print $NF}' | tr -d ':' | tr 'A-F' 'a-f')
-            [ "$GOT" = "$WANT" ] || { echo "a assinatura não é a da chave definitiva"; rm -f "$RUNNER_TEMP/radlog.jks"; exit 1; }
-            echo "assinado com a chave definitiva: $GOT"
-          else
-            echo "assinado com a chave de teste: $GOT"
-          fi
-          rm -f "$RUNNER_TEMP/radlog.jks"
-          mv app/build/outputs/apk/release/app-release.apk "$RUNNER_TEMP/RadLog-android-dev.${{ github.run_number }}.apk"
+      - id: apk
+        uses: ./.github/actions/android-apk
+        with:
+          version: ${{ env.RADLOG_APK_VER }}
+          google-client-id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          google-client-secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          keystore: ${{ secrets.RADLOG_ANDROID_KEYSTORE }}
+          keystore-password: ${{ secrets.RADLOG_ANDROID_KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.RADLOG_ANDROID_KEY_ALIAS }}
+          key-password: ${{ secrets.RADLOG_ANDROID_KEY_PASSWORD }}
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: RadLog-android
-          path: ${{ runner.temp }}/RadLog-android-*.apk
+          path: ${{ steps.apk.outputs.apk }}
           retention-days: 14
       - name: Pré-release do Android (só com android/alpha.txt)
         # só com a chave definitiva e fora de PR de fork; publica uma vez por
@@ -174,8 +127,7 @@ jobs:
           if gh release view "$TAG" -R "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
             echo "$TAG já publicada: nada a fazer"; exit 0
           fi
-          APK="$RUNNER_TEMP/RadLog-android-$RADLOG_APK_VER.apk"
-          cp "$RUNNER_TEMP"/RadLog-android-dev.*.apk "$APK"
+          APK="${{ steps.apk.outputs.apk }}"
           gh release create "$TAG" "$APK" -R "$GITHUB_REPOSITORY" --prerelease --latest=false \
             --target "${{ github.event.pull_request.head.sha || github.sha }}" \
             --title "RadLog Android $RADLOG_APK_VER (pré-release)" --notes-file android/alpha-notas.md

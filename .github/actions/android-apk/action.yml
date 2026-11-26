@@ -1,0 +1,117 @@
+name: APK do RadLog
+description: >
+  Monta o APK do app de Android: o motor em Go vira uma .aar pelo gomobile e
+  o Gradle monta o APK. Usado pelo CI (build de teste) e pelo release.yml
+  (o APK que sai junto do .exe e do AppImage). Sem o keystore do RadLog sai
+  com a chave de teste fixa do repositório (android/chave-teste.jks), a não
+  ser que require-key seja "true".
+
+inputs:
+  version:
+    description: versionName do APK (ex. 3.0.0, 3.0.0-alpha.1, 3.0.0-dev.N)
+    required: true
+  google-client-id:
+    required: false
+    default: ""
+  google-client-secret:
+    required: false
+    default: ""
+  keystore:
+    description: keystore em base64 (segredo RADLOG_ANDROID_KEYSTORE)
+    required: false
+    default: ""
+  keystore-password:
+    required: false
+    default: ""
+  key-alias:
+    required: false
+    default: ""
+  key-password:
+    required: false
+    default: ""
+  require-key:
+    description: '"true" falha sem a chave definitiva (release)'
+    required: false
+    default: "false"
+
+outputs:
+  apk:
+    description: caminho do APK pronto
+    value: ${{ steps.apk.outputs.apk }}
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-java@d1374f8ac74474200d16ef8ecee22c7ae7a51880 # v6.3.0
+      with:
+        distribution: temurin
+        java-version: "17"
+    - name: Motor compila para o Android
+      shell: bash
+      run: |
+        CGO_ENABLED=0 GOOS=android GOARCH=arm64 go vet ./internal/... ./mobile
+        go test -race ./mobile
+    - name: gomobile (motor em .aar)
+      shell: bash
+      env:
+        # gomobile preso pela versão do módulo (golang.org/x/mobile não tem etiquetas)
+        GOMOBILE: v0.0.0-20261011034528-197770444867
+        # a mesma chave do Google do PC (login da nuvem); não chega a PR de fork
+        GOOGLE_CLIENT_ID: ${{ inputs.google-client-id }}
+        GOOGLE_CLIENT_SECRET: ${{ inputs.google-client-secret }}
+      run: |
+        go install golang.org/x/mobile/cmd/gomobile@$GOMOBILE
+        go install golang.org/x/mobile/cmd/gobind@$GOMOBILE
+        # só aqui: o go.mod do repositório não leva o gomobile
+        go get golang.org/x/mobile/bind@$GOMOBILE
+        export ANDROID_NDK_HOME="$ANDROID_NDK_LATEST_HOME"
+        gomobile init
+        mkdir -p android/app/libs
+        gomobile bind -target=android/arm64 -androidapi 29 -javapkg=app.radlog.go \
+          -ldflags "-s -w -X radlog/internal/app.googleClientID=$GOOGLE_CLIENT_ID -X radlog/internal/app.googleClientSecret=$GOOGLE_CLIENT_SECRET" \
+          -o android/app/libs/radlog.aar ./mobile
+    - name: APK
+      id: apk
+      shell: bash
+      working-directory: android
+      env:
+        # a chave de verdade em todo build do repositório (PR de fork não
+        # recebe segredos): assim o APK de teste e o publicado atualizam um por
+        # cima do outro. Sem ela, vale a chave de teste fixa.
+        KEYSTORE: ${{ inputs.keystore }}
+        KS_PASS: ${{ inputs.keystore-password }}
+        KEY_ALIAS: ${{ inputs.key-alias }}
+        KEY_PASS: ${{ inputs.key-password }}
+        VER: ${{ inputs.version }}
+        NEED_KEY: ${{ inputs.require-key }}
+      run: |
+        if [ "$NEED_KEY" = "true" ] && [ -z "$KEYSTORE" ]; then
+          echo "::error::falta o segredo RADLOG_ANDROID_KEYSTORE (o APK publicado precisa da chave definitiva)"
+          exit 1
+        fi
+        # versionCode = minutos desde 1/1/2026 (UTC): sobe sempre, igual no
+        # CI e no release, para um APK instalar por cima do outro. (Até o
+        # dev.682 era o número do CI, bem menor: continua instalando por cima.)
+        CODE=$(( ($(date -u +%s) - 1767225600) / 60 ))
+        SIGN=""
+        if [ -n "$KEYSTORE" ]; then
+          echo "$KEYSTORE" | base64 -d > "$RUNNER_TEMP/radlog.jks"
+          SIGN="-Pradlog.storeFile=$RUNNER_TEMP/radlog.jks -Pradlog.storePassword=$KS_PASS -Pradlog.keyAlias=$KEY_ALIAS -Pradlog.keyPassword=$KEY_PASS"
+        fi
+        ./gradlew --no-daemon assembleRelease -PradlogVersion=$VER -PradlogCode=$CODE $SIGN
+        # confere no registro qual chave assinou (a definitiva ou a de teste)
+        APKS=$(ls -d "$ANDROID_HOME"/build-tools/* | sort -V | tail -1)/apksigner
+        GOT=$("$APKS" verify --print-certs app/build/outputs/apk/release/app-release.apk | grep -m1 'SHA-256' | awk '{print $NF}')
+        if [ -n "$KEYSTORE" ]; then
+          WANT=$(keytool -list -v -keystore "$RUNNER_TEMP/radlog.jks" -storepass "$KS_PASS" -alias "$KEY_ALIAS" | grep -m1 'SHA256:' | awk '{print $NF}' | tr -d ':' | tr 'A-F' 'a-f')
+          [ "$GOT" = "$WANT" ] || { echo "a assinatura não é a da chave definitiva"; rm -f "$RUNNER_TEMP/radlog.jks"; exit 1; }
+          echo "assinado com a chave definitiva: $GOT"
+        else
+          echo "assinado com a chave de teste: $GOT"
+        fi
+        rm -f "$RUNNER_TEMP/radlog.jks"
+        OUT="$RUNNER_TEMP/RadLog-v$VER.apk"
+        case "$VER" in *-dev.*|*-alpha.*|*-beta.*) OUT="$RUNNER_TEMP/RadLog-android-$VER.apk" ;; esac
+        mv app/build/outputs/apk/release/app-release.apk "$OUT"
+        echo "versão $VER, código $CODE: $OUT"
+        echo "apk=$OUT" >> "$GITHUB_OUTPUT"
