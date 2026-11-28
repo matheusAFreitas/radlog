@@ -128,7 +128,7 @@ function rnMemBox(st) {
 function rnPlacesTable(places) {
   const rows = (places || []).filter((p) => p.hours > 0);
   if (!rows.length) return `<p class="small muted">Escolha onde o RadonScan está (em cima, à direita). Com pelo menos um dia em cada cômodo, o radônio de cada um aparece aqui junto do fundo do GMC-800 no mesmo período.</p>`;
-  const body = rows.map((p) => `<tr><td>${rnPlaceName(p.place)}</td><td class="mono">${rnHours(p.hours)}</td><td class="mono">${rnBqTxt(rnBq(p.pciL))} Bq/m³</td><td class="mono">${p.gmcMin ? rnNum(p.gmcCpm) + " cpm" : "—"}</td></tr>`).join("");
+  const body = rows.map((p) => `<tr><td>${rnPlaceName(p.place)}</td><td class="mono">${rnHours(p.hours)}</td><td class="mono">${rnBqTxt(rnBq(p.pciL))} Bq/m³</td><td class="mono">${p.gmcMin ? countTxt(p.gmcCpm) : "—"}</td></tr>`).join("");
   const short = rows.some((p) => p.hours < 24);
   return `<div class="rn-tw"><table class="rn-table"><thead><tr><th>Cômodo</th><th>Tempo</th><th>Radônio médio</th><th>Fundo GMC-800</th></tr></thead><tbody>${body}</tbody></table></div>` +
     `<p class="small muted">${short ? "<span>Menos de um dia num cômodo ainda é pouco: o radônio muda bastante entre o dia e a noite.</span> " : ""}<span>O fundo do GMC-800 conta só os minutos em que ele estava em casa, fora das medições de objeto.</span></p>`;

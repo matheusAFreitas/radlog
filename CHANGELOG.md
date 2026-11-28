@@ -1,5 +1,49 @@
 # Versões
 
+## 2.106.5
+- App em inglês: a janela de atualização mostrava "Baixando and
+  conferindo…" durante o download. Ela agora sai toda em inglês, inclusive
+  "(skipped)", "(checked at …)" e as mensagens de erro do download.
+- App em inglês: outros textos que ficavam em português também foram
+  traduzidos, como a tendência do fundo ("rose"/"fell"), os eventos do
+  RC102 ("turned on", "dose reset"), as rajadas suspeitas do GMC-800, o
+  aviso de histórico baixado com alertas e a explicação da medição de
+  objeto quando a diferença dá entre 2σ e 3σ.
+- A conferência de idioma agora reconhece português sem acento (como
+  "baixando", "conferido" e o " e "), e o teste de telas passa pela janela
+  de atualização em todos os estados.
+
+**English**
+- English app: the update window showed "Baixando and conferindo…" while
+  downloading. It is now fully in English, including "(skipped)",
+  "(checked at …)" and the download error messages.
+- English app: other texts that stayed in Portuguese were translated too,
+  such as the background trend ("rose"/"fell"), RC102 events ("turned on",
+  "dose reset"), the GMC-800 suspicious bursts, the history download notice
+  with alerts, and the object measurement explanation when the difference
+  is between 2σ and 3σ.
+- The language check now recognizes Portuguese without accents (such as
+  "baixando", "conferido" and " e "), and the screen test goes through the
+  update window in every state.
+
+## 2.106.4
+- GQ RadonScan: se o aparelho ficou sem energia por mais de umas 3 h
+  enquanto estava fora do PC, as horas desse buraco ficam de fora em vez de
+  entrar com a hora errada (o relógio dele para sem energia, e as horas de
+  depois da parada saíam adiantadas por todo o tempo desligado). O app avisa
+  quando isso acontece.
+- GQ RadonScan, tabela dos cômodos: o fundo do GMC-800 segue a unidade de
+  contagem escolhida nas configurações (CPM ou CPS).
+
+**English**
+- GQ RadonScan: if the device was without power for more than about 3 h
+  while away from the PC, the hours in that gap are left out instead of
+  coming in at the wrong time (its clock stops without power, and the hours
+  after the outage came out early by the whole time it was off). The app
+  says so when this happens.
+- GQ RadonScan, rooms table: the GMC-800 background follows the count unit
+  chosen in the settings (CPM or CPS).
+
 ## 2.106.3
 - GQ RadonScan: as horas de fora do PC agora entram também quando o app
   baixa a memória mais de 15 minutos depois de o aparelho reconectar (por

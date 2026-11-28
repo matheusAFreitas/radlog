@@ -596,6 +596,7 @@ const I18N_EN = {
 "alarme ativo": "alarm active",
 "alerta": "alert",
 "alerta encontrado": "alert found",
+"alertas encontrados": "alerts found",
 "alerta não encontrado": "alert not found",
 "aniquilação": "annihilation",
 "anotação": "note",
@@ -4971,6 +4972,9 @@ const I18N_EN = {
 "Voltar para o período": "Back to the period",
 "gráfico parado neste trecho": "chart frozen on this stretch",
 "trava nuvem": "cloud lock",
+"trava rc.arquivo": "RC102 file lock",
+"chamada": "call",
+"==== fechando o app (celular)": "==== closing the app (phone)",
 "Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
 "(ou U-235)": "(or U-235)",
 "rádio": "radium",
@@ -5089,6 +5093,7 @@ const I18N_EN = {
 "O RadonScan guarda a contagem de cada hora: dá pra trazer.": "The RadonScan keeps the count for each hour: it can be brought in.",
 "A memória do aparelho não tinha horas novas pra trazer.": "The device memory had no new hours to bring in.",
 "Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho.": "It is not possible yet to tell the time of each record in the memory. The app needs a few hours reading the device live; it tries again by itself.",
+"O RadonScan ficou um tempo sem energia enquanto estava fora do PC. Sem relógio, não dá pra saber a hora de cada registro desse buraco, e essas horas ficaram de fora.": "The RadonScan was without power for a while when it was away from the PC. With no clock, there is no way to tell the time of each record in that gap, so those hours were left out.",
 "Não consegui gravar as horas da memória.": "Could not save the hours from the memory.",
 "Não consegui ler a memória do RadonScan. Tente de novo daqui a pouco.": "Could not read the RadonScan memory. Try again in a little while.",
 "O RadonScan não está conectado.": "The RadonScan is not connected.",
@@ -5103,7 +5108,25 @@ const I18N_EN = {
 "RC102 solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
 "RadiaCode solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
 "RC102 pego de volta: o app volta a conectar": "RC102 taken back: the app connects again",
-"RadiaCode pego de volta: o app volta a conectar": "RC102 taken back: the app connects again"
+"RadiaCode pego de volta: o app volta a conectar": "RC102 taken back: the app connects again",
+"(pulada)": "(skipped)",
+"Procurando o RadonScan…": "Looking for the RadonScan…",
+"GMC-800 conectando": "GMC-800 connecting",
+": provavelmente real, mas vale repetir.": ": probably real, but worth repeating.",
+"(campo desconhecido)": "(unknown field)",
+"Desconhecido": "Unknown",
+"GMC-800 saturado": "GMC-800 saturated",
+"acumulados": "accumulated",
+"zerada": "reset",
+"subiu": "rose",
+"desceu": "fell",
+"desligou": "turned off",
+"ligou": "turned on",
+"dose zerada": "dose reset",
+"rajada suspeita em 30 dias": "suspicious burst in 30 days",
+"rajadas suspeitas em 30 dias": "suspicious bursts in 30 days",
+"login cancelado": "sign-in cancelled",
+"(aproximada)": "(approximate)"
 },
 "patterns": [
 [
@@ -5396,6 +5419,15 @@ const I18N_EN = {
 ". Quem limita é o fundo medido na hora (± ",
 " em ",
 "): para ir além, meça o fundo por mais tempo ou use o fundo da casa."
+]
+],
+[
+"rajadas suspeitas em 30 dias, a maioria perto das ",
+"^rajadas suspeitas em 30 dias, a maioria perto das ((?:(?! · ).)+?)h\\. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC\\-800\\.$",
+"suspicious bursts in 30 days, most of them around ${1}:00. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.",
+[
+"rajadas suspeitas em 30 dias, a maioria perto das ",
+"h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800."
 ]
 ],
 [
@@ -5711,6 +5743,16 @@ const I18N_EN = {
 [
 "A coleta terminou com só ",
 " minutos com os dois aparelhos medindo (precisa de pelo menos 60). Confira se o RC102 ficou conectado."
+]
+],
+[
+"A diferença vale ",
+"^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): o objeto deu abaixo do fundo, então o fundo provavelmente mudou \\(outro lugar, chuva\\)\\.$",
+"The difference is ${1} times the uncertainty (${2}σ): the object came out below background, so the background probably changed (another spot, rain).",
+[
+"A diferença vale ",
+" vezes a incerteza (",
+"σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva)."
 ]
 ],
 [
@@ -6313,6 +6355,15 @@ const I18N_EN = {
 ]
 ],
 [
+"rajadas suspeitas em 30 dias. A última foi ",
+"^rajadas suspeitas em 30 dias\\. A última foi ((?:(?! · ).)+?)\\. Veja se algum aparelho elétrico ficou perto do GMC\\-800\\.$",
+"suspicious bursts in 30 days. The last one was ${1}. Check whether some electrical device was near the GMC-800.",
+[
+"rajadas suspeitas em 30 dias. A última foi ",
+". Veja se algum aparelho elétrico ficou perto do GMC-800."
+]
+],
+[
 "Calibração do GMC: ",
 "^Calibração do GMC: ((?:(?! · ).)+?) µSv/h por CPM no fundo, pela intercalibração com o RC102 \\(vale a partir de agora\\)$",
 "GMC calibration: ${1} µSv/h per CPM at background, from the cross-calibration with the RC102 (applies from now on)",
@@ -6596,6 +6647,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Histórico baixado: ",
+"^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos, ((?:(?! · ).)+?) alertas encontrados \\(leitura interrompida: ((?:(?! · ).)+?)\\)$",
+"History downloaded: ${1} records, ${2} new minutes, ${3} alerts found (reading interrupted: ${4})",
+[
+"Histórico baixado: ",
+" registros, ",
+" minutos novos, ",
+" alertas encontrados (leitura interrompida: "
+]
+],
+[
 "RadiaCode ",
 "^RadiaCode ((?:(?! · ).)+?) não apareceu no Bluetooth \\(ligado e perto\\? o celular não está conectado nele\\?\\)$",
 "RC102 ${1} didn't show up on Bluetooth (on and nearby? is the phone connected to it?)",
@@ -6677,6 +6739,16 @@ const I18N_EN = {
 " trecho(s) encaixado(s), ligado ",
 " h no total; ",
 " hora(s) nova(s)"
+]
+],
+[
+"Histórico baixado: ",
+"^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos, 1 alerta encontrado \\(leitura interrompida: ((?:(?! · ).)+?)\\)$",
+"History downloaded: ${1} records, ${2} new minutes, 1 alert found (reading interrupted: ${3})",
+[
+"Histórico baixado: ",
+" registros, ",
+" minutos novos, 1 alerta encontrado (leitura interrompida: "
 ]
 ],
 [
@@ -7365,6 +7437,16 @@ const I18N_EN = {
 ]
 ],
 [
+"A diferença vale ",
+"^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): provavelmente real, mas vale repetir\\.$",
+"The difference is ${1} times the uncertainty (${2}σ): probably real, but worth repeating.",
+[
+"A diferença vale ",
+" vezes a incerteza (",
+"σ): provavelmente real, mas vale repetir."
+]
+],
+[
 "Chegou ao tempo máximo (",
 "^Chegou ao tempo máximo \\(((?:(?! · ).)+?)\\) sem decidir\\. Para ir além, aumente o tempo máximo\\.$",
 "Reached the time limit (${1}) without deciding. To go further, raise the time limit.",
@@ -7420,6 +7502,16 @@ const I18N_EN = {
 ") · ≈ ",
 " mSv/ano nesse ritmo · ",
 "% medido desde o primeiro dado ("
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)–((?:(?! · ).)+?): ((?:(?! · ).)+?) hora\\(s\\) do aparelho em ((?:(?! · ).)+?) h de relógio \\(\\~((?:(?! · ).)+?) h sem energia\\): ficaram de fora$",
+"${1}–${2}: ${3} device hour(s) in ${4} h of clock time (~${5} h without power): left out",
+[
+" hora(s) do aparelho em ",
+" h de relógio (~",
+" h sem energia): ficaram de fora"
 ]
 ],
 [
@@ -7858,6 +7950,16 @@ const I18N_EN = {
 ]
 ],
 [
+"Histórico baixado: ",
+"^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos \\(leitura interrompida: ((?:(?! · ).)+?)\\)$",
+"History downloaded: ${1} records, ${2} new minutes (reading interrupted: ${3})",
+[
+"Histórico baixado: ",
+" registros, ",
+" minutos novos (leitura interrompida: "
+]
+],
+[
 "Sem contagens há ",
 "^Sem contagens há ((?:(?! · ).)+?): o tubo pode estar com defeito\\. Confira o contador\\.$",
 "No counts for ${1}: the tube may be faulty. Check the counter.",
@@ -8193,6 +8295,17 @@ const I18N_EN = {
 ]
 ],
 [
+"Histórico baixado: ",
+"^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos, ((?:(?! · ).)+?) alertas encontrados$",
+"History downloaded: ${1} records, ${2} new minutes, ${3} alerts found",
+[
+"Histórico baixado: ",
+" registros, ",
+" minutos novos, ",
+" alertas encontrados"
+]
+],
+[
 "atualização: não deu para salvar em ",
 "^atualização: não deu para salvar em ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\); usando a pasta de dados$",
 "update: couldn't save to ${1} (${2}); using the data folder",
@@ -8254,6 +8367,16 @@ const I18N_EN = {
 [
 "Busca: o espectro do RC102 levou ",
 " s para chegar; colunas a cada "
+]
+],
+[
+"Histórico baixado: ",
+"^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos, 1 alerta encontrado$",
+"History downloaded: ${1} records, ${2} new minutes, 1 alert found",
+[
+"Histórico baixado: ",
+" registros, ",
+" minutos novos, 1 alerta encontrado"
 ]
 ],
 [
@@ -13079,6 +13202,14 @@ const I18N_EN = {
 ]
 ],
 [
+"SETDATETIME: resposta inesperada 0x",
+"^SETDATETIME: resposta inesperada 0x((?:(?! · ).)+?)$",
+"SETDATETIME: unexpected answer 0x${1}",
+[
+"SETDATETIME: resposta inesperada 0x"
+]
+],
+[
 "não consegui abrir a versão nova: ",
 "^não consegui abrir a versão nova: ((?:(?! · ).)+?)$",
 "couldn't open the new version: ${1}",
@@ -13575,6 +13706,14 @@ const I18N_EN = {
 "radonscan: did not save the reading: ${1}",
 [
 "radonscan: não gravei a leitura: "
+]
+],
+[
+"alarmes: registros recusados (",
+"^alarmes: registros recusados \\(((?:(?! · ).)+?)\\)$",
+"alarms: registers refused (${1})",
+[
+"alarmes: registros recusados ("
 ]
 ],
 [
@@ -14834,6 +14973,14 @@ const I18N_EN = {
 ]
 ],
 [
+"o Google recusou o login (",
+"^o Google recusou o login \\(((?:(?! · ).)+?)\\)$",
+"Google refused the sign-in (${1})",
+[
+"o Google recusou o login ("
+]
+],
+[
 "Lacunas de 10 min ou mais (",
 "^Lacunas de 10 min ou mais \\(((?:(?! · ).)+?)$",
 "Gaps of 10 min or more (${1}",
@@ -15068,6 +15215,14 @@ const I18N_EN = {
 [
 "RadonScan conectado (",
 " em "
+]
+],
+[
+"escrita recusada (status ",
+"^escrita recusada \\(status ((?:(?! · ).)+?)\\)$",
+"write refused (status ${1})",
+[
+"escrita recusada (status "
 ]
 ],
 [
@@ -15440,6 +15595,14 @@ const I18N_EN = {
 ]
 ],
 [
+"download: GitHub respondeu ",
+"^download: GitHub respondeu ((?:(?! · ).)+?)$",
+"download: GitHub answered ${1}",
+[
+"download: GitHub respondeu "
+]
+],
+[
 "Modelo: última busca às ",
 "^Modelo: última busca às ((?:(?! · ).)+?)\\.$",
 "Model: last fetch at ${1}.",
@@ -15733,6 +15896,14 @@ const I18N_EN = {
 "send refused (status ${1})",
 [
 "envio recusado (status "
+]
+],
+[
+"ERRO o app tinha travado: ",
+"^ERRO o app tinha travado: ((?:(?! · ).)+?)$",
+"ERROR the app had hung: ${1}",
+[
+"ERRO o app tinha travado: "
 ]
 ],
 [
@@ -16384,6 +16555,14 @@ const I18N_EN = {
 ]
 ],
 [
+"Baixando e conferindo… ",
+"^Baixando e conferindo… ((?:(?! · ).)+?)%$",
+"Downloading and checking… ${1}%",
+[
+"Baixando e conferindo… "
+]
+],
+[
 "(",
 "^\\(((?:(?! · ).)+?) acima do fundo de ((?:(?! · ).)+?)\\)$",
 "(${1} above the background of ${2})",
@@ -16754,6 +16933,23 @@ const I18N_EN = {
 "radonscan: searching: ${1}",
 [
 "radonscan: procurando: "
+]
+],
+[
+"Backup importado (",
+"^Backup importado \\(((?:(?! · ).)+?)\\): ((?:(?! · ).)+?)$",
+"Backup imported (${1}): ${2}",
+[
+"Backup importado (",
+"): "
+]
+],
+[
+"download interrompido: ",
+"^download interrompido: ((?:(?! · ).)+?)$",
+"download interrupted: ${1}",
+[
+"download interrompido: "
 ]
 ],
 [
@@ -17223,6 +17419,14 @@ const I18N_EN = {
 [
 " sem leitura (",
 ")."
+]
+],
+[
+"Google respondeu ",
+"^Google respondeu ((?:(?! · ).)+?) \\(((?:(?! · ).)+?)\\)$",
+"Google answered ${1} (${2})",
+[
+"Google respondeu "
 ]
 ],
 [
@@ -18059,6 +18263,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode · ",
+"^RadiaCode · ((?:(?! · ).)+?)% medido$",
+"RC102 · ${1}% measured",
+[
+"RadiaCode · ",
+"% medido"
+]
+],
+[
 "igual à média das ",
 "^igual à média das ((?:(?! · ).)+?)h$",
 "same as the ${1}h average",
@@ -18523,6 +18736,23 @@ const I18N_EN = {
 ]
 ],
 [
+"",
+"^((?:(?! · ).)+?): GitHub respondeu ((?:(?! · ).)+?)$",
+"${1}: GitHub answered ${2}",
+[
+": GitHub respondeu "
+]
+],
+[
+"GMC-800 · ",
+"^GMC\\-800 · ((?:(?! · ).)+?)% medido$",
+"GMC-800 · ${1}% measured",
+[
+"GMC-800 · ",
+"% medido"
+]
+],
+[
 "chuva",
 "^chuva((?:(?! · ).)+?) · modelo às ((?:(?! · ).)+?)$",
 "rain${1} · model at ${2}",
@@ -18936,6 +19166,14 @@ const I18N_EN = {
 "in dose · certainty ${1}",
 [
 "na dose · certeza "
+]
+],
+[
+"fase desconhecida ",
+"^fase desconhecida ((?:(?! · ).)+?)$",
+"unknown phase ${1}",
+[
+"fase desconhecida "
 ]
 ],
 [
@@ -19403,6 +19641,31 @@ const I18N_EN = {
 ]
 ],
 [
+"GitHub respondeu ",
+"^GitHub respondeu ((?:(?! · ).)+?)$",
+"GitHub answered ${1}",
+[
+"GitHub respondeu "
+]
+],
+[
+"escrita ",
+"^escrita ((?:(?! · ).)+?) recusada$",
+"write ${1} refused",
+[
+"escrita ",
+" recusada"
+]
+],
+[
+"Google respondeu ",
+"^Google respondeu ((?:(?! · ).)+?)$",
+"Google answered ${1}",
+[
+"Google respondeu "
+]
+],
+[
 "a partir de ",
 "^a partir de ((?:(?! · ).)+?) CPM$",
 "from ${1} CPM",
@@ -19767,6 +20030,23 @@ const I18N_EN = {
 "±${1}%: not saved",
 [
 "%: não guardada"
+]
+],
+[
+"radar respondeu ",
+"^radar respondeu ((?:(?! · ).)+?)$",
+"radar answered ${1}",
+[
+"radar respondeu "
+]
+],
+[
+"RC102 · ",
+"^RC102 · ((?:(?! · ).)+?)% medido$",
+"RC102 · ${1}% measured",
+[
+"RC102 · ",
+"% medido"
 ]
 ],
 [
@@ -20562,6 +20842,14 @@ const I18N_EN = {
 ]
 ],
 [
+"testando… (",
+"^testando… \\(((?:(?! · ).)+?)\\)$",
+"testing… (${1})",
+[
+"testando… ("
+]
+],
+[
 "(olhou às ",
 "^\\(olhou às ((?:(?! · ).)+?)\\)$",
 "(checked at ${1})",
@@ -20915,6 +21203,14 @@ const I18N_EN = {
 "found on ${1}",
 [
 "encontrei em "
+]
+],
+[
+"baixando v",
+"^baixando v((?:(?! · ).)+?)… ((?:(?! · ).)+?)%$",
+"downloading v${1}… ${2}%",
+[
+"baixando v"
 ]
 ],
 [
@@ -21397,6 +21693,14 @@ const I18N_EN = {
 ],
 [
 "",
+"^((?:(?! · ).)+?) \\(cortado\\)$",
+"${1} (cut)",
+[
+" (cortado)"
+]
+],
+[
+"",
 "^((?:(?! · ).)+?) com valor ((?:(?! · ).)+?)$",
 "${1} with value ${2}",
 [
@@ -21721,6 +22025,22 @@ const I18N_EN = {
 "updated ${1}",
 [
 "atualizado "
+]
+],
+[
+"copiando ",
+"^copiando ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"copying ${1}: ${2}",
+[
+"copiando "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?), encostado$",
+"${1}, touching",
+[
+", encostado"
 ]
 ],
 [
@@ -22159,6 +22479,14 @@ const I18N_EN = {
 "${1} counts",
 [
 " contagens"
+]
+],
+[
+"",
+"^((?:(?! · ).)+?)–((?:(?! · ).)+?) · durou ((?:(?! · ).)+?)$",
+"${1}–${2} · lasted ${3}",
+[
+" · durou "
 ]
 ],
 [

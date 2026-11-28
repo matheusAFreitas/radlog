@@ -589,6 +589,7 @@ alarme	alarm
 alarme ativo	alarm active
 alerta	alert
 alerta encontrado	alert found
+alertas encontrados	alerts found
 alerta não encontrado	alert not found
 aniquilação	annihilation
 anotação	note
@@ -6518,6 +6519,10 @@ aberto pelas {0} · gráfico parado neste trecho	opened from {0} · chart frozen
 gráfico parado neste trecho	chart frozen on this stretch
 ERRO motor travado ({0} presa desde {1}): reiniciando o app	ERROR engine stuck ({0} held since {1}): restarting the app
 trava nuvem	cloud lock
+trava rc.arquivo	RC102 file lock
+chamada	call
+ERRO o app tinha travado: {0}	ERROR the app had hung: {0}
+==== fechando o app (celular)	==== closing the app (phone)
 {0} travou: {1} presa desde {2} (versão {3})	{0} stuck: {1} held since {2} (version {3})
 ==== RadLog {0} iniciado (android/{1}, {2}, motor {3}, {4})	==== RadLog {0} started (android/{1}, {2}, engine {3}, {4})
 Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso "certo" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).	With little spectrum time, a small difference already passes 5 σ. So "sure" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).
@@ -6675,6 +6680,7 @@ Média dessas horas:	Average of these hours:
 O RadonScan guarda a contagem de cada hora: dá pra trazer.	The RadonScan keeps the count for each hour: it can be brought in.
 A memória do aparelho não tinha horas novas pra trazer.	The device memory had no new hours to bring in.
 Ainda não dá pra saber a hora de cada registro da memória. O app precisa de algumas horas lendo o aparelho ao vivo; ele tenta de novo sozinho.	It is not possible yet to tell the time of each record in the memory. The app needs a few hours reading the device live; it tries again by itself.
+O RadonScan ficou um tempo sem energia enquanto estava fora do PC. Sem relógio, não dá pra saber a hora de cada registro desse buraco, e essas horas ficaram de fora.	The RadonScan was without power for a while when it was away from the PC. With no clock, there is no way to tell the time of each record in that gap, so those hours were left out.
 Não consegui gravar as horas da memória.	Could not save the hours from the memory.
 Não consegui ler a memória do RadonScan. Tente de novo daqui a pouco.	Could not read the RadonScan memory. Try again in a little while.
 O RadonScan não está conectado.	The RadonScan is not connected.
@@ -6700,8 +6706,60 @@ radonscan: memória: {0} ({1} trecho(s), {2} encaixado(s), ligado {3} h no total
 radonscan: memória: {0} de {1} trecho(s) encaixado(s), ligado {2} h no total; {3} hora(s) nova(s)	radonscan: memory: {0} of {1} stretch(es) matched, on for {2} h in total; {3} new hour(s)
 radonscan: não gravei a troca de cômodo: {0}	radonscan: room change not saved: {0}
 {0}–{1}: virada aos {2} min, última hora na entrada {3}	{0}–{1}: hour turns at minute {2}, last hour at entry {3}
+{0}–{1}: {2} hora(s) do aparelho em {3} h de relógio (~{4} h sem energia): ficaram de fora	{0}–{1}: {2} device hour(s) in {3} h of clock time (~{4} h without power): left out
 # 2.106.3: tempo ligado ao conectar
 radonscan: não li o tempo ligado: {0}	radonscan: could not read the time on: {0}
 radonscan: não gravei o tempo ligado: {0}	radonscan: time on not saved: {0}
 RC102 solto: o app não tenta conectar até você pegar de volta	RC102 released: the app won't try to connect until you take it back
 RC102 pego de volta: o app volta a conectar	RC102 taken back: the app connects again
+# 2.106.5: atualizador e textos que o extrator não via (sem acento)
+Baixando e conferindo… {0}%	Downloading and checking… {0}%
+baixando v{0}… {1}%	downloading v{0}… {1}%
+(pulada)	(skipped)
+Procurando o RadonScan…	Looking for the RadonScan…
+GMC-800 conectando	GMC-800 connecting
+testando… ({0})	testing… ({0})
+o Google recusou o login ({0})	Google refused the sign-in ({0})
+copiando {0}: {1}	copying {0}: {1}
+: provavelmente real, mas vale repetir.	: probably real, but worth repeating.
+A diferença vale {0} vezes a incerteza ({1}σ): provavelmente real, mas vale repetir.	The difference is {0} times the uncertainty ({1}σ): probably real, but worth repeating.
+A diferença vale {0} vezes a incerteza ({1}σ): o objeto deu abaixo do fundo, então o fundo provavelmente mudou (outro lugar, chuva).	The difference is {0} times the uncertainty ({1}σ): the object came out below background, so the background probably changed (another spot, rain).
+(campo desconhecido)	(unknown field)
+{0} (cortado)	{0} (cut)
+Desconhecido	Unknown
+GMC-800 saturado	GMC-800 saturated
+acumulados	accumulated
+zerada	reset
+subiu	rose
+desceu	fell
+desligou	turned off
+ligou	turned on
+dose zerada	dose reset
+rajada suspeita em 30 dias	suspicious burst in 30 days
+rajadas suspeitas em 30 dias	suspicious bursts in 30 days
+rajadas suspeitas em 30 dias, a maioria perto das {0}h. Horário que se repete tem cara de interferência elétrica: veja o que liga nessa hora perto do GMC-800.	suspicious bursts in 30 days, most of them around {0}:00. A repeating time looks like electrical interference: check what turns on at that time near the GMC-800.
+rajadas suspeitas em 30 dias. A última foi {0}. Veja se algum aparelho elétrico ficou perto do GMC-800.	suspicious bursts in 30 days. The last one was {0}. Check whether some electrical device was near the GMC-800.
+Backup importado ({0}): {1}	Backup imported ({0}): {1}
+GitHub respondeu {0}	GitHub answered {0}
+{0}: GitHub respondeu {1}	{0}: GitHub answered {1}
+download: GitHub respondeu {0}	download: GitHub answered {0}
+download interrompido: {0}	download interrupted: {0}
+Google respondeu {0} ({1})	Google answered {0} ({1})
+radar respondeu {0}	radar answered {0}
+SETDATETIME: resposta inesperada 0x{0}	SETDATETIME: unexpected answer 0x{0}
+escrita recusada (status {0})	write refused (status {0})
+fase desconhecida {0}	unknown phase {0}
+login cancelado	sign-in cancelled
+GMC-800 · {0}% medido	GMC-800 · {0}% measured
+RC102 · {0}% medido	RC102 · {0}% measured
+{0}, encostado	{0}, touching
+{0}–{1} · durou {2}	{0}–{1} · lasted {2}
+(aproximada)	(approximate)
+Histórico baixado: {0} registros, {1} minutos novos, 1 alerta encontrado	History downloaded: {0} records, {1} new minutes, 1 alert found
+Histórico baixado: {0} registros, {1} minutos novos, {2} alertas encontrados	History downloaded: {0} records, {1} new minutes, {2} alerts found
+Histórico baixado: {0} registros, {1} minutos novos (leitura interrompida: {2})	History downloaded: {0} records, {1} new minutes (reading interrupted: {2})
+Histórico baixado: {0} registros, {1} minutos novos, 1 alerta encontrado (leitura interrompida: {2})	History downloaded: {0} records, {1} new minutes, 1 alert found (reading interrupted: {2})
+Histórico baixado: {0} registros, {1} minutos novos, {2} alertas encontrados (leitura interrompida: {3})	History downloaded: {0} records, {1} new minutes, {2} alerts found (reading interrupted: {3})
+escrita {0} recusada	write {0} refused
+Google respondeu {0}	Google answered {0}
+alarmes: registros recusados ({0})	alarms: registers refused ({0})

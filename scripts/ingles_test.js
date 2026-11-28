@@ -19,7 +19,8 @@ const ROOT = path.resolve(__dirname, "..");
 const D = path.join(ROOT, "frontend/dist/");
 
 // palavras e letras que só o português tem (o inglês não usa nenhuma delas)
-const PT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|sim|muito|pouco)\b/i;
+const PT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|sim|muito|pouco|já|só|está|isso|quando|onde|pasta|arquivo|[a-zà-ú]{3,}(?:ando|endo|indo|ção|ções|mente|ou|eu|iu|ado|ada|ido|ida|ados|adas|idos|idas))\b| e (?=\p{L})/iu;
+// 2.106.5: gerúndio e particípio ("Baixando e conferindo…") passavam sem acento
 // o que pode ficar como está: nomes próprios, unidades, o seletor de idioma
 const OK = [
   /^Português$/, /^Automático \(idioma do sistema\) · Automatic$/, /^Automatic \(system language\) · Automático$/, // seletor de idioma: os dois de propósito
@@ -85,7 +86,8 @@ async function part2() {
   try { pw = require("playwright"); } catch { pw = require("playwright-core"); }
   const VIEWS = ["agora", "resumo", "gmc", "radiacode", "radonscan", "graficos", "fundo", "alertas", "fora", "medir", "chuva", "config"];
   // "posicao" (2.101.15, item 138): Posição escrita pela pessoa na calibração e no histórico da Atividade (Bq)
-  const SCEN = ["", "casa", "atencao", "alarme", "perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta", "posicao"];
+  // "atualizador" (2.106.5): a janela da versão nova em cada estado (procurando, baixando…)
+  const SCEN = ["", "casa", "atencao", "alarme", "perigo", "fonte", "picorc", "saturado", "saida", "cs137", "desconecta", "posicao", "atualizador"];
   const b = await pw.chromium.launch(process.env.RADLOG_CHROME ? { channel: process.env.RADLOG_CHROME } : {});
   const found = new Map(), errs = new Set();
   let scans = 0;
@@ -132,6 +134,20 @@ async function part2() {
       for (const [x, y, w, h] of boxes.slice(0, 10)) for (let i = 1; i < 10; i++) { await p.mouse.move(x + (w * i) / 10, y + h / 2); await p.waitForTimeout(40); await scan(where + "/hover"); }
       await p.mouse.move(2, 2);
     };
+    if (sc === "atualizador") {
+      const base = { current: "2.106.3", latest: "2.106.4", available: true, canAuto: true, checkedAt: Date.now(), notes: "- nota\n\n**English**\n\n- note", progress: 0.31, wait: "120 CPM" };
+      const states = [{}, { skipped: true }, { state: "procurando" }, { state: "baixando" }, { state: "esperando" }, { state: "abrindo" }, { state: "erro", error: "a assinatura do SHA256SUMS.txt não confere; não vou instalar esta versão" }, { state: "erro", error: "download interrompido: unexpected EOF" }, { state: "cancelado" },
+        { available: false, latest: "2.106.3" }, { available: false, current: "2.107.0" }, { canAuto: false, manual: "a release não tem a assinatura (SHA256SUMS.txt.sig); baixe pela página e confira" }, { error: "não consegui olhar o GitHub: GitHub respondeu 403 Forbidden" }];
+      for (const [k, x] of states.entries()) {
+        await p.evaluate((u) => { renderUpdate(u); const d = $("updDlg"); if (!d.open) d.showModal(); }, { ...base, ...x });
+        await p.waitForTimeout(250);
+        await scan(`atualizador/${k}`);
+        await p.evaluate(() => showView("config")); await p.waitForTimeout(250);
+        await scan(`atualizador/${k}/config`);
+      }
+      await ctx.close();
+      continue;
+    }
     // no cenário normal passa também pelos botões de cada página
     const BAD = /apagar|excluir|delete|remove|reset|zerar|clear|quit|sair do app|disconnect|desconectar|stop|parar|export|download|baixar|choose|escolher|folder|pasta|sign|login|logout|install|instalar|update now|restore|restaurar|import/i;
     for (const v of VIEWS) {

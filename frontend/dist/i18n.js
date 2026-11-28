@@ -34,7 +34,8 @@ const tr = (() => {
   // 2.101.2: sobra de português num resultado (acento ou palavra comum)
   // o nome que a pessoa deu (⁨…⁩, asIs) não conta: pode ter acento à vontade
   const ptLeft = (s) => PT_LEFT.test(s.replace(/\u2068[^\u2069]*\u2069/g, ""));
-  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa|igual|trecho|selecionado|percentis|lacuna)\b/i;
+  const PT_LEFT = /[ãõçáéíóúâêôà]|\b(não|de|da|das|dos|na|nas|nos|em|que|ou|com|para|sem|uma|pelo|pela|tudo|nada|dia|dias|hora|horas|minutos|segundos|semana|casa|fundo|aparelho|aparelhos|contador|hoje|ontem|seguro|nível|até|mais|menos|ainda|agora|aqui|desde|depois|antes|medição|medir|objeto|pico|picos|alarme|atenção|perigo|chuva|leitura|contagens|ligado|desligado|conectado|desconectado|aberto|fechado|nenhum|nenhuma|vezes|muito|pouco|certeza|alta|baixa|igual|trecho|selecionado|percentis|lacuna|já|só|está|isso|quando|onde|pasta|arquivo|[a-zà-ú]{3,}(?:ando|endo|indo|ção|ções|mente|ou|eu|iu|ado|ada|ido|ida|ados|adas|idos|idas))\b| e (?=\p{L})/iu;
+  // 2.106.5: gerúndio, particípio e o " e " também contam como português sobrando
   const hasWord = /[A-Za-zÀ-ú]{2}/;
   // números do Go vêm com vírgula decimal ("52,3"); os do app já saem no
   // formato do idioma ("1,239" = mil duzentos…). Só troca a vírgula quando é
@@ -159,6 +160,12 @@ const tr = (() => {
     let out = one(core, false, false);
     if (out == null) out = wide(core);
     if (out == null) out = sentences(core);
+    // 2.106.5: "· simulado" (porta do GMC-800 na demonstração): um pedaço só,
+    // começando no "· ", traduz o resto
+    if (out == null && core.startsWith("· ") && !core.includes(" · ")) {
+      const t = tr(core.slice(2));
+      if (t !== core.slice(2)) out = "· " + t;
+    }
     let segFallback = null;
     if (out == null && core.includes(" · ")) {
       // pedaços juntados com " · ": traduz cada um (com e sem o "· ")
