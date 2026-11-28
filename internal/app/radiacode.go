@@ -318,9 +318,16 @@ func (a *App) SetRadiacode(on bool, ble string) RcState {
 		// novo): tenta o Bluetooth já, sem esperar a vez
 		a.rc.bleNow.Store(true)
 	}
+	was := !a.settings.RcOff
 	a.settings.RcOff, a.settings.RcBLE = !on, ble
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	// no registro, para explicar um trecho sem nenhuma tentativa de conectar
+	if was && !on {
+		a.logEvent("RC102 solto: o app não tenta conectar até você pegar de volta")
+	} else if !was && on {
+		a.logEvent("RC102 pego de volta: o app volta a conectar")
+	}
 	a.rcWake()
 	a.emitRc()
 	return a.GetRadiacode()

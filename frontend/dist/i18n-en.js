@@ -5099,7 +5099,11 @@ const I18N_EN = {
 "a memória do RadonScan está vazia": "the RadonScan memory is empty",
 "não deu pra encaixar a memória nas leituras do app": "could not match the memory to the app's readings",
 "automático": "automatic",
-"botão": "button"
+"botão": "button",
+"RC102 solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
+"RadiaCode solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
+"RC102 pego de volta: o app volta a conectar": "RC102 taken back: the app connects again",
+"RadiaCode pego de volta: o app volta a conectar": "RC102 taken back: the app connects again"
 },
 "patterns": [
 [

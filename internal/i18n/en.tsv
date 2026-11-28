@@ -6703,3 +6703,5 @@ radonscan: não gravei a troca de cômodo: {0}	radonscan: room change not saved:
 # 2.106.3: tempo ligado ao conectar
 radonscan: não li o tempo ligado: {0}	radonscan: could not read the time on: {0}
 radonscan: não gravei o tempo ligado: {0}	radonscan: time on not saved: {0}
+RC102 solto: o app não tenta conectar até você pegar de volta	RC102 released: the app won't try to connect until you take it back
+RC102 pego de volta: o app volta a conectar	RC102 taken back: the app connects again
