@@ -20,7 +20,7 @@ func TestAssetIsVersion(t *testing.T) {
 	}{
 		{"RadLog-v2.70.1.exe", "2.70.1", true},
 		{"RadLog-v2.70.1-x86_64.AppImage", "2.70.1", true},
-		{"GMC-Monitor-v1.46.1.exe", "1.46.1", true},
+		{"GMC-Monitor-v1.46.1.exe", "1.46.1", false}, // 3.0.0: o nome da 1.x não vale mais
 		{"RadLog-v2.16.0.exe", "9.9.9", false},
 		{"RadLog-v2.70.1.exe.part", "2.70.1", false},
 		{"RadLog.exe", "2.70.1", false},

@@ -2048,6 +2048,14 @@ const I18N_EN = {
 "GMC-800 com você, RadiaCode com você": "GMC-800 with you, RC102 with you",
 "GMC-800 com você, RC102 em casa": "GMC-800 with you, RC102 at home",
 "GMC-800 com você, RadiaCode em casa": "GMC-800 with you, RC102 at home",
+"Fora de casa: GMC-800 em casa, RC102 com você": "Away from home: GMC-800 at home, RC102 with you",
+"Fora de casa: GMC-800 em casa, RadiaCode com você": "Away from home: GMC-800 at home, RC102 with you",
+"Fora de casa: GMC-800 em casa, RC102 em casa": "Away from home: GMC-800 at home, RC102 at home",
+"Fora de casa: GMC-800 em casa, RadiaCode em casa": "Away from home: GMC-800 at home, RC102 at home",
+"Fora de casa: GMC-800 fora do cálculo, RC102 com você": "Away from home: GMC-800 out of the calculation, RC102 with you",
+"Fora de casa: GMC-800 fora do cálculo, RadiaCode com você": "Away from home: GMC-800 out of the calculation, RC102 with you",
+"Fora de casa: GMC-800 fora do cálculo, RC102 em casa": "Away from home: GMC-800 out of the calculation, RC102 at home",
+"Fora de casa: GMC-800 fora do cálculo, RadiaCode em casa": "Away from home: GMC-800 out of the calculation, RC102 at home",
 "Onde está cada aparelho": "Where each device is",
 "o normal: GMC-800 em casa, RC102 com você": "usual: GMC-800 at home, RC102 with you",
 "o normal: GMC-800 em casa, RadiaCode com você": "usual: GMC-800 at home, RC102 with you",
@@ -4322,6 +4330,8 @@ const I18N_EN = {
 "o GMC-800 de verdade está sem contagens": "the real GMC-800 has no counts",
 "a memória do GMC-800 de verdade passou de 95%": "the real GMC-800 memory is over 95%",
 "a memória do GMC-800 de verdade passou de 80%": "the real GMC-800 memory is over 80%",
+"Bluetooth: o app ainda não ligou o rádio": "Bluetooth: the app hasn't turned on the radio yet",
+"nada chegou": "nothing arrived",
 "Abrir eventos": "Open events",
 "Configurações › Atualizações e sobre": "Settings › Updates and about",
 "Configurações › Dados e backup": "Settings › Data and backup",
@@ -4686,6 +4696,8 @@ const I18N_EN = {
 "Formato da data": "Date format",
 "Dia, mês e ano, ou ano, mês e dia. Vale para a tela e o relatório em PDF, nos dois idiomas.": "Day, month and year, or year, month and day. Applies to the screen and the PDF report, in both languages.",
 "formato da data": "date format",
+"o rádio não respondeu": "the radio didn't answer",
+"não deu para perguntar ao rádio": "couldn't ask the radio",
 "Clique para mostrar ou esconder no gráfico": "Click to show or hide on the chart",
 "fixo: 10 min": "fixed: 10 min",
 "fixo: 30 min": "fixed: 30 min",
@@ -4940,10 +4952,29 @@ const I18N_EN = {
 "não há calibração anterior do tório": "there is no previous thorium calibration",
 "pior que a atual: não usada": "worse than the current one: not used",
 "Pedra solta: a massa fica opcional e o resultado sai em Bq da peça.": "Loose stone: the mass is optional and the result comes in Bq for the piece.",
+"o RC102 não respondeu (longe, desligado ou com outro aparelho)": "the RC102 didn't respond (too far, off, or with another device)",
+"o RadiaCode não respondeu (longe, desligado ou com outro aparelho)": "the RC102 didn't respond (too far, off, or with another device)",
+"o aparelho não aceita notificações": "the device doesn't accept notifications",
+"não consegui ler os serviços do aparelho": "couldn't read the device's services",
+"não consegui ligar as notificações": "couldn't turn on notifications",
+"o Android não abriu a conexão": "Android didn't open the connection",
+"o Android não aceitou o envio": "Android didn't accept the send",
+"o envio não terminou": "the send didn't finish",
+"este celular não tem Bluetooth": "this phone has no Bluetooth",
+"o Bluetooth do celular está desligado": "the phone's Bluetooth is off",
+"modo celular (Android)": "phone mode (Android)",
+"· não deu para perguntar ao rádio": "· couldn't ask the radio",
+"· o rádio não respondeu": "· the radio didn't answer",
+"· mandado de novo, nada": "· sent again, nothing",
+"mandado de novo, nada": "sent again, nothing",
 "Mais ações do trecho": "More actions for this stretch",
 "Voltar ao zoom anterior": "Back to the previous zoom",
 "Voltar para o período": "Back to the period",
 "gráfico parado neste trecho": "chart frozen on this stretch",
+"trava nuvem": "cloud lock",
+"trava rc.arquivo": "RC102 file lock",
+"chamada": "call",
+"==== fechando o app (celular)": "==== closing the app (phone)",
 "Com pouco tempo de espectro, uma diferença pequena já passa de 5 σ. Por isso \"certo\" pede também que o pico suba pelo menos 30% acima do que tem embaixo e que outra linha da mesma série apareça (ou 60%, se ele estiver sozinho).": "With little spectrum time, a small difference already passes 5 σ. So \"sure\" also needs the peak to rise at least 30% above what is underneath it and another line from the same series to show up (or 60%, if it is alone).",
 "(ou U-235)": "(or U-235)",
 "rádio": "radium",
@@ -5074,6 +5105,10 @@ const I18N_EN = {
 "não deu pra encaixar a memória nas leituras do app": "could not match the memory to the app's readings",
 "automático": "automatic",
 "botão": "button",
+"RC102 solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
+"RadiaCode solto: o app não tenta conectar até você pegar de volta": "RC102 released: the app won't try to connect until you take it back",
+"RC102 pego de volta: o app volta a conectar": "RC102 taken back: the app connects again",
+"RadiaCode pego de volta: o app volta a conectar": "RC102 taken back: the app connects again",
 "(pulada)": "(skipped)",
 "Procurando o RadonScan…": "Looking for the RadonScan…",
 "GMC-800 conectando": "GMC-800 connecting",
@@ -7334,6 +7369,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode (Bluetooth): o pedido ",
+"^RadiaCode \\(Bluetooth\\): o pedido ((?:(?! · ).)+?) ficou ((?:(?! · ).)+?) sem resposta; mandado de novo, respondeu$",
+"RC102 (Bluetooth): request ${1} got no answer for ${2}; sent again, it answered",
+[
+"RadiaCode (Bluetooth): o pedido ",
+" ficou ",
+" sem resposta; mandado de novo, respondeu"
+]
+],
+[
 "K-40 achado em ",
 "^K\\-40 achado em ((?:(?! · ).)+?) keV: a escala de energia do RC102 está ((?:(?! · ).)+?)% baixa; a conta corrige\\.$",
 "K-40 found at ${1} keV: the RC102 energy scale is ${2}% low; the calculation corrects it.",
@@ -7579,6 +7624,16 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 (Bluetooth): o pedido ",
+"^RC102 \\(Bluetooth\\): o pedido ((?:(?! · ).)+?) ficou ((?:(?! · ).)+?) sem resposta; mandado de novo, respondeu$",
+"RC102 (Bluetooth): request ${1} got no answer for ${2}; sent again, it answered",
+[
+"RC102 (Bluetooth): o pedido ",
+" ficou ",
+" sem resposta; mandado de novo, respondeu"
+]
+],
+[
 "A diferença vale ",
 "^A diferença vale ((?:(?! · ).)+?) vezes a incerteza \\(((?:(?! · ).)+?)σ\\): é real, não variação da contagem\\.$",
 "The difference is ${1} times the uncertainty (${2}σ): it's real, not count variation.",
@@ -7715,6 +7770,18 @@ const I18N_EN = {
 [
 "anexo ",
 " ficou de fora (não consegui tirar a localização de dentro da foto)"
+]
+],
+[
+"nuvem: subiu ",
+"^nuvem: subiu ((?:(?! · ).)+?) arquivo\\(s\\), juntou ((?:(?! · ).)+?) · ((?:(?! · ).)+?) KB enviados, ((?:(?! · ).)+?) KB recebidos, ((?:(?! · ).)+?) pedidos$",
+"cloud: uploaded ${1} file(s), merged ${2} · ${3} KB sent, ${4} KB received, ${5} requests",
+[
+"nuvem: subiu ",
+" arquivo(s), juntou ",
+" KB enviados, ",
+" KB recebidos, ",
+" pedidos"
 ]
 ],
 [
@@ -8274,6 +8341,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode: não conectou (",
+"^RadiaCode: não conectou \\(((?:(?! · ).)+?)\\); próxima tentativa pelo Bluetooth em ((?:(?! · ).)+?)$",
+"RC102: did not connect (${1}); next Bluetooth try in ${2}",
+[
+"RadiaCode: não conectou (",
+"); próxima tentativa pelo Bluetooth em "
+]
+],
+[
 "mais alto por volta das ",
 "^mais alto por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\) · mais baixo por volta das ((?:(?! · ).)+?)h \\(((?:(?! · ).)+?) ((?:(?! · ).)+?)\\)$",
 "highest around ${1}h (${2} ${3}) · lowest around ${4}h (${5} ${6})",
@@ -8756,6 +8832,15 @@ const I18N_EN = {
 "o arquivo da release (",
 ") não é o da versão ",
 "; não vou instalar"
+]
+],
+[
+"RC102: não conectou (",
+"^RC102: não conectou \\(((?:(?! · ).)+?)\\); próxima tentativa pelo Bluetooth em ((?:(?! · ).)+?)$",
+"RC102: did not connect (${1}); next Bluetooth try in ${2}",
+[
+"RC102: não conectou (",
+"); próxima tentativa pelo Bluetooth em "
 ]
 ],
 [
@@ -9528,6 +9613,16 @@ const I18N_EN = {
 ]
 ],
 [
+"ERRO motor travado (",
+"^ERRO motor travado \\(((?:(?! · ).)+?) presa desde ((?:(?! · ).)+?)\\): reiniciando o app$",
+"ERROR engine stuck (${1} held since ${2}): restarting the app",
+[
+"ERRO motor travado (",
+" presa desde ",
+"): reiniciando o app"
+]
+],
+[
 "✓ O RC102 está vendo o KCl: faixa de 300 a 1.400 keV ",
 "^✓ O RC102 está vendo o KCl: faixa de 300 a 1\\.400 keV ((?:(?! · ).)+?)((?:(?! · ).)+?)%$",
 "✓ The RC102 sees the KCl: 300 to 1,400 keV band ${1}${2}%",
@@ -9640,6 +9735,15 @@ const I18N_EN = {
 "A conta RadiaCode ÷ GMC-800 mudou: ",
 " contra ",
 " em casa."
+]
+],
+[
+"RadiaCode (Bluetooth): sem resposta em ",
+"^RadiaCode \\(Bluetooth\\): sem resposta em ((?:(?! · ).)+?) ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in ${1} to request ${2}: ${3}",
+[
+"RadiaCode (Bluetooth): sem resposta em ",
+" ao pedido "
 ]
 ],
 [
@@ -10294,6 +10398,15 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102 (Bluetooth): sem resposta em ",
+"^RC102 \\(Bluetooth\\): sem resposta em ((?:(?! · ).)+?) ao pedido ((?:(?! · ).)+?): ((?:(?! · ).)+?)$",
+"RC102 (Bluetooth): no answer in ${1} to request ${2}: ${3}",
+[
+"RC102 (Bluetooth): sem resposta em ",
+" ao pedido "
+]
+],
+[
 "junho a agosto ficaram ",
 "^junho a agosto ficaram ((?:(?! · ).)+?)% acima de novembro a março$",
 "June to August were ${1}% above November to March",
@@ -10883,6 +10996,24 @@ const I18N_EN = {
 ]
 ],
 [
+"não consegui ligar as notificações (status ",
+"^não consegui ligar as notificações \\(status ((?:(?! · ).)+?)\\)$",
+"couldn't turn on notifications (status ${1})",
+[
+"não consegui ligar as notificações (status "
+]
+],
+[
+"==== RadLog ",
+"^==== RadLog ((?:(?! · ).)+?) iniciado \\(android/((?:(?! · ).)+?), ((?:(?! · ).)+?), motor ((?:(?! · ).)+?), ((?:(?! · ).)+?)\\)$",
+"==== RadLog ${1} started (android/${2}, ${3}, engine ${4}, ${5})",
+[
+"==== RadLog ",
+" iniciado (android/",
+", motor "
+]
+],
+[
 "Histórico baixado: ",
 "^Histórico baixado: ((?:(?! · ).)+?) registros, ((?:(?! · ).)+?) minutos novos$",
 "History downloaded: ${1} records, ${2} new minutes",
@@ -11244,6 +11375,14 @@ const I18N_EN = {
 "Activity: calibration replaced by the new one (${1})",
 [
 "Atividade: calibração trocada pela nova ("
+]
+],
+[
+"o aparelho não aceitou a conexão (status ",
+"^o aparelho não aceitou a conexão \\(status ((?:(?! · ).)+?)\\)$",
+"the device refused the connection (status ${1})",
+[
+"o aparelho não aceitou a conexão (status "
 ]
 ],
 [
@@ -12394,6 +12533,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RadiaCode: conectou mas não abriu (",
+"^RadiaCode: conectou mas não abriu \\(((?:(?! · ).)+?)\\)$",
+"RC102: connected but did not open (${1})",
+[
+"RadiaCode: conectou mas não abriu ("
+]
+],
+[
 "o dia mais baixo é ",
 "^o dia mais baixo é ((?:(?! · ).)+?), ((?:(?! · ).)+?)% abaixo da média$",
 "the lowest day is ${1}, ${2}% below the average",
@@ -12521,6 +12668,16 @@ const I18N_EN = {
 "peak within the usual ups and downs of the background of ${1}",
 [
 "pico dentro do vai e vem do fundo de "
+]
+],
+[
+"· resposta pela metade (",
+"^· resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+"· half a response (${1} of ${2} bytes)",
+[
+"· resposta pela metade (",
+" de ",
+" bytes)"
 ]
 ],
 [
@@ -13009,6 +13166,16 @@ const I18N_EN = {
 ]
 ],
 [
+"resposta pela metade (",
+"^resposta pela metade \\(((?:(?! · ).)+?) de ((?:(?! · ).)+?) bytes\\)$",
+"half a response (${1} of ${2} bytes)",
+[
+"resposta pela metade (",
+" de ",
+" bytes)"
+]
+],
+[
 "% acima da média das 2 h antes (",
 "^% acima da média das 2 h antes \\(((?:(?! · ).)+?)\\)$",
 "% above the average of the 2 h before (${1})",
@@ -13188,6 +13355,14 @@ const I18N_EN = {
 ]
 ],
 [
+"RC102: conectou mas não abriu (",
+"^RC102: conectou mas não abriu \\(((?:(?! · ).)+?)\\)$",
+"RC102: connected but did not open (${1})",
+[
+"RC102: conectou mas não abriu ("
+]
+],
+[
 "RadiaCode desligado em ",
 "^RadiaCode desligado em ((?:(?! · ).)+?) do período$",
 "RC102 off for ${1} of the period",
@@ -13219,6 +13394,26 @@ const I18N_EN = {
 "± ${1}% (1σ, from the RC102 dose)",
 [
 "% (1σ, pela dose do RadiaCode)"
+]
+],
+[
+"==== RadLog ",
+"^==== RadLog ((?:(?! · ).)+?) iniciado \\(((?:(?! · ).)+?)/((?:(?! · ).)+?), ((?:(?! · ).)+?), PC ((?:(?! · ).)+?)\\)$",
+"==== RadLog ${1} started (${2}/${3}, ${4}, PC ${5})",
+[
+"==== RadLog ",
+" iniciado (",
+", PC "
+]
+],
+[
+"",
+"^((?:(?! · ).)+?) travou: ((?:(?! · ).)+?) presa desde ((?:(?! · ).)+?) \\(versão ((?:(?! · ).)+?)\\)$",
+"${1} stuck: ${2} held since ${3} (version ${4})",
+[
+" travou: ",
+" presa desde ",
+" (versão "
 ]
 ],
 [
@@ -13494,6 +13689,15 @@ const I18N_EN = {
 "fundo ",
 " µSv + acima do fundo ",
 " µSv"
+]
+],
+[
+"· o rádio ainda responde (",
+"^· o rádio ainda responde \\(((?:(?! · ).)+?) dBm\\)$",
+"· the radio still answers (${1} dBm)",
+[
+"· o rádio ainda responde (",
+" dBm)"
 ]
 ],
 [
@@ -14027,6 +14231,15 @@ const I18N_EN = {
 "The device memory brought back ${1}.",
 [
 "A memória do aparelho trouxe "
+]
+],
+[
+"o rádio ainda responde (",
+"^o rádio ainda responde \\(((?:(?! · ).)+?) dBm\\)$",
+"the radio still answers (${1} dBm)",
+[
+"o rádio ainda responde (",
+" dBm)"
 ]
 ],
 [
@@ -15675,6 +15888,22 @@ const I18N_EN = {
 "Updating to version ${1}",
 [
 "Atualizando para a versão "
+]
+],
+[
+"envio recusado (status ",
+"^envio recusado \\(status ((?:(?! · ).)+?)\\)$",
+"send refused (status ${1})",
+[
+"envio recusado (status "
+]
+],
+[
+"ERRO o app tinha travado: ",
+"^ERRO o app tinha travado: ((?:(?! · ).)+?)$",
+"ERROR the app had hung: ${1}",
+[
+"ERRO o app tinha travado: "
 ]
 ],
 [
@@ -17519,6 +17748,15 @@ const I18N_EN = {
 [
 "Remover \"",
 "\" da nuvem?"
+]
+],
+[
+"chegaram ",
+"^chegaram ((?:(?! · ).)+?) pedaço\\(s\\)$",
+"${1} chunk(s) arrived",
+[
+"chegaram ",
+" pedaço(s)"
 ]
 ],
 [
@@ -22195,11 +22433,28 @@ const I18N_EN = {
 ]
 ],
 [
+"montagem: ",
+"^montagem: ((?:(?! · ).)+?)$",
+"assembly: ${1}",
+[
+"montagem: "
+]
+],
+[
 "",
 "^((?:(?! · ).)+?): sem dado((?:(?! · ).)+?)$",
 "${1}: no data${2}",
 [
 ": sem dado"
+]
+],
+[
+"sinal ",
+"^sinal ((?:(?! · ).)+?) dBm$",
+"signal ${1} dBm",
+[
+"sinal ",
+" dBm"
 ]
 ],
 [

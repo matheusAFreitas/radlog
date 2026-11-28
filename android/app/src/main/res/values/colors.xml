@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="bg">#0B0E10</color>
+    <color name="nav">#0D1114</color>
+    <color name="accent">#6EE7A0</color>
+    <color name="att">#F5B84A</color>
+    <color name="alarm">#F28C38</color>
+    <color name="warn">#F0656A</color>
+    <color name="off">#5D666E</color>
+</resources>

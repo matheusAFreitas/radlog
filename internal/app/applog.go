@@ -48,6 +48,11 @@ func (a *App) logf(format string, args ...any) {
 }
 
 func (a *App) logStart() {
+	if a.mobile {
+		// a versão do APK (3.0.0-dev.N); a do motor é a do desktop desta compilação
+		a.logf("==== RadLog %s iniciado (android/%s, %s, motor %s, %s)", runVersion(), runtime.GOARCH, runtime.Version(), AppVersion, mobileHost)
+		return
+	}
 	host, _ := os.Hostname()
 	a.logf("==== RadLog %s iniciado (%s/%s, %s, PC %s)", AppVersion, runtime.GOOS, runtime.GOARCH, runtime.Version(), host)
 }

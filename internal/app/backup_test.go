@@ -145,3 +145,22 @@ func TestNoURL(t *testing.T) {
 		t.Fatalf("erro com o endereço: %v", noURL(err))
 	}
 }
+
+// 3.0.0: a compatibilidade com a 1.x saiu: backup do GMC Monitor não entra.
+func TestOldBackupRefused(t *testing.T) {
+	a := newTestApp(t)
+	for _, app := range []string{"gmc-monitor", "outro"} {
+		zp := filepath.Join(t.TempDir(), app+".zip")
+		f, _ := os.Create(zp)
+		zw := zip.NewWriter(f)
+		w, _ := zw.Create("backup.json")
+		w.Write([]byte(`{"app":"` + app + `","version":"1.46.1"}`))
+		w, _ = zw.Create("leituras/2026-10.csv")
+		w.Write([]byte("data_hora,cpm,origem\n2026-10-27T20:18:00-03:00,25,ao vivo\n"))
+		zw.Close()
+		f.Close()
+		if _, err := a.mergeZip(zp, true); err == nil {
+			t.Fatalf("backup %q deveria ser recusado", app)
+		}
+	}
+}

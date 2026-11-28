@@ -26,14 +26,19 @@ import (
 //   - "aparelho": nome, último envio e quem escreve (para achar PC copiado);
 //   - "comum": os pequenos (alertas encerrados, saídas, medições, anotações,
 //     apagados, históricos), igual se nada mudou;
+//   - "medicoes": as medições (com os espectros), fora do comum desde a 3.0.0;
 //   - "dia|AAAA-MM-DD": minutos do GMC-800 e do RC102 e segundos de alerta
 //     daquele dia (UTC). Só o dia que mudou sobe de novo (N7);
-//   - "espectros|AAAA-MM": os espectros fechados do mês;
+//   - "espectros|AAAA-MM-DD": os espectros fechados do dia (até a 3.0.0-dev
+//     era um por mês, e cada arquivo novo fazia o mês inteiro subir de novo:
+//     ~2,8 MB a cada envio no celular, que fecha um arquivo a cada queda);
 //   - "anexo|<UID da medição>/<arquivo>": um anexo, que sobe uma vez só.
 
 const (
 	cloudKeyDevice = "aparelho"
 	cloudKeyCommon = "comum"
+	// as medições, fora do comum (3.0.0): mudam pouco e são grandes
+	cloudKeyMeasures = "medicoes"
 	// marca de um pacote que já está na nuvem pelo aparelho que mandou: não
 	// sobe de novo daqui (eco)
 	cloudEcho = "e:"
@@ -99,14 +104,18 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 		parts[d] = append(parts[d], "a"+n)
 	}
 	// o comum: o resumo é o próprio pacote (pequeno e igual se nada mudou)
-	common := cloudPack{key: cloudKeyCommon, kind: rs.KindCommon, month: time.Now().UTC().Format("2006-01"), req: pullReq{Rc: true, cloud: true}}
-	z, err := a.buildDelta(common.req)
-	if err != nil {
-		return nil, err
+	common := cloudPack{key: cloudKeyCommon, kind: rs.KindCommon, month: time.Now().UTC().Format("2006-01"), req: pullReq{Rc: true, cloud: true, noMeasures: true}}
+	meas := cloudPack{key: cloudKeyMeasures, kind: rs.KindCommon, month: common.month, req: pullReq{Rc: true, cloud: true, onlyMeasures: true}}
+	var out []cloudPack
+	for _, p := range []*cloudPack{&common, &meas} {
+		z, err := a.buildDelta(p.req)
+		if err != nil {
+			return nil, err
+		}
+		sum := sha256.Sum256(z)
+		p.digest = hex.EncodeToString(sum[:16])
+		out = append(out, *p)
 	}
-	sum := sha256.Sum256(z)
-	common.digest = hex.EncodeToString(sum[:16])
-	out := []cloudPack{common}
 	var ds []string
 	for d := range byDay {
 		ds = append(ds, d)
@@ -120,10 +129,10 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 		p.digest = hex.EncodeToString(h[:16])
 		out = append(out, *p)
 	}
-	// espectros por mês (os sem data no nome ficam juntos)
+	// espectros por dia (os sem data no nome ficam juntos)
 	spec := map[string][]string{}
 	for _, f := range rc.Files {
-		m := reMonth.FindString(f)
+		m := reDate.FindString(f)
 		if m == "" {
 			m = "sem-data"
 		}
@@ -138,9 +147,9 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 		fs := spec[m]
 		sort.Strings(fs)
 		h := sha256.Sum256([]byte(strings.Join(fs, "\n")))
-		month := m
-		if m == "sem-data" {
-			month = ""
+		month := ""
+		if m != "sem-data" {
+			month = m[:7]
 		}
 		out = append(out, cloudPack{key: "espectros|" + m, kind: rs.KindSpectra, month: month, digest: hex.EncodeToString(h[:16]),
 			req: pullReq{Rc: true, cloud: true, noSmall: true, RcFiles: fs}})
@@ -161,7 +170,7 @@ func (a *App) cloudPacks() ([]cloudPack, error) {
 	return out, nil
 }
 
-var reMonth = regexp.MustCompile(`\d{4}-\d{2}`)
+var reDate = regexp.MustCompile(`\d{4}-\d{2}-\d{2}`)
 
 func cloudQueue(todo []cloudPack) []string {
 	seen := map[string]bool{}
@@ -463,7 +472,8 @@ func (a *App) cloudSyncRun(ctx context.Context, gen int) error {
 	a.cloudSaveLocked()
 	c.mu.Unlock()
 	if sent > 0 || got > 0 {
-		a.logf("nuvem: subiu %d arquivo(s), juntou %d", sent, got)
+		a.logf("nuvem: subiu %d arquivo(s), juntou %d · %d KB enviados, %d KB recebidos, %d pedidos", sent, got,
+			(d.Sent.Load()+512)/1024, (d.Recv.Load()+512)/1024, d.Calls.Load())
 	}
 	if bad > 0 {
 		// o resto sincronizou; os que não entraram são tentados de novo (N2)
@@ -487,9 +497,10 @@ func (a *App) cloudEchoLocked(before, after []cloudPack, got map[string]bool) {
 	}
 	now := time.Now().UTC()
 	recent := map[string]bool{
-		"dia|" + now.Format("2006-01-02"):                   true,
-		"dia|" + now.AddDate(0, 0, -1).Format("2006-01-02"): true,
-		"espectros|" + now.Format("2006-01"):                true,
+		"dia|" + now.Format("2006-01-02"):                         true,
+		"dia|" + now.AddDate(0, 0, -1).Format("2006-01-02"):       true,
+		"espectros|" + now.Format("2006-01-02"):                   true,
+		"espectros|" + now.AddDate(0, 0, -1).Format("2006-01-02"): true,
 	}
 	for _, p := range after {
 		if (p.kind != rs.KindDay && p.kind != rs.KindSpectra) || recent[p.key] {

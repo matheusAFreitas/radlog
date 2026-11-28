@@ -1,6 +1,7 @@
 name: release
 
-# Gera o .exe (Windows), o AppImage e o .tar.gz (Linux) e publica a release
+# Gera o .exe (Windows), o AppImage e o .tar.gz (Linux) e o .apk (Android) e
+# publica a release
 # com o trecho daquela versão no CHANGELOG. Dispara sozinho:
 #   - quando um push no main muda internal/app/version.go e a versão ainda
 #     não tem release (cria a tag vX.Y.Z);
@@ -108,10 +109,29 @@ jobs:
           mv "$P/RadLog-v$V-x86_64.AppImage" out/
           rm -rf "$P/RadLog.AppDir" "$P/appimagetool" "$P/appimage-runtime"
           tar -C out -czf "out/radlog-v$V-linux-x86_64.tar.gz" "radlog-v$V-linux-x86_64"
+      - name: Android (APK)
+        # a mesma ação do CI, com a chave definitiva obrigatória: sem ela o
+        # passo falha e nada é publicado (o celular não instalaria por cima)
+        id: apk
+        uses: ./.github/actions/android-apk
+        with:
+          version: ${{ steps.v.outputs.ver }}
+          require-key: "true"
+          google-client-id: ${{ secrets.GOOGLE_CLIENT_ID }}
+          google-client-secret: ${{ secrets.GOOGLE_CLIENT_SECRET }}
+          keystore: ${{ secrets.RADLOG_ANDROID_KEYSTORE }}
+          keystore-password: ${{ secrets.RADLOG_ANDROID_KEYSTORE_PASSWORD }}
+          key-alias: ${{ secrets.RADLOG_ANDROID_KEY_ALIAS }}
+          key-password: ${{ secrets.RADLOG_ANDROID_KEY_PASSWORD }}
+      - name: APK junto dos outros arquivos
+        run: |
+          mv "${{ steps.apk.outputs.apk }}" "out/RadLog-v${{ steps.v.outputs.ver }}.apk"
+          # o gomobile mexe no go.mod/go.sum só para montar a .aar
+          git checkout -- go.mod go.sum
       - name: SHA-256 dos arquivos (o atualizador do app confere)
         run: |
           cd out
-          sha256sum *.exe *.AppImage *.tar.gz > SHA256SUMS.txt
+          sha256sum *.exe *.AppImage *.tar.gz *.apk > SHA256SUMS.txt
           cat SHA256SUMS.txt
       - name: Assinatura do SHA256SUMS.txt (o app 2.16+ só instala se conferir)
         env:
@@ -124,8 +144,8 @@ jobs:
       - name: Notas da versão (do CHANGELOG)
         run: |
           awk -v v="## ${{ steps.v.outputs.ver }}" '$0==v{f=1;next} /^## /{if(f)exit} f' CHANGELOG.md > notes.md
-          printf '\n---\n**Downloads:** Windows: `RadLog-v%s.exe` · Linux: `RadLog-v%s-x86_64.AppImage` (precisa da WebKitGTK 4.1) ou `radlog-v%s-linux-x86_64.tar.gz` (com `install.sh`).\n' \
-            "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" >> notes.md
+          printf '\n---\n**Downloads:** Windows: `RadLog-v%s.exe` · Linux: `RadLog-v%s-x86_64.AppImage` (precisa da WebKitGTK 4.1) ou `radlog-v%s-linux-x86_64.tar.gz` (com `install.sh`) · Android: `RadLog-v%s.apk`.\n' \
+            "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" "${{ steps.v.outputs.ver }}" >> notes.md
           cat notes.md
       - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
@@ -138,6 +158,7 @@ jobs:
             out/*.exe
             out/*.AppImage
             out/*.tar.gz
+            out/*.apk
             out/SHA256SUMS.txt
             out/SHA256SUMS.txt.sig
 

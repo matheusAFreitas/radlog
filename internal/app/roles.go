@@ -370,7 +370,13 @@ func (a *App) setWhereOut(now time.Time, gmc, rc, name string, notHome bool) (Wh
 	err := a.savePeriodsLocked()
 	a.mu.Unlock()
 	where := map[string]string{WhereHome: "em casa", WhereMe: "com você", WhereOff: "fora do cálculo"}
-	a.logEvent("GMC-800 " + where[gmc] + ", RC102 " + where[rc])
+	msg := "GMC-800 " + where[gmc] + ", RC102 " + where[rc]
+	if notHome {
+		// sem isto, "saí de casa" e "voltei" com os mesmos lugares davam
+		// duas linhas iguais no registro
+		msg = "Fora de casa: " + msg
+	}
+	a.logEvent(msg)
 	a.emitPeriods()
 	return a.GetWhereabouts(), err
 }

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ch_reading">Reading</string>
+    <string name="ch_reading_desc">Ongoing notification with the RC102 reading while the app reads in the background.</string>
+    <string name="ch_alarms">Alarms</string>
+    <string name="ch_alarms_desc">Alarm and danger: they ring, vibrate and show over everything.</string>
+    <string name="ch_notices">Notices</string>
+    <string name="ch_notices_desc">Attention: short sound, no full screen.</string>
+    <string name="n_title">RadLog · reading</string>
+    <string name="n_searching">Looking for the Radiacode 102…</string>
+    <string name="n_connecting">Connecting to the RC102…</string>
+    <string name="n_off">RC102 with the PC</string>
+    <string name="n_error">RC102: %1$s</string>
+    <string name="n_today">Dose today %1$s µSv</string>
+    <string name="lv_safe">Safe</string>
+    <string name="lv_attn">Attention</string>
+    <string name="lv_alarm">Alarm</string>
+    <string name="lv_danger">Danger</string>
+    <string name="a_alarm_title">Alarm on the RC102 · %1$s µSv/h</string>
+    <string name="a_danger_title">Danger on the RC102 · %1$s µSv/h</string>
+    <string name="a_attn_title">Attention on the RC102 · %1$s µSv/h</string>
+    <string name="a_text">Move away and look for the source. Tap to open RadLog.</string>
+    <string name="act_silence">Silence</string>
+    <string name="act_release">Release the RC102</string>
+    <string name="act_take">Take the RC102</string>
+    <string name="a_lock_text">Move away and look for the source.</string>
+    <string name="a_silenced">Silenced</string>
+    <string name="act_open">Open RadLog</string>
+</resources>

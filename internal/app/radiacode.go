@@ -30,12 +30,14 @@ import (
 // do µSv/h que o aparelho calcula), separado das leituras do GMC.
 
 const (
-	rcPollEvery  = time.Second
-	rcRetryUSB   = 10 * time.Second
-	rcRetryBLE   = 30 * time.Second
-	rcDirName    = "radiacode"
-	rcHeader     = "hora,cps,usvh,n"
-	rcCompareMax = 24 * 60
+	rcPollEvery = time.Second
+	rcRetryUSB  = 10 * time.Second
+	rcRetryBLE  = 30 * time.Second
+	// rcRetryBLEMobile: o primeiro intervalo no celular (15 s, 30 s, 1 min)
+	rcRetryBLEMobile = 15 * time.Second
+	rcDirName        = "radiacode"
+	rcHeader         = "hora,cps,usvh,n"
+	rcCompareMax     = 24 * 60
 )
 
 // RcState é o que a tela mostra do Radiacode.
@@ -311,12 +313,21 @@ func (a *App) emitRc() {
 func (a *App) SetRadiacode(on bool, ble string) RcState {
 	ble = strings.ToUpper(strings.TrimSpace(ble))
 	a.mu.Lock()
-	if ble != "" && ble != a.settings.RcBLE {
-		a.rc.bleNow.Store(true) // endereço novo: tenta o Bluetooth já, sem esperar a vez
+	if ble != "" && (ble != a.settings.RcBLE || a.mobile) {
+		// endereço novo (ou, no celular, a pessoa escolheu o aparelho de
+		// novo): tenta o Bluetooth já, sem esperar a vez
+		a.rc.bleNow.Store(true)
 	}
+	was := !a.settings.RcOff
 	a.settings.RcOff, a.settings.RcBLE = !on, ble
 	a.saveSettingsLocked()
 	a.mu.Unlock()
+	// no registro, para explicar um trecho sem nenhuma tentativa de conectar
+	if was && !on {
+		a.logEvent("RC102 solto: o app não tenta conectar até você pegar de volta")
+	} else if !was && on {
+		a.logEvent("RC102 pego de volta: o app volta a conectar")
+	}
 	a.rcWake()
 	a.emitRc()
 	return a.GetRadiacode()
@@ -339,6 +350,7 @@ func (a *App) ReconnectRadiacode() RcState {
 		d.Close()
 	}
 	a.rc.mu.Unlock()
+	a.rc.bleNow.Store(true) // pedido da pessoa: o Bluetooth tenta já
 	a.rcWake()
 	return a.GetRadiacode()
 }
@@ -373,7 +385,18 @@ func (a *App) rcLoop() {
 	// uma e outra (30 s, 1, 2, 4, 8 até 16 min). Cada tentativa conecta no
 	// aparelho e pode levar dados que iriam para quem está com ele no USB.
 	bleFails := 0
-	bleGap := func() time.Duration { return rcRetryBLE << min(bleFails, 5) }
+	//
+	// No celular é 15 s, 30 s e no máximo 1 min: ele é quem fica com o RC102
+	// (16 min sem tentar fazia a conexão parecer quebrada; ACE, 15/11). O
+	// "status 133" do Android costuma passar em segundos e os 2 min de antes
+	// deixavam o RC102 de fora 4 a 6 min por queda (registros de 23 a 25/11).
+	bleGap := func() time.Duration {
+		if a.mobile {
+			return rcRetryBLEMobile << min(bleFails, 2)
+		}
+		return rcRetryBLE << min(bleFails, 5)
+	}
+	lastErr := ""
 	wait := func(d time.Duration) {
 		select {
 		case <-wake:
@@ -407,6 +430,12 @@ func (a *App) rcLoop() {
 				a.rcSet(func(s *RcState) { s.State, s.Err = "procurando", "" })
 			} else {
 				msg := err.Error()
+				if msg != lastErr || a.mobile {
+					// no registro: por que não conectou (no celular, cada
+					// tentativa; no PC, só quando o motivo muda)
+					a.logf("RC102: não conectou (%s); próxima tentativa pelo Bluetooth em %s", msg, bleGap())
+				}
+				lastErr = msg
 				a.rcSet(func(s *RcState) { s.State, s.Err, s.Offscale = "erro", msg, false })
 			}
 			wait(rcRetryUSB)
@@ -416,6 +445,7 @@ func (a *App) rcLoop() {
 		dev, err := radiacode.Open(tr)
 		if err != nil {
 			msg := err.Error()
+			a.logf("RC102: conectou mas não abriu (%s)", msg)
 			a.rcSet(func(s *RcState) { s.State, s.Err, s.Offscale = "erro", msg, false })
 			if viaBLE {
 				bleFails++
@@ -423,9 +453,15 @@ func (a *App) rcLoop() {
 			wait(rcRetryUSB)
 			continue
 		}
+		lastErr = ""
 		began := time.Now()
 		a.rcRun(dev)
-		if viaBLE {
+		if viaBLE && a.mobile {
+			// no celular ninguém mais disputa o RC102: a conexão caiu (o
+			// Bluetooth travou), reconecta já
+			a.rc.bleNow.Store(true)
+			bleFails = 0
+		} else if viaBLE {
 			if time.Since(began) < 2*time.Minute {
 				bleFails++
 				a.logf("RC102: a conexão pelo Bluetooth caiu em %s; próxima tentativa em %s", time.Since(began).Round(time.Second), bleGap())
@@ -476,7 +512,9 @@ func (a *App) rcRun(dev *radiacode.Device) {
 		askAway()
 		a.rcAlertsOff()
 		a.rcFlushMinute()
-		a.rcSpecClose()
+		if !a.mobile { // no celular fica aberto (ver rcSpecRotate)
+			a.rcSpecClose()
+		}
 		a.rc.mu.Lock()
 		a.rc.dev = nil
 		a.rcDoseSaveLiveLocked(time.Now())

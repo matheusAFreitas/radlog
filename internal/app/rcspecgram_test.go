@@ -119,3 +119,21 @@ func TestRcSpectrogram(t *testing.T) {
 		t.Fatalf("ultimo.json não vai no backup")
 	}
 }
+
+// O arquivo do espectrograma troca depois de rcSpecRotate, não a cada
+// leitura (no celular ele não fecha quando o Bluetooth cai).
+func TestRcSpecRotate(t *testing.T) {
+	a, _ := testApp(t)
+	t0 := time.Date(2026, 11, 19, 6, 0, 0, 0, time.Local)
+	sp := func(n uint32, sec float64) radiacode.Spectrum {
+		return radiacode.Spectrum{Duration: time.Duration(sec) * time.Second, A1: 3, Counts: []uint32{n, n, n, n}}
+	}
+	for i, at := range []time.Duration{0, time.Minute, 2 * time.Minute, rcSpecRotate + 3*time.Minute, rcSpecRotate + 4*time.Minute} {
+		a.rcSpecAdd("RC-1", t0.Add(at), sp(uint32(10*(i+1)), float64(60*(i+1))))
+	}
+	a.rcSpecClose()
+	names, _ := a.rcSpecFiles()
+	if len(names) != 2 {
+		t.Fatalf("arquivos: %v", names)
+	}
+}

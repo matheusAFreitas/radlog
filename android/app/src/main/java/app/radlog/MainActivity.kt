@@ -1,0 +1,262 @@
+package app.radlog
+
+import android.Manifest
+import android.annotation.SuppressLint
+import android.app.Activity
+import android.app.NotificationManager
+import android.content.Context
+import android.content.res.Configuration
+import android.content.Intent
+import android.content.pm.PackageManager
+import android.net.Uri
+import android.os.Build
+import android.os.Bundle
+import android.os.PowerManager
+import android.provider.Settings
+import android.view.WindowManager
+import android.view.ViewGroup
+import android.webkit.JavascriptInterface
+import android.webkit.RenderProcessGoneDetail
+import android.webkit.WebResourceRequest
+import android.webkit.WebResourceResponse
+import android.webkit.WebView
+import android.webkit.WebViewClient
+import androidx.webkit.WebViewAssetLoader
+import org.json.JSONObject
+import java.util.concurrent.Executors
+
+/**
+ * A tela: o HTML de assets/www num WebView (como o desktop, que usa o
+ * WebView2/WebKit). A página chama o motor por RadLogNative.call e recebe
+ * as respostas e os eventos por window.__rl.
+ */
+class MainActivity : Activity() {
+    private lateinit var web: WebView
+    private val pool = Executors.newCachedThreadPool()
+    private var permCb: String? = null
+
+    override fun onCreate(saved: Bundle?) {
+        super.onCreate(saved)
+        try { Engine.start(this) } catch (_: Exception) { /* a tela mostra o erro */ }
+        if (prefs().getBoolean("paired", false)) RadLogService.start(this)
+        shape = shapeOf(resources.configuration)
+        newWeb()
+    }
+
+    /**
+     * Monta o WebView. O Android pode matar o processo que desenha a página
+     * (com o app em segundo plano, para liberar memória): sem tratar isso, a
+     * tela voltava toda preta até fechar o app. Agora um WebView novo sobe
+     * no lugar (onRenderProcessGone).
+     */
+    @SuppressLint("SetJavaScriptEnabled")
+    private fun newWeb() {
+        val loader = WebViewAssetLoader.Builder()
+            .addPathHandler("/assets/", WebViewAssetLoader.AssetsPathHandler(this))
+            .build()
+        val w = WebView(this)
+        web = w
+        w.setBackgroundColor(0xFF0B0E10.toInt())
+        w.settings.javaScriptEnabled = true
+        w.settings.domStorageEnabled = true
+        w.settings.setSupportZoom(false) // a página não amplia; o gráfico do espectro tem zoom próprio
+        w.settings.allowFileAccess = false
+        w.settings.allowContentAccess = false
+        w.webViewClient = object : WebViewClient() {
+            override fun shouldInterceptRequest(v: WebView, r: WebResourceRequest): WebResourceResponse? =
+                loader.shouldInterceptRequest(r.url)
+
+            override fun shouldOverrideUrlLoading(v: WebView, r: WebResourceRequest): Boolean {
+                if (r.url.host == "appassets.androidplatform.net") return false
+                startActivity(Intent(Intent.ACTION_VIEW, r.url)) // link de fora: navegador
+                return true
+            }
+
+            override fun onRenderProcessGone(v: WebView, d: RenderProcessGoneDetail): Boolean {
+                UiBridge.detach(v)
+                (v.parent as? ViewGroup)?.removeView(v)
+                v.destroy()
+                if (!isFinishing && !isDestroyed) newWeb()
+                return true // o app continua; só a página recomeça
+            }
+        }
+        w.addJavascriptInterface(Native(), "RadLogNative")
+        setContentView(w)
+        UiBridge.attach(w)
+        w.loadUrl("https://appassets.androidplatform.net/assets/www/index.html")
+    }
+
+    /**
+     * Flip 6 (19/11): fechar o celular com o app aberto e abrir na tela de
+     * fora, ou o contrário, troca de tela sem recriar a Activity
+     * (configChanges). O WebView, pausado no meio da troca, ficava com o
+     * tamanho da tela anterior: preto na tela de fora e um retângulo no
+     * canto ao abrir. Quando a tela muda de verdade (densidade ou menor
+     * lado), um WebView novo sobe no lugar; a página recomeça e pega o
+     * estado do motor, que não parou. Girar a tela só pede um novo layout.
+     */
+    private var shape = ""
+    private var resumed = false
+    private var rebuild = false
+
+    private fun shapeOf(c: Configuration) = "${c.densityDpi}/${c.smallestScreenWidthDp}"
+
+    override fun onConfigurationChanged(c: Configuration) {
+        super.onConfigurationChanged(c)
+        val s = shapeOf(c)
+        if (shape.isNotEmpty() && s != shape) rebuild = true
+        shape = s
+        if (rebuild && resumed) rebuildWeb() else web.requestLayout()
+    }
+
+    private fun rebuildWeb() {
+        rebuild = false
+        val old = web
+        UiBridge.detach(old)
+        (old.parent as? ViewGroup)?.removeView(old)
+        old.destroy()
+        newWeb()
+        UiBridge.paused = !resumed
+    }
+
+    override fun onPause() {
+        resumed = false
+        // tela fora de vista: para os relógios da página e os eventos
+        UiBridge.paused = true
+        web.onPause()
+        super.onPause()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        resumed = true
+        val s = shapeOf(resources.configuration)
+        if (shape.isNotEmpty() && s != shape) rebuild = true
+        shape = s
+        if (rebuild) rebuildWeb()
+        Engine.syncTimeZone()
+        web.onResume()
+        UiBridge.resumed()
+        // rede de segurança: se a página voltou vazia (sem o script de pé), recarrega
+        val w = web
+        w.postDelayed({
+            if (web === w && !isFinishing) w.evaluateJavascript("!!(window.__rl&&document.getElementById('main').childElementCount)") { r ->
+                if (r != "true" && web === w) w.reload()
+            }
+        }, 2500)
+    }
+
+    override fun onDestroy() {
+        UiBridge.detach(web)
+        web.destroy()
+        pool.shutdown()
+        super.onDestroy()
+    }
+
+    @Deprecated("Activity sem AndroidX")
+    override fun onBackPressed() {
+        UiBridge.js("window.__rl&&__rl.back()")
+    }
+
+    private fun prefs() = getSharedPreferences("radlog", Context.MODE_PRIVATE)
+
+    private fun done(id: String, json: String) = UiBridge.js("window.__rl&&__rl.done(${JSONObject.quote(id)},$json)")
+
+    // ---------- permissões ----------
+
+    private fun has(p: String) = checkSelfPermission(p) == PackageManager.PERMISSION_GRANTED
+
+    private fun btPerms(): Array<String> = if (Build.VERSION.SDK_INT >= 31) {
+        arrayOf(Manifest.permission.BLUETOOTH_SCAN, Manifest.permission.BLUETOOTH_CONNECT)
+    } else {
+        arrayOf(Manifest.permission.ACCESS_FINE_LOCATION)
+    }
+
+    private fun permState(): JSONObject {
+        val pm = getSystemService(PowerManager::class.java)
+        val nm = getSystemService(NotificationManager::class.java)
+        return JSONObject()
+            .put("bluetooth", btPerms().all { has(it) })
+            .put("btOn", try { Engine.ble.enabled() } catch (_: Exception) { getSystemService(android.bluetooth.BluetoothManager::class.java)?.adapter?.isEnabled == true })
+            .put("notifications", if (Build.VERSION.SDK_INT >= 33) has(Manifest.permission.POST_NOTIFICATIONS) else nm.areNotificationsEnabled())
+            .put("battery", pm.isIgnoringBatteryOptimizations(packageName))
+            .put("fullScreen", if (Build.VERSION.SDK_INT >= 34) nm.canUseFullScreenIntent() else true)
+    }
+
+    override fun onRequestPermissionsResult(code: Int, perms: Array<out String>, res: IntArray) {
+        super.onRequestPermissionsResult(code, perms, res)
+        permCb?.let { done(it, JSONObject().put("r", permState()).toString()) }
+        permCb = null
+    }
+
+    @SuppressLint("BatteryLife") // o app precisa ler o dia todo com a tela apagada
+    private fun askBattery() {
+        val i = Intent(Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS, Uri.parse("package:$packageName"))
+        try { startActivity(i) } catch (_: Exception) {
+            startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+        }
+    }
+
+    inner class Native {
+        /** Chama um método do motor; a resposta volta por __rl.done(id, …). */
+        @JavascriptInterface
+        fun call(id: String, method: String, args: String) {
+            pool.execute {
+                val out = try { Engine.call(method, args) } catch (e: Exception) {
+                    JSONObject().put("e", e.message ?: e.toString()).toString()
+                }
+                done(id, out)
+            }
+        }
+
+        /** Funções do Android (permissões, serviço, alarme). */
+        @JavascriptInterface
+        fun native(id: String, name: String, arg: String) {
+            runOnUiThread {
+                val ok = { r: Any? -> done(id, JSONObject().put("r", r ?: JSONObject.NULL).toString()) }
+                when (name) {
+                    "perms" -> ok(permState())
+                    "askBluetooth" -> { permCb = id; requestPermissions(btPerms(), 1) }
+                    "askNotifications" -> if (Build.VERSION.SDK_INT >= 33) {
+                        permCb = id; requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 2)
+                    } else ok(permState())
+                    "askBattery" -> { askBattery(); ok(true) }
+                    "askFullScreen" -> {
+                        if (Build.VERSION.SDK_INT >= 34) startActivity(Intent(Settings.ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT, Uri.parse("package:$packageName")))
+                        ok(true)
+                    }
+                    "openBluetooth" -> { startActivity(Intent(Settings.ACTION_BLUETOOTH_SETTINGS)); ok(true) }
+                    "paired" -> {
+                        prefs().edit().putBoolean("paired", arg == "true").apply()
+                        if (arg == "true") RadLogService.start(this@MainActivity)
+                        ok(true)
+                    }
+                    "isPaired" -> ok(prefs().getBoolean("paired", false))
+                    "silence" -> { RadLogService.instance?.silence(); ok(true) }
+                    "owner" -> { // "phone" pega o RC102, "pc" solta
+                        val svc = RadLogService.instance
+                        if (svc != null) svc.setOwner(arg == "phone") else if (arg == "phone") RadLogService.start(this@MainActivity)
+                        ok(true)
+                    }
+                    "alarm" -> ok(JSONObject().put("sev", UiBridge.alarmSev ?: JSONObject.NULL).put("quiet", UiBridge.alarmQuiet))
+                    "keepOn" -> {
+                        if (arg == "true") window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        else window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                        ok(true)
+                    }
+                    "info" -> ok(JSONObject().put("model", Build.MODEL).put("android", Build.VERSION.RELEASE)
+                        .put("sdk", Build.VERSION.SDK_INT).put("app", packageManager.getPackageInfo(packageName, 0).versionName))
+                    "testAlarm" -> { // arg: o som ("sirene", "bipes", "perigo")
+                        if (UiBridge.alarmSev == null) {
+                            AlarmSound.play(arg.ifEmpty { "sirene" }, false)
+                            window.decorView.postDelayed({ if (UiBridge.alarmSev == null) AlarmSound.stop() }, 5000)
+                        }
+                        ok(true)
+                    }
+                    "exit" -> { finish(); ok(true) }
+                    else -> done(id, JSONObject().put("e", "função desconhecida: $name").toString())
+                }
+            }
+        }
+    }
+}

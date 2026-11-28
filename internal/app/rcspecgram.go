@@ -35,6 +35,8 @@ const (
 	rcSgBins    = 256     // faixas de energia no espectrograma
 	rcSgMaxRows = 2000    // limite de linhas por pedido
 	rcSgMaxSpan = 31 * 24 // horas
+	// rcSpecRotate: um arquivo do espectrograma fica aberto no máximo isso
+	rcSpecRotate = 3 * time.Hour
 )
 
 type rcSpecLog struct {
@@ -45,6 +47,7 @@ type rcSpecLog struct {
 	last   *rcSpecSnap
 	loaded bool
 	at     time.Time // última leitura (só a goroutine do rcRun mexe)
+	opened time.Time // quando o arquivo de agora abriu
 }
 
 // rcSpecSnap é uma leitura do espectro atual do aparelho.
@@ -108,13 +111,20 @@ func (a *App) rcSpecAdd(serial string, now time.Time, s radiacode.Spectrum) {
 		return
 	}
 	day := now.Format("2006-01-02")
+	// no celular o arquivo não fecha quando o Bluetooth cai (são dezenas de
+	// quedas por dia e cada arquivo fechado faz o pacote do dia subir de
+	// novo na nuvem): troca de arquivo a cada rcSpecRotate, para o PC ver o
+	// espectrograma do dia sem esperar o dia virar
+	if l.gz != nil && now.Sub(l.opened) >= rcSpecRotate {
+		l.closeLocked()
+	}
 	if l.day != day || l.gz == nil {
 		l.closeLocked()
 		f, err := os.OpenFile(a.rcSpecPath(day+"-"+now.Format("150405")+".jsonl.gz"), os.O_CREATE|os.O_APPEND|os.O_WRONLY, 0o644)
 		if err != nil {
 			return
 		}
-		l.f, l.gz, l.day = f, gzip.NewWriter(f), day
+		l.f, l.gz, l.day, l.opened = f, gzip.NewWriter(f), day, now
 	}
 	b, _ := json.Marshal(row)
 	l.gz.Write(append(b, '\n'))

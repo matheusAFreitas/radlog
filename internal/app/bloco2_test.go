@@ -18,11 +18,12 @@ import (
 func TestNoBareWriteFile(t *testing.T) {
 	bare := regexp.MustCompile(`\bos\.(WriteFile|Rename)\(`)
 	allowed := map[string]bool{ // trocas de nome que não são gravação
-		"applog.go":   true, // log-anterior.txt
-		"migrate.go":  true, // mudança de pasta
-		"rcconfig.go": true, // desfazer
-		"update.go":   true, // troca do .exe
-		"atomic.go":   true, // o próprio writeFileAtomic e a cópia .ilegivel
+		"applog.go":    true, // log-anterior.txt
+		"hangwatch.go": true, // retrato do travamento: sem travas (a presa pode ser a do writeFileAtomic)
+		"datadir.go":   true, // copyFile (cópia por temporário)
+		"rcconfig.go":  true, // desfazer
+		"update.go":    true, // troca do .exe
+		"atomic.go":    true, // o próprio writeFileAtomic e a cópia .ilegivel
 	}
 	files, _ := filepath.Glob("*.go")
 	for _, f := range files {

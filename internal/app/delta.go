@@ -66,6 +66,10 @@ type pullReq struct {
 	cloud bool
 	// sem os pequenos de sempre (na nuvem eles vão no pacote "comum")
 	noSmall bool
+	// nuvem: as medições (com os espectros de cada fase, as maiores dos
+	// pequenos) vão num pacote só delas, que só sobe quando elas mudam; o
+	// comum muda a cada minuto (dose do aparelho) e subia ~190 KB por vez
+	noMeasures, onlyMeasures bool
 }
 
 // dayDigests resume os minutos gravados de cada dia (UTC): "n:hash". Dois
@@ -172,7 +176,14 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 			}
 		}
 	}
-	if !req.noSmall {
+	if req.onlyMeasures {
+		if b, err := os.ReadFile(filepath.Join(a.dataDir, "medicoes.json")); err == nil {
+			if f, err := zw.Create("medicoes.json"); err == nil {
+				_, _ = f.Write(b)
+			}
+		}
+	}
+	if !req.noSmall && !req.onlyMeasures {
 		// só alertas encerrados (os de agora ainda mudam)
 		a.mu.Lock()
 		var rows [][]string
@@ -191,6 +202,9 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 			}
 		}
 		for _, name := range []string{"fora-de-casa.json", "medicoes.json", "anotacoes.json"} {
+			if name == "medicoes.json" && req.noMeasures {
+				continue
+			}
 			if b, err := os.ReadFile(filepath.Join(a.dataDir, name)); err == nil {
 				if f, err := zw.Create(name); err == nil {
 					_, _ = f.Write(b)
@@ -209,7 +223,7 @@ func (a *App) buildDelta(req pullReq) ([]byte, error) {
 			}
 		}
 	}
-	if req.Rc {
+	if req.Rc && !req.onlyMeasures {
 		if err := a.rcAddToDelta(zw, req.RcDays, req.RcFiles, !req.noSmall); err != nil {
 			return nil, err
 		}

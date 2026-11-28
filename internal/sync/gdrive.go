@@ -11,6 +11,7 @@ import (
 	"net/url"
 	"sort"
 	"strings"
+	"sync/atomic"
 	"time"
 )
 
@@ -30,6 +31,20 @@ type Drive struct {
 	Base   string // https://www.googleapis.com/drive/v3
 	Upload string // https://www.googleapis.com/upload/drive/v3
 	OnDate func(t time.Time)
+	// 19/11: quanto este cliente mandou e recebeu (só o conteúdo, sem o
+	// TLS) e quantos pedidos fez: o registro do celular mostra o gasto
+	Sent, Recv, Calls atomic.Int64
+}
+
+type countReader struct {
+	r io.Reader
+	n *atomic.Int64
+}
+
+func (c countReader) Read(p []byte) (int, error) {
+	n, err := c.r.Read(p)
+	c.n.Add(int64(n))
+	return n, err
 }
 
 // NewDrive devolve o cliente com os endereços do Google.
@@ -74,11 +89,17 @@ func (d *Drive) do(ctx context.Context, method, u, ctype string, body []byte, ou
 	if ctype != "" {
 		req.Header.Set("Content-Type", ctype)
 	}
+	d.Calls.Add(1)
+	d.Sent.Add(int64(len(body)))
 	resp, err := d.HTTP.Do(req)
 	if err != nil {
 		return nil, err
 	}
 	defer resp.Body.Close()
+	resp.Body = struct {
+		io.Reader
+		io.Closer
+	}{countReader{resp.Body, &d.Recv}, resp.Body}
 	if d.OnDate != nil {
 		if t, err := http.ParseTime(resp.Header.Get("Date")); err == nil {
 			d.OnDate(t)

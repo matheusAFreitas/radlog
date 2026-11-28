@@ -1,6 +1,8 @@
 package app
 
 import (
+	"archive/zip"
+	"bytes"
 	"context"
 	"net/http"
 	"net/url"
@@ -260,7 +262,7 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 	for _, p := range ps {
 		keys = append(keys, p.key)
 	}
-	if strings.Join(keys, ",") != "comum,dia|2026-09-20,dia|2026-10-20" {
+	if strings.Join(keys, ",") != "comum,medicoes,dia|2026-09-20,dia|2026-10-20" {
 		t.Fatalf("pacotes: %v", keys)
 	}
 	z1, _ := a.buildDelta(ps[0].req)
@@ -273,7 +275,7 @@ func TestCloudPacksSkipSmallAndHost(t *testing.T) {
 		t.Fatal("nome do PC no pacote da nuvem")
 	}
 	ps2, _ := a.cloudPacks()
-	if ps2[1].digest != ps[1].digest {
+	if ps2[2].digest != ps[2].digest {
 		t.Fatal("resumo do mês mudou sem mudança")
 	}
 }
@@ -325,5 +327,78 @@ func TestCopyCloudCodeClears(t *testing.T) {
 	time.Sleep(80 * time.Millisecond)
 	if read() != "outra coisa" {
 		t.Fatalf("apagou o que a pessoa copiou depois: %q", read())
+	}
+}
+
+// Espectros sobem por dia: um arquivo novo (no celular, a cada queda do
+// Bluetooth) não faz o mês inteiro subir de novo (~2,8 MB por envio no
+// dev.612).
+func TestCloudPacksSpectraPerDay(t *testing.T) {
+	a, _ := testApp(t)
+	dir := a.rcSpecPath("")
+	if err := os.MkdirAll(dir, 0o755); err != nil {
+		t.Fatal(err)
+	}
+	for _, n := range []string{"2026-11-18-070000.jsonl.gz", "2026-11-19-070000.jsonl.gz"} {
+		if err := os.WriteFile(filepath.Join(dir, n), []byte("x"), 0o644); err != nil {
+			t.Fatal(err)
+		}
+	}
+	dig := func() map[string]string {
+		ps, err := a.cloudPacks()
+		if err != nil {
+			t.Fatal(err)
+		}
+		m := map[string]string{}
+		for _, p := range ps {
+			if p.kind == rs.KindSpectra {
+				m[p.key] = p.digest + " " + p.month
+			}
+		}
+		return m
+	}
+	before := dig()
+	if len(before) != 2 || before["espectros|2026-11-18"] == "" || !strings.HasSuffix(before["espectros|2026-11-19"], " 2026-11") {
+		t.Fatalf("pacotes: %v", before)
+	}
+	_ = os.WriteFile(filepath.Join(dir, "2026-11-19-090000.jsonl.gz"), []byte("y"), 0o644)
+	after := dig()
+	if after["espectros|2026-11-18"] != before["espectros|2026-11-18"] || after["espectros|2026-11-19"] == before["espectros|2026-11-19"] {
+		t.Fatalf("só o dia do arquivo novo muda: %v → %v", before, after)
+	}
+}
+
+// As medições (grandes, com espectros) sobem num pacote só delas: o comum,
+// que muda a cada minuto, não leva elas junto (191 KB por envio no dev.617).
+func TestCloudMeasuresOwnPack(t *testing.T) {
+	a, dir := testApp(t)
+	if err := os.WriteFile(filepath.Join(dir, "medicoes.json"), []byte(`[{"id":1}]`), 0o644); err != nil {
+		t.Fatal(err)
+	}
+	ps, err := a.cloudPacks()
+	if err != nil {
+		t.Fatal(err)
+	}
+	has := func(key string) bool {
+		for _, p := range ps {
+			if p.key == key {
+				z, _ := a.buildDelta(p.req)
+				zr, err := zip.NewReader(bytes.NewReader(z), int64(len(z)))
+				if err != nil {
+					t.Fatal(err)
+				}
+				for _, f := range zr.File {
+					if f.Name == "medicoes.json" {
+						return true
+					}
+				}
+				return false
+			}
+		}
+		t.Fatalf("sem o pacote %s", key)
+		return false
+	}
+	if has("comum") || !has("medicoes") {
+		t.Fatal("medicoes.json tem que ir só no pacote medicoes")
 	}
 }

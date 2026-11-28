@@ -92,6 +92,9 @@ type Settings struct {
 	RcBLE string `json:"rcBLE"`
 	// medição de objeto: gerar o PDF sozinho no fim (ligado se false)
 	NoMeasureReport bool `json:"noMeasureReport"`
+	// celular: nuvem pela rede móvel (dados pagos): "" a cada 15 min, como no
+	// Wi-Fi; "hora" de hora em hora; "wifi" só no Wi-Fi (ACE, 19/11)
+	CloudCell string `json:"cloudCell"`
 	// baixar a memória do GMC-800 sozinho ao conectar (ligado se false; 2.83.0)
 	NoAutoHistory bool `json:"noAutoHistory"`
 	// pasta dos relatórios em PDF; vazio = Documentos/RadLog/Relatórios
@@ -408,6 +411,11 @@ type App struct {
 	histAskFrom    int64                        // sem pasta de dados: o mesmo que perguntarDesde (autohist.go)
 	histDownload   func() (ImportResult, error) // testes: no lugar do downloadHistory
 	emitHook       func(name string, data any)  // testes: os eventos para a tela
+	mobile         bool                         // app de Android (mobile.go)
+	// celular: a rede de agora é paga (dados móveis), e a nuvem deixou de
+	// sincronizar por isso (sincroniza quando o Wi-Fi voltar)
+	netMetered   atomic.Bool
+	cloudWaitNet atomic.Bool
 
 	// pausa a reconexão automática quando o usuário desconecta na mão
 	manualOff bool
@@ -499,23 +507,16 @@ func NewApp() *App {
 
 func (a *App) startup(ctx context.Context) {
 	a.ctx = ctx
-	a.dataDir = migNow.dir
-	if a.dataDir == "" {
-		base, err := os.UserConfigDir()
-		if err != nil || base == "" {
-			base, _ = os.Getwd()
-		}
-		a.dataDir = filepath.Join(base, appDirName)
+	base, err := os.UserConfigDir()
+	if err != nil || base == "" {
+		base, _ = os.Getwd()
 	}
+	a.dataDir = filepath.Join(base, appDirName)
 	_ = os.MkdirAll(a.dataDir, 0o755)
 	a.logStart()
 
 	a.settings = a.loadSettings()
 	defer a.cfgRecord("app") // estado inicial (ou o que mudou com o app fechado)
-	if d := docsBase(); d != "" && a.settings.ReportDir == filepath.Join(d, oldDirName, "Relatórios") {
-		a.settings.ReportDir = "" // era a pasta padrão antiga: vale a nova (a migração levou os PDFs)
-	}
-	renameAutostart() // tira o "GMC Monitor" da 1.x do início com o Windows
 	a.loadLastCal()
 	a.loadCalHist()
 	a.mu.Lock()
@@ -545,7 +546,6 @@ func (a *App) startup(ctx context.Context) {
 	if a.settingsBroken {
 		a.logEvent("Não consegui ler as configurações (arquivo estragado): voltaram ao padrão. Confira os alarmes e a calibração")
 	}
-	a.logMigration(migNow, migDocsMoved, migDocsErr)
 
 	a.store = a.openStore()
 	// tarefas de fundo protegidas contra panic (panics.go)

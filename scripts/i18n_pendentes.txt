@@ -55,7 +55,6 @@ subindo
 , {0} alertas encontrados
 2. Comandos conhecidos (controle)
 :recalculado
-==== RadLog {0} iniciado ({1}/{2}, {3}, PC {4})
 CSP bloqueou: {0} {1} {2}
 Fora dos alertas, a casa ficou
 achou
